@@ -1,0 +1,13 @@
+﻿.next
+out
+node_modules
+.pnpm-store
+
+.env.local
+.env.*.local
+
+.DS_Store
+*.log
+.idea
+.vscode/*
+!.vscode/settings.json
