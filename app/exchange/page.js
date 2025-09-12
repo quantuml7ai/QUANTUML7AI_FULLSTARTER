@@ -83,7 +83,7 @@ export default function ExchangePage(){
   const [style, setStyle] = useState('quantum')      // 'candle' | 'hollow' | 'heikin' | 'area' | 'quantum'
   const [theme, setTheme] = useState('violet')
   const [bars, setBars]   = useState(320)
-  const [glow, setGlow]   = useState(250)            // будет «зажато» ниже
+  const [glow, setGlow]   = useState(250)
   const [tickMs, setTickMs] = useState(900)
   const [speed, setSpeed] = useState(2.0)
   const [live, setLive]   = useState(true)
@@ -96,17 +96,16 @@ export default function ExchangePage(){
   const rafRef = useRef(0)
 
   const pxRatio = typeof window!=='undefined'
-    ? Math.min(Math.max(window.devicePixelRatio||1,1), 1.5)     // <= 1.5 вместо 2.0+
+    ? Math.min(Math.max(window.devicePixelRatio||1,1), 1.5)
     : 1
-  const glowEff = Math.min(glow, 120)                            // блур жёстко ограничен
+  const glowEff = Math.min(glow, 120)
 
   const dataRef    = useRef(genOHLCV(bars, 118, TF_PARAMS[tf].vol, TF_PARAMS[tf].seed, TF_PARAMS[tf].bias))
   const derivedRef = useRef({ ema21:[], ma50:[], ma200:[], vwap:[], mid:[], sd:[] })
   const gridPathRef = useRef(null)
   const starsRef    = useRef([])
-  const volDirtyRef = useRef(true)                               // перерисовывать объём только при изменении данных
+  const volDirtyRef = useRef(true)
 
-  /* recompute derived only when data changes */
   const recomputeDerived = () => {
     const src = dataRef.current
     const c = src.c
@@ -114,7 +113,6 @@ export default function ExchangePage(){
     const ma50  = sma(c,50)
     const ma200 = sma(c,200)
 
-    // vwap
     const typ = typical(src.o,src.h,src.l,src.c)
     let pv=0, vv=0; const vw=new Array(c.length)
     for(let i=0;i<c.length;i++){ pv+=typ[i]*src.v[i]; vv+=src.v[i]; vw[i]=pv/Math.max(1,vv) }
@@ -123,7 +121,6 @@ export default function ExchangePage(){
     derivedRef.current = { ema21, ma50, ma200, vwap:vw, mid, sd }
   }
 
-  /* resize */
   const resize = () => {
     const cvs=cvsRef.current, vol=volRef.current
     if(!cvs||!cvs.parentElement) return
@@ -131,14 +128,12 @@ export default function ExchangePage(){
     const W = Math.floor(rect.width)
     const H = Math.floor(rect.width*0.5)
     for(const el of [cvs,vol]){ if(!el) continue; el.width=Math.floor(W*pxRatio); el.height=Math.floor(H*pxRatio); el.style.width=W+'px'; el.style.height=H+'px' }
-    // rebuild grid & stars for new size
     const padL=60*pxRatio, padR=20*pxRatio, padT=20*pxRatio, padB=24*pxRatio
     const Gh=H*pxRatio - 0
     const path = new Path2D()
     for(let i=0;i<=6;i++){ const y=lerp(padT, Gh*0.78 - padB, i/6); path.moveTo(padL,y); path.lineTo(W*pxRatio-padR,y) }
     for(let i=0;i<=10;i++){ const x=lerp(padL, W*pxRatio-padR, i/10); path.moveTo(x,padT); path.lineTo(x,Gh*0.78 - padB) }
     gridPathRef.current = path
-    // static star field
     const stars=[]; const count=60
     for(let i=0;i<count;i++){
       stars.push({
@@ -151,7 +146,6 @@ export default function ExchangePage(){
   }
   useEffect(()=>{ resize(); const ro=new ResizeObserver(resize); if(cvsRef.current?.parentElement) ro.observe(cvsRef.current.parentElement); return ()=>ro.disconnect() },[pxRatio])
 
-  /* regenerate on bars/tf change */
   useEffect(()=>{
     const p = TF_PARAMS[tf] || TF_PARAMS['1m']
     dataRef.current = genOHLCV(bars, 118, p.vol, p.seed, p.bias)
@@ -159,7 +153,6 @@ export default function ExchangePage(){
     volDirtyRef.current = true
   },[bars, tf])
 
-  /* live ticks (data change only) */
   useEffect(()=>{
     let timer
     const loop = () => {
@@ -187,7 +180,6 @@ export default function ExchangePage(){
     return () => clearTimeout(timer)
   },[bars, tf, tickMs, live])
 
-  /* draw loop (throttled to 30fps) */
   useEffect(()=>{
     cancelAnimationFrame(rafRef.current)
     const ctx = cvsRef.current?.getContext('2d')
@@ -213,24 +205,19 @@ export default function ExchangePage(){
       let {o,h,l,c,v} = src
       const n=c.length
 
-      // choose visual price series
       let vo=o, vh=h, vl=l, vc=c
       if(style==='heikin'){ ({o:vo,h:vh,l:vl,c:vc}=heikinAshi(src)) }
 
-      // scaling
       const max=Math.max(...vh), min=Math.min(...vl)
       const priceToY = (p)=> padT + (Gh-padT-padB) * (1 - (p - min) / (max - min + 1e-6))
       const xStep = (W-padL-padR)/(n-1)
 
-      // clear
       ctx.clearRect(0,0,W,H)
 
-      // grid (static path)
       if (gridPathRef.current){
         ctx.save(); ctx.strokeStyle=grid; ctx.lineWidth=1*pxRatio; ctx.stroke(gridPathRef.current); ctx.restore()
       }
 
-      // bands (precomputed mid/sd)
       if(show.bands){
         const { mid, sd } = derivedRef.current
         ctx.save(); ctx.strokeStyle=band; ctx.globalAlpha=.45; ctx.lineWidth=1*pxRatio; ctx.beginPath()
@@ -242,7 +229,6 @@ export default function ExchangePage(){
         ctx.stroke(); ctx.restore()
       }
 
-      // candles / area (без shadowBlur во имя FPS)
       if(style==='area'){
         ctx.save(); ctx.lineWidth=2*pxRatio; ctx.strokeStyle=ln; ctx.beginPath()
         for(let i=0;i<n;i++){ const x=padL+i*xStep, y=priceToY(vc[i]); i?ctx.lineTo(x,y):ctx.moveTo(x,y) }
@@ -265,7 +251,6 @@ export default function ExchangePage(){
         ctx.restore()
       }
 
-      // indicators (используем derivedRef — без пересчётов)
       const { ema21, ma50, ma200, vwap } = derivedRef.current
       if(show.ema21){
         ctx.save(); ctx.strokeStyle=th.line; ctx.lineWidth=2*pxRatio; ctx.beginPath()
@@ -288,7 +273,6 @@ export default function ExchangePage(){
         ctx.stroke(); ctx.restore()
       }
 
-      // volume canvas — только если dirty
       if(show.vol && volDirtyRef.current){
         vtx.clearRect(0,0,W,H)
         const maxV=Math.max(...v)
@@ -300,7 +284,6 @@ export default function ExchangePage(){
         volDirtyRef.current = false
       }
 
-      // decor — лёгкие версии
       if(decor.stars && starsRef.current.length){
         for(const s of starsRef.current){
           const a=.35 + .25*Math.sin((s.x*0.01 + ts*0.003*speed))
@@ -345,7 +328,7 @@ export default function ExchangePage(){
     return () => cancelAnimationFrame(rafRef.current)
   }, [style, theme, show, decor, bars, glowEff, tickMs, speed, live, tf, pxRatio])
 
-  /* ---------- AI recommendation (без тяжёлых пересчётов) ---------- */
+  /* ---------- AI recommendation ---------- */
   const advice = useMemo(()=>{
     const src = dataRef.current
     const price = src.c[src.c.length-1]
@@ -392,12 +375,12 @@ export default function ExchangePage(){
     return { action, conf, price, tp, sl, tf, factors }
   }, [bars, tf, lang, t])
 
-  /* ---------- text blocks ---------- */
   const sections = Array.isArray(TX(t, 'exchange_sections', [])) ? TX(t, 'exchange_sections', []) : []
   const bullets  = Array.isArray(TX(t, 'ex_bullets', [])) ? TX(t, 'ex_bullets', []) : []
 
   return (
     <>
+      {/* Header + controls */}
       <section className="panel" style={{ marginTop:10 }}>
         <div className="row" style={{ alignItems:'center', gap:10, flexWrap:'wrap' }}>
           <span className="badge">{TX(t,'ui_inprogress','IN PROGRESS')}</span>
@@ -405,7 +388,6 @@ export default function ExchangePage(){
         </div>
         <p style={{ marginTop:8, whiteSpace:'pre-line' }}>{TX(t,'exchange_sub','A living neon canvas…')}</p>
 
-        {/* controls */}
         <div className="row" style={{ gap:8, flexWrap:'wrap', marginTop:6 }}>
           {['1m','5m','15m','1h','4h','1d'].map(x=>(
             <Btn key={x} active={tf===x} onClick={()=>setTf(x)}>{x}</Btn>
@@ -469,19 +451,18 @@ export default function ExchangePage(){
           <canvas ref={volRef} style={{ position:'absolute', left:0, top:0 }} />
         </div>
 
-        {/* AI box */}
-        <div className="panel" style={{ position:'absolute', right:18, top:18, width:320, maxWidth:'calc(100% - 36px)', background:'rgba(10,20,35,.55)', backdropFilter:'blur(6px)' }}>
-          <div className="row" style={{ justifyContent:'space-between', alignItems:'center' }}>
-            <strong style={{ fontSize:18 }}>{TX(t,'ui_ai_reco','AI Recommendation')}</strong>
-            <span className="badge" style={{ background:'rgba(0,0,0,.25)' }}>{TX(t,'ui_preview','preview')}</span>
-          </div>
-
-          <AdviceBox t={t} advice={useMemo(()=>advice,[advice])} />
-        </div>
-
         <div style={{ opacity:.7, fontSize:12, marginTop:8 }}>
           TF: {tf} • Bars: {bars} • Style: {style} • Theme: {theme} • Live: {live ? 'on':'off'}
         </div>
+      </section>
+
+      {/* AI Recommendation — ОТДЕЛЬНЫМ БЛОКОМ НИЖЕ ГРАФИКА */}
+      <section className="panel panel-narrow" style={{ marginTop:-6 }}>
+        <div className="row" style={{ justifyContent:'space-between', alignItems:'center' }}>
+          <strong style={{ fontSize:18 }}>{TX(t,'ui_ai_reco','AI Recommendation')}</strong>
+          <span className="badge" style={{ background:'rgba(0,0,0,.25)' }}>{TX(t,'ui_preview','preview')}</span>
+        </div>
+        <AdviceBox t={t} advice={useMemo(()=>advice,[advice])} />
       </section>
 
       {/* Roadmap */}
@@ -503,7 +484,7 @@ export default function ExchangePage(){
   )
 }
 
-/* ---------- split small box (чтобы не дёргать React часто) ---------- */
+/* ---------- split small box ---------- */
 function AdviceBox({ t, advice }){
   return (
     <>
