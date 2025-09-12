@@ -1,29 +1,24 @@
 // components/LanguageSwitcher.js
-'use client';
+'use client'
 
-import { useI18n } from './i18n';
+import { useI18n } from './i18n'
 
 export default function LanguageSwitcher() {
-  const { lang, setLang, t } = useI18n();
+  const { lang, setLang } = useI18n()
+  const isEN = lang === 'en'
+  const next = isEN ? 'ru' : 'en'
+  const title = isEN ? 'Переключить на русский' : 'Switch to English'
 
   return (
-    <div className="lang">
-      <button
-        aria-label="Russian"
-        className={`lang-btn ${lang === 'ru' ? 'active' : ''}`}
-        onClick={() => setLang('ru')}
-        type="button"
-      >
-        {t('lang_ru')}
-      </button>
-      <button
-        aria-label="English"
-        className={`lang-btn ${lang === 'en' ? 'active' : ''}`}
-        onClick={() => setLang('en')}
-        type="button"
-      >
-        {t('lang_en')}
-      </button>
-    </div>
-  );
+    <button
+      type="button"
+      className="planet-lang"
+      aria-label={title}
+      title={title}
+      data-lang={lang}
+      onClick={() => setLang(next)}
+    >
+      <span className="planet-core">{isEN ? 'EN' : 'RU'}</span>
+    </button>
+  )
 }
