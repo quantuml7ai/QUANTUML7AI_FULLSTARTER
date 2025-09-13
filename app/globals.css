@@ -228,3 +228,21 @@ ul.bullets li{margin:6px 0}
 @media (prefers-reduced-motion: reduce){
   .topbar .brand-logo{ animation:none }
 }
+
+/* === Telegram card tape in hero === */
+.tg-tape{
+  display:block;
+  width:min(500px,100%);
+  height:auto;
+  margin:14px auto 0;
+  border-radius:12px;
+  border:1px solid rgba(157,220,255,.18);
+  box-shadow:0 10px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
+  image-rendering:auto;
+}
+@media (max-width:720px){
+  .tg-tape{ margin:12px auto 0; border-radius:10px }
+}
+
+/* перенос строк через CSS вместо inline style */
+.prewrap{ white-space: pre-line; }
