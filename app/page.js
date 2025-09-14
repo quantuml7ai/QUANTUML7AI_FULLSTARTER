@@ -19,6 +19,48 @@ export default function Home() {
   const raw = t('home_blocks')
   const blocks = Array.isArray(raw) ? raw : []
 
+  // собираем контент с инъекцией картинки после первого блока
+  const content = []
+  blocks.forEach((b, idx) => {
+    content.push(
+      <section className="panel" key={`b-${idx}`}>
+        <h2>{b.title}</h2>
+        {Array.isArray(b.paras) &&
+          b.paras.map((p, i) => (
+            <p className="prewrap" key={i}>
+              {p}
+            </p>
+          ))}
+        {Array.isArray(b.bullets) && b.bullets.length > 0 && (
+          <ul className="bullets">
+            {b.bullets.map((x, i) => (
+              <li key={i}>• {x}</li>
+            ))}
+          </ul>
+        )}
+      </section>
+    )
+
+    // после первого блока (idx === 0) вставляем квант-картинку
+    if (idx === 0) {
+      content.push(
+        <figure className="panel" key="qc-shot">
+          <img
+            className="quantum-shot"
+            src="/branding/qc_room.jpg"
+            alt="Quantum L7 AI — quantum computing lab. We are the future of the industry."
+            loading="lazy"
+            decoding="async"
+          />
+          {/* подпись для скринридеров; визуально скрыта, если есть .sr-only в CSS */}
+          <figcaption className="sr-only">
+            Quantum L7 AI — We are the future of the industry
+          </figcaption>
+        </figure>
+      )
+    }
+  })
+
   return (
     <>
       {/* ===== HERO ===== */}
@@ -40,7 +82,7 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* ВСТАВКА PNG-ЛЕНТЫ С КАРТОЧКОЙ TELEGRAM */}
+        {/* Лента карточки Telegram */}
         <img
           className="tg-tape"
           src="/branding/telegram_card_tape_fixed.png"
@@ -49,25 +91,8 @@ export default function Home() {
         />
       </section>
 
-      {/* ===== Контентные блоки ===== */}
-      {blocks.map((b, idx) => (
-        <section className="panel" key={idx}>
-          <h2>{b.title}</h2>
-          {Array.isArray(b.paras) &&
-            b.paras.map((p, i) => (
-              <p className="prewrap" key={i}>
-                {p}
-              </p>
-            ))}
-          {Array.isArray(b.bullets) && b.bullets.length > 0 ? (
-            <ul className="bullets">
-              {b.bullets.map((x, i) => (
-                <li key={i}>• {x}</li>
-              ))}
-            </ul>
-          ) : null}
-        </section>
-      ))}
+      {/* ===== Контентные блоки (с картинкой после первого) ===== */}
+      {content}
 
       {/* ===== Маркиза ===== */}
       <section className="marquee-wrap" aria-hidden="true">

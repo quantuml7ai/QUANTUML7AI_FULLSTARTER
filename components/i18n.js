@@ -1577,7 +1577,1088 @@ bir platform veya bölünmüş rota seçer ve kullanıcı risk sınırlarına uy
     links: { bot: BOT_LINK, channel: CHANNEL_LINK, feedback: FEEDBACK_LINK, email: CONTACT_EMAIL },
   },
 }
+/* ============================================================
+   PRIVACY & POLICY — EXTENDED PATCH (x5 content)
+   ВСТАВИТЬ в components/i18n.js ПЕРЕД export I18nProvider / useI18n
+   НИЧЕГО НЕ ЛОМАЕТ: просто дополняет/перезаписывает ключи.
+   ============================================================ */
 
+/* -------------------- EN -------------------- */
+const PRIVACY_EN = {
+  nav_privacy: 'Privacy & Policy',
+  privacy_title: 'Privacy & Policy',
+  privacy_updated_label: 'Updated:',
+  privacy_updated: '2025-09-14',
+  privacy_empty: 'No items',
+  privacy_sections: [
+    { title: 'Overview', paras: [
+      'This Policy explains what we collect, how we use it, and how we protect data on the website, in the Telegram bot, and in our services.',
+      'By using the service, you agree to this Policy. This is a product notice, not legal advice.'
+    ]},
+    { title: 'What we collect', paras: [
+      'Account and contact data: Telegram ID/username/display name; email (if you send it); messages you send to us.',
+      'Wallet linking: networks and public addresses (never private keys).',
+      'Usage and device data: pages, clicks, referrer, hashed IP, user agent, timestamps, error and performance telemetry.'
+    ]},
+    { title: 'On-chain and public data', paras: [
+      'We analyse public blockchain and market data. Such sources are public by design and are not personal data under our control.',
+      'Requests (e.g., symbol or address analytics) can be logged to operate the service and improve reliability.'
+    ]},
+    { title: 'Cookies and localStorage', paras: [
+      'We use them minimally: language, session, anti-abuse. You may block them; some features may degrade.'
+    ]},
+    { title: 'How we use data', paras: [
+      'Provide and improve research and signals; routing and guarded execution; abuse prevention; support and communication.',
+      'We do not build advertising profiles.'
+    ]},
+    { title: 'Sharing with third parties', paras: [
+      'We do not sell personal data.',
+      'Processors: hosting (e.g., Vercel), storage, analytics (if enabled), error tracking, email/Telegram delivery.',
+      'Disclosure may be required to comply with law or to protect rights.'
+    ]},
+    { title: 'Security', paras: [
+      'Keys stay with you; we never request seed phrases. Data is encrypted in transit and at rest; access is role-scoped and logged.',
+      'We apply least-privilege access, MFA on critical systems, and change control for deployments.'
+    ]},
+    { title: 'International transfers', paras: [
+      'Processing may occur abroad. Where required, we use standard safeguards (e.g., SCC) or other lawful transfer mechanisms.'
+    ]},
+    { title: 'Your rights', paras: [
+      'EEA/UK (GDPR): access, rectification, erasure, portability, restriction/objection; right to lodge a complaint with a supervisory authority.',
+      'California (CPRA): access, deletion, correction, opt-out of sale/share; non-discrimination for exercising rights.'
+    ]},
+    { title: 'Children', paras: [
+      'The service is not intended for children under 13 (or higher minimum age in your jurisdiction).'
+    ]},
+    { title: 'Changes', paras: [
+      'We may update this Policy. We will revise the “Updated” date and, when appropriate, notify in-app or via channel.'
+    ]},
+    { title: 'Contacts', paras: [
+      'Email: quantuml7ai@gmail.com',
+      'Feedback bot: https://t.me/L7ai_feedback'
+    ]},
+
+    /* ===== Extended sections ===== */
+
+    { title: 'Definitions and scope', paras: [
+      '“Service” means our websites, bots, APIs, and related applications. “We” means Quantum L7 AI.',
+      'This Policy covers data we process as controller. Vendor policies and blockchain networks have their own rules.'
+    ]},
+    { title: 'Legal bases (GDPR)', paras: [
+      'Contract: to provide requested features (routing, research, dashboards).',
+      'Legitimate interests: service reliability, security, abuse prevention, product analytics with minimal impact.',
+      'Consent: optional analytics/marketing where applicable; you can withdraw at any time.',
+      'Legal obligation: where we must retain or disclose data under law.'
+    ]},
+    { title: 'Data retention', paras: [
+      'We keep personal data only as long as necessary for the purposes described or as required by law.',
+      'Typical ranges: operational logs 30–180 days; support messages up to 12 months; legal records as mandated.'
+    ]},
+    { title: 'Subprocessors', paras: [
+      'Typical categories: hosting/CDN, object storage, email/Telegram delivery, monitoring, error tracking, basic product analytics.',
+      'We engage reputable providers under data-processing agreements and review their safeguards periodically.'
+    ]},
+    { title: 'Analytics and metrics', paras: [
+      'If enabled, we measure aggregate usage (pages, performance, feature adoption).',
+      'Analytics is configured to avoid sensitive data and to minimise personal data wherever practical.'
+    ]},
+    { title: 'Logging and telemetry', paras: [
+      'Operational logs may include timestamps, hashed IP, user agent, error traces, and request identifiers.',
+      'Logs are rotated, access-controlled, and used for debugging, capacity planning, and abuse detection.'
+    ]},
+    { title: 'Email and communications', paras: [
+      'If you contact us by email or bot, we process your message for support and record keeping.',
+      'We do not send marketing without consent. You can opt out at any time.'
+    ]},
+    { title: 'Webhooks and API', paras: [
+      'If you use our APIs or webhooks, payloads may be stored temporarily for reliability and replay protection.',
+      'Do not include secrets or private keys in requests; use appropriate auth and rotate tokens regularly.'
+    ]},
+    { title: 'Wallet linking specifics', paras: [
+      'We store networks and public addresses to enable features. We never request or store private keys or seed phrases.',
+      'Transactions you perform on-chain are public; we may index and annotate them for analytics and reporting.'
+    ]},
+    { title: 'Execution guardrails', paras: [
+      'Where execution or routing is supported, we apply guardrails (limits, risk rules, sanity checks).',
+      'These features are tools, not guarantees; you remain responsible for your decisions and compliance.'
+    ]},
+    { title: 'Research, models, and LLMs', paras: [
+      'We may train or evaluate models on aggregated and anonymised data where possible.',
+      'If third-party LLMs are used, we avoid sending personal data unless necessary and covered by agreements.'
+    ]},
+    { title: 'Automated decision-making', paras: [
+      'We do not make solely automated decisions with legal or similarly significant effects.',
+      'Recommendations and scores are assistive signals; final decisions remain with you.'
+    ]},
+    { title: 'Pseudonymisation and aggregation', paras: [
+      'Where feasible, we hash or aggregate identifiers to reduce privacy risk.',
+      'We separate keys from content and apply access controls to link them only when necessary.'
+    ]},
+    { title: 'Portability and export', paras: [
+      'You can request an export of your personal data associated with your account or bot identity.',
+      'We will provide it in a commonly used, machine-readable format unless legal limits apply.'
+    ]},
+    { title: 'How to exercise rights', paras: [
+      'Submit requests via email or our feedback bot. We may ask for reasonable verification (e.g., bot message from your account).',
+      'We respond within applicable legal deadlines. Some requests may be limited by law or security considerations.'
+    ]},
+    { title: 'Incidents and breach notification', paras: [
+      'We maintain incident response procedures. If a breach occurs, we will notify affected users and authorities as required by law.',
+      'We also conduct post-incident reviews and improve controls to prevent recurrence.'
+    ]},
+    { title: 'Jurisdiction-specific notices', paras: [
+      'EEA/UK: GDPR applies where we act as controller for users in these regions.',
+      'US: state privacy laws (e.g., CPRA) may give additional rights; we honour valid opt-out signals where feasible.'
+    ]},
+    { title: 'Do Not Track and GPC', paras: [
+      'Browsers may send Do Not Track or Global Privacy Control signals. Where legally required and technically feasible, we respect them.'
+    ]},
+    { title: 'Opt-out options', paras: [
+      'You can disable optional analytics/cookies, unsubscribe from emails, and limit bot permissions.',
+      'Core security and essential functionality may still require minimal processing.'
+    ]},
+    { title: 'Accessibility and language', paras: [
+      'We aim to provide clear explanations in multiple languages. If translations differ, the English version may prevail for interpretation.'
+    ]},
+    { title: 'DPO / privacy contact', paras: [
+      'Privacy contact: quantuml7ai@gmail.com (subject: Privacy). We aim to reply within 30 days.'
+    ]},
+    { title: 'Effective date and versions', paras: [
+      'This Policy is effective on the “Updated” date above. Prior versions may be archived for reference.'
+    ]},
+    { title: 'Appendix: Glossary', paras: [
+      'Controller: decides purposes and means of processing. Processor: processes on behalf of controller.',
+      'Personal data: information relating to an identified or identifiable person.'
+    ]},
+    { title: 'Appendix: Subprocessor list (summary)', paras: [
+      'Hosting/CDN (e.g., Vercel), object storage, email/Telegram delivery, error tracking, monitoring, basic product analytics.',
+      'A detailed up-to-date list is available on request.'
+    ]}
+  ]
+};
+
+/* -------------------- RU -------------------- */
+const PRIVACY_RU = {
+  nav_privancy: undefined, // guard against typos
+  nav_privacy: 'Конфиденциальность и политика',
+  privacy_title: 'Конфиденциальность и политика',
+  privacy_updated_label: 'Обновлено:',
+  privacy_updated: '2025-09-14',
+  privacy_empty: 'Нет данных',
+  privacy_sections: [
+    { title: 'Обзор', paras: [
+      'Эта Политика объясняет, какие данные мы собираем, как используем и защищаем на сайте, в Telegram-боте и сервисах.',
+      'Пользуясь сервисом, вы соглашаетесь с Политикой. Это продуктовое уведомление, а не юридическая консультация.'
+    ]},
+    { title: 'Что мы собираем', paras: [
+      'Учётные и контактные данные: Telegram ID/username/отображаемое имя; email (если отправляете); сообщения, которые вы нам передаёте.',
+      'Привязка кошелька: сети и публичные адреса (никогда не приватные ключи).',
+      'Данные использования и устройства: страницы, клики, реферер, хешированный IP, user-agent, временные метки, телеметрия ошибок и производительности.'
+    ]},
+    { title: 'Ончейн и публичные данные', paras: [
+      'Мы анализируем публичные блокчейн- и рыночные данные. Эти источники по своей природе публичны и не являются нашими «персональными данными».',
+      'Запросы (например, анализ адреса или символа) могут логироваться для работы сервиса и повышения надёжности.'
+    ]},
+    { title: 'Cookie и localStorage', paras: [
+      'Используем минимально: язык, сессия, анти-абьюз. Блокировка возможна; часть функций может ухудшиться.'
+    ]},
+    { title: 'Как используем данные', paras: [
+      'Предоставление и улучшение исследований и сигналов; роутинг и защищённое исполнение; предотвращение злоупотреблений; поддержка и коммуникации.',
+      'Рекламное профилирование не ведём.'
+    ]},
+    { title: 'Передача третьим лицам', paras: [
+      'Мы не продаём персональные данные.',
+      'Процессоры: хостинг (например, Vercel), хранение, аналитика (если включена), трекинг ошибок, доставка email/Telegram.',
+      'Раскрытие возможно для соблюдения закона или защиты прав.'
+    ]},
+    { title: 'Безопасность', paras: [
+      'Ключи остаются у вас; seed-фразы мы не запрашиваем. Данные шифруются при передаче и хранении; доступ ролевой и логируется.',
+      'Мы применяем принцип наименьших привилегий, MFA для критичных систем и контроль изменений при деплоях.'
+    ]},
+    { title: 'Международные передачи', paras: [
+      'Обработка может выполняться за рубежом. При необходимости используются стандартные гарантии (SCC) или иные законные механизмы.'
+    ]},
+    { title: 'Ваши права', paras: [
+      'ЕЭЗ/Великобритания (GDPR): доступ, исправление, удаление, переносимость, ограничение/возражение; право пожаловаться регулятору.',
+      'Калифорния (CPRA): доступ, удаление, исправление, отказ от продажи/обмена; отсутствие дискриминации за реализацию прав.'
+    ]},
+    { title: 'Дети', paras: [
+      'Сервис не предназначен для детей младше 13 лет (или более высокого минимума в вашей юрисдикции).'
+    ]},
+    { title: 'Изменения', paras: [
+      'Мы можем обновлять Политику. Изменим дату «Обновлено» и, при необходимости, уведомим в интерфейсе или канале.'
+    ]},
+    { title: 'Контакты', paras: [
+      'Email: quantuml7ai@gmail.com',
+      'Бот обратной связи: https://t.me/L7ai_feedback'
+    ]},
+    { title: 'Определения и область', paras: [
+      '«Сервис» — наши сайты, боты, API и связанные приложения. «Мы» — Quantum L7 AI.',
+      'Эта Политика охватывает данные, где мы выступаем контролёром. У вендоров и блокчейнов — свои правила.'
+    ]},
+    { title: 'Правовые основания (GDPR)', paras: [
+      'Договор: чтобы предоставлять запрошенные функции (роутинг, исследования, панели).',
+      'Законный интерес: надёжность, безопасность, предотвращение абьюза, продуктовая аналитика при минимальном влиянии.',
+      'Согласие: опциональная аналитика/маркетинг; вы можете отозвать его в любой момент.',
+      'Юр. обязанность: хранение/раскрытие, если этого требует закон.'
+    ]},
+    { title: 'Хранение данных', paras: [
+      'Храним персональные данные столько, сколько нужно для целей обработки или по закону.',
+      'Ориентиры: операционные логи 30–180 дней; сообщения поддержки до 12 месяцев; юр. записи — согласно требованиям.'
+    ]},
+    { title: 'Субпроцессоры', paras: [
+      'Категории: хостинг/CDN, объектное хранилище, email/Telegram, мониторинг, трекинг ошибок, базовая аналитика.',
+      'С вендорами заключены DPA; периодически оцениваем их меры защиты.'
+    ]},
+    { title: 'Аналитика и метрики', paras: [
+      'Если включено, измеряем агрегированное использование (страницы, производительность, принятие функций).',
+      'Аналитика настраивается так, чтобы исключать чувствительные данные и минимизировать персональные.'
+    ]},
+    { title: 'Логи и телеметрия', paras: [
+      'Операционные логи могут включать временные метки, хеш-IP, user-agent, трассировки ошибок, ID запросов.',
+      'Логи ротируются, доступны по ролям и используются для отладки, планирования ёмкости и детекта злоупотреблений.'
+    ]},
+    { title: 'Почта и коммуникации', paras: [
+      'Если вы пишете нам на email или в боте, мы обрабатываем сообщение для поддержки и учёта.',
+      'Маркетинг без согласия не рассылаем. Можно отписаться в любой момент.'
+    ]},
+    { title: 'Webhooks и API', paras: [
+      'При использовании API/webhook полезные нагрузки могут временно сохраняться для надёжности и защиты от реплеев.',
+      'Не передавайте секреты и приватные ключи; применяйте корректную аутентификацию и ротацию токенов.'
+    ]},
+    { title: 'Привязка кошелька', paras: [
+      'Храним сети и публичные адреса для функций. Приватные ключи/seed-фразы не запрашиваем и не храним.',
+      'Ваши ончейн-транзакции публичны; мы можем индексировать и аннотировать их для аналитики и отчётности.'
+    ]},
+    { title: 'Ограничители исполнения', paras: [
+      'Когда поддерживается исполнение/роутинг, применяем ограничители (лимиты, правила риска, sanity-checks).',
+      'Это инструменты, а не гарантии; ответственность за решения и соблюдение требований лежит на вас.'
+    ]},
+    { title: 'Исследования, модели и LLM', paras: [
+      'Мы можем обучать/оценивать модели на агрегированных и анонимизированных данных, где это возможно.',
+      'При использовании сторонних LLM избегаем передачи персональных данных без необходимости и договорных гарантий.'
+    ]},
+    { title: 'Автоматизированные решения', paras: [
+      'Мы не принимаем исключительно автоматизированные решения с юридически значимым эффектом.',
+      'Рекомендации/оценки — вспомогательные сигналы; окончательные решения за вами.'
+    ]},
+    { title: 'Псевдонимизация и агрегация', paras: [
+      'Где возможно, хешируем/агрегируем идентификаторы для снижения рисков.',
+      'Ключи отделяем от содержимого; доступ к связке — по необходимости и по ролям.'
+    ]},
+    { title: 'Портируемость и экспорт', paras: [
+      'Вы можете запросить экспорт персональных данных, связанных с вашим аккаунтом или бот-идентификатором.',
+      'Предоставим в машиночитаемом формате, если нет законных ограничений.'
+    ]},
+    { title: 'Как реализовать права', paras: [
+      'Отправьте запрос на email или в боте. Для верификации можем попросить сообщение из вашего бота-аккаунта.',
+      'Отвечаем в сроки закона; некоторые запросы ограничены правовыми и безопасностными требованиями.'
+    ]},
+    { title: 'Инциденты и уведомления', paras: [
+      'У нас есть процедуры реагирования. В случае инцидента уведомим затронутых пользователей и органы, если требуется законом.',
+      'Проводим разбор и улучшаем контроль, чтобы предотвратить повторение.'
+    ]},
+    { title: 'Заметки по юрисдикциям', paras: [
+      'ЕЭЗ/UK: применяется GDPR, когда мы контролёр.',
+      'США: законы штатов (например, CPRA) могут давать дополнительные права; по возможности учитываем валидные сигналы opt-out.'
+    ]},
+    { title: 'Do Not Track и GPC', paras: [
+      'Браузер может посылать Do Not Track/Global Privacy Control. Где это требуется и возможно — учитываем.'
+    ]},
+    { title: 'Опции отказа', paras: [
+      'Можно отключить опциональную аналитику/cookies, отписаться от писем, ограничить права бота.',
+      'Базовая безопасность и функциональность могут требовать минимальной обработки.'
+    ]},
+    { title: 'Доступность и язык', paras: [
+      'Стараемся давать понятные тексты на нескольких языках. При расхождениях для толкования может применяться английская версия.'
+    ]},
+    { title: 'Контакт по приватности', paras: [
+      'Privacy contact: quantuml7ai@gmail.com (тема: Privacy). Цель — ответить в течение 30 дней.'
+    ]},
+    { title: 'Действие и версии', paras: [
+      'Политика действует с даты «Обновлено». Предыдущие версии можем хранить для справки.'
+    ]},
+    { title: 'Приложение: глоссарий', paras: [
+      'Контролёр — определяет цели и средства обработки. Процессор — обрабатывает по поручению контролёра.',
+      'Персональные данные — информация об идентифицированном или идентифицируемом лице.'
+    ]},
+    { title: 'Приложение: список субпроцессоров (кратко)', paras: [
+      'Хостинг/CDN (например, Vercel), объектное хранилище, доставка email/Telegram, трекинг ошибок, мониторинг, базовая аналитика.',
+      'Подробный актуальный список доступен по запросу.'
+    ]}
+  ]
+};
+
+/* -------------------- ZH (简体) -------------------- */
+const PRIVACY_ZH = {
+  nav_privacy: '隐私与政策',
+  privacy_title: '隐私与政策',
+  privacy_updated_label: '更新日期：',
+  privacy_updated: '2025-09-14',
+  privacy_empty: '无内容',
+  privacy_sections: [
+    { title: '概述', paras: [
+      '本政策说明我们在网站、Telegram 机器人和服务中如何收集、使用和保护数据。',
+      '使用服务即表示您同意本政策。本文为产品告知，并非法律意见。'
+    ]},
+    { title: '我们收集什么', paras: [
+      '账户与联系：Telegram ID/用户名/展示名；邮箱（如您提供）；您发送的消息。',
+      '钱包绑定：网络与公开地址（绝不收集私钥）。',
+      '使用与设备：页面、点击、来源、哈希化 IP、UA、时间戳、错误与性能遥测。'
+    ]},
+    { title: '链上与公共数据', paras: [
+      '我们分析公开的区块链/市场数据；其本身公开，并非我们控制下的个人数据。',
+      '请求（如地址/交易对分析）可记录用于运行和提升可靠性。'
+    ]},
+    { title: 'Cookies 与本地存储', paras: [
+      '仅最小化使用：语言、会话、反滥用。可屏蔽，但功能可能受影响。'
+    ]},
+    { title: '我们如何使用', paras: [
+      '提供与改进研究/信号；带护栏的路由与执行；防滥用；支持与沟通。',
+      '不进行广告画像。'
+    ]},
+    { title: '与第三方共享', paras: [
+      '不出售个人数据。',
+      '处理方：托管（如 Vercel）、存储、分析（如启用）、错误跟踪、邮件/Telegram 投递。',
+      '为守法或保护权利时可能披露。'
+    ]},
+    { title: '安全性', paras: [
+      '密钥在您手中；从不索取助记词。数据在传输与存储中加密；按角色控制并记录访问。',
+      '对关键系统采用最小权限与多因子认证，并对部署变更进行管控。'
+    ]},
+    { title: '跨境传输', paras: [
+      '处理可能在境外进行；必要时使用标准保障（如 SCC）或其他合法机制。'
+    ]},
+    { title: '您的权利', paras: [
+      'EEA/英国（GDPR）：访问、更正、删除、可携带、限制/反对；可向监管机构投诉。',
+      '加州（CPRA）：访问、删除、纠正、退出出售/共享；行使权利不受歧视。'
+    ]},
+    { title: '儿童', paras: [
+      '本服务不针对 13 岁以下儿童（或您所在法域更高的最低年龄）。'
+    ]},
+    { title: '变更', paras: [
+      '我们可能更新本政策；将调整“更新日期”，必要时在应用内或频道通知。'
+    ]},
+    { title: '联系', paras: [
+      '邮箱：quantuml7ai@gmail.com',
+      '反馈机器人：https://t.me/L7ai_feedback'
+    ]},
+    { title: '定义与范围', paras: [
+      '“服务”指我们的网站、机器人、API 及相关应用；“我们”指 Quantum L7 AI。',
+      '本政策适用于我们作为控制者处理的数据；供应商/区块链网络有其自身政策。'
+    ]},
+    { title: '法律基础（GDPR）', paras: [
+      '合同：提供所需功能（路由、研究、看板）。',
+      '合法利益：可靠性、安全、防滥用、最小化的产品分析。',
+      '同意：可选分析/营销；可随时撤回。',
+      '法律义务：依法保留或披露数据。'
+    ]},
+    { title: '数据保留', paras: [
+      '仅在必要期间保留个人数据，或按法律要求保留。',
+      '参考范围：运行日志 30–180 天；支持消息最长 12 个月；法律记录按要求保留。'
+    ]},
+    { title: '次处理者', paras: [
+      '类别：托管/CDN、对象存储、邮件/Telegram 投递、监控、错误跟踪、基础分析。',
+      '与可信供应商签订 DPA，并定期评估其保障。'
+    ]},
+    { title: '分析与度量', paras: [
+      '如启用，仅统计聚合使用（页面、性能、功能采用）。',
+      '尽量避免敏感数据并最小化个人数据处理。'
+    ]},
+    { title: '日志与遥测', paras: [
+      '运行日志可能含时间戳、哈希 IP、UA、错误追踪、请求标识。',
+      '日志轮转、受控访问，用于调试、容量规划与滥用检测。'
+    ]},
+    { title: '邮件与沟通', paras: [
+      '您通过邮件或机器人联系时，我们为支持与记录处理消息。',
+      '未经同意不发送营销；可随时退订。'
+    ]},
+    { title: 'Webhooks 与 API', paras: [
+      '使用 API/webhook 时，负载可能暂存以提高可靠性并防重放。',
+      '请勿在请求中包含密钥/私钥；正确使用认证并定期轮换令牌。'
+    ]},
+    { title: '钱包绑定细则', paras: [
+      '为提供功能，我们保存网络与公开地址；从不请求/保存私钥或助记词。',
+      '链上交易是公开的；我们可能索引并注释用于分析与报表。'
+    ]},
+    { title: '执行护栏', paras: [
+      '如支持执行/路由，我们施加护栏（限额、风险规则、合理性检查）。',
+      '这些是工具而非保证；您对决策与合规负责。'
+    ]},
+    { title: '研究、模型与 LLM', paras: [
+      '尽可能使用聚合匿名数据训练/评估模型。',
+      '若使用第三方 LLM，避免发送个人数据，除非必要且有协议保障。'
+    ]},
+    { title: '自动化决策', paras: [
+      '我们不进行具有法律或类似重大影响的完全自动化决策。',
+      '推荐与评分是辅助信号；最终决策由您作出。'
+    ]},
+    { title: '去标识与聚合', paras: [
+      '在可行时对标识进行哈希或聚合以降低风险。',
+      '将键与内容分离，仅在必要时按权限关联。'
+    ]},
+    { title: '可携带与导出', paras: [
+      '您可请求导出与账户或机器人身份关联的个人数据。',
+      '我们将以通用机器可读格式提供，除非受法律限制。'
+    ]},
+    { title: '权利行使方式', paras: [
+      '通过邮箱或反馈机器人提交请求；我们可能要求合理校验（如从您账号发送机器人消息）。',
+      '在法定期限内答复；某些请求受法律或安全限制。'
+    ]},
+    { title: '事件与通报', paras: [
+      '我们有事故响应流程；若发生泄露，将依法通知受影响用户与监管部门。',
+      '同时复盘改进，防止复发。'
+    ]},
+    { title: '特定法域说明', paras: [
+      'EEA/英国：我们作为控制者时适用 GDPR。',
+      '美国：州法（如 CPRA）赋予额外权利；在可行时尊重有效的 opt-out 信号。'
+    ]},
+    { title: 'Do Not Track / GPC', paras: [
+      '浏览器可能发送 DNT 或 GPC 信号；在法律要求且技术可行时，我们予以尊重。'
+    ]},
+    { title: '退出选项', paras: [
+      '可禁用可选分析/ cookie、退订邮件、限制机器人权限。',
+      '核心安全与必要功能可能仍需最小处理。'
+    ]},
+    { title: '无障碍与语言', paras: [
+      '我们致力于多语言清晰表述；如有差异，以英文版为准。'
+    ]},
+    { title: '隐私联系人', paras: [
+      '隐私联系：quantuml7ai@gmail.com（主题：Privacy）。我们力争 30 天内回复。'
+    ]},
+    { title: '生效与版本', paras: [
+      '本政策自上述“更新日期”起生效；历史版本可存档备查。'
+    ]},
+    { title: '附录：术语', paras: [
+      '控制者：决定处理目的与方式。处理者：代表控制者处理。',
+      '个人数据：与已识别或可识别个人相关的信息。'
+    ]},
+    { title: '附录：次处理者（摘要）', paras: [
+      '托管/CDN（如 Vercel）、对象存储、邮件/Telegram 投递、错误跟踪、监控、基础分析。',
+      '可应请求提供更新的详细列表。'
+    ]}
+  ]
+};
+
+/* -------------------- UK -------------------- */
+const PRIVACY_UK = {
+  nav_privacy: 'Конфіденційність і політика',
+  privacy_title: 'Конфіденційність і політика',
+  privacy_updated_label: 'Оновлено:',
+  privacy_updated: '2025-09-14',
+  privacy_empty: 'Немає даних',
+  privacy_sections: [
+    { title: 'Огляд', paras: [
+      'Ця Політика пояснює, які дані ми збираємо, як використовуємо та захищаємо на сайті, у Telegram-боті та сервісах.',
+      'Користуючись сервісом, ви погоджуєтесь із Політикою. Це продуктове повідомлення, а не юридична порада.'
+    ]},
+    { title: 'Що збираємо', paras: [
+      'Облікові й контактні дані: Telegram ID/username/ім’я відображення; email (якщо надсилаєте); повідомлення, які ви нам надсилаєте.',
+      'Прив’язка гаманця: мережі та публічні адреси (ніколи не приватні ключі).',
+      'Дані використання та пристрою: сторінки, кліки, реферер, хешований IP, user-agent, часові мітки, телеметрія помилок і продуктивності.'
+    ]},
+    { title: 'Он-чейн і публічні дані', paras: [
+      'Ми аналізуємо публічні блокчейн- та ринкові дані; вони відкриті за своєю природою та не є нашими «персональними даними».',
+      'Запити (наприклад, аналітика адрес/символів) можуть логуватися для роботи сервісу та підвищення надійності.'
+    ]},
+    { title: 'Cookie та localStorage', paras: [
+      'Використовуємо мінімально: мова, сесія, анти-аб’юз. Блокування можливе; деякі функції можуть погіршитися.'
+    ]},
+    { title: 'Як використовуємо дані', paras: [
+      'Надання та покращення досліджень і сигналів; роутинг і захищене виконання; запобігання зловживанням; підтримка та комунікація.',
+      'Рекламного профілювання не робимо.'
+    ]},
+    { title: 'Передача третім сторонам', paras: [
+      'Ми не продаємо персональні дані.',
+      'Процесори: хостинг (напр., Vercel), зберігання, аналітика (якщо увімкнено), відстеження помилок, доставка email/Telegram.',
+      'Розкриття можливе для дотримання закону або захисту прав.'
+    ]},
+    { title: 'Безпека', paras: [
+      'Ключі залишаються у вас; seed-фрази не запитуємо. Дані шифруються під час передачі та зберігання; доступ за ролями і логування.',
+      'Застосовуємо найменші привілеї, MFA для критичних систем і контроль змін при деплоях.'
+    ]},
+    { title: 'Міжнародні передачі', paras: [
+      'Обробка може виконуватися за кордоном; де це потрібно, використовуємо стандартні гарантії (SCC) або інші законні механізми.'
+    ]},
+    { title: 'Ваші права', paras: [
+      'ЄЕЗ/ВБ (GDPR): доступ, виправлення, видалення, переносимість, обмеження/заперечення; право на скаргу до наглядового органу.',
+      'Каліфорнія (CPRA): доступ, видалення, виправлення, відмова від продажу/обміну; відсутність дискримінації.'
+    ]},
+    { title: 'Діти', paras: [
+      'Сервіс не призначено для дітей до 13 років (або вищий мінімальний вік у вашій юрисдикції).'
+    ]},
+    { title: 'Зміни', paras: [
+      'Можемо оновлювати Політику; змінюємо дату «Оновлено» і, за потреби, повідомляємо в застосунку чи каналі.'
+    ]},
+    { title: 'Контакти', paras: [
+      'Email: quantuml7ai@gmail.com',
+      'Бот зворотного зв’язку: https://t.me/L7ai_feedback'
+    ]},
+    { title: 'Визначення та сфера', paras: [
+      '«Сервіс» — наші сайти, боти, API та пов’язані застосунки; «ми» — Quantum L7 AI.',
+      'Політика охоплює дані, де ми контролер; у вендорів і блокчейнів — власні правила.'
+    ]},
+    { title: 'Правові підстави (GDPR)', paras: [
+      'Договір: надання запитаних функцій (роутинг, дослідження, панелі).',
+      'Законний інтерес: надійність, безпека, запобігання зловживанням, мінімальна продуктова аналітика.',
+      'Згода: опційна аналітика/маркетинг; можна відкликати будь-коли.',
+      'Юридичний обов’язок: зберігання/розкриття за вимогою закону.'
+    ]},
+    { title: 'Зберігання даних', paras: [
+      'Зберігаємо персональні дані стільки, скільки потрібно для зазначених цілей або за вимогою закону.',
+      'Орієнтири: операційні логи 30–180 днів; повідомлення підтримки до 12 міс.; юридичні записи — згідно норм.'
+    ]},
+    { title: 'Субпроцесори', paras: [
+      'Категорії: хостинг/CDN, об’єктне сховище, email/Telegram, моніторинг, відстеження помилок, базова аналітика.',
+      'DPA із постачальниками; періодична оцінка їхніх заходів безпеки.'
+    ]},
+    { title: 'Аналітика та метрики', paras: [
+      'Якщо увімкнено, вимірюємо агреговане використання (сторінки, продуктивність, прийняття функцій).',
+      'Налаштовуємо аналітику так, щоб мінімізувати персональні дані і виключати чутливі.'
+    ]},
+    { title: 'Логи та телеметрія', paras: [
+      'Логи можуть містити мітки часу, хеш-IP, user-agent, трасування помилок, ідентифікатори запитів.',
+      'Логи ротуються, доступ контролюється; застосовуються для відладки, планування ємності та виявлення зловживань.'
+    ]},
+    { title: 'Пошта та комунікації', paras: [
+      'Ваші листи/повідомлення обробляємо для підтримки і обліку.',
+      'Маркетинг без згоди не надсилаємо; можна відписатися будь-коли.'
+    ]},
+    { title: 'Webhooks і API', paras: [
+      'Під час використання API/webhook навантаження можуть тимчасово зберігатися для надійності та захисту від повторів.',
+      'Не передавайте секрети/приватні ключі; використовуйте коректну автентифікацію і ротацію токенів.'
+    ]},
+    { title: 'Прив’язка гаманця', paras: [
+      'Зберігаємо мережі та публічні адреси для функцій. Приватні ключі/seed не запитуємо і не зберігаємо.',
+      'Операції он-чейн публічні; можемо індексувати та анотувати їх для аналітики й звітності.'
+    ]},
+    { title: 'Огрàничувачі виконання', paras: [
+      'Якщо підтримується виконання/роутинг, застосовуємо ліміти, правила ризику, перевірки адекватності.',
+      'Це інструменти, а не гарантії; відповідальність за рішення — на вас.'
+    ]},
+    { title: 'Дослідження, моделі та LLM', paras: [
+      'Можемо навчати/оцінювати моделі на агрегованих та анонімізованих даних.',
+      'За участі сторонніх LLM уникаємо передачі персональних даних без необхідності та договірних гарантій.'
+    ]},
+    { title: 'Автоматизовані рішення', paras: [
+      'Не приймаємо виключно автоматизованих рішень із юридично значним ефектом.',
+      'Рекомендації — допоміжні сигнали; фінальні рішення — за вами.'
+    ]},
+    { title: 'Псевдонімізація і агрегація', paras: [
+      'Де можливо, хешуємо/агрегуємо ідентифікатори для зменшення ризиків.',
+      'Ключі відокремлюємо від контенту; зв’язування — лише за потреби та за ролями.'
+    ]},
+    { title: 'Портативність і експорт', paras: [
+      'Можна запросити експорт персональних даних, пов’язаних із вашим акаунтом/бот-ідентифікатором.',
+      'Надаємо у машинно-читаному форматі, якщо немає правових обмежень.'
+    ]},
+    { title: 'Як реалізувати права', paras: [
+      'Надішліть запит на email або у боті; можемо попросити верифікацію (повідомлення з вашого акаунта).',
+      'Відповідаємо у строки закону; деякі запити обмежені правом/безпекою.'
+    ]},
+    { title: 'Інциденти і повідомлення', paras: [
+      'Маємо процедури реагування; про порушення повідомляємо користувачів/органи — якщо цього вимагає закон.',
+      'Проводимо розбір і вдосконалюємо контролі.'
+    ]},
+    { title: 'Примітки для юрисдикцій', paras: [
+      'ЄЕЗ/ВБ: застосовується GDPR, коли ми контролер.',
+      'США: закони штатів (CPRA тощо) надають додаткові права; враховуємо валідні сигнали відмови, де це можливо.'
+    ]},
+    { title: 'Do Not Track / GPC', paras: [
+      'Повідомлення DNT/GPC враховуємо там, де це вимагає закон і технічно можливо.'
+    ]},
+    { title: 'Відмова', paras: [
+      'Можна вимкнути опційну аналітику/cookies, відписатися від листів, обмежити права бота.',
+      'Базова безпека і функціонал можуть потребувати мінімальної обробки.'
+    ]},
+    { title: 'Доступність і мова', paras: [
+      'Надаємо пояснення кількома мовами; у разі розбіжностей для тлумачення може застосовуватись англомовна версія.'
+    ]},
+    { title: 'Контакт з приватності', paras: [
+      'quantuml7ai@gmail.com (тема: Privacy). Мета — відповідь до 30 днів.'
+    ]},
+    { title: 'Набуття чинності та версії', paras: [
+      'Політика чинна з дати «Оновлено»; попередні версії можуть архівуватися для довідки.'
+    ]},
+    { title: 'Додаток: глосарій', paras: [
+      'Контролер — визначає цілі та засоби обробки. Процесор — обробляє від імені контролера.',
+      'Персональні дані — інформація про ідентифіковану/ідентифіковану особу.'
+    ]},
+    { title: 'Додаток: субпроцесори (стисло)', paras: [
+      'Хостинг/CDN (напр., Vercel), об’єктне сховище, email/Telegram, трекінг помилок, моніторинг, базова аналітика.',
+      'Детальний актуальний перелік — на запит.'
+    ]}
+  ]
+};
+
+/* -------------------- AR (العربية) -------------------- */
+const PRIVACY_AR = {
+  nav_privacy: 'الخصوصية والسياسة',
+  privacy_title: 'الخصوصية والسياسة',
+  privacy_updated_label: 'آخر تحديث:',
+  privacy_updated: '2025-09-14',
+  privacy_empty: 'لا توجد عناصر',
+  privacy_sections: [
+    { title: 'نظرة عامة', paras: [
+      'توضح هذه السياسة ما نجمعه وكيف نستخدمه ونحمي البيانات على الموقع وروبوت تيليجرام وخدماتنا.',
+      'باستخدامك للخدمة فأنت توافق على هذه السياسة. هذا إشعار منتج وليس استشارة قانونية.'
+    ]},
+    { title: 'ما الذي نجمعه', paras: [
+      'بيانات الحساب والتواصل: معرّف/اسم مستخدم/اسم العرض في تيليجرام؛ البريد (إن أرسلته)؛ الرسائل التي ترسلها لنا.',
+      'ربط المحفظة: الشبكات والعناوين العامة (أبدًا ليست المفاتيح الخاصة).',
+      'بيانات الاستخدام والجهاز: الصفحات والنقرات والمرجع وعنوان IP مُجزّأ ووكيل المستخدم والطوابع الزمنية وتتبع الأخطاء والأداء.'
+    ]},
+    { title: 'بيانات السلسلة والبيانات العامة', paras: [
+      'نحلل بيانات بلوك تشين والسوق العامة؛ هذه المصادر عامة بطبيعتها وليست بيانات شخصية تحت سيطرتنا.',
+      'قد تُسجَّل الطلبات (مثل تحليل العنوان/الرمز) لتشغيل الخدمة وتحسين الموثوقية.'
+    ]},
+    { title: 'الكوكيز والتخزين المحلي', paras: [
+      'نستخدمها بالحد الأدنى: اللغة والجلسة ومكافحة الإساءة. يمكنك الحظر وقد تتراجع بعض الميزات.'
+    ]},
+    { title: 'كيف نستخدم البيانات', paras: [
+      'تقديم وتحسين الأبحاث والإشارات؛ التوجيه والتنفيذ المحمي؛ منع الإساءة؛ الدعم والتواصل.',
+      'لا ننشئ ملفات إعلانية.'
+    ]},
+    { title: 'المشاركة مع أطراف ثالثة', paras: [
+      'لا نبيع البيانات الشخصية.',
+      'معالِجون: الاستضافة (مثل Vercel) والتخزين والتحليلات (إن فُعّلت) وتتبع الأخطاء والبريد/تيليجرام.',
+      'قد يحدث الإفصاح امتثالًا للقانون أو لحماية الحقوق.'
+    ]},
+    { title: 'الأمان', paras: [
+      'تظل المفاتيح لديك؛ لا نطلب عبارات الاسترداد. البيانات مُشفّرة أثناء النقل والتخزين؛ الوصول مُقيّد بالأدوار ويُسجّل.',
+      'نطبق أقل امتياز ممكن وmfa للأنظمة الحرجة وضبط تغييرات النشر.'
+    ]},
+    { title: 'النقل الدولي', paras: [
+      'قد تتم المعالجة خارج البلد؛ نستخدم ضمانات معيارية (SCC) أو آليات قانونية أخرى عند اللزوم.'
+    ]},
+    { title: 'حقوقك', paras: [
+      'EEA/المملكة المتحدة (GDPR): الوصول والتصحيح والحذف وقابلية النقل والاعتراض/التقييد؛ والشكوى للجهة المختصة.',
+      'كاليفورنيا (CPRA): الوصول والحذف والتصحيح والانسحاب من البيع/المشاركة؛ دون تمييز.'
+    ]},
+    { title: 'الأطفال', paras: [
+      'الخدمة غير موجهة لمن هم دون 13 عامًا (أو الحد الأدنى الأعلى في نطاقك القضائي).'
+    ]},
+    { title: 'التغييرات', paras: [
+      'قد نحدّث هذه السياسة؛ سنغيّر تاريخ "آخر تحديث" وسنخطرك داخل التطبيق أو عبر القناة عند الاقتضاء.'
+    ]},
+    { title: 'جهات الاتصال', paras: [
+      'البريد: quantuml7ai@gmail.com',
+      'بوت الملاحظات: https://t.me/L7ai_feedback'
+    ]},
+    { title: 'التعريفات والنطاق', paras: [
+      'الخدمة تشمل مواقعنا وروبوتاتنا وواجهاتنا البرمجية وتطبيقاتنا؛ "نحن" تعني Quantum L7 AI.',
+      'تنطبق هذه السياسة عندما نكون متحكمًا في البيانات. للمورّدين والشبكات قواعدهم الخاصة.'
+    ]},
+    { title: 'الأسس القانونية (GDPR)', paras: [
+      'العقد: لتقديم الميزات المطلوبة (التوجيه، الأبحاث، اللوحات).',
+      'المصلحة المشروعة: الموثوقية والأمان ومنع الإساءة وتحليلات المنتج بحد أدنى من التأثير.',
+      'الموافقة: التحليلات/التسويق الاختياري؛ يمكنك سحبها في أي وقت.',
+      'الالتزام القانوني: الاحتفاظ/الإفصاح وفقًا للقانون.'
+    ]},
+    { title: 'الاحتفاظ بالبيانات', paras: [
+      'نحتفظ بالبيانات الشخصية للمدة اللازمة للأغراض الموضحة أو كما يتطلب القانون.',
+      'أمثلة: سجلات التشغيل 30–180 يومًا؛ رسائل الدعم حتى 12 شهرًا؛ السجلات القانونية حسب المتطلبات.'
+    ]},
+    { title: 'المعالِجون الفرعيون', paras: [
+      'الفئات: الاستضافة/CDN، تخزين الكائنات، تسليم البريد/تيليجرام، المراقبة، تتبع الأخطاء، التحليلات الأساسية.',
+      'نبرم اتفاقيات معالجة ونراجع الضمانات دوريًا.'
+    ]},
+    { title: 'التحليلات والقياس', paras: [
+      'إن فُعلت، نقيس الاستخدام التجميعي (الصفحات والأداء وتبنّي الميزات).',
+      'نضبط التحليلات لتجنّب البيانات الحساسة وتقليل البيانات الشخصية قدر الإمكان.'
+    ]},
+    { title: 'السجلات والقياس عن بُعد', paras: [
+      'قد تتضمن السجلات طوابع زمنية وعنوان IP مُجزّأ ووكيل المستخدم وتتبع الأخطاء ومعرّفات الطلبات.',
+      'نُدوّر السجلات ونقيّد الوصول ونستخدمها للتصحيح والتخطيط والحد من الإساءة.'
+    ]},
+    { title: 'البريد والتواصل', paras: [
+      'إذا تواصلت معنا، نعالج رسالتك للدعم والسجلات.',
+      'لا نرسل تسويقًا دون موافقة؛ يمكنك الانسحاب في أي وقت.'
+    ]},
+    { title: 'واجهات API والويب هوكس', paras: [
+      'قد تُخزّن الحمولات مؤقتًا للموثوقية ومنع إعادة الإرسال.',
+      'لا ترسل الأسرار/المفاتيح الخاصة؛ استخدم اعتمادًا مناسبًا وقم بتدوير الرموز.'
+    ]},
+    { title: 'ربط المحفظة', paras: [
+      'نخزّن الشبكات والعناوين العامة فقط؛ لا نطلب/نخزن مفاتيح خاصة أو عبارات استرداد.',
+      'معاملات السلسلة عامة؛ قد نفهرسها ونشرحها للتحليل والتقارير.'
+    ]},
+    { title: 'ضوابط التنفيذ', paras: [
+      'عند دعم التنفيذ/التوجيه نطبق حدودًا وقواعد مخاطر وفحوصات معقولة.',
+      'هذه أدوات وليست ضمانات؛ القرار والامتثال مسؤوليتك.'
+    ]},
+    { title: 'الأبحاث والنماذج وLLM', paras: [
+      'قد نُدرّب/نقيّم النماذج على بيانات مجمعة ومجهّلة حيثما أمكن.',
+      'إذا استُخدمت LLM خارجية نتجنّب إرسال بيانات شخصية إلا للضرورة وتحت اتفاقيات.'
+    ]},
+    { title: 'القرارات الآلية', paras: [
+      'لا نتخذ قرارات آلية بحتة ذات أثر قانوني أو مماثل.',
+      'التوصيات درجات مساعدة؛ القرار النهائي لك.'
+    ]},
+    { title: 'إخفاء الهوية والتجميع', paras: [
+      'نُجزّئ/نُجمّع المعرفات حيثما أمكن لتقليل المخاطر.',
+      'نفصل المفاتيح عن المحتوى ونربطهما عند الحاجة فقط وبحسب الأدوار.'
+    ]},
+    { title: 'قابلية النقل والتصدير', paras: [
+      'يمكنك طلب تصدير لبياناتك الشخصية المرتبطة بحسابك/هوية الروبوت.',
+      'نقدّمها بصيغة مقروءة آليًا ما لم تمنعنا حدود قانونية.'
+    ]},
+    { title: 'ممارسة الحقوق', paras: [
+      'أرسل طلبك عبر البريد أو بوت الملاحظات؛ قد نطلب تحققًا معقولًا.',
+      'نستجيب ضمن المهل القانونية؛ قد تُقيّد بعض الطلبات بالقانون أو الأمن.'
+    ]},
+    { title: 'الحوادث والإخطار', paras: [
+      'لدينا إجراءات للاستجابة للحوادث؛ سنُخطر المتأثرين والجهات المختصة عند اللزوم.',
+      'نراجع الحوادث ونعزز الضوابط منعًا للتكرار.'
+    ]},
+    { title: 'إشعارات قضائية', paras: [
+      'EEA/UK: ينطبق GDPR حيث نكون متحكمًا.',
+      'الولايات المتحدة: قد تمنح القوانين الحقوق الإضافية (CPRA)؛ نراعي إشارات الانسحاب حيث أمكن.'
+    ]},
+    { title: 'عدم التتبع وGPC', paras: [
+      'نحترم إشارات DNT/GPC حيث يوجب القانون وكان ذلك ممكنًا تقنيًا.'
+    ]},
+    { title: 'خيارات الانسحاب', paras: [
+      'يمكنك تعطيل التحليلات/الكوكيز الاختيارية، وإلغاء الاشتراك من البريد، وتقييد صلاحيات الروبوت.',
+      'قد تتطلّب الوظائف الأساسية حدًا أدنى من المعالجة.'
+    ]},
+    { title: 'إتاحة الوصول واللغة', paras: [
+      'نسعى لشرح واضح بلغات متعددة؛ عند التعارض قد تسود النسخة الإنجليزية.'
+    ]},
+    { title: 'جهة خصوصية', paras: [
+      'privacy: quantuml7ai@gmail.com — نحاول الرد خلال 30 يومًا.'
+    ]},
+    { title: 'سريان السياسة والإصدارات', paras: [
+      'تسري من تاريخ "آخر تحديث" أعلاه؛ قد نحتفظ بنُسخ سابقة للرجوع.'
+    ]},
+    { title: 'ملحق: مصطلحات', paras: [
+      'المتحكم: يحدد أغراض ووسائل المعالجة. المعالِج: يعالج نيابة عن المتحكم.',
+      'البيانات الشخصية: معلومات تخص شخصًا مُعرّفًا أو قابلًا للتعريف.'
+    ]},
+    { title: 'ملحق: قائمة المعالِجين الفرعيين (موجز)', paras: [
+      'الاستضافة/CDN (مثل Vercel) وتخزين الكائنات وتسليم البريد/تيليجرام وتتبع الأخطاء والمراقبة والتحليلات الأساسية.',
+      'قائمة محدثة بالتفصيل متاحة عند الطلب.'
+    ]}
+  ]
+};
+
+/* -------------------- TR (Türkçe) -------------------- */
+const PRIVACY_TR = {
+  nav_privacy: 'Gizlilik ve Politika',
+  privacy_title: 'Gizlilik ve Politika',
+  privacy_updated_label: 'Güncelleme:',
+  privacy_updated: '2025-09-14',
+  privacy_empty: 'Kayıt yok',
+  privacy_sections: [
+    { title: 'Genel bakış', paras: [
+      'Bu politika; web sitesi, Telegram botu ve hizmetlerde hangi verileri topladığımızı, nasıl kullandığımızı ve nasıl koruduğumuzu açıklar.',
+      'Hizmeti kullanarak bu Politikayı kabul etmiş olursunuz. Bu bir ürün bildirimi olup hukuki danışmanlık değildir.'
+    ]},
+    { title: 'Topladıklarımız', paras: [
+      'Hesap ve iletişim: Telegram ID/kullanıcı adı/görünen ad; e-posta (gönderirseniz); bize gönderdiğiniz mesajlar.',
+      'Cüzdan bağlantısı: ağlar ve herkese açık adresler (özel anahtar asla).',
+      'Kullanım ve cihaz: sayfalar, tıklamalar, yönlendiren, karma IP, user-agent, zaman damgaları, hata ve performans telemetrisi.'
+    ]},
+    { title: 'Zincir üstü ve açık veriler', paras: [
+      'Herkese açık blokzincir/piyasa verilerini analiz ederiz; doğası gereği açıktır ve kontrolümüzdeki kişisel veri değildir.',
+      'İstekler (örn. adres/sembol analizi) hizmetin işletimi ve güvenilirliği için günlüğe alınabilir.'
+    ]},
+    { title: 'Çerezler ve localStorage', paras: [
+      'Asgari düzeyde kullanırız: dil, oturum, kötüye kullanım önleme. Engelleyebilirsiniz; bazı işlevler zayıflayabilir.'
+    ]},
+    { title: 'Veriyi nasıl kullanırız', paras: [
+      'Araştırma/sinyalleri sağlamak ve iyileştirmek; korumalı yönlendirme/yürütme; kötüye kullanımı önleme; destek ve iletişim.',
+      'Reklam profillemesi yapmayız.'
+    ]},
+    { title: 'Üçüncü taraflarla paylaşım', paras: [
+      'Kişisel veri satmayız.',
+      'Veri işleyenler: barındırma (örn. Vercel), depolama, analiz (etkinse), hata izleme, e-posta/Telegram teslimi.',
+      'Yasa gereği veya hakları korumak için açıklama olabilir.'
+    ]},
+    { title: 'Güvenlik', paras: [
+      'Anahtarlar sizdedir; seed phrase istemeyiz. Veri aktarım ve depolamada şifrelenir; erişim role dayalıdır ve kayda alınır.',
+      'Kritik sistemlerde en az ayrıcalık ve MFA uygular, dağıtımlarda değişiklik kontrolü yaparız.'
+    ]},
+    { title: 'Uluslararası aktarımlar', paras: [
+      'İşleme yurt dışında olabilir; gerektiğinde standart güvenceler (SCC) veya diğer yasal mekanizmalar kullanılır.'
+    ]},
+    { title: 'Haklarınız', paras: [
+      'AEA/UK (GDPR): erişim, düzeltme, silme, taşınabilirlik, kısıtlama/itiraz; denetleyici kuruma şikâyet hakkı.',
+      'Kaliforniya (CPRA): erişim, silme, düzeltme, satış/paylaşımdan vazgeçme; hak kullanımında ayrımcılık yok.'
+    ]},
+    { title: 'Çocuklar', paras: [
+      'Hizmet 13 yaş altına (veya yargı bölgenizdeki daha yüksek yaş) yönelik değildir.'
+    ]},
+    { title: 'Değişiklikler', paras: [
+      'Politikayı güncelleyebiliriz; “Güncelleme” tarihini değiştirir ve gerektiğinde uygulama içi/kanal bildirimi yaparız.'
+    ]},
+    { title: 'İletişim', paras: [
+      'E-posta: quantuml7ai@gmail.com',
+      'Geri bildirim botu: https://t.me/L7ai_feedback'
+    ]},
+    { title: 'Tanımlar ve kapsam', paras: [
+      '“Hizmet” web siteleri, botlar, API’ler ve ilgili uygulamalardır; “biz” Quantum L7 AI’dır.',
+      'Bu politika, denetleyici olduğumuz veriyi kapsar. Sağlayıcıların ve blokzincirlerin kendi kuralları vardır.'
+    ]},
+    { title: 'Hukuki dayanaklar (GDPR)', paras: [
+      'Sözleşme: talep edilen özellikleri sağlamak (yönlendirme, araştırma, paneller).',
+      'Meşru menfaat: güvenilirlik, güvenlik, kötüye kullanım önleme, asgari ürün analitiği.',
+      'Açık rıza: isteğe bağlı analitik/pazarlama; istediğiniz an geri çekebilirsiniz.',
+      'Yasal yükümlülük: veriyi saklama/açıklama.'
+    ]},
+    { title: 'Saklama', paras: [
+      'Kişisel verileri amaçlar için gerekli olduğu sürece veya yasa gerektirdiği kadar saklarız.',
+      'Örnekler: operasyonel günlükler 30–180 gün; destek mesajları 12 aya kadar; yasal kayıtlar mevzuata göre.'
+    ]},
+    { title: 'Alt işleyiciler', paras: [
+      'Kategoriler: barındırma/CDN, nesne depolama, e-posta/Telegram teslimi, izleme, hata takibi, temel analitik.',
+      'DPA imzalar ve güvenlik önlemlerini periyodik inceleriz.'
+    ]},
+    { title: 'Analitik ve metrikler', paras: [
+      'Etkinse, toplu kullanımı ölçeriz (sayfalar, performans, özellik benimseme).',
+      'Duyarlı verileri hariç tutar, kişisel veriyi asgari düzeye indiririz.'
+    ]},
+    { title: 'Günlükler ve telemetri', paras: [
+      'Günlükler zaman damgaları, karma IP, user-agent, hata izleri ve istek kimlikleri içerebilir.',
+      'Döndürülür, erişimi kontrol edilir ve hata ayıklama/kapasite planlama/kötüye kullanım tespiti için kullanılır.'
+    ]},
+    { title: 'E-posta ve iletişim', paras: [
+      'E-posta veya bot üzerinden destek amaçlı mesajlarınızı işleriz.',
+      'Onay olmadan pazarlama göndermeyiz; istediğiniz an vazgeçebilirsiniz.'
+    ]},
+    { title: 'Webhooks ve API', paras: [
+      'API/webhook yükleri güvenilirlik için geçici olarak saklanabilir.',
+      'İsteklere sır/özel anahtar koymayın; doğru kimlik doğrulama ve token rotasyonu kullanın.'
+    ]},
+    { title: 'Cüzdan bağlantısı', paras: [
+      'Ağlar ve açık adresleri saklarız; özel anahtar/seed talep etmeyiz.',
+      'Zincir üstü işlemler açıktır; analiz ve raporlama için indeksleyebiliriz.'
+    ]},
+    { title: 'Yürütme korumaları', paras: [
+      'Destekleniyorsa limitler, risk kuralları ve mantık kontrolleri uygularız.',
+      'Bunlar araçtır, garanti değildir; karar ve uyum sorumluluğu sizdedir.'
+    ]},
+    { title: 'Araştırma, modeller ve LLM', paras: [
+      'Mümkün olduğunda toplu/anonim verilerle modelleri eğitir/değerlendiririz.',
+      'Üçüncü taraf LLM kullanıldığında kişisel veri göndermekten kaçınırız; sözleşmesel korumalar uygularız.'
+    ]},
+    { title: 'Otomatik kararlar', paras: [
+      'Hukuki veya benzer önemli etkileri olan salt otomatik kararlar vermeyiz.',
+      'Öneriler yardımcı sinyallerdir; son karar sizindir.'
+    ]},
+    { title: 'Takma ad ve toplulaştırma', paras: [
+      'Mümkün olduğunda tanımlayıcıları karma/toplu hâle getiririz.',
+      'Anahtarları içerikten ayırır, gerekli olduğunda rollere göre ilişkilendiririz.'
+    ]},
+    { title: 'Taşınabilirlik ve dışa aktarma', paras: [
+      'Hesabınız/bot kimliğinizle ilişkili kişisel verinizin dışa aktarımını talep edebilirsiniz.',
+      'Yasal kısıtlar yoksa yaygın makinece okunur bir biçimde sağlarız.'
+    ]},
+    { title: 'Hakların kullanımı', paras: [
+      'E-posta veya geri bildirim botu ile başvurun; makul doğrulama isteyebiliriz.',
+      'Yasal sürelerde yanıt veririz; bazı talepler hukuk/güvenlik nedeniyle kısıtlanabilir.'
+    ]},
+    { title: 'Olaylar ve ihbar', paras: [
+      'Olay müdahale süreçlerimiz vardır; ihlal olursa yasaya göre kullanıcıları/otoriteleri bilgilendiririz.',
+      'Tekrarı önlemek için gözden geçirme ve iyileştirme yaparız.'
+    ]},
+    { title: 'Yargı notları', paras: [
+      'AEA/UK: kontrolör olduğumuz yerde GDPR geçerlidir.',
+      'ABD: eyalet yasaları (CPRA vb.) ek haklar sağlar; mümkünse geçerli vazgeçme sinyallerine uyarız.'
+    ]},
+    { title: 'DNT ve GPC', paras: [
+      'Gerektiğinde ve teknik olarak mümkünse Do Not Track/Global Privacy Control sinyallerine saygı duyarız.'
+    ]},
+    { title: 'Vazgeçme seçenekleri', paras: [
+      'İsteğe bağlı analitik/cookie’leri kapatabilir, e-postadan çıkabilir, bot izinlerini kısıtlayabilirsiniz.',
+      'Temel güvenlik ve işlevsellik asgari işlem gerektirebilir.'
+    ]},
+    { title: 'Erişilebilirlik ve dil', paras: [
+      'Birden fazla dilde açık metin sunmaya çalışırız; yorumda fark olursa İngilizce sürüm geçerli olabilir.'
+    ]},
+    { title: 'Gizlilik irtibatı', paras: [
+      'quantuml7ai@gmail.com (konu: Privacy) — hedef: 30 gün içinde yanıt.'
+    ]},
+    { title: 'Yürürlük ve sürümler', paras: [
+      'Bu politika yukarıdaki tarihten itibaren yürürlüktedir; önceki sürümler referans için saklanabilir.'
+    ]},
+    { title: 'Ek: Sözlük', paras: [
+      'Denetleyici: işleme amaç ve araçlarını belirler. İşleyen: denetleyici adına işler.',
+      'Kişisel veri: kimliği belirli veya belirlenebilir kişiye ilişkin bilgi.'
+    ]},
+    { title: 'Ek: Alt işleyiciler (özet)', paras: [
+      'Barındırma/CDN (örn. Vercel), nesne depolama, e-posta/Telegram teslimi, hata takibi, izleme, temel analitik.',
+      'Güncel ayrıntılı liste talep üzerine sunulur.'
+    ]}
+  ]
+};
+/* -------------------- ES -------------------- */
+const PRIVACY_ES = {
+  nav_privancy: undefined, // guard against typos
+  nav_privacy: 'Privacidad y política',
+  privacy_title: 'Privacidad y política',
+  privacy_updated_label: 'Actualizado:',
+  privacy_updated: '2025-09-14',
+  privacy_empty: 'Sin datos',
+  privacy_sections: [
+    { title: 'Resumen', paras: [
+      'Esta Política explica qué datos recopilamos, cómo los usamos y cómo los protegemos en el sitio web, en el bot de Telegram y en los servicios.',
+      'Al utilizar el servicio, aceptas esta Política. Es un aviso de producto para ayudarte a entender el uso de datos; no constituye asesoría legal.'
+    ]},
+    { title: 'Qué recopilamos', paras: [
+      'Datos de cuenta y de contacto: ID/username de Telegram/nombre mostrado; correo electrónico (si lo envías); mensajes que nos compartes.',
+      'Vinculación de monedero: redes y direcciones públicas (nunca claves privadas).',
+      'Datos de uso y del dispositivo: páginas, clics, referente, IP con hash, user-agent, marcas de tiempo, telemetría de errores y rendimiento.'
+    ]},
+    { title: 'Datos on-chain y públicos', paras: [
+      'Analizamos datos públicos de blockchain y de mercado. Por su naturaleza, esos datos ya son públicos y no constituyen “datos personales” bajo nuestro control.',
+      'Las consultas (por ejemplo, análisis de dirección o de símbolo) pueden registrarse para operar el servicio y mejorar su fiabilidad.'
+    ]},
+    { title: 'Cookies y almacenamiento local', paras: [
+      'Uso mínimo: idioma, sesión y anti-abuso. Puedes bloquearlas; algunas funciones pueden degradarse.'
+    ]},
+    { title: 'Cómo usamos los datos', paras: [
+      'Prestación y mejora de investigación y señales; ruteo y ejecución protegida; prevención de abusos; soporte y comunicaciones.',
+      'No realizamos perfilado publicitario.'
+    ]},
+    { title: 'Cesión a terceros', paras: [
+      'No vendemos datos personales.',
+      'Encargados del tratamiento: hosting (p. ej., Vercel), almacenamiento, analítica (si está habilitada), seguimiento de errores, entrega de email/Telegram.',
+      'Podemos revelar datos para cumplir la ley o para proteger derechos.'
+    ]},
+    { title: 'Seguridad', paras: [
+      'Las claves permanecen contigo; nunca solicitamos frases semilla. Los datos se cifran en tránsito y en reposo; el acceso es por roles y se registra.',
+      'Aplicamos principio de mínimo privilegio, MFA en sistemas críticos y control de cambios en los despliegues.'
+    ]},
+    { title: 'Transferencias internacionales', paras: [
+      'El tratamiento puede realizarse en el extranjero. Cuando es necesario, aplicamos garantías estándar (SCC) u otros mecanismos legales.'
+    ]},
+    { title: 'Tus derechos', paras: [
+      'EEE/Reino Unido (RGPD): acceso, rectificación, supresión, portabilidad, restricción/oposición; derecho a reclamar ante la autoridad supervisora.',
+      'California (CPRA): acceso, eliminación, rectificación, opción de no “vender” o “compartir”; sin discriminación por ejercer tus derechos.'
+    ]},
+    { title: 'Menores', paras: [
+      'El servicio no está destinado a menores de 13 años (o a la edad mínima superior de tu jurisdicción).'
+    ]},
+    { title: 'Cambios', paras: [
+      'Podemos actualizar esta Política. Cambiaremos la fecha de “Actualizado” y, cuando sea necesario, avisaremos en la interfaz o en el canal.'
+    ]},
+    { title: 'Contacto', paras: [
+      'Email: quantuml7ai@gmail.com',
+      'Bot de feedback: https://t.me/L7ai_feedback'
+    ]},
+    { title: 'Definiciones y alcance', paras: [
+      '“Servicio”: nuestros sitios, bots, API y apps relacionadas. “Nosotros”: Quantum L7 AI.',
+      'Esta Política cubre los datos para los que actuamos como responsables del tratamiento. Los proveedores y las blockchains tienen sus propias reglas.'
+    ]},
+    { title: 'Bases legales (RGPD)', paras: [
+      'Contrato: para prestar las funciones solicitadas (ruteo, investigación, paneles).',
+      'Interés legítimo: fiabilidad, seguridad, prevención de abusos, analítica de producto con impacto mínimo.',
+      'Consentimiento: analítica/marketing opcional; puedes retirarlo en cualquier momento.',
+      'Obligación legal: conservación/divulgación cuando lo exija la ley.'
+    ]},
+    { title: 'Conservación de datos', paras: [
+      'Conservamos los datos personales durante el tiempo necesario para los fines del tratamiento o por exigencias legales.',
+      'Guías: logs operativos 30–180 días; mensajes de soporte hasta 12 meses; registros legales según los requisitos.'
+    ]},
+    { title: 'Encargados/Subencargados', paras: [
+      'Categorías: hosting/CDN, almacenamiento de objetos, email/Telegram, monitorización, seguimiento de errores, analítica básica.',
+      'Tenemos DPAs con los proveedores; evaluamos periódicamente sus medidas de seguridad.'
+    ]},
+    { title: 'Analítica y métricas', paras: [
+      'Si está habilitada, medimos uso agregado (páginas, rendimiento, adopción de funciones).',
+      'Configuramos la analítica para excluir datos sensibles y minimizar los personales.'
+    ]},
+    { title: 'Registros y telemetría', paras: [
+      'Los registros operativos pueden incluir marcas de tiempo, IP con hash, user-agent, trazas de errores e IDs de solicitud.',
+      'Los logs se rotan, se accede a ellos por rol y se usan para depuración, planificación de capacidad y detección de abusos.'
+    ]},
+    { title: 'Correo y comunicaciones', paras: [
+      'Si nos escribes por email o en el bot, procesamos el mensaje para soporte y seguimiento.',
+      'No enviamos marketing sin consentimiento. Puedes darte de baja en cualquier momento.'
+    ]},
+    { title: 'Webhooks y API', paras: [
+      'Al usar API/webhooks, las cargas útiles pueden conservarse temporalmente para fiabilidad y protección contra repeticiones.',
+      'No envíes secretos ni claves privadas; usa autenticación adecuada y rotación de tokens.'
+    ]},
+    { title: 'Vinculación de monedero', paras: [
+      'Almacenamos redes y direcciones públicas para las funciones. No solicitamos ni almacenamos claves privadas o frases semilla.',
+      'Tus transacciones on-chain son públicas; podemos indexarlas y anotarlas para analítica e informes.'
+    ]},
+    { title: 'Guardarraíles de ejecución', paras: [
+      'Cuando hay ejecución/ruteo, aplicamos guardarraíles (límites, reglas de riesgo, comprobaciones de cordura).',
+      'Son herramientas, no garantías; la responsabilidad sobre decisiones y cumplimiento es tuya.'
+    ]},
+    { title: 'Investigación, modelos y LLM', paras: [
+      'Podemos entrenar/evaluar modelos con datos agregados y anonimizados cuando sea posible.',
+      'Al usar LLM de terceros, evitamos enviar datos personales sin necesidad y sin garantías contractuales.'
+    ]},
+    { title: 'Decisiones automatizadas', paras: [
+      'No adoptamos decisiones exclusivamente automatizadas con efecto jurídico significativo.',
+      'Las recomendaciones/valoraciones son señales de apoyo; las decisiones finales son tuyas.'
+    ]},
+    { title: 'Seudonimización y agregación', paras: [
+      'Cuando es posible, aplicamos hash/aggregación de identificadores para reducir riesgos.',
+      'Separamos claves de contenido; el acceso al vínculo está limitado por necesidad y por rol.'
+    ]},
+    { title: 'Portabilidad y exportación', paras: [
+      'Puedes solicitar la exportación de los datos personales vinculados a tu cuenta o identificador del bot.',
+      'Los proporcionaremos en formato legible por máquina, salvo restricciones legales.'
+    ]},
+    { title: 'Cómo ejercer tus derechos', paras: [
+      'Envía una solicitud por email o en el bot. Para verificar, podemos pedirte un mensaje desde tu cuenta del bot.',
+      'Respondemos en los plazos legales; algunas solicitudes están limitadas por requisitos legales y de seguridad.'
+    ]},
+    { title: 'Incidentes y notificaciones', paras: [
+      'Contamos con procedimientos de respuesta. Si ocurre un incidente, notificaremos a los usuarios afectados y a las autoridades cuando lo exija la ley.',
+      'Realizamos análisis posterior y mejoramos controles para evitar recurrencias.'
+    ]},
+    { title: 'Notas por jurisdicción', paras: [
+      'EEE/Reino Unido: aplica el RGPD cuando actuamos como responsables.',
+      'EE. UU.: las leyes estatales (por ejemplo, CPRA) pueden otorgar derechos adicionales; cuando sea posible, respetamos señales de exclusión válidas.'
+    ]},
+    { title: 'Do Not Track y GPC', paras: [
+      'El navegador puede enviar Do Not Track/Global Privacy Control. Donde se requiera y sea posible, los respetamos.'
+    ]},
+    { title: 'Opciones de exclusión', paras: [
+      'Puedes desactivar la analítica/cookies opcionales, darte de baja de correos y limitar permisos del bot.',
+      'La seguridad y la funcionalidad básicas pueden requerir un tratamiento mínimo.'
+    ]},
+    { title: 'Accesibilidad e idioma', paras: [
+      'Procuramos textos claros en varios idiomas. En caso de discrepancia, la versión en inglés puede prevalecer para interpretación.'
+    ]},
+    { title: 'Contacto de privacidad', paras: [
+      'Contacto de privacidad: quantuml7ai@gmail.com (asunto: Privacy). Objetivo: responder en 30 días.'
+    ]},
+    { title: 'Vigencia y versiones', paras: [
+      'La Política rige desde la fecha “Actualizado”. Podemos conservar versiones previas para referencia.'
+    ]},
+    { title: 'Anexo: Glosario', paras: [
+      'Responsable: determina fines y medios del tratamiento. Encargado: trata datos por cuenta del responsable.',
+      'Datos personales: información sobre una persona identificada o identificable.'
+    ]},
+    { title: 'Anexo: Lista abreviada de encargados', paras: [
+      'Hosting/CDN (p. ej., Vercel), almacenamiento de objetos, entrega de email/Telegram, seguimiento de errores, monitorización, analítica básica.',
+      'La lista actualizada y detallada está disponible bajo solicitud.'
+    ]}
+  ]
+};
+
+
+// Применяем патч без ломки существующего словаря:
+try {
+  Object.assign(dict.en, PRIVACY_EN)
+  Object.assign(dict.ru, PRIVACY_RU)
+  Object.assign(dict.zh, PRIVACY_ZH)
+  Object.assign(dict.uk, PRIVACY_UK)
+  Object.assign(dict.ar, PRIVACY_AR)
+  Object.assign(dict.tr, PRIVACY_TR)
+  Object.assign(dict.es, PRIVACY_ES)
+} catch (e) {
+  // Если переменная dict называется иначе — поправьте имя ниже под ваш файл.
+  console.warn('Privacy patch: please make sure the root dictionary is named "dict".')
+}
+/* ===== END OF PRIVACY PATCH ===== */
 const I18nContext = createContext({ t: (k) => k, lang: 'en', setLang: () => {} })
 
 export function I18nProvider({ children }) {

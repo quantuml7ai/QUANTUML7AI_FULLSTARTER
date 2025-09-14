@@ -260,3 +260,149 @@ ul.bullets li{margin:6px 0}
 .lang-switch .lang.active {
   opacity:1; background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.35);
 }
+/* === Навбар: усиленный пульс/свечение активного пункта === */
+:root{
+  --nav-glow-color: #67e8f9;              /* базовый оттенок свечения (циан) */
+  --nav-glow-strong: rgba(103,232,249,.95);
+  --nav-glow-soft:   rgba(103,232,249,.35);
+  --nav-active-scale: 1.08;               /* насколько увеличивать активную ссылку */
+}
+
+/* базовая ссылка — добавим позиционирование для псевдо-элемента */
+.topbar .nav-link{
+  position: relative;
+  transition: color .2s ease, transform .2s ease, filter .2s ease;
+  will-change: transform, filter;
+}
+
+/* активный пункт: намного ярче + пульс */
+.topbar .nav-link.active,
+.topbar .nav-link[data-active="true"]{
+  color: var(--nav-glow-color);
+  font-weight: 800;
+  transform: translateZ(0) scale(var(--nav-active-scale));
+  /* многоступенчатое свечение текста */
+  text-shadow:
+    0 0 2px  var(--nav-glow-color),
+    0 0 10px var(--nav-glow-color),
+    0 0 22px var(--nav-glow-strong),
+    0 0 44px var(--nav-glow-strong);
+  filter: brightness(1.2) saturate(130%);
+  animation: glowPulse 1.25s ease-in-out infinite;
+}
+
+/* мягкое «облако» света позади текста */
+.topbar .nav-link.active::before,
+.topbar .nav-link[data-active="true"]::before{
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 140%;
+  height: 220%;
+  transform: translate(-50%,-50%) scale(.92);
+  border-radius: 999px;
+  background: radial-gradient(circle, var(--nav-glow-soft) 0%, transparent 60%);
+  filter: blur(18px) saturate(130%);
+  opacity: .95;
+  mix-blend-mode: screen;                 /* красиво на тёмном фоне */
+  pointer-events: none;
+  z-index: -1;
+  animation: aura 1.25s ease-in-out infinite;
+}
+
+/* чуть усилим при ховере/фокусе */
+.topbar .nav-link.active:hover,
+.topbar .nav-link.active:focus-visible{
+  transform: translateZ(0) scale(calc(var(--nav-active-scale) + .02));
+  filter: brightness(1.35) saturate(150%);
+}
+
+/* Пульс текста */
+@keyframes glowPulse{
+  0%,100%{
+    text-shadow:
+      0 0 2px  var(--nav-glow-color),
+      0 0 10px var(--nav-glow-color),
+      0 0 22px var(--nav-glow-strong),
+      0 0 44px var(--nav-glow-strong);
+    filter: brightness(1.15) saturate(130%);
+  }
+  50%{
+    text-shadow:
+      0 0 4px  var(--nav-glow-color),
+      0 0 20px var(--nav-glow-color),
+      0 0 42px var(--nav-glow-strong),
+      0 0 72px var(--nav-glow-strong);
+    filter: brightness(1.45) saturate(160%);
+  }
+}
+
+/* Пульс «ауры» */
+@keyframes aura{
+  0%,100%{ transform: translate(-50%,-50%) scale(.92); opacity: .9; }
+  50%    { transform: translate(-50%,-50%) scale(1.06); opacity: 1;  }
+}
+
+/* уважение к reduced-motion */
+@media (prefers-reduced-motion: reduce){
+  .topbar .nav-link.active,
+  .topbar .nav-link[data-active="true"],
+  .topbar .nav-link.active::before,
+  .topbar .nav-link[data-active="true"]::before{
+    animation: none;
+  }
+}
+/* ---- Inline illustration panel ---- */
+.panel--image {
+  padding: 0; /* Без внутренних отступов у обёртки */
+  background: transparent;
+}
+
+.panel--image .panel-img {
+  position: relative;          /* обязательно для Image with fill */
+  width: 100%;
+  aspect-ratio: 16 / 9;        /* 16:9 как просили */
+  overflow: hidden;
+  border-radius: 18px;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.35),
+    0 0 40px rgba(0, 200, 255, 0.15); /* мягкое свечение */
+}
+
+.panel--image .panel-img img {
+  object-fit: cover;
+  transform: scale(1.001);     /* убирает тонкие артефакты на краях */
+}
+
+/* Небольшая «дышка» снизу, как у обычных панелей */
+.panel--image + .panel {
+  margin-top: 18px;
+}
+/* ===== Responsive media block (16:9 inside .panel) ===== */
+.media-block {
+  margin: 12px 0 28px;
+}
+
+.media-block img {
+  display: block;
+  width: 100%;
+  height: auto;              /* сохраняет пропорции */
+  aspect-ratio: 16 / 9;      /* одинаковое окно на любых экранах */
+  object-fit: cover;         /* заполняем окно без искажений */
+  border-radius: 16px;
+  box-shadow: 0 14px 40px -10px rgba(0,0,0,.55);
+}
+
+.media-block figcaption {
+  margin-top: 8px;
+  font-size: .95rem;
+  opacity: .85;
+}
+
+/* чуть мягче скругление и подпись поменьше на телефонах */
+@media (max-width: 640px) {
+  .media-block img { border-radius: 12px; }
+  .media-block figcaption { font-size: .9rem; }
+}
+.quantum-shot{width:100%;height:auto;display:block;border-radius:16px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
