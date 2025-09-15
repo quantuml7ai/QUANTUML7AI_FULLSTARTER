@@ -3,6 +3,7 @@ import './globals.css'
 import dynamic from 'next/dynamic'
 import { I18nProvider } from '../components/i18n'
 import TopBar from '../components/TopBar'
+import Providers from './providers' // <— добавили провайдер wagmi/web3modal
 
 // Рендерим тяжёлые/интерактивные вещи только на клиенте
 const HeroAvatar = dynamic(() => import('../components/HeroAvatar'), { ssr: false })
@@ -86,18 +87,21 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <I18nProvider>
-          {/* Фоновая анимация/герой (клиент-рендер) */}
-          <HeroAvatar />
+        {/* Оборачиваем всё приложение в провайдер wagmi/web3modal */}
+        <Providers>
+          <I18nProvider>
+            {/* Фоновая анимация/герой (клиент-рендер) */}
+            <HeroAvatar />
 
-          <div className="page-content">
-            <TopBar />
-            {children}
-          </div>
+            <div className="page-content">
+              <TopBar />
+              {children}
+            </div>
 
-          {/* Фоновая музыка: автоплей не требуем, старт по клику пользователя */}
-          <BgAudio src="/audio/cosmic.mp3" defaultVolume={0.35} />
-        </I18nProvider>
+            {/* Фоновая музыка: автоплей не требуем, старт по клику пользователя */}
+            <BgAudio src="/audio/cosmic.mp3" defaultVolume={0.35} />
+          </I18nProvider>
+        </Providers>
       </body>
     </html>
   )

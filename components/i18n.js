@@ -2660,6 +2660,459 @@ try {
 }
 /* ===== END OF PRIVACY PATCH ===== */
 const I18nContext = createContext({ t: (k) => k, lang: 'en', setLang: () => {} })
+// ===== Subscribe page dictionary (7 langs) — MARKETING EDITION =====
+const SUBSCRIBE_EN = {
+  sub_title: 'Subscribe',
+  sub_intro:
+    'Activate your edge. Connect your wallet to unlock live trading intelligence, effortless automation, and a clear roadmap to disciplined decisions. Choose your pace — explore with Free, accelerate with PRO, or dominate with VIP.',
+  sub_wallet_cta: 'Connect Wallet',
+  sub_wallet_cta_note: 'Connect your wallet to activate your plan.',
+  sub_plans_title: 'Plans',
+  sub_free_title: 'FREE — explore & feel the flow',
+  sub_free_desc: `
+    • 3-day access to experience the platform without commitments.<br/>
+    • 1 manual “Signal Now” per day to feel the timing and rhythm.<br/>
+    • See how ideas are framed into simple, actionable cards.<br/>
+    • Perfect for first touch: interface, language, and overall vibe.<br/>
+    • Upgrade anytime — your journey is entirely in your hands.<br/>
+  `,
+  sub_pro_title: 'PRO — pace, clarity, control',
+  sub_pro_price: 'Price: 10 USDT / week',
+  sub_pro_desc: `
+    • Daily flow tuned for intraday decisions without noise overload.<br/>
+    • Structured rhythm to plan entries, manage risk, and review outcomes.<br/>
+    • Sharper context around market sessions and momentum shifts.<br/>
+    • Flexible enough for workday trading or evening sessions.<br/>
+    • Priority assistance when you need a human touch.<br/>
+    • Upgrade/extend anytime — your time never goes to waste.<br/>
+  `,
+  sub_vip_title: 'VIP — full frequency, full focus',
+  sub_vip_price: 'Price: 30 USDT / week',
+  sub_vip_desc: `
+    • Maximum cadence for traders who live the market clock.<br/>
+    • Early access to premium tools and exclusive reports.<br/>
+    • Deep coverage across assets — ready when opportunities pop.<br/>
+    • Personal-feel feedback channel for fast iteration of ideas.<br/>
+    • Recognition inside the platform — the VIP mark speaks for itself.<br/>
+    • Designed for speed, precision, and decisive execution.<br/>
+  `,
+  sub_benefits_title: 'Why traders choose us',
+  sub_benefits: [
+    'Actionable signal cards distilled from complex data — no clutter.',
+    'Clear timing windows so you act with purpose, not panic.',
+    'Consistent multi-language interface — switch, don’t stumble.',
+    'Frictionless plan upgrades and extensions when momentum is on your side.',
+    'Weekly highlights that cut through noise and keep you on track.',
+    'A community mindset: we grow together, one decision at a time.',
+  ],
+  sub_payments_title: 'Start in minutes',
+  sub_payments: [
+    'Pick a plan, connect your wallet, confirm — and you’re in.',
+    'Pay in popular assets you already use across major networks.',
+    'Your access updates instantly once payment is confirmed.',
+    'No manual addresses, no screenshots, no back-and-forth.',
+  ],
+  sub_legal_note:
+    'All information is educational and analytical — not financial advice. Trading involves risk. Stay disciplined with position sizing and protective stops.',
+  sub_faq_title: 'FAQ',
+  sub_faq: [
+    { q: 'What makes Free valuable?', a: 'It lets you test the rhythm and flow risk-free for 3 days — perfect to learn how the interface and signal cards fit your style.' },
+    { q: 'Who is PRO for?', a: 'Intraday traders who want pace and clarity without overload — structured timing, clean context, and room to execute.' },
+    { q: 'Who is VIP for?', a: 'Active pros who need maximum cadence, early access to premium content, and the fastest turnaround on insights.' },
+    { q: 'Can I switch plans later?', a: 'Yes. You can upgrade or extend anytime — your remaining time carries over with no friction.' },
+    { q: 'How fast do I start?', a: 'Right after your payment is confirmed — your access switches on instantly.' },
+  ],
+}
+
+const SUBSCRIBE_RU = {
+  sub_title: 'Подписка',
+  sub_intro:
+    'Активируйте преимущество. Подключите кошелёк — и откройте доступ к живой рыночной аналитике, аккуратной автоматике и понятной дисциплине решений. Выбирайте темп: познакомиться на Free, ускориться на PRO, доминировать на VIP.',
+  sub_wallet_cta: 'Подключить кошелёк',
+  sub_wallet_cta_note: 'Подключите кошелёк, чтобы активировать план.',
+  sub_plans_title: 'Тарифы',
+  sub_free_title: 'FREE — узнать и прочувствовать',
+  sub_free_desc: `
+    • 3 дня, чтобы спокойно освоиться без обязательств.<br/>
+    • 1 ручной «Сигнал сейчас» в день — почувствовать ритм и тайминг.<br/>
+    • Идеи — в виде понятных карточек, без информационного шума.<br/>
+    • Отлично для первого касания: интерфейс, язык, общий вайб.<br/>
+    • Переход на платный — когда захотите, без давления.<br/>
+  `,
+  sub_pro_title: 'PRO — темп, ясность, контроль',
+  sub_pro_price: 'Цена: 10 USDT / неделя',
+  sub_pro_desc: `
+    • Ежедневный ритм для внутридневных решений без перегруза.<br/>
+    • Структура, которая помогает планировать входы и управлять риском.<br/>
+    • Больше контекста по сессиям и сменам импульса.<br/>
+    • Гибко сочетается с рабочим днём или вечерней торговлей.<br/>
+    • Приоритетная помощь там, где важно участие человека.<br/>
+    • Апгрейд/продление в любой момент — время не пропадает.<br/>
+  `,
+  sub_vip_title: 'VIP — максимальная частота, максимальный фокус',
+  sub_vip_price: 'Цена: 30 USDT / неделя',
+  sub_vip_desc: `
+    • Максимальный темп для тех, кто живёт по рыночным часам.<br/>
+    • Ранний доступ к премиум-материалам и эксклюзивным отчётам.<br/>
+    • Глубокое покрытие активов — готовность к моменту «сейчас».<br/>
+    • Быстрый канал обратной связи для ускорения идей.<br/>
+    • Узнаваемость в платформе — знак VIP говорит сам за себя.<br/>
+    • Для скорости, точности и уверенного исполнения.<br/>
+  `,
+  sub_benefits_title: 'Почему выбирают нас',
+  sub_benefits: [
+    'Карточки сигналов: суть из сложных данных — без визуального мусора.',
+    'Понятные окна времени: действуете осознанно, а не в панике.',
+    'Единый интерфейс на 7 языках — переключайтесь, не спотыкаясь.',
+    'Планы масштабируются: апгрейд и продление без трения.',
+    'Еженедельные выжимки, которые ведут, а не отвлекают.',
+    'Комьюнити-подход: растём вместе, решение за решением.',
+  ],
+  sub_payments_title: 'Старт за минуты',
+  sub_payments: [
+    'Выберите план, подключите кошелёк, подтвердите — и вы в деле.',
+    'Оплачивайте популярными активами в привычных сетях.',
+    'Доступ включается сразу после подтверждения платежа.',
+    'Без ручных адресов, скриншотов и долгой переписки.',
+  ],
+  sub_legal_note:
+    'Вся информация — образовательная и аналитическая, не финсовет. Торговля связана с риском. Дисциплина, размер позиции и защитные стопы — обязательны.',
+  sub_faq_title: 'FAQ',
+  sub_faq: [
+    { q: 'Зачем Free?', a: '3 дня, чтобы безопасно прочувствовать ритм: интерфейс, карточки, подача — поймёте, как это ложится на ваш стиль.' },
+    { q: 'Кому подойдёт PRO?', a: 'Тем, кто торгует внутри дня и ценит темп без перегруза: структурированный тайминг и чистый контекст.' },
+    { q: 'Кому нужен VIP?', a: 'Активным профи, кому важна максимальная частота, премиум-контент и быстрый цикл обратной связи.' },
+    { q: 'Можно менять план?', a: 'Да, апгрейд и продление доступны в любой момент; остаток времени сохраняется.' },
+    { q: 'Когда начинается доступ?', a: 'Сразу после подтверждения платежа — без задержек и лишних действий.' },
+  ],
+}
+
+const SUBSCRIBE_UK = {
+  sub_title: 'Підписка',
+  sub_intro:
+    'Увімкніть перевагу. Під’єднайте гаманець — і відкрийте живу аналітику, легку автоматизацію та дисципліну рішень. Оберіть темп: познайомтеся на Free, пришвидшіть PRO або домінуйте з VIP.',
+  sub_wallet_cta: 'Під’єднати гаманець',
+  sub_wallet_cta_note: 'Під’єднайте гаманець, щоб активувати план.',
+  sub_plans_title: 'Тарифи',
+  sub_free_title: 'FREE — відчути ритм',
+  sub_free_desc: `
+    • 3 дні, щоб спокійно спробувати без зобов’язань.<br/>
+    • 1 ручний «Сигнал зараз» на добу — відчути таймінг і подачу.<br/>
+    • Ідеї у вигляді зрозумілих карток без зайвого шуму.<br/>
+    • Чудово для першого знайомства: інтерфейс, мова, стиль.<br/>
+    • Переходьте на платний у будь-який момент — все під контролем.<br/>
+  `,
+  sub_pro_title: 'PRO — темп і ясність',
+  sub_pro_price: 'Ціна: 10 USDT / тиждень',
+  sub_pro_desc: `
+    • Щоденний ритм для інтрадей-рішень без перевантаження.<br/>
+    • Структура для планування входів і керування ризиком.<br/>
+    • Більше контексту щодо сесій та імпульсів ринку.<br/>
+    • Гнучко поєднується з роботою або вечірньою торгівлею.<br/>
+    • Пріоритетна допомога, коли важлива увага людини.<br/>
+    • Апгрейд/продовження будь-коли — час не зникає.<br/>
+  `,
+  sub_vip_title: 'VIP — максимальна частота',
+  sub_vip_price: 'Ціна: 30 USDT / тиждень',
+  sub_vip_desc: `
+    • Найвищий темп для тих, хто живе ринковим годинником.<br/>
+    • Перший доступ до преміум-матеріалів та ексклюзивних оглядів.<br/>
+    • Глибоке покриття активів — готовність до моменту «зараз».<br/>
+    • Швидкий фідбек-канал для ідей і покращень.<br/>
+    • Відзнака всередині платформи — статус VIP говорить сам за себе.<br/>
+    • Для швидкості, точності та впевненого виконання.<br/>
+  `,
+  sub_benefits_title: 'Чому нас обирають',
+  sub_benefits: [
+    'Зрозумілі картки сигналів — суть без зайвого інформаційного шуму.',
+    'Чіткі часові вікна — дієте усвідомлено, а не в паніці.',
+    'Єдиний інтерфейс 7 мовами — перемикайтесь без бар’єрів.',
+    'Гнучкі плани та просте продовження — коли є імпульс, не гальмуйте.',
+    'Щотижневі вижимки — тримають у фокусі важливе.',
+    'Мислення спільноти: зростаємо разом, рішення за рішенням.',
+  ],
+  sub_payments_title: 'Почніть за кілька хвилин',
+  sub_payments: [
+    'Обирайте план, під’єднуйте гаманець, підтверджуйте — і вперед.',
+    'Оплачуйте популярними активами у звичних мережах.',
+    'Доступ вмикається одразу після підтвердження платежу.',
+    'Без ручних адрес і зайвої бюрократії.',
+  ],
+  sub_legal_note:
+    'Інформація має освітній та аналітичний характер і не є фінансовою порадою. Торгівля ризикована — використовуйте розмір позиції та захисні стопи.',
+  sub_faq_title: 'FAQ',
+  sub_faq: [
+    { q: 'Навіщо Free?', a: '3 дні, щоб відчути ритм і стиль подачі — безкоштовно і без зобов’язань.' },
+    { q: 'Кому підійде PRO?', a: 'Тим, хто торгує всередині дня і цінує темп та ясність без зайвого шуму.' },
+    { q: 'Для кого VIP?', a: 'Для активних профі, яким потрібна максимальна частота та ранній доступ до преміум-матеріалів.' },
+    { q: 'Чи можна змінити план?', a: 'Так. Апгрейд і продовження доступні будь-коли; залишок зберігається.' },
+    { q: 'Коли стартує доступ?', a: 'Одразу після підтвердження платежу.' },
+  ],
+}
+
+const SUBSCRIBE_TR = {
+  sub_title: 'Abonelik',
+  sub_intro:
+    'Avantajınızı açın. Cüzdanı bağlayın ve canlı içgörüler, zahmetsiz otomasyon, disiplinli kararlar için net bir yol haritası elde edin. Temponuzu seçin: Free ile keşfedin, PRO ile hızlanın, VIP ile oyunu yönetin.',
+  sub_wallet_cta: 'Cüzdanı Bağla',
+  sub_wallet_cta_note: 'Planı etkinleştirmek için cüzdanınızı bağlayın.',
+  sub_plans_title: 'Paketler',
+  sub_free_title: 'FREE — ritmi hisset',
+  sub_free_desc: `
+    • 3 gün boyunca risksiz deneyim.<br/>
+    • Günde 1 manuel “Şimdi Sinyal” ile zamanlamayı ölç.<br/>
+    • Fikirler sade kartlarda, kafa karıştırmadan.<br/>
+    • Arayüz, dil ve akışı tanımak için harika başlangıç.<br/>
+    • Hazır olduğunda yükselt — kontrol sende.<br/>
+  `,
+  sub_pro_title: 'PRO — tempo ve netlik',
+  sub_pro_price: 'Fiyat: 10 USDT / hafta',
+  sub_pro_desc: `
+    • Gün içi kararlar için dengeli akış, gürültüsüz.<br/>
+    • Giriş planı, risk yönetimi ve sonuç değerlendirmesi için yapı.<br/>
+    • Seans dinamiklerine dair daha temiz bağlam.<br/>
+    • İş günü veya akşam seanslarına uyumlu esneklik.<br/>
+    • İhtiyaç duyduğunda öncelikli destek.<br/>
+    • İstediğin an yükselt/uzat — zaman boşa gitmez.<br/>
+  `,
+  sub_vip_title: 'VIP — tam frekans, tam odak',
+  sub_vip_price: 'Fiyat: 30 USDT / hafta',
+  sub_vip_desc: `
+    • Piyasayı yaşayanlar için maksimum kadans.<br/>
+    • Premium içerik ve özel raporlara erken erişim.<br/>
+    • Fırsatlar doğduğunda hazır, geniş kapsam.<br/>
+    • Hızlı geri bildirim kanalıyla fikirleri birlikte hızlandırın.<br/>
+    • Platform içinde tanınan VIP statüsü.<br/>
+    • Hız, hassasiyet ve kararlılık için tasarlandı.<br/>
+  `,
+  sub_benefits_title: 'Neden bizi seçiyorlar',
+  sub_benefits: [
+    'Karmaşayı eleyen, eyleme dönük sinyal kartları.',
+    'Panik değil, amaçla hareket etmenizi sağlayan zaman pencereleri.',
+    '7 dilde tutarlı arayüz — takılmadan geçiş yapın.',
+    'Anlık yükseltme ve uzatma — momentumu kaçırmayın.',
+    'Haftalık öne çıkanlar — odağınızı koruyun.',
+    'Topluluk bakışı: her kararla birlikte büyüyoruz.',
+  ],
+  sub_payments_title: 'Dakikalar içinde başla',
+  sub_payments: [
+    'Planını seç, cüzdanı bağla, onayla ve başla.',
+    'Alışık olduğun ağ ve varlıklarla ödeme yap.',
+    'Onaydan sonra erişim anında açılır.',
+    'Manuel adres yok, gereksiz adım yok.',
+  ],
+  sub_legal_note:
+    'Tüm bilgiler eğitim/analitik amaçlıdır; yatırım tavsiyesi değildir. İşlemler risk içerir. Pozisyon boyutu ve koruyucu stoplar kullanın.',
+  sub_faq_title: 'SSS',
+  sub_faq: [
+    { q: 'Free neden değerli?', a: '3 gün boyunca ritmi risksiz denersin: arayüz, kartlar, sunum — stiline uyumunu görürsün.' },
+    { q: 'PRO kime uygun?', a: 'Gün içi tempo ve netlik isteyen, aşırı gürültüye ihtiyaç duymayanlara.' },
+    { q: 'VIP kime uygun?', a: 'Maksimum kadans, premium içerik ve hızlı geri bildirim isteyen aktif profesyonellere.' },
+    { q: 'Planı sonra değiştirebilir miyim?', a: 'Evet. İstediğin zaman yükselt veya uzat; kalan süre korunur.' },
+    { q: 'Ne kadar hızlı başlarım?', a: 'Ödeme onaylanır onaylanmaz erişimin açılır.' },
+  ],
+}
+
+const SUBSCRIBE_ES = {
+  sub_title: 'Suscripción',
+  sub_intro:
+    'Activa tu ventaja. Conecta tu wallet y desbloquea inteligencia en vivo, automatización sencilla y decisiones disciplinadas. Elige tu ritmo: descubre con Free, acelera con PRO o lidera con VIP.',
+  sub_wallet_cta: 'Conectar wallet',
+  sub_wallet_cta_note: 'Conecta tu wallet para activar tu plan.',
+  sub_plans_title: 'Planes',
+  sub_free_title: 'FREE — sentir el ritmo',
+  sub_free_desc: `
+    • 3 días para explorar sin compromiso.<br/>
+    • 1 “Señal ahora” manual al día — prueba el timing.<br/>
+    • Ideas claras en tarjetas sin ruido.<br/>
+    • Ideal para conocer interfaz, idioma y estilo.<br/>
+    • Actualiza cuando quieras — tú marcas el paso.<br/>
+  `,
+  sub_pro_title: 'PRO — ritmo y claridad',
+  sub_pro_price: 'Precio: 10 USDT / semana',
+  sub_pro_desc: `
+    • Flujo diario afinado para intradía, sin saturación.<br/>
+    • Estructura para entradas, gestión de riesgo y revisión.<br/>
+    • Contexto más nítido sobre sesiones e impulsos.<br/>
+    • Flexible para jornadas laborales o tarde-noche.<br/>
+    • Soporte prioritario cuando hace falta.<br/>
+    • Mejora/extiende en cualquier momento — sin pérdidas de tiempo.<br/>
+  `,
+  sub_vip_title: 'VIP — máxima frecuencia',
+  sub_vip_price: 'Precio: 30 USDT / semana',
+  sub_vip_desc: `
+    • Cadencia máxima para quienes viven el mercado.<br/>
+    • Acceso temprano a contenidos premium y reportes exclusivos.<br/>
+    • Cobertura profunda: listo para las oportunidades cuando surgen.<br/>
+    • Canal de feedback ágil para iterar más rápido.<br/>
+    • Distintivo VIP dentro de la plataforma.<br/>
+    • Hecho para velocidad, precisión y ejecución decidida.<br/>
+  `,
+  sub_benefits_title: 'Por qué nos eligen',
+  sub_benefits: [
+    'Tarjetas accionables: esencia sin desorden.',
+    'Ventanas de tiempo claras para actuar con calma y propósito.',
+    'Interfaz en 7 idiomas con experiencia consistente.',
+    'Planes que crecen contigo: upgrades y extensiones sin fricción.',
+    'Resúmenes semanales que separan la señal del ruido.',
+    'Mentalidad de comunidad — avanzamos juntos, decisión a decisión.',
+  ],
+  sub_payments_title: 'Empieza en minutos',
+  sub_payments: [
+    'Elige plan, conecta wallet, confirma y listo.',
+    'Paga con activos populares en redes conocidas.',
+    'Acceso al instante tras la confirmación del pago.',
+    'Sin direcciones manuales ni trámites innecesarios.',
+  ],
+  sub_legal_note:
+    'La información es educativa y analítica; no constituye asesoría financiera. Operar implica riesgo. Usa tamaño de posición y stops protectores.',
+  sub_faq_title: 'FAQ',
+  sub_faq: [
+    { q: '¿Para qué sirve Free?', a: '3 días para sentir el ritmo sin riesgo: interfaz, tarjetas, estilo — comprueba si encaja contigo.' },
+    { q: '¿Para quién es PRO?', a: 'Para intradía que quieren ritmo y claridad sin exceso de ruido.' },
+    { q: '¿Para quién es VIP?', a: 'Para profesionales activos que necesitan máxima cadencia y acceso premium.' },
+    { q: '¿Puedo cambiar de plan?', a: 'Sí, puedes mejorar o extender cuando quieras; el tiempo restante se mantiene.' },
+    { q: '¿Cuándo comienza el acceso?', a: 'Justo después de la confirmación del pago.' },
+  ],
+}
+
+const SUBSCRIBE_AR = {
+  sub_title: 'الاشتراك',
+  sub_intro:
+    'فعّل ميزتك. اربط محفظتك لفتح تحليلات مباشرة، وأتمتة سلسة، وانضباط في القرارات. اختر وتيرتك: تعرّف عبر Free، تسارع مع PRO، أو تقدّم مع VIP.',
+  sub_wallet_cta: 'ربط المحفظة',
+  sub_wallet_cta_note: 'اربط محفظتك لتفعيل الخطة.',
+  sub_plans_title: 'الباقات',
+  sub_free_title: 'FREE — جرّب الإيقاع',
+  sub_free_desc: `
+    • 3 أيام لاستكشاف المنصة دون التزام.<br/>
+    • إشارة يدوية واحدة يوميًا لتجربة التوقيت والإيقاع.<br/>
+    • أفكار واضحة في بطاقات مرتّبة بلا ضوضاء.<br/>
+    • مثالية للتعرّف على الواجهة واللغة والأسلوب.<br/>
+    • يمكنك الترقية متى أردت — القرار بيدك.<br/>
+  `,
+  sub_pro_title: 'PRO — وتيرة ووضوح',
+  sub_pro_price: 'السعر: 10 USDT / أسبوع',
+  sub_pro_desc: `
+    • تدفّق يومي مضبوط لقرارات داخل اليوم دون إرباك.<br/>
+    • بنية تساعد على التخطيط وإدارة المخاطر ومراجعة النتائج.<br/>
+    • سياق أوضح لتغيّرات الجلسات والزخم.<br/>
+    • مرونة تناسب العمل أو جلسات المساء.<br/>
+    • دعم ذو أولوية عند الحاجة.<br/>
+    • ترقية/تمديد في أي وقت — الوقت لا يضيع.<br/>
+  `,
+  sub_vip_title: 'VIP — أقصى تردد، أقصى تركيز',
+  sub_vip_price: 'السعر: 30 USDT / أسبوع',
+  sub_vip_desc: `
+    • وتيرة قصوى لمن يعيشون على ساعة السوق.<br/>
+    • وصول مبكر لمحتوى مميز وتقارير حصرية.<br/>
+    • تغطية أوسع للأصول — جاهزية للحظة المناسبة.<br/>
+    • قناة ملاحظات سريعة لتسريع الأفكار.<br/>
+    • تمييز VIP داخل المنصة — يكفي اسمه.<br/>
+    • صُمّم للسرعة والدقّة والتنفيذ الحاسم.<br/>
+  `,
+  sub_benefits_title: 'لماذا يختارنا المتداولون',
+  sub_benefits: [
+    'بطاقات إشارات عملية تُظهر الخلاصة بلا فوضى.',
+    'نوافذ زمنية واضحة لتتحرّك بهدوء وهدف.',
+    'واجهة متعدّدة اللغات (7) بتجربة متناسقة.',
+    'خطط تتوسّع معك — ترقية وتمديد بلا عناء.',
+    'ملخصات أسبوعية تُبقي تركيزك على الأهم.',
+    'عقلية المجتمع — نتقدّم معًا، قرارًا بعد قرار.',
+  ],
+  sub_payments_title: 'ابدأ خلال دقائق',
+  sub_payments: [
+    'اختر الخطة، اربط محفظتك، أكّد — وانطلق.',
+    'ادفع بأصول شائعة على الشبكات المعروفة لديك.',
+    'يُفعَّل الوصول فور تأكيد الدفع.',
+    'لا عناوين يدوية ولا إجراءات مزعجة.',
+  ],
+  sub_legal_note:
+    'المحتوى تعليمي/تحليلي وليس نصيحة مالية. التداول ينطوي على مخاطرة — استخدم إدارة المخاطر وإيقاف الخسارة.',
+  sub_faq_title: 'الأسئلة الشائعة',
+  sub_faq: [
+    { q: 'ما فائدة Free؟', a: '3 أيام لتجربة الإيقاع بلا مخاطرة: الواجهة، البطاقات، الأسلوب — لترى إن كان يناسبك.' },
+    { q: 'لمن خُصّص PRO؟', a: 'لمتداولي اليوم الذين يريدون وتيرة ووضوحًا بلا ضجيج زائد.' },
+    { q: 'لمن خُصّص VIP؟', a: 'للمحترفين النشطين الذين يحتاجون أقصى تردد ووصولًا مميزًا.' },
+    { q: 'هل أستطيع تغيير الخطة لاحقًا؟', a: 'نعم، يمكنك الترقية والتمديد في أي وقت، مع الحفاظ على الوقت المتبقي.' },
+    { q: 'متى يبدأ الوصول؟', a: 'فور تأكيد الدفع مباشرة.' },
+  ],
+}
+
+const SUBSCRIBE_ZH = {
+  sub_title: '订阅',
+  sub_intro:
+    '启动你的优势。连接钱包，即可解锁实时洞察、轻松自动化与更有纪律的决策。选择你的节奏：先用 Free 探路，用 PRO 加速，用 VIP 掌控全局。',
+  sub_wallet_cta: '连接钱包',
+  sub_wallet_cta_note: '连接钱包以激活订阅。',
+  sub_plans_title: '套餐',
+  sub_free_title: 'FREE — 先感受节奏',
+  sub_free_desc: `
+    • 3 天自由体验，无任何义务。<br/>
+    • 每天 1 次手动“即刻信号”，感受时机与韵律。<br/>
+    • 清爽卡片呈现要点，无冗余噪音。<br/>
+    • 适合初识界面、语言与风格的你。<br/>
+    • 随时升级——节奏由你把控。<br/>
+  `,
+  sub_pro_title: 'PRO — 节奏与清晰',
+  sub_pro_price: '价格：10 USDT / 周',
+  sub_pro_desc: `
+    • 为日内决策精心调校的日常节奏，避免信息过载。<br/>
+    • 帮你规划入场、管理风险并复盘结果。<br/>
+    • 更清晰的交易时段与动能切换语境。<br/>
+    • 可与工作/夜间交易灵活搭配。<br/>
+    • 需要时享受优先支持。<br/>
+    • 随时升级/延长——时间价值不浪费。<br/>
+  `,
+  sub_vip_title: 'VIP — 全频率，全专注',
+  sub_vip_price: '价格：30 USDT / 周',
+  sub_vip_desc: `
+    • 为以市场为日程的人提供最高节奏。<br/>
+    • 优先获得精选内容与独家报告。<br/>
+    • 更深覆盖，机会来临即可把握。<br/>
+    • 快速反馈渠道，加速迭代思路。<br/>
+    • 平台内尊享 VIP 标识。<br/>
+    • 为速度、精准与果断执行而生。<br/>
+  `,
+  sub_benefits_title: '为什么选择我们',
+  sub_benefits: [
+    '可行动的信号卡片，去繁就简直击要点。',
+    '明确的时间窗口，助你从容而有目的地出手。',
+    '7 种语言的统一体验，切换流畅不卡壳。',
+    '套餐随你成长，升级与续期无阻力。',
+    '每周重点提炼，帮你穿透噪音保持专注。',
+    '社区型思维——一路同行，步步精进。',
+  ],
+  sub_payments_title: '几分钟即可开始',
+  sub_payments: [
+    '选择套餐，连接钱包，确认后立即使用。',
+    '用你熟悉的主流资产与网络支付即可。',
+    '支付确认后，访问权限立即开启。',
+    '无需手填地址，无需繁琐步骤。',
+  ],
+  sub_legal_note:
+    '所有内容仅供教育与分析，不构成投资建议。交易有风险，请合理控制仓位并使用止损。',
+  sub_faq_title: '常见问题',
+  sub_faq: [
+    { q: 'Free 有何价值？', a: '3 天无负担体验：界面、卡片、呈现方式——看看是否契合你的风格。' },
+    { q: 'PRO 适合谁？', a: '希望保持节奏与清晰、避免过载的日内交易者。' },
+    { q: 'VIP 适合谁？', a: '需要最高频率与精选内容的活跃型专业交易者。' },
+    { q: '可以之后换套餐吗？', a: '可以。随时升级或续期，剩余时间保持有效。' },
+    { q: '多久能开始？', a: '支付确认后即可立即开启访问权限。' },
+  ],
+}
+
+// Merge into dict (keep as-is)
+try {
+  Object.assign(dict.en, SUBSCRIBE_EN)
+  Object.assign(dict.ru, SUBSCRIBE_RU)
+  Object.assign(dict.uk, SUBSCRIBE_UK)
+  Object.assign(dict.tr, SUBSCRIBE_TR)
+  Object.assign(dict.es, SUBSCRIBE_ES)
+  Object.assign(dict.ar, SUBSCRIBE_AR)
+  Object.assign(dict.zh, SUBSCRIBE_ZH)
+} catch {}
+
 
 export function I18nProvider({ children }) {
   const [lang, setLang] = useState('en')
