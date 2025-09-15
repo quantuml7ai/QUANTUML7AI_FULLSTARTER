@@ -2,11 +2,14 @@
 'use client'
 
 import NextDynamic from 'next/dynamic'
-import { useI18n } from '../../components/i18n'
+import { useI18n } from '../components/i18n' // <-- был ../../components/i18n
 import Link from 'next/link'
 
 // Кнопка Web3Modal — только на клиенте (без SSR)
-const W3MButton = NextDynamic(() => import('../../components/wallet/W3MButton.jsx'), { ssr: false })
+const W3MButton = NextDynamic(
+  () => import('../components/wallet/W3MButton.jsx'), // <-- был ../../components/...
+  { ssr: false }
+)
 
 export default function ClientSubscribe() {
   const { t } = useI18n()
@@ -32,14 +35,12 @@ export default function ClientSubscribe() {
       <section className="panel panel-narrow">
         <h2>{t('sub_plans_title')}</h2>
 
-        {/* FREE */}
         <div style={{ marginTop: 8 }}>
           <div className="badge">FREE</div>
           <h3 style={{ marginTop: 8 }}>{t('sub_free_title')}</h3>
           <p dangerouslySetInnerHTML={{ __html: t('sub_free_desc') }} />
         </div>
 
-        {/* PRO */}
         <div style={{ marginTop: 18 }}>
           <div className="badge">PRO</div>
           <h3 style={{ marginTop: 8 }}>{t('sub_pro_title')}</h3>
@@ -47,7 +48,6 @@ export default function ClientSubscribe() {
           <p dangerouslySetInnerHTML={{ __html: t('sub_pro_desc') }} />
         </div>
 
-        {/* VIP */}
         <div style={{ marginTop: 18 }}>
           <div className="badge">VIP</div>
           <h3 style={{ marginTop: 8 }}>{t('sub_vip_title')}</h3>
