@@ -1,13 +1,15 @@
 // app/subscribe/page.js
 'use client'
+
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-import dynamic from 'next/dynamic'
+import NextDynamic from 'next/dynamic'
 import { useI18n } from '../../components/i18n'
 import Link from 'next/link'
 
-const W3MButton = dynamic(() => import('../../components/wallet/W3MButton.jsx'), { ssr: false })
+// Кнопка Web3Modal — только на клиенте (без SSR)
+const W3MButton = NextDynamic(() => import('../../components/wallet/W3MButton.jsx'), { ssr: false })
 
 export default function SubscribePage() {
   const { t } = useI18n()
@@ -22,23 +24,28 @@ export default function SubscribePage() {
         <p>{t('sub_intro')}</p>
         <div className="row" style={{ marginTop: 12 }}>
           <W3MButton label={t('sub_wallet_cta')} note={t('sub_wallet_cta_note')} />
-          <Link href="/contact" className="btn ghost" aria-label={t('nav_contact')}>✉️ {t('nav_contact')}</Link>
+          <Link href="/contact" className="btn ghost" aria-label={t('nav_contact')}>
+            ✉️ {t('nav_contact')}
+          </Link>
         </div>
       </section>
 
       <section className="panel panel-narrow">
         <h2>{t('sub_plans_title')}</h2>
+
         <div style={{ marginTop: 8 }}>
           <div className="badge">FREE</div>
           <h3 style={{ marginTop: 8 }}>{t('sub_free_title')}</h3>
           <p dangerouslySetInnerHTML={{ __html: t('sub_free_desc') }} />
         </div>
+
         <div style={{ marginTop: 18 }}>
           <div className="badge">PRO</div>
           <h3 style={{ marginTop: 8 }}>{t('sub_pro_title')}</h3>
           <p><b>{t('sub_pro_price')}</b></p>
           <p dangerouslySetInnerHTML={{ __html: t('sub_pro_desc') }} />
         </div>
+
         <div style={{ marginTop: 18 }}>
           <div className="badge">VIP</div>
           <h3 style={{ marginTop: 8 }}>{t('sub_vip_title')}</h3>
@@ -49,7 +56,9 @@ export default function SubscribePage() {
 
       <section className="panel panel-narrow">
         <h2>{t('sub_benefits_title')}</h2>
-        <ul className="bullets">{benefits.map((line, i) => <li key={i}>{line}</li>)}</ul>
+        <ul className="bullets">
+          {benefits.map((line, i) => <li key={i}>{line}</li>)}
+        </ul>
       </section>
 
       <section className="panel panel-narrow">
