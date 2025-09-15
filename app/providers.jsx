@@ -24,7 +24,6 @@ export default function Providers({ children }) {
       try {
         const { createWeb3Modal } = await import('@web3modal/wagmi/react')
         if (!mounted) return
-        // Инициализируем 1 раз
         if (!window.__W3M_INITIALIZED__) {
           window.__W3M_INITIALIZED__ = 'loading'
           createWeb3Modal({ wagmiConfig, projectId, chains, themeMode: 'dark' })
