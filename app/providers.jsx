@@ -1,50 +1,43 @@
 // app/providers.jsx
 'use client'
 
+import { useEffect } from 'react'
 import { WagmiProvider, createConfig, http } from 'wagmi'
 import { mainnet, polygon, arbitrum, optimism, bsc, avalanche, base } from 'wagmi/chains'
 
-// WalletConnect
 const projectId = process.env.NEXT_PUBLIC_WC_PROJECT_ID || ''
 
-// EVM сети
 const chains = [mainnet, polygon, arbitrum, optimism, bsc, avalanche, base]
 const transports = chains.reduce((acc, c) => ({ ...acc, [c.id]: http() }), {})
 
-// Единый wagmi-конфиг
 const wagmiConfig = createConfig({
   chains,
   transports,
   ssr: true
 })
 
-// Инициализируем Web3Modal ОДИН РАЗ на клиенте до рендера кнопки
-if (typeof window !== 'undefined' && projectId) {
-  if (!window.__W3M_INITIALIZED__) {
-    window.__W3M_INITIALIZED__ = 'loading'
-    import('@web3modal/wagmi/react')
-      .then(({ createWeb3Modal }) => {
-        try {
-          createWeb3Modal({
-            wagmiConfig,
-            projectId,
-            chains,
-            themeMode: 'dark'
-          })
+export default function Providers({ children }) {
+  useEffect(() => {
+    if (!projectId) return
+    let mounted = true
+    ;(async () => {
+      try {
+        const { createWeb3Modal } = await import('@web3modal/wagmi/react')
+        if (!mounted) return
+        // Инициализируем 1 раз
+        if (!window.__W3M_INITIALIZED__) {
+          window.__W3M_INITIALIZED__ = 'loading'
+          createWeb3Modal({ wagmiConfig, projectId, chains, themeMode: 'dark' })
           window.__W3M_INITIALIZED__ = true
           window.dispatchEvent(new Event('w3m-ready'))
-        } catch (e) {
-          console.error('Web3Modal init error:', e)
-          window.__W3M_INITIALIZED__ = false
         }
-      })
-      .catch(e => {
-        console.error('Web3Modal import error:', e)
+      } catch (e) {
+        console.error('Web3Modal init error:', e)
         window.__W3M_INITIALIZED__ = false
-      })
-  }
-}
+      }
+    })()
+    return () => { mounted = false }
+  }, [])
 
-export default function Providers({ children }) {
   return <WagmiProvider config={wagmiConfig}>{children}</WagmiProvider>
 }

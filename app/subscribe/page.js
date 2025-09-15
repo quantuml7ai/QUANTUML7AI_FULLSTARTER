@@ -1,11 +1,13 @@
 // app/subscribe/page.js
 'use client'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 import dynamic from 'next/dynamic'
 import { useI18n } from '../../components/i18n'
 import Link from 'next/link'
 
-// Кнопка Web3Modal вынесена в клиентский компонент (без SSR)
 const W3MButton = dynamic(() => import('../../components/wallet/W3MButton'), { ssr: false })
 
 export default function SubscribePage() {
@@ -32,14 +34,12 @@ export default function SubscribePage() {
       <section className="panel panel-narrow">
         <h2>{t('sub_plans_title')}</h2>
 
-        {/* FREE */}
         <div style={{ marginTop: 8 }}>
           <div className="badge">FREE</div>
           <h3 style={{ marginTop: 8 }}>{t('sub_free_title')}</h3>
           <p dangerouslySetInnerHTML={{ __html: t('sub_free_desc') }} />
         </div>
 
-        {/* PRO */}
         <div style={{ marginTop: 18 }}>
           <div className="badge">PRO</div>
           <h3 style={{ marginTop: 8 }}>{t('sub_pro_title')}</h3>
@@ -47,7 +47,6 @@ export default function SubscribePage() {
           <p dangerouslySetInnerHTML={{ __html: t('sub_pro_desc') }} />
         </div>
 
-        {/* VIP */}
         <div style={{ marginTop: 18 }}>
           <div className="badge">VIP</div>
           <h3 style={{ marginTop: 8 }}>{t('sub_vip_title')}</h3>
@@ -56,7 +55,6 @@ export default function SubscribePage() {
         </div>
       </section>
 
-      {/* What you get */}
       <section className="panel panel-narrow">
         <h2>{t('sub_benefits_title')}</h2>
         <ul className="bullets">
@@ -64,7 +62,6 @@ export default function SubscribePage() {
         </ul>
       </section>
 
-      {/* Payments */}
       <section className="panel panel-narrow">
         <h2>{t('sub_payments_title')}</h2>
         <ul className="bullets">
@@ -73,7 +70,6 @@ export default function SubscribePage() {
         <p className="muted" style={{ marginTop: 8 }}>{t('sub_legal_note')}</p>
       </section>
 
-      {/* FAQ */}
       <section className="panel panel-narrow">
         <h2>{t('sub_faq_title')}</h2>
         <ul className="bullets">
