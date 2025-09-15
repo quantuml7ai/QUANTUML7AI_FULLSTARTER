@@ -1,19 +1,18 @@
 // app/subscribe/page.js
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useI18n } from '../../components/i18n'
 import Link from 'next/link'
-import { useWeb3Modal } from '@web3modal/wagmi/react' // <— добавили
+
+// Кнопка Web3Modal вынесена в клиентский компонент (без SSR)
+const W3MButton = dynamic(() => import('../../components/wallet/W3MButton'), { ssr: false })
 
 export default function SubscribePage() {
   const { t } = useI18n()
   const benefits = t('sub_benefits') || []
   const payments = t('sub_payments') || []
   const faq = t('sub_faq') || []
-
-  // Инициализация модалки EVM (MetaMask/Trust/и т.д.)
-  const { open } = useWeb3Modal()
-  const hasW3M = !!process.env.NEXT_PUBLIC_WC_PROJECT_ID
 
   return (
     <main>
@@ -22,21 +21,7 @@ export default function SubscribePage() {
         <h1>{t('sub_title')}</h1>
         <p>{t('sub_intro')}</p>
         <div className="row" style={{ marginTop: 12 }}>
-          <button
-            id="wallet-connect"
-            className="btn"
-            onClick={() => {
-              if (!hasW3M) {
-                // Если не настроен Project ID — подсказка
-                alert(t('sub_wallet_cta_note'))
-                return
-              }
-              open()
-            }}
-            aria-label={t('sub_wallet_cta')}
-          >
-            🔗 {t('sub_wallet_cta')}
-          </button>
+          <W3MButton label={t('sub_wallet_cta')} note={t('sub_wallet_cta_note')} />
           <Link href="/contact" className="btn ghost" aria-label={t('nav_contact')}>
             ✉️ {t('nav_contact')}
           </Link>
