@@ -1,0 +1,408 @@
+/* ===== Base ===== */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:#05070e;color:#e6f0ff;
+  font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,"Helvetica Neue",Arial;
+  overflow-x:hidden;
+}
+
+/* ===== Hero background (video + effects) ===== */
+.scene{position:fixed;inset:0;width:100%;height:100%;overflow:hidden;z-index:0}
+.bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(1.05)}
+.stars{
+  position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,.06), transparent 70%),
+    radial-gradient(circle at 22% 28%, rgba(0,160,255,.14), transparent 55%),
+    radial-gradient(circle at 78% 72%, rgba(0,160,255,.1), transparent 55%);
+}
+
+/* ===== Floating crypto tickers ===== */
+.tickers{position:absolute;inset:0;pointer-events:none;z-index:3}
+.ticker{
+  position:absolute;top:0;
+  color:#c9f1ff;font-weight:800;letter-spacing:.02em;
+  text-shadow:0 0 8px rgba(64,200,255,.9),0 0 14px rgba(0,160,255,.45);
+  -webkit-text-stroke:.6px rgba(0,25,40,.6);
+  opacity:var(--opacity,.95);
+  --dx:0px;--dur:20s;--delay:0s;--floatx:14px;
+  transform:translate3d(var(--dx),100vh,0);
+  will-change:transform,opacity,filter;
+  animation: floatUpDrift var(--dur) linear forwards;
+  animation-delay: var(--delay);
+}
+@keyframes floatUpDrift{
+  0%   { transform: translate3d(var(--dx),100vh,0); opacity:0 }
+  12%  { opacity: var(--opacity,.95) }
+  35%  { transform: translate3d(calc(var(--dx) + var(--floatx)),62vh,0) }
+  65%  { transform: translate3d(calc(var(--dx) - var(--floatx)),28vh,0) }
+  100% { transform: translate3d(var(--dx),-12vh,0); opacity:0 }
+}
+
+/* Subtle glows */
+.glow{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(0,200,255,.85),transparent 70%);z-index:2;mix-blend-mode:screen;pointer-events:none}
+.glow.eye.left{width:42px;height:42px;top:38%;left:41%}
+.glow.eye.right{width:42px;height:42px;top:38%;right:41%}
+.glow.chest{width:90px;height:90px;bottom:30%;left:50%;transform:translateX(-50%)}
+
+/* ===== Content layer ===== */
+.page-content{position:relative;z-index:5;min-height:100dvh;padding:20px 24px 64px}
+
+/* TopBar */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 4px 14px}
+.topbar .brand{letter-spacing:.08em;font-weight:800;opacity:.95}
+.topbar nav{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.topbar a{color:#cfe7ff;text-decoration:none;opacity:.9}
+.topbar a:hover{opacity:1}
+.lang-switch{background:transparent;border:1px solid rgba(157,220,255,.35);color:#cfe7ff;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:14px}
+.lang-switch:hover{background:rgba(157,220,255,.15)}
+
+/* Panels */
+.panel{
+  width:min(1100px,94vw);
+  background:linear-gradient(180deg,rgba(7,12,20,.65),rgba(7,12,20,.35));
+  border:1px solid rgba(157,220,255,.14);
+  border-radius:16px;backdrop-filter:blur(6px);
+  padding:22px 24px;box-shadow:0 12px 28px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.05);
+  margin:18px 0 24px
+}
+.panel h1{margin:4px 0 14px;font-size:clamp(26px,3.6vw,38px)}
+.panel h2{margin:2px 0 10px;font-size:clamp(20px,2.8vw,28px)}
+.panel p{margin:8px 0 10px;color:#cfe1ff;line-height:1.6}
+.panel .row{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.panel-narrow{width:min(880px,94vw)}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 16px;border-radius:12px;background:#00c2ff;color:#00121f;font-weight:800;text-decoration:none;border:none;box-shadow:0 8px 18px rgba(0,194,255,.35)}
+.btn:hover{filter:brightness(1.05);transform:translateY(-1px)}
+.btn.ghost{background:transparent;border:1px solid rgba(157,220,255,.35);color:#cfe7ff;box-shadow:none}
+
+/* Lists */
+ul.bullets{padding-left:20px}
+ul.bullets li{margin:6px 0}
+
+/* Marquee */
+.marquee-wrap{position:relative;width:100%;overflow:hidden;margin-top:10px;z-index:6}
+.marquee{display:inline-flex;gap:48px;white-space:nowrap;animation:marquee 60s linear infinite;opacity:.9;mask-image:linear-gradient(90deg,transparent,#fff 7%,#fff 93%,transparent)}
+.marquee span{font-size:clamp(14px,1.4vw,17px);color:#d9ecff;opacity:.92}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+
+/* Exchange canvas box */
+.chart-wrap{width:min(1100px,94vw);height:min(560px,60vh);border:1px solid rgba(157,220,255,.14);border-radius:16px;overflow:hidden;background:linear-gradient(180deg,rgba(8,12,20,.6),rgba(8,12,20,.35));box-shadow:0 10px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05)}
+.chart-wrap canvas{display:block;width:100%;height:100%}
+.badge{display:inline-block;padding:4px 8px;border-radius:8px;background:rgba(0,194,255,.15);border:1px solid rgba(0,194,255,.35);color:#cfe7ff;font-size:12px}
+
+/* Contact cards */
+.contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.contact-card{background:rgba(7,12,20,.5);border:1px solid rgba(157,220,255,.14);border-radius:12px;padding:14px}
+
+/* Responsive */
+@media (max-width:720px){
+  .page-content{padding:12px 12px 48px}
+  .topbar nav{gap:12px}
+  .panel{padding:16px 14px}
+}
+
+/* === Planet language switcher === */
+.planet-lang{
+  --size: 42px;
+  --glow: 0, 192, 255;
+  --pulse: 255, 188, 72;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid rgba(157,220,255,.35);
+  background:
+    radial-gradient(120% 120% at 30% 30%, rgba(255,255,255,.14), rgba(255,255,255,0) 60%),
+    radial-gradient(100% 100% at 70% 70%, rgba(var(--glow),.16), rgba(var(--glow),0) 60%),
+    linear-gradient(180deg, rgba(0,35,60,.25), rgba(0,35,60,.35));
+  box-shadow:
+    inset 0 0 20px rgba(0,180,255,.18),
+    0 8px 20px rgba(0,0,0,.35);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform .18s ease, filter .18s ease;
+}
+.planet-lang:hover{ transform: translateY(-1px) scale(1.03) }
+.planet-lang:active{ transform: scale(.98) }
+.planet-lang::after{
+  content:"";
+  position:absolute; inset:-14%;
+  border-radius:inherit;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255,255,255,.18), transparent 42%),
+    radial-gradient(circle at 70% 72%, rgba(0,255,255,.12), transparent 52%);
+  mix-blend-mode: screen; pointer-events:none;
+}
+.planet-lang::before{
+  content:"";
+  position:absolute; inset:-35%;
+  border-radius:inherit;
+  background: radial-gradient(circle, rgba(var(--pulse),.40), rgba(var(--pulse),0) 60%);
+  transform: scale(.55);
+  opacity: 0;
+  animation: planetPulse 3.2s ease-in-out infinite;
+}
+@keyframes planetPulse{
+  0%   { transform:scale(.55); opacity:0 }
+  35%  { opacity:.55 }
+  60%  { opacity:.14 }
+  100% { transform:scale(1); opacity:0 }
+}
+@media (prefers-reduced-motion: reduce){
+  .planet-lang::before{ animation:none; opacity:0 }
+}
+.planet-core{
+  position: relative; z-index: 1;
+  color:#e6f4ff; font-weight:900; letter-spacing:.06em;
+  font-size: 12px; user-select:none;
+  text-shadow: 0 0 6px rgba(64,200,255,.7);
+}
+.planet-lang[data-lang="ru"]{ --pulse: 255, 160, 90 }
+.planet-lang[data-lang="en"]{ --pulse: 180, 220, 255 }
+
+/* === Background audio control === */
+.audio-toggle{
+  position: fixed; right: 14px; bottom: 14px; z-index: 60;
+  width: 44px; height: 44px; border-radius: 999px;
+  display: grid; place-items: center;
+  background:
+    radial-gradient(120% 120% at 30% 30%, rgba(255,255,255,.12), rgba(255,255,255,0) 60%),
+    radial-gradient(100% 100% at 70% 70%, rgba(0,200,255,.16), rgba(0,200,255,0) 60%),
+    linear-gradient(180deg, rgba(0,35,60,.25), rgba(0,35,60,.35));
+  border: 1px solid rgba(157,220,255,.35);
+  color:#e6f4ff; cursor:pointer; user-select:none;
+  box-shadow: inset 0 0 18px rgba(0,180,255,.16), 0 8px 20px rgba(0,0,0,.35);
+  transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+}
+.audio-toggle:hover{ transform: translateY(-1px) scale(1.03) }
+.audio-toggle:active{ transform: scale(.98) }
+.audio-toggle .ico{ font-size: 18px; filter: drop-shadow(0 0 6px rgba(64,200,255,.7)); }
+
+.audio-toggle.on{ animation: audioPulse 3s ease-out infinite; }
+@keyframes audioPulse{
+  0%   { box-shadow: inset 0 0 18px rgba(0,180,255,.16), 0 0 0 0 rgba(0,194,255,.35) }
+  60%  { box-shadow: inset 0 0 18px rgba(0,180,255,.16), 0 0 0 12px rgba(0,194,255,0) }
+  100% { box-shadow: inset 0 0 18px rgba(0,180,255,.16), 0 0 0 0 rgba(0,194,255,0) }
+}
+@media (prefers-reduced-motion: reduce){
+  .audio-toggle.on{ animation:none }
+}
+
+/* === Brand logo (PNG) === */
+.topbar .brand{ display:flex; align-items:center }
+.topbar .brand-logo{
+  display:block;
+  height:236px;
+  width:auto;
+  image-rendering:auto;
+  filter:
+    drop-shadow(0 0 6px rgba(64,200,255,.55))
+    drop-shadow(0 0 14px rgba(150,80,255,.22));
+  animation: ql7LogoPulse 3.4s ease-in-out infinite;
+  will-change: filter, transform;
+}
+.topbar .brand-logo:hover{ transform: translateY(-1px) }
+@keyframes ql7LogoPulse{
+  0%{
+    filter:
+      drop-shadow(0 0 6px rgba(64,200,255,.55))
+      drop-shadow(0 0 14px rgba(150,80,255,.22))
+      saturate(1.0) brightness(1.0);
+  }
+  50%{
+    filter:
+      drop-shadow(0 0 10px rgba(64,200,255,.85))
+      drop-shadow(0 0 24px rgba(150,80,255,.35))
+      saturate(1.12) brightness(1.06);
+  }
+  100%{
+    filter:
+      drop-shadow(0 0 6px rgba(64,200,255,.55))
+      drop-shadow(0 0 14px rgba(150,80,255,.22))
+      saturate(1.0) brightness(1.0);
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  .topbar .brand-logo{ animation:none }
+}
+
+/* === Telegram card tape in hero === */
+.tg-tape{
+  display:block;
+  width:min(500px,100%);
+  height:auto;
+  margin:14px auto 0;
+  border-radius:12px;
+  border:1px solid rgba(157,220,255,.18);
+  box-shadow:0 10px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
+  image-rendering:auto;
+}
+@media (max-width:720px){
+  .tg-tape{ margin:12px auto 0; border-radius:10px }
+}
+
+/* перенос строк через CSS вместо inline style */
+.prewrap{ white-space: pre-line; }
+/* About page blocks */
+.about-sections { display: grid; gap: 1.25rem; margin-top: 1rem; }
+.about-block { padding-top: .75rem; border-top: 1px solid rgba(255,255,255,.08); }
+.about-block:first-child { border-top: 0; padding-top: 0; }
+.about-block-title { font-size: clamp(1.15rem, 1vw + 1rem, 1.5rem); font-weight: 700; margin: 0 0 .25rem; }
+.about-block p { margin: .35rem 0; line-height: 1.65; }
+.lang-switch { display:flex; gap:.25rem; align-items:center }
+.lang-switch .lang {
+  padding:.25rem .5rem; border-radius:.5rem; opacity:.7;
+  background:transparent; border:1px solid rgba(255,255,255,.15); color:inherit;
+}
+.lang-switch .lang.active {
+  opacity:1; background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.35);
+}
+/* === Навбар: усиленный пульс/свечение активного пункта === */
+:root{
+  --nav-glow-color: #67e8f9;              /* базовый оттенок свечения (циан) */
+  --nav-glow-strong: rgba(103,232,249,.95);
+  --nav-glow-soft:   rgba(103,232,249,.35);
+  --nav-active-scale: 1.08;               /* насколько увеличивать активную ссылку */
+}
+
+/* базовая ссылка — добавим позиционирование для псевдо-элемента */
+.topbar .nav-link{
+  position: relative;
+  transition: color .2s ease, transform .2s ease, filter .2s ease;
+  will-change: transform, filter;
+}
+
+/* активный пункт: намного ярче + пульс */
+.topbar .nav-link.active,
+.topbar .nav-link[data-active="true"]{
+  color: var(--nav-glow-color);
+  font-weight: 800;
+  transform: translateZ(0) scale(var(--nav-active-scale));
+  /* многоступенчатое свечение текста */
+  text-shadow:
+    0 0 2px  var(--nav-glow-color),
+    0 0 10px var(--nav-glow-color),
+    0 0 22px var(--nav-glow-strong),
+    0 0 44px var(--nav-glow-strong);
+  filter: brightness(1.2) saturate(130%);
+  animation: glowPulse 1.25s ease-in-out infinite;
+}
+
+/* мягкое «облако» света позади текста */
+.topbar .nav-link.active::before,
+.topbar .nav-link[data-active="true"]::before{
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 140%;
+  height: 220%;
+  transform: translate(-50%,-50%) scale(.92);
+  border-radius: 999px;
+  background: radial-gradient(circle, var(--nav-glow-soft) 0%, transparent 60%);
+  filter: blur(18px) saturate(130%);
+  opacity: .95;
+  mix-blend-mode: screen;                 /* красиво на тёмном фоне */
+  pointer-events: none;
+  z-index: -1;
+  animation: aura 1.25s ease-in-out infinite;
+}
+
+/* чуть усилим при ховере/фокусе */
+.topbar .nav-link.active:hover,
+.topbar .nav-link.active:focus-visible{
+  transform: translateZ(0) scale(calc(var(--nav-active-scale) + .02));
+  filter: brightness(1.35) saturate(150%);
+}
+
+/* Пульс текста */
+@keyframes glowPulse{
+  0%,100%{
+    text-shadow:
+      0 0 2px  var(--nav-glow-color),
+      0 0 10px var(--nav-glow-color),
+      0 0 22px var(--nav-glow-strong),
+      0 0 44px var(--nav-glow-strong);
+    filter: brightness(1.15) saturate(130%);
+  }
+  50%{
+    text-shadow:
+      0 0 4px  var(--nav-glow-color),
+      0 0 20px var(--nav-glow-color),
+      0 0 42px var(--nav-glow-strong),
+      0 0 72px var(--nav-glow-strong);
+    filter: brightness(1.45) saturate(160%);
+  }
+}
+
+/* Пульс «ауры» */
+@keyframes aura{
+  0%,100%{ transform: translate(-50%,-50%) scale(.92); opacity: .9; }
+  50%    { transform: translate(-50%,-50%) scale(1.06); opacity: 1;  }
+}
+
+/* уважение к reduced-motion */
+@media (prefers-reduced-motion: reduce){
+  .topbar .nav-link.active,
+  .topbar .nav-link[data-active="true"],
+  .topbar .nav-link.active::before,
+  .topbar .nav-link[data-active="true"]::before{
+    animation: none;
+  }
+}
+/* ---- Inline illustration panel ---- */
+.panel--image {
+  padding: 0; /* Без внутренних отступов у обёртки */
+  background: transparent;
+}
+
+.panel--image .panel-img {
+  position: relative;          /* обязательно для Image with fill */
+  width: 100%;
+  aspect-ratio: 16 / 9;        /* 16:9 как просили */
+  overflow: hidden;
+  border-radius: 18px;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.35),
+    0 0 40px rgba(0, 200, 255, 0.15); /* мягкое свечение */
+}
+
+.panel--image .panel-img img {
+  object-fit: cover;
+  transform: scale(1.001);     /* убирает тонкие артефакты на краях */
+}
+
+/* Небольшая «дышка» снизу, как у обычных панелей */
+.panel--image + .panel {
+  margin-top: 18px;
+}
+/* ===== Responsive media block (16:9 inside .panel) ===== */
+.media-block {
+  margin: 12px 0 28px;
+}
+
+.media-block img {
+  display: block;
+  width: 100%;
+  height: auto;              /* сохраняет пропорции */
+  aspect-ratio: 16 / 9;      /* одинаковое окно на любых экранах */
+  object-fit: cover;         /* заполняем окно без искажений */
+  border-radius: 16px;
+  box-shadow: 0 14px 40px -10px rgba(0,0,0,.55);
+}
+
+.media-block figcaption {
+  margin-top: 8px;
+  font-size: .95rem;
+  opacity: .85;
+}
+
+/* чуть мягче скругление и подпись поменьше на телефонах */
+@media (max-width: 640px) {
+  .media-block img { border-radius: 12px; }
+  .media-block figcaption { font-size: .9rem; }
+}
+.quantum-shot{width:100%;height:auto;display:block;border-radius:16px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
