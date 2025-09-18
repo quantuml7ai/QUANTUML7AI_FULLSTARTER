@@ -53,7 +53,7 @@ const dict = {
     nav_subscribe: 'Subscribe',
     nav_contact: 'Contact',
     nav_channel: 'Channel',
-
+    auth_signin: 'Sign in',
     /* ===== HERO / HOME (кратко) ===== */
     hero_title: 'Quantum L7 AI',
     hero_subtitle:
@@ -279,7 +279,7 @@ select the venue or a split route, and respect user risk limits.`,
     nav_subscribe: 'Подписка',
     nav_contact: 'Связаться',
     nav_channel: 'Канал',
-
+    auth_signin: 'Авторизация',
     /* ===== HERO / HOME (кратко) ===== */
     hero_title: 'Quantum L7 AI',
     hero_subtitle:
@@ -505,7 +505,7 @@ select the venue or a split route, and respect user risk limits.`,
     nav_subscribe: 'Підписка',
     nav_contact: 'Зв’язатися',
     nav_channel: 'Канал',
-
+    auth_signin: 'Авторизація',
     /* ===== HERO / HOME (коротко) ===== */
     hero_title: 'Quantum L7 AI',
     hero_subtitle:
@@ -730,7 +730,7 @@ select the venue or a split route, and respect user risk limits.`,
     nav_subscribe: 'Suscripción',
     nav_contact: 'Contacto',
     nav_channel: 'Canal',
-
+    auth_signin: 'Iniciar sesión',
     /* ===== HERO / HOME ===== */
     hero_title: 'Quantum L7 AI',
     hero_subtitle:
@@ -956,7 +956,7 @@ selecciona venue o ruta dividida, y respeta límites de riesgo.`,
     nav_subscribe: '订阅',
     nav_contact: '联系',
     nav_channel: '频道',
-
+    auth_signin: '登录',
     /* ===== HERO / HOME ===== */
     hero_title: 'Quantum L7 AI',
     hero_subtitle:
@@ -1182,7 +1182,7 @@ selecciona venue o ruta dividida, y respeta límites de riesgo.`,
     nav_subscribe: 'اشتراك',
     nav_contact: 'اتصال',
     nav_channel: 'القناة',
-
+    auth_signin: 'تسجيل الدخول',
     /* ===== HERO / HOME ===== */
     hero_title: 'Quantum L7 AI',
     hero_subtitle:
@@ -1408,7 +1408,7 @@ selecciona venue o ruta dividida, y respeta límites de riesgo.`,
     nav_subscribe: 'Abone Ol',
     nav_contact: 'İletişim',
     nav_channel: 'Kanal',
-
+    auth_signin: 'Giriş yap',
     /* ===== HERO / HOME ===== */
     hero_title: 'Quantum L7 AI',
     hero_subtitle:

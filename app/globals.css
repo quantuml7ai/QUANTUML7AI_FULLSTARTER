@@ -533,3 +533,11 @@ html, body, #__next {
 html, body {
   overflow: visible !important;
 }
+/* Пример (опционально): чтобы вписалась как таб */
+.nav-auth-btn {
+  margin-left: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 10px;
+  line-height: 1;
+}
+
