@@ -1,86 +1,65 @@
 // app/providers.jsx
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import dynamic from 'next/dynamic';
+import { useEffect, useState } from 'react';
 
-// Если у вас есть глобальные провайдеры (i18n, theme и т.п.) — оставляем их здесь.
-// Кошельки подгружаем только в браузере, чтобы на сервере не трогать indexedDB.
-
+// Все web3-импорты грузим ТОЛЬКО в браузере, чтобы на сервере не дергать IndexedDB.
 export default function Providers({ children }) {
-  // держим загруженные модули wagmi / web3modal в состоянии
   const [wagmi, setWagmi] = useState(null); // { WagmiProvider, config }
-  const [W3M, setW3M] = useState(null);     // { createWeb3Modal }
-
-  // читаем .env только как константы (это ок и на сервере)
-  const WALLET_PROJECT_ID = process.env.NEXT_PUBLIC_WC_PROJECT_ID;
-  // сети/чейны можно оставить, если задаёте их вручную строками/ID;
-  // но любые импорты из 'viem' / '@web3modal/*' – только динамически ниже.
 
   useEffect(() => {
-    // Защита: выполняем только в браузере
     if (typeof window === 'undefined') return;
 
     let cancelled = false;
 
     (async () => {
-      // ВАЖНО: все web3 импорты — ТОЛЬКО здесь
-      const [{ WagmiProvider, createConfig }, { http }, chainsMod, w3mReact] = await Promise.all([
-        import('wagmi'),
-        import('wagmi'),
-        import('viem/chains'),
-        import('@web3modal/wagmi/react')
-      ]);
+      // Динамические импорты — только на клиенте
+      const [{ defaultWagmiConfig }, { createWeb3Modal }, { WagmiProvider }, chains] =
+        await Promise.all([
+          import('@web3modal/wagmi'),
+          import('@web3modal/wagmi/react'),
+          import('wagmi'),
+          import('wagmi/chains'),
+        ]);
 
-      const { mainnet, polygon, arbitrum, bsc, base, optimism, avalanche } = chainsMod;
+      const { mainnet, polygon, arbitrum, base, bsc, optimism, avalanche } = chains;
+      const chainsArr = [mainnet, polygon, arbitrum, base, bsc, optimism, avalanche];
 
-      // базовый transport без IndexedDB (http)
-      const config = createConfig({
-        chains: [mainnet, polygon, arbitrum, bsc, base, optimism, avalanche],
-        transports: {
-          [mainnet.id]: http(),
-          [polygon.id]: http(),
-          [arbitrum.id]: http(),
-          [bsc.id]: http(),
-          [base.id]: http(),
-          [optimism.id]: http(),
-          [avalanche.id]: http()
-        },
-        ssr: false, // ключ: не пытаться гидрировать persist-хранилища на сервере
+      const projectId = process.env.NEXT_PUBLIC_WC_PROJECT_ID || '';
+      // Метаданные кошельков (иконку мы уже добавляли в /public/branding/ql7-logo-512.png)
+      const metadata = {
+        name: 'Quantum L7 AI',
+        description: 'Signals · research · multi-chain',
+        url: window.location.origin,
+        icons: ['/branding/ql7-logo-512.png'],
+      };
+
+      // Конфиг wagmi с корректными коннекторами под Web3Modal
+      const config = defaultWagmiConfig({
+        chains: chainsArr,
+        projectId,
+        metadata,
       });
 
-      // создаём модалку уже в браузере
-      const { createWeb3Modal } = w3mReact;
-      if (WALLET_PROJECT_ID) {
-        createWeb3Modal({
-          wagmiConfig: config,
-          projectId: WALLET_PROJECT_ID,
-          enableAnalytics: true,
-          themeMode: 'dark',
-        });
-      }
+      // Инициализация модалки уже в браузере
+      createWeb3Modal({
+        wagmiConfig: config,
+        projectId,
+        chains: chainsArr,
+        themeMode: 'dark',
+        enableAnalytics: true,
+      });
 
-      if (!cancelled) {
-        setWagmi({ WagmiProvider, config });
-        setW3M({ createWeb3Modal });
-      }
+      if (!cancelled) setWagmi({ WagmiProvider, config });
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [WALLET_PROJECT_ID]);
+  }, []);
 
-  // Пока web3 ещё не подгрузился — просто отдаём детей (сайт работает без модалки)
-  if (!wagmi?.WagmiProvider) {
-    return <>{children}</>;
-  }
+  if (!wagmi?.WagmiProvider) return <>{children}</>;
 
   const { WagmiProvider, config } = wagmi;
-
-  return (
-    <WagmiProvider config={config}>
-      {children}
-    </WagmiProvider>
-  );
+  return <WagmiProvider config={config}>{children}</WagmiProvider>;
 }

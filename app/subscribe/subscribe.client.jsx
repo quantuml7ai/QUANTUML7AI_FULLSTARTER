@@ -24,7 +24,7 @@ function TierBadge({ label }) {
 export default function SubscribePage() {
   const { t } = useI18n()
   const benefits = t('sub_benefits') || []
-  const payments = t('sub_payments') || []   // в вашей локали это «Старт за минуты»
+  const payments = t('sub_payments') || []
   const faq = t('sub_faq') || []
 
   const { open } = useWeb3Modal()
@@ -36,7 +36,7 @@ export default function SubscribePage() {
       <section className="panel">
         <h1>{t('sub_title')}</h1>
 
-        {/* Адаптивное изображение под заголовком «Подписка» */}
+        {/* Адаптивная картинка под заголовком */}
         <div className="block-media">
           <img
             src="/branding/sub-hero.jpg"
@@ -54,7 +54,7 @@ export default function SubscribePage() {
             className="btn"
             onClick={() => {
               if (!hasW3M) {
-                alert(t('sub_wallet_cta_note'))
+                alert(t('sub_wallet_cta_note') || 'Set NEXT_PUBLIC_WC_PROJECT_ID')
                 return
               }
               open()
@@ -105,11 +105,11 @@ export default function SubscribePage() {
         </ul>
       </section>
 
-      {/* Start in minutes (у вас это раздел с шагами) */}
+      {/* Start in minutes */}
       <section className="panel panel-narrow">
         <h2>{t('sub_payments_title')}</h2>
 
-        {/* Адаптивное изображение под заголовком «Старт за минуты» */}
+        {/* Адаптивная картинка под заголовком «Старт за минуты» */}
         <div className="block-media">
           <img
             src="/branding/sub-start.jpg"
@@ -141,7 +141,7 @@ export default function SubscribePage() {
         </ul>
       </section>
 
-      {/* Local styles (бейджи + адаптив медиа) */}
+      {/* Локальные стили: кликабельные бейджи + адаптивные медиа */}
       <style jsx>{`
         .badge {
           display: inline-flex;
@@ -181,8 +181,6 @@ export default function SubscribePage() {
             background: rgba(0, 136, 255, .10);
           }
         }
-
-        /* Адаптивные иллюстрации внутри панелей */
         .block-media {
           width: 100%;
           margin: 12px 0 6px 0;
