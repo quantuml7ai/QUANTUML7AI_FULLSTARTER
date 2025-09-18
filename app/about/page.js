@@ -5,34 +5,132 @@ import { useI18n } from '../../components/i18n'
 export default function AboutPage() {
   const { t } = useI18n()
 
-  const title     = t('about_title')
-  const parasAll  = t('about_paragraphs') || []
-  const raw       = t('about_sections')   || []
-  const bullets   = t('about_bullets')    || []
-  const links     = t('links')            || {}
+  const title    = t('about_title')
+  const parasAll = t('about_paragraphs') || []
+  const raw      = t('about_sections')   || []
+  const bullets  = t('about_bullets')    || []
+  const links    = t('links')            || {}
 
-  // Превращаем {title, parasIdx} в {title, paras[]}
+  // Собираем секции из словаря (оставлено как в текущем файле)
   const sections = raw.length
     ? raw.map((s) => ({
-        title: s && s.title ? s.title : '',
+        title: s?.title || '',
         paras: Array.isArray(s?.paras)
           ? s.paras
-          : (Array.isArray(s?.parasIdx) ? s.parasIdx.map((i) => parasAll[i]).filter(Boolean) : []),
+          : (Array.isArray(s?.parasIdx)
+              ? s.parasIdx.map((i) => parasAll[i]).filter(Boolean)
+              : []),
       }))
     : [{ title: '', paras: parasAll }]
+
+  // Варианты путей к короткому 16:9-видео под заголовком страницы
+  const videoSources = [
+    '/branding/about-loop.mp4',
+    '/about-loop.mp4',
+    '/video_2025-09-18_01-19-40.mp4',
+  ]
+
+  // ---- Распознавание заголовков на разных языках
+  const hasAny = (s, needles) => {
+    const x = (s || '').toLowerCase()
+    return needles.some(n => x.includes(n))
+  }
+
+  const isAnalytics = (s) =>
+    hasAny(s, [
+      // RU/UA
+      'аналитическ', 'аналітичн',
+      // EN/ES/TR
+      'analytics', 'analítico', 'analitik',
+      // AR / ZH
+      'تحلي', '分析'
+    ])
+
+  const isFeed = (s) =>
+    hasAny(s, [
+      // RU/UA
+      'лента новостей', 'исследован', 'стрічка новин', 'досліджен',
+      // EN/ES/TR
+      'news feed', 'research feed', 'research & news', 'investigación', 'noticias', 'haber', 'araştırma',
+      // AR / ZH
+      'أخبار', 'بحث', '研究', '新闻'
+    ])
+
+  const isArchitecture = (s) =>
+    hasAny(s, [
+      // RU/UA
+      'архитектур', 'архітектур',
+      // EN/ES/TR
+      'architecture', 'arquitectura', 'mimari',
+      // AR / ZH
+      'هيكل', 'بنية', 'هيكلية', '架构', '架構'
+    ])
+
+  // Карта соответствий заголовок → картинка (положи файлы в /public/branding/)
+  const imageForTitle = (s) => {
+    if (isAnalytics(s)) {
+      return {
+        src: '/branding/about-analytics.jpg',
+        alt: 'Analytics engine — quantum signals and multi-chain context'
+      }
+    }
+    if (isFeed(s)) {
+      return {
+        src: '/branding/about-feed.jpg',
+        alt: 'News & Research feed — multilingual sources with explainable metrics'
+      }
+    }
+    if (isArchitecture(s)) {
+      return {
+        src: '/branding/about-architecture.jpg',
+        alt: 'Architecture — services, agents, TypeScript/Python APIs and live updates'
+      }
+    }
+    return null
+  }
 
   return (
     <main className="container">
       <section className="panel">
         <h1>{title}</h1>
 
+        {/* Адаптивное видео 16:9 сразу под заголовком */}
+        <div className="about-hero" aria-hidden="true">
+          <video
+            className="about-hero-video"
+            playsInline
+            autoPlay
+            muted
+            loop
+            preload="metadata"
+            poster="/branding/about-poster.jpg"
+            onError={(e) => console.warn('[about] video error', e)}
+          >
+            {videoSources.map((src) => (
+              <source key={src} src={src} type="video/mp4" />
+            ))}
+          </video>
+        </div>
+
+        {/* Контент секций */}
         <div className="about-sections">
-          {sections.map((s, idx) => (
-            <div className="about-block" key={idx}>
-              {s.title ? <h3 className="about-block-title">{s.title}</h3> : null}
-              {Array.isArray(s.paras) && s.paras.map((p, i) => <p key={i}>{p}</p>)}
-            </div>
-          ))}
+          {sections.map((s, idx) => {
+            const img = imageForTitle(s.title)
+            return (
+              <div className="about-block" key={idx}>
+                {s.title ? <h3 className="about-block-title">{s.title}</h3> : null}
+
+                {/* Если заголовок распознан — показываем картинку 16:9 сразу ПОСЛЕ него */}
+                {img && (
+                  <figure className="about-img">
+                    <img src={img.src} alt={img.alt} loading="lazy" />
+                  </figure>
+                )}
+
+                {Array.isArray(s.paras) && s.paras.map((p, i) => <p key={i}>{p}</p>)}
+              </div>
+            )
+          })}
         </div>
 
         {Array.isArray(bullets) && bullets.length > 0 && (
@@ -51,6 +149,43 @@ export default function AboutPage() {
           </div>
         )}
       </section>
+
+      {/* Локальные стили страницы */}
+      <style jsx>{`
+        .about-hero {
+          width: 100%;
+          aspect-ratio: 16 / 9;
+          border-radius: 16px;
+          overflow: hidden;
+          margin: .75rem 0 1rem;
+        }
+        .about-hero-video {
+          width: 100%;
+          height: 100%;
+          display: block;
+          object-fit: cover;
+          background: #000;
+        }
+        .about-sections { width: 100%; }
+        .about-block + .about-block { margin-top: 1.25rem; }
+        .about-block-title { margin-bottom: .5rem; }
+
+        /* Адаптивные изображения 16:9 */
+        .about-img {
+          width: 100%;
+          aspect-ratio: 16 / 9;
+          margin: .5rem 0 1rem;
+          border-radius: 16px;
+          overflow: hidden;
+        }
+        .about-img img {
+          width: 100%;
+          height: 100%;
+          display: block;
+          object-fit: cover;
+          background: #000;
+        }
+      `}</style>
     </main>
   )
 }

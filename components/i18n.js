@@ -281,9 +281,9 @@ select the venue or a split route, and respect user risk limits.`,
     nav_channel: 'Канал',
 
     /* ===== HERO / HOME (кратко) ===== */
-    hero_title: 'Космический интеллект для аналитики',
+    hero_title: 'Quantum L7 AI',
     hero_subtitle:
-      'Исследования, альфа-сигналы и исполнение под защитой. Авторизация кошельком, уровни PRO/VIP.',
+      'Космический интеллект для аналитики, исследования, альфа-сигналы и исполнение под защитой. Авторизация кошельком, уровни PRO/VIP.',
     hero_cta: 'Начать в Telegram',
     hero_learn_more: 'Подробнее',
     marquee: 'ИИ • Блокчейн • Автоматизация • Квант • Исследования • Агенты • Альфа',
@@ -668,6 +668,19 @@ select the venue or a split route, and respect user risk limits.`,
       'Бектести, реплеї і пояснювані метрики',
       'Підключення гаманців і миттєва аналітика портфеля',
       'Шаблони стратегій і захисні бар’єри',
+    ],
+    /* ===== SUBSCRIBE / CONTACT (скорочено) ===== */
+    subscribe_title: 'Тарифи та підписки',
+    subscribe_sub:
+      'Авторизація через гаманець. PRO/VIP відкривають швидкі дослідження, приватні сигнали та ранні функції.',
+    subscribe_cta: 'Оформити підписку в Telegram',
+
+    contact_title: 'Зв’язатися з нами',
+    contact_sub: 'Пишіть — відповідаємо швидко.',
+    contact_lines: [
+      `Telegram-канал — анонси та дослідження: ${CHANNEL_LINK}`,
+      `Бот зворотного зв’язку — підтримка та запити: ${FEEDBACK_LINK}`,
+      `Пошта — партнерства та enterprise: ${CONTACT_EMAIL}`,
     ],
 
     links: { bot: BOT_LINK, channel: CHANNEL_LINK, feedback: FEEDBACK_LINK, email: CONTACT_EMAIL },

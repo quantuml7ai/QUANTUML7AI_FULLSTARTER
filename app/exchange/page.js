@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useI18n } from '../../components/i18n'
+import Image from 'next/image'
 
 /* ---------- small ui helpers ---------- */
 const TX = (t, key, fb) => { try { const v = t(key); return v === key ? fb : v } catch { return fb } }
@@ -465,21 +466,72 @@ export default function ExchangePage(){
         <AdviceBox t={t} advice={useMemo(()=>advice,[advice])} />
       </section>
 
-      {/* Roadmap */}
-      <section className="panel">
-        <h2>{TX(t,'roadmap','Roadmap')}</h2>
-        <ul className="bullets">
-          {bullets.map((b,i)=><li key={i}>• {b}</li>)}
-        </ul>
-      </section>
+{/* Roadmap */}
+<section className="panel">
+  <h2>{TX(t,'roadmap','Roadmap')}</h2>
+
+  {/* promo image (адаптивная 16:9) */}
+  <div className="img16x9 panel-media">
+    <Image
+      src="/branding/exchange_promo.png"              // <-- имя файла
+      alt="Next-gen Exchange — AI + quantum analytics + multi-chain"
+      fill                                            // занять весь контейнер
+      sizes="100vw"
+      priority={false}
+      className="cover"
+    />
+  </div>
+
+  <ul className="bullets">
+    {bullets.map((b,i)=><li key={i}>• {b}</li>)}
+  </ul>
+</section>
+
 
       {/* Extended sections */}
-      {sections.map((s,idx)=>(
-        <section className="panel" key={idx}>
-          <h2>{s.title}</h2>
-          {Array.isArray(s.paras) ? s.paras.map((p,i)=><p key={i} style={{ whiteSpace:'pre-line' }}>{p}</p>) : null}
-        </section>
-      ))}
+      {sections.map((s, idx) => {
+        // Определяем "ту самую" секцию по заголовку во всех нужных языках
+        const title = String(s?.title || '').toLowerCase();
+        const isExplain =
+          title.includes('объясн') ||      // RU
+          title.includes('аналіт') ||      // UK
+          title.includes('explain') ||     // EN
+          title.includes('explic') ||      // ES/TR variants (explicación / explicabilidad / açıkl…)
+          title.includes('解释') ||        // ZH
+          title.includes('شرح');           // AR
+
+        return (
+          <React.Fragment key={idx}>
+            <section className="panel">
+              <h2>{s.title}</h2>
+              {Array.isArray(s.paras)
+                ? s.paras.map((p, i) => (
+                    <p key={i} style={{ whiteSpace: 'pre-line' }}>
+                      {p}
+                    </p>
+                  ))
+                : null}
+            </section>
+
+            {isExplain && (
+              <section className="panel panel-narrow">
+                {/* адаптивная 16:9 картинка */}
+                <div className="img16x9 panel-media">
+                  <Image
+                    src="/branding/explain_promo.png"  // положи файл в /public/branding/
+                    alt="Analytics & explainability — Quantum L7 AI"
+                    fill
+                    sizes="100vw"
+                    className="cover"
+                    priority={false}
+                  />
+                </div>
+              </section>
+            )}
+          </React.Fragment>
+        );
+      })}
+
     </>
   )
 }
