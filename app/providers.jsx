@@ -1,85 +1,97 @@
-// app/providers.jsx
-'use client'
+'use client';
 
-import { useEffect } from 'react'
-import { WagmiProvider, createConfig, http } from 'wagmi'
+import { useEffect, useMemo } from 'react';
+import { WagmiConfig, createConfig, http } from 'wagmi';
 import {
   mainnet,
   polygon,
-  arbitrum,
-  optimism,
   bsc,
-  avalanche,
-  base
-} from 'wagmi/chains'
+  base,
+  arbitrum,
+  optimism
+} from 'wagmi/chains';
+import { injected, walletConnect } from 'wagmi/connectors';
+import { cookieStorage, createStorage } from 'wagmi';
 
-const projectId = process.env.NEXT_PUBLIC_WC_PROJECT_ID
-
-// !! ВАЖНО: пропиши ПУБЛИЧНЫЙ https URL твоего сайта.
-// На локалке можно оставить http://localhost:3000,
-// но на проде ОБЯЗАТЕЛЬНО https://www.quantuml7ai.com/
-const dappUrl =
-  typeof window !== 'undefined'
-    ? window?.location?.origin
-    : 'https://www.quantuml7ai.com'
-
-// Минимальная «паспортка» dapp для WalletConnect (must-have на мобильных)
-const metadata = {
-  name: 'Quantum L7 AI',
-  description: 'AI-driven crypto insights, signals & execution.',
-  url: dappUrl, // должен быть https в продакшене
-  icons: ['https://www.quantuml7ai.com/branding/ql7-logo-512.png']
+/* ---------------- GCX: глобальные CSS-фиксы для модалки ---------------- */
+function GCX() {
+  return (
+    <style
+      id="gcx"
+      dangerouslySetInnerHTML={{
+        __html: `
+#w3m-modal, .w3m-modal{position:fixed!important;inset:0!important;z-index:999999!important}
+#w3m-modal .w3m-container,.w3m-modal .w3m-container{max-height:100dvh!important}
+html,body{overflow:visible!important}
+`}}
+    />
+  );
 }
 
-const chains = [mainnet, polygon, arbitrum, optimism, bsc, avalanche, base]
-const transports = chains.reduce((acc, c) => ({ ...acc, [c.id]: http() }), {})
-
-const wagmiConfig = createConfig({
-  chains,
-  transports,
-  ssr: true
-})
-
+/* ---------------------- Web3 / wagmi провайдер ------------------------ */
 export default function Providers({ children }) {
+  const projectId = process.env.NEXT_PUBLIC_WC_PROJECT_ID || 'YOUR_WC_PROJECT_ID';
+
+  const chains = [mainnet, polygon, bsc, base, arbitrum, optimism];
+
+  // ВАЖНО: cookieStorage — чтобы wagmi не тянул IndexedDB на сервере
+  const wagmiConfig = useMemo(
+    () =>
+      createConfig({
+        chains,
+        transports: {
+          [mainnet.id]: http(),
+          [polygon.id]: http(),
+          [bsc.id]: http(),
+          [base.id]: http(),
+          [arbitrum.id]: http(),
+          [optimism.id]: http()
+        },
+        connectors: [
+          injected({ shimDisconnect: true }),
+          walletConnect({
+            projectId,
+            metadata: {
+              name: 'Quantum L7 AI',
+              description: 'Quantum L7 AI — research, signals, and guarded execution.',
+              url: 'https://www.quantuml7ai.com',
+              icons: ['https://www.quantuml7ai.com/branding/ql7-logo-512.png']
+            },
+            showQrModal: true
+          })
+        ],
+        storage: createStorage({ storage: cookieStorage })
+      }),
+    [projectId]
+  );
+
+  // ИНИЦИАЛИЗАЦИЯ MODAL — ТОЛЬКО В БРАУЗЕРЕ (динамический импорт)
   useEffect(() => {
-    // только на клиенте и один раз
-    if (typeof window === 'undefined') return
-    if (!projectId) {
-      console.error('NEXT_PUBLIC_WC_PROJECT_ID is missing')
-      return
-    }
+    if (!projectId || typeof window === 'undefined') return;
 
-    let cancelled = false
-    ;(async () => {
-      try {
-        const { createWeb3Modal } = await import('@web3modal/wagmi/react')
-        if (cancelled) return
+    (async () => {
+      const { createWeb3Modal } = await import('@web3modal/wagmi/react');
+      createWeb3Modal({
+        wagmiConfig,
+        projectId,
+        chains,
+        themeMode: 'dark',
+        themeVariables: { '--w3m-z-index': '999999' },
+        mobileWallets: [
+          { id: 'metamask', name: 'MetaMask' },
+          { id: 'trust', name: 'Trust Wallet' },
+          { id: 'okx', name: 'OKX' },
+          { id: 'binance', name: 'Binance Web3' },
+          { id: 'phantom', name: 'Phantom' }
+        ]
+      });
+    })();
+  }, [projectId, wagmiConfig, chains]);
 
-        createWeb3Modal({
-          wagmiConfig,
-          projectId,
-          chains,
-          themeMode: 'dark',
-          // ключевое — прокинуть metadata (иначе мобилки часто «пустые»)
-          metadata,
-          // по желанию: подсветить популярные мобильные кошельки
-          mobileWallets: [
-            { id: 'metamask', name: 'MetaMask' },
-            { id: 'trust', name: 'Trust Wallet' },
-            { id: 'okx', name: 'OKX' },
-            { id: 'binance', name: 'Binance Web3' },
-            { id: 'phantom', name: 'Phantom' }
-          ]
-        })
-      } catch (e) {
-        console.error('Failed to init Web3Modal:', e)
-      }
-    })()
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  return <WagmiProvider config={wagmiConfig}>{children}</WagmiProvider>
+  return (
+    <WagmiConfig config={wagmiConfig}>
+      <GCX />
+      {children}
+    </WagmiConfig>
+  );
 }

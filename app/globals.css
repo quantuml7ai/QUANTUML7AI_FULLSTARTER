@@ -488,3 +488,48 @@ ul.bullets li{margin:6px 0}
   user-select: none;
   -webkit-user-drag: none;
 }
+/* страховка от случайных перекрытий */
+.w3m-modal,
+.w3m-overlay {
+  z-index: 99999 !important;
+}
+/* === Fix: Web3Modal clipped on mobile (bottom sheet only shows header) === */
+html, body, #__next {
+  height: 100%;
+}
+
+/* На всякий случай запретим клип для порталов модалки */
+#w3m-modal, .w3m-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99999 !important;
+  overflow: visible !important;
+}
+
+/* Не даём приложению «резать» порталы на мобилках */
+@media (max-width: 768px) {
+  html, body, #__next {
+    overflow: visible !important;
+  }
+  /* если где-то стоит transform/filter, это создаёт новый stacking context.
+     Сбрасываем его для корневых оболочек, чтобы порталы были поверх */
+  main, .container, .panel {
+    transform: none !important;
+    will-change: auto !important;
+  }
+}
+/* --- Web3Modal mobile safety fixes --- */
+#w3m-modal, .w3m-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 999999 !important;
+}
+
+#w3m-modal .w3m-container, .w3m-modal .w3m-container {
+  max-height: 100dvh !important; /* чтобы не обрезалось на мобильных */
+}
+
+/* если где-то стоит глобальный overflow:hidden у html/body — снимем */
+html, body {
+  overflow: visible !important;
+}
