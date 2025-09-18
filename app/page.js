@@ -96,11 +96,8 @@ export default function Home() {
 
       {/* ===== Маркиза ===== */}
       <section className="marquee-wrap" aria-hidden="true">
-        <div className="marquee" ref={marqueeRef}>
-          <span>{t('marquee')}</span>
-          <span>{t('marquee')}</span>
-          <span>{t('marquee')}</span>
-          <span>{t('marquee')}</span>
+        <div className="ррррррр" ref={marqueeRef}>
+
         </div>
       </section>
     </>

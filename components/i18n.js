@@ -60,7 +60,7 @@ const dict = {
       'Cosmic-grade intelligence for research, alpha signals and guarded execution. Wallet auth, PRO/VIP tiers.',
     hero_cta: 'Start in Telegram',
     hero_learn_more: 'Learn More',
-    marquee: 'AI • Blockchain • Automation • Quant • Research • Agents • Alpha',
+    marquee: 'AI • Blockchain • Automation • Quant • Research • Agents • Alpha • All rights reserved ',
 
     home_blocks: [
       {
@@ -286,7 +286,7 @@ select the venue or a split route, and respect user risk limits.`,
       'Космический интеллект для аналитики, исследования, альфа-сигналы и исполнение под защитой. Авторизация кошельком, уровни PRO/VIP.',
     hero_cta: 'Начать в Telegram',
     hero_learn_more: 'Подробнее',
-    marquee: 'ИИ • Блокчейн • Автоматизация • Квант • Исследования • Агенты • Альфа',
+    marquee: 'ИИ • Блокчейн • Автоматизация • Квант • Исследования • Агенты • Альфа • Все права защищены ',
 
     home_blocks: [
       {
@@ -512,7 +512,7 @@ select the venue or a split route, and respect user risk limits.`,
       'Космічний інтелект для досліджень, альфа-сигналів та безпечного виконання. Авторизація гаманцем, рівні PRO/VIP.',
     hero_cta: 'Почати в Telegram',
     hero_learn_more: 'Дізнатися більше',
-    marquee: 'ШІ • Блокчейн • Автоматизація • Квант • Дослідження • Агенти • Альфа',
+    marquee: 'ШІ • Блокчейн • Автоматизація • Квант • Дослідження • Агенти • Альфа • Усі права захищені ',
 
     home_blocks: [
       {
@@ -737,7 +737,7 @@ select the venue or a split route, and respect user risk limits.`,
       'Inteligencia cósmica para investigación, señales alfa y ejecución segura. Autenticación con billetera, niveles PRO/VIP.',
     hero_cta: 'Comenzar en Telegram',
     hero_learn_more: 'Saber más',
-    marquee: 'IA • Blockchain • Automatización • Cuántico • Investigación • Agentes • Alfa',
+    marquee: 'IA • Blockchain • Automatización • Cuántico • Investigación • Agentes • Alfa • Todos los derechos reservados ',
 
     home_blocks: [
       {
@@ -963,7 +963,7 @@ selecciona venue o ruta dividida, y respeta límites de riesgo.`,
       '为研究、阿尔法信号和安全执行提供宇宙级智能。钱包认证，PRO/VIP 等级。',
     hero_cta: '在 Telegram 开始',
     hero_learn_more: '了解更多',
-    marquee: '人工智能 • 区块链 • 自动化 • 量化 • 研究 • 智能体 • 阿尔法',
+    marquee: '人工智能 • 区块链 • 自动化 • 量化 • 研究 • 智能体 • 阿尔法 • 版权所有 ',
 
     home_blocks: [
       {
@@ -1189,7 +1189,7 @@ selecciona venue o ruta dividida, y respeta límites de riesgo.`,
       'ذكاء بمستوى كوني للبحث، إشارات ألفا وتنفيذ محمي. توثيق عبر المحفظة، مستويات PRO/VIP.',
     hero_cta: 'ابدأ عبر Telegram',
     hero_learn_more: 'اعرف المزيد',
-    marquee: 'ذكاء اصطناعي • بلوكتشين • أتمتة • كوانت • بحث • وكلاء • ألفا',
+    marquee: 'الذكاء الاصطناعي • سلسلة الكتل • الأتمتة • الكمي • الأبحاث • الوكلاء • ألفا • جميع الحقوق محفوظة',
 
     home_blocks: [
       {
@@ -1415,7 +1415,7 @@ selecciona venue o ruta dividida, y respeta límites de riesgo.`,
       'Araştırma, alfa sinyalleri ve güvenli yürütme için kozmik düzeyde zeka. Cüzdan doğrulaması, PRO/VIP seviyeleri.',
     hero_cta: 'Telegram’da Başla',
     hero_learn_more: 'Daha Fazla Bilgi',
-    marquee: 'AI • Blockchain • Otomasyon • Kuant • Araştırma • Ajanlar • Alfa',
+    marquee: 'AI • Blockchain • Otomasyon • Kuant • Araştırma • Ajanlar • Alfa • Tüm hakları saklıdır ',
 
     home_blocks: [
       {

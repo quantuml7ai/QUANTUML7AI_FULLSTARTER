@@ -3,6 +3,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useI18n } from '../../components/i18n'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
+const ExchangeDemo = dynamic(() => import('../../components/ExchangeDemo'), { ssr: false })
 
 /* ---------- small ui helpers ---------- */
 const TX = (t, key, fb) => { try { const v = t(key); return v === key ? fb : v } catch { return fb } }
@@ -465,7 +467,10 @@ export default function ExchangePage(){
         </div>
         <AdviceBox t={t} advice={useMemo(()=>advice,[advice])} />
       </section>
-
+{/* EXCHANGE DEMO (real Binance data, demo controls) */}
+<section className="panel" style={{ marginTop: 8 }}>
+  <ExchangeDemo />
+</section>
 {/* Roadmap */}
 <section className="panel">
   <h2>{TX(t,'roadmap','Roadmap')}</h2>
