@@ -230,6 +230,26 @@ function AIBox({ data }) {
         .levels{opacity:.95;margin-top:6px}
         .small{font-size:12px;opacity:.7}
       `}</style>
+{/* CTA to Telegram — version without styled-jsx */}
+{(() => {
+  const BOT = process.env.NEXT_PUBLIC_BOT_LINK ?? 'https://t.me/l7ai_bot'
+  const linkStyle = {
+    display:'inline-flex', alignItems:'center', gap:8,
+    padding:'10px 14px', borderRadius:999, fontWeight:800,
+    background:'linear-gradient(135deg,#1d4ed8,#3b82f6)', color:'#fff',
+    border:'1px solid rgba(59,130,246,.65)',
+    boxShadow:'0 0 0 1px rgba(59,130,246,.25), 0 10px 20px rgba(59,130,246,.25)',
+    textDecoration:'none', userSelect:'none'
+  }
+  return (
+    <div style={{marginTop:10, display:'flex', justifyContent:'flex-start'}}>
+      <a href={BOT} target="_blank" rel="noopener noreferrer" style={linkStyle}>
+        {tr('ai_cta_start_telegram') || 'Start in Telegram'}
+      </a>
+    </div>
+  )
+})()}
+
     </Panel>
   )
 }

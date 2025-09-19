@@ -3143,7 +3143,7 @@ try {
 /* -------------------- EN -------------------- */
 const AI_EN = {
   exchange_title: 'Exchange (in progress)',
-
+  ai_cta_start_telegram: 'Start in Telegram',
   ai_reco_title: 'AI Recommendation',
   ai_action: 'Action',
   ai_confidence: 'Confidence',
@@ -3180,7 +3180,7 @@ const AI_EN = {
 /* -------------------- RU -------------------- */
 const AI_RU = {
   exchange_title: 'Биржа (в разработке)',
-
+  ai_cta_start_telegram: 'Начать в Telegram',
   ai_reco_title: 'AI-рекомендация',
   ai_action: 'Действие',
   ai_confidence: 'Уверенность',
@@ -3215,7 +3215,7 @@ const AI_RU = {
 /* -------------------- UK -------------------- */
 const AI_UK = {
   exchange_title: 'Біржа (в розробці)',
-
+  ai_cta_start_telegram: 'Почати в Telegram',
   ai_reco_title: 'AI-рекомендація',
   ai_action: 'Дія',
   ai_confidence: 'Впевненість',
@@ -3250,7 +3250,7 @@ const AI_UK = {
 /* -------------------- ZH (简体) -------------------- */
 const AI_ZH = {
   exchange_title: '交易所（开发中）',
-
+  ai_cta_start_telegram: '在 Telegram 开始',
   ai_reco_title: 'AI 建议',
   ai_action: '操作',
   ai_confidence: '置信度',
@@ -3285,7 +3285,7 @@ const AI_ZH = {
 /* -------------------- ES -------------------- */
 const AI_ES = {
   exchange_title: 'Bolsa (en desarrollo)',
-
+  ai_cta_start_telegram: 'Empezar en Telegram',
   ai_reco_title: 'Recomendación AI',
   ai_action: 'Acción',
   ai_confidence: 'Confianza',
@@ -3320,7 +3320,7 @@ const AI_ES = {
 /* -------------------- AR (العربية) -------------------- */
 const AI_AR = {
   exchange_title: 'البورصة (قيد التطوير)',
-
+  ai_cta_start_telegram: 'ابدأ في تيليجرام',
   ai_reco_title: 'توصية الذكاء الاصطناعي',
   ai_action: 'الإجراء',
   ai_confidence: 'الثقة',
@@ -3355,7 +3355,7 @@ const AI_AR = {
 /* -------------------- TR -------------------- */
 const AI_TR = {
   exchange_title: 'Borsa (geliştirme aşamasında)',
-
+  ai_cta_start_telegram: 'Telegram’da Başla',
   ai_reco_title: 'AI Önerisi',
   ai_action: 'Aksiyon',
   ai_confidence: 'Güven',
