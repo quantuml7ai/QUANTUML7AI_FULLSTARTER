@@ -17,6 +17,7 @@
     "@tanstack/react-query": "^5.51.21",
     "@tonconnect/ui": "^2.3.0",
     "@tonconnect/ui-react": "^2.3.0",
+    "@vercel/analytics": "^1.5.0",
     "@web3modal/wagmi": "^5.1.11",
     "next": "14.2.5",
     "react": "18.2.0",
@@ -30,10 +31,5 @@
     "@types/react": "^19.1.13",
     "pino-pretty": "^13.1.1",
     "typescript": "^5.9.2"
-  },
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
-  }  
+  }
 }

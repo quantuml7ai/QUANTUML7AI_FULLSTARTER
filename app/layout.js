@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic'
 import { I18nProvider } from '../components/i18n'
 import TopBar from '../components/TopBar'
 import Providers from './providers' // <— добавили провайдер wagmi/web3modal
-
+import { Analytics } from '@vercel/analytics/react'
 // Рендерим тяжёлые/интерактивные вещи только на клиенте
 const HeroAvatar = dynamic(() => import('../components/HeroAvatar'), { ssr: false })
 const BgAudio    = dynamic(() => import('../components/BgAudio'),    { ssr: false })
@@ -102,6 +102,16 @@ export default function RootLayout({ children }) {
             <BgAudio src="/audio/cosmic.mp3" defaultVolume={0.35} />
           </I18nProvider>
         </Providers>
+      </body>
+    </html>
+  )
+}
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        {children}
+        <Analytics />  {/* отправка событий на Vercel */}
       </body>
     </html>
   )
