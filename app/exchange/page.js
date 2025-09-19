@@ -201,8 +201,13 @@ function AIBox({ data }) {
         <div className="ttl">{tr('ai_explainer_title') || 'Why this recommendation'}</div>
         <ul className="reasons">
           {Array.isArray(data.reasons) && data.reasons.length
-            ? data.reasons.map((r,i)=> <li key={i}>{typeof r==='string' ? r : tr(r.key, r.params)}</li>)
-            : <li>—</li>}
+  ? data.reasons.map((r,i)=> (
+      <li key={i}>
+        {typeof r==='string' ? tr(r) : tr(r.key, r.params)}
+      </li>
+    ))
+  : <li>—</li>}
+
         </ul>
       </div>
 
