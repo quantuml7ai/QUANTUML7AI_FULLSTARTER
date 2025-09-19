@@ -54,6 +54,7 @@ const dict = {
     nav_contact: 'Contact',
     nav_channel: 'Channel',
     auth_signin: 'Sign in',
+    select_symbol_tf: "Select symbol / TF",
     /* ===== HERO / HOME (кратко) ===== */
     hero_title: 'Quantum L7 AI',
     hero_subtitle:
@@ -280,6 +281,7 @@ select the venue or a split route, and respect user risk limits.`,
     nav_contact: 'Связаться',
     nav_channel: 'Канал',
     auth_signin: 'Авторизация',
+    select_symbol_tf: "Выбрать символ / TF",
     /* ===== HERO / HOME (кратко) ===== */
     hero_title: 'Quantum L7 AI',
     hero_subtitle:
@@ -506,6 +508,7 @@ select the venue or a split route, and respect user risk limits.`,
     nav_contact: 'Зв’язатися',
     nav_channel: 'Канал',
     auth_signin: 'Авторизація',
+    select_symbol_tf: "Вибрати символ / TF",
     /* ===== HERO / HOME (коротко) ===== */
     hero_title: 'Quantum L7 AI',
     hero_subtitle:
@@ -731,6 +734,7 @@ select the venue or a split route, and respect user risk limits.`,
     nav_contact: 'Contacto',
     nav_channel: 'Canal',
     auth_signin: 'Iniciar sesión',
+    select_symbol_tf: "Seleccionar símbolo / TF",
     /* ===== HERO / HOME ===== */
     hero_title: 'Quantum L7 AI',
     hero_subtitle:
@@ -957,6 +961,7 @@ selecciona venue o ruta dividida, y respeta límites de riesgo.`,
     nav_contact: '联系',
     nav_channel: '频道',
     auth_signin: '登录',
+    select_symbol_tf: "选择符号 / 时间框架",
     /* ===== HERO / HOME ===== */
     hero_title: 'Quantum L7 AI',
     hero_subtitle:
@@ -1183,6 +1188,8 @@ selecciona venue o ruta dividida, y respeta límites de riesgo.`,
     nav_contact: 'اتصال',
     nav_channel: 'القناة',
     auth_signin: 'تسجيل الدخول',
+    select_symbol_tf: "اختر الرمز / الإطار الزمني",
+
     /* ===== HERO / HOME ===== */
     hero_title: 'Quantum L7 AI',
     hero_subtitle:
@@ -1409,6 +1416,7 @@ selecciona venue o ruta dividida, y respeta límites de riesgo.`,
     nav_contact: 'İletişim',
     nav_channel: 'Kanal',
     auth_signin: 'Giriş yap',
+    select_symbol_tf: "Sembol / Zaman Çerçevesi Seç",
     /* ===== HERO / HOME ===== */
     hero_title: 'Quantum L7 AI',
     hero_subtitle:
@@ -3126,6 +3134,269 @@ try {
   Object.assign(dict.zh, SUBSCRIBE_ZH)
 } catch {}
 
+/* ============================================================
+   AI RECOMMENDATIONS — PATCH (7 languages)
+   ВСТАВИТЬ ПЕРЕД export I18nProvider / useI18n
+   НИЧЕГО НЕ ЛОМАЕТ: просто дополняет/перезаписывает ключи.
+   ============================================================ */
+
+/* -------------------- EN -------------------- */
+const AI_EN = {
+  exchange_title: 'Exchange (in progress)',
+
+  ai_reco_title: 'AI Recommendation',
+  ai_action: 'Action',
+  ai_confidence: 'Confidence',
+  ai_price: 'Price',
+  ai_tp: 'TP',
+  ai_sl: 'SL',
+  ai_horizons: 'Horizons',
+  ai_support: 'Support',
+  ai_resistance: 'Resistance',
+  ai_levels: 'Levels',
+  ai_explainer_title: 'Why this recommendation',
+  ai_disclaimer: 'Signals are assistive and educational; not financial advice.',
+
+  // factor lines (ON when condition true; OFF variant used when false)
+  ai_f_ema21_gt_ma50_on: 'Uptrend (EMA21 > MA50)',
+  ai_f_ema21_gt_ma50_off: 'Not uptrend (EMA21 ≤ MA50)',
+  ai_f_ma50_gt_ma200_on: 'Bull regime (MA50 > MA200)',
+  ai_f_ma50_gt_ma200_off: 'Bear regime (MA50 ≤ MA200)',
+  ai_f_price_gt_vwap_on: 'Price above VWAP',
+  ai_f_price_gt_vwap_off: 'Price below VWAP',
+  ai_f_rsi_bull_on: 'RSI14 bullish',
+  ai_f_rsi_bull_off: 'RSI14 bearish/neutral',
+  ai_f_macd_pos_on: 'MACD histogram positive',
+  ai_f_macd_pos_off: 'MACD histogram negative',
+  ai_note_atr: 'ATR14≈{v} — volatility used for TP/SL',
+  ai_note_sr: 'Nearest levels detected from bands/MAs and VWAP',
+  ai_note_h: 'Expected absolute move (median) over 6h/24h based on recent returns',
+
+  // CTA / misc (на будущее)
+  ai_cta_more: 'Details',
+  ai_cta_backtest: 'Backtest (soon)',
+}
+
+/* -------------------- RU -------------------- */
+const AI_RU = {
+  exchange_title: 'Биржа (в разработке)',
+
+  ai_reco_title: 'AI-рекомендация',
+  ai_action: 'Действие',
+  ai_confidence: 'Уверенность',
+  ai_price: 'Цена',
+  ai_tp: 'TP',
+  ai_sl: 'SL',
+  ai_horizons: 'Горизонты',
+  ai_support: 'Поддержка',
+  ai_resistance: 'Сопротивление',
+  ai_levels: 'Уровни',
+  ai_explainer_title: 'Почему такая рекомендация',
+  ai_disclaimer: 'Сигналы носят вспомогательный/обучающий характер и не являются финсоветом.',
+
+  ai_f_ema21_gt_ma50_on: 'Восходящий режим (EMA21 > MA50)',
+  ai_f_ema21_gt_ma50_off: 'Нет восходящего режима (EMA21 ≤ MA50)',
+  ai_f_ma50_gt_ma200_on: 'Бычий режим (MA50 > MA200)',
+  ai_f_ma50_gt_ma200_off: 'Медвежий режим (MA50 ≤ MA200)',
+  ai_f_price_gt_vwap_on: 'Цена выше VWAP',
+  ai_f_price_gt_vwap_off: 'Цена ниже VWAP',
+  ai_f_rsi_bull_on: 'RSI14 бычий',
+  ai_f_rsi_bull_off: 'RSI14 медвежий/нейтральный',
+  ai_f_macd_pos_on: 'MACD-гистограмма положительная',
+  ai_f_macd_pos_off: 'MACD-гистограмма отрицательная',
+  ai_note_atr: 'ATR14≈{v} — волатильность для TP/SL',
+  ai_note_sr: 'Ближайшие уровни найдены по полосам/MA и VWAP',
+  ai_note_h: 'Ожидаемое абсолютное движение (медиана) на 6ч/24ч по недавним данным',
+
+  ai_cta_more: 'Подробно',
+  ai_cta_backtest: 'Бэктест (скоро)',
+}
+
+/* -------------------- UK -------------------- */
+const AI_UK = {
+  exchange_title: 'Біржа (в розробці)',
+
+  ai_reco_title: 'AI-рекомендація',
+  ai_action: 'Дія',
+  ai_confidence: 'Впевненість',
+  ai_price: 'Ціна',
+  ai_tp: 'TP',
+  ai_sl: 'SL',
+  ai_horizons: 'Горизонти',
+  ai_support: 'Підтримка',
+  ai_resistance: 'Опір',
+  ai_levels: 'Рівні',
+  ai_explainer_title: 'Чому саме така рекомендація',
+  ai_disclaimer: 'Сигнали мають допоміжний/освітній характер і не є фінансовою порадою.',
+
+  ai_f_ema21_gt_ma50_on: 'Висхідний режим (EMA21 > MA50)',
+  ai_f_ema21_gt_ma50_off: 'Немає висхідного режиму (EMA21 ≤ MA50)',
+  ai_f_ma50_gt_ma200_on: 'Бичачий режим (MA50 > MA200)',
+  ai_f_ma50_gt_ma200_off: 'Ведмежий режим (MA50 ≤ MA200)',
+  ai_f_price_gt_vwap_on: 'Ціна вище VWAP',
+  ai_f_price_gt_vwap_off: 'Ціна нижче VWAP',
+  ai_f_rsi_bull_on: 'RSI14 — бичачий',
+  ai_f_rsi_bull_off: 'RSI14 — ведмежий/нейтральний',
+  ai_f_macd_pos_on: 'Позитивна гістограма MACD',
+  ai_f_macd_pos_off: 'Негативна гістограма MACD',
+  ai_note_atr: 'ATR14≈{v} — волатильність для TP/SL',
+  ai_note_sr: 'Найближчі рівні з Bands/MA та VWAP',
+  ai_note_h: 'Очікуваний абсолютний рух (медіана) за 6г/24г',
+
+  ai_cta_more: 'Детальніше',
+  ai_cta_backtest: 'Бектест (скоро)',
+}
+
+/* -------------------- ZH (简体) -------------------- */
+const AI_ZH = {
+  exchange_title: '交易所（开发中）',
+
+  ai_reco_title: 'AI 建议',
+  ai_action: '操作',
+  ai_confidence: '置信度',
+  ai_price: '价格',
+  ai_tp: '止盈',
+  ai_sl: '止损',
+  ai_horizons: '时间范围',
+  ai_support: '支撑',
+  ai_resistance: '阻力',
+  ai_levels: '关键位',
+  ai_explainer_title: '推荐理由',
+  ai_disclaimer: '所有信号仅用于辅助/学习，不构成投资建议。',
+
+  ai_f_ema21_gt_ma50_on: '上升趋势（EMA21 > MA50）',
+  ai_f_ema21_gt_ma50_off: '非上升趋势（EMA21 ≤ MA50）',
+  ai_f_ma50_gt_ma200_on: '多头结构（MA50 > MA200）',
+  ai_f_ma50_gt_ma200_off: '空头结构（MA50 ≤ MA200）',
+  ai_f_price_gt_vwap_on: '价格在 VWAP 之上',
+  ai_f_price_gt_vwap_off: '价格在 VWAP 之下',
+  ai_f_rsi_bull_on: 'RSI14 偏多',
+  ai_f_rsi_bull_off: 'RSI14 偏空/中性',
+  ai_f_macd_pos_on: 'MACD 柱线为正',
+  ai_f_macd_pos_off: 'MACD 柱线为负',
+  ai_note_atr: 'ATR14≈{v} — 用于 TP/SL 的波动度',
+  ai_note_sr: '依据布林/均线与 VWAP 计算的近端价位',
+  ai_note_h: '基于近段收益的 6h/24h 典型幅度（中位数）',
+
+  ai_cta_more: '详情',
+  ai_cta_backtest: '回测（即将推出）',
+}
+
+/* -------------------- ES -------------------- */
+const AI_ES = {
+  exchange_title: 'Bolsa (en desarrollo)',
+
+  ai_reco_title: 'Recomendación AI',
+  ai_action: 'Acción',
+  ai_confidence: 'Confianza',
+  ai_price: 'Precio',
+  ai_tp: 'TP',
+  ai_sl: 'SL',
+  ai_horizons: 'Horizontes',
+  ai_support: 'Soporte',
+  ai_resistance: 'Resistencia',
+  ai_levels: 'Niveles',
+  ai_explainer_title: 'Por qué esta recomendación',
+  ai_disclaimer: 'Las señales son de apoyo/educación; no constituyen asesoramiento financiero.',
+
+  ai_f_ema21_gt_ma50_on: 'Tendencia alcista (EMA21 > MA50)',
+  ai_f_ema21_gt_ma50_off: 'Sin tendencia alcista (EMA21 ≤ MA50)',
+  ai_f_ma50_gt_ma200_on: 'Régimen alcista (MA50 > MA200)',
+  ai_f_ma50_gt_ma200_off: 'Régimen bajista (MA50 ≤ MA200)',
+  ai_f_price_gt_vwap_on: 'Precio sobre VWAP',
+  ai_f_price_gt_vwap_off: 'Precio bajo VWAP',
+  ai_f_rsi_bull_on: 'RSI14 alcista',
+  ai_f_rsi_bull_off: 'RSI14 bajista/neutro',
+  ai_f_macd_pos_on: 'Histograma MACD positivo',
+  ai_f_macd_pos_off: 'Histograma MACD negativo',
+  ai_note_atr: 'ATR14≈{v} — volatilidad para TP/SL',
+  ai_note_sr: 'Niveles cercanos desde bandas/MAs y VWAP',
+  ai_note_h: 'Movimiento absoluto esperado (mediana) 6h/24h',
+
+  ai_cta_more: 'Detalles',
+  ai_cta_backtest: 'Backtest (pronto)',
+}
+
+/* -------------------- AR (العربية) -------------------- */
+const AI_AR = {
+  exchange_title: 'البورصة (قيد التطوير)',
+
+  ai_reco_title: 'توصية الذكاء الاصطناعي',
+  ai_action: 'الإجراء',
+  ai_confidence: 'الثقة',
+  ai_price: 'السعر',
+  ai_tp: 'جني ربح',
+  ai_sl: 'إيقاف خسارة',
+  ai_horizons: 'الأُطُر الزمنية',
+  ai_support: 'الدعم',
+  ai_resistance: 'المقاومة',
+  ai_levels: 'المستويات',
+  ai_explainer_title: 'لماذا هذه التوصية',
+  ai_disclaimer: 'الإشارات لأغراض المساعدة والتعليم فقط وليست نصيحة مالية.',
+
+  ai_f_ema21_gt_ma50_on: 'اتجاه صاعد (EMA21 > MA50)',
+  ai_f_ema21_gt_ma50_off: 'لا يوجد اتجاه صاعد (EMA21 ≤ MA50)',
+  ai_f_ma50_gt_ma200_on: 'نظام صعودي (MA50 > MA200)',
+  ai_f_ma50_gt_ma200_off: 'نظام هبوطي (MA50 ≤ MA200)',
+  ai_f_price_gt_vwap_on: 'السعر أعلى من VWAP',
+  ai_f_price_gt_vwap_off: 'السعر أدنى من VWAP',
+  ai_f_rsi_bull_on: 'RSI14 إيجابي',
+  ai_f_rsi_bull_off: 'RSI14 سلبي/محايد',
+  ai_f_macd_pos_on: 'مُدرّج MACD موجب',
+  ai_f_macd_pos_off: 'مُدرّج MACD سالب',
+  ai_note_atr: 'ATR14≈{v} — التذبذب المستخدم لـ TP/SL',
+  ai_note_sr: 'أقرب المستويات من الحزم/المتوسطات و VWAP',
+  ai_note_h: 'الحركة المتوقعة (الوسيط) خلال 6س/24س',
+
+  ai_cta_more: 'تفاصيل',
+  ai_cta_backtest: 'اختبار رجعي (قريبًا)',
+}
+
+/* -------------------- TR -------------------- */
+const AI_TR = {
+  exchange_title: 'Borsa (geliştirme aşamasında)',
+
+  ai_reco_title: 'AI Önerisi',
+  ai_action: 'Aksiyon',
+  ai_confidence: 'Güven',
+  ai_price: 'Fiyat',
+  ai_tp: 'TP',
+  ai_sl: 'SL',
+  ai_horizons: 'Zaman ufukları',
+  ai_support: 'Destek',
+  ai_resistance: 'Direnç',
+  ai_levels: 'Seviyeler',
+  ai_explainer_title: 'Bu önerinin gerekçesi',
+  ai_disclaimer: 'Sinyaller yardımcı/eğitseldir; yatırım tavsiyesi değildir.',
+
+  ai_f_ema21_gt_ma50_on: 'Yükseliş rejimi (EMA21 > MA50)',
+  ai_f_ema21_gt_ma50_off: 'Yükseliş rejimi yok (EMA21 ≤ MA50)',
+  ai_f_ma50_gt_ma200_on: 'Boğa rejimi (MA50 > MA200)',
+  ai_f_ma50_gt_ma200_off: 'Ayı rejimi (MA50 ≤ MA200)',
+  ai_f_price_gt_vwap_on: 'Fiyat VWAP üzerinde',
+  ai_f_price_gt_vwap_off: 'Fiyat VWAP altında',
+  ai_f_rsi_bull_on: 'RSI14 yükseliş',
+  ai_f_rsi_bull_off: 'RSI14 düşüş/nötr',
+  ai_f_macd_pos_on: 'MACD histogramı pozitif',
+  ai_f_macd_pos_off: 'MACD histogramı negatif',
+  ai_note_atr: 'ATR14≈{v} — TP/SL için volatilite',
+  ai_note_sr: 'Yakın seviyeler: bantlar/MA ve VWAP',
+  ai_note_h: '6s/24s için beklenen mutlak hareket (medyan)',
+
+  ai_cta_more: 'Detaylar',
+  ai_cta_backtest: 'Backtest (yakında)',
+}
+
+/* -------------------- MERGE -------------------- */
+try {
+  Object.assign(dict.en, AI_EN)
+  Object.assign(dict.ru, AI_RU)
+  Object.assign(dict.uk, AI_UK)
+  Object.assign(dict.es, AI_ES)
+  Object.assign(dict.zh, AI_ZH)
+  Object.assign(dict.ar, AI_AR)
+  Object.assign(dict.tr, AI_TR)
+} catch {}
 
 export function I18nProvider({ children }) {
   const [lang, setLang] = useState('en')
