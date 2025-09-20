@@ -5,40 +5,67 @@ import { I18nProvider } from '../components/i18n'
 import TopBar from '../components/TopBar'
 import Providers from './providers'
 
+// ✅ Vercel Analytics & Speed Insights
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+
+// ⬇️ добавлено для автозапуска
 import Script from 'next/script'
 
+// Рендерим тяжёлые/интерактивные вещи только на клиенте
 const HeroAvatar = dynamic(() => import('../components/HeroAvatar'), { ssr: false })
 const BgAudio    = dynamic(() => import('../components/BgAudio'),    { ssr: false })
 
 export const metadata = {
   metadataBase: new URL('https://quantuml7ai.com'),
-  title: { default: 'Quantum L7 AI', template: '%s — Quantum L7 AI' },
-  description: 'Cosmic-grade intelligence for research, alpha signals and guarded execution. Wallet auth, PRO/VIP tiers.',
+
+  title: {
+    default: 'Quantum L7 AI',
+    template: '%s — Quantum L7 AI',
+  },
+
+  description:
+    'Cosmic-grade intelligence for research, alpha signals and guarded execution. Wallet auth, PRO/VIP tiers.',
+
   applicationName: 'Quantum L7 AI',
   keywords: ['crypto','research','signals','ai','quant','defi','exchange','alpha','quantum l7'],
+
   openGraph: {
     type: 'website',
     url: '/',
     siteName: 'Quantum L7 AI',
     title: 'Quantum L7 AI',
-    description: 'Cosmic-grade intelligence for research, alpha signals and guarded execution.',
+    description:
+      'Cosmic-grade intelligence for research, alpha signals and guarded execution.',
     images: [{ url: '/branding/quantum_l7_logo.png', width: 1200, height: 630, alt: 'Quantum L7 AI' }],
   },
+
   twitter: {
     card: 'summary_large_image',
     site: '@quantuml7ai',
     creator: '@quantuml7ai',
     title: 'Quantum L7 AI',
-    description: 'Cosmic-grade intelligence for research, alpha signals and guarded execution.',
+    description:
+      'Cosmic-grade intelligence for research, alpha signals and guarded execution.',
     images: ['/branding/quantum_l7_logo.png'],
   },
-  icons: { icon: '/favicon.ico', shortcut: '/favicon.ico', apple: '/apple-touch-icon.png' },
-  alternates: { canonical: '/', languages: { en:'/en', ru:'/ru', uk:'/uk', zh:'/zh', ar:'/ar', tr:'/tr', es:'/es' } },
+
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
+
+  alternates: {
+    canonical: '/',
+    languages: { en:'/en', ru:'/ru', uk:'/uk', zh:'/zh', ar:'/ar', tr:'/tr', es:'/es' },
+  },
 }
 
-export const viewport = { themeColor: '#0b1220', colorScheme: 'dark' }
+export const viewport = {
+  themeColor: '#0b1220',
+  colorScheme: 'dark',
+}
 
 export default function RootLayout({ children }) {
   return (
@@ -46,17 +73,25 @@ export default function RootLayout({ children }) {
       <body>
         <Providers>
           <I18nProvider>
+            {/* фон/герой (клиент-рендер) */}
             <HeroAvatar />
+
             <div className="page-content">
               <TopBar />
               {children}
             </div>
+
+            {/* фон. аудио (кнопка снизу — «Выключить аудио») */}
             <BgAudio src="/audio/cosmic.mp3" defaultVolume={0.35} />
           </I18nProvider>
         </Providers>
 
-        {/* Невидимая кнопка на весь экран: первый жест = разблокировать звук */}
-        <Script id="ql7-audio-gate" strategy="afterInteractive">{`
+        {/* ✅ Автозапуск при ПЕРВОМ действии пользователя.
+            — НЕ создаёт второй <audio>, работает с тем, что рендерит BgAudio
+            — если аудио смонтируется позже, ждёт через MutationObserver/поллинг
+            — уважает кнопку «Выключить аудио» (localStorage: ql7_audio_enabled)
+        */}
+        <Script id="ql7-audio-autoplay" strategy="afterInteractive">{`
           (function(){
             try{
               var VOL = 0.35;
@@ -64,14 +99,14 @@ export default function RootLayout({ children }) {
               function isEnabled(){
                 try{
                   var v = localStorage.getItem('ql7_audio_enabled');
-                  if (v == null) return true; // по умолчанию включено
+                  if (v==null) return true; // по умолчанию включено
                   v = (''+v).toLowerCase();
                   return !(v==='0' || v==='false' || v==='off');
                 }catch(e){ return true }
               }
-
               function getAudio(){
-                // надёжный поиск: любой <audio> на странице
+                // приоритет: глобальная ссылка из BgAudio -> любой <audio>
+                if (window.__ql7Audio && typeof window.__ql7Audio.play==='function') return window.__ql7Audio;
                 var list = document.querySelectorAll('audio');
                 for (var i=0;i<list.length;i++){
                   var a = list[i];
@@ -79,112 +114,93 @@ export default function RootLayout({ children }) {
                 }
                 return null;
               }
-
               function tryPlay(a){
                 if (!a) return Promise.reject();
-                a.muted = false;
-                a.volume = VOL;
+                try { a.muted = false; a.volume = VOL; } catch(e){}
                 var p; try{ p = a.play(); }catch(e){ p = Promise.reject(e); }
                 if (p && typeof p.then==='function') return p;
                 return Promise.resolve();
               }
 
-              function hideGate(btn){
-                if (!btn) return;
-                btn.style.opacity = '0';
-                setTimeout(function(){
-                  if (btn && btn.parentNode) btn.parentNode.removeChild(btn);
-                }, 200);
+              var attached = false;
+              function detach(){
+                if (!attached) return;
+                window.removeEventListener('pointerdown', onGesture, true);
+                window.removeEventListener('click',       onGesture, true);
+                window.removeEventListener('keydown',     onGesture, true);
+                window.removeEventListener('wheel',       onGesture, true);
+                window.removeEventListener('touchstart',  onGesture, true);
+                window.removeEventListener('touchmove',   onGesture, true);
+                attached = false;
+              }
+              function attach(){
+                if (attached) return;
+                // без once:true — пока реально не запустим
+                window.addEventListener('pointerdown', onGesture, true);
+                window.addEventListener('click',       onGesture, true);
+                window.addEventListener('keydown',     onGesture, true);
+                window.addEventListener('wheel',       onGesture, true);
+                window.addEventListener('touchstart',  onGesture, true);
+                window.addEventListener('touchmove',   onGesture, true);
+                attached = true;
               }
 
-              function unlockWithWait(btn){
-                if (!isEnabled()){ hideGate(btn); return; }
+              function kickWhenReady(){
+                if (!isEnabled()) return; // пользователь выключил — уважаем
                 var a = getAudio();
                 if (a){
-                  tryPlay(a).finally(function(){ hideGate(btn); });
+                  tryPlay(a).then(detach).catch(function(){ /* если браузер блокирует — ждём следующий жест */ });
                   return;
                 }
-                // Если аудио ещё не смонтировано — дождаться появления
-                var t0 = Date.now();
-                var max = 8000; // до 8с ждём
+                // Ждём появления <audio> после первого жеста
+                var stop = false;
                 var obs = new MutationObserver(function(){
-                  var a2 = getAudio();
-                  if (a2){
-                    tryPlay(a2).finally(function(){
-                      obs.disconnect(); hideGate(btn);
-                    });
+                  var aa = getAudio();
+                  if (aa){
+                    tryPlay(aa).finally(function(){ stop=true; obs.disconnect(); detach(); });
                   }
                 });
                 obs.observe(document.documentElement, { childList:true, subtree:true });
+
+                var t0 = Date.now(), max = 8000;
                 (function poll(){
-                  var a3 = getAudio();
-                  if (a3){
-                    tryPlay(a3).finally(function(){ obs.disconnect(); hideGate(btn); });
+                  if (stop) return;
+                  var aa = getAudio();
+                  if (aa){
+                    tryPlay(aa).finally(function(){ stop=true; obs.disconnect(); detach(); });
                   } else if (Date.now()-t0 < max){
                     setTimeout(poll, 120);
                   } else {
-                    obs.disconnect(); hideGate(btn);
+                    obs.disconnect(); // не нашли — оставим слушатели, следующий жест попробует снова
                   }
                 })();
               }
 
-              function mountGate(){
-                if (!isEnabled()) return;
-                var id='ql7-audio-gate-overlay';
-                if (document.getElementById(id)) return;
+              function onGesture(){ kickWhenReady(); }
 
-                var gate = document.createElement('button');
-                gate.id = id;
-                gate.type = 'button';
-                gate.setAttribute('aria-label','Enable sound');
-                gate.style.cssText = [
-                  'position:fixed','inset:0','z-index:2147483647',
-                  'width:100vw','height:100vh','background:transparent',
-                  'border:0','padding:0','margin:0','cursor:pointer',
-                  'opacity:0','transition:opacity .2s ease','outline:none'
-                ].join(';');
-                gate.innerHTML = '<span style="position:absolute;left:-9999px">Tap to enable sound</span>';
-
-                var once = { once:true };
-                gate.addEventListener('pointerdown', function(){ unlockWithWait(gate); }, once);
-                gate.addEventListener('keydown', function(ev){
-                  if (ev && (ev.key==='Enter' || ev.key===' ')) unlockWithWait(gate);
-                }, once);
-
-                document.body.appendChild(gate);
-                // прозрачный, но кликабельный
-              }
-
-              // Если в этой сессии уже разблокировали — просто попробуем проиграть
-              if (sessionStorage.getItem('ql7_audio_unlock') === '1'){
-                var aPrev = getAudio();
-                if (aPrev) { tryPlay(aPrev).catch(function(){}); }
-              }
-
-              // Первая попытка без оверлея (вдруг браузер разрешит)
+              // 1) Пробуем запустить без жеста (если политика разрешит)
               var a0 = getAudio();
               if (a0 && isEnabled()){
-                tryPlay(a0).then(function(){
-                  sessionStorage.setItem('ql7_audio_unlock','1');
-                }).catch(function(){ mountGate(); });
+                tryPlay(a0).catch(function(){ attach(); });
               } else {
-                mountGate();
+                attach();
               }
 
-              // Синхронизация с MUTE/UNMUTE через localStorage
+              // 2) Реакция на MUTE/UNMUTE снизу
               window.addEventListener('storage', function(ev){
                 if (!ev || ev.key!=='ql7_audio_enabled') return;
                 var a = getAudio(); if (!a) return;
                 if (isEnabled()){
-                  a.muted = false; a.volume = VOL; a.play().catch(function(){});
+                  tryPlay(a).catch(function(){ attach(); });
                 } else {
-                  a.pause(); a.muted = true;
+                  try{ a.pause(); a.muted = true; }catch(e){}
                 }
               });
             }catch(e){}
           })();
         `}</Script>
 
+        {/* ✅ Включаем аналитику Vercel */}
         <Analytics />
         <SpeedInsights />
       </body>
