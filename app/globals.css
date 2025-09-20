@@ -541,3 +541,15 @@ html, body {
   line-height: 1;
 }
 
+
+/* Центровка контента на страницах (пер-странично) */
+.page-center{
+  max-width: 1100px;   /* поставь 960/1200 по вкусу */
+  margin: 0 auto;      /* центрируем */
+  padding: 20px 16px;  /* внутренние отступы */
+}
+
+@media (max-width: 640px){
+  .page-center{ padding: 14px 12px; }
+}
+

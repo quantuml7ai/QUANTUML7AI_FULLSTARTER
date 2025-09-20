@@ -52,7 +52,6 @@ export default function Home() {
             loading="lazy"
             decoding="async"
           />
-          {/* подпись для скринридеров; визуально скрыта, если есть .sr-only в CSS */}
           <figcaption className="sr-only">
             Quantum L7 AI — We are the future of the industry
           </figcaption>
@@ -62,7 +61,7 @@ export default function Home() {
   })
 
   return (
-    <>
+    <div className="center-wrap">
       {/* ===== HERO ===== */}
       <section className="panel">
         <h1>{t('hero_title')}</h1>
@@ -103,6 +102,40 @@ export default function Home() {
           <span>{t('marquee')}</span>
         </div>
       </section>
-    </>
+
+      <style jsx>{`
+        .center-wrap {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+        }
+        .panel {
+          width: 100%;
+          max-width: 960px;
+          text-align: center;
+        }
+        .row {
+          display: flex;
+          justify-content: center;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+        .tg-tape {
+          margin-top: 16px;
+          max-width: 100%;
+          height: auto;
+        }
+        .prewrap {
+          white-space: pre-wrap;
+        }
+        .bullets {
+          text-align: left;
+          display: inline-block;
+          margin: 0 auto;
+        }
+      `}</style>
+    </div>
   )
 }
