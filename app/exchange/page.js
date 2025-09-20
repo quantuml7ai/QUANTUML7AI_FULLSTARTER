@@ -253,6 +253,105 @@ function AIBox({ data }) {
     </Panel>
   )
 }
+/* ============================ AI Quota Gate (10 min/day) ============================ */
+const QUOTA_LIMIT_SEC = 10 * 60; // 10 минут
+const QUOTA_HEARTBEAT_MS = 1000; // шаг 1 секунда
+
+function todayKey() {
+  try {
+    const d = new Date()
+    const y = d.getFullYear(), m = (`0${d.getMonth()+1}`).slice(-2), day = (`0${d.getDate()}`).slice(-2)
+    return `aiQuota:${y}-${m}-${day}`
+  } catch { return 'aiQuota' }
+}
+
+function getUsedSec() {
+  if (typeof window === 'undefined') return 0
+  try {
+    const raw = localStorage.getItem(todayKey())
+    const n = Number(raw)
+    return Number.isFinite(n) ? n : 0
+  } catch { return 0 }
+}
+
+function setUsedSec(v) {
+  if (typeof window === 'undefined') return
+  try { localStorage.setItem(todayKey(), String(Math.max(0, Math.floor(v)))) } catch {}
+}
+
+function LimitBanner({ tr }) {
+  const BOT = process?.env?.NEXT_PUBLIC_BOT_LINK || 'https://t.me/l7ai_bot'
+  return (
+    <Panel>
+      <div className="limit">
+        <div className="blink">
+          { (tr?.('ai_limit_reached') || 'Лимит исчерпан. Для полного доступа — продолжить в Telegram') }
+        </div>
+        <div style={{marginTop:10, display:'flex', justifyContent:'flex-start'}}>
+          <a href={BOT} target="_blank" rel="noopener noreferrer"
+             style={{
+               display:'inline-flex', alignItems:'center', gap:8,
+               padding:'10px 14px', borderRadius:999, fontWeight:800,
+               background:'linear-gradient(135deg,#1d4ed8,#3b82f6)', color:'#fff',
+               border:'1px solid rgba(59,130,246,.65)',
+               boxShadow:'0 0 0 1px rgba(59,130,246,.25), 0 10px 20px rgba(59,130,246,.25)',
+               textDecoration:'none', userSelect:'none'
+             }}>
+            { (tr?.('ai_cta_start_telegram') || 'Начать в Telegram') }
+          </a>
+        </div>
+      </div>
+      <style jsx>{`
+        .limit{display:flex;flex-direction:column}
+        .blink{
+          font-weight:900; color:#ff5757; background:rgba(255,0,0,.08);
+          border:1px solid rgba(255,0,0,.35); border-radius:10px;
+          padding:10px 12px; text-transform:uppercase; letter-spacing:.5px;
+          animation: blink 1s linear infinite;
+        }
+        @keyframes blink{0%,50%{opacity:1} 51%,100%{opacity:.45}}
+      `}</style>
+    </Panel>
+  )
+}
+
+function AIQuotaGate({ children }) {
+  const { t } = useI18n()
+  const [used, setUsed] = React.useState(0)
+  const [limit, setLimit] = React.useState(QUOTA_LIMIT_SEC)
+
+  // при монтировании — читаем накопленное за сегодня
+  useEffect(() => {
+    setUsed(getUsedSec())
+    setLimit(QUOTA_LIMIT_SEC)
+  }, [])
+
+  // тикаем, пока не выбрали лимит
+  useEffect(() => {
+    if (used >= limit) return
+    const timer = setInterval(() => {
+      const v = getUsedSec() + QUOTA_HEARTBEAT_MS/1000
+      setUsed(v)
+      setUsedSec(v)
+    }, QUOTA_HEARTBEAT_MS)
+    return () => clearInterval(timer)
+  }, [used, limit])
+
+  // если лимит исчерпан — показываем красную плашку
+  if (used >= limit) return <LimitBanner tr={t} />
+
+  // иначе — показываем контент (AIBox), рядом можно показать оставшееся время
+  const remain = Math.max(0, limit - used)
+  const mm = Math.floor(remain/60), ss = Math.floor(remain%60)
+  return (
+    <>
+      {children}
+      <div style={{margin:'6px 0 0 6px', fontSize:12, opacity:.65}}>
+        {(t('ai_time_left') || 'Осталось времени сегодня')}: {mm}:{String(ss).padStart(2,'0')}
+      </div>
+    </>
+  )
+}
 
 /* ================================= OrderBook (black) ================================= */
 function OrderBook({symbol}){
@@ -338,7 +437,10 @@ export default function ExchangePage(){
 
       <TVChart symbol={symbol} tf={tf}/>
 
-      <AIBox data={ai}/>
+      <AIQuotaGate>
+        <AIBox data={ai}/>
+      </AIQuotaGate>
+
 
       <OrderBook symbol={symbol}/>
 

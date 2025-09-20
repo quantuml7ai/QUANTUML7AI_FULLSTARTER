@@ -228,9 +228,9 @@ select the venue or a split route, and respect user risk limits.`,
     contact_title: 'Contact us',
     contact_sub: 'Reach the team — we respond fast.',
     contact_lines: [
-      `Telegram channel — announcements and research: ${CHANNEL_LINK}`,
-      `Feedback bot — support & requests: ${FEEDBACK_LINK}`,
-      `Email — partnerships & enterprise: ${CONTACT_EMAIL}`,
+      `Telegram channel — announcements and research: `,
+      `Feedback bot — support & requests: `,
+      `Email — partnerships & enterprise: `,
     ],
 
     links: { bot: BOT_LINK, channel: CHANNEL_LINK, feedback: FEEDBACK_LINK, email: CONTACT_EMAIL },
@@ -455,9 +455,9 @@ select the venue or a split route, and respect user risk limits.`,
     contact_title: 'Связаться с нами',
     contact_sub: 'Пишите — отвечаем быстро.',
     contact_lines: [
-      `Telegram-канал — анонсы и исследования: ${CHANNEL_LINK}`,
-      `Бот обратной связи — поддержка и запросы: ${FEEDBACK_LINK}`,
-      `Почта — партнёрства и enterprise: ${CONTACT_EMAIL}`,
+      `Telegram-канал — анонсы и исследования: `,
+      `Бот обратной связи — поддержка и запросы: `,
+      `Почта — партнёрства и enterprise: `,
     ],
 
     links: { bot: BOT_LINK, channel: CHANNEL_LINK, feedback: FEEDBACK_LINK, email: CONTACT_EMAIL },
@@ -681,9 +681,9 @@ select the venue or a split route, and respect user risk limits.`,
     contact_title: 'Зв’язатися з нами',
     contact_sub: 'Пишіть — відповідаємо швидко.',
     contact_lines: [
-      `Telegram-канал — анонси та дослідження: ${CHANNEL_LINK}`,
-      `Бот зворотного зв’язку — підтримка та запити: ${FEEDBACK_LINK}`,
-      `Пошта — партнерства та enterprise: ${CONTACT_EMAIL}`,
+      `Telegram-канал — анонси та дослідження: `,
+      `Бот зворотного зв’язку — підтримка та запити: `,
+      `Пошта — партнерства та enterprise: `,
     ],
 
     links: { bot: BOT_LINK, channel: CHANNEL_LINK, feedback: FEEDBACK_LINK, email: CONTACT_EMAIL },
@@ -908,9 +908,9 @@ selecciona venue o ruta dividida, y respeta límites de riesgo.`,
     contact_title: 'Contáctanos',
     contact_sub: 'Escríbenos — respondemos rápido.',
     contact_lines: [
-      `Canal de Telegram — anuncios e investigación: ${CHANNEL_LINK}`,
-      `Bot de feedback — soporte y pedidos: ${FEEDBACK_LINK}`,
-      `Correo — partnerships & enterprise: ${CONTACT_EMAIL}`,
+      `Canal de Telegram — anuncios e investigación: `,
+      `Bot de feedback — soporte y pedidos: `,
+      `Correo — partnerships & enterprise: `,
     ],
 
     links: { bot: BOT_LINK, channel: CHANNEL_LINK, feedback: FEEDBACK_LINK, email: CONTACT_EMAIL },
@@ -1135,9 +1135,9 @@ selecciona venue o ruta dividida, y respeta límites de riesgo.`,
     contact_title: '联系我们',
     contact_sub: '联系我们 — 快速响应。',
     contact_lines: [
-      `Telegram 频道 — 公告与研究: ${CHANNEL_LINK}`,
-      `反馈机器人 — 支持与请求: ${FEEDBACK_LINK}`,
-      `邮箱 — 合作与企业: ${CONTACT_EMAIL}`,
+      `Telegram 频道 — 公告与研究: `,
+      `反馈机器人 — 支持与请求: `,
+      `邮箱 — 合作与企业: `,
     ],
 
     links: { bot: BOT_LINK, channel: CHANNEL_LINK, feedback: FEEDBACK_LINK, email: CONTACT_EMAIL },
@@ -1363,9 +1363,9 @@ selecciona venue o ruta dividida, y respeta límites de riesgo.`,
     contact_title: 'اتصل بنا',
     contact_sub: 'تواصل مع الفريق — نستجيب بسرعة.',
     contact_lines: [
-      `قناة Telegram — إعلانات وبحث: ${CHANNEL_LINK}`,
-      `بوت الملاحظات — دعم وطلبات: ${FEEDBACK_LINK}`,
-      `البريد — شراكات ومؤسسات: ${CONTACT_EMAIL}`,
+      `قناة Telegram — إعلانات وبحث: `,
+      `بوت الملاحظات — دعم وطلبات: `,
+      `البريد — شراكات ومؤسسات: `,
     ],
 
     links: { bot: BOT_LINK, channel: CHANNEL_LINK, feedback: FEEDBACK_LINK, email: CONTACT_EMAIL },
@@ -1590,9 +1590,9 @@ bir platform veya bölünmüş rota seçer ve kullanıcı risk sınırlarına uy
     contact_title: 'Bize Ulaşın',
     contact_sub: 'Ekiple iletişime geçin — hızlı yanıtlıyoruz.',
     contact_lines: [
-      `Telegram kanalı — duyurular ve araştırma: ${CHANNEL_LINK}`,
-      `Geri bildirim botu — destek ve istekler: ${FEEDBACK_LINK}`,
-      `E-posta — ortaklıklar ve kurumsal: ${CONTACT_EMAIL}`,
+      `Telegram kanalı — duyurular ve araştırma: `,
+      `Geri bildirim botu — destek ve istekler: `,
+      `E-posta — ortaklıklar ve kurumsal: `,
     ],
 
     links: { bot: BOT_LINK, channel: CHANNEL_LINK, feedback: FEEDBACK_LINK, email: CONTACT_EMAIL },
@@ -3396,6 +3396,59 @@ try {
   Object.assign(dict.zh, AI_ZH)
   Object.assign(dict.ar, AI_AR)
   Object.assign(dict.tr, AI_TR)
+} catch {}
+/* ========================= AI QUOTA STRINGS — PATCH =========================
+   ВСТАВИТЬ ПЕРЕД export I18nProvider / useI18n
+   Добавляет ключи:
+   - ai_limit_reached   — мигающая красная надпись
+   - ai_time_left       — строка «Осталось времени сегодня»
+   ========================================================================== */
+
+// EN
+const AI_QUOTA_EN = {
+  ai_limit_reached: 'Limit reached. For full access — continue in Telegram',
+  ai_time_left: 'Time left today',
+}
+// RU
+const AI_QUOTA_RU = {
+  ai_limit_reached: 'Лимит исчерпан. Для полного доступа — продолжить в Telegram',
+  ai_time_left: 'Осталось времени сегодня',
+}
+// UK
+const AI_QUOTA_UK = {
+  ai_limit_reached: 'Ліміт вичерпано. Для повного доступу — продовжити в Telegram',
+  ai_time_left: 'Залишилось часу сьогодні',
+}
+// ZH (简体)
+const AI_QUOTA_ZH = {
+  ai_limit_reached: '已达今日限额。获取完整访问请前往 Telegram',
+  ai_time_left: '今日剩余时间',
+}
+// ES
+const AI_QUOTA_ES = {
+  ai_limit_reached: 'Límite alcanzado. Para acceso completo — continúa en Telegram',
+  ai_time_left: 'Tiempo restante de hoy',
+}
+// AR
+const AI_QUOTA_AR = {
+  ai_limit_reached: 'تم الوصول إلى الحد. للوصول الكامل — تابع في تيليجرام',
+  ai_time_left: 'الوقت المتبقي اليوم',
+}
+// TR
+const AI_QUOTA_TR = {
+  ai_limit_reached: 'Limit doldu. Tam erişim için — Telegram’da devam et',
+  ai_time_left: 'Bugün kalan süre',
+}
+
+// MERGE
+try {
+  Object.assign(dict.en, AI_QUOTA_EN)
+  Object.assign(dict.ru, AI_QUOTA_RU)
+  Object.assign(dict.uk, AI_QUOTA_UK)
+  Object.assign(dict.zh, AI_QUOTA_ZH)
+  Object.assign(dict.es, AI_QUOTA_ES)
+  Object.assign(dict.ar, AI_QUOTA_AR)
+  Object.assign(dict.tr, AI_QUOTA_TR)
 } catch {}
 
 export function I18nProvider({ children }) {
