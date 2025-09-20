@@ -67,7 +67,7 @@ export default function Contact(){
             <div className="contact-card">
               <h3>Feedback / Support</h3>
               <p>{lines[1]}</p>
-              <a className="btn" href={links.feedback} target="_blank" rel="noreferrer">Feedback Bot</a>
+              <a className="btn" href={links.feedback} target="_blank" rel="noreferrer">Telegram</a>
             </div>
             <div className="contact-card">
               <h3>Email</h3>
