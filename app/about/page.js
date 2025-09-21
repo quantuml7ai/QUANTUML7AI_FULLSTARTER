@@ -1,6 +1,69 @@
 'use client'
 
 import { useI18n } from '../../components/i18n'
+import { useRef, useEffect } from 'react'
+
+/* ===== Маркиза как на главной: бесшовно, full-bleed, без «пропаданий» ===== */
+function PageMarqueeTail() {
+  const { t } = useI18n()
+  const marqueeRef = useRef(null)
+
+  useEffect(() => {
+    const el = marqueeRef.current
+    if (!el) return
+    // Идемпотентность: не дублируем контент повторно (в dev эффект может сработать 2 раза)
+    if (el.dataset.duped === '1') return
+    el.innerHTML += el.innerHTML
+    el.dataset.duped = '1'
+  }, [])
+
+  return (
+    // no-gutters — отключаем глобальные гаттеры; full-bleed через отрицательные маргины
+    <section className="marquee-wrap no-gutters" aria-hidden="true">
+      <div className="marquee" ref={marqueeRef}>
+        <span>{t('marquee')}</span>
+        <span>{t('marquee')}</span>
+        <span>{t('marquee')}</span>
+        <span>{t('marquee')}</span>
+      </div>
+
+      <style jsx>{`
+        .marquee-wrap{
+          width: 100%;
+          overflow: hidden;
+          border-top: 1px solid rgba(255,255,255,.1);
+          margin-top: 40px;
+
+          /* full-bleed: компенсируем глобальные отступы краёв */
+          margin-left: calc(-1 * var(--gutter, 24px));
+          margin-right: calc(-1 * var(--gutter, 24px));
+          padding-left: 0;
+          padding-right: 0;
+        }
+        .marquee{
+          display: inline-flex;
+          gap: 40px;
+          white-space: nowrap;
+          will-change: transform;
+          animation: marquee 20s linear infinite;
+        }
+        .marquee > *{ flex: 0 0 auto; }   /* без переносов */
+        .marquee span{ opacity: .7; }
+
+        /* Бесшовность: во второй половине содержимое идентично → смещаем на 50% */
+        @keyframes marquee{
+          from{ transform: translateX(0); }
+          to  { transform: translateX(-50%); }
+        }
+
+        /* Доступность: уважение reduce-motion */
+        @media (prefers-reduced-motion: reduce){
+          .marquee{ animation: none; }
+        }
+      `}</style>
+    </section>
+  )
+}
 
 export default function AboutPage() {
   const { t } = useI18n()
@@ -90,102 +153,107 @@ export default function AboutPage() {
   }
 
   return (
-    <main className="container">
-      <section className="panel">
-        <h1>{title}</h1>
+    <>
+      <main className="container">
+        <section className="panel">
+          <h1>{title}</h1>
 
-        {/* Адаптивное видео 16:9 сразу под заголовком */}
-        <div className="about-hero" aria-hidden="true">
-          <video
-            className="about-hero-video"
-            playsInline
-            autoPlay
-            muted
-            loop
-            preload="metadata"
-            poster="/branding/about-poster.jpg"
-            onError={(e) => console.warn('[about] video error', e)}
-          >
-            {videoSources.map((src) => (
-              <source key={src} src={src} type="video/mp4" />
-            ))}
-          </video>
-        </div>
-
-        {/* Контент секций */}
-        <div className="about-sections">
-          {sections.map((s, idx) => {
-            const img = imageForTitle(s.title)
-            return (
-              <div className="about-block" key={idx}>
-                {s.title ? <h3 className="about-block-title">{s.title}</h3> : null}
-
-                {/* Если заголовок распознан — показываем картинку 16:9 сразу ПОСЛЕ него */}
-                {img && (
-                  <figure className="about-img">
-                    <img src={img.src} alt={img.alt} loading="lazy" />
-                  </figure>
-                )}
-
-                {Array.isArray(s.paras) && s.paras.map((p, i) => <p key={i}>{p}</p>)}
-              </div>
-            )
-          })}
-        </div>
-
-        {Array.isArray(bullets) && bullets.length > 0 && (
-          <div className="about-block">
-            <ul>
-              {bullets.map((b, i) => <li key={i}>{b}</li>)}
-            </ul>
+          {/* Адаптивное видео 16:9 сразу под заголовком */}
+          <div className="about-hero" aria-hidden="true">
+            <video
+              className="about-hero-video"
+              playsInline
+              autoPlay
+              muted
+              loop
+              preload="metadata"
+              poster="/branding/about-poster.jpg"
+              onError={(e) => console.warn('[about] video error', e)}
+            >
+              {videoSources.map((src) => (
+                <source key={src} src={src} type="video/mp4" />
+              ))}
+            </video>
           </div>
-        )}
 
-        {links?.bot && (
-          <div style={{ marginTop: '1rem' }}>
-            <a href={links.bot} target="_blank" rel="noreferrer" className="btn btn-primary">
-              {t('tg_button')}
-            </a>
+          {/* Контент секций */}
+          <div className="about-sections">
+            {sections.map((s, idx) => {
+              const img = imageForTitle(s.title)
+              return (
+                <div className="about-block" key={idx}>
+                  {s.title ? <h3 className="about-block-title">{s.title}</h3> : null}
+
+                  {/* Если заголовок распознан — показываем картинку 16:9 сразу ПОСЛЕ него */}
+                  {img && (
+                    <figure className="about-img">
+                      <img src={img.src} alt={img.alt} loading="lazy" />
+                    </figure>
+                  )}
+
+                  {Array.isArray(s.paras) && s.paras.map((p, i) => <p key={i}>{p}</p>)}
+                </div>
+              )
+            })}
           </div>
-        )}
-      </section>
 
-      {/* Локальные стили страницы */}
-      <style jsx>{`
-        .about-hero {
-          width: 100%;
-          aspect-ratio: 16 / 9;
-          border-radius: 16px;
-          overflow: hidden;
-          margin: .75rem 0 1rem;
-        }
-        .about-hero-video {
-          width: 100%;
-          height: 100%;
-          display: block;
-          object-fit: cover;
-          background: #000;
-        }
-        .about-sections { width: 100%; }
-        .about-block + .about-block { margin-top: 1.25rem; }
-        .about-block-title { margin-bottom: .5rem; }
+          {Array.isArray(bullets) && bullets.length > 0 && (
+            <div className="about-block">
+              <ul>
+                {bullets.map((b, i) => <li key={i}>{b}</li>)}
+              </ul>
+            </div>
+          )}
 
-        /* Адаптивные изображения 16:9 */
-        .about-img {
-          width: 100%;
-          aspect-ratio: 16 / 9;
-          margin: .5rem 0 1rem;
-          border-radius: 16px;
-          overflow: hidden;
-        }
-        .about-img img {
-          width: 100%;
-          height: 100%;
-          display: block;
-          object-fit: cover;
-          background: #000;
-        }
-      `}</style>
-    </main>
+          {links?.bot && (
+            <div style={{ marginTop: '1rem' }}>
+              <a href={links.bot} target="_blank" rel="noreferrer" className="btn btn-primary">
+                {t('tg_button')}
+              </a>
+            </div>
+          )}
+        </section>
+
+        {/* Локальные стили страницы */}
+        <style jsx>{`
+          .about-hero {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: 16px;
+            overflow: hidden;
+            margin: .75rem 0 1rem;
+          }
+          .about-hero-video {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            background: #000;
+          }
+          .about-sections { width: 100%; }
+          .about-block + .about-block { margin-top: 1.25rem; }
+          .about-block-title { margin-bottom: .5rem; }
+
+          /* Адаптивные изображения 16:9 */
+          .about-img {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            margin: .5rem 0 1rem;
+            border-radius: 16px;
+            overflow: hidden;
+          }
+          .about-img img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            background: #000;
+          }
+        `}</style>
+      </main>
+
+      {/* Хвост страницы: бегущая строка во всю ширину */}
+      <PageMarqueeTail />
+    </>
   )
 }

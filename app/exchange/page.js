@@ -393,6 +393,68 @@ function OrderBook({symbol}){
   </Panel>
 }
 
+/* ===================== Маркиза как на главной: бесшовно, full-bleed ===================== */
+function PageMarqueeTail() {
+  const { t } = useI18n()
+  const marqueeRef = useRef(null)
+
+  useEffect(() => {
+    const el = marqueeRef.current
+    if (!el) return
+    // Идемпотентность: не дублируем контент повторно (в dev эффект может сработать 2 раза)
+    if (el.dataset.duped === '1') return
+    el.innerHTML += el.innerHTML
+    el.dataset.duped = '1'
+  }, [])
+
+  return (
+    // no-gutters — отключаем глобальные гаттеры; full-bleed через отрицательные маргины
+    <section className="marquee-wrap no-gutters" aria-hidden="true">
+      <div className="marquee" ref={marqueeRef}>
+        <span>{t('marquee')}</span>
+        <span>{t('marquee')}</span>
+        <span>{t('marquee')}</span>
+        <span>{t('marquee')}</span>
+      </div>
+
+      <style jsx>{`
+        .marquee-wrap{
+          width: 100%;
+          overflow: hidden;
+          border-top: 1px solid rgba(255,255,255,.1);
+          margin-top: 40px;
+
+          /* full-bleed: компенсируем глобальные отступы краёв */
+          margin-left: calc(-1 * var(--gutter, 24px));
+          margin-right: calc(-1 * var(--gutter, 24px));
+          padding-left: 0;
+          padding-right: 0;
+        }
+        .marquee{
+          display: inline-flex;
+          gap: 40px;
+          white-space: nowrap;
+          will-change: transform;
+          animation: marquee 20s linear infinite;
+        }
+        .marquee > *{ flex: 0 0 auto; }   /* без переносов */
+        .marquee span{ opacity: .7; }
+
+        /* Бесшовность: во второй половине содержимое идентично → смещаем на 50% */
+        @keyframes marquee{
+          from{ transform: translateX(0); }
+          to  { transform: translateX(-50%); }
+        }
+
+        /* Доступность: уважение reduce-motion */
+        @media (prefers-reduced-motion: reduce){
+          .marquee{ animation: none; }
+        }
+      `}</style>
+    </section>
+  )
+}
+
 /* ================================= Page ================================= */
 export default function ExchangePage(){
   const { t } = useI18n()
@@ -460,6 +522,9 @@ export default function ExchangePage(){
         </section>
       ))}
 
+      {/* Хвост страницы: бегущая строка во всю ширину */}
+      <PageMarqueeTail />
+
       <style jsx>{`
         .wrap{display:block;max-width:1200px;margin:0 auto;padding:0 8px}
         .muted{opacity:.7}
@@ -470,4 +535,3 @@ export default function ExchangePage(){
     </div>
   )
 }
-

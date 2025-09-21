@@ -203,6 +203,7 @@ export default function RootLayout({ children }) {
         {/* ✅ Включаем аналитику Vercel */}
         <Analytics />
         <SpeedInsights />
+
       </body>
     </html>
   )
