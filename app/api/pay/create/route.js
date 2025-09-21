@@ -1,5 +1,7 @@
 // app/api/pay/create/route.js
 import { NextResponse } from 'next/server'
+export const runtime = 'nodejs'       // чтобы точно был Node.js runtime
+export const dynamic = 'force-dynamic' // запрет кэширования роутов
 
 export async function POST(req) {
   try {
