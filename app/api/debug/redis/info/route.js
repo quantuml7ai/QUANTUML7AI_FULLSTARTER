@@ -20,20 +20,12 @@ export async function GET(req) {
       valLegacy = await redis.get(`vip:vipplus:${id}`)
     }
 
-    const sample = []
-    let i = 0
-    for await (const key of redis.scanIterator({ match: 'vip*', count: 50 })) {
-      sample.push(key)
-      if (++i >= 20) break
-    }
-
     return NextResponse.json({
       ok: true,
       env: { host, hasToken: !!process.env.UPSTASH_REDIS_REST_TOKEN },
       queryId: raw || null,
       found: { main: valMain, legacy: valLegacy },
-      sampleKeys: sample,
-      hint: 'GET /api/debug/redis/info?id=<accountId>',
+      hint: "GET /api/debug/redis/info?id=<accountId>",
     })
   } catch (e) {
     return NextResponse.json({ ok: false, error: String(e) }, { status: 500 })

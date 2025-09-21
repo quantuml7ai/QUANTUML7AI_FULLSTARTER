@@ -5,27 +5,36 @@ import { Redis } from '@upstash/redis'
 export const dynamic = 'force-dynamic'
 const redis = Redis.fromEnv()
 
-export async function POST(req) {
-  try {
-    const { searchParams } = new URL(req.url)
-    const raw = (searchParams.get('id') || '').trim().toLowerCase()
-    if (!raw) return NextResponse.json({ ok: false, error: 'PASS ?id=<accountId>' }, { status: 400 })
+async function run(idRaw) {
+  const raw = String(idRaw || '').trim().toLowerCase()
+  if (!raw) return { ok: false, error: 'PASS id' }
 
-    const legacyKey = `vip:vipplus:${raw}`
-    const mainKey   = `vip:${raw}`
+  const legacyKey = `vip:vipplus:${raw}`
+  const mainKey   = `vip:${raw}`
 
-    const v = await redis.get(legacyKey)
-    if (!v) {
-      const cur = await redis.get(mainKey)
-      return NextResponse.json({ ok: true, moved: false, info: cur ? 'already main' : 'no legacy & no main' })
-    }
-
-    await redis.set(mainKey, v, { ex: 3600 * 24 * 400 })
-    await redis.del(legacyKey)
-
-    const check = await redis.get(mainKey)
-    return NextResponse.json({ ok: true, moved: true, value: check })
-  } catch (e) {
-    return NextResponse.json({ ok: false, error: String(e) }, { status: 500 })
+  const legacy = await redis.get(legacyKey)
+  if (!legacy) {
+    const cur = await redis.get(mainKey)
+    return { ok: true, moved: false, info: cur ? 'already main' : 'no legacy & no main' }
   }
+
+  await redis.set(mainKey, legacy, { ex: 3600 * 24 * 400 })
+  await redis.del(legacyKey)
+
+  const check = await redis.get(mainKey)
+  return { ok: true, moved: true, value: check }
+}
+
+export async function GET(req) {
+  const { searchParams } = new URL(req.url)
+  const id = searchParams.get('id') || searchParams.get('accountId')
+  const res = await run(id)
+  return NextResponse.json(res, { status: res.ok ? 200 : 400 })
+}
+
+export async function POST(req) {
+  const body = await req.json().catch(()=> ({}))
+  const id = body?.id || body?.accountId
+  const res = await run(id)
+  return NextResponse.json(res, { status: res.ok ? 200 : 400 })
 }
