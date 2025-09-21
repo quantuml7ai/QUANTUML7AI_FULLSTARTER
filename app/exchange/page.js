@@ -438,21 +438,69 @@ function AIQuotaGate({ children, onOpenUnlimit }) {
     }, QUOTA_HEARTBEAT_MS)
     return () => clearInterval(timer)
   }, [used, limit])
-useEffect(() => {
-  (async () => {
-    const accountId = /* получить из твоего auth/wallet контекста */
-      (typeof window !== 'undefined' && window.__AUTH_ACCOUNT__)
-      || localStorage.getItem('wallet')
-    if (!accountId) return
-    const r = await fetch('/api/subscription/status', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ accountId }) })
-    const j = await r.json()
-    if (j?.isVip) {
-      setUsed(0)             // на всякий
-      setUsedSec(0)
-      setLimit(Number.POSITIVE_INFINITY) // фактически «сняли» квоту
+
+  // ==== ДОБАВЛЕНО: функция и события авто-проверки VIP статуса ====
+  const checkingRef = useRef(false)
+  const refreshVip = useRef(async function () {
+    if (checkingRef.current) return
+    checkingRef.current = true
+    try {
+      const accountId =
+        (typeof window !== 'undefined' && window.__AUTH_ACCOUNT__)
+        || localStorage.getItem('wallet')
+      if (!accountId) return
+      const r = await fetch('/api/subscription/status', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ accountId })
+      })
+      const j = await r.json().catch(()=> ({}))
+      if (j?.isVip) {
+        setUsed(0)
+        setUsedSec(0)
+        setLimit(Number.POSITIVE_INFINITY)
+      }
+    } catch (_) {
+      // no-op
+    } finally {
+      checkingRef.current = false
     }
-  })()
-}, [])
+  }).current
+
+  // первоначальная проверка как и раньше (оставляем)
+  useEffect(() => {
+    (async () => {
+      const accountId =
+        (typeof window !== 'undefined' && window.__AUTH_ACCOUNT__)
+        || localStorage.getItem('wallet')
+      if (!accountId) return
+      const r = await fetch('/api/subscription/status', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ accountId }) })
+      const j = await r.json()
+      if (j?.isVip) {
+        setUsed(0)             // на всякий
+        setUsedSec(0)
+        setLimit(Number.POSITIVE_INFINITY) // фактически «сняли» квоту
+      }
+    })()
+  }, [])
+
+  // слушаем глобальные события и клики для авто-обновления VIP
+  useEffect(() => {
+    const onRefresh = () => refreshVip()
+    const onFocus = () => refreshVip()
+    const onVis = () => { if (document.visibilityState === 'visible') refreshVip() }
+
+    window.addEventListener('vip:refresh', onRefresh)
+    window.addEventListener('focus', onFocus)
+    document.addEventListener('visibilitychange', onVis)
+    window.addEventListener('auth:ok', onRefresh)
+
+    return () => {
+      window.removeEventListener('vip:refresh', onRefresh)
+      window.removeEventListener('focus', onFocus)
+      document.removeEventListener('visibilitychange', onVis)
+      window.removeEventListener('auth:ok', onRefresh)
+    }
+  }, [refreshVip])
 
   // если лимит исчерпан — показываем плашку + кнопка «Снять лимит»
   if (used >= limit) return <LimitBanner tr={t} onOpen={onOpenUnlimit} />
@@ -577,6 +625,15 @@ function PageMarqueeTail() {
 export default function ExchangePage(){
   const { t } = useI18n()
   useTVCore()
+
+  // ===== ДОБАВЛЕНО: глобальный авто-рефреш VIP по любому клику на странице =====
+  useEffect(() => {
+    const clickHandler = () => {
+      try { window.dispatchEvent(new CustomEvent('vip:refresh')) } catch {}
+    }
+    document.addEventListener('click', clickHandler)
+    return () => document.removeEventListener('click', clickHandler)
+  }, [])
 
   // symbols
   const [symbols,setSymbols]=useState(['BTCUSDT','ETHUSDT','BNBUSDT'])
