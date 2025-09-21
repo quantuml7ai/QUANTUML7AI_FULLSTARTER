@@ -19,8 +19,8 @@ export default function TopBar() {
     { href: '/subscribe', label: t('nav_subscribe') },
     { href: '/exchange',  label: t('nav_exchange') },
     { href: '/about',     label: t('nav_about') },
-    { href: '/privacy',   label: t('nav_privacy') }, // Privacy & Policy
     { href: '/contact',   label: t('nav_contact') },
+    { href: '/privacy',   label: t('nav_privacy') }, // Privacy & Policy
   ]
 
   // true для точного совпадения и вложенных страниц (например /about/team)
