@@ -1,71 +1,66 @@
-import crypto from 'crypto'
-import { NextResponse } from 'next/server'
-import { setVip } from '../../../../lib/subscriptions'
+// app/api/pay/webhook/route.js
+import crypto from 'crypto';
+import { NextResponse } from 'next/server';
+import { setVip } from '../../../../lib/subscriptions';
 
-// Берём секрет из любого из двух имён
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 function getSecret() {
   return (
     process.env.NOWPAY_IPN_SECRET ||
     process.env.NOWPAYMENTS_IPN_SECRET ||
     ''
-  )
+  );
 }
-
-// Берём подпись из любого заголовка, который шлёт NowPayments
-function getSignature(req) {
+function getSig(req) {
   return (
     req.headers.get('x-nowpayments-sig') ||
     req.headers.get('x-nowpayments-signature') ||
     ''
-  )
+  );
 }
-
-// HMAC-SHA512 по raw body
-function verifySig(rawBody, sig) {
-  const secret = getSecret()
-  if (!secret || !sig) return false
-  const h = crypto.createHmac('sha512', secret).update(rawBody).digest('hex')
-  return h.toLowerCase() === String(sig).toLowerCase()
+function verify(raw, sig) {
+  const secret = getSecret();
+  if (!secret || !sig) return false;
+  const h = crypto.createHmac('sha512', secret).update(raw).digest('hex');
+  return h.toLowerCase() === String(sig).toLowerCase();
 }
 
 export async function POST(req) {
   try {
-    // 1) читаем сырой текст, чтобы верифицировать подпись
-    const raw = await req.text()
-    const sig = getSignature(req)
-    if (!verifySig(raw, sig)) {
-      return NextResponse.json({ ok:false, error:'BAD_SIGNATURE' }, { status: 401 })
+    const raw = await req.text();
+    const sig = getSig(req);
+
+    if (!verify(raw, sig)) {
+      return NextResponse.json({ ok: false, error: 'BAD_SIGNATURE' }, { status: 401 });
     }
 
-    // 2) теперь можно парсить JSON
-    const j = JSON.parse(raw || '{}')
+    const j = JSON.parse(raw || '{}');
 
-    // 3) интересующие статусы (можешь скорректировать под свою политику)
-    const okStatuses = new Set([
-      'finished', 'confirmed', 'completed', 'partially_paid'
-    ])
-    const status = String(j.payment_status || j.status || '').toLowerCase()
+    // Статусы, при которых считаем оплату успешной.
+    // Если хочешь строгий вариант — оставь только finished/confirmed/completed.
+    const okStatuses = new Set(['finished', 'confirmed', 'completed', 'partially_paid']);
+    const status = String(j.payment_status || j.status || '').toLowerCase();
     if (!okStatuses.has(status)) {
-      // игнорируем «в процессе»
-      return NextResponse.json({ ok:true, ignored:true, status })
+      return NextResponse.json({ ok: true, ignored: true, status });
     }
 
-    // 4) на ком активировать — это наш order_id из create
-    const accountId =
-      j.order_id || j.orderId || j.order || j.invoice_id || j.invoiceId
-    if (!accountId) {
-      return NextResponse.json({ ok:false, error:'NO_ACCOUNT_ID' }, { status: 400 })
+    const wallet =
+      j.order_id || j.orderId || j.order || j.invoice_id || j.invoiceId;
+    if (!wallet) {
+      return NextResponse.json({ ok: false, error: 'NO_WALLET' }, { status: 400 });
     }
 
-    // 5) срок подписки
-    const days = Number(process.env.PLAN_DAYS || process.env.NOWPAYMENTS_PLAN_DAYS || 30)
-    const until = new Date(Date.now() + days*24*60*60*1000).toISOString()
+    const days =
+      Number(process.env.PLAN_DAYS || process.env.NOWPAYMENTS_PLAN_DAYS || 30);
+    const until = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
 
-    // 6) записываем VIP
-    setVip(accountId, until)
+    // Идемпотентность: не продлеваем повторно один и тот же payment_id
+    await setVip(wallet, until, { paymentId: j.payment_id });
 
-    return NextResponse.json({ ok:true, accountId, until, status })
+    return NextResponse.json({ ok: true, wallet, until, status });
   } catch (e) {
-    return NextResponse.json({ ok:false, error:String(e) }, { status: 500 })
+    return NextResponse.json({ ok: false, error: String(e) }, { status: 500 });
   }
 }

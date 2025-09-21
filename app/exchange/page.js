@@ -2,13 +2,12 @@
 
 // ==================================================================================================
 // app/exchange/page.js — QUANTUML7 Exchange — R12c-fix (remove duplicate onTVReady; TV + AI from klines + neon + info)
+// + Auth gate for payment (VIP+) — wait for wallet modal, then proceed
 // ==================================================================================================
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import * as Brain from '../../lib/brain.js'
-
-
 
 /* ================================ i18n bridge ================================ */
 let useI18n = () => ({ t: (k)=>k })
@@ -253,6 +252,7 @@ function AIBox({ data }) {
     </Panel>
   )
 }
+
 /* ============================ AI Quota Gate (10 min/day) ============================ */
 const QUOTA_LIMIT_SEC = 10 * 60; // 10 минут
 const QUOTA_HEARTBEAT_MS = 1000; // шаг 1 секунда
@@ -402,26 +402,26 @@ function AIQuotaGate({ children, onOpenUnlimit }) {
     }, QUOTA_HEARTBEAT_MS)
     return () => clearInterval(timer)
   }, [used, limit])
-useEffect(() => {
-  (async () => {
-    const accountId = /* получить из твоего auth/wallet контекста */
-      (typeof window !== 'undefined' && window.__AUTH_ACCOUNT__)
-      || localStorage.getItem('wallet')
-    if (!accountId) return
-    const r = await fetch('/api/subscription/status', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ accountId }) })
-    const j = await r.json()
-    if (j?.isVip) {
-      setUsed(0)             // на всякий
-      setUsedSec(0)
-      setLimit(Number.POSITIVE_INFINITY) // фактически «сняли» квоту
-    }
-  })()
-}, [])
 
-  // если лимит исчерпан — показываем плашку + кнопка «Снять лимит»
+  // проверка VIP-подписки (снимаем квоту)
+  useEffect(() => {
+    (async () => {
+      const accountId =
+        (typeof window !== 'undefined' && window.__AUTH_ACCOUNT__)
+        || localStorage.getItem('wallet')
+      if (!accountId) return
+      const r = await fetch('/api/subscription/status', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ accountId }) })
+      const j = await r.json()
+      if (j?.isVip) {
+        setUsed(0)
+        setUsedSec(0)
+        setLimit(Number.POSITIVE_INFINITY)
+      }
+    })()
+  }, [])
+
   if (used >= limit) return <LimitBanner tr={t} onOpen={onOpenUnlimit} />
 
-  // иначе — показываем контент (AIBox), рядом можно показать оставшееся время
   const remain = Math.max(0, limit - used)
   const mm = Math.floor(remain/60), ss = Math.floor(remain%60)
   return (
@@ -433,7 +433,6 @@ useEffect(() => {
     </>
   )
 }
-
 
 /* ================================= OrderBook (black) ================================= */
 function OrderBook({symbol}){
@@ -483,14 +482,12 @@ function PageMarqueeTail() {
   useEffect(() => {
     const el = marqueeRef.current
     if (!el) return
-    // Идемпотентность: не дублируем контент повторно (в dev эффект может сработать 2 раза)
     if (el.dataset.duped === '1') return
     el.innerHTML += el.innerHTML
     el.dataset.duped = '1'
   }, [])
 
   return (
-    // no-gutters — отключаем глобальные гаттеры; full-bleed через отрицательные маргины
     <section className="marquee-wrap no-gutters" aria-hidden="true">
       <div className="marquee" ref={marqueeRef}>
         <span>{t('marquee')}</span>
@@ -505,36 +502,47 @@ function PageMarqueeTail() {
           overflow: hidden;
           border-top: 1px solid rgba(255,255,255,.1);
           margin-top: 40px;
-
-          /* full-bleed: компенсируем глобальные отступы краёв */
           margin-left: calc(-1 * var(--gutter, 24px));
           margin-right: calc(-1 * var(--gutter, 24px));
-          padding-left: 0;
-          padding-right: 0;
+          padding-left: 0; padding-right: 0;
         }
         .marquee{
-          display: inline-flex;
-          gap: 40px;
-          white-space: nowrap;
-          will-change: transform;
+          display: inline-flex; gap: 40px; white-space: nowrap; will-change: transform;
           animation: marquee 20s linear infinite;
         }
-        .marquee > *{ flex: 0 0 auto; }   /* без переносов */
+        .marquee > *{ flex: 0 0 auto; }
         .marquee span{ opacity: .7; }
-
-        /* Бесшовность: во второй половине содержимое идентично → смещаем на 50% */
-        @keyframes marquee{
-          from{ transform: translateX(0); }
-          to  { transform: translateX(-50%); }
-        }
-
-        /* Доступность: уважение reduce-motion */
-        @media (prefers-reduced-motion: reduce){
-          .marquee{ animation: none; }
-        }
+        @keyframes marquee{ from{ transform: translateX(0); } to{ transform: translateX(-50%); } }
+        @media (prefers-reduced-motion: reduce){ .marquee{ animation: none; } }
       `}</style>
     </section>
   )
+}
+
+/* ========= НОВОЕ: «универсальная» обвязка для открытия вашего модала и ожидания кошелька ========= */
+function readAccount() {
+  if (typeof window === 'undefined') return null
+  return window.__AUTH_ACCOUNT__ || localStorage.getItem('wallet') || null
+}
+function triggerAuthUI() {
+  try { window.openAuthModal?.() } catch {}
+  try { window.dispatchEvent?.(new CustomEvent('open-auth')) } catch {}
+  try { window.dispatchEvent?.(new CustomEvent('open-wallet-modal')) } catch {}
+  try { document.body?.dispatchEvent?.(new CustomEvent('open-auth')) } catch {}
+}
+async function ensureAccount(timeoutMs = 120000) {
+  if (typeof window === 'undefined') throw new Error('No browser')
+  let acc = readAccount()
+  if (acc) return acc
+  // попросим открыть модал
+  triggerAuthUI()
+  const started = Date.now()
+  while (Date.now() - started < timeoutMs) {
+    await new Promise(r => setTimeout(r, 500))
+    acc = readAccount()
+    if (acc) return acc
+  }
+  throw new Error('Требуется авторизация кошелька')
 }
 
 /* ================================= Page ================================= */
@@ -579,33 +587,29 @@ export default function ExchangePage(){
     window.addEventListener('open-unlimit', open)
     return () => window.removeEventListener('open-unlimit', open)
   }, [])
-const handlePayClick = async () => {
-  try {
-    // 1) возьми текущий аккаунт из твоей авторизации
-    const accountId =
-      (typeof window !== 'undefined' && window.__AUTH_ACCOUNT__)        // пример
-      || localStorage.getItem('wallet')                                 // пример
-      || 'browser:' + (crypto?.randomUUID?.() || Date.now())            // fallback для теста
 
-    const r = await fetch('/api/pay/create', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ accountId })
-    })
-    const j = await r.json()
-    if (!r.ok) throw new Error(j?.error || 'Create failed')
+  const handlePayClick = async () => {
+    try {
+      // 1) гарантия авторизации: если нет кошелька — открываем ваш модал и ждём
+      const accountId =
+        readAccount() || await ensureAccount(120000) // до 2-х минут на авторизацию
 
-    // 2) открываем инвойс
-    if (j.url) window.open(j.url, '_blank', 'noopener,noreferrer')
+      // 2) создаём инвойс
+      const r = await fetch('/api/pay/create', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ accountId })
+      })
+      const j = await r.json()
+      if (!r.ok) throw new Error(j?.error || 'Create failed')
 
-    // 3) можем показать «ожидание» (по желанию)
-    // setPayState('waiting') ...
-  } catch (e) {
-    console.error(e)
-    alert('Payment error: ' + e.message)
+      // 3) открываем платёж
+      if (j.url) window.open(j.url, '_blank', 'noopener,noreferrer')
+    } catch (e) {
+      console.error(e)
+      alert((t('auth_required') || 'Сначала авторизуйтесь кошельком') + `\n\n${e.message ?? e}`)
+    }
   }
-}
-
 
   return (
     <div className="wrap">
@@ -619,7 +623,6 @@ const handlePayClick = async () => {
       <AIQuotaGate onOpenUnlimit={() => setOpenUnlimit(true)}>
         <AIBox data={ai}/>
       </AIQuotaGate>
-
 
       <OrderBook symbol={symbol}/>
 
@@ -659,3 +662,4 @@ const handlePayClick = async () => {
     </div>
   )
 }
+

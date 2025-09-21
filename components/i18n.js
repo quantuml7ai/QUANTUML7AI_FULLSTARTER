@@ -3649,6 +3649,117 @@ try {
   Object.assign(dict.tr, UNLIMIT_TR)
 } catch (e) {}
 
+/* ===================== inline i18n keys (safe no-op if already present) ===================== */
+/**
+ * Я добавил ключи, которые точно используются выше:
+ * - auth_required, ai_unlimit_title, ai_unlimit_price, ai_unlimit_desc, ai_unlimit_benefits[],
+ *   ai_unlimit_pay_now, ai_unlimit_cancel, ai_limit_reached, ai_time_left, ai_cta_start_telegram
+ * Если твой i18n уже содержит их — этот блок просто проигнорируется.
+ */
+(() => {
+  if (typeof window === 'undefined') return
+  const patch = {
+    ru: {
+      auth_required: 'Сначала авторизуйтесь кошельком',
+      ai_unlimit_title: 'Снять лимит • VIP+',
+      ai_unlimit_price: 'Стоимость: $30 / месяц',
+      ai_unlimit_desc: 'VIP+ отключает дневной лимит и открывает доступ к AI-рекомендациям 24/7.',
+      ai_unlimit_benefits: [
+        'Без лимита по времени',
+        'AI-рекомендации 24/7',
+        'Приоритетные расчёты',
+        'Поддержка'
+      ],
+      ai_unlimit_pay_now: 'Оплатить $30',
+      ai_unlimit_cancel: 'Отмена',
+      ai_limit_reached: 'Лимит исчерпан. Для полного доступа — продолжить в Telegram или снять лимит здесь.',
+      ai_time_left: 'Осталось времени сегодня',
+      ai_cta_start_telegram: 'Начать в Telegram'
+    },
+    en: {
+      auth_required: 'Please connect your wallet first',
+      ai_unlimit_title: 'Remove limit • VIP+',
+      ai_unlimit_price: 'Price: $30 / month',
+      ai_unlimit_desc: 'VIP+ removes the daily quota and unlocks AI recommendations 24/7.',
+      ai_unlimit_benefits: [
+        'No time limit',
+        'AI recommendations 24/7',
+        'Priority processing',
+        'Support'
+      ],
+      ai_unlimit_pay_now: 'Pay $30',
+      ai_unlimit_cancel: 'Cancel',
+      ai_limit_reached: 'Limit reached. For full access continue in Telegram or remove the limit here.',
+      ai_time_left: 'Time left today',
+      ai_cta_start_telegram: 'Start in Telegram'
+    },
+    zh: {
+      auth_required: '请先连接您的钱包',
+      ai_unlimit_title: '解除限制 • VIP+',
+      ai_unlimit_price: '价格：$30/月',
+      ai_unlimit_desc: 'VIP+ 取消每日配额，24/7 解锁 AI 建议。',
+      ai_unlimit_benefits: ['不限时长','AI 建议 24/7','优先计算','支持'],
+      ai_unlimit_pay_now: '支付 $30',
+      ai_unlimit_cancel: '取消',
+      ai_limit_reached: '已达上限。要获得完整访问，请在 Telegram 继续或在此解除限制。',
+      ai_time_left: '今日剩余时间',
+      ai_cta_start_telegram: '在 Telegram 开始'
+    },
+    uk: {
+      auth_required: 'Спочатку підключіть гаманець',
+      ai_unlimit_title: 'Зняти ліміт • VIP+',
+      ai_unlimit_price: 'Вартість: $30 / місяць',
+      ai_unlimit_desc: 'VIP+ знімає денний ліміт і відкриває доступ до AI-рекомендацій 24/7.',
+      ai_unlimit_benefits: ['Без ліміту часу','AI-рекомендації 24/7','Пріоритетні обчислення','Підтримка'],
+      ai_unlimit_pay_now: 'Сплатити $30',
+      ai_unlimit_cancel: 'Скасувати',
+      ai_limit_reached: 'Ліміт вичерпано. Для повного доступу продовжуйте в Telegram або зніміть ліміт тут.',
+      ai_time_left: 'Залишилось часу сьогодні',
+      ai_cta_start_telegram: 'Почати в Telegram'
+    },
+    ar: {
+      auth_required: 'يرجى توصيل محفظتك أولاً',
+      ai_unlimit_title: 'إزالة الحد • VIP+',
+      ai_unlimit_price: 'السعر: 30$ شهريًا',
+      ai_unlimit_desc: 'VIP+ يزيل الحصة اليومية ويفتح توصيات الذكاء الاصطناعي على مدار الساعة.',
+      ai_unlimit_benefits: ['بدون حد زمني','توصيات 24/7','أولوية المعالجة','الدعم'],
+      ai_unlimit_pay_now: 'ادفع 30$',
+      ai_unlimit_cancel: 'إلغاء',
+      ai_limit_reached: 'تم بلوغ الحد. للوصول الكامل تابع في تيليجرام أو أزل الحد هنا.',
+      ai_time_left: 'الوقت المتبقي اليوم',
+      ai_cta_start_telegram: 'ابدأ في تيليجرام'
+    },
+    tr: {
+      auth_required: 'Lütfen önce cüzdanınızı bağlayın',
+      ai_unlimit_title: 'Limiti kaldır • VIP+',
+      ai_unlimit_price: 'Fiyat: $30 / ay',
+      ai_unlimit_desc: 'VIP+ günlük kotayı kaldırır ve 7/24 AI önerilerini açar.',
+      ai_unlimit_benefits: ['Süre sınırı yok','7/24 AI önerileri','Öncelikli işlem','Destek'],
+      ai_unlimit_pay_now: '$30 öde',
+      ai_unlimit_cancel: 'İptal',
+      ai_limit_reached: 'Limit doldu. Tam erişim için Telegram’da devam edin veya burada limiti kaldırın.',
+      ai_time_left: 'Bugün kalan süre',
+      ai_cta_start_telegram: 'Telegram’da başla'
+    },
+    es: {
+      auth_required: 'Conecta tu wallet primero',
+      ai_unlimit_title: 'Quitar límite • VIP+',
+      ai_unlimit_price: 'Precio: $30 / mes',
+      ai_unlimit_desc: 'VIP+ elimina la cuota diaria y habilita recomendaciones de IA 24/7.',
+      ai_unlimit_benefits: ['Sin límite de tiempo','IA 24/7','Procesamiento prioritario','Soporte'],
+      ai_unlimit_pay_now: 'Pagar $30',
+      ai_unlimit_cancel: 'Cancelar',
+      ai_limit_reached: 'Límite alcanzado. Para acceso completo continúa en Telegram o quita el límite aquí.',
+      ai_time_left: 'Tiempo restante hoy',
+      ai_cta_start_telegram: 'Empezar en Telegram'
+    }
+  }
+
+  // Мягкая инъекция: если у твоего i18n есть глобальный merge — используем его,
+  // иначе кладём в window.__I18N_PATCH, чтобы провайдер подхватил при инициализации.
+  try { window.__ADD_I18N?.(patch) } catch {}
+  try { window.__I18N_PATCH = Object.assign({}, window.__I18N_PATCH || {}, patch) } catch {}
+})();
 export function I18nProvider({ children }) {
   const [lang, setLang] = useState('en')
   useEffect(() => {

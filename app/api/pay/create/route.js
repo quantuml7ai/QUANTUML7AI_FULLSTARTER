@@ -1,118 +1,93 @@
 // app/api/pay/create/route.js
-
 import { NextResponse } from 'next/server';
+import { cookies, headers } from 'next/headers';
 
-// чтобы Vercel/Next не кэшировали и не делали ISR
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
-// Быстрый GET-пинг: можно просто открыть /api/pay/create в браузере и увидеть ok:true
-export async function GET() {
-  return NextResponse.json({ ok: true, ping: true });
+function getEnv(name, fallback) {
+  return process.env[name] ?? fallback;
 }
 
-/**
- * POST /api/pay/create
- * Создаёт invoice в NOWPayments и отдаёт { ok:true, url: <invoice_url> }.
- * Пользователь выберет валюту на стороне NOWPayments.
- */
-export async function POST(req) {
-  try {
-    // Тело не обязательно
-    let body = {};
-    try {
-      body = await req.json();
-    } catch (_) {
-      body = {};
-    }
+// Достаём адрес кошелька из авторизации.
+// 1) Если ты уже кладёшь адрес в cookie (например, 'wallet') — заберём его.
+// 2) Либо можешь прокидывать в заголовок X-Q-Wallet на клиенте.
+// 3) При желании добавь сюда свою проверку сессии (JWT и т.п.)
+function getWalletFromAuth() {
+  const h = headers();
+  const c = cookies();
 
-    const plan = body?.plan || 'VIP+';
+  const fromHeader = h.get('x-q-wallet');
+  const fromCookie = c.get('wallet')?.value;
 
-    const apiKey = process.env.NOWPAYMENTS_API_KEY;
-    const price = Number(process.env.PLAN_PRICE_USD || '30');
+  const addr = (fromHeader || fromCookie || '').trim();
+  return addr || null;
+}
 
-    const appUrl =
-      process.env.APP_URL ||
-      process.env.NEXT_PUBLIC_SITE_URL ||
-      '';
-
-    const successUrl =
-      process.env.NOWPAYMENTS_SUCCESS_URL ||
-      (appUrl ? `${appUrl}/exchange?paid=1` : '');
-
-    const cancelUrl =
-      process.env.NOWPAYMENTS_CANCEL_URL ||
-      (appUrl ? `${appUrl}/exchange?cancel=1` : '');
-
-    const ipnUrl =
-      process.env.NOWPAYMENTS_CALLBACK ||
-      (appUrl ? `${appUrl}/api/pay/webhook` : '');
-
-    if (!apiKey) {
-      // отдадим ok:false со статусом 200 — фронт покажет алерт
-      return NextResponse.json({ ok: false, error: 'NO_API_KEY' });
-    }
-    if (!price || Number.isNaN(price)) {
-      return NextResponse.json({ ok: false, error: 'BAD_PRICE' });
-    }
-
-    // ВАЖНО: pay_currency НЕ указываем — выбор монеты будет на странице NOWPayments
-    const payload = {
-      price_amount: price,
-      price_currency: 'usd',
-      order_id: `vip-${Date.now()}`,
-      order_description: `Remove quota — ${plan}`,
-      success_url: successUrl || undefined,
-      cancel_url: cancelUrl || undefined,
-      ipn_callback_url: ipnUrl || undefined,
-    };
-
-    const res = await fetch('https://api.nowpayments.io/v1/invoice', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-      },
-      body: JSON.stringify(payload),
-    });
-
-    const data = await res.json().catch(() => null);
-
-    if (!res.ok) {
-      console.error('NOWPAY create failed', res.status, data);
-      // ok:false, чтобы твой фронтовый обработчик показал ошибку
-      return NextResponse.json({
-        ok: false,
-        error: 'NOWPAY_ERROR',
-        status: res.status,
-        message: data?.message || data?.description || 'Create invoice failed',
-        data,
-      });
-    }
-
-    // Ожидаемое поле для редиректа на фронте
-    const url = data?.invoice_url || data?.invoice?.url || data?.url;
-    if (!url) {
-      console.error('NOWPAY no invoice_url in response', data);
-      return NextResponse.json({
-        ok: false,
-        error: 'NO_INVOICE_URL',
-        data,
-      });
-    }
-
-    return NextResponse.json({
-      ok: true,
-      url,                 // <<< фронт редиректит на это поле
-      invoiceId: data?.id,
-      raw: data,
-    });
-  } catch (err) {
-    console.error('SERVER_ERROR /api/pay/create', err);
-    return NextResponse.json({
-      ok: false,
-      error: 'SERVER_ERROR',
-      message: err?.message || String(err),
-    });
+export async function POST() {
+  // 1) Проверка авторизации (наличие привязанного кошелька)
+  const wallet = getWalletFromAuth();
+  if (!wallet) {
+    return NextResponse.json(
+      { ok: false, needAuth: true, message: 'WALLET_REQUIRED' },
+      { status: 401 }
+    );
   }
+
+  const apiKey = getEnv('NOWPAYMENTS_API_KEY', getEnv('NOWPAY_API_KEY', ''));
+  if (!apiKey) {
+    return NextResponse.json(
+      { ok: false, error: 'NO_API_KEY' },
+      { status: 500 }
+    );
+  }
+
+  const price = Number(getEnv('PLAN_PRICE_USD', '30')); // $30 по умолчанию
+  const appUrl = getEnv('APP_URL', getEnv('NEXT_PUBLIC_SITE_URL', ''));
+  const successUrl = getEnv('NOWPAYMENTS_SUCCESS_URL', `${appUrl}/exchange?paid=1`);
+  const cancelUrl  = getEnv('NOWPAYMENTS_CANCEL_URL',  `${appUrl}/exchange?cancel=1`);
+  const ipnUrl     = getEnv('NOWPAYMENTS_CALLBACK',    `${appUrl}/api/pay/webhook`);
+
+  // 2) Создаём инвойс БЕЗ pay_currency, чтобы на стороне NowPayments
+  //    пользователь сам выбрал монету.
+  const body = {
+    price_amount: price,
+    price_currency: 'usd',
+    order_id: wallet, // <— здесь передаём привязанный кошелёк как идентификатор
+    success_url: successUrl,
+    cancel_url: cancelUrl,
+    ipn_callback_url: ipnUrl,
+    is_fixed_rate: true,
+    is_fee_paid_by_user: true,
+  };
+
+  const res = await fetch('https://api.nowpayments.io/v1/invoice', {
+    method: 'POST',
+    headers: {
+      'x-api-key': apiKey,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    return NextResponse.json(
+      { ok: false, error: 'NOWPAY_ERROR', detail: text },
+      { status: 500 }
+    );
+  }
+
+  const data = await res.json();
+  // NOWPayments обычно возвращает invoice_url
+  const url = data?.invoice_url || data?.payment_url;
+  if (!url) {
+    return NextResponse.json(
+      { ok: false, error: 'NO_INVOICE_URL', data },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({ ok: true, url, id: data?.id ?? data?.invoice_id ?? null });
 }
