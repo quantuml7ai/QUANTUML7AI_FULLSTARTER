@@ -421,33 +421,43 @@ function AIQuotaGate({ children, onOpenUnlimit }) {
   const { t } = useI18n()
   const [used, setUsed] = React.useState(0)
   const [limit, setLimit] = React.useState(QUOTA_LIMIT_SEC)
+  const [vipUntil, setVipUntil] = React.useState(null) // <-- ДОБАВЛЕНО
 
-  // при монтировании — читаем накопленное за сегодня
+  // начальные значения
   useEffect(() => {
     setUsed(getUsedSec())
     setLimit(QUOTA_LIMIT_SEC)
   }, [])
+// фоновая проверка: каждые 7с в течение 3 минут после загрузки страницы
+useEffect(() => {
+  const started = Date.now()
+  const tick = async () => {
+    if (Date.now() - started > 3 * 60 * 1000) return // 3 минуты
+    await refreshVip()
+    timer = setTimeout(tick, 7000)
+  }
+  let timer = setTimeout(tick, 7000)
+  return () => clearTimeout(timer)
+}, [refreshVip])
 
-  // тикаем, пока не выбрали лимит
+  // тикаем только если НЕ VIP
   useEffect(() => {
-    if (used >= limit) return
+    if (!Number.isFinite(limit) || used >= limit) return
     const timer = setInterval(() => {
-      const v = getUsedSec() + QUOTA_HEARTBEAT_MS/1000
-      setUsed(v)
-      setUsedSec(v)
+      const v = getUsedSec() + QUOTA_HEARTBEAT_MS / 1000
+      setUsed(v); setUsedSec(v)
     }, QUOTA_HEARTBEAT_MS)
     return () => clearInterval(timer)
   }, [used, limit])
 
-  // ==== ДОБАВЛЕНО: функция и события авто-проверки VIP статуса ====
   const checkingRef = useRef(false)
   const refreshVip = useRef(async function () {
     if (checkingRef.current) return
     checkingRef.current = true
     try {
       const accountId =
-        (typeof window !== 'undefined' && window.__AUTH_ACCOUNT__)
-        || localStorage.getItem('wallet')
+        (typeof window !== 'undefined' && window.__AUTH_ACCOUNT__) ||
+        localStorage.getItem('wallet')
       if (!accountId) return
       const r = await fetch('/api/subscription/status', {
         method:'POST', headers:{'Content-Type':'application/json'},
@@ -455,45 +465,28 @@ function AIQuotaGate({ children, onOpenUnlimit }) {
       })
       const j = await r.json().catch(()=> ({}))
       if (j?.isVip) {
-        setUsed(0)
-        setUsedSec(0)
-        setLimit(Number.POSITIVE_INFINITY)
+        setUsed(0); setUsedSec(0)
+        setLimit(Number.POSITIVE_INFINITY)   // квота снята
+        setVipUntil(j.untilISO || null)      // <-- запоминаем дату
+      } else {
+        setVipUntil(null)
+        setLimit(QUOTA_LIMIT_SEC)
       }
-    } catch (_) {
-      // no-op
-    } finally {
-      checkingRef.current = false
-    }
+    } catch {} finally { checkingRef.current = false }
   }).current
 
-  // первоначальная проверка как и раньше (оставляем)
-  useEffect(() => {
-    (async () => {
-      const accountId =
-        (typeof window !== 'undefined' && window.__AUTH_ACCOUNT__)
-        || localStorage.getItem('wallet')
-      if (!accountId) return
-      const r = await fetch('/api/subscription/status', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ accountId }) })
-      const j = await r.json()
-      if (j?.isVip) {
-        setUsed(0)             // на всякий
-        setUsedSec(0)
-        setLimit(Number.POSITIVE_INFINITY) // фактически «сняли» квоту
-      }
-    })()
-  }, [])
+  // первичная проверка
+  useEffect(() => { refreshVip() }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // слушаем глобальные события и клики для авто-обновления VIP
+  // авто-обновление на клики/фокус/авторизацию
   useEffect(() => {
     const onRefresh = () => refreshVip()
     const onFocus = () => refreshVip()
     const onVis = () => { if (document.visibilityState === 'visible') refreshVip() }
-
     window.addEventListener('vip:refresh', onRefresh)
     window.addEventListener('focus', onFocus)
     document.addEventListener('visibilitychange', onVis)
     window.addEventListener('auth:ok', onRefresh)
-
     return () => {
       window.removeEventListener('vip:refresh', onRefresh)
       window.removeEventListener('focus', onFocus)
@@ -502,10 +495,40 @@ function AIQuotaGate({ children, onOpenUnlimit }) {
     }
   }, [refreshVip])
 
-  // если лимит исчерпан — показываем плашку + кнопка «Снять лимит»
+  // формат
+  const fmtDate = (iso) => {
+    try {
+      if (!iso) return '-'
+      const d = new Date(iso)
+      return d.toLocaleDateString(undefined, { year:'numeric', month:'2-digit', day:'2-digit' })
+    } catch { return '-' }
+  }
+  const daysLeft = (iso) => {
+    try {
+      if (!iso) return 0
+      const ms = (new Date(iso)).getTime() - Date.now()
+      return Math.max(0, Math.ceil(ms / (1000*60*60*24)))
+    } catch { return 0 }
+  }
+
+  // ===== Рендер =====
+  // VIP: показываем «до какой даты» и кол-во дней, без таймера
+  if (Number.isFinite(limit) === false) {
+    const dLeft = daysLeft(vipUntil)
+    return (
+      <>
+        {children}
+        <div style={{margin:'6px 0 0 6px', fontSize:12, opacity:.75}}>
+          VIP+ {t('active_until') || 'активен до'}: {fmtDate(vipUntil)} ({dLeft} {t('days') || 'дн.'})
+        </div>
+      </>
+    )
+  }
+
+  // квота исчерпана — баннер «Снять лимит»
   if (used >= limit) return <LimitBanner tr={t} onOpen={onOpenUnlimit} />
 
-  // иначе — показываем контент (AIBox), рядом можно показать оставшееся время
+  // обычный режим — таймер «сколько осталось»
   const remain = Math.max(0, limit - used)
   const mm = Math.floor(remain/60), ss = Math.floor(remain%60)
   return (
@@ -517,6 +540,7 @@ function AIQuotaGate({ children, onOpenUnlimit }) {
     </>
   )
 }
+
 
 
 /* ================================= OrderBook (black) ================================= */

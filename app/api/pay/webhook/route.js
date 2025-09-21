@@ -1,124 +1,79 @@
 // app/api/pay/webhook/route.js
-import crypto from 'crypto'
 import { NextResponse } from 'next/server'
-import { setVip, addVipDays } from '../../../../lib/subscriptions'
 import { Redis } from '@upstash/redis'
+import crypto from 'crypto'
+import { addVipDays, setVip } from '@/lib/subscriptions'
 
-export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-
-/* -------------------- ENV & helpers -------------------- */
 const redis = Redis.fromEnv()
 
-function getSecret() {
-  return (
-    process.env.NOWPAY_IPN_SECRET ||            // допустим алиас
-    process.env.NOWPAYMENTS_IPN_SECRET ||       // основной
-    ''
-  )
-}
-function getSig(req) {
-  return (
-    req.headers.get('x-nowpayments-sig') ||
-    req.headers.get('x-nowpayments-signature') ||
-    ''
-  )
-}
-function verify(raw, sig) {
-  const secret = getSecret()
-  if (!secret || !sig) return false
-  // NOWPayments: HMAC-SHA512 от raw body
-  const h = crypto.createHmac('sha512', secret).update(raw).digest('hex')
-  return h.toLowerCase() === String(sig).toLowerCase()
+function hmac(body, secret) {
+  return crypto.createHmac('sha512', secret).update(body).digest('hex')
 }
 
-// vipplus:<accountId>:<ts>
-function parseAccountFromOrder(orderId = '') {
+function extractAccountId(orderId) {
+  // ожидаем vipplus:<accountId>:<ts>
   try {
-    const s = String(orderId)
+    const s = String(orderId || '').trim().toLowerCase()
     if (s.startsWith('vipplus:')) {
       const parts = s.split(':')
-      return parts[1] || null
+      if (parts.length >= 2) return parts[1]
     }
-  } catch {}
-  return null
+    // на всякий: если прилетел чистый id — вернём его
+    return s.includes(':') ? s.split(':')[0] : s
+  } catch { return '' }
 }
 
-/* -------------------- Webhook -------------------- */
 export async function POST(req) {
+  const rawBody = await req.text() // важно: сырой текст для HMAC
   try {
-    // берём сырое тело для HMAC
-    const raw = await req.text()
-    const sig = getSig(req)
+    const sig = req.headers.get('x-nowpayments-sig') || ''
+    const secret = process.env.NOWPAYMENTS_IPN_SECRET || ''
+    const calc = hmac(rawBody, secret)
+    const okSig = sig && secret && sig.toLowerCase() === calc.toLowerCase()
 
-    if (!verify(raw, sig)) {
+    // сохраняем последний вызов для дебага
+    await redis.set('np:last', JSON.stringify({
+      at: new Date().toISOString(),
+      okSig, sig, calc,
+      body: rawBody?.slice?.(0, 4000) || null
+    }), { ex: 3600 * 24 })
+
+    if (!okSig) {
       return NextResponse.json({ ok: false, error: 'BAD_SIGNATURE' }, { status: 401 })
     }
 
-    const j = JSON.parse(raw || '{}')
-
-    // Учитываем статусы NOWPayments
-    // (обычно достаточно finished/confirmed; оставим partially_paid на твоё усмотрение)
-    const okStatuses = new Set(['finished', 'confirmed', 'completed'])
-    const status = String(j.payment_status || j.status || '').toLowerCase()
-
-    // Сохраним черновик записи по инвойсу (даже если статус не ОК)
-    const invoiceId = j.invoice_id || j.invoiceId || j.id || null
-    if (invoiceId) {
-      await redis.hset(`invoice:${invoiceId}`, {
-        lastStatus: status,
-        lastUpdate: Date.now(),
-        orderId: j.order_id || '',
-        paymentId: j.payment_id || '',
-        payCurrency: j.pay_currency || '',
-        payAmount: j.pay_amount || '',
-      })
-    }
-
-    if (!okStatuses.has(status)) {
-      // игнорим, но отвечаем 200
-      return NextResponse.json({ ok: true, ignored: true, status })
-    }
-
-    // --- Определяем accountId (кошелёк) ---
-    let accountId =
-      parseAccountFromOrder(j.order_id) || null
-
-    // если в order_id нет префикса — попробуем вытянуть из Redis по invoice:<id>
-    if (!accountId && invoiceId) {
-      const inv = await redis.hgetall(`invoice:${invoiceId}`)
-      if (inv?.accountId) accountId = inv.accountId
-    }
+    const j = JSON.parse(rawBody || '{}')
+    const status = (j.payment_status || '').toLowerCase()
+    const invoiceId = j.invoice_id || ''
+    const paymentId = j.payment_id || ''
+    const orderId = j.order_id || ''
+    const accountId = extractAccountId(orderId)
 
     if (!accountId) {
-      return NextResponse.json({ ok: false, error: 'NO_ACCOUNT_ID' }, { status: 400 })
+      return NextResponse.json({ ok: false, error: 'NO_ACCOUNT_IN_ORDER' }, { status: 400 })
     }
 
-    // --- Продлеваем VIP ---
-    const days =
-      Number(process.env.PLAN_DAYS || process.env.NOWPAYMENTS_PLAN_DAYS || 30)
+    // финальные статусы — активируем
+    const finished = ['finished', 'confirmed', 'sending', 'partially_paid'].includes(status)
 
-    // Идемпотентность по payment_id: addVipDays внутри вызывает setVip(..., { paymentId })
-    const paymentId = j.payment_id || j.paymentId || j.id || `inv:${invoiceId || 'unknown'}`
-    const res = await addVipDays(accountId, days, { paymentId })
-
-    // Дополним запись об инвойсе (что активировали VIP)
-    if (invoiceId) {
-      await redis.hset(`invoice:${invoiceId}`, {
-        lastStatus: status,
-        activatedAt: Date.now(),
-        accountId,
-        tier: 'vip_plus',
+    if (finished) {
+      const days = Number(process.env.PLAN_DAYS || '30')
+      // продлеваем от максимума (если уже есть активный VIP)
+      const res = await addVipDays(accountId, days, { paymentId })
+      await redis.hset(`invoice:${invoiceId || paymentId}`, {
+        accountId, orderId, paymentId, lastStatus: status,
+        activatedAt: new Date().toISOString(),
       })
+      return NextResponse.json({ ok: true, activated: true, res })
+    } else {
+      // просто запишем последнее состояние
+      await redis.hset(`invoice:${invoiceId || paymentId}`, {
+        accountId, orderId, paymentId, lastStatus: status,
+        updatedAt: new Date().toISOString(),
+      })
+      return NextResponse.json({ ok: true, activated: false, status })
     }
-
-    return NextResponse.json({
-      ok: true,
-      accountId,
-      days,
-      status,
-      vip: res || null,
-    })
   } catch (e) {
     return NextResponse.json({ ok: false, error: String(e) }, { status: 500 })
   }
