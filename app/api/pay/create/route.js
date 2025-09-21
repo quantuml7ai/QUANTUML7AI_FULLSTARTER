@@ -38,14 +38,17 @@ export async function POST(req) {
 
     const successUrl = process.env.NOWPAYMENTS_SUCCESS_URL || `${appUrl}/exchange?status=success`
     const cancelUrl  = process.env.NOWPAYMENTS_CANCEL_URL  || `${appUrl}/exchange?status=cancel`
-    const ipnUrl     = process.env.NOWPAYMENTS_CALLBACK    || `${appUrl}/api/pay/create/webhook`
+    // ВАЖНО: по умолчанию шлём на /api/pay/webhook
+    const ipnUrl     = process.env.NOWPAYMENTS_CALLBACK    || `${appUrl}/api/pay/webhook`
 
     if (!API_KEY)  return NextResponse.json({ ok: false, error: 'NO_API_KEY' }, { status: 500 })
     if (!PRICE_USD || Number.isNaN(PRICE_USD))
       return NextResponse.json({ ok: false, error: 'BAD_PRICE' }, { status: 500 })
 
     // -------- создаём invoice --------
-    const orderId = `vipplus:${accountId}:${Date.now()}`
+    const tsSec   = Math.floor(Date.now() / 1000)
+    const orderId = `vipplus:${accountId}:${tsSec}`
+
     const payload = {
       price_amount: PRICE_USD,
       price_currency: 'USD',               // валюту оплаты юзер выберет у NOWPayments
@@ -95,7 +98,7 @@ export async function POST(req) {
       await redis.hset(`invoice:${invoiceId}`, {
         accountId,
         orderId,
-        tier: 'vip_plus',
+        tier: plan,
         createdAt: Date.now(),
       })
     }

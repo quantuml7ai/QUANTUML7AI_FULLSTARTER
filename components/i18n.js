@@ -3637,6 +3637,25 @@ const UNLIMIT_TR = {
   ai_unlimit_toast_on: 'VIP+ etkin',
   ai_unlimit_toast_off: 'VIP+ sona erdi',
 }
+/* -------------------- ACTIVE_UNTIL (only one key) -------------------- */
+const ACTIVE_EN = { active_until: 'active until' }
+const ACTIVE_RU = { active_until: 'активно до' }
+const ACTIVE_UK = { active_until: 'активно до' }
+const ACTIVE_ES = { active_until: 'activo hasta' }
+const ACTIVE_ZH = { active_until: '有效至' }           // 简体中文
+const ACTIVE_AR = { active_until: 'نشط حتى' }         // RTL
+const ACTIVE_TR = { active_until: 'şu tarihe kadar aktif' }
+
+/* -------------------- MERGE (append without removing anything) -------------------- */
+try {
+  Object.assign(dict.en, ACTIVE_EN)
+  Object.assign(dict.ru, ACTIVE_RU)
+  Object.assign(dict.uk, ACTIVE_UK)
+  Object.assign(dict.es, ACTIVE_ES)
+  Object.assign(dict.zh, ACTIVE_ZH)
+  Object.assign(dict.ar, ACTIVE_AR)
+  Object.assign(dict.tr, ACTIVE_TR)
+} catch (e) {}
 
 /* -------------------- MERGE -------------------- */
 try {
