@@ -2070,7 +2070,7 @@ const PRIVACY_ZH = {
 
 /* -------------------- UK -------------------- */
 const PRIVACY_UK = {
-  nav_privacy: 'КонфіденційністьЫ',
+  nav_privacy: 'Конфіденційність',
   privacy_title: 'Конфіденційність',
   privacy_updated_label: 'Оновлено:',
   privacy_updated: '2025-09-14',
