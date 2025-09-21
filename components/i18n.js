@@ -1768,8 +1768,8 @@ const PRIVACY_EN = {
 /* -------------------- RU -------------------- */
 const PRIVACY_RU = {
   nav_privancy: undefined, // guard against typos
-  nav_privacy: 'Конфиденциальность и политика',
-  privacy_title: 'Конфиденциальность и политика',
+  nav_privacy: 'Конфиденциальность',
+  privacy_title: 'Конфиденциальность',
   privacy_updated_label: 'Обновлено:',
   privacy_updated: '2025-09-14',
   privacy_empty: 'Нет данных',
@@ -2070,8 +2070,8 @@ const PRIVACY_ZH = {
 
 /* -------------------- UK -------------------- */
 const PRIVACY_UK = {
-  nav_privacy: 'Конфіденційність і політика',
-  privacy_title: 'Конфіденційність і політика',
+  nav_privacy: 'КонфіденційністьЫ',
+  privacy_title: 'Конфіденційність',
   privacy_updated_label: 'Оновлено:',
   privacy_updated: '2025-09-14',
   privacy_empty: 'Немає даних',
