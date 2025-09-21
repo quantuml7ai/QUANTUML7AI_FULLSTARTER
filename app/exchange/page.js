@@ -402,21 +402,6 @@ function AIQuotaGate({ children, onOpenUnlimit }) {
     }, QUOTA_HEARTBEAT_MS)
     return () => clearInterval(timer)
   }, [used, limit])
-useEffect(() => {
-  (async () => {
-    const accountId = /* получить из твоего auth/wallet контекста */
-      (typeof window !== 'undefined' && window.__AUTH_ACCOUNT__)
-      || localStorage.getItem('wallet')
-    if (!accountId) return
-    const r = await fetch('/api/subscription/status', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ accountId }) })
-    const j = await r.json()
-    if (j?.isVip) {
-      setUsed(0)             // на всякий
-      setUsedSec(0)
-      setLimit(Number.POSITIVE_INFINITY) // фактически «сняли» квоту
-    }
-  })()
-}, [])
 
   // если лимит исчерпан — показываем плашку + кнопка «Снять лимит»
   if (used >= limit) return <LimitBanner tr={t} onOpen={onOpenUnlimit} />
@@ -433,7 +418,6 @@ useEffect(() => {
     </>
   )
 }
-
 
 /* ================================= OrderBook (black) ================================= */
 function OrderBook({symbol}){
@@ -579,33 +563,10 @@ export default function ExchangePage(){
     window.addEventListener('open-unlimit', open)
     return () => window.removeEventListener('open-unlimit', open)
   }, [])
-const handlePayClick = async () => {
-  try {
-    // 1) возьми текущий аккаунт из твоей авторизации
-    const accountId =
-      (typeof window !== 'undefined' && window.__AUTH_ACCOUNT__)        // пример
-      || localStorage.getItem('wallet')                                 // пример
-      || 'browser:' + (crypto?.randomUUID?.() || Date.now())            // fallback для теста
-
-    const r = await fetch('/api/pay/create', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ accountId })
-    })
-    const j = await r.json()
-    if (!r.ok) throw new Error(j?.error || 'Create failed')
-
-    // 2) открываем инвойс
-    if (j.url) window.open(j.url, '_blank', 'noopener,noreferrer')
-
-    // 3) можем показать «ожидание» (по желанию)
-    // setPayState('waiting') ...
-  } catch (e) {
-    console.error(e)
-    alert('Payment error: ' + e.message)
+  const handlePayClick = () => {
+    // ШАГ 3 (позже): здесь дернем /api/pay/create → редирект на invoice_url
+    console.log('[VIP+] Pay clicked')
   }
-}
-
 
   return (
     <div className="wrap">
