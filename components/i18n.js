@@ -3413,37 +3413,37 @@ try {
 
 // EN
 const AI_QUOTA_EN = {
-  ai_limit_reached: 'Limit reached. For full access — continue in Telegram',
+  ai_limit_reached: 'Limit reached. For full access, continue in Telegram or remove the limit here',
   ai_time_left: 'Time left today',
 }
 // RU
 const AI_QUOTA_RU = {
-  ai_limit_reached: 'Лимит исчерпан. Для полного доступа — продолжить в Telegram',
+  ai_limit_reached: 'Лимит исчерпан. Для полного доступа — продолжить в Telegram или снять лимит здесь',
   ai_time_left: 'Осталось времени сегодня',
 }
 // UK
 const AI_QUOTA_UK = {
-  ai_limit_reached: 'Ліміт вичерпано. Для повного доступу — продовжити в Telegram',
+  ai_limit_reached: 'Ліміт вичерпано. Для повного доступу — продовжуйте в Telegram або зніміть ліміт тут',
   ai_time_left: 'Залишилось часу сьогодні',
 }
 // ZH (简体)
 const AI_QUOTA_ZH = {
-  ai_limit_reached: '已达今日限额。获取完整访问请前往 Telegram',
+  ai_limit_reached: '已达上限。要获得完整访问，请在 Telegram 中继续，或在此处解除限制',
   ai_time_left: '今日剩余时间',
 }
 // ES
 const AI_QUOTA_ES = {
-  ai_limit_reached: 'Límite alcanzado. Para acceso completo — continúa en Telegram',
+  ai_limit_reached: 'Límite alcanzado. Para acceso completo, continúa en Telegram o quita el límite aquí',
   ai_time_left: 'Tiempo restante de hoy',
 }
 // AR
 const AI_QUOTA_AR = {
-  ai_limit_reached: 'تم الوصول إلى الحد. للوصول الكامل — تابع في تيليجرام',
-  ai_time_left: 'الوقت المتبقي اليوم',
+  ai_limit_reached: 'العربية: تم بلوغ الحد. للوصول الكامل، تابع في Telegram أو أزل الحد من هنا',
+  ai_time_left: 'الوقت المتبقي اليوم', 
 }
 // TR
 const AI_QUOTA_TR = {
-  ai_limit_reached: 'Limit doldu. Tam erişim için — Telegram’da devam et',
+  ai_limit_reached: 'Limit aşıldı. Tam erişim için Telegram’da devam edin veya limiti burada kaldırın',
   ai_time_left: 'Bugün kalan süre',
 }
 

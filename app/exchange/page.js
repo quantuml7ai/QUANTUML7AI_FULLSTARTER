@@ -279,7 +279,58 @@ function setUsedSec(v) {
   try { localStorage.setItem(todayKey(), String(Math.max(0, Math.floor(v)))) } catch {}
 }
 
-function LimitBanner({ tr }) {
+/* ====== ДОБАВЛЕНО: модалка VIP+ (только UI) ====== */
+function UnlimitModal({ open, onClose, onPay }) {
+  const { t } = useI18n()
+  if (!open) return null
+  return (
+    <div className="unlimit-overlay" role="dialog" aria-modal="true" aria-labelledby="unlimit-title">
+      <div className="unlimit-modal">
+        <h3 id="unlimit-title">{t('ai_unlimit_title')}</h3>
+        <p className="muted">{t('ai_unlimit_price')}</p>
+        <p className="desc">{t('ai_unlimit_desc')}</p>
+        <ul className="benefits">
+          {(t('ai_unlimit_benefits') || []).map((x, i) => <li key={i}>{x}</li>)}
+        </ul>
+        <div className="row">
+          <button className="btn primary" onClick={onPay}>{t('ai_unlimit_pay_now')}</button>
+          <button className="btn ghost" onClick={onClose}>{t('ai_unlimit_cancel')}</button>
+        </div>
+      </div>
+      <style jsx>{`
+        .unlimit-overlay{
+          position: fixed; inset: 0; background: rgba(0,0,0,.55);
+          display: grid; place-items: center; z-index: 1000;
+        }
+        .unlimit-modal{
+          width: min(720px, calc(100% - 24px));
+          background: rgba(10,10,12,.96);
+          border: 1px solid rgba(255,255,255,.08);
+          border-radius: 14px; padding: 16px;
+          box-shadow: 0 12px 40px rgba(0,0,0,.45);
+        }
+        h3{ margin: 0 0 4px 0; }
+        .muted{ opacity: .8; margin: 0 0 10px 0; }
+        .desc{ opacity: .9; }
+        .benefits{ margin: 10px 0 14px 20px; }
+        .row{ display:flex; gap:10px; flex-wrap:wrap }
+        .btn{
+          padding:10px 14px; border-radius:10px; cursor:pointer;
+          border:1px solid rgba(255,255,255,.18); background:#0f1116; color:#eaf6ff;
+          font-weight:700;
+        }
+        .btn.primary{
+          border-color:#00d2ff; color:#baf1ff;
+          box-shadow: 0 0 0 1px rgba(0,210,255,.22), inset 0 0 18px rgba(0,210,255,.18);
+        }
+        .btn.ghost{ background:transparent; }
+      `}</style>
+    </div>
+  )
+}
+
+/* ====== МАЛЕНЬКОЕ ДОПОЛНЕНИЕ: кнопка «Снять лимит» в баннере ====== */
+function LimitBanner({ tr, onOpen }) {
   const BOT = process?.env?.NEXT_PUBLIC_BOT_LINK || 'https://t.me/l7ai_bot'
   return (
     <Panel>
@@ -287,22 +338,21 @@ function LimitBanner({ tr }) {
         <div className="blink">
           { (tr?.('ai_limit_reached') || 'Лимит исчерпан. Для полного доступа — продолжить в Telegram') }
         </div>
-        <div style={{marginTop:10, display:'flex', justifyContent:'flex-start'}}>
+
+        <div className="row">
           <a href={BOT} target="_blank" rel="noopener noreferrer"
-             style={{
-               display:'inline-flex', alignItems:'center', gap:8,
-               padding:'10px 14px', borderRadius:999, fontWeight:800,
-               background:'linear-gradient(135deg,#1d4ed8,#3b82f6)', color:'#fff',
-               border:'1px solid rgba(59,130,246,.65)',
-               boxShadow:'0 0 0 1px rgba(59,130,246,.25), 0 10px 20px rgba(59,130,246,.25)',
-               textDecoration:'none', userSelect:'none'
-             }}>
+             className="btn tg">
             { (tr?.('ai_cta_start_telegram') || 'Начать в Telegram') }
           </a>
+
+          {/* новая кнопка — открывает модалку VIP+ */}
+          <button className="btn vip" onClick={() => onOpen?.()}>
+            { tr?.('ai_unlimit_btn') || 'Снять лимит' }
+          </button>
         </div>
       </div>
       <style jsx>{`
-        .limit{display:flex;flex-direction:column}
+        .limit{display:flex;flex-direction:column; gap:10px}
         .blink{
           font-weight:900; color:#ff5757; background:rgba(255,0,0,.08);
           border:1px solid rgba(255,0,0,.35); border-radius:10px;
@@ -310,12 +360,28 @@ function LimitBanner({ tr }) {
           animation: blink 1s linear infinite;
         }
         @keyframes blink{0%,50%{opacity:1} 51%,100%{opacity:.45}}
+        .row{ display:flex; gap:10px; flex-wrap:wrap }
+        .btn{
+          display:inline-flex; align-items:center; gap:8px;
+          padding:10px 14px; border-radius:999px; font-weight:800;
+          text-decoration:none; cursor:pointer;
+        }
+        .tg{
+          background:linear-gradient(135deg,#1d4ed8,#3b82f6); color:#fff;
+          border:1px solid rgba(59,130,246,.65);
+          box-shadow:0 0 0 1px rgba(59,130,246,.25), 0 10px 20px rgba(59,130,246,.25);
+        }
+        .vip{
+          background:rgba(0,0,0,.55); color:#baf1ff;
+          border:1px solid rgba(0,210,255,.45);
+          box-shadow: inset 0 0 18px rgba(0,210,255,.2);
+        }
       `}</style>
     </Panel>
   )
 }
 
-function AIQuotaGate({ children }) {
+function AIQuotaGate({ children, onOpenUnlimit }) {
   const { t } = useI18n()
   const [used, setUsed] = React.useState(0)
   const [limit, setLimit] = React.useState(QUOTA_LIMIT_SEC)
@@ -336,9 +402,24 @@ function AIQuotaGate({ children }) {
     }, QUOTA_HEARTBEAT_MS)
     return () => clearInterval(timer)
   }, [used, limit])
+useEffect(() => {
+  (async () => {
+    const accountId = /* получить из твоего auth/wallet контекста */
+      (typeof window !== 'undefined' && window.__AUTH_ACCOUNT__)
+      || localStorage.getItem('wallet')
+    if (!accountId) return
+    const r = await fetch('/api/subscription/status', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ accountId }) })
+    const j = await r.json()
+    if (j?.isVip) {
+      setUsed(0)             // на всякий
+      setUsedSec(0)
+      setLimit(Number.POSITIVE_INFINITY) // фактически «сняли» квоту
+    }
+  })()
+}, [])
 
-  // если лимит исчерпан — показываем красную плашку
-  if (used >= limit) return <LimitBanner tr={t} />
+  // если лимит исчерпан — показываем плашку + кнопка «Снять лимит»
+  if (used >= limit) return <LimitBanner tr={t} onOpen={onOpenUnlimit} />
 
   // иначе — показываем контент (AIBox), рядом можно показать оставшееся время
   const remain = Math.max(0, limit - used)
@@ -352,6 +433,7 @@ function AIQuotaGate({ children }) {
     </>
   )
 }
+
 
 /* ================================= OrderBook (black) ================================= */
 function OrderBook({symbol}){
@@ -490,6 +572,41 @@ export default function ExchangePage(){
   const sections = Array.isArray(TX(t, 'exchange_sections', [])) ? TX(t, 'exchange_sections', []) : []
   const bullets  = Array.isArray(TX(t, 'ex_bullets', [])) ? TX(t, 'ex_bullets', []) : []
 
+  // ===== ДОБАВЛЕНО: состояние модалки VIP+ и обработчики =====
+  const [openUnlimit, setOpenUnlimit] = useState(false)
+  useEffect(() => {
+    const open = () => setOpenUnlimit(true)
+    window.addEventListener('open-unlimit', open)
+    return () => window.removeEventListener('open-unlimit', open)
+  }, [])
+const handlePayClick = async () => {
+  try {
+    // 1) возьми текущий аккаунт из твоей авторизации
+    const accountId =
+      (typeof window !== 'undefined' && window.__AUTH_ACCOUNT__)        // пример
+      || localStorage.getItem('wallet')                                 // пример
+      || 'browser:' + (crypto?.randomUUID?.() || Date.now())            // fallback для теста
+
+    const r = await fetch('/api/pay/create', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ accountId })
+    })
+    const j = await r.json()
+    if (!r.ok) throw new Error(j?.error || 'Create failed')
+
+    // 2) открываем инвойс
+    if (j.url) window.open(j.url, '_blank', 'noopener,noreferrer')
+
+    // 3) можем показать «ожидание» (по желанию)
+    // setPayState('waiting') ...
+  } catch (e) {
+    console.error(e)
+    alert('Payment error: ' + e.message)
+  }
+}
+
+
   return (
     <div className="wrap">
       <BadgeTitle/>
@@ -499,7 +616,7 @@ export default function ExchangePage(){
 
       <TVChart symbol={symbol} tf={tf}/>
 
-      <AIQuotaGate>
+      <AIQuotaGate onOpenUnlimit={() => setOpenUnlimit(true)}>
         <AIBox data={ai}/>
       </AIQuotaGate>
 
@@ -521,6 +638,13 @@ export default function ExchangePage(){
           {Array.isArray(s.paras)? s.paras.map((p,i)=>(<p key={i} style={{whiteSpace:'pre-line'}}>{p}</p>)) : null}
         </section>
       ))}
+
+      {/* ===== ДОБАВЛЕНО: модалка VIP+ ===== */}
+      <UnlimitModal
+        open={openUnlimit}
+        onClose={() => setOpenUnlimit(false)}
+        onPay={handlePayClick}
+      />
 
       {/* Хвост страницы: бегущая строка во всю ширину */}
       <PageMarqueeTail />

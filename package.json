@@ -17,6 +17,7 @@
     "@tanstack/react-query": "^5.51.21",
     "@tonconnect/ui": "^2.3.0",
     "@tonconnect/ui-react": "^2.3.0",
+    "@upstash/redis": "^1.35.4",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "@web3modal/wagmi": "^5.1.11",
