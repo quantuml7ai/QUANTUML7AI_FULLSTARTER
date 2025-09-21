@@ -17,10 +17,10 @@ export default function TopBar() {
   const items = [
     { href: '/',          label: t('nav_home') },
     { href: '/subscribe', label: t('nav_subscribe') },
-    { href: '/about',     label: t('nav_about') },
     { href: '/exchange',  label: t('nav_exchange') },
-    { href: '/contact',   label: t('nav_contact') },
+    { href: '/about',     label: t('nav_about') },
     { href: '/privacy',   label: t('nav_privacy') }, // Privacy & Policy
+    { href: '/contact',   label: t('nav_contact') },
   ]
 
   // true для точного совпадения и вложенных страниц (например /about/team)

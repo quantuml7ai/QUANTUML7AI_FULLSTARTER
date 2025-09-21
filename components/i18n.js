@@ -3457,6 +3457,197 @@ try {
   Object.assign(dict.ar, AI_QUOTA_AR)
   Object.assign(dict.tr, AI_QUOTA_TR)
 } catch {}
+/* ============================================================
+   VIP+ — "Снять лимит" / Remove Limit (NowPayments) — I18N (7 langs)
+   ВСТАВИТЬ ПЕРЕД export I18nProvider / useI18n
+   НИЧЕГО НЕ ЛОМАЕТ: просто дополняет/перезаписывает ключи.
+   ============================================================ */
+
+/* -------------------- EN -------------------- */
+const UNLIMIT_EN = {
+  ai_unlimit_btn: 'Remove limit',
+  ai_unlimit_vip_badge: 'VIP+',
+  ai_unlimit_title: 'Remove limit — VIP+',
+  ai_unlimit_price: 'Price: $30 / month',
+  ai_unlimit_desc:
+    'Unlock 24/7 AI Box access on this account. The daily browser quota is disabled for 30 days once the payment is confirmed via NowPayments.',
+  ai_unlimit_benefits: [
+    'No daily browser quota — AI Box is always on.',
+    'Plan is tied to your current account/wallet auth.',
+    'Payment is processed by NowPayments; webhook activates access automatically.',
+  ],
+  ai_unlimit_pay_now: 'Pay $30',
+  ai_unlimit_cancel: 'Cancel',
+  ai_unlimit_learn_more: 'Details',
+  ai_unlimit_status_waiting: 'Waiting for payment confirmation…',
+  ai_unlimit_status_confirmed: 'Payment confirmed — limit removed until {date}.',
+  ai_unlimit_status_underpaid: 'Underpaid: received {got}, required {need}.',
+  ai_unlimit_status_expired: 'Invoice expired or was cancelled.',
+  ai_unlimit_status_error: 'Payment error. Please try again or contact support.',
+  ai_unlimit_toast_on: 'VIP+ activated',
+  ai_unlimit_toast_off: 'VIP+ expired',
+}
+
+/* -------------------- RU -------------------- */
+const UNLIMIT_RU = {
+  ai_unlimit_btn: 'Снять лимит',
+  ai_unlimit_vip_badge: 'VIP+',
+  ai_unlimit_title: 'Снять лимит — VIP+',
+  ai_unlimit_price: 'Цена: $30 / месяц',
+  ai_unlimit_desc:
+    'Откройте круглосуточный доступ к AI Box на этом аккаунте. Дневная квота из браузера отключается на 30 дней после подтверждения платежа через NowPayments.',
+  ai_unlimit_benefits: [
+    'Без дневной квоты — AI Box всегда доступен.',
+    'План привязан к текущей авторизации/кошельку.',
+    'Оплата через NowPayments; вебхук активирует доступ автоматически.',
+  ],
+  ai_unlimit_pay_now: 'Оплатить $30',
+  ai_unlimit_cancel: 'Отмена',
+  ai_unlimit_learn_more: 'Подробнее',
+  ai_unlimit_status_waiting: 'Ждём подтверждение платежа…',
+  ai_unlimit_status_confirmed: 'Оплата подтверждена — лимит снят до {date}.',
+  ai_unlimit_status_underpaid: 'Недоплата: получено {got}, требуется {need}.',
+  ai_unlimit_status_expired: 'Счёт истёк или был отменён.',
+  ai_unlimit_status_error: 'Ошибка платежа. Попробуйте ещё раз или напишите в поддержку.',
+  ai_unlimit_toast_on: 'VIP+ активирован',
+  ai_unlimit_toast_off: 'VIP+ закончился',
+}
+
+/* -------------------- UK -------------------- */
+const UNLIMIT_UK = {
+  ai_unlimit_btn: 'Зняти ліміт',
+  ai_unlimit_vip_badge: 'VIP+',
+  ai_unlimit_title: 'Зняти ліміт — VIP+',
+  ai_unlimit_price: 'Ціна: $30 / місяць',
+  ai_unlimit_desc:
+    'Відкрийте цілодобовий доступ до AI Box для цього акаунта. Денна квота з браузера вимикається на 30 днів після підтвердження платежу через NowPayments.',
+  ai_unlimit_benefits: [
+    'Без денної квоти — AI Box завжди доступний.',
+    'План прив’язано до поточної авторизації/гаманця.',
+    'Оплата через NowPayments; вебхук автоматично активує доступ.',
+  ],
+  ai_unlimit_pay_now: 'Сплатити $30',
+  ai_unlimit_cancel: 'Скасувати',
+  ai_unlimit_learn_more: 'Деталі',
+  ai_unlimit_status_waiting: 'Очікуємо підтвердження платежу…',
+  ai_unlimit_status_confirmed: 'Оплату підтверджено — ліміт знято до {date}.',
+  ai_unlimit_status_underpaid: 'Недоплата: отримано {got}, потрібно {need}.',
+  ai_unlimit_status_expired: 'Рахунок прострочено або скасовано.',
+  ai_unlimit_status_error: 'Помилка платежу. Спробуйте ще раз або зверніться в підтримку.',
+  ai_unlimit_toast_on: 'VIP+ активовано',
+  ai_unlimit_toast_off: 'VIP+ завершився',
+}
+
+/* -------------------- ES -------------------- */
+const UNLIMIT_ES = {
+  ai_unlimit_btn: 'Quitar límite',
+  ai_unlimit_vip_badge: 'VIP+',
+  ai_unlimit_title: 'Quitar límite — VIP+',
+  ai_unlimit_price: 'Precio: $30 / mes',
+  ai_unlimit_desc:
+    'Desbloquea acceso 24/7 al AI Box en esta cuenta. La cuota diaria del navegador se desactiva durante 30 días tras la confirmación del pago vía NowPayments.',
+  ai_unlimit_benefits: [
+    'Sin cuota diaria — AI Box siempre activo.',
+    'Plan vinculado a tu cuenta/cartera actual.',
+    'Pago por NowPayments; el webhook activa el acceso automáticamente.',
+  ],
+  ai_unlimit_pay_now: 'Pagar $30',
+  ai_unlimit_cancel: 'Cancelar',
+  ai_unlimit_learn_more: 'Detalles',
+  ai_unlimit_status_waiting: 'Esperando confirmación del pago…',
+  ai_unlimit_status_confirmed: 'Pago confirmado — límite quitado hasta {date}.',
+  ai_unlimit_status_underpaid: 'Pago insuficiente: recibido {got}, requerido {need}.',
+  ai_unlimit_status_expired: 'La factura caducó o fue cancelada.',
+  ai_unlimit_status_error: 'Error de pago. Inténtalo de nuevo o contacta soporte.',
+  ai_unlimit_toast_on: 'VIP+ activado',
+  ai_unlimit_toast_off: 'VIP+ expiró',
+}
+
+/* -------------------- ZH (简体) -------------------- */
+const UNLIMIT_ZH = {
+  ai_unlimit_btn: '解除限制',
+  ai_unlimit_vip_badge: 'VIP+',
+  ai_unlimit_title: '解除限制 — VIP+',
+  ai_unlimit_price: '价格：$30 / 月',
+  ai_unlimit_desc:
+    '为此账户解锁 24/7 AI Box 访问。通过 NowPayments 确认支付后，浏览器的每日配额将在 30 天内关闭。',
+  ai_unlimit_benefits: [
+    '无每日配额 — AI Box 持续可用。',
+    '套餐绑定到你当前的账户/钱包登录。',
+    '使用 NowPayments 支付；回调（webhook）会自动开通权限。',
+  ],
+  ai_unlimit_pay_now: '支付 $30',
+  ai_unlimit_cancel: '取消',
+  ai_unlimit_learn_more: '详情',
+  ai_unlimit_status_waiting: '正在等待支付确认…',
+  ai_unlimit_status_confirmed: '支付已确认 — 限制解除至 {date}。',
+  ai_unlimit_status_underpaid: '支付不足：已收 {got}，需 {need}。',
+  ai_unlimit_status_expired: '账单已过期或被取消。',
+  ai_unlimit_status_error: '支付错误。请重试或联系支持。',
+  ai_unlimit_toast_on: 'VIP+ 已开通',
+  ai_unlimit_toast_off: 'VIP+ 已到期',
+}
+
+/* -------------------- AR -------------------- */
+const UNLIMIT_AR = {
+  ai_unlimit_btn: 'إزالة الحدّ',
+  ai_unlimit_vip_badge: 'VIP+',
+  ai_unlimit_title: 'إزالة الحدّ — VIP+',
+  ai_unlimit_price: 'السعر: 30$ / شهريًا',
+  ai_unlimit_desc:
+    'افتح وصولًا مستمرًا على مدار الساعة إلى AI Box لهذا الحساب. يتم إيقاف حصة المتصفح اليومية لمدة 30 يومًا بعد تأكيد الدفع عبر NowPayments.',
+  ai_unlimit_benefits: [
+    'بدون حصة يومية — AI Box متاح دائمًا.',
+    'الخطة مرتبطة بتسجيل دخولك / محفظتك الحالية.',
+    'يُعالج الدفع عبر NowPayments ويُفعَّل الوصول تلقائيًا بواسطة Webhook.',
+  ],
+  ai_unlimit_pay_now: 'ادفع 30$',
+  ai_unlimit_cancel: 'إلغاء',
+  ai_unlimit_learn_more: 'تفاصيل',
+  ai_unlimit_status_waiting: 'بانتظار تأكيد الدفع…',
+  ai_unlimit_status_confirmed: 'تم تأكيد الدفع — أزيل الحد حتى {date}.',
+  ai_unlimit_status_underpaid: 'دفع غير مكتمل: المستلم {got}، المطلوب {need}.',
+  ai_unlimit_status_expired: 'انتهت صلاحية الفاتورة أو أُلغيت.',
+  ai_unlimit_status_error: 'خطأ في الدفع. حاول مجددًا أو تواصل مع الدعم.',
+  ai_unlimit_toast_on: 'تم تفعيل VIP+',
+  ai_unlimit_toast_off: 'انتهى VIP+',
+}
+
+/* -------------------- TR -------------------- */
+const UNLIMIT_TR = {
+  ai_unlimit_btn: 'Limiti kaldır',
+  ai_unlimit_vip_badge: 'VIP+',
+  ai_unlimit_title: 'Limiti kaldır — VIP+',
+  ai_unlimit_price: 'Fiyat: $30 / ay',
+  ai_unlimit_desc:
+    'Bu hesapta 7/24 AI Box erişimini aç. NowPayments üzerinden ödeme onaylandığında tarayıcı günlük kotası 30 gün boyunca kapatılır.',
+  ai_unlimit_benefits: [
+    'Günlük kota yok — AI Box her zaman açık.',
+    'Plan, mevcut hesabın/cüzdan girişinle eşleştirilir.',
+    'Ödeme NowPayments ile; webhook erişimi otomatik açar.',
+  ],
+  ai_unlimit_pay_now: '30$ öde',
+  ai_unlimit_cancel: 'İptal',
+  ai_unlimit_learn_more: 'Detaylar',
+  ai_unlimit_status_waiting: 'Ödeme onayı bekleniyor…',
+  ai_unlimit_status_confirmed: 'Ödeme onaylandı — limit {date} tarihine kadar kaldırıldı.',
+  ai_unlimit_status_underpaid: 'Eksik ödeme: alınan {got}, gereken {need}.',
+  ai_unlimit_status_expired: 'Fatura süresi doldu veya iptal edildi.',
+  ai_unlimit_status_error: 'Ödeme hatası. Tekrar deneyin veya destekle iletişime geçin.',
+  ai_unlimit_toast_on: 'VIP+ etkin',
+  ai_unlimit_toast_off: 'VIP+ sona erdi',
+}
+
+/* -------------------- MERGE -------------------- */
+try {
+  Object.assign(dict.en, UNLIMIT_EN)
+  Object.assign(dict.ru, UNLIMIT_RU)
+  Object.assign(dict.uk, UNLIMIT_UK)
+  Object.assign(dict.es, UNLIMIT_ES)
+  Object.assign(dict.zh, UNLIMIT_ZH)
+  Object.assign(dict.ar, UNLIMIT_AR)
+  Object.assign(dict.tr, UNLIMIT_TR)
+} catch (e) {}
 
 export function I18nProvider({ children }) {
   const [lang, setLang] = useState('en')

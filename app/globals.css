@@ -542,129 +542,98 @@ html, body {
 }
 
 
-/* Центровка контента на страницах (пер-странично) */
-.page-center{
-  max-width: 1100px;   /* поставь 960/1200 по вкусу */
-  margin: 0 auto;      /* центрируем */
-  padding: 20px 16px;  /* внутренние отступы */
-}
+/* === page-center оставляем как у тебя === */
+.page-center{ max-width:1100px; margin:0 auto; padding:20px 16px; }
+@media (max-width:640px){ .page-center{ padding:14px 12px; } }
 
-@media (max-width: 640px){
-  .page-center{ padding: 14px 12px; }
-}
-/* === Глобальные гаттеры (увеличенные) + единая ширина + фиксы === */
-:root { --gutter: 24px; }
-@media (min-width: 1280px){ :root { --gutter: 48px; } }
+/* === Глобальные гаттеры === */
+:root { --gutter: 26px; }
+@media (min-width:1280px){ :root{ --gutter: 10px; } }
+/* Мобайл: микро-гаттер 8px, чтобы ничего не «резалось» по краям */
+@media (max-width:640px){ :root{ --gutter: 8px; } }
 
 /* База */
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  min-height: 100%;
-  overflow-x: hidden;
-}
-*, *::before, *::after { box-sizing: border-box; }
+html,body{ margin:0; padding:0; width:100%; min-height:100%; overflow-x:hidden; }
+*,*::before,*::after{ box-sizing:border-box; }
 
-/* 1) Единая ширина контейнеров */
+/* 1) Единая ширина */
 .page-content,
-main, section, header, footer, nav, article, aside,
-figure, .panel, .container, .content, .wrap, .wrapper, .page, .block, .hero, .card {
-  width: 100% !important;
-  max-width: 100% !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
+main,section,header,footer,nav,article,aside,
+figure,.panel,.container,.content,.wrap,.wrapper,.page,.block,.hero,.card{
+  width:100% !important; max-width:100% !important; margin-left:auto !important; margin-right:auto !important;
 }
 
-/* 2) Единые гаттеры с приоритетом (+ opt-out .no-gutters) */
+/* 2) Гаттеры (с учётом моб. 8px) */
 body > :not(style):not(script):not(.no-gutters),
 .page-content,
-main:not(.no-gutters),
-section:not(.no-gutters),
-header:not(.no-gutters),
-footer:not(.no-gutters),
-nav:not(.no-gutters),
-article:not(.no-gutters),
-aside:not(.no-gutters),
-figure:not(.no-gutters),
-.panel:not(.no-gutters),
-.container:not(.no-gutters),
-.content:not(.no-gutters),
-.wrap:not(.no-gutters),
-.wrapper:not(.no-gutters),
-.page:not(.no-gutters),
-.block:not(.no-gutters),
-.hero:not(.no-gutters),
-.card:not(.no-gutters) {
-  padding-left: var(--gutter) !important;
-  padding-right: var(--gutter) !important;
+main:not(.no-gutters),section:not(.no-gutters),header:not(.no-gutters),footer:not(.no-gutters),
+nav:not(.no-gutters),article:not(.no-gutters),aside:not(.no-gutters),
+figure:not(.no-gutters),.panel:not(.no-gutters),.container:not(.no-gutters),.content:not(.no-gutters),
+.wrap:not(.no-gutters),.wrapper:not(.no-gutters),.page:not(.no-gutters),
+.block:not(.no-gutters),.hero:not(.no-gutters),.card:not(.no-gutters){
+  padding-left:var(--gutter) !important; padding-right:var(--gutter) !important;
 }
 
-/* 3) Прямые дети общего контейнера — только «контейнерные» узлы */
-.page-content > :is(main, section, header, footer, nav, article, aside, div) {
-  width: 100% !important;
-  max-width: 100% !important;
-  flex: 0 0 auto !important;
-  align-self: stretch !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
+/* 3) ТОЛЬКО контейнеры в .page-content тянем на 100% */
+.page-content > :is(main,section,header,footer,nav,article,aside,div){
+  width:100% !important; max-width:100% !important; flex:0 0 auto !important; align-self:stretch !important;
+  margin-left:0 !important; margin-right:0 !important;
 }
 
-/* 4) Медиа и длинные элементы */
-img, video, canvas, svg, iframe {
-  max-width: 100% !important;
-  height: auto;
-  display: block;
-}
-pre { white-space: pre-wrap; word-break: break-word; overflow-x: auto; max-width: 100%; }
-table { display: block; width: 100% !important; max-width: 100% !important; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+/* 4) Медиа */
+img,video,canvas,svg,iframe{ max-width:100% !important; height:auto; display:block; }
+pre{ white-space:pre-wrap; word-break:break-word; overflow-x:auto; max-width:100%; }
+table{ display:block; width:100% !important; max-width:100% !important; overflow-x:auto; -webkit-overflow-scrolling:touch; }
 
-/* 5) Фикс главной: растягиваем .center-wrap и перебиваем локальные .panel */
+/* 5) Главная: .center-wrap */
 .center-wrap{
-  width: 100% !important;
-  max-width: 100% !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  padding-left: var(--gutter) !important;
-  padding-right: var(--gutter) !important;
+  width:100% !important; max-width:100% !important; margin-left:auto !important; margin-right:auto !important;
+  padding-left:var(--gutter) !important; padding-right:var(--gutter) !important;
 }
-.center-wrap .panel,
-.center-wrap figure.panel{
-  width: 100% !important;
-  max-width: 100% !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
+.center-wrap .panel, .center-wrap figure.panel{
+  width:100% !important; max-width:100% !important; margin-left:0 !important; margin-right:0 !important;
 }
-.center-wrap figure.panel img{
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  height: auto;
+.center-wrap figure.panel img{ display:block; width:100%; max-width:100%; height:auto; }
+
+/* 6) Плавающая аудио-кнопка — круг */
+button[style*="position:fixed"], button.fixed, .fixed>button, button.fab, .fab>button,
+button[class*="audio"], [class*="audio"]>button, button[data-audio], [data-audio]>button{
+  width:auto !important; max-width:none !important; height:40px; aspect-ratio:1/1;
+  border-radius:9999px !important; padding:0 !important; display:inline-flex; align-items:center; justify-content:center;
+}
+[class*="audio"][style*="position:fixed"], .fab[style*="position:fixed"], .fixed[style*="position:fixed"]{
+  width:auto !important; max-width:none !important;
 }
 
-/* 6) Плавающая аудио-кнопка: не растягивать, держать круг */
-button[style*="position:fixed"],
-button.fixed, .fixed > button,
-button.fab, .fab > button,
-button[class*="audio"], [class*="audio"] > button,
-button[data-audio], [data-audio] > button {
-  width: auto !important;
-  max-width: none !important;
-  height: 48px;         /* при желании: 40–56px */
-  aspect-ratio: 1 / 1;
-  border-radius: 9999px !important;
-  padding: 0 !important;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+/* === Header: меню вправо + управление логотипом === */
+
+/* НАСТРАИВАЕШЬ ЗДЕСЬ: минимальная / динамическая / максимальная высота лого */
+:root { --logo-h: clamp(140px, 30vw, 260px); }
+
+header, .topbar, .header-bar{ display:flex; align-items:center; gap:.5rem; }
+
+/* Логотип — не сжимать, сохранять пропорции, но не выше var(--logo-h) */
+header .brand, header .brand-logo, header a.logo{
+  display:inline-flex; align-items:center; flex:0 0 auto !important; min-width:auto;
 }
-/* если фиксирован контейнер под кнопку */
-[class*="audio"][style*="position:fixed"],
-.fab[style*="position:fixed"],
-.fixed[style*="position:fixed"] {
-  width: auto !important;
-  max-width: none !important;
+header .brand img, header .brand-logo img, header a.logo img,
+header img[alt*="logo" i], header img[alt*="quantum" i]{
+  width:auto !important; height:auto !important; max-height:var(--logo-h) !important;
+  object-fit:contain; flex:0 0 auto !important; display:block;
 }
+/* если внутри svg без размеров */
+header .brand svg, header .brand-logo svg, header a.logo svg{
+  max-height:var(--logo-h); width:auto; height:auto;
+}
+
+/* Навигация — всегда вправо; может переноситься, не давя лого */
+header nav, header .nav, header .menu{
+  margin-left:auto !important; display:flex; align-items:center; justify-content:flex-end;
+  flex:1 1 auto; min-width:0;
+}
+header nav ul{ display:flex; flex-wrap:wrap; gap:.5rem; margin:0; padding:0; }
+@media (max-width:640px){ header nav ul{ gap:.35rem; } }
+
 
 
 
