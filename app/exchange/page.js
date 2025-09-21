@@ -279,6 +279,42 @@ function setUsedSec(v) {
   try { localStorage.setItem(todayKey(), String(Math.max(0, Math.floor(v)))) } catch {}
 }
 
+/* ===== ДОБАВЛЕНО: ensureAuthorized — жмёт кнопку логина в TopBar и ждёт подтверждение ===== */
+async function ensureAuthorized() {
+  if (typeof window === 'undefined') return null
+  const getAcc = () => window.__AUTH_ACCOUNT__ || localStorage.getItem('wallet') || null
+
+  // уже авторизован?
+  let acc = getAcc()
+  if (acc) return acc
+
+  // попросим TopBar открыть модалку авторизации
+  try { window.dispatchEvent(new CustomEvent('open-auth')) } catch {}
+
+  // пробуем "нажать" распространённые селекторы кнопки входа в топбаре
+  try {
+    const sels = ['[data-auth-open]', '.nav-auth-btn', '#nav-auth-btn', '[data-testid="auth-open"]']
+    for (const s of sels) {
+      const btn = document.querySelector(s)
+      if (btn && typeof btn.click === 'function') { btn.click(); break }
+    }
+  } catch {}
+
+  // ждём событие об успешной авторизации
+  acc = await new Promise((resolve) => {
+    const done = (e)=> {
+      const id = e?.detail?.accountId || getAcc()
+      if (id) resolve(id)
+    }
+    window.addEventListener('auth:ok', done, { once:true })
+    window.addEventListener('auth:success', done, { once:true })
+    // запасной таймаут — если ничего не пришло, пробуем ещё раз прочитать состояние
+    setTimeout(()=> resolve(getAcc()), 120000)
+  })
+
+  return acc || null
+}
+
 /* ====== ДОБАВЛЕНО: модалка VIP+ (только UI) ====== */
 function UnlimitModal({ open, onClose, onPay }) {
   const { t } = useI18n()
@@ -579,32 +615,39 @@ export default function ExchangePage(){
     window.addEventListener('open-unlimit', open)
     return () => window.removeEventListener('open-unlimit', open)
   }, [])
-const handlePayClick = async () => {
-  try {
-    // 1) возьми текущий аккаунт из твоей авторизации
-    const accountId =
-      (typeof window !== 'undefined' && window.__AUTH_ACCOUNT__)        // пример
-      || localStorage.getItem('wallet')                                 // пример
-      || 'browser:' + (crypto?.randomUUID?.() || Date.now())            // fallback для теста
 
-    const r = await fetch('/api/pay/create', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ accountId })
-    })
-    const j = await r.json()
-    if (!r.ok) throw new Error(j?.error || 'Create failed')
-
-    // 2) открываем инвойс
-    if (j.url) window.open(j.url, '_blank', 'noopener,noreferrer')
-
-    // 3) можем показать «ожидание» (по желанию)
-    // setPayState('waiting') ...
-  } catch (e) {
-    console.error(e)
-    alert('Payment error: ' + e.message)
+  // добавили: открывать VIP+ только после авторизации
+  const handleOpenUnlimit = async () => {
+    const acc = await ensureAuthorized()
+    if (acc) setOpenUnlimit(true)
   }
-}
+
+  const handlePayClick = async () => {
+    try {
+      // ДОБАВЛЕНО: гарантируем авторизацию перед оплатой
+      const accountId = await ensureAuthorized()
+      if (!accountId) return
+
+      // (оставляем прежние примеры получения id — не удаляем)
+      const _prevAccountId =
+        (typeof window !== 'undefined' && window.__AUTH_ACCOUNT__)        // пример
+        || localStorage.getItem('wallet')                                 // пример
+        || 'browser:' + (crypto?.randomUUID?.() || Date.now())            // fallback для теста
+
+      const r = await fetch('/api/pay/create', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ accountId })
+      })
+      const j = await r.json()
+      if (!r.ok) throw new Error(j?.error || 'Create failed')
+
+      if (j.url) window.open(j.url, '_blank', 'noopener,noreferrer')
+    } catch (e) {
+      console.error(e)
+      alert('Payment error: ' + e.message)
+    }
+  }
 
 
   return (
@@ -616,7 +659,7 @@ const handlePayClick = async () => {
 
       <TVChart symbol={symbol} tf={tf}/>
 
-      <AIQuotaGate onOpenUnlimit={() => setOpenUnlimit(true)}>
+      <AIQuotaGate onOpenUnlimit={handleOpenUnlimit}>
         <AIBox data={ai}/>
       </AIQuotaGate>
 

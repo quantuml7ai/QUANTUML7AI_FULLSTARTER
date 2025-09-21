@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useWeb3Modal } from '@web3modal/wagmi/react'
 import { useAccount } from 'wagmi'
 import { useI18n } from './i18n'
@@ -15,6 +15,7 @@ export default function AuthNavClient() {
   // Читаем способ авторизации, чтобы показывать Google/Email/Connected
   const [authMethod, setAuthMethod] = useState(null)
   const [mounted, setMounted] = useState(false)
+  const announcedRef = useRef(false) // чтобы не дублировать auth:ok
 
   useEffect(() => {
     setMounted(true)
@@ -28,6 +29,41 @@ export default function AuthNavClient() {
       setAuthMethod(m1 || m2 || null)
     } catch {}
   }, [mounted, isConnected])
+
+  // === ДОБАВЛЕНО: глобальный вызов авторизации с Exchange — слушаем 'open-auth'
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const handler = () => {
+      try { open() } catch {}
+    }
+    window.addEventListener('open-auth', handler)
+    return () => window.removeEventListener('open-auth', handler)
+  }, [open])
+
+  // === ДОБАВЛЕНО: после успешной авторизации сообщаем странице и сохраняем ID
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!isConnected || !address) {
+      announcedRef.current = false
+      return
+    }
+    if (announcedRef.current) return
+
+    try {
+      // Проставляем глобальный идентификатор авторизованного пользователя (кошелёк как ID)
+      window.__AUTH_ACCOUNT__ = address
+      // Оповещаем страницу: авторизация успешна
+      window.dispatchEvent(new CustomEvent('auth:ok', {
+        detail: {
+          accountId: address,
+          provider: authMethod || 'wallet'
+        }
+      }))
+      announcedRef.current = true
+    } catch {
+      // no-op
+    }
+  }, [isConnected, address, authMethod])
 
   const authLabel = useMemo(() => {
     if (isConnected && address) return shortAddr(address)
@@ -52,6 +88,7 @@ export default function AuthNavClient() {
       onClick={() => open()}
       className="nav-auth-btn"
       aria-label="Open connect modal"
+      data-auth-open // для программного клика со страницы
     >
       {authLabel}
     </button>
