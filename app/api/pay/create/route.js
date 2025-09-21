@@ -1,49 +1,52 @@
-// app/api/pay/create/route.js
-import { NextResponse } from 'next/server'
-export const runtime = 'nodejs'       // чтобы точно был Node.js runtime
-export const dynamic = 'force-dynamic' // запрет кэширования роутов
+import { NextResponse } from 'next/server';
 
-export async function POST(req) {
+export async function POST(req: Request) {
   try {
-    const { accountId } = await req.json() || {}
-    if (!accountId) return NextResponse.json({ error:'NO_ACCOUNT' }, { status: 400 })
+    const { plan, price = Number(process.env.PLAN_PRICE_USD || 30) } = await req.json();
 
-    // Читать и твои имена тоже
-    const apiKey =
-      process.env.NOWPAY_API_KEY ||
-      process.env.NOWPAYMENTS_API_KEY
-
-    if (!apiKey) return NextResponse.json({ error:'NO_API_KEY' }, { status: 500 })
-
-    const price =
-      Number(process.env.PLAN_PRICE_USD) ||
-      Number(process.env.NOWPAYMENTS_PRICE_VIP) ||
-      30
-
-    const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    const API_KEY =
+      process.env.NOWPAYMENTS_API_KEY || process.env.NOWPAY_API_KEY; // подхватить любой
+    const APP_URL = process.env.APP_URL!;
+    const successUrl = process.env.NOWPAYMENTS_SUCCESS_URL || `${APP_URL}/exchange?paid=1`;
+    const cancelUrl  = process.env.NOWPAYMENTS_CANCEL_URL  || `${APP_URL}/exchange?paid=0`;
+    const ipnUrl     = process.env.NOWPAYMENTS_CALLBACK    || `${APP_URL}/api/pay/webhook`;
 
     const body = {
-      price_amount: price,
-      price_currency: process.env.NOWPAYMENTS_CURRENCY || 'usd',
-      order_id: accountId,
-      success_url: `${appUrl}/exchange?paid=1`,
-      cancel_url:  `${appUrl}/exchange?cancel=1`,
-      ipn_callback_url: `${appUrl}/api/pay/webhook`,
-    }
+      price_amount: price,            // 30
+      price_currency: 'usd',          // валюта цены
+      order_id: `vip_${Date.now()}`,  // уникальный ID
+      order_description: 'VIP+ Remove AI Box limit',
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      ipn_callback_url: ipnUrl,
+      // pay_currency: 'usdttrc20',   // можно добавить позже, если понадобится фиксированный coin
+    };
 
-    const r = await fetch('https://api.nowpayments.io/v1/invoice', {
+    const res = await fetch('https://api.nowpayments.io/v1/payment', {
       method: 'POST',
       headers: {
-        'x-api-key': apiKey,
-        'Content-Type': 'application/json'
+        'x-api-key': API_KEY!,
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body)
-    })
-    const j = await r.json()
-    if (!r.ok) return NextResponse.json({ error:'NOWPAY_ERROR', details:j }, { status: 500 })
+      body: JSON.stringify(body),
+    });
 
-    return NextResponse.json({ invoice_id: j.id || j.invoice_id, url: j.invoice_url || j.invoice_url })
-  } catch (e) {
-    return NextResponse.json({ error:'CREATE_FAILED', details:String(e) }, { status: 500 })
+    if (!res.ok) {
+      const text = await res.text();        // ← ВАЖНО: снимаем текст ошибки провайдера
+      console.error('NOWPAY create failed', res.status, text);
+      return NextResponse.json(
+        { error: 'NOWPAY_ERROR', status: res.status, detail: text },
+        { status: 500 },
+      );
+    }
+
+    const data = await res.json();
+    return NextResponse.json({ ok: true, data });
+  } catch (err: any) {
+    console.error('NOWPAY create exception', err?.stack || err?.message || err);
+    return NextResponse.json(
+      { error: 'NOWPAY_ERROR', detail: err?.message || 'unexpected' },
+      { status: 500 },
+    );
   }
 }
