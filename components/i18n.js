@@ -3637,6 +3637,16 @@ const UNLIMIT_TR = {
   ai_unlimit_toast_on: 'VIP+ etkin',
   ai_unlimit_toast_off: 'VIP+ sona erdi',
 }
+/* -------------------- MERGE -------------------- */
+try {
+  Object.assign(dict.en, UNLIMIT_EN)
+  Object.assign(dict.ru, UNLIMIT_RU)
+  Object.assign(dict.uk, UNLIMIT_UK)
+  Object.assign(dict.es, UNLIMIT_ES)
+  Object.assign(dict.zh, UNLIMIT_ZH)
+  Object.assign(dict.ar, UNLIMIT_AR)
+  Object.assign(dict.tr, UNLIMIT_TR)
+} catch (e) {}
 /* -------------------- ACTIVE_UNTIL (only one key) -------------------- */
 const ACTIVE_EN = { active_until: 'active until' }
 const ACTIVE_RU = { active_until: 'активно до' }
@@ -3657,16 +3667,6 @@ try {
   Object.assign(dict.tr, ACTIVE_TR)
 } catch (e) {}
 
-/* -------------------- MERGE -------------------- */
-try {
-  Object.assign(dict.en, UNLIMIT_EN)
-  Object.assign(dict.ru, UNLIMIT_RU)
-  Object.assign(dict.uk, UNLIMIT_UK)
-  Object.assign(dict.es, UNLIMIT_ES)
-  Object.assign(dict.zh, UNLIMIT_ZH)
-  Object.assign(dict.ar, UNLIMIT_AR)
-  Object.assign(dict.tr, UNLIMIT_TR)
-} catch (e) {}
 
 export function I18nProvider({ children }) {
   const [lang, setLang] = useState('en')
