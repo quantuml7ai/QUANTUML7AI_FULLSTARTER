@@ -248,13 +248,7 @@ function AIBox({ data }) {
 
 /* ============================ AI Quota Gate (10 min/day) ============================ */
 const QUOTA_LIMIT_SEC = 10 * 60; // 10 минут
-const QUOTA_HEARTBEAT_MS = 1000; // шаг 1 секунда (визуальный таргет)
-
-const AIQ_API = '/api/aiquota/usage'
-let __aiq_lastKnown = 0          // последнее серверное/локально подтверждённое значение (сек)
-let __aiq_syncing = false
-let __aiq_lastSyncAt = 0
-let __aiq_dayKey = null          // для отслеживания смены суток
+const QUOTA_HEARTBEAT_MS = 1000; // шаг 1 секунда (визуальная цель)
 
 function todayKey() {
   try {
@@ -263,87 +257,34 @@ function todayKey() {
     return `aiQuota:${y}-${m}-${day}`
   } catch { return 'aiQuota' }
 }
-function readLocalUsed() {
+
+function getUsedSec() {
+  if (typeof window === 'undefined') return 0
   try {
     const raw = localStorage.getItem(todayKey())
     const n = Number(raw)
     return Number.isFinite(n) ? n : 0
   } catch { return 0 }
 }
-function writeLocalUsed(v) {
-  try { localStorage.setItem(todayKey(), String(Math.max(0, Math.floor(v)))) } catch {}
-}
-function ensureDayKey() {
-  const k = todayKey()
-  if (__aiq_dayKey && __aiq_dayKey !== k) {
-    __aiq_lastKnown = 0
-  }
-  __aiq_dayKey = k
-}
 
-// ===== синхронизация с сервером (GET), можно передать accountId чтобы VIP подхватился сразу
-async function syncFromServer(accountId) {
-  if (typeof window === 'undefined') return { usedSec: __aiq_lastKnown, unlimited:false }
-  ensureDayKey()
-  const now = Date.now()
-  if (!accountId && (__aiq_syncing || (now - __aiq_lastSyncAt < 1000))) {
-    return { usedSec: __aiq_lastKnown, unlimited:false }
-  }
-  __aiq_syncing = true
-  try {
-    const url = new URL(AIQ_API, window.location.origin)
-    if (accountId) url.searchParams.set('id', accountId)
-    const r = await fetch(url.toString(), { credentials:'include', cache:'no-store' })
-    const j = await r.json().catch(()=>null)
-    if (j?.ok) {
-      if (j.unlimited || j.isVip) {
-        __aiq_lastKnown = 0
-        writeLocalUsed(0)
-        return { usedSec: 0, unlimited:true, vip:j.isVip, untilISO:j.untilISO }
-      }
-      if (Number.isFinite(j.usedSec)) {
-        __aiq_lastKnown = Number(j.usedSec)
-        writeLocalUsed(__aiq_lastKnown)
-        return { usedSec: __aiq_lastKnown, unlimited:false }
-      }
-    }
-  } catch {} finally {
-    __aiq_lastSyncAt = Date.now()
-    __aiq_syncing = false
-  }
-  return { usedSec: __aiq_lastKnown, unlimited:false }
-}
-
-// совместимые геттер/сеттер (для старого кода)
-function getUsedSec() {
-  if (typeof window === 'undefined') return 0
-  ensureDayKey()
-  const loc = readLocalUsed()
-  __aiq_lastKnown = Math.max(__aiq_lastKnown, loc)
-  // асинхронный sync (без ждём)
-  syncFromServer()
-  return Math.max(__aiq_lastKnown, loc)
-}
 function setUsedSec(v) {
   if (typeof window === 'undefined') return
-  try {
-    ensureDayKey()
-    const next = Math.max(0, Math.floor(v))
-    __aiq_lastKnown = next
-    writeLocalUsed(__aiq_lastKnown)
-    // сетевой POST теперь делает «батчер» в интервале (см. ниже)
-  } catch {}
+  try { localStorage.setItem(todayKey(), String(Math.max(0, Math.floor(v)))) } catch {}
 }
 
-/* ===== ensureAuthorized — как было ===== */
+/* ===== ДОБАВЛЕНО: ensureAuthorized — жмёт кнопку логина в TopBar и ждёт подтверждение ===== */
 async function ensureAuthorized() {
   if (typeof window === 'undefined') return null
   const getAcc = () => window.__AUTH_ACCOUNT__ || localStorage.getItem('wallet') || null
 
+  // уже авторизован?
   let acc = getAcc()
   if (acc) return acc
 
+  // попросим TopBar открыть модалку авторизации
   try { window.dispatchEvent(new CustomEvent('open-auth')) } catch {}
+
+  // пробуем "нажать" распространённые селекторы кнопки входа в топбаре
   try {
     const sels = ['[data-auth-open]', '.nav-auth-btn', '#nav-auth-btn', '[data-testid="auth-open"]']
     for (const s of sels) {
@@ -352,6 +293,7 @@ async function ensureAuthorized() {
     }
   } catch {}
 
+  // ждём событие об успешной авторизации
   acc = await new Promise((resolve) => {
     const done = (e)=> {
       const id = e?.detail?.accountId || getAcc()
@@ -361,10 +303,11 @@ async function ensureAuthorized() {
     window.addEventListener('auth:success', done, { once:true })
     setTimeout(()=> resolve(getAcc()), 120000)
   })
+
   return acc || null
 }
 
-/* ====== UnlimitModal — как было ====== */
+/* ====== ДОБАВЛЕНО: модалка VIP+ (только UI) ====== */
 function UnlimitModal({ open, onClose, onPay }) {
   const { t } = useI18n()
   if (!open) return null
@@ -383,20 +326,38 @@ function UnlimitModal({ open, onClose, onPay }) {
         </div>
       </div>
       <style jsx>{`
-        .unlimit-overlay{ position: fixed; inset: 0; background: rgba(0,0,0,.55); display: grid; place-items: center; z-index: 1000; }
-        .unlimit-modal{ width: min(720px, calc(100% - 24px)); background: rgba(10,10,12,.96); border: 1px solid rgba(255,255,255,.08);
-          border-radius: 14px; padding: 16px; box-shadow: 0 12px 40px rgba(0,0,0,.45); }
-        h3{ margin: 0 0 4px 0; } .muted{ opacity: .8; margin: 0 0 10px 0; } .desc{ opacity: .9; }
-        .benefits{ margin: 10px 0 14px 20px; } .row{ display:flex; gap:10px; flex-wrap:wrap }
-        .btn{ padding:10px 14px; border-radius:10px; cursor:pointer; border:1px solid rgba(255,255,255,.18); background:#0f1116; color:#eaf6ff; font-weight:700; }
-        .btn.primary{ border-color:#00d2ff; color:#baf1ff; box-shadow: 0 0 0 1px rgba(0,210,255,.22), inset 0 0 18px rgba(0,210,255,.18); }
+        .unlimit-overlay{
+          position: fixed; inset: 0; background: rgba(0,0,0,.55);
+          display: grid; place-items: center; z-index: 1000;
+        }
+        .unlimit-modal{
+          width: min(720px, calc(100% - 24px));
+          background: rgba(10,10,12,.96);
+          border: 1px solid rgba(255,255,255,.08);
+          border-radius: 14px; padding: 16px;
+          box-shadow: 0 12px 40px rgba(0,0,0,.45);
+        }
+        h3{ margin: 0 0 4px 0; }
+        .muted{ opacity: .8; margin: 0 0 10px 0; }
+        .desc{ opacity: .9; }
+        .benefits{ margin: 10px 0 14px 20px; }
+        .row{ display:flex; gap:10px; flex-wrap:wrap }
+        .btn{
+          padding:10px 14px; border-radius:10px; cursor:pointer;
+          border:1px solid rgba(255,255,255,.18); background:#0f1116; color:#eaf6ff;
+          font-weight:700;
+        }
+        .btn.primary{
+          border-color:#00d2ff; color:#baf1ff;
+          box-shadow: 0 0 0 1px rgba(0,210,255,.22), inset 0 0 18px rgba(0,210,255,.18);
+        }
         .btn.ghost{ background:transparent; }
       `}</style>
     </div>
   )
 }
 
-/* ====== LimitBanner — как было ====== */
+/* ====== МАЛЕНЬКОЕ ДОПОЛНЕНИЕ: кнопка «Снять лимит» в баннере ====== */
 function LimitBanner({ tr, onOpen }) {
   const BOT = process?.env?.NEXT_PUBLIC_BOT_LINK || 'https://t.me/l7ai_bot'
   return (
@@ -405,10 +366,13 @@ function LimitBanner({ tr, onOpen }) {
         <div className="blink">
           { (tr?.('ai_limit_reached') || 'Лимит исчерпан. Для полного доступа — продолжить в Telegram') }
         </div>
+
         <div className="row">
-          <a href={BOT} target="_blank" rel="noopener noreferrer" className="btn tg">
+          <a href={BOT} target="_blank" rel="noopener noreferrer"
+             className="btn tg">
             { (tr?.('ai_cta_start_telegram') || 'Начать в Telegram') }
           </a>
+
           <button className="btn vip" onClick={() => onOpen?.()}>
             { tr?.('ai_unlimit_btn') || 'Снять лимит' }
           </button>
@@ -416,14 +380,29 @@ function LimitBanner({ tr, onOpen }) {
       </div>
       <style jsx>{`
         .limit{display:flex;flex-direction:column; gap:10px}
-        .blink{ font-weight:900; color:#ff5757; background:rgba(255,0,0,.08); border:1px solid rgba(255,0,0,.35); border-radius:10px;
-          padding:10px 12px; text-transform:uppercase; letter-spacing:.5px; animation: blink 1s linear infinite; }
+        .blink{
+          font-weight:900; color:#ff5757; background:rgba(255,0,0,.08);
+          border:1px solid rgba(255,0,0,.35); border-radius:10px;
+          padding:10px 12px; text-transform:uppercase; letter-spacing:.5px;
+          animation: blink 1s linear infinite;
+        }
         @keyframes blink{0%,50%{opacity:1} 51%,100%{opacity:.45}}
         .row{ display:flex; gap:10px; flex-wrap:wrap }
-        .btn{ display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:999px; font-weight:800; text-decoration:none; cursor:pointer; }
-        .tg{ background:linear-gradient(135deg,#1d4ed8,#3b82f6); color:#fff; border:1px solid rgba(59,130,246,.65);
-             box-shadow:0 0 0 1px rgba(59,130,246,.25), 0 10px 20px rgba(59,130,246,.25); }
-        .vip{ background:rgba(0,0,0,.55); color:#baf1ff; border:1px solid rgba(0,210,255,.45); box-shadow: inset 0 0 18px rgba(0,210,255,.2); }
+        .btn{
+          display:inline-flex; align-items:center; gap:8px;
+          padding:10px 14px; border-radius:999px; font-weight:800;
+          text-decoration:none; cursor:pointer;
+        }
+        .tg{
+          background:linear-gradient(135deg,#1d4ed8,#3b82f6); color:#fff;
+          border:1px solid rgba(59,130,246,.65);
+          box-shadow:0 0 0 1px rgba(59,130,246,.25), 0 10px 20px rgba(59,130,246,.25);
+        }
+        .vip{
+          background:rgba(0,0,0,.55); color:#baf1ff;
+          border:1px solid rgba(0,210,255,.45);
+          box-shadow: inset 0 0 18px rgba(0,210,255,.2);
+        }
       `}</style>
     </Panel>
   )
@@ -431,6 +410,56 @@ function LimitBanner({ tr, onOpen }) {
 
 /* ======================== Квота/статус VIP с корректным рендером ======================== */
 const QUOTA_LIMIT = QUOTA_LIMIT_SEC
+const HEARTBEAT = QUOTA_HEARTBEAT_MS
+
+/* ===== ДОБАВЛЕНО: серверное хранилище квоты (GET/POST) ===== */
+const AIQ_API = '/api/aiquota/usage'
+let __aiq_lastKnown = 0
+let __aiq_dayKey = null
+function ensureDayKey() {
+  const k = todayKey()
+  if (__aiq_dayKey && __aiq_dayKey !== k) {
+    __aiq_lastKnown = 0
+    try { localStorage.removeItem(__aiq_dayKey) } catch {}
+  }
+  __aiq_dayKey = k
+}
+async function quotaGet() {
+  ensureDayKey()
+  try {
+    const r = await fetch(AIQ_API, { credentials:'include', cache:'no-store' })
+    const j = await r.json().catch(()=>null)
+    if (j?.ok && Number.isFinite(j.usedSec)) {
+      __aiq_lastKnown = Math.min(QUOTA_LIMIT, j.usedSec|0)
+      setUsedSec(__aiq_lastKnown)
+      return __aiq_lastKnown
+    }
+  } catch {}
+  return getUsedSec()
+}
+async function quotaPost(deltaSec) {
+  ensureDayKey()
+  try {
+    const accountId =
+      (typeof window!=='undefined' && (window.__ASHER_ID__ || window.__AUTH_ACCOUNT__)) ||
+      localStorage.getItem('asherId') || localStorage.getItem('account') || undefined
+    const r = await fetch(AIQ_API, {
+      method:'POST',
+      headers:{ 'content-type':'application/json' },
+      credentials:'include',
+      cache:'no-store',
+      body: JSON.stringify({ op:'tick', deltaSec: Math.max(0, deltaSec|0), accountId }),
+      keepalive: true,
+    })
+    const j = await r.json().catch(()=>null)
+    if (j?.ok && Number.isFinite(j.usedSec)) {
+      __aiq_lastKnown = Math.min(QUOTA_LIMIT, j.usedSec|0)
+      setUsedSec(__aiq_lastKnown)
+      return __aiq_lastKnown
+    }
+  } catch {}
+  return null
+}
 
 function AIQuotaGate({ children, onOpenUnlimit }) {
   const { t } = useI18n()
@@ -438,159 +467,165 @@ function AIQuotaGate({ children, onOpenUnlimit }) {
   const [limit, setLimit] = useState(QUOTA_LIMIT)
   const [vipUntil, setVipUntil] = useState(null)
 
-  // локальный монотонический накопитель и батчер
-  const accMsRef = useRef(0)          // накопленные миллисекунды с последнего применения к UI
-  const lastMsRef = useRef(0)         // last performance.now()
-  const batchSecRef = useRef(0)       // сколько секунд накоплено для POST
+  // ===== ДОБАВЛЕНО: точный монотонический тикер + батч в базу =====
+  const accMsRef = useRef(0)
+  const lastMsRef = useRef(0)
+  const batchSecRef = useRef(0)
   const tickerRef = useRef(null)
+  const lastSyncRef = useRef(0)
 
-  // первичный sync (учтёт VIP и usedSec сервера)
+  // init counters (локально) + первичная подгрузка квоты с бэка
   useEffect(() => {
+    setLimit(QUOTA_LIMIT)
+    setUsed(getUsedSec())
     let alive = true
     ;(async () => {
-      const res = await syncFromServer()
+      const srvUsed = await quotaGet()
       if (!alive) return
-      if (res.unlimited) {
-        setUsed(0); setLimit(Number.POSITIVE_INFINITY); setVipUntil(res.untilISO || null)
-      } else {
-        const u = res.usedSec ?? getUsedSec()
-        setUsed(u); setLimit(QUOTA_LIMIT); setVipUntil(null)
-      }
+      setUsed(srvUsed)
     })()
     return () => { alive = false }
   }, [])
 
-  // единый точный тикер
+  // тикать только если квота конечная
   useEffect(() => {
-    // VIP — не тикаем
     if (!Number.isFinite(limit)) return
+    if (tickerRef.current) { clearInterval(tickerRef.current); tickerRef.current = null }
 
-    let stopped = false
-    const startTicker = () => {
-      if (stopped || tickerRef.current) return
-      lastMsRef.current = (typeof performance!=='undefined' ? performance.now() : Date.now())
-      tickerRef.current = setInterval(async () => {
-        // пауза, если вкладка скрыта
-        if (document.visibilityState === 'hidden') {
-          lastMsRef.current = (typeof performance!=='undefined' ? performance.now() : Date.now())
-          return
+    // если квота выбрана — не запускаем тикер
+    if (used >= limit) { accMsRef.current = 0; batchSecRef.current = 0; return }
+
+    lastMsRef.current = (typeof performance!=='undefined' ? performance.now() : Date.now())
+    tickerRef.current = setInterval(async () => {
+      // пауза, если вкладка скрыта
+      if (document.visibilityState === 'hidden') {
+        lastMsRef.current = (typeof performance!=='undefined' ? performance.now() : Date.now())
+        return
+      }
+
+      // если лимит достигнут — замрём
+      if (used >= QUOTA_LIMIT) { accMsRef.current = 0; batchSecRef.current = 0; return }
+
+      // точная дельта
+      const now = (typeof performance!=='undefined' ? performance.now() : Date.now())
+      const deltaMs = Math.max(0, now - lastMsRef.current)
+      lastMsRef.current = now
+
+      accMsRef.current += deltaMs
+      // как только набежала целая секунда — прибавляем
+      const whole = Math.floor(accMsRef.current / 1000)
+      if (whole > 0) {
+        accMsRef.current -= whole * 1000
+        const next = Math.min(QUOTA_LIMIT, used + whole)
+        setUsed(next)
+        setUsedSec(next)       // локальный дневной кэш
+        __aiq_lastKnown = next
+        batchSecRef.current += whole
+      }
+
+      // батч в базу раз в ~5 сек или когда накопилось ≥1 сек
+      const nowTs = Date.now()
+      if (batchSecRef.current >= 1 && (batchSecRef.current >= 5 || nowTs - lastSyncRef.current > 4500)) {
+        const delta = Math.min(batchSecRef.current, Math.max(0, QUOTA_LIMIT - used))
+        batchSecRef.current = 0
+        const srvUsed = await quotaPost(delta)
+        lastSyncRef.current = nowTs
+        if (Number.isFinite(srvUsed)) {
+          setUsed(srvUsed)
+          if (srvUsed >= QUOTA_LIMIT) { accMsRef.current = 0 }
         }
-
-        // монотоническая дельта
-        const now = (typeof performance!=='undefined' ? performance.now() : Date.now())
-        let deltaMs = Math.max(0, now - lastMsRef.current)
-        lastMsRef.current = now
-
-        // накапливаем и переводим в секунды «цельными шагами»
-        accMsRef.current += deltaMs
-        const addWhole = Math.floor(accMsRef.current / 1000)
-        if (addWhole > 0) {
-          accMsRef.current -= addWhole * 1000
-          const next = Math.min(QUOTA_LIMIT, (used + addWhole))
-          setUsed(next)
-          setUsedSec(next)
-          batchSecRef.current += addWhole
-        }
-
-        // раз в ~5 сек отправляем батч на сервер (или если накопилось ≥1 сек)
-        const sinceSync = Date.now() - __aiq_lastSyncAt
-        if (batchSecRef.current >= 1 && (batchSecRef.current >= 5 || sinceSync > 4500)) {
-          const delta = Math.min(batchSecRef.current, Math.max(0, QUOTA_LIMIT - used))
-          if (delta > 0) {
-            try {
-              const accId = (typeof window!=='undefined' && (window.__ASHER_ID__ || window.__AUTH_ACCOUNT__)) || localStorage.getItem('asherId') || undefined
-              const r = await fetch(AIQ_API, {
-                method:'POST',
-                headers:{ 'content-type':'application/json' },
-                credentials:'include',
-                cache:'no-store',
-                body: JSON.stringify({ op:'tick', deltaSec: delta, accountId: accId }),
-                keepalive: true,
-              })
-              const j = await r.json().catch(()=>null)
-              __aiq_lastSyncAt = Date.now()
-              if (j?.ok) {
-                if (j.unlimited || j.isVip) {
-                  setUsed(0); setLimit(Number.POSITIVE_INFINITY); setVipUntil(j.untilISO || null)
-                  clearInterval(tickerRef.current); tickerRef.current = null
-                  return
-                }
-                if (Number.isFinite(j.usedSec)) {
-                  setUsed(j.usedSec)
-                  __aiq_lastKnown = j.usedSec
-                  writeLocalUsed(__aiq_lastKnown)
-                }
-              }
-            } catch {}
-          }
-          batchSecRef.current = 0
-        }
-
-      }, 250) // частый тик для ровного счёта времени
-    }
-
-    startTicker()
-    const onVisible = () => {
-      if (document.visibilityState === 'visible') startTicker()
-    }
-    document.addEventListener('visibilitychange', onVisible)
+      }
+    }, 250)
 
     return () => {
-      stopped = true
-      document.removeEventListener('visibilitychange', onVisible)
       if (tickerRef.current) { clearInterval(tickerRef.current); tickerRef.current = null }
     }
-  }, [limit, used]) // зависимость от used нужна только для клампа UI (не плодит интервал)
+  }, [used, limit])
 
-  // форс-рефреш при фокусе/логине/оплате
-  useEffect(() => {
-    const refresh = async (forceAid) => {
-      const res = await syncFromServer(forceAid)
-      if (res.unlimited) {
-        setUsed(0); setLimit(Number.POSITIVE_INFINITY); setVipUntil(res.untilISO || null)
+  const checkingRef = useRef(false)
+  const refreshVip = useRef(async function () {
+    if (checkingRef.current) return
+    checkingRef.current = true
+    try {
+      const accountId =
+        (typeof window !== 'undefined' && window.__AUTH_ACCOUNT__) ||
+        localStorage.getItem('wallet')
+      if (!accountId) return
+      const r = await fetch('/api/subscription/status', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ accountId })
+      })
+      const j = await r.json().catch(()=> ({}))
+      if (j?.isVip) {
+        setUsed(0); setUsedSec(0)
+        setLimit(Number.POSITIVE_INFINITY)
+        setVipUntil(j.untilISO || null)
       } else {
-        setVipUntil(null); setLimit(QUOTA_LIMIT)
-        setUsed(res.usedSec ?? getUsedSec())
+        setVipUntil(null)
+        setLimit(QUOTA_LIMIT)
+        // при выходе из VIP — подтянем серверную квоту
+        const srvUsed = await quotaGet()
+        setUsed(srvUsed)
+      }
+    } catch {} finally { checkingRef.current = false }
+  }).current
+
+  // первичная проверка VIP
+  useEffect(() => { refreshVip() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // авто-обновление на клики/фокус/видимость
+  useEffect(() => {
+    const onRefresh = async () => {
+      await refreshVip()
+      if (Number.isFinite(limit)) {
+        const srvUsed = await quotaGet()
+        setUsed(srvUsed)
       }
     }
-    const onFocus = () => refresh()
-    const onVis = () => { if (document.visibilityState === 'visible') refresh() }
-    const onVip = () => refresh()
-    const onAuthOk = () => {
-      const aid = (typeof window!=='undefined' && (window.__ASHER_ID__ || window.__AUTH_ACCOUNT__)) || localStorage.getItem('asherId') || undefined
-      refresh(aid)
-    }
-
+    const onFocus = onRefresh
+    const onVis = () => { if (document.visibilityState === 'visible') onRefresh() }
+    window.addEventListener('vip:refresh', onRefresh)
     window.addEventListener('focus', onFocus)
     document.addEventListener('visibilitychange', onVis)
-    window.addEventListener('vip:refresh', onVip)
-    window.addEventListener('auth:ok', onAuthOk)
-    window.addEventListener('auth:success', onAuthOk)
-
+    window.addEventListener('auth:ok', onRefresh)
     return () => {
+      window.removeEventListener('vip:refresh', onRefresh)
       window.removeEventListener('focus', onFocus)
       document.removeEventListener('visibilitychange', onVis)
-      window.removeEventListener('vip:refresh', onVip)
-      window.removeEventListener('auth:ok', onAuthOk)
-      window.removeEventListener('auth:success', onAuthOk)
+      window.removeEventListener('auth:ok', onRefresh)
     }
-  }, [])
+  }, [limit, refreshVip])
+
+  // + мягкий фоновой опрос первые 3 минуты (на случай оплаты в соседней вкладке)
+  useEffect(() => {
+    const started = Date.now()
+    let timer = setTimeout(function tick(){
+      if (Date.now() - started > 3*60*1000) return
+      refreshVip()
+      if (Number.isFinite(limit)) quotaGet().then((u)=> setUsed(u))
+      timer = setTimeout(tick, 7000)
+    }, 7000)
+    return () => clearTimeout(timer)
+  }, [limit, refreshVip])
 
   // формат
   const fmtDate = (iso) => {
-    try { if (!iso) return '-'
+    try {
+      if (!iso) return '-'
       const d = new Date(iso)
       return d.toLocaleDateString(undefined, { year:'numeric', month:'2-digit', day:'2-digit' })
     } catch { return '-' }
   }
   const daysLeft = (iso) => {
-    try { if (!iso) return 0
+    try {
+      if (!iso) return 0
       const ms = (new Date(iso)).getTime() - Date.now()
       return Math.max(0, Math.ceil(ms / (1000*60*60*24)))
     } catch { return 0 }
   }
 
   // ===== Рендер =====
+  // VIP-режим: не показываем таймер; показываем «активен до»
   if (!Number.isFinite(limit)) {
     const dLeft = daysLeft(vipUntil)
     return (
@@ -603,8 +638,10 @@ function AIQuotaGate({ children, onOpenUnlimit }) {
     )
   }
 
+  // квота исчерпана — баннер + кнопка «Снять лимит»
   if (used >= limit) return <LimitBanner tr={t} onOpen={onOpenUnlimit} />
 
+  // обычный режим — таймер
   const remain = Math.max(0, limit - used)
   const mm = Math.floor(remain/60), ss = Math.floor(remain%60)
   return (
@@ -616,7 +653,6 @@ function AIQuotaGate({ children, onOpenUnlimit }) {
     </>
   )
 }
-
 
 
 /* ================================= OrderBook (black) ================================= */
