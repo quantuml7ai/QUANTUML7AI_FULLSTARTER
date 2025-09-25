@@ -1,7 +1,7 @@
 'use client'
 // #############################################################
 // hooks/useForum.js — React-хуки для форума и новостей (SWR)
-// Синхронизировано с lib/forumClient.js и /api/forum/*
+// Синхронизировано с lib/forumClient.js и единым /api/forum?op=...
 // #############################################################
 
 import useSWR, { useSWRConfig, mutate as globalMutate } from 'swr'
@@ -16,17 +16,15 @@ const swrOpts = {
   errorRetryCount: 2,
 }
 
-// ---------- Ключи SWR (согласованы с API) ----------
-const keyTopics = (page=1, limit=20, sort='new', q='') =>
-  `/api/forum/listTopics?page=${page}&limit=${limit}&sort=${sort}&q=${encodeURIComponent(q||'')}`
-
-const keyPosts = (topicId, page=1, limit=30, sort='new', q='') =>
-  topicId ? `/api/forum/listPosts?topicId=${encodeURIComponent(topicId)}&page=${page}&limit=${limit}&sort=${sort}&q=${encodeURIComponent(q||'')}` : null
+// ---------- Ключи SWR (опираемся на op-схему) ----------
+const keyMe      = '/api/forum?op=me'
+const keyTopics  = (page=1, limit=20, sort='new', q='') =>
+  `/api/forum?op=listTopics&page=${page}&limit=${limit}&sort=${encodeURIComponent(sort)}&q=${encodeURIComponent(q||'')}`
+const keyPosts   = (topicId, page=1, limit=30, sort='new', q='') =>
+  topicId ? `/api/forum?op=listPosts&topicId=${encodeURIComponent(topicId)}&page=${page}&limit=${limit}&sort=${encodeURIComponent(sort)}&q=${encodeURIComponent(q||'')}` : null
 
 const keyNews = (page=1, pageSize=50, source='all', sort='time') =>
   `/api/news?page=${page}&pageSize=${pageSize}&source=${source}&sort=${sort}`
-
-const keyMe = '/api/forum/me'
 
 // ----------------------------------------------------
 // useMe — статус авторизации
@@ -44,6 +42,7 @@ export function useMe() {
     authed: ok,
     asherId: data?.asherId || null,
     accountId: data?.accountId || null,
+    banned: !!data?.banned,
     error,
     isLoading,
     refresh: mutate,
@@ -92,8 +91,8 @@ export function useCreateTopic({ page=1, limit=20, sort='new', q='' } = {}) {
 
     try {
       const res = await ForumAPI.createTopic({ title, category, tags, text, user })
-      // у createTopic контракт {ok,id}; реальный объект подтянем рефетчем
-      await mutate(listKey) // фон: подтянет реальный топик
+      // подтянем реальный объект сервера
+      await mutate(listKey)
       return res
     } catch (e) {
       await mutate(listKey, (prev) => {
@@ -114,7 +113,7 @@ export function usePosts({ topicId, page=1, limit=30, sort='new', q='' } = {}) {
   const key = keyPosts(topicId, page, limit, sort, q)
   const { data, error, isLoading, mutate } = useSWR(
     key,
-    () => ForumAPI.listPosts({ topicId, page, limit, sort, search: q }),
+    () => ForumAPI.listPosts({ topicId, page, limit, sort, q }),
     { ...swrOpts }
   )
   const posts = data?.posts || []
@@ -139,7 +138,7 @@ export function useCreatePost({ topicId, page=1, limit=30, sort='new', q='' }) {
 
     const optimistic = {
       id: 'tmp_' + Math.random().toString(36).slice(2, 8),
-      topicId, parentId, user: 'me', text, ts: Date.now(),
+      topicId, parentId: parentId ?? null, user: 'me', text, ts: Date.now(),
       reactions: { '👍':0, '👎':0 }, myReactions: {},
       _optimistic: true,
     }
@@ -152,7 +151,6 @@ export function useCreatePost({ topicId, page=1, limit=30, sort='new', q='' }) {
 
     try {
       await ForumAPI.createPost({ topicId, text, parentId })
-      // подтянуть реальный пост (сервер вернёт уже нормализованный объект)
       await mutate(key)
     } catch (e) {
       await mutate(key, (prev) => {
@@ -181,14 +179,12 @@ export function useReactPost({ topicId, page=1, limit=30, sort='new', q='' }) {
     const isOn = !!next.myReactions[emoji]
     const other = emoji === '👍' ? '👎' : (emoji === '👎' ? '👍' : null)
 
-    // снять текущую
     if (isOn) {
       next.myReactions[emoji] = false
       next.reactions[emoji] = Math.max(0, (next.reactions[emoji]||0) - 1)
     } else {
       next.myReactions[emoji] = true
       next.reactions[emoji] = (next.reactions[emoji]||0) + 1
-      // взаимоисключение
       if (other && next.myReactions[other]) {
         next.myReactions[other] = false
         next.reactions[other] = Math.max(0, (next.reactions[other]||0) - 1)
@@ -198,7 +194,6 @@ export function useReactPost({ topicId, page=1, limit=30, sort='new', q='' }) {
   }
 
   const react = useCallback(async ({ postId, emoji }) => {
-    // оптимизм
     await mutate(key, (prev) => {
       if (!prev || !Array.isArray(prev.posts)) return prev
       const posts = prev.posts.map(p => p.id === postId ? toggleThumb(p, emoji) : p)
@@ -206,24 +201,16 @@ export function useReactPost({ topicId, page=1, limit=30, sort='new', q='' }) {
     }, false)
 
     try {
-      // remove вычислим из текущего состояния после оптимизма: если мы включили — remove=false,
-      // если выключили — remove=true. Но сервер сам делает тоггл; можно просто слать remove=false.
       await ForumAPI.react({ postId, emoji })
-      // освежим с сервера (счётчики «зажаты» на бекенде)
       await globalMutate(key)
     } catch (e) {
-      // на ошибке — откат к бэку
       await globalMutate(key)
       throw e
     }
   }, [mutate, key])
 
   const report = useCallback(async ({ postId, reason }) => {
-    try {
-      await ForumAPI.report({ postId, reason })
-      // без локальных изменений, просто тихо
-      return true
-    } catch (e) { throw e }
+    try { await ForumAPI.report({ postId, reason }); return true } catch (e) { throw e }
   }, [])
 
   return { react, report }
