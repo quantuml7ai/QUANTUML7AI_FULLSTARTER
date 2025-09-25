@@ -248,13 +248,13 @@ function AIBox({ data }) {
 
 /* ============================ AI Quota Gate (10 min/day) ============================ */
 const QUOTA_LIMIT_SEC = 10 * 60; // 10 минут
-const QUOTA_HEARTBEAT_MS = 1000; // шаг 1 секунда
+const QUOTA_HEARTBEAT_MS = 1000; // шаг 1 секунда (визуальный таргет)
 
-// ===== серверная квота по IP (+VIP), совместимо с текущими вызовами =====
 const AIQ_API = '/api/aiquota/usage'
-let __aiq_lastKnown = 0
+let __aiq_lastKnown = 0          // последнее серверное/локально подтверждённое значение (сек)
 let __aiq_syncing = false
 let __aiq_lastSyncAt = 0
+let __aiq_dayKey = null          // для отслеживания смены суток
 
 function todayKey() {
   try {
@@ -273,12 +273,20 @@ function readLocalUsed() {
 function writeLocalUsed(v) {
   try { localStorage.setItem(todayKey(), String(Math.max(0, Math.floor(v)))) } catch {}
 }
+function ensureDayKey() {
+  const k = todayKey()
+  if (__aiq_dayKey && __aiq_dayKey !== k) {
+    __aiq_lastKnown = 0
+  }
+  __aiq_dayKey = k
+}
 
-// мягкая подтяжка с сервера (GET), опционально с accountId
+// ===== синхронизация с сервером (GET), можно передать accountId чтобы VIP подхватился сразу
 async function syncFromServer(accountId) {
   if (typeof window === 'undefined') return { usedSec: __aiq_lastKnown, unlimited:false }
+  ensureDayKey()
   const now = Date.now()
-  if (!accountId && (__aiq_syncing || (now - __aiq_lastSyncAt < 1200))) {
+  if (!accountId && (__aiq_syncing || (now - __aiq_lastSyncAt < 1000))) {
     return { usedSec: __aiq_lastKnown, unlimited:false }
   }
   __aiq_syncing = true
@@ -294,7 +302,7 @@ async function syncFromServer(accountId) {
         return { usedSec: 0, unlimited:true, vip:j.isVip, untilISO:j.untilISO }
       }
       if (Number.isFinite(j.usedSec)) {
-        __aiq_lastKnown = Math.max(__aiq_lastKnown, Number(j.usedSec))
+        __aiq_lastKnown = Number(j.usedSec)
         writeLocalUsed(__aiq_lastKnown)
         return { usedSec: __aiq_lastKnown, unlimited:false }
       }
@@ -306,50 +314,28 @@ async function syncFromServer(accountId) {
   return { usedSec: __aiq_lastKnown, unlimited:false }
 }
 
-// публичные геттер/сеттер — оставляем имена, чтобы ничего не ломать
+// совместимые геттер/сеттер (для старого кода)
 function getUsedSec() {
   if (typeof window === 'undefined') return 0
+  ensureDayKey()
   const loc = readLocalUsed()
   __aiq_lastKnown = Math.max(__aiq_lastKnown, loc)
-  // асинхронный sync без accountId (обычный случай)
+  // асинхронный sync (без ждём)
   syncFromServer()
   return Math.max(__aiq_lastKnown, loc)
 }
 function setUsedSec(v) {
   if (typeof window === 'undefined') return
   try {
+    ensureDayKey()
     const next = Math.max(0, Math.floor(v))
-    const delta = Math.max(0, next - __aiq_lastKnown)
     __aiq_lastKnown = next
     writeLocalUsed(__aiq_lastKnown)
-
-    if (delta > 0) {
-      const accId = (typeof window!=='undefined' && (window.__ASHER_ID__ || window.__AUTH_ACCOUNT__)) || localStorage.getItem('asherId') || undefined
-      fetch(AIQ_API, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        credentials: 'include',
-        cache: 'no-store',
-        body: JSON.stringify({ op:'tick', deltaSec: delta, accountId: accId }),
-        keepalive: true,
-      })
-      .then(r=>r.json().catch(()=>null))
-      .then(j=>{
-        if (!j) return
-        if (j.unlimited || j.isVip) {
-          __aiq_lastKnown = 0
-          writeLocalUsed(0)
-        } else if (Number.isFinite(j.usedSec)) {
-          __aiq_lastKnown = j.usedSec
-          writeLocalUsed(__aiq_lastKnown)
-        }
-      })
-      .catch(()=>{})
-    }
+    // сетевой POST теперь делает «батчер» в интервале (см. ниже)
   } catch {}
 }
 
-/* ===== ДОБАВЛЕНО: ensureAuthorized — жмёт кнопку логина в TopBar и ждёт подтверждение ===== */
+/* ===== ensureAuthorized — как было ===== */
 async function ensureAuthorized() {
   if (typeof window === 'undefined') return null
   const getAcc = () => window.__AUTH_ACCOUNT__ || localStorage.getItem('wallet') || null
@@ -358,7 +344,6 @@ async function ensureAuthorized() {
   if (acc) return acc
 
   try { window.dispatchEvent(new CustomEvent('open-auth')) } catch {}
-
   try {
     const sels = ['[data-auth-open]', '.nav-auth-btn', '#nav-auth-btn', '[data-testid="auth-open"]']
     for (const s of sels) {
@@ -376,11 +361,10 @@ async function ensureAuthorized() {
     window.addEventListener('auth:success', done, { once:true })
     setTimeout(()=> resolve(getAcc()), 120000)
   })
-
   return acc || null
 }
 
-/* ====== ДОБАВЛЕНО: модалка VIP+ (только UI) ====== */
+/* ====== UnlimitModal — как было ====== */
 function UnlimitModal({ open, onClose, onPay }) {
   const { t } = useI18n()
   if (!open) return null
@@ -412,7 +396,7 @@ function UnlimitModal({ open, onClose, onPay }) {
   )
 }
 
-/* ====== МАЛЕНЬКОЕ ДОПОЛНЕНИЕ: кнопка «Снять лимит» в баннере ====== */
+/* ====== LimitBanner — как было ====== */
 function LimitBanner({ tr, onOpen }) {
   const BOT = process?.env?.NEXT_PUBLIC_BOT_LINK || 'https://t.me/l7ai_bot'
   return (
@@ -447,87 +431,126 @@ function LimitBanner({ tr, onOpen }) {
 
 /* ======================== Квота/статус VIP с корректным рендером ======================== */
 const QUOTA_LIMIT = QUOTA_LIMIT_SEC
-const HEARTBEAT = QUOTA_HEARTBEAT_MS
 
 function AIQuotaGate({ children, onOpenUnlimit }) {
   const { t } = useI18n()
   const [used, setUsed] = useState(0)
   const [limit, setLimit] = useState(QUOTA_LIMIT)
   const [vipUntil, setVipUntil] = useState(null)
-  const usedRef = useRef(0)
 
-  // первичный sync
+  // локальный монотонический накопитель и батчер
+  const accMsRef = useRef(0)          // накопленные миллисекунды с последнего применения к UI
+  const lastMsRef = useRef(0)         // last performance.now()
+  const batchSecRef = useRef(0)       // сколько секунд накоплено для POST
+  const tickerRef = useRef(null)
+
+  // первичный sync (учтёт VIP и usedSec сервера)
   useEffect(() => {
     let alive = true
-    ;(async()=>{
+    ;(async () => {
       const res = await syncFromServer()
       if (!alive) return
       if (res.unlimited) {
-        setUsed(0); usedRef.current = 0
-        setLimit(Number.POSITIVE_INFINITY)
-        setVipUntil(res.untilISO || null)
+        setUsed(0); setLimit(Number.POSITIVE_INFINITY); setVipUntil(res.untilISO || null)
       } else {
         const u = res.usedSec ?? getUsedSec()
-        setUsed(u); usedRef.current = u
-        setLimit(QUOTA_LIMIT)
+        setUsed(u); setLimit(QUOTA_LIMIT); setVipUntil(null)
       }
     })()
     return () => { alive = false }
   }, [])
 
-  // сердцебиение: ОДИН setInterval на включённую квоту (не зависит от used)
+  // единый точный тикер
   useEffect(() => {
-    if (!Number.isFinite(limit)) return // VIP — не тикаем
-    let interval = null
-    interval = setInterval(async () => {
-      // локально двигаем ровно на 1 сек
-      const next = Math.min(QUOTA_LIMIT, (usedRef.current || 0) + HEARTBEAT/1000)
-      usedRef.current = next
-      setUsed(next)
-      setUsedSec(next)
+    // VIP — не тикаем
+    if (!Number.isFinite(limit)) return
 
-      // серверный тик (учтёт VIP мгновенно через accountId)
-      try {
-        const accId = (typeof window!=='undefined' && (window.__ASHER_ID__ || window.__AUTH_ACCOUNT__)) || localStorage.getItem('asherId') || undefined
-        const r = await fetch(AIQ_API, {
-          method:'POST',
-          headers:{ 'content-type':'application/json' },
-          credentials:'include',
-          cache:'no-store',
-          body: JSON.stringify({ op:'tick', deltaSec: 1, accountId: accId }),
-          keepalive: true,
-        })
-        const j = await r.json().catch(()=>null)
-        if (j?.ok) {
-          if (j.unlimited || j.isVip) {
-            setUsed(0); usedRef.current = 0
-            setLimit(Number.POSITIVE_INFINITY)
-            setVipUntil(j.untilISO || null)
-            clearInterval(interval)
-            return
-          }
-          if (Number.isFinite(j.usedSec)) {
-            setUsed(j.usedSec); usedRef.current = j.usedSec
-          }
+    let stopped = false
+    const startTicker = () => {
+      if (stopped || tickerRef.current) return
+      lastMsRef.current = (typeof performance!=='undefined' ? performance.now() : Date.now())
+      tickerRef.current = setInterval(async () => {
+        // пауза, если вкладка скрыта
+        if (document.visibilityState === 'hidden') {
+          lastMsRef.current = (typeof performance!=='undefined' ? performance.now() : Date.now())
+          return
         }
-      } catch {}
-    }, HEARTBEAT)
 
-    return () => { if (interval) clearInterval(interval) }
-  }, [limit]) // ВАЖНО: завязка только на limit, не на used
+        // монотоническая дельта
+        const now = (typeof performance!=='undefined' ? performance.now() : Date.now())
+        let deltaMs = Math.max(0, now - lastMsRef.current)
+        lastMsRef.current = now
 
-  // авто-обновление при фокусе/видимости + мгновенно после логина
+        // накапливаем и переводим в секунды «цельными шагами»
+        accMsRef.current += deltaMs
+        const addWhole = Math.floor(accMsRef.current / 1000)
+        if (addWhole > 0) {
+          accMsRef.current -= addWhole * 1000
+          const next = Math.min(QUOTA_LIMIT, (used + addWhole))
+          setUsed(next)
+          setUsedSec(next)
+          batchSecRef.current += addWhole
+        }
+
+        // раз в ~5 сек отправляем батч на сервер (или если накопилось ≥1 сек)
+        const sinceSync = Date.now() - __aiq_lastSyncAt
+        if (batchSecRef.current >= 1 && (batchSecRef.current >= 5 || sinceSync > 4500)) {
+          const delta = Math.min(batchSecRef.current, Math.max(0, QUOTA_LIMIT - used))
+          if (delta > 0) {
+            try {
+              const accId = (typeof window!=='undefined' && (window.__ASHER_ID__ || window.__AUTH_ACCOUNT__)) || localStorage.getItem('asherId') || undefined
+              const r = await fetch(AIQ_API, {
+                method:'POST',
+                headers:{ 'content-type':'application/json' },
+                credentials:'include',
+                cache:'no-store',
+                body: JSON.stringify({ op:'tick', deltaSec: delta, accountId: accId }),
+                keepalive: true,
+              })
+              const j = await r.json().catch(()=>null)
+              __aiq_lastSyncAt = Date.now()
+              if (j?.ok) {
+                if (j.unlimited || j.isVip) {
+                  setUsed(0); setLimit(Number.POSITIVE_INFINITY); setVipUntil(j.untilISO || null)
+                  clearInterval(tickerRef.current); tickerRef.current = null
+                  return
+                }
+                if (Number.isFinite(j.usedSec)) {
+                  setUsed(j.usedSec)
+                  __aiq_lastKnown = j.usedSec
+                  writeLocalUsed(__aiq_lastKnown)
+                }
+              }
+            } catch {}
+          }
+          batchSecRef.current = 0
+        }
+
+      }, 250) // частый тик для ровного счёта времени
+    }
+
+    startTicker()
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') startTicker()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+
+    return () => {
+      stopped = true
+      document.removeEventListener('visibilitychange', onVisible)
+      if (tickerRef.current) { clearInterval(tickerRef.current); tickerRef.current = null }
+    }
+  }, [limit, used]) // зависимость от used нужна только для клампа UI (не плодит интервал)
+
+  // форс-рефреш при фокусе/логине/оплате
   useEffect(() => {
     const refresh = async (forceAid) => {
       const res = await syncFromServer(forceAid)
       if (res.unlimited) {
-        setUsed(0); usedRef.current = 0
-        setLimit(Number.POSITIVE_INFINITY)
-        setVipUntil(res.untilISO || null)
+        setUsed(0); setLimit(Number.POSITIVE_INFINITY); setVipUntil(res.untilISO || null)
       } else {
         setVipUntil(null); setLimit(QUOTA_LIMIT)
-        const u = res.usedSec ?? getUsedSec()
-        setUsed(u); usedRef.current = u
+        setUsed(res.usedSec ?? getUsedSec())
       }
     }
     const onFocus = () => refresh()
@@ -535,7 +558,7 @@ function AIQuotaGate({ children, onOpenUnlimit }) {
     const onVip = () => refresh()
     const onAuthOk = () => {
       const aid = (typeof window!=='undefined' && (window.__ASHER_ID__ || window.__AUTH_ACCOUNT__)) || localStorage.getItem('asherId') || undefined
-      refresh(aid) // <— ПОДХВАТЫВАЕМ VIP сразу после логина
+      refresh(aid)
     }
 
     window.addEventListener('focus', onFocus)
@@ -593,6 +616,7 @@ function AIQuotaGate({ children, onOpenUnlimit }) {
     </>
   )
 }
+
 
 
 /* ================================= OrderBook (black) ================================= */
