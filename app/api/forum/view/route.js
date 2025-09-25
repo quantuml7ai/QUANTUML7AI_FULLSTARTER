@@ -1,19 +1,15 @@
-export const runtime = 'edge'
+// app/api/forum/view/route.js
 export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
-import { cookies, headers } from 'next/headers'
-import { getMe, viewTopic } from '@/lib/forumStore'
+import { addView } from '@/lib/forumStore'   // ← было viewTopic
 
 export async function POST(req){
   try{
-    const body = await req.json().catch(()=> ({}))
-    const { topicId } = body||{}
-    if (!topicId) return NextResponse.json({ ok:false, error:'no_topic' }, { status:400 })
-    const me = await getMe({ cookies: cookies(), headers: headers() })
-    const ip = headers().get('x-forwarded-for')?.split(',')?.[0] || '0.0.0.0'
-    const res = await viewTopic({ topicId:String(topicId), asherId: me.asherId, ip })
-    return NextResponse.json(res, { headers:{ 'cache-control':'no-store' }})
+    const { topicId } = await req.json().catch(()=>({}))
+    if (!topicId) return NextResponse.json({ ok:false, error:'bad-request' }, { status:400 })
+    const r = await addView({ topicId })
+    return NextResponse.json(r)
   }catch(e){
-    return NextResponse.json({ ok:false, error: e.message||'view_fail' }, { status:500 })
+    return NextResponse.json({ ok:false, error:'server' }, { status:500 })
   }
 }
