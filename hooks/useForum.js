@@ -1,15 +1,14 @@
 'use client'
 // #############################################################
 // hooks/useForum.js — React-хуки для форума и новостей (SWR)
+// Синхронизировано с lib/forumClient.js и /api/forum/*
 // #############################################################
 
 import useSWR, { useSWRConfig, mutate as globalMutate } from 'swr'
-import useSWRMutation from 'swr/mutation'
 import { useCallback, useMemo, useRef, useState, useEffect } from 'react'
-import { ForumAPI, NewsAPI, clamp, fmtDate } from '@/lib/forumClient'
+import { ForumAPI, NewsAPI, fmtDate } from '@/lib/forumClient'
 
-// ---------- Общая SWR конфигурация-хелперы ----------
-
+// ---------- Общая SWR конфигурация ----------
 const swrOpts = {
   revalidateOnFocus: false,
   revalidateOnReconnect: true,
@@ -17,26 +16,34 @@ const swrOpts = {
   errorRetryCount: 2,
 }
 
-const keyTopics = (page=1, limit=50, sort='new', q='') =>
-  `/forum/topics?page=${page}&limit=${limit}&sort=${sort}&q=${q}`
+// ---------- Ключи SWR (согласованы с API) ----------
+const keyTopics = (page=1, limit=20, sort='new', q='') =>
+  `/api/forum/listTopics?page=${page}&limit=${limit}&sort=${sort}&q=${encodeURIComponent(q||'')}`
 
-const keyPosts = (topicId, page=1, limit=20, sort='new', search='') =>
-  topicId ? `/forum/posts?topic=${topicId}&page=${page}&limit=${limit}&sort=${sort}&search=${search}` : null
+const keyPosts = (topicId, page=1, limit=30, sort='new', q='') =>
+  topicId ? `/api/forum/listPosts?topicId=${encodeURIComponent(topicId)}&page=${page}&limit=${limit}&sort=${sort}&q=${encodeURIComponent(q||'')}` : null
 
-const keyNews  = (page=1, pageSize=50, source='all', sort='time') =>
-  `/news?page=${page}&pageSize=${pageSize}&source=${source}&sort=${sort}`
+const keyNews = (page=1, pageSize=50, source='all', sort='time') =>
+  `/api/news?page=${page}&pageSize=${pageSize}&source=${source}&sort=${sort}`
 
-const keyMe = '/forum/me'
+const keyMe = '/api/forum/me'
 
 // ----------------------------------------------------
-// useMe — статус авторизации и бана
+// useMe — статус авторизации
 // ----------------------------------------------------
 export function useMe() {
-  const { data, error, isLoading, mutate } = useSWR(keyMe, ForumAPI.me, swrOpts)
+  const { data, error, isLoading, mutate } = useSWR(
+    keyMe,
+    () => ForumAPI.me(),
+    { ...swrOpts }
+  )
+
+  const ok = !!data?.ok
   return {
-    me: data?.user || null,
-    authed: !!data?.authed,
-    bannedUntil: data?.user?.banUntil || 0,
+    ok,
+    authed: ok,
+    asherId: data?.asherId || null,
+    accountId: data?.accountId || null,
     error,
     isLoading,
     refresh: mutate,
@@ -46,14 +53,17 @@ export function useMe() {
 // ----------------------------------------------------
 // useTopics — список тем (пагинация, поиск, сорт)
 // ----------------------------------------------------
-export function useTopics({ page=1, limit=50, sort='new', q='' } = {}) {
+export function useTopics({ page=1, limit=20, sort='new', q='' } = {}) {
   const key = keyTopics(page, limit, sort, q)
-  const { data, error, isLoading, mutate } = useSWR(key, () =>
-    ForumAPI.listTopics({ page, limit, sort, q }), swrOpts)
+  const { data, error, isLoading, mutate } = useSWR(
+    key,
+    () => ForumAPI.listTopics({ page, limit, sort, q }),
+    { ...swrOpts }
+  )
 
   const items = data?.items || []
   const total = data?.total || 0
-  const pages = data?.pages || Math.max(1, Math.ceil(total / limit))
+  const pages = Math.max(1, Math.ceil(total / Math.max(1, limit)))
 
   return {
     items, total, page, pages, sort, q,
@@ -64,70 +74,55 @@ export function useTopics({ page=1, limit=50, sort='new', q='' } = {}) {
 // ----------------------------------------------------
 // useCreateTopic — создание темы (оптимистично)
 // ----------------------------------------------------
-export function useCreateTopic() {
+export function useCreateTopic({ page=1, limit=20, sort='new', q='' } = {}) {
   const { mutate } = useSWRConfig()
+  const listKey = keyTopics(page, limit, sort, q)
 
-  const trigger = useCallback(async ({ title, user }) => {
-    // сервер создаёт тему; здесь оптимизм: добавим в первую страницу new
-    const optimisticTopic = {
+  const createTopic = useCallback(async ({ title, category='', tags=[], text='', user }) => {
+    const optimistic = {
       id: 'tmp_' + Math.random().toString(36).slice(2, 8),
-      title, user: user || 'me', views: 0, posts: 0, ts: Date.now(),
-      _optimistic: true,
+      title, category, tags, posts: 0, views: 0, ts: Date.now(), _optimistic: true,
     }
 
-    // подменим кэш первой страницы new без фильтра
-    const listKey = keyTopics(1, 50, 'new', '')
     await mutate(listKey, (prev) => {
-      if (!prev || !Array.isArray(prev.items)) return prev
-      return {
-        ...prev,
-        items: [optimisticTopic, ...prev.items],
-        total: (prev.total || 0) + 1,
-      }
+      if (!prev) return { items:[optimistic], total:1 }
+      const items = Array.isArray(prev.items) ? [optimistic, ...prev.items] : [optimistic]
+      return { ...prev, items, total: (prev.total||0)+1 }
     }, false)
 
     try {
-      const res = await ForumAPI.createTopic({ title, user })
-      // заменить оптимистичный на реальный
-      await mutate(listKey, (prev) => {
-        if (!prev || !Array.isArray(prev.items)) return prev
-        const items = prev.items.slice()
-        const idx = items.findIndex(x => x._optimistic)
-        if (idx >= 0) items[idx] = res.topic
-        else items.unshift(res.topic)
-        return { ...prev, items }
-      }, false)
-      return res.topic
+      const res = await ForumAPI.createTopic({ title, category, tags, text, user })
+      // у createTopic контракт {ok,id}; реальный объект подтянем рефетчем
+      await mutate(listKey) // фон: подтянет реальный топик
+      return res
     } catch (e) {
-      // откат
       await mutate(listKey, (prev) => {
         if (!prev || !Array.isArray(prev.items)) return prev
         return { ...prev, items: prev.items.filter(x => !x._optimistic), total: Math.max(0, (prev.total||1)-1) }
       }, false)
       throw e
-    } finally {
-      // фоновой рефетч
-      mutate(listKey)
     }
-  }, [mutate])
+  }, [mutate, listKey])
 
-  return { createTopic: trigger }
+  return { createTopic }
 }
 
 // ----------------------------------------------------
 // usePosts — посты по теме (пагинация, сорт, поиск)
 // ----------------------------------------------------
-export function usePosts({ topicId, page=1, limit=20, sort='new', search='' } = {}) {
-  const key = keyPosts(topicId, page, limit, sort, search)
-  const fetcher = () => ForumAPI.listPosts({ topicId, page, limit, sort, search })
-  const { data, error, isLoading, mutate } = useSWR(key, fetcher, swrOpts)
-
-  const posts = data?.posts || data?.items || []
+export function usePosts({ topicId, page=1, limit=30, sort='new', q='' } = {}) {
+  const key = keyPosts(topicId, page, limit, sort, q)
+  const { data, error, isLoading, mutate } = useSWR(
+    key,
+    () => ForumAPI.listPosts({ topicId, page, limit, sort, search: q }),
+    { ...swrOpts }
+  )
+  const posts = data?.posts || []
   const total = data?.total || 0
-  const pages = Math.max(1, Math.ceil(total / limit))
+  const pages = Math.max(1, Math.ceil(total / Math.max(1, limit)))
 
   return {
-    posts, total, page, pages, sort, search,
+    posts, total, page, pages, sort, q,
     error, isLoading, refresh: mutate,
   }
 }
@@ -135,89 +130,89 @@ export function usePosts({ topicId, page=1, limit=20, sort='new', search='' } = 
 // ----------------------------------------------------
 // useCreatePost — создание сообщения (оптимистично)
 // ----------------------------------------------------
-export function useCreatePost({ topicId, page=1, limit=20, sort='new', search='' }) {
-  const key = keyPosts(topicId, page, limit, sort, search)
+export function useCreatePost({ topicId, page=1, limit=30, sort='new', q='' }) {
   const { mutate } = useSWRConfig()
+  const key = keyPosts(topicId, page, limit, sort, q)
 
-  const trigger = useCallback(async ({ text, parentId }) => {
+  const createPost = useCallback(async ({ text, parentId }) => {
     if (!topicId) throw new Error('topicId required')
 
-    const optimisticPost = {
+    const optimistic = {
       id: 'tmp_' + Math.random().toString(36).slice(2, 8),
-      topicId, user: 'me', text, ts: Date.now(),
-      likes: 0, reports: 0, views: 0, ...(parentId ? { parentId } : {}),
+      topicId, parentId, user: 'me', text, ts: Date.now(),
+      reactions: { '👍':0, '👎':0 }, myReactions: {},
       _optimistic: true,
     }
 
-    // добавим в текущую страницу
     await mutate(key, (prev) => {
-      if (!prev) return { posts: [optimisticPost], total: 1, page, limit }
-      const posts = Array.isArray(prev.posts) ? [optimisticPost, ...prev.posts] : [optimisticPost]
-      return { ...prev, posts, total: (prev.total || 0) + 1 }
+      if (!prev) return { posts: [optimistic], total: 1 }
+      const posts = Array.isArray(prev.posts) ? [optimistic, ...prev.posts] : [optimistic]
+      return { ...prev, posts, total: (prev.total||0)+1 }
     }, false)
 
     try {
-      const res = await ForumAPI.createPost({ topicId, text, parentId })
-      await mutate(key, (prev) => {
-        if (!prev || !Array.isArray(prev.posts)) return prev
-        const posts = prev.posts.slice()
-        const idx = posts.findIndex(x => x._optimistic)
-        if (idx >= 0) posts[idx] = res.post
-        else posts.unshift(res.post)
-        return { ...prev, posts }
-      }, false)
-      return res.post
+      await ForumAPI.createPost({ topicId, text, parentId })
+      // подтянуть реальный пост (сервер вернёт уже нормализованный объект)
+      await mutate(key)
     } catch (e) {
-      // откат
       await mutate(key, (prev) => {
         if (!prev || !Array.isArray(prev.posts)) return prev
         return { ...prev, posts: prev.posts.filter(x => !x._optimistic), total: Math.max(0, (prev.total||1)-1) }
       }, false)
       throw e
-    } finally {
-      mutate(key) // рефетч
     }
-  }, [mutate, key, topicId, page, limit, sort, search])
+  }, [mutate, key, topicId, page, limit, sort, q])
 
-  return { createPost: trigger }
+  return { createPost }
 }
 
 // ----------------------------------------------------
-// useReactPost — лайки/эмодзи/жалобы (оптимистично)
+// useReactPost — реакции/репорты (оптимистично)
 // ----------------------------------------------------
-export function useReactPost({ topicId, page=1, limit=20, sort='new', search='' }) {
-  const key = keyPosts(topicId, page, limit, sort, search)
+export function useReactPost({ topicId, page=1, limit=30, sort='new', q='' }) {
   const { mutate } = useSWRConfig()
+  const key = keyPosts(topicId, page, limit, sort, q)
 
-  const react = useCallback(async ({ postId, action, emoji }) => {
-    // оптимизм для лайка / эмодзи
+  const toggleThumb = (post, emoji) => {
+    const next = { ...post }
+    next.reactions = { '👍':0, '👎':0, ...(post.reactions||{}) }
+    next.myReactions = { ...(post.myReactions||{}) }
+
+    const isOn = !!next.myReactions[emoji]
+    const other = emoji === '👍' ? '👎' : (emoji === '👎' ? '👍' : null)
+
+    // снять текущую
+    if (isOn) {
+      next.myReactions[emoji] = false
+      next.reactions[emoji] = Math.max(0, (next.reactions[emoji]||0) - 1)
+    } else {
+      next.myReactions[emoji] = true
+      next.reactions[emoji] = (next.reactions[emoji]||0) + 1
+      // взаимоисключение
+      if (other && next.myReactions[other]) {
+        next.myReactions[other] = false
+        next.reactions[other] = Math.max(0, (next.reactions[other]||0) - 1)
+      }
+    }
+    return next
+  }
+
+  const react = useCallback(async ({ postId, emoji }) => {
+    // оптимизм
     await mutate(key, (prev) => {
       if (!prev || !Array.isArray(prev.posts)) return prev
-      const posts = prev.posts.map(p => {
-        if (p.id !== postId) return p
-        const next = { ...p }
-        if (action === 'like') next.likes = (next.likes || 0) + 1
-        if (action === 'unlike') next.likes = Math.max(0, (next.likes || 0) - 1)
-        if (action === 'emoji' && emoji) {
-          next.reactions = next.reactions || {}
-          next.reactions[emoji] = (next.reactions[emoji] || 0) + 1
-        }
-        return next
-      })
+      const posts = prev.posts.map(p => p.id === postId ? toggleThumb(p, emoji) : p)
       return { ...prev, posts }
     }, false)
 
     try {
-      const res = await ForumAPI.react({ postId, action, emoji })
-      // сверим фактические данные
-      await mutate(key, (prev) => {
-        if (!prev || !Array.isArray(prev.posts)) return prev
-        const posts = prev.posts.map(p => p.id === postId ? { ...p, ...res.post } : p)
-        return { ...prev, posts }
-      }, false)
-      return res.post
+      // remove вычислим из текущего состояния после оптимизма: если мы включили — remove=false,
+      // если выключили — remove=true. Но сервер сам делает тоггл; можно просто слать remove=false.
+      await ForumAPI.react({ postId, emoji })
+      // освежим с сервера (счётчики «зажаты» на бекенде)
+      await globalMutate(key)
     } catch (e) {
-      // на ошибке откатим к бэку
+      // на ошибке — откат к бэку
       await globalMutate(key)
       throw e
     }
@@ -225,50 +220,46 @@ export function useReactPost({ topicId, page=1, limit=20, sort='new', search='' 
 
   const report = useCallback(async ({ postId, reason }) => {
     try {
-      const res = await ForumAPI.report({ postId, reason })
-      // можно пометить пост визуально
-      await globalMutate(key)
-      return res
-    } catch (e) {
-      throw e
-    }
-  }, [key])
+      await ForumAPI.report({ postId, reason })
+      // без локальных изменений, просто тихо
+      return true
+    } catch (e) { throw e }
+  }, [])
 
   return { react, report }
 }
 
 // ----------------------------------------------------
-// useViewCounter — отметка просмотра (без перерисовок)
+// useViewCounter — отметка просмотра темы (без лишних ререндеров)
 // ----------------------------------------------------
 export function useViewCounter() {
   const viewedRef = useRef(new Set())
-  const mark = useCallback(async ({ type, id }) => {
-    const key = `${type}:${id}`
+  const markTopicView = useCallback(async (topicId) => {
+    if (!topicId) return
+    const key = `topic:${topicId}`
     if (viewedRef.current.has(key)) return
     viewedRef.current.add(key)
-    try {
-      await ForumAPI.view({ type, id })
-    } catch {
-      // молча игнорируем
-    }
+    try { await ForumAPI.view({ topicId }) } catch {}
   }, [])
-  return { mark }
+  return { markTopicView }
 }
 
 // ----------------------------------------------------
-// useNews — аггрегированные новости (пагинация, источники)
+// useNews — аггрегированные новости (как было)
 // ----------------------------------------------------
-export function useNews({ page=1, pageSize, source='all', sort='time' } = {}) {
-  const size = pageSize || Number(process.env.NEXT_PUBLIC_NEWS_PAGE_SIZE || 50) || 50
-  const key = keyNews(page, size, source, sort)
-  const { data, error, isLoading, mutate } = useSWR(key, () =>
-    NewsAPI.list({ page, pageSize: size, source, sort }), swrOpts)
+export function useNews({ page=1, pageSize=50, source='all', sort='time' } = {}) {
+  const key = keyNews(page, pageSize, source, sort)
+  const { data, error, isLoading, mutate } = useSWR(
+    key,
+    () => NewsAPI.list({ page, pageSize, source, sort }),
+    { ...swrOpts }
+  )
 
   return {
     items: data?.items || [],
     total: data?.total || 0,
     page,
-    pageSize: size,
+    pageSize,
     error,
     isLoading,
     refresh: mutate,
@@ -276,7 +267,7 @@ export function useNews({ page=1, pageSize, source='all', sort='time' } = {}) {
 }
 
 // ----------------------------------------------------
-// Полезные утилиты для UI
+// Утилиты для UI
 // ----------------------------------------------------
 export function useDebouncedState(initial='', delay=400) {
   const [value, setValue] = useState(initial)
@@ -286,30 +277,6 @@ export function useDebouncedState(initial='', delay=400) {
     return () => clearTimeout(id)
   }, [value, delay])
   return { value, setValue, debounced }
-}
-
-export function useTopicSelectors({ items }) {
-  // готовые представления: новые / популярные / самое обсуждаемое
-  const newest = useMemo(() =>
-    [...(items||[])].sort((a,b)=> (b.ts||0)-(a.ts||0)), [items])
-
-  const mostViewed = useMemo(() =>
-    [...(items||[])].sort((a,b)=> (b.views||0)-(a.views||0)), [items])
-
-  const mostDiscussed = useMemo(() =>
-    [...(items||[])].sort((a,b)=> (b.posts||0)-(a.posts||0)), [items])
-
-  return { newest, mostViewed, mostDiscussed }
-}
-
-export function usePostSelectors({ posts }) {
-  const newest = useMemo(() =>
-    [...(posts||[])].sort((a,b)=> (b.ts||0)-(a.ts||0)), [posts])
-
-  const popular = useMemo(() =>
-    [...(posts||[])].sort((a,b)=> (b.likes||0)-(a.likes||0)), [posts])
-
-  return { newest, popular }
 }
 
 export function useFmtDate() {

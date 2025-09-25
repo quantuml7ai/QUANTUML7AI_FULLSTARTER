@@ -1,151 +1,104 @@
-/* ============================================================================
-   POST /api/forum/report — production (Edge, strict auth)
-   Тело (любой формат):
-     { postId: string, reason?: string }
-     { target: 'post', id: string, reason?: string }
-
-   Требует авторизацию: cookie ql7_uid (или header x-ql7-uid). Иначе 401.
-   Поведение:
-     - Один актор ⇒ один голос на пост (уникальность per post)
-     - Порог бана автора по ENV (дефолт: 10 уникальных акторов), длительность бана ENV (24ч)
-     - При новом репорте инкрементируем post.reports (защита от <0)
-   Ответ: { ok:true, reported:true, postReports, userReports, banned, threshold }
-   ENV:
-     UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN
-     FORUM_REPORT_THRESHOLD   (дефолт 10)
-     FORUM_BAN_SECONDS        (дефолт 86400 = 24ч)
-   ============================================================================ */
+// app/api/forum/react/route.js
+// БОЕВАЯ: Реакции на пост (эмодзи). 👍/👎 — взаимоисключение.
+// Контракт: POST { target:'post', id, reaction, remove? } -> { ok }
 
 export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
 
-import { NextResponse } from 'next/server'
-import { headers } from 'next/headers'
+const RURL = process.env.UPSTASH_REDIS_REST_URL
+const RTOK = process.env.UPSTASH_REDIS_REST_TOKEN
 
-/* =============================== ENV/CONST =============================== */
-const ENV = {
-  URL   : process.env.UPSTASH_REDIS_REST_URL   || '',
-  TOKEN : process.env.UPSTASH_REDIS_REST_TOKEN || '',
-  THR   : Math.max(1, Number(process.env.FORUM_REPORT_THRESHOLD || 10)),
-  BAN_S : Math.max(60, Number(process.env.FORUM_BAN_SECONDS || 86400)),
-}
-const TIMEOUT = 8000
-
-// v1 keys
-const K_POST_V1       = (p)=> `ql7:forum:v1:post:${p}`
-const K_REPORT_SET    = (p)=> `ql7:forum:v1:reports:${p}`         // SET of reporter ids (uid)
-const K_USER_REP_SET  = (u)=> `ql7:forum:v1:user-reports:${u}`    // SET of reporter ids against user
-const K_BAN_V1        = (u)=> `ql7:forum:v1:ban:${u}`             // {until:number}
-
-/* =============================== HTTP utils =============================== */
-const H = {
-  'Cache-Control':'no-store',
-  'Content-Type':'application/json; charset=utf-8',
-}
-const ok   = (d) => NextResponse.json({ ok:true, ...d }, { headers: H })
-const fail = (s,m)=> new NextResponse(JSON.stringify({ ok:false, error:m }), { status:s, headers: H })
-export async function OPTIONS(){ return new NextResponse(null, { status:204, headers: H }) }
-
-/* =============================== Upstash helpers =============================== */
-const haveUpstash = !!(ENV.URL && ENV.TOKEN)
-const withTimeout = (p, ms=TIMEOUT) => new Promise((res,rej)=>{
-  const id = setTimeout(()=>rej(new Error('timeout')), ms)
-  p.then(v=>{clearTimeout(id);res(v)}, e=>{clearTimeout(id);rej(e)})
-})
-async function rCmd(command, ...args){
-  if(!haveUpstash) throw new Error('upstash_not_configured')
-  const path = [command, ...args.map(x=>encodeURIComponent(String(x)))].join('/')
-  const r = await withTimeout(fetch(`${ENV.URL}/${path}`,{
-    headers:{ Authorization:`Bearer ${ENV.TOKEN}` }, cache:'no-store'
-  }))
-  if(!r.ok) throw new Error(`upstash_${r.status}`)
-  return r.json()
-}
-async function rGet(key){
-  if(!haveUpstash) return null
-  const r = await withTimeout(fetch(`${ENV.URL}/get/${encodeURIComponent(key)}`,{
-    headers:{ Authorization:`Bearer ${ENV.TOKEN}` }, cache:'no-store'
-  }))
-  if(!r.ok) return null
-  const j = await r.json()
-  const raw = j?.result
-  if(raw == null) return null
-  try { return JSON.parse(raw) } catch { return raw }
-}
-async function rSetJson(key, value){
-  if(!haveUpstash) throw new Error('upstash_not_configured')
-  const r = await withTimeout(fetch(`${ENV.URL}/set/${encodeURIComponent(key)}`,{
-    method:'POST',
-    headers:{ Authorization:`Bearer ${ENV.TOKEN}`, 'Content-Type':'application/json' },
-    body: JSON.stringify({ value: JSON.stringify(value) }),
-    cache:'no-store'
-  }))
-  if(!r.ok) throw new Error(`upstash_${r.status}`)
-  return true
-}
-async function rSetJsonTTL(key, value, ttlSec){
-  return rCmd('set', key, JSON.stringify(value), 'EX', String(ttlSec))
+async function rcmd(command, ...args) {
+  const r = await fetch(RURL, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${RTOK}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ command: [command, ...args] }),
+    cache: 'no-store',
+  })
+  const j = await r.json().catch(() => null)
+  if (!j) throw new Error('upstash_error')
+  return j.result
 }
 
-/* =============================== Auth & Utils =============================== */
-function getCookie(name, cookieHeader){
-  if(!cookieHeader) return null
-  const m = cookieHeader.match(new RegExp(`(?:^|; )${name}=([^;]*)`))
-  return m ? decodeURIComponent(m[1]) : null
+const K = {
+  post:       (id) => `forum:post:${id}`,                // JSON (существование поста)
+  postReact:  (id) => `forum:post:${id}:reactions`,      // HMAP emoji -> count
+  postReactBy:(id,emoji)=> `forum:post:${id}:reactions:users:${emoji}`, // SET of users (кто поставил)
 }
-function requireActor(){
-  const h = headers()
-  const cookieHeader = h.get('cookie') || ''
-  const uidHdr = (h.get('x-ql7-uid') || h.get('x-user-id') || '').trim()
-  const uidCk  = getCookie('ql7_uid', cookieHeader) || ''
-  const uid = (uidHdr || uidCk).trim()
-  if(!uid) return null
-  return uid
+
+function pickUser(req) {
+  try {
+    const ip =
+      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      req.headers.get('cf-connecting-ip') ||
+      req.headers.get('x-real-ip') || ''
+    const asherId   = req.headers.get('x-asher-id')   || null
+    const accountId = req.headers.get('x-account-id') || null
+    return asherId || accountId || ip || 'anon'
+  } catch {
+    return 'anon'
+  }
 }
-const toNum = (v,d=0)=>{ const n=Number(v); return Number.isFinite(n)?n:d }
 
-/* =============================== Handler =============================== */
-export async function POST(req){
-  try{
-    // strict auth
-    const actorUid = requireActor()
-    if(!actorUid) return fail(401, 'auth_required')
+// безопасный инкремент с «зажимом» не ниже 0
+async function hincrClampZero(hashKey, field, delta) {
+  const v = Number(await rcmd('HINCRBY', hashKey, field, delta)) || 0
+  if (v < 0) {
+    await rcmd('HSET', hashKey, field, 0)
+    return 0
+  }
+  return v
+}
 
-    const ct = (req.headers.get('content-type')||'').toLowerCase()
-    if (!ct.includes('application/json')) return fail(415,'json_required')
-
-    const body = await req.json().catch(()=> ({}))
-    const postId = String(body?.postId || (body?.target === 'post' ? body?.id : '') || '').trim()
-    if(!postId) return fail(400,'post_required')
-
-    const post = await rGet(K_POST_V1(postId))
-    if(!post || !post.id) return fail(404,'post_not_found')
-
-    const targetUserId = String(post?.user?.id || post?.user || '').trim() || 'anon'
-
-    // 1) Уникальный репорт по посту от этого uid
-    const addPostRes   = await rCmd('sadd', K_REPORT_SET(postId), actorUid)
-    const addedForPost = Number(addPostRes?.result || 0) === 1
-    const postReports  = Number((await rCmd('scard', K_REPORT_SET(postId)))?.result || 0)
-
-    // 2) Уникальный репорт против автора (анти-абьюз)
-    await rCmd('sadd', K_USER_REP_SET(targetUserId), actorUid)
-    const userReports  = Number((await rCmd('scard', K_USER_REP_SET(targetUserId)))?.result || 0)
-
-    // 3) Инкремент post.reports только если новый репорт по посту
-    if (addedForPost){
-      post.reports = Math.max(0, toNum(post.reports, 0) + 1)
-      await rSetJson(K_POST_V1(postId), post)
+export async function POST(req) {
+  try {
+    if (!RURL || !RTOK) {
+      return new Response(JSON.stringify({ ok:false, error:'misconfig' }), { status: 500 })
     }
 
-    // 4) Бан пользователя при достижении порога
-    let banned = false
-    if (userReports >= ENV.THR){
-      await rSetJsonTTL(K_BAN_V1(targetUserId), { until: Date.now() + ENV.BAN_S*1000 }, ENV.BAN_S)
-      banned = true
+    const { target, id, reaction, remove = false } = await req.json()
+    if (target !== 'post' || !id || !reaction) {
+      return new Response(JSON.stringify({ ok:false, error:'bad_args' }), { status: 400 })
     }
 
-    return ok({ reported:true, postReports, userReports, banned, threshold: ENV.THR })
-  }catch(e){
-    return fail(500, e?.message || 'report_error')
+    // убедимся, что пост существует (мягко)
+    const postRaw = await rcmd('GET', K.post(id))
+    if (!postRaw) {
+      return new Response(JSON.stringify({ ok:false, error:'post_not_found' }), { status: 404 })
+    }
+
+    const uid = pickUser(req)
+    const emoji = String(reaction)
+
+    const hash = K.postReact(id)
+    const set  = K.postReactBy(id, emoji)
+
+    // Взаимоисключение для пары 👍/👎
+    const isThumb = (emoji === '👍' || emoji === '👎')
+    const other   = emoji === '👍' ? '👎' : (emoji === '👎' ? '👍' : null)
+
+    if (isThumb && other) {
+      const otherSet = K.postReactBy(id, other)
+      const hadOther = await rcmd('SISMEMBER', otherSet, uid)
+      if (hadOther) {
+        await rcmd('SREM', otherSet, uid)
+        await hincrClampZero(hash, other, -1)
+      }
+    }
+
+    // Тоггл текущей реакции
+    const has = await rcmd('SISMEMBER', set, uid)
+    if (remove || has) {
+      await rcmd('SREM', set, uid)
+      await hincrClampZero(hash, emoji, -1)
+    } else {
+      await rcmd('SADD', set, uid)
+      // если поле ещё не существует, HINCRBY создаст с 0
+      await hincrClampZero(hash, emoji, +1)
+    }
+
+    return Response.json({ ok:true }, { headers: { 'Cache-Control': 'no-store' } })
+  } catch (e) {
+    return new Response(JSON.stringify({ ok:false, error:'srv' }), { status: 500 })
   }
 }
