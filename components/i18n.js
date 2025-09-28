@@ -3637,6 +3637,16 @@ const UNLIMIT_TR = {
   ai_unlimit_toast_on: 'VIP+ etkin',
   ai_unlimit_toast_off: 'VIP+ sona erdi',
 }
+/* -------------------- MERGE -------------------- */
+try {
+  Object.assign(dict.en, UNLIMIT_EN)
+  Object.assign(dict.ru, UNLIMIT_RU)
+  Object.assign(dict.uk, UNLIMIT_UK)
+  Object.assign(dict.es, UNLIMIT_ES)
+  Object.assign(dict.zh, UNLIMIT_ZH)
+  Object.assign(dict.ar, UNLIMIT_AR)
+  Object.assign(dict.tr, UNLIMIT_TR)
+} catch (e) {}
 /* -------------------- ACTIVE_UNTIL (only one key) -------------------- */
 const ACTIVE_EN = { active_until: 'active until' }
 const ACTIVE_RU = { active_until: 'активно до' }
@@ -3656,17 +3666,624 @@ try {
   Object.assign(dict.ar, ACTIVE_AR)
   Object.assign(dict.tr, ACTIVE_TR)
 } catch (e) {}
+/* -------------------- EN -------------------- */
+const FORUM_NEWS_EN = {
+  forum_title: 'Forum',
+  forum_seo_title: 'Forum — Quantum L7 AI',
+  forum_seo_desc:
+    'A cosmic-scale forum where traders, builders and newcomers meet AI. Cross-chain topics, global news, market wisdom and history in the making.',
+  forum_description:
+    'Welcome to the Quantum L7 AI Forum — a cosmic hub that unites people from every continent and every chain. '
+    + 'Here professionals share hard-won trading practice, newcomers learn safely, and research turns into real products. '
+    + 'We connect all blockchains, aggregate worldwide news and macro signals, and link them to assets and topics so any discussion stays grounded in facts. '
+    + 'The forum blends human insight with artificial intelligence: threads can include data, charts and on-chain evidence; summaries keep reading fast; '
+    + 'reactions and reputation surface quality contributions. This is a living archive of the industry — history is being written in public. '
+    + 'Be precise, be respectful, and build together. The future of the planet’s financial fabric will be woven here by humans and AI side by side.',
+  news_title: 'News',
+  news_seo_title: 'News — Quantum L7 AI',
+  news_seo_desc:
+    'A multilingual stream of crypto, macro and on-chain events — normalized, deduplicated and ready for fast reading.',
+}
+
+/* -------------------- RU -------------------- */
+const FORUM_NEWS_RU = {
+  forum_title: 'Форум',
+  forum_seo_title: 'Форум — Quantum L7 AI',
+  forum_seo_desc:
+    'Космический форум, где трейдеры, создатели и новички встречаются с ИИ. Кросс-чейн темы, мировые новости и живая история рынка.',
+  forum_description:
+    'Добро пожаловать на Форум Quantum L7 AI — узел космического масштаба, который объединяет людей со всех континентов и всех блокчейнов. '
+    + 'Здесь профессионалы делятся практикой, новички учатся без страха, а исследования превращаются в работающие продукты. '
+    + 'Мы объединяем все блокчейны, собираем мировые новости и макро-сигналы, привязываем их к активам и темам, чтобы обсуждения оставались предметными. '
+    + 'Форум соединяет человеческую экспертизу и искусственный интеллект: посты дополняются данными, графиками и ончейн-доказательствами; '
+    + 'сводки ускоряют чтение; реакции и репутация поднимают качественный контент. Это живой архив индустрии — история пишется здесь и сейчас. '
+    + 'Будьте точны, уважительны и создавайте вместе. Будущее финансовой структуры планеты рождается здесь — на стыке человека и ИИ.',
+  news_title: 'Новости',
+  news_seo_title: 'Новости — Quantum L7 AI',
+  news_seo_desc:
+    'Многоязычная лента крипты, макро и ончейн-событий: нормализовано, без дублей, удобно для быстрого чтения.',
+}
+
+/* -------------------- UK -------------------- */
+const FORUM_NEWS_UK = {
+  forum_title: 'Форум',
+  forum_seo_title: 'Форум — Quantum L7 AI',
+  forum_seo_desc:
+    'Космічний форум, де трейдери, розробники й новачки зустрічаються з ШІ. Крос-чейн теми, світові новини та жива історія.',
+  forum_description:
+    'Ласкаво просимо на Форум Quantum L7 AI — космічний вузол, що об’єднує людей з усього світу та всіх блокчейнів. '
+    + 'Тут професіонали діляться практикою, новачки навчаються безпечно, а дослідження стають реальними продуктами. '
+    + 'Ми збираємо новини з усього світу та ончейн-події, пов’язуємо їх із активами й темами, щоб обговорення були предметними. '
+    + 'Форум поєднує людську експертизу з ШІ: треди можна підсилювати даними, графіками та доказами з блокчейну; '
+    + 'резюме пришвидшує читання; реакції та репутація підсвічують якісний контент. Це живий архів індустрії — історію пишемо тут і зараз. '
+    + 'Будь точним, поважай інших і творімо разом. Майбутнє фінансової тканини планети творитимуть люди та ШІ пліч-о-пліч саме тут.',
+  news_title: 'Новини',
+  news_seo_title: 'Новини — Quantum L7 AI',
+  news_seo_desc:
+    'Багатомовна стрічка крипти, макро та ончейн-подій — нормалізована, без дублікатів, для швидкого читання.',
+}
+
+/* -------------------- ES -------------------- */
+const FORUM_NEWS_ES = {
+  forum_title: 'Foro',
+  forum_seo_title: 'Foro — Quantum L7 AI',
+  forum_seo_desc:
+    'Foro de escala cósmica donde traders, builders y principiantes se encuentran con la IA. Temas cross-chain y noticias globales.',
+  forum_description:
+    'Bienvenido al Foro de Quantum L7 AI: un hub cósmico que une a personas de todo el planeta y de todas las cadenas. '
+    + 'Aquí los profesionales comparten práctica real, los principiantes aprenden con seguridad y la investigación se convierte en producto. '
+    + 'Conectamos todas las cadenas y agregamos noticias globales y señales macro, enlazándolas con activos y temas para mantener el debate anclado a hechos. '
+    + 'El foro fusiona la visión humana con la inteligencia artificial: los hilos pueden incluir datos, gráficos y pruebas on-chain; '
+    + 'los resúmenes agilizan la lectura; las reacciones y la reputación elevan las mejores aportaciones. Es un archivo vivo de la industria — la historia se escribe aquí. '
+    + 'Sé preciso, respeta y construyamos juntos. El futuro del tejido financiero del planeta se teje aquí, codo a codo entre humanos y IA.',
+  news_title: 'Noticias',
+  news_seo_title: 'Noticias — Quantum L7 AI',
+  news_seo_desc:
+    'Flujo multilingüe de cripto, macro y eventos on-chain — normalizado y sin duplicados para lectura rápida.',
+}
+
+/* -------------------- ZH (简体) -------------------- */
+const FORUM_NEWS_ZH = {
+  forum_title: '论坛',
+  forum_seo_title: '论坛 — Quantum L7 AI',
+  forum_seo_desc:
+    '宇宙级论坛：交易员、建设者与新手在此与 AI 相遇。跨链话题、全球新闻与正在书写的历史。',
+  forum_description:
+    '欢迎来到 Quantum L7 AI 论坛——一个连接全球与各条公链的宇宙级枢纽。'
+    + '在这里，高手分享实战经验，新手安全学习，研究真正落地为产品。'
+    + '我们整合全球新闻、链上事件与宏观信号，并与资产和主题关联，让讨论始终以事实为基。'
+    + '论坛把人类洞见与人工智能结合：帖子可附数据、图表与链上证据；摘要让阅读更快；'
+    + '反应与声誉机制凸显高质量内容。这是行业的活档案——历史正在公开书写。'
+    + '请保持准确与尊重，并一起构建。星球金融结构的未来，将在此由人类与 AI 并肩编织。',
+  news_title: '新闻',
+  news_seo_title: '新闻 — Quantum L7 AI',
+  news_seo_desc:
+    '多语言加密/宏观/链上资讯流 —— 规范化、去重，适合快速阅读。',
+}
+
+/* -------------------- AR -------------------- */
+const FORUM_NEWS_AR = {
+  forum_title: 'المنتدى',
+  forum_seo_title: 'المنتدى — Quantum L7 AI',
+  forum_seo_desc:
+    'منتدى بمقياس كوني يجمع المتداولين والبنّائين والمبتدئين مع الذكاء الاصطناعي. مواضيع عبر السلاسل وأخبار عالمية.',
+  forum_description:
+    'مرحبًا بك في منتدى Quantum L7 AI — مركز كوني يوحّد الناس من جميع القارات وجميع الشبكات. '
+    + 'هنا يشارك المحترفون خبراتهم العملية، ويتعلّم المبتدئون بأمان، وتتحول الأبحاث إلى منتجات حقيقية. '
+    + 'نجمع الأخبار العالمية والأحداث على السلسلة والإشارات الكلية ونربطها بالأصول والمواضيع لتبقى الحوارات قائمة على الحقائق. '
+    + 'يجمع المنتدى بين بصيرة الإنسان والذكاء الاصطناعي: يمكن إرفاق البيانات والرسوم والأدلة على السلسلة؛ '
+    + 'تُسرّع الملخصات القراءة؛ وتُبرز التفاعلات والسمعة المشاركات عالية الجودة. هذا أرشيف حي للصناعة — التاريخ يُكتب علناً هنا. '
+    + 'كن دقيقًا ومحترمًا ولنَبْنِ معًا. مستقبل نسيج التمويل على الكوكب سيُنسَج هنا جنبًا إلى جنب بين البشر والذكاء الاصطناعي.',
+  news_title: 'الأخبار',
+  news_seo_title: 'الأخبار — Quantum L7 AI',
+  news_seo_desc:
+    'سير أخبار متعدد اللغات للتشفير والاقتصاد الكلي وأحداث السلسلة — منسّق وخالٍ من التكرار لقراءة سريعة.',
+}
+
+/* -------------------- TR -------------------- */
+const FORUM_NEWS_TR = {
+  forum_title: 'Forum',
+  forum_seo_title: 'Forum — Quantum L7 AI',
+  forum_seo_desc:
+    'Tüccarların, builder’ların ve yeni başlayanların yapay zekâ ile buluştuğu kozmik forum. Zincirler arası konular ve küresel haberler.',
+  forum_description:
+    'Quantum L7 AI Forumu’na hoş geldin — gezegenin her yerinden ve tüm zincirlerden insanları bir araya getiren kozmik bir merkez. '
+    + 'Burada profesyoneller gerçek pratiklerini paylaşır, yeni başlayanlar güvenle öğrenir ve araştırmalar ürüne dönüşür. '
+    + 'Tüm blok zincirlerini ve küresel haberleri birleştirir, bunları varlıklar ve konularla ilişkilendiririz ki tartışmalar gerçeklere dayansın. '
+    + 'Forum, insan sezgisini yapay zekâ ile birleştirir: başlıklara veri, grafik ve zincir üstü kanıtlar eklenebilir; özetler okumayı hızlandırır; '
+    + 'tepkiler ve itibar kaliteli katkıları öne çıkarır. Bu sektörün yaşayan arşivi — tarih burada yazılıyor. '
+    + 'Net ol, saygılı ol ve birlikte inşa edelim. Gezegenin finansal dokusunun geleceği burada, insan ve yapay zekâ omuz omuza örülecek.',
+  news_title: 'Haberler',
+  news_seo_title: 'Haberler — Quantum L7 AI',
+  news_seo_desc:
+    'Çok dilli kripto/makro/zincir üstü haber akışı — normalize, yinelenmesiz ve hızlı okumaya uygun.',
+}
 
 /* -------------------- MERGE -------------------- */
 try {
-  Object.assign(dict.en, UNLIMIT_EN)
-  Object.assign(dict.ru, UNLIMIT_RU)
-  Object.assign(dict.uk, UNLIMIT_UK)
-  Object.assign(dict.es, UNLIMIT_ES)
-  Object.assign(dict.zh, UNLIMIT_ZH)
-  Object.assign(dict.ar, UNLIMIT_AR)
-  Object.assign(dict.tr, UNLIMIT_TR)
-} catch (e) {}
+  Object.assign(dict.en  || {}, FORUM_NEWS_EN)
+  Object.assign(dict.ru  || {}, FORUM_NEWS_RU)
+  Object.assign(dict.uk  || {}, FORUM_NEWS_UK)
+  Object.assign(dict.es  || {}, FORUM_NEWS_ES)
+  Object.assign(dict.zh  || {}, FORUM_NEWS_ZH)
+  Object.assign(dict.ar  || {}, FORUM_NEWS_AR)
+  Object.assign(dict.tr  || {}, FORUM_NEWS_TR)
+} catch (_) {}
+/* -------------------- EN -------------------- */
+const FORUM_UI_EN = {
+  forum_id_label: 'ID',
+  forum_id_copied: 'ID copied',
+  forum_total: 'total',
+  forum_btn_create_topic: 'create',
+  forum_btn_settings: 'settings',
+
+  forum_create_topic: 'Create topic',
+  forum_topic_title: 'Title',
+  forum_topic_title_ph: 'Short, precise title',
+  forum_topic_category: 'Category',
+  forum_topic_category_ph: 'e.g. Macro, DeFi, On-chain',
+  forum_topic_tags: 'Tags',
+  forum_topic_tags_ph: 'Comma separated (btc,eth,macro)',
+  forum_topic_tags_hint: 'Use 1–5 tags. Avoid duplicates.',
+  forum_topic_first_msg: 'First message',
+  forum_topic_first_msg_ph: 'Start the discussion with facts, data and sources…',
+  forum_cancel: 'Cancel',
+  forum_creating: 'Creating…',
+  forum_create: 'Create',
+
+  forum_err_topics: 'Failed to load topics',
+  forum_empty_topics: 'No topics yet',
+
+  forum_prev: 'prev',
+  forum_next: 'next',
+
+  forum_msgs: 'msgs',
+  forum_views: 'views',
+
+  forum_err_posts: 'Failed to load posts',
+  forum_empty_posts: 'No messages yet',
+
+  forum_replying_to: 'Replying to',
+  forum_composer_hint: 'Be precise. Respect evidence. Links are welcome.',
+  forum_composer_placeholder: 'Write a message…',
+  forum_send: 'Send',
+
+  forum_emoji_recent: 'Recent',
+  forum_more_emoji: 'More emoji',
+  forum_done: 'Done',
+
+  forum_btn_report_title: 'Report',
+  forum_btn_reply_title: 'Reply',
+  forum_user_anon: 'Anonymous',
+  forum_report_ok: 'Report sent',
+
+  forum_back: 'Back',
+  forum_open_replies: 'Replies',
+  forum_hint_select_topic: 'Select a topic to read and reply',
+  forum_topic_open: 'Open topic',
+
+  forum_settings_topics: 'Topics',
+  forum_settings_posts: 'Posts',
+  forum_sort_by: 'Sort by',
+  forum_sort_new: 'Newest',
+  forum_sort_top: 'Top',
+  forum_sort_views: 'By views',
+  forum_search: 'Search',
+  forum_search_placeholder: 'Enter keyword…',
+  forum_apply: 'Apply',
+
+  forum_need_auth: 'Please sign in first',
+}
+
+/* -------------------- RU -------------------- */
+const FORUM_UI_RU = {
+  forum_id_label: 'ID',
+  forum_id_copied: 'ID скопирован',
+  forum_total: 'всего',
+  forum_btn_create_topic: 'создать',
+  forum_btn_settings: 'настройки',
+
+  forum_create_topic: 'Создать тему',
+  forum_topic_title: 'Заголовок',
+  forum_topic_title_ph: 'Короткий точный заголовок',
+  forum_topic_category: 'Категория',
+  forum_topic_category_ph: 'напр. Макро, DeFi, Ончейн',
+  forum_topic_tags: 'Теги',
+  forum_topic_tags_ph: 'Через запятую (btc,eth,macro)',
+  forum_topic_tags_hint: '1–5 тегов. Избегайте дублей.',
+  forum_topic_first_msg: 'Первое сообщение',
+  forum_topic_first_msg_ph: 'Начните обсуждение: факты, данные, источники…',
+  forum_cancel: 'Отмена',
+  forum_creating: 'Создаём…',
+  forum_create: 'Создать',
+
+  forum_err_topics: 'Не удалось загрузить темы',
+  forum_empty_topics: 'Тем пока нет',
+
+  forum_prev: 'назад',
+  forum_next: 'вперёд',
+
+  forum_msgs: 'сообщ.',
+  forum_views: 'просм.',
+
+  forum_err_posts: 'Не удалось загрузить сообщения',
+  forum_empty_posts: 'Сообщений пока нет',
+
+  forum_replying_to: 'Ответ на',
+  forum_composer_hint: 'Будьте точны. Ссылайтесь на факты. Ссылки приветствуются.',
+  forum_composer_placeholder: 'Напишите сообщение…',
+  forum_send: 'Отправить',
+
+  forum_emoji_recent: 'Недавние',
+  forum_more_emoji: 'Больше эмодзи',
+  forum_done: 'Готово',
+
+  forum_btn_report_title: 'Пожаловаться',
+  forum_btn_reply_title: 'Ответить',
+  forum_user_anon: 'Аноним',
+  forum_report_ok: 'Жалоба отправлена',
+
+  forum_back: 'Назад',
+  forum_open_replies: 'Ответы',
+  forum_hint_select_topic: 'Выберите тему для чтения и ответа',
+  forum_topic_open: 'Открыть тему',
+
+  forum_settings_topics: 'Темы',
+  forum_settings_posts: 'Сообщения',
+  forum_sort_by: 'Сортировать по',
+  forum_sort_new: 'Новизне',
+  forum_sort_top: 'Топ',
+  forum_sort_views: 'Просмотрам',
+  forum_search: 'Поиск',
+  forum_search_placeholder: 'Введите ключевое слово…',
+  forum_apply: 'Применить',
+
+  forum_need_auth: 'Сначала войдите в систему',
+}
+
+/* -------------------- UK -------------------- */
+const FORUM_UI_UK = {
+  forum_id_label: 'ID',
+  forum_id_copied: 'ID скопійовано',
+  forum_total: 'всього',
+  forum_btn_create_topic: 'створити',
+  forum_btn_settings: 'налаштування',
+
+  forum_create_topic: 'Створити тему',
+  forum_topic_title: 'Заголовок',
+  forum_topic_title_ph: 'Короткий точний заголовок',
+  forum_topic_category: 'Категорія',
+  forum_topic_category_ph: 'напр. Макро, DeFi, Ончейн',
+  forum_topic_tags: 'Теги',
+  forum_topic_tags_ph: 'Через кому (btc,eth,macro)',
+  forum_topic_tags_hint: '1–5 тегів. Уникайте дублів.',
+  forum_topic_first_msg: 'Перше повідомлення',
+  forum_topic_first_msg_ph: 'Почніть дискусію: факти, дані, джерела…',
+  forum_cancel: 'Скасувати',
+  forum_creating: 'Створюємо…',
+  forum_create: 'Створити',
+
+  forum_err_topics: 'Не вдалося завантажити теми',
+  forum_empty_topics: 'Тем поки немає',
+
+  forum_prev: 'назад',
+  forum_next: 'далі',
+
+  forum_msgs: 'повідомл.',
+  forum_views: 'перегл.',
+
+  forum_err_posts: 'Не вдалося завантажити повідомлення',
+  forum_empty_posts: 'Повідомлень поки немає',
+
+  forum_replying_to: 'Відповідь на',
+  forum_composer_hint: 'Будьте точні. Посилайтеся на факти. Посилання вітаються.',
+  forum_composer_placeholder: 'Напишіть повідомлення…',
+  forum_send: 'Надіслати',
+
+  forum_emoji_recent: 'Нещодавні',
+  forum_more_emoji: 'Більше емодзі',
+  forum_done: 'Готово',
+
+  forum_btn_report_title: 'Поскаржитися',
+  forum_btn_reply_title: 'Відповісти',
+  forum_user_anon: 'Анонім',
+  forum_report_ok: 'Скаргу надіслано',
+
+  forum_back: 'Назад',
+  forum_open_replies: 'Відповіді',
+  forum_hint_select_topic: 'Оберіть тему для читання та відповіді',
+  forum_topic_open: 'Відкрити тему',
+
+  forum_settings_topics: 'Теми',
+  forum_settings_posts: 'Повідомлення',
+  forum_sort_by: 'Сортувати за',
+  forum_sort_new: 'Новими',
+  forum_sort_top: 'Топ',
+  forum_sort_views: 'Переглядами',
+  forum_search: 'Пошук',
+  forum_search_placeholder: 'Введіть ключове слово…',
+  forum_apply: 'Застосувати',
+
+  forum_need_auth: 'Спершу увійдіть',
+}
+
+/* -------------------- ES -------------------- */
+const FORUM_UI_ES = {
+  forum_id_label: 'ID',
+  forum_id_copied: 'ID copiado',
+  forum_total: 'total',
+  forum_btn_create_topic: 'crear',
+  forum_btn_settings: 'ajustes',
+
+  forum_create_topic: 'Crear tema',
+  forum_topic_title: 'Título',
+  forum_topic_title_ph: 'Título corto y preciso',
+  forum_topic_category: 'Categoría',
+  forum_topic_category_ph: 'p. ej., Macro, DeFi, On-chain',
+  forum_topic_tags: 'Etiquetas',
+  forum_topic_tags_ph: 'Separadas por comas (btc,eth,macro)',
+  forum_topic_tags_hint: 'Usa 1–5 etiquetas. Evita duplicados.',
+  forum_topic_first_msg: 'Primer mensaje',
+  forum_topic_first_msg_ph: 'Inicia con hechos, datos y fuentes…',
+  forum_cancel: 'Cancelar',
+  forum_creating: 'Creando…',
+  forum_create: 'Crear',
+
+  forum_err_topics: 'No se pudieron cargar los temas',
+  forum_empty_topics: 'Aún no hay temas',
+
+  forum_prev: 'anterior',
+  forum_next: 'siguiente',
+
+  forum_msgs: 'msjs',
+  forum_views: 'vistas',
+
+  forum_err_posts: 'No se pudieron cargar los mensajes',
+  forum_empty_posts: 'Aún no hay mensajes',
+
+  forum_replying_to: 'Respondiendo a',
+  forum_composer_hint: 'Sé preciso. Basa en evidencias. Los enlaces son bienvenidos.',
+  forum_composer_placeholder: 'Escribe un mensaje…',
+  forum_send: 'Enviar',
+
+  forum_emoji_recent: 'Recientes',
+  forum_more_emoji: 'Más emoji',
+  forum_done: 'Listo',
+
+  forum_btn_report_title: 'Reportar',
+  forum_btn_reply_title: 'Responder',
+  forum_user_anon: 'Anónimo',
+  forum_report_ok: 'Reporte enviado',
+
+  forum_back: 'Volver',
+  forum_open_replies: 'Respuestas',
+  forum_hint_select_topic: 'Elige un tema para leer y responder',
+  forum_topic_open: 'Abrir tema',
+
+  forum_settings_topics: 'Temas',
+  forum_settings_posts: 'Mensajes',
+  forum_sort_by: 'Ordenar por',
+  forum_sort_new: 'Más nuevo',
+  forum_sort_top: 'Top',
+  forum_sort_views: 'Vistas',
+  forum_search: 'Buscar',
+  forum_search_placeholder: 'Introduce una palabra clave…',
+  forum_apply: 'Aplicar',
+
+  forum_need_auth: 'Inicia sesión primero',
+}
+
+/* -------------------- ZH (简体) -------------------- */
+const FORUM_UI_ZH = {
+  forum_id_label: 'ID',
+  forum_id_copied: '已复制 ID',
+  forum_total: '合计',
+  forum_btn_create_topic: '创建',
+  forum_btn_settings: '设置',
+
+  forum_create_topic: '创建主题',
+  forum_topic_title: '标题',
+  forum_topic_title_ph: '简短而准确的标题',
+  forum_topic_category: '分类',
+  forum_topic_category_ph: '如 Macro、DeFi、On-chain',
+  forum_topic_tags: '标签',
+  forum_topic_tags_ph: '逗号分隔（btc,eth,macro）',
+  forum_topic_tags_hint: '使用 1–5 个标签，避免重复。',
+  forum_topic_first_msg: '首条消息',
+  forum_topic_first_msg_ph: '用事实、数据与来源开启讨论…',
+  forum_cancel: '取消',
+  forum_creating: '正在创建…',
+  forum_create: '创建',
+
+  forum_err_topics: '主题加载失败',
+  forum_empty_topics: '暂无主题',
+
+  forum_prev: '上一页',
+  forum_next: '下一页',
+
+  forum_msgs: '消息',
+  forum_views: '浏览',
+
+  forum_err_posts: '消息加载失败',
+  forum_empty_posts: '暂无消息',
+
+  forum_replying_to: '回复给',
+  forum_composer_hint: '请准确、基于证据。欢迎附上链接。',
+  forum_composer_placeholder: '写点什么…',
+  forum_send: '发送',
+
+  forum_emoji_recent: '最近',
+  forum_more_emoji: '更多表情',
+  forum_done: '完成',
+
+  forum_btn_report_title: '举报',
+  forum_btn_reply_title: '回复',
+  forum_user_anon: '匿名',
+  forum_report_ok: '已提交举报',
+
+  forum_back: '返回',
+  forum_open_replies: '回复',
+  forum_hint_select_topic: '选择一个主题以阅读和回复',
+  forum_topic_open: '打开主题',
+
+  forum_settings_topics: '主题',
+  forum_settings_posts: '消息',
+  forum_sort_by: '排序方式',
+  forum_sort_new: '最新',
+  forum_sort_top: '热门',
+  forum_sort_views: '浏览量',
+  forum_search: '搜索',
+  forum_search_placeholder: '输入关键字…',
+  forum_apply: '应用',
+
+  forum_need_auth: '请先登录',
+}
+
+/* -------------------- AR -------------------- */
+const FORUM_UI_AR = {
+  forum_id_label: 'المعرّف',
+  forum_id_copied: 'تم نسخ المعرّف',
+  forum_total: 'الإجمالي',
+  forum_btn_create_topic: 'إنشاء',
+  forum_btn_settings: 'إعدادات',
+
+  forum_create_topic: 'إنشاء موضوع',
+  forum_topic_title: 'العنوان',
+  forum_topic_title_ph: 'عنوان قصير ودقيق',
+  forum_topic_category: 'الفئة',
+  forum_topic_category_ph: 'مثلاً: ماكرو، DeFi، على السلسلة',
+  forum_topic_tags: 'الوسوم',
+  forum_topic_tags_ph: 'مفصولة بفواصل (btc,eth,macro)',
+  forum_topic_tags_hint: 'استخدم 1–5 وسوم. تجنّب التكرار.',
+  forum_topic_first_msg: 'أول رسالة',
+  forum_topic_first_msg_ph: 'ابدأ النقاش بالحقائق والبيانات والمصادر…',
+  forum_cancel: 'إلغاء',
+  forum_creating: 'جارٍ الإنشاء…',
+  forum_create: 'إنشاء',
+
+  forum_err_topics: 'تعذّر تحميل المواضيع',
+  forum_empty_topics: 'لا مواضيع بعد',
+
+  forum_prev: 'السابق',
+  forum_next: 'التالي',
+
+  forum_msgs: 'رسائل',
+  forum_views: 'مشاهدات',
+
+  forum_err_posts: 'تعذّر تحميل الرسائل',
+  forum_empty_posts: 'لا رسائل بعد',
+
+  forum_replying_to: 'رد على',
+  forum_composer_hint: 'كن دقيقًا واستند إلى الأدلة. الروابط مُرحّب بها.',
+  forum_composer_placeholder: 'اكتب رسالة…',
+  forum_send: 'إرسال',
+
+  forum_emoji_recent: 'الأخيرة',
+  forum_more_emoji: 'المزيد من الرموز',
+  forum_done: 'تم',
+
+  forum_btn_report_title: 'إبلاغ',
+  forum_btn_reply_title: 'رد',
+  forum_user_anon: 'مجهول',
+  forum_report_ok: 'تم إرسال البلاغ',
+
+  forum_back: 'رجوع',
+  forum_open_replies: 'الردود',
+  forum_hint_select_topic: 'اختر موضوعًا للقراءة والرد',
+  forum_topic_open: 'فتح الموضوع',
+
+  forum_settings_topics: 'المواضيع',
+  forum_settings_posts: 'الرسائل',
+  forum_sort_by: 'فرز حسب',
+  forum_sort_new: 'الأحدث',
+  forum_sort_top: 'الأعلى',
+  forum_sort_views: 'المشاهدات',
+  forum_search: 'بحث',
+  forum_search_placeholder: 'أدخل كلمة مفتاحية…',
+  forum_apply: 'تطبيق',
+
+  forum_need_auth: 'يرجى تسجيل الدخول أولاً',
+}
+
+/* -------------------- TR -------------------- */
+const FORUM_UI_TR = {
+  forum_id_label: 'ID',
+  forum_id_copied: 'ID kopyalandı',
+  forum_total: 'toplam',
+  forum_btn_create_topic: 'oluştur',
+  forum_btn_settings: 'ayarlar',
+
+  forum_create_topic: 'Konu oluştur',
+  forum_topic_title: 'Başlık',
+  forum_topic_title_ph: 'Kısa ve net başlık',
+  forum_topic_category: 'Kategori',
+  forum_topic_category_ph: 'örn. Makro, DeFi, On-chain',
+  forum_topic_tags: 'Etiketler',
+  forum_topic_tags_ph: 'Virgülle (btc,eth,macro)',
+  forum_topic_tags_hint: '1–5 etiket. Yinelenenlerden kaçın.',
+  forum_topic_first_msg: 'İlk mesaj',
+  forum_topic_first_msg_ph: 'Tartışmayı gerçekler, veriler ve kaynaklarla başlat…',
+  forum_cancel: 'İptal',
+  forum_creating: 'Oluşturuluyor…',
+  forum_create: 'Oluştur',
+
+  forum_err_topics: 'Konular yüklenemedi',
+  forum_empty_topics: 'Henüz konu yok',
+
+  forum_prev: 'geri',
+  forum_next: 'ileri',
+
+  forum_msgs: 'msj',
+  forum_views: 'görünt.',
+
+  forum_err_posts: 'Mesajlar yüklenemedi',
+  forum_empty_posts: 'Henüz mesaj yok',
+
+  forum_replying_to: 'Yanıtlıyor',
+  forum_composer_hint: 'Kesin ol. Kanıta dayandır. Bağlantılar hoş karşılanır.',
+  forum_composer_placeholder: 'Bir mesaj yaz…',
+  forum_send: 'Gönder',
+
+  forum_emoji_recent: 'Son kullanılanlar',
+  forum_more_emoji: 'Daha fazla emoji',
+  forum_done: 'Bitti',
+
+  forum_btn_report_title: 'Şikayet',
+  forum_btn_reply_title: 'Yanıtla',
+  forum_user_anon: 'Anonim',
+  forum_report_ok: 'Şikayet gönderildi',
+
+  forum_back: 'Geri',
+  forum_open_replies: 'Yanıtlar',
+  forum_hint_select_topic: 'Okumak ve yanıtlamak için bir konu seç',
+  forum_topic_open: 'Konuyu aç',
+
+  forum_settings_topics: 'Konular',
+  forum_settings_posts: 'Mesajlar',
+  forum_sort_by: 'Sırala',
+  forum_sort_new: 'En yeni',
+  forum_sort_top: 'Top',
+  forum_sort_views: 'Görüntülenme',
+  forum_search: 'Ara',
+  forum_search_placeholder: 'Anahtar kelime gir…',
+  forum_apply: 'Uygula',
+
+  forum_need_auth: 'Lütfen önce giriş yap',
+}
+
+/* -------------------- MERGE -------------------- */
+try {
+  Object.assign(dict.en  || {}, FORUM_UI_EN)
+  Object.assign(dict.ru  || {}, FORUM_UI_RU)
+  Object.assign(dict.uk  || {}, FORUM_UI_UK)
+  Object.assign(dict.es  || {}, FORUM_UI_ES)
+  Object.assign(dict.zh  || {}, FORUM_UI_ZH)
+  Object.assign(dict.ar  || {}, FORUM_UI_AR)
+  Object.assign(dict.tr  || {}, FORUM_UI_TR)
+} catch (_) {}
+
+
+
 
 export function I18nProvider({ children }) {
   const [lang, setLang] = useState('en')
