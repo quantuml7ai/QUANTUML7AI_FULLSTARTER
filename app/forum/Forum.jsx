@@ -94,30 +94,45 @@ const api = {
       return { ok: false, error: 'network' }
     }
   },
+   // Мутации (батч операций)
+  async mutate(batch){
+    try{
+      // кто актор — берём из batch или из auth
+      const actorId =
+        batch?.userId ||
+        batch?.accountId ||
+        batch?.asherId ||
+        auth?.userId ||
+        auth?.accountId ||
+        auth?.asherId ||
+        'guest'
 
-  // Мутации (батч операций)
-  async mutate(batch) {
-    try {
-      const r = await fetch('/api/forum/mutate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        // ожидаем, что в batch есть { ops: [...], userId/accountId/asherId, isAdmin }
-        body: JSON.stringify(batch),
-      })
-
-      // Спец-обработка глобального бана
-      if (r.status === 403) {
-        // Попытка распарсить ответ, но даже если не получится — вернем флаг banned
-        const data = await r.json().catch(() => ({}))
-        return { ok: false, banned: true, ...data }
+      const headers = {
+        'Content-Type': 'application/json',
+        'x-forum-user-id': String(actorId),
       }
 
-      const data = await r.json().catch(() => ({}))
-      return data
-    } catch (e) {
-      return { ok: false, error: 'network' }
+      const payload = {
+        ...batch,
+        userId: actorId,
+        isAdmin: auth?.isAdmin ? 1 : 0,
+      }
+
+      const r = await fetch('/api/forum/mutate', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+      })
+
+      const json = await r.json()
+      return json
+    }catch(e){
+      console.error('mutate error', e)
+      toast?.error(e?.message || String(e))
+      return null
     }
   },
+
 
   // Админ-подтверждение пароля (включение admin-режима в UI по локалстораджу — делаешь снаружи)
   async adminVerify(pass) {
@@ -125,7 +140,7 @@ const api = {
       const r = await fetch('/api/forum/admin/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pass }),
+        body: JSON.stringify({ password: pass }),
       })
       const data = await r.json().catch(() => ({}))
       return data
