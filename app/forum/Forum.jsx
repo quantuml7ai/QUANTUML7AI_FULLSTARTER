@@ -1061,25 +1061,40 @@ useEffect(() => {
     return /max requests limit exceeded/i.test(msg);
   };
 
+  // ⬇️ ВАЖНО: безопасное слияние + выкидываем всё, чего нет на сервере
   const safeMerge = (prev, r) => {
     const out = { ...prev };
 
+    // --- TOPICS: оставляем только те, что пришли с сервера; порядок прежних сохраняем ---
     if (Array.isArray(r.topics)) {
-      const byIdPrev = new Map((prev.topics || []).map((t, i) => [String(t.id), { ...t, __idx:i }]));
-      for (const t of r.topics) {
+      const prevTopics = prev.topics || [];
+      const byIdPrev = new Map(prevTopics.map((t, i) => [String(t.id), { ...t, __idx: i }]));
+      const srvList = r.topics;
+      const srvSet  = new Set(srvList.map(t => String(t.id)));
+
+      // обновляем/добавляем серверные поверх локальных
+      for (const t of srvList) {
         const id = String(t.id);
-        byIdPrev.set(id, { ...(byIdPrev.get(id) || { __idx: 9e9 }), ...t });
+        const base = byIdPrev.get(id) || { __idx: 9e9 };
+        byIdPrev.set(id, { ...base, ...t });
       }
-      out.topics = Array.from(byIdPrev.values())
-        .sort((a,b)=>a.__idx-b.__idx)
-        .map(({__idx, ...t})=>t);
+
+      // берём ТОЛЬКО серверные id (ничего лишнего), порядок по старому индексу
+      out.topics = Array.from(byIdPrev.entries())
+        .filter(([id]) => srvSet.has(id))
+        .sort((a, b) => a[1].__idx - b[1].__idx)
+        .map(([, t]) => { const { __idx, ...rest } = t; return rest; });
     }
 
+    // --- POSTS: слияние + удаление всего, чего нет в снапшоте (кроме свежих tmp_*) ---
     if (Array.isArray(r.posts)) {
       const prevList = prev.posts || [];
       const srvMap   = new Map(r.posts.map(p => [String(p.id), p]));
+
+      // 1) начинаем с копии локальных
       const mergedById = new Map(prevList.map(p => [String(p.id), { ...p }]));
 
+      // 2) накатываем сервер поверх локальных; счётчики не уменьшаем
       for (const [id, srv] of srvMap) {
         const loc = mergedById.get(id) || {};
         const likes    = Math.max(Number(srv.likes ?? 0),    Number(loc.likes ?? 0));
@@ -1088,22 +1103,32 @@ useEffect(() => {
         mergedById.set(id, { ...loc, ...srv, likes, dislikes, views, myReaction: (loc.myReaction ?? srv.myReaction ?? null) });
       }
 
+      // 3) tmp_* которых нет на сервере, держим до 10с; всё остальное — удаляем
       const tnow = now();
-      for (const p of prevList) {
-        const id = String(p.id);
-        if (id.startsWith('tmp_') && !mergedById.has(id)) {
+      for (const [id, p] of Array.from(mergedById.entries())) {
+        if (srvMap.has(id)) continue;                 // есть на сервере — остаётся
+        if (id.startsWith('tmp_')) {
           const fresh = (tnow - Number(p.ts || tnow)) < 10_000;
-          if (fresh) mergedById.set(id, p);
+          if (fresh) continue;                        // свежий tmp — оставляем
         }
+        mergedById.delete(id);                        // нет на сервере и не свежий tmp — удаляем
       }
 
+      // 4) собираем список: старые по прежним позициям, новые серверные в конец
+      const order = new Map(prevList.map((p, i) => [String(p.id), i]));
+      const used  = new Set();
       const mergedList = [];
+
       for (const p of prevList) {
         const id = String(p.id);
-        const found = mergedById.get(id);
-        if (found) { mergedList.push(found); mergedById.delete(id); }
+        if (mergedById.has(id)) {
+          mergedList.push(mergedById.get(id));
+          used.add(id);
+        }
       }
-      for (const p of mergedById.values()) mergedList.push(p);
+      for (const [id, p] of mergedById.entries()) {
+        if (!used.has(id)) mergedList.push(p);
+      }
 
       out.posts = mergedList;
     }
@@ -1113,7 +1138,7 @@ useEffect(() => {
     if (r.rev    !== undefined)  out.rev    = r.rev;
     if (r.cursor !== undefined)  out.cursor = r.cursor;
 
-    return out; // при желании оберни в dedupeAll(out)
+    return out; // при желании можно обернуть в dedupeAll(out)
   };
 
   const pull = async () => {
@@ -1129,7 +1154,6 @@ useEffect(() => {
       // если лимит — уходим на паузу и не шторми сервер
       if (isOverLimit(e)) {
         cooldownUntil = now() + COOLDOWN_MS;
-        // (опционально) уведомление один раз:
         try { toast?.warn?.('Backend cooldown: Redis limit reached'); } catch {}
       }
     } finally {
@@ -1159,7 +1183,7 @@ useEffect(() => {
   window.addEventListener('online', kick);
   document.addEventListener('visibilitychange', kick);
 
-  // перехват любых POST на /api/forum/* c дебаунсом до 1/с
+  // перехват любых POST на /api/forum/* c дебаунсом до ~1/с
   const _fetch = window.fetch;
   window.fetch = async (...args) => {
     const res = await _fetch(...args);
@@ -1183,10 +1207,7 @@ useEffect(() => {
     window.fetch = _fetch;
   };
 }, []);
-
-
-
- 
+  
   //  const refresh = async () => {
   //    const r = await api.snapshot()
   //   if (r?.ok && r.full) {
