@@ -23,6 +23,7 @@ import { useI18n } from '../../components/i18n'
 /* =========================================================
    helpers
 ========================================================= */
+
 // ---- отображение имени/аватарки ----
 const displayName = (p) => (p?.nickname && String(p.nickname).trim()) || shortId(p?.userId || '');
 const displayIcon  = (p) => (p?.icon && String(p.icon).trim()) || '👤';
@@ -1715,7 +1716,7 @@ useEffect(()=>{
               <button className="tag" title={idShown||'—'} onClick={copyId}>{nickShown || t('forum_not_signed')}</button>
               {isAdmin && <span className="tag" style={{borderColor:'rgba(255,120,80,.55)',color:'#ffb1a1'}}>ADMIN</span>}
             </div>
-            <div className="meta truncate">ID: {idShown || '—'}</div>
+            {/* <div className="meta truncate">ID: {idShown || '—'}</div> */}
           </div>
 
           {/* === НОВОЕ: правый встроенный контейнер управления === */}
