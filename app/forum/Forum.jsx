@@ -1044,70 +1044,65 @@ const sendBatch = (immediate=false) => {
     next.cursor = cursor ?? prev.cursor
     return dedupeAll(next)
   }
-// === SILENT SYNC: мягкое докатывание без «прыжков» ===
+// === SILENT SYNC with backoff & debounce ===
 useEffect(() => {
   let stop = false;
+  let pulling = false;
+  let cooldownUntil = 0;              // таймштамп: до какого времени не дергаем снапшот
+  let debounceTimer = null;           // для дебаунса pull() после POST
+  const BASE_INTERVAL = 2000;         // 2s как и было
+  const COOLDOWN_MS   = 60_000;       // 60s пауза при лимите
+  const JITTER_MS     = 350;          // небольшой рандом, чтобы рассинхронить табы
 
-  // стабильное слияние сервера в локальный снап (сохраняем порядок и tmp)
-  const silentMerge = (prev, r) => {
+  const now = () => Date.now();
+
+  const isOverLimit = (err) => {
+    const msg = String(err?.message || err || '');
+    return /max requests limit exceeded/i.test(msg);
+  };
+
+  const safeMerge = (prev, r) => {
     const out = { ...prev };
 
-    // --- TOPICS (без прыжков) ---
     if (Array.isArray(r.topics)) {
       const byIdPrev = new Map((prev.topics || []).map((t, i) => [String(t.id), { ...t, __idx:i }]));
       for (const t of r.topics) {
         const id = String(t.id);
         byIdPrev.set(id, { ...(byIdPrev.get(id) || { __idx: 9e9 }), ...t });
       }
-      // сохраняем прежний порядок, новые в конец
-      out.topics = Array.from(byIdPrev.values()).sort((a,b)=>a.__idx-b.__idx).map(({__idx, ...t})=>t);
+      out.topics = Array.from(byIdPrev.values())
+        .sort((a,b)=>a.__idx-b.__idx)
+        .map(({__idx, ...t})=>t);
     }
 
-    // --- POSTS (главное: не дёргать и не терять tmp_*) ---
     if (Array.isArray(r.posts)) {
       const prevList = prev.posts || [];
       const srvMap   = new Map(r.posts.map(p => [String(p.id), p]));
-      const order    = new Map(prevList.map((p, i) => [String(p.id), i])); // старые позиции
-
-      // 1) обновляем/добавляем серверные поверх локальных
       const mergedById = new Map(prevList.map(p => [String(p.id), { ...p }]));
+
       for (const [id, srv] of srvMap) {
         const loc = mergedById.get(id) || {};
-        // счётчики не «скачут» вниз: не уменьшаем ниже локального
         const likes    = Math.max(Number(srv.likes ?? 0),    Number(loc.likes ?? 0));
         const dislikes = Math.max(Number(srv.dislikes ?? 0), Number(loc.dislikes ?? 0));
         const views    = Math.max(Number(srv.views ?? 0),    Number(loc.views ?? 0));
         mergedById.set(id, { ...loc, ...srv, likes, dislikes, views, myReaction: (loc.myReaction ?? srv.myReaction ?? null) });
       }
-if (Array.isArray(r.bans)) {
-  const sinceWrite = (window.__forum_write_guard_until__ || 0) - Date.now();
-  if (sinceWrite > 0) {
-    const s = new Set([...(prev.bans || []), ...r.bans]);
-    out.bans = Array.from(s);
-  } else {
-    out.bans = r.bans;
-  }
-}
 
-      // 2) не подтверждённые tmp_* оставляем на месте до 10с (не мигают)
-      const now = Date.now();
+      const tnow = now();
       for (const p of prevList) {
         const id = String(p.id);
         if (id.startsWith('tmp_') && !mergedById.has(id)) {
-          const fresh = (now - Number(p.ts || now)) < 10_000;
+          const fresh = (tnow - Number(p.ts || tnow)) < 10_000;
           if (fresh) mergedById.set(id, p);
         }
       }
 
-      // 3) строим список в СТАРОМ порядке; новые (которых не было) дописываем в конец
       const mergedList = [];
-      // существующие — по прежним индексам
       for (const p of prevList) {
         const id = String(p.id);
         const found = mergedById.get(id);
         if (found) { mergedList.push(found); mergedById.delete(id); }
       }
-      // новые серверные (которых не было) — в конец (без пересортировки)
       for (const p of mergedById.values()) mergedList.push(p);
 
       out.posts = mergedList;
@@ -1118,58 +1113,78 @@ if (Array.isArray(r.bans)) {
     if (r.rev    !== undefined)  out.rev    = r.rev;
     if (r.cursor !== undefined)  out.cursor = r.cursor;
 
-    return dedupeAll(out);
+    return out; // при желании оберни в dedupeAll(out)
   };
 
   const pull = async () => {
+    if (pulling) return;                    // не пускаем параллельные
+    if (now() < cooldownUntil) return;      // в «тишине» — выходим
+    pulling = true;
     try {
-      const r = await api.snapshot(); // внутри желательно cache-control: no-store
-      if (r?.ok) persist(prev => silentMerge(prev, r));
-    } catch {}
+      const r = await api.snapshot();       // сервер должен отвечать no-store
+      if (r?.ok) {
+        persist(prev => safeMerge(prev, r));
+      }
+    } catch (e) {
+      // если лимит — уходим на паузу и не шторми сервер
+      if (isOverLimit(e)) {
+        cooldownUntil = now() + COOLDOWN_MS;
+        // (опционально) уведомление один раз:
+        try { toast?.warn?.('Backend cooldown: Redis limit reached'); } catch {}
+      }
+    } finally {
+      pulling = false;
+    }
   };
 
-  // — живой докат раз в 2 c (можешь поставить 1500–3000)
+  const schedulePull = (delay = 180) => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => { debounceTimer = null; pull(); }, delay);
+  };
+
+  // основной цикл с небольшим джиттером
   (async function loop(){
+    // разовый старт
+    schedulePull(50 + Math.floor(Math.random()*JITTER_MS));
     while (!stop) {
+      const jitter = Math.floor(Math.random()*JITTER_MS);
+      await new Promise(r => setTimeout(r, BASE_INTERVAL + jitter));
       await pull();
-      await new Promise(r => setTimeout(r, 2000));
     }
   })();
 
-  // — мгновенно при возврате фокуса/онлайна
-  const kick = () => { pull(); };
+  // быстрые «пинки»
+  const kick = () => schedulePull(80);
   window.addEventListener('focus', kick);
   window.addEventListener('online', kick);
   document.addEventListener('visibilitychange', kick);
 
-  // — после ЛЮБОГО POST на /api/forum/* (лайк/ответ/бан/удаление)
-  // защита от двойной обёртки fetch при HMR/повторном маунте
-  const hadWrap = !!window.__forum_silent_sync__;
+  // перехват любых POST на /api/forum/* c дебаунсом до 1/с
   const _fetch = window.fetch;
-  if (!hadWrap) {
-    window.__forum_silent_sync__ = true;
-    window.fetch = async (...args) => {
-      const res = await _fetch(...args);
-      try {
-        const req    = args[0];
-        const url    = typeof req === 'string' ? req : req?.url;
-        const method = (typeof req === 'string' ? (args[1]?.method || 'GET') : (req.method || 'GET')).toUpperCase();
-        if (method !== 'GET' && /\/api\/forum\//.test(String(url || ''))) {
-          setTimeout(pull, 180); // даём серверу применить
-        }
-      } catch {}
-      return res;
-    };
-  }
+  window.fetch = async (...args) => {
+    const res = await _fetch(...args);
+    try {
+      const req    = args[0];
+      const url    = typeof req === 'string' ? req : req?.url;
+      const method = (typeof req === 'string' ? (args[1]?.method || 'GET') : (req.method || 'GET')).toUpperCase();
+      if (method !== 'GET' && /\/api\/forum\//.test(String(url || ''))) {
+        schedulePull(180); // дебаунс
+      }
+    } catch {}
+    return res;
+  };
 
   return () => {
     stop = true;
+    if (debounceTimer) { clearTimeout(debounceTimer); debounceTimer = null; }
     window.removeEventListener('focus', kick);
     window.removeEventListener('online', kick);
     document.removeEventListener('visibilitychange', kick);
-    if (!hadWrap) { window.fetch = _fetch; window.__forum_silent_sync__ = false; }
+    window.fetch = _fetch;
   };
 }, []);
+
+
 
  
   //  const refresh = async () => {
