@@ -17,12 +17,15 @@
  * Остальной код сохранён без изменений.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useCallback, useState } from 'react'
 import { useI18n } from '../../components/i18n'
 
 /* =========================================================
    helpers
 ========================================================= */
+// ---- отображение имени/аватарки ----
+const displayName = (p) => (p?.nickname && String(p.nickname).trim()) || shortId(p?.userId || '');
+const displayIcon  = (p) => (p?.icon && String(p.icon).trim()) || '👤';
 const isBrowser = () => typeof window !== 'undefined'
 const cls = (...xs) => xs.filter(Boolean).join(' ')
 const shortId = id => id ? `${String(id).slice(0,6)}…${String(id).slice(-4)}` : '—'
@@ -61,10 +64,58 @@ function ensureClientId(){
     return v
   }catch{ return `c_${Date.now()}` }
 }
+// --- hydration-safe helpers (вставь выше разметки) ---
+function safeReadProfile(userId) {
+  if (typeof window === 'undefined' || !userId) return {};
+  try { return JSON.parse(localStorage.getItem('profile:' + userId) || '{}'); }
+  catch { return {}; }
+}
+
+/**
+ * Аватар-эмодзи без ошибок гидрации:
+ * - SSR и первоначальный клиентский рендер = одинаковый fallback ('👤')
+ * - после mount подменяем на локальный icon ('👽') или pIcon
+ */
+function AvatarEmoji({ userId, pIcon, ssrFallback = '👤', clientFallback = '👽' }) {
+  // первый кадр на клиенте совпадает с SSR
+  const [icon, setIcon] = React.useState(pIcon || ssrFallback);
+
+  React.useEffect(() => {
+    const prof = safeReadProfile(userId);
+    setIcon(pIcon || prof.icon || clientFallback);
+  }, [userId, pIcon]);
+
+  return <span>{icon}</span>;
+}
 
 /** сигнатуры для схлопывания дублей (tmp_* против пришедших с сервера) */
 const sigTopic = (t) => `${(t.title||'').slice(0,80)}|${t.userId||t.accountId||''}|${Math.round((t.ts||0)/60000)}`
 const sigPost  = (p) => `${(p.text||'').slice(0,120)}|${p.userId||p.accountId||''}|${p.topicId||''}|${p.parentId||''}|${Math.round((p.ts||0)/60000)}`
+// берем из window.__FORUM_CONF__ (его отдаёт сервер из env), иначе — дефолты
+const CFG = (typeof window!=='undefined' && window.__FORUM_CONF__) || {};
+const MIN_INTERVAL_MS   = Math.max(0, Number(CFG.FORUM_MIN_INTERVAL_SEC   ?? 1)*1000);
+const REACTS_PER_MINUTE = Number(CFG.FORUM_REACTS_PER_MINUTE ?? 120);
+const VIEW_TTL_SEC      = Number(CFG.FORUM_VIEW_TTL_SEC      ?? 1800);
+
+
+function getBucket(ttlSec=VIEW_TTL_SEC){ return Math.floor((Date.now()/1000)/ttlSec) }
+
+function rateLimiter(){
+  let lastActionAt = 0;
+  let stamps = [];
+  return {
+    allowAction(){
+      const now = Date.now();
+      if (now - lastActionAt < MIN_INTERVAL_MS) return false;
+      const windowStart = now - 60_000;
+      stamps = stamps.filter(ts => ts >= windowStart);
+      if (stamps.length >= REACTS_PER_MINUTE) return false;
+      stamps.push(now);
+      lastActionAt = now;
+      return true;
+    }
+  }
+}
 
 /* =========================================================
    toasts (single)
@@ -79,140 +130,233 @@ function useToast(){
 }
 
 /* =========================================================
-   API (клиент)
+   API (клиент) — ЗАМЕНИТЬ ВЕСЬ ОБЪЕКТ ПОЛНОСТЬЮ
 ========================================================= */
+
+// вспомогательные (можешь оставить свои, если уже есть ИДЕНТИЧНЫЕ)
+function getForumUserId() {
+  if (typeof window === 'undefined') return 'srv';
+  const KEY = 'forum_user_id';
+  let id = localStorage.getItem(KEY);
+  if (!id) {
+    id = 'web_' + (crypto?.randomUUID?.() || Date.now().toString(36));
+    localStorage.setItem(KEY, id);
+  }
+  return id;
+}
+function setAdminToken(token){
+  if(typeof window!=='undefined') localStorage.setItem('forum_admin_token', token);
+}
+function getAdminToken(){
+  if(typeof window==='undefined') return '';
+  return localStorage.getItem('forum_admin_token') || '';
+}
+
+// ==== API (клиент) ====
 const api = {
-  // Снимок базы (вся лента, инкрементально через ?since=...)
+  // Снимок базы (полный или инкрементальный через ?since=…)
   async snapshot(since) {
     try {
-      const url = '/api/forum/snapshot' + (since ? `?since=${encodeURIComponent(since)}` : '')
-      const r = await fetch(url, { cache: 'no-store' })
-      // Если бэкенд вдруг вернул не JSON — ловим аккуратно
-      const data = await r.json().catch(() => ({}))
-      return data
+      const url = '/api/forum/snapshot' + (since ? `?since=${encodeURIComponent(since)}` : '');
+      const r = await fetch(url, { cache: 'no-store' });
+
+      // попробуем как JSON; если не получилось — дадим пустой объект
+      const raw = await r.text();
+      let data = {};
+      try { data = raw ? JSON.parse(raw) : {}; } catch {}
+
+      // нормализация (чтобы в UI не было undefined/null)
+      const topics = Array.isArray(data?.topics) ? data.topics : [];
+      const posts  = Array.isArray(data?.posts)  ? data.posts  : [];
+      const bans   = Array.isArray(data?.bans)   ? data.bans   : [];
+      const rev    = Number.isFinite(+data?.rev) ? +data.rev   : 0;
+      const cursor = data?.cursor ?? null;
+
+      // флажок: сервер «пустой» => можно делать жёсткий ресет стейта
+      const __reset = topics.length === 0 && posts.length === 0;
+
+      return { ok: r.ok, status: r.status, topics, posts, bans, rev, cursor, __reset };
     } catch (e) {
-      return { ok: false, error: 'network' }
+      console.warn('snapshot failed:', e);
+      return { ok: false, error: 'network', topics: [], posts: [], bans: [], rev: 0, cursor: null, __reset: false };
     }
   },
-   // Мутации (батч операций)
-  async mutate(batch){
-    try{
-      // кто актор — берём из batch или из auth
+
+  // Батч-мутации
+  async mutate(batch, userId) {
+    try {
+      // кто выполняет операцию (берём из аргумента/батча/лок.ид)
       const actorId =
-        batch?.userId ||
-        batch?.accountId ||
-        batch?.asherId ||
-        auth?.userId ||
-        auth?.accountId ||
-        auth?.asherId ||
-        'guest'
+        userId ??
+        batch?.userId ??
+        batch?.accountId ??
+        batch?.asherId ??
+        (typeof getForumUserId === 'function' ? getForumUserId() : '');
 
       const headers = {
         'Content-Type': 'application/json',
-        'x-forum-user-id': String(actorId),
-      }
+        'x-forum-user-id': String(actorId || ''),
+      };
 
+      // сервер ждёт { ops:[...], userId:'...' }
       const payload = {
-        ...batch,
-        userId: actorId,
-        isAdmin: auth?.isAdmin ? 1 : 0,
+        ops: Array.isArray(batch?.ops) ? batch.ops : [],
+        userId: String(actorId || ''),
+      };
+
+      // без ops смысла нет
+      if (!payload.ops.length) {
+        return { ok: false, error: 'empty_ops' };
       }
 
-      const r = await fetch('/api/forum/mutate', {
+      const req = {
+        ts: Date.now(),
+        url: '/api/forum/mutate',
         method: 'POST',
         headers,
         body: JSON.stringify(payload),
-      })
+      };
 
-      const json = await r.json()
-      return json
-    }catch(e){
-      console.error('mutate error', e)
-      toast?.error(e?.message || String(e))
-      return null
+      const r = await fetch(req.url, { method: req.method, headers: req.headers, body: req.body });
+
+      // тело ответа текстом — а потом попробуем распарсить
+      const resText = await r.text().catch(() => '');
+      let resJson = null;
+      try { resJson = resText ? JSON.parse(resText) : null; } catch {}
+
+      // лог последнего мутейта для консоли
+      try {
+        window.__lastMutate = () => ({
+          ts: req.ts,
+          url: req.url,
+          method: req.method,
+          req: { headers, body: req.body },
+          res: { status: r.status, ok: r.ok, body: resJson ?? resText },
+        });
+      } catch {}
+
+      if (!r.ok) {
+        console.warn('mutate non-2xx', r.status, resText, payload);
+      }
+
+      return resJson ?? { ok: r.ok, status: r.status };
+    } catch (e) {
+      console.error('mutate error', e);
+      return { ok: false, error: 'network' };
     }
+  }, // ← ВАЖНО: запятая! дальше идут хелперы ниже
+
+  // ---- Хелперы (по желанию) ----
+
+  // Быстрый лайк/дизлайк
+  async react(postId, kind = 'like', delta = 1, userId) {
+    return this.mutate({
+      ops: [{ type: 'react', payload: { postId: String(postId), kind, delta: Number(delta) } }]
+    }, userId);
   },
 
+  // Создать пост/ответ
+  async createPost({ topicId, text, parentId = null, nickname = '' }, userId) {
+    return this.mutate({
+      ops: [{ type: 'create_post', payload: { topicId: String(topicId), text: String(text || ''), parentId, nickname } }]
+    }, userId);
+  },
 
-  // Админ-подтверждение пароля (включение admin-режима в UI по локалстораджу — делаешь снаружи)
+  // ==== Админ ====
+
+  // Подтверждение пароля (включение админ-режима в UI)
   async adminVerify(pass) {
     try {
       const r = await fetch('/api/forum/admin/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: pass }),
-      })
-      const data = await r.json().catch(() => ({}))
-      return data
-    } catch (e) {
-      return { ok: false, error: 'network' }
+      });
+      const data = await r.json().catch(() => ({}));
+      if (data?.ok && typeof setAdminToken === 'function') setAdminToken(pass);
+      return data;
+    } catch {
+      return { ok: false, error: 'network' };
     }
   },
 
-  // Админ: удалить тему
+  // Удалить тему
   async adminDeleteTopic(id) {
     try {
       const r = await fetch('/api/forum/admin/deleteTopic', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
-      })
-      const data = await r.json().catch(() => ({}))
-      return data
-    } catch (e) {
-      return { ok: false, error: 'network' }
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-token': typeof getAdminToken === 'function' ? getAdminToken() : '',
+        },
+        body: JSON.stringify({ topicId: id }),
+      });
+      const data = await r.json().catch(() => ({}));
+      return data;
+    } catch {
+      return { ok: false, error: 'network' };
     }
   },
 
-  // Админ: удалить пост (ветка удалится каскадно на сервере)
+  // Удалить пост (ветка удалится каскадно на сервере)
   async adminDeletePost(id) {
     try {
       const r = await fetch('/api/forum/admin/deletePost', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
-      })
-      const data = await r.json().catch(() => ({}))
-      return data
-    } catch (e) {
-      return { ok: false, error: 'network' }
-    }
-  },
-  // Админ: снять бан с пользователя
-  async adminUnbanUser(accountId) {
-    try {
-      const r = await fetch('/api/forum/admin/unbanUser', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accountId }),
-      })
-      const data = await r.json().catch(() => ({}))
-      return data
-    } catch (e) {
-      return { ok: false, error: 'network' }
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-token': typeof getAdminToken === 'function' ? getAdminToken() : '',
+        },
+        body: JSON.stringify({ postId: id }),
+      });
+      const data = await r.json().catch(() => ({}));
+      return data;
+    } catch {
+      return { ok: false, error: 'network' };
     }
   },
 
-  // Админ: бан пользователя
+  // Бан пользователя
   async adminBanUser(accountId) {
     try {
       const r = await fetch('/api/forum/admin/banUser', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-token': typeof getAdminToken === 'function' ? getAdminToken() : '',
+        },
         body: JSON.stringify({ accountId }),
-      })
-      const data = await r.json().catch(() => ({}))
-      return data
-    } catch (e) {
-      return { ok: false, error: 'network' }
+      });
+      const data = await r.json().catch(() => ({}));
+      return data;
+    } catch {
+      return { ok: false, error: 'network' };
     }
   },
-}
+
+  // Снять бан
+  async adminUnbanUser(accountId) {
+    try {
+      const r = await fetch('/api/forum/admin/unbanUser', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-token': typeof getAdminToken === 'function' ? getAdminToken() : '',
+        },
+        body: JSON.stringify({ accountId }),
+      });
+      const data = await r.json().catch(() => ({}));
+      return data;
+    } catch {
+      return { ok: false, error: 'network' };
+    }
+  },
+};
 
 
-
-
-
+/* =========================================================
+   КОНЕЦ API
+========================================================= */
 
 /* =========================================================
    Styles (global)
@@ -223,6 +367,33 @@ const Styles = () => (
     .forum_root{ color:var(--ink) }
     .glass{ background:rgba(8,13,20,.94); border:1px solid rgba(255,255,255,.10); border-radius:16px; backdrop-filter: blur(12px) }
     .neon{ box-shadow:0 0 28px rgba(25,129,255,.14), inset 0 0 18px rgba(25,129,255,.06) }
+    .postBody{ white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word }
+    .btn, .tag, .iconBtn, .adminBtn, .emojiBtn { cursor:pointer }
+    /* === clicky effects for small chips/buttons === */
+    .tag,
+    .item .tag,
+    .reactionBtn {
+      cursor: pointer;
+      transition: transform .08s ease, box-shadow .18s ease, filter .14s ease;
+      user-select: none;
+    }
+
+    .tag:hover,
+    .item .tag:hover,
+    .reactionBtn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 18px rgba(80,167,255,.25);
+      filter: brightness(1.08);
+    }
+
+    .tag:active,
+    .item .tag:active,
+    .reactionBtn:active {
+      transform: translateY(0) scale(.97);
+    }
+
+    /* компактный вариант для action-кнопок на карточке */
+    .btnSm { padding: 2px 8px; font-size: 12px; line-height: 1; }
 
     /* --- header: теперь переносит элементы при нехватке места --- */
     .head{
@@ -232,6 +403,11 @@ const Styles = () => (
       flex-wrap:wrap; /* <— ключевой момент: разрешаем перенос на новую строку */
     }
     .body{ padding:12px; overflow:auto }
+    /* ДОБАВЬ в Styles() (любой блок <style jsx global>) */
+    .tagOk{ border-color: rgba(110,240,170,.45)!important; color:#baf7d6!important; background: rgba(70,210,120,.12)!important }
+    .tagDanger{ border-color: rgba(255,120,120,.45)!important; color:#ffb1a1!important; background: rgba(255,90,90,.10)!important }
+
+    /* эффекты клика уже есть: для .btn, .tag, .reactionBtn — hover/active добавлены */
 
     .btn{ border:1px solid var(--b); background:linear-gradient(180deg, rgba(25,129,255,.28),rgba(25,129,255,.15));
       padding:.62rem .95rem; border-radius:12px; color:var(--ink); display:inline-flex; align-items:center; gap:.6rem;
@@ -269,20 +445,24 @@ const Styles = () => (
     /* ====== НОВОЕ: правый блок управления в хедере ====== */
     .controls{
       margin-left:auto;
-      display:flex; align-items:center; gap:8px; overflow:visible;
-      /* Ключ: позволяем сжиматься и переноситься на следующую строку при нехватке места */
-      flex: 1 1 clamp(420px, 48vw, 640px);
-      min-width: 320px; /* но не меньше этого */
+      display:flex; align-items:center; gap:6px;
+      flex-wrap: wrap;              /* ← разрешаем перенос внутри controls */
+      flex: 1 1 auto;               /* ← убрали жёсткий clamp */
+      min-width: 0;                 /* ← даём контейнеру ужиматься */
+      max-width: 100%;
       order: 2;
     }
+
 
     /* Поиск встроен в .controls и сжимается по ширине на узких экранах */
     .search{
       position:relative;
       display:flex; align-items:center; gap:8px;
       z-index:60; overflow:visible;
-      flex: 1 1 clamp(260px, 40vw, 560px); /* <— сжимается, но остаётся на своём месте */
+      flex: 1 1 clamp(140px, 30vw, 560px); /* <— сжимается, но остаётся на своём месте */
     }
+    .searchInput{ flex:1; min-width:120px; max-width:100% }
+ 
     .searchInput{ flex:1; height:40px; border-radius:12px; padding:.55rem .9rem; background:#0b1018; color:var(--ink); border:1px solid rgba(255,255,255,.16) }
     .iconBtn{ width:40px; height:40px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:transparent; display:grid; place-items:center; transition:transform .08s, box-shadow .2s }
     .iconBtn:hover{ box-shadow:0 0 18px rgba(80,167,255,.25) } .iconBtn:active{ transform:scale(.96) }
@@ -326,6 +506,12 @@ const Styles = () => (
       .controls{ order:3; flex: 1 1 100%; min-width:100% }
       .search{ flex-basis: 100% }
     }
+    @media (max-width:420px){
+      .search{ flex: 1 1 clamp(160px, 55vw, 560px) } /* позволяем ужаться ещё больше */
+      .adminWrap{ flex: 0 0 auto }                   /* кнопка админа остаётся видимой */
+      .iconBtn{ width:36px; height:36px }            /* чуть уменьшим иконки у поиска при необходимости */
+}
+
   `}</style>
 )
 
@@ -429,20 +615,35 @@ function ProfilePopover({ anchorRef, open, onClose, t, auth, onSaved }){
 /* =========================================================
    UI: посты/темы
 ========================================================= */
-function ReactionStrip({ post, onReact }){
-  const like = (post.reactions||{})['👍'] || 0
-  const dis  = (post.reactions||{})['👎'] || 0
-  const my   = post.myReaction || null
-  const togg = e => onReact?.(my===e ? null : e)
+/* === REACTION STRIP — ПОД ПОЛНУЮ ЗАМЕНУ === */
+function ReactionStrip({ post, onReact }) {
+  const likes    = Number(post?.likes ?? 0);
+  const dislikes = Number(post?.dislikes ?? 0);
+  const mine     = post?.myReaction || null;
+
   return (
-    <div className="flex flex-wrap items-center gap-2 justify-end">
-      <span className="tag meta">↩️ {post.repliesCount||0}</span>
-      <span className="tag meta">👁 {post.views||0}</span>
-      <button className={cls('tag', my==='👍' && 'item')} onClick={()=>togg('👍')}>👍 {like}</button>
-      <button className={cls('tag', my==='👎' && 'item')} onClick={()=>togg('👎')}>👎 {dis}</button>
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        className={cls('btn btnGhost btnSm', mine==='like' && 'tagOk')}
+        title="👍"
+        onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); onReact?.('like'); }}
+      >
+        👍 {likes}
+      </button>
+
+      <button
+        type="button"
+        className={cls('btn btnGhost btnSm', mine==='dislike' && 'tagDanger')}
+        title="👎"
+        onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); onReact?.('dislike'); }}
+      >
+        👎 {dislikes}
+      </button>
     </div>
-  )
+  );
 }
+
 
 function TopicItem({ t, agg, onOpen, isAdmin, onDelete }){
   const { posts, likes, dislikes, views } = agg || {}
@@ -473,47 +674,171 @@ function TopicItem({ t, agg, onOpen, isAdmin, onDelete }){
   )
 }
 
-function PostCard({ p, parentAuthor, onReport, onReply, onOpenThread, onReact, isAdmin, onDeletePost, onBanUser, onUnbanUser, isBanned, authId, markView }){
+function PostCard({
+  p,
+  parentAuthor,
+  onReport,
+  onReply,
+  onOpenThread,
+  onReact,
+  isAdmin,
+  onDeletePost,
+  onBanUser,
+  onUnbanUser,
+  isBanned,
+  authId,
+  markView,
+  t, // локализация
+}) {
+  // сниппет текста родителя (до 40 символов)
+  const parentSnippet = (() => {
+    const raw = p?.parentText || p?._parentText || '';
+    if (!raw) return null;
+    const s = String(raw).replace(/\s+/g, ' ').trim();
+    return s.length > 40 ? s.slice(0, 40) + '…' : s;
+  })();
 
-  useEffect(()=>{ // уникальный просмотр раз в сутки
-    if(!p?.id || !authId || !isBrowser()) return
-    const day = new Date().toISOString().slice(0,10)
-    const key = `post:${p.id}:viewed:${authId}:${day}`
-    if(!localStorage.getItem(key)){ localStorage.setItem(key,'1'); markView?.(p.id) }
-  },[p?.id,authId,markView])
+  // учёт просмотра
+  useEffect(() => {
+    if (!p?.id || !authId || typeof window === 'undefined') return;
+    markView?.(p.id);
+  }, [p?.id, authId, markView]);
+
+  // безопасные числовые поля
+  const views    = Number(p?.views ?? 0);
+  const replies  = Number(
+    p?.replies ?? p?.repliesCount ?? p?.childrenCount ?? p?.answers ?? p?.comments ?? 0
+  );
+  const likes    = Number(p?.likes ?? 0);
+  const dislikes = Number(p?.dislikes ?? 0);
+
+  // клики по реакциям
+  const like    = (e) => { e.preventDefault(); e.stopPropagation(); onReact?.(p, 'like'); };
+  const dislike = (e) => { e.preventDefault(); e.stopPropagation(); onReact?.(p, 'dislike'); };
 
   return (
-    <article className="item" onClick={e=>{ if(e.target.closest('button,.tag,a,svg')) return; onOpenThread?.(p) }}>
+    <article
+      className="item"
+      onClick={(e) => {
+        if (e.target.closest('button,.tag,a,svg')) return;
+        onOpenThread?.(p);
+      }}
+      role="article"
+      aria-label="Пост форума"
+    >
+      {/* шапка */}
       <div className="flex items-center justify-between gap-3 mb-2">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-14 h-14 rounded-[10px] border grid place-items-center text-3xl bg-[rgba(25,129,255,.10)]">{p.icon || '👤'}</div>
+          {/* мини-аватар */}
+          <div className="w-10 h-10 rounded-[10px] border grid place-items-center text-2xl bg-[rgba(25,129,255,.10)]">
+            <AvatarEmoji userId={p.userId} pIcon={p.icon} />
+          </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <div className="nick truncate">{p.nickname || shortId(p.userId||'')}</div>
-              {p.isAdmin && <span className="tag" style={{borderColor:'rgba(255,120,80,.55)',color:'#ffb1a1'}}>ADMIN</span>}
-              {p.parentId && <span className="tag">ответ для {parentAuthor ? `@${parentAuthor}` : '…'}</span>}
+              <div className="nick truncate">{p.nickname || shortId(p.userId || '')}</div>
+              {p.isAdmin && (
+                <span className="tag" style={{ borderColor: 'rgba(255,120,80,.55)', color: '#ffb1a1' }}>
+                  ADMIN
+                </span>
+              )}
+              {p.parentId && (
+                <span className="tag" aria-label={t?.('forum_reply_to') || 'Ответ для'}>
+                  {(t?.('forum_reply_to') || 'ответ для') + ' '}
+                  {parentAuthor ? '@' + parentAuthor : '…'}
+                  {parentSnippet && <>: “{parentSnippet}”</>}
+                </span>
+              )}
             </div>
             <div className="meta truncate">{human(p.ts)}</div>
           </div>
         </div>
+
+        {/* действия */}
         <div className="flex items-center gap-2">
-          <button className="tag" onClick={(e)=>{e.preventDefault();e.stopPropagation();onReport?.(p)}}>⚠️</button>
-          <button className="tag" onClick={(e)=>{e.preventDefault();e.stopPropagation();onReply?.(p)}}>↩️</button>
-          {isAdmin && (<>
-            <button className="tag" onClick={(e)=>{e.preventDefault();e.stopPropagation();onDeletePost?.(p)}}>🗑</button>
-            {isBanned ? (
-              <button className="tag" title="Снять бан" onClick={(e)=>{e.preventDefault();e.stopPropagation();onUnbanUser?.(p)}}>✅</button>
-            ) : (
-              <button className="tag" title="Забанить" onClick={(e)=>{e.preventDefault();e.stopPropagation();onBanUser?.(p)}}>⛔</button>
-            )}
-          </>)}
+          <button
+            type="button"
+            className="btn btnGhost btnSm"
+            title={t?.('forum_report') || 'Пожаловаться'}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onReport?.(p); }}
+          >⚠️</button>
+
+          <button
+            type="button"
+            className="btn btnGhost btnSm"
+            title={t?.('forum_reply') || 'Ответить'}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onReply?.(p); }}
+          >↩️</button>
+
+          {isAdmin && (
+            <>
+              <button
+                type="button"
+                className="btn btnGhost btnSm"
+                title={t?.('forum_delete') || 'Удалить'}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDeletePost?.(p); }}
+              >🗑</button>
+
+              {isBanned ? (
+                <button
+                  type="button"
+                  className="btn btnGhost btnSm tagOk"
+                  title={t?.('forum_unban') || 'Снять бан'}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); onUnbanUser?.(p); }}
+                >✅</button>
+              ) : (
+                <button
+                  type="button"
+                  className="btn btnGhost btnSm tagDanger"
+                  title={t?.('forum_ban') || 'Забанить'}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); onBanUser?.(p); }}
+                >⛔</button>
+              )}
+            </>
+          )}
         </div>
       </div>
-      <div className="text-[15px] leading-relaxed" dangerouslySetInnerHTML={{__html:rich(p.text||'')}} />
-      <div className="mt-3"><ReactionStrip post={p} onReact={(emoji)=>onReact?.(p,emoji)} /></div>
+
+      {/* тело поста — ОДИН раз */}
+      <div
+        className="text-[15px] leading-relaxed postBody whitespace-pre-wrap break-words"
+        dangerouslySetInnerHTML={{ __html: rich(p.text || '') }}
+      />
+
+      {/* нижняя полоса счётчиков + кнопки реакций */}
+      <div className="mt-3 flex items-center gap-2 text-[13px] opacity-80">
+        <span className="tag" title={t?.('forum_views') || 'Просмотры'}>👁 {views}</span>
+
+        <span
+          className="tag cursor-pointer"
+          title={t?.('forum_replies') || 'Ответы'}
+          onClick={(e) => { e.stopPropagation(); onOpenThread?.(p); }}
+        >
+          💬 {replies}
+        </span>
+
+        <button
+          type="button"
+          className="btn btnGhost btnSm"
+          title={t?.('forum_like') || 'Лайк'}
+          onClick={like}
+        >
+          👍 {likes}
+        </button>
+
+        <button
+          type="button"
+          className="btn btnGhost btnSm"
+          title={t?.('forum_dislike') || 'Дизлайк'}
+          onClick={dislike}
+        >
+          👎 {dislikes}
+        </button>
+      </div>
     </article>
-  )
+  );
 }
+
+
 
 
 /* =========================================================
@@ -535,42 +860,61 @@ export default function Forum(){
   },[])
   const requireAuth = async () => { const cur=readAuth(); if(cur?.asherId||cur?.accountId){ setAuth(cur); return cur } const r=await openAuth(); setAuth(r); return r }
 
-  /* ---- локальный снап и очередь ---- */
-  const [data,setData] = useState(()=>{
-    if(!isBrowser()) return {topics:[],posts:[],bans:[],admins:[],cursor:null}
-    try{ return JSON.parse(localStorage.getItem('forum:snap')||'null') || {topics:[],posts:[],bans:[],admins:[],cursor:null} }catch{ return {topics:[],posts:[],bans:[],admins:[],cursor:null} }
-  })
-  const persist = (patch) => setData(prev => {
-    const next = typeof patch==='function' ? patch(prev) : ({...prev, ...patch})
-    try{ localStorage.setItem('forum:snap', JSON.stringify(next)) }catch{}
-    return next
-  })
-  const clientId = useMemo(()=>ensureClientId(),[])
-  const [queue,setQueue] = useState(()=>{ if(!isBrowser()) return []; try{ return JSON.parse(localStorage.getItem('forum:queue')||'[]') }catch{return[]} })
-  const saveQueue = q => { setQueue(q); try{ localStorage.setItem('forum:queue', JSON.stringify(q)) }catch{} }
-  const pushOp = (type,payload) => saveQueue([ ...(queue||[]), { type, payload, opId:`${Date.now()}_${Math.random().toString(36).slice(2)}` } ])
-
-  const busyRef=useRef(false), debRef=useRef(null)
-  const sendBatch = (immediate=false) => {
-    if(busyRef.current) return
-    const run = async () => {
-      const ops = queue||[]; if(ops.length===0) return
-      busyRef.current = true
-      try{
-        const r = await api.mutate({ clientId, baseCursor:data.cursor||null, ops })
-        if(r?.ok){
-          if(r.full){
-            persist({ topics:r.topics||[], posts:r.posts||[], bans:r.bans||[], admins:r.admins||[], cursor:r.cursor||null })
-          }else if(r.delta){
-            persist(prev=>mergeDelta(prev, r.delta, r.cursor))
-          }
-          saveQueue([])
-        }
-      }catch{}finally{ busyRef.current=false }
-    }
-    if(immediate) run()
-    else { clearTimeout(debRef.current); debRef.current = setTimeout(run, 650) }
+/* ---- локальный снап и очередь ---- */
+const [data,setData] = useState(()=>{
+  if(!isBrowser()) return { topics:[], posts:[], bans:[], admins:[], rev:null }
+  try{
+    return JSON.parse(localStorage.getItem('forum:snap')||'null') || { topics:[], posts:[], bans:[], admins:[], rev:null }
+  }catch{
+    return { topics:[], posts:[], bans:[], admins:[], rev:null }
   }
+})
+const persist = (patch) => setData(prev => {
+  const next = typeof patch==='function' ? patch(prev) : ({ ...prev, ...patch })
+  try{ localStorage.setItem('forum:snap', JSON.stringify(next)) }catch{}
+  return next
+})
+
+const clientId = useMemo(()=>ensureClientId(),[])
+
+const [queue,setQueue] = useState(()=>{
+  if(!isBrowser()) return []
+  try{ return JSON.parse(localStorage.getItem('forum:queue')||'[]') }catch{ return [] }
+})
+const saveQueue = q => { setQueue(q); try{ localStorage.setItem('forum:queue', JSON.stringify(q)) }catch{} }
+const pushOp = (type,payload) => saveQueue([ ...(queue||[]), { type, payload, opId:`${Date.now()}_${Math.random().toString(36).slice(2)}` } ])
+
+const busyRef=useRef(false), debRef=useRef(null)
+const sendBatch = (immediate=false) => {
+  if(busyRef.current) return
+  const run = async () => {
+    const ops = queue || []
+    if (ops.length === 0) return
+    busyRef.current = true
+    try{
+      const userId = auth?.accountId || auth?.asherId || getForumUserId()
+      const resp = await api.mutate({ ops }, userId)
+
+      if (resp && Array.isArray(resp.applied)) {
+        // успех — чистим очередь и обновляем снап
+        saveQueue([])
+        await refresh()
+      } else {
+        // неуспех (например, 400). Чтобы не застревать: выкидываем первую опу.
+        // На практике это будет невалидная react/view по tmp-id.
+        saveQueue(ops.slice(1))
+      }
+    }catch(e){
+      console.error('sendBatch', e)
+    }finally{
+      busyRef.current=false
+    }
+  }
+  if(immediate) run()
+  else { clearTimeout(debRef.current); debRef.current = setTimeout(run, 650) }
+}
+
+
 
   // >>>>>>>>> Единственное изменение логики: усиленные антидубликаты
   function dedupeAll(prev){
@@ -630,17 +974,22 @@ export default function Forum(){
     return dedupeAll(next)
   }
 
-  const refresh = async (forceFull=false) => {
-    try{
-      const r = await api.snapshot(forceFull ? null : data.cursor)
-      if(r?.ok){
-        if(r.full){ persist(dedupeAll({ topics:r.topics||[], posts:r.posts||[], bans:r.bans||[], admins:r.admins||[], cursor:r.cursor||null })) }
-        else if(r.delta){ persist(prev=>mergeDelta(prev, r.delta, r.cursor)) }
-      }
-    }catch{}
+  const refresh = async () => {
+    const r = await api.snapshot()
+    if (r?.ok && r.full) {
+      persist(dedupeAll({
+        topics: r.topics || [],
+        posts:  r.posts  || [],
+        bans:   r.bans   || [],
+        admins: r.admins || [],
+        rev:    r.rev    || null,
+      }))
+    }
   }
-  useEffect(()=>{ refresh(!data.cursor) },[]) // старт
-  useEffect(()=>{ const id=setInterval(()=>refresh(false), 8000); return ()=>clearInterval(id) },[data.cursor])
+
+useEffect(()=>{ refresh() },[]) 
+useEffect(()=>{ const id=setInterval(()=>refresh(), 8000); return ()=>clearInterval(id) },[])
+
 
 /* ---- admin ---- */
 const [adminOpen, setAdminOpen] = useState(false)
@@ -688,19 +1037,33 @@ const delPost = async (p) => {
 
 const banUser = async (p) => {
   if (!isAdmin) return
-  const r = await api.adminBanUser(p.accountId || p.userId)
+  const id = p.accountId || p.userId
+  const r = await api.adminBanUser(id)
   if (r?.ok) {
-    toast.ok('User banned')
+    // локально обновляем список банов, чтобы кнопка сразу стала зелёной
+    persist(prev => {
+      const bans = new Set(prev.bans || [])
+      bans.add(id)
+      return { ...prev, bans: Array.from(bans) }
+    })
+    toast.ok(t('forum_banned_ok') || 'User banned')
   } else {
     console.error('adminBanUser error:', r)
     toast.err(r?.error || 'Admin endpoint error')
   }
 }
+
 const unbanUser = async (p) => {
   if (!isAdmin) return
-  const r = await api.adminUnbanUser(p.accountId || p.userId)
+  const id = p.accountId || p.userId
+  const r = await api.adminUnbanUser(id)
   if (r?.ok) {
-    toast.ok('User unbanned')
+    persist(prev => {
+      const bans = new Set(prev.bans || [])
+      bans.delete(id)
+      return { ...prev, bans: Array.from(bans) }
+    })
+    toast.ok(t('forum_unbanned_ok') || 'User unbanned')
   } else {
     console.error('adminUnbanUser error:', r)
     toast.err(r?.error || 'Admin endpoint error')
@@ -735,51 +1098,76 @@ const unbanUser = async (p) => {
   // плоский вывод для рендера правой колонки:
   // - если threadRoot == null → выводим ТОЛЬКО корневые (без детей);
   // - если выбран корень → выводим весь поддеревом с отступами.
-  const flat = useMemo(()=>{
-    if(!sel?.id) return []
-    if(!threadRoot){
-      return rootPosts.map(r => ({ ...r, _lvl:0, repliesCount:(idMap.get(r.id)?.children||[]).length })) // без рекурсии
-    }
-    const start = idMap.get(threadRoot.id)
-    if(!start) return []
-    const out=[]
-    const cnt=(n)=> (n.children||[]).reduce((a,ch)=>a+1+cnt(ch),0)
-    const walk=(n,l=0)=>{ out.push({ ...n, _lvl:l, repliesCount:cnt(n) }); (n.children||[]).forEach(c=>walk(c,l+1)) }
-    walk(start,0)
-    return out
-  },[sel?.id, threadRoot, rootPosts, idMap])
+// плоский вывод для рендера правой колонки:
+// - если threadRoot == null → выводим ТОЛЬКО корневые (без детей);
+// - если выбран корень → выводим поддерево с отступами и repliesCount, посчитанным рекурсивно.
+const flat = useMemo(() => {
+  if (!sel?.id) return [];
+
+  if (!threadRoot) {
+    // только корни, без рекурсии: repliesCount = число прямых детей
+    return rootPosts.map(r => ({
+      ...r,
+      _lvl: 0,
+      repliesCount: (idMap.get(r.id)?.children || []).length,
+    }));
+  }
+
+  // выбран корень: обходим всё поддерево
+  const start = idMap.get(threadRoot.id);
+  if (!start) return [];
+
+  const out = [];
+  const cnt = (n) => (n.children || []).reduce((a, ch) => a + 1 + cnt(ch), 0);
+  const walk = (n, l = 0) => {
+    out.push({ ...n, _lvl: l, repliesCount: cnt(n) });
+    (n.children || []).forEach(c => walk(c, l + 1));
+  };
+  walk(start, 0);
+  return out;
+}, [sel?.id, threadRoot, rootPosts, idMap]);
+
 
   /* ---- агрегаты по темам ---- */
     // Множество забаненных (по userId/accountId)
   const bannedSet = useMemo(() => new Set(data.bans || []), [data.bans])
 
+ // ===== ПУНКТ 5: Агрегаты по темам из постов снапшота =====
   const aggregates = useMemo(()=>{
-    const byTopic=new Map()
-    for(const p of (data.posts||[])){
-      const a = byTopic.get(p.topicId) || { posts:0, likes:0, dislikes:0, views:0 }
-      a.posts += 1
-      a.likes += (p.reactions?.['👍']||0)
-      a.dislikes += (p.reactions?.['👎']||0)
-      a.views += (p.views||0)
-      byTopic.set(p.topicId, a)
+    const byTopic = new Map();
+    for (const p of (data.posts || [])) {
+      const a = byTopic.get(p.topicId) || { posts: 0, likes: 0, dislikes: 0, views: 0 };
+      a.posts    += 1;
+      a.likes    += (p.likes    || 0);
+      a.dislikes += (p.dislikes || 0);
+      a.views    += (p.views    || 0);
+      byTopic.set(p.topicId, a);
     }
-    return byTopic
-  },[data.posts])
+    return byTopic;
+  }, [data.posts]);
+
 
   /* ---- сортировка тем ---- */
   const [topicSort, setTopicSort] = useState('new') // new/top/likes/views/replies
+// ===== ПУНКТ 5: Сортировка тем с использованием агрегатов =====
   const sortedTopics = useMemo(()=>{
-    const topics = [...(data.topics||[])]
+    const topics = [...(data.topics || [])];
     const score = (t) => {
-      const agg = aggregates.get(t.id) || { posts:0, likes:0, dislikes:0, views:0 }
-      if(topicSort==='new') return t.ts||0
-      if(topicSort==='likes') return agg.likes
-      if(topicSort==='views') return agg.views
-      if(topicSort==='replies') return agg.posts
-      return agg.likes*2 + agg.posts + Math.floor(agg.views*0.2)
-    }
-    return topics.sort((a,b)=>(score(b)-score(a)) || (b.ts-a.ts))
-  },[data.topics,aggregates,topicSort])
+      const agg = aggregates.get(t.id) || { posts:0, likes:0, dislikes:0, views:0 };
+      switch (topicSort) {
+        case 'new':     return t.ts || 0;
+        case 'likes':   return agg.likes;
+        case 'views':   return agg.views;
+        case 'replies': return agg.posts;
+        case 'top':
+        default:
+          // смешанный скор: лайки главнее, затем кол-во постов и немного просмотров
+          return (agg.likes * 2) + agg.posts + Math.floor(agg.views * 0.2);
+      }
+    };
+    return topics.sort((a,b) => (score(b) - score(a)) || ((b.ts||0) - (a.ts||0)));
+  }, [data.topics, aggregates, topicSort]);
+
 
   /* ---- composer ---- */
   const [text,setText] = useState('')
@@ -789,60 +1177,233 @@ const unbanUser = async (p) => {
     const r = await requireAuth(); if(!r) return
     const uid = r.asherId || r.accountId || ''
     const prof = (()=>{ if(!isBrowser()) return {}; try{ return JSON.parse(localStorage.getItem('profile:'+uid)||'{}') }catch{return{}} })()
+
+    // лимиты по ТЗ
+    const safeTitle = String(title||'')
+    const safeDesc  = String(description||'').slice(0,40)
+    const safeFirst = String(first||'').slice(0,180)
+
+    // временные id (оптимизм)
     const tmpT = `tmp_t_${now()}_${Math.random().toString(36).slice(2)}`
     const tmpP = `tmp_p_${now()}_${Math.random().toString(36).slice(2)}`
     const isAdm = isBrowser() && localStorage.getItem('ql7_admin')==='1'
-    const t0 = { id:tmpT, title, description, ts:now(), userId:uid, nickname:prof.nickname||shortId(uid), icon:prof.icon||'👤', isAdmin:isAdm, views:0 }
-    const p0 = { id:tmpP, topicId:tmpT, parentId:null, text:first, ts:now(), userId:uid, nickname:t0.nickname, icon:t0.icon, isAdmin:isAdm, reactions:{}, myReaction:null, views:0 }
-    persist(prev => dedupeAll({ ...prev, topics:[t0, ...prev.topics], posts:[...prev.posts, p0] }))
-    pushOp('create_topic', { title, description, text:first||'', profile:{ nickname:t0.nickname, icon:t0.icon }, isAdmin:isAdm })
-    sendBatch(true)
-    setSel(t0)
-    toast.ok('Тема создана')
-  }
 
-  const createPost = async () => {
-    const body = text.trim(); if(!body || !sel?.id) return
-    const r = await requireAuth(); if(!r) return
-    const uid = r.asherId || r.accountId || ''
-    const prof = (()=>{ if(!isBrowser()) return {}; try{ return JSON.parse(localStorage.getItem('profile:'+uid)||'{}') }catch{return{}} })()
-    const tmpId = `tmp_p_${now()}_${Math.random().toString(36).slice(2)}`
-    const isAdm = isBrowser() && localStorage.getItem('ql7_admin')==='1'
-    const p = { id:tmpId, topicId:sel.id, parentId:replyTo?.id||null, text:body, ts:now(), userId:uid, nickname:prof.nickname||shortId(uid), icon:prof.icon||'👤', isAdmin:isAdm, reactions:{}, myReaction:null, views:0 }
-    persist(prev => dedupeAll({ ...prev, posts:[...prev.posts, p] }))
-    pushOp('create_post', { topicId:sel.id, parentId:replyTo?.id||null, text:body, isAdmin:isAdm })
-    sendBatch(true)
-    setText(''); setReplyTo(null)
-    toast.ok('Отправлено')
-  }
+    const t0 = {
+      id: tmpT, title: safeTitle, description: safeDesc, ts: now(),
+      userId: uid, nickname: prof.nickname || shortId(uid),
+      icon: prof.icon || '👤', isAdmin: isAdm, views: 0
+    }
+    const p0 = {
+      id: tmpP, topicId: tmpT, parentId: null, text: safeFirst, ts: now(),
+      userId: uid, nickname: t0.nickname, icon: t0.icon, isAdmin: isAdm,
+      likes: 0, dislikes: 0, views: 0, myReaction: null
+    }
 
-  const reactMut = async (post, emoji) => {
-    const r = await requireAuth(); if(!r) return
-    const next = emoji // (или null)
+// оптимистично кладём в локальный снап
+persist(prev => dedupeAll({ ...prev, topics:[t0, ...prev.topics], posts:[...prev.posts, p0] }))
+setSel(t0)
+toast.ok('Тема создана')
+
+   
+    // 1) создаём тему на бэке
+    const createTopicResp = await api.mutate({
+      ops:[{ type:'create_topic', payload:{ title: safeTitle, description: safeDesc, nickname: t0.nickname, icon: t0.icon } }]
+    }, uid)
+
+    const realTopicId = createTopicResp?.applied?.find(x=>x.op==='create_topic')?.topic?.id
+    if (!realTopicId) { await refresh(); return }
+
+    // ремап tmp -> real локально
     persist(prev=>{
-      const map = new Map(prev.posts.map(x=>[x.id,x])); const p = { ...(map.get(post.id)||{}) }
-      const was = p.myReaction || null; p.myReaction = next; p.reactions = { ...(p.reactions||{}) }
-      if(was) p.reactions[was] = Math.max(0, (p.reactions[was]||0)-1)
-      if(next) p.reactions[next] = (p.reactions[next]||0)+1
-      map.set(post.id, p); return dedupeAll({ ...prev, posts: Array.from(map.values()) })
+      const topics = prev.topics.map(x => x.id===tmpT ? { ...x, id:String(realTopicId) } : x)
+      const posts  = prev.posts.map(x => x.topicId===tmpT ? { ...x, topicId:String(realTopicId) } : x)
+      return dedupeAll({ ...prev, topics, posts })
     })
-    pushOp('react', { topicId: sel.id, postId: post.id, emoji: next }); sendBatch()
+
+    // 2) создаём первый пост (отдельной операцией, уже с реальным topicId)
+    await api.mutate({
+      ops:[{ type:'create_post', payload:{ topicId:String(realTopicId), text:safeFirst, nickname:t0.nickname, parentId:null } }]
+    }, uid)
+
+    // подтянуть свежий снапшот
+    await refresh()
   }
 
-  const markViewPost = (postId) => {
-    if(!isBrowser()) return
-    const uid = auth.asherId || auth.accountId || ''
-    if(!uid || !postId) return
-    const day = new Date().toISOString().slice(0,10)
-    const key = `post:${postId}:viewed:${uid}:${day}`
-    if(!localStorage.getItem(key)){ localStorage.setItem(key,'1'); pushOp('view_post', { postId }); sendBatch() }
+
+const createPost = async () => {
+  const body = String(text || '').trim().slice(0, 180);
+  if (!body || !sel?.id) return;
+
+  const r = await requireAuth(); if (!r) return;
+  const uid  = r.asherId || r.accountId || '';
+  const isAdm = typeof window !== 'undefined' && localStorage.getItem('ql7_admin') === '1';
+
+  // локальный профиль — чтобы ник/иконка сразу были правильными
+  const prof = (() => {
+    if (typeof window === 'undefined') return {};
+    try { return JSON.parse(localStorage.getItem('profile:' + uid) || '{}'); }
+    catch { return {}; }
+  })();
+
+  // если мы в ветке или нажали "Ответить" — берём родителя
+  const parentId = (replyTo?.id) || (threadRoot?.id) || null;
+  const isReply  = !!parentId;
+
+// оптимистичный tmp-пост
+const tmpPostId = `tmp_p_${Date.now()}_${Math.random().toString(36).slice(2)}`
+const p = {
+  id: tmpPostId,
+  topicId: sel.id,
+  parentId,
+  text: body,
+  ts: Date.now(),
+  userId: uid,
+  nickname: prof.nickname || shortId(uid),
+  icon: prof.icon || '👤',
+  isAdmin: isAdm,
+  likes: 0, dislikes: 0, views: 0,
+  myReaction: null,
+}
+
+// Моментально показываем в UI (+ инкремент ответов у родителя)
+persist(prev => {
+  const pid  = String(parentId)
+  const next = { ...prev, posts: [ ...(prev.posts || []), p ] }
+  // гарантируем, что рут ветки выставлен прямо сейчас
+  if (isReply && (!threadRoot || String(threadRoot.id) !== String(parentId))) {
+    setThreadRoot({ id: String(parentId) })
   }
-  useEffect(()=>{
-    if(!sel?.id || !isBrowser()) return
-    const day = new Date().toISOString().slice(0,10)
-    const key = `topic:${sel.id}:viewed:${day}`
-    if(!localStorage.getItem(key)){ localStorage.setItem(key,'1'); pushOp('view_topic', { topicId: sel.id }); sendBatch() }
-  },[sel?.id]) // eslint-disable-line
+
+  if (isReply && Array.isArray(prev.posts)) {
+    next.posts = next.posts.map(x => {
+      if (String(x.id) !== pid) return x
+      const replies = Number(x.replies ?? x.repliesCount ?? 0) + 1
+      return { ...x, replies, repliesCount: replies }
+    })
+  }
+  return dedupeAll(next)
+})
+
+// если это ответ — сразу раскрыть ветку по РЕАЛЬНОМУ объекту родителя
+if (isReply) {
+  const parentPost = (data?.posts || []).find(x => String(x.id) === String(parentId))
+  setThreadRoot(parentPost || { id: String(parentId) })
+  setTimeout(() => {
+    try { document.querySelector('.body')?.scrollTo?.({ top: 9e9, behavior: 'smooth' }) } catch {}
+  }, 60)
+}
+
+// батч на бэкенд — строго по контракту
+pushOp('create_post', { topicId: sel.id, text: body, parentId, nickname: p.nickname });
+sendBatch(true);
+
+// мягкий догон серверного состояния: через ~0.2с подтянем снапшот,
+// чтобы tmp_* заменился на реальный пост и обновились счётчики
+setTimeout(() => {
+  try { if (typeof refresh === 'function') refresh(); } catch {}
+}, 200);
+
+// сброс UI
+setText('');
+setReplyTo(null);
+toast.ok('Отправлено');
+};
+
+
+/* === REACT: поставить/снять лайк/дизлайк c оптимистикой === */
+const reactMut = useCallback(async (post, kind) => {
+  // kind: 'like' | 'dislike'
+  if (!post?.id) return;
+  const uid = (auth?.asherId || auth?.accountId || (typeof getForumUserId==='function' ? getForumUserId() : 'web'));
+
+  const current = post.myReaction || null;        // что стоит у пользователя сейчас
+  const ops = [];
+
+  if (current === kind) {
+    // повторный клик по тому же — снимаем реакцию
+    ops.push({ type: 'react', payload: { postId: String(post.id), kind, delta: -1 } });
+  } else {
+    // если стояло другое — сначала снимаем предыдущее
+    if (current === 'like')     ops.push({ type: 'react', payload: { postId: String(post.id), kind: 'like',     delta: -1 } });
+    if (current === 'dislike')  ops.push({ type: 'react', payload: { postId: String(post.id), kind: 'dislike',  delta: -1 } });
+    // затем ставим новое
+    ops.push({ type: 'react', payload: { postId: String(post.id), kind, delta: +1 } });
+  }
+
+  // --- оптимистическое обновление локального снапа ---
+  persist(prev => {
+    const posts = (prev.posts || []).map(p => {
+      if (p.id !== post.id) return p;
+      let likes    = Number(p.likes    ?? 0);
+      let dislikes = Number(p.dislikes ?? 0);
+      let myReaction = p.myReaction || null;
+
+      if (current === kind) {
+        // снимаем
+        if (kind === 'like')    likes    = Math.max(0, likes - 1);
+        if (kind === 'dislike') dislikes = Math.max(0, dislikes - 1);
+        myReaction = null;
+      } else {
+        // переключение
+        if (current === 'like')    likes    = Math.max(0, likes - 1);
+        if (current === 'dislike') dislikes = Math.max(0, dislikes - 1);
+        if (kind === 'like')       likes    = likes + 1;
+        if (kind === 'dislike')    dislikes = dislikes + 1;
+        myReaction = kind;
+      }
+      return { ...p, likes, dislikes, myReaction };
+    });
+    return { ...prev, posts };
+  });
+
+  // --- батч на сервер ---
+  try {
+    const r = await api.mutate({ ops }, uid);
+    // если хочешь мгновенно дотянуть серверные значения — дерни твой рефреш/снапшот:
+    if (r && r.applied && typeof refresh === 'function') await refresh();
+  } catch (e) {
+    console.warn('react mutate failed', e);
+  }
+}, [auth, persist]);
+
+
+const FORUM_VIEW_TTL_SEC = VIEW_TTL_SEC
+const getBucket = (ttl) => Math.floor(Date.now()/1000 / (ttl||1800))
+
+const markViewPost = (postId) => {
+  if(!isBrowser()) return
+  const uid = auth.asherId || auth.accountId || ''
+  if(!uid || !postId) return
+  const bucket = getBucket(FORUM_VIEW_TTL_SEC)
+  const key = `post:${postId}:viewed:${uid}:${bucket}`
+
+  if(!localStorage.getItem(key)){
+    localStorage.setItem(key,'1')
+    // оптимистический инкремент views
+    persist(prev=>{
+      const map = new Map(prev.posts.map(x=>[x.id,x]))
+      const p = { ...(map.get(postId)||{}) }
+      p.views = (p.views||0)+1
+      map.set(postId, p)
+      return dedupeAll({ ...prev, posts: Array.from(map.values()) })
+    })
+    pushOp('view_post', { postId })
+    sendBatch()
+  }
+}
+
+
+useEffect(()=>{
+  if(!sel?.id || !isBrowser()) return
+  const bucket = getBucket(VIEW_TTL_SEC)
+  const key = `topic:${sel.id}:viewed:${bucket}`
+  if(!localStorage.getItem(key)){
+    localStorage.setItem(key,'1')
+    pushOp('view_topic', { topicId: sel.id })
+    sendBatch()
+  }
+},[sel?.id]) // eslint-disable-line
+
 
   /* ---- поиск/сортировки/поповеры ---- */
   const [q, setQ] = useState('')
@@ -877,7 +1438,7 @@ const unbanUser = async (p) => {
   /* ---- render ---- */
   return (
     <div className="forum_root space-y-4">
-      <Styles/>{toast.view}
+      <Styles />{toast.view}
 
       {/* шапка */}
       <section className="glass neon p-3" style={{ position:'relative', zIndex:40, overflow:'visible' }}>
@@ -1033,18 +1594,19 @@ const unbanUser = async (p) => {
                     <div key={p.id} id={`post_${p.id}`} style={{ marginLeft: p._lvl*18 }}>
                       <PostCard
                         p={p}
-                        parentAuthor={parent?.nickname || (parent ? shortId(parent.userId||'') : null)}
-                        onReport={()=>toast.ok(t('forum_report_ok'))}
-                        onReply={()=>setReplyTo(p)}
-                        onOpenThread={(clickP)=>{ if(!threadRoot){ setThreadRoot(clickP) } }}
-                        onReact={(emoji)=>reactMut(p,emoji)}
+                        parentAuthor={parent?.nickname || (parent ? shortId(parent.userId || '') : null)}
+                        onReport={() => toast.ok(t('forum_report_ok'))}
+                        onReply={() => setReplyTo(p)}
+                        onOpenThread={(clickP) => { setThreadRoot(clickP) }}
+                        onReact={reactMut}
                         isAdmin={isAdmin}
                         onDeletePost={delPost}
                         onBanUser={banUser}
                         onUnbanUser={unbanUser}
                         isBanned={bannedSet.has(p.accountId || p.userId)}
-                        authId={auth.asherId||auth.accountId}
+                        authId={auth.asherId || auth.accountId}
                         markView={markViewPost}
+                        t={t}
                       />
                     </div>
                   )
@@ -1061,7 +1623,14 @@ const unbanUser = async (p) => {
                   : t('forum_composer_hint') }
               </div>
               <div className="flex items-end gap-2">
-                <textarea className="ta" value={text} onChange={e=>setText(e.target.value)} placeholder={t('forum_composer_placeholder')}/>
+                <textarea
+                  className="ta"
+                  value={text}
+                  onChange={e=>setText(e.target.value.slice(0,180))}
+                  maxLength={180}
+                  placeholder={t('forum_composer_placeholder')}
+                />
+
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
                     <button className="btn" disabled={!text.trim()} onClick={createPost}>{t('forum_send')}</button>
@@ -1096,8 +1665,10 @@ const unbanUser = async (p) => {
       </div>
     </div>
   )
-}
-
+};
+/* =========================================================
+   Карточка создания темы
+========================================================= */
 /* =========================================================
    Карточка создания темы
 ========================================================= */
@@ -1114,15 +1685,34 @@ function CreateTopicCard({ t, onCreate }){
           <div className="grid gap-2">
             <label className="block">
               <div className="meta mb-1">{t('forum_topic_title')}</div>
-              <input className="input" value={title} onChange={e=>setTitle(e.target.value)} placeholder={t('forum_topic_title_ph')}/>
+              <input
+                className="input"
+                value={title}
+                onChange={e=>setTitle(e.target.value)}
+                placeholder={t('forum_topic_title_ph')}
+              />
             </label>
             <label className="block">
               <div className="meta mb-1">{t('forum_topic_desc')}</div>
-              <textarea className="ta" rows={3} value={descr} onChange={e=>setDescr(e.target.value)} placeholder={t('forum_topic_desc_ph')}/>
+              <textarea
+                className="ta"
+                rows={3}
+                value={descr}
+                onChange={e=>setDescr(e.target.value.slice(0,40))}
+                maxLength={40}
+                placeholder={t('forum_topic_desc_ph')}
+              />
             </label>
             <label className="block">
               <div className="meta mb-1">{t('forum_topic_first_msg')}</div>
-              <textarea className="ta" rows={6} value={first} onChange={e=>setFirst(e.target.value)} placeholder={t('forum_topic_first_msg_ph')}/>
+              <textarea
+                className="ta"
+                rows={6}
+                value={first}
+                onChange={e=>setFirst(e.target.value.slice(0,180))}
+                maxLength={180}
+                placeholder={t('forum_topic_first_msg_ph')}
+              />
             </label>
             <div className="flex items-center justify-end gap-2">
               <button className="btn btnGhost" onClick={()=>setOpen(false)}>{t('forum_cancel')}</button>
