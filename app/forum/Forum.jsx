@@ -973,22 +973,134 @@ const sendBatch = (immediate=false) => {
     next.cursor = cursor ?? prev.cursor
     return dedupeAll(next)
   }
+// === SILENT SYNC: мягкое докатывание без «прыжков» ===
+useEffect(() => {
+  let stop = false;
 
-  const refresh = async () => {
-    const r = await api.snapshot()
-    if (r?.ok && r.full) {
-      persist(dedupeAll({
-        topics: r.topics || [],
-        posts:  r.posts  || [],
-        bans:   r.bans   || [],
-        admins: r.admins || [],
-        rev:    r.rev    || null,
-      }))
+  // стабильное слияние сервера в локальный снап (сохраняем порядок и tmp)
+  const silentMerge = (prev, r) => {
+    const out = { ...prev };
+
+    // --- TOPICS (без прыжков) ---
+    if (Array.isArray(r.topics)) {
+      const byIdPrev = new Map((prev.topics || []).map((t, i) => [String(t.id), { ...t, __idx:i }]));
+      for (const t of r.topics) {
+        const id = String(t.id);
+        byIdPrev.set(id, { ...(byIdPrev.get(id) || { __idx: 9e9 }), ...t });
+      }
+      // сохраняем прежний порядок, новые в конец
+      out.topics = Array.from(byIdPrev.values()).sort((a,b)=>a.__idx-b.__idx).map(({__idx, ...t})=>t);
     }
-  }
 
-useEffect(()=>{ refresh() },[]) 
-useEffect(()=>{ const id=setInterval(()=>refresh(), 8000); return ()=>clearInterval(id) },[])
+    // --- POSTS (главное: не дёргать и не терять tmp_*) ---
+    if (Array.isArray(r.posts)) {
+      const prevList = prev.posts || [];
+      const srvMap   = new Map(r.posts.map(p => [String(p.id), p]));
+      const order    = new Map(prevList.map((p, i) => [String(p.id), i])); // старые позиции
+
+      // 1) обновляем/добавляем серверные поверх локальных
+      const mergedById = new Map(prevList.map(p => [String(p.id), { ...p }]));
+      for (const [id, srv] of srvMap) {
+        const loc = mergedById.get(id) || {};
+        // счётчики не «скачут» вниз: не уменьшаем ниже локального
+        const likes    = Math.max(Number(srv.likes ?? 0),    Number(loc.likes ?? 0));
+        const dislikes = Math.max(Number(srv.dislikes ?? 0), Number(loc.dislikes ?? 0));
+        const views    = Math.max(Number(srv.views ?? 0),    Number(loc.views ?? 0));
+        mergedById.set(id, { ...loc, ...srv, likes, dislikes, views, myReaction: (loc.myReaction ?? srv.myReaction ?? null) });
+      }
+
+      // 2) не подтверждённые tmp_* оставляем на месте до 10с (не мигают)
+      const now = Date.now();
+      for (const p of prevList) {
+        const id = String(p.id);
+        if (id.startsWith('tmp_') && !mergedById.has(id)) {
+          const fresh = (now - Number(p.ts || now)) < 10_000;
+          if (fresh) mergedById.set(id, p);
+        }
+      }
+
+      // 3) строим список в СТАРОМ порядке; новые (которых не было) дописываем в конец
+      const mergedList = [];
+      // существующие — по прежним индексам
+      for (const p of prevList) {
+        const id = String(p.id);
+        const found = mergedById.get(id);
+        if (found) { mergedList.push(found); mergedById.delete(id); }
+      }
+      // новые серверные (которых не было) — в конец (без пересортировки)
+      for (const p of mergedById.values()) mergedList.push(p);
+
+      out.posts = mergedList;
+    }
+
+    if (Array.isArray(r.bans))   out.bans   = r.bans;
+    if (Array.isArray(r.admins)) out.admins = r.admins;
+    if (r.rev    !== undefined)  out.rev    = r.rev;
+    if (r.cursor !== undefined)  out.cursor = r.cursor;
+
+    return dedupeAll(out);
+  };
+
+  const pull = async () => {
+    try {
+      const r = await api.snapshot(); // внутри должен быть no-store
+      if (r?.ok) persist(prev => silentMerge(prev, r));
+    } catch {}
+  };
+
+  // — живой докат раз в 2 c (можешь поставить 1500–3000)
+  (async function loop(){
+    while (!stop) {
+      await pull();
+      await new Promise(r => setTimeout(r, 2000));
+    }
+  })();
+
+  // — мгновенно при возврате фокуса/онлайна
+  const kick = () => { pull(); };
+  window.addEventListener('focus', kick);
+  window.addEventListener('online', kick);
+  document.addEventListener('visibilitychange', kick);
+
+  // — после ЛЮБОГО POST на /api/forum/* (лайк/ответ/бан/удаление)
+  const _fetch = window.fetch;
+  window.fetch = async (...args) => {
+    const res = await _fetch(...args);
+    try {
+      const req    = args[0];
+      const url    = typeof req === 'string' ? req : req?.url;
+      const method = (typeof req === 'string' ? (args[1]?.method || 'GET') : (req.method || 'GET')).toUpperCase();
+      if (method !== 'GET' && /\/api\/forum\//.test(String(url || ''))) {
+        setTimeout(pull, 180); // даём серверу применить
+      }
+    } catch {}
+    return res;
+  };
+
+  return () => {
+    stop = true;
+    window.removeEventListener('focus', kick);
+    window.removeEventListener('online', kick);
+    document.removeEventListener('visibilitychange', kick);
+    window.fetch = _fetch;
+  };
+}, []);
+
+  //  const refresh = async () => {
+  //    const r = await api.snapshot()
+  //   if (r?.ok && r.full) {
+  //     persist(dedupeAll({
+  //       topics: r.topics || [],
+  //       posts:  r.posts  || [],
+  //       bans:   r.bans   || [],
+  //       admins: r.admins || [],
+  //       rev:    r.rev    || null,
+  //     }))
+  //   }
+  // }
+
+// useEffect(()=>{ refresh() },[]) 
+// useEffect(()=>{ const id=setInterval(()=>refresh(), 8000); return ()=>clearInterval(id) },[])
 
 
 /* ---- admin ---- */
@@ -1071,61 +1183,63 @@ const unbanUser = async (p) => {
 }
 
 
-  /* ---- выбор темы и построение данных ---- */
-  const [sel, setSel] = useState(null)
+/* ---- выбор темы и построение данных ---- */
+const [sel, setSel] = useState(null);
 
-  // все посты темы
-  const allPosts = useMemo(()=> sel?.id ? (data.posts||[]).filter(p=>p.topicId===sel.id) : [], [data.posts, sel?.id])
+// все посты выбранной темы (строго сравниваем как строки)
+const allPosts = useMemo(() => (
+  sel?.id ? (data.posts || []).filter(p => String(p.topicId) === String(sel.id)) : []
+), [data.posts, sel?.id]);
 
-  // корневые — новые сверху
-  const rootPosts = useMemo(()=> allPosts.filter(p=>!p.parentId).sort((a,b)=>b.ts-a.ts), [allPosts])
+// корневые посты (без parentId), новые сверху
+const rootPosts = useMemo(
+  () => allPosts.filter(p => !p.parentId).sort((a, b) => b.ts - a.ts),
+  [allPosts]
+);
 
-  // индекс для быстрых ссылок
-  const idMap = useMemo(()=> new Map(allPosts.map(p => [p.id, { ...p, children: [] }])), [allPosts])
-  useEffect(()=>{
-    // связываем детей после построения idMap
-    idMap.forEach(node => {
-      if(node.parentId && idMap.has(node.parentId)){
-        idMap.get(node.parentId).children.push(node)
-      }
-    })
-  },[idMap])
+// индекс по id и подготовка узлов с children — ВСЕГДА ключ как String
+const idMap = useMemo(() => {
+  const m = new Map(allPosts.map(p => [String(p.id), { ...p, children: [] }]));
+  // связываем детей с родителями (детерминированно, без setState)
+  for (const node of m.values()) {
+    const pid = node.parentId != null ? String(node.parentId) : null;
+    if (pid && m.has(pid)) m.get(pid).children.push(node);
+  }
+  return m;
+}, [allPosts]);
 
-  // режим ветки: выбранный корневой пост
-  const [threadRoot, setThreadRoot] = useState(null)
-  useEffect(()=>{ setThreadRoot(null) },[sel?.id])
+// выбранный корень ветки (null = режим списка корней)
+const [threadRoot, setThreadRoot] = useState(null);
+// при смене темы выходим из веточного режима
+useEffect(() => { setThreadRoot(null); }, [sel?.id]);
 
-  // плоский вывод для рендера правой колонки:
-  // - если threadRoot == null → выводим ТОЛЬКО корневые (без детей);
-  // - если выбран корень → выводим весь поддеревом с отступами.
-// плоский вывод для рендера правой колонки:
-// - если threadRoot == null → выводим ТОЛЬКО корневые (без детей);
-// - если выбран корень → выводим поддерево с отступами и repliesCount, посчитанным рекурсивно.
+// плоский список для рендера правой колонки
+// - без threadRoot → только корни + repliesCount = число прямых детей;
+// - с threadRoot   → всё поддерево с отступами и суммарным repliesCount.
 const flat = useMemo(() => {
   if (!sel?.id) return [];
 
   if (!threadRoot) {
-    // только корни, без рекурсии: repliesCount = число прямых детей
     return rootPosts.map(r => ({
       ...r,
       _lvl: 0,
-      repliesCount: (idMap.get(r.id)?.children || []).length,
+      repliesCount: (idMap.get(String(r.id))?.children || []).length,
     }));
   }
 
-  // выбран корень: обходим всё поддерево
-  const start = idMap.get(threadRoot.id);
+  const start = idMap.get(String(threadRoot.id));
   if (!start) return [];
 
   const out = [];
-  const cnt = (n) => (n.children || []).reduce((a, ch) => a + 1 + cnt(ch), 0);
-  const walk = (n, l = 0) => {
-    out.push({ ...n, _lvl: l, repliesCount: cnt(n) });
-    (n.children || []).forEach(c => walk(c, l + 1));
+  const countDeep = (n) => (n.children || []).reduce((a, ch) => a + 1 + countDeep(ch), 0);
+  const walk = (n, level = 0) => {
+    out.push({ ...n, _lvl: level, repliesCount: countDeep(n) });
+    (n.children || []).forEach(ch => walk(ch, level + 1));
   };
   walk(start, 0);
   return out;
 }, [sel?.id, threadRoot, rootPosts, idMap]);
+
 
 
   /* ---- агрегаты по темам ---- */
@@ -1236,77 +1350,69 @@ const createPost = async () => {
 
   const r = await requireAuth(); if (!r) return;
   const uid  = r.asherId || r.accountId || '';
-  const isAdm = typeof window !== 'undefined' && localStorage.getItem('ql7_admin') === '1';
+  const isAdm = (typeof window !== 'undefined') && localStorage.getItem('ql7_admin') === '1';
 
-  // локальный профиль — чтобы ник/иконка сразу были правильными
+  // локальный профиль (ник/иконка для моментального UI)
   const prof = (() => {
     if (typeof window === 'undefined') return {};
     try { return JSON.parse(localStorage.getItem('profile:' + uid) || '{}'); }
     catch { return {}; }
   })();
 
-  // если мы в ветке или нажали "Ответить" — берём родителя
+  // если отвечаем — определяем родителя
   const parentId = (replyTo?.id) || (threadRoot?.id) || null;
   const isReply  = !!parentId;
 
-// оптимистичный tmp-пост
-const tmpPostId = `tmp_p_${Date.now()}_${Math.random().toString(36).slice(2)}`
-const p = {
-  id: tmpPostId,
-  topicId: sel.id,
-  parentId,
-  text: body,
-  ts: Date.now(),
-  userId: uid,
-  nickname: prof.nickname || shortId(uid),
-  icon: prof.icon || '👤',
-  isAdmin: isAdm,
-  likes: 0, dislikes: 0, views: 0,
-  myReaction: null,
-}
+  // --- OPTIMISTIC: tmp-пост сразу в UI ---
+  const tmpId = `tmp_p_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+  const p = {
+    id: tmpId,
+    topicId: String(sel.id),
+    parentId: parentId ? String(parentId) : null,
+    text: body,
+    ts: Date.now(),
+    userId: uid,
+    nickname: prof.nickname || shortId(uid),
+    icon: prof.icon || '👤',
+    isAdmin: isAdm,
+    likes: 0, dislikes: 0, views: 0,
+    myReaction: null,
+  };
 
-// Моментально показываем в UI (+ инкремент ответов у родителя)
-persist(prev => {
-  const pid  = String(parentId)
-  const next = { ...prev, posts: [ ...(prev.posts || []), p ] }
-  // гарантируем, что рут ветки выставлен прямо сейчас
-  if (isReply && (!threadRoot || String(threadRoot.id) !== String(parentId))) {
-    setThreadRoot({ id: String(parentId) })
+  // 1) мгновенно положили в локальный снап, инкрементнули счётчик у родителя
+  persist(prev => {
+    const next = { ...prev, posts: [ ...(prev.posts || []), p ] };
+    if (isReply && Array.isArray(prev.posts)) {
+      const pid = String(parentId);
+      next.posts = next.posts.map(x => {
+        if (String(x.id) !== pid) return x;
+        const replies = Number(x.replies ?? x.repliesCount ?? 0) + 1;
+        return { ...x, replies, repliesCount: replies };
+      });
+    }
+    return dedupeAll(next);
+  });
+
+  // 2) если это ответ — сразу раскрываем ветку по РЕАЛЬНОМУ объекту родителя
+  if (isReply) {
+    const parentPost = (data?.posts || []).find(x => String(x.id) === String(parentId));
+    setThreadRoot(parentPost || { id: String(parentId) });
+    setTimeout(() => {
+      try { document.querySelector('.body')?.scrollTo?.({ top: 9e9, behavior: 'smooth' }); } catch {}
+    }, 60);
   }
 
-  if (isReply && Array.isArray(prev.posts)) {
-    next.posts = next.posts.map(x => {
-      if (String(x.id) !== pid) return x
-      const replies = Number(x.replies ?? x.repliesCount ?? 0) + 1
-      return { ...x, replies, repliesCount: replies }
-    })
-  }
-  return dedupeAll(next)
-})
+  // 3) батч на бэкенд (как у тебя)
+  pushOp('create_post', { topicId: sel.id, text: body, parentId, nickname: p.nickname });
+  sendBatch(true);
 
-// если это ответ — сразу раскрыть ветку по РЕАЛЬНОМУ объекту родителя
-if (isReply) {
-  const parentPost = (data?.posts || []).find(x => String(x.id) === String(parentId))
-  setThreadRoot(parentPost || { id: String(parentId) })
-  setTimeout(() => {
-    try { document.querySelector('.body')?.scrollTo?.({ top: 9e9, behavior: 'smooth' }) } catch {}
-  }, 60)
-}
+  // 4) мягкий догон серверного состояния: убираем tmp_*, дотягиваем id/счётчики
+  setTimeout(() => { try { if (typeof refresh === 'function') refresh(); } catch {} }, 200);
 
-// батч на бэкенд — строго по контракту
-pushOp('create_post', { topicId: sel.id, text: body, parentId, nickname: p.nickname });
-sendBatch(true);
-
-// мягкий догон серверного состояния: через ~0.2с подтянем снапшот,
-// чтобы tmp_* заменился на реальный пост и обновились счётчики
-setTimeout(() => {
-  try { if (typeof refresh === 'function') refresh(); } catch {}
-}, 200);
-
-// сброс UI
-setText('');
-setReplyTo(null);
-toast.ok('Отправлено');
+  // 5) сброс UI
+  setText('');
+  setReplyTo(null);
+  toast.ok('Отправлено');
 };
 
 
@@ -1589,7 +1695,7 @@ useEffect(()=>{
             <div className="body">
               <div className="grid gap-2">
                 {flat.map(p=>{
-                  const parent = p.parentId ? allPosts.find(x=>x.id===p.parentId) : null
+                  const parent = p.parentId ? allPosts.find(x => String(x.id) === String(p.parentId)) : null
                   return (
                     <div key={p.id} id={`post_${p.id}`} style={{ marginLeft: p._lvl*18 }}>
                       <PostCard
