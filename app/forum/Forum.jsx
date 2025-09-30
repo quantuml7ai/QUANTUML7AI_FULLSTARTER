@@ -1044,81 +1044,74 @@ const sendBatch = (immediate=false) => {
     next.cursor = cursor ?? prev.cursor
     return dedupeAll(next)
   }
-// === SILENT SYNC with backoff & debounce ===
+// === SILENT SYNC with cache-bust, backoff & hard-consistency ===
 useEffect(() => {
   let stop = false;
   let pulling = false;
-  let cooldownUntil = 0;              // таймштамп: до какого времени не дергаем снапшот
-  let debounceTimer = null;           // для дебаунса pull() после POST
-  const BASE_INTERVAL = 2000;         // 2s как и было
-  const COOLDOWN_MS   = 60_000;       // 60s пауза при лимите
-  const JITTER_MS     = 350;          // небольшой рандом, чтобы рассинхронить табы
+  let cooldownUntil = 0;         // до какого времени не дёргаем снапшот (бэк-офф)
+  let debounceTimer = null;      // дебаунс для pull() после POST
+  let bustRef = 0;               // volatile ключ для обхода микрокэша на сервере
+
+  const BASE_INTERVAL = 2000;    // базовый период опроса
+  const JITTER_MS     = 400;     // небольшой джиттер, чтобы рассинхронить вкладки
+  const COOLDOWN_MS   = 60_000;  // пауза при превышении лимита
+  const TMP_GRACE_MS  = 10_000;  // сколько держим неподтверждённые tmp_*
 
   const now = () => Date.now();
+  const isOverLimit = (err) => /max requests limit exceeded/i.test(String(err?.message || err || ''));
 
-  const isOverLimit = (err) => {
-    const msg = String(err?.message || err || '');
-    return /max requests limit exceeded/i.test(msg);
-  };
-
-  // ⬇️ ВАЖНО: безопасное слияние + выкидываем всё, чего нет на сервере
+  // безопасное слияние + выкидываем всё, чего нет на сервере
   const safeMerge = (prev, r) => {
     const out = { ...prev };
 
-    // --- TOPICS: оставляем только те, что пришли с сервера; порядок прежних сохраняем ---
+    // ---- TOPICS: только серверные (порядок прежний), никаких исчезнувших ----
     if (Array.isArray(r.topics)) {
       const prevTopics = prev.topics || [];
       const byIdPrev = new Map(prevTopics.map((t, i) => [String(t.id), { ...t, __idx: i }]));
       const srvList = r.topics;
       const srvSet  = new Set(srvList.map(t => String(t.id)));
 
-      // обновляем/добавляем серверные поверх локальных
       for (const t of srvList) {
         const id = String(t.id);
         const base = byIdPrev.get(id) || { __idx: 9e9 };
         byIdPrev.set(id, { ...base, ...t });
       }
 
-      // берём ТОЛЬКО серверные id (ничего лишнего), порядок по старому индексу
       out.topics = Array.from(byIdPrev.entries())
-        .filter(([id]) => srvSet.has(id))
+        .filter(([id]) => srvSet.has(id))                 // нет на сервере — выкидываем
         .sort((a, b) => a[1].__idx - b[1].__idx)
         .map(([, t]) => { const { __idx, ...rest } = t; return rest; });
     }
 
-    // --- POSTS: слияние + удаление всего, чего нет в снапшоте (кроме свежих tmp_*) ---
+    // ---- POSTS: обновляем счётчики вверх, не теряем свежие tmp_*, остальное — как на сервере ----
     if (Array.isArray(r.posts)) {
       const prevList = prev.posts || [];
       const srvMap   = new Map(r.posts.map(p => [String(p.id), p]));
-
-      // 1) начинаем с копии локальных
       const mergedById = new Map(prevList.map(p => [String(p.id), { ...p }]));
 
-      // 2) накатываем сервер поверх локальных; счётчики не уменьшаем
+      // накат серверных поверх локальных; счётчики не уменьшаем
       for (const [id, srv] of srvMap) {
         const loc = mergedById.get(id) || {};
-        const likes    = Math.max(Number(srv.likes ?? 0),    Number(loc.likes ?? 0));
-        const dislikes = Math.max(Number(srv.dislikes ?? 0), Number(loc.dislikes ?? 0));
-        const views    = Math.max(Number(srv.views ?? 0),    Number(loc.views ?? 0));
+        const likes    = Math.max(+srv.likes    || 0, +loc.likes    || 0);
+        const dislikes = Math.max(+srv.dislikes || 0, +loc.dislikes || 0);
+        const views    = Math.max(+srv.views    || 0, +loc.views    || 0);
         mergedById.set(id, { ...loc, ...srv, likes, dislikes, views, myReaction: (loc.myReaction ?? srv.myReaction ?? null) });
       }
 
-      // 3) tmp_* которых нет на сервере, держим до 10с; всё остальное — удаляем
+      // удаляем всё, чего нет в снапшоте, кроме свежих tmp_*
       const tnow = now();
       for (const [id, p] of Array.from(mergedById.entries())) {
-        if (srvMap.has(id)) continue;                 // есть на сервере — остаётся
+        if (srvMap.has(id)) continue; // есть на сервере — ок
         if (id.startsWith('tmp_')) {
-          const fresh = (tnow - Number(p.ts || tnow)) < 10_000;
-          if (fresh) continue;                        // свежий tmp — оставляем
+          const fresh = (tnow - Number(p.ts || tnow)) < TMP_GRACE_MS;
+          if (fresh) continue;        // даём шанс подтвердиться
         }
-        mergedById.delete(id);                        // нет на сервере и не свежий tmp — удаляем
+        mergedById.delete(id);        // нет на сервере — выкидываем
       }
 
-      // 4) собираем список: старые по прежним позициям, новые серверные в конец
-      const order = new Map(prevList.map((p, i) => [String(p.id), i]));
-      const used  = new Set();
+      // порядок: старые позиции сохраняем, новые серверные — в конец
+      const used = new Set();
       const mergedList = [];
-
       for (const p of prevList) {
         const id = String(p.id);
         if (mergedById.has(id)) {
@@ -1126,9 +1119,7 @@ useEffect(() => {
           used.add(id);
         }
       }
-      for (const [id, p] of mergedById.entries()) {
-        if (!used.has(id)) mergedList.push(p);
-      }
+      for (const [id, p] of mergedById.entries()) if (!used.has(id)) mergedList.push(p);
 
       out.posts = mergedList;
     }
@@ -1138,52 +1129,53 @@ useEffect(() => {
     if (r.rev    !== undefined)  out.rev    = r.rev;
     if (r.cursor !== undefined)  out.cursor = r.cursor;
 
-    return out; // при желании можно обернуть в dedupeAll(out)
+    return out; // при необходимости можно обернуть в dedupeAll(out)
   };
 
-  const pull = async () => {
-    if (pulling) return;                    // не пускаем параллельные
-    if (now() < cooldownUntil) return;      // в «тишине» — выходим
+  // один запрос снапшота; force=true — игнорируем cooldown (для подтверждения мутаций)
+  const pull = async (force = false) => {
+    if (pulling) return;
+    if (!force && now() < cooldownUntil) return;
+
     pulling = true;
     try {
-      const r = await api.snapshot();       // сервер должен отвечать no-store
-      if (r?.ok) {
-        persist(prev => safeMerge(prev, r));
-      }
+      // важно: прокидываем bustRef для обхода серверного микрокэша
+      const r = await api.snapshot({ b: bustRef });
+      if (r?.ok) persist(prev => safeMerge(prev, r));
     } catch (e) {
-      // если лимит — уходим на паузу и не шторми сервер
       if (isOverLimit(e)) {
         cooldownUntil = now() + COOLDOWN_MS;
         try { toast?.warn?.('Backend cooldown: Redis limit reached'); } catch {}
+      } else {
+        console.error('snapshot error:', e);
       }
     } finally {
       pulling = false;
     }
   };
 
-  const schedulePull = (delay = 180) => {
+  const schedulePull = (delay = 180, force = false) => {
     if (debounceTimer) clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => { debounceTimer = null; pull(); }, delay);
+    debounceTimer = setTimeout(() => { debounceTimer = null; pull(force); }, delay);
   };
 
-  // основной цикл с небольшим джиттером
+  // основной цикл
   (async function loop(){
-    // разовый старт
-    schedulePull(50 + Math.floor(Math.random()*JITTER_MS));
+    schedulePull(60 + Math.floor(Math.random() * JITTER_MS)); // быстрый старт
     while (!stop) {
-      const jitter = Math.floor(Math.random()*JITTER_MS);
+      const jitter = Math.floor(Math.random() * JITTER_MS);
       await new Promise(r => setTimeout(r, BASE_INTERVAL + jitter));
-      await pull();
+      await pull(false); // фоновая актуализация
     }
   })();
 
-  // быстрые «пинки»
-  const kick = () => schedulePull(80);
+  // "пинки" по событиям среды
+  const kick = () => schedulePull(80, false);
   window.addEventListener('focus', kick);
   window.addEventListener('online', kick);
   document.addEventListener('visibilitychange', kick);
 
-  // перехват любых POST на /api/forum/* c дебаунсом до ~1/с
+  // перехват ЛЮБОГО POST на /api/forum/*: ставим bust и делаем форс-пул
   const _fetch = window.fetch;
   window.fetch = async (...args) => {
     const res = await _fetch(...args);
@@ -1192,11 +1184,19 @@ useEffect(() => {
       const url    = typeof req === 'string' ? req : req?.url;
       const method = (typeof req === 'string' ? (args[1]?.method || 'GET') : (req.method || 'GET')).toUpperCase();
       if (method !== 'GET' && /\/api\/forum\//.test(String(url || ''))) {
-        schedulePull(180); // дебаунс
+        bustRef = Date.now();         // новый ключ кэша
+        schedulePull(120, true);      // быстрый форс-пул для подтверждения мутации
       }
     } catch {}
     return res;
   };
+
+  // кросс-вкладочный “пинок” (опционально, но полезно)
+  let bc = null;
+  try {
+    bc = new BroadcastChannel('forum-sync');
+    bc.onmessage = (ev) => { if (ev?.data === 'bump') schedulePull(120, true); };
+  } catch {}
 
   return () => {
     stop = true;
@@ -1205,9 +1205,11 @@ useEffect(() => {
     window.removeEventListener('online', kick);
     document.removeEventListener('visibilitychange', kick);
     window.fetch = _fetch;
+    try { bc && bc.close(); } catch {}
   };
 }, []);
-  
+
+
   //  const refresh = async () => {
   //    const r = await api.snapshot()
   //   if (r?.ok && r.full) {
