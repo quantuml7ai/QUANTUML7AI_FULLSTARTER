@@ -33,29 +33,48 @@ const human = ts => new Date(ts || Date.now()).toLocaleString()
 const now = () => Date.now()
 const safeHtml = s => String(s || '')
   .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-  .replace(/(https?:\/\/[^\s<]+)(?=\s|$)/g,'<a target="_blank" rel="noreferrer" href="$1">$1</a>')
+  .replace(/(https?:\/\/[^\s<]+)(?=\s|$)/g,'<a target="_blank" rel="noreferrer noopener" href="$1">$1</a>')
   .replace(/\n/g,'<br/>')
 const rich = s => safeHtml(s).replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\*(.*?)\*/g,'<i>$1</i>')
+// короткий адрес для UI
+const shortAddr = (id) => {
+  if (!id) return '';
+  const s = String(id);
+  return s.length > 14 ? `${s.slice(0, 6)}…${s.slice(-4)}` : s;
+};
 
 const readAuth = () => ({
   accountId: isBrowser() && (window.__AUTH_ACCOUNT__ || localStorage.getItem('account') || localStorage.getItem('wallet')) || null,
   asherId:   isBrowser() && (window.__ASHER_ID__      || localStorage.getItem('asherId') || localStorage.getItem('ql7_uid')) || null,
 })
 
-async function openAuth(){
+async function openAuth({ timeoutMs = 15000 } = {}) {
   try { window.dispatchEvent(new CustomEvent('open-auth')) } catch {}
-  ;(document.querySelector('[data-auth-open]')||document.querySelector('#nav-auth-btn'))?.click?.()
-  return new Promise(res=>{
-    const done = () => res(readAuth())
-    if (typeof window !== 'undefined') {
-      window.addEventListener('auth:ok', done, { once:true })
-      window.addEventListener('auth:success', done, { once:true })
-      setTimeout(done, 6000)
-    } else {
-      res(readAuth())
-    }
-  })
+  (document.querySelector('[data-auth-open]') || document.querySelector('#nav-auth-btn'))?.click?.();
+
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = (val) => { if (done) return; done = true; cleanup(); resolve(val); };
+
+    const ok = () => finish(readAuth());
+    const cancel = () => finish(null);
+    const cleanup = () => {
+      window.removeEventListener('auth:ok', ok);
+      window.removeEventListener('auth:success', ok);
+      window.removeEventListener('auth:cancel', cancel);
+      window.removeEventListener('auth:fail', cancel);
+      clearTimeout(timer);
+    };
+
+    window.addEventListener('auth:ok', ok, { once: true });
+    window.addEventListener('auth:success', ok, { once: true });
+    window.addEventListener('auth:cancel', cancel, { once: true });
+    window.addEventListener('auth:fail', cancel, { once: true });
+
+    const timer = setTimeout(() => cancel(), timeoutMs);
+  });
 }
+
 
 function ensureClientId(){
   try{
@@ -145,12 +164,25 @@ function getForumUserId() {
   return id;
 }
 function setAdminToken(token){
-  if(typeof window!=='undefined') localStorage.setItem('forum_admin_token', token);
+  if (typeof window !== 'undefined') {
+    try {
+      window.__FORUM_ADMIN_TOKEN__ = String(token || '');
+      localStorage.removeItem('forum_admin_token'); // старый способ — выключаем
+    } catch {
+      window.__FORUM_ADMIN_TOKEN__ = String(token || '');
+    }
+  }
 }
+
 function getAdminToken(){
-  if(typeof window==='undefined') return '';
-  return localStorage.getItem('forum_admin_token') || '';
+  if (typeof window === 'undefined') return '';
+  try {
+    return window.__FORUM_ADMIN_TOKEN__ || localStorage.getItem('forum_admin_token') || '';
+  } catch {
+    return window.__FORUM_ADMIN_TOKEN__ || '';
+  }
 }
+
 
 // ==== API (клиент) ====
 const api = {
@@ -183,120 +215,65 @@ const api = {
   },
 
   // Батч-мутации
-  async mutate(batch, userId) {
-    try {
-      // кто выполняет операцию (берём из аргумента/батча/лок.ид)
-      const actorId =
-        userId ??
-        batch?.userId ??
-        batch?.accountId ??
-        batch?.asherId ??
-        (typeof getForumUserId === 'function' ? getForumUserId() : '');
+async mutate(batch, userId) {
+  try {
+    const actorId =
+      userId ??
+      batch?.userId ??
+      batch?.accountId ??
+      batch?.asherId ??
+      (typeof getForumUserId === 'function' ? getForumUserId() : '');
 
-      const headers = {
+    const headers = {
+      'Content-Type': 'application/json',
+      'x-forum-user-id': String(actorId || ''),
+    };
+
+    // если есть админ-токен — всегда прикладываем
+    try {
+      const adm = (typeof getAdminToken === 'function') ? getAdminToken() : '';
+      if (adm) headers['x-admin-token'] = String(adm);
+    } catch {}
+
+    const payload = {
+      ops: Array.isArray(batch?.ops) ? batch.ops : [],
+      userId: String(actorId || ''),
+    };
+    if (!payload.ops.length) return { ok: false, error: 'empty_ops' };
+
+    const url = '/api/forum/mutate';
+    const body = JSON.stringify(payload);
+    const r = await fetch(url, { method: 'POST', headers, body });
+
+    const text = await r.text().catch(() => '');
+    let json = null; try { json = text ? JSON.parse(text) : null; } catch {}
+
+    try { window.__lastMutate = () => ({ url, req:{ headers, body }, res:{ status:r.status, ok:r.ok, body: json ?? text } }); } catch {}
+
+    if (!r.ok) console.warn('mutate non-2xx', r.status, text, payload);
+    return json ?? { ok: r.ok, status: r.status };
+  } catch (e) {
+    console.error('mutate error', e);
+    return { ok: false, error: 'network' };
+  }
+},
+// Удалить тему (со всем деревом)
+async adminDeleteTopic(id) {
+  try {
+    const r = await fetch('/api/forum/admin/deleteTopic', {
+      method: 'POST',
+      headers: {
         'Content-Type': 'application/json',
-        'x-forum-user-id': String(actorId || ''),
-      };
-
-      // сервер ждёт { ops:[...], userId:'...' }
-      const payload = {
-        ops: Array.isArray(batch?.ops) ? batch.ops : [],
-        userId: String(actorId || ''),
-      };
-
-      // без ops смысла нет
-      if (!payload.ops.length) {
-        return { ok: false, error: 'empty_ops' };
-      }
-
-      const req = {
-        ts: Date.now(),
-        url: '/api/forum/mutate',
-        method: 'POST',
-        headers,
-        body: JSON.stringify(payload),
-      };
-
-      const r = await fetch(req.url, { method: req.method, headers: req.headers, body: req.body });
-
-      // тело ответа текстом — а потом попробуем распарсить
-      const resText = await r.text().catch(() => '');
-      let resJson = null;
-      try { resJson = resText ? JSON.parse(resText) : null; } catch {}
-
-      // лог последнего мутейта для консоли
-      try {
-        window.__lastMutate = () => ({
-          ts: req.ts,
-          url: req.url,
-          method: req.method,
-          req: { headers, body: req.body },
-          res: { status: r.status, ok: r.ok, body: resJson ?? resText },
-        });
-      } catch {}
-
-      if (!r.ok) {
-        console.warn('mutate non-2xx', r.status, resText, payload);
-      }
-
-      return resJson ?? { ok: r.ok, status: r.status };
-    } catch (e) {
-      console.error('mutate error', e);
-      return { ok: false, error: 'network' };
-    }
-  }, // ← ВАЖНО: запятая! дальше идут хелперы ниже
-
-  // ---- Хелперы (по желанию) ----
-
-  // Быстрый лайк/дизлайк
-  async react(postId, kind = 'like', delta = 1, userId) {
-    return this.mutate({
-      ops: [{ type: 'react', payload: { postId: String(postId), kind, delta: Number(delta) } }]
-    }, userId);
-  },
-
-  // Создать пост/ответ
-  async createPost({ topicId, text, parentId = null, nickname = '' }, userId) {
-    return this.mutate({
-      ops: [{ type: 'create_post', payload: { topicId: String(topicId), text: String(text || ''), parentId, nickname } }]
-    }, userId);
-  },
-
-  // ==== Админ ====
-
-  // Подтверждение пароля (включение админ-режима в UI)
-  async adminVerify(pass) {
-    try {
-      const r = await fetch('/api/forum/admin/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: pass }),
-      });
-      const data = await r.json().catch(() => ({}));
-      if (data?.ok && typeof setAdminToken === 'function') setAdminToken(pass);
-      return data;
-    } catch {
-      return { ok: false, error: 'network' };
-    }
-  },
-
-  // Удалить тему
-  async adminDeleteTopic(id) {
-    try {
-      const r = await fetch('/api/forum/admin/deleteTopic', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-token': typeof getAdminToken === 'function' ? getAdminToken() : '',
-        },
-        body: JSON.stringify({ topicId: id }),
-      });
-      const data = await r.json().catch(() => ({}));
-      return data;
-    } catch {
-      return { ok: false, error: 'network' };
-    }
-  },
+        'x-admin-token': typeof getAdminToken === 'function' ? getAdminToken() : '',
+      },
+      body: JSON.stringify({ topicId: id }),
+    });
+    const data = await r.json().catch(() => ({}));
+    return data;
+  } catch {
+    return { ok: false, error: 'network' };
+  }
+},
 
   // Удалить пост (ветка удалится каскадно на сервере)
   async adminDeletePost(id) {
@@ -442,33 +419,45 @@ const Styles = () => (
     .avaBig{ width:72px; height:72px; border-radius:14px; border:1px solid rgba(80,167,255,.45); display:grid; place-items:center; font-size:48px; background:rgba(25,129,255,.10) }
     .avaMini{ width:24px; height:24px; border-radius:6px; border:1px solid rgba(80,167,255,.35); display:grid; place-items:center; font-size:14px; background:rgba(25,129,255,.08) }
 
-    /* ====== НОВОЕ: правый блок управления в хедере ====== */
-    .controls{
-      margin-left:auto;
-      display:flex; align-items:center; gap:6px;
-      flex-wrap: wrap;              /* ← разрешаем перенос внутри controls */
-      flex: 1 1 auto;               /* ← убрали жёсткий clamp */
-      min-width: 0;                 /* ← даём контейнеру ужиматься */
-      max-width: 100%;
-      order: 2;
-    }
+/* ====== НОВОЕ: правый блок управления в хедере ====== */
+.controls{
+  margin-left:auto;
+  display:flex; align-items:center; gap:6px;
+  flex-wrap: nowrap;            /* ← КНОПКИ НЕ ПЕРЕНОСЯТСЯ */
+  flex: 1 1 auto;
+  min-width: 0;                 /* ← можно ужиматься */
+  max-width: 100%;
+  order: 2;
+}
 
+/* Поиск встроен в .controls и сжимается по ширине на узких экранах */
+.search{
+  position:relative;
+  display:flex; align-items:center; gap:8px;
+  z-index:60; overflow:visible;
+  flex: 1 1 auto;               /* ← поле поиска резиновое */
+  min-width: 80px;              /* нижняя граница на очень узких экранах */
+}
 
-    /* Поиск встроен в .controls и сжимается по ширине на узких экранах */
-    .search{
-      position:relative;
-      display:flex; align-items:center; gap:8px;
-      z-index:60; overflow:visible;
-      flex: 1 1 clamp(140px, 30vw, 560px); /* <— сжимается, но остаётся на своём месте */
-    }
-    .searchInput{ flex:1; min-width:120px; max-width:100% }
- 
-    .searchInput{ flex:1; height:40px; border-radius:12px; padding:.55rem .9rem; background:#0b1018; color:var(--ink); border:1px solid rgba(255,255,255,.16) }
-    .iconBtn{ width:40px; height:40px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:transparent; display:grid; place-items:center; transition:transform .08s, box-shadow .2s }
-    .iconBtn:hover{ box-shadow:0 0 18px rgba(80,167,255,.25) } .iconBtn:active{ transform:scale(.96) }
+/* инпут занимает всё оставшееся место и ужимается первым */
+.searchInput{
+  flex: 1 1 auto; min-width: 60px; max-width:100%;
+  height:40px; border-radius:12px; padding:.55rem .9rem;
+  background:#0b1018; color:var(--ink); border:1px solid rgba(255,255,255,.16);
+}
 
-    .searchDrop{ position:absolute; top:48px; right:0; width:100%; max-height:360px; overflow:auto; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:8px; z-index:3000 }
-    .sortDrop{ position:absolute; top:48px; right:-4px; width:220px; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:6px; z-index:3000 }
+/* кнопки/чипы — фикс. ширина, не сжимаются и не переносятся */
+.iconBtn,
+.sortWrap,
+.adminWrap,
+.adminBtn{ flex:0 0 auto; }
+
+.iconBtn{ width:40px; height:40px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:transparent; display:grid; place-items:center; transition:transform .08s, box-shadow .2s }
+.iconBtn:hover{ box-shadow:0 0 18px rgba(80,167,255,.25) } .iconBtn:active{ transform:scale(.96) }
+
+.searchDrop{ position:absolute; top:48px; right:0; width:100%; max-height:360px; overflow:auto; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:8px; z-index:3000 }
+.sortDrop{ position:absolute; top:48px; right:-4px; width:220px; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:6px; z-index:3000 }
+
 
     .adminWrap{ position:relative; flex:0 0 auto } /* справа от поиска, в рамках .controls */
     .adminBtn{ border:1px solid rgba(255,255,255,.16); border-radius:12px; padding:.55rem .8rem; font-weight:700; letter-spacing:.4px }
@@ -495,22 +484,43 @@ const Styles = () => (
     }
     .profileList{ max-height:260px; overflow:auto; padding:4px; border:1px solid rgba(255,255,255,.08); border-radius:10px; background:rgba(255,255,255,.03) }
 
-    /* Немного поджать на очень узких вьюпортах:
-       .controls уходит на СЛЕДУЮЩУЮ СТРОКУ и занимает 100% ширины (под аватаром и ID) */
-    @media (max-width:860px){
-      .controls{ order:3; flex: 1 1 100%; min-width: 100% }
-      .search{ flex-basis: auto }
-    }
-    @media (max-width:560px){
-      .head{ padding:10px }
-      .controls{ order:3; flex: 1 1 100%; min-width:100% }
-      .search{ flex-basis: 100% }
-    }
-    @media (max-width:420px){
-      .search{ flex: 1 1 clamp(160px, 55vw, 560px) } /* позволяем ужаться ещё больше */
-      .adminWrap{ flex: 0 0 auto }                   /* кнопка админа остаётся видимой */
-      .iconBtn{ width:36px; height:36px }            /* чуть уменьшим иконки у поиска при необходимости */
+/* Вьюпорты: переносим ВЕСЬ ряд под аватар, но внутри — одна строка */
+@media (max-width:860px){
+  .controls{
+    order:3;
+    flex:0 0 100%;
+    min-width:100%;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex-wrap:nowrap;         /* ← НЕ ПЕРЕНОСИТСЯ ВНУТРИ */
+  }
+  .search{ flex:1 1 0; min-width:120px } /* сжимается первой */
 }
+
+/* Уже уже: ещё сильнее ужимаем поиск, кнопки остаются */
+@media (max-width:560px){
+  .head{ padding:10px }
+  .controls{
+    order:3;
+    flex:0 0 100%;
+    min-width:100%;
+    flex-wrap:nowrap;         /* ← всё ещё одна линия */
+  }
+  .search{ flex:1 1 0; min-width:90px }
+  .iconBtn{ width:36px; height:36px }
+}
+
+/* Совсем узко: минимальный допуск для поиска */
+@media (max-width:420px){
+  .search{ flex:1 1 0; min-width:70px }
+}
+
+/* вне медиа: фиксируем, что кнопки/чипы не сжимаются */
+.iconBtn,
+.sortWrap,
+.adminWrap,
+.adminBtn{ flex:0 0 auto; }
 
   `}</style>
 )
@@ -530,10 +540,10 @@ const EMOJI = [
 /* =========================================================
    маленькие поповеры
 ========================================================= */
-function AdminPopover({ anchorRef, open, onClose, t, isActive, onActivated, onDeactivated }){
-  const [pass,setPass] = useState('')
-  useEffect(()=>{ if(open) setPass('') },[open])
-  if(!open || !anchorRef?.current) return null
+function AdminPopover({ anchorRef, open, onClose, t, isActive, onActivated, onDeactivated }) {
+  const [pass, setPass] = useState('')
+  useEffect(() => { if (open) setPass('') }, [open])
+  if (!open || !anchorRef?.current) return null
   const top = anchorRef.current.offsetTop + anchorRef.current.offsetHeight + 8
   const right = 0
   return (
@@ -543,7 +553,7 @@ function AdminPopover({ anchorRef, open, onClose, t, isActive, onActivated, onDe
           <div className="meta">{t('forum_admin_active')}</div>
           <button
             className="btn"
-            onClick={()=>{ try{ localStorage.removeItem('ql7_admin') }catch{}; onDeactivated?.(); onClose?.() }}>
+            onClick={() => { try { localStorage.removeItem('ql7_admin') } catch { }; onDeactivated?.(); onClose?.() }}>
             {t('forum_admin_exit')}
           </button>
         </div>
@@ -551,16 +561,22 @@ function AdminPopover({ anchorRef, open, onClose, t, isActive, onActivated, onDe
         <div className="grid gap-2">
           <label className="block">
             <div className="meta mb-1">{t('forum_admin_pass')}</div>
-            <input className="input" type="password" value={pass} onChange={e=>setPass(e.target.value)} placeholder="••••••••" />
+            <input
+              className="input"
+              type="password"
+              value={pass}
+              onChange={e => setPass(e.target.value)}
+              placeholder="••••••••"
+            />
           </label>
           <div className="flex items-center justify-end gap-2">
             <button className="btn btnGhost" onClick={onClose}>{t('forum_cancel')}</button>
             <button
               className="btn"
-              onClick={async()=>{
-                if(!pass.trim()) return
+              onClick={async () => {
+                if (!pass.trim()) return
                 const r = await api.adminVerify(pass.trim())
-                if(r?.ok){ try{ localStorage.setItem('ql7_admin','1') }catch{}; onActivated?.(); onClose?.() }
+                if (r?.ok) { try { localStorage.setItem('ql7_admin', '1') } catch { }; onActivated?.(); onClose?.() }
               }}>
               {t('forum_activate')}
             </button>
@@ -572,18 +588,18 @@ function AdminPopover({ anchorRef, open, onClose, t, isActive, onActivated, onDe
 }
 
 /** мини-поповер профиля рядом с аватаром */
-function ProfilePopover({ anchorRef, open, onClose, t, auth, onSaved }){
+function ProfilePopover({ anchorRef, open, onClose, t, auth, onSaved }) {
   const uid = auth.asherId || auth.accountId || ''
-  const readLocal = () => { try{ return JSON.parse(localStorage.getItem('profile:'+uid) || 'null') }catch{return null } }
-  const [nick,setNick] = useState(readLocal()?.nickname || '')
-  const [icon,setIcon] = useState(readLocal()?.icon || ICONS[0])
-  useEffect(()=>{ if(open){ const l=readLocal(); setNick(l?.nickname||''); setIcon(l?.icon||ICONS[0]) } },[open]) // eslint-disable-line
-  if(!open || !anchorRef?.current) return null
+  const readLocal = () => { try { return JSON.parse(localStorage.getItem('profile:' + uid) || 'null') } catch { return null } }
+  const [nick, setNick] = useState(readLocal()?.nickname || '')
+  const [icon, setIcon] = useState(readLocal()?.icon || ICONS[0])
+  useEffect(() => { if (open) { const l = readLocal(); setNick(l?.nickname || ''); setIcon(l?.icon || ICONS[0]) } }, [open]) // eslint-disable-line
+  if (!open || !anchorRef?.current) return null
   const top = (anchorRef.current.offsetTop || 0) + (anchorRef.current.offsetHeight || 0) + 8
   const left = (anchorRef.current.offsetLeft || 0)
   const save = () => {
-    try { localStorage.setItem('profile:'+uid, JSON.stringify({ nickname:nick.trim(), icon })) } catch {}
-    onSaved?.({ nickname:nick.trim(), icon }); onClose?.()
+    try { localStorage.setItem('profile:' + uid, JSON.stringify({ nickname: nick.trim(), icon })) } catch { }
+    onSaved?.({ nickname: nick.trim(), icon }); onClose?.()
   }
   return (
     <div className="profilePop" style={{ top, left }}>
@@ -591,14 +607,22 @@ function ProfilePopover({ anchorRef, open, onClose, t, auth, onSaved }){
       <div className="grid gap-2">
         <label className="block">
           <div className="meta mb-1">{t('forum_profile_nickname')}</div>
-          <input className="input" value={nick} onChange={e=>setNick(e.target.value)} placeholder={t('forum_profile_nickname_ph')} />
+          <input className="input" value={nick} onChange={e => setNick(e.target.value)} placeholder={t('forum_profile_nickname_ph')} />
         </label>
         <div>
           <div className="meta mb-1">{t('forum_profile_avatar')}</div>
           <div className="profileList">
             <div className="iconWrap p-1">
-              {ICONS.map(ic=>(
-                <button key={ic} className={cls('avaMini', icon===ic && 'tag')} onClick={()=>setIcon(ic)} title={ic} style={{width:40,height:40,fontSize:22}}>{ic}</button>
+              {ICONS.map(ic => (
+                <button
+                  key={ic}
+                  className={cls('avaMini', icon === ic && 'tag')}
+                  onClick={() => setIcon(ic)}
+                  title={ic}
+                  style={{ width: 40, height: 40, fontSize: 22 }}
+                >
+                  {ic}
+                </button>
               ))}
             </div>
           </div>
@@ -611,6 +635,7 @@ function ProfilePopover({ anchorRef, open, onClose, t, auth, onSaved }){
     </div>
   )
 }
+
 
 /* =========================================================
    UI: посты/темы
@@ -847,7 +872,7 @@ function PostCard({
 export default function Forum(){
   const { t } = useI18n()
   const toast = useToast()
-
+  const rl = useMemo(rateLimiter, [])
   /* ---- auth ---- */
   const [auth,setAuth] = useState(()=>readAuth())
   useEffect(()=>{
@@ -858,7 +883,14 @@ export default function Forum(){
     const id=setInterval(upd,3000)
     return ()=>{ window.removeEventListener('auth:ok',upd); window.removeEventListener('auth:success',upd); clearInterval(id) }
   },[])
-  const requireAuth = async () => { const cur=readAuth(); if(cur?.asherId||cur?.accountId){ setAuth(cur); return cur } const r=await openAuth(); setAuth(r); return r }
+const requireAuthStrict = async () => {
+  const cur = readAuth();
+  if (cur?.asherId || cur?.accountId) { setAuth(cur); return cur; }
+  const r = await openAuth({ timeoutMs: 20000 });
+  if (r?.asherId || r?.accountId) { setAuth(r); return r; }
+  toast.warn(t('forum_auth_required') || 'Нужна авторизация');
+  return null;
+};
 
 /* ---- локальный снап и очередь ---- */
 const [data,setData] = useState(()=>{
@@ -898,7 +930,7 @@ const sendBatch = (immediate=false) => {
       if (resp && Array.isArray(resp.applied)) {
         // успех — чистим очередь и обновляем снап
         saveQueue([])
-        await refresh()
+        if (typeof refresh === 'function') await refresh()
       } else {
         // неуспех (например, 400). Чтобы не застревать: выкидываем первую опу.
         // На практике это будет невалидная react/view по tmp-id.
@@ -973,22 +1005,134 @@ const sendBatch = (immediate=false) => {
     next.cursor = cursor ?? prev.cursor
     return dedupeAll(next)
   }
+// === SILENT SYNC: мягкое докатывание без «прыжков» ===
+useEffect(() => {
+  let stop = false;
 
-  const refresh = async () => {
-    const r = await api.snapshot()
-    if (r?.ok && r.full) {
-      persist(dedupeAll({
-        topics: r.topics || [],
-        posts:  r.posts  || [],
-        bans:   r.bans   || [],
-        admins: r.admins || [],
-        rev:    r.rev    || null,
-      }))
+  // стабильное слияние сервера в локальный снап (сохраняем порядок и tmp)
+  const silentMerge = (prev, r) => {
+    const out = { ...prev };
+
+    // --- TOPICS (без прыжков) ---
+    if (Array.isArray(r.topics)) {
+      const byIdPrev = new Map((prev.topics || []).map((t, i) => [String(t.id), { ...t, __idx:i }]));
+      for (const t of r.topics) {
+        const id = String(t.id);
+        byIdPrev.set(id, { ...(byIdPrev.get(id) || { __idx: 9e9 }), ...t });
+      }
+      // сохраняем прежний порядок, новые в конец
+      out.topics = Array.from(byIdPrev.values()).sort((a,b)=>a.__idx-b.__idx).map(({__idx, ...t})=>t);
     }
-  }
 
-useEffect(()=>{ refresh() },[]) 
-useEffect(()=>{ const id=setInterval(()=>refresh(), 8000); return ()=>clearInterval(id) },[])
+    // --- POSTS (главное: не дёргать и не терять tmp_*) ---
+    if (Array.isArray(r.posts)) {
+      const prevList = prev.posts || [];
+      const srvMap   = new Map(r.posts.map(p => [String(p.id), p]));
+      const order    = new Map(prevList.map((p, i) => [String(p.id), i])); // старые позиции
+
+      // 1) обновляем/добавляем серверные поверх локальных
+      const mergedById = new Map(prevList.map(p => [String(p.id), { ...p }]));
+      for (const [id, srv] of srvMap) {
+        const loc = mergedById.get(id) || {};
+        // счётчики не «скачут» вниз: не уменьшаем ниже локального
+        const likes    = Math.max(Number(srv.likes ?? 0),    Number(loc.likes ?? 0));
+        const dislikes = Math.max(Number(srv.dislikes ?? 0), Number(loc.dislikes ?? 0));
+        const views    = Math.max(Number(srv.views ?? 0),    Number(loc.views ?? 0));
+        mergedById.set(id, { ...loc, ...srv, likes, dislikes, views, myReaction: (loc.myReaction ?? srv.myReaction ?? null) });
+      }
+
+      // 2) не подтверждённые tmp_* оставляем на месте до 10с (не мигают)
+      const now = Date.now();
+      for (const p of prevList) {
+        const id = String(p.id);
+        if (id.startsWith('tmp_') && !mergedById.has(id)) {
+          const fresh = (now - Number(p.ts || now)) < 10_000;
+          if (fresh) mergedById.set(id, p);
+        }
+      }
+
+      // 3) строим список в СТАРОМ порядке; новые (которых не было) дописываем в конец
+      const mergedList = [];
+      // существующие — по прежним индексам
+      for (const p of prevList) {
+        const id = String(p.id);
+        const found = mergedById.get(id);
+        if (found) { mergedList.push(found); mergedById.delete(id); }
+      }
+      // новые серверные (которых не было) — в конец (без пересортировки)
+      for (const p of mergedById.values()) mergedList.push(p);
+
+      out.posts = mergedList;
+    }
+
+    if (Array.isArray(r.bans))   out.bans   = r.bans;
+    if (Array.isArray(r.admins)) out.admins = r.admins;
+    if (r.rev    !== undefined)  out.rev    = r.rev;
+    if (r.cursor !== undefined)  out.cursor = r.cursor;
+
+    return dedupeAll(out);
+  };
+
+  const pull = async () => {
+    try {
+      const r = await api.snapshot(); // внутри должен быть no-store
+      if (r?.ok) persist(prev => silentMerge(prev, r));
+    } catch {}
+  };
+
+  // — живой докат раз в 2 c (можешь поставить 1500–3000)
+  (async function loop(){
+    while (!stop) {
+      await pull();
+      await new Promise(r => setTimeout(r, 2000));
+    }
+  })();
+
+  // — мгновенно при возврате фокуса/онлайна
+  const kick = () => { pull(); };
+  window.addEventListener('focus', kick);
+  window.addEventListener('online', kick);
+  document.addEventListener('visibilitychange', kick);
+
+  // — после ЛЮБОГО POST на /api/forum/* (лайк/ответ/бан/удаление)
+  const _fetch = window.fetch;
+  window.fetch = async (...args) => {
+    const res = await _fetch(...args);
+    try {
+      const req    = args[0];
+      const url    = typeof req === 'string' ? req : req?.url;
+      const method = (typeof req === 'string' ? (args[1]?.method || 'GET') : (req.method || 'GET')).toUpperCase();
+      if (method !== 'GET' && /\/api\/forum\//.test(String(url || ''))) {
+        setTimeout(pull, 180); // даём серверу применить
+      }
+    } catch {}
+    return res;
+  };
+
+  return () => {
+    stop = true;
+    window.removeEventListener('focus', kick);
+    window.removeEventListener('online', kick);
+    document.removeEventListener('visibilitychange', kick);
+    window.fetch = _fetch;
+  };
+}, []);
+
+  //  const refresh = async () => {
+  //    const r = await api.snapshot()
+  //   if (r?.ok && r.full) {
+  //     persist(dedupeAll({
+  //       topics: r.topics || [],
+  //       posts:  r.posts  || [],
+  //       bans:   r.bans   || [],
+  //       admins: r.admins || [],
+  //       rev:    r.rev    || null,
+  //     }))
+  //   }
+  // }
+
+// useEffect(()=>{ refresh() },[]) 
+// useEffect(()=>{ const id=setInterval(()=>refresh(), 8000); return ()=>clearInterval(id) },[])
 
 
 /* ---- admin ---- */
@@ -1101,12 +1245,11 @@ const [threadRoot, setThreadRoot] = useState(null);
 // при смене темы выходим из веточного режима
 useEffect(() => { setThreadRoot(null); }, [sel?.id]);
 
-// плоский список для рендера правой колонки
-// - без threadRoot → только корни + repliesCount = число прямых детей;
-// - с threadRoot   → всё поддерево с отступами и суммарным repliesCount.
+// === BEGIN flat (REPLACE WHOLE BLOCK) ===
 const flat = useMemo(() => {
   if (!sel?.id) return [];
 
+  // без ветки: только корни, repliesCount = число прямых детей
   if (!threadRoot) {
     return rootPosts.map(r => ({
       ...r,
@@ -1115,20 +1258,23 @@ const flat = useMemo(() => {
     }));
   }
 
+  // выбрана ветка: обходим всё поддерево
   const start = idMap.get(String(threadRoot.id));
   if (!start) return [];
 
   const out = [];
-  const countDeep = (n) => (n.children || []).reduce((a, ch) => a + 1 + countDeep(ch), 0);
+  const countDeep = (n) =>
+    (n.children || []).reduce((a, ch) => a + 1 + countDeep(ch), 0);
+
   const walk = (n, level = 0) => {
     out.push({ ...n, _lvl: level, repliesCount: countDeep(n) });
-    (n.children || []).forEach(ch => walk(ch, level + 1));
+    (n.children || []).forEach(c => walk(c, level + 1));
   };
+
   walk(start, 0);
   return out;
 }, [sel?.id, threadRoot, rootPosts, idMap]);
-
-
+// === END flat ===
 
   /* ---- агрегаты по темам ---- */
     // Множество забаненных (по userId/accountId)
@@ -1176,7 +1322,8 @@ const flat = useMemo(() => {
   const [replyTo,setReplyTo] = useState(null)
 
   const createTopic = async (title, description, first) => {
-    const r = await requireAuth(); if(!r) return
+     if (!rl.allowAction()) { toast.warn(t('forum_too_fast') || 'Слишком часто'); return; }
+    const r = await requireAuthStrict(); if (!r) return;
     const uid = r.asherId || r.accountId || ''
     const prof = (()=>{ if(!isBrowser()) return {}; try{ return JSON.parse(localStorage.getItem('profile:'+uid)||'{}') }catch{return{}} })()
 
@@ -1213,7 +1360,8 @@ toast.ok('Тема создана')
     }, uid)
 
     const realTopicId = createTopicResp?.applied?.find(x=>x.op==='create_topic')?.topic?.id
-    if (!realTopicId) { await refresh(); return }
+    if (!realTopicId) { if (typeof refresh === 'function') await refresh();
+      return }
 
     // ремап tmp -> real локально
     persist(prev=>{
@@ -1228,15 +1376,17 @@ toast.ok('Тема создана')
     }, uid)
 
     // подтянуть свежий снапшот
-    await refresh()
+    if (typeof refresh === 'function') await refresh()
   }
 
 
-const createPost = async () => {
+
+  const createPost = async () => {
+    if (!rl.allowAction()) { toast.warn(t('forum_too_fast') || 'Слишком часто'); return; }
   const body = String(text || '').trim().slice(0, 180);
   if (!body || !sel?.id) return;
 
-  const r = await requireAuth(); if (!r) return;
+  const r = await requireAuthStrict(); if (!r) return;
   const uid  = r.asherId || r.accountId || '';
   const isAdm = (typeof window !== 'undefined') && localStorage.getItem('ql7_admin') === '1';
 
@@ -1306,6 +1456,8 @@ const createPost = async () => {
 
 /* === REACT: поставить/снять лайк/дизлайк c оптимистикой === */
 const reactMut = useCallback(async (post, kind) => {
+  if (!rl.allowAction()) { if (toast?.warn) toast.warn(t('forum_too_fast') || 'Слишком часто'); return; }
+  const r = await requireAuthStrict(); if (!r) return;
   // kind: 'like' | 'dislike'
   if (!post?.id) return;
   const uid = (auth?.asherId || auth?.accountId || (typeof getForumUserId==='function' ? getForumUserId() : 'web'));
@@ -1354,7 +1506,7 @@ const reactMut = useCallback(async (post, kind) => {
   try {
     const r = await api.mutate({ ops }, uid);
     // если хочешь мгновенно дотянуть серверные значения — дерни твой рефреш/снапшот:
-    if (r && r.applied && typeof refresh === 'function') await refresh();
+    if (r && r.applied && typeof refresh === 'function') if (typeof refresh === 'function') await refresh();
   } catch (e) {
     console.warn('react mutate failed', e);
   }
@@ -1443,7 +1595,8 @@ useEffect(()=>{
               className={cls('avaBig neon', (!nickShown || iconShown==='👤') && 'pulse')}
               title={nickShown || t('forum_account')}
               onClick={async()=>{
-                const ok = await requireAuth(); if(!ok) return
+                const a = await requireAuthStrict();
+                if (!a) return;
                 setProfileOpen(v=>!v)
               }}>
               {iconShown}
@@ -1726,8 +1879,8 @@ function CreateTopicCard({ t, onCreate }){
           </div>
         </div>
       )}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2"> 
+     </div>
     </div>
-   </div>
   )
 }
