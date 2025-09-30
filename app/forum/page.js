@@ -9,12 +9,12 @@ import { useI18n } from '@/components/i18n'
 
 /**
  * forum/page.js — порядок блоков:
- *  1) Greeting: banner (cover, responsive) + forum_description (i18n)
+ *  1) Greeting: banner + forum_description (i18n)
  *  2) Forum — отдельная затемнённая карточка (full width)
  *  3) Live Markets (тикер котировок)
  *  4) Crypto TV (Bloomberg) — адаптивный iframe
  *  5) News — 30 на страницу
- *  6) Bottom Marquee — ровно как на других страницах (ключ t('marquee')), бесшовная
+ *  6) Bottom Marquee — бесшовная бегущая строка
  */
 
 /* -------------------- helpers & global styles -------------------- */
@@ -27,13 +27,16 @@ const PageStyles = () => (
     .glass    { background: rgba(10,14,20,.55); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.08); }
     .neon     { box-shadow: 0 0 16px rgba(0,255,255,.12), inset 0 0 16px rgba(0,255,255,.05); border-color: rgba(0,255,255,.22); }
 
-    /* Banner */
-    .banner-wrap { position: relative; width:100%; }
-    .banner-ratio { position:relative; width:100%; }
-    @media (max-width: 639px){  .banner-ratio { aspect-ratio: 16/10; } }
-    @media (min-width:640px) and (max-width:1023px){ .banner-ratio { aspect-ratio: 16/7; } }
-    @media (min-width:1024px){ .banner-ratio { aspect-ratio: 16/5; } }
-    .banner-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center; }
+    /* ===== Banner: всегда на всю ширину контейнера, без обрезки ===== */
+    .banner-wrap { width:100%; }
+    .banner-img{
+      display:block;
+      width:100%;
+      height:auto;            /* сохраняем пропорции */
+      object-fit:contain;     /* ничего не обрезаем */
+      object-position:center; /* центрируем */
+      background:transparent;
+    }
 
     /* Forum container breathing */
     .forum-card { padding: 16px; }
@@ -44,8 +47,7 @@ const PageStyles = () => (
     .tv-wrap { position: relative; width:100%; aspect-ratio: 16/9; }
     .tv-iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
 
-    /* ===== Bottom Marquee (как на остальных страницах) =====
-       Бесшовная, без фейдов, от края до края. */
+    /* ===== Bottom Marquee ===== */
     .bottom-marquee-rail { width:100%; }
     .bottom-marquee { overflow:hidden; }
     .bottom-marquee .track {
@@ -53,7 +55,6 @@ const PageStyles = () => (
       will-change: transform;
       animation: bm-roll 45s linear infinite;
     }
-    /* удваиваем ширину дорожки, поэтому уезжаем на -50% */
     @keyframes bm-roll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
   `}</style>
 )
@@ -81,19 +82,19 @@ function Greeting() {
       {/* Banner */}
       <div className="glass neon card p-0 overflow-hidden mb-4">
         <div className="banner-wrap">
-          <div className="banner-ratio">
-            <Image
-              src="/branding/forum-banner.png"
-              alt={t('forum_banner_alt')}
-              fill
-              priority
-              sizes="100vw"
-              className="banner-img"
-            />
-          </div>
+          {/* ширину/высоту указываем для оптимизации; отображение управляется CSS (width:100%; height:auto) */}
+          <Image
+            src="/branding/forum-banner.png"
+            alt={t('forum_banner_alt')}
+            priority
+            sizes="100vw"
+            width={2400}
+            height={800}
+            className="banner-img"
+          />
         </div>
       </div>
-      {/* Текст приветствия (без заголовков/кнопок) */}
+      {/* Текст приветствия */}
       <div className="glass neon card p-4 md:p-6">
         <p className="text-white/80 text-sm md:text-base leading-relaxed">
           {t('forum_description')}
@@ -154,7 +155,7 @@ function NewsCard() {
   )
 }
 
-/* -------------------- Bottom Marquee (как везде) -------------------- */
+/* -------------------- Bottom Marquee -------------------- */
 function BottomMarquee() {
   const { t } = useI18n()
   const content = (
@@ -169,7 +170,7 @@ function BottomMarquee() {
     <div className="bottom-marquee-rail">
       <div className="page-wrap">
         <section className="glass neon card px-4 py-2 mb-3 bottom-marquee" aria-hidden="true">
-          {/* две одинаковые дорожки подряд, чтобы цикл был бесшовный */}
+          {/* две одинаковые дорожки подряд — бесшовный цикл */}
           <div className="track">{content}{content}</div>
         </section>
       </div>
@@ -189,8 +190,6 @@ export default function ForumPage() {
       {/* 2) Forum */}
       <div className="page-wrap">
         <section className="glass neon card forum-card">
-          {/* сам вид карточек/затемнение/скролл реализованы внутри Forum.jsx;
-             здесь мы отдаём ширину и «стекло» на всю страницу */}
           <Forum />
         </section>
       </div>
@@ -204,7 +203,7 @@ export default function ForumPage() {
       {/* 5) News */}
       <NewsCard />
 
-      {/* 6) Bottom Marquee (одна, как на остальных страницах) */}
+      {/* 6) Bottom Marquee */}
       <BottomMarquee />
     </>
   )

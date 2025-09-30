@@ -42,6 +42,20 @@ const shortAddr = (id) => {
   const s = String(id);
   return s.length > 14 ? `${s.slice(0, 6)}…${s.slice(-4)}` : s;
 };
+// fallback на случай, если в api нет adminVerify
+const adminVerifyFetch = async (pass) => {
+  try {
+    const res = await fetch('/api/forum/admin/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'cache-control':'no-store' },
+      body: JSON.stringify({ pass: String(pass || '') })
+    });
+    return await res.json();
+  } catch (e) {
+    console.warn('adminVerify failed', e);
+    return null;
+  }
+};
 
 const readAuth = () => ({
   accountId: isBrowser() && (window.__AUTH_ACCOUNT__ || localStorage.getItem('account') || localStorage.getItem('wallet')) || null,
@@ -541,19 +555,52 @@ const EMOJI = [
    маленькие поповеры
 ========================================================= */
 function AdminPopover({ anchorRef, open, onClose, t, isActive, onActivated, onDeactivated }) {
-  const [pass, setPass] = useState('')
-  useEffect(() => { if (open) setPass('') }, [open])
-  if (!open || !anchorRef?.current) return null
-  const top = anchorRef.current.offsetTop + anchorRef.current.offsetHeight + 8
-  const right = 0
+  const [pass, setPass] = useState('');
+  useEffect(() => { if (open) setPass(''); }, [open]);
+  if (!open || !anchorRef?.current) return null;
+
+  const top = anchorRef.current.offsetTop + anchorRef.current.offsetHeight + 8;
+  const right = 0;
+
+  const activate = async () => {
+    const password = pass.trim();
+    if (!password) return;
+    try {
+      let r;
+      if (typeof api?.adminVerify === 'function') {
+        // если у тебя уже есть обёртка в api — используем её
+        r = await api.adminVerify(password);
+      } else {
+        // прямой вызов существующего роута
+        const res = await fetch('/api/forum/admin/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'cache-control': 'no-store' },
+          body: JSON.stringify({ password }),
+          cache: 'no-store',
+        });
+        r = await res.json().catch(() => null);
+      }
+      if (r?.ok) {
+        try { localStorage.setItem('ql7_admin', '1'); } catch {}
+        onActivated?.();
+        onClose?.();
+      }
+    } catch {}
+  };
+
+  const exit = async () => {
+    try { await fetch('/api/forum/admin/verify', { method: 'DELETE', cache: 'no-store' }); } catch {}
+    try { localStorage.removeItem('ql7_admin'); } catch {}
+    onDeactivated?.();
+    onClose?.();
+  };
+
   return (
     <div className="adminPop" style={{ top, right }}>
       {isActive ? (
         <div className="grid gap-2">
           <div className="meta">{t('forum_admin_active')}</div>
-          <button
-            className="btn"
-            onClick={() => { try { localStorage.removeItem('ql7_admin') } catch { }; onDeactivated?.(); onClose?.() }}>
+          <button className="btn" onClick={exit}>
             {t('forum_admin_exit')}
           </button>
         </div>
@@ -571,20 +618,14 @@ function AdminPopover({ anchorRef, open, onClose, t, isActive, onActivated, onDe
           </label>
           <div className="flex items-center justify-end gap-2">
             <button className="btn btnGhost" onClick={onClose}>{t('forum_cancel')}</button>
-            <button
-              className="btn"
-              onClick={async () => {
-                if (!pass.trim()) return
-                const r = await api.adminVerify(pass.trim())
-                if (r?.ok) { try { localStorage.setItem('ql7_admin', '1') } catch { }; onActivated?.(); onClose?.() }
-              }}>
+            <button className="btn" onClick={activate}>
               {t('forum_activate')}
             </button>
           </div>
         </div>
       )}
     </div>
-  )
+  );
 }
 
 /** мини-поповер профиля рядом с аватаром */
@@ -945,9 +986,7 @@ const sendBatch = (immediate=false) => {
   if(immediate) run()
   else { clearTimeout(debRef.current); debRef.current = setTimeout(run, 650) }
 }
-
-
-
+ 
   // >>>>>>>>> Единственное изменение логики: усиленные антидубликаты
   function dedupeAll(prev){
     // -------- Темы: дедуп по сигнатуре, предпочтение real > admin > новее ts
@@ -1040,6 +1079,15 @@ useEffect(() => {
         const views    = Math.max(Number(srv.views ?? 0),    Number(loc.views ?? 0));
         mergedById.set(id, { ...loc, ...srv, likes, dislikes, views, myReaction: (loc.myReaction ?? srv.myReaction ?? null) });
       }
+if (Array.isArray(r.bans)) {
+  const sinceWrite = (window.__forum_write_guard_until__ || 0) - Date.now();
+  if (sinceWrite > 0) {
+    const s = new Set([...(prev.bans || []), ...r.bans]);
+    out.bans = Array.from(s);
+  } else {
+    out.bans = r.bans;
+  }
+}
 
       // 2) не подтверждённые tmp_* оставляем на месте до 10с (не мигают)
       const now = Date.now();
@@ -1075,7 +1123,7 @@ useEffect(() => {
 
   const pull = async () => {
     try {
-      const r = await api.snapshot(); // внутри должен быть no-store
+      const r = await api.snapshot(); // внутри желательно cache-control: no-store
       if (r?.ok) persist(prev => silentMerge(prev, r));
     } catch {}
   };
@@ -1095,29 +1143,35 @@ useEffect(() => {
   document.addEventListener('visibilitychange', kick);
 
   // — после ЛЮБОГО POST на /api/forum/* (лайк/ответ/бан/удаление)
+  // защита от двойной обёртки fetch при HMR/повторном маунте
+  const hadWrap = !!window.__forum_silent_sync__;
   const _fetch = window.fetch;
-  window.fetch = async (...args) => {
-    const res = await _fetch(...args);
-    try {
-      const req    = args[0];
-      const url    = typeof req === 'string' ? req : req?.url;
-      const method = (typeof req === 'string' ? (args[1]?.method || 'GET') : (req.method || 'GET')).toUpperCase();
-      if (method !== 'GET' && /\/api\/forum\//.test(String(url || ''))) {
-        setTimeout(pull, 180); // даём серверу применить
-      }
-    } catch {}
-    return res;
-  };
+  if (!hadWrap) {
+    window.__forum_silent_sync__ = true;
+    window.fetch = async (...args) => {
+      const res = await _fetch(...args);
+      try {
+        const req    = args[0];
+        const url    = typeof req === 'string' ? req : req?.url;
+        const method = (typeof req === 'string' ? (args[1]?.method || 'GET') : (req.method || 'GET')).toUpperCase();
+        if (method !== 'GET' && /\/api\/forum\//.test(String(url || ''))) {
+          setTimeout(pull, 180); // даём серверу применить
+        }
+      } catch {}
+      return res;
+    };
+  }
 
   return () => {
     stop = true;
     window.removeEventListener('focus', kick);
     window.removeEventListener('online', kick);
     document.removeEventListener('visibilitychange', kick);
-    window.fetch = _fetch;
+    if (!hadWrap) { window.fetch = _fetch; window.__forum_silent_sync__ = false; }
   };
 }, []);
 
+ 
   //  const refresh = async () => {
   //    const r = await api.snapshot()
   //   if (r?.ok && r.full) {
@@ -1150,11 +1204,13 @@ const delTopic = async (t) => {
       posts:  prev.posts.filter(p => p.topicId !== t.id),
     }))
     toast.ok('Topic removed')
+    if (typeof refresh === 'function') await refresh()   // ← добавили
   } else {
     console.error('adminDeleteTopic error:', r)
     toast.err(r?.error || 'Admin endpoint error')
   }
 }
+
 
 const delPost = async (p) => {
   if (!isAdmin) return
@@ -1173,29 +1229,32 @@ const delPost = async (p) => {
       return { ...prev, posts: prev.posts.filter(x => !del.has(x.id)) }
     })
     toast.ok('Post removed')
+    if (typeof refresh === 'function') await refresh()   // ← добавили
   } else {
     console.error('adminDeletePost error:', r)
     toast.err(r?.error || 'Admin endpoint error')
   }
 }
 
+
 const banUser = async (p) => {
   if (!isAdmin) return
   const id = p.accountId || p.userId
   const r = await api.adminBanUser(id)
   if (r?.ok) {
-    // локально обновляем список банов, чтобы кнопка сразу стала зелёной
     persist(prev => {
       const bans = new Set(prev.bans || [])
       bans.add(id)
       return { ...prev, bans: Array.from(bans) }
     })
     toast.ok(t('forum_banned_ok') || 'User banned')
+    if (typeof refresh === 'function') await refresh()   // ← добавили
   } else {
     console.error('adminBanUser error:', r)
     toast.err(r?.error || 'Admin endpoint error')
   }
 }
+
 
 const unbanUser = async (p) => {
   if (!isAdmin) return
@@ -1208,11 +1267,13 @@ const unbanUser = async (p) => {
       return { ...prev, bans: Array.from(bans) }
     })
     toast.ok(t('forum_unbanned_ok') || 'User unbanned')
+    if (typeof refresh === 'function') await refresh()   // ← добавили
   } else {
     console.error('adminUnbanUser error:', r)
     toast.err(r?.error || 'Admin endpoint error')
   }
 }
+
 
 
 /* ---- выбор темы и построение данных ---- */
