@@ -973,134 +973,22 @@ const sendBatch = (immediate=false) => {
     next.cursor = cursor ?? prev.cursor
     return dedupeAll(next)
   }
-// === SILENT SYNC: мягкое докатывание без «прыжков» ===
-useEffect(() => {
-  let stop = false;
 
-  // стабильное слияние сервера в локальный снап (сохраняем порядок и tmp)
-  const silentMerge = (prev, r) => {
-    const out = { ...prev };
-
-    // --- TOPICS (без прыжков) ---
-    if (Array.isArray(r.topics)) {
-      const byIdPrev = new Map((prev.topics || []).map((t, i) => [String(t.id), { ...t, __idx:i }]));
-      for (const t of r.topics) {
-        const id = String(t.id);
-        byIdPrev.set(id, { ...(byIdPrev.get(id) || { __idx: 9e9 }), ...t });
-      }
-      // сохраняем прежний порядок, новые в конец
-      out.topics = Array.from(byIdPrev.values()).sort((a,b)=>a.__idx-b.__idx).map(({__idx, ...t})=>t);
+  const refresh = async () => {
+    const r = await api.snapshot()
+    if (r?.ok && r.full) {
+      persist(dedupeAll({
+        topics: r.topics || [],
+        posts:  r.posts  || [],
+        bans:   r.bans   || [],
+        admins: r.admins || [],
+        rev:    r.rev    || null,
+      }))
     }
+  }
 
-    // --- POSTS (главное: не дёргать и не терять tmp_*) ---
-    if (Array.isArray(r.posts)) {
-      const prevList = prev.posts || [];
-      const srvMap   = new Map(r.posts.map(p => [String(p.id), p]));
-      const order    = new Map(prevList.map((p, i) => [String(p.id), i])); // старые позиции
-
-      // 1) обновляем/добавляем серверные поверх локальных
-      const mergedById = new Map(prevList.map(p => [String(p.id), { ...p }]));
-      for (const [id, srv] of srvMap) {
-        const loc = mergedById.get(id) || {};
-        // счётчики не «скачут» вниз: не уменьшаем ниже локального
-        const likes    = Math.max(Number(srv.likes ?? 0),    Number(loc.likes ?? 0));
-        const dislikes = Math.max(Number(srv.dislikes ?? 0), Number(loc.dislikes ?? 0));
-        const views    = Math.max(Number(srv.views ?? 0),    Number(loc.views ?? 0));
-        mergedById.set(id, { ...loc, ...srv, likes, dislikes, views, myReaction: (loc.myReaction ?? srv.myReaction ?? null) });
-      }
-
-      // 2) не подтверждённые tmp_* оставляем на месте до 10с (не мигают)
-      const now = Date.now();
-      for (const p of prevList) {
-        const id = String(p.id);
-        if (id.startsWith('tmp_') && !mergedById.has(id)) {
-          const fresh = (now - Number(p.ts || now)) < 10_000;
-          if (fresh) mergedById.set(id, p);
-        }
-      }
-
-      // 3) строим список в СТАРОМ порядке; новые (которых не было) дописываем в конец
-      const mergedList = [];
-      // существующие — по прежним индексам
-      for (const p of prevList) {
-        const id = String(p.id);
-        const found = mergedById.get(id);
-        if (found) { mergedList.push(found); mergedById.delete(id); }
-      }
-      // новые серверные (которых не было) — в конец (без пересортировки)
-      for (const p of mergedById.values()) mergedList.push(p);
-
-      out.posts = mergedList;
-    }
-
-    if (Array.isArray(r.bans))   out.bans   = r.bans;
-    if (Array.isArray(r.admins)) out.admins = r.admins;
-    if (r.rev    !== undefined)  out.rev    = r.rev;
-    if (r.cursor !== undefined)  out.cursor = r.cursor;
-
-    return dedupeAll(out);
-  };
-
-  const pull = async () => {
-    try {
-      const r = await api.snapshot(); // внутри должен быть no-store
-      if (r?.ok) persist(prev => silentMerge(prev, r));
-    } catch {}
-  };
-
-  // — живой докат раз в 2 c (можешь поставить 1500–3000)
-  (async function loop(){
-    while (!stop) {
-      await pull();
-      await new Promise(r => setTimeout(r, 2000));
-    }
-  })();
-
-  // — мгновенно при возврате фокуса/онлайна
-  const kick = () => { pull(); };
-  window.addEventListener('focus', kick);
-  window.addEventListener('online', kick);
-  document.addEventListener('visibilitychange', kick);
-
-  // — после ЛЮБОГО POST на /api/forum/* (лайк/ответ/бан/удаление)
-  const _fetch = window.fetch;
-  window.fetch = async (...args) => {
-    const res = await _fetch(...args);
-    try {
-      const req    = args[0];
-      const url    = typeof req === 'string' ? req : req?.url;
-      const method = (typeof req === 'string' ? (args[1]?.method || 'GET') : (req.method || 'GET')).toUpperCase();
-      if (method !== 'GET' && /\/api\/forum\//.test(String(url || ''))) {
-        setTimeout(pull, 180); // даём серверу применить
-      }
-    } catch {}
-    return res;
-  };
-
-  return () => {
-    stop = true;
-    window.removeEventListener('focus', kick);
-    window.removeEventListener('online', kick);
-    document.removeEventListener('visibilitychange', kick);
-    window.fetch = _fetch;
-  };
-}, []);
-
-  //  const refresh = async () => {
-  //    const r = await api.snapshot()
-  //   if (r?.ok && r.full) {
-  //     persist(dedupeAll({
-  //       topics: r.topics || [],
-  //       posts:  r.posts  || [],
-  //       bans:   r.bans   || [],
-  //       admins: r.admins || [],
-  //       rev:    r.rev    || null,
-  //     }))
-  //   }
-  // }
-
-// useEffect(()=>{ refresh() },[]) 
-// useEffect(()=>{ const id=setInterval(()=>refresh(), 8000); return ()=>clearInterval(id) },[])
+useEffect(()=>{ refresh() },[]) 
+useEffect(()=>{ const id=setInterval(()=>refresh(), 8000); return ()=>clearInterval(id) },[])
 
 
 /* ---- admin ---- */
@@ -1839,8 +1727,7 @@ function CreateTopicCard({ t, onCreate }){
         </div>
       )}
       <div className="flex items-center gap-2">
-        <div className="tag">{t('forum_markets_badge') || 'BTC'}</div>
-      </div>
     </div>
+   </div>
   )
 }
