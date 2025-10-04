@@ -1,64 +1,100 @@
 // app/api/forum/events/stream/route.js
-export const runtime    = 'edge';
-export const dynamic    = 'force-dynamic';
-export const revalidate = 0;
-export const fetchCache = 'force-no-store';
+// SSE-хаб: подписывается на Redis Pub/Sub (forum:events) и ретранслирует всем клиентам.
 
-import { Redis } from '@upstash/redis';
+import { Redis } from '@upstash/redis'
+import { bus } from '../../_bus.js'
+export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+export const fetchCache = 'force-no-store'
+// ... после функции broadcast(evt) { ... }
+bus.on((evt) => broadcast(evt))  // <— добавили
 
-// 🔔 ВАЖНО: этот маршрут рассчитан на Edge (Vercel). В деве он тоже работает.
-// Локальный process-bus на Edge недоступен — работаем через Redis Pub/Sub.
+// --- подключенные клиенты SSE ---
+const clients = new Set()
 
-export async function GET() {
-  const encoder = new TextEncoder();
+function write(ctrl, obj) {
+  try {
+    ctrl.enqueue(`data: ${JSON.stringify(obj)}\n\n`)
+  } catch {}
+}
+
+// Экспортируем для "лучшего усилия": если в том же процессе кто-то вызовет broadcast(evt)
+export function broadcast(evt) {
+  for (const c of clients) write(c, evt)
+}
+
+// --- Redis subscription (однократно на процесс/лямбду) ---
+let subscribed = false
+let subRunning = false
+
+async function ensureSubscribed() {
+  if (subscribed || subRunning) return
+  subRunning = true
+
+  const tryLoop = async () => {
+    for (;;) {
+      try {
+        const redis = Redis.fromEnv()
+        await redis.subscribe('forum:events', (raw) => {
+          try {
+            const evt = typeof raw === 'string' ? JSON.parse(raw) : raw
+            broadcast(evt)
+          } catch {}
+        })
+        // если вышли из subscribe без ошибки — считаем подписанными
+        subscribed = true
+        subRunning = false
+        return
+      } catch (e) {
+        // это тот самый BodyTimeout/terminated: подождём и попробуем снова
+        console.warn('events_stream_subscribe_retry', e?.code || e?.message || String(e))
+        await new Promise(r => setTimeout(r, 3000))
+        // цикл повторится
+      }
+    }
+  }
+
+  tryLoop().finally(() => { subRunning = false })
+}
+
+
+export async function GET(req) {
+  await ensureSubscribed()
 
   const stream = new ReadableStream({
     start(controller) {
-      const write = (s) => controller.enqueue(encoder.encode(s));
-      const send  = (evt) => write(`data: ${JSON.stringify(evt)}\n\n`);
-      const hb    = () => write(`:hb ${Date.now()}\n\n`);
+      clients.add(controller)
+      write(controller, { type: 'connected', ts: Date.now() })
 
-      // немедленный connect-событие — чтобы curl/EventSource увидел живой стрим
-      send({ type: 'connected', ts: Date.now() });
+      // heartbeat каждые 15с (комментарий по протоколу SSE)
+      const hb = setInterval(() => {
+        try { controller.enqueue(`:hb ${Date.now()}\n\n`) } catch {}
+      }, 15000)
 
-      // heartbeat каждые 15с (держит соединение «тёплым» у прокси)
-      const hbId = setInterval(hb, 15000);
-
-      // Подписка на Redis Pub/Sub
-      let unsubscribe = null;
-      (async () => {
-        try {
-          const redis = Redis.fromEnv();
-          unsubscribe = await redis.subscribe('forum:events', (raw) => {
-            let evt = raw;
-            try { if (typeof raw === 'string') evt = JSON.parse(raw) } catch {}
-            try { send(evt) } catch {}
-          });
-        } catch (e) {
-          // можно вывести разовый тех. эвент, чтобы видеть, что подписка не удалась
-          write(`event: warn\ndata: ${JSON.stringify({ msg: 'subscribe_failed', err: String(e?.message || e) })}\n\n`);
-        }
-      })();
-
-      // Закрытие
       const close = () => {
-        clearInterval(hbId);
-        try { unsubscribe && unsubscribe() } catch {}
+        clearInterval(hb)
+        clients.delete(controller)
         try { controller.close() } catch {}
-      };
+      }
 
-      // В Edge ReadableStream нет oncancel — завершим по return
-      // Возвращаем функцию, которую Next вызовет при обрыве клиента
-      return close;
-    }
-  });
+      // закрытие по аборту запроса/разрыву сети
+      const { signal } = req
+      if (signal) {
+        if (signal.aborted) close()
+        else signal.addEventListener('abort', close, { once: true })
+      }
+    },
+    cancel() {
+      // no-op
+    },
+  })
 
   return new Response(stream, {
     headers: {
-      'Content-Type': 'text/event-stream; charset=utf-8',
-      'Cache-Control': 'no-cache, no-transform',
-      // Ни gzip, ни proxy-буферизацию
-      'X-Accel-Buffering': 'no'
-    }
-  });
+      'content-type': 'text/event-stream; charset=utf-8',
+      'cache-control': 'no-store, max-age=0',
+      'connection': 'keep-alive',
+    },
+  })
 }
