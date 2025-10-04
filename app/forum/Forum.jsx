@@ -1252,6 +1252,37 @@ const Styles = () => (
 .forumTopbar .right{ display:flex; gap:6px; align-items:center; }
 
 /* карточки можно переиспользовать из левой/правой колонок без изменений */
+/* --- Форум: никогда не вылазим из карточки/экрана --- */
+.forum-card { overflow: hidden; }
+
+.forum_root { width:100%; max-width:100%; }
+.forum_root, .forum_root * { box-sizing: border-box; }
+
+/* сетка «одна колонка», колонка обрезает ширину детей корректно */
+.forum_root .grid2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr); /* вместо 1fr */
+  gap: 0.5rem;
+}
+
+/* любые «стеклянные» секции не раздувают контейнер */
+.forum_root .glass { max-width: 100%; overflow: hidden; }
+.forum_root .body  { overflow-x: hidden; }
+
+/* мультимедиа и превью всегда ужимаются */
+.forum_root img,
+.forum_root video,
+.forum_root iframe { max-width: 100%; height: auto; }
+
+/* карточки постов и их внутренности могут сжиматься */
+.forum_root .item,
+.forum_root .item * { min-width: 0; }
+
+/* текст: переносим очень длинные слова/URL */
+.forum_root .postBody {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
 
   `}</style>
 )
@@ -3418,7 +3449,7 @@ const onFilesChosen = React.useCallback(async (e) => {
         </div>
       </section>
 
-<div className="grid2" style={{ gridTemplateColumns: '1fr' }}>
+<div className="grid2" style={{ gridTemplateColumns: 'minmax(0, 1fr)' }}>
   {/* ОДНА КОЛОНКА: если тема не выбрана — список тем; если выбрана — посты темы */}
   {!sel ? (
     /* === СПИСОК ТЕМ === */
