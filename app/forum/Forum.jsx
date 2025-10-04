@@ -1240,6 +1240,18 @@ const Styles = () => (
   .qcoinValue.paused{ animation:none }
   .qcoinExchangeBtn::before, .qcoinExchangeBtn::after{ animation:none }
 }
+.forumSingle { display: grid; gap: 16px; }
+.panel { background: rgba(10,14,22,.96); border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:12px; }
+.panelTitle { margin:0 0 8px; font-weight:600; opacity:.9; }
+
+.forumTopbar{
+  display:flex; gap:8px; align-items:center; justify-content:space-between;
+  margin-bottom:10px; flex-wrap:wrap;
+}
+.forumTopbar .left{ display:flex; gap:6px; align-items:center; }
+.forumTopbar .right{ display:flex; gap:6px; align-items:center; }
+
+/* карточки можно переиспользовать из левой/правой колонок без изменений */
 
   `}</style>
 )
@@ -1860,49 +1872,8 @@ function PostCard({
           </div>
         </div>
 
-        {/* действия */}
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="btn btnGhost btnSm"
-            title={t?.('forum_report') || 'Пожаловаться'}
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onReport?.(p); }}
-          >⚠️</button>
-
-          <button
-            type="button"
-            className="btn btnGhost btnSm"
-            title={t?.('forum_reply') || 'Ответить'}
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onReply?.(p); }}
-          >↩️</button>
-
-          {isAdmin && (
-            <>
-              <button
-                type="button"
-                className="btn btnGhost btnSm"
-                title={t?.('forum_delete') || 'Удалить'}
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDeletePost?.(p); }}
-              >🗑</button>
-
-              {isBanned ? (
-                <button
-                  type="button"
-                  className="btn btnGhost btnSm tagOk"
-                  title={t?.('forum_unban') || 'Снять бан'}
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); onUnbanUser?.(p); }}
-                >✅</button>
-              ) : (
-                <button
-                  type="button"
-                  className="btn btnGhost btnSm tagDanger"
-                  title={t?.('forum_ban') || 'Забанить'}
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); onBanUser?.(p); }}
-                >⛔</button>
-              )}
-            </>
-          )}
-        </div>
+        {/* действия — ПЕРЕНЕСЕНО ВНИЗ В ОДНУ СТРОКУ СО СЧЁТЧИКАМИ */}
+        <div className="flex items-center gap-2"></div>
       </div>
 
       {/* тело поста — VIP-эмодзи как картинка, иначе ОЧИЩЕННЫЙ текст без URL-строк */}
@@ -1938,53 +1909,89 @@ function PostCard({
         </div>
       )}
 
-      {/* нижняя полоса счётчиков + кнопки реакций */}
-      <div className="mt-3 flex items-center gap-2 text-[13px] opacity-80">
-        <span className="tag" title={t?.('forum_views') || 'Просмотры'}>👁 {views}</span>
+{/* нижняя полоса: СЧЁТЧИКИ + РЕАКЦИИ + (ПЕРЕНЕСЁННЫЕ) ДЕЙСТВИЯ — В ОДНУ СТРОКУ */}
+<div
+  className="mt-3 flex items-center gap-2 text-[13px] opacity-80"
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    flexWrap: 'nowrap',                // ← запрещаем перенос flex-элементов
+    whiteSpace: 'nowrap',              // косметика для inline-частей
+    overflow: 'hidden',                // ничего не выпадает
+    fontSize: 'clamp(9px, 1.1vw, 13px)'// ← сильнее сжимаем на узких экранах
+  }}
+>
+  <span className="tag" title={t?.('forum_views') || 'Просмотры'}>👁 {views}</span>
 
-        <span
-          className="tag cursor-pointer"
-          title={t?.('forum_replies') || 'Ответы'}
-          onClick={(e) => { e.stopPropagation(); onOpenThread?.(p); }}
-        >
-          💬 {replies}
-        </span>
+  <span
+    className="tag cursor-pointer"
+    title={t?.('forum_replies') || 'Ответы'}
+    onClick={(e) => { e.stopPropagation(); onOpenThread?.(p); }}
+  >
+    💬 {replies}
+  </span>
 
+  <button
+    type="button"
+    className="btn btnGhost btnSm"
+    title={t?.('forum_like') || 'Лайк'}
+    onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); onReact?.(p,'like'); }}
+  >
+    👍 {likes}
+  </button>
+
+  <button
+    type="button"
+    className="btn btnGhost btnSm"
+    title={t?.('forum_dislike') || 'Дизлайк'}
+    onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); onReact?.(p,'dislike'); }}
+  >
+    👎 {dislikes}
+  </button>
+
+  {/* разделяем левый и правый края, но остаёмся в одном ряду */}
+  <div style={{ flex: 1, minWidth: 8 }} />
+
+  {/* действия (пожаловаться, ответить, бан/разбан, удалить) — справа в той же строке */}
+  <button
+    type="button"
+    className="btn btnGhost btnSm"
+    title={t?.('forum_report') || 'Пожаловаться'}
+    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onReport?.(p); }}
+  >⚠️</button>
+
+  {isAdmin && (
+    <>
+      <button
+        type="button"
+        className="btn btnGhost btnSm"
+        title={t?.('forum_delete') || 'Удалить'}
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDeletePost?.(p); }}
+      >🗑</button>
+
+      {isBanned ? (
         <button
           type="button"
-          className="btn btnGhost btnSm"
-          title={t?.('forum_like') || 'Лайк'}
-          onClick={like}
-        >
-          👍 {likes}
-        </button>
-
+          className="btn btnGhost btnSm tagOk"
+          title={t?.('forum_unban') || 'Снять бан'}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onUnbanUser?.(p); }}
+        >✅</button>
+      ) : (
         <button
           type="button"
-          className="btn btnGhost btnSm"
-          title={t?.('forum_dislike') || 'Дизлайк'}
-          onClick={dislike}
-        >
-          👎 {dislikes}
-        </button>
-      </div>
-
-      {/* лайтбокс */}
-      {lightbox.open && (
-        <div className="lightbox" onClick={(e)=>{ e.stopPropagation(); setLightbox(v=>({ ...v, open:false })); }}>
-          <img src={lightbox.src} alt="" />
-          {lightbox.list.length > 1 && (
-            <>
-              <button className="nav prev" onClick={(e)=>{ e.stopPropagation(); const n=(lightbox.idx-1+lightbox.list.length)%lightbox.list.length; setLightbox({ open:true, src:lightbox.list[n], idx:n, list:lightbox.list }); }}>‹</button>
-              <button className="nav next" onClick={(e)=>{ e.stopPropagation(); const n=(lightbox.idx+1)%lightbox.list.length; setLightbox({ open:true, src:lightbox.list[n], idx:n, list:lightbox.list }); }}>›</button>
-            </>
-          )}
-        </div>
+          className="btn btnGhost btnSm tagDanger"
+          title={t?.('forum_ban') || 'Забанить'}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onBanUser?.(p); }}
+        >⛔</button>
       )}
-
+    </>
+  )}
+</div>
     </article>
   );
 }
+
 
 
 /* =========================================================
@@ -2412,27 +2419,10 @@ const safeMerge = (prev, r) => {
 }, []);
 
 
-// локальный shim: принудительное обновление страницы/данных (гибридный refresh)
+// локальный shim: принудительное обновление страницы/данных
 const router = useRouter();
-const refresh = React.useCallback(async () => {
-  // 1) мягко просим Next пересобрать серверные компоненты
+const refresh = React.useCallback(() => {
   try { router.refresh?.(); } catch {}
-
-  // 2) жёстко тянем свежий снапшот, обходя микрокэш (bust)
-  try {
-    const r = await fetch(`/api/forum/snapshot?b=${Date.now()}`, { cache: 'no-store' });
-    const j = await r.json().catch(() => null);
-    if (j?.ok) {
-      // обновляем стор (как у тебя было)
-      persist(dedupeAll({
-        topics: j.topics || [],
-        posts:  j.posts  || [],
-        bans:   j.banned || j.bans || [],
-        admins: j.admins || [],
-        rev:    j.rev    || null,
-      }));
-    }
-  } catch {}
 }, [router]);
 
 React.useEffect(() => {
@@ -2443,10 +2433,44 @@ React.useEffect(() => {
   const es = new EventSource('/api/forum/events/stream', { withCredentials: false });
   window.__forumSSE = es;
 
-  // простой debounce для сглаживания пачек
-  const deb = (fn, ms = 160) => {
-    clearTimeout(window.__forumSSEDebounce__);
-    window.__forumSSEDebounce__ = setTimeout(fn, ms);
+  // === антидребезг + ограничение частоты ===
+  const lastRefreshAtRef = { current: 0 };
+  let debTimer = null;
+
+  // базовая задержка и доп. задержки для «тяжёлых» событий
+  const REFRESH_BASE_DELAY = 350; // было 160 → стало 350 мс
+  const EXTRA_DELAY_BY_TYPE = {
+    post_created: 250,
+    topic_created: 250,
+    post_deleted: 150,
+    topic_deleted: 150,
+    react: 0,
+    view_post: 0,
+    view_topic: 0,
+    ban: 0,
+    unban: 0,
+  };
+  const MIN_INTERVAL_MS = 600; // не чаще, чем раз в 600 мс
+
+  const scheduleRefresh = (evtType) => {
+    const extra = EXTRA_DELAY_BY_TYPE[evtType] || 0;
+    const delay = REFRESH_BASE_DELAY + extra;
+
+    clearTimeout(debTimer);
+    debTimer = setTimeout(() => {
+      const now = Date.now();
+      if (now - (lastRefreshAtRef.current || 0) < MIN_INTERVAL_MS) {
+        // если слишком часто — докидаем паузу до MIN_INTERVAL_MS
+        const leftover = MIN_INTERVAL_MS - (now - (lastRefreshAtRef.current || 0));
+        setTimeout(() => {
+          lastRefreshAtRef.current = Date.now();
+          refresh?.();
+        }, Math.max(60, leftover));
+      } else {
+        lastRefreshAtRef.current = now;
+        refresh?.();
+      }
+    }, delay);
   };
 
   es.onmessage = (e) => {
@@ -2464,40 +2488,30 @@ React.useEffect(() => {
       ]);
 
       if (needRefresh.has(evt.type)) {
-        deb(() => { refresh?.(); });
+        scheduleRefresh(evt.type);
       }
     } catch {}
   };
 
   let fallbackTimer = null;
   es.onerror = () => {
-    // если SSE сломался — раз в 60с подтягиваем снапшот
+    // если SSE сломался — раз в 60с подтягиваем
     if (!fallbackTimer) {
-      fallbackTimer = setInterval(() => { refresh?.(); }, 60000);
+      fallbackTimer = setInterval(() => { refresh?.() }, 60000);
     }
-    // через 5с пробуем переподключиться
-    setTimeout(() => {
-      try { es.close(); } catch {}
-      if (window.__forumSSE === es) window.__forumSSE = null;
-      // переподключение
-      if (!window.__forumSSE) {
-        const newEs = new EventSource('/api/forum/events/stream', { withCredentials: false });
-        window.__forumSSE = newEs;
-      }
-    }, 5000);
   };
-
   es.onopen = () => {
     // как только SSE поднялся — вырубаем fallback
-    if (fallbackTimer) { clearInterval(fallbackTimer); fallbackTimer = null; }
+    if (fallbackTimer) { clearInterval(fallbackTimer); fallbackTimer = null }
   };
 
   return () => {
     try { es.close(); } catch {}
     if (window.__forumSSE === es) window.__forumSSE = null;
-    if (fallbackTimer) { clearInterval(fallbackTimer); fallbackTimer = null; }
+    clearTimeout(debTimer);
   };
 }, [refresh]);
+
 
 
 // ---- VIP ----
@@ -2698,6 +2712,32 @@ const idMap = useMemo(() => {
 const [threadRoot, setThreadRoot] = useState(null);
 // при смене темы выходим из веточного режима
 useEffect(() => { setThreadRoot(null); }, [sel?.id]);
+// === Навигация для одного блока (safe-версия, без чтения до инициализации) ===
+const selRef = React.useRef(null);
+const threadRootRef = React.useRef(null);
+
+React.useEffect(() => { selRef.current = sel }, [sel]);
+React.useEffect(() => { threadRootRef.current = threadRoot }, [threadRoot]);
+
+const goHome = React.useCallback(() => {
+  try { setReplyTo(null); } catch {}
+  try { setThreadRoot(null); } catch {}
+  try { setSel(null); } catch {}
+}, []);
+
+const goBack = React.useCallback(() => {
+  // если открыта ветка ответов — выходим из неё
+  if (threadRootRef.current) {
+    try { setReplyTo(null); } catch {}
+    try { setThreadRoot(null); } catch {}
+    return;
+  }
+  // иначе — из выбранной темы к списку тем
+  if (selRef.current) {
+    try { setReplyTo(null); } catch {}
+    try { setSel(null); } catch {}
+  }
+}, []);
 
 // === BEGIN flat (REPLACE WHOLE BLOCK) ===
 const flat = useMemo(() => {
@@ -3378,252 +3418,285 @@ const onFilesChosen = React.useCallback(async (e) => {
         </div>
       </section>
 
-
-     <div className="grid2">
-        {/* левая колонка — темы */}
-        <section className="glass neon" style={{ display:'flex', flexDirection:'column', height:'calc(100vh - 215px)' }}>
-          <div className="head"><div className="meta">{t('forum_total')}: {(data.topics||[]).length}</div></div>
-          <div className="body">
-            <CreateTopicCard t={t} onCreate={createTopic} />
-            <div className="grid gap-2 mt-2">
-              {sortedTopics.map(x=>{
-                const agg=aggregates.get(x.id)||{posts:0,likes:0,dislikes:0,views:0}
-                return <TopicItem key={x.id} t={x} agg={agg} onOpen={(tt)=>{ setSel(tt); setThreadRoot(null) }} isAdmin={isAdmin} onDelete={delTopic}/>
-              })}
-            </div>
+<div className="grid2" style={{ gridTemplateColumns: '1fr' }}>
+  {/* ОДНА КОЛОНКА: если тема не выбрана — список тем; если выбрана — посты темы */}
+  {!sel ? (
+    /* === СПИСОК ТЕМ === */
+    <section className="glass neon" style={{ display:'flex', flexDirection:'column', height:'calc(100vh - 215px)' }}>
+      <div className="head">
+        {/* ЕДИНЫЙ РЯД КНОПОК ВНУТРИ БЛОКА */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="left flex items-center gap-2">
+            <button type="button" className="btn" disabled onClick={()=>{}}>
+              ← {t?.('forum_back') || 'Назад'}
+            </button>
+            <button type="button" className="btn btnGhost" onClick={()=>{ try{ setReplyTo(null) }catch{}; try{ setThreadRoot(null) }catch{}; try{ setSel(null) }catch{}; }}>
+              ⌂ {t?.('forum_home') || 'На главную'}
+            </button>
           </div>
-        </section>
+          <div className="right flex items-center gap-2">
 
-        {/* правая колонка — сообщения и дерево */}
-        {sel ? (
-          <section className="glass neon" style={{ display:'flex', flexDirection:'column', height:'calc(100vh - 215px)' }}>
-            <div className="head">
-              <div className="title">
-                {threadRoot
-                  ? <button className="btn btnGhost" onClick={()=>{ setThreadRoot(null); setReplyTo(null) }}>← {t('forum_back')}</button>
-                  : null}
-                <span className="ml-2">{threadRoot ? (t('forum_open_replies')||'Ответы') : sel.title}</span>
-              </div>
-            </div>
-            <div className="body">
-              <div className="grid gap-2">
-                {flat.map(p=>{
-                  const parent = p.parentId ? allPosts.find(x => String(x.id) === String(p.parentId)) : null
-                  return (
-                    <div key={p.id} id={`post_${p.id}`} style={{ marginLeft: p._lvl*18 }}>
-                      <PostCard
-                        p={p}
-                        parentAuthor={parent?.nickname || (parent ? shortId(parent.userId || '') : null)}
-                        onReport={() => toast.ok(t('forum_report_ok'))}
-                        onReply={() => setReplyTo(p)}
-                        onOpenThread={(clickP) => { setThreadRoot(clickP) }}
-                        onReact={reactMut}
-                        isAdmin={isAdmin}
-                        onDeletePost={delPost}
-                        onBanUser={banUser}
-                        onUnbanUser={unbanUser}
-                        isBanned={bannedSet.has(p.accountId || p.userId)}
-                        authId={auth.asherId || auth.accountId}
-                        markView={markViewPost}
-                        t={t}
-                      />
-                    </div>
-                  )
-                })}
-                {(!threadRoot && flat.length===0) && <div className="meta">{t('forum_no_posts_yet') || 'Пока нет сообщений'}</div>}
-              </div>
-            </div>
+          </div>
+        </div>
 
-            {/* нижний композер */}
-            <div className="composer">
-              <div className="meta mb-2">
-                {replyTo
-                  ? `${t('forum_reply_to')||'Ответ для'} ${replyTo.nickname||shortId(replyTo.userId||'')}`
-                  : threadRoot
-                    ? `${t('forum_replying_to')||'Ответ к'} ${shortId(threadRoot.userId||'')}`
-                    : t('forum_composer_hint')}
-              </div>
+        <div className="meta mt-2">{t('forum_total')}: {(data.topics||[]).length}</div>
+      </div>
 
-              <div className="flex items-end gap-2 forumComposer">
-                <textarea
-                  className="ta"
-                  /* если выбран VIP-эмодзи — показываем пусто */
-                  value={(/^\[VIP_EMOJI:\/[^\]]+\]$/).test(text || '') ? '' : (text || '')}
-                  onChange={e=>{
-                    /* один VIP-эмодзи на сообщение: если уже выбран — блокируем ввод */
-                    if ((/^\[VIP_EMOJI:\/[^\]]+\]$/).test(text || '')) {
-                      setText(text); // оставляем токен как есть
-                    } else {
-                      setText(e.target.value.slice(0,180));
-                    }
-                  }}
-                  readOnly={(/^\[VIP_EMOJI:\/[^\]]+\]$/).test(text || '')}
-                  maxLength={180}
-                  placeholder={
-                    (/^\[VIP_EMOJI:\/[^\]]+\]$/).test(text || '')
-                      ? (t('forum_more_emoji') || 'VIP emoji selected')
-                      : t('forum_composer_placeholder')
-                  }
+      <div className="body">
+        <CreateTopicCard t={t} onCreate={createTopic} />
+        <div className="grid gap-2 mt-2">
+          {sortedTopics.map(x=>{
+            const agg = aggregates.get(x.id) || {posts:0,likes:0,dislikes:0,views:0}
+            return (
+              <TopicItem
+                key={x.id}
+                t={x}
+                agg={agg}
+                onOpen={(tt)=>{ setSel(tt); setThreadRoot(null) }}
+                isAdmin={isAdmin}
+                onDelete={delTopic}
+              />
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  ) : (
+    /* === ВЫБРАННАЯ ТЕМА: посты + композер === */
+    <section className="glass neon" style={{ display:'flex', flexDirection:'column', height:'calc(100vh - 215px)' }}>
+      <div className="head">
+        {/* ЕДИНЫЙ РЯД КНОПОК ВНУТРИ БЛОКА (без «Создать тему») */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="left flex items-center gap-2">
+            <button
+              type="button"
+              className="btn"
+              onClick={()=>{ 
+                if (threadRoot) { try{ setReplyTo(null) }catch{}; try{ setThreadRoot(null) }catch{}; }
+                else            { try{ setReplyTo(null) }catch{}; try{ setSel(null) }catch{}; }
+              }}
+            >
+              ← {t?.('forum_back') || 'Назад'}
+            </button>
+
+            <button
+              type="button"
+              className="btn btnGhost"
+              onClick={()=>{ try{ setReplyTo(null) }catch{}; try{ setThreadRoot(null) }catch{}; try{ setSel(null) }catch{}; }}
+            >
+              ⌂ {t?.('forum_home') || 'На главную'}
+            </button>
+          </div>
+
+          <div className="right" />
+        </div>
+
+        <div className="title mt-2">
+          {threadRoot
+            ? <span>{t('forum_open_replies')||'Ответы'}</span>
+            : <span>{sel.title}</span>}
+        </div>
+      </div>
+
+      <div className="body">
+        <div className="grid gap-2">
+          {flat.map(p=>{
+            const parent = p.parentId ? allPosts.find(x => String(x.id) === String(p.parentId)) : null
+            return (
+              <div key={p.id} id={`post_${p.id}`} style={{ marginLeft: p._lvl*18 }}>
+                <PostCard
+                  p={p}
+                  parentAuthor={parent?.nickname || (parent ? shortId(parent.userId || '') : null)}
+                  onReport={() => toast.ok(t('forum_report_ok'))}
+                  onReply={() => setReplyTo(p)}
+                  onOpenThread={(clickP) => { setThreadRoot(clickP) }}
+                  onReact={reactMut}
+                  isAdmin={isAdmin}
+                  onDeletePost={delPost}
+                  onBanUser={banUser}
+                  onUnbanUser={unbanUser}
+                  isBanned={bannedSet.has(p.accountId || p.userId)}
+                  authId={auth.asherId || auth.accountId}
+                  markView={markViewPost}
+                  t={t}
                 />
-                {/* L52 → ВСТАВИТЬ СЮДА: счётчик символов для композера */}
-                <div className="charRow" aria-live="polite">
-                  <span className="charNow">{String(text || '').trim().length}</span>
-                  <span className="charSep">/</span>
-                  <span className={(String(text || '').trim().length > 180) ? 'charMax charOver' : 'charMax'}>180</span>
-                </div>
+              </div>
+            )
+          })}
+          {(!threadRoot && flat.length===0) && <div className="meta">{t('forum_no_posts_yet') || 'Пока нет сообщений'}</div>}
+        </div>
+      </div>
 
-                {/* превью VIP-эмодзи под полем */}
-                {(/^\[VIP_EMOJI:\/[^\]]+\]$/).test(text || '') && (
-                  <div className="vipComposerPreview">
-                    <img
-                      src={(text || '').replace(/^\[VIP_EMOJI:(.*?)\]$/, '$1')}
-                      alt=""
-                      className="vipEmojiBig"
-                      style={{ width: 'var(--vip-emoji-size,48px)', height: 'var(--vip-emoji-size,48px)' }}
-                    />
-                  </div>
-                )}
-              </div>          
-<div className="flex flex-col gap-2">
-  {/* одна строка: не переносим элементы */}
-  <div className="flex items-center gap-2 flex-nowrap">
-    <button
-      className="btn shrink-0"
-      disabled={!canSend || String(text||'').trim().length > 180}
-      onClick={createPost}
-    >
-      {t('forum_send')}
-    </button>
+        {/* нижний композер */}
+        <div className="composer">
+          <div className="meta mb-2">
+            {replyTo
+              ? `${t('forum_reply_to')||'Ответ для'} ${replyTo.nickname||shortId(replyTo.userId||'')}`
+              : threadRoot
+                ? `${t('forum_replying_to')||'Ответ к'} ${shortId(threadRoot.userId||'')}`
+                : t('forum_composer_hint')}
+          </div>
 
-    <button
-      className="emojiOutline shrink-0"
-      title={t('forum_more_emoji')}
-      onClick={()=>setEmojiOpen(v=>!v)}
-    >
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.7"/>
-        <circle cx="9" cy="10" r="1.2" fill="currentColor"/>
-        <circle cx="15" cy="10" r="1.2" fill="currentColor"/>
-        <path d="M8 14.5c1.2 1.2 2.8 1.8 4 1.8s2.8-.6 4-1.8" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
-      </svg>
-    </button>
-
-    {/* скрепка */}
-    <button
-      className="emojiOutline lockable shrink-0"
-      data-locked={!vipActive}
-      title={t('forum_attach') || 'Прикрепить'}
-      onClick={handleAttachClick}
-    >
-      <svg className="clipSvg" width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path d="M7 13.5l6.5-6.5a3.5 3.5 0 115 5L10 20a6 6 0 11-8.5-8.5"
-              stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-      {!vipActive && <span className="lockBadge" aria-hidden>🔒</span>}
-    </button>
-
-    {/* ПРЕВЬЮ — справа от скрепки, в той же строке */}
-    {pendingImgs.length > 0 && (
-      <div
-        className="inline-flex items-center gap-2 ml-2 overflow-x-auto"
-        style={{ maxWidth: '50%' }} // можно убрать/подкрутить
-      >
-        {pendingImgs.map((u, i) => (
-          <button
-            key={i}
-            type="button"
-            className="relative group shrink-0"
-            title={t?.('forum_remove_attachment') || 'Убрать вложение'}
-            onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); setPendingImgs(prev => prev.filter((_,idx)=>idx!==i)); }}
-          >
-            <img
-              src={u}
-              alt=""
-              loading="lazy"
-              className="h-8 w-auto max-w-[96px] rounded-md ring-1 ring-white/10"
+          <div className="flex items-end gap-2 forumComposer">
+            <textarea
+              className="ta"
+              style={{ minHeight: 60 }}  /* ↑ композер ниже (≈1.5–2x) */
+              value={(/^\[VIP_EMOJI:\/[^\]]+\]$/).test(text || '') ? '' : (text || '')}
+              onChange={e=>{
+                if ((/^\[VIP_EMOJI:\/[^\]]+\]$/).test(text || '')) {
+                  setText(text);
+                } else {
+                  setText(e.target.value.slice(0,180));
+                }
+              }}
+              readOnly={(/^\[VIP_EMOJI:\/[^\]]+\]$/).test(text || '')}
+              maxLength={180}
+              placeholder={
+                (/^\[VIP_EMOJI:\/[^\]]+\]$/).test(text || '')
+                  ? (t('forum_more_emoji') || 'VIP emoji selected')
+                  : t('forum_composer_placeholder')
+              }
             />
-            <span
-              className="absolute -top-1 -right-1 hidden group-hover:inline-flex items-center justify-center
-                         text-[10px] leading-none px-1 rounded bg-black/70"
-            >✕</span>
-          </button>
-        ))}
-      </div>
-    )}
 
-    {/* скрытый input */}
-    <input
-      ref={fileRef}
-      type="file"
-      accept=".png,.jpg,.jpeg,.webp,.gif,image/png,image/jpeg,image/webp,image/gif"
-      multiple
-      style={{ display:'none' }}
-      onChange={onFilesChosen}
-    />
-                  </div>
-                    {emojiOpen && (
-                      <div className="emojiPanel">
-                        {/* VIP (верхний ряд эмодзи) */}
-<div className="p-1">
-  <div className="emojiTitle">{t?.('forum_emoji_vip') || 'VIP+ emoji'}</div>
-  <div className="emojiGrid">
-    {VIP_EMOJI.map((e) => (
-      <button
-        key={e}
-        type="button"
-        className="emojiBtn hoverPop"
-        onClick={() => {
-          if (vipActive) {
-            addEmoji(e);          // <— ВАЖНО: именно сюда прилетает путь '/vip/emoji/…'
-            setEmojiOpen(false);  // опционально закрывать панель после выбора
-          } else {
-            try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ required'); } catch {}
-            try { setVipOpen?.(true); } catch {}
-          }
-        }}
-        title={vipActive ? '' : (t?.('forum_vip_only') || 'VIP+ only')}
-      >
-        {/* превью: если это путь — <img>, иначе текст */}
-        {typeof e === 'string' && e.startsWith('/')
-          ? <img src={e} alt="" className="vipEmojiIcon" />
-          : <span className="vipEmojiIcon">{e}</span>}
+            {/* счётчик символов */}
+            <div className="charRow" aria-live="polite">
+              <span className="charNow">{String(text || '').trim().length}</span>
+              <span className="charSep">/</span>
+              <span className={(String(text || '').trim().length > 180) ? 'charMax charOver' : 'charMax'}>180</span>
+            </div>
 
-        {!vipActive && <span className="vipLock" aria-hidden>🔒</span>}
-      </button>
-    ))}
-  </div>
-</div>
+            {/* превью VIP-эмодзи */}
+            {(/^\[VIP_EMOJI:\/[^\]]+\]$/).test(text || '') && (
+              <div className="vipComposerPreview">
+                <img
+                  src={(text || '').replace(/^\[VIP_EMOJI:(.*?)\]$/, '$1')}
+                  alt=""
+                  className="vipEmojiBig"
+                  style={{ width: 'var(--vip-emoji-size,48px)', height: 'var(--vip-emoji-size,48px)' }}
+                />
+              </div>
+            )}
+          </div>
 
-                        {/* === /VIP эмодзи === */}
-                        <div style={{height:1,opacity:.1,background:'currentColor',margin:'6px 0'}} />
-                        {/* обычные категории ниже */}
-                        {EMOJI.map((cat) => (
-                          <div key={cat.k} className="mb-2">
-                            <div className="emojiTitle">{t(cat.title)}</div>
-                            <div className="emojiGrid">
-                              {cat.list.map((e) => (
-                                <button
-                                  key={e}
-                                  className="emojiBtn"
-                                  onClick={() => addEmoji(e)}
-                                >
-                                  {e}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2 flex-nowrap">
+              <button
+                className="btn shrink-0"
+                disabled={!canSend || String(text||'').trim().length > 180}
+                onClick={async ()=>{ try { await createPost() } finally { try { setEmojiOpen(false) } catch {} } }}  /* ← автозакрытие панели эмодзи */
+              >
+                {t('forum_send')}
+              </button>
+
+              <button
+                className="emojiOutline shrink-0"
+                title={t('forum_more_emoji')}
+                onClick={()=>setEmojiOpen(v=>!v)}
+              >
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.7"/>
+                  <circle cx="9" cy="10" r="1.2" fill="currentColor"/>
+                  <circle cx="15" cy="10" r="1.2" fill="currentColor"/>
+                  <path d="M8 14.5c1.2 1.2 2.8 1.8 4 1.8s2.8-.6 4-1.8" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
+                </svg>
+              </button>
+
+              {/* скрепка */}
+              <button
+                className="emojiOutline lockable shrink-0"
+                data-locked={!vipActive}
+                title={t('forum_attach') || 'Прикрепить'}
+                onClick={handleAttachClick}
+              >
+                <svg className="clipSvg" width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden>
+                  <path d="M7 13.5l6.5-6.5a3.5 3.5 0 115 5L10 20a6 6 0 11-8.5-8.5"
+                        stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                {!vipActive && <span className="lockBadge" aria-hidden>🔒</span>}
+              </button>
+
+              {/* превью вложений */}
+              {pendingImgs.length > 0 && (
+                <div className="inline-flex items-center gap-2 ml-2 overflow-x-auto" style={{ maxWidth: '50%' }}>
+                  {pendingImgs.map((u, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      className="relative group shrink-0"
+                      title={t?.('forum_remove_attachment') || 'Убрать вложение'}
+                      onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); setPendingImgs(prev => prev.filter((_,idx)=>idx!==i)); }}
+                    >
+                      <img src={u} alt="" loading="lazy" className="h-8 w-auto max-w-[96px] rounded-md ring-1 ring-white/10" />
+                      <span className="absolute -top-1 -right-1 hidden group-hover:inline-flex items-center justify-center text-[10px] leading-none px-1 rounded bg-black/70">✕</span>
+                    </button>
+                  ))}
                 </div>
-              </div>            
-          </section>
-        ) : (
-          <section className="glass neon p-6 meta flex items-center justify-center">{t('forum_hint_select_topic')}</section>
-        )}
-      </div>
-    </div>
-  )
+              )}
+
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".png,.jpg,.jpeg,.webp,.gif,image/png,image/jpeg,image/webp,image/gif"
+                multiple
+                style={{ display:'none' }}
+                onChange={onFilesChosen}
+              />
+            </div>
+
+            {emojiOpen && (
+              <div
+                className="emojiPanel"
+                style={{
+                  maxHeight: 150,      /* ↓ панель ниже */
+                  overflowY: 'auto',   /* скролл */
+                  overscrollBehavior: 'contain',
+                  paddingRight: 4,
+                  marginTop: 6,
+                }}
+              >
+                <div className="p-1">
+                  <div className="emojiTitle">{t?.('forum_emoji_vip') || 'VIP+ emoji'}</div>
+                  <div className="emojiGrid">
+                    {VIP_EMOJI.map((e) => (
+                      <button
+                        key={e}
+                        type="button"
+                        className="emojiBtn hoverPop"
+                        onClick={() => {
+                          if (vipActive) { addEmoji(e); setEmojiOpen(false); }
+                          else { try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ required'); } catch {}; try { setVipOpen?.(true); } catch {} }
+                        }}
+                        title={vipActive ? '' : (t?.('forum_vip_only') || 'VIP+ only')}
+                      >
+                        {typeof e === 'string' && e.startsWith('/') ? <img src={e} alt="" className="vipEmojiIcon" /> : <span className="vipEmojiIcon">{e}</span>}
+                        {!vipActive && <span className="vipLock" aria-hidden>🔒</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{height:1,opacity:.1,background:'currentColor',margin:'6px 0'}} />
+
+                {EMOJI.map((cat) => (
+                  <div key={cat.k} className="mb-2">
+                    <div className="emojiTitle">{t(cat.title)}</div>
+                    <div className="emojiGrid">
+                      {cat.list.map((e) => (
+                        <button key={e} className="emojiBtn" onClick={() => addEmoji(e)}>{e}</button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+    </section>
+  )}
+</div>
+</div>
+)
 };
 
 /* =========================================================
