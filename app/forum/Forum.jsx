@@ -1326,6 +1326,114 @@ const Styles = () => (
 
 /* карточки можно переиспользовать из левой/правой колонок без изменений */
 
+/* === MSG PANEL: адаптив под ширину контейнера (ПОД ЗАМЕНУ) === */
+
+/* 0) Контейнер форума — даём контекст и жесткий клип краёв */
+.forum_root{
+  position: relative;
+  container-type: inline-size;
+  container-name: forum;
+  max-width: 100%;
+  overflow: hidden; /* подрежет субпикс. выпирания */
+}
+
+/* 1) Любой «стеклянный» секшен форума — не шире контейнера */
+.forum_root section.glass{
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;         /* внутри уже управляем скроллами */
+}
+
+/* 2) Прокрутка только контента, не ломая ширину */
+.forum_root section.glass .body{
+  padding: 12px;
+  overflow: auto;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;             /* КРИТИЧНО для flex/grid детей */
+}
+
+/* 3) Карточки постов и сетки — не раздувают контейнер */
+.forum_root .grid,
+.forum_root .item{
+  min-width: 0;             /* позволяет сжиматься по ширине */
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 4) Текст поста и длинные URL никогда не раздувают ширину */
+.forum_root .postBody{
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* 5) Отступы дерева комментариев не ломают ширину на узких */
+@container forum (max-width: 520px){
+  [id^="post_"]{ margin-left: clamp(0px, 4vw, 12px) !important; }
+}
+
+/* 6) Изображения/галереи — 100% по ширине, auto по высоте */
+.forum_root .postImages{ display:grid; gap:8px; margin-top:8px; max-width:100%; }
+.forum_root .postImages .imgWrap{ margin:0; padding:6px; border-radius:10px; overflow:hidden; }
+.forum_root .postImages img{ display:block; max-width:100%; width:100%; height:auto; object-fit:contain; }
+
+/* 7) Нижняя полоса (счётчики/лайки) — всегда в строку или переносится,
+      но НИКОГДА не шире карточки */
+.forum_root .item .mt-3{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  min-width:0; max-width:100%;
+}
+
+/* 8) Композер: одна строка где можно, перенос при узости, ничего не выпирает */
+.forum_root .forumComposer{
+  display:flex; align-items:flex-end; gap:8px;
+  flex-wrap: wrap;           /* разрешаем перенос, чтобы не выталкивало */
+  min-width: 0; max-width: 100%;
+}
+.forum_root .forumComposer .ta{
+  flex: 1 1 260px;           /* тянется, но может ужаться */
+  min-width: 0;              /* ПОЗВОЛЯЕТ ужаться */
+  max-width: 100%;
+}
+.forum_root .charRow{
+  flex: 0 0 auto;
+}
+
+/* 9) Превью вложений в композере — в рамках строки, с горизонтальным скроллом */
+.forum_root .forumComposer .inline-flex,
+.forum_root .forumComposer .attachPreviewRow{
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  white-space: nowrap;
+}
+
+/* 10) Кнопки композера и иконки — не растягивают строку */
+.forum_root .emojiOutline,
+.forum_root .btn{ flex: 0 0 auto; }
+
+/* 11) Панель эмодзи — вписывается в блок, скролл внутри */
+.forum_root .emojiPanel{
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+/* 12) «шапка» секции (head) — может переносить элементы, не выталкивая ширину */
+.forum_root .head{
+  display:flex; gap:12px; align-items:center;
+  flex-wrap: wrap;
+  min-width: 0; max-width: 100%;
+}
+
+/* 13) На сверхузких — ещё компактнее поля у карточек и композера */
+@container forum (max-width: 380px){
+  .forum_root .item{ padding:10px; }
+  .forum_root .composer{ padding:.6rem; }
+  .forum_root .emojiBtn{ width:34px; height:34px; }
+}
 
   `}</style>
 )
