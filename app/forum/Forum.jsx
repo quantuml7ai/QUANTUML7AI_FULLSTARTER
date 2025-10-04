@@ -905,7 +905,7 @@ const Styles = () => (
 
     /* мини-поповеры */
     .adminPop, .profilePop{
-      position:absolute; width: min(42vw, 360px);
+      position:absolute; width: min(52vw, 360px);
       border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98);
       border-radius:12px; padding:10px; z-index:3200; box-shadow:0 10px 30px rgba(0,0,0,.45)
     }
