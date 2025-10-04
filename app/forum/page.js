@@ -70,7 +70,27 @@ const PageStyles = () => (
       animation: bm-roll 45s linear infinite;
     }
     @keyframes bm-roll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-  `}</style>
+ /* ——— Форум-карточка: вытянуть и не обрезать sticky-хедер ——— */
+.forum-card{
+  /* раньше было только padding; добавим: */
+  overflow: visible;                /* чтобы .head (position:sticky) не срезалась краями секции */
+}
+
+/* единый «высотный» класс для секции с форумом */
+.forum-fit{
+  /* делаем секцию заметно выше: почти экран */
+  min-height: clamp(640px, 88dvh, 1200px);
+  /* небольшой запас, чтобы на очень низких экранах не было переполнений */
+  padding-block: 12px;
+}
+
+/* на старых браузерах без dvh используем vh */
+@supports not (height: 1dvh){
+  .forum-fit{ min-height: clamp(640px, 88vh, 1200px); }
+}
+
+
+    `}</style>
 )
 
 /* -------------------- generic card -------------------- */
@@ -204,7 +224,7 @@ return (
 
       {/* 2) Forum */}
       <div className="page-wrap">
-        <section className="glass neon card forum-card">
+        <section className="glass neon card forum-card forum-fit">
           <Forum />
         </section>
       </div>

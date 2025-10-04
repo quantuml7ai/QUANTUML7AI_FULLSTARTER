@@ -1324,116 +1324,80 @@ const Styles = () => (
 .forumTopbar .left{ display:flex; gap:6px; align-items:center; }
 .forumTopbar .right{ display:flex; gap:6px; align-items:center; }
 
-/* карточки можно переиспользовать из левой/правой колонок без изменений */
-
-/* === MSG PANEL: адаптив под ширину контейнера (ПОД ЗАМЕНУ) === */
-
-/* 0) Контейнер форума — даём контекст и жесткий клип краёв */
-.forum_root{
-  position: relative;
-  container-type: inline-size;
-  container-name: forum;
-  max-width: 100%;
-  overflow: hidden; /* подрежет субпикс. выпирания */
-}
-
-/* 1) Любой «стеклянный» секшен форума — не шире контейнера */
-.forum_root section.glass{
+/* ——— Форум-контейнер и панели не выходят за ширину родителя ——— */
+.forum_root,
+.glass.neon {
   max-width: 100%;
   width: 100%;
   box-sizing: border-box;
-  overflow: hidden;         /* внутри уже управляем скроллами */
 }
 
-/* 2) Прокрутка только контента, не ломая ширину */
-.forum_root section.glass .body{
-  padding: 12px;
+/* Контент секции скроллится внутри, не расширяя панель */
+.glass.neon .body {
   overflow: auto;
-  max-width: 100%;
-  box-sizing: border-box;
-  min-width: 0;             /* КРИТИЧНО для flex/grid детей */
 }
 
-/* 3) Карточки постов и сетки — не раздувают контейнер */
-.forum_root .grid,
-.forum_root .item{
-  min-width: 0;             /* позволяет сжиматься по ширине */
+/* Карточки постов/тем никогда не раздувают ширину */
+.item,
+.item * {
   max-width: 100%;
   box-sizing: border-box;
+  min-width: 0;
 }
 
-/* 4) Текст поста и длинные URL никогда не раздувают ширину */
-.forum_root .postBody{
+/* Текст в посте переносится всегда — никакой горизонтальной прокрутки */
+.postBody {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
 
-/* 5) Отступы дерева комментариев не ломают ширину на узких */
-@container forum (max-width: 520px){
-  [id^="post_"]{ margin-left: clamp(0px, 4vw, 12px) !important; }
+/* Чуть компактнее карточки на телефонах, чтобы точно влезали */
+@media (max-width: 480px) {
+  .item { padding: 8px; }
+  .head { padding-inline: 10px; }
+  .glass.neon .body { padding-inline: 10px; }
 }
 
-/* 6) Изображения/галереи — 100% по ширине, auto по высоте */
-.forum_root .postImages{ display:grid; gap:8px; margin-top:8px; max-width:100%; }
-.forum_root .postImages .imgWrap{ margin:0; padding:6px; border-radius:10px; overflow:hidden; }
-.forum_root .postImages img{ display:block; max-width:100%; width:100%; height:auto; object-fit:contain; }
-
-/* 7) Нижняя полоса (счётчики/лайки) — всегда в строку или переносится,
-      но НИКОГДА не шире карточки */
-.forum_root .item .mt-3{
-  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
-  min-width:0; max-width:100%;
+/* Композер на мобильных — без «выпирания» */
+.composer { box-sizing: border-box; }
+.composer .ta { width: 100%; }
+/* карта форума — контейнер секции */
+.forumSection{
+  display:flex;
+  flex-direction:column;
+  /* вытянуть секцию чтобы внутри был свой скролл, а не у окна */
+  min-height: clamp(640px, 88dvh, 1200px);
+  overflow: visible;                 /* чтобы sticky-голова не обрезалась */
 }
 
-/* 8) Композер: одна строка где можно, перенос при узости, ничего не выпирает */
-.forum_root .forumComposer{
-  display:flex; align-items:flex-end; gap:8px;
-  flex-wrap: wrap;           /* разрешаем перенос, чтобы не выталкивало */
-  min-width: 0; max-width: 100%;
-}
-.forum_root .forumComposer .ta{
-  flex: 1 1 260px;           /* тянется, но может ужаться */
-  min-width: 0;              /* ПОЗВОЛЯЕТ ужаться */
-  max-width: 100%;
-}
-.forum_root .charRow{
-  flex: 0 0 auto;
+/* сам «карточный» фон не должен резать содержимое */
+.glass, .neon{ overflow: visible; }
+
+/* липкая шапка внутри секции — всегда поверх body */
+.forumSection .head{
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(10,14,22,.98);    /* сплошной фон, чтобы body не «перекрашивал» низ кнопок */
+  border-bottom: 1px solid rgba(255,255,255,.10);
+  /* если линия пересекает кнопки — чуть увеличим внутренний отступ */
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
-/* 9) Превью вложений в композере — в рамках строки, с горизонтальным скроллом */
-.forum_root .forumComposer .inline-flex,
-.forum_root .forumComposer .attachPreviewRow{
-  max-width: 100% !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  white-space: nowrap;
-}
-
-/* 10) Кнопки композера и иконки — не растягивают строку */
-.forum_root .emojiOutline,
-.forum_root .btn{ flex: 0 0 auto; }
-
-/* 11) Панель эмодзи — вписывается в блок, скролл внутри */
-.forum_root .emojiPanel{
-  max-width: 100%;
-  box-sizing: border-box;
+/* прокрутка только у тела, а не у всей секции */
+.forumSection .body{
+  flex: 1 1 auto;
+  min-height: 0;                     /* важно: разрешает flex-элементу сжиматься */
   overflow: auto;
 }
 
-/* 12) «шапка» секции (head) — может переносить элементы, не выталкивая ширину */
-.forum_root .head{
-  display:flex; gap:12px; align-items:center;
-  flex-wrap: wrap;
-  min-width: 0; max-width: 100%;
+/* на очень узких — делаем секцию ещё «выше», чтобы места хватало */
+@media (max-width: 420px){
+  .forumSection{ min-height: clamp(560px, 92dvh, 1200px); }
 }
 
-/* 13) На сверхузких — ещё компактнее поля у карточек и композера */
-@container forum (max-width: 380px){
-  .forum_root .item{ padding:10px; }
-  .forum_root .composer{ padding:.6rem; }
-  .forum_root .emojiBtn{ width:34px; height:34px; }
-}
 
   `}</style>
 )
@@ -3604,8 +3568,9 @@ const onFilesChosen = React.useCallback(async (e) => {
   {/* ОДНА КОЛОНКА: если тема не выбрана — список тем; если выбрана — посты темы */}
   {!sel ? (
     /* === СПИСОК ТЕМ === */
-    <section className="glass neon" style={{ display:'flex', flexDirection:'column', height:'calc(100vh - 215px)' }}>
-      <div className="head">
+    <section className="glass neon" style={{ display:'flex', flexDirection:'column', height:'calc(100dvh - 120px)', minHeight:'calc(100dvh - 120px)' }}>
+      <div className="body" style={{ overflow:'auto' }}>
+      
         {/* ЕДИНЫЙ РЯД КНОПОК ВНУТРИ БЛОКА */}
         <div className="flex items-center justify-between gap-2">
           <div className="left flex items-center gap-2">
@@ -3645,8 +3610,9 @@ const onFilesChosen = React.useCallback(async (e) => {
     </section>
   ) : (
     /* === ВЫБРАННАЯ ТЕМА: посты + композер === */
-    <section className="glass neon" style={{ display:'flex', flexDirection:'column', height:'calc(100vh - 215px)' }}>
-      <div className="head">
+    <section className="glass neon forumSection" style={{ display:'flex', flexDirection:'column', height:'calc(100dvh - 120px)', minHeight:'calc(100dvh - 120px)' }}>
+     
+      <div className="body" style={{ overflow:'auto' }}>
         {/* ЕДИНЫЙ РЯД КНОПОК ВНУТРИ БЛОКА (без «Создать тему») */}
         <div className="flex items-center justify-between gap-2">
           <div className="left flex items-center gap-2">
