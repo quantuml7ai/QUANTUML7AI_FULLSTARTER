@@ -29,7 +29,8 @@ export default function TopBar() {
   const items = [
     { href: '/',          label: t('nav_home') },
     { href: '/subscribe', label: t('nav_subscribe') },
-    { href: '/exchange',  label: t('nav_exchange') },    
+    { href: '/exchange',  label: t('nav_exchange') },
+    { href: "/forum",     label: t('forum_title') },
     { href: '/about',     label: t('nav_about') },
     { href: '/contact',   label: t('nav_contact') },
     { href: '/privacy',   label: t('nav_privacy') }, // Privacy & Policy
