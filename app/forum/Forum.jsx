@@ -905,7 +905,7 @@ const Styles = () => (
 
     /* мини-поповеры */
     .adminPop, .profilePop{
-      position:absolute; width: min(92vw, 360px);
+      position:absolute; width: min(62vw, 360px);
       border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98);
       border-radius:12px; padding:10px; z-index:3200; box-shadow:0 10px 30px rgba(0,0,0,.45)
     }
@@ -1114,43 +1114,36 @@ const Styles = () => (
   font-size: 12px;
   cursor: pointer;
 }
-/* === Q COIN (инлайн + модалка) === */
+/* === Q COIN (инлайн + модалка) — компакт и адаптив (ПОД ЗАМЕНУ) === */
 .qcoinRow{
-  display:inline-flex; align-items:center; gap:6px; margin-left:6px;
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  margin-left:10px;
+  flex-wrap:wrap;
+  min-width:0;
 }
 
-/* === Q COIN (инлайн + модалка) === */
-.qcoinRow{ display:inline-flex; align-items:center; gap:10px; margin-left:10px; }
-
-/* Золотая надпись с переливом и свечением */
+/* Золотая надпись */
 .qcoinLabel{
   font-size:1.5em; font-weight:900; letter-spacing:.4px;
-  background:
-    linear-gradient(135deg,
-      #7a5c00 0%,
-      #ffd700 18%,
-      #fff4b3 32%,
-      #ffd700 46%,
-      #ffea80 60%,
-      #b38400 74%,
-      #ffd700 88%,
-      #7a5c00 100%);
+  background:linear-gradient(135deg,#7a5c00 0%,#ffd700 18%,#fff4b3 32%,#ffd700 46%,#ffea80 60%,#b38400 74%,#ffd700 88%,#7a5c00 100%);
   background-size:200% 100%;
   -webkit-background-clip:text; background-clip:text; color:transparent;
   animation:qcoinShine 6s linear infinite, qcoinGlow 2.8s ease-in-out infinite;
   text-shadow:0 0 .3rem rgba(255,215,0,.35), 0 0 .1rem rgba(255,255,180,.35);
 }
-@keyframes qcoinShine{ 0%{background-position:0% 50%} 100%{background-position:200% 50%} }
+@keyframes qcoinShine{0%{background-position:0% 50%}100%{background-position:200% 50%}}
 @keyframes qcoinGlow{
-  0%{ text-shadow:0 0 .3rem rgba(255,215,0,.35), 0 0 .1rem rgba(255,255,180,.35) }
-  50%{ text-shadow:0 0 .9rem rgba(255,215,0,.55), 0 0 .25rem rgba(255,255,190,.55) }
-  100%{ text-shadow:0 0 .3rem rgba(255,215,0,.35), 0 0 .1rem rgba(255,255,180,.35) }
+  0%{text-shadow:0 0 .3rem rgba(255,215,0,.35), 0 0 .1rem rgba(255,255,180,.35)}
+  50%{text-shadow:0 0 .9rem rgba(255,215,0,.55), 0 0 .25rem rgba(255,255,190,.55)}
+  100%{text-shadow:0 0 .3rem rgba(255,215,0,.35), 0 0 .1rem rgba(255,255,180,.35)}
 }
 
-/* Само число — крупнее, с «стеклянной» подложкой */
+/* Число */
 .qcoinValue{
   font-size:1.2em;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   font-weight:800; padding:.24em .36em; border-radius:.36em;
   border:1px solid rgba(255,255,255,.14);
   background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
@@ -1158,24 +1151,102 @@ const Styles = () => (
 }
 .qcoinValue.live{ color:#ffd700 }
 .qcoinValue.paused{ color:#ff8c8c; animation:blinkPause .9s steps(1) infinite }
-@keyframes blinkPause{ 50%{ opacity:.45 } }
+@keyframes blinkPause{50%{opacity:.45}}
 
-/* модалка */
-.qcoinModal{
-  position:fixed; inset:0; z-index:3500; display:grid; place-items:center;
-  background:rgba(8,12,22,.8);
+/* Контейнер форума — ЖЁСТКАЯ рамка для модалки */
+.forum_root{
+  position:relative;
+  container-type:inline-size;
+  container-name:forum;
+  max-width:100%;
+  overflow:hidden;                 /* клипует тени/субпиксели у модалки */
 }
+
+/* Оверлей модалки — строго в пределах .forum_root */
+.qcoinModal{
+  position:absolute;               /* ограничиваемся форумом, а не окном */
+  inset:0;
+  z-index:3500;
+  display:grid;
+  place-items:center;
+  background:rgba(8,12,22,.8);
+  padding: max(4px, env(safe-area-inset-left, 0px));
+  box-sizing:border-box;
+  overflow:hidden;
+  contain: layout paint;           /* убирает визуальные «выпирания» */
+}
+
+/* Карточка модалки — ещё уже и заметно выше */
 .qcoinCard{
-  width:min(520px, 94vw); max-height:70vh; overflow:auto;
-  border:1px solid rgba(255,255,255,.14); border-radius:14px;
-  background:rgba(10,14,20,.96); padding:14px;
+  box-sizing:border-box;
+  width:100%;
+  max-width:100%;
+  margin:0 auto;
+  overflow:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+
+  /* текст/URL никогда не раздувают ширину */
+  overflow-wrap:anywhere;
+  word-break:break-word;
+  hyphens:auto;
+  line-height:1.5;
+
+  /* визуал */
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:14px;
+  background:rgba(10,14,20,.96);
+  padding:12px;                    /* чуть компактнее поля — больше полезной ширины */
   box-shadow:0 10px 30px rgba(0,0,0,.45);
 }
-.qcoinCardHdr{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px }
+
+/* точные размеры от ширины/высоты ФОРУМА (современные браузеры) */
+@supports (width: 1cqw) {
+  .qcoinCard{
+    /* ещё уже: было 480px → стало 440px; минус поля от контейнера форума */
+    max-width: min(440px, calc(100cqw - 12px));
+    /* ещё выше: было 94cqh → стало 96cqh */
+    max-height: min(96cqh, 96vh);
+  }
+}
+
+/* фолбэк для старых браузеров */
+@supports not (width: 1cqw) {
+  .qcoinCard{
+    max-width: min(440px, calc(100% - 12px), calc(100vw - 12px));
+    max-height: min(96vh, 100%);
+  }
+}
+
+/* медиа внутри не раздувают карточку */
+.qcoinCard img,
+.qcoinCard video,
+.qcoinCard iframe{
+  max-width:100%;
+  height:auto;
+  display:block;
+}
+
+/* Шапка — не тянет ширину, переносится при узости */
+.qcoinCardHdr{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+  min-width:0;
+  flex-wrap:wrap;
+}
+
+/* сверхузкие — ещё компактнее поля */
+@media (max-width:360px){
+  .qcoinModal{ padding:6px; }
+  .qcoinCard{ padding:10px; }
+}
 
 /* гиф/аватар — х3 размер */
 .qcoinMini{
-  width:  clamp(108px, 12.6vw, 144px);  /* было 36–48px → стало ~108–144px */
+  width:  clamp(108px, 12.6vw, 144px);
   height: clamp(108px, 12.6vw, 144px);
   border-radius:10px;
   object-fit:cover;
@@ -1183,6 +1254,7 @@ const Styles = () => (
   flex:0 0 auto;
 }
 
+/* тело поповера внутри модалки */
 .qcoinPopBody{ max-height:50vh; overflow:auto; }
 .qcoinCardHdr img, .qcoinPopBody img{ max-width:100%; height:auto }
 
@@ -1240,6 +1312,7 @@ const Styles = () => (
   .qcoinValue.paused{ animation:none }
   .qcoinExchangeBtn::before, .qcoinExchangeBtn::after{ animation:none }
 }
+
 .forumSingle { display: grid; gap: 16px; }
 .panel { background: rgba(10,14,22,.96); border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:12px; }
 .panelTitle { margin:0 0 8px; font-weight:600; opacity:.9; }
@@ -1252,37 +1325,7 @@ const Styles = () => (
 .forumTopbar .right{ display:flex; gap:6px; align-items:center; }
 
 /* карточки можно переиспользовать из левой/правой колонок без изменений */
-/* --- Форум: никогда не вылазим из карточки/экрана --- */
-.forum-card { overflow: hidden; }
 
-.forum_root { width:100%; max-width:100%; }
-.forum_root, .forum_root * { box-sizing: border-box; }
-
-/* сетка «одна колонка», колонка обрезает ширину детей корректно */
-.forum_root .grid2 {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr); /* вместо 1fr */
-  gap: 0.5rem;
-}
-
-/* любые «стеклянные» секции не раздувают контейнер */
-.forum_root .glass { max-width: 100%; overflow: hidden; }
-.forum_root .body  { overflow-x: hidden; }
-
-/* мультимедиа и превью всегда ужимаются */
-.forum_root img,
-.forum_root video,
-.forum_root iframe { max-width: 100%; height: auto; }
-
-/* карточки постов и их внутренности могут сжиматься */
-.forum_root .item,
-.forum_root .item * { min-width: 0; }
-
-/* текст: переносим очень длинные слова/URL */
-.forum_root .postBody {
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
 
   `}</style>
 )
@@ -3449,7 +3492,7 @@ const onFilesChosen = React.useCallback(async (e) => {
         </div>
       </section>
 
-<div className="grid2" style={{ gridTemplateColumns: 'minmax(0, 1fr)' }}>
+<div className="grid2" style={{ gridTemplateColumns: '1fr' }}>
   {/* ОДНА КОЛОНКА: если тема не выбрана — список тем; если выбрана — посты темы */}
   {!sel ? (
     /* === СПИСОК ТЕМ === */
