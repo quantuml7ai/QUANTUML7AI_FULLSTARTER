@@ -1275,6 +1275,231 @@ const Styles = () => (
 /* Липкий композер растягиваем по ширине контейнера-скролла */
 .forum_root .composer { left: 0; right: 0; width: auto; }
 
+/* === FIX: кнопки действий в карточках постов всегда в один ряд и сжимаются === */
+
+/* 1) Страхуем контейнеры карточек от обрезания контента */
+[id^="post_"],
+[id^="post_"] > div,
+.postCard {
+  min-width: 0;         /* позволяет flex-детям сжиматься */
+  overflow: visible;    /* исключает внутреннее «подрезание» */
+}
+
+/* 2) Ряд с кнопками действий поста: запрещаем перенос, даём сжатие */
+[id^="post_"] .actions,
+.postCard .actions,
+.post .actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;    /* никогда не переносить на вторую строку */
+  min-width: 0;
+  overflow: visible;
+  white-space: nowrap;  /* тексты на кнопках в одну строку */
+}
+
+/* 3) Сами кнопки: разрешаем сжиматься, уменьшаем паддинги и шрифт по мере сужения */
+[id^="post_"] .actions .btn,
+[id^="post_"] .actions .iconBtn,
+.postCard .actions .btn,
+.postCard .actions .iconBtn,
+.post .actions .btn,
+.post .actions .iconBtn {
+  flex: 0 1 auto;                    /* можно сжиматься */
+  min-width: 0;                      /* чтобы не держали ширину */
+  height: clamp(26px, 4.2vw, 32px);  /* ниже — уже неудобно нажимать */
+  padding-inline: clamp(6px, 1.4vw, 12px);
+  padding-block: 4px;
+  font-size: clamp(11px, 1.6vw, 14px);
+  line-height: 1;                    /* компактнее строка */
+}
+
+/* 4) Если в кнопке есть текстовый сын — пусть он ужимается с троеточием */
+[id^="post_"] .actions .btn > span,
+.postCard .actions .btn > span,
+.post .actions .btn > span {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 5) На сверхузких — чуть уменьшаем зазоры, но всё ещё в один ряд */
+@media (max-width: 360px) {
+  [id^="post_"] .actions,
+  .postCard .actions,
+  .post .actions {
+    gap: 6px;
+  }
+  [id^="post_"] .actions .btn,
+  [id^="post_"] .actions .iconBtn,
+  .postCard .actions .btn,
+  .postCard .actions .iconBtn,
+  .post .actions .btn,
+  .post .actions .iconBtn {
+    padding-inline: clamp(4px, 1.2vw, 10px);
+    font-size: clamp(10px, 1.4vw, 13px);
+    height: clamp(24px, 3.8vw, 30px);
+  }
+}
+/* === FIX: перенос длинных title/description в карточках тем === */
+
+/* страхуем контейнеры карточек тем от «расталкивания» соседей */
+[id^="topic_"],
+.topicCard {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden; /* не даём горизонтальный скролл из-за длинных слов */
+}
+
+/* заголовок темы */
+[id^="topic_"] .title,
+.topicCard .title,
+[id^="topic_"] h2,
+.topicCard h2,
+[id^="topic_"] h3,
+.topicCard h3 {
+  white-space: normal !important;   /* разрешаем перенос строк */
+  overflow-wrap: anywhere;          /* переносим даже «слитки» символов */
+  word-break: break-word;           /* классический перенос длинных слов */
+  hyphens: auto;                    /* расставляем мягкие переносы там, где можно */
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* описание темы (подзаголовок/превью) */
+[id^="topic_"] .desc,
+.topicCard .desc,
+[id^="topic_"] .subtitle,
+.topicCard .subtitle,
+[id^="topic_"] p.topic-desc,
+.topicCard p.topic-desc {
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* если внутри попадаются длинные URL — не ломаем раскладку, но переносим */
+[id^="topic_"] .title a,
+[id^="topic_"] .desc  a,
+.topicCard .title a,
+.topicCard .desc  a {
+  word-break: break-all;    /* адрес можно рубить в любом месте */
+  overflow-wrap: anywhere;
+  text-decoration: inherit;
+}
+
+/* на сверхузких — слегка уменьшаем межстрочные/отступы, чтобы текст «умещался красиво» */
+@media (max-width: 360px) {
+  [id^="topic_"] .title,
+  .topicCard .title { line-height: 1.15; }
+  [id^="topic_"] .desc,
+  .topicCard .desc  { line-height: 1.2; }
+}
+/* === HARD FIX: темы не вылезают, любые длинные строки переносятся === */
+
+/* 0) Страхуем карточку темы и всех её детей: можно сжиматься, нельзя распихивать */
+[id^="topic_"],
+.topicCard {
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow-x: hidden !important;
+}
+[id^="topic_"] * ,
+.topicCard * {
+  min-width: 0 !important;            /* ключ к нормальному сжатию во flex/grid */
+}
+
+/* 1) Сам заголовок темы — ломаем даже «оооооооо» и длинные URL/слитки */
+[id^="topic_"] .title,
+.topicCard .title,
+[id^="topic_"] h1, [id^="topic_"] h2, [id^="topic_"] h3,
+.topicCard h1, .topicCard h2, .topicCard h3 {
+  display: block;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;  /* главный герой */
+  word-break: break-word !important;   /* классика */
+  line-break: anywhere !important;     /* для очень длинных слитков */
+  hyphens: auto;
+  max-width: 100%;
+}
+
+/* Текстовые узлы внутри заголовка (span/a/strong и т.п.) — тоже ломаем */
+[id^="topic_"] .title *, .topicCard .title * {
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  line-break: anywhere !important;
+}
+
+/* 2) Описание темы — те же правила */
+[id^="topic_"] .desc,
+.topicCard .desc,
+[id^="topic_"] .subtitle,
+.topicCard .subtitle,
+[id^="topic_"] p.topic-desc,
+.topicCard p.topic-desc {
+  display: block;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  line-break: anywhere !important;
+  hyphens: auto;
+  max-width: 100%;
+}
+
+/* Любые ссылки внутри title/desc — позволяем рубить в любом месте */
+[id^="topic_"] .title a,
+[id^="topic_"] .desc a,
+.topicCard .title a,
+.topicCard .desc a {
+  word-break: break-all !important;
+  overflow-wrap: anywhere !important;
+}
+
+/* 3) Если шапка карточки — flex/grid: контентная колонка должна иметь min-width:0 */
+[id^="topic_"] .header,
+.topicCard .header,
+[id^="topic_"] .content,
+.topicCard .content {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden;                   /* на всякий, чтобы не появлялся горизонтальный скролл */
+}
+
+/* 4) Бейджи/аватар не тянут ширину: не растягиваются и не ломают строку */
+[id^="topic_"] .avatar,
+.topicCard .avatar,
+[id^="topic_"] .badge,
+.topicCard .badge {
+  flex: 0 0 auto;
+}
+
+/* 5) На сверхузких — уменьшаем межстрочные, чтобы визуально аккуратно умещалось */
+@media (max-width: 360px) {
+  [id^="topic_"] .title,
+  .topicCard .title { line-height: 1.15; }
+  [id^="topic_"] .desc,
+  .topicCard .desc  { line-height: 1.2; }
+}
+/* === FORCE WRAP for topic title/desc (перекрываем старые правила) === */
+.topicTitle, .topicTitle * {
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  line-break: anywhere !important;
+  max-width: 100% !important;
+}
+.topicDesc, .topicDesc * {
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  line-break: anywhere !important;
+  max-width: 100% !important;
+}
 
   `}</style>
 )
@@ -1779,36 +2004,81 @@ function ReactionStrip({ post, onReact }) {
 }
 
 
-function TopicItem({ t, agg, onOpen, isAdmin, onDelete }){
-  const { posts, likes, dislikes, views } = agg || {}
+function TopicItem({ t, agg, onOpen, isAdmin, onDelete }) {
+  const { posts, likes, dislikes, views } = agg || {};
   return (
-    <div className="item cursor-pointer" onClick={()=>onOpen?.(t)}>
+    <div className="item cursor-pointer" onClick={() => onOpen?.(t)}>
       <div className="flex items-start justify-between gap-3">
+        {/* ВАЖНО: min-w-0 на колонке с текстом, чтобы flex разрешал сжатие */}
         <div className="min-w-0">
-          <div className="title text-[#eaf4ff] truncate">{t.title}</div>
-          {t.description && <div className="text-[#eaf4ff]/75 text-sm truncate">{t.description}</div>}
+          {/* TITLE — уходим от класса .title и жёстко ломаем любые «слитки» */}
+          <div
+            className="
+              topicTitle text-[#eaf4ff]
+              !whitespace-normal break-words break-all
+              [overflow-wrap:anywhere] [line-break:anywhere]
+              max-w-full
+            "
+          >
+            {t.title}
+          </div>
+
+          {/* DESCRIPTION */}
+          {t.description && (
+            <div
+              className="
+                topicDesc text-[#eaf4ff]/75 text-sm
+                !whitespace-normal break-words break-all
+                [overflow-wrap:anywhere] [line-break:anywhere]
+                max-w-full
+              "
+            >
+              {t.description}
+            </div>
+          )}
+
           <div className="meta">{human(t.ts)}</div>
-          {(t.nickname||t.icon) && (
+
+          {(t.nickname || t.icon) && (
             <div className="flex items-center gap-2 mt-1">
-              <div className="avaMini"><AvatarEmoji userId={t.userId||t.accountId} pIcon={t.icon} /></div>
-              {/* красивый ник под общий стиль */}
+              <div className="avaMini">
+                <AvatarEmoji userId={t.userId || t.accountId} pIcon={t.icon} />
+              </div>
+              {/* Ник можно оставить с truncate */}
               <span className="nick-badge nick-animate">
-                <span className="nick-text truncate">{t.nickname||shortId(t.userId||t.accountId||'')}</span>
+                <span className="nick-text truncate">
+                  {t.nickname || shortId(t.userId || t.accountId || '')}
+                </span>
               </span>
             </div>
           )}
         </div>
+
+        {/* Правая колонка — не даём ей тянуть ширину */}
         <div className="flex items-center gap-2 shrink-0">
-          <span className="tag">👁 {views||0}</span>
-          <span className="tag">💬 {posts||0}</span>
-          <span className="tag">👍 {likes||0}</span>
-          <span className="tag">👎 {dislikes||0}</span>
-          {isAdmin && <button className="tag" onClick={(e)=>{e.preventDefault();e.stopPropagation();onDelete?.(t)}}>🗑</button>}
+          <span className="tag">👁 {views || 0}</span>
+          <span className="tag">💬 {posts || 0}</span>
+          <span className="tag">👍 {likes || 0}</span>
+          <span className="tag">👎 {dislikes || 0}</span>
+          {isAdmin && (
+            <button
+              className="tag"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onDelete?.(t);
+              }}
+            >
+              🗑
+            </button>
+          )}
         </div>
       </div>
     </div>
-  )
+  );
 }
+
+
 
 function PostCard({
   p,
@@ -2511,19 +2781,19 @@ es.onmessage = (e) => {
     ]);
 
     if (needRefresh.has(evt.type)) {
-      // 1) Мгновенно прогреваем снапшот, чтобы refresh не «обогнал» запись
-      // evt.rev будет, если ты добавил его в publishForumEvent; иначе просто bust
+      // 1) Сразу прогреваем снапшот с обходом микрокэша,
+      //    чтобы новый счётчик просмотров был в данных
       Promise.resolve().then(async () => {
         try {
-          const hintRev = Number.isFinite(Number(evt?.rev)) ? Number(evt.rev) : undefined;
-          await api.snapshot({ b: Date.now(), rev: hintRev });
+          await api.snapshot({ b: Date.now() }); // <- ключ: b=now обходит TTL=2s
         } catch {}
-        // 2) После прогрева — мягкий дебаунс-рефреш
+        // 2) После прогрева — мягкий дебаунс-рефреш UI
         scheduleRefresh(evt.type);
       });
     }
   } catch {}
 };
+
 
 let fallbackTimer = null;
 es.onerror = () => {
