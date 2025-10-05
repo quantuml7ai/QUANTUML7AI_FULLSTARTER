@@ -812,7 +812,7 @@ const Styles = () => (
     }
 
     /* компактный вариант для action-кнопок на карточке */
-    .btnSm { padding: 2px 8px; font-size: 12px; line-height: 1; }
+    .btnSm { padding: 6px 8px; font-size: 12px; line-height: 1; }
 
 /* --- header: ... --- */
 .head{
@@ -2303,8 +2303,8 @@ function PostCard({
           {/* мини-аватар */}
           <div className="avaMini">
             <AvatarEmoji
-  userId={p.userId}
-  pIcon={resolveIconForDisplay(p.userId, p.icon)}
+  userId={p.userId || p.accountId}
+  pIcon={resolveIconForDisplay(p.userId || p.accountId, p.icon)}
 />
 
           </div>
@@ -2312,7 +2312,7 @@ function PostCard({
             <div className="flex items-center gap-2">
               {/* НИК — красивый бейдж (для всех одинаково) */}
               <span className="nick-badge nick-animate">
-                <span className="nick-text truncate">{p.nickname || shortId(p.userId || '')}</span>
+                <span className="nick-text truncate">{p.nickname || shortId(p.userId || p.accountId || '')}</span>
               </span>
               {p.parentId && (
                 <span className="tag" aria-label={t?.('forum_reply_to') || 'Ответ для'}>
@@ -2369,7 +2369,7 @@ function PostCard({
   style={{
     display: 'flex',
     alignItems: 'center',
-    gap: 6,
+    gap: 20,
     flexWrap: 'nowrap',                // ← запрещаем перенос flex-элементов
     overflowX: 'auto',              // косметика для inline-частей
     overflowY: 'hidden', 
