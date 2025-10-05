@@ -19,9 +19,7 @@ function emitDeleted(pId, tId) {
    helpers
 ========================================================= */
 
-// ---- отображение имени/аватарки ----
-const displayName = (p) => (p?.nickname && String(p.nickname).trim()) || shortId(p?.userId || '');
-const displayIcon  = (p) => (p?.icon && String(p.icon).trim()) || '👤';
+// ---- отображение имени/аватарки ---- 
 const isBrowser = () => typeof window !== 'undefined'
 const cls = (...xs) => xs.filter(Boolean).join(' ')
 const shortId = id => id ? `${String(id).slice(0,6)}…${String(id).slice(-4)}` : '—'
@@ -116,6 +114,35 @@ async function openAuth({ timeoutMs = 15000 } = {}) {
     const timer = setTimeout(() => cancel(), timeoutMs);
   });
 }
+function BackToTopButton() {
+  const [show, setShow] = React.useState(false);
+
+  React.useEffect(() => {
+    const scroller = document.querySelector('.forum_root .body');
+    if (!scroller) return;
+    const onScroll = () => setShow(scroller.scrollTop > 600);
+    scroller.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => scroller.removeEventListener('scroll', onScroll);
+  }, []);
+
+  if (!show) return null;
+
+  return (
+    <button
+      type="button"
+      className="backToTop"
+      onClick={() => {
+        const scroller = document.querySelector('.forum_root .body');
+        if (scroller) scroller.scrollTo({ top: 0, behavior: 'smooth' });
+      }}
+      aria-label="Back to top"
+      title="Наверх"
+    >
+      ↑
+    </button>
+  );
+}
 
 
 function ensureClientId(){
@@ -130,6 +157,12 @@ function safeReadProfile(userId) {
   if (typeof window === 'undefined' || !userId) return {};
   try { return JSON.parse(localStorage.getItem('profile:' + userId) || '{}'); }
   catch { return {}; }
+}
+// [VIP AVATAR FIX] выбираем, что показывать на карточках
+function resolveIconForDisplay(userId, pIcon) {
+  const prof = safeReadProfile(userId) || {};
+  // приоритет: vipIcon (URL) → vipEmoji (эмодзи) → то, что пришло с сервера
+  return prof.vipIcon || prof.vipEmoji || pIcon || '👤';
 }
 
 /**
@@ -413,7 +446,38 @@ async adminDeleteTopic(id) {
     }
   },
 };
+function initForumAutosnapshot({ intervalMs = 60000, debounceMs = 1000 } = {}) {
+  if (!isBrowser()) return () => {};
 
+  let last = 0;
+  const doSnap = () => {
+    const now = Date.now();
+    if (now - last < debounceMs) return;       // простая защита от «дребезга»
+    last = now;
+    // bust: гарантируем полный снимок, даже если сервер кеширует
+    api.snapshot({ b: Date.now() }).catch(() => {});
+  };
+
+  // Любое взаимодействие пользователя — триггерим снапшот (дёшево и сердито)
+  const handler = () => doSnap();
+  const evts = [
+    'pointerdown','pointerup','click','keydown','wheel','scroll',
+    'touchstart','visibilitychange','focus'
+  ];
+
+  evts.forEach((e) => window.addEventListener(e, handler, { passive: true }));
+
+  // Параллельно — периодический «heartbeat», если надо
+  const id = intervalMs ? setInterval(() => {
+    api.snapshot().catch(() => {});
+  }, intervalMs) : null;
+
+  // снятие слушателей при размонтировании
+  return () => {
+    evts.forEach((e) => window.removeEventListener(e, handler));
+    if (id) clearInterval(id);
+  };
+}
 
 /* =========================================================
    КОНЕЦ API
@@ -442,21 +506,7 @@ function resolveForumUserId(explicit){
   // 3) крайний вариант — пусто
   return '';
 }
-
-function onAuthEvents(cb){
-  if (typeof window==='undefined') return ()=>{};
-  const h = ()=> cb();
-  window.addEventListener('auth:ok', h);
-  window.addEventListener('auth:success', h);
-  window.addEventListener('auth:fail', h);
-  window.addEventListener('auth:cancel', h);
-  return ()=> {
-    window.removeEventListener('auth:ok', h);
-    window.removeEventListener('auth:success', h);
-    window.removeEventListener('auth:fail', h);
-    window.removeEventListener('auth:cancel', h);
-  };
-}
+ 
 
 // === Q COIN: client-side live ticker with rare sync (AUTH-ONLY) ===
 function useQCoinLive(userKey){
@@ -1356,6 +1406,21 @@ const Styles = () => (
   overflow: visible;
   white-space: nowrap;  /* тексты на кнопках в одну строку */
 }
+/* [ACTIONS-SHRINK-EXTRA] ещё сильнее разрешаем сжатие на сверхузких */
+.post .actions .btn,
+.post .actions .iconBtn {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+.post .actions .btn > span { 
+  display: inline-block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 /* 3) Сами кнопки: разрешаем сжиматься, уменьшаем паддинги и шрифт по мере сужения */
 [id^="post_"] .actions .btn,
@@ -1587,6 +1652,35 @@ const Styles = () => (
   word-break: break-word !important;
   line-break: anywhere !important;
   min-width: 0;
+}
+/* [STICKY-HEADER] верхний блок всегда прилипает к верху окна прокрутки форума */
+.forum_root .head {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--glass, rgba(8,13,20,.94));
+  backdrop-filter: saturate(140%) blur(8px);
+  -webkit-backdrop-filter: saturate(140%) blur(8px);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+/* [BACK-TO-TOP] плавающая кнопка наверх (над композером) */
+.backToTop{
+  position: fixed;
+  right: clamp(12px, 3vw, 20px);
+  bottom: clamp(110px, 12vh, 140px);
+  z-index: 40;
+  padding: .55rem .7rem;
+  font-size: 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(20,26,36,.8);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transition: transform .2s ease, opacity .2s ease;
+}
+.backToTop:hover{ transform: translateY(-1px); }
+@media (max-width: 480px){
+  .backToTop{ bottom: clamp(84px, 16dvh, 120px); }
 }
 
 
@@ -2063,36 +2157,7 @@ function ProfilePopover({ anchorRef, open, onClose, t, auth, vipActive, onSaved 
 /* =========================================================
    UI: посты/темы
 ========================================================= */
-/* === REACTION STRIP — ПОД ПОЛНУЮ ЗАМЕНУ === */
-function ReactionStrip({ post, onReact }) {
-  const likes    = Number(post?.likes ?? 0);
-  const dislikes = Number(post?.dislikes ?? 0);
-  const mine     = post?.myReaction || null;
-
-  return (
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
-        className={cls('btn btnGhost btnSm', mine==='like' && 'tagOk')}
-        title="👍"
-        onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); onReact?.('like'); }}
-      >
-        👍 {likes}
-      </button>
-
-      <button
-        type="button"
-        className={cls('btn btnGhost btnSm', mine==='dislike' && 'tagDanger')}
-        title="👎"
-        onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); onReact?.('dislike'); }}
-      >
-        👎 {dislikes}
-      </button>
-    </div>
-  );
-}
-
-
+ 
 function TopicItem({ t, agg, onOpen, isAdmin, onDelete }) {
   const { posts, likes, dislikes, views } = agg || {};
   return (
@@ -2131,7 +2196,11 @@ function TopicItem({ t, agg, onOpen, isAdmin, onDelete }) {
           {(t.nickname || t.icon) && (
             <div className="flex items-center gap-2 mt-1">
               <div className="avaMini">
-                <AvatarEmoji userId={t.userId || t.accountId} pIcon={t.icon} />
+                <AvatarEmoji
+  userId={t.userId || t.accountId}
+  pIcon={resolveIconForDisplay(t.userId || t.accountId, t.icon)}
+/>
+
               </div>
               {/* Ник можно оставить с truncate */}
               <span className="nick-badge nick-animate">
@@ -2172,8 +2241,7 @@ function TopicItem({ t, agg, onOpen, isAdmin, onDelete }) {
 function PostCard({
   p,
   parentAuthor,
-  onReport,
-  onReply,
+  onReport, 
   onOpenThread,
   onReact,
   isAdmin,
@@ -2234,7 +2302,11 @@ function PostCard({
         <div className="flex items-center gap-3 min-w-0">
           {/* мини-аватар */}
           <div className="avaMini">
-            <AvatarEmoji userId={p.userId} pIcon={p.icon} />
+            <AvatarEmoji
+  userId={p.userId}
+  pIcon={resolveIconForDisplay(p.userId, p.icon)}
+/>
+
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
@@ -2297,10 +2369,11 @@ function PostCard({
   style={{
     display: 'flex',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
     flexWrap: 'nowrap',                // ← запрещаем перенос flex-элементов
-    whiteSpace: 'nowrap',              // косметика для inline-частей
-    overflow: 'hidden',                // ничего не выпадает
+    overflowX: 'auto',              // косметика для inline-частей
+    overflowY: 'hidden', 
+    WebkitOverflowScrolling: 'touch',               // ничего не выпадает
     fontSize: 'clamp(9px, 1.1vw, 13px)'// ← сильнее сжимаем на узких экранах
   }}
 >
@@ -2393,6 +2466,13 @@ export default function Forum(){
     const id=setInterval(upd,3000)
     return ()=>{ window.removeEventListener('auth:ok',upd); window.removeEventListener('auth:success',upd); clearInterval(id) }
   },[])
+    useEffect(() => {
+    const stop = initForumAutosnapshot({
+      intervalMs: 60000,   // ⬅️ можно 30000 (30 сек) если хочешь чаще
+      debounceMs: 2000     // ⬅️ чтобы не спамить при частом скролле
+    });
+    return stop; // снимем слушатели при размонтировании
+  }, []);
 const requireAuthStrict = async () => {
   const cur = readAuth();
   if (cur?.asherId || cur?.accountId) { setAuth(cur); return cur; }
@@ -2541,6 +2621,28 @@ React.useEffect(()=>{
   const id = setInterval(()=>{ if (visibleRef.current) activeRef.current = true }, 20000);
   return ()=> clearInterval(id);
 },[]);
+// [PERIODIC-PULL] — периодический пул даже при открытом SSE
+React.useEffect(() => {
+  const id = setInterval(() => {
+    try { schedulePull?.(120, false); } catch {}
+  }, 2 * 60 * 1000);  // каждые 2 минуты
+  return () => clearInterval(id);
+}, []);
+// [TOUCH-PULL] — любой пользовательский жест внутри форума
+React.useEffect(() => {
+  const root = document.querySelector('.forum_root') || document.body;
+  if (!root) return;
+  const kick = () => { try { schedulePull?.(80, false); } catch {} };
+
+  ['pointerdown','wheel','touchstart','keydown'].forEach(evt =>
+    root.addEventListener(evt, kick, { passive: true })
+  );
+  return () => {
+    ['pointerdown','wheel','touchstart','keydown'].forEach(evt =>
+      root.removeEventListener(evt, kick)
+    );
+  };
+}, []);
  
   // >>>>>>>>> Единственное изменение логики: усиленные антидубликаты
   function dedupeAll(prev){
@@ -4042,6 +4144,7 @@ onClick={()=>{
                 ? `${t('forum_replying_to')||'Ответ к'} ${shortId(threadRoot.userId||'')}`
                 : t('forum_composer_hint')}
           </div>
+          <BackToTopButton />
 
           <div className="flex items-end gap-2 forumComposer">
             <textarea
