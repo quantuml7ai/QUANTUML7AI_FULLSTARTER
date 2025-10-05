@@ -1,15 +1,17 @@
 // app/api/forum/mutate/route.js
 import { json, bad, requireUserId } from '../_utils.js'
-import {
-  createTopic,
-  createPost,
-  incrementTopicViews,
-  incrementPostViews,
-  reactPost,
-  // для счётчиков и ключей
-  redis as redisDirect,
-  K,
-} from '../_db.js'
+ import {
+   createTopic,
+   createPost,
+   incrementTopicViews,
+   incrementPostViews,
+   // reactPost, // больше не нужен
+   nextRev,
+   pushChange,
+   // для счётчиков и ключей
+   redis as redisDirect,
+   K,
+ } from './_db.js'
 import { Redis } from '@upstash/redis'
 // ДОПОЛНИ импортами в mutate/route.js
 import { bus } from '../_bus.js'
@@ -102,7 +104,7 @@ export async function POST(request) {
           await publishForumEvent({
             type: 'topic_created',
             topicId: topic?.id,
-            title: topic?.title ?? '',
+            title: topic?.title ?? '', rev
           })
 
         } else if (op.type === 'create_post') {
@@ -124,7 +126,7 @@ export async function POST(request) {
             topicId,
             postId: post?.id,
             parentId: parentId || null,
-            hasImages,
+            hasImages, rev,
           })
 
         } else if (op.type === 'view_topic') {
@@ -195,17 +197,10 @@ export async function POST(request) {
           } catch {}
 
           // сохраняем совместимый формат ответа (delta и rev оставляем как раньше)
-          const maybeWithUser = null
-          results.push({ op: 'react', postId, kind, delta, rev: maybeWithUser?.rev, likes, dislikes })
-
-          await publishForumEvent({
-            type: 'react',
-            postId,
-            kind,
-            delta,
-            likes,
-            dislikes,
-          })
+          const rev = await nextRev()
+           await pushChange({ rev, kind: 'react', id: String(postId), data: { kind, delta, likes, dislikes }, ts: Date.now() })
+          results.push({ op: 'react', postId, kind, delta, rev, likes, dislikes })
+          await publishForumEvent({ type: 'react', postId, kind, delta, likes, dislikes, rev })
 
         } else {
           results.push({ op: op.type, error: 'noop' })

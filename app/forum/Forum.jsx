@@ -2496,43 +2496,53 @@ React.useEffect(() => {
     }, delay);
   };
 
-  es.onmessage = (e) => {
-    if (!e?.data) return;
-    if (e.data.startsWith(':')) return; // heartbeat
-    try {
-      const evt = JSON.parse(e.data);
-      if (!evt?.type) return;
+es.onmessage = (e) => {
+  if (!e?.data) return;
+  if (e.data.startsWith(':')) return; // heartbeat
+  try {
+    const evt = JSON.parse(e.data);
+    if (!evt?.type) return;
 
-      const needRefresh = new Set([
-        'topic_created','topic_deleted',
-        'post_created','post_deleted',
-        'react','view_post','view_topic',
-        'ban','unban'
-      ]);
+    const needRefresh = new Set([
+      'topic_created','topic_deleted',
+      'post_created','post_deleted',
+      'react','view_post','view_topic',
+      'ban','unban'
+    ]);
 
-      if (needRefresh.has(evt.type)) {
+    if (needRefresh.has(evt.type)) {
+      // 1) Мгновенно прогреваем снапшот, чтобы refresh не «обогнал» запись
+      // evt.rev будет, если ты добавил его в publishForumEvent; иначе просто bust
+      Promise.resolve().then(async () => {
+        try {
+          const hintRev = Number.isFinite(Number(evt?.rev)) ? Number(evt.rev) : undefined;
+          await api.snapshot({ b: Date.now(), rev: hintRev });
+        } catch {}
+        // 2) После прогрева — мягкий дебаунс-рефреш
         scheduleRefresh(evt.type);
-      }
-    } catch {}
-  };
-
-  let fallbackTimer = null;
-  es.onerror = () => {
-    // если SSE сломался — раз в 60с подтягиваем
-    if (!fallbackTimer) {
-      fallbackTimer = setInterval(() => { refresh?.() }, 60000);
+      });
     }
-  };
-  es.onopen = () => {
-    // как только SSE поднялся — вырубаем fallback
-    if (fallbackTimer) { clearInterval(fallbackTimer); fallbackTimer = null }
-  };
+  } catch {}
+};
 
-  return () => {
-    try { es.close(); } catch {}
-    if (window.__forumSSE === es) window.__forumSSE = null;
-    clearTimeout(debTimer);
-  };
+let fallbackTimer = null;
+es.onerror = () => {
+  // если SSE сломался — раз в 60с подтягиваем
+  if (!fallbackTimer) {
+    fallbackTimer = setInterval(() => { refresh?.(); }, 60000);
+  }
+};
+es.onopen = () => {
+  // как только SSE поднялся — вырубаем fallback
+  if (fallbackTimer) { clearInterval(fallbackTimer); fallbackTimer = null; }
+};
+
+return () => {
+  try { es.close(); } catch {}
+  if (window.__forumSSE === es) window.__forumSSE = null;
+  if (fallbackTimer) { clearInterval(fallbackTimer); fallbackTimer = null; }
+  clearTimeout(debTimer);
+};
 }, [refresh]);
 
 
@@ -3077,14 +3087,30 @@ const reactMut = useCallback(async (post, kind) => {
     return { ...prev, posts };
   });
 
-  // --- батч на сервер ---
+// --- батч на сервер ---
+try {
+  const r = await api.mutate({ ops }, uid);
+
+  // Барьер по rev: берём последний rev из применённых операций
+  const lastRev = Number(
+    (r?.applied || [])
+      .map(x => x?.rev)
+      .filter(v => Number.isFinite(v))
+      .pop() || 0
+  );
+
+  // Мгновенно прогреваем снапшот с обходом микрокэша:
+  // передаём уникальный bust (b=Date.now()) и hint по ревизии
   try {
-    const r = await api.mutate({ ops }, uid);
-    // если хочешь мгновенно дотянуть серверные значения — дерни твой рефреш/снапшот:
-    if (r && r.applied && typeof refresh === 'function') if (typeof refresh === 'function') await refresh();
-  } catch (e) {
-    console.warn('react mutate failed', e);
-  }
+    await api.snapshot({ b: Date.now(), rev: lastRev || undefined });
+  } catch {}
+
+  // После прогрева снапшота — мягкий UI-рефреш
+  if (typeof refresh === 'function') await refresh();
+} catch (e) {
+  console.warn('react mutate failed', e);
+}
+
 }, [auth, persist]);
 
 
