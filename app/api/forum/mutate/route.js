@@ -11,7 +11,7 @@ import { json, bad, requireUserId } from '../_utils.js'
    // для счётчиков и ключей
    redis as redisDirect,
    K,
- } from './_db.js'
+ } from '../_db.js'
 import { Redis } from '@upstash/redis'
 // ДОПОЛНИ импортами в mutate/route.js
 import { bus } from '../_bus.js'
