@@ -3069,6 +3069,8 @@ const safeMerge = (prev, r) => {
 
 // локальный shim: принудительное обновление страницы/данных
 const router = useRouter();
+const sseAliveRef = useRef(false)
+const didManualKickRef = useRef(false)
 const refresh = React.useCallback(() => {
   try { router.refresh?.(); } catch {}
 }, [router]);
@@ -3122,6 +3124,7 @@ React.useEffect(() => {
   };
 
 es.onmessage = (e) => {
+  sseAliveRef.current = true
   if (!e?.data) return;
   if (e.data.startsWith(':')) return; // heartbeat
   try {
@@ -3151,12 +3154,8 @@ es.onmessage = (e) => {
 
 
 let fallbackTimer = null;
-es.onerror = () => {
-  // если SSE сломался — раз в 60с подтягиваем
-  if (!fallbackTimer) {
-    fallbackTimer = setInterval(() => { refresh?.(); }, 60000);
-  }
-};
+es.onerror = () => { /* оставляем молча; fallback подтянет снапшот */ }
+
 es.onopen = () => {
   // как только SSE поднялся — вырубаем fallback
   if (fallbackTimer) { clearInterval(fallbackTimer); fallbackTimer = null; }
@@ -3170,7 +3169,24 @@ return () => {
 };
 }, [refresh]);
 
-
+  // Fallback: если SSE молчит — на первый gesture принудительно тянем снапшот
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    function kickOnce() {
+      if (didManualKickRef.current || sseAliveRef.current) return
+      didManualKickRef.current = true
+      // принудительно подтягиваем свежий снапшот и обновляем
+      fetch('/api/forum/snapshot?kick=1', { cache: 'no-store' })
+        .catch(() => null)
+        .finally(() => router.refresh())
+    }
+    window.addEventListener('pointerdown', kickOnce, { once: true, capture: true })
+    window.addEventListener('keydown',     kickOnce, { once: true, capture: true })
+    return () => {
+      try { window.removeEventListener('pointerdown', kickOnce, { capture: true }) } catch {}
+      try { window.removeEventListener('keydown',     kickOnce, { capture: true }) } catch {}
+    }
+  }, [router])
 
 // ---- VIP ----
 const [vipOpen, setVipOpen] = useState(false)

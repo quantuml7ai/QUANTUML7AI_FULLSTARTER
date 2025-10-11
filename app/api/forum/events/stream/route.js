@@ -7,8 +7,7 @@ import { bus } from '../../_bus.js'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const fetchCache = 'force-no-store'
-export const runtime = (process.env.VERCEL === '1') ? 'edge' : 'nodejs'
-
+export const runtime = 'edge'
 // --- подключенные клиенты SSE ---
 const clients = new Set()
 
@@ -40,6 +39,7 @@ async function ensureSubscribed() {
   const tryLoop = async () => {
     for (;;) {
       try {
+        // В Edge нужны REST-переменные Upstash: UPSTASH_REDIS_REST_URL/TOKEN
         const redis = Redis.fromEnv()
         await redis.subscribe('forum:events', (raw) => {
           try {
