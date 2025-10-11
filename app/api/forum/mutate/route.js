@@ -226,18 +226,7 @@ export async function POST(request) {
       }
     }
 
-    // Верхнеуровневая ревизия для клиента: максимум из успешных операций (fallback — текущее значение rev)
-    let respRev = 0
-    try {
-      const okRevs = results.filter(r => !r.error && Number.isFinite(r?.rev)).map(r => r.rev)
-      if (okRevs.length) respRev = Math.max(...okRevs)
-      if (!respRev) {
-        const cur = parseInt(await redisDirect.get(K.rev), 10)
-        if (Number.isFinite(cur)) respRev = cur
-      }
-    } catch { /* no-op */ }
-
-    return json({ ok: true, rev: respRev, applied: results })
+    return json({ applied: results })
   } catch (err) {
     console.error('mutate error', err)
     return bad(err.message || 'internal_error', 500)
