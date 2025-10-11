@@ -1,7 +1,5 @@
-// app/api/forum/admin/delete-post/route.js
 import { bad, json, requireAdmin } from '../../_utils.js'
-import { dbDeletePost, rebuildSnapshot, redis as redisDirect } from '../../_db.js'
-import { bus } from '../../_bus.js'
+import { K, redis, rebuildSnapshot } from'../../_db.js'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -9,27 +7,40 @@ export const fetchCache = 'force-no-store'
 
 export async function POST(req) {
   try {
-    // только по admin-cookie
-    await requireAdmin(req)
-
+    await requireAdmin(req) // теперь только cookie
     const body = await req.json().catch(() => ({}))
-    const postId = String(body?.postId ?? '').trim()
+    const postId = String(body.postId || '').trim()
     if (!postId) return bad('missing_postId', 400)
 
-    // 1) Удаляем пост через единый DB-слой (он чистит счётчики, снижает topicPostsCount, pushChange)
-    const r = await dbDeletePost(postId)
-    if (!r) return bad('not_found', 404)
+    // 1) Удаляем объект и связанные счётчики (мягко: игнорируем частичные ошибки)
+    await Promise.allSettled([
+      redis.srem(K.postsSet, postId),
+      redis.del(K.postKey(postId)),
+      redis.del(K.postViews(postId)),
+      redis.del(K.postLikes(postId)),
+      redis.del(K.postDislikes(postId)),
+    ])
 
-    // 2) Мгновенно пересобираем снапшот — чтобы /snapshot сразу отдал консистентные данные
+    // 2) Фиксируем ревизию и пишем событие в каноническом формате,
+    //    чтобы клиент применил удаление мгновенно (kind: 'post', _del:1)
+    const rev = await redis.incr(K.rev)
+    await redis.lpush(
+      K.changes,
+      JSON.stringify({ rev, kind: 'post', id: String(postId), _del: 1, ts: Date.now() })
+    )
+
+    // 3) Мгновенно пересобираем снапшот, чтобы следующий snapshot() был консистентным
     await rebuildSnapshot()
 
-    // 3) Оповещаем слушателей (локально и меж-инстансно)
-    const evt = { type: 'post_deleted', postId, rev: r.rev, ts: Date.now() }
-    try { bus.emit(evt) } catch {}
-    try { await redisDirect.publish('forum:events', JSON.stringify(evt)) } catch {}
+    // 4) (опционально) уведомим слушателей SSE
+    try {
+      await redis.publish(
+        'forum:events',
+        JSON.stringify({ type: 'post_deleted', postId, rev, ts: Date.now() })
+      )
+    } catch {}
 
-    // 4) Ответ
-    return json({ ok: true, rev: r.rev })
+    return json({ ok: true, rev })
   } catch (e) {
     console.error('deletePost error', e)
     return bad(e?.message || 'internal_error', e?.status || 500)

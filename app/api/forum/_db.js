@@ -101,7 +101,7 @@ export async function rebuildSnapshot() {
       const raw = await redis.get(K.postKey(pid))
       const p = safeParse(raw)
       if (!p) { errors.push({ id: String(pid), kind: 'post', reason: 'parse' }); continue }
-      p.views    = await getInt(K.postViews(pid), 0)
+      p.views    = await getInt(K.postViews(pid), 0)  
       p.likes    = await getInt(K.postLikes(pid), 0)
       p.dislikes = await getInt(K.postDislikes(pid), 0)
       posts.push(p)
@@ -247,26 +247,12 @@ export async function dbUnbanUser(accountId) {
 export async function dbDeletePost(postId) {
   const raw = await redis.get(K.postKey(postId))
   if (!raw) return null
-  const post = safeParse(raw)
-  if (!post) return null
+  const post = JSON.parse(raw)
   post._del = 1
-  const topicId = String(post.topicId || '')
-  // атомарно: снять пост из множества, пометить удалённым, скорректировать счётчик темы и подчистить счётчики поста
-  const m = redis.multi()
+  await redis.multi()
     .set(K.postKey(postId), JSON.stringify(post))
     .srem(K.postsSet, String(postId))
-    .del(K.postViews(postId))
-    .del(K.postLikes(postId))
-    .del(K.postDislikes(postId))
-  if (topicId) m.decr(K.topicPostsCount(topicId))
-  await m.exec()
-  // нижняя граница: если упали ниже 0 (гоночка), вернуть к 0
-  if (topicId) {
-    try {
-      const v = parseInt(await redis.get(K.topicPostsCount(topicId)), 10) || 0
-      if (v < 0) await redis.set(K.topicPostsCount(topicId), '0')
-    } catch {}
-  }
+    .exec()
   const rev = await nextRev()
   await pushChange({ rev, kind: 'post', id: String(postId), _del: 1, ts: now() })
   return { rev, post }
@@ -274,36 +260,24 @@ export async function dbDeletePost(postId) {
 export async function dbDeleteTopic(topicId) {
   const raw = await redis.get(K.topicKey(topicId))
   if (!raw) return null
-  const topic = safeParse(raw)
-  if (!topic) return null
+  const topic = JSON.parse(raw)
   topic._del = 1
   await redis.set(K.topicKey(topicId), JSON.stringify(topic))
   await redis.srem(K.topicsSet, String(topicId))
 
-  // пометим и удалим все посты темы
   const posts = await redis.smembers(K.postsSet)
   const toDel = []
   for (const pid of posts) {
     const pr = await redis.get(K.postKey(pid))
     if (!pr) continue
-    const p = safeParse(pr)
-    if (!p) continue
+    const p = JSON.parse(pr)
     if (String(p.topicId) === String(topicId)) {
       p._del = 1
       await redis.set(K.postKey(pid), JSON.stringify(p))
       await redis.srem(K.postsSet, pid)
-      // подчистим счётчики поста (на случай старых значений)
-      await redis.del(K.postViews(pid))
-      await redis.del(K.postLikes(pid))
-      await redis.del(K.postDislikes(pid))
       toDel.push(pid)
     }
   }
-
-  // подчистим счётчики темы
-  await redis.del(K.topicPostsCount(topicId))
-  await redis.del(K.topicViews(topicId))
-
   const rev = await nextRev()
   await pushChange({ rev, kind: 'topic', id: String(topicId), _del: 1, ts: now(), deletedPosts: toDel })
   return { rev, topic, deletedPosts: toDel }

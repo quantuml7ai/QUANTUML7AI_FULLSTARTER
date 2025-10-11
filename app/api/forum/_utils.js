@@ -1,49 +1,41 @@
 // app/api/forum/_utils.js
 import { cookies } from 'next/headers'
 
-// ---------- lightweight helpers ----------
+// lightweight helpers (совместимы с исходной кодовой базой)
 export function now() { return Date.now() }
 export function toStr(x) { return String(x ?? '') }
-export function parseIntSafe(x, d = 0) { const n = parseInt(x, 10); return Number.isFinite(n) ? n : d }
+export function parseIntSafe(x, d=0) { const n = parseInt(x,10); return Number.isFinite(n) ? n : d }
 export function bool01(b) { return b ? '1' : '0' }
 
-// Создаёт JSON-ответ с нужными заголовками
-export function json(data, status = 200, extraHeaders) {
-  const headers = new Headers({
-    'content-type': 'application/json; charset=utf-8',
-    'cache-control': 'no-store, max-age=0',
+export function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { 'content-type': 'application/json' },
   })
-  if (extraHeaders) {
-    // корректно вливаем любые внешние хедеры
-    for (const [k, v] of Object.entries(extraHeaders)) {
-      if (v != null) headers.set(k, String(v))
-    }
-  }
-  return new Response(JSON.stringify(data), { status, headers })
 }
 export function bad(msg = 'bad_request', status = 400) {
-  return json({ ok: false, error: msg }, status)
+  return json({ error: msg }, status)
 }
 
 /* =========================
    Admin cookie helpers
-   - On Vercel/production выставляем Secure
-   - HttpOnly, SameSite=Lax по умолчанию
+   - FOR DEPLOY ON VERCEL: cookie must have secure flag when in prod (NODE_ENV === 'production')
 ========================= */
-function isProd() {
-  return process.env.NODE_ENV === 'production' || process.env.VERCEL === '1'
-}
 
-export function setAdminCookie(resHeaders = {}) {
+export function setAdminCookie(resHeaders) {
+  const isProd = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1'
+  // cookie format: forum_admin=1; HttpOnly; Path=/; Max-Age=2592000; SameSite=Lax; Secure (in prod)
   let cookie = `forum_admin=1; Path=/; HttpOnly; Max-Age=${60 * 60 * 24 * 30}; SameSite=Lax`
-  if (isProd()) cookie += '; Secure'
+  if (isProd) cookie += '; Secure'
+  // Caller должен проставить header 'Set-Cookie'
   resHeaders['Set-Cookie'] = cookie
   return cookie
 }
 
-export function clearAdminCookie(resHeaders = {}) {
+export function clearAdminCookie(resHeaders) {
   let cookie = `forum_admin=0; Path=/; HttpOnly; Max-Age=0; SameSite=Lax`
-  if (isProd()) cookie += '; Secure'
+  const isProd = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1'
+  if (isProd) cookie += '; Secure'
   resHeaders['Set-Cookie'] = cookie
   return cookie
 }
@@ -58,12 +50,13 @@ export function isAdminFromCookies() {
 }
 
 /* =========================
-   Request identity / guards
-   - Запись требует header 'x-forum-user-id' ИЛИ 'userId' в JSON body
-   - Admin endpoints требуют валидную forum_admin cookie
+   Helpers for request identity:
+   - For writes we require header 'x-forum-user-id' OR 'userId' in JSON body
+   - Admin endpoints accept only existing forum_admin cookie
 ========================= */
+
 export function getUserIdFromReq(req, body = null) {
-  // приоритет: заголовок → поле в body
+  // prefer header
   const raw = req.headers.get('x-forum-user-id') || (body && body.userId) || ''
   return toStr(raw).trim()
 }
@@ -78,42 +71,19 @@ export function requireUserId(req, body = null) {
   return uid
 }
 
-export function requireAdmin(_req) {
+export function requireAdmin(req) {
   try {
     const cookieStore = cookies()
-    const ok = cookieStore.get('forum_admin')?.value === '1'
-    if (!ok) {
+    const isAdmin = cookieStore.get('forum_admin')?.value === '1'
+    if (!isAdmin) {
       const err = new Error('not admin')
       err.status = 403
       throw err
     }
-  } catch {
+  } catch (e) {
+    // если cookies() недоступны по каким-то причинам — тоже 403
     const err = new Error('not admin')
     err.status = 403
     throw err
-  }
-}
-
-/* =========================
-   Small helpers for routes
-========================= */
-
-// Сливает Headers/объект заголовков в plain-объект (удобно для Response(..., { headers }))
-export function headersToObject(h) {
-  if (!h) return {}
-  if (h instanceof Headers) {
-    const o = {}
-    for (const [k, v] of h.entries()) o[k] = v
-    return o
-  }
-  return { ...h }
-}
-
-// Создаёт plain headers с возможностью добавить Set-Cookie заранее
-export function makeHeaders(base = {}) {
-  return {
-    'content-type': 'application/json; charset=utf-8',
-    'cache-control': 'no-store, max-age=0',
-    ...base,
   }
 }

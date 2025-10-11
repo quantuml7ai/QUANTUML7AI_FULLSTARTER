@@ -1,5 +1,5 @@
 // app/api/forum/mutate/route.js
-import { json, bad, requireUserId} from '../_utils.js'
+import { json, bad, requireUserId } from '../_utils.js'
 import {
   createTopic,
   createPost,
@@ -13,10 +13,11 @@ import {
   getBannedUsers,
 } from '../_db.js'
 import { Redis } from '@upstash/redis'
-import { bus, instanceId } from '../_bus.js'
+import { bus } from '../_bus.js'
+
 // ЕДИНСТВЕННАЯ версия publishForumEvent
 async function publishForumEvent(evt) {
-  const payload = { ...evt, ts: Date.now(), origin: instanceId }
+  const payload = { ...evt, ts: Date.now() }
 
   // 1) Мгновенно в пределах процесса (слушатели SSE увидят сразу)
   try { bus.emit(payload) } catch {}
@@ -76,7 +77,7 @@ export async function POST(request) {
     const body = await request.json().catch(() => ({}))
     const userId = requireUserId(request, body)
 
-    // 🚫 бан-guard: блокируем любые операции от забаненных
+    // 🚫 Проверка: если пользователь в бане, блокируем всё (включая реакции/создание)
     const banned = await getBannedUsers()
     if (banned.has(userId)) {
       return bad('banned user', 403)
@@ -135,51 +136,37 @@ export async function POST(request) {
 
         } else if (op.type === 'view_topic') {
           const { topicId } = p
-          // --- антидубль: один пользователь → один инкремент в сутки по теме ---
-          const day = new Date(); const y = day.getUTCFullYear(); const m = String(day.getUTCMonth()+1).padStart(2,'0'); const d = String(day.getUTCDate()).padStart(2,'0');
-          const guardKey = `forum:view:topic:${topicId}:by:${userId}:d:${y}${m}${d}`;
-          let firstToday = false;
-          try { firstToday = await redisDirect.set(guardKey, '1', { nx: true, ex: 86400 }) } catch {}
-          if (firstToday) {
-            await incrementTopicViews(topicId, 1)
-          }
+          await incrementTopicViews(topicId, 1)
           let views = null
           try { views = parseInt(await redisDirect.get(K.topicViews(topicId)), 10) || 0 } catch {}
-          if (firstToday) {
-            const rev = await nextRev()
-            await pushChange({ rev, kind: 'topic', id: String(topicId), data: { views }, ts: Date.now() })
-            results.push({ op: 'view_topic', topicId, views: Number.isFinite(views) ? views : undefined, rev })
-            await publishForumEvent({ type: 'view_topic', topicId, views, rev })
-          } else {
-            results.push({ op: 'view_topic', topicId, views: Number.isFinite(views) ? views : undefined })
-          }
+          // ⬆️ двигаем ревизию и пишем change, чтобы другие клиенты увидели счётчик мгновенно
+          const rev = await nextRev()
+          await pushChange({
+            rev, kind: 'topic', id: String(topicId),
+            data: { views }, ts: Date.now()
+          })
+          results.push({ op: 'view_topic', topicId, views: Number.isFinite(views) ? views : undefined, rev })
+          await publishForumEvent({ type: 'view_topic', topicId, views, rev })
 
         } else if (op.type === 'view_post') {
           const { postId } = p
-          // --- антидубль: один пользователь → один инкремент в сутки по посту ---
-          const day = new Date(); const y = day.getUTCFullYear(); const m = String(day.getUTCMonth()+1).padStart(2,'0'); const d = String(day.getUTCDate()).padStart(2,'0');
-          const guardKey = `forum:view:post:${postId}:by:${userId}:d:${y}${m}${d}`;
-          let firstToday = false;
-          try { firstToday = await redisDirect.set(guardKey, '1', { nx: true, ex: 86400 }) } catch {}
-          if (firstToday) {
-            await incrementPostViews(postId, 1)
-          }
+          await incrementPostViews(postId, 1)
           let views = null
           try { views = parseInt(await redisDirect.get(K.postViews(postId)), 10) || 0 } catch {}
-          if (firstToday) {
-            const rev = await nextRev()
-            await pushChange({ rev, kind: 'post', id: String(postId), data: { views }, ts: Date.now() })
-            results.push({ op: 'view_post', postId, views: Number.isFinite(views) ? views : undefined, rev })
-            await publishForumEvent({ type: 'view_post', postId, views, rev })
-          } else {
-            results.push({ op: 'view_post', postId, views: Number.isFinite(views) ? views : undefined })
-          }
+          // ⬆️ двигаем ревизию и пишем change
+          const rev = await nextRev()
+          await pushChange({
+            rev, kind: 'post', id: String(postId),
+            data: { views }, ts: Date.now()
+          })
+          results.push({ op: 'view_post', postId, views: Number.isFinite(views) ? views : undefined, rev })
+          await publishForumEvent({ type: 'view_post', postId, views, rev })
 
         } else if (op.type === 'react') {
           const { postId, kind } = p
           const delta = Math.max(-1, Math.min(1, Number(p.delta ?? 1) || 1))
 
-          // уникальные реакции: один пользователь = like ИЛИ dislike; delta указывает снять/поставить
+          // уникальные реакции: один пользователь = like или dislike
           let likes = null, dislikes = null
           try {
             if (!postId || !['like','dislike'].includes(kind)) {
@@ -189,22 +176,12 @@ export async function POST(request) {
             const likeSetKey = (K?.postLikesSet ? K.postLikesSet(postId) : `post:${postId}:likes:set`)
             const disSetKey  = (K?.postDislikesSet ? K.postDislikesSet(postId) : `post:${postId}:dislikes:set`)
 
-            if (delta === -1) {
-              // СНЯТИЕ реакции конкретного вида (без добавления противоположной)
-              if (kind === 'like') {
-                await redisDirect.srem(likeSetKey, userId)
-              } else {
-                await redisDirect.srem(disSetKey, userId)
-              }
+            if (kind === 'like') {
+              await redisDirect.srem(disSetKey, userId)
+              await redisDirect.sadd(likeSetKey, userId)
             } else {
-              // УСТАНОВКА реакции: эксклюзивность — убираем противоположную и ставим текущую
-              if (kind === 'like') {
-                await redisDirect.srem(disSetKey, userId)
-                await redisDirect.sadd(likeSetKey, userId)
-              } else {
-                await redisDirect.srem(likeSetKey, userId)
-                await redisDirect.sadd(disSetKey, userId)
-              }
+              await redisDirect.srem(likeSetKey, userId)
+              await redisDirect.sadd(disSetKey, userId)
             }
 
             const [lcnt, dcnt] = await Promise.all([
@@ -243,9 +220,9 @@ export async function POST(request) {
 
       // ✂️ Ограничение роста журнала изменений (оставляем последние 50k)
       try {
-        await redisDirect.ltrim('forum:changes', -50000, -1)
+        await redisDirect.ltrim("forum:changes", -50000, -1)
       } catch (e) {
-        console.error('failed to trim changes log', e)
+        console.error("failed to trim changes log", e)
       }
     }
 

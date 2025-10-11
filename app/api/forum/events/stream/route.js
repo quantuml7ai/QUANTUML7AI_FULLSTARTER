@@ -2,7 +2,8 @@
 // SSE-хаб: мгновенно ретранслирует локальные события (bus) и меж-инстансные (Redis Pub/Sub)
 
 import { Redis } from '@upstash/redis'
-import { bus, instanceId } from '../../_bus.js'
+import { bus } from '../../_bus.js'
+
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const fetchCache = 'force-no-store'
@@ -12,8 +13,7 @@ export const runtime = (process.env.VERCEL === '1') ? 'edge' : 'nodejs'
 const clients = new Set()
 
 function safeEnqueue(controller, chunk) {
-  try { controller.enqueue(typeof chunk === 'string' ? chunk : String(chunk)) }
-  catch { clients.delete(controller) }
+  try { controller.enqueue(chunk) } catch { clients.delete(controller) }
 }
 
 function write(controller, obj) {
@@ -22,8 +22,8 @@ function write(controller, obj) {
 
 // ЕДИНСТВЕННАЯ функция broadcast
 function broadcast(evt) {
-  const payload = `data: ${JSON.stringify(evt)}\n\n`
-  for (const c of Array.from(clients)) safeEnqueue(c, payload)
+  const chunk = `data: ${JSON.stringify(evt)}\n\n`
+  for (const c of Array.from(clients)) safeEnqueue(c, chunk)
 }
 
 // Локальные события из mutate (через процессную шину) — увидеть сразу
@@ -44,11 +44,8 @@ async function ensureSubscribed() {
         await redis.subscribe('forum:events', (raw) => {
           try {
             const evt = typeof raw === 'string' ? JSON.parse(raw) : raw
-            if (evt && evt.origin && evt.origin === instanceId) return
             broadcast(evt)
-          } catch {
-            /* no-op */
-          }
+          } catch { /* no-op */ }
         })
         subscribed = true
         subRunning = false
