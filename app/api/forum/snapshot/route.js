@@ -7,15 +7,17 @@ export const fetchCache = 'force-no-store'
 
 // Лёгкий процессный микрокэш (живёт в памяти инстанса)
 const cache = new Map()
-const TTL_MS = 2000 // 2 секунды
+// В проде задержка мешает «одной истине». Оставляем 0.
+const TTL_MS = 0
 
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url)
     const revHint = searchParams.get('rev') || ''
     const revTarget = Number.isFinite(+revHint) ? +revHint : 0
-    // const bust = searchParams.get('b') || '' // только для клиента
+    
 
+    // ключ кэша зависит от ревизии-хинта (пер-рев кэш)
     const key = `all:${revHint}`
     const now = Date.now()
     const hit = cache.get(key)
@@ -24,14 +26,19 @@ export async function GET(req) {
     }
 
     let data = null
+
+    // ---- читаем текущий снапшот
     try {
-      // основной путь: читаем единый снапшот
-      data = await snapshot(0)
-      if (!data || typeof data !== 'object' || typeof data.rev !== 'number') {
+      const snap = await snapshot(0)
+      if (!snap || typeof snap !== 'object' || typeof snap.rev !== 'number') {
         throw new Error('bad_snapshot_payload')
       }
+      // нормализуем форму: {rev, ...payload}
+      data = ('payload' in snap && snap.payload && typeof snap.payload === 'object')
+        ? { rev: snap.rev, ...snap.payload }
+        : snap
     } catch (_e) {
-      // Авто-чин: пересобрать и отдать
+      // авто-чин: пересобрать и отдать
       const snap = await rebuildSnapshot()
       data = { rev: snap.rev, ...snap.payload }
 
@@ -43,7 +50,7 @@ export async function GET(req) {
       }
     }
 
-    // 🔧 Барьер по ревизии: если клиент знает, что уже есть более свежая ревизия — догонимся
+    // ---- Барьер по ревизии: если клиент знает, что уже есть более свежая ревизия — догонимся
     if (revTarget > 0 && Number.isFinite(data.rev) && data.rev < revTarget) {
       try {
         const snap2 = await rebuildSnapshot()
@@ -64,9 +71,12 @@ export async function GET(req) {
     const headers = new Headers({
       'content-type': 'application/json; charset=utf-8',
       'cache-control': 'no-store, max-age=0',
+      'x-forum-rev': String(data.rev ?? 0),
     })
 
-    cache.set(key, { body, headers, exp: now + TTL_MS })
+    if (TTL_MS > 0) {
+      cache.set(key, { body, headers, exp: now + TTL_MS })
+    }
     return new Response(body, { status: 200, headers })
   } catch (e) {
     return new Response(

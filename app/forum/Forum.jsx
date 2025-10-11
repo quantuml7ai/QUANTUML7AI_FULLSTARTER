@@ -349,8 +349,11 @@ async function adminLogin(password) {
       body: JSON.stringify({ password: String(password || '') }),
     });
     const j = await r.json().catch(() => ({}));
-    return j; // { ok: true } при успехе; cookie HttpOnly ставится сервером
-  } catch {
+    // cookie HttpOnly ставится сервером; локальный флаг — только для UI
+    if (j?.ok) {
+      try { localStorage.setItem('ql7_admin', '1'); } catch {}
+    }
+    return j;  } catch {
     return { ok: false, error: 'network' };
   }
 }
@@ -359,8 +362,9 @@ async function adminLogout() {
   try {
     const r = await fetch('/api/forum/admin/verify', { method: 'DELETE' });
     const j = await r.json().catch(() => ({}));
-    return j; // { ok: true }
-  } catch {
+    try { localStorage.removeItem('ql7_admin'); } catch {}
+    return j; // { ok: true }  
+    } catch {
     return { ok: false, error: 'network' };
   }
 }
@@ -393,6 +397,19 @@ if (typeof window !== 'undefined') {
 
 // ==== API (клиент) ====
 const api = {
+  async mutate(body, userId){
+    const uid = String(userId || getForumUserId() || '').trim();
+    const r = await fetch('/api/forum/mutate', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-forum-user-id': uid,        // ⬅️ ОБЯЗАТЕЛЬНО для прод-роута
+      },
+      body: JSON.stringify({ ...body, userId: uid }),
+    });
+    const j = await r.json().catch(()=>({}));
+    return j;
+  },  
   // Снимок базы (полный), поддерживает cache-bust b и подсказку rev
   async snapshot(q = {}) {
     try {
@@ -2409,9 +2426,7 @@ function PostCard({
   const likes    = Number(p?.likes ?? 0);
   const dislikes = Number(p?.dislikes ?? 0);
 
-  // клики по реакциям
-  const like    = (e) => { e.preventDefault(); e.stopPropagation(); onReact?.(p, 'like'); };
-  const dislike = (e) => { e.preventDefault(); e.stopPropagation(); onReact?.(p, 'dislike'); };
+
 
   // --- ТОЛЬКО ДЛЯ ИЗОБРАЖЕНИЙ: выделяем и вырезаем строки-URL картинок ---
   const IMG_RE = /^(?:\/uploads\/[A-Za-z0-9._\-\/]+?\.(?:webp|png|jpe?g|gif)|https?:\/\/[^\s]+?\.(?:webp|png|jpe?g|gif))(?:\?.*)?$/i;
@@ -3644,13 +3659,19 @@ toast.ok('Тема создана')
       const posts  = prev.posts.map(x => x.topicId===tmpT ? { ...x, topicId:String(realTopicId) } : x)
       return dedupeAll({ ...prev, topics, posts })
     })
-
+    // 2.0) прогреваем снапшот с барьером по ревизии (последний rev из applied)
+    try {
+      const lastRev = Number(
+        (createTopicResp?.applied || []).map(x=>x?.rev).filter(v=>Number.isFinite(v)).pop() || 0
+      );
+      if (lastRev > 0) await api.snapshot({ b: Date.now(), rev: lastRev });
+    } catch {}
     // 2) создаём первый пост (отдельной операцией, уже с реальным topicId)
     await api.mutate({
       ops:[{ type:'create_post', payload:{ topicId:String(realTopicId), text:safeFirst, nickname:t0.nickname, icon:t0.icon, parentId:null } }]
     }, uid)
 
-    // подтянуть свежий снапшот
+    // 3) финальный мягкий refresh после прогрева снапа
     if (typeof refresh === 'function') await refresh()
   }
 

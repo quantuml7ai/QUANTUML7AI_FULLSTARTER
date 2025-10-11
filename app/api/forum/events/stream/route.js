@@ -8,11 +8,19 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const fetchCache = 'force-no-store'
 export const runtime = 'edge'
+
 // --- подключенные клиенты SSE ---
 const clients = new Set()
+const encoder = new TextEncoder()
 
 function safeEnqueue(controller, chunk) {
-  try { controller.enqueue(chunk) } catch { clients.delete(controller) }
+  try {
+    // В Edge надёжнее отправлять Uint8Array
+    const buf = typeof chunk === 'string' ? encoder.encode(chunk) : chunk
+    controller.enqueue(buf)
+  } catch {
+    clients.delete(controller)
+  }
 }
 
 function write(controller, obj) {
@@ -26,7 +34,9 @@ function broadcast(evt) {
 }
 
 // Локальные события из mutate (через процессную шину) — увидеть сразу
-bus.on((evt) => broadcast(evt))
+bus.on((evt) => {
+  try { broadcast(evt) } catch { /* no-op */ }
+})
 
 // --- Redis subscription (однократно на процесс/инстанс) ---
 let subscribed = false
@@ -69,7 +79,9 @@ export async function GET(req) {
 
       // подсказка клиенту о времени повторного коннекта
       safeEnqueue(controller, `retry: 1000\n\n`)
-      write(controller, { type: 'connected', ts: Date.now() })
+      // явное событие "connected"
+      safeEnqueue(controller, `event: connected\n`)
+      safeEnqueue(controller, `data: {"ts":${Date.now()}}\n\n`)
 
       // heartbeat по протоколу SSE (комментарии), чтобы соединение не считалось «тихим»
       const hb = setInterval(() => {
@@ -99,9 +111,10 @@ export async function GET(req) {
       'content-type': 'text/event-stream; charset=utf-8',
       'cache-control': 'no-store, no-transform, max-age=0',
       'connection': 'keep-alive',
-      // подсказки прокси/компрессору
+      
       'x-no-compression': '1',
       'keep-alive': 'timeout=120',
+      'x-forum-sse': 'stream',
     },
   })
 }

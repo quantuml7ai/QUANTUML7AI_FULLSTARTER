@@ -249,10 +249,18 @@ export async function dbDeletePost(postId) {
   if (!raw) return null
   const post = JSON.parse(raw)
   post._del = 1
+  // атомарно помечаем пост как удалённый, убираем из множества
+  // и уменьшаем счётчик постов в теме
   await redis.multi()
     .set(K.postKey(postId), JSON.stringify(post))
     .srem(K.postsSet, String(postId))
+    .incrby(K.topicPostsCount(post.topicId), -1)
     .exec()
+  // защитный кламп (на всякий случай, чтобы счётчик не ушёл в минус)
+  try {
+    const pc = await getInt(K.topicPostsCount(post.topicId), 0)
+    if (pc < 0) await redis.set(K.topicPostsCount(post.topicId), 0)
+  } catch {}
   const rev = await nextRev()
   await pushChange({ rev, kind: 'post', id: String(postId), _del: 1, ts: now() })
   return { rev, post }
@@ -321,6 +329,12 @@ export async function snapshot(sinceRev = 0, limit = 10000) {
     .filter(Boolean)
     .filter(e => (e.rev || 0) > sinceRev)
     .sort((a, b) => (a.rev || 0) - (b.rev || 0)) // ↑ по возрастанию
+return { rev: currentRev, events }
 
-  return { rev: currentRev, events }
+}
+
+// Утилита: публикация события в канал (на случай, если потребуется из роутов)
+export async function publishEvent(raw) {
+  try { await redis.publish('forum:events', typeof raw === 'string' ? raw : JSON.stringify(raw)) }
+  catch { /* no-op */ }
 }
