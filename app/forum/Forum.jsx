@@ -1829,7 +1829,10 @@ const Styles = () => (
 @media (max-width:360px){
   .btnXs{ padding: 2px 5px; font-size: 10px; height: 24px; }
 }
-
+  /* Полоса действий поста: кнопки занимают доступную ширину и сжимаются без скролла */
+  .actionBar > * { min-width: 0; }                /* детям разрешаем сжиматься */
+  .actionBar .btnXs { flex: 1 1 0; min-width: 0; }/* сами маленькие кнопки — гибкие */
+  .actionBar .tag  { min-width: 0; } 
   `}</style>
 )
 
@@ -2512,18 +2515,17 @@ function PostCard({
         </div>
       )}
 
-      {/* нижняя полоса: СЧЁТЧИКИ + РЕАКЦИИ + (ПЕРЕНЕСЁННЫЕ) ДЕЙСТВИЯ — В ОДНУ СТРОКУ */}
       <div
-        className="mt-3 flex items-center gap-2 text-[13px] opacity-80"
+        className="mt-3 flex items-center gap-2 text-[13px] opacity-80 actionBar"
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 20,
-          flexWrap: 'nowrap',                // ← запрещаем перенос flex-элементов
-          overflowX: 'auto',                 // косметика для inline-частей
+          gap: 'clamp(4px, 1.5vw, 8px)',     // адаптивный зазор вместо фикс. 20px
+          flexWrap: 'nowrap',                 // в одну линию
+          overflowX: 'clip',                  // без горизонтальной прокрутки
           overflowY: 'hidden',
-          WebkitOverflowScrolling: 'touch',  // ничего не выпадает
-          fontSize: 'clamp(9px, 1.1vw, 13px)'// ← сильнее сжимаем на узких экранах
+          WebkitOverflowScrolling: 'touch',
+          fontSize: 'clamp(9px, 1.1vw, 13px)' // можно оставить как было
         }}
       >
         <span className="tag" title={t?.('forum_views') || 'Просмотры'}>
@@ -2557,7 +2559,7 @@ function PostCard({
         </button>
 
         {/* разделяем левый и правый края, но остаёмся в одном ряду */}
-        <div style={{ flex: 1, minWidth: 8 }} />
+        <div style={{ flex: '0 0 clamp(8px, 2vw, 16px)' }} />
 
         {/* действия (пожаловаться, ответить, бан/разбан, удалить) — справа в той же строке */}
         <button
