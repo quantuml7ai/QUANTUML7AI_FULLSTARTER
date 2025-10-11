@@ -1129,10 +1129,10 @@ const Styles = () => (
     .qft_toast_wrap{ position:fixed; right:16px; bottom:16px; z-index:4000 }
     .qft_toast{ max-width:min(420px,90vw); padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(10,14,22,.94); color:#eaf4ff; box-shadow:0 10px 28px rgba(0,0,0,.45) }
     .qft_toast.ok{ border-color:rgba(70,220,130,.5) } .qft_toast.warn{ border-color:rgba(255,200,80,.5) } .qft_toast.err{ border-color:rgba(255,90,90,.5) }
-
+    
     /* мини-поповеры */
     .adminPop, .profilePop{
-      position:absolute; width: min(92vw, 360px);
+      position:absolute; width: min(62vw, 360px);
       border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98);
       border-radius:12px; padding:10px; z-index:3200; box-shadow:0 10px 30px rgba(0,0,0,.45)
     }
@@ -2079,7 +2079,7 @@ function VipPopover({ anchorRef, open, onClose, t, vipActive, onPay }){
   const el = anchorRef?.current
   if (!open || !el) return null
   const top = (el.offsetTop || 0) + (el.offsetHeight || 0) + 8
-  const right = 0
+  const right = -90
   return (
     <div className="adminPop" style={{ top, right }}>
       {vipActive ? (
