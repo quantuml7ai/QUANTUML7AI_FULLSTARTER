@@ -1893,47 +1893,39 @@ const Styles = () => (
   font-size:12px; line-height:1;
   background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.12);
 }
-/* ---- one-line row: avatar | nick | Q COIN (wrap-aware) ---- */
-.rowClamp{
-  display:flex; align-items:center; gap:8px;
-  min-width:0;                 /* можно ужимать */
-  flex-wrap:wrap;              /* разрешаем перенос ИМЕННО элементам ряда */
-  /* ВАЖНО: больше НЕ ставим white-space:nowrap здесь */
+/* --- avatar + nick (ник всегда под аватаром) --- */
+.avaNick{
+  display:block;
+  margin-top:8px;
+  width:84px;                  /* = ширина твоего .avaBig; если другая — подставь её */
+  text-align:center;
+  white-space:nowrap;          /* не переносим ник */
+  overflow:hidden; text-overflow:ellipsis;
 }
 
-/* ник — всегда одна строка, без переноса */
-.rowNick{
-  flex:1 1 auto;               /* занимает оставшееся место в первой строке */
+/* --- правая полоса с Q COIN --- */
+.qRowRight{
+  display:flex; align-items:center; justify-content:flex-start;
   min-width:0;
+  /* управление позицией/размером */
+  --qcoin-offset: 0px;      /* сдвиг вниз/вверх (Y) */
+  --qcoin-scale:  1;        /* масштаб блока */
+  transform: translateY(var(--qcoin-offset)) scale(var(--qcoin-scale));
+  transform-origin: left center;
+  will-change: transform;
 }
-.rowNick .nick-text{
-  display:block; min-width:0;
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; /* ← запрет переноса */
-  max-width:100%;
-}
-
-/* Q COIN — в ряд справа, но может переехать на вторую строку */
-.rowQCoin{
-  flex:0 1 auto;               /* по умолчанию в той же строке справа от ника */
-  min-width:0;
-  max-width:clamp(120px, 28vw, 260px);
-  font-size:clamp(11px, 1.6vw, 14px);
-  line-height:1;
-  /* без nowrap — разрешаем перенос блока как целого */
-}
-.rowQCoin > *{
+.qRowRight > *{
   display:inline-flex; align-items:center;
-  min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  min-width:0; max-width:clamp(170px, 58vw, 580px);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  font-size:clamp(22px, 1.6vw, 34px); /* базовый размер (масштабируется сверху) */
 }
 
-/* На узких экранах Q COIN уходит ПОД ник (второй строкой) */
-@media (max-width: 520px){
-  .rowQCoin{
-    flex-basis:100%;    /* переносим на новую строку */
-    margin-top:4px;     /* небольшой отступ под ником */
-    max-width:100%;     /* на всю ширину контейнера */
-  }
-}
+/* чтобы вся шапка держала один ряд: [аватар+ник] | [QCOIN] */
+.head{ display:flex; align-items:flex-start; gap:12px; }
+.head > div:first-child{ flex:0 0 auto; }     /* колонка аватара фикс */
+.head .min-w-0{ flex:1 1 auto; min-width:0; } /* правая часть тянется */
+
  
   `}</style>
 )
@@ -4216,6 +4208,14 @@ const onFilesChosen = React.useCallback(async (e) => {
               vipActive={vipActive}
               onSaved={()=>{}}
             />
+  {/* ник ВСЕГДА под аватаром */}
+  <button
+    className="nick-badge nick-animate avaNick"
+    title={idShown||'—'}
+    onClick={copyId}
+  >
+    <span className="nick-text">{nickShown || t('forum_not_signed')}</span>
+  </button>            
           </div>
 
   {/* ← ВОТ СЮДА ВСТАВЬ ПОПОВЕР */}
@@ -4228,26 +4228,14 @@ const onFilesChosen = React.useCallback(async (e) => {
   )}
 
 
-<div className="min-w-0">  
-    <div className="rowClamp">
-    <button
-      className="nick-badge nick-animate rowNick"
-      title={idShown||'—'}
-      onClick={copyId}
-    >
-      <span className="nick-text truncate">
-        {nickShown || t('forum_not_signed')}
-      </span>
-    </button>
-
-
-
-{/* Q COIN inline справа от ника */}
-<span className="rowQCoin">
- <QCoinInline t={t} userKey={idShown} /> 
-</span>
-  </div> 
-</div>
+ <div className="min-w-0">
+   <div
+     className="qRowRight"
+     style={{ '--qcoin-offset':'6px', '--qcoin-scale':'1.15' }}  /* ← здесь настраиваешь */
+   >
+     <QCoinInline t={t} userKey={idShown} />
+   </div>
+ </div>
 
 
 
