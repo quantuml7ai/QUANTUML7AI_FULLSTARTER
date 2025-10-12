@@ -1895,10 +1895,14 @@ const Styles = () => (
 }
 /* --- avatar + nick (ник всегда под аватаром) --- */
 .avaNick{
-  display:block;
+  display:inline-flex;
+  align-items:center; justify-content:center;
   margin-top:14px;
-  width:84px;                  /* = ширина твоего .avaBig; если другая — подставь её */
+  width:84px; 
+   width:120px;                  /* = ширина твоего .avaBig; если другая — подставь её */
   text-align:center;
+  max-width:clamp;
+  padding:2 88px;
   white-space:nowrap;          /* не переносим ник */
   overflow:hidden; text-overflow:ellipsis;
 }
@@ -1923,12 +1927,153 @@ const Styles = () => (
   display:inline-flex; align-items:center; justify-content:flex-end;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   text-align:right;
-  font-size:clamp(12px, 2.8vw, 20px);     /* адаптивный размер шрифта */
+  font-size:clamp(12px, 2.8vw, 24px);     /* адаптивный размер шрифта */
   max-width:100%;
 }
 
+/* --- Поповер QCoin контейнер --- */
+.qcoinPop{
+  /* если у тебя уже стоит position/left/top/width — оставь их */
+  max-width: 520px;
+  z-index: 3200;
+}
 
- 
+/* Карточка: делаем колоночный лэйаут с прокручиваемым body */
+.qcoinCard{
+  display:flex; flex-direction:column;
+  max-height: min(72vh, 560px);   /* ограничим высоту поповера */
+  overflow:hidden;                /* скролл только в body */
+}
+
+/* Шапка фикс сверху */
+.qcoinCardHdr{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:10px 12px;
+  border-bottom:1px solid rgba(160,180,255,.15);
+}
+
+/* Тело: именно оно скроллится */
+.qcoinPopBody{
+  padding:12px; overflow:auto;
+  overscroll-behavior: contain;
+  max-height: 100%;
+}
+
+/* --- Полоса действий: всегда один ряд, адаптивно сжимается --- */
+.qcActions{
+  display:flex; flex-wrap:nowrap; gap:10px;
+  align-items:center; justify-content:space-between;
+  padding:10px 12px; border-top:1px solid rgba(160,180,255,.15);
+}
+
+.qcBtn{
+  flex:1 1 0;                    /* равные доли, сжиматься можно */
+  min-width:0;                   /* позволяем ужиматься реально */
+  white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis;
+  font-size: clamp(12px, 2.6vw, 14px);
+  line-height: 1.15;
+  padding: 10px 12px;
+}
+
+/* Спецэффект на "Биржа" — лёгкий шимер + неоновый ховер */
+.qcBtn.qcExchange{
+  position:relative;
+  border:1px solid rgba(160,180,255,.28);
+  background: linear-gradient(180deg, rgba(20,28,52,.35), rgba(12,18,34,.3));
+}
+.qcBtn.qcExchange::after{
+  content:"";
+  position:absolute; inset:0;
+  background: linear-gradient(120deg, transparent 0%, rgba(170,200,255,.10) 35%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform .6s ease;
+  pointer-events:none;
+}
+.qcBtn.qcExchange:hover::after{ transform: translateX(0%); }
+.qcBtn.qcExchange:hover{
+  box-shadow: 0 0 12px rgba(120,160,255,.22), inset 0 0 0 1px rgba(255,255,255,.05);
+  border-color: rgba(180,200,255,.45);
+}
+
+/* "Вывод" — золотая, когда доступно; серая, когда disabled */
+.qcBtn.qcWithdraw[disabled]{
+  opacity:.7;
+  border:1px solid rgba(160,180,255,.22);
+  background: linear-gradient(180deg, rgba(18,26,46,.38), rgba(12,18,34,.32));
+  cursor:not-allowed;
+}
+.qcBtn.qcWithdraw:not([disabled]){
+  color:#1d1400;
+  background:
+    linear-gradient(180deg, rgba(255,233,140,1) 0%, rgba(255,220,90,1) 60%, rgba(250,205,70,1) 100%);
+  border:1px solid rgba(255,210,80,.9);
+  box-shadow:
+    0 6px 18px rgba(255,200,80,.25),
+    inset 0 0 0 1px rgba(255,255,255,.35);
+}
+.qcBtn.qcWithdraw:not([disabled]):hover{
+  filter: saturate(1.1) brightness(1.03);
+}
+
+/* На очень узких экранах — жмём плотнее */
+@media (max-width: 360px){
+  .qcBtn{ font-size: clamp(11px, 3.2vw, 13px); padding:8px 10px; }
+}
+.topicTitle{ font-size: clamp(16px, 2.2vw, 18px); line-height: 1.25; }
+.topicDesc { line-height: 1.35; }
+
+/* --- TopicItem: аватар слева, ник справа В ОДНУ СТРОКУ --- */
+.item .topicUserRow{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:nowrap;   /* запрещаем перенос ника вниз */
+  min-width:0;        /* разрешаем реальное сжатие строки */
+}
+.item .topicUserRow .avaMini{
+  flex:0 0 auto;      /* аватар фиксированный */
+}
+ .item .topicUserRow .nick-badge{
+   display:inline-flex;
+   align-items:center;
+   flex:0 1 auto;        /* ← больше НЕ растягиваемся */
+   min-width:0;
+   width:auto;
+   max-width:clamp(96px, 40vw, 240px);  /* аккуратный предел для обрезки */
+ }
+ .item .topicUserRow .nick-badge .nick-text{
+   display:block;
+   white-space:nowrap;
+   overflow:hidden;
+   text-overflow:ellipsis;
+   max-width:100%;
+ }
+ /* PostCard: аватар слева, ник справа — одна строка, без растяжения */
+.item .postUserRow{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:nowrap;
+  min-width:0;
+}
+.item .postUserRow .avaMini{ flex:0 0 auto; }
+.item .postUserRow .nick-badge{
+  display:inline-flex;
+  align-items:center;
+  flex:0 1 auto;      /* не растягиваемся на всю ширину */
+  min-width:0;
+  width:auto;
+  max-width:clamp(96px, 40vw, 260px);  /* аккуратный предел под ellipsis */
+}
+.item .postUserRow .nick-badge .nick-text{
+  display:block;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:100%;
+}
+
   `}</style>
 )
 
@@ -2275,25 +2420,33 @@ function QCoinWithdrawPopover({ anchorRef, onClose, t }) {
           <button className="btn btnGhost" onClick={onClose}>{t('forum_close')}</button>
         </div>
 
+        {/* тело — скроллимое */}
         <div className="qcoinPopBody">
-          {/* тут потом добавишь длинное описание/скролл */}
+
           <div className="meta">{t('forum_qcoin_withdraw_note')||''}</div>
+          {/* ...тут может быть длинное описание/правила и т.д. ... */}
         </div>
 
-<div className="flex items-center justify-end pt-3 gap-2">
-  <a
-    className="btn btnGhost"
-    href="https://www.quantuml7ai.com/exchange"
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    {t('forum_qcoin_exchange') || 'Биржа'}
-  </a>
-  <button className="qcoinBtn" disabled>
-    {t('forum_qcoin_withdraw')}
-  </button>
-</div>
-
+        {/* ДЕЙСТВИЯ: всегда в одну строку, адаптивные */}
+        <div className="qcActions">
+          <a
+            className="btn qcBtn qcExchange"
+            href="https://www.quantuml7ai.com/exchange"
+            target="_blank"
+            rel="noopener noreferrer"
+            title={t('forum_qcoin_exchange') || 'Биржа'}
+          >
+            {t('forum_qcoin_exchange') || 'Биржа'}
+          </a>
+          <button
+            type="button"
+            className="btn qcBtn qcWithdraw"
+            disabled
+            title={t('forum_qcoin_withdraw')}
+          >
+            {t('forum_qcoin_withdraw')}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -2408,60 +2561,62 @@ function TopicItem({ t, agg, onOpen, isAdmin, onDelete }) {
   const { posts, likes, dislikes, views } = agg || {};
   return (
     <div className="item cursor-pointer" onClick={() => onOpen?.(t)}>
-      <div className="flex items-start justify-between gap-3">
-        {/* ВАЖНО: min-w-0 на колонке с текстом, чтобы flex разрешал сжатие */}
-        <div className="min-w-0">
-          {/* TITLE — уходим от класса .title и жёстко ломаем любые «слитки» */}
+      <div className="flex flex-col gap-3">
+        {/* верх: аватар → ник */}
+        {(t.nickname || t.icon) && (
+  <div className="topicUserRow">
+    <div className="avaMini">
+      <AvatarEmoji
+        userId={t.userId || t.accountId}
+        pIcon={resolveIconForDisplay(t.userId || t.accountId, t.icon)}
+      />
+    </div>
+    <button
+      type="button"
+      className="nick-badge nick-animate"
+      onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); }}
+      title={t.userId || t.accountId || ''}
+      style={{ flex: '0 1 auto', minWidth: 0 }}
+    >
+      <span className="nick-text">
+        {t.nickname || shortId(t.userId || t.accountId || '')}
+      </span>
+    </button>
+  </div>
+        )}
+
+        {/* контент: заголовок → описание → время */}
+        <div className="min-w-0"> 
           <div
             className="
               topicTitle text-[#eaf4ff]
               !whitespace-normal break-words break-all
               [overflow-wrap:anywhere] [line-break:anywhere]
-              max-w-full
-            "
+              max-w-full"
+            
           >
             {t.title}
           </div>
-
-          {/* DESCRIPTION */}
+ 
           {t.description && (
             <div
               className="
                 topicDesc text-[#eaf4ff]/75 text-sm
                 !whitespace-normal break-words break-all
                 [overflow-wrap:anywhere] [line-break:anywhere]
-                max-w-full
-              "
+                max-w-full mt-1"                                
             >
               {t.description}
             </div>
           )}
 
-          {/* ВРЕМЯ — через HydrateText */}
-          <div className="meta">
+          <div className="meta mt-1">
             <HydrateText value={human(t.ts)} />
-          </div>
-
-          {(t.nickname || t.icon) && (
-            <div className="flex items-center gap-2 mt-1">
-              <div className="avaMini">
-                <AvatarEmoji
-                  userId={t.userId || t.accountId}
-                  pIcon={resolveIconForDisplay(t.userId || t.accountId, t.icon)}
-                />
-              </div>
-              {/* Ник можно оставить с truncate */}
-              <span className="nick-badge nick-animate">
-                <span className="nick-text truncate">
-                  {t.nickname || shortId(t.userId || t.accountId || '')}
-                </span>
-              </span>
-            </div>
-          )}
+          </div> 
         </div>
 
-        {/* Правая колонка — не даём ей тянуть ширину */}
-        <div className="flex items-center gap-2 shrink-0">
+        {/* низ: счётчики/кнопки (как было) */}
+        <div className="flex items-center gap-2 pt-1">
           <span className="tag">👁 <HydrateText value={formatCount(views)} /></span>
           <span className="tag">💬 <HydrateText value={formatCount(posts)} /></span>
           <span className="tag">👍 <HydrateText value={formatCount(likes)} /></span>
@@ -2474,6 +2629,7 @@ function TopicItem({ t, agg, onOpen, isAdmin, onDelete }) {
                 e.stopPropagation();
                 onDelete?.(t);
               }}
+              title="Удалить тему"
             >
               🗑
             </button>
@@ -2560,39 +2716,26 @@ function PostCard({
       role="article"
       aria-label="Пост форума"
     >
-      {/* шапка */}
-      <div className="flex items-center justify-between gap-3 mb-2">
-        <div className="flex items-center gap-3 min-w-0">
-          {/* мини-аватар */}
-          <div className="avaMini">
-            <AvatarEmoji
-              userId={p.userId || p.accountId}
-              pIcon={resolveIconForDisplay(p.userId || p.accountId, p.icon)}
-            />
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              {/* НИК — красивый бейдж (для всех одинаково) */}
-              <span className="nick-badge nick-animate">
-                <span className="nick-text truncate">{p.nickname || shortId((p.userId || p.accountId || ''))}</span>
-              </span>
-              {p.parentId && (
-                <span className="tag" aria-label={t?.('forum_reply_to') || 'Ответ для'}>
-                  {(t?.('forum_reply_to') || 'ответ для') + ' '}
-                  {parentAuthor ? '@' + parentAuthor : '…'}
-                  {parentSnippet && <>: “{parentSnippet}”</>}
-                </span>
-              )}
-            </div>
-            {/* ВРЕМЯ — через HydrateText */}
-            <div className="meta truncate">
-              <HydrateText value={human(p.ts)} />
-            </div>
-          </div>
+      {/* шапка: Аватар слева, Ник справа (в одну строку), без времени */}
+      <div className="postUserRow mb-2">
+        <div className="avaMini">
+          <AvatarEmoji
+            userId={p.userId || p.accountId}
+            pIcon={resolveIconForDisplay(p.userId || p.accountId, p.icon)}
+          />
         </div>
-
-        {/* действия — ПЕРЕНЕСЕНО ВНИЗ В ОДНУ СТРОКУ СО СЧЁТЧИКАМИ */}
-        <div className="flex items-center gap-2"></div>
+        <span className="nick-badge nick-animate">
+          <span className="nick-text truncate">
+            {p.nickname || shortId((p.userId || p.accountId || ''))}
+          </span>
+        </span>
+         {p.parentId && (
+          <span className="tag ml-1" aria-label={t?.('forum_reply_to') || 'Ответ для'}>
+            {(t?.('forum_reply_to') || 'ответ для') + ' '}
+            {parentAuthor ? '@' + parentAuthor : '…'}
+            {parentSnippet && <>: “{parentSnippet}”</>}
+          </span>
+        )}
       </div>
 
       {/* тело поста — VIP-эмодзи как картинка, иначе ОЧИЩЕННЫЙ текст без URL-строк */}
@@ -2643,6 +2786,10 @@ function PostCard({
      ))}
    </div>
  )}
+       {/* время создания — ниже контента */}
+      <div className="meta mt-2">
+        <HydrateText value={human(p.ts)} />
+      </div>
       {/* нижняя полоса: СЧЁТЧИКИ + РЕАКЦИИ + (ПЕРЕНЕСЁННЫЕ) ДЕЙСТВИЯ — В ОДНУ СТРОКУ */}
       <div
         className="mt-3 flex items-center gap-2 text-[13px] opacity-80 actionBar"
