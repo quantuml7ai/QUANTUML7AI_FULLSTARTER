@@ -1817,6 +1817,84 @@ const Styles = () => (
   .actionBar > * { min-width: 0; }                /* детям разрешаем сжиматься */
   .actionBar .btnXs { flex: 1 1 0; min-width: 0; }/* сами маленькие кнопки — гибкие */
   .actionBar .tag  { min-width: 0; }              /* счётчики тоже не фиксируем */
+/* ---- VOICE dock ---- */
+.forumComposer{ position:relative; --voice-size:48px; --voice-right:10px; }
+
+.voiceDock{
+  position:absolute;
+  right:var(--voice-right);
+  bottom:calc(-1 * (var(--voice-size) - 4px));
+  display:inline-flex; align-items:center; gap:8px; pointer-events:auto;
+  height:var(--voice-size);
+}
+
+.voiceBtn{
+  position:relative; display:inline-flex; align-items:center; justify-content:center;
+  width:var(--voice-size); height:var(--voice-size); border-radius:50%;
+  border:0;                      /* нет контура в покое */
+  background:transparent;        /* нет фона */
+  color:#cfe0ff;
+  cursor:pointer;
+  transition:transform .12s ease, filter .18s ease;
+}
+.voiceBtn:hover{ filter:brightness(1.08) saturate(1.1); }
+.voiceBtn:active{ transform:translateY(1px) scale(.98); }
+.voiceBtn.locked{ opacity:.55; cursor:not-allowed; filter:saturate(.6); }
+.voiceBtn.rec{
+  /* красный контур-ореол во время записи, без фона */
+  box-shadow:0 0 0 2px rgba(255,90,90,.9), 0 0 14px 2px rgba(255,90,90,.25);
+  color:#ffd1d1;
+}
+.voiceBtn .recDot{
+  position:absolute; top:6px; right:6px; width:7px; height:7px; border-radius:50%;
+  background:#ff5959; box-shadow:0 0 6px rgba(255,0,0,.75);
+}
+/* авто-масштаб иконки под размер кнопки */
+.voiceBtn svg{ width:calc(var(--voice-size)*.46); height:calc(var(--voice-size)*.46); }
+
+/* таймер-пилюля над кнопкой */
+.voiceTimerPill{
+  position:absolute; right:0; bottom:calc(var(--voice-size) + 8px);
+  padding:4px 10px; border-radius:999px;
+  font:600 12px/1 ui-monospace,monospace;
+  color:#ffecec;
+  background:rgba(255,80,80,.22);
+  border:1px solid rgba(255,120,120,.45);
+  box-shadow:0 6px 16px rgba(255,80,80,.18), inset 0 0 0 1px rgba(255,255,255,.04);
+  backdrop-filter: blur(6px) saturate(120%);
+}
+
+/* ---- AUDIO card (превью + пост) ---- */
+.audioCard{
+  position:relative;
+  display:flex; align-items:center; gap:10px;
+  padding:10px 12px; border-radius:12px;
+  background:linear-gradient(180deg, rgba(18,26,46,.45), rgba(12,18,34,.35));
+  border:1px solid rgba(160,180,255,.22);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.03), 0 10px 30px rgba(10,20,40,.22);
+  backdrop-filter: blur(8px) saturate(120%);
+}
+.audioCard.preview{ max-width:min(90%, 520px); }
+
+.audioIcon{
+  width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center;
+  color:#9fb7ff; opacity:.95;
+}
+.audioCard audio{ display:block; width:100%; color-scheme:dark; }
+/* убираем серую плашку у Chromium */
+.audioCard audio::-webkit-media-controls-panel{ background:transparent !important; }
+.audioCard audio::-webkit-media-controls-enclosure{ background:transparent !important; }
+.audioCard audio::-webkit-media-controls{ background:transparent !important; }
+
+.audioRemove{
+  position:absolute; top:6px; right:6px;
+  width:18px; height:18px; border-radius:50%;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:12px; line-height:1;
+  background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.12);
+}
+
+ 
   `}</style>
 )
 
@@ -2412,16 +2490,31 @@ function PostCard({
   );
   const likes    = Number(p?.likes ?? 0);
   const dislikes = Number(p?.dislikes ?? 0);
-
-  // клики по реакциям
-  const like    = (e) => { e.preventDefault(); e.stopPropagation(); onReact?.(p, 'like'); };
-  const dislike = (e) => { e.preventDefault(); e.stopPropagation(); onReact?.(p, 'dislike'); };
-
-  // --- ТОЛЬКО ДЛЯ ИЗОБРАЖЕНИЙ: выделяем и вырезаем строки-URL картинок ---
-  const IMG_RE = /^(?:\/uploads\/[A-Za-z0-9._\-\/]+?\.(?:webp|png|jpe?g|gif)|https?:\/\/[^\s]+?\.(?:webp|png|jpe?g|gif))(?:\?.*)?$/i;
-  const allLines   = String(p?.text || '').split(/\r?\n/);
-  const imgLines   = allLines.map(s=>s.trim()).filter(s => IMG_RE.test(s));
-  const cleanedText = allLines.filter(s => !IMG_RE.test(s.trim())).join('\n');
+  const IMG_RE = /^(?:\/uploads\/[A-Za-z0-9._\-\/]+?\.(?:webp|png|jpe?g|gif)|https?:\/\/[^\s]+?\.(?:webp|png|jpe?g|gif))(?:[?#].*)?$/i;
+  // аудио: поддерживаем https и blob: (blob используется только локально, но подстрахуемся)
+  const AUDIO_EXT = /\.(?:webm|ogg|mp3|m4a|wav)(?:$|[?#])/i;
+  const isAudioLine = (s) => {
+    const t = String(s).trim();
+    if (!t) return false;
+    // одиночный URL в строке
+    if (!/^\S+$/.test(t)) return false;
+    // blob:… (локальное превью)
+    if (/^blob:/.test(t)) return true;
+    // https://… или твои относительные пути
+    if (/^https?:\/\//i.test(t) || /^\/uploads\/audio\//i.test(t) || /\/forum\/voice/i.test(t)) {
+      if (AUDIO_EXT.test(t)) return true;
+      if (/[?&]filename=.*\.(webm|ogg|mp3|m4a|wav)(?:$|[&#])/i.test(t)) return true;
+    }
+    return false;
+  };
+  const allLines    = String(p?.text || '').split(/\r?\n/);
+  const trimmed     = allLines.map(s => s.trim());
+  const imgLines    = trimmed.filter(s => IMG_RE.test(s));
+  const audioLines  = trimmed.filter(isAudioLine);
+  const cleanedText = allLines.filter(s => {
+    const t = s.trim();
+    return !IMG_RE.test(t) && !isAudioLine(t);
+  }).join('\n');
 
   return (
     <article
@@ -2500,7 +2593,22 @@ function PostCard({
           ))}
         </div>
       )}
-
+      {/* аудио: «невидимая» ссылка → карточка с плеером */}
+ {audioLines.length > 0 && (
+   <div className="postAudio" style={{display:'grid', gap:8, marginTop:8}}>
+     {audioLines.map((src, i) => (
+       <div key={i} className="audioCard">
+         <div className="audioIcon" aria-hidden>
+           <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+             <path d="M12 14a3 3 0 003-3V7a3 3 0 10-6 0v4a3 3 0 003 3Z" stroke="currentColor" strokeWidth="1.6"/>
+             <path d="M5 11a7 7 0 0014 0M12 18v3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+           </svg>
+         </div>
+         <audio src={src} controls preload="metadata" />
+       </div>
+     ))}
+   </div>
+ )}
       {/* нижняя полоса: СЧЁТЧИКИ + РЕАКЦИИ + (ПЕРЕНЕСЁННЫЕ) ДЕЙСТВИЯ — В ОДНУ СТРОКУ */}
       <div
         className="mt-3 flex items-center gap-2 text-[13px] opacity-80 actionBar"
@@ -3575,9 +3683,65 @@ React.useEffect(() => {
   return () => document.removeEventListener('pointerdown', onPointerDown);
 }, []);
 // [FOCUS_TOOLS_STATE:END]
+ // --- voice recording state ---
+ const [pendingAudio, setPendingAudio] = useState(null); // data: URL на blob (webm/ogg)
+ 
+ const [recState, setRecState] = useState('idle');       // 'idle' | 'rec'
+ const mediaRef = useRef(null);      // MediaRecorder
+ const chunksRef = useRef([]);       // буфер чанков
+ // — таймер записи
+
+ const [recElapsed, setRecElapsed] = useState(0);     // sec
+ const recTimerRef = useRef(null);
+ const fmtSec = (n) => {
+   const m = Math.floor((n||0)/60), s = (n||0)%60;
+   return `${m}:${String(s).padStart(2,'0')}`;
+ };
+ // --- voice handlers (зажал/держишь/отпустил) ---
+   const startRecord = async () => {
+     if (recState === 'rec') return;
+     try {
+       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+       const mr = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+       chunksRef.current = [];
+       mr.ondataavailable = (e) => { if (e.data && e.data.size) chunksRef.current.push(e.data) };
+       mr.onstop = async () => {
+         try {
+           const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+           const url  = URL.createObjectURL(blob);
+           setPendingAudio(url);
+         } catch {}
+       };
+       mr.start();
+       mediaRef.current = mr;
+       setRecState('rec');
+      // — запуск таймера    
+      setRecElapsed(0);
+      const started = Date.now();
+      clearInterval(recTimerRef.current);
+      recTimerRef.current = setInterval(() => {
+        setRecElapsed(Math.min(60, Math.floor((Date.now() - started)/1000)));
+      }, 200);
+     } catch (e) {
+       console.warn('mic denied', e);
+     }
+   };
+
+   const stopRecord = () => {
+     if (recState !== 'rec') return;
+     try { mediaRef.current?.stop(); } catch {}
+     try { mediaRef.current?.stream?.getTracks?.().forEach(tr => tr.stop()); } catch {}
+     mediaRef.current = null;
+     setRecState('idle');
+    // — стоп таймера
+    clearInterval(recTimerRef.current);
+    recTimerRef.current = null;    
+    setRecElapsed(0);
+   };
+
 
 // отправлять можно, если есть текст ИЛИ хотя бы одна картинка
-const canSend = (String(text || '').trim().length > 0) || (pendingImgs.length > 0);
+const canSend = (String(text || '').trim().length > 0) || (pendingImgs.length > 0) || !!pendingAudio;
   // === composer helpers (images) ===
 const IMG_LINE_RE = /^(\/uploads\/[A-Za-z0-9._\-\/]+?\.(webp|png|jpe?g|gif)$|https?:\/\/.+\.(webp|png|jpe?g|gif)(\?.*)?$)/i;
 
@@ -3653,7 +3817,11 @@ toast.ok('Тема создана')
     await api.mutate({
       ops:[{ type:'create_post', payload:{ topicId:String(realTopicId), text:safeFirst, nickname:t0.nickname, icon:t0.icon, parentId:null } }]
     }, uid)
-
+  // жёсткая очистка и подтягиваем свежий снапшот
+  try { setText(''); } catch {}
+  try { setPendingImgs([]); } catch {}
+  try { setPendingAudio(null); } catch {}
+  try { setReplyTo(null); } catch {}
     // подтянуть свежий снапшот
     if (typeof refresh === 'function') await refresh()
   }
@@ -3662,9 +3830,29 @@ toast.ok('Тема создана')
 
   const createPost = async () => {
     if (!rl.allowAction()) { toast.warn(t('forum_too_fast') || 'Слишком часто'); return; }
-const plain = (String(text || '').trim() || (pendingImgs.length > 0 ? '\u200B' : '')).slice(0,180);
-// к тексту приклеиваем каждую картинку отдельной строкой
-const body  = [plain, ...pendingImgs].filter(Boolean).join('\n');
+ // 0) аудио: если у нас в превью blob: — сначала грузим его и берём https-URL
+ let audioUrlToSend = '';
+ if (pendingAudio) {
+   try {
+     if (/^blob:/.test(pendingAudio)) {
+       const resp = await fetch(pendingAudio);
+       const blob = await resp.blob();
+       const fd = new FormData();
+       fd.append('file', blob, `voice-${Date.now()}.webm`);
+       const up = await fetch('/api/forum/uploadAudio', { method:'POST', body: fd, cache:'no-store' });
+       const uj = await up.json().catch(()=>null);
+       audioUrlToSend = (uj && Array.isArray(uj.urls) && uj.urls[0]) ? uj.urls[0] : '';
+     } else {
+       audioUrlToSend = pendingAudio;
+     }
+   } catch { audioUrlToSend = ''; }
+ }
+
+ // 1) собираем текст: видимый текст + невидимые медиа-ссылки построчно (как у картинок)
+ const plain = (String(text || '').trim() || ((pendingImgs.length>0 || audioUrlToSend) ? '\u200B' : '')).slice(0,180);
+ const body  = [plain, ...pendingImgs, ...(audioUrlToSend ? [audioUrlToSend] : [])]
+   .filter(Boolean).join('\n');
+
 if (!body || !sel?.id) return;
 
 
@@ -3744,9 +3932,11 @@ if (!body || !sel?.id) return;
   // 4) мягкий догон серверного состояния: убираем tmp_*, дотягиваем id/счётчики
   setTimeout(() => { try { if (typeof refresh === 'function') refresh(); } catch {} }, 200);
 
-  // 5) сброс UI
+  // 5) сброс UI + ЧИСТКА АУДИО-ПРЕВЬЮ
   setText('');
   setPendingImgs([]);
+  try { if (pendingAudio && /^blob:/.test(pendingAudio)) URL.revokeObjectURL(pendingAudio) } catch {}
+  setPendingAudio(null);
   setReplyTo(null);
   toast.ok(t('forum_post_sent') || 'Отправлено');
 };
@@ -4361,7 +4551,10 @@ onClick={()=>{
           </div>
           <BackToTopButton />
 
-          <div className="flex items-end gap-2 forumComposer">
+          <div
+           className="flex items-end gap-2 forumComposer"
+           style={{ '--voice-size':'56px', '--voice-right':'90px' }}
+           >
             <textarea
               className="ta"
               style={{ minHeight: 60 }}  /* ↑ композер ниже (≈1.5–2x) */
@@ -4401,6 +4594,30 @@ onClick={()=>{
                 />
               </div>
             )}
+ {/* VOICE: кнопка + таймер сверху (жёстко справа под композером) */}
+ <div className="voiceDock">
+   {recState==='rec' && (
+     <div className="voiceTimerPill" role="status">
+       {fmtSec(recElapsed)}
+     </div>
+   )}
+   <button
+     type="button"
+     className={cls('voiceBtn', recState==='rec' && 'rec', !vipActive && 'locked')}
+     aria-label="Hold to record voice"
+     onMouseDown={(e)=>{ e.preventDefault(); if (vipActive) startRecord(); }}
+     onMouseUp={()=>{ if (recState==='rec') stopRecord(); }}
+     onMouseLeave={()=>{ if (recState==='rec') stopRecord(); }}
+     onTouchStart={(e)=>{ e.preventDefault(); if (vipActive) startRecord(); }}
+     onTouchEnd={()=>{ if (recState==='rec') stopRecord(); }}
+   >
+     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
+       <path d="M12 14a3 3 0 003-3V7a3 3 0 10-6 0v4a3 3 0 003 3Z" stroke="currentColor" strokeWidth="1.8"/>
+       <path d="M5 11a7 7 0 0014 0M12 18v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+     </svg>
+   </button>
+ </div>
+
           </div>
 
           <div className="tools flex flex-col gap-2">
@@ -4425,6 +4642,7 @@ onClick={()=>{
                   <path d="M8 14.5c1.2 1.2 2.8 1.8 4 1.8s2.8-.6 4-1.8" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
                 </svg>
               </button>
+
 
               {/* скрепка */}
               <button
@@ -4457,6 +4675,21 @@ onClick={()=>{
                   ))}
                 </div>
               )}
+ {/* voice preview (если записано) */}
+{pendingAudio && (
+  <div className="attachPreviewRow">
+    <div className="audioCard preview">
+      <div className="audioIcon" aria-hidden>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+          <path d="M12 14a3 3 0 003-3V7a3 3 0 10-6 0v4a3 3 0 003 3Z" stroke="currentColor" strokeWidth="1.6"/>
+          <path d="M5 11a7 7 0 0014 0M12 18v3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+        </svg>
+      </div>
+      <audio controls src={pendingAudio} />
+      <button type="button" className="audioRemove" title={t('forum_remove')||'Убрать'} onClick={()=> setPendingAudio(null)}>✕</button>
+    </div>
+  </div>
+)}
 
               <input
                 ref={fileRef}
@@ -4467,6 +4700,7 @@ onClick={()=>{
                 onChange={onFilesChosen}
               />
             </div>
+
 
             {emojiOpen && (
               <div
