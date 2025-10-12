@@ -1896,7 +1896,7 @@ const Styles = () => (
 /* --- avatar + nick (ник всегда под аватаром) --- */
 .avaNick{
   display:block;
-  margin-top:8px;
+  margin-top:14px;
   width:84px;                  /* = ширина твоего .avaBig; если другая — подставь её */
   text-align:center;
   white-space:nowrap;          /* не переносим ник */
@@ -1905,26 +1905,28 @@ const Styles = () => (
 
 /* --- правая полоса с Q COIN --- */
 .qRowRight{
-  display:flex; align-items:center; justify-content:flex-start;
-  min-width:0;
-  /* управление позицией/размером */
-  --qcoin-offset: 0px;      /* сдвиг вниз/вверх (Y) */
-  --qcoin-scale:  1;        /* масштаб блока */
-  transform: translateY(var(--qcoin-offset)) scale(var(--qcoin-scale));
-  transform-origin: left center;
-  will-change: transform;
-}
-.qRowRight > *{
-  display:inline-flex; align-items:center;
-  min-width:0; max-width:clamp(170px, 58vw, 450px);
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  font-size:clamp(22px, 1.6vw, 34px); /* базовый размер (масштабируется сверху) */
+  /* контейнер QCoin занимает всю правую часть и по высоте ровно аватар */
+  flex:1 1 auto; min-width:0; width:100%;
+  align-self:center;                      /* центр по колонке аватара */
+  height:var(--ava-size);
+  display:flex; align-items:center; justify-content:flex-end; /* прижимаем контент вправо */
+  /* тонкая вертикальная подстройка от середины аватара (можно крутить инлайном) */
+  --qcoin-y: 0px;
+  transform: translateY(var(--qcoin-y));
+  transform-origin:left center;
 }
 
-/* чтобы вся шапка держала один ряд: [аватар+ник] | [QCOIN] */
-.head{ display:flex; align-items:flex-start; gap:12px; }
-.head > div:first-child{ flex:0 0 auto; }     /* колонка аватара фикс */
-.head .min-w-0{ flex:1 1 auto; min-width:0; } /* правая часть тянется */
+/* сам блок QCoin растягивается на всю доступную ширину,
+   но не переносится и не вылазит */
+.qRowRight > *{
+  flex:1 1 auto; min-width:0; width:100%;
+  display:inline-flex; align-items:center; justify-content:flex-end;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  text-align:right;
+  font-size:clamp(12px, 2.4vw, 16px);     /* адаптивный размер шрифта */
+  max-width:100%;
+}
+
 
  
   `}</style>
@@ -4231,7 +4233,7 @@ const onFilesChosen = React.useCallback(async (e) => {
  <div className="min-w-0">
    <div
      className="qRowRight"
-     style={{ '--qcoin-offset':'6px', '--qcoin-scale':'1.15' }}  /* ← здесь настраиваешь */
+     style={{ '--qcoin-offset':'6px', '--qcoin-y': '-15px', '--qcoin-scale':'1.15' }}  /* ← здесь настраиваешь */
    >
      <QCoinInline t={t} userKey={idShown} />
    </div>
