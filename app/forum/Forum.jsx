@@ -1916,7 +1916,7 @@ const Styles = () => (
 }
 .qRowRight > *{
   display:inline-flex; align-items:center;
-  min-width:0; max-width:clamp(170px, 58vw, 580px);
+  min-width:0; max-width:clamp(170px, 58vw, 450px);
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   font-size:clamp(22px, 1.6vw, 34px); /* базовый размер (масштабируется сверху) */
 }
