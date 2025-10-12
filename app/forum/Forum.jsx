@@ -1916,7 +1916,7 @@ const Styles = () => (
   max-width:clamp(120px, 28vw, 260px);
   font-size:clamp(11px, 1.6vw, 14px);  /* адаптивный размер для мелких экранов */
   line-height:1;
-  white-space:nowrap;
+  white-space:wrap;
 }
 .rowQCoin > *{
   display:inline-flex; align-items:center;
