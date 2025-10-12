@@ -1923,7 +1923,7 @@ const Styles = () => (
   display:inline-flex; align-items:center; justify-content:flex-end;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   text-align:right;
-  font-size:clamp(16px, 2.8vw, 22px);     /* адаптивный размер шрифта */
+  font-size:clamp(12px, 2.8vw, 20px);     /* адаптивный размер шрифта */
   max-width:100%;
 }
 
