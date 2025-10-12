@@ -1893,36 +1893,47 @@ const Styles = () => (
   font-size:12px; line-height:1;
   background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.12);
 }
-/* ---- one-line row: avatar | nick | Q COIN ---- */
+/* ---- one-line row: avatar | nick | Q COIN (wrap-aware) ---- */
 .rowClamp{
   display:flex; align-items:center; gap:8px;
-  min-width:0;                /* позволяет ряду ужиматься */
-  white-space:nowrap;         /* никогда не переносим */
+  min-width:0;                 /* можно ужимать */
+  flex-wrap:wrap;              /* разрешаем перенос ИМЕННО элементам ряда */
+  /* ВАЖНО: больше НЕ ставим white-space:nowrap здесь */
 }
+
+/* ник — всегда одна строка, без переноса */
 .rowNick{
-  flex:1 1 auto;              /* ник занимает всё оставшееся */
-  min-width:0;                /* и может ужиматься */
+  flex:1 1 auto;               /* занимает оставшееся место в первой строке */
+  min-width:0;
 }
 .rowNick .nick-text{
   display:block; min-width:0;
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; /* ← запрет переноса */
   max-width:100%;
 }
 
-/* Q COIN блок: ужимается, но не вылезает и не переносится */
+/* Q COIN — в ряд справа, но может переехать на вторую строку */
 .rowQCoin{
-  flex:0 1 auto;              /* можно сжимать, но не растягивать весь ряд */
+  flex:0 1 auto;               /* по умолчанию в той же строке справа от ника */
   min-width:0;
   max-width:clamp(120px, 28vw, 260px);
-  font-size:clamp(11px, 1.6vw, 14px);  /* адаптивный размер для мелких экранов */
+  font-size:clamp(11px, 1.6vw, 14px);
   line-height:1;
-  white-space:wrap;
+  /* без nowrap — разрешаем перенос блока как целого */
 }
 .rowQCoin > *{
   display:inline-flex; align-items:center;
   min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
 
+/* На узких экранах Q COIN уходит ПОД ник (второй строкой) */
+@media (max-width: 520px){
+  .rowQCoin{
+    flex-basis:100%;    /* переносим на новую строку */
+    margin-top:4px;     /* небольшой отступ под ником */
+    max-width:100%;     /* на всю ширину контейнера */
+  }
+}
  
   `}</style>
 )
