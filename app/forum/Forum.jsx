@@ -1893,6 +1893,35 @@ const Styles = () => (
   font-size:12px; line-height:1;
   background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.12);
 }
+/* ---- one-line row: avatar | nick | Q COIN ---- */
+.rowClamp{
+  display:flex; align-items:center; gap:8px;
+  min-width:0;                /* позволяет ряду ужиматься */
+  white-space:nowrap;         /* никогда не переносим */
+}
+.rowNick{
+  flex:1 1 auto;              /* ник занимает всё оставшееся */
+  min-width:0;                /* и может ужиматься */
+}
+.rowNick .nick-text{
+  display:block; min-width:0;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  max-width:100%;
+}
+
+/* Q COIN блок: ужимается, но не вылезает и не переносится */
+.rowQCoin{
+  flex:0 1 auto;              /* можно сжимать, но не растягивать весь ряд */
+  min-width:0;
+  max-width:clamp(120px, 28vw, 260px);
+  font-size:clamp(11px, 1.6vw, 14px);  /* адаптивный размер для мелких экранов */
+  line-height:1;
+  white-space:nowrap;
+}
+.rowQCoin > *{
+  display:inline-flex; align-items:center;
+  min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
 
  
   `}</style>
@@ -4188,10 +4217,10 @@ const onFilesChosen = React.useCallback(async (e) => {
   )}
 
 
-<div className="min-w-0">
-  <div className="flex items-center gap-2">
+<div className="min-w-0">  
+    <div className="rowClamp">
     <button
-      className="nick-badge nick-animate"
+      className="nick-badge nick-animate rowNick"
       title={idShown||'—'}
       onClick={copyId}
     >
@@ -4203,9 +4232,9 @@ const onFilesChosen = React.useCallback(async (e) => {
 
 
 {/* Q COIN inline справа от ника */}
-<QCoinInline
-  t={t}
-  userKey={idShown} />
+<span className="rowQCoin">
+ <QCoinInline t={t} userKey={idShown} /> 
+</span>
   </div> 
 </div>
 
