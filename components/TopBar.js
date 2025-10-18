@@ -14,6 +14,9 @@ export default function TopBar() {
   const { t } = useI18n()
   const pathname = usePathname()
 
+  // Детекция Telegram WebApp (только на клиенте)
+  const isTg = typeof window !== 'undefined' && !!(window.Telegram && window.Telegram.WebApp)
+
   // Мягкая реакция на глобальный логаут (сохранить квоту → reload)
   if (typeof window !== 'undefined') {
     window.__QL7_TOPBAR_LOGOUT_ONCE__ ||= (() => {
@@ -30,6 +33,7 @@ export default function TopBar() {
     { href: '/',          label: t('nav_home') },
     { href: '/subscribe', label: t('nav_subscribe') },
     { href: '/exchange',  label: t('nav_exchange') },
+    { href: '/forum',     label: t('forum_title') },
     { href: '/about',     label: t('nav_about') },
     { href: '/contact',   label: t('nav_contact') },
     { href: '/privacy',   label: t('nav_privacy') }, // Privacy & Policy
@@ -42,8 +46,8 @@ export default function TopBar() {
   }
 
   return (
-    <header className="topbar">
-      {/* Логотип — оставил как было */}
+    <header className="topbar" data-in-tg={isTg ? 'true' : 'false'}>
+      {/* Логотип — как было */}
       <Link href="/" className="brand" aria-label="Quantum L7 AI">
         <img
           src="/branding/quantum_l7_logo.png"
@@ -54,10 +58,13 @@ export default function TopBar() {
         />
       </Link>
 
-      {/* Основная навигация — оставил порядок и классы */}
+      {/* Основная навигация — порядок и классы без изменений */}
       <nav aria-label="Main">
         {items.map(({ href, label }) => {
           const active = isActive(href)
+          // Внутри Telegram WebApp можно при желании открывать некоторые страницы в системном браузере.
+          // По умолчанию оставляем поведение как есть, но добавим безопасные атрибуты для совместимости.
+          const linkProps = isTg ? { rel: 'noopener noreferrer' } : {}
           return (
             <Link
               key={href}
@@ -65,15 +72,17 @@ export default function TopBar() {
               className={`nav-link${active ? ' active' : ''}`}
               aria-current={active ? 'page' : undefined}
               data-active={active ? 'true' : 'false'}
+              {...linkProps}
             >
               {label}
             </Link>
           )
         })}
-        {/* Кнопка «Авторизация» / статус входа — без изменений */}
+
+        {/* Кнопка «Авторизация» / статус входа — теперь сама умеет Telegram WebApp login */}
         <AuthNavClient />
 
-        {/* Переключатель языка — как было */}
+        {/* Переключатель языка — без изменений */}
         <LanguageSwitcher />
       </nav>
     </header>

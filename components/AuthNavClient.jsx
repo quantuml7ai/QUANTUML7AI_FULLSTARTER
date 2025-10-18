@@ -1,3 +1,4 @@
+// components/AuthNavClient.jsx
 'use client'
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
@@ -12,24 +13,25 @@ export default function AuthNavClient() {
   const { isConnected, address } = useAccount()
   const { t } = useI18n()
 
-  // Читаем способ авторизации, чтобы показывать Google/Email/Connected
-  const [authMethod, setAuthMethod] = useState(null)
+  // ---- локальные состояния/refs ----
+  const [authMethod, setAuthMethod] = useState(null)  // 'google' | 'email' | 'walletConnect' | ...
   const [mounted, setMounted] = useState(false)
-  const announcedRef = useRef(false) // чтобы не дублировать auth:ok
-  const prevConnectedRef = useRef(isConnected) // прошлое состояние
+  const announcedRef = useRef(false)                 // чтобы не дублировать auth:ok
+  const prevConnectedRef = useRef(isConnected)       // прошлое состояние
 
   useEffect(() => { setMounted(true) }, [])
 
+  // читаем сохранённый способ авторизации (для лейбла)
   useEffect(() => {
     if (!mounted) return
     try {
-      const m1 = localStorage.getItem('w3m-auth-provider') // 'google' | 'email' | ...
-      const m2 = localStorage.getItem('W3M_CONNECTED_CONNECTOR') // 'walletConnect' | 'injected' | ...
+      const m1 = localStorage.getItem('w3m-auth-provider')           // 'google' | 'email'
+      const m2 = localStorage.getItem('W3M_CONNECTED_CONNECTOR')     // 'walletConnect' | 'injected' | ...
       setAuthMethod(m1 || m2 || null)
     } catch {}
   }, [mounted, isConnected])
 
-  // Глобальный вызов авторизации (exchange и т.п.) — слушаем 'open-auth'
+  // глобальный вызов модалки (exchange и т.п.)
   useEffect(() => {
     if (typeof window === 'undefined') return
     const handler = () => { try { open() } catch {} }
@@ -37,12 +39,11 @@ export default function AuthNavClient() {
     return () => window.removeEventListener('open-auth', handler)
   }, [open])
 
-  // После успешной авторизации — сообщаем странице и сохраняем ID
+  // уведомляем страницу после успешного wallet-коннекта
   useEffect(() => {
     if (typeof window === 'undefined') return
     if (!isConnected || !address) { announcedRef.current = false; return }
     if (announcedRef.current) return
-
     try {
       window.__AUTH_ACCOUNT__ = address
       window.dispatchEvent(new CustomEvent('auth:ok', {
@@ -52,11 +53,11 @@ export default function AuthNavClient() {
     } catch {}
   }, [isConnected, address, authMethod])
 
-  // Перезагрузка при разлогине/отключении кошелька — с сохранением квоты
+  // перезагрузка при разлогине кошелька
   useEffect(() => {
     if (prevConnectedRef.current === true && isConnected === false) {
       try {
-        window.dispatchEvent(new Event('aiquota:flush'))   // ← сохранить квоту
+        window.dispatchEvent(new Event('aiquota:flush'))
         window.dispatchEvent(new CustomEvent('auth:logout'))
       } catch {}
       if (typeof window !== 'undefined') window.location.reload()
@@ -64,13 +65,13 @@ export default function AuthNavClient() {
     prevConnectedRef.current = isConnected
   }, [isConnected])
 
-  // События провайдера кошелька (если доступен)
+  // события провайдера кошелька
   useEffect(() => {
     if (typeof window === 'undefined' || !window.ethereum) return
     const onAccountsChanged = (accs) => {
       if (!accs || accs.length === 0) {
         try {
-          window.dispatchEvent(new Event('aiquota:flush')) // ← сохранить квоту
+          window.dispatchEvent(new Event('aiquota:flush'))
           window.dispatchEvent(new CustomEvent('auth:logout'))
         } catch {}
         window.location.reload()
@@ -78,7 +79,7 @@ export default function AuthNavClient() {
     }
     const onDisconnect = () => {
       try {
-        window.dispatchEvent(new Event('aiquota:flush'))   // ← сохранить квоту
+        window.dispatchEvent(new Event('aiquota:flush'))
         window.dispatchEvent(new CustomEvent('auth:logout'))
       } catch {}
       window.location.reload()
@@ -91,7 +92,7 @@ export default function AuthNavClient() {
     }
   }, [])
 
-  // Если в другой вкладке стерли локальное состояние — обновим (с сохранением квоты)
+  // синхронизация по localStorage
   useEffect(() => {
     const onStorage = (e) => {
       if (!e) return
@@ -100,7 +101,7 @@ export default function AuthNavClient() {
         const w = localStorage.getItem('ql7_account') || localStorage.getItem('account') || localStorage.getItem('wallet')
         if (!a && !w) {
           try {
-            window.dispatchEvent(new Event('aiquota:flush')) // ← сохранить квоту
+            window.dispatchEvent(new Event('aiquota:flush'))
             window.dispatchEvent(new CustomEvent('auth:logout'))
           } catch {}
           window.location.reload()
@@ -111,28 +112,83 @@ export default function AuthNavClient() {
     return () => window.removeEventListener('storage', onStorage)
   }, [])
 
-  const authLabel = useMemo(() => {
-    if (isConnected && address) return shortAddr(address)
+  // ======== детекция мини-аппа и сессии (кука) ========
+  const isTg = typeof window !== 'undefined' && !!(window.Telegram && window.Telegram.WebApp)
+  const hasSessionCookie = typeof document !== 'undefined' && document.cookie.includes('ql7_session=')
+  const isAuthed = hasSessionCookie || (isConnected && !!address)
 
+  // ======== Telegram WebApp login ========
+  const loginViaTelegramWebApp = async () => {
+    try {
+      const tg = window?.Telegram?.WebApp
+      if (!tg) { open(); return } // на всякий случай — fallback к обычной авторизации
+      tg.expand?.()
+      const initData = tg.initData || ''
+      const r = await fetch('/api/tg/webapp-login', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-telegram-init-data': initData,
+        },
+        body: JSON.stringify({ initData }),
+        credentials: 'include',
+      })
+      const j = await r.json().catch(() => null)
+      if (j?.ok) {
+        // кука уже установлена на сервере — просто перезагрузим
+        window.location.reload()
+      } else {
+        alert('Telegram login failed: ' + (j?.error || 'Unknown error'))
+      }
+    } catch (e) {
+      alert('Telegram login error: ' + e)
+    }
+  }
+
+  // ======== подпись/лейбл ========
+  const authLabel = useMemo(() => {
+    if (isAuthed && address) return shortAddr(address)
+    if (isAuthed && !address) return t('auth_connected') || 'Connected' // сессия есть, но не кошелёк
     if (authMethod) {
       const map = {
         google: t('auth_google') || 'Google',
         email: t('auth_email') || 'Email',
       }
-      return map[authMethod] || t('auth_connected') || 'Connected'
+      return map[authMethod] || (t('auth_connected') || 'Connected')
     }
-
     const v = t('auth_signin')
     return v && v !== 'auth_signin' ? v : 'Sign in'
-  }, [isConnected, address, authMethod, t])
+  }, [isAuthed, address, authMethod, t])
 
+  // ======== рендер ========
+  // Внутри Telegram WebApp:
+  //  - если уже авторизован (есть кука или кошелёк) — показать «Connected» (золото)
+  //  - если нет — показать кнопку Telegram-логина
+  if (isTg) {
+    return (
+      <button
+        type="button"
+        onClick={isAuthed ? undefined : loginViaTelegramWebApp}
+        className={`nav-auth-btn ${isAuthed ? 'is-auth' : 'is-guest'} nav-auth-btn--tg`}
+        aria-label={isAuthed ? 'Account' : 'Login via Telegram'}
+        data-auth={isAuthed ? 'true' : 'false'}
+        title={isAuthed ? (t('auth_account') || 'Account') : 'Continue with Telegram'}
+      >
+        {isAuthed ? (authLabel || 'Connected') : 'Continue with Telegram'}
+      </button>
+    )
+  }
+
+  // Обычные браузеры: старая логика — открываем w3m
   return (
     <button
       type="button"
       onClick={() => open()}
-      className="nav-auth-btn"
+      className={`nav-auth-btn ${isAuthed ? 'is-auth' : 'is-guest'}`}
       aria-label="Open connect modal"
       data-auth-open
+      data-auth={isAuthed ? 'true' : 'false'}
+      title={isAuthed ? (t('auth_account') || 'Account') : (t('auth_signin') || 'Sign in')}
     >
       {authLabel}
     </button>
