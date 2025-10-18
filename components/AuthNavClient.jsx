@@ -17,6 +17,7 @@ export default function AuthNavClient() {
   const [mounted, setMounted] = useState(false)
   const announcedRef = useRef(false)
   const prevConnectedRef = useRef(isConnected)
+  const triedTgAutoRef = useRef(false)
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -110,28 +111,16 @@ export default function AuthNavClient() {
     return () => window.removeEventListener('storage', onStorage)
   }, [])
 
-  // ===== Telegram WebApp: максимально терпимая детекция + подготовка =====
+  // ===== Telegram WebApp: авто-логин и перехват клика =====
   const tg = (typeof window !== 'undefined') ? (window.Telegram && window.Telegram.WebApp) : null
 
-  useEffect(() => {
-    if (!tg) return
-    try {
-      // некоторые клиенты требуют явного ready()
-      tg.ready?.()
-      // на iOS полезно "развернуть" вебвью
-      tg.expand?.()
-    } catch {}
-  }, [tg])
-
-  // пытаемся вытащить initData — через объект, hash или search (на всякий случай)
+  // Достаём initData наиболее терпимо
   const getTgInitData = () => {
     try {
       if (tg?.initData) return tg.initData
-      // иногда Telegram кладёт tgWebAppData в hash (#tgWebAppData=...)
       const h = new URLSearchParams((typeof window !== 'undefined' ? window.location.hash : '').replace(/^#/, ''))
       const fromHash = h.get('tgWebAppData')
       if (fromHash) return fromHash
-      // или в search (?tgWebAppData=...)
       const s = new URLSearchParams((typeof window !== 'undefined' ? window.location.search : ''))
       const fromSearch = s.get('tgWebAppData')
       if (fromSearch) return fromSearch
@@ -141,12 +130,9 @@ export default function AuthNavClient() {
 
   const isTgWebApp = !!(tg && (tg.initDataUnsafe?.user || getTgInitData()))
 
-  // логин через Telegram (без алертов "web app not available")
   const tgLogin = async () => {
     try {
-      // если Telegram-объект не доступен, тихо выходим (кнопка у нас и так не покажется снаружи)
       if (!isTgWebApp) return
-
       tg?.ready?.()
       tg?.expand?.()
 
@@ -166,7 +152,6 @@ export default function AuthNavClient() {
           detail: { accountId: j.accountId, provider: 'telegram' }
         }))
       } else {
-        // мягкий фэйл: не спамим юзера, но в консоль пишем причину
         console.warn('Telegram login failed:', j?.error || j)
       }
     } catch (e) {
@@ -174,46 +159,50 @@ export default function AuthNavClient() {
     }
   }
 
+  // АВТО-ЛОГИН: внутри Telegram и ещё не авторизованы локально → сразу пробуем
+  useEffect(() => {
+    if (!isTgWebApp) return
+    if (triedTgAutoRef.current) return
+    const hasLocal = !!(localStorage.getItem('asherId') || localStorage.getItem('ql7_uid'))
+    if (!hasLocal) {
+      triedTgAutoRef.current = true
+      tgLogin()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isTgWebApp])
+
   // ===== состояние для цвета основной кнопки =====
-  const isAuthed = !!(isConnected && address)
+  const isAuthed = !!(isConnected && address) || !!(typeof window !== 'undefined' && localStorage.getItem('asherId'))
+
   const authLabel = useMemo(() => {
-    if (isAuthed) return shortAddr(address)
+    if (isConnected && address) return shortAddr(address)
     if (authMethod) {
       const map = { google: t('auth_google') || 'Google', email: t('auth_email') || 'Email' }
       return map[authMethod] || t('auth_connected') || 'Connected'
     }
     const v = t('auth_signin')
     return v && v !== 'auth_signin' ? v : 'Sign in'
-  }, [isAuthed, address, authMethod, t])
+  }, [isConnected, address, authMethod, t])
+
+  // Клик по кнопке:
+  // - В Telegram WebApp: пробуем tgLogin()
+  // - В обычном браузере: открываем Web3Modal как раньше
+  const handleClick = () => {
+    if (isTgWebApp) tgLogin()
+    else open()
+  }
 
   return (
-    <>
-      {/* Основная кнопка (как было) */}
-      <button
-        type="button"
-        onClick={() => open()}
-        className={`nav-auth-btn ${isAuthed ? 'is-auth' : 'is-guest'}`}
-        aria-label="Open connect modal"
-        data-auth-open
-        data-auth={isAuthed ? 'true' : 'false'}
-        title={isAuthed ? (t('auth_account') || 'Account') : (t('auth_signin') || 'Sign in')}
-      >
-        {authLabel}
-      </button>
-
-      {/* Кнопка Telegram отображается только внутри Telegram WebApp */}
-      {isTgWebApp && (
-        <button
-          type="button"
-          onClick={tgLogin}
-          className="nav-auth-btn tg"
-          aria-label="Sign in with Telegram"
-          title="Sign in with Telegram"
-          style={{ marginLeft: 8 }}
-        >
-          Telegram
-        </button>
-      )}
-    </>
+    <button
+      type="button"
+      onClick={handleClick}
+      className={`nav-auth-btn ${isAuthed ? 'is-auth' : 'is-guest'}`}
+      aria-label="Open connect modal"
+      data-auth-open
+      data-auth={isAuthed ? 'true' : 'false'}
+      title={isAuthed ? (t('auth_account') || 'Account') : (t('auth_signin') || 'Sign in')}
+    >
+      {authLabel}
+    </button>
   )
 }
