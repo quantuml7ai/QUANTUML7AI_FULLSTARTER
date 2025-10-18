@@ -15,33 +15,6 @@ import Script from 'next/script'
 // Рендерим тяжёлые/интерактивные вещи только на клиенте
 const HeroAvatar = dynamic(() => import('../components/HeroAvatar'), { ssr: false })
 const BgAudio    = dynamic(() => import('../components/BgAudio'),    { ssr: false })
-{/* Dev: глушим метрику Coinbase, чтобы не было 401 в консоли */}
-{process.env.NODE_ENV !== 'production' && (
-  <script
-    // eslint-disable-next-line react/no-danger
-    dangerouslySetInnerHTML={{
-      __html: `
-(function(){
-  try {
-    // Отключаем их аналитику через локалсторадж
-    localStorage.setItem('walletlink_analytics_enabled', 'false');
-  } catch(e){}
-
-  // Перехватываем fetch к их метрике и возвращаем 204
-  const _fetch = window.fetch;
-  window.fetch = function(input, init) {
-    try {
-      const url = typeof input === 'string' ? input : (input && input.url) || '';
-      if (url.includes('cca-lite.coinbase.com/metrics')) {
-        return Promise.resolve(new Response(null, { status: 204 }));
-      }
-    } catch(e){}
-    return _fetch.apply(this, arguments);
-  };
-})();`,
-    }}
-  />
-)}
 
 export const metadata = {
   metadataBase: new URL('https://quantuml7ai.com'),
@@ -110,7 +83,6 @@ export default function RootLayout({ children }) {
 
             {/* фон. аудио (кнопка снизу — «Выключить аудио») */}
             <BgAudio src="/audio/cosmic.mp3" defaultVolume={0.35} />
-
           </I18nProvider>
         </Providers>
 
