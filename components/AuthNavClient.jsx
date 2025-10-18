@@ -8,72 +8,46 @@ import { useI18n } from './i18n'
 
 const shortAddr = (a) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '')
 
+// вспомогательно: достаём accountId так же, как у тебя уже делается по месту
+function readAccountId() {
+  try {
+    if (typeof window === 'undefined') return null
+    // твой ранний бродкаст
+    if (window.__AUTH_ACCOUNT__) return String(window.__AUTH_ACCOUNT__)
+    // иногда ты кладёшь в localStorage разные ключи — проверим их
+    const a1 = localStorage.getItem('asherId')
+    const a2 = localStorage.getItem('ql7_uid')
+    const a3 = localStorage.getItem('ql7_account') || localStorage.getItem('account') || localStorage.getItem('wallet')
+    return (a1 || a2 || a3) ? String(a1 || a2 || a3) : null
+  } catch { return null }
+}
+
 export default function AuthNavClient() {
   const { open } = useWeb3Modal()
   const { isConnected, address } = useAccount()
   const { t } = useI18n()
 
-  // Читаем способ авторизации, чтобы показывать Google/Email/Connected
   const [authMethod, setAuthMethod] = useState(null)
   const [mounted, setMounted] = useState(false)
-  const announcedRef = useRef(false) // чтобы не дублировать auth:ok
-  const prevConnectedRef = useRef(isConnected) // прошлое состояние
-function LinkTelegramButton({ accountId, t }) {
-  const [busy, setBusy] = React.useState(false)
-  const [err, setErr] = React.useState(null)
+  const announcedRef = useRef(false)
+  const prevConnectedRef = useRef(isConnected)
 
-  const click = async () => {
-    if (!accountId) return
-    setBusy(true); setErr(null)
-    try {
-      const r = await fetch('/api/telegram/link/start', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ accountId }),
-      })
-      const j = await r.json().catch(() => null)
-      if (!j?.ok || !j?.deepLink) throw new Error(j?.error || 'FAILED_START')
-
-      // Если запущено внутри Telegram WebApp — откроем нативно
-      const isTg = typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp
-      if (isTg && window.Telegram.WebApp.openTelegramLink) {
-        window.Telegram.WebApp.openTelegramLink(j.deepLink)
-      } else {
-        window.open(j.deepLink, '_blank', 'noopener,noreferrer')
-      }
-    } catch (e) {
-      setErr(String(e?.message || e))
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  return (
-    <button
-      type="button"
-      className="nav-auth-btn link-tg"
-      onClick={click}
-      disabled={busy || !accountId}
-      title={t?.('auth_link_telegram') || 'Link Telegram'}
-      aria-label="Link Telegram"
-    >
-      {busy ? (t?.('auth_wait') || 'Wait…') : (t?.('auth_link_telegram') || 'Link Telegram')}
-    </button>
-  )
-}
+  // NEW: статус привязки TG
+  const [tgLinked, setTgLinked] = useState(false)
+  const checkingRef = useRef(false)
 
   useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
     if (!mounted) return
     try {
-      const m1 = localStorage.getItem('w3m-auth-provider') // 'google' | 'email' | ...
-      const m2 = localStorage.getItem('W3M_CONNECTED_CONNECTOR') // 'walletConnect' | 'injected' | ...
+      const m1 = localStorage.getItem('w3m-auth-provider')
+      const m2 = localStorage.getItem('W3M_CONNECTED_CONNECTOR')
       setAuthMethod(m1 || m2 || null)
     } catch {}
   }, [mounted, isConnected])
 
-  // Глобальный вызов авторизации (exchange и т.п.) — слушаем 'open-auth'
+  // глобальный вызов авторизации
   useEffect(() => {
     if (typeof window === 'undefined') return
     const handler = () => { try { open() } catch {} }
@@ -81,12 +55,11 @@ function LinkTelegramButton({ accountId, t }) {
     return () => window.removeEventListener('open-auth', handler)
   }, [open])
 
-  // После успешной авторизации — сообщаем странице и сохраняем ID
+  // анонсируем логин
   useEffect(() => {
     if (typeof window === 'undefined') return
     if (!isConnected || !address) { announcedRef.current = false; return }
     if (announcedRef.current) return
-
     try {
       window.__AUTH_ACCOUNT__ = address
       window.dispatchEvent(new CustomEvent('auth:ok', {
@@ -96,11 +69,11 @@ function LinkTelegramButton({ accountId, t }) {
     } catch {}
   }, [isConnected, address, authMethod])
 
-  // Перезагрузка при разлогине/отключении кошелька — с сохранением квоты
+  // разлогин → reload
   useEffect(() => {
     if (prevConnectedRef.current === true && isConnected === false) {
       try {
-        window.dispatchEvent(new Event('aiquota:flush'))   // ← сохранить квоту
+        window.dispatchEvent(new Event('aiquota:flush'))
         window.dispatchEvent(new CustomEvent('auth:logout'))
       } catch {}
       if (typeof window !== 'undefined') window.location.reload()
@@ -108,13 +81,13 @@ function LinkTelegramButton({ accountId, t }) {
     prevConnectedRef.current = isConnected
   }, [isConnected])
 
-  // События провайдера кошелька (если доступен)
+  // эвенты провайдера
   useEffect(() => {
     if (typeof window === 'undefined' || !window.ethereum) return
     const onAccountsChanged = (accs) => {
       if (!accs || accs.length === 0) {
         try {
-          window.dispatchEvent(new Event('aiquota:flush')) // ← сохранить квоту
+          window.dispatchEvent(new Event('aiquota:flush'))
           window.dispatchEvent(new CustomEvent('auth:logout'))
         } catch {}
         window.location.reload()
@@ -122,7 +95,7 @@ function LinkTelegramButton({ accountId, t }) {
     }
     const onDisconnect = () => {
       try {
-        window.dispatchEvent(new Event('aiquota:flush'))   // ← сохранить квоту
+        window.dispatchEvent(new Event('aiquota:flush'))
         window.dispatchEvent(new CustomEvent('auth:logout'))
       } catch {}
       window.location.reload()
@@ -135,7 +108,7 @@ function LinkTelegramButton({ accountId, t }) {
     }
   }, [])
 
-  // Если в другой вкладке стерли локальное состояние — обновим (с сохранением квоты)
+  // кросс-вкладочный логаут
   useEffect(() => {
     const onStorage = (e) => {
       if (!e) return
@@ -144,7 +117,7 @@ function LinkTelegramButton({ accountId, t }) {
         const w = localStorage.getItem('ql7_account') || localStorage.getItem('account') || localStorage.getItem('wallet')
         if (!a && !w) {
           try {
-            window.dispatchEvent(new Event('aiquota:flush')) // ← сохранить квоту
+            window.dispatchEvent(new Event('aiquota:flush'))
             window.dispatchEvent(new CustomEvent('auth:logout'))
           } catch {}
           window.location.reload()
@@ -154,6 +127,30 @@ function LinkTelegramButton({ accountId, t }) {
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
   }, [])
+
+  // ===== NEW: проверка статуса привязки TG =====
+  async function refreshTgLinkStatus() {
+    if (checkingRef.current) return
+    checkingRef.current = true
+    try {
+      const accountId = readAccountId() || address || null
+      if (!accountId) { setTgLinked(false); return }
+      const url = `/api/telegram/link/status?accountId=${encodeURIComponent(accountId)}`
+      const r = await fetch(url, { method: 'GET' })
+      const j = await r.json().catch(() => null)
+      setTgLinked(!!j?.linked)
+    } catch {
+      // молча
+    } finally {
+      checkingRef.current = false
+    }
+  }
+
+  // проверяем при монтировании и когда меняется аккаунт/логин
+  useEffect(() => {
+    refreshTgLinkStatus()
+    // можно также слушать эвент от бота, если ты его шлёшь в окно
+  }, [mounted, isConnected, address])
 
   // ===== новинка: вычисляем состояние авторизации для цвета кнопки =====
   const isAuthed = !!(isConnected && address)
@@ -171,23 +168,61 @@ function LinkTelegramButton({ accountId, t }) {
     return v && v !== 'auth_signin' ? v : 'Sign in'
   }, [isAuthed, address, authMethod, t])
 
-return (
-  <>
-    <button
-      type="button"
-      onClick={() => open()}
-      className={`nav-auth-btn ${isAuthed ? 'is-auth' : 'is-guest'}`}
-      aria-label="Open connect modal"
-      data-auth-open
-      data-auth={isAuthed ? 'true' : 'false'}
-      title={isAuthed ? (t('auth_account') || 'Account') : (t('auth_signin') || 'Sign in')}
-    >
-      {authLabel}
-    </button>
+  // действие по кнопке "Связать Telegram"
+  async function onLinkTelegram() {
+    try{
+      const accountId = readAccountId() || address || null
+      const r = await fetch('/api/telegram/link/start', {
+        method:'POST',
+        headers:{'content-type':'application/json'},
+        body: JSON.stringify({ accountId })
+      })
+      const j = await r.json()
+      if(!j.ok){ alert(j.error || 'Error'); return }
+      const botName = (process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || '@l7ai_bot')
+      const deepLink = j.deepLink || `https://t.me/${botName.replace('@','')}?start=ql7link_${j.token}`
+      window.open(deepLink, '_blank', 'noopener,noreferrer')
 
-    {/* ДОБАВЛЕНО: показываем «Связать с Telegram» только когда уже авторизован */}
-    {isAuthed && <LinkTelegramButton accountId={address} t={t} />}
-  </>
-)
+      // лёгкий поллинг статуса 15 секунд
+      const t0 = Date.now()
+      const deadline = t0 + 15000
+      const delay = (ms)=>new Promise(r=>setTimeout(r,ms))
+      while(Date.now() < deadline) {
+        await delay(1200)
+        await refreshTgLinkStatus()
+        if (tgLinked) break
+      }
+    }catch(e){
+      alert('Network error')
+    }
+  }
 
+  return (
+    <>
+      {/* основная кнопка авторизации — как было */}
+      <button
+        type="button"
+        onClick={() => open()}
+        className={`nav-auth-btn ${isAuthed ? 'is-auth' : 'is-guest'}`}
+        aria-label="Open connect modal"
+        data-auth-open
+        data-auth={isAuthed ? 'true' : 'false'}
+        title={isAuthed ? (t('auth_account') || 'Account') : (t('auth_signin') || 'Sign in')}
+      >
+        {authLabel}
+      </button>
+
+      {/* кнопка "Связать Telegram" — ПОКАЗЫВАЕМ ТОЛЬКО ЕСЛИ ЕЩЁ НЕ ПРИВЯЗАНО */}
+      {!tgLinked && (
+        <button
+          type="button"
+          className="nav-auth-btn link-tg"
+          onClick={onLinkTelegram}
+          title={t('auth_link_telegram') || 'Link Telegram'}
+        >
+          {t('auth_link_telegram') || 'Link Telegram'}
+        </button>
+      )}
+    </>
+  )
 }
