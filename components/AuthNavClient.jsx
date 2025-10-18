@@ -1,21 +1,20 @@
 // components/AuthNavClient.jsx
 'use client'
 
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { useWeb3Modal } from '@web3modal/wagmi/react'
 import { useAccount } from 'wagmi'
 import { useI18n } from './i18n'
 
 const shortAddr = (a) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '')
 
-// ——— helpers ———
-function isTelegramWebApp () {
+function isInTelegramWebApp() {
   if (typeof window === 'undefined') return false
-  // Официальный объект TG mini-app
+  // Надёжная проверка на наличие WebApp SDK
   if (window.Telegram && window.Telegram.WebApp) return true
-  // Подстраховка по UA некоторых клиентов
-  const ua = String(navigator.userAgent || '').toLowerCase()
-  return ua.includes('telegram') || ua.includes('tgwebapp')
+  // fallback по UA (на случай кастомных оболочек)
+  const ua = String(navigator.userAgent || '')
+  return /telegram|tgwebapp/i.test(ua)
 }
 
 export default function AuthNavClient() {
@@ -25,10 +24,17 @@ export default function AuthNavClient() {
 
   const [authMethod, setAuthMethod] = useState(null)
   const [mounted, setMounted] = useState(false)
+  const [isTg, setIsTg] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+
   const announcedRef = useRef(false)
   const prevConnectedRef = useRef(isConnected)
 
-  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => {
+    setMounted(true)
+    setIsTg(isInTelegramWebApp())
+  }, [])
 
   useEffect(() => {
     if (!mounted) return
@@ -39,7 +45,7 @@ export default function AuthNavClient() {
     } catch {}
   }, [mounted, isConnected])
 
-  // глобальный «открой авторизацию»
+  // Глобальный вызов авторизации (exchange и т.п.) — слушаем 'open-auth'
   useEffect(() => {
     if (typeof window === 'undefined') return
     const handler = () => { try { open() } catch {} }
@@ -47,11 +53,12 @@ export default function AuthNavClient() {
     return () => window.removeEventListener('open-auth', handler)
   }, [open])
 
-  // сообщаем об успешной авторизации
+  // После успешной авторизации — сообщаем странице и сохраняем ID
   useEffect(() => {
     if (typeof window === 'undefined') return
     if (!isConnected || !address) { announcedRef.current = false; return }
     if (announcedRef.current) return
+
     try {
       window.__AUTH_ACCOUNT__ = address
       window.dispatchEvent(new CustomEvent('auth:ok', {
@@ -61,7 +68,7 @@ export default function AuthNavClient() {
     } catch {}
   }, [isConnected, address, authMethod])
 
-  // релогин/отключение
+  // Перезагрузка при разлогине/отключении кошелька — с сохранением квоты
   useEffect(() => {
     if (prevConnectedRef.current === true && isConnected === false) {
       try {
@@ -73,7 +80,7 @@ export default function AuthNavClient() {
     prevConnectedRef.current = isConnected
   }, [isConnected])
 
-  // события провайдера
+  // События провайдера кошелька (если доступен)
   useEffect(() => {
     if (typeof window === 'undefined' || !window.ethereum) return
     const onAccountsChanged = (accs) => {
@@ -100,7 +107,7 @@ export default function AuthNavClient() {
     }
   }, [])
 
-  // синхронизация по localStorage
+  // Если в другой вкладке стерли локальное состояние — обновим (с сохранением квоты)
   useEffect(() => {
     const onStorage = (e) => {
       if (!e) return
@@ -120,12 +127,52 @@ export default function AuthNavClient() {
     return () => window.removeEventListener('storage', onStorage)
   }, [])
 
-  // ========= визуал и поведение =========
-  const isAuthed = !!(isConnected && address)
-  const inTg = isTelegramWebApp()
+  // ===== Telegram Mini App логин =====
+  const tgLogin = useCallback(async () => {
+    setBusy(true); setErr('')
+    try {
+      const tg = window.Telegram?.WebApp
+      if (!tg) throw new Error('Telegram WebApp is not available')
+
+      const initData = String(tg.initData || '')
+      const user = tg.initDataUnsafe?.user ? JSON.stringify(tg.initDataUnsafe.user) : ''
+
+      const r = await fetch('/api/auth/telegram', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ initData, user })
+      })
+      const j = await r.json().catch(() => null)
+      if (!j?.ok) throw new Error(j?.error || 'Auth failed')
+
+      // Зафиксируем локально — как у тебя в проекте принято
+      try { localStorage.setItem('asherId', j.accountId) } catch {}
+      try {
+        window.dispatchEvent(new CustomEvent('auth:ok', {
+          detail: { accountId: j.accountId, provider: 'telegram' }
+        }))
+      } catch {}
+
+      // Обновим страницу, чтобы всё подтянулось (форум, VIP и т.п.)
+      try { window.location.reload() } catch {}
+    } catch (e) {
+      setErr(String(e?.message || e))
+      // опционально можно показать toast, если у тебя глобальный toast есть
+      try { window.dispatchEvent(new CustomEvent('toast:error', { detail: String(e?.message || e) })) } catch {}
+    } finally {
+      setBusy(false)
+    }
+  }, [])
+
+  // ===== новинка: вычисляем состояние авторизации для цвета кнопки =====
+  const isAuthed = !!(isConnected && address) || !!(mounted && localStorage.getItem('asherId'))
 
   const authLabel = useMemo(() => {
-    if (isAuthed) return shortAddr(address)
+    if (isAuthed && address) return shortAddr(address)
+    if (isTg) {
+      // внутри TG показываем понятный текст
+      return busy ? 'Connecting…' : (t('auth_continue_telegram') || 'Continue with Telegram')
+    }
     if (authMethod) {
       const map = {
         google: t('auth_google') || 'Google',
@@ -135,43 +182,43 @@ export default function AuthNavClient() {
     }
     const v = t('auth_signin')
     return v && v !== 'auth_signin' ? v : 'Sign in'
-  }, [isAuthed, address, authMethod, t])
+  }, [isAuthed, address, authMethod, isTg, busy, t])
 
-  const handleClick = () => {
-    // ⚠️ Спец-поведение внутри Telegram Mini App:
-    if (inTg) {
-      try {
-        const url = 'https://www.quantuml7ai.com/auth/bridge?from=tg-miniapp'
-        // если доступен официальный API
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink) {
-          window.Telegram.WebApp.openLink(url, { try_instant_view: false })
-        } else {
-          // запасной вариант: обычная навигация
-          window.location.href = url
-        }
-      } catch {
-        // совсем fallback
-        try { window.location.href = 'https://www.quantuml7ai.com/auth/bridge?from=tg-miniapp' } catch {}
-      }
+  const onClick = useCallback(() => {
+    if (busy) return
+    if (isTg) {
+      // Внутри Telegram Mini App — авторизуемся через initData
+      tgLogin()
       return
     }
-
-    // Обычные браузеры — как раньше
+    // Обычный браузер — Web3Modal
     open()
-  }
+  }, [busy, isTg, tgLogin, open])
 
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      className={`nav-auth-btn ${isAuthed ? 'is-auth' : 'is-guest'}`}
-      aria-label="Open connect modal"
-      data-auth-open
-      data-auth={isAuthed ? 'true' : 'false'}
-      data-env={inTg ? 'tg' : 'web'}
-      title={isAuthed ? (t('auth_account') || 'Account') : (t('auth_signin') || 'Sign in')}
-    >
-      {authLabel}
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={onClick}
+        className={`nav-auth-btn ${isAuthed ? 'is-auth' : 'is-guest'}`}
+        aria-label={isTg ? 'Continue with Telegram' : 'Open connect modal'}
+        data-auth-open
+        data-auth={isAuthed ? 'true' : 'false'}
+        title={
+          isAuthed
+            ? (t('auth_account') || 'Account')
+            : (isTg ? (t('auth_continue_telegram') || 'Continue with Telegram') : (t('auth_signin') || 'Sign in'))
+        }
+        disabled={busy}
+      >
+        {authLabel}
+      </button>
+      {/* компактная ошибка прямо в топбаре (если случится) */}
+      {err && (
+        <span className="nav-auth-error" style={{ marginLeft: 8, fontSize: 12, opacity: 0.9 }}>
+          {err}
+        </span>
+      )}
+    </>
   )
 }
