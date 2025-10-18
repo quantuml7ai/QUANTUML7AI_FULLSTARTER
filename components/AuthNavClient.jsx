@@ -8,13 +8,11 @@ import { useI18n } from './i18n'
 
 const shortAddr = (a) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '')
 
-// вспомогательно: достаём accountId так же, как у тебя уже делается по месту
+// Вспомогательно: достаём accountId так же, как у тебя уже делается по месту
 function readAccountId() {
   try {
     if (typeof window === 'undefined') return null
-    // твой ранний бродкаст
     if (window.__AUTH_ACCOUNT__) return String(window.__AUTH_ACCOUNT__)
-    // иногда ты кладёшь в localStorage разные ключи — проверим их
     const a1 = localStorage.getItem('asherId')
     const a2 = localStorage.getItem('ql7_uid')
     const a3 = localStorage.getItem('ql7_account') || localStorage.getItem('account') || localStorage.getItem('wallet')
@@ -47,7 +45,7 @@ export default function AuthNavClient() {
     } catch {}
   }, [mounted, isConnected])
 
-  // глобальный вызов авторизации
+  // Глобальный вызов авторизации (exchange и т.п.)
   useEffect(() => {
     if (typeof window === 'undefined') return
     const handler = () => { try { open() } catch {} }
@@ -55,7 +53,7 @@ export default function AuthNavClient() {
     return () => window.removeEventListener('open-auth', handler)
   }, [open])
 
-  // анонсируем логин
+  // После успешной авторизации — сообщаем странице
   useEffect(() => {
     if (typeof window === 'undefined') return
     if (!isConnected || !address) { announcedRef.current = false; return }
@@ -69,7 +67,7 @@ export default function AuthNavClient() {
     } catch {}
   }, [isConnected, address, authMethod])
 
-  // разлогин → reload
+  // Разлогин → reload
   useEffect(() => {
     if (prevConnectedRef.current === true && isConnected === false) {
       try {
@@ -81,7 +79,7 @@ export default function AuthNavClient() {
     prevConnectedRef.current = isConnected
   }, [isConnected])
 
-  // эвенты провайдера
+  // Эвенты провайдера
   useEffect(() => {
     if (typeof window === 'undefined' || !window.ethereum) return
     const onAccountsChanged = (accs) => {
@@ -108,7 +106,7 @@ export default function AuthNavClient() {
     }
   }, [])
 
-  // кросс-вкладочный логаут
+  // Кросс-вкладочный логаут
   useEffect(() => {
     const onStorage = (e) => {
       if (!e) return
@@ -128,31 +126,35 @@ export default function AuthNavClient() {
     return () => window.removeEventListener('storage', onStorage)
   }, [])
 
-  // ===== NEW: проверка статуса привязки TG =====
+  // ===== ЕДИНАЯ проверка статуса привязки TG (POST /api/telegram/link/status) =====
   async function refreshTgLinkStatus() {
-    if (checkingRef.current) return
+    if (checkingRef.current) return false
     checkingRef.current = true
     try {
       const accountId = readAccountId() || address || null
-      if (!accountId) { setTgLinked(false); return }
-      const url = `/api/telegram/link/status?accountId=${encodeURIComponent(accountId)}`
-      const r = await fetch(url, { method: 'GET' })
+      if (!accountId) { setTgLinked(false); return false }
+      const r = await fetch('/api/telegram/link/status', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ accountId })
+      })
       const j = await r.json().catch(() => null)
-      setTgLinked(!!j?.linked)
+      const linked = !!j?.linked
+      setTgLinked(linked)
+      return linked
     } catch {
-      // молча
+      return false
     } finally {
       checkingRef.current = false
     }
   }
 
-  // проверяем при монтировании и когда меняется аккаунт/логин
+  // Проверяем при монтировании и при смене аккаунта
   useEffect(() => {
     refreshTgLinkStatus()
-    // можно также слушать эвент от бота, если ты его шлёшь в окно
   }, [mounted, isConnected, address])
 
-  // ===== новинка: вычисляем состояние авторизации для цвета кнопки =====
+  // ===== Вычисляем состояние авторизации для цвета кнопки =====
   const isAuthed = !!(isConnected && address)
 
   const authLabel = useMemo(() => {
@@ -168,7 +170,7 @@ export default function AuthNavClient() {
     return v && v !== 'auth_signin' ? v : 'Sign in'
   }, [isAuthed, address, authMethod, t])
 
-  // действие по кнопке "Связать Telegram"
+  // Действие по кнопке "Связать Telegram"
   async function onLinkTelegram() {
     try{
       const accountId = readAccountId() || address || null
@@ -183,23 +185,22 @@ export default function AuthNavClient() {
       const deepLink = j.deepLink || `https://t.me/${botName.replace('@','')}?start=ql7link_${j.token}`
       window.open(deepLink, '_blank', 'noopener,noreferrer')
 
-      // лёгкий поллинг статуса 15 секунд
-      const t0 = Date.now()
-      const deadline = t0 + 15000
+      // Лёгкий поллинг статуса 15 сек.
+      const deadline = Date.now() + 15000
       const delay = (ms)=>new Promise(r=>setTimeout(r,ms))
       while(Date.now() < deadline) {
         await delay(1200)
-        await refreshTgLinkStatus()
-        if (tgLinked) break
+        const linked = await refreshTgLinkStatus()
+        if (linked) break
       }
-    }catch(e){
+    }catch{
       alert('Network error')
     }
   }
 
   return (
     <>
-      {/* основная кнопка авторизации — как было */}
+      {/* Основная кнопка авторизации — как было */}
       <button
         type="button"
         onClick={() => open()}
@@ -212,7 +213,7 @@ export default function AuthNavClient() {
         {authLabel}
       </button>
 
-      {/* кнопка "Связать Telegram" — ПОКАЗЫВАЕМ ТОЛЬКО ЕСЛИ ЕЩЁ НЕ ПРИВЯЗАНО */}
+      {/* Кнопка "Связать Telegram" — показываем, только если ещё не привязано */}
       {!tgLinked && (
         <button
           type="button"
