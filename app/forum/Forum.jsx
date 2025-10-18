@@ -5713,7 +5713,7 @@ onClick={()=>{
               isAdmin={isAdmin}
               onDeletePost={delPost}
               onBanUser={banUser}
-              onUnbanUser={onUnbanUser}
+              onUnbanUser={unbanUser}
               isBanned={bannedSet.has(p.accountId || p.userId)}
               authId={auth.asherId || auth.accountId}
               markView={markViewPost}
