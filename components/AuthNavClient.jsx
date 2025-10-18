@@ -1,40 +1,68 @@
 // components/AuthNavClient.jsx
 'use client'
 
-import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useWeb3Modal } from '@web3modal/wagmi/react'
 import { useAccount } from 'wagmi'
 import { useI18n } from './i18n'
 
 const shortAddr = (a) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '')
 
-function isInTelegramWebApp() {
-  if (typeof window === 'undefined') return false
-  // Надёжная проверка на наличие WebApp SDK
-  if (window.Telegram && window.Telegram.WebApp) return true
-  // fallback по UA (на случай кастомных оболочек)
-  const ua = String(navigator.userAgent || '')
-  return /telegram|tgwebapp/i.test(ua)
-}
-
 export default function AuthNavClient() {
   const { open } = useWeb3Modal()
   const { isConnected, address } = useAccount()
   const { t } = useI18n()
 
+  // Читаем способ авторизации, чтобы показывать Google/Email/Connected
   const [authMethod, setAuthMethod] = useState(null)
   const [mounted, setMounted] = useState(false)
-  const [isTg, setIsTg] = useState(false)
-  const [busy, setBusy] = useState(false)
-  const [err, setErr] = useState('')
+  const announcedRef = useRef(false) // чтобы не дублировать auth:ok
+  const prevConnectedRef = useRef(isConnected) // прошлое состояние
+function LinkTelegramButton({ accountId, t }) {
+  const [busy, setBusy] = React.useState(false)
+  const [err, setErr] = React.useState(null)
 
-  const announcedRef = useRef(false)
-  const prevConnectedRef = useRef(isConnected)
+  const click = async () => {
+    if (!accountId) return
+    setBusy(true); setErr(null)
+    try {
+      const r = await fetch('/api/telegram/link/start', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ accountId }),
+      })
+      const j = await r.json().catch(() => null)
+      if (!j?.ok || !j?.deepLink) throw new Error(j?.error || 'FAILED_START')
 
-  useEffect(() => {
-    setMounted(true)
-    setIsTg(isInTelegramWebApp())
-  }, [])
+      // Если запущено внутри Telegram WebApp — откроем нативно
+      const isTg = typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp
+      if (isTg && window.Telegram.WebApp.openTelegramLink) {
+        window.Telegram.WebApp.openTelegramLink(j.deepLink)
+      } else {
+        window.open(j.deepLink, '_blank', 'noopener,noreferrer')
+      }
+    } catch (e) {
+      setErr(String(e?.message || e))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      className="nav-auth-btn link-tg"
+      onClick={click}
+      disabled={busy || !accountId}
+      title={t?.('auth_link_telegram') || 'Link Telegram'}
+      aria-label="Link Telegram"
+    >
+      {busy ? (t?.('auth_wait') || 'Wait…') : (t?.('auth_link_telegram') || 'Link Telegram')}
+    </button>
+  )
+}
+
+  useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
     if (!mounted) return
@@ -72,7 +100,7 @@ export default function AuthNavClient() {
   useEffect(() => {
     if (prevConnectedRef.current === true && isConnected === false) {
       try {
-        window.dispatchEvent(new Event('aiquota:flush'))
+        window.dispatchEvent(new Event('aiquota:flush'))   // ← сохранить квоту
         window.dispatchEvent(new CustomEvent('auth:logout'))
       } catch {}
       if (typeof window !== 'undefined') window.location.reload()
@@ -86,7 +114,7 @@ export default function AuthNavClient() {
     const onAccountsChanged = (accs) => {
       if (!accs || accs.length === 0) {
         try {
-          window.dispatchEvent(new Event('aiquota:flush'))
+          window.dispatchEvent(new Event('aiquota:flush')) // ← сохранить квоту
           window.dispatchEvent(new CustomEvent('auth:logout'))
         } catch {}
         window.location.reload()
@@ -94,7 +122,7 @@ export default function AuthNavClient() {
     }
     const onDisconnect = () => {
       try {
-        window.dispatchEvent(new Event('aiquota:flush'))
+        window.dispatchEvent(new Event('aiquota:flush'))   // ← сохранить квоту
         window.dispatchEvent(new CustomEvent('auth:logout'))
       } catch {}
       window.location.reload()
@@ -116,7 +144,7 @@ export default function AuthNavClient() {
         const w = localStorage.getItem('ql7_account') || localStorage.getItem('account') || localStorage.getItem('wallet')
         if (!a && !w) {
           try {
-            window.dispatchEvent(new Event('aiquota:flush'))
+            window.dispatchEvent(new Event('aiquota:flush')) // ← сохранить квоту
             window.dispatchEvent(new CustomEvent('auth:logout'))
           } catch {}
           window.location.reload()
@@ -127,52 +155,11 @@ export default function AuthNavClient() {
     return () => window.removeEventListener('storage', onStorage)
   }, [])
 
-  // ===== Telegram Mini App логин =====
-  const tgLogin = useCallback(async () => {
-    setBusy(true); setErr('')
-    try {
-      const tg = window.Telegram?.WebApp
-      if (!tg) throw new Error('Telegram WebApp is not available')
-
-      const initData = String(tg.initData || '')
-      const user = tg.initDataUnsafe?.user ? JSON.stringify(tg.initDataUnsafe.user) : ''
-
-      const r = await fetch('/api/auth/telegram', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ initData, user })
-      })
-      const j = await r.json().catch(() => null)
-      if (!j?.ok) throw new Error(j?.error || 'Auth failed')
-
-      // Зафиксируем локально — как у тебя в проекте принято
-      try { localStorage.setItem('asherId', j.accountId) } catch {}
-      try {
-        window.dispatchEvent(new CustomEvent('auth:ok', {
-          detail: { accountId: j.accountId, provider: 'telegram' }
-        }))
-      } catch {}
-
-      // Обновим страницу, чтобы всё подтянулось (форум, VIP и т.п.)
-      try { window.location.reload() } catch {}
-    } catch (e) {
-      setErr(String(e?.message || e))
-      // опционально можно показать toast, если у тебя глобальный toast есть
-      try { window.dispatchEvent(new CustomEvent('toast:error', { detail: String(e?.message || e) })) } catch {}
-    } finally {
-      setBusy(false)
-    }
-  }, [])
-
   // ===== новинка: вычисляем состояние авторизации для цвета кнопки =====
-  const isAuthed = !!(isConnected && address) || !!(mounted && localStorage.getItem('asherId'))
+  const isAuthed = !!(isConnected && address)
 
   const authLabel = useMemo(() => {
-    if (isAuthed && address) return shortAddr(address)
-    if (isTg) {
-      // внутри TG показываем понятный текст
-      return busy ? 'Connecting…' : (t('auth_continue_telegram') || 'Continue with Telegram')
-    }
+    if (isAuthed) return shortAddr(address)
     if (authMethod) {
       const map = {
         google: t('auth_google') || 'Google',
@@ -182,43 +169,25 @@ export default function AuthNavClient() {
     }
     const v = t('auth_signin')
     return v && v !== 'auth_signin' ? v : 'Sign in'
-  }, [isAuthed, address, authMethod, isTg, busy, t])
+  }, [isAuthed, address, authMethod, t])
 
-  const onClick = useCallback(() => {
-    if (busy) return
-    if (isTg) {
-      // Внутри Telegram Mini App — авторизуемся через initData
-      tgLogin()
-      return
-    }
-    // Обычный браузер — Web3Modal
-    open()
-  }, [busy, isTg, tgLogin, open])
+return (
+  <>
+    <button
+      type="button"
+      onClick={() => open()}
+      className={`nav-auth-btn ${isAuthed ? 'is-auth' : 'is-guest'}`}
+      aria-label="Open connect modal"
+      data-auth-open
+      data-auth={isAuthed ? 'true' : 'false'}
+      title={isAuthed ? (t('auth_account') || 'Account') : (t('auth_signin') || 'Sign in')}
+    >
+      {authLabel}
+    </button>
 
-  return (
-    <>
-      <button
-        type="button"
-        onClick={onClick}
-        className={`nav-auth-btn ${isAuthed ? 'is-auth' : 'is-guest'}`}
-        aria-label={isTg ? 'Continue with Telegram' : 'Open connect modal'}
-        data-auth-open
-        data-auth={isAuthed ? 'true' : 'false'}
-        title={
-          isAuthed
-            ? (t('auth_account') || 'Account')
-            : (isTg ? (t('auth_continue_telegram') || 'Continue with Telegram') : (t('auth_signin') || 'Sign in'))
-        }
-        disabled={busy}
-      >
-        {authLabel}
-      </button>
-      {/* компактная ошибка прямо в топбаре (если случится) */}
-      {err && (
-        <span className="nav-auth-error" style={{ marginLeft: 8, fontSize: 12, opacity: 0.9 }}>
-          {err}
-        </span>
-      )}
-    </>
-  )
+    {/* ДОБАВЛЕНО: показываем «Связать с Telegram» только когда уже авторизован */}
+    {isAuthed && <LinkTelegramButton accountId={address} t={t} />}
+  </>
+)
+
 }
