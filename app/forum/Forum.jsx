@@ -1396,16 +1396,13 @@ const Styles = () => (
   background:rgba(8,12,22,.8);
 }
 .qcoinCard{
-  width:min(520px, 94vw); max-height:100vh; overflow:auto;
+  width:min(520px, 94vw); max-height:180vh; overflow:auto;
   border:1px solid rgba(255,255,255,.14); border-radius:14px;
   background:rgba(10,14,20,.96); padding:14px;
   box-shadow:0 10px 30px rgba(0,0,0,.45);
 }
 .qcoinCardHdr{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px }
-.qcoinCard{
-  /* …остальное как выше… */
-  max-height: var(--qcoin-maxh, min(1560px, 112dvh));
-}
+
 
 /* гиф/аватар — х3 размер */
 .qcoinMini{
