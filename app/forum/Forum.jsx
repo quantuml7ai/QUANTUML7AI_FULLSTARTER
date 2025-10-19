@@ -1346,11 +1346,8 @@ const Styles = () => (
 }
 /* === Q COIN (инлайн + модалка) === */
 .qcoinRow{
-  display:inline-flex; align-items:center; gap:6px; margin-left:6px;
+  display:inline-flex; align-items:center; gap:10px; margin-left:10px;
 }
-
-/* === Q COIN (инлайн + модалка) === */
-.qcoinRow{ display:inline-flex; align-items:center; gap:10px; margin-left:10px; }
 
 /* Золотая надпись с переливом и свечением */
 .qcoinLabel{
@@ -1373,7 +1370,7 @@ const Styles = () => (
 @keyframes qcoinShine{ 0%{background-position:0% 50%} 100%{background-position:200% 50%} }
 @keyframes qcoinGlow{
   0%{ text-shadow:0 0 .3rem rgba(255,215,0,.35), 0 0 .1rem rgba(255,255,180,.35) }
-  50%{ text-shadow:0 0 .9rem rgba(255,215,0,.55), 0 0 .25rem rgba(255,255,190,.55) }
+  50%{ text-shadow:0 0 .9рем rgba(255,215,0,.55), 0 0 .25rem rgba(255,255,190,.55) }
   100%{ text-shadow:0 0 .3rem rgba(255,215,0,.35), 0 0 .1rem rgba(255,255,180,.35) }
 }
 
@@ -1390,41 +1387,41 @@ const Styles = () => (
 .qcoinValue.paused{ color:#ff8c8c; animation:blinkPause .9s steps(1) infinite }
 @keyframes blinkPause{ 50%{ opacity:.45 } }
 
-/* модалка */
+/* модалка — скроллим подложку, карточка растягивается по контенту */
 .qcoinModal{
-  position:fixed; inset:0; z-index:3200; display:grid; place-items:center;
+  position:fixed; inset:0; z-index:3200;
+  display:grid; align-items:start; justify-items:center; /* вместо place-items:center */
+  overflow:auto;                     /* скролл у подложки */
+  padding:16px 10px;                 /* запас от краёв экрана */
   background:rgba(8,12,22,.8);
 }
 .qcoinCard{
-  width:min(520px, 84vw); max-height:72vh; overflow:auto;
+  width:min(520px, 88vw);            /* ширину НЕ трогаем */
+  height:auto !important;
+  max-height:none !important;        /* убираем ограничение по высоте */
+  overflow:visible !important;       /* без внутреннего скролла */
   border:1px solid rgba(255,255,255,.14); border-radius:14px;
   background:rgba(10,14,20,.96); padding:14px;
   box-shadow:0 10px 30px rgba(0,0,0,.45);
 }
 .qcoinCardHdr{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px }
 
-
-/* гиф/аватар — х3 размер */
+/* гиф/аватар — одна версия (убраны дубли) */
 .qcoinMini{
-  width:  clamp(108px, 12.6vw, 144px);  /* было 36–48px → стало ~108–144px */
+  width:  clamp(108px, 12.6vw, 144px);
   height: clamp(108px, 12.6vw, 144px);
   border-radius:10px;
   object-fit:cover;
   border:1px solid rgba(255,215,0,.4);
   flex:0 0 auto;
-}
-/* мини-анимация слева от заголовка — теперь это <video> */
-.qcoinMini{
-  display:inline-block;
-  width:120px;
-  height:120px;
-  border-radius:8px;
-  object-fit:cover;              /* не деформировать ролик */
-  background: #000;              /* на всякий случай, пока метаданные грузятся */
+  background:#000;                   /* на случай загрузки метаданных */
   box-shadow:0 4px 12px rgba(50,80,160,.25);
 }
 
-.qcoinPopBody{ max-height:50vh; overflow:auto; }
+.qcoinPopBody{
+  max-height:none !important;        /* снимаем второй лимит */
+  overflow:visible !important;       /* скролл не здесь */
+}
 .qcoinCardHdr img, .qcoinPopBody img{ max-width:100%; height:auto }
 
 /* кнопки (старые) */
@@ -1481,9 +1478,11 @@ const Styles = () => (
   .qcoinValue.paused{ animation:none }
   .qcoinExchangeBtn::before, .qcoinExchangeBtn::after{ animation:none }
 }
+
 .forumSingle { display: grid; gap: 16px; }
 .panel { background: rgba(10,14,22,.96); border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:12px; }
 .panelTitle { margin:0 0 8px; font-weight:600; opacity:.9; }
+
 
 .forumTopbar{
   display:flex; gap:8px; align-items:center; justify-content:space-between;
