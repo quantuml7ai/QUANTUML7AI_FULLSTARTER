@@ -1402,6 +1402,10 @@ const Styles = () => (
   box-shadow:0 10px 30px rgba(0,0,0,.45);
 }
 .qcoinCardHdr{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px }
+.qcoinCard{
+  /* …остальное как выше… */
+  max-height: var(--qcoin-maxh, min(1060px, 72dvh));
+}
 
 /* гиф/аватар — х3 размер */
 .qcoinMini{
@@ -2816,7 +2820,7 @@ function QCoinWithdrawPopover({ anchorRef, onClose, t }) {
         width: pos.maxW,
       }}
     >
-      <div className="qcoinCard" style={{ maxHeight: pos.maxH }}>
+      <div className="qcoinCard" style={{ '--qcoin-maxh': `${pos.maxH}px` }}>
         <div className="qcoinCardHdr">
           <div className="flex items-center gap-3">
 <video
