@@ -1392,11 +1392,11 @@ const Styles = () => (
 
 /* модалка */
 .qcoinModal{
-  position:fixed; inset:0; z-index:3500; display:grid; place-items:center;
+  position:fixed; inset:0; z-index:3200; display:grid; place-items:center;
   background:rgba(8,12,22,.8);
 }
 .qcoinCard{
-  width:min(520px, 94vw); max-height:180vh; overflow:auto;
+  width:min(520px, 194vw); max-height:380vh; overflow:auto;
   border:1px solid rgba(255,255,255,.14); border-radius:14px;
   background:rgba(10,14,20,.96); padding:14px;
   box-shadow:0 10px 30px rgba(0,0,0,.45);
