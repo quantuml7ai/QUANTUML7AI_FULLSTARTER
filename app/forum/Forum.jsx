@@ -1404,7 +1404,7 @@ const Styles = () => (
 .qcoinCardHdr{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px }
 .qcoinCard{
   /* …остальное как выше… */
-  max-height: var(--qcoin-maxh, min(1060px, 72dvh));
+  max-height: var(--qcoin-maxh, min(1560px, 112dvh));
 }
 
 /* гиф/аватар — х3 размер */
