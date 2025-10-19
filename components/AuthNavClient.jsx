@@ -1,3 +1,4 @@
+// components/AuthNavClient.jsx
 'use client'
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
@@ -7,29 +8,44 @@ import { useI18n } from './i18n'
 
 const shortAddr = (a) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '')
 
+// Вспомогательно: достаём accountId так же, как у тебя уже делается по месту
+function readAccountId() {
+  try {
+    if (typeof window === 'undefined') return null
+    if (window.__AUTH_ACCOUNT__) return String(window.__AUTH_ACCOUNT__)
+    const a1 = localStorage.getItem('asherId')
+    const a2 = localStorage.getItem('ql7_uid')
+    const a3 = localStorage.getItem('ql7_account') || localStorage.getItem('account') || localStorage.getItem('wallet')
+    return (a1 || a2 || a3) ? String(a1 || a2 || a3) : null
+  } catch { return null }
+}
+
 export default function AuthNavClient() {
   const { open } = useWeb3Modal()
   const { isConnected, address } = useAccount()
   const { t } = useI18n()
 
-  // Читаем способ авторизации, чтобы показывать Google/Email/Connected
   const [authMethod, setAuthMethod] = useState(null)
   const [mounted, setMounted] = useState(false)
-  const announcedRef = useRef(false) // чтобы не дублировать auth:ok
-  const prevConnectedRef = useRef(isConnected) // прошлое состояние
+  const announcedRef = useRef(false)
+  const prevConnectedRef = useRef(isConnected)
+
+  // NEW: статус привязки TG
+  const [tgLinked, setTgLinked] = useState(false)
+  const checkingRef = useRef(false)
 
   useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
     if (!mounted) return
     try {
-      const m1 = localStorage.getItem('w3m-auth-provider') // 'google' | 'email' | ...
-      const m2 = localStorage.getItem('W3M_CONNECTED_CONNECTOR') // 'walletConnect' | 'injected' | ...
+      const m1 = localStorage.getItem('w3m-auth-provider')
+      const m2 = localStorage.getItem('W3M_CONNECTED_CONNECTOR')
       setAuthMethod(m1 || m2 || null)
     } catch {}
   }, [mounted, isConnected])
 
-  // Глобальный вызов авторизации (exchange и т.п.) — слушаем 'open-auth'
+  // Глобальный вызов авторизации (exchange и т.п.)
   useEffect(() => {
     if (typeof window === 'undefined') return
     const handler = () => { try { open() } catch {} }
@@ -37,12 +53,11 @@ export default function AuthNavClient() {
     return () => window.removeEventListener('open-auth', handler)
   }, [open])
 
-  // После успешной авторизации — сообщаем странице и сохраняем ID
+  // После успешной авторизации — сообщаем странице
   useEffect(() => {
     if (typeof window === 'undefined') return
     if (!isConnected || !address) { announcedRef.current = false; return }
     if (announcedRef.current) return
-
     try {
       window.__AUTH_ACCOUNT__ = address
       window.dispatchEvent(new CustomEvent('auth:ok', {
@@ -52,11 +67,11 @@ export default function AuthNavClient() {
     } catch {}
   }, [isConnected, address, authMethod])
 
-  // Перезагрузка при разлогине/отключении кошелька — с сохранением квоты
+  // Разлогин → reload
   useEffect(() => {
     if (prevConnectedRef.current === true && isConnected === false) {
       try {
-        window.dispatchEvent(new Event('aiquota:flush'))   // ← сохранить квоту
+        window.dispatchEvent(new Event('aiquota:flush'))
         window.dispatchEvent(new CustomEvent('auth:logout'))
       } catch {}
       if (typeof window !== 'undefined') window.location.reload()
@@ -64,13 +79,13 @@ export default function AuthNavClient() {
     prevConnectedRef.current = isConnected
   }, [isConnected])
 
-  // События провайдера кошелька (если доступен)
+  // Эвенты провайдера
   useEffect(() => {
     if (typeof window === 'undefined' || !window.ethereum) return
     const onAccountsChanged = (accs) => {
       if (!accs || accs.length === 0) {
         try {
-          window.dispatchEvent(new Event('aiquota:flush')) // ← сохранить квоту
+          window.dispatchEvent(new Event('aiquota:flush'))
           window.dispatchEvent(new CustomEvent('auth:logout'))
         } catch {}
         window.location.reload()
@@ -78,7 +93,7 @@ export default function AuthNavClient() {
     }
     const onDisconnect = () => {
       try {
-        window.dispatchEvent(new Event('aiquota:flush'))   // ← сохранить квоту
+        window.dispatchEvent(new Event('aiquota:flush'))
         window.dispatchEvent(new CustomEvent('auth:logout'))
       } catch {}
       window.location.reload()
@@ -91,7 +106,7 @@ export default function AuthNavClient() {
     }
   }, [])
 
-  // Если в другой вкладке стерли локальное состояние — обновим (с сохранением квоты)
+  // Кросс-вкладочный логаут
   useEffect(() => {
     const onStorage = (e) => {
       if (!e) return
@@ -100,7 +115,7 @@ export default function AuthNavClient() {
         const w = localStorage.getItem('ql7_account') || localStorage.getItem('account') || localStorage.getItem('wallet')
         if (!a && !w) {
           try {
-            window.dispatchEvent(new Event('aiquota:flush')) // ← сохранить квоту
+            window.dispatchEvent(new Event('aiquota:flush'))
             window.dispatchEvent(new CustomEvent('auth:logout'))
           } catch {}
           window.location.reload()
@@ -111,9 +126,39 @@ export default function AuthNavClient() {
     return () => window.removeEventListener('storage', onStorage)
   }, [])
 
-  const authLabel = useMemo(() => {
-    if (isConnected && address) return shortAddr(address)
+  // ===== ЕДИНАЯ проверка статуса привязки TG (POST /api/telegram/link/status) =====
+  async function refreshTgLinkStatus() {
+    if (checkingRef.current) return false
+    checkingRef.current = true
+    try {
+      const accountId = readAccountId() || address || null
+      if (!accountId) { setTgLinked(false); return false }
+      const r = await fetch('/api/telegram/link/status', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ accountId })
+      })
+      const j = await r.json().catch(() => null)
+      const linked = !!j?.linked
+      setTgLinked(linked)
+      return linked
+    } catch {
+      return false
+    } finally {
+      checkingRef.current = false
+    }
+  }
 
+  // Проверяем при монтировании и при смене аккаунта
+  useEffect(() => {
+    refreshTgLinkStatus()
+  }, [mounted, isConnected, address])
+
+  // ===== Вычисляем состояние авторизации для цвета кнопки =====
+  const isAuthed = !!(isConnected && address)
+
+  const authLabel = useMemo(() => {
+    if (isAuthed) return shortAddr(address)
     if (authMethod) {
       const map = {
         google: t('auth_google') || 'Google',
@@ -121,20 +166,64 @@ export default function AuthNavClient() {
       }
       return map[authMethod] || t('auth_connected') || 'Connected'
     }
-
     const v = t('auth_signin')
     return v && v !== 'auth_signin' ? v : 'Sign in'
-  }, [isConnected, address, authMethod, t])
+  }, [isAuthed, address, authMethod, t])
+
+  // Действие по кнопке "Связать Telegram"
+  async function onLinkTelegram() {
+    try{
+      const accountId = readAccountId() || address || null
+      const r = await fetch('/api/telegram/link/start', {
+        method:'POST',
+        headers:{'content-type':'application/json'},
+        body: JSON.stringify({ accountId })
+      })
+      const j = await r.json()
+      if(!j.ok){ alert(j.error || 'Error'); return }
+      const botName = (process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || '@l7ai_bot')
+      const deepLink = j.deepLink || `https://t.me/${botName.replace('@','')}?start=ql7link_${j.token}`
+      window.open(deepLink, '_blank', 'noopener,noreferrer')
+
+      // Лёгкий поллинг статуса 15 сек.
+      const deadline = Date.now() + 15000
+      const delay = (ms)=>new Promise(r=>setTimeout(r,ms))
+      while(Date.now() < deadline) {
+        await delay(1200)
+        const linked = await refreshTgLinkStatus()
+        if (linked) break
+      }
+    }catch{
+      alert('Network error')
+    }
+  }
 
   return (
-    <button
-      type="button"
-      onClick={() => open()}
-      className="nav-auth-btn"
-      aria-label="Open connect modal"
-      data-auth-open
-    >
-      {authLabel}
-    </button>
+    <>
+      {/* Основная кнопка авторизации — как было */}
+      <button
+        type="button"
+        onClick={() => open()}
+        className={`nav-auth-btn ${isAuthed ? 'is-auth' : 'is-guest'}`}
+        aria-label="Open connect modal"
+        data-auth-open
+        data-auth={isAuthed ? 'true' : 'false'}
+        title={isAuthed ? (t('auth_account') || 'Account') : (t('auth_signin') || 'Sign in')}
+      >
+        {authLabel}
+      </button>
+
+      {/* Кнопка "Связать Telegram" — показываем, только если ещё не привязано */}
+      {!tgLinked && (
+        <button
+          type="button"
+          className="nav-auth-btn link-tg"
+          onClick={onLinkTelegram}
+          title={t('auth_link_telegram') || 'Link Telegram'}
+        >
+          {t('auth_link_telegram') || 'Link Telegram'}
+        </button>
+      )}
+    </>
   )
 }

@@ -3637,6 +3637,16 @@ const UNLIMIT_TR = {
   ai_unlimit_toast_on: 'VIP+ etkin',
   ai_unlimit_toast_off: 'VIP+ sona erdi',
 }
+/* -------------------- MERGE -------------------- */
+try {
+  Object.assign(dict.en, UNLIMIT_EN)
+  Object.assign(dict.ru, UNLIMIT_RU)
+  Object.assign(dict.uk, UNLIMIT_UK)
+  Object.assign(dict.es, UNLIMIT_ES)
+  Object.assign(dict.zh, UNLIMIT_ZH)
+  Object.assign(dict.ar, UNLIMIT_AR)
+  Object.assign(dict.tr, UNLIMIT_TR)
+} catch (e) {}
 /* -------------------- ACTIVE_UNTIL (only one key) -------------------- */
 const ACTIVE_EN = { active_until: 'active until' }
 const ACTIVE_RU = { active_until: 'активно до' }
@@ -3657,17 +3667,980 @@ try {
   Object.assign(dict.tr, ACTIVE_TR)
 } catch (e) {}
 
+/* -------------------- EN -------------------- */
+const FORUM_UI_EN = {
+  // Admin
+  forum_admin: 'ADMIN',
+  forum_admin_active: 'ADMIN',
+  forum_admin_exit: 'exit admin',
+  forum_admin_pass: 'Admin password',
+  forum_activate: 'Activate',
+
+  // Global / Dialogs
+  forum_cancel: 'Cancel',
+  forum_close: 'Close',
+  forum_save: 'Save',
+  forum_total: 'total',
+  forum_need_auth: 'Authorization required',
+  forum_auth_required: 'Sign in required',
+  forum_not_signed: 'Not signed in',
+
+  // Account / Profile
+  forum_account: 'Account',
+  forum_account_settings: 'Account settings',
+  forum_profile_nickname: 'Nickname',
+  forum_profile_nickname_ph: 'How should we call you?',
+  forum_profile_avatar: 'Avatar',
+  forum_avatar_vip: 'VIP+ avatars',
+
+  // VIP+
+forum_vip_only: 'VIP+ only',
+forum_vip_plus: 'VIP+',
+forum_vip_active: 'VIP+ active',
+forum_vip_thanks: 'Thanks for your support!',
+forum_vip_title: 'VIP+',
+forum_vip_desc: 'VIP+ unlocks premium avatars and emoji, the ability to send voice messages and images, and a faster Q COIN growth rate (×2 accrual). VIP+ also removes the limit on the AI Analytics box on the Exchange page, giving you access to high-fidelity forecasts and deeper insights. Be seen, be heard, and grow your balance faster with VIP+.',
+forum_vip_pay: 'Pay',
+forum_vip_pay_fail: 'Payment failed. Try again later.',
+forum_vip_required: 'VIP+ required',
+forum_vip_already_active: 'VIP is already active',
+forum_vip_activated: 'VIP activated',
+forum_vip_pending: 'Payment pending…',
+
+
+  // Header / Search / Sort
+  forum_search_ph: 'Enter keyword…',
+  forum_sort: 'Sort',
+  forum_sort_new: 'Newest',
+  forum_sort_top: 'Top',
+  forum_sort_views: 'Views',
+  forum_sort_likes: 'Likes',
+  forum_sort_replies: 'Replies',
+  forum_search_empty: 'Nothing found',
+
+  // Navigation
+  forum_back: 'Back',
+  forum_home: 'Home',
+
+  // Threads / Posts
+  forum_open_replies: 'Replies',
+  forum_no_posts_yet: 'No posts yet',
+  forum_report_ok: 'Report sent',
+  forum_report: 'Report',
+  forum_reply: 'Reply',
+  forum_delete: 'Delete',
+  forum_unban: 'Unban',
+  forum_ban: 'Ban',
+  forum_views: 'Views',
+  forum_replies: 'Replies',
+  forum_like: 'Like',
+  forum_dislike: 'Dislike',
+
+  // Composer
+  forum_reply_to: 'Reply to',
+  forum_replying_to: 'Replying to',
+  forum_composer_hint: 'Be precise. Respect evidence. Links are welcome.',
+  forum_composer_placeholder: 'Write a message…',
+  forum_send: 'Send',
+  forum_more_emoji: 'More emoji',
+  forum_emoji_vip: 'VIP+ emoji',
+  forum_attach: 'Attach',
+  forum_remove: 'Remove',
+  forum_remove_attachment: 'Remove attachment',
+  forum_post_sent: 'Sent',
+
+  // New Topic
+  forum_hint_select_topic: 'Select a topic to read and reply',
+  forum_create: 'Create',
+  forum_creating: 'Creating…',
+  forum_topic_title: 'Title',
+  forum_topic_title_ph: 'Short, precise title',
+  forum_topic_desc: 'Description',
+  forum_topic_desc_ph: 'Optional description',
+  forum_topic_first_msg: 'First message',
+  forum_topic_first_msg_ph: 'Start the discussion with facts, data and sources…',
+
+   // QCoin Desk (expanded)
+/* -------------------- EN -------------------- */
+forum_qcoin_desc:
+  'Q COIN is a next-generation token with a proof-of-activity accrual model.\n\n' +
+  'Accrual is earned for real participation in the forum: reading topics, posting and replying, receiving reactions, and returning regularly.\n\n' +
+  'The architecture is designed for cross-chain interoperability and future bridges so Q COIN can operate as a settlement asset across networks. Accounting runs in a hybrid on-/off-chain scheme with continuous sync.\n\n' +
+  'To keep accrual running, open the forum at least once every 4 hours — that heartbeat confirms activity; otherwise accrual pauses until you return.\n\n' +
+  'VIP+ members receive a ×2 rate multiplier; a blinking “x2” badge is shown next to the counter.',
+
+forum_qcoin_withdraw_note:
+  'Listing and exchange integrations are announced in the forum under the key “Q COIN · Windrush”.\n\n' +
+  'Withdrawals unlock after account verification **and** once your balance reaches the minimum threshold **1.0000000000**. At that moment the “Withdraw” button turns gold and becomes active.\n\n' +
+  'Threshold example: 1.0000000000.',
+
+forum_qcoin_exchange: 'Exchange',
+forum_qcoin_withdraw: 'Withdraw',
+forum_qcoin_open_hint: 'Open Q COIN',
+forum_qcoin_x2: 'x2',
+forum_qcoin_x2_hint: 'VIP+: accrual ×2',
+
+forum_inbox: 'Replies to me',
+forum_inbox_title: 'Replies to your messages',
+forum_inbox_empty: 'No new replies',
+
+}
+
+/* -------------------- RU -------------------- */
+const FORUM_UI_RU = {
+  // Admin
+  forum_admin: 'АДМИН',
+  forum_admin_active: 'АДМИН',
+  forum_admin_exit: 'выйти из режима админа',
+  forum_admin_pass: 'Админ-пароль',
+  forum_activate: 'Активировать',
+
+  // Global / Dialogs
+  forum_cancel: 'Отмена',
+  forum_close: 'Закрыть',
+  forum_save: 'Сохранить',
+  forum_total: 'всего',
+  forum_need_auth: 'Требуется авторизация',
+  forum_auth_required: 'Нужна авторизация',
+  forum_not_signed: 'Вы не вошли',
+
+  // Account / Profile
+  forum_account: 'Аккаунт',
+  forum_account_settings: 'Настройки аккаунта',
+  forum_profile_nickname: 'Ник',
+  forum_profile_nickname_ph: 'Как вас называть?',
+  forum_profile_avatar: 'Аватар',
+  forum_avatar_vip: 'VIP+ аватары',
+
+  // VIP+
+forum_vip_only: 'Только для VIP+',
+forum_vip_plus: 'VIP+',
+forum_vip_active: 'VIP+ активен',
+forum_vip_thanks: 'Спасибо за поддержку!',
+forum_vip_title: 'VIP+',
+forum_vip_desc: 'VIP+ открывает доступ к премиум-аватарам и эмодзи, отправке голосовых сообщений и изображений, а также ускоряет рост Q COIN (начисление ×2). Кроме того, VIP+ снимает лимит c AI-бокса аналитики на странице Exchange — доступны продвинутые прогнозы и глубокая аналитика. Будьте заметны, отправляйте больше форматов и ускоряйте баланс с VIP+.',
+forum_vip_pay: 'Оплатить',
+forum_vip_pay_fail: 'Оплата не удалась. Повторите позже.',
+forum_vip_required: 'Нужен VIP+',
+forum_vip_already_active: 'VIP уже активен',
+forum_vip_activated: 'VIP активирован',
+forum_vip_pending: 'Платёж в обработке…',
+
+
+  // Header / Search / Sort
+  forum_search_ph: 'Введите ключевое слово…',
+  forum_sort: 'Сортировать',
+  forum_sort_new: 'Новые',
+  forum_sort_top: 'Топ',
+  forum_sort_views: 'Просмотры',
+  forum_sort_likes: 'Лайки',
+  forum_sort_replies: 'Ответы',
+  forum_search_empty: 'Ничего не найдено',
+
+  // Navigation
+  forum_back: 'Назад',
+  forum_home: 'На главную',
+
+  // Threads / Posts
+  forum_open_replies: 'Ответы',
+  forum_no_posts_yet: 'Пока нет сообщений',
+  forum_report_ok: 'Жалоба отправлена',
+  forum_report: 'Пожаловаться',
+  forum_reply: 'Ответить',
+  forum_delete: 'Удалить',
+  forum_unban: 'Снять бан',
+  forum_ban: 'Забанить',
+  forum_views: 'Просмотры',
+  forum_replies: 'Ответы',
+  forum_like: 'Нравится',
+  forum_dislike: 'Не нравится',
+
+  // Composer
+  forum_reply_to: 'Ответ для',
+  forum_replying_to: 'Ответ к',
+  forum_composer_hint: 'Будьте точны. Ссылайтесь на факты. Ссылки приветствуются.',
+  forum_composer_placeholder: 'Напишите сообщение…',
+  forum_send: 'Отправить',
+  forum_more_emoji: 'Больше эмодзи',
+  forum_emoji_vip: 'VIP+ эмодзи',
+  forum_attach: 'Прикрепить',
+  forum_remove: 'Убрать',
+  forum_remove_attachment: 'Убрать вложение',
+  forum_post_sent: 'Отправлено',
+
+  // New Topic
+  forum_hint_select_topic: 'Выберите тему для чтения и ответа',
+  forum_create: 'Создать',
+  forum_creating: 'Создаём…',
+  forum_topic_title: 'Заголовок',
+  forum_topic_title_ph: 'Короткий точный заголовок',
+  forum_topic_desc: 'Описание',
+  forum_topic_desc_ph: 'Необязательное описание',
+  forum_topic_first_msg: 'Первое сообщение',
+  forum_topic_first_msg_ph: 'Начните обсуждение фактами, данными и источниками…',
+
+ // QCoin Desk (expanded)
+/* -------------------- RU -------------------- */
+forum_qcoin_desc:
+  'Q COIN — токен нового поколения с моделью начисления proof-of-activity.\n\n' +
+  'Начисление идёт за реальное участие в форуме: чтение тем, публикации и ответы, полученные реакции и регулярные визиты.\n\n' +
+  'Архитектура ориентирована на кроссчейн-совместимость и будущие мосты, чтобы Q COIN выступал расчётным активом между сетями. Учёт ведётся в гибридной on-/off-chain-схеме с непрерывной синхронизацией.\n\n' +
+  'Чтобы начисления не останавливались, открывайте форум не реже одного раза в 4 часа — этот «heartbeat» подтверждает активность; иначе начисление ставится на паузу до вашего возвращения.\n\n' +
+  'Для VIP+ действует повышающий коэффициент ×2; рядом со счётчиком мигает бейдж «x2».',
+
+forum_qcoin_withdraw_note:
+  'Объявления о листинге и интеграциях публикуются в форуме под ключом «Q COIN · Windrush».\n\n' +
+  'Вывод становится доступен после верификации аккаунта **и** когда баланс достигает минимального порога **1.0000000000**. В этот момент кнопка «Вывести» загорается золотым и становится активной.\n\n' +
+  'Пример порога: 1.0000000000.',
+
+forum_qcoin_exchange: 'Биржа',
+forum_qcoin_withdraw: 'Вывести',
+forum_qcoin_open_hint: 'Открыть Q COIN',
+forum_qcoin_x2: 'x2',
+forum_qcoin_x2_hint: 'VIP+: начисление ×2',
+
+forum_inbox: 'Ответы мне',
+forum_inbox_title: 'Ответы на ваши сообщения',
+forum_inbox_empty: 'Новых ответов нет',
+
+}
+
+/* -------------------- UK -------------------- */
+const FORUM_UI_UK = {
+  // Admin
+  forum_admin: 'АДМІН',
+  forum_admin_active: 'АДМІН',
+  forum_admin_exit: 'вийти з режиму адміна',
+  forum_admin_pass: 'Пароль адміністратора',
+  forum_activate: 'Активувати',
+
+  // Global / Dialogs
+  forum_cancel: 'Скасувати',
+  forum_close: 'Закрити',
+  forum_save: 'Зберегти',
+  forum_total: 'усього',
+  forum_need_auth: 'Потрібна авторизація',
+  forum_auth_required: 'Потрібен вхід',
+  forum_not_signed: 'Не ввійшли',
+
+  // Account / Profile
+  forum_account: 'Обліковий запис',
+  forum_account_settings: 'Налаштування облікового запису',
+  forum_profile_nickname: 'Нікнейм',
+  forum_profile_nickname_ph: 'Як до вас звертатися?',
+  forum_profile_avatar: 'Аватар',
+  forum_avatar_vip: 'VIP+ аватари',
+
+  // VIP+
+forum_vip_only: 'Лише для VIP+',
+forum_vip_plus: 'VIP+',
+forum_vip_active: 'VIP+ активний',
+forum_vip_thanks: 'Дякуємо за підтримку!',
+forum_vip_title: 'VIP+',
+forum_vip_desc: 'VIP+ надає преміум-аватари й емодзі, можливість надсилати голосові повідомлення та зображення, а також пришвидшує нарахування Q COIN (×2). Додатково VIP+ знімає ліміт з AI-бокса аналітики на сторінці Exchange — відкриває високоточні прогнози та глибоку аналітику. Будьте помітними й накопичуйте баланс швидше з VIP+.',
+forum_vip_pay: 'Сплатити',
+forum_vip_pay_fail: 'Оплату не виконано. Спробуйте пізніше.',
+forum_vip_required: 'Потрібен VIP+',
+forum_vip_already_active: 'VIP уже активний',
+forum_vip_activated: 'VIP активовано',
+forum_vip_pending: 'Платіж обробляється…',
+
+
+  // Header / Search / Sort
+  forum_search_ph: 'Введіть ключове слово…',
+  forum_sort: 'Сортувати',
+  forum_sort_new: 'Нові',
+  forum_sort_top: 'Топ',
+  forum_sort_views: 'Перегляди',
+  forum_sort_likes: 'Вподобання',
+  forum_sort_replies: 'Відповіді',
+  forum_search_empty: 'Нічого не знайдено',
+
+  // Navigation
+  forum_back: 'Назад',
+  forum_home: 'На головну',
+
+  // Threads / Posts
+  forum_open_replies: 'Відповіді',
+  forum_no_posts_yet: 'Повідомлень ще немає',
+  forum_report_ok: 'Скаргу надіслано',
+  forum_report: 'Поскаржитися',
+  forum_reply: 'Відповісти',
+  forum_delete: 'Видалити',
+  forum_unban: 'Розблокувати',
+  forum_ban: 'Заблокувати',
+  forum_views: 'Перегляди',
+  forum_replies: 'Відповіді',
+  forum_like: 'Подобається',
+  forum_dislike: 'Не подобається',
+
+  // Composer
+  forum_reply_to: 'Відповідь для',
+  forum_replying_to: 'Відповідь на',
+  forum_composer_hint: 'Будьте точні. Посилайтеся на факти. Посилання вітаються.',
+  forum_composer_placeholder: 'Напишіть повідомлення…',
+  forum_send: 'Надіслати',
+  forum_more_emoji: 'Більше емодзі',
+  forum_emoji_vip: 'VIP+ емодзі',
+  forum_attach: 'Прикріпити',
+  forum_remove: 'Прибрати',
+  forum_remove_attachment: 'Прибрати вкладення',
+  forum_post_sent: 'Надіслано',
+
+  // New Topic
+  forum_hint_select_topic: 'Оберіть тему для читання та відповіді',
+  forum_create: 'Створити',
+  forum_creating: 'Створюємо…',
+  forum_topic_title: 'Заголовок',
+  forum_topic_title_ph: 'Короткий точний заголовок',
+  forum_topic_desc: 'Опис',
+  forum_topic_desc_ph: 'Необов’язковий опис',
+  forum_topic_first_msg: 'Перше повідомлення',
+  forum_topic_first_msg_ph: 'Почніть дискусію фактами, даними і джерелами…',
+
+/* -------------------- UK (Українська) -------------------- */
+forum_qcoin_desc:
+  'Q COIN — токен наступного покоління з моделлю proof-of-activity.\n\n' +
+  'Нарахування відбувається за реальну участь у форумі: читання тем, пости та відповіді, отримані реакції та регулярні візити.\n\n' +
+  'Архітектура спроєктована для кросчейн-сумісності та майбутніх містків, щоб Q COIN працював як розрахунковий актив між мережами. Облік ведеться у гібридній on-/off-chain-моделі з безперервною синхронізацією.\n\n' +
+  'Щоб нарахування не зупинялося, відкривайте форум щонайменше раз на 4 години — цей “heartbeat” підтверджує активність; інакше нарахування призупиняється до вашого повернення.\n\n' +
+  'Для VIP+ діє підвищений коефіцієнт ×2; поруч з лічильником блимає бейдж «x2».',
+
+forum_qcoin_withdraw_note:
+  'Оголошення про лістинг та біржові інтеграції публікуються у форумі під ключем «Q COIN · Windrush».\n\n' +
+  'Вивід стає доступним після верифікації акаунта **та** коли баланс досягає мінімального порога **1.0000000000**. У цей момент кнопка «Вивести» засвітиться золотим і стане активною.\n\n' +
+  'Приклад порога: 1.0000000000.',
+
+forum_qcoin_exchange: 'Біржа',
+forum_qcoin_withdraw: 'Вивести',
+forum_qcoin_open_hint: 'Відкрити Q COIN',
+forum_qcoin_x2: 'x2',
+forum_qcoin_x2_hint: 'VIP+: нарахування ×2',
+
+forum_inbox: 'Відповіді мені',
+forum_inbox_title: 'Відповіді на ваші повідомлення',
+forum_inbox_empty: 'Нових відповідей немає',
+
+}
+
+/* -------------------- ES -------------------- */
+const FORUM_UI_ES = {
+  // Admin
+  forum_admin: 'ADMIN',
+  forum_admin_active: 'ADMIN',
+  forum_admin_exit: 'salir de admin',
+  forum_admin_pass: 'Contraseña de administrador',
+  forum_activate: 'Activar',
+
+  // Global / Dialogs
+  forum_cancel: 'Cancelar',
+  forum_close: 'Cerrar',
+  forum_save: 'Guardar',
+  forum_total: 'total',
+  forum_need_auth: 'Se requiere autorización',
+  forum_auth_required: 'Se requiere iniciar sesión',
+  forum_not_signed: 'Sin iniciar sesión',
+
+  // Account / Profile
+  forum_account: 'Cuenta',
+  forum_account_settings: 'Ajustes de la cuenta',
+  forum_profile_nickname: 'Apodo',
+  forum_profile_nickname_ph: '¿Cómo te llamamos?',
+  forum_profile_avatar: 'Avatar',
+  forum_avatar_vip: 'Avatares VIP+',
+
+  // VIP+
+forum_vip_only: 'Solo VIP+',
+forum_vip_plus: 'VIP+',
+forum_vip_active: 'VIP+ activo',
+forum_vip_thanks: '¡Gracias por apoyar!',
+forum_vip_title: 'VIP+',
+forum_vip_desc: 'VIP+ desbloquea avatares y emoji premium, permite enviar mensajes de voz e imágenes y acelera el crecimiento de Q COIN (acumulación ×2). Además, VIP+ elimina el límite del cuadro de Analítica IA en la página Exchange para acceder a pronósticos de alta fidelidad y análisis profundos. Destácate y aumenta tu saldo más rápido con VIP+.',
+forum_vip_pay: 'Pagar',
+forum_vip_pay_fail: 'El pago falló. Inténtalo de nuevo más tarde.',
+forum_vip_required: 'Se requiere VIP+',
+forum_vip_already_active: 'El VIP ya está activo',
+forum_vip_activated: 'VIP activado',
+forum_vip_pending: 'Pago en proceso…',
+
+
+  // Header / Search / Sort
+  forum_search_ph: 'Introduce una palabra clave…',
+  forum_sort: 'Ordenar',
+  forum_sort_new: 'Más nuevo',
+  forum_sort_top: 'Top',
+  forum_sort_views: 'Vistas',
+  forum_sort_likes: 'Me gusta',
+  forum_sort_replies: 'Respuestas',
+  forum_search_empty: 'No se encontró nada',
+
+  // Navigation
+  forum_back: 'Volver',
+  forum_home: 'Inicio',
+
+  // Threads / Posts
+  forum_open_replies: 'Respuestas',
+  forum_no_posts_yet: 'Aún no hay mensajes',
+  forum_report_ok: 'Reporte enviado',
+  forum_report: 'Reportar',
+  forum_reply: 'Responder',
+  forum_delete: 'Eliminar',
+  forum_unban: 'Quitar bloqueo',
+  forum_ban: 'Bloquear',
+  forum_views: 'Vistas',
+  forum_replies: 'Respuestas',
+  forum_like: 'Me gusta',
+  forum_dislike: 'No me gusta',
+
+  // Composer
+  forum_reply_to: 'Responder a',
+  forum_replying_to: 'Respondiendo a',
+  forum_composer_hint: 'Sé preciso. Basa en evidencias. Los enlaces son bienvenidos.',
+  forum_composer_placeholder: 'Escribe un mensaje…',
+  forum_send: 'Enviar',
+  forum_more_emoji: 'Más emoji',
+  forum_emoji_vip: 'Emoji VIP+',
+  forum_attach: 'Adjuntar',
+  forum_remove: 'Quitar',
+  forum_remove_attachment: 'Quitar adjunto',
+  forum_post_sent: 'Enviado',
+
+  // New Topic
+  forum_hint_select_topic: 'Elige un tema para leer y responder',
+  forum_create: 'Crear',
+  forum_creating: 'Creando…',
+  forum_topic_title: 'Título',
+  forum_topic_title_ph: 'Título corto y preciso',
+  forum_topic_desc: 'Descripción',
+  forum_topic_desc_ph: 'Descripción opcional',
+  forum_topic_first_msg: 'Primer mensaje',
+  forum_topic_first_msg_ph: 'Inicia con hechos, datos y fuentes…',
+
+/* -------------------- ES (Español) -------------------- */
+forum_qcoin_desc:
+  'Q COIN es un token de nueva generación con modelo de acumulación proof-of-activity.\n\n' +
+  'Se acumula por participación real en el foro: leer temas, publicar y responder, recibir reacciones y regresar con regularidad.\n\n' +
+  'La arquitectura está diseñada para interoperabilidad cross-chain y futuros puentes, de modo que Q COIN pueda actuar como activo de liquidación entre redes. La contabilidad funciona en un esquema híbrido on/off-chain con sincronización continua.\n\n' +
+  'Para mantener la acumulación activa, abre el foro al menos cada 4 horas —ese “heartbeat” confirma actividad; de lo contrario, la acumulación se pausa hasta tu regreso.\n\n' +
+  'Los miembros VIP+ reciben un multiplicador ×2; un distintivo parpadeante “x2” aparece junto al contador.',
+
+forum_qcoin_withdraw_note:
+  'Los avisos de listado e integraciones de exchange se publican en el foro bajo la clave “Q COIN · Windrush”.\n\n' +
+  'Los retiros se habilitan tras la verificación de la cuenta **y** cuando tu saldo alcance el umbral mínimo **1.0000000000**. En ese momento el botón “Retirar” se vuelve dorado y queda activo.\n\n' +
+  'Ejemplo de umbral: 1.0000000000.',
+
+forum_qcoin_exchange: 'Exchange',
+forum_qcoin_withdraw: 'Retirar',
+forum_qcoin_open_hint: 'Abrir Q COIN',
+forum_qcoin_x2: 'x2',
+forum_qcoin_x2_hint: 'VIP+: acumulación ×2',
+
+forum_inbox: 'Respuestas para mí',
+forum_inbox_title: 'Respuestas a tus mensajes',
+forum_inbox_empty: 'No hay respuestas nuevas',
+
+}
+
+/* -------------------- ZH (简体) -------------------- */
+const FORUM_UI_ZH = {
+  // Admin
+  forum_admin: '管理员',
+  forum_admin_active: '管理员',
+  forum_admin_exit: '退出管理员模式',
+  forum_admin_pass: '管理员密码',
+  forum_activate: '激活',
+
+  // Global / Dialogs
+  forum_cancel: '取消',
+  forum_close: '关闭',
+  forum_save: '保存',
+  forum_total: '合计',
+  forum_need_auth: '需要授权',
+  forum_auth_required: '需要登录',
+  forum_not_signed: '未登录',
+
+  // Account / Profile
+  forum_account: '账号',
+  forum_account_settings: '账号设置',
+  forum_profile_nickname: '昵称',
+  forum_profile_nickname_ph: '我们如何称呼你？',
+  forum_profile_avatar: '头像',
+  forum_avatar_vip: 'VIP+ 头像',
+
+  // VIP+
+forum_vip_only: '仅限 VIP+',
+forum_vip_plus: 'VIP+',
+forum_vip_active: 'VIP+ 已激活',
+forum_vip_thanks: '感谢支持！',
+forum_vip_title: 'VIP+',
+forum_vip_desc: 'VIP+ 解锁高级头像与表情，可发送语音消息与图片，并将 Q COIN 的累计速度提升至 ×2。此外，VIP+ 还取消 Exchange 页面 AI 分析框的限制，提供高保真预测与深度洞察。更醒目、更高效地增长余额，尽在 VIP+。',
+forum_vip_pay: '支付',
+forum_vip_pay_fail: '支付失败，请稍后重试。',
+forum_vip_required: '需要 VIP+',
+forum_vip_already_active: 'VIP 已处于激活状态',
+forum_vip_activated: 'VIP 已激活',
+forum_vip_pending: '支付处理中…',
+
+
+  // Header / Search / Sort
+  forum_search_ph: '输入关键字…',
+  forum_sort: '排序',
+  forum_sort_new: '最新',
+  forum_sort_top: '热门',
+  forum_sort_views: '浏览量',
+  forum_sort_likes: '点赞',
+  forum_sort_replies: '回复数',
+  forum_search_empty: '未找到内容',
+
+  // Navigation
+  forum_back: '返回',
+  forum_home: '首页',
+
+  // Threads / Posts
+  forum_open_replies: '回复',
+  forum_no_posts_yet: '暂无消息',
+  forum_report_ok: '已提交举报',
+  forum_report: '举报',
+  forum_reply: '回复',
+  forum_delete: '删除',
+  forum_unban: '解除封禁',
+  forum_ban: '封禁',
+  forum_views: '浏览量',
+  forum_replies: '回复',
+  forum_like: '赞',
+  forum_dislike: '踩',
+
+  // Composer
+  forum_reply_to: '回复给',
+  forum_replying_to: '正在回复',
+  forum_composer_hint: '请准确、基于证据。欢迎附上链接。',
+  forum_composer_placeholder: '写点什么…',
+  forum_send: '发送',
+  forum_more_emoji: '更多表情',
+  forum_emoji_vip: 'VIP+ 表情',
+  forum_attach: '附件',
+  forum_remove: '移除',
+  forum_remove_attachment: '移除附件',
+  forum_post_sent: '已发送',
+
+  // New Topic
+  forum_hint_select_topic: '选择一个主题以阅读和回复',
+  forum_create: '创建',
+  forum_creating: '正在创建…',
+  forum_topic_title: '标题',
+  forum_topic_title_ph: '简短而准确的标题',
+  forum_topic_desc: '描述',
+  forum_topic_desc_ph: '可选描述',
+  forum_topic_first_msg: '首条消息',
+  forum_topic_first_msg_ph: '用事实、数据与来源开启讨论…',
+
+/* -------------------- ZH (简体) -------------------- */
+forum_qcoin_desc:
+  'Q COIN 是新一代代币，采用基于活动证明（proof-of-activity）的计息模型。\n\n' +
+  '计息来源于真实参与：阅读主题、发布与回复、获得互动，以及规律回访。\n\n' +
+  '系统架构面向跨链互通与未来跨链桥，使 Q COIN 可作为跨网络的结算资产。记账采用 on/off-chain 混合模式并持续同步。\n\n' +
+  '为保持持续计息，请至少每 4 小时打开一次论坛（心跳确认活跃）；否则计息将暂停，直至你返回。\n\n' +
+  'VIP+ 享受 ×2 计息倍率，计数器旁会显示闪烁的“x2”徽记。',
+
+forum_qcoin_withdraw_note:
+  '关于上所与交易集成的公告将发布在论坛的 “Q COIN · Windrush” 条目下。\n\n' +
+  '当账户完成验证，且余额达到最低门槛 **1.0000000000** 时，提币功能解锁；此时“提取”按钮会变为金色并可用。\n\n' +
+  '门槛示例：1.0000000000。',
+
+forum_qcoin_exchange: '交易所',
+forum_qcoin_withdraw: '提取',
+forum_qcoin_open_hint: '打开 Q COIN',
+forum_qcoin_x2: 'x2',
+forum_qcoin_x2_hint: 'VIP+：计息 ×2',
+
+forum_inbox: '回复给我',
+forum_inbox_title: '给你的回复',
+forum_inbox_empty: '暂无新回复',
+
+
+  // Inbox
+  forum_inbox: '给我的回复',
+  forum_inbox_title: '针对你消息的回复',
+  forum_inbox_empty: '暂无新回复',
+}
+
+/* -------------------- AR -------------------- */
+const FORUM_UI_AR = {
+  // Admin
+  forum_admin: 'مشرف',
+  forum_admin_active: 'مشرف',
+  forum_admin_exit: 'الخروج من وضع المشرف',
+  forum_admin_pass: 'كلمة مرور المشرف',
+  forum_activate: 'تفعيل',
+
+  // Global / Dialogs
+  forum_cancel: 'إلغاء',
+  forum_close: 'إغلاق',
+  forum_save: 'حفظ',
+  forum_total: 'الإجمالي',
+  forum_need_auth: 'يلزم تفويض',
+  forum_auth_required: 'يلزم تسجيل الدخول',
+  forum_not_signed: 'غير مسجل الدخول',
+
+  // Account / Profile
+  forum_account: 'الحساب',
+  forum_account_settings: 'إعدادات الحساب',
+  forum_profile_nickname: 'الاسم المستعار',
+  forum_profile_nickname_ph: 'بماذا نناديك؟',
+  forum_profile_avatar: 'الصورة الرمزية',
+  forum_avatar_vip: 'صور VIP+',
+
+  // VIP+
+forum_vip_only: 'خاص بـ VIP+',
+forum_vip_plus: 'VIP+',
+forum_vip_active: 'VIP+ مُفعّل',
+forum_vip_thanks: 'شكرًا على دعمك!',
+forum_vip_title: 'VIP+',
+forum_vip_desc: 'يوفّر VIP+ صورًا رمزية ورموزًا تعبيرية مميزة، وإرسال رسائل صوتية وصور، ويمنح معدل تراكم أسرع لعملة Q COIN (×2). كما يزيل VIP+ حدّ صندوق تحليلات الذكاء الاصطناعي في صفحة Exchange لتصل إلى توقعات عالية الدقة ورؤى معمّقة. تميّز ونمِّ رصيدك بسرعة أكبر مع VIP+.',
+forum_vip_pay: 'ادفع',
+forum_vip_pay_fail: 'فشل الدفع. حاول لاحقًا.',
+forum_vip_required: 'يتطلب VIP+',
+forum_vip_already_active: 'VIP مفعّل بالفعل',
+forum_vip_activated: 'تم تفعيل VIP',
+forum_vip_pending: 'الدفع قيد المعالجة…',
+
+
+  // Header / Search / Sort
+  forum_search_ph: 'أدخل كلمة مفتاحية…',
+  forum_sort: 'فرز',
+  forum_sort_new: 'الأحدث',
+  forum_sort_top: 'الأعلى',
+  forum_sort_views: 'المشاهدات',
+  forum_sort_likes: 'الإعجابات',
+  forum_sort_replies: 'الردود',
+  forum_search_empty: 'لا توجد نتائج',
+
+  // Navigation
+  forum_back: 'رجوع',
+  forum_home: 'الصفحة الرئيسية',
+
+  // Threads / Posts
+  forum_open_replies: 'الردود',
+  forum_no_posts_yet: 'لا رسائل بعد',
+  forum_report_ok: 'تم إرسال البلاغ',
+  forum_report: 'إبلاغ',
+  forum_reply: 'رد',
+  forum_delete: 'حذف',
+  forum_unban: 'إلغاء الحظر',
+  forum_ban: 'حظر',
+  forum_views: 'المشاهدات',
+  forum_replies: 'الردود',
+  forum_like: 'إعجاب',
+  forum_dislike: 'عدم إعجاب',
+
+  // Composer
+  forum_reply_to: 'رد على',
+  forum_replying_to: 'جارٍ الرد على',
+  forum_composer_hint: 'كن دقيقًا واستند إلى الأدلة. الروابط مُرحب بها.',
+  forum_composer_placeholder: 'اكتب رسالة…',
+  forum_send: 'إرسال',
+  forum_more_emoji: 'المزيد من الرموز',
+  forum_emoji_vip: 'رموز VIP+',
+  forum_attach: 'إرفاق',
+  forum_remove: 'إزالة',
+  forum_remove_attachment: 'إزالة المرفق',
+  forum_post_sent: 'تم الإرسال',
+
+  // New Topic
+  forum_hint_select_topic: 'اختر موضوعًا للقراءة والرد',
+  forum_create: 'إنشاء',
+  forum_creating: 'جارٍ الإنشاء…',
+  forum_topic_title: 'العنوان',
+  forum_topic_title_ph: 'عنوان قصير ودقيق',
+  forum_topic_desc: 'الوصف',
+  forum_topic_desc_ph: 'وصف اختياري',
+  forum_topic_first_msg: 'أول رسالة',
+  forum_topic_first_msg_ph: 'ابدأ النقاش بالحقائق والبيانات والمصادر…',
+
+/* -------------------- AR (العربية) -------------------- */
+forum_qcoin_desc:
+  'Q COIN هو رمز من الجيل التالي يعتمد نموذج احتساب قائمًا على إثبات النشاط (proof-of-activity).\n\n' +
+  'يُحتسب الرصيد لقاء المشاركة الفعلية في المنتدى: قراءة المواضيع، نشر المشاركات والردود، تلقي التفاعلات، والعودة المنتظمة.\n\n' +
+  'البنية مصممة للتشغيل البيني عبر سلاسل متعددة مع جسور مستقبلية، ليعمل Q COIN كأصل للتسوية بين الشبكات. يعتمد نظام القيود نموذجًا هجينًا on/off-chain مع مزامنة مستمرة.\n\n' +
+  'للحفاظ على الاستحقاق مستمرًا، افتح المنتدى مرة واحدة على الأقل كل 4 ساعات — نبضة قلب تؤكد النشاط؛ وإلا يتوقف الاحتساب حتى تعود.\n\n' +
+  'أعضاء VIP+ يحصلون على معامل ×2، وتظهر شارة “x2” يومض بجوار العداد.',
+
+forum_qcoin_withdraw_note:
+  'يتم الإعلان عن الإدراج والتكاملات مع المنصات ضمن المنتدى تحت المفتاح «Q COIN · Windrush».\n\n' +
+  'يتاح السحب بعد التحقق من الحساب **وعند** وصول الرصيد إلى الحد الأدنى **1.0000000000**. عندها يتحول زر «سحب» إلى اللون الذهبي ويصبح فعالًا.\n\n' +
+  'مثال على الحد الأدنى: 1.0000000000.',
+
+forum_qcoin_exchange: 'منصة',
+forum_qcoin_withdraw: 'سحب',
+forum_qcoin_open_hint: 'فتح Q COIN',
+forum_qcoin_x2: 'x2',
+forum_qcoin_x2_hint: 'VIP+: احتساب ×2',
+
+forum_inbox: 'الردود عليّ',
+forum_inbox_title: 'الردود على رسائلك',
+forum_inbox_empty: 'لا ردود جديدة',
+
+}
+
+/* -------------------- TR -------------------- */
+const FORUM_UI_TR = {
+  // Admin
+  forum_admin: 'ADMİN',
+  forum_admin_active: 'ADMİN',
+  forum_admin_exit: 'admin modundan çık',
+  forum_admin_pass: 'Yönetici parolası',
+  forum_activate: 'Etkinleştir',
+
+  // Global / Dialogs
+  forum_cancel: 'İptal',
+  forum_close: 'Kapat',
+  forum_save: 'Kaydet',
+  forum_total: 'toplam',
+  forum_need_auth: 'Yetkilendirme gerekli',
+  forum_auth_required: 'Giriş gerekli',
+  forum_not_signed: 'Giriş yapılmadı',
+
+  // Account / Profile
+  forum_account: 'Hesap',
+  forum_account_settings: 'Hesap ayarları',
+  forum_profile_nickname: 'Takma ad',
+  forum_profile_nickname_ph: 'Sana nasıl hitap edelim?',
+  forum_profile_avatar: 'Avatar',
+  forum_avatar_vip: 'VIP+ avatarlar',
+
+  // VIP+
+forum_vip_only: 'Sadece VIP+',
+forum_vip_plus: 'VIP+',
+forum_vip_active: 'VIP+ aktif',
+forum_vip_thanks: 'Desteğin için teşekkürler!',
+forum_vip_title: 'VIP+',
+forum_vip_desc: 'VIP+; premium avatarlar ve emojiler, sesli mesaj ve görsel gönderimi, ayrıca Q COIN için daha hızlı birikim (×2) sunar. Ek olarak VIP+, Exchange sayfasındaki Yapay Zekâ Analiz kutusundaki limiti kaldırır; yüksek doğruluklu tahminler ve derin analizlere erişim sağlar. Öne çık ve bakiyeni daha hızlı büyüt: VIP+ ile.',
+forum_vip_pay: 'Öde',
+forum_vip_pay_fail: 'Ödeme başarısız. Daha sonra tekrar deneyin.',
+forum_vip_required: 'VIP+ gerekli',
+forum_vip_already_active: 'VIP zaten aktif',
+forum_vip_activated: 'VIP etkinleştirildi',
+forum_vip_pending: 'Ödeme beklemede…',
+
+
+  // Header / Search / Sort
+  forum_search_ph: 'Anahtar kelime gir…',
+  forum_sort: 'Sırala',
+  forum_sort_new: 'En yeni',
+  forum_sort_top: 'Top',
+  forum_sort_views: 'Görüntülenme',
+  forum_sort_likes: 'Beğeni',
+  forum_sort_replies: 'Yanıt',
+  forum_search_empty: 'Sonuç yok',
+
+  // Navigation
+  forum_back: 'Geri',
+  forum_home: 'Ana sayfa',
+
+  // Threads / Posts
+  forum_open_replies: 'Yanıtlar',
+  forum_no_posts_yet: 'Henüz mesaj yok',
+  forum_report_ok: 'Şikayet gönderildi',
+  forum_report: 'Şikayet et',
+  forum_reply: 'Yanıtla',
+  forum_delete: 'Sil',
+  forum_unban: 'Yasağı kaldır',
+  forum_ban: 'Yasakla',
+  forum_views: 'Görüntülenme',
+  forum_replies: 'Yanıt',
+  forum_like: 'Beğen',
+  forum_dislike: 'Beğenme',
+
+  // Composer
+  forum_reply_to: 'Şuna yanıtla',
+  forum_replying_to: 'Yanıtlıyor',
+  forum_composer_hint: 'Kesin ol. Kanıta dayandır. Bağlantılar hoş karşılanır.',
+  forum_composer_placeholder: 'Bir mesaj yaz…',
+  forum_send: 'Gönder',
+  forum_more_emoji: 'Daha fazla emoji',
+  forum_emoji_vip: 'VIP+ emoji',
+  forum_attach: 'Ekle',
+  forum_remove: 'Kaldır',
+  forum_remove_attachment: 'Eki kaldır',
+  forum_post_sent: 'Gönderildi',
+
+  // New Topic
+  forum_hint_select_topic: 'Okumak ve yanıtlamak için bir konu seç',
+  forum_create: 'Oluştur',
+  forum_creating: 'Oluşturuluyor…',
+  forum_topic_title: 'Başlık',
+  forum_topic_title_ph: 'Kısa ve net başlık',
+  forum_topic_desc: 'Açıklama',
+  forum_topic_desc_ph: 'İsteğe bağlı açıklama',
+  forum_topic_first_msg: 'İlk mesaj',
+  forum_topic_first_msg_ph: 'Tartışmayı gerçekler, veriler ve kaynaklarla başlat…',
+
+/* -------------------- TR (Türkçe) -------------------- */
+forum_qcoin_desc:
+  'Q COIN, etkinlik kanıtına (proof-of-activity) dayalı tahakkuk modeli olan yeni nesil bir tokendir.\n\n' +
+  'Tahakkuk; forumda gerçek katılımla kazanılır: konuları okuma, gönderi ve yanıt yazma, etkileşim alma ve düzenli geri dönüş.\n\n' +
+  'Mimari, çapraz-zincir birlikte çalışabilirlik ve gelecekteki köprüler için tasarlanmıştır; Q COIN ağlar arasında mutabakat/ödemede kullanılabilir. Muhasebe, sürekli senkronize edilen hibrit on/off-chain düzeninde yürür.\n\n' +
+  'Tahakkukun durmaması için foruma en az 4 saatte bir girin — bu “heartbeat” etkinliği doğrular; aksi halde siz dönene kadar duraklar.\n\n' +
+  'VIP+ üyeleri ×2 çarpan alır; sayacın yanında yanıp sönen “x2” rozeti görünür.',
+
+forum_qcoin_withdraw_note:
+  'Listeleme ve borsa entegrasyonları forumda “Q COIN · Windrush” başlığı altında duyurulur.\n\n' +
+  'Çekim, hesap doğrulamasından **ve** bakiyenin asgari eşik olan **1.0000000000**’e ulaşmasından sonra açılır. O anda “Çek” düğmesi altın renge döner ve etkinleşir.\n\n' +
+  'Eşik örneği: 1.0000000000.',
+
+forum_qcoin_exchange: 'Borsa',
+forum_qcoin_withdraw: 'Çek',
+forum_qcoin_open_hint: 'Q COIN’i aç',
+forum_qcoin_x2: 'x2',
+forum_qcoin_x2_hint: 'VIP+: tahakkuk ×2',
+
+forum_inbox: 'Bana yanıtlar',
+forum_inbox_title: 'İletilerinize gelen yanıtlar',
+forum_inbox_empty: 'Yeni yanıt yok',
+
+}
+
 /* -------------------- MERGE -------------------- */
 try {
-  Object.assign(dict.en, UNLIMIT_EN)
-  Object.assign(dict.ru, UNLIMIT_RU)
-  Object.assign(dict.uk, UNLIMIT_UK)
-  Object.assign(dict.es, UNLIMIT_ES)
-  Object.assign(dict.zh, UNLIMIT_ZH)
-  Object.assign(dict.ar, UNLIMIT_AR)
-  Object.assign(dict.tr, UNLIMIT_TR)
-} catch (e) {}
+  Object.assign(dict.en || {}, FORUM_UI_EN)
+  Object.assign(dict.ru || {}, FORUM_UI_RU)
+  Object.assign(dict.uk || {}, FORUM_UI_UK)
+  Object.assign(dict.es || {}, FORUM_UI_ES)
+  Object.assign(dict.zh || {}, FORUM_UI_ZH)
+  Object.assign(dict.ar || {}, FORUM_UI_AR)
+  Object.assign(dict.tr || {}, FORUM_UI_TR)
+} catch (_) {}
 
+
+const EMOJI_CATS_EN = {
+  forum_emoji_cat_people:     'People',
+  forum_emoji_cat_animals:    'Animals',
+  forum_emoji_cat_food:       'Food',
+  forum_emoji_cat_activities: 'Activities',
+  forum_emoji_cat_travel:     'Travel',
+  forum_emoji_cat_objects:    'Objects',
+  forum_emoji_cat_symbols:    'Symbols',
+};
+
+const EMOJI_CATS_RU = {
+  forum_emoji_cat_people:     'Люди',
+  forum_emoji_cat_animals:    'Животные',
+  forum_emoji_cat_food:       'Еда',
+  forum_emoji_cat_activities: 'Активности',
+  forum_emoji_cat_travel:     'Путешествия',
+  forum_emoji_cat_objects:    'Предметы',
+  forum_emoji_cat_symbols:    'Символы',
+};
+
+const EMOJI_CATS_UK = {
+  forum_emoji_cat_people:     'Люди',
+  forum_emoji_cat_animals:    'Тварини',
+  forum_emoji_cat_food:       'Їжа',
+  forum_emoji_cat_activities: 'Активності',
+  forum_emoji_cat_travel:     'Подорожі',
+  forum_emoji_cat_objects:    'Предмети',
+  forum_emoji_cat_symbols:    'Символи',
+};
+
+const EMOJI_CATS_ES = {
+  forum_emoji_cat_people:     'Personas',
+  forum_emoji_cat_animals:    'Animales',
+  forum_emoji_cat_food:       'Comida',
+  forum_emoji_cat_activities: 'Actividades',
+  forum_emoji_cat_travel:     'Viajes',
+  forum_emoji_cat_objects:    'Objetos',
+  forum_emoji_cat_symbols:    'Símbolos',
+};
+
+const EMOJI_CATS_ZH = { // 简体中文
+  forum_emoji_cat_people:     '人物',
+  forum_emoji_cat_animals:    '动物',
+  forum_emoji_cat_food:       '食物',
+  forum_emoji_cat_activities: '活动',
+  forum_emoji_cat_travel:     '旅行',
+  forum_emoji_cat_objects:    '物品',
+  forum_emoji_cat_symbols:    '符号',
+};
+
+const EMOJI_CATS_AR = { // RTL
+  forum_emoji_cat_people:     'الأشخاص',
+  forum_emoji_cat_animals:    'الحيوانات',
+  forum_emoji_cat_food:       'الطعام',
+  forum_emoji_cat_activities: 'الأنشطة',
+  forum_emoji_cat_travel:     'السفر',
+  forum_emoji_cat_objects:    'الأشياء',
+  forum_emoji_cat_symbols:    'الرموز',
+};
+
+const EMOJI_CATS_TR = {
+  forum_emoji_cat_people:     'İnsanlar',
+  forum_emoji_cat_animals:    'Hayvanlar',
+  forum_emoji_cat_food:       'Yiyecek',
+  forum_emoji_cat_activities: 'Etkinlikler',
+  forum_emoji_cat_travel:     'Seyahat',
+  forum_emoji_cat_objects:    'Nesneler',
+  forum_emoji_cat_symbols:    'Semboller',
+};
+
+/* -------------------- MERGE (append without removing anything) -------------------- */
+try {
+  Object.assign(dict.en, EMOJI_CATS_EN);
+  Object.assign(dict.ru, EMOJI_CATS_RU);
+  Object.assign(dict.uk, EMOJI_CATS_UK);
+  Object.assign(dict.es, EMOJI_CATS_ES);
+  Object.assign(dict.zh, EMOJI_CATS_ZH);
+  Object.assign(dict.ar, EMOJI_CATS_AR);
+  Object.assign(dict.tr, EMOJI_CATS_TR);
+} catch (e) {}
+ 
+const FORUM_NEWS_EN = {
+  forum_title: 'Forum',
+
+}
+
+/* -------------------- RU -------------------- */
+const FORUM_NEWS_RU = {
+  forum_title: 'Форум',
+
+}
+
+/* -------------------- UK -------------------- */
+const FORUM_NEWS_UK = {
+  forum_title: 'Форум',
+}
+
+/* -------------------- ES -------------------- */
+const FORUM_NEWS_ES = {
+  forum_title: 'Foro',
+}
+
+/* -------------------- ZH (简体) -------------------- */
+const FORUM_NEWS_ZH = {
+  forum_title: '论坛',
+
+}
+
+/* -------------------- AR -------------------- */
+const FORUM_NEWS_AR = {
+  forum_title: 'المنتدى',
+}
+
+/* -------------------- TR -------------------- */
+const FORUM_NEWS_TR = {
+  forum_title: 'Forum',
+ 
+}
+
+/* -------------------- MERGE -------------------- */
+try {
+  Object.assign(dict.en  || {}, FORUM_NEWS_EN)
+  Object.assign(dict.ru  || {}, FORUM_NEWS_RU)
+  Object.assign(dict.uk  || {}, FORUM_NEWS_UK)
+  Object.assign(dict.es  || {}, FORUM_NEWS_ES)
+  Object.assign(dict.zh  || {}, FORUM_NEWS_ZH)
+  Object.assign(dict.ar  || {}, FORUM_NEWS_AR)
+  Object.assign(dict.tr  || {}, FORUM_NEWS_TR)
+} catch (_) {}  
 export function I18nProvider({ children }) {
   const [lang, setLang] = useState('en')
   useEffect(() => {
