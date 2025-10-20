@@ -1073,8 +1073,44 @@ const Styles = () => (
 }
 
     .iconWrap{ display:flex; flex-wrap:wrap; gap:10px }
-    .avaBig{ width:112px; height:112px; border-radius:14px; border:1px solid rgba(80,167,255,.45); display:grid; place-items:center; font-size:48px; background:rgba(25,129,255,.10) }
+    .avaBig{ width:112px; height:112px; border-radius:34px; border:1px solid rgba(80,167,255,.45); display:grid; place-items:center; font-size:48px; background:rgba(25,129,255,.10) }
     .avaMini{ width:60px; height:60px; border-radius:10px; font-size:18px }
+/* === AVATAR FILL (добавка) ============================= */
+
+/* 1) Контейнер: ничего не меняем кроме обрезки и контекста позиционирования */
+.avaBig,
+.avaMini{
+  overflow: hidden;         /* чтобы лишнее обрезалось по рамке */
+  position: relative;       /* нужно, чтобы next/image не «убежал» */
+}
+
+/* 2) Обычные <img>/<video>/<canvas>/<svg> внутри — растянуть и покрыть */
+.avaBig :is(img, video, canvas, svg),
+.avaMini :is(img, video, canvas, svg){
+  width: 100%;
+  height: 100%;
+  object-fit: cover;        /* заполняем без «писем» */
+  object-position: center;
+  display: block;
+  border-radius: inherit;   /* скругление как у контейнера */
+}
+
+/* 3) Если используется next/image (img позиционируется абсолютно внутри span) */
+.avaBig :is(span, div) > img,
+.avaMini :is(span, div) > img{
+  inset: 0 !important;      /* растягиваем во весь контейнер */
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+}
+
+/* 4) На всякий случай растянем сам обёрточный span next/image */
+.avaBig :is(span, div):has(> img),
+.avaMini :is(span, div):has(> img){
+  position: absolute;       /* заполняет всю кнопку */
+  inset: 0;
+}
 
 /* ====== НОВОЕ: правый блок управления в хедере ====== */
 .controls{
@@ -2323,9 +2359,9 @@ const Styles = () => (
   backdrop-filter: blur(8px) saturate(120%);
   border: 1px solid rgba(255,255,255,.08);
   padding: 12px 64px;      /* место под рельсы */
-  padding-left: 56px;
-  padding-right: 68px;
-  min-height: 150px;
+  padding-left: 10px;
+  padding-right: 10px;
+  min-height: 70px;
 }
 .taWrap::before,
 .taWrap::after{
@@ -2334,8 +2370,8 @@ const Styles = () => (
   background: linear-gradient(to bottom, transparent, rgba(255,255,255,.12), transparent);
   pointer-events:none;
 }
-.taWrap::before{ left:48px; }
-.taWrap::after { right:58px; }
+.taWrap::before{ left:0px; }
+.taWrap::after { right:0px; }
 
 .taInput{
   width:100%;
@@ -2347,14 +2383,7 @@ const Styles = () => (
   color:#eaf1ff; font:inherit; line-height:1.35;
 }
 
-/* рельсы */
-.leftRail,.rightRail{
-  position:absolute; top:0; bottom:0;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:10px; padding:6px;
-}
-.leftRail{ left:4px; }
-.rightRail{ right:4px; }
+
 
 /* кнопки-иконки */
 .iconBtn{
@@ -2476,6 +2505,48 @@ const Styles = () => (
     margin-block-start: 10px;
   }
 }
+
+/* Единая горизонтальная рельса — визуально как сам композер */
+.topRail{
+  width:100%;
+  margin-bottom:8px;
+}
+.topRail .railInner{
+  display:grid;
+  grid-template-columns: repeat(6, 1fr); /* 6 равных зон */
+  align-items:center;
+  gap: clamp(8px, 2vw, 16px);
+  padding: 8px 10px;
+
+  /* подгон под стиль композера */
+  border:1px solid rgba(255, 255, 255, 0);
+  border-radius:14px;
+  background: rgba(10, 14, 22, 0);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.02) inset;
+  backdrop-filter: blur(6px);
+}
+
+.topRail .railItem{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-width:0;
+}
+
+.topRail .iconBtn{
+  width:36px; height:36px;
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:0; /* не меняем твои классы, только габариты */
+}
+
+.topRail .miniCounter{
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:12px; opacity:.8;
+}
+
+/* Чтоб между рельсой и полем ввода было ровно как по бокам раньше */
+.taWrap { gap: 8px; display:flex; flex-direction:column; }
+
 
   `}</style>
 )
@@ -4114,6 +4185,7 @@ React.useEffect(() => {
     view_topic: 0,
     ban: 0,
     unban: 0,
+    'profile.avatar': 0,
   };
   const MIN_INTERVAL_MS = 600; // не чаще, чем раз в 600 мс
 
@@ -4146,12 +4218,41 @@ es.onmessage = (e) => {
     const evt = JSON.parse(e.data);
     if (!evt?.type) return;
 
+    // --- [PROFILE AVATAR LIVE SYNC] ---
+    // Если пришло событие обновления аватара — кладём в локальный профиль и мягко перерисовываем UI.
+    if (evt.type === 'profile.avatar' && evt.accountId) {
+      try {
+        const key = 'profile:' + String(evt.accountId);
+        const cur = JSON.parse(localStorage.getItem(key) || '{}');
+        const next = { ...cur };
+        // Поддерживаем возможные имена поля
+        if (evt.icon)    next.icon = evt.icon;
+        if (evt.avatar)  next.icon = evt.avatar;   // если бек шлёт "avatar" вместо "icon"
+        if (evt.vipIcon) next.vipIcon = evt.vipIcon;
+
+        localStorage.setItem(key, JSON.stringify(next));
+      } catch { /* no-op */ }
+
+      // Лёгкий рефреш компонентов, которые читают профиль
+      scheduleRefresh('profile.avatar');
+      return; // дальше ничего не делаем — снапшоты/ревизии не нужны для этого события
+    }
+
+    // --- [EVENTS REQUIRING SOFT REFRESH] ---
     const needRefresh = new Set([
       'topic_created','topic_deleted',
       'post_created','post_deleted',
       'react','view_post','view_topic',
       'ban','unban'
     ]);
+
+    if (needRefresh.has(evt.type)) {
+      scheduleRefresh(evt.type);
+      return;
+    }
+
+    // ...ниже остаётся твоя существующая логика, если она есть (rev/snapshot и т.п.)
+
 
     // Тянем снапшот ТОЛЬКО если ревизия реально выросла
     const curRev = (() => {
@@ -5962,7 +6063,6 @@ onClick={()=>{
         </div>
       </div>
 
-
 {/* нижний композер */}
 <div className="composer" data-active={composerActive} ref={composerRef}>
   <div className="meta mb-2">
@@ -5977,6 +6077,178 @@ onClick={()=>{
   {/* ВСТРОЕННЫЙ КОМПОЗЕР ВНУТРИ ПОЛЯ */}
   <div className="forumComposer">
     <div className="taWrap" data-active={composerActive}>
+
+      {/* ЕДИНАЯ ГОРИЗОНТАЛЬНАЯ РЕЛЬСА (вместо боковых) */}
+      <div className="topRail" role="toolbar" aria-label="Composer actions">
+        <div className="railInner">
+          {/* 1) Счётчик */}
+          <div className="railItem">
+            <div className="miniCounter" aria-live="polite">
+              <span>{String(text || '').trim().length}</span>
+              <span className="sep">/</span>
+              <span className={(String(text || '').trim().length > 180) ? 'max over' : 'max'}>180</span>
+            </div>
+          </div>
+
+          {/* 2) Скрепка */}
+          <div className="railItem">
+            <button
+              type="button"
+              className="iconBtn ghost lockable"
+              data-locked={!vipActive}
+              aria-label={t('forum_attach') || 'Прикрепить'}
+              title={t('forum_attach') || 'Прикрепить'}
+              onClick={(e)=>{
+                if (!vipActive){
+                  try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ only') } catch {}
+                  try { setVipOpen?.(true) } catch {}
+                  return;
+                }
+                handleAttachClick(e);
+              }}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden>
+                <path
+                  d="M7 13.5l6.5-6.5a3.5 3.5 0 115 5L10 20a6 6 0 11-8.5-8.5"
+                  stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" fill="none"
+                />
+              </svg>
+              {!vipActive && <span className="lockBadge" aria-hidden>🔒</span>}
+            </button>
+          </div>
+
+          {/* 3) Смайл */}
+          <div className="railItem">
+            <button
+              type="button"
+              className="iconBtn ghost"
+              title={t('forum_more_emoji')}
+              aria-label={t('forum_more_emoji')}
+              onClick={()=>setEmojiOpen(v=>!v)}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden>
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.7" fill="none"/>
+                <circle cx="9"  cy="10" r="1.2" fill="currentColor"/>
+                <circle cx="15" cy="10" r="1.2" fill="currentColor"/>
+                <path d="M8 14.5c1.2 1.2 2.8 1.8 4 1.8s2.8-.6 4-1.8" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
+              </svg>
+            </button>
+          </div>
+
+          {/* 4) Видео */}
+          <div className="railItem">
+            <button
+              type="button"
+              className={cls(
+                'iconBtn camBtn',
+                videoState==='recording' && 'rec',
+                (videoState==='uploading') && 'disabled',
+                !vipActive && 'locked'
+              )}
+              aria-label={videoState==='recording' ? 'Stop' : (videoState==='preview' ? 'Снять заново' : 'Снять видео')}
+              title={videoState==='recording' ? 'Stop' : (videoState==='preview' ? 'Снять заново' : 'Снять видео')}
+              onClick={(e)=>{
+                e.preventDefault();
+                if (!vipActive){
+                  try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ only') } catch {}
+                  try { setVipOpen?.(true) } catch {}
+                  try { setComposerActive(false) } catch {}
+                  try { document.activeElement?.blur?.() } catch {}
+                  return;
+                }
+                if (videoState==='recording') { stopVideo(); }
+                else if (videoState==='uploading') { /* ignore */ }
+                else { startVideo(); }
+              }}
+            >
+              {videoState==='recording'
+                ? <span style={{display:'inline-flex',alignItems:'center',gap:6}}>
+                    <span style={{width:12,height:12,borderRadius:'50%',background:'#FF4D4F',display:'inline-block'}}/>
+                    <b>REC</b>
+                  </span>
+                : (
+                  <svg viewBox="0 0 24 24" aria-hidden>
+                    <path d="M7 7h10a2 2 0 012 2v6a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2z" stroke="currentColor" strokeWidth="1.8" fill="none"/>
+                    <circle cx="12" cy="12" r="3" fill={videoState==='preview' ? '#3A7BFF' : 'currentColor'} />
+                  </svg>
+                )
+              }
+              {!vipActive && <span className="lockBadge" aria-hidden>🔒</span>}
+            </button>
+          </div>
+
+          {/* 5) Голос */}
+          <div className="railItem">
+            <button
+              type="button"
+              className={cls('iconBtn ghost micBtn', recState==='rec' && 'rec', !vipActive && 'locked')}
+              aria-label="Hold to record voice"
+              onMouseDown={(e)=>{
+                e.preventDefault();
+                if (!vipActive){
+                  try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ only') } catch {}
+                  try { setVipOpen?.(true) } catch {}
+                  try { setComposerActive(false) } catch {}
+                  try { document.activeElement?.blur?.() } catch {}
+                  return;
+                }
+                startRecord();
+              }}
+              onMouseUp={()=>{ if (recState==='rec') stopRecord(); }}
+              onMouseLeave={()=>{ if (recState==='rec') stopRecord(); }}
+              onTouchStart={(e)=>{
+                e.preventDefault();
+                if (!vipActive){
+                  try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ only') } catch {}
+                  try { setVipOpen?.(true) } catch {}
+                  try { setComposerActive(false) } catch {}
+                  return;
+                }
+                startRecord();
+              }}
+              onTouchEnd={()=>{ if (recState==='rec') stopRecord(); }}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden>
+                <path d="M12 14a3 3 0 003-3V7a3 3 0 10-6 0v4a3 3 0 003 3Z" stroke="currentColor" strokeWidth="1.8" fill="none"/>
+                <path d="M5 11a7 7 0 0014 0M12 18v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+              </svg>
+              {!vipActive && <span className="lockBadge" aria-hidden>🔒</span>}
+            </button>
+          </div>
+
+          {/* 6) Отправка */}
+          <div className="railItem">
+            <button
+              type="button"
+              className={cls(
+                'iconBtn planeBtn',
+                (postingRef.current || cooldownLeft>0 || !canSend || String(text||'').trim().length>180) && 'disabled'
+              )}
+              title={cooldownLeft>0 ? `${cooldownLeft}s` : (t('forum_send')||'Send')}
+              aria-label={t('forum_send')||'Send'}
+              disabled={postingRef.current || cooldownLeft>0 || !canSend || String(text||'').trim().length>180}
+              onClick={async ()=>{
+                if (postingRef.current || cooldownLeft>0) return;
+                try{
+                  setVideoState(s => (pendingVideo ? 'uploading' : s));
+                  try { if (videoOpen) setVideoOpen(false); } catch {}
+                  await createPost();
+                  setCooldownLeft?.(10);
+                  try { resetVideo(); } catch {}
+                }finally{
+                  try { setEmojiOpen(false) } catch {}
+                }
+              }}
+            >
+              <svg viewBox="0 0 24 24" className="plane" aria-hidden>
+                <path d="M3 11.5l17-8.5-7.2 18.5-2.3-6.2-6.5-3.8z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      {/* /единая рельса */}
+
       {/* поле ввода */}
       <textarea
         className="taInput"
@@ -5997,162 +6269,6 @@ onClick={()=>{
             : t('forum_composer_placeholder')
         }
       />
-
-      {/* левая рельса: эмодзи + скрепка */}
-      <div className="leftRail">
-        <button
-          type="button"
-          className="iconBtn ghost"
-          title={t('forum_more_emoji')}
-          aria-label={t('forum_more_emoji')}
-          onClick={()=>setEmojiOpen(v=>!v)}
-        >
-          <svg viewBox="0 0 24 24" aria-hidden>
-            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.7" fill="none"/>
-            <circle cx="9"  cy="10" r="1.2" fill="currentColor"/>
-            <circle cx="15" cy="10" r="1.2" fill="currentColor"/>
-            <path d="M8 14.5c1.2 1.2 2.8 1.8 4 1.8s2.8-.6 4-1.8" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
-          </svg>
-        </button>
-
-        <button
-          type="button"
-          className="iconBtn ghost lockable"
-          data-locked={!vipActive}
-          aria-label={t('forum_attach') || 'Прикрепить'}
-          title={t('forum_attach') || 'Прикрепить'}
-          onClick={(e)=>{
-            if (!vipActive){
-              try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ only') } catch {}
-              try { setVipOpen?.(true) } catch {}
-              return;
-            }
-            handleAttachClick(e);
-          }}
-        >
-          <svg viewBox="0 0 24 24" aria-hidden>
-            <path
-              d="M7 13.5l6.5-6.5a3.5 3.5 0 115 5L10 20a6 6 0 11-8.5-8.5"
-              stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" fill="none"
-            />
-          </svg>
-          {!vipActive && <span className="lockBadge" aria-hidden>🔒</span>}
-        </button>
-      </div>
-
-{/* правая рельса: микрофон + отправка */}
-<div className="rightRail">
-  {/* CAMERA: главный контрол записи видео (с VIP-замком как у микрофона) */}
-  <button
-    type="button"
-    className={cls(
-      'iconBtn camBtn',
-      videoState==='recording' && 'rec',
-      (videoState==='uploading') && 'disabled',
-      !vipActive && 'locked'
-    )}
-    aria-label={videoState==='recording' ? 'Stop' : (videoState==='preview' ? 'Снять заново' : 'Снять видео')}
-    title={videoState==='recording' ? 'Stop' : (videoState==='preview' ? 'Снять заново' : 'Снять видео')}
-    onClick={(e)=>{
-      e.preventDefault();
-      if (!vipActive){
-        try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ only') } catch {}
-        try { setVipOpen?.(true) } catch {}
-        try { setComposerActive(false) } catch {}
-        try { document.activeElement?.blur?.() } catch {}
-        return;
-      }
-      if (videoState==='recording') { stopVideo(); }
-      else if (videoState==='uploading') { /* ignore */ }
-      else { startVideo(); }
-    }}
-    style={{marginBottom:'8px'}}
-  >
-    {videoState==='recording'
-      ? <span style={{display:'inline-flex',alignItems:'center',gap:6}}>
-          <span style={{width:12,height:12,borderRadius:'50%',background:'#FF4D4F',display:'inline-block'}}/>
-          <b>REC</b>
-        </span>
-      : (
-        <svg viewBox="0 0 24 24" aria-hidden>
-          <path d="M7 7h10a2 2 0 012 2v6a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2z" stroke="currentColor" strokeWidth="1.8" fill="none"/>
-          <circle cx="12" cy="12" r="3" fill={videoState==='preview' ? '#3A7BFF' : 'currentColor'} />
-        </svg>
-      )
-    }
-    {!vipActive && <span className="lockBadge" aria-hidden>🔒</span>}
-  </button>
-
-  <button
-    type="button"
-    className={cls('iconBtn ghost micBtn', recState==='rec' && 'rec', !vipActive && 'locked')}
-    aria-label="Hold to record voice"
-    onMouseDown={(e)=>{
-      e.preventDefault();
-      if (!vipActive){
-        try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ only') } catch {}
-        try { setVipOpen?.(true) } catch {}
-        try { setComposerActive(false) } catch {}
-        try { document.activeElement?.blur?.() } catch {}
-        return;
-      }
-      startRecord();
-    }}
-    onMouseUp={()=>{ if (recState==='rec') stopRecord(); }}
-    onMouseLeave={()=>{ if (recState==='rec') stopRecord(); }}
-    onTouchStart={(e)=>{
-      e.preventDefault();
-      if (!vipActive){
-        try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ only') } catch {}
-        try { setVipOpen?.(true) } catch {}
-        try { setComposerActive(false) } catch {}
-        return;
-      }
-      startRecord();
-    }}
-    onTouchEnd={()=>{ if (recState==='rec') stopRecord(); }}
-  >
-    <svg viewBox="0 0 24 24" aria-hidden>
-      <path d="M12 14a3 3 0 003-3V7a3 3 0 10-6 0v4a3 3 0 003 3Z" stroke="currentColor" strokeWidth="1.8" fill="none"/>
-      <path d="M5 11a7 7 0 0014 0M12 18v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
-    </svg>
-    {!vipActive && <span className="lockBadge" aria-hidden>🔒</span>}
-  </button>
-
-        <button
-          type="button"
-          className={cls(
-            'iconBtn planeBtn',
-            (postingRef.current || cooldownLeft>0 || !canSend || String(text||'').trim().length>180) && 'disabled'
-          )}
-          title={cooldownLeft>0 ? `${cooldownLeft}s` : (t('forum_send')||'Send')}
-          aria-label={t('forum_send')||'Send'}
-          disabled={postingRef.current || cooldownLeft>0 || !canSend || String(text||'').trim().length>180}
-          onClick={async ()=>{
-            if (postingRef.current || cooldownLeft>0) return;
-            try{
-              setVideoState(s => (pendingVideo ? 'uploading' : s));
-              try { if (videoOpen) setVideoOpen(false); } catch {}
-              await createPost();
-              setCooldownLeft?.(10);  // старт кулдауна (ты уже завёл хук)
-              try { resetVideo(); } catch {}
-            }finally{
-              try { setEmojiOpen(false) } catch {}
-            }
-          }}
-        >
-          <svg viewBox="0 0 24 24" className="plane" aria-hidden>
-            <path d="M3 11.5l17-8.5-7.2 18.5-2.3-6.2-6.5-3.8z"/>
-          </svg>
-        </button>
-      </div>
-
-      {/* мини-счётчик внизу поля */}
-      <div className="miniCounter" aria-live="polite">
-        <span>{String(text || '').trim().length}</span>
-        <span className="sep">/</span>
-        <span className={(String(text || '').trim().length > 180) ? 'max over' : 'max'}>180</span>
-      </div>
 
       {/* превью VIP-эмодзи (если выбрано) */}
       {(/^\[VIP_EMOJI:\/[^\]]+\]$/).test(text || '') && (
@@ -6266,7 +6382,6 @@ onClick={()=>{
 </div>
 )
 };
-
 
 
 
