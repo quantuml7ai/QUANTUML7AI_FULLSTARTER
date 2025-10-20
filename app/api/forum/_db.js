@@ -40,7 +40,7 @@ export const K = {
   snapshot:  'forum:snapshot',
   // nick index (case-insensitive)
   nickIdx:   (nickLower) => `forum:nick:${nickLower}`,   // value = userId
-  userNick:  (userId)    => `forum:user:${userId}:nick`, // value = original nick
+  userIcon:  (userId)    => `forum:user:${userId}:icon`, // value = iconId/URL/emoji
   // per-topic
   topicPostsCount: (topicId) => `forum:topic:${topicId}:posts_count`,
   topicViews:      (topicId) => `forum:topic:${topicId}:views`,
@@ -115,8 +115,26 @@ export async function rebuildSnapshot() {
   // Бан-лист
   const banned = await redis.smembers(K.bannedSet)
 
-  // Текущая ревизия и сохранение снапшота одним ключом
-  const rev = parseIntSafe(await redis.get(K.rev), 0)
+  // Профили (икономично: один mget по никам и один по иконкам)
+  const uidSet = new Set([
+    ...topics.map(t=>String(t.userId||'')),
+    ...posts.map (p=>String(p.userId||'')),
+  ].filter(Boolean));
+  const uids = Array.from(uidSet);
+  const nickKeys = uids.map(id=>K.userNick(id));
+  const iconKeys = uids.map(id=>K.userIcon(id));
+  let nickVals = [], iconVals = [];
+  try { nickVals = await redis.mget(...nickKeys); } catch {}
+  try { iconVals = await redis.mget(...iconKeys); } catch {}
+  const profiles = {};
+  for (let i=0;i<uids.length;i++){
+    profiles[uids[i]] = {
+      nick: String(nickVals?.[i] || ''),
+      icon: String(iconVals?.[i] || ''),
+    };
+  }
+
+  // Текущая ревизия и сохранение снапшота одним ключом  const rev = parseIntSafe(await redis.get(K.rev), 0)
   const payload = { topics, posts, banned, errors }
   await redis.set(K.snapshot, JSON.stringify({ rev, payload }))
 
@@ -290,6 +308,14 @@ export async function setUserNick(userId, newNick) {
   return nn
 }
 
+export async function getUserIcon(userId) {
+  return String(await redis.get(K.userIcon(userId)) || '');
+}
+export async function setUserIcon(userId, iconId) {
+  const v = String(iconId||'').trim();
+  await redis.set(K.userIcon(userId), v);
+  return v;
+}
 
 /* =========================
    Admin ops
