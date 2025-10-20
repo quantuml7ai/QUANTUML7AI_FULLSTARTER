@@ -4210,50 +4210,26 @@ React.useEffect(() => {
     }, delay);
   };
 
-es.onmessage = (e) => {
-  sseAliveRef.current = true
-  if (!e?.data) return;
-  if (e.data.startsWith(':')) return; // heartbeat
-  try {
-    const evt = JSON.parse(e.data);
-    if (!evt?.type) return;
-
-    // --- [PROFILE AVATAR LIVE SYNC] ---
-    // Если пришло событие обновления аватара — кладём в локальный профиль и мягко перерисовываем UI.
-    if (evt.type === 'profile.avatar' && evt.accountId) {
-      try {
-        const key = 'profile:' + String(evt.accountId);
-        const cur = JSON.parse(localStorage.getItem(key) || '{}');
-        const next = { ...cur };
-        // Поддерживаем возможные имена поля
-        if (evt.icon)    next.icon = evt.icon;
-        if (evt.avatar)  next.icon = evt.avatar;   // если бек шлёт "avatar" вместо "icon"
-        if (evt.vipIcon) next.vipIcon = evt.vipIcon;
-
-        localStorage.setItem(key, JSON.stringify(next));
-      } catch { /* no-op */ }
-
-      // Лёгкий рефреш компонентов, которые читают профиль
-      scheduleRefresh('profile.avatar');
-      return; // дальше ничего не делаем — снапшоты/ревизии не нужны для этого события
-    }
-
-    // --- [EVENTS REQUIRING SOFT REFRESH] ---
-    const needRefresh = new Set([
-      'topic_created','topic_deleted',
-      'post_created','post_deleted',
-      'react','view_post','view_topic',
-      'ban','unban'
-    ]);
-
-    if (needRefresh.has(evt.type)) {
+es.onmessage = (e) => { 
+  sseAliveRef.current = true 
+  if (!e?.data) return; 
+  if (e.data.startsWith(':')) return; 
+ try { const evt = JSON.parse(e.data); 
+  if (!evt?.type) return; 
+  const needRefresh = new Set([ 
+    'topic_created',
+    'topic_deleted',
+     'post_created',
+     'post_deleted', 'react',
+     'view_post',
+     'view_topic',
+      'ban',
+      'unban'
+     ]);
+if (needRefresh.has(evt.type)) {
       scheduleRefresh(evt.type);
       return;
     }
-
-    // ...ниже остаётся твоя существующая логика, если она есть (rev/snapshot и т.п.)
-
-
     // Тянем снапшот ТОЛЬКО если ревизия реально выросла
     const curRev = (() => {
       try { return (JSON.parse(localStorage.getItem('forum:snap') || '{}').rev) || 0; }
