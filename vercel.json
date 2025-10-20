@@ -1,8 +1,4 @@
 ﻿{
-  "regions": ["sfo1", "cdg1", "hnd1"],
-  "functions": {
-    "app/api/forum/events/stream/route.js": {
-      "regions": ["sfo1", "cdg1", "hnd1"]
-    }
-  }
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["cdg1"]               
 }
