@@ -1376,7 +1376,7 @@ const Styles = () => (
 
 /* Само число — крупнее, с «стеклянной» подложкой */
 .qcoinValue{
-  font-size:1.3em;
+  font-size:1.6em;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-weight:800; padding:.20em .96em; border-radius:.36em;
   border:1px solid rgba(255,255,255,.14);
