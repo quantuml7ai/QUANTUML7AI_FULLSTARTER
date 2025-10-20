@@ -2276,7 +2276,7 @@ const Styles = () => (
 .qcoinTop{
   display: inline-flex;
   align-items: center;
-  gap: 38px;                     /* расстояние между Q COIN и ×2 */
+  gap: 32px;                     /* расстояние между Q COIN и ×2 */
 }
     
 /* Базовая икон-кнопка без фона */
