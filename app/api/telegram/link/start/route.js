@@ -1,5 +1,4 @@
 // app/api/telegram/link/start/route.js
-export const runtime = 'nodejs'; 
 import { randomBytes } from 'crypto'
 import { redis } from '@/lib/redis'   // путь совпадает с твоим либом
 

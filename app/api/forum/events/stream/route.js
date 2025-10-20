@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const fetchCache = 'force-no-store'
 export const runtime = 'edge'
+export const preferredRegion = ['sfo1', 'cdg1', 'hnd1']
 // --- подключенные клиенты SSE ---
 const clients = new Set()
 
