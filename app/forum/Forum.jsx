@@ -1351,7 +1351,7 @@ const Styles = () => (
 
 /* Золотая надпись с переливом и свечением */
 .qcoinLabel{
-  font-size:1.5em; font-weight:900; letter-spacing:.4px;
+  font-size:1.8em; font-weight:900; letter-spacing:.4px;
   background:
     linear-gradient(135deg,
       #7a5c00 0%,
@@ -1376,9 +1376,9 @@ const Styles = () => (
 
 /* Само число — крупнее, с «стеклянной» подложкой */
 .qcoinValue{
-  font-size:1.4em;
+  font-size:1.3em;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-weight:800; padding:.24em .36em; border-radius:.36em;
+  font-weight:800; padding:.20em .96em; border-radius:.36em;
   border:1px solid rgba(255,255,255,.14);
   background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
   backdrop-filter: blur(6px);
