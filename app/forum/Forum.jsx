@@ -4226,10 +4226,7 @@ es.onmessage = (e) => {
       'ban',
       'unban'
      ]);
-if (needRefresh.has(evt.type)) {
-      scheduleRefresh(evt.type);
-      return;
-    }
+
     // Тянем снапшот ТОЛЬКО если ревизия реально выросла
     const curRev = (() => {
       try { return (JSON.parse(localStorage.getItem('forum:snap') || '{}').rev) || 0; }
