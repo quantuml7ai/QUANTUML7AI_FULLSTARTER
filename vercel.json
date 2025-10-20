@@ -1,7 +1,0 @@
-{
-  "regions": ["sfo1", "cdg1"],
-  "functions": {
-    "api/**": { "regions": ["sfo1", "cdg1"] },
-    "middleware.ts": { "runtime": "edge", "regions": ["sfo1", "cdg1"] }
-  }
-}
