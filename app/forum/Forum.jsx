@@ -1376,7 +1376,7 @@ const Styles = () => (
 
 /* Само число — крупнее, с «стеклянной» подложкой */
 .qcoinValue{
-  font-size:1.2em;
+  font-size:1.4em;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-weight:800; padding:.24em .36em; border-radius:.36em;
   border:1px solid rgba(255,255,255,.14);
@@ -2829,14 +2829,14 @@ function QCoinWithdrawPopover({ anchorRef, onClose, t }) {
   preload="metadata"
 />
 
-
+          </div>
+          <button className="btn btnGhost" onClick={onClose}>{t('forum_close')}</button>
+        </div>
             <div>
               <div className="qcoinLabel" style={{fontSize:'2.00rem'}}>Q COIN</div>
               <div className="meta">{t('forum_qcoin_desc')}</div>
             </div>
-          </div>
-          <button className="btn btnGhost" onClick={onClose}>{t('forum_close')}</button>
-        </div>
+
 
         {/* тело — скроллимое */}
         <div className="qcoinPopBody">
