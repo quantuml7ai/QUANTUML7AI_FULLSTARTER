@@ -1,7 +1,8 @@
-{
+﻿{
   "regions": ["sfo1", "cdg1", "hnd1"],
   "functions": {
-    "app/api/forum/events/stream/route.js": { "regions": ["sfo1", "cdg1", "hnd1"] },
-    "app/middleware.ts": { "regions": ["sfo1", "cdg1", "hnd1"] }
+    "app/api/forum/events/stream/route.js": {
+      "regions": ["sfo1", "cdg1", "hnd1"]
+    }
   }
 }
