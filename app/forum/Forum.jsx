@@ -1073,44 +1073,8 @@ const Styles = () => (
 }
 
     .iconWrap{ display:flex; flex-wrap:wrap; gap:10px }
-    .avaBig{ width:112px; height:112px; border-radius:34px; border:1px solid rgba(80,167,255,.45); display:grid; place-items:center; font-size:48px; background:rgba(25,129,255,.10) }
+    .avaBig{ width:112px; height:112px; border-radius:14px; border:1px solid rgba(80,167,255,.45); display:grid; place-items:center; font-size:48px; background:rgba(25,129,255,.10) }
     .avaMini{ width:60px; height:60px; border-radius:10px; font-size:18px }
-/* === AVATAR FILL (добавка) ============================= */
-
-/* 1) Контейнер: ничего не меняем кроме обрезки и контекста позиционирования */
-.avaBig,
-.avaMini{
-  overflow: hidden;         /* чтобы лишнее обрезалось по рамке */
-  position: relative;       /* нужно, чтобы next/image не «убежал» */
-}
-
-/* 2) Обычные <img>/<video>/<canvas>/<svg> внутри — растянуть и покрыть */
-.avaBig :is(img, video, canvas, svg),
-.avaMini :is(img, video, canvas, svg){
-  width: 100%;
-  height: 100%;
-  object-fit: cover;        /* заполняем без «писем» */
-  object-position: center;
-  display: block;
-  border-radius: inherit;   /* скругление как у контейнера */
-}
-
-/* 3) Если используется next/image (img позиционируется абсолютно внутри span) */
-.avaBig :is(span, div) > img,
-.avaMini :is(span, div) > img{
-  inset: 0 !important;      /* растягиваем во весь контейнер */
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  object-position: center !important;
-}
-
-/* 4) На всякий случай растянем сам обёрточный span next/image */
-.avaBig :is(span, div):has(> img),
-.avaMini :is(span, div):has(> img){
-  position: absolute;       /* заполняет всю кнопку */
-  inset: 0;
-}
 
 /* ====== НОВОЕ: правый блок управления в хедере ====== */
 .controls{
@@ -1382,12 +1346,15 @@ const Styles = () => (
 }
 /* === Q COIN (инлайн + модалка) === */
 .qcoinRow{
-  display:inline-flex; align-items:center; gap:10px; margin-left:10px;
+  display:inline-flex; align-items:center; gap:6px; margin-left:6px;
 }
+
+/* === Q COIN (инлайн + модалка) === */
+.qcoinRow{ display:inline-flex; align-items:center; gap:10px; margin-left:10px; }
 
 /* Золотая надпись с переливом и свечением */
 .qcoinLabel{
-  font-size:2.4em; font-weight:900; letter-spacing:.4px;
+  font-size:1.5em; font-weight:900; letter-spacing:.4px;
   background:
     linear-gradient(135deg,
       #7a5c00 0%,
@@ -1406,15 +1373,15 @@ const Styles = () => (
 @keyframes qcoinShine{ 0%{background-position:0% 50%} 100%{background-position:200% 50%} }
 @keyframes qcoinGlow{
   0%{ text-shadow:0 0 .3rem rgba(255,215,0,.35), 0 0 .1rem rgba(255,255,180,.35) }
-  50%{ text-shadow:0 0 .9рем rgba(255,215,0,.55), 0 0 .25rem rgba(255,255,190,.55) }
+  50%{ text-shadow:0 0 .9rem rgba(255,215,0,.55), 0 0 .25rem rgba(255,255,190,.55) }
   100%{ text-shadow:0 0 .3rem rgba(255,215,0,.35), 0 0 .1rem rgba(255,255,180,.35) }
 }
 
 /* Само число — крупнее, с «стеклянной» подложкой */
 .qcoinValue{
-  font-size:1.6em;
+  font-size:1.2em;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-weight:800; padding:.20em .96em; border-radius:.36em;
+  font-weight:800; padding:.24em .36em; border-radius:.36em;
   border:1px solid rgba(255,255,255,.14);
   background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
   backdrop-filter: blur(6px);
@@ -1423,41 +1390,40 @@ const Styles = () => (
 .qcoinValue.paused{ color:#ff8c8c; animation:blinkPause .9s steps(1) infinite }
 @keyframes blinkPause{ 50%{ opacity:.45 } }
 
-/* модалка — скроллим подложку, карточка растягивается по контенту */
+/* модалка */
 .qcoinModal{
-  position:fixed; inset:0; z-index:3200;
-  display:grid; align-items:start; justify-items:center; /* вместо place-items:center */
-  overflow:auto;                     /* скролл у подложки */
-  padding:16px 10px;                 /* запас от краёв экрана */
+  position:fixed; inset:0; z-index:3500; display:grid; place-items:center;
   background:rgba(8,12,22,.8);
 }
 .qcoinCard{
-  width:min(520px, 88vw);            /* ширину НЕ трогаем */
-  height:auto !important;
-  max-height:none !important;        /* убираем ограничение по высоте */
-  overflow:visible !important;       /* без внутреннего скролла */
+  width:min(520px, 94vw); max-height:70vh; overflow:auto;
   border:1px solid rgba(255,255,255,.14); border-radius:14px;
   background:rgba(10,14,20,.96); padding:14px;
   box-shadow:0 10px 30px rgba(0,0,0,.45);
 }
 .qcoinCardHdr{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px }
 
-/* гиф/аватар — одна версия (убраны дубли) */
+/* гиф/аватар — х3 размер */
 .qcoinMini{
-  width:  clamp(108px, 12.6vw, 144px);
+  width:  clamp(108px, 12.6vw, 144px);  /* было 36–48px → стало ~108–144px */
   height: clamp(108px, 12.6vw, 144px);
   border-radius:10px;
   object-fit:cover;
   border:1px solid rgba(255,215,0,.4);
   flex:0 0 auto;
-  background:#000;                   /* на случай загрузки метаданных */
+}
+/* мини-анимация слева от заголовка — теперь это <video> */
+.qcoinMini{
+  display:inline-block;
+  width:120px;
+  height:120px;
+  border-radius:8px;
+  object-fit:cover;              /* не деформировать ролик */
+  background: #000;              /* на всякий случай, пока метаданные грузятся */
   box-shadow:0 4px 12px rgba(50,80,160,.25);
 }
 
-.qcoinPopBody{
-  max-height:none !important;        /* снимаем второй лимит */
-  overflow:visible !important;       /* скролл не здесь */
-}
+.qcoinPopBody{ max-height:50vh; overflow:auto; }
 .qcoinCardHdr img, .qcoinPopBody img{ max-width:100%; height:auto }
 
 /* кнопки (старые) */
@@ -1514,11 +1480,9 @@ const Styles = () => (
   .qcoinValue.paused{ animation:none }
   .qcoinExchangeBtn::before, .qcoinExchangeBtn::after{ animation:none }
 }
-
 .forumSingle { display: grid; gap: 16px; }
 .panel { background: rgba(10,14,22,.96); border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:12px; }
 .panelTitle { margin:0 0 8px; font-weight:600; opacity:.9; }
-
 
 .forumTopbar{
   display:flex; gap:8px; align-items:center; justify-content:space-between;
@@ -2268,32 +2232,6 @@ const Styles = () => (
   overflow: hidden;
   animation: qcoinX2Pulse 1.6s ease-in-out infinite;
 }
-  /* Базовый вид .qcoinX2 уже есть */
-
-/* Активный VIP — золотой с переливом (повторяем эффекты заголовка) */
-.qcoinX2.vip{
-  background:
-    linear-gradient(135deg,
-      #7a5c00 0%, #ffd700 18%, #fff4b3 32%, #ffd700 46%,
-      #ffea80 60%, #b38400 74%, #ffd700 88%, #7a5c00 100%);
-  background-size:200% 100%;
-  color:#1a1000;
-  border:1px solid rgba(255,215,0,.45);
-  box-shadow:0 0 18px rgba(255,215,0,.25);
-  animation:qcoinShine 6s linear infinite, qcoinGlow 2.8s ease-in-out infinite;
-  cursor:default;
-}
-
-/* Не VIP — заметно мигает красным и кликабельно */
-.qcoinX2.needVip{
-  background:rgba(255,70,70,.18);
-  color:#fff;
-  border:1px solid rgba(255,120,120,.6);
-  box-shadow:0 0 12px rgba(255,70,70,.35);
-  animation:blinkPause .9s steps(1) infinite;
-  cursor:pointer;
-}
-
 @keyframes qcoinX2Pulse{
   0%,100%{ filter:brightness(1); box-shadow:
      0 0 10px rgba(255,210,90,.3),
@@ -2304,17 +2242,6 @@ const Styles = () => (
      inset 0 0 0 1px rgba(255,255,255,.35),
      0 1px 0 0 rgba(0,0,0,.35); }
 }
- .qcoinCol{
-  flex-direction: column;       /* теперь колонкой */
-  align-items: flex-end;        /* выравнивание вправо, как и раньше */
-  gap: 8px;                     /* вертикальный зазор между строками */
-}
-.qcoinTop{
-  display: inline-flex;
-  align-items: center;
-  gap: 22px;                     /* расстояние между Q COIN и ×2 */
-}
-    
 /* Базовая икон-кнопка без фона */
 .iconBtn{
   display:inline-flex; align-items:center; justify-content:center;
@@ -2359,9 +2286,9 @@ const Styles = () => (
   backdrop-filter: blur(8px) saturate(120%);
   border: 1px solid rgba(255,255,255,.08);
   padding: 12px 64px;      /* место под рельсы */
-  padding-left: 10px;
-  padding-right: 10px;
-  min-height: 70px;
+  padding-left: 56px;
+  padding-right: 68px;
+  min-height: 120px;
 }
 .taWrap::before,
 .taWrap::after{
@@ -2370,8 +2297,8 @@ const Styles = () => (
   background: linear-gradient(to bottom, transparent, rgba(255,255,255,.12), transparent);
   pointer-events:none;
 }
-.taWrap::before{ left:0px; }
-.taWrap::after { right:0px; }
+.taWrap::before{ left:48px; }
+.taWrap::after { right:58px; }
 
 .taInput{
   width:100%;
@@ -2383,7 +2310,14 @@ const Styles = () => (
   color:#eaf1ff; font:inherit; line-height:1.35;
 }
 
-
+/* рельсы */
+.leftRail,.rightRail{
+  position:absolute; top:0; bottom:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:10px; padding:6px;
+}
+.leftRail{ left:4px; }
+.rightRail{ right:4px; }
 
 /* кнопки-иконки */
 .iconBtn{
@@ -2505,48 +2439,6 @@ const Styles = () => (
     margin-block-start: 10px;
   }
 }
-
-/* Единая горизонтальная рельса — визуально как сам композер */
-.topRail{
-  width:100%;
-  margin-bottom:8px;
-}
-.topRail .railInner{
-  display:grid;
-  grid-template-columns: repeat(6, 1fr); /* 6 равных зон */
-  align-items:center;
-  gap: clamp(8px, 2vw, 16px);
-  padding: 8px 10px;
-
-  /* подгон под стиль композера */
-  border:1px solid rgba(255, 255, 255, 0);
-  border-radius:14px;
-  background: rgba(10, 14, 22, 0);
-  box-shadow: 0 0 0 1px rgba(255,255,255,.02) inset;
-  backdrop-filter: blur(6px);
-}
-
-.topRail .railItem{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-width:0;
-}
-
-.topRail .iconBtn{
-  width:36px; height:36px;
-  display:inline-flex; align-items:center; justify-content:center;
-  padding:0; /* не меняем твои классы, только габариты */
-}
-
-.topRail .miniCounter{
-  display:inline-flex; align-items:center; gap:4px;
-  font-size:12px; opacity:.8;
-}
-
-/* Чтоб между рельсой и полем ввода было ровно как по бокам раньше */
-.taWrap { gap: 8px; display:flex; flex-direction:column; }
-
 
   `}</style>
 )
@@ -2837,29 +2729,24 @@ function VipPopover({ anchorRef, open, onClose, t, vipActive, onPay }){
   )
 }
 function QCoinWithdrawPopover({ anchorRef, onClose, t }) {
-  const [pos, setPos] = useState({ top: 0, left: 0, maxW: 520, maxH: 600 });
-
+  const [pos, setPos] = useState({ top: 0, left: 0, maxW: 520 });
+  // позиционируем относительно ближайшего родителя с position:relative (section .glass)
   useEffect(() => {
     const btn = anchorRef?.current;
     if (!btn) return;
 
-    const popParent  = btn.closest('section'); // .glass
-    const parentRect = popParent?.getBoundingClientRect?.() || { top: 0, left: 0, width: window.innerWidth, bottom: window.innerHeight };
+    const popParent = btn.closest('section'); // наша .glass
+    const parentRect = popParent?.getBoundingClientRect?.() || { top: 0, left: 0, width: window.innerWidth };
     const r = btn.getBoundingClientRect();
+
     const gap = 8;
+    const maxW = Math.min(520, parentRect.width - 16);
+    let left = r.left - parentRect.left; // базово подгоняем к кнопке
+    // стараемся не вылезать за правую границу
+    if (left + maxW > parentRect.width) left = Math.max(8, parentRect.width - maxW - 8);
 
-    const maxW = Math.min(520, (parentRect.width || window.innerWidth) - 16);
-    let left = r.left - parentRect.left;
-    if (left + maxW > (parentRect.width || window.innerWidth)) left = Math.max(8, (parentRect.width || window.innerWidth) - maxW - 8);
-
-    // сколько пикселей осталось до низа вьюпорта (на мобилках используем 100dvh/innerHeight)
-    const viewportH = window.innerHeight || document.documentElement.clientHeight || 800;
-    const spaceBelow = Math.max(160, Math.min(viewportH, parentRect.bottom || viewportH) - r.bottom - gap);
-    const maxH = Math.min(1060, Math.floor(spaceBelow - 8)); // запас 8px
-
-    setPos({ top: (r.bottom - parentRect.top) + gap, left, maxW, maxH });
+    setPos({ top: (r.bottom - parentRect.top) + gap, left, maxW });
   }, [anchorRef]);
-
 
   // закрытие по Esc/клик вне
   useEffect(() => {
@@ -2887,7 +2774,7 @@ function QCoinWithdrawPopover({ anchorRef, onClose, t }) {
         width: pos.maxW,
       }}
     >
-      <div className="qcoinCard" style={{ '--qcoin-maxh': `${pos.maxH}px` }}>
+      <div className="qcoinCard">
         <div className="qcoinCardHdr">
           <div className="flex items-center gap-3">
 <video
@@ -2900,14 +2787,14 @@ function QCoinWithdrawPopover({ anchorRef, onClose, t }) {
   preload="metadata"
 />
 
-          </div>
-          <button className="btn btnGhost" onClick={onClose}>{t('forum_close')}</button>
-        </div>
+
             <div>
               <div className="qcoinLabel" style={{fontSize:'2.00rem'}}>Q COIN</div>
               <div className="meta">{t('forum_qcoin_desc')}</div>
             </div>
-
+          </div>
+          <button className="btn btnGhost" onClick={onClose}>{t('forum_close')}</button>
+        </div>
 
         {/* тело — скроллимое */}
         <div className="qcoinPopBody">
@@ -2945,36 +2832,26 @@ function QCoinWithdrawPopover({ anchorRef, onClose, t }) {
 function QCoinInline({ t, userKey, vipActive, anchorRef }) {
   const q = useQCoinLive(userKey, !!vipActive)
   const clsVal = q.paused ? 'qcoinValue paused' : 'qcoinValue live'
-return (
-  <div className="qcoinRow qcoinCol">
-    <div className="qcoinTop">
-      <span className="qcoinLabel">Q COIN</span>
-<span
-  className={cls('qcoinX2', vipActive ? 'vip' : 'needVip', 'hoverPop')}
-  role="button"
-  tabIndex={0}
-  aria-label="x2 VIP"
-  title={vipActive ? (t('forum_qcoin_x2_active') || '×2 за VIP — активно') 
-                   : (t('forum_qcoin_x2_get')    || 'Купить VIP+ чтобы получить ×2')}
-  onClick={() => { try { window.dispatchEvent(new Event('vip:open')) } catch {} }}
-  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { try { window.dispatchEvent(new Event('vip:open')) } catch {} } }}
-  suppressHydrationWarning
->×2</span>
+  return (
+    <div className="qcoinRow">
+      <span className="qcoinLabel">
+       Q COIN
+       
+         </span>
+      <span
+        ref={anchorRef}
+        className={clsVal}
+        onClick={() => { try{ window.dispatchEvent(new Event('qcoin:open')) }catch{}; try{ q.open?.() }catch{} }}
+        style={{ cursor:'pointer' }}
+        title={t('forum_qcoin_open_hint') || 'Открыть Q COIN'}
+     
+            suppressHydrationWarning
+  >
+    {Number((q.balanceDisplay ?? q.balance ?? 0)).toFixed(10)}
+      </span>
+      {vipActive && <span className="qcoinX2" aria-label="x2 VIP" suppressHydrationWarning>×2</span>}
     </div>
-
-    <span
-      ref={anchorRef}
-      className={clsVal}
-      onClick={() => { try{ window.dispatchEvent(new Event('qcoin:open')) }catch{}; try{ q.open?.() }catch{} }}
-      style={{ cursor:'pointer' }}
-      title={t('forum_qcoin_open_hint') || 'Открыть Q COIN'}
-      suppressHydrationWarning
-    >
-      {Number((q.balanceDisplay ?? q.balance ?? 0)).toFixed(10)}
-    </span>
-  </div>
-);
-
+  )
 }
 
 
@@ -3248,10 +3125,6 @@ function PostCard({
   const likes    = Number(p?.likes ?? 0);
   const dislikes = Number(p?.dislikes ?? 0);
   const IMG_RE = /^(?:\/uploads\/[A-Za-z0-9._\-\/]+?\.(?:webp|png|jpe?g|gif)|https?:\/\/[^\s]+?\.(?:webp|png|jpe?g|gif))(?:[?#].*)?$/i;
-   // видео: blob: (локальный превью) или публичные ссылки /video-*.webm|.mp4 (и любые .mp4)
-  const VIDEO_RE =
-    /^(?:blob:[^\s]+|https?:\/\/[^\s]+(?:\/video-\d+\.(?:webm|mp4)|\.mp4)(?:[?#].*)?)$/i;
-
   // аудио: поддерживаем https и blob: (blob используется только локально, но подстрахуемся)
   const AUDIO_EXT = /\.(?:webm|ogg|mp3|m4a|wav)(?:$|[?#])/i;
   const isAudioLine = (s) => {
@@ -3259,8 +3132,8 @@ function PostCard({
     if (!t) return false;
     // одиночный URL в строке
     if (!/^\S+$/.test(t)) return false;
-     // blob: — тип неизвестен (может быть видео) → не относим к аудио
-     if (/^blob:/.test(t)) return false;
+    // blob:… (локальное превью)
+    if (/^blob:/.test(t)) return true;
     // https://… или твои относительные пути
     if (/^https?:\/\//i.test(t) || /^\/uploads\/audio\//i.test(t) || /\/forum\/voice/i.test(t)) {
       if (AUDIO_EXT.test(t)) return true;
@@ -3271,13 +3144,10 @@ function PostCard({
   const allLines    = String(p?.text || '').split(/\r?\n/);
   const trimmed     = allLines.map(s => s.trim());
   const imgLines    = trimmed.filter(s => IMG_RE.test(s));
-  const videoLines  = trimmed.filter(s => VIDEO_RE.test(s));
-  const audioLines  = trimmed
-    .filter(isAudioLine)
-    .filter(s => !VIDEO_RE.test(s)); // ничего «видео»-похожего не пускаем в аудио
+  const audioLines  = trimmed.filter(isAudioLine);
   const cleanedText = allLines.filter(s => {
     const t = s.trim();
-  return !IMG_RE.test(t) && !VIDEO_RE.test(t) && !isAudioLine(t);
+    return !IMG_RE.test(t) && !isAudioLine(t);
   }).join('\n');
 
   return (
@@ -3344,43 +3214,6 @@ function PostCard({
           ))}
         </div>
       )}
- {/* видео: отдельные карточки с <video controls> */}
- {videoLines.length > 0 && (
-   <div className="postVideo" style={{display:'grid', gap:8, marginTop:8}}>
-     {videoLines.map((src, i) => (
-       <div key={`v${i}`} className="videoCard" style={{
-         margin:0, padding:8, background:'rgba(10,16,28,.35)',
-         border:'1px solid rgba(140,170,255,.25)', borderRadius:10, overflow:'hidden'
-       }}>
-  <video
-  src={src}
-  controls
-  playsInline
-  preload="metadata"
-  onLoadedMetadata={(e) => {
-    const v = e.currentTarget;
-    const w = v.videoWidth || 0;
-    const h = v.videoHeight || 0;
-    if (w && h) {
-      // даём карточке правильную высоту по реальному соотношению сторон
-      v.style.aspectRatio = `${w} / ${h}`;
-    }
-    v.style.height = 'auto';
-  }}
-  style={{
-    display: 'block',
-    width: '100%',
-    height: 'auto',           // вместо maxHeight
-    objectFit: 'contain',     // без кропа; если нужен кроп — поменяй на 'cover'
-    borderRadius: 6,
-    background: '#000'
-  }}
-/>
- </div>
-     ))}
-   </div>
- )}
-
       {/* аудио: «невидимая» ссылка → карточка с плеером */}
  {audioLines.length > 0 && (
    <div className="postAudio" style={{display:'grid', gap:8, marginTop:8}}>
@@ -3498,175 +3331,6 @@ function HydrateText({ value }) {
     </span>
   );
 }
-// --- live preview video: не перерисовывается каждую секунду таймера
-function LivePreview({ streamRef }) {
-  const ref = React.useRef(null);
-  React.useEffect(() => {
-    const el = ref.current;
-    const s  = streamRef?.current;
-    if (!el || !s) return;
-    if (el.srcObject !== s) el.srcObject = s;
-    el.muted = true; el.playsInline = true;
-    el.play?.();
-  }, [streamRef?.current]);
-  return (
-    <video
-      ref={ref}
-      autoPlay
-      playsInline
-      muted
-      style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:12, background:'#000' }}
-    />
-  );
-}
-
-// --- overlay камеры/плеера ---
-function VideoOverlay({
-  open, state, elapsed, onClose, onStop, streamRef,
-  previewUrl, onResetConfirm, t
-}) {
-  const tt = t || ((k)=>k); // безопасный алиас
-  const rootRef = React.useRef(null);
-
-  // высота композера (чтобы низ оверлея был ровно над ним)
-  const [composerPad, setComposerPad] = React.useState(0);
-  // выравниваем overlay по левому краю и ширине композера
-  const [composerRect, setComposerRect] = React.useState({ left: 0, width: 0 });
-
-  React.useEffect(() => {
-    if (!open || typeof window === 'undefined') return;
-    const el = document.querySelector('.composer');
-    if (!el) { setComposerPad(0); setComposerRect({ left:0, width:0 }); return; }
-
-    const upd = () => {
-      setComposerPad(el.offsetHeight || 0);
-      const r = el.getBoundingClientRect?.();
-      if (r) setComposerRect({ left: Math.round(r.left), width: Math.round(r.width) });
-    };
-    upd();
-
-    const ro = new ResizeObserver(upd);
-    ro.observe(el);
-    window.addEventListener('resize', upd);
-
-    // ESC
-    rootRef.current?.focus?.();
-
-    return () => {
-      ro.disconnect();
-      window.removeEventListener('resize', upd);
-    };
-  }, [open]);
-
-  // аспект (16:9 / 9:16)
-  const [aspect, setAspect] = React.useState('16 / 9');
-  React.useEffect(() => {
-    if (!open || state !== 'recording') return;
-    const track = streamRef?.current?.getVideoTracks?.()[0];
-    const s = track?.getSettings?.();
-    const w = Number(s?.width || 0), h = Number(s?.height || 0);
-    if (w && h) setAspect(w < h ? '9 / 16' : '16 / 9');
-  }, [open, state, streamRef?.current]);
-
-  const onMeta = React.useCallback((ev) => {
-    const v = ev?.currentTarget;
-    const w = v?.videoWidth || 0, h = v?.videoHeight || 0;
-    if (w && h) setAspect(w < h ? '9 / 16' : '16 / 9');
-  }, []);
-
-  if (!open) return null;
-
-  return (
-    <div
-      ref={rootRef}
-      className="forum_video_overlay"
-      role="dialog"
-      aria-modal="true"
-      tabIndex={-1}
-      style={{
-        position:'fixed',
-        top:0, left:0, right:0,
-        bottom: composerPad,          // низ — ровно над композером
-        zIndex:1000,
-        // ВАЖНО: никаких полупрозрачных фонов и блюра
-        background:'transparent',
-        backdropFilter:'none',
-        // фон не перехватывает клики (камера/отправить доступны)
-        pointerEvents:'none'
-      }}
-      onKeyDown={(e) => { if (e.key === 'Escape') onResetConfirm?.(); }}
-    >
-      {/* рабочая область: строго по ширине/левому краю композера */}
-      <div style={{
-        position:'fixed',
-        left: composerRect.left,
-        width: composerRect.width,
-        top: 0,
-        bottom: composerPad,
-        margin: 0,
-        // клики ловим только тут
-        pointerEvents:'auto'
-      }}>
-        {/* таймер */}
-        <div
-          className="camHudTimer"
-          style={{
-            position:'absolute', top:8, left:8, zIndex:5,
-            font:'600 14px/1 ui-monospace,monospace',
-            padding:'6px 10px', borderRadius:999,
-            background:'rgba(0,0,0,.45)', color:'#fff',
-            pointerEvents:'none'
-          }}
-          aria-live="polite"
-        >
-          {Math.floor(elapsed/60)}:{String(elapsed%60).padStart(2,'0')}
-        </div>
-
-        {/* крестик — всегда ПОЛНЫЙ сброс */}
-        <button
-          type="button"
-          onClick={()=>{
-            if (state === 'recording') {
-              if (confirm(tt('forum_video_reset_confirm'))) onResetConfirm?.();
-            } else {
-              onResetConfirm?.();
-            }
-          }}
-          aria-label={tt('forum_video_reset')}
-          className="camHudClose"
-          style={{
-            position:'absolute', top:8, right:8, zIndex:6,
-            width:36, height:36, borderRadius:'50%',
-            background:'rgba(0,0,0,.5)', color:'#fff',
-            border:'1px solid rgba(255,255,255,.25)'
-          }}
-        >✕</button>
-
-        {/* кадр без полей; видео заполняет область */}
-        <div style={{
-          position:'absolute', inset:0,
-          display:'flex', alignItems:'center', justifyContent:'center'
-        }}>
-          <div style={{ width:'100%', height:'100%', aspectRatio: aspect, overflow:'hidden' }}>
-            {state === 'recording' ? (
-              <LivePreview streamRef={streamRef} />
-            ) : (
-              <video
-                src={previewUrl || ''}
-                controls
-                playsInline
-                onLoadedMetadata={onMeta}
-                style={{ width:'100%', height:'100%', objectFit:'cover', background:'#000' }}
-              />
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-
 
 
 /* =========================================================
@@ -3706,19 +3370,6 @@ React.useEffect(()=>{
   const open = ()=> setQcoinModalOpen(true)
   window.addEventListener('qcoin:open', open)
   return ()=> window.removeEventListener('qcoin:open', open)
-},[])
-// QCoin: управлялка модалкой из инлайна
-React.useEffect(()=>{
-  const open = ()=> setQcoinModalOpen(true)
-  window.addEventListener('qcoin:open', open)
-  return ()=> window.removeEventListener('qcoin:open', open)
-},[])
-
-// VIP: открывать VipPopover по событию из бейджа ×2
-React.useEffect(()=>{
-  const openVip = () => setVipOpen(true)
-  window.addEventListener('vip:open', openVip)
-  return () => window.removeEventListener('vip:open', openVip)
 },[])
 
 /* ---- локальный снап и очередь ---- */
@@ -4185,7 +3836,6 @@ React.useEffect(() => {
     view_topic: 0,
     ban: 0,
     unban: 0,
-    'profile.avatar': 0,
   };
   const MIN_INTERVAL_MS = 600; // не чаще, чем раз в 600 мс
 
@@ -4210,47 +3860,20 @@ React.useEffect(() => {
     }, delay);
   };
 
-es.onmessage = (e) => { 
-  sseAliveRef.current = true 
-  if (!e?.data) return; 
-  if (e.data.startsWith(':')) return; 
- try { const evt = JSON.parse(e.data); 
-  if (!evt?.type) return; 
-    // --- [PROFILE AVATAR LIVE SYNC] ---
-    // Если пришло событие обновления аватара — кладём в локальный профиль и мягко перерисовываем UI.
-    if (evt.type === 'profile.avatar' && evt.accountId) {
-      try {
-        const key = 'profile:' + String(evt.accountId);
-        const cur = JSON.parse(localStorage.getItem(key) || '{}');
-        const next = { ...cur };
-        // Поддерживаем возможные имена поля
-        if (evt.icon)    next.icon = evt.icon;
-        if (evt.avatar)  next.icon = evt.avatar;   // если бек шлёт "avatar" вместо "icon"
-        if (evt.vipIcon) next.vipIcon = evt.vipIcon;
+es.onmessage = (e) => {
+  sseAliveRef.current = true
+  if (!e?.data) return;
+  if (e.data.startsWith(':')) return; // heartbeat
+  try {
+    const evt = JSON.parse(e.data);
+    if (!evt?.type) return;
 
-        localStorage.setItem(key, JSON.stringify(next));
-      } catch { /* no-op */ }
-
-      // Лёгкий рефреш компонентов, которые читают профиль
-      scheduleRefresh('profile.avatar');
-      return; // дальше ничего не делаем — снапшоты/ревизии не нужны для этого события
-    }
-
-    // --- [EVENTS REQUIRING SOFT REFRESH] ---
     const needRefresh = new Set([
       'topic_created','topic_deleted',
       'post_created','post_deleted',
       'react','view_post','view_topic',
       'ban','unban'
     ]);
-
-    if (needRefresh.has(evt.type)) {
-      scheduleRefresh(evt.type);
-      return;
-    }
-
-    // ...ниже остаётся твоя существующая логика, если она есть (rev/snapshot и т.п.)
-
 
     // Тянем снапшот ТОЛЬКО если ревизия реально выросла
     const curRev = (() => {
@@ -4771,16 +4394,6 @@ const startSendCooldown = React.useCallback((sec = 10) => {
    const m = Math.floor((n||0)/60), s = (n||0)%60;
    return `${m}:${String(s).padStart(2,'0')}`;
  };
-  // --- video recording state machine ---
- const [videoState, setVideoState] = useState('idle'); // 'idle'|'opening'|'recording'|'processing'|'preview'|'uploading'
- const [videoOpen, setVideoOpen]   = useState(false);
- const [videoElapsed, setVideoElapsed] = useState(0);
- const videoTimerRef = useRef(null);
- const videoStreamRef = useRef(null);   // MediaStream
- const videoRecRef    = useRef(null);   // MediaRecorder
- const videoChunksRef = useRef([]);     // BlobParts
- const [pendingVideo, setPendingVideo] = useState(null); // blob: URL готового ролика (preview)
-const videoCancelRef = useRef(false); // true => onstop не собирает blob (отмена)
  // --- voice handlers (зажал/держишь/отпустил) ---
    const startRecord = async () => {
      if (recState === 'rec') return;
@@ -4823,72 +4436,10 @@ const videoCancelRef = useRef(false); // true => onstop не собирает bl
     setRecElapsed(0);
    };
 
- // ==== CAMERA: открыть → запись → стоп → превью ====
- const startVideo = async () => {
-   if (videoState !== 'idle' && videoState !== 'preview') return;
-   try{
-     setVideoState('opening'); setVideoOpen(true);
-     const stream = await navigator.mediaDevices.getUserMedia({ video: { width:1280, height:720 }, audio:true });
-     videoStreamRef.current = stream;
-     const mr = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm' });
-     videoChunksRef.current = [];
-     mr.ondataavailable = (e)=>{ if(e.data?.size) videoChunksRef.current.push(e.data) };
- mr.onstop = async ()=>{
-   clearInterval(videoTimerRef.current); videoTimerRef.current=null;
-   try{
-     if (videoCancelRef.current) {
-       // режим ОТМЕНЫ: ничего не собираем
-       videoChunksRef.current = [];
-       setPendingVideo(null);
-       setVideoState('idle');
-       videoCancelRef.current = false;
-       return;
-     }
-     const blob = new Blob(videoChunksRef.current, { type: mr.mimeType || 'video/webm' });
-     const url  = URL.createObjectURL(blob);
-     setPendingVideo(url);
-     setVideoState('preview');
-   }catch{
-     setVideoState('idle');
-   }
- };
-     videoRecRef.current = mr;
-     mr.start(250); // chunk every 250ms
-     // таймер
-     setVideoState('recording'); setVideoElapsed(0);
-     const started = Date.now();
-     clearInterval(videoTimerRef.current);
-     videoTimerRef.current = setInterval(()=>{
-       const sec = Math.floor((Date.now()-started)/1000);
-       setVideoElapsed(Math.min(600, sec)); // лимит 10:00
-       if (sec>=600) stopVideo();           // авто-стоп
-     }, 200);
-   }catch(e){
-     setVideoState('idle'); setVideoOpen(false);
-     try{ toast?.warn?.(t?.('forum_camera_denied')||'Нет доступа к камере/микрофону') }catch{}
-   }
- };
- const stopVideo = () => {
-   if (videoState!=='recording') return;
-   setVideoState('processing');
-   try{ videoRecRef.current?.stop?.() }catch{}
-   try{ videoStreamRef.current?.getTracks?.().forEach(tr=>tr.stop()) }catch{}
-   clearInterval(videoTimerRef.current); videoTimerRef.current=null;
- };
- const resetVideo = () => {
-  try { videoCancelRef.current = true; } catch {}
-   try{ videoRecRef.current?.stop?.() }catch{}
-   try{ videoStreamRef.current?.getTracks?.().forEach(tr=>tr.stop()) }catch{}
-   videoRecRef.current=null; videoStreamRef.current=null;
-   if (pendingVideo && /^blob:/.test(pendingVideo)) { try{ URL.revokeObjectURL(pendingVideo) }catch{} }
-   setPendingVideo(null); setVideoOpen(false); setVideoState('idle'); setVideoElapsed(0);
- };
 
 // отправлять можно, если есть текст ИЛИ хотя бы одна картинка
- const canSend = (String(text || '').trim().length > 0)
-   || (pendingImgs.length > 0)
-   || !!pendingAudio
-   || !!pendingVideo;  // === composer helpers (images) ===
+const canSend = (String(text || '').trim().length > 0) || (pendingImgs.length > 0) || !!pendingAudio;
+  // === composer helpers (images) ===
 const IMG_LINE_RE = /^(\/uploads\/[A-Za-z0-9._\-\/]+?\.(webp|png|jpe?g|gif)$|https?:\/\/.+\.(webp|png|jpe?g|gif)(\?.*)?$)/i;
 
 const hasImageLines = React.useMemo(() => {
@@ -4967,7 +4518,6 @@ toast.ok('Тема создана')
   try { setText(''); } catch {}
   try { setPendingImgs([]); } catch {}
   try { setPendingAudio(null); } catch {}
-  try { resetVideo(); } catch {}
   try { setReplyTo(null); } catch {}
     // подтянуть свежий снапшот
     if (typeof refresh === 'function') await refresh()
@@ -4982,24 +4532,6 @@ toast.ok('Тема создана')
   postingRef.current = true;   
     if (!rl.allowAction()) { toast.warn(t('forum_too_fast') || 'Слишком часто'); return; }
  // 0) аудио: если у нас в превью blob: — сначала грузим его и берём https-URL
-  // 0b) видео: если в превью blob:, сначала грузим и берём https-URL
- let videoUrlToSend = '';
- if (pendingVideo) {
-   try {
-     if (/^blob:/.test(pendingVideo)) {
-       const resp = await fetch(pendingVideo);
-       const blob = await resp.blob();
-       const fd = new FormData();
-       fd.append('file', blob, `video-${Date.now()}.webm`);
-       const up = await fetch('/api/forum/uploadVideo', { method:'POST', body: fd, cache:'no-store' });
-       const uj = await up.json().catch(()=>null);
-       videoUrlToSend = (uj && Array.isArray(uj.urls) && uj.urls[0]) ? uj.urls[0] : '';
-     } else {
-       videoUrlToSend = pendingVideo;
-     }
-   } catch { videoUrlToSend = ''; }
- }
-
  let audioUrlToSend = '';
  if (pendingAudio) {
    try {
@@ -5018,13 +4550,8 @@ toast.ok('Тема создана')
  }
 
  // 1) собираем текст: видимый текст + невидимые медиа-ссылки построчно (как у картинок)
- const plain = (String(text || '').trim()
-   || ((pendingImgs.length>0 || audioUrlToSend || videoUrlToSend) ? '\u200B' : '')
- ).slice(0,180);
- const body  = [plain, ...pendingImgs,
-   ...(audioUrlToSend ? [audioUrlToSend] : []),
-   ...(videoUrlToSend ? [videoUrlToSend] : []),
- ]
+ const plain = (String(text || '').trim() || ((pendingImgs.length>0 || audioUrlToSend) ? '\u200B' : '')).slice(0,180);
+ const body  = [plain, ...pendingImgs, ...(audioUrlToSend ? [audioUrlToSend] : [])]
    .filter(Boolean).join('\n');
 
 if (!body || !sel?.id) return;
@@ -5317,154 +4844,6 @@ const onFilesChosen = React.useCallback(async (e) => {
 
   const [profileOpen, setProfileOpen] = useState(false)
   const avatarRef = useRef(null)
-// === VIDEO FEED: состояние + хелперы =====================
-const [videoFeedOpen, setVideoFeedOpen] = React.useState(false);
-const [videoFeed, setVideoFeed] = React.useState([]);
-
-/** URL указывает на видео? — учитываем blob:, vercel-storage и классические расширения */
-function isVideoUrl(url) {
-  const s = String(url || '').trim();
-  if (!s) return false;
-  // одиночный токен
-  if (!/^\S+$/.test(s)) return false;
-
-  if (/^blob:/.test(s)) return true; // локальный превью
-
-  // обычные расширения
-  if (/\.(webm|mp4|mov|m4v|mkv)(?:$|[?#])/i.test(s)) return true;
-
-  // filename=video.ext
-  if (/[?&]filename=.*\.(webm|mp4|mov|m4v|mkv)(?:$|[&#])/i.test(s)) return true;
-
-  // публичные vercel-storage / твои пути без расширений
-  if (/vercel[-]?storage|vercel[-]?blob|\/uploads\/video|\/forum\/video|\/api\/forum\/uploadVideo/i.test(s)) return true;
-
-  return false;
-}
-
-/** пост содержит видео? — сканируем поля, вложения и КАЖДУЮ строку текста */
-function isVideoPost(p) {
-  if (!p) return false;
-
-  // явные поля
-  if (p.type === 'video') return true;
-  if (p.videoUrl || p.posterUrl) return true;
-  if (p.mime && String(p.mime).toLowerCase().startsWith('video/')) return true;
-  if (p.media && (p.media.type === 'video' || p.media.videoUrl)) return true;
-
-  // контейнеры вложений
-  if (Array.isArray(p.files) && p.files.some(f =>
-    f?.type === 'video' ||
-    String(f?.mime || '').toLowerCase().startsWith('video/') ||
-    isVideoUrl(f?.url)
-  )) return true;
-
-  if (Array.isArray(p.attachments) && p.attachments.some(a =>
-    a?.type === 'video' ||
-    String(a?.mime || '').toLowerCase().startsWith('video/') ||
-    a?.videoUrl || isVideoUrl(a?.url)
-  )) return true;
-
-  // текст/боди — важно: ссылки идут КАЖДОЙ СВОЕЙ строкой
-  const text = String(p.text ?? p.body ?? '').trim();
-  if (text) {
-    const lines = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-    if (lines.some(isVideoUrl)) return true;
-  }
-
-  // html как запасной вариант
-  if (typeof p.html === 'string' && /<\s*video[\s>]/i.test(p.html)) return true;
-
-  return false;
-}
-
-/** собрать все посты откуда только можно */
-function gatherAllPosts(data, allPosts) {
-  const pool = [];
-
-  if (Array.isArray(allPosts)) pool.push(...allPosts);
-  if (Array.isArray(data?.posts)) pool.push(...data.posts);
-  if (Array.isArray(data?.messages)) pool.push(...data.messages);
-  if (Array.isArray(data?.feed)) pool.push(...data.feed);
-
-  if (Array.isArray(data?.topics)) {
-    for (const t of data.topics) {
-      if (Array.isArray(t?.posts)) pool.push(...t.posts);
-      if (Array.isArray(t?.messages)) pool.push(...t.messages);
-      if (Array.isArray(t?.feed)) pool.push(...t.feed);
-    }
-  }
-
-  return pool;
-}
-
-/** построить и сохранить ленту видео */
-function buildAndSetVideoFeed() {
-  const pool = gatherAllPosts(data, allPosts);
-
-  // мягкий дедуп по стабильному ключу, но без выкидывания «безидешных»
-  const seen = new Set();
-  const all = [];
-  for (const p of pool) {
-    if (!p) continue;
-    const base = (p.id ?? p._id ?? p.uuid ?? p.key ?? null);
-    const topic = (p.topicId ?? p.threadId ?? null);
-    const key = base != null ? String(base) : (topic != null ? `${topic}:${String(base)}` : null);
-
-    if (key) {
-      if (seen.has(key)) continue;
-      seen.add(key);
-    }
-    all.push(p);
-  }
-
-  const only = all.filter(isVideoPost)
-                  .sort((a,b) => Number(b?.ts || 0) - Number(a?.ts || 0));
-
-  setVideoFeed(only);
-}
-
-/** открыть ленту видео */
-function openVideoFeed() {
-  setVideoFeedOpen(true);
-  try { setInboxOpen?.(false); } catch {}
-  try { setSel?.(null); setThreadRoot?.(null); } catch {}
-  try { setTopicFilterId?.(null); } catch {}
-  try { requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'smooth' })); } catch {}
-}
-
-/** закрыть ленту видео */
-function closeVideoFeed() {
-  setVideoFeedOpen(false);
-}
-
-// авто-обновление ленты, когда лента открыта и что-то меняется в снапшоте
-React.useEffect(() => {
-  if (!videoFeedOpen) return;
-  buildAndSetVideoFeed();
-  // зависимости: любые сигналы обновления снапшота/постов у тебя в состоянии
-}, [videoFeedOpen, data?.rev, data?.posts, data?.messages, data?.topics, allPosts]);
-
-// [VIDEO_FEED:OPEN_THREAD] — открыть полноценную ветку из ленты
-function openThreadFromPost(p){
-  if (!p) return;
-  try { setInboxOpen?.(false); } catch {}
-
-  // находим тему, к которой относится пост
-  const tt = (data?.topics || []).find(x => String(x.id) === String(p.topicId));
-  if (!tt) return;
-
-  // переключаемся в обычный режим ветки
-  setSel(tt);
-  setThreadRoot({ id: p.parentId || p.id }); // фокус на корневом/самом посте
-  setVideoFeedOpen(false);
-
-  // мягкий скролл к посту в открытой ветке
-  setTimeout(() => {
-    try { document.getElementById(`post_${p.id}`)?.scrollIntoView({ behavior:'smooth', block:'center' }) } catch {}
-  }, 120);
-}
-
 
   /* ---- render ---- */
   return (
@@ -5475,18 +4854,6 @@ function openThreadFromPost(p){
 >
 
       <Styles />{toast.view}
-       {/* Overlay камеры/плеера */}
-       <VideoOverlay
-         open={videoOpen}
-         state={videoState==='recording' ? 'recording' : (videoState==='preview' ? 'preview' : 'hidden')}
-         elapsed={videoElapsed}
-         streamRef={videoStreamRef}
-         previewUrl={pendingVideo}
-         onClose={resetVideo}
-         onStop={stopVideo}
-         onResetConfirm={resetVideo}
-         t={t}
-       />
 
       {/* шапка */}
       <section className="glass neon p-3" style={{ position:'relative', zIndex:40, overflow:'visible' }}>
@@ -5747,13 +5114,13 @@ onClick={()=>{
         {/* ЕДИНЫЙ РЯД КНОПОК ВНУТРИ БЛОКА */}
         <div className="flex flex-nowrap items-center gap-2 w-full relative pr-[56px]">
 <div className="left flex items-center gap-2">
-  {/* Назад (иконка) — в режиме videoFeedOpen закрывает видео-ленту */}
+  {/* Назад (иконка) */}
   <button
     type="button"
     className="iconBtn ghost"
     aria-label={t?.('forum_back') || 'Назад'}
-    disabled={!videoFeedOpen}
-    onClick={()=>{ if (videoFeedOpen) { try{ closeVideoFeed?.() }catch{} } }}
+    disabled
+    onClick={()=>{}}
     title={t?.('forum_back') || 'Назад'}
   >
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
@@ -5766,12 +5133,7 @@ onClick={()=>{
     type="button"
     className="iconBtn ghost"
     aria-label={t?.('forum_home') || 'На главную'}
-    onClick={()=>{
-    if (videoFeedOpen) { try{ closeVideoFeed?.() }catch{} }
-    try{ setReplyTo(null) }catch{};
-    try{ setThreadRoot(null) }catch{};
-    try{ setSel(null) }catch{};
-  }}
+    onClick={()=>{ try{ setReplyTo(null) }catch{}; try{ setThreadRoot(null) }catch{}; try{ setSel(null) }catch{}; }}
     title={t?.('forum_home') || 'На главную'}
   >
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
@@ -5808,115 +5170,67 @@ onClick={()=>{
 
         <div className="meta mt-2">{t('forum_total')}: {(data.topics||[]).length}</div>
       </div>
-{videoFeedOpen ? (
-  <>
-{/* ВЕТКА-ЛЕНТА: медиа (видео/аудио/изображения) */}
-<div className="meta mt-1">{t('') || ''}</div>
-<div className="grid gap-2 mt-2" suppressHydrationWarning>
-  {videoFeed.map((p) => {
-    const parent = p?.parentId ? (data?.posts || []).find(x => String(x.id) === String(p.parentId)) : null;
-
-    // локальный обработчик: открыть полноценную ветку по посту из ленты
-    const openThreadHere = () => {
-      try { setInboxOpen?.(false); } catch {}
-      const tt = (data?.topics || []).find(x => String(x.id) === String(p?.topicId));
-      if (!tt) return;
-      try { setSel(tt); } catch {}
-      try { setThreadRoot({ id: p?.parentId || p?.id }); } catch {}
-      try { setVideoFeedOpen(false); } catch {}
-      // мягкий скролл к посту
-      setTimeout(() => {
-        try { document.getElementById(`post_${p?.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch {}
-      }, 120);
-    };
-
-    return (
-      <div key={`vf:${p?.id ?? `${p?.topicId || 't'}:${p?.ts || Math.random()}`}`} id={`post_${p?.id || ''}`}>
-        <PostCard
-          p={p}
-          parentAuthor={parent?.nickname || (parent ? shortId(parent.userId || '') : null)}
-          onReport={() => toast.ok(t('forum_report_ok'))}
-          onOpenThread={() => openThreadHere()}     
-          onReact={reactMut}
-          isAdmin={isAdmin}
-          onDeletePost={delPost}
-          onBanUser={banUser}
-          onUnbanUser={unbanUser}
-          isBanned={bannedSet.has(p?.accountId || p?.userId)}
-          authId={auth.asherId || auth.accountId}
-          markView={markViewPost}
-          t={t}
-        />
+  {inboxOpen ? (
+    <>
+      <div className="meta mt-1">{t('forum_inbox_title') || 'Ответы на ваши сообщения'}</div>
+      <div className="grid gap-2 mt-2" suppressHydrationWarning>
+        {repliesToMe
+          .slice()
+          .sort((a,b) => Number(b.ts||0) - Number(a.ts||0))
+          .map(p => (
+            <div key={`ib:${p.id}`} id={`post_${p.id}`}>
+              <PostCard
+                p={p}
+                parentAuthor={(data.posts||[]).find(x=>String(x.id)===String(p.parentId))?.nickname || ''}
+                onReport={() => toast.ok(t('forum_report_ok'))}
+                onOpenThread={(clickP) => {
+                  const tt = (data.topics||[]).find(t => String(t.id)===String(p.topicId));
+                  if (tt) { setSel(tt); setThreadRoot(clickP); setInboxOpen(false); }
+                }}
+                onReact={reactMut}
+                isAdmin={isAdmin}
+                onDeletePost={delPost}
+                onBanUser={banUser}
+                onUnbanUser={unbanUser}
+                isBanned={bannedSet.has(p.accountId || p.userId)}
+                authId={auth.asherId || auth.accountId}
+                markView={markViewPost}
+                t={t}
+              />
+            </div>
+          ))}
+        {repliesToMe.length === 0 && (
+          <div className="meta">{t('forum_inbox_empty') || 'Новых ответов нет'}</div>
+        )}
       </div>
-    );
-  })}
-  {videoFeed.length === 0 && (
-    <div className="meta">{t('forum_search_empty') || 'Ничего не найдено'}</div>
+    </>
+  ) : (
+    <>
+      <CreateTopicCard t={t} onCreate={createTopic} />
+      <div className="grid gap-2 mt-2" suppressHydrationWarning>
+        {(sortedTopics || [])
+          .slice()
+          .sort((a,b) => {
+            const at = Number(a?.ts || 0), bt = Number(b?.ts || 0);
+            if (bt !== at) return bt - at;
+            return String(b?.id || '').localeCompare(String(a?.id || ''));
+          })
+          .map(x => {
+            const agg = aggregates.get(x.id) || { posts:0, likes:0, dislikes:0, views:0 };
+            return (
+              <TopicItem
+                key={`t:${x.id}`}
+                t={x}
+                agg={agg}
+                onOpen={(tt)=>{ setSel(tt); setThreadRoot(null) }}
+                isAdmin={isAdmin}
+                onDelete={delTopic}
+              />
+            )
+          })}
+      </div>
+    </>
   )}
-</div>
-
-  </>
-) : inboxOpen ? (
-  <>
-    <div className="meta mt-1">{t('forum_inbox_title') || 'Ответы на ваши сообщения'}</div>
-    <div className="grid gap-2 mt-2" suppressHydrationWarning>
-      {repliesToMe
-        .slice()
-        .sort((a,b) => Number(b.ts||0) - Number(a.ts||0))
-        .map(p => (
-          <div key={`ib:${p.id}`} id={`post_${p.id}`}>
-            <PostCard
-              p={p}
-              parentAuthor={(data.posts||[]).find(x=>String(x.id)===String(p.parentId))?.nickname || ''}
-              onReport={() => toast.ok(t('forum_report_ok'))}
-              onOpenThread={(clickP) => {
-                const tt = (data.topics||[]).find(t => String(t.id)===String(p.topicId));
-                if (tt) { setSel(tt); setThreadRoot(clickP); setInboxOpen(false); }
-              }}
-              onReact={reactMut}
-              isAdmin={isAdmin}
-              onDeletePost={delPost}
-              onBanUser={banUser}
-              onUnbanUser={unbanUser}
-              isBanned={bannedSet.has(p.accountId || p.userId)}
-              authId={auth.asherId || auth.accountId}
-              markView={markViewPost}
-              t={t}
-            />
-          </div>
-        ))}
-      {repliesToMe.length === 0 && (
-        <div className="meta">{t('forum_inbox_empty') || 'Новых ответов нет'}</div>
-      )}
-    </div>
-  </>
-) : (
-  <>
-    <CreateTopicCard t={t} onCreate={createTopic} onOpenVideoFeed={openVideoFeed} />
-    <div className="grid gap-2 mt-2" suppressHydrationWarning>
-      {(sortedTopics || [])
-       .slice()
-        .sort((a,b) => {
-          const at = Number(a?.ts || 0), bt = Number(b?.ts || 0);
-          if (bt !== at) return bt - at;
-          return String(b?.id || '').localeCompare(String(a?.id || ''));
-        })
-        .map(x => {
-          const agg = aggregates.get(x.id) || { posts:0, likes:0, dislikes:0, views:0 };
-          return (
-            <TopicItem
-              key={`t:${x.id}`}
-              t={x}
-              agg={agg}
-              onOpen={(tt)=>{ setSel(tt); setThreadRoot(null) }}
-              isAdmin={isAdmin}
-              onDelete={delTopic}
-            />
-          )
-        })}
-    </div>
-  </>
-)}
 
 <div
   className="body"
@@ -6061,6 +5375,7 @@ onClick={()=>{
         </div>
       </div>
 
+
 {/* нижний композер */}
 <div className="composer" data-active={composerActive} ref={composerRef}>
   <div className="meta mb-2">
@@ -6068,185 +5383,13 @@ onClick={()=>{
       ? `${t('forum_reply_to')||'Ответ для'} ${replyTo.nickname||shortId(replyTo.userId||'')}`
       : threadRoot
         ? `${t('forum_replying_to')||'Ответ к'} ${shortId(threadRoot.userId||'')}`
-        : t('')}
+        : t('forum_composer_hint')}
   </div>
   <BackToTopButton />
 
   {/* ВСТРОЕННЫЙ КОМПОЗЕР ВНУТРИ ПОЛЯ */}
   <div className="forumComposer">
     <div className="taWrap" data-active={composerActive}>
-
-      {/* ЕДИНАЯ ГОРИЗОНТАЛЬНАЯ РЕЛЬСА (вместо боковых) */}
-      <div className="topRail" role="toolbar" aria-label="Composer actions">
-        <div className="railInner">
-          {/* 1) Счётчик */}
-          <div className="railItem">
-            <div className="miniCounter" aria-live="polite">
-              <span>{String(text || '').trim().length}</span>
-              <span className="sep">/</span>
-              <span className={(String(text || '').trim().length > 180) ? 'max over' : 'max'}>180</span>
-            </div>
-          </div>
-
-          {/* 2) Скрепка */}
-          <div className="railItem">
-            <button
-              type="button"
-              className="iconBtn ghost lockable"
-              data-locked={!vipActive}
-              aria-label={t('forum_attach') || 'Прикрепить'}
-              title={t('forum_attach') || 'Прикрепить'}
-              onClick={(e)=>{
-                if (!vipActive){
-                  try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ only') } catch {}
-                  try { setVipOpen?.(true) } catch {}
-                  return;
-                }
-                handleAttachClick(e);
-              }}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden>
-                <path
-                  d="M7 13.5l6.5-6.5a3.5 3.5 0 115 5L10 20a6 6 0 11-8.5-8.5"
-                  stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" fill="none"
-                />
-              </svg>
-              {!vipActive && <span className="lockBadge" aria-hidden>🔒</span>}
-            </button>
-          </div>
-
-          {/* 3) Смайл */}
-          <div className="railItem">
-            <button
-              type="button"
-              className="iconBtn ghost"
-              title={t('forum_more_emoji')}
-              aria-label={t('forum_more_emoji')}
-              onClick={()=>setEmojiOpen(v=>!v)}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden>
-                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.7" fill="none"/>
-                <circle cx="9"  cy="10" r="1.2" fill="currentColor"/>
-                <circle cx="15" cy="10" r="1.2" fill="currentColor"/>
-                <path d="M8 14.5c1.2 1.2 2.8 1.8 4 1.8s2.8-.6 4-1.8" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
-              </svg>
-            </button>
-          </div>
-
-          {/* 4) Видео */}
-          <div className="railItem">
-            <button
-              type="button"
-              className={cls(
-                'iconBtn camBtn',
-                videoState==='recording' && 'rec',
-                (videoState==='uploading') && 'disabled',
-                !vipActive && 'locked'
-              )}
-              aria-label={videoState==='recording' ? 'Stop' : (videoState==='preview' ? 'Снять заново' : 'Снять видео')}
-              title={videoState==='recording' ? 'Stop' : (videoState==='preview' ? 'Снять заново' : 'Снять видео')}
-              onClick={(e)=>{
-                e.preventDefault();
-                if (!vipActive){
-                  try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ only') } catch {}
-                  try { setVipOpen?.(true) } catch {}
-                  try { setComposerActive(false) } catch {}
-                  try { document.activeElement?.blur?.() } catch {}
-                  return;
-                }
-                if (videoState==='recording') { stopVideo(); }
-                else if (videoState==='uploading') { /* ignore */ }
-                else { startVideo(); }
-              }}
-            >
-              {videoState==='recording'
-                ? <span style={{display:'inline-flex',alignItems:'center',gap:6}}>
-                    <span style={{width:12,height:12,borderRadius:'50%',background:'#FF4D4F',display:'inline-block'}}/>
-                    <b>REC</b>
-                  </span>
-                : (
-                  <svg viewBox="0 0 24 24" aria-hidden>
-                    <path d="M7 7h10a2 2 0 012 2v6a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2z" stroke="currentColor" strokeWidth="1.8" fill="none"/>
-                    <circle cx="12" cy="12" r="3" fill={videoState==='preview' ? '#3A7BFF' : 'currentColor'} />
-                  </svg>
-                )
-              }
-              {!vipActive && <span className="lockBadge" aria-hidden>🔒</span>}
-            </button>
-          </div>
-
-          {/* 5) Голос */}
-          <div className="railItem">
-            <button
-              type="button"
-              className={cls('iconBtn ghost micBtn', recState==='rec' && 'rec', !vipActive && 'locked')}
-              aria-label="Hold to record voice"
-              onMouseDown={(e)=>{
-                e.preventDefault();
-                if (!vipActive){
-                  try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ only') } catch {}
-                  try { setVipOpen?.(true) } catch {}
-                  try { setComposerActive(false) } catch {}
-                  try { document.activeElement?.blur?.() } catch {}
-                  return;
-                }
-                startRecord();
-              }}
-              onMouseUp={()=>{ if (recState==='rec') stopRecord(); }}
-              onMouseLeave={()=>{ if (recState==='rec') stopRecord(); }}
-              onTouchStart={(e)=>{
-                e.preventDefault();
-                if (!vipActive){
-                  try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ only') } catch {}
-                  try { setVipOpen?.(true) } catch {}
-                  try { setComposerActive(false) } catch {}
-                  return;
-                }
-                startRecord();
-              }}
-              onTouchEnd={()=>{ if (recState==='rec') stopRecord(); }}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden>
-                <path d="M12 14a3 3 0 003-3V7a3 3 0 10-6 0v4a3 3 0 003 3Z" stroke="currentColor" strokeWidth="1.8" fill="none"/>
-                <path d="M5 11a7 7 0 0014 0M12 18v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
-              </svg>
-              {!vipActive && <span className="lockBadge" aria-hidden>🔒</span>}
-            </button>
-          </div>
-
-          {/* 6) Отправка */}
-          <div className="railItem">
-            <button
-              type="button"
-              className={cls(
-                'iconBtn planeBtn',
-                (postingRef.current || cooldownLeft>0 || !canSend || String(text||'').trim().length>180) && 'disabled'
-              )}
-              title={cooldownLeft>0 ? `${cooldownLeft}s` : (t('forum_send')||'Send')}
-              aria-label={t('forum_send')||'Send'}
-              disabled={postingRef.current || cooldownLeft>0 || !canSend || String(text||'').trim().length>180}
-              onClick={async ()=>{
-                if (postingRef.current || cooldownLeft>0) return;
-                try{
-                  setVideoState(s => (pendingVideo ? 'uploading' : s));
-                  try { if (videoOpen) setVideoOpen(false); } catch {}
-                  await createPost();
-                  setCooldownLeft?.(10);
-                  try { resetVideo(); } catch {}
-                }finally{
-                  try { setEmojiOpen(false) } catch {}
-                }
-              }}
-            >
-              <svg viewBox="0 0 24 24" className="plane" aria-hidden>
-                <path d="M3 11.5l17-8.5-7.2 18.5-2.3-6.2-6.5-3.8z"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-      {/* /единая рельса */}
-
       {/* поле ввода */}
       <textarea
         className="taInput"
@@ -6267,6 +5410,118 @@ onClick={()=>{
             : t('forum_composer_placeholder')
         }
       />
+
+      {/* левая рельса: эмодзи + скрепка */}
+      <div className="leftRail">
+        <button
+          type="button"
+          className="iconBtn ghost"
+          title={t('forum_more_emoji')}
+          aria-label={t('forum_more_emoji')}
+          onClick={()=>setEmojiOpen(v=>!v)}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden>
+            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.7" fill="none"/>
+            <circle cx="9"  cy="10" r="1.2" fill="currentColor"/>
+            <circle cx="15" cy="10" r="1.2" fill="currentColor"/>
+            <path d="M8 14.5c1.2 1.2 2.8 1.8 4 1.8s2.8-.6 4-1.8" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          className="iconBtn ghost lockable"
+          data-locked={!vipActive}
+          aria-label={t('forum_attach') || 'Прикрепить'}
+          title={t('forum_attach') || 'Прикрепить'}
+          onClick={(e)=>{
+            if (!vipActive){
+              try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ only') } catch {}
+              try { setVipOpen?.(true) } catch {}
+              return;
+            }
+            handleAttachClick(e);
+          }}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden>
+            <path
+              d="M7 13.5l6.5-6.5a3.5 3.5 0 115 5L10 20a6 6 0 11-8.5-8.5"
+              stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" fill="none"
+            />
+          </svg>
+          {!vipActive && <span className="lockBadge" aria-hidden>🔒</span>}
+        </button>
+      </div>
+
+      {/* правая рельса: микрофон + отправка */}
+      <div className="rightRail">
+        <button
+          type="button"
+          className={cls('iconBtn ghost micBtn', recState==='rec' && 'rec', !vipActive && 'locked')}
+          aria-label="Hold to record voice"
+          onMouseDown={(e)=>{
+            e.preventDefault();
+            if (!vipActive){
+              try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ only') } catch {}
+              try { setVipOpen?.(true) } catch {}
+              try { setComposerActive(false) } catch {}
+              try { document.activeElement?.blur?.() } catch {}
+              return;
+            }
+            startRecord();
+          }}
+          onMouseUp={()=>{ if (recState==='rec') stopRecord(); }}
+          onMouseLeave={()=>{ if (recState==='rec') stopRecord(); }}
+          onTouchStart={(e)=>{
+            e.preventDefault();
+            if (!vipActive){
+              try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ only') } catch {}
+              try { setVipOpen?.(true) } catch {}
+              try { setComposerActive(false) } catch {}
+              return;
+            }
+            startRecord();
+          }}
+          onTouchEnd={()=>{ if (recState==='rec') stopRecord(); }}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden>
+            <path d="M12 14a3 3 0 003-3V7a3 3 0 10-6 0v4a3 3 0 003 3Z" stroke="currentColor" strokeWidth="1.8" fill="none"/>
+            <path d="M5 11a7 7 0 0014 0M12 18v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+          </svg>
+          {!vipActive && <span className="lockBadge" aria-hidden>🔒</span>}
+        </button>
+
+        <button
+          type="button"
+          className={cls(
+            'iconBtn planeBtn',
+            (postingRef.current || cooldownLeft>0 || !canSend || String(text||'').trim().length>180) && 'disabled'
+          )}
+          title={cooldownLeft>0 ? `${cooldownLeft}s` : (t('forum_send')||'Send')}
+          aria-label={t('forum_send')||'Send'}
+          disabled={postingRef.current || cooldownLeft>0 || !canSend || String(text||'').trim().length>180}
+          onClick={async ()=>{
+            if (postingRef.current || cooldownLeft>0) return;
+            try{
+              await createPost();
+              setCooldownLeft?.(10);  // старт кулдауна (ты уже завёл хук)
+            }finally{
+              try { setEmojiOpen(false) } catch {}
+            }
+          }}
+        >
+          <svg viewBox="0 0 24 24" className="plane" aria-hidden>
+            <path d="M3 11.5l17-8.5-7.2 18.5-2.3-6.2-6.5-3.8z"/>
+          </svg>
+        </button>
+      </div>
+
+      {/* мини-счётчик внизу поля */}
+      <div className="miniCounter" aria-live="polite">
+        <span>{String(text || '').trim().length}</span>
+        <span className="sep">/</span>
+        <span className={(String(text || '').trim().length > 180) ? 'max over' : 'max'}>180</span>
+      </div>
 
       {/* превью VIP-эмодзи (если выбрано) */}
       {(/^\[VIP_EMOJI:\/[^\]]+\]$/).test(text || '') && (
@@ -6383,10 +5638,11 @@ onClick={()=>{
 
 
 
+
 /* =========================================================
    Карточка создания темы
 ========================================================= */
-function CreateTopicCard({ t, onCreate, onOpenVideoFeed }){
+function CreateTopicCard({ t, onCreate }){
   const [open,setOpen] = useState(false)
   const [busy,setBusy] = useState(false)
   const [title,setTitle] = useState(''), [descr,setDescr] = useState(''), [first,setFirst] = useState('')
@@ -6403,21 +5659,7 @@ function CreateTopicCard({ t, onCreate, onOpenVideoFeed }){
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
         </svg>
-      </button>
-      {/* [VIDEO_FEED:BUTTON] — камера рядом с плюсом */}
-      <button
-        type="button"
-        className="iconBtn bigPlus"
-         onClick={() => onOpenVideoFeed?.()}
-        title={t('forum_video_feed') || 'Видео'}
-        aria-label={t('forum_video_feed') || 'Видео'}
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <rect x="3" y="5" width="14" height="14" rx="3"></rect>
-          <path d="M17 9l4-2v10l-4-2z" strokeLinejoin="round" />
-        </svg>
-      </button>     
-       {open && (
+      </button>      {open && (
         <div className="item w-full mt-2">
           <div className="grid gap-2">
             <label className="block">
