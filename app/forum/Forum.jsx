@@ -12,8 +12,8 @@ function emitCreated(pId, tId) {
 }
 function emitDeleted(pId, tId) {
   try { forumBroadcast({ type: 'post_deleted', postId: String(pId), topicId: String(tId) }); } catch {}
- 
-}
+} 
+
 
 /* =========================================================
    helpers
@@ -150,35 +150,26 @@ function ensureClientId(){
     return v
   }catch{ return `c_${Date.now()}` }
 }
-// --- hydration-safe helpers (вставь выше разметки) ---
-function safeReadProfile(userId) {
-  if (typeof window === 'undefined' || !userId) return {};
-  try { return JSON.parse(localStorage.getItem('profile:' + userId) || '{}'); }
-  catch { return {}; }
-}
+
 // [VIP AVATAR FIX] выбираем, что показывать на карточках
 function resolveIconForDisplay(userId, pIcon) {
-  const sid = String(userId||'');
-  const srv = (data?.profiles && data.profiles[sid]) || {};
-  if (srv.icon) return normalizeIconId(srv.icon);
-  const prof = safeReadProfile(sid) || {};
-  return prof.vipIcon || prof.vipEmoji || pIcon || '👤';
+  const prof = safeReadProfile(userId) || {};
+  // приоритет: vipIcon (URL) → vipEmoji (эмодзи) → то, что пришло с сервера
+  const v = prof.vipIcon || prof.vipEmoji || pIcon;
+  return v || '👤';
 }
 // iconId → канон
 function normalizeIconId(v) {
-  if (!v) return ''
-  const s = String(v).trim()
-  if (s.startsWith('e:')) {
-    // e:1F60A → e:1f60a
-    return 'e:' + s.slice(2).toLowerCase()
-  }
-  if (s.startsWith('v:') || s.startsWith('s:')) return s
-  if (/^https?:\/\//i.test(s)) return s
-  if (s.startsWith('/uploads/') || s.startsWith('/vip/') || s.startsWith('/avatars/')) return s
-  // если пришло эмодзи 1–2 символа — переведём в e:xxxx
-  const asCode = emojiToCodepoints(s)
-  return asCode ? `e:${asCode}` : s
+  if (!v) return '';
+  const s = String(v).trim();
+  if (s.startsWith('e:')) return 'e:' + s.slice(2).toLowerCase();
+  if (s.startsWith('v:') || s.startsWith('s:')) return s;
+  if (/^https?:\/\//i.test(s)) return s;
+  if (s.startsWith('/uploads/') || s.startsWith('/vip/') || s.startsWith('/avatars/')) return s;
+  const asCode = emojiToCodepoints(s);
+  return asCode ? `e:${asCode}` : s;
 }
+
 
 function emojiToCodepoints(str) {
   if (!str) return ''
@@ -231,6 +222,25 @@ function defaultAvatarUrl(userId = '') {
   const i = Math.abs(h) % 8
   return `/avatars/${i}.webp`
 }
+// --- profile v2 (TTL 30s) ---
+// Ключ: profile:v2:<uid>  =>  { ts: <epoch_ms>, data: { nick, icon } }
+function safeReadProfile(userId) {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = localStorage.getItem('profile:v2:' + String(userId || ''));
+    if (!raw) return {};
+    const obj = JSON.parse(raw);
+    if (!obj || typeof obj !== 'object') return {};
+    const ts = Number(obj.ts || 0);
+    if (!(ts > 0)) return {};
+    if (Date.now() - ts > 30_000) return {}; // TTL 30s
+    const data = obj.data && typeof obj.data === 'object' ? obj.data : {};
+    const out = {};
+    if (typeof data.nick === 'string') out.nick = data.nick;
+    if (typeof data.icon === 'string') out.icon = data.icon;
+    return out;
+  } catch { return {}; }
+}
 
 /**
  * SSR-safe AvatarEmoji
@@ -247,15 +257,16 @@ function AvatarEmoji({ userId, pIcon, className }) {
   const [url, setUrl] = React.useState(initialUrl)
 
   // 2) после mount можно «уточнить» из локального профиля, но структура не меняется
-  React.useEffect(() => {
-    try {
-      const prof = safeReadProfile(userId) // может вернуть { icon: 'e:1f60a' | 'v:...' | '/uploads/...' | ... }
-      const iconId = normalizeIconId(prof?.icon || pIcon)
-      setUrl(resolveIconUrl(iconId, userId))
-    } catch {
-      // no-op
-    }
-  }, [userId, pIcon])
+React.useEffect(() => {
+  try {
+    const prof = safeReadProfile(userId);
+    const iconId = normalizeIconId(prof?.icon || pIcon);
+    const u = resolveIconUrl(iconId, userId);
+    if (u && u !== url) setUrl(u);
+  } catch { /* no-op */ }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [userId, pIcon]);
+
 
   return (
     <span className={className || 'avaWrap'}>
@@ -321,9 +332,18 @@ function useToast(){
 // === helpers: images in post text ==========================================
 function hasImageLines(text) {
   const lines = String(text || '').split(/\r?\n/);
-  return lines.some((s) =>
-    /^\/uploads\/[A-Za-z0-9._\-\/]+?\.(webp|png|jpe?g|gif)$/i.test(s.trim())
-  );
+  return lines.some((s) => /^(?:\/uploads\/[A-Za-z0-9._\-\/]+?\.(?:webp|png|jpe?g|gif)|https?:\/\/[^\s]+?\.(?:webp|png|jpe?g|gif))(?:\?.*)?$/i.test(s.trim()));
+}
+
+function getLocalSnapRev() {
+  try {
+    const raw = localStorage.getItem('forum:snap:v2');
+    if (!raw) return 0;
+    const obj = JSON.parse(raw);
+    const ts = Number(obj?.ts || 0);
+    if (!(ts > 0) || (Date.now() - ts) > 30_000) return 0;
+    return Number(obj?.data?.rev || 0) || 0;
+  } catch { return 0; }
 }
 
 /* =========================================================
@@ -400,8 +420,10 @@ const api = {
   async snapshot(q = {}) {
     try {
       const params = new URLSearchParams();
-      if (q.b)   params.set('b',   String(q.b));
-      if (q.rev) params.set('rev', String(q.rev));
+if (q.b)   params.set('b',   String(q.b));
+const revHint = Number.isFinite(+q.rev) && +q.rev > 0 ? +q.rev : getLocalSnapRev();
+if (revHint > 0) params.set('rev', String(revHint));
+
       const url = '/api/forum/snapshot' + (params.toString() ? `?${params}` : '');
       const r   = await fetch(url, { cache: 'no-store' });
 
@@ -409,19 +431,18 @@ const api = {
       let data = {};
       try { data = raw ? JSON.parse(raw) : {}; } catch {}
 
-      const topics   = Array.isArray(data?.topics) ? data.topics : [];
-      const posts    = Array.isArray(data?.posts)  ? data.posts  : [];
-      const profiles = (data && typeof data.profiles==='object') ? data.profiles : {};
-      // server -> 'banned'; поддерживаем обратную совместимость с 'bans'
-      const bans   = Array.isArray(data?.banned) ? data.banned
-                    : Array.isArray(data?.bans)  ? data.bans : [];
-      const rev    = Number.isFinite(+data?.rev) ? +data.rev   : 0;
-      const cursor = data?.cursor ?? null;
+const topics = Array.isArray(data?.topics) ? data.topics : [];
+const posts  = Array.isArray(data?.posts)  ? data.posts  : [];
+const bans   = Array.isArray(data?.banned) ? data.banned
+                  : Array.isArray(data?.bans)  ? data.bans : [];
+const users  = (data && typeof data.users === 'object' && data.users) ? data.users : {};
+const rev    = Number.isFinite(+data?.rev) ? +data.rev   : 0;
+const cursor = data?.cursor ?? null;
 
-      // «пустой» ответ => можно делать жёсткий ресет
-      const __reset = topics.length === 0 && posts.length === 0;
+const __reset = topics.length === 0 && posts.length === 0;
 
-      return { ok: r.ok, status: r.status, topics, posts, bans, rev, cursor, profiles, __reset };
+return { ok: r.ok, status: r.status, topics, posts, bans, users, rev, cursor, __reset };
+
     } catch {
       return { ok:false, error:'network', topics:[], posts:[], bans:[], rev:0, cursor:null, __reset:false };
     }
@@ -473,34 +494,7 @@ const api = {
       return { ok: false, error: 'network' };
     }
   },
-  // Сохранить аватар для текущего пользователя (cookie/x-forum-user-id)
-  async saveAvatar(icon) {
-    try {
-      const headers = {
-        'Content-Type': 'application/json',
-        // Совместимо с серверным requireUserId: либо cookie, либо этот заголовок
-        'x-forum-user-id': String(
-          typeof getForumUserId === 'function' ? getForumUserId() : ''
-        ),
-      };
-      const r = await fetch('/api/forum/profile/saveAvatar', {
-        method: 'POST',
-        headers,
-        cache: 'no-store',
-        body: JSON.stringify({ icon: String(icon || '') }),
-      });
-      const text = await r.text().catch(()=>'');
-      let json = null; try { json = text ? JSON.parse(text) : null; } catch {}
-      if (!r.ok) {
-        const err = (json && (json.error || json.message)) || r.statusText || 'saveAvatar_failed';
-        throw new Error(err);
-      }
-      return json ?? { ok: true };
-    } catch (e) {
-      console.error('saveAvatar error', e);
-      return { ok:false, error: String(e?.message || 'network') };
-    }
-  },
+
   // Удалить тему (со всем деревом)
   async adminDeleteTopic(id) {
     try {
@@ -573,7 +567,50 @@ const api = {
     }
   },
 };
-
+function useLocalStorageSweeperV2() {
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const sweep = () => {
+      try {
+        const now = Date.now();
+        // forum:snap:v2
+        const snapRaw = localStorage.getItem('forum:snap:v2');
+        if (snapRaw) {
+          try {
+            const obj = JSON.parse(snapRaw);
+            if (!obj || !obj.ts || (now - obj.ts) > 30_000) localStorage.removeItem('forum:snap:v2');
+          } catch { localStorage.removeItem('forum:snap:v2'); }
+        }
+        // forum:queue:v2
+        const qRaw = localStorage.getItem('forum:queue:v2');
+        if (qRaw) {
+          try {
+            const obj = JSON.parse(qRaw);
+            if (!obj || !obj.ts || (now - obj.ts) > 30_000) localStorage.removeItem('forum:queue:v2');
+          } catch { localStorage.removeItem('forum:queue:v2'); }
+        }
+        // profile:v2:*
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const k = localStorage.key(i) || '';
+          if (k.startsWith('profile:v2:')) {
+            const raw = localStorage.getItem(k);
+            let kill = true;
+            try {
+              const obj = JSON.parse(raw || 'null');
+              if (obj && obj.ts && (now - obj.ts) <= 30_000) kill = false;
+            } catch { kill = true; }
+            if (kill) localStorage.removeItem(k);
+          }
+        }
+        // legacy purge
+        ['forum:snap','forum:queue'].forEach((legacy) => localStorage.removeItem(legacy));
+      } catch {}
+    };
+    const id = setInterval(sweep, 10_000);
+    sweep();
+    return () => clearInterval(id);
+  }, []);
+}
 function initForumAutosnapshot({ intervalMs = 60000, debounceMs = 1000 } = {}) {
   if (!isBrowser()) return () => {};
 
@@ -583,7 +620,8 @@ function initForumAutosnapshot({ intervalMs = 60000, debounceMs = 1000 } = {}) {
     if (now - last < debounceMs) return;       // простая защита от «дребезга»
     last = now;
     // bust: гарантируем полный снимок, даже если сервер кеширует
-    api.snapshot({ b: Date.now() }).catch(() => {});
+    api.snapshot({ b: Date.now(), rev: getLocalSnapRev() }).catch(() => {});
+
   };
 
   // Любое взаимодействие пользователя — триггерим снапшот (дёшево и сердито)
@@ -597,7 +635,8 @@ function initForumAutosnapshot({ intervalMs = 60000, debounceMs = 1000 } = {}) {
 
   // Параллельно — периодический «heartbeat», если надо
   const id = intervalMs ? setInterval(() => {
-    api.snapshot().catch(() => {});
+    api.snapshot({ rev: getLocalSnapRev() }).catch(() => {});
+
   }, intervalMs) : null;
 
   // снятие слушателей при размонтировании
@@ -606,6 +645,7 @@ function initForumAutosnapshot({ intervalMs = 60000, debounceMs = 1000 } = {}) {
     if (id) clearInterval(id);
   };
 }
+
 
 /* =========================================================
    КОНЕЦ API
@@ -3010,15 +3050,31 @@ return (
 
 /** мини-поповер профиля рядом с аватаром */
 function ProfilePopover({ anchorRef, open, onClose, t, auth, vipActive, onSaved }) {
-  const uid = auth.asherId || auth.accountId || ''
-  const readLocal = () => { try { return JSON.parse(localStorage.getItem('profile:' + uid) || 'null') } catch { return null } }
-  const [nick, setNick] = useState(readLocal()?.nickname || '')
-  const [icon, setIcon] = useState(readLocal()?.icon || ICONS[0])
+const uid = auth.asherId || auth.accountId || ''
+const readLocal = () => {
+  try {
+    const raw = localStorage.getItem('profile:v2:' + uid)
+    if (!raw) return null
+    const obj = JSON.parse(raw)
+    if (!obj || typeof obj !== 'object' || !obj.ts || (Date.now() - obj.ts) > 30_000) return null
+    const data = obj.data && typeof obj.data === 'object' ? obj.data : {}
+    return { nickname: data.nick || '', icon: data.icon || '' }
+  } catch { return null }
+}
+const [nick, setNick] = useState(readLocal()?.nickname || '')
+const [icon, setIcon] = useState(readLocal()?.icon || ICONS[0])
+
     // валидация ника
   const [nickFree, setNickFree] = useState(null)   // null|true|false
   const [nickBusy, setNickBusy] = useState(false)  // идет проверка
   const [busy, setBusy] = useState(false)          // сохранение
-  useEffect(() => { if (open) { const l = readLocal(); setNick(l?.nickname || ''); setIcon(l?.icon || ICONS[0]) } }, [open]) // eslint-disable-line
+  useEffect(() => {
+  if (!open) return
+  const l = readLocal()
+  setNick(l?.nickname || '')
+  setIcon(l?.icon || ICONS[0])
+}, [open]) // eslint-disable-line
+
     // дебаунс-проверка ника в базе
   useEffect(() => {
     if (!open) return
@@ -3039,31 +3095,57 @@ function ProfilePopover({ anchorRef, open, onClose, t, auth, vipActive, onSaved 
   if (!open || !anchorRef?.current) return null
   const top = (anchorRef.current.offsetTop || 0) + (anchorRef.current.offsetHeight || 0) + 8
   const left = (anchorRef.current.offsetLeft || 0)
-  const save = async () => {
-    const n = String(nick || '').trim()
-    if (!n || nickFree === false || busy) return
-    setBusy(true)
+const save = async () => {
+  const n = String(nick || '').trim()
+  if (!n || nickFree === false || busy) return
+  setBusy(true)
+  try {
+    // 1) ник → сервер (rev++, changes, SSE: profile_updated)
+    const r = await fetch('/api/profile/save-nick', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ nick: n, accountId: uid })
+    })
+    const j = await r.json().catch(() => null)
+    if (!r.ok || !j?.ok) {
+      if (j?.error === 'nick_taken') setNickFree(false)
+      return
+    }
+
+    // 2) иконка → сервер (если пользователь выбрал новую)
     try {
-      // 1) атомарно записываем ник (бэк вернет 409, если занят)
-      const r = await fetch('/api/profile/save-nick', {
+      await fetch('/api/profile/save-icon', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          nick: n,
-          accountId: uid,            // ← ПЕРЕДАЁМ UID
-          asherId: uid               // ← на всякий случай, если роут читает это поле
-        }),      })
-      const j = await r.json().catch(() => null)
-      if (!r.ok || !j?.ok) {
-        if (j?.error === 'nick_taken') setNickFree(false)
-        return
-      }
-      // 2) локально кешируем ник+иконку (иконку сохраняем по-старому)
-      try { localStorage.setItem('profile:' + uid, JSON.stringify({ nickname: j.nick || n, icon })) } catch {}
-      onSaved?.({ nickname: j.nick || n, icon })
-      onClose?.()
-    } finally { setBusy(false) }
-  }
+        body: JSON.stringify({ icon: String(icon || ''), accountId: uid })
+      })
+    } catch { /* no-op */ }
+
+    // 3) v2-кеш на 30с (локальный UX-ускоритель; рендер всё равно берёт users{} из снапа)
+    try {
+      localStorage.setItem(
+        'profile:v2:' + uid,
+        JSON.stringify({ ts: Date.now(), data: { nick: j.nick || n, icon: String(icon || '') } })
+      )
+    } catch {}
+
+    // 4) локальный broadcast для мгновенного UI (даже до прихода SSE)
+    try {
+      forumBroadcast({
+        type: 'profile_updated',
+        userId: uid,
+        accountId: uid,
+        nick: j.nick || n,
+        icon: String(icon || ''),
+        // rev придёт по SSE; если бэк вернёт rev тут — можно добавить: rev: j.rev
+      })
+    } catch {}
+
+    onSaved?.({ nickname: j.nick || n, icon })
+    onClose?.()
+  } finally { setBusy(false) }
+}
+
   return (
     <div className="profilePop" style={{ top, left }}>
       <div className="text-lg font-bold mb-2">{t('forum_account_settings')}</div>
@@ -3175,9 +3257,10 @@ function TopicItem({ t, agg, onOpen, isAdmin, onDelete }) {
       title={t.userId || t.accountId || ''}
       style={{ flex: '0 1 auto', minWidth: 0 }}
     >
-      <span className="nick-text">
-        {t.nickname || shortId(t.userId || t.accountId || '')}
-      </span>
+<span className="nick-text">
+  {(safeReadProfile(t.userId || t.accountId).nick) || t.nickname || shortId(t.userId || t.accountId || '')}
+</span>
+
     </button>
   </div>
         )}
@@ -3329,9 +3412,10 @@ function PostCard({
           />
         </div>
         <span className="nick-badge nick-animate">
-          <span className="nick-text truncate">
-            {p.nickname || shortId((p.userId || p.accountId || ''))}
-          </span>
+<span className="nick-text truncate">
+  {(safeReadProfile(p.userId || p.accountId).nick) || p.nickname || shortId((p.userId || p.accountId || ''))}
+</span>
+
         </span>
          {p.parentId && (
           <span className="tag ml-1" aria-label={t?.('forum_reply_to') || 'Ответ для'}>
@@ -3731,6 +3815,7 @@ const requireAuthStrict = async () => {
   toast.warn(t('forum_auth_required') || 'Нужна авторизация');
   return null;
 };
+
 // QCoin: управлялка модалкой из инлайна
 React.useEffect(()=>{
   const open = ()=> setQcoinModalOpen(true)
@@ -3750,51 +3835,80 @@ React.useEffect(()=>{
   window.addEventListener('vip:open', openVip)
   return () => window.removeEventListener('vip:open', openVip)
 },[])
-
-/* ---- локальный снап и очередь ---- */
-const [data,setData] = useState(()=>{
-  if(!isBrowser()) return { topics:[], posts:[], bans:[], admins:[], rev:null }
-  try{
-    const raw = JSON.parse(localStorage.getItem('forum:snap')||'null');
-    const ok  = raw && Number.isFinite(+raw.__savedAt) && (Date.now()-raw.__savedAt)<=60_000;
-    return ok ? raw : { topics:[], posts:[], bans:[], admins:[], rev:null };
-  }catch{
-    return { topics:[], posts:[], bans:[], admins:[], rev:null }
-  }
-})
-const persist = (patch) => setData(prev => {
-  const next = typeof patch==='function' ? patch(prev) : ({ ...prev, ...patch })
-  try{ localStorage.setItem('forum:snap', JSON.stringify({ ...next, __savedAt: Date.now() })) }catch{}
-  return next
-})
-// страховка: если вкладка «уснула» — раз в 30с убираем протухший слепок
+useLocalStorageSweeperV2();
+// авто-свипер локалки
 useEffect(()=>{
-  const id = setInterval(()=>{
+  const FKEYS = ['forum:snap:v2','forum:queue:v2'];
+  const tick = () => {
     try{
-      const raw = JSON.parse(localStorage.getItem('forum:snap')||'null');
-      if(raw && raw.__savedAt && (Date.now()-raw.__savedAt)>60_000){
-        localStorage.removeItem('forum:snap');
+      const now = Date.now();
+      for (const k of FKEYS){
+        const raw = JSON.parse(localStorage.getItem(k)||'null');
+        if (!raw || (now - (raw.ts||0)) > 30_000) localStorage.removeItem(k);
       }
+      // legacy cleanup
+      localStorage.removeItem('forum:snap');
+      localStorage.removeItem('forum:queue');
     }catch{}
-  }, 30_000);
-  return ()=>clearInterval(id);
-},[])
+  };
+  const id = setInterval(tick, 10000);
+  tick();
+  return () => clearInterval(id);
+},[]);
+
+const SNAP_KEY = 'forum:snap:v2';
+const SNAP_TTL = 30_000;
+
+const [data,setData] = useState(()=>{
+  if(!isBrowser()) return { topics:[], posts:[], bans:[], admins:[], rev:null };
+  try{
+    const raw = JSON.parse(localStorage.getItem(SNAP_KEY)||'null');
+    if (raw && typeof raw==='object' && (Date.now() - (raw.ts||0)) <= SNAP_TTL) {
+      return raw.data || { topics:[], posts:[], bans:[], admins:[], rev:null };
+    }
+  }catch{}
+  return { topics:[], posts:[], bans:[], admins:[], rev:null };
+});
+const persist = (patch) => setData(prev => {
+  const next = typeof patch==='function' ? patch(prev) : ({ ...prev, ...patch });
+  try{ localStorage.setItem(SNAP_KEY, JSON.stringify({ ts: Date.now(), data: next })) }catch{}
+  return next;
+});
+// --- rev barrier (hint from last known rev) ---
+const prevRevRef = React.useRef(0);
+React.useEffect(() => { prevRevRef.current = Number(data?.rev || 0) }, [data?.rev]);
+
 const withdrawBtnRef = useRef(null);
 
 const [qcoinModalOpen, setQcoinModalOpen] = useState(false);
 
 const clientId = useMemo(()=>ensureClientId(),[])
 
+const QUEUE_KEY = 'forum:queue:v2';
 const [queue,setQueue] = useState(()=>{
-  if(!isBrowser()) return []
-  try{ return JSON.parse(localStorage.getItem('forum:queue')||'[]') }catch{ return [] }
-})
-const saveQueue = q => { setQueue(q); try{ localStorage.setItem('forum:queue', JSON.stringify(q)) }catch{} }
+  try{ 
+    const raw = JSON.parse(localStorage.getItem(QUEUE_KEY)||'null');
+    if (raw && typeof raw==='object' && (Date.now() - (raw.ts||0)) <= 30_000) return raw.ops || [];
+  }catch{}
+  return [];
+});
+const saveQueue = q => { 
+  setQueue(q); 
+  try{ localStorage.setItem(QUEUE_KEY, JSON.stringify({ ts: Date.now(), ops: q })) }catch{} 
+};
+
 const pushOp = (type,payload) => saveQueue([ ...(queue||[]), { type, payload, opId:`${Date.now()}_${Math.random().toString(36).slice(2)}` } ])
 // всегда иметь «свежие» значения внутри async-кода (без устаревших замыканий)
 const queueRef = useRef(queue);  useEffect(()=>{ queueRef.current = queue }, [queue])
 const authRef  = useRef(auth);   useEffect(()=>{ authRef.current  = auth  }, [auth])
 const busyRef=useRef(false), debRef=useRef(null)
+// router.refresh "без TDZ"
+const router = useRouter();
+const refresh = React.useCallback(() => { try { router.refresh?.() } catch {} }, [router]);
+const refreshRef = React.useRef(refresh);
+React.useEffect(() => { refreshRef.current = refresh }, [refresh]);
+const sseAliveRef = useRef(false)
+const didManualKickRef = useRef(false)
 const sendBatch = (immediate = false) => {
   if (busyRef.current) return;
 
@@ -3803,7 +3917,7 @@ const sendBatch = (immediate = false) => {
     let snapshot = Array.isArray(queueRef.current) ? queueRef.current.slice() : [];
     // fallback: иногда setState ещё не применился — подстрахуемся локалстораджем
     if (!snapshot.length) {
-      try { snapshot = JSON.parse(localStorage.getItem('forum:queue')||'[]') || [] } catch {}
+      try { const raw = JSON.parse(localStorage.getItem(QUEUE_KEY)||'null'); snapshot = (raw && raw.ops) || [] } catch {}
     }
     if (!snapshot.length) return;
 
@@ -3859,11 +3973,12 @@ const sendBatch = (immediate = false) => {
         if (leftover.length) setTimeout(() => sendBatch(true), 0);
 
         // опционально: локальный «хук» на ручной рефреш, если вернёшь функцию
-        if (typeof refresh === 'function') await refresh();
+        await refreshRef.current?.()
       } else {
         // неуспех (напр., 400). Чтобы не застревать — выкидываем первую операцию.
         // На практике это часто невалидная react/view по tmp-id.
-        saveQueue(ops.slice(1));
+        saveQueue(snapshot.slice(1));
+
       }
     } catch (e) {
       console.error('sendBatch', e);
@@ -3913,7 +4028,8 @@ React.useEffect(()=>{
 // [PERIODIC-PULL] — периодический пул даже при открытом SSE
 React.useEffect(() => {
   const id = setInterval(() => {
-    try { schedulePull?.(120, false); } catch {}
+    schedulePullRef.current?.(120, false);
+
   }, 2 * 60 * 1000);  // каждые 2 минуты
   return () => clearInterval(id);
 }, []);
@@ -3921,7 +4037,7 @@ React.useEffect(() => {
 React.useEffect(() => {
   const root = document.querySelector('.forum_root') || document.body;
   if (!root) return;
-  const kick = () => { try { schedulePull?.(80, false); } catch {} };
+const kick = () => { schedulePullRef.current?.(80, false) };
 
   ['pointerdown','wheel','touchstart','keydown'].forEach(evt =>
     root.addEventListener(evt, kick, { passive: true })
@@ -3991,6 +4107,9 @@ React.useEffect(() => {
     return dedupeAll(next)
   }
 // === SILENT SYNC with cache-bust, backoff & hard-consistency ===
+// наружный указатель на планировщик пулла
+const schedulePullRef = React.useRef(null);
+
 useEffect(() => {
   let stop = false;
   let pulling = false;
@@ -4002,7 +4121,7 @@ useEffect(() => {
   const JITTER_MS     = 400;     // небольшой джиттер, чтобы рассинхронить вкладки
   const COOLDOWN_MS   = 60_000;  // пауза при превышении лимита
   const TMP_GRACE_MS  = 10_000;  // сколько держим неподтверждённые tmp_*
-  const lastHardResetAtRef = useRef(0);
+
   const now = () => Date.now();
   const isOverLimit = (err) => /max requests limit exceeded/i.test(String(err?.message || err || ''));
 
@@ -4011,13 +4130,7 @@ const safeMerge = (prev, r) => {
   const out = { ...prev };
   const hardReset = r && r.__reset === true;
 
-  // ---- PROFILES (server-first) ----
-  if (r && r.profiles) {
-  out.profiles = hardReset
-      ? { ...r.profiles }
-      : { ...(out.profiles||{}), ...r.profiles };
-  }
-  // ---- TOPICS ----  
+  // ---- TOPICS ----
   if (Array.isArray(r.topics)) {
     const prevList = prev.topics || [];
     const prevById = new Map(prevList.map((t, i) => [String(t.id), { ...t, __idx: i }]));
@@ -4114,6 +4227,8 @@ const safeMerge = (prev, r) => {
   if (r.rev    !== undefined)  out.rev    = r.rev;
   if (r.cursor !== undefined)  out.cursor = r.cursor;
 
+// NEW: users — поверх существующих (server-first; локальные патчи перезатираются снапом)
+if (r.users && typeof r.users === 'object') out.users = { ...(prev.users || {}), ...r.users };  
   // Схлопываем tmp_* и реальные дубли по сигнатурам/ID
   return dedupeAll(out);
 };
@@ -4128,12 +4243,8 @@ const safeMerge = (prev, r) => {
     pulling = true;
     try {
       // важно: прокидываем bustRef для обхода серверного микрокэша
-      const r = await api.snapshot({ b: bustRef });
-      if (r?.ok){
-        const needHard = (Date.now() - (lastHardResetAtRef.current||0)) > 60_000;
-        if (needHard) { r.__reset = true; lastHardResetAtRef.current = Date.now(); }
-        persist(prev => safeMerge(prev, r));
-      }
+      const r = await api.snapshot({ b: bustRef, rev: Number(prevRevRef?.current || 0) || undefined });
+      if (r?.ok) persist(prev => safeMerge(prev, r));
     } catch (e) {
       if (isOverLimit(e)) {
         cooldownUntil = now() + COOLDOWN_MS;
@@ -4165,6 +4276,7 @@ const safeMerge = (prev, r) => {
     } catch {}
     }
   })();
+schedulePullRef.current = schedulePull;
 
   // "пинки" по событиям среды
   const kick = () => schedulePull(80, false);
@@ -4206,15 +4318,7 @@ const safeMerge = (prev, r) => {
   };
 }, []);
 
-
-// локальный shim: принудительное обновление страницы/данных
-const router = useRouter();
-const sseAliveRef = useRef(false)
-const didManualKickRef = useRef(false)
-const refresh = React.useCallback(() => {
-  try { router.refresh?.(); } catch {}
-}, [router]);
-
+ 
 React.useEffect(() => {
   if (typeof window === 'undefined') return;
 
@@ -4272,29 +4376,33 @@ es.onmessage = (e) => {
   if (!evt?.type) return; 
     // --- [PROFILE AVATAR LIVE SYNC] ---
     // Если пришло событие обновления аватара — кладём в локальный профиль и мягко перерисовываем UI.
-    if (evt.type === 'profile.avatar' && evt.accountId) {
-      try {
-        const key = 'profile:' + String(evt.accountId);
-        const cur = JSON.parse(localStorage.getItem(key) || '{}');
-        const next = { ...cur };
-        // Поддерживаем возможные имена поля
-        if (evt.icon)    next.icon = evt.icon;
-        if (evt.avatar)  next.icon = evt.avatar;   // если бек шлёт "avatar" вместо "icon"
-        if (evt.vipIcon) next.vipIcon = evt.vipIcon;
+if ((evt.type === 'profile.avatar' || evt.type === 'profile_updated') && evt.accountId) {
+  try {
+    const key = 'profile:v2:' + String(evt.accountId);
+    // поддерживаем разные имена полей от бэка
+    const nick = (typeof evt.nick === 'string') ? evt.nick : undefined;
+    const icon = (typeof evt.icon === 'string') ? evt.icon
+               : (typeof evt.avatar === 'string') ? evt.avatar
+               : (typeof evt.vipIcon === 'string') ? evt.vipIcon
+               : undefined;
 
-        localStorage.setItem(key, JSON.stringify(next));
-      } catch { /* no-op */ }
+    // мержим с текущим
+    let cur = null; try { cur = JSON.parse(localStorage.getItem(key) || 'null') } catch {}
+    const data0 = (cur && cur.data) || {};
+    const data1 = { ...data0 };
+    if (nick) data1.nick = nick;
+    if (icon) data1.icon = icon;
 
-      // синхронизируем оперативное состояние
-      persist(prev=>{
-        const profiles = { ...(prev.profiles||{}) };
-        const id = String(evt.accountId);
-        profiles[id] = { ...(profiles[id]||{}), icon: evt.icon||evt.avatar||evt.vipIcon||'' };
-        return { ...prev, profiles };
-      });
-      scheduleRefresh('profile.avatar');
-      return; // дальше ничего не делаем — снапшоты/ревизии не нужны для этого события
-    }
+    localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data: data1 }));
+  } catch {}
+
+  scheduleRefresh('profile.avatar');
+  // Тянем снапшот, если есть rev
+  const nextRev = Number(evt?.rev || 0);
+  const curRev  = Number(prevRevRef.current || 0);
+  if (nextRev > curRev) schedulePullRef.current?.(120, true);
+  return;
+}
 
     // --- [EVENTS REQUIRING SOFT REFRESH] ---
     const needRefresh = new Set([
@@ -4304,28 +4412,28 @@ es.onmessage = (e) => {
       'ban','unban'
     ]);
 
-    if (evt.type === 'post_deleted' && evt.postId) {
-      persist(prev => ({ ...prev, posts: prev.posts.filter(p => String(p.id)!==String(evt.postId)) }));
+    if (needRefresh.has(evt.type)) {
       scheduleRefresh(evt.type);
       return;
     }
-    if (evt.type === 'topic_deleted' && evt.topicId) {
-      persist(prev => ({ ...prev, topics: prev.topics.filter(t => String(t.id)!==String(evt.topicId)) }));
-      scheduleRefresh(evt.type);
-      return;
-    }
-    if (needRefresh.has(evt.type)) { scheduleRefresh(evt.type); return; }
+
+    // ...ниже остаётся твоя существующая логика, если она есть (rev/snapshot и т.п.)
+
 
     // Тянем снапшот ТОЛЬКО если ревизия реально выросла
-    const curRev = (() => {
-      try { return (JSON.parse(localStorage.getItem('forum:snap') || '{}').rev) || 0; }
-      catch { return 0; }
-    })();
+const curRev = (() => {
+  try { 
+    const raw = JSON.parse(localStorage.getItem('forum:snap:v2') || 'null');
+    return (raw && raw.data && Number(raw.data.rev)) || 0;
+  } catch { return 0; }
+})();
+
     const nextRev = Number(evt?.rev || 0);
     if (nextRev > curRev) {
       // Один запрос снапшота через готовый pull() → persist(safeMerge)
       // Немного подождём, чтобы схлопнуть серии событий
-      schedulePull(120, true);
+      schedulePullRef.current?.(120, true);
+
     }
    } catch {}
  };
@@ -4461,7 +4569,8 @@ const delTopic = async (t) => {
     toast.ok('Topic removed')
     forumBroadcast({ type: 'post_deleted' }); // без id — просто триггерим перечитку
 
-    if (typeof refresh === 'function') await refresh()   // ← добавили
+    await refreshRef.current?.()
+   // ← добавили
   } else {
     console.error('adminDeleteTopic error:', r)
     toast.err(r?.error || 'Admin endpoint error')
@@ -4488,7 +4597,8 @@ const delPost = async (p) => {
     toast.ok('Post removed')
     emitDeleted(p.id, p.topicId);   // ← сообщить об удалении
 
-    if (typeof refresh === 'function') await refresh()   // ← добавили
+    await refreshRef.current?.()
+   // ← добавили
   } else {
     console.error('adminDeletePost error:', r)
     toast.err(r?.error || 'Admin endpoint error')
@@ -4507,7 +4617,7 @@ const banUser = async (p) => {
       return { ...prev, bans: Array.from(bans) }
     })
     toast.ok(t('forum_banned_ok') || 'User banned')
-    if (typeof refresh === 'function') await refresh()   // ← добавили
+    await refreshRef.current?.()   
   } else {
     console.error('adminBanUser error:', r)
     toast.err(r?.error || 'Admin endpoint error')
@@ -4526,7 +4636,8 @@ const unbanUser = async (p) => {
       return { ...prev, bans: Array.from(bans) }
     })
     toast.ok(t('forum_unbanned_ok') || 'User unbanned')
-    if (typeof refresh === 'function') await refresh()   // ← добавили
+    await refreshRef.current?.()
+   // ← добавили
   } else {
     console.error('adminUnbanUser error:', r)
     toast.err(r?.error || 'Admin endpoint error')
@@ -4967,7 +5078,8 @@ const hasImageLines = React.useMemo(() => {
      if (!rl.allowAction()) { toast.warn(t('forum_too_fast') || 'Слишком часто'); return; }
     const r = await requireAuthStrict(); if (!r) return;
     const uid = r.asherId || r.accountId || ''
-    const prof = (()=>{ if(!isBrowser()) return {}; try{ return JSON.parse(localStorage.getItem('profile:'+uid)||'{}') }catch{return{}} })()
+    const prof = (()=>{ try{ return safeReadProfile(uid) }catch{return {}} })()
+
 
     // лимиты по ТЗ
     const safeTitle = String(title||'')
@@ -4992,7 +5104,7 @@ const hasImageLines = React.useMemo(() => {
 
     const t0 = {
       id: tmpT, title: safeTitle, description: safeDesc, ts: now(),
-      userId: uid, nickname: prof.nickname || shortId(uid),
+      userId: uid, nickname: prof.nick || shortId(uid),
       icon: prof.icon || '👤', isAdmin: isAdm, views: 0
     }
     const p0 = {
@@ -5013,7 +5125,8 @@ toast.ok('Тема создана')
     }, uid)
 
     const realTopicId = createTopicResp?.applied?.find(x=>x.op==='create_topic')?.topic?.id
-    if (!realTopicId) { if (typeof refresh === 'function') await refresh();
+    if (!realTopicId) {
+       await refreshRef.current?.();
       return }
 
     // ремап tmp -> real локально
@@ -5034,7 +5147,8 @@ toast.ok('Тема создана')
   try { resetVideo(); } catch {}
   try { setReplyTo(null); } catch {}
     // подтянуть свежий снапшот
-    if (typeof refresh === 'function') await refresh()
+    await refreshRef.current?.()
+
   }
 
 
@@ -5106,11 +5220,17 @@ if (!body || !sel?.id) return;
 
 
   // локальный профиль (ник/иконка для моментального UI)
-  const prof = (() => {
-    if (typeof window === 'undefined') return {};
-    try { return JSON.parse(localStorage.getItem('profile:' + uid) || '{}'); }
-    catch { return {}; }
-  })();
+const prof = (() => {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = localStorage.getItem('profile:v2:' + uid);
+    if (!raw) return {};
+    const obj = JSON.parse(raw);
+    if (!obj || !obj.ts || (Date.now() - obj.ts) > 30_000) return {};
+    return obj.data || {};
+  } catch { return {}; }
+})();
+
 
   // если отвечаем — определяем родителя
   const parentId = (replyTo?.id) || (threadRoot?.id) || null;
@@ -5125,8 +5245,9 @@ if (!body || !sel?.id) return;
     text: body,
     ts: Date.now(),
     userId: uid,
-    nickname: prof.nickname || shortId(uid),
-    icon: prof.icon || '👤',
+nickname: prof.nick || shortId(uid),
+icon: prof.icon || '👤',
+
     isAdmin: isAdm,
     likes: 0, dislikes: 0, views: 0,
     myReaction: null,
@@ -5169,7 +5290,9 @@ if (!body || !sel?.id) return;
   emitCreated(p.id, sel.id);   // ← оповестить другие вкладки/клиентов
 
   // 4) мягкий догон серверного состояния: убираем tmp_*, дотягиваем id/счётчики
-  setTimeout(() => { try { if (typeof refresh === 'function') refresh(); } catch {} }, 200);
+  setTimeout(() => { try { if (typeof refresh === 'function') refresh();
+  
+ } catch {} }, 200);
 
   // 5) сброс UI + ЧИСТКА АУДИО-ПРЕВЬЮ
   setText('');
@@ -5249,7 +5372,7 @@ try {
   } catch {}
 
   // После прогрева снапшота — мягкий UI-рефреш
-  if (typeof refresh === 'function') await refresh();
+await refreshRef.current?.()
 } catch (e) {
   console.warn('react mutate failed', e);
 }
@@ -5374,9 +5497,10 @@ const onFilesChosen = React.useCallback(async (e) => {
 
   /* ---- профиль (поповер у аватара) ---- */
   const idShown = auth.asherId || auth.accountId || ''
-  const profile = (()=>{ if(!isBrowser()) return null; try{ return JSON.parse(localStorage.getItem('profile:'+idShown)||'null') }catch{return null} })()
-  const nickShown = profile?.nickname || (idShown ? shortId(idShown) : null)
-  const iconShown = profile?.icon || '👤'
+const profile = (()=>{ try{ return safeReadProfile(idShown) }catch{return {}} })()
+const nickShown = profile?.nick || (idShown ? shortId(idShown) : null)
+const iconShown = profile?.icon || '👤'
+
   const copyId = async () => { try{ await navigator.clipboard.writeText(idShown) }catch{} }
 
   const [profileOpen, setProfileOpen] = useState(false)
@@ -5567,15 +5691,29 @@ function openThreadFromPost(p){
               }}>
               <AvatarEmoji userId={idShown} pIcon={iconShown} />
             </button>
-            <ProfilePopover
-              anchorRef={avatarRef}
-              open={profileOpen}
-              onClose={()=>setProfileOpen(false)}
-              t={t}
-              auth={auth}
-              vipActive={vipActive}
-              onSaved={()=>{}}
-            />
+<ProfilePopover
+  anchorRef={avatarRef}
+  open={profileOpen}
+  onClose={()=>setProfileOpen(false)}
+  t={t}
+  auth={auth}
+  vipActive={vipActive}
+  onSaved={(p)=>{ 
+    try{
+      const uid = auth?.accountId || auth?.asherId || '';
+      if (uid) {
+        localStorage.setItem('profile:v2:'+uid, JSON.stringify({
+          ts: Date.now(),
+          data: { nick: p?.nickname, icon: p?.icon }
+        }));
+      }
+    }catch{}
+    // мягко перерисуем
+    try { setProfileOpen(false) } catch {}
+    refreshRef.current?.();
+  }}
+/>
+
   {/* ник ВСЕГДА под аватаром */}
   <button
     className="nick-badge nick-animate avaNick"
@@ -5898,7 +6036,7 @@ onClick={()=>{
       <div key={`vf:${p?.id ?? `${p?.topicId || 't'}:${p?.ts || Math.random()}`}`} id={`post_${p?.id || ''}`}>
         <PostCard
           p={p}
-          parentAuthor={parent?.nickname || (parent ? shortId(parent.userId || '') : null)}
+          parentAuthor={(data.users?.[parent?.userId || '']?.nick) || parent?.nickname || (parent ? shortId(parent.userId || '') : null)}
           onReport={() => toast.ok(t('forum_report_ok'))}
           onOpenThread={() => openThreadHere()}     
           onReact={reactMut}
@@ -6067,16 +6205,27 @@ onClick={()=>{
               }
             }}>
               {/* мини-«шапка», как в PostCard */}
-              <div className="flex items-center gap-2 mb-1">
-                <div className="avaMini">
-                  <AvatarEmoji userId={p.userId || p.accountId} pIcon={resolveIconForDisplay(p.userId || p.accountId, p.icon)} />
-                </div>
-                <span className="nick-badge"><span className="nick-text truncate">{p.nickname || shortId(p.userId || p.accountId || '')}</span></span>
-                <span className="meta"><HydrateText value={human(p.ts)} /></span>
-              </div>
+<div className="flex items-center gap-2 mb-1">
+  {(() => {
+    const uid = p.userId || p.accountId || '';
+    const u = (data.users || {})[uid] || {};
+    const nick = u.nick || p.nickname || shortId(uid);
+    const icon = u.icon || p.icon;
+    return (
+      <>
+        <div className="avaMini">
+          <AvatarEmoji userId={uid} pIcon={resolveIconForDisplay(uid, icon)} />
+        </div>
+        <span className="nick-badge"><span className="nick-text truncate">{nick}</span></span>
+        <span className="meta"><HydrateText value={human(p.ts)} /></span>
+      </>
+    );
+  })()}
+</div>
+
               {/* текст ответа (очищенный) + упоминание родителя */}
               <div className="meta">
-                {t('forum_reply_to') || 'Ответ для'} @{parent?.nickname || shortId(parent?.userId || '')}
+{t('forum_reply_to') || 'Ответ для'} @{(data.users?.[parent?.userId || '']?.nick) || parent?.nickname || shortId(parent?.userId || '')}
               </div>
               {(p.text||'').trim() && (
                 <div className="postBody text-[15px] whitespace-pre-wrap break-words">{(p.text||'').slice(0,180)}</div>
@@ -6104,7 +6253,7 @@ onClick={()=>{
               <div key={p.id} id={`post_${p.id}`} style={{ marginLeft: p._lvl*18 }}>
                 <PostCard
                   p={p}
-                  parentAuthor={parent?.nickname || (parent ? shortId(parent.userId || '') : null)}
+                  parentAuthor={(data.users?.[parent?.userId || '']?.nick) || parent?.nickname || (parent ? shortId(parent.userId || '') : null)}
                   onReport={() => toast.ok(t('forum_report_ok'))}
                   onReply={() => setReplyTo(p)}
                   onOpenThread={(clickP) => { setThreadRoot(clickP) }}

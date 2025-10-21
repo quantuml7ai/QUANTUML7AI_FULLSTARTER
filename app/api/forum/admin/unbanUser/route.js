@@ -1,9 +1,24 @@
+// app/api/forum/admin/unbanUser/route.js
+
 import { json, bad, requireAdmin } from '../../_utils.js'
 import { dbUnbanUser, rebuildSnapshot, redis as redisDirect } from '../../_db.js'
+import { Redis } from '@upstash/redis'
+import { bus } from '../../_bus.js'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const fetchCache = 'force-no-store'
+
+ 
+// ЕДИНАЯ публикация событий форума (локально и межинстансово)
+async function publishForumEvent(evt) {
+  const payload = { ...evt, ts: Date.now() }
+  try { bus.emit(payload) } catch {}
+  try {
+    const redis = Redis.fromEnv()
+    await redis.publish('forum:events', JSON.stringify(payload))
+  } catch {}
+}
 
 export async function POST(request) {
   try {
@@ -16,18 +31,20 @@ export async function POST(request) {
     // 1) снять бан (внутри: nextRev + pushChange {kind:'unban'})
     const r = await dbUnbanUser(accountId)
 
-    // 2) мгновенно пересобрать снапшот — чтобы клиенты сразу увидели изменения в /snapshot
-    await rebuildSnapshot()
+    // 2) пересобрать снапшот — чтобы /snapshot сразу содержал актуальный banned[]
+    // fail-safe: даже если rebuild упадёт, клиенты догонят по rev-барьеру
+    try { await rebuildSnapshot() } catch {}
+    // ✂️ ограничить рост журнала изменений (последние 50k)
+    try { await redisDirect.ltrim('forum:changes', -50000, -1) } catch {}
+ 
 
-    // 3) (опционально) оповестить SSE-слушателей
-    try {
-      await redisDirect.publish('forum:events', JSON.stringify({
-        type: 'unban',
-        accountId,
-        rev: r.rev,
-        ts: Date.now(),
-      }))
-    } catch {}
+    // 3) оповестить SSE-слушателей (единый формат; отправляем и userId, и accountId)
+    await publishForumEvent({
+      type: 'unban',
+      userId: accountId,
+      accountId,
+      rev: r.rev,
+    })
 
     // 4) ответ
     return json({ ok: true, rev: r.rev })

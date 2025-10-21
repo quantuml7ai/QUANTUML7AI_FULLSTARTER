@@ -95,10 +95,12 @@ export async function POST(request) {
         const p = op.payload || {}
 
         if (op.type === 'create_topic') {
-          const title       = trimStr(p.title, MAX_TITLE)
-          const description = trimStr(p.description || '', MAX_TEXT)
-          const nickname    = trimStr(p.nickname || '', 80)
-          const icon        = trimStr(p.icon || '', 32)
+const title       = trimStr(p.title, MAX_TITLE)
+const description = trimStr(p.description || '', MAX_TEXT)
+// server-first: игнорим клиентские nickname/icon, оставляем пусто → _db подставит профиль
+const nickname    = ''
+const icon        = ''
+
          // --- idem на создание темы
          const cid = String(p.cid || '')
          if (cid) {
@@ -123,11 +125,13 @@ export async function POST(request) {
           })
 
         } else if (op.type === 'create_post') {
-          const topicId   = p.topicId
-          const parentId  = p.parentId ?? null
-          const text      = trimStr(p.text, MAX_TEXT)
-          const nickname  = trimStr(p.nickname || '', 80)
-          const icon      = trimStr(p.icon || '', 32)
+const topicId   = p.topicId
+const parentId  = p.parentId ?? null
+const text      = trimStr(p.text, MAX_TEXT)
+// server-first: игнорим клиентские nickname/icon, оставляем пусто → _db подставит профиль
+const nickname  = ''
+const icon      = ''
+
 // --- idem: dedupe по client id (cid) на 60 сек
          const cid = String(p.cid || '')
          if (cid) {
@@ -235,16 +239,18 @@ export async function POST(request) {
     }
 
     // единая пересборка снимка — ОДИН раз, если были успешные операции
-    if (results.some(r => !r.error)) {
-      await rebuildSnapshot()
+// пересборка снимка — только при структурных изменениях (create_topic/create_post)
+const needRebuild = results.some(r => !r.error && (r.op === 'create_topic' || r.op === 'create_post'))
+if (needRebuild) {
+  await rebuildSnapshot()
+}
+try {
+  // ✂️ Ограничение роста журнала изменений (оставляем последние 50k) — всегда
+  await redisDirect.ltrim("forum:changes", -50000, -1)
+} catch (e) {
+  console.error("failed to trim changes log", e)
+}
 
-      // ✂️ Ограничение роста журнала изменений (оставляем последние 50k)
-      try {
-        await redisDirect.ltrim("forum:changes", -50000, -1)
-      } catch (e) {
-        console.error("failed to trim changes log", e)
-      }
-    }
 
     return json({ applied: results })
   } catch (err) {
