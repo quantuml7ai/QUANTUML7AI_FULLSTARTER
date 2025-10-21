@@ -4595,39 +4595,51 @@ try {
  
 const FORUM_NEWS_EN = {
   forum_title: 'Forum',
-
+  nick_free: "Username is available",
+  nick_taken: "Username is taken",
 }
 
 /* -------------------- RU -------------------- */
 const FORUM_NEWS_RU = {
   forum_title: 'Форум',
-
+   nick_free: "Ник свободен",
+   nick_taken: "Ник уже занят",
 }
 
 /* -------------------- UK -------------------- */
 const FORUM_NEWS_UK = {
   forum_title: 'Форум',
+  nick_free: "Нік вільний",
+  nick_taken: "Нік вже зайнятий",
 }
 
 /* -------------------- ES -------------------- */
 const FORUM_NEWS_ES = {
   forum_title: 'Foro',
+  nick_free: "Nombre de usuario disponible",
+  nick_taken: "Nombre de usuario ocupado",
 }
 
 /* -------------------- ZH (简体) -------------------- */
 const FORUM_NEWS_ZH = {
   forum_title: '论坛',
-
+  nick_free: "昵称可用",
+  nick_taken: "昵称已被占用",
 }
 
 /* -------------------- AR -------------------- */
 const FORUM_NEWS_AR = {
   forum_title: 'المنتدى',
+  nick_free: "اسم المستخدم متاح",
+  nick_taken: "اسم المستخدم مستخدم بالفعل",  
+
 }
 
 /* -------------------- TR -------------------- */
 const FORUM_NEWS_TR = {
   forum_title: 'Forum',
+  nick_free: "Kullanıcı adı uygun",
+  nick_taken: "Kullanıcı adı alınmış",  
  
 }
 
