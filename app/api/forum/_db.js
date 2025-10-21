@@ -41,12 +41,10 @@ export const K = {
   // nick index (case-insensitive)
   nickIdx:   (nickLower) => `forum:nick:${nickLower}`,   // value = userId
   userNick:  (userId)    => `forum:user:${userId}:nick`, // value = original nick
-  userIcon:  (userId)    => `forum:user:${userId}:icon`, // value = icon id/url
   // per-topic
   topicPostsCount: (topicId) => `forum:topic:${topicId}:posts_count`,
   topicViews:      (topicId) => `forum:topic:${topicId}:views`,
-  // индекс постов темы (для быстрых каскадных операций)
-  topicPostsSet:   (topicId) => `forum:topic:${topicId}:posts:set`,
+
   // per-post
   postViews:    (postId) => `forum:post:${postId}:views`,
   postLikes:    (postId) => `forum:post:${postId}:likes`,
@@ -73,8 +71,6 @@ export async function nextPostId() {
 /** Запись события в журнал изменений */
 export async function pushChange(evt) {
   await redis.lpush(K.changes, JSON.stringify(evt))
-  // страховочный трим: держим хвост в разумных пределах всегда
-  try { await redis.ltrim(K.changes, -50000, -1) } catch {}
 }
 
 /* =========================
@@ -121,24 +117,7 @@ export async function rebuildSnapshot() {
 
   // Текущая ревизия и сохранение снапшота одним ключом
   const rev = parseIntSafe(await redis.get(K.rev), 0)
-  
-  // Собираем users{} из профилей
-  const userIds = new Set()
-  for (const t of topics) { if (t.userId) userIds.add(String(t.userId)) }
-  for (const p of posts)  { if (p.userId) userIds.add(String(p.userId)) }
-  const users = {}
-  for (const uid of userIds) {
-  const [nick, icon] = await Promise.all([
-      redis.get(K.userNick(uid)),
-      redis.get(K.userIcon(uid)),
-    ])
-    const u = {}
-    if (nick) u.nick = String(nick)
-    if (icon) u.icon = String(icon)
-    if (Object.keys(u).length) users[uid] = u
-  }
-
-  const payload = { topics, posts, users, banned, errors }
+  const payload = { topics, posts, banned, errors }
   await redis.set(K.snapshot, JSON.stringify({ rev, payload }))
 
   // ✂️ страховочный трим лога изменений (держим хвост на разумном уровне)
@@ -153,19 +132,14 @@ export async function rebuildSnapshot() {
 export async function createTopic({ title, description, userId, nickname, icon, ts }) {
   const topicId = String(await nextTopicId())
   const rev = await nextRev()
-  // приоритетно профиль сервера
-  const [srvNick, srvIcon] = await Promise.all([
-    redis.get(K.userNick(userId)),
-    redis.get(K.userIcon(userId)),
-  ])
   const t = {
     id:       topicId,
     title:    toStr(title),
     description: toStr(description),
     ts:       ts ?? now(),
     userId:   toStr(userId),
-    nickname: toStr(srvNick ?? nickname),
-    icon:     toStr(srvIcon ?? icon),  // ← сервер сохраняет иконку автора темы
+    nickname: toStr(nickname),
+    icon:     toStr(icon),  // ← сервер сохраняет иконку автора темы
     isAdmin:  '0',
   }
 
@@ -182,12 +156,6 @@ export async function createTopic({ title, description, userId, nickname, icon, 
 }
 
 export async function createPost({ topicId, parentId, text, userId, nickname, icon, ts }) {
-
-  // приоритетно берём профиль сервера
-  const [srvNick, srvIcon] = await Promise.all([
-    redis.get(K.userNick(userId)),
-    redis.get(K.userIcon(userId)),
-  ])
   const postId = String(await nextPostId())
   const rev = await nextRev()
   const p = {
@@ -197,15 +165,14 @@ export async function createPost({ topicId, parentId, text, userId, nickname, ic
     text:     toStr(text),
     ts:       ts ?? now(),
     userId:   toStr(userId),
-    nickname: toStr(srvNick ?? nickname), // will be overridden by server profile if exists
-    icon:     toStr(srvIcon ?? icon),
+    nickname: toStr(nickname),
+    icon:     toStr(icon),
     isAdmin:  '0',
   }
 
   // атомарная запись поста и счётчиков
   await redis.multi()
     .sadd(K.postsSet, postId)
-    .sadd(K.topicPostsSet(p.topicId), postId)
     .set(K.postKey(postId), JSON.stringify(p))
     .incr(K.topicPostsCount(p.topicId))
     .set(K.postViews(postId), 0)
@@ -291,10 +258,7 @@ export async function isNickAvailable(nick, userId) {
 export async function getUserNick(userId) {
   return await redis.get(K.userNick(userId))
 }
-/** Прочитать текущую иконку пользователя */
-export async function getUserIcon(userId) {
-  return await redis.get(K.userIcon(userId))
-}
+
 /**
  * Попытка установить ник пользователю атомарно.
  * - освобождает старый (если он принадлежал этому userId)
@@ -325,12 +289,7 @@ export async function setUserNick(userId, newNick) {
   }
   return nn
 }
-/** Установить/обновить иконку пользователя (без уникальности) */
-export async function setUserIcon(userId, icon) {
-  const v = String(icon || '').trim()
-  await redis.set(K.userIcon(userId), v)
-  return v
- }
+
 
 /* =========================
    Admin ops
@@ -355,7 +314,6 @@ export async function dbDeletePost(postId) {
   await redis.multi()
     .set(K.postKey(postId), JSON.stringify(post))
     .srem(K.postsSet, String(postId))
-    .srem(K.topicPostsSet(String(post.topicId || '')), String(postId))
     .exec()
   const rev = await nextRev()
   await pushChange({ rev, kind: 'post', id: String(postId), _del: 1, ts: now() })
@@ -382,8 +340,6 @@ export async function dbDeleteTopic(topicId) {
       toDel.push(pid)
     }
   }
-  // убрать индекс постов этой темы
-  try { await redis.del(K.topicPostsSet(String(topicId))) } catch {}  
   const rev = await nextRev()
   await pushChange({ rev, kind: 'topic', id: String(topicId), _del: 1, ts: now(), deletedPosts: toDel })
   return { rev, topic, deletedPosts: toDel }

@@ -8,60 +8,57 @@ export const fetchCache = 'force-no-store'
 // Лёгкий процессный микрокэш (живёт в памяти инстанса)
 const cache = new Map()
 const TTL_MS = 2000 // 2 секунды
-const CACHE_KEY = 'snapshot_v2'
 
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url)
     const revHint = searchParams.get('rev') || ''
     const revTarget = Number.isFinite(+revHint) ? +revHint : 0
+    // const bust = searchParams.get('b') || '' // только для клиента
 
+    const key = `all:${revHint}`
     const now = Date.now()
-    const hit = cache.get(CACHE_KEY)
+    const hit = cache.get(key)
     if (hit && hit.exp > now) {
-      // не отдаём кэш, если клиент ждёт более свежую ревизию
-      try {
-        const parsed = JSON.parse(hit.body)
-        const cachedRev = Number(parsed?.rev ?? 0)
-        if (cachedRev >= revTarget) {
-          return new Response(hit.body, { status: 200, headers: hit.headers })
-        }
-      } catch {
-        // если кэш испорчен — просто игнорируем и пойдём дальше
-      }
+      return new Response(hit.body, { status: 200, headers: hit.headers })
     }
 
-    // основной путь: читаем единый снапшот
-    let data = await snapshot(0)
-    if (!data || typeof data !== 'object' || typeof data.rev !== 'number') {
+    let data = null
+    try {
+      // основной путь: читаем единый снапшот
+      data = await snapshot(0)
+      if (!data || typeof data !== 'object' || typeof data.rev !== 'number') {
+        throw new Error('bad_snapshot_payload')
+      }
+    } catch (_e) {
       // Авто-чин: пересобрать и отдать
       const snap = await rebuildSnapshot()
       data = { rev: snap.rev, ...snap.payload }
-      try { await redisDirect.ltrim('forum:changes', -50000, -1) } catch {}
+
+      // ✂️ ограничиваем рост журнала изменений
+      try {
+        await redisDirect.ltrim('forum:changes', -50000, -1)
+      } catch (e) {
+        console.error('failed to trim changes log (snapshot)', e)
+      }
     }
 
-    // Барьер схемы: гарантируем users{}
-    if (!data.users || typeof data.users !== 'object') {
+    // 🔧 Барьер по ревизии: если клиент знает, что уже есть более свежая ревизия — догонимся
+    if (revTarget > 0 && Number.isFinite(data.rev) && data.rev < revTarget) {
       try {
         const snap2 = await rebuildSnapshot()
         data = { rev: snap2.rev, ...snap2.payload }
       } catch {
-        // в крайнем случае отдадим имеющееся (users{} может отсутствовать только кратко)
+        // no-op: в крайнем случае отдаём имеющееся
       }
     }
 
-    // Барьер ревизии: если клиент знает про более свежую ревизию — догонимся
-    if (revTarget > 0 && Number.isFinite(data.rev) && data.rev < revTarget) {
-      try {
-        const snap3 = await rebuildSnapshot()
-        data = { rev: snap3.rev, ...snap3.payload }
-      } catch {
-        // no-op: отдадим текущие данные
-      }
+    // ✂️ Подрезаем журнал и в «успешной» ветке тоже
+    try {
+      await redisDirect.ltrim('forum:changes', -50000, -1)
+    } catch {
+      /* no-op */
     }
-
-    // ✂️ Подрезаем журнал (в «успешной» ветке тоже)
-    try { await redisDirect.ltrim('forum:changes', -50000, -1) } catch {}
 
     const body = JSON.stringify({ ok: true, ...data })
     const headers = new Headers({
@@ -69,7 +66,7 @@ export async function GET(req) {
       'cache-control': 'no-store, max-age=0',
     })
 
-    cache.set(CACHE_KEY, { body, headers, exp: now + TTL_MS })
+    cache.set(key, { body, headers, exp: now + TTL_MS })
     return new Response(body, { status: 200, headers })
   } catch (e) {
     return new Response(

@@ -10,38 +10,23 @@ export const fetchCache = 'force-no-store'
 export const runtime = 'edge'
 
 const clients = new Set()
-const heartbeats = new Map() // controller -> interval id
-
-function sseChunk(evt) {
-  const e = (evt && typeof evt === 'object') ? evt : { message: String(evt || '') }
-  const lines = []
-  // поддержка Last-Event-ID
-  if (Number.isFinite(+e.rev)) lines.push(`id: ${+e.rev}`)
-  if (typeof e.type === 'string') lines.push(`event: ${e.type}`)
-  lines.push(`data: ${JSON.stringify(e)}`)
-  return lines.join('\n') + '\n\n'
-}
 
 function safeEnqueue(controller, chunk) {
   try { controller.enqueue(chunk) } catch { clients.delete(controller) }
 }
 
 function write(controller, obj) {
-  safeEnqueue(controller, sseChunk(obj))
+  safeEnqueue(controller, `data: ${JSON.stringify(obj)}\n\n`)
 }
 
 // ЕДИНСТВЕННАЯ функция broadcast
 function broadcast(evt) {
-  const chunk = sseChunk(evt)
+  const chunk = `data: ${JSON.stringify(evt)}\n\n`
   for (const c of Array.from(clients)) safeEnqueue(c, chunk)
 }
 
 // Локальные события из mutate (через процессную шину) — увидеть сразу
-bus.on((evt) => {
-  const e = (evt && typeof evt === 'object') ? evt : { message: String(evt || '') }
-  if (e.ts == null) e.ts = Date.now()
-  broadcast(e)
-})
+bus.on((evt) => broadcast(evt))
 
 // --- Redis subscription (однократно на процесс/инстанс) ---
 let subscribed = false
@@ -82,16 +67,17 @@ export async function GET(req) {
     start(controller) {
       clients.add(controller)
 
-      safeEnqueue(controller, `retry: 1000\n\n`) 
-      write(controller, { type: 'connected', ts: Date.now() }) 
+      // подсказка клиенту о времени повторного коннекта
+      safeEnqueue(controller, `retry: 1000\n\n`)
+      write(controller, { type: 'connected', ts: Date.now() })
+
       // heartbeat по протоколу SSE (комментарии), чтобы соединение не считалось «тихим»
       const hb = setInterval(() => {
         safeEnqueue(controller, `: ping ${Date.now()}\n\n`)
       }, 15000)
-       heartbeats.set(controller, hb)
+
       const close = () => {
-        try { clearInterval(heartbeats.get(controller)) } catch {}
-        heartbeats.delete(controller)        
+        clearInterval(hb)
         clients.delete(controller)
         try { controller.close() } catch { /* no-op */ }
       }
@@ -104,15 +90,7 @@ export async function GET(req) {
       }
     },
     cancel() {
-      // симметричный клинап при явной отмене потока
-     // (в ряде рантаймов сюда тоже попадаем)
-      try { clearInterval(heartbeats.get(this)) } catch {}
-      // у ReadableStream нет this=controller, поэтому пройдёмся по набору
-      for (const c of Array.from(clients)) {
-        try { clearInterval(heartbeats.get(c)) } catch {}
-        heartbeats.delete(c)
-        clients.delete(c)
-      }
+      // no-op
     },
   })
 

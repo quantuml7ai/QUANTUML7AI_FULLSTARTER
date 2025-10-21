@@ -1,9 +1,6 @@
 // app/api/forum/_utils.js
 import { cookies } from 'next/headers'
 
-export const UID_RE = /^[A-Za-z0-9:_-]{1,64}$/  // допустимые userId (анти-инъекции в ключи/логи)
-
-
 // lightweight helpers (совместимы с исходной кодовой базой)
 export function now() { return Date.now() }
 export function toStr(x) { return String(x ?? '') }
@@ -13,10 +10,7 @@ export function bool01(b) { return b ? '1' : '0' }
 export function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: {
-      'content-type': 'application/json; charset=utf-8',
-      'cache-control': 'no-store, max-age=0',
-    },
+    headers: { 'content-type': 'application/json' },
   })
 }
 export function bad(msg = 'bad_request', status = 400) {
@@ -74,12 +68,6 @@ export function requireUserId(req, body = null) {
     err.status = 401
     throw err
   }
-  // строгая валидация идентификатора (без пробелов/юникода/SQL/Redis-якорей)
-  if (!UID_RE.test(uid)) {
-    const err = new Error('bad_user_id')
-    err.status = 400
-    throw err
-  }  
   return uid
 }
 
