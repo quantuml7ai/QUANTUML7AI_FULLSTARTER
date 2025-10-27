@@ -1,0 +1,39 @@
+{
+  "name": "quantuml7ai-fullstarter",
+  "version": "0.3.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.114.0",
+    "@react-three/fiber": "^8.15.13",
+    "@solana/wallet-adapter-react": "^0.15.39",
+    "@solana/wallet-adapter-react-ui": "^0.9.39",
+    "@solana/wallet-adapter-wallets": "^0.19.37",
+    "@solana/web3.js": "^1.98.4",
+    "@tanstack/react-query": "^5.51.21",
+    "@tonconnect/ui": "^2.3.0",
+    "@tonconnect/ui-react": "^2.3.0",
+    "@upstash/redis": "^1.35.4",
+    "@vercel/analytics": "^1.5.0",
+    "@vercel/blob": "^2.0.0",
+    "@vercel/speed-insights": "^1.2.0",
+    "@web3modal/wagmi": "^5.1.11",
+    "next": "14.2.5",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "sharp": "^0.34.4",
+    "three": "^0.163.0",
+    "viem": "^2.16.5",
+    "wagmi": "^2.12.10"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "@types/react": "^19.1.13",
+    "pino-pretty": "^13.1.1",
+    "typescript": "^5.9.2"
+  }
+}
