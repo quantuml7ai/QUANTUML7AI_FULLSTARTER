@@ -46,33 +46,53 @@
   const OAUTH_HOSTS = [
     'accounts.google.com',
     'appleid.apple.com',
-    'discord.com',
-    'oauth.discord.com',
-    'twitter.com',
-    'x.com'
+    'discord.com', 'oauth.discord.com',
+    'twitter.com', 'x.com',
+    // Web3Modal / WalletConnect Auth проксирует Google/Apple через собственные домены:
+    'walletconnect.com', 'verify.walletconnect.com', 'auth.walletconnect.com', 'cloud.walletconnect.com',
+    // (опционально) магические провайдеры
+    'magic.link', 'auth.magic.link', 'web3auth.io'
   ];
   document.addEventListener('click', (e) => {
     const a = e.target.closest && e.target.closest('a[href]');
     if (!a) return;
-    if (a.closest('#w3m-modal, w3m-modal, [data-w3m]')) return;
-    try {
+     try {
       const url = new URL(a.href, location.href);
       if (OAUTH_HOSTS.some(h => url.hostname.includes(h))) {
-        safeOpenExternal(url.href, e);
-      }
+        // пометки webview (см. мой предыдущий ответ — пригодится для callback-моста)
+        try {
+          if (isTG) url.searchParams.set('bridge', 'tma');
+          else if (isGSA) url.searchParams.set('bridge', 'gsa');
+        } catch {}
+        safeOpenExternal(url.href, e);      }
     } catch {}
   }, true);
 
-  // --- Перехват window.open в webview (TMA/GSA): уводим наружу редиректом
+  // --- Перехват window.open в webview (TMA/GSA) c поддержкой about:blank
   try {
     if ((isTG || isGSA) && typeof window.open === 'function') {
       const _open = window.open;
       window.open = function(url, target, feats){
-        if (typeof url === 'string' && url) {
-          safeOpenExternal(url);
+        // 1) если сразу даётся URL — уводим наружу
+        if (typeof url === 'string' && url && url !== 'about:blank') {
+         safeOpenExternal(url);
           return null;
         }
-        return _open.apply(this, arguments);
+        // 2) about:blank (или пусто): возвращаем «фальш-окно» с перехватом location.*
+        const fake = {
+          closed: false,
+          close(){},
+          focus(){},
+          // document не нужен, достаточно location
+          location: {}
+        };
+        const set = (u)=>{ if (u && typeof u === 'string') safeOpenExternal(u); };
+        try {
+          Object.defineProperty(fake.location, 'href', { set });
+          fake.location.assign  = set;
+          fake.location.replace = set;
+        } catch { /* no-op */ }
+        return fake;
       };
     }
   } catch {}
