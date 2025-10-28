@@ -7,6 +7,27 @@ import { useAccount } from 'wagmi'
 import { useI18n } from './i18n'
 
 const shortAddr = (a) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '')
+// Безопасное открытие внешней ссылки (Safari / Telegram Mini App / все остальные)
+function safeOpenExternal(url) {
+  try {
+    const isTG  = typeof window !== 'undefined' && !!(window.Telegram && window.Telegram.WebApp);
+    const ua    = (typeof navigator !== 'undefined' ? navigator.userAgent : '').toLowerCase();
+    const isIOS = /iphone|ipad|ipod/.test(ua);
+
+    if (isTG && window.Telegram.WebApp.openLink) {
+      window.Telegram.WebApp.openLink(url);      // внутри TMA
+      return;
+    }
+    if (isIOS) {                                 // iOS Safari надёжнее так
+      window.location.href = url;
+      return;
+    }
+    window.open(url, '_blank', 'noopener,noreferrer'); // десктоп/обычные браузеры
+  } catch {
+    // на крайний случай — прямой переход
+    try { window.location.href = url } catch {}
+  }
+}
 
 // Вспомогательно: достаём accountId так же, как у тебя уже делается по месту
 function readAccountId() {
@@ -183,7 +204,7 @@ export default function AuthNavClient() {
       if(!j.ok){ alert(j.error || 'Error'); return }
       const botName = (process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || '@l7ai_bot')
       const deepLink = j.deepLink || `https://t.me/${botName.replace('@','')}?start=ql7link_${j.token}`
-      window.open(deepLink, '_blank', 'noopener,noreferrer')
+      safeOpenExternal(deepLink)
 
       // Лёгкий поллинг статуса 15 сек.
       const deadline = Date.now() + 15000
@@ -216,14 +237,15 @@ export default function AuthNavClient() {
 {/* "Связать Telegram" — кликабельная GIF-иконка без <button> */}
 {!tgLinked && (
   <img
-    src="/click/telegram.gif"                       // /public/click/telegram.gif
+    src="/click/telegram.gif"
     alt={t('ql7ai_bot') || 'Link Telegram'}
     title={t('ql7ai_bot') || 'Link Telegram'}
     className="tgLinkIcon"
     role="button"
     tabIndex={0}
-    style={{ width: 43, height: 43, cursor: 'pointer', display: 'inline-block' }}
+    style={{ width: 43, height: 43, cursor: 'pointer', display: 'inline-block', pointerEvents: 'auto' }}
     onClick={(e) => { e.preventDefault(); onLinkTelegram?.(); }}
+    onTouchEnd={(e) => { e.preventDefault(); onLinkTelegram?.(); }}  // ← важно для iOS
     onKeyDown={(e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
@@ -232,6 +254,7 @@ export default function AuthNavClient() {
     }}
   />
 )}
+
 
      
     </>
