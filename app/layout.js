@@ -98,6 +98,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
+        <Script src="/compat.js" strategy="beforeInteractive" id="compat-bootstrap" />
         <Providers>
           <I18nProvider>
             {/* фон/герой (клиент-рендер) */}
