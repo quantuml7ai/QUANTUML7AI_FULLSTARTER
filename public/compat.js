@@ -1,113 +1,25 @@
 /* /public/compat.js
-   Универсальный адаптер: Safari/iOS, Telegram Mini App, OAuth, Wallet deeplinks.
-   Подключать раньше приложения: <Script src="/compat.js" strategy="beforeInteractive" />
+   Универсальный адаптер для Safari/iOS, Telegram Mini App, OAuth, Wallet deeplinks.
+   Подключать раньше приложения:
+   <Script src="/compat.js" strategy="beforeInteractive" />
 */
 (function () {
-  // ---------------- UA / Platform flags ----------------
-  const ua  = (navigator.userAgent || '').toLowerCase();
-  const pf  = (navigator.platform   || '').toLowerCase();
-  const isIOS     = /iphone|ipad|ipod/.test(ua);
+  const ua = (navigator.userAgent || '').toLowerCase();
+  const isIOS = /iphone|ipad|ipod/.test(ua);
   const isAndroid = /android/.test(ua);
-  const isSafari  = /^((?!chrome|android).)*safari/.test(ua) || (!!window.safari && !/chrome/.test(ua));
-  const isMac     = pf.includes('mac') || /macintosh/.test(ua);
-  const isFirefox = ua.includes('firefox');
-  const isEdge    = ua.includes('edg/');
-  const isWebView = /\bwv\b/.test(ua) || (isIOS && !/safari/.test(ua)); // очень грубо
-  const isTG      = (typeof window.Telegram !== 'undefined' && !!window.Telegram.WebApp) || ua.includes('telegram');
+  const isTG = (typeof window.Telegram !== 'undefined' && !!window.Telegram.WebApp) || ua.includes('telegram');
+  const isGSA = /\bGSA\b/i.test(navigator.userAgent || '');
+  const isWebView = isGSA || /\bwv\b/.test(ua) || (isIOS && !/safari/.test(ua));
 
-  // CSS-флажки на <html>
-  try {
-    const html = document.documentElement;
-    isIOS     && html.classList.add('ua-ios');
-    isAndroid && html.classList.add('ua-android');
-    isSafari  && html.classList.add('ua-safari');
-    isFirefox && html.classList.add('ua-firefox');
-    isEdge    && html.classList.add('ua-edge');
-    isMac     && html.classList.add('ua-mac');
-    isTG      && html.classList.add('ua-telegram');
-    isWebView && html.classList.add('ua-webview');
-  } catch {}
-
-  // ---------------- Lazy polyfills ----------------
-  if (!('IntersectionObserver' in window)) {
-    import('intersection-observer').catch(() => {});
-  }
-  if (!('ResizeObserver' in window)) {
-    import('resize-observer-polyfill')
-      .then(m => { window.ResizeObserver = m.default || m.ResizeObserver; })
-      .catch(() => {});
-  }
-  if (!('scrollBehavior' in document.documentElement.style)) {
-    import('smoothscroll-polyfill').then(m => m.polyfill?.()).catch(() => {});
-  }
-
-  // ---------------- iOS 100vh fix ----------------
+  // --- 100vh fix
   function setVhVars() {
-    try {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh',  `${vh}px`);
-      document.documentElement.style.setProperty('--svh', `${vh}px`);
-    } catch {}
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
   }
   setVhVars();
-  window.addEventListener('resize', setVhVars, { passive: true });
-  window.addEventListener('orientationchange', setVhVars, { passive: true });
+  window.addEventListener('resize', setVhVars);
 
-  // ---------------- Click fixes (Safari imgs/svg) ----------------
-  function delegateClickFromTouch(e) {
-    try {
-      const el = e.target.closest && e.target.closest('a,button,[role="button"],[data-click],[data-action]');
-      if (!el) return;
-      if ((e.target.tagName === 'IMG' || e.target.tagName === 'SVG') && typeof el.click === 'function') {
-        el.click();
-      }
-    } catch {}
-  }
-  document.addEventListener('touchend', delegateClickFromTouch, { passive: true });
-
-  // курсор и кликабельность для псевдо-кнопок
-  (function injectStyle() {
-    try {
-      const css = `
-        img[role="button"], svg[role="button"], [data-click], [data-action] { cursor: pointer !important; }
-      `;
-      const s = document.createElement('style');
-      s.setAttribute('data-compat', 'cursor-fixes');
-      s.appendChild(document.createTextNode(css));
-      document.head.appendChild(s);
-    } catch {}
-  })();
-
-  // ---------------- Firefox focus on [role=button] ----------------
-  if (isFirefox) {
-    document.addEventListener('keydown', (e) => {
-      if ((e.key === 'Enter' || e.key === ' ') &&
-          e.target && e.target.matches && e.target.matches('[role="button"]')) {
-        e.preventDefault();
-        e.target.click?.();
-      }
-    });
-  }
-
-  // ---------------- Same-origin fetch: keep cookies in Safari/FF ----------------
-  const _fetch = window.fetch.bind(window);
-  window.fetch = function (input, init = {}) {
-    try {
-      const u = (typeof input === 'string')
-        ? new URL(input, location.href)
-        : new URL(input.url, location.href);
-      if (u.origin === location.origin && !init.credentials) {
-        init.credentials = 'include';
-      }
-    } catch {}
-    return _fetch(input, init);
-  };
-
-  // ---------------- Passive scroll listeners (smoother mobile scroll) ----------------
-  window.addEventListener('wheel',     () => {}, { passive: true });
-  window.addEventListener('touchmove', () => {}, { passive: true });
-
-  // ---------------- Telegram Mini App: external links + bootstrap ----------------
+  // --- Telegram external open
   function tgOpenLink(href) {
     try {
       const wa = window.Telegram && window.Telegram.WebApp;
@@ -118,57 +30,31 @@
     } catch {}
     return false;
   }
-  if (isTG) {
-    // Любые внешние ссылки в TMA открываем через openLink (но НЕ мешаем внутренней навигации модалок)
-    document.addEventListener('click', (e) => {
-      const a = e.target.closest && e.target.closest('a[href]');
-      if (!a) return;
-      // не трогаем ссылки внутри модалок web3modal/other
-      if (a.closest('#w3m-modal, w3m-modal, .w3m-modal, [data-w3m]')) return;
 
-      try {
-        const url = new URL(a.href, location.href);
-        const external = (url.origin !== location.origin) || a.target === '_blank';
-        if (external) {
-          e.preventDefault();
-          tgOpenLink(url.href) || (window.location.href = url.href);
-        }
-      } catch {}
-    }, true);
-
-    try {
-      const wa = window.Telegram.WebApp;
-      wa.expand?.();
-      wa.enableClosingConfirmation?.();
-    } catch {}
-  }
-
-  // ---------------- Safe external open (exported) ----------------
+  // --- Safe external open (для OAuth и прочего)
   function safeOpenExternal(url, ev) {
     try {
       if (isTG && tgOpenLink(url)) { ev && ev.preventDefault(); return; }
-      if (isIOS) { ev && ev.preventDefault(); window.location.href = url; return; }
+      if (isIOS || isGSA) { ev && ev.preventDefault(); window.location.href = url; return; }
       if (ev) ev.preventDefault();
       window.open(url, '_blank', 'noopener,noreferrer');
-    } catch {
-      try { window.location.href = url; } catch {}
-    }
+    } catch { window.location.href = url; }
   }
   try { window.__safeOpenExternal = safeOpenExternal; } catch {}
 
-  // ---------------- OAuth helpers (Google/Apple/…): безопасный открыватель ----------------
+  // --- OAuth redirect-friendly
   const OAUTH_HOSTS = [
     'accounts.google.com',
     'appleid.apple.com',
-    'facebook.com',
-    'github.com',
-    'login.microsoftonline.com',
+    'discord.com',
+    'oauth.discord.com',
+    'twitter.com',
+    'x.com'
   ];
   document.addEventListener('click', (e) => {
     const a = e.target.closest && e.target.closest('a[href]');
     if (!a) return;
-    // не трогаем ссылки внутри Web3Modal
-    if (a.closest('#w3m-modal, w3m-modal, .w3m-modal, [data-w3m]')) return;
+    if (a.closest('#w3m-modal, w3m-modal, [data-w3m]')) return;
     try {
       const url = new URL(a.href, location.href);
       if (OAUTH_HOSTS.some(h => url.hostname.includes(h))) {
@@ -177,56 +63,34 @@
     } catch {}
   }, true);
 
-  // ---------------- Wallet deeplink fallback (mobile in-app, no injections) ----------------
+  // --- Wallet deeplink fallback (mobile, no injection)
   (function walletDeeplinks() {
     const isMobile = isIOS || isAndroid;
     if (!isMobile) return;
 
     const hasEvm = !!window.ethereum;
-    const hasSol = !!(window.solana && (window.solana.isPhantom || window.solana.isBrave || window.solana.isMathWallet));
+    const hasSol = !!(window.solana && window.solana.isPhantom);
+    if (hasEvm || hasSol) return;
 
     const dappURL = () => encodeURIComponent(location.origin);
+    const openMetaMask = () => location.href = `https://metamask.app.link/dapp/${dappURL()}`;
+    const openPhantom  = () => location.href = `https://phantom.app/ul/browse/${dappURL()}`;
+    const openTrust    = () => location.href = `https://link.trustwallet.com/open_url?coin_id=60&url=${dappURL()}`;
+    const openOkx      = () => location.href = `okx://wallet/dapp/url?url=${dappURL()}`;
+    const openCoinbase = () => location.href = `https://go.cb-w.com/dapp?cb_url=${dappURL()}`;
 
-    function openMetaMask()  { location.href = `https://metamask.app.link/dapp/${dappURL()}`; }
-    function openPhantom()   { location.href = `https://phantom.app/ul/browse/${dappURL()}`; }
-    function openTrust()     { location.href = `https://link.trustwallet.com/open_url?coin_id=60&url=${dappURL()}`; }
-    function openOkx()       { location.href = `okx://wallet/dapp/url?url=${dappURL()}`; }
-    function openWalletConnect() { /* опционально: дайте реальный wc uri из вашего кода, если нужно */ }
-
-    // ВАЖНО: перехватываем ТОЛЬКО клики ВНУТРИ модалки Web3Modal,
-    // и ТОЛЬКО по элементам, название которых явным образом указывает на кошелёк.
-    const MODAL_SELECTOR = '#w3m-modal, w3m-modal, .w3m-modal, [data-w3m]';
-
+    const MODAL = '#w3m-modal, w3m-modal, [data-w3m]';
     document.addEventListener('click', (e) => {
-      const root = e.target && e.target.closest && e.target.closest(MODAL_SELECTOR);
-      if (!root) return;                    // не внутри модалки — не трогаем
+      const root = e.target.closest && e.target.closest(MODAL);
+      if (!root) return;
       const btn = e.target.closest('[data-wallet],button,[role="button"],a');
       if (!btn) return;
-
-      // Берём читаемую метку
-      const label = (btn.getAttribute('data-wallet') || btn.textContent || '').toLowerCase().trim();
-
-      // если инъекция уже есть — не мешаем библиотеке
-      if ((label.includes('metamask') && hasEvm) || (label.includes('phantom') && hasSol)) return;
-
-      // deeplink только по «узнанным» кошелькам
-      if (label.includes('metamask'))        { e.preventDefault(); openMetaMask(); }
-      else if (label.includes('phantom'))    { e.preventDefault(); openPhantom(); }
-      else if (label.includes('trust'))      { e.preventDefault(); openTrust(); }
-      else if (label.includes('okx'))        { e.preventDefault(); openOkx(); }
-      else if (label.includes('walletconnect')) { /* e.preventDefault(); openWalletConnect(); */ }
-    }, false); // <-- НЕ capture, чтобы не мешать внутренним обработчикам
-
-    try {
-      window.__walletDeeplink = { metamask: openMetaMask, phantom: openPhantom, trust: openTrust, okx: openOkx, walletconnect: openWalletConnect };
-    } catch {}
+      const label = (btn.getAttribute('data-wallet') || btn.textContent || '').toLowerCase();
+      if (label.includes('metamask')) { e.preventDefault(); openMetaMask(); }
+      else if (label.includes('phantom')) { e.preventDefault(); openPhantom(); }
+      else if (label.includes('trust')) { e.preventDefault(); openTrust(); }
+      else if (label.includes('okx')) { e.preventDefault(); openOkx(); }
+      else if (label.includes('coinbase')) { e.preventDefault(); openCoinbase(); }
+    }, false);
   })();
-
-  // ---------------- Helpers export (debug) ----------------
-  try {
-    window.__compat = {
-      flags: { isIOS, isAndroid, isSafari, isMac, isFirefox, isEdge, isTG, isWebView },
-      safeOpenExternal
-    };
-  } catch {}
 })();

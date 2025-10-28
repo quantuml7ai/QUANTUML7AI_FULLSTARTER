@@ -1,65 +1,74 @@
-// app/providers.jsx
 'use client';
 
 import { useEffect, useState } from 'react';
 
-// Все web3-импорты грузим ТОЛЬКО в браузере, чтобы на сервере не дергать IndexedDB.
 export default function Providers({ children }) {
-  const [wagmi, setWagmi] = useState(null); // { WagmiProvider, config }
+  const [ctx, setCtx] = useState(null); // { WagmiProvider, config }
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
     let cancelled = false;
 
     (async () => {
-      // Динамические импорты — только на клиенте
-      const [{ defaultWagmiConfig }, { createWeb3Modal }, { WagmiProvider }, chains] =
-        await Promise.all([
-          import('@web3modal/wagmi'),
-          import('@web3modal/wagmi/react'),
-          import('wagmi'),
-          import('wagmi/chains'),
-        ]);
+      try {
+        // Все из одного пакета /react
+        const [{ createWeb3Modal, defaultWagmiConfig }, { WagmiProvider }, chains] =
+          await Promise.all([
+            import('@web3modal/wagmi/react'),
+            import('wagmi'),
+            import('wagmi/chains')
+          ]);
 
-      const { mainnet, polygon, arbitrum, base, bsc, optimism, avalanche } = chains;
-      const chainsArr = [mainnet, polygon, arbitrum, base, bsc, optimism, avalanche];
+        const { mainnet, polygon, arbitrum, base, bsc, optimism, avalanche } = chains;
+        const chainsArr = [mainnet, polygon, arbitrum, base, bsc, optimism, avalanche];
 
-      const projectId = process.env.NEXT_PUBLIC_WC_PROJECT_ID || '';
-      // Метаданные кошельков (иконку мы уже добавляли в /public/branding/ql7-logo-512.png)
-      const metadata = {
-        name: 'Quantum L7 AI',
-        description: 'Signals · research · multi-chain',
-        url: window.location.origin,
-        icons: ['/branding/ql7-logo-512.png'],
-      };
+        const projectId = process.env.NEXT_PUBLIC_WC_PROJECT_ID || '';
+        if (!projectId) console.warn('⚠️ NEXT_PUBLIC_WC_PROJECT_ID is empty');
 
-      // Конфиг wagmi с корректными коннекторами под Web3Modal
-      const config = defaultWagmiConfig({
-        chains: chainsArr,
-        projectId,
-        metadata,
-      });
+        const metadata = {
+          name: 'Quantum L7 AI',
+          description: 'Signals · research · multi-chain',
+          url: window.location.origin,
+          icons: ['/branding/ql7-logo-512.png']
+        };
 
-      // Инициализация модалки уже в браузере
-      createWeb3Modal({
-        wagmiConfig: config,
-        projectId,
-        chains: chainsArr,
-        themeMode: 'dark',
-        enableAnalytics: true,
-      });
+        const config = defaultWagmiConfig({
+          projectId,
+          chains: chainsArr,
+          metadata
+        });
 
-      if (!cancelled) setWagmi({ WagmiProvider, config });
+        // Инициализация Web3Modal с Explorer
+        createWeb3Modal({
+          wagmiConfig: config,
+          projectId,
+          chains: chainsArr,
+          themeMode: 'dark',
+          enableAnalytics: true,
+          enableExplorer: true, // 👈 обязательно для списка 600+ кошельков
+          explorerRecommendedWalletIds: 'NONE', // показывает все кошельки
+          featuredWalletIds: [
+            'metaMask',
+            'phantom',
+            'trust',
+            'okx',
+            'coinbaseWallet',
+            'brave'
+          ]
+        });
+
+        if (!cancelled) setCtx({ WagmiProvider, config });
+      } catch (err) {
+        console.error('[providers] init error', err);
+        if (!cancelled) setCtx(null);
+      }
     })();
 
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
-  if (!wagmi?.WagmiProvider) return <>{children}</>;
+  if (!ctx?.WagmiProvider) return <>{children}</>;
 
-  const { WagmiProvider, config } = wagmi;
+  const { WagmiProvider, config } = ctx;
   return <WagmiProvider config={config}>{children}</WagmiProvider>;
 }
