@@ -7,27 +7,16 @@ import { useAccount } from 'wagmi'
 import { useI18n } from './i18n'
 
 const shortAddr = (a) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '')
-// Безопасное открытие внешней ссылки (Safari / Telegram Mini App / все остальные)
-function safeOpenExternal(url) {
+// Единая точка внешнего открытия из /public/compat.js
+const safeOpenExternal = (url) => {
   try {
-    const isTG  = typeof window !== 'undefined' && !!(window.Telegram && window.Telegram.WebApp);
-    const ua    = (typeof navigator !== 'undefined' ? navigator.userAgent : '').toLowerCase();
-    const isIOS = /iphone|ipad|ipod/.test(ua);
-
-    if (isTG && window.Telegram.WebApp.openLink) {
-      window.Telegram.WebApp.openLink(url);      // внутри TMA
-      return;
+    if (typeof window !== 'undefined' && typeof window.__safeOpenExternal === 'function') {
+      return window.__safeOpenExternal(url);
     }
-    if (isIOS) {                                 // iOS Safari надёжнее так
-      window.location.href = url;
-      return;
-    }
-    window.open(url, '_blank', 'noopener,noreferrer'); // десктоп/обычные браузеры
-  } catch {
-    // на крайний случай — прямой переход
-    try { window.location.href = url } catch {}
-  }
-}
+  } catch {}
+  // запасной путь, если compat.js по какой-то причине не загрузился
+  try { window.open(url, '_blank', 'noopener,noreferrer'); } catch { try{ window.location.href = url }catch{} }
+};
 
 // Вспомогательно: достаём accountId так же, как у тебя уже делается по месту
 function readAccountId() {

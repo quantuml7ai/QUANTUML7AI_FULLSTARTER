@@ -63,6 +63,19 @@
     } catch {}
   }, true);
 
+  // --- Перехват window.open в webview (TMA/GSA): уводим наружу редиректом
+  try {
+    if ((isTG || isGSA) && typeof window.open === 'function') {
+      const _open = window.open;
+      window.open = function(url, target, feats){
+        if (typeof url === 'string' && url) {
+          safeOpenExternal(url);
+          return null;
+        }
+        return _open.apply(this, arguments);
+      };
+    }
+  } catch {}
   // --- Wallet deeplink fallback (mobile, no injection)
   (function walletDeeplinks() {
     const isMobile = isIOS || isAndroid;
