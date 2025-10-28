@@ -53,9 +53,25 @@
     'twitter.com', 'x.com',
     // Web3Modal / WalletConnect Auth часто ходит через эти домены:
     'walletconnect.com', 'verify.walletconnect.com', 'auth.walletconnect.com', 'cloud.walletconnect.com',
-    // при желании можно добавить кастомные провайдеры:
+    // (по желанию) другие:
     'magic.link', 'auth.magic.link', 'web3auth.io'
   ];
+
+  // --- вспомогательные парсеры HTML → извлечь внешний URL
+  function extractUrlFromHtml(html){
+    try{
+      // <meta http-equiv="refresh" content="0;url=https://...">
+      var m1 = /http\-equiv=["']?refresh["']?[^>]*content=["'][^"']*url=([^"'>\s]+)["']/i.exec(html);
+      if (m1 && m1[1]) return m1[1];
+      // <a href="https://...">
+      var m2 = /<a[^>]+href=["']([^"']+)["']/i.exec(html);
+      if (m2 && m2[1]) return m2[1];
+      // window.location = 'https://...'
+      var m3 = /location\s*=\s*['"]([^'"]+)['"]/i.exec(html);
+      if (m3 && m3[1]) return m3[1];
+      return null;
+    }catch(e){ return null }
+  }
 
   // --- Перехват кликов по ссылкам (включая элементы внутри Web3Modal)
   document.addEventListener('click', function(e){
@@ -66,11 +82,7 @@
       var host = url.hostname || '';
       for (var i=0;i<OAUTH_HOSTS.length;i++){
         if (host.indexOf(OAUTH_HOSTS[i]) !== -1) {
-          // метим источник (может пригодиться на сервере для callback-моста)
-          try {
-            if (isTG) url.searchParams.set('bridge', 'tma');
-            else if (isGSA) url.searchParams.set('bridge', 'gsa');
-          } catch(_){}
+          try { if (isTG) url.searchParams.set('bridge', 'tma'); else if (isGSA) url.searchParams.set('bridge', 'gsa'); } catch(_){}
           safeOpenExternal(url.href, e);
           return;
         }
@@ -78,28 +90,73 @@
     } catch(_e){}
   }, true);
 
-  // --- Перехват window.open в webview (TMA/GSA/прочие WV) с поддержкой about:blank
+  // --- Перехват submit форм, которые уводят на OAuth (иногда кнопки не <a>)
+  document.addEventListener('submit', function(e){
+    try{
+      var form = e.target;
+      if (!form || !form.action) return;
+      var url = new URL(form.action, location.href);
+      var host = url.hostname || '';
+      for (var i=0;i<OAUTH_HOSTS.length;i++){
+        if (host.indexOf(OAUTH_HOSTS[i]) !== -1) {
+          try { if (isTG) url.searchParams.set('bridge', 'tma'); else if (isGSA) url.searchParams.set('bridge', 'gsa'); } catch(_){}
+          safeOpenExternal(url.href, e);
+          return;
+        }
+      }
+    }catch(_){}
+  }, true);
+
+  // --- Сильный shim window.open в webview (TMA/GSA/WV) с поддержкой about:blank и document.write
   try {
     if ((isTG || isGSA || isWV) && typeof window.open === 'function') {
       var _open = window.open;
       window.open = function(url, target, feats){
-        // 1) если сразу дан конечный URL — уводим наружу
+        // 1) Конечный URL сразу → наружу
         if (typeof url === 'string' && url && url !== 'about:blank') {
           safeOpenExternal(url);
-          return null;
+          // Возвращаем «псевдо-окно», чтобы код, рассчитывающий на объект, не падал
+          return createFakePopup();
         }
-        // 2) about:blank (или пусто): вернуть «фальш-окно», перехватить присвоение location.*
-        var fake = { closed:false, close:function(){}, focus:function(){}, location:{} };
-        var set = function(u){ if (u && typeof u === 'string') safeOpenExternal(u); };
-        try {
-          Object.defineProperty(fake.location, 'href', { set: set });
-          fake.location.assign  = set;
-          fake.location.replace = set;
-        } catch(_){}
-        return fake;
+        // 2) about:blank / пусто → возвращаем полноценный fake popup
+        return createFakePopup();
       };
     }
   } catch(_e){}
+
+  function createFakePopup(){
+    var fake = {
+      closed: false,
+      opener: window,
+      close: function(){ try{ this.closed = true }catch(e){} },
+      focus: function(){},
+      blur: function(){},
+      postMessage: function(){},                 // чтобы SDK не падал на проверках
+      addEventListener: function(){},
+      removeEventListener: function(){},
+      dispatchEvent: function(){ return false; },
+      // минимальный document
+      document: {
+        write: function(html){
+          try{
+            var u = extractUrlFromHtml(String(html || ''));
+            if (u) safeOpenExternal(u);
+          }catch(e){}
+        },
+        open: function(){},
+        close: function(){}
+      },
+      location: {}
+    };
+    // перехватываем любые попытки навигации
+    var set = function(u){ if (u && typeof u === 'string') safeOpenExternal(u); };
+    try {
+      Object.defineProperty(fake.location, 'href', { set: set, get: function(){ return '' } });
+      fake.location.assign  = set;
+      fake.location.replace = set;
+    } catch(_){}
+    return fake;
+  }
 
   // --- Wallet deeplink fallback (mobile, без инжекта провайдера)
   (function walletDeeplinks() {
