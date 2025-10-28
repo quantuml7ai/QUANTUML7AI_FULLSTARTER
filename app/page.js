@@ -184,11 +184,12 @@ export default function Home() {
         </section>
       )
 
-      // qc_room изображение/видео (как и было)
+      // qc_room изображение — ТОЛЬКО qc_room.jpg
       content.push(
         <figure className="panel" key="qc-shot">
           <AutoMedia
             base="/branding/qc_room"
+            exts={['jpg']}                     // ← читаем только qc_room.jpg
             className="quantum-shot"
             alt="Quantum L7 AI — quantum computing lab. We are the future of the industry."
             imgProps={{}}
