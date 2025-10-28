@@ -2918,7 +2918,27 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   width: 84px;
   height: 84px;
 }
+/* Абсолютно «чистая» картинка: ни фона, ни рамок, ни подсветки фокуса */
+.questIconPure {
+  width: var(--quest-w, 64px);
+  height: var(--quest-h, auto);
+  display: inline-block;
+  background: transparent !important;
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 0;
+  margin: 0;
+  cursor: var(--quest-cursor, pointer);
+  image-rendering: auto;
+  transform: translateY(var(--quest-y, 0));
+}
 
+/* Выключенное состояние */
+.questIconPure[aria-disabled="true"] {
+  opacity: 0.5;
+  pointer-events: none;
+}
 `}</style>
 )
 
@@ -3451,18 +3471,32 @@ function QCoinWithdrawPopover({ anchorRef, onClose, onOpenQuests, t, questEnable
             />
           </div>
 
-          {/* Кнопка «Quests» — цвет/поведение по auth, тумблер по questEnabled */}
-          <button
-            type="button"
-            className={questBtnClass}
-            disabled={!questEnabled}
-            onClick={handleQuestClick}
-            title={t('quest_open') || 'Quests'}
-            data-quest-state={questState}
-          >
-            <span className="dot" aria-hidden />
-            {t('quest_open') || 'Quests'}
-          </button>
+{/* «Чистая» иконка квеста — без кнопки/фона/рамок */}
+<img
+  src="/click/quest.gif"                             // твой файл из public/click/quest.gif
+  alt=""                                             // без подписи; озвучку даём через aria-label
+  role="button"
+  aria-label={t('quest_open') || 'Quests'}
+  aria-disabled={!questEnabled}
+  tabIndex={questEnabled ? 0 : -1}
+  onClick={questEnabled ? handleQuestClick : undefined}
+  onKeyDown={(e) => {
+    if (!questEnabled) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleQuestClick();
+    }
+  }}
+  draggable={false}
+  className={`questIconPure ${questBtnClass}`}       // оставляем твой класс для расположения на странице
+  style={{
+    // Настрой размеры прямо тут:
+    ['--quest-w']: '72px',   // можно '96px' | '3rem' | 'auto'
+    ['--quest-h']: 'auto',
+    ['--quest-cursor']: questEnabled ? 'pointer' : 'default',
+    ['--quest-y']: '-14px',
+  }}
+/>
 
           <button className="btn btnGhost" onClick={onClose}>{t('forum_close')}</button>
         </div>
@@ -6722,7 +6756,34 @@ const closeQuests = React.useCallback(() => {
                   <path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
                 </svg>
               </button>
-
+{/* ⬇️ КВЕСТ-ИКОНКА МЕЖДУ СОРТИРОВКОЙ И VIP+ */}
+<img
+  src="/click/quest.gif"
+  alt=""
+  role="button"
+  aria-label={t('quest_open') || 'Quests'}
+  aria-disabled={!QUEST_ENABLED}
+  tabIndex={QUEST_ENABLED ? 0 : -1}
+  onClick={QUEST_ENABLED ? openQuests : undefined}
+  onKeyDown={(e) => {
+    if (!QUEST_ENABLED) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openQuests?.();
+    }
+  }}
+  draggable={false}
+  className={
+    `questIconPure ${typeof questBtnClass !== 'undefined' ? questBtnClass : ''}`
+  }
+  style={{
+    ['--quest-w']: '52px',   // меняй по желанию: '96px' | '3rem' | 'auto'
+    ['--quest-h']: 'auto',
+    ['--quest-cursor']: QUEST_ENABLED ? 'pointer' : 'default',
+    ['--quest-y']: '-14px',
+ }}
+/>
+{/* ⬆️ КОНЕЦ ВСТАВКИ */}
                 {drop && q.trim() && (
                 <div className="searchDrop" onMouseLeave={()=>setDrop(false)}>
                   {results.length===0 && <div className="meta px-1 py-1">{t('forum_search_empty') || 'Ничего не найдено'}</div>}
