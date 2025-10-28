@@ -2918,28 +2918,6 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   width: 84px;
   height: 84px;
 }
-/* Абсолютно «чистая» картинка: ни фона, ни рамок, ни подсветки фокуса */
-.questIconPure {
-  width: var(--quest-w, 64px);
-  height: var(--quest-h, auto);
-  display: inline-block;
-  background: transparent !important;
-  border: 0 !important;
-  outline: none !important;
-  box-shadow: none !important;
-  padding: 0;
-  margin: 0;
-  cursor: var(--quest-cursor, pointer);
-  image-rendering: auto;
-  transform: translateY(var(--quest-y, 0));
-}
-
-/* Выключенное состояние */
-.questIconPure[aria-disabled="true"] {
-  opacity: 0.5;
-  pointer-events: none;
-}
-
 
 `}</style>
 )
@@ -3473,32 +3451,19 @@ function QCoinWithdrawPopover({ anchorRef, onClose, onOpenQuests, t, questEnable
             />
           </div>
 
-{/* «Чистая» иконка квеста — без кнопки/фона/рамок */}
-<img
-  src="/click/quest.gif"                             // твой файл из public/click/quest.gif
-  alt=""                                             // без подписи; озвучку даём через aria-label
-  role="button"
-  aria-label={t('quest_open') || 'Quests'}
-  aria-disabled={!questEnabled}
-  tabIndex={questEnabled ? 0 : -1}
-  onClick={questEnabled ? handleQuestClick : undefined}
-  onKeyDown={(e) => {
-    if (!questEnabled) return;
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      handleQuestClick();
-    }
-  }}
-  draggable={false}
-  className={`questIconPure ${questBtnClass}`}       // оставляем твой класс для расположения на странице
-  style={{
-    // Настрой размеры прямо тут:
-    ['--quest-w']: '72px',   // можно '96px' | '3rem' | 'auto'
-    ['--quest-h']: 'auto',
-    ['--quest-cursor']: questEnabled ? 'pointer' : 'default',
-    ['--quest-y']: '-14px',
-  }}
-/>
+          {/* Кнопка «Quests» — цвет/поведение по auth, тумблер по questEnabled */}
+          <button
+            type="button"
+            className={questBtnClass}
+            disabled={!questEnabled}
+            onClick={handleQuestClick}
+            title={t('quest_open') || 'Quests'}
+            data-quest-state={questState}
+          >
+            <span className="dot" aria-hidden />
+            {t('quest_open') || 'Quests'}
+          </button>
+
           <button className="btn btnGhost" onClick={onClose}>{t('forum_close')}</button>
         </div>
 
@@ -5581,6 +5546,7 @@ const videoCancelRef = useRef(false); // true => onstop не собирает bl
    if (videoState !== 'idle' && videoState !== 'preview') return;
    try{
      setVideoState('opening'); setVideoOpen(true);
+     try { videoCancelRef.current = false; } catch {}
      const stream = await navigator.mediaDevices.getUserMedia({ video: { width:1280, height:720 }, audio:true });
      videoStreamRef.current = stream;
      const mr = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm' });
@@ -5599,7 +5565,12 @@ const videoCancelRef = useRef(false); // true => onstop не собирает bl
      }
      const blob = new Blob(videoChunksRef.current, { type: mr.mimeType || 'video/webm' });
      const url  = URL.createObjectURL(blob);
-     setPendingVideo(url);
+           // освобождаем старый blob:URL, если он был
+         try {
+           const prev = pendingVideo;
+           if (prev && /^blob:/.test(prev)) URL.revokeObjectURL(prev);
+         } catch {}
+         setPendingVideo(url);
      setVideoState('preview');
    }catch{
      setVideoState('idle');
@@ -5629,11 +5600,19 @@ const videoCancelRef = useRef(false); // true => onstop не собирает bl
    clearInterval(videoTimerRef.current); videoTimerRef.current=null;
  };
  const resetVideo = () => {
-  try { videoCancelRef.current = true; } catch {}
-   try{ videoRecRef.current?.stop?.() }catch{}
-   try{ videoStreamRef.current?.getTracks?.().forEach(tr=>tr.stop()) }catch{}
-   videoRecRef.current=null; videoStreamRef.current=null;
-   if (pendingVideo && /^blob:/.test(pendingVideo)) { try{ URL.revokeObjectURL(pendingVideo) }catch{} }
+   const rec = videoRecRef.current;
+   const isActive = !!rec && (rec.state === 'recording' || rec.state === 'paused');
+   // Флаг отмены нужен только для активной записи — чтобы onstop пропустил сборку
+   if (isActive) {
+     try { videoCancelRef.current = true; } catch {}
+     try { rec.stop(); } catch {}
+   } else {
+     // Если записи нет, не оставляем флаг «в утечке»
+     try { videoCancelRef.current = false; } catch {}
+   }
+   try { videoStreamRef.current?.getTracks?.().forEach(tr => tr.stop()) } catch {}
+   videoRecRef.current = null; videoStreamRef.current = null;
+   if (pendingVideo && /^blob:/.test(pendingVideo)) { try { URL.revokeObjectURL(pendingVideo) } catch {} }
    setPendingVideo(null); setVideoOpen(false); setVideoState('idle'); setVideoElapsed(0);
  };
 
@@ -6743,34 +6722,6 @@ const closeQuests = React.useCallback(() => {
                   <path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
                 </svg>
               </button>
-{/* ⬇️ КВЕСТ-ИКОНКА МЕЖДУ СОРТИРОВКОЙ И VIP+ */}
-<img
-  src="/click/quest.gif"
-  alt=""
-  role="button"
-  aria-label={t('quest_open') || 'Quests'}
-  aria-disabled={!QUEST_ENABLED}
-  tabIndex={QUEST_ENABLED ? 0 : -1}
-  onClick={QUEST_ENABLED ? openQuests : undefined}
-  onKeyDown={(e) => {
-    if (!QUEST_ENABLED) return;
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      openQuests?.();
-    }
-  }}
-  draggable={false}
-  className={
-    `questIconPure ${typeof questBtnClass !== 'undefined' ? questBtnClass : ''}`
-  }
-  style={{
-    ['--quest-w']: '52px',   // меняй по желанию: '96px' | '3rem' | 'auto'
-    ['--quest-h']: 'auto',
-    ['--quest-cursor']: QUEST_ENABLED ? 'pointer' : 'default',
-    ['--quest-y']: '-14px',
- }}
-/>
-{/* ⬆️ КОНЕЦ ВСТАВКИ */}
 
                 {drop && q.trim() && (
                 <div className="searchDrop" onMouseLeave={()=>setDrop(false)}>
