@@ -1,4 +1,3 @@
-// components/AuthNavClient.jsx
 'use client'
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
@@ -8,19 +7,51 @@ import { useI18n } from './i18n'
 
 const shortAddr = (a) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '')
 
-/**
- * ЕДИНАЯ точка открытия внешних ссылок.
- * Работает через глобальный адаптер из /public/compat.js (window.__safeOpenExternal),
- * а при его отсутствии — максимально безопасные фолбэки.
- */
+/** ЕДИНЫЙ адаптер (из /public/compat.js), с безопасными фолбэками */
 const safeOpenExternal = (url) => {
   try {
     if (typeof window !== 'undefined' && typeof window.__safeOpenExternal === 'function') {
       return window.__safeOpenExternal(url)
     }
   } catch {}
-  // запасной путь, если compat.js не подгрузился
   try { window.open(url, '_blank', 'noopener,noreferrer') } catch { try { window.location.href = url } catch {} }
+}
+
+/** Детект проблемных контейнеров (TMA / Google App webview / generic webview) */
+function isProblemWebView() {
+  try {
+    const ua = (navigator.userAgent || '').toLowerCase()
+    const isIOS = /iphone|ipad|ipod/.test(ua)
+    const isTG  = (typeof window.Telegram !== 'undefined' && !!window.Telegram.WebApp) || ua.includes('telegram')
+    const isGSA = /\bGSA\b/i.test(navigator.userAgent || '')
+    const isWV  = isGSA || /\bwv\b/.test(ua) || (isIOS && !/safari/.test(ua))
+    return !!(isTG || isGSA || isWV)
+  } catch { return false }
+}
+
+/**
+ * КОНФИГ внешних OAuth-эндпоинтов (серверный редирект).
+ * Заполни .env, чтобы совпадало с тем, что уже работает в Chrome.
+ * Если переменная пуста — будет использован разумный дефолт.
+ */
+function getExternalAuthUrl(kind) {
+  const base = (typeof window !== 'undefined' ? window.location.origin : '')
+  const env = (k, d) => (process.env[k] && process.env[k].trim()) || d
+  switch ((kind || '').toLowerCase()) {
+    case 'google':
+      return env('NEXT_PUBLIC_AUTH_GOOGLE_URL', `${base}/api/auth/google/start`)
+    case 'apple':
+      return env('NEXT_PUBLIC_AUTH_APPLE_URL',  `${base}/api/auth/apple/start`)
+    case 'discord':
+      return env('NEXT_PUBLIC_AUTH_DISCORD_URL',`${base}/api/auth/discord/start`)
+    case 'twitter':
+    case 'x':
+      return env('NEXT_PUBLIC_AUTH_TWITTER_URL',`${base}/api/auth/twitter/start`)
+    case 'email':
+      return env('NEXT_PUBLIC_AUTH_EMAIL_URL',  `${base}/auth/email`) // страница ввода email (если есть)
+    default:
+      return `${base}/auth` // fallback: твоя «страница выбора провайдера»
+  }
 }
 
 // Вспомогательно: достаём accountId так же, как у тебя уже делается по месту
@@ -40,6 +71,7 @@ export default function AuthNavClient() {
   const { isConnected, address } = useAccount()
   const { t } = useI18n()
 
+  const isWV = isProblemWebView() // ← ключевой переключатель
   const [authMethod, setAuthMethod] = useState(null)
   const [mounted, setMounted] = useState(false)
   const announcedRef = useRef(false)
@@ -60,7 +92,7 @@ export default function AuthNavClient() {
     } catch {}
   }, [mounted, isConnected])
 
-  // Глобальный вызов авторизации (откуда угодно: window.dispatchEvent(new Event('open-auth')))
+  // Глобальный вызов авторизации (оставляем)
   useEffect(() => {
     if (typeof window === 'undefined') return
     const handler = () => { try { open() } catch {} }
@@ -68,7 +100,7 @@ export default function AuthNavClient() {
     return () => window.removeEventListener('open-auth', handler)
   }, [open])
 
-  // После успешной авторизации — сообщаем странице единым событием
+  // После успешной авторизации — сообщаем странице
   useEffect(() => {
     if (typeof window === 'undefined') return
     if (!isConnected || !address) { announcedRef.current = false; return }
@@ -82,7 +114,7 @@ export default function AuthNavClient() {
     } catch {}
   }, [isConnected, address, authMethod])
 
-  // Разлогин → мягкий reload (как было)
+  // Разлогин → мягкий reload
   useEffect(() => {
     if (prevConnectedRef.current === true && isConnected === false) {
       try {
@@ -94,7 +126,7 @@ export default function AuthNavClient() {
     prevConnectedRef.current = isConnected
   }, [isConnected])
 
-  // Эвенты провайдера (wagmi/инжект)
+  // Эвенты провайдера
   useEffect(() => {
     if (typeof window === 'undefined' || !window.ethereum) return
     const onAccountsChanged = (accs) => {
@@ -141,7 +173,7 @@ export default function AuthNavClient() {
     return () => window.removeEventListener('storage', onStorage)
   }, [])
 
-  // ===== Проверка статуса привязки TG (POST /api/telegram/link/status) =====
+  // ===== Проверка статуса привязки TG
   async function refreshTgLinkStatus() {
     if (checkingRef.current) return false
     checkingRef.current = true
@@ -164,12 +196,9 @@ export default function AuthNavClient() {
     }
   }
 
-  // Проверяем при монтировании и при смене аккаунта
-  useEffect(() => {
-    refreshTgLinkStatus()
-  }, [mounted, isConnected, address])
+  useEffect(() => { refreshTgLinkStatus() }, [mounted, isConnected, address])
 
-  // ===== Поддержка возврата из внешнего браузера в Telegram Mini App по startapp=auth_<code>
+  // ===== Возврат из внешнего браузера в TMA (startapp=auth_<code>)
   useEffect(() => {
     try {
       const wa = typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp
@@ -183,30 +212,43 @@ export default function AuthNavClient() {
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ code: m[1] })
           })
-          // Сессия выставлена в текущем webview — «тихо» перезагрузимся
           window.location.replace(window.location.origin + window.location.pathname)
         } catch {}
       })()
     } catch {}
   }, [])
 
-  // ===== Вычисляем состояние авторизации для цвета кнопки / надписи =====
+  // ===== UI state
   const isAuthed = !!(isConnected && address)
-
   const authLabel = useMemo(() => {
     if (isAuthed) return shortAddr(address)
     if (authMethod) {
-      const map = {
-        google: t('auth_google') || 'Google',
-        email: t('auth_email') || 'Email',
-      }
+      const map = { google: t('auth_google') || 'Google', email: t('auth_email') || 'Email' }
       return map[authMethod] || (t('auth_connected') || 'Connected')
     }
     const v = t('auth_signin')
     return v && v !== 'auth_signin' ? v : 'Sign in'
   }, [isAuthed, address, authMethod, t])
 
-  // Действие по кнопке "Связать Telegram"
+  // ===== Основное действие авторизации
+  async function onAuthClick() {
+    if (!isWV) {
+      // Нормальные браузеры → открываем Web3Modal (и соц-кнопки, и кошельки как раньше)
+      try { await open() } catch {}
+      return
+    }
+    // WebView (TMA/GSA/etc): НИКОГДА не дёргаем Web3Modal-Auth → показываем системное «внешнее меню»
+    try {
+      // 1) сначала предлагаем кошельки (Web3Modal) — он нужен для deeplinks (у тебя уже есть фолбэки в compat.js)
+      await open()
+    } catch {}
+    // 2) Соц-логины/почта: сразу наружу, минуя Web3Modal-Auth (который в webview падает)
+    // Если хочешь явное меню — делаешь свои кнопки рядом; здесь просто открываем твою страницу выбора:
+    const selector = getExternalAuthUrl('') // /auth — твоя страница выбора Google/Apple/Email и т.п.
+    safeOpenExternal(selector)
+  }
+
+  // ===== Действие "Связать Telegram"
   async function onLinkTelegram() {
     try {
       const accountId = readAccountId() || address || null
@@ -236,12 +278,12 @@ export default function AuthNavClient() {
 
   return (
     <>
-      {/* Основная кнопка авторизации — как было */}
+      {/* Основная кнопка авторизации */}
       <button
         type="button"
-        onClick={() => open()}
+        onClick={onAuthClick}
         className={`nav-auth-btn ${isAuthed ? 'is-auth' : 'is-guest'}`}
-        aria-label="Open connect modal"
+        aria-label="Open connect"
         data-auth-open
         data-auth={isAuthed ? 'true' : 'false'}
         title={isAuthed ? (t('auth_account') || 'Account') : (t('auth_signin') || 'Sign in')}
