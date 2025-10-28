@@ -1,6 +1,6 @@
 /* /public/compat.js
-   Универсальный адаптер кросс-браузерности + Telegram Mini App + OAuth + Wallet deeplinks.
-   Подключать РАНЬШЕ приложения: <Script src="/compat.js" strategy="beforeInteractive" />
+   Универсальный адаптер: Safari/iOS, Telegram Mini App, OAuth, Wallet deeplinks.
+   Подключать раньше приложения: <Script src="/compat.js" strategy="beforeInteractive" />
 */
 (function () {
   // ---------------- UA / Platform flags ----------------
@@ -12,7 +12,7 @@
   const isMac     = pf.includes('mac') || /macintosh/.test(ua);
   const isFirefox = ua.includes('firefox');
   const isEdge    = ua.includes('edg/');
-  const isWebView = /\bwv\b/.test(ua) || (isIOS && !('standalone' in navigator) && !/safari/.test(ua)); // очень грубо
+  const isWebView = /\bwv\b/.test(ua) || (isIOS && !/safari/.test(ua)); // очень грубо
   const isTG      = (typeof window.Telegram !== 'undefined' && !!window.Telegram.WebApp) || ua.includes('telegram');
 
   // CSS-флажки на <html>
@@ -70,7 +70,6 @@
     try {
       const css = `
         img[role="button"], svg[role="button"], [data-click], [data-action] { cursor: pointer !important; }
-        a[target="_blank"]:not([rel~="noopener"]):not([rel~="noreferrer"]) { rel: noopener noreferrer; }
       `;
       const s = document.createElement('style');
       s.setAttribute('data-compat', 'cursor-fixes');
@@ -120,10 +119,13 @@
     return false;
   }
   if (isTG) {
-    // Любые внешние ссылки в TMA открываем через openLink
+    // Любые внешние ссылки в TMA открываем через openLink (но НЕ мешаем внутренней навигации модалок)
     document.addEventListener('click', (e) => {
       const a = e.target.closest && e.target.closest('a[href]');
       if (!a) return;
+      // не трогаем ссылки внутри модалок web3modal/other
+      if (a.closest('#w3m-modal, w3m-modal, .w3m-modal, [data-w3m]')) return;
+
       try {
         const url = new URL(a.href, location.href);
         const external = (url.origin !== location.origin) || a.target === '_blank';
@@ -134,7 +136,6 @@
       } catch {}
     }, true);
 
-    // Базовые рекомендации TMA
     try {
       const wa = window.Telegram.WebApp;
       wa.expand?.();
@@ -147,18 +148,15 @@
     try {
       if (isTG && tgOpenLink(url)) { ev && ev.preventDefault(); return; }
       if (isIOS) { ev && ev.preventDefault(); window.location.href = url; return; }
-      // остальным — новое окно/вкладка
       if (ev) ev.preventDefault();
       window.open(url, '_blank', 'noopener,noreferrer');
     } catch {
       try { window.location.href = url; } catch {}
     }
   }
-  // доступно из приложения
   try { window.__safeOpenExternal = safeOpenExternal; } catch {}
 
-  // ---------------- OAuth helpers (Google/Apple/Facebook) ----------------
-  // В мини-браузерах/в TMA попапы часто блокируются — открываем через safeOpenExternal.
+  // ---------------- OAuth helpers (Google/Apple/…): безопасный открыватель ----------------
   const OAUTH_HOSTS = [
     'accounts.google.com',
     'appleid.apple.com',
@@ -169,10 +167,11 @@
   document.addEventListener('click', (e) => {
     const a = e.target.closest && e.target.closest('a[href]');
     if (!a) return;
+    // не трогаем ссылки внутри Web3Modal
+    if (a.closest('#w3m-modal, w3m-modal, .w3m-modal, [data-w3m]')) return;
     try {
       const url = new URL(a.href, location.href);
       if (OAUTH_HOSTS.some(h => url.hostname.includes(h))) {
-        // Принудительно через наш «безопасный» путь
         safeOpenExternal(url.href, e);
       }
     } catch {}
@@ -183,51 +182,43 @@
     const isMobile = isIOS || isAndroid;
     if (!isMobile) return;
 
-    const hasEvm = !!window.ethereum; // MetaMask/OKX/Trust (инъекции EVM)
+    const hasEvm = !!window.ethereum;
     const hasSol = !!(window.solana && (window.solana.isPhantom || window.solana.isBrave || window.solana.isMathWallet));
 
-    function dappURL() { return encodeURIComponent(location.origin); }
+    const dappURL = () => encodeURIComponent(location.origin);
 
-    function openMetaMask() {
-      location.href = `https://metamask.app.link/dapp/${dappURL()}`;
-    }
-    function openPhantom() {
-      location.href = `https://phantom.app/ul/browse/${dappURL()}`;
-    }
-    function openTrust() {
-      location.href = `https://link.trustwallet.com/open_url?coin_id=60&url=${dappURL()}`;
-    }
-    function openOkx() {
-      location.href = `okx://wallet/dapp/url?url=${dappURL()}`;
-    }
-    // В качестве общего фоллбэка — WalletConnect v2 universal link (если используете)
-    function openWalletConnect() {
-      // открываем в их приложении, если установлено; иначе — стянет установку
-      location.href = `wc://wc?uri=${encodeURIComponent('')}`; // оставлено пусто — библиотека сама выставит
-    }
+    function openMetaMask()  { location.href = `https://metamask.app.link/dapp/${dappURL()}`; }
+    function openPhantom()   { location.href = `https://phantom.app/ul/browse/${dappURL()}`; }
+    function openTrust()     { location.href = `https://link.trustwallet.com/open_url?coin_id=60&url=${dappURL()}`; }
+    function openOkx()       { location.href = `okx://wallet/dapp/url?url=${dappURL()}`; }
+    function openWalletConnect() { /* опционально: дайте реальный wc uri из вашего кода, если нужно */ }
 
-    // Перехватываем клики по кнопкам модалки авторизации
+    // ВАЖНО: перехватываем ТОЛЬКО клики ВНУТРИ модалки Web3Modal,
+    // и ТОЛЬКО по элементам, название которых явным образом указывает на кошелёк.
+    const MODAL_SELECTOR = '#w3m-modal, w3m-modal, .w3m-modal, [data-w3m]';
+
     document.addEventListener('click', (e) => {
-      const btn = e.target.closest && e.target.closest('[data-wallet],button,[role="button"]');
+      const root = e.target && e.target.closest && e.target.closest(MODAL_SELECTOR);
+      if (!root) return;                    // не внутри модалки — не трогаем
+      const btn = e.target.closest('[data-wallet],button,[role="button"],a');
       if (!btn) return;
-      const label = (btn.getAttribute('data-wallet') || btn.textContent || '').toLowerCase();
+
+      // Берём читаемую метку
+      const label = (btn.getAttribute('data-wallet') || btn.textContent || '').toLowerCase().trim();
 
       // если инъекция уже есть — не мешаем библиотеке
       if ((label.includes('metamask') && hasEvm) || (label.includes('phantom') && hasSol)) return;
 
-      // если инъекций нет — пробуем deeplink
-      if (label.includes('metamask')) { e.preventDefault(); openMetaMask(); }
-      else if (label.includes('phantom')) { e.preventDefault(); openPhantom(); }
-      else if (label.includes('trust')) { e.preventDefault(); openTrust(); }
-      else if (label.includes('okx')) { e.preventDefault(); openOkx(); }
-      else if (label.includes('walletconnect')) { /* опционально */ e.preventDefault(); openWalletConnect(); }
-    }, true);
+      // deeplink только по «узнанным» кошелькам
+      if (label.includes('metamask'))        { e.preventDefault(); openMetaMask(); }
+      else if (label.includes('phantom'))    { e.preventDefault(); openPhantom(); }
+      else if (label.includes('trust'))      { e.preventDefault(); openTrust(); }
+      else if (label.includes('okx'))        { e.preventDefault(); openOkx(); }
+      else if (label.includes('walletconnect')) { /* e.preventDefault(); openWalletConnect(); */ }
+    }, false); // <-- НЕ capture, чтобы не мешать внутренним обработчикам
 
-    // Экспорт для явного вызова (если вдруг нужно из кода)
     try {
-      window.__walletDeeplink = {
-        metamask: openMetaMask, phantom: openPhantom, trust: openTrust, okx: openOkx, walletconnect: openWalletConnect
-      };
+      window.__walletDeeplink = { metamask: openMetaMask, phantom: openPhantom, trust: openTrust, okx: openOkx, walletconnect: openWalletConnect };
     } catch {}
   })();
 
@@ -238,5 +229,4 @@
       safeOpenExternal
     };
   } catch {}
-
 })();
