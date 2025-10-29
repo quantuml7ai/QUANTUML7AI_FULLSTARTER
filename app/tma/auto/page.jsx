@@ -2,46 +2,31 @@
 
 import { useEffect, useState } from 'react'
 
-/** Ждём появления Telegram.WebApp какое-то время */
-async function waitForTg(msTotal = 2500, step = 150) {
-  const t0 = Date.now()
-  while (Date.now() - t0 < msTotal) {
-    const tg = globalThis?.Telegram?.WebApp
-    if (tg) return tg
-    await new Promise(r => setTimeout(r, step))
-  }
-  return globalThis?.Telegram?.WebApp || null
-}
-
-/** Достаём СЫРОЙ initData (строку), пригодную для бэка */
-function readInitDataRaw() {
-  // 1) Из SDK: tg.initData — уже строка вида "user=...&hash=..."
+function readInitDataSafe() {
+  // 1) Сырая строка initData (есть у Main App, то что нужно для верификации)
   try {
-    const tg = globalThis?.Telegram?.WebApp
-    if (tg?.initData && String(tg.initData).includes('hash=')) {
-      return String(tg.initData)
+    const raw = window?.Telegram?.WebApp?.initData
+    if (raw && typeof raw === 'string' && raw.includes('hash=')) {
+      return { __raw: raw }
     }
   } catch {}
 
-  // 2) Из location.hash: Telegram кладёт blob в #tgWebAppData=...
+  // 2) Объект initDataUnsafe (если вдруг есть, но это НЕ сырая строка)
   try {
-    const hash = (globalThis.location?.hash || '').replace(/^#/, '')
-    if (!hash) return null
-
-    // Если есть явный tgWebAppData — берём его значение
-    const qs = new URLSearchParams(hash)
-    const rawParam =
-      qs.get('tgWebAppData') ||
-      qs.get('tgwebappdata') ||
-      null
-    if (rawParam) {
-      // Может быть url-encoded — но сервер сам умеет, отдадим как есть
-      return rawParam
+    const u = window?.Telegram?.WebApp?.initDataUnsafe
+    if (u && u.user && u.user.id) {
+      // серверу всё равно нужна сырая строка; тут сырых нет — пойдём в hash
+      // оставим «метку», что TMA точно есть
     }
+  } catch {}
 
-    // Иначе многие клиенты кладут весь blob прямо в hash: "user=...&chat_instance=...&hash=..."
-    if (hash.includes('hash=')) {
-      return hash
+  // 3) tgWebAppData в #hash (частый вариант при запуске по прямой ссылке)
+  try {
+    const h = (window.location.hash || '').slice(1)
+    if (h) {
+      const params = new URLSearchParams(h)
+      const raw = params.get('tgWebAppData') || params.get('tgwebappdata')
+      if (raw) return { __raw: decodeURIComponent(raw) }
     }
   } catch {}
 
@@ -52,78 +37,45 @@ export default function TmaAutoPage() {
   const [msg, setMsg] = useState('Authorizing…')
 
   useEffect(() => {
-    let cancelled = false
-
-    ;(async () => {
-      // Ждём SDK, расширяем канву и отмечаем ready (на всякий случай)
-      const tg = await waitForTg()
-      try { tg?.expand?.() } catch {}
-      try { tg?.ready?.() } catch {}
-
-      // Пару ретраев чтения initData на медленных клиентах
-      let raw = readInitDataRaw()
-      if (!raw) {
-        for (let i = 0; i < 6 && !raw; i++) {
-          await new Promise(r => setTimeout(r, 150))
-          raw = readInitDataRaw()
-        }
-      }
-
-      if (!raw) {
-        if (!cancelled) setMsg('No initData from Telegram (open from Mini App).')
-        return
-      }
-
-      // Пробрасываем на серверную проверку + запись в Redis
-      // Передаём именно СТРОКУ — наш /api/tma/auto это ожидает
-      const url = new URL(globalThis.location?.href || 'https://quantuml7ai.com/tma/auto')
-      const ret = url.searchParams.get('return') || '/forum'
+    (async () => {
+      const data = readInitDataSafe()
+      if (!data?.__raw) { setMsg('No initData from Telegram'); return }
 
       try {
-        const r = await fetch(`/api/tma/auto?return=${encodeURIComponent(ret)}`, {
+        const r = await fetch('/api/tma/auto', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ initData: raw })
+          body: JSON.stringify({ initData: data.__raw })
         })
+        const j = await r.json()
+        if (!j.ok) { setMsg(`Auth failed: ${j.error || 'unknown'}`); return }
 
-        const j = await r.json().catch(() => null)
-
-        if (!j?.ok) {
-          if (!cancelled) setMsg(`Auth failed: ${j?.error || r.status || 'unknown'}`)
-          return
-        }
-
-        // Локальные маркеры, чтобы фронт жил "как авторизованный"
         try {
           if (j.accountId) {
             localStorage.setItem('ql7_uid', String(j.accountId))
-            globalThis.__AUTH_ACCOUNT__ = String(j.accountId)
-            globalThis.dispatchEvent?.(
-              new CustomEvent('auth:ok', {
-                detail: { accountId: String(j.accountId), provider: 'tg' }
-              })
-            )
+            window.__AUTH_ACCOUNT__ = String(j.accountId)
+            window.dispatchEvent(new CustomEvent('auth:ok', {
+              detail: { accountId: String(j.accountId), provider: 'tg' }
+            }))
           }
         } catch {}
 
-        // Редирект на целевую страницу
-        globalThis.location?.replace(j.return || ret)
-      } catch (e) {
-        if (!cancelled) setMsg('Network error')
+        const url = new URL(window.location.href)
+        const ret = url.searchParams.get('return') || '/forum'
+        window.location.replace(ret)
+      } catch {
+        setMsg('Network error')
       }
     })()
-
-    return () => { cancelled = true }
   }, [])
 
   return (
-    <div style={{ color:'#9cf', padding:'24px', fontFamily:'system-ui, sans-serif' }}>
-      <h1 style={{ margin: 0, fontSize: 28 }}>Quantum L7 — Telegram Mini App</h1>
-      <p style={{ marginTop: 8 }}>{msg}</p>
-      {/* Отладка: покажем сырое наличие initData/хэша */}
-      <pre style={{ opacity:.6, fontSize:12, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
-        {typeof window !== 'undefined' ? window.location.hash : ''}
-      </pre>
+    <div style={{color:'#9cf', padding:'24px', fontFamily:'system-ui, sans-serif'}}>
+      <h1>Quantum L7 — Telegram Mini App</h1>
+      <p>{msg}</p>
+      <small>
+        {typeof window!=='undefined' ? (window.Telegram?.WebApp?.initData ? 'initData present' : 'no initData') : ''}
+      </small>
     </div>
   )
 }

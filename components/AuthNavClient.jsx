@@ -11,10 +11,13 @@ const shortAddr = (a) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '')
 // ---------- helpers ----------
 function readCookie(name) {
   try {
-    const m = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'));
-    return m ? decodeURIComponent(m[1]) : null;
+    const m = document.cookie.match(
+      new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()[\]\\/+^])/g, '\\$1') + '=([^;]*)')
+    )
+    return m ? decodeURIComponent(m[1]) : null
   } catch { return null }
 }
+
 function safeOpenExternal(url) {
   try {
     const isTG = typeof window !== 'undefined' && !!(window.Telegram && window.Telegram.WebApp)
@@ -36,18 +39,26 @@ function readAccountId() {
     const a1 = localStorage.getItem('asherId')
     const a2 = localStorage.getItem('ql7_uid')
     const a3 = localStorage.getItem('ql7_account') || localStorage.getItem('account') || localStorage.getItem('wallet')
-    // фолбэк на не-httpOnly cookie asherId, которую ставит /api/tma/auto
-const c1 = readCookie('asherId')
+    const c1 = readCookie('asherId') // fallback — ставится /api/tma/auto
     return (a1 || a2 || a3 || c1) ? String(a1 || a2 || a3 || c1) : null
   } catch { return null }
 }
 
-function detectTMA() {
+// Строгое определение настоящего Mini App
+function detectTMAHard() {
   try {
     if (typeof window === 'undefined') return false
-    if (window.Telegram && window.Telegram.WebApp) return true
-    const ua = (navigator.userAgent || '').toLowerCase()
-    return ua.includes('telegram') // подстраховка
+    const tg = window.Telegram && window.Telegram.WebApp
+    if (!tg) return false
+
+    // 1) Самый надёжный признак — сырая строка initData с подписью
+    if (tg.initData && typeof tg.initData === 'string' && tg.initData.includes('hash=')) return true
+
+    // 2) Иногда Telegram прокидывает tgWebAppData в hash
+    const h = (window.location.hash || '')
+    if (h.includes('tgWebAppData=') || h.includes('tgwebappdata=')) return true
+
+    return false
   } catch { return false }
 }
 
@@ -62,7 +73,7 @@ export default function AuthNavClient() {
   const announcedRef = useRef(false)
   const prevConnectedRef = useRef(isConnected)
 
-  // --- NEW: режим "мы внутри TMA и уже авторизованы через /api/tma/auto"
+  // --- режим "мы внутри TMA" + статус автологина через /api/tma/auto
   const [isTMA, setIsTMA] = useState(false)
   const [tmaAuthed, setTmaAuthed] = useState(false)
 
@@ -74,10 +85,12 @@ export default function AuthNavClient() {
 
   useEffect(() => {
     if (!mounted) return
-    setIsTMA(detectTMA())
+    setIsTMA(detectTMAHard())
+
     const acc = readAccountId()
     setTmaAuthed(!!acc)
-    // если перезаход: синхронизируем глобалку и бросаем событие, чтобы остальной код знал об аккаунте
+
+    // если перезаход: синхронизируем глобалку и кидаем событие
     try {
       if (acc && !window.__AUTH_ACCOUNT__) {
         window.__AUTH_ACCOUNT__ = acc
@@ -105,7 +118,7 @@ export default function AuthNavClient() {
     return () => window.removeEventListener('auth:ok', onAuthOk)
   }, [])
 
-  // глобальный вызов web3modal (оставляем как есть)
+  // глобальный вызов web3modal (как было)
   useEffect(() => {
     if (typeof window === 'undefined') return
     const handler = () => { try { open() } catch {} }
@@ -221,35 +234,8 @@ export default function AuthNavClient() {
     return v && v !== 'auth_signin' ? v : 'Sign in'
   }, [isAuthedWallet, address, authMethod, t])
 
-  // ===== “Связать Telegram” (для веба оставляем)
-  async function onLinkTelegram() {
-    try {
-      const accountId = readAccountId() || address || null
-      const r = await fetch('/api/telegram/link/start', {
-        method:'POST',
-        headers:{'content-type':'application/json'},
-        body: JSON.stringify({ accountId })
-      })
-      const j = await r.json()
-      if(!j.ok){ alert(j.error || 'Error'); return }
-      const botName = (process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || '@l7ai_bot')
-      const deepLink = j.deepLink || `https://t.me/${botName.replace('@','')}?start=ql7link_${j.token}`
-      safeOpenExternal(deepLink)
-
-      const deadline = Date.now() + 15000
-      const delay = (ms)=>new Promise(r=>setTimeout(r,ms))
-      while(Date.now() < deadline) {
-        await delay(1200)
-        const linked = await refreshTgLinkStatus()
-        if (linked) break
-      }
-    } catch {
-      alert('Network error')
-    }
-  }
-
-  // ===== Мини-апп: auth-UI не рендерим совсем (без мигания, по ТЗ)
-  if (isTMA) return null
+  // ===== Мини-апп: прячем auth-UI ТОЛЬКО когда есть авторизация (по ТЗ)
+  if (isTMA && tmaAuthed) return null
 
   // ===== Веб-режим — как раньше =====
   return (
