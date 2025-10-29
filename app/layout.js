@@ -73,7 +73,12 @@ export default function RootLayout({ children }) {
       <head>
         {/* ✅ compat.js – максимально рано */}
         <Script src="/compat.js" strategy="beforeInteractive" id="compat-bootstrap" />
-
+  {/* ✅ Telegram WebApp SDK — ДОЛЖЕН грузиться до рендера страниц */}
+  <Script
+    src="https://telegram.org/js/telegram-web-app.js"
+    strategy="beforeInteractive"
+    id="tg-webapp-sdk"
+  />
         {/* ✅ Dev: глушим метрику Coinbase, чтобы не было 401 в консоли */}
         {process.env.NODE_ENV !== 'production' && (
           <Script id="cb-metrics-mute" strategy="beforeInteractive">{`

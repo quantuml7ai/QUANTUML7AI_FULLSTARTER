@@ -1,58 +1,73 @@
-// app/tma/auto/page.jsx
 'use client'
+
 import { useEffect, useState } from 'react'
+
+function readInitDataSafe() {
+  // 1) SDK
+  try {
+    const tg = window?.Telegram?.WebApp
+    if (tg?.initDataUnsafe && tg.initDataUnsafe.user?.id) {
+      return tg.initDataUnsafe
+    }
+  } catch {}
+
+  // 2) Прямо из hash (Telegram кладёт tgWebAppData в #)
+  try {
+    const h = (window.location.hash || '').replace(/^#/, '')
+    const params = new URLSearchParams(h)
+    const raw = params.get('tgWebAppData') || params.get('tgwebappdata')
+    // если нужен парсинг — back/route будет принимать raw строку
+    if (raw) return { __raw: raw } // отдаём сырой blob, бэкенд проверит подпись
+  } catch {}
+
+  return null
+}
 
 export default function TmaAutoPage() {
   const [msg, setMsg] = useState('')
 
   useEffect(() => {
     (async () => {
+      const data = readInitDataSafe()
+      if (!data) { setMsg('No initData from Telegram'); return }
+
       try {
-        const wa = typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null
-        const initData = (wa && wa.initData) ? wa.initData : ''
-        const ret = new URLSearchParams(window.location.search).get('return') || '/forum'
-
-        if (!initData) {
-          setMsg('No initData from Telegram (open from Mini App).')
-          return
-        }
-
+        // отправляем на серверную проверку/запись в Redis
         const r = await fetch('/api/tma/auto', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ initData, return: ret }),
-          credentials: 'include',
+          body: JSON.stringify({ initData: data.__raw || data })
         })
-        const j = await r.json().catch(() => ({}))
+        const j = await r.json()
+        if (!j.ok) { setMsg(`Auth failed: ${j.error || 'unknown'}`); return }
 
-        if (!j?.ok) {
-          setMsg(`Auth failed: ${j?.error || r.status}`)
-          return
-        }
-
-        // Синхронизируем глобалку и уведомляем фронт
+        // кладём локальные маркеры, чтобы AuthNavClient понял "мы авторизованы"
         try {
-          window.__AUTH_ACCOUNT__ = j.accountId
-          window.dispatchEvent(new CustomEvent('auth:ok', { detail: { accountId: j.accountId, provider: 'tma' } }))
+          if (j.accountId) {
+            localStorage.setItem('ql7_uid', String(j.accountId))
+            window.__AUTH_ACCOUNT__ = String(j.accountId)
+            window.dispatchEvent(new CustomEvent('auth:ok', {
+              detail: { accountId: String(j.accountId), provider: 'tg' }
+            }))
+          }
         } catch {}
 
-        // Возврат туда, откуда пришли (внутри Mini App)
-        const backTo = j.return || ret || '/'
-        if (wa && typeof wa.openLink === 'function') {
-          wa.openLink(window.location.origin + backTo)
-        } else {
-          window.location.replace(backTo)
-        }
+        // редирект туда, откуда просили
+        const url = new URL(window.location.href)
+        const ret = url.searchParams.get('return') || '/forum'
+        window.location.replace(ret)
       } catch (e) {
-        setMsg('Auth error: ' + String(e?.message || e))
+        setMsg('Network error')
       }
     })()
   }, [])
 
   return (
-    <div style={{padding:'24px', color:'#fff'}}>
-      <h2>Quantum L7 — Telegram Mini App</h2>
-      {msg && <p>{msg}</p>}
+    <div style={{color:'#9cf', padding:'24px', fontFamily:'system-ui, sans-serif'}}>
+      <h1>Quantum L7 — Telegram Mini App</h1>
+      <p>{msg || 'Authorizing…'}</p>
+      {/* На время отладки можно подсветить хэш */}
+      <small>hash: {typeof window!=='undefined' ? window.location.hash : ''}</small>
     </div>
   )
 }
