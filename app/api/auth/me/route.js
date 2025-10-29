@@ -1,4 +1,3 @@
-// app/api/auth/me/route.js
 import { NextResponse } from 'next/server'
 import { Redis } from '@upstash/redis'
 
@@ -10,17 +9,15 @@ const redis = Redis.fromEnv()
 export async function GET(req) {
   try {
     const cookie = req.headers.get('cookie') || ''
-    const sid = cookie.split('; ').find(x => x.startsWith('sid='))?.split('=')[1]
-    if (!sid) return NextResponse.json({ ok:false, user:null })
+    const sid = cookie.split('; ').find(s => s.startsWith('sid='))?.split('=')[1]
+    if (!sid) return NextResponse.json({ ok:false }, { status:401 })
 
-    const data = await redis.hgetall(`sess:${sid}`)
-    if (!data?.userId) return NextResponse.json({ ok:false, user:null })
+    const sess = await redis.hgetall(`sess:${sid}`)
+    const userId = sess?.userId
+    if (!userId) return NextResponse.json({ ok:false }, { status:401 })
 
-    return NextResponse.json({
-      ok: true,
-      user: { userId: String(data.userId), email: data.email || null, name: data.name || null }
-    }, { headers: { 'cache-control': 'no-store' } })
+    return NextResponse.json({ ok:true, user:{ userId } }, { status:200 })
   } catch (e) {
-    return NextResponse.json({ ok:false, error:String(e) }, { status:500 })
+    return NextResponse.json({ ok:false, error:String(e?.message||e) }, { status:500 })
   }
 }
