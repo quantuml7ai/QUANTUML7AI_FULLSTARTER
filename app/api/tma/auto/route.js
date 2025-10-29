@@ -1,99 +1,64 @@
-import { NextResponse } from 'next/server';
-import crypto from 'crypto';
-import { Redis } from '@upstash/redis';
+// app/api/tma/auto/route.js
+import { NextResponse } from 'next/server'
+import { Redis } from '@upstash/redis'
+import { verifyInitData, extractTelegramUserId } from '@/lib/tma'
 
-export const dynamic = 'force-dynamic';
-const redis = Redis.fromEnv();
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
-// ---- Telegram initData verify (docs) ----
-function verifyTelegramInitData(initData, botToken) {
-  if (!initData || !botToken) return { ok: false, error: 'NO_DATA_OR_TOKEN' };
+const redis = Redis.fromEnv()
 
-  // initData приходит строкой query-пары (a=1&b=2&hash=…)
-  const url = new URLSearchParams(initData);
-  const hash = url.get('hash');
-  url.delete('hash');
-
-  // Собираем data_check_string отсортированно
-  const pairs = [];
-  for (const [k, v] of url.entries()) pairs.push(`${k}=${v}`);
-  pairs.sort();
-  const dataCheckString = pairs.join('\n');
-
-  // Секрет = HMAC_SHA256("WebAppData", SHA256(bot_token))
-  const secret = crypto
-    .createHmac('sha256', 'WebAppData')
-    .update(crypto.createHash('sha256').update(botToken).digest())
-    .digest();
-
-  const calcHash = crypto.createHmac('sha256', secret).update(dataCheckString).digest('hex');
-
-  const ok = calcHash === (hash || '').toLowerCase();
-  if (!ok) return { ok: false, error: 'BAD_HASH' };
-
-  // Парсим user
-  let user = null;
-  try {
-    const raw = url.get('user');
-    if (raw) user = JSON.parse(raw);
-  } catch {}
-
-  return { ok: true, user, params: Object.fromEntries(url.entries()) };
+function setCookie(res, name, value, { days = 365 } = {}) {
+  const maxAge = days * 24 * 60 * 60
+  res.cookies.set(name, value, {
+    path: '/',
+    httpOnly: false,        // НУЖНО, чтобы фронт прочитал asherId
+    sameSite: 'Lax',
+    secure: true,
+    maxAge,
+  })
 }
 
-// ---- cookie helper: простая sid + asherId ----
-function setCookies(res, accountId) {
-  // httpOnly sid — если хотите, можно поднимать полноценную сессию
-  const sid = `sess:${crypto.randomBytes(8).toString('hex')}`;
-  res.cookies.set('sid', sid, { httpOnly: true, path: '/', sameSite: 'Lax', secure: true });
-
-  // не httpOnly — чтобы фронт видел id сразу (ваш фронт так и ожидает)
-  res.cookies.set('asherId', accountId, { httpOnly: false, path: '/', sameSite: 'Lax', secure: true, maxAge: 3600 * 24 * 365 });
-}
-
-// ---- основной обработчик ----
 export async function POST(req) {
   try {
-    const { initData, return: ret } = await req.json().catch(() => ({}));
-    const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
+    const body = await req.json().catch(() => ({}))
+    const initDataRaw = String(body?.initData || '')
+    const ret = String(body?.return || '/forum')
 
-    const v = verifyTelegramInitData(initData, BOT_TOKEN);
-    if (!v.ok) {
-      return NextResponse.json({ ok: false, error: v.error }, { status: 400 });
+    const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || ''
+    if (!initDataRaw || !BOT_TOKEN) {
+      return NextResponse.json({ ok:false, error:'NO_DATA_OR_TOKEN' }, { status:400 })
     }
 
-    const tg = v.user || {};
-    const tgId = String(tg.id || '').trim();
+    const vr = verifyInitData(initDataRaw, BOT_TOKEN)
+    if (!vr.ok) {
+      return NextResponse.json({ ok:false, error: vr.error || 'BAD_HASH', debug: { got: vr.got, calc: vr.calc } }, { status:401 })
+    }
+
+    const tgId = extractTelegramUserId(vr.data)
     if (!tgId) {
-      return NextResponse.json({ ok: false, error: 'NO_TG_ID' }, { status: 400 });
+      return NextResponse.json({ ok:false, error: 'NO_TG_USER' }, { status:400 })
     }
 
-    // 1) делаем детерминированный accountId (или свою схему)
-    const accountId = `tg:${tgId}`;
+    // Маппинг tg -> accountId (в твоей схеме accountId = tgId)
+    const accountId = String(tgId)
 
-    // 2) сохраняем связи в Redis (как у вас в скринах)
+    // Пишем в Redis обе стороны (как ты и показывал в скринах)
     await Promise.all([
-      redis.hset(`acc:${accountId}`, {
-        tg_id: tgId,
-        tg_username: tg.username || '',
-        tg_first_name: tg.first_name || '',
-        tg_last_name: tg.last_name || '',
-        updated_at: Date.now(),
-      }),
-      redis.set(`tg:uid:${tgId}`, accountId, { ex: 60 * 60 * 24 * 365 }),
-    ]);
+      redis.hset(`acc:${accountId}`, { tg_id: accountId }),
+      redis.set(`tg:uid:${accountId}`, accountId, { ex: 60 * 60 * 24 * 365 }),
+    ])
 
-    // (опционально) можно мигрировать VIP-ключи tg:<id> -> tg:<id> без префикса и т.д.
+    const res = NextResponse.json({ ok:true, accountId, return: ret })
 
-    const res = NextResponse.json({
-      ok: true,
-      accountId,
-      return: ret || '/',
-    });
+    // Для фронта: asherId (LS fallback) и «сессионный» sid, если хочешь
+    setCookie(res, 'asherId', accountId, { days: 365 })
+    // Можно добавить sid, если используешь серверные сессии:
+    // res.cookies.set('sid', 'tma:'+accountId, { path:'/', httpOnly:true, sameSite:'Lax', secure:true, maxAge: 365*24*60*60 })
 
-    setCookies(res, accountId);
-    return res;
+    return res
   } catch (e) {
-    return NextResponse.json({ ok: false, error: String(e?.message || e) }, { status: 500 });
+    return NextResponse.json({ ok:false, error:'SERVER_ERROR', message:String(e?.message || e) }, { status:500 })
   }
 }
