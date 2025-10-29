@@ -16,7 +16,22 @@ function goSameTab(url) {
   try { window.location.href = url } catch {}
 }
 
-/** Собираем URL старта OAuth на сервере */
+/** Детект webview/TMA (подстраховка на случай, если где-то понадобится) */
+function detectWV() {
+  try {
+    const uaFull = navigator.userAgent || ''
+    const ua = uaFull.toLowerCase()
+    const isIOS   = /iphone|ipad|ipod/.test(ua)
+    const isTG    = !!(typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp)
+    const isGSA   = /\bGSA\b/.test(uaFull)
+    const isWV    = /\bwv\b/.test(ua) || /Line\/|FBAN|FBAV|OKApp|VKClient|Instagram|KAKAOTALK/i.test(uaFull)
+    const isIOSwv = isIOS && !/safari/i.test(ua)
+    const isAndWV = /Android/i.test(ua) && /\bwv\b/.test(ua)
+    return isTG || isGSA || isWV || isIOSwv || isAndWV || isIOS
+  } catch { return true }
+}
+
+/** URL старта OAuth на сервере */
 function buildAuthStartUrl() {
   const base = (typeof window !== 'undefined' ? window.location.origin : '')
   const target = `${base}/api/auth/start`
@@ -36,7 +51,7 @@ function buildAuthStartUrl() {
   }
 }
 
-// Берём accountId как у тебя
+// Вспомогательное — как у тебя
 function readAccountId() {
   try {
     if (typeof window === 'undefined') return null
@@ -52,78 +67,94 @@ export default function AuthNavClient() {
   const { isConnected, address } = useAccount()
   const { t } = useI18n()
 
-  const [mounted, setMounted] = useState(false)
+  // ---- Новое: состояние OAuth-сессии сайта (НЕ кошелёк)
+  const [siteAuthed, setSiteAuthed] = useState(false)
+  const [siteUser, setSiteUser] = useState(null) // { userId, email, name } — по желанию
+  const [checking, setChecking] = useState(false)
+
   const [authMethod, setAuthMethod] = useState(null)
   const announcedRef = useRef(false)
-  const prevConnectedRef = useRef(isConnected)
+  const prevWalletRef = useRef(isConnected)
 
-  // Telegram link state
+  // Telegram link state (как было)
   const [tgLinked, setTgLinked] = useState(false)
   const checkingRef = useRef(false)
 
-  useEffect(() => { setMounted(true) }, [])
+  // ---- Пингуем сервер: есть ли живая сессия по cookie sid
+  async function refreshSession() {
+    if (checking) return
+    setChecking(true)
+    try {
+      const r = await fetch('/api/auth/me', { method: 'GET', credentials: 'include', headers: { 'accept': 'application/json' } })
+      const j = await r.json().catch(()=>null)
+      const ok = !!j?.ok
+      setSiteAuthed(ok)
+      setSiteUser(ok ? (j.user || null) : null)
+      if (ok && j.user?.userId) {
+        // даём сигнал остальным частям фронта
+        try {
+          window.__AUTH_ACCOUNT__ = j.user.userId
+          window.dispatchEvent(new CustomEvent('auth:ok', { detail: { accountId: j.user.userId, provider: 'oauth' }}))
+        } catch {}
+      }
+      return ok
+    } catch {
+      setSiteAuthed(false); setSiteUser(null); return false
+    } finally {
+      setChecking(false)
+    }
+  }
 
+  // Первый чек + чек при возврате в вкладку/после OAuth
   useEffect(() => {
-    if (!mounted) return
+    refreshSession()
+    const onFocus = () => refreshSession()
+    const onVis = () => { if (document.visibilityState === 'visible') refreshSession() }
+    window.addEventListener('focus', onFocus)
+    document.addEventListener('visibilitychange', onVis)
+    return () => { window.removeEventListener('focus', onFocus); document.removeEventListener('visibilitychange', onVis) }
+  }, [])
+
+  // Отслеживание способа авторизации web3modal (если пригодится в лейбле)
+  useEffect(() => {
     try {
       const m1 = localStorage.getItem('w3m-auth-provider')
       const m2 = localStorage.getItem('W3M_CONNECTED_CONNECTOR')
       setAuthMethod(m1 || m2 || null)
     } catch {}
-  }, [mounted, isConnected])
-
-  // Держим событие open-auth: всегда идём на наш API-роут (никаких попапов)
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const handler = () => { try { goSameTab(buildAuthStartUrl()) } catch {} }
-    window.addEventListener('open-auth', handler)
-    return () => window.removeEventListener('open-auth', handler)
-  }, [])
-
-  // После успешной авторизации — сообщаем странице
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    if (!isConnected || !address) { announcedRef.current = false; return }
-    if (announcedRef.current) return
-    try {
-      window.__AUTH_ACCOUNT__ = address
-      window.dispatchEvent(new CustomEvent('auth:ok', {
-        detail: { accountId: address, provider: authMethod || 'wallet' }
-      }))
-      announcedRef.current = true
-    } catch {}
-  }, [isConnected, address, authMethod])
-
-  // Разлогин → reload
-  useEffect(() => {
-    if (prevConnectedRef.current === true && isConnected === false) {
-      try {
-        window.dispatchEvent(new Event('aiquota:flush'))
-        window.dispatchEvent(new CustomEvent('auth:logout'))
-      } catch {}
-      if (typeof window !== 'undefined') window.location.reload()
-    }
-    prevConnectedRef.current = isConnected
   }, [isConnected])
 
-  // Эвенты провайдера (если установлен кошелёк)
+  // Сброс при дисконнекте кошелька — НЕ трогаем siteAuthed (OAuth остаётся)
+  useEffect(() => {
+    if (prevWalletRef.current === true && isConnected === false) {
+      try {
+        window.dispatchEvent(new Event('aiquota:flush'))
+        window.dispatchEvent(new CustomEvent('auth:logout', { detail: { scope: 'wallet' }}))
+      } catch {}
+      // перерисуемся, но без total reload
+      refreshSession()
+    }
+    prevWalletRef.current = isConnected
+  }, [isConnected])
+
+  // Провайдерные эвенты (как у тебя)
   useEffect(() => {
     if (typeof window === 'undefined' || !window.ethereum) return
     const onAccountsChanged = (accs) => {
       if (!accs || accs.length === 0) {
         try {
           window.dispatchEvent(new Event('aiquota:flush'))
-          window.dispatchEvent(new CustomEvent('auth:logout'))
+          window.dispatchEvent(new CustomEvent('auth:logout', { detail: { scope: 'wallet' }}))
         } catch {}
-        window.location.reload()
+        refreshSession()
       }
     }
     const onDisconnect = () => {
       try {
         window.dispatchEvent(new Event('aiquota:flush'))
-        window.dispatchEvent(new CustomEvent('auth:logout'))
+        window.dispatchEvent(new CustomEvent('auth:logout', { detail: { scope: 'wallet' }}))
       } catch {}
-      window.location.reload()
+      refreshSession()
     }
     window.ethereum.on?.('accountsChanged', onAccountsChanged)
     window.ethereum.on?.('disconnect', onDisconnect)
@@ -133,27 +164,7 @@ export default function AuthNavClient() {
     }
   }, [])
 
-  // Кросс-вкладочный логаут
-  useEffect(() => {
-    const onStorage = (e) => {
-      if (!e) return
-      if (['ql7_uid','asherId','ql7_account','account','wallet'].includes(e.key)) {
-        const a = localStorage.getItem('asherId') || localStorage.getItem('ql7_uid')
-        const w = localStorage.getItem('ql7_account') || localStorage.getItem('account') || localStorage.getItem('wallet')
-        if (!a && !w) {
-          try {
-            window.dispatchEvent(new Event('aiquota:flush'))
-            window.dispatchEvent(new CustomEvent('auth:logout'))
-          } catch {}
-          window.location.reload()
-        }
-      }
-    }
-    window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
-  }, [])
-
-  // ===== Проверка статуса привязки TG
+  // ===== Проверка статуса привязки TG (как было)
   async function refreshTgLinkStatus() {
     if (checkingRef.current) return false
     checkingRef.current = true
@@ -169,16 +180,11 @@ export default function AuthNavClient() {
       const linked = !!j?.linked
       setTgLinked(linked)
       return linked
-    } catch {
-      return false
-    } finally {
-      checkingRef.current = false
-    }
+    } catch { return false }
+    finally { checkingRef.current = false }
   }
 
-  useEffect(() => {
-    refreshTgLinkStatus()
-  }, [mounted, isConnected, address])
+  useEffect(() => { refreshTgLinkStatus() }, [isConnected, address])
 
   // ===== Возврат из внешнего браузера в TMA (startapp=auth_<code>)
   useEffect(() => {
@@ -194,33 +200,46 @@ export default function AuthNavClient() {
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ code: m[1] })
           })
+          // cookie sid установлена сервером → просто обновим сессию и UI
+          await refreshSession()
           window.location.replace(window.location.origin + window.location.pathname)
         } catch {}
       })()
     } catch {}
   }, [])
 
-  // ===== UI state
-  const isAuthed = !!(isConnected && address)
+  // ===== Единое состояние «вход выполнен»
+  const isSigned = !!(siteAuthed || (isConnected && address))
+
+  // Видимая надпись на кнопке
   const authLabel = useMemo(() => {
-    if (isAuthed) return shortAddr(address)
+    if (isConnected && address) return shortAddr(address)
+    if (siteAuthed) {
+      const email = siteUser?.email
+      if (email) return email
+      return t('auth_connected') || 'Connected'
+    }
     if (authMethod) {
       const map = { google: t('auth_google') || 'Google', email: t('auth_email') || 'Email' }
       return map[authMethod] || (t('auth_connected') || 'Connected')
     }
     const v = t('auth_signin')
     return v && v !== 'auth_signin' ? v : 'Sign in'
-  }, [isAuthed, address, authMethod, t])
+  }, [isConnected, address, siteAuthed, siteUser, authMethod, t])
 
-  // ===== Основная кнопка авторизации — ВСЕГДА same-tab OAuth
+  // ===== Основная кнопка авторизации — всегда same-tab OAuth
   function onAuthClick() {
-    goSameTab(buildAuthStartUrl())
+    if (!isSigned) {
+      goSameTab(buildAuthStartUrl())
+      return
+    }
+    // здесь можешь открыть меню аккаунта, если нужно
   }
 
   // ===== "Связать Telegram"
   async function onLinkTelegram() {
     try{
-      const accountId = readAccountId() || address || null
+      const accountId = readAccountId() || siteUser?.userId || address || null
       const r = await fetch('/api/telegram/link/start', {
         method:'POST',
         headers:{'content-type':'application/json'},
@@ -239,9 +258,7 @@ export default function AuthNavClient() {
         const linked = await refreshTgLinkStatus()
         if (linked) break
       }
-    }catch{
-      alert('Network error')
-    }
+    }catch{ alert('Network error') }
   }
 
   return (
@@ -249,11 +266,10 @@ export default function AuthNavClient() {
       <button
         type="button"
         onClick={(e)=>{ e.preventDefault(); onAuthClick() }}
-        className={`nav-auth-btn ${isAuthed ? 'is-auth' : 'is-guest'}`}
+        className={`nav-auth-btn ${isSigned ? 'is-auth' : 'is-guest'}`}
         aria-label="Open auth"
-        data-auth-open
-        data-auth={isAuthed ? 'true' : 'false'}
-        title={isAuthed ? (t('auth_account') || 'Account') : (t('auth_signin') || 'Sign in')}
+        data-auth={isSigned ? 'true' : 'false'}
+        title={isSigned ? (t('auth_account') || 'Account') : (t('auth_signin') || 'Sign in')}
       >
         {authLabel}
       </button>
