@@ -11,7 +11,7 @@ function setSessionCookie(res, sessId) {
     httpOnly: true,
     path: '/',
     sameSite: 'Lax',
-    secure: true,
+    secure: true
   })
 }
 
@@ -26,8 +26,8 @@ export async function POST(req) {
       return NextResponse.json({ ok:false, error:'CODE_NOT_FOUND' }, { status:404 })
     }
 
-    // Поднимем сессию в текущем вебвью (ставим ту же cookie sid)
-    const res = NextResponse.json({ ok:true, userId: data.userId, return: data.return || '/' })
+    // Выставляем ту же session cookie в текущем вебвью
+    const res = NextResponse.json({ ok:true, userId: data.userId || null, return: data.return || '/' })
     setSessionCookie(res, data.sessId)
 
     // Код одноразовый — удалим

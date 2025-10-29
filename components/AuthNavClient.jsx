@@ -2,6 +2,7 @@
 'use client'
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useWeb3Modal } from '@web3modal/wagmi/react'
 import { useAccount } from 'wagmi'
 import { useI18n } from './i18n'
 
@@ -16,39 +17,22 @@ function goSameTab(url) {
   try { window.location.href = url } catch {}
 }
 
-/** Детект webview/TMA (подстраховка на случай, если где-то понадобится) */
-function detectWV() {
-  try {
-    const uaFull = navigator.userAgent || ''
-    const ua = uaFull.toLowerCase()
-    const isIOS   = /iphone|ipad|ipod/.test(ua)
-    const isTG    = !!(typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp)
-    const isGSA   = /\bGSA\b/.test(uaFull)
-    const isWV    = /\bwv\b/.test(ua) || /Line\/|FBAN|FBAV|OKApp|VKClient|Instagram|KAKAOTALK/i.test(uaFull)
-    const isIOSwv = isIOS && !/safari/i.test(ua)
-    const isAndWV = /Android/i.test(ua) && /\bwv\b/.test(ua)
-    return isTG || isGSA || isWV || isIOSwv || isAndWV || isIOS
-  } catch { return true }
-}
-
-/** URL старта OAuth на сервере */
-function buildAuthStartUrl() {
+/** Сформировать URL старта OAuth (same-tab), провайдер обязателен */
+function buildAuthStartUrl(provider) {
   const base = (typeof window !== 'undefined' ? window.location.origin : '')
   const target = `${base}/api/auth/start`
   try {
     const cur = new URL(window.location.href)
     const u = new URL(target)
+    u.searchParams.set('provider', (provider || 'google').toLowerCase())
     u.searchParams.set('return', cur.pathname + cur.search) // вернуться туда же
     const ua = (navigator.userAgent || '').toLowerCase()
     const isTG  = (typeof window.Telegram !== 'undefined' && !!window.Telegram.WebApp) || ua.includes('telegram')
     const isGSA = /\bGSA\b/i.test(navigator.userAgent || '')
     if (isTG)  u.searchParams.set('bridge', 'tma')
     else if (isGSA) u.searchParams.set('bridge', 'gsa')
-    u.searchParams.set('provider', 'google') // по умолчанию Google
     return u.toString()
-  } catch {
-    return target
-  }
+  } catch { return target }
 }
 
 // Вспомогательное — как у тебя
@@ -63,24 +47,76 @@ function readAccountId() {
   } catch { return null }
 }
 
+/** Простой модал без сторонних зависимостей */
+function UnifiedAuthModal({ open, onClose, onWallet, onOAuth }) {
+  if (!open) return null
+  return (
+    <div className="ua-backdrop" role="dialog" aria-modal="true" aria-labelledby="ua-title" onClick={onClose}>
+      <div className="ua-modal" onClick={(e)=>e.stopPropagation()}>
+        <h3 id="ua-title">Sign in</h3>
+
+        <div className="ua-section">
+          <div className="ua-caption">Wallet</div>
+          <button className="ua-btn primary" onClick={onWallet}>
+            <img src="/icons/wallet.svg" alt="" width="18" height="18" style={{marginRight:8}}/>
+            Connect wallet
+          </button>
+        </div>
+
+        <div className="ua-section">
+          <div className="ua-caption">Or continue with</div>
+          <div className="ua-grid">
+            <button className="ua-btn" onClick={() => onOAuth('google')}>
+              <img src="/icons/google.svg" alt="" width="18" height="18" style={{marginRight:8}}/>
+              Google
+            </button>
+            <button className="ua-btn" onClick={() => onOAuth('apple')}>
+              <img src="/icons/apple.svg" alt="" width="18" height="18" style={{marginRight:8}}/>
+              Apple
+            </button>
+            <button className="ua-btn" onClick={() => onOAuth('email')}>
+              <img src="/icons/mail.svg" alt="" width="18" height="18" style={{marginRight:8}}/>
+              Email
+            </button>
+          </div>
+        </div>
+
+        <button className="ua-close" onClick={onClose} aria-label="Close">×</button>
+
+        <style jsx>{`
+          .ua-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:grid;place-items:center;z-index:1000}
+          .ua-modal{position:relative;width:min(480px,calc(100% - 24px));background:#0c1119;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px 16px 12px 16px;box-shadow:0 16px 48px rgba(0,0,0,.5)}
+          h3{margin:0 0 6px 0}
+          .ua-section{margin-top:10px}
+          .ua-caption{opacity:.7;font-size:13px;margin:6px 0 8px}
+          .ua-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+          .ua-btn{display:flex;align-items:center;justify-content:center;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:#0f1218;color:#e9f6ff;font-weight:700;cursor:pointer}
+          .ua-btn.primary{border-color:#00d2ff;box-shadow:0 0 0 1px rgba(0,210,255,.22), inset 0 0 18px rgba(0,210,255,.18)}
+          .ua-close{position:absolute;right:10px;top:8px;opacity:.7;background:transparent;border:0;font-size:22px;color:#fff;cursor:pointer}
+        `}</style>
+      </div>
+    </div>
+  )
+}
+
 export default function AuthNavClient() {
   const { isConnected, address } = useAccount()
+  const { open } = useWeb3Modal()
   const { t } = useI18n()
 
-  // ---- Новое: состояние OAuth-сессии сайта (НЕ кошелёк)
+  // ---- Состояние OAuth-сессии сайта (cookie sid)
   const [siteAuthed, setSiteAuthed] = useState(false)
-  const [siteUser, setSiteUser] = useState(null) // { userId, email, name } — по желанию
+  const [siteUser, setSiteUser] = useState(null)
   const [checking, setChecking] = useState(false)
+  const [showModal, setShowModal] = useState(false)
 
   const [authMethod, setAuthMethod] = useState(null)
-  const announcedRef = useRef(false)
   const prevWalletRef = useRef(isConnected)
 
-  // Telegram link state (как было)
+  // Telegram link
   const [tgLinked, setTgLinked] = useState(false)
   const checkingRef = useRef(false)
 
-  // ---- Пингуем сервер: есть ли живая сессия по cookie sid
   async function refreshSession() {
     if (checking) return
     setChecking(true)
@@ -91,21 +127,14 @@ export default function AuthNavClient() {
       setSiteAuthed(ok)
       setSiteUser(ok ? (j.user || null) : null)
       if (ok && j.user?.userId) {
-        // даём сигнал остальным частям фронта
         try {
           window.__AUTH_ACCOUNT__ = j.user.userId
           window.dispatchEvent(new CustomEvent('auth:ok', { detail: { accountId: j.user.userId, provider: 'oauth' }}))
         } catch {}
       }
-      return ok
-    } catch {
-      setSiteAuthed(false); setSiteUser(null); return false
-    } finally {
-      setChecking(false)
-    }
+    } finally { setChecking(false) }
   }
 
-  // Первый чек + чек при возврате в вкладку/после OAuth
   useEffect(() => {
     refreshSession()
     const onFocus = () => refreshSession()
@@ -115,7 +144,6 @@ export default function AuthNavClient() {
     return () => { window.removeEventListener('focus', onFocus); document.removeEventListener('visibilitychange', onVis) }
   }, [])
 
-  // Отслеживание способа авторизации web3modal (если пригодится в лейбле)
   useEffect(() => {
     try {
       const m1 = localStorage.getItem('w3m-auth-provider')
@@ -124,20 +152,17 @@ export default function AuthNavClient() {
     } catch {}
   }, [isConnected])
 
-  // Сброс при дисконнекте кошелька — НЕ трогаем siteAuthed (OAuth остаётся)
   useEffect(() => {
     if (prevWalletRef.current === true && isConnected === false) {
       try {
         window.dispatchEvent(new Event('aiquota:flush'))
         window.dispatchEvent(new CustomEvent('auth:logout', { detail: { scope: 'wallet' }}))
       } catch {}
-      // перерисуемся, но без total reload
       refreshSession()
     }
     prevWalletRef.current = isConnected
   }, [isConnected])
 
-  // Провайдерные эвенты (как у тебя)
   useEffect(() => {
     if (typeof window === 'undefined' || !window.ethereum) return
     const onAccountsChanged = (accs) => {
@@ -164,12 +189,12 @@ export default function AuthNavClient() {
     }
   }, [])
 
-  // ===== Проверка статуса привязки TG (как было)
+  // TG link
   async function refreshTgLinkStatus() {
     if (checkingRef.current) return false
     checkingRef.current = true
     try {
-      const accountId = readAccountId() || address || null
+      const accountId = readAccountId() || siteUser?.userId || address || null
       if (!accountId) { setTgLinked(false); return false }
       const r = await fetch('/api/telegram/link/status', {
         method: 'POST',
@@ -180,13 +205,11 @@ export default function AuthNavClient() {
       const linked = !!j?.linked
       setTgLinked(linked)
       return linked
-    } catch { return false }
-    finally { checkingRef.current = false }
+    } finally { checkingRef.current = false }
   }
+  useEffect(() => { refreshTgLinkStatus() }, [isConnected, address, siteUser?.userId])
 
-  useEffect(() => { refreshTgLinkStatus() }, [isConnected, address])
-
-  // ===== Возврат из внешнего браузера в TMA (startapp=auth_<code>)
+  // Возврат в TMA (startapp=auth_<code>)
   useEffect(() => {
     try {
       const wa = typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp
@@ -200,7 +223,6 @@ export default function AuthNavClient() {
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ code: m[1] })
           })
-          // cookie sid установлена сервером → просто обновим сессию и UI
           await refreshSession()
           window.location.replace(window.location.origin + window.location.pathname)
         } catch {}
@@ -208,10 +230,8 @@ export default function AuthNavClient() {
     } catch {}
   }, [])
 
-  // ===== Единое состояние «вход выполнен»
   const isSigned = !!(siteAuthed || (isConnected && address))
 
-  // Видимая надпись на кнопке
   const authLabel = useMemo(() => {
     if (isConnected && address) return shortAddr(address)
     if (siteAuthed) {
@@ -227,16 +247,25 @@ export default function AuthNavClient() {
     return v && v !== 'auth_signin' ? v : 'Sign in'
   }, [isConnected, address, siteAuthed, siteUser, authMethod, t])
 
-  // ===== Основная кнопка авторизации — всегда same-tab OAuth
-  function onAuthClick() {
-    if (!isSigned) {
-      goSameTab(buildAuthStartUrl())
-      return
-    }
-    // здесь можешь открыть меню аккаунта, если нужно
+  // Открыть единый модал
+  function onMainButton() {
+    if (!isSigned) setShowModal(true)
+    // если уже залогинен — здесь можно показать меню аккаунта
   }
 
-  // ===== "Связать Telegram"
+  // Кнопка «Wallet» внутри модала
+  const handleWallet = async () => {
+    try { await open() } catch {}
+    // закрывать модал не будем насильно — пусть сам закроет после connect
+  }
+
+  // Кнопки «Google / Apple / Email» внутри модала
+  const handleOAuth = (provider) => {
+    setShowModal(false) // закрываем модал, сразу уходим на same-tab OAuth
+    goSameTab(buildAuthStartUrl(provider))
+  }
+
+  // Привязка Telegram (опционально оставить)
   async function onLinkTelegram() {
     try{
       const accountId = readAccountId() || siteUser?.userId || address || null
@@ -250,22 +279,15 @@ export default function AuthNavClient() {
       const botName = (process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || '@l7ai_bot')
       const deepLink = j.deepLink || `https://t.me/${botName.replace('@','')}?start=ql7link_${j.token}`
       goSameTab(deepLink)
-
-      const deadline = Date.now() + 15000
-      const delay = (ms)=>new Promise(r=>setTimeout(r,ms))
-      while(Date.now() < deadline) {
-        await delay(1200)
-        const linked = await refreshTgLinkStatus()
-        if (linked) break
-      }
     }catch{ alert('Network error') }
   }
 
   return (
     <>
+      {/* ОДНА кнопка авторизации */}
       <button
         type="button"
-        onClick={(e)=>{ e.preventDefault(); onAuthClick() }}
+        onClick={(e)=>{ e.preventDefault(); onMainButton() }}
         className={`nav-auth-btn ${isSigned ? 'is-auth' : 'is-guest'}`}
         aria-label="Open auth"
         data-auth={isSigned ? 'true' : 'false'}
@@ -274,6 +296,7 @@ export default function AuthNavClient() {
         {authLabel}
       </button>
 
+      {/* (опционально) иконка TG привязки */}
       {!tgLinked && (
         <img
           src="/click/telegram.gif"
@@ -288,6 +311,14 @@ export default function AuthNavClient() {
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onLinkTelegram?.() } }}
         />
       )}
+
+      {/* ЕДИНЫЙ модал */}
+      <UnifiedAuthModal
+        open={!isSigned && showModal}
+        onClose={() => setShowModal(false)}
+        onWallet={handleWallet}
+        onOAuth={handleOAuth}
+      />
     </>
   )
 }
