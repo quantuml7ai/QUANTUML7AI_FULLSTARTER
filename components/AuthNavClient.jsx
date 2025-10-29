@@ -7,25 +7,48 @@ import { useAccount } from 'wagmi'
 import { useI18n } from './i18n'
 
 const shortAddr = (a) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '')
-// Безопасное открытие внешней ссылки (Safari / Telegram Mini App / все остальные)
-function safeOpenExternal(url) {
-  try {
-    const isTG  = typeof window !== 'undefined' && !!(window.Telegram && window.Telegram.WebApp);
-    const ua    = (typeof navigator !== 'undefined' ? navigator.userAgent : '').toLowerCase();
-    const isIOS = /iphone|ipad|ipod/.test(ua);
 
-    if (isTG && window.Telegram.WebApp.openLink) {
-      window.Telegram.WebApp.openLink(url);      // внутри TMA
-      return;
+/** ЕДИНАЯ точка открытия — всегда без новой вкладки */
+function goSameTab(url) {
+  try {
+    if (typeof window !== 'undefined' && typeof window.__safeOpenExternal === 'function') {
+      // в TMA это откроет через openLink (тоже top-nav), в iOS/GSA — location.href
+      return window.__safeOpenExternal(url)
     }
-    if (isIOS) {                                 // iOS Safari надёжнее так
-      window.location.href = url;
-      return;
-    }
-    window.open(url, '_blank', 'noopener,noreferrer'); // десктоп/обычные браузеры
+  } catch {}
+  try { window.location.href = url } catch {}
+}
+
+/** Детект проблемных контейнеров (webview/TMA/GSA/iOS no-safari) */
+function isProblemWebView() {
+  try {
+    const ua = (navigator.userAgent || '').toLowerCase()
+    const isIOS = /iphone|ipad|ipod/.test(ua)
+    const isTG  = (typeof window.Telegram !== 'undefined' && !!window.Telegram.WebApp) || ua.includes('telegram')
+    const isGSA = /\bGSA\b/i.test(navigator.userAgent || '')
+    const isWV  = isGSA || /\bwv\b/.test(ua) || (isIOS && !/safari/.test(ua))
+    return !!(isTG || isGSA || isWV || isIOS) // iOS: предпочтём ту же вкладку
+  } catch { return true }
+}
+
+/** Адрес селектора авторизации на сервере (открываем в той же вкладке) */
+function buildAuthSelectorUrl() {
+  const base = (typeof window !== 'undefined' ? window.location.origin : '')
+  const env = (k, d) => (process.env[k] && process.env[k].trim()) || d
+  const target = env('NEXT_PUBLIC_AUTH_SELECTOR_URL', `${base}/auth`)
+  // добавим return + bridge, чтобы потом корректно вернуться
+  try {
+    const cur = new URL(window.location.href)
+    const u = new URL(target, base)
+    u.searchParams.set('return', cur.pathname + cur.search) // куда вернуться после логина
+    const ua = (navigator.userAgent || '').toLowerCase()
+    const isTG  = (typeof window.Telegram !== 'undefined' && !!window.Telegram.WebApp) || ua.includes('telegram')
+    const isGSA = /\bGSA\b/i.test(navigator.userAgent || '')
+    if (isTG)  u.searchParams.set('bridge', 'tma')
+    else if (isGSA) u.searchParams.set('bridge', 'gsa')
+    return u.toString()
   } catch {
-    // на крайний случай — прямой переход
-    try { window.location.href = url } catch {}
+    return target
   }
 }
 
@@ -46,12 +69,13 @@ export default function AuthNavClient() {
   const { isConnected, address } = useAccount()
   const { t } = useI18n()
 
+  const inWV = isProblemWebView() // ← ключевой переключатель
   const [authMethod, setAuthMethod] = useState(null)
   const [mounted, setMounted] = useState(false)
   const announcedRef = useRef(false)
   const prevConnectedRef = useRef(isConnected)
 
-  // NEW: статус привязки TG
+  // статус привязки TG
   const [tgLinked, setTgLinked] = useState(false)
   const checkingRef = useRef(false)
 
@@ -66,13 +90,21 @@ export default function AuthNavClient() {
     } catch {}
   }, [mounted, isConnected])
 
-  // Глобальный вызов авторизации (exchange и т.п.)
+  // Глобальный вызов авторизации: в webview → та же вкладка на /auth, иначе → Web3Modal
   useEffect(() => {
     if (typeof window === 'undefined') return
-    const handler = () => { try { open() } catch {} }
+    const handler = () => {
+      try {
+        if (inWV) {
+          goSameTab(buildAuthSelectorUrl())
+        } else {
+          open()
+        }
+      } catch {}
+    }
     window.addEventListener('open-auth', handler)
     return () => window.removeEventListener('open-auth', handler)
-  }, [open])
+  }, [open, inWV])
 
   // После успешной авторизации — сообщаем странице
   useEffect(() => {
@@ -117,7 +149,7 @@ export default function AuthNavClient() {
         window.dispatchEvent(new Event('aiquota:flush'))
         window.dispatchEvent(new CustomEvent('auth:logout'))
       } catch {}
-      window.location.reload()
+        window.location.reload()
     }
     window.ethereum.on?.('accountsChanged', onAccountsChanged)
     window.ethereum.on?.('disconnect', onDisconnect)
@@ -147,7 +179,7 @@ export default function AuthNavClient() {
     return () => window.removeEventListener('storage', onStorage)
   }, [])
 
-  // ===== ЕДИНАЯ проверка статуса привязки TG (POST /api/telegram/link/status) =====
+  // ===== Проверка статуса привязки TG
   async function refreshTgLinkStatus() {
     if (checkingRef.current) return false
     checkingRef.current = true
@@ -170,28 +202,54 @@ export default function AuthNavClient() {
     }
   }
 
-  // Проверяем при монтировании и при смене аккаунта
   useEffect(() => {
     refreshTgLinkStatus()
   }, [mounted, isConnected, address])
 
-  // ===== Вычисляем состояние авторизации для цвета кнопки =====
-  const isAuthed = !!(isConnected && address)
+  // ===== Возврат из внешнего браузера в TMA (startapp=auth_<code>)
+  useEffect(() => {
+    try {
+      const wa = typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp
+      const sp = wa && wa.initDataUnsafe && wa.initDataUnsafe.start_param
+      const m = sp && /^auth_(\w{8,64})$/i.exec(sp)
+      if (!m) return
+      ;(async () => {
+        try {
+          await fetch('/api/tma/auth/exchange', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ code: m[1] })
+          })
+          window.location.replace(window.location.origin + window.location.pathname)
+        } catch {}
+      })()
+    } catch {}
+  }, [])
 
+  // ===== UI state
+  const isAuthed = !!(isConnected && address)
   const authLabel = useMemo(() => {
     if (isAuthed) return shortAddr(address)
     if (authMethod) {
-      const map = {
-        google: t('auth_google') || 'Google',
-        email: t('auth_email') || 'Email',
-      }
-      return map[authMethod] || t('auth_connected') || 'Connected'
+      const map = { google: t('auth_google') || 'Google', email: t('auth_email') || 'Email' }
+      return map[authMethod] || (t('auth_connected') || 'Connected')
     }
     const v = t('auth_signin')
     return v && v !== 'auth_signin' ? v : 'Sign in'
   }, [isAuthed, address, authMethod, t])
 
-  // Действие по кнопке "Связать Telegram"
+  // ===== Основная кнопка авторизации
+  async function onAuthClick() {
+    if (inWV) {
+      // В webview/iOS — ВСЕГДА в той же вкладке, без попапов
+      goSameTab(buildAuthSelectorUrl())
+      return
+    }
+    // В обычных браузерах оставляем прежний UX (кошельки/модалка)
+    try { await open() } catch {}
+  }
+
+  // ===== Действие "Связать Telegram"
   async function onLinkTelegram() {
     try{
       const accountId = readAccountId() || address || null
@@ -204,7 +262,7 @@ export default function AuthNavClient() {
       if(!j.ok){ alert(j.error || 'Error'); return }
       const botName = (process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || '@l7ai_bot')
       const deepLink = j.deepLink || `https://t.me/${botName.replace('@','')}?start=ql7link_${j.token}`
-      safeOpenExternal(deepLink)
+      goSameTab(deepLink)
 
       // Лёгкий поллинг статуса 15 сек.
       const deadline = Date.now() + 15000
@@ -221,12 +279,12 @@ export default function AuthNavClient() {
 
   return (
     <>
-      {/* Основная кнопка авторизации — как было */}
+      {/* Основная кнопка авторизации */}
       <button
         type="button"
-        onClick={() => open()}
+        onClick={onAuthClick}
         className={`nav-auth-btn ${isAuthed ? 'is-auth' : 'is-guest'}`}
-        aria-label="Open connect modal"
+        aria-label="Open connect"
         data-auth-open
         data-auth={isAuthed ? 'true' : 'false'}
         title={isAuthed ? (t('auth_account') || 'Account') : (t('auth_signin') || 'Sign in')}
@@ -234,29 +292,23 @@ export default function AuthNavClient() {
         {authLabel}
       </button>
 
-{/* "Связать Telegram" — кликабельная GIF-иконка без <button> */}
-{!tgLinked && (
-  <img
-    src="/click/telegram.gif"
-    alt={t('ql7ai_bot') || 'Link Telegram'}
-    title={t('ql7ai_bot') || 'Link Telegram'}
-    className="tgLinkIcon"
-    role="button"
-    tabIndex={0}
-    style={{ width: 43, height: 43, cursor: 'pointer', display: 'inline-block', pointerEvents: 'auto' }}
-    onClick={(e) => { e.preventDefault(); onLinkTelegram?.(); }}
-    onTouchEnd={(e) => { e.preventDefault(); onLinkTelegram?.(); }}  // ← важно для iOS
-    onKeyDown={(e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        onLinkTelegram?.();
-      }
-    }}
-  />
-)}
-
-
-     
+      {/* "Связать Telegram" — кликабельная GIF-иконка */}
+      {!tgLinked && (
+        <img
+          src="/click/telegram.gif"
+          alt={t('ql7ai_bot') || 'Link Telegram'}
+          title={t('ql7ai_bot') || 'Link Telegram'}
+          className="tgLinkIcon"
+          role="button"
+          tabIndex={0}
+          style={{ width: 43, height: 43, cursor: 'pointer', display: 'inline-block', pointerEvents: 'auto' }}
+          onClick={(e) => { e.preventDefault(); onLinkTelegram?.() }}
+          onTouchEnd={(e) => { e.preventDefault(); onLinkTelegram?.() }}  // важно для iOS
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onLinkTelegram?.() }
+          }}
+        />
+      )}
     </>
   )
 }
