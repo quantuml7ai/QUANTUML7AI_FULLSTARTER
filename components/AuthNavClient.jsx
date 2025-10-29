@@ -11,17 +11,20 @@ const shortAddr = (a) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '')
 // ---------- helpers ----------
 function readCookie(name) {
   try {
+    // ВАЖНО: экранирования в RegExp должны быть ровно такие
     const m = document.cookie.match(
       new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()[\]\\/+^])/g, '\\$1') + '=([^;]*)')
     )
     return m ? decodeURIComponent(m[1]) : null
-  } catch { return null }
+  } catch {
+    return null
+  }
 }
 
 function safeOpenExternal(url) {
   try {
     const isTG = typeof window !== 'undefined' && !!(window.Telegram && window.Telegram.WebApp)
-    const ua = (typeof navigator !== 'undefined' ? navigator.userAgent : '').toLowerCase()
+    const ua   = (typeof navigator !== 'undefined' ? navigator.userAgent : '').toLowerCase()
     const isIOS = /iphone|ipad|ipod/.test(ua)
 
     if (isTG && window.Telegram.WebApp.openLink) { window.Telegram.WebApp.openLink(url); return }
@@ -41,7 +44,9 @@ function readAccountId() {
     const a3 = localStorage.getItem('ql7_account') || localStorage.getItem('account') || localStorage.getItem('wallet')
     const c1 = readCookie('asherId') // fallback — ставится /api/tma/auto
     return (a1 || a2 || a3 || c1) ? String(a1 || a2 || a3 || c1) : null
-  } catch { return null }
+  } catch {
+    return null
+  }
 }
 
 // Строгое определение настоящего Mini App
@@ -50,14 +55,9 @@ function detectTMAHard() {
     if (typeof window === 'undefined') return false
     const tg = window.Telegram && window.Telegram.WebApp
     if (!tg) return false
-
-    // 1) Самый надёжный признак — сырая строка initData с подписью
     if (tg.initData && typeof tg.initData === 'string' && tg.initData.includes('hash=')) return true
-
-    // 2) Иногда Telegram прокидывает tgWebAppData в hash
     const h = (window.location.hash || '')
     if (h.includes('tgWebAppData=') || h.includes('tgwebappdata=')) return true
-
     return false
   } catch { return false }
 }
@@ -77,7 +77,7 @@ export default function AuthNavClient() {
   const [isTMA, setIsTMA] = useState(false)
   const [tmaAuthed, setTmaAuthed] = useState(false)
 
-  // TG link status (как было)
+  // TG link status
   const [tgLinked, setTgLinked] = useState(false)
   const checkingRef = useRef(false)
 
@@ -199,7 +199,7 @@ export default function AuthNavClient() {
     return () => window.removeEventListener('storage', onStorage)
   }, [])
 
-  // ===== Проверка статуса привязки TG (как было)
+  // ===== Проверка статуса привязки TG
   async function refreshTgLinkStatus() {
     if (checkingRef.current) return false
     checkingRef.current = true
@@ -234,10 +234,46 @@ export default function AuthNavClient() {
     return v && v !== 'auth_signin' ? v : 'Sign in'
   }, [isAuthedWallet, address, authMethod, t])
 
-  // ===== Мини-апп: прячем auth-UI ТОЛЬКО когда есть авторизация (по ТЗ)
+  // ===== Связка Telegram (веб)
+  async function onLinkTelegram() {
+    try {
+      const accountId = readAccountId() || address || null
+
+      // если не авторизован — просим открыть auth-модалку
+      if (!accountId) {
+        window.dispatchEvent(new Event('open-auth'))
+        return
+      }
+
+      const r = await fetch('/api/telegram/link/start', {
+        method:'POST',
+        headers:{'content-type':'application/json'},
+        body: JSON.stringify({ accountId })
+      })
+      const j = await r.json().catch(() => null)
+      if (!j || !j.ok) { alert((j && j.error) || 'Error'); return }
+
+      const botName = (process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || '@l7ai_bot')
+      const deepLink = j.deepLink || `https://t.me/${botName.replace('@','')}?start=ql7link_${j.token}`
+      safeOpenExternal(deepLink)
+
+      // лёгкий поллинг статуса
+      const deadline = Date.now() + 15000
+      const delay = (ms)=>new Promise(r=>setTimeout(r,ms))
+      while(Date.now() < deadline) {
+        await delay(1200)
+        const linked = await refreshTgLinkStatus()
+        if (linked) break
+      }
+    } catch {
+      alert('Network error')
+    }
+  }
+
+  // ===== Мини-апп: прячем auth-UI ТОЛЬКО когда есть авторизация
   if (isTMA && tmaAuthed) return null
 
-  // ===== Веб-режим — как раньше =====
+  // ===== Веб-режим
   return (
     <>
       <button
@@ -261,10 +297,10 @@ export default function AuthNavClient() {
           role="button"
           tabIndex={0}
           style={{ width: 43, height: 43, cursor: 'pointer', display: 'inline-block', pointerEvents: 'auto' }}
-          onClick={(e) => { e.preventDefault(); onLinkTelegram?.(); }}
-          onTouchEnd={(e) => { e.preventDefault(); onLinkTelegram?.(); }}
+          onClick={(e) => { e.preventDefault(); onLinkTelegram(); }}
+          onTouchEnd={(e) => { e.preventDefault(); onLinkTelegram(); }}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onLinkTelegram?.() }
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onLinkTelegram() }
           }}
         />
       )}
