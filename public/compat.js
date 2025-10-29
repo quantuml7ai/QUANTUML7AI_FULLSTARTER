@@ -36,10 +36,12 @@
     try {
       if (isTG && tgOpenLink(url)) { ev && ev.preventDefault(); return; }
       if (isIOS || isGSA) { ev && ev.preventDefault(); window.location.href = url; return; }
-      if (ev) ev.preventDefault();
- // во всех сомнительных контейнерах — только top-navigation
+  if (ev) ev.preventDefault();
+  // всегда top-navigation (TMA/iOS/webview), никаких попапов
   try { window.open('about:blank'); } catch(e) {}
-  window.location.href = url;    } catch { window.location.href = url; }
+  window.location.href = url;
+  
+ } catch { window.location.href = url; }
   }
   try { window.__safeOpenExternal = safeOpenExternal; } catch {}
 

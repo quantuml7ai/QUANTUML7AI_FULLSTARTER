@@ -32,22 +32,22 @@ function isProblemWebView() {
   } catch { return true }
 }
 
-/** Адрес селектора авторизации на сервере (открываем в той же вкладке) */
+/** Адрес старта OAuth на сервере (открываем в той же вкладке) */
 function buildAuthSelectorUrl() {
   const base = (typeof window !== 'undefined' ? window.location.origin : '')
-  const env = (k, d) => (process.env[k] && process.env[k].trim()) || d
-  const target = env('NEXT_PUBLIC_AUTH_SELECTOR_URL', `${base}/auth`)
+  // идём СРАЗУ в API-роут старта OAuth, без каких-либо страниц-мостов
+  const target = `${base}/api/auth/start`
   // добавим return + bridge, чтобы потом корректно вернуться
   try {
     const cur = new URL(window.location.href)
-    const u = new URL(target, base)
+    const u = new URL(target)            // /api/auth/start
     u.searchParams.set('return', cur.pathname + cur.search) // куда вернуться после логина
     const ua = (navigator.userAgent || '').toLowerCase()
     const isTG  = (typeof window.Telegram !== 'undefined' && !!window.Telegram.WebApp) || ua.includes('telegram')
     const isGSA = /\bGSA\b/i.test(navigator.userAgent || '')
     if (isTG)  u.searchParams.set('bridge', 'tma')
     else if (isGSA) u.searchParams.set('bridge', 'gsa')
-      // если хотим идти сразу в Google OAuth старт-роут (без модалки web3modal)
+    // всегда идём в Google OAuth (можешь заменить/расширить по своему UI)
     u.searchParams.set('provider', 'google')
     return u.toString()
   } catch {
@@ -243,7 +243,7 @@ export default function AuthNavClient() {
 
   // ===== Основная кнопка авторизации
   async function onAuthClick() {
-    // В TMA/любом webview/iOS — принудительно ведём в наш /auth (Google OAuth) в той же вкладке.
+    // В TMA/любой webview/iOS — ТОЛЬКО top-navigation на наш API-роут.
     if (inWV) { goSameTab(buildAuthSelectorUrl()); return }
     // В обычных браузерах оставляем Web3Modal (кошельки и т.п.)
     try { await open() } catch {}
