@@ -9,6 +9,12 @@ import { useI18n } from './i18n'
 const shortAddr = (a) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '')
 
 // ---------- helpers ----------
+function readCookie(name) {
+  try {
+    const m = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'));
+    return m ? decodeURIComponent(m[1]) : null;
+  } catch { return null }
+}
 function safeOpenExternal(url) {
   try {
     const isTG = typeof window !== 'undefined' && !!(window.Telegram && window.Telegram.WebApp)
@@ -30,7 +36,9 @@ function readAccountId() {
     const a1 = localStorage.getItem('asherId')
     const a2 = localStorage.getItem('ql7_uid')
     const a3 = localStorage.getItem('ql7_account') || localStorage.getItem('account') || localStorage.getItem('wallet')
-    return (a1 || a2 || a3) ? String(a1 || a2 || a3) : null
+    // фолбэк на не-httpOnly cookie asherId, которую ставит /api/tma/auto
+const c1 = readCookie('asherId')
+    return (a1 || a2 || a3 || c1) ? String(a1 || a2 || a3 || c1) : null
   } catch { return null }
 }
 
@@ -67,7 +75,15 @@ export default function AuthNavClient() {
   useEffect(() => {
     if (!mounted) return
     setIsTMA(detectTMA())
-    setTmaAuthed(!!readAccountId())
+    const acc = readAccountId()
+    setTmaAuthed(!!acc)
+    // если перезаход: синхронизируем глобалку и бросаем событие, чтобы остальной код знал об аккаунте
+    try {
+      if (acc && !window.__AUTH_ACCOUNT__) {
+        window.__AUTH_ACCOUNT__ = acc
+        window.dispatchEvent(new CustomEvent('auth:ok', { detail: { accountId: acc, provider: 'tma' } }))
+      }
+    } catch {}
 
     try {
       const m1 = localStorage.getItem('w3m-auth-provider')
@@ -232,11 +248,8 @@ export default function AuthNavClient() {
     }
   }
 
-  // ===== ГЛАВНАЯ "тонкость": в TMA после /api/tma/auto не рендерим ничего =====
-  // Условие: мы в мини-аппе И есть accountId (его положил /api/tma/auto).
-  if (isTMA && tmaAuthed) {
-    return null
-  }
+  // ===== Мини-апп: auth-UI не рендерим совсем (без мигания, по ТЗ)
+  if (isTMA) return null
 
   // ===== Веб-режим — как раньше =====
   return (
