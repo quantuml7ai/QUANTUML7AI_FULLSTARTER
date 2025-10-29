@@ -2,13 +2,12 @@
 'use client'
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { useWeb3Modal } from '@web3modal/wagmi/react'
 import { useAccount } from 'wagmi'
 import { useI18n } from './i18n'
 
 const shortAddr = (a) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '')
 
-/** Открыть строго в той же вкладке (TMA -> openLink, иначе location.href) */
+/** Открыть строго в той же вкладке: TMA → openLink, иначе → location.href */
 function goSameTab(url) {
   try {
     const wa = (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null
@@ -17,22 +16,7 @@ function goSameTab(url) {
   try { window.location.href = url } catch {}
 }
 
-/** Детектор webview/TMA — вызывать после mount и прямо перед кликом */
-function detectWV() {
-  try {
-    const uaFull = navigator.userAgent || ''
-    const ua = uaFull.toLowerCase()
-    const isIOS   = /iphone|ipad|ipod/.test(ua)
-    const isTG    = !!(typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp)
-    const isGSA   = /\bGSA\b/.test(uaFull) // Google App webview
-    const isWV    = /\bwv\b/.test(ua) || /Line\/|FBAN|FBAV|OKApp|VKClient|Instagram|KAKAOTALK/i.test(uaFull)
-    const isIOSwv = isIOS && !/safari/i.test(ua)
-    const isAndWV = /Android/i.test(ua) && /\bwv\b/.test(ua)
-    return isTG || isGSA || isWV || isIOSwv || isAndWV || isIOS
-  } catch { return true }
-}
-
-/** Построить URL старта OAuth на сервере (без попапов) */
+/** Собираем URL старта OAuth на сервере */
 function buildAuthStartUrl() {
   const base = (typeof window !== 'undefined' ? window.location.origin : '')
   const target = `${base}/api/auth/start`
@@ -52,7 +36,7 @@ function buildAuthStartUrl() {
   }
 }
 
-// Вспомогательно: берём accountId так же, как и раньше
+// Берём accountId как у тебя
 function readAccountId() {
   try {
     if (typeof window === 'undefined') return null
@@ -65,12 +49,10 @@ function readAccountId() {
 }
 
 export default function AuthNavClient() {
-  const { open } = useWeb3Modal()
   const { isConnected, address } = useAccount()
   const { t } = useI18n()
 
   const [mounted, setMounted] = useState(false)
-  const [inWV, setInWV] = useState(false)      // ← динамический детект webview/TMA
   const [authMethod, setAuthMethod] = useState(null)
   const announcedRef = useRef(false)
   const prevConnectedRef = useRef(isConnected)
@@ -81,23 +63,6 @@ export default function AuthNavClient() {
 
   useEffect(() => { setMounted(true) }, [])
 
-  // Досчитываем webview/TMA после mount и при готовности Telegram
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const apply = () => setInWV(detectWV())
-    apply()
-    const t = setTimeout(apply, 50)
-    try {
-      const wa = window.Telegram && window.Telegram.WebApp
-      if (wa && typeof wa.onEvent === 'function') {
-        wa.onEvent('themeChanged', apply)
-        wa.onEvent('viewportChanged', apply)
-        try { wa.ready && wa.ready() } catch {}
-      }
-    } catch {}
-    return () => clearTimeout(t)
-  }, [])
-
   useEffect(() => {
     if (!mounted) return
     try {
@@ -107,19 +72,13 @@ export default function AuthNavClient() {
     } catch {}
   }, [mounted, isConnected])
 
-  // Глобальный вызов авторизации (если кто-то диспатчит `open-auth`)
+  // Держим событие open-auth: всегда идём на наш API-роут (никаких попапов)
   useEffect(() => {
     if (typeof window === 'undefined') return
-    const handler = () => {
-      try {
-        const wv = detectWV() || inWV
-        if (wv) return goSameTab(buildAuthStartUrl())
-        open()
-      } catch {}
-    }
+    const handler = () => { try { goSameTab(buildAuthStartUrl()) } catch {} }
     window.addEventListener('open-auth', handler)
     return () => window.removeEventListener('open-auth', handler)
-  }, [open, inWV])
+  }, [])
 
   // После успешной авторизации — сообщаем странице
   useEffect(() => {
@@ -147,7 +106,7 @@ export default function AuthNavClient() {
     prevConnectedRef.current = isConnected
   }, [isConnected])
 
-  // Эвенты провайдера
+  // Эвенты провайдера (если установлен кошелёк)
   useEffect(() => {
     if (typeof window === 'undefined' || !window.ethereum) return
     const onAccountsChanged = (accs) => {
@@ -253,11 +212,9 @@ export default function AuthNavClient() {
     return v && v !== 'auth_signin' ? v : 'Sign in'
   }, [isAuthed, address, authMethod, t])
 
-  // ===== Основная кнопка авторизации
-  async function onAuthClick() {
-    const wv = detectWV() || inWV
-    if (wv) { goSameTab(buildAuthStartUrl()); return }
-    try { await open() } catch {}
+  // ===== Основная кнопка авторизации — ВСЕГДА same-tab OAuth
+  function onAuthClick() {
+    goSameTab(buildAuthStartUrl())
   }
 
   // ===== "Связать Telegram"
@@ -293,7 +250,7 @@ export default function AuthNavClient() {
         type="button"
         onClick={(e)=>{ e.preventDefault(); onAuthClick() }}
         className={`nav-auth-btn ${isAuthed ? 'is-auth' : 'is-guest'}`}
-        aria-label="Open connect"
+        aria-label="Open auth"
         data-auth-open
         data-auth={isAuthed ? 'true' : 'false'}
         title={isAuthed ? (t('auth_account') || 'Account') : (t('auth_signin') || 'Sign in')}
