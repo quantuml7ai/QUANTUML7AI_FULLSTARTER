@@ -1,3 +1,4 @@
+// app/tma/auto/page.jsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -8,18 +9,23 @@ export default function TmaAutoPage() {
   useEffect(() => {
     (async () => {
       try {
-        // получаем именно СЫРУЮ строку initData
+        // Telegram WebApp SDK должен быть доступен ТОЛЬКО внутри мини-аппа
         const raw = window?.Telegram?.WebApp?.initData
         if (!raw || typeof raw !== 'string' || !raw.includes('hash=')) {
-          setMsg('No valid initData (Mini App must be opened inside Telegram)')
+          setMsg('No valid initData (open inside Telegram Mini App)')
           return
         }
 
-        // отправляем эту строку без изменений
-        const res = await fetch('/api/tma/auto', {
+        // на всякий случай «разбудим» WebApp
+        try { window.Telegram.WebApp.ready?.() } catch {}
+
+        const ret = new URL(window.location.href).searchParams.get('return') || '/forum'
+
+        // Отправляем СЫРУЮ строку initData без изменений
+        const res = await fetch('/api/tma/auto?return=' + encodeURIComponent(ret), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ initData: raw })  // ← важно: не JSON.stringify(raw)
+          body: JSON.stringify({ initData: raw })
         })
 
         const j = await res.json().catch(() => ({}))
@@ -28,23 +34,29 @@ export default function TmaAutoPage() {
           return
         }
 
-        localStorage.setItem('ql7_uid', j.accountId)
-        window.__AUTH_ACCOUNT__ = j.accountId
-        window.dispatchEvent(new CustomEvent('auth:ok', { detail: { accountId: j.accountId, provider: 'tg' } }))
+        // Локальные маркеры авторизации
+        try {
+          localStorage.setItem('ql7_uid', String(j.accountId))
+          window.__AUTH_ACCOUNT__ = String(j.accountId)
+          window.dispatchEvent(new CustomEvent('auth:ok', {
+            detail: { accountId: String(j.accountId), provider: 'tg' }
+          }))
+        } catch {}
 
-        const ret = new URL(window.location.href).searchParams.get('return') || '/forum'
-        window.location.replace(ret)
+        window.location.replace(j.return || ret)
       } catch (e) {
-        setMsg('Network error: ' + e.message)
+        setMsg('Network error: ' + (e?.message || e))
       }
     })()
   }, [])
 
+  const hasInit = typeof window !== 'undefined' && !!window?.Telegram?.WebApp?.initData
+
   return (
-    <div style={{ color: '#9cf', padding: '24px', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ color: '#9cf', padding: 24, fontFamily: 'system-ui, sans-serif' }}>
       <h1>Quantum L7 — Telegram Mini App</h1>
       <p>{msg}</p>
-      <small>{typeof window !== 'undefined' && window.Telegram?.WebApp?.initData ? 'initData present' : 'no initData'}</small>
+      <small>{hasInit ? 'initData present' : 'no initData'}</small>
     </div>
   )
 }
