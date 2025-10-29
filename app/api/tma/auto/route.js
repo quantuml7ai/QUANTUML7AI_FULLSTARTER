@@ -3,27 +3,25 @@ import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { Redis } from '@upstash/redis'
 
-export const runtime  = 'nodejs'
-export const dynamic  = 'force-dynamic'
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 const redis = Redis.fromEnv()
+const YEAR = 60 * 60 * 24 * 365
 
 function setCookie(res, name, value, { days = 365 } = {}) {
   const maxAge = days * 24 * 60 * 60
   res.cookies.set(name, value, {
     path: '/',
-    httpOnly: false,     // фронту нужно читать asherId
+    httpOnly: false,   // фронту нужно читать asherId
     sameSite: 'Lax',
     secure: true,
-    maxAge
+    maxAge,
   })
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// utils
-const normalizeTgId = (v) => String(v ?? '').trim()
-
+// ── utils ──────────────────────────────────────────────────────────────────────
 function parseInitData(raw) {
   if (!raw) return null
   let s = String(raw)
@@ -32,26 +30,25 @@ function parseInitData(raw) {
   if (s.startsWith('?tgWebAppData=')) s = s.slice('?tgWebAppData='.length)
   if (s.startsWith('#')) s = s.slice(1)
   if (s.startsWith('?')) s = s.slice(1)
-
   try { s = decodeURIComponent(s) } catch {}
+
   const params = new URLSearchParams(s)
   const out = {}
   for (const [k, v] of params.entries()) out[k] = v
   return out
 }
 
+// Телеграм WebApp: секрет = HMAC_SHA256("WebAppData", botToken)
 function verifyInitData(obj, botToken) {
-  if (!obj || typeof obj !== 'object') return { ok:false, error:'NO_DATA' }
-  if (!obj.hash)                      return { ok:false, error:'NO_HASH' }
-  if (!botToken)                      return { ok:false, error:'NO_BOT_TOKEN' }
+  if (!obj || typeof obj !== 'object') return { ok: false, error: 'NO_DATA' }
+  if (!obj.hash) return { ok: false, error: 'NO_HASH' }
+  if (!botToken) return { ok: false, error: 'NO_BOT_TOKEN' }
 
-  // секрет по доке: HMAC_SHA256("WebAppData", botToken)
   const secret = crypto.createHmac('sha256', 'WebAppData').update(botToken).digest()
-
   const checkString = Object.keys(obj)
-    .filter(k => k !== 'hash')
+    .filter((k) => k !== 'hash')
     .sort()
-    .map(k => `${k}=${obj[k]}`)
+    .map((k) => `${k}=${obj[k]}`)
     .join('\n')
 
   const calc = crypto.createHmac('sha256', secret).update(checkString).digest('hex')
@@ -70,15 +67,12 @@ function extractTelegramUserId(data) {
   return null
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// handler
 async function handle(req, method) {
   try {
     const url = new URL(req.url)
     const ret = url.searchParams.get('return') || '/forum'
     const wantRedirect = url.searchParams.get('redirect') === '1'
 
-    // initData из body/init/заголовка
     let initCandidate = url.searchParams.get('init')
     if (method === 'POST') {
       const body = await req.json().catch(() => ({}))
@@ -91,9 +85,7 @@ async function handle(req, method) {
     }
 
     const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || ''
-    if (!BOT_TOKEN) {
-      return NextResponse.json({ ok:false, error:'NO_BOT_TOKEN' }, { status:500 })
-    }
+    if (!BOT_TOKEN) return NextResponse.json({ ok:false, error:'NO_BOT_TOKEN' }, { status:500 })
 
     const parsed = parseInitData(initCandidate)
     if (!parsed) return NextResponse.json({ ok:false, error:'NO_DATA' }, { status:400 })
@@ -106,21 +98,32 @@ async function handle(req, method) {
       )
     }
 
-    const tgId = normalizeTgId(extractTelegramUserId(vr.data))
+    const tgId = extractTelegramUserId(vr.data)
     if (!tgId) return NextResponse.json({ ok:false, error:'NO_TG_USER' }, { status:400 })
 
-    // В TMA «аккаунт» = tgId (кошелька ещё нет).
-    // Пишем ТОЛЬКО обратный индекс (мягко), чтобы веб-связка позже
-    // положила туда кошелёк: tguid:<tgId> -> <wallet>.
-    // Никаких acc:* и никаких tg:uid:/telegram:id: не создаём.
-    await redis.set(`tguid:${tgId}`, '', { nx: true, ex: 60 * 60 * 24 * 365 })
+    // ── ЕДИНАЯ СХЕМА ───────────────────────────────────────────────────────────
+    // Если уже есть «правильная» привязка TG → account (обычно это wallet),
+    // используем её. Иначе временно считаем account = tgId (перезатрётся веб-линком).
+    let accountId = await redis.get(`tguid:${tgId}`)
+    if (!accountId) accountId = await redis.get(`tg:uid:${tgId}`)
+    if (!accountId) accountId = String(tgId)
 
-    // Ответ + cookie для фронта (форум-авторизация)
+    // Профиль аккаунта: кладём tg_id (идемпотентно)
+    await redis.hset(`acc:${accountId}`, { tg_id: String(tgId) })
+
+    // Обратные индексы/алиасы (все читают одно и то же)
+    await Promise.all([
+      redis.set(`tguid:${tgId}`,        String(accountId), { ex: YEAR }),
+      redis.set(`tg:uid:${tgId}`,       String(accountId), { ex: YEAR }),
+      redis.set(`telegram:id:${tgId}`,  String(accountId), { ex: YEAR }),
+    ])
+
+    // Ответ + cookie «asherId» = accountId (важно для веба)
     const res = wantRedirect
       ? NextResponse.redirect(new URL(ret, req.url))
-      : NextResponse.json({ ok:true, accountId: tgId, return: ret })
+      : NextResponse.json({ ok:true, accountId, return: ret })
 
-    setCookie(res, 'asherId', tgId, { days: 365 })
+    setCookie(res, 'asherId', String(accountId), { days: 365 })
     return res
   } catch (e) {
     return NextResponse.json(
@@ -130,5 +133,5 @@ async function handle(req, method) {
   }
 }
 
-export async function POST(req){ return handle(req, 'POST') }
-export async function GET(req){  return handle(req, 'GET')  }
+export async function POST(req) { return handle(req, 'POST') }
+export async function GET(req)  { return handle(req, 'GET')  }

@@ -30,6 +30,7 @@ export async function POST(req) {
     await Promise.all([
       redis.hset(`acc:${accountId}`, { tg_id: String(telegramId) }),
       redis.set(`tg:uid:${telegramId}`, String(accountId), { ex: 60 * 60 * 24 * 365 }),
+      redis.set(`tguid:${telegramId}`,  String(accountId), { ex: 60*60*24*365 }),
       redis.del(key),
     ])
 
