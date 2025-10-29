@@ -1,3 +1,4 @@
+// app/api/tma/auth/exchange/route.js
 import { NextResponse } from 'next/server'
 import { Redis } from '@upstash/redis'
 
@@ -6,12 +7,23 @@ export const revalidate = 0
 
 const redis = Redis.fromEnv()
 
-function setSessionCookie(res, sessId) {
+function setSessionCookie(res, sessId, req) {
+  // вычислим домен (чтобы кука жила и на www, и без)
+  let domain
+  try {
+    const { hostname } = new URL(req.url)
+    // если поддоменов нет — не ставим domain вообще
+    if (hostname.split('.').length > 2) {
+      const parts = hostname.split('.')
+      domain = `.${parts.slice(-2).join('.')}`
+    }
+  } catch {}
   res.cookies.set('sid', sessId, {
     httpOnly: true,
     path: '/',
-    sameSite: 'Lax',
-    secure: true
+    sameSite: 'None',     // <-- важно для webview
+    secure: true,
+    ...(domain ? { domain } : {}),
   })
 }
 
@@ -26,11 +38,9 @@ export async function POST(req) {
       return NextResponse.json({ ok:false, error:'CODE_NOT_FOUND' }, { status:404 })
     }
 
-    // Выставляем ту же session cookie в текущем вебвью
-    const res = NextResponse.json({ ok:true, userId: data.userId || null, return: data.return || '/' })
-    setSessionCookie(res, data.sessId)
+    const res = NextResponse.json({ ok:true, userId: data.userId, return: data.return || '/' })
+    setSessionCookie(res, data.sessId, req)
 
-    // Код одноразовый — удалим
     await redis.del(key)
     return res
   } catch (err) {

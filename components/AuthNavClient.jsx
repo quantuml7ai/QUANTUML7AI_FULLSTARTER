@@ -1,3 +1,4 @@
+// components/AuthNavClient.jsx
 'use client'
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
@@ -15,70 +16,105 @@ function goSameTab(url) {
   try { window.location.href = url } catch {}
 }
 
-function isWV() {
+function isWebViewLike() {
   try {
-    const uaF = navigator.userAgent || ''
-    const ua  = uaF.toLowerCase()
+    const uaFull = navigator.userAgent || ''
+    const ua = uaFull.toLowerCase()
     const isIOS   = /iphone|ipad|ipod/.test(ua)
     const isTG    = !!(typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp)
-    const isGSA   = /\bGSA\b/.test(uaF)
-    const isWV    = /\bwv\b/.test(ua) || /Line\/|FBAN|FBAV|OKApp|VKClient|Instagram|KAKAOTALK/i.test(uaF)
+    const isGSA   = /\bGSA\b/.test(uaFull)
+    const isWV    = /\bwv\b/.test(ua) || /Line\/|FBAN|FBAV|OKApp|VKClient|Instagram|KAKAOTALK/i.test(uaFull)
     const isIOSwv = isIOS && !/safari/i.test(ua)
     const isAndWV = /Android/i.test(ua) && /\bwv\b/.test(ua)
     return isTG || isGSA || isWV || isIOSwv || isAndWV || isIOS
   } catch { return true }
 }
 
-function buildAuthUrl(provider) {
+function buildAuthStartUrl() {
   const base = (typeof window !== 'undefined' ? window.location.origin : '')
-  const target = `${base}/api/auth/start`
+  const target = `${base}/auth`
   try {
     const cur = new URL(window.location.href)
-    const u = new URL(target)
-    u.searchParams.set('provider', provider)
+    const u = new URL(target, base)
     u.searchParams.set('return', cur.pathname + cur.search)
     const ua = (navigator.userAgent || '').toLowerCase()
-    const tg = (typeof window.Telegram !== 'undefined' && !!window.Telegram.WebApp) || ua.includes('telegram')
-    const gsa = /\bGSA\b/i.test(navigator.userAgent || '')
-    if (tg)  u.searchParams.set('bridge', 'tma')
-    else if (gsa) u.searchParams.set('bridge', 'gsa')
+    const isTG  = (typeof window.Telegram !== 'undefined' && !!window.Telegram.WebApp) || ua.includes('telegram')
+    const isGSA = /\bGSA\b/i.test(navigator.userAgent || '')
+    if (isTG)  u.searchParams.set('bridge', 'tma')
+    else if (isGSA) u.searchParams.set('bridge', 'gsa')
     return u.toString()
-  } catch { return `${target}?provider=${provider}` }
+  } catch { return target }
 }
 
-async function fetchMe() {
+function readAccountId() {
   try {
-    const r = await fetch('/api/auth/me', { credentials: 'include' })
-    const j = await r.json().catch(()=>null)
-    return j?.ok ? (j.user || null) : null
+    if (typeof window === 'undefined') return null
+    if (window.__AUTH_ACCOUNT__) return String(window.__AUTH_ACCOUNT__)
+    const a1 = localStorage.getItem('asherId')
+    const a2 = localStorage.getItem('ql7_uid')
+    const a3 = localStorage.getItem('ql7_account') || localStorage.getItem('account') || localStorage.getItem('wallet')
+    return (a1 || a2 || a3) ? String(a1 || a2 || a3) : null
   } catch { return null }
+}
+
+// синхронизируем cookie-сессию -> твои локальные маркеры
+function mirrorUserToLocals(user) {
+  try {
+    const id = String(user?.userId || '')
+    if (!id) return
+    localStorage.setItem('ql7_uid', id)
+    localStorage.setItem('asherId', id)
+    localStorage.setItem('ql7_account', id)
+    window.__AUTH_ACCOUNT__ = id
+    window.dispatchEvent(new CustomEvent('auth:ok', { detail: { accountId: id, provider: 'oauth' }}))
+  } catch {}
+}
+
+function clearLocalAuth() {
+  try {
+    ;['ql7_uid','asherId','ql7_account','account','wallet'].forEach(k => localStorage.removeItem(k))
+    window.__AUTH_ACCOUNT__ = ''
+    window.dispatchEvent(new CustomEvent('auth:logout', { detail: { scope: 'site' }}))
+  } catch {}
 }
 
 export default function AuthNavClient() {
   const { open } = useWeb3Modal()
   const { isConnected, address } = useAccount()
   const { t } = useI18n()
-  const inWV = isWV()
 
-  // Состояние cookie-сессии (Google/Apple/Email)
-  const [user, setUser] = useState(null)
-  const [loadingMe, setLoadingMe] = useState(false)
+  const inWV = isWebViewLike()
 
-  // Локальный модал
-  const [showModal, setShowModal] = useState(false)
+  const [siteAuthed, setSiteAuthed] = useState(false)
+  const [siteUser, setSiteUser]     = useState(null)
+  const [checking, setChecking]     = useState(false)
 
-  // label web3modal
-  const [method, setMethod] = useState(null)
-  const prevWallet = useRef(isConnected)
+  const [authMethod, setAuthMethod] = useState(null)
+  const prevWalletRef = useRef(isConnected)
+
+  const [tgLinked, setTgLinked] = useState(false)
+  const checkingRef = useRef(false)
+
+  async function refreshSession() {
+    if (checking) return
+    setChecking(true)
+    try {
+      const r = await fetch('/api/auth/me', { method: 'GET', credentials: 'include', headers: { accept: 'application/json' } })
+      const j = await r.json().catch(()=>null)
+      const ok = !!j?.ok
+      setSiteAuthed(ok)
+      setSiteUser(ok ? (j.user || null) : null)
+      if (ok && j.user?.userId) mirrorUserToLocals(j.user)
+      return ok
+    } catch {
+      setSiteAuthed(false); setSiteUser(null); clearLocalAuth(); return false
+    } finally { setChecking(false) }
+  }
 
   useEffect(() => {
-    ;(async () => {
-      setLoadingMe(true)
-      setUser(await fetchMe())
-      setLoadingMe(false)
-    })()
-    const onFocus = () => fetchMe().then(setUser)
-    const onVis   = () => { if (document.visibilityState === 'visible') fetchMe().then(setUser) }
+    refreshSession()
+    const onFocus = () => refreshSession()
+    const onVis = () => { if (document.visibilityState === 'visible') refreshSession() }
     window.addEventListener('focus', onFocus)
     document.addEventListener('visibilitychange', onVis)
     return () => { window.removeEventListener('focus', onFocus); document.removeEventListener('visibilitychange', onVis) }
@@ -88,27 +124,55 @@ export default function AuthNavClient() {
     try {
       const m1 = localStorage.getItem('w3m-auth-provider')
       const m2 = localStorage.getItem('W3M_CONNECTED_CONNECTOR')
-      setMethod(m1 || m2 || null)
+      setAuthMethod(m1 || m2 || null)
     } catch {}
   }, [isConnected])
 
   useEffect(() => {
-    if (prevWallet.current === true && isConnected === false) {
-      try {
-        window.dispatchEvent(new Event('aiquota:flush'))
-        window.dispatchEvent(new CustomEvent('auth:logout', { detail: { scope: 'wallet' }}))
-      } catch {}
-      fetchMe().then(setUser)
+    if (prevWalletRef.current === true && isConnected === false) {
+      try { window.dispatchEvent(new Event('aiquota:flush')) } catch {}
+      refreshSession()
     }
-    prevWallet.current = isConnected
+    prevWalletRef.current = isConnected
   }, [isConnected])
 
-  // Возврат из TMA (startapp=auth_<code>) — поднять cookie
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.ethereum) return
+    const onAny = () => { try { window.dispatchEvent(new Event('aiquota:flush')) } catch {}; refreshSession() }
+    window.ethereum.on?.('accountsChanged', onAny)
+    window.ethereum.on?.('disconnect', onAny)
+    return () => {
+      window.ethereum.removeListener?.('accountsChanged', onAny)
+      window.ethereum.removeListener?.('disconnect', onAny)
+    }
+  }, [])
+
+  async function refreshTgLinkStatus() {
+    if (checkingRef.current) return false
+    checkingRef.current = true
+    try {
+      const accountId = readAccountId() || siteUser?.userId || address || null
+      if (!accountId) { setTgLinked(false); return false }
+      const r = await fetch('/api/telegram/link/status', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ accountId })
+      })
+      const j = await r.json().catch(() => null)
+      const linked = !!j?.linked
+      setTgLinked(linked)
+      return linked
+    } catch { return false }
+    finally { checkingRef.current = false }
+  }
+  useEffect(() => { refreshTgLinkStatus() }, [isConnected, address, siteAuthed, siteUser?.userId])
+
+  // возврат из TMA (startapp)
   useEffect(() => {
     try {
       const wa = typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp
       const sp = wa && wa.initDataUnsafe && wa.initDataUnsafe.start_param
-      const m  = sp && /^auth_(\w{8,64})$/i.exec(sp)
+      const m = sp && /^auth_(\w{8,64})$/i.exec(sp)
       if (!m) return
       ;(async () => {
         try {
@@ -118,102 +182,102 @@ export default function AuthNavClient() {
             credentials: 'include',
             body: JSON.stringify({ code: m[1] })
           })
-          setUser(await fetchMe())
+          await refreshSession()
           window.location.replace(window.location.origin + window.location.pathname)
         } catch {}
       })()
     } catch {}
   }, [])
 
-  const signed = !!(user || (isConnected && address))
-  const label = useMemo(() => {
+  const isSigned = !!(siteAuthed || (isConnected && address))
+
+  const authLabel = useMemo(() => {
     if (isConnected && address) return shortAddr(address)
-    if (user?.email) return user.email
-    if (user) return t('auth_connected') || 'Connected'
-    if (method) {
+    if (siteAuthed) {
+      const email = siteUser?.email
+      if (email) return email
+      return t('auth_connected') || 'Connected'
+    }
+    if (authMethod) {
       const map = { google: t('auth_google') || 'Google', email: t('auth_email') || 'Email' }
-      return map[method] || (t('auth_connected') || 'Connected')
+      return map[authMethod] || (t('auth_connected') || 'Connected')
     }
     const v = t('auth_signin')
     return v && v !== 'auth_signin' ? v : 'Sign in'
-  }, [isConnected, address, user, method, t])
-
-  // --- действия
-  const openSignIn = () => setShowModal(true)
+  }, [isConnected, address, siteAuthed, siteUser, authMethod, t])
 
   async function signOut() {
-    try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }) } catch {}
+    try {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
+    } catch {}
+    clearLocalAuth()
     try { await disconnect?.() } catch {}
-    try { ['ql7_uid','asherId','ql7_account','account','wallet'].forEach(k => localStorage.removeItem(k)) } catch {}
-    setUser(await fetchMe())
-    setShowModal(false)
+    await refreshSession()
   }
 
-  async function switchAccount() {
-    setShowModal(false)
-    // соц. провайдеры — только same-tab:
-    if (inWV) { goSameTab('/auth?return='+encodeURIComponent(location.pathname+location.search)) }
-    else { try { await open() } catch {} }
+  async function openAccountMenu() {
+    const action = window.prompt(
+      'Account\n\nType:\n 1 — Switch account\n 2 — Sign out\n\n(esc — cancel)',
+      '1'
+    )
+    if (action === '2') { await signOut(); return }
+    if (action === '1') {
+      if (inWV) goSameTab(buildAuthStartUrl())
+      else try { await open() } catch {}
+    }
   }
 
-  // --- кнопки соц. провайдеров: только same-tab redirect (никаких попапов)
-  const startSocial = (p) => () => { setShowModal(false); goSameTab(buildAuthUrl(p)) }
-  const connectWallet = async () => { setShowModal(false); try { await open() } catch {} }
+  async function onAuthClick() {
+    if (isSigned) { await openAccountMenu(); return }
+    if (inWV) { goSameTab(buildAuthStartUrl()); return }
+    try { await open() } catch {}
+  }
+
+  async function onLinkTelegram() {
+    try{
+      const accountId = readAccountId() || siteUser?.userId || address || null
+      const r = await fetch('/api/telegram/link/start', {
+        method:'POST',
+        headers:{'content-type':'application/json'},
+        body: JSON.stringify({ accountId })
+      })
+      const j = await r.json()
+      if(!j.ok){ alert(j.error || 'Error'); return }
+      const botName = (process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || '@l7ai_bot')
+      const deepLink = j.deepLink || `https://t.me/${botName.replace('@','')}?start=ql7link_${j.token}`
+      goSameTab(deepLink)
+      const deadline = Date.now() + 15000
+      const delay = (ms)=>new Promise(r=>setTimeout(r,ms))
+      while(Date.now() < deadline) { await delay(1200); if (await refreshTgLinkStatus()) break }
+    }catch{ alert('Network error') }
+  }
 
   return (
     <>
       <button
         type="button"
-        onClick={() => (signed ? setShowModal(true) : openSignIn())}
-        className={`nav-auth-btn ${signed ? 'is-auth' : 'is-guest'}`}
-        aria-label="Sign in"
-        data-auth={signed ? 'true' : 'false'}
-        title={signed ? (t('auth_account') || 'Account') : (t('auth_signin') || 'Sign in')}
+        onClick={(e)=>{ e.preventDefault(); onAuthClick() }}
+        className={`nav-auth-btn ${isSigned ? 'is-auth' : 'is-guest'}`}
+        aria-label="Open auth"
+        data-auth={isSigned ? 'true' : 'false'}
+        title={isSigned ? (t('auth_account') || 'Account') : (t('auth_signin') || 'Sign in')}
       >
-        {loadingMe ? '…' : label}
+        {authLabel}
       </button>
 
-      {showModal && (
-        <div className="ql7-auth-overlay" role="dialog" aria-modal="true">
-          <div className="ql7-auth-modal">
-            {!signed ? (
-              <>
-                <h3>{t('auth_signin') || 'Sign in'}</h3>
-                <div className="row">
-                  <button className="btn w" onClick={connectWallet}>🔗 {t('connect_wallet') || 'Connect wallet'}</button>
-                </div>
-                <div className="or">{t('or_continue_with') || 'Or continue with'}</div>
-                <div className="row">
-                  <button className="btn" onClick={startSocial('google')}>G  Google</button>
-                  <button className="btn" onClick={startSocial('apple')}> Apple</button>
-                  <button className="btn" onClick={startSocial('email')}>✉ Email</button>
-                </div>
-                <div className="row"><button className="btn ghost" onClick={()=>setShowModal(false)}>Close</button></div>
-              </>
-            ) : (
-              <>
-                <h3>{t('auth_account') || 'Account'}</h3>
-                <p className="muted">{user?.email || (isConnected && address) || 'Signed in'}</p>
-                <div className="row">
-                  <button className="btn" onClick={switchAccount}>{t('auth_switch') || 'Switch account'}</button>
-                  <button className="btn danger" onClick={signOut}>{t('auth_logout') || 'Sign out'}</button>
-                  <button className="btn ghost" onClick={()=>setShowModal(false)}>Close</button>
-                </div>
-              </>
-            )}
-          </div>
-          <style jsx>{`
-            .ql7-auth-overlay{position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.5);z-index:1000}
-            .ql7-auth-modal{width:min(420px,calc(100% - 24px));background:#0f1116;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;box-shadow:0 12px 40px rgba(0,0,0,.45)}
-            .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-            .btn{padding:10px 14px;border-radius:10px;cursor:pointer;border:1px solid rgba(255,255,255,.18);background:#151a22;color:#eaf6ff;font-weight:700}
-            .btn.w{width:100%}
-            .btn.ghost{background:transparent}
-            .btn.danger{border-color:#ff6b6b}
-            .or{opacity:.8;margin:12px 0 4px}
-            .muted{opacity:.8;margin:0 0 8px}
-          `}</style>
-        </div>
+      {!tgLinked && (
+        <img
+          src="/click/telegram.gif"
+          alt={t('ql7ai_bot') || 'Link Telegram'}
+          title={t('ql7ai_bot') || 'Link Telegram'}
+          className="tgLinkIcon"
+          role="button"
+          tabIndex={0}
+          style={{ width: 43, height: 43, cursor: 'pointer', display: 'inline-block', pointerEvents: 'auto' }}
+          onClick={(e) => { e.preventDefault(); onLinkTelegram?.() }}
+          onTouchEnd={(e) => { e.preventDefault(); onLinkTelegram?.() }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onLinkTelegram?.() } }}
+        />
       )}
     </>
   )
