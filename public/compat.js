@@ -37,8 +37,9 @@
       if (isTG && tgOpenLink(url)) { ev && ev.preventDefault(); return; }
       if (isIOS || isGSA) { ev && ev.preventDefault(); window.location.href = url; return; }
       if (ev) ev.preventDefault();
-      window.open(url, '_blank', 'noopener,noreferrer');
-    } catch { window.location.href = url; }
+ // во всех сомнительных контейнерах — только top-navigation
+  try { window.open('about:blank'); } catch(e) {}
+  window.location.href = url;    } catch { window.location.href = url; }
   }
   try { window.__safeOpenExternal = safeOpenExternal; } catch {}
 

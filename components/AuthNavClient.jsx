@@ -8,13 +8,11 @@ import { useI18n } from './i18n'
 
 const shortAddr = (a) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '')
 
-/** ЕДИНАЯ точка открытия — всегда без новой вкладки */
+/** Жёсткое открытие в ТОЙ ЖЕ вкладке (без попапов и без window.open) */
 function goSameTab(url) {
   try {
-    if (typeof window !== 'undefined' && typeof window.__safeOpenExternal === 'function') {
-      // в TMA это откроет через openLink (тоже top-nav), в iOS/GSA — location.href
-      return window.__safeOpenExternal(url)
-    }
+    const wa = (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null
+    if (wa && typeof wa.openLink === 'function') { wa.openLink(url); return }
   } catch {}
   try { window.location.href = url } catch {}
 }
@@ -22,12 +20,15 @@ function goSameTab(url) {
 /** Детект проблемных контейнеров (webview/TMA/GSA/iOS no-safari) */
 function isProblemWebView() {
   try {
-    const ua = (navigator.userAgent || '').toLowerCase()
-    const isIOS = /iphone|ipad|ipod/.test(ua)
-    const isTG  = (typeof window.Telegram !== 'undefined' && !!window.Telegram.WebApp) || ua.includes('telegram')
-    const isGSA = /\bGSA\b/i.test(navigator.userAgent || '')
-    const isWV  = isGSA || /\bwv\b/.test(ua) || (isIOS && !/safari/.test(ua))
-    return !!(isTG || isGSA || isWV || isIOS) // iOS: предпочтём ту же вкладку
+    const uaFull = navigator.userAgent || ''
+    const ua = uaFull.toLowerCase()
+    const isIOS  = /iphone|ipad|ipod/.test(ua)
+    const isTG   = !!(typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp)
+    const isGSA  = /\bGSA\b/.test(uaFull)                       // Google App webview
+    const isWV   = /\bwv\b/.test(ua) || /Line\/|FBAN|FBAV|OKApp|VKClient|Instagram|KAKAOTALK/i.test(uaFull)
+    const isIOSwv = isIOS && !/safari/i.test(ua)                // iOS webview без Safari
+    const isAndWV = /Android/i.test(ua) && /\bwv\b/.test(ua)    // Android webview
+    return isTG || isGSA || isWV || isIOSwv || isAndWV
   } catch { return true }
 }
 
@@ -46,6 +47,8 @@ function buildAuthSelectorUrl() {
     const isGSA = /\bGSA\b/i.test(navigator.userAgent || '')
     if (isTG)  u.searchParams.set('bridge', 'tma')
     else if (isGSA) u.searchParams.set('bridge', 'gsa')
+      // если хотим идти сразу в Google OAuth старт-роут (без модалки web3modal)
+    u.searchParams.set('provider', 'google')
     return u.toString()
   } catch {
     return target
@@ -240,12 +243,9 @@ export default function AuthNavClient() {
 
   // ===== Основная кнопка авторизации
   async function onAuthClick() {
-    if (inWV) {
-      // В webview/iOS — ВСЕГДА в той же вкладке, без попапов
-      goSameTab(buildAuthSelectorUrl())
-      return
-    }
-    // В обычных браузерах оставляем прежний UX (кошельки/модалка)
+    // В TMA/любом webview/iOS — принудительно ведём в наш /auth (Google OAuth) в той же вкладке.
+    if (inWV) { goSameTab(buildAuthSelectorUrl()); return }
+    // В обычных браузерах оставляем Web3Modal (кошельки и т.п.)
     try { await open() } catch {}
   }
 
