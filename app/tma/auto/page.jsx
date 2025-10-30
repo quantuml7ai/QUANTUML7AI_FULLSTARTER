@@ -77,7 +77,7 @@ export default function TmaAutoPage() {
       <style jsx>{`
         /* Чёрный контейнер на весь экран по ширине и высоте */
         .tma-full{
-          min-height: 100vh;
+          min-height: 60vh;
           width: 100%;
           background: #000;
           display: grid;
