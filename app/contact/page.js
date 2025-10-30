@@ -2,7 +2,7 @@
 
 import { useRef, useEffect } from 'react'
 import { useI18n } from '../../components/i18n'
-
+import Link from 'next/link'
 /* ===== Маркиза как на главной: бесшовно, full-bleed, без «пропаданий» ===== */
 function PageMarqueeTail() {
   const { t } = useI18n()
@@ -99,6 +99,26 @@ export default function Contact(){
 
       {/* Хвост страницы: бегущая строка во всю ширину */}
       <PageMarqueeTail />
+      {/* ===== ИКОНКИ ПОСЛЕ МАРКИЗЫ (глобальные стили ql7-*, как на главной/subscribe) ===== */}
+      <div className="ql7-icons-row">
+        <Link
+          href="/privacy"
+          className="ql7-icon-link"
+          aria-label="Privacy / Политика"
+          style={{ '--ql7-icon-size': '130px' }}
+        >
+          <img className="ql7-click-icon" src="/click/policy.png" alt="Privacy" draggable="false" />
+        </Link>
+
+        <Link
+          href="/contact"
+          className="ql7-icon-link"
+          aria-label="Support / Поддержка"
+          style={{ '--ql7-icon-size': '130px' }}
+        >
+          <img className="ql7-click-icon" src="/click/support.png" alt="Support" draggable="false" />
+        </Link>
+      </div>
     </>
   )
 }

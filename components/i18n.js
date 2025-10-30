@@ -2567,7 +2567,7 @@ ex_bullets: [
 /* -------------------- EN -------------------- */
 const PRIVACY_EN = {
   nav_privacy: 'Privacy',
-  privacy_title: 'Privacy',
+  privacy_title: 'Privacy & Policy',
   privacy_updated_label: 'Updated:',
   privacy_updated: '2025-10-30',
   privacy_empty: 'No data',
@@ -2909,8 +2909,8 @@ const PRIVACY_EN = {
 
 /* -------------------- RU -------------------- */
 const PRIVACY_RU = { 
-  nav_privacy: 'Конфиденциальность',
-  privacy_title: 'Конфиденциальность',
+  nav_privacy: 'Политика конфиденциальности',
+  privacy_title: 'Политика конфиденциальности',
   privacy_updated_label: 'Обновлено:',
   privacy_updated: '2025-10-30',
   privacy_empty: 'Нет данных',
@@ -3253,7 +3253,7 @@ const PRIVACY_RU = {
 /* -------------------- ZH (简体) -------------------- */
 const PRIVACY_ZH = {
   nav_privacy: '隐私',
-  privacy_title: '隐私',
+  privacy_title: '隐私政策',
   privacy_updated_label: '更新：',
   privacy_updated: '2025-10-30',
   privacy_empty: '无数据',
@@ -3595,7 +3595,7 @@ const PRIVACY_ZH = {
 /* -------------------- UK -------------------- */
 const PRIVACY_UK = {
   nav_privacy: 'Конфіденційність',
-  privacy_title: 'Конфіденційність',
+  privacy_title: 'Політика конфіденційності',
   privacy_updated_label: 'Оновлено:',
   privacy_updated: '2025-10-30',
   privacy_empty: 'Немає даних',
@@ -3938,7 +3938,7 @@ const PRIVACY_UK = {
 /* -------------------- AR (العربية) -------------------- */
 const PRIVACY_AR = {
   nav_privacy: 'الخصوصية',
-  privacy_title: 'الخصوصية',
+  privacy_title: 'سياسة الخصوصية',
   privacy_updated_label: 'تم التحديث:',
   privacy_updated: '2025-10-30',
   privacy_empty: 'لا توجد بيانات',
@@ -4281,7 +4281,7 @@ const PRIVACY_AR = {
 /* -------------------- TR (Türkçe) -------------------- */
 const PRIVACY_TR = {
   nav_privacy: 'Gizlilik',
-  privacy_title: 'Gizlilik',
+  privacy_title: 'Gizlilik Politikası',
   privacy_updated_label: 'Güncellendi:',
   privacy_updated: '2025-10-30',
   privacy_empty: 'Veri yok',
@@ -4623,7 +4623,7 @@ const PRIVACY_TR = {
 /* -------------------- ES -------------------- */
 const PRIVACY_ES = {
   nav_privacy: 'Privacidad',
-  privacy_title: 'Privacidad',
+  privacy_title: 'Política de privacidad',
   privacy_updated_label: 'Actualizado:',
   privacy_updated: '2025-10-30',
   privacy_empty: 'Sin datos',

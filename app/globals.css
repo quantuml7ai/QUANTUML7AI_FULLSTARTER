@@ -606,10 +606,10 @@ html, body {
 @media (max-width:640px){ .page-center{ padding:14px 12px; } }
 
 /* === Глобальные гаттеры === */
-:root { --gutter: 26px; --miniapp-top-offset: 40px; } /* ↑ докрути тут при необходимости */
+:root { --gutter: 26px; --miniapp-top-offset: 45px; } /* ↑ докрути тут при необходимости */
 @media (min-width:1280px){ :root{ --gutter: 100px; } }
 /* Мобайл: микро-гаттер 8px, чтобы ничего не «резалось» по краям */
-@media (max-width:640px){ :root{ --gutter: 4px; --miniapp-top-offset: 40px; } }
+@media (max-width:640px){ :root{ --gutter: 6px; --miniapp-top-offset: 45px; } }
 
 /* База */
 html,body{ margin:0; padding:0; width:100%; min-height:100%; overflow-x:hidden; }
@@ -857,7 +857,7 @@ header nav ul{ display:flex; flex-wrap:wrap; gap:.5rem; margin:0; padding:0; }
 }
 /* Золотая надпись с переливом и свечением */
 .qcoinLabel{
-  font-size:2.0em; font-weight:900; letter-spacing:.4px;
+  font-size:1.8em; font-weight:900; letter-spacing:.4px;
   background:
     linear-gradient(135deg,
       #7a5c00 0%,

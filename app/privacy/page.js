@@ -3,7 +3,7 @@
 
 import { useI18n } from '@/components/i18n'
 import { useRef, useEffect } from 'react'
-
+import Link from 'next/link'
 /* ===== Маркиза как на главной: бесшовно, full-bleed, без «пропаданий» ===== */
 function PageMarqueeTail() {
   const { t } = useI18n()
@@ -70,7 +70,7 @@ export default function PrivacyPage() {
   const { t } = useI18n()
 
   // Заголовки
-  const crumb  = t('nav_privacy') || 'Privacy & Policy'
+  const crumb  = t('') || ''
   const h1     = t('privacy_title') || crumb
   const updatedLabel = t('privacy_updated_label') || 'Updated:'
   const updated = t('privacy_updated') || new Date().toISOString().slice(0, 10)
@@ -125,6 +125,26 @@ export default function PrivacyPage() {
 
       {/* Хвост страницы: бегущая строка во всю ширину */}
       <PageMarqueeTail />
+      {/* ===== ИКОНКИ ПОСЛЕ МАРКИЗЫ (глобальные стили ql7-*, как на главной/subscribe) ===== */}
+      <div className="ql7-icons-row">
+        <Link
+          href="/privacy"
+          className="ql7-icon-link"
+          aria-label="Privacy / Политика"
+          style={{ '--ql7-icon-size': '130px' }}
+        >
+          <img className="ql7-click-icon" src="/click/policy.png" alt="Privacy" draggable="false" />
+        </Link>
+
+        <Link
+          href="/contact"
+          className="ql7-icon-link"
+          aria-label="Support / Поддержка"
+          style={{ '--ql7-icon-size': '130px' }}
+        >
+          <img className="ql7-click-icon" src="/click/support.png" alt="Support" draggable="false" />
+        </Link>
+      </div>      
     </>
   )
 }
