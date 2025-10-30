@@ -88,9 +88,9 @@ body{
 /* компакт на узких экранах — можно переопределить переменные */
 @media (max-width: 480px){
   .topbar{
-    --nav-font-size: 13px;
-    --nav-pad-y: 5px;
-    --nav-pad-x: 8px;
+    --nav-font-size: 20px;
+    --nav-pad-y: 6px;
+    --nav-pad-x: 4px;
   }
   .lang-switch{ font-size:13px }
 }
