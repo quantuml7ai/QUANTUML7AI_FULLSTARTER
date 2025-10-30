@@ -47,7 +47,11 @@ body{
 .glow.chest{width:90px;height:90px;bottom:30%;left:50%;transform:translateX(-50%)}
 
 /* ===== Content layer ===== */
-.page-content{position:relative;z-index:5;min-height:100dvh;padding:20px 24px 64px}
+ .page-content{
+   position:relative; z-index:5; min-height:100dvh;
+   /* безопасный отступ сверху: базовый + safe-area + ручная докрутка */
+   padding: calc(20px + env(safe-area-inset-top, 0px) + var(--miniapp-top-offset, 0px)) 24px 64px;
+ }
 
 /* TopBar */
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 4px 14px}
@@ -97,8 +101,9 @@ ul.bullets li{margin:6px 0}
 
 /* Responsive */
 @media (max-width:720px){
-  .page-content{padding:12px 12px 48px}
-  .topbar nav{gap:12px}
+  .page-content{
+    padding: calc(12px + env(safe-area-inset-top, 0px) + var(--miniapp-top-offset, 0px)) 12px 48px;
+  }  .topbar nav{gap:12px}
   .panel{padding:16px 14px}
 }
 
@@ -229,6 +234,31 @@ ul.bullets li{margin:6px 0}
   .topbar .brand-logo{ animation:none }
 }
 
+/* ——— Anti-highlight для кликабельного лого (как у мешочка) ——— */
+/* Линки-логотипы: убираем tap-highlight/фокус-бокс/активный фон */
+a.brand-logo,
+a.logo,
+.topbar .brand a,
+header .brand a{
+  -webkit-tap-highlight-color: transparent;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+/* На клавиатуре — тоже без синей окантовки */
+a.brand-logo:focus-visible,
+a.logo:focus-visible,
+.topbar .brand a:focus-visible,
+header .brand a:focus-visible{
+  outline: none !important;
+  box-shadow: none !important;
+}
+/* Само изображение: не выделяется, не перетаскивается */
+.topbar .brand a img,
+header .brand a img{
+  user-select: none;
+  -webkit-user-drag: none;
+}
 /* === Telegram card tape in hero — responsive like quantum-shot === */
 .tg-tape{
   display:block;
@@ -547,10 +577,10 @@ html, body {
 @media (max-width:640px){ .page-center{ padding:14px 12px; } }
 
 /* === Глобальные гаттеры === */
-:root { --gutter: 26px; }
+:root { --gutter: 26px; --miniapp-top-offset: 0px; } /* ↑ докрути тут при необходимости */
 @media (min-width:1280px){ :root{ --gutter: 100px; } }
 /* Мобайл: микро-гаттер 8px, чтобы ничего не «резалось» по краям */
-@media (max-width:640px){ :root{ --gutter: 2px; } }
+@media (max-width:640px){ :root{ --gutter: 2px; --miniapp-top-offset: 12px; } }
 
 /* База */
 html,body{ margin:0; padding:0; width:100%; min-height:100%; overflow-x:hidden; }
