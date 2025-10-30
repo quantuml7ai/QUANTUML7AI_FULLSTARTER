@@ -10,15 +10,14 @@ export const fetchCache = 'force-no-store'
 const redis = Redis.fromEnv()
 
 // ----- KEYS -----
-const qpKey    = uid         => `quest:progress:${uid}`
-const claimKey = (uid, card) => `quest:claim:${uid}:${card}`
-const qcoinKey = uid         => `qcoin:${uid}`
+const qpKey    = (uid)        => `quest:progress:${uid}`
+const claimKey = (uid, card)  => `quest:claim:${uid}:${card}`
+const qcoinKey = (uid)        => `qcoin:${uid}`
 
 // ====== small helpers ======
 const nowMs = () => Date.now()
-const uniqStrings = arr => Array.from(new Set((arr || []).map(String)))
-const getVipFlag = req => (req.headers.get('x-forum-vip') || '').trim() === '1'
-
+const uniqStrings = (arr) => Array.from(new Set((arr || []).map(String)))
+const getVipFlag = (req) => (req.headers.get('x-forum-vip') || '').trim() === '1'
 const toInt  = (v, d=0) => { const n = Number.parseInt(String(v ?? '').trim(), 10); return Number.isFinite(n) ? n : d }
 const toNum  = (v, d=0) => { const n = Number(v); return Number.isFinite(n) ? n : d }
 const toBool = (v, d=false) => {
@@ -26,27 +25,31 @@ const toBool = (v, d=false) => {
   if (!s) return d
   return s === '1' || s === 'true' || s === 'yes'
 }
+const normalizeCardId = (x) => {
+  const m = String(x ?? '').match(/(\d+)$/)
+  return m ? m[1] : String(x ?? '')
+}
 
 // ====== ENV adapters (совместимы с /api/quest/env) ======
 function getGlobalDefaultsFromEnv(env) {
   return {
     // общее число карточек без лимита (fallback на старое имя)
-    cardCount: toInt(env.NEXT_PUBLIC_QUEST_CARD_COUNT, toInt(env.NEXT_PUBLIC_QUEST_CARDS, 0)),
+    cardCount:   toInt(env.NEXT_PUBLIC_QUEST_CARD_COUNT, toInt(env.NEXT_PUBLIC_QUEST_CARDS, 0)),
     tasksPerCard: Math.max(0, toInt(env.NEXT_PUBLIC_QUEST_TASKS_PER_CARD, 10)),
     taskDelayMs:  Math.max(0, toInt(env.NEXT_PUBLIC_QUEST_TASK_DELAY_MS, 15000)),
     // совместимость — но **не используется** для клейма (клейм мгновенный)
     claimDelayMs: Math.max(0, toInt(env.NEXT_PUBLIC_QUEST_CLAIM_DELAY_MS, 0)),
   }
 }
-function getCardTaskCount(env, cardId, defaults) {
-  return Math.max(0, toInt(env[`NEXT_PUBLIC_QUEST_CARD_${cardId}_TASK_COUNT`], defaults.tasksPerCard))
+function getCardTaskCount(env, cardNum, defaults) {
+  return Math.max(0, toInt(env[`NEXT_PUBLIC_QUEST_CARD_${cardNum}_TASK_COUNT`], defaults.tasksPerCard))
 }
-function getCardTaskDelayMs(env, cardId, defaults) {
-  return Math.max(0, toInt(env[`NEXT_PUBLIC_QUEST_CARD_${cardId}_TASK_DELAY_MS`], defaults.taskDelayMs))
+function getCardTaskDelayMs(env, cardNum, defaults) {
+  return Math.max(0, toInt(env[`NEXT_PUBLIC_QUEST_CARD_${cardNum}_TASK_DELAY_MS`], defaults.taskDelayMs))
 }
-function getCardEnabled(env, cardId) {
+function getCardEnabled(env, cardNum) {
   // по умолчанию включено
-  return toBool(env[`NEXT_PUBLIC_QUEST_CARD_${cardId}_ENABLED`], true)
+  return toBool(env[`NEXT_PUBLIC_QUEST_CARD_${cardNum}_ENABLED`], true)
 }
 function readRewardAmount(env, { rewardKey, cardId }) {
   // приоритет 1: явный ключ из тела запроса
@@ -136,7 +139,10 @@ export async function POST(req) {
     const userId = await getUid(req, body)
     if (!userId) return NextResponse.json({ ok:false, error:'unauthorized' }, { status:401 })
 
-    const { cardId, taskId, claim = false, rewardKey } = body
+    // Нормализуем cardId и запоминаем «сырой» ключ для мягкой миграции
+    const rawCardId = body.cardId
+    const cardId = normalizeCardId(rawCardId)
+    const { taskId, claim = false, rewardKey } = body
     if (!cardId) return NextResponse.json({ ok:false, error:'invalid_card' }, { status:400 })
 
     // читаем ENV один раз
@@ -147,56 +153,70 @@ export async function POST(req) {
     const enabled = getCardEnabled(env, cardId)
     if (!enabled) return NextResponse.json({ ok:false, error:'card_disabled' }, { status:400 })
 
-    const taskCount = getCardTaskCount(env, cardId, defaults)
+    const taskCount   = getCardTaskCount(env, cardId, defaults)
     const taskDelayMs = getCardTaskDelayMs(env, cardId, defaults) // сейчас инфо-мета; сервер не ждёт
 
     // 1) Отметить задачу (по завершению клиентского таймера)
     if (taskId) {
-      // опционально: игнорировать «лишние» taskId
       const tId = String(taskId)
       const validIdx = toInt(taskId, 0)
       if (taskCount > 0 && (validIdx < 1 || validIdx > taskCount)) {
         return NextResponse.json({ ok:false, error:'invalid_task' }, { status:400 })
       }
 
-      const cur  = await readProgress(userId)
-      const card = cur[cardId] || { done: [] }
+      const cur    = await readProgress(userId)
+      const legacy = cur[String(rawCardId || '')]
+      const base   = cur[cardId] || legacy || { done: [] }
 
-      const done = uniqStrings([ ...(card.done || []), tId ])
-      const wasCount = (card.done?.length || 0)
-      const becameAll = wasCount < taskCount && done.length >= taskCount
+      const done = uniqStrings([ ...(base.done || []), tId ])
+      const nextDoneCount = done.length
 
+      // Никогда не обнуляем claimReadyTs: ставим один раз, когда стало «все»
       const nextCard = {
-        ...card,
+        ...base,
         done,
         ts: nowMs(),
-        // оставляем поле — возможно пригодится для аналитики; но сервер не ждёт его при claim
-        claimReadyTs: card.claimReadyTs || (becameAll ? nowMs() : 0),
+        ...(base.claimReadyTs
+          ? { claimReadyTs: base.claimReadyTs }
+          : (nextDoneCount >= taskCount ? { claimReadyTs: nowMs() } : {})),
         taskCount,
         taskDelayMs,
       }
+
       const next = { ...cur, [cardId]: nextCard }
+      if (legacy && !cur[cardId]) {
+        // мягко убираем старый ключ "quest-<n>"
+        delete next[String(rawCardId || '')]
+      }
+
       await writeProgress(userId, next)
-      return NextResponse.json({ ok: true, progress: next, awarded: 0 })
+      // можно отдать флаг готовности — клиенту удобно
+      const serverClaimable = nextDoneCount >= taskCount
+      return NextResponse.json({ ok: true, progress: next, awarded: 0, serverClaimable })
     }
 
     // 2) Клейм (мгновенно после выполнения всех задач)
     if (claim) {
-      const prog = await readProgress(userId)
-      const card = prog[cardId] || {}
+      const prog   = await readProgress(userId)
+      const legacy = prog[String(rawCardId || '')]
+      const card   = prog[cardId] || legacy || {}
+
       const doneCount = Array.isArray(card.done) ? card.done.length : 0
       if (doneCount < taskCount) {
-        return NextResponse.json({ ok:false, error:'not_completed', details:{ done: doneCount, need: taskCount } }, { status:400 })
+        return NextResponse.json(
+          { ok:false, error:'not_completed', details:{ done: doneCount, need: taskCount } },
+          { status:400 }
+        )
       }
 
       // сумма из ENV (по rewardKey, либо по номеру карточки)
       const r = readRewardAmount(env, { rewardKey, cardId })
       if (!r.ok) return NextResponse.json({ ok:false, error:r.error }, { status:400 })
-      const base   = r.amount
-      const amount = getVipFlag(req) ? (base * 2) : base
+      const baseAmount = r.amount
+      const amount     = getVipFlag(req) ? (baseAmount * 2) : baseAmount
 
       // идемпотентность
-      const ck = claimKey(userId, cardId)
+      const ck = claimKey(userId, cardId) // всегда числовой ключ
       const nx = await redis.set(ck, nowMs(), { nx: true })
       if (!nx) return NextResponse.json({ ok:false, error:'already_claimed' }, { status:409 })
 
@@ -207,15 +227,18 @@ export async function POST(req) {
       const next = {
         ...prog,
         [cardId]: {
-          ...(prog[cardId] || {}),
+          ...(prog[cardId] || legacy || {}),
           claimed: true,
           claimTs: nowMs(),
           taskCount,
           taskDelayMs,
         }
       }
-      await writeProgress(userId, next)
+      if (legacy && !prog[cardId]) {
+        delete next[String(rawCardId || '')]
+      }
 
+      await writeProgress(userId, next)
       return NextResponse.json({ ok: true, progress: next, awarded: amount })
     }
 

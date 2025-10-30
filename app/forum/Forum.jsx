@@ -6447,7 +6447,17 @@ const writeTimers = React.useCallback((patch) => {
     return next;
   });
 }, [QUEST_TIMERS_LS]);
-// … рядом с остальными useCallback
+ // … рядом с остальными useCallback
+// helper: нормализуем client cardId ("quest-1") -> server cardId ("1")
+const normalizeCardId = React.useCallback((x) => {
+  const m = String(x ?? '').match(/(\d+)$/);
+  return m ? String(Number(m[1])) : String(x ?? '');
+}, []);
+
+// in-flight защита от дублей POST /api/quest/progress для задач
+const taskPostInflightRef = React.useRef(new Set());
+
+
 const openQuestCardChecked = React.useCallback(async (card) => {
   try {
     // 1) гарантируем UID
@@ -6459,8 +6469,8 @@ const openQuestCardChecked = React.useCallback(async (card) => {
       if (!uid) return
     }
 
-    // 2) нормализуем cardId -> "1"
-    const serverCardId = String(Number(String(card?.id || '').match(/(\d+)$/)?.[1] || 0))
+    // 2) нормализуем cardId -> "1" (та же функция, что и в markTaskDone)
+    const serverCardId = normalizeCardId(card?.id)
     if (!serverCardId || serverCardId === '0') return
 
     // 3) запрос к статус-роуту
@@ -6491,7 +6501,7 @@ const openQuestCardChecked = React.useCallback(async (card) => {
     // на сбой — пусть откроется, чтобы не «глохло» UI
     setQuestSel(card)
   }
-}, [auth?.accountId, auth?.asherId, requireAuthStrict, openAuth, writeQuestProg, toast, t, setQuestSel])
+}, [auth?.accountId, auth?.asherId, requireAuthStrict, openAuth, writeQuestProg, toast, t, setQuestSel, normalizeCardId])
 
 // ← ДОБАВИТЬ: перечитываем прогресс/таймеры, если сменился LS-ключ (анон → юзер)
 React.useEffect(() => {
@@ -6541,13 +6551,15 @@ const getCardTotalTasks = React.useCallback((qid) => {
   const idx = m ? Number(m[1]) : NaN;
   const perCard = Number(readEnv?.(`NEXT_PUBLIC_QUEST_CARD_${idx}_TASK_COUNT`, 'NaN'));
   if (Number.isFinite(perCard) && perCard > 0) return perCard;
-  // 3) глобальный дефолт из ENV
-  const global = Number(readEnv?.('NEXT_PUBLIC_QUEST_TASKS', '10'));
+  // 3) глобальный дефолт из ENV (как на сервере: NEXT_PUBLIC_QUEST_TASKS_PER_CARD, затем легаси NEXT_PUBLIC_QUEST_TASKS)
+  const g1 = Number(readEnv?.('NEXT_PUBLIC_QUEST_TASKS_PER_CARD', 'NaN'));
+  const g2 = Number(readEnv?.('NEXT_PUBLIC_QUEST_TASKS', 'NaN'));
+  const global = Number.isFinite(g1) ? g1 : g2;
   return Math.max(1, Number.isFinite(global) && global > 0 ? global : 10);
 }, [QUESTS, readEnv]);
 
 // Пометить задачу выполненной + завести локальный таймер (tid = "1".."N")
-const markTaskDone = React.useCallback((qid, tid) => {
+const markTaskDone = React.useCallback(async (qid, tid) => {
   writeQuestProg(prev => {
     const cardPrev = { ...(prev[qid] || {}) };
     const done = new Set(cardPrev.done || []);
@@ -6566,7 +6578,54 @@ const markTaskDone = React.useCallback((qid, tid) => {
     if (!card[String(tid)]) card[String(tid)] = Date.now(); // индекс
     return { ...prev, [qid]: card };
   });
-}, [writeQuestProg, writeTimers]);
+  // === фоновый POST на сервер (не ломает локальную логику) ===
+  try {
+    // нужна авторизация: без uid сервер вернёт 401 — просто молча выходим
+    const uid = auth?.accountId || auth?.asherId || '';   
+     if (!uid) return;
+
+    const serverCardId = normalizeCardId(qid);     // "quest-1" -> "1"
+    const taskNum = String(tid);                   // "1".."N"
+    if (!serverCardId || !taskNum) return;
+
+    // антидубль (ключ на конкретную задачу)
+    const flightKey = `${uid}::${serverCardId}::${taskNum}`;
+    if (taskPostInflightRef.current.has(flightKey)) return;
+    taskPostInflightRef.current.add(flightKey);
+
+    const r = await fetch('/api/quest/progress', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-forum-user': uid,
+        'x-forum-vip': vipActive ? '1' : '0',
+      },
+      cache: 'no-store',
+      body: JSON.stringify({ cardId: serverCardId, taskId: taskNum, accountId: uid }),
+    });
+    let j = null; try { j = await r.json(); } catch {}
+
+    // если сервер вернул serverClaimable — «подтягиваем» claimReadyTs локально (без ожидания таймеров)
+    if (j?.ok && j?.serverClaimable) {
+      writeQuestProg(prev => {
+        const card = { ...(prev[qid] || {}) };
+        if (!card.claimReadyTs) card.claimReadyTs = Date.now();
+        return { ...prev, [qid]: card };
+      });
+    }
+  } catch {
+    /* без шума — оффлайн/сбой сети не мешает UX */
+  } finally {
+    try {
+      const uid = auth?.accountId || auth?.asherId || '';
+      if (uid) {
+        const serverCardId = normalizeCardId(qid);
+        const flightKey = `${uid}::${serverCardId}::${String(tid)}`;
+        taskPostInflightRef.current.delete(flightKey);
+      }
+    } catch {}
+  }
+}, [writeQuestProg, writeTimers, auth?.accountId, auth?.asherId, vipActive, normalizeCardId]);
 
 // Выполнены все 10 задач?
 const isCardCompleted = React.useCallback((qid) => {
@@ -6858,17 +6917,16 @@ const closeQuests = React.useCallback(() => {
             uid = String(uid).replace(/[^\x20-\x7E]/g, '');
 
             const clientCardId = claimFx.cardId;                 // "quest-1"
-            const serverCardId = String(
-              Number(String(clientCardId||'').match(/(\d+)$/)?.[1] || 0)
-            );                                                    // "1"
+            const serverCardId = normalizeCardId(clientCardId);   // "1"                                                   // "1"
             if (!serverCardId || serverCardId === '0') return finish(false);
             const qq = QUESTS?.find(q => q.id === clientCardId);
             if (!qq || !qq.rewardKey) return finish(false);
 
-            // ===== helpers
-            const normalizeId = (x) => {
-              const m = String(x).match(/(\d+)$/);
-              return m ? String(Number(m[1])) : String(x);
+           // ===== helpers
+            const normalizeTaskId = (x) => {
+              const s = String(x ?? '');
+              const m = s.match(/(\d+)$/);
+              return m ? String(Number(m[1])) : s;
             };
             const postTask = async (numStr) => {
               const common = {
@@ -6897,7 +6955,7 @@ const closeQuests = React.useCallback(() => {
             let prog = {}; try { prog = await progRes.json(); } catch {}
             const serverCard = prog?.progress?.[serverCardId] || {};
             const serverDoneRaw = Array.isArray(serverCard.done) ? serverCard.done : [];
-            const serverDone = new Set(serverDoneRaw.map(normalizeId));
+            const serverDone = new Set(serverDoneRaw.map(normalizeTaskId));
 
             const totalTasks = getCardTotalTasks(clientCardId);
             const allIds = Array.from({ length: totalTasks }, (_, i) => String(i + 1));
@@ -6938,7 +6996,7 @@ const closeQuests = React.useCallback(() => {
                 if (!Array.isArray(card.done) || card.done.length < allNumIds.length) {
                   card.done = allNumIds.slice();
                 } else {
-                  card.done = card.done.map(normalizeId);
+                  card.done = card.done.map(normalizeTaskId);
                 }
                 if (!card.claimReadyTs) card.claimReadyTs = Date.now();
                 return { ...prev, [clientCardId]: card };
