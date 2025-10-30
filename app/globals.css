@@ -50,7 +50,7 @@ body{
  .page-content{
    position:relative; z-index:5; min-height:100dvh;
    /* безопасный отступ сверху: базовый + safe-area + ручная докрутка */
-   padding: calc(40px + env(safe-area-inset-top, 40px) + var(--miniapp-top-offset, 20px)) 24px 64px;
+   padding: calc(20px + env(safe-area-inset-top, 0px) + var(--miniapp-top-offset, 40px)) 24px 64px;
  }
 
 /* TopBar */
@@ -572,10 +572,10 @@ html, body {
 @media (max-width:640px){ .page-center{ padding:14px 12px; } }
 
 /* === Глобальные гаттеры === */
-:root { --gutter: 26px; --miniapp-top-offset: 20px; } /* ↑ докрути тут при необходимости */
+:root { --gutter: 26px; --miniapp-top-offset: 40px; } /* ↑ докрути тут при необходимости */
 @media (min-width:1280px){ :root{ --gutter: 100px; } }
 /* Мобайл: микро-гаттер 8px, чтобы ничего не «резалось» по краям */
-@media (max-width:640px){ :root{ --gutter: 4px; --miniapp-top-offset: 20px; } }
+@media (max-width:640px){ :root{ --gutter: 4px; --miniapp-top-offset: 40px; } }
 
 /* База */
 html,body{ margin:0; padding:0; width:100%; min-height:100%; overflow-x:hidden; }
