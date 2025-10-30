@@ -234,31 +234,26 @@ ul.bullets li{margin:6px 0}
   .topbar .brand-logo{ animation:none }
 }
 
-/* ——— Anti-highlight для кликабельного лого (как у мешочка) ——— */
-/* Линки-логотипы: убираем tap-highlight/фокус-бокс/активный фон */
-a.brand-logo,
-a.logo,
-.topbar .brand a,
-header .brand a{
-  -webkit-tap-highlight-color: transparent;
+/* ——— Убираем «синюю кликабельность» у ссылки-логотипа ——— */
+/* сама ссылка внутри topbar */
+.topbar a.brand{
+  -webkit-tap-highlight-color: transparent; /* iOS/Android WebKit синий overlay */
   outline: none !important;
   box-shadow: none !important;
   background: transparent !important;
 }
-/* На клавиатуре — тоже без синей окантовки */
-a.brand-logo:focus-visible,
-a.logo:focus-visible,
-.topbar .brand a:focus-visible,
-header .brand a:focus-visible{
+/* фокус по Tab — тоже без синего бокса */
+.topbar a.brand:focus,
+.topbar a.brand:focus-visible{
   outline: none !important;
   box-shadow: none !important;
 }
-/* Само изображение: не выделяется, не перетаскивается */
-.topbar .brand a img,
-header .brand a img{
+/* на всякий — и по изображению убираем tap-highlight/drag */
+.topbar a.brand img{
+  -webkit-tap-highlight-color: transparent;
   user-select: none;
   -webkit-user-drag: none;
-}
+} 
 /* === Telegram card tape in hero — responsive like quantum-shot === */
 .tg-tape{
   display:block;
