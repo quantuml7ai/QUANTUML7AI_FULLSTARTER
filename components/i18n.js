@@ -5111,6 +5111,146 @@ try {
   Object.assign(dict.ar  || {}, FORUM_NEWS_AR)
   Object.assign(dict.tr  || {}, FORUM_NEWS_TR)
 } catch (_) {}  
+
+const TMA_AUTO_EN = {
+  tma_authorizing: 'Authorizing…',
+  tma_no_init: 'Open inside Telegram Mini App (no valid initData)',
+  tma_auth_failed: 'Auth failed',
+  tma_network_error: 'Network error',
+  tma_init_present: 'initData present',
+  tma_init_absent: 'no initData',
+
+  // Hero copy
+  tma_welcome_title: 'The Quantum Metaverse of L7 AI',
+  tma_welcome_sub: 'Welcome! A global forum, AI recommendations, crypto trading, news, and planet-wide chat await you.',
+  tma_feat_forum: 'Global Forum',
+  tma_feat_ai: 'AI Recommendations',
+  tma_feat_trading: 'Crypto Trading',
+  tma_feat_news: 'News',
+  tma_feat_chat: 'Chat with the World',
+  tma_mining_note: 'Post comments and mine crypto right here ⚙️🪙'
+};
+
+const TMA_AUTO_RU = {
+  tma_authorizing: 'Авторизация…',
+  tma_no_init: 'Откройте внутри Telegram Mini App (нет корректного initData)',
+  tma_auth_failed: 'Ошибка авторизации',
+  tma_network_error: 'Сетевая ошибка',
+  tma_init_present: 'initData найден',
+  tma_init_absent: 'initData отсутствует',
+
+  tma_welcome_title: 'Квантовая метавселенная L7 AI',
+  tma_welcome_sub: 'Добро пожаловать! Здесь глобальный форум, ИИ-рекомендации, криптоторговля, новости и общение со всей планетой.',
+  tma_feat_forum: 'Глобальный форум',
+  tma_feat_ai: 'ИИ-рекомендации',
+  tma_feat_trading: 'Криптоторговля',
+  tma_feat_news: 'Новости',
+  tma_feat_chat: 'Общение со всем миром',
+  tma_mining_note: 'Комментируй и майни криптовалюту прямо здесь ⚙️🪙'
+};
+
+const TMA_AUTO_UK = {
+  tma_authorizing: 'Авторизація…',
+  tma_no_init: 'Відкрийте всередині Telegram Mini App (немає коректного initData)',
+  tma_auth_failed: 'Помилка авторизації',
+  tma_network_error: 'Мережева помилка',
+  tma_init_present: 'initData знайдено',
+  tma_init_absent: 'initData відсутній',
+
+  tma_welcome_title: 'Квантова метавсесвіт L7 AI',
+  tma_welcome_sub: 'Ласкаво просимо! Тут глобальний форум, ІІ-рекомендації, криптоторгівля, новини та спілкування з усім світом.',
+  tma_feat_forum: 'Глобальний форум',
+  tma_feat_ai: 'Рекомендації ШІ',
+  tma_feat_trading: 'Криптоторгівля',
+  tma_feat_news: 'Новини',
+  tma_feat_chat: 'Спілкування зі світом',
+  tma_mining_note: 'Коментуй і майнь криптовалюту прямо тут ⚙️🪙'
+};
+
+const TMA_AUTO_ES = {
+  tma_authorizing: 'Autorizando…',
+  tma_no_init: 'Ábrelo dentro de Telegram Mini App (sin initData válido)',
+  tma_auth_failed: 'Error de autenticación',
+  tma_network_error: 'Error de red',
+  tma_init_present: 'initData presente',
+  tma_init_absent: 'initData ausente',
+
+  tma_welcome_title: 'El Metaverso Cuántico de L7 AI',
+  tma_welcome_sub: '¡Bienvenido! Te esperan un foro global, recomendaciones de IA, trading cripto, noticias y chat con todo el mundo.',
+  tma_feat_forum: 'Foro Global',
+  tma_feat_ai: 'Recomendaciones de IA',
+  tma_feat_trading: 'Trading Cripto',
+  tma_feat_news: 'Noticias',
+  tma_feat_chat: 'Chat mundial',
+  tma_mining_note: 'Comenta y mina criptomonedas aquí ⚙️🪙'
+};
+
+const TMA_AUTO_ZH = { // 简体中文
+  tma_authorizing: '正在授权…',
+  tma_no_init: '请在 Telegram 小程序中打开（缺少有效的 initData）',
+  tma_auth_failed: '授权失败',
+  tma_network_error: '网络错误',
+  tma_init_present: '已检测到 initData',
+  tma_init_absent: '未检测到 initData',
+
+  tma_welcome_title: 'L7 AI 量子元宇宙',
+  tma_welcome_sub: '欢迎加入！这里有全球论坛、AI 推荐、加密交易、新闻与全球交流。',
+  tma_feat_forum: '全球论坛',
+  tma_feat_ai: 'AI 推荐',
+  tma_feat_trading: '加密交易',
+  tma_feat_news: '新闻资讯',
+  tma_feat_chat: '与世界交流',
+  tma_mining_note: '发表评论即可在此处挖矿 ⚙️🪙'
+};
+
+const TMA_AUTO_AR = { // العربية (RTL)
+  tma_authorizing: 'جارٍ التفويض…',
+  tma_no_init: 'افتح داخل تطبيق تيليجرام المصغّر (لا توجد بيانات initData صالحة)',
+  tma_auth_failed: 'فشل تسجيل الدخول',
+  tma_network_error: 'خطأ في الشبكة',
+  tma_init_present: 'تم العثور على initData',
+  tma_init_absent: 'لا توجد initData',
+
+  tma_welcome_title: 'الكون المتعدد الكمي لـ L7 AI',
+  tma_welcome_sub: 'مرحبًا بك! هنا منتدى عالمي وتوصيات ذكاء اصطناعي وتداول عملات مشفّرة وأخبار ودردشة مع العالم.',
+  tma_feat_forum: 'منتدى عالمي',
+  tma_feat_ai: 'توصيات الذكاء الاصطناعي',
+  tma_feat_trading: 'تداول العملات المشفّرة',
+  tma_feat_news: 'الأخبار',
+  tma_feat_chat: 'دردشة مع العالم',
+  tma_mining_note: 'علّق وابدأ تعدين العملة المشفّرة هنا ⚙️🪙'
+};
+
+const TMA_AUTO_TR = {
+  tma_authorizing: 'Yetkilendiriliyor…',
+  tma_no_init: 'Telegram Mini App içinde açın (geçerli initData yok)',
+  tma_auth_failed: 'Kimlik doğrulama başarısız',
+  tma_network_error: 'Ağ hatası',
+  tma_init_present: 'initData mevcut',
+  tma_init_absent: 'initData yok',
+
+  tma_welcome_title: 'L7 AI’in Kuantum Metaverse’ü',
+  tma_welcome_sub: 'Hoş geldin! Küresel forum, YZ önerileri, kripto ticareti, haberler ve dünya ile sohbet seni bekliyor.',
+  tma_feat_forum: 'Küresel Forum',
+  tma_feat_ai: 'YZ Önerileri',
+  tma_feat_trading: 'Kripto Ticareti',
+  tma_feat_news: 'Haberler',
+  tma_feat_chat: 'Dünya ile Sohbet',
+  tma_mining_note: 'Yorum yap ve burada kripto kaz! ⚙️🪙'
+};
+
+/* -------------------- MERGE (append without removing anything) -------------------- */
+try {
+  Object.assign(dict.en, TMA_AUTO_EN);
+  Object.assign(dict.ru, TMA_AUTO_RU);
+  Object.assign(dict.uk, TMA_AUTO_UK);
+  Object.assign(dict.es, TMA_AUTO_ES);
+  Object.assign(dict.zh, TMA_AUTO_ZH);
+  Object.assign(dict.ar, TMA_AUTO_AR);
+  Object.assign(dict.tr, TMA_AUTO_TR);
+} catch (e) {}
+
+
 export function I18nProvider({ children }) {
   const [lang, setLang] = useState('en')
   useEffect(() => {
