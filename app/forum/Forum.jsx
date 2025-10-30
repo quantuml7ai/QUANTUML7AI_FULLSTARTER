@@ -2932,6 +2932,12 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   cursor: var(--quest-cursor, pointer);
   image-rendering: auto;
   transform: translateY(var(--quest-y, 0));
+/* убираем мобильный tap-highlight, выделение и кольца фокуса */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-focus-ring-color: rgba(0,0,0,0);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 /* Выключенное состояние */
@@ -2939,6 +2945,20 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   opacity: 0.5;
   pointer-events: none;
 }
+
+/* гасим визуальный «клик»/focus */
+.questIconPure:active,
+.questIconPure:focus,
+.questIconPure:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* на всякий случай — убираем подсветку выделения пикчи при тапе/дабл-тапе */
+.questIconPure::selection {
+  background: transparent;
+}  
 `}</style>
 )
 
