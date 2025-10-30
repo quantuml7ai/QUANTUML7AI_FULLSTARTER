@@ -857,7 +857,7 @@ header nav ul{ display:flex; flex-wrap:wrap; gap:.5rem; margin:0; padding:0; }
 }
 /* Золотая надпись с переливом и свечением */
 .qcoinLabel{
-  font-size:2.4em; font-weight:900; letter-spacing:.4px;
+  font-size:2.0em; font-weight:900; letter-spacing:.4px;
   background:
     linear-gradient(135deg,
       #7a5c00 0%,
