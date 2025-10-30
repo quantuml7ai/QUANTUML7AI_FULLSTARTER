@@ -5113,29 +5113,14 @@ try {
 } catch (_) {}  
 
 // === TMA Auto — welcome title (7 languages) ===
-const TMA_AUTO_EN = {
-  tma_welcome_title: "Welcome to the Quantum L7 AI Universe",
-};
-const TMA_AUTO_RU = {
-  tma_welcome_title: "Добро пожаловать в Вселенную Quantum L7 AI",
-};
-const TMA_AUTO_UK = {
-  tma_welcome_title: "Ласкаво просимо до Всесвіту Quantum L7 AI",
-};
-const TMA_AUTO_ES = {
-  tma_welcome_title: "Bienvenido al Universo de Quantum L7 AI",
-};
-const TMA_AUTO_ZH = { // 简体中文
-  tma_welcome_title: "欢迎来到 Quantum L7 AI 宇宙",
-};
-const TMA_AUTO_AR = { // RTL
-  tma_welcome_title: "مرحبًا بكم في كون Quantum L7 AI",
-};
-const TMA_AUTO_TR = {
-  tma_welcome_title: "Quantum L7 AI Evrenine Hoş Geldiniz",
-};
+const TMA_AUTO_EN = { tma_welcome_title: "Welcome to the Quantum L7 AI Universe" };
+const TMA_AUTO_RU = { tma_welcome_title: "Добро пожаловать во Вселенную Quantum L7 AI" };
+const TMA_AUTO_UK = { tma_welcome_title: "Ласкаво просимо до Всесвіту Quantum L7 AI" };
+const TMA_AUTO_ES = { tma_welcome_title: "Bienvenido al Universo de Quantum L7 AI" };
+const TMA_AUTO_ZH = { tma_welcome_title: "欢迎来到 Quantum L7 AI 宇宙" }; // 简体
+const TMA_AUTO_AR = { tma_welcome_title: "مرحبًا بكم في كون Quantum L7 AI" };
+const TMA_AUTO_TR = { tma_welcome_title: "Quantum L7 AI Evrenine Hoş Geldiniz" };
 
-/* -------------------- MERGE (append without removing anything) -------------------- */
 try {
   Object.assign(dict.en, TMA_AUTO_EN);
   Object.assign(dict.ru, TMA_AUTO_RU);
@@ -5145,7 +5130,6 @@ try {
   Object.assign(dict.ar, TMA_AUTO_AR);
   Object.assign(dict.tr, TMA_AUTO_TR);
 } catch (e) {}
-
 
 
 export function I18nProvider({ children }) {
