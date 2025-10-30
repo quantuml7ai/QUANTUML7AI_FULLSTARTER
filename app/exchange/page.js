@@ -7,6 +7,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import * as Brain from '../../lib/brain.js'
 
 /* ================================ i18n bridge ================================ */
@@ -850,7 +851,26 @@ export default function ExchangePage(){
       />
 
       <PageMarqueeTail />
+      {/* ===== ИКОНКИ ПОСЛЕ МАРКИЗЫ (глобальные стили ql7-*, как на главной/subscribe) ===== */}
+      <div className="ql7-icons-row">
+        <Link
+          href="/privacy"
+          className="ql7-icon-link"
+          aria-label="Privacy / Политика"
+          style={{ '--ql7-icon-size': '130px' }}
+        >
+          <img className="ql7-click-icon" src="/click/policy.png" alt="Privacy" draggable="false" />
+        </Link>
 
+        <Link
+          href="/contact"
+          className="ql7-icon-link"
+          aria-label="Support / Поддержка"
+          style={{ '--ql7-icon-size': '130px' }}
+        >
+          <img className="ql7-click-icon" src="/click/support.png" alt="Support" draggable="false" />
+        </Link>
+      </div>
       <style jsx>{`
         .wrap{display:block;max-width:1200px;margin:0 auto;padding:0 8px}
         .muted{opacity:.7}

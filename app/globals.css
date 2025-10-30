@@ -879,3 +879,73 @@ header nav ul{ display:flex; flex-wrap:wrap; gap:.5rem; margin:0; padding:0; }
   50%{ text-shadow:0 0 .9рем rgba(255,215,0,.55), 0 0 .25rem rgba(255,255,190,.55) }
   100%{ text-shadow:0 0 .3rem rgba(255,215,0,.35), 0 0 .1rem rgba(255,255,180,.35) }
 }
+/* === Global icons after marquee (reused across pages) === */
+.ql7-icons-row{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 16px 0 8px;
+}
+
+.ql7-icon-link{
+  display: inline-block;
+  line-height: 0;
+  cursor: pointer;
+  outline: none;
+}
+
+.ql7-click-icon{
+  width: var(--ql7-icon-size, 120px);
+  height: auto;
+  display: block;
+  user-select: none;
+  pointer-events: none; /* клик ловит ссылка */
+  background: transparent;
+
+  /* базовая «парящая» анимация как на главной */
+  animation:
+    ql7FloatY 3s ease-in-out infinite,
+    ql7Glow 2.4s ease-in-out infinite alternate;
+}
+
+/* hover/focus: подпрыгивание + усиленное свечение */
+.ql7-icon-link:hover .ql7-click-icon,
+.ql7-icon-link:focus-visible .ql7-click-icon{
+  animation:
+    ql7FloatY 3s ease-in-out infinite,
+    ql7GlowStrong 1.6s ease-in-out infinite alternate,
+    ql7Bounce 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ——— keyframes (уникальные имена) ——— */
+@keyframes ql7FloatY{
+  0%   { transform: translateY(0) rotate(0deg); }
+  50%  { transform: translateY(-8px) rotate(-2deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+@keyframes ql7Glow{
+  0%   { filter: drop-shadow(0 2px 6px rgba(0, 200, 255, 0.18)); }
+  100% { filter: drop-shadow(0 10px 22px rgba(0, 200, 255, 0.45)); }
+}
+
+@keyframes ql7GlowStrong{
+  0%   { filter: drop-shadow(0 4px 10px rgba(0, 200, 255, 0.28)); }
+  100% { filter: drop-shadow(0 14px 32px rgba(0, 220, 255, 0.7)); }
+}
+
+@keyframes ql7Bounce{
+  0%   { transform: translateY(0) scale(1); }
+  35%  { transform: translateY(-16px) scale(1.06); }
+  60%  { transform: translateY(0) scale(0.98); }
+  85%  { transform: translateY(-8px) scale(1.03); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* Доступность */
+@media (prefers-reduced-motion: reduce){
+  .ql7-click-icon{ animation: none !important; }
+}

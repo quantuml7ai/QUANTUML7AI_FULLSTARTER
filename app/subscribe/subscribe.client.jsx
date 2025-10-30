@@ -186,7 +186,6 @@ export default function SubscribePage() {
   const payments = t('sub_payments') || []
   const faq = t('sub_faq') || []
 
-  /* --- БЕЗОПАСНО: пробуем получить open из useWeb3Modal; если модалка не инициализирована (после логаута), не падаем --- */
   let openW3M = null
   try {
     const api = useWeb3Modal()
@@ -196,7 +195,6 @@ export default function SubscribePage() {
   }
   const hasW3M = !!process.env.NEXT_PUBLIC_WC_PROJECT_ID && typeof openW3M === 'function'
 
-  /* ===== VIP state + авто-проверки (как на Exchange) ===== */
   const [isVip, setIsVip] = useState(false)
   const [vipUntil, setVipUntil] = useState(null)
 
@@ -288,7 +286,6 @@ export default function SubscribePage() {
 
           {/* VIP */}
           <div style={{ marginTop: 18 }}>
-            {/* Кнопка VIP+: только визуальные эффекты добавлены */}
             <TierBadge label="VIP+" isVip={isVip} onClick={handleVipClick} />
             <h3 style={{ marginTop: 8 }}>{t('sub_vip_title')}</h3>
             <p><b>{t('sub_vip_price')}</b></p>
@@ -318,7 +315,6 @@ export default function SubscribePage() {
         <section className="panel panel-narrow">
           <h2>{t('sub_payments_title')}</h2>
 
-          {/* Адаптивная картинка под заголовком «Старт за минуты» */}
           <div className="block-media">
             <img
               src="/branding/sub-start.jpg"
@@ -350,7 +346,7 @@ export default function SubscribePage() {
           </ul>
         </section>
 
-        {/* Локальные стили */}
+        {/* Локальные стили (как были) */}
         <style jsx>{`
           .badge {
             display: inline-flex;
@@ -406,8 +402,39 @@ export default function SubscribePage() {
         `}</style>
       </main>
 
-      {/* Хвост страницы: бегущая строка во всю ширину */}
+      {/* Хвост страницы: бегущая строка */}
       <PageMarqueeTail />
+
+      {/* ===== ИКОНКИ ПОСЛЕ МАРКИЗЫ (разметка без локальных стилей) ===== */}
+      <div className="ql7-icons-row">
+        <Link
+          href="/privacy"
+          className="ql7-icon-link"
+          aria-label="Privacy / Политика"
+          style={{ '--ql7-icon-size': '130px' }}
+        >
+          <img
+            className="ql7-click-icon"
+            src="/click/policy.png"
+            alt="Privacy"
+            draggable="false"
+          />
+        </Link>
+
+        <Link
+          href="/contact"
+          className="ql7-icon-link"
+          aria-label="Support / Поддержка"
+          style={{ '--ql7-icon-size': '130px' }}
+        >
+          <img
+            className="ql7-click-icon"
+            src="/click/support.png"
+            alt="Support"
+            draggable="false"
+          />
+        </Link>
+      </div>
     </>
   )
 }
