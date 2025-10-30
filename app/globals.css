@@ -784,3 +784,40 @@ header nav ul{ display:flex; flex-wrap:wrap; gap:.5rem; margin:0; padding:0; }
   background: linear-gradient(180deg, rgb(1, 18, 251), rgba(255,255,255,.02));
   box-shadow: var(--ring), 0 8px 24px rgba(0,0,0,.18);
 }
+/* ==== Kill blue click highlight globally (links, buttons, imgs-as-buttons) ==== */
+
+/* Мобильные WebKit (iOS/Android): убираем синий/серый tap overlay */
+*, *::before, *::after { -webkit-tap-highlight-color: transparent; }
+
+/* Firefox: убираем внутренний фокус-бордер на кнопках */
+button::-moz-focus-inner { border: 0; }
+
+/* Все фокусируемые элементы: без outline/теней/фоновых подсветок при клике/фокусе */
+a, button, area, label, summary,
+[role="button"], [role="link"],
+input, textarea, select, details,
+[tabindex] {
+  outline: none !important;
+  box-shadow: none !important;
+  background-image: none !important;
+}
+
+/* На всякий — глушим в состояниях */
+a:focus, a:active, a:focus-visible,
+button:focus, button:active, button:focus-visible,
+[role="button"]:focus, [role="button"]:active, [role="button"]:focus-visible,
+input:focus, input:active, input:focus-visible,
+textarea:focus, textarea:active, textarea:focus-visible,
+select:focus, select:active, select:focus-visible,
+[tabindex]:focus, [tabindex]:active, [tabindex]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* У картинок и инлайновых SVG, если они кликабельны */
+img[role="button"], img[draggable="false"], svg[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-drag: none;
+}
