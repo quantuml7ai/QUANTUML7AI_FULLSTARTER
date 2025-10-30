@@ -575,7 +575,7 @@ html, body {
 :root { --gutter: 26px; --miniapp-top-offset: 20px; } /* ↑ докрути тут при необходимости */
 @media (min-width:1280px){ :root{ --gutter: 100px; } }
 /* Мобайл: микро-гаттер 8px, чтобы ничего не «резалось» по краям */
-@media (max-width:640px){ :root{ --gutter: 2px; --miniapp-top-offset: 20px; } }
+@media (max-width:640px){ :root{ --gutter: 4px; --miniapp-top-offset: 20px; } }
 
 /* База */
 html,body{ margin:0; padding:0; width:100%; min-height:100%; overflow-x:hidden; }
