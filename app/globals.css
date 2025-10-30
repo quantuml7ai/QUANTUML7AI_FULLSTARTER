@@ -54,13 +54,47 @@ body{
  }
 
 /* TopBar */
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 4px 14px}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 4px 14px;
+
+  /* === настройки размера навигации === */
+  --nav-font-size: 20px;   /* размер текста пунктов меню */
+  --nav-pad-y: 6px;        /* вертикальные отступы кликабельной зоны */
+  --nav-pad-x: 4px;       /* горизонтальные отступы кликабельной зоны */
+}
 .topbar .brand{letter-spacing:.08em;font-weight:800;opacity:.95}
-.topbar nav{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-.topbar a{color:#cfe7ff;text-decoration:none;opacity:.9}
+
+.topbar nav{
+  display:flex;gap:16px;align-items:center;flex-wrap:wrap;
+  font-size: var(--nav-font-size); /* все ссылки наследуют этот размер */
+}
+
+.topbar a{
+  color:#f9f4f4;text-decoration:none;opacity:.9;
+  font-size: inherit;                /* берём размер из nav */
+  line-height:1;
+  padding: var(--nav-pad-y) var(--nav-pad-x); /* увеличиваем кликабельную область */
+  border-radius:8px;
+}
 .topbar a:hover{opacity:1}
-.lang-switch{background:transparent;border:1px solid rgba(157,220,255,.35);color:#cfe7ff;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:14px}
+
+.lang-switch{
+  background:transparent;border:1px solid rgba(157,220,255,.35);
+  color:#cfe7ff;padding:6px 10px;border-radius:8px;cursor:pointer;
+  font-size:14px
+}
 .lang-switch:hover{background:rgba(157,220,255,.15)}
+
+/* компакт на узких экранах — можно переопределить переменные */
+@media (max-width: 480px){
+  .topbar{
+    --nav-font-size: 13px;
+    --nav-pad-y: 5px;
+    --nav-pad-x: 8px;
+  }
+  .lang-switch{ font-size:13px }
+}
+
 
 /* Panels */
 .panel{
@@ -76,9 +110,9 @@ body{
 .panel p{margin:8px 0 10px;color:#cfe1ff;line-height:1.6}
 .panel .row{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
 .panel-narrow{width:min(880px,94vw)}
-.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 16px;border-radius:12px;background:#00c2ff;color:#00121f;font-weight:800;text-decoration:none;border:none;box-shadow:0 8px 18px rgba(0,194,255,.35)}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 16px;border-radius:12px;background:#039cfb38;color:#f9fbfc;font-weight:800;text-decoration:none;border:none;box-shadow:0 8px 18px rgb(250, 221, 3)}
 .btn:hover{filter:brightness(1.05);transform:translateY(-1px)}
-.btn.ghost{background:transparent;border:1px solid rgba(157,220,255,.35);color:#cfe7ff;box-shadow:none}
+.btn.ghost{background:transparent;border:1px solid rgb(3, 235, 248);color:#cfe7ff;box-shadow:none}
 
 /* Lists */
 ul.bullets{padding-left:20px}
@@ -290,9 +324,9 @@ ul.bullets li{margin:6px 0}
 }
 /* === Навбар: усиленный пульс/свечение активного пункта === */
 :root{
-  --nav-glow-color: #67e8f9;              /* базовый оттенок свечения (циан) */
+  --nav-glow-color: #ffb700;              /* базовый оттенок свечения (циан) */
   --nav-glow-strong: rgba(103,232,249,.95);
-  --nav-glow-soft:   rgba(103,232,249,.35);
+  --nav-glow-soft:   rgb(5, 214, 251);
   --nav-active-scale: 1.08;               /* насколько увеличивать активную ссылку */
 }
 
@@ -698,32 +732,68 @@ header nav ul{ display:flex; flex-wrap:wrap; gap:.5rem; margin:0; padding:0; }
 
 .topbar .nav-auth-btn:active{ transform: translateY(1px) scale(.98); }
 
-/* состояние «гость» — СЕРАЯ */
+/* --- Гость (не авторизован): мигает красным как QCoinX2.needVip --- */
 .topbar .nav-auth-btn.is-guest{
-  color: #ffffff;
-  background: linear-gradient(180deg, rgb(251, 1, 1), rgba(255,255,255,.01));
-  box-shadow: var(--ring), 0 6px 18px rgba(0,0,0,.16);
+  color:#ffffff;
+  background: rgba(255,70,70,.18);
+  border: 1px solid rgba(255,120,120,.60);
+  box-shadow:
+    var(--ring),
+    0 0 12px rgba(255,70,70,.35);
+  animation: blinkPause .9s steps(1) infinite;
 }
 .topbar .nav-auth-btn.is-guest:hover{
-  color: #ffffff;
-  background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+  background: rgba(255,70,70,.24);
+  box-shadow:
+    var(--ring),
+    0 0 18px rgba(255,70,70,.45);
+}
+@keyframes blinkPause{
+  0%,50%{ opacity:1 }
+  51%,100%{ opacity:.45 }
 }
 
-/* состояние «авторизован» — ЗОЛОТАЯ */
+/* --- Авторизован: золотой «перелив монеты» как у X2 --- */
 .topbar .nav-auth-btn.is-auth{
   color: #121214;
-  background: linear-gradient(180deg, #f6d36a, #e5b93a);
+  /* многоступенчатый градиент + бегущий блик */
+  background:
+    linear-gradient(135deg,
+      #7a5c00 0%, #ffd700 18%, #fff4b3 32%, #ffd700 46%,
+      #ffea80 60%, #b38400 74%, #ffd700 88%, #7a5c00 100%);
+  background-size: 200% 100%;
   box-shadow:
     0 0 0 1px rgba(255,215,99,.5) inset,
     0 10px 26px rgba(229,185,58,.35),
     0 0 24px rgba(246,211,106,.25);
+  animation: qcoinShine 6s linear infinite, qcoinGlow 2.8s ease-in-out infinite;
 }
 .topbar .nav-auth-btn.is-auth:hover{
-  background: linear-gradient(180deg, #ffd976, #ecbe42);
-  box-shadow:
-    0 0 0 1px rgba(255,225,120,.7) inset,
-    0 12px 32px rgba(236,190,66,.42),
-    0 0 28px rgba(255,217,118,.30);
+  /* при ховере чуть ярче, анимации продолжают работать */
+  filter: brightness(1.05) saturate(110%);
+}
+
+/* блик «катается» по градиенту */
+@keyframes qcoinShine{
+  0%   { background-position:   0% 0; }
+  100% { background-position: 100% 0; }
+}
+/* мягкое дыхание свечения */
+@keyframes qcoinGlow{
+  0%,100%{
+    box-shadow:
+      0 0 0 1px rgba(255,215,99,.50) inset,
+      0 10px 26px rgba(229,185,58,.35),
+      0 0 18px rgba(246,211,106,.25);
+    filter: brightness(1) saturate(100%);
+  }
+  50%{
+    box-shadow:
+      0 0 0 1px rgba(255,230,130,.65) inset,
+      0 12px 32px rgba(236,190,66,.42),
+      0 0 28px rgba(255,217,118,.35);
+    filter: brightness(1.12) saturate(115%);
+  }
 }
 
 /* фокус-кольцо для клавиатуры */
@@ -751,6 +821,7 @@ header nav ul{ display:flex; flex-wrap:wrap; gap:.5rem; margin:0; padding:0; }
     margin-left: 8px;
   }
 }
+
 /* ==== Auth button in TopBar ========================================= */
 .topbar .nav-auth-btnlink-tg{
   --btn-h: 34px;
@@ -779,9 +850,32 @@ header nav ul{ display:flex; flex-wrap:wrap; gap:.5rem; margin:0; padding:0; }
 
   transition: transform .08s ease, box-shadow .2s ease, background-color .2s ease, color .2s ease, opacity .2s ease;
 
-  /* базовая «стеклянная» кнопка (переопределяется модами ниже) */
+  /* базовая «стеклянная» кнопка (оставлено без изменений) */
   color: #e7e7ea;
   background: linear-gradient(180deg, rgb(1, 18, 251), rgba(255,255,255,.02));
   box-shadow: var(--ring), 0 8px 24px rgba(0,0,0,.18);
 }
- 
+/* Золотая надпись с переливом и свечением */
+.qcoinLabel{
+  font-size:2.4em; font-weight:900; letter-spacing:.4px;
+  background:
+    linear-gradient(135deg,
+      #7a5c00 0%,
+      #ffd700 18%,
+      #fff4b3 32%,
+      #ffd700 46%,
+      #ffea80 60%,
+      #b38400 74%,
+      #ffd700 88%,
+      #7a5c00 100%);
+  background-size:200% 100%;
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  animation:qcoinShine 6s linear infinite, qcoinGlow 2.8s ease-in-out infinite;
+  text-shadow:0 0 .3rem rgba(255,215,0,.35), 0 0 .1rem rgba(255,255,180,.35);
+}
+@keyframes qcoinShine{ 0%{background-position:0% 50%} 100%{background-position:200% 50%} }
+@keyframes qcoinGlow{
+  0%{ text-shadow:0 0 .3rem rgba(255,215,0,.35), 0 0 .1rem rgba(255,255,180,.35) }
+  50%{ text-shadow:0 0 .9рем rgba(255,215,0,.55), 0 0 .25rem rgba(255,255,190,.55) }
+  100%{ text-shadow:0 0 .3rem rgba(255,215,0,.35), 0 0 .1rem rgba(255,255,180,.35) }
+}

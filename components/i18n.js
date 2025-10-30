@@ -56,169 +56,299 @@ const dict = {
     auth_signin: 'Sign in',
     nav_support: 'Support',
     select_symbol_tf: "Select symbol / TF",
-    /* ===== HERO / HOME (кратко) ===== */
-    hero_title: 'Quantum L7 AI',
-    hero_subtitle:
-      'Cosmic-grade intelligence for research, alpha signals and guarded execution. Wallet auth, PRO/VIP tiers.',
-    hero_cta: 'Start in Telegram',
-    hero_learn_more: 'Learn More',
-    marquee: 'AI • Blockchain • Automation • Quant • Research • Agents • Alpha • All rights reserved ',
+/* ===== HERO / HOME (short) ===== */
+hero_title: 'Welcome to the Quantum L7 AI Universe',
+hero_subtitle:
+  'Quantum L7 AI is not just a platform but an entire cybernetic universe of decision-making: institutional-grade multichain data, autonomous L7 agents, on-chain pipelines, and trading routing operate as a single digital organism. We connect the Web-MiniApp, Telegram MiniApp and QL7 AI Bot, a forum with the QCoin economy, and a global exchange ( core in the final stage ) to provide instant alpha signals, disciplined entry/exit windows, automated execution, and a transparent risk perimeter. Authorization is via non-custodial wallets (keys stay with you), support for PRO/VIP tiers, priority limits, and quota removal. At the core is a legally vetted Web3 architecture, cross-exchange liquidity aggregation, behavioral and microstructural models, as well as replicable research pipelines with the log hypothesis → test → evidence. This is next-generation infrastructure for those who work at market pace and require provability, speed, and accuracy.',
+hero_cta: 'Start in Telegram',
+hero_learn_more: 'Learn more',
+marquee: 'AI • Quantum agents • On-chain analytics • Crypto exchange (core) • Forum • QCoin mining • Auto-execution • Risk perimeter • Liquidity routing • Web3 metaverse • API/SDK • Enterprise • All rights reserved',
 
-    home_blocks: [
-      {
-        title: 'Why Quantum L7 AI',
-        paras: [
-          `We fuse multi-modul models with L7 autonomous agents and on-chain pipelines.
-The system authenticates via non-custodial wallets, keeps keys with the user, and turns raw data into decisions across discovery, validation and execution.`,
-          `Our philosophy is clarity: hypotheses → tests → evidence.
-Agents read docs, parse APIs, stream on-chain data, and compose human-grade reports with charts and citations.`,
-        ],
-      },
-      {
-        title: 'What you get',
-        bullets: [
-          'Alpha discovery from curated on-chain and off-chain sources',
-          'Signal ranking, confidence scoring and risk overlays',
-          'Backtests, notebooks and reproducible research',
-          'Portfolio insights, PnL attribution and regime detection',
-          'Automated execution with guardrails and kill-switches',
-          'Streaming dashboards and alerting',
-          'Private datasets and connectors',
-          'API/SDK for desks and builders',
-          'Governance hooks and audit trails',
-          'Education tracks & live research sessions',
-        ],
-      },
+home_blocks: [
+  {
+    title: 'Why Quantum L7 AI',
+    paras: [
+      `Quantum L7 AI is a cross-platform ecosystem: the AI core, autonomous L7 agents, on-chain monitoring, normalized market feeds, the forum social network, and the QCoin economy are combined into a single computational fabric. Every artifact — a transaction, a news narrative, a post, a liquidity chart — enters the common data loop and becomes a call to action.`,
+      `L7 agents autonomously read documents and APIs, observe blockchains and order books, classify behavioral patterns, assess market regimes, and produce verifiable hypotheses. The result is not a “black box” but an explainable card: scenario probability, amplitude, horizons, SL/TP, confidence factors, and links to primary sources.`,
+      `Authorization is via non-custodial wallets: we do not store private keys and only confirm ownership of the address. Access rights and quotas are synchronized between the Telegram MiniApp, the web interface, and the QL7 bot; VIP status marks the boundaries of limits and lets you into priority processing channels.`,
+      `The market core is built on cross-exchange aggregation, unification of symbols/contracts, and latency-aware feed processing. We combine institution-level histories with real-time streams to track spread dispersion, shock volumes, order balance, MEV risks, and the effect of the news impulse.`,
+      `The platform principle is provability: hypothesis → test → evidence. Every computation is logged, metrics are reproducible, and “noise” arbitrage is cut off by regime filters. This is how we turn raw data into disciplined decisions and intuition into verifiable tactics.`,
+      `The forum is embedded into the loop: content passes AI scoring (quality, engagement, anti-spam/anti-sybil), and activity is mapped into the QCoin economy. This is not a “social network for likes” but a targeted cognitive bus where knowledge and contribution are converted into tokenized value.`,
     ],
+  },
 
-    /* ===== ABOUT ===== */
-    about_title: 'About Quantum L7 AI',
-    about_paragraphs: [
-      `Quantum L7 AI is a compact research and signals stack for crypto. Our goal is simple: reduce noise, reveal real market structure, and help you act with discipline rather than impulse.`,
-
-      `L7 stands for application-layer agents. These agents read documents, call APIs, observe blockchains and order books, run small experiments, and assemble explainable outputs. You do not get a black box; you get hypotheses, tests, and a clear trace of why a suggestion appeared.`,
-
-      `Who it is for: traders who want fast situational awareness; researchers who need repeatable studies; builders and desks that require a clean API and a stable data plane.`,
-
-      `Coverage. We ingest market data from major CEX venues and leading DEX aggregators, add reference data (symbols, mappings, contract metadata), and unify it into a single schema. Cross-venue comparability is the design target.`,
-
-      `Data pipeline. Feeds are normalized, gaps are auto-patched, splits and contract changes are reconciled, and derivatives are labeled. Large history buckets enable regime attribution instead of short-term overfitting.`,
-
-      `Analytics engine. More than two hundred indicators are available, but the point is not quantity—the point is ensembles, learned weights, and context. Classic families (RSI, Stochastic, MFI, CCI, ADX/DI, EMA/SMA/WMA, MACD, ATR, Bollinger Bands, VWAP, OBV, Ichimoku baselines) are combined with regime filters and liquidity awareness.`,
-
-      `On-chain modules. We parse transfers, liquidity additions and removals, bridge flows, holder distributions, and basic MEV fingerprints. Signals are down-weighted in thin or manipulated regions.`,
-
-      `News and research stream. Multilingual sources are auto-translated, embedded, and deduplicated. Sentiment, novelty, and source reliability contribute to a lightweight narrative score next to price metrics.`,
-
-      `Signal cards. Each card shows an expected move and time horizon derived from the asset’s history, plus confidence, liquidity context, and quick indicators. Treat cards as beacons that help you frame scenarios and risk—never as a promise.`,
-
-      `Discipline. We build for pre-commitment: playbooks, volatility corridors, dynamic stops, and position-sizing templates. The system nudges you to define invalidation before the trade, not after.`,
-
-      `Architecture. Data and agentic services run as small TypeScript/Python processes behind a stable API. The website uses Next.js for rendering and WebSockets for live updates. Caches and fallbacks keep the UI responsive even during data bursts.`,
-
-      `Security and privacy. We are non-custodial; keys remain with the user. Actions are scoped by role and logged. Secrets are stored server-side, and personal data is minimized and encrypted in transit and at rest.`,
-
-      `Roadmap. Public notebooks and backtests, strategy templates, a portfolio engine with attribution, smarter routing across venues, DeFi connectors, and an optional autopilot mode with strict guardrails and human checkpoints.`,
-
-      `Community and support. We publish weekly research notes, maintain a Telegram channel, and welcome specific requests from teams. Your feedback directly shapes the backlog—useful features ship, while shiny distractions do not.`,
-
-      `Important: subscriptions and wallet linking are handled in our Telegram bot. The website focuses on research, visualization, and documentation. Nothing here is financial advice.`,
+  {
+    title: 'What you get',
+    bullets: [
+      'Next-generation quantum analytics: a symbiosis of AI intelligence, on-chain metrics, and microstructural market features.',
+      'Alpha signals with probability of execution, amplitude, and horizon, plus transparent justification of confidence factors.',
+      'A normalized cross-exchange data core: unification of symbols/contracts, liquidity, spreads, and tick frequency.',
+      'On-chain monitoring: holder distribution, flows through bridges, CEX/DEX liquidity, basic MEV patterns.',
+      'Global exchange (core in development): liquidity routing, slippage protection, contextual risk assessment.',
+      'Auto-execute: execution with fail-safe triggers, dynamic stops, and emergency shutdown on anomalies.',
+      'Portfolio dashboards: PnL attribution, risk budgets, volatility regimes, corridors, and position sizing discipline.',
+      'Replicable research: backtests, notebooks, visual reports, what-if scenarios, and exposure of assumptions.',
+      'Narrative feed: AI tonality, embeddings, source trust, and linking news to price metrics.',
+      'Forum economy: AI moderation, QCoin mining for contribution and activity, media posting with algorithmic scoring.',
+      'VIP program: removal of daily quotas in the AI Box, extended limits, priority processing, and X2 for QCoin on quests/time.',
+      'Integrations: Telegram MiniApp, web, QL7 bot; single session, shared status, and coordinated access rights.',
+      'API/SDK/Webhooks: secure integrations, sandbox mode, event-driven architecture for teams and automation.',
+      'Multichain stack: Ethereum, BSC, Polygon, Solana, TON, Avalanche, etc.; bridging and accounting for network specifics.',
+      'Legally vetted Web3 architecture: logging, role separation, cryptographic verification, and privacy.',
     ],
-    about_sections: [
-      { title: 'What is Quantum L7 AI',           parasIdx: [0] },
-      { title: 'L7 agents, not black boxes',      parasIdx: [1] },
-      { title: 'Who it is for',                   parasIdx: [2] },
-      { title: 'Coverage',                        parasIdx: [3] },
-      { title: 'Data pipeline',                   parasIdx: [4] },
-      { title: 'Analytics engine',                parasIdx: [5] },
-      { title: 'On-chain modules',                parasIdx: [6] },
-      { title: 'News & research stream',          parasIdx: [7] },
-      { title: 'Signal cards',                    parasIdx: [8] },
-      { title: 'Decision discipline',             parasIdx: [9] },
-      { title: 'Architecture',                    parasIdx: [10] },
-      { title: 'Security & privacy',              parasIdx: [11] },
-      { title: 'Roadmap',                          parasIdx: [12] },
-      { title: 'Community & support',             parasIdx: [13] },
-      { title: 'Important',                       parasIdx: [14] },
-    ],
+  },
 
-    about_bullets: [
-      'Fast situational awareness: market state, trend, momentum, volatility',
-      'Cross-venue normalization and liquidity-aware scoring',
-      'On-chain flows: holders, liquidity moves, bridge activity, basic MEV flags',
-      'News stream with translation, embedding search, and source reliability',
-      'Expected move and horizon on every signal card (history-based quantiles)',
-      'Ensembles of indicators with regime filters and learned weights',
-      'Backtests and notebooks for reproducible research (roadmap)',
-      'Portfolio engine: risk budgets, constraints, attribution (roadmap)',
-      'Smart routing across CEX/DEX; latency and slippage guards (roadmap)',
-      'API/SDK for desks and builders; simple webhooks for automation',
-      'Enterprise options: SSO, private deployments, SLA and change windows',
-      'Security model: non-custodial, scoped actions, audit logs',
-      'Operational resilience: caching layers, graceful degradation, fallbacks',
-      'Clean UI that emphasizes decisions, not noise',
-      'Scenario thinking: predefined invalidation and stop frameworks',
-      'Research artifacts: charts, tables, concise reports with links',
-      'Embedding search across your notes and public sources (opt-in)',
-      'Extensible connectors: pricing, on-chain, research, social',
-      'Human-in-the-loop guardrails for semi-automated workflows',
-      'Clear boundaries: signals are tools, not guarantees',
+  {
+    title: 'Infrastructure and data',
+    paras: [
+      `Market data: we combine historical and streaming CEX/DEX feeds, bring them to a common schema, close gaps, and account for splits and derivative specifics. On top — ensemble indicators (RSI/ADX/ATR/VWAP/OBV/Ichimoku/volume clusters), regime filters, and liquidity context.`,
+      `On-chain layer: address graphs, liquidity movements, holder concentrations, bridge events, basic MEV risks. Public blockchains are not personal data, but we carefully log requests and debug IDs for reliability and incident investigation.`,
+      `Narratives and news: multilingual indexing, translation, deduplication, source scoring, assessment of novelty and covariations with price; the result is a light numerical overlay next to price and volume that helps distinguish noise from a meaningful impulse.`,
+      `Storage and cache: splitting streams into hot/warm, graceful degradation without loss of critical functions, prioritization of channels for VIP and system tasks. All computation stages have traceability, artifact version control, and reproducibility.`,
     ],
+  },
 
-    tg_button: 'Telegram',
+  {
+    title: 'Security and compliance',
+    paras: [
+      `Non-custodial model: private keys and seed phrases remain with the user. Authorization is by signature; access is role-based, logged, and audited. Minimization of personal data, encryption in transit and at rest, anti-fraud/anti-sybil pipelines.`,
+      `Legal clarity: we provide analytics and tools, not financial advice. The payment flow through NowPayments with on-chain confirmation activates the subscription automatically; the status is synchronized across MiniApp/web/bot. Privacy and logging policies are transparent and updated.`,
+      `Execution limiters: sanity checks, limits, emergency stop triggers, and anomaly monitoring. These are instruments of discipline, not a guarantee of result; trading involves risk, decisions are on the user side.`,
+    ],
+  },
 
-    /* ===== EXCHANGE (расширенное описание) ===== */
-    exchange_title: 'Exchange (in development)',
-    exchange_sub:
-      `A living market canvas with quantum-styled waves, constellation particles and a spiral galaxy overlay.
-Next milestones: smart routing across DEX/CEX, venue selection with slippage control, latency-aware execution, auto-hedge and risk limits.`,
-    exchange_sections: [
-      {
-        title: 'Vision: a next-gen L7 exchange',
-        paras: [
-          `The exchange is not just a chart. It is an L7 agentic pipeline that ingests market data, on-chain events and order book signals, 
-scores them and renders explainable recommendations (BUY/SELL/HOLD) with confidence and risk context.`,
-          `User identity is wallet-based; compute is orchestrated by agents. Keys stay with the user. 
-Everything leaves an audit trail, from research steps to execution.`,
-        ],
-      },
-      {
-        title: 'Smart routing & liquidity',
-        paras: [
-          `Routing will scan liquidity on DEX/CEX venues in parallel, estimate slippage and fees, 
-select the venue or a split route, and respect user risk limits.`,
-          `Latency matters: the router targets best-effort timing with cancellation/replace logic and a dynamic kill-switch.`,
-        ],
-      },
-      {
-        title: 'Risk & controls',
-        paras: [
-          `Limits by notional, exposure and drawdown. Conditional orders, time-in-force, minimum confidence threshold for AI signals.`,
-          `Guardrails protect from runaway loops. Every action is traceable with reason, inputs and model versions.`,
-        ],
-      },
-      {
-        title: 'Analytics & explainability',
-        paras: [
-          `The AI box shows confidence and factors: moving averages alignment, VWAP relation, band position, RSI regime and more.`,
-          `Every recommendation is paired with TP/SL bands derived from ATR-like volatility measures and the current regime.`,
-        ],
-      },
-      {
-        title: 'What’s next',
-        paras: [
-          `Portfolio view, PnL attribution, factor contribution charts.`,
-          `Backtests & replays directly on the canvas, strategy templates and one-click deployment.`,
-        ],
-      },
+  {
+    title: 'Integrations: MiniApp • Bot • Forum • Exchange',
+    paras: [
+      `The Telegram MiniApp and the web work as mirror interfaces with a single session and rights. The QL7 bot is a lightweight entry into the AI channel and notifications. The forum is not just a community: it is a cognitive bus where knowledge and contribution are converted into QCoin, and VIP content passes priority AI scoring.`,
+      `Exchange (core in the final stage): order routing, contextual assessment of slippage, on-chain execution where applicable, and extended backtest/what-if modes for VIP. Integration with analytics gives a rare effect — the signal knows “how” it will be executed.`,
     ],
-    roadmap: 'Roadmap',
-    ex_bullets: [
-      'Smart routing with slippage control and venue selection',
-      'Backtests, replays and explainable metrics',
-      'Wallet connections and instant portfolio analytics',
-      'Strategy templates and guardrails',
+  },
+
+  {
+    title: 'For teams and developers',
+    bullets: [
+      'API/SDK/Webhooks with a secure token model and key rotation.',
+      'Event-driven integrations, sandbox environments, connectors to on-chain/off-chain sources.',
+      'White-Label and Enterprise modes: SSO, private deployments, SLA, change windows.',
+      'Notebooks/backtests: artifact export, reports, reproducibility of experiments.',
+      'Deep feature acceptance and performance metrics for product teams.',
     ],
+  },
+],
+
+
+/* ===== ABOUT ===== */
+about_title: 'About Quantum L7 AI',
+about_paragraphs: [
+  `Quantum L7 AI is not just “analytics” — it is an integrated operational framework for making trading decisions and enabling social interaction around crypto markets. The platform’s core unites Web-MiniApp (web + Telegram), forums with gamified QCoin mining, and an AI research engine that filters noise, reveals liquidity structures, and suggests disciplined entry/exit scenarios. We combine market microstructure, on-chain telemetry, behavioral patterns, and news narratives into one coherent, interpretable layer — so you don’t have to “chase” the market but can design your moves in advance.`,
+
+  `L7 agents are applied AI modules that live on data. They read documents and feeds, query APIs, observe blockchains, order books, and derivatives, run mini-experiments, and produce explainable artifacts: hypotheses, backtest snapshots, contextual indicators. The focus is not on the “black box magic,” but on traceability: from each conclusion, the path is visible — which features were considered (liquidity, spreads, asymmetry, imbalances, impulses, volume clusters), why weight was reduced in thin/manipulated zones, and where the boundary of scenario invalidation lies.`,
+
+  `Who it’s for. For traders — fast situational awareness and manageable signal frequency without overload; for researchers — reproducible pipelines and clean data; for teams — API/SDK, webhooks, and a reliable event bus; for the builder community — forums, reputation metrics, and the QCoin economy for contributions. VIP+ receives a priority AI channel, media posting, accelerated quotas, and a “gold” status that affects ranking and limits.`,
+
+  `Coverage. We aggregate data from leading CEXs and DEX aggregators, normalize symbols and contract metadata, unify tick frequencies and order book depth. We introduce unified directories, mappings of pairs/networks/markets, tag derivatives, and account for splits, delistings, and contract migrations. The goal is comparability across platforms and networks: a single abstraction layer to compare liquidity, costs, latency, and the “real” availability of volumes.`,
+
+  `Data pipeline. Streams are cleaned, gaps are restored, anomalies are tagged, and delay contours are calibrated. The history is deep — this allows detection of regimes instead of chasing random spikes. We add on-chain routes, bridge transfers, holder distributions, MEV activity markers, and link them with market metrics. The result — feature ensembles resistant to “noise bubbles” and local anomalies.`,
+
+  `Analytical core. Hundreds of indicators are merely a palette. The essence is in ensembles and context: RSI/RSX, Stochastic, CCI/MFI, ADX/DI, ATR and bands, EMA/SMA/WMA, MACD/Signal/Histogram, VWAP/POC/Value-Area, volume profiles, Bid/Ask imbalances, and liquidity sweeps. We blend classical families with regime filters, liquidity and behavioral heuristics, and on-chain inflow/outflow markers. Each card is not a “tip,” but a compass: amplitude through history, realization horizon, confidence, prerequisites, and invalidation boundaries.`,
+
+  `On-chain modules. We track transfer clusters, bridges, accumulation/distribution, large holder concentration, basic MEV patterns, and anomalous routes. In thin liquidity zones, during funding or spread spikes, signal weights decrease; when confirmed by several domains (spot, derivatives, on-chain) — they increase. This minimizes “false confidence” where the market is fragile.`,
+
+  `Narratives and news. The multilingual feed is translated, deduplicated, and indexed by embeddings. We evaluate novelty, source credibility, the ratio of “ritual/substance,” tone, and thematic persistence over time. Alongside price and on-chain metrics, a light “narrative map” emerges: what drives attention, where regulatory risks appear, what amplifies volatility, and what fades away.`,
+
+  `Signal cards and discipline. Each card contains expected amplitude (quantiles), time horizon, SL/TP markers, a quick liquidity summary, and a set of triggers that must align. The system promotes discipline: before entry, you see invalidation, risk unit, and a dynamic volatility corridor; after entry — you receive validation checkpoints and risk removal conditions.`,
+
+  `Architecture. Lightweight TypeScript/Python services behind a stable API; the website runs on Next.js with live layers via WebSocket. Cache layers and fallback sources ensure graceful degradation during peaks. API/SDK and webhooks enable automation, while roles and audit enforce secure boundaries. MiniApp works in web and Telegram so you can manage the market in one flow: charts, forum, wallet, bot — without friction.`,
+
+  `Security and privacy. Non-custodial: we do not request or store private keys/seeds. Roles restrict access, actions are logged, personal data is minimized and encrypted in transit and at rest. Anti-sybil/anti-fraud pipelines protect the QCoin economy and the forum’s reputation mechanics; session validation is gentle yet strict, maintaining access integrity.`,
+
+  `Forum and QCoin mining. The forum is not a “social network,” but a production line of knowledge. Every 4 hours, you confirm activity and lock in rewards; posts with media (video/images/audio) go through QuantumLCM-AI scoring (quality, engagement, anti-spam/anti-sybil) and are converted into QCoin. VIP+ receives X2 in time and X2 in quests, priority in ranking, extended media limits, and accelerated moderation. Reputation and contribution are not empty noise but economically meaningful values.`,
+
+  `Exchange (in development) and recommendations. The trading core and execution are being connected step by step; AI-based recommendations by symbols/timeframes, order book depth, and liquidity profiles are already available. We are designing smart routing, delay/slippage protection, portfolio constraints, and PnL attribution. VIP+ gains access to experimental indicators, what-if/backtest modes, and extended analytical horizons.`,
+
+  `QCoin economy and L7 blockchain. QCoin is the fuel of knowledge and productive traffic. The upcoming L7-chain is a layer that connects cross-network assets, banks, and financial infrastructure into a universal value router. Our goal is for QCoin to become a neutral settlement unit within the ecosystem, with transparent issuance/burning and a fair withdrawal queue. VIP+ enjoys higher priority in distributions and early access to staking/validator roles.`,
+
+  `Payment and activation. The VIP+ subscription is processed via NowPayments: crypto payment (USDT and others), webhook instantly activates access and synchronizes status across MiniApp, bot, and forum. No screenshots or manual checks. The interface is available in 7 languages; wallet linking is seamless. You pay for speed, interpretability, and an economy where contribution is rewarded.`,
+
+  `Community and roadmap. We publish weekly notes, open alpha-feature betas, and accept targeted requests from teams. In the backlog: a portfolio engine with risk budgets, extended CEX/DEX smart routing, public notebooks/backtests, and a “semi-autopilot” under human supervision. Everything that enhances discipline and reduces friction goes to release; what merely glitters but doesn’t help — doesn’t. Materials are educational/analytical, not financial advice.`
+],
+
+about_sections: [
+  { title: 'What is Quantum L7 AI',             parasIdx: [0] },
+  { title: 'L7 Agents, not a “Black Box”',       parasIdx: [1] },
+  { title: 'Who it’s for',                       parasIdx: [2] },
+  { title: 'Coverage',                           parasIdx: [3] },
+  { title: 'Data Pipeline',                      parasIdx: [4] },
+  { title: 'Analytical Core',                    parasIdx: [5] },
+  { title: 'On-chain Modules',                   parasIdx: [6] },
+  { title: 'Narratives and News',                parasIdx: [7] },
+  { title: 'Cards and Discipline',               parasIdx: [8] },
+  { title: 'Architecture',                       parasIdx: [9] },
+  { title: 'Security and Privacy',               parasIdx: [10] },
+  { title: 'Forum and QCoin Mining',             parasIdx: [11] },
+  { title: 'Exchange and Recommendations',       parasIdx: [12] },
+  { title: 'QCoin Economy and L7 Chain',         parasIdx: [13] },
+  { title: 'Payment, Localization, Roadmap',     parasIdx: [14] }
+],
+
+about_bullets: [
+  'Situational awareness: trend, impulse, volatility, liquidity',
+  'Cross-exchange normalization, latency-aware feature weighting',
+  'On-chain flows, holder concentrations, bridges, MEV hints',
+  'Narrative feed with translation and trust/novelty assessment',
+  'Cards: amplitude (quantiles), horizons, SL/TP, confidence',
+  'Indicator ensembles + regime filters + behavioral factors',
+  'API/SDK and webhooks for automation without “magic”',
+  'Graceful degradation and fallback sources under peak load',
+  'Non-custodial security: roles, audit, encryption',
+  'Forum: QCoin mining, quests, media posting with AI scoring',
+  'VIP+: X2 in time and quests, priority in rankings and limits',
+  'Exchange recommendations already available; execution core coming soon',
+  'NowPayments: instant activation, status synchronization',
+  'L7 blockchain: priority withdrawal queues and early roles',
+  '7 languages, unified access via web and Telegram MiniApp'
+],
+
+tg_button: 'Telegram',
+
+
+/* ===== EXCHANGE (extended description) ===== */
+exchange_title: 'Exchange (in development)',
+exchange_sub:
+  `Quantum L7 Exchange is a multi-chain, plausibly explainable next-generation trading platform,
+combining CEX/DEX liquidity, AI recommendations, and institutional-grade data infrastructure into a unified computational fabric.
+We process 87 TB of market histories and over 37 billion historical candles across all major networks and venues, normalize ticks,
+order book depth, and derivative specifications, bringing the market to a single decision-making standard. The goal is not "yet another exchange,"
+but an execution circuit with provable logic: hypothesis → test → evidence → trade, with transparent risk limiters and traceable audit.`,
+
+exchange_sections: [
+  {
+    title: 'Vision: next-generation L7 Exchange',
+    paras: [
+      `L7 Exchange is an agent-based pipeline where autonomous L7 agents consume market feeds, on-chain events, news, and behavioral microstructure signals,
+synchronize them in time, and output explainable recommendations (BUY/SELL/HOLD) with probability,
+amplitude, horizon, and risk context (liquidity, spread, dispersion, anomalies). For the user, this means
+decision reproducibility: each signal card is accompanied by a log of factors, model versions, and links to primary sources.`,
+      `Identity — through non-custodial wallets (we do not store private keys or seed phrases). Access rights,
+quotas, and limits are synchronized between the web interface and MiniApp. Execution of actions — only within user-defined
+limiters and with sufficient model confidence. The platform principle is provability, not a “black box.”`,
+      `Institutional-grade data: 87 TB of histories, 37+ billion candles, contract and symbol unification,
+latency-aware stream processing, gap cleaning, accounting for splits and derivative specifics. On top — ensembles of 200+ indicators
+(RSI/ADX/ATR/VWAP/OBV/Ichimoku/volume clusters, regime filters, etc.), behavioral features, and micro-imbalance statistics.`,
+      `H2 2026 — target window for public launch of the L7 Exchange core along with the next-generation L7 blockchain
+(inter-network coordination layer). At launch — cross-exchange routing, explainable auto-execution,
+and later — expansion toward on-chain clearing and native smart access rights.`,
+    ],
+  },
+
+  {
+    title: 'Routing and liquidity',
+    paras: [
+      `The smart router simultaneously scans liquidity on CEX/DEX, models slippage, fees, and delays,
+selects the venue/split route, and controls execution quality via target metrics (expected fill, adverse selection,
+mark-out over N seconds/minutes). In split mode, orders are fragmented and distributed across pools/books to minimize impact.`,
+      `Latency matters: we support cancel/replace, timeouts, “kill-switch,” partial take-profit rules,
+and reactions to spread dispersion spikes. In arbitrage scenarios, tick synchronization windows and low-latency connections are used.`,
+      `Market microstructure: we analyze order imbalances, hidden volume spikes, level-by-level liquidity,
+the influence of news/on-chain events, behavior of “aggressive” prints, and slippage probability relative to notional size.`,
+    ],
+  },
+
+  {
+    title: 'Risk and control',
+    paras: [
+      `Global and instrument-level limits: by notional, portfolio share, daily/weekly drawdown, leverage, and concentration.
+Execution profiles (conservative/balanced/aggressive) and minimum required model confidence. All triggers are transparently described
+and logged for audit. Every action is explainable: reason, input data, model versions, and execution parameters.`,
+      `Conditional orders (stop/stop-limit), time-in-force (GTC/IOC/FOK), partial take-profit directives, dynamic stop corridors
+by volatility regime (ATR-like), “circuit-breaker” during anomalies, night “silences,” and event blocks (e.g., high-impact news).`,
+      `Anti-pump and anti-spike: extra checks of spread/liquidity, deviation thresholds from fair price, ban on “averaging into the abyss,”
+emergency forced de-escalation level when the environment becomes “not suitable for trading.”`,
+    ],
+  },
+
+  {
+    title: 'Analytics and explainability',
+    paras: [
+      `AI-Box for each symbol/TF displays confidence level, decision factors (from relative position to VWAP/bands
+to RSI/volume cluster regimes), amplitude and historical horizons (quantiles), and recommended TP/SL.
+Presentation is compact but verifiable: numbers, not metaphors.`,
+      `Explainability by design: cause ➜ effect. The card contains factor weights, links to sources,
+snapshot of books/volumes, and “what-if” mini-simulations. The goal is to give the trader a transparent decision skeleton
+that can be reproduced and challenged.`,
+      `News/narratives: multilingual parsing, translation, deduplication, AI tonality, source trust, and correlation with price reaction.
+This is not “noise” but context for assessing scenario probability and execution windows.`,
+    ],
+  },
+
+  {
+    title: 'Portfolio, reporting, and attribution',
+    paras: [
+      `Portfolio panels with PnL attribution: decomposition by alpha sources, market regimes, symbols, risk budgets,
+and model decisions. “Mark-out” and impact metrics are calculated separately to distinguish “luck” from systematic performance.`,
+      `Trade journals, export, reports, APIs for integrations. Research reproducibility: backtests and “replay”
+on historical streams directly over the chart. “Strategy templates” and “one-click” deployment with limiters.`,
+      `Team modes (roadmap): roles, permissions, parameter coordination, centralized reports,
+white-label and private deployments for enterprise.`,
+    ],
+  },
+
+  {
+    title: 'Data and network infrastructure',
+    paras: [
+      `Feed unification: cross-exchange aggregation, normalization of ticks and depth to a common schema, gap filling,
+handling of splits and contract changes. On top — ensembles of 200+ indicators, behavioral/regime filters,
+and microstructural features. Historical layer — 87 TB, over 37 billion candles.`,
+      `On-chain layer: address graphs, holder concentration, liquidity inflows/outflows, bridge movements, basic MEV risks.
+Public blockchains are not personal data; operational logs (within legal limits) help
+ensure reliability and incident investigation.`,
+      `Network stack: optimized connections to liquidity and market data providers, degradation strategy
+without losing critical functions, hot/warm caches, prioritization of VIP processing channels. All computation stages are traceable.`,
+    ],
+  },
+
+  {
+    title: 'Security and compliance',
+    paras: [
+      `Non-custodial model: keys remain with the user, authorization — by signature. Role-based access,
+minimization of personal data, encryption “in transit” and “at rest,” anti-fraud/anti-sybil pipelines.
+Action logging for audit and reproducibility.`,
+      `Regulatory context: we provide analytics and tools, not financial advice.
+Subscription payment via NowPayments with on-chain confirmation — automatic activation of limits/rights without manual “checks.”
+Privacy and logging policies are transparent and regularly updated.`,
+      `Execution limiters are discipline, not guarantee. The market is volatile; decisions and compliance with jurisdictional
+requirements rest on the user. We provide frameworks, metrics, and explainability so that risk is conscious.`,
+    ],
+  },
+
+  {
+    title: 'Roadmap and launch',
+    paras: [
+      `H2 2026: public launch of the L7 Exchange core and next-generation L7 blockchain — inter-network coordination layer
+designed to simplify clearing and access rights at the smart contract level, as well as improve execution observability.
+Main focus — liquidity routing, explainable auto-execute, portfolio attribution, and team modes.`,
+      `QCoin — the internal economy of the L7 ecosystem. The roadmap includes QCoin’s role in payment and incentive processes
+within the ecosystem. The goal is a unified “settlement layer” between analytics, execution, and user services.`,
+      `Before the public release — extended betas, stress tests, stability reports, and open logged results
+on execution quality and latency. Transparency is the core of trust.`,
+    ],
+  },
+],
+
+roadmap: 'Roadmap',
+
+ex_bullets: [
+  'Smart CEX/DEX routing with slippage control, splits, and latency-aware execution',
+  'Explainable AI signals: probability, amplitude, horizons, confidence factors, TP/SL',
+  'Portfolio panels: PnL attribution, risk budgets, “mark-out,” impact metrics',
+  'Backtests and replays on historical streams directly on the chart',
+  'Risk limiters: limits, time-in-force, kill-switch, dynamic stop corridors',
+  'Data unification: 87 TB of histories, 37+ billion candles, 200+ indicators and regime filters',
+  'Wallet connection, non-custodial model, and logged action audit',
+  'H2 2026: public launch of L7 Exchange core and next-generation L7 blockchain',
+],
+
 
     /* ===== SUBSCRIBE / CONTACT (кратко) ===== */
     subscribe_title: 'Subscription Plans',
@@ -284,169 +414,306 @@ select the venue or a split route, and respect user risk limits.`,
     auth_signin: 'Авторизация',
     nav_support: 'Поддержка',
     select_symbol_tf: "Выбрать символ / TF",
-    /* ===== HERO / HOME (кратко) ===== */
-    hero_title: 'Quantum L7 AI',
-    hero_subtitle:
-      'Космический интеллект для аналитики, исследования, альфа-сигналы и исполнение под защитой. Авторизация кошельком, уровни PRO/VIP.',
-    hero_cta: 'Начать в Telegram',
-    hero_learn_more: 'Подробнее',
-    marquee: 'ИИ • Блокчейн • Автоматизация • Квант • Исследования • Агенты • Альфа • Все права защищены ',
+/* ===== HERO / HOME (кратко) ===== */
+hero_title: 'Добро пожаловать в Quantum L7 AI Вселенную',
+hero_subtitle:
+  'Quantum L7 AI — это не просто платформа, а целая кибернетическая вселенная принятия решений: мультичейн-данные институционального класса, автономные L7-агенты, ончейн-пайплайны и торговая маршрутизация работают как единый цифровой организм. Мы стыкуем Web-MiniApp, Telegram MiniApp и QL7 AI Bot, форум с экономикой QCoin и глобальную биржу ( ядро в финальной стадии ), чтобы дать мгновочные альфа-сигналы, дисциплинированные окна входа/выхода, автоматизированное исполнение и прозрачный риск-контур. Авторизация — через некостодиальные кошельки (ключи у вас), поддержка PRO/VIP-уровней, приоритетные лимиты и снятие квот. В основе — юридически выверенная архитектура Web3, кросс-эксчендж-агрегация ликвидности, поведенческие и микроструктурные модели, а также реплицируемые ресёрч-пайплайны с логом гипотеза → тест → свидетельства. Это инфраструктура нового поколения для тех, кто работает в темпе рынка и требует доказуемости, скорости и точности.',
+hero_cta: 'Начать в Telegram',
+hero_learn_more: 'Подробнее',
+marquee: 'ИИ • Квантовые агенты • Ончейн-аналитика • Криптобиржа (ядро) • Форум • QCoin Майнинг • Автоисполнение • Risk-контур • Маршрутизация ликвидности • Метавселенная Web3 • API/SDK • Enterprise • Все права защищены',
 
-    home_blocks: [
-      {
-        title: 'Почему Quantum L7 AI',
-        paras: [
-          `Мы соединяем мультимодульные модели, автономных L7-агентов и ончейн-пайплайны.
-Система авторизует через некостодиальные кошельки, ключи остаются у пользователя, а сырые данные превращаются в решения: от поиска идей до исполнения.`,
-          `Наш принцип — доказуемость: гипотеза → тест → свидетельства.
-Агенты читают документы, ходят в API и блокчейны, собирают отчёты уровня аналитика с графиками и ссылками.`,
-        ],
-      },
-      {
-        title: 'Что вы получаете',
-        bullets: [
-          'Поиск альфы из отобранных on-chain и off-chain источников',
-          'Ранжирование сигналов, уверенность и риск-оверлеи',
-          'Бэктесты, ноутбуки и воспроизводимость',
-          'Инсайты по портфелю, атрибуция PnL и детекция режимов',
-          'Автоисполнение со страховками и аварийной остановкой',
-          'Онлайн-дашборды и оповещения',
-          'Приватные датасеты и коннекторы',
-          'API/SDK для команд и разработчиков',
-          'Аудит действий и управляемые права',
-          'Обучение и живые ресёрч-сессии',
-        ],
-      },
+home_blocks: [
+  {
+    title: 'Почему Quantum L7 AI',
+    paras: [
+      `Quantum L7 AI — кросс-платформенная экосистема: ИИ-ядро, автономные L7-агенты, ончейн-мониторинг, нормализованные маркет-фиды, социальная сеть форума и экономика QCoin объединены в единую вычислительную ткань. Каждый артефакт — транзакция, новостной нарратив, пост, график ликвидности — попадает в общий контур данных и становится сигналом к действию.`,
+      `Агенты L7 автономно читают документы и API, наблюдают блокчейны и стаканы, классифицируют поведенческие паттерны, оценивают режимы рынка и выводят проверяемые гипотезы. Результат — не «чёрный ящик», а объяснимая карточка: вероятность сценария, амплитуда, горизонты, SL/TP, факторы уверенности и ссылки на первоисточники.`,
+      `Авторизация — через некостодиальные кошельки: мы не храним приватные ключи, а подтверждаем владение адресом. Права доступа и квоты синхронизируются между Telegram MiniApp, веб-интерфейсом и ботом QL7, статус VIP размечает границы лимитов и пропускает в приоритетные каналы обработки.`,
+      `Маркет-ядро строится на кросс-биржевой агрегации, унификации символов/контрактов и latency-aware обработке фидов. Мы совмещаем институт-уровень историй с потоками реального времени, чтобы отслеживать дисперсию спреда, ударные объёмы, баланс заявок, MEV-риски и эффект новостного импульса.`,
+      `Принцип платформы — доказуемость: гипотеза → тест → свидетельства. Каждый расчёт логируется, метрики воспроизводимы, а арбитраж «шума» отсекается фильтрами режимов. Так мы превращаем сырые данные в дисциплинированные решения, а интуицию — в проверяемую тактику.`,
+      `Форум встраивается в контур: контент проходит AI-скоринг (качество, вовлечённость, анти-спам/anti-sybil), а активность маппится в экономику QCoin. Это не «соцсеть ради лайков», а целевая когнитивная шина, где знания и вклад конвертируются в токенизированную ценность.`,
     ],
+  },
 
-    /* ===== ABOUT ===== */
-    about_title: 'О Quantum L7 AI',
-    about_paragraphs: [
-      `Quantum L7 AI — компактный стек для исследований и сигналов по крипторынку. Наша задача проста: убрать шум, показать реальную структуру рынка и помочь действовать дисциплинированно, а не импульсивно.`,
-
-      `L7 — это агенты прикладного уровня. Эти агенты читают документы, обращаются к API, наблюдают блокчейны и стаканы, запускают небольшие эксперименты и собирают объяснимые результаты. Вы получаете не «чёрный ящик», а гипотезы, проверки и понятный след причин появления рекомендации.`,
-
-      `Для кого это: трейдерам — быстрая ситуационная осведомлённость; исследователям — воспроизводимые исследования; командам и разработчикам — чистый API и стабильная шина данных.`,
-
-      `Покрытие. Мы собираем рыночные данные с крупных CEX и ведущих DEX-агрегаторов, добавляем справочники (символы, соответствия, метаданные контрактов) и приводим всё к единой схеме. Цель — сопоставимость площадок.`,
-
-      `Пайплайн данных. Потоки нормализуются, разрывы автоматически закрываются, сплиты и изменения контрактов учитываются, деривативы помечаются. Большая история позволяет определять режимы вместо подгонки под случайные колебания.`,
-
-      `Аналитическое ядро. Индикаторов более двухсот, но важна не численность, а ансамбли, взвешивание и контекст. Классические семейства (RSI, Stochastic, MFI, CCI, ADX/DI, EMA/SMA/WMA, MACD, ATR, полосы Боллинджера, VWAP, OBV, базовые линии Ichimoku) комбинируются с фильтрами режимов и учётом ликвидности.`,
-
-      `Ончейн-модули. Мы анализируем переводы, ввод и вывод ликвидности, перемещения через мосты, распределение держателей и базовые признаки MEV. Сигналы понижаются в весе в тонких или манипулируемых зонах.`,
-
-      `Лента новостей и исследований. Многоязычные источники автоматически переводятся, индексируются и дедуплицируются. Тональность, новизна и надёжность источника формируют лёгкую «оценку нарратива» рядом с ценовыми метриками.`,
-
-      `Карточки сигналов. На каждой — ожидаемая амплитуда и горизонт по истории, уровень уверенности, контекст ликвидности и быстрые индикаторы. Воспринимайте карточку как маяк для сценариев и управления риском, а не как обещание.`,
-
-      `Дисциплина. Мы проектируем инструменты под предварительное принятие правил: плейбуки, коридоры волатильности, динамические стопы и шаблоны расчёта размера позиции. Система мягко подталкивает определить «инвалидацию» до входа, а не после.`,
-
-      `Архитектура. Сервисы данных и агенты — небольшие процессы на TypeScript/Python за стабильным API. Сайт на Next.js, живые обновления — через WebSocket. Кэши и резервные источники поддерживают отзывчивость даже в пиковые моменты.`,
-
-      `Безопасность и приватность. Мы некостодиальны; ключи остаются у пользователя. Действия ограничены ролями и логируются. Секреты хранятся на сервере; персональные данные минимизируются и шифруются при передаче и хранении.`,
-
-      `Дорожная карта. Публичные ноутбуки и бэктесты, шаблоны стратегий, портфельный движок с атрибуцией, более умная маршрутизация между площадками, DeFi-коннекторы и опциональный автопилот с жёсткими ограничителями и человеческими чекпоинтами.`,
-
-      `Сообщество и поддержка. Публикуем еженедельные заметки, ведём Telegram-канал и открыты к конкретным запросам команд. Обратная связь напрямую формирует бэклог: полезные функции выходят в релиз, а блестящие, но бесполезные — нет.`,
-
-      `Важно: подписки и привязка кошельков выполняются в нашем Telegram-боте. Сайт сосредоточен на аналитике, визуализации и документации. Материалы не являются инвестиционной рекомендацией.`,
+  {
+    title: 'Что вы получаете',
+    bullets: [
+      'Квантовую аналитику нового поколения: симбиоз AI-интеллекта, ончейн-метрик и микроструктурных признаков рынка.',
+      'Альфа-сигналы с вероятностью исполнения, амплитудой и горизонтом, плюс прозрачное обоснование факторов уверенности.',
+      'Нормализованное кросс-биржевое ядро данных: унификация символов/контрактов, ликвидности, спредов и частоты тиков.',
+      'Ончейн-мониторинг: распределение держателей, потоки через мосты, ликвидность CEX/DEX, базовые MEV-паттерны.',
+      'Глобальная биржа (ядро в разработке): маршрутизация ликвидности, защита от проскальзывания, контекстная оценка риска.',
+      'Auto-execute: исполнение с fail-safe триггерами, динамическими стопами и аварийной остановкой при аномалиях.',
+      'Портфельные панели: атрибуция PnL, риск-бюджеты, режимы волатильности, коридоры и дисциплина размера позиции.',
+      'Реплицируемые исследования: бэктесты, ноутбуки, визуальные отчёты, what-if-сценарии и экспозиция допущений.',
+      'Лента нарративов: AI-тональность, эмбеддинги, доверие источников и связывание новостей с ценовыми метриками.',
+      'Форум-экономика: AI-модерация, QCoin-майнинг за вклад и активность, медиапостинг с алгоритмическим скорингом.',
+      'VIP-программа: снятие дневных квот в AI Box, расширенные лимиты, приоритетная обработка и X2 по QCoin для квестов/времени.',
+      'Интеграции: Telegram MiniApp, веб, бот QL7; единая сессия, общий статус и согласованные права доступа.',
+      'API/SDK/Webhooks: безопасные интеграции, sandbox-режим, event-driven архитектура для команд и автоматизации.',
+      'Мультичейн-стек: Ethereum, BSC, Polygon, Solana, TON, Avalanche и др.; мостирование и учёт сетевой специфики.',
+      'Юридически выверенная Web3-архитектура: логирование, разделение ролей, криптографическая верификация и приватность.',
     ],
-    about_sections: [
-      { title: 'Что такое Quantum L7 AI',           parasIdx: [0] },
-      { title: 'L7-агенты, а не «чёрный ящик»',     parasIdx: [1] },
-      { title: 'Для кого',                          parasIdx: [2] },
-      { title: 'Покрытие',                          parasIdx: [3] },
-      { title: 'Пайплайн данных',                   parasIdx: [4] },
-      { title: 'Аналитическое ядро',                parasIdx: [5] },
-      { title: 'Ончейн-модули',                     parasIdx: [6] },
-      { title: 'Лента новостей и исследований',     parasIdx: [7] },
-      { title: 'Карточки сигналов',                 parasIdx: [8] },
-      { title: 'Дисциплина',                        parasIdx: [9] },
-      { title: 'Архитектура',                       parasIdx: [10] },
-      { title: 'Безопасность и приватность',        parasIdx: [11] },
-      { title: 'Дорожная карта',                    parasIdx: [12] },
-      { title: 'Сообщество и поддержка',            parasIdx: [13] },
-      { title: 'Важно',                             parasIdx: [14] },
-    ],
+  },
 
-    about_bullets: [
-      'Быстрая ситуационная осведомлённость: состояние рынка, тренд, импульс, волатильность',
-      'Кросс-биржевая нормализация и «ликвидностно-осознанное» взвешивание',
-      'Ончейн-потоки: распределение держателей, ввод/вывод ликвидности, перемещения через мосты, базовые признаки MEV',
-      'Новостная лента с переводом, поиском по эмбеддингам и оценкой надёжности источников',
-      'Ожидаемая амплитуда и горизонт на каждой карточке (квантили по истории)',
-      'Ансамбли индикаторов, фильтры режимов и обучаемые веса',
-      'Бэктесты и ноутбуки для воспроизводимых исследований (roadmap)',
-      'Портфельный модуль: риск-бюджеты, ограничения, атрибуция PnL (roadmap)',
-      'Смарт-маршрутизация по CEX/DEX; защита от задержек и проскальзывания (roadmap)',
-      'API/SDK для команд и автоматизации; простые вебхуки',
-      'Enterprise-опции: SSO, частные деплои, SLA и окна изменений',
-      'Некостодиальная модель безопасности: роли и аудит действий',
-      'Надёжность: уровни кэширования, плавная деградация, резервные источники',
-      'Чистый интерфейс, который подчёркивает решения, а не шум',
-      'Сценарное мышление: заранее заданная инвалидация и стоп-фреймворки',
-      'Исследовательские артефакты: графики, таблицы, краткие отчёты со ссылками',
-      'Поиск по эмбеддингам по вашим заметкам и публичным источникам (по желанию)',
-      'Расширяемые коннекторы: цены, ончейн, исследования, социальные сигналы',
-      'Человек в контуре для полуавтоматизированных процессов',
-      'Чёткие границы: сигналы — инструмент, а не гарантия',
+  {
+    title: 'Инфраструктура и данные',
+    paras: [
+      `Маркет-данные: объединяем исторические и потоковые фиды CEX/DEX, приводим к общей схеме, закрываем разрывы, учитываем сплиты и особенности деривативов. Поверх — ансамблевые индикаторы (RSI/ADX/ATR/VWAP/OBV/Ichimoku/объёмные кластеры), фильтры режимов и контекст ликвидности.`,
+      `Ончейн-слой: адресные графы, перемещения ликвидности, концентрации держателей, мостовые события, базовые MEV-риски. Публичные блокчейны — не персональные данные, но мы аккуратно логируем запросы и отладочные ID для надёжности и расследования инцидентов.`,
+      `Нарративы и новости: мультиязычная индексация, перевод, дедупликация, скоринг источников, оценка новизны и ковариаций с ценой; результат — лёгкая числовая надстройка рядом с ценой и объёмом, которая помогает отличить шум от значимого импульса.`,
+      `Хранилища и кэш: разделение потоков на горячие/тёплые, деградация без потери критичных функций, приоритизация каналов для VIP и системных задач. Все вычислительные этапы имеют трассировку, контроль версий артефактов и воспроизводимость.`,
     ],
+  },
 
-    tg_button: 'Телеграм',
+  {
+    title: 'Безопасность и соответствие',
+    paras: [
+      `Некостодиальная модель: приватные ключи и сид-фразы остаются у пользователя. Авторизация — подписью; доступы — по ролям, журналируются и проверяются. Минимизация персональных данных, шифрование в транзите и на хранении, анти-fraud/anti-sybil пайплайны.`,
+      `Юридическая чистота: мы предоставляем аналитику и инструменты, а не финсоветы. Флоу оплаты через NowPayments с ончейн-подтверждением активирует подписку автоматически; статус синхронизируется между MiniApp/веб/ботом. Политики приватности и логирования — прозрачны и обновляются.`,
+      `Ограничители исполнения: sanity-checks, лимиты, аварийные стоп-триггеры и мониторинг аномалий. Это инструменты дисциплины, а не гарантия результата; трейдинг связан с риском, решения — на стороне пользователя.`,
+    ],
+  },
 
-    /* ===== EXCHANGE (расширенное описание) ===== */
-    exchange_title: 'Биржа (в разработке)',
-    exchange_sub:
-      `Живой неоновый холст: квант-волны, «созвездия» частиц и спираль-галактика.
-Далее: смарт-маршрутизация DEX/CEX, выбор площадки со слиппедж-контролем, latency-execution, авто-хедж и риск-лимиты.`,
-    exchange_sections: [
-      {
-        title: 'Видение: биржа нового поколения L7',
-        paras: [
-          `Это не просто график. Это агентный пайплайн L7, который поглощает рыночные данные, ончейн-события и сигналы стаканов,
-оценивает их и выдаёт объяснимые рекомендации (BUY/SELL/HOLD) с уверенностью и контекстом риска.`,
-          `Идентичность — через кошелёк; вычисления оркестрируют агенты. Ключи — у пользователя.
-Каждый шаг исследован и протоколируется: от открытия данных до исполнения.`,
-        ],
-      },
-      {
-        title: 'Маршрутизация и ликвидность',
-        paras: [
-          `Роутер сканирует ликвидность на DEX/CEX параллельно, оценивает слиппедж и комиссии,
-выбирает площадку или сплит-маршрут и соблюдает ваши риск-лимиты.`,
-          `Latency имеет значение: целимся в своевременность, поддерживаем cancel/replace-логику и аварийный kill-switch.`,
-        ],
-      },
-      {
-        title: 'Риск и контроль',
-        paras: [
-          `Лимиты по нотионалу, экспозиции и просадке. Conditional-ордера, time-in-force, минимальный порог уверенности для AI-сигналов.`,
-          `Страховки защищают от разгона. Любое действие объяснимо: причина, входные данные, версии моделей.`,
-        ],
-      },
-      {
-        title: 'Аналитика и объяснимость',
-        paras: [
-          `AI-бокс показывает уверенность и факторы: согласованность скользящих, отношение к VWAP, положение в полосах, режим RSI и др.`,
-          `Каждая рекомендация сопровождается TP/SL, рассчитанными по волатильности (ATR-подобно) и текущему режиму.`,
-        ],
-      },
-      {
-        title: 'Что дальше',
-        paras: [
-          `Портфель, атрибуция PnL, вклад факторов.`,
-          `Бэктесты и реплеи прямо на холсте, шаблоны стратегий и развёртывание в один клик.`,
-        ],
-      },
+  {
+    title: 'Интеграции: MiniApp • Бот • Форум • Биржа',
+    paras: [
+      `Telegram MiniApp и веб работают как зеркальные интерфейсы с единой сессией и правами. Бот QL7 — лёгкий вход в AI-канал и уведомления. Форум — не просто комьюнити: это когнитивная шина, где знания и вклад конвертируются в QCoin, а контент VIP проходит приоритетный AI-скоринг.`,
+      `Биржа (ядро в финальной стадии): маршрутизация ордеров, контекстная оценка проскальзывания, ончейн-исполнение там, где применимо, и расширенные режимы backtest/what-if для VIP. Интеграция с аналитикой даёт редкий эффект — сигнал знает, «как» он будет исполняться.`,
     ],
-    roadmap: 'Дорожная карта',
-    ex_bullets: [
-      'Смарт-маршрутизация со слиппедж-контролем и выбором площадки',
-      'Бэктесты, реплеи и объяснимые метрики',
-      'Подключение кошельков и мгновенная аналитика портфеля',
-      'Шаблоны стратегий и защитные барьеры',
+  },
+
+  {
+    title: 'VIP и экономика QCoin',
+    paras: [
+      `VIP снимает дневные квоты в AI Box, расширяет лимиты и приоритизирует обработку. На форуме VIP получает X2 множители по времени и квестам, золотой бейдж и увеличенный вес медиапостов (видео/изображения/аудио) в алгоритмическом скоринге. Активность, вклад и просмотры конвертируются в QCoin с учётом качества и вовлечённости.`,
+      `Оплата через NowPayments: как только on-chain подтверждение приходит, статус активируется мгновенно и распространяется на MiniApp/бот/веб. В дорожной карте — запуск L7-чейна: VIP — верхние слои priority-tier для распределений и очередей вывода QCoin, ранние роли валидаторов/стейкеров и повышенные лимиты.`,
     ],
+  },
+
+  {
+    title: 'Для команд и разработчиков',
+    bullets: [
+      'API/SDK/Webhooks с безопасной моделью токенов и ротацией ключей.',
+      'Event-driven интеграции, sandbox-окружения, коннекторы к ончейн/офчейн источникам.',
+      'White-Label и Enterprise-режимы: SSO, частные деплои, SLA, окна изменений.',
+      'Ноутбуки/бэктесты: экспорт артефактов, отчёты, воспроизводимость экспериментов.',
+      'Глубокие метрики приёмки фич и производительности для продуктовых команд.',
+    ],
+  },
+],
+
+
+/* ===== ABOUT ===== */
+about_title: 'О Quantum L7 AI',
+about_paragraphs: [
+  `Quantum L7 AI — это не просто «аналитика», а единый операционный контур принятия торговых решений и социального взаимодействия вокруг крипто-рынков. Ядро платформы объединяет Web-MiniApp (веб + Telegram), форумы с геймифицированным QCoin-майнингом и ИИ-ресёрч-движок, который снимает шум, выявляет структуру ликвидности и подсказывает дисциплинированные сценарии входа/выхода. Мы соединяем рыночную микро-структуру, ончейн-телееметрию, поведенческие паттерны и новостные нарративы в один согласованный, интерпретируемый слой — так, чтобы вам не приходилось «догонять» рынок, а можно было проектировать ход заранее.`,
+
+  `L7-агенты — это прикладные ИИ-модули, которые живут на данных. Они читают документы и ленты, запрашивают API, наблюдают блокчейны, стаканы и деривативы, прогоняют мини-эксперименты и выдают объяснимые артефакты: гипотезы, бэктест-снапшоты, контекстные индикаторы. Важна не «магия чёрного ящика», а трассируемость: из каждого вывода виден путь — какие признаки были учтены (ликвидность, спрэды, асимметрия, дисбалансы, импульсы, кластера объёмов), почему понижен вес в тонких/манипулируемых зонах и где проходит граница невалидности сценария.`,
+
+  `Для кого это. Трейдерам — быстрая ситуационная осведомлённость и управляемая частота сигналов без перегруза; исследователям — воспроизводимые пайплайны и чистые данные; командам — API/SDK, вебхуки и надёжная шина событий; билдер-сообществу — форумы, репутационные метрики и QCoin-экономика за вклад. VIP+ получает приоритетный ИИ-канал, медиапостинг, ускоренные квоты и «золотой» статус, который влияет на выдачу и лимиты.`,
+
+  `Покрытие. Мы агрегируем данные с ведущих CEX и DEX-агрегаторов, нормализуем символы и контракт-метаданные, унифицируем частоты тиков и глубину стаканов. Вводим единые справочники, мэппинги пар/сетей/маркетов, помечаем деривативы, учитываем сплиты, делистинги и миграции контрактов. Цель — сопоставимость площадок и сетей: один слой абстракции, чтобы сравнивать ликвидность, издержки, задержки и «реальную» доступность объёмов.`,
+
+  `Пайплайн данных. Потоки очищаются, пропуски реставрируются, аномалии маркируются, контуры задержек калибруются. История глубока — это даёт возможность выявлять режимы, а не натягивать указку на случайный всплеск. Мы добавляем ончейн-маршруты, переводные мосты, распределения держателей, признаки MEV-активности и связываем это с рыночными метриками. Итог — ансамбли признаков, устойчивые к «пузырям шума» и локальным аномалиям.`,
+
+  `Аналитическое ядро. Сотни индикаторов — лишь палитра. Главное — ансамбли и контекст: RSI/RSX, Stochastic, CCI/MFI, ADX/DI, ATR и полосы, EMA/SMA/WMA, MACD/Signal/Histogram, VWAP/POC/Value-Area, объёмные профили, дисбалансы Bid/Ask и свипы ликвидности. Мы смешиваем классические семейства с фильтрами режимов, евристиками по ликвидности и поведению, а также с ончейн-маркером притока/оттока. Каждая карточка — это не «совет», а компас: амплитуда по истории, горизонт реализации, уверенность, предпосылки и границы инвалидации.`,
+
+  `Ончейн-модули. Мы отслеживаем переводные кластера, мосты, накопление/распределение, концентрацию крупных держателей, базовые MEV-паттерны и аномальные маршруты. В тонких зонах ликвидности, при всплесках фандинга или спрэда вес сигналов снижается; при подтверждении несколькими доменами (спот, деривативы, ончейн) — повышается. Так минимизируется «ложная уверенность» там, где рынок хрупок.`,
+
+  `Нарративы и новости. Мультиязычная лента переводится, дедуплицируется и индексируется по эмбеддингам. Мы оцениваем новизну, доверие источника, соотношение «ритуал/суть», тональность и «тягучесть» темы во времени. Рядом с ценовыми и ончейн-метриками появляется лёгкая «карта нарратива»: чем драйвится внимание, где регуляторные риски, что усиливает волатильность, а что сдувается.`,
+
+  `Карточки сигналов и дисциплина. На карточке — ожидаемая амплитуда (квантили), временной горизонт, SL/TP-маркеры, быстрая сводка ликвидности и набор триггеров, которые должны сойтись. Система подталкивает к дисциплине: до входа вы видите инвалидацию, риск-единицу и динамический коридор волатильности; после — получаете проверочные чек-поинты и условия снятия риска.`,
+
+  `Архитектура. Лёгкие сервисы на TypeScript/Python за стабильным API; сайт — на Next.js с живыми слоями через WebSocket. Кэш-уровни и резервные источники обеспечивают плавную деградацию в пиках. API/SDK и вебхуки дают автоматизацию, а роли и аудит — безопасные границы. MiniApp работает в вебе и в Telegram, чтобы вы могли вести рынок в одном потоке: графики, форум, кошелёк, бот — без трения.`,
+
+  `Безопасность и приватность. Некостодиально: приватные ключи/seed не запрашиваем и не храним. Роли ограничивают доступ, действия логируются, персональные данные минимизируются и шифруются в передаче и хранении. Анти-sybil/anti-fraud пайплайны защищают экономику QCoin и репутационные механики форума; валидация сессий бережно, но строго поддерживает целостность доступа.`,
+
+  `Форум и QCoin-майнинг. Форум — это не «соцсеть», а производственная линия знаний. Каждые 4 часа вы подтверждаете активность и лочите награду; посты с медиа (видео/изображения/аудио) проходят скоринг QuantumLCM-AI (качество, вовлечённость, анти-спам/анти-sybil) и конвертятся в QCoin. VIP+ получает X2 по времени и X2 по квестам, приоритет в выдаче, расширенные лимиты на медиа и ускоренную модерацию. Репутация и вклад — не пустой шум, а экономически значимая величина.`,
+
+  `Биржа (в разработке) и рекомендации. Торговое ядро и исполнение подключаются поэтапно; уже доступны ИИ-рекомендации по символам/таймфреймам, глубина стакана и профиль ликвидности. Мы проектируем smart-routing, защиту от задержек/проскальзывания, портфельные ограничения и атрибуцию PnL. VIP+ получает доступ к экспериментальным индикаторам, режимам what-if/backtest и расширенным горизонтам анализа.`,
+
+  `Экономика QCoin и L7-блокчейн. QCoin — топливо знаний и полезного трафика. Будущий L7-chain — это слой, который связывает кросс-сетевые активы, банки и фин-инфраструктуру в универсальный маршрутизатор ценности. Наша цель — чтобы QCoin стал нейтральной расчётной единицей в экосистеме, с прозрачной эмиссией/сжиганием и честной очередью вывода. VIP+ имеет повышенный приоритет на распределения и ранний доступ к стейкингу/валидаторским ролям.`,
+
+  `Оплата и активация. Подписка VIP+ оформляется через NowPayments: крипто-оплата (USDT и др.), вебхук мгновенно активирует доступ и синхронизирует статус между MiniApp, ботом и форумом. Никаких скриншотов и ручных проверок. Интерфейс доступен на 7 языках; связка кошелька — бесшовная. Вы платите за скорость, интерпретируемость и экономику, в которой вклад вознаграждается.`,
+
+  `Комьюнити и дорожная карта. Мы публикуем еженедельные заметки, открываем беты альфа-фич, принимаем целевые запросы от команд. В бэклоге: портфельный движок с риск-бюджетами, расширенная смарт-маршрутизация CEX/DEX, публичные ноутбуки/бэктесты, «полуавтопилот» под контролем человека. Всё, что повышает дисциплину и снижает трение, идёт в релиз; то, что блестит, но не помогает — нет. Материалы — образовательные/аналитические, не финсовет.`
+],
+
+about_sections: [
+  { title: 'Что такое Quantum L7 AI',           parasIdx: [0] },
+  { title: 'L7-агенты, а не «чёрный ящик»',     parasIdx: [1] },
+  { title: 'Для кого',                          parasIdx: [2] },
+  { title: 'Покрытие',                          parasIdx: [3] },
+  { title: 'Пайплайн данных',                   parasIdx: [4] },
+  { title: 'Аналитическое ядро',                parasIdx: [5] },
+  { title: 'Ончейн-модули',                     parasIdx: [6] },
+  { title: 'Нарративы и новости',               parasIdx: [7] },
+  { title: 'Карточки и дисциплина',             parasIdx: [8] },
+  { title: 'Архитектура',                       parasIdx: [9] },
+  { title: 'Безопасность и приватность',        parasIdx: [10] },
+  { title: 'Форум и QCoin-майнинг',             parasIdx: [11] },
+  { title: 'Биржа и рекомендации',              parasIdx: [12] },
+  { title: 'Экономика QCoin и L7-чейн',         parasIdx: [13] },
+  { title: 'Оплата, локализация, дорожная карта', parasIdx: [14] }
+],
+
+about_bullets: [
+  'Ситуационная осведомлённость: тренд, импульс, волатильность, ликвидность',
+  'Кросс-биржевая нормализация, latency-aware взвешивание признаков',
+  'Ончейн-потоки, концентрации держателей, мосты, MEV-намёки',
+  'Нарративная лента с переводом и оценкой доверия/новизны',
+  'Карточки: амплитуда (квантили), горизонты, SL/TP, уверенность',
+  'Ансамбли индикаторов + фильтры режимов + поведение',
+  'API/SDK и вебхуки для автоматизации без «магии»',
+  'Плавная деградация и резервные источники в пике нагрузки',
+  'Некостодиальная безопасность: роли, аудит, шифрование',
+  'Форум: QCoin-майнинг, квесты, медиапостинг с AI-скорингом',
+  'VIP+: X2 по времени и квестам, приоритет в выдаче и лимитах',
+  'Рекомендации на бирже уже доступны; ядро исполнения на подходе',
+  'NowPayments: мгновенная активация, синхронизация статуса',
+  'L7-блокчейн: приоритетные очереди вывода и ранние роли',
+  '7 языков, единый доступ в вебе и Telegram MiniApp'
+],
+
+tg_button: 'Телеграм',
+
+
+/* ===== EXCHANGE (расширенное описание) ===== */
+exchange_title: 'Биржа (в разработке)',
+exchange_sub:
+  `Quantum L7 Exchange — это многоцепочная, правдоподобно объяснимая торговая платформа нового поколения,
+объединяющая CEX/DEX-ликвидность, ИИ-рекомендации и институциональную инфраструктуру данных в единую вычислительную ткань.
+Мы обрабатываем 87 ТБ рыночных историй и более 37 млрд исторических свечей по всем крупным сетям и площадкам, нормализуем тики,
+глубину стаканов и деривативные спецификации, приводя рынок к одному стандарту принятия решений. Цель — не «ещё одна биржа»,
+а контур исполнения с доказуемой логикой: гипотеза → тест → свидетельства → сделка, с прозрачными ограничителями риска и трассируемым аудитом.`,
+
+exchange_sections: [
+  {
+    title: 'Видение: биржа нового поколения L7',
+    paras: [
+      `L7 Exchange — это агентный пайплайн, где автономные L7-агенты потребляют маркет-фиды, ончейн-события, новости и поведенческие сигналы
+микроструктуры, синхронизируют их по времени и выдают объяснимые рекомендации (BUY/SELL/HOLD) с вероятностью,
+амплитудой, горизонтом и контекстом риска (ликвидность, спред, дисперсия, аномалии). Для пользователя это означает
+воспроизводимость решений: каждая карточка сигнала сопровождается логом факторов, версиями моделей и ссылками на первоисточники.`,
+      `Идентичность — через некостодиальные кошельки (мы не храним приватные ключи и seed-фразы). Права доступа,
+квоты и лимиты синхронизируются в веб-интерфейсе и MiniApp. Исполнение действий — только в пределах заданных вами
+ограничителей и при достаточном уровне уверенности модели. Принцип платформы — доказуемость, а не «чёрный ящик».`,
+      `Данные институционального уровня: 87 ТБ историй, 37+ млрд свечей, унификация контрактов и символов,
+latency-aware обработка потоков, очистка разрывов, учёт сплитов и специфик деривативов. Поверх — ансамбли из 200+ индикаторов
+(RSI/ADX/ATR/VWAP/OBV/Ichimoku/объёмные кластеры, режимные фильтры и др.), поведенческие признаки и статистика микро-имбалансов.`,
+      `H2 2026 — целевое окно публичного запуска ядра L7 Exchange вместе с L7-блокчейном нового поколения
+(межсетевой уровень согласования). На старте — кросс-биржевая маршрутизация, объяснимое автоисполнение,
+а затем — расширение в сторону ончейн-клиринга и нативных смарт-прав доступа.`,
+    ],
+  },
+
+  {
+    title: 'Маршрутизация и ликвидность',
+    paras: [
+      `Смарт-роутер параллельно сканирует ликвидность на CEX/DEX, моделирует слиппедж, комиссии и задержки,
+подбирает площадку/сплит-маршрут и контролирует качество исполнения через целевые метрики (expected fill, adverse selection, 
+mark-out через N секунд/минут). В режиме сплита заявки дробятся и разносятся по пулам/книгам, чтобы минимизировать воздействие.`,
+      `Latency имеет значение: поддерживаем cancel/replace, тайм-ауты, «kill-switch», правила частичной фиксации и
+реакцию на скачки дисперсии спреда. В арбитражных сценариях используются окна синхронизации тиков и соединения с низкой задержкой.`,
+      `Маркет-микроструктура: анализируем дисбаланс заявок, всплески скрытого объёма, ликвидность по уровням,
+влияние новостей/ончейн-событий, поведение «агрессивных» принтов и вероятность проскальзывания по размеру нотионала.`,
+    ],
+  },
+
+  {
+    title: 'Риск и контроль',
+    paras: [
+      `Глобальные и инструментальные лимиты: по нотионалу, доле портфеля, дневной/недельной просадке, плечу, концентрации.
+Профили исполнения (conservative/balanced/aggressive) и минимальная требуемая уверенность модели. Все триггеры прозрачно описаны
+и логируются для аудита. Любое действие объяснимо: причина, входные данные, версии моделей и параметры исполнения.`,
+      `Conditional-ордера (stop/stop-limit), time-in-force (GTC/IOC/FOK), директивы частичной фиксации, динамические стоп-коридоры
+по режиму волатильности (ATR-подобные), «circuit-breaker» при аномалиях, ночные «тишины» и блоки событий (например, high-impact новости).`,
+      `Анти-разгон и анти-скачок: экстра-проверки спреда/ликвидности, пороги отклонений от справедливой цены, запрет усреднения «в пропасть»,
+аварийный уровень принудительной деэскалации, когда окружение становится «некорректным для торгов».`,
+    ],
+  },
+
+  {
+    title: 'Аналитика и объяснимость',
+    paras: [
+      `AI-Box для каждого символа/TF показывает уровень уверенности, факторы решения (от относительного положения к VWAP/полосам
+до режимов RSI/объёмных кластеров), амплитуду и горизонты по истории (квантили) и рекомендуемые TP/SL. 
+Подача компактна, но проверяема: цифры, а не метафоры.`,
+      `Explainability by design: причина ➜ эффект. Карточка содержит веса факторов, ссылки на источники, 
+моментальные снимки стаканов/объёмов и «what-if» мини-симуляции. Цель — дать трейдеру прозрачный скелет решения, 
+который можно воспроизвести и оспорить.`,
+      `Новости/нарративы: мультиязычный парсинг, перевод, дедупликация, AI-тональность, доверие к источнику, связь с ценовой реакцией.
+Это не «шум», а контекст для оценки вероятности сценария и временных окон исполнения.`,
+    ],
+  },
+
+  {
+    title: 'Портфель, отчётность и атрибуция',
+    paras: [
+      `Портфельные панели с атрибуцией PnL: decomposition по источникам альфы, режимам рынка, символам, риск-бюджетам и
+решениям модели. Отдельно считаются «mark-out» и impact-метрики, чтобы отличать «везение» от системности.`,
+      `Журналы сделок, экспорт, отчёты, API для интеграций. Реплицируемость исследований: бэктесты и «replay» 
+на исторических потоках прямо поверх графика. «Шаблоны стратегий» и «one-click» развертывание с ограничителями.`,
+      `Командные режимы (roadmap): роли, права, согласование параметров, централизованные отчёты, 
+white-label и приватные развертывания для enterprise.`,
+    ],
+  },
+
+  {
+    title: 'Инфраструктура данных и сети',
+    paras: [
+      `Унификация фидов: кросс-эксчендж-агрегация, приведение тиков и глубины к общей схеме, закрытие пропусков, 
+обработка сплитов и контрактных изменений. Поверх — ансамбли из 200+ индикаторов, поведенческие/режимные фильтры
+и микроструктурные признаки. Исторический пласт — 87 ТБ, свыше 37 млрд свечей.`,
+      `Ончейн-уровень: адресные графы, концентрация держателей, ввод/вывод ликвидности, мостовые перемещения, базовые MEV-риски.
+Публичные блокчейны не являются персональными данными; при этом операционные логи (в пределах закона) помогают 
+обеспечить надёжность и расследование инцидентов.`,
+      `Сетевой стек: оптимизированные соединения к провайдерам ликвидности и маркет-данным, стратегия деградации
+без потери критичных функций, горячие/тёплые кэши, приоритизация VIP-каналов обработки. Все вычислительные этапы трассируются.`,
+    ],
+  },
+
+  {
+    title: 'Безопасность и соответствие',
+    paras: [
+      `Некостодиальная модель: ключи у пользователя, авторизация — подписью. Ролевой доступ, 
+минимизация персональных данных, шифрование «в полёте» и «на хранении», анти-fraud/anti-sybil пайплайны.
+Логирование действий для аудита и воспроизводимости.`,
+      `Регуляторный контекст: мы предоставляем аналитику и инструменты, а не финансовые рекомендации.
+Оплата подписки через NowPayments с ончейн-подтверждением — автоматическая активация лимитов/прав без ручных «чеков». 
+Политики конфиденциальности и логирования — прозрачные и регулярного обновления.`,
+      `Ограничители исполнения — это дисциплина, а не гарантия. Рынок волатилен; решения и соблюдение требований юрисдикций —
+на стороне пользователя. Мы даём рамки, метрики и explainability, чтобы риск был осознанным.`,
+    ],
+  },
+
+  {
+    title: 'Дорожная карта и запуск',
+    paras: [
+      `H2 2026: публичный запуск ядра L7 Exchange и L7-блокчейна нового поколения — межсетевой слой согласования,
+призванный упростить клиринг и права доступа на уровне смарт-контрактов, а также улучшить наблюдаемость исполнения.
+Основной акцент — маршрутизация ликвидности, explainable auto-execute, портфельная атрибуция и командные режимы.`,
+      `QCoin — внутренняя экономика экосистемы L7. В дорожной карте — роль QCoin в платёжных/стимулирующих процессах экосистемы.
+Цель — единый «расчётный слой» между аналитикой, исполнением и пользовательскими сервисами.`,
+      `Перед публичным релизом — расширенные беты, стресс-тесты, отчёты стабильности и открытые журналируемые результаты 
+по качеству исполнения и задержкам. Прозрачность — ядро доверия.`,
+    ],
+  },
+],
+
+roadmap: 'Дорожная карта',
+
+ex_bullets: [
+  'Смарт-маршрутизация CEX/DEX со слиппедж-контролем, сплитами и latency-aware исполнением',
+  'Explainable AI-сигналы: вероятность, амплитуда, горизонты, факторы уверенности, TP/SL',
+  'Портфельные панели: атрибуция PnL, риск-бюджеты, «mark-out», impact-метрики',
+  'Бэктесты и реплеи на исторических потоках прямо на графике',
+  'Ограничители риска: лимиты, time-in-force, kill-switch, динамические стоп-коридоры',
+  'Унификация данных: 87 ТБ историй, 37+ млрд свечей, 200+ индикаторов и режимные фильтры',
+  'Подключение кошельков, некостодиальная модель и журналируемый аудит действий',
+  'H2 2026: публичный запуск ядра L7 Exchange и L7-блокчейна нового поколения',
+],
 
     /* ===== SUBSCRIBE / CONTACT (кратко) ===== */
     subscribe_title: 'Тарифы и подписки',
@@ -512,169 +779,307 @@ select the venue or a split route, and respect user risk limits.`,
     auth_signin: 'Авторизація',
     nav_support: 'Підтримка',
     select_symbol_tf: "Вибрати символ / TF",
-    /* ===== HERO / HOME (коротко) ===== */
-    hero_title: 'Quantum L7 AI',
-    hero_subtitle:
-      'Космічний інтелект для досліджень, альфа-сигналів та безпечного виконання. Авторизація гаманцем, рівні PRO/VIP.',
-    hero_cta: 'Почати в Telegram',
-    hero_learn_more: 'Дізнатися більше',
-    marquee: 'ШІ • Блокчейн • Автоматизація • Квант • Дослідження • Агенти • Альфа • Усі права захищені ',
+/* ===== HERO / HOME (коротко) ===== */ 
+hero_title: 'Ласкаво просимо до Всесвіту Quantum L7 AI',
+hero_subtitle:
+  'Quantum L7 AI — це не просто платформа, а цілий кібернетичний всесвіт прийняття рішень: мультичейн-дані інституційного класу, автономні L7-агенти, ончейн-пайплайни та торговельна маршрутизація працюють як єдиний цифровий організм. Ми поєднуємо Web-MiniApp, Telegram MiniApp і QL7 AI Bot, форум з економікою QCoin та глобальну біржу (ядро на фінальній стадії), щоб надати миттєві альфа-сигнали, дисципліновані вікна входу/виходу, автоматизоване виконання та прозорий ризик-контур. Авторизація — через некостодіальні гаманці (ключі у вас), підтримка рівнів PRO/VIP, пріоритетні ліміти та зняття квот. В основі — юридично вивірена архітектура Web3, кросс-екчейндж-агрегація ліквідності, поведінкові та мікроструктурні моделі, а також відтворювані ресерч-пайплайни з логом гіпотеза → тест → свідчення. Це інфраструктура нового покоління для тих, хто працює в темпі ринку й потребує доказовості, швидкості та точності.',
+hero_cta: 'Почати в Telegram',
+hero_learn_more: 'Докладніше',
+marquee: 'ШІ • Квантові агенти • Ончейн-аналітика • Криптобіржа (ядро) • Форум • QCoin Майнінг • Автовиконання • Risk-контур • Маршрутизація ліквідності • Метавсесвіт Web3 • API/SDK • Enterprise • Усі права захищено',
 
-    home_blocks: [
-      {
-        title: 'Чому Quantum L7 AI',
-        paras: [
-          `Ми поєднуємо мультимодальні моделі, автономних агентів L7 і ончейн-пайплайни.
-Система авторизує через некостодіальні гаманці, ключі залишаються у користувача, а сирі дані перетворюються на рішення — від відкриття до виконання.`,
-          `Наш принцип — прозорість: гіпотеза → тест → докази.
-Агенти читають документи, ходять в API і блокчейни, складають звіти рівня аналітика з графіками та посиланнями.`,
-        ],
-      },
-      {
-        title: 'Що ви отримуєте',
-        bullets: [
-          'Пошук альфи з відібраних on-chain і off-chain джерел',
-          'Ранжування сигналів, впевненість та ризик-оверлеї',
-          'Бектести, ноутбуки і відтворювані дослідження',
-          'Інсайти по портфелю, атрибуція PnL і виявлення режимів',
-          'Автоматичне виконання зі страховками і аварійною зупинкою',
-          'Онлайн-дашборди та сповіщення',
-          'Приватні датасети та конектори',
-          'API/SDK для команд і розробників',
-          'Аудит дій та контрольовані права',
-          'Навчання і живі ресерч-сесії',
-        ],
-      },
+home_blocks: [
+  {
+    title: 'Чому Quantum L7 AI',
+    paras: [
+      `Quantum L7 AI — кросплатформна екосистема: ШІ-ядро, автономні L7-агенти, ончейн-моніторинг, нормалізовані маркет-фіди, соціальна мережа форуму та економіка QCoin об’єднані в єдину обчислювальну тканину. Кожен артефакт — транзакція, новинний наратив, пост, графік ліквідності — потрапляє в загальний контур даних і стає сигналом до дії.`,
+      `Агенти L7 автономно читають документи й API, спостерігають блокчейни та стакани, класифікують поведінкові патерни, оцінюють режими ринку та формують перевірювані гіпотези. Результат — не «чорна скринька», а пояснювана картка: імовірність сценарію, амплітуда, горизонти, SL/TP, фактори впевненості та посилання на першоджерела.`,
+      `Авторизація — через некостодіальні гаманці: ми не зберігаємо приватні ключі, а підтверджуємо володіння адресою. Права доступу й квоти синхронізуються між Telegram MiniApp, веб-інтерфейсом і ботом QL7, статус VIP визначає межі лімітів і пропускає у пріоритетні канали обробки.`,
+      `Маркет-ядро побудоване на кросбіржовій агрегації, уніфікації символів/контрактів і latency-aware обробці фідів. Ми поєднуємо інституційного рівня історії з потоками реального часу, щоб відстежувати дисперсію спреду, ударні об’єми, баланс заявок, MEV-ризики та ефект новинного імпульсу.`,
+      `Принцип платформи — доказовість: гіпотеза → тест → свідчення. Кожен розрахунок логуються, метрики відтворювані, а арбітраж «шуму» відсікається фільтрами режимів. Так ми перетворюємо сирі дані на дисципліновані рішення, а інтуїцію — на перевірювану тактику.`,
+      `Форум вбудовується в контур: контент проходить AI-скоринг (якість, залученість, анти-спам/anti-sybil), а активність мапується в економіку QCoin. Це не «соцмережа заради лайків», а цільова когнітивна шина, де знання та внесок конвертуються в токенізовану цінність.`,
     ],
+  },
 
-    /* ===== ABOUT ===== */
-    about_title: 'Про Quantum L7 AI',
-    about_paragraphs: [
-      `Quantum L7 AI — компактний стек для досліджень і сигналів на крипторинку. Наша мета проста: прибрати шум, показати справжню структуру ринку і допомогти діяти дисципліновано, а не імпульсивно.`,
-
-      `L7 — це агенти прикладного рівня. Вони читають документи, звертаються до API, спостерігають блокчейни та стакани, запускають експерименти й формують пояснювані результати. Це не «чорна скринька», а гіпотези, перевірки і зрозумілий слід причин появи рекомендації.`,
-
-      `Для кого це: трейдерам — швидка ситуаційна поінформованість; дослідникам — відтворювані експерименти; командам і розробникам — чистий API і стабільна шина даних.`,
-
-      `Покриття. Ми збираємо ринкові дані з великих CEX і провідних DEX-агрегаторів, додаємо довідкові дані (символи, відповідності, метадані контрактів) і приводимо все до єдиної схеми. Мета — порівнюваність між біржами.`,
-
-      `Пайплайн даних. Потоки нормалізуються, розриви автоматично закриваються, спліти і зміни контрактів враховуються, деривативи маркуються. Велика історія дозволяє визначати режими замість підгонки під випадкові коливання.`,
-
-      `Аналітичне ядро. Індикаторів понад двісті, але головне — ансамблі, ваги і контекст. Класичні сімейства (RSI, Stochastic, MFI, CCI, ADX/DI, EMA/SMA/WMA, MACD, ATR, смуги Боллінджера, VWAP, OBV, базові лінії Ichimoku) комбінуються з фільтрами режимів і урахуванням ліквідності.`,
-
-      `Ончейн-модулі. Ми аналізуємо трансфери, введення та виведення ліквідності, переміщення через мости, розподіл власників та базові ознаки MEV. Сигнали знижуються у вазі в тонких або маніпульованих зонах.`,
-
-      `Стрічка новин і досліджень. Багатомовні джерела автоматично перекладаються, індексуються та дедуплікуються. Тональність, новизна і надійність формують «оцінку наративу» поруч із ціновими метриками.`,
-
-      `Картки сигналів. На кожній — очікуваний рух і горизонт по історії, рівень впевненості, контекст ліквідності та швидкі індикатори. Це маяк для сценаріїв і управління ризиком, а не обіцянка.`,
-
-      `Дисципліна. Ми створюємо інструменти під попереднє визначення правил: плейбуки, коридори волатильності, динамічні стопи і шаблони розміру позиції. Система підштовхує визначати «інвалідацію» до входу, а не після.`,
-
-      `Архітектура. Сервіси даних і агенти — невеликі процеси на TypeScript/Python за стабільним API. Сайт на Next.js, живі оновлення через WebSocket. Кеші і резервні джерела підтримують відгук навіть у пікові моменти.`,
-
-      `Безпека і приватність. Ми некостодіальні; ключі залишаються у користувача. Дії обмежуються ролями і логуються. Секрети зберігаються на сервері; персональні дані мінімізуються і шифруються під час передачі та зберігання.`,
-
-      `Дорожня карта. Публічні ноутбуки і бектести, шаблони стратегій, портфельний рушій з атрибуцією, розумна маршрутизація між біржами, DeFi-конектори і опціональний автопілот з обмежувачами та чекпоінтами.`,
-
-      `Спільнота і підтримка. Ми публікуємо щотижневі замітки, ведемо Telegram-канал і відкриті до конкретних запитів команд. Фідбек напряму формує беклог: корисні функції виходять у реліз, а блискучі, але непотрібні — ні.`,
-
-      `Важливо: підписки і прив’язка гаманців здійснюються в нашому Telegram-боті. Сайт зосереджений на дослідженнях, візуалізації та документації. Це не фінансова порада.`,
+  {
+    title: 'Що ви отримуєте',
+    bullets: [
+      'Квантову аналітику нового покоління: симбіоз AI-інтелекту, ончейн-метрик і мікроструктурних ознак ринку.',
+      'Альфа-сигнали з імовірністю виконання, амплітудою та горизонтом, плюс прозоре обґрунтування факторів упевненості.',
+      'Нормалізоване кросбіржове ядро даних: уніфікація символів/контрактів, ліквідності, спредів і частоти тікiв.',
+      'Ончейн-моніторинг: розподіл власників, потоки через мости, ліквідність CEX/DEX, базові MEV-патерни.',
+      'Глобальна біржа (ядро в розробці): маршрутизація ліквідності, захист від проскальзування, контекстна оцінка ризику.',
+      'Auto-execute: виконання з fail-safe тригерами, динамічними стопами й аварійною зупинкою при аномаліях.',
+      'Портфельні панелі: атрибуція PnL, ризик-бюджети, режими волатильності, коридори та дисципліна розміру позиції.',
+      'Відтворювані дослідження: бектести, ноутбуки, візуальні звіти, what-if-сценарії та експозиція припущень.',
+      'Стрічка наративів: AI-тональність, ембеддінги, довіра джерел і зв’язок новин із ціновими метриками.',
+      'Форум-економіка: AI-модерація, QCoin-майнінг за внесок і активність, медіапостинг з алгоритмічним скорингом.',
+      'VIP-програма: зняття денних квот у AI Box, розширені ліміти, пріоритетна обробка та X2 по QCoin для квестів/часу.',
+      'Інтеграції: Telegram MiniApp, веб, бот QL7; єдина сесія, спільний статус і узгоджені права доступу.',
+      'API/SDK/Webhooks: безпечні інтеграції, sandbox-режим, event-driven архітектура для команд та автоматизації.',
+      'Мультичейн-стек: Ethereum, BSC, Polygon, Solana, TON, Avalanche тощо; мостування й урахування мережевої специфіки.',
+      'Юридично вивірена Web3-архітектура: логування, розподіл ролей, криптографічна верифікація та приватність.',
     ],
-    about_sections: [
-      { title: 'Що таке Quantum L7 AI', parasIdx: [0] },
-      { title: 'L7-агенти, а не «чорна скринька»', parasIdx: [1] },
-      { title: 'Для кого', parasIdx: [2] },
-      { title: 'Покриття', parasIdx: [3] },
-      { title: 'Пайплайн даних', parasIdx: [4] },
-      { title: 'Аналітичне ядро', parasIdx: [5] },
-      { title: 'Ончейн-модулі', parasIdx: [6] },
-      { title: 'Стрічка новин і досліджень', parasIdx: [7] },
-      { title: 'Картки сигналів', parasIdx: [8] },
-      { title: 'Дисципліна', parasIdx: [9] },
-      { title: 'Архітектура', parasIdx: [10] },
-      { title: 'Безпека і приватність', parasIdx: [11] },
-      { title: 'Дорожня карта', parasIdx: [12] },
-      { title: 'Спільнота і підтримка', parasIdx: [13] },
-      { title: 'Важливо', parasIdx: [14] },
-    ],
+  },
 
-    about_bullets: [
-      'Швидка ситуаційна поінформованість: стан ринку, тренд, імпульс, волатильність',
-      'Крос-біржова нормалізація і «ліквіднісно-усвідомлене» зважування',
-      'Ончейн-потоки: власники, ліквідність, мости, базові ознаки MEV',
-      'Новинна стрічка з перекладом, пошуком по ембеддингам і надійністю джерел',
-      'Очікуваний рух і горизонт на кожній картці (історичні квантілі)',
-      'Ансамблі індикаторів, фільтри режимів і ваги',
-      'Бектести і ноутбуки для відтворюваних досліджень (roadmap)',
-      'Портфельний модуль: ризик-бюджети, обмеження, атрибуція PnL (roadmap)',
-      'Смарт-маршрутизація по CEX/DEX; захист від затримок і прослизання (roadmap)',
-      'API/SDK для команд і автоматизації; прості вебхуки',
-      'Enterprise-опції: SSO, приватні деплои, SLA і вікна змін',
-      'Некостодіальна модель безпеки: ролі і аудит дій',
-      'Надійність: рівні кешування, плавна деградація, резервні джерела',
-      'Чистий інтерфейс, що підкреслює рішення, а не шум',
-      'Сценарне мислення: заздалегідь визначена інвалідація і стоп-фреймворки',
-      'Дослідницькі артефакти: графіки, таблиці, звіти з посиланнями',
-      'Пошук по ембеддингам у власних нотатках і публічних джерелах (опційно)',
-      'Розширювані конектори: ціни, ончейн, дослідження, соціальні сигнали',
-      'Людина в контурі для напівавтоматизованих процесів',
-      'Чіткі межі: сигнали — це інструмент, а не гарантія',
+  {
+    title: 'Інфраструктура та дані',
+    paras: [
+      `Маркет-дані: об’єднуємо історичні та потокові фіди CEX/DEX, приводимо до спільної схеми, закриваємо розриви, враховуємо спліти та особливості деривативів. Поверх — ансамблеві індикатори (RSI/ADX/ATR/VWAP/OBV/Ichimoku/об’ємні кластери), фільтри режимів і контекст ліквідності.`,
+      `Ончейн-шар: адресні графи, переміщення ліквідності, концентрації власників, події мостів, базові MEV-ризики. Публічні блокчейни — не персональні дані, але ми обережно логуємо запити й відладкові ID для надійності та розслідування інцидентів.`,
+      `Наративи та новини: мультимовна індексація, переклад, дедуплікація, скоринг джерел, оцінка новизни та коваріацій із ціною; результат — легка числова надбудова поряд із ціною й об’ємом, яка допомагає відрізнити шум від значущого імпульсу.`,
+      `Сховища та кеш: поділ потоків на гарячі/теплі, деградація без втрати критичних функцій, пріоритизація каналів для VIP і системних завдань. Усі обчислювальні етапи мають трасування, контроль версій артефактів і відтворюваність.`,
     ],
+  },
 
-    tg_button: 'Телеграм',
+  {
+    title: 'Безпека та відповідність',
+    paras: [
+      `Некостодіальна модель: приватні ключі та сид-фрази залишаються у користувача. Авторизація — підписом; доступи — за ролями, журналюються й перевіряються. Мінімізація персональних даних, шифрування під час передачі та зберігання, анти-fraud/anti-sybil пайплайни.`,
+      `Юридична чистота: ми надаємо аналітику й інструменти, а не фінансові поради. Флоу оплати через NowPayments з ончейн-підтвердженням активує підписку автоматично; статус синхронізується між MiniApp/веб/ботом. Політики приватності та логування — прозорі й оновлюються.`,
+      `Обмежувачі виконання: sanity-checks, ліміти, аварійні стоп-тригери та моніторинг аномалій. Це інструменти дисципліни, а не гарантія результату; трейдинг пов’язаний із ризиком, рішення — на стороні користувача.`,
+    ],
+  },
 
-    /* ===== EXCHANGE ===== */
-    exchange_title: 'Біржа (в розробці)',
-    exchange_sub:
-      `Живий неоновий холст: квантові хвилі, сузір’я частинок і спіраль-галактика.
-Далі: смарт-маршрутизація DEX/CEX, вибір біржі зі слиппедж-контролем, latency-execution, авто-хедж і ризик-ліміти.`,
-    exchange_sections: [
-      {
-        title: 'Бачення: біржа нового покоління L7',
-        paras: [
-          `Це не просто графік. Це агентний пайплайн L7, що поглинає ринкові дані, ончейн-події та сигнали стаканів,
-оцінює їх і видає пояснювані рекомендації (BUY/SELL/HOLD) з упевненістю та контекстом ризику.`,
-          `Ідентичність — через гаманець; обчислення оркеструють агенти. Ключі — у користувача.
-Кожен крок досліджується і протоколюється: від відкриття даних до виконання.`,
-        ],
-      },
-      {
-        title: 'Маршрутизація і ліквідність',
-        paras: [
-          `Роутер сканує ліквідність на DEX/CEX паралельно, оцінює слиппедж і комісії,
-вибирає біржу або спліт-маршрут і дотримується ризик-лімітів.`,
-          `Latency має значення: ціль — своєчасність, підтримка cancel/replace-логіки і аварійний kill-switch.`,
-        ],
-      },
-      {
-        title: 'Ризик і контроль',
-        paras: [
-          `Ліміти по нотіоналу, експозиції і просадці. Conditional-ордера, time-in-force, мінімальний поріг впевненості для AI-сигналів.`,
-          `Страховки захищають від розгону. Будь-яка дія пояснювана: причина, дані, версії моделей.`,
-        ],
-      },
-      {
-        title: 'Аналітика і пояснюваність',
-        paras: [
-          `AI-бокс показує впевненість і фактори: узгодженість ковзних, відношення до VWAP, положення в смугах, режим RSI тощо.`,
-          `Кожна рекомендація супроводжується TP/SL, розрахованими по волатильності (ATR-подібно) і поточному режиму.`,
-        ],
-      },
-      {
-        title: 'Що далі',
-        paras: [
-          `Портфель, атрибуція PnL, внесок факторів.`,
-          `Бектести і реплеї прямо на холсті, шаблони стратегій і розгортання в один клік.`,
-        ],
-      },
+  {
+    title: 'Інтеграції: MiniApp • Бот • Форум • Біржа',
+    paras: [
+      `Telegram MiniApp і веб працюють як дзеркальні інтерфейси з єдиною сесією та правами. Бот QL7 — легкий вхід до AI-каналу й сповіщень. Форум — не просто ком’юніті: це когнітивна шина, де знання й внесок конвертуються в QCoin, а контент VIP проходить пріоритетний AI-скоринг.`,
+      `Біржа (ядро на фінальній стадії): маршрутизація ордерів, контекстна оцінка проскальзування, ончейн-виконання там, де застосовується, і розширені режими backtest/what-if для VIP. Інтеграція з аналітикою дає рідкісний ефект — сигнал знає, «як» він буде виконаний.`,
     ],
-    roadmap: 'Дорожня карта',
-    ex_bullets: [
-      'Смарт-маршрутизація зі слиппедж-контролем і вибором біржі',
-      'Бектести, реплеї і пояснювані метрики',
-      'Підключення гаманців і миттєва аналітика портфеля',
-      'Шаблони стратегій і захисні бар’єри',
+  },
+
+  {
+    title: 'VIP і економіка QCoin',
+    paras: [
+      `VIP знімає денні квоти в AI Box, розширює ліміти та пріоритизує обробку. На форумі VIP отримує X2 множники за час і квести, золотий бейдж і збільшену вагу медіапостів (відео/зображення/аудіо) в алгоритмічному скорингу. Активність, внесок і перегляди конвертуються в QCoin із урахуванням якості та залученості.`,
+      `Оплата через NowPayments: щойно on-chain підтвердження надходить, статус активується миттєво й поширюється на MiniApp/бот/веб. У дорожній карті — запуск L7-чейну: VIP — верхні шари priority-tier для розподілів і черг виведення QCoin, ранні ролі валідаторів/стейкерів і підвищені ліміти.`,
     ],
+  },
+
+  {
+    title: 'Для команд і розробників',
+    bullets: [
+      'API/SDK/Webhooks із безпечною моделлю токенів і ротацією ключів.',
+      'Event-driven інтеграції, sandbox-середовища, конектори до ончейн/офчейн джерел.',
+      'White-Label і Enterprise-режими: SSO, приватні деплої, SLA, вікна змін.',
+      'Ноутбуки/бектести: експорт артефактів, звіти, відтворюваність експериментів.',
+      'Глибокі метрики приймання фіч і продуктивності для продуктових команд.',
+    ],
+  },
+],
+
+
+/* ===== ABOUT ===== */ 
+about_title: 'Про Quantum L7 AI',
+about_paragraphs: [
+  `Quantum L7 AI — це не просто «аналітика», а єдиний операційний контур ухвалення торговельних рішень і соціальної взаємодії навколо крипторинків. Ядро платформи об’єднує Web-MiniApp (веб + Telegram), форуми з гейміфікованим майнінгом QCoin і ІІ-ресерч-рушій, який прибирає шум, виявляє структуру ліквідності та підказує дисципліновані сценарії входу/виходу. Ми поєднуємо ринкову мікроструктуру, ончейн-телеметрію, поведінкові патерни та новинні наративи в один узгоджений, інтерпретований шар — так, щоб вам не доводилося «наздоганяти» ринок, а можна було проєктувати хід заздалегідь.`,
+
+  `L7-агенти — це прикладні ІІ-модулі, які живуть на даних. Вони читають документи та стрічки, запитують API, спостерігають блокчейни, стакани й деривативи, проганяють мініексперименти та видають пояснювані артефакти: гіпотези, бектест-снепшоти, контекстні індикатори. Важлива не «магія чорної скриньки», а трасованість: із кожного висновку видно шлях — які ознаки було враховано (ліквідність, спреди, асиметрія, дисбаланси, імпульси, кластери обсягів), чому знижено вагу в тонких/маніпульованих зонах і де проходить межа невалідності сценарію.`,
+
+  `Для кого це. Трейдерам — швидка ситуаційна обізнаність і керована частота сигналів без перевантаження; дослідникам — відтворювані пайплайни та чисті дані; командам — API/SDK, вебхуки й надійна шина подій; білдер-спільноті — форуми, репутаційні метрики та економіка QCoin за внесок. VIP+ отримує пріоритетний ІІ-канал, медіапостинг, пришвидшені квоти та «золотий» статус, який впливає на видачу й ліміти.`,
+
+  `Покриття. Ми агрегуємо дані з провідних CEX і DEX-агрегаторів, нормалізуємо символи й контракт-метадані, уніфікуємо частоти тіків і глибину стаканів. Уводимо єдині довідники, мепінги пар/мереж/ринків, позначаємо деривативи, враховуємо спліти, делістинги та міграції контрактів. Мета — співставність майданчиків і мереж: один шар абстракції, щоб порівнювати ліквідність, витрати, затримки та «реальну» доступність обсягів.`,
+
+  `Пайплайн даних. Потоки очищуються, пропуски відновлюються, аномалії маркуються, контури затримок калібруються. Історія глибока — це дає змогу виявляти режими, а не натягувати вказівник на випадковий сплеск. Ми додаємо ончейн-маршрути, переказні мости, розподіли тримачів, ознаки MEV-активності та пов’язуємо це з ринковими метриками. Підсумок — ансамблі ознак, стійкі до «бульбашок шуму» й локальних аномалій.`,
+
+  `Аналітичне ядро. Сотні індикаторів — лише палітра. Головне — ансамблі та контекст: RSI/RSX, Stochastic, CCI/MFI, ADX/DI, ATR і смуги, EMA/SMA/WMA, MACD/Signal/Histogram, VWAP/POC/Value-Area, об’ємні профілі, дисбаланси Bid/Ask і свіпи ліквідності. Ми змішуємо класичні сімейства з фільтрами режимів, евристиками з ліквідності та поведінки, а також з ончейн-маркером притоку/відтоку. Кожна картка — це не «порада», а компас: амплітуда за історією, горизонт реалізації, упевненість, передумови та межі інвалідації.`,
+
+  `Ончейн-модулі. Ми відстежуємо переказні кластери, мости, накопичення/розподіл, концентрацію великих тримачів, базові MEV-патерни та аномальні маршрути. У тонких зонах ліквідності, за сплесків фондінгу чи спреду вага сигналів знижується; за підтвердження кількома доменами (спот, деривативи, ончейн) — підвищується. Так мінімізується «хибна впевненість» там, де ринок крихкий.`,
+
+  `Наративи та новини. Багатомовна стрічка перекладається, дедуплікується й індексується за ембедингами. Ми оцінюємо новизну, довіру до джерела, співвідношення «ритуал/сутність», тональність і «липкість» теми в часі. Поруч із ціновими та ончейн-метриками з’являється легка «карта наративу»: чим драйвиться увага, де регуляторні ризики, що підсилює волатильність, а що здувається.`,
+
+  `Картки сигналів і дисципліна. На картці — очікувана амплітуда (квантілі), часовий горизонт, SL/TP-маркери, швидка зведена з ліквідності та набір тригерів, які мають зійтися. Система підштовхує до дисципліни: до входу ви бачите інвалідацію, ризик-одиницю й динамічний коридор волатильності; після — отримуєте перевірочні чек-поінти та умови зняття ризику.`,
+
+  `Архітектура. Легкі сервіси на TypeScript/Python за стабільним API; сайт — на Next.js із живими шарами через WebSocket. Кеш-рівні та резервні джерела забезпечують плавну деградацію в піках. API/SDK і вебхуки дають автоматизацію, а ролі й аудит — безпечні межі. MiniApp працює у вебі й у Telegram, щоб ви могли вести ринок в одному потоці: графіки, форум, гаманець, бот — без тертя.`,
+
+  `Безпека та приватність. Некостодіально: приватні ключі/seed не запитуємо й не зберігаємо. Ролі обмежують доступ, дії логуються, персональні дані мінімізуються та шифруються під час передавання і зберігання. Anti-sybil/anti-fraud пайплайни захищають економіку QCoin і репутаційні механіки форуму; валідація сесій дбайливо, але суворо підтримує цілісність доступу.`,
+
+  `Форум і майнінг QCoin. Форум — це не «соцмережа», а виробнича лінія знань. Кожні 4 години ви підтверджуєте активність і фіксуєте винагороду; пости з медіа (відео/зображення/аудіо) проходять скоринг QuantumLCM-AI (якість, залученість, анти-спам/anti-sybil) і конвертуються в QCoin. VIP+ отримує X2 за часом і X2 за квестами, пріоритет у видачі, розширені ліміти на медіа та пришвидшену модерацію. Репутація і внесок — не порожній шум, а економічно значуща величина.`,
+
+  `Біржа (в розробці) і рекомендації. Торговельне ядро та виконання під’єднуються поетапно; уже доступні ІІ-рекомендації за символами/таймфреймами, глибина стакана й профіль ліквідності. Ми проєктуємо smart-routing, захист від затримок/прослизання, портфельні обмеження й атрибуцію PnL. VIP+ отримує доступ до експериментальних індикаторів, режимів what-if/backtest і розширених горизонтів аналізу.`,
+
+  `Економіка QCoin і L7-блокчейн. QCoin — паливо знань і корисного трафіку. Майбутній L7-chain — це шар, який поєднує кросмережеві активи, банки та фінінфраструктуру в універсальний маршрутизатор цінності. Наша мета — щоб QCoin став нейтральною розрахунковою одиницею в екосистемі, з прозорою емісією/спалюванням і чесною чергою виводу. VIP+ має підвищений пріоритет на розподіли й ранній доступ до стейкінгу/валідаторських ролей.`,
+
+  `Оплата й активація. Підписка VIP+ оформлюється через NowPayments: криптооплата (USDT та ін.), вебхук миттєво активує доступ і синхронізує статус між MiniApp, ботом і форумом. Жодних скріншотів і ручних перевірок. Інтерфейс доступний 7 мовами; зв’язка гаманця — безшовна. Ви платите за швидкість, інтерпретованість і економіку, у якій внесок винагороджується.`,
+
+  `Ком’юніті та дорожня карта. Ми публікуємо щотижневі нотатки, відкриваємо бети альфа-фіч, приймаємо цільові запити від команд. У беклозі: портфельний рушій із ризик-бюджетами, розширена смарт-маршрутизація CEX/DEX, публічні ноутбуки/бектести, «напівавтопілот» під контролем людини. Усе, що підвищує дисципліну й знижує тертя, іде в реліз; те, що блищить, але не допомагає — ні. Матеріали — освітні/аналітичні, не фінансова порада.`
+],
+
+about_sections: [
+  { title: 'Що таке Quantum L7 AI',             parasIdx: [0] },
+  { title: 'L7-агенти, а не «чорна скринька»',   parasIdx: [1] },
+  { title: 'Для кого',                           parasIdx: [2] },
+  { title: 'Покриття',                           parasIdx: [3] },
+  { title: 'Пайплайн даних',                     parasIdx: [4] },
+  { title: 'Аналітичне ядро',                    parasIdx: [5] },
+  { title: 'Ончейн-модулі',                      parasIdx: [6] },
+  { title: 'Наративи та новини',                 parasIdx: [7] },
+  { title: 'Картки та дисципліна',               parasIdx: [8] },
+  { title: 'Архітектура',                        parasIdx: [9] },
+  { title: 'Безпека та приватність',             parasIdx: [10] },
+  { title: 'Форум і майнінг QCoin',              parasIdx: [11] },
+  { title: 'Біржа та рекомендації',              parasIdx: [12] },
+  { title: 'Економіка QCoin і L7-ланцюг',        parasIdx: [13] },
+  { title: 'Оплата, локалізація, дорожня карта', parasIdx: [14] }
+],
+
+about_bullets: [
+  'Ситуаційна обізнаність: тренд, імпульс, волатильність, ліквідність',
+  'Кросбіржова нормалізація, latency-aware зважування ознак',
+  'Ончейн-потоки, концентрації тримачів, мости, натяки MEV',
+  'Наративна стрічка з перекладом і оцінкою довіри/новизни',
+  'Картки: амплітуда (квантілі), горизонти, SL/TP, упевненість',
+  'Ансамблі індикаторів + фільтри режимів + поведінка',
+  'API/SDK і вебхуки для автоматизації без «магії»',
+  'Плавна деградація та резервні джерела в пікове навантаження',
+  'Некостодіальна безпека: ролі, аудит, шифрування',
+  'Форум: майнінг QCoin, квести, медіапостинг з AI-скорингом',
+  'VIP+: X2 за часом і квестами, пріоритет у видачі та лімітах',
+  'Рекомендації на біржі вже доступні; ядро виконання на підході',
+  'NowPayments: миттєва активація, синхронізація статусу',
+  'L7-блокчейн: пріоритетні черги виводу та ранні ролі',
+  '7 мов, єдиний доступ у вебі й Telegram MiniApp'
+],
+
+tg_button: 'Телеграм',
+
+
+/* ===== EXCHANGE (розширений опис) ===== */
+exchange_title: 'Біржа (у розробці)',
+exchange_sub:
+  `Quantum L7 Exchange — це багатоланцюгова, правдоподібно пояснювана торгова платформа нового покоління,
+що об’єднує CEX/DEX-ліквідність, ІІ-рекомендації та інституційну інфраструктуру даних в єдину обчислювальну тканину.
+Ми обробляємо 87 ТБ ринкових історій і понад 37 млрд історичних свічок по всіх великих мережах і майданчиках, нормалізуємо тікі,
+глибину книг заявок і специфікації деривативів, приводячи ринок до одного стандарту ухвалення рішень. Мета — не «ще одна біржа»,
+а контур виконання з доведеною логікою: гіпотеза → тест → свідчення → угода, з прозорими обмежувачами ризику та простежуваним аудитом.`,
+
+exchange_sections: [
+  {
+    title: 'Бачення: біржа нового покоління L7',
+    paras: [
+      `L7 Exchange — це агентний пайплайн, де автономні L7-агенти споживають маркет-фіди, ончейн-події, новини та поведінкові сигнали
+мікроструктури, синхронізують їх у часі та видають пояснювані рекомендації (BUY/SELL/HOLD) з імовірністю,
+амплітудою, горизонтом і контекстом ризику (ліквідність, спред, дисперсія, аномалії). Для користувача це означає
+відтворюваність рішень: кожна картка сигналу супроводжується логом факторів, версіями моделей і посиланнями на першоджерела.`,
+      `Ідентичність — через некостодіальні гаманці (ми не зберігаємо приватні ключі та seed-фрази). Права доступу,
+квоти та ліміти синхронізуються у веб-інтерфейсі та MiniApp. Виконання дій — тільки в межах заданих вами
+обмежувачів і за достатнього рівня впевненості моделі. Принцип платформи — доведеність, а не «чорна скринька».`,
+      `Дані інституційного рівня: 87 ТБ історій, 37+ млрд свічок, уніфікація контрактів і символів,
+обробка потоків з урахуванням затримок (latency-aware), очищення розривів, урахування сплітів і специфік деривативів. Поверх — ансамблі з 200+ індикаторів
+(RSI/ADX/ATR/VWAP/OBV/Ichimoku/об’ємні кластери, режимні фільтри тощо), поведінкові ознаки та статистика мікро-імбалансів.`,
+      `H2 2026 — цільове вікно публічного запуску ядра L7 Exchange разом із L7-блокчейном нового покоління
+(міжмережевий рівень узгодження). На старті — крос-біржова маршрутизація, пояснюване авто виконання,
+а далі — розширення у бік ончейн-клірингу та нативних смарт-прав доступу.`,
+    ],
+  },
+
+  {
+    title: 'Маршрутизація та ліквідність',
+    paras: [
+      `Смарт-роутер паралельно сканує ліквідність на CEX/DEX, моделює сліпедж, комісії та затримки,
+добирає майданчик/спліт-маршрут і контролює якість виконання через цільові метрики (expected fill, adverse selection,
+mark-out через N секунд/хвилин). У режимі спліта заявки дробляться й розносяться по пулам/книгам, щоб мінімізувати вплив.`,
+      `Latency має значення: підтримуємо cancel/replace, тайм-аути, «kill-switch», правила часткової фіксації та
+реакцію на стрибки дисперсії спреда. В арбітражних сценаріях використовуються вікна синхронізації тіків і з’єднання з низькою затримкою.`,
+      `Маркет-мікроструктура: аналізуємо дисбаланс заявок, сплески прихованого об’єму, ліквідність по рівнях,
+вплив новин/ончейн-подій, поведінку «агресивних» принтів і ймовірність прослизання за розміром ноціоналу.`,
+    ],
+  },
+
+  {
+    title: 'Ризик і контроль',
+    paras: [
+      `Глобальні та інструментальні ліміти: за ноціоналом, часткою портфеля, денною/тижневою просадкою, плечем, концентрацією.
+Профілі виконання (conservative/balanced/aggressive) і мінімальна потрібна впевненість моделі. Усі тригери прозоро описані
+та логуються для аудиту. Будь-яка дія пояснювана: причина, вхідні дані, версії моделей і параметри виконання.`,
+      `Conditional-ордера (stop/stop-limit), time-in-force (GTC/IOC/FOK), директиви часткової фіксації, динамічні стоп-коридори
+за режимом волатильності (ATR-подібні), «circuit-breaker» при аномаліях, нічні «тиші» та блоки подій (наприклад, high-impact новини).`,
+      `Анти-розгін і анти-стрибок: екстра-перевірки спреда/ліквідності, пороги відхилень від справедливої ціни, заборона усереднення «в прірву»,
+аварійний рівень примусової деескалації, коли оточення стає «некоректним для торгів».`,
+    ],
+  },
+
+  {
+    title: 'Аналітика та пояснюваність',
+    paras: [
+      `AI-Box для кожного символу/TF показує рівень впевненості, фактори рішення (від відносного положення до VWAP/смуг
+до режимів RSI/об’ємних кластерів), амплітуду й горизонти за історією (квантили) та рекомендовані TP/SL.
+Подача компактна, але перевірювана: цифри, а не метафори.`,
+      `Explainability by design: причина ➜ ефект. Картка містить ваги факторів, посилання на джерела,
+моментальні знімки книг/об’ємів і «what-if» міні-симуляції. Мета — дати трейдеру прозорий скелет рішення,
+який можна відтворити й оскаржити.`,
+      `Новини/наративи: мультимовний парсинг, переклад, дедуплікація, AI-тональність, довіра до джерела, зв’язок із ціновою реакцією.
+Це не «шум», а контекст для оцінки імовірності сценарію та часових вікон виконання.`,
+    ],
+  },
+
+  {
+    title: 'Портфель, звітність і атрибуція',
+    paras: [
+      `Портфельні панелі з атрибуцією PnL: decomposition за джерелами альфи, режимами ринку, символами, ризик-бюджетами та
+рішеннями моделі. Окремо рахуються «mark-out» і impact-метрики, щоб відрізняти «везіння» від системності.`,
+      `Журнали угод, експорт, звіти, API для інтеграцій. Репліковуваність досліджень: бек-тести та «replay»
+на історичних потоках прямо поверх графіка. «Шаблони стратегій» і «one-click» розгортання з обмежувачами.`,
+      `Командні режими (roadmap): ролі, права, погодження параметрів, централізовані звіти,
+white-label і приватні розгортання для enterprise.`,
+    ],
+  },
+
+  {
+    title: 'Інфраструктура даних і мережі',
+    paras: [
+      `Уніфікація фідів: крос-біржова агрегація, приведення тіків і глибини до спільної схеми, закриття пропусків,
+обробка сплітів і контрактних змін. Поверх — ансамблі з 200+ індикаторів, поведінкові/режимні фільтри
+та мікроструктурні ознаки. Історичний пласт — 87 ТБ, понад 37 млрд свічок.`,
+      `Ончейн-рівень: адресні графи, концентрація тримачів, ввід/вивід ліквідності, мостові переміщення, базові MEV-ризики.
+Публічні блокчейни не є персональними даними; при цьому операційні логи (у межах закону) допомагають
+забезпечити надійність і розслідування інцидентів.`,
+      `Мережевий стек: оптимізовані з’єднання до провайдерів ліквідності та маркет-даних, стратегія деградації
+без втрати критичних функцій, гарячі/теплі кеші, пріоритизація VIP-каналів обробки. Усі обчислювальні етапи трасуються.`,
+    ],
+  },
+
+  {
+    title: 'Безпека та відповідність',
+    paras: [
+      `Некостодіальна модель: ключі у користувача, авторизація — підписом. Рольовий доступ,
+мінімізація персональних даних, шифрування «в польоті» і «на зберіганні», анти-fraud/anti-sybil пайплайни.
+Логування дій для аудиту та відтворюваності.`,
+      `Регуляторний контекст: ми надаємо аналітику й інструменти, а не фінансові рекомендації.
+Оплата підписки через NowPayments з ончейн-підтвердженням — автоматична активація лімітів/прав без ручних «чеків».
+Політики конфіденційності та логування — прозорі та регулярного оновлення.`,
+      `Обмежувачі виконання — це дисципліна, а не гарантія. Ринок волатильний; рішення та дотримання вимог юрисдикцій —
+на боці користувача. Ми даємо рамки, метрики та explainability, щоб ризик був усвідомленим.`,
+    ],
+  },
+
+  {
+    title: 'Дорожня карта і запуск',
+    paras: [
+      `H2 2026: публічний запуск ядра L7 Exchange і L7-блокчейна нового покоління — міжмережевий шар узгодження,
+покликаний спростити кліринг і права доступу на рівні смарт-контрактів, а також покращити спостережуваність виконання.
+Основний акцент — маршрутизація ліквідності, explainable auto-execute, портфельна атрибуція та командні режими.`,
+      `QCoin — внутрішня економіка екосистеми L7. У дорожній карті — роль QCoin у платіжних/стимулюючих процесах екосистеми.
+Мета — єдиний «розрахунковий шар» між аналітикою, виконанням і користувацькими сервісами.`,
+      `Перед публічним релізом — розширені бети, стрес-тести, звіти стабільності та відкриті журналовані результати
+щодо якості виконання й затримок. Прозорість — ядро довіри.`,
+    ],
+  },
+],
+
+roadmap: 'Дорожня карта',
+
+ex_bullets: [
+  'Смарт-маршрутизація CEX/DEX зі сліпедж-контролем, сплітами та latency-aware виконанням',
+  'Explainable AI-сигнали: імовірність, амплітуда, горизонти, фактори впевненості, TP/SL',
+  'Портфельні панелі: атрибуція PnL, ризик-бюджети, «mark-out», impact-метрики',
+  'Бек-тести й реплеї на історичних потоках прямо на графіку',
+  'Обмежувачі ризику: ліміти, time-in-force, kill-switch, динамічні стоп-коридори',
+  'Уніфікація даних: 87 ТБ історій, 37+ млрд свічок, 200+ індикаторів і режимні фільтри',
+  'Підключення гаманців, некостодіальна модель і журналований аудит дій',
+  'H2 2026: публічний запуск ядра L7 Exchange і L7-блокчейна нового покоління',
+],
+
     /* ===== SUBSCRIBE / CONTACT (скорочено) ===== */
     subscribe_title: 'Тарифи та підписки',
     subscribe_sub:
@@ -739,169 +1144,306 @@ select the venue or a split route, and respect user risk limits.`,
     auth_signin: 'Iniciar sesión',
     nav_support: 'Soporte',
     select_symbol_tf: "Seleccionar símbolo / TF",
-    /* ===== HERO / HOME ===== */
-    hero_title: 'Quantum L7 AI',
-    hero_subtitle:
-      'Inteligencia cósmica para investigación, señales alfa y ejecución segura. Autenticación con billetera, niveles PRO/VIP.',
-    hero_cta: 'Comenzar en Telegram',
-    hero_learn_more: 'Saber más',
-    marquee: 'IA • Blockchain • Automatización • Cuántico • Investigación • Agentes • Alfa • Todos los derechos reservados ',
+/* ===== HERO / HOME (breve) ===== */  
+hero_title: 'Bienvenido al Universo Quantum L7 AI',
+hero_subtitle:
+  'Quantum L7 AI no es solo una plataforma, sino todo un universo cibernético de toma de decisiones: datos multichain de clase institucional, agentes L7 autónomos, pipelines on-chain y enrutamiento de trading funcionan como un único organismo digital. Acoplamos Web-MiniApp, Telegram MiniApp y QL7 AI Bot, el foro con la economía de QCoin y la bolsa global ( núcleo en fase final ), para ofrecer señales alfa instantáneas, ventanas disciplinadas de entrada/salida, ejecución automatizada y un contorno de riesgo transparente. La autorización es a través de carteras no custodiales (las llaves son tuyas), soporte de niveles PRO/VIP, límites prioritarios y eliminación de cuotas. En la base hay una arquitectura Web3 jurídicamente afinada, agregación de liquidez entre exchanges, modelos de comportamiento y microestructurales, así como pipelines de research replicables con registro hipótesis → prueba → evidencias. Es una infraestructura de nueva generación para quienes trabajan al ritmo del mercado y exigen demostrabilidad, velocidad y precisión.',
+hero_cta: 'Empezar en Telegram',
+hero_learn_more: 'Más información',
+marquee: 'IA • Agentes cuánticos • Analítica on-chain • Criptobolsa (núcleo) • Foro • Minería de QCoin • Autoejecución • Contorno de riesgo • Enrutamiento de liquidez • Metaverso Web3 • API/SDK • Enterprise • Todos los derechos reservados',
 
-    home_blocks: [
-      {
-        title: 'Por qué Quantum L7 AI',
-        paras: [
-          `Fusionamos modelos multimodales con agentes autónomos L7 y pipelines on-chain.
-El sistema se autentica vía billeteras no custodiales, mantiene las llaves en el usuario y convierte datos en decisiones: desde descubrimiento hasta ejecución.`,
-          `Nuestra filosofía es claridad: hipótesis → pruebas → evidencia.
-Los agentes leen documentos, llaman APIs, observan blockchains y arman reportes de nivel humano con gráficos y citas.`,
-        ],
-      },
-      {
-        title: 'Qué obtienes',
-        bullets: [
-          'Descubrimiento de alfa en fuentes on-chain y off-chain seleccionadas',
-          'Ranking de señales, puntuación de confianza y superposición de riesgos',
-          'Backtests, cuadernos y reproducibilidad',
-          'Insights de portafolio, atribución PnL y detección de regímenes',
-          'Ejecución automática con protecciones y kill-switch',
-          'Dashboards en vivo y alertas',
-          'Datasets privados y conectores',
-          'API/SDK para equipos y desarrolladores',
-          'Hooks de gobernanza y trazabilidad de auditoría',
-          'Rutas educativas y sesiones de investigación en vivo',
-        ],
-      },
+home_blocks: [
+  {
+    title: 'Por qué Quantum L7 AI',
+    paras: [
+      `Quantum L7 AI es un ecosistema multiplataforma: núcleo de IA, agentes L7 autónomos, monitoreo on-chain, feeds de mercado normalizados, red social del foro y economía de QCoin unidos en un único tejido computacional. Cada artefacto —transacción, narrativa de noticias, publicación, gráfico de liquidez— entra en el contorno común de datos y se convierte en una señal para la acción.`,
+      `Los agentes L7 leen de forma autónoma documentos y API, observan blockchains y order books, clasifican patrones de comportamiento, evalúan regímenes de mercado y producen hipótesis verificables. El resultado no es una «caja negra», sino una tarjeta explicable: probabilidad del escenario, amplitud, horizontes, SL/TP, factores de confianza y enlaces a fuentes primarias.`,
+      `La autorización es a través de carteras no custodiales: no almacenamos claves privadas, sino que confirmamos la titularidad de la dirección. Los derechos de acceso y las cuotas se sincronizan entre Telegram MiniApp, la interfaz web y el bot QL7, el estado VIP delimita los límites y da paso a canales de procesamiento prioritarios.`,
+      `El núcleo de mercado se construye sobre agregación entre exchanges, unificación de símbolos/contratos y procesamiento de feeds con conciencia de latencia (latency-aware). Combinamos historiales de nivel institucional con flujos en tiempo real para seguir la dispersión del spread, volúmenes de impacto, balance de órdenes, riesgos MEV y el efecto del impulso de noticias.`,
+      `El principio de la plataforma es la demostrabilidad: hipótesis → prueba → evidencias. Cada cálculo se registra, las métricas son reproducibles y el arbitraje del «ruido» se recorta con filtros de régimen. Así convertimos datos en bruto en decisiones disciplinadas, y la intuición en táctica verificable.`,
+      `El foro se integra en el contorno: el contenido pasa por scoring de IA (calidad, engagement, anti-spam/anti-sybil), y la actividad se mapea a la economía de QCoin. No es una «red social por los likes», sino un bus cognitivo orientado a objetivos donde el conocimiento y la contribución se convierten en valor tokenizado.`,
     ],
+  },
 
-    /* ===== ABOUT ===== */
-    about_title: 'Acerca de Quantum L7 AI',
-    about_paragraphs: [
-      `Quantum L7 AI es un stack compacto de investigación y señales para cripto. Nuestra meta es simple: reducir ruido, revelar la estructura real del mercado y ayudarte a actuar con disciplina en lugar de impulso.`,
-
-      `L7 significa agentes de capa de aplicación. Estos agentes leen documentos, llaman APIs, observan blockchains y libros de órdenes, corren experimentos y arman salidas explicables. No recibes una caja negra; recibes hipótesis, pruebas y un rastro claro de por qué apareció una sugerencia.`,
-
-      `Para quién: traders que quieren conciencia situacional rápida; investigadores que necesitan estudios repetibles; equipos y mesas que requieren API limpia y un plano de datos estable.`,
-
-      `Cobertura. Ingerimos datos de mercado de principales CEX y agregadores DEX, añadimos datos de referencia (símbolos, mapeos, metadatos de contratos) y unificamos en un esquema único. La comparabilidad entre venues es la meta.`,
-
-      `Pipeline de datos. Feeds normalizados, huecos auto-rellenados, splits y cambios de contratos reconciliados, y derivados etiquetados. Grandes históricos permiten atribución de regímenes en lugar de sobreajuste de corto plazo.`,
-
-      `Motor analítico. Más de doscientos indicadores, pero la clave no es cantidad, sino ensembles, pesos aprendidos y contexto. Familias clásicas (RSI, Stochastic, MFI, CCI, ADX/DI, EMA/SMA/WMA, MACD, ATR, Bandas de Bollinger, VWAP, OBV, líneas de Ichimoku) combinadas con filtros de regímenes y conciencia de liquidez.`,
-
-      `Módulos on-chain. Analizamos transferencias, adiciones y retiros de liquidez, flujos de puentes, distribución de holders y huellas básicas de MEV. Las señales se reducen en peso en regiones delgadas o manipuladas.`,
-
-      `Stream de noticias e investigación. Fuentes multilingües auto-traducidas, embebidas y deduplicadas. Sentimiento, novedad y fiabilidad del origen contribuyen a un score narrativo al lado de métricas de precio.`,
-
-      `Tarjetas de señales. Cada tarjeta muestra un movimiento esperado y horizonte de tiempo derivado de la historia del activo, más confianza, contexto de liquidez e indicadores rápidos. Úsalas como faros para escenarios y riesgo, no como promesas.`,
-
-      `Disciplina. Construimos para pre-compromiso: playbooks, corredores de volatilidad, stops dinámicos y plantillas de sizing. El sistema te anima a definir invalidación antes de la operación, no después.`,
-
-      `Arquitectura. Servicios de datos y agentes corren como pequeños procesos TypeScript/Python tras un API estable. El sitio usa Next.js y WebSockets para actualizaciones en vivo. Caches y respaldos mantienen la UI responsiva aún en picos de datos.`,
-
-      `Seguridad y privacidad. No custodial; llaves permanecen con el usuario. Acciones con roles y logueadas. Secretos guardados en servidor; datos minimizados y cifrados en tránsito y reposo.`,
-
-      `Hoja de ruta. Cuadernos públicos y backtests, plantillas de estrategias, motor de portafolio con atribución, enrutamiento inteligente entre venues, conectores DeFi y modo autopiloto opcional con protecciones y checkpoints humanos.`,
-
-      `Comunidad y soporte. Publicamos notas semanales, mantenemos canal en Telegram y aceptamos pedidos específicos de equipos. Tu feedback forma directamente el backlog: salen features útiles, no distracciones brillantes.`,
-
-      `Importante: suscripciones y vínculo de billetera gestionados en nuestro bot de Telegram. El sitio se centra en investigación, visualización y documentación. Nada aquí es asesoría financiera.`,
+  {
+    title: 'Qué obtienes',
+    bullets: [
+      'Analítica cuántica de nueva generación: simbiosis de inteligencia de IA, métricas on-chain y rasgos microestructurales del mercado.',
+      'Señales alfa con probabilidad de ejecución, amplitud y horizonte, más una justificación transparente de los factores de confianza.',
+      'Núcleo de datos cross-exchange normalizado: unificación de símbolos/contratos, liquidez, spreads y frecuencia de ticks.',
+      'Monitoreo on-chain: distribución de holders, flujos a través de puentes, liquidez CEX/DEX, patrones MEV básicos.',
+      'Bolsa global (núcleo en desarrollo): enrutamiento de liquidez, protección contra slippage, evaluación contextual del riesgo.',
+      'Auto-execute: ejecución con triggers a prueba de fallos (fail-safe), stops dinámicos y parada de emergencia ante anomalías.',
+      'Paneles de portafolio: atribución de PnL, presupuestos de riesgo, regímenes de volatilidad, corredores y disciplina del tamaño de la posición.',
+      'Investigaciones replicables: backtests, notebooks, informes visuales, escenarios what-if y exposición de supuestos.',
+      'Feed de narrativas: tonalidad de IA, embeddings, confianza de las fuentes y vinculación de noticias con métricas de precio.',
+      'Economía del foro: moderación por IA, minería de QCoin por contribución y actividad, publicación de medios con scoring algorítmico.',
+      'Programa VIP: eliminación de cuotas diarias en AI Box, límites ampliados, procesamiento prioritario y X2 en QCoin para misiones/tiempo.',
+      'Integraciones: Telegram MiniApp, web, bot QL7; sesión unificada, estado común y derechos de acceso alineados.',
+      'API/SDK/Webhooks: integraciones seguras, modo sandbox, arquitectura dirigida por eventos (event-driven) para equipos y automatización.',
+      'Stack multichain: Ethereum, BSC, Polygon, Solana, TON, Avalanche y otros; puenteo y consideración de la especificidad de la red.',
+      'Arquitectura Web3 jurídicamente afinada: logging, separación de roles, verificación criptográfica y privacidad.',
     ],
-    about_sections: [
-      { title: 'Qué es Quantum L7 AI', parasIdx: [0] },
-      { title: 'Agentes L7, no cajas negras', parasIdx: [1] },
-      { title: 'Para quién', parasIdx: [2] },
-      { title: 'Cobertura', parasIdx: [3] },
-      { title: 'Pipeline de datos', parasIdx: [4] },
-      { title: 'Motor analítico', parasIdx: [5] },
-      { title: 'Módulos on-chain', parasIdx: [6] },
-      { title: 'Noticias e investigación', parasIdx: [7] },
-      { title: 'Tarjetas de señales', parasIdx: [8] },
-      { title: 'Disciplina', parasIdx: [9] },
-      { title: 'Arquitectura', parasIdx: [10] },
-      { title: 'Seguridad y privacidad', parasIdx: [11] },
-      { title: 'Hoja de ruta', parasIdx: [12] },
-      { title: 'Comunidad y soporte', parasIdx: [13] },
-      { title: 'Importante', parasIdx: [14] },
-    ],
+  },
 
-    about_bullets: [
-      'Conciencia situacional rápida: estado de mercado, tendencia, momentum, volatilidad',
-      'Normalización cross-venue y puntuación con liquidez',
-      'Flujos on-chain: holders, movimientos de liquidez, puentes, banderas MEV básicas',
-      'Noticias con traducción, búsqueda embebida y fiabilidad de fuente',
-      'Movimiento esperado e horizonte en cada tarjeta (cuantiles históricos)',
-      'Ensembles de indicadores con filtros y pesos',
-      'Backtests y cuadernos reproducibles (roadmap)',
-      'Motor de portafolio: presupuestos de riesgo, restricciones, atribución (roadmap)',
-      'Enrutamiento CEX/DEX; protecciones contra latencia y slippage (roadmap)',
-      'API/SDK para equipos; webhooks simples',
-      'Opciones enterprise: SSO, despliegues privados, SLA',
-      'Modelo no custodial: acciones con rol, logs de auditoría',
-      'Resiliencia: caches, degradación elegante, respaldos',
-      'UI limpia enfocada en decisiones, no ruido',
-      'Pensamiento de escenarios: invalidación previa y frameworks de stop',
-      'Artefactos: gráficos, tablas, reportes con links',
-      'Búsqueda embebida en tus notas y fuentes públicas (opt-in)',
-      'Conectores extensibles: precios, on-chain, investigación, social',
-      'Guardrails con humano en el loop',
-      'Límites claros: señales son herramientas, no garantías',
+  {
+    title: 'Infraestructura y datos',
+    paras: [
+      `Datos de mercado: unimos feeds históricos y en streaming de CEX/DEX, los llevamos a un esquema común, cerramos brechas y consideramos splits y particularidades de los derivados. Encima — indicadores en ensemble (RSI/ADX/ATR/VWAP/OBV/Ichimoku/clusteres de volumen), filtros de régimen y contexto de liquidez.`,
+      `Capa on-chain: grafos de direcciones, movimientos de liquidez, concentraciones de holders, eventos de puentes, riesgos MEV básicos. Las blockchains públicas no son datos personales, pero registramos cuidadosamente solicitudes e ID de depuración para fiabilidad e investigación de incidentes.`,
+      `Narrativas y noticias: indexación multilingüe, traducción, deduplicación, scoring de fuentes, evaluación de novedad y covariaciones con el precio; el resultado es una ligera sobreestructura numérica junto al precio y el volumen que ayuda a distinguir el ruido del impulso significativo.`,
+      `Almacenamiento y caché: separación de flujos en calientes/templados, degradación sin pérdida de funciones críticas, priorización de canales para VIP y tareas del sistema. Todas las etapas computacionales tienen trazabilidad, control de versiones de artefactos y reproducibilidad.`,
     ],
+  },
 
-    tg_button: 'Telegram',
+  {
+    title: 'Seguridad y cumplimiento',
+    paras: [
+      `Modelo no custodial: las claves privadas y las frases semilla permanecen con el usuario. Autorización por firma; accesos por roles, registrados y auditados. Minimización de datos personales, cifrado en tránsito y en reposo, pipelines anti-fraude/anti-sybil.`,
+      `Limpieza jurídica: proporcionamos analítica y herramientas, no consejos financieros. El flujo de pago vía NowPayments con confirmación on-chain activa la suscripción automáticamente; el estado se sincroniza entre MiniApp/web/bot. Las políticas de privacidad y logging son transparentes y se actualizan.`,
+      `Limitadores de ejecución: sanity-checks, límites, triggers de stop de emergencia y monitoreo de anomalías. Son instrumentos de disciplina, no garantía de resultado; el trading conlleva riesgo y las decisiones están del lado del usuario.`,
+    ],
+  },
 
-    /* ===== EXCHANGE ===== */
-    exchange_title: 'Intercambio (en desarrollo)',
-    exchange_sub:
-      `Un lienzo vivo de mercado con ondas cuánticas, partículas constelación y una galaxia espiral.
-Próximos hitos: enrutamiento DEX/CEX, selección con control de slippage, ejecución consciente de latencia, auto-hedge y límites de riesgo.`,
-    exchange_sections: [
-      {
-        title: 'Visión: un intercambio L7 de próxima generación',
-        paras: [
-          `El intercambio no es solo un gráfico. Es un pipeline agentico L7 que ingiere datos de mercado, eventos on-chain y señales de libros de órdenes,
-los puntúa y genera recomendaciones explicables (BUY/SELL/HOLD) con confianza y contexto de riesgo.`,
-          `Identidad via billetera; cómputo orquestado por agentes. Llaves con el usuario.
-Todo deja trazabilidad: desde investigación hasta ejecución.`,
-        ],
-      },
-      {
-        title: 'Enrutamiento y liquidez',
-        paras: [
-          `El router escanea liquidez en DEX/CEX en paralelo, estima slippage y fees,
-selecciona venue o ruta dividida, y respeta límites de riesgo.`,
-          `La latencia importa: timing con lógica de cancel/replace y kill-switch dinámico.`,
-        ],
-      },
-      {
-        title: 'Riesgo y controles',
-        paras: [
-          `Límites por notional, exposición y drawdown. Órdenes condicionales, time-in-force, umbral de confianza mínima para señales AI.`,
-          `Guardrails protegen de bucles runaway. Todo trazable: razones, inputs y versiones de modelo.`,
-        ],
-      },
-      {
-        title: 'Analítica y explicabilidad',
-        paras: [
-          `El AI box muestra confianza y factores: medias móviles, relación VWAP, posición en bandas, régimen RSI y más.`,
-          `Cada recomendación incluye bandas TP/SL derivadas de ATR y el régimen actual.`,
-        ],
-      },
-      {
-        title: 'Qué sigue',
-        paras: [
-          `Vista de portafolio, atribución PnL, contribución de factores.`,
-          `Backtests y replays en el lienzo, plantillas y despliegue 1-clic.`,
-        ],
-      },
+  {
+    title: 'Integraciones: MiniApp • Bot • Foro • Bolsa',
+    paras: [
+      `Telegram MiniApp y la web funcionan como interfaces espejadas con sesión y derechos unificados. El bot QL7 es una entrada ligera al canal de IA y a las notificaciones. El foro no es solo una comunidad: es un bus cognitivo donde el conocimiento y la contribución se convierten en QCoin, y el contenido VIP pasa por un scoring de IA prioritario.`,
+      `Bolsa (núcleo en fase final): enrutamiento de órdenes, evaluación contextual del slippage, ejecución on-chain donde aplique y modos ampliados de backtest/what-if para VIP. La integración con la analítica ofrece un efecto poco común: la señal sabe «cómo» se ejecutará.`,
     ],
-    roadmap: 'Hoja de ruta',
-    ex_bullets: [
-      'Enrutamiento inteligente con control de slippage',
-      'Backtests, replays y métricas explicables',
-      'Conexiones de billetera y analítica instantánea',
-      'Plantillas de estrategia y guardrails',
+  },
+
+  {
+    title: 'VIP y economía de QCoin',
+    paras: [
+      `VIP elimina las cuotas diarias en AI Box, amplía los límites y prioriza el procesamiento. En el foro, VIP recibe multiplicadores X2 por tiempo y misiones, una insignia dorada y mayor peso de las publicaciones de medios (video/imagen/audio) en el scoring algorítmico. La actividad, la contribución y las visualizaciones se convierten en QCoin considerando calidad y engagement.`,
+      `Pago vía NowPayments: en cuanto llega la confirmación on-chain, el estado se activa al instante y se propaga a MiniApp/bot/web. En la hoja de ruta está el lanzamiento de L7-chain: VIP — capas superiores del priority-tier para distribuciones y colas de retiro de QCoin, roles tempranos de validadores/stakers y límites aumentados.`,
     ],
+  },
+
+  {
+    title: 'Para equipos y desarrolladores',
+    bullets: [
+      'API/SDK/Webhooks con modelo seguro de tokens y rotación de claves.',
+      'Integraciones dirigidas por eventos (event-driven), entornos sandbox, conectores a fuentes on-chain/off-chain.',
+      'Modos White-Label y Enterprise: SSO, despliegues privados, SLA, ventanas de cambio.',
+      'Notebooks/backtests: exportación de artefactos, informes y reproducibilidad de experimentos.',
+      'Métricas profundas de adopción de features y rendimiento para equipos de producto.',
+    ],
+  },
+],
+
+/* ===== ABOUT ===== */  
+about_title: 'Acerca de Quantum L7 AI',
+about_paragraphs: [
+  `Quantum L7 AI no es solo «analítica», sino un único contorno operativo para la toma de decisiones de trading y la interacción social alrededor de los cripto­mercados. El núcleo de la plataforma unifica Web-MiniApp (web + Telegram), foros con minería gamificada de QCoin y un motor de investigación con IA que elimina el ruido, revela la estructura de liquidez y sugiere escenarios disciplinados de entrada/salida. Conectamos la microestructura del mercado, la telemetría on-chain, los patrones de comportamiento y las narrativas de noticias en una única capa coherente e interpretable, para que no tengas que «correr detrás» del mercado, sino poder diseñar la jugada de antemano.`,
+
+  `Los agentes L7 son módulos de IA aplicados que viven de los datos. Leen documentos y feeds, consultan APIs, observan blockchains, libros de órdenes y derivados, ejecutan mini-experimentos y entregan artefactos explicables: hipótesis, instantáneas de backtest e indicadores contextuales. Lo importante no es la «magia de la caja negra», sino la trazabilidad: desde cada conclusión se ve el camino — qué señales se tuvieron en cuenta (liquidez, spreads, asimetría, desbalances, impulsos, clústeres de volumen), por qué se redujo el peso en zonas finas/manipulables y dónde está el límite de invalidez del escenario.`,
+
+  `Para quién es. Para traders — conciencia situacional rápida y frecuencia de señales controlada sin sobrecarga; para investigadores — pipelines reproducibles y datos limpios; para equipos — API/SDK, webhooks y un bus de eventos confiable; para la comunidad de builders — foros, métricas de reputación y economía de QCoin por contribución. VIP+ obtiene un canal de IA prioritario, publicación de medios, cuotas aceleradas y un estatus «dorado» que influye en la exposición y los límites.`,
+
+  `Cobertura. Agregamos datos de los principales CEX y agregadores DEX, normalizamos símbolos y metadatos de contratos, unificamos frecuencias de ticks y profundidad de libros. Introducimos catálogos unificados, mapeos de pares/redes/mercados, marcamos derivados, tenemos en cuenta splits, delistings y migraciones de contratos. El objetivo es la comparabilidad entre plataformas y redes: una sola capa de abstracción para comparar liquidez, costes, latencias y la disponibilidad «real» de volúmenes.`,
+
+  `Pipeline de datos. Los flujos se limpian, los huecos se restauran, las anomalías se marcan y los contornos de latencia se calibran. La historia es profunda — esto permite identificar regímenes y no encajar un puntero sobre un pico aleatorio. Añadimos rutas on-chain, puentes de transferencia, distribuciones de holders, señales de actividad MEV y lo vinculamos con métricas de mercado. El resultado son conjuntos de características resistentes a «burbujas de ruido» y anomalías locales.`,
+
+  `Núcleo analítico. Cientos de indicadores son solo la paleta. Lo principal son los conjuntos y el contexto: RSI/RSX, Stochastic, CCI/MFI, ADX/DI, ATR y bandas, EMA/SMA/WMA, MACD/Signal/Histogram, VWAP/POC/Value-Area, perfiles de volumen, desbalances Bid/Ask y barridos de liquidez. Mezclamos familias clásicas con filtros de régimen, heurísticas de liquidez y comportamiento, así como con un marcador on-chain de entrada/salida de flujos. Cada tarjeta no es un «consejo», sino una brújula: amplitud histórica, horizonte de materialización, confianza, supuestos y límites de invalidación.`,
+
+  `Módulos on-chain. Rastrearmos clústeres de transferencias, puentes, acumulación/distribución, concentración de grandes tenedores, patrones MEV básicos y rutas anómalas. En zonas de liquidez fina, o con picos de funding o de spread, el peso de las señales se reduce; cuando se confirma en varios dominios (spot, derivados, on-chain) — aumenta. Así se minimiza la «falsa confianza» donde el mercado es frágil.`,
+
+  `Narrativas y noticias. El feed multilingüe se traduce, se desduplica y se indexa mediante embeddings. Evaluamos la novedad, la confianza en la fuente, la proporción «ritual/esencia», la tonalidad y la persistencia del tema en el tiempo. Junto a las métricas de precio y on-chain aparece un «mapa de narrativa» ligero: qué impulsa la atención, dónde están los riesgos regulatorios, qué aumenta la volatilidad y qué se desinfla.`,
+
+  `Tarjetas de señales y disciplina. En la tarjeta — amplitud esperada (cuantiles), horizonte temporal, marcadores SL/TP, un resumen rápido de liquidez y un conjunto de triggers que deben confluir. El sistema impulsa la disciplina: antes de entrar ves la invalidación, la unidad de riesgo y el corredor dinámico de volatilidad; después — recibes checkpoints de verificación y condiciones para retirar riesgo.`,
+
+  `Arquitectura. Servicios ligeros en TypeScript/Python tras un API estable; el sitio — en Next.js con capas en vivo vía WebSocket. Niveles de caché y fuentes de respaldo aseguran una degradación suave en picos. API/SDK y webhooks habilitan la automatización, y los roles y el auditoría marcan límites seguros. MiniApp funciona en la web y en Telegram para que puedas llevar el mercado en un mismo flujo: gráficos, foro, billetera, bot — sin fricción.`,
+
+  `Seguridad y privacidad. No custodial: no solicitamos ni almacenamos claves privadas/seed. Los roles restringen el acceso, las acciones se registran, los datos personales se minimizan y se cifran en tránsito y en reposo. Los pipelines anti-sybil/anti-fraude protegen la economía de QCoin y los mecanismos de reputación del foro; la validación de sesiones mantiene con cuidado, pero con rigor, la integridad del acceso.`,
+
+  `Foro y minería de QCoin. El foro no es una «red social», sino una línea de producción de conocimiento. Cada 4 horas confirmas actividad y bloqueas la recompensa; las publicaciones con medios (video/imagen/audio) pasan el scoring de QuantumLCM-AI (calidad, engagement, anti-spam/anti-sybil) y se convierten en QCoin. VIP+ obtiene X2 en tiempo y X2 en misiones, prioridad en la exposición, límites ampliados para medios y moderación acelerada. Reputación y contribución no son ruido vacío, sino una magnitud económicamente significativa.`,
+
+  `Exchange (en desarrollo) y recomendaciones. El núcleo de trading y la ejecución se conectan por etapas; ya están disponibles recomendaciones con IA por símbolos/marcos temporales, profundidad de libro y perfil de liquidez. Diseñamos smart-routing, protección frente a latencias/deslizamiento, restricciones de cartera y atribución de PnL. VIP+ obtiene acceso a indicadores experimentales, modos what-if/backtest y horizontes de análisis ampliados.`,
+
+  `Economía de QCoin y L7-blockchain. QCoin es el combustible del conocimiento y del tráfico útil. El futuro L7-chain es una capa que conecta activos cross-chain, bancos e infra financiera en un enrutador universal de valor. Nuestro objetivo es que QCoin se convierta en una unidad de liquidación neutral en el ecosistema, con emisión/quema transparente y una cola de retirada justa. VIP+ tiene prioridad elevada en distribuciones y acceso temprano a staking/roles de validador.`,
+
+  `Pago y activación. La suscripción VIP+ se tramita vía NowPayments: pago cripto (USDT y otros), el webhook activa el acceso al instante y sincroniza el estatus entre MiniApp, bot y foro. Sin capturas de pantalla ni verificaciones manuales. La interfaz está disponible en 7 idiomas; el enlace con la billetera es sin fricción. Pagas por velocidad, interpretabilidad y una economía donde la contribución es recompensada.`,
+
+  `Comunidad y hoja de ruta. Publicamos notas semanales, abrimos betas de funciones alfa y aceptamos solicitudes dirigidas de equipos. En el backlog: motor de carteras con presupuestos de riesgo, smart-routing ampliado CEX/DEX, notebooks/backtests públicos y «piloto semiautomático» bajo control humano. Todo lo que aumente la disciplina y reduzca la fricción va a release; lo que brilla pero no ayuda — no. Materiales — educativos/analíticos, no asesoramiento financiero.`
+],
+
+about_sections: [
+  { title: 'Qué es Quantum L7 AI',            parasIdx: [0] },
+  { title: 'Agentes L7, no una «caja negra»', parasIdx: [1] },
+  { title: 'Para quién',                      parasIdx: [2] },
+  { title: 'Cobertura',                       parasIdx: [3] },
+  { title: 'Pipeline de datos',               parasIdx: [4] },
+  { title: 'Núcleo analítico',                parasIdx: [5] },
+  { title: 'Módulos on-chain',                parasIdx: [6] },
+  { title: 'Narrativas y noticias',           parasIdx: [7] },
+  { title: 'Tarjetas y disciplina',           parasIdx: [8] },
+  { title: 'Arquitectura',                    parasIdx: [9] },
+  { title: 'Seguridad y privacidad',          parasIdx: [10] },
+  { title: 'Foro y minería de QCoin',         parasIdx: [11] },
+  { title: 'Exchange y recomendaciones',      parasIdx: [12] },
+  { title: 'Economía de QCoin y L7-chain',    parasIdx: [13] },
+  { title: 'Pago, localización, hoja de ruta', parasIdx: [14] }
+],
+
+about_bullets: [
+  'Conciencia situacional: tendencia, impulso, volatilidad, liquidez',
+  'Normalización cross-exchange, ponderación de señales sensible a latencia',
+  'Flujos on-chain, concentración de holders, puentes, indicios MEV',
+  'Feed narrativo con traducción y evaluación de confianza/novedad',
+  'Tarjetas: amplitud (cuantiles), horizontes, SL/TP, confianza',
+  'Conjuntos de indicadores + filtros de régimen + comportamiento',
+  'API/SDK y webhooks para automatización sin «magia»',
+  'Degradación suave y fuentes de respaldo en picos de carga',
+  'Seguridad no custodial: roles, auditoría, cifrado',
+  'Foro: minería de QCoin, misiones, publicación de medios con scoring IA',
+  'VIP+: X2 en tiempo y misiones, prioridad en exposición y límites',
+  'Recomendaciones en el exchange ya disponibles; núcleo de ejecución en camino',
+  'NowPayments: activación instantánea, sincronización de estatus',
+  'L7-blockchain: colas de retiro prioritarias y roles tempranos',
+  '7 idiomas, acceso unificado en la web y Telegram MiniApp'
+],
+
+tg_button: 'Telegram',
+
+
+/* ===== EXCHANGE (descripción ampliada) ===== */
+exchange_title: 'Exchange (en desarrollo)',
+exchange_sub:
+  `Quantum L7 Exchange — es una plataforma de trading multichain, plausiblemente explicable, de nueva generación,
+que unifica la liquidez CEX/DEX, las recomendaciones de IA y la infraestructura de datos institucional en un único tejido computacional.
+Procesamos 87 TB de históricos de mercado y más de 37 mil millones de velas históricas en todas las redes y plazas principales, normalizamos los ticks,
+la profundidad de los libros de órdenes y las especificaciones de derivados, llevando el mercado a un único estándar de toma de decisiones. El objetivo no es «otro exchange más»,
+sino un circuito de ejecución con lógica demostrable: hipótesis → test → evidencias → operación, con limitadores de riesgo transparentes y auditoría trazable.`,
+
+exchange_sections: [
+  {
+    title: 'Visión: Exchange L7 de nueva generación',
+    paras: [
+      `L7 Exchange es un pipeline basado en agentes, donde agentes L7 autónomos consumen feeds de mercado, eventos on-chain, noticias y señales de comportamiento
+de la microestructura, los sincronizan en el tiempo y emiten recomendaciones explicables (BUY/SELL/HOLD) con probabilidad,
+amplitud, horizonte y contexto de riesgo (liquidez, spread, dispersión, anomalías). Para el usuario esto significa
+reproducibilidad de las decisiones: cada tarjeta de señal va acompañada de un log de factores, versiones de modelos y enlaces a las fuentes primarias.`,
+      `Identidad — a través de monederos no custodiales (no almacenamos claves privadas ni frases semilla). Los derechos de acceso,
+cuotas y límites se sincronizan en la interfaz web y en el MiniApp. La ejecución de acciones — solo dentro de los limitadores
+establecidos por ti y con un nivel suficiente de confianza del modelo. El principio de la plataforma — demostrabilidad, no una «caja negra».`,
+      `Datos de nivel institucional: 87 TB de históricos, 37+ mil millones de velas, unificación de contratos y símbolos,
+procesamiento de flujos con reconocimiento de latencia (latency-aware), limpieza de cortes, consideración de splits y especificidades de derivados. Encima — ensembles de 200+ indicadores
+(RSI/ADX/ATR/VWAP/OBV/Ichimoku/clústeres de volumen, filtros de régimen, etc.), rasgos de comportamiento y estadística de micro–desequilibrios.`,
+      `H2 2026 — ventana objetivo de lanzamiento público del núcleo de L7 Exchange junto con el L7-blockchain de nueva generación
+(nivel de conciliación entre redes). En el inicio — enrutamiento cross-exchange, auto-ejecución explicable,
+y después — expansión hacia clearing on-chain y smart-permisos de acceso nativos.`,
+    ],
+  },
+
+  {
+    title: 'Enrutamiento y liquidez',
+    paras: [
+      `El smart router escanea en paralelo la liquidez en CEX/DEX, modela el slippage, comisiones y latencias,
+elige la plaza/ruta dividida y controla la calidad de ejecución mediante métricas objetivo (expected fill, adverse selection,
+mark-out tras N segundos/minutos). En modo split, las órdenes se fraccionan y distribuyen por pools/libros para minimizar el impacto.`,
+      `La latencia importa: soportamos cancel/replace, time-outs, «kill-switch», reglas de fijación parcial
+y reacción a saltos en la dispersión del spread. En escenarios de arbitraje se usan ventanas de sincronización de ticks y conexiones de baja latencia.`,
+      `Microestructura de mercado: analizamos el desequilibrio de órdenes, picos de volumen oculto, liquidez por niveles,
+el impacto de noticias/eventos on-chain, el comportamiento de prints «agresivos» y la probabilidad de deslizamiento según el tamaño nocional.`,
+    ],
+  },
+
+  {
+    title: 'Riesgo y control',
+    paras: [
+      `Límites globales y por instrumento: por nocional, cuota de cartera, caída diaria/semanal, apalancamiento, concentración.
+Perfiles de ejecución (conservative/balanced/aggressive) y confianza mínima requerida del modelo. Todos los disparadores están descritos con transparencia
+y se registran para auditoría. Cualquier acción es explicable: motivo, datos de entrada, versiones de modelos y parámetros de ejecución.`,
+      `Órdenes condicionales (stop/stop-limit), time-in-force (GTC/IOC/FOK), directivas de fijación parcial, corredores de stop dinámicos
+por régimen de volatilidad (tipo ATR), «circuit-breaker» ante anomalías, «silencios» nocturnos y bloques de eventos (por ejemplo, noticias de alto impacto).`,
+      `Anti-aceleración y anti-pico: comprobaciones extra de spread/liquidez, umbrales de desviación respecto al precio justo, prohibición de promediar «al abismo»,
+nivel de desescalada forzosa de emergencia cuando el entorno se vuelve «no apto para el trading».`,
+    ],
+  },
+
+  {
+    title: 'Analítica y explicabilidad',
+    paras: [
+      `El AI-Box para cada símbolo/TF muestra el nivel de confianza, los factores de decisión (desde la posición relativa frente a VWAP/bandas
+hasta los regímenes de RSI/clústeres de volumen), la amplitud y los horizontes según la historia (cuantiles) y los TP/SL recomendados.
+La presentación es compacta pero verificable: cifras, no metáforas.`,
+      `Explainability by design: causa ➜ efecto. La tarjeta contiene los pesos de los factores, enlaces a las fuentes,
+instantáneas de libros/volúmenes y mini-simulaciones «what-if». El objetivo — dar al trader un esqueleto transparente de la decisión,
+que pueda reproducirse y debatirse.`,
+      `Noticias/narrativas: parsing multilingüe, traducción, deduplicación, tonalidad por IA, confianza en la fuente y vínculo con la reacción del precio.
+No es «ruido», sino contexto para evaluar la probabilidad del escenario y las ventanas temporales de ejecución.`,
+    ],
+  },
+
+  {
+    title: 'Cartera, informes y atribución',
+    paras: [
+      `Paneles de cartera con atribución de PnL: descomposición por fuentes de alfa, regímenes de mercado, símbolos, presupuestos de riesgo y
+decisiones del modelo. Se calculan por separado las métricas de «mark-out» e impacto, para diferenciar la «suerte» de la sistematicidad.`,
+      `Diarios de operaciones, exportación, informes, API para integraciones. Reproducibilidad de investigación: backtests y «replay»
+sobre flujos históricos directamente sobre el gráfico. «Plantillas de estrategia» y despliegue «one-click» con limitadores.`,
+      `Modos de equipo (roadmap): roles, permisos, consenso de parámetros, informes centralizados,
+white-label y despliegues privados para enterprise.`,
+    ],
+  },
+
+  {
+    title: 'Infraestructura de datos y red',
+    paras: [
+      `Unificación de feeds: agregación cross-exchange, normalización de ticks y profundidad a un esquema común, cierre de huecos,
+procesamiento de splits y cambios de contrato. Encima — ensembles de 200+ indicadores, filtros de comportamiento/régimen
+y rasgos de microestructura. Capa histórica — 87 TB, más de 37 mil millones de velas.`,
+      `Nivel on-chain: grafos de direcciones, concentración de tenedores, entrada/salida de liquidez, movimientos por puentes, riesgos MEV básicos.
+Las blockchains públicas no son datos personales; al mismo tiempo, los logs operativos (dentro de la ley) ayudan
+a garantizar la fiabilidad e investigar incidentes.`,
+      `Stack de red: conexiones optimizadas a proveedores de liquidez y datos de mercado, estrategia de degradación
+sin pérdida de funciones críticas, cachés calientes/templados, priorización de canales VIP de procesamiento. Todas las etapas de cómputo se trazan.`,
+    ],
+  },
+
+  {
+    title: 'Seguridad y cumplimiento',
+    paras: [
+      `Modelo no custodial: las llaves con el usuario, autorización — mediante firma. Acceso por roles,
+minimización de datos personales, cifrado «en tránsito» y «en reposo», pipelines anti-fraude/anti-sybil.
+Registro de acciones para auditoría y reproducibilidad.`,
+      `Contexto regulatorio: proporcionamos analítica y herramientas, no recomendaciones financieras.
+Pago de suscripción vía NowPayments con confirmación on-chain — activación automática de límites/permisos sin «chequeos» manuales.
+Las políticas de privacidad y registro — transparentes y de actualización regular.`,
+      `Los limitadores de ejecución — son disciplina, no garantía. El mercado es volátil; las decisiones y el cumplimiento normativo —
+del lado del usuario. Damos marcos, métricas y explicabilidad para que el riesgo sea consciente.`,
+    ],
+  },
+
+  {
+    title: 'Hoja de ruta y lanzamiento',
+    paras: [
+      `H2 2026: lanzamiento público del núcleo de L7 Exchange y del L7-blockchain de nueva generación — una capa de conciliación entre redes,
+destinada a simplificar el clearing y los permisos de acceso a nivel de smart contracts, así como a mejorar la observabilidad de la ejecución.
+El foco principal — enrutamiento de liquidez, auto-ejecución explicable, atribución de cartera y modos de equipo.`,
+      `QCoin — la economía interna del ecosistema L7. En la hoja de ruta — el papel de QCoin en los procesos de pago/estimulación del ecosistema.
+El objetivo — una «capa de liquidación» única entre analítica, ejecución y servicios de usuario.`,
+      `Antes del lanzamiento público — betas ampliadas, pruebas de estrés, informes de estabilidad y resultados abiertos y registrables
+sobre la calidad de ejecución y latencias. La transparencia — el núcleo de la confianza.`,
+    ],
+  },
+],
+
+roadmap: 'Hoja de ruta',
+
+ex_bullets: [
+  'Enrutamiento inteligente CEX/DEX con control de slippage, splits y ejecución con reconocimiento de latencia (latency-aware)',
+  'Señales de IA explicables: probabilidad, amplitud, horizontes, factores de confianza, TP/SL',
+  'Paneles de cartera: atribución de PnL, presupuestos de riesgo, «mark-out», métricas de impacto',
+  'Backtests y replays en flujos históricos directamente en el gráfico',
+  'Limitadores de riesgo: límites, time-in-force, kill-switch, corredores de stop dinámicos',
+  'Unificación de datos: 87 TB de históricos, 37+ mil millones de velas, 200+ indicadores y filtros de régimen',
+  'Conexión de monederos, modelo no custodial y auditoría registrada de acciones',
+  'H2 2026: lanzamiento público del núcleo de L7 Exchange y del L7-blockchain de nueva generación',
+],
+
 
     /* ===== SUBSCRIBE / CONTACT ===== */
     subscribe_title: 'Planes de suscripción',
@@ -967,169 +1509,306 @@ selecciona venue o ruta dividida, y respeta límites de riesgo.`,
     auth_signin: '登录',
     nav_support: '支持',
     select_symbol_tf: "选择符号 / 时间框架",
-    /* ===== HERO / HOME ===== */
-    hero_title: 'Quantum L7 AI',
-    hero_subtitle:
-      '为研究、阿尔法信号和安全执行提供宇宙级智能。钱包认证，PRO/VIP 等级。',
-    hero_cta: '在 Telegram 开始',
-    hero_learn_more: '了解更多',
-    marquee: '人工智能 • 区块链 • 自动化 • 量化 • 研究 • 智能体 • 阿尔法 • 版权所有 ',
+/* ===== HERO / HOME (简述) ===== */   
+hero_title: '欢迎来到 Quantum L7 AI 宇宙',
+hero_subtitle:
+  'Quantum L7 AI 不只是一个平台，而是一个完整的决策赛博宇宙：机构级的多链数据、自治的 L7 代理、链上流水线与交易路由像一个数字有机体协同运作。我们对接 Web-MiniApp、Telegram MiniApp 与 QL7 AI Bot、具有 QCoin 经济的论坛以及全球交易所（ 内核处于最终阶段 ），以提供即时的 Alpha 信号、纪律化的进场/出场窗口、自动化执行与透明的风险轮廓。授权通过非托管钱包（私钥在你手中），支持 PRO/VIP 等级、优先级限额与取消配额。其基础是法务严谨的 Web3 架构、跨交易所的流动性聚合、行为与微结构模型，以及可复现的研究流水线并记录 假设 → 测试 → 证据。它是为在市场节奏中工作并要求可证性、速度与精度的人所打造的新一代基础设施。',
+hero_cta: '从 Telegram 开始',
+hero_learn_more: '了解更多',
+marquee: 'AI • 量子代理 • 链上分析 • 加密交易所（内核） • 论坛 • QCoin 挖矿 • 自动执行 • 风险轮廓 • 流动性路由 • Web3 元宇宙 • API/SDK • Enterprise • 保留所有权利',
 
-    home_blocks: [
-      {
-        title: '为什么选择 Quantum L7 AI',
-        paras: [
-          `我们将多模态模型与 L7 自主代理和链上管道融合。
-系统通过去托管钱包认证，密钥由用户掌握，将原始数据转化为从发现、验证到执行的决策。`,
-          `我们的理念是清晰：假设 → 测试 → 证据。
-代理读取文档、调用 API、监听链上数据，并生成带有图表和引用的人类级别报告。`,
-        ],
-      },
-      {
-        title: '你将获得什么',
-        bullets: [
-          '从精选的链上和链下来源中发现阿尔法',
-          '信号排名、置信度评分和风险覆盖',
-          '回测、研究笔记本和可复现研究',
-          '投资组合洞察、PnL 归因和市场状态检测',
-          '带有防护和紧急开关的自动化执行',
-          '实时仪表盘和警报',
-          '私有数据集和连接器',
-          '为团队和开发者提供 API/SDK',
-          '治理挂钩和审计追踪',
-          '教育课程和实时研究会话',
-        ],
-      },
+home_blocks: [
+  {
+    title: '为什么选择 Quantum L7 AI',
+    paras: [
+      `Quantum L7 AI 是一个跨平台生态：AI 核心、自治 L7 代理、链上监控、规范化的市场数据源、论坛社交网络与 QCoin 经济被整合为一体的计算织体。每个工件——交易、新闻叙事、帖子、流动性图——都会进入公共数据闭环并转化为行动信号。`,
+      `L7 代理可自主阅读文档与 API，观察区块链与订单簿，归类行为模式，评估市场状态并产出可验证的假设。结果不是“黑箱”，而是一张可解释的卡片：情景概率、幅度、时间跨度、SL/TP、置信因子以及指向原始来源的链接。`,
+      `授权通过非托管钱包：我们不保存私钥，而是确认地址所有权。访问权限与配额在 Telegram MiniApp、Web 界面与 QL7 机器人之间同步，VIP 状态标定限额边界并进入优先处理通道。`,
+      `市场内核基于跨交易所聚合、符号/合约统一与延迟感知（latency-aware）数据处理构建。我们将机构级历史与实时流结合，以跟踪价差离散、冲击性成交量、订单平衡、MEV 风险以及新闻脉冲效应。`,
+      `平台原则是可证性：假设 → 测试 → 证据。每次计算均记录在案，度量可复现，“噪声套利”由状态过滤器剔除。由此我们把原始数据转化为纪律化决策，把直觉变为可验证的战术。`,
+      `论坛嵌入闭环：内容经过 AI 评分（质量、参与度、anti-spam/anti-sybil），活动被映射到 QCoin 经济。这不是“为点赞而生的社交网络”，而是目标导向的认知总线，知识与贡献被转化为代币化价值。`,
     ],
+  },
 
-    /* ===== ABOUT ===== */
-    about_title: '关于 Quantum L7 AI',
-    about_paragraphs: [
-      `Quantum L7 AI 是一个紧凑的加密研究和信号堆栈。目标很简单：减少噪音，揭示真实的市场结构，帮助你用纪律而非冲动行动。`,
-
-      `L7 代表应用层代理。这些代理读取文档、调用 API、观察区块链和订单簿，运行实验并生成可解释的输出。你获得的不是黑箱，而是假设、测试和清晰的推理链。`,
-
-      `适用人群：需要快速市场感知的交易员；需要可复现研究的研究者；需要干净 API 和稳定数据层的团队和平台。`,
-
-      `覆盖范围。我们从主要 CEX 和领先 DEX 聚合器获取市场数据，添加参考数据（符号、映射、合约元数据），并统一成单一架构。跨平台可比性是目标。`,
-
-      `数据管道。数据源被标准化，缺口自动填补，拆分和合约变更被处理，衍生品被标记。大量历史数据支持市场状态归因，而不是短期过拟合。`,
-
-      `分析引擎。提供 200 多个指标，但重点不在数量，而在于集成、权重和上下文。经典系列（RSI、随机指标、MFI、CCI、ADX/DI、EMA/SMA/WMA、MACD、ATR、布林带、VWAP、OBV、一目均衡表）与状态过滤和流动性感知结合。`,
-
-      `链上模块。我们解析转账、流动性增加和移除、跨链桥流、持有者分布和基本 MEV 特征。在流动性不足或操纵区域信号会被降权。`,
-
-      `新闻与研究流。多语言来源自动翻译、嵌入并去重。情绪、新颖性和来源可靠性共同构成轻量级叙事评分，显示在价格指标旁。`,
-
-      `信号卡。每张卡片显示预期走势和时间范围，附带置信度、流动性上下文和快速指标。它们是帮助你制定场景和风险的灯塔，而不是承诺。`,
-
-      `纪律。我们为预先承诺而构建：操作手册、波动走廊、动态止损和仓位大小模板。系统推动你在交易前定义无效点，而不是之后。`,
-
-      `架构。数据和代理服务作为小型 TypeScript/Python 进程运行在稳定 API 背后。网站用 Next.js 渲染，WebSocket 实时更新。缓存和备用保持界面在数据高峰期依然响应。`,
-
-      `安全与隐私。我们是去托管的；密钥在用户手中。操作按角色划分并记录。秘密存储在服务器端，个人数据在传输和存储中被最小化并加密。`,
-
-      `路线图。公共笔记本和回测、策略模板、投资组合引擎、跨平台更智能路由、DeFi 连接器和带有人类检查点的自动驾驶模式。`,
-
-      `社区与支持。我们每周发布研究笔记，维护 Telegram 频道，接受团队的具体请求。你的反馈直接塑造待办事项——有用功能上线，花哨但无用的不会。`,
-
-      `重要提示：订阅和钱包绑定通过我们的 Telegram 机器人处理。网站专注于研究、可视化和文档。这里不是投资建议。`,
+  {
+    title: '你将获得什么',
+    bullets: [
+      '新一代量子分析：AI 智能、链上度量与市场微结构特征的共生融合。',
+      'Alpha 信号包含执行概率、幅度与时间跨度，并提供透明的置信因子依据。',
+      '规范化的跨交易所数据内核：统一符号/合约、流动性、价差与 Tick 频率。',
+      '链上监控：持有者分布、跨桥流动、CEX/DEX 流动性、基础 MEV 模式。',
+      '全球交易所（内核开发中）：流动性路由、滑点防护、情境化风险评估。',
+      'Auto-execute：具备故障安全触发器、动态止损与异常紧急停止的执行。',
+      '投资组合面板：PnL 归因、风险预算、波动率状态、通道与仓位规模纪律。',
+      '可复现研究：回测、Notebooks、可视化报告、what-if 场景与假设曝光。',
+      '叙事信息流：AI 语调、嵌入（embeddings）、来源可信度与新闻与价格度量的关联。',
+      '论坛经济：AI 审核、以贡献与活跃度进行 QCoin 挖矿、带算法评分的媒体发帖。',
+      'VIP 计划：移除 AI Box 的日配额、扩展限额、优先处理，以及针对任务/时间的 QCoin X2。',
+      '集成：Telegram MiniApp、Web、QL7 机器人；统一会话、共享状态与一致的访问权限。',
+      'API/SDK/Webhooks：安全集成、sandbox 模式、面向事件（event-driven）的团队与自动化架构。',
+      '多链栈：Ethereum、BSC、Polygon、Solana、TON、Avalanche 等；跨链桥接并考虑网络特性。',
+      '法务严谨的 Web3 架构：日志记录、角色分离、密码学验证与隐私保护。',
     ],
-    about_sections: [
-      { title: '什么是 Quantum L7 AI', parasIdx: [0] },
-      { title: 'L7 代理，不是黑箱', parasIdx: [1] },
-      { title: '适用人群', parasIdx: [2] },
-      { title: '覆盖范围', parasIdx: [3] },
-      { title: '数据管道', parasIdx: [4] },
-      { title: '分析引擎', parasIdx: [5] },
-      { title: '链上模块', parasIdx: [6] },
-      { title: '新闻与研究流', parasIdx: [7] },
-      { title: '信号卡', parasIdx: [8] },
-      { title: '纪律', parasIdx: [9] },
-      { title: '架构', parasIdx: [10] },
-      { title: '安全与隐私', parasIdx: [11] },
-      { title: '路线图', parasIdx: [12] },
-      { title: '社区与支持', parasIdx: [13] },
-      { title: '重要提示', parasIdx: [14] },
-    ],
+  },
 
-    about_bullets: [
-      '快速市场感知：市场状态、趋势、动量、波动性',
-      '跨平台标准化和流动性感知评分',
-      '链上流：持有者、流动性变化、跨链桥、MEV 指标',
-      '带翻译的新闻流、嵌入式搜索和来源可靠性',
-      '每个信号卡上的预期走势和时间范围（基于历史分位数）',
-      '指标集成与状态过滤和权重学习',
-      '回测和可复现研究（路线图）',
-      '投资组合引擎：风险预算、约束、PnL 归因（路线图）',
-      '跨 CEX/DEX 智能路由；延迟和滑点保护（路线图）',
-      '团队 API/SDK；简单 webhook 自动化',
-      '企业选项：SSO、私有部署、SLA',
-      '安全模型：去托管、角色范围、审计日志',
-      '运行可靠性：缓存层、优雅降级、备用',
-      '简洁 UI 突出决策，而非噪音',
-      '场景思维：预定义无效点和止损框架',
-      '研究成果：图表、表格、简报',
-      '跨笔记嵌入搜索（可选）',
-      '可扩展连接器：价格、链上、研究、社交',
-      '半自动化流程中的人为防护',
-      '清晰边界：信号是工具，不是保证',
+  {
+    title: '基础设施与数据',
+    paras: [
+      `市场数据：我们汇聚 CEX/DEX 的历史与流式数据源，统一到通用模式、弥合缺口，考虑拆分与衍生品特性。其上叠加集成式指标（RSI/ADX/ATR/VWAP/OBV/Ichimoku/成交量簇）、状态过滤器与流动性上下文。`,
+      `链上层：地址图、流动性迁移、持有者集中度、跨桥事件、基础 MEV 风险。公共区块链不是个人数据，但我们会谨慎记录请求与调试 ID，以保障可靠性并用于事件调查。`,
+      `叙事与新闻：多语言索引、翻译、去重、来源评分、新颖性与与价格的协方差评估；输出是在价格与成交量旁的一层轻量数值叠加，帮助分辨噪声与有意义的脉冲。`,
+      `存储与缓存：将流拆分为热/温路径，在不丢失关键功能的前提下渐进降级，并为 VIP 与系统任务优先分配通道。所有计算阶段具备可追溯性、工件版本控制与可复现性。`,
     ],
+  },
 
-    tg_button: 'Telegram',
+  {
+    title: '安全与合规',
+    paras: [
+      `非托管模型：私钥与助记词保留在用户侧。签名授权；基于角色的访问已记录并可审计。最小化个人数据，在传输与存储中加密，具备 anti-fraud/anti-sybil 流水线。`,
+      `法律洁净：我们提供分析与工具，而非财务建议。通过 NowPayments 的链上确认将自动激活订阅；状态在 MiniApp/Web/机器人间同步。隐私与日志策略透明且持续更新。`,
+      `执行限幅器：sanity-checks、限制、紧急止损触发器与异常监控。它们是纪律工具，而非结果保证；交易伴随风险，决策由用户自行承担。`,
+    ],
+  },
 
-    /* ===== EXCHANGE ===== */
-    exchange_title: '交易所（开发中）',
-    exchange_sub:
-      `一个动态的市场画布，带有量子波、星座粒子和螺旋星系覆盖。
-下一步：DEX/CEX 智能路由、滑点控制、延迟感知执行、自动对冲和风险限制。`,
-    exchange_sections: [
-      {
-        title: '愿景：下一代 L7 交易所',
-        paras: [
-          `交易所不仅是图表。它是一个 L7 代理管道，吸收市场数据、链上事件和订单簿信号，
-评分并生成可解释的推荐（买/卖/持有）及其置信度和风险上下文。`,
-          `身份基于钱包；计算由代理编排。密钥掌握在用户手中。
-所有过程都有审计轨迹：从研究到执行。`,
-        ],
-      },
-      {
-        title: '智能路由与流动性',
-        paras: [
-          `路由器并行扫描 DEX/CEX 的流动性，估计滑点和费用，
-选择最佳 venue 或拆分路径，并遵守风险限制。`,
-          `延迟至关重要：通过 cancel/replace 逻辑和 kill-switch 提高执行及时性。`,
-        ],
-      },
-      {
-        title: '风险与控制',
-        paras: [
-          `名义、敞口和回撤限制。条件订单、时效、AI 信号最小置信阈值。`,
-          `防护栏防止失控循环。所有操作可追踪：原因、输入和模型版本。`,
-        ],
-      },
-      {
-        title: '分析与可解释性',
-        paras: [
-          `AI 框显示信心和因素：均线对齐、VWAP 关系、带内位置、RSI 状态等。`,
-          `每个推荐配有基于 ATR 的 TP/SL 波段及当前市场状态。`,
-        ],
-      },
-      {
-        title: '下一步',
-        paras: [
-          `投资组合视图、PnL 归因、因子贡献。`,
-          `回测和重放直接在画布上，策略模板，一键部署。`,
-        ],
-      },
+  {
+    title: '集成：MiniApp • 机器人 • 论坛 • 交易所',
+    paras: [
+      `Telegram MiniApp 与 Web 作为镜像界面运行，具备统一会话与权限。QL7 机器人是进入 AI 通道与通知的轻入口。论坛不只是社区：它是认知总线，知识与贡献转化为 QCoin，且 VIP 内容享有优先的 AI 评分。`,
+      `交易所（内核处于最终阶段）：订单路由、滑点的情境评估、在适用处进行链上执行，以及为 VIP 提供扩展的 backtest/what-if 模式。与分析的整合带来罕见效果——信号“知道”它将如何被执行。`,
     ],
-    roadmap: '路线图',
-    ex_bullets: [
-      '智能路由与滑点控制',
-      '回测、重放和可解释指标',
-      '钱包连接与即时投资组合分析',
-      '策略模板与防护栏',
+  },
+
+  {
+    title: 'VIP 与 QCoin 经济',
+    paras: [
+      `VIP 取消 AI Box 的日配额、扩展限额并优先处理。在论坛中，VIP 获得时间与任务的 X2 倍增、金色徽章，以及在算法评分中更高权重的媒体帖子（视频/图片/音频）。活动、贡献与浏览量会在考量质量与参与度后转化为 QCoin。`,
+      `通过 NowPayments 支付：一旦链上确认到达，状态即刻激活并传播到 MiniApp/机器人/Web。路线图包含 L7 链的启动：VIP 处于分配与 QCoin 提现队列的高优先层级，拥有验证人/质押者等早期角色与更高限额。`,
     ],
+  },
+
+  {
+    title: '面向团队与开发者',
+    bullets: [
+      '具备安全令牌模型与密钥轮换的 API/SDK/Webhooks。',
+      '面向事件（event-driven）的集成、sandbox 环境、对接链上/链下来源的连接器。',
+      'White-Label 与 Enterprise 模式：SSO、私有部署、SLA、变更窗口。',
+      'Notebooks/回测：工件导出、报告与实验可复现性。',
+      '为产品团队提供深入的功能采纳与性能度量。',
+    ],
+  },
+],
+
+
+/* ===== ABOUT ===== */   
+about_title: '关于 Quantum L7 AI',
+about_paragraphs: [
+  `Quantum L7 AI 不仅仅是“分析”，而是围绕加密市场的交易决策与社会化互动的统一运营闭环。平台内核整合了 Web-MiniApp（网页 + Telegram）、带有游戏化 QCoin 挖矿的论坛，以及能降噪、识别流动性结构并给出纪律化入场/出场方案的 AI 研究引擎。我们把市场微观结构、链上遥测、行为模式与新闻叙事融合为一个一致且可解释的层，让你不必“追着”市场跑，而是可以提前设计下一步。`,
+
+  `L7 代理是运行在数据之上的应用型 AI 模块。它们读取文档与信息流，请求 API，观察区块链、订单簿与衍生品，运行小型实验，并产出可解释的工件：假设、回测快照、上下文指标。重视的不是“黑箱魔法”，而是可追溯性：每个结论都能看到路径——考虑了哪些特征（流动性、价差、非对称、失衡、动量、成交量簇），为何在薄弱/易被操纵的区域降低权重，以及情景的失效边界在哪里。`,
+
+  `适用对象。对交易员——快速的情境感知与可控的信号频率而不致过载；对研究者——可复现的流水线与干净数据；对团队——API/SDK、webhook 与可靠的事件总线；对构建者社区——论坛、声誉度量与按贡献计的 QCoin 经济。VIP+ 获得优先级 AI 通道、媒体发布、加速配额以及影响曝光与限额的“金色”状态。`,
+
+  `覆盖面。我们聚合头部 CEX 与 DEX 聚合器的数据，规范化交易符号与合约元数据，统一 TICK 频率与订单簿深度。引入统一目录、交易对/网络/市场映射，标注衍生品，纳入拆分、下架与合约迁移。目标是平台与网络的可比性：用单一抽象层对比流动性、成本、延迟与“真实”的可用成交量。`,
+
+  `数据流水线。数据流被清洗，缺口被修复，异常被标记，延迟轮廓被校准。历史足够深，从而识别“市场状态”，而不是把指针硬套在偶发尖峰上。我们加入链上路径、跨链桥、持有者分布、MEV 活动迹象，并把它们与市场指标相连。结果是对“噪声气泡”和局部异常足够稳健的特征集合。`,
+
+  `分析内核。上百个指标只是调色板。关键在于“特征集合 + 上下文”：RSI/RSX、Stochastic、CCI/MFI、ADX/DI、ATR 与带宽、EMA/SMA/WMA、MACD/Signal/Histogram、VWAP/POC/Value-Area、成交量剖面、Bid/Ask 失衡与流动性扫单。我们把经典家族与状态过滤器、基于流动性与行为的启发式、以及链上流入/流出标记相融合。每张卡片不是“建议”，而是罗盘：历史幅度、实现期限、自信度、前提与失效边界。`,
+
+  `链上模块。我们跟踪转账簇、跨链桥、累积/分配、大额持有者集中度、基础 MEV 模式与异常路径。在流动性薄弱区域或资金费率/价差飙升时，信号权重降低；当被多个域（现货、衍生品、链上）共同确认时，权重提升。这样能把市场脆弱处的“虚假自信”降到最低。`,
+
+  `叙事与新闻。多语言信息流会被翻译、去重，并以嵌入向量索引。我们评估新颖性、来源可信度、“形式/实质”的比例、语调以及主题随时间的黏性。与价格与链上指标并排，会出现一张轻量的“叙事地图”：注意力被什么驱动、监管风险在哪里、哪些放大波动、哪些正在消退。`,
+
+  `信号卡片与纪律。卡片上包含——期望幅度（分位数）、时间地平线、SL/TP 标记、流动性速览与必须共振的触发器集合。系统促使纪律：入场前你能看到失效点、风险单位与动态波动率走廊；入场后——会获得用于核对的检查点与减风险条件。`,
+
+  `架构。以 TypeScript/Python 实现的轻量服务位于稳定 API 之后；站点基于 Next.js，并通过 WebSocket 提供实时层。缓存层与后备来源确保在峰值期间的平滑降级。API/SDK 与 webhook 支持自动化，而角色与审计定义安全边界。MiniApp 同时运行在 Web 与 Telegram 上，让你在单一流程中操盘市场：图表、论坛、钱包、机器人——无摩擦。`,
+
+  `安全与隐私。非托管：我们不请求也不存储私钥/seed。通过角色限制访问、记录操作，个人数据最小化，并在传输与存储中加密。anti-sybil/anti-fraud 流水线保护 QCoin 经济与论坛的声誉机制；会话校验在温和且严格的前提下维护访问完整性。`,
+
+  `论坛与 QCoin 挖矿。论坛不是“社交网络”，而是知识生产线。每 4 小时你确认活跃度并锁定奖励；含媒体（视频/图片/音频）的帖子通过 QuantumLCM-AI 的评分（质量、参与度、反垃圾/反女巫）并转化为 QCoin。VIP+ 获得时间 X2 与任务 X2、曝光优先、扩展的媒体限额与加速审核。声誉与贡献不是空噪声，而是具有经济意义的量。`,
+
+  `交易所（开发中）与推荐。交易内核与执行会分阶段接入；已提供按品种/周期的 AI 推荐、订单簿深度与流动性画像。我们设计智能路由、延迟/滑点防护、组合约束与 PnL 归因。VIP+ 可访问实验性指标、what-if/回测模式与更宽的分析视野。`,
+
+  `QCoin 经济与 L7 区块链。QCoin 是知识与有效流量的燃料。未来的 L7-chain 是把跨网络资产、银行与金融基础设施连接起来的通用价值路由层。我们的目标是让 QCoin 成为生态内的中性结算单位，具备透明的发行/销毁与公平的提现队列。VIP+ 在分配上享有更高优先级，并可更早获得质押/验证者角色的通道。`,
+
+  `支付与激活。VIP+ 订阅通过 NowPayments 办理：加密支付（USDT 等），Webhook 即刻激活访问并在 MiniApp、机器人与论坛之间同步状态。无需截图与人工核验。界面支持 7 种语言；钱包绑定无缝。你为速度、可解释性，以及一个对贡献予以回报的经济付费。`,
+
+  `社区与路线图。我们发布每周笔记、开放 alpha 功能的 beta 测试，并接受团队的定向需求。待办中：带风险预算的组合引擎、增强的 CEX/DEX 智能路由、公开笔记本/回测、“半自动驾驶”（人控）。凡能提升纪律、降低摩擦的都会发布；那些华而不实的则不会。所有材料均为教育/分析内容，非财务建议。`
+],
+
+about_sections: [
+  { title: '什么是 Quantum L7 AI',           parasIdx: [0] },
+  { title: 'L7 代理，而非“黑箱”',            parasIdx: [1] },
+  { title: '适用对象',                         parasIdx: [2] },
+  { title: '覆盖面',                           parasIdx: [3] },
+  { title: '数据流水线',                       parasIdx: [4] },
+  { title: '分析内核',                         parasIdx: [5] },
+  { title: '链上模块',                         parasIdx: [6] },
+  { title: '叙事与新闻',                       parasIdx: [7] },
+  { title: '卡片与纪律',                       parasIdx: [8] },
+  { title: '架构',                             parasIdx: [9] },
+  { title: '安全与隐私',                       parasIdx: [10] },
+  { title: '论坛与 QCoin 挖矿',                parasIdx: [11] },
+  { title: '交易所与推荐',                     parasIdx: [12] },
+  { title: 'QCoin 经济与 L7-chain',            parasIdx: [13] },
+  { title: '支付、在地化与路线图',             parasIdx: [14] }
+],
+
+about_bullets: [
+  '情境感知：趋势、动量、波动率、流动性',
+  '跨交易所归一化，面向延迟的特征加权',
+  '链上流、持有者集中度、跨链桥、MEV 线索',
+  '叙事信息流：翻译与信任/新颖性评估',
+  '卡片：幅度（分位数）、地平线、SL/TP、自信度',
+  '指标集合 + 状态过滤 + 行为',
+  '用于无“魔法”的自动化：API/SDK 与 webhook',
+  '峰值负载下的平滑降级与后备来源',
+  '非托管安全：角色、审计、加密',
+  '论坛：QCoin 挖矿、任务、带 AI 评分的媒体发布',
+  'VIP+：时间 X2 与任务 X2，曝光与限额优先',
+  '交易所内的推荐已可用；执行内核在路上',
+  'NowPayments：即时激活，状态同步',
+  'L7 区块链：提现优先队列与早期角色',
+  '7 种语言，Web 与 Telegram MiniApp 的统一入口'
+],
+
+tg_button: 'Telegram',
+
+/* ===== EXCHANGE（扩展描述） ===== */
+exchange_title: '交易所（开发中）',
+exchange_sub:
+  `Quantum L7 Exchange——这是一个多链、可信可解释的下一代交易平台，
+将 CEX/DEX 流动性、AI 推荐与机构级数据基础设施融合为统一的计算织体。
+我们处理 87 TB 的市场历史与超过 370 亿条历史 K 线，覆盖所有主流网络与平台，规范化 tick、
+订单簿深度与衍生品规范，把市场拉齐到同一套决策标准。目标不是“又一个交易所”，
+而是具备可证逻辑的执行回路：假设 → 测试 → 证据 → 成交，并配以透明的风险限制与可追溯审计。`,
+
+exchange_sections: [
+  {
+    title: '愿景：新一代 L7 交易所',
+    paras: [
+      `L7 Exchange 是一条基于代理的管线，自治的 L7 代理会消费行情馈送、链上事件、新闻与
+微观结构的行为信号，将其按时间对齐，输出可解释的（BUY/SELL/HOLD）建议，附带概率、
+幅度、时间跨度与风险语境（流动性、价差、离散度、异常）。对用户而言，这意味着
+决策的可复现性：每张信号卡都伴随因素日志、模型版本与原始来源链接。`,
+      `身份——通过非托管钱包（我们不保存私钥与助记词）。访问权限、
+配额与限额在 Web 界面与 MiniApp 间同步。行动执行——仅在你设定的
+限制之内，且在模型置信度足够时进行。平台原则——可证，而非“黑箱”。`,
+      `机构级数据：87 TB 历史、370 亿+ K 线，合一的合约与符号，
+感知延迟的流处理（latency-aware）、缺口清理、考虑拆分与衍生品特性。在此之上——200+ 指标的集成
+（RSI/ADX/ATR/VWAP/OBV/Ichimoku/成交量簇、状态滤波等）、行为特征与微观失衡统计。`,
+      `H2 2026——与新一代 L7 区块链共同的 L7 Exchange 内核公开发布目标窗口
+（跨网络协调层）。启动阶段——跨交易所路由、可解释的自动执行，
+随后——向链上清算与原生智能访问权限扩展。`,
+    ],
+  },
+
+  {
+    title: '路由与流动性',
+    paras: [
+      `智能路由器并行扫描 CEX/DEX 流动性，建模滑点、手续费与延迟，
+选择场所/拆分路径，并通过目标指标（expected fill、adverse selection、
+N 秒/分钟后的 mark-out）监控执行质量。在拆分模式下，订单被分片并分散到池/订单簿，以最小化冲击。`,
+      `延迟很重要：支持 cancel/replace、超时、“kill-switch”、部分止盈规则，
+以及对价差离散度跳变的响应。在套利场景下，使用 tick 同步窗口与低延迟连接。`,
+      `市场微观结构：我们分析订单失衡、隐藏量突发、分层流动性、
+新闻/链上事件影响、“激进”成交打印的行为，以及按名义规模的滑点概率。`,
+    ],
+  },
+
+  {
+    title: '风险与控制',
+    paras: [
+      `全局与品种级限额：按名义金额、组合占比、日/周回撤、杠杆、集中度。
+执行侧档（conservative/balanced/aggressive）与模型所需的最低置信度。所有触发器均透明描述，
+并记录以供审计。任何动作皆可解释：原因、输入数据、模型版本与执行参数。`,
+      `条件单（stop/stop-limit）、time-in-force（GTC/IOC/FOK）、部分止盈指令、按波动状态
+（类 ATR）的动态止损走廊、异常时的“circuit-breaker”、夜间静默期与事件阻断（如高影响新闻）。`,
+      `反拉高与反跳跃：对价差/流动性的额外校验、公允价格偏离阈值、禁止“越跌越加仓”式摊薄，
+以及当环境变得“不适合交易”时的紧急强制去风险级别。`,
+    ],
+  },
+
+  {
+    title: '分析与可解释性',
+    paras: [
+      `每个品种/周期的 AI-Box 显示置信度、决策因素（从相对 VWAP/带状区间的位置
+到 RSI/成交量簇的状态）、基于历史的幅度与时间跨度（分位数）以及建议的 TP/SL。
+呈现紧凑但可核验：数字，而非比喻。`,
+      `按设计即“可解释”（Explainability by design）：原因 ➜ 结果。卡片包含因素权重、来源链接、
+订单簿/成交量快照与“what-if”微模拟。目标——为交易者提供透明的决策骨架，
+可被重现与质疑。`,
+      `新闻/叙事：多语言解析、翻译、去重、AI 情感、来源可信度与与价格反应的关联。
+这不是“噪声”，而是用于评估情景概率与执行时间窗口的语境。`,
+    ],
+  },
+
+  {
+    title: '组合、报表与归因',
+    paras: [
+      `带 PnL 归因的组合面板：按阿尔法来源、市场状态、品种、风险预算与
+模型决策进行分解。单独计算“mark-out”与冲击指标，以区分“运气”与系统性。`,
+      `交易日志、导出、报表、用于集成的 API。研究可复现性：回测与
+在历史流上的“重放”，直接叠加在图表之上。“策略模板”与带限制的一键部署。`,
+      `团队模式（roadmap）：角色、权限、参数协同、集中报表、
+white-label 与面向企业的私有部署。`,
+    ],
+  },
+
+  {
+    title: '数据与网络基础设施',
+    paras: [
+      `馈送统一：跨交易所聚合、将 tick 与深度拉齐到统一模式、弥补缺失、
+处理拆分与合约变更。在其上——200+ 指标集成、行为/状态滤波
+与微观结构特征。历史层——87 TB，超过 370 亿条 K 线。`,
+      `链上层：地址图、持有者集中度、流动性入/出、跨桥迁移、基础 MEV 风险。
+公有区块链不属于个人数据；同时，运营日志（在法律范围内）有助于
+保障可靠性与事件调查。`,
+      `网络栈：到流动性与行情提供方的优化连接、在不丢失关键功能前提下的降级策略、
+热/温缓存、VIP 处理通道优先级。所有计算阶段均可追踪。`,
+    ],
+  },
+
+  {
+    title: '安全与合规',
+    paras: [
+      `非托管模型：密钥在用户侧，授权——签名完成。基于角色的访问、
+最小化个人数据、传输与静态加密、反欺诈/anti-sybil 管线。
+行为记录用于审计与可复现。`,
+      `监管语境：我们提供分析与工具，而非金融建议。
+通过 NowPayments 的链上确认订阅付款——自动激活限额/权限，无需人工“检查”。
+隐私与日志策略——透明且定期更新。`,
+      `执行限制——是纪律而非担保。市场具备波动性；决策与司法辖区合规——
+在用户一侧。我们提供框架、指标与可解释性，使风险是“被认知”的。`,
+    ],
+  },
+
+  {
+    title: '路线图与发布',
+    paras: [
+      `H2 2026：L7 Exchange 内核与新一代 L7 区块链的公开发布——一个跨网络的协调层，
+旨在简化清算与在智能合约层面的访问权限，并提升执行的可观测性。
+核心聚焦——流动性路由、可解释的自动执行、组合归因与团队模式。`,
+      `QCoin——L7 生态的内部经济。在路线图中——QCoin 在生态支付/激励流程中的角色。
+目标——在分析、执行与用户服务之间构建统一的“结算层”。`,
+      `公开发布前——扩展 Beta、压力测试、稳定性报告与对
+执行质量与延迟的公开可记录结果。透明性——信任的核心。`,
+    ],
+  },
+],
+
+roadmap: '路线图',
+
+ex_bullets: [
+  '具备滑点控制、拆分与感知延迟执行的 CEX/DEX 智能路由',
+  '可解释的 AI 信号：概率、幅度、时间跨度、置信因素、TP/SL',
+  '组合面板：PnL 归因、风险预算、“mark-out”、冲击指标',
+  '直接在图表上的历史流回测与重放',
+  '风险限制：限额、time-in-force、kill-switch、动态止损走廊',
+  '数据统一：87 TB 历史、370 亿+ K 线、200+ 指标与状态滤波',
+  '钱包连接、非托管模型与可记录的行为审计',
+  'H2 2026：L7 Exchange 内核与新一代 L7 区块链的公开发布',
+],
+
 
     /* ===== SUBSCRIBE / CONTACT ===== */
     subscribe_title: '订阅计划',
@@ -1196,169 +1875,306 @@ selecciona venue o ruta dividida, y respeta límites de riesgo.`,
     nav_support: 'الدعم',
     select_symbol_tf: "اختر الرمز / الإطار الزمني",
 
-    /* ===== HERO / HOME ===== */
-    hero_title: 'Quantum L7 AI',
-    hero_subtitle:
-      'ذكاء بمستوى كوني للبحث، إشارات ألفا وتنفيذ محمي. توثيق عبر المحفظة، مستويات PRO/VIP.',
-    hero_cta: 'ابدأ عبر Telegram',
-    hero_learn_more: 'اعرف المزيد',
-    marquee: 'الذكاء الاصطناعي • سلسلة الكتل • الأتمتة • الكمي • الأبحاث • الوكلاء • ألفا • جميع الحقوق محفوظة',
+/* ===== HERO / HOME (مختصر) ===== */    
+hero_title: 'مرحبًا بكم في كون Quantum L7 AI',
+hero_subtitle:
+  'Quantum L7 AI ليست مجرد منصة، بل هي كون سيبراني متكامل لاتخاذ القرار: بيانات متعددة السلاسل بمستوى مؤسساتي، عملاء L7 مستقلون، خطوط معالجة على السلسلة وتوجيه تداول يعمل كوحدة رقمية واحدة. نحن ندمج Web-MiniApp و Telegram MiniApp و QL7 AI Bot ومنتدى باقتصاد QCoin وبورصة عالمية (النواة في المرحلة النهائية) لتقديم إشارات Alpha فورية، ونوافذ دخول/خروج منضبطة، وتنفيذ آلي، وهيكل شفاف لإدارة المخاطر. يتم تسجيل الدخول عبر محافظ غير وصائية (المفاتيح لديك)، مع دعم مستويات PRO/VIP، وحدود أولوية وإلغاء الحصص. الأساس هو هيكل Web3 قانوني محكم، وتراكم سيولة عبر البورصات، ونماذج سلوكية وميكروهيكلية، إضافةً إلى خطوط بحث قابلة للتكرار مع سجل فرضية → اختبار → أدلة. إنها بنية تحتية من الجيل الجديد لأولئك الذين يعملون وفق إيقاع السوق ويطلبون الإثبات والسرعة والدقة.',
+hero_cta: 'ابدأ عبر Telegram',
+hero_learn_more: 'اعرف المزيد',
+marquee: 'الذكاء الاصطناعي • العملاء الكميون • تحليلات على السلسلة • بورصة العملات المشفرة (النواة) • المنتدى • تعدين QCoin • تنفيذ آلي • هيكل المخاطر • توجيه السيولة • ميتافيرس Web3 • API/SDK • Enterprise • جميع الحقوق محفوظة',
 
-    home_blocks: [
-      {
-        title: 'لماذا Quantum L7 AI',
-        paras: [
-          `نمزج النماذج متعددة الأنماط مع وكلاء L7 المستقلين وخطوط المعالجة على السلسلة.
-النظام يتوثق عبر محافظ غير احتجازية، تبقى المفاتيح لدى المستخدم، ويحوّل البيانات الخام إلى قرارات عبر الاكتشاف، التحقق والتنفيذ.`,
-          `فلسفتنا هي الوضوح: فرضيات → اختبارات → أدلة.
-الوكلاء يقرؤون المستندات، يستدعون واجهات برمجة التطبيقات، يراقبون بيانات السلسلة، ويؤلفون تقارير بمستوى بشري مع رسوم بيانية ومراجع.`,
-        ],
-      },
-      {
-        title: 'ما الذي ستحصل عليه',
-        bullets: [
-          'اكتشاف ألفا من مصادر مختارة على السلسلة وخارجها',
-          'تصنيف إشارات، درجات ثقة وطبقات مخاطر',
-          'اختبارات رجعية، دفاتر وأبحاث قابلة للتكرار',
-          'رؤى المحفظة، نسب الأرباح والخسائر واكتشاف الأنظمة',
-          'تنفيذ آلي مع ضوابط ومفاتيح إيقاف',
-          'لوحات معلومات مباشرة وتنبيهات',
-          'مجموعات بيانات خاصة وموصلات',
-          'واجهة برمجة تطبيقات/SDK للفرق والمطورين',
-          'وصلات الحوكمة وسجلات التدقيق',
-          'مسارات تعليمية وجلسات بحث مباشرة',
-        ],
-      },
+home_blocks: [
+  {
+    title: 'لماذا Quantum L7 AI',
+    paras: [
+      `Quantum L7 AI هو نظام بيئي متعدد المنصات: نواة ذكاء اصطناعي، عملاء L7 مستقلون، مراقبة على السلسلة، خلاصات سوقية موحدة، شبكة اجتماعية للمنتدى واقتصاد QCoin مدمجة في نسيج حسابي واحد. كل أثر — معاملة، سرد خبري، منشور، مخطط سيولة — يدخل في دائرة البيانات العامة ويصبح إشارة للعمل.`,
+      `عملاء L7 يقرؤون المستندات وواجهات API بشكل مستقل، ويراقبون سلاسل الكتل ودفاتر الأوامر، ويصنفون الأنماط السلوكية، ويقيّمون أوضاع السوق ويستنتجون فرضيات قابلة للتحقق. النتيجة ليست "صندوقًا أسود"، بل بطاقة قابلة للتفسير: احتمال السيناريو، السعة، الآفاق، SL/TP، عوامل الثقة وروابط إلى المصادر الأصلية.`,
+      `تسجيل الدخول عبر محافظ غير وصائية: لا نخزن المفاتيح الخاصة بل نتحقق من ملكية العنوان. يتم مزامنة حقوق الوصول والحصص بين Telegram MiniApp وواجهة الويب وروبوت QL7، حالة VIP تحدد حدود القيود وتمنح أولوية في قنوات المعالجة.`,
+      `نواة السوق مبنية على تراكم عبر البورصات، وتوحيد الرموز/العقود، ومعالجة خلاصات مدركة للكمون. ندمج البيانات المؤسسية التاريخية مع التدفقات الآنية لتتبع تشتت الفروق، الأحجام الصادمة، توازن الطلبات، مخاطر MEV وتأثير نبض الأخبار.`,
+      `مبدأ المنصة هو الإثبات: فرضية → اختبار → أدلة. كل عملية حسابية يتم تسجيلها، المقاييس قابلة لإعادة الإنتاج، ويتم استبعاد "ضوضاء" المراجحة عبر مرشحات الأوضاع. وهكذا نحول البيانات الخام إلى قرارات منضبطة، والحدس إلى تكتيك قابل للتحقق.`,
+      `المنتدى جزء من الحلقة: المحتوى يخضع لتقييم ذكاء اصطناعي (جودة، تفاعل، مكافحة البريد المزعج/anti-sybil)، والنشاط يُرسم على اقتصاد QCoin. إنها ليست "شبكة اجتماعية من أجل الإعجابات"، بل حافلة معرفية موجهة حيث تتحول المعرفة والمساهمة إلى قيمة رمزية.`,
     ],
+  },
 
-    /* ===== ABOUT ===== */
-    about_title: 'حول Quantum L7 AI',
-    about_paragraphs: [
-      `Quantum L7 AI هو حزمة مدمجة للبحث والإشارات في مجال الكريبتو. هدفنا بسيط: تقليل الضوضاء، كشف البنية الحقيقية للسوق، ومساعدتك على التصرف بانضباط بدلًا من الاندفاع.`,
-
-      `L7 تعني وكلاء طبقة التطبيقات. هؤلاء الوكلاء يقرؤون المستندات، يستدعون واجهات برمجة التطبيقات، يراقبون السلاسل ودفاتر الأوامر، يجرون تجارب صغيرة، ويجمعون مخرجات قابلة للتفسير. لا تحصل على صندوق أسود؛ بل على فرضيات، اختبارات، ومسار واضح للتوصية.`,
-
-      `لمن هذا: للمتداولين الذين يريدون وعيًا سريعًا بالحالة؛ للباحثين الذين يحتاجون دراسات قابلة للتكرار؛ للفرق والمكاتب التي تحتاج إلى واجهة برمجة تطبيقات نظيفة ومستقرة.`,
-
-      `التغطية. نستوعب بيانات السوق من منصات CEX الرئيسية ومجمّعات DEX الرائدة، نضيف بيانات مرجعية (رموز، خرائط، بيانات عقود) ونوحدها في مخطط واحد. الهدف هو إمكانية المقارنة عبر المنصات.`,
-
-      `خط البيانات. يتم تطبيع التدفقات، تُسد الثغرات تلقائيًا، تُعالج الانقسامات وتغييرات العقود، وتوسم المشتقات. توفر السجلات التاريخية الكبيرة إمكانية عزو الأنظمة بدلاً من الإفراط في الملاءمة قصيرة الأجل.`,
-
-      `محرك التحليلات. أكثر من مئتي مؤشر، لكن النقطة ليست الكثرة، بل التشكيلات، الأوزان المكتسبة والسياق. العائلات الكلاسيكية (RSI، Stochastic، MFI، CCI، ADX/DI، EMA/SMA/WMA، MACD، ATR، بولينجر باندز، VWAP، OBV، Ichimoku) مع مرشحات الأنظمة وإدراك السيولة.`,
-
-      `الوحدات على السلسلة. نحلل التحويلات، إضافات وإزالات السيولة، تدفقات الجسور، توزيع الحامِلين وبصمات MEV الأساسية. الإشارات تخفّض في المناطق الضعيفة أو المتلاعب بها.`,
-
-      `تيار الأخبار والأبحاث. المصادر متعددة اللغات تترجم تلقائيًا، تُضمَّن وتُزال الازدواجية. المزاج، الجِدة وموثوقية المصدر تشكّل درجة سردية بجوار مقاييس السعر.`,
-
-      `بطاقات الإشارات. كل بطاقة تعرض حركة متوقعة وأفقًا زمنيًا مستمدًا من تاريخ الأصل، إضافة إلى الثقة، سياق السيولة ومؤشرات سريعة. تعامل معها كمنارات تساعدك على التفكير بالسيناريوهات والمخاطر — لا كوعود.`,
-
-      `الانضباط. نبني من أجل الالتزام المسبق: أدلة تشغيل، ممرات تقلب، توقفات ديناميكية وقوالب تحديد حجم الصفقات. النظام يدفعك لتعريف الإلغاء قبل الصفقة لا بعدها.`,
-
-      `البنية. خدمات البيانات والوكلاء تعمل كعمليات صغيرة بلغة TypeScript/Python خلف واجهة API مستقرة. الموقع يستخدم Next.js للتقديم و WebSockets للتحديث المباشر. التخزين المؤقت والبدائل تحافظ على استجابة الواجهة أثناء فترات الذروة.`,
-
-      `الأمان والخصوصية. نحن غير احتجازيين؛ المفاتيح تبقى مع المستخدم. الأفعال مقيدة بالأدوار ومسجلة. الأسرار محفوظة على الخادم، والبيانات الشخصية مُقللة ومشفرة أثناء النقل وفي الراحة.`,
-
-      `خارطة الطريق. دفاتر عامة واختبارات رجعية، قوالب استراتيجيات، محرك محفظة مع عزو، توجيه أكثر ذكاءً بين المنصات، موصلات DeFi ووضع الطيار الآلي الاختياري مع ضوابط صارمة ونقاط تحقق بشرية.`,
-
-      `المجتمع والدعم. ننشر ملاحظات أسبوعية، ندير قناة Telegram، ونرحب بالطلبات المحددة من الفرق. ملاحظاتك تشكّل مباشرة جدول الأعمال — تُطلق الميزات المفيدة، لا اللمّاعة بلا فائدة.`,
-
-      `مهم: الاشتراكات وربط المحافظ تُدار عبر بوت Telegram. الموقع يركّز على البحث، التصور والتوثيق. لا شيء هنا يُعتبر نصيحة مالية.`,
+  {
+    title: 'ما الذي ستحصل عليه',
+    bullets: [
+      'تحليلات كمية من الجيل الجديد: تكامل ذكاء اصطناعي وقياسات على السلسلة وخصائص ميكروهيكل السوق.',
+      'إشارات Alpha باحتمالية تنفيذ وسعة وأفق، مع تبرير شفاف لعوامل الثقة.',
+      'نواة بيانات موحدة عبر البورصات: توحيد الرموز/العقود، السيولة، الفروق وتردد التحديث.',
+      'مراقبة على السلسلة: توزيع الحاملين، التدفقات عبر الجسور، سيولة CEX/DEX، أنماط MEV الأساسية.',
+      'بورصة عالمية (النواة قيد التطوير): توجيه السيولة، حماية من الانزلاق، تقييم سياقي للمخاطر.',
+      'تنفيذ آلي Auto-execute: تشغيل بمحفزات آمنة، وقف ديناميكي وتوقف طارئ عند الشذوذ.',
+      'لوحات المحافظ: نسب PnL، ميزانيات المخاطر، أوضاع التقلب، الممرات وانضباط حجم المركز.',
+      'بحوث قابلة للتكرار: اختبارات خلفية، دفاتر تفاعلية، تقارير مرئية، سيناريوهات what-if وعرض الافتراضات.',
+      'تغذية السرديات: نغمة الذكاء الاصطناعي، تمثيلات embeddings، ثقة المصادر وربط الأخبار بالمقاييس السعرية.',
+      'اقتصاد المنتدى: إشراف ذكاء اصطناعي، تعدين QCoin مقابل المساهمة والنشاط، نشر وسائط بتقييم خوارزمي.',
+      'برنامج VIP: إزالة الحصص اليومية في AI Box، حدود موسعة، معالجة أولوية و X2 لـ QCoin للمهام/الوقت.',
+      'تكاملات: Telegram MiniApp، الويب، روبوت QL7؛ جلسة موحدة، حالة مشتركة وصلاحيات وصول متناسقة.',
+      'API/SDK/Webhooks: تكاملات آمنة، وضع sandbox، هيكلية مدفوعة بالأحداث للفرق والأتمتة.',
+      'حزمة متعددة السلاسل: Ethereum و BSC و Polygon و Solana و TON و Avalanche وغيرها؛ جسر وأخذ الخصائص الشبكية بعين الاعتبار.',
+      'هيكل Web3 قانوني محكم: تسجيل، فصل الأدوار، تحقق تشفيري وخصوصية.',
     ],
-    about_sections: [
-      { title: 'ما هو Quantum L7 AI', parasIdx: [0] },
-      { title: 'وكلاء L7، لا صناديق سوداء', parasIdx: [1] },
-      { title: 'لمن', parasIdx: [2] },
-      { title: 'التغطية', parasIdx: [3] },
-      { title: 'خط البيانات', parasIdx: [4] },
-      { title: 'محرك التحليلات', parasIdx: [5] },
-      { title: 'الوحدات على السلسلة', parasIdx: [6] },
-      { title: 'تيار الأخبار والأبحاث', parasIdx: [7] },
-      { title: 'بطاقات الإشارات', parasIdx: [8] },
-      { title: 'الانضباط', parasIdx: [9] },
-      { title: 'البنية', parasIdx: [10] },
-      { title: 'الأمان والخصوصية', parasIdx: [11] },
-      { title: 'خارطة الطريق', parasIdx: [12] },
-      { title: 'المجتمع والدعم', parasIdx: [13] },
-      { title: 'مهم', parasIdx: [14] },
-    ],
+  },
 
-    about_bullets: [
-      'وعي سريع بالحالة: حالة السوق، الاتجاه، الزخم، التقلب',
-      'تطبيع عبر المنصات وتقييم واعٍ بالسيولة',
-      'تدفقات على السلسلة: حامِلون، تحركات السيولة، نشاط الجسور، إشارات MEV أساسية',
-      'أخبار مع ترجمة، بحث مضمَّن وموثوقية المصدر',
-      'حركة متوقعة وأفق على كل بطاقة إشارة (كوانتايل تاريخية)',
-      'تشكيلات مؤشرات مع مرشحات أنظمة وأوزان مكتسبة',
-      'اختبارات رجعية ودفاتر أبحاث قابلة للتكرار (خارطة الطريق)',
-      'محرك محفظة: ميزانيات مخاطر، قيود، عزو PnL (خارطة الطريق)',
-      'توجيه ذكي بين CEX/DEX؛ حماية من التأخير والانزلاق (خارطة الطريق)',
-      'واجهة برمجة تطبيقات/SDK للفرق والأتمتة؛ ويب هوكس بسيطة',
-      'خيارات مؤسساتية: SSO، نشر خاص، SLA',
-      'نموذج أمان غير احتجازي: أدوار وسجلات تدقيق',
-      'المرونة التشغيلية: طبقات تخزين مؤقت، تدهور سلس، بدائل',
-      'واجهة نظيفة تركز على القرارات لا الضوضاء',
-      'تفكير بالسيناريوهات: إلغاء مُسبق وتوقفات محددة',
-      'نتائج أبحاث: رسوم بيانية، جداول، تقارير موجزة',
-      'بحث مضمَّن عبر ملاحظاتك والمصادر العامة (اختياري)',
-      'موصلات قابلة للتوسيع: أسعار، على السلسلة، بحث، اجتماعي',
-      'حماية بوجود إنسان في الحلقة للعمليات شبه المؤتمتة',
-      'حدود واضحة: الإشارات أدوات لا ضمانات',
+  {
+    title: 'البنية التحتية والبيانات',
+    paras: [
+      `بيانات السوق: نجمع الخلاصات التاريخية والفورية من CEX/DEX، نوحدها ضمن مخطط عام، نغلق الفجوات، نأخذ بعين الاعتبار التقسيمات وخصائص المشتقات. في الأعلى — مؤشرات جماعية (RSI/ADX/ATR/VWAP/OBV/Ichimoku/عناقيد الحجم)، مرشحات أوضاع وسياق السيولة.`,
+      `الطبقة على السلسلة: رسوم العناوين، تحركات السيولة، تركّز الحاملين، أحداث الجسور، مخاطر MEV الأساسية. سلاسل الكتل العامة ليست بيانات شخصية، لكننا نسجل الطلبات ومعرّفات التصحيح بعناية من أجل الموثوقية والتحقيق في الحوادث.`,
+      `السرديات والأخبار: فهرسة متعددة اللغات، ترجمة، إزالة التكرار، تقييم المصادر، تقدير الحداثة والتغاير مع السعر؛ النتيجة — طبقة رقمية خفيفة بجانب السعر والحجم تساعد على التمييز بين الضوضاء والنبض المهم.`,
+      `التخزين والذاكرة المؤقتة: تقسيم التدفقات إلى ساخنة/دافئة، تدهور تدريجي دون فقدان الوظائف الحرجة، أولوية القنوات لـ VIP والمهام النظامية. جميع مراحل الحساب تتمتع بتتبع، تحكم في نسخ القطع الأثرية وقابلية إعادة الإنتاج.`,
     ],
+  },
 
-    tg_button: 'تيليجرام',
+  {
+    title: 'الأمان والامتثال',
+    paras: [
+      `نموذج غير وصائي: المفاتيح الخاصة وعبارات البذور تبقى لدى المستخدم. المصادقة بالتوقيع؛ الوصولات حسب الأدوار، تُسجّل وتُراجع. تقليل البيانات الشخصية، تشفير أثناء النقل والتخزين، خطوط معالجة anti-fraud/anti-sybil.`,
+      `النزاهة القانونية: نحن نقدم تحليلات وأدوات وليس نصائح مالية. تدفق الدفع عبر NowPayments مع تأكيد على السلسلة يُفعّل الاشتراك تلقائيًا؛ الحالة تُزامن بين MiniApp/الويب/الروبوت. سياسات الخصوصية والتسجيل شفافة ويتم تحديثها.`,
+      `حدود التنفيذ: فحوص منطقية، قيود، محفزات توقف طارئة ومراقبة الشذوذ. إنها أدوات انضباط وليست ضمانًا للنتائج؛ التداول ينطوي على مخاطر، والقرارات تقع على عاتق المستخدم.`,
+    ],
+  },
 
-    /* ===== EXCHANGE ===== */
-    exchange_title: 'البورصة (قيد التطوير)',
-    exchange_sub:
-      `لوحة سوق حيّة مع أمواج كمومية، جزيئات كوكبية وتراكب مجرة حلزونية.
-الخطوات التالية: توجيه ذكي عبر DEX/CEX، اختيار منصات مع تحكم بالانزلاق، تنفيذ مدرك للتأخير، تحوط تلقائي وحدود مخاطر.`,
-    exchange_sections: [
-      {
-        title: 'رؤية: بورصة L7 من الجيل القادم',
-        paras: [
-          `البورصة ليست مجرد رسم بياني. إنها خط معالجة L7 يستوعب بيانات السوق، أحداث على السلسلة وإشارات دفاتر الأوامر،
-يقيمها ويصدر توصيات قابلة للتفسير (شراء/بيع/احتفاظ) مع الثقة وسياق المخاطر.`,
-          `الهوية قائمة على المحفظة؛ الحساب ينفذه الوكلاء. المفاتيح مع المستخدم.
-كل شيء يترك أثر تدقيق: من خطوات البحث إلى التنفيذ.`,
-        ],
-      },
-      {
-        title: 'التوجيه والسيولة',
-        paras: [
-          `الراوتر يمسح السيولة على DEX/CEX بالتوازي، يقدّر الانزلاق والرسوم،
-يختار منصة أو مسار مقسم، ويحترم حدود المخاطر.`,
-          `التأخير مهم: الهدف توقيت أفضل بآلية إلغاء/استبدال ومفتاح إيقاف ديناميكي.`,
-        ],
-      },
-      {
-        title: 'المخاطر والضوابط',
-        paras: [
-          `حدود بالقيمة الاسمية، الانكشاف والتراجع. أوامر مشروطة، مدة صلاحية، حد أدنى للثقة في إشارات AI.`,
-          `حواجز تحمي من الحلقات الخارجة عن السيطرة. كل فعل قابل للتتبع: السبب، المدخلات وإصدارات النماذج.`,
-        ],
-      },
-      {
-        title: 'التحليلات وقابلية التفسير',
-        paras: [
-          `صندوق AI يظهر الثقة والعوامل: توافق المتوسطات المتحركة، علاقة VWAP، الموضع في الأشرطة، نظام RSI وأكثر.`,
-          `كل توصية تترافق مع نطاقات TP/SL مشتقة من تقلبات ATR والنظام الحالي.`,
-        ],
-      },
-      {
-        title: 'ما التالي',
-        paras: [
-          `عرض المحفظة، عزو الأرباح والخسائر، مساهمة العوامل.`,
-          `اختبارات رجعية وإعادات تشغيل مباشرة على اللوحة، قوالب استراتيجيات ونشر بنقرة واحدة.`,
-        ],
-      },
+  {
+    title: 'التكاملات: MiniApp • روبوت • منتدى • بورصة',
+    paras: [
+      `يعمل Telegram MiniApp والويب كواجهات متطابقة بجلسة وصلاحيات موحدة. روبوت QL7 هو مدخل خفيف لقناة الذكاء الاصطناعي والإشعارات. المنتدى ليس مجرد مجتمع: إنه حافلة معرفية حيث تتحول المعرفة والمساهمات إلى QCoin، ومحتوى VIP يخضع لتقييم ذكاء اصطناعي ذي أولوية.`,
+      `البورصة (النواة في المرحلة النهائية): توجيه الأوامر، تقييم سياقي للانزلاق، تنفيذ على السلسلة حيثما ينطبق، وأوضاع موسعة للاختبار الخلفي/what-if لـ VIP. التكامل مع التحليلات يخلق تأثيرًا نادرًا — الإشارة "تعرف" كيف سيتم تنفيذها.`,
     ],
-    roadmap: 'خارطة الطريق',
-    ex_bullets: [
-      'توجيه ذكي مع تحكم بالانزلاق واختيار المنصات',
-      'اختبارات رجعية، إعادات تشغيل ومقاييس قابلة للتفسير',
-      'اتصال المحفظة وتحليلات فورية للمحفظة',
-      'قوالب استراتيجيات وضوابط حماية',
+  },
+
+  {
+    title: 'VIP واقتصاد QCoin',
+    paras: [
+      `VIP يزيل الحصص اليومية في AI Box، يوسع الحدود ويمنح أولوية المعالجة. في المنتدى، يحصل VIP على مضاعفات X2 للوقت والمهام، شارة ذهبية ووزن أكبر للمنشورات الإعلامية (فيديو/صور/صوت) في التقييم الخوارزمي. النشاط والمساهمة والمشاهدات تتحول إلى QCoin مع مراعاة الجودة والمشاركة.`,
+      `الدفع عبر NowPayments: بمجرد وصول التأكيد على السلسلة، يتم تفعيل الحالة فورًا وتمتد إلى MiniApp/الروبوت/الويب. في خارطة الطريق — إطلاق سلسلة L7: VIP في الطبقات العليا من فئة الأولوية لتوزيع وسحب QCoin، بأدوار مبكرة للمُحققين/المُكدِّسين وحدود أعلى.`,
     ],
+  },
+
+  {
+    title: 'للفرق والمطورين',
+    bullets: [
+      'API/SDK/Webhooks بنموذج رموز آمن وتدوير المفاتيح.',
+      'تكاملات مدفوعة بالأحداث، بيئات sandbox، موصلات لمصادر على السلسلة/خارجها.',
+      'أنماط White-Label وEnterprise: تسجيل دخول موحد SSO، نشرات خاصة، اتفاقيات SLA ونوافذ تغيير.',
+      'دفاتر/اختبارات خلفية: تصدير القطع الأثرية، تقارير، قابلية إعادة تجربة التجارب.',
+      'مقاييس عميقة لقبول الميزات والأداء لفرق المنتج.',
+    ],
+  },
+],
+
+/* ===== ABOUT ===== */    
+about_title: 'حول Quantum L7 AI',
+about_paragraphs: [
+  `Quantum L7 AI ليس مجرد «تحليلات»، بل هو مسارٌ تشغيلي موحّد لاتخاذ قرارات التداول والتفاعل الاجتماعي حول أسواق التشفير. نواة المنصّة توحّد Web-MiniApp (الويب + تيليغرام)، والمنتديات مع تعدين QCoin المُعمّم بنظام اللعب، ومحرك بحثٍ بحثيّ بالذكاء الاصطناعي يخفّض الضوضاء، ويكشف بنية السيولة، ويقترح سيناريوهات دخول/خروج منضبطة. نحن نصل البنيةَ الميكروية للسوق، والقياس عن بُعد على السلسلة، والأنماط السلوكية، والسرديات الإخبارية في طبقة واحدة منسجمة قابلة للتفسير — حتى لا تضطر «لمطاردة» السوق، بل لتصميم الخطوة مسبقًا.`,
+
+  `وكلاء L7 هي وحدات ذكاء اصطناعي تطبيقية تعيش على البيانات. تقرأ الوثائق والتغذيات، تطلب واجهات API، تراقب البلوكشينات ودفاتر الأوامر والمشتقات، تُشغِّل تجارب مصغّرة وتُخرج مُخرجات قابلة للتفسير: فروض، لقطات backtest، ومؤشرات سياقية. المهم ليس «سحر الصندوق الأسود»، بل القابلية للتتبّع: من كل استنتاج يظهر المسار — ما السمات التي أُخذت بالحسبان (السيولة، الفروقات، اللاتماثل، الاختلالات، الزخم، عناقيد الأحجام)، ولماذا خُفِّض الوزن في المناطق الرقيقة/القابلة للتلاعب، وأين تمرّ حدود بطلان السيناريو.`,
+
+  `لمن هذا. للمتداولين — وعيٌ سياقي سريع وتردد إشارات مُتحكَّم به دون إرهاق؛ وللباحثين — خطوط معالجة قابلة لإعادة الإنتاج وبيانات نظيفة؛ وللفِرَق — API/SDK و webhooks وحافّة أحداث موثوقة؛ ولمجتمع البنّائين — منتديات ومقاييس سمعة واقتصاد QCoin مقابل المساهمة. يحصل VIP+ على قناة ذكاء اصطناعي ذات أولوية، ونشر وسائط، وحصص مُعجّلة، وحالة «ذهبية» تؤثر على الظهور والحدود.`,
+
+  `التغطية. نُجمّع البيانات من أبرز منصّات CEX ومجمّعات DEX، نطبع الرموز وبيانات تعريف العقود، نوحّد ترددات التيك وعمق دفاتر الأوامر. ندخل دلائل موحّدة، وخرائط أزواج/شبكات/أسواق، نُعلِّم المشتقات، ونأخذ بالانقسامات وشطب الإدراج وهجرة العقود. الهدف — قابلية مقارنة المنصات والشبكات: طبقة تجريد واحدة لمقارنة السيولة والتكاليف والتأخّر و«التوافر الحقيقي» للأحجام.`,
+
+  `خط أنابيب البيانات. تُنقّى التدفقات، تُرمّم الفجوات، تُعلَّم الشذوذات، وتُعايَر محيطات التأخّر. التاريخ عميق — ما يتيح كشف الأنظمة بدلاً من شدّ المؤشر على ومضة عشوائية. نضيف المسارات على السلسلة، الجسور التحويلية، توزيعات الحائزين، دلائل نشاط MEV ونربط ذلك بمقاييس السوق. النتيجة — مجموعات سمات متينة ضد «فقاعات الضوضاء» والشذوذات المحلية.`,
+
+  `النواة التحليلية. مئات المؤشرات ليست سوى لوحة ألوان. الأساس — المجموعات والسياق: RSI/RSX و Stochastic و CCI/MFI و ADX/DI و ATR والشرائط، و EMA/SMA/WMA و MACD/Signal/Histogram و VWAP/POC/Value-Area، وبروفايلات الحجم، واختلالات Bid/Ask و«كنس» السيولة. نمزج العائلات الكلاسيكية مع مرشّحات الأنماط، والحدسيات المبنية على السيولة والسلوك، ومع مُؤشِّر التدفق/الخروج على السلسلة. كل بطاقة ليست «نصيحة»، بل بوصلة: السعة تاريخيًا، أفق التحقّق، الثقة، الفرضيات، وحدود الإبطال.`,
+
+  `وحدات على السلسلة. نتابع عناقيد التحويل، والجسور، والتراكم/التوزيع، وتركيز الحائزين الكبار، وأنماط MEV الأساسية والمسارات الشاذة. في مناطق السيولة الرقيقة أو عند طفرة الفاندنغ أو الفروقات، يُخفض وزن الإشارات؛ وعند التأكيد عبر مجالات متعددة (سبوت، مشتقات، على السلسلة) يُرفع. هكذا نقلّل «الثقة الزائفة» في مواضع هشاشة السوق.`,
+
+  `السرديات والأخبار. تُترجم التغذية متعددة اللغات، وتُزال المكررات، وتُفهرس بالتضمينات. نقيس الجِدّة، وثوقية المصدر، نسبة «الطقس/الجوهر»، النبرة، و«لزوجة» الموضوع عبر الزمن. بجوار مقاييس السعر وما على السلسلة، تظهر «خريطة سردية» خفيفة: ما الذي يقود الانتباه، أين مخاطر التنظيم، ما الذي يضخّم التذبذب، وما الذي يخبو.`,
+
+  `بطاقات الإشارات والانضباط. على البطاقة — السعة المتوقعة (الكوَنتيلات)، الأفق الزمني، علامات SL/TP، ملخص سريع للسيولة ومجموعة مُشغّلات يجب أن تتلاقى. المنظومة تدفع نحو الانضباط: قبل الدخول ترى الإبطال، وحدة المخاطرة، وممر تذبذب ديناميكي؛ وبعده — تتلقى نقاط فحص وشروط خفض المخاطرة.`,
+
+  `البنية. خدمات خفيفة بـ TypeScript/Python خلف API مستقر؛ الموقع على Next.js بطبقات حيّة عبر WebSocket. طبقات الكاش والمصادر الاحتياطية تضمن هبوطًا سلسًا وقت الذروة. API/SDK و webhooks يتيحان الأتمتة، بينما الأدوار والتدقيق يرسمان حدود الأمان. MiniApp يعمل على الويب وفي تيليغرام، لتقود السوق في مسار واحد: رسوم بيانية، منتدى، محفظة، بوت — بلا احتكاك.`,
+
+  `الأمان والخصوصية. غير وصائي: لا نطلب ولا نخزّن المفاتيح الخاصة/seed. تُقيَّد الصلاحيات عبر الأدوار، وتُسجَّل الأفعال، وتُقلّل البيانات الشخصية وتُشفّر في النقل والتخزين. خطوط anti-sybil/anti-fraud تحمي اقتصاد QCoin وآليات السمعة في المنتدى؛ والتحقّق من الجلسات يحافظ بعناية — ولكن بصرامة — على سلامة الوصول.`,
+
+  `المنتدى وتعدين QCoin. المنتدى ليس «شبكة اجتماعية»، بل خط إنتاج للمعرفة. كل 4 ساعات تؤكّد النشاط وتُقفل المكافأة؛ المنشورات ذات الوسائط (فيديو/صور/صوت) تمر بتقييم QuantumLCM-AI (جودة، تفاعل، مضاد للسبام/للسيبيل) وتتحوّل إلى QCoin. يحصل VIP+ على ×2 في الوقت و×2 في المهام، أولوية في الظهور، حدود موسّعة للوسائط وتدقيقًا مُسرَّعًا. السمعة والمساهمة ليست ضجيجًا فارغًا، بل مقدار ذو دلالة اقتصادية.`,
+
+  `البورصة (قيد التطوير) والتوصيات. نواة التداول والتنفيذ تُربطان تدريجيًا؛ تتوفر بالفعل توصيات ذكاء اصطناعي بحسب الرموز/الأُطر الزمنية، وعمق دفتر الأوامر وبروفايل السيولة. نُصمّم توجيهًا ذكيًا، وحماية من التأخّر/الانزلاق، وقيود محفظية، ونَسب PnL. يحصل VIP+ على مؤشرات تجريبية، وأنماط what-if/backtest، وآفاق تحليل موسّعة.`,
+
+  `اقتصاد QCoin وسلسلة L7. الـ QCoin هو وقود المعرفة والحركة المفيدة. سلسلة L7 المستقبلية طبقة تصل الأصول عَبْر الشبكات والبنوك والبنية المالية إلى مُوجِّه قيمة عام. هدفنا أن يصبح QCoin وحدة تسوية محايدة في المنظومة، بإصدار/حرق شفاف وطابور سحب عادل. يتمتع VIP+ بأولوية أعلى في التوزيعات وبوصول مبكر لأدوار التخزين/التحقق.`,
+
+  `الدفع والتفعيل. اشتراك VIP+ يتم عبر NowPayments: دفعٌ بالعملات المشفّرة (USDT وغيرها)، يُفعِّل الـ webhook الوصول فورًا ويُزامن الحالة بين MiniApp والبوت والمنتدى. لا لقطات شاشة ولا فحوصات يدوية. الواجهة متاحة بـ 7 لغات؛ ربط المحفظة سلس. أنت تدفع مقابل السرعة والقابلية للتفسير واقتصادٍ تُكافَأ فيه المساهمة.`,
+
+  `المجتمع وخارطة الطريق. ننشر مذكرات أسبوعية، نفتح بيتا لميزات ألفا، ونتلقّى طلبات موجّهة من الفرق. في قائمة العمل: محرّك محفظة بميزانيات مخاطر، توجيه ذكي موسّع CEX/DEX، دفاتر/اختبارات عامة، و«طيار نصف آلي» تحت تحكّم بشري. كل ما يعزّز الانضباط ويقلّل الاحتكاك يذهب للإصدار؛ وما يلمع ولا يُفيد — فلا. المواد تعليمية/تحليلية، وليست نصيحةً مالية.`
+],
+
+about_sections: [
+  { title: 'ما هو Quantum L7 AI',           parasIdx: [0] },
+  { title: 'وكلاء L7، وليس «صندوقًا أسود»',  parasIdx: [1] },
+  { title: 'لمن هذا',                        parasIdx: [2] },
+  { title: 'التغطية',                        parasIdx: [3] },
+  { title: 'خط أنابيب البيانات',             parasIdx: [4] },
+  { title: 'النواة التحليلية',               parasIdx: [5] },
+  { title: 'وحدات على السلسلة',              parasIdx: [6] },
+  { title: 'السرديات والأخبار',              parasIdx: [7] },
+  { title: 'البطاقات والانضباط',             parasIdx: [8] },
+  { title: 'البنية',                         parasIdx: [9] },
+  { title: 'الأمان والخصوصية',               parasIdx: [10] },
+  { title: 'المنتدى وتعدين QCoin',           parasIdx: [11] },
+  { title: 'البورصة والتوصيات',              parasIdx: [12] },
+  { title: 'اقتصاد QCoin وسلسلة L7',         parasIdx: [13] },
+  { title: 'الدفع، التوطين، خارطة الطريق',   parasIdx: [14] }
+],
+
+about_bullets: [
+  'وعيٌ سياقي: اتجاه، زخم، تذبذب، سيولة',
+  'تطبيع عبر البورصات، وزن سمات واعٍ للتأخّر (latency-aware)',
+  'تدفّقات على السلسلة، تركّز الحائزين، الجسور، لمحات MEV',
+  'تغذية سردية مع ترجمة وتقييم الثقة/الجِدّة',
+  'بطاقات: السعة (كوَنتيلات)، الآفاق، SL/TP، الثقة',
+  'مجاميع مؤشرات + مرشّحات أنماط + سلوك',
+  'API/SDK و webhooks للأتمتة بلا «سحر»',
+  'هبوط سلس ومصادر احتياطية عند ذروة الحمل',
+  'أمان غير وصائي: أدوار، تدقيق، تشفير',
+  'منتدى: تعدين QCoin، مهام، نشر وسائط مع تقييم بالذكاء الاصطناعي',
+  'VIP+: ×2 في الوقت والمهام، أولوية في الظهور والحدود',
+  'التوصيات على البورصة متاحة؛ نواة التنفيذ في الطريق',
+  'NowPayments: تفعيل فوري، مزامنة للحالة',
+  'سلسلة L7: طوابير سحب أولوية وأدوار مبكرة',
+  '7 لغات، دخول موحّد عبر الويب و Telegram MiniApp'
+],
+
+tg_button: 'تيليغرام',
+
+
+/* ===== EXCHANGE (الوصف الموسّع) ===== */
+exchange_title: 'البورصة (قيد التطوير)',
+exchange_sub:
+  `Quantum L7 Exchange — هي منصة تداول متعددة السلاسل، قابلة للتفسير بشكل موثوق من الجيل الجديد،
+توحِّد سيولة CEX/DEX، وتوصيات الذكاء الاصطناعي، والبنية التحتية المؤسسية للبيانات في نسيج حوسبي موحّد.
+نعالج 87 تيرابايت من تواريخ السوق وأكثر من 37 مليار شمعة تاريخية عبر جميع الشبكات والمنصات الكبرى، ونقوم بتطبيع التكات،
+وعمق دفاتر الأوامر ومواصفات المشتقات، لنجعل السوق وفق معيار واحد لاتخاذ القرار. الهدف ليس «بورصة أخرى»،
+بل حلقة تنفيذ بمنطق قابل للإثبات: فرضية → اختبار → أدلة → صفقة، مع محددات مخاطر شفافة وتدقيق قابل للتتبع.`,
+
+exchange_sections: [
+  {
+    title: 'الرؤية: بورصة L7 من الجيل الجديد',
+    paras: [
+      `L7 Exchange — هو خط أنابيب قائم على الوكلاء، حيث تستهلك وكلات L7 الذاتية خلاصات السوق، والأحداث على السلسلة، والأخبار، والإشارات السلوكية
+للبنية المجهرية، وتزامنها زمنياً وتُخرج توصيات قابلة للتفسير (BUY/SELL/HOLD) مع الاحتمال،
+وسعة الحركة، والأفق الزمني، وسياق المخاطر (السيولة، الفارق السعري، التشتت، الشذوذات). بالنسبة للمستخدم، هذا يعني
+قابلية إعادة إنتاج القرارات: كل بطاقة إشارة تُرفق بسجل العوامل، وإصدارات النماذج، وروابط إلى المصادر الأصلية.`,
+      `الهوية — عبر محافظ غير وصائية (لا نحفظ المفاتيح الخاصة ولا عبارات الاسترداد). حقوق الوصول،
+والحصص والحدود تتزامن بين واجهة الويب وMiniApp. يتم تنفيذ الإجراءات فقط ضمن
+المحددات التي عيّنتها ومع مستوى كافٍ من ثقة النموذج. مبدأ المنصة — القابلية للإثبات، لا «الصندوق الأسود».`,
+      `بيانات بمستوى مؤسسي: 87 تيرابايت من التواريخ، 37+ مليار شمعة، توحيد للعقود والرموز،
+معالجة مدركة للكمون (latency-aware)، ترميم للفجوات، وأخذ انقسامات وخصائص المشتقات بالحسبان. فوق ذلك — توليفات من 200+ مؤشر
+(RSI/ADX/ATR/VWAP/OBV/Ichimoku/عناقيد حجمية، مرشحات حالات وغيرها)، وسمات سلوكية وإحصائيات اختلالات دقيقة.`,
+      `النصف الثاني 2026 — نافذة الإطلاق العلني لهواة L7 Exchange مع سلسلة L7 من الجيل الجديد
+(طبقة تنسيق بين الشبكات). في البداية — توجيه عبر-البورصات، وتنفيذ تلقائي قابل للتفسير،
+ثم — التوسع نحو المقاصة على السلسلة وصلاحيات وصول ذكية أصلية.`,
+    ],
+  },
+
+  {
+    title: 'التوجيه والسيولة',
+    paras: [
+      `الموجّه الذكي يفحص بالتوازي السيولة على CEX/DEX، ويُنمذج الانزلاق السعري والعمولات والكمون،
+ويختار المنصة/مسار التجزئة ويضبط جودة التنفيذ عبر مقاييس مستهدفة (التعبئة المتوقعة expected fill، الاختيار المعاكس adverse selection،
+وmark-out بعد N من الثواني/الدقائق). في وضع التجزئة تُقسّم الطلبات وتُوزّع عبر المجمعات/الدفاتر لتقليل الأثر.`,
+      `للْكمون أهمية: ندعم cancel/replace، والمهل الزمنية (timeouts)، و«kill-switch»، وقواعد التثبيت الجزئي،
+والاستجابة لقفزات تشتت الفارق السعري. في سيناريوهات المراجحة تُستخدم نوافذ مزامنة للتكات واتصالات منخفضة الكمون.`,
+      `البنية المجهرية للسوق: نحلّل اختلال الأوامر، طفرات الحجم المخفي، السيولة على المستويات،
+أثر الأخبار/الأحداث على السلسلة، سلوك الطبعات «العدوانية» واحتمال الانزلاق وفق حجم القيمة الإسمية (notional).`,
+    ],
+  },
+
+  {
+    title: 'المخاطر والتحكّم',
+    paras: [
+      `حدود عامة وعلى مستوى الأداة: حسب القيمة الإسمية، ونسبة المحفظة، والتراجع اليومي/الأسبوعي، والرافعة، والتركيز.
+ملفات تنفيذ (conservative/balanced/aggressive) والحد الأدنى المطلوب لثقة النموذج. جميع المشغلات موصوفة بشفافية
+ويتم تسجيلها للتدقيق. أي إجراء قابل للتفسير: السبب، والبيانات الداخلة، وإصدارات النماذج، ومعايير التنفيذ.`,
+      `أوامر مشروطة (stop/stop-limit)، وtime-in-force (GTC/IOC/FOK)، وتوجيهات التثبيت الجزئي، وممرات وقف خسارة ديناميكية
+وفق حالة التقلب (مشابهة لـ ATR)، و«circuit-breaker» عند الشذوذات، و«صمت» ليلي وحواجز أحداث (مثلاً أخبار عالية الأثر).`,
+      `مضادّ التضخيم ومضادّ القفزات: تحققّات إضافية للفارق/السيولة، عتبات انحراف عن السعر العادل، حظر المتوسط «نحو الهاوية»،
+ومستوى طارئ لخفض المخاطر قسراً عندما يصبح المحيط «غير مناسب للتداول».`,
+    ],
+  },
+
+  {
+    title: 'التحليلات والقابلية للتفسير',
+    paras: [
+      `AI-Box لكل رمز/إطار زمني يعرض مستوى الثقة، وعوامل القرار (من الموضع النسبي لـ VWAP/النطاقات
+إلى حالات RSI/العناقيد الحجمية)، والسعة والأفق عبر التاريخ (القيم الكمية) وTP/SL الموصى بها.
+العرض مُكثّف ولكنه قابل للتحقق: أرقام لا استعارات.`,
+      `القابلية للتفسير بحسب التصميم: سبب ➜ أثر. البطاقة تحتوي أوزان العوامل، وروابط المصادر،
+ولقطات فورية للدفاتر/الأحجام ومحاكاة «what-if» مصغّرة. الهدف — منح المتداول هيكل قرار شفاف
+يمكن إعادة إنتاجه والطعن فيه.`,
+      `الأخبار/السرديات: تحليل متعدد اللغات، وترجمة، وإزالة تكرار، ونبرة بالذكاء الاصطناعي، وثقة بالمصدر، وصلات بردة الفعل السعرية.
+هذا ليس «ضجيجاً»، بل سياقاً لتقييم احتمال السيناريو ونوافذ التنفيذ الزمنية.`,
+    ],
+  },
+
+  {
+    title: 'المحفظة، التقارير والإسناد',
+    paras: [
+      `ألواح محفظة مع إسناد PnL: تفكيك حسب مصادر الألفا، وحالات السوق، والرموز، وميزانيات المخاطر،
+وقرارات النموذج. تُحسب على حدة مقاييس «mark-out» والأثر للتمييز بين «الحظ» والمنهجية.`,
+      `سجلات صفقات، وتصدير، وتقارير، وواجهات API للتكامل. قابلية تكرار البحوث: اختبارات رجعية و«إعادة تشغيل»
+على التدفقات التاريخية مباشرة فوق الرسم البياني. «قوالب استراتيجيات» ونشر «بنقرة واحدة» مع محددات.`,
+      `أوضاع الفرق (خارطة طريق): أدوار، وصلاحيات، ومواءمة المعايير، وتقارير مركزية،
+وعلامة بيضاء ونشرات خاصة للمؤسسات (enterprise).`,
+    ],
+  },
+
+  {
+    title: 'بنية البيانات والشبكات',
+    paras: [
+      `توحيد الخلاصات: تجميع عبر-البورصات، ومواءمة التكات والعمق إلى مخطط موحّد، وسدّ الفجوات،
+ومعالجة الانقسامات وتغييرات العقود. فوق ذلك — توليفات من 200+ مؤشر، ومرشحات سلوكية/حالات،
+وسمات بنية مجهرية. طبقة التاريخ — 87 تيرابايت، وأكثر من 37 مليار شمعة.`,
+      `الطبقة على السلسلة: رسوم عناوين، وتركيز الحائزين، وإدخال/سحب السيولة، وتحركات عبر الجسور، ومخاطر MEV الأساسية.
+سلاسل الكتل العامة ليست بيانات شخصية؛ ومع ذلك فإن سجلات التشغيل (ضمن القانون) تساعد
+على ضمان الموثوقية والتحقيق في الحوادث.`,
+      `ركيمة الشبكة: وصلات مُحسّنة إلى مزودي السيولة وبيانات السوق، واستراتيجية تدهور
+من دون فقدان الوظائف الحرجة، وذاكرات تخزين مؤقتة ساخنة/دافئة، وأولوية لقنوات VIP. جميع مراحل الحساب قابلة للتتبع.`,
+    ],
+  },
+
+  {
+    title: 'الأمان والامتثال',
+    paras: [
+      `نموذج غير وصائي: المفاتيح لدى المستخدم، والتخويل — بالتوقيع. وصول قائم على الأدوار،
+وتقليل البيانات الشخصية إلى الحد الأدنى، وتشفير «أثناء النقل» و«أثناء التخزين»، وخطوط مضاد-احتيال/anti-sybil.
+تسجيل الأفعال للتدقيق وقابلية التكرار.`,
+      `السياق التنظيمي: نقدّم تحليلات وأدوات، لا نصائح مالية.
+دفع الاشتراك عبر NowPayments مع تأكيد على السلسلة — تفعيل تلقائي للحدود/الحقوق من دون «شيكات» يدوية.
+سياسات الخصوصية والتسجيل — شفافة وتُحدَّث بانتظام.`,
+      `محددات التنفيذ — انضباط لا ضمان. السوق متقلب؛ القرارات والامتثال لمتطلبات الولايات القضائية —
+على عاتق المستخدم. نحن نقدّم أطر العمل والمقاييس والقابلية للتفسير ليكون الخطر مُدرَكاً.`,
+    ],
+  },
+
+  {
+    title: 'خارطة الطريق والإطلاق',
+    paras: [
+      `H2 2026: الإطلاق العلني لهواة L7 Exchange ونظام سلسلة L7 من الجيل الجديد — طبقة تنسيق بين الشبكات،
+مقصود بها تبسيط المقاصة وصلاحيات الوصول على مستوى العقود الذكية، وتحسين قابلية ملاحظة التنفيذ.
+التركيز الأساسي — توجيه السيولة، وتنفيذ تلقائي قابل للتفسير، وإسناد المحفظة وأوضاع الفرق.`,
+      `QCoin — الاقتصاد الداخلي لمنظومة L7. في خارطة الطريق — دور QCoin في عمليات الدفع/التحفيز داخل المنظومة.
+الغاية — «طبقة تسوية» موحّدة بين التحليلات، والتنفيذ، وخدمات المستخدم.`,
+      `قبل الإصدار العلني — نسخ بيتا موسّعة، واختبارات إجهاد، وتقارير استقرار، ونتائج مفتوحة مُسجّلة
+حول جودة التنفيذ والكمون. الشفافية — نواة الثقة.`,
+    ],
+  },
+],
+
+roadmap: 'خارطة الطريق',
+
+ex_bullets: [
+  'توجيه ذكي CEX/DEX مع ضبط الانزلاق، وتجزيئات، وتنفيذ مدرك للكمون',
+  'إشارات ذكاء اصطناعي قابلة للتفسير: الاحتمال، السعة، الآفاق، عوامل الثقة، TP/SL',
+  'ألواح المحفظة: إسناد PnL، ميزانيات المخاطر، «mark-out»، ومقاييس الأثر',
+  'اختبارات رجعية وإعادة تشغيل على التدفقات التاريخية مباشرة على الرسم البياني',
+  'محددات المخاطر: حدود، time-in-force، مفتاح إيقاف (kill-switch)، وممرات وقف خسارة ديناميكية',
+  'توحيد البيانات: 87 تيرابايت من التاريخ، 37+ مليار شمعة، 200+ مؤشر ومرشحات حالات',
+  'اتصال المحافظ، نموذج غير وصائي وتدقيق أفعال قابل للتسجيل',
+  'H2 2026: الإطلاق العلني لهواة L7 Exchange ونظام سلسلة L7 من الجيل الجديد',
+],
+
 
     /* ===== SUBSCRIBE / CONTACT ===== */
     subscribe_title: 'خطط الاشتراك',
@@ -1424,169 +2240,306 @@ selecciona venue o ruta dividida, y respeta límites de riesgo.`,
     auth_signin: 'Giriş yap',
     nav_support: 'Destek',
     select_symbol_tf: "Sembol / Zaman Çerçevesi Seç",
-    /* ===== HERO / HOME ===== */
-    hero_title: 'Quantum L7 AI',
-    hero_subtitle:
-      'Araştırma, alfa sinyalleri ve güvenli yürütme için kozmik düzeyde zeka. Cüzdan doğrulaması, PRO/VIP seviyeleri.',
-    hero_cta: 'Telegram’da Başla',
-    hero_learn_more: 'Daha Fazla Bilgi',
-    marquee: 'AI • Blockchain • Otomasyon • Kuant • Araştırma • Ajanlar • Alfa • Tüm hakları saklıdır ',
+/* ===== HERO / HOME (kısa) ===== */     
+hero_title: 'Quantum L7 AI Evrenine Hoş Geldiniz',
+hero_subtitle:
+  'Quantum L7 AI sadece bir platform değil, baştan sona bir karar alma siber evrenidir: kurumsal sınıf çok zincirli veriler, otonom L7 ajanları, on-chain hatlar ve ticaret yönlendirmesi tek bir dijital organizma gibi çalışır. Web-MiniApp, Telegram MiniApp ve QL7 AI Bot’u, QCoin ekonomisine sahip forumu ve küresel borsayı ( çekirdek son aşamada ) birbirine bağlıyoruz; böylece anlık alfa sinyalleri, disiplinli giriş/çıkış pencereleri, otomatikleştirilmiş icra ve şeffaf bir risk konturu sağlıyoruz. Yetkilendirme — saklama yapmayan cüzdanlar üzerinden (anahtarlar sizde), PRO/VIP seviyeleri desteği, öncelikli limitler ve kota kaldırma. Temelde — hukuken titizlikle doğrulanmış bir Web3 mimarisi, borsalar arası likidite agregasyonu, davranışsal ve mikro-yapısal modeller ile hipotez → test → kanıt günlüklerine sahip tekrarlanabilir araştırma hatları. Bu, piyasanın temposunda çalışan ve ispatlanabilirlik, hız ve doğruluk talep edenler için yeni nesil bir altyapıdır.',
+hero_cta: 'Telegram’da Başla',
+hero_learn_more: 'Daha fazla bilgi',
+marquee: 'YZ • Kuantum ajanlar • On-chain analitik • Kripto borsası (çekirdek) • Forum • QCoin Madenciliği • Otomatik icra • Risk konturu • Likidite yönlendirme • Web3 Metaverse • API/SDK • Enterprise • Tüm hakları saklıdır',
 
-    home_blocks: [
-      {
-        title: 'Neden Quantum L7 AI',
-        paras: [
-          `Çok modüllü modelleri L7 otonom ajanlar ve zincir üstü hatlarla birleştiriyoruz.
-Sistem, gözetimsiz cüzdanlarla doğrulanır, anahtarlar kullanıcıda kalır ve ham verileri keşif, doğrulama ve yürütme arasında kararlara dönüştürür.`,
-          `Felsefemiz açıklıktır: hipotezler → testler → kanıt.
-Ajanlar belgeleri okur, API’leri çağırır, zincir verilerini izler ve grafikler ile alıntılarla insan düzeyinde raporlar hazırlar.`,
-        ],
-      },
-      {
-        title: 'Ne elde edersiniz',
-        bullets: [
-          'Seçilmiş zincir içi ve dışı kaynaklardan alfa keşfi',
-          'Sinyal sıralaması, güven puanlaması ve risk katmanları',
-          'Geriye dönük testler, defterler ve yeniden üretilebilir araştırmalar',
-          'Portföy içgörüleri, PnL atıfı ve rejim tespiti',
-          'Koruma ve acil durdurma anahtarıyla otomatik yürütme',
-          'Canlı panolar ve uyarılar',
-          'Özel veri kümeleri ve bağlayıcılar',
-          'Ekipler ve geliştiriciler için API/SDK',
-          'Yönetişim kancaları ve denetim izleri',
-          'Eğitim yolları ve canlı araştırma oturumları',
-        ],
-      },
+home_blocks: [
+  {
+    title: 'Neden Quantum L7 AI',
+    paras: [
+      `Quantum L7 AI — çok platformlu bir ekosistemdir: YZ çekirdeği, otonom L7 ajanları, on-chain izleme, normalize edilmiş piyasa feed’leri, forumun sosyal ağı ve QCoin ekonomisi tek bir hesaplama dokusunda birleştirilmiştir. Her bir artefakt — işlem, haber anlatısı, gönderi, likidite grafiği — ortak veri çevrimine girer ve eylem sinyaline dönüşür.`,
+      `L7 ajanları belgeleri ve API’leri otonom olarak okur, blokzincirleri ve emir defterlerini gözlemler, davranış kalıplarını sınıflandırır, piyasa rejimlerini değerlendirir ve doğrulanabilir hipotezler çıkarır. Sonuç — “kara kutu” değil, açıklanabilir bir karttır: senaryo olasılığı, genlik, ufuklar, SL/TP, güven faktörleri ve birincil kaynaklara bağlantılar.`,
+      `Yetkilendirme — saklama yapmayan cüzdanlar üzerinden: özel anahtarları saklamayız, adres sahipliğini doğrularız. Erişim hakları ve kotalar Telegram MiniApp, web arayüzü ve QL7 botu arasında senkronize edilir; VIP durumu limit sınırlarını işaretler ve öncelikli işleme kanallarına geçirir.`,
+      `Piyasa çekirdeği borsalar arası agregasyon, sembol/kontrat birliği ve gecikme-duyarlı (latency-aware) feed işleme üzerine kuruludur. Spread dağılımını, şok hacimleri, emir dengesi, MEV riskleri ve haber impulsu etkisini izlemek için kurum seviyesindeki tarihçeleri gerçek zamanlı akışlarla birleştiriyoruz.`,
+      `Platform ilkesi — ispatlanabilirlik: hipotez → test → kanıtlar. Her hesaplama loglanır, metrikler yeniden üretilebilir ve “gürültü” arbitrajı rejim filtreleriyle ayıklanır. Böylece ham verileri disiplinli kararlara, sezgiyi doğrulanabilir taktiğe dönüştürüyoruz.`,
+      `Forum çevrime gömülüdür: içerik AI skorlama’dan (kalite, etkileşim, anti-spam/anti-sybil) geçer ve aktivite QCoin ekonomisine haritalanır. Bu “beğeni için sosyal ağ” değil, bilginin ve katkının jetonlaştırılmış değere dönüştüğü hedeflenmiş bir bilişsel otobüstür.`,
     ],
+  },
 
-    /* ===== ABOUT ===== */
-    about_title: 'Quantum L7 AI Hakkında',
-    about_paragraphs: [
-      `Quantum L7 AI, kripto için kompakt bir araştırma ve sinyal yığınıdır. Amacımız basittir: gürültüyü azaltmak, gerçek piyasa yapısını ortaya çıkarmak ve sizi dürtüyle değil disiplinle hareket etmeye yönlendirmek.`,
-
-      `L7, uygulama katmanı ajanlarını ifade eder. Bu ajanlar belgeleri okur, API’leri çağırır, blok zincirlerini ve emir defterlerini gözlemler, küçük deneyler yapar ve açıklanabilir çıktılar üretir. Kara kutu almazsınız; hipotezler, testler ve açık bir iz elde edersiniz.`,
-
-      `Kimler için: Hızlı durum farkındalığı isteyen traderlar; tekrar edilebilir çalışmalar isteyen araştırmacılar; temiz API ve istikrarlı veri düzlemi isteyen ekipler ve masalar.`,
-
-      `Kapsam. Büyük CEX platformlarından ve önde gelen DEX toplayıcılarından piyasa verilerini alıyoruz, referans veriler (semboller, eşlemeler, sözleşme meta verileri) ekliyoruz ve tek bir şemada birleştiriyoruz. Çapraz platform karşılaştırılabilirliği hedeflenir.`,
-
-      `Veri hattı. Beslemeler normalize edilir, boşluklar otomatik doldurulur, bölünmeler ve sözleşme değişiklikleri uzlaştırılır ve türevler etiketlenir. Büyük tarih havuzları kısa vadeli aşırı uyum yerine rejim atfına izin verir.`,
-
-      `Analitik motoru. İki yüzden fazla gösterge mevcuttur, ancak mesele miktar değil; topluluklar, öğrenilmiş ağırlıklar ve bağlamdır. Klasik aileler (RSI, Stokastik, MFI, CCI, ADX/DI, EMA/SMA/WMA, MACD, ATR, Bollinger Bantları, VWAP, OBV, Ichimoku) rejim filtreleri ve likidite farkındalığıyla birleştirilir.`,
-
-      `Zincir üstü modüller. Transferleri, likidite ekleme ve kaldırma işlemlerini, köprü akışlarını, sahip dağılımlarını ve temel MEV parmak izlerini çözümleriz. İnce veya manipüle edilmiş bölgelerde sinyallerin ağırlığı azaltılır.`,
-
-      `Haber ve araştırma akışı. Çok dilli kaynaklar otomatik çevrilir, gömülür ve yinelenenler kaldırılır. Duyarlılık, yenilik ve kaynak güvenilirliği fiyat metriklerinin yanında hafif bir anlatı puanına katkıda bulunur.`,
-
-      `Sinyal kartları. Her kart, varlığın geçmişinden türetilen beklenen hareketi ve zaman ufkunu gösterir, ayrıca güven, likidite bağlamı ve hızlı göstergeler sunar. Kartlara, risk ve senaryoları çerçevelemeye yardımcı olan işaretçiler olarak davranın — asla bir garanti olarak değil.`,
-
-      `Disiplin. Ön taahhüt için oluşturuyoruz: oyun planları, oynaklık koridorları, dinamik duraklar ve pozisyon boyutlandırma şablonları. Sistem sizi işlemden önce geçersizliği tanımlamaya iter, sonrasında değil.`,
-
-      `Mimari. Veri ve ajan hizmetleri, sabit bir API arkasında küçük TypeScript/Python süreçleri olarak çalışır. Web sitesi, Next.js ile render edilir ve WebSockets ile canlı güncellemeler yapılır. Önbellekler ve yedekler, veri patlamaları sırasında bile kullanıcı arayüzünü duyarlı tutar.`,
-
-      `Güvenlik ve gizlilik. Gözetimsiziz; anahtarlar kullanıcıda kalır. Eylemler role göre kapsamlıdır ve kaydedilir. Sırlar sunucu tarafında saklanır, kişisel veriler minimize edilir ve aktarımda ve depoda şifrelenir.`,
-
-      `Yol Haritası. Genel defterler ve geriye dönük testler, strateji şablonları, portföy motoru, platformlar arası daha akıllı yönlendirme, DeFi bağlayıcıları ve katı korumalar ile insan denetimleri olan isteğe bağlı bir otomatik pilot modu.`,
-
-      `Topluluk ve destek. Haftalık araştırma notları yayınlıyoruz, bir Telegram kanalı işletiyoruz ve ekiplerden gelen özel talepleri memnuniyetle karşılıyoruz. Geri bildiriminiz doğrudan bekleme listemizi şekillendirir — yararlı özellikler çıkar, dikkat dağıtıcı olanlar çıkmaz.`,
-
-      `Önemli: abonelikler ve cüzdan bağlantısı Telegram botumuz aracılığıyla yönetilir. Web sitesi araştırma, görselleştirme ve belgeler üzerinde yoğunlaşır. Buradaki hiçbir şey finansal tavsiye değildir.`,
+  {
+    title: 'Ne elde edersiniz',
+    bullets: [
+      'Yeni nesil kuant analitik: YZ zekâsı, on-chain metrikler ve piyasanın mikro-yapısal özelliklerinin sinerjisi.',
+      'Yürütme olasılığı, genlik ve ufukla birlikte alfa sinyalleri; ayrıca güven faktörlerinin şeffaf gerekçesi.',
+      'Normalize edilmiş borsalar arası veri çekirdeği: sembol/kontrat, likidite, spread ve tik frekansının birleştirilmesi.',
+      'On-chain izleme: sahip dağılımı, köprüler üzerinden akışlar, CEX/DEX likiditesi, temel MEV kalıpları.',
+      'Küresel borsa (çekirdek geliştirme aşamasında): likidite yönlendirme, kayma koruması, bağlamsal risk değerlendirmesi.',
+      'Auto-execute: fail-safe tetikleyicilerle yürütme, dinamik stoplar ve anomalilerde acil durdurma.',
+      'Portföy panelleri: PnL atfı, risk bütçeleri, oynaklık rejimleri, koridorlar ve pozisyon boyutu disiplini.',
+      'Tekrarlanabilir araştırmalar: backtestler, not defterleri, görsel raporlar, what-if senaryoları ve varsayımların ekspozisyonu.',
+      'Anlatı akışı: AI tonlaması, gömlemeler (embeddings), kaynak güveni ve haberlerin fiyat metrikleriyle bağlanması.',
+      'Forum ekonomisi: AI moderasyonu, katkı ve aktivite için QCoin madenciliği, algoritmik skorlama ile medya gönderimi.',
+      'VIP programı: AI Box’ta günlük kotaların kaldırılması, genişletilmiş limitler, öncelikli işleme ve görevler/zaman için QCoin’de X2.',
+      'Entegrasyonlar: Telegram MiniApp, web, QL7 botu; tek oturum, ortak durum ve uyumlu erişim hakları.',
+      'API/SDK/Webhooks: güvenli entegrasyonlar, sandbox modu, ekipler ve otomasyon için olay güdümlü mimari.',
+      'Multichain yığın: Ethereum, BSC, Polygon, Solana, TON, Avalanche vb.; köprüleme ve ağ özgünlüklerinin dikkate alınması.',
+      'Hukuken titizlikle doğrulanmış Web3 mimarisi: loglama, rol ayrımı, kriptografik doğrulama ve mahremiyet.',
     ],
-    about_sections: [
-      { title: 'Quantum L7 AI Nedir', parasIdx: [0] },
-      { title: 'L7 ajanları, kara kutular değil', parasIdx: [1] },
-      { title: 'Kimler için', parasIdx: [2] },
-      { title: 'Kapsam', parasIdx: [3] },
-      { title: 'Veri hattı', parasIdx: [4] },
-      { title: 'Analitik motoru', parasIdx: [5] },
-      { title: 'Zincir üstü modüller', parasIdx: [6] },
-      { title: 'Haber & araştırma akışı', parasIdx: [7] },
-      { title: 'Sinyal kartları', parasIdx: [8] },
-      { title: 'Disiplin', parasIdx: [9] },
-      { title: 'Mimari', parasIdx: [10] },
-      { title: 'Güvenlik & gizlilik', parasIdx: [11] },
-      { title: 'Yol Haritası', parasIdx: [12] },
-      { title: 'Topluluk & destek', parasIdx: [13] },
-      { title: 'Önemli', parasIdx: [14] },
-    ],
+  },
 
-    about_bullets: [
-      'Hızlı durum farkındalığı: piyasa durumu, trend, momentum, oynaklık',
-      'Platformlar arası normalleştirme ve likiditeye duyarlı puanlama',
-      'Zincir üstü akışlar: sahipler, likidite hareketleri, köprü aktiviteleri, temel MEV işaretleri',
-      'Çeviri, gömülü arama ve kaynak güvenilirliği ile haber akışı',
-      'Her sinyal kartında beklenen hareket ve ufuk (tarihsel kantiller)',
-      'Rejim filtreleri ve öğrenilmiş ağırlıklarla gösterge toplulukları',
-      'Geriye dönük testler ve yeniden üretilebilir araştırmalar (yol haritası)',
-      'Portföy motoru: risk bütçeleri, kısıtlamalar, PnL atıfı (yol haritası)',
-      'Akıllı yönlendirme; gecikme ve kayma korumaları (yol haritası)',
-      'Ekipler için API/SDK; basit web kancaları',
-      'Kurumsal seçenekler: SSO, özel dağıtımlar, SLA',
-      'Gözetimsiz güvenlik modeli: kapsamlı eylemler, denetim kayıtları',
-      'Operasyonel dayanıklılık: önbellek katmanları, zarif bozulma, yedekler',
-      'Temiz UI: kararları vurgular, gürültüyü değil',
-      'Senaryo düşüncesi: önceden tanımlanmış geçersizlik ve durdurma çerçeveleri',
-      'Araştırma çıktıları: grafikler, tablolar, raporlar',
-      'Notlarınız ve genel kaynaklar arasında gömülü arama (isteğe bağlı)',
-      'Genişletilebilir bağlayıcılar: fiyat, zincir, araştırma, sosyal',
-      'Yarı otomatik iş akışları için insan denetimli korumalar',
-      'Açık sınırlar: sinyaller araçtır, garanti değil',
+  {
+    title: 'Altyapı ve veriler',
+    paras: [
+      `Piyasa verileri: CEX/DEX’in tarihsel ve akış feed’lerini birleştirir, ortak şemaya getirir, boşlukları kapatır, bölünmeleri ve türev özelliklerini hesaba katarız. Üstünde — topluluk (ensemble) göstergeler (RSI/ADX/ATR/VWAP/OBV/Ichimoku/hacim kümeleri), rejim filtreleri ve likidite bağlamı.`,
+      `On-chain katman: adres grafikleri, likidite hareketleri, büyük sahip yoğunlukları, köprü olayları, temel MEV riskleri. Açık blokzincirler kişisel veri değildir, ancak güvenilirlik ve olay incelemesi için istekleri ve hata ayıklama kimliklerini dikkatle loglarız.`,
+      `Anlatılar ve haberler: çok dilli indeksleme, çeviri, yinelenenlerin kaldırılması, kaynak skoru, yenilik ve fiyatla kovaryansın değerlendirilmesi; sonuç — fiyat ve hacmin yanında gürültüyü anlamlı impulsdan ayırmaya yardım eden hafif sayısal bir üst katman.`,
+      `Depolar ve önbellek: akışların sıcak/ılık olarak ayrılması, kritik işlev kaybı olmadan kademeli bozulma, VIP ve sistem görevleri için kanal önceliklendirme. Tüm hesaplama aşamalarında izlenebilirlik, artefakt sürüm kontrolü ve yeniden üretilebilirlik vardır.`,
     ],
+  },
 
-    tg_button: 'Telegram',
+  {
+    title: 'Güvenlik ve uygunluk',
+    paras: [
+      `Saklama yapmayan model: özel anahtarlar ve seed ifadeleri kullanıcıda kalır. Yetkilendirme — imza ile; erişimler — rollere göre, loglanır ve denetlenir. Kişisel verilerin en aza indirilmesi, aktarımda ve depoda şifreleme, anti-fraud/anti-sybil hatları.`,
+      `Hukuki temizlik: analiz ve araçlar sağlarız, finansal tavsiye değil. NowPayments üzerinden on-chain teyit ile ödeme akışı aboneliği otomatik etkinleştirir; durum MiniApp/web/bot arasında senkronize edilir. Gizlilik ve log politikaları şeffaftır ve güncellenir.`,
+      `Yürütme sınırlayıcıları: sağduyu kontrolleri (sanity-checks), limitler, acil durdurma tetikleyicileri ve anomali izleme. Bunlar disiplin araçlarıdır, sonuç garantisi değil; ticaret risk içerir, kararlar kullanıcıya aittir.`,
+    ],
+  },
 
-    /* ===== EXCHANGE ===== */
-    exchange_title: 'Borsa (gelişiyor)',
-    exchange_sub:
-      `Kuantum tarzı dalgalar, takımyıldız parçacıkları ve spiral galaksi örtüsüyle canlı bir piyasa tuvali.
-Sonraki adımlar: DEX/CEX üzerinde akıllı yönlendirme, kayma kontrolüyle platform seçimi, gecikmeye duyarlı yürütme, otomatik hedge ve risk limitleri.`,
-    exchange_sections: [
-      {
-        title: 'Vizyon: yeni nesil L7 borsası',
-        paras: [
-          `Borsa sadece bir grafik değildir. Bu, piyasa verilerini, zincir üstü olayları ve emir defteri sinyallerini alan,
-puanlayan ve güven ile risk bağlamında açıklanabilir öneriler (AL/SAT/TUT) sunan bir L7 ajan hattıdır.`,
-          `Kimlik cüzdan tabanlıdır; işlem ajanlar tarafından orkestre edilir. Anahtarlar kullanıcıda kalır.
-Araştırmadan yürütmeye kadar her şeyin denetim izi vardır.`,
-        ],
-      },
-      {
-        title: 'Akıllı yönlendirme & likidite',
-        paras: [
-          `Yönlendirici, DEX/CEX üzerindeki likiditeyi paralel tarar, kaymayı ve ücretleri tahmin eder,
-bir platform veya bölünmüş rota seçer ve kullanıcı risk sınırlarına uyar.`,
-          `Gecikme önemlidir: iptal/değiştir mantığı ve dinamik kill-switch ile en iyi zamanlama hedeflenir.`,
-        ],
-      },
-      {
-        title: 'Risk & kontroller',
-        paras: [
-          `Nominal, maruz kalma ve çekilme sınırları. Koşullu emirler, geçerlilik süresi, AI sinyalleri için minimum güven eşiği.`,
-          `Koruma rayları kontrolden çıkan döngüleri önler. Her eylem gerekçesi, girdiler ve model sürümleriyle izlenebilir.`,
-        ],
-      },
-      {
-        title: 'Analitik & açıklanabilirlik',
-        paras: [
-          `AI kutusu güven ve faktörleri gösterir: hareketli ortalama uyumu, VWAP ilişkisi, bant konumu, RSI rejimi ve daha fazlası.`,
-          `Her öneri, ATR benzeri volatilite ölçülerinden ve mevcut rejimden türetilen TP/SL bantlarıyla birlikte gelir.`,
-        ],
-      },
-      {
-        title: 'Sonraki adımlar',
-        paras: [
-          `Portföy görünümü, PnL atıfı, faktör katkı grafikleri.`,
-          `Tuval üzerinde doğrudan backtest ve tekrarlar, strateji şablonları ve tek tıkla dağıtım.`,
-        ],
-      },
+  {
+    title: 'Entegrasyonlar: MiniApp • Bot • Forum • Borsa',
+    paras: [
+      `Telegram MiniApp ve web, tek oturum ve haklarla aynalı arayüzler olarak çalışır. QL7 botu AI kanalına ve bildirimlere hafif bir giriş sağlar. Forum sadece bir topluluk değil: bilgi ve katkının QCoin’e dönüştüğü bilişsel bir otobüstür ve VIP içeriği öncelikli AI skorlamasından geçer.`,
+      `Borsa (çekirdek son aşamada): emir yönlendirme, kayma için bağlamsal değerlendirme, uygulanabildiğinde on-chain icra ve VIP için genişletilmiş backtest/what-if modları. Analitik ile entegrasyon nadir bir etki verir — sinyal “nasıl” icra edileceğini bilir.`,
     ],
-    roadmap: 'Yol Haritası',
-    ex_bullets: [
-      'Kayma kontrolüyle akıllı yönlendirme ve platform seçimi',
-      'Geriye dönük testler, tekrarlar ve açıklanabilir metrikler',
-      'Cüzdan bağlantıları ve anlık portföy analizi',
-      'Strateji şablonları ve koruma rayları',
+  },
+
+  {
+    title: 'VIP ve QCoin ekonomisi',
+    paras: [
+      `VIP, AI Box’taki günlük kotaları kaldırır, limitleri genişletir ve işlemeyi önceliklendirir. Forumda VIP, zaman ve görevler için X2 çarpanları, altın rozet ve algoritmik skorlama içinde medya gönderilerine (video/görüntü/ses) artırılmış ağırlık alır. Aktivite, katkı ve görüntülemeler kalite ve etkileşim dikkate alınarak QCoin’e dönüştürülür.`,
+      `Ödeme NowPayments üzerinden: on-chain teyit gelir gelmez durum anında etkinleşir ve MiniApp/bot/web’e yayılır. Yol haritasında — L7 zincirinin başlatılması: VIP, QCoin dağıtımı ve çekim kuyrukları için öncelik katmanlarının üstünde yer alır, doğrulayıcı/stake eden rollere erken erişim ve artırılmış limitler alır.`,
     ],
+  },
+
+  {
+    title: 'Takımlar ve geliştiriciler için',
+    bullets: [
+      'Güvenli token modeli ve anahtar döndürme ile API/SDK/Webhooks.',
+      'Olay güdümlü entegrasyonlar, sandbox ortamları, on-chain/off-chain kaynaklara konnektörler.',
+      'White-Label ve Enterprise modları: SSO, özel dağıtımlar, SLA, değişiklik pencereleri.',
+      'Not defterleri/backtestler: artefakt dışa aktarımı, raporlar, deneylerin yeniden üretilebilirliği.',
+      'Ürün ekipleri için özellik kabulü ve performansa dair derin metrikler.',
+    ],
+  },
+],
+
+
+/* ===== ABOUT ===== */     
+about_title: 'Quantum L7 AI Hakkında',
+about_paragraphs: [
+  `Quantum L7 AI sadece bir “analitik” değildir; kripto piyasaları etrafında ticaret kararları almayı ve sosyal etkileşimi birleştiren tek bir operasyonel sistemdir. Platformun çekirdeği, Web-MiniApp’i (web + Telegram), oyunlaştırılmış QCoin madenciliğine sahip forumları ve gürültüyü azaltan, likidite yapısını ortaya çıkaran ve disiplinli giriş/çıkış senaryoları öneren bir yapay zekâ araştırma motorunu bir araya getirir. Piyasa mikro yapısını, zincir üstü telemetrileri, davranış kalıplarını ve haber anlatılarını tek bir uyumlu ve yorumlanabilir katmanda birleştiriyoruz — böylece piyasayı “yakalamak” zorunda kalmaz, adımı önceden planlayabilirsiniz.`,
+
+  `L7 ajanları — veriler üzerinde yaşayan uygulamalı yapay zekâ modülleridir. Belgeleri ve akışları okur, API’lere istek gönderir, blok zincirlerini, emir defterlerini ve türevleri gözlemler, mini deneyler yürütür ve açıklanabilir çıktılar sunar: hipotezler, backtest anlık görüntüleri, bağlamsal göstergeler. Burada önemli olan “kara kutu büyüsü” değil, izlenebilirliktir: Her sonuçta yol görünür — hangi özellikler dikkate alınmıştır (likidite, spread’ler, asimetri, dengesizlikler, momentum, hacim kümeleri), neden ince/manipüle edilebilir alanlarda ağırlık azaltılmıştır ve senaryonun geçersizlik sınırı nerededir.`,
+
+  `Kimin için. Tüccarlar için — hızlı durumsal farkındalık ve aşırı yüklenmeden kontrol edilebilir sinyal sıklığı; araştırmacılar için — yeniden üretilebilir veri işleme hatları ve temiz veri; ekipler için — API/SDK, webhook’lar ve güvenilir bir olay hattı; geliştirici topluluğu için — forumlar, itibar metrikleri ve katkıya dayalı QCoin ekonomisi. VIP+ kullanıcıları, öncelikli bir yapay zekâ kanalı, medya paylaşımı, hızlandırılmış kotalar ve görünürlük ve limitleri etkileyen “altın” statü elde eder.`,
+
+  `Kapsam. Önde gelen CEX ve DEX toplayıcılarından veri topluyor, sembolleri ve sözleşme meta verilerini normalleştiriyor, tik frekanslarını ve emir defteri derinliklerini birleştiriyoruz. Birleşik dizinler, çiftler/ağlar/piyasalar için eşleştirmeler oluşturuyor, türevleri işaretliyor, bölünmeleri, delistleri ve sözleşme göçlerini hesaba katıyoruz. Amaç — platformlar ve ağlar arasında karşılaştırılabilirliktir: likiditeyi, maliyetleri, gecikmeleri ve “gerçek” hacim kullanılabilirliğini karşılaştırmak için tek bir soyutlama katmanı.`,
+
+  `Veri hattı. Akışlar temizlenir, eksikler onarılır, anormallikler işaretlenir, gecikme konturları kalibre edilir. Derin geçmiş, rastgele bir sıçrama yerine rejimleri tanımlama olanağı sağlar. Zincir üstü yollar, köprüler, sahip dağılımları, MEV etkinliği göstergeleri ekliyor ve bunları piyasa metrikleriyle ilişkilendiriyoruz. Sonuç — “gürültü kabarcıklarına” ve yerel anormalliklere dayanıklı özellik kümeleri.`,
+
+  `Analitik çekirdek. Yüzlerce gösterge yalnızca bir palettir. Önemli olan — ansambller ve bağlamdır: RSI/RSX, Stochastic, CCI/MFI, ADX/DI, ATR ve bantlar, EMA/SMA/WMA, MACD/Signal/Histogram, VWAP/POC/Value-Area, hacim profilleri, Bid/Ask dengesizlikleri ve likidite süpürmeleri. Klasik aileleri rejim filtreleriyle, likidite ve davranışa dayalı sezgilerle ve zincir üstü giriş/çıkış işaretçileriyle birleştiriyoruz. Her kart bir “tavsiye” değil, bir pusuladır: tarihsel genlik, gerçekleştirme ufku, güven düzeyi, varsayımlar ve geçersizlik sınırları.`,
+
+  `Zincir üstü modüller. Transfer kümelerini, köprüleri, birikim/dağılımı, büyük sahip yoğunluklarını, temel MEV kalıplarını ve anormal yolları izliyoruz. İnce likidite bölgelerinde veya fonlama/spread patlamalarında sinyal ağırlığı azalır; birden fazla alan (spot, türev, zincir üstü) tarafından onaylandığında artar. Bu, piyasanın kırılgan olduğu yerlerde “yanlış güven”i en aza indirir.`,
+
+  `Anlatılar ve haberler. Çok dilli akış çevrilir, yinelenenler kaldırılır ve gömülerle endekslenir. Yenilik, kaynak güvenilirliği, “ritüel/öz” oranı, ton ve konunun zaman içindeki “yoğunluğu” değerlendirilir. Fiyat ve zincir üstü metriklerin yanında hafif bir “anlatı haritası” görünür: ilgiyi ne yönlendiriyor, düzenleyici riskler nerede, volatiliteyi ne artırıyor, ne sönümleniyor.`,
+
+  `Sinyal kartları ve disiplin. Kartta — beklenen genlik (kantiller), zaman ufku, SL/TP işaretleri, hızlı likidite özeti ve bir araya gelmesi gereken tetikleyici seti bulunur. Sistem disiplini teşvik eder: Giriş öncesinde geçersizliği, risk birimini ve dinamik volatilite koridorunu görürsünüz; sonrasında — kontrol noktaları ve risk azaltma koşulları alırsınız.`,
+
+  `Mimari. TypeScript/Python üzerinde hafif servisler, istikrarlı bir API’nin arkasında; site — WebSocket üzerinden canlı katmanlarla Next.js üzerine kuruludur. Önbellek seviyeleri ve yedek kaynaklar, zirve zamanlarında sorunsuz bozulmayı sağlar. API/SDK ve webhook’lar otomasyon sağlar, roller ve denetimler güvenli sınırlar belirler. MiniApp, web’de ve Telegram’da çalışır, böylece piyasayı tek bir akışta yönetebilirsiniz: grafikler, forum, cüzdan, bot — sürtünmesiz.`,
+
+  `Güvenlik ve gizlilik. Saklama yapılmaz: özel anahtarlar/seed istenmez veya saklanmaz. Roller erişimi sınırlar, eylemler kaydedilir, kişisel veriler en aza indirilir ve iletim/depolama sırasında şifrelenir. Anti-sybil/anti-fraud hatları QCoin ekonomisini ve forumun itibar mekanizmalarını korur; oturum doğrulaması dikkatli ama sıkı bir şekilde erişim bütünlüğünü sürdürür.`,
+
+  `Forum ve QCoin madenciliği. Forum bir “sosyal ağ” değil, bilgi üretim hattıdır. Her 4 saatte bir etkinliği onaylar ve ödülü kilitlersiniz; medya içeren gönderiler (video/görsel/ses) QuantumLCM-AI tarafından (kalite, etkileşim, anti-spam/anti-sybil) puanlanır ve QCoin’e dönüştürülür. VIP+ zaman açısından ×2 ve görevlerde ×2 alır, listelerde öncelik, genişletilmiş medya limitleri ve hızlandırılmış moderasyon elde eder. İtibar ve katkı, boş bir gürültü değil, ekonomik olarak anlamlı bir değerdir.`,
+
+  `Borsa (geliştirme aşamasında) ve öneriler. Ticaret çekirdeği ve yürütme kademeli olarak bağlanır; şu anda sembol/zaman aralıkları, emir defteri derinliği ve likidite profiline göre yapay zekâ önerileri mevcuttur. Akıllı yönlendirme, gecikme/kayma koruması, portföy kısıtlamaları ve PnL atfı tasarlıyoruz. VIP+ deneysel göstergelere, what-if/backtest modlarına ve genişletilmiş analiz ufuklarına erişim sağlar.`,
+
+  `QCoin ekonomisi ve L7 blok zinciri. QCoin — bilgi ve faydalı trafiğin yakıtıdır. Gelecekteki L7-chain, çapraz ağ varlıklarını, bankaları ve finansal altyapıyı evrensel bir değer yönlendiriciye bağlayan bir katmandır. Amacımız, QCoin’in ekosistem içinde şeffaf ihraç/yakım ve adil çekim sırası ile nötr bir hesap birimi haline gelmesidir. VIP+, dağıtımlarda artırılmış önceliğe ve stake/doğrulayıcı rollere erken erişime sahiptir.`,
+
+  `Ödeme ve aktivasyon. VIP+ aboneliği NowPayments üzerinden yapılır: kripto ödeme (USDT vb.), webhook erişimi anında etkinleştirir ve durumu MiniApp, bot ve forum arasında senkronize eder. Ekran görüntüleri veya manuel doğrulamalar gerekmez. Arayüz 7 dilde mevcuttur; cüzdan bağlantısı sorunsuzdur. Hız, yorumlanabilirlik ve katkının ödüllendirildiği bir ekonomi için ödeme yaparsınız.`,
+
+  `Topluluk ve yol haritası. Haftalık notlar yayımlıyoruz, alfa özelliklerinin betalarını açıyoruz, ekiplerden hedefli talepler alıyoruz. Geri planda: risk bütçeleriyle portföy motoru, gelişmiş CEX/DEX akıllı yönlendirme, herkese açık not defterleri/backtest’ler, insan kontrolünde “yarı otomatik pilot”. Disiplini artıran ve sürtünmeyi azaltan her şey yayına girer; parlayan ama faydasız olanlar — asla. Materyaller — eğitimsel/analitik, finansal tavsiye değildir.`
+],
+
+about_sections: [
+  { title: 'Quantum L7 AI Nedir',           parasIdx: [0] },
+  { title: 'L7 Ajanları, “Kara Kutu” Değil', parasIdx: [1] },
+  { title: 'Kimler İçin',                   parasIdx: [2] },
+  { title: 'Kapsam',                        parasIdx: [3] },
+  { title: 'Veri Hattı',                    parasIdx: [4] },
+  { title: 'Analitik Çekirdek',             parasIdx: [5] },
+  { title: 'Zincir Üstü Modüller',          parasIdx: [6] },
+  { title: 'Anlatılar ve Haberler',         parasIdx: [7] },
+  { title: 'Kartlar ve Disiplin',           parasIdx: [8] },
+  { title: 'Mimari',                        parasIdx: [9] },
+  { title: 'Güvenlik ve Gizlilik',          parasIdx: [10] },
+  { title: 'Forum ve QCoin Madenciliği',    parasIdx: [11] },
+  { title: 'Borsa ve Öneriler',             parasIdx: [12] },
+  { title: 'QCoin Ekonomisi ve L7 Zinciri', parasIdx: [13] },
+  { title: 'Ödeme, Yerelleştirme, Yol Haritası', parasIdx: [14] }
+],
+
+about_bullets: [
+  'Durumsal farkındalık: trend, momentum, volatilite, likidite',
+  'Borsalar arası normalizasyon, gecikme farkındalıklı özellik ağırlığı',
+  'Zincir üstü akışlar, sahip yoğunlukları, köprüler, MEV ipuçları',
+  'Çevirili ve güven/yenilik değerlendirmeli anlatı akışı',
+  'Kartlar: genlik (kantiller), ufuklar, SL/TP, güven',
+  'Gösterge ansamblleri + rejim filtreleri + davranış',
+  '“Sihir” olmadan otomasyon için API/SDK ve webhook’lar',
+  'Yoğunlukta sorunsuz düşüş ve yedek kaynaklar',
+  'Saklamasız güvenlik: roller, denetim, şifreleme',
+  'Forum: QCoin madenciliği, görevler, AI puanlamalı medya paylaşımı',
+  'VIP+: zamana ve görevlere ×2, listelerde ve limitlerde öncelik',
+  'Borsa önerileri zaten mevcut; yürütme çekirdeği yolda',
+  'NowPayments: anında aktivasyon, durum senkronizasyonu',
+  'L7 blok zinciri: öncelikli çekim sıraları ve erken roller',
+  '7 dil, web ve Telegram MiniApp üzerinden tek erişim'
+],
+
+tg_button: 'Telegram',
+
+
+/* ===== EXCHANGE (genişletilmiş açıklama) ===== */
+exchange_title: 'Borsa (geliştirme aşamasında)',
+exchange_sub:
+  `Quantum L7 Exchange — çok zincirli, makul şekilde açıklanabilir yeni nesil bir ticaret platformudur,
+CEX/DEX likiditesini, yapay zekâ önerilerini ve kurumsal veri altyapısını tek bir hesaplama dokusunda birleştirir.
+Tüm büyük ağlar ve platformlarda 87 TB piyasa geçmişini ve 37+ milyar tarihsel mum verisini işliyor, tikleri,
+emir defteri derinliğini ve türev spesifikasyonlarını normalize ederek piyasayı tek bir karar alma standardına getiriyoruz. Amaç — «bir borsa daha» değil,
+kanıtlanabilir mantığa sahip bir yürütme çevrimi: hipotez → test → kanıtlar → işlem, şeffaf risk sınırlayıcıları ve izlenebilir denetim ile.`,
+
+exchange_sections: [
+  {
+    title: 'Vizyon: yeni nesil L7 borsası',
+    paras: [
+      `L7 Exchange — otonom L7 ajanlarının piyasa beslemelerini, onchain olayları, haberleri ve mikroyapı davranış sinyallerini
+tükettiği, bunları zaman açısından senkronize edip açıklanabilir öneriler (BUY/SELL/HOLD) ürettiği ajan-temelli bir boru hattıdır,
+olasılık, genlik, ufuk ve risk bağlamı (likidite, spread, varyans, anormallikler) ile. Kullanıcı için bu,
+kararların yeniden üretilebilirliği anlamına gelir: her sinyal kartı faktör günlüğü, model sürümleri ve birincil kaynaklara bağlantılar ile birlikte gelir.`,
+      `Kimlik — saklama yapmayan cüzdanlar aracılığıyla (özel anahtarları ve seed ifadelerini saklamıyoruz). Erişim hakları,
+kotalar ve limitler web arayüzü ve MiniApp içinde senkronize edilir. Eylemlerin yürütülmesi — yalnızca sizin belirlediğiniz
+sınırlayıcılar dâhilinde ve modelin yeterli güven düzeyi olduğunda. Platformun ilkesi — «kara kutu» değil, kanıtlanabilirlik.`,
+      `Kurumsal düzeyde veriler: 87 TB geçmiş, 37+ milyar mum, sözleşmelerin ve sembollerin birleştirilmesi,
+gecikme-duyarlı (latency-aware) akış işleme, boşlukların temizlenmesi, bölünmelerin ve türev özelliklerinin dikkate alınması. Üstünde — 200+ göstergeden oluşan ansambller
+(RSI/ADX/ATR/VWAP/OBV/Ichimoku/hacim kümeleri, rejim filtreleri vb.), davranışsal özellikler ve mikro dengesizlik istatistikleri.`,
+      `H2 2026 — yeni nesil L7 blokzinciri ile birlikte L7 Exchange çekirdeğinin halka açık lansmanı için hedef pencere
+(ağlar arası uzlaşma katmanı). Başlangıçta — borsalar arası yönlendirme, açıklanabilir otomatik yürütme,
+ardından — onchain kliringe ve yerel akıllı erişim haklarına doğru genişleme.`,
+    ],
+  },
+
+  {
+    title: 'Yönlendirme ve likidite',
+    paras: [
+      `Akıllı yönlendirici paralel olarak CEX/DEX üzerindeki likiditeyi tarar, kayma (slippage), ücretler ve gecikmeleri modeller,
+platformu/bölünmüş rotayı seçer ve hedef metrikler (expected fill, adverse selection, 
+N saniye/dakika sonrası mark-out) üzerinden yürütme kalitesini kontrol eder. Bölme modunda emirler parçalanır ve etkisini en aza indirmek için havuzlara/defterlere dağıtılır.`,
+      `Gecikme önemlidir: cancel/replace, zaman aşımı (time-out), «kill-switch», kısmi kâr alma kuralları ve
+spread varyansındaki sıçramalara tepkiyi destekliyoruz. Arbitraj senaryolarında tik senkronizasyon pencereleri ve düşük gecikmeli bağlantılar kullanılır.`,
+      `Piyasa mikroyapısı: emir dengesizliğini, gizli hacim sıçramalarını, seviye bazlı likiditeyi,
+haberlerin/onchain olayların etkisini, «agresif» baskıların davranışını ve nominal büyüklüğe göre kayma olasılığını analiz ediyoruz.`,
+    ],
+  },
+
+  {
+    title: 'Risk ve kontrol',
+    paras: [
+      `Küresel ve enstrüman bazlı limitler: nominal, portföy payı, günlük/haftalık geri çekilme, kaldıraç, yoğunlaşma.
+Yürütme profilleri (conservative/balanced/aggressive) ve model için asgari gerekli güven. Tüm tetikleyiciler şeffaf biçimde tanımlanır
+ve denetim için kaydedilir. Her eylem açıklanabilir: neden, giriş verileri, model sürümleri ve yürütme parametreleri.`,
+      `Koşullu emirler (stop/stop-limit), time-in-force (GTC/IOC/FOK), kısmi kâr alma direktifleri, dinamik stop koridorları
+volatilite rejimine göre (ATR-benzeri), «circuit-breaker» anormalliklerde, gece «sessizlikleri» ve olay blokları (örneğin yüksek etkili haberler).`,
+      `Anti-hızlandırma ve anti-sıçrama: spread/likidite için ekstra kontroller, adil fiyattan sapma eşikleri, «uçuruma» doğru ortalamayı yasaklama,
+çevre «ticaret için uygunsuz» olduğunda zorunlu gerilimi azaltma için acil düzey.`,
+    ],
+  },
+
+  {
+    title: 'Analitik ve açıklanabilirlik',
+    paras: [
+      `Her sembol/TF için AI-Box güven düzeyini, karar faktörlerini (VWAP/bantlara göre göreli konumdan
+RSI/hacim kümeleri rejimlerine kadar), tarihsel genliği ve ufukları (kantil) ve önerilen TP/SL’yi gösterir. 
+Sunum kompakt ama doğrulanabilirdir: metafor değil, rakamlar.`,
+      `Tasarım gereği açıklanabilirlik: neden ➜ etki. Kart, faktör ağırlıklarını, kaynak bağlantılarını,
+defterler/hacimler için anlık görüntüleri ve «what-if» mini simülasyonlarını içerir. Amaç — tüccara şeffaf bir karar iskeleti vermek,
+ki yeniden üretilebilir ve itiraz edilebilir.`,
+      `Haberler/anlatılar: çok dilli ayrıştırma, çeviri, yinelenenlerin kaldırılması, AI-tonu, kaynağa güven, fiyat tepkisiyle bağ.
+Bu «gürültü» değil, senaryo olasılığını ve yürütme zaman pencerelerini değerlendirmek için bağlamdır.`,
+    ],
+  },
+
+  {
+    title: 'Portföy, raporlama ve atıf',
+    paras: [
+      `PnL atfı olan portföy panelleri: alfa kaynaklarına, piyasa rejimlerine, sembollere, risk bütçelerine ve
+model kararlarına göre ayrıştırma. «Mark-out» ve etki metrikleri ayrıca hesaplanır ki «şansı» sistematiklikten ayırabilelim.`,
+      `İşlem günlükleri, dışa aktarma, raporlar, entegrasyonlar için API. Araştırmaların tekrarlanabilirliği: backtestler ve «replay» 
+geçmiş akışlar üzerinde doğrudan grafiğin üstünde. «Strateji şablonları» ve sınırlayıcılarla «tek tıkla» devreye alma.`,
+      `Takım modları (yol haritası): roller, yetkiler, parametre uzlaşması, merkezi raporlar, 
+white-label ve enterprise için özel dağıtımlar.`,
+    ],
+  },
+
+  {
+    title: 'Veri ve ağ altyapısı',
+    paras: [
+      `Beslemelerin birleştirilmesi: borsalar arası toplama, tik ve derinliğin ortak şemaya getirilmesi, boşlukların kapatılması, 
+bölünmelerin ve sözleşme değişikliklerinin işlenmesi. Üstünde — 200+ göstergeden ansambller, davranışsal/rejim filtreleri
+ve mikroyapısal özellikler. Tarihsel katman — 87 TB, 37 milyardan fazla mum.`,
+      `Onchain katman: adres grafikleri, sahip yoğunlaşması, likidite girişi/çıkışı, köprü hareketleri, temel MEV riskleri.
+Genel blokzincirler kişisel veri değildir; buna karşın operasyonel günlükler (yasa sınırları içinde) 
+güvenilirliği sağlamak ve olay soruşturmalarına yardımcı olmak için fayda sağlar.`,
+      `Ağ yığını: likidite ve piyasa verisi sağlayıcılarına optimize bağlantılar, kritik işlev kaybı olmadan bozulma stratejisi,
+sıcak/ılık önbellekler, VIP işleme kanallarına öncelik. Tüm hesaplama aşamaları izlenebilir.`,
+    ],
+  },
+
+  {
+    title: 'Güvenlik ve uyumluluk',
+    paras: [
+      `Saklama yapmayan model: anahtarlar kullanıcıda, yetkilendirme — imzayla. Rol tabanlı erişim, 
+asgari kişisel veri, «aktarılırken» ve «depolanırken» şifreleme, anti-fraud/anti-sybil hatları.
+Eylemlerin denetim ve tekrarlanabilirlik için günlüğe alınması.`,
+      `Düzenleyici bağlam: finansal tavsiyeler değil, analiz ve araçlar sunuyoruz.
+NowPayments üzerinden onchain teyit ile abonelik ödemesi — manuel «kontroller» olmadan limit/hakların otomatik aktivasyonu. 
+Gizlilik ve günlükleme politikaları — şeffaf ve düzenli güncellenir.`,
+      `Yürütme sınırlayıcıları — disiplin, garanti değil. Piyasa oynaktır; kararlar ve yargı gerekliliklerine uyum —
+kullanıcı tarafındadır. Riskin bilinçli olması için çerçeveler, metrikler ve açıklanabilirlik sunuyoruz.`,
+    ],
+  },
+
+  {
+    title: 'Yol haritası ve lansman',
+    paras: [
+      `H2 2026: L7 Exchange çekirdeği ve yeni nesil L7 blokzincirinin halka açık lansmanı — akıllı sözleşmeler seviyesinde kliringi
+ve erişim haklarını basitleştirmeyi, ayrıca yürütmenin gözlemlenebilirliğini iyileştirmeyi amaçlayan ağlar arası uzlaşma katmanı.
+Ana odak — likidite yönlendirme, açıklanabilir otomatik yürütme, portföy atfı ve takım modları.`,
+      `QCoin — L7 ekosisteminin dahili ekonomisi. Yol haritasında — ekosistemin ödeme/teşvik süreçlerinde QCoin’in rolü.
+Amaç — analitik, yürütme ve kullanıcı hizmetleri arasında tek bir «hesaplaşma katmanı».`,
+      `Halka açık sürümden önce — genişletilmiş betalar, stres testleri, kararlılık raporları ve 
+yürütme kalitesi ile gecikmeler üzerine açık, günlüklü sonuçlar. Şeffaflık — güvenin çekirdeği.`,
+    ],
+  },
+],
+
+roadmap: 'Yol haritası',
+
+ex_bullets: [
+  'Slippage kontrolü, bölme ve gecikme-duyarlı yürütme ile CEX/DEX akıllı yönlendirme',
+  'Açıklanabilir AI sinyalleri: olasılık, genlik, ufuklar, güven faktörleri, TP/SL',
+  'Portföy panelleri: PnL atfı, risk bütçeleri, «mark-out», etki metrikleri',
+  'Geçmiş akışlar üzerinde doğrudan grafikte backtestler ve replayler',
+  'Risk sınırlayıcıları: limitler, time-in-force, kill-switch, dinamik stop koridorları',
+  'Veri birleştirme: 87 TB geçmiş, 37+ milyar mum, 200+ gösterge ve rejim filtreleri',
+  'Cüzdan bağlantısı, saklama yapmayan model ve eylemlerin günlüğe alınabilir denetimi',
+  'H2 2026: L7 Exchange çekirdeğinin ve yeni nesil L7 blokzincirinin halka açık lansmanı',
+],
 
     /* ===== SUBSCRIBE / CONTACT ===== */
     subscribe_title: 'Abonelik Planları',
@@ -1613,458 +2566,1029 @@ bir platform veya bölünmüş rota seçer ve kullanıcı risk sınırlarına uy
 
 /* -------------------- EN -------------------- */
 const PRIVACY_EN = {
-  nav_privacy: 'Privacy & Policy',
-  privacy_title: 'Privacy & Policy',
+  nav_privacy: 'Privacy',
+  privacy_title: 'Privacy',
   privacy_updated_label: 'Updated:',
-  privacy_updated: '2025-09-14',
-  privacy_empty: 'No items',
+  privacy_updated: '2025-10-30',
+  privacy_empty: 'No data',
   privacy_sections: [
-    { title: 'Overview', paras: [
-      'This Policy explains what we collect, how we use it, and how we protect data on the website, in the Telegram bot, and in our services.',
-      'By using the service, you agree to this Policy. This is a product notice, not legal advice.'
-    ]},
-    { title: 'What we collect', paras: [
-      'Account and contact data: Telegram ID/username/display name; email (if you send it); messages you send to us.',
-      'Wallet linking: networks and public addresses (never private keys).',
-      'Usage and device data: pages, clicks, referrer, hashed IP, user agent, timestamps, error and performance telemetry.'
-    ]},
-    { title: 'On-chain and public data', paras: [
-      'We analyse public blockchain and market data. Such sources are public by design and are not personal data under our control.',
-      'Requests (e.g., symbol or address analytics) can be logged to operate the service and improve reliability.'
-    ]},
-    { title: 'Cookies and localStorage', paras: [
-      'We use them minimally: language, session, anti-abuse. You may block them; some features may degrade.'
-    ]},
-    { title: 'How we use data', paras: [
-      'Provide and improve research and signals; routing and guarded execution; abuse prevention; support and communication.',
-      'We do not build advertising profiles.'
-    ]},
-    { title: 'Sharing with third parties', paras: [
-      'We do not sell personal data.',
-      'Processors: hosting (e.g., Vercel), storage, analytics (if enabled), error tracking, email/Telegram delivery.',
-      'Disclosure may be required to comply with law or to protect rights.'
-    ]},
-    { title: 'Security', paras: [
-      'Keys stay with you; we never request seed phrases. Data is encrypted in transit and at rest; access is role-scoped and logged.',
-      'We apply least-privilege access, MFA on critical systems, and change control for deployments.'
-    ]},
-    { title: 'International transfers', paras: [
-      'Processing may occur abroad. Where required, we use standard safeguards (e.g., SCC) or other lawful transfer mechanisms.'
-    ]},
-    { title: 'Your rights', paras: [
-      'EEA/UK (GDPR): access, rectification, erasure, portability, restriction/objection; right to lodge a complaint with a supervisory authority.',
-      'California (CPRA): access, deletion, correction, opt-out of sale/share; non-discrimination for exercising rights.'
-    ]},
-    { title: 'Children', paras: [
-      'The service is not intended for children under 13 (or higher minimum age in your jurisdiction).'
-    ]},
-    { title: 'Changes', paras: [
-      'We may update this Policy. We will revise the “Updated” date and, when appropriate, notify in-app or via channel.'
-    ]},
-    { title: 'Contacts', paras: [
-      'Email: quantuml7ai@gmail.com',
-      'Feedback bot: https://t.me/L7ai_feedback'
-    ]},
+    {
+      title: '1. Overview',
+      paras: [
+        '1.1. This Quantum L7 AI Privacy Policy (hereinafter — the “Policy”) describes what data we collect, the legal bases for processing, where and how we store it, how we protect it, and how we transfer it within the ecosystem: website, Web-MiniApp, Telegram Mini App, Telegram bot(s), API, Forum, analytics services, and trading interfaces (incl. the Exchange under development).',
+        '1.2. By using Quantum L7 AI services (“Service”), you confirm that you have read the Policy and accept its terms. The Policy is intended to transparently inform users, is not individual legal advice, and does not replace contracts/offers/policies of specific vendors.',
+        '1.3. We act as a data controller with respect to personal data we collect and for which we determine the purposes/means of processing, and as a processor where we process data on behalf of clients/partners.',
+        '1.4. The terms “personal data,” “processing,” “controller,” “processor,” “data subject,” and “international transfer” are used as defined by global regulatory frameworks (GDPR/UK GDPR, CCPA/CPRA, etc.).',
+        '1.5. Our services interact with on-chain sources and market feeds: public blockchain data is inherently open and is not our “personal data,” but correlations with your account may constitute personal data.'
+      ]
+    },
 
-    /* ===== Extended sections ===== */
+    {
+      title: '2. What We Collect',
+      paras: [
+        '2.1. Account and identification data: Telegram ID/username/display name (when logging in via Telegram Mini App or bot), internal Account ID, subscription status labels (VIP/Free), interface language.',
+        '2.2. Contact data: email (if provided), Forum nickname, reference identifiers of external accounts (Google, Apple, Twitter/X, Discord, etc.) when linked.',
+        '2.3. Authorization and linkages: the fact and route of login through a multi-provider ecosystem (OAuth/OIDC, Telegram WebApp initData, Sign in with Apple/Google/Twitter/X/Discord, wallet signature, magic link), technical tokens/stamps/signatures (without storing private keys or seed phrases).',
+        '2.4. Wallets and networks: public addresses, networks used (L1/L2), transaction metadata related to subscription payments via NowPayments and on-chain confirmations.',
+        '2.5. Usage data: visited pages/screens, interface actions, timestamps, hashed IP, user agent, client performance parameters, error telemetry.',
+        '2.6. Forum and content: posts, topics, upload metadata (images/video/audio), system scoring artifacts (quality/engagement/anti-spam/anti-sybil), activity statistics for QCoin mining.',
+        '2.7. Payments and billing: invoice statuses, payment confirmations (via the integrated payment provider), amounts/currencies/timestamps, technical routing logs.',
+        '2.8. On-chain and market data: we index and aggregate public chains/exchange feeds/order books/historical candles for analytical purposes and to provide Service functionality.'
+      ]
+    },
 
-    { title: 'Definitions and scope', paras: [
-      '“Service” means our websites, bots, APIs, and related applications. “We” means Quantum L7 AI.',
-      'This Policy covers data we process as controller. Vendor policies and blockchain networks have their own rules.'
-    ]},
-    { title: 'Legal bases (GDPR)', paras: [
-      'Contract: to provide requested features (routing, research, dashboards).',
-      'Legitimate interests: service reliability, security, abuse prevention, product analytics with minimal impact.',
-      'Consent: optional analytics/marketing where applicable; you can withdraw at any time.',
-      'Legal obligation: where we must retain or disclose data under law.'
-    ]},
-    { title: 'Data retention', paras: [
-      'We keep personal data only as long as necessary for the purposes described or as required by law.',
-      'Typical ranges: operational logs 30–180 days; support messages up to 12 months; legal records as mandated.'
-    ]},
-    { title: 'Subprocessors', paras: [
-      'Typical categories: hosting/CDN, object storage, email/Telegram delivery, monitoring, error tracking, basic product analytics.',
-      'We engage reputable providers under data-processing agreements and review their safeguards periodically.'
-    ]},
-    { title: 'Analytics and metrics', paras: [
-      'If enabled, we measure aggregate usage (pages, performance, feature adoption).',
-      'Analytics is configured to avoid sensitive data and to minimise personal data wherever practical.'
-    ]},
-    { title: 'Logging and telemetry', paras: [
-      'Operational logs may include timestamps, hashed IP, user agent, error traces, and request identifiers.',
-      'Logs are rotated, access-controlled, and used for debugging, capacity planning, and abuse detection.'
-    ]},
-    { title: 'Email and communications', paras: [
-      'If you contact us by email or bot, we process your message for support and record keeping.',
-      'We do not send marketing without consent. You can opt out at any time.'
-    ]},
-    { title: 'Webhooks and API', paras: [
-      'If you use our APIs or webhooks, payloads may be stored temporarily for reliability and replay protection.',
-      'Do not include secrets or private keys in requests; use appropriate auth and rotate tokens regularly.'
-    ]},
-    { title: 'Wallet linking specifics', paras: [
-      'We store networks and public addresses to enable features. We never request or store private keys or seed phrases.',
-      'Transactions you perform on-chain are public; we may index and annotate them for analytics and reporting.'
-    ]},
-    { title: 'Execution guardrails', paras: [
-      'Where execution or routing is supported, we apply guardrails (limits, risk rules, sanity checks).',
-      'These features are tools, not guarantees; you remain responsible for your decisions and compliance.'
-    ]},
-    { title: 'Research, models, and LLMs', paras: [
-      'We may train or evaluate models on aggregated and anonymised data where possible.',
-      'If third-party LLMs are used, we avoid sending personal data unless necessary and covered by agreements.'
-    ]},
-    { title: 'Automated decision-making', paras: [
-      'We do not make solely automated decisions with legal or similarly significant effects.',
-      'Recommendations and scores are assistive signals; final decisions remain with you.'
-    ]},
-    { title: 'Pseudonymisation and aggregation', paras: [
-      'Where feasible, we hash or aggregate identifiers to reduce privacy risk.',
-      'We separate keys from content and apply access controls to link them only when necessary.'
-    ]},
-    { title: 'Portability and export', paras: [
-      'You can request an export of your personal data associated with your account or bot identity.',
-      'We will provide it in a commonly used, machine-readable format unless legal limits apply.'
-    ]},
-    { title: 'How to exercise rights', paras: [
-      'Submit requests via email or our feedback bot. We may ask for reasonable verification (e.g., bot message from your account).',
-      'We respond within applicable legal deadlines. Some requests may be limited by law or security considerations.'
-    ]},
-    { title: 'Incidents and breach notification', paras: [
-      'We maintain incident response procedures. If a breach occurs, we will notify affected users and authorities as required by law.',
-      'We also conduct post-incident reviews and improve controls to prevent recurrence.'
-    ]},
-    { title: 'Jurisdiction-specific notices', paras: [
-      'EEA/UK: GDPR applies where we act as controller for users in these regions.',
-      'US: state privacy laws (e.g., CPRA) may give additional rights; we honour valid opt-out signals where feasible.'
-    ]},
-    { title: 'Do Not Track and GPC', paras: [
-      'Browsers may send Do Not Track or Global Privacy Control signals. Where legally required and technically feasible, we respect them.'
-    ]},
-    { title: 'Opt-out options', paras: [
-      'You can disable optional analytics/cookies, unsubscribe from emails, and limit bot permissions.',
-      'Core security and essential functionality may still require minimal processing.'
-    ]},
-    { title: 'Accessibility and language', paras: [
-      'We aim to provide clear explanations in multiple languages. If translations differ, the English version may prevail for interpretation.'
-    ]},
-    { title: 'DPO / privacy contact', paras: [
-      'Privacy contact: quantuml7ai@gmail.com (subject: Privacy). We aim to reply within 30 days.'
-    ]},
-    { title: 'Effective date and versions', paras: [
-      'This Policy is effective on the “Updated” date above. Prior versions may be archived for reference.'
-    ]},
-    { title: 'Appendix: Glossary', paras: [
-      'Controller: decides purposes and means of processing. Processor: processes on behalf of controller.',
-      'Personal data: information relating to an identified or identifiable person.'
-    ]},
-    { title: 'Appendix: Subprocessor list (summary)', paras: [
-      'Hosting/CDN (e.g., Vercel), object storage, email/Telegram delivery, error tracking, monitoring, basic product analytics.',
-      'A detailed up-to-date list is available on request.'
-    ]}
+    {
+      title: '3. On-chain and Public Data',
+      paras: [
+        '3.1. Public blockchain records are available to any network participant; their processing for analytics, indicators, and recommendations is carried out within the permitted use of publicly available information.',
+        '3.2. Matching on-chain activity with your account is possible when a wallet/payments/subscriptions are voluntarily linked. In this case, a personal usage profile is created.',
+        '3.3. Requests to public nodes/RPC/indexing providers and market aggregators may be logged for reliability, security, abuse prevention, and service quality improvement.'
+      ]
+    },
+
+    {
+      title: '4. Cookies, localStorage, and Other Client Artifacts',
+      paras: [
+        '4.1. We apply minimally necessary mechanisms: language storage, secure session tokens, anti-abuse parameters, UX settings.',
+        '4.2. If cookies/localStorage are blocked, some functions may become unavailable or degraded (e.g., sessions, personal limits, language).',
+        '4.3. Where required by law, we request consent for non-critical cookies/analytics.'
+      ]
+    },
+
+    {
+      title: '5. How We Use Data',
+      paras: [
+        '5.1. Providing functionality: authorization/linking of accounts, synchronization of subscription statuses, access to the Forum, MiniApp, bot, analytics dashboards, and recommendations.',
+        '5.2. Product improvement: aggregated usage analytics, A/B evaluations, performance telemetry, troubleshooting, improving AI model accuracy.',
+        '5.3. Security and integrity: abuse protection (rate limit, anti-spam, anti-sybil), anomaly control, audit of service actions, incident investigation.',
+        '5.4. Billing and compliance: processing payment statuses, confirmations, access rights accounting, compliance with financial reporting and counter-illegal activity laws.',
+        '5.5. Communications and support: responses to requests, status notifications (e.g., successful VIP activation), service messages.',
+        '5.6. We do not conduct marketing profiling; mailings are carried out only when a lawful basis exists (e.g., consent).'
+      ]
+    },
+
+    {
+      title: '6. Transfer and Disclosure to Third Parties',
+      paras: [
+        '6.1. We do not sell personal data.',
+        '6.2. Data may be processed by our subprocessors under our instructions and only for the purposes described in the Policy: compute platforms/hosting, CDN, object storage, queues and caches, monitoring/logging/error tracking, payment gateways, messaging providers (email/Telegram), analytics platforms.',
+        '6.3. Disclosure is possible in compliance with the law, lawful requests by competent authorities, and to protect the rights/safety of users and the Service.',
+        '6.4. In the event of a change in corporate control (merger/sale of assets), data may be transferred to the successor provided equivalent protection is maintained and notice is given where required by law.'
+      ]
+    },
+
+    {
+      title: '7. Security',
+      paras: [
+        '7.1. Principles: security by design, least privilege (PoLP), separation of duties, mandatory logging of critical operations.',
+        '7.2. Encryption: TLS in transit; encryption at rest for sensitive artifacts; key management with access control.',
+        '7.3. Access: multi-factor authentication for admin consoles, role-based access control, environment segmentation (prod/stage/dev).',
+        '7.4. Change control: code reviews, signed builds, gradual rollouts, rollbacks, blocking unsafe configurations.',
+        '7.5. Testing and monitoring: intrusion detection, alerts, periodic reviews of configurations and permissions.',
+        '7.6. Wallet keys and seed phrases: we do not request or store them. Signatures are performed on the user side or in a trusted wallet.'
+      ]
+    },
+
+    {
+      title: '8. International Transfers',
+      paras: [
+        '8.1. Processing and storage may be carried out in multi-regional infrastructure with geo-replication and load balancing.',
+        '8.2. For cross-border transfers, lawful mechanisms are used (including standard contractual clauses, where applicable) and equivalent protective measures.',
+        '8.3. The user consents to international data transfer within the scope of providing the Service.'
+      ]
+    },
+
+    {
+      title: '9. Your Rights',
+      paras: [
+        '9.1. EEA/UK (GDPR): right of access, rectification, erasure, restriction/objection, portability, and the right to lodge a complaint with a supervisory authority.',
+        '9.2. USA (including California/CPRA): right to know, correct, delete, opt out of sale/sharing, and the right to non-discrimination for exercising rights.',
+        '9.3. Exercising rights: see the “How to Exercise Rights” section. Identity verification is required.'
+      ]
+    },
+
+    {
+      title: '10. Children',
+      paras: [
+        '10.1. The Service is not intended for children under 13 (or a higher age as required by your jurisdiction).',
+        '10.2. If you believe a child has provided us with data, contact us for deletion.'
+      ]
+    },
+
+    {
+      title: '11. Changes',
+      paras: [
+        '11.1. We may update the Policy to reflect changes in technology, law, and products.',
+        '11.2. In the event of material changes, the “Updated” date is revised and, if necessary, a notice is displayed in the interface.'
+      ]
+    },
+
+    {
+      title: '12. Contacts',
+      paras: [
+        '12.1. Email for privacy requests: quantuml7ai@gmail.com',
+        '12.2. Feedback channel (bot): https://t.me/L7ai_feedback'
+      ]
+    },
+
+    {
+      title: '13. Definitions and Scope',
+      paras: [
+        '13.1. “Service” — websites, Web-MiniApp, Telegram Mini App, Telegram bots, Forum, API, analytics, payment integrations, and trading interfaces.',
+        '13.2. “We” — Quantum L7 AI. The Policy covers data where we act as the controller. Third-party services (authorization providers, blockchains, wallets, payment gateways) operate under their own rules.',
+        '13.3. The subject of the Policy — user data and operational data necessary for the functioning of the Service.'
+      ]
+    },
+
+    {
+      title: '14. Legal Bases for Processing (GDPR/UK GDPR)',
+      paras: [
+        '14.1. Contract/necessity for service provision: authorization, access to functionality, billing, and support.',
+        '14.2. Legitimate interest: security, abuse prevention, operational analytics with low privacy risk.',
+        '14.3. Consent: optional metrics/marketing communications, where applicable. Consent may be withdrawn.',
+        '14.4. Legal obligation: storage and disclosure where required by law (e.g., accounting records).'
+      ]
+    },
+
+    {
+      title: '15. Data Storage (Retention)',
+      paras: [
+        '15.1. We retain personal data no longer than necessary for the purposes of processing or as required by law.',
+        '15.2. Benchmarks: service logs 30–180 days; performance telemetry up to 90 days; support correspondence up to 12 months; billing records — according to legal retention periods.',
+        '15.3. Anonymized aggregates may be stored longer for research and statistical purposes.'
+      ]
+    },
+
+    {
+      title: '16. Subprocessors and Infrastructure',
+      paras: [
+        '16.1. Categories of subprocessors: compute platforms and hosting, CDN, object storages, SQL/NoSQL databases, caches and message queues, monitoring/logging/tracing, email/messaging dispatch, payment operators, providers indexing on-chain/market feeds.',
+        '16.2. Data Protection Agreements (DPAs) are in place with each subprocessor, and technical/organizational security measures are applied.',
+        '16.3. The up-to-date list of categories is available in the Policy; a detailed current list is provided upon request subject to security requirements.'
+      ]
+    },
+
+    {
+      title: '17. Analytics and Metrics',
+      paras: [
+        '17.1. We may collect aggregated usage metrics (interface coverage, performance, feature adoption) to the extent necessary to improve the product.',
+        '17.2. Analytics settings aim to exclude sensitive data and minimize personal identifiers.',
+        '17.3. Where required, a consent mechanism is used for non-essential metrics.'
+      ]
+    },
+
+    {
+      title: '18. Logs and Telemetry',
+      paras: [
+        '18.1. Operational logs may include timestamps, hashed IP, user agent, error traces, request/correlation IDs, response codes.',
+        '18.2. Logs are rotated, access-restricted, and used for debugging, capacity planning, DDoS/bot traffic protection, and auditing.',
+        '18.3. Logging points are designed in line with the principle of minimization.'
+      ]
+    },
+
+    {
+      title: '19. Mail, Notifications, and Communications',
+      paras: [
+        '19.1. Messages sent to our addresses/bots are processed for support, contract performance, and service quality accounting.',
+        '19.2. You may opt out of non-service mailings; service notifications (e.g., subscription status) are essential for functionality.'
+      ]
+    },
+
+    {
+      title: '20. Webhooks and API',
+      paras: [
+        '20.1. When using Webhook/API, payloads may be temporarily buffered for reliable delivery, deduplication, and replay protection.',
+        '20.2. Do not transmit secrets, private keys, or other materials not intended for third parties via Webhook/API; use signatures, token rotation, and source restrictions.'
+      ]
+    },
+
+    {
+      title: '21. Wallet Linking and Payments',
+      paras: [
+        '21.1. We store public addresses and network parameters necessary for identification and billing functions. Private keys/seed phrases are not collected or stored.',
+        '21.2. Payment processing is performed via an integrated provider; we receive invoice/confirmation statuses and identifiers necessary for VIP subscription activation.',
+        '21.3. On-chain payment confirmations are public information; we match them with your account solely for access purposes.'
+      ]
+    },
+
+    {
+      title: '22. Execution Limiters and Risk Contour',
+      paras: [
+        '22.1. Technical limiters (rate limit, sanity checks) and risk rules apply to trading/analytical modes. These are engineering mechanisms, not guarantees of results.',
+        '22.2. The user is responsible for trading decisions, legal compliance, and risk management.'
+      ]
+    },
+
+    {
+      title: '23. Research, Models, and AI',
+      paras: [
+        '23.1. We may train/validate models on aggregated/pseudonymized datasets where appropriate and lawful.',
+        '23.2. When using third-party models, we comply with contractual and technical restrictions on transferring personal data and apply minimization.'
+      ]
+    },
+
+    {
+      title: '24. Automated Decisions',
+      paras: [
+        '24.1. We do not make solely automated decisions with a legally significant effect on the user.',
+        '24.2. Recommendations and assessments are auxiliary signals to support decisions. The final choice remains with the user.'
+      ]
+    },
+
+    {
+      title: '25. Pseudonymization, Aggregation, and Minimization',
+      paras: [
+        '25.1. Where possible, we pseudonymize identifiers and aggregate metrics, separating keys and data payloads.',
+        '25.2. Access to the “key—data” linkage is limited by roles and necessity.'
+      ]
+    },
+
+    {
+      title: '26. Portability and Export',
+      paras: [
+        '26.1. You may request an export of personal data associated with your account/bot identifier.',
+        '26.2. We will provide the data in a machine-readable format, if there are no legal restrictions, and after verification.'
+      ]
+    },
+
+    {
+      title: '27. Exercising Data Subject Rights',
+      paras: [
+        '27.1. Send a request by email to quantuml7ai@gmail.com or via the feedback bot.',
+        '27.2. For identity verification, we may ask you to send a message from the linked Telegram/bot account or to confirm ownership of the associated account/wallet.',
+        '27.3. A response is provided within the timeframes established by applicable law; some requests may be limited by security/legislative requirements.'
+      ]
+    },
+
+    {
+      title: '28. Incidents and Breach Notifications',
+      paras: [
+        '28.1. Response procedures are in place: incident classification, impact containment, root cause investigation, service restoration.',
+        '28.2. Where required by law, affected users and regulators are notified and provided with relevant information about the nature of the incident and the measures taken.'
+      ]
+    },
+
+    {
+      title: '29. Jurisdictional Notes',
+      paras: [
+        '29.1. EEA/UK: GDPR/UK GDPR norms apply regarding data subject rights, lawfulness of processing, and international transfers.',
+        '29.2. USA: applicable state laws apply (including CPRA). Where supported technical opt-out signals exist, we strive to honor them.',
+        '29.3. Other regions: local rules apply regarding mandatory storage, notification, and protection requirements.'
+      ]
+    },
+
+    {
+      title: '30. Do Not Track (DNT) and Global Privacy Control (GPC)',
+      paras: [
+        '30.1. If your browser sends DNT/GPC, we account for these signals to the extent technically supported and required by law.'
+      ]
+    },
+
+    {
+      title: '31. Opt-Out Options and Privacy Settings',
+      paras: [
+        '31.1. You may disable non-essential cookies/analytics, unsubscribe from non-service emails, and restrict bot permissions.',
+        '31.2. Core security/functional mechanisms may require minimal processing and cannot be disabled.'
+      ]
+    },
+
+    {
+      title: '32. Accessibility, Languages, and Interpretation',
+      paras: [
+        '32.1. We provide texts in multiple languages. In case of discrepancies, the English version may prevail for legal interpretation.',
+        '32.2. Translations aim to maintain legal equivalence.'
+      ]
+    },
+
+    {
+      title: '33. Data Stores and Location',
+      paras: [
+        '33.1. Operational databases: relational and/or document-oriented DBMS deployed in a multi-zone architecture with redundancy and replication.',
+        '33.2. Caches and queues: Redis clusters/streams/queues to accelerate sessions, anti-abuse logic, and temporary artifacts.',
+        '33.3. Object storage: storage of user-uploaded media and backups with managed versioning and lifecycle policies.',
+        '33.4. Backups: periodic backups, recovery verification, separation of access rights, encryption at rest.',
+        '33.5. Authorization integrations: identity providers (Google, Apple, Twitter/X, Discord, Telegram) provide us with tokens/confirmations; we do not store their passwords or manage their internal databases.',
+        '33.6. Geography: data may be processed in multi-regional infrastructure for fault tolerance and performance, using lawful international transfer mechanisms.'
+      ]
+    },
+
+    {
+      title: '34. Policy Term and Versions',
+      paras: [
+        '34.1. The Policy enters into force as of the “Updated” date indicated above.',
+        '34.2. We may retain previous editions for archival purposes and transparency of changes.'
+      ]
+    },
+
+    {
+      title: 'Appendix A: Glossary',
+      paras: [
+        'A.1. Controller — a person/organization determining the purposes and means of processing personal data.',
+        'A.2. Processor — a person/organization processing data on behalf of the controller.',
+        'A.3. Personal data — any information about an identified or identifiable person.',
+        'A.4. International transfer — the transfer of personal data outside the country/region of their initial collection.'
+      ]
+    },
+
+    {
+      title: 'Appendix B: Categories of Subprocessors',
+      paras: [
+        'B.1. Hosting/compute and container orchestration.',
+        'B.2. CDN and edge content delivery.',
+        'B.3. Databases (SQL/NoSQL) and Redis caches.',
+        'B.4. Object storages and backup systems.',
+        'B.5. Monitoring/logging/tracing/error tracking.',
+        'B.6. Payment operators and on-chain confirmation gateways.',
+        'B.7. Messaging providers (email/Telegram) and queue services.',
+        'B.8. Blockchain data/market feed indexing and analytics platforms.'
+      ]
+    }
   ]
 };
 
+
 /* -------------------- RU -------------------- */
-const PRIVACY_RU = {
-  nav_privancy: undefined, // guard against typos
+const PRIVACY_RU = { 
   nav_privacy: 'Конфиденциальность',
   privacy_title: 'Конфиденциальность',
   privacy_updated_label: 'Обновлено:',
-  privacy_updated: '2025-09-14',
+  privacy_updated: '2025-10-30',
   privacy_empty: 'Нет данных',
   privacy_sections: [
-    { title: 'Обзор', paras: [
-      'Эта Политика объясняет, какие данные мы собираем, как используем и защищаем на сайте, в Telegram-боте и сервисах.',
-      'Пользуясь сервисом, вы соглашаетесь с Политикой. Это продуктовое уведомление, а не юридическая консультация.'
-    ]},
-    { title: 'Что мы собираем', paras: [
-      'Учётные и контактные данные: Telegram ID/username/отображаемое имя; email (если отправляете); сообщения, которые вы нам передаёте.',
-      'Привязка кошелька: сети и публичные адреса (никогда не приватные ключи).',
-      'Данные использования и устройства: страницы, клики, реферер, хешированный IP, user-agent, временные метки, телеметрия ошибок и производительности.'
-    ]},
-    { title: 'Ончейн и публичные данные', paras: [
-      'Мы анализируем публичные блокчейн- и рыночные данные. Эти источники по своей природе публичны и не являются нашими «персональными данными».',
-      'Запросы (например, анализ адреса или символа) могут логироваться для работы сервиса и повышения надёжности.'
-    ]},
-    { title: 'Cookie и localStorage', paras: [
-      'Используем минимально: язык, сессия, анти-абьюз. Блокировка возможна; часть функций может ухудшиться.'
-    ]},
-    { title: 'Как используем данные', paras: [
-      'Предоставление и улучшение исследований и сигналов; роутинг и защищённое исполнение; предотвращение злоупотреблений; поддержка и коммуникации.',
-      'Рекламное профилирование не ведём.'
-    ]},
-    { title: 'Передача третьим лицам', paras: [
-      'Мы не продаём персональные данные.',
-      'Процессоры: хостинг (например, Vercel), хранение, аналитика (если включена), трекинг ошибок, доставка email/Telegram.',
-      'Раскрытие возможно для соблюдения закона или защиты прав.'
-    ]},
-    { title: 'Безопасность', paras: [
-      'Ключи остаются у вас; seed-фразы мы не запрашиваем. Данные шифруются при передаче и хранении; доступ ролевой и логируется.',
-      'Мы применяем принцип наименьших привилегий, MFA для критичных систем и контроль изменений при деплоях.'
-    ]},
-    { title: 'Международные передачи', paras: [
-      'Обработка может выполняться за рубежом. При необходимости используются стандартные гарантии (SCC) или иные законные механизмы.'
-    ]},
-    { title: 'Ваши права', paras: [
-      'ЕЭЗ/Великобритания (GDPR): доступ, исправление, удаление, переносимость, ограничение/возражение; право пожаловаться регулятору.',
-      'Калифорния (CPRA): доступ, удаление, исправление, отказ от продажи/обмена; отсутствие дискриминации за реализацию прав.'
-    ]},
-    { title: 'Дети', paras: [
-      'Сервис не предназначен для детей младше 13 лет (или более высокого минимума в вашей юрисдикции).'
-    ]},
-    { title: 'Изменения', paras: [
-      'Мы можем обновлять Политику. Изменим дату «Обновлено» и, при необходимости, уведомим в интерфейсе или канале.'
-    ]},
-    { title: 'Контакты', paras: [
-      'Email: quantuml7ai@gmail.com',
-      'Бот обратной связи: https://t.me/L7ai_feedback'
-    ]},
-    { title: 'Определения и область', paras: [
-      '«Сервис» — наши сайты, боты, API и связанные приложения. «Мы» — Quantum L7 AI.',
-      'Эта Политика охватывает данные, где мы выступаем контролёром. У вендоров и блокчейнов — свои правила.'
-    ]},
-    { title: 'Правовые основания (GDPR)', paras: [
-      'Договор: чтобы предоставлять запрошенные функции (роутинг, исследования, панели).',
-      'Законный интерес: надёжность, безопасность, предотвращение абьюза, продуктовая аналитика при минимальном влиянии.',
-      'Согласие: опциональная аналитика/маркетинг; вы можете отозвать его в любой момент.',
-      'Юр. обязанность: хранение/раскрытие, если этого требует закон.'
-    ]},
-    { title: 'Хранение данных', paras: [
-      'Храним персональные данные столько, сколько нужно для целей обработки или по закону.',
-      'Ориентиры: операционные логи 30–180 дней; сообщения поддержки до 12 месяцев; юр. записи — согласно требованиям.'
-    ]},
-    { title: 'Субпроцессоры', paras: [
-      'Категории: хостинг/CDN, объектное хранилище, email/Telegram, мониторинг, трекинг ошибок, базовая аналитика.',
-      'С вендорами заключены DPA; периодически оцениваем их меры защиты.'
-    ]},
-    { title: 'Аналитика и метрики', paras: [
-      'Если включено, измеряем агрегированное использование (страницы, производительность, принятие функций).',
-      'Аналитика настраивается так, чтобы исключать чувствительные данные и минимизировать персональные.'
-    ]},
-    { title: 'Логи и телеметрия', paras: [
-      'Операционные логи могут включать временные метки, хеш-IP, user-agent, трассировки ошибок, ID запросов.',
-      'Логи ротируются, доступны по ролям и используются для отладки, планирования ёмкости и детекта злоупотреблений.'
-    ]},
-    { title: 'Почта и коммуникации', paras: [
-      'Если вы пишете нам на email или в боте, мы обрабатываем сообщение для поддержки и учёта.',
-      'Маркетинг без согласия не рассылаем. Можно отписаться в любой момент.'
-    ]},
-    { title: 'Webhooks и API', paras: [
-      'При использовании API/webhook полезные нагрузки могут временно сохраняться для надёжности и защиты от реплеев.',
-      'Не передавайте секреты и приватные ключи; применяйте корректную аутентификацию и ротацию токенов.'
-    ]},
-    { title: 'Привязка кошелька', paras: [
-      'Храним сети и публичные адреса для функций. Приватные ключи/seed-фразы не запрашиваем и не храним.',
-      'Ваши ончейн-транзакции публичны; мы можем индексировать и аннотировать их для аналитики и отчётности.'
-    ]},
-    { title: 'Ограничители исполнения', paras: [
-      'Когда поддерживается исполнение/роутинг, применяем ограничители (лимиты, правила риска, sanity-checks).',
-      'Это инструменты, а не гарантии; ответственность за решения и соблюдение требований лежит на вас.'
-    ]},
-    { title: 'Исследования, модели и LLM', paras: [
-      'Мы можем обучать/оценивать модели на агрегированных и анонимизированных данных, где это возможно.',
-      'При использовании сторонних LLM избегаем передачи персональных данных без необходимости и договорных гарантий.'
-    ]},
-    { title: 'Автоматизированные решения', paras: [
-      'Мы не принимаем исключительно автоматизированные решения с юридически значимым эффектом.',
-      'Рекомендации/оценки — вспомогательные сигналы; окончательные решения за вами.'
-    ]},
-    { title: 'Псевдонимизация и агрегация', paras: [
-      'Где возможно, хешируем/агрегируем идентификаторы для снижения рисков.',
-      'Ключи отделяем от содержимого; доступ к связке — по необходимости и по ролям.'
-    ]},
-    { title: 'Портируемость и экспорт', paras: [
-      'Вы можете запросить экспорт персональных данных, связанных с вашим аккаунтом или бот-идентификатором.',
-      'Предоставим в машиночитаемом формате, если нет законных ограничений.'
-    ]},
-    { title: 'Как реализовать права', paras: [
-      'Отправьте запрос на email или в боте. Для верификации можем попросить сообщение из вашего бота-аккаунта.',
-      'Отвечаем в сроки закона; некоторые запросы ограничены правовыми и безопасностными требованиями.'
-    ]},
-    { title: 'Инциденты и уведомления', paras: [
-      'У нас есть процедуры реагирования. В случае инцидента уведомим затронутых пользователей и органы, если требуется законом.',
-      'Проводим разбор и улучшаем контроль, чтобы предотвратить повторение.'
-    ]},
-    { title: 'Заметки по юрисдикциям', paras: [
-      'ЕЭЗ/UK: применяется GDPR, когда мы контролёр.',
-      'США: законы штатов (например, CPRA) могут давать дополнительные права; по возможности учитываем валидные сигналы opt-out.'
-    ]},
-    { title: 'Do Not Track и GPC', paras: [
-      'Браузер может посылать Do Not Track/Global Privacy Control. Где это требуется и возможно — учитываем.'
-    ]},
-    { title: 'Опции отказа', paras: [
-      'Можно отключить опциональную аналитику/cookies, отписаться от писем, ограничить права бота.',
-      'Базовая безопасность и функциональность могут требовать минимальной обработки.'
-    ]},
-    { title: 'Доступность и язык', paras: [
-      'Стараемся давать понятные тексты на нескольких языках. При расхождениях для толкования может применяться английская версия.'
-    ]},
-    { title: 'Контакт по приватности', paras: [
-      'Privacy contact: quantuml7ai@gmail.com (тема: Privacy). Цель — ответить в течение 30 дней.'
-    ]},
-    { title: 'Действие и версии', paras: [
-      'Политика действует с даты «Обновлено». Предыдущие версии можем хранить для справки.'
-    ]},
-    { title: 'Приложение: глоссарий', paras: [
-      'Контролёр — определяет цели и средства обработки. Процессор — обрабатывает по поручению контролёра.',
-      'Персональные данные — информация об идентифицированном или идентифицируемом лице.'
-    ]},
-    { title: 'Приложение: список субпроцессоров (кратко)', paras: [
-      'Хостинг/CDN (например, Vercel), объектное хранилище, доставка email/Telegram, трекинг ошибок, мониторинг, базовая аналитика.',
-      'Подробный актуальный список доступен по запросу.'
-    ]}
+    {
+      title: '1. Обзор',
+      paras: [
+        '1.1. Эта Политика конфиденциальности Quantum L7 AI (далее — «Политика») описывает, какие данные мы собираем, на каких правовых основаниях обрабатываем, где и как храним, как защищаем и передаём в пределах экосистемы: веб-сайт, Web-MiniApp, Telegram Mini App, Telegram-бот(ы), API, Форум, аналитические сервисы и торговые интерфейсы (вкл. разрабатываемую Биржу).',
+        '1.2. Используя сервисы Quantum L7 AI («Сервис»), вы подтверждаете, что ознакомились с Политикой и принимаете её условия. Политика предназначена для прозрачного информирования пользователей, не является индивидуальной юридической консультацией и не заменяет договоры/оферты/политики конкретных вендоров.',
+        '1.3. Мы действуем как контролёр данных в отношении персональных данных, которые собираем и определяем цели/средства их обработки, и как процессор там, где обрабатываем данные по поручению клиентов/партнёров.',
+        '1.4. Термины «персональные данные», «обработка», «контролёр», «процессор», «субъект данных», «международная передача» используются в значениях, принятых глобальными регуляторными рамками (GDPR/UK GDPR, CCPA/CPRA и пр.).',
+        '1.5. Наши сервисы взаимодействуют с ончейн-источниками и рыночными лентами: публичные блокчейн-данные по природе открыты и не являются нашими «персональными данными», но сопоставления с вашим аккаунтом могут образовывать персональные данные.'
+      ]
+    },
+
+    {
+      title: '2. Что мы собираем',
+      paras: [
+        '2.1. Учётные и идентификационные данные: Telegram ID/username/отображаемое имя (при входе через Telegram Mini App или бот), внутренний Account ID, метки статуса подписки (VIP/Free), язык интерфейса.',
+        '2.2. Контактные данные: email (если предоставляете), ник на Форуме, ссылочные идентификаторы внешних аккаунтов (Google, Apple, Twitter/X, Discord и др.) при связывании.',
+        '2.3. Авторизация и связки: факт и маршрут входа через мульти-провайдерную экосистему (OAuth/OIDC, Telegram WebApp initData, Sign in with Apple/Google/Twitter/X/Discord, wallet-signature, magic-link), технические токены/штампы/подписи (без хранения приватных ключей и сид-фраз).',
+        '2.4. Кошельки и сети: публичные адреса, используемые сети (L1/L2), транзакционные метаданные, связанные с оплатой подписки через NowPayments и ончейн-подтверждения.',
+        '2.5. Данные использования: посещённые страницы/экраны, действия в интерфейсе, временные метки, хешированный IP, user-agent, параметры производительности клиента, телеметрия ошибок.',
+        '2.6. Форум и контент: посты, темы, метаданные загрузок (изображения/видео/аудио), системные артефакты скоринга (оценки качества/вовлечённости/anti-spam/anti-sybil), статистика активности для QCoin-майнинга.',
+        '2.7. Оплаты и биллинг: статусы инвойсов, подтверждения платежей (через интегрированный платёжный провайдер), суммы/валюты/временные метки, технические журналы маршрутизации.',
+        '2.8. Ончейн и маркет-данные: мы индексируем и агрегируем публичные цепочки/биржевые ленты/книги заявок/исторические свечи в аналитических целях и для предоставления функций Сервиса.'
+      ]
+    },
+
+    {
+      title: '3. Ончейн и публичные данные',
+      paras: [
+        '3.1. Публичные блокчейн-записи доступны любому участнику сети; их обработка для аналитики, индикаторов и рекомендаций производится в рамках допустимого использования общедоступной информации.',
+        '3.2. Сопоставление ончейн-активности с вашим аккаунтом возможно при добровольной привязке кошелька/платежей/подписок. В таком случае создаётся персональный профиль использования.',
+        '3.3. Запросы к публичным нодам/провайдерам RPC/индексации и маркет-агрегаторам могут логироваться для надёжности, безопасности, защиты от злоупотреблений и улучшения качества сервиса.'
+      ]
+    },
+
+    {
+      title: '4. Cookie, localStorage и другие клиентские артефакты',
+      paras: [
+        '4.1. Мы применяем минимально необходимые механизмы: сохранение языка, безопасные маркеры сессии, анти-абьюз параметры, UX-настройки.',
+        '4.2. При блокировке cookie/localStorage часть функций может стать недоступной или деградировать (например, сессии, персональные лимиты, язык).',
+        '4.3. Где это требуется законом, мы запрашиваем согласие на некритичные cookie/аналитику.'
+      ]
+    },
+
+    {
+      title: '5. Как мы используем данные',
+      paras: [
+        '5.1. Предоставление функционала: авторизация/связывание аккаунтов, синхронизация статусов подписки, доступ к Форуму, MiniApp, боту, аналитическим панелям и рекомендациям.',
+        '5.2. Улучшение продукта: агрегированная аналитика использования, A/B-оценки, телеметрия производительности, устранение сбоев, повышение точности ИИ-моделей.',
+        '5.3. Безопасность и целостность: защита от злоупотреблений (rate-limit, anti-spam, anti-sybil), контроль аномалий, аудит служебных действий, расследование инцидентов.',
+        '5.4. Биллинг и соответствие: обработка статусов платежей, подтверждений, учёт прав доступа, соблюдение законов о финансовой отчётности и противодействии незаконной деятельности.',
+        '5.5. Коммуникации и поддержка: ответы на запросы, уведомления по статусам (например, успешная активация VIP), сервисные сообщения.',
+        '5.6. Маркетинговое профилирование не ведём; рассылки осуществляются только при наличии законного основания (например, согласия).'
+      ]
+    },
+
+    {
+      title: '6. Передача и раскрытие третьим лицам',
+      paras: [
+        '6.1. Мы не продаём персональные данные.',
+        '6.2. Данные могут обрабатываться нашими субпроцессорами по нашим инструкциям и только в целях, описанных Политикой: вычислительные платформы/хостинг, CDN, объектное хранилище, очереди и кэши, мониторинг/логирование/трекинг ошибок, платёжные шлюзы, провайдеры сообщений (email/Telegram), аналитические платформы.',
+        '6.3. Раскрытие возможно при соблюдении закона, законных запросах компетентных органов, защите прав/безопасности пользователей и Сервиса.',
+        '6.4. При смене корпоративного контроля (слияние/продажа активов) данные могут быть переданы правопреемнику при условии соблюдения эквивалентной защиты и уведомления, если это требуется законом.'
+      ]
+    },
+
+    {
+      title: '7. Безопасность',
+      paras: [
+        '7.1. Принципы: безопасность по проекту (security by design), минимум привилегий (PoLP), разделение обязанностей, обязательное журналирование критичных операций.',
+        '7.2. Шифрование: TLS при передаче; шифрование на уровне хранения для чувствительных артефактов; управление ключами с контролем доступа.',
+        '7.3. Доступ: многофакторная аутентификация для админских консолей, ролевое разграничение, сегментация сред (prod/stage/dev).',
+        '7.4. Контроль изменений: рецензирование кода, подписанные сборки, постепенные выкладки, откаты, блокировки небезопасных конфигураций.',
+        '7.5. Тестирование и мониторинг: детектирование вторжений, алерты, периодические ревизии конфигураций и разрешений.',
+        '7.6. Ключи кошельков и seed-фразы: мы их не запрашиваем и не храним. Подписания выполняются на стороне пользователя или доверенного кошелька.'
+      ]
+    },
+
+    {
+      title: '8. Международные передачи',
+      paras: [
+        '8.1. Обработка и хранение могут осуществляться в много-региональной инфраструктуре с гео-репликацией и балансировкой.',
+        '8.2. При трансграничных передачах используются законные механизмы (в т.ч. стандартные договорные положения, если применимо) и эквивалентные меры защиты.',
+        '8.3. Пользователь соглашается на международную передачу данных в рамках предоставления Сервиса.'
+      ]
+    },
+
+    {
+      title: '9. Ваши права',
+      paras: [
+        '9.1. ЕЭЗ/UK (GDPR): право на доступ, исправление, удаление, ограничение/возражение, переносимость, а также право подать жалобу в надзорный орган.',
+        '9.2. США (включая Калифорнию/CPRA): право знать, исправлять, удалять, отказаться от продажи/обмена, право на отсутствие дискриминации за реализацию прав.',
+        '9.3. Реализация прав: см. раздел «Как реализовать права». Идентификационная проверка обязательна.'
+      ]
+    },
+
+    {
+      title: '10. Дети',
+      paras: [
+        '10.1. Сервис не предназначен для детей младше 13 лет (или более высокого возраста согласно праву вашей юрисдикции).',
+        '10.2. Если вы считаете, что ребёнок предоставил нам данные, свяжитесь с нами для удаления.'
+      ]
+    },
+
+    {
+      title: '11. Изменения',
+      paras: [
+        '11.1. Мы можем обновлять Политику для отражения изменений в технологиях, праве и продуктах.',
+        '11.2. При существенных изменениях обновляется дата «Обновлено» и, при необходимости, отображается уведомление в интерфейсе.'
+      ]
+    },
+
+    {
+      title: '12. Контакты',
+      paras: [
+        '12.1. Email для запросов по приватности: quantuml7ai@gmail.com',
+        '12.2. Канал обратной связи (бот): https://t.me/L7ai_feedback'
+      ]
+    },
+
+    {
+      title: '13. Определения и область действия',
+      paras: [
+        '13.1. «Сервис» — сайты, Web-MiniApp, Telegram Mini App, Telegram-боты, Форум, API, аналитика, интеграции платежей и биржевые интерфейсы.',
+        '13.2. «Мы» — Quantum L7 AI. Политика охватывает данные, где мы выступаем контролёром. Сторонние сервисы (провайдеры авторизации, блокчейны, кошельки, платёжные шлюзы) действуют по своим правилам.',
+        '13.3. Объект Политики — данные пользователей и операционные данные, необходимые для функционирования Сервиса.'
+      ]
+    },
+
+    {
+      title: '14. Правовые основания обработки (GDPR/UK GDPR)',
+      paras: [
+        '14.1. Договор/необходимость для оказания услуги: авторизация, доступ к функционалу, биллинг и поддержка.',
+        '14.2. Законный интерес: безопасность, предотвращение злоупотреблений, эксплуатационная аналитика с низким риском для частной жизни.',
+        '14.3. Согласие: опциональные метрики/маркетинговые коммуникации, если применимо. Согласие можно отозвать.',
+        '14.4. Юридическая обязанность: хранение и раскрытие там, где этого требует закон (например, бухгалтерские записи).'
+      ]
+    },
+
+    {
+      title: '15. Хранение данных (ретенция)',
+      paras: [
+        '15.1. Мы храним персональные данные не дольше, чем необходимо для целей обработки или требований закона.',
+        '15.2. Ориентиры: служебные логи 30–180 дней; телеметрия производительности до 90 дней; переписка поддержки до 12 месяцев; биллинговые записи — согласно правовым срокам хранения.',
+        '15.3. Анонимизированные агрегаты могут храниться дольше для исследовательских и статистических целей.'
+      ]
+    },
+
+    {
+      title: '16. Субпроцессоры и инфраструктура',
+      paras: [
+        '16.1. Категории субпроцессоров: вычислительные платформы и хостинг, CDN, объектные хранилища, базы данных SQL/NoSQL, кэши и очереди сообщений, мониторинг/логирование/трассировка, рассылка email/сообщений, платёжные операторы, провайдеры индексирования ончейн/рыночных лент.',
+        '16.2. С каждым субпроцессором заключены договорённости о защите данных (DPA) и применяются технические/организационные меры безопасности.',
+        '16.3. Обновляемый перечень категорий доступен в Политике; детальный актуальный список предоставляется по запросу с учётом требований безопасности.'
+      ]
+    },
+
+    {
+      title: '17. Аналитика и метрики',
+      paras: [
+        '17.1. Мы можем собирать агрегированные метрики использования (покрытие интерфейсов, производительность, принятие функций) в объёме, необходимом для улучшения продукта.',
+        '17.2. Настройки аналитики ориентированы на исключение чувствительных данных и минимизацию персональных идентификаторов.',
+        '17.3. Где требуется, применяется механизм согласия для несущественных метрик.'
+      ]
+    },
+
+    {
+      title: '18. Логи и телеметрия',
+      paras: [
+        '18.1. Операционные логи могут включать временные метки, хеш-IP, user-agent, трассировки ошибок, ID запросов/корреляции, коды ответов.',
+        '18.2. Логи ротируются, ограничены по доступу и используются для отладки, планирования ёмкости, защиты от DDoS/бот-трафика, аудита.',
+        '18.3. Точки логирования спроектированы с учётом принципа минимизации.'
+      ]
+    },
+
+    {
+      title: '19. Почта, уведомления и коммуникации',
+      paras: [
+        '19.1. Сообщения, отправленные на наши адреса/боты, обрабатываются для поддержки, исполнения договорных обязательств и учёта качества сервиса.',
+        '19.2. Вы можете отказаться от несервисных рассылок; сервисные уведомления (например, о статусе подписки) являются обязательными для функционирования.'
+      ]
+    },
+
+    {
+      title: '20. Webhooks и API',
+      paras: [
+        '20.1. При использовании Webhook/API полезные нагрузки могут временно буферизоваться для надёжной доставки, дедупликации и защиты от повторов.',
+        '20.2. Не передавайте через Webhook/API секреты, приватные ключи и иные материалы, не предназначенные для сторон; используйте подписи, ротацию токенов и ограничение источников.'
+      ]
+    },
+
+    {
+      title: '21. Привязка кошельков и платежи',
+      paras: [
+        '21.1. Мы храним публичные адреса и сетевые параметры, необходимые для функций идентификации и биллинга. Приватные ключи/seed-фразы не собираются и не хранятся.',
+        '21.2. Платёжный процессинг выполняется через интегрированный провайдер; мы получаем статусы/идентификаторы инвойсов и подтверждений, необходимые для активации подписки VIP.',
+        '21.3. Ончейн-подтверждения платежей являются публичной информацией; мы сопоставляем их с вашим аккаунтом исключительно для целей доступа.'
+      ]
+    },
+
+    {
+      title: '22. Ограничители исполнения и риск-контур',
+      paras: [
+        '22.1. Для торговых/аналитических режимов применяются технические ограничители (rate-limit, sanity-checks) и риск-правила. Это инженерные механизмы, а не гарантии результата.',
+        '22.2. Ответственность за торговые решения, соблюдение правовых требований и риск-менеджмент несёт пользователь.'
+      ]
+    },
+
+    {
+      title: '23. Исследования, модели и ИИ',
+      paras: [
+        '23.1. Мы можем обучать/валидировать модели на агрегированных/псевдонимизированных наборах, где это уместно и законно.',
+        '23.2. При использовании сторонних моделей соблюдаем договорные и технические ограничения передачи персональных данных и применяем минимизацию.'
+      ]
+    },
+
+    {
+      title: '24. Автоматизированные решения',
+      paras: [
+        '24.1. Мы не принимаем исключительно автоматизированные решения с юридически значимым эффектом в отношении пользователя.',
+        '24.2. Рекомендации и оценки — вспомогательные сигналы для поддержки решений. Окончательный выбор остаётся за пользователем.'
+      ]
+    },
+
+    {
+      title: '25. Псевдонимизация, агрегация и минимизация',
+      paras: [
+        '25.1. Где возможно, мы псевдонимизируем идентификаторы и агрегируем метрики, разделяем ключи и полезные данные.',
+        '25.2. Доступ к связке «ключ—данные» ограничивается ролями и необходимостью.'
+      ]
+    },
+
+    {
+      title: '26. Портируемость и экспорт',
+      paras: [
+        '26.1. Вы можете запросить экспорт персональных данных, связанных с вашим аккаунтом/бот-идентификатором.',
+        '26.2. Мы предоставим данные в машиночитаемом формате, если отсутствуют правовые ограничения, и после верификации.'
+      ]
+    },
+
+    {
+      title: '27. Реализация прав субъектов данных',
+      paras: [
+        '27.1. Направьте запрос по email quantuml7ai@gmail.com или через бота обратной связи.',
+        '27.2. Для верификации личности можем попросить отправить сообщение из привязанного Telegram/бот-аккаунта либо подтвердить владение связанной учётной записью/кошельком.',
+        '27.3. Ответ предоставляется в сроки, установленные применимым правом; некоторые запросы могут быть ограничены требованиями безопасности/законодательства.'
+      ]
+    },
+
+    {
+      title: '28. Инциденты и уведомления о нарушениях',
+      paras: [
+        '28.1. Действуют процедуры реагирования: классификация инцидента, ограничение воздействия, расследование причин, восстановление сервисности.',
+        '28.2. В случаях, требуемых законом, уведомляются затронутые пользователи и регуляторы, предоставляется релевантная информация о характере инцидента и применённых мерах.'
+      ]
+    },
+
+    {
+      title: '29. Юрисдикционные заметки',
+      paras: [
+        '29.1. ЕЭЗ/UK: применяются нормы GDPR/UK GDPR в части прав субъектов данных, законности обработки, международных передач.',
+        '29.2. США: применяются соответствующие законы штатов (включая CPRA). При наличии поддерживаемых технических сигналов opt-out мы стремимся их учитывать.',
+        '29.3. Иные регионы: применяются локальные нормы в части обязательных требований к хранению, уведомлению и защите.'
+      ]
+    },
+
+    {
+      title: '30. Do Not Track (DNT) и Global Privacy Control (GPC)',
+      paras: [
+        '30.1. Если ваш браузер отправляет DNT/GPC, мы учитываем эти сигналы в той мере, в какой это поддерживается технически и требуется правом.'
+      ]
+    },
+
+    {
+      title: '31. Опции отказа и настройки приватности',
+      paras: [
+        '31.1. Вы можете отключить несущественные cookies/аналитику, отписаться от несервисных писем, ограничить права бота.',
+        '31.2. Базовые механизмы безопасности/функциональности могут требовать минимальной обработки и не могут быть отключены.'
+      ]
+    },
+
+    {
+      title: '32. Доступность, языки и толкование',
+      paras: [
+        '32.1. Мы предоставляем тексты на нескольких языках. При несоответствии версий приоритет может иметь английская версия для целей юридического толкования.',
+        '32.2. Переводы стремятся сохранять юридическую эквивалентность.'
+      ]
+    },
+
+    {
+      title: '33. Хранилища и расположение данных',
+      paras: [
+        '33.1. Операционные базы данных: реляционные и/или документо-ориентированные СУБД, развернутые в много-зонной архитектуре с резервированием и репликацией.',
+        '33.2. Кэши и очереди: Redis-кластеры/стримы/очереди для ускорения сессий, анти-абьюз логики и временных артефактов.',
+        '33.3. Объектное хранилище: хранение загруженных пользователями медиа и резервных копий с управляемыми политиками версионирования и жизненного цикла.',
+        '33.4. Бэкапы: периодические резервные копии, проверка восстановления, разделение прав доступа, шифрование на хранении.',
+        '33.5. Интеграции авторизации: провайдеры идентичности (Google, Apple, Twitter/X, Discord, Telegram) предоставляют нам токены/подтверждения; мы не храним их пароли и не управляем их внутренними базами данных.',
+        '33.6. География: данные могут обрабатываться в много-региональной инфраструктуре для отказоустойчивости и производительности, с применением законных механизмов международной передачи.'
+      ]
+    },
+
+    {
+      title: '34. Срок действия и версии Политики',
+      paras: [
+        '34.1. Политика вступает в силу с даты «Обновлено», указанной выше.',
+        '34.2. Мы можем хранить предыдущие редакции для архивных целей и прозрачности изменений.'
+      ]
+    },
+
+    {
+      title: 'Приложение A: Глоссарий',
+      paras: [
+        'A.1. Контролёр — лицо/организация, определяющие цели и средства обработки персональных данных.',
+        'A.2. Процессор — лицо/организация, обрабатывающие данные по поручению контролёра.',
+        'A.3. Персональные данные — любая информация об идентифицированном или идентифицируемом лице.',
+        'A.4. Международная передача — передача персональных данных за пределы страны/региона их первоначального сбора.'
+      ]
+    },
+
+    {
+      title: 'Приложение B: Категории субпроцессоров',
+      paras: [
+        'B.1. Хостинг/вычисления и контейнерная оркестрация.',
+        'B.2. CDN и пограничная доставка контента.',
+        'B.3. Базы данных (SQL/NoSQL) и Redis-кэши.',
+        'B.4. Объектные хранилища и системы бэкапов.',
+        'B.5. Мониторинг/логирование/трассировка/трекинг ошибок.',
+        'B.6. Платёжные операторы и шлюзы ончейн-подтверждений.',
+        'B.7. Провайдеры сообщений (email/Telegram) и сервисы очередей.',
+        'B.8. Индексация блокчейн-данных/рыночных лент и аналитические платформы.'
+      ]
+    }
   ]
 };
 
+
 /* -------------------- ZH (简体) -------------------- */
 const PRIVACY_ZH = {
-  nav_privacy: '隐私与政策',
-  privacy_title: '隐私与政策',
-  privacy_updated_label: '更新日期：',
-  privacy_updated: '2025-09-14',
-  privacy_empty: '无内容',
+  nav_privacy: '隐私',
+  privacy_title: '隐私',
+  privacy_updated_label: '更新：',
+  privacy_updated: '2025-10-30',
+  privacy_empty: '无数据',
   privacy_sections: [
-    { title: '概述', paras: [
-      '本政策说明我们在网站、Telegram 机器人和服务中如何收集、使用和保护数据。',
-      '使用服务即表示您同意本政策。本文为产品告知，并非法律意见。'
-    ]},
-    { title: '我们收集什么', paras: [
-      '账户与联系：Telegram ID/用户名/展示名；邮箱（如您提供）；您发送的消息。',
-      '钱包绑定：网络与公开地址（绝不收集私钥）。',
-      '使用与设备：页面、点击、来源、哈希化 IP、UA、时间戳、错误与性能遥测。'
-    ]},
-    { title: '链上与公共数据', paras: [
-      '我们分析公开的区块链/市场数据；其本身公开，并非我们控制下的个人数据。',
-      '请求（如地址/交易对分析）可记录用于运行和提升可靠性。'
-    ]},
-    { title: 'Cookies 与本地存储', paras: [
-      '仅最小化使用：语言、会话、反滥用。可屏蔽，但功能可能受影响。'
-    ]},
-    { title: '我们如何使用', paras: [
-      '提供与改进研究/信号；带护栏的路由与执行；防滥用；支持与沟通。',
-      '不进行广告画像。'
-    ]},
-    { title: '与第三方共享', paras: [
-      '不出售个人数据。',
-      '处理方：托管（如 Vercel）、存储、分析（如启用）、错误跟踪、邮件/Telegram 投递。',
-      '为守法或保护权利时可能披露。'
-    ]},
-    { title: '安全性', paras: [
-      '密钥在您手中；从不索取助记词。数据在传输与存储中加密；按角色控制并记录访问。',
-      '对关键系统采用最小权限与多因子认证，并对部署变更进行管控。'
-    ]},
-    { title: '跨境传输', paras: [
-      '处理可能在境外进行；必要时使用标准保障（如 SCC）或其他合法机制。'
-    ]},
-    { title: '您的权利', paras: [
-      'EEA/英国（GDPR）：访问、更正、删除、可携带、限制/反对；可向监管机构投诉。',
-      '加州（CPRA）：访问、删除、纠正、退出出售/共享；行使权利不受歧视。'
-    ]},
-    { title: '儿童', paras: [
-      '本服务不针对 13 岁以下儿童（或您所在法域更高的最低年龄）。'
-    ]},
-    { title: '变更', paras: [
-      '我们可能更新本政策；将调整“更新日期”，必要时在应用内或频道通知。'
-    ]},
-    { title: '联系', paras: [
-      '邮箱：quantuml7ai@gmail.com',
-      '反馈机器人：https://t.me/L7ai_feedback'
-    ]},
-    { title: '定义与范围', paras: [
-      '“服务”指我们的网站、机器人、API 及相关应用；“我们”指 Quantum L7 AI。',
-      '本政策适用于我们作为控制者处理的数据；供应商/区块链网络有其自身政策。'
-    ]},
-    { title: '法律基础（GDPR）', paras: [
-      '合同：提供所需功能（路由、研究、看板）。',
-      '合法利益：可靠性、安全、防滥用、最小化的产品分析。',
-      '同意：可选分析/营销；可随时撤回。',
-      '法律义务：依法保留或披露数据。'
-    ]},
-    { title: '数据保留', paras: [
-      '仅在必要期间保留个人数据，或按法律要求保留。',
-      '参考范围：运行日志 30–180 天；支持消息最长 12 个月；法律记录按要求保留。'
-    ]},
-    { title: '次处理者', paras: [
-      '类别：托管/CDN、对象存储、邮件/Telegram 投递、监控、错误跟踪、基础分析。',
-      '与可信供应商签订 DPA，并定期评估其保障。'
-    ]},
-    { title: '分析与度量', paras: [
-      '如启用，仅统计聚合使用（页面、性能、功能采用）。',
-      '尽量避免敏感数据并最小化个人数据处理。'
-    ]},
-    { title: '日志与遥测', paras: [
-      '运行日志可能含时间戳、哈希 IP、UA、错误追踪、请求标识。',
-      '日志轮转、受控访问，用于调试、容量规划与滥用检测。'
-    ]},
-    { title: '邮件与沟通', paras: [
-      '您通过邮件或机器人联系时，我们为支持与记录处理消息。',
-      '未经同意不发送营销；可随时退订。'
-    ]},
-    { title: 'Webhooks 与 API', paras: [
-      '使用 API/webhook 时，负载可能暂存以提高可靠性并防重放。',
-      '请勿在请求中包含密钥/私钥；正确使用认证并定期轮换令牌。'
-    ]},
-    { title: '钱包绑定细则', paras: [
-      '为提供功能，我们保存网络与公开地址；从不请求/保存私钥或助记词。',
-      '链上交易是公开的；我们可能索引并注释用于分析与报表。'
-    ]},
-    { title: '执行护栏', paras: [
-      '如支持执行/路由，我们施加护栏（限额、风险规则、合理性检查）。',
-      '这些是工具而非保证；您对决策与合规负责。'
-    ]},
-    { title: '研究、模型与 LLM', paras: [
-      '尽可能使用聚合匿名数据训练/评估模型。',
-      '若使用第三方 LLM，避免发送个人数据，除非必要且有协议保障。'
-    ]},
-    { title: '自动化决策', paras: [
-      '我们不进行具有法律或类似重大影响的完全自动化决策。',
-      '推荐与评分是辅助信号；最终决策由您作出。'
-    ]},
-    { title: '去标识与聚合', paras: [
-      '在可行时对标识进行哈希或聚合以降低风险。',
-      '将键与内容分离，仅在必要时按权限关联。'
-    ]},
-    { title: '可携带与导出', paras: [
-      '您可请求导出与账户或机器人身份关联的个人数据。',
-      '我们将以通用机器可读格式提供，除非受法律限制。'
-    ]},
-    { title: '权利行使方式', paras: [
-      '通过邮箱或反馈机器人提交请求；我们可能要求合理校验（如从您账号发送机器人消息）。',
-      '在法定期限内答复；某些请求受法律或安全限制。'
-    ]},
-    { title: '事件与通报', paras: [
-      '我们有事故响应流程；若发生泄露，将依法通知受影响用户与监管部门。',
-      '同时复盘改进，防止复发。'
-    ]},
-    { title: '特定法域说明', paras: [
-      'EEA/英国：我们作为控制者时适用 GDPR。',
-      '美国：州法（如 CPRA）赋予额外权利；在可行时尊重有效的 opt-out 信号。'
-    ]},
-    { title: 'Do Not Track / GPC', paras: [
-      '浏览器可能发送 DNT 或 GPC 信号；在法律要求且技术可行时，我们予以尊重。'
-    ]},
-    { title: '退出选项', paras: [
-      '可禁用可选分析/ cookie、退订邮件、限制机器人权限。',
-      '核心安全与必要功能可能仍需最小处理。'
-    ]},
-    { title: '无障碍与语言', paras: [
-      '我们致力于多语言清晰表述；如有差异，以英文版为准。'
-    ]},
-    { title: '隐私联系人', paras: [
-      '隐私联系：quantuml7ai@gmail.com（主题：Privacy）。我们力争 30 天内回复。'
-    ]},
-    { title: '生效与版本', paras: [
-      '本政策自上述“更新日期”起生效；历史版本可存档备查。'
-    ]},
-    { title: '附录：术语', paras: [
-      '控制者：决定处理目的与方式。处理者：代表控制者处理。',
-      '个人数据：与已识别或可识别个人相关的信息。'
-    ]},
-    { title: '附录：次处理者（摘要）', paras: [
-      '托管/CDN（如 Vercel）、对象存储、邮件/Telegram 投递、错误跟踪、监控、基础分析。',
-      '可应请求提供更新的详细列表。'
-    ]}
+    {
+      title: '1. 概述',
+      paras: [
+        '1.1. 本《Quantum L7 AI 隐私政策》（下称“政策”）描述我们收集哪些数据、基于何种法律依据处理这些数据、在何处以及如何存储、如何保护并在以下生态系统范围内进行传输：网站、Web-MiniApp、Telegram Mini App、Telegram 机器人、API、论坛、分析服务以及交易界面（包括正在开发的交易所）。',
+        '1.2. 使用 Quantum L7 AI 的服务（“服务”）即表示您确认已阅读并接受本政策的条款。本政策旨在对用户进行透明告知，并非个别法律意见，且不取代特定供应商的合同/要约/政策。',
+        '1.3. 对于我们收集并决定其处理目的/方式的个人数据，我们作为数据控制者；对于我们受客户/合作伙伴委托而处理的数据，我们作为数据处理者。',
+        '1.4. “个人数据”、“处理”、“控制者”、“处理者”、“数据主体”、“跨境传输”等术语，按照全球监管框架（GDPR/UK GDPR、CCPA/CPRA 等）的通行含义使用。',
+        '1.5. 我们的服务与链上来源及市场数据源交互：公共区块链数据本质上是开放的，并非我们的“个人数据”；但与您的账户进行关联后，可能构成个人数据。'
+      ]
+    },
+
+    {
+      title: '2. 我们收集什么',
+      paras: [
+        '2.1. 账户与身份数据：Telegram ID/用户名/显示名（通过 Telegram Mini App 或机器人登录时）、内部 Account ID、订阅状态标记（VIP/Free）、界面语言。',
+        '2.2. 联系方式：电子邮件（如您提供）、论坛昵称、在绑定时的外部账户引用标识（Google、Apple、Twitter/X、Discord 等）。',
+        '2.3. 认证与关联：通过多提供方生态系统登录的事实与路径（OAuth/OIDC、Telegram WebApp initData、用 Apple/Google/Twitter/X/Discord 登录、钱包签名、魔法链接），技术令牌/时间戳/签名（不存储私钥与助记词）。',
+        '2.4. 钱包与网络：公开地址、使用的网络（L1/L2）、与通过 NowPayments 支付订阅及链上确认相关的交易元数据。',
+        '2.5. 使用数据：访问的页面/界面、界面中的操作、时间戳、哈希化 IP、user-agent、客户端性能参数、错误遥测。',
+        '2.6. 论坛与内容：帖子、主题、上传元数据（图片/视频/音频）、系统评分产物（质量/参与度/反垃圾/反女巫）、用于 QCoin 挖矿的活跃度统计。',
+        '2.7. 支付与计费：发票状态、付款确认（通过集成的支付提供方）、金额/货币/时间戳、路由技术日志。',
+        '2.8. 链上与市场数据：我们出于分析目的及提供服务功能，会索引并聚合公共链/交易所行情/订单簿/历史 K 线等数据。'
+      ]
+    },
+
+    {
+      title: '3. 链上与公共数据',
+      paras: [
+        '3.1. 公共区块链记录对任何网络参与者开放；为分析、指标与推荐而进行的处理属于对公开信息的允许使用范围之内。',
+        '3.2. 当您自愿绑定钱包/支付/订阅时，可能将链上活动与您的账号进行关联，此时会生成个性化的使用画像。',
+        '3.3. 向公共节点/RPC/索引服务与市场聚合器发起的请求可为可靠性、安全、滥用防护与服务质量改进之目的而记录日志。'
+      ]
+    },
+
+    {
+      title: '4. Cookie、localStorage 及其他客户端工件',
+      paras: [
+        '4.1. 我们仅采用最低限度必要的机制：语言保存、安全会话标记、反滥用参数、用户体验设置。',
+        '4.2. 若阻止 cookie/localStorage，部分功能可能不可用或降级（如会话、个性化限额、语言）。',
+        '4.3. 法律要求的场景下，我们会就非关键性 cookie/分析征求同意。'
+      ]
+    },
+
+    {
+      title: '5. 我们如何使用数据',
+      paras: [
+        '5.1. 提供功能：账户授权/绑定、订阅状态同步、访问论坛、MiniApp、机器人、分析面板与推荐。',
+        '5.2. 产品改进：汇总的使用分析、A/B 评估、性能遥测、故障排除、提升 AI 模型准确度。',
+        '5.3. 安全与完整性：滥用防护（限流、反垃圾、反女巫）、异常控制、运维操作审计、事件调查。',
+        '5.4. 计费与合规：处理支付状态、确认信息、访问权限核算，遵守财务报告与反非法活动相关法律。',
+        '5.5. 通讯与支持：回复请求、状态通知（如 VIP 成功激活）、服务消息。',
+        '5.6. 我们不进行营销画像；仅在具有合法依据（如同意）时发送通信。'
+      ]
+    },
+
+    {
+      title: '6. 向第三方的传输与披露',
+      paras: [
+        '6.1. 我们不出售个人数据。',
+        '6.2. 数据可由我们的分处理方按我们的指示并仅为本政策所述之目的进行处理：计算平台/主机托管、CDN、对象存储、队列与缓存、监控/日志/错误追踪、支付网关、消息提供方（电子邮件/Telegram）、分析平台。',
+        '6.3. 在符合法律、具备主管机关合法请求、以及为保护用户与服务之权利/安全的情况下，可能进行披露。',
+        '6.4. 如发生公司控制权变更（合并/资产出售），可在确保等效保护并在法律要求时进行通知的前提下，将数据转移给继任方。'
+      ]
+    },
+
+    {
+      title: '7. 安全',
+      paras: [
+        '7.1. 原则：从设计即安全（security by design）、最小权限（PoLP）、职责分离、对关键操作的强制日志记录。',
+        '7.2. 加密：传输中使用 TLS；对敏感工件进行静态加密；密钥管理实施访问控制。',
+        '7.3. 访问：管理控制台采用多因素认证，基于角色的访问控制，环境分段（prod/stage/dev）。',
+        '7.4. 变更控制：代码评审、签名构建、渐进式发布、回滚、阻断不安全配置。',
+        '7.5. 测试与监控：入侵检测、告警、定期审查配置与权限。',
+        '7.6. 钱包密钥与助记词：我们不请求也不存储。签名在用户侧或受信钱包侧完成。'
+      ]
+    },
+
+    {
+      title: '8. 跨境传输',
+      paras: [
+        '8.1. 处理与存储可能在多区域基础设施内进行，并采用地理副本与负载均衡。',
+        '8.2. 进行跨境传输时使用合法机制（包括如适用的标准合同条款）及等效的保护措施。',
+        '8.3. 用户同意在提供服务范围内进行数据的国际传输。'
+      ]
+    },
+
+    {
+      title: '9. 您的权利',
+      paras: [
+        '9.1. EEA/英国（GDPR）：访问、更正、删除、限制/反对、可携带权，以及向监管机构投诉的权利。',
+        '9.2. 美国（含加州/CPRA）：知情、更正、删除、选择退出出售/共享，以及就行使权利不受歧视的权利。',
+        '9.3. 权利行使：见“如何行使权利”一节。需进行身份核验。'
+      ]
+    },
+
+    {
+      title: '10. 儿童',
+      paras: [
+        '10.1. 本服务不面向 13 岁以下儿童（或依据您所属法域规定的更高年龄）。',
+        '10.2. 若您认为儿童向我们提供了数据，请与我们联系以删除。'
+      ]
+    },
+
+    {
+      title: '11. 变更',
+      paras: [
+        '11.1. 我们可能为反映技术、法律与产品的变化而更新本政策。',
+        '11.2. 发生重大变更时，将更新“更新”日期，并在必要时于界面中显示通知。'
+      ]
+    },
+
+    {
+      title: '12. 联系方式',
+      paras: [
+        '12.1. 隐私请求邮箱：quantuml7ai@gmail.com',
+        '12.2. 反馈渠道（机器人）：https://t.me/L7ai_feedback'
+      ]
+    },
+
+    {
+      title: '13. 定义与适用范围',
+      paras: [
+        '13.1. “服务”——网站、Web-MiniApp、Telegram Mini App、Telegram 机器人、论坛、API、分析、支付集成与交易界面。',
+        '13.2. “我们”——Quantum L7 AI。本政策涵盖我们作为控制者所涉及的数据。第三方服务（认证提供方、区块链、钱包、支付网关）遵循其各自规则。',
+        '13.3. 政策客体——用户数据及服务运行所必需的运营数据。'
+      ]
+    },
+
+    {
+      title: '14. 处理的法律依据（GDPR/UK GDPR）',
+      paras: [
+        '14.1. 合同/提供服务所必需：授权、功能访问、计费与支持。',
+        '14.2. 合法利益：安全、滥用防护、对隐私风险较低的运营分析。',
+        '14.3. 同意：如适用的可选指标/营销通信。可随时撤回同意。',
+        '14.4. 法定义务：在法律要求时进行保存与披露（如会计记录）。'
+      ]
+    },
+
+    {
+      title: '15. 数据存储（留存）',
+      paras: [
+        '15.1. 我们保留个人数据的时间不超过处理目的所需或法律要求的期限。',
+        '15.2. 参考：业务日志 30–180 天；性能遥测最长 90 天；支持往来最长 12 个月；计费记录——依法律留存期限保存。',
+        '15.3. 为研究与统计目的，匿名化汇总数据可保留更久。'
+      ]
+    },
+
+    {
+      title: '16. 分处理者与基础设施',
+      paras: [
+        '16.1. 分处理者类别：计算平台与托管、CDN、对象存储、SQL/NoSQL 数据库、缓存与消息队列、监控/日志/追踪、电子邮件/消息发送、支付处理方、链上/市场数据索引提供方。',
+        '16.2. 我们与每个分处理者签有数据处理协议（DPA），并落实技术/组织的安全措施。',
+        '16.3. 类别清单会在本政策中保持更新；在符合安全要求的前提下，可按请求提供当前的详细清单。'
+      ]
+    },
+
+    {
+      title: '17. 分析与指标',
+      paras: [
+        '17.1. 我们可在必要范围内收集汇总使用指标（界面覆盖度、性能、功能采纳）以改进产品。',
+        '17.2. 分析设置旨在排除敏感数据并最小化个人标识符。',
+        '17.3. 在需要时，对非必要指标适用同意机制。'
+      ]
+    },
+
+    {
+      title: '18. 日志与遥测',
+      paras: [
+        '18.1. 运营日志可能包含时间戳、哈希化 IP、user-agent、错误追踪、请求/关联 ID、响应代码。',
+        '18.2. 日志实施轮换与访问限制，用于调试、容量规划、DDoS/机器人流量防护与审计。',
+        '18.3. 日志采集点遵循最小化原则进行设计。'
+      ]
+    },
+
+    {
+      title: '19. 邮件、通知与通信',
+      paras: [
+        '19.1. 发送至我们地址/机器人的消息，会为支持、合同履行与服务质量核算之目的而处理。',
+        '19.2. 您可退订非服务类邮件；服务通知（如订阅状态）为运行所必需。'
+      ]
+    },
+
+    {
+      title: '20. Webhooks 与 API',
+      paras: [
+        '20.1. 使用 Webhook/API 时，负载可能会被临时缓冲以确保可靠投递、去重与重放防护。',
+        '20.2. 请勿通过 Webhook/API 传输机密、私钥或其他不面向第三方的材料；请使用签名、令牌轮换与来源限制。'
+      ]
+    },
+
+    {
+      title: '21. 钱包绑定与支付',
+      paras: [
+        '21.1. 我们保存用于身份识别与计费所需的公开地址与网络参数。不收集也不存储私钥/助记词。',
+        '21.2. 支付处理由集成的提供方执行；我们接收用于激活 VIP 订阅所必需的发票与确认的状态/标识。',
+        '21.3. 链上支付确认属于公共信息；我们仅为访问目的将其与您的账户进行匹配。'
+      ]
+    },
+
+    {
+      title: '22. 执行限制与风险框架',
+      paras: [
+        '22.1. 在交易/分析模式下适用技术限制（限流、合理性检查）与风险规则。这些为工程机制，并不构成结果保证。',
+        '22.2. 用户对交易决策、合规与风险管理自行负责。'
+      ]
+    },
+
+    {
+      title: '23. 研究、模型与人工智能',
+      paras: [
+        '23.1. 在适当且合法的情况下，我们可基于汇总/假名化的数据集训练/验证模型。',
+        '23.2. 使用第三方模型时，我们遵守个人数据传输的合同与技术限制，并贯彻最小化。'
+      ]
+    },
+
+    {
+      title: '24. 自动化决策',
+      paras: [
+        '24.1. 我们不作出对用户具有法律意义且完全由自动化产生的决定。',
+        '24.2. 推荐与评估为辅助性信号，用于支持决策。最终选择权在用户。'
+      ]
+    },
+
+    {
+      title: '25. 假名化、聚合与最小化',
+      paras: [
+        '25.1. 在可能的情况下，我们对标识符进行假名化并对指标进行汇总，将密钥与有效数据相分离。',
+        '25.2. 对“密钥—数据”关联的访问受角色与必要性限制。'
+      ]
+    },
+
+    {
+      title: '26. 可携带性与导出',
+      paras: [
+        '26.1. 您可请求导出与您的账户/机器人标识关联的个人数据。',
+        '26.2. 在不存在法律限制且通过验证后，我们将以机器可读格式提供数据。'
+      ]
+    },
+
+    {
+      title: '27. 数据主体权利的实现',
+      paras: [
+        '27.1. 请通过电子邮件 quantuml7ai@gmail.com 或反馈机器人提交请求。',
+        '27.2. 为进行身份验证，我们可能会要求您通过已绑定的 Telegram/机器人账户发送消息，或确认对关联账户/钱包的所有权。',
+        '27.3. 我们将在适用法律规定的时限内答复；出于安全/法律要求，部分请求可能受到限制。'
+      ]
+    },
+
+    {
+      title: '28. 事件与泄露通知',
+      paras: [
+        '28.1. 我们设有响应程序：事件分类、影响控制、原因调查、服务恢复。',
+        '28.2. 在法律要求的情况下，我们会通知受影响的用户与监管机构，并提供有关事件性质与所采取措施的相关信息。'
+      ]
+    },
+
+    {
+      title: '29. 司法辖区说明',
+      paras: [
+        '29.1. EEA/英国：在数据主体权利、处理的合法性与跨境传输方面适用 GDPR/UK GDPR 规范。',
+        '29.2. 美国：适用相关州法（包括 CPRA）。在支持技术性选择退出信号的情况下，我们将尽力予以尊重。',
+        '29.3. 其他地区：在强制性存储、通知与保护要求方面适用当地规范。'
+      ]
+    },
+
+    {
+      title: '30. Do Not Track（DNT）与 Global Privacy Control（GPC）',
+      paras: [
+        '30.1. 若您的浏览器发送 DNT/GPC 信号，我们将在技术可行且法律要求的范围内予以考虑。'
+      ]
+    },
+
+    {
+      title: '31. 退出选项与隐私设置',
+      paras: [
+        '31.1. 您可以禁用非必要的 cookies/分析、退订非服务类邮件，并限制机器人的权限。',
+        '31.2. 核心安全/功能机制可能需要最低限度处理，且无法禁用。'
+      ]
+    },
+
+    {
+      title: '32. 可及性、语言与解释',
+      paras: [
+        '32.1. 我们提供多语言文本。若版本不一致，出于法律解释之目的，英文版本可能具有优先效力。',
+        '32.2. 各语言译文力求保持法律等效性。'
+      ]
+    },
+
+    {
+      title: '33. 存储与数据位置',
+      paras: [
+        '33.1. 运营数据库：在多可用区架构中部署的关系型与/或文档型数据库管理系统，具备冗余与复制能力。',
+        '33.2. 缓存与队列：用于加速会话、反滥用逻辑与临时工件的 Redis 集群/流/队列。',
+        '33.3. 对象存储：存放用户上传的媒体与备份，配有受管的版本及生命周期策略。',
+        '33.4. 备份：定期备份、恢复校验、访问权限分离、静态加密。',
+        '33.5. 认证集成：身份提供方（Google、Apple、Twitter/X、Discord、Telegram）向我们提供令牌/确认；我们不存储其密码，也不管理其内部数据库。',
+        '33.6. 地理位置：为容错与性能，数据可在多区域基础设施中处理，并使用合法的国际传输机制。'
+      ]
+    },
+
+    {
+      title: '34. 政策效力与版本',
+      paras: [
+        '34.1. 本政策自上述“更新”日期起生效。',
+        '34.2. 我们可能为存档与变更透明之目的保留先前版本。'
+      ]
+    },
+
+    {
+      title: '附录 A：术语表',
+      paras: [
+        'A.1. 控制者——决定个人数据处理目的与方式的个人/组织。',
+        'A.2. 处理者——代表控制者处理数据的个人/组织。',
+        'A.3. 个人数据——关于已识别或可识别个体的任何信息。',
+        'A.4. 跨境传输——将个人数据传输出其最初收集的国家/地区之外。'
+      ]
+    },
+
+    {
+      title: '附录 B：分处理者类别',
+      paras: [
+        'B.1. 主机托管/计算与容器编排。',
+        'B.2. CDN 与边缘内容分发。',
+        'B.3. 数据库（SQL/NoSQL）与 Redis 缓存。',
+        'B.4. 对象存储与备份系统。',
+        'B.5. 监控/日志/追踪/错误跟踪。',
+        'B.6. 支付处理方与链上确认网关。',
+        'B.7. 消息提供方（电子邮件/Telegram）与队列服务。',
+        'B.8. 区块链数据/市场行情索引与分析平台。'
+      ]
+    }
   ]
 };
 
@@ -2073,604 +3597,1371 @@ const PRIVACY_UK = {
   nav_privacy: 'Конфіденційність',
   privacy_title: 'Конфіденційність',
   privacy_updated_label: 'Оновлено:',
-  privacy_updated: '2025-09-14',
+  privacy_updated: '2025-10-30',
   privacy_empty: 'Немає даних',
   privacy_sections: [
-    { title: 'Огляд', paras: [
-      'Ця Політика пояснює, які дані ми збираємо, як використовуємо та захищаємо на сайті, у Telegram-боті та сервісах.',
-      'Користуючись сервісом, ви погоджуєтесь із Політикою. Це продуктове повідомлення, а не юридична порада.'
-    ]},
-    { title: 'Що збираємо', paras: [
-      'Облікові й контактні дані: Telegram ID/username/ім’я відображення; email (якщо надсилаєте); повідомлення, які ви нам надсилаєте.',
-      'Прив’язка гаманця: мережі та публічні адреси (ніколи не приватні ключі).',
-      'Дані використання та пристрою: сторінки, кліки, реферер, хешований IP, user-agent, часові мітки, телеметрія помилок і продуктивності.'
-    ]},
-    { title: 'Он-чейн і публічні дані', paras: [
-      'Ми аналізуємо публічні блокчейн- та ринкові дані; вони відкриті за своєю природою та не є нашими «персональними даними».',
-      'Запити (наприклад, аналітика адрес/символів) можуть логуватися для роботи сервісу та підвищення надійності.'
-    ]},
-    { title: 'Cookie та localStorage', paras: [
-      'Використовуємо мінімально: мова, сесія, анти-аб’юз. Блокування можливе; деякі функції можуть погіршитися.'
-    ]},
-    { title: 'Як використовуємо дані', paras: [
-      'Надання та покращення досліджень і сигналів; роутинг і захищене виконання; запобігання зловживанням; підтримка та комунікація.',
-      'Рекламного профілювання не робимо.'
-    ]},
-    { title: 'Передача третім сторонам', paras: [
-      'Ми не продаємо персональні дані.',
-      'Процесори: хостинг (напр., Vercel), зберігання, аналітика (якщо увімкнено), відстеження помилок, доставка email/Telegram.',
-      'Розкриття можливе для дотримання закону або захисту прав.'
-    ]},
-    { title: 'Безпека', paras: [
-      'Ключі залишаються у вас; seed-фрази не запитуємо. Дані шифруються під час передачі та зберігання; доступ за ролями і логування.',
-      'Застосовуємо найменші привілеї, MFA для критичних систем і контроль змін при деплоях.'
-    ]},
-    { title: 'Міжнародні передачі', paras: [
-      'Обробка може виконуватися за кордоном; де це потрібно, використовуємо стандартні гарантії (SCC) або інші законні механізми.'
-    ]},
-    { title: 'Ваші права', paras: [
-      'ЄЕЗ/ВБ (GDPR): доступ, виправлення, видалення, переносимість, обмеження/заперечення; право на скаргу до наглядового органу.',
-      'Каліфорнія (CPRA): доступ, видалення, виправлення, відмова від продажу/обміну; відсутність дискримінації.'
-    ]},
-    { title: 'Діти', paras: [
-      'Сервіс не призначено для дітей до 13 років (або вищий мінімальний вік у вашій юрисдикції).'
-    ]},
-    { title: 'Зміни', paras: [
-      'Можемо оновлювати Політику; змінюємо дату «Оновлено» і, за потреби, повідомляємо в застосунку чи каналі.'
-    ]},
-    { title: 'Контакти', paras: [
-      'Email: quantuml7ai@gmail.com',
-      'Бот зворотного зв’язку: https://t.me/L7ai_feedback'
-    ]},
-    { title: 'Визначення та сфера', paras: [
-      '«Сервіс» — наші сайти, боти, API та пов’язані застосунки; «ми» — Quantum L7 AI.',
-      'Політика охоплює дані, де ми контролер; у вендорів і блокчейнів — власні правила.'
-    ]},
-    { title: 'Правові підстави (GDPR)', paras: [
-      'Договір: надання запитаних функцій (роутинг, дослідження, панелі).',
-      'Законний інтерес: надійність, безпека, запобігання зловживанням, мінімальна продуктова аналітика.',
-      'Згода: опційна аналітика/маркетинг; можна відкликати будь-коли.',
-      'Юридичний обов’язок: зберігання/розкриття за вимогою закону.'
-    ]},
-    { title: 'Зберігання даних', paras: [
-      'Зберігаємо персональні дані стільки, скільки потрібно для зазначених цілей або за вимогою закону.',
-      'Орієнтири: операційні логи 30–180 днів; повідомлення підтримки до 12 міс.; юридичні записи — згідно норм.'
-    ]},
-    { title: 'Субпроцесори', paras: [
-      'Категорії: хостинг/CDN, об’єктне сховище, email/Telegram, моніторинг, відстеження помилок, базова аналітика.',
-      'DPA із постачальниками; періодична оцінка їхніх заходів безпеки.'
-    ]},
-    { title: 'Аналітика та метрики', paras: [
-      'Якщо увімкнено, вимірюємо агреговане використання (сторінки, продуктивність, прийняття функцій).',
-      'Налаштовуємо аналітику так, щоб мінімізувати персональні дані і виключати чутливі.'
-    ]},
-    { title: 'Логи та телеметрія', paras: [
-      'Логи можуть містити мітки часу, хеш-IP, user-agent, трасування помилок, ідентифікатори запитів.',
-      'Логи ротуються, доступ контролюється; застосовуються для відладки, планування ємності та виявлення зловживань.'
-    ]},
-    { title: 'Пошта та комунікації', paras: [
-      'Ваші листи/повідомлення обробляємо для підтримки і обліку.',
-      'Маркетинг без згоди не надсилаємо; можна відписатися будь-коли.'
-    ]},
-    { title: 'Webhooks і API', paras: [
-      'Під час використання API/webhook навантаження можуть тимчасово зберігатися для надійності та захисту від повторів.',
-      'Не передавайте секрети/приватні ключі; використовуйте коректну автентифікацію і ротацію токенів.'
-    ]},
-    { title: 'Прив’язка гаманця', paras: [
-      'Зберігаємо мережі та публічні адреси для функцій. Приватні ключі/seed не запитуємо і не зберігаємо.',
-      'Операції он-чейн публічні; можемо індексувати та анотувати їх для аналітики й звітності.'
-    ]},
-    { title: 'Огрàничувачі виконання', paras: [
-      'Якщо підтримується виконання/роутинг, застосовуємо ліміти, правила ризику, перевірки адекватності.',
-      'Це інструменти, а не гарантії; відповідальність за рішення — на вас.'
-    ]},
-    { title: 'Дослідження, моделі та LLM', paras: [
-      'Можемо навчати/оцінювати моделі на агрегованих та анонімізованих даних.',
-      'За участі сторонніх LLM уникаємо передачі персональних даних без необхідності та договірних гарантій.'
-    ]},
-    { title: 'Автоматизовані рішення', paras: [
-      'Не приймаємо виключно автоматизованих рішень із юридично значним ефектом.',
-      'Рекомендації — допоміжні сигнали; фінальні рішення — за вами.'
-    ]},
-    { title: 'Псевдонімізація і агрегація', paras: [
-      'Де можливо, хешуємо/агрегуємо ідентифікатори для зменшення ризиків.',
-      'Ключі відокремлюємо від контенту; зв’язування — лише за потреби та за ролями.'
-    ]},
-    { title: 'Портативність і експорт', paras: [
-      'Можна запросити експорт персональних даних, пов’язаних із вашим акаунтом/бот-ідентифікатором.',
-      'Надаємо у машинно-читаному форматі, якщо немає правових обмежень.'
-    ]},
-    { title: 'Як реалізувати права', paras: [
-      'Надішліть запит на email або у боті; можемо попросити верифікацію (повідомлення з вашого акаунта).',
-      'Відповідаємо у строки закону; деякі запити обмежені правом/безпекою.'
-    ]},
-    { title: 'Інциденти і повідомлення', paras: [
-      'Маємо процедури реагування; про порушення повідомляємо користувачів/органи — якщо цього вимагає закон.',
-      'Проводимо розбір і вдосконалюємо контролі.'
-    ]},
-    { title: 'Примітки для юрисдикцій', paras: [
-      'ЄЕЗ/ВБ: застосовується GDPR, коли ми контролер.',
-      'США: закони штатів (CPRA тощо) надають додаткові права; враховуємо валідні сигнали відмови, де це можливо.'
-    ]},
-    { title: 'Do Not Track / GPC', paras: [
-      'Повідомлення DNT/GPC враховуємо там, де це вимагає закон і технічно можливо.'
-    ]},
-    { title: 'Відмова', paras: [
-      'Можна вимкнути опційну аналітику/cookies, відписатися від листів, обмежити права бота.',
-      'Базова безпека і функціонал можуть потребувати мінімальної обробки.'
-    ]},
-    { title: 'Доступність і мова', paras: [
-      'Надаємо пояснення кількома мовами; у разі розбіжностей для тлумачення може застосовуватись англомовна версія.'
-    ]},
-    { title: 'Контакт з приватності', paras: [
-      'quantuml7ai@gmail.com (тема: Privacy). Мета — відповідь до 30 днів.'
-    ]},
-    { title: 'Набуття чинності та версії', paras: [
-      'Політика чинна з дати «Оновлено»; попередні версії можуть архівуватися для довідки.'
-    ]},
-    { title: 'Додаток: глосарій', paras: [
-      'Контролер — визначає цілі та засоби обробки. Процесор — обробляє від імені контролера.',
-      'Персональні дані — інформація про ідентифіковану/ідентифіковану особу.'
-    ]},
-    { title: 'Додаток: субпроцесори (стисло)', paras: [
-      'Хостинг/CDN (напр., Vercel), об’єктне сховище, email/Telegram, трекінг помилок, моніторинг, базова аналітика.',
-      'Детальний актуальний перелік — на запит.'
-    ]}
+    {
+      title: '1. Огляд',
+      paras: [
+        '1.1. Ця Політика конфіденційності Quantum L7 AI (далі — «Політика») описує, які дані ми збираємо, на яких правових підставах обробляємо, де й як зберігаємо, як захищаємо та передаємо в межах екосистеми: вебсайт, Web-MiniApp, Telegram Mini App, Telegram-бот(и), API, Форум, аналітичні сервіси та торгові інтерфейси (вкл. Біржу, що розробляється).',
+        '1.2. Користуючись сервісами Quantum L7 AI («Сервіс»), ви підтверджуєте, що ознайомилися з Політикою і приймаєте її умови. Політика призначена для прозорого інформування користувачів, не є індивідуальною юридичною консультацією і не замінює договори/оферти/політики конкретних вендорів.',
+        '1.3. Ми діємо як контролер даних щодо персональних даних, які збираємо і визначаємо цілі/засоби їх обробки, та як процесор там, де обробляємо дані за дорученням клієнтів/партнерів.',
+        '1.4. Терміни «персональні дані», «обробка», «контролер», «процесор», «суб’єкт даних», «міжнародна передача» використовуються у значеннях, прийнятих глобальними регуляторними рамками (GDPR/UK GDPR, CCPA/CPRA тощо).',
+        '1.5. Наші сервіси взаємодіють з ончейн-джерелами та ринковими стрічками: публічні блокчейн-дані за своєю природою відкриті і не є нашими «персональними даними», втім співставлення з вашим акаунтом може утворювати персональні дані.'
+      ]
+    },
+
+    {
+      title: '2. Що ми збираємо',
+      paras: [
+        '2.1. Облікові та ідентифікаційні дані: Telegram ID/username/відображуване ім’я (при вході через Telegram Mini App або бота), внутрішній Account ID, мітки статусу підписки (VIP/Free), мова інтерфейсу.',
+        '2.2. Контактні дані: email (якщо надаєте), нік на Форумі, референтні ідентифікатори зовнішніх акаунтів (Google, Apple, Twitter/X, Discord тощо) при зв’язуванні.',
+        '2.3. Авторизація і зв’язки: факт і маршрут входу через мульти-провайдерну екосистему (OAuth/OIDC, Telegram WebApp initData, Sign in with Apple/Google/Twitter/X/Discord, wallet-signature, magic-link), технічні токени/штампи/підписи (без зберігання приватних ключів і seed-фраз).',
+        '2.4. Гаманці та мережі: публічні адреси, використовувані мережі (L1/L2), транзакційні метадані, пов’язані з оплатою підписки через NowPayments та ончейн-підтвердження.',
+        '2.5. Дані використання: відвідані сторінки/екрани, дії в інтерфейсі, часові мітки, хешований IP, user-agent, параметри продуктивності клієнта, телеметрія помилок.',
+        '2.6. Форум і контент: пости, теми, метадані завантажень (зображення/відео/аудіо), системні артефакти скорингу (оцінки якості/залученості/anti-spam/anti-sybil), статистика активності для майнінгу QCoin.',
+        '2.7. Оплати і білінг: статуси інвойсів, підтвердження платежів (через інтегрованого платіжного провайдера), суми/валюти/часові мітки, технічні журнали маршрутизації.',
+        '2.8. Ончейн і маркет-дані: ми індексуємо та агрегуємо публічні ланцюги/біржові стрічки/книги ордерів/історичні свічки в аналітичних цілях і для надання функцій Сервісу.'
+      ]
+    },
+
+    {
+      title: '3. Ончейн і публічні дані',
+      paras: [
+        '3.1. Публічні записи блокчейна доступні будь-якому учаснику мережі; їх обробка для аналітики, індикаторів і рекомендацій здійснюється в межах допустимого використання загальнодоступної інформації.',
+        '3.2. Співставлення ончейн-активності з вашим акаунтом можливе за добровільного прив’язування гаманця/платежів/підписок. У такому разі створюється персональний профіль використання.',
+        '3.3. Запити до публічних нод/провайдерів RPC/індексації та маркет-агрегаторів можуть логуватися для надійності, безпеки, захисту від зловживань і покращення якості сервісу.'
+      ]
+    },
+
+    {
+      title: '4. Cookie, localStorage та інші клієнтські артефакти',
+      paras: [
+        '4.1. Ми застосовуємо мінімально необхідні механізми: збереження мови, безпечні маркери сесії, параметри анти-abuse, UX-налаштування.',
+        '4.2. При блокуванні cookie/localStorage частина функцій може стати недоступною або деградувати (наприклад, сесії, персональні ліміти, мова).',
+        '4.3. Де це вимагається законом, ми запитуємо згоду на некритичні cookie/аналітику.'
+      ]
+    },
+
+    {
+      title: '5. Як ми використовуємо дані',
+      paras: [
+        '5.1. Надання функціоналу: авторизація/зв’язування акаунтів, синхронізація статусів підписки, доступ до Форуму, MiniApp, бота, аналітичних панелей і рекомендацій.',
+        '5.2. Поліпшення продукту: агрегована аналітика використання, A/B-оцінки, телеметрія продуктивності, усунення збоїв, підвищення точності AI-моделей.',
+        '5.3. Безпека і цілісність: захист від зловживань (rate-limit, anti-spam, anti-sybil), контроль аномалій, аудит службових дій, розслідування інцидентів.',
+        '5.4. Білінг і відповідність: обробка статусів платежів, підтверджень, облік прав доступу, дотримання законів щодо фінансової звітності та протидії незаконній діяльності.',
+        '5.5. Комунікації і підтримка: відповіді на запити, сповіщення про статуси (наприклад, успішна активація VIP), сервісні повідомлення.',
+        '5.6. Маркетингового профілювання не ведемо; розсилки здійснюються лише за наявності законної підстави (наприклад, згоди).'
+      ]
+    },
+
+    {
+      title: '6. Передача і розкриття третім особам',
+      paras: [
+        '6.1. Ми не продаємо персональні дані.',
+        '6.2. Дані можуть оброблятися нашими субпроцесорами за нашими інструкціями і лише з цілями, описаними Політикою: обчислювальні платформи/хостинг, CDN, об’єктне сховище, черги і кеші, моніторинг/логування/трекінг помилок, платіжні шлюзи, провайдери повідомлень (email/Telegram), аналітичні платформи.',
+        '6.3. Розкриття можливе при дотриманні закону, законних запитах компетентних органів, захисті прав/безпеки користувачів і Сервісу.',
+        '6.4. При зміні корпоративного контролю (злиття/продаж активів) дані можуть бути передані правонаступнику за умови збереження еквівалентного захисту і повідомлення, якщо це вимагається законом.'
+      ]
+    },
+
+    {
+      title: '7. Безпека',
+      paras: [
+        '7.1. Принципи: безпека за проєктом (security by design), мінімум привілеїв (PoLP), розподіл обов’язків, обов’язкове журналювання критичних операцій.',
+        '7.2. Шифрування: TLS під час передавання; шифрування на рівні зберігання для чутливих артефактів; керування ключами з контролем доступу.',
+        '7.3. Доступ: багатофакторна автентифікація для адмінських консолей, ролева сегрегація доступу, сегментація середовищ (prod/stage/dev).',
+        '7.4. Контроль змін: рецензування коду, підписані збірки, поступові викладки, відкати, блокування небезпечних конфігурацій.',
+        '7.5. Тестування і моніторинг: виявлення вторгнень, алерти, періодичні ревізії конфігурацій і дозволів.',
+        '7.6. Ключі гаманців і seed-фрази: ми їх не запитуємо і не зберігаємо. Підписання виконується на стороні користувача або довіреного гаманця.'
+      ]
+    },
+
+    {
+      title: '8. Міжнародні передачі',
+      paras: [
+        '8.1. Обробка і зберігання можуть здійснюватися у багаторегіональній інфраструктурі з геореплікацією і балансуванням.',
+        '8.2. При транскордонних передачах використовуються законні механізми (в т.ч. стандартні договірні положення, якщо застосовно) і еквівалентні заходи захисту.',
+        '8.3. Користувач погоджується на міжнародну передачу даних у межах надання Сервісу.'
+      ]
+    },
+
+    {
+      title: '9. Ваші права',
+      paras: [
+        '9.1. ЄЕЗ/UK (GDPR): право на доступ, виправлення, видалення, обмеження/заперечення, переносимість, а також право подати скаргу до наглядового органу.',
+        '9.2. США (включно з Каліфорнією/CPRA): право знати, виправляти, видаляти, відмовитися від продажу/обміну, право на відсутність дискримінації за реалізацію прав.',
+        '9.3. Реалізація прав: див. розділ «Як реалізувати права». Ідентифікаційна перевірка обов’язкова.'
+      ]
+    },
+
+    {
+      title: '10. Діти',
+      paras: [
+        '10.1. Сервіс не призначений для дітей молодше 13 років (або вищого віку згідно із правом вашої юрисдикції).',
+        '10.2. Якщо ви вважаєте, що дитина надала нам дані, зв’яжіться з нами для видалення.'
+      ]
+    },
+
+    {
+      title: '11. Зміни',
+      paras: [
+        '11.1. Ми можемо оновлювати Політику для відображення змін у технологіях, праві та продуктах.',
+        '11.2. При суттєвих змінах оновлюється дата «Оновлено» і, за необхідності, відображається сповіщення в інтерфейсі.'
+      ]
+    },
+
+    {
+      title: '12. Контакти',
+      paras: [
+        '12.1. Email для запитів з приватності: quantuml7ai@gmail.com',
+        '12.2. Канал зворотного зв’язку (бот): https://t.me/L7ai_feedback'
+      ]
+    },
+
+    {
+      title: '13. Визначення та сфера дії',
+      paras: [
+        '13.1. «Сервіс» — сайти, Web-MiniApp, Telegram Mini App, Telegram-боти, Форум, API, аналітика, інтеграції платежів і біржові інтерфейси.',
+        '13.2. «Ми» — Quantum L7 AI. Політика охоплює дані, де ми виступаємо контролером. Сторонні сервіси (провайдери авторизації, блокчейни, гаманці, платіжні шлюзи) діють за власними правилами.',
+        '13.3. Об’єкт Політики — дані користувачів та операційні дані, необхідні для функціонування Сервісу.'
+      ]
+    },
+
+    {
+      title: '14. Правові підстави обробки (GDPR/UK GDPR)',
+      paras: [
+        '14.1. Договір/необхідність для надання послуги: авторизація, доступ до функціоналу, білінг і підтримка.',
+        '14.2. Законний інтерес: безпека, запобігання зловживанням, операційна аналітика з низьким ризиком для приватності.',
+        '14.3. Згода: опціональні метрики/маркетингові комунікації, якщо застосовно. Згоду можна відкликати.',
+        '14.4. Юридичний обов’язок: зберігання і розкриття там, де цього вимагає закон (наприклад, бухгалтерські записи).'
+      ]
+    },
+
+    {
+      title: '15. Зберігання даних (ретенція)',
+      paras: [
+        '15.1. Ми зберігаємо персональні дані не довше, ніж потрібно для цілей обробки або вимог закону.',
+        '15.2. Орієнтири: службові журнали 30–180 днів; телеметрія продуктивності до 90 днів; листування підтримки до 12 місяців; білінгові записи — згідно з правовими строками зберігання.',
+        '15.3. Анонімізовані агрегати можуть зберігатися довше для дослідницьких і статистичних цілей.'
+      ]
+    },
+
+    {
+      title: '16. Субпроцесори і інфраструктура',
+      paras: [
+        '16.1. Категорії субпроцесорів: обчислювальні платформи і хостинг, CDN, об’єктні сховища, бази даних SQL/NoSQL, кеші та черги повідомлень, моніторинг/логування/трасування, розсилка email/повідомлень, платіжні оператори, провайдери індексування ончейн/ринкових стрічок.',
+        '16.2. З кожним субпроцесором укладені угоди про захист даних (DPA) і застосовуються технічні/організаційні заходи безпеки.',
+        '16.3. Оновлюваний перелік категорій доступний у Політиці; детальний актуальний список надається за запитом з урахуванням вимог безпеки.'
+      ]
+    },
+
+    {
+      title: '17. Аналітика і метрики',
+      paras: [
+        '17.1. Ми можемо збирати агреговані метрики використання (покриття інтерфейсів, продуктивність, прийняття функцій) у обсязі, необхідному для поліпшення продукту.',
+        '17.2. Налаштування аналітики орієнтовані на виключення чутливих даних і мінімізацію персональних ідентифікаторів.',
+        '17.3. Де потрібно, застосовується механізм згоди для неістотних метрик.'
+      ]
+    },
+
+    {
+      title: '18. Журнали і телеметрія',
+      paras: [
+        '18.1. Операційні журнали можуть включати часові мітки, хеш-IP, user-agent, трасування помилок, ID запитів/кореляції, коди відповідей.',
+        '18.2. Журнали ротуються, обмежені за доступом і використовуються для налагодження, планування ємності, захисту від DDoS/бот-трафіку, аудиту.',
+        '18.3. Точки логування спроєктовані з урахуванням принципу мінімізації.'
+      ]
+    },
+
+    {
+      title: '19. Пошта, сповіщення і комунікації',
+      paras: [
+        '19.1. Повідомлення, надіслані на наші адреси/боти, обробляються для підтримки, виконання договірних зобов’язань і обліку якості сервісу.',
+        '19.2. Ви можете відмовитися від несервісних розсилок; сервісні сповіщення (наприклад, про статус підписки) є обов’язковими для функціонування.'
+      ]
+    },
+
+    {
+      title: '20. Webhooks і API',
+      paras: [
+        '20.1. При використанні Webhook/API корисні навантаження можуть тимчасово буферизуватися для надійної доставки, дедуплікації і захисту від повторів.',
+        '20.2. Не передавайте через Webhook/API секрети, приватні ключі та інші матеріали, не призначені для сторонніх; використовуйте підписи, ротацію токенів і обмеження джерел.'
+      ]
+    },
+
+    {
+      title: '21. Прив’язка гаманців і платежі',
+      paras: [
+        '21.1. Ми зберігаємо публічні адреси і мережеві параметри, необхідні для функцій ідентифікації і білінгу. Приватні ключі/seed-фрази не збираються і не зберігаються.',
+        '21.2. Платіжний процесинг виконується через інтегрованого провайдера; ми отримуємо статуси/ідентифікатори інвойсів і підтверджень, необхідні для активації підписки VIP.',
+        '21.3. Ончейн-підтвердження платежів є публічною інформацією; ми співставляємо їх з вашим акаунтом виключно для цілей доступу.'
+      ]
+    },
+
+    {
+      title: '22. Обмежувачі виконання і контур ризику',
+      paras: [
+        '22.1. Для торгових/аналітичних режимів застосовуються технічні обмежувачі (rate-limit, sanity-checks) і правила ризику. Це інженерні механізми, а не гарантії результату.',
+        '22.2. Відповідальність за торгові рішення, дотримання правових вимог і ризик-менеджмент несе користувач.'
+      ]
+    },
+
+    {
+      title: '23. Дослідження, моделі і ШІ',
+      paras: [
+        '23.1. Ми можемо навчати/валідувати моделі на агрегованих/псевдонімізованих наборах, де це доречно і законно.',
+        '23.2. При використанні сторонніх моделей дотримуємося договірних і технічних обмежень передачі персональних даних і застосовуємо мінімізацію.'
+      ]
+    },
+
+    {
+      title: '24. Автоматизовані рішення',
+      paras: [
+        '24.1. Ми не приймаємо виключно автоматизовані рішення з юридично значущим ефектом щодо користувача.',
+        '24.2. Рекомендації і оцінки — допоміжні сигнали для підтримки рішень. Остаточний вибір залишається за користувачем.'
+      ]
+    },
+
+    {
+      title: '25. Псевдонімізація, агрегація і мінімізація',
+      paras: [
+        '25.1. Де можливо, ми псевдонімізуємо ідентифікатори і агрегуємо метрики, розділяємо ключі та корисні дані.',
+        '25.2. Доступ до зв’язки «ключ—дані» обмежується ролями і необхідністю.'
+      ]
+    },
+
+    {
+      title: '26. Портативність і експорт',
+      paras: [
+        '26.1. Ви можете запросити експорт персональних даних, пов’язаних з вашим акаунтом/бот-ідентифікатором.',
+        '26.2. Ми надамо дані у машиночитному форматі, за відсутності правових обмежень, і після верифікації.'
+      ]
+    },
+
+    {
+      title: '27. Реалізація прав суб’єктів даних',
+      paras: [
+        '27.1. Надішліть запит на email quantuml7ai@gmail.com або через бота зворотного зв’язку.',
+        '27.2. Для верифікації особи можемо попросити надіслати повідомлення з прив’язаного Telegram/бот-акаунта або підтвердити володіння пов’язаним обліковим записом/гаманцем.',
+        '27.3. Відповідь надається у строки, встановлені застосовним правом; деякі запити можуть бути обмежені вимогами безпеки/законодавства.'
+      ]
+    },
+
+    {
+      title: '28. Інциденти і повідомлення про порушення',
+      paras: [
+        '28.1. Діють процедури реагування: класифікація інциденту, обмеження впливу, розслідування причин, відновлення сервісності.',
+        '28.2. У випадках, що вимагаються законом, повідомляються залучені користувачі і регулятори, надається релевантна інформація про характер інциденту і вжиті заходи.'
+      ]
+    },
+
+    {
+      title: '29. Юрисдикційні примітки',
+      paras: [
+        '29.1. ЄЕЗ/UK: застосовуються норми GDPR/UK GDPR у частині прав суб’єктів даних, законності обробки, міжнародних передач.',
+        '29.2. США: застосовуються відповідні закони штатів (включно з CPRA). За наявності підтримуваних технічних сигналів opt-out ми прагнемо їх враховувати.',
+        '29.3. Інші регіони: застосовуються локальні норми у частині обов’язкових вимог до зберігання, повідомлення і захисту.'
+      ]
+    },
+
+    {
+      title: '30. Do Not Track (DNT) та Global Privacy Control (GPC)',
+      paras: [
+        '30.1. Якщо ваш браузер надсилає DNT/GPC, ми враховуємо ці сигнали тією мірою, якою це підтримується технічно і вимагається правом.'
+      ]
+    },
+
+    {
+      title: '31. Опції відмови і налаштування приватності',
+      paras: [
+        '31.1. Ви можете вимкнути неістотні cookies/аналітику, відписатися від несервісних листів, обмежити права бота.',
+        '31.2. Базові механізми безпеки/функціональності можуть вимагати мінімальної обробки і не можуть бути вимкнені.'
+      ]
+    },
+
+    {
+      title: '32. Доступність, мови і тлумачення',
+      paras: [
+        '32.1. Ми надаємо тексти кількома мовами. У разі невідповідності версій пріоритет може мати англійська версія для цілей юридичного тлумачення.',
+        '32.2. Переклади спрямовані на збереження юридичної еквівалентності.'
+      ]
+    },
+
+    {
+      title: '33. Сховища і розташування даних',
+      paras: [
+        '33.1. Операційні бази даних: реляційні та/або документно-орієнтовані СУБД, розгорнуті в багатозонній архітектурі з резервуванням і реплікацією.',
+        '33.2. Кеші і черги: Redis-кластери/стрими/черги для прискорення сесій, анти-abuse логіки та тимчасових артефактів.',
+        '33.3. Об’єктне сховище: зберігання завантажених користувачами медіа і резервних копій з керованими політиками версіонування та життєвого циклу.',
+        '33.4. Бекапи: періодичні резервні копії, перевірка відновлення, розмежування прав доступу, шифрування при зберіганні.',
+        '33.5. Інтеграції авторизації: провайдери ідентичності (Google, Apple, Twitter/X, Discord, Telegram) надають нам токени/підтвердження; ми не зберігаємо їх паролі і не керуємо їх внутрішніми базами даних.',
+        '33.6. Географія: дані можуть оброблятися у багаторегіональній інфраструктурі для відмовостійкості та продуктивності, із застосуванням законних механізмів міжнародної передачі.'
+      ]
+    },
+
+    {
+      title: '34. Строк дії і версії Політики',
+      paras: [
+        '34.1. Політика набирає чинності з дати «Оновлено», зазначеної вище.',
+        '34.2. Ми можемо зберігати попередні редакції для архівних цілей і прозорості змін.'
+      ]
+    },
+
+    {
+      title: 'Додаток A: Глосарій',
+      paras: [
+        'A.1. Контролер — особа/організація, що визначає цілі і засоби обробки персональних даних.',
+        'A.2. Процесор — особа/організація, що обробляє дані за дорученням контролера.',
+        'A.3. Персональні дані — будь-яка інформація про ідентифіковану або ідентифіковану особу.',
+        'A.4. Міжнародна передача — передача персональних даних за межі країни/регіону їх початкового збирання.'
+      ]
+    },
+
+    {
+      title: 'Додаток B: Категорії субпроцесорів',
+      paras: [
+        'B.1. Хостинг/обчислення і контейнерна оркестрація.',
+        'B.2. CDN і прикордонна доставка контенту.',
+        'B.3. Бази даних (SQL/NoSQL) і Redis-кеші.',
+        'B.4. Об’єктні сховища і системи бекапів.',
+        'B.5. Моніторинг/логування/трасування/трекинг помилок.',
+        'B.6. Платіжні оператори і шлюзи ончейн-підтверджень.',
+        'B.7. Провайдери повідомлень (email/Telegram) і сервіси черг.',
+        'B.8. Індексація блокчейн-даних/ринкових стрічок і аналітичні платформи.'
+      ]
+    }
   ]
 };
+
 
 /* -------------------- AR (العربية) -------------------- */
 const PRIVACY_AR = {
-  nav_privacy: 'الخصوصية والسياسة',
-  privacy_title: 'الخصوصية والسياسة',
-  privacy_updated_label: 'آخر تحديث:',
-  privacy_updated: '2025-09-14',
-  privacy_empty: 'لا توجد عناصر',
+  nav_privacy: 'الخصوصية',
+  privacy_title: 'الخصوصية',
+  privacy_updated_label: 'تم التحديث:',
+  privacy_updated: '2025-10-30',
+  privacy_empty: 'لا توجد بيانات',
   privacy_sections: [
-    { title: 'نظرة عامة', paras: [
-      'توضح هذه السياسة ما نجمعه وكيف نستخدمه ونحمي البيانات على الموقع وروبوت تيليجرام وخدماتنا.',
-      'باستخدامك للخدمة فأنت توافق على هذه السياسة. هذا إشعار منتج وليس استشارة قانونية.'
-    ]},
-    { title: 'ما الذي نجمعه', paras: [
-      'بيانات الحساب والتواصل: معرّف/اسم مستخدم/اسم العرض في تيليجرام؛ البريد (إن أرسلته)؛ الرسائل التي ترسلها لنا.',
-      'ربط المحفظة: الشبكات والعناوين العامة (أبدًا ليست المفاتيح الخاصة).',
-      'بيانات الاستخدام والجهاز: الصفحات والنقرات والمرجع وعنوان IP مُجزّأ ووكيل المستخدم والطوابع الزمنية وتتبع الأخطاء والأداء.'
-    ]},
-    { title: 'بيانات السلسلة والبيانات العامة', paras: [
-      'نحلل بيانات بلوك تشين والسوق العامة؛ هذه المصادر عامة بطبيعتها وليست بيانات شخصية تحت سيطرتنا.',
-      'قد تُسجَّل الطلبات (مثل تحليل العنوان/الرمز) لتشغيل الخدمة وتحسين الموثوقية.'
-    ]},
-    { title: 'الكوكيز والتخزين المحلي', paras: [
-      'نستخدمها بالحد الأدنى: اللغة والجلسة ومكافحة الإساءة. يمكنك الحظر وقد تتراجع بعض الميزات.'
-    ]},
-    { title: 'كيف نستخدم البيانات', paras: [
-      'تقديم وتحسين الأبحاث والإشارات؛ التوجيه والتنفيذ المحمي؛ منع الإساءة؛ الدعم والتواصل.',
-      'لا ننشئ ملفات إعلانية.'
-    ]},
-    { title: 'المشاركة مع أطراف ثالثة', paras: [
-      'لا نبيع البيانات الشخصية.',
-      'معالِجون: الاستضافة (مثل Vercel) والتخزين والتحليلات (إن فُعّلت) وتتبع الأخطاء والبريد/تيليجرام.',
-      'قد يحدث الإفصاح امتثالًا للقانون أو لحماية الحقوق.'
-    ]},
-    { title: 'الأمان', paras: [
-      'تظل المفاتيح لديك؛ لا نطلب عبارات الاسترداد. البيانات مُشفّرة أثناء النقل والتخزين؛ الوصول مُقيّد بالأدوار ويُسجّل.',
-      'نطبق أقل امتياز ممكن وmfa للأنظمة الحرجة وضبط تغييرات النشر.'
-    ]},
-    { title: 'النقل الدولي', paras: [
-      'قد تتم المعالجة خارج البلد؛ نستخدم ضمانات معيارية (SCC) أو آليات قانونية أخرى عند اللزوم.'
-    ]},
-    { title: 'حقوقك', paras: [
-      'EEA/المملكة المتحدة (GDPR): الوصول والتصحيح والحذف وقابلية النقل والاعتراض/التقييد؛ والشكوى للجهة المختصة.',
-      'كاليفورنيا (CPRA): الوصول والحذف والتصحيح والانسحاب من البيع/المشاركة؛ دون تمييز.'
-    ]},
-    { title: 'الأطفال', paras: [
-      'الخدمة غير موجهة لمن هم دون 13 عامًا (أو الحد الأدنى الأعلى في نطاقك القضائي).'
-    ]},
-    { title: 'التغييرات', paras: [
-      'قد نحدّث هذه السياسة؛ سنغيّر تاريخ "آخر تحديث" وسنخطرك داخل التطبيق أو عبر القناة عند الاقتضاء.'
-    ]},
-    { title: 'جهات الاتصال', paras: [
-      'البريد: quantuml7ai@gmail.com',
-      'بوت الملاحظات: https://t.me/L7ai_feedback'
-    ]},
-    { title: 'التعريفات والنطاق', paras: [
-      'الخدمة تشمل مواقعنا وروبوتاتنا وواجهاتنا البرمجية وتطبيقاتنا؛ "نحن" تعني Quantum L7 AI.',
-      'تنطبق هذه السياسة عندما نكون متحكمًا في البيانات. للمورّدين والشبكات قواعدهم الخاصة.'
-    ]},
-    { title: 'الأسس القانونية (GDPR)', paras: [
-      'العقد: لتقديم الميزات المطلوبة (التوجيه، الأبحاث، اللوحات).',
-      'المصلحة المشروعة: الموثوقية والأمان ومنع الإساءة وتحليلات المنتج بحد أدنى من التأثير.',
-      'الموافقة: التحليلات/التسويق الاختياري؛ يمكنك سحبها في أي وقت.',
-      'الالتزام القانوني: الاحتفاظ/الإفصاح وفقًا للقانون.'
-    ]},
-    { title: 'الاحتفاظ بالبيانات', paras: [
-      'نحتفظ بالبيانات الشخصية للمدة اللازمة للأغراض الموضحة أو كما يتطلب القانون.',
-      'أمثلة: سجلات التشغيل 30–180 يومًا؛ رسائل الدعم حتى 12 شهرًا؛ السجلات القانونية حسب المتطلبات.'
-    ]},
-    { title: 'المعالِجون الفرعيون', paras: [
-      'الفئات: الاستضافة/CDN، تخزين الكائنات، تسليم البريد/تيليجرام، المراقبة، تتبع الأخطاء، التحليلات الأساسية.',
-      'نبرم اتفاقيات معالجة ونراجع الضمانات دوريًا.'
-    ]},
-    { title: 'التحليلات والقياس', paras: [
-      'إن فُعلت، نقيس الاستخدام التجميعي (الصفحات والأداء وتبنّي الميزات).',
-      'نضبط التحليلات لتجنّب البيانات الحساسة وتقليل البيانات الشخصية قدر الإمكان.'
-    ]},
-    { title: 'السجلات والقياس عن بُعد', paras: [
-      'قد تتضمن السجلات طوابع زمنية وعنوان IP مُجزّأ ووكيل المستخدم وتتبع الأخطاء ومعرّفات الطلبات.',
-      'نُدوّر السجلات ونقيّد الوصول ونستخدمها للتصحيح والتخطيط والحد من الإساءة.'
-    ]},
-    { title: 'البريد والتواصل', paras: [
-      'إذا تواصلت معنا، نعالج رسالتك للدعم والسجلات.',
-      'لا نرسل تسويقًا دون موافقة؛ يمكنك الانسحاب في أي وقت.'
-    ]},
-    { title: 'واجهات API والويب هوكس', paras: [
-      'قد تُخزّن الحمولات مؤقتًا للموثوقية ومنع إعادة الإرسال.',
-      'لا ترسل الأسرار/المفاتيح الخاصة؛ استخدم اعتمادًا مناسبًا وقم بتدوير الرموز.'
-    ]},
-    { title: 'ربط المحفظة', paras: [
-      'نخزّن الشبكات والعناوين العامة فقط؛ لا نطلب/نخزن مفاتيح خاصة أو عبارات استرداد.',
-      'معاملات السلسلة عامة؛ قد نفهرسها ونشرحها للتحليل والتقارير.'
-    ]},
-    { title: 'ضوابط التنفيذ', paras: [
-      'عند دعم التنفيذ/التوجيه نطبق حدودًا وقواعد مخاطر وفحوصات معقولة.',
-      'هذه أدوات وليست ضمانات؛ القرار والامتثال مسؤوليتك.'
-    ]},
-    { title: 'الأبحاث والنماذج وLLM', paras: [
-      'قد نُدرّب/نقيّم النماذج على بيانات مجمعة ومجهّلة حيثما أمكن.',
-      'إذا استُخدمت LLM خارجية نتجنّب إرسال بيانات شخصية إلا للضرورة وتحت اتفاقيات.'
-    ]},
-    { title: 'القرارات الآلية', paras: [
-      'لا نتخذ قرارات آلية بحتة ذات أثر قانوني أو مماثل.',
-      'التوصيات درجات مساعدة؛ القرار النهائي لك.'
-    ]},
-    { title: 'إخفاء الهوية والتجميع', paras: [
-      'نُجزّئ/نُجمّع المعرفات حيثما أمكن لتقليل المخاطر.',
-      'نفصل المفاتيح عن المحتوى ونربطهما عند الحاجة فقط وبحسب الأدوار.'
-    ]},
-    { title: 'قابلية النقل والتصدير', paras: [
-      'يمكنك طلب تصدير لبياناتك الشخصية المرتبطة بحسابك/هوية الروبوت.',
-      'نقدّمها بصيغة مقروءة آليًا ما لم تمنعنا حدود قانونية.'
-    ]},
-    { title: 'ممارسة الحقوق', paras: [
-      'أرسل طلبك عبر البريد أو بوت الملاحظات؛ قد نطلب تحققًا معقولًا.',
-      'نستجيب ضمن المهل القانونية؛ قد تُقيّد بعض الطلبات بالقانون أو الأمن.'
-    ]},
-    { title: 'الحوادث والإخطار', paras: [
-      'لدينا إجراءات للاستجابة للحوادث؛ سنُخطر المتأثرين والجهات المختصة عند اللزوم.',
-      'نراجع الحوادث ونعزز الضوابط منعًا للتكرار.'
-    ]},
-    { title: 'إشعارات قضائية', paras: [
-      'EEA/UK: ينطبق GDPR حيث نكون متحكمًا.',
-      'الولايات المتحدة: قد تمنح القوانين الحقوق الإضافية (CPRA)؛ نراعي إشارات الانسحاب حيث أمكن.'
-    ]},
-    { title: 'عدم التتبع وGPC', paras: [
-      'نحترم إشارات DNT/GPC حيث يوجب القانون وكان ذلك ممكنًا تقنيًا.'
-    ]},
-    { title: 'خيارات الانسحاب', paras: [
-      'يمكنك تعطيل التحليلات/الكوكيز الاختيارية، وإلغاء الاشتراك من البريد، وتقييد صلاحيات الروبوت.',
-      'قد تتطلّب الوظائف الأساسية حدًا أدنى من المعالجة.'
-    ]},
-    { title: 'إتاحة الوصول واللغة', paras: [
-      'نسعى لشرح واضح بلغات متعددة؛ عند التعارض قد تسود النسخة الإنجليزية.'
-    ]},
-    { title: 'جهة خصوصية', paras: [
-      'privacy: quantuml7ai@gmail.com — نحاول الرد خلال 30 يومًا.'
-    ]},
-    { title: 'سريان السياسة والإصدارات', paras: [
-      'تسري من تاريخ "آخر تحديث" أعلاه؛ قد نحتفظ بنُسخ سابقة للرجوع.'
-    ]},
-    { title: 'ملحق: مصطلحات', paras: [
-      'المتحكم: يحدد أغراض ووسائل المعالجة. المعالِج: يعالج نيابة عن المتحكم.',
-      'البيانات الشخصية: معلومات تخص شخصًا مُعرّفًا أو قابلًا للتعريف.'
-    ]},
-    { title: 'ملحق: قائمة المعالِجين الفرعيين (موجز)', paras: [
-      'الاستضافة/CDN (مثل Vercel) وتخزين الكائنات وتسليم البريد/تيليجرام وتتبع الأخطاء والمراقبة والتحليلات الأساسية.',
-      'قائمة محدثة بالتفصيل متاحة عند الطلب.'
-    ]}
+    {
+      title: '1. نظرة عامة',
+      paras: [
+        '1.1. توضح سياسة الخصوصية الخاصة بـ Quantum L7 AI (ويُشار إليها فيما بعد بـ «السياسة») البيانات التي نجمعها، والأسس القانونية التي نعالجها بموجبها، وأين وكيف نخزّنها، وكيف نحميها وننقلها ضمن حدود المنظومة: الموقع الإلكتروني، Web-MiniApp، تطبيق Telegram Mini App، روبوت/روبوتات Telegram، واجهة برمجة التطبيقات (API)، المنتدى، خدمات التحليلات وواجهات التداول (بما في ذلك البورصة قيد التطوير).',
+        '1.2. باستخدامك لخدمات Quantum L7 AI («الخدمة») فإنك تؤكد اطّلاعك على السياسة وقبولك لشروطها. تهدف السياسة إلى إبلاغ المستخدمين بشفافية، وليست استشارة قانونية فردية، ولا تُ替ل العقود/العروض/السياسات الخاصة بمورّدين محددين.',
+        '1.3. نعمل بصفتنا متحكمًا بالبيانات فيما يتعلق بالبيانات الشخصية التي نجمعها ونحدد أغراض/وسائل معالجتها، وبصفتنا معالجًا حيث نعالج البيانات نيابةً عن العملاء/الشركاء.',
+        '1.4. تُستخدم مصطلحات «البيانات الشخصية»، «المعالجة»، «المتحكم»، «المعالج»، «صاحب البيانات»، «النقل الدولي» وفق المعاني المعتمدة في الأطر التنظيمية العالمية (GDPR/UK GDPR، وCCPA/CPRA وغيرها).',
+        '1.5. تتفاعل خدماتنا مع مصادر على السلسلة (On-chain) ومع خلاصات الأسواق: بيانات البلوك تشين العامة بطبيعتها مفتوحة وليست «بياناتنا الشخصية»، إلا أن مواءمتها مع حسابك قد تشكّل بيانات شخصية.'
+      ]
+    },
+
+    {
+      title: '2. ما الذي نجمعه',
+      paras: [
+        '2.1. بيانات الحساب والتعريف: معرف Telegram/اسم المستخدم/الاسم المعروض (عند تسجيل الدخول عبر Telegram Mini App أو الروبوت)، معرف الحساب الداخلي (Account ID)، وسوم حالة الاشتراك (VIP/Free)، لغة الواجهة.',
+        '2.2. بيانات الاتصال: البريد الإلكتروني (إن قمت بتقديمه)، لقب المنتدى، معرّفات الإحالة للحسابات الخارجية (Google, Apple, Twitter/X, Discord وغيرها) عند الربط.',
+        '2.3. التفويض والربط: واقعة ومسار الدخول عبر منظومة متعددة المزوّدين (OAuth/OIDC، وTelegram WebApp initData، وSign in with Apple/Google/Twitter/X/Discord، وتوقيع المحفظة wallet-signature، والرابط السحري magic-link)، والرموز/الأختام/التواقيع التقنية (دون تخزين المفاتيح الخاصة أو عبارات الاسترجاع seed).',
+        '2.4. المحافظ والشبكات: العناوين العامة، والشبكات المستخدمة (L1/L2)، والبيانات الوصفية للمعاملات المرتبطة بدفع الاشتراك عبر NowPayments وتأكيدات السلسلة.',
+        '2.5. بيانات الاستخدام: الصفحات/الشاشات التي تمت زيارتها، الأفعال داخل الواجهة، الطوابع الزمنية، عنوان IP المُجزّأ (hashed)، وكيل المستخدم (user-agent)، معلمات أداء العميل، قياسات التليمترية للأخطاء.',
+        '2.6. المنتدى والمحتوى: المنشورات، المواضيع، بيانات وصفية للملفات المرفوعة (صور/فيديو/صوت)، مصنوعات نظام التقييم (الجودة/التفاعل/anti-spam/anti-sybil)، وإحصاءات النشاط لتعدين QCoin.',
+        '2.7. المدفوعات والفوترة: حالات الفواتير، وتأكيدات المدفوعات (عبر مزوّد الدفع المدمج)، المبالغ/العملات/الطوابع الزمنية، والسجلات التقنية للتوجيه.',
+        '2.8. بيانات السلسلة والأسواق: نقوم بفهرسة وتجميع سلاسل عامة/خلاصات البورصات/دفاتر الأوامر/الشموع التاريخية لأغراض تحليلية ولتقديم وظائف الخدمة.'
+      ]
+    },
+
+    {
+      title: '3. بيانات السلسلة والبيانات العامة',
+      paras: [
+        '3.1. سجلات البلوك تشين العامة متاحة لأي مشارك في الشبكة؛ ومعالجتها لأغراض التحليلات والمؤشرات والتوصيات تتم في إطار الاستخدام المسموح للمعلومات المتاحة للعامة.',
+        '3.2. قد يكون مواءمة النشاط على السلسلة مع حسابك ممكنًا عند الربط الطوعي لمحفظتك/مدفوعاتك/اشتراكاتك. في هذه الحالة يُنشأ ملف استخدام شخصي.',
+        '3.3. قد يتم تسجيل الطلبات إلى العُقد العامة/مزودي RPC/خدمات الفهرسة وإلى مُجمِّعات الأسواق لأغراض الاعتمادية والأمان ومنع إساءة الاستخدام وتحسين جودة الخدمة.'
+      ]
+    },
+
+    {
+      title: '4. ملفات تعريف الارتباط (Cookie) وlocalStorage وغيرها من عناصر العميل',
+      paras: [
+        '4.1. نطبق آليات بالحد الأدنى الضروري: حفظ اللغة، رموز جلسات آمنة، معلمات مكافحة الإساءة، إعدادات تجربة المستخدم.',
+        '4.2. عند حظر ملفات Cookie/مساحة localStorage قد تصبح بعض الوظائف غير متاحة أو تتدهور (مثل الجلسات، الحدود الشخصية، اللغة).',
+        '4.3. حيثما يقتضي القانون ذلك، نطلب الموافقة على ملفات تعريف الارتباط/التحليلات غير الأساسية.'
+      ]
+    },
+
+    {
+      title: '5. كيف نستخدم البيانات',
+      paras: [
+        '5.1. إتاحة الوظائف: التفويض/ربط الحسابات، مزامنة حالات الاشتراك، الوصول إلى المنتدى وMiniApp والروبوت ولوحات التحليلات والتوصيات.',
+        '5.2. تحسين المنتج: تحليلات استخدام مجمّعة، تقييمات A/B، تليمترية الأداء، معالجة الأعطال، رفع دقة نماذج الذكاء الاصطناعي.',
+        '5.3. الأمان والنزاهة: حماية من الإساءة (rate-limit وanti-spam وanti-sybil)، التحكم في الشذوذات، تدقيق الأفعال الخدمية، التحقيق في الحوادث.',
+        '5.4. الفوترة والامتثال: معالجة حالات المدفوعات والتأكيدات، احتساب حقوق الوصول، الامتثال لقوانين التقارير المالية ومكافحة الأنشطة غير المشروعة.',
+        '5.5. الاتصالات والدعم: الرد على الطلبات، إشعارات بالحالات (مثل تفعيل VIP بنجاح)، رسائل خدمية.',
+        '5.6. لا نقوم بإجراء تنميط تسويقي؛ وتُرسل الرسائل فقط عند وجود أساس قانوني (مثل الموافقة).'
+      ]
+    },
+
+    {
+      title: '6. النقل والإفصاح لأطراف ثالثة',
+      paras: [
+        '6.1. لا نبيع البيانات الشخصية.',
+        '6.2. قد تُعالج البيانات بواسطة معالِجينا الفرعيين وفق تعليماتنا وللغايات الموصوفة في السياسة فقط: منصات الحوسبة/الاستضافة، شبكات توصيل المحتوى (CDN)، التخزين الكائني (Object Storage)، الطوابير والذاكرات المؤقتة (Caches)، المراقبة/التسجيل/تتبع الأخطاء، بوابات الدفع، مزودو الرسائل (email/Telegram)، منصات التحليلات.',
+        '6.3. قد يتم الإفصاح وفقًا للقانون، وللاستجابات المشروعة للجهات المختصة، ولحماية حقوق/سلامة المستخدمين والخدمة.',
+        '6.4. عند تغيير السيطرة المؤسسية (اندماج/بيع الأصول) قد تُنقل البيانات إلى الخلف القانوني بشرط الحفاظ على حماية مكافئة والإخطار عند الاقتضاء قانونًا.'
+      ]
+    },
+
+    {
+      title: '7. الأمان',
+      paras: [
+        '7.1. مبادئ: الأمان حسب التصميم (security by design)، أقل قدر من الصلاحيات (PoLP)، فصل المهام، التسجيل الإلزامي للعمليات الحرجة.',
+        '7.2. التشفير: TLS أثناء النقل؛ وتشفير على مستوى التخزين للمواد الحساسة؛ وإدارة مفاتيح مع ضوابط وصول.',
+        '7.3. الوصول: مصادقة متعددة العوامل لوحدات تحكم الإدارة، وضبط قائم على الأدوار، وتقسيم البيئات (prod/stage/dev).',
+        '7.4. التحكم في التغييرات: مراجعات للكود، نسخ مبنية وموقعة، نشر تدريجي، إمكانات الرجوع، وحظر التهيئات غير الآمنة.',
+        '7.5. الاختبار والمراقبة: كشف التسلل، التنبيهات، مراجعات دورية للتهيئات والأذونات.',
+        '7.6. مفاتيح المحافظ وعبارات الاسترجاع (seed): لا نطلبها ولا نخزنها. تُجرى عمليات التوقيع على جهة المستخدم أو المحفظة الموثوقة.'
+      ]
+    },
+
+    {
+      title: '8. عمليات النقل الدولية',
+      paras: [
+        '8.1. قد تتم المعالجة والتخزين ضمن بنية تحتية متعددة الأقاليم مع نسخ جغرافي (geo-replication) وموازنة أحمال.',
+        '8.2. عند عمليات النقل عبر الحدود تُستخدم آليات قانونية (بما في ذلك الشروط التعاقدية القياسية عند الاقتضاء) وتُطبّق تدابير حماية مكافئة.',
+        '8.3. يوافق المستخدم على النقل الدولي للبيانات في إطار تقديم الخدمة.'
+      ]
+    },
+
+    {
+      title: '9. حقوقك',
+      paras: [
+        '9.1. المنطقة الاقتصادية الأوروبية/المملكة المتحدة (GDPR): حق الوصول، التصحيح، المحو، التقييد/الاعتراض، قابلية النقل، وكذلك حق تقديم شكوى إلى سلطة رقابية.',
+        '9.2. الولايات المتحدة (بما فيها كاليفورنيا/CPRA): حق المعرفة، التصحيح، المحو، إلغاء البيع/المشاركة، والحق في عدم التمييز عند ممارسة الحقوق.',
+        '9.3. ممارسة الحقوق: انظر قسم «كيفية ممارسة الحقوق». التحقق من الهوية إلزامي.'
+      ]
+    },
+
+    {
+      title: '10. الأطفال',
+      paras: [
+        '10.1. الخدمة غير موجهة للأطفال دون 13 عامًا (أو سن أعلى وفق قانون سلطتكم القضائية).',
+        '10.2. إذا اعتقدت أن طفلًا قد زوّدنا ببيانات، فالرجاء التواصل معنا للحذف.'
+      ]
+    },
+
+    {
+      title: '11. التغييرات',
+      paras: [
+        '11.1. قد نقوم بتحديث السياسة لتعكس التغييرات في التكنولوجيا والقانون والمنتجات.',
+        '11.2. عند حدوث تغييرات جوهرية تُحدّث خانة «تم التحديث» وقد يظهر إشعار داخل الواجهة عند الحاجة.'
+      ]
+    },
+
+    {
+      title: '12. جهات الاتصال',
+      paras: [
+        '12.1. بريد طلبات الخصوصية: quantuml7ai@gmail.com',
+        '12.2. قناة التغذية الراجعة (روبوت): https://t.me/L7ai_feedback'
+      ]
+    },
+
+    {
+      title: '13. التعاريف ونطاق التطبيق',
+      paras: [
+        '13.1. «الخدمة» — المواقع، Web-MiniApp، تطبيق Telegram Mini App، روبوتات Telegram، المنتدى، API، التحليلات، تكاملات الدفع وواجهات التداول.',
+        '13.2. «نحن» — Quantum L7 AI. تغطي السياسة البيانات التي نؤدي فيها دور المتحكم. تعمل الخدمات الخارجية (مزودو التفويض، سلاسل الكتل، المحافظ، بوابات الدفع) وفق قواعدها الخاصة.',
+        '13.3. موضوع السياسة — بيانات المستخدمين والبيانات التشغيلية اللازمة لعمل الخدمة.'
+      ]
+    },
+
+    {
+      title: '14. الأسس القانونية للمعالجة (GDPR/UK GDPR)',
+      paras: [
+        '14.1. العقد/الضرورة لتقديم الخدمة: التفويض، الوصول إلى الوظائف، الفوترة والدعم.',
+        '14.2. المصلحة المشروعة: الأمان، منع إساءة الاستخدام، التحليلات التشغيلية منخفضة المخاطر على الخصوصية.',
+        '14.3. الموافقة: المقاييس الاختيارية/الاتصالات التسويقية عند الاقتضاء. يمكن سحب الموافقة.',
+        '14.4. الالتزام القانوني: التخزين والإفصاح حيثما يقتضي القانون (مثل السجلات المحاسبية).'
+      ]
+    },
+
+    {
+      title: '15. الاحتفاظ بالبيانات',
+      paras: [
+        '15.1. نحتفظ بالبيانات الشخصية لمدة لا تتجاوز ما يلزم لأغراض المعالجة أو ما يقتضيه القانون.',
+        '15.2. مؤشرات إرشادية: سجلات الخدمة 30–180 يومًا؛ تليمترية الأداء حتى 90 يومًا؛ مراسلات الدعم حتى 12 شهرًا؛ سجلات الفوترة — وفق فترات الاحتفاظ القانونية.',
+        '15.3. قد تُحتفظ بالتجميعات المُجهّلة لمدة أطول لأغراض بحثية وإحصائية.'
+      ]
+    },
+
+    {
+      title: '16. المعالجون الفرعيون والبنية التحتية',
+      paras: [
+        '16.1. فئات المعالجين الفرعيين: منصات الحوسبة والاستضافة، CDN، مخازن كائنية، قواعد بيانات SQL/NoSQL، الذاكرات المؤقتة وطوابير الرسائل، المراقبة/التسجيل/التتبع، إرسال البريد/الرسائل، مشغلو الدفع، مزودو فهرسة بيانات السلسلة/خلاصات السوق.',
+        '16.2. لدينا اتفاقيات معالجة بيانات (DPA) مع كل معالج فرعي وتُطبق تدابير أمنية تقنية/تنظيمية.',
+        '16.3. قائمة الفئات المحدّثة متاحة في السياسة؛ وتُقدَّم قائمة تفصيلية سارية عند الطلب مع مراعاة متطلبات الأمان.'
+      ]
+    },
+
+    {
+      title: '17. التحليلات والمقاييس',
+      paras: [
+        '17.1. قد نجمع مقاييس استخدام مجمّعة (تغطية الواجهات، الأداء، اعتماد الميزات) بالقدر اللازم لتحسين المنتج.',
+        '17.2. تُضبط إعدادات التحليلات لاستبعاد البيانات الحساسة وتقليل المعرّفات الشخصية.',
+        '17.3. حيثما يلزم، يُطبّق نظام موافقة للمقاييس غير الأساسية.'
+      ]
+    },
+
+    {
+      title: '18. السجلات والتليمترية',
+      paras: [
+        '18.1. قد تتضمن السجلات التشغيلية طوابع زمنية، وعنوان IP مُجزّأ، وuser-agent، وتتبع الأخطاء، ومعرّفات الطلب/الارتباط، وأكواد الاستجابة.',
+        '18.2. تُدار السجلات بالتدوير وتقييد الوصول وتُستخدم لأغراض تصحيح الأعطال، وتخطيط السعة، والحماية من هجمات DDoS/حركة الروبوتات، والتدقيق.',
+        '18.3. تُصمَّم نقاط التسجيل وفق مبدأ التقليل إلى الحد الأدنى.'
+      ]
+    },
+
+    {
+      title: '19. البريد والإشعارات والاتصالات',
+      paras: [
+        '19.1. تُعالَج الرسائل المرسلة إلى عناويننا/روبوتاتنا لأغراض الدعم، والوفاء بالالتزامات التعاقدية، وحساب جودة الخدمة.',
+        '19.2. يمكنك إلغاء الاشتراك من المراسلات غير الخدمية؛ أمّا إشعارات الخدمة (مثل حالة الاشتراك) فهي ضرورية للتشغيل.'
+      ]
+    },
+
+    {
+      title: '20. Webhooks وواجهة برمجة التطبيقات (API)',
+      paras: [
+        '20.1. عند استخدام Webhook/API قد تُخزّن الحمولات مؤقتًا لضمان التسليم الموثوق، وإزالة التكرار، والحماية من الإعادة.',
+        '20.2. لا تمرّر أسرارًا أو مفاتيح خاصة أو أي مواد غير مخصصة للغير عبر Webhook/API؛ استخدم التواقيع، وتدوير الرموز (token rotation)، وتقييد المصادر.'
+      ]
+    },
+
+    {
+      title: '21. ربط المحافظ والمدفوعات',
+      paras: [
+        '21.1. نخزّن العناوين العامة ومعلمات الشبكة اللازمة لوظائف التعريف والفوترة. لا نجمع أو نخزّن المفاتيح الخاصة/عبارات الاسترجاع.',
+        '21.2. تُنفَّذ معالجة المدفوعات عبر مزود مدمج؛ ونتلقى حالات/معرّفات الفواتير والتأكيدات اللازمة لتفعيل اشتراك VIP.',
+        '21.3. تُعد تأكيدات المدفوعات على السلسلة معلومات عامة؛ ونقوم بمواءمتها مع حسابك لأغراض الوصول فقط.'
+      ]
+    },
+
+    {
+      title: '22. محددات التنفيذ وإطار المخاطر',
+      paras: [
+        '22.1. تُطبّق محددات تقنية (rate-limit وsanity-checks) وقواعد مخاطر على أوضاع التداول/التحليل. هذه آليات هندسية وليست ضمانات للنتيجة.',
+        '22.2. يتحمل المستخدم مسؤولية قرارات التداول، والامتثال للمتطلبات القانونية، وإدارة المخاطر.'
+      ]
+    },
+
+    {
+      title: '23. الأبحاث والنماذج والذكاء الاصطناعي',
+      paras: [
+        '23.1. قد نقوم بتدريب/التحقق من النماذج على مجموعات بيانات مجمّعة/مُستعارة الاسم (pseudonymized) حيثما كان ذلك مناسبًا وقانونيًا.',
+        '23.2. عند استخدام نماذج تابعة لطرف ثالث نلتزم بالقيود التعاقدية والتقنية لنقل البيانات الشخصية ونطبّق مبدأ التقليل.'
+      ]
+    },
+
+    {
+      title: '24. القرارات المؤتمتة',
+      paras: [
+        '24.1. لا نتخذ قرارات مؤتمتة بالكامل ذات أثر قانوني جوهري على المستخدم.',
+        '24.2. التوصيات والتقييمات إشارات مساعدة لدعم القرارات. يظل الاختيار النهائي للمستخدم.'
+      ]
+    },
+
+    {
+      title: '25. إخفاء الهوية الجزئي، التجميع، والتقليل',
+      paras: [
+        '25.1. حيثما أمكن، نقوم باستعارة معرّفات الهوية وتجميع المقاييس، وفصل المفاتيح عن البيانات المفيدة.',
+        '25.2. يُقيَّد الوصول إلى رابطة «المفتاح—البيانات» بحسب الأدوار والحاجة.'
+      ]
+    },
+
+    {
+      title: '26. قابلية النقل والتصدير',
+      paras: [
+        '26.1. يمكنك طلب تصدير البيانات الشخصية المرتبطة بحسابك/معرّف الروبوت.',
+        '26.2. سنقدّم البيانات بتنسيق قابل للقراءة آليًا عند عدم وجود قيود قانونية وبعد التحقق.'
+      ]
+    },
+
+    {
+      title: '27. تنفيذ حقوق أصحاب البيانات',
+      paras: [
+        '27.1. أرسل طلبًا عبر البريد الإلكتروني إلى quantuml7ai@gmail.com أو عبر روبوت التغذية الراجعة.',
+        '27.2. للتحقق من الهوية قد نطلب إرسال رسالة من حساب Telegram/الروبوت المرتبط أو تأكيد ملكية الحساب/المحفظة المرتبطة.',
+        '27.3. يُقدَّم الرد ضمن الآجال التي يحددها القانون الساري؛ وقد تُقيَّد بعض الطلبات بمتطلبات الأمان/التشريعات.'
+      ]
+    },
+
+    {
+      title: '28. الحوادث وإشعارات الخروقات',
+      paras: [
+        '28.1. توجد إجراءات استجابة: تصنيف الحادث، احتواء الأثر، التحقيق في الأسباب، واستعادة الخدمة.',
+        '28.2. في الحالات التي يقتضيها القانون، يُخطَر المستخدمون المتأثرون والجهات الرقابية وتُقدَّم معلومات ذات صلة بطبيعة الحادث والإجراءات المتخذة.'
+      ]
+    },
+
+    {
+      title: '29. ملاحظات قضائية',
+      paras: [
+        '29.1. المنطقة الاقتصادية الأوروبية/المملكة المتحدة: تُطبَّق قواعد GDPR/UK GDPR فيما يخص حقوق أصحاب البيانات، ومشروعية المعالجة، وعمليات النقل الدولية.',
+        '29.2. الولايات المتحدة: تُطبَّق القوانين ذات الصلة للولايات (بما في ذلك CPRA). وعند توفر إشارات تقنية مدعومة للرفض (opt-out) نسعى لأخذها بالاعتبار.',
+        '29.3. مناطق أخرى: تُطبَّق القواعد المحلية بشأن المتطلبات الإلزامية للتخزين والإخطار والحماية.'
+      ]
+    },
+
+    {
+      title: '30. عدم التتبع (DNT) والتحكم العالمي بالخصوصية (GPC)',
+      paras: [
+        '30.1. إذا أرسل متصفحك إشعارات DNT/GPC فإننا نأخذ هذه الإشارات بالاعتبار بالقدر المتاح تقنيًا والمطلوب قانونًا.'
+      ]
+    },
+
+    {
+      title: '31. خيارات الانسحاب وإعدادات الخصوصية',
+      paras: [
+        '31.1. يمكنك تعطيل ملفات تعريف الارتباط/التحليلات غير الأساسية، وإلغاء الاشتراك من الرسائل غير الخدمية، وتقييد صلاحيات الروبوت.',
+        '31.2. قد تتطلب آليات الأمان/الوظائف الأساسية حدًا أدنى من المعالجة ولا يمكن تعطيلها.'
+      ]
+    },
+
+    {
+      title: '32. الإتاحة واللغات والتفسير',
+      paras: [
+        '32.1. نوفر نصوصًا بعدة لغات. وعند عدم التطابق بين النسخ قد تكون للنسخة الإنجليزية أولوية لأغراض التفسير القانوني.',
+        '32.2. تسعى الترجمات للحفاظ على التكافؤ القانوني.'
+      ]
+    },
+
+    {
+      title: '33. المخازن ومواقع البيانات',
+      paras: [
+        '33.1. قواعد البيانات التشغيلية: أنظمة إدارة قواعد بيانات علائقية و/أو موجهة للوثائق، منشورة ضمن بنية متعددة المناطق مع توفير redundancies وreplication.',
+        '33.2. الذاكرات المؤقتة والطوابير: عناقيد/تدفقات/طوابير Redis لتسريع الجلسات ومنطق مكافحة الإساءة والعناصر المؤقتة.',
+        '33.3. التخزين الكائني: تخزين الوسائط التي يرفعها المستخدمون والنسخ الاحتياطية مع سياسات مُدارة للإصدارات ودورة الحياة.',
+        '33.4. النسخ الاحتياطي: نسخ احتياطية دورية، تحقق من الاستعادة، فصل صلاحيات الوصول، وتشفير أثناء التخزين.',
+        '33.5. تكاملات التفويض: يزوّدنا مزودو الهوية (Google وApple وTwitter/X وDiscord وTelegram) بالرموز/التأكيدات؛ لا نخزن كلمات مرورهم ولا ندير قواعد بياناتهم الداخلية.',
+        '33.6. الجغرافيا: قد تُعالَج البيانات ضمن بنية متعددة الأقاليم لتحقيق الاعتمادية والأداء، باستخدام آليات نقل دولية قانونية.'
+      ]
+    },
+
+    {
+      title: '34. مدة ونُسخ السياسة',
+      paras: [
+        '34.1. تدخل السياسة حيز التنفيذ اعتبارًا من تاريخ «تم التحديث» المبيّن أعلاه.',
+        '34.2. قد نحتفظ بالإصدارات السابقة لأغراض الأرشفة وشفافية التغييرات.'
+      ]
+    },
+
+    {
+      title: 'الملحق A: مسرد المصطلحات',
+      paras: [
+        'A.1. المتحكم — شخص/منظمة يحدد أغراض ووسائل معالجة البيانات الشخصية.',
+        'A.2. المعالج — شخص/منظمة يعالج البيانات نيابةً عن المتحكم.',
+        'A.3. البيانات الشخصية — أي معلومات عن شخص مُعرّف أو قابل للتعريف.',
+        'A.4. النقل الدولي — نقل البيانات الشخصية خارج بلد/منطقة جمعها الأولي.'
+      ]
+    },
+
+    {
+      title: 'الملحق B: فئات المعالجين الفرعيين',
+      paras: [
+        'B.1. الاستضافة/الحوسبة وتنظيم الحاويات.',
+        'B.2. شبكات توصيل المحتوى (CDN) والتوصيل الطرفي للمحتوى.',
+        'B.3. قواعد البيانات (SQL/NoSQL) وذاكرات Redis المؤقتة.',
+        'B.4. المخازن الكائنية وأنظمة النسخ الاحتياطي.',
+        'B.5. المراقبة/التسجيل/التتبع/تتبع الأخطاء.',
+        'B.6. مشغلو الدفع وبوابات تأكيدات السلسلة.',
+        'B.7. مزودو الرسائل (email/Telegram) وخدمات الطوابير.',
+        'B.8. فهرسة بيانات البلوك تشين/خلاصات السوق ومنصات التحليلات.'
+      ]
+    }
   ]
 };
 
+
 /* -------------------- TR (Türkçe) -------------------- */
 const PRIVACY_TR = {
-  nav_privacy: 'Gizlilik ve Politika',
-  privacy_title: 'Gizlilik ve Politika',
-  privacy_updated_label: 'Güncelleme:',
-  privacy_updated: '2025-09-14',
-  privacy_empty: 'Kayıt yok',
+  nav_privacy: 'Gizlilik',
+  privacy_title: 'Gizlilik',
+  privacy_updated_label: 'Güncellendi:',
+  privacy_updated: '2025-10-30',
+  privacy_empty: 'Veri yok',
   privacy_sections: [
-    { title: 'Genel bakış', paras: [
-      'Bu politika; web sitesi, Telegram botu ve hizmetlerde hangi verileri topladığımızı, nasıl kullandığımızı ve nasıl koruduğumuzu açıklar.',
-      'Hizmeti kullanarak bu Politikayı kabul etmiş olursunuz. Bu bir ürün bildirimi olup hukuki danışmanlık değildir.'
-    ]},
-    { title: 'Topladıklarımız', paras: [
-      'Hesap ve iletişim: Telegram ID/kullanıcı adı/görünen ad; e-posta (gönderirseniz); bize gönderdiğiniz mesajlar.',
-      'Cüzdan bağlantısı: ağlar ve herkese açık adresler (özel anahtar asla).',
-      'Kullanım ve cihaz: sayfalar, tıklamalar, yönlendiren, karma IP, user-agent, zaman damgaları, hata ve performans telemetrisi.'
-    ]},
-    { title: 'Zincir üstü ve açık veriler', paras: [
-      'Herkese açık blokzincir/piyasa verilerini analiz ederiz; doğası gereği açıktır ve kontrolümüzdeki kişisel veri değildir.',
-      'İstekler (örn. adres/sembol analizi) hizmetin işletimi ve güvenilirliği için günlüğe alınabilir.'
-    ]},
-    { title: 'Çerezler ve localStorage', paras: [
-      'Asgari düzeyde kullanırız: dil, oturum, kötüye kullanım önleme. Engelleyebilirsiniz; bazı işlevler zayıflayabilir.'
-    ]},
-    { title: 'Veriyi nasıl kullanırız', paras: [
-      'Araştırma/sinyalleri sağlamak ve iyileştirmek; korumalı yönlendirme/yürütme; kötüye kullanımı önleme; destek ve iletişim.',
-      'Reklam profillemesi yapmayız.'
-    ]},
-    { title: 'Üçüncü taraflarla paylaşım', paras: [
-      'Kişisel veri satmayız.',
-      'Veri işleyenler: barındırma (örn. Vercel), depolama, analiz (etkinse), hata izleme, e-posta/Telegram teslimi.',
-      'Yasa gereği veya hakları korumak için açıklama olabilir.'
-    ]},
-    { title: 'Güvenlik', paras: [
-      'Anahtarlar sizdedir; seed phrase istemeyiz. Veri aktarım ve depolamada şifrelenir; erişim role dayalıdır ve kayda alınır.',
-      'Kritik sistemlerde en az ayrıcalık ve MFA uygular, dağıtımlarda değişiklik kontrolü yaparız.'
-    ]},
-    { title: 'Uluslararası aktarımlar', paras: [
-      'İşleme yurt dışında olabilir; gerektiğinde standart güvenceler (SCC) veya diğer yasal mekanizmalar kullanılır.'
-    ]},
-    { title: 'Haklarınız', paras: [
-      'AEA/UK (GDPR): erişim, düzeltme, silme, taşınabilirlik, kısıtlama/itiraz; denetleyici kuruma şikâyet hakkı.',
-      'Kaliforniya (CPRA): erişim, silme, düzeltme, satış/paylaşımdan vazgeçme; hak kullanımında ayrımcılık yok.'
-    ]},
-    { title: 'Çocuklar', paras: [
-      'Hizmet 13 yaş altına (veya yargı bölgenizdeki daha yüksek yaş) yönelik değildir.'
-    ]},
-    { title: 'Değişiklikler', paras: [
-      'Politikayı güncelleyebiliriz; “Güncelleme” tarihini değiştirir ve gerektiğinde uygulama içi/kanal bildirimi yaparız.'
-    ]},
-    { title: 'İletişim', paras: [
-      'E-posta: quantuml7ai@gmail.com',
-      'Geri bildirim botu: https://t.me/L7ai_feedback'
-    ]},
-    { title: 'Tanımlar ve kapsam', paras: [
-      '“Hizmet” web siteleri, botlar, API’ler ve ilgili uygulamalardır; “biz” Quantum L7 AI’dır.',
-      'Bu politika, denetleyici olduğumuz veriyi kapsar. Sağlayıcıların ve blokzincirlerin kendi kuralları vardır.'
-    ]},
-    { title: 'Hukuki dayanaklar (GDPR)', paras: [
-      'Sözleşme: talep edilen özellikleri sağlamak (yönlendirme, araştırma, paneller).',
-      'Meşru menfaat: güvenilirlik, güvenlik, kötüye kullanım önleme, asgari ürün analitiği.',
-      'Açık rıza: isteğe bağlı analitik/pazarlama; istediğiniz an geri çekebilirsiniz.',
-      'Yasal yükümlülük: veriyi saklama/açıklama.'
-    ]},
-    { title: 'Saklama', paras: [
-      'Kişisel verileri amaçlar için gerekli olduğu sürece veya yasa gerektirdiği kadar saklarız.',
-      'Örnekler: operasyonel günlükler 30–180 gün; destek mesajları 12 aya kadar; yasal kayıtlar mevzuata göre.'
-    ]},
-    { title: 'Alt işleyiciler', paras: [
-      'Kategoriler: barındırma/CDN, nesne depolama, e-posta/Telegram teslimi, izleme, hata takibi, temel analitik.',
-      'DPA imzalar ve güvenlik önlemlerini periyodik inceleriz.'
-    ]},
-    { title: 'Analitik ve metrikler', paras: [
-      'Etkinse, toplu kullanımı ölçeriz (sayfalar, performans, özellik benimseme).',
-      'Duyarlı verileri hariç tutar, kişisel veriyi asgari düzeye indiririz.'
-    ]},
-    { title: 'Günlükler ve telemetri', paras: [
-      'Günlükler zaman damgaları, karma IP, user-agent, hata izleri ve istek kimlikleri içerebilir.',
-      'Döndürülür, erişimi kontrol edilir ve hata ayıklama/kapasite planlama/kötüye kullanım tespiti için kullanılır.'
-    ]},
-    { title: 'E-posta ve iletişim', paras: [
-      'E-posta veya bot üzerinden destek amaçlı mesajlarınızı işleriz.',
-      'Onay olmadan pazarlama göndermeyiz; istediğiniz an vazgeçebilirsiniz.'
-    ]},
-    { title: 'Webhooks ve API', paras: [
-      'API/webhook yükleri güvenilirlik için geçici olarak saklanabilir.',
-      'İsteklere sır/özel anahtar koymayın; doğru kimlik doğrulama ve token rotasyonu kullanın.'
-    ]},
-    { title: 'Cüzdan bağlantısı', paras: [
-      'Ağlar ve açık adresleri saklarız; özel anahtar/seed talep etmeyiz.',
-      'Zincir üstü işlemler açıktır; analiz ve raporlama için indeksleyebiliriz.'
-    ]},
-    { title: 'Yürütme korumaları', paras: [
-      'Destekleniyorsa limitler, risk kuralları ve mantık kontrolleri uygularız.',
-      'Bunlar araçtır, garanti değildir; karar ve uyum sorumluluğu sizdedir.'
-    ]},
-    { title: 'Araştırma, modeller ve LLM', paras: [
-      'Mümkün olduğunda toplu/anonim verilerle modelleri eğitir/değerlendiririz.',
-      'Üçüncü taraf LLM kullanıldığında kişisel veri göndermekten kaçınırız; sözleşmesel korumalar uygularız.'
-    ]},
-    { title: 'Otomatik kararlar', paras: [
-      'Hukuki veya benzer önemli etkileri olan salt otomatik kararlar vermeyiz.',
-      'Öneriler yardımcı sinyallerdir; son karar sizindir.'
-    ]},
-    { title: 'Takma ad ve toplulaştırma', paras: [
-      'Mümkün olduğunda tanımlayıcıları karma/toplu hâle getiririz.',
-      'Anahtarları içerikten ayırır, gerekli olduğunda rollere göre ilişkilendiririz.'
-    ]},
-    { title: 'Taşınabilirlik ve dışa aktarma', paras: [
-      'Hesabınız/bot kimliğinizle ilişkili kişisel verinizin dışa aktarımını talep edebilirsiniz.',
-      'Yasal kısıtlar yoksa yaygın makinece okunur bir biçimde sağlarız.'
-    ]},
-    { title: 'Hakların kullanımı', paras: [
-      'E-posta veya geri bildirim botu ile başvurun; makul doğrulama isteyebiliriz.',
-      'Yasal sürelerde yanıt veririz; bazı talepler hukuk/güvenlik nedeniyle kısıtlanabilir.'
-    ]},
-    { title: 'Olaylar ve ihbar', paras: [
-      'Olay müdahale süreçlerimiz vardır; ihlal olursa yasaya göre kullanıcıları/otoriteleri bilgilendiririz.',
-      'Tekrarı önlemek için gözden geçirme ve iyileştirme yaparız.'
-    ]},
-    { title: 'Yargı notları', paras: [
-      'AEA/UK: kontrolör olduğumuz yerde GDPR geçerlidir.',
-      'ABD: eyalet yasaları (CPRA vb.) ek haklar sağlar; mümkünse geçerli vazgeçme sinyallerine uyarız.'
-    ]},
-    { title: 'DNT ve GPC', paras: [
-      'Gerektiğinde ve teknik olarak mümkünse Do Not Track/Global Privacy Control sinyallerine saygı duyarız.'
-    ]},
-    { title: 'Vazgeçme seçenekleri', paras: [
-      'İsteğe bağlı analitik/cookie’leri kapatabilir, e-postadan çıkabilir, bot izinlerini kısıtlayabilirsiniz.',
-      'Temel güvenlik ve işlevsellik asgari işlem gerektirebilir.'
-    ]},
-    { title: 'Erişilebilirlik ve dil', paras: [
-      'Birden fazla dilde açık metin sunmaya çalışırız; yorumda fark olursa İngilizce sürüm geçerli olabilir.'
-    ]},
-    { title: 'Gizlilik irtibatı', paras: [
-      'quantuml7ai@gmail.com (konu: Privacy) — hedef: 30 gün içinde yanıt.'
-    ]},
-    { title: 'Yürürlük ve sürümler', paras: [
-      'Bu politika yukarıdaki tarihten itibaren yürürlüktedir; önceki sürümler referans için saklanabilir.'
-    ]},
-    { title: 'Ek: Sözlük', paras: [
-      'Denetleyici: işleme amaç ve araçlarını belirler. İşleyen: denetleyici adına işler.',
-      'Kişisel veri: kimliği belirli veya belirlenebilir kişiye ilişkin bilgi.'
-    ]},
-    { title: 'Ek: Alt işleyiciler (özet)', paras: [
-      'Barındırma/CDN (örn. Vercel), nesne depolama, e-posta/Telegram teslimi, hata takibi, izleme, temel analitik.',
-      'Güncel ayrıntılı liste talep üzerine sunulur.'
-    ]}
+    {
+      title: '1. Genel Bakış',
+      paras: [
+        '1.1. Bu Quantum L7 AI Gizlilik Politikası (bundan sonra “Politika”) hangi verileri topladığımızı, hangi hukuki dayanaklarla işlediğimizi, verileri nerede ve nasıl sakladığımızı, nasıl koruduğumuzu ve aşağıdaki ekosistem sınırları içinde nasıl aktardığımızı açıklar: web sitesi, Web-MiniApp, Telegram Mini App, Telegram bot(lar)ı, API, Forum, analitik hizmetleri ve ticaret arayüzleri (geliştirilmekte olan Borsa dahil).',
+        '1.2. Quantum L7 AI hizmetlerini (“Hizmet”) kullanmak, Politika’yı okuduğunuzu ve koşullarını kabul ettiğinizi teyit eder. Politika, kullanıcıları şeffaf biçimde bilgilendirmek içindir; bireysel hukuki danışmanlık değildir ve belirli sağlayıcıların sözleşme/teklif/politikalarının yerine geçmez.',
+        '1.3. Topladığımız ve işleme amaçlarını/araçlarını belirlediğimiz kişisel veriler yönünden veri sorumlusu, müşteriler/iş ortakları adına verileri işlediğimiz yerlerde ise veri işleyen olarak hareket ederiz.',
+        '1.4. “Kişisel veriler”, “işleme”, “sorumlu”, “işleyen”, “veri sahibi”, “uluslararası aktarım” terimleri, küresel düzenleyici çerçevelerde (GDPR/UK GDPR, CCPA/CPRA vb.) kabul edilen anlamlarda kullanılır.',
+        '1.5. Hizmetlerimiz on-chain kaynaklar ve piyasa yayınları ile etkileşir: kamuya açık blokzincir verileri doğası gereği açıktır ve bizim “kişisel verimiz” değildir; ancak hesabınızla eşleştirildiğinde kişisel veri teşkil edebilir.'
+      ]
+    },
+
+    {
+      title: '2. Ne Topluyoruz',
+      paras: [
+        '2.1. Hesap ve kimlik verileri: Telegram ID/kullanıcı adı/görünen ad (Telegram Mini App veya bot üzerinden girişte), dahili Account ID, abonelik durumu etiketleri (VIP/Free), arayüz dili.',
+        '2.2. İletişim verileri: e-posta (sağlarsanız), Forum takma adı, bağlama sırasında harici hesaplara ait referans tanımlayıcılar (Google, Apple, Twitter/X, Discord vb.).',
+        '2.3. Yetkilendirme ve bağlantılar: çoklu sağlayıcılı ekosistem üzerinden girişin olgusu ve rotası (OAuth/OIDC, Telegram WebApp initData, Apple/Google/Twitter/X/Discord ile giriş, cüzdan imzası, magic-link), teknik belirteçler/zaman damgaları/imutlar (özel anahtar ve seed ifadelerini saklamadan).',
+        '2.4. Cüzdanlar ve ağlar: açık adresler, kullanılan ağlar (L1/L2), NowPayments üzerinden abonelik ödemesine ve on-chain onaylara ilişkin işlem üst verileri.',
+        '2.5. Kullanım verileri: ziyaret edilen sayfalar/ekranlar, arayüzdeki işlemler, zaman damgaları, karma IP, user-agent, istemci performans parametreleri, hata telemetrisi.',
+        '2.6. Forum ve içerik: gönderiler, konular, yüklemelerin üst verileri (görsel/video/ses), puanlama sistemine ait eserler (kalite/etkileşim/anti-spam/anti-sybil), QCoin madenciliği için etkinlik istatistikleri.',
+        '2.7. Ödemeler ve faturalama: fatura durumları, ödeme onayları (entegrasyonlu ödeme sağlayıcısı üzerinden), tutarlar/para birimleri/zaman damgaları, yönlendirme teknik günlükleri.',
+        '2.8. On-chain ve piyasa verileri: analitik amaçlarla ve Hizmet işlevlerini sunmak için kamuya açık zincirleri/borsa akışlarını/emir defterlerini/tarihsel mumları indeksleyip toplulaştırırız.'
+      ]
+    },
+
+    {
+      title: '3. On-chain ve Kamu Verileri',
+      paras: [
+        '3.1. Kamu blokzincir kayıtları ağdaki herkesin erişimine açıktır; bunların analitik, gösterge ve tavsiye amaçlı işlenmesi, kamuya açık bilginin izin verilen kullanımı kapsamındadır.',
+        '3.2. Cüzdan/ödeme/aboneliği gönüllü olarak bağladığınızda, on-chain etkinliğin hesabınızla eşleştirilmesi mümkün olup bu durumda kişiselleştirilmiş bir kullanım profili oluşturulur.',
+        '3.3. Kamu düğümlerine/RPC/indeksleme sağlayıcılarına ve piyasa toplayıcılarına yapılan istekler, güvenilirlik, güvenlik, kötüye kullanımın önlenmesi ve hizmet kalitesinin iyileştirilmesi amaçlarıyla günlüğe kaydedilebilir.'
+      ]
+    },
+
+    {
+      title: '4. Çerezler, localStorage ve Diğer İstemci Eserleri',
+      paras: [
+        '4.1. Asgari gerekli mekanizmaları uygularız: dilin saklanması, güvenli oturum belirteçleri, kötüye kullanım karşıtı parametreler, UX ayarları.',
+        '4.2. Çerezler/localStorage engellendiğinde bazı işlevler kullanılamaz hale gelebilir veya gerileyebilir (ör. oturumlar, kişisel limitler, dil).',
+        '4.3. Kanunen gerektiği yerlerde, kritik olmayan çerezler/analitik için rıza talep ederiz.'
+      ]
+    },
+
+    {
+      title: '5. Verileri Nasıl Kullanıyoruz',
+      paras: [
+        '5.1. İşlevsellik sağlama: hesap yetkilendirme/bağlama, abonelik durumlarının senkronizasyonu, Forum, MiniApp, bot, analitik paneller ve önerilere erişim.',
+        '5.2. Ürün iyileştirme: toplulaştırılmış kullanım analitiği, A/B değerlendirmeleri, performans telemetrisi, arızaların giderilmesi, yapay zeka modellerinin doğruluğunun artırılması.',
+        '5.3. Güvenlik ve bütünlük: kötüye kullanımdan koruma (rate-limit, anti-spam, anti-sybil), anomali kontrolü, hizmet işlemlerinin denetimi, olay soruşturmaları.',
+        '5.4. Faturalama ve uygunluk: ödeme durumlarının ve onaylarının işlenmesi, erişim haklarının muhasebesi, finansal raporlama ve yasa dışı faaliyetle mücadele mevzuatına uyum.',
+        '5.5. İletişimler ve destek: taleplere yanıtlar, durum bildirimleri (ör. VIP’in başarıyla etkinleştirilmesi), hizmet mesajları.',
+        '5.6. Pazarlama profillemesi yürütmüyoruz; gönderimler yalnızca yasal dayanak (ör. rıza) olması halinde yapılır.'
+      ]
+    },
+
+    {
+      title: '6. Üçüncü Taraflara Aktarım ve Açıklama',
+      paras: [
+        '6.1. Kişisel verileri satmayız.',
+        '6.2. Veriler, yalnızca Politika’da açıklanan amaçlar için ve talimatlarımız doğrultusunda alt işleyicilerimiz tarafından işlenebilir: bilişim platformları/barındırma, CDN, nesne depolama, kuyruklar ve önbellekler, izleme/günlükleme/hata izleme, ödeme ağ geçitleri, mesaj sağlayıcıları (e-posta/Telegram), analitik platformları.',
+        '6.3. Kanuna uyum, yetkili mercilerin yasal talepleri ve kullanıcıların ile Hizmetin haklarının/güvenliğinin korunması hallerinde açıklama yapılabilir.',
+        '6.4. Kurumsal kontrol değişiminde (birleşme/varlık satışı) veriler, eşdeğer korumanın sürdürülmesi ve kanunen gerekirse bildirim yapılması koşuluyla halefe devredilebilir.'
+      ]
+    },
+
+    {
+      title: '7. Güvenlik',
+      paras: [
+        '7.1. İlkeler: tasarım gereği güvenlik (security by design), asgari ayrıcalık (PoLP), görevlerin ayrımı, kritik işlemlerin zorunlu günlüğe alınması.',
+        '7.2. Şifreleme: aktarım sırasında TLS; hassas eserler için saklama katmanında şifreleme; erişim kontrolüyle anahtar yönetimi.',
+        '7.3. Erişim: yönetim konsolları için çok faktörlü kimlik doğrulama, role dayalı ayrım, ortamların segmentasyonu (prod/stage/dev).',
+        '7.4. Değişiklik kontrolü: kod gözden geçirme, imzalı derlemeler, kademeli yayınlar, geri alma, güvensiz yapılandırmaların engellenmesi.',
+        '7.5. Test ve izleme: saldırı tespiti, uyarılar, yapılandırmaların ve izinlerin periyodik gözden geçirilmesi.',
+        '7.6. Cüzdan anahtarları ve seed ifadeleri: bunları talep etmeyiz ve saklamayız. İmzalama, kullanıcı tarafında veya güvenilir cüzdan tarafında yapılır.'
+      ]
+    },
+
+    {
+      title: '8. Uluslararası Aktarımlar',
+      paras: [
+        '8.1. İşleme ve saklama, coğrafi replikasyon ve yük dengeleme içeren çok bölgeli bir altyapıda yürütülebilir.',
+        '8.2. Sınır ötesi aktarımlarda yasal mekanizmalar (uygulanabildiğinde standart sözleşme maddeleri dahil) ve eşdeğer koruma tedbirleri kullanılır.',
+        '8.3. Kullanıcı, Hizmetin sunulması kapsamında verilerin uluslararası aktarımına rıza gösterir.'
+      ]
+    },
+
+    {
+      title: '9. Haklarınız',
+      paras: [
+        '9.1. AEA/UK (GDPR): erişim, düzeltme, silme, kısıtlama/itiraz, taşınabilirlik hakları ve denetim otoritesine şikayet hakkı.',
+        '9.2. ABD (Kaliforniya/CPRA dahil): bilme, düzeltme, silme, satış/paylaşımın reddi ve hakların kullanımında ayrımcılık yapılmaması hakkı.',
+        '9.3. Hakların kullanımı: bkz. “Haklar nasıl kullanılır” bölümü. Kimlik doğrulaması zorunludur.'
+      ]
+    },
+
+    {
+      title: '10. Çocuklar',
+      paras: [
+        '10.1. Hizmet, 13 yaş altı çocuklara (veya yargı alanınızdaki daha yüksek yaş sınırına) yönelik değildir.',
+        '10.2. Bir çocuğun bize veri sağladığını düşünüyorsanız, silme için bizimle iletişime geçin.'
+      ]
+    },
+
+    {
+      title: '11. Değişiklikler',
+      paras: [
+        '11.1. Politikayı; teknoloji, hukuk ve ürünlerdeki değişiklikleri yansıtmak üzere güncelleyebiliriz.',
+        '11.2. Önemli değişikliklerde “Güncellendi” tarihi güncellenir ve gerektiğinde arayüzde bildirim gösterilir.'
+      ]
+    },
+
+    {
+      title: '12. İletişim',
+      paras: [
+        '12.1. Gizlilik talepleri için e-posta: quantuml7ai@gmail.com',
+        '12.2. Geri bildirim kanalı (bot): https://t.me/L7ai_feedback'
+      ]
+    },
+
+    {
+      title: '13. Tanımlar ve Kapsam',
+      paras: [
+        '13.1. “Hizmet” — siteler, Web-MiniApp, Telegram Mini App, Telegram botları, Forum, API, analitik, ödeme entegrasyonları ve borsa arayüzleri.',
+        '13.2. “Biz” — Quantum L7 AI. Politika, veri sorumlusu olduğumuz verileri kapsar. Üçüncü taraf hizmetler (yetkilendirme sağlayıcıları, blokzincirler, cüzdanlar, ödeme ağ geçitleri) kendi kurallarına göre hareket eder.',
+        '13.3. Politikanın konusu — kullanıcı verileri ve Hizmetin çalışması için gerekli operasyonel veriler.'
+      ]
+    },
+
+    {
+      title: '14. İşlemenin Hukuki Dayanakları (GDPR/UK GDPR)',
+      paras: [
+        '14.1. Sözleşme/hizmet sunumu için gereklilik: yetkilendirme, işlevlere erişim, faturalama ve destek.',
+        '14.2. Meşru menfaat: güvenlik, kötüye kullanımın önlenmesi, mahremiyet açısından düşük riskli operasyonel analitik.',
+        '14.3. Rıza: uygulanabildiğinde isteğe bağlı metrikler/pazarlama iletişimleri. Rıza geri çekilebilir.',
+        '14.4. Hukuki yükümlülük: kanunun gerektirdiği hallerde saklama ve açıklama (ör. muhasebe kayıtları).'
+      ]
+    },
+
+    {
+      title: '15. Veri Saklama (Retansiyon)',
+      paras: [
+        '15.1. Kişisel verileri, işleme amaçları için gerekli olan veya yasanın gerektirdiği süreden daha uzun süre saklamayız.',
+        '15.2. Kılavuzlar: hizmet günlükleri 30–180 gün; performans telemetrisi 90 güne kadar; destek yazışmaları 12 aya kadar; faturalama kayıtları — yasal saklama sürelerine göre.',
+        '15.3. Anonimleştirilmiş toplulaştırmalar, araştırma ve istatistik amaçlarıyla daha uzun süre saklanabilir.'
+      ]
+    },
+
+    {
+      title: '16. Alt İşleyiciler ve Altyapı',
+      paras: [
+        '16.1. Alt işleyici kategorileri: bilişim platformları ve barındırma, CDN, nesne depoları, SQL/NoSQL veritabanları, önbellekler ve mesaj kuyrukları, izleme/günlükleme/iz sürme, e-posta/mesaj gönderimi, ödeme operatörleri, on-chain/piyasa akışları indeks sağlayıcıları.',
+        '16.2. Her alt işleyiciyle veri işleme anlaşmaları (DPA) yapılmıştır ve teknik/organizasyonel güvenlik önlemleri uygulanır.',
+        '16.3. Güncellenebilir kategori listesi Politika’da mevcuttur; güvenlik gereklilikleri gözetilerek talep üzerine güncel detaylı liste sağlanır.'
+      ]
+    },
+
+    {
+      title: '17. Analitik ve Metrikler',
+      paras: [
+        '17.1. Ürünü geliştirmek için gerekli ölçüde toplulaştırılmış kullanım metrikleri (arayüz kapsaması, performans, özellik benimseme) toplayabiliriz.',
+        '17.2. Analitik ayarları, hassas verilerin hariç tutulmasına ve kişisel tanımlayıcıların en aza indirilmesine yöneliktir.',
+        '17.3. Gerektiği yerlerde, kritik olmayan metrikler için rıza mekanizması uygulanır.'
+      ]
+    },
+
+    {
+      title: '18. Günlükler ve Telemetri',
+      paras: [
+        '18.1. Operasyonel günlükler; zaman damgaları, karma IP, user-agent, hata izleri, istek/ilişkilendirme kimlikleri, yanıt kodlarını içerebilir.',
+        '18.2. Günlükler döndürülür, erişimle sınırlandırılır ve hata ayıklama, kapasite planlama, DDoS/bot trafiğinden korunma ve denetim için kullanılır.',
+        '18.3. Günlükleme noktaları, minimizasyon ilkesine göre tasarlanır.'
+      ]
+    },
+
+    {
+      title: '19. E-posta, Bildirimler ve İletişimler',
+      paras: [
+        '19.1. Adreslerimize/botlarımıza gönderilen mesajlar; destek, sözleşmesel yükümlülüklerin ifası ve hizmet kalitesi muhasebesi amaçlarıyla işlenir.',
+        '19.2. Hizmet dışı gönderimleri reddedebilirsiniz; hizmet bildirimleri (ör. abonelik durumu) işleyiş için zorunludur.'
+      ]
+    },
+
+    {
+      title: '20. Webhooks ve API',
+      paras: [
+        '20.1. Webhook/API kullanıldığında, yükler güvenilir teslimat, yinelenenlerin elenmesi ve yeniden oynatmaya karşı koruma için geçici olarak arabelleğe alınabilir.',
+        '20.2. Webhook/API üzerinden sırlar, özel anahtarlar ve üçüncü taraflara yönelik olmayan diğer materyalleri iletmeyin; imzalar, belirteç rotasyonu ve kaynak kısıtlama kullanın.'
+      ]
+    },
+
+    {
+      title: '21. Cüzdan Bağlama ve Ödemeler',
+      paras: [
+        '21.1. Kimlik tespiti ve faturalama işlevleri için gerekli açık adresleri ve ağ parametrelerini saklarız. Özel anahtarlar/seed ifadeleri toplanmaz ve saklanmaz.',
+        '21.2. Ödeme işleme entegre sağlayıcı aracılığıyla yürütülür; VIP aboneliğin etkinleştirilmesi için gerekli fatura ve onay durumlarını/kimliklerini alırız.',
+        '21.3. On-chain ödeme onayları kamuya açık bilgidir; bunları yalnızca erişim amaçlarıyla hesabınızla eşleştiririz.'
+      ]
+    },
+
+    {
+      title: '22. Yürütme Sınırlayıcıları ve Risk Çerçevesi',
+      paras: [
+        '22.1. Ticaret/analitik modlarında teknik sınırlayıcılar (rate-limit, sanity-checks) ve risk kuralları uygulanır. Bunlar mühendislik mekanizmalarıdır; sonuç garantisi değildir.',
+        '22.2. Ticaret kararları, hukuki gerekliliklere uyum ve risk yönetimi sorumluluğu kullanıcıya aittir.'
+      ]
+    },
+
+    {
+      title: '23. Araştırmalar, Modeller ve Yapay Zeka',
+      paras: [
+        '23.1. Uygun ve yasal olduğu durumlarda, modelleri toplulaştırılmış/pseudonymize edilmiş veri kümeleri üzerinde eğitebilir/doğrulayabiliriz.',
+        '23.2. Üçüncü taraf modeller kullanıldığında, kişisel veri aktarımına ilişkin sözleşmesel ve teknik kısıtlamalara uyar ve minimizasyon uygularız.'
+      ]
+    },
+
+    {
+      title: '24. Otomatik Kararlar',
+      paras: [
+        '24.1. Kullanıcı üzerinde hukuken anlamlı etki doğuran tamamen otomatik kararlar almayız.',
+        '24.2. Tavsiyeler ve değerlendirmeler, karar desteği için yardımcı sinyallerdir. Nihai seçim kullanıcıya aittir.'
+      ]
+    },
+
+    {
+      title: '25. Takma Adlandırma, Toplulaştırma ve Minimizasyon',
+      paras: [
+        '25.1. Mümkün olduğunda, tanımlayıcıları takma adlandırır ve metrikleri toplulaştırır, anahtarları yararlı verilerden ayırırız.',
+        '25.2. “Anahtar—veri” bağlantısına erişim roller ve gereklilikle sınırlandırılır.'
+      ]
+    },
+
+    {
+      title: '26. Taşınabilirlik ve Dışa Aktarım',
+      paras: [
+        '26.1. Hesabınız/bot tanımlayıcınız ile ilişkili kişisel verilerin dışa aktarımını talep edebilirsiniz.',
+        '26.2. Hukuki kısıt bulunmaması ve doğrulama sonrasında verileri makinece okunabilir biçimde sağlayacağız.'
+      ]
+    },
+
+    {
+      title: '27. Veri Sahibi Haklarının Kullanımı',
+      paras: [
+        '27.1. Talebinizi quantuml7ai@gmail.com e-postasına veya geri bildirim botu üzerinden iletin.',
+        '27.2. Kimlik doğrulaması için, bağlı Telegram/bot hesabınızdan mesaj göndermenizi veya ilişkili hesap/cüzdan mülkiyetini teyit etmenizi isteyebiliriz.',
+        '27.3. Yanıt, yürürlükteki hukukun öngördüğü sürelerde sağlanır; bazı talepler güvenlik/mevzuat gereklilikleriyle sınırlandırılabilir.'
+      ]
+    },
+
+    {
+      title: '28. Olaylar ve İhlal Bildirimleri',
+      paras: [
+        '28.1. Yanıt prosedürleri yürürlüktedir: olay sınıflandırması, etkinin sınırlandırılması, nedenlerin araştırılması, hizmetin geri yüklenmesi.',
+        '28.2. Kanunen gerektiği durumlarda, etkilenen kullanıcılar ve düzenleyiciler bilgilendirilir; olayın niteliği ve alınan önlemler hakkında ilgili bilgiler sağlanır.'
+      ]
+    },
+
+    {
+      title: '29. Yargı Notları',
+      paras: [
+        '29.1. AEA/UK: veri sahibi hakları, işlemenin yasallığı ve uluslararası aktarımlar bakımından GDPR/UK GDPR hükümleri uygulanır.',
+        '29.2. ABD: ilgili eyalet kanunları (CPRA dahil) uygulanır. Desteklenen teknik “vazgeçme” sinyalleri mevcutsa bunları dikkate almaya çalışırız.',
+        '29.3. Diğer bölgeler: saklama, bildirim ve korumaya ilişkin zorunlu gerekliliklerde yerel kurallar uygulanır.'
+      ]
+    },
+
+    {
+      title: '30. Do Not Track (DNT) ve Global Privacy Control (GPC)',
+      paras: [
+        '30.1. Tarayıcınız DNT/GPC sinyalleri gönderiyorsa, bunları teknik olarak mümkün ve hukuken gerekli olduğu ölçüde dikkate alırız.'
+      ]
+    },
+
+    {
+      title: '31. Vazgeçme Seçenekleri ve Gizlilik Ayarları',
+      paras: [
+        '31.1. Gerekli olmayan çerezleri/analitiği devre dışı bırakabilir, hizmet dışı e-postalardan ayrılabilir, bot izinlerini kısıtlayabilirsiniz.',
+        '31.2. Temel güvenlik/işlevsellik mekanizmaları asgari işlem gerektirebilir ve devre dışı bırakılamaz.'
+      ]
+    },
+
+    {
+      title: '32. Erişilebilirlik, Diller ve Yorum',
+      paras: [
+        '32.1. Metinleri birden çok dilde sunarız. Sürümler arasında uyumsuzluk halinde, hukuki yorum amaçları için İngilizce sürüm öncelik kazanabilir.',
+        '32.2. Çeviriler, hukuki eşdeğerliği korumayı hedefler.'
+      ]
+    },
+
+    {
+      title: '33. Depolar ve Veri Konumları',
+      paras: [
+        '33.1. Operasyonel veritabanları: yedeklilik ve replikasyon içeren çok bölgeli mimaride konuşlandırılmış ilişkisel ve/veya belge odaklı VTYS’ler.',
+        '33.2. Önbellekler ve kuyruklar: oturumları hızlandırmak, kötüye kullanım karşıtı mantık ve geçici eserler için Redis kümeleri/akışları/kuyrukları.',
+        '33.3. Nesne depolama: kullanıcı tarafından yüklenen ortamlar ve yedeklerin, yönetilen sürümleme ve yaşam döngüsü politikalarıyla saklanması.',
+        '33.4. Yedekler: periyodik yedeklemeler, geri yükleme doğrulaması, erişim haklarının ayrımı, saklama sırasında şifreleme.',
+        '33.5. Yetkilendirme entegrasyonları: kimlik sağlayıcıları (Google, Apple, Twitter/X, Discord, Telegram) bize belirteçler/onaylar sağlar; parolalarını saklamaz ve iç veritabanlarını yönetmeyiz.',
+        '33.6. Coğrafya: veriler, dayanıklılık ve performans için çok bölgeli altyapıda işlenebilir ve yasal uluslararası aktarım mekanizmaları uygulanır.'
+      ]
+    },
+
+    {
+      title: '34. Politikanın Yürürlüğü ve Sürümleri',
+      paras: [
+        '34.1. Politika, yukarıda belirtilen “Güncellendi” tarihinden itibaren yürürlüğe girer.',
+        '34.2. Arşivleme ve değişikliklerin şeffaflığı amaçlarıyla önceki sürümleri saklayabiliriz.'
+      ]
+    },
+
+    {
+      title: 'Ek A: Terimler Sözlüğü',
+      paras: [
+        'A.1. Veri sorumlusu — kişisel verilerin işlenme amaç ve araçlarını belirleyen kişi/kuruluş.',
+        'A.2. Veri işleyen — veri sorumlusu adına verileri işleyen kişi/kuruluş.',
+        'A.3. Kişisel veriler — tanımlanmış veya tanımlanabilir kişiye ilişkin herhangi bir bilgi.',
+        'A.4. Uluslararası aktarım — kişisel verilerin ilk toplandığı ülke/bölge dışına aktarılması.'
+      ]
+    },
+
+    {
+      title: 'Ek B: Alt İşleyici Kategorileri',
+      paras: [
+        'B.1. Barındırma/bilgi işlem ve konteyner orkestrasyonu.',
+        'B.2. CDN ve uç içerik dağıtımı.',
+        'B.3. Veritabanları (SQL/NoSQL) ve Redis önbellekleri.',
+        'B.4. Nesne depoları ve yedekleme sistemleri.',
+        'B.5. İzleme/günlükleme/iz sürme/hata takibi.',
+        'B.6. Ödeme operatörleri ve on-chain onay ağ geçitleri.',
+        'B.7. Mesaj sağlayıcıları (e-posta/Telegram) ve kuyruk servisleri.',
+        'B.8. Blokzincir verisi/piyasa akışı indeksleme ve analitik platformları.'
+      ]
+    }
   ]
 };
+
 /* -------------------- ES -------------------- */
 const PRIVACY_ES = {
-  nav_privancy: undefined, // guard against typos
-  nav_privacy: 'Privacidad y política',
-  privacy_title: 'Privacidad y política',
+  nav_privacy: 'Privacidad',
+  privacy_title: 'Privacidad',
   privacy_updated_label: 'Actualizado:',
-  privacy_updated: '2025-09-14',
+  privacy_updated: '2025-10-30',
   privacy_empty: 'Sin datos',
   privacy_sections: [
-    { title: 'Resumen', paras: [
-      'Esta Política explica qué datos recopilamos, cómo los usamos y cómo los protegemos en el sitio web, en el bot de Telegram y en los servicios.',
-      'Al utilizar el servicio, aceptas esta Política. Es un aviso de producto para ayudarte a entender el uso de datos; no constituye asesoría legal.'
-    ]},
-    { title: 'Qué recopilamos', paras: [
-      'Datos de cuenta y de contacto: ID/username de Telegram/nombre mostrado; correo electrónico (si lo envías); mensajes que nos compartes.',
-      'Vinculación de monedero: redes y direcciones públicas (nunca claves privadas).',
-      'Datos de uso y del dispositivo: páginas, clics, referente, IP con hash, user-agent, marcas de tiempo, telemetría de errores y rendimiento.'
-    ]},
-    { title: 'Datos on-chain y públicos', paras: [
-      'Analizamos datos públicos de blockchain y de mercado. Por su naturaleza, esos datos ya son públicos y no constituyen “datos personales” bajo nuestro control.',
-      'Las consultas (por ejemplo, análisis de dirección o de símbolo) pueden registrarse para operar el servicio y mejorar su fiabilidad.'
-    ]},
-    { title: 'Cookies y almacenamiento local', paras: [
-      'Uso mínimo: idioma, sesión y anti-abuso. Puedes bloquearlas; algunas funciones pueden degradarse.'
-    ]},
-    { title: 'Cómo usamos los datos', paras: [
-      'Prestación y mejora de investigación y señales; ruteo y ejecución protegida; prevención de abusos; soporte y comunicaciones.',
-      'No realizamos perfilado publicitario.'
-    ]},
-    { title: 'Cesión a terceros', paras: [
-      'No vendemos datos personales.',
-      'Encargados del tratamiento: hosting (p. ej., Vercel), almacenamiento, analítica (si está habilitada), seguimiento de errores, entrega de email/Telegram.',
-      'Podemos revelar datos para cumplir la ley o para proteger derechos.'
-    ]},
-    { title: 'Seguridad', paras: [
-      'Las claves permanecen contigo; nunca solicitamos frases semilla. Los datos se cifran en tránsito y en reposo; el acceso es por roles y se registra.',
-      'Aplicamos principio de mínimo privilegio, MFA en sistemas críticos y control de cambios en los despliegues.'
-    ]},
-    { title: 'Transferencias internacionales', paras: [
-      'El tratamiento puede realizarse en el extranjero. Cuando es necesario, aplicamos garantías estándar (SCC) u otros mecanismos legales.'
-    ]},
-    { title: 'Tus derechos', paras: [
-      'EEE/Reino Unido (RGPD): acceso, rectificación, supresión, portabilidad, restricción/oposición; derecho a reclamar ante la autoridad supervisora.',
-      'California (CPRA): acceso, eliminación, rectificación, opción de no “vender” o “compartir”; sin discriminación por ejercer tus derechos.'
-    ]},
-    { title: 'Menores', paras: [
-      'El servicio no está destinado a menores de 13 años (o a la edad mínima superior de tu jurisdicción).'
-    ]},
-    { title: 'Cambios', paras: [
-      'Podemos actualizar esta Política. Cambiaremos la fecha de “Actualizado” y, cuando sea necesario, avisaremos en la interfaz o en el canal.'
-    ]},
-    { title: 'Contacto', paras: [
-      'Email: quantuml7ai@gmail.com',
-      'Bot de feedback: https://t.me/L7ai_feedback'
-    ]},
-    { title: 'Definiciones y alcance', paras: [
-      '“Servicio”: nuestros sitios, bots, API y apps relacionadas. “Nosotros”: Quantum L7 AI.',
-      'Esta Política cubre los datos para los que actuamos como responsables del tratamiento. Los proveedores y las blockchains tienen sus propias reglas.'
-    ]},
-    { title: 'Bases legales (RGPD)', paras: [
-      'Contrato: para prestar las funciones solicitadas (ruteo, investigación, paneles).',
-      'Interés legítimo: fiabilidad, seguridad, prevención de abusos, analítica de producto con impacto mínimo.',
-      'Consentimiento: analítica/marketing opcional; puedes retirarlo en cualquier momento.',
-      'Obligación legal: conservación/divulgación cuando lo exija la ley.'
-    ]},
-    { title: 'Conservación de datos', paras: [
-      'Conservamos los datos personales durante el tiempo necesario para los fines del tratamiento o por exigencias legales.',
-      'Guías: logs operativos 30–180 días; mensajes de soporte hasta 12 meses; registros legales según los requisitos.'
-    ]},
-    { title: 'Encargados/Subencargados', paras: [
-      'Categorías: hosting/CDN, almacenamiento de objetos, email/Telegram, monitorización, seguimiento de errores, analítica básica.',
-      'Tenemos DPAs con los proveedores; evaluamos periódicamente sus medidas de seguridad.'
-    ]},
-    { title: 'Analítica y métricas', paras: [
-      'Si está habilitada, medimos uso agregado (páginas, rendimiento, adopción de funciones).',
-      'Configuramos la analítica para excluir datos sensibles y minimizar los personales.'
-    ]},
-    { title: 'Registros y telemetría', paras: [
-      'Los registros operativos pueden incluir marcas de tiempo, IP con hash, user-agent, trazas de errores e IDs de solicitud.',
-      'Los logs se rotan, se accede a ellos por rol y se usan para depuración, planificación de capacidad y detección de abusos.'
-    ]},
-    { title: 'Correo y comunicaciones', paras: [
-      'Si nos escribes por email o en el bot, procesamos el mensaje para soporte y seguimiento.',
-      'No enviamos marketing sin consentimiento. Puedes darte de baja en cualquier momento.'
-    ]},
-    { title: 'Webhooks y API', paras: [
-      'Al usar API/webhooks, las cargas útiles pueden conservarse temporalmente para fiabilidad y protección contra repeticiones.',
-      'No envíes secretos ni claves privadas; usa autenticación adecuada y rotación de tokens.'
-    ]},
-    { title: 'Vinculación de monedero', paras: [
-      'Almacenamos redes y direcciones públicas para las funciones. No solicitamos ni almacenamos claves privadas o frases semilla.',
-      'Tus transacciones on-chain son públicas; podemos indexarlas y anotarlas para analítica e informes.'
-    ]},
-    { title: 'Guardarraíles de ejecución', paras: [
-      'Cuando hay ejecución/ruteo, aplicamos guardarraíles (límites, reglas de riesgo, comprobaciones de cordura).',
-      'Son herramientas, no garantías; la responsabilidad sobre decisiones y cumplimiento es tuya.'
-    ]},
-    { title: 'Investigación, modelos y LLM', paras: [
-      'Podemos entrenar/evaluar modelos con datos agregados y anonimizados cuando sea posible.',
-      'Al usar LLM de terceros, evitamos enviar datos personales sin necesidad y sin garantías contractuales.'
-    ]},
-    { title: 'Decisiones automatizadas', paras: [
-      'No adoptamos decisiones exclusivamente automatizadas con efecto jurídico significativo.',
-      'Las recomendaciones/valoraciones son señales de apoyo; las decisiones finales son tuyas.'
-    ]},
-    { title: 'Seudonimización y agregación', paras: [
-      'Cuando es posible, aplicamos hash/aggregación de identificadores para reducir riesgos.',
-      'Separamos claves de contenido; el acceso al vínculo está limitado por necesidad y por rol.'
-    ]},
-    { title: 'Portabilidad y exportación', paras: [
-      'Puedes solicitar la exportación de los datos personales vinculados a tu cuenta o identificador del bot.',
-      'Los proporcionaremos en formato legible por máquina, salvo restricciones legales.'
-    ]},
-    { title: 'Cómo ejercer tus derechos', paras: [
-      'Envía una solicitud por email o en el bot. Para verificar, podemos pedirte un mensaje desde tu cuenta del bot.',
-      'Respondemos en los plazos legales; algunas solicitudes están limitadas por requisitos legales y de seguridad.'
-    ]},
-    { title: 'Incidentes y notificaciones', paras: [
-      'Contamos con procedimientos de respuesta. Si ocurre un incidente, notificaremos a los usuarios afectados y a las autoridades cuando lo exija la ley.',
-      'Realizamos análisis posterior y mejoramos controles para evitar recurrencias.'
-    ]},
-    { title: 'Notas por jurisdicción', paras: [
-      'EEE/Reino Unido: aplica el RGPD cuando actuamos como responsables.',
-      'EE. UU.: las leyes estatales (por ejemplo, CPRA) pueden otorgar derechos adicionales; cuando sea posible, respetamos señales de exclusión válidas.'
-    ]},
-    { title: 'Do Not Track y GPC', paras: [
-      'El navegador puede enviar Do Not Track/Global Privacy Control. Donde se requiera y sea posible, los respetamos.'
-    ]},
-    { title: 'Opciones de exclusión', paras: [
-      'Puedes desactivar la analítica/cookies opcionales, darte de baja de correos y limitar permisos del bot.',
-      'La seguridad y la funcionalidad básicas pueden requerir un tratamiento mínimo.'
-    ]},
-    { title: 'Accesibilidad e idioma', paras: [
-      'Procuramos textos claros en varios idiomas. En caso de discrepancia, la versión en inglés puede prevalecer para interpretación.'
-    ]},
-    { title: 'Contacto de privacidad', paras: [
-      'Contacto de privacidad: quantuml7ai@gmail.com (asunto: Privacy). Objetivo: responder en 30 días.'
-    ]},
-    { title: 'Vigencia y versiones', paras: [
-      'La Política rige desde la fecha “Actualizado”. Podemos conservar versiones previas para referencia.'
-    ]},
-    { title: 'Anexo: Glosario', paras: [
-      'Responsable: determina fines y medios del tratamiento. Encargado: trata datos por cuenta del responsable.',
-      'Datos personales: información sobre una persona identificada o identificable.'
-    ]},
-    { title: 'Anexo: Lista abreviada de encargados', paras: [
-      'Hosting/CDN (p. ej., Vercel), almacenamiento de objetos, entrega de email/Telegram, seguimiento de errores, monitorización, analítica básica.',
-      'La lista actualizada y detallada está disponible bajo solicitud.'
-    ]}
+    {
+      title: '1. Visión general',
+      paras: [
+        '1.1. Esta Política de Privacidad de Quantum L7 AI (en adelante, la «Política») describe qué datos recopilamos, en qué bases jurídicas los tratamos, dónde y cómo los almacenamos, cómo los protegemos y cómo los transferimos dentro del ecosistema: sitio web, Web-MiniApp, Telegram Mini App, bot(es) de Telegram, API, Foro, servicios analíticos e interfaces de trading (incluida la Bolsa en desarrollo).',
+        '1.2. Al utilizar los servicios de Quantum L7 AI (el «Servicio»), usted confirma que ha leído la Política y acepta sus términos. La Política está destinada a informar a los usuarios de forma transparente; no constituye asesoramiento jurídico individual ni sustituye a contratos/ofertas/políticas de proveedores específicos.',
+        '1.3. Actuamos como responsable del tratamiento respecto de los datos personales que recopilamos y para los que determinamos los fines/medios del tratamiento, y como encargado del tratamiento cuando tratamos datos por encargo de clientes/socios.',
+        '1.4. Los términos «datos personales», «tratamiento», «responsable», «encargado», «titular de los datos», «transferencia internacional» se utilizan con los significados aceptados por los marcos regulatorios globales (GDPR/UK GDPR, CCPA/CPRA, etc.).',
+        '1.5. Nuestros servicios interactúan con fuentes on-chain y flujos de mercado: los datos de blockchain públicos son por naturaleza abiertos y no constituyen nuestros «datos personales», pero su correlación con su cuenta puede conformar datos personales.'
+      ]
+    },
+
+    {
+      title: '2. Qué recopilamos',
+      paras: [
+        '2.1. Datos de cuenta e identificación: Telegram ID/nombre de usuario/nombre visible (al iniciar sesión mediante Telegram Mini App o bot), Account ID interno, etiquetas de estado de suscripción (VIP/Free), idioma de la interfaz.',
+        '2.2. Datos de contacto: correo electrónico (si lo proporciona), alias en el Foro, identificadores de referencia de cuentas externas (Google, Apple, Twitter/X, Discord, etc.) al vincularlas.',
+        '2.3. Autorización y vinculaciones: hecho y ruta de inicio de sesión a través del ecosistema multiforme de proveedores (OAuth/OIDC, Telegram WebApp initData, Sign in with Apple/Google/Twitter/X/Discord, firma de monedero, magic-link), tokens/marcas/firmas técnicas (sin almacenar claves privadas ni frases semilla).',
+        '2.4. Monederos y redes: direcciones públicas, redes utilizadas (L1/L2), metadatos de transacciones relacionados con el pago de la suscripción vía NowPayments y confirmaciones on-chain.',
+        '2.5. Datos de uso: páginas/pantallas visitadas, acciones en la interfaz, marcas de tiempo, IP con hash, user-agent, parámetros de rendimiento del cliente, telemetría de errores.',
+        '2.6. Foro y contenido: publicaciones, temas, metadatos de cargas (imágenes/video/audio), artefactos de sistemas de puntuación (calidad/engagement/anti-spam/anti-sybil), estadísticas de actividad para la minería de QCoin.',
+        '2.7. Pagos y facturación: estados de facturas, confirmaciones de pagos (a través del proveedor de pagos integrado), importes/monedas/marcas de tiempo, registros técnicos de enrutamiento.',
+        '2.8. Datos on-chain y de mercado: indexamos y agregamos cadenas públicas/feeds de intercambio/libros de órdenes/velas históricas con fines analíticos y para ofrecer funciones del Servicio.'
+      ]
+    },
+
+    {
+      title: '3. Datos on-chain y públicos',
+      paras: [
+        '3.1. Los registros públicos de blockchain están disponibles para cualquier participante de la red; su tratamiento para análisis, indicadores y recomendaciones se realiza dentro del uso permitido de la información de acceso público.',
+        '3.2. La correlación de la actividad on-chain con su cuenta es posible mediante la vinculación voluntaria de monedero/pagos/suscripciones. En tal caso, se crea un perfil de uso personal.',
+        '3.3. Las solicitudes a nodos públicos/proveedores de RPC/indexación y a agregadores de mercado pueden registrarse para fiabilidad, seguridad, prevención de abusos y mejora de la calidad del servicio.'
+      ]
+    },
+
+    {
+      title: '4. Cookies, localStorage y otros artefactos del cliente',
+      paras: [
+        '4.1. Aplicamos mecanismos estrictamente necesarios: conservación del idioma, marcadores de sesión seguros, parámetros antiabuso, ajustes de UX.',
+        '4.2. Si se bloquean las cookies/localStorage, parte de las funciones puede volverse inaccesible o degradarse (por ejemplo, sesiones, límites personalizados, idioma).',
+        '4.3. Cuando lo exige la ley, solicitamos consentimiento para cookies/analítica no críticas.'
+      ]
+    },
+
+    {
+      title: '5. Cómo utilizamos los datos',
+      paras: [
+        '5.1. Prestación de funcionalidades: autorización/vinculación de cuentas, sincronización de estados de suscripción, acceso al Foro, MiniApp, bot, paneles analíticos y recomendaciones.',
+        '5.2. Mejora del producto: analítica de uso agregada, evaluaciones A/B, telemetría de rendimiento, resolución de fallos, aumento de la precisión de los modelos de IA.',
+        '5.3. Seguridad e integridad: protección contra abusos (rate-limit, anti-spam, anti-sybil), control de anomalías, auditoría de acciones de servicio, investigación de incidentes.',
+        '5.4. Facturación y cumplimiento: tratamiento de estados de pagos y confirmaciones, gestión de derechos de acceso, cumplimiento de leyes de contabilidad financiera y de lucha contra actividades ilícitas.',
+        '5.5. Comunicaciones y soporte: respuestas a solicitudes, notificaciones de estado (por ejemplo, activación exitosa de VIP), mensajes de servicio.',
+        '5.6. No realizamos perfilado de marketing; los envíos se efectúan solo cuando existe base legal (por ejemplo, consentimiento).'
+      ]
+    },
+
+    {
+      title: '6. Transferencia y divulgación a terceros',
+      paras: [
+        '6.1. No vendemos datos personales.',
+        '6.2. Los datos pueden ser tratados por nuestros subencargados conforme a nuestras instrucciones y únicamente para los fines descritos en la Política: plataformas de cómputo/hosting, CDN, almacenamiento de objetos, colas y cachés, monitorización/registro/seguimiento de errores, pasarelas de pago, proveedores de mensajería (email/Telegram), plataformas analíticas.',
+        '6.3. La divulgación es posible en cumplimiento de la ley, ante solicitudes legítimas de autoridades competentes, y para proteger los derechos/seguridad de los usuarios y del Servicio.',
+        '6.4. En caso de cambio de control corporativo (fusión/venta de activos), los datos pueden transferirse al sucesor siempre que se mantenga una protección equivalente y se notifique cuando lo exija la ley.'
+      ]
+    },
+
+    {
+      title: '7. Seguridad',
+      paras: [
+        '7.1. Principios: seguridad por diseño (security by design), mínimo privilegio (PoLP), segregación de funciones, registro obligatorio de operaciones críticas.',
+        '7.2. Cifrado: TLS en tránsito; cifrado en almacenamiento para artefactos sensibles; gestión de claves con control de acceso.',
+        '7.3. Acceso: autenticación multifactor para consolas de administración, segregación por roles, segmentación de entornos (prod/stage/dev).',
+        '7.4. Control de cambios: revisión de código, builds firmadas, despliegues graduales, rollbacks, bloqueo de configuraciones inseguras.',
+        '7.5. Pruebas y monitorización: detección de intrusiones, alertas, revisiones periódicas de configuraciones y permisos.',
+        '7.6. Claves de monedero y frases semilla: no las solicitamos ni almacenamos. Las firmas se realizan del lado del usuario o de un monedero de confianza.'
+      ]
+    },
+
+    {
+      title: '8. Transferencias internacionales',
+      paras: [
+        '8.1. El tratamiento y almacenamiento pueden realizarse en una infraestructura multirregional con replicación geográfica y balanceo.',
+        '8.2. En transferencias transfronterizas se utilizan mecanismos legales (incluidas cláusulas contractuales tipo, cuando corresponda) y medidas de protección equivalentes.',
+        '8.3. El usuario consiente la transferencia internacional de datos en el marco de la prestación del Servicio.'
+      ]
+    },
+
+    {
+      title: '9. Sus derechos',
+      paras: [
+        '9.1. EEE/Reino Unido (GDPR): derecho de acceso, rectificación, supresión, limitación/oposición, portabilidad, así como derecho a presentar reclamación ante una autoridad de control.',
+        '9.2. EE. UU. (incluida California/CPRA): derecho a saber, rectificar, eliminar, optar por no vender/compartir, y derecho a no sufrir discriminación por ejercer sus derechos.',
+        '9.3. Ejercicio de derechos: véase la sección «Cómo ejercer los derechos». La verificación de identidad es obligatoria.'
+      ]
+    },
+
+    {
+      title: '10. Menores',
+      paras: [
+        '10.1. El Servicio no está destinado a menores de 13 años (o una edad superior según la legislación de su jurisdicción).',
+        '10.2. Si cree que un menor nos ha proporcionado datos, póngase en contacto con nosotros para su eliminación.'
+      ]
+    },
+
+    {
+      title: '11. Cambios',
+      paras: [
+        '11.1. Podemos actualizar la Política para reflejar cambios en tecnologías, legislación y productos.',
+        '11.2. En cambios sustanciales, se actualiza la fecha de «Actualizado» y, cuando sea necesario, se muestra un aviso en la interfaz.'
+      ]
+    },
+
+    {
+      title: '12. Contacto',
+      paras: [
+        '12.1. Correo para solicitudes de privacidad: quantuml7ai@gmail.com',
+        '12.2. Canal de feedback (bot): https://t.me/L7ai_feedback'
+      ]
+    },
+
+    {
+      title: '13. Definiciones y alcance',
+      paras: [
+        '13.1. «Servicio»: sitios, Web-MiniApp, Telegram Mini App, bots de Telegram, Foro, API, analítica, integraciones de pagos e interfaces de intercambio.',
+        '13.2. «Nosotros»: Quantum L7 AI. La Política abarca los datos respecto de los cuales actuamos como responsable del tratamiento. Los servicios de terceros (proveedores de autorización, blockchains, monederos, pasarelas de pago) actúan conforme a sus propias normas.',
+        '13.3. Objeto de la Política: datos de usuarios y datos operativos necesarios para el funcionamiento del Servicio.'
+      ]
+    },
+
+    {
+      title: '14. Bases jurídicas del tratamiento (GDPR/UK GDPR)',
+      paras: [
+        '14.1. Contrato/necesidad para la prestación del servicio: autorización, acceso a funcionalidades, facturación y soporte.',
+        '14.2. Interés legítimo: seguridad, prevención de abusos, analítica operativa de bajo riesgo para la vida privada.',
+        '14.3. Consentimiento: métricas opcionales/comunicaciones de marketing, cuando corresponda. El consentimiento puede retirarse.',
+        '14.4. Obligación legal: conservación y divulgación cuando lo exija la ley (por ejemplo, registros contables).'
+      ]
+    },
+
+    {
+      title: '15. Conservación de datos (retención)',
+      paras: [
+        '15.1. Conservamos los datos personales no más tiempo del necesario para los fines del tratamiento o los requisitos legales.',
+        '15.2. Guías: logs de servicio 30–180 días; telemetría de rendimiento hasta 90 días; correspondencia de soporte hasta 12 meses; registros de facturación según plazos legales de conservación.',
+        '15.3. Los agregados anonimizados pueden conservarse por más tiempo con fines de investigación y estadísticos.'
+      ]
+    },
+
+    {
+      title: '16. Subencargados e infraestructura',
+      paras: [
+        '16.1. Categorías de subencargados: plataformas de cómputo y hosting, CDN, almacenes de objetos, bases de datos SQL/NoSQL, cachés y colas de mensajes, monitorización/registro/trazabilidad, envío de email/mensajes, operadores de pago, proveedores de indexación de datos on-chain/feeds de mercado.',
+        '16.2. Con cada subencargado se han suscrito acuerdos de tratamiento de datos (DPA) y se aplican medidas técnicas/organizativas de seguridad.',
+        '16.3. La lista actualizable de categorías está disponible en la Política; la lista detallada y vigente se proporciona bajo solicitud considerando los requisitos de seguridad.'
+      ]
+    },
+
+    {
+      title: '17. Analítica y métricas',
+      paras: [
+        '17.1. Podemos recopilar métricas de uso agregadas (cobertura de interfaces, rendimiento, adopción de funciones) en la medida necesaria para mejorar el producto.',
+        '17.2. Los ajustes de analítica están orientados a excluir datos sensibles y minimizar identificadores personales.',
+        '17.3. Donde se requiera, se aplica un mecanismo de consentimiento para métricas no esenciales.'
+      ]
+    },
+
+    {
+      title: '18. Logs y telemetría',
+      paras: [
+        '18.1. Los logs operativos pueden incluir marcas de tiempo, IP con hash, user-agent, trazas de errores, IDs de solicitudes/correlación, códigos de respuesta.',
+        '18.2. Los logs se rotan, se restringe su acceso y se utilizan para depuración, planificación de capacidad, protección contra DDoS/tráfico de bots y auditoría.',
+        '18.3. Los puntos de registro se diseñan conforme al principio de minimización.'
+      ]
+    },
+
+    {
+      title: '19. Correo, notificaciones y comunicaciones',
+      paras: [
+        '19.1. Los mensajes enviados a nuestras direcciones/bots se tratan para soporte, ejecución de obligaciones contractuales y control de calidad del servicio.',
+        '19.2. Puede darse de baja de envíos no relacionados con el servicio; las notificaciones de servicio (por ejemplo, sobre el estado de la suscripción) son obligatorias para el funcionamiento.'
+      ]
+    },
+
+    {
+      title: '20. Webhooks y API',
+      paras: [
+        '20.1. Al utilizar Webhook/API, las cargas útiles pueden almacenarse temporalmente en búfer para la entrega fiable, la deduplicación y la protección contra repeticiones.',
+        '20.2. No transmita secretos, claves privadas u otros materiales no destinados a terceros a través de Webhook/API; utilice firmas, rotación de tokens y restricción de orígenes.'
+      ]
+    },
+
+    {
+      title: '21. Vinculación de monederos y pagos',
+      paras: [
+        '21.1. Almacenamos direcciones públicas y parámetros de red necesarios para funciones de identificación y facturación. No se recopilan ni almacenan claves privadas/frases semilla.',
+        '21.2. El procesamiento de pagos se realiza a través del proveedor integrado; recibimos estados/identificadores de facturas y confirmaciones necesarios para activar la suscripción VIP.',
+        '21.3. Las confirmaciones de pagos on-chain son información pública; las correlacionamos con su cuenta exclusivamente para fines de acceso.'
+      ]
+    },
+
+    {
+      title: '22. Limitadores de ejecución y contorno de riesgo',
+      paras: [
+        '22.1. Para modos de trading/analítica se aplican limitadores técnicos (rate-limit, sanity-checks) y reglas de riesgo. Son mecanismos de ingeniería, no garantías de resultado.',
+        '22.2. La responsabilidad por las decisiones de trading, el cumplimiento normativo y la gestión del riesgo recae en el usuario.'
+      ]
+    },
+
+    {
+      title: '23. Investigación, modelos e IA',
+      paras: [
+        '23.1. Podemos entrenar/validar modelos con conjuntos agregados/pseudonimizados cuando sea apropiado y legal.',
+        '23.2. Al usar modelos de terceros, respetamos las restricciones contractuales y técnicas de transferencia de datos personales y aplicamos minimización.'
+      ]
+    },
+
+    {
+      title: '24. Decisiones automatizadas',
+      paras: [
+        '24.1. No adoptamos decisiones exclusivamente automatizadas con efecto jurídico significativo sobre el usuario.',
+        '24.2. Las recomendaciones y valoraciones son señales auxiliares de apoyo a la decisión. La elección final corresponde al usuario.'
+      ]
+    },
+
+    {
+      title: '25. Pseudonimización, agregación y minimización',
+      paras: [
+        '25.1. Cuando es posible, pseudonimizamos identificadores y agregamos métricas, separando claves y datos útiles.',
+        '25.2. El acceso al vínculo «clave—datos» se limita por roles y necesidad.'
+      ]
+    },
+
+    {
+      title: '26. Portabilidad y exportación',
+      paras: [
+        '26.1. Puede solicitar la exportación de los datos personales asociados a su cuenta/identificador de bot.',
+        '26.2. Proporcionaremos los datos en un formato legible por máquina, si no existen restricciones legales, y tras la verificación.'
+      ]
+    },
+
+    {
+      title: '27. Ejercicio de derechos de los titulares de datos',
+      paras: [
+        '27.1. Envíe su solicitud al correo quantuml7ai@gmail.com o a través del bot de feedback.',
+        '27.2. Para la verificación de identidad, podemos pedirle que envíe un mensaje desde su cuenta de Telegram/bot vinculada o que confirme la titularidad de la cuenta/monedero asociado.',
+        '27.3. La respuesta se proporciona dentro de los plazos establecidos por la ley aplicable; algunas solicitudes pueden estar limitadas por requisitos de seguridad/legislación.'
+      ]
+    },
+
+    {
+      title: '28. Incidentes y notificaciones de brechas',
+      paras: [
+        '28.1. Existen procedimientos de respuesta: clasificación del incidente, contención del impacto, investigación de causas, restauración del servicio.',
+        '28.2. En los casos exigidos por la ley, se notifica a los usuarios afectados y a los reguladores, proporcionando información relevante sobre la naturaleza del incidente y las medidas aplicadas.'
+      ]
+    },
+
+    {
+      title: '29. Notas jurisdiccionales',
+      paras: [
+        '29.1. EEE/Reino Unido: se aplican las normas del GDPR/UK GDPR en lo relativo a derechos de los titulares, licitud del tratamiento y transferencias internacionales.',
+        '29.2. EE. UU.: se aplican las leyes estatales correspondientes (incluida la CPRA). Cuando existan señales técnicas de «opt-out» compatibles, procuramos tenerlas en cuenta.',
+        '29.3. Otras regiones: se aplican las normas locales respecto de requisitos obligatorios de conservación, notificación y protección.'
+      ]
+    },
+
+    {
+      title: '30. Do Not Track (DNT) y Global Privacy Control (GPC)',
+      paras: [
+        '30.1. Si su navegador envía DNT/GPC, consideramos dichas señales en la medida en que sea técnicamente posible y lo exija la ley.'
+      ]
+    },
+
+    {
+      title: '31. Opciones de exclusión y ajustes de privacidad',
+      paras: [
+        '31.1. Puede desactivar cookies/analítica no esenciales, darse de baja de correos no relacionados con el servicio y limitar permisos del bot.',
+        '31.2. Los mecanismos básicos de seguridad/funcionalidad pueden requerir tratamiento mínimo y no pueden desactivarse.'
+      ]
+    },
+
+    {
+      title: '32. Accesibilidad, idiomas e interpretación',
+      paras: [
+        '32.1. Proporcionamos textos en varios idiomas. En caso de discrepancia entre versiones, la versión en inglés puede tener prioridad a efectos de interpretación jurídica.',
+        '32.2. Las traducciones procuran mantener la equivalencia jurídica.'
+      ]
+    },
+
+    {
+      title: '33. Almacenes y ubicación de datos',
+      paras: [
+        '33.1. Bases de datos operativas: SGBD relacionales y/o orientadas a documentos, desplegadas en arquitectura multizona con redundancia y replicación.',
+        '33.2. Cachés y colas: clústeres/streams/colas de Redis para acelerar sesiones, lógica antiabuso y artefactos temporales.',
+        '33.3. Almacenamiento de objetos: conservación de medios cargados por usuarios y copias de seguridad con políticas gestionadas de versionado y ciclo de vida.',
+        '33.4. Copias de seguridad: backups periódicos, verificación de restauración, segregación de derechos de acceso, cifrado en reposo.',
+        '33.5. Integraciones de autorización: los proveedores de identidad (Google, Apple, Twitter/X, Discord, Telegram) nos proporcionan tokens/confirmaciones; no almacenamos sus contraseñas ni gestionamos sus bases de datos internas.',
+        '33.6. Geografía: los datos pueden tratarse en infraestructura multirregional para resiliencia y rendimiento, aplicando mecanismos legales de transferencia internacional.'
+      ]
+    },
+
+    {
+      title: '34. Vigencia y versiones de la Política',
+      paras: [
+        '34.1. La Política entra en vigor a partir de la fecha de «Actualizado» indicada arriba.',
+        '34.2. Podemos conservar versiones anteriores con fines de archivo y transparencia de cambios.'
+      ]
+    },
+
+    {
+      title: 'Anexo A: Glosario',
+      paras: [
+        'A.1. Responsable del tratamiento: persona/organización que determina los fines y medios del tratamiento de datos personales.',
+        'A.2. Encargado del tratamiento: persona/organización que trata datos por encargo del responsable.',
+        'A.3. Datos personales: cualquier información sobre una persona identificada o identificable.',
+        'A.4. Transferencia internacional: transferencia de datos personales fuera del país/región donde se recopilaron inicialmente.'
+      ]
+    },
+
+    {
+      title: 'Anexo B: Categorías de subencargados',
+      paras: [
+        'B.1. Alojamiento/cómputo y orquestación de contenedores.',
+        'B.2. CDN y entrega de contenido en el borde.',
+        'B.3. Bases de datos (SQL/NoSQL) y cachés Redis.',
+        'B.4. Almacenes de objetos y sistemas de copias de seguridad.',
+        'B.5. Monitorización/registro/trazabilidad/seguimiento de errores.',
+        'B.6. Operadores de pago y pasarelas de confirmaciones on-chain.',
+        'B.7. Proveedores de mensajería (email/Telegram) y servicios de colas.',
+        'B.8. Indexación de datos de blockchain/feeds de mercado y plataformas analíticas.'
+      ]
+    }
   ]
 };
+
 
 
 // Применяем патч без ломки существующего словаря:
@@ -2690,445 +4981,702 @@ try {
 const I18nContext = createContext({ t: (k) => k, lang: 'en', setLang: () => {} })
 // ===== Subscribe page dictionary (7 langs) — MARKETING EDITION =====
 const SUBSCRIBE_EN = {
-  sub_title: 'Subscribe',
+  sub_title: 'Subscription',
   sub_intro:
-    'Activate your edge. Connect your wallet to unlock live trading intelligence, effortless automation, and a clear roadmap to disciplined decisions. Choose your pace — explore with Free, accelerate with PRO, or dominate with VIP.',
-  sub_wallet_cta: 'Connect Wallet',
-  sub_wallet_cta_note: 'Connect your wallet to activate your plan.',
+    'Quantum L7 is not "just another service" but a unified decision-making framework. 87 TB of market data, 37 billion historical candles across-chains, cross-exchange aggregation, liquidity normalization, and latency-aware processing. One account opens the Web MiniApp, Telegram bot QL7 AI Bot, and the Forum with QCoin mining. The MiniApp runs in Telegram and on the web; exchange recommendations are already delivered in real time (trading core and execution are in the final stage). VIP+ provides unlimited AI analytics time, X2 quest multipliers, and bonus QCoin accruals for media content (video/images/audio) that passes scoring by the Quantum L7 AI engine. Payment is via NowPayments: once on-chain confirmation arrives, access is activated instantly and synchronized across MiniApp/bot/forum. Ahead — the launch of the next-generation L7 blockchain: VIPs receive a higher priority tier for distribution and QCoin withdrawal queue, early access to staking/validator roles, and increased limits. Seven interface languages, precise wallet integration, strict risk management discipline, and “entry windows” without noise — everything to keep you in the market flow.',
+
+  sub_wallet_cta: 'Connect wallet',
+  sub_wallet_cta_note: 'Connect your wallet — the plan will activate and sync with MiniApp/Telegram/forum.',
   sub_plans_title: 'Plans',
-  sub_free_title: 'FREE — explore & feel the flow',
-  sub_free_desc: `
-    • 3-day access to experience the platform without commitments.<br/>
-    • 1 manual “Signal Now” per day to feel the timing and rhythm.<br/>
-    • See how ideas are framed into simple, actionable cards.<br/>
-    • Perfect for first touch: interface, language, and overall vibe.<br/>
-    • Upgrade anytime — your journey is entirely in your hands.<br/>
-  `,
-  sub_pro_title: 'PRO — pace, clarity, control',
-  sub_pro_price: 'Price: 10 USDT / week',
-  sub_pro_desc: `
-    • Daily flow tuned for intraday decisions without noise overload.<br/>
-    • Structured rhythm to plan entries, manage risk, and review outcomes.<br/>
-    • Sharper context around market sessions and momentum shifts.<br/>
-    • Flexible enough for workday trading or evening sessions.<br/>
-    • Priority assistance when you need a human touch.<br/>
-    • Upgrade/extend anytime — your time never goes to waste.<br/>
-  `,
-  sub_vip_title: 'VIP — full frequency, full focus',
-  sub_vip_price: 'Price: 30 USDT / week',
+
+  sub_vip_title: 'VIP+ — X2 QCoin, premium AI channel, media posting, L7 network priority',
+  sub_vip_price: 'Price: 30 USDT / month',
   sub_vip_desc: `
-    • Maximum cadence for traders who live the market clock.<br/>
-    • Early access to premium tools and exclusive reports.<br/>
-    • Deep coverage across assets — ready when opportunities pop.<br/>
-    • Personal-feel feedback channel for fast iteration of ideas.<br/>
-    • Recognition inside the platform — the VIP mark speaks for itself.<br/>
-    • Designed for speed, precision, and decisive execution.<br/>
+    • Unified VIP layer: MiniApp + Telegram + Web — status and limits everywhere, with no discrepancies or delays.<br/>
+    • Forum mining: every 4 hours confirm your activity and record QCoin; VIP gets X2 to time and X2 quest multiplier.<br/>
+    • Media posting (VIP): videos/images/audio are processed by Quantum L7 AI scoring (quality, engagement, anti-spam/anti-sybil) and converted into boosted QCoin bonuses.<br/>
+    • Market recommendations: symbol/TF signals already work; advanced volatility analysis, volume clustering, and what-if/backtest are prioritized for VIP.<br/>
+    • Telegram QL7 AI Bot: extended quotas, priority responses, X2 “on-chain clarity” windows during turbulence peaks.<br/>
+    • NowPayments: crypto payment (USDT and others) with instant activation after on-chain confirmation — no screenshots or manual checks.<br/>
+    • L7 blockchain (upcoming release): VIPs — top layers of the QCoin withdrawal queue, higher caps, early access to validator/staking and technical beta channels.<br/>
+    • Forum profile: gold badge, boosted visibility, extended media limits, faster moderation, and higher content weight in ranking.<br/>
+    • Localization in 7 languages and adaptive UX from mobile Telegram to desktop web — one interface, different environments, zero friction.<br/>
+    • For those who need pace: precise entries/SL/TP, clean risk contour, transparent calculations, and fair reward economy.<br/>
   `,
-  sub_benefits_title: 'Why traders choose us',
+
+  sub_benefits_title: 'Why Choose Us',
   sub_benefits: [
-    'Actionable signal cards distilled from complex data — no clutter.',
-    'Clear timing windows so you act with purpose, not panic.',
-    'Consistent multi-language interface — switch, don’t stumble.',
-    'Frictionless plan upgrades and extensions when momentum is on your side.',
-    'Weekly highlights that cut through noise and keep you on track.',
-    'A community mindset: we grow together, one decision at a time.',
+    'Institutional-grade data: 87 TB, 37 billion candles, cross-exchange liquidity aggregator, unified tick frequency and order book depth.',
+    'MiniApp + Telegram + Forum: one subscription = shared quotas, rights, and progress; context switching without state loss.',
+    'QCoin economy: activity every 4 hours, quests, media posting; VIP gets X2 time/quest multiplier and increased content weight.',
+    'AI analytics without noise: focus on entry/exit windows, SL/TP, risk profile, and real horizons — not on “news” noise.',
+    'Market microstructure: spread dispersion, impact volumes, imbalances, VWAP/POC scenarios, and behavioral patterns — delivered concisely.',
+    'NowPayments onboarding: crypto payment and instant activation; no manual confirmations.',
+    'Road to L7-chain: VIP — top priority tier for QCoin withdrawal, staking, and validator programs at network launch.',
+    'Anti-sybil/anti-fraud pipelines: behavioral metrics, anti-manipulation protection, and fair distribution model.',
+    'Premium AI bandwidth: higher request frequency, shorter latency, priority processing.',
+    'Research and alpha features: experimental indicators, private channels, early betas for advanced users.',
+    'Multi-jurisdictional localization: 7 languages, unified signal semantics, and interface without “broken” translations.',
+    'Lag-free experience: lightweight front-end, adaptive panels, seamless flow between bot, forum, and MiniApp.',
+    'Support for speed: VIP tickets are handled with short SLA and priority escalation.',
   ],
-  sub_payments_title: 'Start in minutes',
+
+  sub_payments_title: 'Start in Minutes',
   sub_payments: [
-    'Pick a plan, connect your wallet, confirm — and you’re in.',
-    'Pay in popular assets you already use across major networks.',
-    'Your access updates instantly once payment is confirmed.',
-    'No manual addresses, no screenshots, no back-and-forth.',
+    '1) Connect your wallet — your account will link with MiniApp/Telegram/forum.',
+    '2) Choose VIP+ and pay via NowPayments (USDT and other networks).',
+    '3) Once on-chain confirmation arrives, the subscription activates automatically — no screenshots or emails.',
+    '4) Status and limits sync across all points: MiniApp, QL7 AI Bot, Forum.',
+    '5) Enable QCoin mining: confirm activity every 4 hours + quests; VIP gets X2.',
+    '6) Publish media: Quantum L7 AI will evaluate and grant bonus QCoin according to scoring.',
+    '7) Follow the exchange and L7-chain release: VIPs are first in withdrawal queues and early roles in the network.',
+    '8) Manage risks: use SL/TP, maintain position size, don’t overtrade volatility.',
+    '9) Update your plan seamlessly: upgrade and renew in a few clicks, remaining time carries over.',
+    '10) Keep your access: single account, local auth markers, and session fail protection.',
   ],
+
   sub_legal_note:
-    'All information is educational and analytical — not financial advice. Trading involves risk. Stay disciplined with position sizing and protective stops.',
+    'We provide analytics and tools — not financial advice. Volatility is high; control your risks, position size, and execution discipline.',
+
   sub_faq_title: 'FAQ',
   sub_faq: [
-    { q: 'What makes Free valuable?', a: 'It lets you test the rhythm and flow risk-free for 3 days — perfect to learn how the interface and signal cards fit your style.' },
-    { q: 'Who is PRO for?', a: 'Intraday traders who want pace and clarity without overload — structured timing, clean context, and room to execute.' },
-    { q: 'Who is VIP for?', a: 'Active pros who need maximum cadence, early access to premium content, and the fastest turnaround on insights.' },
-    { q: 'Can I switch plans later?', a: 'Yes. You can upgrade or extend anytime — your remaining time carries over with no friction.' },
-    { q: 'How fast do I start?', a: 'Right after your payment is confirmed — your access switches on instantly.' },
+    {
+      q: 'What is MiniApp and how is it different from a regular website?',
+      a: 'It’s a cross-platform interface (web + Telegram) with a single account and synchronized limits; requires no installation and opens instantly.'
+    },
+    {
+      q: 'How does QCoin mining on the forum work?',
+      a: 'Every 4 hours you confirm activity and record rewards; tasks/quests and media posting boost profitability. VIP gets X2 in time and X2 in quests.'
+    },
+    {
+      q: 'What does VIP+ provide right now?',
+      a: 'Priority AI channel, media posting with QCoin bonuses and gold badge, increased content weight, early access to experimental indicators, and accelerated support.'
+    },
+    {
+      q: 'What market data do we use?',
+      a: 'Aggregated historical series — 87 TB, 37 billion candles, cross-exchange unification, microstructure and behavioral pattern analysis considering liquidity and spread.'
+    },
+    {
+      q: 'How is the subscription activated and why is it instant?',
+      a: 'Payment goes through NowPayments; as soon as the transaction is confirmed on-chain, VIP status is automatically enabled across all components.'
+    },
+    {
+      q: 'How will VIP affect the future L7 blockchain?',
+      a: 'VIPs receive priority in distributions and first in line for QCoin withdrawals, higher limits, early validator/staker roles, and access to technical beta channels.'
+    },
+    {
+      q: 'Can the plan be upgraded without losing time?',
+      a: 'Yes. Upgrading takes a couple of clicks; unused time carries over and accumulates.'
+    },
+    {
+      q: 'Which languages are supported?',
+      a: 'Seven locales with unified signal terminology; switching is instant and does not break the interface layout.'
+    },
+    {
+      q: 'Are there any verification requirements?',
+      a: 'Anti-sybil/anti-fraud mechanics and behavioral filters are in place; in risky signals, the system may request additional verification.'
+    },
   ],
 }
 
 const SUBSCRIBE_RU = {
   sub_title: 'Подписка',
   sub_intro:
-    'Активируйте преимущество. Подключите кошелёк — и откройте доступ к живой рыночной аналитике, аккуратной автоматике и понятной дисциплине решений. Выбирайте темп: познакомиться на Free, ускориться на PRO, доминировать на VIP.',
+    'Quantum L7 — это не «ещё один сервис», а единый контур принятия решений. 87 ТБ рыночных данных, 37 млрд исторических свечей across-chains, кросс-эксчендж-агрегация, нормализация ликвидности и latency-aware обработка. Один аккаунт открывает Web-MiniApp, Telegram-бота QL7 AI Bot и Форум с QCoin-майнингом. MiniApp живёт в Telegram и в вебе, рекомендации по бирже уже отдаются в реальном времени (торговое ядро и исполнение — на финальной стадии). VIP+ даёт безлимит времени ИИ-аналитики, X2 квест-множители и бонусные QCoin-начисления за медиаконтент (видео/изображения/аудио), который проходит скоринг движком Quantum L7 AI. Оплата — через NowPayments: как только on-chain подтверждение прилетело, доступ включается мгновенно и синхронизируется в MiniApp/боте/форуме. Впереди — запуск L7-блокчейна нового поколения: VIP получают повышенный priority tier на распределение и очередь вывода QCoin, ранний доступ к стейкингу/валидаторским ролям и повышенные лимиты. Семь языков интерфейса, аккуратная связка кошелька, строгая дисциплина риск-менеджмента и «окна входа» без шума — всё, чтобы держать тебя в рыночном потоке.',
+
   sub_wallet_cta: 'Подключить кошелёк',
-  sub_wallet_cta_note: 'Подключите кошелёк, чтобы активировать план.',
+  sub_wallet_cta_note: 'Подключите кошелёк — план активируется и синхронизируется с MiniApp/Telegram/форумом.',
   sub_plans_title: 'Тарифы',
-  sub_free_title: 'FREE — узнать и прочувствовать',
-  sub_free_desc: `
-    • 3 дня, чтобы спокойно освоиться без обязательств.<br/>
-    • 1 ручной «Сигнал сейчас» в день — почувствовать ритм и тайминг.<br/>
-    • Идеи — в виде понятных карточек, без информационного шума.<br/>
-    • Отлично для первого касания: интерфейс, язык, общий вайб.<br/>
-    • Переход на платный — когда захотите, без давления.<br/>
-  `,
-  sub_pro_title: 'PRO — темп, ясность, контроль',
-  sub_pro_price: 'Цена: 10 USDT / неделя',
-  sub_pro_desc: `
-    • Ежедневный ритм для внутридневных решений без перегруза.<br/>
-    • Структура, которая помогает планировать входы и управлять риском.<br/>
-    • Больше контекста по сессиям и сменам импульса.<br/>
-    • Гибко сочетается с рабочим днём или вечерней торговлей.<br/>
-    • Приоритетная помощь там, где важно участие человека.<br/>
-    • Апгрейд/продление в любой момент — время не пропадает.<br/>
-  `,
-  sub_vip_title: 'VIP — максимальная частота, максимальный фокус',
-  sub_vip_price: 'Цена: 30 USDT / неделя',
+
+  sub_vip_title: 'VIP+ — X2 QCoin, премиальный AI-канал, медиапостинг, приоритет L7-сети',
+  sub_vip_price: 'Цена: 30 USDT / месяц',
   sub_vip_desc: `
-    • Максимальный темп для тех, кто живёт по рыночным часам.<br/>
-    • Ранний доступ к премиум-материалам и эксклюзивным отчётам.<br/>
-    • Глубокое покрытие активов — готовность к моменту «сейчас».<br/>
-    • Быстрый канал обратной связи для ускорения идей.<br/>
-    • Узнаваемость в платформе — знак VIP говорит сам за себя.<br/>
-    • Для скорости, точности и уверенного исполнения.<br/>
+    • Единый VIP-слой: MiniApp + Telegram + Веб — статус и лимиты везде, без расхождений и задержек.<br/>
+    • Форум-майнинг: каждые 4 часа подтверждай активность и фиксируй QCoin; VIP получает X2 ко времени и X2 квест-мультипликатор.<br/>
+    • Медиапостинг (VIP): видео/изображения/аудио проходят Quantum L7 AI-скоринг (quality, engagement, anti-spam/anti-sybil) и конвертятся в повышенные QCoin-бонусы.<br/>
+    • Рекомендации по рынку: сигналы по символам/TF уже работают; углублённый анализ волатильности, кластеризация объёмов и what-if/backtest доступны в приоритете для VIP.<br/>
+    • Telegram QL7 AI Bot: расширенные квоты, приоритет ответа, X2 окна «on-chain clarity» в пиках турбулентности.<br/>
+    • NowPayments: крипто-оплата (USDT и др.) с мгновенной активацией после on-chain подтверждения — без скринов и мануальных проверок.<br/>
+    • L7-блокчейн (грядущий релиз): VIP — верхние слои очереди на вывод QCoin, повышенные капы, ранний доступ к валидаторам/стейкингу и техническим бета-каналам.<br/>
+    • Профиль на форуме: золотой бейдж, буст выдачи, расширенные лимиты на медиа, ускоренная модерация и повышенный вес контента в ранжировании.<br/>
+    • Локализация на 7 языках и адаптивный UX от мобильного Telegram до десктопного веба — один интерфейс, разные среды, ноль трения.<br/>
+    • Для тех, кому нужен темп: precise entries/SL/TP, риск-контур без лишней «пены», прозрачность расчётов и честная экономика наград.<br/>
   `,
+
   sub_benefits_title: 'Почему выбирают нас',
   sub_benefits: [
-    'Карточки сигналов: суть из сложных данных — без визуального мусора.',
-    'Понятные окна времени: действуете осознанно, а не в панике.',
-    'Единый интерфейс на 7 языках — переключайтесь, не спотыкаясь.',
-    'Планы масштабируются: апгрейд и продление без трения.',
-    'Еженедельные выжимки, которые ведут, а не отвлекают.',
-    'Комьюнити-подход: растём вместе, решение за решением.',
+    'Данные институционального уровня: 87 ТБ, 37 млрд свечей, кросс-биржевой агрегат ликвидности, унификация тик-частоты и глубины стаканов.',
+    'MiniApp + Telegram + Форум: одна подписка = общие квоты, права и прогресс; переключение контекстов без потери состояния.',
+    'QCoin-экономика: активность каждые 4 часа, квесты, медиапостинг; VIP получает X2 время/квест-мультипликатор и повышенный вес контента.',
+    'AI-аналитика без шума: фокус на окнах входа/выхода, SL/TP, риск-профиле и реальных горизонтах, а не на «новостном» шуме.',
+    'Market microstructure: дисперсия спрэда, ударные объёмы, имбалансы, VWAP/POC-сценарии и поведенческие паттерны — в лаконичной подаче.',
+    'NowPayments-онбординг: оплата в крипто и моментальная активация; никаких ручных подтверждений.',
+    'Road to L7-chain: VIP — верхний priority tier для вывода QCoin, стейкинга и валидаторских программ при запуске сети.',
+    'Anti-sybil/anti-fraud пайплайны: поведенческие метрики, защита от накруток и честная распределительная модель.',
+    'Премиальный AI-бэндвидт: больше частоты запросов, более короткие задержки, приоритетная обработка.',
+    'Ресёрч и альфа-фичи: экспериментальные индикаторы, закрытые каналы, ранние беты для продвинутых пользователей.',
+    'Мультиюридическая локализация: 7 языков, единая семантика сигналов и интерфейс без «ломающего» перевода.',
+    'Опыт без лагов: лёгкий фронт, адаптивные панели, бесшовный flow между ботом, форумом и MiniApp.',
+    'Поддержка для темпа: VIP-тикеты обрабатываются с коротким SLA и приоритетной эскалацией.',
   ],
+
   sub_payments_title: 'Старт за минуты',
   sub_payments: [
-    'Выберите план, подключите кошелёк, подтвердите — и вы в деле.',
-    'Оплачивайте популярными активами в привычных сетях.',
-    'Доступ включается сразу после подтверждения платежа.',
-    'Без ручных адресов, скриншотов и долгой переписки.',
+    '1) Подключите кошелёк — аккаунт свяжется с MiniApp/Telegram/форумом.',
+    '2) Выберите VIP+ и оплатите через NowPayments (USDT и другие сети).',
+    '3) По on-chain подтверждению подписка активируется автоматически — без скринов и писем.',
+    '4) Статус и лимиты синхронизируются во всех точках: MiniApp, QL7 AI Bot, Форум.',
+    '5) Включайте QCoin-майнинг: каждые 4 часа подтверждение активности + квесты; для VIP действует X2.',
+    '6) Публикуйте медиа: Quantum L7 AI оценит и начислит бонусные QCoin согласно скорингу.',
+    '7) Следите за релизом биржи и L7-чейна: VIP — первые в очередях на вывод и ранние роли в сети.',
+    '8) Менеджьте риски: используйте SL/TP, выдерживайте размер позиции, не переторговывайте волатильность.',
+    '9) Обновляйте план без трения: апгрейд и продление в пару кликов, остаток переносится.',
+    '10) Храните доступ: единый аккаунт, локальные маркеры авторизации и защита от сбоев сессии.',
   ],
+
   sub_legal_note:
-    'Вся информация — образовательная и аналитическая, не финсовет. Торговля связана с риском. Дисциплина, размер позиции и защитные стопы — обязательны.',
+    'Мы предоставляем аналитику и инструменты — не финансовые рекомендации. Волатильность высока; контролируйте риски, размер позиции и соблюдайте дисциплину исполнения.',
+
   sub_faq_title: 'FAQ',
   sub_faq: [
-    { q: 'Зачем Free?', a: '3 дня, чтобы безопасно прочувствовать ритм: интерфейс, карточки, подача — поймёте, как это ложится на ваш стиль.' },
-    { q: 'Кому подойдёт PRO?', a: 'Тем, кто торгует внутри дня и ценит темп без перегруза: структурированный тайминг и чистый контекст.' },
-    { q: 'Кому нужен VIP?', a: 'Активным профи, кому важна максимальная частота, премиум-контент и быстрый цикл обратной связи.' },
-    { q: 'Можно менять план?', a: 'Да, апгрейд и продление доступны в любой момент; остаток времени сохраняется.' },
-    { q: 'Когда начинается доступ?', a: 'Сразу после подтверждения платежа — без задержек и лишних действий.' },
+    {
+      q: 'Что такое MiniApp и чем он отличается от обычного сайта?',
+      a: 'Это кросс-платформенный интерфейс (веб + Telegram) с единым аккаунтом и синхронизированными лимитами; не требует установок и открывается мгновенно.'
+    },
+    {
+      q: 'Как устроен QCoin-майнинг на форуме?',
+      a: 'Каждые 4 часа подтверждаете активность и фиксируете награду; задания/квесты и медиапостинг усиливают доходность. VIP получает X2 по времени и X2 по квестам.'
+    },
+    {
+      q: 'Что даёт VIP+ прямо сейчас?',
+      a: 'Приоритетный AI-канал, медиапостинг с QCoin-бонусами и золотой бейдж, повышенный вес контента, ранний доступ к экспериментальным индикаторам и ускоренная поддержка.'
+    },
+    {
+      q: 'Какие рыночные данные мы используем?',
+      a: 'Агрегированные исторические ряды — 87 ТБ, 37 млрд свечей, cross-exchange унификация, анализ микроструктуры и поведенческих паттернов с учётом ликвидности и спрэда.'
+    },
+    {
+      q: 'Как активируется подписка и почему она мгновенная?',
+      a: 'Оплата проходит через NowPayments; как только транзакция подтверждена on-chain, статус VIP включается автоматически во всех компонентах.'
+    },
+    {
+      q: 'Как VIP повлияет на будущий L7-блокчейн?',
+      a: 'VIP получает приоритет в распределениях и первой очереди на вывод QCoin, повышенные лимиты, ранние роли валидаторов/стейкеров и доступ к техническим бета-каналам.'
+    },
+    {
+      q: 'Можно ли апгрейдить план без потери времени?',
+      a: 'Да. Апгрейд выполняется в пару кликов; неиспользованный остаток переносится и суммируется.'
+    },
+    {
+      q: 'Какие языки поддерживаются?',
+      a: 'Семь локалей с едиными терминами сигналов; переключение мгновенное и не ломает разметку интерфейса.'
+    },
+    {
+      q: 'Есть ли требования к верификации?',
+      a: 'Работают anti-sybil/anti-fraud механики и поведенческие фильтры; при рисковых сигналах система может запросить дополнительное подтверждение.'
+    },
   ],
 }
 
 const SUBSCRIBE_UK = {
   sub_title: 'Підписка',
   sub_intro:
-    'Увімкніть перевагу. Під’єднайте гаманець — і відкрийте живу аналітику, легку автоматизацію та дисципліну рішень. Оберіть темп: познайомтеся на Free, пришвидшіть PRO або домінуйте з VIP.',
-  sub_wallet_cta: 'Під’єднати гаманець',
-  sub_wallet_cta_note: 'Під’єднайте гаманець, щоб активувати план.',
+    'Quantum L7 — це не «ще один сервіс», а єдиний контур ухвалення рішень. 87 ТБ ринкових даних, 37 млрд історичних свічок across-chains, крос-ексчендж-агрегація, нормалізація ліквідності та latency-aware обробка. Один акаунт відкриває Web-MiniApp, Telegram-бота QL7 AI Bot і Форум із QCoin-майнінгом. MiniApp працює в Telegram і на вебі, рекомендації по біржі вже видаються в реальному часі (торгове ядро та виконання — на фінальній стадії). VIP+ дає безліміт часу ІІ-аналітики, X2 квест-множники та бонусні QCoin-нарахування за медіаконтент (відео/зображення/аудіо), який проходить скоринг рушієм Quantum L7 AI. Оплата — через NowPayments: щойно on-chain підтвердження надійшло, доступ вмикається миттєво та синхронізується в MiniApp/боті/форумі. Попереду — запуск L7-блокчейну нового покоління: VIP отримують підвищений priority tier на розподіл і чергу виведення QCoin, ранній доступ до стейкінгу/валідаторських ролей і підвищені ліміти. Сім мов інтерфейсу, акуратна зв’язка гаманця, сувора дисципліна ризик-менеджменту та «вікна входу» без шуму — усе, щоб тримати тебе в ринковому потоці.',
+
+  sub_wallet_cta: 'Підключити гаманець',
+  sub_wallet_cta_note: 'Підключи гаманець — план активується та синхронізується з MiniApp/Telegram/форумом.',
   sub_plans_title: 'Тарифи',
-  sub_free_title: 'FREE — відчути ритм',
-  sub_free_desc: `
-    • 3 дні, щоб спокійно спробувати без зобов’язань.<br/>
-    • 1 ручний «Сигнал зараз» на добу — відчути таймінг і подачу.<br/>
-    • Ідеї у вигляді зрозумілих карток без зайвого шуму.<br/>
-    • Чудово для першого знайомства: інтерфейс, мова, стиль.<br/>
-    • Переходьте на платний у будь-який момент — все під контролем.<br/>
-  `,
-  sub_pro_title: 'PRO — темп і ясність',
-  sub_pro_price: 'Ціна: 10 USDT / тиждень',
-  sub_pro_desc: `
-    • Щоденний ритм для інтрадей-рішень без перевантаження.<br/>
-    • Структура для планування входів і керування ризиком.<br/>
-    • Більше контексту щодо сесій та імпульсів ринку.<br/>
-    • Гнучко поєднується з роботою або вечірньою торгівлею.<br/>
-    • Пріоритетна допомога, коли важлива увага людини.<br/>
-    • Апгрейд/продовження будь-коли — час не зникає.<br/>
-  `,
-  sub_vip_title: 'VIP — максимальна частота',
-  sub_vip_price: 'Ціна: 30 USDT / тиждень',
+
+  sub_vip_title: 'VIP+ — X2 QCoin, преміальний AI-канал, медіапостинг, пріоритет L7-мережі',
+  sub_vip_price: 'Ціна: 30 USDT / місяць',
   sub_vip_desc: `
-    • Найвищий темп для тих, хто живе ринковим годинником.<br/>
-    • Перший доступ до преміум-матеріалів та ексклюзивних оглядів.<br/>
-    • Глибоке покриття активів — готовність до моменту «зараз».<br/>
-    • Швидкий фідбек-канал для ідей і покращень.<br/>
-    • Відзнака всередині платформи — статус VIP говорить сам за себе.<br/>
-    • Для швидкості, точності та впевненого виконання.<br/>
+    • Єдиний VIP-рівень: MiniApp + Telegram + Веб — статус і ліміти всюди, без розбіжностей і затримок.<br/>
+    • Форум-майнінг: кожні 4 години підтверджуй активність і фіксуй QCoin; VIP отримує X2 до часу та X2 квест-мультиплікатор.<br/>
+    • Медіапостинг (VIP): відео/зображення/аудіо проходять Quantum L7 AI-скоринг (quality, engagement, anti-spam/anti-sybil) і конвертуються в підвищені QCoin-бонуси.<br/>
+    • Рекомендації по ринку: сигнали по символах/TF уже працюють; поглиблений аналіз волатильності, кластеризація обсягів і what-if/backtest доступні з пріоритетом для VIP.<br/>
+    • Telegram QL7 AI Bot: розширені квоти, пріоритет відповіді, X2 вікна «on-chain clarity» у піки турбулентності.<br/>
+    • NowPayments: крипто-оплата (USDT та ін.) з миттєвою активацією після on-chain підтвердження — без скрінів і ручних перевірок.<br/>
+    • L7-блокчейн (майбутній реліз): VIP — верхні рівні черги на виведення QCoin, підвищені капи, ранній доступ до валідаторів/стейкінгу та технічних бета-каналів.<br/>
+    • Профіль на форумі: золота відзнака, буст видачі, розширені ліміти на медіа, прискорена модерація та підвищена вага контенту в ранжуванні.<br/>
+    • Локалізація на 7 мовах і адаптивний UX від мобільного Telegram до десктопного вебу — один інтерфейс, різні середовища, нуль тертя.<br/>
+    • Для тих, кому потрібен темп: precise entries/SL/TP, ризик-контур без зайвої «піни», прозорість розрахунків і чесна економіка винагород.<br/>
   `,
-  sub_benefits_title: 'Чому нас обирають',
+
+  sub_benefits_title: 'Чому обирають нас',
   sub_benefits: [
-    'Зрозумілі картки сигналів — суть без зайвого інформаційного шуму.',
-    'Чіткі часові вікна — дієте усвідомлено, а не в паніці.',
-    'Єдиний інтерфейс 7 мовами — перемикайтесь без бар’єрів.',
-    'Гнучкі плани та просте продовження — коли є імпульс, не гальмуйте.',
-    'Щотижневі вижимки — тримають у фокусі важливе.',
-    'Мислення спільноти: зростаємо разом, рішення за рішенням.',
+    'Дані інституційного рівня: 87 ТБ, 37 млрд свічок, крос-біржовий агрегат ліквідності, уніфікація тік-частоти та глибини стаканів.',
+    'MiniApp + Telegram + Форум: одна підписка = спільні квоти, права і прогрес; перемикання контекстів без втрати стану.',
+    'QCoin-економіка: активність кожні 4 години, квести, медіапостинг; VIP отримує X2 час/квест-мультиплікатор і підвищену вагу контенту.',
+    'AI-аналітика без шуму: фокус на вікнах входу/виходу, SL/TP, ризик-профілі та реальних горизонтах, а не на «новинному» шумі.',
+    'Market microstructure: дисперсія спреду, ударні обсяги, імбаланси, VWAP/POC-сценарії та поведінкові патерни — у лаконічній подачі.',
+    'NowPayments-онбординг: оплата в крипто і миттєва активація; ніяких ручних підтверджень.',
+    'Road to L7-chain: VIP — верхній priority tier для виведення QCoin, стейкінгу та валідаторських програм під час запуску мережі.',
+    'Anti-sybil/anti-fraud пайплайни: поведінкові метрики, захист від накруток і чесна розподільна модель.',
+    'Преміальний AI-бендвідт: більша частота запитів, коротші затримки, пріоритетна обробка.',
+    'Ресерч і альфа-фічі: експериментальні індикатори, закриті канали, ранні бети для просунутих користувачів.',
+    'Мультиюридична локалізація: 7 мов, єдина семантика сигналів і інтерфейс без «зламаного» перекладу.',
+    'Досвід без лагів: легкий фронт, адаптивні панелі, безшовний flow між ботом, форумом і MiniApp.',
+    'Підтримка для темпу: VIP-тікет обробляються з коротким SLA і пріоритетною ескалацією.',
   ],
-  sub_payments_title: 'Почніть за кілька хвилин',
+
+  sub_payments_title: 'Старт за хвилини',
   sub_payments: [
-    'Обирайте план, під’єднуйте гаманець, підтверджуйте — і вперед.',
-    'Оплачуйте популярними активами у звичних мережах.',
-    'Доступ вмикається одразу після підтвердження платежу.',
-    'Без ручних адрес і зайвої бюрократії.',
+    '1) Підключіть гаманець — акаунт зв’яжеться з MiniApp/Telegram/форумом.',
+    '2) Оберіть VIP+ і оплатіть через NowPayments (USDT та інші мережі).',
+    '3) Після on-chain підтвердження підписка активується автоматично — без скрінів і листів.',
+    '4) Статус і ліміти синхронізуються в усіх точках: MiniApp, QL7 AI Bot, Форум.',
+    '5) Вмикайте QCoin-майнінг: кожні 4 години підтвердження активності + квести; для VIP діє X2.',
+    '6) Публікуйте медіа: Quantum L7 AI оцінить і нарахує бонусні QCoin згідно зі скорингом.',
+    '7) Слідкуйте за релізом біржі та L7-чейну: VIP — перші в чергах на виведення та ранні ролі в мережі.',
+    '8) Керуйте ризиками: використовуйте SL/TP, дотримуйтесь розміру позиції, не переторговуйте волатильність.',
+    '9) Оновлюйте план без тертя: апгрейд і продовження в кілька кліків, залишок переноситься.',
+    '10) Зберігайте доступ: єдиний акаунт, локальні маркери авторизації та захист від збоїв сесії.',
   ],
+
   sub_legal_note:
-    'Інформація має освітній та аналітичний характер і не є фінансовою порадою. Торгівля ризикована — використовуйте розмір позиції та захисні стопи.',
+    'Ми надаємо аналітику та інструменти — не фінансові рекомендації. Волатильність висока; контролюйте ризики, розмір позиції та дотримуйтесь дисципліни виконання.',
+
   sub_faq_title: 'FAQ',
   sub_faq: [
-    { q: 'Навіщо Free?', a: '3 дні, щоб відчути ритм і стиль подачі — безкоштовно і без зобов’язань.' },
-    { q: 'Кому підійде PRO?', a: 'Тим, хто торгує всередині дня і цінує темп та ясність без зайвого шуму.' },
-    { q: 'Для кого VIP?', a: 'Для активних профі, яким потрібна максимальна частота та ранній доступ до преміум-матеріалів.' },
-    { q: 'Чи можна змінити план?', a: 'Так. Апгрейд і продовження доступні будь-коли; залишок зберігається.' },
-    { q: 'Коли стартує доступ?', a: 'Одразу після підтвердження платежу.' },
+    {
+      q: 'Що таке MiniApp і чим він відрізняється від звичайного сайту?',
+      a: 'Це кросплатформовий інтерфейс (веб + Telegram) з єдиним акаунтом і синхронізованими лімітами; не потребує встановлення і відкривається миттєво.'
+    },
+    {
+      q: 'Як влаштований QCoin-майнінг на форумі?',
+      a: 'Кожні 4 години підтверджуєте активність і фіксуєте нагороду; завдання/квести та медіапостинг підвищують дохідність. VIP отримує X2 за часом і X2 за квестами.'
+    },
+    {
+      q: 'Що дає VIP+ прямо зараз?',
+      a: 'Пріоритетний AI-канал, медіапостинг із QCoin-бонусами та золота відзнака, підвищена вага контенту, ранній доступ до експериментальних індикаторів і прискорена підтримка.'
+    },
+    {
+      q: 'Які ринкові дані ми використовуємо?',
+      a: 'Агреговані історичні ряди — 87 ТБ, 37 млрд свічок, cross-exchange уніфікація, аналіз мікроструктури та поведінкових патернів із урахуванням ліквідності та спреду.'
+    },
+    {
+      q: 'Як активується підписка і чому вона миттєва?',
+      a: 'Оплата проходить через NowPayments; як тільки транзакцію підтверджено on-chain, статус VIP вмикається автоматично у всіх компонентах.'
+    },
+    {
+      q: 'Як VIP вплине на майбутній L7-блокчейн?',
+      a: 'VIP отримує пріоритет у розподілах і першу чергу на виведення QCoin, підвищені ліміти, ранні ролі валідаторів/стейкерів і доступ до технічних бета-каналів.'
+    },
+    {
+      q: 'Чи можна апгрейдити план без втрати часу?',
+      a: 'Так. Апгрейд виконується в кілька кліків; невикористаний залишок переноситься і сумується.'
+    },
+    {
+      q: 'Які мови підтримуються?',
+      a: 'Сім локалей з єдиними термінами сигналів; перемикання миттєве й не ламає розмітку інтерфейсу.'
+    },
+    {
+      q: 'Чи є вимоги до верифікації?',
+      a: 'Працюють anti-sybil/anti-fraud механіки та поведінкові фільтри; у разі ризикових сигналів система може запросити додаткове підтвердження.'
+    },
   ],
 }
+
 
 const SUBSCRIBE_TR = {
   sub_title: 'Abonelik',
   sub_intro:
-    'Avantajınızı açın. Cüzdanı bağlayın ve canlı içgörüler, zahmetsiz otomasyon, disiplinli kararlar için net bir yol haritası elde edin. Temponuzu seçin: Free ile keşfedin, PRO ile hızlanın, VIP ile oyunu yönetin.',
-  sub_wallet_cta: 'Cüzdanı Bağla',
-  sub_wallet_cta_note: 'Planı etkinleştirmek için cüzdanınızı bağlayın.',
-  sub_plans_title: 'Paketler',
-  sub_free_title: 'FREE — ritmi hisset',
-  sub_free_desc: `
-    • 3 gün boyunca risksiz deneyim.<br/>
-    • Günde 1 manuel “Şimdi Sinyal” ile zamanlamayı ölç.<br/>
-    • Fikirler sade kartlarda, kafa karıştırmadan.<br/>
-    • Arayüz, dil ve akışı tanımak için harika başlangıç.<br/>
-    • Hazır olduğunda yükselt — kontrol sende.<br/>
-  `,
-  sub_pro_title: 'PRO — tempo ve netlik',
-  sub_pro_price: 'Fiyat: 10 USDT / hafta',
-  sub_pro_desc: `
-    • Gün içi kararlar için dengeli akış, gürültüsüz.<br/>
-    • Giriş planı, risk yönetimi ve sonuç değerlendirmesi için yapı.<br/>
-    • Seans dinamiklerine dair daha temiz bağlam.<br/>
-    • İş günü veya akşam seanslarına uyumlu esneklik.<br/>
-    • İhtiyaç duyduğunda öncelikli destek.<br/>
-    • İstediğin an yükselt/uzat — zaman boşa gitmez.<br/>
-  `,
-  sub_vip_title: 'VIP — tam frekans, tam odak',
-  sub_vip_price: 'Fiyat: 30 USDT / hafta',
+    'Quantum L7 “bir başka servis” değil, tekil bir karar alma çevrimidir. 87 TB piyasa verisi, zincirler-arası 37 milyar tarihsel mum, cross-exchange agregasyon, likidite normalizasyonu ve latency-aware işleme. Tek hesapla Web-MiniApp, QL7 AI Bot adlı Telegram botu ve QCoin madenciliği olan Foruma erişim açılır. MiniApp Telegram’da ve web’de yaşar; borsa tavsiyeleri hâlihazırda gerçek zamanlı veriliyor (ticaret çekirdeği ve yürütme — son aşamada). VIP+ sınırsız İA-analizi süresi, X2 görev/quest çarpanları ve Quantum L7 AI motorunun skorlama sürecinden geçen medya içerikleri (video/görseller/ses) için bonus QCoin tahakkukları sağlar. Ödeme — NowPayments üzerinden: on-chain onay düşer düşmez erişim anında açılır ve MiniApp/bot/forumda senkronize edilir. İleride — yeni nesil L7 blokzincirinin lansmanı: VIP’ler dağıtım ve QCoin çekim kuyruğunda yükseltilmiş priority tier, staking/validator rollerine erken erişim ve artırılmış limitler alır. Yedi arayüz dili, düzgün cüzdan bağlama, sıkı risk yönetimi disiplini ve gürültüsüz “giriş pencereleri” — seni piyasa akışında tutmak için her şey.',
+
+  sub_wallet_cta: 'Cüzdanı bağla',
+  sub_wallet_cta_note: 'Cüzdanı bağlayın — plan etkinleşir ve MiniApp/Telegram/forum ile senkronize edilir.',
+  sub_plans_title: 'Tarifeler',
+
+  sub_vip_title: 'VIP+ — X2 QCoin, premium AI kanal, medya gönderimi, L7 ağı önceliği',
+  sub_vip_price: 'Fiyat: 30 USDT / ay',
   sub_vip_desc: `
-    • Piyasayı yaşayanlar için maksimum kadans.<br/>
-    • Premium içerik ve özel raporlara erken erişim.<br/>
-    • Fırsatlar doğduğunda hazır, geniş kapsam.<br/>
-    • Hızlı geri bildirim kanalıyla fikirleri birlikte hızlandırın.<br/>
-    • Platform içinde tanınan VIP statüsü.<br/>
-    • Hız, hassasiyet ve kararlılık için tasarlandı.<br/>
+    • Tekil VIP katmanı: MiniApp + Telegram + Web — statü ve limitler her yerde, sapma ve gecikme olmadan.<br/>
+    • Forum madenciliği: her 4 saatte bir aktiviteyi onayla ve QCoin’i sabitle; VIP zaman için X2 ve görev/quest çarpanı için X2 alır.<br/>
+    • Medya gönderimi (VIP): video/görseller/ses Quantum L7 AI skorlama (quality, engagement, anti-spam/anti-sybil) sürecinden geçer ve artırılmış QCoin bonuslarına dönüştürülür.<br/>
+    • Piyasa tavsiyeleri: sembol/TF sinyalleri zaten çalışıyor; oynaklığın derinlemesine analizi, hacim kümeleme ve what-if/backtest VIP için öncelikli erişimdedir.<br/>
+    • Telegram QL7 AI Bot: genişletilmiş kotalar, yanıt önceliği, türbülans piklerinde X2 “on-chain clarity” pencereleri.<br/>
+    • NowPayments: on-chain onaydan sonra anında aktivasyonlu kripto ödeme (USDT ve diğerleri) — ekran görüntüsü ve manuel kontrol yok.<br/>
+    • L7 blokzinciri (yaklaşan sürüm): VIP — QCoin çekim kuyruğunun üst katmanları, artırılmış cap’ler, validator/staking ve teknik beta kanallarına erken erişim.<br/>
+    • Forum profili: altın rozet, gösterim boostu, medya için genişletilmiş limitler, hızlandırılmış moderasyon ve sıralamada içeriğin artırılmış ağırlığı.<br/>
+    • 7 dilde yerelleştirme ve mobil Telegram’dan masaüstü webe kadar uyarlanabilir UX — tek arayüz, farklı ortamlar, sıfır sürtünme.<br/>
+    • Hıza ihtiyacı olanlar için: precise entries/SL/TP, gereksiz “köpük” olmadan risk konturu, şeffaf hesaplamalar ve adil ödül ekonomisi.<br/>
   `,
+
   sub_benefits_title: 'Neden bizi seçiyorlar',
   sub_benefits: [
-    'Karmaşayı eleyen, eyleme dönük sinyal kartları.',
-    'Panik değil, amaçla hareket etmenizi sağlayan zaman pencereleri.',
-    '7 dilde tutarlı arayüz — takılmadan geçiş yapın.',
-    'Anlık yükseltme ve uzatma — momentumu kaçırmayın.',
-    'Haftalık öne çıkanlar — odağınızı koruyun.',
-    'Topluluk bakışı: her kararla birlikte büyüyoruz.',
+    'Kurumsal düzeyde veri: 87 TB, 37 milyar mum, borsa-ötesi likidite agregatörü, tik frekansının ve emir defteri derinliklerinin birleştirilmesi.',
+    'MiniApp + Telegram + Forum: tek abonelik = ortak kotalar, haklar ve ilerleme; durum kaybı olmadan bağlamlar arasında geçiş.',
+    'QCoin ekonomisi: her 4 saatte aktivite, görevler, medya gönderimi; VIP X2 zaman/quest çarpanı ve içeriğin artırılmış ağırlığını alır.',
+    'Gürültüsüz AI analitiği: giriş/çıkış pencerelerine, SL/TP’ye, risk profilene ve gerçek ufuklara odaklanma — “haber” gürültüsüne değil.',
+    'Market microstructure: spread dağılımı, darbe hacimleri, dengesizlikler, VWAP/POC senaryoları ve davranışsal pattern’ler — yalın sunumla.',
+    'NowPayments onboarding: kripto ile ödeme ve anında aktivasyon; hiçbir manuel onay yok.',
+    'Road to L7-chain: VIP — ağ lansmanında QCoin çekimi, staking ve validator programları için üst priority tier.',
+    'Anti-sybil/anti-fraud pipeline’lar: davranış metrikleri, manipülasyona karşı koruma ve adil dağıtım modeli.',
+    'Premium AI bant genişliği: daha yüksek istek sıklığı, daha kısa gecikmeler, öncelikli işleme.',
+    'Research ve alfa özellikleri: deneysel indikatörler, kapalı kanallar, ileri düzey kullanıcılar için erken betalar.',
+    'Çok yargı alanlı yerelleştirme: 7 dil, birleşik sinyal semantiği ve “bozuk” çeviri olmadan arayüz.',
+    'Lagsiz deneyim: hafif front-end, uyarlanabilir paneller, bot, forum ve MiniApp arasında kesintisiz flow.',
+    'Hız için destek: VIP ticket’lar kısa SLA ve öncelikli eskalasyonla işlenir.',
   ],
-  sub_payments_title: 'Dakikalar içinde başla',
+
+  sub_payments_title: 'Dakikalar içinde başlangıç',
   sub_payments: [
-    'Planını seç, cüzdanı bağla, onayla ve başla.',
-    'Alışık olduğun ağ ve varlıklarla ödeme yap.',
-    'Onaydan sonra erişim anında açılır.',
-    'Manuel adres yok, gereksiz adım yok.',
+    '1) Cüzdanı bağlayın — hesap MiniApp/Telegram/forum ile ilişkilendirilecektir.',
+    '2) VIP+’ı seçin ve NowPayments üzerinden ödeyin (USDT ve diğer ağlar).',
+    '3) On-chain onaydan sonra abonelik otomatik olarak etkinleşir — ekran görüntüsü ve e-posta yok.',
+    '4) Statü ve limitler tüm noktalarda senkronize edilir: MiniApp, QL7 AI Bot, Forum.',
+    '5) QCoin madenciliğini açın: her 4 saatte aktivite onayı + görevler; VIP için X2 geçerlidir.',
+    '6) Medya yayınlayın: Quantum L7 AI değerlendirir ve skorlama uyarınca bonus QCoin tahsis eder.',
+    '7) Borsa ve L7-zinciri sürümünü takip edin: VIP — çekim kuyruklarında ilkler ve ağda erken roller.',
+    '8) Riskleri yönetin: SL/TP kullanın, pozisyon boyutunu koruyun, oynaklığı aşırı işlemeyin.',
+    '9) Sürtünmesiz plan güncelleyin: birkaç tıklamayla upgrade ve yenileme, kalan süre taşınır.',
+    '10) Erişimi koruyun: tek hesap, yerel yetkilendirme belirteçleri ve oturum arızalarına karşı koruma.',
   ],
+
   sub_legal_note:
-    'Tüm bilgiler eğitim/analitik amaçlıdır; yatırım tavsiyesi değildir. İşlemler risk içerir. Pozisyon boyutu ve koruyucu stoplar kullanın.',
-  sub_faq_title: 'SSS',
+    'Biz analiz ve araçlar sağlarız — finansal tavsiye değil. Oynaklık yüksektir; riskleri, pozisyon boyutunu kontrol edin ve yürütme disiplinine uyun.',
+
+  sub_faq_title: 'FAQ',
   sub_faq: [
-    { q: 'Free neden değerli?', a: '3 gün boyunca ritmi risksiz denersin: arayüz, kartlar, sunum — stiline uyumunu görürsün.' },
-    { q: 'PRO kime uygun?', a: 'Gün içi tempo ve netlik isteyen, aşırı gürültüye ihtiyaç duymayanlara.' },
-    { q: 'VIP kime uygun?', a: 'Maksimum kadans, premium içerik ve hızlı geri bildirim isteyen aktif profesyonellere.' },
-    { q: 'Planı sonra değiştirebilir miyim?', a: 'Evet. İstediğin zaman yükselt veya uzat; kalan süre korunur.' },
-    { q: 'Ne kadar hızlı başlarım?', a: 'Ödeme onaylanır onaylanmaz erişimin açılır.' },
+    {
+      q: 'MiniApp nedir ve sıradan bir siteden nasıl farklıdır?',
+      a: 'Tek hesap ve senkronize limitlerle (web + Telegram) çapraz platform bir arayüzdür; kurulum gerektirmez ve anında açılır.'
+    },
+    {
+      q: 'Forumda QCoin madenciliği nasıl düzenlenmiştir?',
+      a: 'Her 4 saatte aktiviteyi onaylar ve ödülü sabitlersiniz; görevler/quest’ler ve medya gönderimi kârlılığı artırır. VIP zaman ve görevlerde X2 alır.'
+    },
+    {
+      q: 'VIP+ şu anda ne sağlar?',
+      a: 'Öncelikli AI kanal, QCoin bonuslu medya gönderimi ve altın rozet, içeriğin artırılmış ağırlığı, deneysel indikatörlere erken erişim ve hızlandırılmış destek.'
+    },
+    {
+      q: 'Hangi piyasa verilerini kullanıyoruz?',
+      a: 'Agregat tarihsel seriler — 87 TB, 37 milyar mum, cross-exchange birlikteliği, likidite ve spread dikkate alınarak mikro yapı ve davranışsal pattern analizi.'
+    },
+    {
+      q: 'Abonelik nasıl etkinleşir ve neden anındadır?',
+      a: 'Ödeme NowPayments üzerinden geçer; işlem on-chain onaylanır onaylanmaz VIP statüsü tüm bileşenlerde otomatik olarak açılır.'
+    },
+    {
+      q: 'VIP gelecekteki L7 blokzincirini nasıl etkiler?',
+      a: 'VIP dağıtımlarda öncelik ve QCoin çekimleri için ilk sırayı, daha yüksek limitleri, validator/staker rollerine erken erişimi ve teknik beta kanallarına erişimi alır.'
+    },
+    {
+      q: 'Planı zaman kaybı olmadan upgrade etmek mümkün mü?',
+      a: 'Evet. Upgrade birkaç tıklamada yapılır; kullanılmayan bakiye taşınır ve toplanır.'
+    },
+    {
+      q: 'Hangi diller desteklenir?',
+      a: 'Birleşik sinyal terimleriyle yedi lokal; geçiş anlıktır ve arayüz yerleşimini bozmaz.'
+    },
+    {
+      q: 'Doğrulama gereksinimleri var mı?',
+      a: 'Anti-sybil/anti-fraud mekanikleri ve davranış filtreleri çalışır; riskli sinyallerde sistem ek doğrulama isteyebilir.'
+    },
   ],
 }
+
 
 const SUBSCRIBE_ES = {
   sub_title: 'Suscripción',
   sub_intro:
-    'Activa tu ventaja. Conecta tu wallet y desbloquea inteligencia en vivo, automatización sencilla y decisiones disciplinadas. Elige tu ritmo: descubre con Free, acelera con PRO o lidera con VIP.',
-  sub_wallet_cta: 'Conectar wallet',
-  sub_wallet_cta_note: 'Conecta tu wallet para activar tu plan.',
+    'Quantum L7 no es "otro servicio más", sino un único circuito de toma de decisiones. 87 TB de datos de mercado, 37 mil millones de velas históricas across-chains, agregación cross-exchange, normalización de liquidez y procesamiento con reconocimiento de latencia. Una sola cuenta abre el Web-MiniApp, el bot de Telegram QL7 AI Bot y el Foro con minería de QCoin. MiniApp funciona en Telegram y en la web; las recomendaciones de intercambio ya se entregan en tiempo real (el núcleo comercial y la ejecución están en la etapa final). VIP+ otorga tiempo ilimitado de analítica de IA, multiplicadores de misiones X2 y bonificaciones QCoin por contenido multimedia (video/imágenes/audio) que pasa la puntuación del motor Quantum L7 AI. El pago se realiza a través de NowPayments: tan pronto como llegue la confirmación on-chain, el acceso se activa al instante y se sincroniza en MiniApp/bot/foro. Próximamente — el lanzamiento del blockchain de nueva generación L7: los VIP reciben un nivel de prioridad más alto para la distribución y la cola de retiro de QCoin, acceso anticipado a staking/roles de validadores y límites aumentados. Siete idiomas de interfaz, vinculación precisa de la billetera, estricta disciplina de gestión de riesgos y "ventanas de entrada" sin ruido — todo para mantenerte en el flujo del mercado.',
+
+  sub_wallet_cta: 'Conectar billetera',
+  sub_wallet_cta_note: 'Conecta tu billetera — el plan se activará y se sincronizará con MiniApp/Telegram/foro.',
   sub_plans_title: 'Planes',
-  sub_free_title: 'FREE — sentir el ritmo',
-  sub_free_desc: `
-    • 3 días para explorar sin compromiso.<br/>
-    • 1 “Señal ahora” manual al día — prueba el timing.<br/>
-    • Ideas claras en tarjetas sin ruido.<br/>
-    • Ideal para conocer interfaz, idioma y estilo.<br/>
-    • Actualiza cuando quieras — tú marcas el paso.<br/>
-  `,
-  sub_pro_title: 'PRO — ritmo y claridad',
-  sub_pro_price: 'Precio: 10 USDT / semana',
-  sub_pro_desc: `
-    • Flujo diario afinado para intradía, sin saturación.<br/>
-    • Estructura para entradas, gestión de riesgo y revisión.<br/>
-    • Contexto más nítido sobre sesiones e impulsos.<br/>
-    • Flexible para jornadas laborales o tarde-noche.<br/>
-    • Soporte prioritario cuando hace falta.<br/>
-    • Mejora/extiende en cualquier momento — sin pérdidas de tiempo.<br/>
-  `,
-  sub_vip_title: 'VIP — máxima frecuencia',
-  sub_vip_price: 'Precio: 30 USDT / semana',
+
+  sub_vip_title: 'VIP+ — X2 QCoin, canal premium de IA, publicación multimedia, prioridad de la red L7',
+  sub_vip_price: 'Precio: 30 USDT / mes',
   sub_vip_desc: `
-    • Cadencia máxima para quienes viven el mercado.<br/>
-    • Acceso temprano a contenidos premium y reportes exclusivos.<br/>
-    • Cobertura profunda: listo para las oportunidades cuando surgen.<br/>
-    • Canal de feedback ágil para iterar más rápido.<br/>
-    • Distintivo VIP dentro de la plataforma.<br/>
-    • Hecho para velocidad, precisión y ejecución decidida.<br/>
+    • Capa VIP unificada: MiniApp + Telegram + Web — estado y límites en todas partes, sin discrepancias ni demoras.<br/>
+    • Minería del foro: cada 4 horas confirma actividad y fija QCoin; el VIP recibe X2 en tiempo y X2 multiplicador de misiones.<br/>
+    • Publicación multimedia (VIP): video/imágenes/audio pasan la puntuación de Quantum L7 AI (quality, engagement, anti-spam/anti-sybil) y se convierten en bonificaciones QCoin aumentadas.<br/>
+    • Recomendaciones de mercado: las señales por símbolos/TF ya funcionan; análisis avanzado de volatilidad, agrupación de volúmenes y what-if/backtest están disponibles con prioridad para VIP.<br/>
+    • Telegram QL7 AI Bot: cuotas ampliadas, prioridad de respuesta, ventanas X2 de "on-chain clarity" en picos de turbulencia.<br/>
+    • NowPayments: pago en criptomonedas (USDT y otras) con activación instantánea tras la confirmación on-chain — sin capturas de pantalla ni verificaciones manuales.<br/>
+    • Blockchain L7 (próximo lanzamiento): VIP — niveles superiores en la cola de retiro de QCoin, límites más altos, acceso temprano a validadores/staking y canales beta técnicos.<br/>
+    • Perfil en el foro: insignia dorada, aumento de exposición, límites ampliados de medios, moderación acelerada y mayor peso del contenido en el ranking.<br/>
+    • Localización en 7 idiomas y UX adaptable desde Telegram móvil hasta web de escritorio — una sola interfaz, diferentes entornos, fricción cero.<br/>
+    • Para quienes necesitan ritmo: precise entries/SL/TP, contorno de riesgo sin "espuma" innecesaria, transparencia en los cálculos y economía justa de recompensas.<br/>
   `,
+
   sub_benefits_title: 'Por qué nos eligen',
   sub_benefits: [
-    'Tarjetas accionables: esencia sin desorden.',
-    'Ventanas de tiempo claras para actuar con calma y propósito.',
-    'Interfaz en 7 idiomas con experiencia consistente.',
-    'Planes que crecen contigo: upgrades y extensiones sin fricción.',
-    'Resúmenes semanales que separan la señal del ruido.',
-    'Mentalidad de comunidad — avanzamos juntos, decisión a decisión.',
+    'Datos de nivel institucional: 87 TB, 37 mil millones de velas, agregador de liquidez cross-exchange, unificación de frecuencia de ticks y profundidad de libros de órdenes.',
+    'MiniApp + Telegram + Foro: una suscripción = cuotas, derechos y progreso compartidos; cambio de contexto sin pérdida de estado.',
+    'Economía QCoin: actividad cada 4 horas, misiones, publicaciones multimedia; VIP obtiene X2 en tiempo/multiplicador de misiones y mayor peso del contenido.',
+    'Analítica de IA sin ruido: enfoque en ventanas de entrada/salida, SL/TP, perfil de riesgo y horizontes reales, no en ruido "noticioso".',
+    'Market microstructure: dispersión del spread, volúmenes de impacto, desequilibrios, escenarios VWAP/POC y patrones de comportamiento — presentados de forma concisa.',
+    'Onboarding con NowPayments: pago en cripto y activación instantánea; sin confirmaciones manuales.',
+    'Camino hacia L7-chain: VIP — nivel de prioridad superior para retiro de QCoin, staking y programas de validadores al lanzamiento de la red.',
+    'Pipelines Anti-sybil/anti-fraud: métricas de comportamiento, protección contra manipulaciones y modelo de distribución justo.',
+    'Ancho de banda de IA premium: mayor frecuencia de solicitudes, menor latencia, procesamiento prioritario.',
+    'Investigación y funciones alfa: indicadores experimentales, canales privados, betas tempranas para usuarios avanzados.',
+    'Localización multijurisdiccional: 7 idiomas, semántica unificada de señales e interfaz sin traducciones "rotas".',
+    'Experiencia sin retrasos: front-end liviano, paneles adaptativos, flujo fluido entre bot, foro y MiniApp.',
+    'Soporte para el ritmo: los tickets VIP se procesan con SLA corto y escalamiento prioritario.',
   ],
-  sub_payments_title: 'Empieza en minutos',
+
+  sub_payments_title: 'Comienza en minutos',
   sub_payments: [
-    'Elige plan, conecta wallet, confirma y listo.',
-    'Paga con activos populares en redes conocidas.',
-    'Acceso al instante tras la confirmación del pago.',
-    'Sin direcciones manuales ni trámites innecesarios.',
+    '1) Conecta tu billetera — la cuenta se vinculará con MiniApp/Telegram/foro.',
+    '2) Elige VIP+ y paga a través de NowPayments (USDT y otras redes).',
+    '3) Tras la confirmación on-chain, la suscripción se activa automáticamente — sin capturas ni correos.',
+    '4) Estado y límites se sincronizan en todos los puntos: MiniApp, QL7 AI Bot, Foro.',
+    '5) Activa la minería QCoin: cada 4 horas confirmación de actividad + misiones; VIP recibe X2.',
+    '6) Publica medios: Quantum L7 AI evaluará y acreditará QCoin de bonificación según la puntuación.',
+    '7) Sigue el lanzamiento del exchange y la cadena L7: VIP — los primeros en las colas de retiro y roles tempranos en la red.',
+    '8) Gestiona riesgos: usa SL/TP, mantén el tamaño de la posición, no sobreopere la volatilidad.',
+    '9) Actualiza el plan sin fricción: actualización y renovación en unos clics, el saldo restante se transfiere.',
+    '10) Conserva el acceso: cuenta única, marcadores locales de autorización y protección contra fallos de sesión.',
   ],
+
   sub_legal_note:
-    'La información es educativa y analítica; no constituye asesoría financiera. Operar implica riesgo. Usa tamaño de posición y stops protectores.',
+    'Proporcionamos analítica y herramientas — no asesoramiento financiero. La volatilidad es alta; controla tus riesgos, el tamaño de tu posición y mantén la disciplina de ejecución.',
+
   sub_faq_title: 'FAQ',
   sub_faq: [
-    { q: '¿Para qué sirve Free?', a: '3 días para sentir el ritmo sin riesgo: interfaz, tarjetas, estilo — comprueba si encaja contigo.' },
-    { q: '¿Para quién es PRO?', a: 'Para intradía que quieren ritmo y claridad sin exceso de ruido.' },
-    { q: '¿Para quién es VIP?', a: 'Para profesionales activos que necesitan máxima cadencia y acceso premium.' },
-    { q: '¿Puedo cambiar de plan?', a: 'Sí, puedes mejorar o extender cuando quieras; el tiempo restante se mantiene.' },
-    { q: '¿Cuándo comienza el acceso?', a: 'Justo después de la confirmación del pago.' },
+    {
+      q: '¿Qué es MiniApp y en qué se diferencia de un sitio web normal?',
+      a: 'Es una interfaz multiplataforma (web + Telegram) con una sola cuenta y límites sincronizados; no requiere instalación y se abre al instante.'
+    },
+    {
+      q: '¿Cómo funciona la minería de QCoin en el foro?',
+      a: 'Cada 4 horas confirmas actividad y fijas la recompensa; las misiones y publicaciones multimedia aumentan la rentabilidad. El VIP obtiene X2 en tiempo y X2 en misiones.'
+    },
+    {
+      q: '¿Qué ofrece VIP+ ahora mismo?',
+      a: 'Canal de IA prioritario, publicación multimedia con bonificaciones QCoin e insignia dorada, mayor peso del contenido, acceso temprano a indicadores experimentales y soporte acelerado.'
+    },
+    {
+      q: '¿Qué datos de mercado utilizamos?',
+      a: 'Series históricas agregadas — 87 TB, 37 mil millones de velas, unificación cross-exchange, análisis de microestructura y patrones de comportamiento teniendo en cuenta liquidez y spread.'
+    },
+    {
+      q: '¿Cómo se activa la suscripción y por qué es instantánea?',
+      a: 'El pago se realiza a través de NowPayments; tan pronto como la transacción se confirme on-chain, el estado VIP se activa automáticamente en todos los componentes.'
+    },
+    {
+      q: '¿Cómo afectará el VIP al futuro blockchain L7?',
+      a: 'El VIP recibe prioridad en las distribuciones y primeras filas para retiros de QCoin, límites aumentados, roles tempranos de validadores/stakers y acceso a canales beta técnicos.'
+    },
+    {
+      q: '¿Se puede actualizar el plan sin perder tiempo?',
+      a: 'Sí. La actualización se realiza en unos pocos clics; el saldo no utilizado se transfiere y acumula.'
+    },
+    {
+      q: '¿Qué idiomas son compatibles?',
+      a: 'Siete locales con terminología unificada de señales; el cambio es instantáneo y no rompe el diseño de la interfaz.'
+    },
+    {
+      q: '¿Hay requisitos de verificación?',
+      a: 'Funcionan mecanismos anti-sybil/anti-fraud y filtros de comportamiento; ante señales de riesgo, el sistema puede solicitar verificación adicional.'
+    },
   ],
 }
+
 
 const SUBSCRIBE_AR = {
   sub_title: 'الاشتراك',
   sub_intro:
-    'فعّل ميزتك. اربط محفظتك لفتح تحليلات مباشرة، وأتمتة سلسة، وانضباط في القرارات. اختر وتيرتك: تعرّف عبر Free، تسارع مع PRO، أو تقدّم مع VIP.',
+    'Quantum L7 ليست "خدمة أخرى"، بل هي دائرة موحدة لاتخاذ القرار. 87 تيرابايت من بيانات السوق، 37 مليار شمعة تاريخية عبر السلاسل، تجميع عبر البورصات، توحيد السيولة ومعالجة مدركة للتأخير (latency-aware). حساب واحد يفتح Web-MiniApp، روبوت تيليجرام QL7 AI Bot والمنتدى مع تعدين QCoin. MiniApp يعمل داخل تيليجرام وعلى الويب؛ التوصيات الخاصة بالتداول تُقدَّم بالفعل في الوقت الفعلي (النواة التجارية والتنفيذ في المرحلة النهائية). VIP+ يمنح وقتاً غير محدود لتحليل الذكاء الاصطناعي، مضاعفات مهام X2 ومكافآت QCoin إضافية على المحتوى الإعلامي (فيديو/صور/صوت) الذي يتم تقييمه بواسطة محرك Quantum L7 AI. الدفع عبر NowPayments: بمجرد وصول تأكيد on-chain، يتم تفعيل الوصول فوراً ويتزامن مع MiniApp/الروبوت/المنتدى. قريباً — إطلاق سلسلة كتل L7 من الجيل الجديد: يحصل المستخدمون VIP على مستوى أولوية أعلى للتوزيع وصف انتظار السحب لـ QCoin، وصول مبكر إلى أدوار الـ staking/المدققين وحدود أعلى. سبع لغات للواجهة، ربط محفظة دقيق، انضباط صارم لإدارة المخاطر و"نوافذ دخول" بدون ضوضاء — كل ذلك لإبقائك في تدفق السوق.',
+
   sub_wallet_cta: 'ربط المحفظة',
-  sub_wallet_cta_note: 'اربط محفظتك لتفعيل الخطة.',
-  sub_plans_title: 'الباقات',
-  sub_free_title: 'FREE — جرّب الإيقاع',
-  sub_free_desc: `
-    • 3 أيام لاستكشاف المنصة دون التزام.<br/>
-    • إشارة يدوية واحدة يوميًا لتجربة التوقيت والإيقاع.<br/>
-    • أفكار واضحة في بطاقات مرتّبة بلا ضوضاء.<br/>
-    • مثالية للتعرّف على الواجهة واللغة والأسلوب.<br/>
-    • يمكنك الترقية متى أردت — القرار بيدك.<br/>
-  `,
-  sub_pro_title: 'PRO — وتيرة ووضوح',
-  sub_pro_price: 'السعر: 10 USDT / أسبوع',
-  sub_pro_desc: `
-    • تدفّق يومي مضبوط لقرارات داخل اليوم دون إرباك.<br/>
-    • بنية تساعد على التخطيط وإدارة المخاطر ومراجعة النتائج.<br/>
-    • سياق أوضح لتغيّرات الجلسات والزخم.<br/>
-    • مرونة تناسب العمل أو جلسات المساء.<br/>
-    • دعم ذو أولوية عند الحاجة.<br/>
-    • ترقية/تمديد في أي وقت — الوقت لا يضيع.<br/>
-  `,
-  sub_vip_title: 'VIP — أقصى تردد، أقصى تركيز',
-  sub_vip_price: 'السعر: 30 USDT / أسبوع',
+  sub_wallet_cta_note: 'قم بربط محفظتك — سيتم تفعيل الخطة ومزامنتها مع MiniApp/تيليجرام/المنتدى.',
+  sub_plans_title: 'الخطط',
+
+  sub_vip_title: 'VIP+ — X2 QCoin، قناة ذكاء اصطناعي مميزة، نشر وسائط، أولوية شبكة L7',
+  sub_vip_price: 'السعر: 30 USDT / شهرياً',
   sub_vip_desc: `
-    • وتيرة قصوى لمن يعيشون على ساعة السوق.<br/>
-    • وصول مبكر لمحتوى مميز وتقارير حصرية.<br/>
-    • تغطية أوسع للأصول — جاهزية للحظة المناسبة.<br/>
-    • قناة ملاحظات سريعة لتسريع الأفكار.<br/>
-    • تمييز VIP داخل المنصة — يكفي اسمه.<br/>
-    • صُمّم للسرعة والدقّة والتنفيذ الحاسم.<br/>
+    • طبقة VIP موحدة: MiniApp + تيليجرام + الويب — الحالة والحدود في كل مكان، بدون تأخير أو اختلاف.<br/>
+    • تعدين المنتدى: كل 4 ساعات أكد النشاط وثبت QCoin؛ يحصل VIP على X2 في الوقت وX2 في مضاعف المهام.<br/>
+    • نشر الوسائط (VIP): الفيديو/الصور/الصوت يتم تقييمها عبر نظام Quantum L7 AI (الجودة، التفاعل، مكافحة البريد العشوائي/الهوية المزيفة) وتتحول إلى مكافآت QCoin أعلى.<br/>
+    • توصيات السوق: الإشارات على الرموز/TF تعمل بالفعل؛ تحليل متقدم للتقلبات، تجميع الأحجام، وما-إذا/اختبارات رجعية متاحة بأولوية لـ VIP.<br/>
+    • روبوت تيليجرام QL7 AI: حصص موسعة، أولوية في الرد، نوافذ X2 لـ "on-chain clarity" في فترات الاضطراب.<br/>
+    • NowPayments: الدفع بالعملات المشفرة (USDT وغيرها) مع تفعيل فوري بعد تأكيد on-chain — بدون لقطات شاشة أو تحقق يدوي.<br/>
+    • سلسلة كتل L7 (الإصدار القادم): VIP — في أعلى طبقات صف السحب لـ QCoin، حدود أعلى، وصول مبكر إلى المدققين/staking والقنوات التجريبية التقنية.<br/>
+    • الملف الشخصي في المنتدى: شارة ذهبية، تعزيز الظهور، حدود موسعة للوسائط، إشراف أسرع وزيادة وزن المحتوى في التصنيف.<br/>
+    • توطين بـ 7 لغات وتجربة مستخدم متكيفة من تيليجرام للهاتف إلى الويب المكتبي — واجهة واحدة، بيئات مختلفة، بدون احتكاك.<br/>
+    • لمن يحتاجون إلى السرعة: نقاط دخول/SL/TP دقيقة، محيط مخاطر بدون "رغوة" زائدة، شفافية الحسابات واقتصاد مكافآت عادل.<br/>
   `,
-  sub_benefits_title: 'لماذا يختارنا المتداولون',
+
+  sub_benefits_title: 'لماذا يختاروننا',
   sub_benefits: [
-    'بطاقات إشارات عملية تُظهر الخلاصة بلا فوضى.',
-    'نوافذ زمنية واضحة لتتحرّك بهدوء وهدف.',
-    'واجهة متعدّدة اللغات (7) بتجربة متناسقة.',
-    'خطط تتوسّع معك — ترقية وتمديد بلا عناء.',
-    'ملخصات أسبوعية تُبقي تركيزك على الأهم.',
-    'عقلية المجتمع — نتقدّم معًا، قرارًا بعد قرار.',
+    'بيانات بمستوى المؤسسات: 87 تيرابايت، 37 مليار شمعة، مجمّع سيولة عبر البورصات، توحيد ترددات الـ tick وعمق دفاتر الأوامر.',
+    'MiniApp + تيليجرام + المنتدى: اشتراك واحد = حصص وحقوق وتقدم مشترك؛ التبديل بين السياقات بدون فقدان الحالة.',
+    'اقتصاد QCoin: نشاط كل 4 ساعات، مهام، نشر وسائط؛ يحصل VIP على X2 في الوقت/مضاعف المهام وزيادة وزن المحتوى.',
+    'تحليلات ذكاء اصطناعي بدون ضوضاء: تركيز على نوافذ الدخول/الخروج، SL/TP، ملف المخاطر والآفاق الواقعية، وليس "ضوضاء الأخبار".',
+    'هيكل السوق المصغر: تباين الفارق السعري، أحجام الصفقات المفاجئة، اختلالات، سيناريوهات VWAP/POC وأنماط سلوكية — بشكل مختصر وواضح.',
+    'الانضمام عبر NowPayments: الدفع بالعملات المشفرة والتفعيل الفوري؛ بدون تأكيدات يدوية.',
+    'الطريق إلى سلسلة L7: VIP — أعلى مستوى أولوية لسحب QCoin، staking وبرامج المدققين عند إطلاق الشبكة.',
+    'قنوات مكافحة sybil/الاحتيال: مقاييس سلوكية، حماية من التلاعب ونموذج توزيع عادل.',
+    'عرض نطاق ذكاء اصطناعي متميز: تكرار طلبات أعلى، تأخير أقصر، معالجة أولوية.',
+    'بحث وميزات ألفا: مؤشرات تجريبية، قنوات مغلقة، إصدارات بيتا مبكرة للمستخدمين المتقدمين.',
+    'توطين متعدد القوانين: 7 لغات، دلالات إشارات موحدة وواجهة بدون ترجمة "مكسورة".',
+    'تجربة بدون تأخير: واجهة أمامية خفيفة، لوحات قابلة للتكيف، تدفق سلس بين الروبوت، المنتدى وMiniApp.',
+    'دعم السرعة: تذاكر VIP تتم معالجتها بوقت SLA قصير وتصعيد أولوية.',
   ],
+
   sub_payments_title: 'ابدأ خلال دقائق',
   sub_payments: [
-    'اختر الخطة، اربط محفظتك، أكّد — وانطلق.',
-    'ادفع بأصول شائعة على الشبكات المعروفة لديك.',
-    'يُفعَّل الوصول فور تأكيد الدفع.',
-    'لا عناوين يدوية ولا إجراءات مزعجة.',
+    '1) اربط محفظتك — سيتم ربط الحساب بـ MiniApp/تيليجرام/المنتدى.',
+    '2) اختر VIP+ وادفع عبر NowPayments (USDT وشبكات أخرى).',
+    '3) بعد تأكيد on-chain، يتم تفعيل الاشتراك تلقائياً — بدون لقطات شاشة أو رسائل.',
+    '4) يتم مزامنة الحالة والحدود في جميع النقاط: MiniApp، QL7 AI Bot، المنتدى.',
+    '5) فعّل تعدين QCoin: كل 4 ساعات تأكيد نشاط + مهام؛ VIP يحصل على X2.',
+    '6) انشر الوسائط: يقوم Quantum L7 AI بالتقييم ومنح مكافآت QCoin الإضافية حسب النتيجة.',
+    '7) تابع إصدار المنصة وسلسلة L7: VIP — الأوائل في صفوف السحب والأدوار المبكرة في الشبكة.',
+    '8) أدر المخاطر: استخدم SL/TP، حافظ على حجم الصفقة، لا تتداول بشكل مفرط أثناء التقلب.',
+    '9) قم بتحديث الخطة بدون احتكاك: ترقية وتجديد بنقرات قليلة، ويتم ترحيل الرصيد المتبقي.',
+    '10) احفظ الوصول: حساب موحد، رموز تفويض محلية وحماية من فشل الجلسات.',
   ],
+
   sub_legal_note:
-    'المحتوى تعليمي/تحليلي وليس نصيحة مالية. التداول ينطوي على مخاطرة — استخدم إدارة المخاطر وإيقاف الخسارة.',
+    'نحن نوفر تحليلات وأدوات — ولسنا نصائح مالية. التقلب مرتفع؛ راقب المخاطر، حجم الصفقة والتزم بانضباط التنفيذ.',
+
   sub_faq_title: 'الأسئلة الشائعة',
   sub_faq: [
-    { q: 'ما فائدة Free؟', a: '3 أيام لتجربة الإيقاع بلا مخاطرة: الواجهة، البطاقات، الأسلوب — لترى إن كان يناسبك.' },
-    { q: 'لمن خُصّص PRO؟', a: 'لمتداولي اليوم الذين يريدون وتيرة ووضوحًا بلا ضجيج زائد.' },
-    { q: 'لمن خُصّص VIP؟', a: 'للمحترفين النشطين الذين يحتاجون أقصى تردد ووصولًا مميزًا.' },
-    { q: 'هل أستطيع تغيير الخطة لاحقًا؟', a: 'نعم، يمكنك الترقية والتمديد في أي وقت، مع الحفاظ على الوقت المتبقي.' },
-    { q: 'متى يبدأ الوصول؟', a: 'فور تأكيد الدفع مباشرة.' },
+    {
+      q: 'ما هو MiniApp وكيف يختلف عن الموقع العادي؟',
+      a: 'إنه واجهة متعددة المنصات (الويب + تيليجرام) بحساب واحد وحدود متزامنة؛ لا يتطلب تثبيت ويفتح فوراً.'
+    },
+    {
+      q: 'كيف يعمل تعدين QCoin في المنتدى؟',
+      a: 'كل 4 ساعات تؤكد النشاط وتثبت المكافأة؛ المهام والنشر الإعلامي يزيدان العائد. يحصل VIP على X2 في الوقت وX2 في المهام.'
+    },
+    {
+      q: 'ما الذي يقدمه VIP+ حالياً؟',
+      a: 'قناة ذكاء اصطناعي أولوية، نشر وسائط مع مكافآت QCoin وشارة ذهبية، زيادة وزن المحتوى، وصول مبكر إلى مؤشرات تجريبية ودعم أسرع.'
+    },
+    {
+      q: 'ما البيانات السوقية التي نستخدمها؟',
+      a: 'سلاسل تاريخية مجمعة — 87 تيرابايت، 37 مليار شمعة، توحيد عبر البورصات، تحليل البنية الدقيقة والسلوك مع مراعاة السيولة والفارق السعري.'
+    },
+    {
+      q: 'كيف يتم تفعيل الاشتراك ولماذا هو فوري؟',
+      a: 'يتم الدفع عبر NowPayments؛ وبمجرد تأكيد المعاملة on-chain، يتم تفعيل حالة VIP تلقائياً في جميع المكونات.'
+    },
+    {
+      q: 'كيف سيؤثر VIP على سلسلة كتل L7 المستقبلية؟',
+      a: 'يحصل VIP على أولوية في التوزيع والصف الأول لسحب QCoin، حدود أعلى، أدوار مبكرة للمدققين/stakers والوصول إلى القنوات التجريبية التقنية.'
+    },
+    {
+      q: 'هل يمكن ترقية الخطة دون فقدان الوقت؟',
+      a: 'نعم. تتم الترقية بنقرات قليلة؛ ويتم ترحيل الرصيد غير المستخدم وجمعه.'
+    },
+    {
+      q: 'ما اللغات المدعومة؟',
+      a: 'سبع لغات محلية بمصطلحات إشارات موحدة؛ التبديل فوري ولا يكسر تنسيق الواجهة.'
+    },
+    {
+      q: 'هل هناك متطلبات للتحقق؟',
+      a: 'تعمل آليات مكافحة sybil/الاحتيال والفلاتر السلوكية؛ عند الإشارات الخطرة قد يطلب النظام تحققاً إضافياً.'
+    },
   ],
 }
+
 
 const SUBSCRIBE_ZH = {
   sub_title: '订阅',
   sub_intro:
-    '启动你的优势。连接钱包，即可解锁实时洞察、轻松自动化与更有纪律的决策。选择你的节奏：先用 Free 探路，用 PRO 加速，用 VIP 掌控全局。',
+    'Quantum L7 不是“又一个服务”，而是统一的决策闭环。87 TB 市场数据，跨链（across-chains）370 亿条历史K线，跨交易所聚合、流动性归一化与感知延迟（latency-aware）处理。一个账号即可开启 Web-MiniApp、Telegram 机器人 QL7 AI Bot 和带有 QCoin 挖矿的论坛。MiniApp 同时运行在 Telegram 与网页端，交易所推荐已实时给出（交易内核与执行——处于最终阶段）。VIP+ 提供不限时的 AI 分析、X2 任务倍增器，以及对通过 Quantum L7 AI 引擎打分的媒体内容（视频/图片/音频）的 QCoin 奖励计入。支付——通过 NowPayments：一旦链上（on-chain）确认到达，访问即刻开启，并在 MiniApp/机器人/论坛中同步。接下来——新一代 L7 区块链上线：VIP 获得更高的分发优先级层（priority tier）与 QCoin 提现队列优先、对质押/验证者角色的早期访问以及更高的限额。七种界面语言、严谨的钱包绑定、严格的风险管理纪律与无噪声的“入场窗口”——一切只为让你保持在市场流中。',
+
   sub_wallet_cta: '连接钱包',
-  sub_wallet_cta_note: '连接钱包以激活订阅。',
+  sub_wallet_cta_note: '连接钱包——计划将被激活并与 MiniApp/Telegram/论坛同步。',
   sub_plans_title: '套餐',
-  sub_free_title: 'FREE — 先感受节奏',
-  sub_free_desc: `
-    • 3 天自由体验，无任何义务。<br/>
-    • 每天 1 次手动“即刻信号”，感受时机与韵律。<br/>
-    • 清爽卡片呈现要点，无冗余噪音。<br/>
-    • 适合初识界面、语言与风格的你。<br/>
-    • 随时升级——节奏由你把控。<br/>
-  `,
-  sub_pro_title: 'PRO — 节奏与清晰',
-  sub_pro_price: '价格：10 USDT / 周',
-  sub_pro_desc: `
-    • 为日内决策精心调校的日常节奏，避免信息过载。<br/>
-    • 帮你规划入场、管理风险并复盘结果。<br/>
-    • 更清晰的交易时段与动能切换语境。<br/>
-    • 可与工作/夜间交易灵活搭配。<br/>
-    • 需要时享受优先支持。<br/>
-    • 随时升级/延长——时间价值不浪费。<br/>
-  `,
-  sub_vip_title: 'VIP — 全频率，全专注',
-  sub_vip_price: '价格：30 USDT / 周',
+
+  sub_vip_title: 'VIP+ — X2 QCoin，高级 AI 频道，媒体发布，L7 网络优先级',
+  sub_vip_price: '价格: 30 USDT / 月',
   sub_vip_desc: `
-    • 为以市场为日程的人提供最高节奏。<br/>
-    • 优先获得精选内容与独家报告。<br/>
-    • 更深覆盖，机会来临即可把握。<br/>
-    • 快速反馈渠道，加速迭代思路。<br/>
-    • 平台内尊享 VIP 标识。<br/>
-    • 为速度、精准与果断执行而生。<br/>
+    • 统一的 VIP 层：MiniApp + Telegram + Web —— 各处同一状态与限额，无差异无延迟。<br/>
+    • 论坛挖矿：每 4 小时确认活跃并记账 QCoin；VIP 获得时间 X2 与任务倍增 X2。<br/>
+    • 媒体发布（VIP）：视频/图片/音频通过 Quantum L7 AI 评分（quality、engagement、anti-spam/anti-sybil），并转换为更高的 QCoin 奖励。<br/>
+    • 市场推荐：按符号/TF 的信号已就绪；更深入的波动性分析、成交量聚类与 what-if/backtest 向 VIP 优先开放。<br/>
+    • Telegram QL7 AI Bot：更高配额、回复优先、在动荡高峰期提供 X2 的“on-chain clarity” 窗口。<br/>
+    • NowPayments：加密支付（USDT 等），链上确认后即刻激活——无需截图与人工核验。<br/>
+    • L7 区块链（即将发布）：VIP —— 处于 QCoin 提现队列的更高层级，更高上限，提前获取验证者/质押与技术测试渠道。<br/>
+    • 论坛个人资料：金色徽章、曝光提升、更高的媒体限额、更快的审核，以及内容在排序中的更高权重。<br/>
+    • 7 种语言本地化与自适应 UX（从移动端 Telegram 到桌面端网页）——一个界面、不同环境、零摩擦。<br/>
+    • 适合需要节奏的人：precise entries/SL/TP，无多余“泡沫”的风险轮廓，计算透明与公平的奖励经济。<br/>
   `,
+
   sub_benefits_title: '为什么选择我们',
   sub_benefits: [
-    '可行动的信号卡片，去繁就简直击要点。',
-    '明确的时间窗口，助你从容而有目的地出手。',
-    '7 种语言的统一体验，切换流畅不卡壳。',
-    '套餐随你成长，升级与续期无阻力。',
-    '每周重点提炼，帮你穿透噪音保持专注。',
-    '社区型思维——一路同行，步步精进。',
+    '机构级数据：87 TB、370 亿条K线、跨交易所流动性聚合器、统一的 tick 频率与订单簿深度。',
+    'MiniApp + Telegram + 论坛：一份订阅 = 共享配额、权限与进度；上下文切换不丢状态。',
+    'QCoin 经济：每 4 小时活跃、任务、媒体发布；VIP 获得 X2 时间/任务倍增与更高的内容权重。',
+    '无噪音的 AI 分析：聚焦入场/出场窗口、SL/TP、风险画像与真实周期，而非“新闻”噪音。',
+    'Market microstructure：价差离散度、冲击性成交量、失衡、VWAP/POC 场景与行为模式——简洁呈现。',
+    'NowPayments 上线引导：加密支付与即时激活；无需人工确认。',
+    '通往 L7-chain：VIP —— 在网络启动时，对 QCoin 提现、质押与验证者计划处于更高的优先级层。',
+    'Anti-sybil/anti-fraud 流水线：行为度量、反刷保护与公平的分配模型。',
+    '高级 AI 带宽：更高请求频率、更短时延、优先处理。',
+    '研究与 Alpha 特性：实验性指标、私有频道、面向高级用户的早期测试版。',
+    '多法域本地化：7 种语言、统一的信号语义与不“破版”的界面翻译。',
+    '无卡顿体验：轻量前端、自适应面板，机器人、论坛与 MiniApp 间无缝流转。',
+    '面向节奏的支持：VIP 工单以更短 SLA 与优先级升级处理。',
   ],
+
   sub_payments_title: '几分钟即可开始',
   sub_payments: [
-    '选择套餐，连接钱包，确认后立即使用。',
-    '用你熟悉的主流资产与网络支付即可。',
-    '支付确认后，访问权限立即开启。',
-    '无需手填地址，无需繁琐步骤。',
+    '1) 连接钱包——账号将关联到 MiniApp/Telegram/论坛。',
+    '2) 选择 VIP+ 并通过 NowPayments 支付（USDT 与其他网络）。',
+    '3) 链上确认后，订阅将自动激活——无需截图与邮件。',
+    '4) 状态与限额在各处同步：MiniApp、QL7 AI Bot、论坛。',
+    '5) 开启 QCoin 挖矿：每 4 小时进行活跃确认 + 任务；VIP 享有 X2。',
+    '6) 发布媒体：Quantum L7 AI 将评估并按评分发放 QCoin 奖励。',
+    '7) 关注交易所与 L7 链的发布：VIP —— 提现队列优先且获得网络中的早期角色。',
+    '8) 管理风险：使用 SL/TP，控制仓位大小，勿过度交易波动性。',
+    '9) 无摩擦地更新计划：数次点击即可升级与续订，剩余时间可结转。',
+    '10) 保持访问：统一账号、本地授权标记与会话故障保护。',
   ],
+
   sub_legal_note:
-    '所有内容仅供教育与分析，不构成投资建议。交易有风险，请合理控制仓位并使用止损。',
-  sub_faq_title: '常见问题',
+    '我们提供分析与工具——并非财务建议。波动性较高；请控制风险、仓位大小并遵守执行纪律。',
+
+  sub_faq_title: 'FAQ',
   sub_faq: [
-    { q: 'Free 有何价值？', a: '3 天无负担体验：界面、卡片、呈现方式——看看是否契合你的风格。' },
-    { q: 'PRO 适合谁？', a: '希望保持节奏与清晰、避免过载的日内交易者。' },
-    { q: 'VIP 适合谁？', a: '需要最高频率与精选内容的活跃型专业交易者。' },
-    { q: '可以之后换套餐吗？', a: '可以。随时升级或续期，剩余时间保持有效。' },
-    { q: '多久能开始？', a: '支付确认后即可立即开启访问权限。' },
+    {
+      q: '什么是 MiniApp，它与普通网站有何不同？',
+      a: '这是一个跨平台界面（Web + Telegram），采用单一账号与同步限额；无需安装并可即时打开。'
+    },
+    {
+      q: '论坛中的 QCoin 挖矿如何运作？',
+      a: '每 4 小时确认活跃并记账奖励；任务/任务（quests）与媒体发布提升收益。VIP 在时间与任务上获得 X2。'
+    },
+    {
+      q: 'VIP+ 现在能带来什么？',
+      a: '优先级 AI 频道、带 QCoin 奖励的媒体发布与金色徽章、更高的内容权重、对实验性指标的早期访问与加速支持。'
+    },
+    {
+      q: '我们使用哪些市场数据？',
+      a: '聚合的历史序列——87 TB、370 亿条K线、跨交易所统一，结合流动性与价差进行微观结构与行为模式分析。'
+    },
+    {
+      q: '订阅如何激活，为什么是即时的？',
+      a: '支付通过 NowPayments 进行；一旦交易在链上确认，VIP 状态会在所有组件中自动开启。'
+    },
+    {
+      q: 'VIP 将如何影响未来的 L7 区块链？',
+      a: 'VIP 在分配与 QCoin 提现中享有优先、获得更高限额、对验证者/质押者角色的早期访问，以及进入技术测试频道。'
+    },
+    {
+      q: '能否在不损失时间的情况下升级计划？',
+      a: '可以。升级只需几次点击；未用余额会结转并累计。'
+    },
+    {
+      q: '支持哪些语言？',
+      a: '七种本地化与统一的信号术语；切换即时且不破坏界面布局。'
+    },
+    {
+      q: '是否有验证要求？',
+      a: 'Anti-sybil/anti-fraud 机制与行为过滤已启用；在风险信号下，系统可能要求额外验证。'
+    },
   ],
 }
+
 
 // Merge into dict (keep as-is)
 try {
@@ -3467,26 +6015,41 @@ try {
 const UNLIMIT_EN = {
   ai_unlimit_btn: 'Remove limit',
   ai_unlimit_vip_badge: 'VIP+',
-  ai_unlimit_title: 'Remove limit — VIP+',
+  ai_unlimit_title: 'Remove Limit — VIP+',
   ai_unlimit_price: 'Price: $30 / month',
   ai_unlimit_desc:
-    'Unlock 24/7 AI Box access on this account. The daily browser quota is disabled for 30 days once the payment is confirmed via NowPayments.',
+    'Unlock 24/7 access to AI Box on this account and enable the extended VIP perimeter across the entire Quantum L7 ecosystem. The daily browser quota is disabled for 30 days after on-chain payment confirmation via NowPayments — activation is automatic, with no screenshots or messaging required. VIP status is synchronized between the web version, MiniApp and the Telegram bot: AI analytics without blockers, queue priority, access to media posting on the Forum (video/images/audio) and boosted QCoin mining. VIP gets a ×2 multiplier for time and quests, and content is scored by QuantumLCM-AI (quality/engagement/anti-spam/anti-sybil) and earns additional QCoin. Accruals are counted in the overall QCoin economy and prepare for the launch of the next-generation L7 blockchain — VIP receives elevated priority for distributions and an earlier withdrawal queue.',
   ai_unlimit_benefits: [
-    'No daily browser quota — AI Box is always on.',
-    'Plan is tied to your current account/wallet auth.',
-    'Payment is processed by NowPayments; webhook activates access automatically.',
+    'No daily quota — AI Box is available 24/7 for 30 days.',
+    'Auto-activation via NowPayments: the webhook enables VIP+ immediately after on-chain confirmation.',
+    'Status is linked to the current authentication/wallet; works in the web version, MiniApp and Telegram bot.',
+    'Forum: media posting (video/images/audio) is allowed for VIP — content is ranked higher.',
+    'QCoin mining every 4 hours: VIP gets ×2 time and ×2 quest multiplier.',
+    'Bonus QCoin for media content based on QuantumLCM-AI scoring (quality/engagement/anti-sybil).',
+    'Additional QCoin accruals for views and engagement of your posts based on transparent metrics.',
+    'Priority servicing of the AI channel: higher limits, lower latency, faster responses.',
+    'Exchange recommendations are already available: expanded analysis horizons, early access to experimental modes.',
+    'Unified VIP badge and priority in Forum listings — more visibility and reach.',
+    'Preparation for the L7 blockchain: higher priority in distributions and QCoin withdrawal queues at network launch.',
+    'Security by default: no storage of private keys/seed, only public addresses and invoice statuses.',
+    'Flexible localization: interface and notifications in 7 languages without loss of functionality.',
+    'Transparent billing: price is fixed, period — 30 days, status is shown in the interface.',
+    'Compatibility with quests/events: VIP gets increased caps and faster reward crediting.',
+    'Anti-fraud/anti-spam protection: fair QCoin economy, protection against manipulation and bots.',
+    'Status synchronization across devices: desktop/mobile/Telegram work in sync.',
+    'Quota removal takes effect immediately — no session restart or additional confirmations.'
   ],
   ai_unlimit_pay_now: 'Pay $30',
   ai_unlimit_cancel: 'Cancel',
-  ai_unlimit_learn_more: 'Details',
+  ai_unlimit_learn_more: 'Learn more',
   ai_unlimit_status_waiting: 'Waiting for payment confirmation…',
   ai_unlimit_status_confirmed: 'Payment confirmed — limit removed until {date}.',
-  ai_unlimit_status_underpaid: 'Underpaid: received {got}, required {need}.',
-  ai_unlimit_status_expired: 'Invoice expired or was cancelled.',
+  ai_unlimit_status_underpaid: 'Underpayment: received {got}, required {need}.',
+  ai_unlimit_status_expired: 'Invoice expired or was canceled.',
   ai_unlimit_status_error: 'Payment error. Please try again or contact support.',
   ai_unlimit_toast_on: 'VIP+ activated',
-  ai_unlimit_toast_off: 'VIP+ expired',
-}
+  ai_unlimit_toast_off: 'VIP+ expired'
+};
 
 /* -------------------- RU -------------------- */
 const UNLIMIT_RU = {
@@ -3495,11 +6058,26 @@ const UNLIMIT_RU = {
   ai_unlimit_title: 'Снять лимит — VIP+',
   ai_unlimit_price: 'Цена: $30 / месяц',
   ai_unlimit_desc:
-    'Откройте круглосуточный доступ к AI Box на этом аккаунте. Дневная квота из браузера отключается на 30 дней после подтверждения платежа через NowPayments.',
+    'Откройте круглосуточный доступ к AI Box на этом аккаунте и подключите расширенный VIP-контур всей экосистемы Quantum L7. Дневная квота в браузере отключается на 30 дней после on-chain подтверждения платежа через NowPayments — активация проходит автоматически, без скриншотов и переписки. Статус VIP синхронизируется между веб-версией, MiniApp и Telegram-ботом: AI-аналитика без стопоров, приоритет в очередях, доступ к медиапостингу на Форуме (видео/изображения/аудио) и усиленный QCoin-майнинг. Для VIP действует X2 множитель по времени и квестам, а контент проходит скоринг QuantumLCM-AI (качество/вовлечённость/anti-spam/anti-sybil) и приносит дополнительные QCoin. Накопления учитываются в общей экономике QCoin и готовят к запуску L7-блокчейна нового поколения — VIP получает повышенный приоритет на распределения и более раннюю очередь вывода.',
   ai_unlimit_benefits: [
-    'Без дневной квоты — AI Box всегда доступен.',
-    'План привязан к текущей авторизации/кошельку.',
-    'Оплата через NowPayments; вебхук активирует доступ автоматически.',
+    'Без дневной квоты — AI Box доступен 24/7 на протяжении 30 дней.',
+    'Автоактивация через NowPayments: вебхук включает VIP+ сразу после on-chain подтверждения.',
+    'Статус привязан к текущей авторизации/кошельку; работает в веб-версии, MiniApp и Telegram-боте.',
+    'Форум: разрешён медиапостинг (видео/изображения/аудио) для VIP — контент ранжируется выше.',
+    'QCoin-майнинг каждые 4 часа: VIP получает X2 по времени и X2 квест-множитель.',
+    'Бонусные QCoin за медиаконтент по скорингу QuantumLCM-AI (quality/engagement/anti-sybil).',
+    'Дополнительные QCoin начисления за просмотры и вовлечённость ваших постов по прозрачным метрикам.',
+    'Приоритетное обслуживание AI-канала: выше лимиты, меньше задержки, ускоренные ответы.',
+    'Рекомендации на бирже уже доступны: расширенные горизонты анализа, ранний доступ к экспериментальным режимам.',
+    'Единый VIP-бейдж и приоритет в выдаче на Форуме — больше видимость и охват.',
+    'Подготовка к L7-блокчейну: повышенный приоритет в распределениях и очереди вывода QCoin при старте сети.',
+    'Безопасность по умолчанию: без хранения приватных ключей/seed, только публичные адреса и статусы инвойсов.',
+    'Гибкая локализация: интерфейс и уведомления на 7 языках без потери функционала.',
+    'Прозрачный биллинг: цена фиксирована, период — 30 дней, статус отображается в интерфейсе.',
+    'Совместимость с квестами/ивентами: VIP получает повышенные капы и ускоренное зачисление наград.',
+    'Anti-fraud/anti-spam защита: честная экономика QCoin, защита от накруток и ботов.',
+    'Синхронизация статуса между устройствами: десктоп/мобайл/Telegram работают согласованно.',
+    'Отмена квоты действует сразу — без перезапуска сессии и доп. подтверждений.'
   ],
   ai_unlimit_pay_now: 'Оплатить $30',
   ai_unlimit_cancel: 'Отмена',
@@ -3510,8 +6088,8 @@ const UNLIMIT_RU = {
   ai_unlimit_status_expired: 'Счёт истёк или был отменён.',
   ai_unlimit_status_error: 'Ошибка платежа. Попробуйте ещё раз или напишите в поддержку.',
   ai_unlimit_toast_on: 'VIP+ активирован',
-  ai_unlimit_toast_off: 'VIP+ закончился',
-}
+  ai_unlimit_toast_off: 'VIP+ закончился'
+};
 
 /* -------------------- UK -------------------- */
 const UNLIMIT_UK = {
@@ -3520,123 +6098,203 @@ const UNLIMIT_UK = {
   ai_unlimit_title: 'Зняти ліміт — VIP+',
   ai_unlimit_price: 'Ціна: $30 / місяць',
   ai_unlimit_desc:
-    'Відкрийте цілодобовий доступ до AI Box для цього акаунта. Денна квота з браузера вимикається на 30 днів після підтвердження платежу через NowPayments.',
+    'Відкрийте цілодобовий доступ до AI Box на цьому акаунті та підключіть розширений VIP-контур усієї екосистеми Quantum L7. Денна квота у браузері вимикається на 30 днів після on-chain підтвердження платежу через NowPayments — активація проходить автоматично, без скріншотів і листування. Статус VIP синхронізується між веб-версією, MiniApp і Telegram-ботом: AI-аналітика без стопів, пріоритет у чергах, доступ до медіапостингу на Форумі (відео/зображення/аудіо) та посилений QCoin-майнінг. Для VIP діє X2 множник за часом і квестами, а контент проходить скоринг QuantumLCM-AI (якість/залученість/anti-spam/anti-sybil) і приносить додаткові QCoin. Накопичення враховуються в загальній економіці QCoin і готують до запуску L7-блокчейна нового покоління — VIP отримує підвищений пріоритет у розподіленнях і більш ранню чергу виведення.',
   ai_unlimit_benefits: [
-    'Без денної квоти — AI Box завжди доступний.',
-    'План прив’язано до поточної авторизації/гаманця.',
-    'Оплата через NowPayments; вебхук автоматично активує доступ.',
+    'Без денної квоти — AI Box доступний 24/7 протягом 30 днів.',
+    'Автоактивація через NowPayments: вебхук вмикає VIP+ одразу після on-chain підтвердження.',
+    'Статус прив’язаний до поточної авторизації/гаманця; працює у веб-версії, MiniApp і Telegram-боті.',
+    'Форум: дозволено медіапостинг (відео/зображення/аудіо) для VIP — контент ранжується вище.',
+    'QCoin-майнінг кожні 4 години: VIP отримує X2 за часом і X2 квест-множник.',
+    'Бонусні QCoin за медіаконтент за скорингом QuantumLCM-AI (quality/engagement/anti-sybil).',
+    'Додаткові QCoin нарахування за перегляди та залученість ваших постів за прозорими метриками.',
+    'Пріоритетне обслуговування AI-каналу: вищі ліміти, менше затримок, прискорені відповіді.',
+    'Рекомендації на біржі вже доступні: розширені горизонти аналізу, ранній доступ до експериментальних режимів.',
+    'Єдиний VIP-бейдж і пріоритет у видачі на Форумі — більше видимості та охоплення.',
+    'Підготовка до L7-блокчейна: підвищений пріоритет у розподіленнях і черзі виведення QCoin при старті мережі.',
+    'Безпека за замовчуванням: без зберігання приватних ключів/seed, лише публічні адреси та статуси інвойсів.',
+    'Гнучка локалізація: інтерфейс і сповіщення 7 мовами без втрати функціональності.',
+    'Прозорий білінг: ціна фіксована, період — 30 днів, статус відображається в інтерфейсі.',
+    'Сумісність із квестами/івентами: VIP отримує підвищені капи та прискорене зарахування нагород.',
+    'Anti-fraud/anti-spam захист: чесна економіка QCoin, захист від накруток і ботів.',
+    'Синхронізація статусу між пристроями: десктоп/мобайл/Telegram працюють узгоджено.',
+    'Скасування квоти діє одразу — без перезапуску сесії та додаткових підтверджень.'
   ],
   ai_unlimit_pay_now: 'Сплатити $30',
   ai_unlimit_cancel: 'Скасувати',
-  ai_unlimit_learn_more: 'Деталі',
-  ai_unlimit_status_waiting: 'Очікуємо підтвердження платежу…',
-  ai_unlimit_status_confirmed: 'Оплату підтверджено — ліміт знято до {date}.',
+  ai_unlimit_learn_more: 'Докладніше',
+  ai_unlimit_status_waiting: 'Чекаємо підтвердження платежу…',
+  ai_unlimit_status_confirmed: 'Платіж підтверджено — ліміт знято до {date}.',
   ai_unlimit_status_underpaid: 'Недоплата: отримано {got}, потрібно {need}.',
-  ai_unlimit_status_expired: 'Рахунок прострочено або скасовано.',
+  ai_unlimit_status_expired: 'Рахунок минув або був скасований.',
   ai_unlimit_status_error: 'Помилка платежу. Спробуйте ще раз або зверніться в підтримку.',
   ai_unlimit_toast_on: 'VIP+ активовано',
-  ai_unlimit_toast_off: 'VIP+ завершився',
-}
+  ai_unlimit_toast_off: 'VIP+ завершився'
+};
+
 
 /* -------------------- ES -------------------- */
-const UNLIMIT_ES = {
-  ai_unlimit_btn: 'Quitar límite',
+const UNLIMIT_ES = { 
+  ai_unlimit_btn: 'Eliminar límite',
   ai_unlimit_vip_badge: 'VIP+',
-  ai_unlimit_title: 'Quitar límite — VIP+',
+  ai_unlimit_title: 'Eliminar límite — VIP+',
   ai_unlimit_price: 'Precio: $30 / mes',
   ai_unlimit_desc:
-    'Desbloquea acceso 24/7 al AI Box en esta cuenta. La cuota diaria del navegador se desactiva durante 30 días tras la confirmación del pago vía NowPayments.',
+    'Obtén acceso las 24 horas al AI Box en esta cuenta y activa el perímetro VIP ampliado de todo el ecosistema Quantum L7. La cuota diaria en el navegador se desactiva durante 30 días después de la confirmación on-chain del pago a través de NowPayments — la activación se realiza automáticamente, sin capturas de pantalla ni correspondencia. El estado VIP se sincroniza entre la versión web, MiniApp y el bot de Telegram: analítica de IA sin interrupciones, prioridad en las colas, acceso a publicación multimedia en el Foro (video/imagenes/audio) y minería de QCoin mejorada. Para los VIP se aplica un multiplicador X2 en tiempo y misiones, y el contenido pasa la puntuación de QuantumLCM-AI (calidad/participación/anti-spam/anti-sybil) generando QCoin adicional. Las acumulaciones se tienen en cuenta en la economía general de QCoin y preparan el lanzamiento del blockchain L7 de nueva generación — el VIP recibe mayor prioridad en las distribuciones y una cola de retiro anticipada.',
   ai_unlimit_benefits: [
-    'Sin cuota diaria — AI Box siempre activo.',
-    'Plan vinculado a tu cuenta/cartera actual.',
-    'Pago por NowPayments; el webhook activa el acceso automáticamente.',
+    'Sin cuota diaria — AI Box disponible 24/7 durante 30 días.',
+    'Activación automática a través de NowPayments: el webhook habilita VIP+ inmediatamente después de la confirmación on-chain.',
+    'El estado está vinculado a la autenticación/cartera actual; funciona en la versión web, MiniApp y bot de Telegram.',
+    'Foro: publicación multimedia (video/imagenes/audio) permitida para VIP — el contenido se clasifica más alto.',
+    'Minería de QCoin cada 4 horas: el VIP recibe X2 en tiempo y X2 multiplicador de misiones.',
+    'Bonificación de QCoin por contenido multimedia según la puntuación QuantumLCM-AI (quality/engagement/anti-sybil).',
+    'Acreditaciones adicionales de QCoin por vistas y participación en tus publicaciones según métricas transparentes.',
+    'Atención prioritaria del canal de IA: límites más altos, menor latencia, respuestas aceleradas.',
+    'Las recomendaciones en el intercambio ya están disponibles: horizontes de análisis ampliados, acceso anticipado a modos experimentales.',
+    'Insignia VIP unificada y prioridad en el Foro — mayor visibilidad y alcance.',
+    'Preparación para el blockchain L7: prioridad elevada en las distribuciones y en la cola de retiro de QCoin al iniciar la red.',
+    'Seguridad por defecto: sin almacenamiento de claves privadas/seed, solo direcciones públicas y estados de facturas.',
+    'Localización flexible: interfaz y notificaciones en 7 idiomas sin pérdida de funcionalidad.',
+    'Facturación transparente: precio fijo, periodo — 30 días, el estado se muestra en la interfaz.',
+    'Compatibilidad con misiones/eventos: el VIP obtiene límites más altos y acreditación de recompensas más rápida.',
+    'Protección anti-fraude/anti-spam: economía QCoin justa, protección contra inflaciones y bots.',
+    'Sincronización de estado entre dispositivos: escritorio/móvil/Telegram funcionan de forma coordinada.',
+    'La cancelación de la cuota entra en vigor de inmediato — sin reiniciar sesión ni confirmaciones adicionales.'
   ],
   ai_unlimit_pay_now: 'Pagar $30',
   ai_unlimit_cancel: 'Cancelar',
-  ai_unlimit_learn_more: 'Detalles',
+  ai_unlimit_learn_more: 'Más información',
   ai_unlimit_status_waiting: 'Esperando confirmación del pago…',
-  ai_unlimit_status_confirmed: 'Pago confirmado — límite quitado hasta {date}.',
+  ai_unlimit_status_confirmed: 'Pago confirmado — límite eliminado hasta {date}.',
   ai_unlimit_status_underpaid: 'Pago insuficiente: recibido {got}, requerido {need}.',
-  ai_unlimit_status_expired: 'La factura caducó o fue cancelada.',
-  ai_unlimit_status_error: 'Error de pago. Inténtalo de nuevo o contacta soporte.',
+  ai_unlimit_status_expired: 'La factura ha expirado o fue cancelada.',
+  ai_unlimit_status_error: 'Error de pago. Intenta de nuevo o contacta con soporte.',
   ai_unlimit_toast_on: 'VIP+ activado',
-  ai_unlimit_toast_off: 'VIP+ expiró',
-}
+  ai_unlimit_toast_off: 'VIP+ finalizado'
+};
+
 
 /* -------------------- ZH (简体) -------------------- */
-const UNLIMIT_ZH = {
-  ai_unlimit_btn: '解除限制',
+const UNLIMIT_ZH = {  
+  ai_unlimit_btn: '解除限额',
   ai_unlimit_vip_badge: 'VIP+',
-  ai_unlimit_title: '解除限制 — VIP+',
+  ai_unlimit_title: '解除限额 — VIP+',
   ai_unlimit_price: '价格：$30 / 月',
   ai_unlimit_desc:
-    '为此账户解锁 24/7 AI Box 访问。通过 NowPayments 确认支付后，浏览器的每日配额将在 30 天内关闭。',
+    '为此账号开启 AI Box 的 24/7 不间断访问，并接入 Quantum L7 全生态的扩展 VIP 边界。通过 NowPayments 完成链上支付确认后，浏览器中的每日配额将停用 30 天——激活全程自动完成，无需截图与往返沟通。VIP 状态在网页版、MiniApp 与 Telegram 机器人之间同步：AI 分析无阻塞、队列优先、可在论坛发布媒体（视频/图片/音频），并强化 QCoin 挖矿。VIP 享有 X2 时间与任务倍增，内容将通过 QuantumLCM-AI 评分（质量/参与度/anti-spam/anti-sybil）并获得额外 QCoin。累积计入 QCoin 整体经济，为下一代 L7 区块链上线做准备——VIP 在分配与提现队列中获得更高优先级与更早通道。',
   ai_unlimit_benefits: [
-    '无每日配额 — AI Box 持续可用。',
-    '套餐绑定到你当前的账户/钱包登录。',
-    '使用 NowPayments 支付；回调（webhook）会自动开通权限。',
+    '无日配额——AI Box 在 30 天内 24/7 可用。',
+    '通过 NowPayments 自动激活：webhook 在链上确认后立即开启 VIP+。',
+    '状态绑定到当前授权/钱包；适用于网页版、MiniApp 与 Telegram 机器人。',
+    '论坛：VIP 可发布媒体（视频/图片/音频）——内容排名更靠前。',
+    'QCoin 挖矿每 4 小时一次：VIP 获得 X2 时间与 X2 任务倍增。',
+    '基于 QuantumLCM-AI 评分（quality/engagement/anti-sybil）的媒体内容可获额外 QCoin 奖励。',
+    '依据透明指标，按帖子浏览与参与度获得额外 QCoin 计入。',
+    'AI 通道优先服务：更高限额、更低延迟、更快响应。',
+    '交易所推荐已可用：更广的分析视野，抢先体验实验模式。',
+    '统一的 VIP 徽章与论坛结果优先——更高可见度与覆盖面。',
+    '为 L7 区块链做准备：网络启动时在 QCoin 分配与提现队列中享更高优先级。',
+    '默认安全：不存储私钥/seed，仅保留公开地址与发票状态。',
+    '灵活本地化：界面与通知支持 7 种语言且不降级。',
+    '透明计费：价格固定，周期 — 30 天，状态在界面中显示。',
+    '兼容任务/活动：VIP 获得更高上限并加速发放奖励。',
+    'Anti-fraud/anti-spam 保护：公平的 QCoin 经济，防刷量与机器人。',
+    '跨设备状态同步：桌面/移动端/Telegram 协同工作。',
+    '配额取消即时生效——无需重启会话或额外确认。'
   ],
   ai_unlimit_pay_now: '支付 $30',
   ai_unlimit_cancel: '取消',
-  ai_unlimit_learn_more: '详情',
-  ai_unlimit_status_waiting: '正在等待支付确认…',
-  ai_unlimit_status_confirmed: '支付已确认 — 限制解除至 {date}。',
-  ai_unlimit_status_underpaid: '支付不足：已收 {got}，需 {need}。',
-  ai_unlimit_status_expired: '账单已过期或被取消。',
+  ai_unlimit_learn_more: '了解更多',
+  ai_unlimit_status_waiting: '等待支付确认…',
+  ai_unlimit_status_confirmed: '付款已确认 — 限额解除至 {date}。',
+  ai_unlimit_status_underpaid: '付款不足：收到 {got}，需要 {need}。',
+  ai_unlimit_status_expired: '账单已过期或已被取消。',
   ai_unlimit_status_error: '支付错误。请重试或联系支持。',
-  ai_unlimit_toast_on: 'VIP+ 已开通',
-  ai_unlimit_toast_off: 'VIP+ 已到期',
-}
+  ai_unlimit_toast_on: 'VIP+ 已激活',
+  ai_unlimit_toast_off: 'VIP+ 已到期'
+};
+
 
 /* -------------------- AR -------------------- */
-const UNLIMIT_AR = {
-  ai_unlimit_btn: 'إزالة الحدّ',
+const UNLIMIT_AR = {    
+  ai_unlimit_btn: 'إزالة الحد',
   ai_unlimit_vip_badge: 'VIP+',
-  ai_unlimit_title: 'إزالة الحدّ — VIP+',
-  ai_unlimit_price: 'السعر: 30$ / شهريًا',
+  ai_unlimit_title: 'إزالة الحد — VIP+',
+  ai_unlimit_price: 'السعر: $30 / شهر',
   ai_unlimit_desc:
-    'افتح وصولًا مستمرًا على مدار الساعة إلى AI Box لهذا الحساب. يتم إيقاف حصة المتصفح اليومية لمدة 30 يومًا بعد تأكيد الدفع عبر NowPayments.',
+    'افتح وصولاً على مدار الساعة إلى AI Box على هذا الحساب وفعّل نطاق VIP الموسّع عبر منظومة Quantum L7 بأكملها. يتم تعطيل الحصة اليومية في المتصفح لمدة 30 يوماً بعد تأكيد الدفع على السلسلة عبر NowPayments — تتم عملية التفعيل تلقائياً، دون لقطات شاشة أو مراسلات. تتزامن حالة VIP بين الإصدار الويب وMiniApp وروبوت Telegram: تحليلات الذكاء الاصطناعي بلا توقفات، أولوية في الطوابير، إمكانية نشر الوسائط في المنتدى (فيديو/صور/صوت) وتعدين QCoin معزّز. يحصل VIP على مُضاعِف X2 للوقت والمهام، ويخضع المحتوى لتقييم QuantumLCM-AI (الجودة/التفاعل/anti-spam/anti-sybil) ويُولّد QCoin إضافية. تُحتسب التراكمات ضمن اقتصاد QCoin العام وتُهيّئ لإطلاق بلوكتشين L7 من الجيل الجديد — يحصل VIP على أولوية أعلى في التوزيعات وطابور سحب أبكر.',
   ai_unlimit_benefits: [
-    'بدون حصة يومية — AI Box متاح دائمًا.',
-    'الخطة مرتبطة بتسجيل دخولك / محفظتك الحالية.',
-    'يُعالج الدفع عبر NowPayments ويُفعَّل الوصول تلقائيًا بواسطة Webhook.',
+    'بدون حصة يومية — AI Box متاح 24/7 لمدة 30 يوماً.',
+    'تفعيل تلقائي عبر NowPayments: يفعّل الـ VIP+ مباشرة بعد التأكيد على السلسلة عبر webhook.',
+    'الحالة مرتبطة بعملية المصادقة/المحفظة الحالية؛ تعمل في الإصدار الويب وMiniApp وروبوت Telegram.',
+    'المنتدى: مسموح نشر الوسائط (فيديو/صور/صوت) لمستخدمي VIP — يتم ترتيب المحتوى أعلى.',
+    'تعدين QCoin كل 4 ساعات: يحصل VIP على X2 للوقت وX2 مُضاعِف المهام.',
+    'QCoin إضافية لمحتوى الوسائط وفق تقييم QuantumLCM-AI (quality/engagement/anti-sybil).',
+    'اعتمادات QCoin إضافية مقابل المشاهدات والتفاعل مع منشوراتك وفق مقاييس شفافة.',
+    'خدمة أولوية لقناة الذكاء الاصطناعي: حدود أعلى، كمون أقل، واستجابات أسرع.',
+    'توصيات البورصة متاحة بالفعل: آفاق تحليل موسّعة، وصول مبكر للأوضاع التجريبية.',
+    'شارة VIP موحّدة وأولوية في نتائج المنتدى — رؤية وانتشار أكبر.',
+    'التحضير لبلوكتشين L7: أولوية أعلى في التوزيعات وطابور سحب QCoin عند إطلاق الشبكة.',
+    'الأمان بشكل افتراضي: دون تخزين للمفاتيح الخاصة/seed، عناوين عامة وحالات الفواتير فقط.',
+    'محلية مرنة: الواجهة والإشعارات بـ 7 لغات دون فقدان للوظائف.',
+    'فاتورة شفافة: السعر ثابت، الفترة — 30 يوماً، تُعرض الحالة في الواجهة.',
+    'توافق مع المهام/الفعاليات: يحصل VIP على حدود أعلى وتسريع في إضافة المكافآت.',
+    'حماية Anti-fraud/anti-spam: اقتصاد QCoin عادل، حماية من التلاعب والروبوتات.',
+    'مزامنة الحالة بين الأجهزة: سطح المكتب/الهاتف/Telegram تعمل بانسجام.',
+    'إلغاء الحصة يسري فوراً — دون إعادة تشغيل الجلسة أو تأكيدات إضافية.'
   ],
-  ai_unlimit_pay_now: 'ادفع 30$',
+  ai_unlimit_pay_now: 'ادفع $30',
   ai_unlimit_cancel: 'إلغاء',
-  ai_unlimit_learn_more: 'تفاصيل',
-  ai_unlimit_status_waiting: 'بانتظار تأكيد الدفع…',
-  ai_unlimit_status_confirmed: 'تم تأكيد الدفع — أزيل الحد حتى {date}.',
-  ai_unlimit_status_underpaid: 'دفع غير مكتمل: المستلم {got}، المطلوب {need}.',
-  ai_unlimit_status_expired: 'انتهت صلاحية الفاتورة أو أُلغيت.',
-  ai_unlimit_status_error: 'خطأ في الدفع. حاول مجددًا أو تواصل مع الدعم.',
+  ai_unlimit_learn_more: 'اعرف المزيد',
+  ai_unlimit_status_waiting: 'ننتظر تأكيد الدفع…',
+  ai_unlimit_status_confirmed: 'تم تأكيد الدفع — تمت إزالة الحد حتى {date}.',
+  ai_unlimit_status_underpaid: 'نقص في الدفع: تم استلام {got}، المطلوب {need}.',
+  ai_unlimit_status_expired: 'انتهت صلاحية الفاتورة أو تم إلغاؤها.',
+  ai_unlimit_status_error: 'خطأ في الدفع. حاول مرة أخرى أو تواصل مع الدعم.',
   ai_unlimit_toast_on: 'تم تفعيل VIP+',
-  ai_unlimit_toast_off: 'انتهى VIP+',
-}
+  ai_unlimit_toast_off: 'انتهى VIP+'
+};
+
 
 /* -------------------- TR -------------------- */
-const UNLIMIT_TR = {
+const UNLIMIT_TR = {     
   ai_unlimit_btn: 'Limiti kaldır',
   ai_unlimit_vip_badge: 'VIP+',
   ai_unlimit_title: 'Limiti kaldır — VIP+',
   ai_unlimit_price: 'Fiyat: $30 / ay',
   ai_unlimit_desc:
-    'Bu hesapta 7/24 AI Box erişimini aç. NowPayments üzerinden ödeme onaylandığında tarayıcı günlük kotası 30 gün boyunca kapatılır.',
+    'Bu hesapta AI Box’a 7/24 erişim sağlayın ve Quantum L7 ekosisteminin tamamında genişletilmiş VIP çevresini etkinleştirin. NowPayments üzerinden zincir üzeri ödeme onayından sonra tarayıcıdaki günlük kota 30 gün boyunca devre dışı bırakılır — etkinleştirme otomatik olarak gerçekleşir, ekran görüntüsü veya yazışma gerekmez. VIP durumu web sürümü, MiniApp ve Telegram bot arasında senkronize edilir: kesintisiz AI analitiği, kuyruk önceliği, Forumda medya paylaşımı (video/görseller/ses) erişimi ve güçlendirilmiş QCoin madenciliği. VIP kullanıcıları için zaman ve görevlerde X2 çarpanı geçerlidir, içerik QuantumLCM-AI (kalite/katılım/anti-spam/anti-sybil) tarafından puanlanır ve ek QCoin kazandırır. Birikimler genel QCoin ekonomisine dahil edilir ve yeni nesil L7 blok zincirinin lansmanına hazırlanır — VIP, dağıtımlarda ve para çekme sıralarında daha yüksek öncelik elde eder.',
   ai_unlimit_benefits: [
-    'Günlük kota yok — AI Box her zaman açık.',
-    'Plan, mevcut hesabın/cüzdan girişinle eşleştirilir.',
-    'Ödeme NowPayments ile; webhook erişimi otomatik açar.',
+    'Günlük kota olmadan — AI Box 30 gün boyunca 7/24 kullanılabilir.',
+    'NowPayments üzerinden otomatik etkinleştirme: webhook, zincir üzeri onaydan hemen sonra VIP+’ı etkinleştirir.',
+    'Durum mevcut oturum açma/cüzdanla ilişkilidir; web sürümünde, MiniApp ve Telegram botta çalışır.',
+    'Forum: VIP kullanıcıları için medya paylaşımı (video/görseller/ses) serbesttir — içerik daha üst sıralarda görünür.',
+    'QCoin madenciliği her 4 saatte bir: VIP kullanıcıları zaman ve görevlerde X2 çarpan alır.',
+    'QuantumLCM-AI puanlamasına (quality/engagement/anti-sybil) göre medya içeriği için bonus QCoin.',
+    'Gönderilerinizin görüntülenmesi ve etkileşimine göre şeffaf metriklerle ek QCoin kazançları.',
+    'AI kanalında öncelikli hizmet: daha yüksek limitler, daha az gecikme, daha hızlı yanıtlar.',
+    'Borsa önerileri zaten mevcut: genişletilmiş analiz ufukları, deneysel modlara erken erişim.',
+    'Tek VIP rozeti ve Forumda arama önceliği — daha fazla görünürlük ve erişim.',
+    'L7 blok zinciri hazırlığı: ağ başlatıldığında dağıtımlar ve QCoin çekme sıralarında artan öncelik.',
+    'Varsayılan olarak güvenlik: özel anahtarlar/seed saklanmaz, yalnızca genel adresler ve fatura durumları.',
+    'Esnek yerelleştirme: arayüz ve bildirimler 7 dilde, işlev kaybı olmadan.',
+    'Şeffaf faturalandırma: sabit fiyat, süre — 30 gün, durum arayüzde görüntülenir.',
+    'Görevler/etkinliklerle uyumluluk: VIP kullanıcıları daha yüksek sınırlar ve daha hızlı ödül tahsisi alır.',
+    'Anti-fraud/anti-spam koruması: adil QCoin ekonomisi, sahtecilik ve botlara karşı koruma.',
+    'Cihazlar arasında durum senkronizasyonu: masaüstü/mobil/Telegram uyumlu çalışır.',
+    'Kota iptali anında geçerlidir — oturum yeniden başlatma veya ek onay gerekmez.'
   ],
-  ai_unlimit_pay_now: '30$ öde',
+  ai_unlimit_pay_now: '$30 öde',
   ai_unlimit_cancel: 'İptal',
-  ai_unlimit_learn_more: 'Detaylar',
+  ai_unlimit_learn_more: 'Daha fazla bilgi',
   ai_unlimit_status_waiting: 'Ödeme onayı bekleniyor…',
   ai_unlimit_status_confirmed: 'Ödeme onaylandı — limit {date} tarihine kadar kaldırıldı.',
-  ai_unlimit_status_underpaid: 'Eksik ödeme: alınan {got}, gereken {need}.',
+  ai_unlimit_status_underpaid: 'Eksik ödeme: {got} alındı, gereken {need}.',
   ai_unlimit_status_expired: 'Fatura süresi doldu veya iptal edildi.',
-  ai_unlimit_status_error: 'Ödeme hatası. Tekrar deneyin veya destekle iletişime geçin.',
-  ai_unlimit_toast_on: 'VIP+ etkin',
-  ai_unlimit_toast_off: 'VIP+ sona erdi',
-}
+  ai_unlimit_status_error: 'Ödeme hatası. Lütfen tekrar deneyin veya destekle iletişime geçin.',
+  ai_unlimit_toast_on: 'VIP+ etkinleştirildi',
+  ai_unlimit_toast_off: 'VIP+ süresi doldu'
+};
+
 /* -------------------- MERGE -------------------- */
 try {
   Object.assign(dict.en, UNLIMIT_EN)

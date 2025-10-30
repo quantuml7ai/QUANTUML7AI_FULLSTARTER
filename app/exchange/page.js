@@ -77,7 +77,7 @@ const Btn=({children,onClick,active,neon})=>(
 )
 
 /* ================================= Badge ================================= */
-function BadgeTitle(){ const {t}=useI18n(); return <Panel><span className="pill">{TX(t,'exchange_title','Биржа (в разработке)')}</span>
+function BadgeTitle(){ const {t}=useI18n(); return <Panel><span className="qcoinLabel">{TX(t,'exchange_title','Биржа (в разработке)')}</span>
   <style jsx>{`.pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(59,130,246,.25);border:1px solid rgba(59,130,246,.45);font-weight:700}`}</style>
 </Panel> }
 
@@ -226,16 +226,18 @@ function AIBox({ data }) {
 
       {(() => {
         const BOT = process.env.NEXT_PUBLIC_BOT_LINK ?? 'https://t.me/l7ai_bot'
-        // >>> ЗДЕСЬ ЗАМЕНА КНОПКИ НА ИКОНКУ <<<
+        const linkStyle = {
+          display:'inline-flex', alignItems:'center', gap:8,
+          padding:'10px 14px', borderRadius:999, fontWeight:800,
+          background:'linear-gradient(135deg,#1d4ed8,#3b82f6)', color:'#fff',
+          border:'1px solid rgba(59,130,246,.65)',
+          boxShadow:'0 0 0 1px rgba(59,130,246,.25), 0 10px 20px rgba(59,130,246,.25)',
+          textDecoration:'none', userSelect:'none'
+        }
         return (
           <div style={{marginTop:10, display:'flex', justifyContent:'flex-start'}}>
-            <a href={BOT} target="_blank" rel="noopener noreferrer" style={{ lineHeight: 0, textDecoration: 'none', background: 'transparent', border: 0 }}>
-              <img
-                src="/click/telegram.gif"
-                alt="Start in Telegram"
-                style={{ width: '60px', height: 'auto', display: 'block', background: 'transparent', border: 0 }}
-                draggable="false"
-              />
+            <a href={BOT} target="_blank" rel="noopener noreferrer" style={linkStyle}>
+              {tr('ai_cta_start_telegram') || 'Start in Telegram'}
             </a>
           </div>
         )

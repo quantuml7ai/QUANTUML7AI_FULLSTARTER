@@ -208,6 +208,13 @@ export default function Home() {
       {/* ===== HERO ===== */}
       <section className="panel">
         <h1>{t('hero_title')}</h1>
+        
+        {/* Лента карточки Telegram — авто-медиа */}
+        <AutoMedia
+          base="/branding/telegram_card_tape_fixed"
+          className="tg-tape"
+          alt="Telegram card sample"
+        />
         <p className="prewrap">{t('hero_subtitle')}</p>
 
         <div className="row">
@@ -219,17 +226,11 @@ export default function Home() {
           >
             {t('hero_cta')}
           </a>
-          <Link className="btn ghost" href="/about">
-            {t('hero_learn_more')}
+          <Link className="qcoinLabel" href="/forum">
+            {t('QCoin')}
           </Link>
         </div>
 
-        {/* Лента карточки Telegram — авто-медиа */}
-        <AutoMedia
-          base="/branding/telegram_card_tape_fixed"
-          className="tg-tape"
-          alt="Telegram card sample"
-        />
       </section>
 
       {/* ===== Контентные блоки ===== */}

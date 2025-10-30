@@ -4,25 +4,129 @@
 import { useI18n } from '../../components/i18n'
 import Link from 'next/link'
 import { useWeb3Modal } from '@web3modal/wagmi/react'
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 
-const TG_URL = process.env.NEXT_PUBLIC_TG_BOT_URL || 'https://t.me/l7ai_bot'
+/* ===== helpers: auth / VIP status / payment (как в Exchange) ===== */
+async function ensureAuthorized() {
+  if (typeof window === 'undefined') return null
+  const getAcc = () => window.__AUTH_ACCOUNT__ || localStorage.getItem('wallet') || null
 
-function TierBadge({ label }) {
+  let acc = getAcc()
+  if (acc) return acc
+
+  try { window.dispatchEvent(new CustomEvent('open-auth')) } catch {}
+
+  try {
+    const sels = ['[data-auth-open]', '.nav-auth-btn', '#nav-auth-btn', '[data-testid="auth-open"]']
+    for (const s of sels) {
+      const btn = document.querySelector(s)
+      if (btn && typeof btn.click === 'function') { btn.click(); break }
+    }
+  } catch {}
+
+  acc = await new Promise((resolve) => {
+    const done = (e)=> {
+      const id = e?.detail?.accountId || getAcc()
+      if (id) resolve(id)
+    }
+    window.addEventListener('auth:ok', done, { once:true })
+    window.addEventListener('auth:success', done, { once:true })
+    setTimeout(()=> resolve(getAcc()), 120000)
+  })
+
+  return acc || null
+}
+
+async function fetchVipStatus(accountId) {
+  try {
+    const r = await fetch('/api/subscription/status', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ accountId })
+    })
+    const j = await r.json().catch(()=> ({}))
+    return { isVip: !!j?.isVip, untilISO: j?.untilISO || null }
+  } catch { return { isVip:false, untilISO:null } }
+}
+
+async function createInvoice(accountId) {
+  const r = await fetch('/api/pay/create', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ accountId })
+  })
+  const j = await r.json().catch(()=> ({}))
+  if (!r.ok) throw new Error(j?.error || 'Create failed')
+  if (j?.url) return j.url
+  throw new Error('No payment URL returned')
+}
+
+/* ===== Badge кнопка: только визуальные эффекты X2 (VIP — золото, не VIP — мигает красным) ===== */
+function TierBadge({ label, isVip, onClick }) {
   return (
-    <a
-      href={TG_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="badge badge-cta"
-      aria-label={`Open Telegram bot for ${label} plan`}
+    <button
+      type="button"
+      className={`badge badge-cta ${isVip ? 'vip' : 'needVip'}`}
+      onClick={onClick}
+      aria-label={`Start payment for ${label} plan`}
     >
       {label}
-    </a>
+      <style jsx>{`
+        /* VIP — золотой перелив как у X2 */
+        .badge-cta.vip{
+          background:
+            linear-gradient(135deg,
+              #7a5c00 0%, #ffd700 18%, #fff4b3 32%, #ffd700 46%,
+              #ffea80 60%, #b38400 74%, #ffd700 88%, #7a5c00 100%);
+          background-size:200% 100%;
+          color:#1a1000;
+          border:1px solid rgba(255,215,0,.45);
+          box-shadow:0 0 18px rgba(255,215,0,.25);
+          animation:qcoinShine 6s linear infinite, qcoinGlow 2.8s ease-in-out infinite;
+          cursor:default;
+        }
+        .badge-cta.vip:hover{ transform:none }
+
+        /* Не VIP — заметно мигает красным */
+        .badge-cta.needVip{
+          background:rgba(255,70,70,.18);
+          color:#fff;
+          border:1px solid rgba(255,120,120,.6);
+          box-shadow:0 0 12px rgba(255,70,70,.35);
+          animation:blinkPause .9s steps(1) infinite;
+          cursor:pointer;
+        }
+
+        @keyframes qcoinShine{
+          0%{ background-position:0% 0% }
+          100%{ background-position:200% 0% }
+        }
+        @keyframes qcoinGlow{
+          0%,100%{
+            filter:brightness(1);
+            box-shadow:
+              0 0 10px rgba(255,210,90,.30),
+              inset 0 0 0 1px rgba(255,255,255,.22),
+              0 1px 0 0 rgba(0,0,0,.35);
+          }
+          50%{
+            filter:brightness(1.15);
+            box-shadow:
+              0 0 18px rgba(255,210,90,.70),
+              inset 0 0 0 1px rgba(255,255,255,.35),
+              0 1px 0 0 rgba(0,0,0,.35);
+          }
+        }
+        @keyframes blinkPause{
+          0%,50%{ opacity:1 }
+          51%,100%{ opacity:.45 }
+        }
+      `}</style>
+    </button>
   )
 }
 
-/* ===== Маркиза как на главной/контактах/политике: бесшовно, full-bleed ===== */
+/* ===== Маркиза ===== */
 function PageMarqueeTail() {
   const { t } = useI18n()
   const marqueeRef = useRef(null)
@@ -30,14 +134,12 @@ function PageMarqueeTail() {
   useEffect(() => {
     const el = marqueeRef.current
     if (!el) return
-    // Идемпотентность: не дублируем контент повторно (в dev эффект может сработать 2 раза)
     if (el.dataset.duped === '1') return
     el.innerHTML += el.innerHTML
     el.dataset.duped = '1'
   }, [])
 
   return (
-    // no-gutters — отключаем глобальные гаттеры; full-bleed через отрицательные маргины
     <section className="marquee-wrap no-gutters" aria-hidden="true">
       <div className="marquee" ref={marqueeRef}>
         <span>{t('marquee')}</span>
@@ -52,8 +154,6 @@ function PageMarqueeTail() {
           overflow: hidden;
           border-top: 1px solid rgba(255,255,255,.1);
           margin-top: 40px;
-
-          /* full-bleed: компенсируем глобальные отступы краёв */
           margin-left: calc(-1 * var(--gutter, 24px));
           margin-right: calc(-1 * var(--gutter, 24px));
           padding-left: 0;
@@ -66,16 +166,12 @@ function PageMarqueeTail() {
           will-change: transform;
           animation: marquee 20s linear infinite;
         }
-        .marquee > *{ flex: 0 0 auto; }   /* без переносов */
+        .marquee > *{ flex: 0 0 auto; }
         .marquee span{ opacity: .7; }
-
-        /* Бесшовность: во второй половине содержимое идентично → смещаем на 50% */
         @keyframes marquee{
           from{ transform: translateX(0); }
           to  { transform: translateX(-50%); }
         }
-
-        /* Доступность: уважение reduce-motion */
         @media (prefers-reduced-motion: reduce){
           .marquee{ animation: none; }
         }
@@ -90,8 +186,67 @@ export default function SubscribePage() {
   const payments = t('sub_payments') || []
   const faq = t('sub_faq') || []
 
-  const { open } = useWeb3Modal()
-  const hasW3M = !!process.env.NEXT_PUBLIC_WC_PROJECT_ID
+  /* --- БЕЗОПАСНО: пробуем получить open из useWeb3Modal; если модалка не инициализирована (после логаута), не падаем --- */
+  let openW3M = null
+  try {
+    const api = useWeb3Modal()
+    openW3M = api?.open || null
+  } catch (e) {
+    openW3M = null
+  }
+  const hasW3M = !!process.env.NEXT_PUBLIC_WC_PROJECT_ID && typeof openW3M === 'function'
+
+  /* ===== VIP state + авто-проверки (как на Exchange) ===== */
+  const [isVip, setIsVip] = useState(false)
+  const [vipUntil, setVipUntil] = useState(null)
+
+  const refreshVip = async () => {
+    try {
+      const accountId =
+        (typeof window !== 'undefined' && window.__AUTH_ACCOUNT__) ||
+        (typeof window !== 'undefined' && localStorage.getItem('wallet'))
+      if (!accountId) { setIsVip(false); setVipUntil(null); return }
+      const st = await fetchVipStatus(accountId)
+      setIsVip(!!st.isVip)
+      setVipUntil(st.untilISO || null)
+    } catch {}
+  }
+
+  useEffect(() => {
+    refreshVip()
+    const onFocus = () => refreshVip()
+    const onVis = () => { if (document.visibilityState === 'visible') refreshVip() }
+    const onAuth = () => refreshVip()
+    window.addEventListener('focus', onFocus)
+    document.addEventListener('visibilitychange', onVis)
+    window.addEventListener('auth:ok', onAuth)
+    return () => {
+      window.removeEventListener('focus', onFocus)
+      document.removeEventListener('visibilitychange', onVis)
+      window.removeEventListener('auth:ok', onAuth)
+    }
+  }, [])
+
+  const handleVipClick = async () => {
+    try {
+      const accountId = await ensureAuthorized()
+      if (!accountId) return
+      const url = await createInvoice(accountId)
+      window.open(url, '_blank', 'noopener,noreferrer')
+      setTimeout(() => { refreshVip() }, 5000)
+    } catch (e) {
+      console.error(e)
+      alert('Payment error: ' + (e?.message || e))
+    }
+  }
+
+  const handleWalletClick = () => {
+    if (!hasW3M) {
+      try { window.dispatchEvent(new CustomEvent('open-auth')) } catch {}
+      return
+    }
+    openW3M()
+  }
 
   return (
     <>
@@ -116,18 +271,12 @@ export default function SubscribePage() {
             <button
               id="wallet-connect"
               className="btn"
-              onClick={() => {
-                if (!hasW3M) {
-                  alert(t('sub_wallet_cta_note') || 'Set NEXT_PUBLIC_WC_PROJECT_ID')
-                  return
-                }
-                open()
-              }}
+              onClick={handleWalletClick}
               aria-label={t('sub_wallet_cta')}
             >
               🔗 {t('sub_wallet_cta')}
             </button>
-            <Link href="/contact" className="btn ghost" aria-label={t('nav_contact')}>
+            <Link href="/contact" className="btn" aria-label={t('nav_contact')}>
               ✉️ {t('nav_contact')}
             </Link>
           </div>
@@ -137,27 +286,23 @@ export default function SubscribePage() {
         <section className="panel panel-narrow">
           <h2>{t('sub_plans_title')}</h2>
 
-          {/* FREE */}
-          <div style={{ marginTop: 8 }}>
-            <TierBadge label="FREE" />
-            <h3 style={{ marginTop: 8 }}>{t('sub_free_title')}</h3>
-            <p dangerouslySetInnerHTML={{ __html: t('sub_free_desc') }} />
-          </div>
-
-          {/* PRO */}
-          <div style={{ marginTop: 18 }}>
-            <TierBadge label="PRO" />
-            <h3 style={{ marginTop: 8 }}>{t('sub_pro_title')}</h3>
-            <p><b>{t('sub_pro_price')}</b></p>
-            <p dangerouslySetInnerHTML={{ __html: t('sub_pro_desc') }} />
-          </div>
-
           {/* VIP */}
           <div style={{ marginTop: 18 }}>
-            <TierBadge label="VIP" />
+            {/* Кнопка VIP+: только визуальные эффекты добавлены */}
+            <TierBadge label="VIP+" isVip={isVip} onClick={handleVipClick} />
             <h3 style={{ marginTop: 8 }}>{t('sub_vip_title')}</h3>
             <p><b>{t('sub_vip_price')}</b></p>
             <p dangerouslySetInnerHTML={{ __html: t('sub_vip_desc') }} />
+            {isVip && (
+              <p className="muted" style={{ marginTop: 6 }}>
+                {t('active_until') || 'Активен до'}:&nbsp;
+                {(() => { try {
+                  if (!vipUntil) return '—'
+                  const d = new Date(vipUntil)
+                  return d.toLocaleDateString(undefined, { year:'numeric', month:'2-digit', day:'2-digit' })
+                } catch { return '—' } })()}
+              </p>
+            )}
           </div>
         </section>
 
@@ -205,7 +350,7 @@ export default function SubscribePage() {
           </ul>
         </section>
 
-        {/* Локальные стили: кликабельные бейджи + адаптивные медиа */}
+        {/* Локальные стили */}
         <style jsx>{`
           .badge {
             display: inline-flex;

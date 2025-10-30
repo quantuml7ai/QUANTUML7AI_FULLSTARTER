@@ -55,49 +55,78 @@ export default function TmaAutoPage() {
   const hasInit = typeof window !== 'undefined' && !!window?.Telegram?.WebApp?.initData
 
   return (
-    <main
-      style={{
-        padding: 'min(24px, 5vw)',
-        fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif',
-        color: '#e6f0ff'
-      }}
-    >
-      {/* Верх: локализованный заголовок */}
-      <h1
-        style={{
-          margin: '0 0 14px',
-          fontSize: 'clamp(24px, 4.6vw, 40px)',
-          lineHeight: 1.15,
-          letterSpacing: '.02em',
-          textShadow: '0 0 10px rgba(64,200,255,.55)'
-        }}
-      >
-        {t('tma_welcome_title')}
-      </h1>
+    <main className="tma-full">
+      <div className="tma-inner">
+        {/* Приветственное сообщение по центру */}
+        <h1 className="tma-title">{t('tma_welcome_title')}</h1>
 
-      {/* Низ: гифка авторизации на всю ширину (лежит в /public/click/authorization.gif) */}
-      <div
-        style={{
-          width: '100%',
-          maxWidth: '1400px',
-          margin: '12px auto 0',
-          borderRadius: '14px',
-          overflow: 'hidden',
-          boxShadow: '0 14px 40px -10px rgba(0,0,0,.55), 0 0 40px rgba(0,200,255,.15) inset'
-        }}
-      >
-        <img
-          src="/click/authorization.gif"
-          alt=""
-          style={{ display: 'block', width: '100%', height: 'auto', imageRendering: 'auto' }}
-          draggable={false}
-        />
+        {/* GIF всегда на всю ширину контейнера */}
+        <div className="gif-wrap">
+          <img
+            src="/click/authorization.gif"
+            alt=""
+            className="auth-gif"
+            draggable={false}
+          />
+        </div>
+
+        {/* Служебный статус (как было) */}
+        <small className="tma-status">{hasInit ? msg : 'no initData'}</small>
       </div>
 
-      {/* Служебный статус (оставил как у тебя) */}
-      <small style={{ opacity: .7, display: 'block', marginTop: 10 }}>
-        {hasInit ? msg : 'no initData'}
-      </small>
+      <style jsx>{`
+        /* Чёрный контейнер на весь экран по ширине и высоте */
+        .tma-full{
+          min-height: 100vh;
+          width: 100%;
+          background: #000;
+          display: grid;
+          place-items: center; /* центр по вертикали и горизонтали */
+          overflow: hidden;
+        }
+
+        /* Внутренний блок контента */
+        .tma-inner{
+          width: 100%;
+          max-width: 1600px;
+          padding: min(24px, 5vw);
+          text-align: center;
+          color: #e6f0ff;
+          font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 16px;
+        }
+
+        .tma-title{
+          margin: 0;
+          font-size: clamp(24px, 4.6vw, 40px);
+          line-height: 1.15;
+          letter-spacing: .02em;
+          text-shadow: 0 0 10px rgba(64,200,255,.55);
+        }
+
+        .gif-wrap{
+          width: 100%;
+          max-width: 2000px;
+          border-radius: 14px;
+          overflow: hidden;
+          box-shadow: 0 14px 40px -10px rgba(0,0,0,.55), 0 0 40px rgba(0,200,255,.15) inset;
+        }
+        .auth-gif{
+          display: block;
+          width: 100%;  /* растягиваем под ширину экрана */
+          height: auto; /* сохраняем пропорции */
+          image-rendering: auto;
+        }
+
+        .tma-status{
+          opacity: .7;
+          display: block;
+          margin-top: 6px;
+        }
+      `}</style>
     </main>
   )
 }
