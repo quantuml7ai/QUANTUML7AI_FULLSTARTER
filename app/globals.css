@@ -572,7 +572,7 @@ html, body {
 @media (max-width:640px){ .page-center{ padding:14px 12px; } }
 
 /* === Глобальные гаттеры === */
-:root { --gutter: 26px; --miniapp-top-offset: 0px; } /* ↑ докрути тут при необходимости */
+:root { --gutter: 26px; --miniapp-top-offset: 20px; } /* ↑ докрути тут при необходимости */
 @media (min-width:1280px){ :root{ --gutter: 100px; } }
 /* Мобайл: микро-гаттер 8px, чтобы ничего не «резалось» по краям */
 @media (max-width:640px){ :root{ --gutter: 2px; --miniapp-top-offset: 20px; } }
