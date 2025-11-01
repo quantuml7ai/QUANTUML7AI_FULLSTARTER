@@ -6236,7 +6236,8 @@ const createPost = async () => {
         const resp = await fetch(pendingVideo);
         const blob = await resp.blob();
         const fd = new FormData();
-const t = (blob?.type || '').toLowerCase();
+ // iOS Safari часто пишет video/quicktime (MOV, H.264/AAC)
+ const ALLOWED_MIME = /^(video\/webm|video\/mp4|video\/quicktime)$/i
 const ext = t.includes('mp4') ? 'mp4'
         : t.includes('quicktime') ? 'mov'
         : t.includes('webm') ? 'webm'
@@ -6249,7 +6250,12 @@ fd.append('file', blob, `video-${Date.now()}.${ext}`);
       } else {
         videoUrlToSend = pendingVideo;
       }
-    } catch { videoUrlToSend = ''; }
+} catch {
+  videoUrlToSend = '';
+  try { toast?.warn?.('Не удалось загрузить видео'); } catch {}
+  // важный момент: чтобы кнопка не «синела» из-за залипшего blob:
+  try { setPendingVideo(null); } catch {}
+}
   }
 
   // 0b) аудио: blob -> https
