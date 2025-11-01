@@ -6414,6 +6414,7 @@ fd.append('file', blob, `video-${Date.now()}.${ext}`);
   setReplyTo(null);
   toast.ok(t('forum_post_sent') || 'Отправлено');
   postingRef.current = false;
+
  // ← важный сброс видео-оверлея и состояния после отправки
  try { resetVideo(); } catch {}
  try {
@@ -6421,6 +6422,7 @@ fd.append('file', blob, `video-${Date.now()}.${ext}`);
  } catch {}
  try { setPendingVideo(null); } catch {}
  try { setVideoOpen(false); setVideoState('idle'); } catch {}
+ return true;
 };
 
 
@@ -8215,9 +8217,11 @@ onClick={(e)=>{
                 try{
                   setVideoState(s => (pendingVideo ? 'uploading' : s));
                   try { if (videoOpen) setVideoOpen(false); } catch {}
-                  await createPost();
+                  const ok = await createPost();
+                  if (ok) {
                   setCooldownLeft?.(10);
                   try { resetVideo(); } catch {}
+                  }
                 }finally{
                   try { setEmojiOpen(false) } catch {}
                 }
