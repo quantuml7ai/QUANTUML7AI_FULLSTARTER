@@ -5985,22 +5985,10 @@ const startVideo = async () => {
       videoStreamRef.current = stream;
     }
 
-// iOS Safari предпочитает H.264/AAC (mp4). Падаем на webm только если mp4 не поддержан.
-const preferMp4 =
-  /iPad|iPhone|iPod/i.test(navigator.userAgent) || /AppleWebKit/i.test(navigator.userAgent);
-
-let mime = '';
-if (preferMp4 && MediaRecorder.isTypeSupported?.('video/mp4;codecs=h264')) {
-  mime = 'video/mp4;codecs=h264';
-} else if (preferMp4 && MediaRecorder.isTypeSupported?.('video/mp4')) {
-  mime = 'video/mp4';
-} else if (MediaRecorder.isTypeSupported?.('video/webm;codecs=vp9')) {
-  mime = 'video/webm;codecs=vp9';
-} else if (MediaRecorder.isTypeSupported?.('video/webm;codecs=vp8')) {
-  mime = 'video/webm;codecs=vp8';
-} else {
-  mime = 'video/webm';
-}
+    const mime =
+      MediaRecorder.isTypeSupported?.('video/webm;codecs=vp9')
+        ? 'video/webm;codecs=vp9'
+        : 'video/webm';
 
     const mr = new MediaRecorder(stream, { mimeType: mime });
     videoChunksRef.current = [];
@@ -6022,14 +6010,8 @@ if (preferMp4 && MediaRecorder.isTypeSupported?.('video/mp4;codecs=h264')) {
           return;
         }
 
-const detectedType =
-  mr?.mimeType && mr.mimeType !== '' ? mr.mimeType
-  : (videoChunksRef.current?.[0]?.type || '');
-
-const safeType = detectedType || 'video/mp4'; // на iOS это самый безопасный дефолт
-const blob = new Blob(videoChunksRef.current, { type: safeType });
-const url  = URL.createObjectURL(blob);
-
+        const blob = new Blob(videoChunksRef.current, { type: mr.mimeType || 'video/webm' });
+        const url = URL.createObjectURL(blob);
 
         // освободим предыдущий blob:URL
         try {
@@ -6236,26 +6218,14 @@ const createPost = async () => {
         const resp = await fetch(pendingVideo);
         const blob = await resp.blob();
         const fd = new FormData();
- // iOS Safari часто пишет video/quicktime (MOV, H.264/AAC)
- const ALLOWED_MIME = /^(video\/webm|video\/mp4|video\/quicktime)$/i
-const ext = t.includes('mp4') ? 'mp4'
-        : t.includes('quicktime') ? 'mov'
-        : t.includes('webm') ? 'webm'
-        : 'mp4'; // дефолт под iOS
-
-fd.append('file', blob, `video-${Date.now()}.${ext}`);
+        fd.append('file', blob, `video-${Date.now()}.webm`);
         const up = await fetch('/api/forum/uploadVideo', { method:'POST', body: fd, cache:'no-store' });
         const uj = await up.json().catch(()=>null);
         videoUrlToSend = (uj && Array.isArray(uj.urls) && uj.urls[0]) ? uj.urls[0] : '';
       } else {
         videoUrlToSend = pendingVideo;
       }
-} catch {
-  videoUrlToSend = '';
-  try { toast?.warn?.('Не удалось загрузить видео'); } catch {}
-  // важный момент: чтобы кнопка не «синела» из-за залипшего blob:
-  try { setPendingVideo(null); } catch {}
-}
+    } catch { videoUrlToSend = ''; }
   }
 
   // 0b) аудио: blob -> https
