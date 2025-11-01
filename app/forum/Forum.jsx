@@ -5,7 +5,7 @@ import React, { useEffect, useMemo, useRef, useCallback, useState } from 'react'
 import { useI18n } from '../../components/i18n'
 import { useRouter } from 'next/navigation'
 import { broadcast as forumBroadcast } from './events/bus'
-
+import { upload } from '@vercel/blob/client'
 // хелперы для отправки событий (строки, защита от undefined)
 function emitCreated(pId, tId) {
   try { forumBroadcast({ type: 'post_created', postId: String(pId), topicId: String(tId) }); } catch {}
@@ -6210,32 +6210,37 @@ const createPost = async () => {
 
   if (!rl.allowAction()) return _fail(t('forum_too_fast') || 'Слишком часто');
 
-  // 0) видео: blob -> https
-  let videoUrlToSend = '';
-  if (pendingVideo) {
-    try {
-      if (/^blob:/.test(pendingVideo)) {
- const resp = await fetch(pendingVideo);
- const blob = await resp.blob();
- // нормализуем тип и расширение под iOS/Android
- const mime = String(blob.type || '').toLowerCase();
- const ext =
-   mime.includes('webm')       ? 'webm' :
-   mime.includes('quicktime')  ? 'mov'  :
-   mime.includes('mp4')        ? 'mp4'  :
-   'mp4'; // безопасный дефолт
- // делаем File, чтобы и name, и type были корректны
- const file = new File([blob], `video-${Date.now()}.${ext}`, { type: mime || 'video/mp4' });
- const fd = new FormData();
- fd.append('file', file, file.name);
-        const up = await fetch('/api/forum/uploadVideo', { method:'POST', body: fd, cache:'no-store' });
-        const uj = await up.json().catch(()=>null);
-        videoUrlToSend = (uj && Array.isArray(uj.urls) && uj.urls[0]) ? uj.urls[0] : '';
-      } else {
-        videoUrlToSend = pendingVideo;
-      }
-    } catch { videoUrlToSend = ''; }
-  }
+ // 0) видео: blob -> https (ПРЯМАЯ ЗАГРУЗКА В VERCEL BLOB)
+ let videoUrlToSend = '';
+ if (pendingVideo) {
+   try {
+     if (/^blob:/.test(pendingVideo)) {
+       const resp = await fetch(pendingVideo);
+       const blob = await resp.blob();
+       const mime = String(blob.type || '').toLowerCase();
+       const ext =
+         mime.includes('webm')       ? 'webm' :
+         mime.includes('quicktime')  ? 'mov'  :
+         mime.includes('mp4')        ? 'mp4'  :
+         'mp4';
+       const file = new File([blob], `forum/video-${Date.now()}.${ext}`, { type: mime || 'video/mp4' });
+
+       // ⬇️ ключевая строка: прямой upload в Blob
+       const put = await upload(file.name, file, {
+         access: 'public',
+         handleUploadUrl: '/api/forum/blob-upload', // твой новый роут
+         contentType: file.type,
+       });
+       videoUrlToSend = put?.url || '';
+     } else {
+       // если тут уже https — оставляем как есть
+       videoUrlToSend = pendingVideo;
+     }
+   } catch {
+     videoUrlToSend = '';
+   }
+ }
+
 
   // 0b) аудио: blob -> https
   let audioUrlToSend = '';
