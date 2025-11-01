@@ -6232,12 +6232,15 @@ const createPost = async () => {
          contentType: file.type,
        });
        videoUrlToSend = put?.url || '';
+       if (!videoUrlToSend) { try { toast?.warn?.('Видео не загрузилось'); } catch {} }
      } else {
        // если тут уже https — оставляем как есть
        videoUrlToSend = pendingVideo;
      }
-   } catch {
+   } catch (e) {
+    console.error('video upload failed', e);
      videoUrlToSend = '';
+     try { toast?.warn?.('Видео не загрузилось'); } catch {}
    }
  }
 
