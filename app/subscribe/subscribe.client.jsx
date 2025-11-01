@@ -121,6 +121,7 @@ function TierBadge({ label, isVip, onClick }) {
           0%,50%{ opacity:1 }
           51%,100%{ opacity:.45 }
         }
+
       `}</style>
     </button>
   )
