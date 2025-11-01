@@ -5,7 +5,7 @@ import React, { useEffect, useMemo, useRef, useCallback, useState } from 'react'
 import { useI18n } from '../../components/i18n'
 import { useRouter } from 'next/navigation'
 import { broadcast as forumBroadcast } from './events/bus'
-import { upload } from '@vercel/blob/client'
+
 // хелперы для отправки событий (строки, защита от undefined)
 function emitCreated(pId, tId) {
   try { forumBroadcast({ type: 'post_created', postId: String(pId), topicId: String(tId) }); } catch {}
@@ -6210,49 +6210,23 @@ const createPost = async () => {
 
   if (!rl.allowAction()) return _fail(t('forum_too_fast') || 'Слишком часто');
 
- // 0) видео: blob -> https (ПРЯМАЯ ЗАГРУЗКА В VERCEL BLOB)
- let videoUrlToSend = '';
- if (pendingVideo) {
-   try {
-     if (/^blob:/.test(pendingVideo)) {
-       const resp = await fetch(pendingVideo);
-       const blob = await resp.blob();
-       const mime = String(blob.type || '').toLowerCase();
-       const ext =
-         mime.includes('webm')       ? 'webm' :
-         mime.includes('quicktime')  ? 'mov'  :
-         mime.includes('mp4')        ? 'mp4'  :
-         'mp4';
-       const file = new File([blob], `forum/video-${Date.now()}.${ext}`, { type: mime || 'video/mp4' });
-
-       // ⬇️ ключевая строка: прямой upload в Blob
-       const put = await upload(file.name, file, {
-         access: 'public',
-         handleUploadUrl: '/api/forum/blob-upload', // твой новый роут
-         contentType: file.type,
-       });
- // ⬇️ Нормализация: гарантируем «видимое» расширение через filename=
- const rawUrl = put?.url || '';
- const needsName = rawUrl && !/[?&](filename|download)=/i.test(rawUrl) &&
-                   !/\.(webm|mp4|mov|m4v|mkv)(?:$|[?#])/i.test(rawUrl);
- const sep1 = rawUrl.includes('?') ? '&' : '?';
- const withName = needsName ? `${rawUrl}${sep1}filename=${encodeURIComponent(file.name)}` : rawUrl;
- // ✅ явный маркер для рендера
- const sep2 = withName.includes('?') ? '&' : '?';
- videoUrlToSend = `${withName}${sep2}media=video`;
-   
-  if (!videoUrlToSend) { try { toast?.warn?.('Видео не загрузилось'); } catch {} }
-     } else {
-       // если тут уже https — оставляем как есть
-       videoUrlToSend = pendingVideo;
-     }
-   } catch (e) {
-    console.error('video upload failed', e);
-     videoUrlToSend = '';
-     try { toast?.warn?.('Видео не загрузилось'); } catch {}
-   }
- }
-
+  // 0) видео: blob -> https
+  let videoUrlToSend = '';
+  if (pendingVideo) {
+    try {
+      if (/^blob:/.test(pendingVideo)) {
+        const resp = await fetch(pendingVideo);
+        const blob = await resp.blob();
+        const fd = new FormData();
+        fd.append('file', blob, `video-${Date.now()}.webm`);
+        const up = await fetch('/api/forum/uploadVideo', { method:'POST', body: fd, cache:'no-store' });
+        const uj = await up.json().catch(()=>null);
+        videoUrlToSend = (uj && Array.isArray(uj.urls) && uj.urls[0]) ? uj.urls[0] : '';
+      } else {
+        videoUrlToSend = pendingVideo;
+      }
+    } catch { videoUrlToSend = ''; }
+  }
 
   // 0b) аудио: blob -> https
   let audioUrlToSend = '';
@@ -6369,7 +6343,6 @@ const createPost = async () => {
     isAdmin: isAdm,
     likes: 0, dislikes: 0, views: 0,
     myReaction: null,
-    ...(videoUrlToSend ? { type: 'video' } : {}),
   };
  
   persist(prev => {
@@ -6629,16 +6602,9 @@ function isVideoUrl(url) {
 
   // обычные расширения
   if (/\.(webm|mp4|mov|m4v|mkv)(?:$|[?#])/i.test(s)) return true;
- // явный маркер
- if (/[?#&]media=video(?:$|[&#])/i.test(s)) return true;
- // filename=/download= с расширением
- try {
-   const u = new URL(s, typeof location !== 'undefined' ? location.origin : 'http://local');
-   const fn = u.searchParams.get('filename') || u.searchParams.get('download') || '';
-   if (/\.(webm|mp4|mov|m4v|mkv)$/i.test(fn)) return true;
- } catch {}
- // прежний быстрый регэкс оставим как запасной
- if (/[?&](filename|download)=.*\.(webm|mp4|mov|m4v|mkv)(?:$|[&#])/i.test(s)) return true;
+
+  // filename=video.ext
+  if (/[?&]filename=.*\.(webm|mp4|mov|m4v|mkv)(?:$|[&#])/i.test(s)) return true;
 
   // публичные vercel-storage / твои пути без расширений
   if (/vercel[-]?storage|vercel[-]?blob|\/uploads\/video|\/forum\/video|\/api\/forum\/uploadVideo/i.test(s)) return true;

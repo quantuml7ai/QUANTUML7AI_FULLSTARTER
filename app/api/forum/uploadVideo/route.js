@@ -3,32 +3,10 @@ import { put } from '@vercel/blob'
 
 export const runtime = 'nodejs'
 
-// Разрешаем webm/mp4/mov (+ редкий 3gpp)
-const ALLOWED_MIME = /^(video\/webm|video\/mp4|video\/quicktime|video\/3gpp)$/i
+// webm/mp4 — то, что даёт MediaRecorder и обычные клипы
+const ALLOWED_MIME = /^(video\/webm|video\/mp4)$/i
 // подними лимит, видео тяжелее (например, 200 МБ)
 const MAX_SIZE_BYTES = 200 * 1024 * 1024
-
-// Вспомогалка: определяем расширение по mime/имени файла
-function pickExt(mime = '', filename = '') {
-  const m = mime.toLowerCase()
-  const name = (filename || '').toLowerCase()
-  if (m.includes('mp4') || name.endsWith('.mp4')) return 'mp4'
-  if (m.includes('quicktime') || name.endsWith('.mov')) return 'mov'
-  if (m.includes('3gpp') || name.endsWith('.3gp')) return '3gp'
-  return 'webm'
-}
-
-// Вспомогалка: мягкая проверка типа с фоллбеком по имени файла
-function isAllowedType(mime = '', filename = '') {
-  if (ALLOWED_MIME.test(mime || '')) return true
-  const name = (filename || '').toLowerCase()
-  return (
-    name.endsWith('.webm') ||
-    name.endsWith('.mp4')  ||
-    name.endsWith('.mov')  ||
-    name.endsWith('.3gp')
-  )
-}
 
 export async function POST(req) {
   try {
@@ -37,35 +15,21 @@ export async function POST(req) {
     if (!f) {
       return NextResponse.json({ urls: [], errors: ['no_file'] }, { status: 400, headers:{'cache-control':'no-store'} })
     }
-    if (typeof f !== 'object' || typeof f.arrayBuffer !== 'function') {
-      return NextResponse.json({ urls: [], errors: ['bad_file'] }, { status: 400, headers:{'cache-control':'no-store'} })
-    }
 
-
-
-    // Тип: допускаем video/quicktime (iPhone) и фоллбек по названию файла
-    const filename = typeof f.name === 'string' ? f.name : ''
-    const mime = (f.type || '').toLowerCase()
-
-    if (!isAllowedType(mime, filename)) {
+    const buf = Buffer.from(await f.arrayBuffer())
+    if (!ALLOWED_MIME.test(f.type || '')) {
       return NextResponse.json({ urls: [], errors: ['bad_type'] }, { status: 415, headers:{'cache-control':'no-store'} })
     }
-    // Сначала проверяем заявленный размер, чтобы не держать огромный буфер в памяти
-    const declaredSize = typeof f.size === 'number' ? f.size : undefined
-    if (declaredSize && declaredSize > MAX_SIZE_BYTES) {
-      return NextResponse.json({ urls: [], errors: ['too_large'] }, { status: 413, headers:{'cache-control':'no-store'} })
-    }
-    const buf = Buffer.from(await f.arrayBuffer())    
     if (buf.length > MAX_SIZE_BYTES) {
       return NextResponse.json({ urls: [], errors: ['too_large'] }, { status: 413, headers:{'cache-control':'no-store'} })
     }
 
-    const ext = pickExt(mime, filename)
+    const ext = (f.type||'video/webm').includes('mp4') ? 'mp4' : 'webm'
     const key = `forum/video-${Date.now()}.${ext}`
 
     const { url } = await put(key, buf, {
       access: 'public',
-      contentType: mime || `video/${ext === 'mov' ? 'quicktime' : ext}`, // ставим корректный content-type
+      contentType: f.type || 'video/webm',
       token: process.env.FORUM_READ_WRITE_TOKEN,
     })
 
