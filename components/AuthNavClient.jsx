@@ -7,6 +7,21 @@ import { useAccount } from 'wagmi'
 import { useI18n } from './i18n'
 
 const shortAddr = (a) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '')
+// Единая выборка корректного EVM-провайдера (EIP-1193 / EIP-6963)
+function pickEthereum() {
+  try {
+    if (typeof window === 'undefined') return null
+    const eth = window.ethereum
+    if (!eth) return null
+    if (Array.isArray(eth.providers) && eth.providers.length) {
+      const mm   = eth.providers.find(p => p && p.isMetaMask)
+      const brave= eth.providers.find(p => p && p.isBraveWallet)
+      const okx  = eth.providers.find(p => p && p.isOkxWallet)
+      return (mm || brave || okx || eth)
+    }
+    return eth
+  } catch { return null }
+}
 
 // ---------- helpers ----------
 function readCookie(name) {
@@ -154,8 +169,10 @@ export default function AuthNavClient() {
 
   // эвенты провайдера
   useEffect(() => {
-    if (typeof window === 'undefined' || !window.ethereum) return
-    const onAccountsChanged = (accs) => {
+    if (typeof window === 'undefined') return
+    const eth = pickEthereum()
+    if (!eth || typeof eth.on !== 'function') return
+    const onAccountsChanged = (accs=[]) => {
       if (!accs || accs.length === 0) {
         try {
           window.dispatchEvent(new Event('aiquota:flush'))
@@ -171,12 +188,12 @@ export default function AuthNavClient() {
       } catch {}
       window.location.reload()
     }
-    window.ethereum.on?.('accountsChanged', onAccountsChanged)
-    window.ethereum.on?.('disconnect', onDisconnect)
+    eth.on('accountsChanged', onAccountsChanged)
+    eth.on('disconnect', onDisconnect)
     return () => {
-      window.ethereum.removeListener?.('accountsChanged', onAccountsChanged)
-      window.ethereum.removeListener?.('disconnect', onDisconnect)
-    }
+      try { eth.removeListener && eth.removeListener('accountsChanged', onAccountsChanged) } catch {}
+      try { eth.removeListener && eth.removeListener('disconnect', onDisconnect) } catch {}
+     }
   }, [])
 
   // кросс-вкладочный логаут

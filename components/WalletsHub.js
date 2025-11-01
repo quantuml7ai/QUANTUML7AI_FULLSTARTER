@@ -17,13 +17,13 @@ export default function WalletsHub(){
   },[])
 
   const btns = t('w_btns')
-  const lines = t('w_lines')
+  const lines = t('w_lines') || []
 
   return (
     <section className="panel panel-narrow">
       <h2>{t('w_title')}</h2>
       <ul className="bullets">
-        {lines.map((s,i)=><li key={i}>• {s}</li>)}
+       {lines.map((s,i)=><li key={i}>• {String(s)}</li>)}
       </ul>
 
       <div className="row">
