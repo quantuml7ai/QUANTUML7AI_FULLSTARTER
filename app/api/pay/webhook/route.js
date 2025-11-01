@@ -16,13 +16,18 @@ function extractAccountId(orderId) {
   try {
     const s = String(orderId || '').trim().toLowerCase()
     if (s.startsWith('vipplus:')) {
-      const parts = s.split(':')
-      if (parts.length >= 2) return parts[1]
+      // вырежем префикс и хвостовой :<ts>, оставив ровно <accountId>
+      const noPrefix = s.slice('vipplus:'.length)
+      const lastColon = noPrefix.lastIndexOf(':')
+      if (lastColon > 0) {
+        return noPrefix.slice(0, lastColon) // всё до последнего ":" — это accountId (может содержать двоеточия)
+      }
+      return noPrefix // на всякий случай, если нет хвостового ts
     }
-    // на всякий: если прилетел чистый id — вернём его
-    return s.includes(':') ? s.split(':')[0] : s
+    // на всякий: если прилетел «чистый» id — вернём его как есть (не режем по ':')
+    return s
   } catch { return '' }
-}
+ }
 
 export async function POST(req) {
   const rawBody = await req.text() // важно: сырой текст для HMAC

@@ -5985,10 +5985,22 @@ const startVideo = async () => {
       videoStreamRef.current = stream;
     }
 
-    const mime =
-      MediaRecorder.isTypeSupported?.('video/webm;codecs=vp9')
-        ? 'video/webm;codecs=vp9'
-        : 'video/webm';
+// iOS Safari предпочитает H.264/AAC (mp4). Падаем на webm только если mp4 не поддержан.
+const preferMp4 =
+  /iPad|iPhone|iPod/i.test(navigator.userAgent) || /AppleWebKit/i.test(navigator.userAgent);
+
+let mime = '';
+if (preferMp4 && MediaRecorder.isTypeSupported?.('video/mp4;codecs=h264')) {
+  mime = 'video/mp4;codecs=h264';
+} else if (preferMp4 && MediaRecorder.isTypeSupported?.('video/mp4')) {
+  mime = 'video/mp4';
+} else if (MediaRecorder.isTypeSupported?.('video/webm;codecs=vp9')) {
+  mime = 'video/webm;codecs=vp9';
+} else if (MediaRecorder.isTypeSupported?.('video/webm;codecs=vp8')) {
+  mime = 'video/webm;codecs=vp8';
+} else {
+  mime = 'video/webm';
+}
 
     const mr = new MediaRecorder(stream, { mimeType: mime });
     videoChunksRef.current = [];
@@ -6010,8 +6022,14 @@ const startVideo = async () => {
           return;
         }
 
-        const blob = new Blob(videoChunksRef.current, { type: mr.mimeType || 'video/webm' });
-        const url = URL.createObjectURL(blob);
+const detectedType =
+  mr?.mimeType && mr.mimeType !== '' ? mr.mimeType
+  : (videoChunksRef.current?.[0]?.type || '');
+
+const safeType = detectedType || 'video/mp4'; // на iOS это самый безопасный дефолт
+const blob = new Blob(videoChunksRef.current, { type: safeType });
+const url  = URL.createObjectURL(blob);
+
 
         // освободим предыдущий blob:URL
         try {
@@ -6218,7 +6236,13 @@ const createPost = async () => {
         const resp = await fetch(pendingVideo);
         const blob = await resp.blob();
         const fd = new FormData();
-        fd.append('file', blob, `video-${Date.now()}.webm`);
+const t = (blob?.type || '').toLowerCase();
+const ext = t.includes('mp4') ? 'mp4'
+        : t.includes('quicktime') ? 'mov'
+        : t.includes('webm') ? 'webm'
+        : 'mp4'; // дефолт под iOS
+
+fd.append('file', blob, `video-${Date.now()}.${ext}`);
         const up = await fetch('/api/forum/uploadVideo', { method:'POST', body: fd, cache:'no-store' });
         const uj = await up.json().catch(()=>null);
         videoUrlToSend = (uj && Array.isArray(uj.urls) && uj.urls[0]) ? uj.urls[0] : '';
