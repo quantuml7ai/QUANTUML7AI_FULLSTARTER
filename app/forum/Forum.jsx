@@ -6183,7 +6183,9 @@ toast.ok(t('forum_create_ok') ||'Тема создана')
   try { resetVideo(); } catch {}
   try { setReplyTo(null); } catch {}
     // подтянуть свежий снапшот
-    if (typeof refresh === 'function') await refresh()
+  if (typeof refresh === 'function') await refresh()
+   postingRef.current = false; 
+   return true;
   }
 
 
@@ -6224,6 +6226,7 @@ const createPost = async () => {
   const _fail = (msg) => {
     if (msg) { try { toast?.warn?.(msg) } catch {} }
     postingRef.current = false;
+   return false;  
   };
 
   if (!rl.allowAction()) return _fail(t('forum_too_fast') || 'Слишком часто');
@@ -6234,15 +6237,13 @@ const createPost = async () => {
     try {
       if (/^blob:/.test(pendingVideo)) {
         const resp = await fetch(pendingVideo);
-        const blob = await resp.blob();
-        const fd = new FormData();
-const t = (blob?.type || '').toLowerCase();
-const ext = t.includes('mp4') ? 'mp4'
-        : t.includes('quicktime') ? 'mov'
-        : t.includes('webm') ? 'webm'
-        : 'mp4'; // дефолт под iOS
-
-fd.append('file', blob, `video-${Date.now()}.${ext}`);
+ const blob = await resp.blob();
+ const fd = new FormData();
+ const mime = String(blob.type || '').toLowerCase();      // e.g. 'video/mp4' | 'video/webm' | 'video/quicktime'
+ let ext = 'webm';
+ if (mime.includes('mp4')) ext = 'mp4';
+ else if (mime.includes('quicktime')) ext = 'mp4';        // iOS Safari часто так
+ fd.append('file', blob, `video-${Date.now()}.${ext}`);
         const up = await fetch('/api/forum/uploadVideo', { method:'POST', body: fd, cache:'no-store' });
         const uj = await up.json().catch(()=>null);
         videoUrlToSend = (uj && Array.isArray(uj.urls) && uj.urls[0]) ? uj.urls[0] : '';
