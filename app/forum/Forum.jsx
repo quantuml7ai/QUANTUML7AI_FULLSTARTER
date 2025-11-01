@@ -6231,8 +6231,13 @@ const createPost = async () => {
          handleUploadUrl: '/api/forum/blob-upload', // твой новый роут
          contentType: file.type,
        });
-       videoUrlToSend = put?.url || '';
-       if (!videoUrlToSend) { try { toast?.warn?.('Видео не загрузилось'); } catch {} }
+ // ⬇️ Нормализация: гарантируем «видимое» расширение через filename=
+ const rawUrl = put?.url || '';
+ const needsName = rawUrl && !/[?&](filename|download)=/i.test(rawUrl) &&
+                   !/\.(webm|mp4|mov|m4v|mkv)(?:$|[?#])/i.test(rawUrl);
+ const sep = rawUrl.includes('?') ? '&' : '?';
+ const namedUrl = needsName ? `${rawUrl}${sep}filename=${encodeURIComponent(file.name)}` : rawUrl;
+ videoUrlToSend = namedUrl;       if (!videoUrlToSend) { try { toast?.warn?.('Видео не загрузилось'); } catch {} }
      } else {
        // если тут уже https — оставляем как есть
        videoUrlToSend = pendingVideo;
@@ -6620,8 +6625,14 @@ function isVideoUrl(url) {
   // обычные расширения
   if (/\.(webm|mp4|mov|m4v|mkv)(?:$|[?#])/i.test(s)) return true;
 
-  // filename=video.ext
-  if (/[?&]filename=.*\.(webm|mp4|mov|m4v|mkv)(?:$|[&#])/i.test(s)) return true;
+ // filename=/download= с расширением
+ try {
+   const u = new URL(s, typeof location !== 'undefined' ? location.origin : 'http://local');
+   const fn = u.searchParams.get('filename') || u.searchParams.get('download') || '';
+   if (/\.(webm|mp4|mov|m4v|mkv)$/i.test(fn)) return true;
+ } catch {}
+ // прежний быстрый регэкс оставим как запасной
+ if (/[?&](filename|download)=.*\.(webm|mp4|mov|m4v|mkv)(?:$|[&#])/i.test(s)) return true;
 
   // публичные vercel-storage / твои пути без расширений
   if (/vercel[-]?storage|vercel[-]?blob|\/uploads\/video|\/forum\/video|\/api\/forum\/uploadVideo/i.test(s)) return true;

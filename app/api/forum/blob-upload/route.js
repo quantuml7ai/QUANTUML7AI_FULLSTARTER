@@ -20,7 +20,7 @@ export async function POST(request) {
         allowedContentTypes: ALLOWED_MASKS,
         addRandomSuffix: true,
         tokenPayload: JSON.stringify({ kind: 'forum_video' }),
-        // maximumSize: 2_000_000_000, // (опционально) лимит в байтах, если захочешь
+         maximumSize: 2_000_000, // (опционально) лимит в байтах, если захочешь
       }),
       onUploadCompleted: async ({ blob }) => {
         console.log('[forum] video uploaded:', blob.url, blob.size, blob.contentType)
