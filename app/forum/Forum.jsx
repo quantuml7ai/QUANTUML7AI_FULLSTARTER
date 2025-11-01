@@ -4286,6 +4286,14 @@ React.useEffect(() => {
   };
 }, [open, state]);
 
+  // === ЛОКАЛЬНАЯ НАСТРОЙКА ВЕРХНЕГО ОТСТУПА СЧЁТЧИКА ===
+  React.useEffect(() => {
+    if (!open) return;
+    const TOP_OFFSET = '52px'; // ← ЗАДАЙ СВОЙ ОТСТУП (px, %, calc(...))
+    try { rootRef.current?.style?.setProperty('--vo-top-offset', TOP_OFFSET); } catch {}
+    return () => { try { rootRef.current?.style?.removeProperty('--vo-top-offset'); } catch {} };
+  }, [open]);
+
   // аспект
   const [aspect, setAspect] = React.useState('16 / 9');
   const calcAspectFromTrack = React.useCallback(() => {
@@ -4570,7 +4578,8 @@ const pressComposerSend = () => {
         }
 
         .voTop{
-          position:absolute; left:0; right:0; top:0; height:60px;
+          position:absolute; left:0; right:0; top: var(--vo-top-offset, env(safe-area-inset-top));
+          height:60px;
           display:flex; align-items:center; justify-content:center;
           padding:8px 10px; z-index:6;
         }
@@ -4671,6 +4680,7 @@ const pressComposerSend = () => {
     </div>
   );
 }
+
 
 /* ===== утилиты — прямо в этом файле ===== */
 
@@ -8107,6 +8117,8 @@ onClick={(e)=>{
   if (videoState==='uploading') return;
 
   // ТОЛЬКО открыть оверлей и включить live-превью
+  try { setVideoOpen(true); } catch {}
+ 
   try { setVideoOpen(true); } catch {}
   try { setVideoState('live'); } catch {}
   try { setComposerActive(false); } catch {}
