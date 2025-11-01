@@ -32,12 +32,19 @@ async function publishForumEvent(evt) {
 
 const IMG_LINE_RE =
   /^(?:\/uploads\/[A-Za-z0-9._\-\/]+?\.(?:webp|png|jpe?g|gif)|https?:\/\/[^\s]+?\.(?:webp|png|jpe?g|gif))(?:\?.*)?$/i
-function textHasImages(s) {
+const VID_LINE_RE =
+  /^(?:\/uploads\/[A-Za-z0-9._\-\/]+?\.(?:webm|mp4|mov|m4v)|https?:\/\/[^\s]+?\.(?:webm|mp4|mov|m4v))(?:\?.*)?$/i
+
+  function textHasImages(s) {
   if (!s) return false
   const lines = String(s).split(/\r?\n/).map(x => x.trim())
   return lines.some(line => IMG_LINE_RE.test(line))
 }
-
+function textHasVideos(s) {
+  if (!s) return false
+  const lines = String(s).split(/\r?\n/).map(x => x.trim())
+  return lines.some(line => VID_LINE_RE.test(line))
+}
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const fetchCache = 'force-no-store'
@@ -59,8 +66,10 @@ function validateOp(op) {
     if (!p.title) throw new Error('missing_title')
   } else if (t === 'create_post') {
     if (!p.topicId) throw new Error('missing_topicId')
-    if (!p.text)    throw new Error('missing_text')
-  } else if (t === 'react') {
+   // разрешим «пост-только-видео»: пустой текст ок, если в нём хотя бы один видео-URL
+   if (!p.text || !String(p.text).trim()) {
+     if (!textHasVideos(p.text)) throw new Error('missing_text')
+   }  } else if (t === 'react') {
     if (!p.postId) throw new Error('missing_postId')
     if (!['like','dislike'].includes(p.kind)) throw new Error('bad_reaction_kind')
   } else if (t === 'view_topic' || t === 'view_post') {
