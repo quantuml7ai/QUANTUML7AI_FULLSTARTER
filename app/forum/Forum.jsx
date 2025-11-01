@@ -6716,36 +6716,6 @@ const closeQuests = React.useCallback(() => {
 >
 {/* --- FX: Coin Burst --- */}
 <style jsx global>{`
- /* ===== Forum header row (LTR/RTL aware) ===== */
- .forumRowBar{
-   display:flex; align-items:center; gap:10px;
-   width:100%;
- }
- .forumRowBar .slot-left,
- .forumRowBar .slot-right{
-   display:flex; align-items:center; gap:8px; flex:0 0 auto;
- }
- .forumRowBar .slot-center{
-   flex:1 1 auto; display:flex; align-items:center; justify-content:center; min-width:0;
- }
- .forumRowBar .forumTotal{
-   white-space:nowrap; opacity:.85;
- }
- /* keep badge on inbox button pinned visually */
- .forumRowBar .inboxBtn{ position:relative; }
- .forumRowBar .inboxBtn .inboxBadge{
-   position:absolute; top:-6px; right:-6px;
- }
- /* RTL: зеркалим только порядок слотов, центр остаётся центром */
- [dir="rtl"] .forumRowBar{ direction:ltr; } /* чтобы иконки не переворачивались */
- [dir="rtl"] .forumRowBar .slot-left{ order:3; }
- [dir="rtl"] .forumRowBar .slot-center{ order:2; }
- [dir="rtl"] .forumRowBar .slot-right{ order:1; }
-
- @media (max-width:480px){
-   .forumRowBar{ gap:8px; }
-   .forumRowBar .forumTotal{ font-size:12px; }
- }
   @keyframes coin-pop { 0%{transform:scale(0.2);opacity:0} 60%{transform:scale(1.05);opacity:1} 100%{transform:scale(1);opacity:1} }
   @keyframes coin-fall {
     0%{ transform: translateY(-120vh) rotate(0deg); opacity:0 }
@@ -7224,10 +7194,11 @@ onClick={()=>{
   {!sel ? (
     /* === СПИСОК ТЕМ === */
     <section className="glass neon" style={{ display:'flex', flexDirection:'column', flex:'1 1 auto', minHeight: 0 }}>
-<div className="head">
- {/* ЕДИНАЯ ГОРИЗОНТАЛЬНАЯ ЛИНЕЙКА: ЛЕВО — ЦЕНТР — ПРАВО */}
-  <div className="forumRowBar">
-    <div className="slot-left">
+
+      <div className="head">
+        {/* ЕДИНЫЙ РЯД КНОПОК ВНУТРИ БЛОКА */}
+        <div className="flex flex-nowrap items-center gap-2 w-full relative pr-[56px]">
+<div className="left flex items-center gap-2">
   {/* Назад (иконка) — в режиме videoFeedOpen закрывает видео-ленту */}
   <button
     type="button"
@@ -7274,29 +7245,32 @@ onClick={()=>{
   </button>
 </div>
 
-    <div className="slot-center">
-      <div className="forumTotal">
-        {t('forum_total')}: {(data.topics||[]).length}
-      </div>
-    </div>
-    <div className="slot-right">
-      <button
-        type="button"
-        className="iconBtn inboxBtn"
-        title={t('forum_inbox') || 'Ответы мне'}
-        onClick={() => setInboxOpen(v => !v)}
-        aria-pressed={inboxOpen}
-      >
-        <svg viewBox="0 0 24 24" aria-hidden>
-          <path d="M3 7h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.6" fill="none"/>
-          <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-        {mounted && unreadCount > 0 && (
-          <span className="inboxBadge" suppressHydrationWarning>{unreadCount}</span>
-        )}
-      </button>
-    </div>
-  </div>
+<div
+  className="right flex items-center gap-2"
+  style={{ position:'absolute', right:8, top:0, zIndex:2 }}
+>
+
+  <button
+    type="button"
+    className="iconBtn inboxBtn"
+    title={t('forum_inbox') || 'Ответы мне'}
+    onClick={() => setInboxOpen(v => !v)}
+    aria-pressed={inboxOpen}
+  >
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <path d="M3 7h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.6" fill="none"/>
+      <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+ {mounted && unreadCount > 0 && (
+   <span className="inboxBadge" suppressHydrationWarning>{unreadCount}</span>
+ )}  </button>
+</div>
+
+
+
+</div>
+
+        <div className="meta mt-2">{t('forum_total')}: {(data.topics||[]).length}</div>
       </div>
 {videoFeedOpen ? (
   <>
@@ -7447,9 +7421,9 @@ onClick={()=>{
 
  
        <div className="head">
-  {/* ЕДИНАЯ ГОРИЗОНТАЛЬНАЯ ЛИНЕЙКА: ЛЕВО — ЦЕНТР — ПРАВО */}
-  <div className="forumRowBar">
-    <div className="slot-left">
+        {/* ЕДИНЫЙ РЯД КНОПОК ВНУТРИ БЛОКА (без «Создать тему») */}
+        <div className="flex items-center justify-between gap-2">
+<div className="left flex items-center gap-2">
   {/* Назад (иконка) */}
   <button
     type="button"
@@ -7488,38 +7462,37 @@ onClick={()=>{
 </div>
 
 
-    <div className="slot-center">
-      <div className="forumTotal">
-        {/* в режиме темы выводим "Ответы" / заголовок, но всё равно центрируем */}
-        {threadRoot ? (t('forum_open_replies') || 'Ответы') : (t('forum_total') + ': ' + (data.topics||[]).length)}
-      </div>
-    </div>
-    <div className="slot-right">
-      <button
-        type="button"
-        className="iconBtn inboxBtn"
-        title={t('forum_inbox') || 'Ответы мне'}
-        onClick={() => setInboxOpen(v => !v)}
-        aria-pressed={inboxOpen}
-      >
-        <svg viewBox="0 0 24 24" aria-hidden>
-          <path d="M3 7h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.6" fill="none"/>
-          <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-        {mounted && unreadCount > 0 && (
-          <span className="inboxBadge" suppressHydrationWarning>{unreadCount}</span>
-      )}
-      </button>
-    </div>
+<div
+  className="right flex items-center gap-2"
+  style={{ position:'absolute', right:8, top:0, zIndex:2 }}
+>
+
+  <button
+    type="button"
+    className="iconBtn inboxBtn"
+    title={t('forum_inbox') || 'Ответы мне'}
+    onClick={() => setInboxOpen(v => !v)}
+    aria-pressed={inboxOpen}
+  >
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <path d="M3 7h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.6" fill="none"/>
+      <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+ {mounted && unreadCount > 0 && (
+   <span className="inboxBadge" suppressHydrationWarning>{unreadCount}</span>
+ )}  </button>
+</div>
 
         </div>
 
-  {/* Заголовок темы оставляем ниже, как был */}
-  <div className="title mt-2 whitespace-normal break-words [overflow-wrap:anywhere] [line-break:anywhere] min-w-0" suppressHydrationWarning>
-    <span className="whitespace-normal break-words [overflow-wrap:anywhere] [line-break:anywhere]">
-      {threadRoot ? (t('forum_open_replies') || 'Ответы') : (sel?.title || '')}
-    </span>
-  </div>
+<div
+  className="title mt-2 whitespace-normal break-words [overflow-wrap:anywhere] [line-break:anywhere] min-w-0"
+  suppressHydrationWarning
+>
+  <span className="whitespace-normal break-words [overflow-wrap:anywhere] [line-break:anywhere]">
+    {threadRoot ? (t('forum_open_replies') || 'Ответы') : (sel?.title || '')}
+  </span>
+</div>
 
 {/* [INBOX:PANEL] — панель входящих ответов */}
 {inboxOpen && (
