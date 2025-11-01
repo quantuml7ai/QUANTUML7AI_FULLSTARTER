@@ -132,7 +132,9 @@ function buildMeta(env) {
       name: clean(env[`NEXT_PUBLIC_QUEST_CARD_${n}_MEDIA_NAME`]),
       ext : clean(env[`NEXT_PUBLIC_QUEST_CARD_${n}_MEDIA_EXT`]),
     }
-
+    // НОВОЕ: формат превью задач внутри карточки (fallback на media.ext)
+    const taskMediaExt =
+      clean(env[`NEXT_PUBLIC_QUEST_CARD_${n}_TASK_MEDIA_EXT`]) || media.ext || '';
     const tasks = []
     for (let m = 1; m <= taskCount; m++) {
       const url = getTaskUrl(env, n, m)
@@ -151,6 +153,7 @@ function buildMeta(env) {
       taskDelayMs: taskDelay,
       claimDelayMs, // совместимость
       media,
+      taskMediaExt, // НОВОЕ: чисто для наблюдаемости в UI/дебаге
       tasks,
     })
   }

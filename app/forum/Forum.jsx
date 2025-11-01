@@ -6789,11 +6789,15 @@ const readEnv = (k, def='') => {
   } catch { return def }
 };
 
-// per-card toggles & media (ENV)
-const isCardEnabled  = (n) => (readEnv(`NEXT_PUBLIC_QUEST_CARD_${n}_ENABLED`, '1') === '1');
-const cardMediaExt   = (n) => (readEnv(`NEXT_PUBLIC_QUEST_CARD_${n}_MEDIA_EXT`, 'png') || 'png').toLowerCase(); // png|gif|mp4
-const cardMediaName  = (n) => (readEnv(`NEXT_PUBLIC_QUEST_CARD_${n}_MEDIA_NAME`, `q${n}`) || `q${n}`);
-
+ // per-card toggles & media (ENV)
+ const isCardEnabled  = (n) => (readEnv(`NEXT_PUBLIC_QUEST_CARD_${n}_ENABLED`, '1') === '1');
+ const cardMediaExt   = (n) => (readEnv(`NEXT_PUBLIC_QUEST_CARD_${n}_MEDIA_EXT`, 'png') || 'png').toLowerCase(); // png|gif|mp4
+ const cardMediaName  = (n) => (readEnv(`NEXT_PUBLIC_QUEST_CARD_${n}_MEDIA_NAME`, `q${n}`) || `q${n}`);
+ // НОВОЕ: отдельное расширение для превью задач внутри карточки
+ const taskMediaExt   = (n) => {
+   const fallback = cardMediaExt(n);
+   return (readEnv(`NEXT_PUBLIC_QUEST_CARD_${n}_TASK_MEDIA_EXT`, fallback) || fallback).toLowerCase();
+ };
 const QUEST_ENABLED = (readEnv('NEXT_PUBLIC_QUEST_ENABLED', '1') === '1');
 // без верхнего предела по количеству карточек:
 const QUEST_CARDS   = Math.max(0, Number(readEnv('NEXT_PUBLIC_QUEST_CARDS', '10')) || 10);
@@ -6823,11 +6827,12 @@ const QUESTS = React.useMemo(() => {
     }
   } catch {}
   // Фолбэк: N карточек (по NEXT_PUBLIC_QUEST_CARDS) * M задач (по NEXT_PUBLIC_QUEST_TASKS)
-  const mk = (n) => {
-    const base = cardMediaName(n);        // по умолчанию q<n>
-    const ext  = cardMediaExt(n);         // png|gif|mp4
-    const cover = `/Quest/${base}.${ext}`;
-    const coverType = (ext === 'mp4' ? 'mp4' : (ext === 'gif' ? 'gif' : 'img'));
+   const mk = (n) => {
+     const base = cardMediaName(n);        // по умолчанию q<n>
+     const extCard  = cardMediaExt(n);     // формат обложки карточки (может быть mp4)
+     const extTask  = taskMediaExt(n);     // НОВОЕ: формат превью задач (обычно png/gif/webp)
+     const cover = `/Quest/${base}.${extCard}`;
+     const coverType = (extCard === 'mp4' ? 'mp4' : (extCard === 'gif' ? 'gif' : 'img'));
     const M = tasksPerCard(n);
     return {
       id: `quest-${n}`,
@@ -6840,7 +6845,7 @@ const QUESTS = React.useMemo(() => {
         id: String(i + 1),
         i18nKey: `quest_${n}_t${i+1}`,
         urlKey:  `NEXT_PUBLIC_QUEST${n}_T${i+1}_URL`,
-        cover:   `/Quest/q${n}/${i+1}.${ext}`,
+        cover:   `/Quest/q${n}/${i+1}.${extTask}`,
       })),
     };
   };
