@@ -2,77 +2,58 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+  productionBrowserSourceMaps: true,
 
   async headers() {
-    // Максимально-позволительная, но корректная CSP.
-    // Никаких недопустимых ключевых слов в неподдерживаемых директивах.
-    // Разрешаем http для локалки/дев-виджетов, https для продакшна,
-    // blob: и data: для медиа/инлайнов и т.п.
+    // кто МОЖЕТ встраивать НАС (родители/host-страницы)
+    const FRAME_PARENTS = [
+      'https://web.telegram.org',
+      'https://*.telegram.org',
+      'https://t.me',
+      'https://quantuml7ai.com',
+      'https://www.quantuml7ai.com',
+      // добавь при необходимости другие свои домены:
+      // 'https://app.quantuml7ai.com',
+      // 'https://*.your-domain.com'
+    ];
+
+    // максимально совместимая, но валидная CSP:
+    // - ты Можешь встраивать любых детей (frame-src *),
+    // - делать любые запросы/WS (connect-src *),
+    // - инлайн-скрипты/стили и eval разрешены (для капризных SDK/плееров),
+    // - тебя могут встраивать ТОЛЬКО Telegram + твои домены (frame-ancestors ...).
     const csp = [
-      // Базовый дефолт: всё с https/http/self + data/blob (через спец-директивы ниже мы расширяем сильнее)
       `default-src 'self' https: http: data: blob:;`,
-
-      // Скрипты: максимально либерально (SDK/инлайны/эвалы/Blob-скрипты)
       `script-src 'self' https: http: 'unsafe-inline' 'unsafe-eval' blob:;`,
-
-      // Стили: разрешаем inline (часто нужно), плюс любые https/http
       `style-src 'self' https: http: 'unsafe-inline' blob:;`,
-
-      // Картинки: любые источники, плюс data:/blob: для инлайнов/URL.createObjectURL
       `img-src * data: blob:;`,
-
-      // Шрифты: любые безопасные источники + data:
       `font-src * data:;`,
-
-      // Медиа (видео/аудио/стримы): максимально широко
       `media-src * data: blob:;`,
-
-      // Подключения (XHR/fetch/EventSource/WebSocket): максимально широко + ws/wss
       `connect-src * data: blob: ws: wss:;`,
-
-      // Куда ТЫ встраиваешься (дети: iframe/picture-in-picture/виджеты/плееры)
       `frame-src * data: blob:;`,
-
-      // Воркеры (Service/Web/Shared) — blob/self/https/http
       `worker-src 'self' blob: https: http:;`,
-
-      // Prefetch/Preload/Prerender
-      `prefetch-src *;`,
-
-      // Манифесты PWA
       `manifest-src *;`,
-
-      // Базовый URL может быть любым
       `base-uri *;`,
-
-      // Отправка форм — куда угодно
       `form-action *;`,
-
-      // Разрешаем любые объектные встраивания (для максимума совместимости)
-      `object-src * data: blob:;`,
-
-      // КТО может встраивать НАС (родители): всем разрешено
-      // (X-Frame-Options не ставим, чтобы не конфликтовало)
-      `frame-ancestors *;`
-    ].join(" ");
+      // object-src можно выключить для безопасности. Если вдруг нужен <object>, смени на: object-src * data: blob:;
+      `object-src 'none';`,
+      `frame-ancestors ${FRAME_PARENTS.join(' ')};`
+    ].join(' ');
 
     return [
       {
-        source: "/(.*)",
+        source: '/(.*)',
         headers: [
-          // Базовые тех. заголовки
-          { key: "Referrer-Policy", value: "no-referrer-when-downgrade" },
-          // ВНИМАНИЕ: X-Frame-Options не ставим, чтобы не конфликтовать с frame-ancestors: *
-          // { key: "X-Frame-Options", value: "ALLOWALL" }, // удалено
-          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: 'Referrer-Policy', value: 'no-referrer-when-downgrade' },
+          // X-Frame-Options не ставим, чтобы не конфликтовать с frame-ancestors
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
 
-          // Координационные политики — максимально “мягко”, чтобы ничего не ломать
-          { key: "Cross-Origin-Embedder-Policy", value: "unsafe-none" },
-          { key: "Cross-Origin-Opener-Policy", value: "unsafe-none" },
-          { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
+          // максимально «мягкие» координационные политики для совместимости (в т.ч. iOS/Safari)
+          { key: 'Cross-Origin-Embedder-Policy', value: 'unsafe-none' },
+          { key: 'Cross-Origin-Opener-Policy', value: 'unsafe-none' },
+          { key: 'Cross-Origin-Resource-Policy', value: 'cross-origin' },
 
-          // ВАЖНО: валидная и сверх-добрая CSP
-          { key: "Content-Security-Policy", value: csp }
+          { key: 'Content-Security-Policy', value: csp }
         ]
       }
     ];

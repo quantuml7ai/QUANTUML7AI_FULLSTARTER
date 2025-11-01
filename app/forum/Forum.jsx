@@ -4222,74 +4222,131 @@ function LivePreview({ streamRef }) {
   );
 }
 
-// --- overlay камеры/плеера ---
-function VideoOverlay({
-  open, state, elapsed, onClose, onStop, streamRef,
-  previewUrl, onResetConfirm, t
+// --- overlay камеры/плеера: fullscreen + старт/стоп ИМЕННО из оверлея ---
+export function VideoOverlay({
+  open,
+  state,                 // 'live' | 'recording' | 'preview' | 'hidden'
+  elapsed = 0,
+  onStart,               // ← старт записи по REC в оверлее
+  onStop,                // ← стоп записи по STOP в оверлее
+  onResetConfirm,        // ← закрыть/сбросить
+  streamRef,
+  previewUrl,
+  t,
 }) {
-  const tt = t || ((k)=>k); // безопасный алиас
+  const tt = t || ((k)=>k);
   const rootRef = React.useRef(null);
 
-  // высота композера (чтобы низ оверлея был ровно над ним)
-  const [composerPad, setComposerPad] = React.useState(0);
-  // выравниваем overlay по левому краю и ширине композера
-  const [composerRect, setComposerRect] = React.useState({ left: 0, width: 0 });
+  // нормализуем состояние
+  const st = !open ? 'hidden' : (state || 'live');
 
+  // антидубль кликов
+  const blockClicksRef = React.useRef(false);
+
+  // ===== служебные хуки: блок скролла/кликов фона + флаг на <html> =====
+  usePageLock(!!open); // гасим скролл страницы
+  useHtmlFlag('data-vo-open', open ? '1' : null); // даёт CSS-хук в layout
+
+  // автофокус для ESC
+  React.useEffect(() => { if (open) rootRef.current?.focus?.(); }, [open]);
+
+  // при открытии live/recording — поднимем камеру, если ещё нет
   React.useEffect(() => {
-    if (!open || typeof window === 'undefined') return;
-    const el = document.querySelector('.composer');
-    if (!el) { setComposerPad(0); setComposerRect({ left:0, width:0 }); return; }
+    if (!open) return;
+    if (!(st === 'live' || st === 'recording')) return;
+    const cur = streamRef?.current;
+    const hasTracks = !!cur && (cur.getVideoTracks?.().length || 0) > 0;
+    if (hasTracks) return;
+    (async () => {
+      try {
+        const ms = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'user' } },
+          audio: true,
+        });
+        streamRef.current = ms;
+      } catch {}
+    })();
+  }, [open, st, streamRef]);
+const previewVidRef = React.useRef(null);
+const [isPlaying, setIsPlaying] = React.useState(false);
 
-    const upd = () => {
-      setComposerPad(el.offsetHeight || 0);
-      const r = el.getBoundingClientRect?.();
-      if (r) setComposerRect({ left: Math.round(r.left), width: Math.round(r.width) });
-    };
-    upd();
+React.useEffect(() => {
+  const v = previewVidRef.current;
+  if (!v) return;
+  const onPlay = () => setIsPlaying(true);
+  const onPause = () => setIsPlaying(false);
+  const onEnd = () => setIsPlaying(false);
+  v.addEventListener('play', onPlay);
+  v.addEventListener('pause', onPause);
+  v.addEventListener('ended', onEnd);
+  return () => {
+    v.removeEventListener('play', onPlay);
+    v.removeEventListener('pause', onPause);
+    v.removeEventListener('ended', onEnd);
+  };
+}, [open, state]);
 
-    const ro = new ResizeObserver(upd);
-    ro.observe(el);
-    window.addEventListener('resize', upd);
-
-    // ESC
-    rootRef.current?.focus?.();
-
-    return () => {
-      ro.disconnect();
-      window.removeEventListener('resize', upd);
-    };
-  }, [open]);
-
-  // аспект (16:9 / 9:16)
+  // аспект
   const [aspect, setAspect] = React.useState('16 / 9');
+  const calcAspectFromTrack = React.useCallback(() => {
+    try {
+      const track = streamRef?.current?.getVideoTracks?.()[0];
+      const s = track?.getSettings?.();
+      const w = Number(s?.width || 0), h = Number(s?.height || 0);
+      if (w && h) setAspect(w < h ? '9 / 16' : '16 / 9');
+    } catch {}
+  }, [streamRef]);
+
   React.useEffect(() => {
-    if (!open || state !== 'recording') return;
-    const track = streamRef?.current?.getVideoTracks?.()[0];
-    const s = track?.getSettings?.();
-    const w = Number(s?.width || 0), h = Number(s?.height || 0);
-    if (w && h) setAspect(w < h ? '9 / 16' : '16 / 9');
-  }, [open, state, streamRef?.current]);
+    if (open && (st==='live' || st==='recording')) calcAspectFromTrack();
+  }, [open, st, calcAspectFromTrack]);
 
   const onMeta = React.useCallback((ev) => {
     const v = ev?.currentTarget;
     const w = v?.videoWidth || 0, h = v?.videoHeight || 0;
     if (w && h) setAspect(w < h ? '9 / 16' : '16 / 9');
   }, []);
-  /* === ДОБАВЛЕНО: Torch / Flip + формат времени (НЕ ломает внешнюю логику) === */
+
+  // Torch / Flip
   const [torchOn, setTorchOn] = React.useState(false);
-  const [facing, setFacing]   = React.useState('user'); // или 'environment'
+  const [facing, setFacing]   = React.useState('user');
+
   React.useEffect(() => {
     if (!open) return;
     const track = streamRef?.current?.getVideoTracks?.()[0];
     const s = track?.getSettings?.();
     if (s?.facingMode) setFacing(s.facingMode);
-  }, [open, streamRef?.current]);
+  }, [open, streamRef]);
+
+  // при выходе из записи — выключить фонарик
+  React.useEffect(() => {
+    if (!open) return;
+    if (st !== 'recording' && torchOn) {
+      (async () => {
+        try {
+          const track = streamRef?.current?.getVideoTracks?.()[0];
+          const caps  = track?.getCapabilities?.();
+          if (caps && 'torch' in caps) await track.applyConstraints({ advanced: [{ torch: false }] });
+        } catch {}
+        setTorchOn(false);
+      })();
+    }
+  }, [st, open, torchOn, streamRef]);
+// клик по галочке: жмём кнопку отправки композера
+const pressComposerSend = () => {
+  try {
+    const btn =
+      document.querySelector('[data-composer-send]') ||
+      document.querySelector('.forumComposer .planeBtn:not(.disabled)');
+    if (btn) btn.click();
+  } catch {}
+};
 
   const toggleTorch = async () => {
     try {
       const track = streamRef?.current?.getVideoTracks?.()[0];
       const caps  = track?.getCapabilities?.();
-      if (!caps || !('torch' in caps)) return; // устройство/браузер не поддерживает
+      if (!caps || !('torch' in caps)) return;
       await track.applyConstraints({ advanced: [{ torch: !torchOn }] });
       setTorchOn(v => !v);
     } catch {}
@@ -4302,10 +4359,10 @@ function VideoOverlay({
         video: { facingMode: { ideal: next } },
         audio: true,
       });
-      // останавливаем старые треки и подменяем streamRef — LivePreview сам подхватит
       try { streamRef?.current?.getTracks?.().forEach(tr => tr.stop()); } catch {}
       streamRef.current = ms;
       setFacing(next);
+      setTimeout(calcAspectFromTrack, 0);
     } catch {}
   };
 
@@ -4317,6 +4374,9 @@ function VideoOverlay({
 
   if (!open) return null;
 
+  // перехват кликов/скролла фоном (оверлей подложка)
+  const stopAll = (e) => { e.preventDefault(); e.stopPropagation(); };
+
   return (
     <div
       ref={rootRef}
@@ -4324,101 +4384,61 @@ function VideoOverlay({
       role="dialog"
       aria-modal="true"
       tabIndex={-1}
+      onKeyDown={(e) => { if (e.key === 'Escape') onResetConfirm?.(); }}
+      // подложка: перехватывает любые события
+      onWheel={stopAll}
+      onTouchMove={stopAll}
+      onPointerDown={stopAll}
       style={{
         position:'fixed',
-        top:0, left:0, right:0,
-        bottom: composerPad,          // низ — ровно над композером
-        zIndex:1000,
-        // ВАЖНО: никаких полупрозрачных фонов и блюра
+        inset:0,
+        zIndex: 2147483000,          // поверх всего, включая «музыку»
         background:'transparent',
         backdropFilter:'none',
-        // фон не перехватывает клики (камера/отправить доступны)
-        pointerEvents:'none'
       }}
-      onKeyDown={(e) => { if (e.key === 'Escape') onResetConfirm?.(); }}
     >
-      {/* рабочая область: строго по ширине/левому краю композера */}
-      <div style={{
-        position:'fixed',
-        left: composerRect.left,
-        width: composerRect.width,
-        top: 0,
-        bottom: composerPad,
-        margin: 0,
-        // клики ловим только тут
-        pointerEvents:'auto'
-      }}>
-        {/* ======= TOP BAR: Flash • TIMER (REC) • Close ======= */}
-        <div className="voTop">
-          {/* FLASH (torch) */}
-          <button
-            type="button"
-            className="voBtn voFlash"
-            aria-label={tt('forum_flash') || 'Flash'}
-            title={tt('forum_flash') || 'Flash'}
-            data-on={torchOn ? '1' : '0'}
-            onClick={toggleTorch}
-          >
-            {/* SVG молния с анимацией штриха */}
-            <svg viewBox="0 0 24 24" className="ico">
-              <path className="strokeAnim" d="M13 2L6 14h5l-1 8 8-14h-5l1-6z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
-            </svg>          
-            </button>
-
-          {/* TIMER (в центре) — мигает только в режиме записи */}
-          <div className={`voTimer ${state==='recording' ? 'isRec' : 'isIdle'}`} aria-live="polite">
-            {state === 'recording' && (
-              <>
-                <span className="dot" />
-                <span className="rec">REC</span>
-              </>
-            )}
-            <span className="time">{fmtTime(elapsed)}</span>
-          </div>
-
-          {/* CLOSE */}
-          <button
-            type="button"
-            className="voBtn voClose"
-           aria-label={tt('forum_video_reset') || 'Close'}
-            title={tt('forum_video_reset') || 'Close'}
-            onClick={()=>{
-              if (state === 'recording') {
-                if (confirm(tt('forum_video_reset_confirm'))) onResetConfirm?.();
-              } else {
-                onResetConfirm?.();
-              }
-            }}
-          >
-            <svg viewBox="0 0 24 24" className="ico">
-              <path d="M6 6l12 12M18 6l-12 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-            </svg>
-          </button>
-        </div>
-
-        {/* кадр без полей; видео заполняет область */}
-        <div style={{
+      {/* кликаемая/блокирующая подложка */}
+      <div
+        onClick={stopAll}
+        style={{
           position:'absolute', inset:0,
-          display:'flex', alignItems:'center', justifyContent:'center'
-        }}>
-          <div style={{ width:'100%', height:'100%', aspectRatio: aspect, overflow:'hidden' }}>
-            {state === 'recording' ? (
-              <LivePreview streamRef={streamRef} />
-            ) : (
-              <video
-                src={previewUrl || ''}
-                controls
-                playsInline
-                onLoadedMetadata={onMeta}
-                style={{ width:'100%', height:'100%', objectFit:'cover', background:'#000' }}
-              />
-            )}
-          </div>
-        </div>
+          pointerEvents:'auto', // блокирует фон
+        }}
+      />
 
-        {/* ======= BOTTOM BAR: Switch • BIG REC ======= */}
-        {state === 'recording' && (
-        <div className="voBottom">
+      {/* top: таймер */}
+      <div className="voTop" style={{ pointerEvents:'none' }}>
+        <div className={`voTimer ${st==='recording' ? 'isRec' : 'isIdle'}`} aria-live="polite">
+          {st === 'recording' && (<><span className="dot" /><span className="rec">REC</span></>)}
+          <span className="time">{fmtTime(elapsed)}</span>
+        </div>
+      </div>
+
+      {/* видео (сам рендер не ловит клики, всё управление — ниже) */}
+<div style={{
+  position:'absolute', inset:0, display:'flex',
+  alignItems:'center', justifyContent:'center',
+  pointerEvents: st === 'preview' ? 'auto' : 'none'
+}}>
+        <div style={{ width:'100%', height:'100%', aspectRatio: aspect, overflow:'hidden' }}>
+          {(st === 'live' || st === 'recording') ? (
+            <LivePreview streamRef={streamRef} />
+          ) : (
+            <video
+              ref={previewVidRef}
+              src={previewUrl || ''}
+              controls
+              playsInline
+              onLoadedMetadata={onMeta}
+              style={{ width:'100%', height:'100%', objectFit:'cover', background:'#000' }}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* низ: кнопки — кликабельно и поверх */}
+      {(st === 'live' || st === 'recording') && (
+        <div className="voBottom" style={{ pointerEvents:'auto', zIndex:6 }}>
           <button
             type="button"
             className="voBtn voSwitch"
@@ -4426,7 +4446,6 @@ function VideoOverlay({
             title={tt('forum_camera_switch') || 'Switch camera'}
             onClick={flipCamera}
           >
-            {/* SVG «переключить камеру» */}
             <svg viewBox="0 0 24 24" className="ico">
               <path d="M9 7l-2-2H5a3 3 0 00-3 3v3" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
               <path d="M15 17l2 2h2a3 3 0 003-3v-3" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
@@ -4435,110 +4454,277 @@ function VideoOverlay({
             </svg>
           </button>
 
-          <button
-            type="button"
-            className={'voRec ' + (state==='recording' ? 'rec' : 'idle')}
-            aria-label={state==='recording' ? (tt('forum_stop')||'Stop') : (tt('forum_record')||'Record')}
-            title={state==='recording' ? (tt('forum_stop')||'Stop') : (tt('forum_record')||'Record')}
-            onClick={state==='recording' ? onStop : onResetConfirm}
-          >
-            {/* центр — анимированный SVG-пульс */}
-            <svg viewBox="0 0 120 120" className="recSvg" aria-hidden>
-              <circle cx="60" cy="60" r="50" className="ring" />
-              <circle cx="60" cy="60" r="34" className="glow" />
-              <rect   x="45" y="45" width="30" height="30" rx="8" className="core" />
-            </svg>
-          </button>
+          {st !== 'recording' ? (
+            <button
+              type="button"
+              className="voRec idle"
+              aria-label={tt('forum_record')||'Record'}
+              title={tt('forum_record')||'Record'}
+              onClick={()=>{
+                if (blockClicksRef.current) return;
+                blockClicksRef.current = true;
+                Promise.resolve(onStart?.()).finally(()=>{ blockClicksRef.current = false; });
+              }}
+            >
+              <svg viewBox="0 0 120 120" className="recSvg" aria-hidden>
+                <circle cx="60" cy="60" r="50" className="ring" />
+                <circle cx="60" cy="60" r="34" className="glow" />
+                <rect x="45" y="45" width="30" height="30" rx="8" className="core" />
+              </svg>
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="voRec rec"
+              aria-label={tt('forum_stop')||'Stop'}
+              title={tt('forum_stop')||'Stop'}
+              onClick={()=>{
+                if (blockClicksRef.current) return;
+                blockClicksRef.current = true;
+                Promise.resolve(onStop?.()).finally(()=>{ blockClicksRef.current = false; });
+              }}
+            >
+              <svg viewBox="0 0 120 120" className="recSvg" aria-hidden>
+                <circle cx="60" cy="60" r="50" className="ring" />
+                <circle cx="60" cy="60" r="34" className="glow" />
+                <rect x="45" y="45" width="30" height="30" rx="8" className="core" />
+              </svg>
+            </button>
+          )}
 
           <div className="voSpacer" />
         </div>
-    )}
-        {/* === ЛОКАЛЬНЫЕ СТИЛИ/АНИМАЦИИ === */}
-        <style jsx>{`
-          .voTop{
-            position:absolute; left:0; right:0; top:0; height:60px;
-            display:flex; align-items:center; justify-content:space-between;
-            padding:8px 10px; pointer-events:none; z-index:6;
-          }
-          .voBottom{
-            position:absolute; left:0; right:0; bottom:8px; height:96px;
-            display:flex; align-items:center; justify-content:space-between;
-            padding:12px 18px; gap:12px; pointer-events:none; z-index:6;
-          }
-          .voBtn{
-            pointer-events:auto;
-            width:44px; height:44px; border-radius:12px;
-            display:inline-flex; align-items:center; justify-content:center;
-            border:1px solid rgba(255,255,255,.18);
-            background:rgba(0,0,0,.48); color:#fff;
-            transition:transform .12s ease, box-shadow .2s ease, background .2s;
-            box-shadow:0 0 0 rgba(0,0,0,0);
-          }
-          .voBtn:hover{ transform:translateY(-1px); box-shadow:0 0 18px rgba(255,255,255,.2) }
-          .voBtn .ico{ width:22px; height:22px; }
-          .voFlash[data-on="1"]{ color:#ffd857; box-shadow:0 0 20px rgba(255,216,87,.45) }
-          .voClose{ border-radius:50%; width:38px; height:38px; }
-          .voSpacer{ width:44px; height:44px; }
+      )}
 
-          .strokeAnim{
-            stroke-dasharray:140; stroke-dashoffset:140; animation:dash 1.2s ease forwards;
-          }
-          @keyframes dash{ to{ stroke-dashoffset:0 } }
+      {/* низ-право: фонарик + закрыть — на ОДНОЙ линии с REC/flip */}
+      <div
+        className="voCornerBR"
+        style={{
+          // одна линия со всеми режимами
+          bottom: 'calc(var(--vo-pad-y) + (var(--vo-line-h) - 44px)/2)',
+          pointerEvents:'auto',
+          zIndex:7
+        }}
+      >
+        {st === 'recording' && (
+          <button
+            type="button"
+            className="voBtn voFlash"
+            aria-label={tt('forum_flash') || 'Flash'}
+            title={tt('forum_flash') || 'Flash'}
+            data-on={torchOn ? '1' : '0'}
+            onClick={toggleTorch}
+          >
+            <svg viewBox="0 0 24 24" className="ico">
+              <path className="strokeAnim" d="M13 2L6 14h5l-1 8 8-14h-5l1-6z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
+            </svg>
+            <span className="flashDot" aria-hidden />
+          </button>
+        )}
 
-          .voTimer{
-            pointer-events:none; margin:auto; display:inline-flex; align-items:center; gap:10px;
-            padding:8px 16px; border-radius:999px; font-weight:800; letter-spacing:.6px;
-            background:rgba(0,0,0,.52); color:#fff; border:1px solid rgba(255,255,255,.18);
-            text-transform:uppercase;
-          }
-          .voTimer .dot{
-            width:10px; height:10px; border-radius:50%; background:#ff3b30;
-            box-shadow:0 0 12px rgba(255,59,48,.9);
-            animation:blink .95s steps(1) infinite;
-          }
-          .voTimer .rec{ color:#ffd0d0; font-size:12px; letter-spacing:1.6px }
-          .voTimer .time{ font:700 14px/1.1 ui-monospace,monospace; }
-          @keyframes blink{ 0%,50%{opacity:1} 51%,100%{opacity:.35} }
-          /* режим превью — без REC/миганий (контент уже условный), делаем спокойный бейдж */
-         .voTimer.isIdle{
-            background:rgba(0,0,0,.40);
-           border-color:rgba(255,255,255,.12);
-          }
-          .voRec{
-            pointer-events:auto; width:66px; height:66px; border-radius:50%;
-            display:flex; align-items:center; justify-content:center;
-            background:radial-gradient(circle at 50% 50%, #ff0505ff 0%, #f8f6f606 70%);
-            border:2px solid rgba(250, 4, 4, 1);
-            box-shadow:0 14px 40px rgba(254, 5, 5, 0);
-            transition:transform .08s ease;
-          }
-          .voRec.idle{ animation:pulse 1.6s ease-in-out infinite; }
-          .voRec:active{ transform:scale(.98) }
-          @keyframes pulse{
-            0%,100%{ box-shadow:0 0 0 rgba(255, 0, 0, 1) }
-            50%    { box-shadow:0 0 36px rgba(255,0,0,.45) }
-          }
-          .recSvg{ width:84px; height:84px; }
-          .ring{ fill:none; stroke:rgba(255,255,255,.25); stroke-width:2; }
-          .glow{ fill:none; stroke:rgba(255,80,80,.55); stroke-width:10; filter:blur(1px); opacity:.45; }
-          .core{ fill:#fff; opacity:.12; rx:10; transition:opacity .15s ease }
-          .voRec.rec .core{ opacity:.22 }
-
-          .voSwitch .rot{ transform-origin:12px 12px; animation:spin 1.8s linear infinite; opacity:.65 }
-          @keyframes spin{ to{ transform:rotate(360deg) } }
-
-          @media (max-width:520px){
-            .voBottom{ height:88px }
-            .voRec{ width:86px; height:86px }
-           .recSvg{ width:76px; height:76px }
-          }
-        `}</style>        
+        <button
+          type="button"
+          className="voBtn voClose"
+          aria-label={tt('forum_video_reset') || 'Close'}
+          title={tt('forum_video_reset') || 'Close'}
+          onClick={()=>{
+            if (st === 'recording') {
+              if (confirm(tt('forum_video_reset_confirm'))) onResetConfirm?.();
+            } else {
+              onResetConfirm?.();
+            }
+          }}
+        >
+          <svg viewBox="0 0 24 24" className="ico">
+            <path d="M6 6l12 12M18 6l-12 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+          </svg>
+        </button>
       </div>
+{st === 'preview' && (
+  <div className="voCornerBL" style={{
+    bottom: 'calc(var(--vo-pad-y) + (var(--vo-line-h) - 44px)/2)',
+    pointerEvents:'auto', zIndex:7
+  }}>
+    <button
+      type="button"
+      className="voBtn voAccept"
+      aria-label={tt('forum_video_accept') || 'Accept & send'}
+      title={tt('forum_video_accept') || 'Accept & send'}
+      onClick={pressComposerSend}
+    >
+      <svg viewBox="0 0 24 24" className="ico ok">
+        <path d="M4 12.5l5 5L20 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    </button>
+  </div>
+)}
+
+
+      {/* стили */}
+      <style jsx>{`
+        /* === ПАРАМЕТРЫ ЛИНИИ (можно настраивать где угодно через .forum_video_overlay) === */
+        .forum_video_overlay{
+          --vo-line-h: 96px;  /* высота нижней линии */
+          --vo-pad-y: 54px;   /* отступ линии от низа */
+          --vo-pad-x: 30px;   /* боковые отступы для угловых кнопок */
+        }
+
+        .voTop{
+          position:absolute; left:0; right:0; top:0; height:60px;
+          display:flex; align-items:center; justify-content:center;
+          padding:8px 10px; z-index:6;
+        }
+        .voBottom{
+          position:absolute; left:0; right:0; bottom: var(--vo-pad-y); height: var(--vo-line-h);
+          display:flex; align-items:center; justify-content:space-between;
+          padding:12px 18px; gap:12px;
+        }
+        .voCornerBR{ position:absolute; right: var(--vo-pad-x); display:flex; gap:10px; }
+
+        .voBtn{
+          width:44px; height:44px; border-radius:12px;
+          display:inline-flex; align-items:center; justify-content:center;
+          border:1px solid rgba(255,255,255,.18);
+          background:rgba(0,0,0,.48); color:#fff;
+          transition:transform .12s ease, box-shadow .2s ease, background .2s;
+          box-shadow:0 0 0 rgba(0,0,0,0);
+          position:relative;
+        }
+        .voBtn:hover{ transform:translateY(-1px); box-shadow:0 0 18px rgba(255,255,255,.2) }
+        .voBtn .ico{ width:22px; height:22px; }
+
+        .voFlash[data-on="1"]{
+          color:#ffd857; box-shadow:0 0 20px rgba(255,216,87,.45);
+          border-color: rgba(255,216,87,.6);
+        }
+        .voFlash[data-on="1"] .strokeAnim{ filter:drop-shadow(0 0 6px rgba(255,216,87,.9)); }
+        .flashDot{
+          position:absolute; right:-3px; top:-3px; width:10px; height:10px; border-radius:50%;
+          background:#ffd857; box-shadow:0 0 10px rgba(255,216,87,.9);
+          opacity:0; transform:scale(.6);
+          transition:opacity .15s ease, transform .15s ease;
+        }
+        .voFlash[data-on="1"] .flashDot{ opacity:1; transform:scale(1); }
+
+        .voClose{ border-radius:50%; width:38px; height:38px; }
+        .voSpacer{ width:44px; height:44px; }
+
+        .strokeAnim{ stroke-dasharray:140; stroke-dashoffset:140; animation:dash 1.2s ease forwards; }
+        @keyframes dash{ to{ stroke-dashoffset:0 } }
+
+        .voTimer{
+          margin:auto; display:inline-flex; align-items:center; gap:10px;
+          padding:8px 16px; border-radius:999px; font-weight:800; letter-spacing:.6px;
+          background:rgba(0,0,0,.52); color:#fff; border:1px solid rgba(255,255,255,.18);
+          text-transform:uppercase;
+        }
+        .voTimer .dot{
+          width:10px; height:10px; border-radius:50%; background:#ff3b30;
+          box-shadow:0 0 12px rgba(255,59,48,.9); animation:blink .95s steps(1) infinite;
+        }
+        .voTimer .rec{ color:#ffd0d0; font-size:12px; letter-spacing:1.6px }
+        .voTimer .time{ font:700 14px/1.1 ui-monospace,monospace; }
+        @keyframes blink{ 0%,50%{opacity:1} 51%,100%{opacity:.35} }
+        .voTimer.isIdle{ background:rgba(0,0,0,.40); border-color:rgba(255,255,255,.12); }
+
+        .voRec{
+          width:66px; height:66px; border-radius:50%;
+          display:flex; align-items:center; justify-content:center;
+          background:radial-gradient(circle at 50% 50%, #ff0505ff 0%, #f8f6f606 70%);
+          border:2px solid rgba(250, 4, 4, 1);
+          box-shadow:0 14px 40px rgba(254, 5, 5, 0);
+          transition:transform .08s ease;
+        }
+        .voRec.idle{ animation:pulse 1.6s ease-in-out infinite; }
+        .voRec:active{ transform:scale(.98) }
+        @keyframes pulse{ 0%,100%{ box-shadow:0 0 0 rgba(255, 0, 0, 1) } 50%{ box-shadow:0 0 36px rgba(255,0,0,.45) } }
+        .recSvg{ width:84px; height:84px; }
+        .ring{ fill:none; stroke:rgba(255,255,255,.25); stroke-width:2; }
+        .glow{ fill:none; stroke:rgba(255,80,80,.55); stroke-width:10; filter:blur(1px); opacity:.45; }
+        .core{ fill:#fff; opacity:.12; rx:10; transition:opacity .15s ease }
+        .voRec.rec .core{ opacity:.22 }
+
+        .voSwitch .rot{ transform-origin:12px 12px; animation:spin 1.8s linear infinite; opacity:.65 }
+        @keyframes spin{ to{ transform:rotate(360deg) } }
+
+        @media (max-width:520px){
+          .forum_video_overlay{ --vo-line-h: 88px; }
+          .voRec{ width:86px; height:86px }
+          .recSvg{ width:76px; height:76px }
+        }
+ .voCornerBL{ position:absolute; left: var(--vo-pad-x); display:flex; gap:10px; }
+
+.voAccept{
+  border-color: rgba(56,255,172,.6);
+  background: rgba(0,30,24,.55);
+  color:#46ffb0;
+  box-shadow: 0 0 0 rgba(56,255,172,0);
+  animation: acceptPulse 1.8s ease-in-out infinite;
+}
+@keyframes acceptPulse{
+  0%{ box-shadow: 0 0 0 0 rgba(56,255,172,.35) }
+  70%{ box-shadow: 0 0 0 12px rgba(56,255,172,0) }
+  100%{ box-shadow: 0 0 0 0 rgba(56,255,172,0) }
+}
+       
+      `}</style>
     </div>
   );
 }
 
+/* ===== утилиты — прямо в этом файле ===== */
 
+// Блокирует скролл страницы и перехватывает колесо/тач, пока active=true
+function usePageLock(active) {
+  React.useEffect(() => {
+    if (!active || typeof window === 'undefined') return;
+
+    const { body, documentElement } = document;
+    const y = window.scrollY || window.pageYOffset;
+    const prev = {
+      overflow: body.style.overflow,
+      position: body.style.position,
+      top: body.style.top,
+      width: body.style.width,
+      overscroll: documentElement.style.overscrollBehaviorY,
+    };
+
+    body.style.position = 'fixed';
+    body.style.top = `-${y}px`;
+    body.style.width = '100%';
+    body.style.overflow = 'hidden';
+    documentElement.style.overscrollBehaviorY = 'none';
+
+    const prevent = (e) => e.preventDefault();
+    window.addEventListener('wheel', prevent, { passive: false });
+    window.addEventListener('touchmove', prevent, { passive: false });
+
+    return () => {
+      window.removeEventListener('wheel', prevent);
+      window.removeEventListener('touchmove', prevent);
+      body.style.position = prev.position;
+      body.style.top = prev.top;
+      body.style.width = prev.width;
+      body.style.overflow = prev.overflow;
+      documentElement.style.overscrollBehaviorY = prev.overscroll;
+      window.scrollTo(0, y);
+    };
+  }, [active]);
+}
+
+// Ставит/снимает атрибут на <html> (для глобального CSS-правила)
+function useHtmlFlag(attr, value) {
+  React.useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const el = document.documentElement;
+    if (value == null) {
+      el.removeAttribute(attr);
+    } else {
+      el.setAttribute(attr, String(value));
+    }
+    return () => el.removeAttribute(attr);
+  }, [attr, value]);
+}
 
 
 /* =========================================================
@@ -5765,80 +5951,123 @@ const videoCancelRef = useRef(false); // true => onstop не собирает bl
     setRecElapsed(0);
    };
 
- // ==== CAMERA: открыть → запись → стоп → превью ====
- const startVideo = async () => {
-   if (videoState !== 'idle' && videoState !== 'preview') return;
-   try{
-     setVideoState('opening'); setVideoOpen(true);
-     try { videoCancelRef.current = false; } catch {}
-     const stream = await navigator.mediaDevices.getUserMedia({ video: { width:1280, height:720 }, audio:true });
-     videoStreamRef.current = stream;
-     const mr = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm' });
-     videoChunksRef.current = [];
-     mr.ondataavailable = (e)=>{ if(e.data?.size) videoChunksRef.current.push(e.data) };
- mr.onstop = async ()=>{
-   clearInterval(videoTimerRef.current); videoTimerRef.current=null;
-   try{
-     if (videoCancelRef.current) {
-       // режим ОТМЕНЫ: ничего не собираем
-       videoChunksRef.current = [];
-       setPendingVideo(null);
-       setVideoState('idle');
-       videoCancelRef.current = false;
-       return;
-     }
-     const blob = new Blob(videoChunksRef.current, { type: mr.mimeType || 'video/webm' });
-     const url  = URL.createObjectURL(blob);
-           // освобождаем старый blob:URL, если он был
-         try {
-           const prev = pendingVideo;
-           if (prev && /^blob:/.test(prev)) URL.revokeObjectURL(prev);
-         } catch {}
-         setPendingVideo(url);
-     setVideoState('preview');
-   }catch{
-     setVideoState('idle');
-   }
- };
-     videoRecRef.current = mr;
-     mr.start(250); // chunk every 250ms
-     // таймер
-     setVideoState('recording'); setVideoElapsed(0);
-     const started = Date.now();
-     clearInterval(videoTimerRef.current);
-     videoTimerRef.current = setInterval(()=>{
-       const sec = Math.floor((Date.now()-started)/1000);
-       setVideoElapsed(Math.min(600, sec)); // лимит 10:00
-       if (sec>=600) stopVideo();           // авто-стоп
-     }, 200);
-   }catch(e){
-     setVideoState('idle'); setVideoOpen(false);
-     try{ toast?.warn?.(t?.('forum_camera_denied')||'Нет доступа к камере/микрофону') }catch{}
-   }
- };
- const stopVideo = () => {
-   if (videoState!=='recording') return;
-   setVideoState('processing');
-   try{ videoRecRef.current?.stop?.() }catch{}
-   try{ videoStreamRef.current?.getTracks?.().forEach(tr=>tr.stop()) }catch{}
-   clearInterval(videoTimerRef.current); videoTimerRef.current=null;
- };
- const resetVideo = () => {
-   const rec = videoRecRef.current;
-   const isActive = !!rec && (rec.state === 'recording' || rec.state === 'paused');
-   // Флаг отмены нужен только для активной записи — чтобы onstop пропустил сборку
-   if (isActive) {
-     try { videoCancelRef.current = true; } catch {}
-     try { rec.stop(); } catch {}
-   } else {
-     // Если записи нет, не оставляем флаг «в утечке»
-     try { videoCancelRef.current = false; } catch {}
-   }
-   try { videoStreamRef.current?.getTracks?.().forEach(tr => tr.stop()) } catch {}
-   videoRecRef.current = null; videoStreamRef.current = null;
-   if (pendingVideo && /^blob:/.test(pendingVideo)) { try { URL.revokeObjectURL(pendingVideo) } catch {} }
-   setPendingVideo(null); setVideoOpen(false); setVideoState('idle'); setVideoElapsed(0);
- };
+// ==== CAMERA: открыть → запись → стоп → превью (фиксы для старта из overlay 'live') ====
+const startVideo = async () => {
+  // Разрешаем старт из idle, preview, live
+  const badStates = new Set(['opening', 'recording', 'processing', 'uploading']);
+  if (badStates.has(videoState)) return;
+
+  try {
+    // Оверлей может быть уже открыт — это ок
+    setVideoOpen(true);
+    setVideoState('opening');
+
+    // не создаём лишний стрим, если уже есть
+    let stream = videoStreamRef.current;
+    const hasTracks = !!stream && (stream.getTracks?.().length || 0) > 0;
+
+    if (!hasTracks) {
+      try { videoCancelRef.current = false; } catch {}
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 1280, height: 720, facingMode: { ideal: 'user' } },
+        audio: true,
+      });
+      videoStreamRef.current = stream;
+    }
+
+    const mime =
+      MediaRecorder.isTypeSupported?.('video/webm;codecs=vp9')
+        ? 'video/webm;codecs=vp9'
+        : 'video/webm';
+
+    const mr = new MediaRecorder(stream, { mimeType: mime });
+    videoChunksRef.current = [];
+
+    mr.ondataavailable = (e) => {
+      if (e?.data?.size) videoChunksRef.current.push(e.data);
+    };
+
+    mr.onstop = async () => {
+      clearInterval(videoTimerRef.current); videoTimerRef.current = null;
+
+      try {
+        if (videoCancelRef.current) {
+          // отмена — ничего не собираем
+          videoChunksRef.current = [];
+          setPendingVideo(null);
+          setVideoState('idle');
+          videoCancelRef.current = false;
+          return;
+        }
+
+        const blob = new Blob(videoChunksRef.current, { type: mr.mimeType || 'video/webm' });
+        const url = URL.createObjectURL(blob);
+
+        // освободим предыдущий blob:URL
+        try {
+          const prev = pendingVideo;
+          if (prev && /^blob:/.test(prev)) URL.revokeObjectURL(prev);
+        } catch {}
+
+        setPendingVideo(url);
+        setVideoState('preview');
+      } catch {
+        setVideoState('idle');
+      }
+    };
+
+    videoRecRef.current = mr;
+    mr.start(250);
+
+    // — таймер
+    setVideoState('recording');
+    setVideoElapsed(0);
+
+    const started = Date.now();
+    clearInterval(videoTimerRef.current);
+    videoTimerRef.current = setInterval(() => {
+      const sec = Math.floor((Date.now() - started) / 1000);
+      setVideoElapsed(Math.min(600, sec)); // лимит 10:00
+      if (sec >= 600) stopVideo();         // авто-стоп
+    }, 200);
+  } catch (e) {
+    setVideoState('idle'); setVideoOpen(false);
+    try { toast?.warn?.(t?.('forum_camera_denied') || 'Нет доступа к камере/микрофону') } catch {}
+  }
+};
+
+const stopVideo = () => {
+  if (videoState !== 'recording') return;
+  setVideoState('processing');
+  try { videoRecRef.current?.stop?.(); } catch {}
+  try { videoStreamRef.current?.getTracks?.().forEach(tr => tr.stop()); } catch {}
+  clearInterval(videoTimerRef.current); videoTimerRef.current = null;
+};
+
+const resetVideo = () => {
+  const rec = videoRecRef.current;
+  const isActive = !!rec && (rec.state === 'recording' || rec.state === 'paused');
+
+  if (isActive) {
+    try { videoCancelRef.current = true; } catch {}
+    try { rec.stop(); } catch {}
+  } else {
+    try { videoCancelRef.current = false; } catch {}
+  }
+
+  try { videoStreamRef.current?.getTracks?.().forEach(tr => tr.stop()); } catch {}
+  videoRecRef.current = null; videoStreamRef.current = null;
+
+  if (pendingVideo && /^blob:/.test(pendingVideo)) {
+    try { URL.revokeObjectURL(pendingVideo) } catch {}
+  }
+
+  setPendingVideo(null);
+  setVideoOpen(false);
+  setVideoState('idle');
+  setVideoElapsed(0);
+};
+
 
 // отправлять можно, если есть текст ИЛИ хотя бы одна картинка
  const canSend = (String(text || '').trim().length > 0)
@@ -6944,17 +7173,27 @@ const closeQuests = React.useCallback(() => {
 
       <Styles />{toast.view}
        {/* Overlay камеры/плеера */}
-       <VideoOverlay
-         open={videoOpen}
-         state={videoState==='recording' ? 'recording' : (videoState==='preview' ? 'preview' : 'hidden')}
-         elapsed={videoElapsed}
-         streamRef={videoStreamRef}
-         previewUrl={pendingVideo}
-         onClose={resetVideo}
-         onStop={stopVideo}
-         onResetConfirm={resetVideo}
-         t={t}
-       />
+<VideoOverlay
+  open={videoOpen}
+  state={
+    !videoOpen
+      ? 'hidden'
+      : (videoState === 'recording'
+          ? 'recording'
+          : (videoState === 'preview' ? 'preview' : 'live'))
+  }
+  elapsed={videoElapsed}
+  streamRef={videoStreamRef}
+  previewUrl={pendingVideo}
+  onStart={startVideo}          // ← добавили
+  onStop={stopVideo}
+  onResetConfirm={resetVideo}
+  t={t}
+/>
+
+
+
+
 
       {/* шапка */}
       <section className="glass neon p-3" style={{ position:'relative', zIndex:40, overflow:'visible' }}>
@@ -7856,19 +8095,24 @@ onClick={()=>{
               )}
               aria-label={videoState==='recording' ? 'Stop' : (videoState==='preview' ? 'Снять заново' : 'Снять видео')}
               title={videoState==='recording' ? 'Stop' : (videoState==='preview' ? 'Снять заново' : 'Снять видео')}
-              onClick={(e)=>{
-                e.preventDefault();
-                if (!vipActive){
-                  try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ only') } catch {}
-                  try { setVipOpen?.(true) } catch {}
-                  try { setComposerActive(false) } catch {}
-                  try { document.activeElement?.blur?.() } catch {}
-                  return;
-                }
-                if (videoState==='recording') { stopVideo(); }
-                else if (videoState==='uploading') { /* ignore */ }
-                else { startVideo(); }
-              }}
+onClick={(e)=>{
+  e.preventDefault();
+  if (!vipActive){
+    try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ only') } catch {}
+    try { setVipOpen?.(true) } catch {}
+    try { setComposerActive(false) } catch {}
+    try { document.activeElement?.blur?.() } catch {}
+    return;
+  }
+  if (videoState==='uploading') return;
+
+  // ТОЛЬКО открыть оверлей и включить live-превью
+  try { setVideoOpen(true); } catch {}
+  try { setVideoState('live'); } catch {}
+  try { setComposerActive(false); } catch {}
+  try { document.activeElement?.blur?.() } catch {}
+}}
+
             >
               {videoState==='recording'
                 ? <span style={{display:'inline-flex',alignItems:'center',gap:6}}>

@@ -949,3 +949,42 @@ header nav ul{ display:flex; flex-wrap:wrap; gap:.5rem; margin:0; padding:0; }
 @media (prefers-reduced-motion: reduce){
   .ql7-click-icon{ animation: none !important; }
 }
+/* === Video Overlay integration ======================================= */
+
+/* 1) Когда открыт видео-оверлей — скрыть плавающую кнопку BgAudio */
+html[data-vo-open="1"] .audio-toggle {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* 2) Заблокировать скролл и клики по странице под оверлеем */
+html[data-vo-open="1"],
+html[data-vo-open="1"] body {
+  overflow: hidden !important;
+  overscroll-behavior: contain;       /* iOS/Android не тянем фон */
+}
+
+html[data-vo-open="1"] body {
+  position: fixed;                    /* фиксируем в текущей позиции */
+  width: 100%;
+}
+
+/* Все клики — мимо страницы, но… */
+html[data-vo-open="1"] #__next,
+html[data-vo-open="1"] .page-content {
+  pointer-events: none !important;    /* подложка некликабельна */
+}
+
+/* …сам оверлей остаётся кликабельным */
+.forum_video_overlay {
+  z-index: 100000 !important;         /* поверх любых FAB/модалок */
+  pointer-events: auto !important;
+}
+
+/* на всякий пожарный: любые порталы с z-index ниже — под оверлей */
+html[data-vo-open="1"] .w3m-modal,
+html[data-vo-open="1"] .w3m-overlay {
+  z-index: 99999 !important;
+}
