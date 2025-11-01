@@ -6422,7 +6422,7 @@ fd.append('file', blob, `video-${Date.now()}.${ext}`);
  } catch {}
  try { setPendingVideo(null); } catch {}
  try { setVideoOpen(false); setVideoState('idle'); } catch {}
- return true;
+
 };
 
 
