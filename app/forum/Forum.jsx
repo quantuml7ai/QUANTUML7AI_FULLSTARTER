@@ -6215,10 +6215,19 @@ const createPost = async () => {
   if (pendingVideo) {
     try {
       if (/^blob:/.test(pendingVideo)) {
-        const resp = await fetch(pendingVideo);
-        const blob = await resp.blob();
-        const fd = new FormData();
-        fd.append('file', blob, `video-${Date.now()}.webm`);
+ const resp = await fetch(pendingVideo);
+ const blob = await resp.blob();
+ // нормализуем тип и расширение под iOS/Android
+ const mime = String(blob.type || '').toLowerCase();
+ const ext =
+   mime.includes('webm')       ? 'webm' :
+   mime.includes('quicktime')  ? 'mov'  :
+   mime.includes('mp4')        ? 'mp4'  :
+   'mp4'; // безопасный дефолт
+ // делаем File, чтобы и name, и type были корректны
+ const file = new File([blob], `video-${Date.now()}.${ext}`, { type: mime || 'video/mp4' });
+ const fd = new FormData();
+ fd.append('file', file, file.name);
         const up = await fetch('/api/forum/uploadVideo', { method:'POST', body: fd, cache:'no-store' });
         const uj = await up.json().catch(()=>null);
         videoUrlToSend = (uj && Array.isArray(uj.urls) && uj.urls[0]) ? uj.urls[0] : '';

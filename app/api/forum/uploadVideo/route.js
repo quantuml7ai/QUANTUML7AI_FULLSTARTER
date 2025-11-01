@@ -3,8 +3,8 @@ import { put } from '@vercel/blob'
 
 export const runtime = 'nodejs'
 
-// Разрешаем webm/mp4/mov (iOS отдает video/quicktime = .mov)
-const ALLOWED_MIME = /^(video\/webm|video\/mp4|video\/quicktime)$/i
+// Разрешаем webm/mp4/mov (+ редкий 3gpp)
+const ALLOWED_MIME = /^(video\/webm|video\/mp4|video\/quicktime|video\/3gpp)$/i
 // подними лимит, видео тяжелее (например, 200 МБ)
 const MAX_SIZE_BYTES = 200 * 1024 * 1024
 
@@ -14,6 +14,7 @@ function pickExt(mime = '', filename = '') {
   const name = (filename || '').toLowerCase()
   if (m.includes('mp4') || name.endsWith('.mp4')) return 'mp4'
   if (m.includes('quicktime') || name.endsWith('.mov')) return 'mov'
+  if (m.includes('3gpp') || name.endsWith('.3gp')) return '3gp'
   return 'webm'
 }
 
@@ -21,7 +22,12 @@ function pickExt(mime = '', filename = '') {
 function isAllowedType(mime = '', filename = '') {
   if (ALLOWED_MIME.test(mime || '')) return true
   const name = (filename || '').toLowerCase()
-  return name.endsWith('.webm') || name.endsWith('.mp4') || name.endsWith('.mov')
+  return (
+    name.endsWith('.webm') ||
+    name.endsWith('.mp4')  ||
+    name.endsWith('.mov')  ||
+    name.endsWith('.3gp')
+  )
 }
 
 export async function POST(req) {
@@ -31,8 +37,11 @@ export async function POST(req) {
     if (!f) {
       return NextResponse.json({ urls: [], errors: ['no_file'] }, { status: 400, headers:{'cache-control':'no-store'} })
     }
+    if (typeof f !== 'object' || typeof f.arrayBuffer !== 'function') {
+      return NextResponse.json({ urls: [], errors: ['bad_file'] }, { status: 400, headers:{'cache-control':'no-store'} })
+    }
 
-    const buf = Buffer.from(await f.arrayBuffer())
+
 
     // Тип: допускаем video/quicktime (iPhone) и фоллбек по названию файла
     const filename = typeof f.name === 'string' ? f.name : ''
@@ -41,6 +50,12 @@ export async function POST(req) {
     if (!isAllowedType(mime, filename)) {
       return NextResponse.json({ urls: [], errors: ['bad_type'] }, { status: 415, headers:{'cache-control':'no-store'} })
     }
+    // Сначала проверяем заявленный размер, чтобы не держать огромный буфер в памяти
+    const declaredSize = typeof f.size === 'number' ? f.size : undefined
+    if (declaredSize && declaredSize > MAX_SIZE_BYTES) {
+      return NextResponse.json({ urls: [], errors: ['too_large'] }, { status: 413, headers:{'cache-control':'no-store'} })
+    }
+    const buf = Buffer.from(await f.arrayBuffer())    
     if (buf.length > MAX_SIZE_BYTES) {
       return NextResponse.json({ urls: [], errors: ['too_large'] }, { status: 413, headers:{'cache-control':'no-store'} })
     }
