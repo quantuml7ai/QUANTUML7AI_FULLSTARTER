@@ -6235,9 +6235,13 @@ const createPost = async () => {
  const rawUrl = put?.url || '';
  const needsName = rawUrl && !/[?&](filename|download)=/i.test(rawUrl) &&
                    !/\.(webm|mp4|mov|m4v|mkv)(?:$|[?#])/i.test(rawUrl);
- const sep = rawUrl.includes('?') ? '&' : '?';
- const namedUrl = needsName ? `${rawUrl}${sep}filename=${encodeURIComponent(file.name)}` : rawUrl;
- videoUrlToSend = namedUrl;       if (!videoUrlToSend) { try { toast?.warn?.('Видео не загрузилось'); } catch {} }
+ const sep1 = rawUrl.includes('?') ? '&' : '?';
+ const withName = needsName ? `${rawUrl}${sep1}filename=${encodeURIComponent(file.name)}` : rawUrl;
+ // ✅ явный маркер для рендера
+ const sep2 = withName.includes('?') ? '&' : '?';
+ videoUrlToSend = `${withName}${sep2}media=video`;
+   
+  if (!videoUrlToSend) { try { toast?.warn?.('Видео не загрузилось'); } catch {} }
      } else {
        // если тут уже https — оставляем как есть
        videoUrlToSend = pendingVideo;
@@ -6365,6 +6369,7 @@ const createPost = async () => {
     isAdmin: isAdm,
     likes: 0, dislikes: 0, views: 0,
     myReaction: null,
+    ...(videoUrlToSend ? { type: 'video' } : {}),
   };
  
   persist(prev => {
@@ -6624,7 +6629,8 @@ function isVideoUrl(url) {
 
   // обычные расширения
   if (/\.(webm|mp4|mov|m4v|mkv)(?:$|[?#])/i.test(s)) return true;
-
+ // явный маркер
+ if (/[?#&]media=video(?:$|[&#])/i.test(s)) return true;
  // filename=/download= с расширением
  try {
    const u = new URL(s, typeof location !== 'undefined' ? location.origin : 'http://local');
