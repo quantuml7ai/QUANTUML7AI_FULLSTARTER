@@ -6210,23 +6210,54 @@ const createPost = async () => {
 
   if (!rl.allowAction()) return _fail(t('forum_too_fast') || 'Слишком часто');
 
-  // 0) видео: blob -> https
-  let videoUrlToSend = '';
-  if (pendingVideo) {
-    try {
-      if (/^blob:/.test(pendingVideo)) {
-        const resp = await fetch(pendingVideo);
-        const blob = await resp.blob();
-        const fd = new FormData();
-        fd.append('file', blob, `video-${Date.now()}.webm`);
-        const up = await fetch('/api/forum/uploadVideo', { method:'POST', body: fd, cache:'no-store' });
-        const uj = await up.json().catch(()=>null);
-        videoUrlToSend = (uj && Array.isArray(uj.urls) && uj.urls[0]) ? uj.urls[0] : '';
-      } else {
-        videoUrlToSend = pendingVideo;
-      }
-    } catch { videoUrlToSend = ''; }
+// === 0) ВИДЕО: blob -> одноразовый URL -> прямой PUT (с подписью)
+let videoUrlToSend = '';
+let videoMimeToSend = '';
+
+if (pendingVideo) {
+  try {
+    // получаем Blob из blob:-URL локального превью
+    const resp = await fetch(pendingVideo);
+    const blob = await resp.blob(); // type: video/webm | video/mp4 | video/quicktime
+
+    if (!/^video\/(mp4|webm|quicktime)$/i.test(blob.type)) {
+      throw new Error('bad_type');
+    }
+    if (blob.size > 300 * 1024 * 1024) {
+      try { toast?.err?.('Видео больше 300 МБ'); } catch {}
+      return _fail();
+    }
+
+    // просим сервер одноразовый URL с правильным именем .mp4/.webm/.mov
+    const s = await fetch('/api/forum/blobUploadUrl', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ mime: blob.type }),
+      cache: 'no-store'
+    });
+    if (!s.ok) throw new Error('sign_fail');
+    const { url: signedUrl } = await s.json();
+    if (!signedUrl) throw new Error('no_signed_url');
+
+    // прямой PUT — КРИТИЧНО указать Content-Type видео
+    const putRes = await fetch(signedUrl, {
+      method: 'PUT',
+      body: blob,
+      headers: { 'Content-Type': blob.type }
+    });
+    if (!putRes.ok) throw new Error('upload_failed');
+
+    // публичный URL из ответа
+    const uj = await putRes.json().catch(() => null);
+    videoUrlToSend = uj?.url || '';
+    videoMimeToSend = blob.type || '';
+    if (!videoUrlToSend) throw new Error('no_public_url');
+  } catch (e) {
+    try { toast?.err?.('Не удалось загрузить видео'); } catch {}
+    return _fail(); // важно: НЕ закрываем оверлей, даём повторить отправку
   }
+}
+
 
   // 0b) аудио: blob -> https
   let audioUrlToSend = '';
@@ -6255,9 +6286,10 @@ const createPost = async () => {
     ...(audioUrlToSend ? [audioUrlToSend] : []),
     ...(videoUrlToSend ? [videoUrlToSend] : []),
   ].filter(Boolean).join('\n');
-
-  if (!body || !sel?.id) return _fail();
-
+  // Явная метка видео для рендера/бэка (URL остаётся и в body — для обратной совместимости)
+  const attachments = videoUrlToSend
+    ? [{ type: 'video', url: videoUrlToSend, mime: videoMimeToSend }]
+    : [];
   // 2) auth
   const r = await requireAuthStrict(); 
   if (!r) return _fail();
@@ -6336,6 +6368,7 @@ const createPost = async () => {
     topicId: String(sel.id),
     parentId: parentId ? String(parentId) : null,
     text: body,
+    attachments,
     ts: Date.now(),
     userId: uid,
     nickname: prof.nickname || shortId(uid),
@@ -6373,7 +6406,8 @@ const createPost = async () => {
     parentId,
     nickname: p.nickname,
     icon: p.icon,
-    cid:  tmpId 
+    cid:  tmpId,
+    attachments, 
   });
   sendBatch(true);
   setComposerActive(false);

@@ -6,7 +6,7 @@ export const runtime = 'nodejs'
 // webm/mp4 — то, что даёт MediaRecorder и обычные клипы
 const ALLOWED_MIME = /^(video\/webm|video\/mp4)$/i
 // подними лимит, видео тяжелее (например, 200 МБ)
-const MAX_SIZE_BYTES = 300000 * 1024 * 1024
+const MAX_SIZE_BYTES = 200 * 1024 * 1024
 
 export async function POST(req) {
   try {
