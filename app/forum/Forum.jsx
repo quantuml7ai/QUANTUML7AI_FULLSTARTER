@@ -6210,77 +6210,65 @@ const createPost = async () => {
 
   if (!rl.allowAction()) return _fail(t('forum_too_fast') || 'Слишком часто');
 
-// === 0) ВИДЕО: blob -> одноразовый URL -> прямой POST (multipart + fields) ===
-let videoUrlToSend = '';
-let videoMimeToSend = '';
+  // 0) ВИДЕО: blob -> одноразовый URL -> прямой POST (multipart + fields) с подписью
+  let videoUrlToSend = '';
+  let videoMimeToSend = '';
+  if (pendingVideo) {
+    try {
+      // blob из локального превью
+      const resp = await fetch(pendingVideo);
+      const blob = await resp.blob();
+      const baseMime = String(blob.type || '').split(';')[0].trim(); // убираем ";codecs=..."
+      const safeMime = /^video\/(mp4|webm|quicktime)$/i.test(baseMime) ? baseMime : 'video/webm';
 
-if (pendingVideo) {
-  try {
-    // 1) достаём Blob из blob:-URL превью
-    const resp = await fetch(pendingVideo);
-    const blob = await resp.blob(); // type: video/webm | video/mp4 | video/quicktime
+      if (!/^video\/(mp4|webm|quicktime)$/i.test(safeMime)) throw new Error('bad_type');
+      if (blob.size > 300 * 1024 * 1024) { try { toast?.err?.('Видео больше 300 МБ'); } catch {} ; return _fail(); }
 
-    if (!/^video\/(mp4|webm|quicktime)$/i.test(blob.type)) {
-      throw new Error('bad_type');
-    }
-    if (blob.size > 300 * 1024 * 1024) {
-      try { toast?.err?.('Видео больше 300 МБ'); } catch {}
-      return _fail();
-    }
+      // подписываем загрузку на сервере
+      const s = await fetch('/api/forum/blobUploadUrl', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ mime: safeMime }),
+        cache: 'no-store'
+      });
+      if (!s.ok) throw new Error('sign_fail');
+      const sign = await s.json();
+      const signedUrl = sign?.url;
+      const fields = sign?.fields || null;
+      if (!signedUrl) throw new Error('no_signed_url');
 
-    // 2) просим одноразовый URL (и поля) с правильным расширением
-    const s = await fetch('/api/forum/blobUploadUrl', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ mime: blob.type }),
-      cache: 'no-store'
-    });
-    if (!s.ok) throw new Error('sign_fail');
-    const sign = await s.json();
-    const signedUrl = sign?.url;
-    const fields = sign?.fields || null;
-    if (!signedUrl) throw new Error('no_signed_url');
-
-    // 3) загружаем файл:
-    //    - если сервер выдал fields -> это presigned POST (нужно multipart/form-data)
-    //    - если fields нет -> fallback на PUT с Content-Type
-    let upOk = false;
-    let upRes, uploaded;
-
-    if (fields && typeof fields === 'object') {
-      const fd = new FormData();
-      // все обязательные поля из пресайна
-      Object.keys(fields).forEach(k => fd.append(k, fields[k]));
-      // файл ДОЛЖЕН называться 'file'
-      fd.append('file', new File([blob], `video.${blob.type.includes('mp4')?'mp4':blob.type.includes('quicktime')?'mov':'webm'}`, { type: blob.type }));
-
-      upRes = await fetch(signedUrl, { method: 'POST', body: fd }); // НЕ ставь Content-Type вручную!
-      upOk = upRes.ok;
-      if (upOk) {
-        // у Vercel Blob обычно тело = {"url": "..."}; но на всякий случай возьмём header Location
-        uploaded = await upRes.json().catch(() => null);
-        videoUrlToSend = uploaded?.url || upRes.headers.get('Location') || '';
+      // multipart/form-data с обязательными fields + file
+      let ok = false, upRes, uploaded;
+      if (fields && typeof fields === 'object') {
+        const fd = new FormData();
+        Object.keys(fields).forEach(k => fd.append(k, fields[k]));
+        const filename =
+          safeMime.includes('mp4') ? `video-${Date.now()}.mp4` :
+          safeMime.includes('quicktime') ? `video-${Date.now()}.mov` : `video-${Date.now()}.webm`;
+        fd.append('file', new File([blob], filename, { type: safeMime }));
+        upRes = await fetch(signedUrl, { method: 'POST', body: fd }); // НЕ ставить Content-Type вручную
+        ok = upRes.ok;
+        if (ok) {
+          uploaded = await upRes.json().catch(() => null);
+          videoUrlToSend = uploaded?.url || upRes.headers.get('Location') || '';
+        }
+      } else {
+        // редкий fallback: PUT
+        upRes = await fetch(signedUrl, { method: 'PUT', body: blob, headers: { 'Content-Type': safeMime } });
+        ok = upRes.ok;
+        if (ok) {
+          uploaded = await upRes.json().catch(() => null);
+          videoUrlToSend = uploaded?.url || upRes.headers.get('Location') || '';
+        }
       }
-    } else {
-      // редкий случай — подписали на PUT
-      upRes = await fetch(signedUrl, { method: 'PUT', body: blob, headers: { 'Content-Type': blob.type } });
-      upOk = upRes.ok;
-      if (upOk) {
-        uploaded = await upRes.json().catch(() => null);
-        videoUrlToSend = uploaded?.url || upRes.headers.get('Location') || '';
-      }
+      if (!ok || !videoUrlToSend) throw new Error('upload_failed');
+      videoMimeToSend = safeMime;
+    } catch (e) {
+      console.error('video_upload_error', e);
+      try { toast?.err?.('Не удалось загрузить видео'); } catch {}
+      return _fail(); // не закрываем оверлей — можно повторить
     }
-
-    if (!upOk || !videoUrlToSend) throw new Error('upload_failed');
-
-    videoMimeToSend = blob.type || '';
-  } catch (e) {
-    console.error('video_upload_error', e);
-    try { toast?.err?.('Не удалось загрузить видео'); } catch {}
-    return _fail(); // НЕ закрываем оверлей — человек сможет повторить
   }
-}
-
   // 0b) аудио: blob -> https
   let audioUrlToSend = '';
   if (pendingAudio) {
@@ -6308,10 +6296,12 @@ if (pendingVideo) {
     ...(audioUrlToSend ? [audioUrlToSend] : []),
     ...(videoUrlToSend ? [videoUrlToSend] : []),
   ].filter(Boolean).join('\n');
-  // Явная метка видео для рендера/бэка (URL остаётся и в body — для обратной совместимости)
+  // Явные метаданные: чтобы фронт/бэк точно знали, что это ВИДЕО
   const attachments = videoUrlToSend
     ? [{ type: 'video', url: videoUrlToSend, mime: videoMimeToSend }]
     : [];
+  if (!body || !sel?.id) return _fail();
+
   // 2) auth
   const r = await requireAuthStrict(); 
   if (!r) return _fail();
@@ -6390,7 +6380,7 @@ if (pendingVideo) {
     topicId: String(sel.id),
     parentId: parentId ? String(parentId) : null,
     text: body,
-    attachments,
+    attachments, 
     ts: Date.now(),
     userId: uid,
     nickname: prof.nickname || shortId(uid),
