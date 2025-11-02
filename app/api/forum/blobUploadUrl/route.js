@@ -1,64 +1,138 @@
+// app/api/forum/blobUploadUrl/route.js
 import { NextResponse } from 'next/server'
-import { put } from '@vercel/blob'
-import { createWriteStream, promises as fs } from 'node:fs'
-import { pipeline } from 'node:stream/promises'
-import path from 'node:path'
+import { generateUploadURL } from '@vercel/blob'
 
 export const runtime = 'nodejs'
 
-// Разрешаем webm/mp4/mov (iPhone)
-const ALLOWED_MIME = /^(video\/webm|video\/mp4|video\/quicktime)$/i
-// Лимит 300 МБ
-const MAX_SIZE_BYTES = 300 * 1024 * 1024
-
 export async function POST(req) {
+  const t0 = process.hrtime.bigint()
+  const urlObj = new URL(req.url)
+  const debug = urlObj.searchParams.get('debug') === '1'
+
+  const hdr = Object.fromEntries(req.headers.entries())
+  const clientInfo = {
+    ip: hdr['x-real-ip'] || hdr['x-forwarded-for'] || 'unknown',
+    ua: hdr['user-agent'] || 'unknown',
+  }
+
+  const respond = (status, payload) => {
+    const t1 = process.hrtime.bigint()
+    const ms = Number(t1 - t0) / 1e6
+    const body = {
+      ok: status >= 200 && status < 300,
+      ...payload,
+      timing_ms: Math.round(ms),
+    }
+    return NextResponse.json(body, {
+      status,
+      headers: { 'cache-control': 'no-store' },
+    })
+  }
+
   try {
-    const form = await req.formData()
-    const f = form.get('file')
-    if (!f) {
-      return NextResponse.json({ urls: [], errors: ['no_file'] }, { status: 400, headers:{'cache-control':'no-store'} })
+    // 1) Метод
+    if (req.method !== 'POST') {
+      const code = 'method_not_allowed'
+      console.warn('[blobUploadUrl]', code, { method: req.method, clientInfo })
+      return respond(405, { error: { code, message: 'Use POST' } })
     }
 
-    const mime = String(f.type || '').toLowerCase()
-    if (!ALLOWED_MIME.test(mime)) {
-      return NextResponse.json({ urls: [], errors: ['bad_type'] }, { status: 415, headers:{'cache-control':'no-store'} })
+    // 2) Токен
+    const token = process.env.FORUM_READ_WRITE_TOKEN
+    if (!token) {
+      const code = 'missing_token'
+      console.error('[blobUploadUrl]', code, { clientInfo })
+      return respond(500, {
+        error: {
+          code,
+          message: 'FORUM_READ_WRITE_TOKEN is not set',
+          hint: 'Добавь RW токен в переменные окружения проекта',
+        },
+      })
     }
 
-    // Быстрый предчек по size, если есть
-    if (typeof f.size === 'number' && f.size > MAX_SIZE_BYTES) {
-      return NextResponse.json({ urls: [], errors: ['too_large'] }, { status: 413, headers:{'cache-control':'no-store'} })
+    // 3) Тело и MIME
+    let mimeRaw = ''
+    try {
+      const json = await req.json()
+      mimeRaw = String(json?.mime || '')
+    } catch (e) {
+      const code = 'bad_json'
+      console.error('[blobUploadUrl]', code, { e, clientInfo })
+      return respond(400, {
+        error: { code, message: 'Invalid JSON body', hint: 'Ожидается { "mime": "video/mp4|webm|quicktime" }' },
+      })
     }
 
-    // Пишем входящий файл стримом во временный файл (/tmp) — без огромного Buffer в памяти
-    const ext = mime.includes('mp4') ? 'mp4' : (mime.includes('quicktime') ? 'mov' : 'webm')
-    const tmp = path.join('/tmp', `upload-${Date.now()}.${ext}`)
+    const mime = mimeRaw.split(';')[0].trim() // убираем ;codecs=...
+    const isVideo = /^video\/(mp4|webm|quicktime)$/i.test(mime)
+    const finalMime = isVideo ? mime : 'video/webm'
 
-    // у File есть .stream() в Node 18+; не ставим лимиты на память
-    // @ts-ignore
-    await pipeline(f.stream(), createWriteStream(tmp))
+    // 4) Имя и расширение
+    const ext =
+      finalMime.includes('mp4') ? 'mp4' :
+      finalMime.includes('quicktime') ? 'mov' : 'webm'
+    const pathname = `forum/video-${Date.now()}.${ext}`
 
-    // Страховка на финальный размер, если .size отсутствовал/был неверен
-    const st = await fs.stat(tmp)
-    if (st.size > MAX_SIZE_BYTES) {
-      await fs.unlink(tmp).catch(()=>{})
-      return NextResponse.json({ urls: [], errors: ['too_large'] }, { status: 413, headers:{'cache-control':'no-store'} })
+    // 5) Сигним урл
+    let signed
+    try {
+      signed = await generateUploadURL({
+        pathname,
+        access: 'public',
+        allowedContentTypes: ['video/mp4', 'video/webm', 'video/quicktime'],
+        maximumSizeInBytes: 300 * 1024 * 1024, // 300 МБ
+        token,
+      })
+    } catch (e) {
+      // Часто тут бывают ошибки из Blob API. Логируем всё, но наружу даём понятный код.
+      const code = 'sign_error'
+      console.error('[blobUploadUrl]', code, {
+        clientInfo,
+        input: { mime: mimeRaw, normalized: finalMime, ext, pathname },
+        errName: e?.name,
+        errCode: e?.code,
+        errMsg: e?.message,
+        stack: debug ? e?.stack : undefined,
+      })
+      return respond(500, {
+        error: {
+          code,
+          message: 'Failed to generate upload URL',
+          hint: 'Проверь Blob Storage в проекте и права RW-токена',
+          details: { errName: e?.name, errCode: e?.code, errMsg: e?.message },
+        },
+        debug: debug ? { stack: e?.stack } : undefined,
+      })
     }
 
-    // Читаем в память только перед put (у @vercel/blob нужен Buffer/ArrayBuffer/Blob)
-    const buf = await fs.readFile(tmp)
-    const key = `forum/video-${Date.now()}.${ext}`
+    const mode = signed?.fields ? 'post' : 'put'
 
-    const { url } = await put(key, buf, {
-      access: 'public',
-      contentType: mime || 'video/webm',
-      token: process.env.FORUM_READ_WRITE_TOKEN,
+    // 6) Успех
+    console.log('[blobUploadUrl] ok', {
+      clientInfo,
+      input: { mime: mimeRaw, normalized: finalMime },
+      out: { ext, pathname, mode },
     })
 
-    await fs.unlink(tmp).catch(()=>{})
-
-    return NextResponse.json({ urls: [url], errors: [] }, { headers:{'cache-control':'no-store'} })
+    return respond(200, {
+      url: signed.url,
+      fields: signed.fields || null,
+      pathname,
+      mode,
+    })
   } catch (e) {
-    console.error('upload_video_failed', e)
-    return NextResponse.json({ urls: [], errors: ['upload_failed'] }, { status: 500 })
+    const code = 'server_error'
+    console.error('[blobUploadUrl]', code, {
+      clientInfo,
+      errName: e?.name,
+      errCode: e?.code,
+      errMsg: e?.message,
+      stack: debug ? e?.stack : undefined,
+    })
+    return respond(500, {
+      error: { code, message: 'Unexpected server error' },
+      debug: debug ? { stack: e?.stack } : undefined,
+    })
   }
 }
