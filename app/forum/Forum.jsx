@@ -6210,63 +6210,82 @@ const createPost = async () => {
 
   if (!rl.allowAction()) return _fail(t('forum_too_fast') || 'Слишком часто');
 
-  // 0) ВИДЕО: blob -> одноразовый URL -> прямой POST (multipart + fields) с подписью
+  // 0) ВИДЕО: blob -> одноразовый URL -> загрузка (POST multipart + fields, либо PUT)
   let videoUrlToSend = '';
   let videoMimeToSend = '';
   if (pendingVideo) {
     try {
-      // blob из локального превью
-      const resp = await fetch(pendingVideo);
-      const blob = await resp.blob();
-      const baseMime = String(blob.type || '').split(';')[0].trim(); // убираем ";codecs=..."
-      const safeMime = /^video\/(mp4|webm|quicktime)$/i.test(baseMime) ? baseMime : 'video/webm';
-
-      if (!/^video\/(mp4|webm|quicktime)$/i.test(safeMime)) throw new Error('bad_type');
-      if (blob.size > 300 * 1024 * 1024) { try { toast?.err?.('Видео больше 300 МБ'); } catch {} ; return _fail(); }
-
-      // подписываем загрузку на сервере
-      const s = await fetch('/api/forum/blobUploadUrl', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ mime: safeMime }),
-        cache: 'no-store'
-      });
-      if (!s.ok) throw new Error('sign_fail');
-      const sign = await s.json();
-      const signedUrl = sign?.url;
-      const fields = sign?.fields || null;
-      if (!signedUrl) throw new Error('no_signed_url');
-
-      // multipart/form-data с обязательными fields + file
-      let ok = false, upRes, uploaded;
-      if (fields && typeof fields === 'object') {
-        const fd = new FormData();
-        Object.keys(fields).forEach(k => fd.append(k, fields[k]));
-        const filename =
-          safeMime.includes('mp4') ? `video-${Date.now()}.mp4` :
-          safeMime.includes('quicktime') ? `video-${Date.now()}.mov` : `video-${Date.now()}.webm`;
-        fd.append('file', new File([blob], filename, { type: safeMime }));
-        upRes = await fetch(signedUrl, { method: 'POST', body: fd }); // НЕ ставить Content-Type вручную
-        ok = upRes.ok;
-        if (ok) {
-          uploaded = await upRes.json().catch(() => null);
-          videoUrlToSend = uploaded?.url || upRes.headers.get('Location') || '';
-        }
+      if (!/^blob:/.test(pendingVideo)) {
+        // уже https — просто возьмём как есть
+        videoUrlToSend = pendingVideo;
       } else {
-        // редкий fallback: PUT
-        upRes = await fetch(signedUrl, { method: 'PUT', body: blob, headers: { 'Content-Type': safeMime } });
-        ok = upRes.ok;
-        if (ok) {
-          uploaded = await upRes.json().catch(() => null);
-          videoUrlToSend = uploaded?.url || upRes.headers.get('Location') || '';
+        // 0.1) получаем Blob и нормализуем MIME
+        const resp = await fetch(pendingVideo);
+        const blob = await resp.blob();
+        const baseMime = String(blob.type || '').split(';')[0].trim();
+        const safeMime = /^video\/(mp4|webm|quicktime)$/i.test(baseMime) ? baseMime : 'video/webm';
+        if (!/^video\/(mp4|webm|quicktime)$/i.test(safeMime)) throw new Error('bad_type');
+        if (blob.size > 300 * 1024 * 1024) { try { toast?.err?.('Видео больше 300 МБ'); } catch {}; return _fail(); }
+
+        // 0.2) подпишем загрузку
+        const signRes = await fetch('/api/forum/blobUploadUrl', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ mime: safeMime }),
+          cache: 'no-store'
+        });
+        if (!signRes.ok) {
+          const txt = await signRes.text().catch(()=> '');
+          console.error('sign_fail', signRes.status, txt);
+          throw new Error('sign_fail');
         }
+        const sign = await signRes.json();
+        const signedUrl = sign?.url;
+        const fields = sign?.fields || null;
+        const mode = sign?.mode;
+        if (!signedUrl) throw new Error('no_signed_url');
+
+        // 0.3) загружаем файл
+        let ok = false, upRes, uploaded;
+        if (fields && typeof fields === 'object') {
+          // presigned POST
+          const fd = new FormData();
+          Object.keys(fields).forEach(k => fd.append(k, fields[k]));
+          const filename =
+            safeMime.includes('mp4') ? `video-${Date.now()}.mp4` :
+            safeMime.includes('quicktime') ? `video-${Date.now()}.mov` : `video-${Date.now()}.webm`;
+          fd.append('file', new File([blob], filename, { type: safeMime }));
+          upRes = await fetch(signedUrl, { method: 'POST', body: fd }); // НЕ ставим Content-Type вручную
+          ok = upRes.ok;
+          if (!ok) {
+            const txt = await upRes.text().catch(()=> '');
+            console.error('upload_fail(POST)', upRes.status, txt);
+          }
+          if (ok) {
+            uploaded = await upRes.json().catch(()=> null);
+            videoUrlToSend = uploaded?.url || upRes.headers.get('Location') || '';
+          }
+        } else {
+          // presigned PUT
+          upRes = await fetch(signedUrl, { method: 'PUT', body: blob, headers: { 'Content-Type': safeMime } });
+          ok = upRes.ok;
+          if (!ok) {
+            const txt = await upRes.text().catch(()=> '');
+            console.error('upload_fail(PUT)', upRes.status, txt);
+          }
+          if (ok) {
+            uploaded = await upRes.json().catch(()=> null);
+            videoUrlToSend = uploaded?.url || upRes.headers.get('Location') || '';
+          }
+        }
+        if (!ok || !videoUrlToSend) throw new Error('upload_failed');
+        videoMimeToSend = safeMime;
+        console.debug('video_uploaded', { mode, videoUrlToSend });
       }
-      if (!ok || !videoUrlToSend) throw new Error('upload_failed');
-      videoMimeToSend = safeMime;
     } catch (e) {
       console.error('video_upload_error', e);
       try { toast?.err?.('Не удалось загрузить видео'); } catch {}
-      return _fail(); // не закрываем оверлей — можно повторить
+      return _fail(); // не закрываем оверлей — человек сможет повторить
     }
   }
   // 0b) аудио: blob -> https

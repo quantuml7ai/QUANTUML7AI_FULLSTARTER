@@ -10,10 +10,15 @@ export async function POST(req) {
     const ok = /^video\/(mp4|webm|quicktime)$/i.test(m)
     const finalMime = ok ? m : 'video/webm'
 
+    if (!process.env.FORUM_READ_WRITE_TOKEN) {
+     console.error('blobUploadUrl_failed: missing FORUM_READ_WRITE_TOKEN')
+      return NextResponse.json({ error: 'missing_token' }, { status: 500 })
+    }
+ 
     const ext =
       finalMime.includes('mp4') ? 'mp4' :
       finalMime.includes('quicktime') ? 'mov' : 'webm'
-
+     
     const pathname = `forum/video-${Date.now()}.${ext}`
 
     const { url, fields } = await generateUploadURL({
@@ -24,9 +29,10 @@ export async function POST(req) {
       token: process.env.FORUM_READ_WRITE_TOKEN,
     })
 
-    return NextResponse.json({ url, fields, pathname }, { headers: { 'cache-control': 'no-store' } })
-  } catch (e) {
+    // подсказка клиенту для логов
+    const mode = fields ? 'post' : 'put'
+    return NextResponse.json({ url, fields, pathname, mode }, { headers: { 'cache-control': 'no-store' } })  } catch (e) {
     console.error('blobUploadUrl_failed', e)
     return NextResponse.json({ error: 'server_error' }, { status: 500 })
-  }
+   }
 }
