@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server'
 import { put } from '@vercel/blob'
+import { createWriteStream, promises as fs } from 'node:fs'
+import { pipeline } from 'node:stream/promises'
+import path from 'node:path'
 
 export const runtime = 'nodejs'
 
-// webm/mp4 — то, что даёт MediaRecorder и обычные клипы
-const ALLOWED_MIME = /^(video\/webm|video\/mp4)$/i
-// подними лимит, видео тяжелее (например, 200 МБ)
-const MAX_SIZE_BYTES = 200 * 1024 * 1024
+const ALLOWED_MIME = /^(video\/webm|video\/mp4|video\/quicktime)$/i
+const MAX_SIZE_BYTES = 300 * 1024 * 1024
 
 export async function POST(req) {
   try {
@@ -16,22 +17,35 @@ export async function POST(req) {
       return NextResponse.json({ urls: [], errors: ['no_file'] }, { status: 400, headers:{'cache-control':'no-store'} })
     }
 
-    const buf = Buffer.from(await f.arrayBuffer())
-    if (!ALLOWED_MIME.test(f.type || '')) {
+    const mime = String(f.type || '').toLowerCase()
+    if (!ALLOWED_MIME.test(mime)) {
       return NextResponse.json({ urls: [], errors: ['bad_type'] }, { status: 415, headers:{'cache-control':'no-store'} })
     }
-    if (buf.length > MAX_SIZE_BYTES) {
+
+    if (typeof f.size === 'number' && f.size > MAX_SIZE_BYTES) {
       return NextResponse.json({ urls: [], errors: ['too_large'] }, { status: 413, headers:{'cache-control':'no-store'} })
     }
 
-    const ext = (f.type||'video/webm').includes('mp4') ? 'mp4' : 'webm'
-    const key = `forum/video-${Date.now()}.${ext}`
+    const ext = mime.includes('mp4') ? 'mp4' : (mime.includes('quicktime') ? 'mov' : 'webm')
+    const tmp = path.join('/tmp', `upload-${Date.now()}.${ext}`)
 
+    // @ts-ignore
+    await pipeline(f.stream(), createWriteStream(tmp))
+
+    const st = await fs.stat(tmp)
+    if (st.size > MAX_SIZE_BYTES) {
+      await fs.unlink(tmp).catch(()=>{})
+      return NextResponse.json({ urls: [], errors: ['too_large'] }, { status: 413, headers:{'cache-control':'no-store'} })
+    }
+
+    const buf = await fs.readFile(tmp)
+    const key = `forum/video-${Date.now()}.${ext}`
     const { url } = await put(key, buf, {
       access: 'public',
-      contentType: f.type || 'video/webm',
+      contentType: mime || 'video/webm',
       token: process.env.FORUM_READ_WRITE_TOKEN,
     })
+    await fs.unlink(tmp).catch(()=>{})
 
     return NextResponse.json({ urls: [url], errors: [] }, { headers:{'cache-control':'no-store'} })
   } catch (e) {
