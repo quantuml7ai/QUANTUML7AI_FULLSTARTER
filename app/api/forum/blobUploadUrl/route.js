@@ -1,138 +1,97 @@
-// app/api/forum/blobUploadUrl/route.js
 import { NextResponse } from 'next/server'
-import { generateUploadURL } from '@vercel/blob'
+import * as blob from '@vercel/blob' // берём всё, чтобы проверить доступные функции
 
 export const runtime = 'nodejs'
 
 export async function POST(req) {
-  const t0 = process.hrtime.bigint()
-  const urlObj = new URL(req.url)
-  const debug = urlObj.searchParams.get('debug') === '1'
-
-  const hdr = Object.fromEntries(req.headers.entries())
-  const clientInfo = {
-    ip: hdr['x-real-ip'] || hdr['x-forwarded-for'] || 'unknown',
-    ua: hdr['user-agent'] || 'unknown',
-  }
-
-  const respond = (status, payload) => {
-    const t1 = process.hrtime.bigint()
-    const ms = Number(t1 - t0) / 1e6
-    const body = {
-      ok: status >= 200 && status < 300,
-      ...payload,
-      timing_ms: Math.round(ms),
-    }
-    return NextResponse.json(body, {
-      status,
-      headers: { 'cache-control': 'no-store' },
-    })
-  }
+  const t0 = Date.now()
+  const respond = (status, payload) =>
+    NextResponse.json(
+      { ok: status >= 200 && status < 300, ...payload, timing_ms: Date.now() - t0 },
+      { status, headers: { 'cache-control': 'no-store' } }
+    )
 
   try {
-    // 1) Метод
-    if (req.method !== 'POST') {
-      const code = 'method_not_allowed'
-      console.warn('[blobUploadUrl]', code, { method: req.method, clientInfo })
-      return respond(405, { error: { code, message: 'Use POST' } })
-    }
-
-    // 2) Токен
-    const token = process.env.FORUM_READ_WRITE_TOKEN
-    if (!token) {
-      const code = 'missing_token'
-      console.error('[blobUploadUrl]', code, { clientInfo })
-      return respond(500, {
-        error: {
-          code,
-          message: 'FORUM_READ_WRITE_TOKEN is not set',
-          hint: 'Добавь RW токен в переменные окружения проекта',
-        },
-      })
-    }
-
-    // 3) Тело и MIME
+    // 1) тело и MIME (срезаем ;codecs=...)
     let mimeRaw = ''
     try {
-      const json = await req.json()
-      mimeRaw = String(json?.mime || '')
-    } catch (e) {
-      const code = 'bad_json'
-      console.error('[blobUploadUrl]', code, { e, clientInfo })
+      const j = await req.json()
+      mimeRaw = String(j?.mime || '')
+    } catch {
       return respond(400, {
-        error: { code, message: 'Invalid JSON body', hint: 'Ожидается { "mime": "video/mp4|webm|quicktime" }' },
+        error: { code: 'bad_json', message: 'Invalid JSON body', hint: 'ожидается { "mime": "video/mp4|webm|quicktime" }' }
+      })
+    }
+    const m = mimeRaw.split(';')[0].trim()
+    const isVideo = /^video\/(mp4|webm|quicktime)$/i.test(m)
+    const finalMime = isVideo ? m : 'video/webm'
+
+    // 2) расширение и имя файла (для распознавания на клиенте)
+    const ext = finalMime.includes('mp4') ? 'mp4' : (finalMime.includes('quicktime') ? 'mov' : 'webm')
+    const pathname = `forum/video-${Date.now()}.${ext}`
+
+    // 3) токен
+    const token = process.env.FORUM_READ_WRITE_TOKEN
+    if (!token) {
+      return respond(500, {
+        error: { code: 'missing_token', message: 'FORUM_READ_WRITE_TOKEN is not set' }
       })
     }
 
-    const mime = mimeRaw.split(';')[0].trim() // убираем ;codecs=...
-    const isVideo = /^video\/(mp4|webm|quicktime)$/i.test(mime)
-    const finalMime = isVideo ? mime : 'video/webm'
+    // 4) выбираем актуальную функцию из @vercel/blob
+    const generateUploadURL =
+      (typeof blob.generateUploadURL === 'function' && blob.generateUploadURL) ||
+      (typeof blob.generateUploadUrl === 'function' && blob.generateUploadUrl) ||
+      null
 
-    // 4) Имя и расширение
-    const ext =
-      finalMime.includes('mp4') ? 'mp4' :
-      finalMime.includes('quicktime') ? 'mov' : 'webm'
-    const pathname = `forum/video-${Date.now()}.${ext}`
+    if (!generateUploadURL) {
+      // В этой версии пакета нет нужной функции — подскажем явно
+      return respond(500, {
+        error: {
+          code: 'no_generate_fn',
+          message: 'Your @vercel/blob version does not export generateUploadURL/Url',
+          hint: 'Обнови @vercel/blob или используй эту же функцию с именем generateUploadUrl (lowercase L)'
+        },
+        debug: {
+          exports: Object.keys(blob || {})
+        }
+      })
+    }
 
-    // 5) Сигним урл
+    // 5) пробуем подписать; ловим и отдаём разжёванную ошибку
     let signed
     try {
       signed = await generateUploadURL({
         pathname,
         access: 'public',
         allowedContentTypes: ['video/mp4', 'video/webm', 'video/quicktime'],
-        maximumSizeInBytes: 300 * 1024 * 1024, // 300 МБ
-        token,
+        maximumSizeInBytes: 300 * 1024 * 1024,
+        token
       })
     } catch (e) {
-      // Часто тут бывают ошибки из Blob API. Логируем всё, но наружу даём понятный код.
-      const code = 'sign_error'
-      console.error('[blobUploadUrl]', code, {
-        clientInfo,
-        input: { mime: mimeRaw, normalized: finalMime, ext, pathname },
-        errName: e?.name,
-        errCode: e?.code,
-        errMsg: e?.message,
-        stack: debug ? e?.stack : undefined,
-      })
       return respond(500, {
         error: {
-          code,
+          code: 'sign_error',
           message: 'Failed to generate upload URL',
-          hint: 'Проверь Blob Storage в проекте и права RW-токена',
-          details: { errName: e?.name, errCode: e?.code, errMsg: e?.message },
+          details: { name: e?.name, code: e?.code, msg: e?.message }
         },
-        debug: debug ? { stack: e?.stack } : undefined,
+        debug: {
+          usedFn: generateUploadURL === blob.generateUploadURL ? 'generateUploadURL' : 'generateUploadUrl',
+          input: { mime: mimeRaw, normalized: finalMime, ext, pathname }
+        }
       })
     }
 
     const mode = signed?.fields ? 'post' : 'put'
-
-    // 6) Успех
-    console.log('[blobUploadUrl] ok', {
-      clientInfo,
-      input: { mime: mimeRaw, normalized: finalMime },
-      out: { ext, pathname, mode },
-    })
-
     return respond(200, {
       url: signed.url,
       fields: signed.fields || null,
       pathname,
-      mode,
+      mode
     })
   } catch (e) {
-    const code = 'server_error'
-    console.error('[blobUploadUrl]', code, {
-      clientInfo,
-      errName: e?.name,
-      errCode: e?.code,
-      errMsg: e?.message,
-      stack: debug ? e?.stack : undefined,
-    })
     return respond(500, {
-      error: { code, message: 'Unexpected server error' },
-      debug: debug ? { stack: e?.stack } : undefined,
+      error: { code: 'server_error', message: 'Unexpected server error', details: { name: e?.name, msg: e?.message } }
     })
   }
 }
