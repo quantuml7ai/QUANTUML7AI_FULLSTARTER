@@ -6210,37 +6210,43 @@ const createPost = async () => {
 
   if (!rl.allowAction()) return _fail(t('forum_too_fast') || 'Слишком часто');
 
-  // 0) ВИДЕО: blob -> одноразовый URL -> загрузка (POST multipart + fields, либо PUT)
-let videoUrlToSend = '';
-if (pendingVideo) {
-  try {
-    // 1) получаем Blob из blob:-URL локального превью
-    const fileBlob = await resp.blob() // video/webm|mp4|quicktime
-    const mime = String(fileBlob.type || '').split(';')[0].trim()
-    if (!/^video\/(mp4|webm|quicktime)$/i.test(mime)) throw new Error('bad_type')
-    if (fileBlob.size > 300 * 1024 * 1024) { try { toast?.err?.('Видео больше 300 МБ') } catch {}; return _fail() }
-    // 2) клиентская прямая загрузка
-    //    ВАЖНО: импорт '@vercel/blob/client' делать в клиентском модуле,
-    //    но в рамках функции можно динамически подтянуть.
-    const { upload } = await import('@vercel/blob/client')
-    // имя файла по MIME — чтобы расширение было корректным
-     const ext = mime.includes('mp4') ? 'mp4' : (mime.includes('quicktime') ? 'mov' : 'webm')
-    const name = `forum/video-${Date.now()}.${ext}`
+  // 0) ВИДЕО: прямая загрузка в Vercel Blob через /api/forum/blobUploadUrl
+  let videoUrlToSend = '';
+  if (pendingVideo) {
+    try {
+      if (/^blob:/.test(pendingVideo)) {
+        // получаем Blob из локального blob:-URL
+        const resp = await fetch(pendingVideo);
+        const fileBlob = await resp.blob(); // type: video/webm|mp4|quicktime
+        const mime = String(fileBlob.type || '').split(';')[0].trim().toLowerCase();
+        if (!/^video\/(mp4|webm|quicktime)$/.test(mime)) throw new Error('bad_type');
+        if (fileBlob.size > 300 * 1024 * 1024) { try { toast?.err?.('Видео больше 300 МБ'); } catch {} ; return _fail(); }
 
-    const result = await upload(name, fileBlob, {
-      access: 'public',
-       handleUploadUrl: '/api/forum/blobUploadUrl', // ← ЕДИНСТВЕННЫЙ роут
-      onUploadProgress: (p) => { try { setVideoProgress?.(p.percentage || 0) } catch {} },
-      multipart: true, // надёжно для больших файлов
-    })
-    videoUrlToSend = result?.url || ''
-    if (!videoUrlToSend) throw new Error('no_url')
-  } catch (e) {
-    console.error('video_client_upload_failed', e)
-    try { toast?.err?.('Не удалось загрузить видео'); } catch {}
-    return _fail()
+        // имя с правильным расширением
+        const ext = mime.includes('mp4') ? 'mp4' : (mime.includes('quicktime') ? 'mov' : 'webm');
+        const name = `forum/video-${Date.now()}.${ext}`;
+
+        // динамический импорт клиентского uploader
+        const { upload } = await import('@vercel/blob/client');
+        const result = await upload(name, fileBlob, {
+          access: 'public',
+          handleUploadUrl: '/api/forum/blobUploadUrl', // ← наш единственный роут
+          multipart: true,                                // надёжно для больших файлов
+          contentType: mime,
+          onUploadProgress: (p) => { try { setVideoProgress?.(p.percentage || 0) } catch {} },
+        });
+        videoUrlToSend = result?.url || '';
+        if (!videoUrlToSend) throw new Error('no_url');
+      } else {
+        // уже готовый https-URL
+        videoUrlToSend = pendingVideo;
+      }
+    } catch (e) {
+      console.error('video_client_upload_failed', e);
+      try { toast?.err?.('Не удалось загрузить видео'); } catch {}
+      return _fail();
+    }
   }
-}
   // 0b) аудио: blob -> https
   let audioUrlToSend = '';
   if (pendingAudio) {
@@ -6268,10 +6274,7 @@ if (pendingVideo) {
     ...(audioUrlToSend ? [audioUrlToSend] : []),
     ...(videoUrlToSend ? [videoUrlToSend] : []),
   ].filter(Boolean).join('\n');
-  // Явные метаданные: чтобы фронт/бэк точно знали, что это ВИДЕО
-  const attachments = videoUrlToSend
-    ? [{ type: 'video', url: videoUrlToSend, mime }]
-    : [];
+
   if (!body || !sel?.id) return _fail();
 
   // 2) auth
@@ -6352,7 +6355,6 @@ if (pendingVideo) {
     topicId: String(sel.id),
     parentId: parentId ? String(parentId) : null,
     text: body,
-    attachments, 
     ts: Date.now(),
     userId: uid,
     nickname: prof.nickname || shortId(uid),
@@ -6390,8 +6392,7 @@ if (pendingVideo) {
     parentId,
     nickname: p.nickname,
     icon: p.icon,
-    cid:  tmpId,
-    attachments, 
+    cid:  tmpId 
   });
   sendBatch(true);
   setComposerActive(false);
