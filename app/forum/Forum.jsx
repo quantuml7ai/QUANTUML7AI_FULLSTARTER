@@ -6210,24 +6210,37 @@ const createPost = async () => {
 
   if (!rl.allowAction()) return _fail(t('forum_too_fast') || 'Слишком часто');
 
-  // 0) видео: blob -> https
-  let videoUrlToSend = '';
-  if (pendingVideo) {
-    try {
-      if (/^blob:/.test(pendingVideo)) {
-        const resp = await fetch(pendingVideo);
-        const blob = await resp.blob();
-        const fd = new FormData();
-        fd.append('file', blob, `video-${Date.now()}.webm`);
-        const up = await fetch('/api/forum/uploadVideo', { method:'POST', body: fd, cache:'no-store' });
-        const uj = await up.json().catch(()=>null);
-        videoUrlToSend = (uj && Array.isArray(uj.urls) && uj.urls[0]) ? uj.urls[0] : '';
-      } else {
-        videoUrlToSend = pendingVideo;
-      }
-    } catch { videoUrlToSend = ''; }
-  }
+  // 0) ВИДЕО: blob -> одноразовый URL -> загрузка (POST multipart + fields, либо PUT)
+let videoUrlToSend = '';
+if (pendingVideo) {
+  try {
+    // 1) получаем Blob из blob:-URL локального превью
+    const fileBlob = await resp.blob() // video/webm|mp4|quicktime
+    const mime = String(fileBlob.type || '').split(';')[0].trim()
+    if (!/^video\/(mp4|webm|quicktime)$/i.test(mime)) throw new Error('bad_type')
+    if (fileBlob.size > 300 * 1024 * 1024) { try { toast?.err?.('Видео больше 300 МБ') } catch {}; return _fail() }
+    // 2) клиентская прямая загрузка
+    //    ВАЖНО: импорт '@vercel/blob/client' делать в клиентском модуле,
+    //    но в рамках функции можно динамически подтянуть.
+    const { upload } = await import('@vercel/blob/client')
+    // имя файла по MIME — чтобы расширение было корректным
+     const ext = mime.includes('mp4') ? 'mp4' : (mime.includes('quicktime') ? 'mov' : 'webm')
+    const name = `forum/video-${Date.now()}.${ext}`
 
+    const result = await upload(name, fileBlob, {
+      access: 'public',
+       handleUploadUrl: '/api/forum/blobUploadUrl', // ← ЕДИНСТВЕННЫЙ роут
+      onUploadProgress: (p) => { try { setVideoProgress?.(p.percentage || 0) } catch {} },
+      multipart: true, // надёжно для больших файлов
+    })
+    videoUrlToSend = result?.url || ''
+    if (!videoUrlToSend) throw new Error('no_url')
+  } catch (e) {
+    console.error('video_client_upload_failed', e)
+    try { toast?.err?.('Не удалось загрузить видео'); } catch {}
+    return _fail()
+  }
+}
   // 0b) аудио: blob -> https
   let audioUrlToSend = '';
   if (pendingAudio) {
@@ -6255,7 +6268,10 @@ const createPost = async () => {
     ...(audioUrlToSend ? [audioUrlToSend] : []),
     ...(videoUrlToSend ? [videoUrlToSend] : []),
   ].filter(Boolean).join('\n');
-
+  // Явные метаданные: чтобы фронт/бэк точно знали, что это ВИДЕО
+  const attachments = videoUrlToSend
+    ? [{ type: 'video', url: videoUrlToSend, mime }]
+    : [];
   if (!body || !sel?.id) return _fail();
 
   // 2) auth
@@ -6336,6 +6352,7 @@ const createPost = async () => {
     topicId: String(sel.id),
     parentId: parentId ? String(parentId) : null,
     text: body,
+    attachments, 
     ts: Date.now(),
     userId: uid,
     nickname: prof.nickname || shortId(uid),
@@ -6373,7 +6390,8 @@ const createPost = async () => {
     parentId,
     nickname: p.nickname,
     icon: p.icon,
-    cid:  tmpId 
+    cid:  tmpId,
+    attachments, 
   });
   sendBatch(true);
   setComposerActive(false);

@@ -19,7 +19,7 @@
     "@tonconnect/ui-react": "^2.3.0",
     "@upstash/redis": "^1.35.4",
     "@vercel/analytics": "^1.5.0",
-    "@vercel/blob": "^2.0.0",
+    "@vercel/blob": "0.24.0",
     "@vercel/speed-insights": "^1.2.0",
     "@web3modal/wagmi": "^5.1.11",
     "next": "14.2.5",
@@ -35,5 +35,27 @@
     "@types/react": "^19.1.13",
     "pino-pretty": "^13.1.1",
     "typescript": "^5.9.2"
+  },
+  "overrides": {
+    "@vercel/blob": "0.24.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@vercel/blob": "0.24.0"
+    },
+    "ignoredBuiltDependencies": [
+      "@vercel/speed-insights",
+      "blake-hash",
+      "bufferutil",
+      "keccak",
+      "protobufjs",
+      "sharp",
+      "tiny-secp256k1",
+      "usb",
+      "utf-8-validate"
+    ]
+  },
+  "resolutions": {
+    "@vercel/blob": "0.24.0"
   }
 }
