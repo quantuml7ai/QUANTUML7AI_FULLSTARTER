@@ -6210,13 +6210,13 @@ const createPost = async () => {
 
   if (!rl.allowAction()) return _fail(t('forum_too_fast') || 'Слишком часто');
 
-// === 0) ВИДЕО: blob -> одноразовый URL -> прямой PUT (с подписью)
+// === 0) ВИДЕО: blob -> одноразовый URL -> прямой POST (multipart + fields) ===
 let videoUrlToSend = '';
 let videoMimeToSend = '';
 
 if (pendingVideo) {
   try {
-    // получаем Blob из blob:-URL локального превью
+    // 1) достаём Blob из blob:-URL превью
     const resp = await fetch(pendingVideo);
     const blob = await resp.blob(); // type: video/webm | video/mp4 | video/quicktime
 
@@ -6228,7 +6228,7 @@ if (pendingVideo) {
       return _fail();
     }
 
-    // просим сервер одноразовый URL с правильным именем .mp4/.webm/.mov
+    // 2) просим одноразовый URL (и поля) с правильным расширением
     const s = await fetch('/api/forum/blobUploadUrl', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -6236,28 +6236,50 @@ if (pendingVideo) {
       cache: 'no-store'
     });
     if (!s.ok) throw new Error('sign_fail');
-    const { url: signedUrl } = await s.json();
+    const sign = await s.json();
+    const signedUrl = sign?.url;
+    const fields = sign?.fields || null;
     if (!signedUrl) throw new Error('no_signed_url');
 
-    // прямой PUT — КРИТИЧНО указать Content-Type видео
-    const putRes = await fetch(signedUrl, {
-      method: 'PUT',
-      body: blob,
-      headers: { 'Content-Type': blob.type }
-    });
-    if (!putRes.ok) throw new Error('upload_failed');
+    // 3) загружаем файл:
+    //    - если сервер выдал fields -> это presigned POST (нужно multipart/form-data)
+    //    - если fields нет -> fallback на PUT с Content-Type
+    let upOk = false;
+    let upRes, uploaded;
 
-    // публичный URL из ответа
-    const uj = await putRes.json().catch(() => null);
-    videoUrlToSend = uj?.url || '';
+    if (fields && typeof fields === 'object') {
+      const fd = new FormData();
+      // все обязательные поля из пресайна
+      Object.keys(fields).forEach(k => fd.append(k, fields[k]));
+      // файл ДОЛЖЕН называться 'file'
+      fd.append('file', new File([blob], `video.${blob.type.includes('mp4')?'mp4':blob.type.includes('quicktime')?'mov':'webm'}`, { type: blob.type }));
+
+      upRes = await fetch(signedUrl, { method: 'POST', body: fd }); // НЕ ставь Content-Type вручную!
+      upOk = upRes.ok;
+      if (upOk) {
+        // у Vercel Blob обычно тело = {"url": "..."}; но на всякий случай возьмём header Location
+        uploaded = await upRes.json().catch(() => null);
+        videoUrlToSend = uploaded?.url || upRes.headers.get('Location') || '';
+      }
+    } else {
+      // редкий случай — подписали на PUT
+      upRes = await fetch(signedUrl, { method: 'PUT', body: blob, headers: { 'Content-Type': blob.type } });
+      upOk = upRes.ok;
+      if (upOk) {
+        uploaded = await upRes.json().catch(() => null);
+        videoUrlToSend = uploaded?.url || upRes.headers.get('Location') || '';
+      }
+    }
+
+    if (!upOk || !videoUrlToSend) throw new Error('upload_failed');
+
     videoMimeToSend = blob.type || '';
-    if (!videoUrlToSend) throw new Error('no_public_url');
   } catch (e) {
+    console.error('video_upload_error', e);
     try { toast?.err?.('Не удалось загрузить видео'); } catch {}
-    return _fail(); // важно: НЕ закрываем оверлей, даём повторить отправку
+    return _fail(); // НЕ закрываем оверлей — человек сможет повторить
   }
 }
-
 
   // 0b) аудио: blob -> https
   let audioUrlToSend = '';
