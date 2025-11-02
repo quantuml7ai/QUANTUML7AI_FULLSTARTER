@@ -4250,6 +4250,24 @@ export function VideoOverlay({
   // автофокус для ESC
   React.useEffect(() => { if (open) rootRef.current?.focus?.(); }, [open]);
 
+  // ───────────────────────────────────────────────────────────
+  // КЭШ УСТРОЙСТВ (чтобы на Android не дёргать разрешения по кругу)
+  const devicesRef = React.useRef({ front: null, back: null, all: [] });
+  const [facing, setFacing] = React.useState('user');
+
+  const enumerateVideoInputs = React.useCallback(async () => {
+    try {
+      const list = (await navigator.mediaDevices.enumerateDevices())
+        .filter(d => d.kind === 'videoinput');
+      devicesRef.current.all = list;
+      // эвристики по label
+      const front = list.find(d => /front|user|face|facetime/i.test(d.label || '')) || list[0] || null;
+      const back  = list.find(d => /back|rear|environment|wide|main/i.test(d.label || '')) || list[1] || list[0] || null;
+      devicesRef.current.front = front?.deviceId || null;
+      devicesRef.current.back  = back?.deviceId || null;
+    } catch {}
+  }, []);
+
   // при открытии live/recording — поднимем камеру, если ещё нет
   React.useEffect(() => {
     if (!open) return;
@@ -4264,27 +4282,34 @@ export function VideoOverlay({
           audio: true,
         });
         streamRef.current = ms;
+        try {
+          // после первого разрешения станут доступны labels
+          await enumerateVideoInputs();
+          const s = ms.getVideoTracks?.()[0]?.getSettings?.();
+          if (s?.facingMode) setFacing(s.facingMode);
+        } catch {}
       } catch {}
     })();
-  }, [open, st, streamRef]);
-const previewVidRef = React.useRef(null);
-const [isPlaying, setIsPlaying] = React.useState(false);
+  }, [open, st, streamRef, enumerateVideoInputs]);
 
-React.useEffect(() => {
-  const v = previewVidRef.current;
-  if (!v) return;
-  const onPlay = () => setIsPlaying(true);
-  const onPause = () => setIsPlaying(false);
-  const onEnd = () => setIsPlaying(false);
-  v.addEventListener('play', onPlay);
-  v.addEventListener('pause', onPause);
-  v.addEventListener('ended', onEnd);
-  return () => {
-    v.removeEventListener('play', onPlay);
-    v.removeEventListener('pause', onPause);
-    v.removeEventListener('ended', onEnd);
-  };
-}, [open, state]);
+  const previewVidRef = React.useRef(null);
+  const [isPlaying, setIsPlaying] = React.useState(false);
+
+  React.useEffect(() => {
+    const v = previewVidRef.current;
+    if (!v) return;
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
+    const onEnd = () => setIsPlaying(false);
+    v.addEventListener('play', onPlay);
+    v.addEventListener('pause', onPause);
+    v.addEventListener('ended', onEnd);
+    return () => {
+      v.removeEventListener('play', onPlay);
+      v.removeEventListener('pause', onPause);
+      v.removeEventListener('ended', onEnd);
+    };
+  }, [open, state]);
 
   // === ЛОКАЛЬНАЯ НАСТРОЙКА ВЕРХНЕГО ОТСТУПА СЧЁТЧИКА ===
   React.useEffect(() => {
@@ -4315,9 +4340,8 @@ React.useEffect(() => {
     if (w && h) setAspect(w < h ? '9 / 16' : '16 / 9');
   }, []);
 
-  // Torch / Flip
+  // Torch
   const [torchOn, setTorchOn] = React.useState(false);
-  const [facing, setFacing]   = React.useState('user');
 
   React.useEffect(() => {
     if (!open) return;
@@ -4340,15 +4364,16 @@ React.useEffect(() => {
       })();
     }
   }, [st, open, torchOn, streamRef]);
-// клик по галочке: жмём кнопку отправки композера
-const pressComposerSend = () => {
-  try {
-    const btn =
-      document.querySelector('[data-composer-send]') ||
-      document.querySelector('.forumComposer .planeBtn:not(.disabled)');
-    if (btn) btn.click();
-  } catch {}
-};
+
+  // клик по галочке: жмём кнопку отправки композера
+  const pressComposerSend = () => {
+    try {
+      const btn =
+        document.querySelector('[data-composer-send]') ||
+        document.querySelector('.forumComposer .planeBtn:not(.disabled)');
+      if (btn) btn.click();
+    } catch {}
+  };
 
   const toggleTorch = async () => {
     try {
@@ -4360,18 +4385,98 @@ const pressComposerSend = () => {
     } catch {}
   };
 
+  // ───────────────────────────────────────────────────────────
+  // СМЕНА КАМЕРЫ БЕЗ ПОВТОРНЫХ РАЗРЕШЕНИЙ (Android-friendly)
+  const getStreamVideoOnlyByDeviceId = async (deviceId) => {
+    return await navigator.mediaDevices.getUserMedia({
+      video: deviceId ? { deviceId: { exact: deviceId } } : true,
+      audio: false, // важно: не просим аудио заново → меньше всплывающих разрешений
+    });
+  };
+
+  const getStreamVideoOnlyByFacing = async (want /* 'user' | 'environment' */) => {
+    try {
+      return await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { exact: want } },
+        audio: false,
+      });
+    } catch {}
+    try {
+      return await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: want } },
+        audio: false,
+      });
+    } catch {}
+    return await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+  };
+
   const flipCamera = async () => {
     try {
+      // с какой на какую
       const next = facing === 'user' ? 'environment' : 'user';
-      const ms = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: next } },
-        audio: true,
-      });
-      try { streamRef?.current?.getTracks?.().forEach(tr => tr.stop()); } catch {}
-      streamRef.current = ms;
-      setFacing(next);
+
+      // убедимся, что у нас актуальный список девайсов (после первого разрешения)
+      await enumerateVideoInputs();
+
+      // пробуем через конкретный deviceId
+      const deviceId =
+        (next === 'user' ? devicesRef.current.front : devicesRef.current.back) ||
+        null;
+
+      let onlyVideoStream = null;
+      if (deviceId) {
+        try {
+          onlyVideoStream = await getStreamVideoOnlyByDeviceId(deviceId);
+        } catch {}
+      }
+      if (!onlyVideoStream) {
+        // каскад по facingMode
+        onlyVideoStream = await getStreamVideoOnlyByFacing(next);
+      }
+
+      // новый видео-трек
+      const newVideoTrack = onlyVideoStream.getVideoTracks?.()[0];
+      if (!newVideoTrack) throw new Error('no_video_track');
+
+      // собираем новый общий поток: старые аудио + новый видео
+      const old = streamRef?.current;
+      const oldAudio = (old?.getAudioTracks?.() || []).filter(t => t.readyState === 'live');
+      // останавливаем старый видео-трек
+      try { (old?.getVideoTracks?.() || []).forEach(t => t.stop()); } catch {}
+
+      const merged = new MediaStream([
+        ...oldAudio,
+        newVideoTrack,
+      ]);
+
+      streamRef.current = merged;
+
+      // чистим временный только-видео поток (его трек уже использован)
+      try { onlyVideoStream.getTracks().forEach(t => { if (t !== newVideoTrack) t.stop(); }); } catch {}
+
+      // фикс состояния facing
+      try {
+        const s = newVideoTrack.getSettings?.();
+        setFacing(s?.facingMode || next);
+      } catch { setFacing(next); }
+
       setTimeout(calcAspectFromTrack, 0);
-    } catch {}
+    } catch (e) {
+      // в крайнем случае — полностью перезапустим (видео+аудио)
+      try {
+        const next = facing === 'user' ? 'environment' : 'user';
+        const ms = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: next } }, audio: true
+        });
+        try { streamRef?.current?.getTracks?.().forEach(tr => tr.stop()); } catch {}
+        streamRef.current = ms;
+        try {
+          const s = ms.getVideoTracks?.()[0]?.getSettings?.();
+          setFacing(s?.facingMode || next);
+        } catch { setFacing(next); }
+        setTimeout(calcAspectFromTrack, 0);
+      } catch {}
+    }
   };
 
   const fmtTime = (sec) => {
@@ -4384,6 +4489,9 @@ const pressComposerSend = () => {
 
   // перехват кликов/скролла фоном (оверлей подложка)
   const stopAll = (e) => { e.preventDefault(); e.stopPropagation(); };
+
+  // **ВАЖНО:** убираем любые флипы/зеркала в live и preview
+  const fixMirrorClass = 'voVideoFix';
 
   return (
     <div
@@ -4423,23 +4531,29 @@ const pressComposerSend = () => {
       </div>
 
       {/* видео (сам рендер не ловит клики, всё управление — ниже) */}
-<div style={{
-  position:'absolute', inset:0, display:'flex',
-  alignItems:'center', justifyContent:'center',
-  pointerEvents: st === 'preview' ? 'auto' : 'none'
-}}>
+      <div style={{
+        position:'absolute', inset:0, display:'flex',
+        alignItems:'center', justifyContent:'center',
+        pointerEvents: st === 'preview' ? 'auto' : 'none'
+      }}>
         <div style={{ width:'100%', height:'100%', aspectRatio: aspect, overflow:'hidden' }}>
           {(st === 'live' || st === 'recording') ? (
-            <LivePreview streamRef={streamRef} />
+            // УБЕЖДАЕМСЯ, ЧТО НИКТО НЕ ЗЕРКАЛИТ live:
+            <div className={fixMirrorClass}>
+              <LivePreview streamRef={streamRef} />
+            </div>
           ) : (
-            <video
-              ref={previewVidRef}
-              src={previewUrl || ''}
-              controls
-              playsInline
-              onLoadedMetadata={onMeta}
-              style={{ width:'100%', height:'100%', objectFit:'cover', background:'#000' }}
-            />
+            // И превью файла — тоже без зеркал
+            <div className={fixMirrorClass}>
+              <video
+                ref={previewVidRef}
+                src={previewUrl || ''}
+                controls
+                playsInline
+                onLoadedMetadata={onMeta}
+                style={{ width:'100%', height:'100%', objectFit:'cover', background:'#000' }}
+              />
+            </div>
           )}
         </div>
       </div>
@@ -4455,8 +4569,8 @@ const pressComposerSend = () => {
             onClick={flipCamera}
           >
             <svg viewBox="0 0 24 24" className="ico">
-              <path d="M9 7l-2-2H5a3 3 0 00-3 3v3" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
-              <path d="M15 17l2 2h2a3 3 0 003-3v-3" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
+              <path d="M9 7l-2-2H5a 3 3 0 00-3 3v3" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
+              <path d="M15 17l2 2h2a 3 3 0 003-3v-3" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
               <path d="M7 12a5 5 0 0110 0" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
               <path className="rot" d="M12 5v2M12 17v2" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
             </svg>
@@ -4548,25 +4662,25 @@ const pressComposerSend = () => {
           </svg>
         </button>
       </div>
-{st === 'preview' && (
-  <div className="voCornerBL" style={{
-    bottom: 'calc(var(--vo-pad-y) + (var(--vo-line-h) - 44px)/2)',
-    pointerEvents:'auto', zIndex:7
-  }}>
-    <button
-      type="button"
-      className="voBtn voAccept"
-      aria-label={tt('forum_video_accept') || 'Accept & send'}
-      title={tt('forum_video_accept') || 'Accept & send'}
-      onClick={pressComposerSend}
-    >
-      <svg viewBox="0 0 24 24" className="ico ok">
-        <path d="M4 12.5l5 5L20 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    </button>
-  </div>
-)}
 
+      {st === 'preview' && (
+        <div className="voCornerBL" style={{
+          bottom: 'calc(var(--vo-pad-y) + (var(--vo-line-h) - 44px)/2)',
+          pointerEvents:'auto', zIndex:7
+        }}>
+          <button
+            type="button"
+            className="voBtn voAccept"
+            aria-label={tt('forum_video_accept') || 'Accept & send'}
+            title={tt('forum_video_accept') || 'Accept & send'}
+            onClick={pressComposerSend}
+          >
+            <svg viewBox="0 0 24 24" className="ico ok">
+              <path d="M4 12.5l5 5L20 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* стили */}
       <style jsx>{`
@@ -4589,6 +4703,15 @@ const pressComposerSend = () => {
           padding:12px 18px; gap:12px;
         }
         .voCornerBR{ position:absolute; right: var(--vo-pad-x); display:flex; gap:10px; }
+        .voCornerBL{ position:absolute; left: var(--vo-pad-x); display:flex; gap:10px; }
+
+        /* === ЖЁСТКО УБИВАЕМ ЛЮБОЕ ЗЕРКАЛО ВНУТРИ ПРЕВЬЮ === */
+        .voVideoFix{ width:100%; height:100%; background:#000; }
+        .voVideoFix :global(video), 
+        .voVideoFix :global(canvas){
+          transform: scaleX(1) !important;
+          -webkit-transform: scaleX(1) !important;
+        }
 
         .voBtn{
           width:44px; height:44px; border-radius:12px;
@@ -4661,25 +4784,24 @@ const pressComposerSend = () => {
           .voRec{ width:86px; height:86px }
           .recSvg{ width:76px; height:76px }
         }
- .voCornerBL{ position:absolute; left: var(--vo-pad-x); display:flex; gap:10px; }
 
-.voAccept{
-  border-color: rgba(56,255,172,.6);
-  background: rgba(0,30,24,.55);
-  color:#46ffb0;
-  box-shadow: 0 0 0 rgba(56,255,172,0);
-  animation: acceptPulse 1.8s ease-in-out infinite;
-}
-@keyframes acceptPulse{
-  0%{ box-shadow: 0 0 0 0 rgba(56,255,172,.35) }
-  70%{ box-shadow: 0 0 0 12px rgba(56,255,172,0) }
-  100%{ box-shadow: 0 0 0 0 rgba(56,255,172,0) }
-}
-       
+        .voAccept{
+          border-color: rgba(56,255,172,.6);
+          background: rgba(0,30,24,.55);
+          color:#46ffb0;
+          box-shadow: 0 0 0 rgba(56,255,172,0);
+          animation: acceptPulse 1.8s ease-in-out infinite;
+        }
+        @keyframes acceptPulse{
+          0%{ box-shadow: 0 0 0 0 rgba(56,255,172,.35) }
+          70%{ box-shadow: 0 0 0 12px rgba(56,255,172,0) }
+          100%{ box-shadow: 0 0 0 0 rgba(56,255,172,0) }
+        }
       `}</style>
     </div>
   );
 }
+
 
 
 /* ===== утилиты — прямо в этом файле ===== */
