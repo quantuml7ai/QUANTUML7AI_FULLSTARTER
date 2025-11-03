@@ -4410,13 +4410,40 @@ export function VideoOverlay({
     return await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
   };
 
-  const flipCamera = async () => {
+  // аккуратно освобождаем текущую видеокамеру (для Android)
+  const stopVideoOnly = async (stream) => {
     try {
-      // с какой на какую
+      const vts = stream?.getVideoTracks?.() || [];
+      vts.forEach(t => t.stop());
+      await new Promise(r => setTimeout(r, 30));
+    } catch {}
+  };
+
+  const flipCamera = async () => {
+    // переключаем только в live-превью; при записи и превью файла — выходим тихо
+    if (st !== 'live') return;
+
+    try {
       const next = facing === 'user' ? 'environment' : 'user';
+
+      // пробуем без нового потока: applyConstraints на текущем видеотреке
+      const curStream = streamRef?.current;
+      const curVideoTrack = curStream?.getVideoTracks?.()[0];
+      if (curVideoTrack) {
+        try {
+          await curVideoTrack.applyConstraints({ facingMode: { exact: next } });
+          const s1 = curVideoTrack.getSettings?.();
+          setFacing(s1?.facingMode || next);
+          setTimeout(calcAspectFromTrack, 0);
+          return;
+        } catch {}
+      }
 
       // убедимся, что у нас актуальный список девайсов (после первого разрешения)
       await enumerateVideoInputs();
+
+      // освобождаем камеру перед новым getUserMedia (критично для Android)
+      await stopVideoOnly(curStream);
 
       // пробуем через конкретный deviceId
       const deviceId =
@@ -4434,16 +4461,11 @@ export function VideoOverlay({
         onlyVideoStream = await getStreamVideoOnlyByFacing(next);
       }
 
-      // новый видео-трек
       const newVideoTrack = onlyVideoStream.getVideoTracks?.()[0];
       if (!newVideoTrack) throw new Error('no_video_track');
 
-      // собираем новый общий поток: старые аудио + новый видео
-      const old = streamRef?.current;
-      const oldAudio = (old?.getAudioTracks?.() || []).filter(t => t.readyState === 'live');
-      // останавливаем старый видео-трек
-      try { (old?.getVideoTracks?.() || []).forEach(t => t.stop()); } catch {}
-
+      // собираем новый общий поток: старые аудио + новый видео (без запроса audio)
+      const oldAudio = (curStream?.getAudioTracks?.() || []).filter(t => t.readyState === 'live');
       const merged = new MediaStream([
         ...oldAudio,
         newVideoTrack,
@@ -4451,10 +4473,9 @@ export function VideoOverlay({
 
       streamRef.current = merged;
 
-      // чистим временный только-видео поток (его трек уже использован)
+      // чистим временный только-видео поток
       try { onlyVideoStream.getTracks().forEach(t => { if (t !== newVideoTrack) t.stop(); }); } catch {}
 
-      // фикс состояния facing
       try {
         const s = newVideoTrack.getSettings?.();
         setFacing(s?.facingMode || next);
@@ -4462,20 +4483,8 @@ export function VideoOverlay({
 
       setTimeout(calcAspectFromTrack, 0);
     } catch (e) {
-      // в крайнем случае — полностью перезапустим (видео+аудио)
-      try {
-        const next = facing === 'user' ? 'environment' : 'user';
-        const ms = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: next } }, audio: true
-        });
-        try { streamRef?.current?.getTracks?.().forEach(tr => tr.stop()); } catch {}
-        streamRef.current = ms;
-        try {
-          const s = ms.getVideoTracks?.()[0]?.getSettings?.();
-          setFacing(s?.facingMode || next);
-        } catch { setFacing(next); }
-        setTimeout(calcAspectFromTrack, 0);
-      } catch {}
+      // крайний случай: не трогаем audio в live, чтобы не плодить диалоги
+      // (ничего не делаем, т.к. цель — избежать доп. разрешений)
     }
   };
 
@@ -4567,6 +4576,8 @@ export function VideoOverlay({
             aria-label={tt('forum_camera_switch') || 'Switch camera'}
             title={tt('forum_camera_switch') || 'Switch camera'}
             onClick={flipCamera}
+            disabled={st === 'recording'}
+            aria-disabled={st === 'recording' ? 'true' : undefined}
           >
             <svg viewBox="0 0 24 24" className="ico">
               <path d="M9 7l-2-2H5a 3 3 0 00-3 3v3" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
