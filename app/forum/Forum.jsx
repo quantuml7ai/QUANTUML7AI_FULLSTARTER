@@ -5,7 +5,7 @@ import React, { useEffect, useMemo, useRef, useCallback, useState } from 'react'
 import { useI18n } from '../../components/i18n'
 import { useRouter } from 'next/navigation'
 import { broadcast as forumBroadcast } from './events/bus'
-
+import Image from 'next/image'
 // хелперы для отправки событий (строки, защита от undefined)
 function emitCreated(pId, tId) {
   try { forumBroadcast({ type: 'post_created', postId: String(pId), topicId: String(tId) }); } catch {}
@@ -258,18 +258,19 @@ function AvatarEmoji({ userId, pIcon, className }) {
 
   return (
     <span className={className || 'avaWrap'}>
-      <img
+      <Image
         src={url}
         alt=""
-        loading="lazy"
-        decoding="async"
+        width={64}
+        height={64}
+        unoptimized
         style={{
           width: '100%',
           height: '100%',
           objectFit: 'cover',
           borderRadius: 'inherit',
           display: 'block'
-        }}
+       }}
       />
     </span>
   )
@@ -3492,9 +3493,12 @@ function QCoinWithdrawPopover({ anchorRef, onClose, onOpenQuests, t, questEnable
           </div>
 
 {/* «Чистая» иконка квеста — без кнопки/фона/рамок */}
-<img
-  src="/click/quest.gif"                             // твой файл из public/click/quest.gif
-  alt=""                                             // без подписи; озвучку даём через aria-label
+<Image
+  src="/click/quest.gif"
+  alt=""
+  width={72}
+  height={72}
+  unoptimized
   role="button"
   aria-label={t('quest_open') || 'Quests'}
   aria-disabled={!questEnabled}
@@ -3508,13 +3512,14 @@ function QCoinWithdrawPopover({ anchorRef, onClose, onOpenQuests, t, questEnable
     }
   }}
   draggable={false}
-  className={`questIconPure ${questBtnClass}`}       // оставляем твой класс для расположения на странице
+  className={`questIconPure ${questBtnClass}`}
   style={{
-    // Настрой размеры прямо тут:
-    ['--quest-w']: '72px',   // можно '96px' | '3rem' | 'auto'
+    ['--quest-w']: '72px',
     ['--quest-h']: 'auto',
     ['--quest-cursor']: questEnabled ? 'pointer' : 'default',
     ['--quest-y']: '-14px',
+    width: 'var(--quest-w)',
+    height: 'var(--quest-h)'
   }}
 />
 
@@ -3688,7 +3693,7 @@ function ProfilePopover({ anchorRef, open, onClose, t, auth, vipActive, onSaved 
           title={vipActive ? '' : (t('forum_vip_only') || 'Только для VIP+')}
           style={{ position:'relative', width:40, height:40, padding:0 }}
         >
-          <img src={src} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:10 }}/>
+          <Image src={src} alt="" width={40} height={40} unoptimized style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:10 }}/>
         </button>       
       ))}
     </div>
@@ -4010,14 +4015,18 @@ function PostCard({
       {/* тело поста — крупные эмодзи (VIP/MOZI) как картинка, иначе очищенный текст */}
       {(/^\[(VIP_EMOJI|MOZI):\/[^\]]+\]$/).test(p.text || '') ? (
         <div className="postBody emojiPostWrap">
-          <img
+          <Image
             src={(p.text || '').replace(/^\[(VIP_EMOJI|MOZI):(.*?)\]$/, '$2')}
             alt=""
+            width={512}
+            height={512}
+            unoptimized
             className={
               (p.text || '').startsWith('[MOZI:')
                 ? 'moziEmojiBig emojiPostBig'
                 : 'vipEmojiBig emojiPostBig'
             }
+            style={{ width: '100%', height: 'auto' }}
           />
         </div>
       ) : (
@@ -4038,7 +4047,7 @@ function PostCard({
               border:'1px solid rgba(140,170,255,.25)', borderRadius:10, overflow:'hidden'
             }}
             onClick={(e)=>{ e.stopPropagation(); setLightbox({ open:true, src, idx:i, list:imgLines }); }}>
-              <img src={src} alt="" loading="lazy" style={{ display:'block', width:'100%', height:'auto', objectFit:'contain', borderRadius:6 }}/>
+              <Image src={src} alt="" width={1200} height={800} unoptimized loading="lazy" style={{ display:'block', width:'100%', height:'auto', objectFit:'contain', borderRadius:6 }}/>
             </figure>
           ))}
         </div>
@@ -7442,8 +7451,9 @@ const closeQuests = React.useCallback(() => {
                 </svg>
               </button>
 {/* ⬇️ КВЕСТ-ИКОНКА МЕЖДУ СОРТИРОВКОЙ И VIP+ */}
-<img
+<Image
   src="/click/quest.gif"
+  unoptimized width={52} height={52}
   alt=""
   role="button"
   aria-label={t('quest_open') || 'Quests'}
@@ -8384,9 +8394,9 @@ onClick={(e)=>{
 {/* превью VIP/MOZI эмодзи (если выбрано) */}
 {(/^\[(VIP_EMOJI|MOZI):\/[^\]]+\]$/.test(text || '')) && (
   <div className="vipComposerPreview">
-    <img
+    <Image
       src={(text || '').replace(/^\[(VIP_EMOJI|MOZI):(.*?)\]$/, '$2')}
-      alt=""
+      unoptimized width={64} height={64} alt=""
       className={
         (text || '').startsWith('[MOZI:')
           ? 'moziEmojiBig emojiPreviewBig'
@@ -8421,7 +8431,7 @@ onClick={(e)=>{
             title={t?.('forum_remove_attachment') || 'Убрать вложение'}
             onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); setPendingImgs(prev => prev.filter((_,idx)=>idx!==i)); }}
           >
-            <img src={u} alt="" loading="lazy" className="h-8 w-auto max-w-[96px] rounded-md ring-1 ring-white/10" />
+            <Image src={u} alt="" loading="lazy" unoptimized width={96} height={32} className="h-8 w-auto max-w-[96px] rounded-md ring-1 ring-white/10" />
             <span className="absolute -top-1 -right-1 hidden group-hover:inline-flex items-center justify-center text-[10px] leading-none px-1 rounded bg-black/70">✕</span>
           </button>
         ))}
@@ -8491,9 +8501,9 @@ onClick={(e)=>{
                     onClick={() => { addEmoji(e); setEmojiOpen(false); }}
                     title=""
                   >
-                    {typeof e === 'string' && e.startsWith('/')
-                      ? <img src={e} alt="" className="vipEmojiIcon" />
-                      : <span className="vipEmojiIcon">{e}</span>}
+  {typeof e === 'string' && e.startsWith('/')
+    ? <Image src={e} alt="" className="vipEmojiIcon" width={64} height={64} unoptimized />
+    : <span className="vipEmojiIcon">{e}</span>}
                   </button>
                 ))}
               </div>
@@ -8757,11 +8767,11 @@ if (!selected) {
           >
             <div className="questHead qHeadRow">
               {/* слева — обложка */}
-              {q.cover ? (
-                q.coverType === 'mp4'
-                  ? <video className="questThumb" src={q.cover} playsInline autoPlay muted loop preload="metadata" />
-                  : <img className="questThumb" src={q.cover} alt="" loading="lazy" />
-              ) : (<div className="avaMini">🗂️</div>)}
+          {q.cover ? (
+            q.coverType === 'mp4'
+              ? <video className="questThumb" src={q.cover} playsInline autoPlay muted loop preload="metadata" />
+               : <Image className="questThumb" src={q.cover} alt="" loading="lazy" unoptimized width={60} height={60} />
+          ) : (<div className="avaMini">🗂️</div>)}
 
               {/* середина — тянется/переносится */}
               <div className="qMid min-w-0">
@@ -8834,7 +8844,7 @@ if (!selected) {
           {q.cover ? (
             q.coverType === 'mp4'
               ? <video className="questThumb" src={q.cover} playsInline autoPlay muted loop preload="metadata" />
-              : <img className="questThumb" src={q.cover} alt="" loading="lazy" />
+               : <Image className="questThumb" src={q.cover} alt="" loading="lazy" unoptimized width={60} height={60} />
           ) : (<div className="avaMini">🗂️</div>)}
 
           <div>
@@ -8876,7 +8886,14 @@ if (!selected) {
             <div key={task.id ?? `t:${idx}`} className="item qshine questTask" data-intensity="soft">
               <div className="questHead">
                 {task.cover ? (
-                  <img className="questThumb" src={task.cover} alt="" loading="lazy" />
+                  <Image
+                    className="questThumb"
+                    src={task.cover}
+                    alt=""
+                    unoptimized
+                    width={64}
+                    height={64}
+                  />
                 ) : (
                   <div className="avaMini">🏁</div>
                 )}
