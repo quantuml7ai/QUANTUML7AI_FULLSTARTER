@@ -1,7 +1,8 @@
 // components/AuthNavClient.jsx
 'use client'
 
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import Image from 'next/image'
 import { useWeb3Modal } from '@web3modal/wagmi/react'
 import { useAccount } from 'wagmi'
 import { useI18n } from './i18n'
@@ -196,28 +197,8 @@ export default function AuthNavClient() {
      }
   }, [])
 
-  // кросс-вкладочный логаут
-  useEffect(() => {
-    const onStorage = (e) => {
-      if (!e) return
-      if (['ql7_uid','asherId','ql7_account','account','wallet'].includes(e.key)) {
-        const a = localStorage.getItem('asherId') || localStorage.getItem('ql7_uid')
-        const w = localStorage.getItem('ql7_account') || localStorage.getItem('account') || localStorage.getItem('wallet')
-        if (!a && !w) {
-          try {
-            window.dispatchEvent(new Event('aiquota:flush'))
-            window.dispatchEvent(new CustomEvent('auth:logout'))
-          } catch {}
-          window.location.reload()
-        }
-      }
-    }
-    window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
-  }, [])
-
-  // ===== Проверка статуса привязки TG
-  async function refreshTgLinkStatus() {
+  // ===== Проверка статуса привязки TG (СТАБИЛИЗИРОВАНО) =====
+  const refreshTgLinkStatus = useCallback(async () => {
     if (checkingRef.current) return false
     checkingRef.current = true
     try {
@@ -234,9 +215,9 @@ export default function AuthNavClient() {
       return linked
     } catch { return false }
     finally { checkingRef.current = false }
-  }
+  }, [address])
 
-  useEffect(() => { refreshTgLinkStatus() }, [mounted, isConnected, address])
+  useEffect(() => { refreshTgLinkStatus() }, [mounted, isConnected, address, refreshTgLinkStatus])
 
   // ===== Состояние для цвета/лейбла =====
   const isAuthedWallet = !!(isConnected && address)
@@ -306,14 +287,17 @@ export default function AuthNavClient() {
       </button>
 
       {!tgLinked && (
-        <img
+        <Image
           src="/click/telegram.gif"
           alt={t('ql7ai_bot') || 'Link Telegram'}
           title={t('ql7ai_bot') || 'Link Telegram'}
           className="tgLinkIcon"
           role="button"
           tabIndex={0}
-          style={{ width: 43, height: 43, cursor: 'pointer', display: 'inline-block', pointerEvents: 'auto' }}
+          width={43}
+          height={43}
+          draggable={false}
+          style={{ cursor: 'pointer', display: 'inline-block', pointerEvents: 'auto' }}
           onClick={(e) => { e.preventDefault(); onLinkTelegram(); }}
           onTouchEnd={(e) => { e.preventDefault(); onLinkTelegram(); }}
           onKeyDown={(e) => {

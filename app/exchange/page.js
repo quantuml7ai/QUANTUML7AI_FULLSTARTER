@@ -779,7 +779,7 @@ export default function ExchangePage(){
       }catch{ if(alive) setAI({ action:'HOLD', confidence:50, price:0, horizons:{'1h':0,'6h':0,'24h':0}, reasons:[TX(t,'ai.no_data','Not enough data')] }) }
     })()
     return ()=>{alive=false}
-  },[symbol,tf])
+ },[symbol, tf, t])
 
   const sections = Array.isArray(TX(t, 'exchange_sections', [])) ? TX(t, 'exchange_sections', []) : []
   const bullets  = Array.isArray(TX(t, 'ex_bullets', [])) ? TX(t, 'ex_bullets', []) : []
@@ -853,23 +853,38 @@ export default function ExchangePage(){
       <PageMarqueeTail />
       {/* ===== ИКОНКИ ПОСЛЕ МАРКИЗЫ (глобальные стили ql7-*, как на главной/subscribe) ===== */}
       <div className="ql7-icons-row">
-        <Link
-          href="/privacy"
-          className="ql7-icon-link"
-          aria-label="Privacy / Политика"
-          style={{ '--ql7-icon-size': '130px' }}
-        >
-          <img className="ql7-click-icon" src="/click/policy.png" alt="Privacy" draggable="false" />
-        </Link>
+<Link
+  href="/privacy"
+  className="ql7-icon-link"
+  aria-label="Privacy / Политика"
+  style={{ '--ql7-icon-size': '130px' }}
+>
+  <Image
+    src="/click/policy.png"
+    alt="Privacy"
+    width={130}
+    height={130}
+    draggable={false}
+    className="ql7-click-icon"
+  />
+</Link>
 
-        <Link
-          href="/contact"
-          className="ql7-icon-link"
-          aria-label="Support / Поддержка"
-          style={{ '--ql7-icon-size': '130px' }}
-        >
-          <img className="ql7-click-icon" src="/click/support.png" alt="Support" draggable="false" />
-        </Link>
+<Link
+  href="/contact"
+  className="ql7-icon-link"
+  aria-label="Support / Поддержка"
+  style={{ '--ql7-icon-size': '130px' }}
+>
+  <Image
+    src="/click/support.png"
+    alt="Support"
+    width={130}
+    height={130}
+    draggable={false}
+    className="ql7-click-icon"
+  />
+</Link>
+
       </div>
       <style jsx>{`
         .wrap{display:block;max-width:1200px;margin:0 auto;padding:0 8px}

@@ -1,7 +1,9 @@
+// app/forum/page.js
 'use client'
 
 import { useEffect, useRef } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import Forum from './Forum'
 import { useI18n } from '../../components/i18n'   // тот же хук, что на главной
 
@@ -23,12 +25,14 @@ export default function ForumPage() {
       <div className="iso-forum-shell">
         {/* ВЕРХНИЙ БРЕНД-БЛОК: ширина = ширине контейнера форума */}
         <div className="forum-brand">
-          <img
+          <Image
             className="forum-brand-img"
             src="/branding/forum_logo.png"   // положи файл в public/branding/
             alt="QL7 Forum — Global Network"
             loading="lazy"
             decoding="async"
+            width={1600}
+            height={400}
           />
         </div>
 
@@ -57,11 +61,13 @@ export default function ForumPage() {
           aria-label="Privacy / Политика"
           style={{ '--size': '130px' }}
         >
-          <img
+          <Image
             className="click-icon"
             src="/click/policy.png"
             alt="Privacy"
-            draggable="false"
+            draggable={false}
+            width={130}
+            height={130}
           />
         </Link>
 
@@ -71,11 +77,13 @@ export default function ForumPage() {
           aria-label="Support / Поддержка"
           style={{ '--size': '130px' }}
         >
-          <img
+          <Image
             className="click-icon"
             src="/click/support.png"
             alt="Support"
-            draggable="false"
+            draggable={false}
+            width={130}
+            height={130}
           />
         </Link>
       </div>

@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useI18n } from './i18n'
 import LanguageSwitcher from './LanguageSwitcher'
 import dynamic from 'next/dynamic'
+import Image from 'next/image' // ← добавлено
 
 // Кнопка авторизации (тот же модал, что на /subscribe), грузим только на клиенте
 const AuthNavClient = dynamic(() => import('./AuthNavClient'), { ssr: false })
@@ -45,12 +46,13 @@ export default function TopBar() {
     <header className="topbar">
       {/* Логотип — оставил как было */}
       <Link href="/" className="brand" aria-label="Quantum L7 AI">
-        <img
+        <Image
           src="/branding/quantum_l7_logo.png"
           alt="Quantum L7 AI"
           className="brand-logo"
-          loading="eager"
-          decoding="async"
+          width={160}
+          height={40}
+          priority
         />
       </Link>
 

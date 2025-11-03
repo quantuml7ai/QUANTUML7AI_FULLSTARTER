@@ -3,6 +3,7 @@
 
 import { useI18n } from '../../components/i18n'
 import Link from 'next/link'
+import Image from 'next/image'            // ← добавлено
 import { useWeb3Modal } from '@web3modal/wagmi/react'
 import { useRef, useEffect, useState } from 'react'
 
@@ -254,14 +255,15 @@ export default function SubscribePage() {
         <section className="panel">
           <h1>{t('sub_title')}</h1>
 
-          {/* Адаптивная картинка под заголовком */}
+          {/* Адаптивная картинка под заголовком — заменено на next/image */}
           <div className="block-media">
-            <img
+            <Image
               src="/branding/sub-hero.jpg"
               alt=""
               className="block-img"
-              loading="lazy"
-              decoding="async"
+              width={1600}
+              height={900}
+              priority={false}
             />
           </div>
 
@@ -317,12 +319,12 @@ export default function SubscribePage() {
           <h2>{t('sub_payments_title')}</h2>
 
           <div className="block-media">
-            <img
+            <Image
               src="/branding/sub-start.jpg"
               alt=""
               className="block-img"
-              loading="lazy"
-              decoding="async"
+              width={1600}
+              height={900}
             />
           </div>
 
@@ -406,7 +408,7 @@ export default function SubscribePage() {
       {/* Хвост страницы: бегущая строка */}
       <PageMarqueeTail />
 
-      {/* ===== ИКОНКИ ПОСЛЕ МАРКИЗЫ (разметка без локальных стилей) ===== */}
+      {/* ===== ИКОНКИ ПОСЛЕ МАРКИЗЫ — заменено на next/image ===== */}
       <div className="ql7-icons-row">
         <Link
           href="/privacy"
@@ -414,11 +416,13 @@ export default function SubscribePage() {
           aria-label="Privacy / Политика"
           style={{ '--ql7-icon-size': '130px' }}
         >
-          <img
+          <Image
             className="ql7-click-icon"
             src="/click/policy.png"
             alt="Privacy"
-            draggable="false"
+            width={130}
+            height={130}
+            draggable={false}
           />
         </Link>
 
@@ -428,11 +432,13 @@ export default function SubscribePage() {
           aria-label="Support / Поддержка"
           style={{ '--ql7-icon-size': '130px' }}
         >
-          <img
+          <Image
             className="ql7-click-icon"
             src="/click/support.png"
             alt="Support"
-            draggable="false"
+            width={130}
+            height={130}
+            draggable={false}
           />
         </Link>
       </div>

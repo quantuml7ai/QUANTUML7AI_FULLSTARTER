@@ -4,6 +4,8 @@
 import { useI18n } from '@/components/i18n'
 import { useRef, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image' // ← добавлено
+
 /* ===== Маркиза как на главной: бесшовно, full-bleed, без «пропаданий» ===== */
 function PageMarqueeTail() {
   const { t } = useI18n()
@@ -133,7 +135,14 @@ export default function PrivacyPage() {
           aria-label="Privacy / Политика"
           style={{ '--ql7-icon-size': '130px' }}
         >
-          <img className="ql7-click-icon" src="/click/policy.png" alt="Privacy" draggable="false" />
+          <Image
+            className="ql7-click-icon"
+            src="/click/policy.png"
+            alt="Privacy"
+            width={130}
+            height={130}
+            draggable={false}
+          />
         </Link>
 
         <Link
@@ -142,9 +151,16 @@ export default function PrivacyPage() {
           aria-label="Support / Поддержка"
           style={{ '--ql7-icon-size': '130px' }}
         >
-          <img className="ql7-click-icon" src="/click/support.png" alt="Support" draggable="false" />
+          <Image
+            className="ql7-click-icon"
+            src="/click/support.png"
+            alt="Support"
+            width={130}
+            height={130}
+            draggable={false}
+          />
         </Link>
-      </div>      
+      </div>
     </>
   )
 }

@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from 'react'
 import { useI18n } from '@/components/i18n' // поправь путь, если без алиаса
+import Image from 'next/image'             // ← добавлено
 
 export default function TmaAutoPage() {
   const { t } = useI18n()
@@ -62,11 +63,14 @@ export default function TmaAutoPage() {
 
         {/* GIF всегда на всю ширину контейнера */}
         <div className="gif-wrap">
-          <img
+          <Image
             src="/click/authorization.gif"
             alt=""
             className="auth-gif"
+            width={1600}
+            height={900}
             draggable={false}
+            unoptimized      // чтобы не ломать анимацию GIF
           />
         </div>
 
