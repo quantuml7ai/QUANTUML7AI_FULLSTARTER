@@ -9,7 +9,7 @@ import Providers from './providers'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 
-// ⬇️ добавлено для автозапуска
+// ⬇️ ранние скрипты
 import Script from 'next/script'
 
 // Рендерим тяжёлые/интерактивные вещи только на клиенте
@@ -18,54 +18,32 @@ const BgAudio    = dynamic(() => import('../components/BgAudio'),    { ssr: fals
 
 export const metadata = {
   metadataBase: new URL('https://quantuml7ai.com'),
-
-  title: {
-    default: 'Quantum L7 AI',
-    template: '%s — Quantum L7 AI',
-  },
-
+  title: { default: 'Quantum L7 AI', template: '%s — Quantum L7 AI' },
   description:
     'Cosmic-grade intelligence for research, alpha signals and guarded execution. Wallet auth, PRO/VIP tiers.',
-
   applicationName: 'Quantum L7 AI',
   keywords: ['crypto','research','signals','ai','quant','defi','exchange','alpha','quantum l7'],
-
   openGraph: {
     type: 'website',
     url: '/',
     siteName: 'Quantum L7 AI',
     title: 'Quantum L7 AI',
-    description:
-      'Cosmic-grade intelligence for research, alpha signals and guarded execution.',
+    description: 'Cosmic-grade intelligence for research, alpha signals and guarded execution.',
     images: [{ url: '/branding/quantum_l7_logo.png', width: 1200, height: 630, alt: 'Quantum L7 AI' }],
   },
-
   twitter: {
     card: 'summary_large_image',
     site: '@quantuml7ai',
     creator: '@quantuml7ai',
     title: 'Quantum L7 AI',
-    description:
-      'Cosmic-grade intelligence for research, alpha signals and guarded execution.',
+    description: 'Cosmic-grade intelligence for research, alpha signals and guarded execution.',
     images: ['/branding/quantum_l7_logo.png'],
   },
-
-  icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
-  },
-
-  alternates: {
-    canonical: '/',
-    languages: { en:'/en', ru:'/ru', uk:'/uk', zh:'/zh', ar:'/ar', tr:'/tr', es:'/es' },
-  },
+  icons: { icon: '/favicon.ico', shortcut: '/favicon.ico', apple: '/apple-touch-icon.png' },
+  alternates: { canonical: '/', languages: { en:'/en', ru:'/ru', uk:'/uk', zh:'/zh', ar:'/ar', tr:'/tr', es:'/es' } },
 }
 
-export const viewport = {
-  themeColor: '#0b1220',
-  colorScheme: 'dark',
-}
+export const viewport = { themeColor: '#0b1220', colorScheme: 'dark' }
 
 export default function RootLayout({ children }) {
   return (
@@ -73,22 +51,32 @@ export default function RootLayout({ children }) {
       <head>
         {/* ✅ compat.js – максимально рано */}
         <Script src="/compat.js" strategy="beforeInteractive" id="compat-bootstrap" />
-  {/* ✅ Telegram WebApp SDK — ДОЛЖЕН грузиться до рендера страниц */}
-  <Script
-    src="https://telegram.org/js/telegram-web-app.js"
-    strategy="beforeInteractive"
-    id="tg-webapp-sdk"
-  />
+
+        {/* ✅ Telegram WebApp SDK — грузим РАНО и ТОЛЬКО когда есть смысл */}
+        <Script id="tg-webapp-sdk-check" strategy="beforeInteractive">{`
+          try {
+            var ua = (navigator.userAgent||'').toLowerCase();
+            var isTG = (typeof window.Telegram!=='undefined' && !!window.Telegram.WebApp) || ua.indexOf('telegram')>=0;
+            if (isTG && !document.getElementById('tg-webapp-sdk')) {
+              var s = document.createElement('script');
+              s.src = 'https://telegram.org/js/telegram-web-app.js';
+              s.id = 'tg-webapp-sdk';
+              s.async = false; // гарантируем порядок
+              document.head.appendChild(s);
+            }
+          } catch(e){}
+        `}</Script>
+
         {/* ✅ Dev: глушим метрику Coinbase, чтобы не было 401 в консоли */}
         {process.env.NODE_ENV !== 'production' && (
           <Script id="cb-metrics-mute" strategy="beforeInteractive">{`
             (function(){
               try { localStorage.setItem('walletlink_analytics_enabled', 'false'); } catch(e){}
               try {
-                const _fetch = window.fetch;
+                var _fetch = window.fetch;
                 window.fetch = function(input, init){
                   try {
-                    const url = typeof input === 'string' ? input : (input && input.url) || '';
+                    var url = typeof input === 'string' ? input : (input && input.url) || '';
                     if (url.includes('cca-lite.coinbase.com/metrics')) {
                       return Promise.resolve(new Response(null, { status: 204 }));
                     }
@@ -101,7 +89,8 @@ export default function RootLayout({ children }) {
         )}
       </head>
 
-      <body>
+      {/* Дополнительно подавляем «косметические» различия при гидрации */}
+      <body suppressHydrationWarning>
         <Providers>
           <I18nProvider>
             {/* фон/герой (клиент-рендер) */}
