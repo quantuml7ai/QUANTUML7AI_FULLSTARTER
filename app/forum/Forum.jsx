@@ -3821,7 +3821,6 @@ function TopicItem({ t, agg, onOpen, isAdmin, onDelete, authId, onOwnerDelete })
         {/* OWNER: меню троеточия для владельца темы */}
         {(authId && (authId === (t.userId || t.accountId))) && (
           <div className="ownerKebab" onClick={(e)=>{ e.stopPropagation(); }}>
-            <button className="kebabBtn" type="button" aria-label="Меню темы">⋮</button>
             <div className="ownerMenu">
               <button
                 type="button"
@@ -3985,7 +3984,6 @@ function PostCard({
           <button className="kebabBtn" type="button" aria-label="Меню поста">⋮</button>
           <div className="ownerMenu">
             <button type="button" onClick={ownerEdit}>✏️</button>
-            <button type="button" className="danger" onClick={ownerDelete}>🗑</button>
           </div>
         </div>
       )}

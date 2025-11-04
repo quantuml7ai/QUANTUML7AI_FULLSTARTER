@@ -1,6 +1,7 @@
 // app/api/forum/own/route.js
 import { NextResponse } from 'next/server'
 import { getClientIp, toStr } from '../_utils.js'
+import { K, redis, safeParse } from '..//_db.js'  // ← добавим
 
 // Определяем origin из запроса (надёжно для любых рантаймов)
 function getBaseUrl(req) {
@@ -32,6 +33,22 @@ function ok(payload = {}, status = 200) {
 function fail(code, status = 400, extra = {}) {
   // code — короткий ключ для клиента (через словарь t(code))
   return NextResponse.json({ ok: false, error: code, i18nKey: code, ...extra }, { status })
+}
+
+// точечное чтение из Redis, если в снапшоте объекта нет
+async function getById(kind, id) {
+  const sid = String(id || '').trim()
+  if (!sid) return null
+  try {
+    const key =
+      kind === 'post'
+        ? (K?.postKey ? K.postKey(sid) : `forum:post:${sid}`)
+        : (K?.topicKey ? K.topicKey(sid) : `forum:topic:${sid}`)
+    const raw = await redis.get(key)
+    return safeParse(raw)
+  } catch {
+    return null
+  }
 }
 
 export async function POST(req) {
@@ -70,7 +87,8 @@ export async function POST(req) {
 
     if (action === 'delete_topic') {
       const topicId = String(body?.topicId || '').trim()
-      const topic = topics.find(t => String(t?.id) === topicId)
+      let topic = topics.find(t => String(t?.id) === topicId)
+      if (!topic) topic = await getById('topic', topicId)
       if (!topic) return fail('forum_err_not_found', 404)
       if (!isOwner(userId, topic)) return fail('forum_err_forbidden', 403)
 
@@ -84,7 +102,8 @@ export async function POST(req) {
 
     if (action === 'delete_post') {
       const postId = String(body?.postId || '').trim()
-      const post = posts.find(p => String(p?.id) === postId)
+      let post = posts.find(p => String(p?.id) === postId)
+      if (!post) post = await getById('post', postId)
       if (!post) return fail('forum_err_not_found', 404)
       if (!isOwner(userId, post)) return fail('forum_err_forbidden', 403)
 

@@ -234,7 +234,7 @@ ul.bullets li{margin:6px 0}
 .topbar .brand{ display:flex; align-items:center }
 .topbar .brand-logo{
   display:block;
-  height:250px;
+  height:180px;
   width:auto;
   image-rendering:auto;
   filter:
