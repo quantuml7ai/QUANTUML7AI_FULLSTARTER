@@ -50,8 +50,8 @@ export default function TopBar() {
           src="/branding/quantum_l7_logo.png"
           alt="Quantum L7 AI"
           className="brand-logo"
-          width={160}
-          height={40}
+          width={260}
+          height={140}
           priority
         />
       </Link>
