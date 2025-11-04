@@ -724,7 +724,7 @@ function useQCoinLive(userKey, isVip){
     displayRef.current = 0;
     lastSyncRef.current = 0;
     becameActiveRef.current = !!uid;
-  }, [uid]);
+  }, [uid, INC_PER_SEC]);
 
   // Стартовый GET (с timeout и санитайзингом чисел) — ТОЛЬКО если есть UID
   React.useEffect(function(){
@@ -790,7 +790,7 @@ function useQCoinLive(userKey, isVip){
 
     load();
     return () => { dead = true; };
-  }, [uid, isVip]);
+  }, [uid, isVip, GRACE_MS, INC_PER_SEC]);
 
   // Локальные события активности (любое действие в форуме)
   React.useEffect(function(){
@@ -912,7 +912,7 @@ function useQCoinLive(userKey, isVip){
     }, 1000);
 
     return function(){ clearInterval(id); };
- }, [uid, isVip, server.paused, server.incPerSec, server.graceMs, server.lastConfirmAt]);
+ }, [uid, isVip, server.paused, server.incPerSec, server.graceMs, server.lastConfirmAt, GRACE_MS, INC_PER_SEC, SYNC_MS]);
 
   return {
     ...server,
@@ -3626,7 +3626,7 @@ function ProfilePopover({ anchorRef, open, onClose, t, auth, vipActive, onSaved 
       finally { setNickBusy(false) }
     }, 300)
     return () => clearTimeout(h)
-  }, [open, nick])
+  }, [open, nick, uid])
 
   if (!open || !anchorRef?.current) return null
   const top = (anchorRef.current.offsetTop || 0) + (anchorRef.current.offsetHeight || 0) + 8
@@ -4219,7 +4219,7 @@ function LivePreview({ streamRef }) {
     if (el.srcObject !== s) el.srcObject = s;
     el.muted = true; el.playsInline = true;
     el.play?.();
-  }, [streamRef?.current]);
+  }, [streamRef]);
   return (
     <video
       ref={ref}
@@ -4323,10 +4323,11 @@ export function VideoOverlay({
   // === ЛОКАЛЬНАЯ НАСТРОЙКА ВЕРХНЕГО ОТСТУПА СЧЁТЧИКА ===
   React.useEffect(() => {
     if (!open) return;
-    const TOP_OFFSET = '52px'; // ← ЗАДАЙ СВОЙ ОТСТУП (px, %, calc(...))
-    try { rootRef.current?.style?.setProperty('--vo-top-offset', TOP_OFFSET); } catch {}
-    return () => { try { rootRef.current?.style?.removeProperty('--vo-top-offset'); } catch {} };
-  }, [open]);
+    const TOP_OFFSET = '48px'; // ← ЗАДАЙ СВОЙ ОТСТУП (px, %, calc(...))
+    const el = rootRef.current;
+    try { el?.style?.setProperty('--vo-top-offset', TOP_OFFSET); } catch {}
+    return () => { try { el?.style?.removeProperty('--vo-top-offset'); } catch {} };
+   }, [open]);
 
   // аспект
   const [aspect, setAspect] = React.useState('16 / 9');
@@ -4944,7 +4945,7 @@ React.useEffect(()=>{
       window.addEventListener('forum:edit', onEdit);
       return () => window.removeEventListener('forum:edit', onEdit);
     }
-  }, []);
+   }, [t, toast]);
 /* ---- локальный снап и очередь ---- */
 const [data,setData] = useState(()=>{
   if(!isBrowser()) return { topics:[], posts:[], bans:[], admins:[], rev:null }
@@ -5411,7 +5412,7 @@ for (const [id, srv] of srvMap) {
     schedulePullRef.current = () => {}; // обнуляем ручку
     try { bc && bc.close(); } catch {}
   };
-}, []);
+}, [toast]);
 
 
 // локальный shim: принудительное обновление страницы/данных
@@ -5627,7 +5628,7 @@ useEffect(() => {
   }
   window.addEventListener('storage', onStorage)
   return () => window.removeEventListener('storage', onStorage)
-}, [auth?.accountId])
+}, [auth?.accountId, auth?.asherId])
 
 /* ---- admin ---- */
 const [adminOpen, setAdminOpen] = useState(false)
@@ -6704,7 +6705,7 @@ const handleAttachClick = React.useCallback((e) => {
     return;
   }
   fileRef.current?.click();
-}, [vipActive, t]);
+}, [vipActive, t, toast]);
 
 const onFilesChosen = React.useCallback(async (e) => {
   try{
@@ -6736,7 +6737,7 @@ const onFilesChosen = React.useCallback(async (e) => {
   } finally {
     if (e?.target) e.target.value = '';
   }
-}, [t]);
+}, [t, toast]);
 
 
   /* ---- профиль (поповер у аватара) ---- */
@@ -6939,7 +6940,7 @@ React.useEffect(() => {
 }, [auth?.accountId, auth?.asherId]);
 
 // === ENV helpers/flags for Quests (moved above to avoid TDZ) ===
-const readEnv = (k, def='') => {
+const readEnv = React.useCallback((k, def='') => {
   try {
     if (questEnv && Object.prototype.hasOwnProperty.call(questEnv, k)) {
       const v = questEnv[k];
@@ -6948,7 +6949,7 @@ const readEnv = (k, def='') => {
     const v = process?.env?.[k];
     return (v == null ? def : String(v));
   } catch { return def }
-};
+}, [questEnv]);
 
  // per-card toggles & media (ENV)
  const isCardEnabled  = (n) => (readEnv(`NEXT_PUBLIC_QUEST_CARD_${n}_ENABLED`, '1') === '1');
