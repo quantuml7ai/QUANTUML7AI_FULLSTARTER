@@ -144,6 +144,8 @@ function BackToTopButton() {
 }
 
 
+
+
 function ensureClientId(){
   try{
     let v = localStorage.getItem('forum:cid')
@@ -282,12 +284,346 @@ function AvatarEmoji({ userId, pIcon, className }) {
 const sigTopic = (t) => `${(t.title||'').slice(0,80)}|${t.userId||t.accountId||''}|${Math.round((t.ts||0)/60000)}`
 const sigPost  = (p) => `${(p.text||'').slice(0,120)}|${p.userId||p.accountId||''}|${p.topicId||''}|${p.parentId||''}|${Math.round((p.ts||0)/10000)}`
 // берем из window.__FORUM_CONF__ (его отдаёт сервер из env), иначе — дефолты
-const CFG = (typeof window!=='undefined' && window.__FORUM_CONF__) || {};
+// Берём инъекцию сервера и вшитые на этапе сборки NEXT_PUBLIC_* (Next подставит литералы)
+const CFG = {
+  ...(typeof window!=='undefined' && window.__FORUM_CONF__ || {}),
+  NEXT_PUBLIC_FORUM_AD_EVERY:           process.env.NEXT_PUBLIC_FORUM_AD_EVERY,
+  NEXT_PUBLIC_FORUM_AD_LINKS:           process.env.NEXT_PUBLIC_FORUM_AD_LINKS,
+  NEXT_PUBLIC_FORUM_AD_ROTATE_MIN:      process.env.NEXT_PUBLIC_FORUM_AD_ROTATE_MIN,
+  NEXT_PUBLIC_FORUM_AD_PREVIEW:         process.env.NEXT_PUBLIC_FORUM_AD_PREVIEW,
+  NEXT_PUBLIC_FORUM_AD_THUMB_SERVICES:  process.env.NEXT_PUBLIC_FORUM_AD_THUMB_SERVICES,
+  NEXT_PUBLIC_FORUM_AD_DEBUG:           process.env.NEXT_PUBLIC_FORUM_AD_DEBUG,
+};
 const MIN_INTERVAL_MS   = Math.max(0, Number(CFG.FORUM_MIN_INTERVAL_SEC   ?? 1)*1000);
 const REACTS_PER_MINUTE = Number(CFG.FORUM_REACTS_PER_MINUTE ?? 120);
 const VIEW_TTL_SEC      = Number(CFG.FORUM_VIEW_TTL_SEC      ?? 1800);
 
+  /* =====================[ ADS: CONFIG + ROTATION + INTERLEAVE ]===================== */
+  // ❶ Считываем ENV из приоритетов: window.__FORUM_CONF__ → import.meta.env → process.env
+  function _getRawConf() {
+    // Собираем конфиг из множества возможных источников (чтобы точно «дошло» в клиент):
+    // Приоритет: URL → localStorage → window.__FORUM_CONF__ → CFG → import.meta.env → process.env
+    const out = {};
+    try {
+      // 1) URL (?FORUM_AD_EVERY=..., ?FORUM_AD_LINKS=..., ?FORUM_AD_ROTATE_MIN=...)
+      if (typeof window !== 'undefined' && window.location && window.location.search) {
+        const q = new URLSearchParams(window.location.search);
+        for (const k of ['FORUM_AD_EVERY','FORUM_AD_LINKS','FORUM_AD_ROTATE_MIN','NEXT_PUBLIC_FORUM_AD_EVERY','NEXT_PUBLIC_FORUM_AD_LINKS','NEXT_PUBLIC_FORUM_AD_ROTATE_MIN']) {
+          if (q.has(k)) out[k] = q.get(k);
+        }
+      }
+    } catch {}
+    try {
+      // 2) localStorage (можно задать из консоли: localStorage.setItem('FORUM_AD_EVERY','5'))
+      if (typeof localStorage !== 'undefined') {
+        for (const k of ['FORUM_AD_EVERY','FORUM_AD_LINKS','FORUM_AD_ROTATE_MIN','NEXT_PUBLIC_FORUM_AD_EVERY','NEXT_PUBLIC_FORUM_AD_LINKS','NEXT_PUBLIC_FORUM_AD_ROTATE_MIN']) {
+          const v = localStorage.getItem(k);
+          if (v != null) out[k] = v;
+        }
+      }
+    } catch {}
+    try {
+      // 3) window.__FORUM_CONF__
+      if (typeof window !== 'undefined' && window.__FORUM_CONF__) Object.assign(out, window.__FORUM_CONF__);
+    } catch {}
+    try {
+      // 4) уже созданный в файле CFG
+      if (typeof CFG === 'object' && CFG) Object.assign(out, CFG);
+    } catch {}
+    try {
+      // 5) import.meta.env (Vite и др.)
+      // eslint-disable-next-line no-undef
+      if (typeof import.meta !== 'undefined' && import.meta && import.meta.env) Object.assign(out, import.meta.env);
+    } catch {}
+    try {
+      // 6) process.env (если сборщик не вырезал)
+      if (typeof process !== 'undefined' && process.env) Object.assign(out, process.env);
+    } catch {}
+    return out;
+  }
+  function getForumAdConf() {
+    const raw = _getRawConf();
+  const pick = (base) => (raw[base] ?? raw['NEXT_PUBLIC_' + base] ?? '');
+  const EVERY      = Math.max(0, Number(String(pick('FORUM_AD_EVERY')).trim()) || 0);
+  const ROTATE_MIN = Math.max(0, Number(String(pick('FORUM_AD_ROTATE_MIN')).trim()) || 0);
+  const PREVIEW    = String(pick('FORUM_AD_PREVIEW') || 'auto').trim().toLowerCase(); // auto|screenshot|favicon
+  const DEBUG      = String(pick('FORUM_AD_DEBUG') || pick('NEXT_PUBLIC_FORUM_AD_DEBUG') || '').trim() === '1';
 
+  // строгий парсер списка ссылок: CSV/;/пробел/переносы; срезаем хвостовые # и //
+  const rawLinks = String(pick('FORUM_AD_LINKS') || pick('NEXT_PUBLIC_FORUM_AD_LINKS') || '');
+  const LINKS = rawLinks
+    .split(/[,\n;\s]+/g)                          // CSV/;/пробел/переносы — любые комбинации
+    .map(s => s.replace(/\s+(?:#|\/\/).*$/,'').trim())  // режем КОММЕНТАРИИ только после пробела!
+     .filter(Boolean)
+    .filter(u => /^https?:\/\/\S+$/i.test(u))
+    .map(u => { // нормализация: без trailing '/', сортируем query
+      try {
+        const url = new URL(u);
+        url.pathname = url.pathname.replace(/\/+$/,'');
+        if (url.search) {
+          const sp = new URLSearchParams(url.search);
+          const entries = [...sp.entries()].sort(([a],[b]) => a.localeCompare(b));
+          const norm = new URL(url.origin + url.pathname);
+          entries.forEach(([k,v]) => norm.searchParams.append(k,v));
+          return norm.toString();
+        }
+        return url.toString();
+      } catch { return u; }
+    })
+    .filter((v, i, a) => {
+      try {
+        const u = new URL(v);
+        const sig = u.host + u.pathname;
+        return a.findIndex(w => {
+          try { const z = new URL(w); return z.host+z.pathname === sig; } catch { return false; }
+        }) === i;
+      } catch { return i === a.indexOf(v); }
+    });
+
+  // провайдеры скриншотов
+  const THUMBS = String(pick('FORUM_AD_THUMB_SERVICES') || pick('NEXT_PUBLIC_FORUM_AD_THUMB_SERVICES') || '')
+    .split(/[,\n;]+/g).map(s => s.trim()).filter(Boolean);
+
+  const enabled = (EVERY > 0 && ROTATE_MIN > 0 && LINKS.length > 0);
+    try {
+      if (!window.__adsLogged) {
+        window.__adsLogged = true;
+      const why = enabled ? 'ok' : `disabled: EVERY=${EVERY}, ROTATE_MIN=${ROTATE_MIN}, LINKS=${LINKS.length}`;
+      const sample = Object.keys(raw).filter(k => k.includes('FORUM_AD')).slice(0, 12)
+        .reduce((a,k)=>{ a[k]=raw[k]; return a; }, {});
+      console.log('[ADS] config', {
+        AD_EVERY: EVERY,
+        AD_LINKS_len: LINKS.length,
+        AD_ROTATE_MIN: ROTATE_MIN,
+        PREVIEW,
+        THUMB_SERVICES_len: THUMBS.length,
+        status: why, sources: sample
+      });  
+        }
+    } catch {}
+    return { enabled, EVERY, LINKS, ROTATE_MIN, PREVIEW, THUMBS, DEBUG };
+  }
+  // ❷ Детерминированный shuffle под пользователя (Fisher–Yates)
+  function _hash32(s) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < String(s).length; i++) {
+      h ^= String(s).charCodeAt(i);
+      h = Math.imul(h, 16777619) >>> 0;
+    }
+    return h >>> 0;
+  }
+  function _rand(seed) {
+    // xorshift32
+    let x = seed >>> 0;
+    return () => {
+      x ^= x << 13; x >>>= 0;
+      x ^= x << 17; x >>>= 0;
+      x ^= x << 5;  x >>>= 0;
+      return (x >>> 0) / 4294967296;
+    };
+  }
+  function _shuffleDet(arr, seed) {
+    const a = arr.slice();
+    const rnd = _rand(seed || 1);
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(rnd() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // ❸ Ротация: учитываем и пользователя, и seed конкретной карточки
+  //  adConf, clientId, nowMs, seedPerCard -> url
+  function resolveCurrentAdUrl(adConf, adClientId, nowMs, seed) {
+    if (!adConf?.enabled) return null;
+    const { LINKS, ROTATE_MIN } = adConf;
+    if (!Array.isArray(LINKS) || LINKS.length === 0 || ROTATE_MIN <= 0) return null;
+    const t = Number(nowMs || Date.now());
+    const slotMs = ROTATE_MIN * 60 * 1000;
+    const slot = Math.floor(t / slotMs);
+    const baseSeed = String(adClientId || 'guest') + '|' + String(seed || '');
+    const perm = _shuffleDet(LINKS, _hash32(baseSeed));
+    const offset = Math.abs(_hash32('off|' + baseSeed)) % perm.length; // уникальный сдвиг на карточку
+    return perm[(slot + offset) % perm.length] || null;
+  }
+
+
+  // ❹ Интерливинг: после каждого N-го item вставляем {type:'ad'}
+  function interleaveAds(items, every, withEmpty = false) {
+    const out = [];
+    const arr = Array.isArray(items) ? items : [];
+    if (every <= 0) return arr.map(it => ({ type:'item', item: it }));
+    if (arr.length === 0) {
+     return withEmpty ? [{ type:'ad', key:'ad:empty:0' }] : [];
+    }
+    for (let i = 0; i < arr.length; i++) {
+    const it = arr[i];
+    out.push({ type:'item', item: it });
+    if ((i + 1) % every === 0) {
+      // seed делаем стабильным из позиции и/или идентификатора соседнего элемента
+      const nearId = (it && (it.id || it.postId || it.topicId)) || i;
+      out.push({ type:'ad', key: `ad:${nearId}:${i}` });
+    }
+    }
+    return out;
+  }
+
+  // ====================[ PREVIEW PIPELINE ]====================
+  const DEFAULT_THUMBS = [
+    'https://s.wordpress.com/mshots/v1/{url}?w=1280',
+    'https://image.thum.io/get/width/1280/crop/720/noanimate/{url}',
+    'https://image.microlink.io/?url={url}&screenshot=true&meta=false&fullpage=true',
+    'https://image.microlink.io/?url={url}&screenshot=true&meta=false',
+    'https://api.screenshotmachine.com/?url={url}&device=desktop&dimension=1366x768&format=jpg&cacheLimit=0',
+    'https://shot.screenshotapi.net/screenshot?url={url}&output=image&file_type=webp&full_page=false',
+    'https://cdn.screenshotone.com/capture?url={url}&format=webp',
+  ];
+
+  function buildCandidates(rawUrl, conf){
+    const url = String(rawUrl||'').trim();
+    const out = [];
+    const lower = url.toLowerCase();
+    const isImg = /\.(png|jpe?g|webp|gif|avif)(\?.*)?$/.test(lower);
+    const yt = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/i.exec(url);
+    const ytThumb = yt ? `https://i.ytimg.com/vi/${yt[1]}/hqdefault.jpg` : null;
+    const host = (()=>{ try { return new URL(url).host } catch { return '' } })();
+    const favUrl = host ? `https://icons.duckduckgo.com/ip3/${host}.ico` : null;
+
+    if (isImg) out.push({ src:url,   via:'direct',   type:'bitmap', image:true });
+    if (!isImg && ytThumb) out.push({ src:ytThumb, via:'yt',       type:'bitmap', image:true });
+
+    // Новый первый кандидат: OpenGraph (как делает Telegram)
+    // Microlink JSON: оттуда достанем data.image.url → отрисуем как обычную картинку
+    out.push({ src:`og:${encodeURIComponent(url)}`, via:'og', type:'og', image:false });
+ 
+    const shots = (Array.isArray(conf?.THUMBS) && conf.THUMBS.length ? conf.THUMBS : DEFAULT_THUMBS)
+      .map(t => t.replace('{url}', encodeURIComponent(url)));
+    shots.forEach(s => out.push({ src:s, via:'shot', type:'bitmap', image:false }));
+
+    if (favUrl) out.push({ src:favUrl, via:'favicon', type:'ico', image:false });
+    out.push({ src:'placeholder', via:'placeholder', type:'placeholder', image:false });
+    return out;
+  }
+
+  // компонент, который идёт по «лестнице» с таймаутом (§4.2)
+  function PreviewImage({ url, conf }){
+    const [idx, setIdx] = React.useState(0);
+    const [loaded, setLoaded] = React.useState(false);
+    const [ogUrl, setOgUrl] = React.useState('');
+    const tRef = React.useRef(null);
+    const chain = React.useMemo(()=>buildCandidates(url, conf),[url, conf]);
+    const cur = chain[idx] || chain[chain.length-1];
+
+    // сбрасываем флаг загрузки при смене кандидата
+    React.useEffect(()=>{ setLoaded(false); }, [idx, cur?.src]);
+
+    // Таймаут-сторож только для SHOT и только пока НЕ loaded
+    React.useEffect(()=>{
+      if (cur?.via !== 'shot' || loaded) return;
+      if (tRef.current) clearTimeout(tRef.current);
+      tRef.current = setTimeout(() => {
+        setIdx(i => Math.min(i+1, chain.length-1));
+}, 3000); // 3.0s: даём провайдерам шанс отдать кадр      return ()=>{ if (tRef.current) clearTimeout(tRef.current); };
+    }, [cur?.src, cur?.via, loaded, chain.length]);
+     // Загрузка OG-картинки (первее скриншотов)
+    React.useEffect(() => {
+      if (cur?.type !== 'og') return;
+      setOgUrl('');
+      let stop = false;
+      (async () => {
+        try {
+          const u = decodeURIComponent(cur.src.slice(3)); // после "og:"
+          // публичный Microlink JSON (без ключа), CORS-friendly
+          const resp = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(u)}&meta=true&palette=false&audio=false&video=false`);
+          const j = await resp.json();
+          const img = j?.data?.image?.url || j?.data?.logo?.url || '';
+          if (!stop && img) setOgUrl(img);
+          if (!stop && !img) setIdx(i => Math.min(i+1, chain.length-1)); // нет OG → дальше по лестнице
+        } catch {
+          if (!stop) setIdx(i => Math.min(i+1, chain.length-1));
+        }
+      })();
+      return () => { stop = true; };
+    }, [cur?.src, cur?.type, chain.length]);   
+    if (!cur) return null;
+    if (cur.type === 'placeholder'){
+      const host = (()=>{ try { return new URL(url).host } catch { return 'ad' } })();
+      return <div className="adPlaceholder"><div className="adHost">{host}</div></div>;
+    }
+    if (cur.type === 'og'){
+      if (!ogUrl) {
+        // краткий скелетон, чтобы избежать "скачков"
+        return <div className="adSkeleton" aria-hidden/>;
+      }
+      return <img src={ogUrl} alt="" loading="lazy"
+        onLoad={()=>{ setLoaded(true); if (tRef.current) clearTimeout(tRef.current); }}
+        onError={()=> setIdx(i=>Math.min(i+1, chain.length-1))}
+        style={{ width:'100%', height:'auto', display:'block', objectFit:'contain', borderRadius:'inherit', maxHeight:'70vh' }}/>;
+      }    
+    if (cur.type === 'ico'){
+      return <img src={ogUrl} alt="" loading="lazy"
+        onLoad={()=>{ setLoaded(true); if (tRef.current) clearTimeout(tRef.current); }}
+        onError={()=> setIdx(i=>Math.min(i+1, chain.length-1))}
+        style={{ width:'100%', height:'auto', display:'block', objectFit:'contain', borderRadius:'inherit', maxHeight:'70vh' }}/>;
+      }
+    // bitmap
+    const allowNextImage = /^(?:https:\/\/)(?:i\.ytimg\.com|icons\.duckduckgo\.com|image\.thum\.io|s\.wordpress\.com|image\.microlink\.io|api\.screenshotmachine\.com|shot\.screenshotapi\.net|cdn\.screenshotone\.com)/i.test(cur.src);
+    const onLoadOk = (e)=>{ setLoaded(true); if (tRef.current) clearTimeout(tRef.current); };
+    const onErr = ()=> setIdx(i=>Math.min(i+1, chain.length-1));
+    // Для адаптивной высоты всегда используем нативный <img>,
+    // чтобы реальное соотношение сторон задавало высоту карточки.
+    return <img src={cur.src} alt="" loading="lazy"
+      onLoad={onLoadOk} onError={onErr}
+      style={{ width:'100%', height:'auto', display:'block', objectFit:'contain', borderRadius:'inherit', maxHeight:'70vh' }}/>;
+    }
+
+  // КАСТОМНЫЙ ХУК: безопасный preconnect/dns-prefetch (SSR-safe)
+  function useAdPreconnect(){
+    React.useEffect(() => {
+      try{
+        if (typeof window === 'undefined' || !document?.head) return; // SSR guard
+        const c = getForumAdConf();
+        const hosts = (c.THUMBS && c.THUMBS.length ? c.THUMBS : [
+          'https://s.wordpress.com','https://image.thum.io','https://image.microlink.io',
+         'https://api.screenshotmachine.com','https://shot.screenshotapi.net','https://cdn.screenshotone.com'
+        ]).map(s => new URL(s.replace('{url}','https://example.com')).origin);
+        const head = document.head;
+        hosts.forEach(h => {
+          if (!head.querySelector(`link[data-ad-preconnect="${h}"]`)){
+            const a = document.createElement('link'); a.rel='preconnect'; a.href=h; a.setAttribute('data-ad-preconnect',h); head.appendChild(a);
+            const b = document.createElement('link'); b.rel='dns-prefetch'; b.href=h; b.setAttribute('data-ad-preconnect',h); head.appendChild(b);
+          }
+        });
+      }catch{}
+    }, []);
+  }  
+  // ❺ Карточка рекламы: «как форумная карточка» (QShine), без явного URL-текста,
+  // кликабельное превью (вся карточка — ссылка). Без доп. запросов к нашему бэку.
+ // превью без лишних запросов: 1) прямое изображение; 2) YouTube thumbnail; 3) доменный плейсхолдер
+ function AdCard({ url, t }) {
+  useAdPreconnect(); // ← чтобы преленки подтянулись (один раз за монтирование)
+   const conf = getForumAdConf();
+   if (!url) return null;
+   const label = (t && t('forum_ad_label')) || 'Реклама';
+   let host = ''; try { host = new URL(url).host; } catch {}
+   return (
+     <a
+       className="item qshine adCard"
+       href={url}
+       target="_blank"
+       rel="noreferrer noopener nofollow ugc"
+       aria-label={`${label} • ${host || ''}`.trim()}
+       title={host || label}
+     >
+      <div className="adPreview" aria-hidden>
+        {/* Пока отлаживаем — насильно даём скриншоты */}
+        <PreviewImage url={url} conf={{ ...conf, PREVIEW:'screenshot' }} />
+      </div>
+       <div className="meta miniLabel">{label}</div>
+     </a>
+   );
+ }
+  /* ====================[ /ADS ]==================== */
 function getBucket(ttlSec=VIEW_TTL_SEC){ return Math.floor((Date.now()/1000)/ttlSec) }
 
 function rateLimiter(){
@@ -2277,6 +2613,24 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   text-overflow:ellipsis;
   max-width:100%;
 }
+ .adCard{ display:block; padding:0; overflow:hidden }
+ .adCard .miniLabel{ padding:8px 10px; opacity:.85 }
+ .adPreview{ position:relative; width:100%; aspect-ratio: 16/9; background:rgba(255,255,255,.04); display:grid; place-items:center }
+ .adPreview img{ display:block; width:100%; height:100%; object-fit:cover }
+ .adPlaceholder{
+   width:100%; height:100%;
+   display:grid; place-items:center;
+   background: linear-gradient(135deg, rgba(120,160,255,.12), rgba(40,80,180,.08));
+ }
+ .adHost{ font-weight:600; font-size:14px; color:#eaf4ff; opacity:.9; padding:8px 12px; border-radius:8px;
+   background:rgba(0,0,0,.26); backdrop-filter: blur(4px) saturate(120%);
+ }
+/* a11y: заметный, но ненавязчивый фокус */
+.adCard:focus-visible{
+  outline: 2px solid rgba(160,180,255,.55);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
 /* ---- INBOX (конверт справа в шапке списка) ---- */
 .head .flex.items-center.justify-between{ flex-wrap:nowrap; } /* не переносим ряд */
 
@@ -2959,7 +3313,12 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 /* на всякий случай — убираем подсветку выделения пикчи при тапе/дабл-тапе */
 .questIconPure::selection {
   background: transparent;
-}  
+} 
+    /* ==== ADS: adaptive preview (без фиксированного 16:9) ==== */    
+    .adCard .adPreview{ line-height:0; }
+    .adCard .adPreview img{ width:100%; height:auto; display:block; object-fit:contain; border-radius:12px; max-height:70vh; }
+    /* если где-то раньше было height фиксирован — эти правила перебьют */
+
 `}</style>
 )
 
@@ -6702,7 +7061,7 @@ const handleAttachClick = React.useCallback((e) => {
     return;
   }
   fileRef.current?.click();
-}, [vipActive, t]);
+}, [vipActive, t, toast]);
 
 const onFilesChosen = React.useCallback(async (e) => {
   try{
@@ -6734,7 +7093,7 @@ const onFilesChosen = React.useCallback(async (e) => {
   } finally {
     if (e?.target) e.target.value = '';
   }
-}, [t]);
+}, [t, toast]);
 
 
   /* ---- профиль (поповер у аватара) ---- */
@@ -6872,8 +7231,7 @@ React.useEffect(() => {
   if (!videoFeedOpen) return;
   buildAndSetVideoFeed();
   // зависимости: любые сигналы обновления снапшота/постов у тебя в состоянии
-}, [videoFeedOpen, data?.rev, data?.posts, data?.messages, data?.topics, allPosts]);
-
+}, [videoFeedOpen, data?.rev, data?.posts, data?.messages, data?.topics, allPosts, buildAndSetVideoFeed]);
 // [VIDEO_FEED:OPEN_THREAD] — открыть полноценную ветку из ленты
 function openThreadFromPost(p){
   if (!p) return;
@@ -6937,7 +7295,7 @@ React.useEffect(() => {
 }, [auth?.accountId, auth?.asherId]);
 
 // === ENV helpers/flags for Quests (moved above to avoid TDZ) ===
-const readEnv = (k, def='') => {
+const readEnv = React.useCallback((k, def='') => {
   try {
     if (questEnv && Object.prototype.hasOwnProperty.call(questEnv, k)) {
       const v = questEnv[k];
@@ -6946,7 +7304,7 @@ const readEnv = (k, def='') => {
     const v = process?.env?.[k];
     return (v == null ? def : String(v));
   } catch { return def }
-};
+}, [questEnv]);
 
  // per-card toggles & media (ENV)
  const isCardEnabled  = (n) => (readEnv(`NEXT_PUBLIC_QUEST_CARD_${n}_ENABLED`, '1') === '1');
@@ -7886,8 +8244,18 @@ onClick={()=>{
   <>
 {/* ВЕТКА-ЛЕНТА: медиа (видео/аудио/изображения) */}
 <div className="meta mt-1">{t('') || ''}</div>
-<div className="grid gap-2 mt-2" suppressHydrationWarning>
-  {videoFeed.map((p) => {
+  <div className="grid gap-2 mt-2" suppressHydrationWarning>
+    {(() => {
+      const adConf   = getForumAdConf();
+      const adEvery  = adConf.EVERY;
+      const adCid    = (auth?.asherId || auth?.accountId || 'guest');
+      const mixed    = adConf.enabled ? interleaveAds(videoFeed, adEvery, true) : videoFeed.map(it => ({type:'item', item: it}));
+      return mixed.map((node, idx) => {
+        if (node.type === 'ad') {
+          const url = resolveCurrentAdUrl(adConf, adCid, Date.now(), `video|${node.key || idx}`);
+          return <AdCard key={`vfAd:${idx}`} url={url} t={t} />;
+        }     
+        const p = node.item;
     const parent = p?.parentId ? (data?.posts || []).find(x => String(x.id) === String(p.parentId)) : null;
 
     // локальный обработчик: открыть полноценную ветку по посту из ленты
@@ -7922,9 +8290,10 @@ onClick={()=>{
           t={t}
         />
       </div>
-    );
-  })}
-  {videoFeed.length === 0 && (
+        );
+      });
+    })()}
+    {videoFeed.length === 0 && (
     <div className="meta">{t('forum_search_empty') || 'Ничего не найдено'}</div>
   )}
 </div>
@@ -8109,15 +8478,22 @@ onClick={()=>{
 {inboxOpen && (
   <div className="item mt-2">
     <div className="title">{t('forum_inbox_title') || 'Ответы на ваши сообщения'}</div>
-    {repliesToMe.length === 0 ? (
-      <div className="inboxEmpty">{t('forum_inbox_empty') || 'Пока нет ответов'}</div>
-    ) : (
-      <div className="inboxList">
-        {repliesToMe.map(p => {
-          const parent = (data.posts || []).find(x => String(x.id) === String(p.parentId));
-          return (
-            <div key={`inb:${p.id}`} className="item qshine" onClick={() => {
-              // перейти в тему и открыть ветку
+    {(() => {
+      const adConf   = getForumAdConf();
+      const adEvery  = adConf.EVERY;
+      const adCid    = (auth?.asherId || auth?.accountId || 'guest');
+      const mixed    = adConf.enabled ? interleaveAds(repliesToMe, adEvery, true) : repliesToMe.map(it => ({type:'item', item: it}));
+      if (mixed.length === 0) return <div className="inboxEmpty">{t('forum_inbox_empty') || 'Пока нет ответов'}</div>;
+      return (
+        <div className="inboxList">
+          {mixed.map((node, i) => {
+            if (node.type === 'ad') {
+              const url = resolveCurrentAdUrl(adConf, adCid, Date.now(), `inbox|${node.key || i}`);
+              return <AdCard key={`inbAd:${i}`} url={url} t={t} />;
+            }            const p = node.item;
+            const parent = (data.posts || []).find(x => String(x.id) === String(p.parentId));
+            return (
+              <div key={`inb:${p.id}`} className="item qshine" onClick={() => {              // перейти в тему и открыть ветку
               const tt = (data.topics||[]).find(x => String(x.id) === String(p.topicId));
               if (tt) {
                 setSel(tt);
@@ -8142,10 +8518,11 @@ onClick={()=>{
                 <div className="postBody text-[15px] whitespace-pre-wrap break-words">{(p.text||'').slice(0,180)}</div>
               )}
             </div>
-          );
-        })}
-      </div>
-    )}
+            );
+          })}
+        </div>
+      );
+    })()}
   </div>
 )}
 
@@ -8158,29 +8535,40 @@ onClick={()=>{
 
 
         <div className="grid gap-2">
-          {flat.map(p=>{
-            const parent = p.parentId ? allPosts.find(x => String(x.id) === String(p.parentId)) : null
-            return (
-              <div key={p.id} id={`post_${p.id}`} style={{ marginLeft: p._lvl*18 }}>
-                <PostCard
-                  p={p}
-                  parentAuthor={parent?.nickname || (parent ? shortId(parent.userId || '') : null)}
-                  onReport={() => toast.ok(t('forum_report_ok'))}
-                  onReply={() => setReplyTo(p)}
-                  onOpenThread={(clickP) => { setThreadRoot(clickP) }}
-                  onReact={reactMut}
-                  isAdmin={isAdmin}
-                  onDeletePost={delPost}
-                  onBanUser={banUser}
-                  onUnbanUser={unbanUser}
-                  isBanned={bannedSet.has(p.accountId || p.userId)}
-                  authId={auth.asherId || auth.accountId}
-                  markView={markViewPost}
-                  t={t}
-                />
-              </div>
-            )
-          })}
+          {(() => {
+            const adConf   = getForumAdConf();
+            const adEvery  = adConf.EVERY;
+            const adCid    = (auth?.asherId || auth?.accountId || 'guest');    
+           const mixed    = adConf.enabled ? interleaveAds(flat, adEvery, true) : flat.map(it => ({type:'item', item: it}));
+            return mixed.map((node, idx) => {
+              if (node.type === 'ad') {
+                 const url = resolveCurrentAdUrl(adConf, adCid, Date.now(), `flat|${node.key || idx}`);
+                return <AdCard key={`flatAd:${idx}`} url={url} t={t} />;
+              }
+              const p = node.item;
+              const parent = p.parentId ? allPosts.find(x => String(x.id) === String(p.parentId)) : null;
+              return (
+                <div key={p.id} id={`post_${p.id}`} style={{ marginLeft: p._lvl*18 }}>
+                  <PostCard
+                    p={p}
+                    parentAuthor={parent?.nickname || (parent ? shortId(parent.userId || '') : null)}
+                    onReport={() => toast.ok(t('forum_report_ok'))}
+                    onReply={() => setReplyTo(p)}
+                    onOpenThread={(clickP) => { setThreadRoot(clickP) }}
+                    onReact={reactMut}
+                    isAdmin={isAdmin}
+                    onDeletePost={delPost}
+                    onBanUser={banUser}
+                    onUnbanUser={unbanUser}
+                    isBanned={bannedSet.has(p.accountId || p.userId)}
+                    authId={auth.asherId || auth.accountId}
+                    markView={markViewPost}
+                    t={t}
+                  />
+                </div>
+              );
+            });
+          })()}
           {(!threadRoot && flat.length===0) && <div className="meta">{t('forum_no_posts_yet') || 'Пока нет сообщений'}</div>}
         </div>
       </div>

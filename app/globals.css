@@ -267,7 +267,7 @@ ul.bullets li{margin:6px 0}
 @media (prefers-reduced-motion: reduce){
   .topbar .brand-logo{ animation:none }
 }
-
+ 
 /* ——— Убираем «синюю кликабельность» у ссылки-логотипа ——— */
 /* сама ссылка внутри topbar */
 .topbar a.brand{

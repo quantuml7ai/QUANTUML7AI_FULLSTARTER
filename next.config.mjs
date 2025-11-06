@@ -3,6 +3,25 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   productionBrowserSourceMaps: true,
+images: {
+  remotePatterns: [
+    { protocol: 'https', hostname: 'i.ytimg.com' },
+    { protocol: 'https', hostname: 'icons.duckduckgo.com' },
+
+    // OG/shot провайдеры
+    { protocol: 'https', hostname: 's.wordpress.com' },
+    { protocol: 'https', hostname: 'image.thum.io' },
+    { protocol: 'https', hostname: 'image.microlink.io' },
+    { protocol: 'https', hostname: 'api.screenshotmachine.com' },
+    { protocol: 'https', hostname: 'shot.screenshotapi.net' },
+    { protocol: 'https', hostname: 'cdn.screenshotone.com' },
+
+    // иногда OG-картинки идут с амазоновских CDN
+    { protocol: 'https', hostname: 'm.media-amazon.com' },
+    { protocol: 'https', hostname: 'images-na.ssl-images-amazon.com' },
+  ],
+  formats: ['image/avif','image/webp'],
+},
 
   async headers() {
     // кто МОЖЕТ встраивать НАС (родители/host-страницы)
@@ -17,21 +36,19 @@ const nextConfig = {
       // 'https://*.your-domain.com'
     ];
 
-    // максимально совместимая, но валидная CSP:
-    // - ты Можешь встраивать любых детей (frame-src *),
-    // - делать любые запросы/WS (connect-src *),
-    // - инлайн-скрипты/стили и eval разрешены (для капризных SDK/плееров),
-    // - тебя могут встраивать ТОЛЬКО Telegram + твои домены (frame-ancestors ...).
+    // CSP под требования: запрет http:, upgrade-insecure-requests; либеральный img-src
+ 
     const csp = [
-      `default-src 'self' https: http: data: blob:;`,
-      `script-src 'self' https: http: 'unsafe-inline' 'unsafe-eval' blob:;`,
-      `style-src 'self' https: http: 'unsafe-inline' blob:;`,
-      `img-src * data: blob:;`,
+      `upgrade-insecure-requests;`,
+      `default-src 'self' https: data: blob:;`,
+      `script-src 'self' https: 'unsafe-inline' 'unsafe-eval' blob:;`,
+      `style-src 'self' https: 'unsafe-inline' blob:;`,
+      `img-src * data: blob:;`,  // либерально для совместимости скриншотов
       `font-src * data:;`,
       `media-src * data: blob:;`,
-      `connect-src * data: blob: ws: wss:;`,
+     `connect-src * data: blob: ws: wss:;`,
       `frame-src * data: blob:;`,
-      `worker-src 'self' blob: https: http:;`,
+      `worker-src 'self' blob: https:;`,
       `manifest-src *;`,
       `base-uri *;`,
       `form-action *;`,
