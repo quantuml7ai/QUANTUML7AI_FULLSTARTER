@@ -7396,6 +7396,7 @@ try {
 } catch (e) {}
  
 const FORUM_NEWS_EN = {
+  forum_ad_label: 'Advertisement',
   forum_title: 'Forum',
   nick_free: "Username is available",
   nick_taken: "Username is taken",
@@ -7448,6 +7449,7 @@ const FORUM_NEWS_EN = {
 
 /* -------------------- RU -------------------- */
 const FORUM_NEWS_RU = {
+  forum_ad_label: 'Реклама',
    forum_title: 'Форум',
    nick_free: "Ник свободен",
    nick_taken: "Ник уже занят",
@@ -7500,6 +7502,7 @@ const FORUM_NEWS_RU = {
 
 /* -------------------- UK -------------------- */
 const FORUM_NEWS_UK = {
+  forum_ad_label: 'Реклама',
   forum_title: 'Форум',
   nick_free: "Нік вільний",
   nick_taken: "Нік вже зайнятий",
@@ -7552,6 +7555,7 @@ const FORUM_NEWS_UK = {
 
 /* -------------------- ES -------------------- */
 const FORUM_NEWS_ES = {
+  forum_ad_label: 'Anuncio',
   forum_title: 'Foro',
   nick_free: "Nombre de usuario disponible",
   nick_taken: "Nombre de usuario ocupado",
@@ -7604,6 +7608,7 @@ const FORUM_NEWS_ES = {
 
 /* -------------------- ZH (简体) -------------------- */
 const FORUM_NEWS_ZH = {
+  forum_ad_label: '广告',
   forum_title: '论坛',
   nick_free: "昵称可用",
   nick_taken: "昵称已被占用",
@@ -7656,6 +7661,7 @@ const FORUM_NEWS_ZH = {
 
 /* -------------------- AR -------------------- */
 const FORUM_NEWS_AR = {
+  forum_ad_label: 'إعلان',
   forum_title: 'المنتدى',
   nick_free: "اسم المستخدم متاح",
   nick_taken: "اسم المستخدم مستخدم بالفعل",  
@@ -7708,6 +7714,7 @@ const FORUM_NEWS_AR = {
 
 /* -------------------- TR -------------------- */
 const FORUM_NEWS_TR = {
+  forum_ad_label: 'Reklam',
   forum_title: 'Forum',
   nick_free: "Kullanıcı adı uygun",
   nick_taken: "Kullanıcı adı alınmış",  
