@@ -4286,88 +4286,6 @@ export function VideoOverlay({
       devicesRef.current.back  = back?.deviceId || null;
     } catch {}
   }, []);
-  // ==== CAMERA HELPERS: permission flag + front-camera unmirror ====
-  const CAM_PERMISSION_LS = 'forum:camera:granted:v1';
-  const markCamGranted = () => { try { localStorage.setItem(CAM_PERMISSION_LS, '1'); } catch {} };
-
-  // Создаём видео-трек с инверсией по X через canvas.captureStream().
-  // ВАЖНО: origTrack не останавливаем здесь.
-  async function mirrorVideoTrack(origTrack) {
-    if (!origTrack) return null;
-
-    const srcStream = new MediaStream([origTrack]);
-
-    const video = document.createElement('video');
-    video.muted = true;
-    video.playsInline = true;
-    video.autoplay = true;
-    video.srcObject = srcStream;
-    video.style.position = 'fixed';
-    video.style.opacity = '0';
-    video.style.pointerEvents = 'none';
-    video.style.width = '1px';
-    video.style.height = '1px';
-    document.body.appendChild(video);
-
-    await new Promise((resolve) => {
-      if (video.readyState >= 1 && (video.videoWidth || video.videoHeight)) return resolve();
-      const onMeta = () => { video.removeEventListener('loadedmetadata', onMeta); resolve(); };
-      video.addEventListener('loadedmetadata', onMeta);
-      setTimeout(resolve, 500);
-    });
-
-    try { await video.play(); } catch {}
-
-    const s = origTrack.getSettings ? origTrack.getSettings() : {};
-    const w = video.videoWidth || s.width || 0;
-    const h = video.videoHeight || s.height || 0;
-    if (!w || !h) {
-      try { video.remove(); } catch {}
-      return origTrack;
-    }
-
-    const canvas = document.createElement('canvas');
-    canvas.width = w;
-    canvas.height = h;
-    canvas.style.position = 'fixed';
-    canvas.style.opacity = '0';
-    canvas.style.pointerEvents = 'none';
-    document.body.appendChild(canvas);
-
-    const ctx = canvas.getContext('2d');
-    let rafId = null;
-    const loop = () => {
-      try {
-        ctx.save();
-        // СИСТЕМНОЕ ЗЕРКАЛО (user) → ЕЩЁ РАЗ ФЛИПАЕМ → ПОЛУЧАЕМ НОРМАЛЬНОЕ ВИДЕО
-        ctx.setTransform(-1, 0, 0, 1, w, 0);
-        ctx.drawImage(video, 0, 0, w, h);
-        ctx.restore();
-      } catch {}
-      rafId = requestAnimationFrame(loop);
-    };
-    loop();
-
-    const outStream = canvas.captureStream(30);
-    const mirroredTrack = outStream.getVideoTracks()[0] || null;
-
-    const cleanup = () => {
-      try { if (rafId) cancelAnimationFrame(rafId); } catch {}
-      try { outStream.getTracks().forEach(t => t.stop()); } catch {}
-      try { video.remove(); } catch {}
-      try { canvas.remove(); } catch {}
-    };
-
-    if (!mirroredTrack) {
-      cleanup();
-      return origTrack;
-    }
-
-    mirroredTrack.addEventListener?.('ended', cleanup);
-    origTrack.addEventListener?.('ended', cleanup);
-
-    return mirroredTrack;
-  }
 
   // при открытии live/recording — поднимем камеру, если ещё нет
   React.useEffect(() => {
@@ -4376,40 +4294,18 @@ export function VideoOverlay({
     const cur = streamRef?.current;
     const hasTracks = !!cur && (cur.getVideoTracks?.().length || 0) > 0;
     if (hasTracks) return;
-
     (async () => {
       try {
         const ms = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: { ideal: 'user' } },
           audio: true,
         });
-
-        markCamGranted();
-
-        const vTrack = ms.getVideoTracks?.()[0] || null;
-        const aTracks = ms.getAudioTracks?.() || [];
-        let outStream = ms;
-
-        if (vTrack) {
-          const s = vTrack.getSettings ? vTrack.getSettings() : {};
-          const isFront = s.facingMode === 'user' || s.facingMode === 'front';
-          if (isFront) {
-            const fixed = await mirrorVideoTrack(vTrack);
-            if (fixed && fixed !== vTrack) {
-              outStream = new MediaStream([
-                ...aTracks.filter(t => t.readyState === 'live'),
-                fixed,
-              ]);
-            }
-          }
-        }
-
-        streamRef.current = outStream;
-
+        streamRef.current = ms;
         try {
+          // после первого разрешения станут доступны labels
           await enumerateVideoInputs();
-          const s2 = outStream.getVideoTracks?.()[0]?.getSettings?.();
-          if (s2?.facingMode) setFacing(s2.facingMode);
+          const s = ms.getVideoTracks?.()[0]?.getSettings?.();
+          if (s?.facingMode) setFacing(s.facingMode);
         } catch {}
       } catch {}
     })();
@@ -4511,34 +4407,27 @@ export function VideoOverlay({
   // ───────────────────────────────────────────────────────────
   // СМЕНА КАМЕРЫ БЕЗ ПОВТОРНЫХ РАЗРЕШЕНИЙ (Android-friendly)
   const getStreamVideoOnlyByDeviceId = async (deviceId) => {
-    const s = await navigator.mediaDevices.getUserMedia({
+    return await navigator.mediaDevices.getUserMedia({
       video: deviceId ? { deviceId: { exact: deviceId } } : true,
       audio: false, // важно: не просим аудио заново → меньше всплывающих разрешений
     });
-    markCamGranted();
-    return s;    
   };
 
   const getStreamVideoOnlyByFacing = async (want /* 'user' | 'environment' */) => {
     try {
-      const s1 = await navigator.mediaDevices.getUserMedia({
+      return await navigator.mediaDevices.getUserMedia({
         video: { facingMode: { exact: want } },
         audio: false,
       });
-      markCamGranted();
-      return s1;      
     } catch {}
     try {
-      const s2 = await navigator.mediaDevices.getUserMedia({
+      return await navigator.mediaDevices.getUserMedia({
         video: { facingMode: { ideal: want } },
         audio: false,
       });
-      markCamGranted();
-      return s2;      
     } catch {}
-    const s3 = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-    markCamGranted();
-    return s3;  };
+    return await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+  };
 
   // аккуратно освобождаем текущую видеокамеру (для Android)
   const stopVideoOnly = async (stream) => {
@@ -4594,26 +4483,11 @@ export function VideoOverlay({
       const newVideoTrack = onlyVideoStream.getVideoTracks?.()[0];
       if (!newVideoTrack) throw new Error('no_video_track');
 
-      let finalVideoTrack = newVideoTrack;
-      try {
-        const s2 = newVideoTrack.getSettings ? newVideoTrack.getSettings() : {};
-        const isFront = s2.facingMode === 'user' || s2.facingMode === 'front';
-        if (isFront) {
-          const fixed = await mirrorVideoTrack(newVideoTrack);
-          if (fixed && fixed !== newVideoTrack) {
-            finalVideoTrack = fixed;
-          }
-        }
-      } catch {}
-
-      markCamGranted();
       // собираем новый общий поток: старые аудио + новый видео (без запроса audio)
       const oldAudio = (curStream?.getAudioTracks?.() || []).filter(t => t.readyState === 'live');
       const merged = new MediaStream([
         ...oldAudio,
         newVideoTrack,
-        finalVideoTrack,
-
       ]);
 
       streamRef.current = merged;
@@ -6200,16 +6074,8 @@ const videoCancelRef = useRef(false); // true => onstop не собирает bl
    const startRecord = async () => {
      if (recState === 'rec') return;
      try {
-      let stream = null;
-      try {
-        const cur = streamRef?.current;
-        const ats = (cur?.getAudioTracks?.() || []).filter(t => t.readyState === 'live');
-        if (ats.length) stream = new MediaStream(ats);
-      } catch {}
-      if (!stream) {
-        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      }
-      markCamGranted();       const mr = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+       const mr = new MediaRecorder(stream, { mimeType: 'audio/webm' });
        chunksRef.current = [];
        mr.ondataavailable = (e) => { if (e.data && e.data.size) chunksRef.current.push(e.data) };
        mr.onstop = async () => {
@@ -7425,6 +7291,30 @@ const closeQuests = React.useCallback(() => {
   setQuestSel(null);
   setQuestOpen(false);
 }, []);
+// Жёсткий лог, чтобы увидеть, что происходит с interleaveAds
+function debugAdsSlots(label, slots) {
+  try {
+    console.log('[ADS] slots', label, slots);
+  } catch {}
+  return slots;
+}
+
+// Обёртка над resolveCurrentAdUrl с логом входа/выхода
+function pickAdUrlForSlot(slotKey, slotKind, adConf, clientId) {
+  const url = resolveCurrentAdUrl(
+    adConf,
+    clientId,
+    Date.now(),
+    slotKey,
+    AdsCoordinator
+  );
+
+  try {
+    console.log('[ADS] slot', { slotKey, slotKind, url });
+  } catch {}
+
+  return url;
+}
 // конфиг рекламы
 const adConf = getForumAdConf();
 
@@ -7438,73 +7328,26 @@ const clientId =
 // гарантия, что interleaveAds всегда получит >0
 const adEvery = adConf?.EVERY && adConf.EVERY > 0 ? adConf.EVERY : 1;
 
+// жёсткий лог — раз и навсегда
 console.log('[ADS] adConf', adConf, 'adEvery=', adEvery);
 
-// одна сессия показа рекламы внутри одного тайм-слота (ROTATE_MIN)
-const adSessionRef = useRef({
-  bucket: null,
-  used: new Set(), // урлы, уже выданные слотам в текущем bucket
-});
-
-// лог слотов (если нужно смотреть интерлив)
+// лог + passthrough для слотов
 function debugAdsSlots(label, slots) {
-  try {
-    console.log('[ADS] slots', label, slots);
-  } catch {}
+  console.log('[ADS] slots', label, slots);
   return slots;
 }
 
-// выбор урла для конкретного слота, без дублей в рамках одного ROTATE_MIN
+// обёртка над resolveCurrentAdUrl, чтобы видеть, что реально вызывается
 function pickAdUrlForSlot(slotKey, slotKind) {
-  if (!adConf) return null;
-
-  const now = Date.now();
-  const rotateMin = Number(adConf.ROTATE_MIN || 1);
-  const periodMs = Math.max(1, rotateMin) * 60_000;
-  const bucket = Math.floor(now / periodMs);
-
-  const sess = adSessionRef.current;
-
-  // новый временной слот — сбрасываем использованные ссылки
-  if (sess.bucket !== bucket) {
-    sess.bucket = bucket;
-    sess.used = new Set();
-  }
-
-  // базовый выбор через resolveCurrentAdUrl (ничего не ломаем)
-  let url = resolveCurrentAdUrl(
+  const url = resolveCurrentAdUrl(
     adConf,
     clientId,
-    now,
+    Date.now(),
     slotKey,
     AdsCoordinator
   );
-
-  // актуальный пул ссылок
-  const links = (
-    Array.isArray(adConf.LINKS) && adConf.LINKS.length
-      ? adConf.LINKS
-      : FALLBACK_LINKS
-  ).filter(Boolean);
-
-  // если в этом bucket уже показывали этот url и есть другие варианты —
-  // пробуем отдать неиспользованный
-  if (url && sess.used.has(url) && links.length > 1) {
-    const alt = links.find((candidate) => !sess.used.has(candidate));
-    if (alt) {
-      url = alt;
-    }
-  }
-
-  if (url) {
-    sess.used.add(url);
-  }
-
-  try {
-    console.log('[ADS] slot_pick', { slotKey, slotKind, url });
-  } catch {}
-
-  return url || null;
+  console.log('[ADS] slot_pick', { slotKey, slotKind, url });
+  return url;
 }
 
   /* ---- render ---- */
