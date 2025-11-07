@@ -7291,30 +7291,6 @@ const closeQuests = React.useCallback(() => {
   setQuestSel(null);
   setQuestOpen(false);
 }, []);
-// Жёсткий лог, чтобы увидеть, что происходит с interleaveAds
-function debugAdsSlots(label, slots) {
-  try {
-    console.log('[ADS] slots', label, slots);
-  } catch {}
-  return slots;
-}
-
-// Обёртка над resolveCurrentAdUrl с логом входа/выхода
-function pickAdUrlForSlot(slotKey, slotKind, adConf, clientId) {
-  const url = resolveCurrentAdUrl(
-    adConf,
-    clientId,
-    Date.now(),
-    slotKey,
-    AdsCoordinator
-  );
-
-  try {
-    console.log('[ADS] slot', { slotKey, slotKind, url });
-  } catch {}
-
-  return url;
-}
 // конфиг рекламы
 const adConf = getForumAdConf();
 
@@ -7328,26 +7304,73 @@ const clientId =
 // гарантия, что interleaveAds всегда получит >0
 const adEvery = adConf?.EVERY && adConf.EVERY > 0 ? adConf.EVERY : 1;
 
-// жёсткий лог — раз и навсегда
 console.log('[ADS] adConf', adConf, 'adEvery=', adEvery);
 
-// лог + passthrough для слотов
+// одна сессия показа рекламы внутри одного тайм-слота (ROTATE_MIN)
+const adSessionRef = useRef({
+  bucket: null,
+  used: new Set(), // урлы, уже выданные слотам в текущем bucket
+});
+
+// лог слотов (если нужно смотреть интерлив)
 function debugAdsSlots(label, slots) {
-  console.log('[ADS] slots', label, slots);
+  try {
+    console.log('[ADS] slots', label, slots);
+  } catch {}
   return slots;
 }
 
-// обёртка над resolveCurrentAdUrl, чтобы видеть, что реально вызывается
+// выбор урла для конкретного слота, без дублей в рамках одного ROTATE_MIN
 function pickAdUrlForSlot(slotKey, slotKind) {
-  const url = resolveCurrentAdUrl(
+  if (!adConf) return null;
+
+  const now = Date.now();
+  const rotateMin = Number(adConf.ROTATE_MIN || 1);
+  const periodMs = Math.max(1, rotateMin) * 60_000;
+  const bucket = Math.floor(now / periodMs);
+
+  const sess = adSessionRef.current;
+
+  // новый временной слот — сбрасываем использованные ссылки
+  if (sess.bucket !== bucket) {
+    sess.bucket = bucket;
+    sess.used = new Set();
+  }
+
+  // базовый выбор через resolveCurrentAdUrl (ничего не ломаем)
+  let url = resolveCurrentAdUrl(
     adConf,
     clientId,
-    Date.now(),
+    now,
     slotKey,
     AdsCoordinator
   );
-  console.log('[ADS] slot_pick', { slotKey, slotKind, url });
-  return url;
+
+  // актуальный пул ссылок
+  const links = (
+    Array.isArray(adConf.LINKS) && adConf.LINKS.length
+      ? adConf.LINKS
+      : FALLBACK_LINKS
+  ).filter(Boolean);
+
+  // если в этом bucket уже показывали этот url и есть другие варианты —
+  // пробуем отдать неиспользованный
+  if (url && sess.used.has(url) && links.length > 1) {
+    const alt = links.find((candidate) => !sess.used.has(candidate));
+    if (alt) {
+      url = alt;
+    }
+  }
+
+  if (url) {
+    sess.used.add(url);
+  }
+
+  try {
+    console.log('[ADS] slot_pick', { slotKey, slotKind, url });
+  } catch {}
+
+  return url || null;
 }
 
   /* ---- render ---- */
