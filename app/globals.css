@@ -9,6 +9,12 @@ body{
 
 /* ===== Hero background (video + effects) ===== */
 .scene{position:fixed;inset:0;width:100%;height:100%;overflow:hidden;z-index:0}
+/* iOS fix: фон и всё внутри него не ловят тапы */
+.scene,
+.scene * {
+  pointer-events: none !important;
+}
+
 .bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(1.05)}
 .stars{
   position:absolute;inset:0;pointer-events:none;z-index:1;
