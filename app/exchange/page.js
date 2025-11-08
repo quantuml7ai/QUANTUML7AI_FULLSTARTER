@@ -775,11 +775,13 @@ function OrderBook({ symbol }) {
       <style jsx>{`
         /* ===== Хедер и линия борьбы ===== */
         .ob-hdr {
-          display: flex;
+         display: flex;
           align-items: center;
+          justify-content: space-between;
           gap: 10px;
           margin-bottom: 10px;
           font-size: 12px;
+          flex-wrap: nowrap;
         }
 
         .ob-side-label {
@@ -985,19 +987,12 @@ function OrderBook({ symbol }) {
         }
 
         @media (max-width: 640px) {
-          .ob-hdr {
-            flex-direction: column;
-            align-items: stretch;
+           .ob-hdr {
             gap: 6px;
+            font-size: 11px;
           }
           .ob-battle {
-            order: 3;
-          }
-          .ob-side-label {
-            align-self: flex-start;
-          }
-          .ob-hdr .ob-sell {
-            align-self: flex-end;
+            margin: 0 4px;
           }
         }
       `}</style>
