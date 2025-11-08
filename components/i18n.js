@@ -7396,6 +7396,8 @@ try {
 } catch (e) {}
  
 const FORUM_NEWS_EN = {
+orderbook_buy:  "Buy", 
+orderbook_sell: "Sell",  
   forum_save: 'Saving',
   forum_ad_label: 'Advertisement',
   forum_title: 'Forum',
@@ -7450,6 +7452,8 @@ const FORUM_NEWS_EN = {
 
 /* -------------------- RU -------------------- */
 const FORUM_NEWS_RU = {
+orderbook_buy:  "Покупка", 
+orderbook_sell: "Продажа",  
   forum_save: 'Сохраняем',
   forum_ad_label: 'Реклама',
    forum_title: 'Форум',
@@ -7504,6 +7508,9 @@ const FORUM_NEWS_RU = {
 
 /* -------------------- UK -------------------- */
 const FORUM_NEWS_UK = {
+ orderbook_buy:  "Покупка", 
+orderbook_sell: "Продаж",
+ 
   forum_save: 'Зберігаємо',
   forum_ad_label: 'Реклама',
   forum_title: 'Форум',
@@ -7558,6 +7565,8 @@ const FORUM_NEWS_UK = {
 
 /* -------------------- ES -------------------- */
 const FORUM_NEWS_ES = {
+ orderbook_buy:  "Compra", 
+orderbook_sell: "Venta", 
   forum_save: 'Guardando',
   forum_ad_label: 'Anuncio',
   forum_title: 'Foro',
@@ -7612,6 +7621,8 @@ const FORUM_NEWS_ES = {
 
 /* -------------------- ZH (简体) -------------------- */
 const FORUM_NEWS_ZH = {
+ orderbook_buy:  "买入", 
+orderbook_sell: "卖出", 
   forum_save: '保存中',
   forum_ad_label: '广告',
   forum_title: '论坛',
@@ -7666,6 +7677,8 @@ const FORUM_NEWS_ZH = {
 
 /* -------------------- AR -------------------- */
 const FORUM_NEWS_AR = {
+ orderbook_buy:  "شراء", 
+orderbook_sell: "بيع", 
   forum_save: 'جارٍ الحفظ',
   forum_ad_label: 'إعلان',
   forum_title: 'المنتدى',
@@ -7720,6 +7733,8 @@ const FORUM_NEWS_AR = {
 
 /* -------------------- TR -------------------- */
 const FORUM_NEWS_TR = {
+ orderbook_buy:  "Alış", 
+orderbook_sell: "Satış", 
   forum_save: 'Kaydediyoruz',
   forum_ad_label: 'Reklam',
   forum_title: 'Forum',

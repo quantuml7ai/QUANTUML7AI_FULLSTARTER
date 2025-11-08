@@ -656,45 +656,356 @@ function AIQuotaGate({ children, onOpenUnlimit }) {
 }
 
 
-/* ================================= OrderBook (black) ================================= */
-function OrderBook({symbol}){
-  const [data,setData]=useState(null)
-  useEffect(()=>{
-    let alive=true
-    ;(async()=>{ try{ const j=await fetchDepth(symbol,20); if(alive) setData(j) }catch{} })()
-    const id=setInterval(async()=>{ try{ const j=await fetchDepth(symbol,20); if(alive) setData(j) }catch{} }, 3000)
-    return ()=>{ alive=false; clearInterval(id) }
-  },[symbol])
-  if(!data) return <Panel><div className="muted">…loading</div></Panel>
-  const bids=data.bids.map(([p,q])=>({price:+p,qty:+q}))
-  const asks=data.asks.map(([p,q])=>({price:+p,qty:+q}))
-  const maxQty=Math.max(1,...bids.map(x=>x.qty),...asks.map(x=>x.qty))
-  return <Panel>
-    <div className="hdr">Order Book · {symbol}</div>
-    <div className="cols">
-      <div className="col">
-        <div className="h h-asks">Asks</div>
-        {asks.slice(0,20).reverse().map((r,i)=>(<div key={'a'+i} className="row ask">
-          <div className="bar" style={{width:`${(r.qty/maxQty)*100}%`}}/><span>{fmtP(r.price)}</span><span className="q">{fmtQ(r.qty)}</span></div>))}
+/* ================================= OrderBook (neo-visual) ================================= */
+function OrderBook({ symbol }) {
+  const { t } = useI18n()
+  const [data, setData] = useState(null)
+
+  useEffect(() => {
+    let alive = true
+
+    async function load() {
+      try {
+        const j = await fetchDepth(symbol, 50)
+        if (alive) setData(j)
+      } catch {}
+    }
+
+    load()
+    const id = setInterval(load, 3000)
+
+    return () => {
+      alive = false
+      clearInterval(id)
+    }
+  }, [symbol])
+
+  if (!data) {
+    return (
+      <Panel>
+        <div className="ob-loading">…loading</div>
+        <style jsx>{`
+          .ob-loading {
+            opacity: 0.75;
+            font-size: 12px;
+          }
+        `}</style>
+      </Panel>
+    )
+  }
+
+  const bids = data.bids.map(([p, q]) => ({ price: +p, qty: +q }))
+  const asks = data.asks.map(([p, q]) => ({ price: +p, qty: +q }))
+
+  const maxQty = Math.max(1, ...bids.map(x => x.qty), ...asks.map(x => x.qty))
+
+  // i18n: лейблы "Покупка"/"Продажа" (7 языков в словарях)
+  const labelBuy = TX(t, 'orderbook_buy', 'Buy')
+  const labelSell = TX(t, 'orderbook_sell', 'Sell')
+
+  // === линия борьбы на реальных объёмах стакана ===
+  const totalBid = bids.reduce((s, x) => s + x.qty, 0)
+  const totalAsk = asks.reduce((s, x) => s + x.qty, 0)
+  const total = (totalBid + totalAsk) || 1
+  const bidPct = Math.round((totalBid / total) * 100)
+  const askPct = 100 - bidPct
+
+  return (
+    <Panel>
+      {/* Верхний хедер: Buy слева, Sell справа, посередине анимированная линия доминанса */}
+      <div className="ob-hdr">
+        <span className="ob-side-label ob-buy">{labelBuy}</span>
+
+        <div className="ob-battle">
+          <div className="ob-bar">
+            <div
+              className="ob-seg ob-seg-buy"
+              style={{ width: `${bidPct}%` }}
+            />
+            <div
+              className="ob-seg ob-seg-sell"
+              style={{ width: `${askPct}%` }}
+            />
+            {/* мягкий бегущий блик по всей полосе */}
+            <div className="ob-bar-glow" />
+          </div>
+          <div className="ob-nums">
+            <span className="ob-num ob-num-buy">{bidPct}%</span>
+            <span className="ob-num ob-num-sell">{askPct}%</span>
+          </div>
+        </div>
+
+        <span className="ob-side-label ob-sell">{labelSell}</span>
       </div>
-      <div className="col">
-        <div className="h h-bids">Bids</div>
-        {bids.slice(0,20).map((r,i)=>(<div key={'b'+i} className="row bid">
-          <div className="bar" style={{width:`${(r.qty/maxQty)*100}%`}}/><span>{fmtP(r.price)}</span><span className="q">{fmtQ(r.qty)}</span></div>))}
+
+      {/* Две колонки: слева bids (buy), справа asks (sell) */}
+      <div className="ob-cols">
+        {/* BUY / BIDS */}
+        <div className="ob-col">
+          {bids.slice(0, 20).map((r, i) => (
+            <div key={'b' + i} className="ob-row ob-row-bid">
+              <div
+                className="ob-row-fill"
+                style={{ width: `${(r.qty / maxQty) * 100}%` }}
+              />
+              <span className="ob-price">{fmtP(r.price)}</span>
+              <span className="ob-qty">{fmtQ(r.qty)}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* SELL / ASKS */}
+        <div className="ob-col">
+          {asks
+            .slice(0, 20)
+            .reverse()
+            .map((r, i) => (
+              <div key={'a' + i} className="ob-row ob-row-ask">
+                <div
+                  className="ob-row-fill"
+                  style={{ width: `${(r.qty / maxQty) * 100}%` }}
+                />
+                <span className="ob-price">{fmtP(r.price)}</span>
+                <span className="ob-qty">{fmtQ(r.qty)}</span>
+              </div>
+            ))}
+        </div>
       </div>
-    </div>
-    <style jsx>{`
-      .hdr{opacity:.85;margin-bottom:6px;font-size:12px}
-      .cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-      .h{font-weight:700;margin-bottom:4px}
-      .h-asks{color:#f87171}.h-bids{color:#4ade80}
-      .row{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:4px 8px;border-radius:8px;overflow:hidden;font-variant-numeric:tabular-nums}
-      .row .bar{position:absolute;left:0;top:0;bottom:0;opacity:.18}
-      .ask .bar{background:#ef4444}.bid .bar{background:#22c55e}
-      .q{text-align:right}
-    `}</style>
-  </Panel>
+
+      <style jsx>{`
+        /* ===== Хедер и линия борьбы ===== */
+        .ob-hdr {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 10px;
+          font-size: 12px;
+        }
+
+        .ob-side-label {
+          padding: 4px 14px;
+          border-radius: 999px;
+          font-weight: 800;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: rgba(4, 7, 15, 0.96);
+          box-shadow: 0 0 14px rgba(0, 0, 0, 0.9);
+          border: 1px solid rgba(148, 163, 253, 0.14);
+        }
+
+        .ob-buy {
+          color: #4ade80;
+          border-color: rgba(34, 197, 94, 0.9);
+          box-shadow: 0 0 16px rgba(22, 163, 74, 0.45);
+        }
+        .ob-sell {
+          color: #f87171;
+          border-color: rgba(239, 68, 68, 0.9);
+          box-shadow: 0 0 16px rgba(239, 68, 68, 0.45);
+        }
+
+        .ob-battle {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+        }
+
+        .ob-bar {
+          position: relative;
+          width: 100%;
+          height: 12px;
+          border-radius: 999px;
+          overflow: hidden;
+          background: radial-gradient(
+              circle at 0% 50%,
+              rgba(22, 163, 74, 0.16),
+              transparent 55%
+            ),
+            radial-gradient(
+              circle at 100% 50%,
+              rgba(239, 68, 68, 0.16),
+              transparent 55%
+            ),
+            rgba(6, 8, 20, 0.96);
+          box-shadow:
+            0 0 18px rgba(15, 23, 42, 0.9) inset,
+            0 0 12px rgba(15, 23, 42, 0.9);
+        }
+
+        .ob-seg {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          transition: width 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+
+        .ob-seg-buy {
+          left: 0;
+          background: linear-gradient(
+            to right,
+            rgba(34, 197, 94, 0.95),
+            rgba(22, 163, 74, 0.8)
+          );
+        }
+
+        .ob-seg-sell {
+          right: 0;
+          background: linear-gradient(
+            to left,
+            rgba(239, 68, 68, 0.95),
+            rgba(248, 113, 113, 0.8)
+          );
+        }
+
+        /* Бегущий блик по полосе */
+        .ob-bar-glow {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 18%;
+          background: linear-gradient(
+            to right,
+            transparent,
+            rgba(148, 163, 253, 0.35),
+            transparent
+          );
+          mix-blend-mode: screen;
+          opacity: 0.14;
+          animation: obGlow 2.8s linear infinite;
+        }
+
+        .ob-nums {
+          display: flex;
+          justify-content: space-between;
+          font-size: 10px;
+          font-weight: 600;
+        }
+        .ob-num-buy {
+          color: #4ade80;
+        }
+        .ob-num-sell {
+          color: #f97373;
+        }
+
+        @keyframes obGlow {
+          0% {
+            transform: translateX(-10%);
+          }
+          100% {
+            transform: translateX(110%);
+          }
+        }
+
+        /* ===== Таблица заявок ===== */
+        .ob-cols {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+          margin-top: 4px;
+        }
+
+        .ob-col {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .ob-row {
+          position: relative;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+          padding: 4px 8px;
+          border-radius: 8px;
+          overflow: hidden;
+          font-variant-numeric: tabular-nums;
+          font-size: 11px;
+          color: #e5e7eb;
+          background: radial-gradient(
+              circle at 0 0,
+              rgba(148, 163, 253, 0.06),
+              transparent 65%
+            ),
+            rgba(3, 7, 18, 0.9);
+          transition:
+            background 0.18s ease,
+            transform 0.18s ease,
+            box-shadow 0.18s ease;
+        }
+
+        .ob-row-fill {
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          opacity: 0.16;
+          pointer-events: none;
+          transition: width 0.22s ease-out, opacity 0.18s ease;
+        }
+
+        .ob-row-bid .ob-row-fill {
+          background: linear-gradient(
+            to right,
+            rgba(22, 163, 74, 0.85),
+            rgba(22, 163, 74, 0.15)
+          );
+        }
+
+        .ob-row-ask .ob-row-fill {
+          background: linear-gradient(
+            to right,
+            rgba(239, 68, 68, 0.85),
+            rgba(239, 68, 68, 0.15)
+          );
+        }
+
+        .ob-row:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 8px 14px rgba(0, 0, 0, 0.6);
+          background: radial-gradient(
+              circle at 10% 0,
+              rgba(148, 163, 253, 0.16),
+              transparent 70%
+            ),
+            rgba(6, 9, 20, 0.98);
+        }
+        .ob-row:hover .ob-row-fill {
+          opacity: 0.26;
+        }
+
+        .ob-price {
+          z-index: 1;
+        }
+        .ob-qty {
+          z-index: 1;
+          text-align: right;
+          color: rgba(226, 232, 240, 0.9);
+        }
+
+        @media (max-width: 640px) {
+          .ob-hdr {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 6px;
+          }
+          .ob-battle {
+            order: 3;
+          }
+          .ob-side-label {
+            align-self: flex-start;
+          }
+          .ob-hdr .ob-sell {
+            align-self: flex-end;
+          }
+        }
+      `}</style>
+    </Panel>
+  )
 }
+
+
 
 /* ===================== Маркиза как на главной: бесшовно, full-bleed ===================== */
 function PageMarqueeTail() {
