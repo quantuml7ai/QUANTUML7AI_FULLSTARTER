@@ -578,7 +578,7 @@ export default function ForumPage() {
             border-radius: 14px;
           }
           .fr-body {
-            max-height: 450px;
+            max-height: 400px;
             padding: 8px 8px;
           }
           .fr-body-text,
