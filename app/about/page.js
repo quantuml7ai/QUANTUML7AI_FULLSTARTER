@@ -3,6 +3,7 @@
 
 import { useI18n } from '../../components/i18n'
 import { useRef, useEffect } from 'react'
+import HomeBetweenBlocksAd from '../ads'
 
 /* ===== Маркиза как на главной: бесшовно, full-bleed, без «пропаданий» ===== */
 function PageMarqueeTail() {
@@ -302,7 +303,11 @@ export default function AboutPage() {
           }
         `}</style>
       </main>
-
+     {/* Реклама сразу после биржевого стакана (Order Book) */}
+     <HomeBetweenBlocksAd
+      slotKey="exchange_after_orderbook"
+       slotKind="exchange_after_orderbook"
+     />
       {/* Хвост страницы: бегущая строка во всю ширину */}
       <PageMarqueeTail />
 

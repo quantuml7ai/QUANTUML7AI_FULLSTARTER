@@ -1,10 +1,12 @@
+// app/page.js
+
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'           // ← добавлено
 import { useI18n } from '../components/i18n'
-
+import HomeBetweenBlocksAd from './ads'
 function AutoMedia({ 
   base,
   exts = ['mp4', 'webm', 'gif', 'webp', 'png', 'jpg', 'jpeg'],
@@ -165,6 +167,7 @@ export default function Home() {
     )
 
     if (idx === 0) { 
+  
       content.push(
         <section className="panel" key="live-bloomberg">
           <h2>Live: Bloomberg US</h2>
@@ -219,7 +222,10 @@ export default function Home() {
           </Link>
         </div> 
       </section>
- 
+
+     {/* Реклама строго между hero (1-й блок) и первым блоком из home_blocks (2-й блок) */}
+     <HomeBetweenBlocksAd key="home-ad-between-hero-and-block-1" />
+   
       {content}
  
       <section className="marquee-wrap" aria-hidden="true">

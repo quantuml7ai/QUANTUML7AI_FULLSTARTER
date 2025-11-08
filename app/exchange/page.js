@@ -9,7 +9,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import * as Brain from '../../lib/brain.js'
-
+import HomeBetweenBlocksAd from '../ads'
 /* ================================ i18n bridge ================================ */
 let useI18n = () => ({ t: (k)=>k })
 try { const mod = require('../../components/i18n'); if (mod?.useI18n) useI18n = mod.useI18n } catch {}
@@ -828,7 +828,11 @@ export default function ExchangePage(){
       </AIQuotaGate>
 
       <OrderBook symbol={symbol}/>
-
+     {/* Реклама сразу после биржевого стакана (Order Book) */}
+     <HomeBetweenBlocksAd
+      slotKey="exchange_after_orderbook"
+       slotKind="exchange_after_orderbook"
+     />
       <section className="panel">
         <h2>{TX(t,'roadmap','Roadmap')}</h2>
         <div className="img16x9 panel-media">
@@ -849,7 +853,11 @@ export default function ExchangePage(){
         onClose={() => setOpenUnlimit(false)}
         onPay={handlePayClick}
       />
-
+     {/* Реклама перед финальным блоком (маркиза + иконки) */}
+     <HomeBetweenBlocksAd
+       slotKey="exchange_before_footer"
+       slotKind="exchange_before_footer"
+     />
       <PageMarqueeTail />
       {/* ===== ИКОНКИ ПОСЛЕ МАРКИЗЫ (глобальные стили ql7-*, как на главной/subscribe) ===== */}
       <div className="ql7-icons-row">

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'            // ← добавлено
 import { useWeb3Modal } from '@web3modal/wagmi/react'
 import { useRef, useEffect, useState } from 'react'
+import HomeBetweenBlocksAd from '../ads'
 
 /* ===== helpers: auth / VIP status / payment (как в Exchange) ===== */
 async function ensureAuthorized() {
@@ -305,7 +306,11 @@ export default function SubscribePage() {
             )}
           </div>
         </section>
-
+       {/* Реклама между 2-м (Plans) и 3-м (Why choose us) блоком */}
+       <HomeBetweenBlocksAd
+         slotKey="subscribe_between_2_3"
+         slotKind="subscribe_between"
+       />
         {/* Why choose us */}
         <section className="panel panel-narrow">
           <h2>{t('sub_benefits_title')}</h2>
