@@ -4220,26 +4220,38 @@ function HydrateText({ value }) {
   );
 }
 // --- live preview video: не перерисовывается каждую секунду таймера
-function LivePreview({ streamRef }) {
+function LivePreview({ streamRef, mirror }) {
   const ref = React.useRef(null);
+
   React.useEffect(() => {
     const el = ref.current;
     const s  = streamRef?.current;
     if (!el || !s) return;
     if (el.srcObject !== s) el.srcObject = s;
-    el.muted = true; el.playsInline = true;
+    el.muted = true;
+    el.playsInline = true;
     el.play?.();
   }, [streamRef?.current]);
+
   return (
     <video
       ref={ref}
       autoPlay
       playsInline
       muted
-      style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:12, background:'#000' }}
+      style={{
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        borderRadius: 12,
+        background: '#000',
+        // mirror=true → визуально раззеркаливаем системную фронталку
+        transform: mirror ? 'scaleX(-1)' : 'none'
+      }}
     />
   );
 }
+
 
 // --- overlay камеры/плеера: fullscreen + старт/стоп ИМЕННО из оверлея ---
 export function VideoOverlay({
@@ -4565,24 +4577,27 @@ export function VideoOverlay({
         pointerEvents: st === 'preview' ? 'auto' : 'none'
       }}>
         <div style={{ width:'100%', height:'100%', aspectRatio: aspect, overflow:'hidden' }}>
-          {(st === 'live' || st === 'recording') ? (
-            // УБЕЖДАЕМСЯ, ЧТО НИКТО НЕ ЗЕРКАЛИТ live:
-            <div className={fixMirrorClass}>
-              <LivePreview streamRef={streamRef} />
-            </div>
-          ) : (
-            // И превью файла — тоже без зеркал
-            <div className={fixMirrorClass}>
-              <video
-                ref={previewVidRef}
-                src={previewUrl || ''}
-                controls
-                playsInline
-                onLoadedMetadata={onMeta}
-                style={{ width:'100%', height:'100%', objectFit:'cover', background:'#000' }}
-              />
-            </div>
-          )}
+{(st === 'live' || st === 'recording') ? (
+  <div className={fixMirrorClass}>
+    <LivePreview
+      streamRef={streamRef}
+      // фронталка (user/front) → раззеркаливаем превью, чтобы совпадало с финальным видео
+      mirror={facing === 'user' || facing === 'front'}
+    />
+  </div>
+) : (
+  <div className={fixMirrorClass}>
+    <video
+      ref={previewVidRef}
+      src={previewUrl || ''}
+      controls
+      playsInline
+      onLoadedMetadata={onMeta}
+      style={{ width:'100%', height:'100%', objectFit:'cover', background:'#000' }}
+    />
+  </div>
+)}
+
         </div>
       </div>
 
@@ -4735,13 +4750,13 @@ export function VideoOverlay({
         .voCornerBR{ position:absolute; right: var(--vo-pad-x); display:flex; gap:10px; }
         .voCornerBL{ position:absolute; left: var(--vo-pad-x); display:flex; gap:10px; }
 
-        /* === ЖЁСТКО УБИВАЕМ ЛЮБОЕ ЗЕРКАЛО ВНУТРИ ПРЕВЬЮ === */
-        .voVideoFix{ width:100%; height:100%; background:#000; }
-        .voVideoFix :global(video), 
-        .voVideoFix :global(canvas){
-          transform: scaleX(1) !important;
-          -webkit-transform: scaleX(1) !important;
-        }
+/* === Контейнер превью; управление зеркалом делаем из JS по facing === */
+.voVideoFix{
+  width:100%;
+  height:100%;
+  background:#000;
+}
+
 
         .voBtn{
           width:44px; height:44px; border-radius:12px;
@@ -6070,7 +6085,9 @@ const startSendCooldown = React.useCallback((sec = 10) => {
  const videoChunksRef = useRef([]);     // BlobParts
  const [pendingVideo, setPendingVideo] = useState(null); // blob: URL готового ролика (preview)
 const videoCancelRef = useRef(false); // true => onstop не собирает blob (отмена)
- // --- voice handlers (зажал/держишь/отпустил) ---
+const videoMirrorRef = useRef(null);  // вспомогательный незеркальный front-поток для записи
+ 
+// --- voice handlers (зажал/держишь/отпустил) ---
    const startRecord = async () => {
      if (recState === 'rec') return;
      try {
@@ -6112,8 +6129,105 @@ const videoCancelRef = useRef(false); // true => onstop не собирает bl
     setRecElapsed(0);
    };
 
-// ==== CAMERA: открыть → запись → стоп → превью (фиксы для старта из overlay 'live') ====
-const startVideo = async () => {
+   // ==== CAMERA: открыть → запись → стоп → превью (фиксы для старта из overlay 'live') ====
+// Строит незеркальный видеопоток для фронтальной камеры
+// на основе уже открытого baseStream (без нового getUserMedia).
+async function createUnmirroredFrontStream(baseStream) {
+  try {
+    const srcTrack = baseStream?.getVideoTracks?.()[0];
+    if (!srcTrack) return null;
+
+    const s = srcTrack.getSettings?.() || {};
+    const facing = String(s.facingMode || '').toLowerCase();
+    const isFront =
+      facing.includes('user') ||
+      facing.includes('front') ||
+      facing.includes('face');
+    if (!isFront) return null;
+
+    const srcStream = new MediaStream([srcTrack]);
+
+    const video = document.createElement('video');
+    video.muted = true;
+    video.playsInline = true;
+    video.autoplay = true;
+    video.srcObject = srcStream;
+    video.style.position = 'fixed';
+    video.style.opacity = '0';
+    video.style.pointerEvents = 'none';
+    video.style.width = '1px';
+    video.style.height = '1px';
+    video.style.left = '-10px';
+    video.style.top = '-10px';
+    document.body.appendChild(video);
+
+    await new Promise((resolve) => {
+      if (video.readyState >= 1 && (video.videoWidth || video.videoHeight)) return resolve();
+      const onMeta = () => {
+        video.removeEventListener('loadedmetadata', onMeta);
+        resolve();
+      };
+      video.addEventListener('loadedmetadata', onMeta);
+      setTimeout(resolve, 400);
+    });
+
+    try { await video.play(); } catch {}
+
+    const w = video.videoWidth || s.width || 0;
+    const h = video.videoHeight || s.height || 0;
+    if (!w || !h) {
+      try { video.remove(); } catch {}
+      return null;
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    canvas.style.position = 'fixed';
+    canvas.style.opacity = '0';
+    canvas.style.pointerEvents = 'none';
+    canvas.style.width = '1px';
+    canvas.style.height = '1px';
+    canvas.style.left = '-10px';
+    canvas.style.top = '-10px';
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    let rafId = null;
+    const loop = () => {
+      try {
+        ctx.setTransform(-1, 0, 0, 1, w, 0); // зеркалим по X
+        ctx.drawImage(video, 0, 0, w, h);
+      } catch {}
+      rafId = requestAnimationFrame(loop);
+    };
+    loop();
+
+    const outStream = canvas.captureStream(30);
+    const outTrack = outStream.getVideoTracks?.()[0];
+    if (!outTrack) {
+      try { if (rafId) cancelAnimationFrame(rafId); } catch {}
+      try { outStream.getTracks().forEach(t => t.stop()); } catch {}
+      try { canvas.remove(); } catch {}
+      try { video.remove(); } catch {}
+      return null;
+    }
+
+    const stopMirror = () => {
+      try { if (rafId) cancelAnimationFrame(rafId); } catch {}
+      try { outStream.getTracks().forEach(t => t.stop()); } catch {}
+      try { canvas.remove(); } catch {}
+      try { video.remove(); } catch {}
+    };
+
+    // повесим на поток, чтобы удобно гасить
+    outStream.__stopMirror = stopMirror;
+    return outStream;
+  } catch {
+    return null;
+  }
+}
+   const startVideo = async () => {
   // Разрешаем старт из idle, preview, live
   const badStates = new Set(['opening', 'recording', 'processing', 'uploading']);
   if (badStates.has(videoState)) return;
@@ -6123,26 +6237,60 @@ const startVideo = async () => {
     setVideoOpen(true);
     setVideoState('opening');
 
-    // не создаём лишний стрим, если уже есть
-    let stream = videoStreamRef.current;
-    const hasTracks = !!stream && (stream.getTracks?.().length || 0) > 0;
+    // не создаём лишний базовый стрим, если уже есть живой
+    let baseStream = videoStreamRef.current;
+    const hasTracks = !!baseStream && (baseStream.getTracks?.().length || 0) > 0;
 
     if (!hasTracks) {
       try { videoCancelRef.current = false; } catch {}
-      stream = await navigator.mediaDevices.getUserMedia({
+      baseStream = await navigator.mediaDevices.getUserMedia({
         video: { width: 1280, height: 720, facingMode: { ideal: 'user' } },
         audio: true,
       });
-      videoStreamRef.current = stream;
+      videoStreamRef.current = baseStream;
     }
+
+    // если до этого был вспомогательный поток — гасим
+    try {
+      if (videoMirrorRef.current?.__stopMirror) videoMirrorRef.current.__stopMirror();
+    } catch {}
+    videoMirrorRef.current = null;
 
     const mime =
       MediaRecorder.isTypeSupported?.('video/webm;codecs=vp9')
         ? 'video/webm;codecs=vp9'
         : 'video/webm';
 
-    const mr = new MediaRecorder(stream, { mimeType: mime });
-    videoChunksRef.current = [];
+
+    // строим поток для записи:
+    //  - для задней камеры: baseStream как есть
+    //  - для фронтальной: canvas.captureStream() с разворотом (не зеркально)
+    const vTrack = baseStream.getVideoTracks?.()[0] || null;
+    const aTracks = (baseStream.getAudioTracks?.() || []).filter(t => t.readyState === 'live');
+
+    let recStream = baseStream;
+    if (vTrack) {
+      const s = vTrack.getSettings?.() || {};
+      const facing = String(s.facingMode || '').toLowerCase();
+      const isFront =
+        facing.includes('user') ||
+        facing.includes('front') ||
+        facing.includes('face');
+
+      if (isFront) {
+        const mirrorStream = await createUnmirroredFrontStream(baseStream);
+        const fixedTrack = mirrorStream?.getVideoTracks?.()[0] || null;
+        if (mirrorStream && fixedTrack) {
+          recStream = new MediaStream([
+            ...aTracks,
+            fixedTrack,
+          ]);
+          videoMirrorRef.current = mirrorStream;
+        }
+      }
+    }
+
+    const mr = new MediaRecorder(recStream, { mimeType: mime });    videoChunksRef.current = [];
 
     mr.ondataavailable = (e) => {
       if (e?.data?.size) videoChunksRef.current.push(e.data);
@@ -6151,6 +6299,11 @@ const startVideo = async () => {
     mr.onstop = async () => {
       clearInterval(videoTimerRef.current); videoTimerRef.current = null;
 
+      // в любом случае гасим вспомогательный зеркальный поток (если был)
+      try {
+        if (videoMirrorRef.current?.__stopMirror) videoMirrorRef.current.__stopMirror();
+      } catch {}
+      videoMirrorRef.current = null;
       try {
         if (videoCancelRef.current) {
           // отмена — ничего не собираем
@@ -6201,8 +6354,12 @@ const stopVideo = () => {
   if (videoState !== 'recording') return;
   setVideoState('processing');
   try { videoRecRef.current?.stop?.(); } catch {}
+  // основной стрим и спец-потоки гасим здесь: камера реально выключается
   try { videoStreamRef.current?.getTracks?.().forEach(tr => tr.stop()); } catch {}
-  clearInterval(videoTimerRef.current); videoTimerRef.current = null;
+  try {
+    if (videoMirrorRef.current?.__stopMirror) videoMirrorRef.current.__stopMirror();
+  } catch {}
+  videoMirrorRef.current = null;  clearInterval(videoTimerRef.current); videoTimerRef.current = null;
 };
 
 const resetVideo = () => {
@@ -6217,8 +6374,12 @@ const resetVideo = () => {
   }
 
   try { videoStreamRef.current?.getTracks?.().forEach(tr => tr.stop()); } catch {}
-  videoRecRef.current = null; videoStreamRef.current = null;
-
+  try {
+   if (videoMirrorRef.current?.__stopMirror) videoMirrorRef.current.__stopMirror();
+  } catch {}
+  videoRecRef.current = null;
+  videoStreamRef.current = null;
+  videoMirrorRef.current = null;
   if (pendingVideo && /^blob:/.test(pendingVideo)) {
     try { URL.revokeObjectURL(pendingVideo) } catch {}
   }
