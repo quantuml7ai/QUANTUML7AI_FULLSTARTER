@@ -3896,7 +3896,13 @@ function PostCard({
   // видео: blob: (локальный превью) или публичные ссылки /video-*.webm|.mp4 (и любые .mp4)
   const VIDEO_RE =
     /^(?:blob:[^\s]+|https?:\/\/[^\s]+(?:\/video-\d+\.(?:webm|mp4)|\.mp4)(?:[?#].*)?)$/i;
+  // YouTube: обычные watch + короткие youtu.be
+  const YT_RE =
+    /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{6,})/i;
 
+  // TikTok: базовые форматы ссылок на видео
+  const TIKTOK_RE =
+    /^(?:https?:\/\/)?(?:www\.)?tiktok\.com\/(@[\w.\-]+\/video\/(\d+)|t\/[A-Za-z0-9]+)(?:[?#].*)?$/i;
   // аудио: поддерживаем https и blob: (blob используется только локально, но подстрахуемся)
   const AUDIO_EXT = /\.(?:webm|ogg|mp3|m4a|wav)(?:$|[?#])/i;
   const isAudioLine = (s) => {
@@ -3938,6 +3944,11 @@ function PostCard({
   const imgInline   = collectMatches(allLines, IMG_RE);
   const videoInline = collectMatches(allLines, VIDEO_RE);
   const audioInline = collectMatches(allLines, AUDIO_EXT);
+  const ytInline    = collectMatches(allLines, YT_RE);
+  const tiktokInline = collectMatches(allLines, TIKTOK_RE);
+
+  const ytLines     = Array.from(new Set(ytInline));
+  const tiktokLines = Array.from(new Set(tiktokInline));
 
   const imgLines = Array.from(new Set([
     ...trimmed.filter(s => IMG_RE.test(s)),
@@ -3958,8 +3969,15 @@ function PostCard({
 
   const cleanedText = allLines.filter(s => {
     const t = s.trim();
-    return !IMG_RE.test(t) && !VIDEO_RE.test(t) && !isAudioLine(t);
+    return (
+      !IMG_RE.test(t) &&
+      !VIDEO_RE.test(t) &&
+      !isAudioLine(t) &&
+      !YT_RE.test(t) &&
+      !TIKTOK_RE.test(t)
+    );
   }).join('\n');
+
 
   // ===== OWNER-меню (⋮) — только если владелец поста =====
   const isOwner = !!authId && (String(authId) === String(p?.userId || p?.accountId));
@@ -4099,6 +4117,89 @@ function PostCard({
               />
             </div>
           ))}
+        </div>
+      )}
+      {/* YouTube-видео: рендерим в тех же карточках через iframe */}
+      {ytLines.length > 0 && (
+        <div className="postVideo" style={{display:'grid', gap:8, marginTop:8}}>
+          {ytLines.map((src, i) => {
+            const m = src.match(YT_RE);
+            if (!m) return null;
+            const videoId = m[1];
+            return (
+              <div
+                key={`yt${i}`}
+                className="videoCard"
+                style={{
+                  margin:0,
+                  padding:8,
+                  background:'rgba(10,16,28,.35)',
+                  border:'1px solid rgba(140,170,255,.25)',
+                  borderRadius:10,
+                  overflow:'hidden'
+                }}
+              >
+                <iframe
+                  src={`https://www.youtube.com/embed/${videoId}`}
+                  title="YouTube video"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  style={{
+                    display:'block',
+                    width:'100%',
+                    aspectRatio:'16 / 9',
+                    borderRadius:6
+                  }}
+                />
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {/* TikTok-видео: встраиваем через iframe */}
+      {tiktokLines.length > 0 && (
+        <div className="postVideo" style={{display:'grid', gap:8, marginTop:8}}>
+          {tiktokLines.map((src, i) => {
+            // Пробуем вытащить ID через URL API
+            let videoId = null;
+            try {
+              const u = new URL(src);
+              // Формат /@user/video/1234567890
+              const m = u.pathname.match(/\/video\/(\d+)/);
+              if (m) videoId = m[1];
+            } catch {}
+            if (!videoId) return null;
+
+            return (
+              <div
+                key={`tt${i}`}
+                className="videoCard"
+                style={{
+                  margin:0,
+                  padding:8,
+                  background:'rgba(10,16,28,.35)',
+                  border:'1px solid rgba(140,170,255,.25)',
+                  borderRadius:10,
+                  overflow:'hidden'
+                }}
+              >
+                <iframe
+                  src={`https://www.tiktok.com/embed/v2/${videoId}`}
+                  title="TikTok video"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  style={{
+                    display:'block',
+                    width:'100%',
+                    aspectRatio:'9 / 16',
+                    borderRadius:6
+                  }}
+                />
+              </div>
+            );
+          })}
         </div>
       )}
 
