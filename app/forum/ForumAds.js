@@ -858,7 +858,7 @@ export function AdCard({ url, slotKind, nearId }) {
         <div className="flex flex-col gap-1 h-full">
           {/* header: только бейдж + домен, без url-строки */}
           <div className="flex items-center gap-2 text-[9px] uppercase tracking-wide text-[color:var(--muted-fore,#9ca3af)]">
-            <span className="px-1.5 py-0.5 rounded-md border border-[color:var(--accent,#fbbf24)] bg-black/40">
+            <span className="qcoinLabel">
               {label}
             </span>
             <span className="truncate max-w-[200px] font-medium">
