@@ -67,7 +67,7 @@ export default function Providers({ children }) {
     return () => { cancelled = true; };
   }, []);
 
-  if (!ctx?.WagmiProvider) return <>{children}</>;
+  if (!ctx?.WagmiProvider) return null
 
   const { WagmiProvider, config } = ctx;
   return <WagmiProvider config={config}>{children}</WagmiProvider>;
