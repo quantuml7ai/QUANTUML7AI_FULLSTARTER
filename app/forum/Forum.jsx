@@ -430,8 +430,10 @@ const api = {
       const cursor = data?.cursor ?? null;
 
       // «пустой» ответ => можно делать жёсткий ресет
-      const __reset = topics.length === 0 && posts.length === 0;
-
+      // В текущей реализации клиент НИ РАЗУ не запрашивает инкрементальные снапшоты.
+      // Каждый вызов /api/forum/snapshot — ПОЛНЫЙ снимок состояния форума,
+      // значит локальный forum:snap должен полностью под него подстраиваться.
+      const __reset = true;
       return { ok: r.ok, status: r.status, topics, posts, bans, rev, cursor, __reset };
     } catch {
       return { ok:false, error:'network', topics:[], posts:[], bans:[], rev:0, cursor:null, __reset:false };
@@ -5301,46 +5303,44 @@ const safeMerge = (prev, r) => {
   if (Array.isArray(r.posts)) {
     const prevList   = prev.posts || [];
     const srvList    = r.posts || [];
-    const srvMap     = new Map(srvList.map(p => [String(p.id), p]));
-    const mergedById = new Map(prevList.map(p => [String(p.id), { ...p }]));
 
-// Накат серверных поверх локальных; ЖЁСТКАЯ КОНСИСТЕНЦИЯ по счётчикам
-for (const [id, srv] of srvMap) {
-  const loc = mergedById.get(id) || {};
-  const likes    = Number(srv.likes    ?? 0);
-  const dislikes = Number(srv.dislikes ?? 0);
-  const views    = Number(srv.views    ?? 0);
-  mergedById.set(id, { ...loc, ...srv, likes, dislikes, views, myReaction: (loc.myReaction ?? srv.myReaction ?? null) });
-}
-
+    // Полный снапшот: просто доверяем серверу, выкидываем локальное старьё
     if (hardReset) {
-      // Только при полном ресете чистим отсутствующие; свежим tmp_* даём «льготу»
-      const tnow = now();
-      for (const [id, p] of Array.from(mergedById.entries())) {
-        if (srvMap.has(id)) continue;
-        if (String(id).startsWith('tmp_')) {
-          const fresh = (tnow - Number(p.ts || tnow)) < TMP_GRACE_MS;
-          if (fresh) continue;
-        }
-        mergedById.delete(id);
-      }
-    }
-    // Иначе (частичный снап) — никого не удаляем: ждём, пока сервер пришлёт недостающие порции
+      out.posts = srvList.slice();
+    } else {
+      const srvMap     = new Map(srvList.map(p => [String(p.id), p]));
+      const mergedById = new Map(prevList.map(p => [String(p.id), { ...p }]));
 
-    // Порядок: сохраняем старые позиции, новые серверные — в конец
-    const used = new Set();
-    const mergedList = [];
-    for (const p of prevList) {
-      const id = String(p.id);
-      if (mergedById.has(id)) {
-        mergedList.push(mergedById.get(id));
-        used.add(id);
+      // Накат серверных поверх локальных; жёсткая консистентность по счётчикам
+      for (const [id, srv] of srvMap) {
+        const loc = mergedById.get(id) || {};
+        const likes    = Number(srv.likes    ?? 0);
+        const dislikes = Number(srv.dislikes ?? 0);
+        const views    = Number(srv.views    ?? 0);
+        mergedById.set(id, {
+          ...loc,
+          ...srv,
+          likes,
+          dislikes,
+          views,
+          myReaction: (loc.myReaction ?? srv.myReaction ?? null),
+        });
       }
+
+      const used = new Set();
+      const mergedList = [];
+      for (const p of prevList) {
+        const id = String(p.id);
+        if (mergedById.has(id)) {
+          mergedList.push(mergedById.get(id));
+          used.add(id);
+        }
+      }
+      for (const [id, p] of mergedById.entries()) {
+        if (!used.has(id)) mergedList.push(p);
+      }
+      out.posts = mergedList;
     }
-    for (const [id, p] of mergedById.entries()) {
-      if (!used.has(id)) mergedList.push(p);
-    }
-    out.posts = mergedList;
   }
 
   if (Array.isArray(r.bans))   out.bans   = r.bans;
