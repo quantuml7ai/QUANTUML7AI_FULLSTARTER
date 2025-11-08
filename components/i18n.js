@@ -7396,6 +7396,7 @@ try {
 } catch (e) {}
  
 const FORUM_NEWS_EN = {
+  forum_save: 'Saving',
   forum_ad_label: 'Advertisement',
   forum_title: 'Forum',
   nick_free: "Username is available",
@@ -7449,6 +7450,7 @@ const FORUM_NEWS_EN = {
 
 /* -------------------- RU -------------------- */
 const FORUM_NEWS_RU = {
+  forum_save: 'Сохраняем',
   forum_ad_label: 'Реклама',
    forum_title: 'Форум',
    nick_free: "Ник свободен",
@@ -7502,6 +7504,7 @@ const FORUM_NEWS_RU = {
 
 /* -------------------- UK -------------------- */
 const FORUM_NEWS_UK = {
+  forum_save: 'Зберігаємо',
   forum_ad_label: 'Реклама',
   forum_title: 'Форум',
   nick_free: "Нік вільний",
@@ -7555,6 +7558,7 @@ const FORUM_NEWS_UK = {
 
 /* -------------------- ES -------------------- */
 const FORUM_NEWS_ES = {
+  forum_save: 'Guardando',
   forum_ad_label: 'Anuncio',
   forum_title: 'Foro',
   nick_free: "Nombre de usuario disponible",
@@ -7608,6 +7612,7 @@ const FORUM_NEWS_ES = {
 
 /* -------------------- ZH (简体) -------------------- */
 const FORUM_NEWS_ZH = {
+  forum_save: '保存中',
   forum_ad_label: '广告',
   forum_title: '论坛',
   nick_free: "昵称可用",
@@ -7661,6 +7666,7 @@ const FORUM_NEWS_ZH = {
 
 /* -------------------- AR -------------------- */
 const FORUM_NEWS_AR = {
+  forum_save: 'جارٍ الحفظ',
   forum_ad_label: 'إعلان',
   forum_title: 'المنتدى',
   nick_free: "اسم المستخدم متاح",
@@ -7714,6 +7720,7 @@ const FORUM_NEWS_AR = {
 
 /* -------------------- TR -------------------- */
 const FORUM_NEWS_TR = {
+  forum_save: 'Kaydediyoruz',
   forum_ad_label: 'Reklam',
   forum_title: 'Forum',
   nick_free: "Kullanıcı adı uygun",
