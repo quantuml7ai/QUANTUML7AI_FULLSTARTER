@@ -7470,8 +7470,10 @@ console.log('[ADS] adConf', adConf, 'adEvery=', adEvery);
 // одна сессия показа рекламы внутри одного тайм-слота (ROTATE_MIN)
 const adSessionRef = useRef({
   bucket: null,
-  used: new Set(), // урлы, уже выданные слотам в текущем bucket
+  used: new Set(),          // урлы, уже выданные слотам в текущем bucket (между разными слотами)
+  bySlot: new Map(),        // slotKey -> url (стабильный выбор для каждого слота в рамках bucket)
 });
+
 
 // лог слотов (если нужно смотреть интерлив)
 function debugAdsSlots(label, slots) {
@@ -7492,13 +7494,23 @@ function pickAdUrlForSlot(slotKey, slotKind) {
 
   const sess = adSessionRef.current;
 
-  // новый временной слот — сбрасываем использованные ссылки
+  // Новый временной слот — полностью сбрасываем состояние
   if (sess.bucket !== bucket) {
     sess.bucket = bucket;
     sess.used = new Set();
+    sess.bySlot = new Map();
   }
 
-  // базовый выбор через resolveCurrentAdUrl (ничего не ломаем)
+  // Если для этого слота уже выбрали урл в текущем bucket — возвращаем его как есть
+  if (sess.bySlot && sess.bySlot.has(slotKey)) {
+    const stable = sess.bySlot.get(slotKey);
+    if (stable) {
+      return stable;
+    }
+    // если по какой-то причине null/пусто — просто упадём ниже и переизберём
+  }
+
+  // Базовый выбор через детерминированный resolveCurrentAdUrl
   let url = resolveCurrentAdUrl(
     adConf,
     clientId,
@@ -7507,15 +7519,14 @@ function pickAdUrlForSlot(slotKey, slotKind) {
     AdsCoordinator
   );
 
-  // актуальный пул ссылок
+  // Актуальный пул ссылок
   const links = (
     Array.isArray(adConf.LINKS) && adConf.LINKS.length
       ? adConf.LINKS
-      : FALLBACK_LINKS
+      : []
   ).filter(Boolean);
 
-  // если в этом bucket уже показывали этот url и есть другие варианты —
-  // пробуем отдать неиспользованный
+  // Если в этом bucket уже был такой url в другом слоте и есть альтернатива — попробуем другой
   if (url && sess.used.has(url) && links.length > 1) {
     const alt = links.find((candidate) => !sess.used.has(candidate));
     if (alt) {
@@ -7523,15 +7534,24 @@ function pickAdUrlForSlot(slotKey, slotKind) {
     }
   }
 
-  if (url) {
-    sess.used.add(url);
+  if (!url) {
+    return null;
   }
+
+  // Фиксируем выбор:
+  //  - в used, чтобы не дублировать между слотами в рамках bucket
+  //  - в bySlot, чтобы не прыгать между рендерами
+  sess.used.add(url);
+  if (!sess.bySlot) {
+    sess.bySlot = new Map();
+  }
+  sess.bySlot.set(slotKey, url);
 
   try {
     console.log('[ADS] slot_pick', { slotKey, slotKind, url });
   } catch {}
 
-  return url || null;
+  return url;
 }
 
   /* ---- render ---- */
