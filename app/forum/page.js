@@ -408,7 +408,7 @@ export default function ForumPage() {
           display: flex;
           justify-content: center;
           align-items: flex-start;
-          padding-top: 280px;      /* большой отступ — не перекрывает топ-бар */
+          padding-top: 260px;      /* большой отступ — не перекрывает топ-бар */
           background: transparent;
           pointer-events: none;    /* не блокируем клики вне модалки (топ-бар живой) */
         }
@@ -571,7 +571,7 @@ export default function ForumPage() {
 
         @media (max-width: 640px) {
           .forum-rules-overlay {
-            padding-top: 280px;
+            padding-top: 260px;
           }
           .forum-rules-modal {
             padding: 12px 10px 10px;
