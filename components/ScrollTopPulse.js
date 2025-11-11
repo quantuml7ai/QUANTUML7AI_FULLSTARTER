@@ -141,7 +141,7 @@ export default function ScrollTopPulse() {
         onClick={scrollToTop}
         onKeyDown={onKeyDown}
       >
-        <span className="arrow">⮙</span>
+        <span className="arrow">⇡</span>
       </div>
 
       <style jsx>{`
