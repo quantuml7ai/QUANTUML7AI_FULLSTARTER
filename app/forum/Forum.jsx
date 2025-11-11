@@ -2979,7 +2979,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 /* === Forum Topic Title Controls === */
 :root{
   --forum-topic-title-font: var(--font-forum-title), system-ui, -apple-system, "Segoe UI", sans-serif;
-  --forum-topic-title-size: 30px;
+  --forum-topic-title-size: 25px;
   --forum-topic-title-color: #fec301ff;
 }
 
