@@ -32,6 +32,7 @@ export default function TopBar() {
     { href: '/subscribe', label: t('nav_subscribe') },
     { href: '/exchange',  label: t('nav_exchange') },
     { href: "/forum",     label: t('forum_title') },
+    { href: '/academy',   label: t('nav_academy') },
     { href: '/about',     label: t('nav_about') },
 
   ]

@@ -11,10 +11,21 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 
 // ⬇️ добавлено для автозапуска
 import Script from 'next/script'
+import { Montserrat } from 'next/font/google'
+
+const forumTitleFont = Montserrat({
+  subsets: ['latin', 'cyrillic'],
+  weight: ['600', '700', '800'],
+  display: 'swap',
+  variable: '--font-forum-title',
+})
+
+
 
 // Рендерим тяжёлые/интерактивные вещи только на клиенте
 const HeroAvatar = dynamic(() => import('../components/HeroAvatar'), { ssr: false })
 const BgAudio    = dynamic(() => import('../components/BgAudio'),    { ssr: false })
+const ScrollTopPulse = dynamic(() => import('../components/ScrollTopPulse'), { ssr: false })
 
 export const metadata = {
   metadataBase: new URL('https://quantuml7ai.com'),
@@ -69,7 +80,13 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+<html
+  lang="en"
+  suppressHydrationWarning
+  className={forumTitleFont.variable}
+>
+
+
       <head>
         {/* ✅ compat.js – максимально рано */}
         <Script src="/compat.js" strategy="beforeInteractive" id="compat-bootstrap" />
@@ -114,6 +131,7 @@ export default function RootLayout({ children }) {
 
             {/* фон. аудио (кнопка снизу — «Выключить аудио») */}
             <BgAudio src="/audio/cosmic.mp3" defaultVolume={0.35} />
+           <ScrollTopPulse />
           </I18nProvider>
         </Providers>
 

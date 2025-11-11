@@ -153,7 +153,7 @@ export default function BgAudio({ src = '/audio/cosmic.mp3', defaultVolume = 0.3
         title={isOn ? `Sound on • ${Math.round(vol * 100)}% (wheel to change)` : 'Enable sound'}
         aria-label="Toggle background audio"
       >
-        <span className="ico">{isOn ? '🔊' : '🔈'}</span>
+        <span className="ico">{isOn ? '🔊' : '🔇'}</span>
       </button>
     </>
   )

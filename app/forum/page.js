@@ -99,7 +99,7 @@ export default function ForumPage() {
 
       {/* Нижняя маркиза */}
       <div className="iso-forum-shell">
-        <section className="marquee-wrap" aria-hidden="true">
+        <section className="marquee-wrap no-gutters" aria-hidden="true">
           <div className="marquee" ref={marqueeRef}>
             <span>{t('marquee')}</span>
             <span>{t('marquee')}</span>

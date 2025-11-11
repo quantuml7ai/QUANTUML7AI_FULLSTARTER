@@ -28,41 +28,7 @@ function PageMarqueeTail() {
         <span>{t('marquee')}</span>
         <span>{t('marquee')}</span>
       </div>
-
-      <style jsx>{`
-        .marquee-wrap{
-          width: 100%;
-          overflow: hidden;
-          border-top: 1px solid rgba(255,255,255,.1);
-          margin-top: 40px;
-
-          /* full-bleed: компенсируем глобальные отступы краёв */
-          margin-left: calc(-1 * var(--gutter, 24px));
-          margin-right: calc(-1 * var(--gutter, 24px));
-          padding-left: 0;
-          padding-right: 0;
-        }
-        .marquee{
-          display: inline-flex;
-          gap: 40px;
-          white-space: nowrap;
-          will-change: transform;
-          animation: marquee 20s linear infinite;
-        }
-        .marquee > *{ flex: 0 0 auto; }   /* без переносов */
-        .marquee span{ opacity: .7; }
-
-        /* Бесшовность: во второй половине содержимое идентично → смещаем на 50% */
-        @keyframes marquee{
-          from{ transform: translateX(0); }
-          to  { transform: translateX(-50%); }
-        }
-
-        /* Доступность: уважение reduce-motion */
-        @media (prefers-reduced-motion: reduce){
-          .marquee{ animation: none; }
-        }
-      `}</style>
+ 
     </section>
   )
 }

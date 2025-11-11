@@ -1057,7 +1057,7 @@ const Styles = () => (
     .tag{ border-radius:10px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); padding:.35rem .52rem; display:inline-flex; align-items:center; gap:.35rem }
     .item{ border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06); border-radius:14px; padding:12px; transition:transform .08s, background .15s }
     .item:hover{ background:rgba(255,255,255,.08); transform:translateY(-1px) }
-    .title{ font-size:1.08rem; font-weight:800; letter-spacing:.2px }
+    .title{ font-size:1.8rem; font-weight:800; letter-spacing:.2px;  color: #febf01ff; }
     .meta{ font-size:.84rem; opacity:.78 }
     .nick{ font-weight:700; letter-spacing:.15px }
 
@@ -1832,7 +1832,9 @@ const Styles = () => (
   line-break: anywhere !important;     /* для очень длинных слитков */
   hyphens: auto;
   max-width: 100%;
-}
+
+} 
+
 
 /* Текстовые узлы внутри заголовка (span/a/strong и т.п.) — тоже ломаем */
 [id^="topic_"] .title *, .topicCard .title * {
@@ -2973,7 +2975,39 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 /* на всякий случай — убираем подсветку выделения пикчи при тапе/дабл-тапе */
 .questIconPure::selection {
   background: transparent;
-}  
+} 
+/* === Forum Topic Title Controls === */
+:root{
+  --forum-topic-title-font: var(--font-forum-title), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --forum-topic-title-size: 30px;
+  --forum-topic-title-color: #fec301ff;
+}
+
+/* Единый стиль заголовков тем в форуме */
+.forum_root [id^="topic_"] .title,
+.forum_root .topicCard .title,
+.forum_root .topicTitle,
+.forum_root [id^="topic_"] h1,
+.forum_root [id^="topic_"] h2,
+.forum_root [id^="topic_"] h3,
+.forum_root .topicCard h1,
+.forum_root .topicCard h2,
+.forum_root .topicCard h3 {
+  font-family: var(--forum-topic-title-font) !important;
+  font-weight: 800;
+  font-size: var(--forum-topic-title-size) !important;
+  color: var(--forum-topic-title-color) !important;
+
+  letter-spacing: .06em;
+  text-transform: none;
+
+  /* лёгкий «крипто-неон» спецэффект */
+  text-shadow:
+    0 0 6px rgba(0, 200, 255, 0.55),
+    0 0 14px rgba(0, 0, 0, 0.85);
+}
+
+
 `}</style>
 )
 

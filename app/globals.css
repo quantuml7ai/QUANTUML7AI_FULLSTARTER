@@ -123,13 +123,7 @@ body{
 /* Lists */
 ul.bullets{padding-left:20px}
 ul.bullets li{margin:6px 0}
-
-/* Marquee */
-.marquee-wrap{position:relative;width:100%;overflow:hidden;margin-top:10px;z-index:6}
-.marquee{display:inline-flex;gap:48px;white-space:nowrap;animation:marquee 60s linear infinite;opacity:.9;mask-image:linear-gradient(90deg,transparent,#fff 7%,#fff 93%,transparent)}
-.marquee span{font-size:clamp(14px,1.4vw,17px);color:#d9ecff;opacity:.92}
-@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
-
+ 
 /* Exchange canvas box */
 .chart-wrap{width:min(1100px,94vw);height:min(560px,60vh);border:1px solid rgba(157,220,255,.14);border-radius:16px;overflow:hidden;background:linear-gradient(180deg,rgba(8,12,20,.6),rgba(8,12,20,.35));box-shadow:0 10px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05)}
 .chart-wrap canvas{display:block;width:100%;height:100%}
@@ -334,6 +328,16 @@ ul.bullets li{margin:6px 0}
   --nav-glow-strong: rgba(103,232,249,.95);
   --nav-glow-soft:   rgb(5, 214, 251);
   --nav-active-scale: 1.08;               /* насколько увеличивать активную ссылку */
+}
+:root {
+  --stp-right: 34px;   /* вправо/влево от правого края */
+  --stp-bottom: 200px; /* выше/ниже от низа */
+}
+@media (max-width: 640px) {
+  :root {
+    --stp-right-mobile: 28px;
+    --stp-bottom-mobile: 200px;
+  }
 }
 
 /* базовая ссылка — добавим позиционирование для псевдо-элемента */
@@ -863,7 +867,7 @@ header nav ul{ display:flex; flex-wrap:wrap; gap:.5rem; margin:0; padding:0; }
 }
 /* Золотая надпись с переливом и свечением */
 .qcoinLabel{
-  font-size:1.8em; font-weight:900; letter-spacing:.4px;
+  font-size:1.6em; font-weight:900; letter-spacing:.4px;
   background:
     linear-gradient(135deg,
       #7a5c00 0%,
@@ -994,3 +998,97 @@ html[data-vo-open="1"] .w3m-modal,
 html[data-vo-open="1"] .w3m-overlay {
   z-index: 99999 !important;
 }
+/* Marquee — та же позиция, без фона, крупный неоновый текст */
+
+/* как было: сверху чуть отступ, относительно контента */
+.marquee-wrap{
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  margin-top: 10px;
+  z-index: 6;
+}
+
+/* убрали mask-image и лишнюю прозрачность, оставили тот же бег */
+.marquee{
+  display: inline-flex;
+  gap: 64px;                          /* чуть больше воздуха между фразами */
+  white-space: nowrap;
+  animation: marquee 280s linear infinite;
+  opacity: 1;                         /* без общего затухания */
+}
+
+/* текст ~в 2 раза крупнее + эффект */
+.marquee span{
+  position: relative;
+  font-size: clamp(28px, 2.8vw, 34px); /* было 14/1.4vw/17 → x2 */
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+
+  /* градиент по буквам */
+  color: transparent;
+  background: linear-gradient(
+    90deg,
+    #00eaff,
+    #fef601,
+    #ffd54a,
+    #ff00ff
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  /* лёгкое неоновое свечение */
+  text-shadow:
+    0 0 8px rgba(0, 200, 255, .65),
+    0 0 18px rgba(0, 0, 0, .9);
+
+  /* мягкий бегущий блик по тексту */
+  animation: marqueeShimmer 6s linear infinite;
+}
+
+/* движение самой строки — оставляем как у тебя */
+@keyframes marquee{
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+/* спецэффект: «шимер» градиента по тексту */
+@keyframes marqueeShimmer{
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* если кто-то любит меньше анимаций */
+@media (prefers-reduced-motion: reduce){
+  .marquee{ animation: none; }
+  .marquee span{ animation: none; }
+}
+/* === Глобальные настройки текста (вставить в самом конце) === */
+:root{
+  /* Базовый шрифт для всего сайта */
+  --font-family-base: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, Roboto, sans-serif;
+
+  /* Шрифт для заголовков (может быть тем же, а можно другой) */
+  --font-family-heading: var(--font-family-base);
+
+  /* Базовый размер текста (вся типографика масштабируется вокруг него) */
+  --font-size-base: 16px;
+
+  /* Масштаб всего текста: 1 = нормально, 1.1 = чуть крупнее, 0.9 = чуть меньше */
+  --font-size-scale: 1.4;
+}
+
+/* Применяем эти настройки ко всему сайту */
+body{
+  font-family: var(--font-family-base) !important;
+  font-size: calc(var(--font-size-base) * var(--font-size-scale));
+}
+
+/* Заголовки тоже цепляем к настройкам */
+h1, h2, h3, h4, h5, h6{
+  font-family: var(--font-family-heading);
+  font-weight: 800;
+}
+

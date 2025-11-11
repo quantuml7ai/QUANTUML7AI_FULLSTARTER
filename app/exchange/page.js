@@ -78,9 +78,65 @@ const Btn=({children,onClick,active,neon})=>(
 )
 
 /* ================================= Badge ================================= */
-function BadgeTitle(){ const {t}=useI18n(); return <Panel><span className="qcoinLabel">{TX(t,'exchange_title','Биржа (в разработке)')}</span>
-  <style jsx>{`.pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(59,130,246,.25);border:1px solid rgba(59,130,246,.45);font-weight:700}`}</style>
-</Panel> }
+function BadgeTitle() {
+  const { t } = useI18n()
+  const title = TX(t, 'exchange_title', 'Exchange (in progress)')
+
+  return (
+    <Panel>
+      <div className="ex-hero-panel">
+        {/* Бейдж сверху */}
+        <div className="ex-badge">
+          <span className="qcoinLabel">{title}</span>
+        </div>
+
+        {/* Обёртка 16:9 под баннер */}
+        <div className="ex-hero-wrap">
+          <Image
+            src="/Exchange.png"
+            alt="QL7 Exchange — next-gen AI trading"
+            fill
+            sizes="100vw"
+            priority
+            className="ex-hero-img"
+          />
+        </div>
+      </div>
+
+      <style jsx>{`
+        /* Съедаем дефолтный padding панели, чтобы контент лег от бордера до бордера */
+        .ex-hero-panel{
+          margin: -10px;
+        }
+
+        /* Отступ только под бейдж */
+        .ex-badge{
+        padding: 10px 14px 6px;
+        }
+
+        /* Контейнер под баннер: всегда 16:9 и на всю ширину панели */
+        .ex-hero-wrap{
+          position: relative;
+          width: 100%;
+         aspect-ratio: 15 / 7;
+          overflow: hidden;
+          border-radius: 0 0 4px 4px;
+          background: #f6f1f101; /* подложка, если будут поля */
+        }
+
+        /* Картинка занимает весь контейнер, без обрезки контента */
+        .ex-hero-wrap :global(img.ex-hero-img){
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: contain;   /* показываем всё, не режем */
+        }
+      `}</style>
+    </Panel>
+  )
+}
+
 
 /* ================================= Symbol+TF dropdown ================================= */
 const TF_KEYS=Object.keys(TFmap)
@@ -1023,35 +1079,7 @@ function PageMarqueeTail() {
         <span>{t('marquee')}</span>
         <span>{t('marquee')}</span>
       </div>
-
-      <style jsx>{`
-        .marquee-wrap{
-          width: 100%;
-          overflow: hidden;
-          border-top: 1px solid rgba(255,255,255,.1);
-          margin-top: 40px;
-          margin-left: calc(-1 * var(--gutter, 24px));
-          margin-right: calc(-1 * var(--gutter, 24px));
-          padding-left: 0;
-          padding-right: 0;
-        }
-        .marquee{
-          display: inline-flex;
-          gap: 40px;
-          white-space: nowrap;
-          will-change: transform;
-          animation: marquee 20s linear infinite;
-        }
-        .marquee > *{ flex: 0 0 auto; }
-        .marquee span{ opacity: .7; }
-        @keyframes marquee{
-          from{ transform: translateX(0); }
-          to  { transform: translateX(-50%); }
-        }
-        @media (prefers-reduced-motion: reduce){
-          .marquee{ animation: none; }
-        }
-      `}</style>
+ 
     </section>
   )
 }
@@ -1124,10 +1152,10 @@ export default function ExchangePage(){
   return (
     <div className="wrap">
       <BadgeTitle/>
-
-      <SymbolTFSelector current={{symbol,tf}} symbols={symbols} onChange={(s,tf2)=>{setSymbol(s); setTf(tf2)}}/>
+ 
       <TVTicker symbol={symbol}/>
       <TVChart symbol={symbol} tf={tf}/>
+      <SymbolTFSelector current={{symbol,tf}} symbols={symbols} onChange={(s,tf2)=>{setSymbol(s); setTf(tf2)}}/>
 
       <AIQuotaGate onOpenUnlimit={handleOpenUnlimit}>
         <AIBox data={ai}/>
