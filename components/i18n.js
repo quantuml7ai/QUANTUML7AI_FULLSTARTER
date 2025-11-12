@@ -8354,39 +8354,39 @@ try {
 
 /* === ACADEMY — welcome title (7 languages) === */
 const ACADEMY_WELCOME_EN = {
-qa_ru_title_main: '📘 QUANTUM ACADEMY 📘  GLOBAL GLOSSARY QL7 — Learn and earn rewards for learning!',
+qa_ru_title_main: 'QUANTUM 📘 ACADEMY 📘  GLOBAL GLOSSARY QL7 — Learn and earn rewards for learning!',
 q_what: 'Question',
 q_this: 'Answer',
 }
 const ACADEMY_WELCOME_RU = {
-qa_ru_title_main: '📘 QUANTUM АКАДЕМИЯ 📘 ГЛОБАЛЬНЫЙ ГЛОССАРИЙ QL7 — Обучайтесь и получайте награды за обучение!',
+qa_ru_title_main: 'QUANTUM 📘 АКАДЕМИЯ 📘 ГЛОБАЛЬНЫЙ ГЛОССАРИЙ QL7 — Обучайтесь и получайте награды за обучение!',
 
 q_what: 'Вопрос',
 q_this: 'Ответ',
   }
 const ACADEMY_WELCOME_UK = {
-qa_ru_title_main: '📘 QUANTUM АКАДЕМІЯ 📘 ГЛОБАЛЬНИЙ ГЛОСАРІЙ QL7 — Навчайтеся та отримуйте нагороди за навчання!',
+qa_ru_title_main: 'QUANTUM 📘 АКАДЕМІЯ 📘 ГЛОБАЛЬНИЙ ГЛОСАРІЙ QL7 — Навчайтеся та отримуйте нагороди за навчання!',
 q_what: 'Питання',
 q_this: 'Відповідь',
   }
 const ACADEMY_WELCOME_ES = {
-qa_ru_title_main: '📘 QUANTUM ACADEMY 📘 GLOSARIO GLOBAL QL7 — Aprende y gana recompensas por aprender!',
+qa_ru_title_main: 'QUANTUM 📘 ACADEMY 📘 GLOSARIO GLOBAL QL7 — Aprende y gana recompensas por aprender!',
 q_what: 'Pregunta',
 q_this: 'Respuesta',
   }
 const ACADEMY_WELCOME_ZH = {
-qa_ru_title_main: '📘 QUANTUM 学院 📘 全球词汇表 QL7 — 学习并获得学习奖励！',
+qa_ru_title_main: 'QUANTUM 📘 学院 📘 全球词汇表 QL7 — 学习并获得学习奖励！',
 
 q_what: '问题',
 q_this: '答案',
   }
 const ACADEMY_WELCOME_AR = {
-qa_ru_title_main: '📘 QUANTUM أكاديمية 📘 القاموس العالمي QL7 — تعلّم واحصل على مكافآت مقابل التعلّم!',
+qa_ru_title_main: 'QUANTUM 📘 أكاديمية 📘 القاموس العالمي QL7 — تعلّم واحصل على مكافآت مقابل التعلّم!',
 q_what: 'سؤال',
 q_this: 'إجابة',
   }
 const ACADEMY_WELCOME_TR = {
-qa_ru_title_main: '📘 QUANTUM AKADEMİSİ 📘 KÜRESEL SÖZLÜK QL7 — Öğrenin ve öğrenme için ödüller kazanın!',
+qa_ru_title_main: 'QUANTUM 📘 AKADEMİSİ 📘 KÜRESEL SÖZLÜK QL7 — Öğrenin ve öğrenme için ödüller kazanın!',
 q_what: 'Soru',
 q_this: 'Cevap',
   }
