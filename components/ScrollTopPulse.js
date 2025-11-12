@@ -155,13 +155,13 @@ export default function ScrollTopPulse() {
           right: var(--stp-right, 18px) !important;
           bottom: var(--stp-bottom, 86px) !important;
 
-          width: var(--stp-size, 60px) !important;
-          height: var(--stp-size, 60px) !important;
-          min-width: var(--stp-size, 60px) !important;
-          max-width: var(--stp-size, 60px) !important;
-          min-height: var(--stp-size, 60px) !important;
-          max-height: var(--stp-size, 60px) !important;
-          flex: 0 0 var(--stp-size, 60px) !important;
+          width: var(--stp-size, 50px) !important;
+          height: var(--stp-size, 50px) !important;
+          min-width: var(--stp-size, 50px) !important;
+          max-width: var(--stp-size, 50px) !important;
+          min-height: var(--stp-size, 50px) !important;
+          max-height: var(--stp-size, 50px) !important;
+          flex: 0 0 var(--stp-size, 50px) !important;
 
           display: inline-flex !important;
           align-items: center !important;
@@ -259,13 +259,13 @@ export default function ScrollTopPulse() {
           .ql7-scroll-top {
             right: var(--stp-right-mobile, 14px) !important;
             bottom: var(--stp-bottom-mobile, 80px) !important;
-            width: var(--stp-size-mobile, 60px) !important;
-            height: var(--stp-size-mobile, 60px) !important;
-            min-width: var(--stp-size-mobile, 60px) !important;
-            max-width: var(--stp-size-mobile, 60px) !important;
-            min-height: var(--stp-size-mobile, 60px) !important;
-            max-height: var(--stp-size-mobile, 60px) !important;
-            flex: 0 0 var(--stp-size-mobile, 60px) !important;
+            width: var(--stp-size-mobile, 50px) !important;
+            height: var(--stp-size-mobile, 50px) !important;
+            min-width: var(--stp-size-mobile, 50px) !important;
+            max-width: var(--stp-size-mobile, 50px) !important;
+            min-height: var(--stp-size-mobile, 50px) !important;
+            max-height: var(--stp-size-mobile, 50px) !important;
+            flex: 0 0 var(--stp-size-mobile, 50px) !important;
           }
         }
 
