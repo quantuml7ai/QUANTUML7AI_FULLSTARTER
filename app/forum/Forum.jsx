@@ -2988,7 +2988,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 
 /* FAB внутри дока: позиционируем к правому нижнему углу дока */
 .fabCompose{
-  --fab-size: 54px;
+  --fab-size: 50px;
   --fab-right: 16px;   /* можно менять позицию */
   --fab-bottom: 36px;  /* можно менять позицию */
 

@@ -331,12 +331,12 @@ ul.bullets li{margin:6px 0}
 }
 :root {
   --stp-right: 34px;   /* вправо/влево от правого края */
-  --stp-bottom: 200px; /* выше/ниже от низа */
+  --stp-bottom: 130px; /* выше/ниже от низа */
 }
 @media (max-width: 640px) {
   :root {
     --stp-right-mobile: 28px;
-    --stp-bottom-mobile: 200px;
+    --stp-bottom-mobile: 130px;
   }
 }
 
