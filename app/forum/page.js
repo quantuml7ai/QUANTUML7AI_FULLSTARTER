@@ -494,7 +494,7 @@ export default function ForumPage() {
 
         .fr-body {
           margin-top: 2px;
-          max-height: 240px;
+          max-height: 210px;
           width: 100%;
           padding: 10px 12px;
           background: rgba(2,4,10,.98);

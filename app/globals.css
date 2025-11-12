@@ -1021,7 +1021,8 @@ html[data-vo-open="1"] .w3m-overlay {
 /* текст ~в 2 раза крупнее + эффект */
 .marquee span{
   position: relative;
-  font-size: clamp(28px, 2.8vw, 34px); /* было 14/1.4vw/17 → x2 */
+  font-size: clamp(18.7px, 1.87vw, 22.7px);
+ /* было 14/1.4vw/17 → x2 */
   font-weight: 800;
   letter-spacing: .18em;
   text-transform: uppercase;

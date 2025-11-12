@@ -64,8 +64,7 @@ hero_subtitle:
   'Quantum L7 AI is not just a platform but an entire cybernetic universe of decision-making: institutional-grade multichain data, autonomous L7 agents, on-chain pipelines, and trading routing operate as a single digital organism. We connect the Web-MiniApp, Telegram MiniApp and QL7 AI Bot, a forum with the QCoin economy, and a global exchange ( core in the final stage ) to provide instant alpha signals, disciplined entry/exit windows, automated execution, and a transparent risk perimeter. Authorization is via non-custodial wallets (keys stay with you), support for PRO/VIP tiers, priority limits, and quota removal. At the core is a legally vetted Web3 architecture, cross-exchange liquidity aggregation, behavioral and microstructural models, as well as replicable research pipelines with the log hypothesis → test → evidence. This is next-generation infrastructure for those who work at market pace and require provability, speed, and accuracy.',
 hero_cta: 'Start in Telegram',
 hero_learn_more: 'Learn more',
-marquee: 'AI • Quantum agents • On-chain analytics • Crypto exchange (core) • Forum • QCoin mining • Auto-execution • Risk perimeter • Liquidity routing • Web3 metaverse • API/SDK • Enterprise • All rights reserved',
-
+marquee: 'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©',
 home_blocks: [
   {
     title: 'Why Quantum L7 AI',
@@ -424,8 +423,7 @@ hero_subtitle:
   'Quantum L7 AI — это не просто платформа, а целая кибернетическая вселенная принятия решений: мультичейн-данные институционального класса, автономные L7-агенты, ончейн-пайплайны и торговая маршрутизация работают как единый цифровой организм. Мы стыкуем Web-MiniApp, Telegram MiniApp и QL7 AI Bot, форум с экономикой QCoin и глобальную биржу ( ядро в финальной стадии ), чтобы дать мгновочные альфа-сигналы, дисциплинированные окна входа/выхода, автоматизированное исполнение и прозрачный риск-контур. Авторизация — через некостодиальные кошельки (ключи у вас), поддержка PRO/VIP-уровней, приоритетные лимиты и снятие квот. В основе — юридически выверенная архитектура Web3, кросс-эксчендж-агрегация ликвидности, поведенческие и микроструктурные модели, а также реплицируемые ресёрч-пайплайны с логом гипотеза → тест → свидетельства. Это инфраструктура нового поколения для тех, кто работает в темпе рынка и требует доказуемости, скорости и точности.',
 hero_cta: 'Начать в Telegram',
 hero_learn_more: 'Подробнее',
-marquee: 'ИИ • Квантовые агенты • Ончейн-аналитика • Криптобиржа (ядро) • Форум • QCoin Майнинг • Автоисполнение • Risk-контур • Маршрутизация ликвидности • Метавселенная Web3 • API/SDK • Enterprise • Все права защищены',
-
+marquee: 'ИИ • Квантовые агенты • Ончейн-аналитика • Криптобиржа (ядро) • Форум • Академия • QCoin Майнинг • Автоисполнение • Риск-контур • Маршрутизация ликвидности • Метавселенная Web3 • Игры • API/SDK • Предприятие • Все права защищены • Quantum L7 AI ©',
 home_blocks: [
   {
     title: 'Почему Quantum L7 AI',
@@ -791,8 +789,7 @@ hero_subtitle:
   'Quantum L7 AI — це не просто платформа, а цілий кібернетичний всесвіт прийняття рішень: мультичейн-дані інституційного класу, автономні L7-агенти, ончейн-пайплайни та торговельна маршрутизація працюють як єдиний цифровий організм. Ми поєднуємо Web-MiniApp, Telegram MiniApp і QL7 AI Bot, форум з економікою QCoin та глобальну біржу (ядро на фінальній стадії), щоб надати миттєві альфа-сигнали, дисципліновані вікна входу/виходу, автоматизоване виконання та прозорий ризик-контур. Авторизація — через некостодіальні гаманці (ключі у вас), підтримка рівнів PRO/VIP, пріоритетні ліміти та зняття квот. В основі — юридично вивірена архітектура Web3, кросс-екчейндж-агрегація ліквідності, поведінкові та мікроструктурні моделі, а також відтворювані ресерч-пайплайни з логом гіпотеза → тест → свідчення. Це інфраструктура нового покоління для тих, хто працює в темпі ринку й потребує доказовості, швидкості та точності.',
 hero_cta: 'Почати в Telegram',
 hero_learn_more: 'Докладніше',
-marquee: 'ШІ • Квантові агенти • Ончейн-аналітика • Криптобіржа (ядро) • Форум • QCoin Майнінг • Автовиконання • Risk-контур • Маршрутизація ліквідності • Метавсесвіт Web3 • API/SDK • Enterprise • Усі права захищено',
-
+marquee: 'ШІ • Квантові агенти • Ончейн-аналітика • Криптобіржа (ядро) • Форум • Академія • QCoin Майнінг • Автовиконання • Ризик-контур • Маршрутизація ліквідності • Метавсесвіт Web3 • Ігри • API/SDK • Підприємство • Усі права захищені • Quantum L7 AI ©',
 home_blocks: [
   {
     title: 'Чому Quantum L7 AI',
@@ -1158,8 +1155,7 @@ hero_subtitle:
   'Quantum L7 AI no es solo una plataforma, sino todo un universo cibernético de toma de decisiones: datos multichain de clase institucional, agentes L7 autónomos, pipelines on-chain y enrutamiento de trading funcionan como un único organismo digital. Acoplamos Web-MiniApp, Telegram MiniApp y QL7 AI Bot, el foro con la economía de QCoin y la bolsa global ( núcleo en fase final ), para ofrecer señales alfa instantáneas, ventanas disciplinadas de entrada/salida, ejecución automatizada y un contorno de riesgo transparente. La autorización es a través de carteras no custodiales (las llaves son tuyas), soporte de niveles PRO/VIP, límites prioritarios y eliminación de cuotas. En la base hay una arquitectura Web3 jurídicamente afinada, agregación de liquidez entre exchanges, modelos de comportamiento y microestructurales, así como pipelines de research replicables con registro hipótesis → prueba → evidencias. Es una infraestructura de nueva generación para quienes trabajan al ritmo del mercado y exigen demostrabilidad, velocidad y precisión.',
 hero_cta: 'Empezar en Telegram',
 hero_learn_more: 'Más información',
-marquee: 'IA • Agentes cuánticos • Analítica on-chain • Criptobolsa (núcleo) • Foro • Minería de QCoin • Autoejecución • Contorno de riesgo • Enrutamiento de liquidez • Metaverso Web3 • API/SDK • Enterprise • Todos los derechos reservados',
-
+marquee: 'IA • Agentes Cuánticos • Analítica Onchain • Criptobolsa (núcleo) • Foro • Academia • QCoin Minería • Ejecución Automática • Contorno de Riesgo • Enrutamiento de Liquidez • Metaverso Web3 • Juegos • API/SDK • Empresa • Todos los derechos reservados • Quantum L7 AI ©',
 home_blocks: [
   {
     title: 'Por qué Quantum L7 AI',
@@ -1525,8 +1521,7 @@ hero_subtitle:
   'Quantum L7 AI 不只是一个平台，而是一个完整的决策赛博宇宙：机构级的多链数据、自治的 L7 代理、链上流水线与交易路由像一个数字有机体协同运作。我们对接 Web-MiniApp、Telegram MiniApp 与 QL7 AI Bot、具有 QCoin 经济的论坛以及全球交易所（ 内核处于最终阶段 ），以提供即时的 Alpha 信号、纪律化的进场/出场窗口、自动化执行与透明的风险轮廓。授权通过非托管钱包（私钥在你手中），支持 PRO/VIP 等级、优先级限额与取消配额。其基础是法务严谨的 Web3 架构、跨交易所的流动性聚合、行为与微结构模型，以及可复现的研究流水线并记录 假设 → 测试 → 证据。它是为在市场节奏中工作并要求可证性、速度与精度的人所打造的新一代基础设施。',
 hero_cta: '从 Telegram 开始',
 hero_learn_more: '了解更多',
-marquee: 'AI • 量子代理 • 链上分析 • 加密交易所（内核） • 论坛 • QCoin 挖矿 • 自动执行 • 风险轮廓 • 流动性路由 • Web3 元宇宙 • API/SDK • Enterprise • 保留所有权利',
-
+marquee: '人工智能 • 量子代理 • 链上分析 • 加密交易所（核心）• 论坛 • 学院 • QCoin 挖矿 • 自动执行 • 风险轮廓 • 流动性路由 • Web3 元宇宙 • 游戏 • API/SDK • 企业 • 版权所有 • Quantum L7 AI ©',
 home_blocks: [
   {
     title: '为什么选择 Quantum L7 AI',
@@ -1893,8 +1888,7 @@ hero_subtitle:
   'Quantum L7 AI ليست مجرد منصة، بل هي كون سيبراني متكامل لاتخاذ القرار: بيانات متعددة السلاسل بمستوى مؤسساتي، عملاء L7 مستقلون، خطوط معالجة على السلسلة وتوجيه تداول يعمل كوحدة رقمية واحدة. نحن ندمج Web-MiniApp و Telegram MiniApp و QL7 AI Bot ومنتدى باقتصاد QCoin وبورصة عالمية (النواة في المرحلة النهائية) لتقديم إشارات Alpha فورية، ونوافذ دخول/خروج منضبطة، وتنفيذ آلي، وهيكل شفاف لإدارة المخاطر. يتم تسجيل الدخول عبر محافظ غير وصائية (المفاتيح لديك)، مع دعم مستويات PRO/VIP، وحدود أولوية وإلغاء الحصص. الأساس هو هيكل Web3 قانوني محكم، وتراكم سيولة عبر البورصات، ونماذج سلوكية وميكروهيكلية، إضافةً إلى خطوط بحث قابلة للتكرار مع سجل فرضية → اختبار → أدلة. إنها بنية تحتية من الجيل الجديد لأولئك الذين يعملون وفق إيقاع السوق ويطلبون الإثبات والسرعة والدقة.',
 hero_cta: 'ابدأ عبر Telegram',
 hero_learn_more: 'اعرف المزيد',
-marquee: 'الذكاء الاصطناعي • العملاء الكميون • تحليلات على السلسلة • بورصة العملات المشفرة (النواة) • المنتدى • تعدين QCoin • تنفيذ آلي • هيكل المخاطر • توجيه السيولة • ميتافيرس Web3 • API/SDK • Enterprise • جميع الحقوق محفوظة',
-
+marquee: 'الذكاء الاصطناعي • العوامل الكمّية • تحليلات Onchain • بورصة التشفير (النواة) • المنتدى • الأكاديمية • QCoin التعدين • التنفيذ التلقائي • محيط المخاطر • توجيه السيولة • ميتافيرس Web3 • الألعاب • API/SDK • المؤسسة • جميع الحقوق محفوظة • Quantum L7 AI ©',
 home_blocks: [
   {
     title: 'لماذا Quantum L7 AI',
@@ -2260,8 +2254,7 @@ hero_subtitle:
   'Quantum L7 AI sadece bir platform değil, baştan sona bir karar alma siber evrenidir: kurumsal sınıf çok zincirli veriler, otonom L7 ajanları, on-chain hatlar ve ticaret yönlendirmesi tek bir dijital organizma gibi çalışır. Web-MiniApp, Telegram MiniApp ve QL7 AI Bot’u, QCoin ekonomisine sahip forumu ve küresel borsayı ( çekirdek son aşamada ) birbirine bağlıyoruz; böylece anlık alfa sinyalleri, disiplinli giriş/çıkış pencereleri, otomatikleştirilmiş icra ve şeffaf bir risk konturu sağlıyoruz. Yetkilendirme — saklama yapmayan cüzdanlar üzerinden (anahtarlar sizde), PRO/VIP seviyeleri desteği, öncelikli limitler ve kota kaldırma. Temelde — hukuken titizlikle doğrulanmış bir Web3 mimarisi, borsalar arası likidite agregasyonu, davranışsal ve mikro-yapısal modeller ile hipotez → test → kanıt günlüklerine sahip tekrarlanabilir araştırma hatları. Bu, piyasanın temposunda çalışan ve ispatlanabilirlik, hız ve doğruluk talep edenler için yeni nesil bir altyapıdır.',
 hero_cta: 'Telegram’da Başla',
 hero_learn_more: 'Daha fazla bilgi',
-marquee: 'YZ • Kuantum ajanlar • On-chain analitik • Kripto borsası (çekirdek) • Forum • QCoin Madenciliği • Otomatik icra • Risk konturu • Likidite yönlendirme • Web3 Metaverse • API/SDK • Enterprise • Tüm hakları saklıdır',
-
+marquee: 'YZ • Kuantum Ajanları • Onchain Analitiği • Kripto Borsası (çekirdek) • Forum • Akademi • QCoin Madenciliği • Otomatik Yürütme • Risk Konturu • Likidite Yönlendirme • Web3 Metaverse • Oyunlar • API/SDK • Kurumsal • Tüm hakları saklıdır • Quantum L7 AI ©',
 home_blocks: [
   {
     title: 'Neden Quantum L7 AI',
