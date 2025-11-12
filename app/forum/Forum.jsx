@@ -125,37 +125,7 @@ async function openAuth({ timeoutMs = 15000 } = {}) {
     const timer = setTimeout(() => cancel(), timeoutMs);
   });
 }
-function BackToTopButton() {
-  const [show, setShow] = React.useState(false);
-
-  React.useEffect(() => {
-    const scroller = document.querySelector('.forum_root .body');
-    if (!scroller) return;
-    const onScroll = () => setShow(scroller.scrollTop > 600);
-    scroller.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-    return () => scroller.removeEventListener('scroll', onScroll);
-  }, []);
-
-  if (!show) return null;
-
-  return (
-    <button
-      type="button"
-      className="backToTop"
-      onClick={() => {
-        const scroller = document.querySelector('.forum_root .body');
-        if (scroller) scroller.scrollTo({ top: 0, behavior: 'smooth' });
-      }}
-      aria-label="Back to top"
-      title="Наверх"
-    >
-      ↑
-    </button>
-  );
-}
-
-
+ 
 function ensureClientId(){
   try{
     let v = localStorage.getItem('forum:cid')
@@ -1271,15 +1241,7 @@ const Styles = () => (
     .adminBtn{ border:1px solid rgba(255,255,255,.16); border-radius:12px; padding:.55rem .8rem; font-weight:700; letter-spacing:.4px }
     .adminOff{ background:rgba(255,90,90,.10); border-color:rgba(255,120,120,.45); color:#ffb1a1 }
     .adminOn{ background:rgba(70,210,120,.12); border-color:rgba(110,240,170,.45); color:#baf7d6 }
-    .pulse{ position:relative; overflow:hidden }
-    .pulse::before,.pulse::after{
-      content:''; position:absolute; inset:-20%; border-radius:16px; pointer-events:none;
-      background:radial-gradient(50% 50% at 50% 50%, rgba(80,167,255,.35), rgba(80,167,255,0) 70%);
-      animation:wv 2.4s infinite;
-    }
-    .pulse::after{ animation-delay:1.2s }
-    @keyframes wv{ 0%{ transform:scale(.8); opacity:.55 } 70%{ transform:scale(1.25); opacity:.12 } 100%{ transform:scale(1.35); opacity:0 } }
-
+ 
     .qft_toast_wrap{ position:fixed; right:16px; bottom:16px; z-index:4000 }
     .qft_toast{ max-width:min(420px,90vw); padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(10,14,22,.94); color:#eaf4ff; box-shadow:0 10px 28px rgba(0,0,0,.45) }
     .qft_toast.ok{ border-color:rgba(70,220,130,.5) } .qft_toast.warn{ border-color:rgba(255,200,80,.5) } .qft_toast.err{ border-color:rgba(255,90,90,.5) }
@@ -3005,6 +2967,52 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   text-shadow:
     0 0 6px rgba(0, 200, 255, 0.55),
     0 0 14px rgba(0, 0, 0, 0.85);
+}
+/* общий липкий док внизу окна — держит композер и FAB на месте */
+.composeDock{
+  position: sticky;
+  bottom: 0;
+  z-index: 40;          /* поверх контента со скроллом */
+  pointer-events: none; /* сам док клики не перехватывает */
+}
+/* его дети кликабельны */
+.composeDock > *{ pointer-events: auto; }
+
+/* прячем композер, когда он выключен — если у тебя это уже есть, оставь своё */
+.composer:not([data-active="true"]){
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform .18s ease, opacity .12s ease;
+}
+
+/* FAB внутри дока: позиционируем к правому нижнему углу дока */
+.fabCompose{
+  --fab-size: 54px;
+  --fab-right: 16px;   /* можно менять позицию */
+  --fab-bottom: 36px;  /* можно менять позицию */
+
+  position: absolute;
+  right: max(var(--fab-right), env(safe-area-inset-right));
+  bottom: max(var(--fab-bottom), env(safe-area-inset-bottom));
+  width: var(--fab-size);
+  height: var(--fab-size);
+  border: 0;
+  border-radius: 50%;
+  background: #00aeff8c;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 10px 28px rgba(252, 191, 7, 0.47), 0 0 24px rgba(248, 249, 252, 1);
+  cursor: pointer;
+  z-index: 4000;
+  transition: transform .12s ease, filter .14s ease, box-shadow .18s ease;
+}
+.fabCompose svg{ width: 28px; height: 28px; display:block; }
+
+/* прячем FAB, когда композер активен */
+.composer[data-active="true"] ~ .fabCompose{
+  opacity: 0; transform: translateY(4px) scale(.98); pointer-events: none;
 }
 
 
@@ -6197,6 +6205,25 @@ useEffect(() => {
 const startSendCooldown = React.useCallback((sec = 10) => {
   setCooldownLeft(sec);
 }, []);
+// по клику вне композера — закрываем
+useEffect(() => {
+  if (!composerActive) return;
+  const onDown = (e) => {
+    const el = composerRef?.current;
+    if (el && !el.contains(e.target)) {
+      setComposerActive(false);
+    }
+  };
+  document.addEventListener('pointerdown', onDown, true);
+  return () => document.removeEventListener('pointerdown', onDown, true);
+}, [composerActive, composerRef, setComposerActive]);
+useEffect(() => {
+  const sendBtn = document.querySelector('[data-composer-send], .forumComposer .planeBtn');
+  if (!sendBtn) return;
+  const onClick = () => setComposerActive(false);
+  sendBtn.addEventListener('click', onClick);
+  return () => sendBtn.removeEventListener('click', onClick);
+}, [composerActive]);
 
  // --- voice recording state ---
  const [pendingAudio, setPendingAudio] = useState(null); // data: URL на blob (webm/ogg)
@@ -8706,7 +8733,7 @@ onClick={()=>{
         </div>
 
       </div>
-
+<div className="composeDock">
 {/* нижний композер */}
 <div className="composer" data-active={composerActive} ref={composerRef}>
   <div className="meta mb-2">
@@ -8716,7 +8743,7 @@ onClick={()=>{
         ? `${t('forum_replying_to')||'Ответ к'} ${shortId(threadRoot.userId||'')}`
         : t('')}
   </div>
-  <BackToTopButton />
+
 
   {/* ВСТРОЕННЫЙ КОМПОЗЕР ВНУТРИ ПОЛЯ */}
   <div className="forumComposer">
@@ -9064,8 +9091,20 @@ onClick={(e)=>{
     style={{ display:'none' }}
     onChange={onFilesChosen}
   />
-</div>
-
+  </div>
+  {/* FAB: синяя кнопка с карандашом */}
+  <button
+    type="button"
+    className="fabCompose"
+    aria-label="Написать сообщение"
+    title="Написать сообщение"
+    onClick={() => setComposerActive(true)}
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm14.71-9.04c.39-.39.39-1.02 0-1.41l-2.5-2.5a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.99-1.67z"/>
+    </svg>
+  </button> 
+</div>{/* /composeDock */}
 </section>
 )}
 </div>
