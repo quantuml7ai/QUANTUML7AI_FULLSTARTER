@@ -494,7 +494,7 @@ export default function ForumPage() {
 
         .fr-body {
           margin-top: 2px;
-          max-height: 210px;
+          max-height: 400px;
           width: 100%;
           padding: 10px 12px;
           background: rgba(2,4,10,.98);
@@ -578,7 +578,7 @@ export default function ForumPage() {
             border-radius: 14px;
           }
           .fr-body {
-            max-height: 400px;
+            max-height: 300px;
             padding: 8px 8px;
           }
           .fr-body-text,
