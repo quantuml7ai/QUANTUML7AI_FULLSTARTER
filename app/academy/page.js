@@ -263,7 +263,7 @@ function QASection({ imageSrc, imageAlt, titleKey, qaKeys }) {
 
         @media (min-width: 720px) {
           .QL7-title {
-            font-size: 2.2rem;
+            font-size: 1.8rem;
           }
           .QL7-qa-text {
             font-size: 1.2rem;
