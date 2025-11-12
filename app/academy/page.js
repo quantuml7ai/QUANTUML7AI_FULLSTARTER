@@ -92,7 +92,7 @@ function QASection({ imageSrc, imageAlt, titleKey, qaKeys }) {
 
         .QL7-title {
           margin: 0 0 10px;
-          font-size: 2rem;
+          font-size: 1.6rem;
           font-weight: 600;
           display: flex;
           align-items: center;
