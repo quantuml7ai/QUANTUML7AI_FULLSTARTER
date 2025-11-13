@@ -16,6 +16,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useI18n } from '../../components/i18n'
 import HomeBetweenBlocksAd from '../ads'
+import AcademyExamBlock from './AcademyExamBlock'
 
 /**
  * Блок с Q&A.
@@ -1000,6 +1001,7 @@ function AcademyContent() {
         titleKey="qa_ru_title_main"
         qaKeys={defiKeys}
       />
+      <AcademyExamBlock blockId={1} />
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1012,7 +1014,7 @@ function AcademyContent() {
         qaKeys={defiKeys2}
         titleKey="qa_ru_title_main"
       />
-
+     <AcademyExamBlock blockId={2} />
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1025,7 +1027,7 @@ function AcademyContent() {
         qaKeys={chainKeys}
         titleKey="qa_ru_title_main"
       />
-
+      <AcademyExamBlock blockId={3} />
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1038,7 +1040,7 @@ function AcademyContent() {
         qaKeys={web3SecKeys}
         titleKey="qa_ru_title_main"
       />
-
+      <AcademyExamBlock blockId={4} />
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1051,6 +1053,7 @@ function AcademyContent() {
         qaKeys={secTradeKeys}
         titleKey="qa_ru_title_main"
       />
+      <AcademyExamBlock blockId={5} />
 
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
@@ -1064,6 +1067,8 @@ function AcademyContent() {
         qaKeys={tradeNftKeys}
         titleKey="qa_ru_title_main"
       />
+      <AcademyExamBlock blockId={6} />
+
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1076,6 +1081,7 @@ function AcademyContent() {
         qaKeys={nftRegAiKeys}
         titleKey="qa_ru_title_main"
       />
+       <AcademyExamBlock blockId={7} />
 
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
@@ -1088,7 +1094,9 @@ function AcademyContent() {
         imageAlt="QL7 Academy — DAO & Metaverse Module"
         qaKeys={daoMetaKeys}
         titleKey="qa_ru_title_main"
-      />    
+      />   
+       <AcademyExamBlock blockId={8} />
+
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1101,7 +1109,8 @@ function AcademyContent() {
         qaKeys={metaTailKeys}
         titleKey="qa_ru_title_main"
       />
-
+      <AcademyExamBlock blockId={9} />
+ 
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1114,6 +1123,7 @@ function AcademyContent() {
         qaKeys={metaGamefiKeys}
         titleKey="qa_ru_title_main"
       />
+       <AcademyExamBlock blockId={10} />
 
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
@@ -1127,6 +1137,7 @@ function AcademyContent() {
         qaKeys={gamefiSocialfiKeys}
         titleKey="qa_ru_title_main"
       />
+     <AcademyExamBlock blockId={11} />
 
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
@@ -1140,6 +1151,8 @@ function AcademyContent() {
         qaKeys={socialfiDevKeys}
         titleKey="qa_ru_title_main"
       />
+      <AcademyExamBlock blockId={12} />
+
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1152,6 +1165,8 @@ function AcademyContent() {
         qaKeys={devDataKeys}
         titleKey="qa_ru_title_main"
       />
+      <AcademyExamBlock blockId={13} />
+
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1164,6 +1179,7 @@ function AcademyContent() {
         qaKeys={dataAiKeys}
         titleKey="qa_ru_title_main"
       />
+      <AcademyExamBlock blockId={14} />
 
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
@@ -1177,6 +1193,8 @@ function AcademyContent() {
         qaKeys={aiDeepKeys}
         titleKey="qa_ru_title_main"
       />
+      <AcademyExamBlock blockId={15} />
+
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1189,6 +1207,8 @@ function AcademyContent() {
         qaKeys={aiNextKeys}
         titleKey="qa_ru_title_main"
       />
+      <AcademyExamBlock blockId={16} />
+
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1201,6 +1221,8 @@ function AcademyContent() {
         qaKeys={aiMetaKeys}
         titleKey="qa_ru_title_main"
       />
+      <AcademyExamBlock blockId={17} />
+
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1213,6 +1235,8 @@ function AcademyContent() {
         qaKeys={metaMix18Keys}
         titleKey="qa_ru_title_main"
       />
+      <AcademyExamBlock blockId={18} />
+
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1225,6 +1249,8 @@ function AcademyContent() {
         qaKeys={metaAiReg19Keys}
         titleKey="qa_ru_title_main"
       />
+      <AcademyExamBlock blockId={19} />
+
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1240,6 +1266,8 @@ function AcademyContent() {
         qaKeys={rwaGamefiMix20Keys}
         titleKey="qa_ru_title_main"
       />
+      <AcademyExamBlock blockId={20} />
+
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1252,6 +1280,8 @@ function AcademyContent() {
         qaKeys={meta21Keys}
         titleKey="qa_ru_title_main"
       />
+      <AcademyExamBlock blockId={21} />
+
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1264,6 +1294,8 @@ function AcademyContent() {
         qaKeys={meta22Keys}
         titleKey="qa_ru_title_main"
       />
+      <AcademyExamBlock blockId={22} />
+
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1276,6 +1308,8 @@ function AcademyContent() {
         qaKeys={meta23Keys}
         titleKey="qa_ru_title_main"
       />
+      <AcademyExamBlock blockId={23} />
+
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1288,6 +1322,8 @@ function AcademyContent() {
         qaKeys={meta24Keys}
         titleKey="qa_ru_title_main"
       />
+      <AcademyExamBlock blockId={24} />
+
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1300,6 +1336,8 @@ function AcademyContent() {
         qaKeys={meta25Keys}
         titleKey="qa_ru_title_main"
       />
+      <AcademyExamBlock blockId={25} />
+
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1312,6 +1350,8 @@ function AcademyContent() {
         qaKeys={meta26Keys}
         titleKey="qa_ru_title_main"
       />
+      <AcademyExamBlock blockId={26} />
+
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1324,6 +1364,8 @@ function AcademyContent() {
         qaKeys={meta27Keys}
         titleKey="qa_ru_title_main"
       />
+      <AcademyExamBlock blockId={27} />
+
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1336,6 +1378,8 @@ function AcademyContent() {
         qaKeys={meta28Keys}
         titleKey="qa_ru_title_main"
       />
+      <AcademyExamBlock blockId={28} />
+
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
@@ -1348,6 +1392,8 @@ function AcademyContent() {
        qaKeys={meta29Keys}
        titleKey="qa_ru_title_main"
       />
+      <AcademyExamBlock blockId={29} />
+
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
