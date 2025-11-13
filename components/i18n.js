@@ -8354,7 +8354,7 @@ try {
 
 /* === ACADEMY — welcome title (7 languages) === */
 const ACADEMY_WELCOME_EN = {
-qa_ru_title_main: '🌍 QUANTUM 🌎 ACADEMY.  GLOBAL GLOSSARY QL7 — Learn and earn rewards for learning!',
+qa_ru_title_main: '🌎  GLOBAL 🌎 GLOSSARY QL7 — Learn and earn rewards for learning!',
 q_what: 'Question',
 q_this: 'Answer',
 ACADEMY_EXAM_TITLE: 'Test your knowledge',
@@ -8366,7 +8366,7 @@ academy_exam_answer_fail: 'The answer is incorrect',
 academy_exam_wait: 'Until the exam starts',
 }
 const ACADEMY_WELCOME_RU = {
-qa_ru_title_main: '🌍 QUANTUM 🌎 АКАДЕМИЯ. ГЛОБАЛЬНЫЙ ГЛОССАРИЙ QL7 — Обучайтесь и получайте награды за обучение!',
+qa_ru_title_main: '🌎 ГЛОБАЛЬНЫЙ 🌎 ГЛОССАРИЙ QL7 — Обучайтесь и получайте награды за обучение!',
 ACADEMY_EXAM_TITLE: 'Проверь свои знания',
 q_what: 'Вопрос',
 q_this: 'Ответ',
@@ -8378,7 +8378,7 @@ academy_exam_answer_fail: 'Ответ неправильный',
 academy_exam_wait: 'До начала экзамена',
   }
 const ACADEMY_WELCOME_UK = {
-qa_ru_title_main: '🌍 QUANTUM 🌎 АКАДЕМІЯ. ГЛОБАЛЬНИЙ ГЛОСАРІЙ QL7 — Навчайтеся та отримуйте нагороди за навчання!',
+qa_ru_title_main: '🌎 ГЛОБАЛЬНИЙ 🌎 ГЛОСАРІЙ QL7 — Навчайтеся та отримуйте нагороди за навчання!',
 q_what: 'Питання',
 q_this: 'Відповідь',
 ACADEMY_EXAM_TITLE: 'Перевір свої знання',
@@ -8390,7 +8390,7 @@ academy_exam_answer_fail: 'Відповідь неправильна',
 academy_exam_wait: 'До початку іспиту',
   }
 const ACADEMY_WELCOME_ES = {
-qa_ru_title_main: '🌍 QUANTUM 🌎 ACADEMY. GLOSARIO GLOBAL QL7 — Aprende y gana recompensas por aprender!',
+qa_ru_title_main: '🌎 GLOSARIO 🌎 GLOBAL QL7 — ¡Aprende y obtén recompensas por aprender!',
 q_what: 'Pregunta',
 q_this: 'Respuesta',
 ACADEMY_EXAM_TITLE: 'Pon a prueba tus conocimientos',
@@ -8402,7 +8402,7 @@ academy_exam_answer_fail: 'La respuesta es incorrecta',
 academy_exam_wait: 'Hasta que comience el examen',
   }
 const ACADEMY_WELCOME_ZH = {
-qa_ru_title_main: '🌍 QUANTUM 🌎 学院. 全球词汇表 QL7 — 学习并获得学习奖励！',
+qa_ru_title_main: '🌎 全球 🌎 词汇表 QL7 — 学习并获得学习奖励！',
 ACADEMY_EXAM_TITLE: '检验你的知识',
 q_what: '问题',
 q_this: '答案',
@@ -8414,7 +8414,7 @@ academy_exam_answer_fail: '答案不正确',
 academy_exam_wait: '距离考试开始',
   }
 const ACADEMY_WELCOME_AR = {
-qa_ru_title_main: '🌍 QUANTUM 🌎 أكاديمية .القاموس العالمي QL7 — تعلّم واحصل على مكافآت مقابل التعلّم!',
+qa_ru_title_main: '🌎 عالمي 🌎 مسرد QL7 — تعلّم واحصل على مكافآت مقابل التعلم!',
 q_what: 'سؤال',
 q_this: 'إجابة',
 ACADEMY_EXAM_TITLE: 'اختبر معرفتك',
@@ -8426,7 +8426,7 @@ academy_exam_answer_fail: 'الإجابة غير صحيحة',
 academy_exam_wait: 'حتى يبدأ الامتحان',
   }
 const ACADEMY_WELCOME_TR = {
-qa_ru_title_main: '🌍 QUANTUM 🌎 AKADEMİSİ  KÜRESEL SÖZLÜK QL7 — Öğrenin ve öğrenme için ödüller kazanın!',
+qa_ru_title_main: '🌎 KÜRESEL 🌎 SÖZLÜK QL7 — Öğrenin ve öğrenme karşılığında ödüller kazanın!',
 q_what: 'Soru',
 q_this: 'Cevap',
 ACADEMY_EXAM_TITLE: 'Bilgini test et',
