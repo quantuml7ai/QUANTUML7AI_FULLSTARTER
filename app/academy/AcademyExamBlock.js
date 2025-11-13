@@ -857,30 +857,33 @@ export default function AcademyExamBlock({ blockId }) {
 
   return (
     <section className="QL7-exam">
-      {/* FX оверлей при начислении награды */}
-      {showAwardFx && lastAnswer && lastAnswer.awarded > 0 && (
-        <div className="QL7-award-overlay" aria-hidden="true">
-          <div className="QL7-award-pulse" />
-          <div className="QL7-award-main">
-            <div className="QL7-award-title">
-              +{formatReward(lastAnswer.awarded)} QCoin
-            </div>
-            <div className="QL7-award-sub">{congratsLabel}</div>
-            <div className="QL7-award-rain">
-              {Array.from({ length: 32 }).map(function (_, i) {
-                return (
-                  <span
-                    key={i}
-                    className={'QL7-coin QL7-coin-' + ((i % 12) + 1)}
-                  >
-                    Ⓠ
-                  </span>
-                )
-              })}
-            </div>
-          </div>
-        </div>
-      )}
+{/* FX оверлей при начислении награды — как на форуме, full-screen */}
+{showAwardFx && lastAnswer && lastAnswer.awarded > 0 && (
+  <div className="QL7-coinBurstOverlay" aria-hidden="true">
+    <div className="QL7-coinBurstBox">
+      <div className="QL7-coinSum">
+        +{formatReward(lastAnswer.awarded)} QCoin
+      </div>
+      <div className="QL7-coinCongrats">{congratsLabel}</div>
+    </div>
+
+    {Array.from({ length: 60 }).map(function (_, i) {
+      const lane = i % 20
+      return (
+        <div
+          key={i}
+          className="QL7-coinPiece"
+          style={{
+            left: `${5 + lane * 4.5}%`,
+            animationDuration: `${1.6 + (i % 5) * 0.2}s`,
+            animationDelay: `${(i % 20) * 0.05}s`,
+          }}
+        />
+      )
+    })}
+  </div>
+)}
+
 
       <div className="QL7-exam-header">
         <div className="QL7-exam-title">{title}</div>
@@ -1034,8 +1037,7 @@ export default function AcademyExamBlock({ blockId }) {
             0 0 0 1px rgba(15, 23, 42, 0.95) inset;
           overflow: hidden;
         }
-
-        /* FX оверлей зачисления с дождём монет */
+        /* FX оверлей зачисления с дождём монет — под 4 секунды */
         .QL7-award-overlay {
           position: absolute;
           inset: 0;
@@ -1057,7 +1059,8 @@ export default function AcademyExamBlock({ blockId }) {
             transparent 65%
           );
           filter: blur(1px);
-          animation: QL7awardPulse 2.4s ease-out forwards;
+          /* было ~2.4s → делаем 4s */
+          animation: QL7awardPulse 4s ease-out forwards;
         }
 
         .QL7-award-main {
@@ -1075,8 +1078,9 @@ export default function AcademyExamBlock({ blockId }) {
             0 0 32px rgba(250, 204, 21, 0.95),
             0 0 0 1px rgba(15, 23, 42, 0.95);
           text-align: center;
+          /* поп-анимка оставляем быстрой (вылет), а fade растягиваем до 4s */
           animation: QL7awardPop 0.22s cubic-bezier(0.16, 1, 0.3, 1),
-            QL7awardFade 2.4s ease-out forwards;
+            QL7awardFade 4s ease-out forwards;
         }
 
         .QL7-award-title {
@@ -1117,112 +1121,94 @@ export default function AcademyExamBlock({ blockId }) {
             0 0 14px rgba(250, 250, 210, 0.9);
         }
 
-        /* монеты по всей ширине, с разными задержками и длительностью */
-        .QL7-coin-1 {
-          left: 4%;
-          animation: QL7coinFall 1.7s linear 0s forwards;
-        }
-        .QL7-coin-2 {
-          left: 12%;
-          animation: QL7coinFall 1.8s linear 0.06s forwards;
-        }
-        .QL7-coin-3 {
-          left: 20%;
-          animation: QL7coinFall 1.9s linear 0.12s forwards;
-        }
-        .QL7-coin-4 {
-          left: 28%;
-          animation: QL7coinFall 1.7s linear 0.18s forwards;
-        }
-        .QL7-coin-5 {
-          left: 36%;
-          animation: QL7coinFall 2s linear 0.08s forwards;
-        }
-        .QL7-coin-6 {
-          left: 44%;
-          animation: QL7coinFall 1.8s linear 0.2s forwards;
-        }
-        .QL7-coin-7 {
-          left: 52%;
-          animation: QL7coinFall 2s linear 0.14s forwards;
-        }
-        .QL7-coin-8 {
-          left: 60%;
-          animation: QL7coinFall 1.9s linear 0.22s forwards;
-        }
-        .QL7-coin-9 {
-          left: 68%;
-          animation: QL7coinFall 1.7s linear 0.16s forwards;
-        }
-        .QL7-coin-10 {
-          left: 76%;
-          animation: QL7coinFall 2s linear 0.24s forwards;
-        }
-        .QL7-coin-11 {
-          left: 84%;
-          animation: QL7coinFall 1.8s linear 0.1s forwards;
-        }
-        .QL7-coin-12 {
-          left: 92%;
-          animation: QL7coinFall 1.9s linear 0.26s forwards;
-        }
+/* === FX: Coin Burst как на форуме, но под QCoin === */
+.QL7-coinBurstOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+}
 
-        @keyframes QL7coinFall {
-          0% {
-            transform: translate3d(0, -10px, 0) rotateZ(0deg);
-            opacity: 0;
-          }
-          10% {
-            opacity: 1;
-          }
-          60% {
-            text-shadow:
-              0 0 10px rgba(250, 204, 21, 1),
-              0 0 22px rgba(251, 191, 36, 0.9);
-          }
-          100% {
-            transform: translate3d(0, 260px, 0) rotateZ(260deg);
-            opacity: 0;
-          }
-        }
+.QL7-coinBurstBox {
+  background: radial-gradient(ellipse at center, #1d1d1d 0%, #0e0e0e 60%, #000 100%);
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  box-shadow:
+    0 0 40px rgba(255, 215, 0, 0.25),
+    inset 0 0 40px rgba(255, 215, 0, 0.08);
+  border-radius: 18px;
+  padding: 24px 22px;
+  width: min(520px, 92vw);
+  text-align: center;
+  color: #ffd700;
+  animation: ql7CoinPop 0.35s ease-out;
+}
 
-        @keyframes QL7awardPulse {
-          0% {
-            transform: scale(0.3);
-            opacity: 0;
-          }
-          30% {
-            transform: scale(1);
-            opacity: 1;
-          }
-          100% {
-            transform: scale(1.3);
-            opacity: 0;
-          }
-        }
+.QL7-coinSum {
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 18px rgba(255, 215, 0, 0.55);
+  margin: 6px 0 14px;
+}
 
-        @keyframes QL7awardPop {
-          0% {
-            transform: scale(0.5) translateY(10px);
-            opacity: 0;
-          }
-          100% {
-            transform: scale(1) translateY(0);
-            opacity: 1;
-          }
-        }
+.QL7-coinCongrats {
+  font-size: 18px;
+  color: #ffeaa7;
+  opacity: 0.95;
+}
 
-        @keyframes QL7awardFade {
-          0% {
-            opacity: 1;
-          }
-          80% {
-            opacity: 1;
-          }
-          100% {
-            opacity: 0;
-          }
-        }
+/* Одна монетка QCoin — берём реальный спрайт */
+.QL7-coinPiece {
+  position: fixed;
+  top: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background-image: url('/qcoin-32.png'); /* поменяй путь, если файл в другом месте */
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.75);
+  animation-name: ql7CoinFall;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+/* попап коробки */
+@keyframes ql7CoinPop {
+  0% {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* падение монет, как на форуме: из -120vh в +120vh с вращением */
+@keyframes ql7CoinFall {
+  0% {
+    transform: translateY(-120vh) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(120vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
 
         .QL7-exam-header {
           display: flex;
