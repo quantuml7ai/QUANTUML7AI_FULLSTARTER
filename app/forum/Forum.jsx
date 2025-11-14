@@ -1466,7 +1466,7 @@ const Styles = () => (
 
 /* Золотая надпись с переливом и свечением */
 .qcoinLabel{
-  font-size:2.2em; font-weight:900; letter-spacing:.4px;
+  font-size:2.4em; font-weight:900; letter-spacing:.4px;
   background:
     linear-gradient(135deg,
       #7a5c00 0%,
@@ -7859,7 +7859,7 @@ function pickAdUrlForSlot(slotKey, slotKind) {
  <div className="min-w-0">
    <div
      className="qRowRight"
-     style={{ '--qcoin-offset':'6px', '--qcoin-y': '-15px', '--qcoin-scale':'1.15' }}  /* ← здесь настраиваешь */
+     style={{ '--qcoin-offset':'6px', '--qcoin-y': '10px', '--qcoin-scale':'1.15' }}  /* ← здесь настраиваешь */
    >
      <QCoinInline t={t} userKey={idShown} vipActive={vipActive} />
    </div>
