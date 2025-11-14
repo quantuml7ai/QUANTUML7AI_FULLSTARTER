@@ -287,17 +287,14 @@ export default function AuthNavClient() {
       </button>
 
       {!tgLinked && (
-        <Image
+        <img
           src="/click/telegram.gif"
           alt={t('ql7ai_bot') || 'Link Telegram'}
           title={t('ql7ai_bot') || 'Link Telegram'}
           className="tgLinkIcon"
           role="button"
           tabIndex={0}
-          width={43}
-          height={43}
-          draggable={false}
-          style={{ cursor: 'pointer', display: 'inline-block', pointerEvents: 'auto' }}
+          style={{ width: 43, height: 43, cursor: 'pointer', display: 'inline-block', pointerEvents: 'auto' }}
           onClick={(e) => { e.preventDefault(); onLinkTelegram(); }}
           onTouchEnd={(e) => { e.preventDefault(); onLinkTelegram(); }}
           onKeyDown={(e) => {

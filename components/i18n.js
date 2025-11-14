@@ -357,13 +357,72 @@ ex_bullets: [
       'Wallet-based authentication. PRO/VIP unlock faster research, private signals and early features.',
     subscribe_cta: 'Subscribe via Telegram',
 
-    contact_title: 'Contact us',
-    contact_sub: 'Reach the team — we respond fast.',
-    contact_lines: [
-      `Telegram channel — announcements and research: `,
-      `Feedback bot — support & requests: `,
-      `Email — partnerships & enterprise: `,
-    ],
+contact_title: 'Contact Us',
+contact_sub: `Why reach out to us?
+
+1. For partners and collaborations
+A partnership with us provides access to QuantumL7AI technologies, including:
+— integration of your products with our neural networks and smart agents;
+— joint educational programs and learning modules;
+— promotion of your brand within our platform;
+— development of individualized AI solutions tailored to your audience;
+— opportunities for hosting joint events, streams, and AMA sessions.
+
+We are open to collaborating with any projects — from small businesses to large companies, startups, and educational platforms.
+If you have an idea or initiative — write to us. We will review it quickly and offer the best format for cooperation.
+
+2. For investors
+If you want to:
+— gain access to early QuantumL7AI technologies;
+— participate in the development of the AI ecosystem;
+— support the creation of an international learning platform;
+— be the first to learn about strategic decisions and major releases —
+
+you can contact us directly.
+
+We are open to both private and institutional investors who share our mission:  
+to develop innovative AI technologies that help people grow and achieve more.  
+We review every inquiry individually.
+
+3. For platform users
+If you use our services — Premium subscription, QuantumX, learning modules, Q-Coin, or smart agents — you can always reach out to us regarding:
+
+— technical issues or errors;  
+— suggestions and improvements;  
+— requests for new features;  
+— payment, premium access, and subscription questions;  
+— bug reports;  
+— appreciation messages (we always love them ❤️).
+
+We read each message — it helps us become better.
+
+4. Complaints, safety, and rule violations
+Write to us if you notice:
+— offensive behavior;  
+— suspicious activity or fraud;  
+— violation of platform rules;  
+— incorrect or dangerous model responses.
+
+We respond quickly and ensure safety.
+
+5. For content creators
+If you are:
+— a blogger;  
+— a streamer;  
+— the owner of a large Telegram/YouTube/Instagram channel;  
+— a course creator or educational project author —
+
+we are open to joint collaborations, integrations, and partnership programs.  
+Write to us — we will discuss the format of cooperation.`,
+contact_lines: [
+  `Our social media: stay updated on news and releases.`,
+  `Twitter — fresh announcements and major releases.`,
+  `Telegram — important updates and community content.`,
+  `Instagram — visual posts, backstage, and media content.`,
+  `YouTube — streams, reviews, and feature breakdowns in video format.`,
+  `TikTok — short formats, guides, and quick insights about QuantumL7AI.`,
+],
+
 
     links: { bot: BOT_LINK, channel: CHANNEL_LINK, feedback: FEEDBACK_LINK, email: CONTACT_EMAIL },
   },
@@ -724,12 +783,70 @@ ex_bullets: [
     subscribe_cta: 'Оформить подписку в Telegram',
 
     contact_title: 'Связаться с нами',
-    contact_sub: 'Пишите — отвечаем быстро.',
-    contact_lines: [
-      `Telegram-канал — анонсы и исследования: `,
-      `Бот обратной связи — поддержка и запросы: `,
-      `Почта — партнёрства и enterprise: `,
-    ],
+contact_sub: `Зачем обращаться к нам?
+
+1. Для партнёров и коллабораций
+Партнёрство с нами открывает доступ к технологиям QuantumL7AI, включая:
+— интеграцию ваших продуктов с нашими нейросетями и смарт-агентами;
+— совместные образовательные программы и блоки обучения;
+— продвижение вашего бренда внутри нашей платформы;
+— разработку индивидуальных AI-решений под вашу аудиторию;
+— возможность проведения совместных мероприятий, стримов и AMA-сессий.
+
+Мы открыты для сотрудничества с любыми проектами — от малого бизнеса до крупных компаний, стартапов и образовательных платформ.
+Если у вас есть идея или инициатива — напишите нам. Мы быстро рассмотрим её и предложим лучший формат взаимодействия.
+
+2. Для инвесторов
+Если вы хотите:
+— получить доступ к ранним технологиям QuantumL7AI;
+— участвовать в развитии AI-экосистемы;
+— поддерживать построение международной обучающей платформы;
+— первыми узнавать о стратегических решениях и крупных релизах —
+
+вы можете связаться с нами напрямую.
+
+Мы открыты как для частных, так и институциональных инвесторов, которые разделяют нашу миссию:  
+развивать инновационные AI-технологии, помогающие людям расти и достигать большего.  
+Каждое обращение мы рассматриваем персонально.
+
+3. Для пользователей платформы
+Если ты используешь наши сервисы — Premium подписку, QuantumX, обучающие блоки, Q-Coin или смарт-агентов — ты всегда можешь обратиться к нам по поводу:
+
+— технических проблем или ошибок;  
+— предложений и улучшений;  
+— запросов на новые функции;  
+— вопросов по оплате, премиум-доступу и подписке;  
+— сообщений о багах;  
+— благодарностей (мы всегда рады ❤️).
+
+Мы читаем каждое сообщение — оно помогает нам становиться лучше.
+
+4. Жалобы, безопасность и нарушение правил
+Пиши нам, если заметил:
+— оскорбительное поведение;  
+— подозрительную активность или мошенничество;  
+— нарушение правил платформы;  
+— некорректные или опасные ответы моделей.
+
+Мы быстро реагируем и следим за безопасностью.
+
+5. Для создателей контента
+Если ты:
+— блогер;  
+— стример;  
+— владелец крупного Telegram/YouTube/Instagram-канала;  
+— автор курсов или образовательных проектов —
+
+мы открыты к совместным коллаборациям, интеграциям и партнёрским программам.  
+Напиши нам — обсудим формат сотрудничества.`,
+contact_lines: [
+  `Наши соцсети: оставайся в курсе новостей и обновлений.`,
+  `Twitter — свежие анонсы и большие релизы.`,
+  `Telegram — важные объявления и материалы для сообщества.`,
+  `Instagram — визуальные публикации, backstage и медиа-контент.`,
+  `YouTube — стримы, обзоры и разборы функций в видеоформате.`,
+  `TikTok — короткие форматы, гайды и быстрые инсайты по QuantumL7AI.`,
+],
 
     links: { bot: BOT_LINK, channel: CHANNEL_LINK, feedback: FEEDBACK_LINK, email: CONTACT_EMAIL },
   },
@@ -1089,13 +1206,72 @@ ex_bullets: [
       'Авторизація через гаманець. PRO/VIP відкривають швидкі дослідження, приватні сигнали та ранні функції.',
     subscribe_cta: 'Оформити підписку в Telegram',
 
-    contact_title: 'Зв’язатися з нами',
-    contact_sub: 'Пишіть — відповідаємо швидко.',
-    contact_lines: [
-      `Telegram-канал — анонси та дослідження: `,
-      `Бот зворотного зв’язку — підтримка та запити: `,
-      `Пошта — партнерства та enterprise: `,
-    ],
+contact_title: 'Зв’язатися з нами',
+contact_sub: `Навіщо звертатися до нас?
+
+1. Для партнерів і колаборацій
+Партнерство з нами відкриває доступ до технологій QuantumL7AI, включно з:
+— інтеграцією ваших продуктів із нашими нейромережами та смарт-агентами;
+— спільними освітніми програмами та навчальними модулями;
+— просуванням вашого бренду всередині нашої платформи;
+— розробкою індивідуальних AI-рішень під вашу аудиторію;
+— можливістю проведення спільних заходів, стрімів та AMA-сесій.
+
+Ми відкриті до співпраці з будь-якими проєктами — від малого бізнесу до великих компаній, стартапів та освітніх платформ.
+Якщо у вас є ідея чи ініціатива — напишіть нам. Ми швидко розглянемо її та запропонуємо найкращий формат взаємодії.
+
+2. Для інвесторів
+Якщо ви хочете:
+— отримати доступ до ранніх технологій QuantumL7AI;
+— брати участь у розвитку AI-екосистеми;
+— підтримувати створення міжнародної освітньої платформи;
+— першими дізнаватися про стратегічні рішення та великі релізи —
+
+ви можете зв’язатися з нами напряму.
+
+Ми відкриті як для приватних, так і для інституційних інвесторів, які поділяють нашу місію:  
+розвивати інноваційні AI-технології, що допомагають людям зростати та досягати більшого.  
+Кожне звернення ми розглядаємо персонально.
+
+3. Для користувачів платформи
+Якщо ти використовуєш наші сервіси — Premium-підписку, QuantumX, навчальні модулі, Q-Coin або смарт-агентів — ти завжди можеш звернутися до нас щодо:
+
+— технічних проблем або помилок;  
+— пропозицій та покращень;  
+— запитів на нові функції;  
+— питань щодо оплати, преміум-доступу та підписки;  
+— повідомлень про баги;  
+— подяк (ми завжди раді ❤️).
+
+Ми читаємо кожне повідомлення — воно допомагає нам ставати кращими.
+
+4. Скарги, безпека та порушення правил
+Пиши нам, якщо помітив:
+— образливу поведінку;  
+— підозрілу активність або шахрайство;  
+— порушення правил платформи;  
+— некоректні чи небезпечні відповіді моделей.
+
+Ми швидко реагуємо та стежимо за безпекою.
+
+5. Для творців контенту
+Якщо ти:
+— блогер;  
+— стрімер;  
+— власник великого Telegram/YouTube/Instagram-каналу;  
+— автор курсів або освітніх проєктів —
+
+ми відкриті до спільних колаборацій, інтеграцій і партнерських програм.  
+Напиши нам — обговоримо формат співпраці.`,
+contact_lines: [
+  `Наші соцмережі: залишайся в курсі новин та оновлень.`,
+  `Twitter — свіжі анонси та великі релізи.`,
+  `Telegram — важливі оголошення та матеріали для спільноти.`,
+  `Instagram — візуальні публікації, backstage і медіаконтент.`,
+  `YouTube — стріми, огляди та розбори функцій у відеоформаті.`,
+  `TikTok — короткі формати, гайди та швидкі інсайти щодо QuantumL7AI.`,
+],
+
 
     links: { bot: BOT_LINK, channel: CHANNEL_LINK, feedback: FEEDBACK_LINK, email: CONTACT_EMAIL },
   },
@@ -1455,13 +1631,72 @@ ex_bullets: [
       'Autenticación con billetera. PRO/VIP desbloquea investigación más rápida, señales privadas y features tempranas.',
     subscribe_cta: 'Suscribirse vía Telegram',
 
-    contact_title: 'Contáctanos',
-    contact_sub: 'Escríbenos — respondemos rápido.',
-    contact_lines: [
-      `Canal de Telegram — anuncios e investigación: `,
-      `Bot de feedback — soporte y pedidos: `,
-      `Correo — partnerships & enterprise: `,
-    ],
+contact_title: 'Contactar con nosotros',
+contact_sub: `¿Por qué ponerse en contacto con nosotros?
+
+1. Para socios y colaboraciones
+La colaboración con nosotros abre el acceso a las tecnologías de QuantumL7AI, incluyendo:
+— la integración de sus productos con nuestras redes neuronales y agentes inteligentes;
+— programas educativos conjuntos y módulos de aprendizaje;
+— la promoción de su marca dentro de nuestra plataforma;
+— el desarrollo de soluciones de IA personalizadas para su audiencia;
+— la posibilidad de realizar eventos conjuntos, transmisiones y sesiones AMA.
+
+Estamos abiertos a colaborar con cualquier tipo de proyecto — desde pequeñas empresas hasta grandes compañías, startups y plataformas educativas.
+Si tiene una idea o iniciativa — escríbanos. La revisaremos rápidamente y le propondremos el mejor formato de colaboración.
+
+2. Para inversionistas
+Si desea:
+— obtener acceso a las primeras tecnologías de QuantumL7AI;
+— participar en el desarrollo del ecosistema de IA;
+— apoyar la construcción de una plataforma educativa internacional;
+— ser de los primeros en conocer decisiones estratégicas y grandes lanzamientos —
+
+puede ponerse en contacto con nosotros directamente.
+
+Estamos abiertos tanto a inversionistas privados como institucionales que comparten nuestra misión:  
+desarrollar tecnologías de IA innovadoras que ayuden a las personas a crecer y alcanzar más.  
+Cada solicitud la evaluamos de manera personalizada.
+
+3. Para usuarios de la plataforma
+Si utilizas nuestros servicios — la suscripción Premium, QuantumX, los módulos educativos, Q-Coin o agentes inteligentes — siempre puedes contactarnos sobre:
+
+— problemas técnicos o errores;  
+— sugerencias y mejoras;  
+— solicitudes de nuevas funciones;  
+— preguntas sobre pagos, acceso premium y suscripción;  
+— reportes de bugs;  
+— mensajes de agradecimiento (siempre nos alegran ❤️).
+
+Leemos cada mensaje — nos ayuda a ser mejores.
+
+4. Quejas, seguridad y violaciones de las normas
+Escríbenos si notas:
+— comportamiento ofensivo;  
+— actividad sospechosa o fraude;  
+— violación de las normas de la plataforma;  
+— respuestas incorrectas o peligrosas de los modelos.
+
+Respondemos rápidamente y garantizamos la seguridad.
+
+5. Para creadores de contenido
+Si eres:
+— bloguero;  
+— streamer;  
+— propietario de un canal grande de Telegram/YouTube/Instagram;  
+— autor de cursos o proyectos educativos —
+
+estamos abiertos a colaboraciones conjuntas, integraciones y programas de asociación.  
+Escríbenos — discutiremos el formato de cooperación.`,
+contact_lines: [
+  `Nuestras redes sociales: mantente al tanto de noticias y actualizaciones.`,
+  `Twitter — anuncios recientes y grandes lanzamientos.`,
+  `Telegram — avisos importantes y contenido para la comunidad.`,
+  `Instagram — publicaciones visuales, backstage y contenido multimedia.`,
+  `YouTube — transmisiones, reseñas y análisis de funciones en formato de video.`,
+  `TikTok — formatos cortos, guías e ideas rápidas sobre QuantumL7AI.`,
+],
+
 
     links: { bot: BOT_LINK, channel: CHANNEL_LINK, feedback: FEEDBACK_LINK, email: CONTACT_EMAIL },
   },
@@ -1821,13 +2056,71 @@ ex_bullets: [
       '钱包认证。PRO/VIP 解锁更快的研究、私人信号和早期功能。',
     subscribe_cta: '通过 Telegram 订阅',
 
-    contact_title: '联系我们',
-    contact_sub: '联系我们 — 快速响应。',
-    contact_lines: [
-      `Telegram 频道 — 公告与研究: `,
-      `反馈机器人 — 支持与请求: `,
-      `邮箱 — 合作与企业: `,
-    ],
+contact_title: '联系我们',
+contact_sub: `为什么要联系我们？
+
+1. 合作伙伴与协作
+与我们合作可以让您接触到 QuantumL7AI 的各类技术，包括：
+— 将您的产品与我们的神经网络和智能代理集成；
+— 联合推出教育项目和学习模块；
+— 在我们的平台内推广您的品牌；
+— 针对您的受众开发定制化的 AI 解决方案；
+— 有机会举办联合活动、直播和 AMA（问我任何事）活动。
+
+我们愿意与任何项目合作 — 从小型企业到大型公司、初创企业以及教育平台。
+如果您有想法或计划 — 请写信给我们。我们会尽快进行审核，并为您提供最合适的合作形式。
+
+2. 投资者
+如果您希望：
+— 获取 QuantumL7AI 的早期技术；
+— 参与 AI 生态系统的构建和发展；
+— 支持打造一个国际化学习平台；
+— 第一时间了解战略决策和重大版本发布 —
+
+您可以直接与我们联系。
+
+我们欢迎所有与我们有共同使命的投资者，无论是个人还是机构：  
+致力于发展创新性的 AI 技术，帮助人们成长并取得更大成就。  
+我们会对每一次来信进行单独、认真地评估。
+
+3. 平台用户
+如果你正在使用我们的服务 —— Premium 订阅、QuantumX、学习模块、Q-Coin 或智能代理 —— 你随时可以就以下问题联系我们：
+
+— 技术问题或错误；  
+— 建议和改进意见；  
+— 对新功能的需求；  
+— 有关支付、Premium 访问和订阅的问题；  
+— 关于漏洞和故障的反馈；  
+— 表达感谢的信息（我们一直非常开心收到这些 ❤️）。
+
+我们会阅读每一条消息 —— 它们帮助我们不断变得更好。
+
+4. 投诉、安全与规则违规
+如果你发现：
+— 侮辱性或冒犯性的行为；  
+— 可疑活动或欺诈行为；  
+— 违反平台规则的情况；  
+— 不正确或存在安全隐患的模型回答。
+
+请及时告诉我们，我们会迅速作出回应并保障平台安全。
+
+5. 内容创作者
+如果你是：
+— 博主；  
+— 主播；  
+— 大型 Telegram / YouTube / Instagram 频道的拥有者；  
+— 课程作者或教育项目的发起人 —
+
+我们非常欢迎与您开展联合合作、功能集成以及各类合作伙伴计划。  
+给我们写信 —— 我们一起讨论最合适的合作形式。`,
+contact_lines: [
+  `我们的社交媒体：随时获取最新的新闻和更新。`,
+  `Twitter —— 最新公告和重大发布。`,
+  `Telegram —— 重要通知以及面向社区的内容。`,
+  `Instagram —— 视觉内容、幕后花絮和媒体内容。`,
+  `YouTube —— 直播、评测以及功能解析的视频内容。`,
+  `TikTok —— 短视频形式、教程以及关于 QuantumL7AI 的快速洞见。`,
+],
 
     links: { bot: BOT_LINK, channel: CHANNEL_LINK, feedback: FEEDBACK_LINK, email: CONTACT_EMAIL },
   },
@@ -2188,13 +2481,72 @@ ex_bullets: [
       'توثيق عبر المحفظة. PRO/VIP تفتح بحث أسرع، إشارات خاصة وميزات مبكرة.',
     subscribe_cta: 'اشترك عبر Telegram',
 
-    contact_title: 'اتصل بنا',
-    contact_sub: 'تواصل مع الفريق — نستجيب بسرعة.',
-    contact_lines: [
-      `قناة Telegram — إعلانات وبحث: `,
-      `بوت الملاحظات — دعم وطلبات: `,
-      `البريد — شراكات ومؤسسات: `,
-    ],
+contact_title: 'التواصل معنا',
+contact_sub: `لماذا يجب التواصل معنا؟
+
+1. للشركاء والتعاون
+الشراكة معنا تمنحكم الوصول إلى تقنيات QuantumL7AI، بما في ذلك:
+— دمج منتجاتكم مع شبكاتنا العصبية والوكلاء الذكيين؛
+— برامج تعليمية مشتركة ووحدات تدريبية؛
+— الترويج لعلامتكم التجارية داخل منصتنا؛
+— تطوير حلول ذكاء اصطناعي مخصصة لجمهوركم؛
+— إمكانية عقد فعاليات مشتركة، بثوث مباشرة، وجلسات AMA.
+
+نحن منفتحون على التعاون مع جميع أنواع المشاريع — من الشركات الصغيرة إلى الشركات الكبرى، ومن الشركات الناشئة إلى المنصات التعليمية.
+إذا كانت لديكم فكرة أو مبادرة — راسلونا. سنقوم بمراجعتها بسرعة ونقدم لكم أفضل صيغة للتعاون.
+
+2. للمستثمرين
+إذا كنتم ترغبون في:
+— الحصول على وصول مبكر إلى تقنيات QuantumL7AI؛
+— المشاركة في تطوير منظومة الذكاء الاصطناعي؛
+— دعم بناء منصة تعليمية دولية؛
+— أن تكونوا أول من يعلم بالقرارات الاستراتيجية والإصدارات الكبيرة —
+
+يمكنكم التواصل معنا مباشرة.
+
+نحن منفتحون أمام المستثمرين الأفراد والمؤسسات الذين يشاركوننا رسالتنا:  
+تطوير تقنيات ذكاء اصطناعي مبتكرة تساعد الناس على النمو وتحقيق المزيد.  
+نحن نراجع كل طلب بشكل فردي.
+
+3. لمستخدمي المنصة
+إذا كنت تستخدم خدماتنا — اشتراك Premium، أو QuantumX، أو الوحدات التعليمية، أو Q-Coin، أو الوكلاء الذكيين — يمكنك دائماً التواصل معنا بخصوص:
+
+— المشاكل التقنية أو الأخطاء؛  
+— الاقتراحات والتحسينات؛  
+— طلبات الميزات الجديدة؛  
+— أسئلة الدفع، والوصول المميز، والاشتراكات؛  
+— الإبلاغ عن الأخطاء؛  
+— رسائل الشكر (نحن نحبها دائماً ❤️).
+
+نقرأ كل رسالة — فهي تساعدنا على أن نصبح أفضل.
+
+4. الشكاوى، الأمان، وانتهاكات القواعد
+راسلنا إذا لاحظت:
+— سلوكاً مسيئاً؛  
+— نشاطاً مشبوهاً أو احتيالاً؛  
+— انتهاكاً لقواعد المنصة؛  
+— إجابات غير صحيحة أو خطرة من النماذج.
+
+نحن نتحرك بسرعة ونحرص على الحفاظ على الأمان.
+
+5. لصناع المحتوى
+إذا كنت:
+— مدوناً؛  
+— مبثاً مباشراً؛  
+— مالك قناة كبيرة على Telegram / YouTube / Instagram؛  
+— مؤلف دورات أو مشاريع تعليمية —
+
+نحن منفتحون على التعاونات المشتركة، والاندماجات، وبرامج الشراكة.  
+راسلنا — سنناقش معك أفضل صيغة للتعاون.`,
+contact_lines: [
+  `وسائل التواصل الاجتماعي الخاصة بنا: ابقَ على اطلاع بآخر الأخبار والتحديثات.`,
+  `Twitter — إعلانات جديدة وإصدارات كبيرة.`,
+  `Telegram — إعلانات هامة ومواد موجهة للمجتمع.`,
+  `Instagram — منشورات مرئية، كواليس، ومحتوى إعلامي.`,
+  `YouTube — بثوث مباشرة، مراجعات، وتحليل للميزات في صيغة فيديو.`,
+  `TikTok — مقاطع قصيرة، شروحات، ورؤى سريعة حول QuantumL7AI.`,
+],
+
 
     links: { bot: BOT_LINK, channel: CHANNEL_LINK, feedback: FEEDBACK_LINK, email: CONTACT_EMAIL },
   },
@@ -2554,13 +2906,71 @@ ex_bullets: [
       'Cüzdan tabanlı doğrulama. PRO/VIP daha hızlı araştırma, özel sinyaller ve erken özellikler sunar.',
     subscribe_cta: 'Telegram üzerinden abone ol',
 
-    contact_title: 'Bize Ulaşın',
-    contact_sub: 'Ekiple iletişime geçin — hızlı yanıtlıyoruz.',
-    contact_lines: [
-      `Telegram kanalı — duyurular ve araştırma: `,
-      `Geri bildirim botu — destek ve istekler: `,
-      `E-posta — ortaklıklar ve kurumsal: `,
-    ],
+contact_title: 'Bizimle iletişime geçin',  
+contact_sub: `Neden bizimle iletişime geçmelisiniz?
+
+1. Partnerler ve iş birlikleri için
+Bizimle yapılacak bir ortaklık, aşağıdakiler de dahil olmak üzere QuantumL7AI teknolojilerine erişim sağlar:
+— ürünlerinizin yapay sinir ağlarımız ve akıllı ajanlarımızla entegrasyonu;
+— ortak eğitim programları ve öğrenme modülleri;
+— markanızın platformumuz içinde tanıtılması;
+— kitlenize özel bireyselleştirilmiş yapay zeka çözümlerinin geliştirilmesi;
+— ortak etkinlikler, yayınlar ve AMA oturumları düzenleme imkânı.
+
+Küçük işletmelerden büyük şirketlere, startuplardan eğitim platformlarına kadar her tür projeyle iş birliğine açığız.
+Bir fikriniz veya girişiminiz varsa — bize yazın. Onu hızlıca değerlendirir ve en uygun iş birliği formatını öneririz.
+
+2. Yatırımcılar için
+Eğer şunları istiyorsanız:
+— QuantumL7AI’nin erken aşama teknolojilerine erişmek;
+— yapay zeka ekosisteminin gelişimine katkıda bulunmak;
+— uluslararası bir eğitim platformunun kurulmasını desteklemek;
+— stratejik kararlar ve büyük sürümlerden ilk haberdar olanlar arasında yer almak —
+
+doğrudan bizimle iletişime geçebilirsiniz.
+
+Hem bireysel hem de kurumsal, misyonumuzu paylaşan yatırımcılara açığız:  
+insanların gelişmesine ve daha fazlasına ulaşmasına yardımcı olan yenilikçi yapay zeka teknolojileri geliştirmek.  
+Her başvuruyu ayrı ayrı değerlendiriyoruz.
+
+3. Platform kullanıcıları için
+Eğer hizmetlerimizi kullanıyorsan — Premium abonelik, QuantumX, eğitim blokları, Q-Coin veya akıllı ajanlar — şu konularda her zaman bizimle iletişime geçebilirsin:
+
+— teknik sorunlar veya hatalar;  
+— öneriler ve iyileştirmeler;  
+— yeni özellik talepleri;  
+— ödeme, premium erişim ve abonelikle ilgili sorular;  
+— bug ve hata bildirimleri;  
+— teşekkür mesajları (bunlara her zaman seviniriz ❤️).
+
+Her mesajı okuyoruz — bu, daha iyi olmamıza yardımcı oluyor.
+
+4. Şikâyetler, güvenlik ve kural ihlalleri
+Şunları fark edersen bize yaz:
+— saldırgan veya hakaret içeren davranışlar;  
+— şüpheli aktiviteler veya dolandırıcılık;  
+— platform kurallarının ihlali;  
+— hatalı veya tehlikeli model yanıtları.
+
+Hızlı tepki veriyor ve güvenliği sağlıyoruz.
+
+5. İçerik üreticileri için
+Eğer sen:
+— bir blogger’san;  
+— bir yayıncıysan;  
+— büyük bir Telegram/YouTube/Instagram kanalının sahibiysen;  
+— kursların veya eğitim projelerinin yazarıysan —
+
+ortak iş birliklerine, entegrasyonlara ve partnerlik programlarına açığız.  
+Bize yaz — iş birliği formatını konuşalım.`,
+contact_lines: [
+  `Sosyal ağlarımız: haberler ve güncellemelerden haberdar ol.`,
+  `Twitter — yeni duyurular ve büyük sürümler.`,
+  `Telegram — önemli duyurular ve topluluk için içerikler.`,
+  `Instagram — görsel paylaşımlar, kamera arkası ve medya içerikleri.`,
+  `YouTube — canlı yayınlar, incelemeler ve özellik analizleri video formatında.`,
+  `TikTok — kısa formatlar, rehberler ve QuantumL7AI hakkında hızlı içgörüler.`,
+],
 
     links: { bot: BOT_LINK, channel: CHANNEL_LINK, feedback: FEEDBACK_LINK, email: CONTACT_EMAIL },
   },
@@ -8364,6 +8774,15 @@ academy_exam_auth_required: 'AUTHORIZATION REQUIRED',
 academy_exam_answer_ok: 'Reward credited',
 academy_exam_answer_fail: 'The answer is incorrect',
 academy_exam_wait: 'Until the exam starts',
+contact_name_label: 'Your Name',
+contact_message_label: 'Message',
+contact_name_placeholder: 'How should we address you?',
+contact_message_placeholder: 'Describe your intentions in detail',
+contact_send_btn: 'Send',
+contact_overlay_title: 'Sent!',
+contact_overlay_prefix: 'Thank you for contacting us',
+contact_overlay_suffix: 'We will get in touch with you as soon as possible.',
+contact_overlay_close: 'Close',
 }
 const ACADEMY_WELCOME_RU = {
 qa_ru_title_main: '🌎 ГЛОБАЛЬНЫЙ 🌎 ГЛОССАРИЙ QL7 — Обучайтесь и получайте награды за обучение!',
@@ -8376,6 +8795,15 @@ academy_exam_auth_required: 'НЕОБХОДИМО АВТОРИЗОВАТЬСЯ',
 academy_exam_answer_ok: 'Награда начислена',
 academy_exam_answer_fail: 'Ответ неправильный',
 academy_exam_wait: 'До начала экзамена',
+contact_name_label: 'Ваше Имя',
+contact_message_label: 'Сообщение',
+contact_name_placeholder: 'Как к Вам обращаться?',
+contact_message_placeholder: 'Опишите детально свои намерения',
+contact_send_btn: 'Отправить',
+contact_overlay_title: 'Отправлено!',
+contact_overlay_prefix: 'Спасибо за обращение',
+contact_overlay_suffix: 'Мы обязательно свяжемся с Вами в ближайшее время.',
+contact_overlay_close: 'Закрыть',
   }
 const ACADEMY_WELCOME_UK = {
 qa_ru_title_main: '🌎 ГЛОБАЛЬНИЙ 🌎 ГЛОСАРІЙ QL7 — Навчайтеся та отримуйте нагороди за навчання!',
@@ -8388,6 +8816,15 @@ academy_exam_auth_required: 'ПОТРІБНО АВТОРИЗУВАТИСЯ',
 academy_exam_answer_ok: 'Нагороду нараховано',
 academy_exam_answer_fail: 'Відповідь неправильна',
 academy_exam_wait: 'До початку іспиту',
+contact_name_label: 'Ваше Ім’я',
+contact_message_label: 'Повідомлення',
+contact_name_placeholder: 'Як до Вас звертатися?',
+contact_message_placeholder: 'Опишіть детально свої наміри',
+contact_send_btn: 'Надіслати',
+contact_overlay_title: 'Надіслано!',
+contact_overlay_prefix: 'Дякуємо за звернення',
+contact_overlay_suffix: 'Ми обов’язково зв’яжемося з Вами найближчим часом.',
+contact_overlay_close: 'Закрити',
   }
 const ACADEMY_WELCOME_ES = {
 qa_ru_title_main: '🌎 GLOSARIO 🌎 GLOBAL QL7 — ¡Aprende y obtén recompensas por aprender!',
@@ -8400,6 +8837,15 @@ academy_exam_auth_required: 'ES NECESARIO AUTORIZARSE',
 academy_exam_answer_ok: 'Recompensa acreditada',
 academy_exam_answer_fail: 'La respuesta es incorrecta',
 academy_exam_wait: 'Hasta que comience el examen',
+contact_name_label: 'Su Nombre',
+contact_message_label: 'Mensaje',
+contact_name_placeholder: '¿Cómo debemos dirigirnos a usted?',
+contact_message_placeholder: 'Describa sus intenciones en detalle',
+contact_send_btn: 'Enviar',
+contact_overlay_title: '¡Enviado!',
+contact_overlay_prefix: 'Gracias por contactarnos',
+contact_overlay_suffix: 'Nos pondremos en contacto con usted lo antes posible.',
+contact_overlay_close: 'Cerrar',
   }
 const ACADEMY_WELCOME_ZH = {
 qa_ru_title_main: '🌎 全球 🌎 词汇表 QL7 — 学习并获得学习奖励！',
@@ -8412,6 +8858,15 @@ academy_exam_auth_required: '需要授权',
 academy_exam_answer_ok: '奖励已发放',
 academy_exam_answer_fail: '答案不正确',
 academy_exam_wait: '距离考试开始',
+contact_name_label: '您的姓名',
+contact_message_label: '留言',
+contact_name_placeholder: '我们该如何称呼您？',
+contact_message_placeholder: '请详细描述您的意图',
+contact_send_btn: '发送',
+contact_overlay_title: '已发送！',
+contact_overlay_prefix: '感谢您的联系',
+contact_overlay_suffix: '我们会尽快与您取得联系。',
+contact_overlay_close: '关闭',
   }
 const ACADEMY_WELCOME_AR = {
 qa_ru_title_main: '🌎 عالمي 🌎 مسرد QL7 — تعلّم واحصل على مكافآت مقابل التعلم!',
@@ -8424,6 +8879,15 @@ academy_exam_auth_required: 'يجب تسجيل الدخول',
 academy_exam_answer_ok: 'تم إضافة المكافأة',
 academy_exam_answer_fail: 'الإجابة غير صحيحة',
 academy_exam_wait: 'حتى يبدأ الامتحان',
+contact_name_label: 'اسمك',
+contact_message_label: 'رسالة',
+contact_name_placeholder: 'كيف يجب أن نخاطبك؟',
+contact_message_placeholder: 'صف نواياك بالتفصيل',
+contact_send_btn: 'إرسال',
+contact_overlay_title: 'تم الإرسال!',
+contact_overlay_prefix: 'شكرًا لتواصلك معنا',
+contact_overlay_suffix: 'سنتواصل معك في أقرب وقت ممكن.',
+contact_overlay_close: 'إغلاق',
   }
 const ACADEMY_WELCOME_TR = {
 qa_ru_title_main: '🌎 KÜRESEL 🌎 SÖZLÜK QL7 — Öğrenin ve öğrenme karşılığında ödüller kazanın!',
@@ -8436,6 +8900,15 @@ academy_exam_auth_required: 'YETKİLENDİRME GEREKLİ',
 academy_exam_answer_ok: 'Ödül yüklendi',
 academy_exam_answer_fail: 'Cevap yanlış',
 academy_exam_wait: 'Sınavın başlamasına',
+contact_name_label: 'Adınız',
+contact_message_label: 'Mesaj',
+contact_name_placeholder: 'Size nasıl hitap etmeliyiz?',
+contact_message_placeholder: 'Niyetlerinizi detaylı şekilde açıklayın',
+contact_send_btn: 'Gönder',
+contact_overlay_title: 'Gönderildi!',
+contact_overlay_prefix: 'Bizimle iletişime geçtiğiniz için teşekkürler',
+contact_overlay_suffix: 'En kısa sürede sizinle iletişime geçeceğiz.',
+contact_overlay_close: 'Kapat',
   }
 
 try {
