@@ -1601,7 +1601,7 @@ const Styles = () => (
 
 .forumTopbar{
   display:flex; gap:8px; align-items:center; justify-content:space-between;
-  margin-bottom:10px; flex-wrap:wrap;
+ margin-bottom:10px; flex-wrap:nowrap;
 }
 .forumTopbar .left{ display:flex; gap:6px; align-items:center; }
 .forumTopbar .right{ display:flex; gap:6px; align-items:center; }
