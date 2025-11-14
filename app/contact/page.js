@@ -250,8 +250,8 @@ export default function Contact() {
                 <Image
                   src="/icons/telegram.png"
                   alt="Telegram"
-                  width={40}
-                  height={40}
+                  width={35}
+                  height={35}
                 />
               </a>
 
@@ -264,8 +264,8 @@ export default function Contact() {
                 <Image
                   src="/icons/twitter.png"
                   alt="Twitter"
-                  width={40}
-                  height={40}
+                  width={35}
+                  height={35}
                 />
               </a>
 
@@ -278,8 +278,8 @@ export default function Contact() {
                 <Image
                   src="/icons/instagram.png"
                   alt="Instagram"
-                  width={40}
-                  height={40}
+                  width={35}
+                  height={35}
                 />
               </a>
 
@@ -292,8 +292,8 @@ export default function Contact() {
                 <Image
                   src="/icons/tiktok.png"
                   alt="TikTok"
-                  width={40}
-                  height={40}
+                  width={35}
+                  height={35}
                 />
               </a>
 
@@ -306,8 +306,8 @@ export default function Contact() {
                 <Image
                   src="/icons/youtube.png"
                   alt="YouTube"
-                  width={40}
-                  height={40}
+                  width={35}
+                  height={35}
                 />
               </a>
             </div>
