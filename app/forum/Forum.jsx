@@ -975,6 +975,10 @@ const Styles = () => (
   border-bottom:1px solid rgba(255,255,255,.1);
   flex-wrap:wrap;
 }
+/* ← ДОБАВЬ ЭТО СРАЗУ ПОСЛЕ .head */
+.forum_root .head{
+  flex-wrap:nowrap;      /* в форуме шапка НИКОГДА не переносится на вторую строку */
+}  
 /* [STYLES:BODY-SCOPE] — ограничиваем область действия .body только форумом */
 .forum_root .body{ padding:12px; overflow:visible }
 
@@ -1460,9 +1464,8 @@ const Styles = () => (
 
 /* === Q COIN (инлайн + модалка) === */
 .qcoinRow{
- display:inline-flex; align-items:center; gap:10px; margin-left:10px;
- white-space: nowrap;
- }
+  display:inline-flex; align-items:center; gap:10px; margin-left:10px;
+}
 
 /* Золотая надпись с переливом и свечением */
 .qcoinLabel{
@@ -1601,7 +1604,7 @@ const Styles = () => (
 
 .forumTopbar{
   display:flex; gap:8px; align-items:center; justify-content:space-between;
- margin-bottom:10px; flex-wrap:nowrap;
+  margin-bottom:10px; flex-wrap:wrap;
 }
 .forumTopbar .left{ display:flex; gap:6px; align-items:center; }
 .forumTopbar .right{ display:flex; gap:6px; align-items:center; }
