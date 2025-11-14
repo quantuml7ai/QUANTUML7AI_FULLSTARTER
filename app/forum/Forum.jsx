@@ -1493,7 +1493,7 @@ const Styles = () => (
 .qcoinValue{
   font-size:1.4em;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-weight:800; padding:.20em .96em; border-radius:.36em;
+  font-weight:800; padding:.20em .66em; border-radius:.36em;
   border:1px solid rgba(255,255,255,.14);
   background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
   backdrop-filter: blur(6px);
