@@ -1491,7 +1491,7 @@ const Styles = () => (
 
 /* Само число — крупнее, с «стеклянной» подложкой */
 .qcoinValue{
-  font-size:1.4em;
+  font-size:1.5em;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-weight:800; padding:.20em .66em; border-radius:.36em;
   border:1px solid rgba(255,255,255,.14);
@@ -2411,7 +2411,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
  .qcoinCol{
   flex-direction: column;       /* теперь колонкой */
   align-items: flex-end;        /* выравнивание вправо, как и раньше */
-  gap: 12px;                     /* вертикальный зазор между строками */
+  gap: 18px;                     /* вертикальный зазор между строками */
 }
 .qcoinTop{
   display: inline-flex;
