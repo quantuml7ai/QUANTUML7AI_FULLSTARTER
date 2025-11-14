@@ -1466,7 +1466,7 @@ const Styles = () => (
 
 /* Золотая надпись с переливом и свечением */
 .qcoinLabel{
-  font-size:2.4em; font-weight:900; letter-spacing:.4px;
+  font-size:2.2em; font-weight:900; letter-spacing:.4px;
   background:
     linear-gradient(135deg,
       #7a5c00 0%,
@@ -2411,12 +2411,12 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
  .qcoinCol{
   flex-direction: column;       /* теперь колонкой */
   align-items: flex-end;        /* выравнивание вправо, как и раньше */
-  gap: 8px;                     /* вертикальный зазор между строками */
+  gap: 12px;                     /* вертикальный зазор между строками */
 }
 .qcoinTop{
   display: inline-flex;
   align-items: center;
-  gap: 22px;                     /* расстояние между Q COIN и ×2 */
+  gap: 20px;                     /* расстояние между Q COIN и ×2 */
 }
     
 /* Базовая икон-кнопка без фона */
