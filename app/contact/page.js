@@ -470,8 +470,8 @@ export default function Contact() {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: 56px;
-          height: 56px;
+          width: 46px;
+          height: 46px;
           border-radius: 999px;
           background: rgba(15, 23, 42, 0.95);
           border: 1px solid rgba(148, 163, 184, 0.7);
