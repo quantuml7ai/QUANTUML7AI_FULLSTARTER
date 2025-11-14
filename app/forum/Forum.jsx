@@ -975,10 +975,7 @@ const Styles = () => (
   border-bottom:1px solid rgba(255,255,255,.1);
   flex-wrap:wrap;
 }
-/* ← ДОБАВЬ ЭТО СРАЗУ ПОСЛЕ .head */
-.forum_root .head{
-  flex-wrap:nowrap;      /* в форуме шапка НИКОГДА не переносится на вторую строку */
-}  
+
 /* [STYLES:BODY-SCOPE] — ограничиваем область действия .body только форумом */
 .forum_root .body{ padding:12px; overflow:visible }
 
@@ -1494,7 +1491,7 @@ const Styles = () => (
 
 /* Само число — крупнее, с «стеклянной» подложкой */
 .qcoinValue{
-  font-size:1.6em;
+  font-size:1.4em;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-weight:800; padding:.20em .96em; border-radius:.36em;
   border:1px solid rgba(255,255,255,.14);
