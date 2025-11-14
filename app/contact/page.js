@@ -355,10 +355,18 @@ export default function Contact() {
       </div>
 
       <style jsx>{`
-        .contact-panel {
-          max-width: 640px;
-          margin: 0 auto;
-        }
+.contact-panel {
+  max-width: 640px;
+  margin: 0 auto;
+
+  /* Делаем фон темнее и менее прозрачным */
+  background: rgba(0, 0, 0, 0.65); /* было типа 0.7–0.8, теперь почти непрозрачный */
+  border: 1px solid rgba(255, 255, 255, 1);
+  box-shadow:
+    0 0 34px rgba(15, 23, 42, 0.9),
+    0 0 0 1px rgba(15, 23, 42, 0.95) inset;
+}
+
 
         .contact-header {
           text-align: center;
