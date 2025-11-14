@@ -1460,8 +1460,9 @@ const Styles = () => (
 
 /* === Q COIN (инлайн + модалка) === */
 .qcoinRow{
-  display:inline-flex; align-items:center; gap:10px; margin-left:10px; white-space: nowrap;
-}
+ display:inline-flex; align-items:center; gap:10px; margin-left:10px;
+ white-space: nowrap;
+ }
 
 /* Золотая надпись с переливом и свечением */
 .qcoinLabel{
