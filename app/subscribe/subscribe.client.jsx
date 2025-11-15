@@ -66,48 +66,13 @@ function openPaymentWindow(url) {
   if (!url) return
 
   try {
-    const ua =
-      typeof navigator !== 'undefined'
-        ? navigator.userAgent.toLowerCase()
-        : ''
+    // Для отладки можешь оставить этот лог — увидишь, что Safari реально получает URL
+    console.log('[PAY] redirect to', url)
 
-    const isIOS = /iphone|ipad|ipod/.test(ua)
-
-    const isStandalone =
-      (typeof window !== 'undefined' &&
-        window.navigator &&
-        window.navigator.standalone) ||
-      (typeof window !== 'undefined' &&
-        window.matchMedia &&
-        window.matchMedia('(display-mode: standalone)').matches)
-
-    const isTG =
-      typeof window !== 'undefined' &&
-      window.Telegram &&
-      window.Telegram.WebApp &&
-      typeof window.Telegram.WebApp.openLink === 'function'
-
-    // 1) Внутри Telegram Mini App – платёжка открывается через WebApp API
-    if (isTG) {
-      window.Telegram.WebApp.openLink(url)
-      return
-    }
-
-    // 2) iOS + «домик» (standalone PWA) – ТОЛЬКО прямая навигация
-    if (isIOS || isStandalone) {
-      window.location.href = url
-      return
-    }
-
-    // 3) Обычные браузеры (десктоп / Android)
-    const w = window.open(url, '_blank', 'noopener,noreferrer')
-
-    // если попап заблокировали – фоллбек в текущую вкладку
-    if (!w) {
-      window.location.href = url
-    }
-  } catch {
-    try { window.location.href = url } catch {}
+    // Самый надёжный способ для всех браузеров, особенно Safari:
+    window.location.href = url
+  } catch (e) {
+    try { window.location.assign(url) } catch {}
   }
 }
 
