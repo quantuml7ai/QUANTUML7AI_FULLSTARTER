@@ -269,15 +269,19 @@ function QL7QCoinX2Badge({ vip, onClick }) {
     </>
   )
 }
-function openPaymentWindow(url) {
+function openPaymentWindow(url, accountId) {
   if (!url) return
+
   try {
     const ua =
       typeof navigator !== 'undefined'
         ? navigator.userAgent.toLowerCase()
         : ''
 
-    const isIOS = /iphone|ipad|ipod/.test(ua)
+    const isIOS =
+      ua.includes('iphone') ||
+      ua.includes('ipad') ||
+      ua.includes('ipod')
 
     const isTG =
       typeof window !== 'undefined' &&
@@ -285,15 +289,22 @@ function openPaymentWindow(url) {
       window.Telegram.WebApp &&
       typeof window.Telegram.WebApp.openLink === 'function'
 
-    // 1) Внутри Telegram Mini App – платёж открываем через WebApp API
+    // 1) Внутри Telegram Mini App – как раньше, напрямую на NOWPayments
     if (isTG) {
       window.Telegram.WebApp.openLink(url)
       return
     }
 
-    // 2) Любой iOS (Safari, Chrome, PWA, "домик") – только текущая вкладка
+    // 2) Любой iOS (Safari / Chrome / PWA / "домик")
     if (isIOS) {
-      window.location.href = url
+      // Если знаем accountId → пусть сервер сам создаст invoice и сделает 302
+      if (accountId) {
+        window.location.href =
+          `/api/pay/create?accountId=${encodeURIComponent(accountId)}`
+      } else {
+        // на всякий пожарный, если accountId не прокинули
+        window.location.href = url
+      }
       return
     }
 
@@ -305,7 +316,9 @@ function openPaymentWindow(url) {
       window.location.href = url
     }
   } catch {
-    try { window.location.href = url } catch {}
+    try {
+      window.location.href = url
+    } catch {}
   }
 }
 
@@ -753,7 +766,7 @@ export default function AcademyExamBlock({ blockId }) {
 
       const url = await ql7CreateVipInvoice(acc)
       if (url) {
-      openPaymentWindow(url)     
+      openPaymentWindow(url, accountId)     
     }
 
       setTimeout(async function () {
