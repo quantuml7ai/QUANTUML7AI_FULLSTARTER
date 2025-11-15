@@ -174,34 +174,53 @@ function normalizeUrl(raw) {
 
 /**
  * LINKS: CSV / ; / пробел / \n, поддержка # комментариев
- * дедуп по host+pathname
+ *
+ * Формат одной записи:
+ *   https://site.com
+ *   https://click.url|https://media.url
+ *
+ * ▸ если одна часть → и кликаем, и показываем её
+ * ▸ если через | → слева clickUrl, справа mediaUrl
+ *
+ * дедуп по host+pathname кликовой ссылки.
  */
 function parseLinks(raw) {
-  if (!raw) return [];
+  if (!raw) return { links: [], mediaByClick: {} };
+
   const tokens = String(raw)
     .split(/[\s,;]+/)
     .map((s) => s.replace(/#.*/, '').trim())
     .filter(Boolean);
 
   const seen = new Set();
-  const res = [];
+  const links = [];
+  const mediaByClick = {};
 
   for (const t of tokens) {
-    const n = normalizeUrl(t);
-    if (!n) continue;
+    const parts = t.split('|');
+    const clickRaw = (parts[0] || '').trim();
+    const mediaRaw = (parts[1] || '').trim();
+
+    const clickNorm = normalizeUrl(clickRaw);
+    if (!clickNorm) continue;
+
+    const mediaNorm = normalizeUrl(mediaRaw || clickNorm) || clickNorm;
+
     let u;
     try {
-      u = new URL(n);
+      u = new URL(clickNorm);
     } catch {
       continue;
     }
     const key = `${u.hostname}${u.pathname}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    res.push(u.toString());
+
+    links.push(clickNorm);
+    mediaByClick[clickNorm] = mediaNorm;
   }
 
-  return res;
+  return { links, mediaByClick };
 }
 
 function parseThumbs(raw) {
@@ -224,7 +243,18 @@ export function getForumAdConf() {
       ? PREVIEW_RAW
       : 'auto';
 
-  const LINKS = parseLinks(readRaw('LINKS') || '');
+  const parsed = parseLinks(readRaw('LINKS') || '');
+  let LINKS = parsed.links;
+  let MEDIA_BY_CLICK = parsed.mediaByClick;
+
+  if (!Array.isArray(LINKS) || !LINKS.length) {
+    LINKS = FALLBACK_LINKS.slice();
+    MEDIA_BY_CLICK = {};
+    for (const u of LINKS) {
+      MEDIA_BY_CLICK[u] = u;
+    }
+  }
+
   const THUMBS_RAW = parseThumbs(readRaw('THUMB_SERVICES') || '');
   const DEBUG = String(readRaw('DEBUG') || '').trim() === '1';
 
@@ -233,6 +263,7 @@ export function getForumAdConf() {
     ROTATE_MIN,
     PREVIEW,
     LINKS,
+    MEDIA_BY_CLICK,
     THUMBS: THUMBS_RAW.length ? THUMBS_RAW : DEFAULT_THUMB_SERVICES.slice(),
     DEBUG,
     seed: hash32(`${CAMPAIGN_ID}:${FALLBACK_CAMPAIGN_SEED}:${LINKS.length}`),
@@ -437,20 +468,20 @@ export function resolveCurrentAdUrl(
   let chosen = null;
 
   for (let i = 0; i < perm.length; i++) {
-    const url = perm[i];
-    if (!url) continue;
+    const thisUrl = perm[i];
+    if (!thisUrl) continue;
 
     // не повторяем подряд для этого слота
-    if (lastForSeed && url === lastForSeed && perm.length > 1) continue;
+    if (lastForSeed && thisUrl === lastForSeed && perm.length > 1) continue;
 
     // не повторяем подряд глобально, если есть выбор
-    if (lastGlobal && url === lastGlobal && perm.length > 1) continue;
+    if (lastGlobal && thisUrl === lastGlobal && perm.length > 1) continue;
 
-    if (coordinator && !coordinator.allowed(url, perm.length)) continue;
-    if (coordinator && frameId != null && !coordinator.reserve(url, frameId))
+    if (coordinator && !coordinator.allowed(thisUrl, perm.length)) continue;
+    if (coordinator && frameId != null && !coordinator.reserve(thisUrl, frameId))
       continue;
 
-    chosen = url;
+    chosen = thisUrl;
     break;
   }
 
@@ -560,12 +591,37 @@ function tryLoadImage(src, timeoutMs = 3000) {
   });
 }
 
+function isLikelyVideoUrl(raw) {
+  if (!raw) return false;
+  const s = String(raw).trim();
+  if (!s) return false;
+
+  if (/^blob:/i.test(s)) return true;
+
+  if (/\.(webm|mp4|mov|m4v|mkv)(?:$|[?#])/i.test(s)) return true;
+
+  if (/[?&]filename=.*\.(webm|mp4|mov|m4v|mkv)(?:$|[?#])/i.test(s)) return true;
+
+  if (/vercel[-]?storage|vercel[-]?blob|\/uploads\/video|\/forum\/video|\/api\/forum\/uploadVideo/i.test(s)) {
+    return true;
+  }
+
+  return false;
+}
+
+const YT_RE =
+  /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{6,})/i;
+
+const TIKTOK_RE =
+  /^(?:https?:\/\/)?(?:www\.)?tiktok\.com\/(?:@[\w.\-]+\/video\/(\d+)|t\/[A-Za-z0-9]+)(?:[?#].*)?$/i;
+
 /* ======================= AdCard ======================= */
 /**
- * OG video/screenshot/image → direct file → YouTube thumb → screenshot CDNs → favicon → placeholder
- * Без сырых URL.
+ * OG video/screenshot/image → direct file → YouTube/TikTok → screenshot CDNs → favicon → placeholder
  * Бейдж "Реклама" из словаря: ключ forum_ad_label.
  * Превью тянет карточку на всю доступную высоту.
+ * Видео: автоплей, **без управления**, звук по умолчанию MUTE,
+ * одна кнопка 🔇/🔊 в правом нижнем углу. Клик в любое другое место → переход по ссылке.
  */
 
 export function AdCard({ url, slotKind, nearId }) {
@@ -575,9 +631,13 @@ export function AdCard({ url, slotKind, nearId }) {
   const t = i18n?.t;
 
   const [media, setMedia] = useState({ kind: 'skeleton', src: null });
+  const [muted, setMuted] = useState(true);
   const rootRef = useRef(null);
+  const videoRef = useRef(null);
+  const ytIframeRef = useRef(null);
+  const ytPlayerRef = useRef(null);
 
-  const safe = useMemo(() => {
+  const safeClick = useMemo(() => {
     try {
       const u = new URL(url);
       if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
@@ -587,46 +647,88 @@ export function AdCard({ url, slotKind, nearId }) {
     }
   }, [url]);
 
+  // загрузка медиа (картинка / видео / iframe)
   useEffect(() => {
-    if (!safe) return;
+    if (!safeClick) return;
     let cancelled = false;
 
-    const u = safe;
-    const host = u.hostname;
-    const href = u.toString();
+    const clickHref = safeClick.toString();
+    const landingHost = safeClick.hostname;
+    const mediaHref =
+      (conf.MEDIA_BY_CLICK && conf.MEDIA_BY_CLICK[clickHref]) || clickHref;
+
     const thumbs =
       conf.THUMBS && conf.THUMBS.length
         ? conf.THUMBS
         : DEFAULT_THUMB_SERVICES;
 
-    const isYouTube =
-      /(^|\.)youtube\.com$/i.test(host) ||
-      /(^|\.)youtu\.be$/i.test(host);
-
-    const isDirectVideo = /\.(mp4|webm|mov|m4v)$/i.test(href);
-    const isDirectImg = /\.(jpe?g|png|webp|gif|avif)$/i.test(href);
+    const isDirectImg = /\.(jpe?g|png|webp|gif|avif)(?:$|[?#])/i.test(mediaHref);
 
     async function run() {
-      // 1) Microlink OG / screenshot
+      // 0) прямое видео (blob, mp4, vercel и т.п.)
+      if (!cancelled && isLikelyVideoUrl(mediaHref)) {
+        setMedia({ kind: 'video', src: mediaHref, step: 'env_video' });
+        emitAdEvent(
+          'ad_fallback',
+          { url: clickHref, cascade_step: 'env_video', slot_kind: slotKind },
+          conf
+        );
+        return;
+      }
+
+      // 0.1) YouTube
+      const ytMatch = mediaHref.match(YT_RE);
+      if (!cancelled && ytMatch) {
+        const videoId = ytMatch[1];
+        if (videoId) {
+          setMedia({ kind: 'youtube', src: videoId, step: 'env_youtube' });
+          emitAdEvent(
+            'ad_fallback',
+            { url: clickHref, cascade_step: 'env_youtube', slot_kind: slotKind },
+            conf
+          );
+          return;
+        }
+      }
+
+      // 0.2) TikTok
+      const ttMatch = mediaHref.match(TIKTOK_RE);
+      if (!cancelled && ttMatch) {
+        let videoId = null;
+        try {
+          const u = new URL(mediaHref);
+          const m = u.pathname.match(/\/video\/(\d+)/);
+          if (m) videoId = m[1];
+        } catch {}
+        if (videoId) {
+          setMedia({ kind: 'tiktok', src: videoId, step: 'env_tiktok' });
+          emitAdEvent(
+            'ad_fallback',
+            { url: clickHref, cascade_step: 'env_tiktok', slot_kind: slotKind },
+            conf
+          );
+          return;
+        }
+      }
+
+      // 1) Microlink (OG screenshot / image)
       if (!cancelled && conf.PREVIEW !== 'favicon') {
         try {
           const q =
             'https://api.microlink.io/?url=' +
-            encodeURIComponent(href) +
-            '&screenshot=true&meta=true&video=true&audio=false&iframe=false' +
-            '&waitFor=2000'; // ждём ~2 сек перед скриншотом
-         
-            const resp = await fetch(q).catch(() => null);
+            encodeURIComponent(mediaHref) +
+            '&screenshot=true&meta=true&video=false&audio=false&iframe=false' +
+            '&waitFor=2000';
+
+          const resp = await fetch(q).catch(() => null);
           const data = await resp?.json().catch(() => null);
           const meta = data?.data || {};
 
           const candShot = meta.screenshot?.url || meta.image?.url || null;
-          const candVideo = meta.video?.url || null;
           const candLogo = meta.logo?.url || null;
 
           const ogList = [
             candShot && { kind: 'image', src: candShot, step: 'og_screenshot' },
-            candVideo && { kind: 'video', src: candVideo, step: 'og_video' },
             candLogo && { kind: 'image', src: candLogo, step: 'og_logo' },
           ].filter(Boolean);
 
@@ -636,22 +738,16 @@ export function AdCard({ url, slotKind, nearId }) {
               const cu = new URL(c.src);
               if (cu.protocol !== 'https:') continue;
 
-              if (c.kind === 'image') {
-                const ok = await tryLoadImage(cu.toString());
-                if (ok && !cancelled) {
-                  setMedia({ kind: 'image', src: cu.toString(), step: c.step });
-                  emitAdEvent(
-                    'ad_fallback',
-                    { url: href, cascade_step: c.step, slot_kind: slotKind },
-                    conf
-                  );
-                  return;
-                }
-              } else if (c.kind === 'video') {
-                setMedia({ kind: 'video', src: cu.toString(), step: c.step });
+              const ok = await tryLoadImage(cu.toString());
+              if (ok && !cancelled) {
+                setMedia({ kind: 'image', src: cu.toString(), step: c.step });
                 emitAdEvent(
                   'ad_fallback',
-                  { url: href, cascade_step: c.step, slot_kind: slotKind },
+                  {
+                    url: clickHref,
+                    cascade_step: c.step,
+                    slot_kind: slotKind,
+                  },
                   conf
                 );
                 return;
@@ -661,61 +757,26 @@ export function AdCard({ url, slotKind, nearId }) {
         } catch {}
       }
 
-      // 2) прямой файл
-      if (!cancelled && conf.PREVIEW !== 'favicon') {
-        if (isDirectImg) {
-          const ok = await tryLoadImage(href);
-          if (ok && !cancelled) {
-            setMedia({ kind: 'image', src: href, step: 'direct_image' });
-            emitAdEvent(
-              'ad_fallback',
-              { url: href, cascade_step: 'direct_image', slot_kind: slotKind },
-              conf
-            );
-            return;
-          }
-        } else if (isDirectVideo) {
-          setMedia({ kind: 'video', src: href, step: 'direct_video' });
+      // 2) прямой файл-картинка
+      if (!cancelled && conf.PREVIEW !== 'favicon' && isDirectImg) {
+        const ok = await tryLoadImage(mediaHref);
+        if (ok && !cancelled) {
+          setMedia({ kind: 'image', src: mediaHref, step: 'direct_image' });
           emitAdEvent(
             'ad_fallback',
-            { url: href, cascade_step: 'direct_video', slot_kind: slotKind },
+            { url: clickHref, cascade_step: 'direct_image', slot_kind: slotKind },
             conf
           );
           return;
         }
       }
 
-      // 3) YouTube превью
-      if (!cancelled && isYouTube && conf.PREVIEW !== 'favicon') {
-        let vid = null;
-        try {
-          if (u.hostname.includes('youtu.be')) vid = u.pathname.slice(1);
-          else vid = u.searchParams.get('v');
-        } catch {}
-        if (vid) {
-          const yt =
-            'https://i.ytimg.com/vi/' +
-            encodeURIComponent(vid) +
-            '/hqdefault.jpg';
-          const ok = await tryLoadImage(yt);
-          if (ok && !cancelled) {
-            setMedia({ kind: 'image', src: yt, step: 'youtube_thumb' });
-            emitAdEvent(
-              'ad_fallback',
-              { url: href, cascade_step: 'youtube_thumb', slot_kind: slotKind },
-              conf
-            );
-            return;
-          }
-        }
-      }
-
-      // 4) Screenshot CDNs
+      // 3) Screenshot CDNs
       if (!cancelled && conf.PREVIEW !== 'favicon') {
         for (const tpl of thumbs) {
           if (cancelled) break;
           try {
-            const shotUrl = tpl.replace('{url}', encodeURIComponent(href));
+            const shotUrl = tpl.replace('{url}', encodeURIComponent(mediaHref));
             const uShot = new URL(shotUrl);
             if (uShot.protocol !== 'https:') continue;
             const ok = await tryLoadImage(uShot.toString());
@@ -723,7 +784,7 @@ export function AdCard({ url, slotKind, nearId }) {
               setMedia({ kind: 'image', src: uShot.toString(), step: 'shot' });
               emitAdEvent(
                 'ad_fallback',
-                { url: href, cascade_step: 'shot', slot_kind: slotKind },
+                { url: clickHref, cascade_step: 'shot', slot_kind: slotKind },
                 conf
               );
               return;
@@ -732,16 +793,22 @@ export function AdCard({ url, slotKind, nearId }) {
         }
       }
 
-      // 5) Favicon
-      if (!cancelled && (conf.PREVIEW === 'auto' || conf.PREVIEW === 'favicon')) {
+      // 4) Favicon
+      if (
+        !cancelled &&
+        (conf.PREVIEW === 'auto' || conf.PREVIEW === 'favicon')
+      ) {
         try {
-          const ico = 'https://icons.duckduckgo.com/ip3/' + host + '.ico';
+          const ico =
+            'https://icons.duckduckgo.com/ip3/' +
+            landingHost +
+            '.ico';
           const ok = await tryLoadImage(ico);
           if (ok && !cancelled) {
             setMedia({ kind: 'favicon', src: ico, step: 'favicon' });
             emitAdEvent(
               'ad_fallback',
-              { url: href, cascade_step: 'favicon', slot_kind: slotKind },
+              { url: clickHref, cascade_step: 'favicon', slot_kind: slotKind },
               conf
             );
             return;
@@ -749,12 +816,16 @@ export function AdCard({ url, slotKind, nearId }) {
         } catch {}
       }
 
-      // 6) Placeholder
+      // 5) Placeholder
       if (!cancelled) {
         setMedia({ kind: 'placeholder', src: null, step: 'placeholder' });
         emitAdEvent(
           'ad_fallback',
-          { url: href, cascade_step: 'placeholder', slot_kind: slotKind },
+          {
+            url: clickHref,
+            cascade_step: 'placeholder',
+            slot_kind: slotKind,
+          },
           conf
         );
       }
@@ -764,7 +835,68 @@ export function AdCard({ url, slotKind, nearId }) {
     return () => {
       cancelled = true;
     };
-  }, [safe, conf, slotKind]);
+  }, [safeClick, conf, slotKind]);
+
+  // YouTube Iframe API для управления звуком
+  useEffect(() => {
+    if (!isBrowser()) return;
+    if (media.kind !== 'youtube' || !media.src) return;
+
+    let cancelled = false;
+
+    function createPlayer() {
+      if (cancelled) return;
+      if (!window.YT || !window.YT.Player || !ytIframeRef.current) return;
+
+      try {
+        const player = new window.YT.Player(ytIframeRef.current, {
+          videoId: media.src,
+          playerVars: {
+            autoplay: 1,
+            controls: 0,
+            mute: 1,
+            rel: 0,
+            fs: 0,
+            modestbranding: 1,
+            playsinline: 1,
+            loop: 1,
+            playlist: media.src,
+          },
+          events: {
+            onReady: (ev) => {
+              if (cancelled) return;
+              ytPlayerRef.current = ev.target;
+              try {
+                ev.target.mute();
+                ev.target.playVideo();
+              } catch {}
+            },
+          },
+        });
+        ytPlayerRef.current = player;
+      } catch {}
+    }
+
+    if (window.YT && window.YT.Player) {
+      createPlayer();
+    } else {
+      const prev = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = function () {
+        if (typeof prev === 'function') prev();
+        createPlayer();
+      };
+      if (!document.getElementById('yt-iframe-api')) {
+        const tag = document.createElement('script');
+        tag.id = 'yt-iframe-api';
+        tag.src = 'https://www.youtube.com/iframe_api';
+        document.head.appendChild(tag);
+      }
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [media]);
 
   // Impression tracking
   useEffect(() => {
@@ -773,7 +905,7 @@ export function AdCard({ url, slotKind, nearId }) {
       !el ||
       !isBrowser() ||
       typeof IntersectionObserver === 'undefined' ||
-      !safe
+      !safeClick
     ) {
       return;
     }
@@ -794,8 +926,8 @@ export function AdCard({ url, slotKind, nearId }) {
               emitAdEvent(
                 'ad_impression',
                 {
-                  url: safe.toString(),
-                  url_hash: hash32(safe.toString()),
+                  url: safeClick.toString(),
+                  url_hash: hash32(safeClick.toString()),
                   slot_kind: slotKind,
                   near_id: nearId,
                 },
@@ -816,12 +948,12 @@ export function AdCard({ url, slotKind, nearId }) {
       if (timer) clearTimeout(timer);
       observer.disconnect();
     };
-  }, [safe, slotKind, nearId, conf]);
+  }, [safeClick, slotKind, nearId, conf]);
 
-  if (!safe) return null;
+  if (!safeClick) return null;
 
-  const href = safe.toString();
-  const host = safe.hostname.replace(/^www\./i, '');
+  const clickHref = safeClick.toString();
+  const host = safeClick.hostname.replace(/^www\./i, '');
   const label =
     typeof t === 'function'
       ? t('forum_ad_label', 'Реклама')
@@ -831,14 +963,42 @@ export function AdCard({ url, slotKind, nearId }) {
     emitAdEvent(
       'ad_click',
       {
-        url: href,
-        url_hash: hash32(href),
+        url: clickHref,
+        url_hash: hash32(clickHref),
         slot_kind: slotKind,
         near_id: nearId,
       },
       conf
     );
   };
+
+  const handleToggleSound = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (media.kind === 'video' && videoRef.current) {
+      const v = videoRef.current;
+      const next = !muted;
+      v.muted = next;
+      if (v.paused && !next) v.play?.().catch(() => {});
+      setMuted(next);
+    } else if (media.kind === 'youtube' && ytPlayerRef.current) {
+      const p = ytPlayerRef.current;
+      const next = !muted;
+      try {
+        if (next) {
+          p.mute();
+        } else {
+          p.unMute();
+          p.playVideo();
+        }
+      } catch {}
+      setMuted(next);
+    }
+  };
+
+  const showSoundButton =
+    media.kind === 'video' || media.kind === 'youtube';
 
   return (
     <div
@@ -848,7 +1008,7 @@ export function AdCard({ url, slotKind, nearId }) {
       data-ads="1"
     >
       <a
-        href={href}
+        href={clickHref}
         target="_blank"
         rel="noopener noreferrer nofollow ugc"
         onClick={handleClick}
@@ -861,9 +1021,7 @@ export function AdCard({ url, slotKind, nearId }) {
             <span className="qcoinLabel">
               {label}
             </span>
-            <span className="truncate max-w-[200px] font-medium">
-              
-            </span>
+            <span className="truncate max-w-[200px] font-medium" />
           </div>
 
           {/* media: заполняет карточку */}
@@ -874,13 +1032,70 @@ export function AdCard({ url, slotKind, nearId }) {
 
             {media.kind === 'video' && media.src && (
               <video
+                ref={videoRef}
                 src={media.src}
                 className="w-full h-full object-cover"
                 autoPlay
-                muted
+                muted={muted}
                 loop
                 playsInline
               />
+            )}
+
+            {media.kind === 'youtube' && media.src && (
+              <div
+                className="w-full h-full"
+                style={{
+                  position: 'relative',
+                  paddingBottom: '56.25%',
+                  overflow: 'hidden',
+                  borderRadius: 10,
+                }}
+              >
+                <iframe
+                  ref={ytIframeRef}
+                  src={`https://www.youtube.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}
+                  title="YouTube video"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: 10,
+                    pointerEvents: 'none', // не реагируем на мышку, все клики уходят в <a>
+                  }}
+                />
+              </div>
+            )}
+
+            {media.kind === 'tiktok' && media.src && (
+              <div
+                className="w-full h-full"
+                style={{
+                  position: 'relative',
+                  paddingBottom: '177.78%',
+                  overflow: 'hidden',
+                  borderRadius: 10,
+                }}
+              >
+                <iframe
+                  src={`https://www.tiktok.com/embed/v2/${media.src}`}
+                  title="TikTok video"
+                  frameBorder="0"
+                  allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: 10,
+                    pointerEvents: 'none',
+                  }}
+                />
+              </div>
             )}
 
             {media.kind === 'image' && media.src && (
@@ -911,6 +1126,17 @@ export function AdCard({ url, slotKind, nearId }) {
               <div className="w-full h-full flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)]">
                 {host}
               </div>
+            )}
+
+            {showSoundButton && (
+              <button
+                type="button"
+                onClick={handleToggleSound}
+                className="audio-toggle"
+                aria-label={muted ? 'Включить звук' : 'Выключить звук'}
+              >
+                {muted ? '🔇' : '🔊'}
+              </button>
             )}
 
             <div className="pointer-events-none absolute inset-0 rounded-lg border border-transparent qshine" />

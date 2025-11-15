@@ -113,12 +113,12 @@ export default function ForumPage() {
       <div className="icons-row">
         <Link 
           href="/privacy"
-          className="icon-link"
+          className="ql7-icon-link"
           aria-label="Privacy / Политика"
           style={{ '--size': '130px' }}
         >
           <Image
-            className="click-icon"
+            className="ql7-click-icon"
             src="/click/policy.png"
             alt="Privacy"
             draggable={false}
@@ -129,12 +129,12 @@ export default function ForumPage() {
 
         <Link
           href="/contact"
-          className="icon-link"
+          className="ql7-icon-link"
           aria-label="Support / Поддержка"
           style={{ '--size': '130px' }}
         >
           <Image
-            className="click-icon"
+            className="ql7-click-icon"
             src="/click/support.png"
             alt="Support"
             draggable={false}

@@ -8783,6 +8783,7 @@ contact_overlay_title: 'Sent!',
 contact_overlay_prefix: 'Thank you for contacting us',
 contact_overlay_suffix: 'We will get in touch with you as soon as possible.',
 contact_overlay_close: 'Close',
+contact_sending: "Sending.....",
 }
 const ACADEMY_WELCOME_RU = {
 qa_ru_title_main: '🌎 ГЛОБАЛЬНЫЙ 🌎 ГЛОССАРИЙ QL7 — Обучайтесь и получайте награды за обучение!',
@@ -8804,6 +8805,7 @@ contact_overlay_title: 'Отправлено!',
 contact_overlay_prefix: 'Спасибо за обращение',
 contact_overlay_suffix: 'Мы обязательно свяжемся с Вами в ближайшее время.',
 contact_overlay_close: 'Закрыть',
+contact_sending: "Отправляем.....",
   }
 const ACADEMY_WELCOME_UK = {
 qa_ru_title_main: '🌎 ГЛОБАЛЬНИЙ 🌎 ГЛОСАРІЙ QL7 — Навчайтеся та отримуйте нагороди за навчання!',
@@ -8825,6 +8827,7 @@ contact_overlay_title: 'Надіслано!',
 contact_overlay_prefix: 'Дякуємо за звернення',
 contact_overlay_suffix: 'Ми обов’язково зв’яжемося з Вами найближчим часом.',
 contact_overlay_close: 'Закрити',
+contact_sending: "Відправляємо.....",
   }
 const ACADEMY_WELCOME_ES = {
 qa_ru_title_main: '🌎 GLOSARIO 🌎 GLOBAL QL7 — ¡Aprende y obtén recompensas por aprender!',
@@ -8846,6 +8849,7 @@ contact_overlay_title: '¡Enviado!',
 contact_overlay_prefix: 'Gracias por contactarnos',
 contact_overlay_suffix: 'Nos pondremos en contacto con usted lo antes posible.',
 contact_overlay_close: 'Cerrar',
+contact_sending: "Enviando.....",
   }
 const ACADEMY_WELCOME_ZH = {
 qa_ru_title_main: '🌎 全球 🌎 词汇表 QL7 — 学习并获得学习奖励！',
@@ -8867,6 +8871,7 @@ contact_overlay_title: '已发送！',
 contact_overlay_prefix: '感谢您的联系',
 contact_overlay_suffix: '我们会尽快与您取得联系。',
 contact_overlay_close: '关闭',
+contact_sending: "正在发送.....",
   }
 const ACADEMY_WELCOME_AR = {
 qa_ru_title_main: '🌎 عالمي 🌎 مسرد QL7 — تعلّم واحصل على مكافآت مقابل التعلم!',
@@ -8888,6 +8893,7 @@ contact_overlay_title: 'تم الإرسال!',
 contact_overlay_prefix: 'شكرًا لتواصلك معنا',
 contact_overlay_suffix: 'سنتواصل معك في أقرب وقت ممكن.',
 contact_overlay_close: 'إغلاق',
+contact_sending: "جارٍ الإرسال.....",
   }
 const ACADEMY_WELCOME_TR = {
 qa_ru_title_main: '🌎 KÜRESEL 🌎 SÖZLÜK QL7 — Öğrenin ve öğrenme karşılığında ödüller kazanın!',
@@ -8909,6 +8915,7 @@ contact_overlay_title: 'Gönderildi!',
 contact_overlay_prefix: 'Bizimle iletişime geçtiğiniz için teşekkürler',
 contact_overlay_suffix: 'En kısa sürede sizinle iletişime geçeceğiz.',
 contact_overlay_close: 'Kapat',
+contact_sending: "Gönderiliyor.....",
   }
 
 try {

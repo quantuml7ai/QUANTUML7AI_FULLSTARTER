@@ -7,9 +7,11 @@ import Link from 'next/link'
 import Image from 'next/image'           // ← добавлено
 import { useI18n } from '../components/i18n'
 import HomeBetweenBlocksAd from './ads'
+
 function AutoMedia({ 
   base,
-  exts = ['mp4', 'webm', 'gif', 'webp', 'png', 'jpg', 'jpeg'],
+  poster,                               // ← НОВОЕ: явный постер
+  exts = ['mp4', 'jpg'],
   className,
   alt = '',
   imgProps = {},
@@ -77,6 +79,7 @@ function AutoMedia({
       <video
         className={className}
         src={src}
+        poster={poster}               // ← ВОТ ЗДЕСЬ показываем статику пока грузится видео
         playsInline
         muted
         autoPlay
@@ -167,7 +170,6 @@ export default function Home() {
     )
 
     if (idx === 0) { 
-  
       content.push(
         <section className="panel" key="live-bloomberg">
           <h2>Live: Bloomberg US</h2>
@@ -203,6 +205,7 @@ export default function Home() {
 
         <AutoMedia
           base="/branding/telegram_card_tape_fixed"
+          poster="/branding/telegram_card_tape_fixed_poster.jpg"  // ← ДОБАВЛЕН ПОСТЕР ДЛЯ 1-ГО БЛОКА
           className="tg-tape"
           alt="Telegram card sample"
         />
@@ -223,8 +226,8 @@ export default function Home() {
         </div> 
       </section>
 
-     {/* Реклама строго между hero (1-й блок) и первым блоком из home_blocks (2-й блок) */}
-     <HomeBetweenBlocksAd key="home-ad-between-hero-and-block-1" />
+      {/* Реклама строго между hero (1-й блок) и первым блоком из home_blocks (2-й блок) */}
+      <HomeBetweenBlocksAd key="home-ad-between-hero-and-block-1" />
    
       {content}
  
@@ -241,12 +244,12 @@ export default function Home() {
       <div className="icons-row"> 
         <Link
           href="/privacy"
-          className="icon-link"
+          className="ql7-icon-link"
           aria-label="Privacy / Политика"
           style={{ '--size': '130px' }}
         >
           <Image
-            className="click-icon"
+            className="ql7-click-icon"
             src="/click/policy.png"
             alt="Privacy"
             width={130}
@@ -257,12 +260,12 @@ export default function Home() {
 
         <Link
           href="/contact"
-          className="icon-link"
+          className="ql7-icon-link"
           aria-label="Support / Поддержка"
           style={{ '--size': '130px' }}
         >
           <Image
-            className="click-icon"
+            className="ql7-click-icon"
             src="/click/support.png"
             alt="Support"
             width={130}

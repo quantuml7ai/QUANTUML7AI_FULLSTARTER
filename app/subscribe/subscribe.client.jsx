@@ -62,6 +62,48 @@ async function createInvoice(accountId) {
   if (j?.url) return j.url
   throw new Error('No payment URL returned')
 }
+function openPaymentWindow(url) {
+  if (!url) return
+  try {
+    const ua = (typeof navigator !== 'undefined' ? navigator.userAgent : '').toLowerCase()
+    const isIOS =
+      ua.includes('iphone') ||
+      ua.includes('ipad') ||
+      ua.includes('ipod')
+
+    const isStandalone =
+      (typeof window !== 'undefined' && window.navigator && window.navigator.standalone) ||
+      (typeof window !== 'undefined' &&
+        window.matchMedia &&
+        window.matchMedia('(display-mode: standalone)').matches)
+
+    const isTg = typeof window !== 'undefined' &&
+      window.Telegram &&
+      window.Telegram.WebApp &&
+      typeof window.Telegram.WebApp.openLink === 'function'
+
+    // Внутри Telegram Mini App
+    if (isTg) {
+      window.Telegram.WebApp.openLink(url)
+      return
+    }
+
+    // iOS + standalone / иконка на домой → только текущая вкладка
+    if (isIOS && isStandalone) {
+      window.location.href = url
+      return
+    }
+
+    // Обычный браузер — пробуем в новой вкладке
+    const w = window.open(url, '_blank', 'noopener,noreferrer')
+    if (!w) {
+      // попап заблокировали → фоллбек
+      window.location.href = url
+    }
+  } catch {
+    try { window.location.href = url } catch {}
+  }
+}
 
 /* ===== Badge кнопка: только визуальные эффекты X2 (VIP — золото, не VIP — мигает красным) ===== */
 function TierBadge({ label, isVip, onClick }) {
@@ -206,7 +248,7 @@ export default function SubscribePage() {
       const accountId = await ensureAuthorized()
       if (!accountId) return
       const url = await createInvoice(accountId)
-      window.open(url, '_blank', 'noopener,noreferrer')
+      openPaymentWindow(url)      
       setTimeout(() => { refreshVip() }, 5000)
     } catch (e) {
       console.error(e)
