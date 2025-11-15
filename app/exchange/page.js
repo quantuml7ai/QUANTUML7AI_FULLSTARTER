@@ -328,6 +328,40 @@ function setUsedSec(v) {
   if (typeof window === 'undefined') return
   try { localStorage.setItem(todayKey(), String(Math.max(0, Math.floor(v)))) } catch {}
 }
+function openPaymentWindow(url) {
+  try {
+    const isTG =
+      typeof window !== 'undefined' &&
+      window.Telegram &&
+      window.Telegram.WebApp;
+
+    const ua =
+      typeof navigator !== 'undefined'
+        ? navigator.userAgent.toLowerCase()
+        : '';
+
+    const isIOS = /iphone|ipad|ipod/.test(ua);
+
+    // Внутри Telegram Mini App
+    if (isTG && window.Telegram.WebApp.openLink) {
+      window.Telegram.WebApp.openLink(url);
+      return;
+    }
+
+    // iOS Safari / WebView
+    if (isIOS) {
+      window.location.href = url;
+      return;
+    }
+
+    // Обычный веб
+    window.open(url, '_blank', 'noopener,noreferrer');
+  } catch {
+    try {
+      window.location.href = url;
+    } catch {}
+  }
+}
 
 /* ===== ДОБАВЛЕНО: ensureAuthorized — жмёт кнопку логина в TopBar и ждёт подтверждение ===== */
 async function ensureAuthorized() {
@@ -1131,23 +1165,27 @@ export default function ExchangePage(){
     if (acc) setOpenUnlimit(true)
   }
 
-  const handlePayClick = async () => {
-    try {
-      const accountId = await ensureAuthorized()
-      if (!accountId) return
-      const r = await fetch('/api/pay/create', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ accountId })
-      })
-      const j = await r.json()
-      if (!r.ok) throw new Error(j?.error || 'Create failed')
-      if (j.url) window.open(j.url, '_blank', 'noopener,noreferrer')
-    } catch (e) {
-      console.error(e)
-      alert('Payment error: ' + e.message)
+const handlePayClick = async () => {
+  try {
+    const accountId = await ensureAuthorized()
+    if (!accountId) return
+    const r = await fetch('/api/pay/create', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ accountId })
+    })
+    const j = await r.json()
+    if (!r.ok) throw new Error(j?.error || 'Create failed')
+
+    if (j.url) {
+      openPaymentWindow(j.url)
     }
+  } catch (e) {
+    console.error(e)
+    alert('Payment error: ' + e.message)
   }
+}
+
 
   return (
     <div className="wrap">

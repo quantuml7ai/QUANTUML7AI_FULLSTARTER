@@ -269,6 +269,48 @@ function QL7QCoinX2Badge({ vip, onClick }) {
     </>
   )
 }
+function openPaymentWindow(url) {
+  if (!url) return
+  try {
+    const ua = (typeof navigator !== 'undefined' ? navigator.userAgent : '').toLowerCase()
+    const isIOS =
+      ua.includes('iphone') ||
+      ua.includes('ipad') ||
+      ua.includes('ipod')
+
+    const isStandalone =
+      (typeof window !== 'undefined' && window.navigator && window.navigator.standalone) ||
+      (typeof window !== 'undefined' &&
+        window.matchMedia &&
+        window.matchMedia('(display-mode: standalone)').matches)
+
+    const isTg = typeof window !== 'undefined' &&
+      window.Telegram &&
+      window.Telegram.WebApp &&
+      typeof window.Telegram.WebApp.openLink === 'function'
+
+    // Внутри Telegram Mini App
+    if (isTg) {
+      window.Telegram.WebApp.openLink(url)
+      return
+    }
+
+    // iOS + standalone / иконка на домой → только текущая вкладка
+    if (isIOS && isStandalone) {
+      window.location.href = url
+      return
+    }
+
+    // Обычный браузер — пробуем в новой вкладке
+    const w = window.open(url, '_blank', 'noopener,noreferrer')
+    if (!w) {
+      // попап заблокировали → фоллбек
+      window.location.href = url
+    }
+  } catch {
+    try { window.location.href = url } catch {}
+  }
+}
 
 /* ===================== ВСПОМОГАТЕЛЬНЫЕ УТИЛИТЫ ===================== */
 
@@ -714,8 +756,8 @@ export default function AcademyExamBlock({ blockId }) {
 
       const url = await ql7CreateVipInvoice(acc)
       if (url) {
-        window.open(url, '_blank', 'noopener,noreferrer')
-      }
+      openPaymentWindow(url)     
+    }
 
       setTimeout(async function () {
         const st = await ql7FetchVipStatus(acc)

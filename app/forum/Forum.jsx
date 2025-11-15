@@ -906,6 +906,37 @@ function useQCoinLive(userKey, isVip){
   };
 }
 
+function openPaymentWindow(url) {
+  try {
+    const isTG =
+      typeof window !== 'undefined' &&
+      window.Telegram &&
+      window.Telegram.WebApp;
+
+    const ua =
+      typeof navigator !== 'undefined'
+        ? navigator.userAgent.toLowerCase()
+        : '';
+
+    const isIOS = /iphone|ipad|ipod/.test(ua);
+
+    if (isTG && window.Telegram.WebApp.openLink) {
+      window.Telegram.WebApp.openLink(url);
+      return;
+    }
+
+    if (isIOS) {
+      window.location.href = url;
+      return;
+    }
+
+    window.open(url, '_blank', 'noopener,noreferrer');
+  } catch {
+    try {
+      window.location.href = url;
+    } catch {}
+  }
+}
 
 /* =========================================================
    Styles (global)
@@ -8180,8 +8211,7 @@ onClick={()=>{
         const j = await r.json().catch(() => null);
         if (j?.url) {
           // открываем NowPayments (как на бирже)
-          window.open(j.url, '_blank', 'noopener,noreferrer');
-
+          openPaymentWindow(j.url);
           // 3) Короткий опрос статуса, пока webhook не запишет в базу
           const started = Date.now();
           let active = false;
