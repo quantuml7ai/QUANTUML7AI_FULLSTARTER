@@ -328,7 +328,7 @@ function setUsedSec(v) {
   if (typeof window === 'undefined') return
   try { localStorage.setItem(todayKey(), String(Math.max(0, Math.floor(v)))) } catch {}
 }
-function openPaymentWindow(url, accountId) {
+function openPaymentWindow(url) {
   if (!url) return
 
   try {
@@ -337,10 +337,15 @@ function openPaymentWindow(url, accountId) {
         ? navigator.userAgent.toLowerCase()
         : ''
 
-    const isIOS =
-      ua.includes('iphone') ||
-      ua.includes('ipad') ||
-      ua.includes('ipod')
+    const isIOS = /iphone|ipad|ipod/.test(ua)
+
+    const isStandalone =
+      (typeof window !== 'undefined' &&
+        window.navigator &&
+        window.navigator.standalone) ||
+      (typeof window !== 'undefined' &&
+        window.matchMedia &&
+        window.matchMedia('(display-mode: standalone)').matches)
 
     const isTG =
       typeof window !== 'undefined' &&
@@ -348,38 +353,30 @@ function openPaymentWindow(url, accountId) {
       window.Telegram.WebApp &&
       typeof window.Telegram.WebApp.openLink === 'function'
 
-    // 1) Внутри Telegram Mini App – всё как раньше
+    // 1) Внутри Telegram Mini App – платёжка открывается через WebApp API
     if (isTG) {
       window.Telegram.WebApp.openLink(url)
       return
     }
 
-    // 2) Любой iOS (Safari / Chrome / PWA / "домик")
-    if (isIOS) {
-      // тут можно либо через GET /api/pay/create?accountId=...,
-      // либо напрямую по URL, если invoice уже создан
-      if (accountId) {
-        // если хочешь использовать GET-редирект с сервера:
-        // window.location.href = `/api/pay/create?accountId=${encodeURIComponent(accountId)}`
-        // но раз мы уже получили url из POST, логичнее идти напрямую:
-        window.location.href = url
-      } else {
-        window.location.href = url
-      }
+    // 2) iOS + «домик» (standalone PWA) – ТОЛЬКО прямая навигация
+    if (isIOS || isStandalone) {
+      window.location.href = url
       return
     }
 
     // 3) Обычные браузеры (десктоп / Android)
     const w = window.open(url, '_blank', 'noopener,noreferrer')
 
-    // Если попап заблокировали – фоллбек в текущую вкладку
+    // если попап заблокировали – фоллбек в текущую вкладку
     if (!w) {
       window.location.href = url
     }
   } catch {
     try { window.location.href = url } catch {}
   }
-} 
+}
+
 /* ===== ДОБАВЛЕНО: ensureAuthorized — жмёт кнопку логина в TopBar и ждёт подтверждение ===== */
 async function ensureAuthorized() {
   if (typeof window === 'undefined') return null
@@ -1195,7 +1192,8 @@ const handlePayClick = async () => {
     if (!r.ok) throw new Error(j?.error || 'Create failed')
 
     if (j.url) {
-    openPaymentWindow(url, accountId)
+    openPaymentWindow(url)
+
     }
   } catch (e) {
     console.error(e)
