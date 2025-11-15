@@ -3,140 +3,142 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-export default function BgAudio({ src = '/audio/cosmic.mp3', defaultVolume = 0.35, className = '' }) {
+export default function BgAudio({
+  src = '/audio/cosmic.mp3',
+  defaultVolume = 0.35,
+  className = '',
+}) {
   const audioRef = useRef(null)
-  const userToggledRef = useRef(false) // чтобы не перебивать явный выбор «Off» в рамках СЕССИИ
   const [vol, setVol] = useState(defaultVolume)
-  const [enabled, setEnabled] = useState(true)   // по умолчанию — ВСЕГДА ВКЛ при заходе
-  const [locked, setLocked] = useState(true)     // нужен «жест» для звука?
+  const [playing, setPlaying] = useState(false)
+  const [locked, setLocked] = useState(true) // true = браузер не дал играть со звуком
 
-  // восстановить ТОЛЬКО громкость пользователя (звук не помним — всегда автозапуск)
+  // Громкость держим актуальной
   useEffect(() => {
-    try {
-      const savedVol = parseFloat(localStorage.getItem('ql7_audio_volume'))
-      if (!Number.isNaN(savedVol)) {
-        setVol(Math.max(0, Math.min(1, savedVol)))
-      }
-    } catch {}
-  }, [])
-
-  // поддерживать громкость
-  useEffect(() => {
-    if (audioRef.current) audioRef.current.volume = vol
+    if (audioRef.current) {
+      try {
+        audioRef.current.volume = vol
+      } catch {}
+    }
   }, [vol])
 
-  // 1) сразу пробуем играть со звуком; если нельзя — тихий цикл (muted) и ждём жест
+  // 1) При МОНТАЖЕ сразу пробуем играть СО ЗВУКОМ
   useEffect(() => {
     const a = audioRef.current
     if (!a) return
+
+    let cancelled = false
+
     ;(async () => {
       try {
-        if (enabled) {
-          a.muted = false
-          await a.play()               // попытка со звуком
-          setLocked(false)             // получилось
-        } else {
-          a.muted = true               // пользовательский Off: тихий цикл
-          await a.play().catch(() => {})
-          setLocked(true)
-        }
+        a.muted = false
+        a.loop = true
+        a.playsInline = true
+        await a.play()                // попытка громко
+        if (cancelled) return
+        setPlaying(true)
+        setLocked(false)
       } catch {
-        // браузер заблокировал — запускаем тихо и ждём жест
+        // Браузер зарубил — крутим ТИХО и ждём жест
         try {
           a.muted = true
+          a.loop = true
+          a.playsInline = true
           await a.play().catch(() => {})
-        } finally {
-          setLocked(true)
-        }
+        } catch {}
+        if (cancelled) return
+        setPlaying(false)
+        setLocked(true)
       }
     })()
-  }, [enabled])
 
-  // 2) глобальная разблокировка звука по ЛЮБОМУ действию пользователя
+    return () => {
+      cancelled = true
+    }
+  }, [src])
+
+  // 2) Если locked === true → первый жест юзера включает звук
   useEffect(() => {
     const a = audioRef.current
     if (!a) return
-
-    // Если уже играет со звуком или пользователь явно выключал в ЭТОЙ сессии — не вешаем слушатели
-    if (!locked || (userToggledRef.current && !enabled)) return
+    if (!locked) return  // уже разблокировано — ничего не вешаем
 
     let removed = false
-    const tryEnable = async () => {
-      // Уважать явный Off пользователя в рамках текущей сессии
-      if (userToggledRef.current && !enabled) return
+
+    const enableSound = async () => {
+      if (!audioRef.current) return
       try {
-        a.muted = false
-        await a.play()
-        setEnabled(true)
+        audioRef.current.muted = false
+        await audioRef.current.play()
+        setPlaying(true)
         setLocked(false)
-        // ВАЖНО: НЕ сохраняем enabled в localStorage → новый заход = новый автозапуск
+        detach()
       } catch {
-        // всё ещё заблокировано — ничего, ждём следующий жест
+        // всё ещё заблокировано — оставляем слушатели, попробуем на следующем жесте
       }
     }
 
-    const onPointer = () => { tryEnable() }
-    const onKey     = () => { tryEnable() }
-    const onWheel   = () => { tryEnable() }
-    const onTouch   = () => { tryEnable() }
+    const onGesture = () => {
+      // любой жест → пробуем включить звук
+      enableSound()
+    }
 
-    window.addEventListener('pointerdown', onPointer, { once: true })
-    window.addEventListener('keydown',     onKey,     { once: true })
-    window.addEventListener('wheel',       onWheel,   { passive: true, once: true })
-    window.addEventListener('touchmove',   onTouch,   { passive: true, once: true })
+    function attach() {
+      if (removed) return
+      window.addEventListener('pointerdown', onGesture, true)
+      window.addEventListener('click',       onGesture, true)
+      window.addEventListener('keydown',     onGesture, true)
+      window.addEventListener('wheel',       onGesture, { passive: true, capture: true })
+      window.addEventListener('touchstart',  onGesture, { passive: true, capture: true })
+      window.addEventListener('touchmove',   onGesture, { passive: true, capture: true })
+    }
 
-    return () => {
+    function detach() {
       if (removed) return
       removed = true
-      window.removeEventListener('pointerdown', onPointer)
-      window.removeEventListener('keydown',     onKey)
-      window.removeEventListener('wheel',       onWheel)
-      window.removeEventListener('touchmove',   onTouch)
+      window.removeEventListener('pointerdown', onGesture, true)
+      window.removeEventListener('click',       onGesture, true)
+      window.removeEventListener('keydown',     onGesture, true)
+      window.removeEventListener('wheel',       onGesture, true)
+      window.removeEventListener('touchstart',  onGesture, true)
+      window.removeEventListener('touchmove',   onGesture, true)
     }
-  }, [enabled, locked])
 
-  // кнопка-динамик: выключает/включает звук в СЕССИИ, но не на всю вечность
+    attach()
+    return detach
+  }, [locked])
+
+  // 3) Кнопка-динамик: локальный on/off, НИЧЕГО не пишем в localStorage
   const toggle = async () => {
     const a = audioRef.current
     if (!a) return
-    userToggledRef.current = true
-    if (enabled && !locked) {
-      a.pause()
-      setEnabled(false)
-      // НЕ пишем ql7_audio_enabled → после reload всё равно автозапуск
+
+    if (playing) {
+      try { a.pause() } catch {}
+      setPlaying(false)
+      // не трогаем locked — если юзер снова включит, будет обычный play()
     } else {
       try {
         a.muted = false
         await a.play()
-        setEnabled(true)
+        setPlaying(true)
         setLocked(false)
-        // тоже ничего не сохраняем
-      } catch {}
+      } catch {
+        // если опять зарубили — оставим как есть, жест всё равно уже был
+      }
     }
   }
 
-  // колесо мыши — изменить громкость (эту можно помнить)
+  // 4) Колёсико — громкость (как было)
   const onWheelVolume = (e) => {
     const delta = e.deltaY > 0 ? -0.05 : 0.05
     const nv = Math.max(0, Math.min(1, +(vol + delta).toFixed(2)))
     setVol(nv)
-    try { localStorage.setItem('ql7_audio_volume', String(nv)) } catch {}
+    // Если хочешь — можно сохранять громкость:
+    // try { localStorage.setItem('ql7_audio_volume', String(nv)) } catch {}
   }
 
-  // (опционально) Media Session — красивее в плеере ОС
-  useEffect(() => {
-    if ('mediaSession' in navigator) {
-      try {
-        navigator.mediaSession.metadata = new window.MediaMetadata({
-          title: 'Quantum L7 Ambient',
-          artist: 'Quantum L7',
-          album: 'Site Background',
-        })
-      } catch {}
-    }
-  }, [])
-
-  const isOn = enabled && !locked
+  const isOn = playing && !locked
 
   return (
     <>
@@ -152,6 +154,7 @@ export default function BgAudio({ src = '/audio/cosmic.mp3', defaultVolume = 0.3
         className={`audio-toggle ${isOn ? 'on' : 'off'} ${className}`}
         onClick={toggle}
         onWheel={onWheelVolume}
+        type="button"
         title={
           isOn
             ? `Sound on • ${Math.round(vol * 100)}% (wheel to change)`
