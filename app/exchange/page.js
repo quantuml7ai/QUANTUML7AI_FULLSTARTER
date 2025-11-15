@@ -1192,7 +1192,7 @@ const handlePayClick = async () => {
     if (!r.ok) throw new Error(j?.error || 'Create failed')
 
     if (j.url) {
-    openPaymentWindow(url)
+    openPaymentWindow(j.url)
 
     }
   } catch (e) {
