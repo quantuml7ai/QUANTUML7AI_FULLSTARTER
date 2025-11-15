@@ -289,7 +289,7 @@ function openPaymentWindow(url, accountId) {
       window.Telegram.WebApp &&
       typeof window.Telegram.WebApp.openLink === 'function'
 
-    // 1) Внутри Telegram Mini App – как раньше, напрямую на NOWPayments
+    // 1) Внутри Telegram Mini App – всё как раньше
     if (isTG) {
       window.Telegram.WebApp.openLink(url)
       return
@@ -297,12 +297,14 @@ function openPaymentWindow(url, accountId) {
 
     // 2) Любой iOS (Safari / Chrome / PWA / "домик")
     if (isIOS) {
-      // Если знаем accountId → пусть сервер сам создаст invoice и сделает 302
+      // тут можно либо через GET /api/pay/create?accountId=...,
+      // либо напрямую по URL, если invoice уже создан
       if (accountId) {
-        window.location.href =
-          `/api/pay/create?accountId=${encodeURIComponent(accountId)}`
+        // если хочешь использовать GET-редирект с сервера:
+        // window.location.href = `/api/pay/create?accountId=${encodeURIComponent(accountId)}`
+        // но раз мы уже получили url из POST, логичнее идти напрямую:
+        window.location.href = url
       } else {
-        // на всякий пожарный, если accountId не прокинули
         window.location.href = url
       }
       return
@@ -316,9 +318,7 @@ function openPaymentWindow(url, accountId) {
       window.location.href = url
     }
   } catch {
-    try {
-      window.location.href = url
-    } catch {}
+    try { window.location.href = url } catch {}
   }
 }
 
