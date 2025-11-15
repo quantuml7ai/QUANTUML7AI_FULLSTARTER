@@ -5,22 +5,18 @@ import { useEffect, useRef, useState } from 'react'
 
 export default function BgAudio({ src = '/audio/cosmic.mp3', defaultVolume = 0.35, className = '' }) {
   const audioRef = useRef(null)
-  const userToggledRef = useRef(false) // чтобы не перебивать явный выбор «Off»
+  const userToggledRef = useRef(false) // чтобы не перебивать явный выбор «Off» в рамках СЕССИИ
   const [vol, setVol] = useState(defaultVolume)
-  const [enabled, setEnabled] = useState(true)   // по умолчанию — ВКЛ
+  const [enabled, setEnabled] = useState(true)   // по умолчанию — ВСЕГДА ВКЛ при заходе
   const [locked, setLocked] = useState(true)     // нужен «жест» для звука?
 
-  // восстановить настройки пользователя
+  // восстановить ТОЛЬКО громкость пользователя (звук не помним — всегда автозапуск)
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('ql7_audio_enabled')
-      if (saved !== null) {
-        const on = saved === '1'
-        setEnabled(on)
-        userToggledRef.current = true // пользователь уже явно выбирал
-      }
       const savedVol = parseFloat(localStorage.getItem('ql7_audio_volume'))
-      if (!Number.isNaN(savedVol)) setVol(Math.max(0, Math.min(1, savedVol)))
+      if (!Number.isNaN(savedVol)) {
+        setVol(Math.max(0, Math.min(1, savedVol)))
+      }
     } catch {}
   }, [])
 
@@ -61,19 +57,19 @@ export default function BgAudio({ src = '/audio/cosmic.mp3', defaultVolume = 0.3
     const a = audioRef.current
     if (!a) return
 
-    // Если уже играет со звуком или пользователь явно выключал — не вешаем слушатели
+    // Если уже играет со звуком или пользователь явно выключал в ЭТОЙ сессии — не вешаем слушатели
     if (!locked || (userToggledRef.current && !enabled)) return
 
     let removed = false
     const tryEnable = async () => {
-      // Уважать явный Off пользователя
+      // Уважать явный Off пользователя в рамках текущей сессии
       if (userToggledRef.current && !enabled) return
       try {
         a.muted = false
         await a.play()
         setEnabled(true)
         setLocked(false)
-        try { localStorage.setItem('ql7_audio_enabled', '1') } catch {}
+        // ВАЖНО: НЕ сохраняем enabled в localStorage → новый заход = новый автозапуск
       } catch {
         // всё ещё заблокировано — ничего, ждём следующий жест
       }
@@ -84,7 +80,6 @@ export default function BgAudio({ src = '/audio/cosmic.mp3', defaultVolume = 0.3
     const onWheel   = () => { tryEnable() }
     const onTouch   = () => { tryEnable() }
 
-    // once:true, чтобы автоматически снять слушатель после первого срабатывания
     window.addEventListener('pointerdown', onPointer, { once: true })
     window.addEventListener('keydown',     onKey,     { once: true })
     window.addEventListener('wheel',       onWheel,   { passive: true, once: true })
@@ -100,7 +95,7 @@ export default function BgAudio({ src = '/audio/cosmic.mp3', defaultVolume = 0.3
     }
   }, [enabled, locked])
 
-  // кнопка-динамик: только она может выключить звук
+  // кнопка-динамик: выключает/включает звук в СЕССИИ, но не на всю вечность
   const toggle = async () => {
     const a = audioRef.current
     if (!a) return
@@ -108,19 +103,19 @@ export default function BgAudio({ src = '/audio/cosmic.mp3', defaultVolume = 0.3
     if (enabled && !locked) {
       a.pause()
       setEnabled(false)
-      try { localStorage.setItem('ql7_audio_enabled', '0') } catch {}
+      // НЕ пишем ql7_audio_enabled → после reload всё равно автозапуск
     } else {
       try {
         a.muted = false
         await a.play()
         setEnabled(true)
         setLocked(false)
-        try { localStorage.setItem('ql7_audio_enabled', '1') } catch {}
+        // тоже ничего не сохраняем
       } catch {}
     }
   }
 
-  // колесо мыши — изменить громкость
+  // колесо мыши — изменить громкость (эту можно помнить)
   const onWheelVolume = (e) => {
     const delta = e.deltaY > 0 ? -0.05 : 0.05
     const nv = Math.max(0, Math.min(1, +(vol + delta).toFixed(2)))
@@ -145,12 +140,23 @@ export default function BgAudio({ src = '/audio/cosmic.mp3', defaultVolume = 0.3
 
   return (
     <>
-      <audio ref={audioRef} src={src} loop preload="auto" playsInline aria-hidden="true" />
+      <audio
+        ref={audioRef}
+        src={src}
+        loop
+        preload="auto"
+        playsInline
+        aria-hidden="true"
+      />
       <button
         className={`audio-toggle ${isOn ? 'on' : 'off'} ${className}`}
         onClick={toggle}
         onWheel={onWheelVolume}
-        title={isOn ? `Sound on • ${Math.round(vol * 100)}% (wheel to change)` : 'Enable sound'}
+        title={
+          isOn
+            ? `Sound on • ${Math.round(vol * 100)}% (wheel to change)`
+            : 'Enable sound'
+        }
         aria-label="Toggle background audio"
       >
         <span className="ico">{isOn ? '🔊' : '🔇'}</span>
