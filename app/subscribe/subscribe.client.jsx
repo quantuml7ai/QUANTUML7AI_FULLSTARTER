@@ -66,61 +66,16 @@ function openPaymentWindow(url) {
   if (!url) return
 
   try {
-    const ua =
-      typeof navigator !== 'undefined'
-        ? navigator.userAgent || ''
-        : ''
+    // Для отладки можешь оставить этот лог — увидишь, что Safari реально получает URL
+    console.log('[PAY] redirect to', url)
 
-    const uaLower = ua.toLowerCase()
-
-    // iOS-девайс
-    const isIOS = /iphone|ipad|ipod/.test(uaLower)
-
-    // "настоящий" Safari (и на macOS, и на iOS):
-    // есть Safari, но нет Chrome / Firefox / Edge и т.п.
-    const isSafari =
-      /safari/i.test(ua) &&
-      !/chrome|crios|chromium|fxios|firefox|edg|opios/i.test(ua)
-
-    // PWA / иконка "на домашнем экране"
-    const isStandalone =
-      (typeof window !== 'undefined' &&
-        window.navigator &&
-        window.navigator.standalone) ||
-      (typeof window !== 'undefined' &&
-        window.matchMedia &&
-        window.matchMedia('(display-mode: standalone)').matches)
-
-    // Telegram Mini App
-    const isTG =
-      typeof window !== 'undefined' &&
-      window.Telegram &&
-      window.Telegram.WebApp &&
-      typeof window.Telegram.WebApp.openLink === 'function'
-
-    // 1) Внутри Telegram Mini App – платёжка открывается через WebApp API
-    if (isTG) {
-      window.Telegram.WebApp.openLink(url)
-      return
-    }
-
-    // 2) Настоящий Safari (iOS/macOS) ИЛИ standalone PWA → только текущая вкладка
-    if (isSafari || isStandalone) {
-      window.location.href = url
-      return
-    }
-
-    // 3) Все остальные браузеры (Chrome, Firefox, Edge, Android и т.д.)
-    const w = window.open(url, '_blank', 'noopener,noreferrer')
-
-    // если попап заблокировали – фоллбек в текущую вкладку
-    if (!w) {
-      window.location.href = url
-    }
-  } catch {
-    try { window.location.href = url } catch {}
+    // Самый надёжный способ для всех браузеров, особенно Safari:
+    window.location.href = url
+  } catch (e) {
+    try { window.location.assign(url) } catch {}
   }
 }
+
 
 
 /* ===== Badge кнопка: только визуальные эффекты X2 (VIP — золото, не VIP — мигает красным) ===== */
