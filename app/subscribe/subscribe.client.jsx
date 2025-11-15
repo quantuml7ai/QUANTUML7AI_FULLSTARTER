@@ -54,17 +54,30 @@ async function fetchVipStatus(accountId) {
 async function createInvoice(accountId) {
   const r = await fetch('/api/pay/create', {
     method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ accountId })
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ accountId }),
   })
-  const j = await r.json().catch(()=> ({}))
-  if (!r.ok) throw new Error(j?.error || 'Create failed')
+
+  const j = await r.json().catch(() => ({}))
+
+  if (!r.ok) {
+    console.error('createInvoice error', r.status, j)
+    const msg =
+      j?.message ||
+      j?.error ||
+      (typeof j === 'string' ? j : null) ||
+      `Create failed (${r.status})`
+    throw new Error(msg)
+  }
+
   if (j?.url) return j.url
+
+  console.error('createInvoice: no URL in response', j)
   throw new Error('No payment URL returned')
 }
-// ===== универсальное открытие окна оплаты (TG / iOS / обычный веб) =====
+
 function openPaymentWindow(url, accountId) {
-  if (!url && !accountId) return
+  if (!url) return
 
   try {
     const ua =
@@ -83,44 +96,38 @@ function openPaymentWindow(url, accountId) {
       window.Telegram.WebApp &&
       typeof window.Telegram.WebApp.openLink === 'function'
 
-    // 1) Внутри Telegram Mini App – как раньше, напрямую на NOWPayments
-    if (isTG && url) {
+    // 1) Внутри Telegram Mini App – всё как раньше
+    if (isTG) {
       window.Telegram.WebApp.openLink(url)
       return
     }
 
     // 2) Любой iOS (Safari / Chrome / PWA / "домик")
-    if (isIOS && accountId) {
-      // важно: уводим на наш GET-роут, сервер сам создаст инвойс и сделает 302
-      window.location.href =
-        `/api/pay/create?accountId=${encodeURIComponent(accountId)}`
+    if (isIOS) {
+      // тут можно либо через GET /api/pay/create?accountId=...,
+      // либо напрямую по URL, если invoice уже создан
+      if (accountId) {
+        // если хочешь использовать GET-редирект с сервера:
+        // window.location.href = `/api/pay/create?accountId=${encodeURIComponent(accountId)}`
+        // но раз мы уже получили url из POST, логичнее идти напрямую:
+        window.location.href = url
+      } else {
+        window.location.href = url
+      }
       return
     }
 
     // 3) Обычные браузеры (десктоп / Android)
-    if (url) {
-      const w = window.open(url, '_blank', 'noopener,noreferrer')
-      if (!w) {
-        // если попап заблокирован — фоллбек в текущую вкладку
-        window.location.href = url
-      }
-    } else if (accountId) {
-      // запасной вариант, если вдруг url не пришёл
-      window.location.href =
-        `/api/pay/create?accountId=${encodeURIComponent(accountId)}`
+    const w = window.open(url, '_blank', 'noopener,noreferrer')
+
+    // Если попап заблокировали – фоллбек в текущую вкладку
+    if (!w) {
+      window.location.href = url
     }
   } catch {
-    try {
-      if (url) {
-        window.location.href = url
-      } else if (accountId) {
-        window.location.href =
-          `/api/pay/create?accountId=${encodeURIComponent(accountId)}`
-      }
-    } catch {}
+    try { window.location.href = url } catch {}
   }
 }
-
 
 /* ===== Badge кнопка: только визуальные эффекты X2 (VIP — золото, не VIP — мигает красным) ===== */
 function TierBadge({ label, isVip, onClick }) {
@@ -265,7 +272,7 @@ export default function SubscribePage() {
       const accountId = await ensureAuthorized()
       if (!accountId) return
       const url = await createInvoice(accountId)
-       openPaymentWindow(url, accountId)      
+      openPaymentWindow(url, accountId)     
       setTimeout(() => { refreshVip() }, 5000)
     } catch (e) {
       console.error(e)
