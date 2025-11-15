@@ -130,115 +130,12 @@ export default function RootLayout({ children }) {
             </div>
 
             {/* фон. аудио (кнопка снизу — «Выключить аудио») */}
-            <BgAudio src="/audio/cosmic.mp3" defaultVolume={0.35} />
+            <BgAudio src="/audio/cosmic.mp3" defaultVolume={1.35} />
            <ScrollTopPulse />
           </I18nProvider>
         </Providers>
 
-        {/* ✅ Автозапуск при ПЕРВОМ действии пользователя */}
-        <Script id="ql7-audio-autoplay" strategy="afterInteractive">{`
-          (function(){
-            try{
-              var VOL = 0.35;
 
-              function isEnabled(){
-                try{
-                  var v = localStorage.getItem('ql7_audio_enabled');
-                  if (v==null) return true;
-                  v = (''+v).toLowerCase();
-                  return !(v==='0' || v==='false' || v==='off');
-                }catch(e){ return true }
-              }
-              function getAudio(){
-                if (window.__ql7Audio && typeof window.__ql7Audio.play==='function') return window.__ql7Audio;
-                var list = document.querySelectorAll('audio');
-                for (var i=0;i<list.length;i++){
-                  var a = list[i];
-                  if (a && typeof a.play==='function') return a;
-                }
-                return null;
-              }
-              function tryPlay(a){
-                if (!a) return Promise.reject();
-                try { a.muted = false; a.volume = VOL; } catch(e){}
-                var p; try{ p = a.play(); }catch(e){ p = Promise.reject(e); }
-                if (p && typeof p.then==='function') return p;
-                return Promise.resolve();
-              }
-
-              var attached = false;
-              function detach(){
-                if (!attached) return;
-                window.removeEventListener('pointerdown', onGesture, true);
-                window.removeEventListener('click',       onGesture, true);
-                window.removeEventListener('keydown',     onGesture, true);
-                window.removeEventListener('wheel',       onGesture, true);
-                window.removeEventListener('touchstart',  onGesture, true);
-                window.removeEventListener('touchmove',   onGesture, true);
-                attached = false;
-              }
-              function attach(){
-                if (attached) return;
-                window.addEventListener('pointerdown', onGesture, true);
-                window.addEventListener('click',       onGesture, true);
-                window.addEventListener('keydown',     onGesture, true);
-                window.addEventListener('wheel',       onGesture, true);
-                window.addEventListener('touchstart',  onGesture, true);
-                window.addEventListener('touchmove',   onGesture, true);
-                attached = true;
-              }
-
-              function kickWhenReady(){
-                if (!isEnabled()) return;
-                var a = getAudio();
-                if (a){
-                  tryPlay(a).then(detach).catch(function(){});
-                  return;
-                }
-                var stop = false;
-                var obs = new MutationObserver(function(){
-                  var aa = getAudio();
-                  if (aa){
-                    tryPlay(aa).finally(function(){ stop=true; obs.disconnect(); detach(); });
-                  }
-                });
-                obs.observe(document.documentElement, { childList:true, subtree:true });
-
-                var t0 = Date.now(), max = 8000;
-                (function poll(){
-                  if (stop) return;
-                  var aa = getAudio();
-                  if (aa){
-                    tryPlay(aa).finally(function(){ stop=true; obs.disconnect(); detach(); });
-                  } else if (Date.now()-t0 < max){
-                    setTimeout(poll, 120);
-                  } else {
-                    obs.disconnect();
-                  }
-                })();
-              }
-
-              function onGesture(){ kickWhenReady(); }
-
-              var a0 = getAudio();
-              if (a0 && isEnabled()){
-                tryPlay(a0).catch(function(){ attach(); });
-              } else {
-                attach();
-              }
-
-              window.addEventListener('storage', function(ev){
-                if (!ev || ev.key!=='ql7_audio_enabled') return;
-                var a = getAudio(); if (!a) return;
-                if (isEnabled()){
-                  tryPlay(a).catch(function(){ attach(); });
-                } else {
-                  try{ a.pause(); a.muted = true; }catch(e){}
-                }
-              });
-            }catch(e){}
-          })();
-        `}</Script>
 
         {/* ✅ Включаем аналитику Vercel */}
         <Analytics />
