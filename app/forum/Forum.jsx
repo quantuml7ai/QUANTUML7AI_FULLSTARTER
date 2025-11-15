@@ -8229,7 +8229,7 @@ onClick={()=>{
         const j = await r.json().catch(() => null);
         if (j?.url) {
           // открываем NowPayments (как на бирже)
-        openPaymentWindow(url)
+         openPaymentWindow(j.url);
           // 3) Короткий опрос статуса, пока webhook не запишет в базу
           const started = Date.now();
           let active = false;
