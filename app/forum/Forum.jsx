@@ -907,7 +907,7 @@ function useQCoinLive(userKey, isVip){
 }
 
 function openPaymentWindow(url, accountId) {
-  if (!url) return
+  if (!url && !accountId) return
 
   try {
     const ua =
@@ -926,36 +926,40 @@ function openPaymentWindow(url, accountId) {
       window.Telegram.WebApp &&
       typeof window.Telegram.WebApp.openLink === 'function'
 
-    // 1) Внутри Telegram Mini App – всё как раньше
-    if (isTG) {
+    // 1) Внутри Telegram Mini App – как раньше, напрямую на NOWPayments
+    if (isTG && url) {
       window.Telegram.WebApp.openLink(url)
       return
     }
 
-    // 2) Любой iOS (Safari / Chrome / PWA / "домик")
-    if (isIOS) {
-      // тут можно либо через GET /api/pay/create?accountId=...,
-      // либо напрямую по URL, если invoice уже создан
-      if (accountId) {
-        // если хочешь использовать GET-редирект с сервера:
-        // window.location.href = `/api/pay/create?accountId=${encodeURIComponent(accountId)}`
-        // но раз мы уже получили url из POST, логичнее идти напрямую:
-        window.location.href = url
-      } else {
-        window.location.href = url
-      }
+    // 2) Любой iOS (Safari / Chrome / PWA / "домик"):
+    // не надеемся на попапы вообще, просто уходим на наш GET-роут:
+    if (isIOS && accountId) {
+      window.location.href =
+        `/api/pay/create?accountId=${encodeURIComponent(accountId)}`
       return
     }
 
     // 3) Обычные браузеры (десктоп / Android)
-    const w = window.open(url, '_blank', 'noopener,noreferrer')
-
-    // Если попап заблокировали – фоллбек в текущую вкладку
-    if (!w) {
-      window.location.href = url
+    if (url) {
+      const w = window.open(url, '_blank', 'noopener,noreferrer')
+      if (!w) {
+        // Если попап заблокировали – фоллбек в текущую вкладку
+        window.location.href = url
+      }
+    } else if (accountId) {
+      // теоретически сюда не попадём, но на всякий случай
+      window.location.href =
+        `/api/pay/create?accountId=${encodeURIComponent(accountId)}`
     }
   } catch {
-    try { window.location.href = url } catch {}
+    try {
+      if (url) window.location.href = url
+      else if (accountId) {
+        window.location.href =
+          `/api/pay/create?accountId=${encodeURIComponent(accountId)}`
+      }
+    } catch {}
   }
 }
 

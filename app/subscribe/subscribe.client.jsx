@@ -76,56 +76,30 @@ async function createInvoice(accountId) {
   throw new Error('No payment URL returned')
 }
 
-function openPaymentWindow(url, accountId) {
-  if (!url) return
-
+const handleVipClick = async () => {
   try {
-    const ua =
-      typeof navigator !== 'undefined'
-        ? navigator.userAgent.toLowerCase()
-        : ''
+    const accountId = await ensureAuthorized()
+    if (!accountId) return
 
-    const isIOS =
-      ua.includes('iphone') ||
-      ua.includes('ipad') ||
-      ua.includes('ipod')
-
-    const isTG =
-      typeof window !== 'undefined' &&
-      window.Telegram &&
-      window.Telegram.WebApp &&
-      typeof window.Telegram.WebApp.openLink === 'function'
-
-    // 1) Внутри Telegram Mini App – всё как раньше
-    if (isTG) {
-      window.Telegram.WebApp.openLink(url)
+    // создаём инвойс всегда (для логики + миниап/десктоп)
+    let url = null
+    try {
+      url = await createInvoice(accountId)
+    } catch (e) {
+      console.error('createInvoice failed', e)
+      alert('Payment error: ' + (e?.message || e))
       return
     }
 
-    // 2) Любой iOS (Safari / Chrome / PWA / "домик")
-    if (isIOS) {
-      // тут можно либо через GET /api/pay/create?accountId=...,
-      // либо напрямую по URL, если invoice уже создан
-      if (accountId) {
-        // если хочешь использовать GET-редирект с сервера:
-        // window.location.href = `/api/pay/create?accountId=${encodeURIComponent(accountId)}`
-        // но раз мы уже получили url из POST, логичнее идти напрямую:
-        window.location.href = url
-      } else {
-        window.location.href = url
-      }
-      return
-    }
+    // здесь уже выбираем поведение по платформе
+    openPaymentWindow(url, accountId)
 
-    // 3) Обычные браузеры (десктоп / Android)
-    const w = window.open(url, '_blank', 'noopener,noreferrer')
-
-    // Если попап заблокировали – фоллбек в текущую вкладку
-    if (!w) {
-      window.location.href = url
-    }
-  } catch {
-    try { window.location.href = url } catch {}
+    setTimeout(() => {
+      refreshVip()
+    }, 5000)
+  } catch (e) {
+    console.error(e)
+    alert('Payment error: ' + (e?.message || e))
   }
 }
 
