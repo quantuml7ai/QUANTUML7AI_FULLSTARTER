@@ -272,39 +272,36 @@ function QL7QCoinX2Badge({ vip, onClick }) {
 function openPaymentWindow(url) {
   if (!url) return
   try {
-    const ua = (typeof navigator !== 'undefined' ? navigator.userAgent : '').toLowerCase()
-    const isIOS =
-      ua.includes('iphone') ||
-      ua.includes('ipad') ||
-      ua.includes('ipod')
+    const ua =
+      typeof navigator !== 'undefined'
+        ? navigator.userAgent.toLowerCase()
+        : ''
 
-    const isStandalone =
-      (typeof window !== 'undefined' && window.navigator && window.navigator.standalone) ||
-      (typeof window !== 'undefined' &&
-        window.matchMedia &&
-        window.matchMedia('(display-mode: standalone)').matches)
+    const isIOS = /iphone|ipad|ipod/.test(ua)
 
-    const isTg = typeof window !== 'undefined' &&
+    const isTG =
+      typeof window !== 'undefined' &&
       window.Telegram &&
       window.Telegram.WebApp &&
       typeof window.Telegram.WebApp.openLink === 'function'
 
-    // Внутри Telegram Mini App
-    if (isTg) {
+    // 1) Внутри Telegram Mini App – платёж открываем через WebApp API
+    if (isTG) {
       window.Telegram.WebApp.openLink(url)
       return
     }
 
-    // iOS + standalone / иконка на домой → только текущая вкладка
-    if (isIOS && isStandalone) {
+    // 2) Любой iOS (Safari, Chrome, PWA, "домик") – только текущая вкладка
+    if (isIOS) {
       window.location.href = url
       return
     }
 
-    // Обычный браузер — пробуем в новой вкладке
+    // 3) Обычные браузеры (десктоп / Android)
     const w = window.open(url, '_blank', 'noopener,noreferrer')
+
+    // Если попап заблокировали – фоллбек в текущую вкладку
     if (!w) {
-      // попап заблокировали → фоллбек
       window.location.href = url
     }
   } catch {

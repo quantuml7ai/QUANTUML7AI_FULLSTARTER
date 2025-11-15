@@ -907,34 +907,42 @@ function useQCoinLive(userKey, isVip){
 }
 
 function openPaymentWindow(url) {
+  if (!url) return
   try {
-    const isTG =
-      typeof window !== 'undefined' &&
-      window.Telegram &&
-      window.Telegram.WebApp;
-
     const ua =
       typeof navigator !== 'undefined'
         ? navigator.userAgent.toLowerCase()
-        : '';
+        : ''
 
-    const isIOS = /iphone|ipad|ipod/.test(ua);
+    const isIOS = /iphone|ipad|ipod/.test(ua)
 
-    if (isTG && window.Telegram.WebApp.openLink) {
-      window.Telegram.WebApp.openLink(url);
-      return;
+    const isTG =
+      typeof window !== 'undefined' &&
+      window.Telegram &&
+      window.Telegram.WebApp &&
+      typeof window.Telegram.WebApp.openLink === 'function'
+
+    // 1) Внутри Telegram Mini App – платёж открываем через WebApp API
+    if (isTG) {
+      window.Telegram.WebApp.openLink(url)
+      return
     }
 
+    // 2) Любой iOS (Safari, Chrome, PWA, "домик") – только текущая вкладка
     if (isIOS) {
-      window.location.href = url;
-      return;
+      window.location.href = url
+      return
     }
 
-    window.open(url, '_blank', 'noopener,noreferrer');
+    // 3) Обычные браузеры (десктоп / Android)
+    const w = window.open(url, '_blank', 'noopener,noreferrer')
+
+    // Если попап заблокировали – фоллбек в текущую вкладку
+    if (!w) {
+      window.location.href = url
+    }
   } catch {
-    try {
-      window.location.href = url;
-    } catch {}
+    try { window.location.href = url } catch {}
   }
 }
 

@@ -36,20 +36,71 @@ function readCookie(name) {
     return null
   }
 }
+function isTelegramLink(url) {
+  if (!url) return false
+  const s = String(url)
+  return /^https?:\/\/t\.me\//i.test(s) || /^tg:\/\//i.test(s)
+}
 
 function safeOpenExternal(url) {
   try {
-    const isTG = typeof window !== 'undefined' && !!(window.Telegram && window.Telegram.WebApp)
-    const ua   = (typeof navigator !== 'undefined' ? navigator.userAgent : '').toLowerCase()
+    const isTG =
+      typeof window !== 'undefined' &&
+      window.Telegram &&
+      window.Telegram.WebApp
+
+    const tg = isTG ? window.Telegram.WebApp : null
+
+    const ua =
+      typeof navigator !== 'undefined'
+        ? navigator.userAgent.toLowerCase()
+        : ''
+
     const isIOS = /iphone|ipad|ipod/.test(ua)
 
-    if (isTG && window.Telegram.WebApp.openLink) { window.Telegram.WebApp.openLink(url); return }
-    if (isIOS) { window.location.href = url; return }
-    window.open(url, '_blank', 'noopener,noreferrer')
+    const isStandalone =
+      (typeof window !== 'undefined' &&
+        window.navigator &&
+        window.navigator.standalone) ||
+      (typeof window !== 'undefined' &&
+        window.matchMedia &&
+        window.matchMedia('(display-mode: standalone)').matches)
+
+    const tgLink = isTelegramLink(url)
+
+    // 1) Внутри Telegram Mini App
+    if (isTG && tg) {
+      // 1a) Если это ссылка на бота / чат t.me → используем openTelegramLink
+      if (tgLink && typeof tg.openTelegramLink === 'function') {
+        tg.openTelegramLink(url)
+        return
+      }
+
+      // 1b) Любой внешний http(s) → обычный openLink
+      if (typeof tg.openLink === 'function') {
+        tg.openLink(url)
+        return
+      }
+    }
+
+    // 2) iOS (особенно PWA/иконка на домашнем экране) → лучше прямой переход
+    if (isIOS || isStandalone) {
+      window.location.href = url
+      return
+    }
+
+    // 3) Обычный браузер
+    const w = window.open(url, '_blank', 'noopener,noreferrer')
+
+    // если попап заблокировали — фоллбек
+    if (!w) {
+      window.location.href = url
+    }
   } catch {
     try { window.location.href = url } catch {}
   }
 }
+
 
 function readAccountId() {
   try {
