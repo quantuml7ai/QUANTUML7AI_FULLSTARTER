@@ -1215,115 +1215,123 @@ export function AdCard({ url, slotKind, nearId }) {
             </button>
           </div>
 
-{/* media: единый контейнер, медиа целиком, без обрезки */}
-<div className="relative mt-0.5 overflow-hidden rounded-lg border border-[color:var(--border,#27272a)] bg-[color:var(--bg-soft,#020817)]">
-  {/* фиксируем аспект ~16:9; при желании поменяй pt-[56.25%] */}
-  <div className="relative w-full pt-[56.25%]">
-    {/* SKELETON */}
-    {media.kind === 'skeleton' && (
-      <div className="absolute inset-0 animate-pulse bg-[color:var(--skeleton,#111827)]" />
-    )}
+          {/* media: заполняет карточку */}
+          <div className="relative mt-0.5 overflow-hidden rounded-lg border border-[color:var(--border,#27272a)] bg-[color:var(--bg-soft,#020817)] flex-1 min-h-[140px] max-h-[400px]">
+            {media.kind === 'skeleton' && (
+              <div className="animate-pulse w-full h-full bg-[color:var(--skeleton,#111827)]" />
+            )}
 
-    {/* VIDEO */}
-    {media.kind === 'video' && media.src && (
-      <video
-        ref={videoRef}
-        src={media.src}
-        className="absolute inset-0 w-full h-full object-contain"
-        autoPlay
-        muted={muted}
-        loop
-        playsInline
-      />
-    )}
+            {media.kind === 'video' && media.src && (
+              <video
+                ref={videoRef}
+                src={media.src}
+                className="w-full h-full object-cover"
+                autoPlay
+                muted={muted}
+                loop
+                playsInline
+              />
+            )}
 
-    {/* YOUTUBE */}
-    {media.kind === 'youtube' && media.src && (
-      <iframe
-        ref={ytIframeRef}
-        src={`https://www.youtube.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}
-        title="YouTube video"
-        frameBorder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowFullScreen
-        style={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          borderRadius: 10,
-          pointerEvents: 'none', // клики идут в <a>
-        }}
-      />
-    )}
+            {media.kind === 'youtube' && media.src && (
+              <div
+                className="w-full h-full"
+                style={{
+                  position: 'relative',
+                  paddingBottom: '56.25%',
+                  overflow: 'hidden',
+                  borderRadius: 10,
+                }}
+              >
+                <iframe
+                  ref={ytIframeRef}
+                  src={`https://www.youtube.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}
+                  title="YouTube video"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: 10,
+                    pointerEvents: 'none', // не реагируем на мышку, все клики уходят в <a>
+                  }}
+                />
+              </div>
+            )}
 
-    {/* TIKTOK */}
-    {media.kind === 'tiktok' && media.src && (
-      <iframe
-        src={`https://www.tiktok.com/embed/v2/${media.src}`}
-        title="TikTok video"
-        frameBorder="0"
-        allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          borderRadius: 10,
-          pointerEvents: 'none',
-        }}
-      />
-    )}
+            {media.kind === 'tiktok' && media.src && (
+              <div
+                className="w-full h-full"
+                style={{
+                  position: 'relative',
+                  paddingBottom: '177.78%',
+                  overflow: 'hidden',
+                  borderRadius: 10,
+                }}
+              >
+                <iframe
+                  src={`https://www.tiktok.com/embed/v2/${media.src}`}
+                  title="TikTok video"
+                  frameBorder="0"
+                  allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: 10,
+                    pointerEvents: 'none',
+                  }}
+                />
+              </div>
+            )}
 
-    {/* IMAGE */}
-    {media.kind === 'image' && media.src && (
-      <NextImage
-        src={media.src}
-        alt={host}
-        fill
-        sizes="(max-width: 768px) 100vw, 600px"
-        className="object-contain transition-opacity duration-200"
-        unoptimized
-      />
-    )}
+            {media.kind === 'image' && media.src && (
+              <NextImage
+                src={media.src}
+                alt={host}
+                width={1920}
+                height={1080}
+                className="w-full h-full object-cover transition-opacity duration-200"
+                unoptimized
+              />
+            )}
 
-    {/* FAVICON */}
-    {media.kind === 'favicon' && media.src && (
-      <div className="absolute inset-0 flex items-center justify-center bg-[color:var(--bg-soft,#020817)]">
-        <NextImage
-          src={media.src}
-          alt={host}
-          width={64}
-          height={64}
-          className="object-contain"
-          unoptimized
-        />
-      </div>
-    )}
+            {media.kind === 'favicon' && media.src && (
+              <div className="w-full h-full flex items-center justify-center bg-[color:var(--bg-soft,#020817)]">
+                <NextImage
+                  src={media.src}
+                  alt={host}
+                  width={64}
+                  height={64}
+                  className="object-contain"
+                  unoptimized
+                />
+              </div>
+            )}
 
-    {/* PLACEHOLDER */}
-    {media.kind === 'placeholder' && (
-      <div className="absolute inset-0 flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)]">
-        {host}
-      </div>
-    )}
+            {media.kind === 'placeholder' && (
+              <div className="w-full h-full flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)]">
+                {host}
+              </div>
+            )}
 
-    {/* КНОПКА ЗВУКА — поверх медиа, но внутри этого блока */}
-    {showSoundButton && (
-      <button
-        type="button"
-        onClick={handleToggleSound}
-        className="audio-toggle"
-        aria-label={muted ? 'Включить звук' : 'Выключить звук'}
-      >
-        {muted ? '🔇' : '🔊'}
-      </button>
-    )}
+            {showSoundButton && (
+              <button
+                type="button"
+                onClick={handleToggleSound}
+                className="audio-toggle"
+                aria-label={muted ? 'Включить звук' : 'Выключить звук'}
+              >
+                {muted ? '🔇' : '🔊'}
+              </button>
+            )}
 
-    {/* SHINE-оверлей */}
-    <div className="pointer-events-none absolute inset-0 rounded-lg border border-transparent qshine" />
-  </div>
-</div>
+            <div className="pointer-events-none absolute inset-0 rounded-lg border border-transparent qshine" />
+          </div>
 
 
         </div>
