@@ -90,7 +90,7 @@ export function MetricPill({ label, value, hint, secondary }) {
   )
 }
 
-/* ===== Мини-бар-чарт ===== */
+/* ===== Мини-бар-чарт с вертикальными датами ===== */
 function TinyBarChart({
   t,
   TX,
@@ -157,22 +157,21 @@ function TinyBarChart({
     const pad = (x) => String(x).padStart(2, '0')
     const day = pad(d.getDate())
     const month = pad(d.getMonth() + 1)
+    const year = d.getFullYear()
     const hour = pad(d.getHours())
     const minute = pad(d.getMinutes())
 
     if (isHourly) {
-      // Почасовая детализация: показываем только время
-      if (data.length > 20) return `${hour}` // компактно "0", "1", "2"…
-      if (data.length > 10) return `${hour}:00`
-      return `${hour}:${minute}`
+      // Почасовая детализация: дата + время
+      return `${day}.${month} ${hour}:00`
     }
 
-    // По дням: просто дата
-    return `${day}.${month}`
+    // По дням – как на скрине: дата целиком
+    return `${day}.${month}.${year}`
   }
 
-  const stepLabels =
-    data.length > 24 ? Math.ceil(data.length / 8) : data.length > 10 ? 2 : 1
+  // теперь показываем подпись под КАЖДОЙ колонкой
+  const stepLabels = 1
 
   return (
     <div className="ads-chart" style={{ minHeight: height }}>
@@ -190,7 +189,10 @@ function TinyBarChart({
       <div className="ads-chart-main">
         <div className="ads-chart-bars-wrap">
           <div className="ads-chart-grid-overlay" />
-          <div className="ads-chart-bars">
+          <div
+            className="ads-chart-bars"
+            style={{ '--points': data.length }}
+          >
             {data.map((p, idx) => {
               const v = Number(p[metricKey] || 0)
               const ratio = v / effectiveMax
@@ -211,7 +213,10 @@ function TinyBarChart({
           </div>
         </div>
 
-        <div className="ads-chart-xaxis">
+        <div
+          className="ads-chart-xaxis"
+          style={{ '--points': data.length }}
+        >
           {data.map((p, idx) => {
             const label = p.label || p.ts
             const show = idx % stepLabels === 0
@@ -230,7 +235,7 @@ function TinyBarChart({
           display: grid;
           grid-template-columns: auto minmax(0, 1fr);
           gap: 8px;
-          padding: 10px 12px 14px;
+          padding: 10px 12px 18px;
           border-radius: 18px;
           background:
             radial-gradient(
@@ -258,7 +263,7 @@ function TinyBarChart({
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          padding: 2px 4px 16px 0;
+          padding: 2px 4px 20px 0;
         }
         .ads-chart-yrow {
           position: relative;
@@ -290,11 +295,12 @@ function TinyBarChart({
         .ads-chart-bars {
           position: absolute;
           inset: 0;
-          display: flex;
+          display: grid;
+          grid-template-columns: repeat(var(--points), minmax(0, 1fr));
           align-items: flex-end;
-          justify-content: flex-start;
-          gap: 6px;
-          padding: 6px 10px 8px;
+          justify-items: center;
+          gap: 4px;
+          padding: 6px 8px 8px;
         }
         .ads-chart-grid-overlay {
           position: absolute;
@@ -310,7 +316,7 @@ function TinyBarChart({
           pointer-events: none;
         }
         .ads-chart-bar {
-          flex: 0 0 8px;
+          width: 8px;
           max-width: 10px;
           border-radius: 6px;
           background: linear-gradient(
@@ -335,30 +341,38 @@ function TinyBarChart({
             0 0 0 1px rgba(252, 211, 77, 0.8),
             0 4px 12px rgba(0, 0, 0, 0.9);
         }
+
+        /* ось X: сетка 1:1 с барами, текст вертикально снизу-вверх */
         .ads-chart-xaxis {
-          display: flex;
-          align-items: flex-start;
+          display: grid;
+          grid-template-columns: repeat(var(--points), minmax(0, 1fr));
+          align-items: flex-end;
+          justify-items: center;
           gap: 4px;
-          padding: 0 6px 0;
+          padding: 4px 8px 0;
         }
         .ads-chart-xlabel {
-          flex: 1 1 0;
+          position: relative;
+          height: 44px;
           font-size: 9px;
-          line-height: 1.2;
-          text-align: center;
+          line-height: 1;
           color: rgba(226, 232, 240, 0.9);
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+          overflow: visible;
         }
         .ads-chart-xlabel span {
-          display: block;
+          display: inline-block;
+          white-space: nowrap;
+          transform: rotate(-90deg);
+          transform-origin: bottom center;
         }
 
         @media (max-width: 640px) {
           .ads-chart {
             grid-template-columns: minmax(0, 1fr);
-            padding: 8px 10px 10px;
+            padding: 8px 10px 14px;
           }
           .ads-chart-yaxis {
             display: none;
@@ -795,6 +809,7 @@ function TrafficQualityCard({ TX, t, ctrTotal, avgImpPerDay, avgClicksPerDay }) 
 function HourHeatmap({ TX, t, series }) {
   const buckets = useMemo(() => {
     const arr = Array.from({ length: 24 }, (_, h) => ({
+
       hour: h,
       impressions: 0,
       clicks: 0,
