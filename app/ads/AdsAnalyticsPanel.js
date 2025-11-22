@@ -23,11 +23,10 @@ export function MetricPill({ label, value, hint, secondary }) {
         )}
       </div>
       <div className="ads-pill-value">{value}</div>
-
       <style jsx>{`
         .ads-pill {
-          min-width: 140px;
-          padding: 10px 16px 11px;
+          min-width: 130px;
+          padding: 10px 14px;
           border-radius: 999px;
           background:
             radial-gradient(
@@ -40,9 +39,9 @@ export function MetricPill({ label, value, hint, secondary }) {
               rgba(15, 23, 42, 0.98),
               rgba(15, 23, 42, 0.9)
             );
-          border: 1px solid rgba(148, 163, 184, 0.85);
+          border: 1px solid rgba(148, 163, 184, 0.8);
           box-shadow:
-            0 10px 26px rgba(0, 0, 0, 0.9),
+            0 10px 26px rgba(0, 0, 0, 0.85),
             0 0 18px rgba(56, 189, 248, 0.45);
           display: flex;
           flex-direction: column;
@@ -50,9 +49,9 @@ export function MetricPill({ label, value, hint, secondary }) {
         }
         .ads-pill-header {
           display: flex;
-          align-items: baseline;
+          align-items: center;
           justify-content: space-between;
-          gap: 8px;
+          gap: 4px;
         }
         .ads-pill-label {
           font-size: 11px;
@@ -62,14 +61,13 @@ export function MetricPill({ label, value, hint, secondary }) {
         }
         .ads-pill-secondary {
           font-size: 10px;
-          opacity: 0.75;
+          opacity: 0.7;
           white-space: nowrap;
         }
         .ads-pill-value {
           font-size: 18px;
           font-weight: 800;
           letter-spacing: 0.04em;
-          margin-top: 1px;
         }
 
         @media (max-width: 640px) {
@@ -83,14 +81,14 @@ export function MetricPill({ label, value, hint, secondary }) {
   )
 }
 
-/* ===== Мини-бар-чарт (обновлённый, во всю ширину блока) ===== */
+/* ===== Мини-бар-чарт (обновлённый) ===== */
 function TinyBarChart({
   t,
   TX,
   points,
   metricKey,
   accent = 'impressions',
-  height = 220,
+  height = 180,
 }) {
   const data = Array.isArray(points) ? points : []
 
@@ -105,7 +103,7 @@ function TinyBarChart({
             justify-content: center;
             font-size: 12px;
             opacity: 0.7;
-            height: 160px;
+            height: 140px;
           }
         `}</style>
       </div>
@@ -155,13 +153,10 @@ function TinyBarChart({
   }
 
   const stepLabels =
-    data.length > 24 ? Math.ceil(data.length / 8) : data.length > 12 ? 2 : 1
+    data.length > 16 ? Math.ceil(data.length / 6) : data.length > 10 ? 2 : 1
 
   return (
-    <div
-      className="ads-chart"
-      style={{ '--chartHeight': `${height}px` }}
-    >
+    <div className="ads-chart" style={{ minHeight: height }}>
       <div className="ads-chart-yaxis">
         {ticks
           .slice()
@@ -180,7 +175,7 @@ function TinyBarChart({
             {data.map((p, idx) => {
               const v = Number(p[metricKey] || 0)
               const ratio = v / max
-              const h = Math.max(3, ratio * 100)
+              const h = Math.max(4, ratio * 100)
               const label = p.label || p.ts
               return (
                 <div
@@ -212,23 +207,21 @@ function TinyBarChart({
 
       <style jsx>{`
         .ads-chart {
-          --chartHeight: ${height}px;
           position: relative;
           display: grid;
           grid-template-columns: auto minmax(0, 1fr);
-          gap: 10px;
-          padding: 10px 14px 14px;
-          border-radius: 20px;
-          min-height: var(--chartHeight);
+          gap: 8px;
+          padding: 10px 12px 14px;
+          border-radius: 18px;
           background:
             radial-gradient(
               circle at 0 0,
-              rgba(56, 189, 248, 0.18),
+              rgba(56, 189, 248, 0.16),
               transparent 60%
             ),
             radial-gradient(
               circle at 100% 100%,
-              rgba(250, 204, 21, 0.18),
+              rgba(250, 204, 21, 0.16),
               transparent 55%
             ),
             linear-gradient(
@@ -237,7 +230,7 @@ function TinyBarChart({
               rgba(4, 7, 16, 0.96)
             );
           box-shadow:
-            0 16px 40px rgba(0, 0, 0, 0.9),
+            0 14px 32px rgba(0, 0, 0, 0.9),
             inset 0 1px 0 rgba(255, 255, 255, 0.04);
           overflow: hidden;
         }
@@ -245,7 +238,7 @@ function TinyBarChart({
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          padding: 2px 6px 18px 0;
+          padding: 2px 4px 16px 0;
         }
         .ads-chart-yrow {
           position: relative;
@@ -255,7 +248,7 @@ function TinyBarChart({
         }
         .ads-chart-ylabel {
           font-size: 10px;
-          opacity: 0.72;
+          opacity: 0.7;
           white-space: nowrap;
         }
         .ads-chart-main {
@@ -265,12 +258,12 @@ function TinyBarChart({
         }
         .ads-chart-bars-wrap {
           position: relative;
-          height: calc(var(--chartHeight) - 60px);
-          border-radius: 16px;
+          height: 130px;
+          border-radius: 14px;
           overflow: hidden;
           background: radial-gradient(
             circle at 0 100%,
-            rgba(15, 23, 42, 0.98),
+            rgba(15, 23, 42, 0.96),
             rgba(15, 23, 42, 1)
           );
         }
@@ -280,7 +273,7 @@ function TinyBarChart({
           display: flex;
           align-items: flex-end;
           gap: 4px;
-          padding: 6px 8px 10px;
+          padding: 6px 8px 8px;
         }
         .ads-chart-grid-overlay {
           position: absolute;
@@ -288,11 +281,11 @@ function TinyBarChart({
           background-image:
             linear-gradient(
               to top,
-              rgba(148, 163, 184, 0.34) 1px,
+              rgba(148, 163, 184, 0.28) 1px,
               transparent 1px
             );
           background-size: 100% 26px;
-          opacity: 0.55;
+          opacity: 0.5;
           pointer-events: none;
         }
         .ads-chart-bar {
@@ -301,28 +294,28 @@ function TinyBarChart({
           background: linear-gradient(
             180deg,
             rgba(59, 130, 246, 0.98),
-            rgba(56, 189, 248, 0.93),
-            rgba(45, 212, 191, 0.97)
+            rgba(56, 189, 248, 0.9),
+            rgba(45, 212, 191, 0.95)
           );
           box-shadow:
-            0 0 0 1px rgba(56, 189, 248, 0.75),
-            0 6px 22px rgba(0, 0, 0, 0.9),
-            0 0 34px rgba(56, 189, 248, 0.6);
+            0 0 0 1px rgba(56, 189, 248, 0.65),
+            0 6px 18px rgba(0, 0, 0, 0.85),
+            0 0 26px rgba(56, 189, 248, 0.5);
           transform-origin: bottom center;
-          transform: scaleY(0.1);
+          transform: scaleY(0.2);
           animation: adsBarIn 0.5s ease-out forwards;
         }
         .ads-chart-bar-accent {
           background: linear-gradient(
             180deg,
             rgba(250, 250, 250, 0.98),
-            rgba(252, 211, 77, 0.96),
-            rgba(234, 179, 8, 1)
+            rgba(252, 211, 77, 0.95),
+            rgba(234, 179, 8, 0.98)
           );
           box-shadow:
-            0 0 0 1px rgba(252, 211, 77, 0.9),
-            0 8px 26px rgba(0, 0, 0, 1),
-            0 0 40px rgba(252, 211, 77, 0.7);
+            0 0 0 1px rgba(252, 211, 77, 0.85),
+            0 6px 22px rgba(0, 0, 0, 0.9),
+            0 0 30px rgba(252, 211, 77, 0.65);
         }
         .ads-chart-xaxis {
           display: flex;
@@ -335,7 +328,7 @@ function TinyBarChart({
           font-size: 9px;
           line-height: 1.2;
           text-align: center;
-          color: rgba(226, 232, 240, 0.92);
+          color: rgba(226, 232, 240, 0.9);
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -364,7 +357,7 @@ function TinyBarChart({
             display: none;
           }
           .ads-chart-bars-wrap {
-            height: calc(var(--chartHeight) - 50px);
+            height: 115px;
           }
         }
       `}</style>
@@ -372,200 +365,7 @@ function TinyBarChart({
   )
 }
 
-/* ===== Карта точек на глобусе (псевдо-координаты по странам) ===== */
-const COUNTRY_POINTS = {
-  UA: { x: 60, y: 44 },
-  RU: { x: 70, y: 38 },
-  US: { x: 26, y: 48 },
-  CA: { x: 28, y: 35 },
-  BR: { x: 40, y: 68 },
-  AR: { x: 38, y: 78 },
-  GB: { x: 55, y: 36 },
-  DE: { x: 57, y: 40 },
-  FR: { x: 54, y: 42 },
-  ES: { x: 52, y: 47 },
-  IT: { x: 58, y: 46 },
-  TR: { x: 63, y: 45 },
-  IN: { x: 70, y: 58 },
-  CN: { x: 79, y: 46 },
-  JP: { x: 87, y: 46 },
-  AU: { x: 82, y: 78 },
-}
-
-/* ===== Очень упрощённые контуры стран / мира (для SVG) ===== */
-const WORLD_PATH =
-  'M10 40 L30 28 L55 30 L72 34 L88 40 L90 55 L80 66 L60 70 L38 68 L18 60 Z'
-const COUNTRY_SHAPES = {
-  US: 'M10 42 L30 34 L58 34 L76 38 L86 46 L82 58 L60 64 L32 62 L16 54 Z',
-  UA: 'M24 42 L76 42 L84 50 L70 56 L30 54 L22 48 Z',
-  RU: 'M8 34 L38 26 L70 24 L92 30 L94 40 L80 48 L46 46 L26 44 Z',
-  DE: 'M38 38 L58 38 L66 46 L62 60 L44 62 L36 52 Z',
-  FR: 'M34 40 L54 40 L64 48 L54 62 L40 60 L32 50 Z',
-  BR: 'M36 50 L56 46 L70 54 L66 68 L48 74 L34 64 Z',
-  AU: 'M40 64 L64 64 L78 74 L72 86 L50 88 L34 80 Z',
-}
-
-/* ===== SVG-глобус с контурной картой ===== */
-function CountryGlobe({ countryCode }) {
-  const code = (countryCode || 'ZZ').toUpperCase()
-  const point = COUNTRY_POINTS[code] || { x: 50, y: 50 }
-  const path = COUNTRY_SHAPES[code] || WORLD_PATH
-
-  return (
-    <div className="ads-geo-globe-planet" key={code}>
-      <svg
-        viewBox="0 0 100 100"
-        className="ads-geo-globe-svg"
-        aria-hidden="true"
-      >
-        <defs>
-          <radialGradient id="globeGradient" cx="30%" cy="20%" r="80%">
-            <stop offset="0%" stopColor="#e5f4ff" stopOpacity="0.85" />
-            <stop offset="40%" stopColor="#60a5fa" stopOpacity="0.95" />
-            <stop offset="70%" stopColor="#0f172a" stopOpacity="1" />
-            <stop offset="100%" stopColor="#020617" stopOpacity="1" />
-          </radialGradient>
-          <linearGradient id="landGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#99f6e4" />
-            <stop offset="50%" stopColor="#22c55e" />
-            <stop offset="100%" stopColor="#0ea5e9" />
-          </linearGradient>
-          <clipPath id="globeClip">
-            <circle cx="50" cy="50" r="46" />
-          </clipPath>
-        </defs>
-
-        <g clipPath="url(#globeClip)">
-          {/* океан */}
-          <circle cx="50" cy="50" r="46" fill="url(#globeGradient)" />
-
-          {/* пара долгота / широта */}
-          <g
-            stroke="rgba(148,163,184,0.55)"
-            strokeWidth="0.6"
-            fill="none"
-            opacity="0.8"
-          >
-            <ellipse cx="50" cy="50" rx="40" ry="18" />
-            <ellipse cx="50" cy="50" rx="32" ry="13" />
-            <path d="M50 6 L50 94" />
-            <path d="M30 10 Q50 50 30 90" />
-            <path d="M70 10 Q50 50 70 90" />
-          </g>
-
-          {/* контур суши выбранной страны / мира */}
-          <path
-            d={path}
-            fill="url(#landGradient)"
-            stroke="#0f172a"
-            strokeWidth="0.6"
-            opacity="0.96"
-          />
-
-          {/* лёгкий ночной подсвет по краю */}
-          <circle
-            cx="18"
-            cy="24"
-            r="20"
-            fill="rgba(248,250,252,0.12)"
-            opacity="0.9"
-          />
-        </g>
-
-        {/* рамка по краю планеты */}
-        <circle
-          cx="50"
-          cy="50"
-          r="46"
-          fill="none"
-          stroke="rgba(148,163,184,0.9)"
-          strokeWidth="1.4"
-        />
-
-        {/* точка-хотспот для выбранного гео */}
-        <circle
-          cx={point.x}
-          cy={point.y}
-          r="3"
-          fill="#facc15"
-          stroke="#f97316"
-          strokeWidth="1"
-          className="ads-geo-globe-hotspot"
-        />
-        <circle
-          cx={point.x}
-          cy={point.y}
-          r="7"
-          fill="none"
-          stroke="rgba(250,204,21,0.7)"
-          strokeWidth="0.8"
-        />
-      </svg>
-
-      <style jsx>{`
-        .ads-geo-globe-planet {
-          position: relative;
-          width: 130px;
-          height: 130px;
-          border-radius: 999px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow:
-            0 0 40px rgba(56, 189, 248, 0.65),
-            0 16px 28px rgba(0, 0, 0, 0.95);
-          background: radial-gradient(
-            circle at 30% 20%,
-            rgba(248, 250, 252, 0.4),
-            rgba(56, 189, 248, 0.35),
-            rgba(15, 23, 42, 1)
-          );
-          animation: adsGeoSpin 0.6s ease-out;
-        }
-        .ads-geo-globe-svg {
-          width: 110px;
-          height: 110px;
-          display: block;
-        }
-        .ads-geo-globe-hotspot {
-          animation: adsGeoPulse 1.6s ease-out infinite;
-        }
-
-        @keyframes adsGeoSpin {
-          0% {
-            transform: scale(0.9) rotate(-10deg);
-            opacity: 0;
-          }
-          100% {
-            transform: scale(1) rotate(0deg);
-            opacity: 1;
-          }
-        }
-
-        @keyframes adsGeoPulse {
-          0% {
-            transform: scale(0.4);
-          }
-          40% {
-            transform: scale(1.1);
-          }
-          100% {
-            transform: scale(0.9);
-          }
-        }
-
-        @media (max-width: 640px) {
-          .ads-geo-globe-planet {
-            width: 140px;
-            height: 140px;
-          }
-        }
-      `}</style>
-    </div>
-  )
-}
-
-/* ===== Карточка GEO-детализации (глобус + цифры) ===== */
+/* ===== Карточка GEO-детализации (псевдо-глобус) ===== */
 function GeoGlobeCard({ TX, t, geo, totalImpressions, selectedIndex }) {
   if (!geo.length) return null
   const current = geo[selectedIndex] || geo[0]
@@ -573,11 +373,10 @@ function GeoGlobeCard({ TX, t, geo, totalImpressions, selectedIndex }) {
   const imp = Number(current.impressions || 0)
   const clicks = Number(current.clicks || 0)
   const ctr = imp > 0 ? ((clicks / imp) * 100).toFixed(1) + '%' : '—'
-  const shareNum =
-    totalImpressions > 0 ? (imp / totalImpressions) * 100 : 0
-  const share = shareNum.toFixed(1) + '%'
-
-  const isoCode = (current.country || 'ZZ').toUpperCase()
+  const share =
+    totalImpressions > 0
+      ? ((imp / totalImpressions) * 100).toFixed(1) + '%'
+      : '0%'
 
   return (
     <div className="ads-geo-globe">
@@ -586,17 +385,21 @@ function GeoGlobeCard({ TX, t, geo, totalImpressions, selectedIndex }) {
           {TX(t, 'ads_geo_focus', 'Фокус по гео')}
         </span>
         <div className="ads-geo-globe-title">
-          {localizeCountry(TX, t, isoCode)}
+          {current.country || TX(t, 'ads_geo_country_unknown', 'Не определено')}
         </div>
         <div className="ads-geo-globe-sub">
-          <span>{current.region || '—'}</span>
-          {current.city && <span> • {current.city}</span>}
+          {(current.region || '—')}{' '}
+          {current.city ? `• ${current.city}` : ''}
         </div>
       </div>
 
       <div className="ads-geo-globe-body">
-        <CountryGlobe countryCode={isoCode} />
-
+        <div className="ads-geo-globe-planet">
+          <div className="ads-geo-globe-core" />
+          <div className="ads-geo-globe-orbit ads-geo-globe-orbit-1" />
+          <div className="ads-geo-globe-orbit ads-geo-globe-orbit-2" />
+          <div className="ads-geo-globe-orbit ads-geo-globe-orbit-3" />
+        </div>
         <div className="ads-geo-globe-metrics">
           <div className="ads-geo-globe-metric">
             <span>
@@ -620,7 +423,7 @@ function GeoGlobeCard({ TX, t, geo, totalImpressions, selectedIndex }) {
               <div className="ads-geo-globe-share-bar" />
               <div
                 className="ads-geo-globe-share-value"
-                style={{ width: `${Math.min(shareNum, 100)}%` }}
+                style={{ width: share }}
               />
               <span className="ads-geo-globe-share-text">{share}</span>
             </div>
@@ -630,8 +433,8 @@ function GeoGlobeCard({ TX, t, geo, totalImpressions, selectedIndex }) {
 
       <style jsx>{`
         .ads-geo-globe {
-          border-radius: 18px;
-          padding: 12px 14px 13px;
+          border-radius: 16px;
+          padding: 10px 12px;
           background:
             radial-gradient(
               circle at 0 0,
@@ -645,12 +448,11 @@ function GeoGlobeCard({ TX, t, geo, totalImpressions, selectedIndex }) {
             );
           border: 1px solid rgba(148, 163, 184, 0.7);
           box-shadow:
-            0 16px 40px rgba(0, 0, 0, 0.95),
+            0 14px 32px rgba(0, 0, 0, 0.9),
             inset 0 1px 0 rgba(255, 255, 255, 0.04);
           display: flex;
           flex-direction: column;
           gap: 8px;
-          height: 100%;
         }
         .ads-geo-globe-label {
           font-size: 10px;
@@ -659,26 +461,70 @@ function GeoGlobeCard({ TX, t, geo, totalImpressions, selectedIndex }) {
           opacity: 0.7;
         }
         .ads-geo-globe-title {
-          margin-top: 2px;
-          font-size: 16px;
+          font-size: 15px;
           font-weight: 700;
         }
         .ads-geo-globe-sub {
-          margin-top: 1px;
           font-size: 12px;
-          opacity: 0.82;
+          opacity: 0.8;
         }
         .ads-geo-globe-body {
           margin-top: 4px;
           display: grid;
-          grid-template-columns: 150px minmax(0, 1fr);
-          gap: 14px;
+          grid-template-columns: 120px minmax(0, 1fr);
+          gap: 10px;
           align-items: center;
+        }
+        .ads-geo-globe-planet {
+          position: relative;
+          width: 110px;
+          height: 110px;
+          border-radius: 999px;
+          background: radial-gradient(
+            circle at 30% 20%,
+            rgba(248, 250, 252, 0.4),
+            rgba(56, 189, 248, 0.3),
+            rgba(15, 23, 42, 0.95)
+          );
+          box-shadow:
+            0 0 30px rgba(56, 189, 248, 0.6),
+            0 12px 22px rgba(0, 0, 0, 0.9);
+          overflow: hidden;
+        }
+        .ads-geo-globe-core {
+          position: absolute;
+          inset: 18%;
+          border-radius: 999px;
+          background: radial-gradient(
+            circle at 30% 20%,
+            rgba(248, 250, 252, 0.6),
+            rgba(59, 130, 246, 0.6),
+            transparent 70%
+          );
+        }
+        .ads-geo-globe-orbit {
+          position: absolute;
+          inset: 12%;
+          border-radius: 999px;
+          border: 1px solid rgba(148, 163, 184, 0.5);
+        }
+        .ads-geo-globe-orbit-1 {
+          transform: rotate(18deg);
+        }
+        .ads-geo-globe-orbit-2 {
+          inset: 10%;
+          transform: rotate(-26deg);
+          border-style: dashed;
+        }
+        .ads-geo-globe-orbit-3 {
+          inset: 6%;
+          border-color: rgba(56, 189, 248, 0.9);
+          opacity: 0.9;
         }
         .ads-geo-globe-metrics {
           display: flex;
           flex-direction: column;
-          gap: 7px;
+          gap: 6px;
         }
         .ads-geo-globe-metric span {
           font-size: 11px;
@@ -686,15 +532,13 @@ function GeoGlobeCard({ TX, t, geo, totalImpressions, selectedIndex }) {
         }
         .ads-geo-globe-metric strong {
           font-size: 14px;
-          margin-top: 1px;
-          display: inline-block;
         }
         .ads-geo-globe-share-wrap {
           position: relative;
-          margin-top: 3px;
+          margin-top: 2px;
           height: 8px;
           border-radius: 999px;
-          background: rgba(15, 23, 42, 0.95);
+          background: rgba(15, 23, 42, 0.9);
           overflow: hidden;
         }
         .ads-geo-globe-share-bar {
@@ -711,23 +555,408 @@ function GeoGlobeCard({ TX, t, geo, totalImpressions, selectedIndex }) {
           inset: 0;
           background: linear-gradient(
             90deg,
-            rgba(45, 212, 191, 0.96),
-            rgba(234, 179, 8, 0.98)
+            rgba(45, 212, 191, 0.95),
+            rgba(234, 179, 8, 0.95)
           );
           transform-origin: left center;
         }
         .ads-geo-globe-share-text {
           position: absolute;
-          right: 6px;
-          top: -15px;
+          right: 4px;
+          top: -14px;
           font-size: 10px;
-          opacity: 0.92;
+          opacity: 0.9;
         }
 
         @media (max-width: 640px) {
           .ads-geo-globe-body {
             grid-template-columns: minmax(0, 1fr);
             justify-items: center;
+          }
+          .ads-geo-globe-planet {
+            width: 120px;
+            height: 120px;
+          }
+        }
+      `}</style>
+    </div>
+  )
+}
+
+/* ===== Карточка качества трафика ===== */
+function TrafficQualityCard({ TX, t, ctrTotal, avgImpPerDay, avgClicksPerDay }) {
+  const ctrValue =
+    typeof ctrTotal === 'string' && ctrTotal.endsWith('%')
+      ? parseFloat(ctrTotal)
+      : Number(ctrTotal || 0)
+
+  const targetCtr = 5 // 5%
+  const scoreRaw = targetCtr ? Math.min(100, (ctrValue / targetCtr) * 100) : 0
+  const score = Number.isFinite(scoreRaw) ? Math.max(0, scoreRaw) : 0
+  const ringDeg = (score / 100) * 280 // дуга прогресса
+
+  let tierKey = 'ads_quality_mid'
+  let tierLabel = 'Нормально'
+  if (score >= 90) {
+    tierKey = 'ads_quality_god'
+    tierLabel = 'Максимум'
+  } else if (score >= 65) {
+    tierKey = 'ads_quality_good'
+    tierLabel = 'Сильно'
+  } else if (score <= 30) {
+    tierKey = 'ads_quality_low'
+    tierLabel = 'Слабовато'
+  }
+
+  const tierText = TX(t, tierKey, tierLabel)
+
+  return (
+    <div className="ads-quality-card">
+      <div className="ads-quality-header">
+        <span className="ads-quality-label">
+          {TX(t, 'ads_quality_title', 'Качество трафика')}
+        </span>
+        <span className="ads-quality-tier">{tierText}</span>
+      </div>
+
+      <div className="ads-quality-body">
+        <div className="ads-quality-gauge">
+          <div className="ads-quality-ring">
+            <div
+              className="ads-quality-ring-fill"
+              style={{ '--deg': `${ringDeg}deg` }}
+            />
+            <div className="ads-quality-ring-center">
+              <div className="ads-quality-score">
+                {Math.round(score)}
+                <span>%</span>
+              </div>
+              <div className="ads-quality-score-sub">Score</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="ads-quality-metrics">
+          <div className="ads-quality-metric">
+            <span>{TX(t, 'ads_quality_ctr', 'CTR за период')}</span>
+            <strong>{ctrTotal}</strong>
+          </div>
+          <div className="ads-quality-metric">
+            <span>
+              {TX(
+                t,
+                'ads_quality_imp_per_day',
+                'Показов в среднем / день'
+              )}
+            </span>
+            <strong>{avgImpPerDay}</strong>
+          </div>
+          <div className="ads-quality-metric">
+            <span>
+              {TX(
+                t,
+                'ads_quality_clicks_per_day',
+                'Кликов в среднем / день'
+              )}
+            </span>
+            <strong>{avgClicksPerDay}</strong>
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        .ads-quality-card {
+          border-radius: 16px;
+          padding: 10px 14px;
+          background:
+            radial-gradient(
+              circle at 100% 0,
+              rgba(34, 197, 94, 0.24),
+              transparent 55%
+            ),
+            linear-gradient(
+              150deg,
+              rgba(15, 23, 42, 0.98),
+              rgba(15, 23, 42, 0.9)
+            );
+          border: 1px solid rgba(74, 222, 128, 0.7);
+          box-shadow:
+            0 14px 32px rgba(0, 0, 0, 0.9),
+            0 0 26px rgba(74, 222, 128, 0.5);
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .ads-quality-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 8px;
+        }
+        .ads-quality-label {
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.16em;
+          opacity: 0.8;
+        }
+        .ads-quality-tier {
+          font-size: 12px;
+          padding: 3px 10px;
+          border-radius: 999px;
+          background: rgba(15, 118, 110, 0.35);
+          border: 1px solid rgba(45, 212, 191, 0.9);
+        }
+        .ads-quality-body {
+          display: grid;
+          grid-template-columns: 130px minmax(0, 1fr);
+          gap: 12px;
+          align-items: center;
+        }
+        .ads-quality-gauge {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .ads-quality-ring {
+          position: relative;
+          width: 110px;
+          height: 110px;
+          border-radius: 999px;
+          background: radial-gradient(
+            circle at 30% 10%,
+            rgba(248, 250, 252, 0.45),
+            rgba(21, 128, 61, 0.75),
+            rgba(15, 23, 42, 1)
+          );
+          box-shadow:
+            0 0 26px rgba(45, 212, 191, 0.7),
+            0 10px 24px rgba(0, 0, 0, 0.95);
+          overflow: hidden;
+        }
+        .ads-quality-ring-fill {
+          position: absolute;
+          inset: 10%;
+          border-radius: 999px;
+          border: 6px solid transparent;
+          border-top-color: rgba(74, 222, 128, 0.98);
+          border-right-color: rgba(45, 212, 191, 0.98);
+          border-left-color: rgba(234, 179, 8, 0.9);
+          transform: rotate(-140deg);
+          transform-origin: 50% 50%;
+          --deg: 0deg;
+          mask-image: conic-gradient(
+            from 220deg,
+            rgba(0, 0, 0, 1) calc(var(--deg)),
+            rgba(0, 0, 0, 0.1) calc(var(--deg) + 1deg)
+          );
+        }
+        .ads-quality-ring-center {
+          position: absolute;
+          inset: 22%;
+          border-radius: 999px;
+          background: radial-gradient(
+            circle at 30% 10%,
+            rgba(248, 250, 252, 0.25),
+            rgba(15, 23, 42, 0.98)
+          );
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 2px;
+        }
+        .ads-quality-score {
+          font-size: 20px;
+          font-weight: 800;
+        }
+        .ads-quality-score span {
+          font-size: 11px;
+          opacity: 0.8;
+          margin-left: 2px;
+        }
+        .ads-quality-score-sub {
+          font-size: 10px;
+          opacity: 0.8;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+        }
+        .ads-quality-metrics {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+        .ads-quality-metric span {
+          font-size: 11px;
+          opacity: 0.8;
+        }
+        .ads-quality-metric strong {
+          font-size: 14px;
+        }
+
+        @media (max-width: 640px) {
+          .ads-quality-body {
+            grid-template-columns: minmax(0, 1fr);
+            justify-items: center;
+          }
+        }
+      `}</style>
+    </div>
+  )
+}
+
+/* ===== Heatmap по часам суток ===== */
+function HourHeatmap({ TX, t, series }) {
+  const buckets = useMemo(() => {
+    const arr = Array.from({ length: 24 }, (_, h) => ({
+      hour: h,
+      impressions: 0,
+      clicks: 0,
+    }))
+    if (!Array.isArray(series)) return arr
+    for (const p of series) {
+      const ts = p.ts || p.label
+      if (!ts) continue
+      let d = null
+      const n = Number(ts)
+      if (!Number.isNaN(n) && n > 0) {
+        const ms = n < 1e12 ? n * 1000 : n
+        d = new Date(ms)
+      } else {
+        const parsed = new Date(String(ts))
+        if (!Number.isNaN(parsed.getTime())) d = parsed
+      }
+      if (!d) continue
+      const h = d.getHours()
+      const idx = Number.isNaN(h) ? null : h
+      if (idx == null || idx < 0 || idx > 23) continue
+      arr[idx].impressions += Number(p.impressions || 0)
+      arr[idx].clicks += Number(p.clicks || 0)
+    }
+    return arr
+  }, [series])
+
+  const maxImp = buckets.reduce(
+    (m, b) => (b.impressions > m ? b.impressions : m),
+    0
+  )
+
+  return (
+    <div className="ads-heatmap">
+      <div className="ads-heatmap-header">
+        <span className="ads-heatmap-title">
+          {TX(t, 'ads_heatmap_title', 'Активность по часам')}
+        </span>
+        <span className="ads-heatmap-sub">
+          {TX(
+            t,
+            'ads_heatmap_sub',
+            'Локальное время пользователя, ярче — больше показов'
+          )}
+        </span>
+      </div>
+
+      <div className="ads-heatmap-grid">
+        {buckets.map((b) => {
+          const ratio = maxImp > 0 ? b.impressions / maxImp : 0
+          const intensity = Math.round(ratio * 100)
+          const label = `${String(b.hour).padStart(2, '0')}:00`
+          const ctr =
+            b.impressions > 0
+              ? ((b.clicks / b.impressions) * 100).toFixed(1) + '%'
+              : '—'
+          return (
+            <div
+              key={b.hour}
+              className="ads-heatmap-cell"
+              title={`${label} — ${b.impressions} imp / ${b.clicks} clicks (CTR ${ctr})`}
+            >
+              <div
+                className="ads-heatmap-pill"
+                style={{ '--intensity': `${intensity}` }}
+              />
+              <span className="ads-heatmap-hour">{label}</span>
+            </div>
+          )
+        })}
+      </div>
+
+      <style jsx>{`
+        .ads-heatmap {
+          border-radius: 16px;
+          padding: 10px 12px;
+          background:
+            radial-gradient(
+              circle at 0 0,
+              rgba(56, 189, 248, 0.16),
+              transparent 55%
+            ),
+            linear-gradient(
+              145deg,
+              rgba(15, 23, 42, 0.98),
+              rgba(15, 23, 42, 0.92)
+            );
+          border: 1px solid rgba(148, 163, 184, 0.7);
+          box-shadow:
+            0 12px 30px rgba(0, 0, 0, 0.9),
+            inset 0 1px 0 rgba(255, 255, 255, 0.04);
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .ads-heatmap-header {
+          display: flex;
+          justify-content: space-between;
+          gap: 8px;
+          align-items: baseline;
+        }
+        .ads-heatmap-title {
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.16em;
+          opacity: 0.85;
+        }
+        .ads-heatmap-sub {
+          font-size: 11px;
+          opacity: 0.75;
+        }
+        .ads-heatmap-grid {
+          display: grid;
+          grid-template-columns: repeat(12, minmax(0, 1fr));
+          gap: 4px;
+        }
+        .ads-heatmap-cell {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 2px;
+          font-size: 9px;
+        }
+        .ads-heatmap-pill {
+          width: 100%;
+          height: 14px;
+          border-radius: 999px;
+          background: linear-gradient(
+            90deg,
+            rgba(30, 64, 175, 0.5),
+            rgba(56, 189, 248, 0.9)
+          );
+          opacity: calc(0.2 + (var(--intensity) / 100) * 0.8);
+          box-shadow:
+            0 0 8px rgba(56, 189, 248, 0.4),
+            0 0 0 1px rgba(15, 23, 42, 0.9);
+        }
+        .ads-heatmap-hour {
+          opacity: 0.8;
+        }
+
+        @media (max-width: 960px) {
+          .ads-heatmap-grid {
+            grid-template-columns: repeat(8, minmax(0, 1fr));
+          }
+        }
+        @media (max-width: 640px) {
+          .ads-heatmap-grid {
+            grid-template-columns: repeat(6, minmax(0, 1fr));
           }
         }
       `}</style>
@@ -790,6 +1019,36 @@ export default function AdsAnalyticsPanel({
   const avgClicksPerDay =
     periodDays > 0 ? Math.round(totalClicks / periodDays) : totalClicks
 
+  // Доп. метрики по временным точкам
+  const nonZeroImpIntervals = series.filter(
+    (p) => Number(p.impressions || 0) > 0
+  ).length
+  const nonZeroClickIntervals = series.filter(
+    (p) => Number(p.clicks || 0) > 0
+  ).length
+
+  const bestImpressionPoint = useMemo(() => {
+    if (!series.length) return null
+    return series.reduce((best, p) =>
+      Number(p.impressions || 0) > Number(best.impressions || 0) ? p : best
+    )
+  }, [series])
+
+  const bestCtrPoint = useMemo(() => {
+    if (!series.length) return null
+    let best = null
+    for (const p of series) {
+      const imp = Number(p.impressions || 0)
+      const cl = Number(p.clicks || 0)
+      if (!imp) continue
+      const ctr = cl / imp
+      if (!best || ctr > best.ctr) {
+        best = { ...p, ctr }
+      }
+    }
+    return best
+  }, [series])
+
   if (!selectedCampaign) {
     return (
       <div className="ads-analytics-empty">
@@ -798,7 +1057,6 @@ export default function AdsAnalyticsPanel({
           'ads_analytics_empty',
           'Выбери активную кампанию слева, чтобы увидеть аналитику.'
         )}
-
         <style jsx>{`
           .ads-analytics-empty {
             border-radius: 18px;
@@ -810,7 +1068,7 @@ export default function AdsAnalyticsPanel({
               ),
               linear-gradient(180deg, rgba(8, 12, 20, 0.98), #020617);
             border: 1px solid rgba(148, 163, 184, 0.6);
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.9);
+            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.9);
             font-size: 13px;
             opacity: 0.9;
           }
@@ -833,9 +1091,20 @@ export default function AdsAnalyticsPanel({
   const periodLabel =
     formatDate(selectedCampaign.createdAt || selectedCampaign.startsAt) +
     ' — ' +
-    (selectedCampaign.endsAt
-      ? formatDate(selectedCampaign.endsAt)
-      : '—')
+    (selectedCampaign.endsAt ? formatDate(selectedCampaign.endsAt) : '—')
+
+  const bestImpLabel =
+    bestImpressionPoint && bestImpressionPoint.label
+      ? formatDate(bestImpressionPoint.label)
+      : '—'
+  const bestCtrLabel =
+    bestCtrPoint && bestCtrPoint.label
+      ? formatDate(bestCtrPoint.label)
+      : '—'
+  const bestCtrValue =
+    bestCtrPoint && bestCtrPoint.ctr != null
+      ? (bestCtrPoint.ctr * 100).toFixed(1) + '%'
+      : '—'
 
   return (
     <div className="ads-analytics">
@@ -1016,7 +1285,7 @@ export default function AdsAnalyticsPanel({
 
       {!analyticsLoading && analytics && (
         <>
-          {/* GRID: метрики + большие графики */}
+          {/* GRID: метрики + графики */}
           <div className="ads-analytics-grid">
             <div className="ads-analytics-metrics">
               <MetricPill
@@ -1026,11 +1295,12 @@ export default function AdsAnalyticsPanel({
                   'Показов'
                 )}
                 value={totalImp}
-                secondary={`${avgImpPerDay} / ${TX(
+                secondary={TX(
                   t,
-                  'ads_analytics_per_day_short',
-                  'день'
-                )}`}
+                  'ads_analytics_avg_per_day',
+                  'в среднем / день'
+                )}
+                hint="Total impressions for selected period"
               />
               <MetricPill
                 label={TX(
@@ -1071,6 +1341,32 @@ export default function AdsAnalyticsPanel({
                   'страны'
                 )}
               />
+              <MetricPill
+                label={TX(
+                  t,
+                  'ads_analytics_intervals_imp',
+                  'Интервалы с показами'
+                )}
+                value={nonZeroImpIntervals}
+                secondary={TX(
+                  t,
+                  'ads_analytics_intervals_total',
+                  'по временной серии'
+                )}
+              />
+              <MetricPill
+                label={TX(
+                  t,
+                  'ads_analytics_intervals_clicks',
+                  'Интервалы с кликами'
+                )}
+                value={nonZeroClickIntervals}
+                secondary={TX(
+                  t,
+                  'ads_analytics_intervals_clicks_sub',
+                  'где CTR > 0'
+                )}
+              />
             </div>
 
             <div className="ads-analytics-charts">
@@ -1087,7 +1383,6 @@ export default function AdsAnalyticsPanel({
                   TX={TX}
                   points={series}
                   metricKey="impressions"
-                  height={230}
                 />
               </div>
               <div className="ads-analytics-chart-block">
@@ -1104,13 +1399,69 @@ export default function AdsAnalyticsPanel({
                   points={series}
                   metricKey="clicks"
                   accent="clicks"
-                  height={230}
                 />
               </div>
             </div>
           </div>
 
-          {/* GEO-аналитика: таблица во всю ширину + глобус */}
+          {/* Продвинутые блоки: качество + heatmap + хайлайты */}
+          <div className="ads-advanced-row">
+            <TrafficQualityCard
+              TX={TX}
+              t={t}
+              ctrTotal={ctrTotal}
+              avgImpPerDay={avgImpPerDay}
+              avgClicksPerDay={avgClicksPerDay}
+            />
+            <HourHeatmap TX={TX} t={t} series={series} />
+            <div className="ads-highlights">
+              <div className="ads-highlights-title">
+                {TX(t, 'ads_highlights_title', 'Highlights по кампании')}
+              </div>
+              <ul>
+                <li>
+                  {TX(
+                    t,
+                    'ads_highlights_best_imp',
+                    'Пик показов'
+                  )}
+                  :{' '}
+                  <strong>
+                    {bestImpressionPoint
+                      ? `${bestImpressionPoint.impressions || 0} / ${bestImpLabel}`
+                      : '—'}
+                  </strong>
+                </li>
+                <li>
+                  {TX(t, 'ads_highlights_best_ctr', 'Лучший CTR')}
+                  :{' '}
+                  <strong>
+                    {bestCtrPoint
+                      ? `${bestCtrValue} / ${bestCtrLabel}`
+                      : '—'}
+                  </strong>
+                </li>
+                <li>
+                  {TX(
+                    t,
+                    'ads_highlights_geo',
+                    'Активных гео (страны)'
+                  )}
+                  : <strong>{uniqueCountries}</strong>
+                </li>
+                <li>
+                  {TX(
+                    t,
+                    'ads_highlights_intervals',
+                    'Интервалы с кликами'
+                  )}
+                  : <strong>{nonZeroClickIntervals}</strong>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* GEO-аналитика: таблица + "глобус" */}
           {geo.length > 0 && (
             <div className="ads-geo-row">
               <div className="ads-geo">
@@ -1214,7 +1565,7 @@ export default function AdsAnalyticsPanel({
 
       <style jsx>{`
         .ads-analytics {
-          border-radius: 20px;
+          border-radius: 18px;
           background:
             radial-gradient(
               circle at 100% 0,
@@ -1229,9 +1580,9 @@ export default function AdsAnalyticsPanel({
             linear-gradient(180deg, rgba(8, 12, 21, 0.98), #020617);
           border: 1px solid rgba(148, 163, 184, 0.55);
           box-shadow:
-            0 18px 44px rgba(0, 0, 0, 0.95),
+            0 16px 40px rgba(0, 0, 0, 0.9),
             inset 0 1px 0 rgba(255, 255, 255, 0.06);
-          padding: 14px 16px 16px;
+          padding: 14px 14px 16px;
           display: flex;
           flex-direction: column;
           gap: 12px;
@@ -1239,7 +1590,7 @@ export default function AdsAnalyticsPanel({
         .ads-analytics-header {
           display: flex;
           justify-content: space-between;
-          gap: 14px;
+          gap: 12px;
           align-items: flex-start;
         }
         .ads-analytics-header-main {
@@ -1248,7 +1599,7 @@ export default function AdsAnalyticsPanel({
           gap: 4px;
         }
         .ads-analytics-title {
-          font-size: 18px;
+          font-size: 17px;
           font-weight: 800;
           letter-spacing: 0.03em;
         }
@@ -1258,7 +1609,7 @@ export default function AdsAnalyticsPanel({
         }
         .ads-analytics-dates {
           font-size: 11px;
-          opacity: 0.78;
+          opacity: 0.75;
         }
         .ads-analytics-status {
           font-size: 11px;
@@ -1267,21 +1618,20 @@ export default function AdsAnalyticsPanel({
         .ads-status-pill {
           display: inline-flex;
           align-items: center;
-          padding: 2px 9px 3px;
+          padding: 2px 9px;
           border-radius: 999px;
           background: rgba(34, 197, 94, 0.16);
           border: 1px solid rgba(34, 197, 94, 0.9);
           font-size: 11px;
-          margin-left: 6px;
         }
 
         .ads-analytics-preview {
-          width: 160px;
-          height: 92px;
+          width: 150px;
+          height: 86px;
           border-radius: 12px;
           overflow: hidden;
           border: 1px solid rgba(148, 163, 184, 0.7);
-          box-shadow: 0 10px 26px rgba(0, 0, 0, 0.95);
+          box-shadow: 0 10px 26px rgba(0, 0, 0, 0.9);
           flex-shrink: 0;
         }
         .ads-analytics-preview video,
@@ -1315,12 +1665,12 @@ export default function AdsAnalyticsPanel({
           gap: 6px;
         }
         .ads-select-group span:first-child {
-          opacity: 0.82;
+          opacity: 0.8;
         }
         .ads-select-group button {
-          padding: 4px 10px;
+          padding: 4px 8px;
           border-radius: 999px;
-          border: 1px solid rgba(157, 220, 255, 0.5);
+          border: 1px solid rgba(157, 220, 255, 0.4);
           background: rgba(15, 23, 42, 0.95);
           color: #e5f0ff;
           font-size: 11px;
@@ -1346,9 +1696,9 @@ export default function AdsAnalyticsPanel({
 
         .ads-analytics-grid {
           display: grid;
-          grid-template-columns: minmax(0, 260px) minmax(0, 1.8fr);
-          gap: 16px;
-          align-items: stretch;
+          grid-template-columns: minmax(0, 280px) minmax(0, 1.7fr);
+          gap: 14px;
+          align-items: flex-start;
         }
         .ads-analytics-metrics {
           display: flex;
@@ -1358,8 +1708,7 @@ export default function AdsAnalyticsPanel({
         .ads-analytics-charts {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 12px;
-          align-items: stretch;
+          gap: 10px;
         }
         .ads-analytics-chart-block {
           display: flex;
@@ -1371,43 +1720,81 @@ export default function AdsAnalyticsPanel({
           text-transform: uppercase;
           letter-spacing: 0.16em;
           opacity: 0.8;
-          margin-left: 2px;
+        }
+
+        .ads-advanced-row {
+          margin-top: 4px;
+          display: grid;
+          grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr) minmax(
+              0,
+              0.9fr
+            );
+          gap: 12px;
+          align-items: stretch;
+        }
+        .ads-highlights {
+          border-radius: 16px;
+          padding: 10px 12px;
+          background:
+            radial-gradient(
+              circle at 0 0,
+              rgba(251, 191, 36, 0.22),
+              transparent 55%
+            ),
+            linear-gradient(
+              145deg,
+              rgba(15, 23, 42, 0.98),
+              rgba(15, 23, 42, 0.9)
+            );
+          border: 1px solid rgba(252, 211, 77, 0.7);
+          box-shadow:
+            0 14px 32px rgba(0, 0, 0, 0.9),
+            0 0 22px rgba(252, 211, 77, 0.5);
+          font-size: 12px;
+        }
+        .ads-highlights-title {
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.16em;
+          opacity: 0.85;
+          margin-bottom: 6px;
+        }
+        .ads-highlights ul {
+          margin: 0;
+          padding-left: 18px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
         }
 
         .ads-geo-row {
           margin-top: 6px;
           display: grid;
-          grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-          gap: 14px;
+          grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+          gap: 12px;
           align-items: stretch;
-        }
-        .ads-geo {
-          display: flex;
-          flex-direction: column;
-          min-width: 0;
         }
         .ads-geo-table-wrap {
           margin-top: 4px;
-          flex: 1;
-          max-height: 280px;
+          max-height: 260px;
           overflow-y: auto;
           overflow-x: auto;
-          border-radius: 14px;
+          border-radius: 12px;
           border: 1px solid rgba(148, 163, 184, 0.6);
           background: rgba(15, 23, 42, 0.97);
         }
         .ads-geo-table {
           width: 100%;
-          min-width: 560px;
+          min-width: 520px;
           border-collapse: collapse;
           font-size: 12px;
         }
         .ads-geo-table thead {
-          background: rgba(30, 64, 175, 0.6);
+          background: rgba(30, 64, 175, 0.55);
         }
         .ads-geo-table th,
         .ads-geo-table td {
-          padding: 4px 8px;
+          padding: 4px 6px;
           border-bottom: 1px solid rgba(30, 64, 175, 0.35);
         }
         .ads-geo-table th {
@@ -1418,14 +1805,10 @@ export default function AdsAnalyticsPanel({
           letter-spacing: 0.08em;
         }
         .ads-geo-table tbody tr:nth-child(even) {
-          background: rgba(15, 23, 42, 0.94);
+          background: rgba(15, 23, 42, 0.92);
         }
         .ads-geo-table tbody tr {
           cursor: pointer;
-          transition: background 0.12s ease-out;
-        }
-        .ads-geo-table tbody tr:hover {
-          background: rgba(56, 189, 248, 0.15);
         }
         .ads-geo-table tbody tr.on {
           background: radial-gradient(
@@ -1482,6 +1865,9 @@ export default function AdsAnalyticsPanel({
           .ads-analytics-charts {
             grid-template-columns: minmax(0, 1fr);
           }
+          .ads-advanced-row {
+            grid-template-columns: minmax(0, 1fr);
+          }
           .ads-geo-row {
             grid-template-columns: minmax(0, 1fr);
           }
@@ -1492,8 +1878,8 @@ export default function AdsAnalyticsPanel({
             flex-direction: column;
           }
           .ads-analytics-preview {
-            width: 130px;
-            height: 76px;
+            width: 120px;
+            height: 70px;
           }
         }
       `}</style>
