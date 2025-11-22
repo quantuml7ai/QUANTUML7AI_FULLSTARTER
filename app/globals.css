@@ -1097,7 +1097,7 @@ h1, h2, h3, h4, h5, h6{
 
 :root {
   --popup-width: 540px;         /* ширина */
-  --popup-max-height: 50vh;     /* высота */
+  --popup-max-height: 80vh;     /* высота */
   --popup-padding: 16px;        /* отступ вокруг */
   --popup-inner-padding: 18px;  /* внутренние отступы */
   --popup-radius: 18px;         /* скругление */

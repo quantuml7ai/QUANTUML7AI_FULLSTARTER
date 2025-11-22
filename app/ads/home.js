@@ -2624,7 +2624,7 @@ async function uploadMediaForCreative(cr) {
 @media (max-width: 640px) {
   .ads-rules-modal {
     width: 100%;
-    max-height: 92vh;
+    max-height: 70vh;
     border-radius: 14px;
   }
 }
