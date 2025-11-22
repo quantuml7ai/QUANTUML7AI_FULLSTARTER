@@ -612,12 +612,12 @@ html, body {
 
 
 /* === page-center оставляем как у тебя === */
-.page-center{ max-width:1100px; margin:0 auto; padding:20px 16px; }
+.page-center{ max-width:1100px; margin:0 auto; padding:12px 48px; }
 @media (max-width:640px){ .page-center{ padding:14px 12px; } }
 
 /* === Глобальные гаттеры === */
 :root { --gutter: 26px; --miniapp-top-offset: 70px; } /* ↑ докрути тут при необходимости */
-@media (min-width:1080px){ :root{ --gutter: 150px; } }
+@media (min-width:1280px){ :root{ --gutter: 100px; } }
 /* Мобайл: микро-гаттер 8px, чтобы ничего не «резалось» по краям */
 @media (max-width:640px){ :root{ --gutter: 6px; --miniapp-top-offset: 70px; } }
 
@@ -637,11 +637,13 @@ body > :not(style):not(script):not(.no-gutters),
 .page-content,
 main:not(.no-gutters),section:not(.no-gutters),header:not(.no-gutters),footer:not(.no-gutters),
 nav:not(.no-gutters),article:not(.no-gutters),aside:not(.no-gutters),
-figure:not(.no-gutters),.panel:not(.no-gutters),.container:not(.no-gutters),.content:not(.no-gutters),
+figure:not(.no-gutters),.container:not(.no-gutters),.content:not(.no-gutters),
 .wrap:not(.no-gutters),.wrapper:not(.no-gutters),.page:not(.no-gutters),
 .block:not(.no-gutters),.hero:not(.no-gutters),.card:not(.no-gutters){
-  padding-left:var(--gutter) !important; padding-right:var(--gutter) !important;
+  padding-left:var(--gutter) !important;
+  padding-right:var(--gutter) !important;
 }
+
 
 /* 3) ТОЛЬКО контейнеры в .page-content тянем на 100% */
 .page-content > :is(main,section,header,footer,nav,article,aside,div){
@@ -1095,7 +1097,7 @@ h1, h2, h3, h4, h5, h6{
 
 :root {
   --popup-width: 540px;         /* ширина */
-  --popup-max-height: 80vh;     /* высота */
+  --popup-max-height: 70vh;     /* высота */
   --popup-padding: 16px;        /* отступ вокруг */
   --popup-inner-padding: 18px;  /* внутренние отступы */
   --popup-radius: 18px;         /* скругление */
