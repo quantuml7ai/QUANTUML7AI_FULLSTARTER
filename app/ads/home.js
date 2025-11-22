@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState, useRef } from 'react'
 import { useI18n } from '../../components/i18n'
+import { upload } from '@vercel/blob/client'
 
 /* ===== Вспомогалки i18n ===== */
 const TX = (t, key, fb) => {
@@ -540,37 +541,38 @@ const markRulesAccepted = () => {
   }, [pkgInfo])
 
   /* ===== Upload media → /api/ads?action=upload (для одного креатива) ===== */
-  async function uploadMediaForCreative(cr) {
-    const { videoFile, imageFile } = cr
-    if (!videoFile && !imageFile) {
-      return { mediaUrl: '', mediaType: 'none' }
-    }
+/* ===== Upload media → Vercel Blob через форумный endpoint ===== */
+async function uploadMediaForCreative(cr) {
+  const { videoFile, imageFile } = cr
+  if (!videoFile && !imageFile) {
+    return { mediaUrl: '', mediaType: 'none' }
+  }
 
-    const file = videoFile || imageFile
-    const mediaType = videoFile ? 'video' : 'image'
-    const fd = new FormData()
-    fd.append('file', file)
+  const file = videoFile || imageFile
+  const mediaType = file.type.startsWith('video') ? 'video' : 'image'
 
-    const r = await fetch('/api/ads?action=upload', {
-      method: 'POST',
-      body: fd,
-      cache: 'no-store',
+  try {
+    // Прямой upload в Vercel Blob.
+    // Форум уже использует /api/forum/blobUploadUrl — просто переиспользуем его.
+    const blob = await upload(file.name || 'ad', file, {
+      access: 'public',
+      handleUploadUrl: '/api/forum/blobUploadUrl',
     })
 
-    const j = await r.json().catch(() => null)
-    if (!r.ok || !j?.ok) {
-      throw new Error(j?.error || 'UPLOAD_FAILED')
-    }
-
-    const mediaUrl =
-      j.url || (Array.isArray(j.urls) && j.urls[0]) || j.mediaUrl || j.href || ''
-
-    if (!mediaUrl) {
+    if (!blob || !blob.url) {
       throw new Error('NO_MEDIA_URL')
     }
 
-    return { mediaUrl, mediaType }
+    return {
+      mediaUrl: blob.url,
+      mediaType,
+    }
+  } catch (e) {
+    console.error('[ADS] blob upload error', e)
+    // Для кабинета оставляем то же сообщение, что и раньше
+    throw new Error('UPLOAD_FAILED')
   }
+}
 
   /* ===== Создание кампании через /api/ads (action: campaignCreate) ===== */
   const handleCreateCampaign = async () => {

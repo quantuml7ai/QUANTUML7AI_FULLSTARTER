@@ -13,12 +13,11 @@ import {
   stopCampaign,
   deleteCampaign,
 } from '@/lib/adsCore'
-
-import { handleUpload } from '@vercel/blob/client'   // <— ДОБАВЛЕНО
-
+ 
 export const dynamic = 'force-dynamic'
 
-function jsonOk(res) { 
+function jsonOk(res) {
+  // Все контролируемые ответы — 200, даже если ok: false
   return NextResponse.json(res, { status: 200 })
 }
 
@@ -32,13 +31,22 @@ function jsonError(message, details = null, status = 500) {
     { status },
   )
 }
- 
+
+// ------------------ GET /api/ads ------------------
+// Home/AdsHome:
+//   GET /api/ads?action=cabinet&accountId=...
+//
+// Дополнительно:
+//   ?action=plans      — тарифы + текущий пакет
+//   ?action=links      — строки для ForumAds
+//   ?action=serve      — отдать одну кампанию
 export async function GET(req) {
   const url = new URL(req.url)
   const search = url.searchParams
   const action = (search.get('action') || '').toLowerCase()
 
-  try { 
+  try {
+    // Кабинет: пакет + кампании
     if (action === 'cabinet') {
       const accountId =
         search.get('accountId') ||
@@ -49,7 +57,8 @@ export async function GET(req) {
       return jsonOk(res)
     }
 
-    if (action === 'plans') { 
+    // Тарифы + текущий пакет
+    if (action === 'plans') {
       const accountId =
         search.get('accountId') ||
         search.get('account') ||
@@ -57,12 +66,14 @@ export async function GET(req) {
       const res = await getPackagesWithCurrent(accountId)
       return jsonOk(res)
     }
- 
+
+    // Строки ссылок для форума (ForumAds → /api/ads?action=links)
     if (action === 'links') {
       const res = await getLinksForForum()
       return jsonOk(res)
     }
- 
+
+    // Отдать одну активную кампанию
     if (action === 'serve') {
       const res = await serveAd()
       return jsonOk(res)
@@ -75,16 +86,22 @@ export async function GET(req) {
   }
 }
 
-export async function POST(req) { 
+// ------------------ POST /api/ads ------------------
+// AdsHome использует:
+//   POST /api/ads?action=upload        (FormData, file)
+//   POST /api/ads { action: 'campaignCreate', ... }
+//   POST /api/ads { action: 'campaignAnalytics', ... }
+//
+// ForumAds использует:
+//   POST /api/ads { action: 'event', type: 'ad_impression' | 'ad_click', url_hash, ... }
+export async function POST(req) {
   const url = new URL(req.url)
   const search = url.searchParams
   const actionFromQuery = (search.get('action') || '').toLowerCase()
   const contentType = req.headers.get('content-type') || ''
 
   try {
-    // --------------------------------------------------------
-    //            MULTIPART UPLOAD (ФАЙЛЫ)
-    // --------------------------------------------------------
+    // ---------- multipart/form-data → upload медиа ----------
     if (contentType.startsWith('multipart/form-data')) {
       const form = await req.formData()
       const action =
@@ -92,8 +109,9 @@ export async function POST(req) {
           String(form.get('action') || '')).toLowerCase() || 'upload'
 
       if (action === 'upload') {
-        const file = form.get('file') 
- 
+        const file = form.get('file')
+
+        // Жёсткая защита от отсутствия файла / битых форм
         if (!file || typeof file.arrayBuffer !== 'function') {
           return jsonOk({
             ok: false,
@@ -101,54 +119,25 @@ export async function POST(req) {
           })
         }
 
-        // -------- ПРОСТОЙ И АККУРАТНЫЙ FIX --------
-        // Теперь реклама грузит большие видео напрямую в Vercel Blob,
-        // минуя сервер — как делает форум.
-        const token =
-          process.env.FORUM_READ_WRITE_TOKEN ||
-          process.env.BLOB_READ_WRITE_TOKEN
-
-        if (!token) {
-          return jsonOk({ ok: false, error: 'NO_BLOB_TOKEN' })
-        }
-
-        const uploadRes = await handleUpload({
-          request: req,
-          token,
-          onBeforeGenerateToken: async () => ({
-            allowedContentTypes: [
-              'video/mp4',
-              'video/webm',
-              'video/quicktime',
-              'image/jpeg',
-              'image/png',
-              'image/webp',
-              'image/gif',
-              'image/avif',
-            ],
-            maximumSizeInBytes: 300 * 1024 * 1024, // 300MB
-            addRandomSuffix: true,
-            tokenPayload: JSON.stringify({ kind: 'ads_video' }),
-          }),
-
-          onUploadCompleted: async ({ blob }) => {
-            console.log('ads media uploaded:', {
-              url: blob?.url,
-              size: blob?.size,
-              type: blob?.contentType,
-            })
-          },
+        // Передаём опции во второй аргумент — uploadMedia может
+        // использовать для форс-уникального имени, чтобы одинаковые
+        // видео/картинки не конфликтовали по ключу в сторадже.
+        const res = await uploadMedia(file, {
+          // Можно использовать внутри ADS-Core:
+          // - хешировать
+          // - добавлять рандомный суффикс
+          allowDuplicates: true,
+          forceUniqueName: true,
         })
 
-        return jsonOk(uploadRes)
+        // Даже если uploadMedia вернул ok: false — статус 200
+        return jsonOk(res)
       }
 
       return jsonError('UNKNOWN_ACTION_MULTIPART', { action }, 400)
     }
 
-    // --------------------------------------------------------
-    //                    JSON HANDLING
-    // --------------------------------------------------------
+    // ---------- JSON-тело ----------
     let body = {}
     try {
       body = await req.json()
@@ -158,7 +147,8 @@ export async function POST(req) {
 
     const action = (body.action || actionFromQuery || '').toLowerCase()
 
-    if (action === 'campaigncreate') { 
+    // Создание кампании (AdsHome → action: 'campaignCreate')
+    if (action === 'campaigncreate') {
       const {
         accountId,
         name,
@@ -167,7 +157,8 @@ export async function POST(req) {
         mediaType,
         creatives,
       } = body || {}
- 
+
+      // Нормализация мультикреативов (совместимо с legacy)
       let normalizedCreatives = null
       if (Array.isArray(creatives) && creatives.length > 0) {
         normalizedCreatives = creatives
@@ -194,10 +185,12 @@ export async function POST(req) {
       const res = await createCampaign(payload)
       return jsonOk(res)
     }
- 
+
+    // Аналитика кампании (AdsHome → action: 'campaignAnalytics')
     if (action === 'campaignanalytics') {
       const { campaignId, from, to, groupBy } = body || {}
- 
+
+      // Нормализация groupBy для бекенда: только 'hour' | 'day'
       let gb = (groupBy || '').toLowerCase()
       if (gb !== 'hour' && gb !== 'day') {
         gb = 'day'
@@ -209,29 +202,40 @@ export async function POST(req) {
         to,
         groupBy: gb,
       })
-
+      // Ожидаем, что ADS-Core вернёт:
+      // {
+      //   ok: true,
+      //   impressionsTotal, clicksTotal, ctrTotal,
+      //   series: [{ ts, label?, impressions, clicks }],
+      //   geo: [{ country, region, city, impressions, clicks }]
+      // }
       return jsonOk(res)
     }
- 
+
+    // Остановить кампанию (AdsHome — кнопка "Остановить")
     if (action === 'campaignstop') {
       const { campaignId } = body || {}
       const res = await stopCampaign(campaignId)
       return jsonOk(res)
     }
- 
+
+    // Удалить кампанию (AdsHome — кнопка "Удалить")
     if (action === 'campaigndelete') {
       const { campaignId } = body || {}
       const res = await deleteCampaign(campaignId)
       return jsonOk(res)
     }
 
-    if (action === 'buy' || action === 'createpurchase') { 
+    // Покупка рекламного пакета (если дергать из UI)
+    if (action === 'buy' || action === 'createpurchase') {
       const { accountId, pkgType } = body || {}
       const res = await createPurchase({ accountId, pkgType })
       return jsonOk(res)
     }
 
-    if (action === 'event' || action === 'registerevent') { 
+    // События аналитики (ForumAds / фронт → action: 'event')
+    if (action === 'event' || action === 'registerevent') {
+      // Собираем базовый контекст для GEO/аналитики
       const forwardedFor =
         req.headers.get('x-forwarded-for') ||
         req.headers.get('x-real-ip') ||
@@ -247,7 +251,11 @@ export async function POST(req) {
         referer,
       }
 
-      const res = await registerEvent(eventPayload, req) 
+      const res = await registerEvent(eventPayload, req)
+      // Ожидается, что ADS-Core внутри по ip/userAgent сам
+      // расставит GEO (country/region/city) и корректно
+      // сохранит, чтобы потом getAnalyticsForCampaign.geo
+      // отдавал правильные страны/регионы/города.
       return jsonOk(res)
     }
 
