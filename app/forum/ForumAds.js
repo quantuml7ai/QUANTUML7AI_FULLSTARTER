@@ -1215,29 +1215,30 @@ export function AdCard({ url, slotKind, nearId }) {
             </button>
           </div>
 
-{/* media: карточка подстраивается под медиа, без обрезаний и пустых зон */}
+{/* media: единый контейнер, медиа целиком, без обрезки */}
 <div className="relative mt-0.5 overflow-hidden rounded-lg border border-[color:var(--border,#27272a)] bg-[color:var(--bg-soft,#020817)]">
-  {media.kind === 'skeleton' && (
-    <div className="w-full h-[220px] animate-pulse bg-[color:var(--skeleton,#111827)]" />
-  )}
+  {/* фиксируем аспект ~16:9; при желании поменяй pt-[56.25%] */}
+  <div className="relative w-full pt-[56.25%]">
+    {/* SKELETON */}
+    {media.kind === 'skeleton' && (
+      <div className="absolute inset-0 animate-pulse bg-[color:var(--skeleton,#111827)]" />
+    )}
 
-  {media.kind === 'video' && media.src && (
-    <video
-      ref={videoRef}
-      src={media.src}
-      className="block w-full h-auto"
-      autoPlay
-      muted={muted}
-      loop
-      playsInline
-    />
-  )}
+    {/* VIDEO */}
+    {media.kind === 'video' && media.src && (
+      <video
+        ref={videoRef}
+        src={media.src}
+        className="absolute inset-0 w-full h-full object-contain"
+        autoPlay
+        muted={muted}
+        loop
+        playsInline
+      />
+    )}
 
-  {media.kind === 'youtube' && media.src && (
-    <div
-      className="relative w-full"
-      style={{ aspectRatio: '16 / 9' }}
-    >
+    {/* YOUTUBE */}
+    {media.kind === 'youtube' && media.src && (
       <iframe
         ref={ytIframeRef}
         src={`https://www.youtube.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}
@@ -1251,17 +1252,13 @@ export function AdCard({ url, slotKind, nearId }) {
           width: '100%',
           height: '100%',
           borderRadius: 10,
-          pointerEvents: 'none',
+          pointerEvents: 'none', // клики идут в <a>
         }}
       />
-    </div>
-  )}
+    )}
 
-  {media.kind === 'tiktok' && media.src && (
-    <div
-      className="relative w-full"
-      style={{ aspectRatio: '9 / 16' }}
-    >
+    {/* TIKTOK */}
+    {media.kind === 'tiktok' && media.src && (
       <iframe
         src={`https://www.tiktok.com/embed/v2/${media.src}`}
         title="TikTok video"
@@ -1276,52 +1273,58 @@ export function AdCard({ url, slotKind, nearId }) {
           pointerEvents: 'none',
         }}
       />
-    </div>
-  )}
+    )}
 
-  {media.kind === 'image' && media.src && (
-    <NextImage
-      src={media.src}
-      alt={host}
-      width={1920}
-      height={1080}
-      className="block w-full h-auto transition-opacity duration-200"
-      unoptimized
-    />
-  )}
-
-  {media.kind === 'favicon' && media.src && (
-    <div className="w-full h-auto flex items-center justify-center bg-[color:var(--bg-soft,#020817)] py-6">
+    {/* IMAGE */}
+    {media.kind === 'image' && media.src && (
       <NextImage
         src={media.src}
         alt={host}
-        width={64}
-        height={64}
-        className="object-contain"
+        fill
+        sizes="(max-width: 768px) 100vw, 600px"
+        className="object-contain transition-opacity duration-200"
         unoptimized
       />
-    </div>
-  )}
+    )}
 
-  {media.kind === 'placeholder' && (
-    <div className="w-full h-auto flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)] py-6">
-      {host}
-    </div>
-  )}
+    {/* FAVICON */}
+    {media.kind === 'favicon' && media.src && (
+      <div className="absolute inset-0 flex items-center justify-center bg-[color:var(--bg-soft,#020817)]">
+        <NextImage
+          src={media.src}
+          alt={host}
+          width={64}
+          height={64}
+          className="object-contain"
+          unoptimized
+        />
+      </div>
+    )}
 
-  {showSoundButton && (
-    <button
-      type="button"
-      onClick={handleToggleSound}
-      className="audio-toggle absolute right-2 bottom-2"
-      aria-label={muted ? 'Включить звук' : 'Выключить звук'}
-    >
-      {muted ? '🔇' : '🔊'}
-    </button>
-  )}
+    {/* PLACEHOLDER */}
+    {media.kind === 'placeholder' && (
+      <div className="absolute inset-0 flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)]">
+        {host}
+      </div>
+    )}
 
-  <div className="pointer-events-none absolute inset-0 rounded-lg border border-transparent qshine" />
+    {/* КНОПКА ЗВУКА — поверх медиа, но внутри этого блока */}
+    {showSoundButton && (
+      <button
+        type="button"
+        onClick={handleToggleSound}
+        className="audio-toggle"
+        aria-label={muted ? 'Включить звук' : 'Выключить звук'}
+      >
+        {muted ? '🔇' : '🔊'}
+      </button>
+    )}
+
+    {/* SHINE-оверлей */}
+    <div className="pointer-events-none absolute inset-0 rounded-lg border border-transparent qshine" />
+  </div>
 </div>
+
 
         </div>
       </a>
