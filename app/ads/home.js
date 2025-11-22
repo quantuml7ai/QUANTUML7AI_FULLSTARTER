@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState, useRef } from 'react'
 import { useI18n } from '../../components/i18n'
-import { upload } from '@vercel/blob/client'
+import AdsAnalyticsPanel, { MetricPill } from './AdsAnalyticsPanel'
 
 /* ===== Вспомогалки i18n ===== */
 const TX = (t, key, fb) => {
@@ -13,21 +13,6 @@ const TX = (t, key, fb) => {
   } catch {
     return fb
   }
-}
-
-/* Локализация стран по коду */
-function localizeCountry(t, code) {
-  if (!code) {
-    return TX(t, 'geo_country_unknown', 'Не определено')
-  }
-  const upper = String(code).toUpperCase()
-
-  // ZZ = неизвестная страна
-  if (upper === 'ZZ') {
-    return TX(t, 'geo_country_unknown', 'Не определено')
-  }
-
-  return TX(t, 'geo_country_' + upper, upper)
 }
 
 /* ===== Чтение accountId из глобалов / localStorage ===== */
@@ -138,285 +123,6 @@ function makeEmptyCreative() {
   }
 }
 
-/* ===== Мини-график (bar chart) с осями ===== */
-function TinyBarChart({ t, points, metricKey, accent = 'impressions' }) {
-  if (!Array.isArray(points) || !points.length) {
-    return (
-      <div className="ads-chart-empty">
-        <span>{TX(t, 'ads_chart_empty', 'Нет данных')}</span>
-        <style jsx>{`
-          .ads-chart-empty {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            opacity: 0.7;
-            height: 140px;
-          }
-        `}</style>
-      </div>
-    )
-  }
-
-  const vals = points.map((p) => Number(p[metricKey] || 0))
-  const max = Math.max(...vals, 1)
-
-  // Y-ось: 3 тика (0, mid, max), без дублей и строго по возрастанию
-  const mid = Math.round(max / 2)
-  const ticks = Array.from(new Set([0, mid, max])).sort((a, b) => a - b)
-
-  const formatXLabel = (raw) => {
-    if (raw == null) return ''
-
-    let d = null
-    const n = Number(raw)
-
-    // Если пришло число — считаем таймстампом
-    if (!Number.isNaN(n) && n > 0) {
-      const ms = n < 1e12 ? n * 1000 : n
-      d = new Date(ms)
-    } else {
-      try {
-        d = new Date(String(raw))
-      } catch {
-        d = null
-      }
-    }
-
-    if (!d || Number.isNaN(d.getTime())) {
-      return String(raw)
-    }
-
-    // Короткий формат: ДД.MM HH:MM (локальное время)
-    const pad = (x) => String(x).padStart(2, '0')
-    const day = pad(d.getDate())
-    const month = pad(d.getMonth() + 1)
-    const hour = pad(d.getHours())
-    const minute = pad(d.getMinutes())
-
-    return `${day}.${month} ${hour}:${minute}`
-  }
-
-  const step = points.length > 10 ? Math.ceil(points.length / 6) : 1
-
-  return (
-    <div className="ads-chart">
-      <div className="ads-chart-yaxis">
-        {ticks.map((v) => (
-          <div key={v} className="ads-chart-yrow">
-            <span className="ads-chart-ylabel">{v}</span>
-          </div>
-        ))}
-      </div>
-      <div className="ads-chart-main">
-        <div className="ads-chart-bars-wrap">
-          <div className="ads-chart-bars">
-            {points.map((p, idx) => {
-              const v = Number(p[metricKey] || 0)
-              const h = (v / max) * 100
-              return (
-                <div
-                  key={idx}
-                  className={
-                    'ads-chart-bar ' +
-                    (accent === 'clicks' ? 'ads-chart-bar-accent' : '')
-                  }
-                  style={{ height: `${h || 3}%` }}
-                  title={`${p.label || p.ts}: ${v}`}
-                />
-              )
-            })}
-          </div>
-          <div className="ads-chart-grid-overlay" />
-        </div>
-        <div className="ads-chart-xaxis">
-          {points.map((p, idx) => {
-            if (idx % step !== 0) {
-              return <div key={idx} className="ads-chart-xlabel" />
-            }
-            return (
-              <div key={idx} className="ads-chart-xlabel">
-                <span>{formatXLabel(p.label || p.ts)}</span>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-      <style jsx>{`
-        .ads-chart {
-          position: relative;
-          display: grid;
-          grid-template-columns: auto minmax(0, 1fr);
-          gap: 6px;
-          padding: 6px 8px 10px;
-          border-radius: 12px;
-          background: radial-gradient(
-              circle at 0 0,
-              rgba(0, 194, 255, 0.18),
-              transparent 60%
-            ),
-            radial-gradient(
-              circle at 100% 100%,
-              rgba(255, 196, 0, 0.14),
-              transparent 55%
-            ),
-            linear-gradient(
-              180deg,
-              rgba(8, 12, 20, 0.92),
-              rgba(4, 7, 16, 0.92)
-            );
-          box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
-          overflow: hidden;
-        }
-        .ads-chart-yaxis {
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          padding: 4px 2px 18px 0;
-        }
-        .ads-chart-yrow {
-          height: 1px;
-          position: relative;
-        }
-        .ads-chart-ylabel {
-          position: relative;
-          top: -6px;
-          font-size: 10px;
-          opacity: 0.7;
-          white-space: nowrap;
-        }
-        .ads-chart-main {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-        .ads-chart-bars-wrap {
-          position: relative;
-          height: 120px;
-          border-radius: 10px;
-          overflow: hidden;
-        }
-        .ads-chart-bars {
-          position: absolute;
-          inset: 0;
-          display: flex;
-          align-items: flex-end;
-          gap: 4px;
-          padding: 4px 6px 6px;
-        }
-        .ads-chart-grid-overlay {
-          position: absolute;
-          inset: 0;
-          background-image: linear-gradient(
-            to top,
-            rgba(255, 255, 255, 0.06) 1px,
-            transparent 1px
-          );
-          background-size: 100% 24px;
-          opacity: 0.35;
-          pointer-events: none;
-        }
-        .ads-chart-bar {
-          flex: 1 1 0;
-          border-radius: 999px;
-          background: linear-gradient(
-            180deg,
-            rgba(0, 229, 255, 0.95),
-            rgba(0, 229, 255, 0.65),
-            rgba(255, 196, 0, 0.85)
-          );
-          box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.45),
-            0 6px 16px rgba(0, 0, 0, 0.65),
-            0 0 18px rgba(0, 229, 255, 0.35);
-          transform-origin: bottom center;
-          transform: scaleY(0.25);
-          animation: adsBarIn 0.5s ease-out forwards;
-        }
-        .ads-chart-bar-accent {
-          box-shadow: 0 0 0 1px rgba(255, 196, 0, 0.55),
-            0 6px 18px rgba(0, 0, 0, 0.7),
-            0 0 22px rgba(255, 196, 0, 0.45);
-        }
-        .ads-chart-xaxis {
-          display: flex;
-          align-items: flex-start;
-          gap: 4px;
-          padding: 0 6px 0;
-        }
-        .ads-chart-xlabel {
-          flex: 1 1 0;
-          font-size: 9px;
-          line-height: 1.2;
-          text-align: center;
-          color: rgba(226, 232, 240, 0.8);
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-        .ads-chart-xlabel span {
-          display: block;
-          transform: translateY(0);
-        }
-
-        @keyframes adsBarIn {
-          0% {
-            transform: scaleY(0.1);
-            opacity: 0;
-          }
-          100% {
-            transform: scaleY(1);
-            opacity: 1;
-          }
-        }
-      `}</style>
-    </div>
-  )
-}
-
-/* ===== Кружочки-метрики ===== */
-function MetricPill({ label, value, hint }) {
-  return (
-    <div className="ads-pill" title={hint}>
-      <div className="ads-pill-label">{label}</div>
-      <div className="ads-pill-value">{value}</div>
-      <style jsx>{`
-        .ads-pill {
-          min-width: 120px;
-          padding: 8px 12px;
-          border-radius: 999px;
-          background: radial-gradient(
-              circle at 0 0,
-              rgba(0, 200, 255, 0.4),
-              transparent 60%
-            ),
-            linear-gradient(
-              120deg,
-              rgba(4, 11, 25, 0.96),
-              rgba(7, 15, 30, 0.98)
-            );
-          border: 1px solid rgba(157, 220, 255, 0.4);
-          box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-        .ads-pill-label {
-          font-size: 11px;
-          text-transform: uppercase;
-          letter-spacing: 0.12em;
-          opacity: 0.8;
-        }
-        .ads-pill-value {
-          font-size: 15px;
-          font-weight: 800;
-          letter-spacing: 0.04em;
-        }
-      `}</style>
-    </div>
-  )
-}
-
 /* ====== Основной компонент кабинета ====== */
 
 export default function AdsHome() {
@@ -428,13 +134,10 @@ export default function AdsHome() {
   const [pkgInfo, setPkgInfo] = useState(null)
   const [campaigns, setCampaigns] = useState([])
 
-  // Попап правил: открыт по умолчанию при каждом заходе
-const [rulesOpen, setRulesOpen] = useState(true)
-// Состояние: докрутил ли пользователь до низа текста
-const [rulesScrolledToBottom, setRulesScrolledToBottom] = useState(false)
-// ref на блок с текстом правил
-const rulesBodyRef = useRef(null)
-
+  // Попап правил
+  const [rulesOpen, setRulesOpen] = useState(true)
+  const [rulesScrolledToBottom, setRulesScrolledToBottom] = useState(false)
+  const rulesBodyRef = useRef(null)
 
   // Новая кампания — один креатив
   const [newName, setNewName] = useState('')
@@ -449,6 +152,7 @@ const rulesBodyRef = useRef(null)
   const [analyticsError, setAnalyticsError] = useState(null)
   const [range, setRange] = useState('7d')
   const [groupBy, setGroupBy] = useState('day')
+
   // Действия с кампанией (остановка / удаление)
   const [campaignActionError, setCampaignActionError] = useState(null)
   const [campaignActionLoading, setCampaignActionLoading] = useState(false)
@@ -461,39 +165,36 @@ const rulesBodyRef = useRef(null)
     setCreative((prev) => ({ ...prev, ...patch }))
   }
 
-// При открытии попапа проверяем, есть ли вообще скролл.
-// Если текст помещается целиком – сразу разрешаем нажать кнопку.
-useEffect(() => {
-  if (!rulesOpen) return
-  const el = rulesBodyRef.current
-  if (!el) {
-    setRulesScrolledToBottom(false)
-    return
-  }
-  const canScroll = el.scrollHeight > el.clientHeight + 4
-  if (!canScroll) {
-    setRulesScrolledToBottom(true)
-  } else {
-    setRulesScrolledToBottom(false)
-  }
-}, [rulesOpen])
+  // При открытии попапа проверяем, есть ли вообще скролл.
+  useEffect(() => {
+    if (!rulesOpen) return
+    const el = rulesBodyRef.current
+    if (!el) {
+      setRulesScrolledToBottom(false)
+      return
+    }
+    const canScroll = el.scrollHeight > el.clientHeight + 4
+    if (!canScroll) {
+      setRulesScrolledToBottom(true)
+    } else {
+      setRulesScrolledToBottom(false)
+    }
+  }, [rulesOpen])
 
-// Обработчик скролла в блоке с правилами
-const handleRulesScroll = (e) => {
-  const el = e.currentTarget
-  if (!el) return
-  const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 4
-  if (atBottom) {
-    setRulesScrolledToBottom(true)
+  // Обработчик скролла в блоке с правилами
+  const handleRulesScroll = (e) => {
+    const el = e.currentTarget
+    if (!el) return
+    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 4
+    if (atBottom) {
+      setRulesScrolledToBottom(true)
+    }
   }
-}
 
-// Нажатие "Принять и продолжить"
-const markRulesAccepted = () => {
-  // Никакого localStorage: при каждом входе в кабинет попап показывается заново
-  setRulesOpen(false)
-}
-
+  // Нажатие "Принять и продолжить"
+  const markRulesAccepted = () => {
+    setRulesOpen(false)
+  }
 
   /* ===== Загрузка кабинета через /api/ads?action=cabinet ===== */
   const reloadCabinet = async () => {
@@ -540,39 +241,38 @@ const markRulesAccepted = () => {
     return Math.max(0, max - used)
   }, [pkgInfo])
 
-  /* ===== Upload media → /api/ads?action=upload (для одного креатива) ===== */
-/* ===== Upload media → Vercel Blob через форумный endpoint ===== */
-async function uploadMediaForCreative(cr) {
-  const { videoFile, imageFile } = cr
-  if (!videoFile && !imageFile) {
-    return { mediaUrl: '', mediaType: 'none' }
-  }
+  /* ===== Upload media → /api/ads?action=upload ===== */
+  async function uploadMediaForCreative(cr) {
+    const { videoFile, imageFile } = cr
+    if (!videoFile && !imageFile) {
+      return { mediaUrl: '', mediaType: 'none' }
+    }
 
-  const file = videoFile || imageFile
-  const mediaType = file.type.startsWith('video') ? 'video' : 'image'
+    const file = videoFile || imageFile
+    const mediaType = videoFile ? 'video' : 'image'
+    const fd = new FormData()
+    fd.append('file', file)
 
-  try {
-    // Прямой upload в Vercel Blob.
-    // Форум уже использует /api/forum/blobUploadUrl — просто переиспользуем его.
-    const blob = await upload(file.name || 'ad', file, {
-      access: 'public',
-      handleUploadUrl: '/api/forum/blobUploadUrl',
+    const r = await fetch('/api/ads?action=upload', {
+      method: 'POST',
+      body: fd,
+      cache: 'no-store',
     })
 
-    if (!blob || !blob.url) {
+    const j = await r.json().catch(() => null)
+    if (!r.ok || !j?.ok) {
+      throw new Error(j?.error || 'UPLOAD_FAILED')
+    }
+
+    const mediaUrl =
+      j.url || (Array.isArray(j.urls) && j.urls[0]) || j.mediaUrl || j.href || ''
+
+    if (!mediaUrl) {
       throw new Error('NO_MEDIA_URL')
     }
 
-    return {
-      mediaUrl: blob.url,
-      mediaType,
-    }
-  } catch (e) {
-    console.error('[ADS] blob upload error', e)
-    // Для кабинета оставляем то же сообщение, что и раньше
-    throw new Error('UPLOAD_FAILED')
+    return { mediaUrl, mediaType }
   }
-}
 
   /* ===== Создание кампании через /api/ads (action: campaignCreate) ===== */
   const handleCreateCampaign = async () => {
@@ -678,7 +378,7 @@ async function uploadMediaForCreative(cr) {
     }
   }
 
-  /* ===== Загрузка аналитики выбранной кампании через /api/ads (action: campaignAnalytics) ===== */
+  /* ===== Загрузка аналитики выбранной кампании ===== */
   const selectedCampaign = useMemo(
     () => campaigns.find((c) => (c.id || c.campaignId) === selectedId),
     [campaigns, selectedId]
@@ -713,7 +413,6 @@ async function uploadMediaForCreative(cr) {
     }
   }
 
-  // Остановить выбранную кампанию (ставим статус stopped, проставляем endsAt)
   const handleStopSelectedCampaign = async () => {
     if (!selectedCampaign) return
 
@@ -730,7 +429,6 @@ async function uploadMediaForCreative(cr) {
     await performCampaignAction('campaignStop', id)
   }
 
-  // Удалить выбранную кампанию полностью
   const handleDeleteSelectedCampaign = async () => {
     if (!selectedCampaign) return
 
@@ -826,13 +524,12 @@ async function uploadMediaForCreative(cr) {
     )
   }, [t, pkgInfo])
 
-  /* ===== Обработчики выбора файлов (video / image) ===== */
+  /* ===== Обработчики выбора файлов ===== */
   const handleVideoFileChange = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
     setNewError(null)
 
-    // Сбрасываем картинку
     updateCreative({
       imageFile: null,
       imagePreviewUrl: null,
@@ -872,7 +569,6 @@ async function uploadMediaForCreative(cr) {
     if (!file) return
     setNewError(null)
 
-    // Сбрасываем видео
     updateCreative({
       videoFile: null,
       videoPreviewUrl: null,
@@ -895,65 +591,63 @@ async function uploadMediaForCreative(cr) {
     <div className="page-content">
       <main className="page-center ads-home">
         {/* Попап правил поверх всего */}
-{rulesOpen && (
-  <div
-    className="ads-rules-overlay"
-    role="dialog"
-    aria-modal="true"
-  >
-    <div className="ads-rules-modal">
-      <div className="ads-rules-header">
-        <span className="ads-rules-icon">⚡</span>
-        <h2>
-          {TX(
-            t,
-            'ads_rules_title',
-            'Правила размещения рекламы на Quantum L7 AI GLOBAL'
-          )}
-        </h2>
-      </div>
+        {rulesOpen && (
+          <div
+            className="ads-rules-overlay"
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="ads-rules-modal">
+              <div className="ads-rules-header">
+                <span className="ads-rules-icon">⚡</span>
+                <h2>
+                  {TX(
+                    t,
+                    'ads_rules_title',
+                    'Правила размещения рекламы на Quantum L7 AI GLOBAL'
+                  )}
+                </h2>
+              </div>
 
-      <div
-        className="ads-rules-body"
-        ref={rulesBodyRef}
-        onScroll={handleRulesScroll}
-      >
-        {/* ВАЖНО: теперь весь текст переносится правильно */}
-        <div className="ads-rules-text">
-          {TX(t, 'ads_rules_text_1', '')}
-        </div>
-        <div className="ads-rules-text">
-          {TX(t, 'ads_rules_text_2', '')}
-        </div>
-        <div className="ads-rules-text">
-          {TX(t, 'ads_rules_text_3', '')}
-        </div>
-        <div className="ads-rules-text">
-          {TX(t, 'ads_rules_text_4', '')}
-        </div>
-        <div className="ads-rules-text">
-          {TX(t, 'ads_rules_text_5', '')}
-        </div>
-        <div className="ads-rules-text">
-          {TX(t, 'ads_rules_text_6', '')}
-        </div>
-        <div className="ads-rules-text">
-          {TX(t, 'ads_rules_text_7', '')}
-        </div>
-      </div>
+              <div
+                className="ads-rules-body"
+                ref={rulesBodyRef}
+                onScroll={handleRulesScroll}
+              >
+                <div className="ads-rules-text">
+                  {TX(t, 'ads_rules_text_1', '')}
+                </div>
+                <div className="ads-rules-text">
+                  {TX(t, 'ads_rules_text_2', '')}
+                </div>
+                <div className="ads-rules-text">
+                  {TX(t, 'ads_rules_text_3', '')}
+                </div>
+                <div className="ads-rules-text">
+                  {TX(t, 'ads_rules_text_4', '')}
+                </div>
+                <div className="ads-rules-text">
+                  {TX(t, 'ads_rules_text_5', '')}
+                </div>
+                <div className="ads-rules-text">
+                  {TX(t, 'ads_rules_text_6', '')}
+                </div>
+                <div className="ads-rules-text">
+                  {TX(t, 'ads_rules_text_7', '')}
+                </div>
+              </div>
 
-      <button
-        type="button"
-        className="ads-rules-accept btn"
-        disabled={!rulesScrolledToBottom}
-        onClick={markRulesAccepted}
-      >
-        {TX(t, 'ads_rules_accept', 'Принять и продолжить')}
-      </button>
-    </div>
-  </div>
-)}
-
+              <button
+                type="button"
+                className="ads-rules-accept btn"
+                disabled={!rulesScrolledToBottom}
+                onClick={markRulesAccepted}
+              >
+                {TX(t, 'ads_rules_accept', 'Принять и продолжить')}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Блок состояния пакета */}
         <section className="panel ads-panel">
@@ -1083,7 +777,6 @@ async function uploadMediaForCreative(cr) {
                 />
               </label>
 
-              {/* Основной креатив */}
               <label className="ads-field">
                 <span className="ads-field-label">
                   {TX(
@@ -1372,472 +1065,24 @@ async function uploadMediaForCreative(cr) {
                 </div>
               </div>
 
-              {/* Аналитика выбранной кампании */}
-              <div className="ads-analytics">
-                {selectedCampaign ? (
-                  <>
-                    <div className="ads-analytics-header">
-                      <div>
-                        <div className="ads-analytics-title">
-                          {selectedCampaign.name ||
-                            TX(
-                              t,
-                              'ads_analytics_campaign_fallback',
-                              'Кампания'
-                            )}
-                        </div>
-                        <div className="ads-analytics-sub">
-                          {selectedCampaign.clickUrl
-                            ? selectedCampaign.clickUrl.slice(0, 90)
-                            : ''}
-                        </div>
-                        <div className="ads-analytics-dates">
-                          {TX(
-                            t,
-                            'ads_campaigns_dates',
-                            'Период:'
-                          )}{' '}
-                          {formatDate(
-                            selectedCampaign.createdAt ||
-                              selectedCampaign.startsAt
-                          )}{' '}
-                          —{' '}
-                          {selectedCampaign.endsAt
-                            ? formatDate(selectedCampaign.endsAt)
-                            : '—'}
-                        </div>
-                        <div className="ads-analytics-status">
-                          {TX(
-                            t,
-                            'ads_campaigns_status',
-                            'Статус:'
-                          )}{' '}
-                          <span className="ads-status-pill">
-                            {(() => {
-                              const s = (
-                                selectedCampaign.status || ''
-                              ).toLowerCase()
-                              if (s === 'active' || s === 'running')
-                                return TX(
-                                  t,
-                                  'ads_status_active',
-                                  'Активна'
-                                )
-                              if (s === 'paused')
-                                return TX(
-                                  t,
-                                  'ads_status_paused',
-                                  'На паузе'
-                                )
-                              if (s === 'stopped')
-                                return TX(
-                                  t,
-                                  'ads_status_stopped',
-                                  'Остановлена'
-                                )
-                              if (s === 'finished' || s === 'expired')
-                                return TX(
-                                  t,
-                                  'ads_status_finished',
-                                  'Завершена'
-                                )
-                              return s || '—'
-                            })()}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="ads-analytics-preview">
-                        {selectedCampaign.mediaType === 'video' &&
-                        selectedCampaign.mediaUrl ? (
-                          <video
-                            src={selectedCampaign.mediaUrl}
-                            autoPlay
-                            muted
-                            loop
-                            playsInline
-                          />
-                        ) : selectedCampaign.mediaType === 'image' &&
-                          selectedCampaign.mediaUrl ? (
-                          <img
-                            src={selectedCampaign.mediaUrl}
-                            alt="preview"
-                          />
-                        ) : (
-                          <div className="ads-analytics-preview-empty">
-                            <span>
-                              {TX(
-                                t,
-                                'ads_analytics_preview_stub',
-                                'Preview'
-                              )}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="ads-analytics-controls">
-                      <div className="ads-select-group">
-                        <span>
-                          {TX(
-                            t,
-                            'ads_analytics_period',
-                            'Период:'
-                          )}
-                        </span>
-                        <button
-                          type="button"
-                          className={range === '1d' ? 'on' : ''}
-                          onClick={() => setRange('1d')}
-                        >
-                          24h
-                        </button>
-                        <button
-                          type="button"
-                          className={range === '7d' ? 'on' : ''}
-                          onClick={() => setRange('7d')}
-                        >
-                          7d
-                        </button>
-                        <button
-                          type="button"
-                          className={range === '30d' ? 'on' : ''}
-                          onClick={() => setRange('30d')}
-                        >
-                          30d
-                        </button>
-                        <button
-                          type="button"
-                          className={range === 'all' ? 'on' : ''}
-                          onClick={() => setRange('all')}
-                        >
-                          ALL
-                        </button>
-                      </div>
-                      <div className="ads-select-group">
-                        <span>
-                          {TX(
-                            t,
-                            'ads_analytics_group_by',
-                            'Группировка:'
-                          )}
-                        </span>
-                        <button
-                          type="button"
-                          className={groupBy === 'hour' ? 'on' : ''}
-                          onClick={() => setGroupBy('hour')}
-                        >
-                          {TX(
-                            t,
-                            'ads_analytics_group_by_hour',
-                            'Часы'
-                          )}
-                        </button>
-                        <button
-                          type="button"
-                          className={groupBy === 'day' ? 'on' : ''}
-                          onClick={() => setGroupBy('day')}
-                        >
-                          {TX(
-                            t,
-                            'ads_analytics_group_by_day',
-                            'Дни'
-                          )}
-                        </button>
-                      </div>
-                      <div className="ads-select-group">
-                        <span>
-                          {TX(
-                            t,
-                            'ads_campaigns_actions',
-                            'Действия:'
-                          )}
-                        </span>
-                        <button
-                          type="button"
-                          disabled={
-                            campaignActionLoading ||
-                            !selectedCampaign ||
-                            ['stopped', 'finished', 'expired'].includes(
-                              (selectedCampaign.status || '').toLowerCase()
-                            )
-                          }
-                          onClick={handleStopSelectedCampaign}
-                        >
-                          {campaignActionLoading
-                            ? TX(
-                                t,
-                                'ads_campaigns_action_stop_ing',
-                                'Останавливаем…'
-                              )
-                            : TX(
-                                t,
-                                'ads_campaigns_action_stop',
-                                'Остановить'
-                              )}
-                        </button>
-                        <button
-                          type="button"
-                          disabled={
-                            campaignActionLoading || !selectedCampaign
-                          }
-                          onClick={handleDeleteSelectedCampaign}
-                        >
-                          {campaignActionLoading
-                            ? TX(
-                                t,
-                                'ads_campaigns_action_delete_ing',
-                                'Удаляем…'
-                              )
-                            : TX(
-                                t,
-                                'ads_campaigns_action_delete',
-                                'Удалить'
-                              )}
-                        </button>
-                      </div>
-                    </div>
-                    {campaignActionError && (
-                      <div className="ads-error inline">
-                        <span>
-                          {TX(
-                            t,
-                            'ads_campaigns_action_error',
-                            'Ошибка при выполнении действия с кампанией:'
-                          )}{' '}
-                          {String(campaignActionError)}
-                        </span>
-                      </div>
-                    )}
-
-                    {analyticsLoading && (
-                      <div className="ads-loading">
-                        <div className="ads-spinner" />
-                        <span>
-                          {TX(
-                            t,
-                            'ads_analytics_loading',
-                            'Загружаем аналитику…'
-                          )}
-                        </span>
-                      </div>
-                    )}
-
-                    {!analyticsLoading && analyticsError && (
-                      <div className="ads-error inline">
-                        <span>
-                          {TX(
-                            t,
-                            'ads_analytics_error',
-                            'Ошибка аналитики:'
-                          )}{' '}
-                          {String(analyticsError)}
-                        </span>
-                      </div>
-                    )}
-
-                    {!analyticsLoading && analytics && (
-                      <>
-                        <div className="ads-analytics-metrics">
-                          <MetricPill
-                            label={TX(
-                              t,
-                              'ads_analytics_summary_impressions',
-                              'Показов'
-                            )}
-                            value={analytics.impressionsTotal ?? 0}
-                          />
-                          <MetricPill
-                            label={TX(
-                              t,
-                              'ads_analytics_summary_clicks',
-                              'Кликов'
-                            )}
-                            value={analytics.clicksTotal ?? 0}
-                          />
-                          <MetricPill
-                            label={TX(
-                              t,
-                              'ads_analytics_summary_ctr',
-                              'CTR'
-                            )}
-                            value={
-                              analytics.ctrTotal != null
-                                ? `${(analytics.ctrTotal * 100).toFixed(1)}%`
-                                : '—'
-                            }
-                          />
-                        </div>
-
-                        <div className="ads-analytics-charts">
-                          <div>
-                            <div className="ads-chart-title">
-                              {TX(
-                                t,
-                                'ads_analytics_chart_impressions',
-                                'Импрессии по времени'
-                              )}
-                            </div>
-                            <TinyBarChart
-                              t={t}
-                              points={
-                                analytics.series?.map((p) => ({
-                                  ...p,
-                                  label: p.label || p.ts,
-                                })) || []
-                              }
-                              metricKey="impressions"
-                            />
-                          </div>
-                          <div>
-                            <div className="ads-chart-title">
-                              {TX(
-                                t,
-                                'ads_analytics_chart_clicks',
-                                'Клики по времени'
-                              )}
-                            </div>
-                            <TinyBarChart
-                              t={t}
-                              points={
-                                analytics.series?.map((p) => ({
-                                  ...p,
-                                  label: p.label || p.ts,
-                                })) || []
-                              }
-                              metricKey="clicks"
-                              accent="clicks"
-                            />
-                          </div>
-                        </div>
-
-                        {Array.isArray(analytics.geo) &&
-                          analytics.geo.length > 0 && (
-                            <div className="ads-geo">
-                              <div className="ads-chart-title">
-                                {TX(
-                                  t,
-                                  'ads_analytics_summary_top_regions',
-                                  'Гео по кампаниям'
-                                )}
-                              </div>
-                              <div className="ads-geo-table-wrap">
-                                <table className="ads-geo-table">
-                                  <thead>
-                                    <tr>
-                                      <th>
-                                        {TX(
-                                          t,
-                                          'ads_geo_country',
-                                          'Страна'
-                                        )}
-                                      </th>
-                                      <th>
-                                        {TX(
-                                          t,
-                                          'ads_geo_region',
-                                          'Регион'
-                                        )}
-                                      </th>
-                                      <th>
-                                        {TX(
-                                          t,
-                                          'ads_geo_city',
-                                          'Город'
-                                        )}
-                                      </th>
-                                      <th>
-                                        {TX(
-                                          t,
-                                          'ads_geo_impressions',
-                                          'Импрессии'
-                                        )}
-                                      </th>
-                                      <th>
-                                        {TX(
-                                          t,
-                                          'ads_geo_clicks',
-                                          'Клики'
-                                        )}
-                                      </th>
-                                      <th>
-                                        {TX(
-                                          t,
-                                          'ads_geo_ctr',
-                                          'CTR'
-                                        )}
-                                      </th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {analytics.geo.map((g, idx) => {
-                                      const totalImp = Number(
-                                        analytics.impressionsTotal || 0
-                                      )
-                                      const imp = Number(g.impressions || 0)
-                                      const clicks = Number(g.clicks || 0)
-                                      const ctr =
-                                        imp > 0
-                                          ? `${((clicks / imp) * 100).toFixed(
-                                              1
-                                            )}%`
-                                          : '—'
-                                      const pct =
-                                        totalImp > 0
-                                          ? Math.round((imp / totalImp) * 100)
-                                          : 0
-
-                                      return (
-                                        <tr
-                                          key={
-                                            (g.country || '') +
-                                            (g.region || '') +
-                                            (g.city || '') +
-                                            idx
-                                          }
-                                        >
-                                          <td>
-                                            {localizeCountry(t, g.country)}
-                                          </td>
-                                          <td>{g.region || '—'}</td>
-                                          <td>{g.city || '—'}</td>
-                                          <td>{imp}</td>
-                                          <td>{clicks}</td>
-                                          <td>
-                                            <div className="ads-geo-ctr-cell">
-                                              <span>{ctr}</span>
-                                              <div className="ads-geo-bar-wrap">
-                                                <div
-                                                  className="ads-geo-bar"
-                                                  style={{
-                                                    width: `${pct}%`,
-                                                  }}
-                                                />
-                                              </div>
-                                            </div>
-                                          </td>
-                                        </tr>
-                                      )
-                                    })}
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
-                          )}
-                      </>
-                    )}
-                  </>
-                ) : (
-                  <div className="ads-analytics-empty">
-                    {TX(
-                      t,
-                      'ads_analytics_empty',
-                      'Выбери активную кампанию слева, чтобы увидеть аналитику.'
-                    )}
-                  </div>
-                )}
-              </div>
+              {/* НОВЫЙ пушечный блок аналитики */}
+              <AdsAnalyticsPanel
+                t={t}
+                TX={TX}
+                formatDate={formatDate}
+                selectedCampaign={selectedCampaign}
+                analytics={analytics}
+                analyticsLoading={analyticsLoading}
+                analyticsError={analyticsError}
+                range={range}
+                setRange={setRange}
+                groupBy={groupBy}
+                setGroupBy={setGroupBy}
+                campaignActionLoading={campaignActionLoading}
+                campaignActionError={campaignActionError}
+                onStopCampaign={handleStopSelectedCampaign}
+                onDeleteCampaign={handleDeleteSelectedCampaign}
+              />
             </div>
           </section>
         )}
@@ -2237,411 +1482,93 @@ async function uploadMediaForCreative(cr) {
           opacity: 0.85;
         }
 
-        .ads-analytics {
-          border-radius: 14px;
-          background: radial-gradient(
-              circle at 100% 0,
-              rgba(0, 200, 255, 0.25),
-              transparent 55%
-            ),
-            linear-gradient(180deg, rgba(8, 12, 21, 0.98), #020617);
-          border: 1px solid rgba(157, 220, 255, 0.3);
-          box-shadow: 0 10px 26px rgba(0, 0, 0, 0.65),
-            inset 0 1px 0 rgba(255, 255, 255, 0.06);
-          padding: 12px 12px 14px;
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-        .ads-analytics-empty {
-          font-size: 13px;
-          opacity: 0.9;
-        }
-        .ads-analytics-header {
-          display: flex;
-          justify-content: space-between;
-          gap: 10px;
-        }
-        .ads-analytics-title {
-          font-size: 15px;
-          font-weight: 800;
-        }
-        .ads-analytics-sub {
-          font-size: 12px;
-          opacity: 0.75;
-        }
-
-        .ads-analytics-dates {
-          font-size: 11px;
-          opacity: 0.7;
-          margin-top: 2px;
-        }
-        .ads-analytics-status {
-          margin-top: 4px;
-          font-size: 11px;
-          opacity: 0.85;
-        }
-        .ads-status-pill {
-          display: inline-flex;
-          align-items: center;
-          padding: 2px 8px;
-          border-radius: 999px;
-          background: rgba(34, 197, 94, 0.12);
-          border: 1px solid rgba(34, 197, 94, 0.7);
-          font-size: 11px;
-        }
-
-        .ads-analytics-preview {
-          width: 140px;
-          height: 80px;
-          border-radius: 10px;
-          overflow: hidden;
-          border: 1px solid rgba(157, 220, 255, 0.4);
-          box-shadow: 0 6px 18px rgba(0, 0, 0, 0.7);
-          flex-shrink: 0;
-        }
-        .ads-analytics-preview video,
-        .ads-analytics-preview img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-        }
-        .ads-analytics-preview-empty {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 11px;
-          opacity: 0.7;
-        }
-
-        .ads-analytics-controls {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: space-between;
-          gap: 8px;
-          font-size: 12px;
-        }
-        .ads-select-group {
-          display: inline-flex;
-          flex-wrap: wrap;
-          align-items: center;
-          gap: 6px;
-        }
-        .ads-select-group span:first-child {
-          opacity: 0.8;
-        }
-        .ads-select-group button {
-          padding: 4px 8px;
-          border-radius: 999px;
-          border: 1px solid rgba(157, 220, 255, 0.4);
-          background: rgba(15, 23, 42, 0.9);
-          color: #e5f0ff;
-          font-size: 11px;
-          cursor: pointer;
-        }
-        .ads-select-group button.on {
-          background: linear-gradient(
-            135deg,
-            #7a5c00 0%,
-            #ffd700 18%,
-            #fff4b3 32%,
-            #ffd700 46%,
-            #ffea80 60%,
-            #b38400 74%,
-            #ffd700 88%,
-            #7a5c00 100%
-          );
-          color: #0b0b12;
-          box-shadow: 0 0 0 1px rgba(255, 215, 99, 0.7),
-            0 0 18px rgba(255, 215, 99, 0.45);
-        }
-
-        .ads-analytics-metrics {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-        }
-
-    .ads-analytics-charts {
-      display: flex;
-      flex-direction: column;   /* оба графика строго друг под другом */
-      gap: 12px;
-    }
-
-        .ads-chart-title {
-          font-size: 12px;
-          text-transform: uppercase;
-          letter-spacing: 0.12em;
-          opacity: 0.8;
-          margin: 0 0 4px;
-        }
-
-        .ads-geo {
-          margin-top: 6px;
-        }
-    .ads-geo-table-wrap {
-      margin-top: 4px;
-      max-height: 260px;                /* чуть выше список стран */
-      overflow-y: auto;                 /* вертикальный скролл по странам */
-      overflow-x: auto;                 /* горизонтальный скролл на узких экранах */
-      border-radius: 10px;
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      background: rgba(15, 23, 42, 0.9);
-    }
-    .ads-geo-table {
-      width: 100%;
-      min-width: 520px;                 /* чтобы колонки не схлопывались в точки */
-      border-collapse: collapse;
-      font-size: 12px;
-    }
-    .ads-geo-table th:first-child,
-    .ads-geo-table td:first-child {
-      max-width: 180px;                 /* страна читается */
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-        .ads-geo-table thead {
-          background: rgba(30, 64, 175, 0.35);
-        }
-        .ads-geo-table th,
-        .ads-geo-table td {
-          padding: 4px 6px;
-          border-bottom: 1px solid rgba(30, 64, 175, 0.3);
-        }
-        .ads-geo-table th {
-          text-align: left;
-          font-weight: 600;
-          font-size: 11px;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-        }
-        .ads-geo-table tbody tr:nth-child(even) {
-          background: rgba(15, 23, 42, 0.8);
-        }
-        .ads-geo-ctr-cell {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-        .ads-geo-ctr-cell span {
-          font-size: 11px;
-        }
-        .ads-geo-bar-wrap {
-          position: relative;
-          height: 6px;
-          border-radius: 999px;
-          background: rgba(15, 23, 42, 0.9);
-          overflow: hidden;
-        }
-        .ads-geo-bar {
-          position: absolute;
-          inset: 0;
-          border-radius: inherit;
-          background: linear-gradient(
-            90deg,
-            rgba(0, 229, 255, 0.9),
-            rgba(255, 196, 0, 0.95)
-          );
-          box-shadow: 0 0 12px rgba(0, 229, 255, 0.5);
-          transform-origin: left center;
-          animation: adsGeoIn 0.4s ease-out forwards;
-        }
-        @keyframes adsGeoIn {
-          0% {
-            transform: scaleX(0);
-          }
-          100% {
-            transform: scaleX(1);
-          }
-        }
-
         /* Попап правил */
         .ads-rules-overlay {
           position: fixed;
           inset: 0;
-          z-index: 80;
+          z-index: 999;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 14px;
-          background: radial-gradient(
-              circle at 0 0,
-              rgba(0, 0, 0, 0.75),
-              transparent 60%
-            ),
-            radial-gradient(
-              circle at 100% 100%,
-              rgba(0, 0, 0, 0.7),
-              transparent 55%
-            ),
-            rgba(0, 0, 0, 0.8);
+          padding: var(--popup-padding, 16px);
+          background: rgba(0, 0, 0, 0.75);
+          backdrop-filter: blur(4px);
         }
+
         .ads-rules-modal {
-          width: min(520px, 100%);
-          max-height: min(520px, 100%);
-          border-radius: 18px;
-          padding: 16px 18px 14px;
+          width: var(--popup-width, 540px);
+          max-width: 100%;
+          max-height: var(--popup-max-height, 84vh);
+          border-radius: var(--popup-radius, 18px);
+          padding: var(--popup-inner-padding, 18px);
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+          overflow: hidden;
           background: linear-gradient(
             180deg,
             rgba(15, 23, 42, 0.98),
             rgba(15, 23, 42, 0.92)
           );
-          border: 1px solid rgba(248, 250, 252, 0.1);
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85),
-            0 0 40px rgba(245, 158, 11, 0.35);
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
+          border: 1px solid rgba(248, 250, 252, 0.12);
+          box-shadow: 0 25px 65px rgba(0, 0, 0, 0.85),
+            0 0 55px rgba(255, 215, 99, 0.5);
         }
-        .ads-rules-header {
-          display: flex;
-          align-items: center;
-          gap: 10px;
+
+        .ads-rules-body {
+          flex: 1;
+          overflow-y: auto;
+          padding-right: 6px;
+          border-radius: 12px;
+          border: 1px dashed rgba(255, 220, 110, 0.8);
+          background: rgba(15, 23, 42, 0.9);
+          font-size: 14px;
+          color: #ffe9bc;
+          line-height: 1.42;
+          white-space: pre-wrap;
+          word-break: break-word;
         }
+
+        .ads-rules-text {
+          margin-bottom: 14px;
+          padding-left: 4px;
+        }
+
         .ads-rules-header h2 {
           margin: 0;
-          font-size: 17px;
+          font-size: 18px;
         }
+
         .ads-rules-icon {
-          width: 32px;
-          height: 32px;
+          width: 36px;
+          height: 36px;
           border-radius: 999px;
           display: grid;
           place-items: center;
-          background: radial-gradient(
-              circle,
-              rgba(248, 250, 252, 0.3),
-              transparent 60%
-            ),
-            linear-gradient(
-              180deg,
-              rgba(30, 64, 175, 0.98),
-              #020617
-            );
-          box-shadow: 0 0 18px rgba(250, 204, 21, 0.9);
-          animation: adsRulesGlow 1.2s ease-in-out infinite alternate;
+          background: linear-gradient(180deg, #1e3a8a, #020617);
+          box-shadow: 0 0 18px rgba(255, 215, 99, 0.9);
         }
-        @keyframes adsRulesGlow {
-          0% {
-            transform: translateY(0);
-            filter: brightness(1) saturate(1);
-          }
-          100% {
-            transform: translateY(-2px);
-            filter: brightness(1.1) saturate(1.1);
+
+        .ads-rules-accept {
+          margin-top: 4px;
+          align-self: flex-end;
+          min-width: 200px;
+        }
+
+        .ads-rules-accept:disabled {
+          opacity: 0.45;
+          cursor: not-allowed;
+          box-shadow: none;
+          filter: grayscale(0.2);
+        }
+
+        @media (max-width: 640px) {
+          .ads-rules-modal {
+            width: 100%;
+            max-height: 92vh;
+            border-radius: 14px;
           }
         }
-/* ===========================
-   POPUP — общий стиль
-=========================== */
-.ads-rules-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--popup-padding, 16px);
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(4px);
-}
-
-.ads-rules-modal {
-  width: var(--popup-width, 540px);
-  max-width: 100%;
-  max-height: var(--popup-max-height, 84vh);
-  border-radius: var(--popup-radius, 18px);
-
-  padding: var(--popup-inner-padding, 18px);
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  overflow: hidden;
-
-  background: linear-gradient(
-    180deg,
-    rgba(15, 23, 42, 0.98),
-    rgba(15, 23, 42, 0.92)
-  );
-  border: 1px solid rgba(248, 250, 252, 0.12);
-  box-shadow: 0 25px 65px rgba(0, 0, 0, 0.85),
-    0 0 55px rgba(255, 215, 99, 0.5);
-}
-
-.ads-rules-body {
-  flex: 1;
-  overflow-y: auto;
-  padding-right: 6px;
-
-  border-radius: 12px;
-  border: 1px dashed rgba(255, 220, 110, 0.8);
-  background: rgba(15, 23, 42, 0.9);
-
-  font-size: 14px;
-  color: #ffe9bc;
-  line-height: 1.42;
-
-  white-space: pre-wrap;    /* 🔥 Главное: перенос строк сохраняется */
-  word-break: break-word;
-}
-
-.ads-rules-text {
-  margin-bottom: 14px;
-  padding-left: 4px;
-}
-
-.ads-rules-header h2 {
-  margin: 0;
-  font-size: 18px;
-}
-
-.ads-rules-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(180deg, #1e3a8a, #020617);
-  box-shadow: 0 0 18px rgba(255, 215, 99, 0.9);
-}
-
-.ads-rules-accept {
-  min-width: 230px;
-  align-self: flex-end;
-}
-
-.ads-rules-accept:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-/* 📱 Мобильный */
-@media (max-width: 640px) {
-  .ads-rules-modal {
-    width: 100%;
-    max-height: 70vh;
-    border-radius: 14px;
-  }
-}
-
-.ads-rules-accept {
-  margin-top: 4px;
-  align-self: flex-end;
-  min-width: 200px;
-}
-
-/* Пока не докрутили до низа — кнопка неактивна визуально */
-.ads-rules-accept:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  box-shadow: none;
-  filter: grayscale(0.2);
-}
 
         @media (max-width: 960px) {
           .ads-form-grid {
@@ -2655,10 +1582,6 @@ async function uploadMediaForCreative(cr) {
           .ads-pkg {
             flex-direction: column;
             align-items: flex-start;
-          }
-          .ads-analytics-preview {
-            width: 110px;
-            height: 70px;
           }
         }
       `}</style>

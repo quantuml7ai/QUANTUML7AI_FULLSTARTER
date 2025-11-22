@@ -1201,8 +1201,8 @@ export function AdCard({ url, slotKind, nearId }) {
               onClick={handleOpenAdsPage}
               className="btn"
               style={{
-                fontSize: '10px',
-                padding: '4px 8px',
+                fontSize: '12x',
+                padding: '6px 12px',
                 borderRadius: 999,
                 marginLeft: 'auto',
                 whiteSpace: 'nowrap',
