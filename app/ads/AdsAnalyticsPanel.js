@@ -25,8 +25,8 @@ export function MetricPill({ label, value, hint, secondary }) {
       <div className="ads-pill-value">{value}</div>
       <style jsx>{`
         .ads-pill {
-          min-width: 130px;
-          padding: 10px 14px;
+          min-width: 120px;
+          padding: 8px 12px;
           border-radius: 999px;
           background:
             radial-gradient(
@@ -54,7 +54,7 @@ export function MetricPill({ label, value, hint, secondary }) {
           gap: 4px;
         }
         .ads-pill-label {
-          font-size: 11px;
+          font-size: 10px;
           text-transform: uppercase;
           letter-spacing: 0.12em;
           opacity: 0.9;
@@ -65,7 +65,7 @@ export function MetricPill({ label, value, hint, secondary }) {
           white-space: nowrap;
         }
         .ads-pill-value {
-          font-size: 18px;
+          font-size: 16px;
           font-weight: 800;
           letter-spacing: 0.04em;
         }
@@ -81,7 +81,7 @@ export function MetricPill({ label, value, hint, secondary }) {
   )
 }
 
-/* ===== Мини-бар-чарт (обновлённый) ===== */
+/* ===== Мини-бар-чарт (обновлённый, узкие бары) ===== */
 function TinyBarChart({
   t,
   TX,
@@ -116,6 +116,9 @@ function TinyBarChart({
   const magnitude = 10 ** Math.floor(Math.log10(maxRaw))
   const step = magnitude / 2
   const max = Math.ceil(maxRaw / step) * step || 1
+
+  // небольшой запас по высоте, чтобы бары не били в потолок
+  const effectiveMax = max * 1.1 || 1
 
   const tickCount = 4
   const ticks = Array.from({ length: tickCount }, (_, i) =>
@@ -174,7 +177,7 @@ function TinyBarChart({
           <div className="ads-chart-bars">
             {data.map((p, idx) => {
               const v = Number(p[metricKey] || 0)
-              const ratio = v / max
+              const ratio = v / effectiveMax
               const h = Math.max(4, ratio * 100)
               const label = p.label || p.ts
               return (
@@ -272,8 +275,9 @@ function TinyBarChart({
           inset: 0;
           display: flex;
           align-items: flex-end;
-          gap: 4px;
-          padding: 6px 8px 8px;
+          justify-content: flex-start;
+          gap: 6px;
+          padding: 6px 10px 8px;
         }
         .ads-chart-grid-overlay {
           position: absolute;
@@ -289,8 +293,9 @@ function TinyBarChart({
           pointer-events: none;
         }
         .ads-chart-bar {
-          flex: 1 1 0;
-          border-radius: 999px;
+          flex: 0 0 8px;
+          max-width: 10px;
+          border-radius: 6px;
           background: linear-gradient(
             180deg,
             rgba(59, 130, 246, 0.98),
@@ -298,12 +303,9 @@ function TinyBarChart({
             rgba(45, 212, 191, 0.95)
           );
           box-shadow:
-            0 0 0 1px rgba(56, 189, 248, 0.65),
-            0 6px 18px rgba(0, 0, 0, 0.85),
-            0 0 26px rgba(56, 189, 248, 0.5);
+            0 0 0 1px rgba(56, 189, 248, 0.55),
+            0 4px 10px rgba(0, 0, 0, 0.85);
           transform-origin: bottom center;
-          transform: scaleY(0.2);
-          animation: adsBarIn 0.5s ease-out forwards;
         }
         .ads-chart-bar-accent {
           background: linear-gradient(
@@ -313,9 +315,8 @@ function TinyBarChart({
             rgba(234, 179, 8, 0.98)
           );
           box-shadow:
-            0 0 0 1px rgba(252, 211, 77, 0.85),
-            0 6px 22px rgba(0, 0, 0, 0.9),
-            0 0 30px rgba(252, 211, 77, 0.65);
+            0 0 0 1px rgba(252, 211, 77, 0.8),
+            0 4px 12px rgba(0, 0, 0, 0.9);
         }
         .ads-chart-xaxis {
           display: flex;
@@ -337,17 +338,6 @@ function TinyBarChart({
           display: block;
         }
 
-        @keyframes adsBarIn {
-          0% {
-            transform: scaleY(0.05);
-            opacity: 0;
-          }
-          100% {
-            transform: scaleY(1);
-            opacity: 1;
-          }
-        }
-
         @media (max-width: 640px) {
           .ads-chart {
             grid-template-columns: minmax(0, 1fr);
@@ -365,7 +355,7 @@ function TinyBarChart({
   )
 }
 
-/* ===== Карточка GEO-детализации (псевдо-глобус) ===== */
+/* ===== Карточка GEO-детализации (картинка карты мира) ===== */
 function GeoGlobeCard({ TX, t, geo, totalImpressions, selectedIndex }) {
   if (!geo.length) return null
   const current = geo[selectedIndex] || geo[0]
@@ -385,7 +375,8 @@ function GeoGlobeCard({ TX, t, geo, totalImpressions, selectedIndex }) {
           {TX(t, 'ads_geo_focus', 'Фокус по гео')}
         </span>
         <div className="ads-geo-globe-title">
-          {current.country || TX(t, 'ads_geo_country_unknown', 'Не определено')}
+          {current.country ||
+            TX(t, 'ads_geo_country_unknown', 'Не определено')}
         </div>
         <div className="ads-geo-globe-sub">
           {(current.region || '—')}{' '}
@@ -394,11 +385,11 @@ function GeoGlobeCard({ TX, t, geo, totalImpressions, selectedIndex }) {
       </div>
 
       <div className="ads-geo-globe-body">
-        <div className="ads-geo-globe-planet">
-          <div className="ads-geo-globe-core" />
-          <div className="ads-geo-globe-orbit ads-geo-globe-orbit-1" />
-          <div className="ads-geo-globe-orbit ads-geo-globe-orbit-2" />
-          <div className="ads-geo-globe-orbit ads-geo-globe-orbit-3" />
+        <div className="ads-geo-globe-image">
+          <img
+            src="/geo-world-dots.gif"
+            alt={TX(t, 'ads_geo_world_alt', 'Карта мира')}
+          />
         </div>
         <div className="ads-geo-globe-metrics">
           <div className="ads-geo-globe-metric">
@@ -471,15 +462,16 @@ function GeoGlobeCard({ TX, t, geo, totalImpressions, selectedIndex }) {
         .ads-geo-globe-body {
           margin-top: 4px;
           display: grid;
-          grid-template-columns: 120px minmax(0, 1fr);
+          grid-template-columns: 140px minmax(0, 1fr);
           gap: 10px;
           align-items: center;
         }
-        .ads-geo-globe-planet {
+        .ads-geo-globe-image {
           position: relative;
-          width: 110px;
-          height: 110px;
-          border-radius: 999px;
+          width: 140px;
+          height: 90px;
+          border-radius: 14px;
+          overflow: hidden;
           background: radial-gradient(
             circle at 30% 20%,
             rgba(248, 250, 252, 0.4),
@@ -487,39 +479,14 @@ function GeoGlobeCard({ TX, t, geo, totalImpressions, selectedIndex }) {
             rgba(15, 23, 42, 0.95)
           );
           box-shadow:
-            0 0 30px rgba(56, 189, 248, 0.6),
-            0 12px 22px rgba(0, 0, 0, 0.9);
-          overflow: hidden;
+            0 0 24px rgba(56, 189, 248, 0.6),
+            0 10px 20px rgba(0, 0, 0, 0.9);
         }
-        .ads-geo-globe-core {
-          position: absolute;
-          inset: 18%;
-          border-radius: 999px;
-          background: radial-gradient(
-            circle at 30% 20%,
-            rgba(248, 250, 252, 0.6),
-            rgba(59, 130, 246, 0.6),
-            transparent 70%
-          );
-        }
-        .ads-geo-globe-orbit {
-          position: absolute;
-          inset: 12%;
-          border-radius: 999px;
-          border: 1px solid rgba(148, 163, 184, 0.5);
-        }
-        .ads-geo-globe-orbit-1 {
-          transform: rotate(18deg);
-        }
-        .ads-geo-globe-orbit-2 {
-          inset: 10%;
-          transform: rotate(-26deg);
-          border-style: dashed;
-        }
-        .ads-geo-globe-orbit-3 {
-          inset: 6%;
-          border-color: rgba(56, 189, 248, 0.9);
-          opacity: 0.9;
+        .ads-geo-globe-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
         }
         .ads-geo-globe-metrics {
           display: flex;
@@ -573,9 +540,9 @@ function GeoGlobeCard({ TX, t, geo, totalImpressions, selectedIndex }) {
             grid-template-columns: minmax(0, 1fr);
             justify-items: center;
           }
-          .ads-geo-globe-planet {
-            width: 120px;
-            height: 120px;
+          .ads-geo-globe-image {
+            width: 180px;
+            height: 110px;
           }
         }
       `}</style>
@@ -609,6 +576,7 @@ function TrafficQualityCard({ TX, t, ctrTotal, avgImpPerDay, avgClicksPerDay }) 
   }
 
   const tierText = TX(t, tierKey, tierLabel)
+  const scoreLabel = TX(t, 'ads_quality_score_label', 'Score')
 
   return (
     <div className="ads-quality-card">
@@ -631,7 +599,7 @@ function TrafficQualityCard({ TX, t, ctrTotal, avgImpPerDay, avgClicksPerDay }) 
                 {Math.round(score)}
                 <span>%</span>
               </div>
-              <div className="ads-quality-score-sub">Score</div>
+              <div className="ads-quality-score-sub">{scoreLabel}</div>
             </div>
           </div>
         </div>
@@ -983,6 +951,10 @@ export default function AdsAnalyticsPanel({
   onDeleteCampaign,
 }) {
   const [geoIndex, setGeoIndex] = useState(0)
+  const [geoSort, setGeoSort] = useState({
+    field: 'impressions',
+    direction: 'desc',
+  })
 
   const series = useMemo(
     () =>
@@ -1000,10 +972,36 @@ export default function AdsAnalyticsPanel({
       ? (analytics.ctrTotal * 100).toFixed(1) + '%'
       : '—'
 
-  const geo = Array.isArray(analytics?.geo) ? analytics.geo : []
+  const geoRaw = Array.isArray(analytics?.geo) ? analytics.geo : []
+
+  const geo = useMemo(() => {
+    const copy = [...geoRaw]
+    const { field, direction } = geoSort
+    const dir = direction === 'asc' ? 1 : -1
+
+    copy.sort((a, b) => {
+      const av = a[field]
+      const bv = b[field]
+
+      if (field === 'impressions' || field === 'clicks') {
+        const an = Number(av || 0)
+        const bn = Number(bv || 0)
+        if (an === bn) return 0
+        return an > bn ? dir : -dir
+      }
+
+      const astr = (av || '').toString().toLowerCase()
+      const bstr = (bv || '').toString().toLowerCase()
+      if (astr === bstr) return 0
+      return astr > bstr ? dir : -dir
+    })
+
+    return copy
+  }, [geoRaw, geoSort])
+
   const uniqueCountries = useMemo(
-    () => new Set(geo.map((g) => g.country || 'ZZ')).size,
-    [geo]
+    () => new Set(geoRaw.map((g) => g.country || 'ZZ')).size,
+    [geoRaw]
   )
 
   const periodDays = useMemo(() => {
@@ -1106,6 +1104,29 @@ export default function AdsAnalyticsPanel({
       ? (bestCtrPoint.ctr * 100).toFixed(1) + '%'
       : '—'
 
+  const handleGeoHeaderClick = (field) => {
+    setGeoSort((prev) => {
+      if (prev.field === field) {
+        return {
+          field,
+          direction: prev.direction === 'asc' ? 'desc' : 'asc',
+        }
+      }
+      return { field, direction: 'desc' }
+    })
+  }
+
+  const totalImpHint = TX(
+    t,
+    'ads_analytics_hint_total_imp',
+    'Всего показов за выбранный период'
+  )
+
+  const btn24 = TX(t, 'ads_analytics_range_24h', '24h')
+  const btn7d = TX(t, 'ads_analytics_range_7d', '7d')
+  const btn30d = TX(t, 'ads_analytics_range_30d', '30d')
+  const btnAll = TX(t, 'ads_analytics_range_all', 'ALL')
+
   return (
     <div className="ads-analytics">
       {/* HEADER */}
@@ -1162,28 +1183,28 @@ export default function AdsAnalyticsPanel({
             className={range === '1d' ? 'on' : ''}
             onClick={() => setRange('1d')}
           >
-            24h
+            {btn24}
           </button>
           <button
             type="button"
             className={range === '7d' ? 'on' : ''}
             onClick={() => setRange('7d')}
           >
-            7d
+            {btn7d}
           </button>
           <button
             type="button"
             className={range === '30d' ? 'on' : ''}
             onClick={() => setRange('30d')}
           >
-            30d
+            {btn30d}
           </button>
           <button
             type="button"
             className={range === 'all' ? 'on' : ''}
             onClick={() => setRange('all')}
           >
-            ALL
+            {btnAll}
           </button>
         </div>
 
@@ -1285,8 +1306,9 @@ export default function AdsAnalyticsPanel({
 
       {!analyticsLoading && analytics && (
         <>
-          {/* GRID: метрики + графики */}
+          {/* ЛЕЙАУТ: метрики + два графика, всё столбиком */}
           <div className="ads-analytics-grid">
+            {/* Ряд метрик-бочонков */}
             <div className="ads-analytics-metrics">
               <MetricPill
                 label={TX(
@@ -1300,7 +1322,7 @@ export default function AdsAnalyticsPanel({
                   'ads_analytics_avg_per_day',
                   'в среднем / день'
                 )}
-                hint="Total impressions for selected period"
+                hint={totalImpHint}
               />
               <MetricPill
                 label={TX(
@@ -1369,42 +1391,43 @@ export default function AdsAnalyticsPanel({
               />
             </div>
 
-            <div className="ads-analytics-charts">
-              <div className="ads-analytics-chart-block">
-                <div className="ads-chart-title">
-                  {TX(
-                    t,
-                    'ads_analytics_chart_impressions',
-                    'Импрессии по времени'
-                  )}
-                </div>
-                <TinyBarChart
-                  t={t}
-                  TX={TX}
-                  points={series}
-                  metricKey="impressions"
-                />
+            {/* График показов на всю ширину */}
+            <div className="ads-analytics-chart-block">
+              <div className="ads-chart-title">
+                {TX(
+                  t,
+                  'ads_analytics_chart_impressions',
+                  'Импрессии по времени'
+                )}
               </div>
-              <div className="ads-analytics-chart-block">
-                <div className="ads-chart-title">
-                  {TX(
-                    t,
-                    'ads_analytics_chart_clicks',
-                    'Клики по времени'
-                  )}
-                </div>
-                <TinyBarChart
-                  t={t}
-                  TX={TX}
-                  points={series}
-                  metricKey="clicks"
-                  accent="clicks"
-                />
+              <TinyBarChart
+                t={t}
+                TX={TX}
+                points={series}
+                metricKey="impressions"
+              />
+            </div>
+
+            {/* График кликов на всю ширину, под показами */}
+            <div className="ads-analytics-chart-block">
+              <div className="ads-chart-title">
+                {TX(
+                  t,
+                  'ads_analytics_chart_clicks',
+                  'Клики по времени'
+                )}
               </div>
+              <TinyBarChart
+                t={t}
+                TX={TX}
+                points={series}
+                metricKey="clicks"
+                accent="clicks"
+              />
             </div>
           </div>
 
-          {/* Продвинутые блоки: качество + heatmap + хайлайты */}
+          {/* Продвинутые блоки: качество, heatmap, highlights – тоже столбиком */}
           <div className="ads-advanced-row">
             <TrafficQualityCard
               TX={TX}
@@ -1461,7 +1484,7 @@ export default function AdsAnalyticsPanel({
             </div>
           </div>
 
-          {/* GEO-аналитика: таблица + "глобус" */}
+          {/* GEO-аналитика: сначала таблица на всю ширину, потом карта на всю ширину */}
           {geo.length > 0 && (
             <div className="ads-geo-row">
               <div className="ads-geo">
@@ -1476,23 +1499,63 @@ export default function AdsAnalyticsPanel({
                   <table className="ads-geo-table">
                     <thead>
                       <tr>
-                        <th>
+                        <th
+                          className={
+                            'sortable ' +
+                            (geoSort.field === 'country'
+                              ? 'on ' + geoSort.direction
+                              : '')
+                          }
+                          onClick={() => handleGeoHeaderClick('country')}
+                        >
                           {TX(t, 'ads_geo_country', 'Страна')}
                         </th>
-                        <th>
+                        <th
+                          className={
+                            'sortable ' +
+                            (geoSort.field === 'region'
+                              ? 'on ' + geoSort.direction
+                              : '')
+                          }
+                          onClick={() => handleGeoHeaderClick('region')}
+                        >
                           {TX(t, 'ads_geo_region', 'Регион')}
                         </th>
-                        <th>
+                        <th
+                          className={
+                            'sortable ' +
+                            (geoSort.field === 'city'
+                              ? 'on ' + geoSort.direction
+                              : '')
+                          }
+                          onClick={() => handleGeoHeaderClick('city')}
+                        >
                           {TX(t, 'ads_geo_city', 'Город')}
                         </th>
-                        <th>
+                        <th
+                          className={
+                            'sortable numeric ' +
+                            (geoSort.field === 'impressions'
+                              ? 'on ' + geoSort.direction
+                              : '')
+                          }
+                          onClick={() => handleGeoHeaderClick('impressions')}
+                        >
                           {TX(
                             t,
                             'ads_geo_impressions',
                             'Импрессии'
                           )}
                         </th>
-                        <th>
+                        <th
+                          className={
+                            'sortable numeric ' +
+                            (geoSort.field === 'clicks'
+                              ? 'on ' + geoSort.direction
+                              : '')
+                          }
+                          onClick={() => handleGeoHeaderClick('clicks')}
+                        >
                           {TX(t, 'ads_geo_clicks', 'Клики')}
                         </th>
                         <th>
@@ -1530,8 +1593,8 @@ export default function AdsAnalyticsPanel({
                             </td>
                             <td>{g.region || '—'}</td>
                             <td>{g.city || '—'}</td>
-                            <td>{imp}</td>
-                            <td>{clicks}</td>
+                            <td className="num">{imp}</td>
+                            <td className="num">{clicks}</td>
                             <td>
                               <div className="ads-geo-ctr-cell">
                                 <span>{ctr}</span>
@@ -1694,21 +1757,18 @@ export default function AdsAnalyticsPanel({
             0 0 18px rgba(255, 215, 99, 0.45);
         }
 
+        /* Вся аналитика идёт столбиком: метрики + 2 графика */
         .ads-analytics-grid {
-          display: grid;
-          grid-template-columns: minmax(0, 280px) minmax(0, 1.7fr);
-          gap: 14px;
-          align-items: flex-start;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          align-items: stretch;
         }
         .ads-analytics-metrics {
           display: flex;
-          flex-direction: column;
+          flex-wrap: wrap;
           gap: 8px;
-        }
-        .ads-analytics-charts {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 10px;
+          align-items: stretch;
         }
         .ads-analytics-chart-block {
           display: flex;
@@ -1722,13 +1782,11 @@ export default function AdsAnalyticsPanel({
           opacity: 0.8;
         }
 
+        /* Продвинутые блоки – один под другим */
         .ads-advanced-row {
           margin-top: 4px;
-          display: grid;
-          grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr) minmax(
-              0,
-              0.9fr
-            );
+          display: flex;
+          flex-direction: column;
           gap: 12px;
           align-items: stretch;
         }
@@ -1767,10 +1825,11 @@ export default function AdsAnalyticsPanel({
           gap: 4px;
         }
 
+        /* GEO: таблица -> карта, всё на всю ширину, строго друг под другом */
         .ads-geo-row {
           margin-top: 6px;
-          display: grid;
-          grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+          display: flex;
+          flex-direction: column;
           gap: 12px;
           align-items: stretch;
         }
@@ -1778,16 +1837,17 @@ export default function AdsAnalyticsPanel({
           margin-top: 4px;
           max-height: 260px;
           overflow-y: auto;
-          overflow-x: auto;
+          overflow-x: hidden;
           border-radius: 12px;
           border: 1px solid rgba(148, 163, 184, 0.6);
           background: rgba(15, 23, 42, 0.97);
         }
         .ads-geo-table {
           width: 100%;
-          min-width: 520px;
+          min-width: 0;
           border-collapse: collapse;
           font-size: 12px;
+          table-layout: fixed;
         }
         .ads-geo-table thead {
           background: rgba(30, 64, 175, 0.55);
@@ -1796,6 +1856,9 @@ export default function AdsAnalyticsPanel({
         .ads-geo-table td {
           padding: 4px 6px;
           border-bottom: 1px solid rgba(30, 64, 175, 0.35);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         .ads-geo-table th {
           text-align: left;
@@ -1803,6 +1866,36 @@ export default function AdsAnalyticsPanel({
           font-size: 11px;
           text-transform: uppercase;
           letter-spacing: 0.08em;
+          cursor: default;
+          position: relative;
+          user-select: none;
+        }
+        .ads-geo-table th.sortable {
+          cursor: pointer;
+        }
+        .ads-geo-table th.sortable::after {
+          content: '';
+          position: absolute;
+          right: 6px;
+          top: 50%;
+          margin-top: -4px;
+          border-left: 4px solid transparent;
+          border-right: 4px solid transparent;
+          border-top: 6px solid rgba(226, 232, 240, 0.4);
+          opacity: 0.5;
+        }
+        .ads-geo-table th.sortable.on.asc::after {
+          border-top: none;
+          border-bottom: 6px solid rgba(226, 232, 240, 0.9);
+          margin-top: -2px;
+          opacity: 1;
+        }
+        .ads-geo-table th.sortable.on.desc::after {
+          border-top: 6px solid rgba(226, 232, 240, 0.9);
+          opacity: 1;
+        }
+        .ads-geo-table td.num {
+          text-align: right;
         }
         .ads-geo-table tbody tr:nth-child(even) {
           background: rgba(15, 23, 42, 0.92);
@@ -1851,25 +1944,6 @@ export default function AdsAnalyticsPanel({
           }
           100% {
             transform: scaleX(1);
-          }
-        }
-
-        @media (max-width: 960px) {
-          .ads-analytics-grid {
-            grid-template-columns: minmax(0, 1fr);
-          }
-          .ads-analytics-metrics {
-            flex-direction: row;
-            flex-wrap: wrap;
-          }
-          .ads-analytics-charts {
-            grid-template-columns: minmax(0, 1fr);
-          }
-          .ads-advanced-row {
-            grid-template-columns: minmax(0, 1fr);
-          }
-          .ads-geo-row {
-            grid-template-columns: minmax(0, 1fr);
           }
         }
 
