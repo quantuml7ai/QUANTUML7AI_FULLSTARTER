@@ -47,7 +47,7 @@ export const metadata = {
     siteName: 'Quantum L7 AI',
     title: 'Quantum L7 AI',
     description:
-      'Cosmic-grade intelligence for research, alpha signals and guarded execution.',
+      'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©',
     images: [{ url: '/branding/quantum_l7_logo.png', width: 1200, height: 630, alt: 'Quantum L7 AI' }],
   },
 

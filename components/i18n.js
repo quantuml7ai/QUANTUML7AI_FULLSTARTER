@@ -6114,6 +6114,8 @@ try {
 
 /* -------------------- EN -------------------- */
 const AI_EN = {
+  forum_ad_place: 'Place Ad',
+
   exchange_title: 'Exchange (in progress)',
   ai_cta_start_telegram: 'Start in Telegram',
   ai_reco_title: 'AI Recommendation',
@@ -6151,6 +6153,8 @@ const AI_EN = {
 
 /* -------------------- RU -------------------- */
 const AI_RU = {
+  forum_ad_place: 'Разместить',
+
   exchange_title: 'Биржа (в разработке)',
   ai_cta_start_telegram: 'Начать в Telegram',
   ai_reco_title: 'AI-рекомендация',
@@ -6186,6 +6190,8 @@ const AI_RU = {
 
 /* -------------------- UK -------------------- */
 const AI_UK = {
+  forum_ad_place: 'Розмістити',
+
   exchange_title: 'Біржа (в розробці)',
   ai_cta_start_telegram: 'Почати в Telegram',
   ai_reco_title: 'AI-рекомендація',
@@ -6221,6 +6227,8 @@ const AI_UK = {
 
 /* -------------------- ZH (简体) -------------------- */
 const AI_ZH = {
+  forum_ad_place: '投放广告',
+
   exchange_title: '交易所（开发中）',
   ai_cta_start_telegram: '在 Telegram 开始',
   ai_reco_title: 'AI 建议',
@@ -6256,6 +6264,8 @@ const AI_ZH = {
 
 /* -------------------- ES -------------------- */
 const AI_ES = {
+  forum_ad_place: 'Publicar anuncio',
+
   exchange_title: 'Bolsa (en desarrollo)',
   ai_cta_start_telegram: 'Empezar en Telegram',
   ai_reco_title: 'Recomendación AI',
@@ -6291,6 +6301,8 @@ const AI_ES = {
 
 /* -------------------- AR (العربية) -------------------- */
 const AI_AR = {
+  forum_ad_place: 'وضع إعلان',
+
   exchange_title: 'البورصة (قيد التطوير)',
   ai_cta_start_telegram: 'ابدأ في تيليجرام',
   ai_reco_title: 'توصية الذكاء الاصطناعي',
@@ -6326,6 +6338,8 @@ const AI_AR = {
 
 /* -------------------- TR -------------------- */
 const AI_TR = {
+  forum_ad_place: 'Reklam Ver',
+
   exchange_title: 'Borsa (geliştirme aşamasında)',
   ai_cta_start_telegram: 'Telegram’da Başla',
   ai_reco_title: 'AI Önerisi',
@@ -39988,6 +40002,1870 @@ try {
   Object.assign(dict.tr, ACADEMY_HERO_TR)
 } catch (e) {}
 
+
+const ADS_HERO_EN = {
+ads_pkg_starter_bullet_1: '⚡ Fast advertising launch across the forum and traffic pages',
+ads_pkg_starter_bullet_2: '🎯 Basic display priority and a balanced traffic volume',
+ads_pkg_starter_bullet_3: '📈 Simple impressions and clicks analytics in the cabinet',
+
+ads_pkg_pro_bullet_1: '🚀 Increased display priority and noticeably more traffic',
+ads_pkg_pro_bullet_2: '⚙️ Manage multiple campaigns within a single cabinet',
+ads_pkg_pro_bullet_3: '📊 Extended analytics, including geographic insights',
+ads_pkg_pro_bullet_4: '💸 More cost-efficient daily placement compared to STARTER',
+
+ads_pkg_elite_bullet_1: '👑 Maximum display priority across the forum and the entire ecosystem',
+ads_pkg_elite_bullet_2: '🚀 Consistently high impressions volume throughout the entire package duration',
+ads_pkg_elite_bullet_3: '🧠 Detailed analytics and comfortable scaling of campaigns',
+ads_pkg_elite_bullet_4: '💠 Minimum cost per day of placement due to the long-term package',
+
+ads_test_mode_cta_note: 'Test mode: payments are disabled, the cabinet is available without charge.',
+ads_error_no_account: 'Log in to your account first to purchase a package.',
+ads_pay_redirect: 'Redirecting to the payment page. After successful payment, the advertising cabinet will become active.',
+ads_error_pay_generic: 'Failed to create payment. Try again a bit later.',
+
+ads_hero_badge: 'GLOBAL • SITE-WIDE ADS',
+ads_page_title: 'Launch advertising across the Quantum L7 AI ecosystem',
+ads_page_subtitle: 'Your ad in a neon showcase: forum, traffic pages, global slots across the entire QL7 Global ecosystem.',
+
+ads_cta_test_mode: 'Enter the advertising cabinet (test mode)',
+ads_cta_loading: 'Creating payment…',
+ads_cta_main: 'Buy a package and launch advertising',
+ads_cta_have_pkg: 'I already have a package — to the cabinet',
+
+ads_meta_realtime: 'The slot rotator works in real time, slots are placed across the entire ecosystem, analytics are available directly in the cabinet.',
+
+ads_test_mode_label: 'TEST MODE',
+ads_test_mode_note: 'Payments are disabled. You can safely test cabinets, campaigns, and placements.',
+
+ads_orbit_core_label: 'ADS',
+ads_orbit_tag_global: 'GLOBAL',
+ads_orbit_tag_forum: 'FORUM',
+ads_orbit_tag_ai_rotator: 'AI-ROTATOR',
+
+ads_hero_image_alt: 'Quantum L7 AI Ads — advertising placement preview',
+ads_hero_figure_caption: 'Rotation of advertising cards across the forum and traffic pages.',
+
+ads_packages_title: 'Choose a package for your task',
+ads_packages_subtitle: 'All packages operate through a single cabinet and a single rotator. You can buy extra slots and scale traffic. The longer the package duration, the lower the cost of one day of advertising placement.',
+
+ads_pkg_recommended: 'Recommended',
+
+ads_pkg_tier_starter: 'STARTER',
+ads_pkg_tier_pro: 'PRO',
+ads_pkg_tier_elite: 'ELITE',
+
+ads_pkg_price_sub: 'one-time payment, package valid for full duration',
+ads_pkg_test_mode: 'no payment required in test mode',
+
+ads_pkg_days: 'Package duration',
+ads_pkg_days_suffix: 'days',
+ads_pkg_slots: 'Display intensity',
+
+ads_pkg_slots_value_starter: 'Moderate, even distribution of impressions',
+ads_pkg_slots_value_pro: 'Higher priority and more frequent impressions',
+ads_pkg_slots_value_elite: 'Maximum priority and wide coverage across the ecosystem',
+
+ads_pkg_max_campaigns: 'Campaigns included in the package',
+
+ads_pkg_selected: 'This package is selected for payment and launch.',
+ads_pkg_click_to_select: 'Click to select this package.',
+
+ads_how_title: 'How advertising rotates across the entire ecosystem',
+
+ads_how_step1_title: 'Buy a package — and you’re in',
+ads_how_step1_text: 'Purchase a package and get access to the advertising cabinet.',
+
+ads_how_step2_title: 'Create campaigns and set your link',
+ads_how_step2_text: 'Add a link and configure the ad — the system automatically selects the best preview format.',
+
+ads_how_step3_title: 'The rotator runs ads in ecosystem slots',
+ads_how_step3_text: 'Ads run in forum slots and across the entire ecosystem, without duplicates and with smart rotation.',
+
+ads_how_step4_title: 'Check analytics and optimize campaigns',
+ads_how_step4_text: 'In the cabinet you see impressions, clicks, CTR, and geo — and optimize campaigns based on live data.',
+
+ads_status_error_label: 'Error:',
+ads_status_ok_label: 'OK:',
+
+// cabinet
+geo_country_unknown: 'Not defined',
+
+ads_days_left_0: '0 d',
+ads_days_left_1: '1 d',
+ads_days_left_n: '%d d',
+
+ads_chart_empty: 'No data',
+
+ads_rules_title: 'Advertising Rules for Quantum L7 AI GLOBAL',
+
+ads_rules_text_1: `📘 **Section I. Fundamental Legal Provisions**
+1. By using the Quantum L7 AI GLOBAL advertising platform, the advertiser confirms full agreement with these Rules and accepts them as a legally binding document.
+2. The system operates in accordance with international security standards, consistent with global practices of regulated advertising ecosystems.
+3. Any advertising activity is considered acceptance of a digital offer agreement between the advertiser and Quantum L7 AI GLOBAL.`,
+
+ads_rules_text_2: `🚫 **Section II. Absolutely Prohibited Content (Zero-Tolerance Policy)**
+We apply a *zero-tolerance* regime to the following categories of materials. It is strictly prohibited to place, upload, display, or in any way distribute content containing:
+1. ❌ **Pornography**, erotic scenes, sexualized imagery, or any form of sexual content.  
+2. ❌ **Murder, brutality, gore, violent scenes**, including hidden, stylized, artistic, or documentary forms.  
+3. ❌ **Violence against people, children, or animals**, including any form of abuse.  
+4. ❌ **Materials violating moral norms**, ethics, public order, or human dignity.  
+5. ❌ **Phishing, fraud, deceptive schemes**, data forgery, manipulation, or any destructive advertising activity.  
+6. ❌ **Illegal activity** (drugs, trafficking, weapons, prohibited services).  
+7. ❌ **Promotion of hatred**, extremism, terrorism, or any form of discrimination.
+
+📌 *Any attempt to upload such content is automatically logged and considered a severe violation.*`,
+
+ads_rules_text_3: `⚖️ **Section III. Company’s Right to Unilateral Termination of the Agreement**
+Quantum L7 AI GLOBAL reserves the legally established right to:
+1. 🔸 Immediately stop displaying the advertisement.  
+2. 🔸 Hide or remove advertising materials.  
+3. 🔸 **Unilaterally terminate the advertising agreement** without providing additional notice.  
+4. 🔸 Restrict functionality or close the advertiser’s account.
+
+Grounds for termination include:  
+• uploading prohibited materials,  
+• circumventing moderation mechanisms,  
+• providing false information,  
+• endangering the reputation of the platform or its users,  
+• attempts to harm the ecosystem or digital security.`,
+
+ads_rules_text_4: `💸 **Section IV. Financial Terms in Case of Violation**
+1. In case of violation of the Rules, the advertiser agrees that:
+   • the funds for the advertising package are **non-refundable**;  
+   • any remaining paid period is forfeited without compensation;  
+   • the advertising account may be permanently blocked without possibility of restoration.
+2. The advertiser acknowledges that refunds are impossible, even partially.
+3. All operations are logged internally (backend-logs), which serve as evidence in dispute cases.`,
+
+ads_rules_text_5: `📄 **Section V. Content Rights and Advertiser Responsibility**
+1. The advertiser guarantees that they possess all rights to the uploaded materials, including copyright and related rights.
+2. In case of using someone else’s or illegal content, full responsibility lies solely with the advertiser.
+3. Quantum L7 AI GLOBAL is not responsible for any legal consequences arising from unlawful actions of the advertiser.`,
+
+ads_rules_text_6: `🌐 **Section VI. International Jurisdiction and Rule Changes**
+1. These Rules are developed in accordance with international digital advertising regulations.
+2. Quantum L7 AI GLOBAL may update the Rules unilaterally, keeping the current version available within the system.
+3. Continued use of the advertising platform constitutes automatic acceptance of the updated Rules.`,
+
+ads_rules_text_7: `💠 **Section VII. Ethical Declaration and Platform Values**
+1. We strive to create a global safe environment where advertising messages respect human dignity.
+2. The AI-moderation security system is trained to detect risks and respond without delays.
+3. We value honesty, transparency, and a technological approach to advertising—and expect the same from our partners.`,
+
+ads_rules_accept: 'Accept and continue',
+
+
+ads_title: 'Advertising Dashboard',
+ads_subtitle: 'Manage campaigns, upload creatives, and monitor analytics in real time.',
+
+ads_loading_cabinet: 'Loading dashboard…',
+
+ads_error_cabinet: 'Dashboard loading error:',
+
+ads_pkg_features_title: 'Current Package',
+ads_pkg_expires_in: 'Expires in',
+ads_pkg_expired: 'The package has expired — purchase a new one on the packages page.',
+
+ads_plan_campaigns_limit: 'Campaigns',
+ads_plan_campaigns_hint: 'How many campaigns have already been created within this package.',
+
+ads_new_campaign_title: 'Create a new advertising campaign',
+ads_new_campaign_intro_1: 'Give your campaign a clear name, specify the link, and upload a creative. We will automatically embed the ad into forum and ecosystem traffic slots.',
+
+ads_new_campaign_name_label: 'Campaign name',
+ads_new_campaign_name_placeholder: 'For example, Quantum L7 AI • Premium',
+
+ads_new_campaign_click_url_label: 'Destination link',
+ads_new_campaign_click_url_placeholder: 'https://sample-website.com/landing',
+
+ads_new_campaign_upload_video: 'Upload video (up to 3 minutes)',
+ads_new_campaign_upload_image: 'Upload image',
+
+ads_new_err_pkg_inactive: 'The package is inactive — extend or purchase a new one.',
+ads_new_err_required: 'This field is required.',
+ads_new_err_limit: 'Campaign limit for this package has been reached.',
+ads_new_err_video_too_long: 'The video is longer than 3 minutes (${Math.round(seconds)} sec) — please shorten it.',
+ads_new_err_generic: 'Failed to create the campaign, please try again.',
+
+ads_new_campaign_submiting: 'Launching…',
+ads_new_campaign_submit: 'Launch campaign',
+ads_new_campaign_remaining: 'Campaigns remaining in package:',
+
+ads_analytics_preview_title: 'Ad slot preview',
+
+ads_preview_text: 'After launching the campaign, we will display this ad in forum slots and across the ecosystem traffic.',
+ads_preview_empty: 'Your creative preview will appear here — video, image, or link.',
+
+ads_campaigns_title: 'Your campaigns',
+
+ads_campaigns_col_name: 'Name',
+ads_campaigns_col_start: 'Start',
+ads_campaigns_col_end: 'End',
+ads_campaigns_col_content: 'Content (link / media)',
+
+ads_campaigns_untitled: 'Untitled',
+
+ads_campaigns_media_video: 'Link + Video',
+ads_campaigns_media_image: 'Link + Image',
+ads_campaigns_media_link: 'Link only',
+
+ads_campaigns_finished_title: 'Completed campaigns',
+ads_campaigns_status_finished: 'Completed',
+ads_campaigns_empty: 'No campaigns yet — create your first one to see analytics.',
+
+ads_analytics_campaign_fallback: 'Campaign',
+
+ads_campaigns_dates: 'Period:',
+
+ads_campaigns_status: 'Status:',
+
+ads_status_active: 'Active',
+ads_status_paused: 'Paused',
+ads_status_stopped: 'Stopped',
+ads_status_finished: 'Completed',
+
+ads_analytics_preview_stub: 'Preview',
+
+ads_analytics_period: 'Period:',
+ads_analytics_group_by: 'Group by:',
+ads_analytics_group_by_hour: 'Hours',
+ads_analytics_group_by_day: 'Days',
+
+ads_campaigns_actions: 'Actions:',
+ads_campaigns_action_stop_ing: 'Stopping…',
+ads_campaigns_action_stop: 'Stop',
+ads_campaigns_action_delete_ing: 'Deleting…',
+ads_campaigns_action_delete: 'Delete',
+ads_campaigns_action_error: 'Error performing campaign action:',
+
+ads_analytics_loading: 'Loading analytics…',
+ads_analytics_error: 'Analytics error:',
+
+ads_analytics_summary_impressions: 'Impressions',
+ads_analytics_summary_clicks: 'Clicks',
+ads_analytics_summary_ctr: 'CTR',
+
+ads_analytics_chart_impressions: 'Impressions over time',
+ads_analytics_chart_clicks: 'Clicks over time',
+
+ads_analytics_summary_top_regions: 'Geo by campaigns',
+
+ads_geo_country: 'Country',
+ads_geo_region: 'Region',
+ads_geo_city: 'City',
+ads_geo_impressions: 'Impressions',
+ads_geo_clicks: 'Clicks',
+ads_geo_ctr: 'CTR',
+
+ads_analytics_empty: 'Select an active campaign to view analytics.',
+
+ads_pkg_type_starter: 'STARTER',
+ads_pkg_type_pro: 'PRO',
+ads_pkg_type_elite: 'ELITE',
+
+}
+
+const ADS_HERO_RU = {
+ads_pkg_starter_bullet_1: '⚡ Быстрый старт рекламы по форуму и страницам с трафиком',
+ads_pkg_starter_bullet_2: '🎯 Базовый приоритет показа и аккуратный объём трафика',
+ads_pkg_starter_bullet_3: '📈 Простая аналитика показов и кликов в кабинете',
+
+ads_pkg_pro_bullet_1: '🚀 Повышенный приоритет показа и заметно больше трафика',
+ads_pkg_pro_bullet_2: '⚙️ Управление несколькими кампаниями в одном кабинете',
+ads_pkg_pro_bullet_3: '📊 Расширенная аналитика, в том числе по географии',
+ads_pkg_pro_bullet_4: '💸 Более выгодная цена дня размещения, чем у STARTER',
+
+ads_pkg_elite_bullet_1: '👑 Максимальный приоритет показа по форуму и всей экосистеме',
+ads_pkg_elite_bullet_2: '🚀 Стабильно высокий объём показов на всём сроке пакета',
+ads_pkg_elite_bullet_3: '🧠 Подробная аналитика и комфортное масштабирование кампаний',
+ads_pkg_elite_bullet_4: '💠 Минимальная стоимость одного дня размещения за счёт длительного пакета',
+
+ads_test_mode_cta_note: 'Тестовый режим: оплаты отключены, кабинет доступен без платежа.',
+ads_error_no_account: 'Сначала авторизуйся / зайди в аккаунт, чтобы оформить пакет.',
+ads_pay_redirect: 'Перенаправляем на страницу оплаты. После успешного платежа рекламный кабинет станет активен.',
+ads_error_pay_generic: 'Не удалось создать платёж. Попробуй ещё раз чуть позже.',
+
+ads_hero_badge: 'GLOBAL • SITE-WIDE ADS',
+ads_page_title: 'Запусти рекламу по экосистеме Quantum L7 AI',
+ads_page_subtitle: 'Твоя реклама в неоновой витрине: форум, страницы с трафиком, глобальные слоты по всей экосистеме QL7 Global.',
+
+ads_cta_test_mode: 'Перейти в рекламный кабинет (тестовый режим)',
+ads_cta_loading: 'Создаём платёж…',
+ads_cta_main: 'Купить пакет и запустить рекламу',
+ads_cta_have_pkg: 'У меня уже есть пакет — в кабинет',
+
+ads_meta_realtime: 'Ротатор слотов работает в реальном времени, слоты размещаются по всей экосистеме, аналитику смотри прямо в кабинете.',
+
+ads_test_mode_label: 'TEST MODE',
+ads_test_mode_note: 'Оплаты отключены. Можно спокойно тестировать кабинеты, кампании и размещения.',
+
+ads_orbit_core_label: 'ADS',
+ads_orbit_tag_global: 'GLOBAL',
+ads_orbit_tag_forum: 'FORUM',
+ads_orbit_tag_ai_rotator: 'AI-ROTATOR',
+
+ads_hero_image_alt: 'Quantum L7 AI Ads — предпросмотр размещения рекламы',
+ads_hero_figure_caption: 'Ротация рекламных карточек по форуму и страницам с трафиком.',
+
+ads_packages_title: 'Выбери пакет под задачу',
+ads_packages_subtitle: 'Все пакеты работают через один кабинет и один ротатор. Можно докупать слоты и масштабировать трафик. Чем длиннее срок пакета, тем ниже стоимость одного дня размещения рекламы.',
+
+ads_pkg_recommended: 'Рекомендуем',
+
+ads_pkg_tier_starter: 'STARTER',
+ads_pkg_tier_pro: 'PRO',
+ads_pkg_tier_elite: 'ELITE',
+
+ads_pkg_price_sub: 'оплата один раз, пакет на весь срок',
+ads_pkg_test_mode: 'в тестовом режиме оплаты нет',
+
+ads_pkg_days: 'Срок пакета',
+ads_pkg_days_suffix: 'дн.',
+ads_pkg_slots: 'Интенсивность показов',
+
+ads_pkg_slots_value_starter: 'Умеренный, равномерный объём показов',
+ads_pkg_slots_value_pro: 'Повышенный приоритет и более частые показы',
+ads_pkg_slots_value_elite: 'Максимальный приоритет и широкий охват по экосистеме',
+
+ads_pkg_max_campaigns: 'Кампаний в рамках пакета',
+
+ads_pkg_selected: 'Этот пакет выбран для оплаты и запуска.',
+ads_pkg_click_to_select: 'Нажми, чтобы выбрать этот пакет.',
+
+ads_how_title: 'Как реклама крутится по всей экосистеме',
+
+ads_how_step1_title: 'Покупаешь пакет и ты в деле',
+ads_how_step1_text: 'Оформляешь пакет и получаешь доступ к рекламному кабинету.',
+
+ads_how_step2_title: 'Создаёшь кампании и задаёшь ссылку',
+ads_how_step2_text: 'Добавляешь ссылку и оформляешь объявление — система сама подбирает лучший формат предпросмотра.',
+
+ads_how_step3_title: 'Ротатор крутит объявления в слотах экосистемы',
+ads_how_step3_text: 'Реклама идёт в слотах форума и по всей экосистеме, без дублей и с умной ротацией.',
+
+ads_how_step4_title: 'Смотришь аналитику и докручиваешь кампанию',
+ads_how_step4_text: 'В кабинете видишь показы, клики, CTR и гео — докручиваешь кампании по живым цифрам.',
+
+ads_status_error_label: 'Ошибка:',
+ads_status_ok_label: 'OK:',
+
+// кабинет
+geo_country_unknown: 'Не определено',
+
+ads_days_left_0: '0 д',
+ads_days_left_1: '1 д',
+ads_days_left_n: '%d д',
+
+ads_chart_empty: 'Нет данных',
+
+ads_rules_title: 'Правила размещения рекламы на Quantum L7 AI GLOBAL',
+
+ads_rules_text_1: `📘 **Раздел I. Основные юридические положения**
+1. Используя рекламную платформу Quantum L7 AI GLOBAL, рекламодатель подтверждает своё полное согласие с настоящими Правилами и принимает их как юридически обязательный документ.
+2. Система работает по международным стандартам безопасности, соответствуя глобальной практике регулируемых рекламных экосистем.
+3. Любая рекламная активность расценивается как заключение цифрового договора-оферты между рекламодателем и Quantum L7 AI GLOBAL.`,
+
+ads_rules_text_2: `🚫 **Раздел II. Абсолютно запретный контент (Zero-Tolerance Policy)**
+Мы применяем режим *нулевой терпимости* к следующим видам материалов. Запрещается размещать, загружать, демонстрировать или как-либо распространять контент, содержащий:
+1. ❌ **Порнографию**, эротические сцены, сексуализированные изображения, сексуальный контент любого характера.  
+2. ❌ **Убийства, жестокость, расчленёнку, сцены насилия**, включая скрытое, стилизованное, художественное или документальное.  
+3. ❌ **Насилие над людьми, детьми или животными**, любые формы жестокого обращения.  
+4. ❌ **Материалы, нарушающие нравственные нормы**, нормы морали, публичный порядок или человеческое достоинство.  
+5. ❌ **Фишинг, мошенничество, схемы обмана**, подделку данных, манипуляции и любые виды деструктивной рекламы.  
+6. ❌ **Нелегальную деятельность** (наркотики, трафик, оружие, запрещённые услуги).  
+7. ❌ **Пропаганду ненависти**, экстремизма, терроризма, дискриминации любой формы.
+
+📌 *Попытка загрузки такого контента фиксируется автоматически и считается тяжелейшим нарушением.*`,
+
+ads_rules_text_3: `⚖️ **Раздел III. Право компании на одностороннее расторжение договора**
+Quantum L7 AI GLOBAL оставляет за собой юридически закреплённое право:
+1. 🔸 Немедленно остановить показ рекламы.  
+2. 🔸 Скрыть или удалить рекламные материалы.  
+3. 🔸 **В одностороннем порядке расторгнуть рекламный договор** без предоставления дополнительного уведомления.  
+4. 🔸 Ограничить функционал или закрыть рекламный кабинет.
+
+Основания для расторжения включают:  
+• загрузку запрещённых материалов,  
+• обход механизмов модерации,  
+• предоставление ложных данных,  
+• угрозу репутации платформы или её пользователей,  
+• попытки нанесения вреда экосистеме или нарушению цифровой безопасности.`,
+
+ads_rules_text_4: `💸 **Раздел IV. Финансовые условия в случае нарушения**
+1. В случае нарушения Правил рекламодатель соглашается, что:
+   • средства за рекламный пакет **не возвращаются**;  
+   • остаток оплаченного периода сгорает без компенсации;  
+   • рекламный аккаунт может быть заблокирован навсегда без возможности восстановления.
+2. Рекламодатель подтверждает понимание того, что возврат средств невозможен даже частично.
+3. Все операции протоколируются внутренними журналами (backend-логами), являющимися доказательной базой в спорных ситуациях.`,
+
+ads_rules_text_5: `📄 **Раздел V. Права на контент и ответственность рекламодателя**
+1. Рекламодатель гарантирует наличие всех прав на загружаемые материалы, включая авторские и смежные.
+2. В случае размещения чужого или нелегального контента вся ответственность лежит исключительно на рекламодателе.
+3. Quantum L7 AI GLOBAL не несёт ответственности за юридические последствия, возникшие из-за неправомерных действий рекламодателя.`,
+
+ads_rules_text_6: `🌐 **Раздел VI. Международная юрисдикция и изменения правил**
+1. Настоящие Правила разработаны с учётом международных норм регулирования цифровой рекламы.
+2. Quantum L7 AI GLOBAL может обновлять Правила в одностороннем порядке, сохраняя их актуальную версию в системе.
+3. Продолжение использования рекламной платформы означает автоматическое согласие с обновлёнными Правилами.`,
+
+ads_rules_text_7: `💠 **Раздел VII. Этическая декларация и ценности платформы**
+1. Мы стремимся к созданию глобальной безопасной среды, где рекламные сообщения уважают человеческое достоинство.
+2. Система безопасности AI-модерации обучена определять риски и реагировать на них без задержек.
+3. Мы ценим честность, прозрачность и технологичный подход к рекламе — и ожидаем того же от наших партнёров.`,
+
+ads_rules_accept: 'Принять и продолжить',
+
+
+ads_title: 'Рекламный кабинет',
+ads_subtitle: 'Управляй кампаниями, загружай креативы, смотри аналитику в реальном времени.',
+
+ads_loading_cabinet: 'Загружаем кабинет…',
+
+ads_error_cabinet: 'Ошибка загрузки кабинета:',
+
+ads_pkg_features_title: 'Текущий пакет',
+ads_pkg_expires_in: 'Истекает через',
+ads_pkg_expired: 'Срок действия пакета истёк — купи новый на странице пакетов.',
+
+ads_plan_campaigns_limit: 'Кампаний',
+ads_plan_campaigns_hint: 'Сколько кампаний уже создано в рамках этого пакета.',
+
+ads_new_campaign_title: 'Создать рекламную кампанию',
+ads_new_campaign_intro_1: 'Дай кампании понятное название, укажи ссылку и загрузи креатив. Мы автоматически встроим объявление в рекламные слоты форума и страницы по всей экосистеме.',
+
+ads_new_campaign_name_label: 'Название кампании',
+ads_new_campaign_name_placeholder: 'Например, Quantum L7 AI • Premium',
+
+ads_new_campaign_click_url_label: 'Ссылка для перехода',
+ads_new_campaign_click_url_placeholder: 'https://пример-сайта.com/landing',
+
+ads_new_campaign_upload_video: 'Загрузить видео (до 3 минут)',
+ads_new_campaign_upload_image: 'Загрузить изображение',
+
+ads_new_err_pkg_inactive: 'Пакет не активен — продли или купи новый на странице пакетов.',
+ads_new_err_required: 'Это поле обязательно.',
+ads_new_err_limit: 'Лимит кампаний для пакета исчерпан.',
+ads_new_err_video_too_long: 'Видео длиннее 3 минут (${Math.round(seconds)} сек) — сократи, пожалуйста.',
+ads_new_err_generic: 'Не удалось создать кампанию, попробуй ещё раз.',
+
+ads_new_campaign_submiting: 'Запускаем…',
+ads_new_campaign_submit: 'Запустить кампанию',
+ads_new_campaign_remaining: 'Осталось кампаний в пакете:',
+
+ads_analytics_preview_title: 'Превью рекламного слота',
+
+ads_preview_text: 'После запуска кампании мы будем показывать это объявление в слотах форума и по всей экосистеме с трафиком.',
+ads_preview_empty: 'Здесь появится превью твоего креатива — видео, изображение или ссылка.',
+
+ads_campaigns_title: 'Твои кампании',
+
+ads_campaigns_col_name: 'Название',
+ads_campaigns_col_start: 'Старт',
+ads_campaigns_col_end: 'Завершение',
+ads_campaigns_col_content: 'Контент (линк / медиа)',
+
+ads_campaigns_untitled: 'Без названия',
+
+ads_campaigns_media_video: 'Ссылка + Видео',
+ads_campaigns_media_image: 'Ссылка + Картинка',
+ads_campaigns_media_link: 'Только ссылка',
+
+ads_campaigns_finished_title: 'Завершённые кампании',
+ads_campaigns_status_finished: 'Завершено',
+ads_campaigns_empty: 'Кампаний пока нет — создай первую, чтобы увидеть аналитику.',
+
+ads_analytics_campaign_fallback: 'Кампания',
+
+ads_campaigns_dates: 'Период:',
+
+ads_campaigns_status: 'Статус:',
+
+ads_status_active: 'Активна',
+ads_status_paused: 'На паузе',
+ads_status_stopped: 'Остановлена',
+ads_status_finished: 'Завершена',
+
+ads_analytics_preview_stub: 'Превью',
+
+ads_analytics_period: 'Период:',
+ads_analytics_group_by: 'Группировка:',
+ads_analytics_group_by_hour: 'Часы',
+ads_analytics_group_by_day: 'Дни',
+
+ads_campaigns_actions: 'Действия:',
+ads_campaigns_action_stop_ing: 'Останавливаем…',
+ads_campaigns_action_stop: 'Остановить',
+ads_campaigns_action_delete_ing: 'Удаляем…',
+ads_campaigns_action_delete: 'Удалить',
+ads_campaigns_action_error: 'Ошибка при выполнении действия с кампанией:',
+
+ads_analytics_loading: 'Загружаем аналитику…',
+ads_analytics_error: 'Ошибка аналитики:',
+
+ads_analytics_summary_impressions: 'Показов',
+ads_analytics_summary_clicks: 'Кликов',
+ads_analytics_summary_ctr: 'CTR',
+
+ads_analytics_chart_impressions: 'Импрессии по времени',
+ads_analytics_chart_clicks: 'Клики по времени',
+
+ads_analytics_summary_top_regions: 'Гео по кампаниям',
+
+ads_geo_country: 'Страна',
+ads_geo_region: 'Регион',
+ads_geo_city: 'Город',
+ads_geo_impressions: 'Импрессии',
+ads_geo_clicks: 'Клики',
+ads_geo_ctr: 'CTR',
+
+ads_analytics_empty: 'Выбери активную кампанию, чтобы увидеть аналитику.',
+
+ads_pkg_type_starter: 'STARTER',
+ads_pkg_type_pro: 'PRO',
+ads_pkg_type_elite: 'ELITE',
+
+
+}
+
+const ADS_HERO_UK = {
+
+ads_pkg_starter_bullet_1: '⚡ Швидкий старт реклами на форумі та сторінках із трафіком',
+ads_pkg_starter_bullet_2: '🎯 Базовий пріоритет показу та акуратний обсяг трафіку',
+ads_pkg_starter_bullet_3: '📈 Проста аналітика показів і кліків у кабінеті',
+
+ads_pkg_pro_bullet_1: '🚀 Підвищений пріоритет показу та помітно більший трафік',
+ads_pkg_pro_bullet_2: '⚙️ Керування кількома кампаніями в одному кабінеті',
+ads_pkg_pro_bullet_3: '📊 Розширена аналітика, зокрема за географією',
+ads_pkg_pro_bullet_4: '💸 Більш вигідна ціна дня розміщення, ніж у STARTER',
+
+ads_pkg_elite_bullet_1: '👑 Максимальний пріоритет показу на форумі та в усій екосистемі',
+ads_pkg_elite_bullet_2: '🚀 Стабільно високий обсяг показів протягом усього строку пакета',
+ads_pkg_elite_bullet_3: '🧠 Детальна аналітика та комфортне масштабування кампаній',
+ads_pkg_elite_bullet_4: '💠 Мінімальна вартість одного дня розміщення завдяки тривалому пакету',
+
+ads_test_mode_cta_note: 'Тестовий режим: оплати вимкнено, кабінет доступний без платежу.',
+ads_error_no_account: 'Спочатку увійди до свого акаунта, щоб оформити пакет.',
+ads_pay_redirect: 'Перенаправляємо на сторінку оплати. Після успішного платежу рекламний кабінет стане активним.',
+ads_error_pay_generic: 'Не вдалося створити платіж. Спробуй ще раз трохи пізніше.',
+
+ads_hero_badge: 'GLOBAL • SITE-WIDE ADS',
+ads_page_title: 'Запусти рекламу по екосистемі Quantum L7 AI',
+ads_page_subtitle: 'Твоя реклама у неоновій вітрині: форум, сторінки з трафіком, глобальні слоти по всій екосистемі QL7 Global.',
+
+ads_cta_test_mode: 'Перейти в рекламний кабінет (тестовий режим)',
+ads_cta_loading: 'Створюємо платіж…',
+ads_cta_main: 'Купити пакет і запустити рекламу',
+ads_cta_have_pkg: 'У мене вже є пакет — в кабінет',
+
+ads_meta_realtime: 'Ротатор слотів працює в режимі реального часу, слоти розміщуються по всій екосистемі, аналітику дивись прямо в кабінеті.',
+
+ads_test_mode_label: 'TEST MODE',
+ads_test_mode_note: 'Оплати вимкнено. Можна спокійно тестувати кабінети, кампанії та розміщення.',
+
+ads_orbit_core_label: 'ADS',
+ads_orbit_tag_global: 'GLOBAL',
+ads_orbit_tag_forum: 'FORUM',
+ads_orbit_tag_ai_rotator: 'AI-ROTATOR',
+
+ads_hero_image_alt: 'Quantum L7 AI Ads — передперегляд розміщення реклами',
+ads_hero_figure_caption: 'Ротація рекламних карток на форумі та сторінках із трафіком.',
+
+ads_packages_title: 'Вибери пакет під задачу',
+ads_packages_subtitle: 'Усі пакети працюють через один кабінет і один ротатор. Можна докуповувати слоти та масштабувати трафік. Чим довший строк пакета, тим нижча вартість одного дня розміщення реклами.',
+
+ads_pkg_recommended: 'Рекомендуємо',
+
+ads_pkg_tier_starter: 'STARTER',
+ads_pkg_tier_pro: 'PRO',
+ads_pkg_tier_elite: 'ELITE',
+
+ads_pkg_price_sub: 'оплата один раз, пакет на весь строк',
+ads_pkg_test_mode: 'у тестовому режимі оплати немає',
+
+ads_pkg_days: 'Строк пакета',
+ads_pkg_days_suffix: 'дн.',
+ads_pkg_slots: 'Інтенсивність показів',
+
+ads_pkg_slots_value_starter: 'Помірний, рівномірний обсяг показів',
+ads_pkg_slots_value_pro: 'Підвищений пріоритет і частіші покази',
+ads_pkg_slots_value_elite: 'Максимальний пріоритет і широкий охоплення по екосистемі',
+
+ads_pkg_max_campaigns: 'Кампаній у межах пакета',
+
+ads_pkg_selected: 'Цей пакет вибрано для оплати та запуску.',
+ads_pkg_click_to_select: 'Натисни, щоб вибрати цей пакет.',
+
+ads_how_title: 'Як реклама крутиться по всій екосистемі',
+
+ads_how_step1_title: 'Купуєш пакет — і ти в грі',
+ads_how_step1_text: 'Оформлюєш пакет і отримуєш доступ до рекламного кабінету.',
+
+ads_how_step2_title: 'Створюєш кампанії й задаєш посилання',
+ads_how_step2_text: 'Додаєш посилання та оформлюєш оголошення — система сама підбирає найкращий формат передперегляду.',
+
+ads_how_step3_title: 'Ротатор крутить оголошення у слотах екосистеми',
+ads_how_step3_text: 'Реклама йде у слотах форуму та по всій екосистемі, без дублів і з розумною ротацією.',
+
+ads_how_step4_title: 'Дивишся аналітику й докручуєш кампанію',
+ads_how_step4_text: 'У кабінеті бачиш покази, кліки, CTR і гео — і докручуєш кампанії за живими даними.',
+
+ads_status_error_label: 'Помилка:',
+ads_status_ok_label: 'OK:',
+
+// кабінет
+geo_country_unknown: 'Не визначено',
+
+ads_days_left_0: '0 д',
+ads_days_left_1: '1 д',
+ads_days_left_n: '%d дн',
+
+ads_chart_empty: 'Немає даних',
+
+ads_rules_title: 'Правила розміщення реклами на Quantum L7 AI GLOBAL',
+
+ads_rules_text_1: `📘 **Розділ I. Основні юридичні положення**
+1. Використовуючи рекламну платформу Quantum L7 AI GLOBAL, рекламодавець підтверджує свою повну згоду з цими Правилами та приймає їх як юридично обов’язковий документ.
+2. Система працює за міжнародними стандартами безпеки, відповідно до глобальної практики регульованих рекламних екосистем.
+3. Будь-яка рекламна активність розцінюється як укладення цифрового договору-оферти між рекламодавцем і Quantum L7 AI GLOBAL.`,
+
+ads_rules_text_2: `🚫 **Розділ II. Абсолютно заборонений контент (Zero-Tolerance Policy)**
+Ми застосовуємо режим *нульової толерантності* до таких видів матеріалів. Забороняється розміщувати, завантажувати, демонструвати або будь-яким чином поширювати контент, що містить:
+1. ❌ **Порнографію**, еротичні сцени, сексуалізовані зображення, сексуальний контент будь-якого характеру.  
+2. ❌ **Убивства, жорстокість, розчленування, сцени насильства**, включно зі прихованим, стилізованим, художнім або документальним.  
+3. ❌ **Насильство над людьми, дітьми чи тваринами**, будь-які форми жорстокого поводження.  
+4. ❌ **Матеріали, що порушують моральні норми**, норми етики, громадський порядок або людську гідність.  
+5. ❌ **Фішинг, шахрайство, схеми обману**, підробку даних, маніпуляції та будь-які форми деструктивної реклами.  
+6. ❌ **Нелегальну діяльність** (наркотики, трафік, зброя, заборонені послуги).  
+7. ❌ **Пропаганду ненависті**, екстремізму, тероризму, дискримінації будь-якої форми.
+
+📌 *Спроба завантаження такого контенту фіксується автоматично та вважається найважчим порушенням.*`,
+
+ads_rules_text_3: `⚖️ **Розділ III. Право компанії на одностороннє розірвання договору**
+Quantum L7 AI GLOBAL залишає за собою юридично закріплене право:
+1. 🔸 Негайно зупинити показ реклами.  
+2. 🔸 Приховати або видалити рекламні матеріали.  
+3. 🔸 **В односторонньому порядку розірвати рекламний договір** без надання додаткового повідомлення.  
+4. 🔸 Обмежити функціонал або закрити рекламний кабінет.
+
+Підстави для розірвання включають:  
+• завантаження заборонених матеріалів,  
+• обхід механізмів модерації,  
+• надання неправдивих даних,  
+• загрозу репутації платформи або її користувачів,  
+• спроби завдати шкоди екосистемі або цифровій безпеці.`,
+
+ads_rules_text_4: `💸 **Розділ IV. Фінансові умови у разі порушення**
+1. У разі порушення Правил рекламодавець погоджується, що:
+   • кошти за рекламний пакет **не повертаються**;  
+   • залишок оплаченого періоду згорає без компенсації;  
+   • рекламний акаунт може бути заблокований назавжди без можливості відновлення.
+2. Рекламодавець підтверджує розуміння того, що повернення коштів неможливе навіть частково.
+3. Усі операції протоколюються внутрішніми журналами (backend-логами), які є доказовою базою у спірних ситуаціях.`,
+
+ads_rules_text_5: `📄 **Розділ V. Права на контент і відповідальність рекламодавця**
+1. Рекламодавець гарантує наявність усіх прав на завантажувані матеріали, включно з авторськими та суміжними.
+2. У разі розміщення чужого або нелегального контенту вся відповідальність лежить виключно на рекламодавцеві.
+3. Quantum L7 AI GLOBAL не несе відповідальності за юридичні наслідки, що виникли через неправомірні дії рекламодавця.`,
+
+ads_rules_text_6: `🌐 **Розділ VI. Міжнародна юрисдикція та зміни правил**
+1. Ці Правила розроблені з урахуванням міжнародних норм регулювання цифрової реклами.
+2. Quantum L7 AI GLOBAL може оновлювати Правила в односторонньому порядку, зберігаючи їх актуальну версію в системі.
+3. Продовження використання рекламної платформи означає автоматичну згоду з оновленими Правилами.`,
+
+ads_rules_text_7: `💠 **Розділ VII. Етична декларація та цінності платформи**
+1. Ми прагнемо створити глобальне безпечне середовище, де рекламні повідомлення поважають людську гідність.
+2. Система безпеки AI-модерації навчена визначати ризики та реагувати на них без затримок.
+3. Ми цінуємо чесність, прозорість і технологічний підхід до реклами — і очікуємо того ж від наших партнерів.`,
+
+ads_rules_accept: 'Прийняти і продовжити',
+
+
+ads_title: 'Рекламний кабінет',
+ads_subtitle: 'Керуй кампаніями, завантажуй креативи, переглядай аналітику в реальному часі.',
+
+ads_loading_cabinet: 'Завантажуємо кабінет…',
+
+ads_error_cabinet: 'Помилка завантаження кабінету:',
+
+ads_pkg_features_title: 'Поточний пакет',
+ads_pkg_expires_in: 'Закінчується через',
+ads_pkg_expired: 'Термін дії пакета закінчився — придбай новий на сторінці пакетів.',
+
+ads_plan_campaigns_limit: 'Кампаній',
+ads_plan_campaigns_hint: 'Скільки кампаній уже створено в межах цього пакета.',
+
+ads_new_campaign_title: 'Створити рекламну кампанію',
+ads_new_campaign_intro_1: 'Дай кампанії зрозумілу назву, вкажи посилання і завантаж креатив. Ми автоматично інтегруємо оголошення в рекламні слоти форуму та сторінки всієї екосистеми.',
+
+ads_new_campaign_name_label: 'Назва кампанії',
+ads_new_campaign_name_placeholder: 'Наприклад, Quantum L7 AI • Premium',
+
+ads_new_campaign_click_url_label: 'Посилання для переходу',
+ads_new_campaign_click_url_placeholder: 'https://приклад-сайта.com/landing',
+
+ads_new_campaign_upload_video: 'Завантажити відео (до 3 хвилин)',
+ads_new_campaign_upload_image: 'Завантажити зображення',
+
+ads_new_err_pkg_inactive: 'Пакет не активний — продовж або придбай новий на сторінці пакетів.',
+ads_new_err_required: 'Це поле є обов’язковим.',
+ads_new_err_limit: 'Ліміт кампаній для пакета вичерпано.',
+ads_new_err_video_too_long: 'Відео довше 3 хвилин (${Math.round(seconds)} сек) — скороти, будь ласка.',
+ads_new_err_generic: 'Не вдалося створити кампанію, спробуй ще раз.',
+
+ads_new_campaign_submiting: 'Запускаємо…',
+ads_new_campaign_submit: 'Запустити кампанію',
+ads_new_campaign_remaining: 'Залишилося кампаній у пакеті:',
+
+ads_analytics_preview_title: 'Прев’ю рекламного слоту',
+
+ads_preview_text: 'Після запуску кампанії ми показуватимемо це оголошення в слотах форуму та по всій екосистемі з трафіком.',
+ads_preview_empty: 'Тут з’явиться прев’ю твого креативу — відео, зображення або посилання.',
+
+ads_campaigns_title: 'Твої кампанії',
+
+ads_campaigns_col_name: 'Назва',
+ads_campaigns_col_start: 'Старт',
+ads_campaigns_col_end: 'Завершення',
+ads_campaigns_col_content: 'Контент (лінк / медіа)',
+
+ads_campaigns_untitled: 'Без назви',
+
+ads_campaigns_media_video: 'Посилання + Відео',
+ads_campaigns_media_image: 'Посилання + Картинка',
+ads_campaigns_media_link: 'Тільки посилання',
+
+ads_campaigns_finished_title: 'Завершені кампанії',
+ads_campaigns_status_finished: 'Завершено',
+ads_campaigns_empty: 'Кампаній поки немає — створи першу, щоб побачити аналітику.',
+
+ads_analytics_campaign_fallback: 'Кампанія',
+
+ads_campaigns_dates: 'Період:',
+
+ads_campaigns_status: 'Статус:',
+
+ads_status_active: 'Активна',
+ads_status_paused: 'На паузі',
+ads_status_stopped: 'Зупинена',
+ads_status_finished: 'Завершена',
+
+ads_analytics_preview_stub: 'Прев’ю',
+
+ads_analytics_period: 'Період:',
+ads_analytics_group_by: 'Групування:',
+ads_analytics_group_by_hour: 'Години',
+ads_analytics_group_by_day: 'Дні',
+
+ads_campaigns_actions: 'Дії:',
+ads_campaigns_action_stop_ing: 'Зупиняємо…',
+ads_campaigns_action_stop: 'Зупинити',
+ads_campaigns_action_delete_ing: 'Видаляємо…',
+ads_campaigns_action_delete: 'Видалити',
+ads_campaigns_action_error: 'Помилка виконання дії з кампанією:',
+
+ads_analytics_loading: 'Завантажуємо аналітику…',
+ads_analytics_error: 'Помилка аналітики:',
+
+ads_analytics_summary_impressions: 'Показів',
+ads_analytics_summary_clicks: 'Кліків',
+ads_analytics_summary_ctr: 'CTR',
+
+ads_analytics_chart_impressions: 'Імпресії за часом',
+ads_analytics_chart_clicks: 'Кліки за часом',
+
+ads_analytics_summary_top_regions: 'Гео по кампаніях',
+
+ads_geo_country: 'Країна',
+ads_geo_region: 'Регіон',
+ads_geo_city: 'Місто',
+ads_geo_impressions: 'Імпресії',
+ads_geo_clicks: 'Кліки',
+ads_geo_ctr: 'CTR',
+
+ads_analytics_empty: 'Вибери активну кампанію, щоб переглянути аналітику.',
+
+ads_pkg_type_starter: 'STARTER',
+ads_pkg_type_pro: 'PRO',
+ads_pkg_type_elite: 'ELITE',
+
+}
+
+const ADS_HERO_ES = {
+
+ads_pkg_starter_bullet_1: '⚡ Inicio rápido de la publicidad en el foro y en las páginas con tráfico',
+ads_pkg_starter_bullet_2: '🎯 Prioridad básica de visualización y volumen de tráfico estable',
+ads_pkg_starter_bullet_3: '📈 Analítica sencilla de impresiones y clics en el gabinete',
+
+ads_pkg_pro_bullet_1: '🚀 Prioridad de visualización aumentada y tráfico notablemente mayor',
+ads_pkg_pro_bullet_2: '⚙️ Gestión de varias campañas dentro de un solo gabinete',
+ads_pkg_pro_bullet_3: '📊 Analítica ampliada, incluida la geografía',
+ads_pkg_pro_bullet_4: '💸 Precio más rentable por día de colocación que en STARTER',
+
+ads_pkg_elite_bullet_1: '👑 Máxima prioridad de visualización en el foro y en todo el ecosistema',
+ads_pkg_elite_bullet_2: '🚀 Volumen de impresiones estable y alto durante todo el período del paquete',
+ads_pkg_elite_bullet_3: '🧠 Analítica detallada y escalado cómodo de las campañas',
+ads_pkg_elite_bullet_4: '💠 El coste mínimo por día de colocación gracias a la larga duración del paquete',
+
+ads_test_mode_cta_note: 'Modo de prueba: los pagos están desactivados, el gabinete está disponible sin pago.',
+ads_error_no_account: 'Primero inicia sesión en tu cuenta para poder adquirir el paquete.',
+ads_pay_redirect: 'Redirigiendo a la página de pago. Tras un pago exitoso, el gabinete publicitario se activará.',
+ads_error_pay_generic: 'No se pudo crear el pago. Inténtalo de nuevo un poco más tarde.',
+
+ads_hero_badge: 'GLOBAL • SITE-WIDE ADS',
+ads_page_title: 'Lanza publicidad por todo el ecosistema Quantum L7 AI',
+ads_page_subtitle: 'Tu anuncio en un escaparate neón: foro, páginas con tráfico y slots globales en todo el ecosistema QL7 Global.',
+
+ads_cta_test_mode: 'Ir al gabinete publicitario (modo de prueba)',
+ads_cta_loading: 'Creando pago…',
+ads_cta_main: 'Comprar paquete y lanzar publicidad',
+ads_cta_have_pkg: 'Ya tengo un paquete — ir al gabinete',
+
+ads_meta_realtime: 'El rotador de slots funciona en tiempo real; los slots se colocan por todo el ecosistema, y la analítica se ve directamente en el gabinete.',
+
+ads_test_mode_label: 'TEST MODE',
+ads_test_mode_note: 'Los pagos están desactivados. Puedes probar tranquilamente el gabinete, las campañas y las colocaciones.',
+
+ads_orbit_core_label: 'ADS',
+ads_orbit_tag_global: 'GLOBAL',
+ads_orbit_tag_forum: 'FORUM',
+ads_orbit_tag_ai_rotator: 'AI-ROTATOR',
+
+ads_hero_image_alt: 'Quantum L7 AI Ads — vista previa de la colocación publicitaria',
+ads_hero_figure_caption: 'Rotación de tarjetas publicitarias por el foro y las páginas con tráfico.',
+
+ads_packages_title: 'Elige el paquete adecuado para tu objetivo',
+ads_packages_subtitle: 'Todos los paquetes funcionan mediante un solo gabinete y un solo rotador. Puedes comprar slots adicionales y escalar el tráfico. Cuanto más largo el período del paquete, menor el coste por día de colocación.',
+
+ads_pkg_recommended: 'Recomendado',
+
+ads_pkg_tier_starter: 'STARTER',
+ads_pkg_tier_pro: 'PRO',
+ads_pkg_tier_elite: 'ELITE',
+
+ads_pkg_price_sub: 'pago único, el paquete vale para todo el período',
+ads_pkg_test_mode: 'en modo de prueba no hay pagos',
+
+ads_pkg_days: 'Duración del paquete',
+ads_pkg_days_suffix: 'días',
+ads_pkg_slots: 'Intensidad de los anuncios',
+
+ads_pkg_slots_value_starter: 'Volumen moderado y uniforme de impresiones',
+ads_pkg_slots_value_pro: 'Prioridad aumentada y visualizaciones más frecuentes',
+ads_pkg_slots_value_elite: 'Máxima prioridad y amplio alcance en todo el ecosistema',
+
+ads_pkg_max_campaigns: 'Campañas dentro del paquete',
+
+ads_pkg_selected: 'Este paquete está seleccionado para pago y lanzamiento.',
+ads_pkg_click_to_select: 'Haz clic para seleccionar este paquete.',
+
+ads_how_title: 'Cómo gira la publicidad en todo el ecosistema',
+
+ads_how_step1_title: 'Compras el paquete y ya estás dentro',
+ads_how_step1_text: 'Adquieres el paquete y obtienes acceso al gabinete publicitario.',
+
+ads_how_step2_title: 'Creas campañas y defines el enlace',
+ads_how_step2_text: 'Añades el enlace y configuras el anuncio — el sistema elige automáticamente el mejor formato de vista previa.',
+
+ads_how_step3_title: 'El rotador muestra los anuncios en los slots del ecosistema',
+ads_how_step3_text: 'La publicidad aparece en los slots del foro y en todo el ecosistema, sin duplicados y con rotación inteligente.',
+
+ads_how_step4_title: 'Ves la analítica y ajustas la campaña',
+ads_how_step4_text: 'En el gabinete ves impresiones, clics, CTR y geodatos — y ajustas las campañas según datos reales.',
+
+ads_status_error_label: 'Error:',
+ads_status_ok_label: 'OK:',
+
+// кабінет  
+geo_country_unknown: 'No definido',
+
+ads_days_left_0: '0 d',
+ads_days_left_1: '1 d',
+ads_days_left_n: '%d días',
+
+ads_chart_empty: 'Sin datos',
+
+ads_rules_title: 'Reglas de colocación de publicidad en Quantum L7 AI GLOBAL',
+
+ads_rules_text_1: `📘 **Sección I. Disposiciones jurídicas básicas**
+1. Al utilizar la plataforma publicitaria Quantum L7 AI GLOBAL, el anunciante confirma su plena aceptación de estas Reglas y las reconoce como un documento jurídicamente vinculante.
+2. El sistema opera bajo estándares internacionales de seguridad, en conformidad con las prácticas globales de los ecosistemas publicitarios regulados.
+3. Cualquier actividad publicitaria se considera como la celebración de un contrato digital de oferta entre el anunciante y Quantum L7 AI GLOBAL.`,
+
+ads_rules_text_2: `🚫 **Sección II. Contenido absolutamente prohibido (Zero-Tolerance Policy)**
+Aplicamos un régimen de *tolerancia cero* a los siguientes tipos de materiales. Se prohíbe colocar, cargar, mostrar o distribuir cualquier contenido que incluya:
+1. ❌ **Pornografía**, escenas eróticas, imágenes sexualizadas o contenido sexual de cualquier tipo.  
+2. ❌ **Asesinatos, crueldad, desmembramiento, escenas de violencia**, incluidas formas ocultas, estilizadas, artísticas o documentales.  
+3. ❌ **Violencia contra personas, niños o animales**, cualquier forma de maltrato cruel.  
+4. ❌ **Materiales que violen normas morales**, normas éticas, orden público o la dignidad humana.  
+5. ❌ **Phishing, fraude, esquemas de estafa**, manipulación de datos y cualquier tipo de publicidad destructiva.  
+6. ❌ **Actividades ilegales** (drogas, trata, armas, servicios prohibidos).  
+7. ❌ **Propaganda de odio**, extremismo, terrorismo o discriminación en cualquier forma.
+
+📌 *El intento de cargar dicho contenido se registra automáticamente y se considera una violación grave.*`,
+
+ads_rules_text_3: `⚖️ **Sección III. Derecho de la empresa a rescindir unilateralmente el contrato**
+Quantum L7 AI GLOBAL se reserva el derecho legalmente establecido de:
+1. 🔸 Detener inmediatamente la exhibición de la publicidad.  
+2. 🔸 Ocultar o eliminar los materiales publicitarios.  
+3. 🔸 **Rescindir unilateralmente el contrato publicitario** sin necesidad de notificación adicional.  
+4. 🔸 Restringir funcionalidades o cerrar el panel publicitario.
+
+Los motivos para la rescisión incluyen:  
+• carga de materiales prohibidos,  
+• elusión de los mecanismos de moderación,  
+• suministro de datos falsos,  
+• daño potencial a la reputación de la plataforma o sus usuarios,  
+• intentos de perjudicar la ecosistema o comprometer la seguridad digital.`,
+
+ads_rules_text_4: `💸 **Sección IV. Condiciones financieras en caso de infracción**
+1. En caso de violación de las Reglas, el anunciante acepta que:
+   • los fondos del paquete publicitario **no serán reembolsados**;  
+   • el período restante pagado se cancela sin compensación;  
+   • la cuenta publicitaria puede ser bloqueada permanentemente sin posibilidad de recuperación.
+2. El anunciante confirma entender que no es posible un reembolso ni siquiera parcial.
+3. Todas las operaciones se registran en los registros internos (backend logs), los cuales sirven como base probatoria en situaciones de disputa.`,
+
+ads_rules_text_5: `📄 **Sección V. Derechos sobre el contenido y responsabilidad del anunciante**
+1. El anunciante garantiza poseer todos los derechos sobre los materiales cargados, incluidos derechos de autor y derechos conexos.
+2. En caso de colocar contenido ajeno o ilegal, toda la responsabilidad recae exclusivamente en el anunciante.
+3. Quantum L7 AI GLOBAL no se hace responsable de las consecuencias legales derivadas de acciones indebidas del anunciante.`,
+
+ads_rules_text_6: `🌐 **Sección VI. Jurisdicción internacional y cambios en las reglas**
+1. Estas Reglas se desarrollan teniendo en cuenta las normas internacionales de regulación de la publicidad digital.
+2. Quantum L7 AI GLOBAL puede actualizar las Reglas unilateralmente, manteniendo su versión actualizada dentro del sistema.
+3. El uso continuo de la plataforma publicitaria implica la aceptación automática de las Reglas actualizadas.`,
+
+ads_rules_text_7: `💠 **Sección VII. Declaración ética y valores de la plataforma**
+1. Aspiramos a crear un entorno global seguro donde los mensajes publicitarios respeten la dignidad humana.
+2. El sistema de seguridad de moderación basada en AI está entrenado para identificar riesgos y reaccionar sin demoras.
+3. Valoramos la honestidad, la transparencia y el enfoque tecnológico en la publicidad — y esperamos lo mismo de nuestros socios.`,
+
+ads_rules_accept: 'Aceptar y continuar',
+
+
+ads_title: 'Panel publicitario',
+ads_subtitle: 'Gestiona campañas, carga creatividades y visualiza analíticas en tiempo real.',
+
+ads_loading_cabinet: 'Cargando panel…',
+
+ads_error_cabinet: 'Error al cargar el panel:',
+
+ads_pkg_features_title: 'Paquete actual',
+ads_pkg_expires_in: 'Expira en',
+ads_pkg_expired: 'El paquete ha expirado — compra uno nuevo en la página de paquetes.',
+
+ads_plan_campaigns_limit: 'Campañas',
+ads_plan_campaigns_hint: 'Cuántas campañas ya se han creado dentro de este paquete.',
+
+ads_new_campaign_title: 'Crear campaña publicitaria',
+ads_new_campaign_intro_1: 'Dale un nombre claro a la campaña, especifica el enlace y sube un creativo. Integraremos tu anuncio automáticamente en los espacios publicitarios del foro y de toda la ecosistema.',
+
+ads_new_campaign_name_label: 'Nombre de la campaña',
+ads_new_campaign_name_placeholder: 'Por ejemplo, Quantum L7 AI • Premium',
+
+ads_new_campaign_click_url_label: 'Enlace de destino',
+ads_new_campaign_click_url_placeholder: 'https://ejemplo-sitio.com/landing',
+
+ads_new_campaign_upload_video: 'Subir vídeo (hasta 3 minutos)',
+ads_new_campaign_upload_image: 'Subir imagen',
+
+ads_new_err_pkg_inactive: 'El paquete no está activo — prolonga o compra uno nuevo en la página de paquetes.',
+ads_new_err_required: 'Este campo es obligatorio.',
+ads_new_err_limit: 'Límite de campañas del paquete alcanzado.',
+ads_new_err_video_too_long: 'El vídeo dura más de 3 minutos (${Math.round(seconds)} s) — redúcelo, por favor.',
+ads_new_err_generic: 'No se pudo crear la campaña, intenta nuevamente.',
+
+ads_new_campaign_submiting: 'Lanzando…',
+ads_new_campaign_submit: 'Lanzar campaña',
+ads_new_campaign_remaining: 'Campañas restantes en el paquete:',
+
+ads_analytics_preview_title: 'Previsualización del espacio publicitario',
+
+ads_preview_text: 'Después del lanzamiento, mostraremos este anuncio en los espacios del foro y en toda la ecosistema con tráfico.',
+ads_preview_empty: 'Aquí aparecerá la previsualización de tu creativo — vídeo, imagen o enlace.',
+
+ads_campaigns_title: 'Tus campañas',
+
+ads_campaigns_col_name: 'Nombre',
+ads_campaigns_col_start: 'Inicio',
+ads_campaigns_col_end: 'Finalización',
+ads_campaigns_col_content: 'Contenido (link / media)',
+
+ads_campaigns_untitled: 'Sin nombre',
+
+ads_campaigns_media_video: 'Enlace + Vídeo',
+ads_campaigns_media_image: 'Enlace + Imagen',
+ads_campaigns_media_link: 'Solo enlace',
+
+ads_campaigns_finished_title: 'Campañas finalizadas',
+ads_campaigns_status_finished: 'Finalizada',
+ads_campaigns_empty: 'Aún no hay campañas — crea la primera para ver analíticas.',
+
+ads_analytics_campaign_fallback: 'Campaña',
+
+ads_campaigns_dates: 'Período:',
+
+ads_campaigns_status: 'Estado:',
+
+ads_status_active: 'Activa',
+ads_status_paused: 'En pausa',
+ads_status_stopped: 'Detenida',
+ads_status_finished: 'Finalizada',
+
+ads_analytics_preview_stub: 'Previsualización',
+
+ads_analytics_period: 'Período:',
+ads_analytics_group_by: 'Agrupación:',
+ads_analytics_group_by_hour: 'Horas',
+ads_analytics_group_by_day: 'Días',
+
+ads_campaigns_actions: 'Acciones:',
+ads_campaigns_action_stop_ing: 'Deteniendo…',
+ads_campaigns_action_stop: 'Detener',
+ads_campaigns_action_delete_ing: 'Eliminando…',
+ads_campaigns_action_delete: 'Eliminar',
+ads_campaigns_action_error: 'Error al ejecutar acción sobre la campaña:',
+
+ads_analytics_loading: 'Cargando analíticas…',
+ads_analytics_error: 'Error de analíticas:',
+
+ads_analytics_summary_impressions: 'Impresiones',
+ads_analytics_summary_clicks: 'Clics',
+ads_analytics_summary_ctr: 'CTR',
+
+ads_analytics_chart_impressions: 'Impresiones en el tiempo',
+ads_analytics_chart_clicks: 'Clics en el tiempo',
+
+ads_analytics_summary_top_regions: 'Geo por campañas',
+
+ads_geo_country: 'País',
+ads_geo_region: 'Región',
+ads_geo_city: 'Ciudad',
+ads_geo_impressions: 'Impresiones',
+ads_geo_clicks: 'Clics',
+ads_geo_ctr: 'CTR',
+
+ads_analytics_empty: 'Selecciona una campaña activa para ver las analíticas.',
+
+ads_pkg_type_starter: 'STARTER',
+ads_pkg_type_pro: 'PRO',
+ads_pkg_type_elite: 'ELITE',
+
+
+}
+
+const ADS_HERO_ZH = {
+
+ads_pkg_starter_bullet_1: '⚡ 在论坛和高流量页面上快速启动广告',
+ads_pkg_starter_bullet_2: '🎯 基础展示优先级和稳定的流量分配',
+ads_pkg_starter_bullet_3: '📈 在后台即可查看简单的展示与点击分析',
+
+ads_pkg_pro_bullet_1: '🚀 更高的展示优先级和显著更大的流量',
+ads_pkg_pro_bullet_2: '⚙️ 在一个后台同时管理多条广告活动',
+ads_pkg_pro_bullet_3: '📊 扩展分析功能，包括地理数据',
+ads_pkg_pro_bullet_4: '💸 相比 STARTER 更优惠的每日投放成本',
+
+ads_pkg_elite_bullet_1: '👑 在论坛和整个生态系统中获得最高展示优先级',
+ads_pkg_elite_bullet_2: '🚀 在整个套餐期间保持持续且高量的展示',
+ads_pkg_elite_bullet_3: '🧠 详细的分析和轻松扩展广告活动',
+ads_pkg_elite_bullet_4: '💠 因套餐周期更长而实现最低的每日投放成本',
+
+ads_test_mode_cta_note: '测试模式：支付已关闭，后台可免费访问。',
+ads_error_no_account: '请先登录账号以便购买套餐。',
+ads_pay_redirect: '正在跳转至支付页面。成功支付后，广告后台将自动激活。',
+ads_error_pay_generic: '无法创建支付。请稍后再试。',
+
+ads_hero_badge: 'GLOBAL • SITE-WIDE ADS',
+ads_page_title: '在 Quantum L7 AI 生态系统中启动广告',
+ads_page_subtitle: '你的广告将展示在霓虹橱窗中：论坛、高流量页面以及整个 QL7 Global 生态系统的全球广告位。',
+
+ads_cta_test_mode: '进入广告后台（测试模式）',
+ads_cta_loading: '正在创建支付…',
+ads_cta_main: '购买套餐并启动广告',
+ads_cta_have_pkg: '我已经有套餐 — 进入后台',
+
+ads_meta_realtime: '广告位轮播实时运行，广告位遍布整个生态系统，分析可直接在后台查看。',
+
+ads_test_mode_label: 'TEST MODE',
+ads_test_mode_note: '支付已关闭。可自由测试后台、广告活动和投放。',
+
+ads_orbit_core_label: 'ADS',
+ads_orbit_tag_global: 'GLOBAL',
+ads_orbit_tag_forum: 'FORUM',
+ads_orbit_tag_ai_rotator: 'AI-ROTATOR',
+
+ads_hero_image_alt: 'Quantum L7 AI Ads — 广告投放预览',
+ads_hero_figure_caption: '广告卡片在论坛和高流量页面之间旋转展示。',
+
+ads_packages_title: '选择适合你目标的套餐',
+ads_packages_subtitle: '所有套餐都通过一个后台和一个轮播系统运行。可购买更多广告位并扩大流量规模。套餐越长，每日投放成本越低。',
+
+ads_pkg_recommended: '推荐',
+
+ads_pkg_tier_starter: 'STARTER',
+ads_pkg_tier_pro: 'PRO',
+ads_pkg_tier_elite: 'ELITE',
+
+ads_pkg_price_sub: '一次性支付，套餐全程有效',
+ads_pkg_test_mode: '测试模式无需支付',
+
+ads_pkg_days: '套餐时长',
+ads_pkg_days_suffix: '天',
+ads_pkg_slots: '展示强度',
+
+ads_pkg_slots_value_starter: '适中且均衡的展示量',
+ads_pkg_slots_value_pro: '更高优先级和更频繁的展示',
+ads_pkg_slots_value_elite: '最高优先级与覆盖整个生态系统的广泛展示',
+
+ads_pkg_max_campaigns: '套餐内包含的广告活动数量',
+
+ads_pkg_selected: '此套餐已被选中用于支付与启动。',
+ads_pkg_click_to_select: '点击以选择此套餐。',
+
+ads_how_title: '广告如何在整个生态系统中轮播',
+
+ads_how_step1_title: '购买套餐后，你就进入系统了',
+ads_how_step1_text: '你购买套餐后即可获得广告后台访问权限。',
+
+ads_how_step2_title: '创建广告活动并设置链接',
+ads_how_step2_text: '添加链接并设置广告内容 —— 系统会自动选择最佳预览格式。',
+
+ads_how_step3_title: '轮播器在生态系统广告位中展示你的广告',
+ads_how_step3_text: '广告在论坛和整个生态系统内展示，无重复且具备智能轮播。',
+
+ads_how_step4_title: '查看分析并优化广告活动',
+ads_how_step4_text: '在后台查看展示量、点击量、CTR 与地理数据 —— 根据实时指标优化你的活动。',
+
+ads_status_error_label: '错误：',
+ads_status_ok_label: 'OK：',
+
+// кабинет   
+geo_country_unknown: '未定义',
+
+ads_days_left_0: '0 天',
+ads_days_left_1: '1 天',
+ads_days_left_n: '%d 天',
+
+ads_chart_empty: '没有数据',
+
+ads_rules_title: 'Quantum L7 AI GLOBAL 广告投放规则',
+
+ads_rules_text_1: `📘 **第一部分：基本法律条款**
+1. 使用 Quantum L7 AI GLOBAL 广告平台即表示广告主完全同意本规则，并承认其为具有法律约束力的文件。
+2. 系统按照国际安全标准运行，符合全球受监管广告生态系统的通行做法。
+3. 任何广告活动均视为广告主与 Quantum L7 AI GLOBAL 之间达成的数字化要约合同。`,
+
+ads_rules_text_2: `🚫 **第二部分：绝对禁止的内容（Zero-Tolerance Policy）**
+我们对以下内容实行 *零容忍政策*。禁止投放、上传、展示或以任何方式传播包含以下内容的素材：
+1. ❌ **色情内容**、情色场景、性化图像或任何形式的性内容。  
+2. ❌ **杀戮、残暴、肢解、暴力场景**，包括隐性、艺术化、风格化或纪录式表现。  
+3. ❌ **对人、儿童或动物的暴力行为**，任何形式的虐待。  
+4. ❌ **违反道德规范的材料**，包括违反伦理、公共秩序或侵犯人类尊严的内容。  
+5. ❌ **钓鱼、欺诈、诈骗行为**，伪造数据、操纵信息及任何破坏性的广告活动。  
+6. ❌ **非法活动**（毒品、贩卖、武器、违禁服务等）。  
+7. ❌ **仇恨宣传**、极端主义、恐怖主义和任何形式的歧视。
+
+📌 *任何上传此类内容的企图都会被系统自动记录，并视为严重违规行为。*`,
+
+ads_rules_text_3: `⚖️ **第三部分：公司单方面终止合同的权利**
+Quantum L7 AI GLOBAL 保留依法行使以下权利：
+1. 🔸 立即停止广告展示。  
+2. 🔸 隐藏或删除广告素材。  
+3. 🔸 **单方面终止广告合同**，无需另行通知。  
+4. 🔸 限制广告账户功能或关闭广告后台。
+
+构成终止依据的情况包括：  
+• 上传被禁止的内容，  
+• 试图规避审核机制，  
+• 提供虚假数据，  
+• 损害平台或用户声誉，  
+• 对生态系统或数字安全造成威胁的行为。`,
+
+ads_rules_text_4: `💸 **第四部分：违规时的财务条款**
+1. 如违反本规则，广告主同意以下条款：  
+   • 广告套餐费用 **不予退还**；  
+   • 已支付周期的剩余时长将无补偿作废；  
+   • 广告账户可能被永久封禁，且无法恢复。
+2. 广告主确认理解费用无论如何均不可部分或全部退回。
+3. 所有操作均记录在内部日志（backend logs）中，可作为争议情形下的证据。`,
+
+ads_rules_text_5: `📄 **第五部分：内容权利与广告主责任**
+1. 广告主保证拥有所上传内容的全部合法权利，包括著作权及相关权利。
+2. 如投放他人或非法内容，全部责任由广告主自行承担。
+3. Quantum L7 AI GLOBAL 不对因广告主不当行为造成的法律后果承担责任。`,
+
+ads_rules_text_6: `🌐 **第六部分：国际法域与规则变更**
+1. 本规则根据国际数字广告监管标准制定。
+2. Quantum L7 AI GLOBAL 可单方面更新本规则，并在系统中保留最新版本。
+3. 持续使用广告平台即表示自动同意更新后的规则。`,
+
+ads_rules_text_7: `💠 **第七部分：伦理声明与平台价值观**
+1. 我们致力于构建全球安全的广告环境，使广告内容尊重人类尊严。
+2. AI 审核安全系统经过训练，可即时识别风险并迅速响应。
+3. 我们重视诚信、透明和技术驱动的广告方式——也期待合作伙伴遵循相同价值观。`,
+
+ads_rules_accept: '接受并继续',
+
+
+ads_title: '广告后台',
+ads_subtitle: '管理广告活动、上传素材、查看实时分析。',
+
+ads_loading_cabinet: '正在加载后台…',
+
+ads_error_cabinet: '加载后台时出错：',
+
+ads_pkg_features_title: '当前套餐',
+ads_pkg_expires_in: '到期于',
+ads_pkg_expired: '套餐已到期 — 请前往套餐页面购买新套餐。',
+
+ads_plan_campaigns_limit: '广告活动',
+ads_plan_campaigns_hint: '此套餐下已创建的广告活动数量。',
+
+ads_new_campaign_title: '创建广告活动',
+ads_new_campaign_intro_1: '为活动指定清晰名称，填写跳转链接并上传创意素材。系统会自动将广告嵌入论坛和整个生态系统的广告位中。',
+
+ads_new_campaign_name_label: '广告活动名称',
+ads_new_campaign_name_placeholder: '例如：Quantum L7 AI • Premium',
+
+ads_new_campaign_click_url_label: '跳转链接',
+ads_new_campaign_click_url_placeholder: 'https://示例网站.com/landing',
+
+ads_new_campaign_upload_video: '上传视频（最长 3 分钟）',
+ads_new_campaign_upload_image: '上传图片',
+
+ads_new_err_pkg_inactive: '套餐未激活 — 请续费或在套餐页面购买新套餐。',
+ads_new_err_required: '此字段为必填项。',
+ads_new_err_limit: '已达到该套餐的广告活动上限。',
+ads_new_err_video_too_long: '视频超过 3 分钟（${Math.round(seconds)} 秒）— 请裁剪后再上传。',
+ads_new_err_generic: '无法创建活动，请稍后重试。',
+
+ads_new_campaign_submiting: '正在启动…',
+ads_new_campaign_submit: '启动广告活动',
+ads_new_campaign_remaining: '套餐剩余可用活动数：',
+
+ads_analytics_preview_title: '广告位预览',
+
+ads_preview_text: '活动启动后，我们将在论坛和整个生态系统的广告位中展示此广告。',
+ads_preview_empty: '这里将显示你的创意预览 — 视频、图片或链接。',
+
+ads_campaigns_title: '你的广告活动',
+
+ads_campaigns_col_name: '名称',
+ads_campaigns_col_start: '开始',
+ads_campaigns_col_end: '结束',
+ads_campaigns_col_content: '内容（link / media）',
+
+ads_campaigns_untitled: '未命名',
+
+ads_campaigns_media_video: '链接 + 视频',
+ads_campaigns_media_image: '链接 + 图片',
+ads_campaigns_media_link: '仅链接',
+
+ads_campaigns_finished_title: '已完成的广告活动',
+ads_campaigns_status_finished: '已完成',
+ads_campaigns_empty: '尚无广告活动 — 创建首个活动即可查看分析数据。',
+
+ads_analytics_campaign_fallback: '广告活动',
+
+ads_campaigns_dates: '周期：',
+
+ads_campaigns_status: '状态：',
+
+ads_status_active: '进行中',
+ads_status_paused: '已暂停',
+ads_status_stopped: '已停止',
+ads_status_finished: '已完成',
+
+ads_analytics_preview_stub: '预览',
+
+ads_analytics_period: '周期：',
+ads_analytics_group_by: '分组：',
+ads_analytics_group_by_hour: '按小时',
+ads_analytics_group_by_day: '按天',
+
+ads_campaigns_actions: '操作：',
+ads_campaigns_action_stop_ing: '正在停止…',
+ads_campaigns_action_stop: '停止',
+ads_campaigns_action_delete_ing: '正在删除…',
+ads_campaigns_action_delete: '删除',
+ads_campaigns_action_error: '执行操作时发生错误：',
+
+ads_analytics_loading: '正在加载分析…',
+ads_analytics_error: '分析错误：',
+
+ads_analytics_summary_impressions: '展示数',
+ads_analytics_summary_clicks: '点击数',
+ads_analytics_summary_ctr: 'CTR',
+
+ads_analytics_chart_impressions: '按时间展示',
+ads_analytics_chart_clicks: '按时间点击',
+
+ads_analytics_summary_top_regions: '地区分布',
+
+ads_geo_country: '国家',
+ads_geo_region: '地区',
+ads_geo_city: '城市',
+ads_geo_impressions: '展示',
+ads_geo_clicks: '点击',
+ads_geo_ctr: 'CTR',
+
+ads_analytics_empty: '请选择一个活动以查看分析。',
+
+ads_pkg_type_starter: 'STARTER',
+ads_pkg_type_pro: 'PRO',
+ads_pkg_type_elite: 'ELITE',
+
+}
+
+const ADS_HERO_AR = {
+
+ads_pkg_starter_bullet_1: '⚡ بدء سريع للإعلان عبر المنتدى وصفحات ذات حركة مرور عالية',
+ads_pkg_starter_bullet_2: '🎯 أولوية عرض أساسية وحجم حركة مرور منظم',
+ads_pkg_starter_bullet_3: '📈 تحليلات بسيطة للمشاهدات والنقرات داخل لوحة التحكم',
+
+ads_pkg_pro_bullet_1: '🚀 أولوية عرض أعلى وحركة مرور أكبر بشكل ملحوظ',
+ads_pkg_pro_bullet_2: '⚙️ إدارة عدة حملات داخل لوحة تحكم واحدة',
+ads_pkg_pro_bullet_3: '📊 تحليلات موسعة، بما في ذلك البيانات الجغرافية',
+ads_pkg_pro_bullet_4: '💸 تكلفة يومية أكثر فائدة للإعلان مقارنةً بـ STARTER',
+
+ads_pkg_elite_bullet_1: '👑 أعلى أولوية عرض في المنتدى وفي كامل النظام البيئي',
+ads_pkg_elite_bullet_2: '🚀 حجم عرض مرتفع وثابت طوال مدة الباقة',
+ads_pkg_elite_bullet_3: '🧠 تحليلات مفصلة وقدرة مريحة على توسيع الحملات',
+ads_pkg_elite_bullet_4: '💠 أقل تكلفة يومية بفضل مدة الباقة الطويلة',
+
+ads_test_mode_cta_note: 'وضع الاختبار: المدفوعات معطّلة، ولوحة التحكم متاحة دون دفع.',
+ads_error_no_account: 'سجّل دخولك أولًا إلى حسابك لإتمام شراء الباقة.',
+ads_pay_redirect: 'يتم الآن تحويلك إلى صفحة الدفع. بعد نجاح الدفع سيتم تفعيل لوحة التحكم الإعلانية.',
+ads_error_pay_generic: 'تعذّر إنشاء الدفع. حاول مرة أخرى لاحقًا.',
+
+ads_hero_badge: 'GLOBAL • SITE-WIDE ADS',
+ads_page_title: 'أطلق إعلانك داخل نظام Quantum L7 AI البيئي',
+ads_page_subtitle: 'إعلانك في واجهة نيون: المنتدى، الصفحات ذات الحركة، والخيارات العالمية عبر كامل نظام QL7 Global.',
+
+ads_cta_test_mode: 'الدخول إلى لوحة التحكم الإعلانية (وضع الاختبار)',
+ads_cta_loading: 'جارٍ إنشاء الدفع…',
+ads_cta_main: 'شراء الباقة وإطلاق الإعلان',
+ads_cta_have_pkg: 'لدي بالفعل باقة — إلى لوحة التحكم',
+
+ads_meta_realtime: 'مُدوِّر الإعلانات يعمل في الوقت الفعلي، ويتم توزيع الإعلانات عبر النظام البيئي، ويمكنك رؤية التحليلات مباشرة في اللوحة.',
+
+ads_test_mode_label: 'TEST MODE',
+ads_test_mode_note: 'المدفوعات معطّلة. يمكنك اختبار اللوحات والحملات وعمليات العرض بكل راحة.',
+
+ads_orbit_core_label: 'ADS',
+ads_orbit_tag_global: 'GLOBAL',
+ads_orbit_tag_forum: 'FORUM',
+ads_orbit_tag_ai_rotator: 'AI-ROTATOR',
+
+ads_hero_image_alt: 'Quantum L7 AI Ads — معاينة عرض الإعلان',
+ads_hero_figure_caption: 'تدوير بطاقات الإعلان عبر المنتدى وصفحات ذات حركة مرور.',
+
+ads_packages_title: 'اختر الباقة المناسبة لمهمتك',
+ads_packages_subtitle: 'جميع الباقات تعمل عبر لوحة واحدة ومُدوِّر واحد. يمكنك شراء خانات إضافية وتوسيع حجم الحركة. كلما زادت مدة الباقة قلت تكلفة يوم الإعلان.',
+
+ads_pkg_recommended: 'نوصي بها',
+
+ads_pkg_tier_starter: 'STARTER',
+ads_pkg_tier_pro: 'PRO',
+ads_pkg_tier_elite: 'ELITE',
+
+ads_pkg_price_sub: 'دفعة واحدة، الباقة صالحة لكامل المدة',
+ads_pkg_test_mode: 'لا توجد مدفوعات في وضع الاختبار',
+
+ads_pkg_days: 'مدة الباقة',
+ads_pkg_days_suffix: 'يوم',
+ads_pkg_slots: 'كثافة العرض',
+
+ads_pkg_slots_value_starter: 'حجم عرض معتدل ومتوازن',
+ads_pkg_slots_value_pro: 'أولوية أعلى وعروض أكثر تكرارًا',
+ads_pkg_slots_value_elite: 'أعلى أولوية وانتشار واسع داخل النظام البيئي',
+
+ads_pkg_max_campaigns: 'عدد الحملات ضمن الباقة',
+
+ads_pkg_selected: 'تم اختيار هذه الباقة للدفع والتشغيل.',
+ads_pkg_click_to_select: 'اضغط لاختيار هذه الباقة.',
+
+ads_how_title: 'كيف تعمل الإعلانات داخل النظام البيئي',
+
+ads_how_step1_title: 'تشتري الباقة وتصبح جاهزًا للعمل',
+ads_how_step1_text: 'تشتري الباقة وتحصل على إمكانية الوصول إلى لوحة التحكم الإعلانية.',
+
+ads_how_step2_title: 'تنشئ الحملات وتحدد الرابط',
+ads_how_step2_text: 'تضيف الرابط وتجهز الإعلان — النظام يختار أفضل شكل للمعاينة تلقائيًا.',
+
+ads_how_step3_title: 'المُدوِّر يعرض الإعلانات في خانات النظام البيئي',
+ads_how_step3_text: 'يتم عرض الإعلانات في خانات المنتدى وكامل النظام البيئي دون تكرار ومع تدوير ذكي.',
+
+ads_how_step4_title: 'تطالع التحليلات وتُحسّن الحملة',
+ads_how_step4_text: 'ترى المشاهدات والنقرات وCTR والبيانات الجغرافية — ثم تُجري التحسينات بناءً على الأرقام الفعلية.',
+
+ads_status_error_label: 'خطأ:',
+ads_status_ok_label: 'OK:',
+
+// кабинет    
+geo_country_unknown: 'غير محدد',
+
+ads_days_left_0: '0 يوم',
+ads_days_left_1: '1 يوم',
+ads_days_left_n: '%d يومًا',
+
+ads_chart_empty: 'لا توجد بيانات',
+
+ads_rules_title: 'قواعد عرض الإعلانات على Quantum L7 AI GLOBAL',
+
+ads_rules_text_1: `📘 **القسم الأول: الأحكام القانونية الأساسية**
+1. باستخدام منصة الإعلانات Quantum L7 AI GLOBAL، يؤكد المعلن موافقته الكاملة على هذه القواعد ويعتبرها وثيقة قانونية ملزمة.
+2. تعمل المنظومة وفق معايير الأمن الدولية، بما يتوافق مع الممارسات العالمية للأنظمة الإعلانية المنظمة.
+3. يتم اعتبار أي نشاط إعلاني بمثابة عقد عرض رقمي بين المعلن و Quantum L7 AI GLOBAL.`,
+
+
+ads_rules_text_2: `🚫 **القسم الثاني: المحتوى المحظور تمامًا (Zero-Tolerance Policy)**
+نطبق سياسة *عدم التسامح مطلقًا* مع أنواع المواد التالية. يُمنع منعًا باتًا نشر أو تحميل أو عرض أو توزيع أي محتوى يحتوي على:
+1. ❌ **المواد الإباحية** أو المشاهد الجنسية أو الصور الجنسية أو أي محتوى ذي طابع جنسي.  
+2. ❌ **القتل أو القسوة أو التقطيع أو مشاهد العنف**، بما في ذلك العنف المخفي أو الفني أو الأسلوبي أو الوثائقي.  
+3. ❌ **العنف ضد البشر أو الأطفال أو الحيوانات**، بجميع أشكاله.  
+4. ❌ **المواد التي تنتهك الأخلاق العامة** أو النظام العام أو الكرامة الإنسانية.  
+5. ❌ **التصيد الاحتيالي والاحتيال وأساليب الخداع**، وتزوير البيانات أو التلاعب أو أي نشاط إعلاني تدميري.  
+6. ❌ **الأنشطة غير القانونية** (المخدرات، الاتجار، الأسلحة، الخدمات المحظورة).  
+7. ❌ **خطابات الكراهية** أو التطرف أو الإرهاب أو أي شكل من أشكال التمييز.
+
+📌 *يتم تسجيل أي محاولة لتحميل محتوى من هذا النوع تلقائيًا وتعتبر انتهاكًا جسيمًا.*`,
+
+
+ads_rules_text_3: `⚖️ **القسم الثالث: حق الشركة في فسخ العقد من طرف واحد**
+تحتفظ Quantum L7 AI GLOBAL بالحق القانوني في:
+1. 🔸 إيقاف عرض الإعلان فورًا.  
+2. 🔸 إخفاء أو حذف المواد الإعلانية.  
+3. 🔸 **فسخ العقد الإعلاني من طرف واحد** دون الحاجة لإشعار إضافي.  
+4. 🔸 تقييد وظائف الحساب الإعلاني أو إغلاقه نهائيًا.
+
+تشمل أسباب الفسخ:  
+• تحميل مواد محظورة،  
+• تجاوز أنظمة المراجعة،  
+• تقديم بيانات مزورة،  
+• تهديد سمعة المنصة أو مستخدميها،  
+• محاولة الإضرار بالنظام أو الأمن الرقمي.`,
+
+
+ads_rules_text_4: `💸 **القسم الرابع: الشروط المالية في حال الانتهاك**
+1. في حال مخالفة القواعد، يوافق المعلن على ما يلي:  
+   • رسوم الباقة الإعلانية **غير قابلة للاسترجاع**؛  
+   • الفترة المتبقية من الاشتراك تعتبر ملغاة دون تعويض؛  
+   • يمكن حظر الحساب الإعلاني بشكل دائم دون إمكانية استعادته.
+2. يقر المعلن بأنه لا يمكن استرداد الأموال كليًا أو جزئيًا تحت أي ظرف.
+3. يتم تسجيل جميع العمليات في سجلات النظام الداخلية (backend logs) وتُعد دليلًا قانونيًا عند النزاعات.`,
+
+
+ads_rules_text_5: `📄 **القسم الخامس: حقوق المحتوى ومسؤولية المعلن**
+1. يضمن المعلن امتلاكه جميع الحقوق القانونية للمواد التي يتم تحميلها، بما في ذلك حقوق النشر والحقوق المجاورة.
+2. عند استخدام محتوى غير قانوني أو تابع لطرف آخر، تقع المسؤولية كاملة على المعلن.
+3. لا تتحمل Quantum L7 AI GLOBAL أي مسؤولية عن العواقب القانونية الناتجة عن أفعال المعلن المخالفة.`,
+
+
+ads_rules_text_6: `🌐 **القسم السادس: الاختصاص الدولي وتحديث القواعد**
+1. تم إعداد هذه القواعد وفقًا للمعايير الدولية لتنظيم الإعلانات الرقمية.
+2. يمكن لـ Quantum L7 AI GLOBAL تحديث القواعد من جانب واحد، مع الاحتفاظ بالنسخة المحدثة داخل النظام.
+3. استمرار استخدام منصة الإعلانات يعني الموافقة تلقائيًا على القواعد المحدثة.`,
+
+
+ads_rules_text_7: `💠 **القسم السابع: الإعلان الأخلاقي وقيم المنصة**
+1. نسعى إلى إنشاء بيئة عالمية آمنة تحترم فيها الإعلانات كرامة الإنسان.
+2. نظام أمان AI-moderation مدرب على اكتشاف المخاطر واتخاذ الإجراءات اللازمة دون تأخير.
+3. نحن نقدر النزاهة والشفافية والنهج التكنولوجي المتقدم في الإعلانات — ونتوقع الشيء نفسه من شركائنا.`,
+
+
+ads_rules_accept: 'قبول ومتابعة',
+
+
+ads_title: 'لوحة التحكم الإعلانية',
+ads_subtitle: 'أدِر الحملات، ارفع المواد الإبداعية، واعرض التحليلات في الوقت الحقيقي.',
+
+ads_loading_cabinet: 'يتم تحميل اللوحة…',
+
+ads_error_cabinet: 'حدث خطأ أثناء تحميل اللوحة:',
+
+ads_pkg_features_title: 'الباقة الحالية',
+ads_pkg_expires_in: 'تنتهي بعد',
+ads_pkg_expired: 'انتهت صلاحية الباقة — اشترِ واحدة جديدة من صفحة الباقات.',
+
+ads_plan_campaigns_limit: 'حملات',
+ads_plan_campaigns_hint: 'عدد الحملات التي تم إنشاؤها ضمن هذه الباقة.',
+
+ads_new_campaign_title: 'إنشاء حملة إعلانية',
+ads_new_campaign_intro_1: 'أعط الحملة اسمًا واضحًا، وأدخل الرابط وارفع المادة الإبداعية. سنقوم تلقائيًا بدمج الإعلان في أماكن العرض عبر المنتدى والنظام بأكمله.',
+
+ads_new_campaign_name_label: 'اسم الحملة',
+ads_new_campaign_name_placeholder: 'مثال: Quantum L7 AI • Premium',
+
+ads_new_campaign_click_url_label: 'رابط التحويل',
+ads_new_campaign_click_url_placeholder: 'https://مثال-موقع.com/landing',
+
+ads_new_campaign_upload_video: 'رفع فيديو (حتى 3 دقائق)',
+ads_new_campaign_upload_image: 'رفع صورة',
+
+ads_new_err_pkg_inactive: 'الباقة غير مفعّلة — قم بالتجديد أو شراء باقة جديدة.',
+ads_new_err_required: 'هذا الحقل مطلوب.',
+ads_new_err_limit: 'تم بلوغ الحد الأقصى للحملات في هذه الباقة.',
+ads_new_err_video_too_long: 'مدة الفيديو تتجاوز 3 دقائق (${Math.round(seconds)} ثانية) — يرجى تقصيره.',
+ads_new_err_generic: 'تعذر إنشاء الحملة، حاول مرة أخرى.',
+
+ads_new_campaign_submiting: 'يتم التشغيل…',
+ads_new_campaign_submit: 'تشغيل الحملة',
+ads_new_campaign_remaining: 'عدد الحملات المتبقية في الباقة:',
+
+ads_analytics_preview_title: 'معاينة مكان الإعلان',
+
+ads_preview_text: 'بعد تشغيل الحملة، سنعرض هذا الإعلان في الأماكن المتاحة عبر المنتدى والأنظمة ذات الزيارات.',
+ads_preview_empty: 'ستظهر هنا معاينة المواد الإبداعية — فيديو، صورة أو رابط.',
+
+ads_campaigns_title: 'حملاتك',
+
+ads_campaigns_col_name: 'الاسم',
+ads_campaigns_col_start: 'البدء',
+ads_campaigns_col_end: 'الانتهاء',
+ads_campaigns_col_content: 'المحتوى (link / media)',
+
+ads_campaigns_untitled: 'بدون اسم',
+
+ads_campaigns_media_video: 'رابط + فيديو',
+ads_campaigns_media_image: 'رابط + صورة',
+ads_campaigns_media_link: 'رابط فقط',
+
+ads_campaigns_finished_title: 'الحملات المكتملة',
+ads_campaigns_status_finished: 'مكتملة',
+ads_campaigns_empty: 'لا توجد حملات بعد — أنشئ أول حملة لعرض التحليلات.',
+
+ads_analytics_campaign_fallback: 'حملة',
+
+ads_campaigns_dates: 'الفترة:',
+
+ads_campaigns_status: 'الحالة:',
+
+ads_status_active: 'نشطة',
+ads_status_paused: 'متوقفة مؤقتًا',
+ads_status_stopped: 'متوقفة',
+ads_status_finished: 'منتهية',
+
+ads_analytics_preview_stub: 'معاينة',
+
+ads_analytics_period: 'الفترة:',
+ads_analytics_group_by: 'التجميع حسب:',
+ads_analytics_group_by_hour: 'ساعات',
+ads_analytics_group_by_day: 'أيام',
+
+ads_campaigns_actions: 'الإجراءات:',
+ads_campaigns_action_stop_ing: 'يتم الإيقاف…',
+ads_campaigns_action_stop: 'إيقاف',
+ads_campaigns_action_delete_ing: 'يتم الحذف…',
+ads_campaigns_action_delete: 'حذف',
+ads_campaigns_action_error: 'خطأ أثناء تنفيذ العملية:',
+
+ads_analytics_loading: 'يتم تحميل التحليلات…',
+ads_analytics_error: 'خطأ في التحليلات:',
+
+ads_analytics_summary_impressions: 'مرات الظهور',
+ads_analytics_summary_clicks: 'النقرات',
+ads_analytics_summary_ctr: 'CTR',
+
+ads_analytics_chart_impressions: 'مرات الظهور حسب الوقت',
+ads_analytics_chart_clicks: 'النقرات حسب الوقت',
+
+ads_analytics_summary_top_regions: 'المناطق حسب الحملات',
+
+ads_geo_country: 'الدولة',
+ads_geo_region: 'المنطقة',
+ads_geo_city: 'المدينة',
+ads_geo_impressions: 'الظهور',
+ads_geo_clicks: 'النقرات',
+ads_geo_ctr: 'CTR',
+
+ads_analytics_empty: 'اختر حملة نشطة لعرض التحليلات.',
+
+ads_pkg_type_starter: 'STARTER',
+ads_pkg_type_pro: 'PRO',
+ads_pkg_type_elite: 'ELITE',
+
+}
+
+const ADS_HERO_TR = {
+
+ads_pkg_starter_bullet_1: '⚡ Forumda ve yüksek trafikli sayfalarda hızlı reklam başlatma',
+ads_pkg_starter_bullet_2: '🎯 Temel gösterim önceliği ve düzenli trafik hacmi',
+ads_pkg_starter_bullet_3: '📈 Panelde basit gösterim ve tıklama analitiği',
+
+ads_pkg_pro_bullet_1: '🚀 Daha yüksek gösterim önceliği ve belirgin şekilde daha fazla trafik',
+ads_pkg_pro_bullet_2: '⚙️ Tek bir panelde birden fazla kampanya yönetimi',
+ads_pkg_pro_bullet_3: '📊 Coğrafi veriler dahil genişletilmiş analiz',
+ads_pkg_pro_bullet_4: '💸 STARTER’a göre daha avantajlı günlük gösterim maliyeti',
+
+ads_pkg_elite_bullet_1: '👑 Forum ve tüm ekosistem genelinde en yüksek gösterim önceliği',
+ads_pkg_elite_bullet_2: '🚀 Paketin tamamı boyunca sürekli ve yüksek gösterim hacmi',
+ads_pkg_elite_bullet_3: '🧠 Detaylı analiz ve kampanyaları rahatça ölçeklendirme',
+ads_pkg_elite_bullet_4: '💠 Uzun paket süresi sayesinde en düşük günlük gösterim maliyeti',
+
+ads_test_mode_cta_note: 'Test modu: ödemeler kapalı, panele ücretsiz erişim mevcut.',
+ads_error_no_account: 'Paketi satın almak için önce hesabına giriş yap.',
+ads_pay_redirect: 'Ödeme sayfasına yönlendiriliyorsun. Başarılı ödeme sonrası reklam paneli etkinleşecek.',
+ads_error_pay_generic: 'Ödeme oluşturulamadı. Biraz sonra tekrar dene.',
+
+ads_hero_badge: 'GLOBAL • SITE-WIDE ADS',
+ads_page_title: 'Quantum L7 AI ekosisteminde reklam başlat',
+ads_page_subtitle: 'Reklamın neon vitrininde: forum, trafiği yüksek sayfalar ve tüm QL7 Global ekosistemi çapında global slotlar.',
+
+ads_cta_test_mode: 'Reklam paneline geç (test modu)',
+ads_cta_loading: 'Ödeme oluşturuluyor…',
+ads_cta_main: 'Paketi satın al ve reklamı başlat',
+ads_cta_have_pkg: 'Zaten paketim var — panele git',
+
+ads_meta_realtime: 'Slot döndürücüsü gerçek zamanlı çalışır, slotlar tüm ekosisteme yerleştirilir ve analitiği doğrudan panelde görebilirsin.',
+
+ads_test_mode_label: 'TEST MODE',
+ads_test_mode_note: 'Ödemeler kapalıdır. Paneli, kampanyaları ve yerleşimleri rahatça test edebilirsin.',
+
+ads_orbit_core_label: 'ADS',
+ads_orbit_tag_global: 'GLOBAL',
+ads_orbit_tag_forum: 'FORUM',
+ads_orbit_tag_ai_rotator: 'AI-ROTATOR',
+
+ads_hero_image_alt: 'Quantum L7 AI Ads — reklam yerleşimi önizlemesi',
+ads_hero_figure_caption: 'Reklam kartlarının forum ve trafiği yüksek sayfalar arasında döndürülmesi.',
+
+ads_packages_title: 'Görevine uygun paketi seç',
+ads_packages_subtitle: 'Tüm paketler tek bir panel ve tek bir döndürücü üzerinden çalışır. Ek slotlar satın alabilir ve trafiği ölçeklendirebilirsin. Paket süresi uzadıkça günlük reklam maliyeti düşer.',
+
+ads_pkg_recommended: 'Öneriliyor',
+
+ads_pkg_tier_starter: 'STARTER',
+ads_pkg_tier_pro: 'PRO',
+ads_pkg_tier_elite: 'ELITE',
+
+ads_pkg_price_sub: 'tek seferlik ödeme, paket tüm süre boyunca geçerli',
+ads_pkg_test_mode: 'test modunda ödeme yok',
+
+ads_pkg_days: 'Paket süresi',
+ads_pkg_days_suffix: 'gün',
+ads_pkg_slots: 'Gösterim yoğunluğu',
+
+ads_pkg_slots_value_starter: 'Orta ve dengeli gösterim hacmi',
+ads_pkg_slots_value_pro: 'Daha yüksek öncelik ve daha sık gösterimler',
+ads_pkg_slots_value_elite: 'En yüksek öncelik ve ekosistem genelinde geniş kapsama alanı',
+
+ads_pkg_max_campaigns: 'Paket içindeki kampanya sayısı',
+
+ads_pkg_selected: 'Bu paket ödeme ve başlatma için seçildi.',
+ads_pkg_click_to_select: 'Bu paketi seçmek için tıkla.',
+
+ads_how_title: 'Reklam ekosistem genelinde nasıl döner',
+
+ads_how_step1_title: 'Paketi satın alırsın ve oyuna girersin',
+ads_how_step1_text: 'Paketi satın alırsın ve reklam paneline erişim kazanırsın.',
+
+ads_how_step2_title: 'Kampanyaları oluşturur ve bağlantıyı belirlersin',
+ads_how_step2_text: 'Bağlantı eklersin ve ilanı oluşturursun — sistem otomatik olarak en iyi önizleme biçimini seçer.',
+
+ads_how_step3_title: 'Döndürücü reklamları ekosistem slotlarında döndürür',
+ads_how_step3_text: 'Reklam forum slotlarında ve tüm ekosistemde gösterilir, tekrar olmadan ve akıllı döngüyle.',
+
+ads_how_step4_title: 'Analitiği inceler ve kampanyayı optimize edersin',
+ads_how_step4_text: 'Panelde gösterimler, tıklamalar, CTR ve coğrafi verileri görürsün — kampanyayı gerçek zamanlı rakamlara göre optimize edersin.',
+
+ads_status_error_label: 'Hata:',
+ads_status_ok_label: 'OK:',
+
+// кабинет     
+geo_country_unknown: 'Belirtilmedi',
+
+ads_days_left_0: '0 g',
+ads_days_left_1: '1 g',
+ads_days_left_n: '%d g',
+
+ads_chart_empty: 'Veri yok',
+
+ads_rules_title: 'Quantum L7 AI GLOBAL üzerinde reklam yerleştirme kuralları',
+
+ads_rules_text_1: `📘 **Bölüm I. Temel Hukuki Hükümler**
+1. Quantum L7 AI GLOBAL reklam platformunu kullanarak, reklamveren bu Kuralların tamamını kabul ettiğini ve bunları yasal olarak bağlayıcı bir belge olarak gördüğünü onaylar.
+2. Sistem, uluslararası güvenlik standartlarına uygun şekilde çalışır ve düzenlenen küresel reklam ekosistemlerinin genel uygulamalarına uygundur.
+3. Her türlü reklam faaliyeti, reklamveren ile Quantum L7 AI GLOBAL arasında dijital bir teklif sözleşmesinin kurulması olarak değerlendirilir.`,
+
+ads_rules_text_2: `🚫 **Bölüm II. Kesinlikle Yasaklı İçerik (Zero-Tolerance Policy)**
+Aşağıdaki türdeki içeriklere karşı *sıfır tolerans politikası* uygulanır. Aşağıdaki içeriklerin yüklenmesi, gösterilmesi veya yayılması kesinlikle yasaktır:
+1. ❌ **Pornografi**, erotik sahneler, cinsel içerikli görseller ve her türlü cinsel içerik.  
+2. ❌ **Cinayet, vahşet, parçalama, şiddet sahneleri**, gizli, stilize, sanatsal veya belgesel dahil.  
+3. ❌ **İnsanlara, çocuklara veya hayvanlara yönelik şiddet**, her türlü kötü muamele.  
+4. ❌ **Ahlaki normları ihlal eden materyaller**, toplum düzenine aykırı içerikler veya insan onurunu zedeleyen materyaller.  
+5. ❌ **Phishing, dolandırıcılık, aldatma yöntemleri**, veri sahteciliği, manipülasyon ve her tür yıkıcı reklam faaliyeti.  
+6. ❌ **Yasadışı faaliyetler** (uyuşturucu, kaçakçılık, silah, yasaklı hizmetler).  
+7. ❌ **Nefret söylemi**, aşırılıkçılık, terörizm veya her türlü ayrımcılık.
+
+📌 *Bu tür içerikleri yükleme girişimi sistem tarafından otomatik olarak kaydedilir ve en ağır ihlallerden biri olarak kabul edilir.*`,
+
+ads_rules_text_3: `⚖️ **Bölüm III. Şirketin sözleşmeyi tek taraflı feshetme hakkı**
+Quantum L7 AI GLOBAL aşağıdaki yasal hakları saklı tutar:
+1. 🔸 Reklam gösterimini derhal durdurmak.  
+2. 🔸 Reklam materyallerini gizlemek veya silmek.  
+3. 🔸 **Reklam sözleşmesini tek taraflı olarak feshetmek**, ek bir bildirimde bulunmaksızın.  
+4. 🔸 Reklam panelinin işlevlerini sınırlamak veya hesabı kapatmak.
+
+Fesih gerekçeleri şunları içerir:  
+• yasaklı materyaller yüklemek,  
+• moderasyon mekanizmalarını atlatmak,  
+• yanlış bilgi sağlamak,  
+• platformun veya kullanıcılarının itibarını tehdit etmek,  
+• ekosisteme veya dijital güvenliğe zarar verme girişimleri.`,
+
+
+ads_rules_text_4: `💸 **Bölüm IV. İhlal durumunda mali koşullar**
+1. Kuralların ihlali halinde, reklamveren aşağıdakileri kabul eder:  
+   • reklam paketi için ödenen ücret **iade edilmez**;  
+   • kalan kullanım süresi tazminatsız olarak iptal edilir;  
+   • reklam hesabı kalıcı olarak engellenebilir ve geri yüklenemez.
+2. Reklamveren, ücretlerin hiçbir koşulda kısmen dahi iade edilmeyeceğini kabul eder.
+3. Tüm işlemler, sistemin dahili günlüklerinde (backend loglar) kaydedilir ve ihtilaf durumlarında kanıt niteliği taşır.`,
+
+
+ads_rules_text_5: `📄 **Bölüm V. İçerik hakları ve reklamverenin sorumluluğu**
+1. Reklamveren, yüklediği tüm içerikler için gerekli telif ve ilgili haklara sahip olduğunu garanti eder.
+2. Başkasına ait veya yasadışı içerik yüklenmesi durumunda tüm sorumluluk reklamverene aittir.
+3. Quantum L7 AI GLOBAL, reklamverenin yasa dışı eylemlerinden doğacak hukuki sonuçlardan sorumlu değildir.`,
+
+
+ads_rules_text_6: `🌐 **Bölüm VI. Uluslararası yargı ve kural değişiklikleri**
+1. Bu Kurallar, dijital reklamcılığın uluslararası düzenleme standartlarına uygun olarak hazırlanmıştır.
+2. Quantum L7 AI GLOBAL, Kuralları tek taraflı olarak güncelleyebilir ve güncel sürümü sistemde saklar.
+3. Reklam platformunu kullanmaya devam etmek, güncellenen Kuralların otomatik olarak kabul edildiği anlamına gelir.`,
+
+
+ads_rules_text_7: `💠 **Bölüm VII. Etik deklarasyon ve platformun değerleri**
+1. İnsan onuruna saygı duyan, küresel ve güvenli bir reklam ortamı oluşturmayı hedefliyoruz.
+2. AI-moderation güvenlik sistemi, riskleri belirlemek ve gecikmeden yanıt vermek üzere eğitilmiştir.
+3. Dürüstlüğü, şeffaflığı ve teknolojik yaklaşımı değerli buluyoruz — ve iş ortaklarımızdan da aynısını bekliyoruz.`,
+
+
+ads_rules_accept: 'Kabul et ve devam et',
+
+
+ads_title: 'Reklam paneli',
+ads_subtitle: 'Kampanyaları yönet, kreatifleri yükle, gerçek zamanlı analizleri incele.',
+
+ads_loading_cabinet: 'Panel yükleniyor…',
+
+ads_error_cabinet: 'Panel yükleme hatası:',
+
+ads_pkg_features_title: 'Geçerli paket',
+ads_pkg_expires_in: 'Sona eriyor:',
+ads_pkg_expired: 'Paketin süresi doldu — paketler sayfasından yenisini satın al.',
+
+ads_plan_campaigns_limit: 'Kampanyalar',
+ads_plan_campaigns_hint: 'Bu paket kapsamında oluşturulmuş kampanya sayısı.',
+
+ads_new_campaign_title: 'Yeni reklam kampanyası oluştur',
+ads_new_campaign_intro_1: 'Kampanyaya anlaşılır bir isim ver, bağlantıyı ekle ve kreatifi yükle. Reklamı otomatik olarak forumdaki ve ekosistemdeki tüm slotlara yerleştiririz.',
+
+ads_new_campaign_name_label: 'Kampanya adı',
+ads_new_campaign_name_placeholder: 'Örneğin: Quantum L7 AI • Premium',
+
+ads_new_campaign_click_url_label: 'Yönlendirme bağlantısı',
+ads_new_campaign_click_url_placeholder: 'https://örnek-site.com/landing',
+
+ads_new_campaign_upload_video: 'Video yükle (3 dakikaya kadar)',
+ads_new_campaign_upload_image: 'Görsel yükle',
+
+ads_new_err_pkg_inactive: 'Paket aktif değil — yenile veya yeni paket satın al.',
+ads_new_err_required: 'Bu alan zorunludur.',
+ads_new_err_limit: 'Bu paket için kampanya limiti doldu.',
+ads_new_err_video_too_long: 'Video 3 dakikadan uzun (${Math.round(seconds)} sn) — lütfen kısalt.',
+ads_new_err_generic: 'Kampanya oluşturulamadı, tekrar dene.',
+
+ads_new_campaign_submiting: 'Başlatılıyor…',
+ads_new_campaign_submit: 'Kampanyayı başlat',
+ads_new_campaign_remaining: 'Paket içinde kalan kampanya sayısı:',
+
+ads_analytics_preview_title: 'Reklam slotu ön izlemesi',
+
+ads_preview_text: 'Kampanya başlatıldıktan sonra bu reklam forum ve ekosistemdeki tüm slotlarda gösterilecektir.',
+ads_preview_empty: 'Burada kreatif ön izlemesi görünecek — video, resim veya bağlantı.',
+
+ads_campaigns_title: 'Kampanyaların',
+
+ads_campaigns_col_name: 'Adı',
+ads_campaigns_col_start: 'Başlangıç',
+ads_campaigns_col_end: 'Bitiş',
+ads_campaigns_col_content: 'İçerik (link / medya)',
+
+ads_campaigns_untitled: 'Adsız',
+
+ads_campaigns_media_video: 'Bağlantı + Video',
+ads_campaigns_media_image: 'Bağlantı + Görsel',
+ads_campaigns_media_link: 'Sadece bağlantı',
+
+ads_campaigns_finished_title: 'Tamamlanan kampanyalar',
+ads_campaigns_status_finished: 'Tamamlandı',
+ads_campaigns_empty: 'Henüz kampanya yok — ilkini oluştur ve analizleri gör.',
+
+ads_analytics_campaign_fallback: 'Kampanya',
+
+ads_campaigns_dates: 'Dönem:',
+
+ads_campaigns_status: 'Durum:',
+
+ads_status_active: 'Aktif',
+ads_status_paused: 'Duraklatıldı',
+ads_status_stopped: 'Durduruldu',
+ads_status_finished: 'Bitti',
+
+ads_analytics_preview_stub: 'Ön izleme',
+
+ads_analytics_period: 'Dönem:',
+ads_analytics_group_by: 'Gruplama:',
+ads_analytics_group_by_hour: 'Saatler',
+ads_analytics_group_by_day: 'Günler',
+
+ads_campaigns_actions: 'İşlemler:',
+ads_campaigns_action_stop_ing: 'Durduruluyor…',
+ads_campaigns_action_stop: 'Durdur',
+ads_campaigns_action_delete_ing: 'Siliniyor…',
+ads_campaigns_action_delete: 'Sil',
+ads_campaigns_action_error: 'İşlem hatası:',
+
+ads_analytics_loading: 'Analizler yükleniyor…',
+ads_analytics_error: 'Analiz hatası:',
+
+ads_analytics_summary_impressions: 'Gösterimler',
+ads_analytics_summary_clicks: 'Tıklamalar',
+ads_analytics_summary_ctr: 'CTR',
+
+ads_analytics_chart_impressions: 'Zamana göre gösterimler',
+ads_analytics_chart_clicks: 'Zamana göre tıklamalar',
+
+ads_analytics_summary_top_regions: 'Kampanyalara göre bölge',
+
+ads_geo_country: 'Ülke',
+ads_geo_region: 'Bölge',
+ads_geo_city: 'Şehir',
+ads_geo_impressions: 'Gösterimler',
+ads_geo_clicks: 'Tıklamalar',
+ads_geo_ctr: 'CTR',
+
+ads_analytics_empty: 'Analizleri görmek için aktif bir kampanya seç.',
+
+ads_pkg_type_starter: 'STARTER',
+ads_pkg_type_pro: 'PRO',
+ads_pkg_type_elite: 'ELITE',
+
+}
+
+
+try {
+  Object.assign(dict.en, ADS_HERO_EN)
+  Object.assign(dict.ru, ADS_HERO_RU)
+  Object.assign(dict.uk, ADS_HERO_UK)
+  Object.assign(dict.es, ADS_HERO_ES)
+  Object.assign(dict.zh, ADS_HERO_ZH)
+  Object.assign(dict.ar, ADS_HERO_AR)
+  Object.assign(dict.tr, ADS_HERO_TR)
+} catch (e) {}
 
 export function I18nProvider({ children }) {
   const [lang, setLang] = useState('en')

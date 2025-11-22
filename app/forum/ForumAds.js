@@ -4,6 +4,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import NextImage from 'next/image';
 import { useI18n } from '../../components/i18n';
+import { useRouter } from 'next/navigation';
 
 /* ======================= CAMPAIGN META ======================= */
 
@@ -16,11 +17,9 @@ const DEFAULT_THUMB_SERVICES = [
   'https://image.microlink.io/?url={url}&screenshot=true&meta=false',
 ];
 
-const FALLBACK_LINKS = [
-  'https://web.telegram.org/k/',
-  'https://www.youtube.com/',
-  'https://vercel.com/',
-];
+// Fallback больше НЕ используем в логике показов, просто оставил константу.
+// Если нет ссылок ни в ENV, ни в базе — рекламы нет.
+// const FALLBACK_LINKS = [...]
 
 /**
  * ВАЖНО: только статические обращения к NEXT_PUBLIC_*
@@ -37,6 +36,64 @@ const ENV_AD = {
 /* eslint-enable no-undef */
 
 let cachedClientConf = null;
+
+// ======================= ADS LINKS FROM REDIS =======================
+
+let adsLinksMerged = false;
+
+async function mergeLinksFromRedisOnce() {
+  if (!isBrowser()) return;
+  if (adsLinksMerged) return;
+  adsLinksMerged = true;
+
+  try {
+    // берём ссылки через универсальный /api/ads?action=links
+    const res = await fetch('/api/ads?action=links', {
+      method: 'GET',
+      cache: 'no-store',
+    });
+    if (!res.ok) return;
+    const j = await res.json().catch(() => null);
+    if (!j || !j.ok || !j.linksString) return;
+
+    const extraParsed = parseLinks(j.linksString);
+    if (!extraParsed.links || !extraParsed.links.length) return;
+
+    const base = getForumAdConf(); // берём текущий кэш
+    const baseLinks = Array.isArray(base.LINKS) ? base.LINKS : [];
+
+    // Если ENV пустые — baseLinks = [], значит используем только базу.
+    // Если ENV есть — объединяем ENV + база.
+    const mergedLinks = baseLinks.length
+      ? [...baseLinks, ...extraParsed.links]
+      : extraParsed.links;
+
+    const mergedMedia = {
+      ...(base.MEDIA_BY_CLICK || {}),
+      ...extraParsed.mediaByClick,
+    };
+
+    const dedup = [];
+    const seen = new Set();
+    for (const u of mergedLinks) {
+      if (!u) continue;
+      if (seen.has(u)) continue;
+      seen.add(u);
+      dedup.push(u);
+    }
+
+    base.LINKS = dedup;
+    base.MEDIA_BY_CLICK = mergedMedia;
+
+    debugLog(base, 'merge_links_from_redis', {
+      env_len: baseLinks.length,
+      extra_len: extraParsed.links.length,
+      final_len: dedup.length,
+    });
+  } catch {
+    /* no-op */
+  }
+}
 
 /* ======================= UTILS ======================= */
 
@@ -233,7 +290,11 @@ function parseThumbs(raw) {
 
 export function getForumAdConf() {
   if (isBrowser() && cachedClientConf) return cachedClientConf;
-
+  // Параллельно пробуем подтянуть рекламные кампании из Redis
+  if (isBrowser()) {
+    // fire-and-forget, результат мутирует cachedClientConf, когда готово
+    mergeLinksFromRedisOnce().catch(() => {});
+  }
   const EVERY = parseNumber(readRaw('EVERY'), 0);
   const ROTATE_MIN = parseNumber(readRaw('ROTATE_MIN'), 1);
 
@@ -244,16 +305,8 @@ export function getForumAdConf() {
       : 'auto';
 
   const parsed = parseLinks(readRaw('LINKS') || '');
-  let LINKS = parsed.links;
-  let MEDIA_BY_CLICK = parsed.mediaByClick;
-
-  if (!Array.isArray(LINKS) || !LINKS.length) {
-    LINKS = FALLBACK_LINKS.slice();
-    MEDIA_BY_CLICK = {};
-    for (const u of LINKS) {
-      MEDIA_BY_CLICK[u] = u;
-    }
-  }
+  const LINKS = parsed.links || [];
+  const MEDIA_BY_CLICK = parsed.mediaByClick || {};
 
   const THUMBS_RAW = parseThumbs(readRaw('THUMB_SERVICES') || '');
   const DEBUG = String(readRaw('DEBUG') || '').trim() === '1';
@@ -435,10 +488,11 @@ export function resolveCurrentAdUrl(
   const conf = { ...baseConf };
 
   let links = Array.isArray(conf.LINKS) ? conf.LINKS.filter(Boolean) : [];
-  if (!links.length) links = FALLBACK_LINKS.slice();
 
+  // ВАЖНО: больше НЕ подставляем fallback.
+  // Если ссылок нет ни в ENV, ни в базе → вернули null → блоки не рендерятся.
   if (!links.length) {
-    debugLog(conf, 'slot_no_links', { slotKey });
+    debugLog(conf, 'slot_no_links_no_fallback', { slotKey });
     return null;
   }
 
@@ -563,11 +617,32 @@ function emitAdEvent(type, payload, conf) {
   debugLog(conf, type, detail);
 
   const w = getWin();
-  if (!w || typeof w.dispatchEvent !== 'function') return;
+  if (w && typeof w.dispatchEvent === 'function') {
+    try {
+      w.dispatchEvent(new CustomEvent('ads:event', { detail }));
+    } catch {}
+  }
 
-  try {
-    w.dispatchEvent(new CustomEvent('ads:event', { detail }));
-  } catch {}
+  // Серверная аналитика для пользовательских кампаний
+  if (type === 'ad_impression' || type === 'ad_click') {
+    try {
+      const body = {
+        action: 'event', // работаем через единый /api/ads
+        type, // 'ad_impression' | 'ad_click'
+        url_hash: detail.url_hash,
+        slot_kind: detail.slot_kind,
+        near_id: detail.near_id,
+      };
+      fetch('/api/ads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        keepalive: true,
+      }).catch(() => {});
+    } catch {
+      /* no-op */
+    }
+  }
 }
 
 function tryLoadImage(src, timeoutMs = 3000) {
@@ -591,6 +666,34 @@ function tryLoadImage(src, timeoutMs = 3000) {
   });
 }
 
+// Определяем тип медиа по Content-Type через HEAD
+async function detectMediaKind(url, timeoutMs = 3000) {
+  if (!url || !isBrowser() || typeof fetch === 'undefined') return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const resp = await fetch(url, {
+      method: 'HEAD',
+      signal: controller.signal,
+    }).catch(() => null);
+
+    if (!resp) return null;
+
+    const ct = (resp.headers.get('content-type') || '').toLowerCase();
+
+    if (ct.startsWith('video/')) return 'video';
+    if (ct.startsWith('image/')) return 'image';
+
+    return null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function isLikelyVideoUrl(raw) {
   if (!raw) return false;
   const s = String(raw).trim();
@@ -598,11 +701,18 @@ function isLikelyVideoUrl(raw) {
 
   if (/^blob:/i.test(s)) return true;
 
+  // нормальные видео по расширению
   if (/\.(webm|mp4|mov|m4v|mkv)(?:$|[?#])/i.test(s)) return true;
 
+  // filename=...mp4 в query
   if (/[?&]filename=.*\.(webm|mp4|mov|m4v|mkv)(?:$|[?#])/i.test(s)) return true;
 
-  if (/vercel[-]?storage|vercel[-]?blob|\/uploads\/video|\/forum\/video|\/api\/forum\/uploadVideo/i.test(s)) {
+  // только явные video-эндпоинты
+  if (
+    /vercel[-]?storage|vercel[-]?blob|\/uploads\/video|\/forum\/video|\/api\/forum\/uploadVideo/i.test(
+      s
+    )
+  ) {
     return true;
   }
 
@@ -620,8 +730,6 @@ const TIKTOK_RE =
  * OG video/screenshot/image → direct file → YouTube/TikTok → screenshot CDNs → favicon → placeholder
  * Бейдж "Реклама" из словаря: ключ forum_ad_label.
  * Превью тянет карточку на всю доступную высоту.
- * Видео: автоплей, **без управления**, звук по умолчанию MUTE,
- * одна кнопка 🔇/🔊 в правом нижнем углу. Клик в любое другое место → переход по ссылке.
  */
 
 export function AdCard({ url, slotKind, nearId }) {
@@ -629,7 +737,7 @@ export function AdCard({ url, slotKind, nearId }) {
   useAdPreconnect(conf);
   const i18n = useI18n();
   const t = i18n?.t;
-
+  const router = useRouter();
   const [media, setMedia] = useState({ kind: 'skeleton', src: null });
   const [muted, setMuted] = useState(true);
   const rootRef = useRef(null);
@@ -665,7 +773,33 @@ export function AdCard({ url, slotKind, nearId }) {
     const isDirectImg = /\.(jpe?g|png|webp|gif|avif)(?:$|[?#])/i.test(mediaHref);
 
     async function run() {
-      // 0) прямое видео (blob, mp4, vercel и т.п.)
+      // 0) сначала пробуем определить тип по Content-Type (HEAD)
+      if (!cancelled) {
+        const detected = await detectMediaKind(mediaHref).catch(() => null);
+        if (cancelled) return;
+
+        if (detected === 'video') {
+          setMedia({ kind: 'video', src: mediaHref, step: 'head_video' });
+          emitAdEvent(
+            'ad_fallback',
+            { url: clickHref, cascade_step: 'head_video', slot_kind: slotKind },
+            conf
+          );
+          return;
+        }
+
+        if (detected === 'image') {
+          setMedia({ kind: 'image', src: mediaHref, step: 'head_image' });
+          emitAdEvent(
+            'ad_fallback',
+            { url: clickHref, cascade_step: 'head_image', slot_kind: slotKind },
+            conf
+          );
+          return;
+        }
+      }
+
+      // 1) прямое видео (blob, mp4 и т.п.) по URL-эвристике
       if (!cancelled && isLikelyVideoUrl(mediaHref)) {
         setMedia({ kind: 'video', src: mediaHref, step: 'env_video' });
         emitAdEvent(
@@ -676,7 +810,7 @@ export function AdCard({ url, slotKind, nearId }) {
         return;
       }
 
-      // 0.1) YouTube
+      // 2) YouTube
       const ytMatch = mediaHref.match(YT_RE);
       if (!cancelled && ytMatch) {
         const videoId = ytMatch[1];
@@ -684,14 +818,18 @@ export function AdCard({ url, slotKind, nearId }) {
           setMedia({ kind: 'youtube', src: videoId, step: 'env_youtube' });
           emitAdEvent(
             'ad_fallback',
-            { url: clickHref, cascade_step: 'env_youtube', slot_kind: slotKind },
+            {
+              url: clickHref,
+              cascade_step: 'env_youtube',
+              slot_kind: slotKind,
+            },
             conf
           );
           return;
         }
       }
 
-      // 0.2) TikTok
+      // 3) TikTok
       const ttMatch = mediaHref.match(TIKTOK_RE);
       if (!cancelled && ttMatch) {
         let videoId = null;
@@ -704,14 +842,18 @@ export function AdCard({ url, slotKind, nearId }) {
           setMedia({ kind: 'tiktok', src: videoId, step: 'env_tiktok' });
           emitAdEvent(
             'ad_fallback',
-            { url: clickHref, cascade_step: 'env_tiktok', slot_kind: slotKind },
+            {
+              url: clickHref,
+              cascade_step: 'env_tiktok',
+              slot_kind: slotKind,
+            },
             conf
           );
           return;
         }
       }
 
-      // 1) Microlink (OG screenshot / image)
+      // 4) Microlink (OG screenshot / image)
       if (!cancelled && conf.PREVIEW !== 'favicon') {
         try {
           const q =
@@ -757,21 +899,25 @@ export function AdCard({ url, slotKind, nearId }) {
         } catch {}
       }
 
-      // 2) прямой файл-картинка
+      // 5) прямой файл-картинка
       if (!cancelled && conf.PREVIEW !== 'favicon' && isDirectImg) {
         const ok = await tryLoadImage(mediaHref);
         if (ok && !cancelled) {
           setMedia({ kind: 'image', src: mediaHref, step: 'direct_image' });
           emitAdEvent(
             'ad_fallback',
-            { url: clickHref, cascade_step: 'direct_image', slot_kind: slotKind },
+            {
+              url: clickHref,
+              cascade_step: 'direct_image',
+              slot_kind: slotKind,
+            },
             conf
           );
           return;
         }
       }
 
-      // 3) Screenshot CDNs
+      // 6) Screenshot CDNs
       if (!cancelled && conf.PREVIEW !== 'favicon') {
         for (const tpl of thumbs) {
           if (cancelled) break;
@@ -793,22 +939,24 @@ export function AdCard({ url, slotKind, nearId }) {
         }
       }
 
-      // 4) Favicon
+      // 7) Favicon
       if (
         !cancelled &&
         (conf.PREVIEW === 'auto' || conf.PREVIEW === 'favicon')
       ) {
         try {
           const ico =
-            'https://icons.duckduckgo.com/ip3/' +
-            landingHost +
-            '.ico';
+            'https://icons.duckduckgo.com/ip3/' + landingHost + '.ico';
           const ok = await tryLoadImage(ico);
           if (ok && !cancelled) {
             setMedia({ kind: 'favicon', src: ico, step: 'favicon' });
             emitAdEvent(
               'ad_fallback',
-              { url: clickHref, cascade_step: 'favicon', slot_kind: slotKind },
+              {
+                url: clickHref,
+                cascade_step: 'favicon',
+                slot_kind: slotKind,
+              },
               conf
             );
             return;
@@ -816,7 +964,7 @@ export function AdCard({ url, slotKind, nearId }) {
         } catch {}
       }
 
-      // 5) Placeholder
+      // 8) Placeholder
       if (!cancelled) {
         setMedia({ kind: 'placeholder', src: null, step: 'placeholder' });
         emitAdEvent(
@@ -959,6 +1107,19 @@ export function AdCard({ url, slotKind, nearId }) {
       ? t('forum_ad_label', 'Реклама')
       : 'Реклама';
 
+  // Кнопка «Разместить» — переходим на страницу /ads, не кликая по рекламной ссылке
+  const handleOpenAdsPage = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      router.push('/ads');
+    } catch {
+      if (typeof window !== 'undefined') {
+        window.location.href = '/ads';
+      }
+    }
+  };
+
   const handleClick = () => {
     emitAdEvent(
       'ad_click',
@@ -1017,130 +1178,151 @@ export function AdCard({ url, slotKind, nearId }) {
       >
         <div className="flex flex-col gap-1 h-full">
           {/* header: только бейдж + домен, без url-строки */}
-          <div className="flex items-center gap-2 text-[9px] uppercase tracking-wide text-[color:var(--muted-fore,#9ca3af)]">
-            <span className="qcoinLabel">
-              {label}
-            </span>
-            <span className="truncate max-w-[200px] font-medium" />
+          <div
+            className="flex items-center gap-2 text-[9px] uppercase tracking-wide text-[color:var(--muted-fore,#9ca3af)]"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'nowrap',
+              width: '100%',
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <span className="qcoinLabel">
+                {label}
+              </span>
+              <span className="truncate max-w-[140px] font-medium">
+                {/* домен можно вернуть сюда, если захочешь */}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleOpenAdsPage}
+              className="btn"
+              style={{
+                fontSize: '10px',
+                padding: '4px 8px',
+                borderRadius: 999,
+                marginLeft: 'auto',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+              }}
+            >
+              {typeof t === 'function'
+                ? t('forum_ad_place', 'Разместить')
+                : 'Разместить'}
+            </button>
           </div>
 
-          {/* media: заполняет карточку */}
-          <div className="relative mt-0.5 overflow-hidden rounded-lg border border-[color:var(--border,#27272a)] bg-[color:var(--bg-soft,#020817)] flex-1 min-h-[140px] max-h-[400px]">
-            {media.kind === 'skeleton' && (
-              <div className="animate-pulse w-full h-full bg-[color:var(--skeleton,#111827)]" />
-            )}
+{/* media: карточка подстраивается под медиа, без обрезаний и пустых зон */}
+<div className="relative mt-0.5 overflow-hidden rounded-lg border border-[color:var(--border,#27272a)] bg-[color:var(--bg-soft,#020817)]">
+  {media.kind === 'skeleton' && (
+    <div className="w-full h-[220px] animate-pulse bg-[color:var(--skeleton,#111827)]" />
+  )}
 
-            {media.kind === 'video' && media.src && (
-              <video
-                ref={videoRef}
-                src={media.src}
-                className="w-full h-full object-cover"
-                autoPlay
-                muted={muted}
-                loop
-                playsInline
-              />
-            )}
+  {media.kind === 'video' && media.src && (
+    <video
+      ref={videoRef}
+      src={media.src}
+      className="block w-full h-auto"
+      autoPlay
+      muted={muted}
+      loop
+      playsInline
+    />
+  )}
 
-            {media.kind === 'youtube' && media.src && (
-              <div
-                className="w-full h-full"
-                style={{
-                  position: 'relative',
-                  paddingBottom: '56.25%',
-                  overflow: 'hidden',
-                  borderRadius: 10,
-                }}
-              >
-                <iframe
-                  ref={ytIframeRef}
-                  src={`https://www.youtube.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}
-                  title="YouTube video"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: 10,
-                    pointerEvents: 'none', // не реагируем на мышку, все клики уходят в <a>
-                  }}
-                />
-              </div>
-            )}
+  {media.kind === 'youtube' && media.src && (
+    <div
+      className="relative w-full"
+      style={{ aspectRatio: '16 / 9' }}
+    >
+      <iframe
+        ref={ytIframeRef}
+        src={`https://www.youtube.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}
+        title="YouTube video"
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          borderRadius: 10,
+          pointerEvents: 'none',
+        }}
+      />
+    </div>
+  )}
 
-            {media.kind === 'tiktok' && media.src && (
-              <div
-                className="w-full h-full"
-                style={{
-                  position: 'relative',
-                  paddingBottom: '177.78%',
-                  overflow: 'hidden',
-                  borderRadius: 10,
-                }}
-              >
-                <iframe
-                  src={`https://www.tiktok.com/embed/v2/${media.src}`}
-                  title="TikTok video"
-                  frameBorder="0"
-                  allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: 10,
-                    pointerEvents: 'none',
-                  }}
-                />
-              </div>
-            )}
+  {media.kind === 'tiktok' && media.src && (
+    <div
+      className="relative w-full"
+      style={{ aspectRatio: '9 / 16' }}
+    >
+      <iframe
+        src={`https://www.tiktok.com/embed/v2/${media.src}`}
+        title="TikTok video"
+        frameBorder="0"
+        allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          borderRadius: 10,
+          pointerEvents: 'none',
+        }}
+      />
+    </div>
+  )}
 
-            {media.kind === 'image' && media.src && (
-              <NextImage
-                src={media.src}
-                alt={host}
-                width={1920}
-                height={1080}
-                className="w-full h-full object-cover transition-opacity duration-200"
-                unoptimized
-              />
-            )}
+  {media.kind === 'image' && media.src && (
+    <NextImage
+      src={media.src}
+      alt={host}
+      width={1920}
+      height={1080}
+      className="block w-full h-auto transition-opacity duration-200"
+      unoptimized
+    />
+  )}
 
-            {media.kind === 'favicon' && media.src && (
-              <div className="w-full h-full flex items-center justify-center bg-[color:var(--bg-soft,#020817)]">
-                <NextImage
-                  src={media.src}
-                  alt={host}
-                  width={64}
-                  height={64}
-                  className="object-contain"
-                  unoptimized
-                />
-              </div>
-            )}
+  {media.kind === 'favicon' && media.src && (
+    <div className="w-full h-auto flex items-center justify-center bg-[color:var(--bg-soft,#020817)] py-6">
+      <NextImage
+        src={media.src}
+        alt={host}
+        width={64}
+        height={64}
+        className="object-contain"
+        unoptimized
+      />
+    </div>
+  )}
 
-            {media.kind === 'placeholder' && (
-              <div className="w-full h-full flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)]">
-                {host}
-              </div>
-            )}
+  {media.kind === 'placeholder' && (
+    <div className="w-full h-auto flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)] py-6">
+      {host}
+    </div>
+  )}
 
-            {showSoundButton && (
-              <button
-                type="button"
-                onClick={handleToggleSound}
-                className="audio-toggle"
-                aria-label={muted ? 'Включить звук' : 'Выключить звук'}
-              >
-                {muted ? '🔇' : '🔊'}
-              </button>
-            )}
+  {showSoundButton && (
+    <button
+      type="button"
+      onClick={handleToggleSound}
+      className="audio-toggle absolute right-2 bottom-2"
+      aria-label={muted ? 'Включить звук' : 'Выключить звук'}
+    >
+      {muted ? '🔇' : '🔊'}
+    </button>
+  )}
 
-            <div className="pointer-events-none absolute inset-0 rounded-lg border border-transparent qshine" />
-          </div>
+  <div className="pointer-events-none absolute inset-0 rounded-lg border border-transparent qshine" />
+</div>
+
         </div>
       </a>
     </div>
