@@ -2,13 +2,22 @@ import React, { useMemo, useState } from 'react'
 
 /* Локализация стран по коду (сюда перенесли, вне home.js ничего не ломаем) */
 function localizeCountry(TX, t, code) {
-  if (!code) {
+  const raw = (code ?? '').toString().trim()
+  if (!raw) {
     return TX(t, 'geo_country_unknown', 'Не определено')
   }
-  const upper = String(code).toUpperCase()
-  if (upper === 'ZZ') {
+  const upper = raw.toUpperCase()
+
+  // Всё, что не похоже на нормальный 2-буквенный код, считаем "Не определено"
+  if (
+    upper === 'ZZ' ||
+    upper === 'NOT DEFINED' ||
+    raw.length > 2 ||
+    /[^A-Za-z]/.test(raw)
+  ) {
     return TX(t, 'geo_country_unknown', 'Не определено')
   }
+
   return TX(t, 'geo_country_' + upper, upper)
 }
 
@@ -25,8 +34,8 @@ export function MetricPill({ label, value, hint, secondary }) {
       <div className="ads-pill-value">{value}</div>
       <style jsx>{`
         .ads-pill {
-          min-width: 120px;
-          padding: 8px 12px;
+          min-width: 110px;
+          padding: 8px 10px;
           border-radius: 999px;
           background:
             radial-gradient(
@@ -65,7 +74,7 @@ export function MetricPill({ label, value, hint, secondary }) {
           white-space: nowrap;
         }
         .ads-pill-value {
-          font-size: 16px;
+          font-size: 15px;
           font-weight: 800;
           letter-spacing: 0.04em;
         }
@@ -81,14 +90,15 @@ export function MetricPill({ label, value, hint, secondary }) {
   )
 }
 
-/* ===== Мини-бар-чарт (обновлённый, узкие бары) ===== */
+/* ===== Мини-бар-чарт ===== */
 function TinyBarChart({
   t,
   TX,
   points,
   metricKey,
   accent = 'impressions',
-  height = 180,
+  height = 220,
+  groupBy,
 }) {
   const data = Array.isArray(points) ? points : []
 
@@ -103,7 +113,7 @@ function TinyBarChart({
             justify-content: center;
             font-size: 12px;
             opacity: 0.7;
-            height: 140px;
+            height: 160px;
           }
         `}</style>
       </div>
@@ -115,15 +125,17 @@ function TinyBarChart({
 
   const magnitude = 10 ** Math.floor(Math.log10(maxRaw))
   const step = magnitude / 2
-  const max = Math.ceil(maxRaw / step) * step || 1
+  const niceMax = Math.ceil(maxRaw / step) * step || 1
 
-  // небольшой запас по высоте, чтобы бары не били в потолок
-  const effectiveMax = max * 1.1 || 1
+  // запас по высоте, чтобы бары не били в потолок
+  const effectiveMax = niceMax * 1.25 || 1
 
   const tickCount = 4
   const ticks = Array.from({ length: tickCount }, (_, i) =>
-    Math.round((max / (tickCount - 1 || 1)) * i)
+    Math.round((niceMax / (tickCount - 1 || 1)) * i)
   )
+
+  const isHourly = groupBy === 'hour'
 
   const formatXLabel = (raw) => {
     if (raw == null) return ''
@@ -134,29 +146,33 @@ function TinyBarChart({
       const ms = n < 1e12 ? n * 1000 : n
       d = new Date(ms)
     } else {
-      try {
-        d = new Date(String(raw))
-      } catch {
-        d = null
-      }
+      const parsed = new Date(String(raw))
+      if (!Number.isNaN(parsed.getTime())) d = parsed
     }
+
     if (!d || Number.isNaN(d.getTime())) {
       return String(raw)
     }
+
     const pad = (x) => String(x).padStart(2, '0')
     const day = pad(d.getDate())
     const month = pad(d.getMonth() + 1)
+    const hour = pad(d.getHours())
+    const minute = pad(d.getMinutes())
 
-    if (data.length <= 8) {
-      const hour = pad(d.getHours())
-      const minute = pad(d.getMinutes())
-      return `${day}.${month} ${hour}:${minute}`
+    if (isHourly) {
+      // Почасовая детализация: показываем только время
+      if (data.length > 20) return `${hour}` // компактно "0", "1", "2"…
+      if (data.length > 10) return `${hour}:00`
+      return `${hour}:${minute}`
     }
+
+    // По дням: просто дата
     return `${day}.${month}`
   }
 
   const stepLabels =
-    data.length > 16 ? Math.ceil(data.length / 6) : data.length > 10 ? 2 : 1
+    data.length > 24 ? Math.ceil(data.length / 8) : data.length > 10 ? 2 : 1
 
   return (
     <div className="ads-chart" style={{ minHeight: height }}>
@@ -236,6 +252,7 @@ function TinyBarChart({
             0 14px 32px rgba(0, 0, 0, 0.9),
             inset 0 1px 0 rgba(255, 255, 255, 0.04);
           overflow: hidden;
+          width: 100%;
         }
         .ads-chart-yaxis {
           display: flex;
@@ -261,7 +278,7 @@ function TinyBarChart({
         }
         .ads-chart-bars-wrap {
           position: relative;
-          height: 130px;
+          height: 170px;
           border-radius: 14px;
           overflow: hidden;
           background: radial-gradient(
@@ -347,7 +364,7 @@ function TinyBarChart({
             display: none;
           }
           .ads-chart-bars-wrap {
-            height: 115px;
+            height: 150px;
           }
         }
       `}</style>
@@ -396,15 +413,15 @@ function GeoGlobeCard({ TX, t, geo, totalImpressions, selectedIndex }) {
             <span>
               {TX(t, 'ads_geo_globe_impressions', 'Импрессии')}
             </span>
-            <strong>{imp}</strong>
+            <strong> — {imp}</strong>
           </div>
           <div className="ads-geo-globe-metric">
             <span>{TX(t, 'ads_geo_globe_clicks', 'Клики')}</span>
-            <strong>{clicks}</strong>
+            <strong> — {clicks}</strong>
           </div>
           <div className="ads-geo-globe-metric">
             <span>{TX(t, 'ads_geo_globe_ctr', 'CTR')}</span>
-            <strong>{ctr}</strong>
+            <strong> — {ctr}</strong>
           </div>
           <div className="ads-geo-globe-metric">
             <span>
@@ -416,7 +433,9 @@ function GeoGlobeCard({ TX, t, geo, totalImpressions, selectedIndex }) {
                 className="ads-geo-globe-share-value"
                 style={{ width: share }}
               />
-              <span className="ads-geo-globe-share-text">{share}</span>
+              <span className="ads-geo-globe-share-text">
+                — {share}
+              </span>
             </div>
           </div>
         </div>
@@ -607,7 +626,7 @@ function TrafficQualityCard({ TX, t, ctrTotal, avgImpPerDay, avgClicksPerDay }) 
         <div className="ads-quality-metrics">
           <div className="ads-quality-metric">
             <span>{TX(t, 'ads_quality_ctr', 'CTR за период')}</span>
-            <strong>{ctrTotal}</strong>
+            <strong> — {ctrTotal}</strong>
           </div>
           <div className="ads-quality-metric">
             <span>
@@ -617,7 +636,7 @@ function TrafficQualityCard({ TX, t, ctrTotal, avgImpPerDay, avgClicksPerDay }) 
                 'Показов в среднем / день'
               )}
             </span>
-            <strong>{avgImpPerDay}</strong>
+            <strong> — {avgImpPerDay}</strong>
           </div>
           <div className="ads-quality-metric">
             <span>
@@ -627,7 +646,7 @@ function TrafficQualityCard({ TX, t, ctrTotal, avgImpPerDay, avgClicksPerDay }) 
                 'Кликов в среднем / день'
               )}
             </span>
-            <strong>{avgClicksPerDay}</strong>
+            <strong> — {avgClicksPerDay}</strong>
           </div>
         </div>
       </div>
@@ -1017,35 +1036,9 @@ export default function AdsAnalyticsPanel({
   const avgClicksPerDay =
     periodDays > 0 ? Math.round(totalClicks / periodDays) : totalClicks
 
-  // Доп. метрики по временным точкам
   const nonZeroImpIntervals = series.filter(
     (p) => Number(p.impressions || 0) > 0
   ).length
-  const nonZeroClickIntervals = series.filter(
-    (p) => Number(p.clicks || 0) > 0
-  ).length
-
-  const bestImpressionPoint = useMemo(() => {
-    if (!series.length) return null
-    return series.reduce((best, p) =>
-      Number(p.impressions || 0) > Number(best.impressions || 0) ? p : best
-    )
-  }, [series])
-
-  const bestCtrPoint = useMemo(() => {
-    if (!series.length) return null
-    let best = null
-    for (const p of series) {
-      const imp = Number(p.impressions || 0)
-      const cl = Number(p.clicks || 0)
-      if (!imp) continue
-      const ctr = cl / imp
-      if (!best || ctr > best.ctr) {
-        best = { ...p, ctr }
-      }
-    }
-    return best
-  }, [series])
 
   if (!selectedCampaign) {
     return (
@@ -1090,19 +1083,6 @@ export default function AdsAnalyticsPanel({
     formatDate(selectedCampaign.createdAt || selectedCampaign.startsAt) +
     ' — ' +
     (selectedCampaign.endsAt ? formatDate(selectedCampaign.endsAt) : '—')
-
-  const bestImpLabel =
-    bestImpressionPoint && bestImpressionPoint.label
-      ? formatDate(bestImpressionPoint.label)
-      : '—'
-  const bestCtrLabel =
-    bestCtrPoint && bestCtrPoint.label
-      ? formatDate(bestCtrPoint.label)
-      : '—'
-  const bestCtrValue =
-    bestCtrPoint && bestCtrPoint.ctr != null
-      ? (bestCtrPoint.ctr * 100).toFixed(1) + '%'
-      : '—'
 
   const handleGeoHeaderClick = (field) => {
     setGeoSort((prev) => {
@@ -1306,7 +1286,7 @@ export default function AdsAnalyticsPanel({
 
       {!analyticsLoading && analytics && (
         <>
-          {/* ЛЕЙАУТ: метрики + два графика, всё столбиком */}
+          {/* Метрики и два графика — все блоки столбиком */}
           <div className="ads-analytics-grid">
             {/* Ряд метрик-бочонков */}
             <div className="ads-analytics-metrics">
@@ -1376,19 +1356,6 @@ export default function AdsAnalyticsPanel({
                   'по временной серии'
                 )}
               />
-              <MetricPill
-                label={TX(
-                  t,
-                  'ads_analytics_intervals_clicks',
-                  'Интервалы с кликами'
-                )}
-                value={nonZeroClickIntervals}
-                secondary={TX(
-                  t,
-                  'ads_analytics_intervals_clicks_sub',
-                  'где CTR > 0'
-                )}
-              />
             </div>
 
             {/* График показов на всю ширину */}
@@ -1405,6 +1372,8 @@ export default function AdsAnalyticsPanel({
                 TX={TX}
                 points={series}
                 metricKey="impressions"
+                groupBy={groupBy}
+                height={230}
               />
             </div>
 
@@ -1423,11 +1392,13 @@ export default function AdsAnalyticsPanel({
                 points={series}
                 metricKey="clicks"
                 accent="clicks"
+                groupBy={groupBy}
+                height={230}
               />
             </div>
           </div>
 
-          {/* Продвинутые блоки: качество, heatmap, highlights – тоже столбиком */}
+          {/* Качество трафика + heatmap */}
           <div className="ads-advanced-row">
             <TrafficQualityCard
               TX={TX}
@@ -1437,51 +1408,6 @@ export default function AdsAnalyticsPanel({
               avgClicksPerDay={avgClicksPerDay}
             />
             <HourHeatmap TX={TX} t={t} series={series} />
-            <div className="ads-highlights">
-              <div className="ads-highlights-title">
-                {TX(t, 'ads_highlights_title', 'Highlights по кампании')}
-              </div>
-              <ul>
-                <li>
-                  {TX(
-                    t,
-                    'ads_highlights_best_imp',
-                    'Пик показов'
-                  )}
-                  :{' '}
-                  <strong>
-                    {bestImpressionPoint
-                      ? `${bestImpressionPoint.impressions || 0} / ${bestImpLabel}`
-                      : '—'}
-                  </strong>
-                </li>
-                <li>
-                  {TX(t, 'ads_highlights_best_ctr', 'Лучший CTR')}
-                  :{' '}
-                  <strong>
-                    {bestCtrPoint
-                      ? `${bestCtrValue} / ${bestCtrLabel}`
-                      : '—'}
-                  </strong>
-                </li>
-                <li>
-                  {TX(
-                    t,
-                    'ads_highlights_geo',
-                    'Активных гео (страны)'
-                  )}
-                  : <strong>{uniqueCountries}</strong>
-                </li>
-                <li>
-                  {TX(
-                    t,
-                    'ads_highlights_intervals',
-                    'Интервалы с кликами'
-                  )}
-                  : <strong>{nonZeroClickIntervals}</strong>
-                </li>
-              </ul>
-            </div>
           </div>
 
           {/* GEO-аналитика: сначала таблица на всю ширину, потом карта на всю ширину */}
@@ -1558,9 +1484,7 @@ export default function AdsAnalyticsPanel({
                         >
                           {TX(t, 'ads_geo_clicks', 'Клики')}
                         </th>
-                        <th>
-                          {TX(t, 'ads_geo_ctr', 'CTR')}
-                        </th>
+                        <th>{TX(t, 'ads_geo_ctr', 'CTR')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1757,7 +1681,6 @@ export default function AdsAnalyticsPanel({
             0 0 18px rgba(255, 215, 99, 0.45);
         }
 
-        /* Вся аналитика идёт столбиком: метрики + 2 графика */
         .ads-analytics-grid {
           display: flex;
           flex-direction: column;
@@ -1782,50 +1705,16 @@ export default function AdsAnalyticsPanel({
           opacity: 0.8;
         }
 
-        /* Продвинутые блоки – один под другим */
+        /* Качество + heatmap */
         .ads-advanced-row {
           margin-top: 4px;
-          display: flex;
-          flex-direction: column;
+          display: grid;
+          grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr);
           gap: 12px;
           align-items: stretch;
         }
-        .ads-highlights {
-          border-radius: 16px;
-          padding: 10px 12px;
-          background:
-            radial-gradient(
-              circle at 0 0,
-              rgba(251, 191, 36, 0.22),
-              transparent 55%
-            ),
-            linear-gradient(
-              145deg,
-              rgba(15, 23, 42, 0.98),
-              rgba(15, 23, 42, 0.9)
-            );
-          border: 1px solid rgba(252, 211, 77, 0.7);
-          box-shadow:
-            0 14px 32px rgba(0, 0, 0, 0.9),
-            0 0 22px rgba(252, 211, 77, 0.5);
-          font-size: 12px;
-        }
-        .ads-highlights-title {
-          font-size: 11px;
-          text-transform: uppercase;
-          letter-spacing: 0.16em;
-          opacity: 0.85;
-          margin-bottom: 6px;
-        }
-        .ads-highlights ul {
-          margin: 0;
-          padding-left: 18px;
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
 
-        /* GEO: таблица -> карта, всё на всю ширину, строго друг под другом */
+        /* GEO: список + фокус по гео — строго друг под другом, на всю ширину */
         .ads-geo-row {
           margin-top: 6px;
           display: flex;
@@ -1944,6 +1833,12 @@ export default function AdsAnalyticsPanel({
           }
           100% {
             transform: scaleX(1);
+          }
+        }
+
+        @media (max-width: 960px) {
+          .ads-advanced-row {
+            grid-template-columns: minmax(0, 1fr);
           }
         }
 
