@@ -40334,6 +40334,10 @@ ads_analytics_tab_clicks: 'Clicks',
 ads_analytics_tab_ctr: 'CTR',
 ads_campaigns_action_start: 'Start',
 ads_campaigns_action_start_ing: 'Starting…',
+ads_file_button_choose: "Choose file",
+ads_file_no_video: "No file selected",
+ads_file_no_image: "No file selected",
+
 
 }
 
@@ -40668,6 +40672,9 @@ ads_analytics_main_chart_title: 'Временная аналитика камп�
 ads_analytics_tab_impressions: 'Показов',
 ads_analytics_tab_clicks: 'Кликов',
 ads_analytics_tab_ctr: 'CTR',
+ads_file_button_choose: "Выбрать файл",
+ads_file_no_video: "Файл не выбран",
+ads_file_no_image: "Файл не выбран",
 
 }
 
@@ -41004,6 +41011,9 @@ ads_analytics_main_chart_title: 'Тимчасова аналітика камп�
 ads_analytics_tab_impressions: 'Показів',
 ads_analytics_tab_clicks: 'Кліків',
 ads_analytics_tab_ctr: 'CTR',
+ads_file_button_choose: "Вибрати файл",
+ads_file_no_video: "Файл не вибрано",
+ads_file_no_image: "Файл не вибрано",
 
 }
 
@@ -41339,6 +41349,9 @@ ads_analytics_main_chart_title: 'Analítica temporal de la campaña',
 ads_analytics_tab_impressions: 'Impresiones',
 ads_analytics_tab_clicks: 'Clics',
 ads_analytics_tab_ctr: 'CTR',
+ads_file_button_choose: "Seleccionar archivo",
+ads_file_no_video: "No se ha seleccionado archivo",
+ads_file_no_image: "No se ha seleccionado archivo",
 
 }
 
@@ -41675,6 +41688,9 @@ ads_analytics_main_chart_title: '广告活动的时间分析',
 ads_analytics_tab_impressions: '展示次数',
 ads_analytics_tab_clicks: '点击次数',
 ads_analytics_tab_ctr: 'CTR',
+ads_file_button_choose: "选择文件",
+ads_file_no_video: "未选择文件",
+ads_file_no_image: "未选择文件",
 
 }
 
@@ -42020,10 +42036,17 @@ ads_analytics_main_chart_title: 'التحليل الزمني للحملة',
 ads_analytics_tab_impressions: 'مرات الظهور',
 ads_analytics_tab_clicks: 'النقرات',
 ads_analytics_tab_ctr: 'CTR',
+ads_file_button_choose: "اختر ملفًا",
+ads_file_no_video: "لم يتم اختيار ملف",
+ads_file_no_image: "لم يتم اختيار ملف",
 
 }
 
 const ADS_HERO_TR = {
+ads_file_button_choose: "Dosya seç",
+ads_file_no_video: "Dosya seçilmedi",
+ads_file_no_image: "Dosya seçilmedi",
+
 ads_campaigns_action_start: 'Başlat',
 ads_campaigns_action_start_ing: 'Başlatılıyor…',
 

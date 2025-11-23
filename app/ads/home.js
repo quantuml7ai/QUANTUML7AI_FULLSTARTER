@@ -2350,12 +2350,31 @@ export default function AdsHome() {
                       'Загрузить видео (до 3 минут)'
                     )}
                   </span>
-                  <input
-                    type="file"
-                    accept="video/*"
-                    onChange={handleVideoFileChange}
-                  />
+                  <div className="ads-file-control">
+                    <span className="ads-file-button">
+                      {TX(
+                        t,
+                        'ads_file_button_choose',
+                        'Выбрать файл'
+                      )}
+                    </span>
+                    <span className="ads-file-filename">
+                      {creative.videoFile
+                        ? creative.videoFile.name
+                        : TX(
+                            t,
+                            'ads_file_no_video',
+                            'Файл не выбран'
+                          )}
+                    </span>
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={handleVideoFileChange}
+                    />
+                  </div>
                 </label>
+
                 <label className="ads-field mini">
                   <span className="ads-field-label">
                     {TX(
@@ -2364,13 +2383,32 @@ export default function AdsHome() {
                       'Загрузить изображение'
                     )}
                   </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageFileChange}
-                  />
+                  <div className="ads-file-control">
+                    <span className="ads-file-button">
+                      {TX(
+                        t,
+                        'ads_file_button_choose',
+                        'Выбрать файл'
+                      )}
+                    </span>
+                    <span className="ads-file-filename">
+                      {creative.imageFile
+                        ? creative.imageFile.name
+                        : TX(
+                            t,
+                            'ads_file_no_image',
+                            'Файл не выбран'
+                          )}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageFileChange}
+                    />
+                  </div>
                 </label>
               </div>
+
 
               {newError && (
                 <div className="ads-error inline">
@@ -3470,9 +3508,50 @@ export default function AdsHome() {
           opacity: 0.6;
         }
         .ads-field input[type='file'] {
-          font-size: 12px;
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          opacity: 0;
           cursor: pointer;
         }
+
+        .ads-file-control {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 6px 10px;
+          border-radius: 999px;
+          background: rgba(15, 23, 42, 0.9);
+          border: 1px solid rgba(148, 163, 184, 0.7);
+          box-shadow:
+            0 8px 18px rgba(0, 0, 0, 0.7),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+          font-size: 12px;
+        }
+
+        .ads-file-button {
+          padding: 4px 10px;
+          border-radius: 999px;
+          background: linear-gradient(90deg, #22c55e, #22d3ee);
+          color: #0f172a;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          font-size: 10px;
+          white-space: nowrap;
+        }
+
+        .ads-file-filename {
+          font-size: 12px;
+          opacity: 0.85;
+          max-width: 180px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
         .ads-field-row {
           display: flex;
           gap: 10px;
