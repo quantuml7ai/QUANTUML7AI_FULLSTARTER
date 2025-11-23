@@ -971,7 +971,7 @@ function GeoTable({ t, analytics }) {
         }
         .ads-geo-table-wrap {
           margin-top: 2px;
-          max-height: 320px;
+          max-height: 220px;
          
           overflow-y: auto;
           overflow-x: hidden; /* убираем горизонтальный скролл по умолчанию */
@@ -4028,7 +4028,11 @@ export default function AdsHome() {
           box-shadow: none;
           filter: grayscale(0.2);
         }
-
+       /* Лист кампаний: показываем ~5 строк, дальше вертикальный скролл */
+       .ads-campaigns-scroll {
+         max-height: 260px; /* примерно 5 кампаний по высоте */
+         overflow-y: auto;
+       }
         /* АДАПТИВ */
         @media (max-width: 1200px) {
           .ads-header-grid {
