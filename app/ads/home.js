@@ -1079,6 +1079,7 @@ function GeoTable({ t, analytics }) {
 
 /* ===== Мобильная карточка кампании ===== */
 function CampaignCard({
+   t, 
   campaign,
   idx,
   isSelected,
@@ -2762,19 +2763,21 @@ export default function AdsHome() {
                   </div>
                 ) : (
                   <div className="ads-campaigns-mobile">
-                    {filteredCampaigns.map((c, idx) => {
-                      const id = c.id || c.campaignId
-                      const isSelected = id === selectedId
-                      return (
-                        <CampaignCard
-                          key={id || idx}
-                          campaign={c}
-                          idx={idx}
-                          isSelected={isSelected}
-                          onSelect={() => handleSelectCampaign(id)}
-                        />
-                      )
-                    })}
+{filteredCampaigns.map((c, idx) => {
+  const id = c.id || c.campaignId
+  const isSelected = id === selectedId
+  return (
+    <CampaignCard
+      key={id || idx}
+      t={t}
+      campaign={c}
+      idx={idx}
+      isSelected={isSelected}
+      onSelect={() => handleSelectCampaign(id)}
+    />
+  )
+})}
+
                     {filteredCampaigns.length === 0 && (
                       <div className="ads-campaigns-empty">
                         {TX(
