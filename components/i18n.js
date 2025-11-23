@@ -40092,7 +40092,7 @@ geo_country_unknown: 'Not defined',
 
 ads_days_left_0: '0 d',
 ads_days_left_1: '1 d',
-ads_days_left_n: '%d d',
+ads_days_left_n: ' ',
 
 ads_chart_empty: 'No data',
 
@@ -40263,6 +40263,78 @@ ads_pkg_type_starter: 'STARTER',
 ads_pkg_type_pro: 'PRO',
 ads_pkg_type_elite: 'ELITE',
 
+ads_geo_tab_countries: 'Countries',
+ads_geo_tab_regions: 'Regions',
+ads_geo_tab_cities: 'Cities',
+
+ads_status_active: 'Active',
+ads_status_paused: 'Paused',
+ads_status_stopped: 'Stopped',
+ads_status_finished: 'Finished',
+
+ads_campaign_media_video_with_link: 'Video + link',
+ads_campaign_media_image_with_link: 'Image + link',
+ads_campaign_media_link_only: 'Link only',
+
+ads_campaigns_untitled: 'Untitled',
+
+ads_campaign_card_period_label: 'Period:',
+ads_campaign_card_media_label: 'Media:',
+
+ads_pkg_remaining_label: 'Active',
+
+ads_header_active_campaigns_label: 'Active campaigns',
+ads_header_active_campaigns_hint: 'Number of campaigns in statuses Active / Running / Paused / Pending',
+
+ads_header_impressions_label: 'Impressions for the period',
+ads_header_impressions_hint: 'Impressions for the selected campaign during the filter period',
+
+ads_header_clicks_label: 'Clicks for the period',
+ads_header_clicks_hint: 'Clicks for the selected campaign during the filter period',
+
+ads_header_ctr_label: 'Overall CTR',
+ads_header_ctr_hint: 'CTR for the selected campaign during the filter period',
+
+ads_filter_status_label: 'Status:',
+ads_filter_status_all: 'All',
+ads_filter_status_active: 'Active',
+ads_filter_status_finished: 'Finished',
+ads_filter_status_draft: 'Drafts',
+
+ads_filter_search_placeholder: 'Search by name or link…',
+
+ads_campaigns_head_name: 'Name',
+ads_campaigns_head_status: 'Status',
+ads_campaigns_head_start: 'Start',
+ads_campaigns_head_end: 'End',
+ads_campaigns_head_media_type: 'Media type',
+ads_campaigns_head_impressions: 'Impressions',
+ads_campaigns_head_clicks: 'Clicks',
+ads_campaigns_head_ctr: 'CTR',
+
+ads_campaign_media_video_short: 'Video',
+ads_campaign_media_image_short: 'Image',
+ads_campaign_media_link_short: 'Link',
+
+ads_analytics_back_to_list: '← Back to campaign list',
+
+ads_analytics_period_label: 'Period:',
+ads_analytics_status_label: 'Status:',
+
+ads_chart_tt_date: 'Date:',
+ads_chart_tt_impressions: 'Impressions:',
+ads_chart_tt_clicks: 'Clicks:',
+ads_chart_tt_ctr: 'CTR:',
+
+ads_analytics_duration_label: 'Campaign duration',
+ads_analytics_duration_value: '1 d',
+ads_analytics_main_chart_title: 'Campaign time analytics',
+ads_analytics_tab_impressions: 'Impressions',
+ads_analytics_tab_clicks: 'Clicks',
+ads_analytics_tab_ctr: 'CTR',
+ads_campaigns_action_start: 'Start',
+ads_campaigns_action_start_ing: 'Starting…',
+
 }
 
 const ADS_HERO_RU = {
@@ -40351,10 +40423,12 @@ ads_status_ok_label: 'OK:',
 
 // кабинет
 geo_country_unknown: 'Не определено',
+ads_campaigns_action_start: 'Запустить',
+ads_campaigns_action_start_ing: 'Запускаем…',
 
 ads_days_left_0: '0 д',
 ads_days_left_1: '1 д',
-ads_days_left_n: '%d д',
+ads_days_left_n: ' ',
 
 ads_chart_empty: 'Нет данных',
 
@@ -40525,10 +40599,81 @@ ads_pkg_type_starter: 'STARTER',
 ads_pkg_type_pro: 'PRO',
 ads_pkg_type_elite: 'ELITE',
 
+ads_geo_tab_countries: 'Страны',
+ads_geo_tab_regions: 'Регионы',
+ads_geo_tab_cities: 'Города',
+
+ads_status_active: 'Активна',
+ads_status_paused: 'На паузе',
+ads_status_stopped: 'Остановлена',
+ads_status_finished: 'Завершена',
+
+ads_campaign_media_video_with_link: 'Видео + ссылка',
+ads_campaign_media_image_with_link: 'Картинка + ссылка',
+ads_campaign_media_link_only: 'Только ссылка',
+
+ads_campaigns_untitled: 'Без названия',
+
+ads_campaign_card_period_label: 'Период:',
+ads_campaign_card_media_label: 'Медиа:',
+
+ads_pkg_remaining_label: 'Активно',
+
+ads_header_active_campaigns_label: 'Активных кампаний',
+ads_header_active_campaigns_hint: 'Количество кампаний в статусах Active / Running / Paused / Pending',
+
+ads_header_impressions_label: 'Показов за период',
+ads_header_impressions_hint: 'Импрессии по выбранной кампании за период фильтра',
+
+ads_header_clicks_label: 'Кликов за период',
+ads_header_clicks_hint: 'Клики по выбранной кампании за период фильтра',
+
+ads_header_ctr_label: 'Общий CTR',
+ads_header_ctr_hint: 'CTR для выбранной кампании за период фильтра',
+
+ads_filter_status_label: 'Статус:',
+ads_filter_status_all: 'Все',
+ads_filter_status_active: 'Активные',
+ads_filter_status_finished: 'Завершённые',
+ads_filter_status_draft: 'Черновики',
+
+ads_filter_search_placeholder: 'Поиск по названию или ссылке…',
+
+ads_campaigns_head_name: 'Название',
+ads_campaigns_head_status: 'Статус',
+ads_campaigns_head_start: 'Старт',
+ads_campaigns_head_end: 'Конец',
+ads_campaigns_head_media_type: 'Тип медиа',
+ads_campaigns_head_impressions: 'Показов',
+ads_campaigns_head_clicks: 'Кликов',
+ads_campaigns_head_ctr: 'CTR',
+
+ads_campaign_media_video_short: 'Видео',
+ads_campaign_media_image_short: 'Картинка',
+ads_campaign_media_link_short: 'Ссылка',
+
+ads_analytics_back_to_list: '← Назад к списку кампаний',
+
+ads_analytics_period_label: 'Период:',
+ads_analytics_status_label: 'Статус:',
+
+ads_chart_tt_date: 'Дата:',
+ads_chart_tt_impressions: 'Показов:',
+ads_chart_tt_clicks: 'Кликов:',
+ads_chart_tt_ctr: 'CTR:',
+
+ads_analytics_duration_label: 'Длительность кампании',
+ads_analytics_duration_value: '1 д',
+ads_analytics_main_chart_title: 'Временная аналитика кампании',
+ads_analytics_tab_impressions: 'Показов',
+ads_analytics_tab_clicks: 'Кликов',
+ads_analytics_tab_ctr: 'CTR',
 
 }
 
 const ADS_HERO_UK = {
+ads_campaigns_action_start: 'Запустити',
+ads_campaigns_action_start_ing: 'Запускаємо…',
 
 ads_pkg_starter_bullet_1: '⚡ Швидкий старт реклами на форумі та сторінках із трафіком',
 ads_pkg_starter_bullet_2: '🎯 Базовий пріоритет показу та акуратний обсяг трафіку',
@@ -40618,7 +40763,7 @@ geo_country_unknown: 'Не визначено',
 
 ads_days_left_0: '0 д',
 ads_days_left_1: '1 д',
-ads_days_left_n: '%d дн',
+ads_days_left_n: ' ',
 
 ads_chart_empty: 'Немає даних',
 
@@ -40789,9 +40934,82 @@ ads_pkg_type_starter: 'STARTER',
 ads_pkg_type_pro: 'PRO',
 ads_pkg_type_elite: 'ELITE',
 
+
+ads_geo_tab_countries: 'Країни',
+ads_geo_tab_regions: 'Регіони',
+ads_geo_tab_cities: 'Міста',
+
+ads_status_active: 'Активна',
+ads_status_paused: 'На паузі',
+ads_status_stopped: 'Зупинена',
+ads_status_finished: 'Завершена',
+
+ads_campaign_media_video_with_link: 'Відео + посилання',
+ads_campaign_media_image_with_link: 'Картинка + посилання',
+ads_campaign_media_link_only: 'Тільки посилання',
+
+ads_campaigns_untitled: 'Без назви',
+
+ads_campaign_card_period_label: 'Період:',
+ads_campaign_card_media_label: 'Медіа:',
+
+ads_pkg_remaining_label: 'Активно',
+
+ads_header_active_campaigns_label: 'Активних кампаній',
+ads_header_active_campaigns_hint: 'Кількість кампаній у статусах Active / Running / Paused / Pending',
+
+ads_header_impressions_label: 'Показів за період',
+ads_header_impressions_hint: 'Імпресії по вибраній кампанії за період фільтра',
+
+ads_header_clicks_label: 'Кліків за період',
+ads_header_clicks_hint: 'Кліки по вибраній кампанії за період фільтра',
+
+ads_header_ctr_label: 'Загальний CTR',
+ads_header_ctr_hint: 'CTR для вибраної кампанії за період фільтра',
+
+ads_filter_status_label: 'Статус:',
+ads_filter_status_all: 'Усі',
+ads_filter_status_active: 'Активні',
+ads_filter_status_finished: 'Завершені',
+ads_filter_status_draft: 'Чернетки',
+
+ads_filter_search_placeholder: 'Пошук за назвою або посиланням…',
+
+ads_campaigns_head_name: 'Назва',
+ads_campaigns_head_status: 'Статус',
+ads_campaigns_head_start: 'Старт',
+ads_campaigns_head_end: 'Кінець',
+ads_campaigns_head_media_type: 'Тип медіа',
+ads_campaigns_head_impressions: 'Показів',
+ads_campaigns_head_clicks: 'Кліків',
+ads_campaigns_head_ctr: 'CTR',
+
+ads_campaign_media_video_short: 'Відео',
+ads_campaign_media_image_short: 'Картинка',
+ads_campaign_media_link_short: 'Посилання',
+
+ads_analytics_back_to_list: '← Назад до списку кампаній',
+
+ads_analytics_period_label: 'Період:',
+ads_analytics_status_label: 'Статус:',
+
+ads_chart_tt_date: 'Дата:',
+ads_chart_tt_impressions: 'Показів:',
+ads_chart_tt_clicks: 'Кліків:',
+ads_chart_tt_ctr: 'CTR:',
+
+ads_analytics_duration_label: 'Тривалість кампанії',
+ads_analytics_duration_value: '1 д',
+ads_analytics_main_chart_title: 'Тимчасова аналітика кампанії',
+ads_analytics_tab_impressions: 'Показів',
+ads_analytics_tab_clicks: 'Кліків',
+ads_analytics_tab_ctr: 'CTR',
+
 }
 
 const ADS_HERO_ES = {
+ads_campaigns_action_start: 'Iniciar',
+ads_campaigns_action_start_ing: 'Iniciando…',
 
 ads_pkg_starter_bullet_1: '⚡ Inicio rápido de la publicidad en el foro y en las páginas con tráfico',
 ads_pkg_starter_bullet_2: '🎯 Prioridad básica de visualización y volumen de tráfico estable',
@@ -40881,7 +41099,7 @@ geo_country_unknown: 'No definido',
 
 ads_days_left_0: '0 d',
 ads_days_left_1: '1 d',
-ads_days_left_n: '%d días',
+ads_days_left_n: ' ',
 
 ads_chart_empty: 'Sin datos',
 
@@ -41052,10 +41270,81 @@ ads_pkg_type_starter: 'STARTER',
 ads_pkg_type_pro: 'PRO',
 ads_pkg_type_elite: 'ELITE',
 
+ads_geo_tab_countries: 'Países',
+ads_geo_tab_regions: 'Regiones',
+ads_geo_tab_cities: 'Ciudades',
+
+ads_status_active: 'Activa',
+ads_status_paused: 'En pausa',
+ads_status_stopped: 'Detenida',
+ads_status_finished: 'Finalizada',
+
+ads_campaign_media_video_with_link: 'Vídeo + enlace',
+ads_campaign_media_image_with_link: 'Imagen + enlace',
+ads_campaign_media_link_only: 'Sólo enlace',
+
+ads_campaigns_untitled: 'Sin título',
+
+ads_campaign_card_period_label: 'Período:',
+ads_campaign_card_media_label: 'Medios:',
+
+ads_pkg_remaining_label: 'Activo',
+
+ads_header_active_campaigns_label: 'Campañas activas',
+ads_header_active_campaigns_hint: 'Cantidad de campañas en los estados Active / Running / Paused / Pending',
+
+ads_header_impressions_label: 'Impresiones por período',
+ads_header_impressions_hint: 'Impresiones de la campaña seleccionada durante el período del filtro',
+
+ads_header_clicks_label: 'Clics por período',
+ads_header_clicks_hint: 'Clics de la campaña seleccionada durante el período del filtro',
+
+ads_header_ctr_label: 'CTR general',
+ads_header_ctr_hint: 'CTR de la campaña seleccionada durante el período del filtro',
+
+ads_filter_status_label: 'Estado:',
+ads_filter_status_all: 'Todos',
+ads_filter_status_active: 'Activas',
+ads_filter_status_finished: 'Finalizadas',
+ads_filter_status_draft: 'Borradores',
+
+ads_filter_search_placeholder: 'Búsqueda por nombre o enlace…',
+
+ads_campaigns_head_name: 'Nombre',
+ads_campaigns_head_status: 'Estado',
+ads_campaigns_head_start: 'Inicio',
+ads_campaigns_head_end: 'Fin',
+ads_campaigns_head_media_type: 'Tipo de medios',
+ads_campaigns_head_impressions: 'Impresiones',
+ads_campaigns_head_clicks: 'Clics',
+ads_campaigns_head_ctr: 'CTR',
+
+ads_campaign_media_video_short: 'Vídeo',
+ads_campaign_media_image_short: 'Imagen',
+ads_campaign_media_link_short: 'Enlace',
+
+ads_analytics_back_to_list: '← Volver a la lista de campañas',
+
+ads_analytics_period_label: 'Período:',
+ads_analytics_status_label: 'Estado:',
+
+ads_chart_tt_date: 'Fecha:',
+ads_chart_tt_impressions: 'Impresiones:',
+ads_chart_tt_clicks: 'Clics:',
+ads_chart_tt_ctr: 'CTR:',
+
+ads_analytics_duration_label: 'Duración de la campaña',
+ads_analytics_duration_value: '1 d',
+ads_analytics_main_chart_title: 'Analítica temporal de la campaña',
+ads_analytics_tab_impressions: 'Impresiones',
+ads_analytics_tab_clicks: 'Clics',
+ads_analytics_tab_ctr: 'CTR',
 
 }
 
 const ADS_HERO_ZH = {
+ads_campaigns_action_start: '启动',
+ads_campaigns_action_start_ing: '正在启动…',
 
 ads_pkg_starter_bullet_1: '⚡ 在论坛和高流量页面上快速启动广告',
 ads_pkg_starter_bullet_2: '🎯 基础展示优先级和稳定的流量分配',
@@ -41145,7 +41434,7 @@ geo_country_unknown: '未定义',
 
 ads_days_left_0: '0 天',
 ads_days_left_1: '1 天',
-ads_days_left_n: '%d 天',
+ads_days_left_n: ' ',
 
 ads_chart_empty: '没有数据',
 
@@ -41316,9 +41605,82 @@ ads_pkg_type_starter: 'STARTER',
 ads_pkg_type_pro: 'PRO',
 ads_pkg_type_elite: 'ELITE',
 
+
+ads_geo_tab_countries: '国家',
+ads_geo_tab_regions: '地区',
+ads_geo_tab_cities: '城市',
+
+ads_status_active: '活动',
+ads_status_paused: '暂停',
+ads_status_stopped: '停止',
+ads_status_finished: '已完成',
+
+ads_campaign_media_video_with_link: '视频 + 链接',
+ads_campaign_media_image_with_link: '图片 + 链接',
+ads_campaign_media_link_only: '仅链接',
+
+ads_campaigns_untitled: '无标题',
+
+ads_campaign_card_period_label: '周期:',
+ads_campaign_card_media_label: '媒体:',
+
+ads_pkg_remaining_label: '活动中',
+
+ads_header_active_campaigns_label: '活动的广告系列',
+ads_header_active_campaigns_hint: '处于 Active / Running / Paused / Pending 状态的广告系列数量',
+
+ads_header_impressions_label: '周期内展示次数',
+ads_header_impressions_hint: '所选广告系列在过滤周期内的展示次数',
+
+ads_header_clicks_label: '周期内点击次数',
+ads_header_clicks_hint: '所选广告系列在过滤周期内的点击次数',
+
+ads_header_ctr_label: '总体 CTR',
+ads_header_ctr_hint: '所选广告系列在过滤周期内的 CTR',
+
+ads_filter_status_label: '状态:',
+ads_filter_status_all: '所有',
+ads_filter_status_active: '活动',
+ads_filter_status_finished: '已完成',
+ads_filter_status_draft: '草稿',
+
+ads_filter_search_placeholder: '按名称或链接搜索…',
+
+ads_campaigns_head_name: '名称',
+ads_campaigns_head_status: '状态',
+ads_campaigns_head_start: '开始',
+ads_campaigns_head_end: '结束',
+ads_campaigns_head_media_type: '媒体类型',
+ads_campaigns_head_impressions: '展示次数',
+ads_campaigns_head_clicks: '点击次数',
+ads_campaigns_head_ctr: 'CTR',
+
+ads_campaign_media_video_short: '视频',
+ads_campaign_media_image_short: '图片',
+ads_campaign_media_link_short: '链接',
+
+ads_analytics_back_to_list: '← 返回广告系列列表',
+
+ads_analytics_period_label: '周期:',
+ads_analytics_status_label: '状态:',
+
+ads_chart_tt_date: '日期:',
+ads_chart_tt_impressions: '展示次数:',
+ads_chart_tt_clicks: '点击次数:',
+ads_chart_tt_ctr: 'CTR:',
+
+ads_analytics_duration_label: '广告活动时长',
+ads_analytics_duration_value: '1 天',
+ads_analytics_main_chart_title: '广告活动的时间分析',
+ads_analytics_tab_impressions: '展示次数',
+ads_analytics_tab_clicks: '点击次数',
+ads_analytics_tab_ctr: 'CTR',
+
 }
 
 const ADS_HERO_AR = {
+ads_campaigns_action_start: 'بدء',
+ads_campaigns_action_start_ing: 'جارٍ البدء…',
 
 ads_pkg_starter_bullet_1: '⚡ بدء سريع للإعلان عبر المنتدى وصفحات ذات حركة مرور عالية',
 ads_pkg_starter_bullet_2: '🎯 أولوية عرض أساسية وحجم حركة مرور منظم',
@@ -41408,7 +41770,7 @@ geo_country_unknown: 'غير محدد',
 
 ads_days_left_0: '0 يوم',
 ads_days_left_1: '1 يوم',
-ads_days_left_n: '%d يومًا',
+ads_days_left_n: ' ',
 
 ads_chart_empty: 'لا توجد بيانات',
 
@@ -41586,9 +41948,84 @@ ads_pkg_type_starter: 'STARTER',
 ads_pkg_type_pro: 'PRO',
 ads_pkg_type_elite: 'ELITE',
 
+
+ads_geo_tab_countries: 'الدول',
+ads_geo_tab_regions: 'المناطق',
+ads_geo_tab_cities: 'المدن',
+
+ads_status_active: 'نشطة',
+ads_status_paused: 'موقوفة مؤقتًا',
+ads_status_stopped: 'متوقفة',
+ads_status_finished: 'منتهية',
+
+ads_campaign_media_video_with_link: 'فيديو + رابط',
+ads_campaign_media_image_with_link: 'صورة + رابط',
+ads_campaign_media_link_only: 'رابط فقط',
+
+ads_campaigns_untitled: 'بدون عنوان',
+
+ads_campaign_card_period_label: 'الفترة:',
+ads_campaign_card_media_label: 'الوسائط:',
+
+ads_pkg_remaining_label: 'نشط',
+
+
+ads_header_active_campaigns_label: 'الحملات النشطة',
+ads_header_active_campaigns_hint: 'عدد الحملات في حالات Active / Running / Paused / Pending',
+
+ads_header_impressions_label: 'عدد مرات الظهور خلال الفترة',
+ads_header_impressions_hint: 'مرات الظهور للحملة المختارة خلال فترة الفلتر',
+
+ads_header_clicks_label: 'عدد النقرات خلال الفترة',
+ads_header_clicks_hint: 'النقرات للحملة المختارة خلال فترة الفلتر',
+
+ads_header_ctr_label: 'CTR العام',
+ads_header_ctr_hint: 'CTR للحملة المختارة خلال فترة الفلتر',
+
+ads_filter_status_label: 'الحالة:',
+ads_filter_status_all: 'الكل',
+ads_filter_status_active: 'نشطة',
+ads_filter_status_finished: 'منتهية',
+ads_filter_status_draft: 'مسودات',
+
+ads_filter_search_placeholder: 'البحث بالاسم أو الرابط…',
+
+ads_campaigns_head_name: 'الاسم',
+ads_campaigns_head_status: 'الحالة',
+ads_campaigns_head_start: 'البداية',
+ads_campaigns_head_end: 'النهاية',
+ads_campaigns_head_media_type: 'نوع الوسائط',
+ads_campaigns_head_impressions: 'مرات الظهور',
+ads_campaigns_head_clicks: 'النقرات',
+ads_campaigns_head_ctr: 'CTR',
+
+ads_campaign_media_video_short: 'فيديو',
+ads_campaign_media_image_short: 'صورة',
+ads_campaign_media_link_short: 'رابط',
+
+ads_analytics_back_to_list: '← الرجوع إلى قائمة الحملات',
+
+ads_analytics_period_label: 'الفترة:',
+ads_analytics_status_label: 'الحالة:',
+
+ads_chart_tt_date: 'التاريخ:',
+ads_chart_tt_impressions: 'مرات الظهور:',
+ads_chart_tt_clicks: 'النقرات:',
+ads_chart_tt_ctr: 'CTR:',
+
+
+ads_analytics_duration_label: 'مدة الحملة',
+ads_analytics_duration_value: '1 د',
+ads_analytics_main_chart_title: 'التحليل الزمني للحملة',
+ads_analytics_tab_impressions: 'مرات الظهور',
+ads_analytics_tab_clicks: 'النقرات',
+ads_analytics_tab_ctr: 'CTR',
+
 }
 
 const ADS_HERO_TR = {
+ads_campaigns_action_start: 'Başlat',
+ads_campaigns_action_start_ing: 'Başlatılıyor…',
 
 ads_pkg_starter_bullet_1: '⚡ Forumda ve yüksek trafikli sayfalarda hızlı reklam başlatma',
 ads_pkg_starter_bullet_2: '🎯 Temel gösterim önceliği ve düzenli trafik hacmi',
@@ -41678,7 +42115,7 @@ geo_country_unknown: 'Belirtilmedi',
 
 ads_days_left_0: '0 g',
 ads_days_left_1: '1 g',
-ads_days_left_n: '%d g',
+ads_days_left_n: ' ',
 
 ads_chart_empty: 'Veri yok',
 
@@ -41853,6 +42290,78 @@ ads_analytics_empty: 'Analizleri görmek için aktif bir kampanya seç.',
 ads_pkg_type_starter: 'STARTER',
 ads_pkg_type_pro: 'PRO',
 ads_pkg_type_elite: 'ELITE',
+
+
+ads_geo_tab_countries: 'Ülkeler',
+ads_geo_tab_regions: 'Bölgeler',
+ads_geo_tab_cities: 'Şehirler',
+
+ads_status_active: 'Aktif',
+ads_status_paused: 'Duraklatıldı',
+ads_status_stopped: 'Durduruldu',
+ads_status_finished: 'Tamamlandı',
+
+ads_campaign_media_video_with_link: 'Video + bağlantı',
+ads_campaign_media_image_with_link: 'Resim + bağlantı',
+ads_campaign_media_link_only: 'Sadece bağlantı',
+
+ads_campaigns_untitled: 'Başlıksız',
+
+ads_campaign_card_period_label: 'Dönem:',
+ads_campaign_card_media_label: 'Medya:',
+
+ads_pkg_remaining_label: 'Aktif',
+
+
+ads_header_active_campaigns_label: 'Aktif kampanyalar',
+ads_header_active_campaigns_hint: 'Active / Running / Paused / Pending durumlarındaki kampanya sayısı',
+
+ads_header_impressions_label: 'Dönem gösterimleri',
+ads_header_impressions_hint: 'Seçilen kampanyanın filtre dönemi içindeki gösterimleri',
+
+ads_header_clicks_label: 'Dönem tıklamaları',
+ads_header_clicks_hint: 'Seçilen kampanyanın filtre dönemi içindeki tıklamaları',
+
+ads_header_ctr_label: 'Genel CTR',
+ads_header_ctr_hint: 'Seçilen kampanyanın filtre dönemi içindeki CTR değeri',
+
+ads_filter_status_label: 'Durum:',
+ads_filter_status_all: 'Hepsi',
+ads_filter_status_active: 'Aktif',
+ads_filter_status_finished: 'Tamamlanmış',
+ads_filter_status_draft: 'Taslaklar',
+
+ads_filter_search_placeholder: 'Ad veya bağlantı ile ara…',
+
+ads_campaigns_head_name: 'Ad',
+ads_campaigns_head_status: 'Durum',
+ads_campaigns_head_start: 'Başlangıç',
+ads_campaigns_head_end: 'Bitiş',
+ads_campaigns_head_media_type: 'Medya türü',
+ads_campaigns_head_impressions: 'Gösterimler',
+ads_campaigns_head_clicks: 'Tıklamalar',
+ads_campaigns_head_ctr: 'CTR',
+
+ads_campaign_media_video_short: 'Video',
+ads_campaign_media_image_short: 'Resim',
+ads_campaign_media_link_short: 'Bağlantı',
+
+ads_analytics_back_to_list: '← Kampanya listesine geri dön',
+
+ads_analytics_period_label: 'Dönem:',
+ads_analytics_status_label: 'Durum:',
+
+ads_chart_tt_date: 'Tarih:',
+ads_chart_tt_impressions: 'Gösterimler:',
+ads_chart_tt_clicks: 'Tıklamalar:',
+ads_chart_tt_ctr: 'CTR:',
+
+ads_analytics_duration_label: 'Kampanya süresi',
+ads_analytics_duration_value: '1 g',
+ads_analytics_main_chart_title: 'Kampanyanın zaman analizi',
+ads_analytics_tab_impressions: 'Gösterimler',
+ads_analytics_tab_clicks: 'Tıklamalar',
+ads_analytics_tab_ctr: 'CTR',
 
 }
 

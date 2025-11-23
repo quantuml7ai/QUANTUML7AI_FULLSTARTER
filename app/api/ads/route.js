@@ -11,6 +11,7 @@ import {
   getLinksForForum,
   serveAd,
   stopCampaign,
+  startCampaign,
   deleteCampaign,
 } from '@/lib/adsCore'
  
@@ -218,7 +219,12 @@ export async function POST(req) {
       const res = await stopCampaign(campaignId)
       return jsonOk(res)
     }
-
+    // Запустить / возобновить кампанию (AdsHome — кнопка "Запустить")
+    if (action === 'campaignstart') {
+      const { campaignId } = body || {}
+      const res = await startCampaign(campaignId)
+      return jsonOk(res)
+    }
     // Удалить кампанию (AdsHome — кнопка "Удалить")
     if (action === 'campaigndelete') {
       const { campaignId } = body || {}
