@@ -4086,7 +4086,11 @@ export default function AdsHome() {
             max-height: 72vh;
             border-radius: 14px;
           }
-        }
+       .ads-campaigns-scroll {
+         max-height: 260px; /* примерно 5 кампаний по высоте */
+         overflow-y: auto;
+       }       
+          }
       `}</style>
     </div>
   )
