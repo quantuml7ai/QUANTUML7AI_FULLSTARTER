@@ -4095,10 +4095,7 @@ export default function AdsHome() {
           .ads-header-right {
             align-items: flex-start;
           }
-          .ads-campaigns-head,
-          .ads-campaign-row {
-            display: none;
-          }
+
           .ads-campaigns-list {
             border: none;
             background: transparent;
