@@ -40336,8 +40336,7 @@ ads_campaigns_action_start: 'Start',
 ads_campaigns_action_start_ing: 'Starting…',
 ads_file_button_choose: "Choose file",
 ads_file_no_video: "No file selected",
-ads_file_no_image: "No file selected",
-
+ads_file_no_image: "No file selected", 
 
 }
 
