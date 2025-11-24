@@ -32,41 +32,20 @@ function localizeCountry(t, code) {
 /* ===== Чтение accountId из глобалов / localStorage ===== */
 function getAccountIdSafe() {
   if (typeof window === 'undefined') return null
-
   try {
-    // Определяем, что мы внутри Telegram WebApp
-    const isTg =
-      typeof window.Telegram !== 'undefined' &&
-      window.Telegram &&
-      window.Telegram.WebApp
-
-    let tgUid = null
-    try {
-      tgUid = localStorage.getItem('ql7_uid')
-    } catch {
-      tgUid = null
-    }
-
-    // В ТЕЛЕГЕ: если есть ql7_uid — всегда используем его
-    if (isTg && tgUid) {
-      return tgUid
-    }
-
-    // Обычный веб (или ql7_uid нет) — старый порядок
     return (
       window.__AUTH_ACCOUNT__ ||
       window.__ASHER_ACCOUNT__ ||
       window.__WALLET__ ||
       localStorage.getItem('wallet') ||
       localStorage.getItem('account') ||
-      tgUid ||
+      localStorage.getItem('ql7_uid') ||
       null
     )
   } catch {
     return null
   }
 }
-
 
 /* ===== Форматирование дат / времени ===== */
 function formatDate(dt) {
