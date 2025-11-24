@@ -16,11 +16,7 @@ const DEFAULT_THUMB_SERVICES = [
   'https://s.wordpress.com/mshots/v1/{url}?w=960',
   'https://image.microlink.io/?url={url}&screenshot=true&meta=false',
 ];
-
-// Fallback больше НЕ используем в логике показов, просто оставил константу.
-// Если нет ссылок ни в ENV, ни в базе — рекламы нет.
-// const FALLBACK_LINKS = [...]
-
+ 
 /**
  * ВАЖНО: только статические обращения к NEXT_PUBLIC_*
  */
@@ -64,27 +60,37 @@ async function mergeLinksFromRedisOnce() {
 
     // Если ENV пустые — baseLinks = [], значит используем только базу.
     // Если ENV есть — объединяем ENV + база.
-  const mergedLinks = baseLinks.length
-    ? [...baseLinks, ...extraParsed.links]
-    : extraParsed.links;
+    const mergedLinks = baseLinks.length
+      ? [...baseLinks, ...extraParsed.links]
+      : extraParsed.links;
 
-  const mergedMedia = {
-    ...(base.MEDIA_BY_CLICK || {}),
-    ...extraParsed.mediaByClick,
-  };
+    // MEDIA_BY_CLICK теперь: clickUrl -> массив медиа
+    const mergedMedia = { ...(base.MEDIA_BY_CLICK || {}) };
+    const extraMedia = extraParsed.mediaByClick || {};
 
-  // БОЛЬШЕ НЕ ДЕДУПИМ: сохраняем все вхождения
-  const cleaned = mergedLinks.filter(Boolean);
+    for (const [clickUrl, list] of Object.entries(extraMedia)) {
+      if (!Array.isArray(list) || !list.length) continue;
+      const prev = mergedMedia[clickUrl];
+      if (!prev) {
+        mergedMedia[clickUrl] = [...list];
+      } else if (Array.isArray(prev)) {
+        mergedMedia[clickUrl] = [...prev, ...list];
+      } else {
+        mergedMedia[clickUrl] = [prev, ...list];
+      }
+    }
 
-  base.LINKS = cleaned;
-  base.MEDIA_BY_CLICK = mergedMedia;
+    // БОЛЬШЕ НЕ ДЕДУПИМ ссылки — оставляем все вхождения
+    const cleanedLinks = mergedLinks.filter(Boolean);
 
-  debugLog(base, 'merge_links_from_redis', {
-    env_len: baseLinks.length,
-    extra_len: extraParsed.links.length,
-    final_len: cleaned.length,
-  });
+    base.LINKS = cleanedLinks;
+    base.MEDIA_BY_CLICK = mergedMedia;
 
+    debugLog(base, 'merge_links_from_redis', {
+      env_len: baseLinks.length,
+      extra_len: extraParsed.links.length,
+      final_len: cleanedLinks.length,
+    });
   } catch {
     /* no-op */
   }
@@ -234,7 +240,9 @@ function normalizeUrl(raw) {
  * ▸ если одна часть → и кликаем, и показываем её
  * ▸ если через | → слева clickUrl, справа mediaUrl
  *
- * дедуп по host+pathname кликовой ссылки.
+ * ВАЖНО: больше НЕТ дедупа — каждое вхождение остаётся.
+ * Дополнительно:
+ *   MEDIA_BY_CLICK[clickUrl] = [media1, media2, ...]
  */
 function parseLinks(raw) {
   if (!raw) return { links: [], mediaByClick: {} };
@@ -257,13 +265,16 @@ function parseLinks(raw) {
 
     const mediaNorm = normalizeUrl(mediaRaw || clickNorm) || clickNorm;
 
-    // БОЛЬШЕ НЕ ДЕДУПИМ: каждое вхождение остаётся как отдельный слот
+    // добавляем каждое вхождение в общий список
     links.push(clickNorm);
 
-    // Если на один и тот же URL придёт несколько media – пусть первое (или последнее)
-    // перетирает, это не критично для логики показа.
+    // собираем массив медиа для каждого клик-URL
     if (!mediaByClick[clickNorm]) {
-      mediaByClick[clickNorm] = mediaNorm;
+      mediaByClick[clickNorm] = [mediaNorm];
+    } else if (Array.isArray(mediaByClick[clickNorm])) {
+      mediaByClick[clickNorm].push(mediaNorm);
+    } else {
+      mediaByClick[clickNorm] = [mediaByClick[clickNorm], mediaNorm];
     }
   }
 
@@ -478,9 +489,7 @@ export function resolveCurrentAdUrl(
   const conf = { ...baseConf };
 
   let links = Array.isArray(conf.LINKS) ? conf.LINKS.filter(Boolean) : [];
-
-  // ВАЖНО: больше НЕ подставляем fallback.
-  // Если ссылок нет ни в ENV, ни в базе → вернули null → блоки не рендерятся.
+ 
   if (!links.length) {
     debugLog(conf, 'slot_no_links_no_fallback', { slotKey });
     return null;
@@ -715,6 +724,10 @@ const YT_RE =
 const TIKTOK_RE =
   /^(?:https?:\/\/)?(?:www\.)?tiktok\.com\/(?:@[\w.\-]+\/video\/(\d+)|t\/[A-Za-z0-9]+)(?:[?#].*)?$/i;
 
+/* ====== вспомогательное хранилище для анти-повтора медиы по слоту ====== */
+
+const lastMediaIndexByKey = new Map();
+
 /* ======================= AdCard ======================= */
 /**
  * OG video/screenshot/image → direct file → YouTube/TikTok → screenshot CDNs → favicon → placeholder
@@ -728,8 +741,13 @@ export function AdCard({ url, slotKind, nearId }) {
   const i18n = useI18n();
   const t = i18n?.t;
   const router = useRouter();
+
   const [media, setMedia] = useState({ kind: 'skeleton', src: null });
   const [muted, setMuted] = useState(true);
+
+  // текущий выбранный mediaHref (конкретный youtube / картинка и т.п.)
+  const [mediaHref, setMediaHref] = useState(null);
+
   const rootRef = useRef(null);
   const videoRef = useRef(null);
   const ytIframeRef = useRef(null);
@@ -745,22 +763,89 @@ export function AdCard({ url, slotKind, nearId }) {
     }
   }, [url]);
 
-  // загрузка медиа (картинка / видео / iframe)
+  // ключ для слота, чтобы не повторять одну и ту же медиу подряд
+  const mediaKey = useMemo(
+    () => `${url}::${slotKind || ''}::${nearId || ''}`,
+    [url, slotKind, nearId]
+  );
+
+  // 1) Выбор конкретного mediaHref из MEDIA_BY_CLICK[clickHref] по таймеру
   useEffect(() => {
     if (!safeClick) return;
+
+    const clickHref = safeClick.toString();
+    const entry = conf.MEDIA_BY_CLICK?.[clickHref] ?? null;
+
+    let list = [];
+    if (Array.isArray(entry) && entry.length) {
+      list = entry.filter(Boolean);
+    } else if (typeof entry === 'string' && entry.trim()) {
+      list = [entry.trim()];
+    } else {
+      // если нет отдельной медиы — крутим сам clickHref
+      list = [clickHref];
+    }
+
+    if (!list.length) {
+      setMediaHref(null);
+      return;
+    }
+
+    let idx = lastMediaIndexByKey.has(mediaKey)
+      ? lastMediaIndexByKey.get(mediaKey)
+      : -1;
+
+    const pickNext = () => {
+      if (list.length === 1) {
+        idx = 0;
+      } else {
+        let tries = 0;
+        let next = idx;
+        while (tries < 5 && next === idx) {
+          next = Math.floor(Math.random() * list.length);
+          tries += 1;
+        }
+        idx = next;
+      }
+      lastMediaIndexByKey.set(mediaKey, idx);
+      setMediaHref(list[idx]);
+    };
+
+    // сразу выбираем первую медиу
+    pickNext();
+
+    // период ротации медиы — завязан на ROTATE_MIN,
+    // но не меньше 10 секунд, чтобы был заметен эффект
+    const rotateMs = Math.max(
+      10_000,
+      Number(conf.ROTATE_MIN || 1) * 60_000
+    );
+    const timer = setInterval(pickNext, rotateMs);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [safeClick, conf, mediaKey]);
+
+  // 2) Каскад определения типа медиа для текущего mediaHref
+  useEffect(() => {
+    if (!safeClick || !mediaHref) {
+      setMedia({ kind: 'skeleton', src: null });
+      return;
+    }
     let cancelled = false;
 
     const clickHref = safeClick.toString();
     const landingHost = safeClick.hostname;
-    const mediaHref =
-      (conf.MEDIA_BY_CLICK && conf.MEDIA_BY_CLICK[clickHref]) || clickHref;
 
     const thumbs =
       conf.THUMBS && conf.THUMBS.length
         ? conf.THUMBS
         : DEFAULT_THUMB_SERVICES;
 
-    const isDirectImg = /\.(jpe?g|png|webp|gif|avif)(?:$|[?#])/i.test(mediaHref);
+    const isDirectImg = /\.(jpe?g|png|webp|gif|avif)(?:$|[?#])/i.test(
+      mediaHref
+    );
 
     async function run() {
       // 0) сначала пробуем определить тип по Content-Type (HEAD)
@@ -973,7 +1058,7 @@ export function AdCard({ url, slotKind, nearId }) {
     return () => {
       cancelled = true;
     };
-  }, [safeClick, conf, slotKind]);
+  }, [safeClick, conf, slotKind, nearId, mediaHref]);
 
   // YouTube Iframe API для управления звуком
   useEffect(() => {
@@ -1320,11 +1405,9 @@ export function AdCard({ url, slotKind, nearId }) {
               </button>
             )}
 
-            <div className="pointer-events-none absolute inset-0 rounded-lg border border-transparent qshine" />
+            <div className="pointer-events-none абсолют inset-0 rounded-lg border border-transparent qshine" />
           </div>
-
-
-        </div>
+        </div> 
       </a>
     </div>
   );
