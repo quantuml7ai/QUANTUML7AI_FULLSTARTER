@@ -1330,9 +1330,14 @@ export default function AdsHome() {
   }
 
   /* ===== Загрузка кабинета через /api/ads?action=cabinet ===== */
-  const reloadCabinet = async () => {
-    setLoading(true)
+  const reloadCabinet = async (opts = {}) => {
+    const { silent } = opts || {}
+
+    if (!silent) {
+      setLoading(true)
+    }
     setError(null)
+
     try {
       const params = new URLSearchParams({ action: 'cabinet' })
       if (accountId) params.set('accountId', accountId)
@@ -1345,17 +1350,24 @@ export default function AdsHome() {
       }
 
       setPkgInfo(j.package || j.pkg || null)
-      setCampaigns(Array.isArray(j.campaigns) ? j.campaigns : [])
-      if (!selectedId && j.campaigns && j.campaigns.length) {
-        setSelectedId(j.campaigns[0].id || j.campaigns[0].campaignId)
-      }
+      setCabinet(j.cabinet || null)
+      setCampaigns(j.campaigns || [])
+      setCampaignMetrics(j.metrics || {})
+      setSelectedId((cur) => {
+        const allIds = (j.campaigns || []).map((c) => c.id || c.campaignId)
+        if (cur && allIds.includes(cur)) return cur
+        return allIds[0] || null
+      })
     } catch (e) {
       console.error('[ADS] cabinet error', e)
       setError(e.message || 'CABINET_ERROR')
     } finally {
-      setLoading(false)
+      if (!silent) {
+        setLoading(false)
+      }
     }
   }
+
 
   useEffect(() => {
     reloadCabinet()
@@ -1532,7 +1544,7 @@ export default function AdsHome() {
         throw new Error(j?.error || `HTTP ${r.status}`)
       }
 
-      await reloadCabinet()
+      await reloadCabinet({ silent: true })
 
       setNewName('')
       setCreative(makeEmptyCreative())
@@ -1576,7 +1588,7 @@ export default function AdsHome() {
         throw new Error(j?.error || `HTTP ${r.status}`)
       }
 
-      await reloadCabinet()
+      await reloadCabinet({ silent: true })
     } catch (e) {
       console.error('[ADS] campaign action error', e)
       setCampaignActionError(e.message || 'CAMPAIGN_ACTION_ERROR')
