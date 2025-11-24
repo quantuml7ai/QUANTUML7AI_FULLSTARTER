@@ -1,7 +1,7 @@
 // app/ads/page.jsx
 'use client'
 
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import NextImage from 'next/image'
 import { useI18n } from '../../components/i18n'
 import AdsHome from './home' // наш рекламный кабинет, рендерим внутри этой же страницы
@@ -164,7 +164,19 @@ export default function AdsPage() {
   const [error, setError] = useState(null)
   const [info, setInfo] = useState(null)
 
-  useMemo(() => getAccountIdSafe(), [])
+  // текущий accountId (кошелёк или uid / telegram id)
+  const [accountId, setAccountId] = useState(null)
+
+  useEffect(() => {
+    const acc = getAccountIdSafe()
+    if (acc) {
+      setAccountId(acc)
+      console.log('[ADS] AdsPage accountId:', acc)
+    } else {
+      console.log('[ADS] AdsPage accountId: NONE')
+    }
+  }, [])
+
 
   const selectedPkg = useMemo(
     () => ADS_PACKAGES.find((p) => p.id === selectedId) || ADS_PACKAGES[1],
@@ -172,6 +184,11 @@ export default function AdsPage() {
   )
 
   const openCabinet = () => {
+    if (!accountId) {
+      console.warn(
+        '[ADS] openCabinet without accountId — кабинет откроется, но бэку нечего передавать',
+      )
+    }
     setView('cabinet')
   }
 
@@ -192,7 +209,10 @@ export default function AdsPage() {
       return
     }
 
-    const acc = getAccountIdSafe()
+    const acc = accountId || getAccountIdSafe()
+    if (acc && acc !== accountId) {
+      setAccountId(acc)
+    }
     if (!acc) {
       setError(
         TX(
@@ -203,6 +223,7 @@ export default function AdsPage() {
       )
       return
     }
+
 
     try {
       setLoadingPay(true)
@@ -262,7 +283,7 @@ export default function AdsPage() {
 
   // ====== Если активен режим "кабинет" — просто рендерим AdsHome и всё ======
   if (view === 'cabinet') {
-    return <AdsHome />
+    return <AdsHome initialAccountId={accountId} />
   }
 
   // ====== Иначе — продающая страница с пакетами ======
