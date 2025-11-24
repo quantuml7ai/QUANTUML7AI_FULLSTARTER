@@ -1330,9 +1330,14 @@ export default function AdsHome() {
   }
 
   /* ===== Загрузка кабинета через /api/ads?action=cabinet ===== */
-  const reloadCabinet = async () => {
-    setLoading(true)
+  const reloadCabinet = async (opts = {}) => {
+    const { silent } = opts || {}
+
+    if (!silent) {
+      setLoading(true)
+    }
     setError(null)
+
     try {
       const params = new URLSearchParams({ action: 'cabinet' })
       if (accountId) params.set('accountId', accountId)
@@ -1353,9 +1358,12 @@ export default function AdsHome() {
       console.error('[ADS] cabinet error', e)
       setError(e.message || 'CABINET_ERROR')
     } finally {
-      setLoading(false)
+      if (!silent) {
+        setLoading(false)
+      }
     }
   }
+
 
   useEffect(() => {
     reloadCabinet()
@@ -1527,15 +1535,17 @@ export default function AdsHome() {
         body: JSON.stringify(payload),
         cache: 'no-store',
       })
+
       const j = await r.json().catch(() => null)
       if (!r.ok || !j?.ok) {
         throw new Error(j?.error || `HTTP ${r.status}`)
       }
 
-      await reloadCabinet()
+      await reloadCabinet({ silent: true })
 
       setNewName('')
       setCreative(makeEmptyCreative())
+
     } catch (e) {
       console.error('[ADS] create campaign error', e)
       setNewError(
@@ -1576,10 +1586,11 @@ export default function AdsHome() {
         throw new Error(j?.error || `HTTP ${r.status}`)
       }
 
-      await reloadCabinet()
+      await reloadCabinet({ silent: true })
     } catch (e) {
       console.error('[ADS] campaign action error', e)
       setCampaignActionError(e.message || 'CAMPAIGN_ACTION_ERROR')
+
     } finally {
       setCampaignActionLoading(false)
     }
@@ -2599,224 +2610,87 @@ export default function AdsHome() {
                   </div>
                 </div>
 
-                {/* Desktop / tablet: таблица, Mobile: карточки */}
-                {!isMobile ? (
-                  <div className="ads-campaigns-list">
-                    <div className="ads-campaigns-head">
-                      <span>#</span>
-                      <button
-                        type="button"
-                        className="ads-head-btn"
-                        onClick={() => setSortKey('name')}
-                      >
-                          {TX(
-                            t,
-                            'ads_campaigns_head_name',
-                            'Название'
-                          )}{' '}
-                          <span>{sortIcon('name')}</span>
-                      </button>
-                      <button
-                        type="button"
-                        className="ads-head-btn"
-                        onClick={() => setSortKey('status')}
-                      >
-                          {TX(
-                            t,
-                            'ads_campaigns_head_status',
-                            'Статус'
-                          )}{' '}
-                          <span>{sortIcon('status')}</span>
-                      </button>
-                      <button
-                        type="button"
-                        className="ads-head-btn"
-                        onClick={() => setSortKey('start')}
-                      >
-                          {TX(
-                            t,
-                            'ads_campaigns_head_start',
-                            'Старт'
-                          )}{' '}
-                          <span>{sortIcon('start')}</span>
-                      </button>
-                        <span>
-                          {TX(
-                            t,
-                            'ads_campaigns_head_end',
-                            'Конец'
-                          )}
-                        </span>
-                        <span>
-                          {TX(
-                            t,
-                            'ads_campaigns_head_media_type',
-                            'Тип медиа'
-                          )}                       
-                        </span>
-                        <span>
-                          {TX(
-                            t,
-                            'ads_campaigns_head_impressions',
-                            'Показов'
-                          )}
-                        </span>
-                        <span>
-                          {TX(
-                            t,
-                            'ads_campaigns_head_clicks',
-                            'Кликов'
-                          )}
-                        </span>
-                        <span>
-                          {TX(
-                            t,
-                            'ads_campaigns_head_ctr',
-                            'CTR'
-                          )}
-                        </span>
-                    </div>
-                    <div className="ads-campaigns-scroll">
-                      {filteredCampaigns.length === 0 && (
-                        <div className="ads-campaigns-empty">
-                          {TX(
-                            t,
-                            'ads_campaigns_empty',
-                            'Кампаний пока нет — создай первую, чтобы увидеть аналитику.'
-                          )}
-                        </div>
+                {/* Список кампаний: всегда таблица (как на десктопе) */}
+                <div className="ads-campaigns-list">
+                  <div className="ads-campaigns-head">
+                    <span>#</span>
+                    <button
+                      type="button"
+                      className="ads-head-btn"
+                      onClick={() => setSortKey('name')}
+                    >
+                      {TX(
+                        t,
+                        'ads_campaigns_head_name',
+                        'Название'
+                      )}{' '}
+                      <span>{sortIcon('name')}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="ads-head-btn"
+                      onClick={() => setSortKey('status')}
+                    >
+                      {TX(
+                        t,
+                        'ads_campaigns_head_status',
+                        'Статус'
+                      )}{' '}
+                      <span>{sortIcon('status')}</span>
+                    </button>
+                    <span>
+                      {TX(t, 'ads_campaigns_head_created', 'Создана')}
+                    </span>
+                    <button
+                      type="button"
+                      className="ads-head-btn"
+                      onClick={() => setSortKey('start')}
+                    >
+                      {TX(
+                        t,
+                        'ads_campaigns_head_start',
+                        'Старт'
+                      )}{' '}
+                      <span>{sortIcon('start')}</span>
+                    </button>
+                    <span>
+                      {TX(
+                        t,
+                        'ads_campaigns_head_end',
+                        'Конец'
                       )}
-                      {filteredCampaigns.map((c, idx) => {
-                        const id = c.id || c.campaignId
-                        const isSelected = id === selectedId
-                        const status = (c.status || '').toLowerCase()
-                        const statusLabel = (() => {
-                          if (
-                            status === 'active' ||
-                            status === 'running'
-                          )
-                                return TX(
-                                  t,
-                                  'ads_status_active',
-                                  'Активна'
-                                )
-                          if (status === 'paused')
-                                return TX(
-                                  t,
-                                  'ads_status_paused',
-                                  'На паузе'
-                                )
-                          if (status === 'stopped') 
-                                return TX(
-                                  t,
-                                  'ads_status_stopped',
-                                  'Остановлена'
-                                )
-                          if (
-                            status === 'finished' ||
-                            status === 'expired'
-                          )
-                                return TX(
-                                  t,
-                                  'ads_status_finished',
-                                  'Завершена'
-                                )
-                          return status || '—'
-                        })()
-                        const statusTone =
-                          status === 'active' || status === 'running'
-                            ? 'green'
-                            : status === 'paused'
-                            ? 'yellow'
-                            : status === 'finished' ||
-                              status === 'stopped' ||
-                              status === 'expired'
-                            ? 'red'
-                            : 'gray'
-
-                            const mediaLabel =
-                              c.mediaType === 'video'
-                                ? TX(
-                                    t,
-                                    'ads_campaign_media_video_short',
-                                    'Видео'
-                                  )
-                                : c.mediaType === 'image'
-                                ? TX(
-                                    t,
-                                    'ads_campaign_media_image_short',
-                                    'Картинка'
-                                  )
-                                : TX(
-                                    t,
-                                    'ads_campaign_media_link_short',
-                                    'Ссылка'
-                                  )
-                        const metrics =
-                          isSelected && selectedMetrics
-                            ? selectedMetrics
-                            : null
-
-                        return (
-                          <button
-                            key={id || idx}
-                            type="button"
-                            className={
-                              'ads-campaign-row' +
-                              (isSelected ? ' selected' : '')
-                            }
-                            onClick={() => handleSelectCampaign(id)}
-                          >
-                            <span>{idx + 1}</span>
-                            <span className="ads-camp-name">
-                              {c.name ||
-                                TX(
-                                  t,
-                                  'ads_campaigns_untitled',
-                                  'Без названия'
-                                )}
-                            </span>
-                            <span>
-                              <span
-                                className={`ads-status-pill ads-status-pill-${statusTone}`}
-                              >
-                                {statusLabel}
-                              </span>
-                            </span>
-                            <span>
-                              {formatDateShort(c.createdAt || c.startsAt)}
-                            </span>
-                            <span>
-                              {c.endsAt ? formatDateShort(c.endsAt) : '—'}
-                            </span>
-                            <span className="ads-camp-media">
-                              {mediaLabel}
-                            </span>
-                            <span>{metrics?.impressions ?? '—'}</span>
-                            <span>{metrics?.clicks ?? '—'}</span>
-                            <span>{metrics?.ctr ?? '—'}</span>
-                          </button>
-                        )
-                      })}
-                    </div>
+                    </span>
+                    <span>
+                      {TX(
+                        t,
+                        'ads_campaigns_head_media_type',
+                        'Тип медиа'
+                      )}
+                    </span>
+                    <span>
+                      {TX(
+                        t,
+                        'ads_campaigns_head_impressions',
+                        'Показов'
+                      )}
+                    </span>
+                    <span>
+                      {TX(
+                        t,
+                        'ads_campaigns_head_clicks',
+                        'Кликов'
+                      )}
+                    </span>
+                    <span>
+                      {TX(
+                        t,
+                        'ads_campaigns_head_ctr',
+                        'CTR'
+                      )}
+                    </span>
                   </div>
-                ) : (
-                  <div className="ads-campaigns-mobile">
-{filteredCampaigns.map((c, idx) => {
-  const id = c.id || c.campaignId
-  const isSelected = id === selectedId
-  return (
-    <CampaignCard
-      key={id || idx}
-      t={t}
-      campaign={c}
-      idx={idx}
-      isSelected={isSelected}
-      onSelect={() => handleSelectCampaign(id)}
-    />
-  )
-})}
 
+                  <div className="ads-campaigns-scroll">
                     {filteredCampaigns.length === 0 && (
                       <div className="ads-campaigns-empty">
                         {TX(
@@ -2826,8 +2700,124 @@ export default function AdsHome() {
                         )}
                       </div>
                     )}
+
+                    {filteredCampaigns.map((c, idx) => {
+                      const id = c.id || c.campaignId
+                      const isSelected = id === selectedId
+                      const status = (c.status || '').toLowerCase()
+                      const statusLabel = (() => {
+                        if (
+                          status === 'active' ||
+                          status === 'running'
+                        )
+                          return TX(
+                            t,
+                            'ads_status_active',
+                            'Активна'
+                          )
+                        if (status === 'paused')
+                          return TX(
+                            t,
+                            'ads_status_paused',
+                            'На паузе'
+                          )
+                        if (status === 'stopped')
+                          return TX(
+                            t,
+                            'ads_status_stopped',
+                            'Остановлена'
+                          )
+                        if (
+                          status === 'finished' ||
+                          status === 'expired'
+                        )
+                          return TX(
+                            t,
+                            'ads_status_finished',
+                            'Завершена'
+                          )
+                        return status || '—'
+                      })()
+
+                      const statusTone =
+                        status === 'active' || status === 'running'
+                          ? 'green'
+                          : status === 'paused'
+                          ? 'yellow'
+                          : status === 'finished' ||
+                            status === 'stopped' ||
+                            status === 'expired'
+                          ? 'red'
+                          : 'gray'
+
+                      const mediaLabel =
+                        c.mediaType === 'video'
+                          ? TX(
+                              t,
+                              'ads_campaign_media_video_short',
+                              'Видео'
+                            )
+                          : c.mediaType === 'image'
+                          ? TX(
+                              t,
+                              'ads_campaign_media_image_short',
+                              'Картинка'
+                            )
+                          : TX(
+                              t,
+                              'ads_campaign_media_link_short',
+                              'Ссылка'
+                            )
+
+                      const metrics =
+                        isSelected && selectedMetrics
+                          ? selectedMetrics
+                          : null
+
+                      return (
+                        <button
+                          key={id || idx}
+                          type="button"
+                          className={
+                            'ads-campaign-row' +
+                            (isSelected ? ' selected' : '')
+                          }
+                          onClick={() => handleSelectCampaign(id)}
+                        >
+                          <span>{idx + 1}</span>
+                          <span className="ads-camp-name">
+                            {c.name ||
+                              TX(
+                                t,
+                                'ads_campaigns_untitled',
+                                'Без названия'
+                              )}
+                          </span>
+                          <span>
+                            <span
+                              className={`ads-status-pill ads-status-pill-${statusTone}`}
+                            >
+                              {statusLabel}
+                            </span>
+                          </span>
+                          <span>
+                            {formatDateShort(c.createdAt || c.startsAt)}
+                          </span>
+                          <span>
+                            {c.endsAt ? formatDateShort(c.endsAt) : '—'}
+                          </span>
+                          <span className="ads-camp-media">
+                            {mediaLabel}
+                          </span>
+                          <span>{metrics?.impressions ?? '—'}</span>
+                          <span>{metrics?.clicks ?? '—'}</span>
+                          <span>{metrics?.ctr ?? '—'}</span>
+                        </button>
+                      )
+                    })}
                   </div>
-                )}
+                </div>
+
               </div>
 
               {/* Правая колонка: аналитика выбранной кампании */}
