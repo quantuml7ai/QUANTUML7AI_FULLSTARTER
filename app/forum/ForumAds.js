@@ -64,32 +64,27 @@ async function mergeLinksFromRedisOnce() {
 
     // Если ENV пустые — baseLinks = [], значит используем только базу.
     // Если ENV есть — объединяем ENV + база.
-    const mergedLinks = baseLinks.length
-      ? [...baseLinks, ...extraParsed.links]
-      : extraParsed.links;
+  const mergedLinks = baseLinks.length
+    ? [...baseLinks, ...extraParsed.links]
+    : extraParsed.links;
 
-    const mergedMedia = {
-      ...(base.MEDIA_BY_CLICK || {}),
-      ...extraParsed.mediaByClick,
-    };
+  const mergedMedia = {
+    ...(base.MEDIA_BY_CLICK || {}),
+    ...extraParsed.mediaByClick,
+  };
 
-    const dedup = [];
-    const seen = new Set();
-    for (const u of mergedLinks) {
-      if (!u) continue;
-      if (seen.has(u)) continue;
-      seen.add(u);
-      dedup.push(u);
-    }
+  // БОЛЬШЕ НЕ ДЕДУПИМ: сохраняем все вхождения
+  const cleaned = mergedLinks.filter(Boolean);
 
-    base.LINKS = dedup;
-    base.MEDIA_BY_CLICK = mergedMedia;
+  base.LINKS = cleaned;
+  base.MEDIA_BY_CLICK = mergedMedia;
 
-    debugLog(base, 'merge_links_from_redis', {
-      env_len: baseLinks.length,
-      extra_len: extraParsed.links.length,
-      final_len: dedup.length,
-    });
+  debugLog(base, 'merge_links_from_redis', {
+    env_len: baseLinks.length,
+    extra_len: extraParsed.links.length,
+    final_len: cleaned.length,
+  });
+
   } catch {
     /* no-op */
   }
@@ -249,7 +244,6 @@ function parseLinks(raw) {
     .map((s) => s.replace(/#.*/, '').trim())
     .filter(Boolean);
 
-  const seen = new Set();
   const links = [];
   const mediaByClick = {};
 
@@ -263,18 +257,14 @@ function parseLinks(raw) {
 
     const mediaNorm = normalizeUrl(mediaRaw || clickNorm) || clickNorm;
 
-    let u;
-    try {
-      u = new URL(clickNorm);
-    } catch {
-      continue;
-    }
-    const key = `${u.hostname}${u.pathname}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-
+    // БОЛЬШЕ НЕ ДЕДУПИМ: каждое вхождение остаётся как отдельный слот
     links.push(clickNorm);
-    mediaByClick[clickNorm] = mediaNorm;
+
+    // Если на один и тот же URL придёт несколько media – пусть первое (или последнее)
+    // перетирает, это не критично для логики показа.
+    if (!mediaByClick[clickNorm]) {
+      mediaByClick[clickNorm] = mediaNorm;
+    }
   }
 
   return { links, mediaByClick };
