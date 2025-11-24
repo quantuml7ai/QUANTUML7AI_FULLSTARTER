@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState, useRef } from 'react'
 import { useI18n } from '../../components/i18n'
-
+import { upload as blobUpload } from '@vercel/blob/client'
 /* ===== Вспомогалки i18n ===== */
 const TX = (t, key, fb) => {
   try {
@@ -1374,15 +1374,36 @@ export default function AdsHome() {
     return Math.max(0, max - used)
   }, [pkgInfo])
 
-  /* ===== Upload media → /api/ads?action=upload (для одного креатива) ===== */
+  /* ===== Upload media (для одного креатива) ===== */
   async function uploadMediaForCreative(cr) {
     const { videoFile, imageFile } = cr
+
+    // Если нет ни видео, ни картинки — ничего не загружаем
     if (!videoFile && !imageFile) {
       return { mediaUrl: '', mediaType: 'none' }
     }
 
-    const file = videoFile || imageFile
-    const mediaType = videoFile ? 'video' : 'image'
+    // 1) ВИДЕО: грузим НАПРЯМУЮ в Vercel Blob через форумный blobUploadUrl
+    if (videoFile) {
+      const file = videoFile
+      const mediaType = 'video'
+
+      const res = await blobUpload(file.name, file, {
+        access: 'public',
+        handleUploadUrl: '/api/forum/blobUploadUrl',
+      })
+
+      const mediaUrl = res?.url
+      if (!mediaUrl) {
+        throw new Error('NO_MEDIA_URL')
+      }
+
+      return { mediaUrl, mediaType }
+    }
+
+    // 2) КАРТИНКА: оставляем старый путь через /api/ads?action=upload
+    const file = imageFile
+    const mediaType = 'image'
     const fd = new FormData()
     fd.append('file', file)
 
@@ -1405,8 +1426,7 @@ export default function AdsHome() {
     }
 
     return { mediaUrl, mediaType }
-  }
-
+  } 
   /* ===== Создание кампании через /api/ads (action: campaignCreate) ===== */
   const handleCreateCampaign = async () => {
     setNewError(null)
