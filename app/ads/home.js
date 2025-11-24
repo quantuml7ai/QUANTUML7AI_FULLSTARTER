@@ -2027,11 +2027,14 @@ export default function AdsHome() {
   }, [selectedCampaign, analytics])
 
   const handleSelectCampaign = (id) => {
+    // просто запоминаем выбранную кампанию
     setSelectedId(id)
-    if (isMobile && analyticsRef.current) {
-      analyticsRef.current.scrollIntoView({ behavior: 'smooth' })
-    }
+
+    // Раньше на мобиле тут был scrollIntoView,
+    // из-за этого казалось, что список "пропадает".
+    // Убираем автоскролл – пользователь сам доскроллит до аналитики.
   }
+
 
   const campaignDurationDays = (() => {
     if (!selectedCampaign) return null
@@ -4116,7 +4119,42 @@ export default function AdsHome() {
          max-height: 260px; /* примерно 5 кампаний по высоте */
          overflow-y: auto;
        }       
-          }
+        
+      @media (max-width: 640px) {
+       /* Таблица кампаний на мобиле — как на десктопе, но без наползаний */
+
+       /* даём горизонтальный скролл, если ширины экрана не хватает */
+       .ads-campaigns-list {
+         overflow-x: auto;
+       }
+
+       /* сама "таблица" (шапка + строки) всегда чуть шире экрана */
+       .ads-campaigns-head,
+       .ads-campaigns-scroll {
+         min-width: 720px;
+       }
+
+       /* немного ужимаем шрифт и расстояния между колонками */
+       .ads-campaigns-head,
+       .ads-campaign-row {
+         font-size: 11px;
+         gap: 6px;
+       }
+
+       .ads-campaign-row span {
+         padding: 2px 4px;
+       }
+
+       /* длинные названия кампаний — с троеточием, чтобы не ломать сетку */
+       .ads-camp-name {
+         max-width: 140px;
+         overflow: hidden;
+         text-overflow: ellipsis;
+         white-space: nowrap;
+       }
+     }
+      
+       }
       `}</style>
     </div>
   )
