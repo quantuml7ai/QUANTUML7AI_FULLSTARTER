@@ -1384,11 +1384,31 @@ export default function AdsHome() {
     }
 
     // 1) ВИДЕО: грузим НАПРЯМУЮ в Vercel Blob через форумный blobUploadUrl
+    // и добавляем уникальный префикс к имени файла
     if (videoFile) {
       const file = videoFile
       const mediaType = 'video'
 
-      const res = await blobUpload(file.name, file, {
+      // Берём оригинальное имя или "ad", если его нет
+      const rawName = (file.name && String(file.name)) || 'ad'
+
+      // Выделяем базу и расширение (как в uploadMedia на бэке)
+      const lastDot = rawName.lastIndexOf('.')
+      const base = lastDot > 0 ? rawName.slice(0, lastDot) : rawName
+      const ext = lastDot > 0 ? rawName.slice(lastDot) : ''
+
+      // Чистим базу от странных символов
+      const safeBase = base.replace(/[^\w.-]+/g, '_') || 'ad'
+
+      // Уникальный префикс: timestamp + рандом
+      const prefix = `${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2, 8)}`
+
+      // Итоговое имя: <уникальный_префикс>-<база><расширение>
+      const uniqueName = `${prefix}-${safeBase}${ext}`
+
+      const res = await blobUpload(uniqueName, file, {
         access: 'public',
         handleUploadUrl: '/api/forum/blobUploadUrl',
       })
@@ -1399,8 +1419,7 @@ export default function AdsHome() {
       }
 
       return { mediaUrl, mediaType }
-    }
-
+    } 
     // 2) КАРТИНКА: оставляем старый путь через /api/ads?action=upload
     const file = imageFile
     const mediaType = 'image'
@@ -1426,7 +1445,7 @@ export default function AdsHome() {
     }
 
     return { mediaUrl, mediaType }
-  } 
+  }
   /* ===== Создание кампании через /api/ads (action: campaignCreate) ===== */
   const handleCreateCampaign = async () => {
     setNewError(null)
