@@ -1,7 +1,7 @@
 // app/ads/page.jsx
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import NextImage from 'next/image'
 import { useI18n } from '../../components/i18n'
 import AdsHome from './home' // наш рекламный кабинет, рендерим внутри этой же страницы
