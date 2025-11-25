@@ -1,7 +1,7 @@
 // app/ads/page.jsx
 'use client'
 
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useRef, useEffect } from 'react'
 import NextImage from 'next/image'
 import { useI18n } from '../../components/i18n'
 import AdsHome from './home' // наш рекламный кабинет, рендерим внутри этой же страницы
@@ -32,6 +32,148 @@ function openAdsPaymentWindow(url) {
       window.location.assign(url)
     } catch {}
   }
+}
+/* ===== Маркиза как на About: бесшовно, full-bleed ===== */
+function PageMarqueeTail() {
+  const { t } = useI18n()
+  const marqueeRef = useRef(null)
+
+  useEffect(() => {
+    const el = marqueeRef.current
+    if (!el) return
+    if (el.dataset.duped === '1') return
+    el.innerHTML += el.innerHTML
+    el.dataset.duped = '1'
+  }, [])
+
+  return (
+    <section className="marquee-wrap no-gutters" aria-hidden="true">
+      <div className="marquee" ref={marqueeRef}>
+        <span>{t('marquee')}</span>
+        <span>{t('marquee')}</span>
+        <span>{t('marquee')}</span>
+        <span>{t('marquee')}</span>
+      </div>
+    </section>
+  )
+}
+/* ===== Иконки "Политика" + "Суппорт" как на About ===== */
+function FooterIcons() {
+  useEffect(() => {
+    const root = document.getElementById('ads-footer-icons')
+    if (!root) return
+
+    const imgs = root.querySelectorAll('img[data-anim="1"]')
+    const anims = []
+
+    imgs.forEach((img) => {
+      // постоянное плавание
+      const floatAnim = img.animate(
+        [
+          { transform: 'translateY(0) rotate(0deg)' },
+          { transform: 'translateY(-8px) rotate(-2deg)' },
+          { transform: 'translateY(0) rotate(0deg)' },
+        ],
+        { duration: 3000, iterations: Infinity, easing: 'ease-in-out' },
+      )
+
+      // мягкое свечение
+      const glowAnim = img.animate(
+        [
+          { filter: 'drop-shadow(0 2px 6px rgba(0,200,255,0.18))' },
+          { filter: 'drop-shadow(0 10px 22px rgba(0,200,255,0.45))' },
+        ],
+        {
+          duration: 2400,
+          iterations: Infinity,
+          direction: 'alternate',
+          easing: 'ease-in-out',
+        },
+      )
+
+      // подпрыгивание при наведении
+      const onEnter = () => {
+        img.animate(
+          [
+            { transform: 'translateY(0) scale(1)' },
+            { transform: 'translateY(-16px) scale(1.06)' },
+            { transform: 'translateY(0) scale(0.98)' },
+            { transform: 'translateY(-8px) scale(1.03)' },
+            { transform: 'translateY(0) scale(1)' },
+          ],
+          { duration: 800, easing: 'cubic-bezier(0.22,1,0.36,1)' },
+        )
+      }
+      img.addEventListener('mouseenter', onEnter)
+
+      anims.push({ floatAnim, glowAnim, onEnter, img })
+    })
+
+    return () => {
+      anims.forEach(({ floatAnim, glowAnim, onEnter, img }) => {
+        try {
+          floatAnim.cancel()
+          glowAnim.cancel()
+          img.removeEventListener('mouseenter', onEnter)
+        } catch {}
+      })
+    }
+  }, [])
+
+  return (
+    <div
+      id="ads-footer-icons"
+      style={{
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+        gap: '24px',
+        flexWrap: 'wrap',
+        padding: '16px 0 8px',
+      }}
+    >
+      <a
+        href="/privacy"
+        aria-label="Privacy / Политика"
+        style={{ lineHeight: 0, cursor: 'pointer', '--size': '130px' }}
+      >
+        <img
+          src="/click/policy.png"
+          alt="Privacy"
+          draggable="false"
+          data-anim="1"
+          style={{
+            width: 'var(--size, 120px)',
+            height: 'auto',
+            display: 'block',
+            background: 'transparent',
+            userSelect: 'none',
+          }}
+        />
+      </a>
+
+      <a
+        href="/contact"
+        aria-label="Support / Поддержка"
+        style={{ lineHeight: 0, cursor: 'pointer', '--size': '130px' }}
+      >
+        <img
+          src="/click/support.png"
+          alt="Support"
+          draggable="false"
+          data-anim="1"
+          style={{
+            width: 'var(--size, 120px)',
+            height: 'auto',
+            display: 'block',
+            background: 'transparent',
+            userSelect: 'none',
+          }}
+        />
+      </a>
+    </div>
+  )
 }
 
 /* ===== Чтение accountId из глобалов / localStorage ===== */
@@ -260,9 +402,15 @@ export default function AdsPage() {
     }
   }
 
-  // ====== Если активен режим "кабинет" — просто рендерим AdsHome и всё ======
+  // ====== Если активен режим "кабинет" — кабинет + хвост, как на About ======
   if (view === 'cabinet') {
-    return <AdsHome />
+    return (
+      <>
+        <AdsHome />
+        <PageMarqueeTail />
+        <FooterIcons />
+      </>
+    )
   }
 
   // ====== Иначе — продающая страница с пакетами ======
@@ -666,7 +814,8 @@ export default function AdsPage() {
           </section>
         )}
       </main>
-
+      <PageMarqueeTail />
+      <FooterIcons />
       {/* Стили — усилена технологичная планета и визуальные эффекты */}
       <style jsx>{`
         .ads-landing {

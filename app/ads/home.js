@@ -479,8 +479,8 @@ const ticks = Array.from(new Set([0, mid, max])).sort((a, b) => b - a)
   const tooltip =
     hovered != null
       ? (() => {
-          const dt = hovered.label || hovered.ts
-          const dtFormatted =
+          const dt = hovered.label ?? hovered.ts
+          const dtFormatted = formatXLabel(dt)
             typeof dt === 'number' || typeof dt === 'string'
               ? formatDate(dt)
               : String(dt || '')
@@ -509,7 +509,7 @@ const ticks = Array.from(new Set([0, mid, max])).sort((a, b) => b - a)
                           'Дата:'
                         )}
                       </span>
-                  <strong>{dtFormatted}</strong>
+                  <strong>—{dtFormatted}</strong>
                 </div>
                 <div className="ads-chart-tooltip-row">
                       <span>
@@ -519,7 +519,7 @@ const ticks = Array.from(new Set([0, mid, max])).sort((a, b) => b - a)
                           'Показов:'
                         )}
                       </span>
-                  <strong>{imps}</strong>
+                  <strong>—{imps}</strong>
                 </div>
                 <div className="ads-chart-tooltip-row">
                       <span>
@@ -529,13 +529,13 @@ const ticks = Array.from(new Set([0, mid, max])).sort((a, b) => b - a)
                           'Кликов:'
                         )}
                       </span>
-                  <strong>{clicks}</strong>
+                  <strong>—{clicks}</strong>
                 </div>
                 <div className="ads-chart-tooltip-row">
                       <span>
                         {TX(t, 'ads_chart_tt_ctr', 'CTR:')}
                       </span>
-                  <strong>{ctr}</strong>
+                  <strong>—{ctr}</strong>
                 </div>
               </>
             ),
@@ -637,8 +637,14 @@ const ticks = Array.from(new Set([0, mid, max])).sort((a, b) => b - a)
           gap: 10px;
           margin-bottom: 2px;
         }
+
         .ads-chart-tooltip-row span {
           opacity: 0.7;
+          margin-right: 16px;      /* небольшой отступ от значения */
+          white-space: nowrap;
+        }
+        .ads-chart-tooltip-row strong {
+          white-space: nowrap;    /* число/процент в одну строку */
         }
 
         .ads-chart-grid {
