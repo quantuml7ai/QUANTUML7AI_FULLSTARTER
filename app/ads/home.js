@@ -3327,7 +3327,7 @@ useEffect(() => {
 
         .ads-home {
           padding-top: 16px;
-          padding-bottom: 80px;
+          padding-bottom: 16px;
           color: #e2e8f0;
         }
 
