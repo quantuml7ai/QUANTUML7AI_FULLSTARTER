@@ -8,10 +8,33 @@ export const revalidate = 0
 
 const redis = Redis.fromEnv()
 
-function normalizeAccountId(raw) {
-  if (!raw) return null
-  return String(raw).trim().toLowerCase() || null
-}
+ function normalizeAccountId(raw) {
+   if (!raw) return null
+   let s = String(raw).trim()
+   if (!s) return null
+
+   const lower = s.toLowerCase()
+
+   // Поддержка всех префиксов, как в adsCore/subscriptions
+   if (lower.startsWith('telegramid:')) {
+     s = s.slice('telegramid:'.length)
+   } else if (lower.startsWith('tguid:')) {
+     s = s.slice('tguid:'.length)
+   } else if (lower.startsWith('tg:')) {
+     s = s.slice('tg:'.length)
+   }
+
+   s = s.trim()
+   if (!s) return null
+
+   // Адреса кошельков храним в lowercase 0x...
+   if (s.toLowerCase().startsWith('0x')) {
+     return s.toLowerCase()
+   }
+
+   // Telegram uid оставляем как есть (цифры)
+   return s
+ }
 
 function envNum(name, fallback) {
   const raw = process.env[name]

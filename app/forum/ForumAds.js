@@ -1291,8 +1291,9 @@ export function AdCard({ url, slotKind, nearId }) {
           </div>
 
           {/* media: заполняет карточку */}
-          <div className="relative mt-0.5 overflow-hidden rounded-lg border border-[color:var(--border,#27272a)] bg-[color:var(--bg-soft,#020817)] flex-1 min-h-[140px] max-h-[400px]">
-            {media.kind === 'skeleton' && (
+<div
+  className="relative mt-0.5 overflow-hidden rounded-lg border border-[color:var(--border,#27272a)] bg-[color:var(--bg-soft,#020817)] flex-1 min-h-[140px] max-h-[400px] flex items-center justify-center"
+>            {media.kind === 'skeleton' && (
               <div className="animate-pulse w-full h-full bg-[color:var(--skeleton,#111827)]" />
             )}
 
