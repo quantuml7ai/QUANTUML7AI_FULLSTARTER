@@ -40337,7 +40337,7 @@ ads_campaigns_action_start_ing: 'Starting…',
 ads_file_button_choose: "Choose file",
 ads_file_no_video: "No file selected",
 ads_file_no_image: "No file selected", 
-
+ads_campaigns_delete_confirm: 'Are you sure you want to delete the campaign? It will no longer show, and it cannot be restored.',
 }
 
 const ADS_HERO_RU = {
@@ -40674,7 +40674,7 @@ ads_analytics_tab_ctr: 'CTR',
 ads_file_button_choose: "Выбрать файл",
 ads_file_no_video: "Файл не выбран",
 ads_file_no_image: "Файл не выбран",
-
+ads_campaigns_delete_confirm: 'Точно удалить кампанию? Показов больше не будет, вернуть её нельзя.',
 }
 
 const ADS_HERO_UK = {
@@ -41013,7 +41013,7 @@ ads_analytics_tab_ctr: 'CTR',
 ads_file_button_choose: "Вибрати файл",
 ads_file_no_video: "Файл не вибрано",
 ads_file_no_image: "Файл не вибрано",
-
+ads_campaigns_delete_confirm: 'Точно видалити кампанію? Показів більше не буде, повернути її не можна.',
 }
 
 const ADS_HERO_ES = {
@@ -41351,7 +41351,7 @@ ads_analytics_tab_ctr: 'CTR',
 ads_file_button_choose: "Seleccionar archivo",
 ads_file_no_video: "No se ha seleccionado archivo",
 ads_file_no_image: "No se ha seleccionado archivo",
-
+ads_campaigns_delete_confirm: '¿Seguro que quieres eliminar la campaña? Ya no se mostrará y no se podrá recuperar.',
 }
 
 const ADS_HERO_ZH = {
@@ -41690,7 +41690,7 @@ ads_analytics_tab_ctr: 'CTR',
 ads_file_button_choose: "选择文件",
 ads_file_no_video: "未选择文件",
 ads_file_no_image: "未选择文件",
-
+ads_campaigns_delete_confirm: '确定要删除此广告活动吗？将不再展示，且无法恢复。',
 }
 
 const ADS_HERO_AR = {
@@ -42038,7 +42038,7 @@ ads_analytics_tab_ctr: 'CTR',
 ads_file_button_choose: "اختر ملفًا",
 ads_file_no_video: "لم يتم اختيار ملف",
 ads_file_no_image: "لم يتم اختيار ملف",
-
+ads_campaigns_delete_confirm: 'هل أنت متأكد من حذف الحملة؟ لن يتم عرضها بعد الآن، ولا يمكن استعادتها.',
 }
 
 const ADS_HERO_TR = {
@@ -42384,7 +42384,7 @@ ads_analytics_main_chart_title: 'Kampanyanın zaman analizi',
 ads_analytics_tab_impressions: 'Gösterimler',
 ads_analytics_tab_clicks: 'Tıklamalar',
 ads_analytics_tab_ctr: 'CTR',
-
+ads_campaigns_delete_confirm: 'Kampanyayı silmek istediğinizden emin misiniz? Artık gösterilmeyecek ve geri getirilemez.',
 }
 
 

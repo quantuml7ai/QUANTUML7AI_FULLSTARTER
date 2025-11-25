@@ -303,10 +303,10 @@ function ChartContainer({ title, right, children }) {
           position: relative;
           border-radius: 18px;
           padding: 10px 12px 12px;
-          background:
-            radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.3), transparent 55%),
-            radial-gradient(circle at 120% 130%, rgba(250, 204, 21, 0.25), transparent 65%),
-            linear-gradient(180deg, #020617, #020617);
+         background:
+           radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.3), transparent 55%),
+           /* убрали золотой низ */
+           linear-gradient(180deg, #020617, #020617);
           border: 1px solid rgba(148, 163, 184, 0.6);
           box-shadow:
             0 22px 60px rgba(0, 0, 0, 0.9),
@@ -315,7 +315,7 @@ function ChartContainer({ title, right, children }) {
           overflow: visible;
         }
         .ads-chart-container::before {
-          content: '';
+          content: none;
           position: absolute;
           inset: -40%;
           opacity: 0.18;
@@ -324,11 +324,7 @@ function ChartContainer({ title, right, children }) {
               rgba(56, 189, 248, 0.9),
               transparent 55%
             ),
-            radial-gradient(
-              circle at 100% 0,
-              rgba(250, 204, 21, 0.9),
-              transparent 55%
-            ),
+
             repeating-linear-gradient(
               115deg,
               rgba(148, 163, 184, 0.22),
@@ -1285,6 +1281,10 @@ export default function AdsHome() {
     impressions: 0,
     clicks: 0,
   })
+
+// Метрики по каждой кампании для списка
+const [campaignMetrics, setCampaignMetrics] = useState({})
+
   // Действия с кампанией
   const [campaignActionError, setCampaignActionError] = useState(null)
   const [campaignActionLoading, setCampaignActionLoading] = useState(false)
@@ -1694,82 +1694,99 @@ export default function AdsHome() {
   }, [selectedCampaign, range])
 
 
-  // Общие метрики по всем кампаниям для верхних таблеток
-  useEffect(() => {
-    if (!Array.isArray(campaigns) || campaigns.length === 0) {
-      setOverallTotals({ impressions: 0, clicks: 0 })
-      return
-    }
+// Общие метрики по всем кампаниям (верхние таблетки)
+// + метрики по каждой кампании для списка
+useEffect(() => {
+  if (!Array.isArray(campaigns) || campaigns.length === 0) {
+    setOverallTotals({ impressions: 0, clicks: 0 })
+    setCampaignMetrics({})
+    return
+  }
 
-    let cancelled = false
+  let cancelled = false
 
-    const loadOverall = async () => {
-      try {
-        const now = Date.now()
-        let fromMs = now - 7 * 86400_000
-        if (range === '1d') fromMs = now - 86400_000
-        if (range === '30d') fromMs = now - 30 * 86400_000
-        if (range === 'all') fromMs = now - 365 * 86400_000
+  const loadOverall = async () => {
+    try {
+      const now = Date.now()
+      let fromMs = now - 7 * 86400_000
+      if (range === '1d') fromMs = now - 86400_000
+      if (range === '30d') fromMs = now - 30 * 86400_000
+      if (range === 'all') fromMs = now - 365 * 86400_000
 
-        const from = new Date(fromMs).toISOString()
-        const to = new Date(now).toISOString()
+      const from = new Date(fromMs).toISOString()
+      const to = new Date(now).toISOString()
 
-        // те же правила группировки, что и для выбранной кампании
-        const apiGroupBy = range === '1d' ? 'hour' : 'day'
+      const apiGroupBy = range === '1d' ? 'hour' : 'day'
 
-        let totalImpressions = 0
-        let totalClicks = 0
+      let totalImpressions = 0
+      let totalClicks = 0
+      const metricsById = {}
 
-        await Promise.all(
-          campaigns.map(async (c) => {
-            const id = c.id || c.campaignId
-            if (!id) return
+      await Promise.all(
+        campaigns.map(async (c) => {
+          const id = c.id || c.campaignId
+          if (!id) return
 
-            try {
-              const r = await fetch('/api/ads', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                cache: 'no-store',
-                body: JSON.stringify({
-                  action: 'campaignAnalytics',
-                  campaignId: id,
-                  from,
-                  to,
-                  groupBy: apiGroupBy,
-                }),
-              })
+          try {
+            const r = await fetch('/api/ads', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              cache: 'no-store',
+              body: JSON.stringify({
+                action: 'campaignAnalytics',
+                campaignId: id,
+                from,
+                to,
+                groupBy: apiGroupBy,
+              }),
+            })
 
-              const j = await r.json().catch(() => null)
-              if (!r.ok || !j?.ok) return
+            const j = await r.json().catch(() => null)
+            if (!r.ok || !j?.ok) return
 
-              totalImpressions += Number(j.impressionsTotal || 0)
-              totalClicks += Number(j.clicksTotal || 0)
-            } catch (e) {
-              console.error('[ADS] overall analytics error for campaign', id, e)
+            const imps = Number(j.impressionsTotal || 0)
+            const clicks = Number(j.clicksTotal || 0)
+
+            totalImpressions += imps
+            totalClicks += clicks
+
+            const ctr =
+              imps > 0 ? `${((clicks / imps) * 100).toFixed(1)}%` : '—'
+
+            metricsById[id] = {
+              impressions: imps,
+              clicks,
+              ctr,
             }
-          }),
-        )
+          } catch (e) {
+            console.error(
+              '[ADS] overall analytics error for campaign',
+              id,
+              e,
+            )
+          }
+        }),
+      )
 
-        if (!cancelled) {
-          setOverallTotals({
-            impressions: totalImpressions,
-            clicks: totalClicks,
-          })
-        }
-      } catch (e) {
-        console.error('[ADS] overall analytics error', e)
-        if (!cancelled) {
-          setOverallTotals({ impressions: 0, clicks: 0 })
-        }
+      if (!cancelled) {
+        setOverallTotals({
+          impressions: totalImpressions,
+          clicks: totalClicks,
+        })
+        setCampaignMetrics(metricsById)
       }
+    } catch (e) {
+      console.error('[ADS] overall analytics error', e)
     }
+  }
 
-    loadOverall()
+  loadOverall()
 
-    return () => {
-      cancelled = true
-    }
-  }, [campaigns, range])
+  return () => {
+    cancelled = true
+  }
+}, [campaigns, range])
+
   // Адаптив: отслеживаем мобилку
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -2769,52 +2786,48 @@ export default function AdsHome() {
                                 'ads_campaign_media_link_short',
                                 'Ссылка'
                               )
-                        const metrics =
-                          isSelected && selectedMetrics
-                            ? selectedMetrics
-                            : null
+  const metrics = campaignMetrics[id] || null
 
-                        return (
-                          <button
-                            key={id || idx}
-                            type="button"
-                            className={
-                              'ads-campaign-row' +
-                              (isSelected ? ' selected' : '')
-                            }
-                            onClick={() => handleSelectCampaign(id)}
-                          >
-                            <span>{idx + 1}</span>
-                            <span className="ads-camp-name">
-                              {c.name ||
-                                TX(
-                                  t,
-                                  'ads_campaigns_untitled',
-                                  'Без названия'
-                                )}
-                            </span>
-                            <span>
-                              <span
-                                className={`ads-status-pill ads-status-pill-${statusTone}`}
-                              >
-                                {statusLabel}
-                              </span>
-                            </span>
-                            <span>
-                              {formatDateShort(c.createdAt || c.startsAt)}
-                            </span>
-                            <span>
-                              {c.endsAt ? formatDateShort(c.endsAt) : '—'}
-                            </span>
-                            <span className="ads-camp-media">
-                              {mediaLabel}
-                            </span>
-                            <span>{metrics?.impressions ?? '—'}</span>
-                            <span>{metrics?.clicks ?? '—'}</span>
-                            <span>{metrics?.ctr ?? '—'}</span>
-                          </button>
-                        )
-                      })}
+  return (
+    <button
+      key={id || idx}
+      type="button"
+      className={
+        'ads-campaign-row' + (isSelected ? ' selected' : '')
+      }
+      onClick={() => handleSelectCampaign(id)}
+    >
+      <span>{idx + 1}</span>
+      <span className="ads-camp-name">
+        {c.name ||
+          TX(
+            t,
+            'ads_campaigns_untitled',
+            'Без названия',
+          )}
+      </span>
+      <span>
+        <span
+          className={`ads-status-pill ads-status-pill-${statusTone}`}
+        >
+          {statusLabel}
+        </span>
+      </span>
+      <span>{formatDateShort(c.createdAt || c.startsAt)}        
+      </span>
+      <span>
+  {c.startsAt ? formatDateShort(c.startsAt) : '—'}
+    </span>
+      <span>
+        {c.endsAt ? formatDateShort(c.endsAt) : '—'}
+      </span>
+      <span className="ads-camp-media">{mediaLabel}</span>
+      <span>{metrics ? metrics.impressions : '—'}</span>
+      <span>{metrics ? metrics.clicks : '—'}</span>
+      <span>{metrics ? metrics.ctr : '—'}</span>
+    </button>
+  )
+})}
                     </div>
                   </div>
                 ) : (
@@ -3365,6 +3378,8 @@ export default function AdsHome() {
           pointer-events: none;
           mix-blend-mode: screen;
         } 
+
+       
         .ads-panel > * {
           position: relative;
           z-index: 1;
@@ -3698,7 +3713,7 @@ export default function AdsHome() {
         .ads-campaigns-col {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 18px;
         }
 
         .ads-campaigns-filters {
@@ -3748,51 +3763,101 @@ export default function AdsHome() {
           display: flex;
           flex-direction: column;
         }
-        .ads-campaigns-head {
-          display: grid;
-          grid-template-columns: 32px 1.4fr 0.9fr 0.9fr 0.9fr 0.9fr 0.9fr 0.9fr 0.9fr;
-          gap: 6px;
-          padding: 6px 10px;
-          font-size: 11px;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-          opacity: 0.9;
-          border-bottom: 1px solid rgba(148, 163, 184, 0.4);
-        }
-        .ads-head-btn {
-          background: transparent;
-          border: none;
-          padding: 0;
-          color: inherit;
-          font-size: inherit;
-          text-align: left;
-          cursor: pointer;
-          display: inline-flex;
-          gap: 4px;
-          align-items: center;
-        }
-        .ads-head-btn span {
-          font-size: 10px;
-          opacity: 0.8;
-        }
+.ads-campaigns-head {
+  display: grid;
+  grid-template-columns:
+    32px         /* # */
+    1.6fr        /* Name */
+    1fr          /* Status */
+    0.9fr        /* Created */
+    0.9fr        /* Start */
+    0.9fr        /* End */
+    0.9fr        /* Media */
+    0.9fr        /* Impressions */
+    0.9fr        /* Clicks */
+    0.8fr;       /* CTR */
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.9;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.4);
+}
+/* Ячейки шапки: не ломаемся на 2 строки, режем по многоточию */
+.ads-campaigns-head > span,
+.ads-campaigns-head > button {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ads-head-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  text-align: left;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  min-width: 0;
+}
+
+/* Текст подписи внутри кнопки */
+.ads-head-btn span:first-child {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Иконка сортировки — не сжимаем */
+.ads-head-btn span:last-child {
+  flex-shrink: 0;
+  font-size: 10px;
+  opacity: 0.8;
+}
+
 
         .ads-campaigns-scroll {
           max-height: 320px;
           overflow-y: auto;
         }
-        .ads-campaign-row {
-          width: 100%;
-          display: grid;
-          grid-template-columns: 32px 1.4fr 0.9fr 0.9fr 0.9fr 0.9fr 0.9fr 0.9fr 0.9fr;
-          gap: 6px;
-          padding: 6px 10px;
-          font-size: 12px;
-          text-align: left;
-          border-bottom: 1px solid rgba(15, 23, 42, 0.9);
-          background: transparent;
-          cursor: pointer;
-          transition: background 0.18s ease-out;
-        }
+.ads-campaign-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns:
+    32px
+    1.6fr
+    1fr
+    0.9fr
+    0.9fr
+    0.9fr
+    0.9fr
+    0.9fr
+    0.9fr
+    0.8fr;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.9);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.18s ease-out;
+}
+/* Каждая ячейка строки — одна строка, с многоточием */
+.ads-campaign-row > span {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
         .ads-campaign-row:nth-child(even) {
           background: rgba(15, 23, 42, 0.9);
         }
@@ -4145,8 +4210,7 @@ export default function AdsHome() {
          max-height: 260px; /* примерно 5 кампаний по высоте */
          overflow-y: auto;
        }       
-        
-   
+
        }
       `}</style>
     </div>
