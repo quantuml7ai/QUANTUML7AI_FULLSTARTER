@@ -7,7 +7,6 @@ import {
   getClientIp,
 } from '../../forum/_utils.js'
 import { addVipDays } from '@/lib/subscriptions.js'
-import { addQcoinReward } from '@/lib/qcoin.js'   // <<< НОВЫЙ ИМПОРТ
 
 const redis = Redis.fromEnv()
 
@@ -16,7 +15,7 @@ const REF_UID_BY_CODE_KEY = (code) => `ref:uid_by_code:${code}`
 const REF_IPS_KEY = (code) => `ref:ips:${code}`
 const REF_VIP_PENDING_KEY = (uid) => `ref:vip_pending:${uid}`
 const REF_VIP_QUEUE = 'ref:vip_queue'
-// const QCOIN_KEY = (uid) => `qcoin:${uid}`  // больше не нужен
+const QCOIN_KEY = (uid) => `qcoin:${uid}`
 
 function readNumberEnv(names, fallback) {
   for (const name of names) {
@@ -83,16 +82,10 @@ async function applyReferralReward(uid, code, ip) {
   if (isNew === 1) {
     invitedCount = invitedPrev + 1
 
-    // начисляем QCoin в общий баланс через helper
+    // начисляем QCoin в общий хэш qcoin:<uid>
     try {
-      const res = await addQcoinReward(uid, REF_REWARD_QCOIN, {
-        reason: 'referral',
-        code,
-        at: nowIso,
-      })
-      if (res?.ok) {
-        rewardApplied = true
-      }
+      await redis.hincrbyfloat(QCOIN_KEY(uid), 'balance', REF_REWARD_QCOIN)
+      rewardApplied = true
     } catch {
       // проглатываем ошибку, но не падаем
     }
@@ -100,7 +93,7 @@ async function applyReferralReward(uid, code, ip) {
     baseUpdates.unique_ips = String(invitedCount)
     baseUpdates.invited_count = String(invitedCount)
     baseUpdates.last_reward_at = nowIso
-
+ 
     const goalReachedPrev = (profile?.vip_goal_reached || '0') === '1'
     const vipAlreadyGranted = (profile?.vip_granted || '0') === '1'
 
@@ -112,6 +105,7 @@ async function applyReferralReward(uid, code, ip) {
 
       try {
         await addVipDays(uid, REF_VIP_DAYS, {
+          // просто уникальный идентификатор операции
           paymentId: `referral:${code}:${nowIso}`,
         })
         vipGrantedNow = true
@@ -136,6 +130,7 @@ async function applyReferralReward(uid, code, ip) {
 
       if (vipGrantedNow && !vipAlreadyGranted) {
         baseUpdates.vip_granted = '1'
+        // запасной флаг / очередь больше не нужны
         try {
           await redis.del(REF_VIP_PENDING_KEY(uid))
         } catch {}
@@ -171,7 +166,7 @@ export async function GET(req) {
   }
 
   const uid = await redis.get(REF_UID_BY_CODE_KEY(code))
-  if (!uid) {
+  if (!uid) { 
     const siteUrl = getSiteUrl() || '/'
     if ((req.headers.get('accept') || '').includes('text/html')) {
       return Response.redirect(siteUrl, 302)
@@ -196,7 +191,7 @@ export async function GET(req) {
     },
     200,
   )
-
+ 
   const accept = req.headers.get('accept') || ''
   const siteUrl = getSiteUrl() || '/'
 
