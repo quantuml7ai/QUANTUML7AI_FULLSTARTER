@@ -37,7 +37,7 @@ export default function InviteFriendPopup({
   }, [])
 
   // масштаб гифки на мобильных (можешь легко подстроить)
-  const mobileScale = 0.5
+  const mobileScale = 0.7
   const gifWidth = isMobile ? Math.round(baseGifWidth * mobileScale) : baseGifWidth
   const gifHeight = isMobile ? Math.round(baseGifHeight * mobileScale) : baseGifHeight
 
@@ -620,7 +620,7 @@ export default function InviteFriendPopup({
           /* Мобильная адаптация: увеличенные отступы сверху/снизу + уменьшение шрифтов */
           @media (max-width: 640px) {
             .invite-overlay {
-              padding: 40px 8px 56px; /* вдвое больше, чем базовые 16/24 */
+             padding: 60px 8px 36px /* вдвое больше, чем базовые 16/24 */
               align-items: flex-start;
             }
 
