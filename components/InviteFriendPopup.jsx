@@ -37,7 +37,7 @@ export default function InviteFriendPopup({
   }, [])
 
   // масштаб гифки на мобильных (можешь легко подстроить)
-  const mobileScale = 0.7
+  const mobileScale = 0.55
   const gifWidth = isMobile ? Math.round(baseGifWidth * mobileScale) : baseGifWidth
   const gifHeight = isMobile ? Math.round(baseGifHeight * mobileScale) : baseGifHeight
 
