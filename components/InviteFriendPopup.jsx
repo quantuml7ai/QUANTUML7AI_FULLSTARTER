@@ -626,7 +626,7 @@ export default function InviteFriendPopup({
 
             .invite-modal {
               max-width: 94%;
-              padding: 10px 10px 14px;
+              padding: 14px 10px 14px;
               border-radius: 18px;
             }
 
