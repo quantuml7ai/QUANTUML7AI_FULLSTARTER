@@ -1377,7 +1377,7 @@ h1, h2, h3, h4, h5, h6{
 
 @media (max-width: 640px) {
   .invite-overlay {
-    padding: 40px 8px 56px; /* запас от верхнего и нижнего баров */
+    padding: 60px 8px 36px; /* запас от верхнего и нижнего баров */
     align-items: flex-start;
   }
 
