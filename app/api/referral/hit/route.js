@@ -6,6 +6,7 @@ import {
   bad,
   getClientIp,
 } from '../../forum/_utils.js'
+import { addVipDays } from '@/lib/subscriptions.js'
 
 const redis = Redis.fromEnv()
 
@@ -26,14 +27,22 @@ function readNumberEnv(names, fallback) {
   return fallback
 }
 
+// награда в QCoin за одного уникального друга
 const REF_REWARD_QCOIN = readNumberEnv(
   ['REFERRAL_REWARD_QCOIN', 'NEXT_PUBLIC_REFERRAL_REWARD_QCOIN'],
   0.1,
 )
 
+// сколько уникальных друзей нужно для VIP
 const REF_VIP_THRESHOLD = readNumberEnv(
   ['REFERRAL_VIP_THRESHOLD'],
   50,
+)
+
+// сколько дней VIP выдаём за выполнение цели
+const REF_VIP_DAYS = readNumberEnv(
+  ['REFERRAL_VIP_DAYS'],
+  30,
 )
 
 function getSiteUrl() {
@@ -73,7 +82,7 @@ async function applyReferralReward(uid, code, ip) {
   if (isNew === 1) {
     invitedCount = invitedPrev + 1
 
-    // начисляем QCoin
+    // начисляем QCoin в общий хэш qcoin:<uid>
     try {
       await redis.hincrbyfloat(QCOIN_KEY(uid), 'balance', REF_REWARD_QCOIN)
       rewardApplied = true
@@ -84,26 +93,47 @@ async function applyReferralReward(uid, code, ip) {
     baseUpdates.unique_ips = String(invitedCount)
     baseUpdates.invited_count = String(invitedCount)
     baseUpdates.last_reward_at = nowIso
-
-    // проверяем порог VIP
+ 
     const goalReachedPrev = (profile?.vip_goal_reached || '0') === '1'
+    const vipAlreadyGranted = (profile?.vip_granted || '0') === '1'
+
+    // 4. Впервые достигли порога → пытаемся сразу выдать VIP
     if (!goalReachedPrev && invitedCount >= REF_VIP_THRESHOLD) {
       baseUpdates.vip_goal_reached = '1'
 
-      // ставим флаг и пишем в очередь для ручной выдачи VIP
+      let vipGrantedNow = false
+
       try {
-        await redis.set(REF_VIP_PENDING_KEY(uid), '1')
-        await redis.rpush(
-          REF_VIP_QUEUE,
-          JSON.stringify({
-            uid,
-            invitedCount,
-            code,
-            at: nowIso,
-          }),
-        )
-      } catch {
-        // не критично для основной логики
+        await addVipDays(uid, REF_VIP_DAYS, {
+          // просто уникальный идентификатор операции
+          paymentId: `referral:${code}:${nowIso}`,
+        })
+        vipGrantedNow = true
+      } catch (e) {
+        // если что-то пошло не так — включаем старый режим с очередью
+        try {
+          await redis.set(REF_VIP_PENDING_KEY(uid), '1')
+          await redis.rpush(
+            REF_VIP_QUEUE,
+            JSON.stringify({
+              uid,
+              invitedCount,
+              code,
+              at: nowIso,
+              error: String(e),
+            }),
+          )
+        } catch {
+          // не критично для основной логики
+        }
+      }
+
+      if (vipGrantedNow && !vipAlreadyGranted) {
+        baseUpdates.vip_granted = '1'
+        // запасной флаг / очередь больше не нужны
+        try {
+          await redis.del(REF_VIP_PENDING_KEY(uid))
+        } catch {}
       }
     }
   }
@@ -113,7 +143,11 @@ async function applyReferralReward(uid, code, ip) {
   const updatedProfile = await redis.hgetall(profileKey)
   const vipGoalReached = (updatedProfile?.vip_goal_reached || '0') === '1'
   const vipGranted = (updatedProfile?.vip_granted || '0') === '1'
-  const finalInvited = Number(updatedProfile?.invited_count || updatedProfile?.unique_ips || invitedCount)
+  const finalInvited = Number(
+    updatedProfile?.invited_count ||
+      updatedProfile?.unique_ips ||
+      invitedCount,
+  )
 
   return {
     rewardApplied,
@@ -132,8 +166,7 @@ export async function GET(req) {
   }
 
   const uid = await redis.get(REF_UID_BY_CODE_KEY(code))
-  if (!uid) {
-    // если кода нет – можно сразу редиректнуть на главную
+  if (!uid) { 
     const siteUrl = getSiteUrl() || '/'
     if ((req.headers.get('accept') || '').includes('text/html')) {
       return Response.redirect(siteUrl, 302)
@@ -158,8 +191,7 @@ export async function GET(req) {
     },
     200,
   )
-
-  // Для обычного захода из браузера/мессенджера — редирект на сайт
+ 
   const accept = req.headers.get('accept') || ''
   const siteUrl = getSiteUrl() || '/'
 
