@@ -1380,7 +1380,9 @@ h1, h2, h3, h4, h5, h6{
     padding: 60px 8px 36px; /* запас от верхнего и нижнего баров */
     align-items: flex-start;
   }
-
+  .invite-close {
+    top: 15px; /* или 20px, если хочешь ещё ниже */
+  }
   .invite-modal {
     max-width: 94%;
     max-height: 70vh;

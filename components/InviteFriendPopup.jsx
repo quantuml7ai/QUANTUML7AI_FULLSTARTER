@@ -356,7 +356,7 @@ export default function InviteFriendPopup({
 
           .invite-close {
             position: absolute;
-            top: 10px;
+            top: 15px;
             right: 12px;
             width: 38px;
             height: 38px;
