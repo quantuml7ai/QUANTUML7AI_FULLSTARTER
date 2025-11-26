@@ -591,27 +591,41 @@ export default function InviteFriendPopup({
             text-align: center;
           }
 
-          @media (max-width: 640px) {
-            .invite-modal {
-              max-width: 100%;
-              padding: 12px 12px 14px;
-              border-radius: 18px;
-            }
-            .invite-title {
-              font-size: 22px;
-              margin-bottom: 4px;
-            }
-            .invite-subtitle {
-              font-size: 16px;
-              margin: 0 2px 8px;
-            }
-            .invite-stats {
-              grid-template-columns: minmax(0, 1fr);
-            }
-            .invite-share-grid {
-              grid-template-columns: repeat(3, minmax(0, 1fr));
-            }
-          }
+@media (max-width: 640px) {
+  /* даём запас сверху/снизу, учитывая бары браузера и миниаппа */
+  .invite-overlay {
+    padding: 56px 10px 72px;        /* было 16px 16px 24px */
+    align-items: flex-start;        /* оставляем прижатым к верху, но уже с запасом */
+  }
+
+  .invite-modal {
+    max-width: 96%;                 /* чтобы не липло к краям */
+    padding: 12px 12px 16px;
+    border-radius: 18px;
+  }
+
+  .invite-title {
+    font-size: 22px;
+    margin-bottom: 4px;
+  }
+
+  .invite-subtitle {
+    font-size: 16px;
+    margin: 0 4px 10px;
+  }
+
+  /* ВАЖНО: на мобиле плашки опять в 2 колонки, а не одна под другой */
+  .invite-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));  /* вместо minmax(0,1fr) */
+    gap: 8px;
+  }
+
+  /* сетка мессенджеров на мобиле оставляем как была */
+  .invite-share-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
         `}</style>
       </div>
     </div>
