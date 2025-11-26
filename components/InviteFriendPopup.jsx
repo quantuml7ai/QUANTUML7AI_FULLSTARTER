@@ -1,7 +1,7 @@
 // components/InviteFriendPopup.jsx
 'use client'
 
-import React, { useEffect, useCallback } from 'react'
+import React, { useEffect, useCallback, useState } from 'react'
 import Image from 'next/image'
 import { useI18n } from './i18n'
 
@@ -19,8 +19,27 @@ export default function InviteFriendPopup({
   const { t } = useI18n()
 
   const gifSrc = config?.gifSrc || '/friends/invitation.gif'
-  const gifWidth = config?.gifWidth || 260
-  const gifHeight = config?.gifHeight || 260
+  const baseGifWidth = config?.gifWidth || 260
+  const baseGifHeight = config?.gifHeight || 260
+
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 640)
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // масштаб гифки на мобильных (можешь легко подстроить)
+  const mobileScale = 0.5
+  const gifWidth = isMobile ? Math.round(baseGifWidth * mobileScale) : baseGifWidth
+  const gifHeight = isMobile ? Math.round(baseGifHeight * mobileScale) : baseGifHeight
 
   const safeReferral = referralUrl || ''
   const hasLink = !!safeReferral
@@ -64,7 +83,7 @@ export default function InviteFriendPopup({
         document.execCommand('copy')
         document.body.removeChild(ta)
       }
-      // можно потом повесить тост "скопировано"
+      // тут можно повесить тост "скопировано"
     } catch {
       // no-op
     }
@@ -114,7 +133,6 @@ export default function InviteFriendPopup({
       key: 'viber',
       icon: '/friends/viber.png',
       labelKey: 'invite_share_viber',
-      // Viber на мобилках
       url: hasLink ? `viber://forward?text=${textEncoded}` : '',
     },
     {
@@ -137,7 +155,6 @@ export default function InviteFriendPopup({
       key: 'ig',
       icon: '/friends/ig.png',
       labelKey: 'invite_share_ig',
-      // у Instagram нет нормального web share API — просто открываем, юзер вставит ссылку сам
       url: 'https://www.instagram.com/',
     },
   ]
@@ -162,6 +179,12 @@ export default function InviteFriendPopup({
             height={gifHeight}
             className="invite-gif"
             priority
+            style={{
+              width: gifWidth,
+              height: 'auto',
+              maxWidth: '100%',
+              display: 'block',
+            }}
           />
         </div>
 
@@ -299,394 +322,390 @@ export default function InviteFriendPopup({
             </div>
           </div>
         </div>
-<style jsx>{`
-  .invite-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    background: radial-gradient(circle at top, rgba(56, 189, 248, 0.16), transparent 55%),
-      rgba(3, 7, 18, 0.92);
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding: 16px 16px 24px;
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
 
-  .invite-modal {
-    position: relative;
-    width: 100%;
-    max-width: 620px;
-    max-height: none;
-    background: radial-gradient(circle at top, rgba(37, 99, 235, 0.24), rgba(15, 23, 42, 0.98));
-    border-radius: 20px;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85);
-    border: 1px solid rgba(56, 189, 248, 0.45);
-    padding: 16px 18px 18px;
-    display: flex;
-    flex-direction: column;
-    overflow: visible;
-    box-sizing: border-box;
-  }
+        <style jsx>{`
+          .invite-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: radial-gradient(circle at top, rgba(56, 189, 248, 0.16), transparent 55%),
+              rgba(3, 7, 18, 0.92);
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 16px 16px 24px;
+            overflow-y: auto;
+            overflow-x: hidden;
+          }
 
-  .invite-close {
-    position: absolute;
-    top: 10px;
-    right: 12px;
-    width: 38px;
-    height: 38px;
-    border-radius: 999px;
-    border: 1px solid rgba(148, 163, 184, 0.5);
-    background: radial-gradient(circle at 30% 0, rgba(148, 163, 253, 0.3), rgba(15, 23, 42, 0.9));
-    color: #e5e7eb;
-    font-size: 15px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.16s ease-out;
-    z-index: 2;
-  }
-  .invite-close:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 0 12px rgba(56, 189, 248, 0.7);
-    border-color: rgba(56, 189, 248, 0.9);
-  }
+          .invite-modal {
+            position: relative;
+            width: 100%;
+            max-width: 620px;
+            max-height: none;
+            background: radial-gradient(circle at top, rgba(37, 99, 235, 0.24), rgba(15, 23, 42, 0.98));
+            border-radius: 20px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85);
+            border: 1px solid rgba(56, 189, 248, 0.45);
+            padding: 16px 18px 18px;
+            display: flex;
+            flex-direction: column;
+            overflow: visible;
+            box-sizing: border-box;
+          }
 
-  .invite-gif-wrap {
-    display: flex;
-    justify-content: center;
-    margin-top: 4px;
-    margin-bottom: 6px;
-  }
+          .invite-close {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            width: 38px;
+            height: 38px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            background: radial-gradient(circle at 30% 0, rgba(148, 163, 253, 0.3), rgba(15, 23, 42, 0.9));
+            color: #e5e7eb;
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.16s ease-out;
+            z-index: 2;
+          }
+          .invite-close:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.7);
+            border-color: rgba(56, 189, 248, 0.9);
+          }
 
-  .invite-gif {
-    border-radius: 16px;
-    max-width: 100%;
-    height: auto;
-  }
+          .invite-gif-wrap {
+            display: flex;
+            justify-content: center;
+            margin-top: 4px;
+            margin-bottom: 6px;
+          }
 
-  .invite-body {
-    margin-top: 2px;
-    padding: 4px 4px 0;
-    overflow: visible;
-  }
+          .invite-gif {
+            border-radius: 16px;
+          }
 
-  .invite-title {
-    font-size: 28px;
-    line-height: 1.2;
-    font-weight: 800;
-    letter-spacing: 0.02em;
-    color: #e5e7eb;
-    text-align: center;
-    margin: 0 0 6px;
-  }
+          .invite-body {
+            margin-top: 2px;
+            padding: 4px 4px 0;
+            overflow: visible;
+          }
 
-  .invite-subtitle {
-    font-size: 18px;
-    line-height: 1.35;
-    color: rgba(191, 219, 254, 0.92);
-    text-align: center;
-    margin: 0 6px 12px;
-  }
+          .invite-title {
+            font-size: 28px;
+            line-height: 1.2;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            color: #e5e7eb;
+            text-align: center;
+            margin: 0 0 6px;
+          }
 
-  .invite-stats {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    margin-bottom: 10px;
-  }
+          .invite-subtitle {
+            font-size: 18px;
+            line-height: 1.35;
+            color: rgba(191, 219, 254, 0.92);
+            text-align: center;
+            margin: 0 6px 12px;
+          }
 
-  .invite-pill {
-    border-radius: 16px;
-    padding: 10px 10px 8px;
-    background: radial-gradient(circle at top, rgba(56, 189, 248, 0.24), rgba(15, 23, 42, 0.98));
-    border: 1px solid rgba(59, 130, 246, 0.7);
-    box-shadow: 0 0 16px rgba(56, 189, 248, 0.28);
-  }
+          .invite-stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+          }
 
-  .pill-label {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: rgba(148, 163, 184, 0.96);
-    margin-bottom: 2px;
-  }
+          .invite-pill {
+            border-radius: 16px;
+            padding: 10px 10px 8px;
+            background: radial-gradient(circle at top, rgba(56, 189, 248, 0.24), rgba(15, 23, 42, 0.98));
+            border: 1px solid rgba(59, 130, 246, 0.7);
+            box-shadow: 0 0 16px rgba(56, 189, 248, 0.28);
+          }
 
-  .pill-value {
-    font-size: 18px;
-    font-weight: 800;
-    color: #f9fafb;
-    display: flex;
-    align-items: baseline;
-  }
+          .pill-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(148, 163, 184, 0.96);
+            margin-bottom: 2px;
+          }
 
-  .pill-unit {
-    font-size: 12px;
-    font-weight: 600;
-    color: rgba(129, 140, 248, 0.9);
-    margin-left: 4px;
-  }
+          .pill-value {
+            font-size: 18px;
+            font-weight: 800;
+            color: #f9fafb;
+            display: flex;
+            align-items: baseline;
+          }
 
-  .pill-sep {
-    opacity: 0.85;
-    margin: 0 2px;
-  }
+          .pill-unit {
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(129, 140, 248, 0.9);
+            margin-left: 4px;
+          }
 
-  .pill-caption {
-    margin-top: 3px;
-    font-size: 12px;
-    color: rgba(191, 219, 254, 0.9);
-  }
+          .pill-sep {
+            opacity: 0.85;
+            margin: 0 2px;
+          }
 
-  .invite-vip-status {
-    margin-bottom: 10px;
-  }
+          .pill-caption {
+            margin-top: 3px;
+            font-size: 12px;
+            color: rgba(191, 219, 254, 0.9);
+          }
 
-  .vip-tag {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 9px;
-    border-radius: 999px;
-    font-size: 15px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    border: 1px dashed rgba(234, 179, 8, 0.5);
-    color: rgba(250, 204, 21, 0.95);
-    background: rgba(15, 23, 42, 0.9);
-  }
-  .vip-tag-active {
-    border-style: solid;
-    border-color: rgba(34, 197, 94, 0.9);
-    color: rgba(22, 163, 74, 0.98);
-    box-shadow: 0 0 14px rgba(22, 163, 74, 0.65);
-  }
-  .vip-tag-ready {
-    border-style: solid;
-    border-color: rgba(250, 204, 21, 0.9);
-    box-shadow: 0 0 14px rgba(250, 204, 21, 0.55);
-  }
+          .invite-vip-status {
+            margin-bottom: 10px;
+          }
 
-  .invite-description {
-    font-size: 16px;
-    line-height: 1.4;
-    color: rgba(203, 213, 225, 0.98);
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    margin-bottom: 8px;
-  }
-  .invite-description p {
-    margin: 0 0 4px;      /* уменьшаем отступы между абзацами */
-  }
-  .invite-description p:last-child {
-    margin-bottom: 0;
-  }
+          .vip-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 9px;
+            border-radius: 999px;
+            font-size: 15px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            border: 1px dashed rgba(234, 179, 8, 0.5);
+            color: rgba(250, 204, 21, 0.95);
+            background: rgba(15, 23, 42, 0.9);
+          }
+          .vip-tag-active {
+            border-style: solid;
+            border-color: rgba(34, 197, 94, 0.9);
+            color: rgba(22, 163, 74, 0.98);
+            box-shadow: 0 0 14px rgba(22, 163, 74, 0.65);
+          }
+          .vip-tag-ready {
+            border-style: solid;
+            border-color: rgba(250, 204, 21, 0.9);
+            box-shadow: 0 0 14px rgba(250, 204, 21, 0.55);
+          }
 
-  .invite-link-block {
-    margin-bottom: 10px;
-  }
+          .invite-description {
+            font-size: 16px;
+            line-height: 1.4;
+            color: rgba(203, 213, 225, 0.98);
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            margin-bottom: 8px;
+          }
+          .invite-description p {
+            margin: 0 0 4px;
+          }
+          .invite-description p:last-child {
+            margin-bottom: 0;
+          }
 
-  .invite-link-label {
-    font-size: 16px;
-    color: rgba(148, 163, 184, 0.95);
-    margin-bottom: 4px;
-  }
+          .invite-link-block {
+            margin-bottom: 10px;
+          }
 
-  .invite-link-row {
-    display: flex;
-    align-items: stretch;
-    gap: 6px;
-  }
+          .invite-link-label {
+            font-size: 16px;
+            color: rgba(148, 163, 184, 0.95);
+            margin-bottom: 4px;
+          }
 
-  .invite-link-input {
-    flex: 1;
-    min-width: 0;
-    border-radius: 999px;
-    border: 1px solid rgba(51, 65, 85, 0.9);
-    background: rgba(15, 23, 42, 0.95);
-    padding: 6px 10px;
-    font-size: 15px;
-    color: #e5e7eb;
-    outline: none;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+          .invite-link-row {
+            display: flex;
+            align-items: stretch;
+            gap: 6px;
+          }
 
-  .invite-copy-btn {
-    border-radius: 999px;
-    padding: 6px 12px;
-    font-size: 15px;
-    font-weight: 600;
-    border: 1px solid rgba(56, 189, 248, 0.9);
-    background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.35), rgba(8, 47, 73, 0.98));
-    color: #ecfeff;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.16s ease-out;
-  }
-  .invite-copy-btn:disabled {
-    opacity: 0.5;
-    cursor: default;
-  }
-  .invite-copy-btn:not(:disabled):hover {
-    transform: translateY(-1px);
-    box-shadow: 0 0 14px rgba(56, 189, 248, 0.9);
-  }
+          .invite-link-input {
+            flex: 1;
+            min-width: 0;
+            border-radius: 999px;
+            border: 1px solid rgba(51, 65, 85, 0.9);
+            background: rgba(15, 23, 42, 0.95);
+            padding: 6px 10px;
+            font-size: 15px;
+            color: #e5e7eb;
+            outline: none;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
 
-  .invite-share-block {
-    margin-bottom: 4px;
-  }
+          .invite-copy-btn {
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 15px;
+            font-weight: 600;
+            border: 1px solid rgba(56, 189, 248, 0.9);
+            background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.35), rgba(8, 47, 73, 0.98));
+            color: #ecfeff;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.16s ease-out;
+          }
+          .invite-copy-btn:disabled {
+            opacity: 0.5;
+            cursor: default;
+          }
+          .invite-copy-btn:not(:disabled):hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 14px rgba(56, 189, 248, 0.9);
+          }
 
-  .invite-share-title {
-    font-size: 15px;
-    color: rgba(148, 163, 184, 0.96);
-    margin-bottom: 4px;
-  }
+          .invite-share-block {
+            margin-bottom: 4px;
+          }
 
-  .invite-share-grid {
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 6px;
-  }
+          .invite-share-title {
+            font-size: 15px;
+            color: rgba(148, 163, 184, 0.96);
+            margin-bottom: 4px;
+          }
 
-  .invite-share-btn {
-    border-radius: 14px;
-    border: 1px solid rgba(30, 64, 175, 0.85);
-    background: radial-gradient(circle at top, rgba(37, 99, 235, 0.35), rgba(15, 23, 42, 0.95));
-    padding: 4px 3px 4px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    cursor: pointer;
-    transition: all 0.16s ease-out;
-  }
-  .invite-share-btn:disabled {
-    opacity: 0.4;
-    cursor: default;
-  }
-  .invite-share-btn:not(:disabled):hover {
-    transform: translateY(-1px);
-    box-shadow: 0 0 14px rgba(59, 130, 246, 0.85);
-  }
+          .invite-share-grid {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 6px;
+          }
 
-  .share-icon-wrap {
-    width: 22px;
-    height: 22px;
-    border-radius: 999px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .share-icon {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+          .invite-share-btn {
+            border-radius: 14px;
+            border: 1px solid rgba(30, 64, 175, 0.85);
+            background: radial-gradient(circle at top, rgba(37, 99, 235, 0.35), rgba(15, 23, 42, 0.95));
+            padding: 4px 3px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            cursor: pointer;
+            transition: all 0.16s ease-out;
+          }
+          .invite-share-btn:disabled {
+            opacity: 0.4;
+            cursor: default;
+          }
+          .invite-share-btn:not(:disabled):hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 14px rgba(59, 130, 246, 0.85);
+          }
 
-  .share-label {
-    font-size: 10px;
-    color: rgba(226, 232, 240, 0.96);
-    text-align: center;
-  }
+          .share-icon-wrap {
+            width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .share-icon {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
 
-  /* Мобильная адаптация: уменьшаем всё примерно в 1.5 раза и добавляем запас сверху/снизу */
-  @media (max-width: 640px) {
-    .invite-overlay {
-      padding: 40px 8px 56px;     /* запас от верхней/нижней навигации */
-      align-items: flex-start;
-    }
+          .share-label {
+            font-size: 10px;
+            color: rgba(226, 232, 240, 0.96);
+            text-align: center;
+          }
 
-    .invite-modal {
-      max-width: 94%;
-      padding: 10px 10px 14px;
-      border-radius: 18px;
-    }
+          /* Мобильная адаптация: увеличенные отступы сверху/снизу + уменьшение шрифтов */
+          @media (max-width: 640px) {
+            .invite-overlay {
+              padding: 40px 8px 56px; /* вдвое больше, чем базовые 16/24 */
+              align-items: flex-start;
+            }
 
-    .invite-gif-wrap {
-      margin-top: 0;
-      margin-bottom: 4px;
-    }
-  .invite-gif {
-    max-width: 60px;  /* было 260 – теперь ~в 1.7 раза меньше */
-  }
-    .invite-title {
-      font-size: 20px;
-      margin-bottom: 4px;
-    }
+            .invite-modal {
+              max-width: 94%;
+              padding: 10px 10px 14px;
+              border-radius: 18px;
+            }
 
-    .invite-subtitle {
-      font-size: 13px;
-      margin: 0 2px 6px;
-      line-height: 1.3;
-    }
+            .invite-gif-wrap {
+              margin-top: 0;
+              margin-bottom: 4px;
+            }
 
-    .invite-stats {
-      grid-template-columns: repeat(2, minmax(0, 1fr)); /* 2 колонки и на мобиле */
-      gap: 6px;
-      margin-bottom: 8px;
-    }
+            .invite-title {
+              font-size: 20px;
+              margin-bottom: 4px;
+            }
 
-    .pill-label {
-      font-size: 10px;
-    }
-    .pill-value {
-      font-size: 14px;
-    }
-    .pill-unit {
-      font-size: 10px;
-    }
-    .pill-caption {
-      font-size: 10px;
-    }
+            .invite-subtitle {
+              font-size: 13px;
+              margin: 0 2px 6px;
+              line-height: 1.3;
+            }
 
-    .vip-tag {
-      font-size: 11px;
-      padding: 3px 8px;
-    }
+            .invite-stats {
+              grid-template-columns: repeat(2, minmax(0, 1fr));
+              gap: 6px;
+              margin-bottom: 8px;
+            }
 
-    .invite-description {
-      font-size: 12px;
-      line-height: 1.3;
-      margin-bottom: 6px;
-    }
-    .invite-description p {
-      margin: 0 0 2px;          /* ещё меньше разрыв между строками */
-    }
+            .pill-label {
+              font-size: 10px;
+            }
+            .pill-value {
+              font-size: 14px;
+            }
+            .pill-unit {
+              font-size: 10px;
+            }
+            .pill-caption {
+              font-size: 10px;
+            }
 
-    .invite-link-label {
-      font-size: 12px;
-    }
+            .vip-tag {
+              font-size: 11px;
+              padding: 3px 8px;
+            }
 
-    .invite-link-input {
-      font-size: 12px;
-      padding: 5px 9px;
-    }
+            .invite-description {
+              font-size: 12px;
+              line-height: 1.3;
+              margin-bottom: 6px;
+            }
+            .invite-description p {
+              margin: 0 0 2px;
+            }
 
-    .invite-copy-btn {
-      font-size: 12px;
-      padding: 5px 10px;
-    }
+            .invite-link-label {
+              font-size: 12px;
+            }
 
-    .invite-share-title {
-      font-size: 12px;
-    }
+            .invite-link-input {
+              font-size: 12px;
+              padding: 5px 9px;
+            }
 
-    .share-label {
-      font-size: 9px;
-    }
+            .invite-copy-btn {
+              font-size: 12px;
+              padding: 5px 10px;
+            }
 
-    .invite-share-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-`}</style>
+            .invite-share-title {
+              font-size: 12px;
+            }
 
+            .share-label {
+              font-size: 9px;
+            }
+
+            .invite-share-grid {
+              grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+          }
+        `}</style>
       </div>
     </div>
   )
