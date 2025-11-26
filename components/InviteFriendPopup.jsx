@@ -613,7 +613,7 @@ export default function InviteFriendPopup({
       margin-bottom: 4px;
     }
   .invite-gif {
-    max-width: 120px;  /* было 260 – теперь ~в 1.7 раза меньше */
+    max-width: 60px;  /* было 260 – теперь ~в 1.7 раза меньше */
   }
     .invite-title {
       font-size: 20px;
