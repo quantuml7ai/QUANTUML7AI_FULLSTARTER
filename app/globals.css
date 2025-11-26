@@ -1102,6 +1102,8 @@ h1, h2, h3, h4, h5, h6{
   --popup-inner-padding: 18px;  /* внутренние отступы */
   --popup-radius: 18px;         /* скругление */
 }
+/* === INVITE FRIEND POPUP – GLOBAL STYLES === */
+
 /* Бэкдроп */
 .invite-overlay {
   position: fixed;
@@ -1110,194 +1112,351 @@ h1, h2, h3, h4, h5, h6{
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(5, 8, 20, 0.75);
+  padding: 16px;
+  background: radial-gradient(circle at top, rgba(56, 189, 248, 0.16), transparent 55%),
+    rgba(3, 7, 18, 0.92);
   backdrop-filter: blur(12px);
+  overflow-y: auto;   /* если по высоте не влезаем – скроллится всё окно */
+  overflow-x: hidden;
 }
 
 /* Модалка */
 .invite-modal {
   position: relative;
-  max-width: var(--invite-modal-max-width, 520px);
   width: 100%;
-  max-height: var(--invite-modal-max-height, 80vh);
+  max-width: 620px;
+  max-height: 90vh; /* всегда влезаем в экран */
   display: flex;
   flex-direction: column;
-  padding: var(--invite-modal-padding, 20px 24px);
-  border-radius: var(--invite-modal-radius, 20px);
-  background: radial-gradient(circle at top, rgba(59, 130, 246, 0.25), rgba(17, 24, 39, 0.98));
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(148, 163, 184, 0.4);
+  padding: 16px 18px 18px;
+  border-radius: 20px;
+  background: radial-gradient(circle at top, rgba(37, 99, 235, 0.24), rgba(15, 23, 42, 0.98));
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.45);
   color: #e5e7eb;
+  box-sizing: border-box;
 }
 
 /* Крестик */
 .invite-close {
   position: absolute;
-  top: 12px;
+  top: 10px;
   right: 12px;
-  width: 52px;
-  height: 52px;
+  width: 32px;
+  height: 32px;
   border-radius: 999px;
-  border: none;
-  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: radial-gradient(circle at 30% 0, rgba(148, 163, 253, 0.3), rgba(15, 23, 42, 0.9));
   color: #e5e7eb;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 14px;
+  transition: all 0.16s ease-out;
+  z-index: 2;
 }
 .invite-close:hover {
-  background: rgba(30, 64, 175, 0.9);
+  transform: translateY(-1px);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.7);
+  border-color: rgba(56, 189, 248, 0.9);
 }
 
-/* Хедер + GIF */
-.invite-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+/* GIF + заголовки */
 .invite-gif-wrap {
-  margin-bottom: 12px;
+  display: flex;
+  justify-content: center;
+  margin-top: 4px;
+  margin-bottom: 6px;
 }
 .invite-gif {
-  border-radius: var(--invite-gif-radius, 16px);
+  border-radius: 16px;
   box-shadow: 0 0 40px rgba(59, 130, 246, 0.5);
-}
-.invite-title {
-  text-align: center;
-  font-size: 1.2rem;
-  font-weight: 700;
+  max-width: 260px;
+  width: 100%;
+  height: auto;
 }
 
-/* Тело — скролл */
+.invite-title {
+  text-align: center;
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  margin: 0 0 6px;
+}
+.invite-subtitle {
+  text-align: center;
+  font-size: 18px;
+  line-height: 1.35;
+  margin: 0 6px 12px;
+  color: rgba(191, 219, 254, 0.92);
+}
+
+/* Тело – скроллится внутри модалки при max-height */
 .invite-body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  margin-top: 12px;
-  padding-right: 4px;
+  margin-top: 2px;
+  padding: 4px 2px 0;
 }
 
-/* Награда */
-.invite-reward-block {
+/* Плашки со статами (награда / друзья) */
+.invite-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.invite-pill {
+  border-radius: 16px;
+  padding: 10px 10px 8px;
+  background: radial-gradient(circle at top, rgba(56, 189, 248, 0.24), rgba(15, 23, 42, 0.98));
+  border: 1px solid rgba(59, 130, 246, 0.7);
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.28);
+}
+.pill-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(148, 163, 184, 0.96);
+  margin-bottom: 2px;
+}
+.pill-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: #f9fafb;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-bottom: 12px;
+  align-items: baseline;
 }
-.invite-reward-label {
-  font-size: 0.85rem;
-  opacity: 0.75;
+.pill-unit {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(129, 140, 248, 0.9);
+  margin-left: 4px;
 }
-.invite-reward-value {
-  font-size: 1rem;
-  font-weight: 700;
+.pill-sep {
+  opacity: 0.85;
+  margin: 0 2px;
+}
+.pill-caption {
+  margin-top: 3px;
+  font-size: 12px;
+  color: rgba(191, 219, 254, 0.9);
 }
 
-/* Прогресс */
-.invite-progress {
-  margin-bottom: 12px;
+/* VIP бейдж */
+.invite-vip-status {
+  margin-bottom: 10px;
 }
-.invite-progress-row {
-  display: flex;
-  justify-content: space-between;
+.vip-tag {
+  display: inline-flex;
   align-items: center;
-}
-.invite-progress-bar {
-  position: relative;
-  width: 100%;
-  height: 8px;
+  padding: 4px 9px;
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.7);
-  margin-top: 6px;
-  overflow: hidden;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 1px dashed rgba(234, 179, 8, 0.5);
+  color: rgba(250, 204, 21, 0.95);
+  background: rgba(15, 23, 42, 0.9);
 }
-.invite-progress-bar-fill {
-  position: absolute;
-  inset: 0;
-  width: 0;
-  background: linear-gradient(90deg, #22c55e, #4ade80);
-  transition: width 0.3s ease-out;
+.vip-tag-active {
+  border-style: solid;
+  border-color: rgba(34, 197, 94, 0.9);
+  color: rgba(22, 163, 74, 0.98);
+  box-shadow: 0 0 14px rgba(22, 163, 74, 0.65);
 }
-.invite-progress-hint {
-  margin-top: 6px;
-  font-size: 0.8rem;
-  opacity: 0.8;
-}
-.invite-progress-hint.goal-reached {
-  color: #facc15;
-}
-.invite-progress-hint.goal-done {
-  color: #22c55e;
+.vip-tag-ready {
+  border-style: solid;
+  border-color: rgba(250, 204, 21, 0.9);
+  box-shadow: 0 0 14px rgba(250, 204, 21, 0.55);
 }
 
 /* Описание */
 .invite-description {
-  margin-top: 8px;
-  margin-bottom: 12px;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  white-space: pre-line; /* переносы \n из словаря */
+  font-size: 16px;
+  line-height: 1.4;
+  color: rgba(203, 213, 225, 0.98);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 8px;
+}
+.invite-description p {
+  margin: 0 0 4px;
+}
+.invite-description p:last-child {
+  margin-bottom: 0;
 }
 
 /* Ссылка + кнопка */
+.invite-link-block {
+  margin-bottom: 10px;
+}
+.invite-link-label {
+  font-size: 16px;
+  color: rgba(148, 163, 184, 0.95);
+  margin-bottom: 4px;
+}
 .invite-link-row {
   display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 6px;
 }
 .invite-link-input {
   flex: 1;
   min-width: 0;
   border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.6);
-  background: rgba(15, 23, 42, 0.8);
-  padding: 6px 12px;
-  font-size: 0.85rem;
+  border: 1px solid rgba(51, 65, 85, 0.9);
+  background: rgba(15, 23, 42, 0.95);
+  padding: 6px 10px;
+  font-size: 15px;
   color: #e5e7eb;
 }
 .invite-copy-btn {
   border-radius: 999px;
-  border: none;
-  padding: 6px 14px;
-  font-size: 0.85rem;
+  padding: 6px 12px;
+  font-size: 15px;
+  font-weight: 600;
+  border: 1px solid rgba(56, 189, 248, 0.9);
+  background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.35), rgba(8, 47, 73, 0.98));
+  color: #ecfeff;
   cursor: pointer;
-  background: linear-gradient(90deg, #22c55e, #16a34a);
-  color: #0b1120;
-}
-
-/* Шаринг */
-.invite-share-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 8px;
-  margin-top: 8px;
-}
-.invite-share-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  background: rgba(15, 23, 42, 0.8);
-  cursor: pointer;
-  font-size: 0.8rem;
-}
-.invite-share-btn:hover {
-  border-color: rgba(129, 230, 217, 0.8);
-}
-.invite-share-icon {
-  flex-shrink: 0;
-}
-.invite-share-label {
   white-space: nowrap;
 }
 
-/* Футер */
-.invite-footer {
-  margin-top: 10px;
-  font-size: 0.75rem;
-  opacity: 0.7;
+/* Шаринг */
+.invite-share-block {
+  margin-bottom: 4px;
+}
+.invite-share-title {
+  font-size: 15px;
+  color: rgba(148, 163, 184, 0.96);
+  margin-bottom: 4px;
+}
+.invite-share-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+}
+.invite-share-btn {
+  border-radius: 14px;
+  border: 1px solid rgba(30, 64, 175, 0.85);
+  background: radial-gradient(circle at top, rgba(37, 99, 235, 0.35), rgba(15, 23, 42, 0.95));
+  padding: 4px 3px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: all 0.16s ease-out;
+  font-size: 10px;
+}
+.share-icon-wrap {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.share-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.share-label {
+  font-size: 10px;
   text-align: center;
+}
+
+/* ==== МОБИЛЬНАЯ АДАПТАЦИЯ ==== */
+
+@media (max-width: 640px) {
+  .invite-overlay {
+    padding: 40px 8px 56px; /* запас от верхнего и нижнего баров */
+    align-items: flex-start;
+  }
+
+  .invite-modal {
+    max-width: 94%;
+    max-height: 88vh;
+    padding: 10px 10px 14px;
+    border-radius: 18px;
+  }
+
+  .invite-gif-wrap {
+    margin-top: 0;
+    margin-bottom: 4px;
+  }
+  .invite-gif {
+    max-width: 140px; /* гифка ощутимо меньше на мобиле */
+  }
+
+  .invite-title {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+  .invite-subtitle {
+    font-size: 13px;
+    margin: 0 2px 6px;
+    line-height: 1.3;
+  }
+
+  .invite-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .pill-label {
+    font-size: 10px;
+  }
+  .pill-value {
+    font-size: 14px;
+  }
+  .pill-unit {
+    font-size: 10px;
+  }
+  .pill-caption {
+    font-size: 10px;
+  }
+
+  .vip-tag {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+
+  .invite-description {
+    font-size: 12px;
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+  .invite-description p {
+    margin-bottom: 2px;
+  }
+
+  .invite-link-label {
+    font-size: 12px;
+  }
+  .invite-link-input {
+    font-size: 12px;
+    padding: 5px 9px;
+  }
+  .invite-copy-btn {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+
+  .invite-share-title {
+    font-size: 12px;
+  }
+  .invite-share-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .share-label {
+    font-size: 9px;
+  }
 }
