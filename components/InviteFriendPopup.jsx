@@ -106,7 +106,7 @@ export default function InviteFriendPopup({
   const remaining = Math.max(0, threshold - invited)
 
   const shareText =
-    t('invite_share_text') || 'Join me in Quantum L7 and get rewards together!'
+    t('invite_share_text') || 'Join me in Quantum L7 AI and get rewards together!'
   const urlEncoded = hasLink ? encodeURIComponent(safeReferral) : ''
   const textEncoded = hasLink
     ? encodeURIComponent(`${shareText} ${safeReferral}`)
