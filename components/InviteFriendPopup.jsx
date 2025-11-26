@@ -299,334 +299,392 @@ export default function InviteFriendPopup({
             </div>
           </div>
         </div>
-
-        <style jsx>{`
-          .invite-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            background: radial-gradient(circle at top, rgba(56, 189, 248, 0.16), transparent 55%),
-              rgba(3, 7, 18, 0.92);
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-            padding: 16px 16px 24px;
-            overflow-y: auto;        /* скролл для всей страницы */
-            overflow-x: hidden;
-          }
-
-          .invite-modal {
-            position: relative;
-            width: 100%;
-            max-width: 620px;
-            max-height: none;        /* модалка растёт по контенту */
-            background: radial-gradient(circle at top, rgba(37, 99, 235, 0.24), rgba(15, 23, 42, 0.98));
-            border-radius: 20px;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85);
-            border: 1px solid rgba(56, 189, 248, 0.45);
-            padding: 16px 18px 18px;
-            display: flex;
-            flex-direction: column;
-            overflow: visible;
-            box-sizing: border-box;
-          }
-
-          .invite-close {
-            position: absolute;
-            top: 10px;
-            right: 12px;
-            width: 38px;
-            height: 38px;
-            border-radius: 999px;
-            border: 1px solid rgba(148, 163, 184, 0.5);
-            background: radial-gradient(circle at 30% 0, rgba(148, 163, 253, 0.3), rgba(15, 23, 42, 0.9));
-            color: #e5e7eb;
-            font-size: 15px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.16s ease-out;
-            z-index: 2;
-          }
-          .invite-close:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.7);
-            border-color: rgba(56, 189, 248, 0.9);
-          }
-
-          .invite-gif-wrap {
-            display: flex;
-            justify-content: center;
-            margin-top: 4px;
-            margin-bottom: 6px;
-          }
-
-          .invite-gif {
-            border-radius: 16px;
-            max-width: 100%;
-            height: auto;
-          }
-
-          .invite-body {
-            margin-top: 2px;
-            padding: 4px 4px 0;
-            overflow: visible;     /* внутри модалки не скроллим */
-          }
-
-          .invite-title {
-            font-size: 28px;
-            line-height: 1.2;
-            font-weight: 800;
-            letter-spacing: 0.02em;
-            color: #e5e7eb;
-            text-align: center;
-            margin: 0 0 6px;
-          }
-
-          .invite-subtitle {
-            font-size: 18px;
-            line-height: 1.35;
-            color: rgba(191, 219, 254, 0.92);
-            text-align: center;
-            margin: 0 6px 12px;
-          }
-
-          .invite-stats {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 10px;
-            margin-bottom: 10px;
-          }
-
-          .invite-pill {
-            border-radius: 16px;
-            padding: 10px 10px 8px;
-            background: radial-gradient(circle at top, rgba(56, 189, 248, 0.24), rgba(15, 23, 42, 0.98));
-            border: 1px solid rgba(59, 130, 246, 0.7);
-            box-shadow: 0 0 16px rgba(56, 189, 248, 0.28);
-          }
-
-          .pill-label {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: rgba(148, 163, 184, 0.96);
-            margin-bottom: 2px;
-          }
-
-          .pill-value {
-            font-size: 18px;
-            font-weight: 800;
-            color: #f9fafb;
-            display: flex;
-            align-items: baseline;
-          }
-
-          .pill-unit {
-            font-size: 12px;
-            font-weight: 600;
-            color: rgba(129, 140, 248, 0.9);
-            margin-left: 4px;
-          }
-
-          .pill-sep {
-            opacity: 0.85;
-            margin: 0 2px;
-          }
-
-          .pill-caption {
-            margin-top: 3px;
-            font-size: 12px;
-            color: rgba(191, 219, 254, 0.9);
-          }
-
-          .invite-vip-status {
-            margin-bottom: 10px;
-          }
-
-          .vip-tag {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 9px;
-            border-radius: 999px;
-            font-size: 15px;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            border: 1px dashed rgba(234, 179, 8, 0.5);
-            color: rgba(250, 204, 21, 0.95);
-            background: rgba(15, 23, 42, 0.9);
-          }
-          .vip-tag-active {
-            border-style: solid;
-            border-color: rgba(34, 197, 94, 0.9);
-            color: rgba(22, 163, 74, 0.98);
-            box-shadow: 0 0 14px rgba(22, 163, 74, 0.65);
-          }
-          .vip-tag-ready {
-            border-style: solid;
-            border-color: rgba(250, 204, 21, 0.9);
-            box-shadow: 0 0 14px rgba(250, 204, 21, 0.55);
-          }
-
-          .invite-description {
-            font-size: 16px;
-            line-height: 1.45;
-            color: rgba(203, 213, 225, 0.98);
-            display: flex;
-            flex-direction: column;
-            gap: 1px;
-            margin-bottom: 2px;
-            
-          }
-
-          .invite-link-block {
-            margin-bottom: 10px;
-          }
-
-          .invite-link-label {
-            font-size: 16px;
-            color: rgba(148, 163, 184, 0.95);
-            margin-bottom: 4px;
-          }
-
-          .invite-link-row {
-            display: flex;
-            align-items: stretch;
-            gap: 6px;
-          }
-
-          .invite-link-input {
-            flex: 1;
-            min-width: 0;
-            border-radius: 999px;
-            border: 1px solid rgba(51, 65, 85, 0.9);
-            background: rgba(15, 23, 42, 0.95);
-            padding: 6px 10px;
-            font-size: 15px;
-            color: #e5e7eb;
-            outline: none;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-          }
-
-          .invite-copy-btn {
-            border-radius: 999px;
-            padding: 6px 12px;
-            font-size: 15px;
-            font-weight: 600;
-            border: 1px solid rgba(56, 189, 248, 0.9);
-            background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.35), rgba(8, 47, 73, 0.98));
-            color: #ecfeff;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.16s ease-out;
-          }
-          .invite-copy-btn:disabled {
-            opacity: 0.5;
-            cursor: default;
-          }
-          .invite-copy-btn:not(:disabled):hover {
-            transform: translateY(-1px);
-            box-shadow: 0 0 14px rgba(56, 189, 248, 0.9);
-          }
-
-          .invite-share-block {
-            margin-bottom: 4px;
-          }
-
-          .invite-share-title {
-            font-size: 15px;
-            color: rgba(148, 163, 184, 0.96);
-            margin-bottom: 4px;
-          }
-
-          .invite-share-grid {
-            display: grid;
-            grid-template-columns: repeat(6, minmax(0, 1fr));
-            gap: 6px;
-          }
-
-          .invite-share-btn {
-            border-radius: 14px;
-            border: 1px solid rgba(30, 64, 175, 0.85);
-            background: radial-gradient(circle at top, rgba(37, 99, 235, 0.35), rgba(15, 23, 42, 0.95));
-            padding: 4px 3px 4px; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 3px;
-            cursor: pointer;
-            transition: all 0.16s ease-out;
-          }
-          .invite-share-btn:disabled {
-            opacity: 0.4;
-            cursor: default;
-          }
-          .invite-share-btn:not(:disabled):hover {
-            transform: translateY(-1px);
-            box-shadow: 0 0 14px rgba(59, 130, 246, 0.85);
-          }
-
-          .share-icon-wrap {
-            width: 22px;
-            height: 22px;
-            border-radius: 999px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-          .share-icon {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-
-          .share-label {
-            font-size: 10px;
-            color: rgba(226, 232, 240, 0.96);
-            text-align: center;
-          }
-
-@media (max-width: 640px) {
-  /* даём запас сверху/снизу, учитывая бары браузера и миниаппа */
+<style jsx>{`
   .invite-overlay {
-    padding: 56px 10px 72px;        /* было 16px 16px 24px */
-    align-items: flex-start;        /* оставляем прижатым к верху, но уже с запасом */
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: radial-gradient(circle at top, rgba(56, 189, 248, 0.16), transparent 55%),
+      rgba(3, 7, 18, 0.92);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 16px 16px 24px;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .invite-modal {
-    max-width: 96%;                 /* чтобы не липло к краям */
-    padding: 12px 12px 16px;
-    border-radius: 18px;
+    position: relative;
+    width: 100%;
+    max-width: 620px;
+    max-height: none;
+    background: radial-gradient(circle at top, rgba(37, 99, 235, 0.24), rgba(15, 23, 42, 0.98));
+    border-radius: 20px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85);
+    border: 1px solid rgba(56, 189, 248, 0.45);
+    padding: 16px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    box-sizing: border-box;
+  }
+
+  .invite-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    background: radial-gradient(circle at 30% 0, rgba(148, 163, 253, 0.3), rgba(15, 23, 42, 0.9));
+    color: #e5e7eb;
+    font-size: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.16s ease-out;
+    z-index: 2;
+  }
+  .invite-close:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.7);
+    border-color: rgba(56, 189, 248, 0.9);
+  }
+
+  .invite-gif-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 4px;
+    margin-bottom: 6px;
+  }
+
+  .invite-gif {
+    border-radius: 16px;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .invite-body {
+    margin-top: 2px;
+    padding: 4px 4px 0;
+    overflow: visible;
   }
 
   .invite-title {
-    font-size: 22px;
-    margin-bottom: 4px;
+    font-size: 28px;
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: #e5e7eb;
+    text-align: center;
+    margin: 0 0 6px;
   }
 
   .invite-subtitle {
-    font-size: 16px;
-    margin: 0 4px 10px;
+    font-size: 18px;
+    line-height: 1.35;
+    color: rgba(191, 219, 254, 0.92);
+    text-align: center;
+    margin: 0 6px 12px;
   }
 
-  /* ВАЖНО: на мобиле плашки опять в 2 колонки, а не одна под другой */
   .invite-stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));  /* вместо minmax(0,1fr) */
-    gap: 8px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
   }
 
-  /* сетка мессенджеров на мобиле оставляем как была */
+  .invite-pill {
+    border-radius: 16px;
+    padding: 10px 10px 8px;
+    background: radial-gradient(circle at top, rgba(56, 189, 248, 0.24), rgba(15, 23, 42, 0.98));
+    border: 1px solid rgba(59, 130, 246, 0.7);
+    box-shadow: 0 0 16px rgba(56, 189, 248, 0.28);
+  }
+
+  .pill-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(148, 163, 184, 0.96);
+    margin-bottom: 2px;
+  }
+
+  .pill-value {
+    font-size: 18px;
+    font-weight: 800;
+    color: #f9fafb;
+    display: flex;
+    align-items: baseline;
+  }
+
+  .pill-unit {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(129, 140, 248, 0.9);
+    margin-left: 4px;
+  }
+
+  .pill-sep {
+    opacity: 0.85;
+    margin: 0 2px;
+  }
+
+  .pill-caption {
+    margin-top: 3px;
+    font-size: 12px;
+    color: rgba(191, 219, 254, 0.9);
+  }
+
+  .invite-vip-status {
+    margin-bottom: 10px;
+  }
+
+  .vip-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 15px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border: 1px dashed rgba(234, 179, 8, 0.5);
+    color: rgba(250, 204, 21, 0.95);
+    background: rgba(15, 23, 42, 0.9);
+  }
+  .vip-tag-active {
+    border-style: solid;
+    border-color: rgba(34, 197, 94, 0.9);
+    color: rgba(22, 163, 74, 0.98);
+    box-shadow: 0 0 14px rgba(22, 163, 74, 0.65);
+  }
+  .vip-tag-ready {
+    border-style: solid;
+    border-color: rgba(250, 204, 21, 0.9);
+    box-shadow: 0 0 14px rgba(250, 204, 21, 0.55);
+  }
+
+  .invite-description {
+    font-size: 16px;
+    line-height: 1.4;
+    color: rgba(203, 213, 225, 0.98);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 8px;
+  }
+  .invite-description p {
+    margin: 0 0 4px;      /* уменьшаем отступы между абзацами */
+  }
+  .invite-description p:last-child {
+    margin-bottom: 0;
+  }
+
+  .invite-link-block {
+    margin-bottom: 10px;
+  }
+
+  .invite-link-label {
+    font-size: 16px;
+    color: rgba(148, 163, 184, 0.95);
+    margin-bottom: 4px;
+  }
+
+  .invite-link-row {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .invite-link-input {
+    flex: 1;
+    min-width: 0;
+    border-radius: 999px;
+    border: 1px solid rgba(51, 65, 85, 0.9);
+    background: rgba(15, 23, 42, 0.95);
+    padding: 6px 10px;
+    font-size: 15px;
+    color: #e5e7eb;
+    outline: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .invite-copy-btn {
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 15px;
+    font-weight: 600;
+    border: 1px solid rgba(56, 189, 248, 0.9);
+    background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.35), rgba(8, 47, 73, 0.98));
+    color: #ecfeff;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.16s ease-out;
+  }
+  .invite-copy-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  .invite-copy-btn:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.9);
+  }
+
+  .invite-share-block {
+    margin-bottom: 4px;
+  }
+
+  .invite-share-title {
+    font-size: 15px;
+    color: rgba(148, 163, 184, 0.96);
+    margin-bottom: 4px;
+  }
+
   .invite-share-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
   }
-}
 
-        `}</style>
+  .invite-share-btn {
+    border-radius: 14px;
+    border: 1px solid rgba(30, 64, 175, 0.85);
+    background: radial-gradient(circle at top, rgba(37, 99, 235, 0.35), rgba(15, 23, 42, 0.95));
+    padding: 4px 3px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+    transition: all 0.16s ease-out;
+  }
+  .invite-share-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .invite-share-btn:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 14px rgba(59, 130, 246, 0.85);
+  }
+
+  .share-icon-wrap {
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .share-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .share-label {
+    font-size: 10px;
+    color: rgba(226, 232, 240, 0.96);
+    text-align: center;
+  }
+
+  /* Мобильная адаптация: уменьшаем всё примерно в 1.5 раза и добавляем запас сверху/снизу */
+  @media (max-width: 640px) {
+    .invite-overlay {
+      padding: 40px 8px 56px;     /* запас от верхней/нижней навигации */
+      align-items: flex-start;
+    }
+
+    .invite-modal {
+      max-width: 94%;
+      padding: 10px 10px 14px;
+      border-radius: 18px;
+    }
+
+    .invite-gif-wrap {
+      margin-top: 0;
+      margin-bottom: 4px;
+    }
+
+    .invite-title {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .invite-subtitle {
+      font-size: 13px;
+      margin: 0 2px 6px;
+      line-height: 1.3;
+    }
+
+    .invite-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr)); /* 2 колонки и на мобиле */
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .pill-label {
+      font-size: 10px;
+    }
+    .pill-value {
+      font-size: 14px;
+    }
+    .pill-unit {
+      font-size: 10px;
+    }
+    .pill-caption {
+      font-size: 10px;
+    }
+
+    .vip-tag {
+      font-size: 11px;
+      padding: 3px 8px;
+    }
+
+    .invite-description {
+      font-size: 12px;
+      line-height: 1.3;
+      margin-bottom: 6px;
+    }
+    .invite-description p {
+      margin: 0 0 2px;          /* ещё меньше разрыв между строками */
+    }
+
+    .invite-link-label {
+      font-size: 12px;
+    }
+
+    .invite-link-input {
+      font-size: 12px;
+      padding: 5px 9px;
+    }
+
+    .invite-copy-btn {
+      font-size: 12px;
+      padding: 5px 10px;
+    }
+
+    .invite-share-title {
+      font-size: 12px;
+    }
+
+    .share-label {
+      font-size: 9px;
+    }
+
+    .invite-share-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+`}</style>
+
       </div>
     </div>
   )
