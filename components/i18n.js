@@ -42398,6 +42398,267 @@ try {
   Object.assign(dict.tr, ADS_HERO_TR)
 } catch (e) {}
 
+const POP_HERO_EN = {
+  invite_close: 'Close ✕',
+  invite_title: 'Invite a friend and get a reward 🎁',
+  invite_subtitle:
+    'Share your personal link, your friend joins the Quantum L7 ecosystem, and you receive QCoin rewards 💠',
+
+  invite_reward_label: 'Reward per friend 💎',
+  invite_progress_label: 'Invited friends 👥',
+  invite_progress_remaining: '{n} left to VIP month ⭐',
+  invite_progress_done: 'Goal reached ✅',
+
+  invite_vip_granted: 'VIP month already granted 👑',
+  invite_vip_ready: 'Threshold reached — VIP month can be issued via subscription panel ⚙️',
+  invite_vip_hint: 'Invite the required number of unique users to get a VIP month 👑',
+
+  invite_body_1:
+    'Only unique users count: the system tracks IP addresses and does not credit rewards for repeated visits from the same IP 🔍',
+  invite_body_2:
+    'The referral link is available only for authorized accounts (wallet or Telegram Mini App) 🔐',
+  invite_body_3:
+    'All QCoin rewards from the referral program are added to your unified QCoin balance in Academy, Forum and other modules 🌐',
+
+  invite_link_label: 'Your personal invite link 🔗',
+  invite_link_placeholder: 'Sign in to get your referral link 🔑',
+  invite_copy: 'Copy 📋',
+
+  invite_share_title: 'Share in messengers 📲',
+  invite_share_tg: 'Telegram ✈️',
+  invite_share_wa: 'WhatsApp 💬',
+  invite_share_fb: 'Facebook 📘',
+  invite_share_x: 'X / Twitter 🐦',
+  invite_share_viber: 'Viber 📞',
+  invite_share_ig: 'Instagram 📸',
+}
+
+const POP_HERO_RU = {
+  invite_close: 'Закрыть ✕',
+  invite_title: 'Пригласи друга и получи награду 🎁',
+  invite_subtitle:
+    'Поделись своей персональной ссылкой: друг входит в экосистему Quantum L7, а ты получаешь награды в QCoin 💠',
+
+  invite_reward_label: 'Награда за одного друга 💎',
+  invite_progress_label: 'Приглашённые друзья 👥',
+  invite_progress_remaining: 'До VIP осталось {n} ⭐',
+  invite_progress_done: 'Цель достигнута ✅',
+
+  invite_vip_granted: 'VIP на месяц уже выдан 👑',
+  invite_vip_ready: 'Порог достигнут — VIP на месяц можно выдать через панель подписок ⚙️',
+  invite_vip_hint:
+    'Пригласи нужное количество уникальных пользователей, чтобы получить VIP на месяц 👑',
+
+  invite_body_1:
+    'Считаются только уникальные пользователи: система отслеживает IP-адреса и не начисляет награды за повторные переходы с одного IP 🔍',
+  invite_body_2:
+    'Реферальная ссылка доступна только для авторизованных аккаунтов (кошелёк или Telegram Mini App) 🔐',
+  invite_body_3:
+    'Все награды QCoin за рефералов начисляются на единый QCoin-баланс и учитываются в Академии, Форуме и других модулях 🌐',
+
+  invite_link_label: 'Твоя персональная ссылка 🔗',
+  invite_link_placeholder: 'Авторизуйся, чтобы получить реферальную ссылку 🔑',
+  invite_copy: 'Скопировать 📋',
+
+  invite_share_title: 'Поделиться в мессенджерах 📲',
+  invite_share_tg: 'Telegram ✈️',
+  invite_share_wa: 'WhatsApp 💬',
+  invite_share_fb: 'Facebook 📘',
+  invite_share_x: 'X / Twitter 🐦',
+  invite_share_viber: 'Viber 📞',
+  invite_share_ig: 'Instagram 📸',
+}
+
+const POP_HERO_UK = {
+  invite_close: 'Закрити ✕',
+  invite_title: 'Запроси друга та отримай нагороду 🎁',
+  invite_subtitle:
+    'Поділися своєю персональною лінкою: друг заходить в екосистему Quantum L7, а ти отримуєш нагороду в QCoin 💠',
+
+  invite_reward_label: 'Нагорода за одного друга 💎',
+  invite_progress_label: 'Запрошені друзі 👥',
+  invite_progress_remaining: 'До VIP залишилося {n} ⭐',
+  invite_progress_done: 'Ціль досягнута ✅',
+
+  invite_vip_granted: 'VIP на місяць уже нараховано 👑',
+  invite_vip_ready: 'Поріг досягнуто — VIP на місяць можна видати через панель підписок ⚙️',
+  invite_vip_hint:
+    'Запроси потрібну кількість унікальних користувачів, щоб отримати VIP на один місяць 👑',
+
+  invite_body_1:
+    'Рахуються лише унікальні користувачі: система відстежує IP-адреси і не нараховує нагороди за повторні переходи з одного IP 🔍',
+  invite_body_2:
+    'Реферальне посилання доступне тільки для авторизованих акаунтів (гаманець або Telegram Mini App) 🔐',
+  invite_body_3:
+    'Усі нагороди QCoin за рефералів нараховуються на єдиний QCoin-баланс і враховуються в Академії, Форумі та інших модулях 🌐',
+
+  invite_link_label: 'Твоє персональне посилання 🔗',
+  invite_link_placeholder: 'Авторизуйся, щоб отримати реферальне посилання 🔑',
+  invite_copy: 'Скопіювати 📋',
+
+  invite_share_title: 'Поділитися в месенджерах 📲',
+  invite_share_tg: 'Telegram ✈️',
+  invite_share_wa: 'WhatsApp 💬',
+  invite_share_fb: 'Facebook 📘',
+  invite_share_x: 'X / Twitter 🐦',
+  invite_share_viber: 'Viber 📞',
+  invite_share_ig: 'Instagram 📸',
+}
+
+const POP_HERO_ES = {
+  invite_close: 'Cerrar ✕',
+  invite_title: 'Invita a un amigo y consigue una recompensa 🎁',
+  invite_subtitle:
+    'Comparte tu enlace personal: tu amigo entra en el ecosistema Quantum L7 y tú recibes recompensas en QCoin 💠',
+
+  invite_reward_label: 'Recompensa por amigo 💎',
+  invite_progress_label: 'Amigos invitados 👥',
+  invite_progress_remaining: 'Faltan {n} para el mes VIP ⭐',
+  invite_progress_done: 'Objetivo alcanzado ✅',
+
+  invite_vip_granted: 'Mes VIP ya concedido 👑',
+  invite_vip_ready:
+    'Umbral alcanzado: se puede otorgar el mes VIP desde el panel de suscripciones ⚙️',
+  invite_vip_hint:
+    'Invita al número requerido de usuarios únicos para conseguir un mes de cuenta VIP 👑',
+
+  invite_body_1:
+    'Solo cuentan los usuarios únicos: el sistema rastrea las direcciones IP y no otorga recompensas por visitas repetidas desde la misma IP 🔍',
+  invite_body_2:
+    'El enlace de referido está disponible solo para cuentas autorizadas (billetera o Telegram Mini App) 🔐',
+  invite_body_3:
+    'Todas las recompensas en QCoin del programa de referidos se añaden a tu saldo unificado de QCoin en la Academia, el Foro y otros módulos 🌐',
+
+  invite_link_label: 'Tu enlace personal de invitación 🔗',
+  invite_link_placeholder: 'Inicia sesión para obtener tu enlace de referido 🔑',
+  invite_copy: 'Copiar 📋',
+
+  invite_share_title: 'Compartir en mensajeros 📲',
+  invite_share_tg: 'Telegram ✈️',
+  invite_share_wa: 'WhatsApp 💬',
+  invite_share_fb: 'Facebook 📘',
+  invite_share_x: 'X / Twitter 🐦',
+  invite_share_viber: 'Viber 📞',
+  invite_share_ig: 'Instagram 📸',
+}
+
+const POP_HERO_ZH = {
+  invite_close: '关闭 ✕',
+  invite_title: '邀请好友并获得奖励 🎁',
+  invite_subtitle: '分享你的专属链接，好友加入 Quantum L7 生态，你将获得 QCoin 奖励 💠',
+
+  invite_reward_label: '每位好友奖励 💎',
+  invite_progress_label: '已邀请好友 👥',
+  invite_progress_remaining: '距离 VIP 月度账户还差 {n} 位 ⭐',
+  invite_progress_done: '目标已达成 ✅',
+
+  invite_vip_granted: 'VIP 月度账户已发放 👑',
+  invite_vip_ready: '已达到门槛，可通过订阅面板发放 VIP 月度账户 ⚙️',
+  invite_vip_hint: '邀请足够数量的唯一用户，即可获得一个月 VIP 账户 👑',
+
+  invite_body_1:
+    '只统计唯一用户：系统会跟踪 IP 地址，不会为同一 IP 的重复访问发放奖励 🔍',
+  invite_body_2:
+    '仅已授权账户（钱包或 Telegram Mini App）可以获取推荐链接 🔐',
+  invite_body_3:
+    '所有来自推荐计划的 QCoin 奖励都会计入你的统一 QCoin 余额，并在学院、论坛等模块中显示 🌐',
+
+  invite_link_label: '你的专属邀请链接 🔗',
+  invite_link_placeholder: '登录后即可获取你的推荐链接 🔑',
+  invite_copy: '复制 📋',
+
+  invite_share_title: '分享到聊天工具 📲',
+  invite_share_tg: 'Telegram ✈️',
+  invite_share_wa: 'WhatsApp 💬',
+  invite_share_fb: 'Facebook 📘',
+  invite_share_x: 'X / Twitter 🐦',
+  invite_share_viber: 'Viber 📞',
+  invite_share_ig: 'Instagram 📸',
+}
+
+const POP_HERO_AR = {
+  invite_close: 'إغلاق ✕',
+  invite_title: 'ادعُ صديقًا واحصل على مكافأة 🎁',
+  invite_subtitle:
+    'شارك رابطك الشخصي، ينضم صديقك إلى منظومة Quantum L7 وتحصل أنت على مكافآت QCoin 💠',
+
+  invite_reward_label: 'المكافأة لكل صديق 💎',
+  invite_progress_label: 'الأصدقاء المدعوون 👥',
+  invite_progress_remaining: 'متبقٍ {n} للحصول على شهر VIP ⭐',
+  invite_progress_done: 'تم تحقيق الهدف ✅',
+
+  invite_vip_granted: 'تم منح شهر VIP بالفعل 👑',
+  invite_vip_ready: 'تم الوصول إلى العتبة — يمكن منح شهر VIP من لوحة الاشتراكات ⚙️',
+  invite_vip_hint: 'ادعُ العدد المطلوب من المستخدمين الفريدين لتحصل على شهر VIP 👑',
+
+  invite_body_1:
+    'يتم احتساب المستخدمين الفريدين فقط: يقوم النظام بتتبع عناوين IP ولا يمنح مكافآت للزيارات المتكررة من نفس الـ IP 🔍',
+  invite_body_2:
+    'رابط الإحالة متاح فقط للحسابات الموثقة (محفظة أو Telegram Mini App) 🔐',
+  invite_body_3:
+    'جميع مكافآت QCoin من برنامج الإحالة تُضاف إلى رصيد QCoin الموحّد الخاص بك وتظهر في الأكاديمية والمنتدى والوحدات الأخرى 🌐',
+
+  invite_link_label: 'رابط الدعوة الخاص بك 🔗',
+  invite_link_placeholder: 'سجّل الدخول للحصول على رابط الإحالة الخاص بك 🔑',
+  invite_copy: 'نسخ 📋',
+
+  invite_share_title: 'المشاركة في تطبيقات المراسلة 📲',
+  invite_share_tg: 'تيليجرام ✈️',
+  invite_share_wa: 'واتساب 💬',
+  invite_share_fb: 'فيسبوك 📘',
+  invite_share_x: 'X / تويتر 🐦',
+  invite_share_viber: 'فايبر 📞',
+  invite_share_ig: 'إنستغرام 📸',
+}
+
+const POP_HERO_TR = {
+  invite_close: 'Kapat ✕',
+  invite_title: 'Bir arkadaşını davet et, ödül kazan 🎁',
+  invite_subtitle:
+    'Kişisel bağlantını paylaş: arkadaşın Quantum L7 ekosistemine katılır, sen de QCoin ödülü alırsın 💠',
+
+  invite_reward_label: 'Arkadaş başına ödül 💎',
+  invite_progress_label: 'Davet edilen arkadaşlar 👥',
+  invite_progress_remaining: 'VIP ay için {n} kişi kaldı ⭐',
+  invite_progress_done: 'Hedefe ulaşıldı ✅',
+
+  invite_vip_granted: 'VIP bir aylık üyelik zaten verildi 👑',
+  invite_vip_ready:
+    'Eşik aşıldı — VIP bir aylık üyelik abonelik panelinden verilebilir ⚙️',
+  invite_vip_hint:
+    'Bir aylık VIP üyelik kazanmak için gerekli sayıda benzersiz kullanıcı davet et 👑',
+
+  invite_body_1:
+    'Yalnızca benzersiz kullanıcılar sayılır: sistem IP adreslerini takip eder ve aynı IP’den gelen tekrar ziyaretler için ödül vermez 🔍',
+  invite_body_2:
+    'Yönlendirme bağlantısı yalnızca yetkili hesaplar (cüzdan veya Telegram Mini App) için kullanılabilir 🔐',
+  invite_body_3:
+    'Yönlendirme programından gelen tüm QCoin ödülleri, Akademi, Forum ve diğer modüllerde görülen birleşik QCoin bakiyene eklenir 🌐',
+
+  invite_link_label: 'Kişisel davet bağlantın 🔗',
+  invite_link_placeholder: 'Yönlendirme bağlantını almak için giriş yap 🔑',
+  invite_copy: 'Kopyala 📋',
+
+  invite_share_title: 'Mesajlaşma uygulamalarında paylaş 📲',
+  invite_share_tg: 'Telegram ✈️',
+  invite_share_wa: 'WhatsApp 💬',
+  invite_share_fb: 'Facebook 📘',
+  invite_share_x: 'X / Twitter 🐦',
+  invite_share_viber: 'Viber 📞',
+  invite_share_ig: 'Instagram 📸',
+}
+
+try {
+  Object.assign(dict.en, POP_HERO_EN)
+  Object.assign(dict.ru, POP_HERO_RU)
+  Object.assign(dict.uk, POP_HERO_UK)
+  Object.assign(dict.es, POP_HERO_ES)
+  Object.assign(dict.zh, POP_HERO_ZH)
+  Object.assign(dict.ar, POP_HERO_AR)
+  Object.assign(dict.tr, POP_HERO_TR)
+} catch (e) {}
+
+
 export function I18nProvider({ children }) {
   const [lang, setLang] = useState('en')
   useEffect(() => {

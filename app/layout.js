@@ -12,6 +12,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 // ⬇️ добавлено для автозапуска
 import Script from 'next/script'
 import { Montserrat } from 'next/font/google'
+import InviteFriendProvider from '../components/InviteFriendProvider'
 
 const forumTitleFont = Montserrat({
   subsets: ['latin', 'cyrillic'],
@@ -131,6 +132,9 @@ export default function RootLayout({ children }) {
 
             {/* фон. аудио (кнопка снизу — «Выключить аудио») */}
             <BgAudio src="/audio/cosmic.mp3" defaultVolume={1.35} />
+
+            {/* 🔹 Глобальный поп-ап «Пригласи друга» */}
+            <InviteFriendProvider />            
            <ScrollTopPulse />
           </I18nProvider>
         </Providers>

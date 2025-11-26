@@ -1102,3 +1102,202 @@ h1, h2, h3, h4, h5, h6{
   --popup-inner-padding: 18px;  /* внутренние отступы */
   --popup-radius: 18px;         /* скругление */
 }
+/* Бэкдроп */
+.invite-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 8, 20, 0.75);
+  backdrop-filter: blur(12px);
+}
+
+/* Модалка */
+.invite-modal {
+  position: relative;
+  max-width: var(--invite-modal-max-width, 520px);
+  width: 100%;
+  max-height: var(--invite-modal-max-height, 80vh);
+  display: flex;
+  flex-direction: column;
+  padding: var(--invite-modal-padding, 20px 24px);
+  border-radius: var(--invite-modal-radius, 20px);
+  background: radial-gradient(circle at top, rgba(59, 130, 246, 0.25), rgba(17, 24, 39, 0.98));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  color: #e5e7eb;
+}
+
+/* Крестик */
+.invite-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(15, 23, 42, 0.85);
+  color: #e5e7eb;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.invite-close:hover {
+  background: rgba(30, 64, 175, 0.9);
+}
+
+/* Хедер + GIF */
+.invite-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.invite-gif-wrap {
+  margin-bottom: 12px;
+}
+.invite-gif {
+  border-radius: var(--invite-gif-radius, 16px);
+  box-shadow: 0 0 40px rgba(59, 130, 246, 0.5);
+}
+.invite-title {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+/* Тело — скролл */
+.invite-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin-top: 12px;
+  padding-right: 4px;
+}
+
+/* Награда */
+.invite-reward-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+.invite-reward-label {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+.invite-reward-value {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* Прогресс */
+.invite-progress {
+  margin-bottom: 12px;
+}
+.invite-progress-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.invite-progress-bar {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.7);
+  margin-top: 6px;
+  overflow: hidden;
+}
+.invite-progress-bar-fill {
+  position: absolute;
+  inset: 0;
+  width: 0;
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+  transition: width 0.3s ease-out;
+}
+.invite-progress-hint {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+.invite-progress-hint.goal-reached {
+  color: #facc15;
+}
+.invite-progress-hint.goal-done {
+  color: #22c55e;
+}
+
+/* Описание */
+.invite-description {
+  margin-top: 8px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  white-space: pre-line; /* переносы \n из словаря */
+}
+
+/* Ссылка + кнопка */
+.invite-link-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.invite-link-input {
+  flex: 1;
+  min-width: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  background: rgba(15, 23, 42, 0.8);
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  color: #e5e7eb;
+}
+.invite-copy-btn {
+  border-radius: 999px;
+  border: none;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  color: #0b1120;
+}
+
+/* Шаринг */
+.invite-share-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+.invite-share-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: rgba(15, 23, 42, 0.8);
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+.invite-share-btn:hover {
+  border-color: rgba(129, 230, 217, 0.8);
+}
+.invite-share-icon {
+  flex-shrink: 0;
+}
+.invite-share-label {
+  white-space: nowrap;
+}
+
+/* Футер */
+.invite-footer {
+  margin-top: 10px;
+  font-size: 0.75rem;
+  opacity: 0.7;
+  text-align: center;
+}
