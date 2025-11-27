@@ -26,6 +26,10 @@ function emitDeleted(pId, tId) {
   try { forumBroadcast({ type: 'post_deleted', postId: String(pId), topicId: String(tId) }); } catch {}
  
 }
+const INVITE_BTN_SIZE = 50        // общий размер кнопки
+const INVITE_GIF_SIZE = 40        // размер самой гифки внутри
+const INVITE_BTN_OFFSET_X = 0     // при необходимости сдвиг по X
+const INVITE_BTN_OFFSET_Y = 0     // при необходимости сдвиг по Y
 
 /* =========================================================
    helpers
@@ -8316,6 +8320,48 @@ onClick={()=>{
       </div>
     </div>
     <div className="slot-right">
+   <button
+    type="button"
+    className="iconBtn inviteGifBtn"
+    style={{
+      width: INVITE_BTN_SIZE,
+      height: INVITE_BTN_SIZE,
+      padding: 0,
+      marginRight: 8,
+      transform: `translate(${INVITE_BTN_OFFSET_X}px, ${INVITE_BTN_OFFSET_Y}px)`,
+    }}
+    onClick={() => {
+      try {
+        window.dispatchEvent(new CustomEvent('invite:open'));
+      } catch {}
+    }}
+    onMouseDown={(e) => e.preventDefault()}
+    aria-label="Invite friends"
+  >
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: INVITE_GIF_SIZE,
+        height: INVITE_GIF_SIZE,
+        borderRadius: '999px',
+        overflow: 'hidden',
+      }}
+    >
+      <img
+        src="/friends/invitation.gif"
+        alt=""
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          display: 'block',
+        }}
+        draggable={false}
+      />
+    </span>
+  </button>     
       <button
         type="button"
         className="iconBtn inboxBtn"

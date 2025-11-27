@@ -160,6 +160,24 @@ export default function InviteFriendProvider() {
       window.removeEventListener('auth:success', handleAuth)
     }
   }, [openPopup])
+  // --- Принудительное открытие попапа по глобальному событию --- 
+  useEffect(() => {
+    if (!isBrowser()) return
+
+    const handler = (e) => {
+      // можем поддерживать detail.accountId, если захочешь дергать с явным uid
+      const override = e?.detail?.accountId
+      const effectiveUid = override || uid
+      if (!effectiveUid) return
+
+      openPopup(effectiveUid)
+    }
+
+    window.addEventListener('invite:open', handler)
+    return () => {
+      window.removeEventListener('invite:open', handler)
+    }
+  }, [uid, openPopup])
 
   // --- Отслеживаем активность пользователя ---
 
