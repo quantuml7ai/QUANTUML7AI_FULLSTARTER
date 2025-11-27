@@ -34,20 +34,16 @@ const REF_VIP_THRESHOLD = readNumberEnv(
 
 // ====== Helpers ======
 
-function normalizeAccountId(raw) {
+/**
+ * ВАЖНО:
+ * здесь БОЛЬШЕ НЕ нормализуем accountId.
+ * Используем тот же uid, что и Академия / Квесты / Форум,
+ * чтобы qcoin:<uid> был один и тот же.
+ */
+function normalizeRawUid(raw) {
   if (!raw) return null
-  let s = String(raw).trim()
-  if (!s) return null
-
-  const lower = s.toLowerCase()
-
-  if (lower.startsWith('tguid:')) {
-    s = s.slice('tguid:'.length)
-  } else if (lower.startsWith('tg:')) {
-    s = s.slice('tg:'.length)
-  }
-
-  return s.toLowerCase() || null
+  const s = String(raw).trim()
+  return s || null
 }
 
 const REF_USER_KEY = (uid) => `ref:user:${uid}`
@@ -90,6 +86,8 @@ export async function POST(req) {
     body = null
   }
 
+  // читаем userId так же, как во всех API (форум/академия),
+  // через x-forum-user-id или body.accountId
   let uidRaw
   try {
     uidRaw = requireUserId(req, body)
@@ -98,7 +96,8 @@ export async function POST(req) {
     return bad(err?.message || 'missing_user_id', status)
   }
 
-  const uid = normalizeAccountId(uidRaw)
+  // ВАЖНО: БЕЗ нормализации tguid/tg, просто тот же uid, что и в qcoin:<uid>
+  const uid = normalizeRawUid(uidRaw)
   if (!uid) {
     return bad('invalid_user_id', 400)
   }
@@ -137,6 +136,7 @@ export async function POST(req) {
       vip_granted: profile.vip_granted || '0',
     })
 
+    // mapping code → uid в том же сыром формате, что и qcoin:<uid>
     await redis.set(REF_UID_BY_CODE_KEY(code), uid)
   } else {
     // подстраховка: обратная связь code → uid
@@ -152,7 +152,7 @@ export async function POST(req) {
   const vipGoalReached = (updated?.vip_goal_reached || '0') === '1'
   const vipGranted = (updated?.vip_granted || '0') === '1'
 
-  // ВАЖНО: формируем ПОЛНЫЙ URL — чтобы ссылка была кликабельной в мессенджерах
+  // формируем ПОЛНЫЙ URL — кликабельный в мессенджерах
   const url = `${siteUrl}/api/referral/hit?code=${encodeURIComponent(code)}`
 
   return json({
