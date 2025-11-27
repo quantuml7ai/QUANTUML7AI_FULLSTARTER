@@ -37,7 +37,7 @@ export const metadata = {
   },
 
   description:
-    'Cosmic-grade intelligence for research, alpha signals and guarded execution. Wallet auth, PRO/VIP tiers.',
+    'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©',
 
   applicationName: 'Quantum L7 AI',
   keywords: ['crypto','research','signals','ai','quant','defi','exchange','alpha','quantum l7'],
@@ -58,7 +58,7 @@ export const metadata = {
     creator: '@quantuml7ai',
     title: 'Quantum L7 AI',
     description:
-      'Cosmic-grade intelligence for research, alpha signals and guarded execution.',
+      'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©',
     images: ['/branding/quantum_l7_logo.png'],
   },
 
