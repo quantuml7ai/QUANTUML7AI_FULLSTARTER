@@ -256,7 +256,7 @@ export default function Contact() {
               </a>
 
               <a
-                href="https://www.quantuml7ai.com"
+                href="https://x.com/QL7Company"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Twitter"
