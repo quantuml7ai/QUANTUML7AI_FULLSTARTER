@@ -8,6 +8,8 @@ import {
 } from '../../forum/_utils.js'
 import { addVipDays } from '@/lib/subscriptions.js'
 
+export const dynamic = 'force-dynamic'
+
 const redis = Redis.fromEnv()
 
 const REF_USER_KEY = (uid) => `ref:user:${uid}`
@@ -15,7 +17,9 @@ const REF_UID_BY_CODE_KEY = (code) => `ref:uid_by_code:${code}`
 const REF_IPS_KEY = (code) => `ref:ips:${code}`
 const REF_VIP_PENDING_KEY = (uid) => `ref:vip_pending:${uid}`
 const REF_VIP_QUEUE = 'ref:vip_queue'
-const QCOIN_KEY = (uid) => `qcoin:${uid}`
+
+// QCoin — ровно как в Академии: qcoin:<uid>, HASH, поле balance
+const qcoinKey = (uid) => `qcoin:${uid}`
 
 function readNumberEnv(names, fallback) {
   for (const name of names) {
@@ -47,7 +51,7 @@ const REF_VIP_DAYS = readNumberEnv(
 
 function getSiteUrl() {
   const env = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL
-  if (!env) return ''
+  if (!env) return '/'
   return env.replace(/\/+$/, '')
 }
 
@@ -64,7 +68,7 @@ async function applyReferralReward(uid, code, ip) {
     }
   }
 
-  // 2. Обновляем базовые счётчики
+  // 2. Обновляем базовые счётчики профиля реферальной программы
   const profileKey = REF_USER_KEY(uid)
   const profile = await redis.hgetall(profileKey)
   const clicksTotalPrev = Number(profile?.clicks_total || 0)
@@ -82,22 +86,22 @@ async function applyReferralReward(uid, code, ip) {
   if (isNew === 1) {
     invitedCount = invitedPrev + 1
 
-    // начисляем QCoin в общий хэш qcoin:<uid>
+    // QCoin: делаем ровно как Академия — hincrbyfloat по HASH qcoin:<uid>, поле balance
     try {
-      await redis.hincrbyfloat(QCOIN_KEY(uid), 'balance', REF_REWARD_QCOIN)
+      await redis.hincrbyfloat(qcoinKey(uid), 'balance', REF_REWARD_QCOIN)
       rewardApplied = true
     } catch {
-      // проглатываем ошибку, но не падаем
+      // не ломаем весь роут, если Upstash что-то сказал
     }
 
     baseUpdates.unique_ips = String(invitedCount)
     baseUpdates.invited_count = String(invitedCount)
     baseUpdates.last_reward_at = nowIso
- 
+
     const goalReachedPrev = (profile?.vip_goal_reached || '0') === '1'
     const vipAlreadyGranted = (profile?.vip_granted || '0') === '1'
 
-    // 4. Впервые достигли порога → пытаемся сразу выдать VIP
+    // 4. Впервые достигли порога → пытаемся сразу выдать VIP через subscriptions.js
     if (!goalReachedPrev && invitedCount >= REF_VIP_THRESHOLD) {
       baseUpdates.vip_goal_reached = '1'
 
@@ -105,12 +109,12 @@ async function applyReferralReward(uid, code, ip) {
 
       try {
         await addVipDays(uid, REF_VIP_DAYS, {
-          // просто уникальный идентификатор операции
+          // уникальный идентификатор операции
           paymentId: `referral:${code}:${nowIso}`,
         })
         vipGrantedNow = true
       } catch (e) {
-        // если что-то пошло не так — включаем старый режим с очередью
+        // если что-то пошло не так — старый режим с очередью
         try {
           await redis.set(REF_VIP_PENDING_KEY(uid), '1')
           await redis.rpush(
@@ -165,9 +169,13 @@ export async function GET(req) {
     return bad('missing_code', 400)
   }
 
-  const uid = await redis.get(REF_UID_BY_CODE_KEY(code))
-  if (!uid) { 
-    const siteUrl = getSiteUrl() || '/'
+  // uid, который мы сохраняли при генерации ссылки в ref:uid_by_code:<code>
+  const mappedUid = await redis.get(REF_UID_BY_CODE_KEY(code))
+
+  const uid = String(mappedUid ?? '').trim()
+
+  if (!uid) {
+    const siteUrl = getSiteUrl()
     if ((req.headers.get('accept') || '').includes('text/html')) {
       return Response.redirect(siteUrl, 302)
     }
@@ -178,26 +186,24 @@ export async function GET(req) {
 
   const result = await applyReferralReward(uid, code, ip)
 
-  const responseJson = json(
-    {
-      ok: true,
-      code,
-      uid,
-      rewardApplied: result.rewardApplied,
-      invitedCount: result.invitedCount,
-      vipThreshold: REF_VIP_THRESHOLD,
-      vipGoalReached: result.vipGoalReached,
-      vipGranted: result.vipGranted,
-    },
-    200,
-  )
- 
+  const payload = {
+    ok: true,
+    code,
+    uid,
+    rewardApplied: result.rewardApplied,
+    invitedCount: result.invitedCount,
+    vipThreshold: REF_VIP_THRESHOLD,
+    vipGoalReached: result.vipGoalReached,
+    vipGranted: result.vipGranted,
+  }
+
   const accept = req.headers.get('accept') || ''
-  const siteUrl = getSiteUrl() || '/'
+  const siteUrl = getSiteUrl()
 
   if (accept.includes('text/html')) {
+    // переходы из мессенджеров → редирект на сайт
     return Response.redirect(siteUrl, 302)
   }
 
-  return responseJson
+  return json(payload, 200)
 }
