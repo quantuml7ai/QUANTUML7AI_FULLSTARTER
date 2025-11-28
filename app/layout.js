@@ -136,13 +136,7 @@ export default function RootLayout({ children }) {
               <TopBar />
               {children}
             </div>
-      {/* ❄ СРЕДНИЙ СЛОЙ СНЕГА — как будто внутри интерфейса */}
-      <SnowFX
-        zIndex={40}
-        count={5}
-        minSize={1}
-        maxSize={18}
-      />
+
             {/* фон. аудио (кнопка снизу — «Выключить аудио») */}
             <BgAudio src="/audio/cosmic.mp3" defaultVolume={1.35} />
 
