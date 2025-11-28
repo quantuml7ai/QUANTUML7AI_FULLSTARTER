@@ -3857,7 +3857,7 @@ function TopicItem({ t, agg, onOpen, isAdmin, onDelete, authId, onOwnerDelete })
           {t.description && (
             <div
               className="
-                topicDesc text-[#eaf4ff]/75 text-sm
+                topicDesc text-[#eaf4ff]/90 text-sm
                 !whitespace-normal break-words break-all
                 [overflow-wrap:anywhere] [line-break:anywhere]
                 max-w-full mt-1"                                
