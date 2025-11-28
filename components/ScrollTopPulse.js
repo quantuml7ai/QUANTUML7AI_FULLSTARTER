@@ -10,11 +10,13 @@ const TOP_HIDE_Y      = 40
 
 export default function ScrollTopPulse() {
   const [visible, setVisible] = useState(false)
+  const [mode, setMode] = useState('up') // 'up' | 'down'
 
-  const visibleRef      = useRef(false)
-  const lastYRef        = useRef(0)
-  const appearTimerRef  = useRef(null)
-  const hideTimerRef    = useRef(null)
+  const visibleRef   = useRef(false)
+  const modeRef      = useRef('up')
+  const lastYRef     = useRef(0)
+  const appearTimerRef = useRef(null)
+  const hideTimerRef   = useRef(null)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -63,20 +65,28 @@ export default function ScrollTopPulse() {
       const lastY = lastYRef.current
       lastYRef.current = y
 
-      const goingUp = y < lastY
+      const goingUp   = y < lastY
       const goingDown = y > lastY
 
-      if (y <= TOP_HIDE_Y) {
+      const doc = document.documentElement || document.body
+      const docHeight = doc.scrollHeight || 0
+      const viewportHeight = window.innerHeight || 0
+      const maxY = Math.max(0, docHeight - viewportHeight)
+      const distanceToBottom = maxY - y
+
+      // если мы почти в самом верху или почти внизу — кнопку прячем
+      if (y <= TOP_HIDE_Y || distanceToBottom <= TOP_HIDE_Y) {
         hideNow()
         return
       }
 
-      if (goingDown) {
-        hideNow()
-        return
-      }
-
+      // Движение ВВЕРХ → режим "стрелка вверх / скролл наверх"
       if (goingUp && y > MIN_Y) {
+        if (modeRef.current !== 'up') {
+          modeRef.current = 'up'
+          setMode('up')
+        }
+
         if (!visibleRef.current && !appearTimerRef.current) {
           appearTimerRef.current = setTimeout(() => {
             showNow()
@@ -88,9 +98,31 @@ export default function ScrollTopPulse() {
         if (visibleRef.current) {
           scheduleHide()
         }
-
         return
       }
+
+      // Движение ВНИЗ → режим "стрелка вниз / скролл вниз"
+      if (goingDown && y > MIN_Y) {
+        if (modeRef.current !== 'down') {
+          modeRef.current = 'down'
+          setMode('down')
+        }
+
+        if (!visibleRef.current && !appearTimerRef.current) {
+          appearTimerRef.current = setTimeout(() => {
+            showNow()
+            appearTimerRef.current = null
+            scheduleHide()
+          }, APPEAR_DELAY_MS)
+        }
+
+        if (visibleRef.current) {
+          scheduleHide()
+        }
+        return
+      }
+
+      // если стоим на месте (нет движения) — просто ничего не делаем
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -122,10 +154,48 @@ export default function ScrollTopPulse() {
     setVisible(false)
   }
 
+  const scrollToBottom = () => {
+    try {
+      const doc = document.documentElement || document.body
+      const maxY = Math.max(
+        0,
+        (doc.scrollHeight || 0) - (window.innerHeight || 0),
+      )
+      window.scrollTo({ top: maxY, behavior: 'smooth' })
+    } catch {
+      const doc = document.documentElement || document.body
+      const maxY = Math.max(
+        0,
+        (doc.scrollHeight || 0) - (window.innerHeight || 0),
+      )
+      window.scrollTo(0, maxY)
+    }
+
+    if (appearTimerRef.current) {
+      clearTimeout(appearTimerRef.current)
+      appearTimerRef.current = null
+    }
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current)
+      hideTimerRef.current = null
+    }
+
+    visibleRef.current = false
+    setVisible(false)
+  }
+
+  const handleClick = () => {
+    if (mode === 'down') {
+      scrollToBottom()
+    } else {
+      scrollToTop()
+    }
+  }
+
   const onKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
-      scrollToTop()
+      handleClick()
     }
   }
 
@@ -137,11 +207,13 @@ export default function ScrollTopPulse() {
         className="ql7-scroll-top"
         role="button"
         tabIndex={0}
-        aria-label="Scroll to top"
-        onClick={scrollToTop}
+        aria-label={mode === 'down' ? 'Scroll to bottom' : 'Scroll to top'}
+        onClick={handleClick}
         onKeyDown={onKeyDown}
       >
-        <span className="arrow">⇡</span>
+        <span className={mode === 'down' ? 'arrow arrow-down' : 'arrow'}>
+          ⭱
+        </span>
       </div>
 
       <style jsx>{`
@@ -212,6 +284,11 @@ export default function ScrollTopPulse() {
           text-shadow:
             0 0 8px rgba(0,229,255,.9),
             0 0 18px rgba(0,229,255,.65);
+        }
+
+        /* вниз — та же стрелка, но повернута */
+        .ql7-scroll-top .arrow.arrow-down {
+          transform: rotate(180deg) translateY(1px);
         }
 
         .ql7-scroll-top:hover {
