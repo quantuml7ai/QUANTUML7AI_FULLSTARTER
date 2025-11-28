@@ -105,23 +105,31 @@ export default function InviteFriendPopup({
   const reward = Number.isFinite(rewardQcoin) ? rewardQcoin : 0
   const remaining = Math.max(0, threshold - invited)
 
+  // ====== ТОЛЬКО ЭТОТ БЛОК Я ПОМЕНЯЛ ======
   const shareText =
     t('invite_share_text') || 'Join me in Quantum L7 AI and get rewards together!'
-  const urlEncoded = hasLink ? encodeURIComponent(safeReferral) : ''
-  const textEncoded = hasLink
-    ? encodeURIComponent(`${shareText} ${safeReferral}`)
+
+  // нормализуем ссылку: убираем пробелы и форсим https
+  const normalizedReferral = hasLink
+    ? safeReferral.trim().replace(/^http:\/\//i, 'https://')
     : ''
+
+  // общий текст для мессенджеров: текст + ссылка на новой строке
+  const textForMessengers = hasLink
+    ? `${shareText}\n\n${normalizedReferral}`
+    : shareText
+
+  const textEncoded = encodeURIComponent(textForMessengers)
+  const urlEncoded = hasLink ? encodeURIComponent(normalizedReferral) : ''
+  // =======================================
 
   const shareTargets = [
     {
       key: 'tg',
       icon: '/friends/tg.png',
       labelKey: 'invite_share_tg',
-      url: hasLink
-        ? `https://t.me/share/url?url=${urlEncoded}&text=${encodeURIComponent(
-            shareText,
-          )}`
-        : '',
+      // главное изменение: Telegram только с ?text=, без ?url= → не будет 400 Bad Request
+      url: hasLink ? `https://t.me/share/url?text=${textEncoded}` : '',
     },
     {
       key: 'wa',
@@ -620,7 +628,7 @@ export default function InviteFriendPopup({
           /* Мобильная адаптация: увеличенные отступы сверху/снизу + уменьшение шрифтов */
           @media (max-width: 640px) {
             .invite-overlay {
-             padding: 60px 8px 36px /* вдвое больше, чем базовые 16/24 */
+              padding: 60px 8px 36px;
               align-items: flex-start;
             }
 
