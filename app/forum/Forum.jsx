@@ -3857,7 +3857,7 @@ function TopicItem({ t, agg, onOpen, isAdmin, onDelete, authId, onOwnerDelete })
           {t.description && (
             <div
               className="
-                topicDesc text-[#eaf4ff]/90 text-sm
+                topicDesc text-[#eaf4ff]/75 text-sm
                 !whitespace-normal break-words break-all
                 [overflow-wrap:anywhere] [line-break:anywhere]
                 max-w-full mt-1"                                
@@ -6596,8 +6596,8 @@ const hasImageLines = React.useMemo(() => {
 
     // лимиты по ТЗ
     const safeTitle = String(title||'')
-    const safeDesc  = String(description||'').slice(0,40)
-    const safeFirst = String(first||'').slice(0,180)
+    const safeDesc  = String(description||'').slice(0,90)
+    const safeFirst = String(first||'').slice(0,400)
 
     // временные id (оптимизм)
     const tmpT = `tmp_t_${Date.now()}_${Math.random().toString(36).slice(2)}`
@@ -8816,7 +8816,7 @@ onClick={()=>{
             <div className="miniCounter" aria-live="polite">
               <span>{String(text || '').trim().length}</span>
               <span className="sep">/</span>
-              <span className={(String(text || '').trim().length > 180) ? 'max over' : 'max'}>180</span>
+              <span className={(String(text || '').trim().length > 400) ? 'max over' : 'max'}>400</span>
             </div>
           </div>
 
@@ -8949,11 +8949,11 @@ onClick={(e)=>{
               type="button"
               className={cls(
                 'iconBtn planeBtn',
-                (postingRef.current || cooldownLeft>0 || !canSend || String(text||'').trim().length>180) && 'disabled'
+                (postingRef.current || cooldownLeft>0 || !canSend || String(text||'').trim().length>400) && 'disabled'
               )}
               title={cooldownLeft>0 ? `${cooldownLeft}s` : (t('forum_send')||'Send')}
               aria-label={t('forum_send')||'Send'}
-              disabled={postingRef.current || cooldownLeft>0 || !canSend || String(text||'').trim().length>180}
+              disabled={postingRef.current || cooldownLeft>0 || !canSend || String(text||'').trim().length>400}
               onClick={async ()=>{
                 if (postingRef.current || cooldownLeft>0) return;
                 try{
@@ -8984,12 +8984,12 @@ onClick={(e)=>{
           if ((/^\[(VIP_EMOJI|MOZI):\/[^\]]+\]$/).test(text || '')) {
             setText(text);
           } else {
-            setText(e.target.value.slice(0,180));
+            setText(e.target.value.slice(0,400));
           }
         }}
         onFocus={() => setComposerActive(true)}
         readOnly={(/^\[(VIP_EMOJI|MOZI):\/[^\]]+\]$/).test(text || '')}
-        maxLength={180}
+        maxLength={400}
         placeholder={
           (/^\[(VIP_EMOJI|MOZI):\/[^\]]+\]$/).test(text || '')
             ? (t('forum_more_emoji') || 'VIP emoji selected')
@@ -9639,15 +9639,15 @@ function CreateTopicCard({ t, onCreate, onOpenVideoFeed }){
                 className="ta"
                 rows={6}
                 value={first}
-                onChange={e=>setFirst(e.target.value.slice(0,180))}
-                maxLength={180}
+                onChange={e=>setFirst(e.target.value.slice(0,400))}
+                maxLength={400}
                 placeholder={t('forum_topic_first_msg_ph')}
               />
               {/* L85 → ВСТАВИТЬ СЮДА */}
               <div className="charRow" aria-live="polite">
                 <span className="charNow">{first.trim().length}</span>
                 <span className="charSep">/</span>
-                <span className={first.trim().length > 180 ? 'charMax charOver' : 'charMax'}>180</span>
+                <span className={first.trim().length > 400 ? 'charMax charOver' : 'charMax'}>400</span>
               </div>
             </label>
             <div className="flex items-center justify-end gap-2">
@@ -9660,7 +9660,7 @@ function CreateTopicCard({ t, onCreate, onOpenVideoFeed }){
                   || !first.trim()
                   || title.trim().length > 40
                   || descr.trim().length > 90
-                  || first.trim().length > 180
+                  || first.trim().length > 400
                 }
                 onClick={async()=>{
                   if (
@@ -9669,7 +9669,7 @@ function CreateTopicCard({ t, onCreate, onOpenVideoFeed }){
                     || !first.trim()
                     || title.trim().length > 40
                     || descr.trim().length > 90
-                    || first.trim().length > 180
+                    || first.trim().length > 400
                   ) return;
                   setBusy(true)
                   try{
