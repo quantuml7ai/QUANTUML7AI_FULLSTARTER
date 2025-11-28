@@ -139,7 +139,7 @@ export default function RootLayout({ children }) {
       {/* ❄ СРЕДНИЙ СЛОЙ СНЕГА — как будто внутри интерфейса */}
       <SnowFX
         zIndex={40}
-        count={10}
+        count={5}
         minSize={1}
         maxSize={18}
       />
@@ -155,7 +155,7 @@ export default function RootLayout({ children }) {
   {/* ❄ ПЕРЕДНИЙ СЛОЙ СНЕГА — лёгкая вуаль поверх всего */}
   <SnowFX
     zIndex={9998}
-    count={10}
+    count={5}
     minSize={1}
     maxSize={20}
   />
