@@ -1,446 +1,250 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
-/**
- * ❄️ SnowFX — «живая» метель для Quantum L7 AI
- *
- * Ключевые фишки:
- * - Многослойная глубина: ближние — крупнее и ярче, дальние — мельче и тусклее
- * - Каждая снежинка имеет свой спин, свой sway (качание), свои скорости
- * - Порывы от скролла:
- *     • контент идёт вниз → снежинки вниз
- *     • контент идёт вверх → снежинки вверх
- * - Порывы от клика: локальный «взрыв ветра» вокруг курсора/тача
- * - Плавный возврат к гравитации, без резких обрывов
- */
+const DESKTOP_COUNT = 160
+const MOBILE_COUNT  = 70
 
-/* ===== БАЗОВАЯ ФИЗИКА ===== */
+const DESKTOP_MAX_SIZE = 22
+const MOBILE_MAX_SIZE  = 16
+const MIN_SIZE         = 6
 
-// базовая «гравитация» (скорость падения) — чем больше, тем быстрее вниз
-const GRAVITY = 26
+const GRAVITY          = 22      // базовая «гравитация» (px/s²)
+const WIND_NOISE       = 8       // боковой шум
+const MAX_FPS          = 48      // ограничиваем FPS
+const BASE_SCROLL_IMP  = 0.16    // базовый коэффициент порыва от скролла
+const BASE_CLICK_IMP   = 380     // базовый импульс от клика
+const GUST_DECAY       = 1.8     // затухание порывов (чем больше — тем быстрее)
 
-// лёгкий боковой шум, чтобы не летели по одной прямой
-const WIND_NOISE = 10
-
-// общее трение, сглаживает скорости (чуть < 1)
-const FRICTION_VX = 0.994
-const FRICTION_VY = 0.996
-
-/* ===== ПОРЫВЫ ВЕТРА (скролл/клик) ===== */
-
-// сколько живёт один импульс «ветра» (мс)
-const IMPULSE_DURATION_MS = 1500
-
-// насколько быстро возвращаемся к базовой скорости падения (0.85–0.97)
-const IMPULSE_DAMPING = 0.95
-
-// сила порыва ОТ СКРОЛЛА (вертикаль)
-const SCROLL_IMPULSE_BASE = 100   // чем больше — тем сильнее сдувает
-
-// сила порыва ОТ КЛИКА (локальный взрыв)
-const CLICK_IMPULSE_BASE  = 90  // уменьши, если хочешь ещё мягче
-
-/* ===== КОЛ-ВО И РАЗМЕРЫ СНЕЖИНОК ===== */
-
-const DEFAULT_COUNT   = 100
-const DEFAULT_MINSIZE = 1
-const DEFAULT_MAXSIZE = 20
+function isMobile() {
+  if (typeof window === 'undefined') return false
+  return window.innerWidth <= 768
+}
 
 export default function SnowFX({
-  zIndex  = 9996,
-  count   = DEFAULT_COUNT,
-  minSize = DEFAULT_MINSIZE,
-  maxSize = DEFAULT_MAXSIZE,
+  zIndex        = 9996,
+  fallSpeed     = 1,   // множитель скорости падения
+  stormIntensity= 1,   // множитель силы метели / порывов
 }) {
-  // просто «тик», чтобы форсировать перерисовку React
-  const [, setTick] = useState(0)
+  const canvasRef = useRef(null)
+  const frameRef  = useRef(0)
 
-  const flakesRef       = useRef([])
-  const animFrameRef    = useRef(null)
-  const lastTimeRef     = useRef(0)
-  const worldRef        = useRef({ w: 0, h: 0 })
-  const lastScrollYRef  = useRef(0)
+  const flakesRef = useRef([])
+  const imgRef    = useRef(null)
 
-  // до какого времени импульс ещё считается живым
-  const impulseUntilRef  = useRef(0)
-  // для более плавного затухания импульса (0..1)
-  const impulseStrengthRef = useRef(0)
-
-  const initWorld = () => {
-    if (typeof window === 'undefined') return
-    worldRef.current = {
-      w: window.innerWidth || 1024,
-      h: window.innerHeight || 768,
-    }
-  }
-
-  const respawnFlake = (flake, fromTop = true) => {
-    const { w, h } = worldRef.current
-    const depth = 0.25 + Math.random() * 0.75
-    const size  = minSize + depth * (maxSize - minSize)
-
-    flake.depth = depth
-    flake.size  = size
-
-    flake.x = Math.random() * w
-    flake.y = fromTop ? (-Math.random() * h * 0.25) : (Math.random() * h)
-
-    const baseVy = 14 + 30 * depth
-    flake.baseVy = baseVy
-    flake.vx     = (Math.random() * 2 - 1) * (6 + 12 * depth)
-    flake.vy     = baseVy
-
-    flake.spinDir   = Math.random() < 0.5 ? -1 : 1
-    flake.spinSpeed = 14 + Math.random() * 40
-    flake.angle     = Math.random() * 360
-
-    flake.swayPhase = Math.random() * Math.PI * 2
-    flake.swaySpeed = 0.4 + Math.random() * 1.2
-    flake.swayAmp   = 4 + 12 * depth
-
-    // ближние/крупные — ярче, дальние — тусклее
-    flake.opacity = 0.28 + 0.6 * depth
-  }
-
-  /* ===== ИНИЦИАЛИЗАЦИЯ СНЕЖИНОК ===== */
+  const gustRef   = useRef({ vx: 0, vy: 0 })
+  const scrollYRef= useRef(0)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
+    const canvas = canvasRef.current
+    if (!canvas) return
 
-    initWorld()
-    const { w, h } = worldRef.current
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
 
-    const arr = []
+    // ░░ загрузка текстуры снежинки ░░
+    const img = new Image()
+    img.src = '/snow/fx.png'
+    imgRef.current = img
+
+    let width  = canvas.clientWidth  || window.innerWidth
+    let height = canvas.clientHeight || window.innerHeight
+
+    const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1
+    const resize = () => {
+      width  = canvas.clientWidth  || window.innerWidth
+      height = canvas.clientHeight || window.innerHeight
+
+      canvas.width  = width * dpr
+      canvas.height = height * dpr
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    }
+    resize()
+
+    const mobile = isMobile()
+    const count  = mobile ? MOBILE_COUNT : DESKTOP_COUNT
+    const maxSize= mobile ? MOBILE_MAX_SIZE : DESKTOP_MAX_SIZE
+
+    // ░░ инициализация снежинок ░░
+    const flakes = []
     for (let i = 0; i < count; i += 1) {
-      const depth = 0.25 + Math.random() * 0.75
-      const size  = minSize + depth * (maxSize - minSize)
-      const x     = Math.random() * w
-      const y     = Math.random() * h
+      const depth   = 0.4 + Math.random() * 0.6 // 0.4–1.0
+      const size    = MIN_SIZE + Math.random() * (maxSize - MIN_SIZE)
+      const speedK  = 0.4 + depth * 0.9
 
-      const baseVy = 14 + 30 * depth
-
-      arr.push({
-        id: i,
-        depth,
+      flakes.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() * 2 - 1) * 10 * speedK,
+        vy: (20 + Math.random() * 20) * speedK,
         size,
-        x,
-        y,
-        vx: (Math.random() * 2 - 1) * (6 + 12 * depth),
-        vy: baseVy,
-        baseVy,
-        spinDir: Math.random() < 0.5 ? -1 : 1,
-        spinSpeed: 14 + Math.random() * 40,
-        angle: Math.random() * 360,
-        swayPhase: Math.random() * Math.PI * 2,
-        swaySpeed: 0.4 + Math.random() * 1.2,
-        swayAmp: 4 + 12 * depth,
-        opacity: 0.28 + 0.6 * depth,
+        depth,
+        // вращение
+        angle: Math.random() * Math.PI * 2,
+        spin: (Math.random() * 0.6 - 0.3) * (0.5 + depth),
+        // дальние — темнее
+        baseAlpha: 0.35 + depth * 0.55,
       })
     }
+    flakesRef.current = flakes
 
-    flakesRef.current = arr
-    setTick((x) => x + 1)
+    // ░░ анимация ░░
+    let lastT = performance.now()
+    const loop = (t) => {
+      frameRef.current = requestAnimationFrame(loop)
 
-    const onResize = () => {
-      initWorld()
-    }
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count, minSize, maxSize])
+      const dtMs = t - lastT
+      if (dtMs < 1000 / MAX_FPS) return
+      lastT = t
+      const dt = Math.min(dtMs, 50) / 1000
 
-  /* ===== ГЛАВНЫЙ АНИМАЦИОННЫЙ ЛУП ===== */
+      ctx.clearRect(0, 0, width, height)
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    if (!flakesRef.current.length) return
-
-    lastScrollYRef.current = window.scrollY || 0
-    lastTimeRef.current    = 0
-
-    let stopped = false
-
-    const loop = (ts) => {
-      if (stopped) return
-
-      const { w, h } = worldRef.current
-      if (!w || !h) initWorld()
-
-      if (!lastTimeRef.current) {
-        lastTimeRef.current = ts
-      }
-
-      const dtMs = ts - lastTimeRef.current
-      lastTimeRef.current = ts
-      const dt = Math.min(0.05, Math.max(0.012, dtMs / 1000))
-
-      const flakes = flakesRef.current
-      if (!flakes.length) {
-        animFrameRef.current = requestAnimationFrame(loop)
+      const imgLocal = imgRef.current
+      if (!imgLocal || !imgLocal.complete) {
         return
       }
 
-      const bottom = h + 40
-      const left   = -40
-      const right  = w + 40
+      // затухание порывов (ветра) → мягкий возврат к естественному падению
+      const gust = gustRef.current
+      const decay = Math.exp(-GUST_DECAY * dt)
+      gust.vx *= decay
+      gust.vy *= decay
 
-      // плавное затухание импульса (0..1)
-      const now = ts
-      const impulseLeft = Math.max(0, impulseUntilRef.current - now)
-      const impulsePhase = Math.min(1, impulseLeft / IMPULSE_DURATION_MS)
-      const targetStrength = impulsePhase
-      const currentStrength = impulseStrengthRef.current
-      // сглаженный переход к нужной силе
-      impulseStrengthRef.current =
-        currentStrength + (targetStrength - currentStrength) * 0.18
-
-      const impulseK = impulseStrengthRef.current
+      const gMul   = fallSpeed || 1
+      const sMul   = stormIntensity || 1
 
       for (let i = 0; i < flakes.length; i += 1) {
         const f = flakes[i]
-        const depthFactor = 0.4 + f.depth * 0.6
 
-        // базовая гравитация
-        f.vy += GRAVITY * depthFactor * dt
+        // гравитация
+        f.vy += GRAVITY * gMul * f.depth * dt
 
-        // лёгкий боковой шум
-        f.vx += (Math.random() * 2 - 1) * WIND_NOISE * dt * depthFactor
+        // базовый шум ветра
+        f.vx += (Math.random() * 2 - 1) * WIND_NOISE * sMul * f.depth * dt
 
-        // подавляем «бешенство» скоростей
-        f.vx *= FRICTION_VX
-        f.vy *= FRICTION_VY
+        // воздействие глобального порыва
+        f.vx += gust.vx * f.depth * dt
+        f.vy += gust.vy * f.depth * dt
 
-        // плавный возврат к базовой скорости падения
-        // чем меньше impulseK, тем сильнее возвращаем к baseVy
-        const relax = impulseK > 0.01 ? IMPULSE_DAMPING : 0.9
-        f.vy = f.vy * relax + f.baseVy * (1 - relax)
-
-        // обновляем позицию
+        // обновление позиции
         f.x += f.vx * dt
         f.y += f.vy * dt
 
-        // лёгкое покачивание
-        f.swayPhase += f.swaySpeed * dt
+        // вращение
+        f.angle += f.spin * dt
 
-        // вращение вокруг своей оси
-        f.angle += f.spinDir * f.spinSpeed * dt
-        if (f.angle > 360) f.angle -= 360
-        if (f.angle < 0)   f.angle += 360
+        // выход за границы → зацикливаем
+        if (f.x < -40) f.x = width + 20
+        else if (f.x > width + 40) f.x = -20
 
-        // ушли за границы — спавним сверху
-        if (f.y > bottom || f.x < left || f.x > right) {
-          respawnFlake(f, true)
+        if (f.y > height + 40) {
+          f.y  = -30
+          f.x  = Math.random() * width
+          f.vy = (20 + Math.random() * 30) * (0.4 + f.depth * 0.9)
+          f.vx = (Math.random() * 2 - 1) * 10 * (0.4 + f.depth * 0.9)
         }
+
+        // альфа по глубине + лёгкая зависимость от размера (мелкие дальше/тусклее)
+        const sizeFactor = (f.size - MIN_SIZE) / (maxSize - MIN_SIZE + 0.0001)
+        const farFade    = 0.7 + (1 - sizeFactor) * 0.3
+        const alpha      = f.baseAlpha * farFade
+
+        ctx.save()
+        ctx.globalAlpha = alpha
+        ctx.translate(f.x, f.y)
+        ctx.rotate(f.angle)
+        const s = f.size
+        ctx.drawImage(imgLocal, -s / 2, -s / 2, s, s)
+        ctx.restore()
       }
-
-      setTick((x) => x + 1)
-      animFrameRef.current = requestAnimationFrame(loop)
     }
 
-    animFrameRef.current = requestAnimationFrame(loop)
+    frameRef.current = requestAnimationFrame(loop)
 
-    return () => {
-      stopped = true
-      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current)
-    }
-  }, [])
-
-  /* ===== КЛИК: ЛОКАЛЬНЫЙ ВЗРЫВ ВЕТРА ВОКРУГ ТАЧА/КУРСОРА ===== */
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const onPointerDown = (e) => {
-      const flakes = flakesRef.current
-      if (!flakes.length) return
-      const { w, h } = worldRef.current
-      if (!w || !h) return
-
-      const cx = e.clientX ?? w / 2
-      const cy = e.clientY ?? h / 2
-
-      const radius    = Math.min(w, h) * 0.34
-      const basePower = CLICK_IMPULSE_BASE
-
-      for (let i = 0; i < flakes.length; i += 1) {
-        const f = flakes[i]
-        const dx = f.x - cx
-        const dy = f.y - cy
-        const dist = Math.sqrt(dx * dx + dy * dy)
-        if (dist > radius || dist === 0) continue
-
-        const depthFactor = 0.5 + f.depth * 0.7
-        const k  = (1 - dist / radius) * depthFactor
-        const nx = dx / dist
-        const ny = dy / dist
-
-        const rnd = 0.85 + Math.random() * 0.4
-
-        // разлёт от точки клика — как веником по снегу
-        f.vx += nx * basePower * k * rnd
-        f.vy += ny * basePower * k * rnd
-
-        // чуть ускоряем вращение
-        f.spinSpeed *= 1.04 + Math.random() * 0.08
-      }
-
-      const now =
-        typeof performance !== 'undefined' && performance.now
-          ? performance.now()
-          : Date.now()
-      impulseUntilRef.current = now + IMPULSE_DURATION_MS
-
-      // сразу даём пику импульса
-      impulseStrengthRef.current = Math.min(
-        1,
-        impulseStrengthRef.current + 0.6,
-      )
-
-      setTick((x) => x + 1)
+    // ░░ resize ░░
+    const onResize = () => {
+      resize()
     }
 
-    window.addEventListener('pointerdown', onPointerDown, { passive: true })
-    return () => window.removeEventListener('pointerdown', onPointerDown)
-  }, [])
+    window.addEventListener('resize', onResize)
 
-  /* ===== СКРОЛЛ: ПОРЫВЫ В НАПРАВЛЕНИИ ДВИЖЕНИЯ ПАНЕЛЕЙ ===== */
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    lastScrollYRef.current = window.scrollY || 0
+    // ░░ scroll → порыв в сторону движения страницы ░░
+    scrollYRef.current = window.scrollY || 0
 
     const onScroll = () => {
-      const y    = window.scrollY || 0
-      const last = lastScrollYRef.current
-      lastScrollYRef.current = y
+      const y = window.scrollY || 0
+      const dy = y - scrollYRef.current
+      scrollYRef.current = y
 
-      const dy = y - last
       if (!dy) return
 
-      const flakes = flakesRef.current
-      if (!flakes.length) return
+      // если страница идёт вниз → снежинки тоже чуть вниз ускоряем
+      // страница идёт вверх → снежинки чуть вверх поддувает
+      const dir = dy > 0 ? 1 : -1
+      const mag = Math.min(1.5, Math.abs(dy) * 0.02)
 
-      /**
-       * ВАЖНО:
-       *  - dy > 0 → скроллим вниз (ползунок вниз), контент визуально едет ВВЕРХ
-       *  - dy < 0 → скроллим вверх, контент визуально едет ВНИЗ
-       *
-       * Ты просил: «в которую сторону двигается страница/панель — туда же дуть снежинки».
-       * Значит:
-       *  - контент вверх  → снежинки вверх
-       *  - контент вниз  → снежинки вниз
-       *
-       * Контент-движение = -sign(dy)
-       */
-      const contentDir = dy > 0 ? -1 : 1 // +1 = визуально вниз, -1 = визуально вверх
-
-      // мягкий коэффициент силы порыва
-      const magBase = Math.min(
-        SCROLL_IMPULSE_BASE,
-        Math.abs(dy) * 2.2,
-      )
-
-      for (let i = 0; i < flakes.length; i += 1) {
-        const f = flakes[i]
-        const depthFactor = 0.4 + f.depth * 0.8
-
-        // вертикальный «пинок» в сторону движения панелей
-        f.vy += contentDir * magBase * 0.35 * depthFactor
-
-        // небольшой боковой снос
-        f.vx += (Math.random() * 2 - 1) * magBase * 0.16 * depthFactor
-      }
-
-      const now =
-        typeof performance !== 'undefined' && performance.now
-          ? performance.now()
-          : Date.now()
-      impulseUntilRef.current = now + IMPULSE_DURATION_MS
-
-      // добавляем силу импульса поверх существующей
-      impulseStrengthRef.current = Math.min(
-        1,
-        impulseStrengthRef.current + 0.4,
-      )
-
-      setTick((x) => x + 1)
+      const g = gustRef.current
+      g.vy += BASE_SCROLL_IMP * sMul * dir * mag * 120 // чуть усиливаем вертикальный импульс
+      // горизонтальный лёгкий шум
+      g.vx += (Math.random() * 2 - 1) * BASE_SCROLL_IMP * sMul * mag * 20
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
 
-  const flakes = flakesRef.current
-  if (!flakes.length) return null
+    // ░░ click / tap → локальный «взрыв» ░░
+    const onPointerDown = (e) => {
+      const rect = canvas.getBoundingClientRect()
+      const px = e.clientX - rect.left
+      const py = e.clientY - rect.top
+
+      const radius = Math.min(width, height) * 0.25
+      const radius2 = radius * radius
+
+      const powerBase = BASE_CLICK_IMP * (stormIntensity || 1)
+
+      const flakes = flakesRef.current
+      for (let i = 0; i < flakes.length; i += 1) {
+        const f = flakes[i]
+        const dx = f.x - px
+        const dy = f.y - py
+        const dist2 = dx * dx + dy * dy
+        if (dist2 > radius2) continue
+
+        const dist = Math.sqrt(dist2) || 1
+        const force = (1 - dist / radius) * powerBase
+
+        const nx = dx / dist
+        const ny = dy / dist
+
+        f.vx += nx * force
+        f.vy += ny * force * 0.7
+      }
+    }
+
+    canvas.addEventListener('pointerdown', onPointerDown)
+
+    return () => {
+      cancelAnimationFrame(frameRef.current)
+      window.removeEventListener('resize', onResize)
+      window.removeEventListener('scroll', onScroll)
+      canvas.removeEventListener('pointerdown', onPointerDown)
+    }
+  }, [fallSpeed, stormIntensity])
 
   return (
-    <div
-      className="ql7-snowfx-root"
+    <canvas
+      ref={canvasRef}
+      aria-hidden="true"
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex,
+        width: '100%',
+        height: '100%',
         pointerEvents: 'none',
-        overflow: 'hidden',
+        zIndex,
       }}
-    >
-      {flakes.map((f) => {
-        const swayX = Math.cos(f.swayPhase) * f.swayAmp
-        return (
-          <div
-            key={f.id}
-            className="ql7-snowflake-wrap"
-            style={{
-              transform: `translate3d(${(f.x + swayX).toFixed(
-                1,
-              )}px, ${f.y.toFixed(1)}px, 0)`,
-            }}
-          >
-            <div
-              className="ql7-snowflake"
-              style={{
-                width: `${f.size}px`,
-                height: `${f.size}px`,
-                opacity: f.opacity,
-                transform: `rotate(${f.angle.toFixed(1)}deg)`,
-              }}
-            />
-          </div>
-        )
-      })}
-
-      <style jsx>{`
-        .ql7-snowfx-root {
-          pointer-events: none;
-        }
-
-        .ql7-snowflake-wrap {
-          position: absolute;
-          will-change: transform;
-        }
-
-        .ql7-snowflake {
-          background-image: url('/snow/fx.png');
-          background-size: cover;
-          background-repeat: no-repeat;
-          transform-origin: center center;
-          will-change: transform, opacity;
-        }
-
-        @media (max-width: 640px) {
-          .ql7-snowflake {
-            filter: blur(0.4px);
-          }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .ql7-snowflake-wrap {
-            transition: none;
-          }
-        }
-      `}</style>
-    </div>
+    />
   )
 }
