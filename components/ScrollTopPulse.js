@@ -212,7 +212,7 @@ export default function ScrollTopPulse() {
         onKeyDown={onKeyDown}
       >
         <span className={mode === 'down' ? 'arrow arrow-down' : 'arrow'}>
-          ⭱
+          ⮝
         </span>
       </div>
 
