@@ -30,13 +30,13 @@ const FRICTION_VY = 0.996
 /* ===== ПОРЫВЫ ВЕТРА (скролл/клик) ===== */
 
 // сколько живёт один импульс «ветра» (мс)
-const IMPULSE_DURATION_MS = 4500
+const IMPULSE_DURATION_MS = 1500
 
 // насколько быстро возвращаемся к базовой скорости падения (0.85–0.97)
-const IMPULSE_DAMPING = 1.93
+const IMPULSE_DAMPING = 0.93
 
 // сила порыва ОТ СКРОЛЛА (вертикаль)
-const SCROLL_IMPULSE_BASE = 320   // чем больше — тем сильнее сдувает
+const SCROLL_IMPULSE_BASE = 100   // чем больше — тем сильнее сдувает
 
 // сила порыва ОТ КЛИКА (локальный взрыв)
 const CLICK_IMPULSE_BASE  = 60  // уменьши, если хочешь ещё мягче
