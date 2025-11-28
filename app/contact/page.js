@@ -270,7 +270,7 @@ export default function Contact() {
               </a>
 
               <a
-                href="https://www.quantuml7ai.com"
+                href="https://www.instagram.com/quantuml7ai"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Instagram"
@@ -284,7 +284,7 @@ export default function Contact() {
               </a>
 
               <a
-                href="https://www.quantuml7ai.com"
+                href="https://www.tiktok.com/@ql7ai"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="TikTok"
@@ -298,7 +298,7 @@ export default function Contact() {
               </a>
 
               <a
-                href="https://www.quantuml7ai.com"
+                href="https://www.youtube.com/channel/UCXby6llW_TokAUGoOebFXhg"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="YouTube"
