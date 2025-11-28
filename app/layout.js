@@ -128,7 +128,7 @@ export default function RootLayout({ children }) {
       {/* ❄ ЗАДНИЙ СЛОЙ СНЕГА — за контентом (виден сквозь полупрозрачные панели) */}
       <SnowFX
         zIndex={1}
-        count={140}
+        count={50}
         minSize={4}
         maxSize={14}
       />
