@@ -13,6 +13,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import Script from 'next/script'
 import { Montserrat } from 'next/font/google'
 import InviteFriendProvider from '../components/InviteFriendProvider'
+import SnowFX from '../components/SnowFX'
 
 const forumTitleFont = Montserrat({
   subsets: ['latin', 'cyrillic'],
@@ -124,12 +125,24 @@ export default function RootLayout({ children }) {
           <I18nProvider>
             {/* фон/герой (клиент-рендер) */}
             <HeroAvatar />
-
+      {/* ❄ ЗАДНИЙ СЛОЙ СНЕГА — за контентом (виден сквозь полупрозрачные панели) */}
+      <SnowFX
+        zIndex={1}
+        count={140}
+        minSize={4}
+        maxSize={14}
+      />
             <div className="page-content">
               <TopBar />
               {children}
             </div>
-
+      {/* ❄ СРЕДНИЙ СЛОЙ СНЕГА — как будто внутри интерфейса */}
+      <SnowFX
+        zIndex={40}
+        count={20}
+        minSize={1}
+        maxSize={18}
+      />
             {/* фон. аудио (кнопка снизу — «Выключить аудио») */}
             <BgAudio src="/audio/cosmic.mp3" defaultVolume={1.35} />
 
@@ -139,8 +152,13 @@ export default function RootLayout({ children }) {
           </I18nProvider>
         </Providers>
 
-
-
+  {/* ❄ ПЕРЕДНИЙ СЛОЙ СНЕГА — лёгкая вуаль поверх всего */}
+  <SnowFX
+    zIndex={9998}
+    count={20}
+    minSize={1}
+    maxSize={20}
+  />
         {/* ✅ Включаем аналитику Vercel */}
         <Analytics />
         <SpeedInsights />
