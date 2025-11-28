@@ -36,7 +36,7 @@ export default function InviteFriendPopup({
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // масштаб гифки на мобильных (можешь легко подстроить)
+  // масштаб гифки на мобильных
   const mobileScale = 0.55
   const gifWidth = isMobile ? Math.round(baseGifWidth * mobileScale) : baseGifWidth
   const gifHeight = isMobile ? Math.round(baseGifHeight * mobileScale) : baseGifHeight
@@ -105,23 +105,32 @@ export default function InviteFriendPopup({
   const reward = Number.isFinite(rewardQcoin) ? rewardQcoin : 0
   const remaining = Math.max(0, threshold - invited)
 
+  // ===== БЛОК ПОДГОТОВКИ ТЕКСТА/ССЫЛКИ =====
   const shareText =
     t('invite_share_text') || 'Join me in Quantum L7 AI and get rewards together!'
-  const urlEncoded = hasLink ? encodeURIComponent(safeReferral) : ''
-  const textEncoded = hasLink
-    ? encodeURIComponent(`${shareText} ${safeReferral}`)
+
+  // нормализуем реф-ссылку: убираем пробелы и форсим https
+  const normalizedReferral = hasLink
+    ? safeReferral.trim().replace(/^http:\/\//i, 'https://')
     : ''
+
+  // общий текст для мессенджеров (WhatsApp, Viber, X)
+  const textForMessengers = hasLink
+    ? `${shareText}\n\n${normalizedReferral}`
+    : shareText
+
+  const textEncoded = encodeURIComponent(textForMessengers)
+  const urlEncoded = hasLink ? encodeURIComponent(normalizedReferral) : ''
+  // =========================================
 
   const shareTargets = [
     {
       key: 'tg',
       icon: '/friends/tg.png',
       labelKey: 'invite_share_tg',
-      url: hasLink
-        ? `https://t.me/share/url?url=${urlEncoded}&text=${encodeURIComponent(
-            shareText,
-          )}`
-        : '',
+      // Telegram: максимально простой и «правильный» вариант – только url.
+      // Текст и превью он подтянет из самой страницы.
+      url: hasLink ? `https://t.me/share/url?url=${urlEncoded}` : '',
     },
     {
       key: 'wa',
@@ -617,10 +626,9 @@ export default function InviteFriendPopup({
             text-align: center;
           }
 
-          /* Мобильная адаптация: увеличенные отступы сверху/снизу + уменьшение шрифтов */
           @media (max-width: 640px) {
             .invite-overlay {
-             padding: 60px 8px 36px /* вдвое больше, чем базовые 16/24 */
+              padding: 60px 8px 36px;
               align-items: flex-start;
             }
 
