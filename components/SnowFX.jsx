@@ -33,7 +33,7 @@ const FRICTION_VY = 0.996
 const IMPULSE_DURATION_MS = 1500
 
 // насколько быстро возвращаемся к базовой скорости падения (0.85–0.97)
-const IMPULSE_DAMPING = 0.93
+const IMPULSE_DAMPING = 1.4
 
 // сила порыва ОТ СКРОЛЛА (вертикаль)
 const SCROLL_IMPULSE_BASE = 100   // чем больше — тем сильнее сдувает
