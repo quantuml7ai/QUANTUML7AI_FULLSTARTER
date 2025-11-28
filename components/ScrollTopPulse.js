@@ -211,9 +211,22 @@ export default function ScrollTopPulse() {
         onClick={handleClick}
         onKeyDown={onKeyDown}
       >
-        <span className={mode === 'down' ? 'arrow arrow-down' : 'arrow'}>
-          ⮝
-        </span>
+<span className={mode === 'down' ? 'arrow arrow-down' : 'arrow'}>
+  <svg
+    viewBox="0 0 24 24"
+    width="28"
+    height="28"
+    aria-hidden="true"
+  >
+    {/* Стрелка в стиле ⮙: острый треугольник + ножка */}
+    <path
+      d="M12 3 L5 12 H10 V21 H14 V12 H19 Z"
+      fill="currentColor"
+    />
+  </svg>
+</span>
+
+
       </div>
 
       <style jsx>{`
