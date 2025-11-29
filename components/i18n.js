@@ -42764,7 +42764,477 @@ try {
   Object.assign(dict.ar, Q1_HERO_AR)
   Object.assign(dict.tr, Q1_HERO_TR)
 } catch (e) {}
+const AI_HERO_EN = {
+ai_calculating: 'Calculations in progress — PLEASE WAIT.',
+ai_regime: 'Market regime on the current timeframe (trend/range and volatility level) as detected by Quantum Brain using EMA, ATR and price structure.',
 
+ai_f_ema21_gt_ma50_on: 'Short-term trend is bullish: EMA 21 is above EMA 50 and EMA 50 is above EMA 200 — the market structure is in an uptrend.',
+ai_f_ema21_gt_ma50_off: 'Short-term bullish trend based on EMA 21 and EMA 50 is not confirmed — the moving averages structure does not indicate a stable uptrend.',
+
+ai_f_ma50_gt_ma200_on: 'Medium-term trend is bullish: the 50-period moving average is above the 200-period moving average, indicating dominant upward movement.',
+ai_f_ma50_gt_ma200_off: 'Medium-term bullish trend is not confirmed: MA 50 is not above MA 200, the structure looks more like a range or downtrend.',
+
+ai_f_price_gt_vwap_on: 'Price is trading above VWAP — the volume-weighted average price — which usually means buying pressure and a positive intraday balance.',
+ai_f_price_gt_vwap_off: 'Price is trading below VWAP — the volume-weighted average price — which points to selling pressure and weaker demand.',
+
+ai_f_rsi_overbought: 'RSI is in the overbought zone — the market is overheated to the upside, with a high risk of a correction or pullback.',
+ai_f_rsi_oversold: 'RSI is in the oversold zone — the market has dropped strongly, increasing the probability of a bounce or partial reversal.',
+ai_f_rsi_bull_on: 'RSI is shifted into the bullish zone (above the neutral area) — price momentum supports an upside scenario.',
+ai_f_rsi_bull_off: 'RSI does not confirm a bullish impulse; the indicator is closer to a neutral or bearish zone.',
+
+ai_f_macd_pos_on: 'MACD and its histogram point to bullish momentum — short-term price impulse is directed upward.',
+ai_f_macd_pos_off: 'MACD does not support a strong bullish impulse; the signal is weak or tilting to the bearish side.',
+
+ai_f_breakout_long: 'Price has broken recent highs for the selected period — a bullish breakout of resistance and strengthening of the upward trend.',
+ai_f_breakdown_short: 'Price has broken recent lows for the selected period — a bearish breakdown of support and strengthening of selling pressure.',
+
+ai_f_bbands_width: 'Bollinger Bands width reflects the current volatility level — compression or expansion of the price fluctuation range.',
+ai_f_bbands_squeeze: 'Bollinger Bands are squeezed — volatility is abnormally low, a phase that often precedes a strong move in one direction.',
+ai_f_bbands_breakout_up: 'Price has moved above the upper Bollinger Band — aggressive bullish range expansion, possible acceleration phase or overbought condition.',
+ai_f_bbands_breakout_down: 'Price has moved below the lower Bollinger Band — aggressive bearish move, possible panic phase or oversold condition.',
+
+ai_f_stoch_overbought: 'Stochastic oscillator is in the overbought zone — short-term impulse is overheated upward, correction risk is elevated.',
+ai_f_stoch_oversold: 'Stochastic oscillator is in the oversold zone — short-term impulse is heavily pressed downward, the probability of a bounce increases.',
+
+ai_f_adx: 'ADX measures trend strength, while plus/minus DI show which side dominates — buyers or sellers.',
+ai_f_adx_trending: 'ADX is high — the trend is strong and persistent; trend-following strategies tend to work better.',
+ai_f_adx_flat: 'ADX is low — the market is ranging or weakly structured; trend signals are less reliable.',
+
+ai_f_obv: 'OBV (On Balance Volume) shows the direction of volume flow — the OBV slope reflects whether buyers or sellers dominate.',
+
+ai_note_atr: 'ATR and relative ATR characterize the average price movement range and current volatility, which is crucial for risk assessment and stop-loss placement.',
+ai_f_vola_explosive: 'Volatility is elevated — price movement is aggressive, trade risk is higher, stops may need to be wider and spikes more violent.',
+ai_f_vola_low: 'Volatility is abnormally low — the market is “frozen”; moves may be slow and noisy until a new impulse appears.',
+
+ai_note_sr: 'The algorithm has identified the nearest support and resistance levels used to evaluate entry point, stop-loss and target levels.',
+ai_note_h: 'Movement horizons show the approximate expected price range over time (for example, for 1 hour, 6 hours and 24 hours).',
+
+ai_note_data_short_history: 'Historical data is limited — the bar history is short, so some signals and statistics may be less reliable.',
+ai_note_data_low_vola: 'The market has been in a low-volatility regime for a long time, so the statistical confidence of current volatility estimates may be reduced.',
+
+ai_note_rr_good: 'The risk-reward ratio for the trade looks attractive — expected reward significantly exceeds potential loss.',
+ai_note_rr_poor: 'The risk-reward ratio is weak — expected reward does not sufficiently compensate for potential loss on the trade.',
+
+ai_note_oversold_risk_reversal: 'The market is extremely oversold and near supports — the algorithm avoids selling because the risk of a sharp reversal upward is high.',
+ai_note_overbought_risk_reversal: 'The market is extremely overbought and near resistances — the algorithm avoids buying because the risk of a sharp reversal downward is high.',
+
+ai_note_funding: 'Futures funding shows the imbalance toward longs or shorts — extreme values often signal an overheated side of the market.',
+ai_note_oi_change: 'Open interest change reflects capital entering or leaving the market — together with price direction it helps assess move strength.',
+ai_note_basis: 'Basis (difference between futures and spot price) shows whether the market trades at a premium or a discount — this signals a bias in participants’ expectations.',
+ai_note_dominance: 'Bitcoin dominance shows BTC’s share of the market — for altcoins high dominance often means increased pressure and downside risk.',
+ai_note_btc_corr: 'Correlation with Bitcoin shows how closely this asset moves with BTC — high correlation amplifies the impact of the overall market.',
+
+ai_note_global_spot: 'Global spot is an aggregated fair spot price across major exchanges, used as a reference to evaluate local deviations.',
+ai_note_venue_spread: 'Venue spread shows price differences between exchanges — a large spread may indicate arbitrage, liquidity imbalance or technical distortions.',
+
+ai_no_data: 'Not enough data for a reliable analysis — history is too short or price series are problematic, so the system falls back to HOLD mode.',
+
+}
+const AI_HERO_RU = {
+ai_calculating: 'Идут вычесления "ПОДОЖДИТЕ" ',
+ai_regime: 'Режим рынка на текущем таймфрейме (тренд/флэт и уровень волатильности), который Quantum Brain определил по EMA, ATR и структуре движения цены.',
+
+ai_f_ema21_gt_ma50_on: 'Краткосрочный тренд бычий: EMA 21 выше EMA 50, а EMA 50 выше EMA 200 — рынок структурно в восходящем тренде.',
+ai_f_ema21_gt_ma50_off: 'Краткосрочный бычий тренд по EMA 21 и EMA 50 не подтверждён — структура скользящих не указывает на устойчивый рост.',
+
+ai_f_ma50_gt_ma200_on: 'Среднесрочный тренд бычий: скользящая MA 50 расположена выше MA 200, что говорит о доминировании восходящего движения.',
+ai_f_ma50_gt_ma200_off: 'Среднесрочный бычий тренд не подтверждён: MA 50 не выше MA 200, структура больше похожа на флэт или нисходящий рынок.',
+
+ai_f_price_gt_vwap_on: 'Цена торгуется выше VWAP — средневзвешенной по объёму цены, что обычно означает давление покупателей и позитивный внутридневной баланс.',
+ai_f_price_gt_vwap_off: 'Цена торгуется ниже VWAP — средневзвешенной по объёму цены, что указывает на давление продавцов и более слабый спрос.',
+
+ai_f_rsi_overbought: 'RSI находится в зоне перекупленности — рынок перегрет вверх, высок риск коррекции или отката после текущего роста.',
+ai_f_rsi_oversold: 'RSI находится в зоне перепроданности — рынок сильно просел, повышается вероятность отскока или частичного разворота.',
+ai_f_rsi_bull_on: 'RSI смещён в бычью зону (выше нейтральной области) — импульс цены поддерживает сценарий роста.',
+ai_f_rsi_bull_off: 'RSI не подтверждает бычий импульс, индикатор ближе к нейтральной или медвежьей зоне.',
+
+ai_f_macd_pos_on: 'MACD и его гистограмма указывают на бычий импульс — краткосрочный моментум направлен вверх.',
+ai_f_macd_pos_off: 'MACD не поддерживает устойчивый бычий импульс, сигнал слабый либо склоняется в медвежью сторону.',
+
+ai_f_breakout_long: 'Цена пробила локальные максимумы за выбранный период — формируется бычий пробой сопротивления и усиление трендового движения вверх.',
+ai_f_breakdown_short: 'Цена пробила локальные минимумы за выбранный период — формируется медвежий пробой поддержки и усиление давления продавцов.',
+
+ai_f_bbands_width: 'Ширина полос Боллинджера отражает текущий уровень волатильности рынка — сжатие или расширение диапазона колебаний цены.',
+ai_f_bbands_squeeze: 'Полосы Боллинджера сжаты — волатильность аномально низкая, часто такая фаза предшествует сильному движению в одну из сторон.',
+ai_f_bbands_breakout_up: 'Цена вышла выше верхней полосы Боллинджера — агрессивное бычье расширение диапазона, возможна фаза ускоренного роста или перекупленности.',
+ai_f_bbands_breakout_down: 'Цена ушла ниже нижней полосы Боллинджера — агрессивное медвежье движение, возможна фаза паники или перепроданности.',
+
+ai_f_stoch_overbought: 'Стохастический осциллятор в зоне перекупленности — краткосрочный импульс перегрет вверх, повышён риск коррекции.',
+ai_f_stoch_oversold: 'Стохастический осциллятор в зоне перепроданности — краткосрочный импульс сильно выжат вниз, растёт вероятность отскока.',
+
+ai_f_adx: 'ADX оценивает силу тренда, а плюс/минус DI показывают, какая сторона доминирует — покупатели или продавцы.',
+ai_f_adx_trending: 'ADX высокий — тренд выраженный и устойчивый, стратегии следования за трендом работают лучше.',
+ai_f_adx_flat: 'ADX низкий — рынок во флэте или слабоструктурном движении, трендовые сигналы менее надёжны.',
+
+ai_f_obv: 'OBV (On Balance Volume) показывает направление потока объёмов — наклон OBV отражает, кто доминирует: покупатели или продавцы.',
+
+ai_note_atr: 'ATR и относительный ATR характеризуют средний диапазон движения цены и текущую волатильность, что важно для оценки рисков и постановки стопов.',
+ai_f_vola_explosive: 'Волатильность повышена — движение цены агрессивное, риск по сделке увеличен, возможны расширенные стопы и резкие выбросы.',
+ai_f_vola_low: 'Волатильность аномально низкая — рынок «застыл», движения могут быть вялыми и шумными до появления нового импульса.',
+
+ai_note_sr: 'Алгоритм выделил ближайшие уровни поддержки и сопротивления, относительно которых оценивается точка входа, стоп и целевые уровни.',
+ai_note_h: 'Горизонты движения показывают ориентировочный ожидаемый диапазон хода цены по времени (например, на 1 час, 6 часов и 24 часа).',
+
+ai_note_data_short_history: 'Исторических данных мало — длина выборки баров ограничена, из-за чего часть сигналов и статистика могут быть менее надёжными.',
+ai_note_data_low_vola: 'Рынок долгое время находился в режиме низкой волатильности, поэтому статистическая значимость текущих волатильных оценок может быть снижена.',
+
+ai_note_rr_good: 'Соотношение потенциальной прибыли к риску по сделке выглядит привлекательным — ожидаемая награда значительно превосходит возможный убыток.',
+ai_note_rr_poor: 'Соотношение потенциальной прибыли к риску слабое — ожидаемая награда недостаточно компенсирует возможный убыток по сделке.',
+
+ai_note_oversold_risk_reversal: 'Рынок сверхсильно перепродан и близок к поддержкам — алгоритм удерживается от продажи, так как высок риск резкого разворота вверх.',
+ai_note_overbought_risk_reversal: 'Рынок сверхсильно перекуплен и близок к сопротивлениям — алгоритм удерживается от покупки, так как высок риск резкого разворота вниз.',
+
+ai_note_funding: 'Фандинг по фьючерсам показывает перекос в сторону лонгов или шортов — экстремальные значения часто сигнализируют о перегреве одной из сторон.',
+ai_note_oi_change: 'Изменение открытого интереса отражает вход или выход капитала из рынка — совместно с направлением цены это помогает оценить силу движения.',
+ai_note_basis: 'Базис (разница цены фьючерса и спота) показывает, торгуется ли рынок с премией или скидкой — это даёт сигнал о перекосе ожиданий участников.',
+ai_note_dominance: 'Доминация биткоина показывает долю BTC на рынке — для альткоинов высокая доминация часто означает повышенное давление и риск снижения.',
+ai_note_btc_corr: 'Корреляция с биткоином показывает, насколько данный актив движется синхронно с BTC — высокая корреляция усиливает влияние общего рынка.',
+
+ai_note_global_spot: 'Global spot — агрегированная справедливая спотовая цена по основным биржам, относительно которой оцениваются локальные отклонения.',
+ai_note_venue_spread: 'Спред между биржами показывает разницу цен на разных площадках — сильный спред может указывать на арбитраж, перекос ликвидности или технические искажения.',
+
+ai_no_data: 'Недостаточно данных для надёжного анализа — слишком короткая история или проблемы с ценовыми рядами, поэтому вывод ограничен режимом HOLD.',
+
+}
+const AI_HERO_UK = {
+ai_calculating: 'Йдуть обчислення — "ЗАЧЕКАЙТЕ".',
+ai_regime: 'Режим ринку на поточному таймфреймі (тренд/флет і рівень волатильності), який Quantum Brain визначив за EMA, ATR та структурою руху ціни.',
+
+ai_f_ema21_gt_ma50_on: 'Короткостроковий тренд бичачий: EMA 21 вище EMA 50, а EMA 50 вище EMA 200 — ринок структурно у висхідному тренді.',
+ai_f_ema21_gt_ma50_off: 'Короткостроковий бичачий тренд за EMA 21 та EMA 50 не підтверджений — структура ковзних середніх не вказує на стійке зростання.',
+
+ai_f_ma50_gt_ma200_on: 'Середньостроковий тренд бичачий: MA 50 розташована вище MA 200, що свідчить про домінування висхідного руху.',
+ai_f_ma50_gt_ma200_off: 'Середньостроковий бичачий тренд не підтверджений: MA 50 не вище MA 200, структура більше схожа на флет або низхідний ринок.',
+
+ai_f_price_gt_vwap_on: 'Ціна торгується вище VWAP — середньозваженої за обсягом ціни, що зазвичай означає тиск покупців та позитивний внутрішньоденний баланс.',
+ai_f_price_gt_vwap_off: 'Ціна торгується нижче VWAP — середньозваженої за обсягом ціни, що вказує на тиск продавців та слабший попит.',
+
+ai_f_rsi_overbought: 'RSI перебуває в зоні перекупленості — ринок перегрітий угору, високий ризик корекції або відкоту після поточного росту.',
+ai_f_rsi_oversold: 'RSI перебуває в зоні перепроданості — ринок сильно просів, зростає ймовірність відскоку або часткового розвороту.',
+ai_f_rsi_bull_on: 'RSI зміщений у бичачу зону (вище нейтральної області) — імпульс ціни підтримує сценарій зростання.',
+ai_f_rsi_bull_off: 'RSI не підтверджує бичачий імпульс; індикатор ближче до нейтральної або ведмежої зони.',
+
+ai_f_macd_pos_on: 'MACD та його гістограма вказують на бичачий імпульс — короткостроковий моментум спрямований угору.',
+ai_f_macd_pos_off: 'MACD не підтримує стійкий бичачий імпульс; сигнал слабкий або схиляється у ведмежий бік.',
+
+ai_f_breakout_long: 'Ціна пробила локальні максимуми за вибраний період — формується бичачий пробій опору та посилення трендового руху вгору.',
+ai_f_breakdown_short: 'Ціна пробила локальні мінімуми за вибраний період — формується ведмежий пробій підтримки та посилення тиску продавців.',
+
+ai_f_bbands_width: 'Ширина смуг Боллінджера відображає поточний рівень волатильності ринку — стискання або розширення діапазону коливань ціни.',
+ai_f_bbands_squeeze: 'Смуги Боллінджера стиснуті — волатильність аномально низька; така фаза часто передує сильному руху в один бік.',
+ai_f_bbands_breakout_up: 'Ціна вийшла вище верхньої смуги Боллінджера — агресивне бичаче розширення діапазону, можлива фаза прискореного росту або перекупленості.',
+ai_f_bbands_breakout_down: 'Ціна опустилася нижче нижньої смуги Боллінджера — агресивний ведмежий рух, можлива панічна фаза або перепроданість.',
+
+ai_f_stoch_overbought: 'Стохастичний осцилятор у зоні перекупленості — короткостроковий імпульс перегрітий угору, ризик корекції підвищений.',
+ai_f_stoch_oversold: 'Стохастичний осцилятор у зоні перепроданості — короткостроковий імпульс сильно притиснутий униз, зростає ймовірність відскоку.',
+
+ai_f_adx: 'ADX оцінює силу тренду, а plus/minus DI показують, яка сторона домінує — покупці чи продавці.',
+ai_f_adx_trending: 'ADX високий — тренд виражений і стійкий, трендові стратегії працюють краще.',
+ai_f_adx_flat: 'ADX низький — ринок у флеті або слабоструктурному русі; трендові сигнали менш надійні.',
+
+ai_f_obv: 'OBV (On Balance Volume) показує напрямок потоку обсягів — нахил OBV відображає домінування покупців або продавців.',
+
+ai_note_atr: 'ATR і відносний ATR характеризують середній діапазон руху ціни та поточну волатильність — це важливо для оцінки ризиків і постановки стопів.',
+ai_f_vola_explosive: 'Волатильність підвищена — рух ціни агресивний, ризик по угоді зростає, можливі розширені стопи та різкі викиди.',
+ai_f_vola_low: 'Волатильність аномально низька — ринок "застиг", рухи можуть бути млявими та шумними до появи нового імпульсу.',
+
+ai_note_sr: 'Алгоритм виділив найближчі рівні підтримки та опору, відносно яких оцінюється точка входу, стоп та цільові рівні.',
+ai_note_h: 'Горизонти руху показують орієнтовний очікуваний діапазон ходу ціни за часом (наприклад, на 1 годину, 6 годин і 24 години).',
+
+ai_note_data_short_history: 'Історичних даних мало — довжина вибірки барів обмежена, через що частина сигналів і статистики може бути менш надійною.',
+ai_note_data_low_vola: 'Ринок довгий час перебував у режимі низької волатильності, тому статистична значущість поточних волатильних оцінок може бути знижена.',
+
+ai_note_rr_good: 'Співвідношення потенційного прибутку до ризику виглядає привабливо — очікувана винагорода значно перевищує можливий збиток.',
+ai_note_rr_poor: 'Співвідношення потенційного прибутку до ризику слабке — очікувана винагорода недостатньо компенсує можливий збиток по угоді.',
+
+ai_note_oversold_risk_reversal: 'Ринок надмірно перепроданий і близько до підтримок — алгоритм утримується від продажу, оскільки високий ризик різкого розвороту вгору.',
+ai_note_overbought_risk_reversal: 'Ринок надмірно перекуплений і близько до опорів — алгоритм утримується від покупки, оскільки високий ризик різкого розвороту вниз.',
+
+ai_note_funding: 'Фандинг на ф’ючерсах показує перекіс у бік лонгів або шортів — екстремальні значення часто сигналізують про перегрів однієї зі сторін.',
+ai_note_oi_change: 'Зміна відкритого інтересу відображає вхід або вихід капіталу з ринку — разом із напрямком ціни це допомагає оцінити силу руху.',
+ai_note_basis: 'Базис (різниця між ціною ф’ючерса і спотом) показує, чи торгується ринок з премією або дисконтом — це сигналізує про перекіс очікувань учасників.',
+ai_note_dominance: 'Домінація біткоїна показує частку BTC на ринку — для альткоїнів висока домінація часто означає підвищений тиск і ризик падіння.',
+ai_note_btc_corr: 'Кореляція з біткоїном показує, наскільки актив рухається синхронно з BTC — висока кореляція підсилює вплив загального ринку.',
+
+ai_note_global_spot: 'Global spot — агрегована справедлива спотова ціна по основних біржах, відносно якої оцінюються локальні відхилення.',
+ai_note_venue_spread: 'Спред між біржами показує різницю цін на різних майданчиках — значний спред може вказувати на арбітраж, перекіс ліквідності або технічні спотворення.',
+
+ai_no_data: 'Недостатньо даних для надійного аналізу — надто коротка історія або проблеми з ціновими рядами, тому висновок обмежений режимом HOLD.',
+
+}
+const AI_HERO_ES = {
+ai_calculating: 'Se están realizando los cálculos — "ESPERE".',
+ai_regime: 'Régimen del mercado en el marco temporal actual (tendencia/rango y nivel de volatilidad), determinado por Quantum Brain a partir de EMA, ATR y de la estructura del movimiento del precio.',
+
+ai_f_ema21_gt_ma50_on: 'La tendencia a corto plazo es alcista: EMA 21 está por encima de EMA 50 y EMA 50 está por encima de EMA 200 — el mercado está estructuralmente en una tendencia ascendente.',
+ai_f_ema21_gt_ma50_off: 'La tendencia alcista a corto plazo según EMA 21 y EMA 50 no está confirmada — la estructura de las medias móviles no indica un crecimiento estable.',
+
+ai_f_ma50_gt_ma200_on: 'La tendencia a medio plazo es alcista: la media móvil MA 50 está por encima de MA 200, lo que indica un predominio del movimiento ascendente.',
+ai_f_ma50_gt_ma200_off: 'La tendencia alcista a medio plazo no está confirmada: MA 50 no está por encima de MA 200, la estructura se parece más a un rango lateral o a un mercado bajista.',
+
+ai_f_price_gt_vwap_on: 'El precio cotiza por encima de VWAP — el precio medio ponderado por volumen, lo que normalmente implica presión compradora y un balance intradía positivo.',
+ai_f_price_gt_vwap_off: 'El precio cotiza por debajo de VWAP — el precio medio ponderado por volumen, lo que indica presión vendedora y una demanda más débil.',
+
+ai_f_rsi_overbought: 'RSI se encuentra en zona de sobrecompra — el mercado está sobrecalentado al alza, con un alto riesgo de corrección o retroceso tras el crecimiento actual.',
+ai_f_rsi_oversold: 'RSI se encuentra en zona de sobreventa — el mercado ha caído con fuerza, aumentando la probabilidad de un rebote o de una reversión parcial.',
+ai_f_rsi_bull_on: 'RSI está desplazado hacia la zona alcista (por encima del área neutral) — el impulso del precio respalda un escenario de subida.',
+ai_f_rsi_bull_off: 'RSI no confirma un impulso alcista; el indicador está más cerca de una zona neutral o bajista.',
+
+ai_f_macd_pos_on: 'MACD y su histograma señalan un impulso alcista — el momentum a corto plazo está dirigido hacia arriba.',
+ai_f_macd_pos_off: 'MACD no respalda un impulso alcista sostenido; la señal es débil o se inclina hacia el lado bajista.',
+
+ai_f_breakout_long: 'El precio ha superado los máximos locales del periodo seleccionado — se está formando una ruptura alcista de la resistencia y un fortalecimiento del movimiento tendencial al alza.',
+ai_f_breakdown_short: 'El precio ha roto los mínimos locales del periodo seleccionado — se está formando una ruptura bajista del soporte y un aumento de la presión vendedora.',
+
+ai_f_bbands_width: 'La anchura de las Bandas de Bollinger refleja el nivel actual de volatilidad del mercado — compresión o expansión del rango de fluctuaciones del precio.',
+ai_f_bbands_squeeze: 'Las Bandas de Bollinger están comprimidas — la volatilidad es anormalmente baja; a menudo esta fase precede a un movimiento fuerte en una de las direcciones.',
+ai_f_bbands_breakout_up: 'El precio ha salido por encima de la banda superior de Bollinger — una expansión alcista agresiva del rango, posible fase de crecimiento acelerado o de sobrecompra.',
+ai_f_bbands_breakout_down: 'El precio ha caído por debajo de la banda inferior de Bollinger — un movimiento bajista agresivo, posible fase de pánico o de sobreventa.',
+
+ai_f_stoch_overbought: 'El oscilador estocástico está en zona de sobrecompra — el impulso a corto plazo está sobrecalentado al alza y el riesgo de corrección es elevado.',
+ai_f_stoch_oversold: 'El oscilador estocástico está en zona de sobreventa — el impulso a corto plazo está fuertemente presionado a la baja, aumenta la probabilidad de un rebote.',
+
+ai_f_adx: 'ADX evalúa la fuerza de la tendencia, mientras que plus/minus DI muestran qué lado domina — compradores o vendedores.',
+ai_f_adx_trending: 'ADX es alto — la tendencia es marcada y estable; las estrategias seguidoras de tendencia funcionan mejor.',
+ai_f_adx_flat: 'ADX es bajo — el mercado está en rango o en un movimiento débilmente estructurado; las señales tendenciales son menos fiables.',
+
+ai_f_obv: 'OBV (On Balance Volume) muestra la dirección del flujo de volumen — la pendiente de OBV refleja si dominan los compradores o los vendedores.',
+
+ai_note_atr: 'ATR y el ATR relativo caracterizan el rango medio de movimiento del precio y la volatilidad actual, lo cual es importante para evaluar riesgos y fijar stop-loss.',
+ai_f_vola_explosive: 'La volatilidad está elevada — el movimiento del precio es agresivo, el riesgo de la operación aumenta y pueden ser necesarios stops más amplios y se producen picos bruscos.',
+ai_f_vola_low: 'La volatilidad es anormalmente baja — el mercado está “congelado”, los movimientos pueden ser lentos y ruidosos hasta que aparezca un nuevo impulso.',
+
+ai_note_sr: 'El algoritmo ha identificado los niveles de soporte y resistencia más cercanos, respecto a los cuales se evalúan el punto de entrada, el stop y los objetivos.',
+ai_note_h: 'Los horizontes de movimiento muestran el rango aproximado esperado del desplazamiento del precio en el tiempo (por ejemplo, a 1 hora, 6 horas y 24 horas).',
+
+ai_note_data_short_history: 'Hay pocos datos históricos — la longitud de la muestra de barras es limitada, por lo que parte de las señales y estadísticas puede ser menos fiable.',
+ai_note_data_low_vola: 'El mercado ha permanecido durante mucho tiempo en un régimen de baja volatilidad, por lo que la significancia estadística de las estimaciones actuales de volatilidad puede estar reducida.',
+
+ai_note_rr_good: 'La relación potencial beneficio/riesgo de la operación parece atractiva — la recompensa esperada supera significativamente la posible pérdida.',
+ai_note_rr_poor: 'La relación potencial beneficio/riesgo es débil — la recompensa esperada no compensa suficientemente la posible pérdida de la operación.',
+
+ai_note_oversold_risk_reversal: 'El mercado está extremadamente sobrevendido y cerca de zonas de soporte — el algoritmo evita vender porque el riesgo de un giro brusco al alza es alto.',
+ai_note_overbought_risk_reversal: 'El mercado está extremadamente sobrecomprado y cerca de resistencias — el algoritmo evita comprar porque el riesgo de un giro brusco a la baja es alto.',
+
+ai_note_funding: 'El funding en futuros muestra el sesgo hacia posiciones largas o cortas — los valores extremos suelen señalar un sobrecalentamiento de uno de los lados.',
+ai_note_oi_change: 'El cambio en el open interest refleja la entrada o salida de capital del mercado — junto con la dirección del precio ayuda a valorar la fuerza del movimiento.',
+ai_note_basis: 'El basis (diferencia entre el precio del futuro y el spot) muestra si el mercado cotiza con prima o con descuento — esto indica un sesgo en las expectativas de los participantes.',
+ai_note_dominance: 'La dominancia de Bitcoin muestra la cuota de BTC en el mercado — para las altcoins una dominancia alta suele implicar mayor presión y riesgo de caída.',
+ai_note_btc_corr: 'La correlación con Bitcoin muestra hasta qué punto este activo se mueve de forma sincronizada con BTC — una correlación alta refuerza la influencia del mercado general.',
+
+ai_note_global_spot: 'Global spot — precio spot justo agregado en las principales bolsas, respecto al cual se evalúan las desviaciones locales.',
+ai_note_venue_spread: 'El spread entre bolsas muestra la diferencia de precios entre distintos mercados — un spread elevado puede indicar arbitraje, desequilibrio de liquidez o distorsiones técnicas.',
+
+ai_no_data: 'No hay suficientes datos para un análisis fiable — el historial es demasiado corto o hay problemas con las series de precios, por lo que la conclusión se limita al modo HOLD.',
+
+}
+const AI_HERO_ZH = {
+ai_calculating: '正在进行计算 — “请稍候”',
+ai_regime: '当前时间周期的市场状态（趋势/震荡及波动率水平），由 Quantum Brain 根据 EMA、ATR 和价格结构判断。',
+
+ai_f_ema21_gt_ma50_on: '短期趋势为多头：EMA 21 高于 EMA 50，且 EMA 50 高于 EMA 200 —— 市场结构呈上升趋势。',
+ai_f_ema21_gt_ma50_off: '基于 EMA 21 与 EMA 50 的短期多头趋势未被确认 —— 均线结构未显示稳定的上涨动能。',
+
+ai_f_ma50_gt_ma200_on: '中期趋势为多头：MA 50 位于 MA 200 上方，表明上升动能占主导。',
+ai_f_ma50_gt_ma200_off: '中期多头趋势未被确认：MA 50 未高于 MA 200，结构更像是震荡或下跌行情。',
+
+ai_f_price_gt_vwap_on: '价格运行在 VWAP 上方 —— 这是成交量加权平均价格，通常意味着买方压力和积极的日内平衡。',
+ai_f_price_gt_vwap_off: '价格运行在 VWAP 下方 —— 表示卖方压力更强，需求更弱。',
+
+ai_f_rsi_overbought: 'RSI 位于超买区 —— 市场向上过热，回调或回落风险较高。',
+ai_f_rsi_oversold: 'RSI 位于超卖区 —— 市场大幅下跌，反弹或部分反转的概率提高。',
+ai_f_rsi_bull_on: 'RSI 偏向多头区域（高于中性区）—— 价格动能支持上涨情景。',
+ai_f_rsi_bull_off: 'RSI 未确认多头动能，指标偏向中性或空头区域。',
+
+ai_f_macd_pos_on: 'MACD 及其柱状图显示多头动能 —— 短期价格动能向上。',
+ai_f_macd_pos_off: 'MACD 不支持持续的多头动能，信号较弱或偏向空头。',
+
+ai_f_breakout_long: '价格突破所选周期的局部高点 —— 形成多头突破阻力，并增强向上趋势。',
+ai_f_breakdown_short: '价格跌破所选周期的局部低点 —— 形成空头突破支撑，并增强卖压。',
+
+ai_f_bbands_width: '布林带宽度反映当前市场波动率 —— 表示价格波动区间的收缩或扩张。',
+ai_f_bbands_squeeze: '布林带明显收缩 —— 波动率异常低，通常是强势行情启动前的信号。',
+ai_f_bbands_breakout_up: '价格突破布林带上轨 —— 表示强势多头扩张，可能进入加速上涨或超买阶段。',
+ai_f_bbands_breakout_down: '价格跌破布林带下轨 —— 表示强势空头趋势，可能出现恐慌或超卖阶段。',
+
+ai_f_stoch_overbought: '随机指标处于超买区 —— 短期动能过热，上行修正风险增加。',
+ai_f_stoch_oversold: '随机指标处于超卖区 —— 短期动能过度下压，反弹概率增加。',
+
+ai_f_adx: 'ADX 衡量趋势强度，而 +DI/-DI 显示当前主导力量 —— 买方还是卖方。',
+ai_f_adx_trending: 'ADX 较高 —— 趋势明显且稳定，趋势跟随策略更有效。',
+ai_f_adx_flat: 'ADX 较低 —— 市场震荡或结构弱，趋势信号可靠性下降。',
+
+ai_f_obv: 'OBV（On Balance Volume）显示资金流向 —— OBV 的倾斜程度反映买卖双方的主导地位。',
+
+ai_note_atr: 'ATR 与相对 ATR 描述平均价格波动范围与当前波动率，这对风险评估与止损设置非常重要。',
+ai_f_vola_explosive: '波动率升高 —— 价格运动激烈，交易风险增加，可能需要更宽的止损并预期剧烈波动。',
+ai_f_vola_low: '波动率异常低 —— 市场“停滞”，走势可能缓慢且噪音多，直至出现新的动能。',
+
+ai_note_sr: '算法识别出最近的支撑与阻力水平，用于评估入场点、止损与目标价位。',
+ai_note_h: '价格运动的时间范围预测 ——（例如 1 小时、6 小时、24 小时）的预期波动范围。',
+
+ai_note_data_short_history: '历史数据较少 —— K线数量不足，导致部分信号与统计可能可靠性降低。',
+ai_note_data_low_vola: '市场长期处于低波动状态，因此当前波动率评估的统计显著性可能降低。',
+
+ai_note_rr_good: '该交易的潜在收益风险比表现良好 —— 预期收益显著高于潜在亏损。',
+ai_note_rr_poor: '收益风险比偏弱 —— 预期收益不足以覆盖潜在交易风险。',
+
+ai_note_oversold_risk_reversal: '市场严重超卖并接近支撑区域 —— 算法避免做空，因为向上急速反转的风险较高。',
+ai_note_overbought_risk_reversal: '市场严重超买并接近阻力区域 —— 算法避免做多，因为向下急速反转的风险较高。',
+
+ai_note_funding: '期货资金费率显示多空倾斜 —— 极端值常提示市场某一方过热。',
+ai_note_oi_change: '持仓量变化显示资金进出 —— 结合价格方向可以评估趋势强度。',
+ai_note_basis: '基差（期货与现货价差）显示市场是溢价还是贴水 —— 反映市场参与者的预期偏差。',
+ai_note_dominance: '比特币主导率显示 BTC 的市场份额 —— 对山寨币而言，高主导率通常意味着更大下行压力。',
+ai_note_btc_corr: '与比特币的相关性显示该资产与 BTC 的同步性 —— 高相关性意味着整体市场影响更强。',
+
+ai_note_global_spot: 'Global spot —— 综合主要交易所的公平现货价格，用于评估局部偏差。',
+ai_note_venue_spread: '交易所之间的价差显示不同平台的价格差异 —— 大价差可能表明套利机会、流动性失衡或技术性偏差。',
+
+ai_no_data: '缺乏足够的数据进行可靠分析 —— 历史过短或价格序列存在问题，因此系统返回 HOLD 模式。',
+
+}
+const AI_HERO_AR = {
+ai_calculating: 'يتم تنفيذ الحسابات — "انتظر"',
+ai_regime: 'وضع السوق على إطار الزمن الحالي (اتجاه/نطاق ومستوى التقلب)، الذي يحدده Quantum Brain بالاعتماد على EMA وATR وبنية حركة السعر.',
+
+ai_f_ema21_gt_ma50_on: 'الاتجاه قصير المدى صاعد: EMA 21 أعلى من EMA 50 وEMA 50 أعلى من EMA 200 — السوق هيكلياً في ترند صاعد.',
+ai_f_ema21_gt_ma50_off: 'الاتجاه الصاعد قصير المدى بناءً على EMA 21 وEMA 50 غير مؤكد — هيكلة المتوسطات المتحركة لا تشير إلى نمو مستدام.',
+
+ai_f_ma50_gt_ma200_on: 'الاتجاه متوسط المدى صاعد: المتوسط المتحرك MA 50 يقع فوق MA 200، مما يشير إلى هيمنة الحركة الصعودية.',
+ai_f_ma50_gt_ma200_off: 'الاتجاه الصاعد متوسط المدى غير مؤكد: MA 50 ليست أعلى من MA 200، والبنية أقرب إلى نطاق عرضي أو سوق هابط.',
+
+ai_f_price_gt_vwap_on: 'السعر يتداول أعلى من VWAP — متوسط السعر المرجّح بالحجم، وهذا عادةً يعني ضغطاً شرائياً وتوازناً إيجابياً داخل اليوم.',
+ai_f_price_gt_vwap_off: 'السعر يتداول أدنى من VWAP — متوسط السعر المرجّح بالحجم، وهذا يشير إلى ضغط بيعي وطلب أضعف.',
+
+ai_f_rsi_overbought: 'مؤشر RSI في منطقة تشبع شرائي — السوق ساخن صعوداً، مع خطر مرتفع لحدوث تصحيح أو تراجع بعد الصعود الحالي.',
+ai_f_rsi_oversold: 'مؤشر RSI في منطقة تشبع بيعي — السوق هبط بقوة، ما يزيد من احتمال حدوث ارتداد أو انعكاس جزئي.',
+ai_f_rsi_bull_on: 'مؤشر RSI منحاز إلى المنطقة الصاعدة (أعلى المنطقة المحايدة) — زخم السعر يدعم سيناريو الارتفاع.',
+ai_f_rsi_bull_off: 'مؤشر RSI لا يؤكد الزخم الصاعد؛ المؤشر أقرب لمنطقة محايدة أو هابطة.',
+
+ai_f_macd_pos_on: 'MACD وهيستوغرامه يشيران إلى زخم صاعد — الزخم قصير المدى موجه إلى الأعلى.',
+ai_f_macd_pos_off: 'MACD لا يدعم زخمًا صاعدًا مستدامًا؛ الإشارة ضعيفة أو تميل إلى الجانب الهابط.',
+
+ai_f_breakout_long: 'السعر اخترق القمم المحلية للفترة المختارة — يتكوّن اختراق صاعد لمقاومة مع تعزيز للحركة الاتجاهية إلى الأعلى.',
+ai_f_breakdown_short: 'السعر كسر القيعان المحلية للفترة المختارة — يتكوّن كسر هابط لدعم مع زيادة في ضغط البائعين.',
+
+ai_f_bbands_width: 'عرض نطاقات Bollinger يعكس مستوى التقلب الحالي في السوق — انكماش أو توسع في نطاق تذبذب السعر.',
+ai_f_bbands_squeeze: 'نطاقات Bollinger في حالة انكماش — التقلب منخفض بشكل غير طبيعي، وغالباً ما تسبق هذه المرحلة حركة قوية في أحد الاتجاهين.',
+ai_f_bbands_breakout_up: 'السعر خرج فوق النطاق العلوي لـ Bollinger — توسع صاعد عنيف في النطاق، مع احتمال دخول مرحلة تسارع في الصعود أو تشبع شرائي.',
+ai_f_bbands_breakout_down: 'السعر هبط تحت النطاق السفلي لـ Bollinger — حركة هابطة عنيفة، مع احتمال دخول مرحلة ذعر أو تشبع بيعي.',
+
+ai_f_stoch_overbought: 'المُتذبذب Stochastic في منطقة تشبع شرائي — الزخم قصير المدى ساخن جداً صعوداً، وخطر التصحيح مرتفع.',
+ai_f_stoch_oversold: 'المُتذبذب Stochastic في منطقة تشبع بيعي — الزخم قصير المدى مضغوط بقوة إلى الأسفل، ما يزيد احتمال حدوث ارتداد.',
+
+ai_f_adx: 'مؤشر ADX يقيس قوة الاتجاه، في حين أن plus/minus DI يبيّنان أي جانب يهيمن — المشترون أم البائعون.',
+ai_f_adx_trending: 'قيمة ADX مرتفعة — الاتجاه واضح ومستقر، واستراتيجيات اتباع الترند تعمل بشكل أفضل.',
+ai_f_adx_flat: 'قيمة ADX منخفضة — السوق في نطاق عرضي أو حركة ضعيفة الهيكلة، وإشارات الاتجاه أقل موثوقية.',
+
+ai_f_obv: 'مؤشر OBV (On Balance Volume) يوضّح اتجاه تدفّق الأحجام — ميل منحنى OBV يعكس ما إذا كان المشترون أو البائعون هم المسيطرون.',
+
+ai_note_atr: 'مؤشر ATR وATR النسبي يصفان متوسط نطاق حركة السعر والتقلب الحالي، وهو أمر مهم لتقييم المخاطر ووضع أوامر إيقاف الخسارة.',
+ai_f_vola_explosive: 'التقلب مرتفع — حركة السعر عدوانية، مخاطر الصفقة أكبر، وقد تكون هناك حاجة لهوامش إيقاف أوسع واندفاعات حادة.',
+ai_f_vola_low: 'التقلب منخفض بشكل غير طبيعي — السوق "متجمد"، وقد تكون الحركات بطيئة ومليئة بالضوضاء إلى أن يظهر زخم جديد.',
+
+ai_note_sr: 'الخوارزمية حددت أقرب مستويات الدعم والمقاومة والتي تُستخدم لتقييم نقطة الدخول، وإيقاف الخسارة، والمستويات المستهدفة.',
+ai_note_h: 'آفاق الحركة تُظهر النطاق المتوقع تقريباً لتحرك السعر عبر الزمن (على سبيل المثال خلال 1 ساعة، 6 ساعات، و24 ساعة).',
+
+ai_note_data_short_history: 'البيانات التاريخية قليلة — حجم العيّنة من الشموع محدود، مما يجعل بعض الإشارات والإحصاءات أقل موثوقية.',
+ai_note_data_low_vola: 'السوق ظل لفترة طويلة في وضع تقلب منخفض، لذلك قد تكون الأهمية الإحصائية لتقديرات التقلب الحالية منخفضة.',
+
+ai_note_rr_good: 'نسبة العائد المحتمل إلى المخاطرة في الصفقة تبدو جذابة — العائد المتوقع يتجاوز بشكل ملحوظ الخسارة المحتملة.',
+ai_note_rr_poor: 'نسبة العائد المحتمل إلى المخاطرة ضعيفة — العائد المتوقع لا يعوّض بما يكفي عن الخسارة المحتملة في الصفقة.',
+
+ai_note_oversold_risk_reversal: 'السوق في حالة تشبع بيعي مفرط وقريب من مستويات الدعم — الخوارزمية تتجنب البيع لأن خطر الانعكاس الحاد صعوداً مرتفع.',
+ai_note_overbought_risk_reversal: 'السوق في حالة تشبع شرائي مفرط وقريب من مستويات المقاومة — الخوارزمية تتجنب الشراء لأن خطر الانعكاس الحاد هبوطاً مرتفع.',
+
+ai_note_funding: 'الـ Funding في العقود الآجلة يبيّن الانحياز نحو مراكز Long أو Short — القيم المتطرفة غالباً ما تشير إلى فرط سخونة أحد الجانبين.',
+ai_note_oi_change: 'تغيّر الـ Open Interest يعكس دخول أو خروج رأس المال من السوق — وبالاشتراك مع اتجاه السعر يساعد على تقييم قوة الحركة.',
+ai_note_basis: 'الـ Basis (الفرق بين سعر العقد الآجل وسعر الـ Spot) يوضّح ما إذا كان السوق يتداول بعلاوة أم بخصم — ما يعطي إشارة عن انحراف توقعات المشاركين.',
+ai_note_dominance: 'هيمنة البيتكوين تبيّن حصة BTC في السوق — وبالنسبة للـ Altcoins فإن الهيمنة المرتفعة غالباً ما تعني ضغطاً أكبر ومخاطر هبوط أعلى.',
+ai_note_btc_corr: 'الارتباط مع البيتكوين يوضّح إلى أي مدى يتحرك هذا الأصل بشكل متزامن مع BTC — الارتباط العالي يعزز تأثير السوق الكلي.',
+
+ai_note_global_spot: 'Global spot — سعر Spot عادل مُجمّع من البورصات الرئيسية، ويُستخدم مرجعاً لتقييم الانحرافات المحلية.',
+ai_note_venue_spread: 'الـ Spread بين البورصات يبيّن فروق الأسعار بين المنصات المختلفة — الـ Spread الكبير قد يشير إلى فرص تحكيم أو اختلال في السيولة أو تشوّهات تقنية.',
+
+ai_no_data: 'لا توجد بيانات كافية لإجراء تحليل موثوق — السجل التاريخي قصير جداً أو أن هناك مشكلات في سلاسل الأسعار، لذا يتم حصر النتيجة في وضع HOLD.',
+
+}
+const AI_HERO_TR = {
+ai_calculating: 'Hesaplamalar yapılıyor — "LÜTFEN BEKLEYİN"',    
+ai_regime: 'Mevcut zaman dilimindeki piyasa rejimi (trend/yatay ve volatilite seviyesi), Quantum Brain tarafından EMA, ATR ve fiyat hareketi yapısına göre belirlenir.',
+
+ai_f_ema21_gt_ma50_on: 'Kısa vadeli trend yükselişte: EMA 21, EMA 50’nin üzerinde ve EMA 50 de EMA 200’ün üzerinde — piyasa yapısal olarak yükseliş trendinde.',
+ai_f_ema21_gt_ma50_off: 'EMA 21 ve EMA 50’ye göre kısa vadeli yükseliş trendi doğrulanmadı — hareketli ortalama yapısı istikrarlı büyümeye işaret etmiyor.',
+
+ai_f_ma50_gt_ma200_on: 'Orta vadeli trend yükselişte: MA 50, MA 200’ün üzerinde yer alıyor, bu da yükseliş hareketinin baskın olduğunu gösteriyor.',
+ai_f_ma50_gt_ma200_off: 'Orta vadeli yükseliş trendi doğrulanmadı: MA 50, MA 200’ün üzerinde değil, yapı daha çok yatay veya düşüş eğilimli bir piyasayı andırıyor.',
+
+ai_f_price_gt_vwap_on: 'Fiyat, VWAP’ın üzerinde işlem görüyor — hacim ağırlıklı ortalama fiyat, bu genellikle alıcı baskısı ve pozitif gün içi denge anlamına gelir.',
+ai_f_price_gt_vwap_off: 'Fiyat, VWAP’ın altında işlem görüyor — bu satıcı baskısını ve zayıf talebi gösterir.',
+
+ai_f_rsi_overbought: 'RSI aşırı alım bölgesinde — piyasa yukarı yönde aşırı ısınmış, düzeltme veya geri çekilme riski yüksek.',
+ai_f_rsi_oversold: 'RSI aşırı satım bölgesinde — piyasa sert şekilde düşmüş, tepki yükselişi veya kısmi dönüş ihtimali artıyor.',
+ai_f_rsi_bull_on: 'RSI yükseliş bölgesine kaymış (nötr bölgenin üzerinde) — fiyat momentumu yükseliş senaryosunu destekliyor.',
+ai_f_rsi_bull_off: 'RSI yükseliş momentumu doğrulamıyor; gösterge nötr veya düşüş bölgesine daha yakın.',
+
+ai_f_macd_pos_on: 'MACD ve histogramı yükseliş momentumu gösteriyor — kısa vadeli fiyat momentumu yukarı yönlü.',
+ai_f_macd_pos_off: 'MACD güçlü bir yükseliş momentumu desteklemiyor; sinyal zayıf veya düşüş yönünde.',
+
+ai_f_breakout_long: 'Fiyat seçili periyodun yerel zirvelerini kırdı — yükseliş yönlü bir direnç kırılması ve trend hareketinin güçlenmesi oluşuyor.',
+ai_f_breakdown_short: 'Fiyat seçili periyodun yerel diplerini kırdı — düşüş yönlü bir destek kırılması ve satıcı baskısının artması oluşuyor.',
+
+ai_f_bbands_width: 'Bollinger bant genişliği mevcut piyasa volatilitesini yansıtır — fiyat dalgalanma aralığının daralması veya genişlemesi.',
+ai_f_bbands_squeeze: 'Bollinger bantları sıkışmış durumda — volatilite anormal derecede düşük ve bu tür fazlar genellikle güçlü bir hareketin habercisidir.',
+ai_f_bbands_breakout_up: 'Fiyat Bollinger üst bandının üzerine çıktı — agresif yükseliş genişlemesi, hızlanmış yükseliş veya aşırı alım fazı olabilir.',
+ai_f_bbands_breakout_down: 'Fiyat Bollinger alt bandının altına indi — agresif düşüş hareketi, panik veya aşırı satım fazı olabilir.',
+
+ai_f_stoch_overbought: 'Stochastic osilatörü aşırı alım bölgesinde — kısa vadeli momentum aşırı ısınmış, düzeltme riski artmış.',
+ai_f_stoch_oversold: 'Stochastic osilatörü aşırı satım bölgesinde — kısa vadeli momentum aşırı baskılanmış, tepki yükselişi ihtimali artmış.',
+
+ai_f_adx: 'ADX trend gücünü ölçer; plus/minus DI ise hangi tarafın baskın olduğunu gösterir — alıcılar mı satıcılar mı.',
+ai_f_adx_trending: 'ADX yüksek — trend belirgin ve istikrarlı, trend takip stratejileri daha iyi çalışır.',
+ai_f_adx_flat: 'ADX düşük — piyasa yatay veya zayıf yapıda, trend sinyalleri daha az güvenilir.',
+
+ai_f_obv: 'OBV (On Balance Volume) hacim akışının yönünü gösterir — OBV eğimi, alıcıların mı yoksa satıcıların mı baskın olduğunu yansıtır.',
+
+ai_note_atr: 'ATR ve göreceli ATR, fiyat hareketinin ortalama aralığını ve mevcut volatiliteyi tanımlar; bu, risk değerlendirmesi ve stop belirleme için kritiktir.',
+ai_f_vola_explosive: 'Volatilite yükselmiş — fiyat hareketi agresif, işlem riski artmış, daha geniş stoplar ve ani sıçramalar mümkündür.',
+ai_f_vola_low: 'Volatilite anormal derecede düşük — piyasa “donmuş”, yeni bir momentum oluşana kadar hareketler zayıf ve gürültülü olabilir.',
+
+ai_note_sr: 'Algoritma, giriş noktası, stop ve hedef seviyelerinin değerlendirilmesinde kullanılan en yakın destek ve direnç seviyelerini belirledi.',
+ai_note_h: 'Hareket ufukları, fiyatın zaman içinde (ör. 1 saat, 6 saat, 24 saat) tahmini hareket aralığını gösterir.',
+
+ai_note_data_short_history: 'Tarihsel veri az — bar örneklemi sınırlı, bu nedenle bazı sinyaller ve istatistikler daha az güvenilir olabilir.',
+ai_note_data_low_vola: 'Piyasa uzun süre düşük volatilite modunda kaldı; bu nedenle mevcut volatilite değerlendirmelerinin istatistiksel güvenilirliği düşebilir.',
+
+ai_note_rr_good: 'İşlemin potansiyel kâr/zarar oranı çekici görünüyor — beklenen getiri olası kaybı önemli ölçüde aşıyor.',
+ai_note_rr_poor: 'Kâr/zarar oranı zayıf — beklenen getiri olası zararı yeterince telafi etmiyor.',
+
+ai_note_oversold_risk_reversal: 'Piyasa aşırı satılmış durumda ve desteklere yakın — algoritma satıştan kaçınıyor çünkü yukarı yönlü sert bir dönüş riski yüksek.',
+ai_note_overbought_risk_reversal: 'Piyasa aşırı alınmış durumda ve dirençlere yakın — algoritma alımdan kaçınıyor çünkü aşağı yönlü sert bir dönüş riski yüksek.',
+
+ai_note_funding: 'Vadeli işlemlerdeki funding, long veya short yönündeki dengesizliği gösterir — aşırı değerler taraflardan birinin aşırı ısındığına işaret eder.',
+ai_note_oi_change: 'Open interest değişimi, piyasanın sermaye girişini veya çıkışını gösterir — fiyat yönüyle birlikte hareketin gücünü değerlendirmeye yardımcı olur.',
+ai_note_basis: 'Basis (vadeli fiyat ile spot arasındaki fark), piyasanın primli mi yoksa iskontolu mu işlem gördüğünü gösterir — bu, katılımcı beklentilerindeki kaymaları işaret eder.',
+ai_note_dominance: 'Bitcoin dominance, BTC’nin piyasa payını gösterir — altcoinler için yüksek dominance genellikle daha fazla baskı ve düşüş riski anlamına gelir.',
+ai_note_btc_corr: 'Bitcoin ile korelasyon, bu varlığın BTC ile ne kadar senkron hareket ettiğini gösterir — yüksek korelasyon genel piyasa etkisini güçlendirir.',
+
+ai_note_global_spot: 'Global spot — büyük borsalardaki birleşik adil spot fiyat, yerel sapmaları değerlendirmek için referans alınır.',
+ai_note_venue_spread: 'Borsalar arasındaki spread, platformlar arasındaki fiyat farkını gösterir — büyük spread, arbitraj, likidite dengesizliği veya teknik bozulmalara işaret edebilir.',
+
+ai_no_data: 'Güvenilir analiz için yeterli veri yok — geçmiş çok kısa veya fiyat serilerinde sorun var, bu nedenle sonuç HOLD moduyla sınırlıdır.',
+
+}
+try {
+  Object.assign(dict.en, AI_HERO_EN)
+  Object.assign(dict.ru, AI_HERO_RU)
+  Object.assign(dict.uk, AI_HERO_UK)
+  Object.assign(dict.es, AI_HERO_ES)
+  Object.assign(dict.zh, AI_HERO_ZH)
+  Object.assign(dict.ar, AI_HERO_AR)
+  Object.assign(dict.tr, AI_HERO_TR)
+} catch (e) {}
 export function I18nProvider({ children }) {
   const [lang, setLang] = useState('en')
   useEffect(() => {

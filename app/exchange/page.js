@@ -1,36 +1,61 @@
 'use client'
 
 // ==================================================================================================
-// app/exchange/page.js — QUANTUML7 Exchange — R12c-fix (remove duplicate onTVReady; TV + AI from klines + neon + info)
-// + VIP status auto-check + proper VIP rendering (no Infinity/NaN) + auth-gated payment modal
+// app/exchange/page.js — QUANTUML7 Exchange — R12c + Brain v5 via API (BrainAnalysisRoad)
 // ==================================================================================================
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import * as Brain from '../../lib/brain.js'
+// ⬇⬇⬇ Brain больше не дергаем на клиенте — вся магия на сервере через API
+// import * as Brain from '../../lib/brain.js'
 import HomeBetweenBlocksAd from '../ads'
+
 /* ================================ i18n bridge ================================ */
 let useI18n = () => ({ t: (k)=>k })
 try { const mod = require('../../components/i18n'); if (mod?.useI18n) useI18n = mod.useI18n } catch {}
 const TX = (t, key, fb) => { try { const v=t(key); return v===key?fb:v } catch { return fb } }
 
 /* ================================= helpers ================================= */
-const fmtP=(x)=>!Number.isFinite(x)?'-':(Math.abs(x)>=10000?x.toFixed(0):Math.abs(x)>=1000?x.toFixed(2):Math.abs(x)>=1?x.toFixed(2):x.toFixed(6))
+// Price formatting: адекватно для BTC и шиткоинов типа BTT
+const fmtP = (x) => {
+  if (!Number.isFinite(x)) return '-'
+  const ax = Math.abs(x)
+
+  if (ax >= 10000) return x.toFixed(0)
+  if (ax >= 1000)  return x.toFixed(2)
+  if (ax >= 1)     return x.toFixed(4)
+  if (ax >= 1e-2)  return x.toFixed(6)
+  if (ax >= 1e-4)  return x.toFixed(8)
+  if (ax >= 1e-8)  return x.toFixed(10)
+
+  // Совсем микроцены — в экспоненте, но читаемо
+  return x.toExponential(4)
+}
+
 const fmtQ=(x)=>!Number.isFinite(x)?'-':(Math.abs(x)>=1?x.toFixed(4):x.toFixed(8))
 const MAP_TV=(s)=>`BINANCE:${s}`
 const TFmap={ '1m':'1','5m':'5','15m':'15','1h':'60','4h':'240','1d':'D' }
 const BINANCE='https://api.binance.com'
 
 /* ================================= data ================================= */
-async function fetchDepth(sym,limit=20){ const r=await fetch(`${BINANCE}/api/v3/depth?symbol=${sym}&limit=${limit}`,{cache:'no-store'}); return r.json() }
+async function fetchDepth(sym,limit=20){
+  const r=await fetch(`${BINANCE}/api/v3/depth?symbol=${sym}&limit=${limit}`,{cache:'no-store'})
+  return r.json()
+}
 async function fetchSymbolsUSDT(){ 
-  try{ const r=await fetch(`${BINANCE}/api/v3/exchangeInfo`,{cache:'no-store'}); const j=await r.json()
+  try{
+    const r=await fetch(`${BINANCE}/api/v3/exchangeInfo`,{cache:'no-store'})
+    const j=await r.json()
     const list=j.symbols.filter(s=>s.status==='TRADING' && s.quoteAsset==='USDT').map(s=>s.symbol)
     return [...new Set(list)].sort()
-  }catch{ return ['BTCUSDT','ETHUSDT','BNBUSDT'] }
+  }catch{
+    return ['BTCUSDT','ETHUSDT','BNBUSDT']
+  }
 }
 const TF_TO_BINANCE={"1m":"1m","5m":"5m","15m":"15m","1h":"1h","4h":"4h","1d":"1d"}
+
+// ⬇ эта функция теперь не используется для AI, но оставляем как есть (вдруг пригодится ещё где-то)
 async function fetchKlines(sym, tf, limit=750){
   const interval = TF_TO_BINANCE[tf] || '5m'
   const url = `${BINANCE}/api/v3/klines?symbol=${sym}&interval=${interval}&limit=${limit}`
@@ -62,7 +87,7 @@ function Panel({children}){
   return <div className="panel">{children}
     <style jsx>{`
       .panel{position:relative; overflow:hidden; border:1px solid rgba(255,255,255,.08);
-        border-radius:14px;padding:12px;background:rgba(0,0,0,.85); margin-bottom:12px}
+        border-radius:14px;padding:12px;background:rgba(0, 0, 0, 1); margin-bottom:12px}
     `}</style>
   </div>
 }
@@ -144,24 +169,77 @@ function SymbolTFSelector({current, onChange, symbols}){
   const [open,setOpen]=useState(false)
   const [q,setQ]=useState('')
   const filtered = useMemo(()=> symbols.filter(s=>s.includes(q.toUpperCase())).slice(0,500),[symbols,q])
+
   return <Panel>
+    {/* ⬇⬇⬇ НОВЫЙ БЛОК С GIF НАД ВЫБОРОМ СИМВОЛА/TF ⬇⬇⬇ */}
+    <div className="tf-gif-wrap">
+      <Image
+        src="/ai/ai.gif"          // файл: public/ai/ai.gif
+        alt="Quantum AI timeframe"
+        fill
+        sizes="100vw"
+        priority={false}
+        className="tf-gif"
+        unoptimized               // чтобы GIF не ломался оптимизацией
+      />
+    </div>
+    {/* ⬆⬆⬆ КОНЕЦ НОВОГО БЛОКА С GIF ⬆⬆⬆ */}
+
     <div className="row">
       <div className="now">{current.symbol} · {current.tf}</div>
       <div className="grow" />
-      <Btn neon onClick={()=>setOpen(o=>!o)}>{TX(useI18n().t,'select_symbol_tf','Выбрать символ / TF')}</Btn>
+      <Btn neon onClick={()=>setOpen(o=>!o)}>
+        {TX(useI18n().t,'select_symbol_tf','Выбрать символ / TF')}
+      </Btn>
     </div>
     {open && <div className="pop">
-      <input className="search" placeholder="Search…" value={q} onChange={e=>setQ(e.target.value)} />
+      <input
+        className="search"
+        placeholder="Search…"
+        value={q}
+        onChange={e=>setQ(e.target.value)}
+      />
       <div className="grid">
         {filtered.map(sym=>(
           <div key={sym} className="row2">
             <span className="sym">{sym}</span>
-            <div className="tfs">{TF_KEYS.map(tf=>(<button key={tf} className="tf" onClick={()=>{onChange(sym,tf); setOpen(false)}}>{tf}</button>))}</div>
+            <div className="tfs">
+              {TF_KEYS.map(tf=>(
+                <button
+                  key={tf}
+                  className="tf"
+                  onClick={()=>{
+                    onChange(sym,tf)
+                    setOpen(false)
+                  }}
+                >
+                  {tf}
+                </button>
+              ))}
+            </div>
           </div>
         ))}
       </div>
     </div>}
     <style jsx>{`
+      /* GIF-блок — адаптивный, на всю ширину панели */
+      .tf-gif-wrap{
+        position:relative;
+        width:100%;
+        aspect-ratio:16/9;          /* можно поменять под свою гифку */
+        overflow:hidden;
+        border-radius:12px;
+        margin:-2px 0 10px 0;       /* лёгкий отступ снизу от гифки */
+        background:#000;
+      }
+      .tf-gif-wrap :global(img.tf-gif){
+        position:absolute;
+        inset:0;
+        width:100%;
+        height:100%;
+        object-fit:cover;           /* растягиваем по ширине, сохраняем красоту */
+      }
+
       .row{display:flex;align-items:center;gap:8px}
       .grow{flex:1}
       .now{font-weight:800}
@@ -172,9 +250,17 @@ function SymbolTFSelector({current, onChange, symbols}){
       .sym{color:#0ff;font-weight:700}
       .tf{background:#111;border:1px solid #0ff;border-radius:6px;padding:2px 6px;cursor:pointer;color:#0ff}
       .tf:hover{background:#0ff;color:#000}
+
+      @media (max-width:640px){
+        .tf-gif-wrap{
+          margin-bottom:8px;
+          border-radius:10px;
+        }
+      }
     `}</style>
   </Panel>
 }
+
 
 /* ================================= TV widgets ================================= */
 function TVTicker({symbol}){
@@ -216,10 +302,7 @@ function TVChart({symbol, tf}){
 /* ================================= AI Box (i18n-aware) ================================= */
 function AIBox({ data }) {
   const { t } = useI18n()
-  const fmtP = (x)=> Number.isFinite(x)
-    ? (Math.abs(x)>=10000? x.toFixed(0) : Math.abs(x)>=1000? x.toFixed(2) : Math.abs(x)>=1? x.toFixed(2) : x.toFixed(6))
-    : '-'
-
+ 
   const tr = (key, params) => {
     try {
       let s = t(key)
@@ -302,6 +385,7 @@ function AIBox({ data }) {
     </Panel>
   )
 }
+
 
 /* ============================ AI Quota Gate (10 min/day) ============================ */
 const QUOTA_LIMIT_SEC = 10 * 60; // 10 минут
@@ -398,7 +482,7 @@ function UnlimitModal({ open, onClose, onPay }) {
       </div>
       <style jsx>{`
         .unlimit-overlay{
-          position: fixed; inset: 0; background: rgba(0,0,0,.55);
+          position: fixed; inset: 0; background: rgba(0, 0, 0, 0.48);
           display: grid; place-items: center; z-index: 1000;
         }
         .unlimit-modal{
@@ -727,6 +811,7 @@ function AIQuotaGate({ children, onOpenUnlimit }) {
 
 
 /* ================================= OrderBook (neo-visual) ================================= */
+// ⬇⬇⬇ ВАЖНО: здесь ничего не менял вообще
 function OrderBook({ symbol }) {
   const { t } = useI18n()
   const [data, setData] = useState(null)
@@ -1111,23 +1196,76 @@ export default function ExchangePage(){
   const [symbol,setSymbol]=useState('BTCUSDT')
   const [tf,setTf]=useState('5m')
 
-  // AI state driven by OHLCV klines
+  // AI state (теперь через серверный Brain API)
   const [ai,setAI]=useState(null)
   useEffect(()=>{
-    let alive=true
-    ;(async()=>{
-      try{
-        const pack = await fetchKlines(symbol, tf, 750)
-        const call = (Brain.analyze || Brain.default || (()=>null))
-        let res = await call(pack)
-        if(!res && Brain.default && call!==Brain.default) res = await Brain.default(pack)
-        if(!res && Brain.analyze && call!==Brain.analyze) res = await Brain.analyze(pack)
-        if(!res) res = { action:'HOLD', confidence:50, price:pack.c.at(-1)??0, horizons:{'1h':0,'6h':0,'24h':0}, reasons:[TX(t,'ai.no_data','Not enough data')] }
-        if(alive) setAI(res)
-      }catch{ if(alive) setAI({ action:'HOLD', confidence:50, price:0, horizons:{'1h':0,'6h':0,'24h':0}, reasons:[TX(t,'ai.no_data','Not enough data')] }) }
+    let alive = true
+
+    ;(async () => {
+      try {
+        // Собираем параметры для API
+        const params = new URLSearchParams({
+          symbol,
+          tf,
+          limit: '750', // будет прочитан как limitMain/limit на сервере
+        })
+
+        // Дёргаем серверную ручку Brain v5
+        const r = await fetch(`/api/brain/analyze?${params.toString()}`, {
+          method: 'GET',
+          cache: 'no-store',
+        })
+
+        const j = await r.json().catch(() => null)
+        if (!alive) return
+
+        // ожидаем, что API вернет либо { ok:true, data:{...} }, либо сразу brain-объект
+        let payload = null
+        if (j && typeof j === 'object') {
+          if (j.data) payload = j.data
+          else payload = j
+        }
+
+        if (payload && (payload.action || payload.price != null)) {
+          // гарантируем price, чтобы AIBox не ломался
+          const price = Number.isFinite(payload.price)
+            ? payload.price
+            : (Array.isArray(payload.c) && payload.c.length
+                ? payload.c[payload.c.length - 1]
+                : 0)
+
+          setAI({
+            ...payload,
+            price,
+          })
+        } else {
+          // fallback — если API вернул что-то странное
+          setAI({
+            action:'HOLD',
+            confidence:50,
+            price:0,
+            horizons:{'1h':0,'6h':0,'24h':0},
+            reasons:[TX(t,'ai_no_data','Not enough data')],
+          })
+        }
+      } catch (e) {
+        // fallback — если запрос упал
+        console.error('[Exchange] Brain API error:', e)
+        if (alive) {
+          setAI({
+            action:'HOLD',
+            confidence:50,
+            price:0,
+            horizons:{'1h':0,'6h':0,'24h':0},
+            reasons:[TX(t,'ai_no_data','Not enough data')],
+          })
+        }
+      }
     })()
-    return ()=>{alive=false}
- },[symbol, tf, t])
+
+    return () => { alive = false }
+  }, [symbol, tf, t])
+
 
   const sections = Array.isArray(TX(t, 'exchange_sections', [])) ? TX(t, 'exchange_sections', []) : []
   const bullets  = Array.isArray(TX(t, 'ex_bullets', [])) ? TX(t, 'ex_bullets', []) : []
@@ -1145,27 +1283,26 @@ export default function ExchangePage(){
     if (acc) setOpenUnlimit(true)
   }
 
-const handlePayClick = async () => {
-  try {
-    const accountId = await ensureAuthorized()
-    if (!accountId) return
-    const r = await fetch('/api/pay/create', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ accountId })
-    })
-    const j = await r.json()
-    if (!r.ok) throw new Error(j?.error || 'Create failed')
+  const handlePayClick = async () => {
+    try {
+      const accountId = await ensureAuthorized()
+      if (!accountId) return
+      const r = await fetch('/api/pay/create', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ accountId })
+      })
+      const j = await r.json()
+      if (!r.ok) throw new Error(j?.error || 'Create failed')
 
-    if (j.url) {
-    openPaymentWindow(j.url)
-
+      if (j.url) {
+        openPaymentWindow(j.url)
+      }
+    } catch (e) {
+      console.error(e)
+      alert('Payment error: ' + e.message)
     }
-  } catch (e) {
-    console.error(e)
-    alert('Payment error: ' + e.message)
   }
-}
 
 
   return (
@@ -1214,37 +1351,37 @@ const handlePayClick = async () => {
       <PageMarqueeTail />
       {/* ===== ИКОНКИ ПОСЛЕ МАРКИЗЫ (глобальные стили ql7-*, как на главной/subscribe) ===== */}
       <div className="ql7-icons-row">
-<Link
-  href="/privacy"
-  className="ql7-icon-link"
-  aria-label="Privacy / Политика"
-  style={{ '--ql7-icon-size': '130px' }}
->
-  <Image
-    src="/click/policy.png"
-    alt="Privacy"
-    width={130}
-    height={130}
-    draggable={false}
-    className="ql7-click-icon"
-  />
-</Link>
+        <Link
+          href="/privacy"
+          className="ql7-icon-link"
+          aria-label="Privacy / Политика"
+          style={{ '--ql7-icon-size': '130px' }}
+        >
+          <Image
+            src="/click/policy.png"
+            alt="Privacy"
+            width={130}
+            height={130}
+            draggable={false}
+            className="ql7-click-icon"
+          />
+        </Link>
 
-<Link
-  href="/contact"
-  className="ql7-icon-link"
-  aria-label="Support / Поддержка"
-  style={{ '--ql7-icon-size': '130px' }}
->
-  <Image
-    src="/click/support.png"
-    alt="Support"
-    width={130}
-    height={130}
-    draggable={false}
-    className="ql7-click-icon"
-  />
-</Link>
+        <Link
+          href="/contact"
+          className="ql7-icon-link"
+          aria-label="Support / Поддержка"
+          style={{ '--ql7-icon-size': '130px' }}
+        >
+          <Image
+            src="/click/support.png"
+            alt="Support"
+            width={130}
+            height={130}
+            draggable={false}
+            className="ql7-click-icon"
+          />
+        </Link>
 
       </div>
       <style jsx>{`
