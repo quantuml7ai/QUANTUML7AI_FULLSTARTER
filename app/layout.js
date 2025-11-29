@@ -41,7 +41,7 @@ export const metadata = {
     'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©',
 
   applicationName: 'Quantum L7 AI',
-  keywords: ['crypto','research','signals','ai','quant','defi','exchange','alpha','quantum l7'],
+  keywords: ['crypto', 'research', 'signals', 'ai', 'quant', 'defi', 'exchange', 'alpha', 'quantum l7'],
 
   openGraph: {
     type: 'website',
@@ -50,7 +50,14 @@ export const metadata = {
     title: 'Quantum L7 AI',
     description:
       'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©',
-    images: [{ url: '/branding/quantum_l7_logo.png', width: 1200, height: 630, alt: 'Quantum L7 AI' }],
+    images: [
+      {
+        url: '/branding/quantum_l7_global_og.png',  // <- твой новый общий баннер
+        width: 1200,
+        height: 630,
+        alt: 'Quantum L7 AI — Global Crypto • AI • Web3 Ecosystem',
+      },
+    ],
   },
 
   twitter: {
@@ -60,7 +67,7 @@ export const metadata = {
     title: 'Quantum L7 AI',
     description:
       'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©',
-    images: ['/branding/quantum_l7_logo.png'],
+    images: ['/branding/quantum_l7_global_og.png'], // тот же баннер
   },
 
   icons: {
@@ -71,9 +78,18 @@ export const metadata = {
 
   alternates: {
     canonical: '/',
-    languages: { en:'/en', ru:'/ru', uk:'/uk', zh:'/zh', ar:'/ar', tr:'/tr', es:'/es' },
+    languages: {
+      en: '/en',
+      ru: '/ru',
+      uk: '/uk',
+      zh: '/zh',
+      ar: '/ar',
+      tr: '/tr',
+      es: '/es',
+    },
   },
 }
+
 
 export const viewport = {
   themeColor: '#0b1220',
