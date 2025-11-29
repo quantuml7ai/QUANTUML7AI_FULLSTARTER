@@ -5,8 +5,28 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 const TICKERS = [
   'BTC','ETH','SOL','BNB','XRP','ADA','DOGE','TRX','TON','AVAX',
   'DOT','LINK','LTC','BCH','XLM','NEAR','HBAR','ICP','ARB','OP',
-  'MATIC','APT','SUI','FIL','RNDR','INJ','AAVE','UNI','MKR','CAKE'
-]
+  'MATIC','APT','SUI','FIL','RNDR','INJ','AAVE','UNI','MKR','CAKE',
+  'ATOM','EGLD','ALGO','XTZ','FTM','GRT','RPL','LDO','DYDX','KAVA',
+  'CRV','CVX','COMP','SNX','YFI','BAL','1INCH','ZRX','ENS','FLUX',
+  'MINA','SYS','WAVES','KSM','DOT','FTT','CEL','CHZ','SAND','MANA',
+  'APE','AXS','GALA','ENJ','IMX','ILV','RUNE','KLAY','CELO','FLOW',
+  'NEO','QTUM','VET','ONT','ZIL','SC','STORJ','AR','BAT','FORTH',
+  'ANKR','BAND','OCEAN','API3','FET','AGIX','NMR','WOO','OMG','SKL',
+  'BEL','HOT','ALICE','CHR','ROSE','DAG','XDC','XEC','RVN','ZEN',
+  'ICX','SXP','TFUEL','THETA','CKB','STRAX','BTT','BTG','ETC','DASH',
+  'XMR','ZEC','KDA','ERG','VELO','PHA','MDX','UOS','TVK','YGG',
+  'MOVR','GLMR','MTL','PUNDIX','HIVE','SC','DCR','HNT','IOTA','METIS',
+  'JOE','MAGIC','HIGH','AUDIO','SUSHI','PEPE','SHIB','FLOKI','BONK','WIF',
+  'MEME','TURBO','HYPE','PENDLE','NUM','ALPHA','BAR','BICO','GNO','KNC',
+  'LRC','LOOM','PROM','MX','OKB','HT','GT','FRAX','FXS','USDJ',
+  'USDD','TUSD','USDP','GUSD','WBTC','WETH','STETH','CBETH','PYUSD','USDT',
+  'USDC','DAI','EURS','EUT','XAUT','PAXG','WLD','NXRA','XAI','SYLO',
+  'ARK','ACX','BICO','WAXP','STRK','PORTAL','GG','ONDO','LYX','ZETA',
+  'MANTA','SEI','JUP','PYTH','NGL','ORCA','RAY','JTO','JUP','FIDA',
+  'BOME','SLERF','MEW','CHILLGUY','NEXO','RBN','SAGA','NYM','OXT','POND',
+  'HARD','IRIS','AKT','TOMO','HFT','ID','TIA','SCRT','BLUR','GNS'
+];
+
 
 const rnd = (a,b)=>a+Math.random()*(b-a)
 const pick = a => a[(Math.random()*a.length)|0]
@@ -37,7 +57,7 @@ export default function HeroAvatar({ videoSrc='/avatar.mp4', poster='/avatar.jpg
 
   useEffect(() => {
     let killed = false
-    const spawnEvery = 900 / density
+    const spawnEvery = 2500 / density
     const spawn = () => {
       if (killed) return
       setItems(prev => {
