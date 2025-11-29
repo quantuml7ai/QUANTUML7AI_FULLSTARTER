@@ -22,7 +22,7 @@ export default function BgAudio({
     }
   }, [vol])
 
-  // 1) При МОНТАЖЕ сразу пробуем играть СО ЗВУКОМ
+  // 1) При МОНТАЖЕ сразу пробуем играть СО ЗВУКОМ (но БЕЗ loop)
   useEffect(() => {
     const a = audioRef.current
     if (!a) return
@@ -32,7 +32,6 @@ export default function BgAudio({
     ;(async () => {
       try {
         a.muted = false
-        a.loop = true
         a.playsInline = true
         await a.play()                // попытка громко
         if (cancelled) return
@@ -42,7 +41,6 @@ export default function BgAudio({
         // Браузер зарубил — крутим ТИХО и ждём жест
         try {
           a.muted = true
-          a.loop = true
           a.playsInline = true
           await a.play().catch(() => {})
         } catch {}
@@ -108,7 +106,7 @@ export default function BgAudio({
     return detach
   }, [locked])
 
-  // 3) Кнопка-динамик: локальный on/off, НИЧЕГО не пишем в localStorage
+  // 3) Кнопка-динамик: локальный on/off
   const toggle = async () => {
     const a = audioRef.current
     if (!a) return
@@ -116,7 +114,6 @@ export default function BgAudio({
     if (playing) {
       try { a.pause() } catch {}
       setPlaying(false)
-      // не трогаем locked — если юзер снова включит, будет обычный play()
     } else {
       try {
         a.muted = false
@@ -129,13 +126,11 @@ export default function BgAudio({
     }
   }
 
-  // 4) Колёсико — громкость (как было)
+  // 4) Колёсико — громкость
   const onWheelVolume = (e) => {
     const delta = e.deltaY > 0 ? -0.05 : 0.05
     const nv = Math.max(0, Math.min(1, +(vol + delta).toFixed(2)))
     setVol(nv)
-    // Если хочешь — можно сохранять громкость:
-    // try { localStorage.setItem('ql7_audio_volume', String(nv)) } catch {}
   }
 
   const isOn = playing && !locked
@@ -145,7 +140,6 @@ export default function BgAudio({
       <audio
         ref={audioRef}
         src={src}
-        loop
         preload="auto"
         playsInline
         aria-hidden="true"
