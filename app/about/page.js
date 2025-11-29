@@ -52,7 +52,12 @@ export default function AboutPage() {
               : []),
       }))
     : [{ title: '', paras: parasAll }]
- 
+  // Варианты путей к короткому 16:9-видео под заголовком страницы
+  const videoSources = [
+    '/branding/about-loop.mp4',
+    '/about-loop.mp4',
+    '/video_2025-09-18_01-19-40.mp4',
+  ] 
   // ---- Распознавание заголовков на разных языках
   const hasAny = (s, needles) => {
     const x = (s || '').toLowerCase()
