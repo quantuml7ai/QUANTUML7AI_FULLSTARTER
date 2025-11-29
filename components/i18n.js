@@ -42681,6 +42681,89 @@ try {
   Object.assign(dict.tr, POP_HERO_TR)
 } catch (e) {}
 
+const Q1_HERO_EN = {
+quest_1_t1: 'Subscribe, grow, follow the rules, stay active — earn rewards 🚀📊⚖️🔥',
+quest_1_t2: 'Follow on Instagram, get inspired, create — and earn your well-deserved reward ✨📸🏆',
+quest_1_t3: 'Subscribe on YouTube, absorb knowledge, stay active — and unlock access to new rewards 🎥🔥🚀🏆',
+
+quest_1_t4: 'Follow on Twitter, stay in the flow of events — and claim your reward ⚡🐦🏆',
+quest_1_t5: 'Follow on TikTok, catch the vibe, stay on the wave — and earn your rewards 🎵🔥⚡🏆',
+
+}
+
+const Q1_HERO_RU = {
+quest_1_t1: 'Подписывайся, развивайся, соблюдай правила, будь активным — получай награды 🚀📊⚖️🔥',
+quest_1_t2: 'Подписывайся в Инстаграм, вдохновляйся, твори — и получай заслуженную награду ✨📸🏆',
+quest_1_t3: 'Подписывайся на YouTube, впитывай знания, будь активным — и открывай доступ к новым наградам 🎥🔥🚀🏆',
+
+quest_1_t4: 'Подписывайся в Твиттер, будь в потоке событий — и забирай свою награду ⚡🐦🏆',
+quest_1_t5: 'Подписывайся в TikTok, лови настроение, будь на волне — и получай свои награды 🎵🔥⚡🏆',
+
+
+}
+
+const Q1_HERO_UK = {
+quest_1_t1: 'Підписуйся, розвивайся, дотримуйся правил, будь активним — отримуй нагороди 🚀📊⚖️🔥',
+quest_1_t2: 'Підписуйся в Інстаграм, надихайся, твори — і отримуй заслужену нагороду ✨📸🏆',
+quest_1_t3: 'Підписуйся на YouTube, вбирай знання, будь активним — і відкривай доступ до нових нагород 🎥🔥🚀🏆',
+
+quest_1_t4: 'Підписуйся в Твіттер, будь у потоці подій — і забирай свою нагороду ⚡🐦🏆',
+quest_1_t5: 'Підписуйся в TikTok, лови настрій, будь на хвилі — і отримуй свої нагороди 🎵🔥⚡🏆',
+
+}
+
+const Q1_HERO_ES = {
+quest_1_t1: 'Suscríbete, crece, sigue las reglas, sé activo — recibe recompensas 🚀📊⚖️🔥',
+quest_1_t2: 'Sigue en Instagram, inspírate, crea — y recibe tu merecida recompensa ✨📸🏆',
+quest_1_t3: 'Suscríbete a YouTube, absorbe conocimiento, sé activo — y abre acceso a nuevas recompensas 🎥🔥🚀🏆',
+
+quest_1_t4: 'Sigue en Twitter, mantente en el flujo de los eventos — y reclama tu recompensa ⚡🐦🏆',
+quest_1_t5: 'Sigue en TikTok, siente la vibra, mantente en la ola — y recibe tus recompensas 🎵🔥⚡🏆',
+
+}
+
+const Q1_HERO_ZH = {
+quest_1_t1: '订阅、成长、遵守规则、保持活跃 — 获得奖励 🚀📊⚖️🔥',
+quest_1_t2: '关注Instagram，汲取灵感，创造精彩 — 获得你应得的奖励 ✨📸🏆',
+quest_1_t3: '订阅YouTube，汲取知识，保持活跃 — 开启通往新奖励的通道 🎥🔥🚀🏆',
+
+quest_1_t4: '关注推特，保持在事件流中 — 并领取你的奖励 ⚡🐦🏆',
+quest_1_t5: '关注TikTok，抓住节奏，保持在浪潮之上 — 获取你的奖励 🎵🔥⚡🏆',
+
+
+}
+
+const Q1_HERO_AR = {
+quest_1_t1: 'اشترك، تطوّر، التزم بالقواعد، كن نشطًا — واحصل على المكافآت 🚀📊⚖️🔥',
+quest_1_t2: 'اشترك في إنستغرام، استلهم، أبدع — واحصل على مكافأتك المستحقة ✨📸🏆',
+quest_1_t3: 'اشترك في YouTube، استوعب المعرفة، كن نشطًا — وافتح الوصول إلى مكافآت جديدة 🎥🔥🚀🏆',
+
+quest_1_t4: 'اشترك في تويتر، كن في تدفّق الأحداث — واحصل على مكافأتك ⚡🐦🏆',
+
+quest_1_t5: 'اشترك في TikTok، التقط الإيقاع، كن على الموجة — واحصل على مكافآتك 🎵🔥⚡🏆',
+
+}
+
+const Q1_HERO_TR = {
+quest_1_t1: 'Abone ol, geliş, kurallara uy, aktif ol — ödüller kazan 🚀📊⚖️🔥',
+quest_1_t2: 'Instagram’da takip et, ilham al, üret — ve hak ettiğin ödülü kazan ✨📸🏆',
+quest_1_t3: 'YouTube’a abone ol, bilgiyi içselleştir, aktif ol — ve yeni ödüllere erişim aç 🎥🔥🚀🏆',
+
+quest_1_t4: 'Twitter’da takip et, olayların akışında kal — ve ödülünü al ⚡🐦🏆',
+
+quest_1_t5: 'TikTok’ta abone ol, ritmi yakala, dalgada kal — ve ödüllerini al 🎵🔥⚡🏆',
+
+}
+
+try {
+  Object.assign(dict.en, Q1_HERO_EN)
+  Object.assign(dict.ru, Q1_HERO_RU)
+  Object.assign(dict.uk, Q1_HERO_UK)
+  Object.assign(dict.es, Q1_HERO_ES)
+  Object.assign(dict.zh, Q1_HERO_ZH)
+  Object.assign(dict.ar, Q1_HERO_AR)
+  Object.assign(dict.tr, Q1_HERO_TR)
+} catch (e) {}
 
 export function I18nProvider({ children }) {
   const [lang, setLang] = useState('en')
