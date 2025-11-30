@@ -9281,166 +9281,166 @@ function QuestHub({
     [isCardClaimableProp, isCardClaimableLocal]
   );
 
-// ===== animated checkmark (no masks) =====
-function AnimatedCheckmark() {
-  return (
-    <>
-      <style jsx>{`
-        .cmrk {
-          display:inline-flex; align-items:center; justify-content:center;
-          width:42px; height:42px;
-        }
-        .cmrk svg { width:42px; height:42px; overflow:visible; }
-        .cmrk .tick {
-          fill:none; stroke:#2ecc71; stroke-width:3; stroke-linecap:round; stroke-linejoin:round;
-          /* анимация прорисовки */
-          stroke-dasharray: 28;
-          stroke-dashoffset: 28;
-          animation: cmrk-draw .40s ease-out forwards;
-          filter: drop-shadow(0 0 6px rgba(46,204,113,.55));
-        }
-        @keyframes cmrk-draw { to { stroke-dashoffset: 0; } }
-        /* уважение reduce-motion */
-        @media (prefers-reduced-motion: reduce) {
-          .cmrk .tick { animation: none; stroke-dashoffset: 0; }
-        }
-      `}</style>
-      <span className="cmrk" aria-label="done" title="Готово">
-        <svg viewBox="0 0 24 24" aria-hidden>
-          <path className="tick" d="M5 12.5l5 5L20 7.5" />
-        </svg>
-      </span>
-    </>
-  );
-}
+  // ===== animated checkmark (no masks) =====
+  function AnimatedCheckmark() {
+    return (
+      <>
+        <style jsx>{`
+          .cmrk {
+            display:inline-flex; align-items:center; justify-content:center;
+            width:42px; height:42px;
+          }
+          .cmrk svg { width:42px; height:42px; overflow:visible; }
+          .cmrk .tick {
+            fill:none; stroke:#2ecc71; stroke-width:3; stroke-linecap:round; stroke-linejoin:round;
+            /* анимация прорисовки */
+            stroke-dasharray: 28;
+            stroke-dashoffset: 28;
+            animation: cmrk-draw .40s ease-out forwards;
+            filter: drop-shadow(0 0 6px rgba(46,204,113,.55));
+          }
+          @keyframes cmrk-draw { to { stroke-dashoffset: 0; } }
+          /*respect reduce-motion */
+          @media (prefers-reduced-motion: reduce) {
+            .cmrk .tick { animation: none; stroke-dashoffset: 0; }
+          }
+        `}</style>
+        <span className="cmrk" aria-label="done" title="Готово">
+          <svg viewBox="0 0 24 24" aria-hidden>
+            <path className="tick" d="M5 12.5l5 5L20 7.5" />
+          </svg>
+        </span>
+      </>
+    );
+  }
 
 
-/* ===== Список карточек ===== */
-if (!selected) {
-  return (
-    <div className="questList mt-2" suppressHydrationWarning>
-      {tickStyles}
+  /* ===== Список карточек ===== */
+  if (!selected) {
+    return (
+      <div className="questList mt-2" suppressHydrationWarning>
+        {tickStyles}
 
-      {/* стили для правого бейджа без absolute */}
-      <style jsx>{`
-        .qHeadRow{
-          display:flex; align-items:center; gap:12px;
-        }
-        .qMid{
-          flex: 1 1 auto; min-width:0;   /* даём середине сжиматься и переносить строки */
-        }
-        .qRight{
-          flex: 0 0 auto; margin-left:auto;
-          display:inline-flex; align-items:center; justify-content:center;
-        }
+        {/* стили для правого бейджа без absolute */}
+        <style jsx>{`
+          .qHeadRow{
+            display:flex; align-items:center; gap:12px;
+          }
+          .qMid{
+            flex: 1 1 auto; min-width:0;   /* даём середине сжиматься и переносить строки */
+          }
+          .qRight{
+            flex: 0 0 auto; margin-left:auto;
+            display:inline-flex; align-items:center; justify-content:center;
+          }
 
-        /* анимации/стили бейджей */
-        .tag.warn{
-          color:#ff4d4f; background:rgba(255,77,79,.12);
-          border:1px solid rgba(255,77,79,.45);
-          font-weight:800; letter-spacing:.2px;
-          animation:qWarnPulse 1.6s ease-in-out infinite;
-        }
-        @keyframes qWarnPulse{
-          0%,100%{ transform:scale(1) }
-          50%    { transform:scale(1.08) }
-        }
-        .tag.ok{
-          color:#17d673; background:rgba(23, 214, 115, 0.18);
-          border:1px solid rgba(23, 214, 115, 0.78);
-          animation:qOkPop .6s ease-out both, qOkGlow 2s ease-in-out infinite alternate;
-        }
-        @keyframes qOkPop{
-          0%{ transform:scale(.84) rotate(-6deg); opacity:.75 }
-          60%{ transform:scale(1.05) rotate(0deg); opacity:1 }
-          100%{ transform:scale(1) }
-        }
-        @keyframes qOkGlow{
-          0%  { box-shadow:0 0 0 rgba(23,214,115,0), 0 0 8px rgba(6, 184, 255, 1) }
-          100%{ box-shadow:0 0 16px rgba(23, 214, 115, 0.22), 0 0 22px rgba(23,214,115,.15) }
-        }
+          /* анимации/стили бейджей */
+          .tag.warn{
+            color:#ff4d4f; background:rgba(255,77,79,.12);
+            border:1px solid rgba(255,77,79,.45);
+            font-weight:800; letter-spacing:.2px;
+            animation:qWarnPulse 1.6s ease-in-out infinite;
+          }
+          @keyframes qWarnPulse{
+            0%,100%{ transform:scale(1) }
+            50%    { transform:scale(1.08) }
+          }
+          .tag.ok{
+            color:#17d673; background:rgba(23, 214, 115, 0.18);
+            border:1px solid rgba(23, 214, 115, 0.78);
+            animation:qOkPop .6s ease-out both, qOkGlow 2s ease-in-out infinite alternate;
+          }
+          @keyframes qOkPop{
+            0%{ transform:scale(.84) rotate(-6deg); opacity:.75 }
+            60%{ transform:scale(1.05) rotate(0deg); opacity:1 }
+            100%{ transform:scale(1) }
+          }
+          @keyframes qOkGlow{
+            0%  { box-shadow:0 0 0 rgba(23,214,115,0), 0 0 8px rgba(6, 184, 255, 1) }
+            100%{ box-shadow:0 0 16px rgba(23, 214, 115, 0.22), 0 0 22px rgba(23,214,115,.15) }
+          }
 
-        /* на узких — мету позволяем переносить строки, правый бейдж остаётся на месте */
-        @media (max-width: 520px){
-          .questMeta{ white-space:normal }
-        }
-      `}</style>
+          /* на узких — мету позволяем переносить строки, правый бейдж остаётся на месте */
+          @media (max-width: 520px){
+            .questMeta{ white-space:normal }
+          }
+        `}</style>
 
-      {quests.map((q) => {
-        const done        = (questProg?.[q.id]?.done || []).length || 0;
-        const reward      = readEnv?.(q.rewardKey, '') || '';
-        const rewardShown = vipActive ? doubleDecimal(reward) : reward;
-        const totalTasks  = getTotalTasks(q);
-        const remain      = Math.max(0, totalTasks - done);
-        const isClaimed = !!questProg?.[q.id]?.claimed
-        return (
-          <button
-            key={q.id}
-            type="button"
-            className="item qshine questItem hoverPop text-left"
-            onClick={() => { if (!isClaimed) onOpenCard?.(q) }}
-            aria-disabled={isClaimed}
-            data-claimed={isClaimed ? '1' : '0'}
-            title={t(q.i18nKey) || q.id}
-          >
-            <div className="questHead qHeadRow">
-              {/* слева — обложка */}
-          {q.cover ? (
-            q.coverType === 'mp4'
-              ? <video className="questThumb" src={q.cover} playsInline autoPlay muted loop preload="metadata" />
-               : <Image className="questThumb" src={q.cover} alt="" loading="lazy" unoptimized width={60} height={60} />
-          ) : (<div className="avaMini">🗂️</div>)}
+        {quests.map((q) => {
+          const done        = (questProg?.[q.id]?.done || []).length || 0;
+          const reward      = readEnv?.(q.rewardKey, '') || '';
+          const rewardShown = vipActive ? doubleDecimal(reward) : reward;
+          const totalTasks  = getTotalTasks(q);
+          const remain      = Math.max(0, totalTasks - done);
+          const isClaimed = !!questProg?.[q.id]?.claimed
+          return (
+            <button
+              key={q.id}
+              type="button"
+              className="item qshine questItem hoverPop text-left"
+              onClick={() => { if (!isClaimed) onOpenCard?.(q) }}
+              aria-disabled={isClaimed}
+              data-claimed={isClaimed ? '1' : '0'}
+              title={t(q.i18nKey) || q.id}
+            >
+              <div className="questHead qHeadRow">
+                {/* слева — обложка */}
+                {q.cover ? (
+                  q.coverType === 'mp4'
+                    ? <video className="questThumb" src={q.cover} playsInline autoPlay muted loop preload="metadata" />
+                    : <Image className="questThumb" src={q.cover} alt="" loading="lazy" unoptimized width={60} height={60} />
+                ) : (<div className="avaMini">🗂️</div>)}
 
-              {/* середина — тянется/переносится */}
-              <div className="qMid min-w-0">
-                <div className="questTitle whitespace-normal break-words">
-                  {t(q.i18nKey) || q.id}
+                {/* середина — тянется/переносится */}
+                <div className="qMid min-w-0">
+                  <div className="questTitle whitespace-normal break-words">
+                    {t(q.i18nKey) || q.id}
+                  </div>
+                  <div className="questMeta">
+                    {(t('quest_tasks_done') || 'Выполни')}
+                    {reward ? (
+                      <>
+                        {' • '}{(t('quest_reward') || 'Награда')}: <span className="goldReward big">{rewardShown}</span>
+                        <span
+                          className={cls('qcoinX2', vipActive ? 'vip' : 'needVip', 'hoverPop')}
+                          role="button"
+                          tabIndex={0}
+                          aria-label="x2 VIP"
+                          title={vipActive
+                            ? (t('forum_qcoin_x2_active') || '×2 за VIP — активно')
+                            : (t('forum_qcoin_x2_get')    || 'Купить VIP+ чтобы получить ×2')}
+                          onClick={() => { if (!vipActive) { try { window.dispatchEvent(new Event('vip:open')) } catch {} } }}
+                          onKeyDown={(e) => { if (!vipActive && (e.key === 'Enter' || e.key === ' ')) { try { window.dispatchEvent(new Event('vip:open')) } catch {} } }}
+                          suppressHydrationWarning
+                          style={{ marginLeft: 8 }}
+                        >×2</span>
+                      </>
+                    ) : null}
+                  </div>
                 </div>
-                <div className="questMeta">
-                   {(t('quest_tasks_done') || 'Выполни')}
-                  {reward ? (
-                    <>
-                      {' • '}{(t('quest_reward') || 'Награда')}: <span className="goldReward big">{rewardShown}</span>
-                      <span
-                        className={cls('qcoinX2', vipActive ? 'vip' : 'needVip', 'hoverPop')}
-                        role="button"
-                        tabIndex={0}
-                        aria-label="x2 VIP"
-                        title={vipActive
-                          ? (t('forum_qcoin_x2_active') || '×2 за VIP — активно')
-                          : (t('forum_qcoin_x2_get')    || 'Купить VIP+ чтобы получить ×2')}
-                        onClick={() => { if (!vipActive) { try { window.dispatchEvent(new Event('vip:open')) } catch {} } }}
-                        onKeyDown={(e) => { if (!vipActive && (e.key === 'Enter' || e.key === ' ')) { try { window.dispatchEvent(new Event('vip:open')) } catch {} } }}
-                        suppressHydrationWarning
-                        style={{ marginLeft: 8 }}
-                      >×2</span>
-                    </>
-                  ) : null}
+
+                {/* справа — бейдж/галочка, никогда не перекрывает контент */}
+                <div className="qRight">
+                  {questProg?.[q.id]?.claimed || canClaim(q.id) ? (
+                    <span className="tag ok" title={t('quest_done') || 'Готово'}>✓</span>
+                    // если хочешь — можно заменить на <AnimatedCheckmark />
+                  ) : (
+                    <span
+                      className={cls('tag', 'warn')}
+                      title={t('quest_tasks_left') || 'Осталось задач'}
+                      aria-label="tasks-left"
+                    >
+                      {String(remain)}
+                    </span>
+                  )}
                 </div>
               </div>
-
-              {/* справа — бейдж/галочка, никогда не перекрывает контент */}
-              <div className="qRight">
-                {questProg?.[q.id]?.claimed || canClaim(q.id) ? (
-                  <span className="tag ok" title={t('quest_done') || 'Готово'}>✓</span>
-                  // если хочешь — можно заменить на <AnimatedCheckmark />
-                ) : (
-                  <span
-                    className={cls('tag', 'warn')}
-                    title={t('quest_tasks_left') || 'Осталось задач'}
-                    aria-label="tasks-left"
-                  >
-                    {String(remain)}
-                  </span>
-                )}
-              </div>
-            </div>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
 
 
 
@@ -9462,7 +9462,7 @@ if (!selected) {
           {q.cover ? (
             q.coverType === 'mp4'
               ? <video className="questThumb" src={q.cover} playsInline autoPlay muted loop preload="metadata" />
-               : <Image className="questThumb" src={q.cover} alt="" loading="lazy" unoptimized width={60} height={60} />
+              : <Image className="questThumb" src={q.cover} alt="" loading="lazy" unoptimized width={60} height={60} />
           ) : (<div className="avaMini">🗂️</div>)}
 
           <div>
@@ -9489,6 +9489,8 @@ if (!selected) {
               </div>
             )}
           </div>
+
+
         </div>
 
 
@@ -9503,57 +9505,68 @@ if (!selected) {
           return (
             <div key={task.id ?? `t:${idx}`} className="item qshine questTask" data-intensity="soft">
               <div className="questHead">
-                {task.cover ? (
-                  <Image
-                    className="questThumb"
-                    src={task.cover}
-                    alt=""
-                    unoptimized
-                    width={64}
-                    height={64}
-                  />
-                ) : (
-                  <div className="avaMini">🏁</div>
-                )}
+                {/* ЛЕВАЯ КОЛОНКА: иконка + Start/таймер/галка ПОД ней */}
+                <div className="flex flex-col items-center gap-1">
+                  {task.cover ? (
+                    <Image
+                      className="questThumb"
+                      src={task.cover}
+                      alt=""
+                      unoptimized
+                      width={64}
+                      height={64}
+                    />
+                  ) : (
+                    <div className="avaMini">🏁</div>
+                  )}
 
+                  <div className="mt-1">
+                    {isDone ? (
+                      (() => {
+                        const remain = Math.max(0, __questGetRemainMs(q.id, tid)); // ← страховка на отрицательные
+                        if (remain > 0) {
+                          const sec = Math.ceil(remain / 1000);
+                          return (
+                            <span
+                              className="tag warn"
+                              data-tick={__questTick}
+                              title="Таймер"
+                            >
+                              {sec}s
+                            </span>
+                          );
+                        }
+                        return <AnimatedCheckmark key={`done:${q.id}:${tid}`} />;
+                      })()
+                    ) : (
+                      url ? (
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="nick-badge"
+                          onClick={() => { setTimeout(() => onMarkDone?.(q.id, tid), 0); }}
+                        >
+                          {t('quest_do') || 'Сделать'}
+                        </a>
+                      ) : (
+                        <button
+                          type="button"
+                          className="nick-badge"
+                          onClick={() => { setTimeout(() => onMarkDone?.(q.id, tid), 0); }}
+                        >
+                          {t('quest_do') || 'Сделать'}
+                        </button>
+                      )
+                    )}
+                  </div>
+                </div>
+
+                {/* ПРАВАЯ ЧАСТЬ: текст задачи */}
                 <div className="min-w-0">
                   <div className="title whitespace-normal break-words">
                     {t(task.i18nKey) || `${q.id} • ${idx + 1}`}
                   </div>
-
-                </div>
-
-                <div className="right">
-                  {isDone ? (
-                    (() => {
-const remain = Math.max(0, __questGetRemainMs(q.id, tid)); // ← страховка на отрицательные
-if (remain > 0) {
-                        const sec = Math.ceil(remain / 1000);
-                        return <span className="tag warn" data-tick={__questTick} title="Таймер">{sec}s</span>;
-                      }
-return <AnimatedCheckmark key={`done:${q.id}:${tid}`} />;
-                  })()
-                  ) : (
-                    url ? (
-                      <a
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="nick-badge"
-                        onClick={() => { setTimeout(() => onMarkDone?.(q.id, tid), 0); }}
-                      >
-                        {t('quest_do') || 'Сделать'}
-                      </a>
-                    ) : (
-                      <button
-                        type="button"
-                        className="nick-badge"
-                        onClick={() => { setTimeout(() => onMarkDone?.(q.id, tid), 0); }}
-                      >
-                        {t('quest_do') || 'Сделать'}
-                      </button>
-                    )
-                  )}
                 </div>
               </div>
             </div>
