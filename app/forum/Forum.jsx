@@ -1809,7 +1809,7 @@ const Styles = () => (
   white-space: normal !important;
   overflow-wrap: anywhere !important;  /* главный герой */
   word-break: break-word !important;   /* классика */
-  line-break: anywhere !important;     /* для очень длинных слитков */
+
   hyphens: auto;
   max-width: 100%;
 
@@ -1877,16 +1877,16 @@ const Styles = () => (
 /* === FORCE WRAP for topic title/desc (перекрываем старые правила) === */
 .topicTitle, .topicTitle * {
   white-space: normal !important;
-  overflow-wrap: anywhere !important;
+  overflow-wrap: break-word !important;
   word-break: break-word !important;
-  line-break: anywhere !important;
+
   max-width: 100% !important;
 }
 .topicDesc, .topicDesc * {
   white-space: normal !important;
   overflow-wrap: anywhere !important;
   word-break: break-word !important;
-  line-break: anywhere !important;
+
   max-width: 100% !important;
 }
 
@@ -3846,24 +3846,25 @@ function TopicItem({ t, agg, onOpen, isAdmin, onDelete, authId, onOwnerDelete })
 <div
   className="
     topicTitle text-[#eaf4ff]
-    !whitespace-normal break-words [word-break:normal]
+    !whitespace-normal break-words
+    [overflow-wrap:anywhere]
     max-w-full"
 >
   {t.title}
 </div>
 
- 
-          {t.description && (
-<div
-  className="
-    topicDesc text-[#eaf4ff]/75 text-sm
-    !whitespace-normal break-words [word-break:normal]
-    max-w-full mt-1"
->
-  {t.description}
-</div>
+{t.description && (
+  <div
+    className="
+      topicDesc text-[#eaf4ff]/75 text-sm
+      !whitespace-normal break-words
+      [overflow-wrap:anywhere]
+      max-w-full mt-1"
+  >
+    {t.description}
+  </div>
+)}
 
-          )}
 
           <div className="meta mt-1" suppressHydrationWarning>
             <HydrateText value={human(t.ts)} />
