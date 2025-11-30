@@ -3843,27 +3843,26 @@ function TopicItem({ t, agg, onOpen, isAdmin, onDelete, authId, onOwnerDelete })
 
         {/* контент: заголовок → описание → время */}
         <div className="min-w-0"> 
-          <div
-            className="
-              topicTitle text-[#eaf4ff]
-              !whitespace-normal break-words break-all
-              [overflow-wrap:anywhere] [line-break:anywhere]
-              max-w-full"
-            
-          >
-            {t.title}
-          </div>
+<div
+  className="
+    topicTitle text-[#eaf4ff]
+    !whitespace-normal break-words [word-break:normal]
+    max-w-full"
+>
+  {t.title}
+</div>
+
  
           {t.description && (
-            <div
-              className="
-                topicDesc text-[#eaf4ff]/75 text-sm
-                !whitespace-normal break-words break-all
-                [overflow-wrap:anywhere] [line-break:anywhere]
-                max-w-full mt-1"                                
-            >
-              {t.description}
-            </div>
+<div
+  className="
+    topicDesc text-[#eaf4ff]/75 text-sm
+    !whitespace-normal break-words [word-break:normal]
+    max-w-full mt-1"
+>
+  {t.description}
+</div>
+
           )}
 
           <div className="meta mt-1" suppressHydrationWarning>
