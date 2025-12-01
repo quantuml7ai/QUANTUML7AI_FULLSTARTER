@@ -153,19 +153,50 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
     'home_between';
 
   return (
-    <section
-      className="panel"
-      data-ads-slot={internalSlotKey}
-      data-ads-base-slot={slotKey || ''}
-      data-ads-kind={effectiveSlotKind}
-      aria-label="Реклама"
-    >
-      <AdCard
-        url={url}
-        slotKind={effectiveSlotKind}
-        nearId={internalSlotKey}
-      />
-    </section>
+    <>
+      <section
+        className="panel ads-panel"
+        data-ads-slot={internalSlotKey}
+        data-ads-base-slot={slotKey || ''}
+        data-ads-kind={effectiveSlotKind}
+        aria-label="Реклама"
+      >
+        <div className="ads-media-wrapper">
+          <AdCard
+            url={url}
+            slotKind={effectiveSlotKind}
+            nearId={internalSlotKey}
+          />
+        </div>
+      </section>
+
+      <style jsx>{`
+        .ads-panel {
+          width: 100%;
+        }
+
+        /* Обёртка, которая всегда центрирует карточку/медиа */
+        .ads-media-wrapper {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+        }
+
+        /* На всякий случай централизуем любой медиаконтент внутри */
+        .ads-media-wrapper :global(img),
+        .ads-media-wrapper :global(video),
+        .ads-media-wrapper :global(svg),
+        .ads-media-wrapper :global(canvas) {
+          max-width: 100%;
+          max-height: 100%;
+          object-fit: contain;
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
+        }
+      `}</style>
+    </>
   );
 }
 

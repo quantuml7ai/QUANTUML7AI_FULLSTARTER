@@ -372,7 +372,15 @@ function AIBox({ data }) {
     [typedReasons],
   )
   // ==== КОНЕЦ ДОБАВКИ ====
+  // === ДОБАВЛЯЕМ ref ДЛЯ СКРОЛЛА ===
+  const scrollRef = useRef(null)
 
+  // === АВТОСКРОЛЛ ВНИЗ ===
+  useEffect(() => {
+    if (!scrollRef.current) return
+    const el = scrollRef.current
+    el.scrollTop = el.scrollHeight
+  }, [typedReasons])
   if (!data || !Number.isFinite(data.price)) {
     return (
       <Panel>
@@ -411,12 +419,16 @@ function AIBox({ data }) {
         <div className="ttl">
           {tr('ai_explainer_title') || 'Why this recommendation'}
         </div>
-        <ul className="reasons reasons-typed">
-          {reasonLines.map((line, idx) => (
-            <li key={idx}>{line.replace(/^•\s?/, '')}</li>
-          ))}
-        </ul>
+
+        <div className="reason-scroll" ref={scrollRef}>
+          <ul className="reasons reasons-typed">
+            {reasonLines.map((line, idx) => (
+              <li key={idx}>{line.replace(/^•\s?/, '')}</li>
+            ))}
+          </ul>
+        </div>
       </div>
+
 
       <div className="levels">
         {!!data.support?.length && (
@@ -454,6 +466,25 @@ function AIBox({ data }) {
           white-space:pre-line;
           transition:opacity .15s ease;
         }
+        /* === НОВОЕ: контейнер под причины === */
+        .reason-scroll{
+          max-height: unset;      /* ПК / планшет — как было */
+          overflow-y: visible;
+        }
+
+        /* === НОВОЕ: ТОЛЬКО ДЛЯ МОБИЛОК === */
+        @media (max-width:640px){
+          .reason-scroll{
+            max-height: 200px;    /* высота коробки под текст на телефоне */
+            overflow-y: auto;     /* вертикальный скролл */
+            padding-right: 6px;
+            scrollbar-width: none;
+          }
+          .reason-scroll::-webkit-scrollbar{
+            display:none;
+          }
+        }
+
       `}</style>
 
       {(() => {
