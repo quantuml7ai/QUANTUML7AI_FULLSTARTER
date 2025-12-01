@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-
+import Image from 'next/image'
 const TICKERS = [
   'BTC','ETH','SOL','BNB','XRP','ADA','DOGE','TRX','TON','AVAX',
   'DOT','LINK','LTC','BCH','XLM','NEAR','HBAR','ICP','ARB','OP',
@@ -146,17 +146,23 @@ export default function HeroAvatar({ videoSrc='/avatar.mp4', poster='/avatar.jpg
         onEnded={handleVideoEnded}
         style={{ opacity: showPoster ? 0 : opacity, transition: 'opacity .5s ease' }}
       />
-
+  
       {/* постер-аватар поверх, включается после 3-х циклов видео */}
       {poster && (
-        <img
+        <Image
           src={poster}
           alt=""
           className="bg-video"
           aria-hidden="true"
-          style={{ opacity: showPoster ? opacity : 0, transition: 'opacity .5s ease' }}
+          fill
+          priority
+          style={{
+            opacity: showPoster ? opacity : 0,
+            transition: 'opacity .5s ease',
+          }}
         />
       )}
+
 
       <div className="stars" />
       <div className="tickers">

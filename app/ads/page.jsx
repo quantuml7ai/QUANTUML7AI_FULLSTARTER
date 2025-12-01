@@ -5,7 +5,7 @@ import React, { useMemo, useState, useRef, useEffect } from 'react'
 import NextImage from 'next/image'
 import { useI18n } from '../../components/i18n'
 import AdsHome from './home' // наш рекламный кабинет, рендерим внутри этой же страницы
-
+import Image from 'next/image'
 /* ===== ENV / режим теста ===== */
 /* eslint-disable no-undef */
 const ADS_TEST_MODE =
@@ -138,11 +138,13 @@ function FooterIcons() {
         aria-label="Privacy / Политика"
         style={{ lineHeight: 0, cursor: 'pointer', '--size': '130px' }}
       >
-        <img
+        <NextImage
           src="/click/policy.png"
           alt="Privacy"
-          draggable="false"
+          draggable={false}
           data-anim="1"
+          width={130}
+          height={130}
           style={{
             width: 'var(--size, 120px)',
             height: 'auto',
@@ -153,16 +155,19 @@ function FooterIcons() {
         />
       </a>
 
+
       <a
         href="/contact"
         aria-label="Support / Поддержка"
         style={{ lineHeight: 0, cursor: 'pointer', '--size': '130px' }}
       >
-        <img
+        <NextImage
           src="/click/support.png"
           alt="Support"
-          draggable="false"
+          draggable={false}
           data-anim="1"
+          width={130}
+          height={130}
           style={{
             width: 'var(--size, 120px)',
             height: 'auto',
@@ -172,6 +177,7 @@ function FooterIcons() {
           }}
         />
       </a>
+
     </div>
   )
 }
@@ -424,7 +430,7 @@ export default function AdsPage() {
             <div className="ads-hero-text">
               <div className="ads-hero-label">
                 <span className="badge-cta">
-                  {TX(t, 'ads_hero_badge', 'GLOBAL • SITE-WIDE ADS')}
+                  {TX(t, '', 'GLOBAL • ADVERTISING ACROSS THE ENTIRE ECOSYSTEM')}
                 </span>
               </div>
               <h1 className="ads-hero-title">

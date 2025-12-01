@@ -155,45 +155,44 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
   return (
     <>
       <section
-        className="panel ads-panel"
+        className="panel"
         data-ads-slot={internalSlotKey}
         data-ads-base-slot={slotKey || ''}
         data-ads-kind={effectiveSlotKind}
         aria-label="Реклама"
       >
-        <div className="ads-media-wrapper">
-          <AdCard
-            url={url}
-            slotKind={effectiveSlotKind}
-            nearId={internalSlotKey}
-          />
-        </div>
+        <AdCard
+          url={url}
+          slotKind={effectiveSlotKind}
+          nearId={internalSlotKey}
+        />
       </section>
 
+      {/* Локальные стили только для рекламного слота */}
       <style jsx>{`
-        .ads-panel {
-          width: 100%;
-        }
-
-        /* Обёртка, которая всегда центрирует карточку/медиа */
-        .ads-media-wrapper {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          width: 100%;
-        }
-
-        /* На всякий случай централизуем любой медиаконтент внутри */
-        .ads-media-wrapper :global(img),
-        .ads-media-wrapper :global(video),
-        .ads-media-wrapper :global(svg),
-        .ads-media-wrapper :global(canvas) {
-          max-width: 100%;
-          max-height: 100%;
-          object-fit: contain;
+        /* Любой медиа-контент внутри рекламного секшена:
+           - старается занять всю ширину
+           - если меньше, то по центру с одинаковыми отступами слева/справа */
+        section[data-ads-slot] :global(img),
+        section[data-ads-slot] :global(video) {
           display: block;
           margin-left: auto;
           margin-right: auto;
+          width: 100%;
+          max-width: 100%;
+          height: auto;
+          object-fit: contain;
+        }
+
+        /* Для iframe / svg / canvas — только центрируем и ограничиваем ширину,
+           размеры (width/height) берём из inline-стилей AdCard (YouTube и т.п.) */
+        section[data-ads-slot] :global(iframe),
+        section[data-ads-slot] :global(svg),
+        section[data-ads-slot] :global(canvas) {
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
+          max-width: 100%;
         }
       `}</style>
     </>

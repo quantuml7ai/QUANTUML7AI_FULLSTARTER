@@ -8,6 +8,7 @@ import React, {
   useRef,
   useState,
 } from 'react'
+import Image from 'next/image' 
 import { useI18n } from '../../components/i18n'
 
 // ----------------- i18n helper -----------------
@@ -542,11 +543,15 @@ const filteredOrders = useMemo(() => {
         <div className="battlecoin-header-left">
           <div className="battlecoin-logo-wrap">
             <div className="battlecoin-logo-orbit">
-              <img
-                src="/coins/battlecoin/logo.png"
-                alt="BattleCoin"
-                className="battlecoin-logo"
-              />
+<Image
+  src="/coins/battlecoin/logo.png"
+  alt="BattleCoin"
+  className="battlecoin-logo"
+  width={160}
+  height={160}
+  priority
+/>
+
               <div className="battlecoin-logo-glow" />
             </div>
           </div>
@@ -731,11 +736,14 @@ const filteredOrders = useMemo(() => {
                 </div>
                 <div className="symbol-select-row">
                   <div className="symbol-pill">
-                    <img
-                      src={`/coins/${selectedSymbol}.png`}
-                      alt={selectedSymbol}
-                      className="symbol-pill-icon"
-                    />
+<Image
+  src={`/coins/${selectedSymbol}.png`}
+  alt={selectedSymbol}
+  className="symbol-pill-icon"
+  width={30}
+  height={30}
+/>
+
                     <span className="symbol-pill-text">
                       {selectedSymbol}
                     </span>
@@ -859,13 +867,16 @@ const filteredOrders = useMemo(() => {
                     <span className="info-label">
                       {tf(t, 'battlecoin_col_symbol', 'Symbol')}
                     </span>
-                    <div className="info-symbol">
-                      <img
-                        src={`/coins/${activeOrder.symbol}.png`}
-                        alt={activeOrder.symbol}
-                      />
-                      <span>{activeOrder.symbol}</span>
-                    </div>
+<div className="info-symbol">
+  <Image
+    src={`/coins/${activeOrder.symbol}.png`}
+    alt={activeOrder.symbol}
+    width={16}
+    height={16}
+  />
+  <span>{activeOrder.symbol}</span>
+</div>
+
                   </div>
                   <div className="info-row">
                     <span className="info-label">
@@ -1049,11 +1060,14 @@ const filteredOrders = useMemo(() => {
                     >
                       <div className="mb-col idx">{i + 1}</div>
                       <div className="mb-col symbol">
-                        <img
-                          src={`/coins/${s.symbol}.png`}
-                          alt={s.symbol}
-                          className="market-icon"
-                        />
+<Image
+  src={`/coins/${s.symbol}.png`}
+  alt={s.symbol}
+  className="market-icon"
+  width={50}
+  height={50}
+/>
+
                         <span className="symbol-text">{s.symbol}</span>
                       </div>
                       <div className="mb-col price">

@@ -1366,6 +1366,7 @@ export function AdCard({ url, slotKind, nearId }) {
             )}
 
             {media.kind === 'image' && media.src && (
+           <div className="w-full h-full flex items-center justify-center">
               <NextImage
                 src={media.src}
                 alt={host}
@@ -1374,6 +1375,7 @@ export function AdCard({ url, slotKind, nearId }) {
                 className="w-full h-full object-cover transition-opacity duration-200"
                 unoptimized
               />
+                </div>
             )}
 
             {media.kind === 'favicon' && media.src && (
