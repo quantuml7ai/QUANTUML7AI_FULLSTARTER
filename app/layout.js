@@ -14,7 +14,7 @@ import Script from 'next/script'
 import { Montserrat } from 'next/font/google'
 import InviteFriendProvider from '../components/InviteFriendProvider'
 import SnowFX from '../components/SnowFX'
-
+import QCoinDropFX from '../components/QCoinDropFX'
 const forumTitleFont = Montserrat({
   subsets: ['latin', 'cyrillic'],
   weight: ['600', '700', '800'],
@@ -161,7 +161,7 @@ export default function RootLayout({ children }) {
            <ScrollTopPulse />
           </I18nProvider>
         </Providers>
-
+       <QCoinDropFX />
   {/* ❄ ПЕРЕДНИЙ СЛОЙ СНЕГА — лёгкая вуаль поверх всего */}
   <SnowFX
     zIndex={9998}

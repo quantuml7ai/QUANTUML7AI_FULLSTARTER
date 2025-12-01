@@ -4028,17 +4028,45 @@ function PostCard({
     ...audioInline.filter(u => !VIDEO_RE.test(u))
   ]));
 
-  const cleanedText = allLines.filter(s => {
-    const t = s.trim();
-    return (
-      !IMG_RE.test(t) &&
-      !VIDEO_RE.test(t) &&
-      !isAudioLine(t) &&
-      !YT_RE.test(t) &&
-      !TIKTOK_RE.test(t)
-    );
-  }).join('\n');
+  // очищаем текст: убираем из строк видео/yt/tiktok/аудио/картинки, но оставляем обычные ссылки
+  const cleanedText = allLines
+    .map((s) => {
+      let line = String(s ?? '');
+      if (!line.trim()) return '';
 
+      // вырезаем из строки все "медийные" URL (видео, yt, tiktok, аудио, картинки)
+      line = line.replace(URL_RE, (u) => {
+        const uTrim = u.trim();
+        if (
+          IMG_RE.test(uTrim) ||
+          VIDEO_RE.test(uTrim) ||
+          isAudioLine(uTrim) ||
+          YT_RE.test(uTrim) ||
+          TIKTOK_RE.test(uTrim)
+        ) {
+          return ''; // саму ссылку убираем
+        }
+        return u;    // обычные URL остаются
+      });
+
+      // чистим лишние пробелы после вырезания ссылок
+      line = line.replace(/\s{2,}/g, ' ').trim();
+      return line;
+    })
+    // и дополнительно отсекаем пустые строки и строки, которые всё ещё состоят только из вложений
+    .filter((line) => {
+      if (!line) return false;
+      const t = line.trim();
+      return (
+        t &&
+        !IMG_RE.test(t) &&
+        !VIDEO_RE.test(t) &&
+        !isAudioLine(t) &&
+        !YT_RE.test(t) &&
+        !TIKTOK_RE.test(t)
+      );
+    })
+    .join('\n');
 
   // ===== OWNER-меню (⋮) — только если владелец поста =====
   const isOwner = !!authId && (String(authId) === String(p?.userId || p?.accountId));
@@ -4153,30 +4181,32 @@ function PostCard({
               margin:0, padding:8, background:'rgba(10,16,28,.35)',
               border:'1px solid rgba(140,170,255,.25)', borderRadius:10, overflow:'hidden'
             }}>
-              <video
-                src={src}
-                controls
-                playsInline
-                preload="metadata"
-                onLoadedMetadata={(e) => {
-                  const v = e.currentTarget;
-                  const w = v.videoWidth || 0;
-                  const h = v.videoHeight || 0;
-                  if (w && h) {
-                    // даём карточке правильную высоту по реальному соотношению сторон
-                    v.style.aspectRatio = `${w} / ${h}`;
-                  }
-                  v.style.height = 'auto';
-                }}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  height: 'auto',           // вместо maxHeight
-                  objectFit: 'contain',     // без кропа; если нужен кроп — поменяй на 'cover'
-                  borderRadius: 6,
-                  background: '#000'
-                }}
-              />
+        <video
+          data-forum-video="post"   // ← помечаем, что это плеер из поста
+          src={src}
+          controls
+          playsInline
+          preload="metadata"       // обратно metadata, без "none"
+          onLoadedMetadata={(e) => {
+            const v = e.currentTarget;
+            const w = v.videoWidth || 0;
+            const h = v.videoHeight || 0;
+            if (w && h) {
+              v.style.aspectRatio = `${w} / ${h}`;
+            }
+            v.style.height = 'auto';
+          }}
+          style={{
+            display: 'block',
+            width: '100%',
+            height: 'auto',
+            objectFit: 'contain',
+            borderRadius: 6,
+            background: '#000'
+          }}
+        />
+
+
             </div>
           ))}
         </div>
@@ -5094,6 +5124,84 @@ export default function Forum(){
     });
     return stop; // снимем слушатели при размонтировании
   }, []);
+    // === Глобальный контроллер HTML5-видео в постах ===
+  // В любой момент времени играет только один <video controls>.
+  // Видео без controls (обложки, рекламные петельки и т.п.) не трогаем.
+  useEffect(() => {
+    if (!isBrowser()) return;
+
+    const handlePlay = (e) => {
+      const target = e.target;
+      // интересуют только обычные HTML5-видео с контролами
+      if (!(target instanceof HTMLVideoElement)) return;
+      if (!target.controls) return;
+
+      try {
+        const vids = document.querySelectorAll('video');
+        vids.forEach((v) => {
+          if (v === target) return;
+          if (!(v instanceof HTMLVideoElement)) return;
+          if (!v.controls) return;      // не трогаем рекламу/обложки без контролов
+          v.pause();
+        });
+      } catch {
+        // чтобы в случае чего не уронить UI
+      }
+    };
+
+    // ловим play на CAPTURE-фазе, чтобы сработать раньше всяких слушателей глубже
+    document.addEventListener('play', handlePlay, true);
+    return () => {
+      document.removeEventListener('play', handlePlay, true);
+    };
+  },[])
+  // === Ленивая подгрузка превью видео в постах ===
+  useEffect(() => {
+    if (!isBrowser()) return;
+
+    const selector = 'video[data-forum-video="post"]';
+
+    const prepare = (video) => {
+      if (!(video instanceof HTMLVideoElement)) return;
+      if (video.dataset.previewInit === '1') return;
+      video.dataset.previewInit = '1';
+
+      try {
+        // просим браузер подтянуть метаданные и первый кадр
+        video.preload = 'metadata';
+        video.load();
+      } catch {
+        // если что-то пошло не так — просто молча пропускаем
+      }
+    };
+
+    // если нет IntersectionObserver — готовим всё сразу
+    if (!('IntersectionObserver' in window)) {
+      document.querySelectorAll(selector).forEach(prepare);
+      return;
+    }
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          prepare(entry.target);
+          io.unobserve(entry.target); // один раз на видео
+        });
+      },
+      {
+        threshold: 0.25, // считается «в фокусе», когда ≥25% видно
+      }
+    );
+
+    document.querySelectorAll(selector).forEach((v) => io.observe(v));
+
+    return () => {
+      io.disconnect();
+    };
+  }, []);
+
+ 
 const requireAuthStrict = async () => {
   const cur = readAuth();
   if (cur?.asherId || cur?.accountId) { setAuth(cur); return cur; }
@@ -5116,26 +5224,59 @@ React.useEffect(()=>{
   window.addEventListener('vip:open', openVip)
   return () => window.removeEventListener('vip:open', openVip)
 },[])
-  // === Режим редактирования поста (owner) ===
-  const [editPostId, setEditPostId] = React.useState(null);
-  React.useEffect(() => {
-    const onEdit = (e) => {
-      try {
-        const d = e?.detail || {};
-        if (d?.postId && typeof d?.text === 'string') {
-          setEditPostId(String(d.postId));
-          try { setText(String(d.text)); } catch {}
-          try { document.getElementById('forum-composer')?.scrollIntoView({ behavior:'smooth', block:'center' }); } catch {}
-          try { toast?.ok?.(t?.('forum_edit_mode') || 'Режим редактирования'); } catch {}
+// === Режим редактирования поста (owner) ===
+const [editPostId, setEditPostId] = React.useState(null);
 
-        }
+React.useEffect(() => {
+  const onEdit = (e) => {
+    try {
+      const d = e?.detail || {};
+      if (!d?.postId || typeof d?.text !== 'string') return;
+
+      // какой пост правим + текст в композер
+      setEditPostId(String(d.postId));
+      setText(String(d.text));
+
+      // сразу открыть композер
+      try {
+        setComposerActive(true);
       } catch {}
-    };
-    if (typeof window !== 'undefined') {
-      window.addEventListener('forum:edit', onEdit);
-      return () => window.removeEventListener('forum:edit', onEdit);
-    }
-  }, []);
+
+      // после рендера — проскроллить и фокуснуть поле
+      try {
+        requestAnimationFrame(() => {
+          const root =
+            (composerRef && composerRef.current) ||
+            document.getElementById('forum-composer');
+
+          if (root && root.scrollIntoView) {
+            root.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+
+          // ищем textarea: либо по классу .taInput, либо любую textarea внутри
+          const ta =
+            root?.querySelector?.('.taInput') ||
+            root?.querySelector?.('textarea');
+
+          if (ta && typeof ta.focus === 'function') {
+            ta.focus();
+          }
+        });
+      } catch {}
+
+      // тост про режим редактирования
+      try {
+        toast?.ok?.(t?.('forum_edit_mode') || 'Режим редактирования');
+      } catch {}
+    } catch {}
+  };
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener('forum:edit', onEdit);
+    return () => window.removeEventListener('forum:edit', onEdit);
+  }
+}, [t, toast]); // ВАЖНО: без setComposerActive и composerRef
+
 /* ---- локальный снап и очередь ---- */
 const [data,setData] = useState(()=>{
   if(!isBrowser()) return { topics:[], posts:[], bans:[], admins:[], rev:null }
@@ -6762,7 +6903,7 @@ const createPost = async () => {
   // 1) собираем текст
   const plain = (String(text || '').trim()
     || ((pendingImgs.length>0 || audioUrlToSend || videoUrlToSend) ? '\u200B' : '')
-  ).slice(0,180);
+  ).slice(0,400);
 
   const body = [plain, ...pendingImgs,
     ...(audioUrlToSend ? [audioUrlToSend] : []),
@@ -9300,7 +9441,7 @@ function QuestHub({
             filter: drop-shadow(0 0 6px rgba(46,204,113,.55));
           }
           @keyframes cmrk-draw { to { stroke-dashoffset: 0; } }
-          /*respect reduce-motion */
+          /* уважение reduce-motion */
           @media (prefers-reduced-motion: reduce) {
             .cmrk .tick { animation: none; stroke-dashoffset: 0; }
           }
@@ -9372,7 +9513,7 @@ function QuestHub({
           const rewardShown = vipActive ? doubleDecimal(reward) : reward;
           const totalTasks  = getTotalTasks(q);
           const remain      = Math.max(0, totalTasks - done);
-          const isClaimed = !!questProg?.[q.id]?.claimed
+          const isClaimed = !!questProg?.[q.id]?.claimed;
           return (
             <button
               key={q.id}
@@ -9457,6 +9598,26 @@ function QuestHub({
     <div className="item qshine">
       {tickStyles}
 
+      {/* стили именно для списка задач выбранного квеста */}
+      <style jsx>{`
+        .questTaskHead{
+          display:flex;
+          align-items:flex-start;
+          gap:.6rem;
+        }
+        /* левая колонка: фиксируем ширину = ширине иконки,
+           чтобы маленький счётчик не мог её ужать */
+        .questTaskIconCol{
+          display:flex;
+          flex-direction:column;
+          align-items:center;
+          gap:4px;
+          width:98px;
+          min-width:98px;
+          flex:0 0 98px;
+        }
+      `}</style>
+
       <div className="flex items-center justify-between gap-2 mb-2">
         <div className="flex items-center gap-3">
           {q.cover ? (
@@ -9489,11 +9650,7 @@ function QuestHub({
               </div>
             )}
           </div>
-
-
         </div>
-
-
       </div>
 
       <div className="questTaskList">
@@ -9504,9 +9661,9 @@ function QuestHub({
 
           return (
             <div key={task.id ?? `t:${idx}`} className="item qshine questTask" data-intensity="soft">
-              <div className="questHead">
-                {/* ЛЕВАЯ КОЛОНКА: иконка + Start/таймер/галка ПОД ней */}
-                <div className="flex flex-col items-center gap-1">
+              <div className="questHead questTaskHead">
+                {/* ЛЕВАЯ КОЛОНКА: иконка + Start/таймер/галка ПОД ней, фиксированной ширины */}
+                <div className="questTaskIconCol">
                   {task.cover ? (
                     <Image
                       className="questThumb"
@@ -9520,10 +9677,10 @@ function QuestHub({
                     <div className="avaMini">🏁</div>
                   )}
 
-                  <div className="mt-1">
+                  <div>
                     {isDone ? (
                       (() => {
-                        const remain = Math.max(0, __questGetRemainMs(q.id, tid)); // ← страховка на отрицательные
+                        const remain = Math.max(0, __questGetRemainMs(q.id, tid)); // страховка
                         if (remain > 0) {
                           const sec = Math.ceil(remain / 1000);
                           return (
@@ -9576,6 +9733,7 @@ function QuestHub({
     </div>
   );
 }
+
 
 
 /* =========================================================

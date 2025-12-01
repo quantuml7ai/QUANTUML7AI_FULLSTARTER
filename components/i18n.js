@@ -42828,6 +42828,8 @@ ai_note_global_spot: 'Global spot is an aggregated fair spot price across major 
 ai_note_venue_spread: 'Venue spread shows price differences between exchanges — a large spread may indicate arbitrage, liquidity imbalance or technical distortions.',
 
 ai_no_data: 'Not enough data for a reliable analysis — history is too short or price series are problematic, so the system falls back to HOLD mode.',
+qcoin_drop_toast_error: "(the credit will be verified on the server)",
+qcoin_drop_toast_title: "Congratulations!",
 
 }
 const AI_HERO_RU = {
@@ -42894,6 +42896,8 @@ ai_note_global_spot: 'Global spot — агрегированная справе�
 ai_note_venue_spread: 'Спред между биржами показывает разницу цен на разных площадках — сильный спред может указывать на арбитраж, перекос ликвидности или технические искажения.',
 
 ai_no_data: 'Недостаточно данных для надёжного анализа — слишком короткая история или проблемы с ценовыми рядами, поэтому вывод ограничен режимом HOLD.',
+qcoin_drop_toast_error: "(зачисление будет проверено на сервере)",
+qcoin_drop_toast_title: "Подздравляем!",
 
 }
 const AI_HERO_UK = {
@@ -42960,6 +42964,8 @@ ai_note_global_spot: 'Global spot — агрегована справедлив�
 ai_note_venue_spread: 'Спред між біржами показує різницю цін на різних майданчиках — значний спред може вказувати на арбітраж, перекіс ліквідності або технічні спотворення.',
 
 ai_no_data: 'Недостатньо даних для надійного аналізу — надто коротка історія або проблеми з ціновими рядами, тому висновок обмежений режимом HOLD.',
+qcoin_drop_toast_error: "(зарахування буде перевірено на сервері)",
+qcoin_drop_toast_title: "Вітаємо!",
 
 }
 const AI_HERO_ES = {
@@ -43026,6 +43032,8 @@ ai_note_global_spot: 'Global spot — precio spot justo agregado en las principa
 ai_note_venue_spread: 'El spread entre bolsas muestra la diferencia de precios entre distintos mercados — un spread elevado puede indicar arbitraje, desequilibrio de liquidez o distorsiones técnicas.',
 
 ai_no_data: 'No hay suficientes datos para un análisis fiable — el historial es demasiado corto o hay problemas con las series de precios, por lo que la conclusión se limita al modo HOLD.',
+qcoin_drop_toast_error: "(el abono será verificado en el servidor)",
+qcoin_drop_toast_title: "¡Felicidades!",
 
 }
 const AI_HERO_ZH = {
@@ -43092,6 +43100,8 @@ ai_note_global_spot: 'Global spot —— 综合主要交易所的公平现货价
 ai_note_venue_spread: '交易所之间的价差显示不同平台的价格差异 —— 大价差可能表明套利机会、流动性失衡或技术性偏差。',
 
 ai_no_data: '缺乏足够的数据进行可靠分析 —— 历史过短或价格序列存在问题，因此系统返回 HOLD 模式。',
+qcoin_drop_toast_error: "（充值将由服务器进行验证）",
+qcoin_drop_toast_title: "恭喜！",
 
 }
 const AI_HERO_AR = {
@@ -43158,6 +43168,8 @@ ai_note_global_spot: 'Global spot — سعر Spot عادل مُجمّع من ا�
 ai_note_venue_spread: 'الـ Spread بين البورصات يبيّن فروق الأسعار بين المنصات المختلفة — الـ Spread الكبير قد يشير إلى فرص تحكيم أو اختلال في السيولة أو تشوّهات تقنية.',
 
 ai_no_data: 'لا توجد بيانات كافية لإجراء تحليل موثوق — السجل التاريخي قصير جداً أو أن هناك مشكلات في سلاسل الأسعار، لذا يتم حصر النتيجة في وضع HOLD.',
+qcoin_drop_toast_error: "(سيتم التحقق من الإيداع على الخادم)",
+qcoin_drop_toast_title: "تهانينا!",
 
 }
 const AI_HERO_TR = {
@@ -43224,6 +43236,8 @@ ai_note_global_spot: 'Global spot — büyük borsalardaki birleşik adil spot f
 ai_note_venue_spread: 'Borsalar arasındaki spread, platformlar arasındaki fiyat farkını gösterir — büyük spread, arbitraj, likidite dengesizliği veya teknik bozulmalara işaret edebilir.',
 
 ai_no_data: 'Güvenilir analiz için yeterli veri yok — geçmiş çok kısa veya fiyat serilerinde sorun var, bu nedenle sonuç HOLD moduyla sınırlıdır.',
+qcoin_drop_toast_error: "(yatırım sunucuda doğrulanacaktır)",
+qcoin_drop_toast_title: "Tebrikler!",
 
 }
 try {
@@ -43234,6 +43248,584 @@ try {
   Object.assign(dict.zh, AI_HERO_ZH)
   Object.assign(dict.ar, AI_HERO_AR)
   Object.assign(dict.tr, AI_HERO_TR)
+} catch (e) {}
+
+const BATTLE_EN = {
+battlecoin_auth_required: 'Sign in to trade BattleCoin',
+battlecoin_title: 'BattleCoin',
+battlecoin_subtitle: 'Bet real QCOIN with up to x100 leverage in 10-minute battles.',
+battlecoin_balance_label: 'Available balance',
+
+battlecoin_vip_cta: 'Unlock VIP x100',
+battlecoin_vip_only_leverage: 'x100 leverage is for VIP only',
+
+vip_invoice_failed: 'Failed to create VIP payment invoice.',
+vip_invoice_generic: 'VIP subscription payment error.',
+
+battlecoin_leverage_label: 'Position parameters',
+battlecoin_stake_label: 'Stake',
+battlecoin_stake_max: 'ALL',
+
+battlecoin_col_symbol: 'Symbol',
+battlecoin_col_price: 'Price',
+battlecoin_col_index: '#',
+battlecoin_col_change24h: '24h %',
+
+battlecoin_side_long: 'Long / up',
+battlecoin_side_short: 'Short / down',
+
+battlecoin_order_active_title: 'Active BattleCoin order',
+battlecoin_no_active_order: 'No active BattleCoin orders',
+
+battlecoin_orders_col_side: 'Side',
+battlecoin_orders_col_leverage: 'Leverage',
+battlecoin_orders_col_stake: 'Stake',
+battlecoin_orders_col_entry: 'Entry price',
+battlecoin_orders_col_change: 'Change',
+battlecoin_orders_col_pnl: 'PnL',
+battlecoin_orders_col_index: '#',
+battlecoin_orders_col_symbol: 'Symbol',
+battlecoin_orders_col_status: 'Status',
+
+battlecoin_timer_label: 'Time left',
+
+battlecoin_market_list_title: 'Battle market',
+
+battlecoin_orders_title: 'Battle history',
+battlecoin_filter_all: 'All',
+battlecoin_filter_active: 'Active',
+battlecoin_filter_closed: 'Closed',
+battlecoin_no_orders: 'No BattleCoin orders yet. Your first battle will appear here.',
+
+auth_signin: 'Sign in',
+
+battlecoin_toast_open_ok: 'Order opened successfully.',
+battlecoin_toast_win: 'In profit!',
+battlecoin_toast_loss: 'In loss.',
+battlecoin_toast_break_even: 'Break-even.',
+
+battlecoin_err_open_failed: 'Failed to open order.',
+battlecoin_err_settle_failed: 'Failed to settle order.',
+battlecoin_err_invalid_stake: 'Invalid stake amount.',
+battlecoin_err_active_order: 'You already have an active order.',
+battlecoin_err_insufficient_balance: 'Insufficient QCOIN balance.',
+battlecoin_tagline: '• Quantum Futures •',
+battlecoin_control_subtitle: 'Stake • Leverage • Direction',
+battlecoin_live_market_label: 'Real-time market',
+battlecoin_leverage_extra_vip: 'Up to x100',
+battlecoin_leverage_extra_basic: 'Up to x5 • VIP for more',
+battlecoin_symbol_extra: 'Perpetuals vs USDT',
+battlecoin_longshort_hint: 'LONG — up • SHORT — down',
+battlecoin_long_buy: 'Buy',
+battlecoin_long_bullish: 'Bullish',
+battlecoin_short_sell: 'Sell',
+battlecoin_short_bearish: 'Bearish',
+battlecoin_active_subtitle: '10-minute fixed duration • auto-settle',
+battlecoin_empty_active_hint: 'Specify stake and leverage, choose direction and start your first battle.',
+battlecoin_order_id_label: 'Order #',
+battlecoin_settle_now: 'Settle now',
+battlecoin_market_subtitle: 'Real-time prices • click to select symbol',
+battlecoin_orders_subtitle: 'Last 100 BattleCoin orders for this account',
+
+
+}
+
+
+const BATTLE_RU = {
+battlecoin_auth_required: 'Войдите, чтобы торговать Битве Монет',
+battlecoin_title: 'Битва Монет',
+battlecoin_subtitle: 'Ставь реальные QCOIN с плечом до x100 в 10-минутных баттлах.',
+battlecoin_balance_label: 'Доступный баланс',
+
+battlecoin_vip_cta: 'Открыть VIP x100',
+battlecoin_vip_only_leverage: 'Плечо x100 только для VIP',
+
+vip_invoice_failed: 'Не удалось создать VIP-счёт на оплату.',
+vip_invoice_generic: 'Ошибка оплаты VIP-подписки.',
+
+battlecoin_leverage_label: 'Параметры позиции',
+battlecoin_stake_label: 'Ставка',
+battlecoin_stake_max: 'ВСЁ',
+
+battlecoin_col_symbol: 'Символ',
+battlecoin_col_price: 'Цена',
+battlecoin_col_index: '№',
+battlecoin_col_change24h: '24ч %',
+
+battlecoin_side_long: 'Long / рост',
+battlecoin_side_short: 'Short / падение',
+
+battlecoin_order_active_title: 'Активный ордер Битвы Монет',
+battlecoin_no_active_order: 'Нет активных ордеров Битвы Монет',
+
+battlecoin_orders_col_side: 'Сторона',
+battlecoin_orders_col_leverage: 'Плечо',
+battlecoin_orders_col_stake: 'Ставка',
+battlecoin_orders_col_entry: 'Цена входа',
+battlecoin_orders_col_change: 'Изменение',
+battlecoin_orders_col_pnl: 'PnL',
+battlecoin_orders_col_index: '№',
+battlecoin_orders_col_symbol: 'Символ',
+battlecoin_orders_col_status: 'Статус',
+
+battlecoin_timer_label: 'Оставшееся время',
+
+battlecoin_market_list_title: 'Боевой рынок',
+
+battlecoin_orders_title: 'История баттлов',
+battlecoin_filter_all: 'Все',
+battlecoin_filter_active: 'Активные',
+battlecoin_filter_closed: 'Закрытые',
+battlecoin_no_orders: 'Пока нет ордеров Битвы Монет. Ваш первый баттл появится здесь.',
+
+auth_signin: 'Войти',
+
+battlecoin_toast_open_ok: 'Ордер успешно открыт.',
+battlecoin_toast_win: 'В Прибыли!',
+battlecoin_toast_loss: 'В Убытке.',
+battlecoin_toast_break_even: 'Безубыток.',
+
+battlecoin_err_open_failed: 'Не удалось открыть ордер.',
+battlecoin_err_settle_failed: 'Не удалось закрыть ордер.',
+battlecoin_err_invalid_stake: 'Некорректный размер ставки.',
+battlecoin_err_active_order: 'У вас уже есть активный ордер.',
+battlecoin_err_insufficient_balance: 'Недостаточно QCOIN на балансе.',
+battlecoin_tagline: '• Quantum Futures •',
+battlecoin_control_subtitle: 'Ставка • Плечо • Направление',
+battlecoin_live_market_label: 'Рынок в реальном времени',
+battlecoin_leverage_extra_vip: 'До x100',
+battlecoin_leverage_extra_basic: 'До x5 • VIP для большего',
+battlecoin_symbol_extra: 'Перпетуалы к USDT',
+battlecoin_longshort_hint: 'LONG — рост • SHORT — падение',
+battlecoin_long_buy: 'Покупка',
+battlecoin_long_bullish: 'Бычий',
+battlecoin_short_sell: 'Продажа',
+battlecoin_short_bearish: 'Медвежий',
+battlecoin_active_subtitle: 'Фиксированная длительность 10 минут • автозакрытие',
+battlecoin_empty_active_hint: 'Укажите ставку и плечо, выберите направление и начните свой первый баттл.',
+battlecoin_order_id_label: 'Ордер №',
+battlecoin_settle_now: 'Закрыть сейчас',
+battlecoin_market_subtitle: 'Цены в реальном времени • нажмите для выбора символа',
+battlecoin_orders_subtitle: 'Последние 100 ордеров Битвы Монет для этого аккаунта', 
+
+}
+
+
+const BATTLE_UK = {
+battlecoin_auth_required: 'Увійдіть, щоб торгувати Битвою Монет',
+battlecoin_title: 'Битва Монет',
+battlecoin_subtitle: 'Став реальні QCOIN з плечем до x100 у 10-хвилинних батлах.',
+battlecoin_balance_label: 'Доступний баланс',
+
+battlecoin_vip_cta: 'Відкрити VIP x100',
+battlecoin_vip_only_leverage: 'Плече x100 доступне лише для VIP',
+
+vip_invoice_failed: 'Не вдалося створити VIP-рахунок на оплату.',
+vip_invoice_generic: 'Помилка оплати VIP-підписки.',
+
+battlecoin_leverage_label: 'Параметри позиції',
+battlecoin_stake_label: 'Ставка',
+battlecoin_stake_max: 'ВСЕ',
+
+battlecoin_col_symbol: 'Символ',
+battlecoin_col_price: 'Ціна',
+battlecoin_col_index: '№',
+battlecoin_col_change24h: '24г %',
+
+battlecoin_side_long: 'Long / зростання',
+battlecoin_side_short: 'Short / падіння',
+
+battlecoin_order_active_title: 'Активний ордер Битви Монет',
+battlecoin_no_active_order: 'Немає активних ордерів Битви Монет',
+
+battlecoin_orders_col_side: 'Сторона',
+battlecoin_orders_col_leverage: 'Плече',
+battlecoin_orders_col_stake: 'Ставка',
+battlecoin_orders_col_entry: 'Ціна входу',
+battlecoin_orders_col_change: 'Зміна',
+battlecoin_orders_col_pnl: 'PnL',
+battlecoin_orders_col_index: '№',
+battlecoin_orders_col_symbol: 'Символ',
+battlecoin_orders_col_status: 'Статус',
+
+battlecoin_timer_label: 'Залишок часу',
+
+battlecoin_market_list_title: 'Бойовий ринок',
+
+battlecoin_orders_title: 'Історія батлів',
+battlecoin_filter_all: 'Усі',
+battlecoin_filter_active: 'Активні',
+battlecoin_filter_closed: 'Закриті',
+battlecoin_no_orders: 'Поки немає ордерів Битви Монет. Ваш перший батл з’явиться тут.',
+
+auth_signin: 'Увійти',
+
+battlecoin_toast_open_ok: 'Ордер успішно відкрито.',
+battlecoin_toast_win: 'У прибутку!',
+battlecoin_toast_loss: 'У збитку.',
+battlecoin_toast_break_even: 'Беззбитковість.',
+
+battlecoin_err_open_failed: 'Не вдалося відкрити ордер.',
+battlecoin_err_settle_failed: 'Не вдалося закрити ордер.',
+battlecoin_err_invalid_stake: 'Н некоректний розмір ставки.',
+battlecoin_err_active_order: 'У вас уже є активний ордер.',
+battlecoin_err_insufficient_balance: 'Недостатньо QCOIN на балансі.',
+battlecoin_tagline: '• Quantum Futures •',
+battlecoin_control_subtitle: 'Ставка • Плече • Напрям',
+battlecoin_live_market_label: 'Ринок у реальному часі',
+battlecoin_leverage_extra_vip: 'До x100',
+battlecoin_leverage_extra_basic: 'До x5 • VIP для більшого',
+battlecoin_symbol_extra: 'Перпетуали до USDT',
+battlecoin_longshort_hint: 'SHORT — ПАДІННЯ',
+battlecoin_long_buy: 'Покупка',
+battlecoin_long_bullish: 'Бичачий',
+battlecoin_short_sell: 'Продаж',
+battlecoin_short_bearish: 'Ведмежий',
+battlecoin_active_subtitle: 'Фіксована тривалість 10 хвилин • автозакриття',
+battlecoin_empty_active_hint: 'Вкажіть ставку та плече, оберіть напрям і почніть свій перший батл.',
+battlecoin_order_id_label: 'Ордер №',
+battlecoin_settle_now: 'Закрити зараз',
+battlecoin_market_subtitle: 'Ціни в реальному часі • натисніть, щоб вибрати символ',
+battlecoin_orders_subtitle: 'Останні 100 ордерів Битви Монет для цього акаунта',
+
+
+}
+
+
+const BATTLE_ES = {
+battlecoin_auth_required: 'Inicia sesión para operar en la Batalla de Monedas',
+battlecoin_title: 'Batalla de Monedas',
+battlecoin_subtitle: 'Apuesta QCOIN reales con apalancamiento de hasta x100 en batallas de 10 minutos.',
+battlecoin_balance_label: 'Balance disponible',
+
+battlecoin_vip_cta: 'Abrir VIP x100',
+battlecoin_vip_only_leverage: 'El apalancamiento x100 es solo para VIP',
+
+vip_invoice_failed: 'No se pudo crear la factura VIP para el pago.',
+vip_invoice_generic: 'Error en el pago de la suscripción VIP.',
+
+battlecoin_leverage_label: 'Parámetros de la posición',
+battlecoin_stake_label: 'Apuesta',
+battlecoin_stake_max: 'TODO',
+
+battlecoin_col_symbol: 'Símbolo',
+battlecoin_col_price: 'Precio',
+battlecoin_col_index: '№',
+battlecoin_col_change24h: '24h %',
+
+battlecoin_side_long: 'Long / subida',
+battlecoin_side_short: 'Short / caída',
+
+battlecoin_order_active_title: 'Orden activa de la Batalla de Monedas',
+battlecoin_no_active_order: 'No hay órdenes activas de la Batalla de Monedas',
+
+battlecoin_orders_col_side: 'Lado',
+battlecoin_orders_col_leverage: 'Apalancamiento',
+battlecoin_orders_col_stake: 'Apuesta',
+battlecoin_orders_col_entry: 'Precio de entrada',
+battlecoin_orders_col_change: 'Cambio',
+battlecoin_orders_col_pnl: 'PnL',
+battlecoin_orders_col_index: '№',
+battlecoin_orders_col_symbol: 'Símbolo',
+battlecoin_orders_col_status: 'Estado',
+
+battlecoin_timer_label: 'Tiempo restante',
+
+battlecoin_market_list_title: 'Mercado de batalla',
+
+battlecoin_orders_title: 'Historial de batallas',
+battlecoin_filter_all: 'Todos',
+battlecoin_filter_active: 'Activos',
+battlecoin_filter_closed: 'Cerrados',
+battlecoin_no_orders: 'Aún no hay órdenes de la Batalla de Monedas. Tu primera batalla aparecerá aquí.',
+
+auth_signin: 'Iniciar sesión',
+
+battlecoin_toast_open_ok: 'Orden abierta con éxito.',
+battlecoin_toast_win: '¡En ganancias!',
+battlecoin_toast_loss: 'En pérdidas.',
+battlecoin_toast_break_even: 'Punto de equilibrio.',
+
+battlecoin_err_open_failed: 'No se pudo abrir la orden.',
+battlecoin_err_settle_failed: 'No se pudo cerrar la orden.',
+battlecoin_err_invalid_stake: 'Tamaño de apuesta incorrecto.',
+battlecoin_err_active_order: 'Ya tienes una orden activa.',
+battlecoin_err_insufficient_balance: 'Balance QCOIN insuficiente.',
+battlecoin_tagline: '• Quantum Futures •',
+battlecoin_control_subtitle: 'Apuesta • Apalancamiento • Dirección',
+battlecoin_live_market_label: 'Mercado en tiempo real',
+battlecoin_leverage_extra_vip: 'Hasta x100',
+battlecoin_leverage_extra_basic: 'Hasta x5 • VIP para más',
+battlecoin_symbol_extra: 'Perpetuos frente a USDT',
+battlecoin_longshort_hint: 'LONG — subida • SHORT — caída',
+battlecoin_long_buy: 'Compra',
+battlecoin_long_bullish: 'Alcista',
+battlecoin_short_sell: 'Venta',
+battlecoin_short_bearish: 'Bajista',
+battlecoin_active_subtitle: 'Duración fija de 10 minutos • auto-cierre',
+battlecoin_empty_active_hint: 'Indica la apuesta y el apalancamiento, elige la dirección y comienza tu primera batalla.',
+battlecoin_order_id_label: 'Orden №',
+battlecoin_settle_now: 'Cerrar ahora',
+battlecoin_market_subtitle: 'Precios en tiempo real • haz clic para seleccionar símbolo',
+battlecoin_orders_subtitle: 'Últimas 100 órdenes de la Batalla de Monedas para esta cuenta',
+
+
+}
+
+
+const BATTLE_ZH = {
+battlecoin_auth_required: '登录以参与币之战交易',
+battlecoin_title: '币之战',
+battlecoin_subtitle: '在 10 分钟战斗中使用真实 QCOIN，最高可达 x100 杠杆。',
+battlecoin_balance_label: '可用余额',
+
+battlecoin_vip_cta: '开启 VIP x100',
+battlecoin_vip_only_leverage: 'x100 杠杆仅限 VIP',
+
+vip_invoice_failed: '无法创建 VIP 支付订单。',
+vip_invoice_generic: 'VIP 订阅支付错误。',
+
+battlecoin_leverage_label: '仓位参数',
+battlecoin_stake_label: '下注',
+battlecoin_stake_max: '全部',
+
+battlecoin_col_symbol: '交易对',
+battlecoin_col_price: '价格',
+battlecoin_col_index: '№',
+battlecoin_col_change24h: '24小时 %',
+
+battlecoin_side_long: 'Long / 上涨',
+battlecoin_side_short: 'Short / 下跌',
+
+battlecoin_order_active_title: '币之战活动订单',
+battlecoin_no_active_order: '暂无币之战活动订单',
+
+battlecoin_orders_col_side: '方向',
+battlecoin_orders_col_leverage: '杠杆',
+battlecoin_orders_col_stake: '下注',
+battlecoin_orders_col_entry: '开仓价',
+battlecoin_orders_col_change: '变化',
+battlecoin_orders_col_pnl: 'PnL',
+battlecoin_orders_col_index: '№',
+battlecoin_orders_col_symbol: '交易对',
+battlecoin_orders_col_status: '状态',
+
+battlecoin_timer_label: '剩余时间',
+
+battlecoin_market_list_title: '战斗市场',
+
+battlecoin_orders_title: '战斗历史',
+battlecoin_filter_all: '全部',
+battlecoin_filter_active: '进行中',
+battlecoin_filter_closed: '已关闭',
+battlecoin_no_orders: '尚无币之战订单。您的第一场战斗将显示在此处。',
+
+auth_signin: '登录',
+
+battlecoin_toast_open_ok: '订单已成功打开。',
+battlecoin_toast_win: '盈利！',
+battlecoin_toast_loss: '亏损。',
+battlecoin_toast_break_even: '保本。',
+
+battlecoin_err_open_failed: '无法打开订单。',
+battlecoin_err_settle_failed: '无法结算订单。',
+battlecoin_err_invalid_stake: '下注金额不正确。',
+battlecoin_err_active_order: '您已有一个活动订单。',
+battlecoin_err_insufficient_balance: 'QCOIN 余额不足。',
+battlecoin_tagline: '• Quantum Futures •',
+battlecoin_control_subtitle: '下注 • 杠杆 • 方向',
+battlecoin_live_market_label: '实时市场',
+battlecoin_leverage_extra_vip: '最高 x100',
+battlecoin_leverage_extra_basic: '最高 x5 • VIP 可获得更多',
+battlecoin_symbol_extra: 'USDT 永续合约',
+battlecoin_longshort_hint: 'LONG — 上涨 • SHORT — 下跌',
+battlecoin_long_buy: '买入',
+battlecoin_long_bullish: '看涨',
+battlecoin_short_sell: '卖出',
+battlecoin_short_bearish: '看跌',
+battlecoin_active_subtitle: '固定 10 分钟时长 • 自动结算',
+battlecoin_empty_active_hint: '请输入下注与杠杆，选择方向并开始您的首次战斗。',
+battlecoin_order_id_label: '订单 №',
+battlecoin_settle_now: '立即结算',
+battlecoin_market_subtitle: '实时价格 • 点击选择交易对',
+battlecoin_orders_subtitle: '该账户最近的 100 个币之战订单',
+
+
+}
+
+
+const BATTLE_AR = {
+battlecoin_auth_required: 'سجّل الدخول للتداول في معركة العملات',
+battlecoin_title: 'معركة العملات',
+battlecoin_subtitle: 'راهن بـ QCOIN حقيقية مع رافعة مالية تصل إلى x100 في معارك مدتها 10 دقائق.',
+battlecoin_balance_label: 'الرصيد المتاح',
+
+battlecoin_vip_cta: 'فتح VIP x100',
+battlecoin_vip_only_leverage: 'رافعة x100 مخصّصة فقط لمشتركي VIP',
+
+vip_invoice_failed: 'تعذّر إنشاء فاتورة دفع VIP.',
+vip_invoice_generic: 'خطأ في دفع اشتراك VIP.',
+
+battlecoin_leverage_label: 'معايير الصفقة',
+battlecoin_stake_label: 'الرهان',
+battlecoin_stake_max: 'الكل',
+
+battlecoin_col_symbol: 'الرمز',
+battlecoin_col_price: 'السعر',
+battlecoin_col_index: '№',
+battlecoin_col_change24h: '٪ خلال 24 ساعة',
+
+battlecoin_side_long: 'Long / صعود',
+battlecoin_side_short: 'Short / هبوط',
+
+battlecoin_order_active_title: 'أمر معركة العملات النشط',
+battlecoin_no_active_order: 'لا يوجد أوامر نشطة لمعركة العملات',
+
+battlecoin_orders_col_side: 'الاتجاه',
+battlecoin_orders_col_leverage: 'الرافعة',
+battlecoin_orders_col_stake: 'الرهان',
+battlecoin_orders_col_entry: 'سعر الدخول',
+battlecoin_orders_col_change: 'التغيير',
+battlecoin_orders_col_pnl: 'PnL',
+battlecoin_orders_col_index: '№',
+battlecoin_orders_col_symbol: 'الرمز',
+battlecoin_orders_col_status: 'الحالة',
+
+battlecoin_timer_label: 'الوقت المتبقي',
+
+battlecoin_market_list_title: 'سوق المعركة',
+
+battlecoin_orders_title: 'سجلّ المعارك',
+battlecoin_filter_all: 'الكل',
+battlecoin_filter_active: 'نشطة',
+battlecoin_filter_closed: 'مغلقة',
+battlecoin_no_orders: 'لا توجد بعد أي أوامر في معركة العملات. ستظهر أول معركة لك هنا.',
+
+auth_signin: 'تسجيل الدخول',
+
+battlecoin_toast_open_ok: 'تم فتح الأمر بنجاح.',
+battlecoin_toast_win: 'بربح!',
+battlecoin_toast_loss: 'بخسارة.',
+battlecoin_toast_break_even: 'تعادل.',
+
+battlecoin_err_open_failed: 'تعذّر فتح الأمر.',
+battlecoin_err_settle_failed: 'تعذّر إغلاق الأمر.',
+battlecoin_err_invalid_stake: 'قيمة رهان غير صحيحة.',
+battlecoin_err_active_order: 'لديك بالفعل أمر نشط.',
+battlecoin_err_insufficient_balance: 'رصيد QCOIN غير كافٍ.',
+battlecoin_tagline: '• Quantum Futures •',
+battlecoin_control_subtitle: 'الرهان • الرافعة • الاتجاه',
+battlecoin_live_market_label: 'السوق في الوقت الحقيقي',
+battlecoin_leverage_extra_vip: 'حتى x100',
+battlecoin_leverage_extra_basic: 'حتى x5 • VIP لمزيد من الرافعة',
+battlecoin_symbol_extra: 'عقود دائمة مقابل USDT',
+battlecoin_longshort_hint: 'LONG — صعود • SHORT — هبوط',
+battlecoin_long_buy: 'شراء',
+battlecoin_long_bullish: 'صعودي',
+battlecoin_short_sell: 'بيع',
+battlecoin_short_bearish: 'هبوطي',
+battlecoin_active_subtitle: 'مدة ثابتة 10 دقائق • إغلاق تلقائي',
+battlecoin_empty_active_hint: 'حدّد الرهان والرافعة، اختر الاتجاه وابدأ أول معركة لك.',
+battlecoin_order_id_label: 'الأمر №',
+battlecoin_settle_now: 'إغلاق الآن',
+battlecoin_market_subtitle: 'أسعار لحظية • اضغط لاختيار الرمز',
+battlecoin_orders_subtitle: 'آخر 100 أمر من معركة العملات لهذا الحساب',
+
+
+}
+
+
+const BATTLE_TR = {
+battlecoin_auth_required: 'BattleCoin ile işlem yapmak için giriş yapın',
+battlecoin_title: 'BattleCoin',
+battlecoin_subtitle: 'Gerçek QCOIN ile 10 dakikalık savaşlarda x100 kaldıraçla pozisyon açın.',
+battlecoin_balance_label: 'Kullanılabilir bakiye',
+
+battlecoin_vip_cta: 'VIP x100 aç',
+battlecoin_vip_only_leverage: 'x100 kaldıraç sadece VIP için',
+
+vip_invoice_failed: 'VIP ödeme faturası oluşturulamadı.',
+vip_invoice_generic: 'VIP aboneliği ödeme hatası.',
+
+battlecoin_leverage_label: 'Pozisyon ayarları',
+battlecoin_stake_label: 'Bahis',
+battlecoin_stake_max: 'HEPSİ',
+
+battlecoin_col_symbol: 'Sembol',
+battlecoin_col_price: 'Fiyat',
+battlecoin_col_index: '№',
+battlecoin_col_change24h: '24s %',
+
+battlecoin_side_long: 'Long / yükseliş',
+battlecoin_side_short: 'Short / düşüş',
+
+battlecoin_order_active_title: 'Aktif BattleCoin emri',
+battlecoin_no_active_order: 'Aktif BattleCoin emri yok',
+
+battlecoin_orders_col_side: 'Yön',
+battlecoin_orders_col_leverage: 'Kaldıraç',
+battlecoin_orders_col_stake: 'Bahis',
+battlecoin_orders_col_entry: 'Giriş fiyatı',
+battlecoin_orders_col_change: 'Değişim',
+battlecoin_orders_col_pnl: 'PnL',
+battlecoin_orders_col_index: '№',
+battlecoin_orders_col_symbol: 'Sembol',
+battlecoin_orders_col_status: 'Durum',
+
+battlecoin_timer_label: 'Kalan süre',
+
+battlecoin_market_list_title: 'Savaş piyasası',
+
+battlecoin_orders_title: 'Savaş geçmişi',
+battlecoin_filter_all: 'Tümü',
+battlecoin_filter_active: 'Aktif',
+battlecoin_filter_closed: 'Kapanmış',
+battlecoin_no_orders: 'Henüz BattleCoin emriniz yok. İlk savaşınız burada görünecek.',
+
+auth_signin: 'Giriş yap',
+
+battlecoin_toast_open_ok: 'Emir başarıyla açıldı.',
+battlecoin_toast_win: 'Kârda!',
+battlecoin_toast_loss: 'Zararda.',
+battlecoin_toast_break_even: 'Başa baş.',
+
+battlecoin_err_open_failed: 'Emir açılamadı.',
+battlecoin_err_settle_failed: 'Emir kapatılamadı.',
+battlecoin_err_invalid_stake: 'Geçersiz bahis miktarı.',
+battlecoin_err_active_order: 'Zaten aktif bir emriniz var.',
+battlecoin_err_insufficient_balance: 'Yetersiz QCOIN bakiyesi.',
+battlecoin_tagline: '• Quantum Futures •',
+battlecoin_control_subtitle: 'Bahis • Kaldıraç • Yön',
+battlecoin_live_market_label: 'Gerçek zamanlı piyasa',
+battlecoin_leverage_extra_vip: 'x100\'e kadar',
+battlecoin_leverage_extra_basic: 'x5\'e kadar • Daha fazlası için VIP',
+battlecoin_symbol_extra: 'USDT’ye karşı perpetual sözleşmeler',
+battlecoin_longshort_hint: 'LONG — yükseliş • SHORT — düşüş',
+battlecoin_long_buy: 'Alış',
+battlecoin_long_bullish: 'Yükseliş',
+battlecoin_short_sell: 'Satış',
+battlecoin_short_bearish: 'Düşüş',
+battlecoin_active_subtitle: 'Sabit 10 dakika süre • otomatik kapanış',
+battlecoin_empty_active_hint: 'Bahsi ve kaldıracı ayarlayın, yönü seçin ve ilk savaşınızı başlatın.',
+battlecoin_order_id_label: 'Emir №',
+battlecoin_settle_now: 'Şimdi kapat',
+battlecoin_market_subtitle: 'Gerçek zamanlı fiyatlar • sembol seçmek için tıklayın',
+battlecoin_orders_subtitle: 'Bu hesap için son 100 BattleCoin emri',
+
+
+}
+
+
+
+
+try {
+  Object.assign(dict.en, BATTLE_EN)
+  Object.assign(dict.ru, BATTLE_RU)
+  Object.assign(dict.uk, BATTLE_UK)
+  Object.assign(dict.es, BATTLE_ES)
+  Object.assign(dict.zh, BATTLE_ZH)
+  Object.assign(dict.ar, BATTLE_AR)
+  Object.assign(dict.tr, BATTLE_TR)
 } catch (e) {}
 export function I18nProvider({ children }) {
   const [lang, setLang] = useState('en')

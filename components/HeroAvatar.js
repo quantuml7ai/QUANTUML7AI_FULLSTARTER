@@ -27,7 +27,6 @@ const TICKERS = [
   'HARD','IRIS','AKT','TOMO','HFT','ID','TIA','SCRT','BLUR','GNS'
 ];
 
-
 const rnd = (a,b)=>a+Math.random()*(b-a)
 const pick = a => a[(Math.random()*a.length)|0]
 
@@ -95,9 +94,70 @@ export default function HeroAvatar({ videoSrc='/avatar.mp4', poster='/avatar.jpg
     return () => window.removeEventListener('mousemove', onMove)
   }, [])
 
+  // === логика: видео крутится 3 раза, потом навечно постер ===
+  const videoRef = useRef(null)
+  const [loops, setLoops] = useState(0)
+  const [showPoster, setShowPoster] = useState(false)
+
+  // если меняется источник видео — сбрасываем цикл
+  useEffect(() => {
+    setLoops(0)
+    setShowPoster(false)
+  }, [videoSrc])
+
+  const handleVideoEnded = () => {
+    setLoops(prev => {
+      const next = prev + 1
+      const v = videoRef.current
+
+      if (next < 3) {
+        // запускаем следующий цикл
+        if (v) {
+          try {
+            v.currentTime = 0
+            v.play().catch(() => {})
+          } catch {}
+        }
+      } else {
+        // три раза открутили — показываем постер и глушим видео
+        setShowPoster(true)
+        if (v) {
+          try {
+            v.pause()
+          } catch {}
+        }
+      }
+
+      return next
+    })
+  }
+
   return (
     <div ref={wrapRef} className="scene" aria-hidden="true">
-      <video className="bg-video" src={videoSrc} {...(poster?{poster}:{})} autoPlay loop muted playsInline style={{opacity}} />
+      {/* видео-аватар: без loop, циклы контролируем сами */}
+      <video
+        ref={videoRef}
+        className="bg-video"
+        src={videoSrc}
+        {...(poster ? { poster } : {})}
+        autoPlay
+        muted
+        playsInline
+        onEnded={handleVideoEnded}
+        style={{ opacity: showPoster ? 0 : opacity, transition: 'opacity .5s ease' }}
+      />
+
+      {/* постер-аватар поверх, включается после 3-х циклов видео */}
+      {poster && (
+        <img
+          src={poster}
+          alt=""
+          className="bg-video"
+          aria-hidden="true"
+          style={{ opacity: showPoster ? opacity : 0, transition: 'opacity .5s ease' }}
+        />
+      )}
+
       <div className="stars" />
       <div className="tickers">
         {items.map(i=>(

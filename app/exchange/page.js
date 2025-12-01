@@ -10,7 +10,7 @@ import Link from 'next/link'
 // ⬇⬇⬇ Brain больше не дергаем на клиенте — вся магия на сервере через API
 // import * as Brain from '../../lib/brain.js'
 import HomeBetweenBlocksAd from '../ads'
-
+import BattleCoin from './BattleCoin'
 /* ================================ i18n bridge ================================ */
 let useI18n = () => ({ t: (k)=>k })
 try { const mod = require('../../components/i18n'); if (mod?.useI18n) useI18n = mod.useI18n } catch {}
@@ -298,58 +298,145 @@ function TVChart({symbol, tf}){
     <style jsx>{`.tvWrap{position:relative;width:100%;height:58vh;min-height:360px} .tvWrap :global(#tv_chart){position:absolute;inset:0}`}</style>
   </Panel>
 }
+function useTypewriter(text, speed = 18) {
+  const [value, setValue] = useState(text || '')
+
+  useEffect(() => {
+    if (!text) {
+      setValue('')
+      return
+    }
+
+    let i = 0
+    let cancelled = false
+    setValue('')
+
+    const tick = () => {
+      if (cancelled) return
+      i += 1
+      setValue(text.slice(0, i))
+      if (i < text.length) {
+        setTimeout(tick, speed)
+      }
+    }
+
+    tick()
+
+    return () => {
+      cancelled = true
+    }
+  }, [text, speed])
+
+  return value
+}
 
 /* ================================= AI Box (i18n-aware) ================================= */
 function AIBox({ data }) {
   const { t } = useI18n()
- 
+
   const tr = (key, params) => {
     try {
       let s = t(key)
       if (s === key) s = t(key.replaceAll('.', '_'))
       if (typeof s === 'string' && params) {
-        for (const [k,v] of Object.entries(params)) {
-          s = s.replaceAll(`{${k}}`, typeof v==='number'? fmtP(v) : String(v))
+        for (const [k, v] of Object.entries(params)) {
+          s = s.replaceAll(`{${k}}`, typeof v === 'number' ? fmtP(v) : String(v))
         }
       }
       return s
-    } catch { return key }
+    } catch {
+      return key
+    }
   }
+
+  // ==== ТОЛЬКО ЭТО ДОБАВЛЕНО: текст для тайпрайтера по reasons ====
+  const reasonsFullText = useMemo(() => {
+    if (!data || !Array.isArray(data.reasons) || !data.reasons.length) {
+      return '—'
+    }
+
+    const localized = data.reasons.map((r) =>
+      typeof r === 'string'
+        ? tr(r)
+        : tr(r.key, r.params),
+    )
+
+    // склеиваем в одну строку с переносами
+    return localized.map((s) => `• ${s}`).join('\n')
+  }, [data, t])
+
+  const typedReasons = useTypewriter(reasonsFullText, 14)
+
+  const reasonLines = useMemo(
+    () => (typedReasons || '—').split('\n'),
+    [typedReasons],
+  )
+  // ==== КОНЕЦ ДОБАВКИ ====
 
   if (!data || !Number.isFinite(data.price)) {
-    return <Panel><div className="muted">…{tr('ai_calculating') || 'AI calculating'}</div></Panel>
+    return (
+      <Panel>
+        <div className="muted">
+          …{tr('ai_calculating') || 'AI calculating'}
+        </div>
+      </Panel>
+    )
   }
 
-  const color = data.action==='BUY' ? 'buy' : data.action==='SELL' ? 'sell' : 'hold'
+  const color =
+    data.action === 'BUY'
+      ? 'buy'
+      : data.action === 'SELL'
+      ? 'sell'
+      : 'hold'
+
   return (
     <Panel>
-      <div className={`pill ${color}`}>{tr('ai_action')||'Action'}: {data.action} · {Math.round(data.confidence)}%</div>
+      <div className={`pill ${color}`}>
+        {tr('ai_action') || 'Action'}: {data.action} ·{' '}
+        {Math.round(data.confidence)}%
+      </div>
       <div className="meta">
-        <span>{(tr('ai_price')||'Price')} {fmtP(data.price)}</span>
-        {data.entry!=null && <span>Entry {fmtP(data.entry)}</span>}
-        {data.sl!=null && <span>{(tr('ai_sl')||'SL')} {fmtP(data.sl)}</span>}
-        {data.tp1!=null && <span>{(tr('ai_tp')||'TP')}1 {fmtP(data.tp1)}</span>}
-        {data.tp2!=null && <span>{(tr('ai_tp')||'TP')}2 {fmtP(data.tp2)}</span>}
-        {data.horizons && Object.entries(data.horizons).map(([k,v])=>(
+        <span>{(tr('ai_price') || 'Price')} {fmtP(data.price)}</span>
+        {data.entry != null && <span>Entry {fmtP(data.entry)}</span>}
+        {data.sl != null && <span>{(tr('ai_sl') || 'SL')} {fmtP(data.sl)}</span>}
+        {data.tp1 != null && <span>{(tr('ai_tp') || 'TP')}1 {fmtP(data.tp1)}</span>}
+        {data.tp2 != null && <span>{(tr('ai_tp') || 'TP')}2 {fmtP(data.tp2)}</span>}
+        {data.horizons && Object.entries(data.horizons).map(([k, v]) => (
           <span key={k}>{k} ±{fmtP(v)}</span>
         ))}
       </div>
 
       <div className="reason-block">
-        <div className="ttl">{tr('ai_explainer_title') || 'Why this recommendation'}</div>
-        <ul className="reasons">
-          {Array.isArray(data.reasons) && data.reasons.length
-            ? data.reasons.map((r,i)=> (<li key={i}>{typeof r==='string' ? tr(r) : tr(r.key, r.params)}</li>))
-            : <li>—</li>}
+        <div className="ttl">
+          {tr('ai_explainer_title') || 'Why this recommendation'}
+        </div>
+        <ul className="reasons reasons-typed">
+          {reasonLines.map((line, idx) => (
+            <li key={idx}>{line.replace(/^•\s?/, '')}</li>
+          ))}
         </ul>
       </div>
 
       <div className="levels">
-        {!!data.support?.length && <div><b>{tr('ai_support')||'Support'}:</b> {data.support.map(fmtP).join(' · ')}</div>}
-        {!!data.resistance?.length && <div><b>{tr('ai_resistance')||'Resistance'}:</b> {data.resistance.map(fmtP).join(' · ')}</div>}
+        {!!data.support?.length && (
+          <div>
+            <b>{tr('ai_support') || 'Support'}:</b>{' '}
+            {data.support.map(fmtP).join(' · ')}
+          </div>
+        )}
+        {!!data.resistance?.length && (
+          <div>
+            <b>{tr('ai_resistance') || 'Resistance'}:</b>{' '}
+            {data.resistance.map(fmtP).join(' · ')}
+          </div>
+        )}
       </div>
 
-      <div className="muted small" style={{marginTop:8}}>{tr('ai_disclaimer') || 'Signals are assistive and educational; not financial advice.'}</div>
+      <div className="muted small" style={{ marginTop: 8 }}>
+        {tr('ai_disclaimer') ||
+          'Signals are assistive and educational; not financial advice.'}
+      </div>
 
       <style jsx>{`
         .pill{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:800;color:#fff;margin-bottom:6px}
@@ -362,20 +449,32 @@ function AIBox({ data }) {
         .reasons{margin:0 0 0 18px}
         .levels{opacity:.95;margin-top:6px}
         .small{font-size:12px;opacity:.7}
+        .reasons-typed{
+          min-height:40px;
+          white-space:pre-line;
+          transition:opacity .15s ease;
+        }
       `}</style>
 
       {(() => {
         const BOT = process.env.NEXT_PUBLIC_BOT_LINK ?? 'https://t.me/l7ai_bot'
         const linkStyle = {
-          display:'inline-flex', alignItems:'center', gap:8,
-          padding:'10px 14px', borderRadius:999, fontWeight:800,
-          background:'linear-gradient(135deg,#1d4ed8,#3b82f6)', color:'#fff',
-          border:'1px solid rgba(59,130,246,.65)',
-          boxShadow:'0 0 0 1px rgba(59,130,246,.25), 0 10px 20px rgba(59,130,246,.25)',
-          textDecoration:'none', userSelect:'none'
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '10px 14px',
+          borderRadius: 999,
+          fontWeight: 800,
+          background: 'linear-gradient(135deg,#1d4ed8,#3b82f6)',
+          color: '#fff',
+          border: '1px solid rgba(59,130,246,.65)',
+          boxShadow:
+            '0 0 0 1px rgba(59,130,246,.25), 0 10px 20px rgba(59,130,246,.25)',
+          textDecoration: 'none',
+          userSelect: 'none',
         }
         return (
-          <div style={{marginTop:10, display:'flex', justifyContent:'flex-start'}}>
+          <div style={{ marginTop: 10, display: 'flex', justifyContent: 'flex-start' }}>
             <a href={BOT} target="_blank" rel="noopener noreferrer" style={linkStyle}>
               {tr('ai_cta_start_telegram') || 'Start in Telegram'}
             </a>
@@ -1330,6 +1429,11 @@ export default function ExchangePage(){
         </div>
         <ul className="bullets">{bullets.map((b,i)=><li key={i}>• {b}</li>)}</ul>
       </section>
+
+      <section className="panel">
+      <BattleCoin />
+      </section>
+
 
       {sections.map((s, idx) => (
         <section key={idx} className="panel">
