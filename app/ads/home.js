@@ -4004,7 +4004,7 @@ useEffect(() => {
         .ads-analytics-preview {
          position: relative;
           width: 190px;
-          height: 120px;
+          height: 150px;
           border-radius: 12px;
           overflow: hidden;
           border: 1px solid rgba(148, 163, 184, 0.9);
