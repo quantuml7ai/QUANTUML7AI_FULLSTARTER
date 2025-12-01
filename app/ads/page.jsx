@@ -5,7 +5,7 @@ import React, { useMemo, useState, useRef, useEffect } from 'react'
 import NextImage from 'next/image'
 import { useI18n } from '../../components/i18n'
 import AdsHome from './home' // наш рекламный кабинет, рендерим внутри этой же страницы
-import Image from 'next/image'
+
 /* ===== ENV / режим теста ===== */
 /* eslint-disable no-undef */
 const ADS_TEST_MODE =
@@ -138,13 +138,11 @@ function FooterIcons() {
         aria-label="Privacy / Политика"
         style={{ lineHeight: 0, cursor: 'pointer', '--size': '130px' }}
       >
-        <NextImage
+        <img
           src="/click/policy.png"
           alt="Privacy"
-          draggable={false}
+          draggable="false"
           data-anim="1"
-          width={130}
-          height={130}
           style={{
             width: 'var(--size, 120px)',
             height: 'auto',
@@ -154,20 +152,17 @@ function FooterIcons() {
           }}
         />
       </a>
-
 
       <a
         href="/contact"
         aria-label="Support / Поддержка"
         style={{ lineHeight: 0, cursor: 'pointer', '--size': '130px' }}
       >
-        <NextImage
+        <img
           src="/click/support.png"
           alt="Support"
-          draggable={false}
+          draggable="false"
           data-anim="1"
-          width={130}
-          height={130}
           style={{
             width: 'var(--size, 120px)',
             height: 'auto',
@@ -177,7 +172,6 @@ function FooterIcons() {
           }}
         />
       </a>
-
     </div>
   )
 }

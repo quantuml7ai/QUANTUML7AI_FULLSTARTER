@@ -244,7 +244,6 @@ export default function SnowFX({
       stopped = true
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current)
     }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   /* ===== КЛИК: ЛОКАЛЬНЫЙ ВЗРЫВ ВЕТРА ВОКРУГ ТАЧА/КУРСОРА ===== */

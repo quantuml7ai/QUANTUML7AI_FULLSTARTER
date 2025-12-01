@@ -3,8 +3,6 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react'
 import { useI18n } from '../../components/i18n'
 import { upload as blobUpload } from '@vercel/blob/client'
-import NextImage from 'next/image'
-
 /* ===== Вспомогалки i18n ===== */
 const TX = (t, key, fb) => {
   try {
@@ -2539,25 +2537,22 @@ useEffect(() => {
                 </span>
               </div>
               <div className="ads-preview-body">
-{primaryCreative.videoPreviewUrl ? (
-  <video
-    src={primaryCreative.videoPreviewUrl}
-    className="ads-preview-video"
-    autoPlay
-    muted
-    loop
-    playsInline
-  />
-) : primaryCreative.imagePreviewUrl ? (
-  <NextImage
-    src={primaryCreative.imagePreviewUrl}
-    alt="preview"
-    className="ads-preview-img"
-    fill
-    sizes="100%"
-    unoptimized
-  />
-) : primaryCreative.clickUrl ? (
+                {primaryCreative.videoPreviewUrl ? (
+                  <video
+                    src={primaryCreative.videoPreviewUrl}
+                    className="ads-preview-video"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                  />
+                ) : primaryCreative.imagePreviewUrl ? (
+                  <img
+                    src={primaryCreative.imagePreviewUrl}
+                    alt="preview"
+                    className="ads-preview-img"
+                  />
+                ) : primaryCreative.clickUrl ? (
                   <div className="ads-preview-placeholder">
                     <div className="ads-preview-url">
                       {primaryCreative.clickUrl.trim().slice(0, 80)}
@@ -2997,36 +2992,32 @@ useEffect(() => {
                         </div>
 
                         <div className="ads-analytics-preview">
-{selectedCampaign.mediaType === 'video' &&
- selectedCampaign.mediaUrl ? (
-  <video
-    src={selectedCampaign.mediaUrl}
-    autoPlay
-    muted
-    loop
-    playsInline
-  />
-) : selectedCampaign.mediaType === 'image' &&
-  selectedCampaign.mediaUrl ? (
-  <NextImage
-    src={selectedCampaign.mediaUrl}
-    alt="preview"
-    fill
-    sizes="190px"
-    unoptimized
-  />
-) : (
-  <div className="ads-analytics-preview-empty">
-    <span>
-      {TX(
-        t,
-        'ads_analytics_preview_stub',
-        'Preview'
-      )}
-    </span>
-  </div>
-)}
-
+                          {selectedCampaign.mediaType === 'video' &&
+                          selectedCampaign.mediaUrl ? (
+                            <video
+                              src={selectedCampaign.mediaUrl}
+                              autoPlay
+                              muted
+                              loop
+                              playsInline
+                            />
+                          ) : selectedCampaign.mediaType === 'image' &&
+                            selectedCampaign.mediaUrl ? (
+                            <img
+                              src={selectedCampaign.mediaUrl}
+                              alt="preview"
+                            />
+                          ) : (
+                            <div className="ads-analytics-preview-empty">
+                              <span>
+                                {TX(
+                                  t,
+                                  'ads_analytics_preview_stub',
+                                  'Preview'
+                                )}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -4002,9 +3993,8 @@ useEffect(() => {
         }
 
         .ads-analytics-preview {
-         position: relative;
           width: 190px;
-          height: 150px;
+          height: 120px;
           border-radius: 12px;
           overflow: hidden;
           border: 1px solid rgba(148, 163, 184, 0.9);
