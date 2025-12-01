@@ -363,6 +363,7 @@ function AIBox({ data }) {
 
     // склеиваем в одну строку с переносами
     return localized.map((s) => `• ${s}`).join('\n')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, t])
 
   const typedReasons = useTypewriter(reasonsFullText, 14)
