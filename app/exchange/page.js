@@ -475,7 +475,7 @@ function AIBox({ data }) {
         /* === НОВОЕ: ТОЛЬКО ДЛЯ МОБИЛОК === */
         @media (max-width:640px){
           .reason-scroll{
-            max-height: 200px;    /* высота коробки под текст на телефоне */
+            max-height: 220px;    /* высота коробки под текст на телефоне */
             overflow-y: auto;     /* вертикальный скролл */
             padding-right: 6px;
             scrollbar-width: none;
