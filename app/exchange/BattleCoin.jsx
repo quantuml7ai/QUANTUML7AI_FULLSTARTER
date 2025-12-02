@@ -2629,28 +2629,32 @@ const filteredOrders = useMemo(() => {
     padding: 9px 9px 10px;
   }
 
-  /* --- MOBILE: history table fixes --- */
+  /* --- MOBILE: history table = единый горизонтальный скролл --- */
 
-  /* даём таблице истории горизонтальный скролл */
-  .history-table {
+  /* Горизонтальный скролл одной лентой: шапка + строки вместе */
+  .battlecoin-card.history-card {
     overflow-x: auto;
   }
 
-  /* шапка и строки получают общий min-width,
-     чтобы колонки всегда строго совпадали */
-  .history-head,
-  .history-row {
-    min-width: 720px; /* можешь уменьшить/увеличить при желании, но важно, чтобы число совпадало в обоих селекторах */
+  /* Общая ширина таблицы истории */
+  .history-table {
+    min-width: 720px; /* при желании можно поменять число */
   }
 
-  /* агрессивное перенесение текста, чтобы даже длинные подписи и значения
-     оставались в своей колонке и не выползали в соседние */
+  /* Вертикальный скролл только у списка, без второй горизонтальной полосы */
+  .history-body {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* Агрессивный перенос текста, чтобы подписи/значения держались в своих колонках */
   .history-head .hh-col,
   .history-body .hb-col {
     white-space: normal;
-    word-break: break-all; /* "хоть по букве" */
+    word-break: break-all;
   }
 }
+
 
 
         @media (max-width: 520px) {
