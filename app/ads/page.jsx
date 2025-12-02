@@ -430,7 +430,7 @@ export default function AdsPage() {
             <div className="ads-hero-text">
               <div className="ads-hero-label">
                 <span className="badge-cta">
-                  {TX(t, '', 'GLOBAL • ADVERTISING')}
+                  {TX(t, '', 'GLOBAL • ADVERTISING • CAMPAING')}
                 </span>
               </div>
               <h1 className="ads-hero-title">
