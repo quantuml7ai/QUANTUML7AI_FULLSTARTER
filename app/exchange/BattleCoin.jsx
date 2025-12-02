@@ -2581,54 +2581,77 @@ const filteredOrders = useMemo(() => {
           }
         }
 
-        @media (max-width: 768px) {
-          .battlecoin-panel {
-            margin-top: 18px;
-            padding: 14px 12px 16px;
-            border-radius: 18px;
-          }
+@media (max-width: 768px) {
+  .battlecoin-panel {
+    margin-top: 18px;
+    padding: 14px 12px 16px;
+    border-radius: 18px;
+  }
 
-          .battlecoin-header-left {
-            align-items: flex-start;
-          }
+  .battlecoin-header-left {
+    align-items: flex-start;
+  }
 
-          .battlecoin-logo-wrap {
-            width: 110px;
-            height: 110px;
-          }
+  .battlecoin-logo-wrap {
+    width: 110px;
+    height: 110px;
+  }
 
-          .battlecoin-title {
-            font-size: 18px;
-          }
+  .battlecoin-title {
+    font-size: 18px;
+  }
 
-          .battlecoin-subtitle {
-            font-size: 12px;
-          }
+  .battlecoin-subtitle {
+    font-size: 12px;
+  }
 
-          .active-grid {
-            grid-template-columns: minmax(0, 1fr);
-          }
+  .active-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 
-          .battlecoin-card {
-            padding: 11px 10px 10px;
-          }
+  .battlecoin-card {
+    padding: 11px 10px 10px;
+  }
 
-          .battlecoin-leverage-grid {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-          }
+  .battlecoin-leverage-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 
-          .control-section.two-cols {
-            grid-template-columns: minmax(0, 1fr);
-          }
+  .control-section.two-cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
 
-          .timer-value {
-            font-size: 24px;
-          }
+  .timer-value {
+    font-size: 24px;
+  }
 
-          .ls-btn {
-            padding: 9px 9px 10px;
-          }
-        }
+  .ls-btn {
+    padding: 9px 9px 10px;
+  }
+
+  /* --- MOBILE: history table fixes --- */
+
+  /* даём таблице истории горизонтальный скролл */
+  .history-table {
+    overflow-x: auto;
+  }
+
+  /* шапка и строки получают общий min-width,
+     чтобы колонки всегда строго совпадали */
+  .history-head,
+  .history-row {
+    min-width: 720px; /* можешь уменьшить/увеличить при желании, но важно, чтобы число совпадало в обоих селекторах */
+  }
+
+  /* агрессивное перенесение текста, чтобы даже длинные подписи и значения
+     оставались в своей колонке и не выползали в соседние */
+  .history-head .hh-col,
+  .history-body .hb-col {
+    white-space: normal;
+    word-break: break-all; /* "хоть по букве" */
+  }
+}
+
 
         @media (max-width: 520px) {
           .battlecoin-header-right {
