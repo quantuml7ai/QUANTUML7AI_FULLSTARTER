@@ -1220,6 +1220,18 @@ const Styles = () => (
     .avaBig{ width:112px; height:112px; border-radius:34px; border:1px solid rgba(80,167,255,.45); display:grid; place-items:center; font-size:48px; background:rgba(25,129,255,.10) }
     .avaMini{ width:60px; height:60px; border-radius:10px; font-size:18px }
 /* === AVATAR FILL (добавка) ============================= */
+    /* плавность для мелких аватарок */
+    .profileList .avaMini{
+      transition: transform .12s ease-out, box-shadow .12s ease-out, outline-color .12s ease-out;
+    }
+
+    /* выбранный аватар — чуть крупнее и с ярким контуром */
+    .profileList .avaMini.tag{
+      transform: translateY(-2px) scale(1.06);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, .9), 0 0 16px rgba(56, 189, 248, .5);
+      outline: 2px solid rgba(15, 118, 110, .8);
+      outline-offset: 0;
+    }
 
 /* 1) Контейнер: ничего не меняем кроме обрезки и контекста позиционирования */
 .avaBig,
