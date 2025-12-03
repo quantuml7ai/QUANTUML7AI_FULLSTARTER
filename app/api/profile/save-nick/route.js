@@ -1,7 +1,12 @@
 // app/api/profile/save-nick/route.js
 import { NextResponse } from 'next/server'
 import { requireUserId } from '../../forum/_utils.js'
-import { setUserNick, normNick, getUserNick } from '../../forum/_db.js'
+import {
+  setUserNick,
+  normNick,
+  getUserNick,
+  setUserAvatar,
+} from '../../forum/_db.js'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -19,13 +24,19 @@ export async function POST(req) {
       return NextResponse.json({ ok:false, error:'unauthorized' }, { status:401 })
     }
 
-    const nick = normNick(body?.nick || '')
+const nick = normNick(body?.nick || '')
 if (!nick) {
-      return NextResponse.json({ ok:false, error:'empty_nick' }, { status:400 })
-    }
+  return NextResponse.json({ ok:false, error:'empty_nick' }, { status:400 })
+}
 
-    const saved = await setUserNick(userId, nick) // бросит 'nick_taken' если занято
-    return NextResponse.json({ ok:true, nick:saved })
+// аватар может приходить под разными именами
+const iconRaw = body?.icon || body?.avatar || ''
+
+const saved = await setUserNick(userId, nick) // бросит 'nick_taken' если занято
+const savedIcon = await setUserAvatar(userId, iconRaw)
+
+return NextResponse.json({ ok:true, nick: saved, icon: savedIcon })
+
   } catch (e) {
     const msg = String(e?.message || e)
     const code = msg === 'nick_taken' ? 409 : 500

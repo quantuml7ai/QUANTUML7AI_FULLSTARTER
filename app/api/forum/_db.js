@@ -48,6 +48,9 @@ export const K = {
   nickIdx:   (nickLower) => `forum:nick:${nickLower}`,
   userNick:  (userId)    => `forum:user:${userId}:nick`,
 
+  userAvatar: (userId)   => `forum:user:${userId}:avatar`,
+
+  
   // per-topic
   topicPostsCount: (topicId) => `forum:topic:${topicId}:posts_count`,
   topicViews:      (topicId) => `forum:topic:${topicId}:views`,
@@ -581,4 +584,59 @@ export async function setUserNick(userId, newNick) {
     } catch {}
   }
   return nn
+}
+export async function getUserAvatar(userId) {
+  try {
+    const v = await redis.get(K.userAvatar(userId))
+    return str(v || '')
+  } catch {
+    return ''
+  }
+}
+
+export function normAvatar(raw) {
+  const s0 = str(raw)
+  if (!s0) return ''
+  // до 64 символов, хватит и для эмодзи/иконки/URL
+  return s0.slice(0, 64)
+}
+
+export async function setUserAvatar(userId, icon) {
+  const v = normAvatar(icon)
+  try {
+    if (!v) {
+      // пустое значение — просто очищаем
+      await redis.del(K.userAvatar(userId))
+      return ''
+    }
+    await redis.set(K.userAvatar(userId), v)
+    return v
+  } catch {
+    return v
+  }
+}
+
+export async function getUserProfile(userId) {
+  const [nick, avatar] = await Promise.all([
+    getUserNick(userId),
+    getUserAvatar(userId),
+  ])
+  return {
+    nickname: str(nick || ''),
+    icon: str(avatar || ''),
+  }
+}
+
+export async function setUserProfile(userId, { nickname, icon } = {}) {
+  const out = {}
+
+  if (nickname != null && nickname !== '') {
+    out.nickname = await setUserNick(userId, nickname)
+  }
+
+  if (icon != null) {
+    out.icon = await setUserAvatar(userId, icon)
+  }
+
+  return out
 }

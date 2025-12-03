@@ -143,6 +143,47 @@ function safeReadProfile(userId) {
   try { return JSON.parse(localStorage.getItem('profile:' + userId) || '{}'); }
   catch { return {}; }
 }
+// --- Профиль: подтянуть ник/аватар с бэка и записать в localStorage ---
+function useSyncForumProfileOnMount() {
+  React.useEffect(() => {
+    if (!isBrowser()) return
+
+    const { accountId, asherId } = readAuth()
+    const uid = asherId || accountId
+    if (!uid) return
+
+    const key = 'profile:' + uid
+    let cancelled = false
+
+    async function sync() {
+      try {
+        const r = await fetch(`/api/profile/get-profile?uid=${encodeURIComponent(uid)}`, {
+          method: 'GET',
+          cache: 'no-store',
+        })
+        const j = await r.json().catch(() => null)
+        if (!j?.ok || cancelled) return
+
+        let cur = {}
+        try { cur = JSON.parse(localStorage.getItem(key) || '{}') || {} } catch { cur = {} }
+
+        const next = {
+          ...cur,
+          nickname: j.nickname || j.nick || cur.nickname || '',
+          icon: j.icon || cur.icon || '',
+        }
+
+        localStorage.setItem(key, JSON.stringify(next))
+      } catch {
+        // сеть/бэк лёг — просто молча игнорим
+      }
+    }
+
+    sync()
+    return () => { cancelled = true }
+  }, [])
+}
+
 // [VIP AVATAR FIX] выбираем, что показывать на карточках
 function resolveIconForDisplay(userId, pIcon) {
   const prof = safeReadProfile(userId) || {};
@@ -3379,6 +3420,37 @@ const VIP_AVATARS = [
   '/vip/avatars/a98.gif',
   '/vip/avatars/a99.gif',
   '/vip/avatars/a100.gif',
+  '/vip/avatars/a101.gif',
+'/vip/avatars/a102.gif',
+'/vip/avatars/a103.gif',
+'/vip/avatars/a104.gif',
+'/vip/avatars/a105.gif',
+'/vip/avatars/a106.gif',
+'/vip/avatars/a107.gif',
+'/vip/avatars/a108.gif',
+'/vip/avatars/a109.gif',
+'/vip/avatars/a110.gif',
+'/vip/avatars/a111.gif',
+'/vip/avatars/a112.gif',
+'/vip/avatars/a113.gif',
+'/vip/avatars/a114.gif',
+'/vip/avatars/a115.gif',
+'/vip/avatars/a116.gif',
+'/vip/avatars/a117.gif',
+'/vip/avatars/a118.gif',
+'/vip/avatars/a119.gif',
+'/vip/avatars/a120.gif',
+'/vip/avatars/a121.gif',
+'/vip/avatars/a122.gif',
+'/vip/avatars/a123.gif',
+'/vip/avatars/a124.gif',
+'/vip/avatars/a125.gif',
+'/vip/avatars/a126.gif',
+'/vip/avatars/a127.gif',
+'/vip/avatars/a128.gif',
+'/vip/avatars/a129.gif',
+'/vip/avatars/a130.gif',
+
 ];
 
 
@@ -3736,31 +3808,46 @@ function ProfilePopover({ anchorRef, open, onClose, t, auth, vipActive, onSaved 
   if (!open || !anchorRef?.current) return null
   const top = (anchorRef.current.offsetTop || 0) + (anchorRef.current.offsetHeight || 0) + 8
   const left = (anchorRef.current.offsetLeft || 0)
-  const save = async () => {
-    const n = String(nick || '').trim()
-    if (!n || nickFree === false || busy) return
-    setBusy(true)
+const save = async () => {
+  const n = String(nick || '').trim()
+  if (!n || nickFree === false || busy) return
+  setBusy(true)
+  try {
+    // 1) атомарно записываем ник + аватар (бэк вернет 409, если ник занят)
+    const r = await fetch('/api/profile/save-nick', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        nick: n,
+        icon,                      // ← отправляем выбранный аватар
+        accountId: uid,            // ← ПЕРЕДАЁМ UID
+        asherId: uid,              // ← на всякий случай, если роут читает это поле
+      }),
+    })
+    const j = await r.json().catch(() => null)
+    if (!r.ok || !j?.ok) {
+      if (j?.error === 'nick_taken') setNickFree(false)
+      return
+    }
+
+    const savedNick = j.nick || n
+    const savedIcon = j.icon || icon
+
+    // 2) локально кешируем ник+иконку (теперь из ответа бэка)
     try {
-      // 1) атомарно записываем ник (бэк вернет 409, если занят)
-      const r = await fetch('/api/profile/save-nick', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          nick: n,
-          accountId: uid,            // ← ПЕРЕДАЁМ UID
-          asherId: uid               // ← на всякий случай, если роут читает это поле
-        }),      })
-      const j = await r.json().catch(() => null)
-      if (!r.ok || !j?.ok) {
-        if (j?.error === 'nick_taken') setNickFree(false)
-        return
-      }
-      // 2) локально кешируем ник+иконку (иконку сохраняем по-старому)
-      try { localStorage.setItem('profile:' + uid, JSON.stringify({ nickname: j.nick || n, icon })) } catch {}
-      onSaved?.({ nickname: j.nick || n, icon })
-      onClose?.()
-    } finally { setBusy(false) }
+      localStorage.setItem(
+        'profile:' + uid,
+        JSON.stringify({ nickname: savedNick, icon: savedIcon }),
+      )
+    } catch {}
+
+    onSaved?.({ nickname: savedNick, icon: savedIcon })
+    onClose?.()
+  } finally {
+    setBusy(false)
   }
+}
+
   return (
     <div className="profilePop" style={{ top, left }}>
       <div className="text-lg font-bold mb-2">{t('forum_account_settings')}</div>
@@ -5134,6 +5221,7 @@ function useHtmlFlag(attr, value) {
    Основной компонент
 ========================================================= */
 export default function Forum(){
+  useSyncForumProfileOnMount()
   const { t } = useI18n()
   const toast = useToast()
   const rl = useMemo(rateLimiter, [])
