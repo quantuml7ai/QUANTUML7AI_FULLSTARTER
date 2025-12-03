@@ -522,7 +522,7 @@ function AIBox({ data }) {
         } 
         @media (max-width:640px){
           .reason-scroll{
-            max-height: 230px;
+            max-height: 250px;
             overflow-y: auto;
             padding-right: 6px;
             scrollbar-width: none;
