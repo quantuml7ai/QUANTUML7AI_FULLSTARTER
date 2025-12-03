@@ -3734,7 +3734,9 @@ function QCoinInline({ t, userKey, vipActive, anchorRef }) {
   // ========================================================
 
   return (
-    <div className="qcoinRow qcoinCol">
+    <div className="qcoinRow qcoinCol"
+    translate="no"
+    >
       <div className="qcoinTop">
         <span className="qcoinLabel">Q COIN</span>
         <span
@@ -3779,77 +3781,128 @@ function QCoinInline({ t, userKey, vipActive, anchorRef }) {
 
 /** мини-поповер профиля рядом с аватаром */
 function ProfilePopover({ anchorRef, open, onClose, t, auth, vipActive, onSaved }) {
-  const uid = auth.asherId || auth.accountId || ''
-  const readLocal = () => { try { return JSON.parse(localStorage.getItem('profile:' + uid) || 'null') } catch { return null } }
-  const [nick, setNick] = useState(readLocal()?.nickname || '')
-  const [icon, setIcon] = useState(readLocal()?.icon || ICONS[0])
+  // нормализуем UID через общий хелпер, чтобы TG и веб совпадали
+  const baseAuth = auth || {};
+  const base = baseAuth.asherId || baseAuth.accountId || '';
+  const resolved = resolveForumUserId(base);
+  const uid = typeof resolved === 'string' ? resolved.trim() : '';
+
+  const readLocal = React.useCallback(() => {
+    if (!uid || typeof window === 'undefined') return null;
+    try {
+      return JSON.parse(localStorage.getItem('profile:' + uid) || 'null');
+    } catch {
+      return null;
+    }
+  }, [uid]);
+
+  const initialLocal = readLocal() || {};
+  const [nick, setNick] = useState(initialLocal.nickname || '');
+  const [icon, setIcon] = useState(initialLocal.icon || ICONS[0]);
     // валидация ника
   const [nickFree, setNickFree] = useState(null)   // null|true|false
   const [nickBusy, setNickBusy] = useState(false)  // идет проверка
   const [busy, setBusy] = useState(false)          // сохранение
-  useEffect(() => { if (open) { const l = readLocal(); setNick(l?.nickname || ''); setIcon(l?.icon || ICONS[0]) } }, [open]) // eslint-disable-line
-    // дебаунс-проверка ника в базе
   useEffect(() => {
-    if (!open) return
-    const val = String(nick || '').trim()
-    if (!val) { setNickFree(null); setNickBusy(false); return }
-    setNickBusy(true)
-    const h = setTimeout(async () => {
-      try {
-        const r = await fetch(`/api/profile/check-nick?nick=${encodeURIComponent(val)}&uid=${encodeURIComponent(uid)}`)
-        const j = await r.json().catch(() => null)
-        setNickFree(!!j?.free)
-      } catch { setNickFree(null) }
-      finally { setNickBusy(false) }
-    }, 300)
-    return () => clearTimeout(h)
-  }, [open, nick])
+  if (!open || !uid) return;
+  const l = readLocal() || {};
+  setNick(l.nickname || '');
+  setIcon(l.icon || ICONS[0]);
+}, [open, uid, readLocal]);
 
-  if (!open || !anchorRef?.current) return null
-  const top = (anchorRef.current.offsetTop || 0) + (anchorRef.current.offsetHeight || 0) + 8
-  const left = (anchorRef.current.offsetLeft || 0)
+// дебаунс-проверка ника в базе
+useEffect(() => {
+  if (!open || !uid) {
+    setNickFree(null);
+    setNickBusy(false);
+    return;
+  }
+
+  const val = String(nick || '').trim();
+  if (!val) {
+    setNickFree(null);
+    setNickBusy(false);
+    return;
+  }
+
+  setNickBusy(true);
+  const h = setTimeout(async () => {
+    try {
+      const url = `/api/profile/check-nick?nick=${encodeURIComponent(val)}&uid=${encodeURIComponent(uid)}`;
+      const r = await fetch(url, { method: 'GET', cache: 'no-store' });
+      const j = await r.json().catch(() => null);
+
+      // j?.ok === false или странный ответ — считаем «не знаем», но НЕ кидаем ошибок
+      if (!j || j.error) {
+        setNickFree(null);
+      } else {
+        setNickFree(!!j.free);
+      }
+    } catch {
+      // любая сеть/бэк — просто "не знаем"
+      setNickFree(null);
+    } finally {
+      setNickBusy(false);
+    }
+  }, 300);
+
+  return () => clearTimeout(h);
+}, [open, nick, uid]);
+
+
+if (!open || !anchorRef?.current || !uid) return null;
+
+const top  = (anchorRef.current.offsetTop || 0) + (anchorRef.current.offsetHeight || 0) + 8;
+const left = (anchorRef.current.offsetLeft || 0);
+
 const save = async () => {
-  const n = String(nick || '').trim()
-  if (!n || nickFree === false || busy) return
-  setBusy(true)
-  try {
-    // 1) атомарно записываем ник + аватар (бэк вернет 409, если ник занят)
+  const n = String(nick || '').trim();
+  if (!n || nickFree === false || busy || !uid) return;
+
+  setBusy(true);
+  try { 
     const r = await fetch('/api/profile/save-nick', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         nick: n,
-        icon,                      // ← отправляем выбранный аватар
-        accountId: uid,            // ← ПЕРЕДАЁМ UID
-        asherId: uid,              // ← на всякий случай, если роут читает это поле
+        icon,
+        accountId: uid,  // основной ID
+        asherId: uid,    // зеркало, чтоб бэку было всё равно
       }),
-    })
-    const j = await r.json().catch(() => null)
+    });
+
+    const j = await r.json().catch(() => null);
     if (!r.ok || !j?.ok) {
-      if (j?.error === 'nick_taken') setNickFree(false)
-      return
+      if (j?.error === 'nick_taken') setNickFree(false);
+      return;
     }
 
-    const savedNick = j.nick || n
-    const savedIcon = j.icon || icon
-
-    // 2) локально кешируем ник+иконку (теперь из ответа бэка)
+    const savedNick = j.nick || n;
+    const savedIcon = j.icon || icon;
+ 
     try {
       localStorage.setItem(
         'profile:' + uid,
         JSON.stringify({ nickname: savedNick, icon: savedIcon }),
-      )
+      );
     } catch {}
 
-    onSaved?.({ nickname: savedNick, icon: savedIcon })
-    onClose?.()
+    onSaved?.({ nickname: savedNick, icon: savedIcon });
+    onClose?.();
   } finally {
-    setBusy(false)
+    setBusy(false);
   }
-}
+};
+
 
   return (
-    <div className="profilePop" style={{ top, left }}>
+
+    <div className="profilePop" 
+    style={{ top, left }}
+    translate="no"
+    >
+  
       <div className="text-lg font-bold mb-2">{t('forum_account_settings')}</div>
       <div className="grid gap-2">
         <label className="block">
@@ -3871,6 +3924,7 @@ const save = async () => {
           </div>
         </label>
         <div>
+           
           <div className="meta mb-1">{t('forum_profile_avatar')}</div>
 <div className="profileList">
   {/* VIP блок (верхняя строка) */}
@@ -3923,6 +3977,7 @@ const save = async () => {
         </div>
       </div>
     </div>
+    
   )
 }
 
@@ -3951,7 +4006,8 @@ function TopicItem({ t, agg, onOpen, isAdmin, onDelete, authId, onOwnerDelete })
       onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); }}
       title={t.userId || t.accountId || ''}
       style={{ flex: '0 1 auto', minWidth: 0 }}
-    >
+      translate="no"
+   >
       <span className="nick-text">
         {t.nickname || shortId(t.userId || t.accountId || '')}
       </span>
@@ -4236,7 +4292,9 @@ function PostCard({
             pIcon={resolveIconForDisplay(p.userId || p.accountId, p.icon)}
           />
         </div>
-        <span className="nick-badge nick-animate">
+        <span className="nick-badge nick-animate"
+        translate="no"
+        >
           <span className="nick-text truncate">
             {p.nickname || shortId((p.userId || p.accountId || ''))}
           </span>
@@ -8115,7 +8173,8 @@ function pickAdUrlForSlot(slotKey, slotKind) {
     className="nick-badge nick-animate avaNick"
     title={idShown||'—'}
     onClick={copyId}
-  >
+    translate="no"
+ >
     <span className="nick-text">{nickShown || t('forum_not_signed')}</span>
   </button>            
           </div>

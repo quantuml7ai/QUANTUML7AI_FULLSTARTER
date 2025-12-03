@@ -37,14 +37,25 @@ export default function TmaAutoPage() {
           return
         }
 
-        // Локальные маркеры авторизации
-        try {
-          localStorage.setItem('ql7_uid', String(j.accountId))
-          window.__AUTH_ACCOUNT__ = String(j.accountId)
-          window.dispatchEvent(new CustomEvent('auth:ok', {
-            detail: { accountId: String(j.accountId), provider: 'tg' }
-          }))
-        } catch {}
+// Локальные маркеры авторизации (единый UID для форума/мини-аппа)
+try {
+  const acc = String(j.accountId)
+
+  // наш основной ID
+  localStorage.setItem('ql7_uid', acc)
+
+  // дублируем в asherId, чтобы readAuth() видел тот же uid
+  localStorage.setItem('asherId', acc)
+
+  // глобальные маркеры в window
+  window.__AUTH_ACCOUNT__ = acc
+  window.__ASHER_ID__     = acc
+
+  window.dispatchEvent(new CustomEvent('auth:ok', {
+    detail: { accountId: acc, provider: 'tg' }
+  }))
+} catch {}
+
 
         window.location.replace(j.return || ret)
       } catch (e) {
