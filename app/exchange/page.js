@@ -4,7 +4,8 @@
 // app/exchange/page.js — QUANTUML7 Exchange — R12c + Brain v5 via API (BrainAnalysisRoad)
 // ==================================================================================================
 
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
+
 import Image from 'next/image'
 import Link from 'next/link'
 // ⬇⬇⬇ Brain больше не дергаем на клиенте — вся магия на сервере через API
@@ -332,39 +333,89 @@ function useTypewriter(text, speed = 18) {
 
 /* ================================= AI Box (i18n-aware) ================================= */
 function AIBox({ data }) {
-  const { t } = useI18n()
+  const i18n = useI18n()
 
-  const tr = (key, params) => {
+  // мемоизированный t, чтобы не бесить eslint
+  const t = useMemo(
+    () => (i18n?.t ? i18n.t : (k) => k),
+    [i18n],
+  )
+
+  // Универсальный helper перевода с подстановкой параметров
+  const tr = useCallback((key, params) => {
     try {
       let s = t(key)
       if (s === key) s = t(key.replaceAll('.', '_'))
+
       if (typeof s === 'string' && params) {
+        let out = s
         for (const [k, v] of Object.entries(params)) {
-          s = s.replaceAll(`{${k}}`, typeof v === 'number' ? fmtP(v) : String(v))
+          out = out.replaceAll(
+            `{${k}}`,
+            typeof v === 'number' ? fmtP(v) : String(v),
+          )
         }
+        return out
       }
+
       return s
     } catch {
       return key
     }
-  }
+  }, [t])
 
-  // ==== ТОЛЬКО ЭТО ДОБАВЛЕНО: текст для тайпрайтера по reasons ====
+  // Определяем язык именно из i18n, а не только из браузера
+  const rawLang = (
+    i18n?.lang ??
+    i18n?.locale ??
+    i18n?.currentLang ??
+    ''
+  )
+    .toString()
+    .toLowerCase()
+
+  let regimeLang = 'en'
+  if (rawLang.startsWith('ru')) regimeLang = 'ru'
+  else if (rawLang.startsWith('uk')) regimeLang = 'uk'
+  else if (rawLang.startsWith('es')) regimeLang = 'es'
+  else if (rawLang.startsWith('tr')) regimeLang = 'tr'
+  else if (rawLang.startsWith('zh') || rawLang.startsWith('cn')) regimeLang = 'zh'
+  else if (rawLang.startsWith('ar')) regimeLang = 'ar'
+
   const reasonsFullText = useMemo(() => {
     if (!data || !Array.isArray(data.reasons) || !data.reasons.length) {
       return '—'
     }
 
-    const localized = data.reasons.map((r) =>
-      typeof r === 'string'
-        ? tr(r)
-        : tr(r.key, r.params),
-    )
+    const localized = data.reasons.map((r) => {
+      if (typeof r === 'string') return tr(r)
 
-    // склеиваем в одну строку с переносами
+      // Спец-обработка только для режима рынка:
+      if (r.baseKey === 'ai_regime' && r.params?.regimeText) {
+        const rt = r.params.regimeText || {}
+
+        // Берём текст на нужном языке, иначе fallback
+        const regimeHuman =
+          rt[regimeLang] ||
+          rt.en ||
+          rt.ru ||
+          Object.values(rt)[0] ||
+          r.params.regime
+
+        const params = {
+          ...r.params,
+          regime: regimeHuman,
+        }
+
+        return tr(r.key, params)
+      }
+
+      // Всё остальное как было
+      return tr(r.key, r.params)
+    })
+
     return localized.map((s) => `• ${s}`).join('\n')
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, t])
+  }, [data, tr, regimeLang])
 
   const typedReasons = useTypewriter(reasonsFullText, 14)
 
@@ -372,16 +423,15 @@ function AIBox({ data }) {
     () => (typedReasons || '—').split('\n'),
     [typedReasons],
   )
-  // ==== КОНЕЦ ДОБАВКИ ====
-  // === ДОБАВЛЯЕМ ref ДЛЯ СКРОЛЛА ===
-  const scrollRef = useRef(null)
 
-  // === АВТОСКРОЛЛ ВНИЗ ===
+  const scrollRef = useRef(null)
+ 
   useEffect(() => {
     if (!scrollRef.current) return
     const el = scrollRef.current
     el.scrollTop = el.scrollHeight
   }, [typedReasons])
+
   if (!data || !Number.isFinite(data.price)) {
     return (
       <Panel>
@@ -407,7 +457,7 @@ function AIBox({ data }) {
       </div>
       <div className="meta">
         <span>{(tr('ai_price') || 'Price')} {fmtP(data.price)}</span>
-        {data.entry != null && <span>Entry {fmtP(data.entry)}</span>}
+        {data.entry != null && <span>{(tr('ai_entry') || 'Entry')} {fmtP(data.entry)}</span>}
         {data.sl != null && <span>{(tr('ai_sl') || 'SL')} {fmtP(data.sl)}</span>}
         {data.tp1 != null && <span>{(tr('ai_tp') || 'TP')}1 {fmtP(data.tp1)}</span>}
         {data.tp2 != null && <span>{(tr('ai_tp') || 'TP')}2 {fmtP(data.tp2)}</span>}
@@ -429,8 +479,7 @@ function AIBox({ data }) {
           </ul>
         </div>
       </div>
-
-
+ 
       <div className="levels">
         {!!data.support?.length && (
           <div>
@@ -466,26 +515,22 @@ function AIBox({ data }) {
           min-height:40px;
           white-space:pre-line;
           transition:opacity .15s ease;
-        }
-        /* === НОВОЕ: контейнер под причины === */
+        } 
         .reason-scroll{
-          max-height: unset;      /* ПК / планшет — как было */
+          max-height: unset;
           overflow-y: visible;
-        }
-
-        /* === НОВОЕ: ТОЛЬКО ДЛЯ МОБИЛОК === */
+        } 
         @media (max-width:640px){
           .reason-scroll{
-            max-height: 220px;    /* высота коробки под текст на телефоне */
-            overflow-y: auto;     /* вертикальный скролл */
+            max-height: 230px;
+            overflow-y: auto;
             padding-right: 6px;
             scrollbar-width: none;
           }
           .reason-scroll::-webkit-scrollbar{
             display:none;
           }
-        }
-
+        } 
       `}</style>
 
       {(() => {
@@ -516,8 +561,7 @@ function AIBox({ data }) {
     </Panel>
   )
 }
-
-
+ 
 /* ============================ AI Quota Gate (10 min/day) ============================ */
 const QUOTA_LIMIT_SEC = 10 * 60; // 10 минут
 const QUOTA_HEARTBEAT_MS = 1000; // шаг 1 секунда (визуальная цель)

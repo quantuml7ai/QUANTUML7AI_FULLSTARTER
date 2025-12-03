@@ -6115,7 +6115,7 @@ try {
 /* -------------------- EN -------------------- */
 const AI_EN = {
   forum_ad_place: 'Place Ad',
-
+ai_entry: "Entry point",
   exchange_title: 'Exchange (in progress)',
   ai_cta_start_telegram: 'Start in Telegram',
   ai_reco_title: 'AI Recommendation',
@@ -6154,7 +6154,7 @@ const AI_EN = {
 /* -------------------- RU -------------------- */
 const AI_RU = {
   forum_ad_place: 'Разместить',
-
+ai_entry: "Точка входа",
   exchange_title: 'Биржа (в разработке)',
   ai_cta_start_telegram: 'Начать в Telegram',
   ai_reco_title: 'AI-рекомендация',
@@ -6191,7 +6191,7 @@ const AI_RU = {
 /* -------------------- UK -------------------- */
 const AI_UK = {
   forum_ad_place: 'Розмістити',
-
+ai_entry: "Точка входу",
   exchange_title: 'Біржа (в розробці)',
   ai_cta_start_telegram: 'Почати в Telegram',
   ai_reco_title: 'AI-рекомендація',
@@ -6228,7 +6228,7 @@ const AI_UK = {
 /* -------------------- ZH (简体) -------------------- */
 const AI_ZH = {
   forum_ad_place: '投放广告',
-
+ai_entry: "入口点",
   exchange_title: '交易所（开发中）',
   ai_cta_start_telegram: '在 Telegram 开始',
   ai_reco_title: 'AI 建议',
@@ -6265,7 +6265,7 @@ const AI_ZH = {
 /* -------------------- ES -------------------- */
 const AI_ES = {
   forum_ad_place: 'Publicar anuncio',
-
+ai_entry: "Punto de entrada",
   exchange_title: 'Bolsa (en desarrollo)',
   ai_cta_start_telegram: 'Empezar en Telegram',
   ai_reco_title: 'Recomendación AI',
@@ -6302,7 +6302,7 @@ const AI_ES = {
 /* -------------------- AR (العربية) -------------------- */
 const AI_AR = {
   forum_ad_place: 'وضع إعلان',
-
+ai_entry: "نقطة الدخول",
   exchange_title: 'البورصة (قيد التطوير)',
   ai_cta_start_telegram: 'ابدأ في تيليجرام',
   ai_reco_title: 'توصية الذكاء الاصطناعي',
@@ -6339,7 +6339,7 @@ const AI_AR = {
 /* -------------------- TR -------------------- */
 const AI_TR = {
   forum_ad_place: 'Reklam Ver',
-
+ai_entry: "Giriş noktası",
   exchange_title: 'Borsa (geliştirme aşamasında)',
   ai_cta_start_telegram: 'Telegram’da Başla',
   ai_reco_title: 'AI Önerisi',
@@ -7917,7 +7917,7 @@ forum_rules_lead: 'If you violate the rules described below, you will be permane
 forum_rules_attention: "Attention",
 orderbook_buy:  "Buy", 
 orderbook_sell: "Sell",  
-  forum_save: 'Saving',
+
   forum_ad_label: 'Advertisement',
   forum_title: 'Forum',
   nick_free: "Username is available",
@@ -8048,7 +8048,7 @@ forum_rules_lead: 'Если вы нарушите ниже описанные п
 forum_rules_attention: "Внимание",
 orderbook_buy:  "Покупка", 
 orderbook_sell: "Продажа",  
-  forum_save: 'Сохраняем',
+
   forum_ad_label: 'Реклама',
    forum_title: 'Форум',
    nick_free: "Ник свободен",
@@ -8177,7 +8177,7 @@ forum_rules_body: {
 forum_rules_lead: 'Якщо ви порушите нижче описані правила, вас буде назавжди заблоковано, а ваш баланс анульовано.',
  orderbook_buy:  "Покупка", 
 orderbook_sell: "Продаж", 
-  forum_save: 'Зберігаємо',
+
   forum_ad_label: 'Реклама',
   forum_title: 'Форум',
   nick_free: "Нік вільний",
@@ -8306,7 +8306,7 @@ forum_rules_body: {
 forum_rules_lead: 'Si violas las reglas descritas a continuación, serás bloqueado permanentemente y tu saldo será anulado.',
  orderbook_buy:  "Compra", 
 orderbook_sell: "Venta", 
-  forum_save: 'Guardando',
+
   forum_ad_label: 'Anuncio',
   forum_title: 'Foro',
   nick_free: "Nombre de usuario disponible",
@@ -8435,7 +8435,7 @@ forum_rules_lead: '如果您违反以下所述规则，您的账户将被永久�
  forum_rules_attention: "注意", 
  orderbook_buy:  "买入", 
 orderbook_sell: "卖出", 
-  forum_save: '保存中',
+
   forum_ad_label: '广告',
   forum_title: '论坛',
   nick_free: "昵称可用",
@@ -8564,7 +8564,7 @@ forum_rules_accept: 'قبول',
  forum_rules_attention: "تحذير", 
  orderbook_buy:  "شراء", 
 orderbook_sell: "بيع", 
-  forum_save: 'جارٍ الحفظ',
+
   forum_ad_label: 'إعلان',
   forum_title: 'المنتدى',
   nick_free: "اسم المستخدم متاح",
@@ -8694,7 +8694,7 @@ forum_rules_lead: 'Aşağıda belirtilen kuralları ihlal ederseniz, hesabınız
 forum_rules_attention: "Dikkat",
  orderbook_buy:  "Alış", 
 orderbook_sell: "Satış", 
-  forum_save: 'Kaydediyoruz',
+
   forum_ad_label: 'Reklam',
   forum_title: 'Forum',
   nick_free: "Kullanıcı adı uygun",
@@ -42765,477 +42765,1760 @@ try {
   Object.assign(dict.tr, Q1_HERO_TR)
 } catch (e) {}
 const AI_HERO_EN = {
-ai_calculating: 'Calculations in progress — PLEASE WAIT.',
-ai_regime: 'Market regime on the current timeframe (trend/range and volatility level) as detected by Quantum Brain using EMA, ATR and price structure.',
+// ===== no data =====
+ai_no_data: "Because Brain does not see enough historical data for this instrument, it refrains from giving a specific signal and remains in the neutral HOLD mode.", 
 
-ai_f_ema21_gt_ma50_on: 'Short-term trend is bullish: EMA 21 is above EMA 50 and EMA 50 is above EMA 200 — the market structure is in an uptrend.',
-ai_f_ema21_gt_ma50_off: 'Short-term bullish trend based on EMA 21 and EMA 50 is not confirmed — the moving averages structure does not indicate a stable uptrend.',
+// ===== regime =====
+ai_regime: "Because Brain evaluates the overall market regime as {regime} and the total score (trend={trendScore}, momentum={momentumScore}, vola={volaScore}, total={totalScore}), and based on this builds the current trading recommendation.",
+ai_regime_v2: "Because Brain recognizes the market regime {regime}: trend={trendScore}, momentum={momentumScore}, volatility={volaScore}, total score={totalScore}, and selects an appropriate trade scenario from that.",
+ai_regime_v3: "Because the current market regime that Brain sees is {regime}, and the combination of trend ({trendScore}), momentum ({momentumScore}), and volatility ({volaScore}) produces a final score of {totalScore} and shapes the signal logic.",
+ai_regime_v4: "Because according to Brain’s internal scoring the market is now in regime {regime}: total score totalScore={totalScore}, breakdown by trend={trendScore}, momentum={momentumScore}, and volatility={volaScore}, and this explains the current direction of the recommendation.",
+ai_regime_v5: "Because Brain aggregated many signals into the overall regime {regime} (trend={trendScore}, momentum={momentumScore}, vola={volaScore}, total={totalScore}), and the recommendation follows this market picture.",
 
-ai_f_ma50_gt_ma200_on: 'Medium-term trend is bullish: the 50-period moving average is above the 200-period moving average, indicating dominant upward movement.',
-ai_f_ma50_gt_ma200_off: 'Medium-term bullish trend is not confirmed: MA 50 is not above MA 200, the structure looks more like a range or downtrend.',
+// ===== EMA21 vs MA50 / MA200 =====
+ai_f_ema21_gt_ma50_on: "Because short-term EMA21 is above MA50 and MA200, the market structure favors buyers, and Brain increases the weight of the bullish scenario for this asset.",
+ai_f_ema21_gt_ma50_on_v2: "Because EMA21 has broken above and holds above MA50/MA200, showing a stable up-trend, and Brain more confidently supports the long idea.",
+ai_f_ema21_gt_ma50_on_v3: "Because the dominance of EMA21 over MA50 and MA200 indicates a fresh strong upward impulse, and Brain interprets it as an argument for continuation of growth.",
+ai_f_ema21_gt_ma50_on_v4: "Because EMA21 being above MA50 and MA200 is a classic sign of a bullish structure, and Brain emphasizes long scenarios while this setup remains intact.",
+ai_f_ema21_gt_ma50_on_v5: "Because EMA21 > MA50 > MA200, the trend is confirmed across multiple time horizons, and Brain allows for bolder long decisions within risk management.",
 
-ai_f_price_gt_vwap_on: 'Price is trading above VWAP — the volume-weighted average price — which usually means buying pressure and a positive intraday balance.',
-ai_f_price_gt_vwap_off: 'Price is trading below VWAP — the volume-weighted average price — which points to selling pressure and weaker demand.',
+ai_f_ema21_gt_ma50_off: "Because EMA21 does not hold above MA50/MA200, local buyer strength has weakened, and Brain reduces the aggressiveness of bullish signals.",
+ai_f_ema21_gt_ma50_off_v2: "Because the breakdown of EMA21 below MA50/MA200 shows a tired trend, and Brain treats the growth cautiously and avoids rushing into longs.",
+ai_f_ema21_gt_ma50_off_v3: "Because the reversal of EMA21 under MA50/MA200 signals the loss of uptrend structure, and Brain does not consider the situation a confident bullish setup.",
+ai_f_ema21_gt_ma50_off_v4: "Because while EMA21 trades below the mid-term MAs, the market looks more neutral or bearish, and Brain shifts away from aggressive buying.",
+ai_f_ema21_gt_ma50_off_v5: "Because the EMA21>MA50>MA200 cascade is broken, bullish dominance is in doubt, and Brain uses this as an argument against high long-risk exposure.",
 
-ai_f_rsi_overbought: 'RSI is in the overbought zone — the market is overheated to the upside, with a high risk of a correction or pullback.',
-ai_f_rsi_oversold: 'RSI is in the oversold zone — the market has dropped strongly, increasing the probability of a bounce or partial reversal.',
-ai_f_rsi_bull_on: 'RSI is shifted into the bullish zone (above the neutral area) — price momentum supports an upside scenario.',
-ai_f_rsi_bull_off: 'RSI does not confirm a bullish impulse; the indicator is closer to a neutral or bearish zone.',
+ai_f_ma50_gt_ma200_on: "Because MA50 is above MA200, a mid-term bullish trend is formed, and Brain gives more weight to longs and holding positions along the trend.",
+ai_f_ma50_gt_ma200_on_v2: "Because the MA50 cross above MA200 indicates a mature up-trend, and Brain sees this as a good backdrop for trades toward growth.",
+ai_f_ma50_gt_ma200_on_v3: "Because the structure MA50>MA200 shows the market is globally tilted toward buyers, and Brain uses this as a filter in favor of long scenarios.",
+ai_f_ma50_gt_ma200_on_v4: "Because while MA50 remains above MA200, the trend stays bullish, and Brain leans toward ‘buy the dip’ strategies instead of top-picking.",
+ai_f_ma50_gt_ma200_on_v5: "Because MA50 being above MA200 confirms the main vector is upward, and Brain more confidently supports the uptrend.",
 
-ai_f_macd_pos_on: 'MACD and its histogram point to bullish momentum — short-term price impulse is directed upward.',
-ai_f_macd_pos_off: 'MACD does not support a strong bullish impulse; the signal is weak or tilting to the bearish side.',
+ai_f_ma50_gt_ma200_off: "Because MA50 is below MA200, the basic context remains bearish or weak, and Brain treats longs more cautiously and manages risk tightly.",
+ai_f_ma50_gt_ma200_off_v2: "Because MA50 crossing below MA200 shows the global market structure is not in buyers’ favor, and Brain does not see it as a comfortable backdrop for long positions.",
+ai_f_ma50_gt_ma200_off_v3: "Because when MA50 falls below MA200, this signals worsening of the mid-term trend, and Brain accordingly lowers the priority of bullish ideas.",
+ai_f_ma50_gt_ma200_off_v4: "Because the MA50<MA200 structure indicates an increased risk of a prolonged downtrend, and Brain does not encourage aggressive buying.",
+ai_f_ma50_gt_ma200_off_v5: "Because while MA50 stays under MA200, the general picture is more bearish, and Brain aims for a more defensive and cautious stance.",
 
-ai_f_breakout_long: 'Price has broken recent highs for the selected period — a bullish breakout of resistance and strengthening of the upward trend.',
-ai_f_breakdown_short: 'Price has broken recent lows for the selected period — a bearish breakdown of support and strengthening of selling pressure.',
+// ===== price vs VWAP =====
+ai_f_price_gt_vwap_on: "Because the current price {price} is above VWAP {vwap}, buyers control the average price, and Brain interprets this as support for the long scenario.",
+ai_f_price_gt_vwap_on_v2: "Because the price trades above VWAP, meaning the market is on average willing to pay higher, and Brain sees this as a sign of strength and allows holding long.",
+ai_f_price_gt_vwap_on_v3: "Because the price’s position above VWAP shows trades happening at higher levels, and Brain uses this as an argument in favor of bulls.",
+ai_f_price_gt_vwap_on_v4: "Because while the price is above VWAP, short-term advantage remains with buyers, and Brain is less inclined to open new shorts in such a setup.",
+ai_f_price_gt_vwap_on_v5: "Because being above VWAP signals a positive demand balance, and Brain supports the long idea if other signals do not contradict it.",
 
-ai_f_bbands_width: 'Bollinger Bands width reflects the current volatility level — compression or expansion of the price fluctuation range.',
-ai_f_bbands_squeeze: 'Bollinger Bands are squeezed — volatility is abnormally low, a phase that often precedes a strong move in one direction.',
-ai_f_bbands_breakout_up: 'Price has moved above the upper Bollinger Band — aggressive bullish range expansion, possible acceleration phase or overbought condition.',
-ai_f_bbands_breakout_down: 'Price has moved below the lower Bollinger Band — aggressive bearish move, possible panic phase or oversold condition.',
+ai_f_price_gt_vwap_off: "Because the price {price} is below VWAP {vwap}, the average trade shifts downward, and Brain sees seller advantage and treats longs with caution.",
+ai_f_price_gt_vwap_off_v2: "Because trading below VWAP shows the market is ready to unload at worse prices, and Brain interprets this as a cautious bearish signal.",
+ai_f_price_gt_vwap_off_v3: "Because the price under VWAP is an indicator of local weakness, and Brain lowers the priority of long scenarios considering further downside risk.",
+ai_f_price_gt_vwap_off_v4: "Because when the price consolidates below VWAP, control shifts to sellers, and Brain recommends a more defensive approach to buying.",
+ai_f_price_gt_vwap_off_v5: "Because being below VWAP means the average participant sells the asset cheaper, and Brain interprets this as an unfavorable backdrop for new longs.",
 
-ai_f_stoch_overbought: 'Stochastic oscillator is in the overbought zone — short-term impulse is overheated upward, correction risk is elevated.',
-ai_f_stoch_oversold: 'Stochastic oscillator is in the oversold zone — short-term impulse is heavily pressed downward, the probability of a bounce increases.',
+// ===== RSI =====
+ai_f_rsi_overbought: "Because RSI={rsi} is in the overbought zone, most of the impulse is already priced in, and Brain warns of a high correction risk after the rise.",
+ai_f_rsi_overbought_v2: "Because RSI {rsi} readings show an overheated market, and Brain does not encourage aggressive buying, expecting a better entry point.",
+ai_f_rsi_overbought_v3: "Because RSI entered the upper extreme zone, which often leads to pullbacks, and Brain notes this as a reason for partial profit-taking and caution.",
+ai_f_rsi_overbought_v4: "Because at RSI around {rsi}, buying becomes statistically less profitable, and Brain sees an increased chance of a reversal or at least a pause in growth.",
+ai_f_rsi_overbought_v5: "Because strong overbought RSI ({rsi}) signals not to chase the long further, and Brain recommends not buying at the very top.",
 
-ai_f_adx: 'ADX measures trend strength, while plus/minus DI show which side dominates — buyers or sellers.',
-ai_f_adx_trending: 'ADX is high — the trend is strong and persistent; trend-following strategies tend to work better.',
-ai_f_adx_flat: 'ADX is low — the market is ranging or weakly structured; trend signals are less reliable.',
+ai_f_rsi_oversold: "Because RSI={rsi} is in the oversold zone, the market is skewed toward selling, and Brain sees rebound probability and treats new shorts cautiously.",
+ai_f_rsi_oversold_v2: "Because deep oversold RSI ({rsi}) indicates emotional selling, and Brain considers the chance of a technical reversal upward.",
+ai_f_rsi_oversold_v3: "Because RSI in the lower extreme zone signals a depleted bearish impulse, and Brain allows for a short squeeze or a strong bounce.",
+ai_f_rsi_oversold_v4: "Because at RSI around {rsi} sellers have already squeezed the market hard, and Brain prefers not to open aggressive shorts here.",
+ai_f_rsi_oversold_v5: "Because an oversold RSI state means a lot of downside work is done, and Brain increases the probability of upward correction.",
 
-ai_f_obv: 'OBV (On Balance Volume) shows the direction of volume flow — the OBV slope reflects whether buyers or sellers dominate.',
+ai_f_rsi_bull_on: "Because RSI={rsi} stays in a healthy bullish zone without extremes, and Brain views this as a stable upward impulse.",
+ai_f_rsi_bull_on_v2: "Because a moderately high RSI ({rsi}) confirms buyers are active but the market is not overheated, and Brain supports the uptrend.",
+ai_f_rsi_bull_on_v3: "Because RSI in the comfortable upper range reflects controlled demand, and Brain interprets this as a favorable backdrop for longs.",
+ai_f_rsi_bull_on_v4: "Because when RSI is around {rsi}, growth looks “healthy” without panic, and Brain prefers to follow the trend.",
+ai_f_rsi_bull_on_v5: "Because the position of RSI in the bullish zone shows the upward impulse remains, and Brain accepts it as a plus for continuing the long scenario.",
 
-ai_note_atr: 'ATR and relative ATR characterize the average price movement range and current volatility, which is crucial for risk assessment and stop-loss placement.',
-ai_f_vola_explosive: 'Volatility is elevated — price movement is aggressive, trade risk is higher, stops may need to be wider and spikes more violent.',
-ai_f_vola_low: 'Volatility is abnormally low — the market is “frozen”; moves may be slow and noisy until a new impulse appears.',
+ai_f_rsi_bull_off: "Because RSI={rsi} does not support a confident bullish impulse, and Brain sees weak demand and treats trend-longs cautiously.",
+ai_f_rsi_bull_off_v2: "Because moderate or low RSI ({rsi}) indicates weak buyer interest, and Brain does not get confirmation for an aggressive uptrend.",
+ai_f_rsi_bull_off_v3: "Because RSI does not stay in the upper range, the upward impulse fades, and Brain reduces the weight of trend ideas.",
+ai_f_rsi_bull_off_v4: "Because at RSI around {rsi}, growth looks fragile, and Brain considers the risk of sideways or a pullback.",
+ai_f_rsi_bull_off_v5: "Because the absence of a strong RSI signal ({rsi}) makes Brain treat bullish scenarios as less reliable.",
 
-ai_note_sr: 'The algorithm has identified the nearest support and resistance levels used to evaluate entry point, stop-loss and target levels.',
-ai_note_h: 'Movement horizons show the approximate expected price range over time (for example, for 1 hour, 6 hours and 24 hours).',
+// ===== MACD =====
+ai_f_macd_pos_on: "Because MACD confirms a bullish impulse: MACD={macd} is above the signal {macdSignal}, histogram {hist} is positive, and Brain strengthens the upward signal.",
+ai_f_macd_pos_on_v2: "Because MACD parameters (line {macd}, signal {macdSignal}, hist {hist}>0) indicate buyer dominance, and Brain uses this to support longs.",
+ai_f_macd_pos_on_v3: "Because as long as MACD is above the signal and hist stays positive, the upward impulse is considered alive, and Brain allows holding the trend position.",
+ai_f_macd_pos_on_v4: "Because the bullish MACD configuration gives a statistical advantage for upward continuation, and Brain relies on this while forming the recommendation.",
+ai_f_macd_pos_on_v5: "Because a positive MACD setup strengthens Brain’s confidence in further upward impulse, and all else equal this is a plus for longs.",
 
-ai_note_data_short_history: 'Historical data is limited — the bar history is short, so some signals and statistics may be less reliable.',
-ai_note_data_low_vola: 'The market has been in a low-volatility regime for a long time, so the statistical confidence of current volatility estimates may be reduced.',
+ai_f_macd_pos_off: "Because the current MACD (MACD={macd}, signal={macdSignal}, hist={hist}) does not support a strong uptrend, and Brain softens the bullish signal.",
+ai_f_macd_pos_off_v2: "Because when MACD does not provide a clear bullish picture and the histogram {hist} is unconvincing, Brain reduces confidence in trend continuation.",
+ai_f_macd_pos_off_v3: "Because a weak or neutral MACD signal shows the trend may be losing strength, and Brain considers reversal or slowdown risk.",
+ai_f_macd_pos_off_v4: "Because if MACD and the signal line converge or cross downward, Brain does not see the situation as a strong bullish setup.",
+ai_f_macd_pos_off_v5: "Because the absence of a clear MACD impulse makes Brain treat longs cautiously and avoid inflated expectations for trend continuation.",
 
-ai_note_rr_good: 'The risk-reward ratio for the trade looks attractive — expected reward significantly exceeds potential loss.',
-ai_note_rr_poor: 'The risk-reward ratio is weak — expected reward does not sufficiently compensate for potential loss on the trade.',
+// ===== breakout / breakdown =====
+ai_f_breakout_long: "Because the price {price} broke a key local high and forms a breakout upward, and Brain sees strengthening bulls but reminds of false-breakout risk.",
+ai_f_breakout_long_v2: "Because the price moving above the recent range is a classic breakout signal, and Brain allows further growth under controlled risk.",
+ai_f_breakout_long_v3: "Because a breakout upward shows the market’s readiness to accept new higher prices, and Brain uses this as an argument for a long.",
+ai_f_breakout_long_v4: "Because the breakout of resistance confirms trend strength, and Brain considers that after a pullback the upward movement may continue.",
+ai_f_breakout_long_v5: "Because the actual breakout at price {price} strengthens the bullish scenario, but Brain does not recommend chasing too high and prefers a reasonable pullback.",
 
-ai_note_oversold_risk_reversal: 'The market is extremely oversold and near supports — the algorithm avoids selling because the risk of a sharp reversal upward is high.',
-ai_note_overbought_risk_reversal: 'The market is extremely overbought and near resistances — the algorithm avoids buying because the risk of a sharp reversal downward is high.',
+ai_f_breakdown_short: "Because the price {price} broke key support and forms a breakdown downward, Brain sees strengthening sellers and risk for longs.",
+ai_f_breakdown_short_v2: "Because a breakdown below the range shows the market shifts under bear control, and Brain sees this as an argument for defensive or short tactics.",
+ai_f_breakdown_short_v3: "Because the breakdown of support increases the probability of further decline, and Brain warns of unfavorable conditions for new longs.",
+ai_f_breakdown_short_v4: "Because the failure of support is a strong weakness signal, and Brain allows continuation of the downtrend with entries only on pullbacks.",
+ai_f_breakdown_short_v5: "Because the breakdown phase indicates structural deterioration, and Brain evaluates the chances of growth as low until support recovers.",
 
-ai_note_funding: 'Futures funding shows the imbalance toward longs or shorts — extreme values often signal an overheated side of the market.',
-ai_note_oi_change: 'Open interest change reflects capital entering or leaving the market — together with price direction it helps assess move strength.',
-ai_note_basis: 'Basis (difference between futures and spot price) shows whether the market trades at a premium or a discount — this signals a bias in participants’ expectations.',
-ai_note_dominance: 'Bitcoin dominance shows BTC’s share of the market — for altcoins high dominance often means increased pressure and downside risk.',
-ai_note_btc_corr: 'Correlation with Bitcoin shows how closely this asset moves with BTC — high correlation amplifies the impact of the overall market.',
+// ===== Bollinger Bands =====
+ai_f_bbands_squeeze: "Because Bollinger Bands are heavily compressed (width={width}), Brain sees an energy accumulation phase and prepares for a potentially sharp breakout.",
+ai_f_bbands_squeeze_v2: "Because Bollinger Bands compression indicates abnormally low volatility, and Brain expects the next impulse may be sharp.",
+ai_f_bbands_squeeze_v3: "Because when Bollinger Bands narrow, the market often prepares a strong move, and Brain treats this as a warning of upcoming volatility.",
+ai_f_bbands_squeeze_v4: "Because the Bollinger-squeeze signals a calm period before a potential trend explosion, and Brain recommends not to underestimate the upcoming move.",
+ai_f_bbands_squeeze_v5: "Because prolonged Bollinger compression increases the probability of a large movement, and Brain incorporates this into risk and position sizing.",
 
-ai_note_global_spot: 'Global spot is an aggregated fair spot price across major exchanges, used as a reference to evaluate local deviations.',
-ai_note_venue_spread: 'Venue spread shows price differences between exchanges — a large spread may indicate arbitrage, liquidity imbalance or technical distortions.',
+ai_f_bbands_width: "Because the width of Bollinger Bands={width}, and the mid-line is around {bbMid}, helping Brain understand how “charged” the market is and how much movement is statistically expected.",
 
-ai_no_data: 'Not enough data for a reliable analysis — history is too short or price series are problematic, so the system falls back to HOLD mode.',
+ai_f_bbands_breakout_up: "Because the price {price} moved above the upper Bollinger band {upper}, showing a strong bullish impulse and expanding volatility upward, and Brain notes both the potential and the overheating risk.",
+ai_f_bbands_breakout_down: "Because the price {price} moved below the lower Bollinger band {lower}, indicating seller dominance and aggressive downward movement, and Brain sees this as a risk for longs.",
+
+// ===== Stochastic =====
+ai_f_stoch_overbought: "Because Stochastic (K={k}, D={d}) is in the overbought zone, short-term growth looks exhausted, and Brain sees an increased chance of a pullback.",
+ai_f_stoch_overbought_v2: "Because high Stochastic values indicate price overheating, and Brain avoids supporting new longs here.",
+ai_f_stoch_overbought_v3: "Because Stochastic shows the market is temporarily overbought, and Brain sees this as a reason for caution and possible partial profit-taking.",
+ai_f_stoch_overbought_v4: "Because when K and D stay in the upper zone, correction probability increases, and Brain considers this in position risk evaluation.",
+ai_f_stoch_overbought_v5: "Because an overbought Stochastic signals the local uptrend may pause, and Brain reduces aggressiveness in entering longs.",
+
+ai_f_stoch_oversold: "Because Stochastic (K={k}, D={d}) is in the oversold zone, sellers temporarily overextended the market, and Brain allows for a rebound.",
+ai_f_stoch_oversold_v2: "Because low Stochastic values indicate local oversold conditions, and Brain sees an increased chance of a short-term upward reversal.",
+ai_f_stoch_oversold_v3: "Because Stochastic in the lower zone shows a large move down already happened, and Brain treats new shorts cautiously.",
+ai_f_stoch_oversold_v4: "Because in oversold Stochastic conditions Brain expects some sellers to close positions, potentially causing a bounce.",
+ai_f_stoch_oversold_v5: "Because Stochastic oversold is a statistical argument for corrective growth, and Brain considers it when evaluating probabilities.",
+
+// ===== ADX =====
+ai_f_adx: "Because the ADX index={adx} and the ratio +DI={plusDI} to -DI={minusDI} allow Brain to assess trend strength and direction before issuing a signal.",
+ai_f_adx_trending: "Because high ADX={adx} shows a strong trending market, and Brain gives more weight to trend-following strategies.",
+ai_f_adx_trending_v2: "Because with elevated ADX the trend is statistically more reliable, and Brain more boldly supports trades in the direction of the dominant move.",
+ai_f_adx_trending_v3: "Because strong ADX confirms the trend is not random, and Brain relies on it as the main scenario framework.",
+ai_f_adx_trending_v4: "Because when ADX grows and stays high, Brain sees the trend as stable and allows holding the position longer.",
+ai_f_adx_trending_v5: "Because a powerful ADX signal shows the market moves in an organized way, and Brain uses this to reinforce trend recommendations.",
+
+ai_f_adx_flat: "Because low ADX={adx} indicates a flat and weak trend, and Brain reduces confidence in directional trades.",
+ai_f_adx_flat_v2: "Because with low ADX the market resembles choppiness more than trend, and Brain is careful with attempts to catch large directional moves.",
+ai_f_adx_flat_v3: "Because weak ADX is a sign of sideways action, and Brain does not expect sustainable movement in one direction.",
+ai_f_adx_flat_v4: "Because in flat ADX conditions trend trades are statistically worse, and Brain recommends moderating profit expectations.",
+ai_f_adx_flat_v5: "Because when ADX is low, Brain sees the market as noisy and avoids aggressive directional signals.",
+
+// ===== OBV =====
+ai_f_obv: "Because the OBV slope around {slope} shows the inflow or outflow of volume, and Brain uses this to confirm or refute pure price movement.",
+
+// ===== ATR / volatility =====
+ai_note_atr: "Because ATR={atr} (atrRel={atrRel}, ≈{atrPct}% of price) sets the typical daily range, and Brain uses this volatility to estimate expected 1h≈{h1}, 6h≈{h6}, 24h≈{h24} moves and to build stop/take levels.",
+ai_note_atr_v2: "Because the average true range ATR {atr} (about {atrPct}% of price) helps Brain understand how far price usually moves and what stops/targets are realistic.",
+ai_note_atr_v3: "Because through ATR Brain calibrates the movement scale: atrRel={atrRel}, atrPct≈{atrPct}%, giving reasonable expectations for risk and profit.",
+ai_note_atr_v4: "Because ATR reflects the market’s “breathing”; at {atrPct}% of price Brain chooses stops and targets that avoid noise-triggered liquidation.",
+ai_note_atr_v5: "Because Brain relies on ATR {atr} and its share of the price ({atrPct}%) to balance risk/reward and avoid overestimating expected moves.",
+
+ai_f_vola_explosive: "Because atrRel={atrRel} (≈{atrPct}% of price) shows explosive volatility, and Brain recommends reducing position size and widening protective stops.",
+ai_f_vola_explosive_v2: "Because at such volatility ({atrPct}% of price) any bar may be abnormally large, and Brain treats this as high risk, advising careful risk management.",
+ai_f_vola_explosive_v3: "Because explosive volatility increases both potential and drawdown, and Brain does not advise overloading the account at atrRel={atrRel}.",
+ai_f_vola_explosive_v4: "Because when volatility reaches extreme levels, the market becomes more unpredictable, and Brain recommends acting conservatively.",
+ai_f_vola_explosive_v5: "Because a super-volatile regime (atrPct≈{atrPct}%) is a zone where survival matters more than catching every move, and Brain reduces aggressive signals.",
+
+ai_f_vola_low: "Because atrRel={atrRel} (≈{atrPct}% of price) indicates very low volatility, and Brain does not expect fast or large moves.",
+ai_f_vola_low_v2: "Because with low volatility the market often chops in a range, and Brain does not expect big profits in short time.",
+ai_f_vola_low_v3: "Because low volatility makes trends fragile, and Brain treats targets carefully and avoids overestimating R:R.",
+ai_f_vola_low_v4: "Because when atrPct is small, the market is “asleep,” and Brain often waits for a volatility awakening before strengthening directional signals.",
+ai_f_vola_low_v5: "Because a low-volatility regime increases false-breakout risk and prolonged flats, and Brain factors this in and reduces confidence.",
+
+// ===== levels =====
+ai_note_sr: "Because the nearest support is around {s}, resistance around {r}, current price {price}, and through nearS={nearS} and nearR={nearR} Brain evaluates how much room remains to the level and where stop/take logically fit.",
+ai_note_h: "Because Brain considers expected price movement across different horizons to keep the recommendation time-consistent rather than reacting only to a single bar.",
+
+// ===== data length & volatility =====
+ai_note_data_short_history: "Because the history is short (bars: {bars}), some statistics are unreliable, and Brain reduces confidence in strong directional signals.",
+ai_note_data_short_history_v2: "Because with short history ({bars} bars) volatility and trend models work more roughly, and Brain gives more cautious conclusions.",
+ai_note_data_short_history_v3: "Because a modest amount of data complicates market assessment, and Brain does not overestimate signals derived from a small sample.",
+ai_note_data_short_history_v4: "Because with insufficient historical candles error risk in scoring is higher, and Brain reduces confidence in recommendations.",
+ai_note_data_short_history_v5: "Because low data volume makes any conclusions fragile, and Brain honestly accounts for this without overstating signal strength.",
+
+ai_note_data_low_vola: "Because market activity is currently low (atrRel={atrRel}, ≈{atrPct}% of price), and Brain does not expect aggressive moves, recommending moderate expectations.",
+ai_note_data_low_vola_v2: "Because low volatility activity makes the market sticky, and Brain avoids overly ambitious targets in such conditions.",
+ai_note_data_low_vola_v3: "Because weak price dynamics signal the market is not ready for a big trend, and Brain favors a cautious approach.",
+ai_note_data_low_vola_v4: "Because when vola is low, chop probability is higher, and Brain does not recommend betting on a strong swing.",
+ai_note_data_low_vola_v5: "Because a low-volatility market often wastes time rather than moves, and Brain suggests patiently waiting out the quiet phase.",
+
+// ===== R:R =====
+ai_note_rr_good: "Because the expected risk/reward {rr} at the target level {rrNominal}x looks attractive, and Brain considers the trade statistically justified.",
+ai_note_rr_good_v2: "Because good R:R ({rr} vs the {rrNominal}x benchmark) provides a profitability buffer, and Brain marks the trade as interesting in terms of risk profile.",
+ai_note_rr_good_v3: "Because at this R:R the trade compensates for individual losing entries, and Brain positively evaluates the strategy’s expectancy.",
+ai_note_rr_good_v4: "Because R:R above the benchmark is a rare plus, and Brain allows more active work with such a setup.",
+ai_note_rr_good_v5: "Because when risk/reward works in our favor (rr≈{rr}), Brain sees the setup as high-quality even if the picture is not perfect.",
+
+ai_note_rr_poor: "Because the current risk/reward {rr} is worse than the {rrNominal}x benchmark, and Brain does not recommend entering aggressively.",
+ai_note_rr_poor_v2: "Because a weak R:R ({rr} vs desired {rrNominal}x) makes the idea uninteresting, and Brain sees insufficient profit buffer.",
+ai_note_rr_poor_v3: "Because when R:R falls short of the standard, even a correct forecast pays little, and Brain reduces the priority of the entry.",
+ai_note_rr_poor_v4: "Because poor R:R increases the chance a series of such trades will drain the deposit, and Brain does not encourage taking them systematically.",
+ai_note_rr_poor_v5: "Because at low R:R Brain thinks it’s better to skip the opportunity and wait for a more favorable setup.",
+
+// ===== oversold / overbought risk reversal =====
+ai_note_oversold_risk_reversal: "Because deep oversold conditions (RSI={rsi}) create the risk of a sharp reversal upward, and Brain prefers not to open new shorts here.",
+ai_note_oversold_risk_reversal_v2: "Because at strong RSI oversold levels Brain sees a high probability of a short squeeze and does not push fresh shorts.",
+ai_note_oversold_risk_reversal_v3: "Because when the market is heavily oversold, any positive news may trigger a reversal, and Brain considers this risk against shorts.",
+ai_note_oversold_risk_reversal_v4: "Because oversold conditions make entering shorts statistically dangerous, and Brain recommends a pause.",
+ai_note_oversold_risk_reversal_v5: "Because Brain notes: strong oversold is not the best place to add shorts, the rebound risk is higher here.",
+
+ai_note_overbought_risk_reversal: "Because strong overbought conditions (RSI={rsi}) increase the risk of a sharp reversal downward, and Brain does not encourage aggressive buys at the top.",
+ai_note_overbought_risk_reversal_v2: "Because in overbought RSI conditions Brain sees a high pullback risk and does not consider it reasonable to extend longs.",
+ai_note_overbought_risk_reversal_v3: "Because an overbought market often reverses on news, and Brain considers this advising not to add to positions.",
+ai_note_overbought_risk_reversal_v4: "Because in the overbought zone statistics work against new longs, and Brain acknowledges the increased reversal risk.",
+ai_note_overbought_risk_reversal_v5: "Because Brain believes: at strong overbought it's better to protect profit than open new buys.",
+
+// ===== derivatives / on-chain =====
+ai_note_funding: "Because funding={funding} shows imbalance in derivatives positions, and Brain accounts for which side is overloaded and where the risk of a sharp squeeze is higher.",
+ai_note_funding_v2: "Because abnormal funding hints at a long/short imbalance, and Brain interprets it as a risk factor against the crowded side.",
+ai_note_funding_v3: "Because through funding Brain sees who overpays for leverage, increasing the probability of a move against overloaded positions.",
+ai_note_funding_v4: "Because high absolute funding warns of unstable futures balance, and Brain reduces confidence in continuation of the off-balance side.",
+ai_note_funding_v5: "Because Brain uses funding as a greed/fear thermometer in derivatives, helping avoid standing in line with the crowd.",
+
+ai_note_oi_change: "Because Open Interest change {oiChange} shows inflow/outflow of money into futures, and Brain distinguishes “real” movement from empty volatility.",
+ai_note_oi_change_v2: "Because rising OI with price movement strengthens the trend signal, while falling OI weakens it — this is how Brain reads the {oiChange} metric.",
+ai_note_oi_change_v3: "Because through OI dynamics Brain understands whether new positions are being opened or the market only flushes old ones.",
+ai_note_oi_change_v4: "Because strong OI shifts indicate risk redistribution among participants, and Brain uses this to refine the signal.",
+ai_note_oi_change_v5: "Because Brain looks at {oiChange} to avoid confusing real trend with movement caused by position closing.",
+
+ai_note_basis: "Because futures basis={basis} reflects the difference between futures and spot, and strong deviation indicates overheating of one side, which Brain factors into risk.",
+ai_note_basis_v2: "Because atypical basis signals distorted expectations in derivatives, and Brain does not ignore this hidden stress marker.",
+ai_note_basis_v3: "Because basis shows how much the market is willing to overpay or discount the future price; at extreme values Brain is more cautious.",
+ai_note_basis_v4: "Because a strong basis toward bulls or bears often precedes reversals, and Brain uses this to avoid entering the tail of a trend.",
+ai_note_basis_v5: "Because Brain uses basis as an indicator of trend confidence in futures, especially when it goes beyond normal levels.",
+
+ai_note_dominance: "Because Bitcoin dominance around {dominance}% shows the power balance between BTC and alts; at high dominance Brain expects pressure on altcoins.",
+ai_note_dominance_v2: "Because rising BTC dominance usually worsens conditions for alts, and Brain sees this as a bearish external backdrop for them.",
+ai_note_dominance_v3: "Because low BTC dominance, on the contrary, opens opportunities for alts, and Brain adjusts the risk profile accordingly.",
+ai_note_dominance_v4: "Because through the dominance metric Brain sees where liquidity flows — into BTC (the blue chip) or into riskier assets.",
+ai_note_dominance_v5: "Because dominance changes help Brain understand who the market currently favors — Bitcoin or alts — and adjust signals to this shift.",
+
+ai_note_btc_corr: "Because correlation with BTC around {corr} shows how closely the asset moves with Bitcoin, and Brain factors this in to avoid duplicating the same risk.",
+ai_note_btc_corr_v2: "Because high correlation with BTC means the asset largely depends on Bitcoin’s movement, and Brain accounts for this in portfolio construction.",
+ai_note_btc_corr_v3: "Because low correlation with BTC makes the asset more independent, and Brain uses this for diversification.",
+ai_note_btc_corr_v4: "Because through BTC correlation Brain evaluates how unique the signal for this asset is rather than just a copy of BTC’s position.",
+ai_note_btc_corr_v5: "Because shifts in {corr} help Brain understand whether the BTC linkage strengthens or weakens, adjusting expectations accordingly.",
+
+ai_note_global_spot: "Because the global spot market condition is assessed as {globalSpot}, and Brain uses this background to amplify or soften local signals.",
+ai_note_global_spot_v2: "Because the overall tone of the spot market ({globalSpot}) affects the probability of success of the local setup, and Brain does not consider it in isolation.",
+ai_note_global_spot_v3: "Because if global spot is weak, Brain is more cautious with aggressive longs even in a good local picture.",
+ai_note_global_spot_v4: "Because a strong spot background makes bullish signals more reliable, and Brain takes this tailwind into account.",
+ai_note_global_spot_v5: "Because Brain always checks the local signal against the global spot picture ({globalSpot}) to avoid trading against the overall liquidity flow.",
+
+ai_note_venue_spread: "Because increased venue spread={spread} indicates heterogeneous pricing and possible slippage, and Brain recommends a more conservative position size.",
+ai_note_venue_spread_v2: "Because a large spread between venues is a sign of low liquidity, and Brain sees additional operational risk in this.",
+ai_note_venue_spread_v3: "Because when prices on different exchanges diverge significantly, the risk of poor execution rises, and Brain factors this into the trade risk.",
+ai_note_venue_spread_v4: "Because an expanded venue spread signals to Brain that it's not the best moment for large orders.",
+ai_note_venue_spread_v5: "Because Brain interprets high inter-exchange spread as a signal to slow down and trade more carefully to avoid unnecessary execution losses.",
+
 qcoin_drop_toast_error: "(the credit will be verified on the server)",
 qcoin_drop_toast_title: "Congratulations!",
-
+ai_calculating: 'Calculations in progress — PLEASE WAIT.',
 }
 const AI_HERO_RU = {
-ai_calculating: 'Идут вычесления "ПОДОЖДИТЕ" ',
-ai_regime: 'Режим рынка на текущем таймфрейме (тренд/флэт и уровень волатильности), который Quantum Brain определил по EMA, ATR и структуре движения цены.',
 
-ai_f_ema21_gt_ma50_on: 'Краткосрочный тренд бычий: EMA 21 выше EMA 50, а EMA 50 выше EMA 200 — рынок структурно в восходящем тренде.',
-ai_f_ema21_gt_ma50_off: 'Краткосрочный бычий тренд по EMA 21 и EMA 50 не подтверждён — структура скользящих не указывает на устойчивый рост.',
+ai_no_data: "Потому что Brain не видит достаточного объёма исторических данных по этому инструменту, поэтому удерживается от конкретного сигнала и остаётся в нейтральном режиме HOLD.", 
 
-ai_f_ma50_gt_ma200_on: 'Среднесрочный тренд бычий: скользящая MA 50 расположена выше MA 200, что говорит о доминировании восходящего движения.',
-ai_f_ma50_gt_ma200_off: 'Среднесрочный бычий тренд не подтверждён: MA 50 не выше MA 200, структура больше похожа на флэт или нисходящий рынок.',
+// ===== regime =====
+ai_regime: "Потому что Brain оценивает общий режим рынка как {regime} и суммарный скор (trend={trendScore}, momentum={momentumScore}, vola={volaScore}, total={totalScore}), и на этой основе строит текущую торговую рекомендацию.",
+ai_regime_v2: "Потому что Brain распознаёт рыночный режим {regime}: тренд={trendScore}, моментум={momentumScore}, волатильность={volaScore}, общий скор={totalScore}, и уже от этого подбирает подходящий сценарий сделки.",
+ai_regime_v3: "Потому что текущий режим рынка, который видит Brain, — {regime}, а комбинация тренда ({trendScore}), момента ({momentumScore}) и волы ({volaScore}) даёт итоговый скор {totalScore} и формирует логику сигнала.",
+ai_regime_v4: "Потому что по внутреннему скорингу Brain рынок сейчас в режиме {regime}: суммарный балл totalScore={totalScore}, разложение по тренду={trendScore}, моментуму={momentumScore} и волатильности={volaScore}, и именно это объясняет текущий вектор рекомендации.",
+ai_regime_v5: "Потому что Brain свёл множество сигналов в общий режим {regime} (trend={trendScore}, momentum={momentumScore}, vola={volaScore}, total={totalScore}), и рекомендация ориентируется именно на такую картину рынка.",
 
-ai_f_price_gt_vwap_on: 'Цена торгуется выше VWAP — средневзвешенной по объёму цены, что обычно означает давление покупателей и позитивный внутридневной баланс.',
-ai_f_price_gt_vwap_off: 'Цена торгуется ниже VWAP — средневзвешенной по объёму цены, что указывает на давление продавцов и более слабый спрос.',
+// ===== EMA21 vs MA50 / MA200 =====
+ai_f_ema21_gt_ma50_on: "Потому что краткосрочная EMA21 выше MA50 и MA200, рынок структурно в пользу покупателей, и Brain усиливает вес бычьего сценария по этому активу.",
+ai_f_ema21_gt_ma50_on_v2: "Потому что EMA21 пробита и держится выше MA50/MA200, что показывает устойчивый up-trend, и Brain увереннее поддерживает лонговую идею.",
+ai_f_ema21_gt_ma50_on_v3: "Потому что доминирование EMA21 над MA50 и MA200 говорит о свежем сильном импульсе вверх, и Brain учитывает это как аргумент за продолжение роста.",
+ai_f_ema21_gt_ma50_on_v4: "Потому что позиция EMA21 выше MA50 и MA200 — классический признак бычьей структуры, и Brain делает акцент на long-сценариях, пока эта связка не сломана.",
+ai_f_ema21_gt_ma50_on_v5: "Потому что EMA21 > MA50 > MA200, тренд подтверждён по нескольким горизонтам, и Brain допускает более смелые лонговые решения в рамках риск-менеджмента.",
 
-ai_f_rsi_overbought: 'RSI находится в зоне перекупленности — рынок перегрет вверх, высок риск коррекции или отката после текущего роста.',
-ai_f_rsi_oversold: 'RSI находится в зоне перепроданности — рынок сильно просел, повышается вероятность отскока или частичного разворота.',
-ai_f_rsi_bull_on: 'RSI смещён в бычью зону (выше нейтральной области) — импульс цены поддерживает сценарий роста.',
-ai_f_rsi_bull_off: 'RSI не подтверждает бычий импульс, индикатор ближе к нейтральной или медвежьей зоне.',
+ai_f_ema21_gt_ma50_off: "Потому что EMA21 не удерживается выше MA50/MA200, локальная сила покупателей ослабла, и Brain снижает агрессивность бычьих сигналов.",
+ai_f_ema21_gt_ma50_off_v2: "Потому что пробой EMA21 вниз относительно MA50/MA200 показывает уставший тренд, и Brain относится к росту осторожно и не спешит наращивать long.",
+ai_f_ema21_gt_ma50_off_v3: "Потому что разворот EMA21 под MA50/MA200 — признак потери структуры up-trend, и Brain не рассматривает ситуацию как уверенный бычий сетап.",
+ai_f_ema21_gt_ma50_off_v4: "Потому что пока EMA21 торгуется ниже среднесрочных MA, рынок выглядит более нейтрально или медвежье, и Brain смещает фокус от агрессивных покупок.",
+ai_f_ema21_gt_ma50_off_v5: "Потому что сломан каскад EMA21>MA50>MA200, доминирование быков под вопросом, и Brain учитывает это как аргумент против высоких лонговых рисков.",
 
-ai_f_macd_pos_on: 'MACD и его гистограмма указывают на бычий импульс — краткосрочный моментум направлен вверх.',
-ai_f_macd_pos_off: 'MACD не поддерживает устойчивый бычий импульс, сигнал слабый либо склоняется в медвежью сторону.',
+ai_f_ma50_gt_ma200_on: "Потому что MA50 выше MA200, оформлен среднесрочный бычий тренд, и Brain даёт больше веса лонгам и удержанию позиций по направлению тренда.",
+ai_f_ma50_gt_ma200_on_v2: "Потому что пересечение MA50 над MA200 говорит о зрелом up-trend’е, и Brain воспринимает это как хороший фон для сделок в сторону роста.",
+ai_f_ma50_gt_ma200_on_v3: "Потому что структура MA50>MA200 показывает, что глобально рынок смещён в пользу покупателей, и Brain использует это как фильтр в пользу long-сценариев.",
+ai_f_ma50_gt_ma200_on_v4: "Потому что пока MA50 остаётся над MA200, тренд остаётся бычьим, и Brain склоняется к стратегиям «покупать просадки», а не ловить вершины.",
+ai_f_ma50_gt_ma200_on_v5: "Потому что MA50, находящаяся над MA200, подтверждает, что основной вектор — вверх, и Brain позволяет себе более уверенно поддерживать рост.",
 
-ai_f_breakout_long: 'Цена пробила локальные максимумы за выбранный период — формируется бычий пробой сопротивления и усиление трендового движения вверх.',
-ai_f_breakdown_short: 'Цена пробила локальные минимумы за выбранный период — формируется медвежий пробой поддержки и усиление давления продавцов.',
+ai_f_ma50_gt_ma200_off: "Потому что MA50 ниже MA200, базовый контекст остаётся медвежьим или слабым, и Brain аккуратнее относится к лонгам и фиксирует риск.",
+ai_f_ma50_gt_ma200_off_v2: "Потому что перекрестие MA50 под MA200 показывает, что глобальная структура рынка не в пользу покупателей, и Brain не рассматривает это как комфортный фон для длинных позиций.",
+ai_f_ma50_gt_ma200_off_v3: "Потому что когда MA50 падает ниже MA200, это сигнал об ухудшении среднесрочного тренда, и Brain соответственно снижает приоритет бычьих идей.",
+ai_f_ma50_gt_ma200_off_v4: "Потому что структура MA50<MA200 указывает на повышенный риск затяжного даун-тренда, и Brain не поощряет агрессивные покупки в таком окружении.",
+ai_f_ma50_gt_ma200_off_v5: "Потому что пока MA50 остаётся под MA200, основная картина скорее медвежья, и Brain ориентируется на защитный стиль и осторожные входы.",
 
-ai_f_bbands_width: 'Ширина полос Боллинджера отражает текущий уровень волатильности рынка — сжатие или расширение диапазона колебаний цены.',
-ai_f_bbands_squeeze: 'Полосы Боллинджера сжаты — волатильность аномально низкая, часто такая фаза предшествует сильному движению в одну из сторон.',
-ai_f_bbands_breakout_up: 'Цена вышла выше верхней полосы Боллинджера — агрессивное бычье расширение диапазона, возможна фаза ускоренного роста или перекупленности.',
-ai_f_bbands_breakout_down: 'Цена ушла ниже нижней полосы Боллинджера — агрессивное медвежье движение, возможна фаза паники или перепроданности.',
+// ===== price vs VWAP =====
+ai_f_price_gt_vwap_on: "Потому что текущая цена {price} располагается выше VWAP {vwap}, покупатели контролируют среднюю цену, и Brain трактует это как поддержку лонгового сценария.",
+ai_f_price_gt_vwap_on_v2: "Потому что цена торгуется над VWAP, в среднем рынок готов платить дороже, и Brain расценивает это как признак силы и допускает удержание long.",
+ai_f_price_gt_vwap_on_v3: "Потому что позиция цены выше VWAP показывает, что сделки проходят по более высоким уровням, и Brain использует это как аргумент в пользу быков.",
+ai_f_price_gt_vwap_on_v4: "Потому что пока цена выше VWAP, краткосрочное преимущество остаётся за покупателями, и Brain менее склонен открывать новые шорты в такой конфигурации.",
+ai_f_price_gt_vwap_on_v5: "Потому что нахождение цены над VWAP говорит о позитивном балансе спроса, и Brain готов поддерживать лонговую идею, если остальные сигналы не против.",
 
-ai_f_stoch_overbought: 'Стохастический осциллятор в зоне перекупленности — краткосрочный импульс перегрет вверх, повышён риск коррекции.',
-ai_f_stoch_oversold: 'Стохастический осциллятор в зоне перепроданности — краткосрочный импульс сильно выжат вниз, растёт вероятность отскока.',
+ai_f_price_gt_vwap_off: "Потому что цена {price} ниже VWAP {vwap}, средняя сделка уходит вниз, и Brain видит преимущество продавцов и осторожнее относится к лонгам.",
+ai_f_price_gt_vwap_off_v2: "Потому что торговля ниже VWAP показывает, что рынок готов разгружаться по худшим ценам, и Brain воспринимает это как осторожный медвежий сигнал.",
+ai_f_price_gt_vwap_off_v3: "Потому что цена под VWAP — индикатор локальной слабости, и Brain снижает приоритет long-сценариев и учитывает риск дальнейшего давления вниз.",
+ai_f_price_gt_vwap_off_v4: "Потому что когда цена закрепляется ниже VWAP, контроль смещается к продавцам, и Brain рекомендует более защитный подход к покупкам.",
+ai_f_price_gt_vwap_off_v5: "Потому что позиция ниже VWAP означает, что средний участник рынка продаёт актив дешевле, и Brain учитывает это как неблагоприятный фон для новых лонгов.",
 
-ai_f_adx: 'ADX оценивает силу тренда, а плюс/минус DI показывают, какая сторона доминирует — покупатели или продавцы.',
-ai_f_adx_trending: 'ADX высокий — тренд выраженный и устойчивый, стратегии следования за трендом работают лучше.',
-ai_f_adx_flat: 'ADX низкий — рынок во флэте или слабоструктурном движении, трендовые сигналы менее надёжны.',
+// ===== RSI =====
+ai_f_rsi_overbought: "Потому что RSI={rsi} в зоне перекупленности, большая часть импульса уже отыграна, и Brain предупреждает о высоком риске коррекции после роста.",
+ai_f_rsi_overbought_v2: "Потому что показания RSI {rsi} говорят о перегретом рынке, и Brain не поощряет агрессивные покупки, ожидая более выгодной точки входа.",
+ai_f_rsi_overbought_v3: "Потому что RSI зашёл в верхнюю экстремальную зонy, что часто приводит к откатам, и Brain отмечает это как аргумент за частичную фиксацию и осторожность.",
+ai_f_rsi_overbought_v4: "Потому что при RSI около {rsi} покупки становятся статистически менее выгодными, и Brain видит повышенный шанс разворота или как минимум паузы в росте.",
+ai_f_rsi_overbought_v5: "Потому что сильная перекупленность по RSI ({rsi}) — сигнал не разгонять лонг дальше, и Brain рекомендует не гнаться за движением в самой вершине.",
 
-ai_f_obv: 'OBV (On Balance Volume) показывает направление потока объёмов — наклон OBV отражает, кто доминирует: покупатели или продавцы.',
+ai_f_rsi_oversold: "Потому что RSI={rsi} в зоне перепроданности, рынок перегнут в сторону продаж, и Brain видит вероятность отскока и осторожнее относится к новым шортам.",
+ai_f_rsi_oversold_v2: "Потому что глубокая перепроданность по RSI ({rsi}) показывает эмоциональные продажи, и Brain учитывает шанс технического разворота вверх.",
+ai_f_rsi_oversold_v3: "Потому что RSI в нижней экстремальной зоне сигнализирует о выжатом медвежьем импульсе, и Brain допускает сценарий short squeeze или сильного bounce.",
+ai_f_rsi_oversold_v4: "Потому что при RSI около {rsi} продавцы уже сильно выжали рынок, и Brain предпочитает не открывать агрессивные шорты в такой точке.",
+ai_f_rsi_oversold_v5: "Потому что состояние перепроданности по RSI говорит, что вниз уже сделано много работы, и Brain увеличивает вероятность коррекции вверх.",
 
-ai_note_atr: 'ATR и относительный ATR характеризуют средний диапазон движения цены и текущую волатильность, что важно для оценки рисков и постановки стопов.',
-ai_f_vola_explosive: 'Волатильность повышена — движение цены агрессивное, риск по сделке увеличен, возможны расширенные стопы и резкие выбросы.',
-ai_f_vola_low: 'Волатильность аномально низкая — рынок «застыл», движения могут быть вялыми и шумными до появления нового импульса.',
+ai_f_rsi_bull_on: "Потому что RSI={rsi} держится в здоровой бычьей зоне без экстремумов, и Brain воспринимает это как устойчивый восходящий импульс.",
+ai_f_rsi_bull_on_v2: "Потому что умеренно высокий RSI ({rsi}) подтверждает, что покупатели активны, но ещё не перегрели рынок, и Brain поддерживает тренд вверх.",
+ai_f_rsi_bull_on_v3: "Потому что RSI в комфортной верхней части диапазона отражает контролируемый спрос, и Brain трактует это как благоприятный фон для лонгов.",
+ai_f_rsi_bull_on_v4: "Потому что когда RSI около {rsi}, рост выглядит «здоровым» — без истерики, и Brain склонен продолжать следовать за трендом.",
+ai_f_rsi_bull_on_v5: "Потому что позиция RSI в бычьей зоне показывает, что импульс вверх сохраняется, и Brain принимает это как плюс к продолжению long-сценария.",
 
-ai_note_sr: 'Алгоритм выделил ближайшие уровни поддержки и сопротивления, относительно которых оценивается точка входа, стоп и целевые уровни.',
-ai_note_h: 'Горизонты движения показывают ориентировочный ожидаемый диапазон хода цены по времени (например, на 1 час, 6 часов и 24 часа).',
+ai_f_rsi_bull_off: "Потому что RSI={rsi} не поддерживает уверенный бычий импульс, и Brain не видит сильного спроса, осторожнее относясь к трендовым лонгам.",
+ai_f_rsi_bull_off_v2: "Потому что умеренный или низкий RSI ({rsi}) говорит о слабом покупательском интересе, и Brain не получает подтверждения для агрессивного up-trend.",
+ai_f_rsi_bull_off_v3: "Потому что RSI не удерживается в верхней части диапазона, импульс вверх выдыхается, и Brain снижает вес трендовых идей.",
+ai_f_rsi_bull_off_v4: "Потому что при RSI около {rsi} рост выглядит хрупким, и Brain учитывает риск перехода во флэт или коррекцию.",
+ai_f_rsi_bull_off_v5: "Потому что отсутствие сильного RSI-сигнала ({rsi}) заставляет Brain относиться к бычьим сценариям как к менее надёжным.",
 
-ai_note_data_short_history: 'Исторических данных мало — длина выборки баров ограничена, из-за чего часть сигналов и статистика могут быть менее надёжными.',
-ai_note_data_low_vola: 'Рынок долгое время находился в режиме низкой волатильности, поэтому статистическая значимость текущих волатильных оценок может быть снижена.',
+// ===== MACD =====
+ai_f_macd_pos_on: "Потому что MACD подтверждает бычий импульс: MACD={macd} выше сигнальной {macdSignal}, гистограмма {hist} положительная, и Brain усиливает сигнал в сторону роста.",
+ai_f_macd_pos_on_v2: "Потому что параметры MACD (линия {macd}, сигнал {macdSignal}, hist {hist}>0) говорят о доминировании покупателей, и Brain использует это как поддержку лонга.",
+ai_f_macd_pos_on_v3: "Потому что пока MACD выше сигнальной и hist в плюсе, импульс вверх считается живым, и Brain позволяет держать позицию по тренду.",
+ai_f_macd_pos_on_v4: "Потому что бычья конфигурация MACD даёт статистическое преимущество продолжения движения вверх, и Brain опирается на это при формировании рекомендации.",
+ai_f_macd_pos_on_v5: "Потому что позитивный MACD-сетап укрепляет уверенность Brain в продолжении восходящего импульса, и при прочих равных это плюс к long.",
 
-ai_note_rr_good: 'Соотношение потенциальной прибыли к риску по сделке выглядит привлекательным — ожидаемая награда значительно превосходит возможный убыток.',
-ai_note_rr_poor: 'Соотношение потенциальной прибыли к риску слабое — ожидаемая награда недостаточно компенсирует возможный убыток по сделке.',
+ai_f_macd_pos_off: "Потому что текущий MACD (MACD={macd}, сигнал={macdSignal}, hist={hist}) не поддерживает сильный up-trend, и Brain смягчает бычий сигнал.",
+ai_f_macd_pos_off_v2: "Потому что когда MACD не даёт чёткой бычьей картины, а гистограмма {hist} неубедительна, Brain снижает доверие к продолжению роста.",
+ai_f_macd_pos_off_v3: "Потому что слабый или нейтральный MACD-сигнал говорит, что тренд может терять силу, и Brain учитывает риск разворота или затухания движения.",
+ai_f_macd_pos_off_v4: "Потому что если MACD и сигнальная линия сходятся или пересекаются вниз, Brain не рассматривает ситуацию как сильный бычий сетап.",
+ai_f_macd_pos_off_v5: "Потому что отсутствие явного MACD-импульса заставляет Brain относиться к лонгам осторожно и не завышать ожидания по продолжению тренда.",
 
-ai_note_oversold_risk_reversal: 'Рынок сверхсильно перепродан и близок к поддержкам — алгоритм удерживается от продажи, так как высок риск резкого разворота вверх.',
-ai_note_overbought_risk_reversal: 'Рынок сверхсильно перекуплен и близок к сопротивлениям — алгоритм удерживается от покупки, так как высок риск резкого разворота вниз.',
+// ===== breakout / breakdown =====
+ai_f_breakout_long: "Потому что цена {price} пробила важный локальный максимум и формирует breakout вверх, и Brain видит усиление быков, но напоминает о риске ложных пробоев.",
+ai_f_breakout_long_v2: "Потому что выход цены выше недавнего диапазона — классический breakout-сигнал, и Brain допускает продолжение роста при контролируемом риске.",
+ai_f_breakout_long_v3: "Потому что breakout вверх показывает готовность рынка принимать новые более высокие цены, и Brain использует это как аргумент в пользу лонга.",
+ai_f_breakout_long_v4: "Потому что пробой сопротивления подтверждает силу тренда, и Brain допускает, что после отката движение вверх может продолжиться.",
+ai_f_breakout_long_v5: "Потому что фактический breakout по цене {price} усиливает бычий сценарий, но Brain не рекомендует входить «в космос», а ждёт адекватный pullback.",
 
-ai_note_funding: 'Фандинг по фьючерсам показывает перекос в сторону лонгов или шортов — экстремальные значения часто сигнализируют о перегреве одной из сторон.',
-ai_note_oi_change: 'Изменение открытого интереса отражает вход или выход капитала из рынка — совместно с направлением цены это помогает оценить силу движения.',
-ai_note_basis: 'Базис (разница цены фьючерса и спота) показывает, торгуется ли рынок с премией или скидкой — это даёт сигнал о перекосе ожиданий участников.',
-ai_note_dominance: 'Доминация биткоина показывает долю BTC на рынке — для альткоинов высокая доминация часто означает повышенное давление и риск снижения.',
-ai_note_btc_corr: 'Корреляция с биткоином показывает, насколько данный актив движется синхронно с BTC — высокая корреляция усиливает влияние общего рынка.',
+ai_f_breakdown_short: "Потому что цена {price} пробила ключевую поддержку и формирует breakdown вниз, Brain видит усиление продавцов и риск для лонгов.",
+ai_f_breakdown_short_v2: "Потому что breakdown ниже диапазона показывает переход рынка под контроль медведей, и Brain рассматривает это как аргумент в пользу защитной или шортовой тактики.",
+ai_f_breakdown_short_v3: "Потому что пробой поддержки вниз увеличивает вероятность продолжения снижения, и Brain предупреждает о неблагоприятных условиях для новых лонгов.",
+ai_f_breakdown_short_v4: "Потому что слом уровня поддержки — сильный сигнал слабости, и Brain допускает продолжение даун-тренда при реакции только на откатах.",
+ai_f_breakdown_short_v5: "Потому что фаза breakdown говорит о структурном ухудшении картины, и Brain оценивает шансы на рост как низкие до восстановления уровня.",
 
-ai_note_global_spot: 'Global spot — агрегированная справедливая спотовая цена по основным биржам, относительно которой оцениваются локальные отклонения.',
-ai_note_venue_spread: 'Спред между биржами показывает разницу цен на разных площадках — сильный спред может указывать на арбитраж, перекос ликвидности или технические искажения.',
+// ===== Bollinger Bands (squeeze + width + breakout) =====
+ai_f_bbands_squeeze: "Потому что полосы Bollinger сильно сжаты (width={width}), Brain видит фазу накопления энергии и готовится к потенциально резкому выходу из диапазона.",
+ai_f_bbands_squeeze_v2: "Потому что сжатие Bollinger Bands указывает на аномально низкую волатильность, и Brain ожидает, что следующий импульс может быть резким.",
+ai_f_bbands_squeeze_v3: "Потому что когда полосы Bollinger сужаются, рынок часто готовит сильный рывок, и Brain учитывает это как предупреждение о грядущем движении.",
+ai_f_bbands_squeeze_v4: "Потому что Bollinger-squeeze сигнализирует о периоде покоя перед возможным трендовым выбросом, и Brain не рекомендует недооценивать будущий ход.",
+ai_f_bbands_squeeze_v5: "Потому что длительное сжатие Bollinger Bands повышает вероятность крупного движения, и Brain закладывает это в оценку риска и размера позиции.",
 
-ai_no_data: 'Недостаточно данных для надёжного анализа — слишком короткая история или проблемы с ценовыми рядами, поэтому вывод ограничен режимом HOLD.',
+ai_f_bbands_width: "Потому что ширина Bollinger Bands={width}, а средняя линия около {bbMid}, и через это Brain видит, насколько сейчас рынок «раскачан» и сколько движения можно ожидать статистически.",
+
+ai_f_bbands_breakout_up: "Потому что цена {price} вышла выше верхней полосы Bollinger {upper}, показывая сильный бычий импульс и расширение волатильности вверх, и Brain отмечает и потенциал, и риск перегрева.",
+ai_f_bbands_breakout_down: "Потому что цена {price} опустилась ниже нижней полосы Bollinger {lower}, что говорит о доминировании продавцов и агрессивном движении вниз, и Brain учитывает это как риск для лонгов.",
+
+// ===== Stochastic =====
+ai_f_stoch_overbought: "Потому что Stochastic (K={k}, D={d}) в зоне перекупленности, краткосрочный рост выглядит исчерпанным, и Brain видит повышенный шанс отката.",
+ai_f_stoch_overbought_v2: "Потому что высокие значения Stochastic указывают на перегрев цены, и Brain не спешит поддерживать новые лонги на этом участке.",
+ai_f_stoch_overbought_v3: "Потому что Stochastic показывает, что рынок временно перекуплен, и Brain воспринимает это как повод для осторожности и возможной фиксации части профита.",
+ai_f_stoch_overbought_v4: "Потому что когда K и D висят в верхней зоне, вероятность коррекции повышается, и Brain учитывает это при оценке риска по позиции.",
+ai_f_stoch_overbought_v5: "Потому что перекупленный Stochastic — сигнал, что локальный ап-тренд может взять паузу, и Brain снижает агрессивность входов в long.",
+
+ai_f_stoch_oversold: "Потому что Stochastic (K={k}, D={d}) в зоне перепроданности, продавцы временно перегнули рынок, и Brain допускает сценарий отскока.",
+ai_f_stoch_oversold_v2: "Потому что низкие значения Stochastic говорят о локальной перепроданности, и Brain видит повышенный шанс краткосрочного разворота вверх.",
+ai_f_stoch_oversold_v3: "Потому что Stochastic в нижней зоне показывает, что вниз уже сделали серьёзное движение, и Brain осторожнее относится к новым шортам.",
+ai_f_stoch_oversold_v4: "Потому что при перепроданном Stochastic Brain ожидает, что часть продавцов будет закрывать позиции, что может привести к bounce.",
+ai_f_stoch_oversold_v5: "Потому что Stochastic-oversold — статистический аргумент за коррекционный рост, и Brain учитывает это в оценке вероятностей.",
+
+// ===== ADX / тренд =====
+ai_f_adx: "Потому что индекс ADX={adx} и соотношение +DI={plusDI} к -DI={minusDI} позволяют Brain оценить силу и направление тренда перед выдачей сигнала.",
+ai_f_adx_trending: "Потому что высокий ADX={adx} показывает сильный трендовый рынок, и Brain даёт больше веса стратегиям следования за трендом.",
+ai_f_adx_trending_v2: "Потому что при повышенном ADX тренд статистически надёжнее, и Brain смелее поддерживает сделки в сторону доминирующего движения.",
+ai_f_adx_trending_v3: "Потому что сильный ADX подтверждает, что тренд не случайный, и Brain полагается на него как на основной каркас сценария.",
+ai_f_adx_trending_v4: "Потому что когда ADX растёт и остаётся высоким, Brain считает тренд устойчивым и допускает удержание позиции дольше.",
+ai_f_adx_trending_v5: "Потому что мощный ADX-сигнал говорит, что рынок движется организованно, и Brain использует это для усиления трендовых рекомендаций.",
+
+ai_f_adx_flat: "Потому что низкий ADX={adx} указывает на флэт и слабый тренд, и Brain снижает уверенность в направленных сделках.",
+ai_f_adx_flat_v2: "Потому что при низком ADX рынок больше напоминает пилу, чем тренд, и Brain осторожнее с попытками ловить большие directional-движения.",
+ai_f_adx_flat_v3: "Потому что слабый ADX — признак боковика, и Brain не рассчитывает на устойчивое движение в одну сторону.",
+ai_f_adx_flat_v4: "Потому что во флэте по ADX сделки по тренду статистически хуже, и Brain рекомендует умерять ожидания по профиту.",
+ai_f_adx_flat_v5: "Потому что когда ADX низкий, Brain считает рынок шумным и не склонен давать агрессивные directional-сигналы.",
+
+// ===== OBV =====
+ai_f_obv: "Потому что наклон OBV около {slope} показывает, как идёт приток или отток объёма, и Brain использует это, чтобы подтвердить или опровергнуть чисто ценовое движение.",
+
+// ===== ATR / волатильность =====
+ai_note_atr: "Потому что ATR={atr} (atrRel={atrRel}, ≈{atrPct}% от цены) задаёт типичный дневной разброс, и Brain на этой волатильности оценивает ожидаемый ход 1h≈{h1}, 6h≈{h6}, 24h≈{h24} и строит уровни стопов/тейков.",
+ai_note_atr_v2: "Потому что средний истинный диапазон ATR {atr} (около {atrPct}% от цены) помогает Brain понять, насколько далеко цена обычно гуляет и какие стопы/цели выглядят реалистичными.",
+ai_note_atr_v3: "Потому что через ATR Brain калибрует масштаб движения: atrRel={atrRel}, atrPct≈{atrPct}%, и это задаёт разумные ожидания по риску и профиту.",
+ai_note_atr_v4: "Потому что параметр ATR отражает «дыхание» рынка; при {atrPct}% от цены Brain выбирает такие стопы и цели, чтобы не быть выбитым шумом.",
+ai_note_atr_v5: "Потому что Brain опирается на ATR {atr} и его долю от цены ({atrPct}%), чтобы балансировать риск/доходность и не завышать ожидания по ходу.",
+
+ai_f_vola_explosive: "Потому что atrRel={atrRel} (≈{atrPct}% от цены) показывает взрывную волатильность, и Brain рекомендует уменьшать размер позиции и расширять защитные стопы.",
+ai_f_vola_explosive_v2: "Потому что при такой волатильности ({atrPct}% от цены) любой бар может быть аномально большим, и Brain трактует это как высокий риск, советуя аккуратный риск-менеджмент.",
+ai_f_vola_explosive_v3: "Потому что взрывная vola увеличивает и потенциал, и просадку, и Brain не предлагает перегружать депо при atrRel={atrRel}.",
+ai_f_vola_explosive_v4: "Потому что когда волатильность выходит на экстремальные уровни, рынок становится непредсказуемее, и Brain рекомендует действовать консервативно.",
+ai_f_vola_explosive_v5: "Потому что суперволатильный режим (atrPct≈{atrPct}%) — зона, где важнее выжить, чем поймать каждое движение, и Brain снижает агрессивность сигналов.",
+
+ai_f_vola_low: "Потому что atrRel={atrRel} (≈{atrPct}% от цены) говорит о очень низкой волатильности, и Brain не закладывает быстрых и больших движений.",
+ai_f_vola_low_v2: "Потому что при слабой волатильности рынок часто пилит в диапазоне, и Brain не рассчитывает на крупный профит за короткое время.",
+ai_f_vola_low_v3: "Потому что низкая vola делает тренды хрупкими, и Brain аккуратнее относится к целям и не завышает ожидания по R:R.",
+ai_f_vola_low_v4: "Потому что когда atrPct мал, рынок «уснул», и Brain чаще ждёт пробуждения волатильности, прежде чем усиливать directional-сигналы.",
+ai_f_vola_low_v5: "Потому что лоу-волатильный режим увеличивает вероятность ложных пробоев и затяжных флэтов, и Brain учитывает это и режет уверенность.",
+
+// ===== уровни / контекст =====
+ai_note_sr: "Потому что ближайшая поддержка около {s}, сопротивление около {r}, текущая цена {price}, и через nearS={nearS} и nearR={nearR} Brain оценивает, сколько хода остаётся до уровня и где логично ставить стоп/тейк.",
+ai_note_h: "Потому что Brain учитывает ожидаемый ход цены на разных горизонтах, чтобы рекомендация была согласованной во времени, а не реакцией только на один бар.",
+
+// ===== дата и волатильность данных =====
+ai_note_data_short_history: "Потому что истории мало (баров: {bars}), часть статистики ненадёжна, и Brain снижает уверенность в сильных directional-сигналах.",
+ai_note_data_short_history_v2: "Потому что при короткой истории ({bars} баров) модели волатильности и тренда работают грубее, и Brain поэтому даёт более осторожные выводы.",
+ai_note_data_short_history_v3: "Потому что скромный объём данных усложняет оценку рынка, и Brain не переоценивает сигналы, полученные на малой выборке.",
+ai_note_data_short_history_v4: "Потому что при недостатке исторических свечей риск ошибок в скоринге выше, и Brain режет уверенность в рекомендациях.",
+ai_note_data_short_history_v5: "Потому что малый объём истории делает любые выводы хрупкими, и Brain честно учитывает это, не разгоняя strength сигнала.",
+
+ai_note_data_low_vola: "Потому что сейчас пониженная рыночная активность (atrRel={atrRel}, ≈{atrPct}% от цены), и Brain не ждёт агрессивных движений, рекомендуя умеренные ожидания.",
+ai_note_data_low_vola_v2: "Потому что низкая активность по волатильности делает рынок вязким, и Brain избегает чрезмерно амбициозных целей в таких условиях.",
+ai_note_data_low_vola_v3: "Потому что слабая динамика цен — сигнал, что рынок пока не готов к большому тренду, и Brain учитывает это в пользу аккуратной тактики.",
+ai_note_data_low_vola_v4: "Потому что когда vola мала, вероятность пилы выше, и Brain не рекомендует строить ставку на сильный swing.",
+ai_note_data_low_vola_v5: "Потому что рынок в режиме low-vola часто тратит время, а не даёт движение, и Brain призывает терпеливо переждать фазу затишья.",
+
+// ===== R:R =====
+ai_note_rr_good: "Потому что ожидаемое соотношение риск/прибыль {rr} при целевом уровне {rrNominal}x выглядит привлекательным, и Brain считает такую сделку статистически оправданной.",
+ai_note_rr_good_v2: "Потому что хороший R:R ({rr} против ориентира {rrNominal}x) даёт запас по доходности, и Brain отмечает эту сделку как интересную по профилю риска.",
+ai_note_rr_good_v3: "Потому что при таком R:R сделка компенсирует отдельные убыточные входы, и Brain позитивно оценивает матожидание стратегии.",
+ai_note_rr_good_v4: "Потому что R:R выше ориентирного уровня — редкий плюс, и Brain допускает более активную работу с таким сетапом.",
+ai_note_rr_good_v5: "Потому что когда риск/прибыль работает в нашу пользу (rr≈{rr}), Brain рассматривает сетап как качественный даже при неидеальной картине.",
+
+ai_note_rr_poor: "Потому что текущее соотношение риск/прибыль {rr} хуже ориентира {rrNominal}x, и Brain не рекомендует агрессивно заходить в такую сделку.",
+ai_note_rr_poor_v2: "Потому что слабый R:R ({rr} при желаемом {rrNominal}x) делает идею малоинтересной, и Brain не видит достаточного запаса по профиту.",
+ai_note_rr_poor_v3: "Потому что когда R:R не дотягивает до стандарта, даже правильный прогноз даёт мало, и Brain снижает приоритет этого входа.",
+ai_note_rr_poor_v4: "Потому что плохое соотношение риск/прибыль увеличивает шанс, что серия таких сделок съест депозит, и Brain не поощряет их систематически брать.",
+ai_note_rr_poor_v5: "Потому что при низком R:R Brain считает, что лучше пропустить такую возможность и дождаться более выгодного сетапа.",
+
+// ===== oversold / overbought risk reversal =====
+ai_note_oversold_risk_reversal: "Потому что глубокая перепроданность (RSI={rsi}) создаёт риск резкого разворота вверх, и Brain предпочитает не открывать новые шорты в такой точке.",
+ai_note_oversold_risk_reversal_v2: "Потому что на сильной перепроданности по RSI Brain видит высокую вероятность short squeeze и не подталкивает к свежим шортам.",
+ai_note_oversold_risk_reversal_v3: "Потому что когда рынок сильно перепродан, любая позитивная новость может вызвать разворот, и Brain учитывает этот риск против шортов.",
+ai_note_oversold_risk_reversal_v4: "Потому что состояние oversold делает вход в short статистически опаснее, и Brain рекомендует выдержать паузу.",
+ai_note_oversold_risk_reversal_v5: "Потому что Brain отмечает: сильная перепроданность — не лучшее место, чтобы добавлять шорты, здесь выше шанс отскока.",
+
+ai_note_overbought_risk_reversal: "Потому что сильная перекупленность (RSI={rsi}) повышает риск резкого разворота вниз, и Brain не поощряет агрессивные докупки на вершине.",
+ai_note_overbought_risk_reversal_v2: "Потому что при overbought-состоянии по RSI Brain видит большой риск отката и не считает разумным разгонять лонг.",
+ai_note_overbought_risk_reversal_v3: "Потому что перекупленный рынок часто разворачивается на новостях, и Brain учитывает это, советуя не наращивать позицию.",
+ai_note_overbought_risk_reversal_v4: "Потому что в зоне перекупленности статистика против новых лонгов, и Brain признаёт повышенный риск разворота.",
+ai_note_overbought_risk_reversal_v5: "Потому что Brain считает: на сильной перекупленности лучше защищать прибыль, чем открывать новые покупки.",
+
+// ===== деривативы / on-chain =====
+ai_note_funding: "Потому что funding={funding} показывает перекос в позициях на деривативах, и Brain учитывает, какая сторона рынка перегружена и где выше риск резкого выноса.",
+ai_note_funding_v2: "Потому что аномальный funding намекает на дисбаланс между long и short, и Brain воспринимает это как фактор риска против переполненной стороны.",
+ai_note_funding_v3: "Потому что через funding Brain видит, кто переплачивает за плечо, и это усиливает вероятность движения против перегруженных позиций.",
+ai_note_funding_v4: "Потому что высокий по модулю funding — предупреждение о неустойчивом балансе на фьючерсах, и Brain снижает уверенность в продолжении текущей внебалансовой стороны.",
+ai_note_funding_v5: "Потому что Brain использует funding как термометр жадности/страха на деривативах, что помогает не вставать в очередь с толпой.",
+
+ai_note_oi_change: "Потому что изменение Open Interest {oiChange} показывает приток/отток денег в фьючерсы, и так Brain отличает «живое» движение от пустой волатильности.",
+ai_note_oi_change_v2: "Потому что рост OI при движении цены усиливает тренд-сигнал, а падение OI его ослабляет — именно так Brain читает метрику {oiChange}.",
+ai_note_oi_change_v3: "Потому что через динамику Open Interest Brain понимает, открываются ли новые позиции или рынок лишь выносит старые.",
+ai_note_oi_change_v4: "Потому что сильные сдвиги OI — знак перераспределения риска между участниками, и Brain использует это для уточнения сигнала.",
+ai_note_oi_change_v5: "Потому что Brain смотрит на {oiChange}, чтобы не путать истинный тренд с движением на закрытии позиций.",
+
+ai_note_basis: "Потому что фьючерсный basis={basis} отражает разницу между futures и spot, и сильное отклонение говорит о перегреве одной из сторон, что Brain учитывает в рисках.",
+ai_note_basis_v2: "Потому что атипичный basis сигнализирует о перекосе ожиданий на деривативах, и Brain не игнорирует этот скрытый стресс-маркер.",
+ai_note_basis_v3: "Потому что basis показывает, насколько рынок готов переплачивать или дисконтировать будущую цену; при крайних значениях Brain осторожнее.",
+ai_note_basis_v4: "Потому что сильный basis в сторону быков или медведей часто предшествует разворотам, и Brain учитывает это, чтобы не залезать в хвост тренда.",
+ai_note_basis_v5: "Потому что Brain использует basis как индикатор доверия к тренду на фьючерсах, особенно когда он выходит за нормальные уровни.",
+
+ai_note_dominance: "Потому что dominance Bitcoin около {dominance}% показывает баланс силы между BTC и альтами; при высокой dominance Brain закладывает давление на альткоины.",
+ai_note_dominance_v2: "Потому что рост BTC-dominance обычно ухудшает условия для альтов, и Brain учитывает это как внешний медвежий фон для них.",
+ai_note_dominance_v3: "Потому что низкая dominance BTC, наоборот, открывает окно возможностей для альтов, и Brain корректирует риск-профиль под такую фазу.",
+ai_note_dominance_v4: "Потому что через метрику dominance Brain видит, куда стекает ликвидность — в «синий чип» BTC или в более рискованные активы.",
+ai_note_dominance_v5: "Потому что изменения dominance помогают Brain понять, кто сейчас в фаворе у рынка — Bitcoin или альты, и подстроить сигналы под этот сдвиг.",
+
+ai_note_btc_corr: "Потому что корреляция с BTC около {corr} показывает, насколько сильно актив ходит вместе с Bitcoin, и Brain учитывает это, чтобы не дублировать один и тот же риск.",
+ai_note_btc_corr_v2: "Потому что высокая корреляция с BTC означает, что судьба актива во многом зависит от движения Bitcoin, и Brain учитывает это при формировании портфеля.",
+ai_note_btc_corr_v3: "Потому что низкая корреляция с BTC делает актив более самостоятельным, и Brain использует это для диверсификации рисков.",
+ai_note_btc_corr_v4: "Потому что через корреляцию с BTC Brain оценивает, насколько сигнал по этому активу уникален, а не копия BTC-позы.",
+ai_note_btc_corr_v5: "Потому что сдвиги в {corr} помогают Brain понять, усиливается ли связка с BTC или ослабевает, и скорректировать ожидания по движению.",
+
+ai_note_global_spot: "Потому что состояние глобального spot-рынка оценивается как {globalSpot}, и Brain использует этот фон как фильтр, усиливая или смягчая локальные сигналы.",
+ai_note_global_spot_v2: "Потому что общий тон spot-рынка ({globalSpot}) влияет на вероятность успеха локального сетапа, и Brain не рассматривает его в отрыве от фона.",
+ai_note_global_spot_v3: "Потому что если global spot слабый, Brain осторожнее с агрессивными лонгами, даже при хорошей локальной картине.",
+ai_note_global_spot_v4: "Потому что сильный spot-фон делает бычьи сигналы более надёжными, и Brain учитывает этот tailwind.",
+ai_note_global_spot_v5: "Потому что Brain всегда сверяет локальный сигнал с global spot-картиной ({globalSpot}), чтобы не торговать против общего потока ликвидности.",
+
+ai_note_venue_spread: "Потому что повышенный venue spread={spread} говорит о неоднородности цен и возможных проскальзываниях, и Brain рекомендует более консервативный размер позиции.",
+ai_note_venue_spread_v2: "Потому что большой спред между площадками — признак пониженной ликвидности, и Brain видит в этом дополнительный операционный риск.",
+ai_note_venue_spread_v3: "Потому что когда цены на разных биржах сильно расходятся, возрастает риск плохих исполнений, и Brain учитывает это при оценке риска сделки.",
+ai_note_venue_spread_v4: "Потому что расширенный venue spread подсказывает Brain, что сейчас не лучший момент для крупных ордеров.",
+ai_note_venue_spread_v5: "Потому что Brain воспринимает высокий spread между биржами как сигнал затормозить и торговать аккуратнее, чтобы избежать лишних потерь на исполнении.",
+
+
 qcoin_drop_toast_error: "(зачисление будет проверено на сервере)",
 qcoin_drop_toast_title: "Подздравляем!",
-
+ai_calculating: 'Идут вычесления "ПОДОЖДИТЕ" ',
 }
 const AI_HERO_UK = {
 ai_calculating: 'Йдуть обчислення — "ЗАЧЕКАЙТЕ".',
-ai_regime: 'Режим ринку на поточному таймфреймі (тренд/флет і рівень волатильності), який Quantum Brain визначив за EMA, ATR та структурою руху ціни.',
+// ===== no data =====
+ai_no_data: "Тому що Brain не бачить достатнього обсягу історичних даних по цьому інструменту, тому утримується від конкретного сигналу й лишається в нейтральному режимі HOLD.",  
 
-ai_f_ema21_gt_ma50_on: 'Короткостроковий тренд бичачий: EMA 21 вище EMA 50, а EMA 50 вище EMA 200 — ринок структурно у висхідному тренді.',
-ai_f_ema21_gt_ma50_off: 'Короткостроковий бичачий тренд за EMA 21 та EMA 50 не підтверджений — структура ковзних середніх не вказує на стійке зростання.',
+// ===== regime =====
+ai_regime: "Тому що Brain оцінює загальний режим ринку як {regime} і сумарний скор (trend={trendScore}, momentum={momentumScore}, vola={volaScore}, total={totalScore}), і на цій основі будує поточну торгову рекомендацію.",
+ai_regime_v2: "Тому що Brain розпізнає ринковий режим {regime}: тренд={trendScore}, моментум={momentumScore}, волатильність={volaScore}, загальний скор={totalScore}, і вже від цього підбирає відповідний сценарій угоди.",
+ai_regime_v3: "Тому що поточний режим ринку, який бачить Brain, — {regime}, а комбінація тренду ({trendScore}), моменту ({momentumScore}) і волатильності ({volaScore}) дає підсумковий скор {totalScore} і формує логіку сигналу.",
+ai_regime_v4: "Тому що за внутрішнім скорингом Brain ринок зараз у режимі {regime}: сумарний бал totalScore={totalScore}, розклад за трендом={trendScore}, моментумом={momentumScore} і волатильністю={volaScore}, і саме це пояснює поточний вектор рекомендації.",
+ai_regime_v5: "Тому що Brain звів безліч сигналів у загальний режим {regime} (trend={trendScore}, momentum={momentumScore}, vola={volaScore}, total={totalScore}), і рекомендація орієнтується саме на таку картину ринку.",
 
-ai_f_ma50_gt_ma200_on: 'Середньостроковий тренд бичачий: MA 50 розташована вище MA 200, що свідчить про домінування висхідного руху.',
-ai_f_ma50_gt_ma200_off: 'Середньостроковий бичачий тренд не підтверджений: MA 50 не вище MA 200, структура більше схожа на флет або низхідний ринок.',
+// ===== EMA21 vs MA50 / MA200 =====
+ai_f_ema21_gt_ma50_on: "Тому що короткострокова EMA21 вище MA50 і MA200, ринок структурно на боці покупців, і Brain підсилює вагу бичачого сценарію по цьому активу.",
+ai_f_ema21_gt_ma50_on_v2: "Тому що EMA21 пробита й утримується вище MA50/MA200, що показує стійкий up-trend, і Brain упевненіше підтримує лонгову ідею.",
+ai_f_ema21_gt_ma50_on_v3: "Тому що домінування EMA21 над MA50 і MA200 говорить про свіжий сильний імпульс угору, і Brain враховує це як аргумент за продовження зростання.",
+ai_f_ema21_gt_ma50_on_v4: "Тому що позиція EMA21 вище MA50 і MA200 — класична ознака бичачої структури, і Brain робить акцент на long-сценаріях, поки ця зв’язка не зламана.",
+ai_f_ema21_gt_ma50_on_v5: "Тому що EMA21 > MA50 > MA200, тренд підтверджений на кількох горизонтах, і Brain допускає більш сміливі лонгові рішення в рамках risk-менеджменту.",
 
-ai_f_price_gt_vwap_on: 'Ціна торгується вище VWAP — середньозваженої за обсягом ціни, що зазвичай означає тиск покупців та позитивний внутрішньоденний баланс.',
-ai_f_price_gt_vwap_off: 'Ціна торгується нижче VWAP — середньозваженої за обсягом ціни, що вказує на тиск продавців та слабший попит.',
+ai_f_ema21_gt_ma50_off: "Тому що EMA21 не утримується вище MA50/MA200, локальна сила покупців ослабла, і Brain знижує агресивність бичачих сигналів.",
+ai_f_ema21_gt_ma50_off_v2: "Тому що пробій EMA21 вниз відносно MA50/MA200 показує втомлений тренд, і Brain ставиться до зростання обережно й не поспішает нарощувати long.",
+ai_f_ema21_gt_ma50_off_v3: "Тому що розворот EMA21 під MA50/MA200 — ознака втрати структури up-trend, і Brain не розглядає ситуацію як упевнений бичачий сетап.",
+ai_f_ema21_gt_ma50_off_v4: "Тому що поки EMA21 торгується нижче середньострокових MA, ринок виглядає більш нейтрально або ведмежо, і Brain зміщує фокус від агресивних покупок.",
+ai_f_ema21_gt_ma50_off_v5: "Тому що зламана каскадна структура EMA21>MA50>MA200, домінування биків під питанням, і Brain враховує це як аргумент проти високих лонгових ризиків.",
 
-ai_f_rsi_overbought: 'RSI перебуває в зоні перекупленості — ринок перегрітий угору, високий ризик корекції або відкоту після поточного росту.',
-ai_f_rsi_oversold: 'RSI перебуває в зоні перепроданості — ринок сильно просів, зростає ймовірність відскоку або часткового розвороту.',
-ai_f_rsi_bull_on: 'RSI зміщений у бичачу зону (вище нейтральної області) — імпульс ціни підтримує сценарій зростання.',
-ai_f_rsi_bull_off: 'RSI не підтверджує бичачий імпульс; індикатор ближче до нейтральної або ведмежої зони.',
+ai_f_ma50_gt_ma200_on: "Тому що MA50 вище MA200, сформовано середньостроковий бичачий тренд, і Brain дає більше ваги лонгам та утриманню позицій у напрямку тренду.",
+ai_f_ma50_gt_ma200_on_v2: "Тому що перетин MA50 над MA200 говорить про зрілий up-trend, і Brain сприймає це як хороший фон для угод у бік зростання.",
+ai_f_ma50_gt_ma200_on_v3: "Тому що структура MA50>MA200 показує, що глобально ринок зміщений на користь покупців, і Brain використовує це як фільтр на користь long-сценаріїв.",
+ai_f_ma50_gt_ma200_on_v4: "Тому що поки MA50 залишається над MA200, тренд лишається бичачим, і Brain схиляється до стратегій «купувати просадки», а не ловити вершини.",
+ai_f_ma50_gt_ma200_on_v5: "Тому що MA50, що знаходиться над MA200, підтверджує: основний вектор — угору, і Brain дозволяє собі більш упевнено підтримувати зростання.",
 
-ai_f_macd_pos_on: 'MACD та його гістограма вказують на бичачий імпульс — короткостроковий моментум спрямований угору.',
-ai_f_macd_pos_off: 'MACD не підтримує стійкий бичачий імпульс; сигнал слабкий або схиляється у ведмежий бік.',
+ai_f_ma50_gt_ma200_off: "Тому що MA50 нижче MA200, базовий контекст залишається ведмежим або слабким, і Brain обережніше ставиться до лонгів і жорсткіше контролює ризик.",
+ai_f_ma50_gt_ma200_off_v2: "Тому що перехрестя MA50 під MA200 показує, що глобальна структура ринку не на користь покупців, і Brain не розглядає це як комфортний фон для довгих позицій.",
+ai_f_ma50_gt_ma200_off_v3: "Тому що коли MA50 падає нижче MA200, це сигнал про погіршення середньострокового тренду, і Brain відповідно знижує пріоритет бичачих ідей.",
+ai_f_ma50_gt_ma200_off_v4: "Тому що структура MA50<MA200 вказує на підвищений ризик затяжного даун-тренду, і Brain не заохочує агресивні покупки в такому оточенні.",
+ai_f_ma50_gt_ma200_off_v5: "Тому що поки MA50 залишається під MA200, основна картина радше ведмежа, і Brain орієнтується на захисний стиль та обережні входи.",
 
-ai_f_breakout_long: 'Ціна пробила локальні максимуми за вибраний період — формується бичачий пробій опору та посилення трендового руху вгору.',
-ai_f_breakdown_short: 'Ціна пробила локальні мінімуми за вибраний період — формується ведмежий пробій підтримки та посилення тиску продавців.',
+// ===== price vs VWAP =====
+ai_f_price_gt_vwap_on: "Тому що поточна ціна {price} розташовується вище VWAP {vwap}, покупці контролюють середню ціну, і Brain трактує це як підтримку лонгового сценарію.",
+ai_f_price_gt_vwap_on_v2: "Тому що ціна торгується над VWAP, у середньому ринок готовий платити дорожче, і Brain розцінює це як ознаку сили й допускає утримання long.",
+ai_f_price_gt_vwap_on_v3: "Тому що позиція ціни вище VWAP показує, що угоди проходять на вищих рівнях, і Brain використовує це як аргумент на користь биків.",
+ai_f_price_gt_vwap_on_v4: "Тому що поки ціна вище VWAP, короткострокова перевага залишається за покупцями, і Brain менш схильний відкривати нові шорти в такій конфігурації.",
+ai_f_price_gt_vwap_on_v5: "Тому що знаходження ціни над VWAP говорить про позитивний баланс попиту, і Brain готовий підтримувати лонгову ідею, якщо решта сигналів не проти.",
 
-ai_f_bbands_width: 'Ширина смуг Боллінджера відображає поточний рівень волатильності ринку — стискання або розширення діапазону коливань ціни.',
-ai_f_bbands_squeeze: 'Смуги Боллінджера стиснуті — волатильність аномально низька; така фаза часто передує сильному руху в один бік.',
-ai_f_bbands_breakout_up: 'Ціна вийшла вище верхньої смуги Боллінджера — агресивне бичаче розширення діапазону, можлива фаза прискореного росту або перекупленості.',
-ai_f_bbands_breakout_down: 'Ціна опустилася нижче нижньої смуги Боллінджера — агресивний ведмежий рух, можлива панічна фаза або перепроданість.',
+ai_f_price_gt_vwap_off: "Тому що ціна {price} нижче VWAP {vwap}, середня угода зміщується вниз, і Brain бачить перевагу продавців та обережніше ставиться до лонгів.",
+ai_f_price_gt_vwap_off_v2: "Тому що торгівля нижче VWAP показує, що ринок готовий розвантажуватися за гіршими цінами, і Brain сприймає це як обережний ведмежий сигнал.",
+ai_f_price_gt_vwap_off_v3: "Тому що ціна під VWAP — індикатор локальної слабкості, і Brain знижує пріоритет long-сценаріїв та враховує ризик подальшого тиску вниз.",
+ai_f_price_gt_vwap_off_v4: "Тому що коли ціна закріплюється нижче VWAP, контроль переходить до продавців, і Brain рекомендує більш захисний підхід до покупок.",
+ai_f_price_gt_vwap_off_v5: "Тому що позиція нижче VWAP означає, що середній учасник ринку продає актив дешевше, і Brain враховує це як несприятливий фон для нових лонгів.",
 
-ai_f_stoch_overbought: 'Стохастичний осцилятор у зоні перекупленості — короткостроковий імпульс перегрітий угору, ризик корекції підвищений.',
-ai_f_stoch_oversold: 'Стохастичний осцилятор у зоні перепроданості — короткостроковий імпульс сильно притиснутий униз, зростає ймовірність відскоку.',
+// ===== RSI =====
+ai_f_rsi_overbought: "Тому що RSI={rsi} у зоні перекупленості, більша частина імпульсу вже відіграна, і Brain попереджає про високий ризик корекції після зростання.",
+ai_f_rsi_overbought_v2: "Тому що показники RSI {rsi} говорять про перегрітий ринок, і Brain не заохочує агресивні покупки, очікуючи більш вигідної точки входу.",
+ai_f_rsi_overbought_v3: "Тому що RSI зайшов у верхню екстремальну зону, що часто призводить до відкатів, і Brain відзначає це як аргумент за часткову фіксацію та обережність.",
+ai_f_rsi_overbought_v4: "Тому що при RSI близько {rsi} покупки стають статистично менш вигідними, і Brain бачить підвищений шанс розвороту або щонайменше паузи в зростанні.",
+ai_f_rsi_overbought_v5: "Тому що сильна перекупленість по RSI ({rsi}) — сигнал не розганяти long далі, і Brain рекомендує не гнатися за рухом на самій вершині.",
 
-ai_f_adx: 'ADX оцінює силу тренду, а plus/minus DI показують, яка сторона домінує — покупці чи продавці.',
-ai_f_adx_trending: 'ADX високий — тренд виражений і стійкий, трендові стратегії працюють краще.',
-ai_f_adx_flat: 'ADX низький — ринок у флеті або слабоструктурному русі; трендові сигнали менш надійні.',
+ai_f_rsi_oversold: "Тому що RSI={rsi} у зоні перепроданості, ринок перегнутий у бік продажів, і Brain бачить імовірність відскоку та обережніше ставиться до нових шортів.",
+ai_f_rsi_oversold_v2: "Тому що глибока перепроданість по RSI ({rsi}) показує емоційні продажі, і Brain враховує шанс технічного розвороту вгору.",
+ai_f_rsi_oversold_v3: "Тому що RSI в нижній екстремальній зоні сигналізує про вичавлений ведмежий імпульс, і Brain допускає сценарій short squeeze або сильного bounce.",
+ai_f_rsi_oversold_v4: "Тому що при RSI близько {rsi} продавці вже сильно вичавили ринок, і Brain воліє не відкривати агресивні шорти в такій точці.",
+ai_f_rsi_oversold_v5: "Тому що стан перепроданості по RSI говорить, що вниз уже зроблено багато роботи, і Brain підвищує ймовірність корекції вгору.",
 
-ai_f_obv: 'OBV (On Balance Volume) показує напрямок потоку обсягів — нахил OBV відображає домінування покупців або продавців.',
+ai_f_rsi_bull_on: "Тому що RSI={rsi} тримається в здоровій бичачій зоні без екстремумів, і Brain сприймає це як стійкий висхідний імпульс.",
+ai_f_rsi_bull_on_v2: "Тому що помірно високий RSI ({rsi}) підтверджує, що покупці активні, але ще не перегріли ринок, і Brain підтримує тренд угору.",
+ai_f_rsi_bull_on_v3: "Тому що RSI в комфортній верхній частині діапазону відображає контрольований попит, і Brain трактує це як сприятливий фон для лонгів.",
+ai_f_rsi_bull_on_v4: "Тому що коли RSI близько {rsi}, зростання виглядає «здоровим» — без істерики, і Brain схильний далі слідувати за трендом.",
+ai_f_rsi_bull_on_v5: "Тому що позиція RSI в бичачій зоні показує, що імпульс угору зберігається, і Brain приймає це як плюс до продовження long-сценарію.",
 
-ai_note_atr: 'ATR і відносний ATR характеризують середній діапазон руху ціни та поточну волатильність — це важливо для оцінки ризиків і постановки стопів.',
-ai_f_vola_explosive: 'Волатильність підвищена — рух ціни агресивний, ризик по угоді зростає, можливі розширені стопи та різкі викиди.',
-ai_f_vola_low: 'Волатильність аномально низька — ринок "застиг", рухи можуть бути млявими та шумними до появи нового імпульсу.',
+ai_f_rsi_bull_off: "Тому що RSI={rsi} не підтримує впевнений бичачий імпульс, і Brain не бачить сильного попиту, обережніше ставлячись до трендових лонгів.",
+ai_f_rsi_bull_off_v2: "Тому що помірний або низький RSI ({rsi}) говорить про слабкий інтерес покупців, і Brain не отримує підтвердження для агресивного up-trend.",
+ai_f_rsi_bull_off_v3: "Тому що RSI не утримується у верхній частині діапазону, імпульс угору видихається, і Brain знижує вагу трендових ідей.",
+ai_f_rsi_bull_off_v4: "Тому що при RSI близько {rsi} зростання виглядає крихким, і Brain враховує ризик переходу у флет або корекцію.",
+ai_f_rsi_bull_off_v5: "Тому що відсутність сильного RSI-сигналу ({rsi}) змушує Brain ставитися до бичачих сценаріїв як до менш надійних.",
 
-ai_note_sr: 'Алгоритм виділив найближчі рівні підтримки та опору, відносно яких оцінюється точка входу, стоп та цільові рівні.',
-ai_note_h: 'Горизонти руху показують орієнтовний очікуваний діапазон ходу ціни за часом (наприклад, на 1 годину, 6 годин і 24 години).',
+// ===== MACD =====
+ai_f_macd_pos_on: "Тому що MACD підтверджує бичачий імпульс: MACD={macd} вище сигнальної {macdSignal}, гістограма {hist} позитивна, і Brain підсилює сигнал у бік зростання.",
+ai_f_macd_pos_on_v2: "Тому що параметри MACD (лінія {macd}, сигнал {macdSignal}, hist {hist}>0) говорять про домінування покупців, і Brain використовує це як підтримку лонга.",
+ai_f_macd_pos_on_v3: "Тому що поки MACD вище сигнальної й hist у плюсі, імпульс угору вважається живим, і Brain дозволяє тримати позицію по тренду.",
+ai_f_macd_pos_on_v4: "Тому що бичача конфігурація MACD дає статистичну перевагу продовження руху вгору, і Brain спирається на це при формуванні рекомендації.",
+ai_f_macd_pos_on_v5: "Тому що позитивний MACD-сетап зміцнює впевненість Brain у продовженні висхідного імпульсу, і за інших рівних це плюс до long.",
 
-ai_note_data_short_history: 'Історичних даних мало — довжина вибірки барів обмежена, через що частина сигналів і статистики може бути менш надійною.',
-ai_note_data_low_vola: 'Ринок довгий час перебував у режимі низької волатильності, тому статистична значущість поточних волатильних оцінок може бути знижена.',
+ai_f_macd_pos_off: "Тому що поточний MACD (MACD={macd}, сигнал={macdSignal}, hist={hist}) не підтримує сильний up-trend, і Brain пом’якшує бичачий сигнал.",
+ai_f_macd_pos_off_v2: "Тому що коли MACD не дає чіткої бичачої картини, а гістограма {hist} непереконлива, Brain знижує довіру до продовження зростання.",
+ai_f_macd_pos_off_v3: "Тому що слабкий або нейтральний MACD-сигнал говорить, що тренд може втрачати силу, і Brain враховує ризик розвороту або затухання руху.",
+ai_f_macd_pos_off_v4: "Тому що якщо MACD і сигнальна лінія зближуються або перетинаються вниз, Brain не розглядає ситуацію як сильний бичачий сетап.",
+ai_f_macd_pos_off_v5: "Тому що відсутність явного MACD-імпульсу змушує Brain ставитися до лонгів обережно й не завищувати очікування щодо продовження тренду.",
 
-ai_note_rr_good: 'Співвідношення потенційного прибутку до ризику виглядає привабливо — очікувана винагорода значно перевищує можливий збиток.',
-ai_note_rr_poor: 'Співвідношення потенційного прибутку до ризику слабке — очікувана винагорода недостатньо компенсує можливий збиток по угоді.',
+// ===== breakout / breakdown =====
+ai_f_breakout_long: "Тому що ціна {price} пробила важливий локальний максимум і формує breakout угору, і Brain бачить посилення биків, але нагадує про ризик хибних пробоїв.",
+ai_f_breakout_long_v2: "Тому що вихід ціни вище недавнього діапазону — класичний breakout-сигнал, і Brain допускає продовження зростання за контрольованого ризику.",
+ai_f_breakout_long_v3: "Тому що breakout угору показує готовність ринку приймати нові, вищі ціни, і Brain використовує це як аргумент на користь лонга.",
+ai_f_breakout_long_v4: "Тому що пробій опору підтверджує силу тренду, і Brain допускає, що після відкату рух угору може продовжитися.",
+ai_f_breakout_long_v5: "Тому що фактичний breakout за ціною {price} підсилює бичачий сценарій, але Brain не рекомендує входити «в космос», а чекає адекватний pullback.",
 
-ai_note_oversold_risk_reversal: 'Ринок надмірно перепроданий і близько до підтримок — алгоритм утримується від продажу, оскільки високий ризик різкого розвороту вгору.',
-ai_note_overbought_risk_reversal: 'Ринок надмірно перекуплений і близько до опорів — алгоритм утримується від покупки, оскільки високий ризик різкого розвороту вниз.',
+ai_f_breakdown_short: "Тому що ціна {price} пробила ключову підтримку й формує breakdown вниз, Brain бачить посилення продавців і ризик для лонгів.",
+ai_f_breakdown_short_v2: "Тому що breakdown нижче діапазону показує перехід ринку під контроль ведмедів, і Brain розглядає це як аргумент на користь захисної чи шортової тактики.",
+ai_f_breakdown_short_v3: "Тому що пробій підтримки вниз збільшує ймовірність продовження зниження, і Brain попереджає про несприятливі умови для нових лонгів.",
+ai_f_breakdown_short_v4: "Тому що злам рівня підтримки — сильний сигнал слабкості, і Brain допускає продовження даун-тренду з реакцією тільки на відкатах.",
+ai_f_breakdown_short_v5: "Тому що фаза breakdown говорить про структурне погіршення картини, і Brain оцінює шанси на зростання як низькі до відновлення рівня.",
 
-ai_note_funding: 'Фандинг на ф’ючерсах показує перекіс у бік лонгів або шортів — екстремальні значення часто сигналізують про перегрів однієї зі сторін.',
-ai_note_oi_change: 'Зміна відкритого інтересу відображає вхід або вихід капіталу з ринку — разом із напрямком ціни це допомагає оцінити силу руху.',
-ai_note_basis: 'Базис (різниця між ціною ф’ючерса і спотом) показує, чи торгується ринок з премією або дисконтом — це сигналізує про перекіс очікувань учасників.',
-ai_note_dominance: 'Домінація біткоїна показує частку BTC на ринку — для альткоїнів висока домінація часто означає підвищений тиск і ризик падіння.',
-ai_note_btc_corr: 'Кореляція з біткоїном показує, наскільки актив рухається синхронно з BTC — висока кореляція підсилює вплив загального ринку.',
+// ===== Bollinger Bands (squeeze + width + breakout) =====
+ai_f_bbands_squeeze: "Тому що смуги Bollinger сильно стиснуті (width={width}), Brain бачить фазу накопичення енергії й готується до потенційно різкого виходу з діапазону.",
+ai_f_bbands_squeeze_v2: "Тому що стиснення Bollinger Bands вказує на аномально низьку волатильність, і Brain очікує, що наступний імпульс може бути різким.",
+ai_f_bbands_squeeze_v3: "Тому що коли смуги Bollinger звужуються, ринок часто готує сильний ривок, і Brain враховує це як попередження про майбутній рух.",
+ai_f_bbands_squeeze_v4: "Тому що Bollinger-squeeze сигналізує про період спокою перед можливим трендовим викидом, і Brain не рекомендує недооцінювати майбутній хід.",
+ai_f_bbands_squeeze_v5: "Тому що тривале стиснення Bollinger Bands підвищує ймовірність великого руху, і Brain закладає це в оцінку ризику й розміру позиції.",
 
-ai_note_global_spot: 'Global spot — агрегована справедлива спотова ціна по основних біржах, відносно якої оцінюються локальні відхилення.',
-ai_note_venue_spread: 'Спред між біржами показує різницю цін на різних майданчиках — значний спред може вказувати на арбітраж, перекіс ліквідності або технічні спотворення.',
+ai_f_bbands_width: "Тому що ширина Bollinger Bands={width}, а середня лінія близько {bbMid}, і через це Brain бачить, наскільки зараз ринок «розгойданий» і скільки руху можна статистично очікувати.",
 
-ai_no_data: 'Недостатньо даних для надійного аналізу — надто коротка історія або проблеми з ціновими рядами, тому висновок обмежений режимом HOLD.',
+ai_f_bbands_breakout_up: "Тому що ціна {price} вийшла вище верхньої смуги Bollinger {upper}, показуючи сильний бичачий імпульс і розширення волатильності вгору, і Brain відзначає і потенціал, і ризик перегріву.",
+ai_f_bbands_breakout_down: "Тому що ціна {price} опустилася нижче нижньої смуги Bollinger {lower}, що говорить про домінування продавців та агресивний рух вниз, і Brain враховує це як ризик для лонгів.",
+
+// ===== Stochastic =====
+ai_f_stoch_overbought: "Тому що Stochastic (K={k}, D={d}) у зоні перекупленості, короткострокове зростання виглядає вичерпаним, і Brain бачить підвищений шанс відкату.",
+ai_f_stoch_overbought_v2: "Тому що високі значення Stochastic вказують на перегрів ціни, і Brain не поспішає підтримувати нові лонги на цій ділянці.",
+ai_f_stoch_overbought_v3: "Тому що Stochastic показує, що ринок тимчасово перекуплений, і Brain сприймає це як привід для обережності та можливої фіксації частини профіту.",
+ai_f_stoch_overbought_v4: "Тому що коли K і D висять у верхній зоні, ймовірність корекції зростає, і Brain враховує це при оцінці ризику по позиції.",
+ai_f_stoch_overbought_v5: "Тому що перекуплений Stochastic — сигнал, що локальний up-тренд може взяти паузу, і Brain знижує агресивність входів у long.",
+
+ai_f_stoch_oversold: "Тому що Stochastic (K={k}, D={d}) у зоні перепроданості, продавці тимчасово перегнули ринок, і Brain допускає сценарій відскоку.",
+ai_f_stoch_oversold_v2: "Тому що низькі значення Stochastic говорять про локальну перепроданість, і Brain бачить підвищений шанс короткострокового розвороту вгору.",
+ai_f_stoch_oversold_v3: "Тому що Stochastic у нижній зоні показує, що вниз уже зроблено серйозний рух, і Brain обережніше ставиться до нових шортів.",
+ai_f_stoch_oversold_v4: "Тому що при перепроданому Stochastic Brain очікує, що частина продавців закриватиме позиції, що може привести до bounce.",
+ai_f_stoch_oversold_v5: "Тому що Stochastic-oversold — статистичний аргумент за корекційне зростання, і Brain враховує це в оцінці ймовірностей.",
+
+// ===== ADX / тренд =====
+ai_f_adx: "Тому що індекс ADX={adx} і співвідношення +DI={plusDI} до -DI={minusDI} дозволяють Brain оцінити силу й напрямок тренду перед видачею сигналу.",
+ai_f_adx_trending: "Тому що високий ADX={adx} показує сильний трендовий ринок, і Brain дає більше ваги стратегіям слідування за трендом.",
+ai_f_adx_trending_v2: "Тому що при підвищеному ADX тренд статистично надійніший, і Brain сміливіше підтримує угоди в бік домінуючого руху.",
+ai_f_adx_trending_v3: "Тому що сильний ADX підтверджує, що тренд не випадковий, і Brain покладається на нього як на основний каркас сценарію.",
+ai_f_adx_trending_v4: "Тому що коли ADX зростає й залишається високим, Brain вважає тренд стійким і допускає довше утримання позиції.",
+ai_f_adx_trending_v5: "Тому що потужний ADX-сигнал говорить, що ринок рухається організовано, і Brain використовує це для посилення трендових рекомендацій.",
+
+ai_f_adx_flat: "Тому що низький ADX,={adx} вказує на флет і слабкий тренд, і Brain знижує впевненість у спрямованих угодах.",
+ai_f_adx_flat_v2: "Тому що при низькому ADX ринок більше нагадує пилу, ніж тренд, і Brain обережніше з спробами ловити великі directional-рухи.",
+ai_f_adx_flat_v3: "Тому що слабкий ADX — ознака боковика, і Brain не розраховує на стійкий рух в один бік.",
+ai_f_adx_flat_v4: "Тому що у флеті за ADX угоди по тренду статистично гірші, і Brain рекомендує пом’якшувати очікування по профіту.",
+ai_f_adx_flat_v5: "Тому що коли ADX низький, Brain вважає ринок шумним і не схильний давати агресивні directional-сигнали.",
+
+// ===== OBV =====
+ai_f_obv: "Тому що нахил OBV близько {slope} показує, як іде приплив або відтік обсягу, і Brain використовує це, щоб підтвердити або спростувати чисто ціновий рух.",
+
+// ===== ATR / волатильность =====
+ai_note_atr: "Тому що ATR={atr} (atrRel={atrRel}, ≈{atrPct}% від ціни) задає типовий денний діапазон, і Brain на цій волатильності оцінює очікуваний хід 1h≈{h1}, 6h≈{h6}, 24h≈{h24} і будує рівні стопів/тейків.",
+ai_note_atr_v2: "Тому що середній істинний діапазон ATR {atr} (близько {atrPct}% від ціни) допомагає Brain зрозуміти, наскільки далеко ціна зазвичай ходить і які стопи/цілі виглядають реалістичними.",
+ai_note_atr_v3: "Тому що через ATR Brain калібрує масштаб руху: atrRel={atrRel}, atrPct≈{atrPct}%, і це задає розумні очікування щодо ризику та профіту.",
+ai_note_atr_v4: "Тому що параметр ATR відображає «дихання» ринку; при {atrPct}% від ціни Brain обирає такі стопи й цілі, щоб не бути вибитим шумом.",
+ai_note_atr_v5: "Тому що Brain спирається на ATR {atr} і його частку від ціни ({atrPct}%), щоб балансувати ризик/дохідність і не завищувати очікування по ходу.",
+
+ai_f_vola_explosive: "Тому що atrRel={atrRel} (≈{atrPct}% від ціни) показує вибухову волатильність, і Brain рекомендує зменшувати розмір позиції та розширювати захисні стопи.",
+ai_f_vola_explosive_v2: "Тому що при такій волатильності ({atrPct}% від ціни) будь-який бар може бути аномально великим, і Brain трактує це як високий ризик, радячи акуратний risk-менеджмент.",
+ai_f_vola_explosive_v3: "Тому що вибухова vola збільшує і потенціал, і просадку, і Brain не пропонує перевантажувати депо при atrRel={atrRel}.",
+ai_f_vola_explosive_v4: "Тому що коли волатильність виходить на екстремальні рівні, ринок стає менш передбачуваним, і Brain рекомендує діяти консервативно.",
+ai_f_vola_explosive_v5: "Тому що суперволатильний режим (atrPct≈{atrPct}%) — зона, де важливіше вижити, ніж зловити кожен рух, і Brain знижує агресивність сигналів.",
+
+ai_f_vola_low: "Тому що atrRel={atrRel} (≈{atrPct}% від ціни) говорить про дуже низьку волатильність, і Brain не закладає швидких і великих рухів.",
+ai_f_vola_low_v2: "Тому що при слабкій волатильності ринок часто пиляє в діапазоні, і Brain не розраховує на великий профіт за короткий час.",
+ai_f_vola_low_v3: "Тому що низька vola робить тренди крихкими, і Brain обережніше ставиться до цілей і не завищує очікування по R:R.",
+ai_f_vola_low_v4: "Тому що коли atrPct малий, ринок «заснув», і Brain частіше чекає пробудження волатильності, перш ніж посилювати directional-сигнали.",
+ai_f_vola_low_v5: "Тому що low-vola режим збільшує ймовірність хибних пробоїв і затяжних флетів, і Brain враховує це та ріже впевненість.",
+
+// ===== уровни / контекст =====
+ai_note_sr: "Тому що найближча підтримка близько {s}, опір близько {r}, поточна ціна {price}, і через nearS={nearS} та nearR={nearR} Brain оцінює, скільки ходу лишається до рівня і де логічно ставити стоп/тейк.",
+ai_note_h: "Тому що Brain враховує очікуваний хід ціни на різних горизонтах, щоб рекомендація була узгодженою в часі, а не реакцією тільки на один бар.",
+
+// ===== дата и волатильность данных =====
+ai_note_data_short_history: "Тому що історії мало (барів: {bars}), частина статистики ненадійна, і Brain знижує впевненість у сильних directional-сигналах.",
+ai_note_data_short_history_v2: "Тому що при короткій історії ({bars} барів) моделі волатильності й тренду працюють грубіше, і Brain тому дає обережніші висновки.",
+ai_note_data_short_history_v3: "Тому що скромний обсяг даних ускладнює оцінку ринку, і Brain не переоцінює сигнали, отримані на малій вибірці.",
+ai_note_data_short_history_v4: "Тому що за нестачі історичних свічок ризик помилок у скорингу вищий, і Brain ріже впевненість у рекомендаціях.",
+ai_note_data_short_history_v5: "Тому що малий обсяг історії робить будь-які висновки крихкими, і Brain чесно враховує це, не розганяючи strength сигналу.",
+
+ai_note_data_low_vola: "Тому що зараз знижена ринкова активність (atrRel={atrRel}, ≈{atrPct}% від ціни), і Brain не чекає агресивних рухів, рекомендуючи помірні очікування.",
+ai_note_data_low_vola_v2: "Тому що низька активність за волатильністю робить ринок в’язким, і Brain уникає надто амбіційних цілей у таких умовах.",
+ai_note_data_low_vola_v3: "Тому що слабка динаміка цін — сигнал, що ринок поки не готовий до великого тренду, і Brain враховує це на користь обережної тактики.",
+ai_note_data_low_vola_v4: "Тому що коли vola мала, ймовірність пилки вища, і Brain не рекомендує будувати ставку на сильний swing.",
+ai_note_data_low_vola_v5: "Тому що ринок у режимі low-vola часто витрачає час, а не дає рух, і Brain закликає терпляче переждати фазу затишшя.",
+
+// ===== R:R =====
+ai_note_rr_good: "Тому що очікуване співвідношення ризик/прибуток {rr} при цільовому рівні {rrNominal}x виглядає привабливим, і Brain вважає таку угоду статистично виправданою.",
+ai_note_rr_good_v2: "Тому що хороший R:R ({rr} проти орієнтира {rrNominal}x) дає запас по дохідності, і Brain відзначає цю угоду як цікаву за профілем ризику.",
+ai_note_rr_good_v3: "Тому що при такому R:R угода компенсує окремі збиткові входи, і Brain позитивно оцінює маточікування стратегії.",
+ai_note_rr_good_v4: "Тому що R:R вище орієнтирного рівня — рідкісний плюс, і Brain допускає більш активну роботу з таким сетапом.",
+ai_note_rr_good_v5: "Тому що коли ризик/прибуток працює на нас (rr≈{rr}), Brain розглядає сетап як якісний навіть за неідеальної картини.",
+
+ai_note_rr_poor: "Тому що поточне співвідношення ризик/прибуток {rr} гірше орієнтира {rrNominal}x, і Brain не рекомендує агресивно заходити в таку угоду.",
+ai_note_rr_poor_v2: "Тому що слабкий R:R ({rr} при бажаному {rrNominal}x) робить ідею малоцікавою, і Brain не бачить достатнього запасу по профіту.",
+ai_note_rr_poor_v3: "Тому що коли R:R не дотягує до стандарту, навіть правильний прогноз дає мало, і Brain знижує пріоритет цього входу.",
+ai_note_rr_poor_v4: "Тому що погане співвідношення ризик/прибуток збільшує шанс, що серія таких угод з’їсть депозит, і Brain не заохочує систематично їх брати.",
+ai_note_rr_poor_v5: "Тому що при низькому R:R Brain вважає, що краще пропустити таку можливість і дочекатися більш вигідного сетапу.",
+
+// ===== oversold / overbought risk reversal =====
+ai_note_oversold_risk_reversal: "Тому що глибока перепроданість (RSI={rsi}) створює ризик різкого розвороту вгору, і Brain вважає за краще не відкривати нові шорти в такій точці.",
+ai_note_oversold_risk_reversal_v2: "Тому що за сильної перепроданості по RSI Brain бачить високу ймовірність short squeeze і не підштовхує до свіжих шортів.",
+ai_note_oversold_risk_reversal_v3: "Тому що коли ринок сильно перепроданий, будь-яка позитивна новина може викликати розворот, і Brain враховує цей ризик проти шортів.",
+ai_note_oversold_risk_reversal_v4: "Тому що стан oversold робить вхід у short статистично небезпечнішим, і Brain рекомендує витримати паузу.",
+ai_note_oversold_risk_reversal_v5: "Тому що Brain відзначає: сильна перепроданість — не найкраще місце, щоб додавати шорти, тут вищий шанс відскоку.",
+
+ai_note_overbought_risk_reversal: "Тому що сильна перекупленість (RSI={rsi}) підвищує ризик різкого розвороту вниз, і Brain не заохочує агресивні докупівлі на вершині.",
+ai_note_overbought_risk_reversal_v2: "Тому що при overbought-стані по RSI Brain бачить великий ризик відкату й не вважає розумним розганяти long.",
+ai_note_overbought_risk_reversal_v3: "Тому що перекуплений ринок часто розвертається на новинах, і Brain враховує це, радячи не нарощувати позицію.",
+ai_note_overbought_risk_reversal_v4: "Тому що в зоні перекупленості статистика проти нових лонгів, і Brain визнає підвищений ризик розвороту.",
+ai_note_overbought_risk_reversal_v5: "Тому що Brain вважає: за сильної перекупленості краще захищати прибуток, ніж відкривати нові покупки.",
+
+// ===== деривативы / on-chain =====
+ai_note_funding: "Тому що funding={funding} показує перекіс у позиціях на деривативах, і Brain враховує, яка сторона ринку перевантажена й де вищий ризик різкого винесення.",
+ai_note_funding_v2: "Тому що аномальний funding натякає на дисбаланс між long і short, і Brain сприймає це як фактор ризику проти переповненої сторони.",
+ai_note_funding_v3: "Тому що через funding Brain бачить, хто переплачує за плече, і це посилює ймовірність руху проти перевантажених позицій.",
+ai_note_funding_v4: "Тому що високий за модулем funding — попередження про нестійкий баланс на ф’ючерсах, і Brain знижує впевненість у продовженні поточної позабалансової сторони.",
+ai_note_funding_v5: "Тому що Brain використовує funding як термометр жадібності/страху на деривативах, що допомагає не ставати в чергу разом із натовпом.",
+
+ai_note_oi_change: "Тому що зміна Open Interest {oiChange} показує приплив/відтік грошей у ф’ючерси, і так Brain відрізняє «живий» рух від порожньої волатильності.",
+ai_note_oi_change_v2: "Тому що зростання OI при русі ціни підсилює тренд-сигнал, а падіння OI його послаблює — саме так Brain читає метрику {oiChange}.",
+ai_note_oi_change_v3: "Тому що через динаміку Open Interest Brain розуміє, відкриваються нові позиції чи ринок лише виносить старі.",
+ai_note_oi_change_v4: "Тому що сильні зрушення OI — знак перерозподілу ризику між учасниками, і Brain використовує це для уточнення сигналу.",
+ai_note_oi_change_v5: "Тому що Brain дивиться на {oiChange}, щоб не плутати істинний тренд із рухом на закритті позицій.",
+
+ai_note_basis: "Тому що ф’ючерсний basis={basis} відображає різницю між futures і spot, і сильне відхилення говорить про перегрів однієї зі сторін, що Brain враховує в ризиках.",
+ai_note_basis_v2: "Тому що атиповий basis сигналізує про перекіс очікувань на деривативах, і Brain не ігнорує цей прихований стрес-маркер.",
+ai_note_basis_v3: "Тому що basis показує, наскільки ринок готовий переплачувати або дисконтувати майбутню ціну; за крайніх значень Brain обережніший.",
+ai_note_basis_v4: "Тому що сильний basis у бік биків або ведмедів часто передує розворотам, і Brain враховує це, щоб не залазити в хвіст тренду.",
+ai_note_basis_v5: "Тому що Brain використовує basis як індикатор довіри до тренду на ф’ючерсах, особливо коли він виходить за нормальні рівні.",
+
+ai_note_dominance: "Тому що dominance Bitcoin близько {dominance}% показує баланс сили між BTC і альтами; за високої dominance Brain закладає тиск на альткоїни.",
+ai_note_dominance_v2: "Тому що зростання BTC-dominance зазвичай погіршує умови для альтів, і Brain враховує це як зовнішній ведмежий фон для них.",
+ai_note_dominance_v3: "Тому що низька dominance BTC, навпаки, відкриває вікно можливостей для альтів, і Brain коригує ризик-профіль під таку фазу.",
+ai_note_dominance_v4: "Тому що через метрику dominance Brain бачить, куди стікає ліквідність — у «blue chip» BTC чи в більш ризикові активи.",
+ai_note_dominance_v5: "Тому що зміни dominance допомагають Brain зрозуміти, хто зараз у фаворі в ринку — Bitcoin чи альти, і підлаштувати сигнали під цей зсув.",
+
+ai_note_btc_corr: "Тому що кореляція з BTC близько {corr} показує, наскільки сильно актив ходить разом із Bitcoin, і Brain враховує це, щоб не дублювати один і той самий ризик.",
+ai_note_btc_corr_v2: "Тому що висока кореляція з BTC означає, що доля активу значною мірою залежить від руху Bitcoin, і Brain враховує це при формуванні портфеля.",
+ai_note_btc_corr_v3: "Тому що низька кореляція з BTC робить актив більш самостійним, і Brain використовує це для диверсифікації ризиків.",
+ai_note_btc_corr_v4: "Тому що через кореляцію з BTC Brain оцінює, наскільки сигнал по цьому активу унікальний, а не копія BTC-пози.",
+ai_note_btc_corr_v5: "Тому що зрушення в {corr} допомагають Brain зрозуміти, чи посилюється зв’язка з BTC, чи слабшає, і скоригувати очікування щодо руху.",
+
+ai_note_global_spot: "Тому що стан глобального spot-ринку оцінюється як {globalSpot}, і Brain використовує цей фон як фільтр, підсилюючи або пом’якшуючи локальні сигнали.",
+ai_note_global_spot_v2: "Тому що загальний тон spot-ринку ({globalSpot}) впливає на ймовірність успіху локального сетапу, і Brain не розглядає його відірвано від фону.",
+ai_note_global_spot_v3: "Тому що якщо global spot слабкий, Brain обережніший з агресивними лонгами, навіть за хорошої локальної картини.",
+ai_note_global_spot_v4: "Тому що сильний spot-фон робить бичачі сигнали надійнішими, і Brain враховує цей tailwind.",
+ai_note_global_spot_v5: "Тому що Brain завжди звіряє локальний сигнал із global spot-картиною ({globalSpot}), щоб не торгувати проти загального потоку ліквідності.",
+
+ai_note_venue_spread: "Тому що підвищений venue spread={spread} говорить про неоднорідність цін і можливі проскальзування, і Brain рекомендує більш консервативний розмір позиції.",
+ai_note_venue_spread_v2: "Тому що великий спред між майданчиками — ознака зниженої ліквідності, і Brain бачить у цьому додатковий операційний ризик.",
+ai_note_venue_spread_v3: "Тому що коли ціни на різних біржах сильно розходяться, зростає ризик поганих виконань, і Brain враховує це при оцінці ризику угоди.",
+ai_note_venue_spread_v4: "Тому що розширений venue spread підказує Brain, що зараз не найкращий момент для великих ордерів.",
+ai_note_venue_spread_v5: "Тому що Brain сприймає високий spread між біржами як сигнал пригальмувати й торгувати обережніше, щоб уникнути зайвих втрат на виконанні.",
+
 qcoin_drop_toast_error: "(зарахування буде перевірено на сервері)",
 qcoin_drop_toast_title: "Вітаємо!",
 
 }
 const AI_HERO_ES = {
 ai_calculating: 'Se están realizando los cálculos — "ESPERE".',
-ai_regime: 'Régimen del mercado en el marco temporal actual (tendencia/rango y nivel de volatilidad), determinado por Quantum Brain a partir de EMA, ATR y de la estructura del movimiento del precio.',
+ai_no_data: "Porque Brain no ve un volumen suficiente de datos históricos para este instrumento, por eso se abstiene de dar una señal concreta y permanece en el modo neutral HOLD.",  
 
-ai_f_ema21_gt_ma50_on: 'La tendencia a corto plazo es alcista: EMA 21 está por encima de EMA 50 y EMA 50 está por encima de EMA 200 — el mercado está estructuralmente en una tendencia ascendente.',
-ai_f_ema21_gt_ma50_off: 'La tendencia alcista a corto plazo según EMA 21 y EMA 50 no está confirmada — la estructura de las medias móviles no indica un crecimiento estable.',
+// ===== regime =====
+ai_regime: "Porque Brain evalúa el régimen general del mercado como {regime} y el puntaje total (trend={trendScore}, momentum={momentumScore}, vola={volaScore}, total={totalScore}), y en esta base construye la recomendación comercial actual.",
+ai_regime_v2: "Porque Brain reconoce el régimen del mercado {regime}: tendencia={trendScore}, momentum={momentumScore}, volatilidad={volaScore}, puntaje total={totalScore}, y a partir de esto selecciona el escenario de operación adecuado.",
+ai_regime_v3: "Porque el régimen actual del mercado que ve Brain es {regime}, y la combinación de tendencia ({trendScore}), momentum ({momentumScore}) y volatilidad ({volaScore}) da un puntaje final {totalScore} y forma la lógica de la señal.",
+ai_regime_v4: "Porque según el scoring interno de Brain el mercado ahora está en el régimen {regime}: puntaje total totalScore={totalScore}, descomposición por tendencia={trendScore}, momentum={momentumScore} y volatilidad={volaScore}, y esto explica el vector actual de la recomendación.",
+ai_regime_v5: "Porque Brain combinó múltiples señales en un régimen general {regime} (trend={trendScore}, momentum={momentumScore}, vola={volaScore}, total={totalScore}), y la recomendación se orienta precisamente en esta imagen del mercado.",
 
-ai_f_ma50_gt_ma200_on: 'La tendencia a medio plazo es alcista: la media móvil MA 50 está por encima de MA 200, lo que indica un predominio del movimiento ascendente.',
-ai_f_ma50_gt_ma200_off: 'La tendencia alcista a medio plazo no está confirmada: MA 50 no está por encima de MA 200, la estructura se parece más a un rango lateral o a un mercado bajista.',
+// ===== EMA21 vs MA50 / MA200 =====
+ai_f_ema21_gt_ma50_on: "Porque la EMA21 de corto plazo está por encima de MA50 y MA200, el mercado está estructuralmente a favor de los compradores, y Brain refuerza el peso del escenario alcista para este activo.",
+ai_f_ema21_gt_ma50_on_v2: "Porque la EMA21 ha sido superada y se mantiene por encima de MA50/MA200, lo que muestra una tendencia alcista estable, y Brain apoya con más confianza la idea long.",
+ai_f_ema21_gt_ma50_on_v3: "Porque el dominio de la EMA21 sobre MA50 y MA200 indica un impulso fresco y fuerte hacia arriba, y Brain lo toma como un argumento a favor de la continuación del crecimiento.",
+ai_f_ema21_gt_ma50_on_v4: "Porque la posición de EMA21 por encima de MA50 y MA200 es un signo clásico de una estructura alcista, y Brain enfatiza los escenarios long mientras este conjunto no se rompa.",
+ai_f_ema21_gt_ma50_on_v5: "Porque EMA21 > MA50 > MA200, la tendencia está confirmada en varios horizontes, y Brain permite decisiones long más audaces dentro del risk-management.",
 
-ai_f_price_gt_vwap_on: 'El precio cotiza por encima de VWAP — el precio medio ponderado por volumen, lo que normalmente implica presión compradora y un balance intradía positivo.',
-ai_f_price_gt_vwap_off: 'El precio cotiza por debajo de VWAP — el precio medio ponderado por volumen, lo que indica presión vendedora y una demanda más débil.',
+ai_f_ema21_gt_ma50_off: "Porque la EMA21 no se mantiene por encima de MA50/MA200, la fuerza local de los compradores se debilitó y Brain reduce la agresividad de las señales alcistas.",
+ai_f_ema21_gt_ma50_off_v2: "Porque la ruptura de EMA21 hacia abajo respecto a MA50/MA200 muestra una tendencia cansada, y Brain trata el crecimiento con cautela y no se apresura a aumentar long.",
+ai_f_ema21_gt_ma50_off_v3: "Porque el giro de EMA21 por debajo de MA50/MA200 es un signo de pérdida de estructura alcista, y Brain no considera la situación como un setup alcista confiable.",
+ai_f_ema21_gt_ma50_off_v4: "Porque mientras EMA21 se negocia por debajo de las MA de mediano plazo, el mercado se ve más neutral o bajista, y Brain desplaza el enfoque de compras agresivas.",
+ai_f_ema21_gt_ma50_off_v5: "Porque se ha roto la cascada EMA21>MA50>MA200, el dominio de los toros está en duda y Brain lo considera como un argumento contra riesgos long elevados.",
 
-ai_f_rsi_overbought: 'RSI se encuentra en zona de sobrecompra — el mercado está sobrecalentado al alza, con un alto riesgo de corrección o retroceso tras el crecimiento actual.',
-ai_f_rsi_oversold: 'RSI se encuentra en zona de sobreventa — el mercado ha caído con fuerza, aumentando la probabilidad de un rebote o de una reversión parcial.',
-ai_f_rsi_bull_on: 'RSI está desplazado hacia la zona alcista (por encima del área neutral) — el impulso del precio respalda un escenario de subida.',
-ai_f_rsi_bull_off: 'RSI no confirma un impulso alcista; el indicador está más cerca de una zona neutral o bajista.',
+ai_f_ma50_gt_ma200_on: "Porque MA50 está por encima de MA200, se ha formado una tendencia alcista de mediano plazo, y Brain da más peso a los longs y al mantenimiento de posiciones a favor de la tendencia.",
+ai_f_ma50_gt_ma200_on_v2: "Porque el cruce de MA50 sobre MA200 indica una tendencia alcista madura, y Brain lo ve como un buen contexto para operaciones hacia el crecimiento.",
+ai_f_ma50_gt_ma200_on_v3: "Porque la estructura MA50>MA200 muestra que globalmente el mercado está a favor de los compradores, y Brain lo usa como filtro a favor de escenarios long.",
+ai_f_ma50_gt_ma200_on_v4: "Porque mientras MA50 permanezca sobre MA200, la tendencia sigue siendo alcista, y Brain se inclina por estrategias de «comprar retrocesos» en lugar de buscar techos.",
+ai_f_ma50_gt_ma200_on_v5: "Porque MA50, situada sobre MA200, confirma que el vector principal es hacia arriba, y Brain puede apoyar el crecimiento con mayor confianza.",
 
-ai_f_macd_pos_on: 'MACD y su histograma señalan un impulso alcista — el momentum a corto plazo está dirigido hacia arriba.',
-ai_f_macd_pos_off: 'MACD no respalda un impulso alcista sostenido; la señal es débil o se inclina hacia el lado bajista.',
+ai_f_ma50_gt_ma200_off: "Porque MA50 está por debajo de MA200, el contexto básico sigue siendo bajista o débil, y Brain es más cuidadoso con los longs y controla el riesgo.",
+ai_f_ma50_gt_ma200_off_v2: "Porque el cruce de MA50 por debajo de MA200 muestra que la estructura global del mercado no favorece a los compradores, y Brain no lo considera un buen fondo para posiciones largas.",
+ai_f_ma50_gt_ma200_off_v3: "Porque cuando MA50 cae por debajo de MA200, es una señal de deterioro de la tendencia de mediano plazo, y Brain reduce la prioridad de ideas alcistas.",
+ai_f_ma50_gt_ma200_off_v4: "Porque la estructura MA50<MA200 indica un mayor riesgo de un down-trend prolongado, y Brain no apoya compras agresivas en tal entorno.",
+ai_f_ma50_gt_ma200_off_v5: "Porque mientras MA50 quede por debajo de MA200, la imagen es más bien bajista, y Brain se orienta al estilo defensivo y entradas cautelosas.",
 
-ai_f_breakout_long: 'El precio ha superado los máximos locales del periodo seleccionado — se está formando una ruptura alcista de la resistencia y un fortalecimiento del movimiento tendencial al alza.',
-ai_f_breakdown_short: 'El precio ha roto los mínimos locales del periodo seleccionado — se está formando una ruptura bajista del soporte y un aumento de la presión vendedora.',
+// ===== price vs VWAP =====
+ai_f_price_gt_vwap_on: "Porque el precio actual {price} está por encima del VWAP {vwap}, los compradores controlan el precio medio, y Brain lo interpreta como apoyo al escenario long.",
+ai_f_price_gt_vwap_on_v2: "Porque el precio se negocia por encima del VWAP, en promedio el mercado está dispuesto a pagar más caro, y Brain lo considera un signo de fuerza y permite mantener long.",
+ai_f_price_gt_vwap_on_v3: "Porque la posición del precio sobre VWAP muestra que las operaciones ocurren a niveles más altos, y Brain lo usa como argumento a favor de los toros.",
+ai_f_price_gt_vwap_on_v4: "Porque mientras el precio esté sobre VWAP, la ventaja a corto plazo pertenece a los compradores, y Brain es menos inclinado a abrir nuevos shorts.",
+ai_f_price_gt_vwap_on_v5: "Porque estar por encima del VWAP indica un balance de demanda positivo, y Brain está listo para apoyar la idea long si las demás señales no están en contra.",
 
-ai_f_bbands_width: 'La anchura de las Bandas de Bollinger refleja el nivel actual de volatilidad del mercado — compresión o expansión del rango de fluctuaciones del precio.',
-ai_f_bbands_squeeze: 'Las Bandas de Bollinger están comprimidas — la volatilidad es anormalmente baja; a menudo esta fase precede a un movimiento fuerte en una de las direcciones.',
-ai_f_bbands_breakout_up: 'El precio ha salido por encima de la banda superior de Bollinger — una expansión alcista agresiva del rango, posible fase de crecimiento acelerado o de sobrecompra.',
-ai_f_bbands_breakout_down: 'El precio ha caído por debajo de la banda inferior de Bollinger — un movimiento bajista agresivo, posible fase de pánico o de sobreventa.',
+ai_f_price_gt_vwap_off: "Porque el precio {price} está por debajo del VWAP {vwap}, la operación promedio baja, y Brain ve ventaja de los vendedores y trata los longs con más cautela.",
+ai_f_price_gt_vwap_off_v2: "Porque negociar por debajo del VWAP muestra que el mercado está dispuesto a descargar a peores precios, y Brain lo percibe como una señal bajista prudente.",
+ai_f_price_gt_vwap_off_v3: "Porque el precio bajo VWAP es un indicador de debilidad local, y Brain reduce la prioridad de escenarios long y considera el riesgo de mayor presión bajista.",
+ai_f_price_gt_vwap_off_v4: "Porque cuando el precio se fija por debajo del VWAP, el control se mueve a los vendedores, y Brain recomienda un enfoque más defensivo en las compras.",
+ai_f_price_gt_vwap_off_v5: "Porque la posición por debajo del VWAP significa que el participante promedio vende más barato, y Brain lo toma como un fondo desfavorable para nuevos longs.",
 
-ai_f_stoch_overbought: 'El oscilador estocástico está en zona de sobrecompra — el impulso a corto plazo está sobrecalentado al alza y el riesgo de corrección es elevado.',
-ai_f_stoch_oversold: 'El oscilador estocástico está en zona de sobreventa — el impulso a corto plazo está fuertemente presionado a la baja, aumenta la probabilidad de un rebote.',
+// ===== RSI =====
+ai_f_rsi_overbought: "Porque RSI={rsi} está en zona de sobrecompra, gran parte del impulso ya se ha consumido, y Brain advierte de alto riesgo de corrección tras el crecimiento.",
+ai_f_rsi_overbought_v2: "Porque las lecturas del RSI {rsi} indican un mercado sobrecalentado, y Brain no apoya compras agresivas, esperando un punto de entrada más favorable.",
+ai_f_rsi_overbought_v3: "Porque el RSI entró en la zona extrema superior, lo que a menudo conduce a retrocesos, y Brain lo ve como argumento para fijación parcial y cautela.",
+ai_f_rsi_overbought_v4: "Porque con RSI cerca de {rsi} las compras son estadísticamente menos rentables, y Brain ve más probabilidad de un giro o al menos una pausa en el crecimiento.",
+ai_f_rsi_overbought_v5: "Porque la fuerte sobrecompra según RSI ({rsi}) es señal de no acelerar más el long, y Brain recomienda no perseguir el movimiento en el pico.",
 
-ai_f_adx: 'ADX evalúa la fuerza de la tendencia, mientras que plus/minus DI muestran qué lado domina — compradores o vendedores.',
-ai_f_adx_trending: 'ADX es alto — la tendencia es marcada y estable; las estrategias seguidoras de tendencia funcionan mejor.',
-ai_f_adx_flat: 'ADX es bajo — el mercado está en rango o en un movimiento débilmente estructurado; las señales tendenciales son menos fiables.',
+ai_f_rsi_oversold: "Porque RSI={rsi} está en zona de sobreventa, el mercado está sobreextendido hacia las ventas, y Brain ve probabilidad de rebote y trata con cuidado nuevos shorts.",
+ai_f_rsi_oversold_v2: "Porque la fuerte sobreventa según RSI ({rsi}) muestra ventas emocionales, y Brain considera la posibilidad de un giro técnico al alza.",
+ai_f_rsi_oversold_v3: "Porque el RSI en la zona extrema inferior señala un impulso bajista agotado, y Brain admite escenario de short squeeze o un rebote fuerte.",
+ai_f_rsi_oversold_v4: "Porque con RSI cerca de {rsi} los vendedores ya han exprimido mucho al mercado, y Brain prefiere no abrir shorts agresivos en tal punto.",
+ai_f_rsi_oversold_v5: "Porque el estado de sobreventa indica que ya se ha recorrido mucho hacia abajo, y Brain aumenta la probabilidad de una corrección al alza.",
 
-ai_f_obv: 'OBV (On Balance Volume) muestra la dirección del flujo de volumen — la pendiente de OBV refleja si dominan los compradores o los vendedores.',
+ai_f_rsi_bull_on: "Porque RSI={rsi} se mantiene en una zona alcista saludable sin extremos, y Brain lo percibe como un impulso ascendente estable.",
+ai_f_rsi_bull_on_v2: "Porque un RSI moderadamente alto ({rsi}) confirma que los compradores están activos pero aún sin sobrecalentar el mercado, y Brain apoya la tendencia al alza.",
+ai_f_rsi_bull_on_v3: "Porque el RSI en la parte superior del rango refleja demanda controlada, y Brain lo interpreta como un fondo favorable para longs.",
+ai_f_rsi_bull_on_v4: "Porque cuando el RSI está cerca de {rsi}, el crecimiento se ve «saludable» — sin histeria — y Brain sigue la tendencia.",
+ai_f_rsi_bull_on_v5: "Porque la posición del RSI en zona alcista muestra que el impulso hacia arriba se mantiene, y Brain lo toma como un plus para la continuación del escenario long.",
 
-ai_note_atr: 'ATR y el ATR relativo caracterizan el rango medio de movimiento del precio y la volatilidad actual, lo cual es importante para evaluar riesgos y fijar stop-loss.',
-ai_f_vola_explosive: 'La volatilidad está elevada — el movimiento del precio es agresivo, el riesgo de la operación aumenta y pueden ser necesarios stops más amplios y se producen picos bruscos.',
-ai_f_vola_low: 'La volatilidad es anormalmente baja — el mercado está “congelado”, los movimientos pueden ser lentos y ruidosos hasta que aparezca un nuevo impulso.',
+ai_f_rsi_bull_off: "Porque RSI={rsi} no sostiene un impulso alcista fuerte, y Brain no ve demanda sólida, tratando los longs tendenciales con más cautela.",
+ai_f_rsi_bull_off_v2: "Porque un RSI moderado o bajo ({rsi}) indica interés comprador débil, y Brain no recibe confirmación para un up-trend agresivo.",
+ai_f_rsi_bull_off_v3: "Porque el RSI no se mantiene en la parte superior del rango, el impulso hacia arriba se debilita, y Brain reduce el peso de ideas tendenciales.",
+ai_f_rsi_bull_off_v4: "Porque con RSI cerca de {rsi} el crecimiento parece frágil, y Brain considera el riesgo de rango o corrección.",
+ai_f_rsi_bull_off_v5: "Porque la falta de una señal fuerte del RSI ({rsi}) hace que Brain trate los escenarios alcistas como menos confiables.",
 
-ai_note_sr: 'El algoritmo ha identificado los niveles de soporte y resistencia más cercanos, respecto a los cuales se evalúan el punto de entrada, el stop y los objetivos.',
-ai_note_h: 'Los horizontes de movimiento muestran el rango aproximado esperado del desplazamiento del precio en el tiempo (por ejemplo, a 1 hora, 6 horas y 24 horas).',
+// ===== MACD =====
+ai_f_macd_pos_on: "Porque MACD confirma el impulso alcista: MACD={macd} por encima de la señal {macdSignal}, histograma {hist} positivo, y Brain refuerza la señal hacia el crecimiento.",
+ai_f_macd_pos_on_v2: "Porque los parámetros MACD (línea {macd}, señal {macdSignal}, hist {hist}>0) indican dominio comprador, y Brain lo usa como apoyo al long.",
+ai_f_macd_pos_on_v3: "Porque mientras MACD esté por encima de la señal y el histograma en positivo, el impulso hacia arriba se considera vivo, y Brain permite mantener la posición.",
+ai_f_macd_pos_on_v4: "Porque la configuración alcista del MACD da ventaja estadística a la continuación del movimiento ascendente, y Brain se apoya en ello para la recomendación.",
+ai_f_macd_pos_on_v5: "Porque un setup positivo de MACD fortalece la confianza de Brain en la continuación del impulso alcista, y es un plus para long.",
 
-ai_note_data_short_history: 'Hay pocos datos históricos — la longitud de la muestra de barras es limitada, por lo que parte de las señales y estadísticas puede ser menos fiable.',
-ai_note_data_low_vola: 'El mercado ha permanecido durante mucho tiempo en un régimen de baja volatilidad, por lo que la significancia estadística de las estimaciones actuales de volatilidad puede estar reducida.',
+ai_f_macd_pos_off: "Porque el MACD actual (MACD={macd}, señal={macdSignal}, hist={hist}) no apoya un up-trend fuerte, y Brain suaviza la señal alcista.",
+ai_f_macd_pos_off_v2: "Porque cuando MACD no ofrece un cuadro alcista claro y el histograma {hist} es débil, Brain reduce la confianza en la continuación del crecimiento.",
+ai_f_macd_pos_off_v3: "Porque una señal MACD débil o neutral indica que la tendencia puede perder fuerza, y Brain considera el riesgo de giro o agotamiento del movimiento.",
+ai_f_macd_pos_off_v4: "Porque si MACD y la señal convergen o cruzan hacia abajo, Brain no ve un setup alcista fuerte.",
+ai_f_macd_pos_off_v5: "Porque la ausencia de un impulso MACD claro hace que Brain trate los longs con cautela y no exagere expectativas de continuación.",
 
-ai_note_rr_good: 'La relación potencial beneficio/riesgo de la operación parece atractiva — la recompensa esperada supera significativamente la posible pérdida.',
-ai_note_rr_poor: 'La relación potencial beneficio/riesgo es débil — la recompensa esperada no compensa suficientemente la posible pérdida de la operación.',
+// ===== breakout / breakdown =====
+ai_f_breakout_long: "Porque el precio {price} rompió un máximo local importante y forma un breakout hacia arriba, y Brain ve fortalecimiento de los toros pero recuerda el riesgo de falsos rompimientos.",
+ai_f_breakout_long_v2: "Porque salir del precio por encima del rango reciente es una señal clásica de breakout, y Brain permite la continuación del crecimiento con riesgo controlado.",
+ai_f_breakout_long_v3: "Porque un breakout hacia arriba muestra disposición del mercado a aceptar precios más altos, y Brain lo usa como argumento a favor del long.",
+ai_f_breakout_long_v4: "Porque la ruptura de resistencia confirma la fuerza de la tendencia, y Brain admite que después de un retroceso el movimiento hacia arriba puede continuar.",
+ai_f_breakout_long_v5: "Porque el breakout real del precio {price} refuerza el escenario alcista, pero Brain no recomienda entrar «en el espacio», sino esperar un pullback adecuado.",
 
-ai_note_oversold_risk_reversal: 'El mercado está extremadamente sobrevendido y cerca de zonas de soporte — el algoritmo evita vender porque el riesgo de un giro brusco al alza es alto.',
-ai_note_overbought_risk_reversal: 'El mercado está extremadamente sobrecomprado y cerca de resistencias — el algoritmo evita comprar porque el riesgo de un giro brusco a la baja es alto.',
+ai_f_breakdown_short: "Porque el precio {price} rompió un soporte clave y forma un breakdown hacia abajo, Brain ve fortalecimiento de los vendedores y riesgo para los longs.",
+ai_f_breakdown_short_v2: "Porque el breakdown por debajo del rango muestra que el mercado pasa bajo control de los osos, y Brain lo considera argumento a favor de táctica defensiva o short.",
+ai_f_breakdown_short_v3: "Porque romper el soporte hacia abajo aumenta la probabilidad de continuación de la caída, y Brain advierte de condiciones desfavorables para nuevos longs.",
+ai_f_breakdown_short_v4: "Porque la ruptura del nivel de soporte es una señal fuerte de debilidad, y Brain permite continuación del down-trend reaccionando solo en retrocesos.",
+ai_f_breakdown_short_v5: "Porque la fase de breakdown indica deterioro estructural, y Brain ve bajas probabilidades de crecimiento hasta que se recupere el nivel.",
 
-ai_note_funding: 'El funding en futuros muestra el sesgo hacia posiciones largas o cortas — los valores extremos suelen señalar un sobrecalentamiento de uno de los lados.',
-ai_note_oi_change: 'El cambio en el open interest refleja la entrada o salida de capital del mercado — junto con la dirección del precio ayuda a valorar la fuerza del movimiento.',
-ai_note_basis: 'El basis (diferencia entre el precio del futuro y el spot) muestra si el mercado cotiza con prima o con descuento — esto indica un sesgo en las expectativas de los participantes.',
-ai_note_dominance: 'La dominancia de Bitcoin muestra la cuota de BTC en el mercado — para las altcoins una dominancia alta suele implicar mayor presión y riesgo de caída.',
-ai_note_btc_corr: 'La correlación con Bitcoin muestra hasta qué punto este activo se mueve de forma sincronizada con BTC — una correlación alta refuerza la influencia del mercado general.',
+// ===== Bollinger Bands =====
+ai_f_bbands_squeeze: "Porque las Bandas de Bollinger están muy comprimidas (width={width}), Brain ve una fase de acumulación de energía y se prepara para una posible salida brusca del rango.",
+ai_f_bbands_squeeze_v2: "Porque la compresión de las Bollinger Bands indica volatilidad anormalmente baja, y Brain espera que el próximo impulso pueda ser fuerte.",
+ai_f_bbands_squeeze_v3: "Porque cuando las bandas Bollinger se estrechan, el mercado a menudo prepara un movimiento fuerte, y Brain lo considera una alerta de movimiento inminente.",
+ai_f_bbands_squeeze_v4: "Porque el Bollinger-squeeze señala un periodo de calma antes de un posible estallido tendencial, y Brain recomienda no subestimar el próximo movimiento.",
+ai_f_bbands_squeeze_v5: "Porque la compresión prolongada de Bollinger aumenta la probabilidad de un movimiento grande, y Brain lo incorpora al riesgo y tamaño de posición.",
 
-ai_note_global_spot: 'Global spot — precio spot justo agregado en las principales bolsas, respecto al cual se evalúan las desviaciones locales.',
-ai_note_venue_spread: 'El spread entre bolsas muestra la diferencia de precios entre distintos mercados — un spread elevado puede indicar arbitraje, desequilibrio de liquidez o distorsiones técnicas.',
+ai_f_bbands_width: "Porque el ancho de las Bollinger Bands={width}, y la línea media cerca de {bbMid}, y con esto Brain evalúa cuán «agitado» está el mercado y cuánta movilidad se puede esperar estadísticamente.",
 
-ai_no_data: 'No hay suficientes datos para un análisis fiable — el historial es demasiado corto o hay problemas con las series de precios, por lo que la conclusión se limita al modo HOLD.',
+ai_f_bbands_breakout_up: "Porque el precio {price} salió por encima de la banda superior de Bollinger {upper}, mostrando un fuerte impulso alcista y expansión de volatilidad, y Brain nota tanto el potencial como el riesgo de sobrecalentamiento.",
+ai_f_bbands_breakout_down: "Porque el precio {price} cayó por debajo de la banda inferior de Bollinger {lower}, lo que indica dominio de los vendedores y un movimiento agresivo hacia abajo, y Brain lo considera un riesgo para longs.",
+
+// ===== Stochastic =====
+ai_f_stoch_overbought: "Porque Stochastic (K={k}, D={d}) está en zona de sobrecompra, el crecimiento a corto plazo parece agotado, y Brain ve mayor probabilidad de retroceso.",
+ai_f_stoch_overbought_v2: "Porque valores altos del Stochastic indican sobrecalentamiento del precio, y Brain no se apresura a apoyar nuevos longs.",
+ai_f_stoch_overbought_v3: "Porque Stochastic muestra que el mercado está temporalmente sobrecomprado, y Brain lo percibe como motivo para cautela y posible toma parcial de ganancias.",
+ai_f_stoch_overbought_v4: "Porque cuando K y D están en la zona alta, la probabilidad de corrección aumenta, y Brain lo considera en la evaluación del riesgo.",
+ai_f_stoch_overbought_v5: "Porque un Stochastic sobrecomprado es señal de que el up-trend local podría tomarse una pausa, y Brain reduce agresividad en largos.",
+
+ai_f_stoch_oversold: "Porque Stochastic (K={k}, D={d}) está en zona de sobreventa, los vendedores han sobreextendido temporalmente el mercado, y Brain admite escenario de rebote.",
+ai_f_stoch_oversold_v2: "Porque valores bajos del Stochastic indican sobreventa local, y Brain ve mayor posibilidad de giro a corto plazo hacia arriba.",
+ai_f_stoch_oversold_v3: "Porque Stochastic en zona baja muestra que ya se ha realizado un movimiento fuerte hacia abajo, y Brain trata con cautela nuevos shorts.",
+ai_f_stoch_oversold_v4: "Porque con Stochastic sobrevendido Brain espera que algunos vendedores cierren posiciones, lo que puede producir un bounce.",
+ai_f_stoch_oversold_v5: "Porque el Stochastic-oversold es un argumento estadístico a favor de una corrección alcista, y Brain lo incluye en la evaluación de probabilidades.",
+
+// ===== ADX =====
+ai_f_adx: "Porque el índice ADX={adx} y la relación +DI={plusDI} a -DI={minusDI} permiten a Brain evaluar la fuerza y dirección de la tendencia antes de dar la señal.",
+ai_f_adx_trending: "Porque un ADX alto={adx} muestra un mercado fuertemente tendencial, y Brain da más peso a estrategias de seguimiento de tendencia.",
+ai_f_adx_trending_v2: "Porque con un ADX elevado la tendencia es estadísticamente más confiable, y Brain apoya con más valentía operaciones hacia el movimiento dominante.",
+ai_f_adx_trending_v3: "Porque un ADX fuerte confirma que la tendencia no es aleatoria, y Brain la toma como base del escenario.",
+ai_f_adx_trending_v4: "Porque cuando el ADX crece y se mantiene alto, Brain considera la tendencia estable y permite sostener la posición por más tiempo.",
+ai_f_adx_trending_v5: "Porque una señal potente de ADX indica que el mercado se mueve de manera organizada, y Brain la usa para reforzar recomendaciones tendenciales.",
+
+ai_f_adx_flat: "Porque un ADX bajo={adx} indica rango y tendencia débil, y Brain reduce la confianza en operaciones direccionales.",
+ai_f_adx_flat_v2: "Porque con ADX bajo el mercado parece más un serrucho que una tendencia, y Brain es más cauteloso intentando capturar movimientos grandes.",
+ai_f_adx_flat_v3: "Porque un ADX débil es señal de lateralidad, y Brain no espera un movimiento sostenido en una sola dirección.",
+ai_f_adx_flat_v4: "Porque en rango según ADX las operaciones tendenciales rinden peor estadísticamente, y Brain recomienda moderar expectativas de beneficio.",
+ai_f_adx_flat_v5: "Porque cuando ADX es bajo, Brain considera el mercado ruidoso y no da señales direccionales agresivas.",
+
+// ===== OBV =====
+ai_f_obv: "Porque la pendiente del OBV cerca de {slope} muestra cómo fluye la entrada o salida de volumen, y Brain lo usa para confirmar o negar el movimiento puramente de precio.",
+
+// ===== ATR =====
+ai_note_atr: "Porque ATR={atr} (atrRel={atrRel}, ≈{atrPct}% del precio) define el rango diario típico, y con esta volatilidad Brain estima el movimiento esperado 1h≈{h1}, 6h≈{h6}, 24h≈{h24} y construye niveles de stops/takes.",
+ai_note_atr_v2: "Porque el rango verdadero promedio ATR {atr} (aprox. {atrPct}% del precio) ayuda a Brain a entender hasta dónde suele moverse el precio y qué stops/objetivos son realistas.",
+ai_note_atr_v3: "Porque mediante ATR Brain calibra la escala del movimiento: atrRel={atrRel}, atrPct≈{atrPct}%, y esto fija expectativas razonables de riesgo y beneficio.",
+ai_note_atr_v4: "Porque el parámetro ATR refleja la «respiración» del mercado; con {atrPct}% del precio Brain selecciona stops y objetivos para no ser eliminado por ruido.",
+ai_note_atr_v5: "Porque Brain se apoya en ATR {atr} y su proporción del precio ({atrPct}%) para equilibrar riesgo/rentabilidad y no sobreestimar el recorrido.",
+
+ai_f_vola_explosive: "Porque atrRel={atrRel} (≈{atrPct}% del precio) muestra volatilidad explosiva, y Brain recomienda reducir tamaño de posición y ampliar stops protectores.",
+ai_f_vola_explosive_v2: "Porque con tal volatilidad ({atrPct}% del precio) cualquier vela puede ser anormalmente grande, y Brain lo considera alto riesgo, aconsejando gestión de riesgo cuidadosa.",
+ai_f_vola_explosive_v3: "Porque la vola explosiva aumenta tanto potencial como drawdown, y Brain no propone sobrecargar la cuenta con atrRel={atrRel}.",
+ai_f_vola_explosive_v4: "Porque cuando la volatilidad alcanza niveles extremos, el mercado se vuelve impredecible, y Brain recomienda actuar de manera conservadora.",
+ai_f_vola_explosive_v5: "Porque un régimen supervolátil (atrPct≈{atrPct}%) es zona donde es más importante sobrevivir que capturar cada movimiento, y Brain reduce agresividad de señales.",
+
+ai_f_vola_low: "Porque atrRel={atrRel} (≈{atrPct}% del precio) indica volatilidad muy baja, y Brain no anticipa movimientos rápidos y grandes.",
+ai_f_vola_low_v2: "Porque con volatilidad débil el mercado suele moverse en rango, y Brain no espera ganancias grandes en poco tiempo.",
+ai_f_vola_low_v3: "Porque la vola baja hace las tendencias frágiles, y Brain trata los objetivos con más cuidado y no sobreestima R:R.",
+ai_f_vola_low_v4: "Porque cuando atrPct es pequeño, el mercado «duerme», y Brain a menudo espera el despertar de la volatilidad antes de reforzar señales direccionales.",
+ai_f_vola_low_v5: "Porque el régimen de baja volatilidad aumenta probabilidad de rupturas falsas y rangos prolongados, y Brain lo considera y reduce confianza.",
+
+// ===== niveles / contexto =====
+ai_note_sr: "Porque el soporte más cercano está cerca de {s}, la resistencia cerca de {r}, el precio actual {price}, y mediante nearS={nearS} y nearR={nearR} Brain evalúa cuánto recorrido queda hasta el nivel y dónde colocar stop/take.",
+ai_note_h: "Porque Brain considera el movimiento esperado del precio en distintos horizontes para que la recomendación sea coherente en el tiempo y no reacción a una sola vela.",
+
+// ===== datos / historia =====
+ai_note_data_short_history: "Porque hay poca historia (velas: {bars}), parte de la estadística es poco confiable, y Brain reduce la confianza en señales direccionales fuertes.",
+ai_note_data_short_history_v2: "Porque con historia corta ({bars} velas) los modelos de volatilidad y tendencia funcionan más burdos, y por eso Brain da conclusiones más cautas.",
+ai_note_data_short_history_v3: "Porque el volumen modesto de datos dificulta evaluar el mercado, y Brain no sobrevalora señales obtenidas con muestra pequeña.",
+ai_note_data_short_history_v4: "Porque con falta de velas históricas el riesgo de errores en scoring es mayor, y Brain reduce la confianza en recomendaciones.",
+ai_note_data_short_history_v5: "Porque el poco volumen de historia hace cualquier conclusión frágil, y Brain lo considera honestamente sin inflar la fuerza de la señal.",
+
+ai_note_data_low_vola: "Porque ahora la actividad del mercado es baja (atrRel={atrRel}, ≈{atrPct}% del precio), y Brain no espera movimientos agresivos, recomendando expectativas moderadas.",
+ai_note_data_low_vola_v2: "Porque la baja actividad de volatilidad hace el mercado viscoso, y Brain evita objetivos excesivamente ambiciosos en tales condiciones.",
+ai_note_data_low_vola_v3: "Porque la débil dinámica de precios es señal de que el mercado aún no está listo para una gran tendencia, y Brain favorece la táctica cautelosa.",
+ai_note_data_low_vola_v4: "Porque cuando la volatilidad es baja, la probabilidad de rango es más alta, y Brain no recomienda apostar por un swing fuerte.",
+ai_note_data_low_vola_v5: "Porque un mercado en régimen low-vola suele gastar tiempo y no dar movimiento, y Brain aconseja paciencia durante esta fase.",
+
+// ===== R:R =====
+ai_note_rr_good: "Porque la relación riesgo/beneficio esperada {rr} con nivel objetivo {rrNominal}x parece atractiva, y Brain considera tal operación estadísticamente justificada.",
+ai_note_rr_good_v2: "Porque un buen R:R ({rr} contra el referente {rrNominal}x) da margen de rentabilidad, y Brain califica la operación como interesante en perfil de riesgo.",
+ai_note_rr_good_v3: "Porque con tal R:R la operación compensa entradas perdedoras aisladas, y Brain evalúa positivamente el valor esperado de la estrategia.",
+ai_note_rr_good_v4: "Porque un R:R por encima del nivel de referencia es una ventaja rara, y Brain permite un trabajo más activo con tal setup.",
+ai_note_rr_good_v5: "Porque cuando riesgo/beneficio está a nuestro favor (rr≈{rr}), Brain considera el setup de calidad incluso si la imagen no es perfecta.",
+
+ai_note_rr_poor: "Porque la relación riesgo/beneficio actual {rr} es peor que el referente {rrNominal}x, y Brain no recomienda entrar agresivamente en tal operación.",
+ai_note_rr_poor_v2: "Porque un R:R débil ({rr} con deseado {rrNominal}x) hace la idea poco interesante, y Brain no ve suficiente margen de beneficio.",
+ai_note_rr_poor_v3: "Porque cuando R:R no alcanza el estándar, incluso un pronóstico correcto da poco, y Brain reduce prioridad de esta entrada.",
+ai_note_rr_poor_v4: "Porque una mala relación riesgo/beneficio aumenta probabilidad de que una serie de tales operaciones agote la cuenta, y Brain no las apoya sistemáticamente.",
+ai_note_rr_poor_v5: "Porque con R:R bajo Brain considera mejor saltar esta oportunidad y esperar un setup más favorable.",
+
+// ===== oversold / overbought risk reversal =====
+ai_note_oversold_risk_reversal: "Porque una sobreventa profunda (RSI={rsi}) crea riesgo de un giro brusco hacia arriba, y Brain prefiere no abrir nuevos shorts en tal punto.",
+ai_note_oversold_risk_reversal_v2: "Porque en fuerte sobreventa según RSI Brain ve alta probabilidad de short squeeze y no impulsa nuevos shorts.",
+ai_note_oversold_risk_reversal_v3: "Porque cuando el mercado está muy sobrevendido, cualquier noticia positiva puede causar giro, y Brain considera este riesgo contra los shorts.",
+ai_note_oversold_risk_reversal_v4: "Porque el estado oversold hace estadísticamente más peligroso entrar en short, y Brain recomienda una pausa.",
+ai_note_oversold_risk_reversal_v5: "Porque Brain nota: la fuerte sobreventa no es el mejor lugar para añadir shorts, aquí el rebote es más probable.",
+
+ai_note_overbought_risk_reversal: "Porque una fuerte sobrecompra (RSI={rsi}) aumenta el riesgo de un giro brusco hacia abajo, y Brain no apoya compras agresivas en la cima.",
+ai_note_overbought_risk_reversal_v2: "Porque en estado overbought según RSI Brain ve gran riesgo de retroceso y no cree razonable acelerar el long.",
+ai_note_overbought_risk_reversal_v3: "Porque el mercado sobrecomprado a menudo gira en noticias, y Brain lo considera aconsejando no aumentar la posición.",
+ai_note_overbought_risk_reversal_v4: "Porque en zona de sobrecompra la estadística va contra nuevos longs, y Brain reconoce mayor riesgo de giro.",
+ai_note_overbought_risk_reversal_v5: "Porque Brain considera: en fuerte sobrecompra es mejor proteger la ganancia que abrir nuevas compras.",
+
+// ===== derivados / on-chain =====
+ai_note_funding: "Porque funding={funding} muestra el sesgo en posiciones de derivados, y Brain considera qué lado del mercado está sobrecargado y dónde es mayor el riesgo de un squeeze.",
+ai_note_funding_v2: "Porque un funding anómalo sugiere desequilibrio entre long y short, y Brain lo percibe como factor de riesgo contra el lado saturado.",
+ai_note_funding_v3: "Porque a través del funding Brain ve quién paga de más por apalancamiento, y eso aumenta probabilidad de movimiento contra posiciones sobrecargadas.",
+ai_note_funding_v4: "Porque un funding alto en magnitud es una advertencia de balance inestable en futuros, y Brain reduce confianza en la continuación del lado fuera de balance.",
+ai_note_funding_v5: "Porque Brain usa el funding como termómetro de codicia/miedo en derivados, lo que ayuda a no seguir a la multitud.",
+
+ai_note_oi_change: "Porque el cambio en Open Interest {oiChange} muestra entrada/salida de dinero en futuros, y así Brain distingue movimiento «vivo» de volatilidad vacía.",
+ai_note_oi_change_v2: "Porque el crecimiento de OI con movimiento del precio refuerza señal de tendencia, y caída de OI la debilita — así lee Brain la métrica {oiChange}.",
+ai_note_oi_change_v3: "Porque mediante la dinámica de OI Brain entiende si se abren nuevas posiciones o si el mercado solo está expulsando las antiguas.",
+ai_note_oi_change_v4: "Porque cambios fuertes en OI son señal de redistribución de riesgo entre participantes, y Brain los usa para afinar la señal.",
+ai_note_oi_change_v5: "Porque Brain observa {oiChange} para no confundir tendencia real con movimiento debido al cierre de posiciones.",
+
+ai_note_basis: "Porque el basis de futuros={basis} refleja la diferencia entre futures y spot, y una desviación fuerte indica sobrecalentamiento de un lado, lo que Brain considera en riesgos.",
+ai_note_basis_v2: "Porque un basis atípico señala un sesgo en expectativas de derivados, y Brain no ignora este marcador oculto de estrés.",
+ai_note_basis_v3: "Porque el basis muestra cuánto el mercado está dispuesto a pagar de más o descontar el precio futuro; con valores extremos Brain es más cauteloso.",
+ai_note_basis_v4: "Porque un basis fuerte hacia toros o osos a menudo precede a giros, y Brain lo considera para no entrar tarde en la tendencia.",
+ai_note_basis_v5: "Porque Brain usa el basis como indicador de confianza en la tendencia de futuros, especialmente cuando sale de niveles normales.",
+
+ai_note_dominance: "Porque la dominancia de Bitcoin cerca de {dominance}% muestra el balance de poder entre BTC y alts; con alta dominancia Brain estima presión sobre altcoins.",
+ai_note_dominance_v2: "Porque el crecimiento de BTC-dominance suele empeorar las condiciones para alts, y Brain lo considera un fondo externo bajista para ellas.",
+ai_note_dominance_v3: "Porque baja dominancia BTC, al contrario, abre ventana de oportunidades para alts, y Brain ajusta el perfil de riesgo a esta fase.",
+ai_note_dominance_v4: "Porque mediante la métrica de dominancia Brain ve hacia dónde fluye la liquidez — al «blue chip» BTC o a activos más riesgosos.",
+ai_note_dominance_v5: "Porque los cambios en dominancia ayudan a Brain a entender quién es favorito del mercado — Bitcoin o alts — y ajustar señales a este cambio.",
+
+ai_note_btc_corr: "Porque la correlación con BTC cerca de {corr} muestra cuán estrechamente se mueve el activo con Bitcoin, y Brain lo considera para no duplicar el mismo riesgo.",
+ai_note_btc_corr_v2: "Porque alta correlación con BTC significa que el destino del activo depende en gran medida del movimiento de Bitcoin, y Brain lo considera en la formación del portafolio.",
+ai_note_btc_corr_v3: "Porque baja correlación con BTC hace al activo más independiente, y Brain lo usa para diversificar riesgos.",
+ai_note_btc_corr_v4: "Porque mediante la correlación con BTC Brain evalúa cuán única es la señal del activo y no una copia de la posición BTC.",
+ai_note_btc_corr_v5: "Porque los cambios en {corr} ayudan a Brain a entender si el vínculo con BTC se fortalece o debilita, y ajustar expectativas del movimiento.",
+
+ai_note_global_spot: "Porque el estado del mercado global spot se evalúa como {globalSpot}, y Brain usa este fondo como filtro que refuerza o suaviza señales locales.",
+ai_note_global_spot_v2: "Porque el tono general del mercado spot ({globalSpot}) influye en la probabilidad de éxito del setup local, y Brain no lo considera aislado del contexto.",
+ai_note_global_spot_v3: "Porque si el global spot es débil, Brain es más prudente con longs agresivos incluso con un buen cuadro local.",
+ai_note_global_spot_v4: "Porque un fondo spot fuerte hace las señales alcistas más confiables, y Brain lo considera como tailwind.",
+ai_note_global_spot_v5: "Porque Brain siempre compara la señal local con la imagen global spot ({globalSpot}) para no operar contra el flujo general de liquidez.",
+
+ai_note_venue_spread: "Porque el venue spread elevado={spread} indica heterogeneidad de precios y posibles deslizamientos, y Brain recomienda un tamaño de posición más conservador.",
+ai_note_venue_spread_v2: "Porque un spread grande entre plataformas es signo de liquidez reducida, y Brain ve en esto un riesgo operativo adicional.",
+ai_note_venue_spread_v3: "Porque cuando los precios difieren mucho entre exchanges, aumenta el riesgo de ejecuciones deficientes, y Brain lo considera al evaluar la operación.",
+ai_note_venue_spread_v4: "Porque un venue spread ampliado sugiere a Brain que no es el mejor momento para órdenes grandes.",
+ai_note_venue_spread_v5: "Porque Brain percibe un spread alto entre exchanges como señal para frenar y operar con más cuidado, evitando pérdidas innecesarias en la ejecución.",
+
 qcoin_drop_toast_error: "(el abono será verificado en el servidor)",
 qcoin_drop_toast_title: "¡Felicidades!",
 
 }
 const AI_HERO_ZH = {
 ai_calculating: '正在进行计算 — “请稍候”',
-ai_regime: '当前时间周期的市场状态（趋势/震荡及波动率水平），由 Quantum Brain 根据 EMA、ATR 和价格结构判断。',
+ai_no_data: "因为 Brain 没看到该品种足够的历史数据量，所以避免给出具体信号并保持在中性的 HOLD 模式。",    
 
-ai_f_ema21_gt_ma50_on: '短期趋势为多头：EMA 21 高于 EMA 50，且 EMA 50 高于 EMA 200 —— 市场结构呈上升趋势。',
-ai_f_ema21_gt_ma50_off: '基于 EMA 21 与 EMA 50 的短期多头趋势未被确认 —— 均线结构未显示稳定的上涨动能。',
+// ===== regime =====
+ai_regime: "因为 Brain 将当前市场整体状态评估为 {regime}，并给出综合得分（trend={trendScore}, momentum={momentumScore}, vola={volaScore}, total={totalScore}），并基于此构建当前的交易建议。",
+ai_regime_v2: "因为 Brain 识别出市场状态为 {regime}：趋势={trendScore}、动量={momentumScore}、波动性={volaScore}、综合得分={totalScore}，并据此选择合适的交易情景。",
+ai_regime_v3: "因为 Brain 看到的当前市场状态是 {regime}，而趋势 ({trendScore})、动量 ({momentumScore}) 和波动 ({volaScore}) 的组合给出最终得分 {totalScore}，从而形成信号逻辑。",
+ai_regime_v4: "因为根据 Brain 的内部评分，市场当前处于 {regime} 模式：综合得分 totalScore={totalScore}，趋势={trendScore}、动量={momentumScore}、波动性={volaScore} 的拆分正解释当前建议方向。",
+ai_regime_v5: "因为 Brain 将多种信号汇总为整体模式 {regime}（trend={trendScore}, momentum={momentumScore}, vola={volaScore}, total={totalScore}），而建议正基于这种市场结构。",
 
-ai_f_ma50_gt_ma200_on: '中期趋势为多头：MA 50 位于 MA 200 上方，表明上升动能占主导。',
-ai_f_ma50_gt_ma200_off: '中期多头趋势未被确认：MA 50 未高于 MA 200，结构更像是震荡或下跌行情。',
+// ===== EMA21 vs MA50 / MA200 =====
+ai_f_ema21_gt_ma50_on: "因为短期 EMA21 位于 MA50 和 MA200 上方，市场结构偏向买方，Brain 加强了该资产的多头场景权重。",
+ai_f_ema21_gt_ma50_on_v2: "因为 EMA21 突破并保持在 MA50/MA200 上方，显示出稳固的上升趋势，Brain 更自信地支持做多想法。",
+ai_f_ema21_gt_ma50_on_v3: "因为 EMA21 相对 MA50 和 MA200 的优势表明新的强劲上冲动能，Brain 将此视为上涨延续的支持因素。",
+ai_f_ema21_gt_ma50_on_v4: "因为 EMA21 在 MA50 和 MA200 上方属于典型的牛市结构，Brain 在此组合未被打破前重点考虑 long 场景。",
+ai_f_ema21_gt_ma50_on_v5: "因为 EMA21 > MA50 > MA200，趋势在多周期上得到确认，Brain 在风险管理框架下允许更大胆的做多决策。",
 
-ai_f_price_gt_vwap_on: '价格运行在 VWAP 上方 —— 这是成交量加权平均价格，通常意味着买方压力和积极的日内平衡。',
-ai_f_price_gt_vwap_off: '价格运行在 VWAP 下方 —— 表示卖方压力更强，需求更弱。',
+ai_f_ema21_gt_ma50_off: "因为 EMA21 未能保持在 MA50/MA200 上方，买方短线力量减弱，Brain 降低多头信号的激进程度。",
+ai_f_ema21_gt_ma50_off_v2: "因为 EMA21 下破 MA50/MA200 表明趋势疲惫，Brain 对上涨保持谨慎，不急于增加 long。",
+ai_f_ema21_gt_ma50_off_v3: "因为 EMA21 回落到 MA50/MA200 下方是上升趋势结构丧失的信号，Brain 不将其视为可靠的多头形态。",
+ai_f_ema21_gt_ma50_off_v4: "因为当 EMA21 低于中期均线时，市场更偏向中性或偏空，Brain 弱化对激进买入的关注。",
+ai_f_ema21_gt_ma50_off_v5: "因为 EMA21>MA50>MA200 的多头级联被破坏，多头主导地位存疑，Brain 将此视为反对高风险做多的论据。",
 
-ai_f_rsi_overbought: 'RSI 位于超买区 —— 市场向上过热，回调或回落风险较高。',
-ai_f_rsi_oversold: 'RSI 位于超卖区 —— 市场大幅下跌，反弹或部分反转的概率提高。',
-ai_f_rsi_bull_on: 'RSI 偏向多头区域（高于中性区）—— 价格动能支持上涨情景。',
-ai_f_rsi_bull_off: 'RSI 未确认多头动能，指标偏向中性或空头区域。',
+ai_f_ma50_gt_ma200_on: "因为 MA50 位于 MA200 上方，中期牛市趋势已形成，Brain 增加做多和趋势持仓的权重。",
+ai_f_ma50_gt_ma200_on_v2: "因为 MA50 上穿 MA200 表明成熟的上升趋势，Brain 认为这是顺势做多的良好背景。",
+ai_f_ma50_gt_ma200_on_v3: "因为 MA50>MA200 的结构显示市场整体偏向买方，Brain 以此作为 long 场景的过滤器。",
+ai_f_ma50_gt_ma200_on_v4: "因为 MA50 维持在 MA200 上方，趋势保持多头，Brain 倾向于“逢低买入”而非试图摸顶。",
+ai_f_ma50_gt_ma200_on_v5: "因为 MA50 高于 MA200 说明主方向向上，Brain 更有信心支持上涨。",
 
-ai_f_macd_pos_on: 'MACD 及其柱状图显示多头动能 —— 短期价格动能向上。',
-ai_f_macd_pos_off: 'MACD 不支持持续的多头动能，信号较弱或偏向空头。',
+ai_f_ma50_gt_ma200_off: "因为 MA50 低于 MA200，基本背景偏空或偏弱，Brain 对 long 更谨慎并控制风险。",
+ai_f_ma50_gt_ma200_off_v2: "因为 MA50 下穿 MA200 表明市场结构不利于买方，Brain 不认为这是开多的舒适环境。",
+ai_f_ma50_gt_ma200_off_v3: "因为当 MA50 落到 MA200 下方，这是中期趋势恶化的信号，Brain 因此降低多头优先级。",
+ai_f_ma50_gt_ma200_off_v4: "因为 MA50<MA200 显示下行趋势风险较高，Brain 不鼓励在这种环境下进行激进买入。",
+ai_f_ma50_gt_ma200_off_v5: "因为 MA50 仍在 MA200 下方，总体更偏空，Brain 采用更保守和谨慎的入场方式。",
 
-ai_f_breakout_long: '价格突破所选周期的局部高点 —— 形成多头突破阻力，并增强向上趋势。',
-ai_f_breakdown_short: '价格跌破所选周期的局部低点 —— 形成空头突破支撑，并增强卖压。',
+// ===== price vs VWAP =====
+ai_f_price_gt_vwap_on: "因为当前价格 {price} 位于 VWAP {vwap} 上方，买方掌控平均价格，Brain 将此视为支持多头场景。",
+ai_f_price_gt_vwap_on_v2: "因为价格在 VWAP 上方交易，说明市场平均愿意支付更高价格，Brain 视其为强势信号并允许持有 long。",
+ai_f_price_gt_vwap_on_v3: "因为价格高于 VWAP 表示成交在更高区间发生，Brain 将此作为看多因素。",
+ai_f_price_gt_vwap_on_v4: "因为只要价格在 VWAP 上方，短期优势属于买方，Brain 在这种结构下不倾向开新空。",
+ai_f_price_gt_vwap_on_v5: "因为价格位于 VWAP 之上表明需求平衡积极，若其他信号不反对，Brain 愿意支持 long。",
 
-ai_f_bbands_width: '布林带宽度反映当前市场波动率 —— 表示价格波动区间的收缩或扩张。',
-ai_f_bbands_squeeze: '布林带明显收缩 —— 波动率异常低，通常是强势行情启动前的信号。',
-ai_f_bbands_breakout_up: '价格突破布林带上轨 —— 表示强势多头扩张，可能进入加速上涨或超买阶段。',
-ai_f_bbands_breakout_down: '价格跌破布林带下轨 —— 表示强势空头趋势，可能出现恐慌或超卖阶段。',
+ai_f_price_gt_vwap_off: "因为价格 {price} 低于 VWAP {vwap}，平均成交下移，Brain 看到卖方占优并更谨慎对待 long。",
+ai_f_price_gt_vwap_off_v2: "因为在 VWAP 下方交易表示市场愿意以更差价格出货，Brain 将此视为偏空信号。",
+ai_f_price_gt_vwap_off_v3: "因为价格低于 VWAP 是短线疲弱的指标，Brain 降低 long 场景优先级并考虑下行压力。",
+ai_f_price_gt_vwap_off_v4: "因为当价格稳在 VWAP 下方时，主导权转向卖方，Brain 建议买入更保守。",
+ai_f_price_gt_vwap_off_v5: "因为低于 VWAP 意味着市场参与者平均以更低价格卖出，Brain 将此视为不利于新的多头背景。",
 
-ai_f_stoch_overbought: '随机指标处于超买区 —— 短期动能过热，上行修正风险增加。',
-ai_f_stoch_oversold: '随机指标处于超卖区 —— 短期动能过度下压，反弹概率增加。',
+// ===== RSI =====
+ai_f_rsi_overbought: "因为 RSI={rsi} 处于超买区，大部分上行动能已释放，Brain 提醒上涨后高风险回调。",
+ai_f_rsi_overbought_v2: "因为 RSI {rsi} 显示市场过热，Brain 不鼓励激进买入，等待更优入场点。",
+ai_f_rsi_overbought_v3: "因为 RSI 进入极端上区，这常导致回调，Brain 将其视为部分止盈和谨慎的理由。",
+ai_f_rsi_overbought_v4: "因为当 RSI 接近 {rsi}，买入性价比下降，Brain 看到较高的回落或停顿概率。",
+ai_f_rsi_overbought_v5: "因为强势超买（RSI={rsi}）意味着不宜继续追高，Brain 建议勿在顶部追涨。",
 
-ai_f_adx: 'ADX 衡量趋势强度，而 +DI/-DI 显示当前主导力量 —— 买方还是卖方。',
-ai_f_adx_trending: 'ADX 较高 —— 趋势明显且稳定，趋势跟随策略更有效。',
-ai_f_adx_flat: 'ADX 较低 —— 市场震荡或结构弱，趋势信号可靠性下降。',
+ai_f_rsi_oversold: "因为 RSI={rsi} 在超卖区，市场被过度压低，Brain 看到反弹概率并更谨慎对待新空单。",
+ai_f_rsi_oversold_v2: "因为深度超卖（RSI={rsi}）反映情绪性抛售，Brain 考虑技术性反转的机会。",
+ai_f_rsi_oversold_v3: "因为 RSI 在极端下区表明空头动能已被挤压，Brain 允许出现 short squeeze 或强反弹的场景。",
+ai_f_rsi_oversold_v4: "因为当 RSI 接近 {rsi} 时，卖方已大幅挤压市场，Brain 不倾向开激进空。",
+ai_f_rsi_oversold_v5: "因为超卖说明下行已做了大量工作，Brain 提高向上修正的概率。",
 
-ai_f_obv: 'OBV（On Balance Volume）显示资金流向 —— OBV 的倾斜程度反映买卖双方的主导地位。',
+ai_f_rsi_bull_on: "因为 RSI={rsi} 处于健康的多头区且无极端值，Brain 视其为稳定的上升动能。",
+ai_f_rsi_bull_on_v2: "因为适度偏高的 RSI ( {rsi} ) 表示买方活跃但未过热，Brain 支持上行趋势。",
+ai_f_rsi_bull_on_v3: "因为 RSI 在区间上侧反映受控需求，Brain 将此视为多头友好环境。",
+ai_f_rsi_bull_on_v4: "因为当 RSI 在 {rsi} 附近时，上涨显得“健康”，Brain 倾向继续顺势。",
+ai_f_rsi_bull_on_v5: "因为 RSI 处于多头区表示上行动能持续，Brain 将其视为 long 的加分项。",
 
-ai_note_atr: 'ATR 与相对 ATR 描述平均价格波动范围与当前波动率，这对风险评估与止损设置非常重要。',
-ai_f_vola_explosive: '波动率升高 —— 价格运动激烈，交易风险增加，可能需要更宽的止损并预期剧烈波动。',
-ai_f_vola_low: '波动率异常低 —— 市场“停滞”，走势可能缓慢且噪音多，直至出现新的动能。',
+ai_f_rsi_bull_off: "因为 RSI={rsi} 未能支持强劲上行动能，Brain 未看到足够买盘，对趋势多头更谨慎。",
+ai_f_rsi_bull_off_v2: "因为中低 RSI ({rsi}) 显示买方兴趣弱，Brain 未获得强上升趋势的确认。",
+ai_f_rsi_bull_off_v3: "因为 RSI 未处于区间上方，上行动能减弱，Brain 降低趋势想法的权重。",
+ai_f_rsi_bull_off_v4: "因为 RSI 接近 {rsi} 时上涨显得脆弱，Brain 看到进入震荡或回调的风险。",
+ai_f_rsi_bull_off_v5: "因为缺乏强 RSI 信号（{rsi}），Brain 将多头场景视为不够可靠。",
 
-ai_note_sr: '算法识别出最近的支撑与阻力水平，用于评估入场点、止损与目标价位。',
-ai_note_h: '价格运动的时间范围预测 ——（例如 1 小时、6 小时、24 小时）的预期波动范围。',
+// ===== MACD =====
+ai_f_macd_pos_on: "因为 MACD 确认多头动能：MACD={macd} 高于信号线 {macdSignal}，柱状图 {hist} 为正，Brain 强化上涨信号。",
+ai_f_macd_pos_on_v2: "因为 MACD 参数（线 {macd}、信号 {macdSignal}、hist {hist}>0）显示买方主导，Brain 支持做多。",
+ai_f_macd_pos_on_v3: "因为 MACD 在信号线上方且 hist 为正，向上动能仍然有效，Brain 允许趋势持仓。",
+ai_f_macd_pos_on_v4: "因为多头 MACD 结构提供统计优势，Brain 在建议中依赖此信号。",
+ai_f_macd_pos_on_v5: "因为强势 MACD 形态增强了 Brain 对上涨延续的信心，这是偏多因素。",
 
-ai_note_data_short_history: '历史数据较少 —— K线数量不足，导致部分信号与统计可能可靠性降低。',
-ai_note_data_low_vola: '市场长期处于低波动状态，因此当前波动率评估的统计显著性可能降低。',
+ai_f_macd_pos_off: "因为当前 MACD（MACD={macd}, 信号={macdSignal}, hist={hist}）未支持强 up-trend，Brain 缓和多头倾向。",
+ai_f_macd_pos_off_v2: "因为当 MACD 无明确多头结构且柱状图 {hist} 不强时，Brain 降低对上涨延续的信任度。",
+ai_f_macd_pos_off_v3: "因为 MACD 弱或中性代表趋势可能减弱，Brain 考虑反转或动能衰减风险。",
+ai_f_macd_pos_off_v4: "因为若 MACD 与信号线收敛或下穿，Brain 不将其视为强多头形态。",
+ai_f_macd_pos_off_v5: "因为没有明确 MACD 动能，Brain 对做多保持谨慎，不提高趋势延续预期。",
 
-ai_note_rr_good: '该交易的潜在收益风险比表现良好 —— 预期收益显著高于潜在亏损。',
-ai_note_rr_poor: '收益风险比偏弱 —— 预期收益不足以覆盖潜在交易风险。',
+// ===== breakout / breakdown =====
+ai_f_breakout_long: "因为价格 {price} 突破重要局部高点并形成向上突破（breakout），Brain 看到多头增强，但提醒假突破风险。",
+ai_f_breakout_long_v2: "因为价格突破近期区间属于典型突破信号，Brain 允许在可控风险下看涨延续。",
+ai_f_breakout_long_v3: "因为向上突破显示市场愿意接受更高价格，Brain 将其视为做多的论据。",
+ai_f_breakout_long_v4: "因为突破阻力确认趋势强劲，Brain 允许在回调后继续上涨的可能性。",
+ai_f_breakout_long_v5: "因为价格 {price} 实际出现突破强化了多头场景，但 Brain 建议不要盲目追高，等待合理回踩。",
 
-ai_note_oversold_risk_reversal: '市场严重超卖并接近支撑区域 —— 算法避免做空，因为向上急速反转的风险较高。',
-ai_note_overbought_risk_reversal: '市场严重超买并接近阻力区域 —— 算法避免做多，因为向下急速反转的风险较高。',
+ai_f_breakdown_short: "因为价格 {price} 跌破关键支撑形成向下突破（breakdown），Brain 看到卖方增强和多头风险。",
+ai_f_breakdown_short_v2: "因为跌破区间表明市场进入空头控制，Brain 将此视为保护性或做空策略的支持因素。",
+ai_f_breakdown_short_v3: "因为下破支撑提高持续下跌概率，Brain 提醒此时不利于新多头。",
+ai_f_breakdown_short_v4: "因为支撑被破坏是明显弱势信号，Brain 允许下行趋势在反弹后继续。",
+ai_f_breakdown_short_v5: "因为 breakdown 阶段表示结构恶化，Brain 在恢复支撑前不看好上涨。",
 
-ai_note_funding: '期货资金费率显示多空倾斜 —— 极端值常提示市场某一方过热。',
-ai_note_oi_change: '持仓量变化显示资金进出 —— 结合价格方向可以评估趋势强度。',
-ai_note_basis: '基差（期货与现货价差）显示市场是溢价还是贴水 —— 反映市场参与者的预期偏差。',
-ai_note_dominance: '比特币主导率显示 BTC 的市场份额 —— 对山寨币而言，高主导率通常意味着更大下行压力。',
-ai_note_btc_corr: '与比特币的相关性显示该资产与 BTC 的同步性 —— 高相关性意味着整体市场影响更强。',
+// ===== Bollinger Bands (squeeze + width + breakout) =====
+ai_f_bbands_squeeze: "因为布林带严重收缩（width={width}），Brain 看到能量积累阶段，准备可能的强势突破。",
+ai_f_bbands_squeeze_v2: "因为 Bollinger Bands 收缩表示异常低波动性，Brain 预期下一个动能可能会很强。",
+ai_f_bbands_squeeze_v3: "因为当布林带收窄时市场常准备剧烈波动，Brain 将其视为即将到来的动作预警。",
+ai_f_bbands_squeeze_v4: "因为布林带挤压意味着趋势爆发前的平静期，Brain 不低估潜在的大动作。",
+ai_f_bbands_squeeze_v5: "因为长时间收缩提高大幅运动概率，Brain 将此纳入风险和仓位判断。",
 
-ai_note_global_spot: 'Global spot —— 综合主要交易所的公平现货价格，用于评估局部偏差。',
-ai_note_venue_spread: '交易所之间的价差显示不同平台的价格差异 —— 大价差可能表明套利机会、流动性失衡或技术性偏差。',
+ai_f_bbands_width: "因为布林带宽度={width}，中线接近 {bbMid}，Brain 由此判断市场当前波动水平和潜在可预期的区间。",
 
-ai_no_data: '缺乏足够的数据进行可靠分析 —— 历史过短或价格序列存在问题，因此系统返回 HOLD 模式。',
+ai_f_bbands_breakout_up: "因为价格 {price} 向上突破布林带上轨 {upper}，显示强劲多头动能与上行波动扩张，Brain 注意潜力与过热风险并存。",
+ai_f_bbands_breakout_down: "因为价格 {price} 跌破布林带下轨 {lower}，表明卖方主导和激烈下行，Brain 将此视为多头风险。",
+
+// ===== Stochastic =====
+ai_f_stoch_overbought: "因为 Stochastic (K={k}, D={d}) 处于超买区，短线涨势已接近耗尽，Brain 看到回调概率升高。",
+ai_f_stoch_overbought_v2: "因为高位随机指标显示价格过热，Brain 不急于支持新的多头。",
+ai_f_stoch_overbought_v3: "因为 Stochastic 显示市场暂时超买，Brain 将其视为谨慎或部分止盈的理由。",
+ai_f_stoch_overbought_v4: "因为当 K 和 D 滞留在上区，回调概率上升，Brain 在风险评估中考虑这一点。",
+ai_f_stoch_overbought_v5: "因为超买随机指标暗示短期上行趋势可能暂停，Brain 降低激进做多的力度。",
+
+ai_f_stoch_oversold: "因为 Stochastic (K={k}, D={d}) 处于超卖区，卖方暂时过度，Brain 允许反弹情景。",
+ai_f_stoch_oversold_v2: "因为低位随机指标显示局部超卖，Brain 看到短期反转的概率更高。",
+ai_f_stoch_oversold_v3: "因为随机指标在下区显示下跌已走出了大幅空间，Brain 对新开空单更谨慎。",
+ai_f_stoch_oversold_v4: "因为在超卖随机指标下 Brain 预期部分卖方会平仓，可能带来反弹。",
+ai_f_stoch_oversold_v5: "因为超卖随机指标是支持修复性上涨的统计论据，Brain 将其纳入概率判断。",
+
+// ===== ADX / тренд =====
+ai_f_adx: "因为 ADX 指数={adx} 且 +DI={plusDI} 与 -DI={minusDI} 的关系帮助 Brain 在给出信号前评估趋势强弱与方向。",
+ai_f_adx_trending: "因为高 ADX={adx} 显示强趋势市场，Brain 增加顺势策略权重。",
+ai_f_adx_trending_v2: "因为较高的 ADX 表示趋势统计上更可靠，Brain 更大胆支持顺势交易。",
+ai_f_adx_trending_v3: "因为强 ADX 证明趋势非随机，Brain 将其作为主要情景依据。",
+ai_f_adx_trending_v4: "因为当 ADX 上升并保持高位时，Brain 认为趋势稳固并允许更长持仓时间。",
+ai_f_adx_trending_v5: "因为强 ADX 信号表明市场有序运行，Brain 以此强化趋势建议。",
+
+ai_f_adx_flat: "因为低 ADX={adx} 表示震荡和平弱趋势，Brain 降低对单边交易的信心。",
+ai_f_adx_flat_v2: "因为低 ADX 的市场更像锯齿而非趋势，Brain 对大幅单边波动更谨慎。",
+ai_f_adx_flat_v3: "因为弱 ADX 是横盘信号，Brain 不期待持续的单方向行情。",
+ai_f_adx_flat_v4: "因为震荡 ADX 下趋势交易统计表现较差，Brain 建议放低收益预期。",
+ai_f_adx_flat_v5: "因为 ADX 低时市场噪音更大，Brain 不倾向发布激进方向性信号。",
+
+// ===== OBV =====
+ai_f_obv: "因为 OBV 斜率约为 {slope}，显示资金流入流出情况，Brain 用此来确认或否定纯价格走势。",
+
+// ===== ATR / волатильность =====
+ai_note_atr: "因为 ATR={atr}（atrRel={atrRel}, ≈{atrPct}% 价格波动）定义典型日间波动，Brain 基于此评估预期波动 1h≈{h1}, 6h≈{h6}, 24h≈{h24} 并构建止损/止盈水平。",
+ai_note_atr_v2: "因为 ATR {atr}（约为价格的 {atrPct}%）帮助 Brain 理解价格通常波动范围，从而设定合理的止损和目标。",
+ai_note_atr_v3: "因为 Brain 通过 ATR 校准运动尺度：atrRel={atrRel}, atrPct≈{atrPct}%，从而设定合理的风险与收益预期。",
+ai_note_atr_v4: "因为 ATR 反映市场的“呼吸”，当占价格 {atrPct}% 时，Brain 选择不会被噪音打出的止损和目标。",
+ai_note_atr_v5: "因为 Brain 依赖 ATR {atr} 及其价格占比 ({atrPct}%) 来平衡风险/收益，不夸大行情预期。",
+
+ai_f_vola_explosive: "因为 atrRel={atrRel}（≈{atrPct}%）显示爆炸性波动，Brain 建议减少头寸并放宽保护性止损。",
+ai_f_vola_explosive_v2: "因为在如此波动下（占价格 {atrPct}%）任何 K 线都可能异常巨大，Brain 视其为高风险并建议谨慎管理风险。",
+ai_f_vola_explosive_v3: "因为爆炸性波动既放大潜力也放大回撤，Brain 在 atrRel={atrRel} 的情况下不建议过度加仓。",
+ai_f_vola_explosive_v4: "因为当波动达到极端水平，市场更不可预测，Brain 建议采取保守策略。",
+ai_f_vola_explosive_v5: "因为超高波动（atrPct≈{atrPct}%）环境下“生存”比捕捉每个波动更重要，Brain 降低激进信号。",
+
+ai_f_vola_low: "因为 atrRel={atrRel}（≈{atrPct}%）显示极低波动，Brain 不期待快速大行情。",
+ai_f_vola_low_v2: "因为低波动市场常在区间震荡，Brain 不期待短时间内的大利润。",
+ai_f_vola_low_v3: "因为低 vola 使趋势脆弱，Brain 调低目标，避免过高 R:R 预期。",
+ai_f_vola_low_v4: "因为当 atrPct 很小，市场“沉睡”，Brain 常等待波动恢复后再增强方向信号。",
+ai_f_vola_low_v5: "因为低波动提高假突破和长期震荡概率，Brain 因此削弱信心。",
+
+// ===== уровни / контекст =====
+ai_note_sr: "因为最近支撑位约 {s}、阻力位约 {r}、当前价格 {price}，通过 nearS={nearS} 和 nearR={nearR} Brain 评估价格到关键位的剩余空间以及止损/止盈的合理位置。",
+ai_note_h: "因为 Brain 考虑不同周期下的预期价格波动，使建议在时间上保持一致，而非只对单根 K 线做出反应。",
+
+// ===== дата и волатильность данных =====
+ai_note_data_short_history: "因为历史较少（条数 {bars}），部分统计不够可靠，Brain 降低强方向信号的信心。",
+ai_note_data_short_history_v2: "因为历史较短（{bars} 条）时波动和趋势模型更粗糙，Brain 因此给出更谨慎的结论。",
+ai_note_data_short_history_v3: "因为数据量有限使市场评估更困难，Brain 不会高估小样本下的信号。",
+ai_note_data_short_history_v4: "因为历史 K 线不足时评分误差更高，Brain 降低建议的信心。",
+ai_note_data_short_history_v5: "因为历史样本小导致结论脆弱，Brain 诚实地考虑这一点，不夸大信号强度。",
+
+ai_note_data_low_vola: "因为当前市场活跃度低（atrRel={atrRel}, ≈{atrPct}%），Brain 不期待激进行情并建议保持温和预期。",
+ai_note_data_low_vola_v2: "因为低波动使市场更黏滞，Brain 避免过于雄心的目标。",
+ai_note_data_low_vola_v3: "因为价格动态疲弱代表市场暂时不准备走出大趋势，Brain 倾向更谨慎策略。",
+ai_note_data_low_vola_v4: "因为当波动性低时震荡概率更高，Brain 不建议押注强 swing。",
+ai_note_data_low_vola_v5: "因为低 vola 市场更多耗时间而非给方向，Brain 建议耐心等待波动恢复。",
+
+// ===== R:R =====
+ai_note_rr_good: "因为当前风险/收益比 {rr} 在目标 {rrNominal}x 附近显得有吸引力，Brain 认为该交易在统计上合理。",
+ai_note_rr_good_v2: "因为良好 R:R（{rr} 对比基准 {rrNominal}x）提供收益缓冲，Brain 视其为有吸引力的风险结构。",
+ai_note_rr_good_v3: "因为在此 R:R 下交易能抵消部分亏损单，Brain 对策略的期望值持积极态度。",
+ai_note_rr_good_v4: "因为高于基准的 R:R 属难得优势，Brain 允许对该形态更积极处理。",
+ai_note_rr_good_v5: "因为当风险/收益对我们有利（rr≈{rr}）时，即使结构不完美 Brain 仍视其为优质形态。",
+
+ai_note_rr_poor: "因为当前风险/收益比 {rr} 低于基准 {rrNominal}x，Brain 不建议激进入场。",
+ai_note_rr_poor_v2: "因为弱 R:R（{rr} 对应期望 {rrNominal}x）使该思路吸引力低，Brain 不看到足够利润空间。",
+ai_note_rr_poor_v3: "因为当 R:R 低于标准时，即便方向正确收益也有限，Brain 降低该入场优先级。",
+ai_note_rr_poor_v4: "因为差 R:R 增加长期亏损风险，Brain 不鼓励系统性执行此类交易。",
+ai_note_rr_poor_v5: "因为在低 R:R 下 Brain 认为最好放弃这种机会等待更好的形态。",
+
+// ===== oversold / overbought risk reversal =====
+ai_note_oversold_risk_reversal: "因为深度超卖（RSI={rsi}）带来急剧反转风险，Brain 不倾向在此处开新空单。",
+ai_note_oversold_risk_reversal_v2: "因为强超卖 RSI 让 Brain 看到 short squeeze 的高概率，因此不鼓励新开空。",
+ai_note_oversold_risk_reversal_v3: "因为在深度超卖下任何利好都可能引发反转，Brain 将此作为反对做空的风险因素。",
+ai_note_oversold_risk_reversal_v4: "因为超卖状态下 short 入场在统计上更危险，Brain 建议先观望。",
+ai_note_oversold_risk_reversal_v5: "因为 Brain 认为深度超卖并非加空的好位置，反弹概率更高。",
+
+ai_note_overbought_risk_reversal: "因为强超买（RSI={rsi}）提升急跌反转风险，Brain 不鼓励在顶部激进加仓。",
+ai_note_overbought_risk_reversal_v2: "因为 RSI 处于 overbought 状态时，Brain 看到高回调风险，因此不建议继续拉高多头。",
+ai_note_overbought_risk_reversal_v3: "因为超买市场常在消息下反转，Brain 提醒不要加重仓位。",
+ai_note_overbought_risk_reversal_v4: "因为在超买区统计上不利于新多单，Brain 承认反转风险提高。",
+ai_note_overbought_risk_reversal_v5: "因为 Brain 认为强超买环境更适合保护利润，而非开新多。",
+
+// ===== деривативы / on-chain =====
+ai_note_funding: "因为 funding={funding} 显示衍生品仓位失衡，Brain 判断哪一侧过度拥挤以及哪里有被挤压风险。",
+ai_note_funding_v2: "因为异常 funding 暗示 long 与 short 之间的不均衡，Brain 将其视为对拥挤方向的风险提醒。",
+ai_note_funding_v3: "因为 funding 让 Brain 看到哪一方为杠杆溢价买单，从而提高向拥挤方向反向运动的概率。",
+ai_note_funding_v4: "因为高绝对 funding 表示期货市场平衡不稳，Brain 降低对当前方向延续的信心。",
+ai_note_funding_v5: "因为 Brain 将 funding 视为衍生品恐惧/贪婪指标，用来避免随大流排队。",
+
+ai_note_oi_change: "因为 Open Interest 变化 {oiChange} 显示期货资金流向，Brain 由此区分真实运动与空洞波动。",
+ai_note_oi_change_v2: "因为价格上行时 OI 增加强化趋势信号，而 OI 下降则削弱趋势，Brain 正是这样理解 {oiChange}。",
+ai_note_oi_change_v3: "因为通过 OI 动态 Brain 理解是有新仓位建立还是市场只是清算旧仓。",
+ai_note_oi_change_v4: "因为 OI 的大幅变化意味着参与者风险重新分配，Brain 用它来细化信号。",
+ai_note_oi_change_v5: "因为 Brain 观察 {oiChange} 来避免将平仓引发的走势误判为真实趋势。",
+
+ai_note_basis: "因为期货 basis={basis} 反映 futures 和 spot 的差异，强偏离说明一侧过热，Brain 将其纳入风险判断。",
+ai_note_basis_v2: "因为异常 basis 暗示衍生品预期失衡，Brain 将其视为隐性压力指标。",
+ai_note_basis_v3: "因为 basis 反映市场愿意为未来价格溢价或折价，在极端情况下 Brain 更谨慎。",
+ai_note_basis_v4: "因为强 basis（多头或空头）常先于反转出现，Brain 借此避免追趋势尾部。",
+ai_note_basis_v5: "因为 Brain 将 basis 视为期货趋势信心指标，特别是当其偏离正常水平时。",
+
+ai_note_dominance: "因为 Bitcoin dominance={dominance}% 显示 BTC 与山寨币的力量平衡，高 dominance 时 Brain 预期对山寨币施压。",
+ai_note_dominance_v2: "因为 BTC-dominance 上升通常恶化山寨币环境，Brain 将其视为外部偏空背景。",
+ai_note_dominance_v3: "因为低 BTC dominance 反而为山寨币提供机会窗口，Brain 调整风险配置。",
+ai_note_dominance_v4: "因为通过 dominance Brain 看到流动性流向——是 BTC 还是更高风险资产。",
+ai_note_dominance_v5: "因为 dominance 变化帮助 Brain 判断市场偏好是 BTC 还是山寨币，并据此调整信号。",
+
+ai_note_btc_corr: "因为与 BTC 的相关性 {corr} 表明该资产与 Bitcoin 的联动程度，Brain 以此避免重复风险。",
+ai_note_btc_corr_v2: "因为高 BTC 相关性意味着该资产高度依赖 BTC 波动，Brain 在组合构建中考虑这一点。",
+ai_note_btc_corr_v3: "因为低 BTC 相关性表示资产更独立，Brain 用其作为风险分散工具。",
+ai_note_btc_corr_v4: "因为通过 BTC 相关性 Brain 判断该资产信号是否独特，而非 BTC 仓位的复制。",
+ai_note_btc_corr_v5: "因为 {corr} 的变化帮助 Brain 判断与 BTC 的联动增强还是减弱，并调整对走势的预期。",
+
+ai_note_global_spot: "因为全球现货市场状态被评估为 {globalSpot}，Brain 将其作为过滤器强化或弱化本地信号。",
+ai_note_global_spot_v2: "因为现货市场整体氛围（{globalSpot}）影响本地形态的成功概率，Brain 不孤立看待局部结构。",
+ai_note_global_spot_v3: "因为若 global spot 偏弱，即便本地结构良好 Brain 也更谨慎对待激进多头。",
+ai_note_global_spot_v4: "因为强现货背景使多头信号更可靠，Brain 将此作为顺风因素。",
+ai_note_global_spot_v5: "因为 Brain 始终将本地信号与 global spot（{globalSpot}）对照，以免逆市场流动性主流交易。",
+
+ai_note_venue_spread: "因为较高 venue spread={spread} 显示价格不均衡及潜在滑点，Brain 建议更保守的仓位规模。",
+ai_note_venue_spread_v2: "因为跨交易所的大价差是低流动性的信号，Brain 看到额外的执行风险。",
+ai_note_venue_spread_v3: "因为当不同交易所价格差异明显时，执行质量风险上升，Brain 将其纳入风险考虑。",
+ai_note_venue_spread_v4: "因为扩大的 venue spread 提示 Brain 此时不适合大额订单。",
+ai_note_venue_spread_v5: "因为 Brain 将较高的跨所价差视为需要放慢节奏并更谨慎交易的信号，以避免额外执行损失。",
+
 qcoin_drop_toast_error: "（充值将由服务器进行验证）",
 qcoin_drop_toast_title: "恭喜！",
 
 }
 const AI_HERO_AR = {
 ai_calculating: 'يتم تنفيذ الحسابات — "انتظر"',
-ai_regime: 'وضع السوق على إطار الزمن الحالي (اتجاه/نطاق ومستوى التقلب)، الذي يحدده Quantum Brain بالاعتماد على EMA وATR وبنية حركة السعر.',
+ai_no_data: "لأن Brain لا يرى حجمًا كافيًا من البيانات التاريخية لهذا الأداة، لذلك يمتنع عن إعطاء إشارة محددة ويبقى في الوضع المحايد HOLD.",     
 
-ai_f_ema21_gt_ma50_on: 'الاتجاه قصير المدى صاعد: EMA 21 أعلى من EMA 50 وEMA 50 أعلى من EMA 200 — السوق هيكلياً في ترند صاعد.',
-ai_f_ema21_gt_ma50_off: 'الاتجاه الصاعد قصير المدى بناءً على EMA 21 وEMA 50 غير مؤكد — هيكلة المتوسطات المتحركة لا تشير إلى نمو مستدام.',
+// ===== regime =====
+ai_regime: "لأن Brain يقيّم نظام السوق العام كـ {regime} ومعه السكور الإجمالي (trend={trendScore}, momentum={momentumScore}, vola={volaScore}, total={totalScore})، وعلى هذا الأساس يبني التوصية الحالية للتداول.",
+ai_regime_v2: "لأن Brain يميّز نظام السوق {regime}: الترند={trendScore}، المومنتوم={momentumScore}، التذبذب={volaScore}، السكور الكلي={totalScore}، وانطلاقًا من هذا يختار سيناريو الصفقة المناسب.",
+ai_regime_v3: "لأن نظام السوق الحالي الذي يراه Brain هو {regime}، ومزيج الترند ({trendScore}) والمومنتوم ({momentumScore}) والتذبذب ({volaScore}) يعطي السكور النهائي {totalScore} ويشكّل منطق الإشارة.",
+ai_regime_v4: "لأنه حسب السكورينغ الداخلي لدى Brain السوق الآن في نظام {regime}: مجموع النقاط totalScore={totalScore}، والتفصيل على الترند={trendScore}، المومنتوم={momentumScore} والتذبذب={volaScore}، وهذا بالضبط يفسّر اتجاه التوصية الحالي.",
+ai_regime_v5: "لأن Brain جمع عددًا كبيرًا من الإشارات في نظام عام واحد {regime} (trend={trendScore}, momentum={momentumScore}, vola={volaScore}, total={totalScore})، والتوصية تعتمد تمامًا على هذه الصورة العامة للسوق.",
 
-ai_f_ma50_gt_ma200_on: 'الاتجاه متوسط المدى صاعد: المتوسط المتحرك MA 50 يقع فوق MA 200، مما يشير إلى هيمنة الحركة الصعودية.',
-ai_f_ma50_gt_ma200_off: 'الاتجاه الصاعد متوسط المدى غير مؤكد: MA 50 ليست أعلى من MA 200، والبنية أقرب إلى نطاق عرضي أو سوق هابط.',
+// ===== EMA21 vs MA50 / MA200 =====
+ai_f_ema21_gt_ma50_on: "لأن EMA21 القصيرة الأجل أعلى من MA50 و MA200، ما يعني أن بنية السوق تميل لصالح المشترين، وBrain يزيد وزن السيناريو الصاعد لهذا الأصل.",
+ai_f_ema21_gt_ma50_on_v2: "لأن EMA21 تم اختراقها وتثبيت السعر فوق MA50/MA200، وهذا يظهر up-trend مستقر، وBrain يدعم فكرة long بثقة أكبر.",
+ai_f_ema21_gt_ma50_on_v3: "لأن تفوق EMA21 على MA50 و MA200 يشير إلى دفعة صعودية جديدة وقوية، وBrain يأخذ ذلك كحجة لصالح استمرار النمو.",
+ai_f_ema21_gt_ma50_on_v4: "لأن تموضع EMA21 فوق MA50 و MA200 هو علامة كلاسيكية على هيكل صاعد، وBrain يركّز على سيناريوهات long طالما أن هذه التركيبة لم تُكسَر.",
+ai_f_ema21_gt_ma50_on_v5: "لأن EMA21 > MA50 > MA200، والترند مؤكّد على عدة أطر زمنية، وBrain يسمح بقرارات long أكثر جرأة ضمن إطار إدارة المخاطر.",
 
-ai_f_price_gt_vwap_on: 'السعر يتداول أعلى من VWAP — متوسط السعر المرجّح بالحجم، وهذا عادةً يعني ضغطاً شرائياً وتوازناً إيجابياً داخل اليوم.',
-ai_f_price_gt_vwap_off: 'السعر يتداول أدنى من VWAP — متوسط السعر المرجّح بالحجم، وهذا يشير إلى ضغط بيعي وطلب أضعف.',
+ai_f_ema21_gt_ma50_off: "لأن EMA21 لا تبقى ثابتة فوق MA50/MA200، وقوة المشترين المحلية تضعف، وBrain يقلل من عدوانية الإشارات الصاعدة.",
+ai_f_ema21_gt_ma50_off_v2: "لأن كسر EMA21 هبوطًا تحت MA50/MA200 يُظهر ترندًا مرهقًا، وBrain يتعامل مع الصعود بحذر ولا يتعجّل في زيادة أحجام long.",
+ai_f_ema21_gt_ma50_off_v3: "لأن انعكاس EMA21 تحت MA50/MA200 علامة على فقدان هيكل up-trend، وBrain لا يرى في الوضعية سيناريو صعوديًّا موثوقًا.",
+ai_f_ema21_gt_ma50_off_v4: "لأنه طالما أن EMA21 تتداول أسفل المتوسطات المتحركة المتوسطة الأجل، يبدو السوق أكثر حيادًا أو هبوطيًّا، وBrain ينقل التركيز بعيدًا عن الشراء العدواني.",
+ai_f_ema21_gt_ma50_off_v5: "لأن تسلسل EMA21>MA50>MA200 تم كسره، وهيمنة الثيران أصبحت موضع شك، وBrain يعتبر هذا حجة ضد تحمّل مخاطر long العالية.",
 
-ai_f_rsi_overbought: 'مؤشر RSI في منطقة تشبع شرائي — السوق ساخن صعوداً، مع خطر مرتفع لحدوث تصحيح أو تراجع بعد الصعود الحالي.',
-ai_f_rsi_oversold: 'مؤشر RSI في منطقة تشبع بيعي — السوق هبط بقوة، ما يزيد من احتمال حدوث ارتداد أو انعكاس جزئي.',
-ai_f_rsi_bull_on: 'مؤشر RSI منحاز إلى المنطقة الصاعدة (أعلى المنطقة المحايدة) — زخم السعر يدعم سيناريو الارتفاع.',
-ai_f_rsi_bull_off: 'مؤشر RSI لا يؤكد الزخم الصاعد؛ المؤشر أقرب لمنطقة محايدة أو هابطة.',
+ai_f_ma50_gt_ma200_on: "لأن MA50 أعلى من MA200، ما يعني ترند صاعد متوسط الأجل متكوّن، وBrain يعطي وزنًا أكبر للـ long وللاحتفاظ بالصفقات في اتجاه الترند.",
+ai_f_ma50_gt_ma200_on_v2: "لأن تقاطع MA50 صعودًا فوق MA200 يدل على up-trend ناضج، وBrain يراه خلفية جيدة للصفقات في اتجاه الارتفاع.",
+ai_f_ma50_gt_ma200_on_v3: "لأن هيكل MA50>MA200 يبيّن أن السوق عالميًا منحاز لصالح المشترين، وBrain يستخدم ذلك كفلتر لصالح سيناريوهات long.",
+ai_f_ma50_gt_ma200_on_v4: "لأنه طالما أن MA50 تبقى فوق MA200، يظل الترند صاعدًا، وBrain يميل لاستراتيجيات «شراء الهبوط» بدلًا من صيد القمم.",
+ai_f_ma50_gt_ma200_on_v5: "لأن MA50 الموجودة فوق MA200 تؤكد أن الاتجاه الرئيسي إلى الأعلى، وBrain يسمح لنفسه بدعم النمو بثقة أكبر.",
 
-ai_f_macd_pos_on: 'MACD وهيستوغرامه يشيران إلى زخم صاعد — الزخم قصير المدى موجه إلى الأعلى.',
-ai_f_macd_pos_off: 'MACD لا يدعم زخمًا صاعدًا مستدامًا؛ الإشارة ضعيفة أو تميل إلى الجانب الهابط.',
+ai_f_ma50_gt_ma200_off: "لأن MA50 أسفل MA200، والسياق الأساسي يبقى هبوطيًا أو ضعيفًا، وBrain أكثر حذرًا تجاه الـ long ويثبّت المخاطر.",
+ai_f_ma50_gt_ma200_off_v2: "لأن تقاطع MA50 أسفل MA200 يظهر أن البنية العامة للسوق ليست في صالح المشترين، وBrain لا يعتبرها خلفية مريحة للصفقات الطويلة.",
+ai_f_ma50_gt_ma200_off_v3: "لأنه عندما تهبط MA50 أسفل MA200، فهذا إشارة إلى تدهور الترند المتوسط الأجل، وBrain يقلل تبعًا لذلك من أولوية الأفكار الصعودية.",
+ai_f_ma50_gt_ma200_off_v4: "لأن هيكل MA50<MA200 يدل على مخاطر مرتفعة لترند هابط ممتد، وBrain لا يشجع على الشراء العدواني في مثل هذا المحيط.",
+ai_f_ma50_gt_ma200_off_v5: "لأنه طالما أن MA50 تبقى تحت MA200، فالصورة الرئيسية أقرب للهبوط، وBrain يركز على أسلوب دفاعي ودخول حذر.",
 
-ai_f_breakout_long: 'السعر اخترق القمم المحلية للفترة المختارة — يتكوّن اختراق صاعد لمقاومة مع تعزيز للحركة الاتجاهية إلى الأعلى.',
-ai_f_breakdown_short: 'السعر كسر القيعان المحلية للفترة المختارة — يتكوّن كسر هابط لدعم مع زيادة في ضغط البائعين.',
+// ===== price vs VWAP =====
+ai_f_price_gt_vwap_on: "لأن السعر الحالي {price} يقع فوق VWAP {vwap}، والمشترون يسيطرون على السعر المتوسط، وBrain يفسّر ذلك كدعم لسيناريو long.",
+ai_f_price_gt_vwap_on_v2: "لأن السعر يتداول فوق VWAP، وبالمتوسط السوق مستعد للدفع بسعر أعلى، وBrain يرى هذا علامة قوة ويسمح بالاحتفاظ بـ long.",
+ai_f_price_gt_vwap_on_v3: "لأن تموضع السعر فوق VWAP يبيّن أن الصفقات تتم على مستويات أعلى، وBrain يستخدم ذلك كحجة لصالح الثيران.",
+ai_f_price_gt_vwap_on_v4: "لأنه طالما أن السعر فوق VWAP، تبقى الأفضلية قصيرة الأجل مع المشترين، وBrain أقل ميلًا لفتح شورتات جديدة في هذه البنية.",
+ai_f_price_gt_vwap_on_v5: "لأن وجود السعر فوق VWAP يشير إلى توازن إيجابي في الطلب، وBrain مستعد لدعم فكرة long إذا لم تعارضها الإشارات الأخرى.",
 
-ai_f_bbands_width: 'عرض نطاقات Bollinger يعكس مستوى التقلب الحالي في السوق — انكماش أو توسع في نطاق تذبذب السعر.',
-ai_f_bbands_squeeze: 'نطاقات Bollinger في حالة انكماش — التقلب منخفض بشكل غير طبيعي، وغالباً ما تسبق هذه المرحلة حركة قوية في أحد الاتجاهين.',
-ai_f_bbands_breakout_up: 'السعر خرج فوق النطاق العلوي لـ Bollinger — توسع صاعد عنيف في النطاق، مع احتمال دخول مرحلة تسارع في الصعود أو تشبع شرائي.',
-ai_f_bbands_breakout_down: 'السعر هبط تحت النطاق السفلي لـ Bollinger — حركة هابطة عنيفة، مع احتمال دخول مرحلة ذعر أو تشبع بيعي.',
+ai_f_price_gt_vwap_off: "لأن السعر {price} أدنى VWAP {vwap}، ومتوسط الصفقة ينخفض، وBrain يرى أفضلية للبائعين ويتعامل بحذر أكبر مع الـ long.",
+ai_f_price_gt_vwap_off_v2: "لأن التداول تحت VWAP يُظهر أن السوق مستعد لتفريغ المراكز بأسعار أسوأ، وBrain يعتبر ذلك إشارة هبوطية حذرة.",
+ai_f_price_gt_vwap_off_v3: "لأن السعر تحت VWAP هو مؤشر على ضعف محلي، وBrain يقلل أولوية سيناريوهات long ويأخذ بعين الاعتبار مخاطر ضغط إضافي نحو الأسفل.",
+ai_f_price_gt_vwap_off_v4: "لأنه عندما يثبت السعر تحت VWAP، ينتقل التحكم إلى البائعين، وBrain يوصي بنهج أكثر دفاعية في الشراء.",
+ai_f_price_gt_vwap_off_v5: "لأن التمركز تحت VWAP يعني أن المتعامل المتوسط في السوق يبيع الأصل بسعر أقل، وBrain يعتبر ذلك خلفية غير مواتية لعمليات long جديدة.",
 
-ai_f_stoch_overbought: 'المُتذبذب Stochastic في منطقة تشبع شرائي — الزخم قصير المدى ساخن جداً صعوداً، وخطر التصحيح مرتفع.',
-ai_f_stoch_oversold: 'المُتذبذب Stochastic في منطقة تشبع بيعي — الزخم قصير المدى مضغوط بقوة إلى الأسفل، ما يزيد احتمال حدوث ارتداد.',
+// ===== RSI =====
+ai_f_rsi_overbought: "لأن RSI={rsi} في منطقة تشبّع شرائي، ومعظم الزخم قد تم استيعابه بالفعل، وBrain يحذّر من خطر مرتفع لتصحيح بعد الصعود.",
+ai_f_rsi_overbought_v2: "لأن قراءات RSI {rsi} تشير إلى سوق محموم، وBrain لا يشجع على الشراء العدواني، وينتظر نقطة دخول أكثر ملاءمة.",
+ai_f_rsi_overbought_v3: "لأن RSI دخل المنطقة العلوية القصوى، وهو ما غالبًا ما يؤدي إلى تراجعات، وBrain يعتبر ذلك حجة لجني جزئي للأرباح وتوخّي الحذر.",
+ai_f_rsi_overbought_v4: "لأنه عند RSI قريب من {rsi} تصبح عمليات الشراء أقل جدوى إحصائيًا، وBrain يرى فرصة أعلى للانعكاس أو على الأقل توقف في النمو.",
+ai_f_rsi_overbought_v5: "لأن حالة التشبّع الشرائي القوي على RSI ({rsi}) هي إشارة لعدم دفع الـ long أكثر، وBrain يوصي بعدم مطاردة الحركة في القمة نفسها.",
 
-ai_f_adx: 'مؤشر ADX يقيس قوة الاتجاه، في حين أن plus/minus DI يبيّنان أي جانب يهيمن — المشترون أم البائعون.',
-ai_f_adx_trending: 'قيمة ADX مرتفعة — الاتجاه واضح ومستقر، واستراتيجيات اتباع الترند تعمل بشكل أفضل.',
-ai_f_adx_flat: 'قيمة ADX منخفضة — السوق في نطاق عرضي أو حركة ضعيفة الهيكلة، وإشارات الاتجاه أقل موثوقية.',
+ai_f_rsi_oversold: "لأن RSI={rsi} في منطقة تشبّع بيعي، والسوق مائل بشدة ناحية البيع، وBrain يرى احتمال ارتداد ويتعامل بحذر مع شورتات جديدة.",
+ai_f_rsi_oversold_v2: "لأن التشبّع البيعي العميق على RSI ({rsi}) يدل على بيع عاطفي، وBrain يأخذ في الحسبان فرصة انعكاس تقني صعودًا.",
+ai_f_rsi_oversold_v3: "لأن RSI في المنطقة السفلية القصوى يشير إلى استنفاد الزخم الهبوطي، وBrain يقرّ بإمكانية short squeeze أو bounce قوي.",
+ai_f_rsi_oversold_v4: "لأنه عند RSI قريب من {rsi} يكون البائعون قد ضغطوا السوق بقوة، وBrain يفضّل عدم فتح شورتات عدوانية في مثل هذه النقطة.",
+ai_f_rsi_oversold_v5: "لأن حالة التشبّع البيعي على RSI تعني أن الهبوط قد أنجز بالفعل الكثير، وBrain يرفع احتمال التصحيح صعودًا.",
 
-ai_f_obv: 'مؤشر OBV (On Balance Volume) يوضّح اتجاه تدفّق الأحجام — ميل منحنى OBV يعكس ما إذا كان المشترون أو البائعون هم المسيطرون.',
+ai_f_rsi_bull_on: "لأن RSI={rsi} يبقى في منطقة صعودية صحية بدون تطرف، وBrain يعتبر ذلك زخمًا تصاعديًا مستقرًا.",
+ai_f_rsi_bull_on_v2: "لأن RSI المرتفع باعتدال ({rsi}) يؤكد أن المشترين نشطون لكنهم لم يبالغوا في تسخين السوق، وBrain يدعم الترند الصاعد.",
+ai_f_rsi_bull_on_v3: "لأن RSI في الجزء العلوي المريح من النطاق يعكس طلبًا مضبوطًا، وBrain يفسّر ذلك كخلفية مواتية للـ long.",
+ai_f_rsi_bull_on_v4: "لأنه عندما يكون RSI حول {rsi} يبدو الصعود «صحيًا» دون هستيريا، وBrain يميل لمواصلة تتبّع الترند.",
+ai_f_rsi_bull_on_v5: "لأن تموضع RSI في المنطقة الصعودية يُظهر أن الزخم للأعلى ما زال قائمًا، وBrain يستقبل ذلك كعامل إيجابي لاستمرار سيناريو long.",
 
-ai_note_atr: 'مؤشر ATR وATR النسبي يصفان متوسط نطاق حركة السعر والتقلب الحالي، وهو أمر مهم لتقييم المخاطر ووضع أوامر إيقاف الخسارة.',
-ai_f_vola_explosive: 'التقلب مرتفع — حركة السعر عدوانية، مخاطر الصفقة أكبر، وقد تكون هناك حاجة لهوامش إيقاف أوسع واندفاعات حادة.',
-ai_f_vola_low: 'التقلب منخفض بشكل غير طبيعي — السوق "متجمد"، وقد تكون الحركات بطيئة ومليئة بالضوضاء إلى أن يظهر زخم جديد.',
+ai_f_rsi_bull_off: "لأن RSI={rsi} لا يدعم زخمًا صعوديًا واثقًا، وBrain لا يرى طلبًا قويًا، ويتعامل بحذر مع الـ long الترندي.",
+ai_f_rsi_bull_off_v2: "لأن RSI المتوسط أو المنخفض ({rsi}) يشير إلى ضعف اهتمام المشترين، وBrain لا يحصل على تأكيد لـ up-trend عدواني.",
+ai_f_rsi_bull_off_v3: "لأن RSI لا يبقى في الجزء العلوي من النطاق، ما يدل على خفوت الزخم للأعلى، وBrain يقلل وزن الأفكار الترندية.",
+ai_f_rsi_bull_off_v4: "لأنه عند RSI قريب من {rsi} يبدو الصعود هشًا، وBrain يأخذ في الحسبان خطر الانتقال إلى فلَت أو تصحيح.",
+ai_f_rsi_bull_off_v5: "لأن غياب إشارة RSI قوية ({rsi}) يجعل Brain يتعامل مع السيناريوهات الصعودية باعتبارها أقل موثوقية.",
 
-ai_note_sr: 'الخوارزمية حددت أقرب مستويات الدعم والمقاومة والتي تُستخدم لتقييم نقطة الدخول، وإيقاف الخسارة، والمستويات المستهدفة.',
-ai_note_h: 'آفاق الحركة تُظهر النطاق المتوقع تقريباً لتحرك السعر عبر الزمن (على سبيل المثال خلال 1 ساعة، 6 ساعات، و24 ساعة).',
+// ===== MACD =====
+ai_f_macd_pos_on: "لأن MACD يؤكد الزخم الصعودي: MACD={macd} أعلى من الخط الإشاري {macdSignal}، والهيستوجرام {hist} إيجابي، وBrain يعزّز الإشارة في اتجاه الصعود.",
+ai_f_macd_pos_on_v2: "لأن معاملات MACD (الخط {macd}، الإشارة {macdSignal}، hist {hist}>0) تشير إلى هيمنة المشترين، وBrain يستخدم ذلك كدعم للـ long.",
+ai_f_macd_pos_on_v3: "لأنه طالما أن MACD فوق الخط الإشاري والـ hist في المنطقة الموجبة، يعتبر الزخم الصاعد حيًّا، وBrain يسمح بالاحتفاظ بالصفقة مع الترند.",
+ai_f_macd_pos_on_v4: "لأن كونفيغ MACD الصاعد يعطي أفضلية إحصائية لاستمرار الحركة للأعلى، وBrain يعتمد عليه في تشكيل التوصية.",
+ai_f_macd_pos_on_v5: "لأن إعداد MACD الإيجابي يقوّي ثقة Brain في استمرار الزخم الصاعد، وهذا عامل إيجابي إضافي لصالح long عند ثبات العوامل الأخرى.",
 
-ai_note_data_short_history: 'البيانات التاريخية قليلة — حجم العيّنة من الشموع محدود، مما يجعل بعض الإشارات والإحصاءات أقل موثوقية.',
-ai_note_data_low_vola: 'السوق ظل لفترة طويلة في وضع تقلب منخفض، لذلك قد تكون الأهمية الإحصائية لتقديرات التقلب الحالية منخفضة.',
+ai_f_macd_pos_off: "لأن MACD الحالي (MACD={macd}, signal={macdSignal}, hist={hist}) لا يدعم up-trend قوي، وBrain يخفف من الإشارة الصعودية.",
+ai_f_macd_pos_off_v2: "لأنه عندما لا يعطي MACD صورة صعودية واضحة، وتبدو الهيستوجرام {hist} غير مقنعة، يقلل Brain ثقته في استمرار النمو.",
+ai_f_macd_pos_off_v3: "لأن إشارة MACD الضعيفة أو المحايدة تقول إن الترند قد يفقد قوته، وBrain يأخذ بالحسبان خطر الانعكاس أو خمود الحركة.",
+ai_f_macd_pos_off_v4: "لأنه إذا اقتربت خطوط MACD والإشارة من بعضها أو تقاطعت هبوطًا، فإن Brain لا يعتبر الوضعية سيناريو صعوديًا قويًا.",
+ai_f_macd_pos_off_v5: "لأن غياب زخم MACD واضح يجعل Brain يتعامل مع الـ long بحذر ولا يبالغ في توقع استمرار الترند.",
 
-ai_note_rr_good: 'نسبة العائد المحتمل إلى المخاطرة في الصفقة تبدو جذابة — العائد المتوقع يتجاوز بشكل ملحوظ الخسارة المحتملة.',
-ai_note_rr_poor: 'نسبة العائد المحتمل إلى المخاطرة ضعيفة — العائد المتوقع لا يعوّض بما يكفي عن الخسارة المحتملة في الصفقة.',
+// ===== breakout / breakdown =====
+ai_f_breakout_long: "لأن السعر {price} اخترق قمة محلية مهمة ويشكّل breakout صعودي، وBrain يرى تقوّي الثيران لكنه يذكّر بخطر الاختراقات الكاذبة.",
+ai_f_breakout_long_v2: "لأن خروج السعر فوق النطاق الأخير هو إشارة breakout كلاسيكية، وBrain يسمح بافتراض استمرار الصعود مع ضبط المخاطر.",
+ai_f_breakout_long_v3: "لأن breakout للأعلى يُظهر استعداد السوق لقبول أسعار جديدة أعلى، وBrain يستخدم ذلك كحجة لصالح long.",
+ai_f_breakout_long_v4: "لأن اختراق المقاومة يؤكد قوة الترند، وBrain يفترض أن الحركة للأعلى يمكن أن تستمر بعد التصحيح.",
+ai_f_breakout_long_v5: "لأن breakout الفعلي عند السعر {price} يقوي السيناريو الصعودي، لكن Brain لا يوصي بالدخول «في الفضاء» بل ينتظر pullback مناسب.",
 
-ai_note_oversold_risk_reversal: 'السوق في حالة تشبع بيعي مفرط وقريب من مستويات الدعم — الخوارزمية تتجنب البيع لأن خطر الانعكاس الحاد صعوداً مرتفع.',
-ai_note_overbought_risk_reversal: 'السوق في حالة تشبع شرائي مفرط وقريب من مستويات المقاومة — الخوارزمية تتجنب الشراء لأن خطر الانعكاس الحاد هبوطاً مرتفع.',
+ai_f_breakdown_short: "لأن السعر {price} كسر دعمًا رئيسيًا ويشكّل breakdown هبوطيًا، وBrain يرى تقوّي البائعين ومخاطر على الـ long.",
+ai_f_breakdown_short_v2: "لأن breakdown أسفل النطاق يظهر انتقال السوق إلى سيطرة الدببة، وBrain يعتبر ذلك حجة لصالح تكتيك دفاعي أو شورت.",
+ai_f_breakdown_short_v3: "لأن كسر الدعم نزولًا يزيد احتمال استمرار الهبوط، وBrain يحذر من ظروف غير مواتية لصفقات long جديدة.",
+ai_f_breakdown_short_v4: "لأن انهيار مستوى الدعم إشارة قوية على الضعف، وBrain يفترض استمرار down-trend مع رد الفعل فقط على الارتدادات.",
+ai_f_breakdown_short_v5: "لأن مرحلة breakdown تعكس تدهورًا هيكليًا في الصورة، وBrain يقيّم فرص الصعود بأنها ضعيفة حتى استعادة المستوى.",
 
-ai_note_funding: 'الـ Funding في العقود الآجلة يبيّن الانحياز نحو مراكز Long أو Short — القيم المتطرفة غالباً ما تشير إلى فرط سخونة أحد الجانبين.',
-ai_note_oi_change: 'تغيّر الـ Open Interest يعكس دخول أو خروج رأس المال من السوق — وبالاشتراك مع اتجاه السعر يساعد على تقييم قوة الحركة.',
-ai_note_basis: 'الـ Basis (الفرق بين سعر العقد الآجل وسعر الـ Spot) يوضّح ما إذا كان السوق يتداول بعلاوة أم بخصم — ما يعطي إشارة عن انحراف توقعات المشاركين.',
-ai_note_dominance: 'هيمنة البيتكوين تبيّن حصة BTC في السوق — وبالنسبة للـ Altcoins فإن الهيمنة المرتفعة غالباً ما تعني ضغطاً أكبر ومخاطر هبوط أعلى.',
-ai_note_btc_corr: 'الارتباط مع البيتكوين يوضّح إلى أي مدى يتحرك هذا الأصل بشكل متزامن مع BTC — الارتباط العالي يعزز تأثير السوق الكلي.',
+// ===== Bollinger Bands (squeeze + width + breakout) =====
+ai_f_bbands_squeeze: "لأن نطاقات Bollinger مضغوطة بشدة (width={width})، وBrain يرى مرحلة تراكم للطاقة ويستعد لاحتمال خروج حاد من النطاق.",
+ai_f_bbands_squeeze_v2: "لأن انضغاط Bollinger Bands يشير إلى تذبذب منخفض بشكل غير اعتيادي، وBrain يتوقع أن تكون الدفعة التالية قوية.",
+ai_f_bbands_squeeze_v3: "لأنه عندما تضيق نطاقات Bollinger، غالبًا ما يتهيأ السوق لاندفاعة قوية، وBrain يعتبر ذلك تحذيرًا من حركة قادمة.",
+ai_f_bbands_squeeze_v4: "لأن Bollinger-squeeze يشير إلى فترة هدوء قبل انفجار ترندي محتمل، وBrain لا يوصي بالتقليل من شأن الحركة المستقبلية.",
+ai_f_bbands_squeeze_v5: "لأن انضغاط Bollinger Bands لفترة طويلة يزيد احتمال حركة كبيرة، وBrain يضع ذلك في حسابات المخاطر وحجم الصفقة.",
 
-ai_note_global_spot: 'Global spot — سعر Spot عادل مُجمّع من البورصات الرئيسية، ويُستخدم مرجعاً لتقييم الانحرافات المحلية.',
-ai_note_venue_spread: 'الـ Spread بين البورصات يبيّن فروق الأسعار بين المنصات المختلفة — الـ Spread الكبير قد يشير إلى فرص تحكيم أو اختلال في السيولة أو تشوّهات تقنية.',
+ai_f_bbands_width: "لأن عرض Bollinger Bands={width} والخط المتوسط قرب {bbMid}، ومن خلال ذلك يرى Brain إلى أي حد السوق الآن «مُهتز» وكمية الحركة المتوقعة إحصائيًا.",
 
-ai_no_data: 'لا توجد بيانات كافية لإجراء تحليل موثوق — السجل التاريخي قصير جداً أو أن هناك مشكلات في سلاسل الأسعار، لذا يتم حصر النتيجة في وضع HOLD.',
+ai_f_bbands_breakout_up: "لأن السعر {price} خرج فوق النطاق العلوي لـ Bollinger {upper}، ما يُظهر زخمًا صعوديًا قويًا وتوسعًا في التذبذب للأعلى، وBrain يلاحظ كلًا من الإمكانات ومخاطر التسخين الزائد.",
+ai_f_bbands_breakout_down: "لأن السعر {price} هبط تحت النطاق السفلي لـ Bollinger {lower}، ما يدل على هيمنة البائعين وحركة هبوطية عنيفة، وBrain يعتبر ذلك خطرًا على الـ long.",
+
+// ===== Stochastic =====
+ai_f_stoch_overbought: "لأن Stochastic (K={k}, D={d}) في منطقة تشبّع شرائي، ويبدو الصعود القصير الأجل مستهلكًا، وBrain يرى احتمالًا أعلى للتراجع.",
+ai_f_stoch_overbought_v2: "لأن قيم Stochastic المرتفعة تشير إلى تسخين السعر، وBrain لا يتعجّل في دعم long جديدة في هذا المقطع.",
+ai_f_stoch_overbought_v3: "لأن Stochastic يبيّن أن السوق في حالة تشبّع شرائي مؤقت، وBrain يرى في ذلك سببًا للحذر وربما تثبيت جزء من الأرباح.",
+ai_f_stoch_overbought_v4: "لأنه عندما يبقى K و D في المنطقة العلوية، ترتفع احتمالية التصحيح، وBrain يأخذ ذلك في الاعتبار عند تقييم مخاطر الصفقة.",
+ai_f_stoch_overbought_v5: "لأن Stochastic المتشبّع شرائيًا هو إشارة إلى أن الـ up-trend المحلي قد يأخذ استراحة، وBrain يقلل من عدوانية دخول long.",
+
+ai_f_stoch_oversold: "لأن Stochastic (K={k}, D={d}) في منطقة تشبّع بيعي، والبائعون مؤقتًا يبالغون في الضغط على السوق، وBrain يسمح بسيناريو ارتداد.",
+ai_f_stoch_oversold_v2: "لأن قيم Stochastic المنخفضة تشير إلى تشبّع بيعي محلي، وBrain يرى احتمالًا أعلى لانعكاس قصير الأجل إلى الأعلى.",
+ai_f_stoch_oversold_v3: "لأن Stochastic في المنطقة السفلية يبيّن أن هبوطًا كبيرًا قد تم بالفعل، وBrain يتعامل بحذر مع شورتات جديدة.",
+ai_f_stoch_oversold_v4: "لأنه مع Stochastic المتشبّع بيعيًا يتوقع Brain أن بعض البائعين سيغلقون مراكزهم، ما قد يؤدي إلى bounce.",
+ai_f_stoch_oversold_v5: "لأن Stochastic-oversold هو حجة إحصائية لصالح نمو تصحيحي، وBrain يأخذ ذلك في حساب تقييم الاحتمالات.",
+
+// ===== ADX / тренд =====
+ai_f_adx: "لأن مؤشر ADX={adx} ونسبة +DI={plusDI} إلى -DI={minusDI} تتيحان لِـ Brain تقييم قوة واتجاه الترند قبل إصدار الإشارة.",
+ai_f_adx_trending: "لأن ADX المرتفع={adx} يشير إلى سوق ترندي قوي، وBrain يعطي وزنًا أكبر لاستراتيجيات اتباع الترند.",
+ai_f_adx_trending_v2: "لأنه مع ADX المرتفع تكون الترندات أكثر موثوقية إحصائيًا، وBrain يدعم الصفقات في اتجاه الحركة المهيمنة بجرأة أكبر.",
+ai_f_adx_trending_v3: "لأن ADX القوي يؤكد أن الترند ليس عشوائيًا، وBrain يعتمد عليه كهيكل أساسي للسيناريو.",
+ai_f_adx_trending_v4: "لأنه عندما يرتفع ADX ويبقى في مستويات عالية، يعتبر Brain الترند مستقرًا ويسمح بالاحتفاظ بالصفقة مدة أطول.",
+ai_f_adx_trending_v5: "لأن إشارة ADX القوية تقول إن السوق يتحرك بشكل منظم، وBrain يستخدم ذلك لتعزيز توصيات الترند.",
+
+ai_f_adx_flat: "لأن ADX المنخفض={adx} يشير إلى فلَت وترند ضعيف، وBrain يقلل من ثقته في الصفقات الاتجاهية.",
+ai_f_adx_flat_v2: "لأنه مع ADX منخفض يبدو السوق أقرب إلى «منشار» منه إلى ترند، وBrain أكثر حذرًا مع محاولة اقتناص حركات اتجاهية كبيرة.",
+ai_f_adx_flat_v3: "لأن ADX الضعيف علامة على حركة عرضية، وBrain لا يعوّل على حركة مستقرة في اتجاه واحد.",
+ai_f_adx_flat_v4: "لأنه في الفلَت حسب ADX تكون الصفقات الترندية أسوأ إحصائيًا، وBrain يوصي بخفض التوقعات من حيث الأرباح.",
+ai_f_adx_flat_v5: "لأنه عندما يكون ADX منخفضًا، يعتبر Brain السوق مليئًا بالضوضاء ولا يميل لإعطاء إشارات اتجاهية عدوانية.",
+
+// ===== OBV =====
+ai_f_obv: "لأن ميل OBV قرب {slope} يوضح كيف يسير تدفق أو خروج الأحجام، وBrain يستخدم ذلك لتأكيد أو نفي الحركة السعرية الخالصة.",
+
+// ===== ATR / волатильность =====
+ai_note_atr: "لأن ATR={atr} (atrRel={atrRel}, ≈{atrPct}% من السعر) يحدد التذبذب اليومي النمطي، وعلى هذه التقلبات يقيّم Brain الحركة المتوقعة 1h≈{h1}, 6h≈{h6}, 24h≈{h24} ويضع مستويات الستوبات/التيكات.",
+ai_note_atr_v2: "لأن متوسط المدى الحقيقي ATR {atr} (حوالي {atrPct}% من السعر) يساعد Brain على فهم مدى تحرك السعر عادةً وما هي الستوبات/الأهداف الواقعية.",
+ai_note_atr_v3: "لأن Brain من خلال ATR يعيّر حجم الحركة: atrRel={atrRel}, atrPct≈{atrPct}٪، وهذا يحدد توقعات منطقية للمخاطرة والربح.",
+ai_note_atr_v4: "لأن معامل ATR يعكس «تنفس» السوق؛ وعند {atrPct}% من السعر يختار Brain ستوبات وأهدافًا بحيث لا يُخرج من الصفقة بسبب الضوضاء.",
+ai_note_atr_v5: "لأن Brain يعتمد على ATR {atr} ونسبته إلى السعر ({atrPct}%) ليوازن بين المخاطرة والعائد ولا يبالغ في توقعات الحركة.",
+
+ai_f_vola_explosive: "لأن atrRel={atrRel} (≈{atrPct}% من السعر) يظهر تذبذبًا انفجاريًا، وBrain يوصي بتقليل حجم المركز وتوسيع الستوبات الدفاعية.",
+ai_f_vola_explosive_v2: "لأنه مع مثل هذه التقلبات ({atrPct}% من السعر) يمكن أن يكون أي بار كبيرًا بشكل غير اعتيادي، وBrain يفسّر ذلك كخطر مرتفع وينصح بإدارة مخاطر دقيقة.",
+ai_f_vola_explosive_v3: "لأن vola الانفجارية تزيد كلًا من الإمكانات والهبوط، وBrain لا يقترح التحميل الزائد على الحساب عند atrRel={atrRel}.",
+ai_f_vola_explosive_v4: "لأنه عندما تصل التقلبات إلى مستويات قصوى، يصبح السوق أقل قابلية للتنبؤ، وBrain يوصي بالتصرف بشكل محافظ.",
+ai_f_vola_explosive_v5: "لأن وضعية التقلبات الفائقة (atrPct≈{atrPct}%) هي منطقة يكون فيها البقاء أهم من التقاط كل حركة، وBrain يقلل من عدوانية الإشارات.",
+
+ai_f_vola_low: "لأن atrRel={atrRel} (≈{atrPct}% من السعر) تشير إلى تقلبات منخفضة جدًا، وBrain لا يتوقع حركات سريعة وكبيرة.",
+ai_f_vola_low_v2: "لأنه مع تقلبات ضعيفة غالبًا ما يتحرك السوق في نطاق ضيق، وBrain لا يعوّل على أرباح كبيرة في وقت قصير.",
+ai_f_vola_low_v3: "لأن vola المنخفضة تجعل الترندات هشّة، وBrain يتعامل بحذر مع الأهداف ولا يرفع توقعات R:R.",
+ai_f_vola_low_v4: "لأنه عندما يكون atrPct صغيرًا، يكون السوق «نائمًا»، وغالبًا ما ينتظر Brain استيقاظ التقلبات قبل تقوية الإشارات الاتجاهية.",
+ai_f_vola_low_v5: "لأن وضع low-vola يزيد من احتمال الاختراقات الكاذبة والفلَتات الطويلة، وBrain يأخذ ذلك بالحسبان ويقلل من ثقته.",
+
+// ===== уровни / контекст =====
+ai_note_sr: "لأن أقرب دعم حول {s}، والمقاومة حول {r}، والسعر الحالي {price}، ومن خلال nearS={nearS} و nearR={nearR} يقيّم Brain كم تبقّى من الحركة حتى المستوى وأين من المنطقي وضع الستوب/التيك.",
+ai_note_h: "لأن Brain يأخذ بالحسبان الحركة المتوقعة للسعر على آفاق زمنية مختلفة، حتى تكون التوصية منسجمة زمنيًا وليست رد فعل على بار واحد فقط.",
+
+// ===== дата и волатильность данных =====
+ai_note_data_short_history: "لأن تاريخ البيانات قصير (عدد البارات: {bars})، وبعض الإحصائيات غير موثوقة، وBrain يقلل من ثقته في الإشارات الاتجاهية القوية.",
+ai_note_data_short_history_v2: "لأنه مع تاريخ قصير ({bars} بارًا) تعمل نماذج التقلبات والترند بشكل أكثر خشونة، ولذلك يعطي Brain استنتاجات أكثر حذرًا.",
+ai_note_data_short_history_v3: "لأن حجم البيانات المتواضع يعقّد تقييم السوق، وBrain لا يبالغ في تقدير الإشارات المستخرجة من عينة صغيرة.",
+ai_note_data_short_history_v4: "لأنه عند نقص الشموع التاريخية يكون خطر الأخطاء في السكورينغ أعلى، وBrain يقلل من الثقة في التوصيات.",
+ai_note_data_short_history_v5: "لأن حجم التاريخ الصغير يجعل أي استنتاجات هشة، وBrain يأخذ ذلك بصراحة في الحسبان ولا يضخم strength الإشارة.",
+
+ai_note_data_low_vola: "لأن النشاط السوقي منخفض الآن (atrRel={atrRel}, ≈{atrPct}% من السعر)، وBrain لا يتوقع حركات عدوانية ويوصي بتوقعات معتدلة.",
+ai_note_data_low_vola_v2: "لأن انخفاض النشاط من حيث التقلبات يجعل السوق لزجًا، وBrain يتجنّب الأهداف المفرطة الطموح في مثل هذه الظروف.",
+ai_note_data_low_vola_v3: "لأن ديناميكيات الأسعار الضعيفة إشارة إلى أن السوق ليس جاهزًا بعد لترند كبير، وBrain يأخذ ذلك في الاعتبار لصالح تكتيك حذر.",
+ai_note_data_low_vola_v4: "لأنه عندما تكون vola صغيرة، تزداد احتمالية حركة منشارية، وBrain لا يوصي ببناء رهان على swing قوي.",
+ai_note_data_low_vola_v5: "لأن السوق في وضع low-vola غالبًا ما يستهلك الوقت بدلًا من إعطاء الحركة، وBrain يدعو إلى الصبر وتجاوز مرحلة الهدوء.",
+
+// ===== R:R =====
+ai_note_rr_good: "لأن نسبة المخاطرة/الربح المتوقعة {rr} عند المستوى المستهدف {rrNominal}x تبدو جذابة، وBrain يعتبر مثل هذه الصفقة مبررة إحصائيًا.",
+ai_note_rr_good_v2: "لأن R:R الجيدة ({rr} مقابل المعيار {rrNominal}x) تعطي هامشًا في العائد، وBrain يشير إلى هذه الصفقة كخيار مثير للاهتمام من حيث ملف المخاطر.",
+ai_note_rr_good_v3: "لأنه مع مثل هذا R:R تعوّض الصفقة بعض نقاط الدخول الخاسرة، وBrain يقيم القيمة المتوقعة للاستراتيجية بشكل إيجابي.",
+ai_note_rr_good_v4: "لأن R:R الأعلى من المستوى المرجعي ميزة نادرة، وBrain يسمح لنفسه بالعمل بنشاط أكبر مع مثل هذا الـ setup.",
+ai_note_rr_good_v5: "لأنه عندما تعمل نسبة المخاطرة/الربح لصالحنا (rr≈{rr})، يرى Brain الـ setup عالي الجودة حتى لو لم تكن الصورة مثالية.",
+
+ai_note_rr_poor: "لأن نسبة المخاطرة/الربح الحالية {rr} أسوأ من المعيار {rrNominal}x، وBrain لا يوصي بالدخول العدواني في مثل هذه الصفقة.",
+ai_note_rr_poor_v2: "لأن R:R الضعيفة ({rr} عند المطلوب {rrNominal}x) تجعل الفكرة غير جذابة، وBrain لا يرى ما يكفي من هامش الربح.",
+ai_note_rr_poor_v3: "لأنه عندما لا يصل R:R إلى المعيار، حتى التوقع الصحيح يعطي القليل، وBrain يقلل من أولوية هذا الدخول.",
+ai_note_rr_poor_v4: "لأن نسبة المخاطرة/الربح السيئة تزيد احتمال أن سلسلة من هذه الصفقات ستأكل الحساب، وBrain لا يشجع على أخذها بشكل منهجي.",
+ai_note_rr_poor_v5: "لأنه مع R:R المنخفض يرى Brain أنه من الأفضل تفويت هذه الفرصة وانتظار setup أكثر فائدة.",
+
+// ===== oversold / overbought risk reversal =====
+ai_note_oversold_risk_reversal: "لأن التشبّع البيعي العميق (RSI={rsi}) يخلق خطر انعكاس حاد إلى الأعلى، وBrain يفضّل عدم فتح شورتات جديدة في مثل هذه النقطة.",
+ai_note_oversold_risk_reversal_v2: "لأنه عند تشبّع بيعي قوي على RSI يرى Brain احتمالًا مرتفعًا لـ short squeeze ولا يدفع نحو شورتات جديدة.",
+ai_note_oversold_risk_reversal_v3: "لأنه عندما يكون السوق في حالة تشبّع بيعي قوي يمكن لأي خبر إيجابي أن يسبب انعكاسًا، وBrain يأخذ هذا الخطر ضد الشورتات.",
+ai_note_oversold_risk_reversal_v4: "لأن حالة oversold تجعل الدخول في short أخطر إحصائيًا، وBrain يوصي بأخذ استراحة.",
+ai_note_oversold_risk_reversal_v5: "لأن Brain يشير إلى أن التشبّع البيعي القوي ليس أفضل مكان لزيادة الشورتات، فاحتمال الارتداد أعلى هنا.",
+
+ai_note_overbought_risk_reversal: "لأن التشبّع الشرائي القوي (RSI={rsi}) يرفع خطر انعكاس حاد هبوطي، وBrain لا يشجع على زيادات شرائية عدوانية في القمة.",
+ai_note_overbought_risk_reversal_v2: "لأنه في حالة overbought على RSI يرى Brain خطرًا كبيرًا للتصحيح ولا يعتبر من المنطقي دفع الـ long أكثر.",
+ai_note_overbought_risk_reversal_v3: "لأن السوق المتشبّع شرائيًا كثيرًا ما ينعكس على الأخبار، وBrain يأخذ ذلك بعين الاعتبار ويوصي بعدم زيادة المركز.",
+ai_note_overbought_risk_reversal_v4: "لأن الإحصائيات في منطقة التشبّع الشرائي لا تدعم long جديدة، وBrain يعترف بارتفاع خطر الانعكاس.",
+ai_note_overbought_risk_reversal_v5: "لأن Brain يرى أنه في حالة التشبّع الشرائي القوي من الأفضل حماية الربح بدلًا من فتح مشتريات جديدة.",
+
+// ===== деривативы / on-chain =====
+ai_note_funding: "لأن funding={funding} يبيّن الانحراف في المراكز على المشتقات، وBrain يأخذ في الحسبان أي جانب من السوق أكثر اكتظاظًا وأين يكون خطر الإخراج العنيف أعلى.",
+ai_note_funding_v2: "لأن funding غير الطبيعي يلمّح إلى عدم توازن بين long و short، وBrain يعتبر ذلك عامل خطر ضد الجانب المزدحم.",
+ai_note_funding_v3: "لأن Brain من خلال funding يرى من يدفع أكثر نظير الرافعة، وهذا يزيد احتمال تحرك السعر ضد المراكز المزدحمة.",
+ai_note_funding_v4: "لأن funding العالي بالقيمة المطلقة هو تحذير من توازن غير مستقر على العقود الآجلة، وBrain يقلل من ثقته في استمرار الاتجاه الحالي خارج الميزانية.",
+ai_note_funding_v5: "لأن Brain يستخدم funding كترمومتر للجشع/الخوف على المشتقات، ما يساعد على عدم الاصطفاف مع الحشود.",
+
+ai_note_oi_change: "لأن تغير Open Interest {oiChange} يبيّن تدفق/خروج الأموال في العقود الآجلة، وبهذا يفرّق Brain بين حركة «حية» وتقلبات فارغة.",
+ai_note_oi_change_v2: "لأن ارتفاع OI مع حركة السعر يقوّي إشارة الترند، وانخفاض OI يضعفها — وهكذا بالضبط يقرأ Brain المِترِكة {oiChange}.",
+ai_note_oi_change_v3: "لأنه من خلال ديناميكية Open Interest يفهم Brain ما إذا كانت مراكز جديدة تُفتح أو أن السوق يخرج فقط من المراكز القديمة.",
+ai_note_oi_change_v4: "لأن التحولات القوية في OI علامة على إعادة توزيع المخاطر بين المشاركين، وBrain يستخدم ذلك لتدقيق الإشارة.",
+ai_note_oi_change_v5: "لأن Brain ينظر إلى {oiChange} حتى لا يخلط بين الترند الحقيقي والحركة الناتجة عن إغلاق المراكز.",
+
+ai_note_basis: "لأن basis الفيوتشرز={basis} يعكس الفارق بين futures و spot، والانحراف القوي يشير إلى تسخين أحد الجانبين، ما يأخذه Brain في حساب المخاطر.",
+ai_note_basis_v2: "لأن basis غير المعتاد يشير إلى انحراف في التوقعات على المشتقات، وBrain لا يتجاهل هذا مؤشر الضغط الخفي.",
+ai_note_basis_v3: "لأن basis يبين إلى أي مدى السوق مستعد للدفع زيادة أو خصم على السعر المستقبلي؛ وعند القيم القصوى يكون Brain أكثر حذرًا.",
+ai_note_basis_v4: "لأن basis القوي لصالح الثيران أو الدببة غالبًا ما يسبق الانعكاسات، وBrain يأخذ ذلك في الاعتبار حتى لا يدخل في ذيل الترند.",
+ai_note_basis_v5: "لأن Brain يستخدم basis كمؤشر ثقة في الترند على العقود الآجلة، خصوصًا عندما يخرج عن المستويات الطبيعية.",
+
+ai_note_dominance: "لأن dominance Bitcoin قرب {dominance}% يوضح توازن القوة بين BTC والآلتكوينات؛ وعند dominance مرتفعة يفترض Brain ضغطًا على الآلتكوينات.",
+ai_note_dominance_v2: "لأن نمو BTC-dominance عادةً ما يسيء لظروف الآلتكوينات، وBrain يعتبر ذلك خلفية هبوطية خارجية لها.",
+ai_note_dominance_v3: "لأن dominance المنخفضة لـ BTC، على العكس، تفتح نافذة فرص للآلتكوينات، وBrain يكيّف ملف المخاطر لهذه المرحلة.",
+ai_note_dominance_v4: "لأنه من خلال مِتْرِكة dominance يرى Brain إلى أين تتجه السيولة — إلى «البلو تشيب» BTC أم إلى الأصول الأعلى مخاطرة.",
+ai_note_dominance_v5: "لأن تغيّرات dominance تساعد Brain على فهم من المفضل حاليًا في السوق — Bitcoin أم الآلتكوينات، وضبط الإشارات وفقًا لهذا التحول.",
+
+ai_note_btc_corr: "لأن الارتباط مع BTC قرب {corr} يوضح إلى أي مدى يتحرك الأصل مع Bitcoin، وBrain يأخذ ذلك في الحسبان حتى لا يكرر نفس المخاطرة.",
+ai_note_btc_corr_v2: "لأن الارتباط العالي مع BTC يعني أن مصير الأصل يعتمد بدرجة كبيرة على حركة Bitcoin، وBrain يراعي ذلك عند بناء المحفظة.",
+ai_note_btc_corr_v3: "لأن الارتباط المنخفض مع BTC يجعل الأصل أكثر استقلالية، وBrain يستخدم ذلك لتوزيع المخاطر.",
+ai_note_btc_corr_v4: "لأنه من خلال الارتباط مع BTC يقيّم Brain مدى تفرّد الإشارة على هذا الأصل بدلًا من كونها نسخة من وضعية BTC.",
+ai_note_btc_corr_v5: "لأن التغيرات في {corr} تساعد Brain على فهم ما إذا كانت العلاقة مع BTC تقوى أو تضعف، ومن ثم تعديل التوقعات للحركة.",
+
+ai_note_global_spot: "لأن حالة سوق الـ spot العالمي تُقيّم كـ {globalSpot}، وBrain يستخدم هذه الخلفية كفلتر لتعزيز أو تخفيف الإشارات المحلية.",
+ai_note_global_spot_v2: "لأن النبرة العامة لسوق الـ spot ({globalSpot}) تؤثر في احتمال نجاح الـ setup المحلي، وBrain لا يراها بمعزل عن الخلفية.",
+ai_note_global_spot_v3: "لأنه إذا كان global spot ضعيفًا، يكون Brain أكثر حذرًا مع الـ long العدواني حتى مع صورة محلية جيدة.",
+ai_note_global_spot_v4: "لأن خلفية spot القوية تجعل الإشارات الصعودية أكثر موثوقية، وBrain يأخذ هذا tailwind في الاعتبار.",
+ai_note_global_spot_v5: "لأن Brain دائمًا يطابق الإشارة المحلية مع صورة global spot ({globalSpot}) حتى لا يتداول ضد التدفق العام للسيولة.",
+
+ai_note_venue_spread: "لأن ارتفاع venue spread={spread} يشير إلى عدم تجانس الأسعار وإمكانية الانزلاقات، وBrain يوصي بحجم مركز أكثر تحفظًا.",
+ai_note_venue_spread_v2: "لأن السبريد الكبير بين المنصات علامة على سيولة منخفضة، وBrain يرى في ذلك خطرًا تشغيليًا إضافيًا.",
+ai_note_venue_spread_v3: "لأنه عندما تختلف الأسعار بين البورصات بشكل كبير، يرتفع خطر التنفيذ السيئ، وBrain يأخذ ذلك في تقييم مخاطر الصفقة.",
+ai_note_venue_spread_v4: "لأن اتساع venue spread يوحي لِـ Brain بأن الوقت الحالي ليس الأفضل للطلبات الكبيرة.",
+ai_note_venue_spread_v5: "لأن Brain ينظر إلى السبريد المرتفع بين البورصات كإشارة لتهدئة الوتيرة والتداول بحذر أكبر لتفادي خسائر إضافية في التنفيذ.",
+
 qcoin_drop_toast_error: "(سيتم التحقق من الإيداع على الخادم)",
 qcoin_drop_toast_title: "تهانينا!",
 
 }
 const AI_HERO_TR = {
 ai_calculating: 'Hesaplamalar yapılıyor — "LÜTFEN BEKLEYİN"',    
-ai_regime: 'Mevcut zaman dilimindeki piyasa rejimi (trend/yatay ve volatilite seviyesi), Quantum Brain tarafından EMA, ATR ve fiyat hareketi yapısına göre belirlenir.',
+ai_no_data: "Çünkü Brain bu enstrüman için yeterli miktarda tarihsel veri görmüyor, bu yüzden net bir sinyal vermekten kaçınıyor ve nötr HOLD modunda kalıyor.",      
 
-ai_f_ema21_gt_ma50_on: 'Kısa vadeli trend yükselişte: EMA 21, EMA 50’nin üzerinde ve EMA 50 de EMA 200’ün üzerinde — piyasa yapısal olarak yükseliş trendinde.',
-ai_f_ema21_gt_ma50_off: 'EMA 21 ve EMA 50’ye göre kısa vadeli yükseliş trendi doğrulanmadı — hareketli ortalama yapısı istikrarlı büyümeye işaret etmiyor.',
+// ===== regime =====
+ai_regime: "Çünkü Brain genel piyasa rejimini {regime} olarak değerlendiriyor ve toplam skoru (trend={trendScore}, momentum={momentumScore}, vola={volaScore}, total={totalScore}) böyle hesaplıyor ve buna dayanarak mevcut işlem önerisini oluşturuyor.",
+ai_regime_v2: "Çünkü Brain piyasa rejimini {regime} olarak tanıyor: trend={trendScore}, momentum={momentumScore}, volatilite={volaScore}, toplam skor={totalScore} ve buna göre uygun işlem senaryosunu seçiyor.",
+ai_regime_v3: "Çünkü Brain’in gördüğü mevcut piyasa rejimi {regime}, ve trend ({trendScore}), momentum ({momentumScore}) ve vola ({volaScore}) kombinasyonu nihai skor {totalScore} üretiyor ve sinyalin mantığını oluşturuyor.",
+ai_regime_v4: "Çünkü Brain’in iç skorlama modeline göre piyasa şu an {regime} rejiminde: toplam puan totalScore={totalScore}, trend={trendScore}, momentum={momentumScore} ve volatilite={volaScore} şeklinde ayrışıyor ve tam olarak bu mevcut öneri vektörünü açıklıyor.",
+ai_regime_v5: "Çünkü Brain birçok sinyali ortak bir {regime} rejiminde (trend={trendScore}, momentum={momentumScore}, vola={volaScore}, total={totalScore}) topluyor ve öneri tam olarak bu piyasa görüntüsüne göre hizalanıyor.",
 
-ai_f_ma50_gt_ma200_on: 'Orta vadeli trend yükselişte: MA 50, MA 200’ün üzerinde yer alıyor, bu da yükseliş hareketinin baskın olduğunu gösteriyor.',
-ai_f_ma50_gt_ma200_off: 'Orta vadeli yükseliş trendi doğrulanmadı: MA 50, MA 200’ün üzerinde değil, yapı daha çok yatay veya düşüş eğilimli bir piyasayı andırıyor.',
+// ===== EMA21 vs MA50 / MA200 =====
+ai_f_ema21_gt_ma50_on: "Çünkü kısa vadeli EMA21, MA50 ve MA200’ün üzerinde, piyasa yapısal olarak alıcıların lehinde ve Brain bu varlık için boğa senaryosunun ağırlığını artırıyor.",
+ai_f_ema21_gt_ma50_on_v2: "Çünkü EMA21 yukarı kırılmış ve MA50/MA200’ün üzerinde tutunuyor, bu da kalıcı bir up-trend gösteriyor ve Brain long fikrini daha büyük güvenle destekliyor.",
+ai_f_ema21_gt_ma50_on_v3: "Çünkü EMA21’in MA50 ve MA200 üzerindeki baskınlığı yukarı yönlü taze ve güçlü bir impulsa işaret ediyor ve Brain bunu yükselişin devamı lehine bir argüman olarak dikkate alıyor.",
+ai_f_ema21_gt_ma50_on_v4: "Çünkü EMA21’in MA50 ve MA200’ün üzerinde konumlanması klasik bir boğa yapısı işaretidir ve bu yapı bozulmadığı sürece Brain long senaryolarına ağırlık veriyor.",
+ai_f_ema21_gt_ma50_on_v5: "Çünkü EMA21 > MA50 > MA200, trend birden fazla ufukta teyit edilmiş durumda ve Brain risk yönetimi çerçevesinde daha cesur long kararlarına izin veriyor.",
 
-ai_f_price_gt_vwap_on: 'Fiyat, VWAP’ın üzerinde işlem görüyor — hacim ağırlıklı ortalama fiyat, bu genellikle alıcı baskısı ve pozitif gün içi denge anlamına gelir.',
-ai_f_price_gt_vwap_off: 'Fiyat, VWAP’ın altında işlem görüyor — bu satıcı baskısını ve zayıf talebi gösterir.',
+ai_f_ema21_gt_ma50_off: "Çünkü EMA21 MA50/MA200’ün üzerinde tutunamıyor, alıcıların yerel gücü zayıflamış durumda ve Brain boğa sinyallerinin agresifliğini azaltıyor.",
+ai_f_ema21_gt_ma50_off_v2: "Çünkü EMA21’in MA50/MA200’e göre aşağı kırılması yorgun bir trendi gösteriyor ve Brain yükselişe temkinli yaklaşıp long pozisyonları agresif şekilde artırmaya acele etmiyor.",
+ai_f_ema21_gt_ma50_off_v3: "Çünkü EMA21’in MA50/MA200 altına dönmesi up-trend yapısının kaybı işareti ve Brain durumu güçlü bir boğa setup’ı olarak görmüyor.",
+ai_f_ema21_gt_ma50_off_v4: "Çünkü EMA21 orta vadeli MA’ların altında işlem gördüğü sürece piyasa daha nötr ya da ayımsı görünüyor ve Brain odağını agresif alımlardan uzağa kaydırıyor.",
+ai_f_ema21_gt_ma50_off_v5: "Çünkü EMA21>MA50>MA200 kademeli yapısı bozulmuş, boğaların hakimiyeti sorgulanır durumda ve Brain bunu yüksek riskli long’lara karşı bir argüman olarak değerlendiriyor.",
 
-ai_f_rsi_overbought: 'RSI aşırı alım bölgesinde — piyasa yukarı yönde aşırı ısınmış, düzeltme veya geri çekilme riski yüksek.',
-ai_f_rsi_oversold: 'RSI aşırı satım bölgesinde — piyasa sert şekilde düşmüş, tepki yükselişi veya kısmi dönüş ihtimali artıyor.',
-ai_f_rsi_bull_on: 'RSI yükseliş bölgesine kaymış (nötr bölgenin üzerinde) — fiyat momentumu yükseliş senaryosunu destekliyor.',
-ai_f_rsi_bull_off: 'RSI yükseliş momentumu doğrulamıyor; gösterge nötr veya düşüş bölgesine daha yakın.',
+ai_f_ma50_gt_ma200_on: "Çünkü MA50, MA200’ün üzerinde, orta vadeli boğa trendi oluşmuş ve Brain long’lara ve trend yönünde pozisyon tutmaya daha fazla ağırlık veriyor.",
+ai_f_ma50_gt_ma200_on_v2: "Çünkü MA50’nin MA200’ü yukarı kesmesi olgun bir up-trend’e işaret ediyor ve Brain bunu yükseliş yönlü işlemler için iyi bir zemin olarak görüyor.",
+ai_f_ma50_gt_ma200_on_v3: "Çünkü MA50>MA200 yapısı, küresel ölçekte piyasanın alıcılar lehine kaydığını gösteriyor ve Brain bunu long senaryoları lehine bir filtre olarak kullanıyor.",
+ai_f_ma50_gt_ma200_on_v4: "Çünkü MA50, MA200’ün üzerinde kaldığı sürece trend boğa yönünde ve Brain zirve yakalamaya çalışmak yerine “düşüşleri al” stratejilerine eğiliyor.",
+ai_f_ma50_gt_ma200_on_v5: "Çünkü MA200’ün üzerinde bulunan MA50, ana yönün yukarı olduğunu teyit ediyor ve Brain yükselişi daha güvenle desteklemesine izin veriyor.",
 
-ai_f_macd_pos_on: 'MACD ve histogramı yükseliş momentumu gösteriyor — kısa vadeli fiyat momentumu yukarı yönlü.',
-ai_f_macd_pos_off: 'MACD güçlü bir yükseliş momentumu desteklemiyor; sinyal zayıf veya düşüş yönünde.',
+ai_f_ma50_gt_ma200_off: "Çünkü MA50, MA200’ün altında, temel bağlam ayımsı ya da zayıf kalıyor ve Brain long’lara daha dikkatli yaklaşıp riski sıkı tutuyor.",
+ai_f_ma50_gt_ma200_off_v2: "Çünkü MA50’nin MA200 altına geçmesi, piyasanın genel yapısının alıcılar lehine olmadığını gösteriyor ve Brain bunu uzun pozisyonlar için rahat bir arka plan olarak görmüyor.",
+ai_f_ma50_gt_ma200_off_v3: "Çünkü MA50 MA200’ün altına düştüğünde bu orta vadeli trendin kötüleştiğine dair bir sinyaldir ve Brain buna göre boğa fikirlerinin önceliğini düşürüyor.",
+ai_f_ma50_gt_ma200_off_v4: "Çünkü MA50<MA200 yapısı uzun süreli down-trend riskinin arttığını gösteriyor ve Brain böyle bir ortamda agresif alımları teşvik etmiyor.",
+ai_f_ma50_gt_ma200_off_v5: "Çünkü MA50, MA200’ün altında kaldığı sürece ana tablo daha çok ayımsı ve Brain savunmacı bir stil ve temkinli girişlere odaklanıyor.",
 
-ai_f_breakout_long: 'Fiyat seçili periyodun yerel zirvelerini kırdı — yükseliş yönlü bir direnç kırılması ve trend hareketinin güçlenmesi oluşuyor.',
-ai_f_breakdown_short: 'Fiyat seçili periyodun yerel diplerini kırdı — düşüş yönlü bir destek kırılması ve satıcı baskısının artması oluşuyor.',
+// ===== price vs VWAP =====
+ai_f_price_gt_vwap_on: "Çünkü güncel fiyat {price}, VWAP {vwap} seviyesinin üzerinde, alıcılar ortalama fiyatı kontrol ediyor ve Brain bunu long senaryosunun desteği olarak yorumluyor.",
+ai_f_price_gt_vwap_on_v2: "Çünkü fiyat VWAP’in üzerinde işlem görüyor, ortalamada piyasa daha pahalı ödemeye razı ve Brain bunu güç işareti olarak görüp long pozisyonların tutulmasına izin veriyor.",
+ai_f_price_gt_vwap_on_v3: "Çünkü fiyatın VWAP’in üzerinde konumlanması, işlemlerin daha yüksek seviyelerde geçtiğini gösteriyor ve Brain bunu boğalar lehine bir argüman olarak kullanıyor.",
+ai_f_price_gt_vwap_on_v4: "Çünkü fiyat VWAP’in üzerinde kaldığı sürece kısa vadeli üstünlük alıcılarda ve Brain bu konfigürasyonda yeni short açmaya daha az eğilimli.",
+ai_f_price_gt_vwap_on_v5: "Çünkü fiyatın VWAP üzerinde bulunması talep dengesinin pozitif olduğuna işaret ediyor ve diğer sinyaller karşı çıkmıyorsa Brain long fikrini desteklemeye hazır.",
 
-ai_f_bbands_width: 'Bollinger bant genişliği mevcut piyasa volatilitesini yansıtır — fiyat dalgalanma aralığının daralması veya genişlemesi.',
-ai_f_bbands_squeeze: 'Bollinger bantları sıkışmış durumda — volatilite anormal derecede düşük ve bu tür fazlar genellikle güçlü bir hareketin habercisidir.',
-ai_f_bbands_breakout_up: 'Fiyat Bollinger üst bandının üzerine çıktı — agresif yükseliş genişlemesi, hızlanmış yükseliş veya aşırı alım fazı olabilir.',
-ai_f_bbands_breakout_down: 'Fiyat Bollinger alt bandının altına indi — agresif düşüş hareketi, panik veya aşırı satım fazı olabilir.',
+ai_f_price_gt_vwap_off: "Çünkü fiyat {price}, VWAP {vwap} seviyesinin altında, ortalama işlem fiyatı düşüyor ve Brain satıcıların üstünlük sağladığını görerek long’lara daha temkinli yaklaşıyor.",
+ai_f_price_gt_vwap_off_v2: "Çünkü VWAP altında işlem görmek, piyasanın daha kötü fiyatlardan boşalmaya hazır olduğunu gösteriyor ve Brain bunu temkinli bir ayı sinyali olarak algılıyor.",
+ai_f_price_gt_vwap_off_v3: "Çünkü fiyatın VWAP altında olması yerel zayıflık göstergesi ve Brain long senaryolarının önceliğini düşürüp aşağı yönlü baskı riskini hesaba katıyor.",
+ai_f_price_gt_vwap_off_v4: "Çünkü fiyat VWAP’in altına yerleştikçe kontrol satıcılara geçiyor ve Brain alımlarda daha korumacı bir yaklaşım öneriyor.",
+ai_f_price_gt_vwap_off_v5: "Çünkü VWAP’in altındaki konum, ortalama piyasa katılımcısının varlığı daha ucuza sattığı anlamına geliyor ve Brain bunu yeni long’lar için elverişsiz bir zemin olarak görüyor.",
 
-ai_f_stoch_overbought: 'Stochastic osilatörü aşırı alım bölgesinde — kısa vadeli momentum aşırı ısınmış, düzeltme riski artmış.',
-ai_f_stoch_oversold: 'Stochastic osilatörü aşırı satım bölgesinde — kısa vadeli momentum aşırı baskılanmış, tepki yükselişi ihtimali artmış.',
+// ===== RSI =====
+ai_f_rsi_overbought: "Çünkü RSI={rsi} aşırı alım bölgesinde, momentumun büyük kısmı zaten fiyatlandı ve Brain yükseliş sonrası düzeltme riskinin yüksek olduğu konusunda uyarıyor.",
+ai_f_rsi_overbought_v2: "Çünkü RSI {rsi} okumaları aşırı ısınmış bir piyasaya işaret ediyor ve Brain daha avantajlı bir giriş noktası bekleyerek agresif alımları teşvik etmiyor.",
+ai_f_rsi_overbought_v3: "Çünkü RSI üst ekstrem bölgeye girmiş durumda, bu da sık sık geri çekilmelere yol açıyor ve Brain bunu kısmi kâr realizasyonu ve temkin için bir argüman olarak işaretliyor.",
+ai_f_rsi_overbought_v4: "Çünkü RSI {rsi} civarındayken alımlar istatistiksel olarak daha az cazip hale geliyor ve Brain dönüş ya da en azından yükselişte bir duraklama ihtimalini artmış görüyor.",
+ai_f_rsi_overbought_v5: "Çünkü RSI ({rsi}) üzerindeki güçlü aşırı alım, long’u daha fazla zorlamama sinyali ve Brain hareketi zirvede kovalamamayı öneriyor.",
 
-ai_f_adx: 'ADX trend gücünü ölçer; plus/minus DI ise hangi tarafın baskın olduğunu gösterir — alıcılar mı satıcılar mı.',
-ai_f_adx_trending: 'ADX yüksek — trend belirgin ve istikrarlı, trend takip stratejileri daha iyi çalışır.',
-ai_f_adx_flat: 'ADX düşük — piyasa yatay veya zayıf yapıda, trend sinyalleri daha az güvenilir.',
+ai_f_rsi_oversold: "Çünkü RSI={rsi} aşırı satım bölgesinde, piyasa satış tarafına fazla bükülmüş ve Brain bir tepki olasılığı görerek yeni short’lara daha temkinli yaklaşıyor.",
+ai_f_rsi_oversold_v2: "Çünkü RSI ({rsi}) üzerindeki derin aşırı satım, duygusal satışları gösteriyor ve Brain yukarı yönlü teknik bir dönüş şansını hesaba katıyor.",
+ai_f_rsi_oversold_v3: "Çünkü RSI alt ekstrem bölgede ayı momentumunun sıkıştığına işaret ediyor ve Brain short squeeze ya da güçlü bir bounce senaryosuna izin veriyor.",
+ai_f_rsi_oversold_v4: "Çünkü RSI {rsi} civarındayken satıcılar piyasayı zaten oldukça zorlamış durumda ve Brain böyle bir noktada agresif short açmamayı tercih ediyor.",
+ai_f_rsi_oversold_v5: "Çünkü RSI’deki aşırı satım durumu, aşağı yönlü işin büyük kısmının zaten yapılmış olduğunu söylüyor ve Brain yukarı yönlü düzeltme olasılığını artırıyor.",
 
-ai_f_obv: 'OBV (On Balance Volume) hacim akışının yönünü gösterir — OBV eğimi, alıcıların mı yoksa satıcıların mı baskın olduğunu yansıtır.',
+ai_f_rsi_bull_on: "Çünkü RSI={rsi} ekstrem değerler olmadan sağlıklı bir boğa bölgesinde kalıyor ve Brain bunu istikrarlı bir yukarı yönlü momentum olarak algılıyor.",
+ai_f_rsi_bull_on_v2: "Çünkü orta-yüksek RSI ({rsi}) alıcıların aktif olduğunu ama piyasayı henüz aşırı ısıtmadığını teyit ediyor ve Brain yukarı trendi destekliyor.",
+ai_f_rsi_bull_on_v3: "Çünkü RSI, aralığın konforlu üst kısmında kontrollü bir talep yansıtıyor ve Brain bunu long’lar için elverişli bir zemin olarak yorumluyor.",
+ai_f_rsi_bull_on_v4: "Çünkü RSI {rsi} civarındayken yükseliş “sağlıklı” — panik olmadan — görünüyor ve Brain trende eşlik etmeye devam etmeye eğilimli.",
+ai_f_rsi_bull_on_v5: "Çünkü RSI’nin boğa bölgesindeki konumu, yukarı momentumun korunduğunu gösteriyor ve Brain bunu long senaryosunun devamı için bir artı olarak kabul ediyor.",
 
-ai_note_atr: 'ATR ve göreceli ATR, fiyat hareketinin ortalama aralığını ve mevcut volatiliteyi tanımlar; bu, risk değerlendirmesi ve stop belirleme için kritiktir.',
-ai_f_vola_explosive: 'Volatilite yükselmiş — fiyat hareketi agresif, işlem riski artmış, daha geniş stoplar ve ani sıçramalar mümkündür.',
-ai_f_vola_low: 'Volatilite anormal derecede düşük — piyasa “donmuş”, yeni bir momentum oluşana kadar hareketler zayıf ve gürültülü olabilir.',
+ai_f_rsi_bull_off: "Çünkü RSI={rsi} güçlü bir boğa momentumu desteklemiyor ve Brain güçlü bir talep görmeyerek trend long’lara daha dikkatli yaklaşıyor.",
+ai_f_rsi_bull_off_v2: "Çünkü orta veya düşük RSI ({rsi}) zayıf alıcı ilgisine işaret ediyor ve Brain agresif bir up-trend için onay alamıyor.",
+ai_f_rsi_bull_off_v3: "Çünkü RSI aralığın üst kısmında tutunamıyor, yukarı momentum sönüyor ve Brain trend fikirlerinin ağırlığını azaltıyor.",
+ai_f_rsi_bull_off_v4: "Çünkü RSI {rsi} civarındayken yükseliş kırılgan görünüyor ve Brain yataya geçiş veya düzeltme riskini hesaba katıyor.",
+ai_f_rsi_bull_off_v5: "Çünkü güçlü bir RSI sinyali ({rsi}) eksikliği, Brain’in boğa senaryolarını daha az güvenilir olarak değerlendirmesine yol açıyor.",
 
-ai_note_sr: 'Algoritma, giriş noktası, stop ve hedef seviyelerinin değerlendirilmesinde kullanılan en yakın destek ve direnç seviyelerini belirledi.',
-ai_note_h: 'Hareket ufukları, fiyatın zaman içinde (ör. 1 saat, 6 saat, 24 saat) tahmini hareket aralığını gösterir.',
+// ===== MACD =====
+ai_f_macd_pos_on: "Çünkü MACD boğa momentumunu teyit ediyor: MACD={macd} sinyal {macdSignal} çizgisinin üzerinde, histogram {hist} pozitif ve Brain sinyali yükseliş yönünde güçlendiriyor.",
+ai_f_macd_pos_on_v2: "Çünkü MACD parametreleri (çizgi {macd}, sinyal {macdSignal}, hist {hist}>0) alıcıların baskın olduğunu söylüyor ve Brain bunu long’un desteği olarak kullanıyor.",
+ai_f_macd_pos_on_v3: "Çünkü MACD sinyal çizgisinin üzerinde ve hist pozitif olduğu sürece yukarı momentum canlı kabul ediliyor ve Brain trende uygun pozisyonun tutulmasına izin veriyor.",
+ai_f_macd_pos_on_v4: "Çünkü MACD’nin boğa konfigürasyonu yukarı hareketin devamı için istatistiksel bir avantaj veriyor ve Brain tavsiyeyi oluştururken buna dayanıyor.",
+ai_f_macd_pos_on_v5: "Çünkü pozitif MACD setup’ı Brain’in yükselen momentumun devamına dair güvenini artırıyor ve diğer koşullar sabitken bu long lehine bir artı.",
 
-ai_note_data_short_history: 'Tarihsel veri az — bar örneklemi sınırlı, bu nedenle bazı sinyaller ve istatistikler daha az güvenilir olabilir.',
-ai_note_data_low_vola: 'Piyasa uzun süre düşük volatilite modunda kaldı; bu nedenle mevcut volatilite değerlendirmelerinin istatistiksel güvenilirliği düşebilir.',
+ai_f_macd_pos_off: "Çünkü mevcut MACD (MACD={macd}, sinyal={macdSignal}, hist={hist}) güçlü bir up-trend’i desteklemiyor ve Brain boğa sinyalini yumuşatıyor.",
+ai_f_macd_pos_off_v2: "Çünkü MACD net bir boğa tablosu sunmadığında ve histogram {hist} ikna edici olmadığında, Brain yükselişin devamına olan güvenini azaltıyor.",
+ai_f_macd_pos_off_v3: "Çünkü zayıf veya nötr bir MACD sinyali, trendin güç kaybedebileceğini söylüyor ve Brain dönüş ya da hareketin sönmesi riskini hesaba katıyor.",
+ai_f_macd_pos_off_v4: "Çünkü MACD ve sinyal çizgisi birbirine yaklaşır ya da aşağı kesişirse, Brain durumu güçlü bir boğa setup’ı olarak görmüyor.",
+ai_f_macd_pos_off_v5: "Çünkü belirgin bir MACD momentumu yokluğu, Brain’in long’lara temkinli yaklaşmasına ve trendin devamına dair beklentileri abartmamasına neden oluyor.",
 
-ai_note_rr_good: 'İşlemin potansiyel kâr/zarar oranı çekici görünüyor — beklenen getiri olası kaybı önemli ölçüde aşıyor.',
-ai_note_rr_poor: 'Kâr/zarar oranı zayıf — beklenen getiri olası zararı yeterince telafi etmiyor.',
+// ===== breakout / breakdown =====
+ai_f_breakout_long: "Çünkü fiyat {price} önemli bir yerel tepiyi kırarak yukarı yönlü bir breakout oluşturdu ve Brain boğalardaki güçlenmeyi görüyor ama sahte kırılma riskini de hatırlatıyor.",
+ai_f_breakout_long_v2: "Çünkü fiyatın son aralığın üzerine çıkması klasik bir breakout sinyali ve Brain, kontrol edilebilir riskle yükselişin devamına izin veriyor.",
+ai_f_breakout_long_v3: "Çünkü yukarı breakout, piyasanın yeni ve daha yüksek fiyatları kabul etmeye hazır olduğunu gösteriyor ve Brain bunu long lehine bir argüman olarak kullanıyor.",
+ai_f_breakout_long_v4: "Çünkü direnç kırılımı trendin gücünü teyit ediyor ve Brain düzeltmeden sonra yukarı hareketin devam edebileceğini varsayıyor.",
+ai_f_breakout_long_v5: "Çünkü {price} seviyesindeki gerçek breakout boğa senaryosunu güçlendiriyor, ancak Brain “uzaya” giriş önermiyor ve makul bir pullback bekliyor.",
 
-ai_note_oversold_risk_reversal: 'Piyasa aşırı satılmış durumda ve desteklere yakın — algoritma satıştan kaçınıyor çünkü yukarı yönlü sert bir dönüş riski yüksek.',
-ai_note_overbought_risk_reversal: 'Piyasa aşırı alınmış durumda ve dirençlere yakın — algoritma alımdan kaçınıyor çünkü aşağı yönlü sert bir dönüş riski yüksek.',
+ai_f_breakdown_short: "Çünkü fiyat {price} kritik bir desteği kırarak aşağı yönlü bir breakdown oluşturdu, Brain satıcıların güçlendiğini ve long’lar için risk oluştuğunu görüyor.",
+ai_f_breakdown_short_v2: "Çünkü aralığın altına breakdown, piyasanın ayıların kontrolüne geçtiğini gösteriyor ve Brain bunu savunmacı ya da short odaklı taktikler lehine bir argüman olarak görüyor.",
+ai_f_breakdown_short_v3: "Çünkü desteğin aşağı kırılması düşüşün devamı olasılığını artırıyor ve Brain yeni long’lar için elverişsiz koşullar konusunda uyarıyor.",
+ai_f_breakdown_short_v4: "Çünkü destek seviyesinin kırılması güçlü bir zayıflık sinyali ve Brain sadece düzeltmelere tepki vererek down-trend’in devamına izin veriyor.",
+ai_f_breakdown_short_v5: "Çünkü breakdown fazı yapısal bir bozulmaya işaret ediyor ve Brain seviye yeniden kazanılana kadar yükseliş şansını düşük değerlendiriyor.",
 
-ai_note_funding: 'Vadeli işlemlerdeki funding, long veya short yönündeki dengesizliği gösterir — aşırı değerler taraflardan birinin aşırı ısındığına işaret eder.',
-ai_note_oi_change: 'Open interest değişimi, piyasanın sermaye girişini veya çıkışını gösterir — fiyat yönüyle birlikte hareketin gücünü değerlendirmeye yardımcı olur.',
-ai_note_basis: 'Basis (vadeli fiyat ile spot arasındaki fark), piyasanın primli mi yoksa iskontolu mu işlem gördüğünü gösterir — bu, katılımcı beklentilerindeki kaymaları işaret eder.',
-ai_note_dominance: 'Bitcoin dominance, BTC’nin piyasa payını gösterir — altcoinler için yüksek dominance genellikle daha fazla baskı ve düşüş riski anlamına gelir.',
-ai_note_btc_corr: 'Bitcoin ile korelasyon, bu varlığın BTC ile ne kadar senkron hareket ettiğini gösterir — yüksek korelasyon genel piyasa etkisini güçlendirir.',
+// ===== Bollinger Bands (squeeze + width + breakout) =====
+ai_f_bbands_squeeze: "Çünkü Bollinger bantları ciddi şekilde sıkışmış durumda (width={width}), Brain bir enerji birikim fazı görüyor ve aralıktan potansiyel sert bir çıkışa hazırlanıyor.",
+ai_f_bbands_squeeze_v2: "Çünkü Bollinger Bands sıkışması anormal derecede düşük volatiliteye işaret ediyor ve Brain bir sonraki hareketin sert olabileceğini bekliyor.",
+ai_f_bbands_squeeze_v3: "Çünkü Bollinger bantları daraldığında piyasa sık sık güçlü bir atak hazırlıyor ve Brain bunu yaklaşan harekete dair bir uyarı olarak dikkate alıyor.",
+ai_f_bbands_squeeze_v4: "Çünkü Bollinger-squeeze, olası trend patlamasından önceki sakin dönemi haber veriyor ve Brain gelecekteki hareketi küçümsememeyi öneriyor.",
+ai_f_bbands_squeeze_v5: "Çünkü Bollinger Bands’in uzun süreli sıkışması büyük bir hareket olasılığını artırıyor ve Brain bunu risk ve pozisyon büyüklüğü hesabına dahil ediyor.",
 
-ai_note_global_spot: 'Global spot — büyük borsalardaki birleşik adil spot fiyat, yerel sapmaları değerlendirmek için referans alınır.',
-ai_note_venue_spread: 'Borsalar arasındaki spread, platformlar arasındaki fiyat farkını gösterir — büyük spread, arbitraj, likidite dengesizliği veya teknik bozulmalara işaret edebilir.',
+ai_f_bbands_width: "Çünkü Bollinger Bands genişliği={width} ve orta çizgi {bbMid} civarında; Brain buradan piyasanın şu an ne kadar “salınımlı” olduğunu ve istatistiksel olarak ne kadar hareket beklenebileceğini görüyor.",
 
-ai_no_data: 'Güvenilir analiz için yeterli veri yok — geçmiş çok kısa veya fiyat serilerinde sorun var, bu nedenle sonuç HOLD moduyla sınırlıdır.',
+ai_f_bbands_breakout_up: "Çünkü fiyat {price}, üst Bollinger bandı {upper} seviyesinin üzerine çıktı, bu güçlü bir boğa momentumu ve yukarı yönde artan volatiliteyi gösteriyor ve Brain hem potansiyeli hem de aşırı ısınma riskini not ediyor.",
+ai_f_bbands_breakout_down: "Çünkü fiyat {price}, alt Bollinger bandı {lower} seviyesinin altına indi, bu satıcıların baskın olduğunu ve agresif bir aşağı hareketi gösteriyor ve Brain bunu long’lar için risk olarak değerlendiriyor.",
+
+// ===== Stochastic =====
+ai_f_stoch_overbought: "Çünkü Stochastic (K={k}, D={d}) aşırı alım bölgesinde, kısa vadeli yükseliş tükenmiş görünüyor ve Brain geri çekilme ihtimalinin arttığını görüyor.",
+ai_f_stoch_overbought_v2: "Çünkü yüksek Stochastic değerleri fiyatın aşırı ısındığını gösteriyor ve Brain bu bölgede yeni long’ları desteklemekte acele etmiyor.",
+ai_f_stoch_overbought_v3: "Çünkü Stochastic piyasanın geçici olarak aşırı alımda olduğunu gösteriyor ve Brain bunu temkin ve olası kâr realizasyonu için bir sebep olarak görüyor.",
+ai_f_stoch_overbought_v4: "Çünkü K ve D üst bölgede asılı kaldığında düzeltme olasılığı artıyor ve Brain bunu pozisyon riskini değerlendirirken dikkate alıyor.",
+ai_f_stoch_overbought_v5: "Çünkü aşırı alım Stochastic, yerel up-trend’in mola verebileceğine dair bir sinyal ve Brain long girişlerinin agresifliğini azaltıyor.",
+
+ai_f_stoch_oversold: "Çünkü Stochastic (K={k}, D={d}) aşırı satım bölgesinde, satıcılar piyasayı geçici olarak fazla zorlamış durumda ve Brain bir tepki senaryosuna izin veriyor.",
+ai_f_stoch_oversold_v2: "Çünkü düşük Stochastic değerleri yerel aşırı satıma işaret ediyor ve Brain kısa vadeli yukarı dönüş ihtimalini artmış görüyor.",
+ai_f_stoch_oversold_v3: "Çünkü Stochastic’in alt bölgede olması aşağı yönlü ciddi bir hareketin zaten yaşandığını gösteriyor ve Brain yeni short’lara daha temkinli yaklaşıyor.",
+ai_f_stoch_oversold_v4: "Çünkü aşırı satım Stochastic ile Brain bazı satıcıların pozisyon kapatmasını bekliyor, bu da bir bounce’a yol açabilir.",
+ai_f_stoch_oversold_v5: "Çünkü Stochastic-oversold, düzeltme yönlü yükseliş lehine istatistiksel bir argüman ve Brain bunu olasılık değerlendirmesine dahil ediyor.",
+
+// ===== ADX / тренд =====
+ai_f_adx: "Çünkü ADX endeksi={adx} ve +DI={plusDI} ile -DI={minusDI} oranı, Brain’in sinyal üretmeden önce trendin gücünü ve yönünü değerlendirmesine imkan veriyor.",
+ai_f_adx_trending: "Çünkü yüksek ADX={adx} güçlü trend piyasasına işaret ediyor ve Brain trendi takip eden stratejilere daha fazla ağırlık veriyor.",
+ai_f_adx_trending_v2: "Çünkü yükselmiş ADX ile trend istatistiksel olarak daha güvenilir ve Brain baskın harekete doğru işlemleri daha cesurca destekliyor.",
+ai_f_adx_trending_v3: "Çünkü güçlü ADX trendin tesadüfi olmadığını doğruluyor ve Brain senaryonun ana iskeleti olarak ona dayanıyor.",
+ai_f_adx_trending_v4: "Çünkü ADX yükselip yüksek seviyelerde kaldığında, Brain trendi dayanıklı sayıyor ve pozisyonun daha uzun tutulmasına izin veriyor.",
+ai_f_adx_trending_v5: "Çünkü güçlü ADX sinyali, piyasanın organize biçimde hareket ettiğini söylüyor ve Brain bunu trend tavsiyelerini güçlendirmek için kullanıyor.",
+
+ai_f_adx_flat: "Çünkü düşük ADX={adx} yatay ve zayıf bir trende işaret ediyor ve Brain yönlü işlemlere olan güvenini azaltıyor.",
+ai_f_adx_flat_v2: "Çünkü düşük ADX’te piyasa trendden çok testere hareketine benziyor ve Brain büyük directional hareketleri yakalama denemelerinde daha ihtiyatlı.",
+ai_f_adx_flat_v3: "Çünkü zayıf ADX, yan bant hareketinin bir işareti ve Brain tek yönde kalıcı bir hareket beklemiyor.",
+ai_f_adx_flat_v4: "Çünkü ADX’e göre yatay piyasada trend işlemleri istatistiksel olarak daha zayıf ve Brain kâr beklentilerini kısma tavsiyesinde bulunuyor.",
+ai_f_adx_flat_v5: "Çünkü ADX düşükken Brain piyasayı gürültülü görüyor ve agresif directional sinyaller vermeye meyilli değil.",
+
+// ===== OBV =====
+ai_f_obv: "Çünkü OBV eğimi {slope} civarında, hacim giriş ve çıkışının nasıl ilerlediğini gösteriyor ve Brain bunu salt fiyat hareketini teyit etmek ya da çürütmek için kullanıyor.",
+
+// ===== ATR / волатильность =====
+ai_note_atr: "Çünkü ATR={atr} (atrRel={atrRel}, ≈{atrPct}% fiyattan) tipik günlük oynaklık aralığını belirliyor ve Brain bu volatiliteye göre 1h≈{h1}, 6h≈{h6}, 24h≈{h24} beklenen hareketi hesaplayıp stop/TP seviyelerini kuruyor.",
+ai_note_atr_v2: "Çünkü ortalama gerçek aralık ATR {atr} (fiyatın yaklaşık {atrPct}%’i) Brain’in fiyatın genelde ne kadar oynadığını ve hangi stop/hedeflerin gerçekçi göründüğünü anlamasına yardımcı oluyor.",
+ai_note_atr_v3: "Çünkü Brain hareketin ölçeğini ATR üzerinden kalibre ediyor: atrRel={atrRel}, atrPct≈{atrPct}% ve bu risk ve getiri için makul beklentileri tanımlıyor.",
+ai_note_atr_v4: "Çünkü ATR parametresi piyasanın “nefesini” yansıtıyor; fiyatın {atrPct}%’i seviyesinde Brain, gürültü tarafından vurulmamak için stop ve hedefleri buna göre seçiyor.",
+ai_note_atr_v5: "Çünkü Brain ATR {atr} ve onun fiyattaki payı ({atrPct}%) üzerine dayanarak risk/getiri dengesini kuruyor ve hareket beklentilerini abartmıyor.",
+
+ai_f_vola_explosive: "Çünkü atrRel={atrRel} (≈{atrPct}% fiyattan) patlayıcı volatiliteyi gösteriyor ve Brain pozisyon boyutunu küçültmeyi ve koruyucu stopları genişletmeyi öneriyor.",
+ai_f_vola_explosive_v2: "Çünkü bu tür bir volatilitede ({atrPct}% fiyattan) herhangi bir bar anormal derecede büyük olabilir ve Brain bunu yüksek risk olarak yorumlayıp dikkatli risk yönetimi tavsiye ediyor.",
+ai_f_vola_explosive_v3: "Çünkü patlayıcı vola hem potansiyeli hem de düşüşü büyütüyor ve Brain atrRel={atrRel} iken hesabı aşırı yüklemeyi önermiyor.",
+ai_f_vola_explosive_v4: "Çünkü volatilite aşırı seviyelere çıktığında piyasa daha öngörülemez hale geliyor ve Brain temkinli hareket etmeyi öneriyor.",
+ai_f_vola_explosive_v5: "Çünkü süper volatil rejim (atrPct≈{atrPct}%) her hareketi yakalamaktan çok hayatta kalmanın önemli olduğu bir bölge ve Brain sinyallerin agresifliğini azaltıyor.",
+
+ai_f_vola_low: "Çünkü atrRel={atrRel} (≈{atrPct}% fiyattan) çok düşük volatiliteye işaret ediyor ve Brain hızlı ve büyük hareketler beklemiyor.",
+ai_f_vola_low_v2: "Çünkü düşük volatilitede piyasa çoğunlukla bir aralık içinde testere yapıyor ve Brain kısa sürede büyük kârlar beklemiyor.",
+ai_f_vola_low_v3: "Çünkü düşük vola trendleri kırılgan hale getiriyor ve Brain hedeflere daha dikkatli yaklaşıp R:R beklentilerini yükseltmiyor.",
+ai_f_vola_low_v4: "Çünkü atrPct küçük olduğunda piyasa “uyumuş” durumda ve Brain yönlü sinyalleri güçlendirmeden önce genellikle volatilitenin uyanmasını bekliyor.",
+ai_f_vola_low_v5: "Çünkü low-vola rejimi sahte kırılmaların ve uzun süren yatay hareketlerin olasılığını artırıyor ve Brain bunu dikkate alıp güven seviyesini kesiyor.",
+
+// ===== уровни / контекст =====
+ai_note_sr: "Çünkü en yakın destek {s} civarında, direnç {r} civarında, güncel fiyat {price} ve Brain, nearS={nearS} ve nearR={nearR} üzerinden seviyeye kadar ne kadar yol kaldığını ve stop/TP’yi nereye koymanın mantıklı olduğunu hesaplıyor.",
+ai_note_h: "Çünkü Brain, tavsiyenin yalnızca tek bir bara tepki değil, zamansal olarak tutarlı olması için fiyatın farklı ufuklardaki beklenen hareketini dikkate alıyor.",
+
+// ===== дата и волатильность данных =====
+ai_note_data_short_history: "Çünkü geçmiş veri az (bar sayısı: {bars}), istatistiklerin bir kısmı güvenilir değil ve Brain güçlü yönlü sinyallere olan güvenini azaltıyor.",
+ai_note_data_short_history_v2: "Çünkü kısa geçmişte ({bars} bar) volatilite ve trend modelleri daha kaba çalışıyor ve Brain bu yüzden daha temkinli sonuçlar veriyor.",
+ai_note_data_short_history_v3: "Çünkü mütevazı veri hacmi piyasa değerlendirmesini zorlaştırıyor ve Brain küçük örneklemden gelen sinyalleri abartmıyor.",
+ai_note_data_short_history_v4: "Çünkü yeterli tarihsel mum olmadığında skorlama hatası riski daha yüksek ve Brain tavsiyelerdeki güveni kırpıyor.",
+ai_note_data_short_history_v5: "Çünkü küçük geçmiş hacmi her türlü sonucu kırılgan kılıyor ve Brain bunu dürüstçe hesaba katıp sinyal gücünü şişirmiyor.",
+
+ai_note_data_low_vola: "Çünkü şu anda düşük piyasa aktivitesi var (atrRel={atrRel}, ≈{atrPct}% fiyattan) ve Brain agresif hareketler beklemeyerek ölçülü beklentiler öneriyor.",
+ai_note_data_low_vola_v2: "Çünkü volatilite açısından düşük aktivite piyasayı yapışkan hale getiriyor ve Brain böyle koşullarda aşırı iddialı hedeflerden kaçınıyor.",
+ai_note_data_low_vola_v3: "Çünkü zayıf fiyat dinamiği, piyasanın henüz büyük bir trende hazır olmadığı sinyalini veriyor ve Brain bunu daha temkinli bir taktik lehine değerlendiriyor.",
+ai_note_data_low_vola_v4: "Çünkü vola düşük olduğunda testere hareketi ihtimali daha yüksek ve Brain güçlü bir swing üzerine iddia kurmayı önermiyor.",
+ai_note_data_low_vola_v5: "Çünkü low-vola modundaki piyasa çoğu zaman hareket vermek yerine zaman harcıyor ve Brain durgunluk fazını sabırla atlatmayı tavsiye ediyor.",
+
+// ===== R:R =====
+ai_note_rr_good: "Çünkü beklenen risk/ödül oranı {rr}, hedef seviye {rrNominal}x civarında cazip görünüyor ve Brain böyle bir işlemi istatistiksel olarak gerekçeli kabul ediyor.",
+ai_note_rr_good_v2: "Çünkü iyi bir R:R ({rr} vs referans {rrNominal}x) getiri için bir tampon sağlıyor ve Brain bu işlemi risk profili açısından ilgi çekici olarak işaretliyor.",
+ai_note_rr_good_v3: "Çünkü böyle bir R:R ile işlem, bazı zararlı girişleri telafi ediyor ve Brain stratejinin beklenen değerini olumlu değerlendiriyor.",
+ai_note_rr_good_v4: "Çünkü referans seviyenin üzerindeki R:R nadir bir artı ve Brain böyle bir setup ile daha aktif çalışmaya izin veriyor.",
+ai_note_rr_good_v5: "Çünkü risk/ödül (rr≈{rr}) lehimize işlediğinde Brain, tablo mükemmel olmasa bile setup’ı kaliteli olarak değerlendiriyor.",
+
+ai_note_rr_poor: "Çünkü mevcut risk/ödül oranı {rr}, referans {rrNominal}x’ten daha kötü ve Brain bu tür bir işleme agresif girmeyi önermiyor.",
+ai_note_rr_poor_v2: "Çünkü zayıf R:R ({rr}, istenen {rrNominal}x karşısında) fikri pek cazip kılmıyor ve Brain yeterli kâr marjı görmüyor.",
+ai_note_rr_poor_v3: "Çünkü R:R standart seviyeye ulaşmadığında, doğru tahmin bile az kazandırıyor ve Brain bu girişin önceliğini düşürüyor.",
+ai_note_rr_poor_v4: "Çünkü kötü risk/ödül oranı, bu tür işlemlerden oluşan bir serinin hesabı eritme şansını artırıyor ve Brain bunları sistematik olarak almayı teşvik etmiyor.",
+ai_note_rr_poor_v5: "Çünkü düşük R:R durumunda Brain, böyle bir fırsatı pas geçip daha avantajlı bir setup beklemenin daha iyi olduğunu düşünüyor.",
+
+// ===== oversold / overbought risk reversal =====
+ai_note_oversold_risk_reversal: "Çünkü derin aşırı satım (RSI={rsi}) sert bir yukarı dönüş riski yaratıyor ve Brain böyle bir noktada yeni short açmayı tercih etmiyor.",
+ai_note_oversold_risk_reversal_v2: "Çünkü RSI’deki güçlü aşırı satımda Brain, yüksek short squeeze olasılığı görüyor ve taze short’lara zorlamıyor.",
+ai_note_oversold_risk_reversal_v3: "Çünkü piyasa ciddi şekilde aşırı satımdayken, herhangi bir pozitif haber dönüş yaratabilir ve Brain bu riski short’lar aleyhine dikkate alıyor.",
+ai_note_oversold_risk_reversal_v4: "Çünkü oversold durumu short girişini istatistiksel olarak daha tehlikeli kılıyor ve Brain bir süre beklemeyi öneriyor.",
+ai_note_oversold_risk_reversal_v5: "Çünkü Brain şunu not ediyor: güçlü aşırı satım, short eklemek için iyi bir yer değil; burada tepki ihtimali daha yüksek.",
+
+ai_note_overbought_risk_reversal: "Çünkü güçlü aşırı alım (RSI={rsi}) sert aşağı dönüş riskini artırıyor ve Brain zirvede agresif ek alımları teşvik etmiyor.",
+ai_note_overbought_risk_reversal_v2: "Çünkü RSI üzerindeki overbought durumunda Brain büyük bir düzeltme riski görüyor ve long’u daha da zorlamayı mantıklı bulmuyor.",
+ai_note_overbought_risk_reversal_v3: "Çünkü aşırı alımda olan piyasa haberlerde sık sık döner ve Brain bunu dikkate alarak pozisyon büyütmemeyi öneriyor.",
+ai_note_overbought_risk_reversal_v4: "Çünkü aşırı alım bölgesinde istatistikler yeni long’lara karşı ve Brain dönüş riskinin arttığını kabul ediyor.",
+ai_note_overbought_risk_reversal_v5: "Çünkü Brain’e göre, güçlü aşırı alımda yeni alımlar açmaktan ziyade kârı korumak daha iyi.",
+
+// ===== деривативы / on-chain =====
+ai_note_funding: "Çünkü funding={funding}, türev pozisyonlarında bir kaymaya işaret ediyor ve Brain piyasanın hangi tarafının aşırı yüklendiğini ve nerede sert bir tasfiye riskinin daha yüksek olduğunu dikkate alıyor.",
+ai_note_funding_v2: "Çünkü anormal funding long ve short arasındaki dengesizliğe işaret ediyor ve Brain bunu kalabalık tarafa karşı bir risk faktörü olarak görüyor.",
+ai_note_funding_v3: "Çünkü Brain funding üzerinden kimin kaldıraç için fazla ödediğini görüyor ve bu, aşırı dolu pozisyonlara karşı harekete geçme ihtimalini artırıyor.",
+ai_note_funding_v4: "Çünkü mutlak değeri yüksek funding, vadeli piyasalarda kırılgan bir denge uyarısı ve Brain, dengesiz taraftaki trendin devamına olan güvenini azaltıyor.",
+ai_note_funding_v5: "Çünkü Brain, funding’i türevlerde açgözlülük/korku termometresi olarak kullanıyor ve bu da kalabalığın kuyruğuna takılmamaya yardımcı oluyor.",
+
+ai_note_oi_change: "Çünkü Open Interest değişimi {oiChange}, vadeli işlemlere para giriş/çıkışını gösteriyor ve Brain böylece “canlı” hareketi boş volatiliteden ayırabiliyor.",
+ai_note_oi_change_v2: "Çünkü fiyat hareketiyle birlikte OI artışı trend sinyalini güçlendiriyor, OI düşüşü ise zayıflatıyor — Brain tam da bu şekilde {oiChange} metriğini okuyor.",
+ai_note_oi_change_v3: "Çünkü Open Interest dinamiği üzerinden Brain, yeni pozisyonların açılıp açılmadığını ya da piyasanın sadece eski pozisyonları tasfiye edip etmediğini anlıyor.",
+ai_note_oi_change_v4: "Çünkü OI’deki güçlü kaymalar, katılımcılar arasında riskin yeniden dağıtıldığına işaret ve Brain bunu sinyali netleştirmek için kullanıyor.",
+ai_note_oi_change_v5: "Çünkü Brain, gerçek trendi pozisyon kapatmalardan kaynaklı hareketle karıştırmamak için {oiChange}’e bakıyor.",
+
+ai_note_basis: "Çünkü vadeli basis={basis}, futures ve spot arasındaki farkı yansıtıyor ve güçlü bir sapma taraflardan birinin aşırı ısındığını söylüyor; Brain bunu risk hesabına dahil ediyor.",
+ai_note_basis_v2: "Çünkü alışılmadık basis, türev beklentilerinde bir kaymaya işaret ediyor ve Brain bu gizli stres göstergesini göz ardı etmiyor.",
+ai_note_basis_v3: "Çünkü basis, piyasanın gelecekteki fiyatı ne kadar primli ya da iskontolu fiyatlamaya hazır olduğunu gösteriyor; uç seviyelerde Brain daha temkinli oluyor.",
+ai_note_basis_v4: "Çünkü boğalar veya ayılar yönünde güçlü basis, sık sık dönüşlerden önce gelir ve Brain trendin kuyruğuna binmemek için bunu hesaba katıyor.",
+ai_note_basis_v5: "Çünkü Brain, basis’i özellikle normal seviyelerin dışına çıktığında vadeli işlemlerdeki trende güven göstergesi olarak kullanıyor.",
+
+ai_note_dominance: "Çünkü Bitcoin dominance değeri {dominance}% civarında ve bu BTC ile altlar arasındaki güç dengesini gösteriyor; yüksek dominance durumunda Brain altcoin’ler üzerinde baskı öngörüyor.",
+ai_note_dominance_v2: "Çünkü BTC-dominance artışı genellikle altlar için koşulları kötüleştiriyor ve Brain bunu onlar için dışsal bir ayı arka planı olarak değerlendiriyor.",
+ai_note_dominance_v3: "Çünkü düşük BTC dominance tam tersine altlar için bir fırsat penceresi açıyor ve Brain risk profilini bu faza göre ayarlıyor.",
+ai_note_dominance_v4: "Çünkü dominance metriği üzerinden Brain, likiditenin nereye aktığını görüyor — “blue chip” BTC’ye mi yoksa daha riskli varlıklara mı.",
+ai_note_dominance_v5: "Çünkü dominance değişimleri, Brain’in şu anda piyasada kimin gözde olduğunu — Bitcoin mi yoksa altlar mı — anlamasına ve sinyalleri bu kaymaya göre ayarlamasına yardımcı oluyor.",
+
+ai_note_btc_corr: "Çünkü BTC ile korelasyon {corr} civarında ve bu, varlığın Bitcoin ile ne kadar birlikte hareket ettiğini gösteriyor; Brain bunu aynı riski kopyalamamak için dikkate alıyor.",
+ai_note_btc_corr_v2: "Çünkü BTC ile yüksek korelasyon, varlığın kaderinin büyük ölçüde Bitcoin hareketine bağlı olduğu anlamına geliyor ve Brain portföyü oluştururken bunu hesaba katıyor.",
+ai_note_btc_corr_v3: "Çünkü BTC ile düşük korelasyon, varlığı daha bağımsız kılıyor ve Brain bunu riskleri çeşitlendirmek için kullanıyor.",
+ai_note_btc_corr_v4: "Çünkü BTC korelasyonu üzerinden Brain, bu varlıktaki sinyalin BTC pozisyonunun bir kopyası mı yoksa gerçekten özgün mü olduğunu değerlendiriyor.",
+ai_note_btc_corr_v5: "Çünkü {corr} içindeki kaymalar, Brain’in BTC ile bağın güçlenip güçlenmediğini ya da zayıflayıp zayıflamadığını anlamasına ve hareket beklentilerini buna göre ayarlamasına yardımcı oluyor.",
+
+ai_note_global_spot: "Çünkü küresel spot piyasasının durumu {globalSpot} olarak değerlendiriliyor ve Brain bu arka planı, yerel sinyalleri güçlendiren veya yumuşatan bir filtre olarak kullanıyor.",
+ai_note_global_spot_v2: "Çünkü spot piyasanın genel tonu ({globalSpot}), yerel setup’ın başarı olasılığını etkiliyor ve Brain onu arka plandan kopuk şekilde ele almıyor.",
+ai_note_global_spot_v3: "Çünkü global spot zayıfsa, Brain agresif long’larda daha dikkatli oluyor, yerel tablo iyi olsa bile.",
+ai_note_global_spot_v4: "Çünkü güçlü spot arka planı, boğa sinyallerini daha güvenilir kılıyor ve Brain bu tailwind’i hesaba katıyor.",
+ai_note_global_spot_v5: "Çünkü Brain, yerel sinyali her zaman global spot tablosu ({globalSpot}) ile karşılaştırıyor; böylece genel likidite akışına karşı işlem yapmaktan kaçınıyor.",
+
+ai_note_venue_spread: "Çünkü yükselmiş venue spread={spread}, fiyatların homojen olmadığını ve olası kaymalara işaret ediyor ve Brain daha temkinli bir pozisyon boyutu öneriyor.",
+ai_note_venue_spread_v2: "Çünkü platformlar arasındaki büyük spread, düşük likidite işareti ve Brain bunu ek bir operasyonel risk olarak görüyor.",
+ai_note_venue_spread_v3: "Çünkü farklı borsalardaki fiyatlar ciddi şekilde ayrıştığında, kötü icra riski artıyor ve Brain bunu işlemin risk değerlendirmesinde dikkate alıyor.",
+ai_note_venue_spread_v4: "Çünkü genişlemiş venue spread, Brain’e şu anda büyük emirler için en iyi zaman olmadığı sinyalini veriyor.",
+ai_note_venue_spread_v5: "Çünkü Brain, borsalar arasındaki yüksek spread’i yavaşlamaya ve daha dikkatli işlem yapmaya dair bir sinyal olarak algılıyor; böylece yürütme kaynaklı gereksiz kayıplardan kaçınmayı hedefliyor.",
+
 qcoin_drop_toast_error: "(yatırım sunucuda doğrulanacaktır)",
 qcoin_drop_toast_title: "Tebrikler!",
 
