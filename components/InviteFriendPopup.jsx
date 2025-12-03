@@ -68,26 +68,45 @@ export default function InviteFriendPopup({
     }
   }
 
-  const copyLink = async () => {
-    if (!safeReferral) return
-    try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(safeReferral)
-      } else {
-        const ta = document.createElement('textarea')
-        ta.value = safeReferral
-        ta.style.position = 'fixed'
-        ta.style.opacity = '0'
-        document.body.appendChild(ta)
+const copyLink = async () => {
+  if (!safeReferral) return
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(safeReferral)
+    } else {
+      const ta = document.createElement('textarea')
+      ta.value = safeReferral
+      ta.style.position = 'fixed'
+      ta.style.opacity = '0'
+      document.body.appendChild(ta)
+
+      try {
         ta.select()
         document.execCommand('copy')
-        document.body.removeChild(ta)
+      } finally {
+        // безопасное удаление textarea
+        if (typeof ta.remove === 'function') {
+          ta.remove()
+        } else if (ta.parentNode) {
+          ta.parentNode.removeChild(ta)
+        }
       }
-      // тут можно повесить тост "скопировано"
-    } catch {
-      // no-op
     }
+
+    // === ТОСТ "Скопировано!" ===
+    // t('invite_copied') должен быть в словаре
+    if (window?.toast?.success) {
+      toast.success(t('invite_copied') || 'Copied!')
+    } else {
+      // fallback, если тостов нет — можешь убрать
+      alert(t('invite_copied') || 'Copied!')
+    }
+
+  } catch {
+    // no-op
   }
+}
+
 
   const openShare = (url) => {
     if (!url) return

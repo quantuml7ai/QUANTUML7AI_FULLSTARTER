@@ -42433,7 +42433,7 @@ const POP_HERO_EN = {
   invite_share_ig: 'Instagram 📸',
 
 invite_share_text: `Enter Quantum L7 AI 🤖 — an ecosystem where solutions emerge at the intersection of intelligence, data, and markets. Academy of strategic thinking 📚, global forum of ideas 🌐, institutional exchange architecture 💹, on-chain analytics 🔗, L7-agents and explainable AI-core 📊, QCoin economy 🪙 and unified digital infrastructure MiniApp + Web + Telegram ⚡. Here future scenarios are formed, human influence is amplified, and a new computational civilization is created. Join us — we act as a unified coordinate force 🤝🎁`,
-
+invite_copied: "Copied!",
 }
 
 const POP_HERO_RU = {
@@ -42472,7 +42472,7 @@ const POP_HERO_RU = {
   invite_share_ig: 'Instagram 📸',
 
 invite_share_text: `Входи в Quantum L7 AI 🤖 — экосистему, где решения рождаются на стыке интеллекта, данных и рынков. Академия стратегического мышления 📚, глобальный форум идей 🌐, институциональная биржевая архитектура 💹, ончейн-аналитика 🔗, L7-агенты и объяснимое AI-ядро 📊, экономика QCoin 🪙 и единая цифровая инфраструктура MiniApp + Web + Telegram ⚡. Здесь формируются будущие сценарии, усиливается влияние человека и создаётся новая вычислительная цивилизация. Присоединяйся — действуем как единая координатная сила 🤝🎁`,
-
+invite_copied: "Скопировано!",
 }
 
 const POP_HERO_UK = {
@@ -42511,7 +42511,7 @@ const POP_HERO_UK = {
   invite_share_ig: 'Instagram 📸',
 
 invite_share_text: `Входь у Quantum L7 AI 🤖 — екосистему, де рішення народжуються на перетині інтелекту, даних і ринків. Академія стратегічного мислення 📚, глобальний форум ідей 🌐, інституційна біржова архітектура 💹, ончейн-аналітика 🔗, L7-агенти та пояснюване AI-ядро 📊, економіка QCoin 🪙 і єдина цифрова інфраструктура MiniApp + Web + Telegram ⚡. Тут формуються майбутні сценарії, посилюється вплив людини й створюється нова обчислювальна цивілізація. Приєднуйся — діємо як єдина координатна сила 🤝🎁`,
-
+invite_copied: "Скопійовано!",
 }
 
 const POP_HERO_ES = {
@@ -42551,7 +42551,7 @@ const POP_HERO_ES = {
   invite_share_ig: 'Instagram 📸',
 
 invite_share_text: `Entra en Quantum L7 AI 🤖 — un ecosistema donde las soluciones nacen en la intersección de la inteligencia, los datos y los mercados. Academia de pensamiento estratégico 📚, foro global de ideas 🌐, arquitectura bursátil institucional 💹, analítica on-chain 🔗, agentes L7 y núcleo de IA explicable 📊, economía de QCoin 🪙 y una infraestructura digital unificada MiniApp + Web + Telegram ⚡. Aquí se forman los escenarios futuros, se amplifica la influencia humana y se crea una nueva civilización computacional. Únete — actuamos como una fuerza coordinada unificada 🤝🎁`,
-
+invite_copied: "¡Copiado!",
 }
 
 const POP_HERO_ZH = {
@@ -42589,7 +42589,7 @@ const POP_HERO_ZH = {
 
 invite_share_text: `进入 Quantum L7 AI 🤖 —— 一个在智能、数据和市场交汇处孕育解决方案的生态系统。战略思维学院 📚、全球思想论坛 🌐、机构级交易架构 💹、链上分析 🔗、L7 代理和可解释的 AI 核心 📊、QCoin 经济 🪙 以及统一的数字基础设施 MiniApp + Web + Telegram ⚡。这里形成未来的情景，加强人的影响力，并创造新的计算文明。加入我们 —— 我们作为一个统一的坐标力量行动 🤝🎁`,
 
-
+invite_copied: "已复制！",
 }
 
 const POP_HERO_AR = {
@@ -42627,7 +42627,7 @@ const POP_HERO_AR = {
   invite_share_ig: 'إنستغرام 📸',
 
 invite_share_text: `ادخل إلى Quantum L7 AI 🤖 — منظومة بيئية تُولد فيها الحلول عند تقاطع الذكاء والبيانات والأسواق. أكاديمية التفكير الاستراتيجي 📚، المنتدى العالمي للأفكار 🌐، البنية التحتية المؤسسية للتداول 💹، التحليلات على السلسلة 🔗، وكلاء L7 والنواة التفسيرية للذكاء الاصطناعي 📊، اقتصاد QCoin 🪙 والبنية الرقمية الموحدة MiniApp + Web + Telegram ⚡. هنا تتشكل سيناريوهات المستقبل، ويزداد تأثير الإنسان، وتُبنى حضارة حسابية جديدة. انضم إلينا — نعمل كقوة إحداثية موحّدة 🤝🎁`,
- 
+ invite_copied: "تم النسخ!",
 }
 
 const POP_HERO_TR = {
@@ -42667,7 +42667,7 @@ const POP_HERO_TR = {
   invite_share_ig: 'Instagram 📸',
 
 invite_share_text: `Quantum L7 AI 🤖 ekosistemine gir — çözümler zekâ, veriler ve piyasaların kesişiminde doğar. Stratejik düşünme akademisi 📚, küresel fikir forumu 🌐, kurumsal borsa mimarisi 💹, on-chain analitiği 🔗, L7 ajanları ve açıklanabilir AI çekirdeği 📊, QCoin ekonomisi 🪙 ve birleşik dijital altyapı MiniApp + Web + Telegram ⚡. Burada geleceğin senaryoları oluşur, insan etkisi güçlenir ve yeni bir hesaplama uygarlığı yaratılır. Katıl — tek bir koordinat gücü olarak hareket ediyoruz 🤝🎁`,
-
+invite_copied: "Kopyalandı!",
 
 }
 
