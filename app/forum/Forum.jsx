@@ -3931,7 +3931,7 @@ const save = async () => {
   <div className="p-1">
     <div className="emojiTitle">{t('') /* "VIP+ аватары" */}</div>
     <div className="iconWrap">
-      {VIP_AVATARS.slice(0,100).map(src => (
+      {VIP_AVATARS.slice(0,130).map(src => (
         <button
           key={src}
           className={cls('avaMini', icon===src && 'tag', 'hoverPop')}
