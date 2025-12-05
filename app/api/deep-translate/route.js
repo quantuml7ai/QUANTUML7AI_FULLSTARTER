@@ -8,120 +8,79 @@ function normalizeLang(code, fallback = 'en') {
 }
 
 /**
- * ---------- 1) Lingva (несколько зеркал) ----------
- *
- * Базовые хосты:
- *   - process.env.LINGVA_BASE_URLS = "https://lingva.ml,https://lingva.garudalinux.org"
- * Если env не задан — используем только https://lingva.ml
+ * Зеркала Lingva / LibreTranslate (Google-зеркала и OSS-инстансы).
+ * Можно править/дополнять — код сам по ним пробежится.
  */
-async function translateWithLingvaMirrors(text, sourceLang, targetLang) {
+const LINGVA_MIRRORS = [
+  'https://lingva.ml',
+  'https://translate.plausibility.cloud',
+  'https://lingva.garudalinux.org',
+  'https://lingva.lunar.icu',
+  'https://translate.projectsegfau.lt',
+  'https://translate.tiekoetter.com',
+  'https://lingva.lunar.icu',
+  'https://lingva.mchang.xyz',
+]
+
+/**
+ * === 1) Lingva / Google-зеркала ===
+ * Обходим все зеркала по очереди, пока одно не вернёт нормальный перевод.
+ */
+async function translateViaLingvaMirrors(text, sourceLang, targetLang) {
   const src = sourceLang || 'auto'
   const tgt = targetLang
 
-  const bases =
-    process.env.LINGVA_BASE_URLS
-      ?.split(',')
-      .map((s) => s.trim())
-      .filter(Boolean) || ['https://lingva.ml']
-
   let lastError = null
 
-  for (const base of bases) {
-    const baseUrl = base.replace(/\/+$/, '')
-    const url = `${baseUrl}/api/v1/${encodeURIComponent(
-      src,
-    )}/${encodeURIComponent(tgt)}/${encodeURIComponent(text)}`
-
+  for (const base of LINGVA_MIRRORS) {
     try {
+      const url = `${base.replace(/\/$/, '')}/api/v1/${encodeURIComponent(
+        src,
+      )}/${encodeURIComponent(tgt)}/${encodeURIComponent(text)}`
+
       const res = await fetch(url, {
         method: 'GET',
         cache: 'no-store',
       })
 
       if (!res.ok) {
-        throw new Error(`Lingva[${baseUrl}] HTTP ${res.status}`)
+        throw new Error(`HTTP ${res.status}`)
       }
 
       const data = await res.json().catch(() => {
-        throw new Error('Lingva JSON parse error')
+        throw new Error('JSON parse error')
       })
 
-      if (!data || !data.translation) {
-        throw new Error('Lingva: no translation field')
+      const translated = data?.translation
+      if (!translated) {
+        throw new Error('no translation field')
+      }
+
+      // Если сервис вернул то же самое, считаем, что зеркало не справилось
+      if (translated.trim() === text.trim()) {
+        throw new Error('translation equals source, treating as fail')
       }
 
       return {
-        text: data.translation,
-        provider: `lingva:${baseUrl}`,
+        text: translated,
+        provider: `lingva:${new URL(base).hostname}`,
       }
     } catch (e) {
       lastError = e
       console.error(
-        'translate provider Lingva mirror error',
+        '[deep-translate] lingva mirror failed:',
         base,
         e?.message || e,
       )
-      // идём к следующему зеркалу
+      // просто пробуем следующее зеркало
     }
   }
 
-  throw lastError || new Error('All Lingva mirrors failed')
+  throw lastError || new Error('all lingva mirrors failed')
 }
 
 /**
- * ---------- 2) LibreTranslate (общедоступное демо или своё) ----------
- *
- * Базовый URL:
- *   - process.env.LIBRETRANSLATE_BASE_URL (например, https://libretranslate.com)
- * Если не задан — используем https://libretranslate.com
- *
- * API: POST /translate { q, source, target }
- */
-async function translateWithLibreTranslate(text, sourceLang, targetLang) {
-  const base =
-    process.env.LIBRETRANSLATE_BASE_URL?.trim() ||
-    'https://libretranslate.com'
-  const baseUrl = base.replace(/\/+$/, '')
-
-  const src = sourceLang || 'auto'
-  const tgt = targetLang
-
-  const url = `${baseUrl}/translate`
-
-  const res = await fetch(url, {
-    method: 'POST',
-    cache: 'no-store',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      q: text,
-      source: src,
-      target: tgt,
-      // api_key: process.env.LIBRETRANSLATE_API_KEY || undefined,
-    }),
-  })
-
-  if (!res.ok) {
-    throw new Error(`LibreTranslate HTTP ${res.status}`)
-  }
-
-  const data = await res.json().catch(() => {
-    throw new Error('LibreTranslate JSON parse error')
-  })
-
-  if (!data || !data.translatedText) {
-    throw new Error('LibreTranslate: no translatedText')
-  }
-
-  return {
-    text: data.translatedText,
-    provider: `libre:${baseUrl}`,
-  }
-}
-
-/**
- * ---------- 3) MyMemory (старый fallback) ----------
+ * === 2) MyMemory (fallback) ===
  */
 async function translateWithMyMemory(text, sourceLang, targetLang) {
   let src = sourceLang
@@ -167,15 +126,18 @@ async function translateWithMyMemory(text, sourceLang, targetLang) {
     throw new Error('MyMemory: no translatedText')
   }
 
+  // *** ВАЖНО: если MyMemory вернул то же самое — считаем, что он не перевёл ***
+  if (translated.trim() === text.trim()) {
+    throw new Error('MyMemory returned same text, treating as fail')
+  }
+
   return {
     text: translated,
     provider: 'mymemory',
   }
 }
 
-/**
- * ---------- Основной обработчик ----------
- */
+// ---------- Основной обработчик ----------
 export async function POST(req) {
   try {
     const body = await req.json().catch(() => ({}))
@@ -197,19 +159,22 @@ export async function POST(req) {
       )
     }
 
+    // берём либо targetLang, либо targetLocale
     let finalTarget = normalizeLang(targetLang || targetLocale || 'en')
-    if (!finalTarget) finalTarget = 'en'
+
+    if (!finalTarget) {
+      finalTarget = 'en'
+    }
 
     const finalSource =
       sourceLang && sourceLang !== 'auto'
         ? normalizeLang(sourceLang)
         : 'auto'
 
-    console.log('deep-translate incoming:', {
-      text: text.slice(0, 80) + (text.length > 80 ? '…' : ''),
+    console.log('[deep-translate] incoming', {
+      textPreview: text.slice(0, 80) + (text.length > 80 ? '…' : ''),
       sourceLang: finalSource,
       targetLang: finalTarget,
-      env: process.env.NODE_ENV,
     })
 
     // Если язык исхода и цели одинаковый → просто вернуть текст
@@ -220,28 +185,23 @@ export async function POST(req) {
       })
     }
 
-    // порядок провайдеров:
-    // 1) Lingva (несколько зеркал)
-    // 2) LibreTranslate
-    // 3) MyMemory
-    const providers = [
-      translateWithLingvaMirrors,
-      translateWithLibreTranslate,
-      translateWithMyMemory,
-    ]
+    // Порядок провайдеров:
+    //  1) Lingva-зеркала
+    //  2) MyMemory (как самый последний шанс)
+    const providers = [translateViaLingvaMirrors, translateWithMyMemory]
 
     for (const provider of providers) {
       try {
         const result = await provider(text, finalSource, finalTarget)
-        if (result && result.text) {
+        if (result && result.text && result.text.trim()) {
           return NextResponse.json(result)
         }
       } catch (e) {
         console.error(
-          `translate provider ${provider.name} error:`,
+          `[deep-translate] provider ${provider.name} error:`,
           e?.message || e,
         )
-        // пробуем следующий
+        // пробуем следующего
       }
     }
 
@@ -252,7 +212,7 @@ export async function POST(req) {
       warning: 'all_providers_failed',
     })
   } catch (e) {
-    console.error('translate API fatal error', e)
+    console.error('[deep-translate] fatal error', e)
     return NextResponse.json(
       {
         error: 'internal_error',
