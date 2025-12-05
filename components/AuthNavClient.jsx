@@ -333,7 +333,8 @@ export default function AuthNavClient() {
         data-auth-open
         data-auth={isAuthedWallet ? 'true' : 'false'}
         title={isAuthedWallet ? (t('auth_account') || 'Account') : (t('auth_signin') || 'Sign in')}
-      >
+        translate="no"
+     >
         {authLabel}
       </button>
 

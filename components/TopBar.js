@@ -68,7 +68,8 @@ export default function TopBar() {
               className={`nav-link${active ? ' active' : ''}`}
               aria-current={active ? 'page' : undefined}
               data-active={active ? 'true' : 'false'}
-            >
+              translate="no"
+           >
               {label}
             </Link>
           )

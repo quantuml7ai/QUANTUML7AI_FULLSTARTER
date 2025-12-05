@@ -97,7 +97,42 @@ const hasAnyLink = (s) => {
       || shorters.test(str) || ipLocal.test(str) || domain.test(str) || email.test(str);
 };
 
+// --- общий клиентский враппер над /api/deep-translate ---
+// используется и в новостях, и в форуме
+async function translateText(text, targetLocale) {
+  if (!text) return text;
 
+  let target = targetLocale;
+
+  if (!target && typeof navigator !== 'undefined') {
+    target = navigator.language; // например, "ru-RU"
+  }
+
+  const targetLang = (target || 'en').split('-')[0] || 'en';
+
+  try {
+    const res = await fetch('/api/deep-translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text,
+        sourceLang: 'auto',
+        targetLang,
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    // роут возвращает { text, provider } — но на всякий случай поддерживаем и translatedText
+    return data?.text || data?.translatedText || text;
+  } catch (e) {
+    console.error('translate error', e);
+    return text;
+  }
+}
 const readAuth = () => ({
   accountId: isBrowser() && (window.__AUTH_ACCOUNT__ || localStorage.getItem('account') || localStorage.getItem('wallet')) || null,
   asherId:   isBrowser() && (window.__ASHER_ID__      || localStorage.getItem('asherId') || localStorage.getItem('ql7_uid')) || null,
@@ -2017,6 +2052,79 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 .backToTop:hover{ transform: translateY(-1px); }
 @media (max-width: 480px){
   .backToTop{ bottom: clamp(84px, 16dvh, 120px); }
+}
+/* === PostCard: перевод текста === */
+.translateToggleBtn {
+  position: relative;
+  display: flex;                 /* растягиваем контент по ширине */
+  align-items: center;
+  justify-content: center;       /* текст и иконки по центру */
+
+  width: 100%;                   /* ВСЯ ширина карточки */
+  box-sizing: border-box;
+  margin-top: 8px;               /* отступ от даты */
+  margin-left: 0;                /* больше не нужен смещающий left */
+
+  gap: 8px;                      /* у тебя было 70x — опечатка */
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background:
+    radial-gradient(circle at top left, rgba(0, 200, 255, 0.22), rgba(7, 10, 24, 0.96));
+  color: #e5f2ff;
+  font-size: 15px;
+  line-height: 1.1;
+  cursor: pointer;
+  overflow: hidden;
+  opacity: 0.9;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background 0.16s ease,
+    transform 0.12s ease,
+    opacity 0.12s ease;
+}
+
+.translateToggleBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 0 18px rgba(0, 200, 255, 0.75);
+  border-color: rgba(0, 200, 255, 0.95);
+  background:
+    linear-gradient(120deg, rgba(0, 200, 255, 0.35), rgba(255, 188, 56, 0.45));
+  opacity: 1;
+}
+
+.translateToggleBtnOn {
+  border-color: rgba(255, 188, 56, 0.95);
+  box-shadow: 0 0 20px rgba(255, 188, 56, 0.75);
+  background:
+    linear-gradient(120deg, rgba(255, 188, 56, 0.5), rgba(0, 200, 255, 0.35));
+}
+
+.translateToggleBtn:disabled {
+  cursor: default;
+  opacity: 0.6;
+  box-shadow: none;
+}
+
+.translateToggleIcon {
+  font-size: 13px;
+}
+
+/* текст внутри — под обрез, чтобы на маленьких экранах не ломало разметку */
+.translateToggleText {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* адаптив: чуть меньше шрифт и паддинги на узких экранах */
+@media (max-width: 640px) {
+  .translateToggleBtn {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
 }
 
 /* компактнее, чем .btnSm — под иконки/счётчики */
@@ -4115,9 +4223,14 @@ function PostCard({
   markView,
   t, // локализация
 }) {
+  // берём locale из того же хука, что и в новостном хабе
+  const { locale } = useI18n();
+
   // сниппет текста родителя (до 40 символов)
   const parentSnippet = (() => {
     const raw = p?.parentText || p?._parentText || '';
+ 
+
     if (!raw) return null;
     const s = String(raw).replace(/\s+/g, ' ').trim();
     return s.length > 40 ? s.slice(0, 40) + '…' : s;
@@ -4253,7 +4366,48 @@ function PostCard({
       );
     })
     .join('\n');
+ // --- перевод основного текста поста (ТОЛЬКО текст, без медиа) ---
+  const [isTranslated, setIsTranslated] = React.useState(false);
+  const [translateLoading, setTranslateLoading] = React.useState(false);
+  const [translatedBody, setTranslatedBody] = React.useState(null);
 
+  // при смене поста или изменении очищенного текста — сбрасываем перевод
+  React.useEffect(() => {
+    setIsTranslated(false);
+    setTranslateLoading(false);
+    setTranslatedBody(null);
+  }, [p?.id, cleanedText]);
+
+  // какой текст сейчас показывать в теле поста
+  const displayText =
+    isTranslated && translatedBody ? translatedBody : cleanedText;
+
+  async function handleToggleTranslate(e) {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    if (!cleanedText?.trim()) return;
+
+    // если уже перевели — просто показываем оригинал
+    if (isTranslated) {
+      setIsTranslated(false);
+      return;
+    }
+
+    setTranslateLoading(true);
+    try {
+      const tBody = await translateText(cleanedText, locale);
+      setTranslatedBody(tBody);
+      setIsTranslated(true);
+    } finally {
+      setTranslateLoading(false);
+    }
+  }
+
+  const translateBtnLabel = translateLoading
+    ? (t?.('crypto_news_translate_loading') || 'Перевод...')
+    : isTranslated
+      ? (t?.('crypto_news_show_original') || 'Показать оригинал')
+      : (t?.('crypto_news_translate') || 'Перевести');
   // ===== OWNER-меню (⋮) — только если владелец поста =====
   const isOwner = !!authId && (String(authId) === String(p?.userId || p?.accountId));
   const ownerEdit = (e) => {
@@ -4338,13 +4492,14 @@ function PostCard({
           />
         </div>
       ) : (
-        cleanedText.trim() && (
+        displayText.trim() && (
           <div
             className="text-[15px] leading-relaxed postBody whitespace-pre-wrap break-words"
-            dangerouslySetInnerHTML={{ __html: rich(cleanedText) }}
+            dangerouslySetInnerHTML={{ __html: rich(displayText) }}
           />
         )
       )}
+
 
       {/* изображения: естественные пропорции, без квадратного кропа */}
       {imgLines.length > 0 && (
@@ -4500,10 +4655,15 @@ function PostCard({
         </div>
       )}
 
-      {/* время создания — ниже контента */}
-      <div className="meta mt-2" suppressHydrationWarning>
+      {/* время создания + переключатель перевода — ниже контента */}
+      <div
+        className="meta mt-2 flex items-center justify-between gap-2"
+        suppressHydrationWarning
+      >
         <HydrateText value={human(p.ts)} />
+
       </div>
+
 
       {/* нижняя полоса: СЧЁТЧИКИ + РЕАКЦИИ + (ПЕРЕНЕСЁННЫЕ) ДЕЙСТВИЯ — В ОДНУ СТРОКУ */}
       <div
@@ -4587,6 +4747,18 @@ function PostCard({
           </>
         )}
       </div>
+              {cleanedText.trim() && (
+          <button
+            type="button"
+            className={`btn translateToggleBtn  ${isTranslated ? 'translateToggleBtnOn' : ''}`}
+            onClick={handleToggleTranslate}
+            disabled={translateLoading}
+          >
+            <span className="translateToggleIcon">🌐</span>
+            <span className="translateToggleText">{translateBtnLabel}</span>
+             <span className="translateToggleIcon">🌐</span>
+          </button>
+        )}
     </article>
   );
 }

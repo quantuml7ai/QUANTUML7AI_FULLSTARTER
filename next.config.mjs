@@ -15,15 +15,11 @@ images: {
     { protocol: 'https', hostname: 'api.screenshotmachine.com' },
     { protocol: 'https', hostname: 'shot.screenshotapi.net' },
     { protocol: 'https', hostname: 'cdn.screenshotone.com' },
-      // Microlink OG (картинки/видео могут прийти с сторонних CDN; страхуем редкие кейсы)
-      { protocol: 'https', hostname: 'cdn.embedly.com' },
-      { protocol: 'https', hostname: 'og-image.vercel.app' },
-      { protocol: 'https', hostname: 'm.media-amazon.com' },
-      { protocol: 'https', hostname: 'images-na.ssl-images-amazon.com' },    
-    // резерв для возможных OG-ресурсов (редкие кейсы)
-    { protocol: 'https', hostname: 'cdn.embedly.com' },
-    { protocol: 'https', hostname: 'og-image.vercel.app' },
-    // иногда OG-картинки идут с амазоновских CDN
+
+    // Microlink / OG-CDN (страхуем редкие кейсы)
+    { protocol: 'https', hostname: 'api.microlink.io' },
+    { protocol: 'https', hostname: 'cdn.embedly.com' }, 
+    { protocol: 'https', hostname: 'og-image.vercel.app' }, 
     { protocol: 'https', hostname: 'm.media-amazon.com' },
     { protocol: 'https', hostname: 'images-na.ssl-images-amazon.com' },
   ],

@@ -42434,6 +42434,44 @@ const POP_HERO_EN = {
 
 invite_share_text: `Enter Quantum L7 AI 🤖 — an ecosystem where solutions emerge at the intersection of intelligence, data, and markets. Academy of strategic thinking 📚, global forum of ideas 🌐, institutional exchange architecture 💹, on-chain analytics 🔗, L7-agents and explainable AI-core 📊, QCoin economy 🪙 and unified digital infrastructure MiniApp + Web + Telegram ⚡. Here future scenarios are formed, human influence is amplified, and a new computational civilization is created. Join us — we act as a unified coordinate force 🤝🎁`,
 invite_copied: "Copied!",
+      crypto_news_title: 'Quantum Crypto Radar',
+crypto_news_subtitle: 'Quantum market radar: an instant stream of top deals, regulatory shocks, and capital movements that shift the market into new orbits.',
+
+
+crypto_news_filters_source_all: 'All sources of the universe',
+crypto_news_filters_sort: 'Prioritization mode',
+crypto_news_sort_title: 'News ordering algorithm',
+crypto_news_sort_time: 'By time — freshest events on top',
+crypto_news_sort_importance: 'By strength of market impact',
+crypto_news_sort_mixed: 'Smart hybrid: importance × freshness',
+
+
+crypto_news_filters_mode_focus: 'Focus on a single deal',
+crypto_news_filters_mode_grid: 'Tactical grid of signals',
+
+crypto_news_filters_only_important: 'Market triggers only',
+crypto_news_filters_autoplay: 'Auto-scroll signals',
+crypto_news_filters_settings: 'Fine feed tuning',
+
+crypto_news_updated_at: 'Updated as of {value}',
+crypto_news_live: 'Feed operates in live-market mode',
+crypto_news_count: 'Active signals in the feed: {value}',
+
+crypto_news_filters_time_range: 'Analysis horizon',
+crypto_news_range_1h: 'Last hour of volatility',
+crypto_news_range_4h: 'Last 4 hours of dynamics',
+crypto_news_range_24h: 'Last 24 hours of trading',
+crypto_news_range_7d: 'Last 7 days of market movement',
+
+crypto_news_error_loading: 'Failed to load the news stream. Check your connection and run the scanner again.',
+crypto_news_retry: 'Restart scanning',
+crypto_news_empty_state: 'No signals found for the current filters. Loosen the restrictions and expand the observation window.',
+
+crypto_news_importance_label: 'Market significance of the signal:',
+  crypto_news_translate: "Translate", 
+  crypto_news_show_original: "Show original", 
+  crypto_news_translate_loading: "Translating...",
+
 }
 
 const POP_HERO_RU = {
@@ -42473,6 +42511,44 @@ const POP_HERO_RU = {
 
 invite_share_text: `Входи в Quantum L7 AI 🤖 — экосистему, где решения рождаются на стыке интеллекта, данных и рынков. Академия стратегического мышления 📚, глобальный форум идей 🌐, институциональная биржевая архитектура 💹, ончейн-аналитика 🔗, L7-агенты и объяснимое AI-ядро 📊, экономика QCoin 🪙 и единая цифровая инфраструктура MiniApp + Web + Telegram ⚡. Здесь формируются будущие сценарии, усиливается влияние человека и создаётся новая вычислительная цивилизация. Присоединяйся — действуем как единая координатная сила 🤝🎁`,
 invite_copied: "Скопировано!",
+crypto_news_title: 'Quantum Crypto Radar',
+crypto_news_subtitle: 'Квантовый радар рынка: мгновенный поток топ-сделок, регуляторных шоков и движений капитала, которые переносят рынок на новые орбиты.',
+
+
+crypto_news_filters_source_all: 'Все источники вселенной',
+crypto_news_filters_sort: 'Режим приоритизации',
+crypto_news_sort_title: 'Алгоритм упорядочивания новостей',
+crypto_news_sort_time: 'По времени — свежие события наверху',
+crypto_news_sort_importance: 'По силе влияния на рынок',
+crypto_news_sort_mixed: 'Умный гибрид: важность × свежесть',
+
+
+crypto_news_filters_mode_focus: 'Фокус на одной сделке',
+crypto_news_filters_mode_grid: 'Тактическая сетка сигналов',
+
+crypto_news_filters_only_important: 'Только рыночные триггеры',
+crypto_news_filters_autoplay: 'Автопрокрутка сигналов',
+crypto_news_filters_settings: 'Тонкая настройка ленты',
+
+crypto_news_updated_at: 'Обновлено по состоянию на {value}',
+crypto_news_live: 'Лента работает в режиме живого рынка',
+crypto_news_count: 'Актуальных сигналов в ленте: {value}',
+
+crypto_news_filters_time_range: 'Горизонт анализа',
+crypto_news_range_1h: 'Последний час волатильности',
+crypto_news_range_4h: 'Последние 4 часа динамики',
+crypto_news_range_24h: 'Последние 24 часа торгов',
+crypto_news_range_7d: 'Последние 7 дней движения рынка',
+
+crypto_news_error_loading: 'Не удалось подгрузить поток новостей. Проверьте подключение и запустите сканер ещё раз.',
+crypto_news_retry: 'Перезапустить сканирование',
+crypto_news_empty_state: 'По текущим фильтрам сигналы не найдены. Ослабьте ограничения и расширьте окно наблюдения.',
+
+crypto_news_importance_label: 'Рыночная значимость сигнала:',
+  crypto_news_translate: "Перевести", 
+  crypto_news_show_original: "Показать оригинал", 
+  crypto_news_translate_loading: "Перевод...",
+
 }
 
 const POP_HERO_UK = {
@@ -42512,6 +42588,44 @@ const POP_HERO_UK = {
 
 invite_share_text: `Входь у Quantum L7 AI 🤖 — екосистему, де рішення народжуються на перетині інтелекту, даних і ринків. Академія стратегічного мислення 📚, глобальний форум ідей 🌐, інституційна біржова архітектура 💹, ончейн-аналітика 🔗, L7-агенти та пояснюване AI-ядро 📊, економіка QCoin 🪙 і єдина цифрова інфраструктура MiniApp + Web + Telegram ⚡. Тут формуються майбутні сценарії, посилюється вплив людини й створюється нова обчислювальна цивілізація. Приєднуйся — діємо як єдина координатна сила 🤝🎁`,
 invite_copied: "Скопійовано!",
+      crypto_news_title: 'Quantum Crypto Radar', 
+crypto_news_subtitle: 'Квантовий радар ринку: миттєвий потік топ-угод, регуляторних шоків і рухів капіталу, які переносять ринок на нові орбіти.',
+
+
+crypto_news_filters_source_all: 'Усі джерела всесвіту',
+crypto_news_filters_sort: 'Режим пріоритизації',
+crypto_news_sort_title: 'Алгоритм впорядкування новин',
+crypto_news_sort_time: 'За часом — свіжі події зверху',
+crypto_news_sort_importance: 'За силою впливу на ринок',
+crypto_news_sort_mixed: 'Розумний гібрид: важливість × свіжість',
+
+
+crypto_news_filters_mode_focus: 'Фокус на одній угоді',
+crypto_news_filters_mode_grid: 'Тактична сітка сигналів',
+
+crypto_news_filters_only_important: 'Тільки ринкові тригери',
+crypto_news_filters_autoplay: 'Автопрокрутка сигналів',
+crypto_news_filters_settings: 'Тонке налаштування стрічки',
+
+crypto_news_updated_at: 'Оновлено станом на {value}',
+crypto_news_live: 'Стрічка працює в режимі живого ринку',
+crypto_news_count: 'Актуальних сигналів у стрічці: {value}',
+
+crypto_news_filters_time_range: 'Горизонт аналізу',
+crypto_news_range_1h: 'Остання година волатильності',
+crypto_news_range_4h: 'Останні 4 години динаміки',
+crypto_news_range_24h: 'Останні 24 години торгів',
+crypto_news_range_7d: 'Останні 7 днів руху ринку',
+
+crypto_news_error_loading: 'Не вдалося завантажити потік новин. Перевірте підключення та запустіть сканер ще раз.',
+crypto_news_retry: 'Перезапустити сканування',
+crypto_news_empty_state: 'За поточними фільтрами сигнали не знайдено. Послабте обмеження та розширте вікно спостереження.',
+
+crypto_news_importance_label: 'Ринкова значущість сигналу:',
+  crypto_news_translate: "Перекласти", 
+  crypto_news_show_original: "Показати оригінал", 
+  crypto_news_translate_loading: "Переклад...",
+
 }
 
 const POP_HERO_ES = {
@@ -42552,6 +42666,44 @@ const POP_HERO_ES = {
 
 invite_share_text: `Entra en Quantum L7 AI 🤖 — un ecosistema donde las soluciones nacen en la intersección de la inteligencia, los datos y los mercados. Academia de pensamiento estratégico 📚, foro global de ideas 🌐, arquitectura bursátil institucional 💹, analítica on-chain 🔗, agentes L7 y núcleo de IA explicable 📊, economía de QCoin 🪙 y una infraestructura digital unificada MiniApp + Web + Telegram ⚡. Aquí se forman los escenarios futuros, se amplifica la influencia humana y se crea una nueva civilización computacional. Únete — actuamos como una fuerza coordinada unificada 🤝🎁`,
 invite_copied: "¡Copiado!",
+      crypto_news_title: 'Quantum Crypto Radar',  
+crypto_news_subtitle: 'Radar cuántico del mercado: un flujo instantáneo de operaciones top, choques regulatorios y movimientos de capital que trasladan el mercado a nuevas órbitas.',
+
+
+crypto_news_filters_source_all: 'Todas las fuentes del universo',
+crypto_news_filters_sort: 'Modo de priorización',
+crypto_news_sort_title: 'Algoritmo de ordenación de noticias',
+crypto_news_sort_time: 'Por tiempo — los eventos más recientes arriba',
+crypto_news_sort_importance: 'Por fuerza del impacto en el mercado',
+crypto_news_sort_mixed: 'Híbrido inteligente: importancia × frescura',
+
+
+crypto_news_filters_mode_focus: 'Foco en una sola operación',
+crypto_news_filters_mode_grid: 'Cuadrícula táctica de señales',
+
+crypto_news_filters_only_important: 'Solo detonadores del mercado',
+crypto_news_filters_autoplay: 'Auto-desplazamiento de señales',
+crypto_news_filters_settings: 'Ajuste fino del feed',
+
+crypto_news_updated_at: 'Actualizado a fecha de {value}',
+crypto_news_live: 'El feed funciona en modo de mercado en vivo',
+crypto_news_count: 'Señales activas en el feed: {value}',
+
+crypto_news_filters_time_range: 'Horizonte de análisis',
+crypto_news_range_1h: 'Última hora de volatilidad',
+crypto_news_range_4h: 'Últimas 4 horas de dinámica',
+crypto_news_range_24h: 'Últimas 24 horas de negociación',
+crypto_news_range_7d: 'Últimos 7 días de movimiento del mercado',
+
+crypto_news_error_loading: 'No se pudo cargar el flujo de noticias. Verifique la conexión y ejecute el escáner nuevamente.',
+crypto_news_retry: 'Reiniciar el escaneo',
+crypto_news_empty_state: 'No se encontraron señales con los filtros actuales. Relaje las restricciones y amplíe la ventana de observación.',
+
+crypto_news_importance_label: 'Relevancia de mercado de la señal:',
+  crypto_news_translate: "Traducir", 
+  crypto_news_show_original: "Mostrar original", 
+  crypto_news_translate_loading: "Traduciendo...",
+
 }
 
 const POP_HERO_ZH = {
@@ -42590,6 +42742,44 @@ const POP_HERO_ZH = {
 invite_share_text: `进入 Quantum L7 AI 🤖 —— 一个在智能、数据和市场交汇处孕育解决方案的生态系统。战略思维学院 📚、全球思想论坛 🌐、机构级交易架构 💹、链上分析 🔗、L7 代理和可解释的 AI 核心 📊、QCoin 经济 🪙 以及统一的数字基础设施 MiniApp + Web + Telegram ⚡。这里形成未来的情景，加强人的影响力，并创造新的计算文明。加入我们 —— 我们作为一个统一的坐标力量行动 🤝🎁`,
 
 invite_copied: "已复制！",
+      crypto_news_title: 'Quantum Crypto Radar',   
+crypto_news_subtitle: '量子级市场雷达：即时捕捉顶级交易、监管冲击和资本流动，将市场推向新的轨道.',
+
+
+crypto_news_filters_source_all: '全宇宙的所有来源',
+crypto_news_filters_sort: '优先级模式',
+crypto_news_sort_title: '新闻排序算法',
+crypto_news_sort_time: '按时间排序 — свежие события наверху',
+crypto_news_sort_importance: '按对市场影响力排序',
+crypto_news_sort_mixed: '智能混合: важность × свежесть',
+
+
+crypto_news_filters_mode_focus: '聚焦单笔交易',
+crypto_news_filters_mode_grid: '战术信号栅格',
+
+crypto_news_filters_only_important: '仅显示市场触发信号',
+crypto_news_filters_autoplay: '信号自动滚动',
+crypto_news_filters_settings: '精细调节资讯流',
+
+crypto_news_updated_at: '更新至 {value}',
+crypto_news_live: '资讯流运行于实时市场模式',
+crypto_news_count: '资讯流中的有效信号数量: {value}',
+
+crypto_news_filters_time_range: '分析视野',
+crypto_news_range_1h: '最近一小时的波动',
+crypto_news_range_4h: '最近四小时的动态',
+crypto_news_range_24h: '最近二十四小时的交易',
+crypto_news_range_7d: '最近七天的市场走势',
+
+crypto_news_error_loading: '无法加载新闻流. 请检查连接后重新启动扫描器.',
+crypto_news_retry: '重新启动扫描',
+crypto_news_empty_state: '在当前过滤条件下未找到任何信号. 请放宽限制并扩展观察窗口.',
+
+crypto_news_importance_label: '信号的市场重要性:',
+  crypto_news_translate: "翻译", 
+  crypto_news_show_original: "显示原文", 
+  crypto_news_translate_loading: "翻译中...",
+
 }
 
 const POP_HERO_AR = {
@@ -42628,6 +42818,44 @@ const POP_HERO_AR = {
 
 invite_share_text: `ادخل إلى Quantum L7 AI 🤖 — منظومة بيئية تُولد فيها الحلول عند تقاطع الذكاء والبيانات والأسواق. أكاديمية التفكير الاستراتيجي 📚، المنتدى العالمي للأفكار 🌐، البنية التحتية المؤسسية للتداول 💹، التحليلات على السلسلة 🔗، وكلاء L7 والنواة التفسيرية للذكاء الاصطناعي 📊، اقتصاد QCoin 🪙 والبنية الرقمية الموحدة MiniApp + Web + Telegram ⚡. هنا تتشكل سيناريوهات المستقبل، ويزداد تأثير الإنسان، وتُبنى حضارة حسابية جديدة. انضم إلينا — نعمل كقوة إحداثية موحّدة 🤝🎁`,
  invite_copied: "تم النسخ!",
+       crypto_news_title: 'Quantum Crypto Radar',    
+crypto_news_subtitle: 'رادار السوق الكمي: تدفّق فوري لأفضل الصفقات، والصدمات التنظيمية، وحركات رأس المال التي تنقل السوق إلى مدارات جديدة.',
+
+
+crypto_news_filters_source_all: 'جميع مصادر الكون',
+crypto_news_filters_sort: 'وضع تحديد الأولويات',
+crypto_news_sort_title: 'خوارزمية ترتيب الأخبار',
+crypto_news_sort_time: 'حسب الوقت — الأحداث الأحدث في الأعلى',
+crypto_news_sort_importance: 'بحسب قوة التأثير في السوق',
+crypto_news_sort_mixed: 'هجين ذكي: الأهمية × الحداثة',
+
+
+crypto_news_filters_mode_focus: 'تركيز على صفقة واحدة',
+crypto_news_filters_mode_grid: 'شبكة تكتيكية للإشارات',
+
+crypto_news_filters_only_important: 'محفزات السوق فقط',
+crypto_news_filters_autoplay: 'التمرير التلقائي للإشارات',
+crypto_news_filters_settings: 'ضبط دقيق للتغذية',
+
+crypto_news_updated_at: 'محدَّث حتى {value}',
+crypto_news_live: 'التغذية تعمل في وضع السوق الحي',
+crypto_news_count: 'عدد الإشارات الفعّالة في التغذية: {value}',
+
+crypto_news_filters_time_range: 'أفق التحليل',
+crypto_news_range_1h: 'آخر ساعة من التقلبات',
+crypto_news_range_4h: 'آخر 4 ساعات من الحركة',
+crypto_news_range_24h: 'آخر 24 ساعة من التداول',
+crypto_news_range_7d: 'آخر 7 أيام من حركة السوق',
+
+crypto_news_error_loading: 'تعذّر تحميل تدفّق الأخبار. تحقَّق من الاتصال ثم شغِّل الماسح مرة أخرى.',
+crypto_news_retry: 'إعادة تشغيل المسح',
+crypto_news_empty_state: 'لا توجد إشارات وفق المرشحات الحالية. خفِّف القيود ووسِّع نافذة المراقبة.',
+
+crypto_news_importance_label: 'أهمية الإشارة السوقية:',
+  crypto_news_translate: "ترجمة", 
+  crypto_news_show_original: "عرض الأصل", 
+  crypto_news_translate_loading: "جاري الترجمة...",
+
 }
 
 const POP_HERO_TR = {
@@ -42668,6 +42896,43 @@ const POP_HERO_TR = {
 
 invite_share_text: `Quantum L7 AI 🤖 ekosistemine gir — çözümler zekâ, veriler ve piyasaların kesişiminde doğar. Stratejik düşünme akademisi 📚, küresel fikir forumu 🌐, kurumsal borsa mimarisi 💹, on-chain analitiği 🔗, L7 ajanları ve açıklanabilir AI çekirdeği 📊, QCoin ekonomisi 🪙 ve birleşik dijital altyapı MiniApp + Web + Telegram ⚡. Burada geleceğin senaryoları oluşur, insan etkisi güçlenir ve yeni bir hesaplama uygarlığı yaratılır. Katıl — tek bir koordinat gücü olarak hareket ediyoruz 🤝🎁`,
 invite_copied: "Kopyalandı!",
+      crypto_news_title: 'Quantum Crypto Radar',     
+crypto_news_subtitle: 'Piyasanın kuantum radarı: en iyi işlemlerin, düzenleyici şokların ve sermaye hareketlerinin piyasayı yeni yörüngelere taşıyan anlık akışı.',
+
+
+crypto_news_filters_source_all: 'Evrenin tüm kaynakları',
+crypto_news_filters_sort: 'Önceliklendirme modu',
+crypto_news_sort_title: 'Haberleri sıralama algoritması',
+crypto_news_sort_time: 'Zamana göre — en taze olaylar en üstte',
+crypto_news_sort_importance: 'Piyasaya etki gücüne göre',
+crypto_news_sort_mixed: 'Akıllı hibrit: önem × tazelik',
+
+
+crypto_news_filters_mode_focus: 'Tek bir işleme odak',
+crypto_news_filters_mode_grid: 'Taktik sinyal ızgarası',
+
+crypto_news_filters_only_important: 'Yalnızca piyasa tetikleyicileri',
+crypto_news_filters_autoplay: 'Sinyallerin otomatik kaydırılması',
+crypto_news_filters_settings: 'Akışın ince ayarı',
+
+crypto_news_updated_at: 'Durum itibarıyla güncellendi: {value}',
+crypto_news_live: 'Akış canlı piyasa modunda çalışıyor',
+crypto_news_count: 'Akıştaki güncel sinyaller: {value}',
+
+crypto_news_filters_time_range: 'Analiz ufku',
+crypto_news_range_1h: 'Son bir saatlik oynaklık',
+crypto_news_range_4h: 'Son 4 saatin dinamiği',
+crypto_news_range_24h: 'Son 24 saatlik işlem',
+crypto_news_range_7d: 'Son 7 günün piyasa hareketi',
+
+crypto_news_error_loading: 'Haber akışı yüklenemedi. Bağlantınızı kontrol edin ve tarayıcıyı tekrar çalıştırın.',
+crypto_news_retry: 'Taramayı yeniden başlat',
+crypto_news_empty_state: 'Geçerli filtrelere göre sinyal bulunamadı. Kısıtlamaları gevşetin ve gözlem penceresini genişletin.',
+
+crypto_news_importance_label: 'Sinyalin piyasa önemi:',
+  crypto_news_translate: "Çevir", 
+  crypto_news_show_original: "Orijinali göster", 
+  crypto_news_translate_loading: "Çevriliyor...",
 
 }
 

@@ -46,6 +46,7 @@ export default function LanguageSwitcher() {
       aria-live="polite"
       onClick={goNext}
       onKeyDown={onKeyDown}
+      translate="no"
     >
       <span className="planet-core">{tag}</span>
     </button>

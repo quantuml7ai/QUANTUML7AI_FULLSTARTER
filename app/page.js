@@ -7,17 +7,20 @@ import Link from 'next/link'
 import Image from 'next/image'           // ← добавлено
 import { useI18n } from '../components/i18n'
 import HomeBetweenBlocksAd from './ads'
+import CryptoNewsLens from './components/CryptoNewsLens'
 
 function AutoMedia({ 
   base,
-  poster,                               // ← НОВОЕ: явный постер
-  exts = ['mp4', 'jpg'],
+  poster,
+  // видео больше не используем, по умолчанию только картинки
+  exts = ['jpg', 'png', 'webp'],
   className,
   alt = '',
   imgProps = {},
   videoProps = {},
 }) {
   const [src, setSrc] = useState(null)
+  // видео больше не рендерим – всегда картинка
   const [kind, setKind] = useState('img')
 
   useEffect(() => {
@@ -57,7 +60,8 @@ function AutoMedia({
         if (ok) {
           if (dead) return
           setSrc(url)
-          setKind(ext === 'mp4' || ext === 'webm' ? 'video' : 'img')
+          // независимо от расширения – трактуем как img
+          setKind('img')
           return
         }
       }
@@ -71,26 +75,9 @@ function AutoMedia({
   // ── Вариант без предупреждения (если хотите совсем убрать хинт eslint):
   // const extsKey = Array.isArray(exts) ? exts.join(',') : ''
   // useEffect(..., [base, extsKey])
+  if (!src) return null 
 
-  if (!src) return null
-
-  if (kind === 'video') {
-    return (
-      <video
-        className={className}
-        src={src}
-        poster={poster}               // ← ВОТ ЗДЕСЬ показываем статику пока грузится видео
-        playsInline
-        muted
-        autoPlay
-        loop
-        controls={false}
-        {...videoProps}
-      />
-    )
-  }
-
-  // ← заменено <img> на <Image/>
+ // видео больше не используем – всегда картинка
   return (
     <Image
       className={className}
@@ -155,7 +142,9 @@ export default function Home() {
   const content = []
   blocks.forEach((b, idx) => {
     content.push(
+  
       <section className="panel" key={`b-${idx}`}>
+   
         <h2>{b.title}</h2>
         {Array.isArray(b.paras) &&
           b.paras.map((p, i) => (
@@ -172,29 +161,16 @@ export default function Home() {
     if (idx === 0) { 
       content.push(
         <section className="panel" key="live-bloomberg">
-          <h2>Live: Bloomberg US</h2>
+          <CryptoNewsLens />   
+     
           <ResponsiveEmbed
             src={'https://www.bloomberg.com/live/us'}
             title="Bloomberg US — Live"
           />
         </section>
       )
- 
-      content.push(
-        <figure className="panel" key="qc-shot">
-          <AutoMedia
-            base="/branding/qc_room"
-            exts={['jpg']}
-            className="quantum-shot"
-            alt="Quantum L7 AI — quantum computing lab. We are the future of the industry."
-            imgProps={{}}
-            videoProps={{}}
-          />
-          <figcaption className="sr-only">
-            Quantum L7 AI — We are the future of the industry
-          </figcaption>
-        </figure>
-      )
+
+
     }
   })
 
@@ -205,7 +181,8 @@ export default function Home() {
 
         <AutoMedia
           base="/branding/telegram_card_tape_fixed"
-          poster="/branding/telegram_card_tape_fixed_poster.jpg"  // ← ДОБАВЛЕН ПОСТЕР ДЛЯ 1-ГО БЛОКА
+          // явно: только картинки, без видео
+          exts={['jpg', 'png', 'webp']}
           className="tg-tape"
           alt="Telegram card sample"
         />
@@ -228,7 +205,14 @@ export default function Home() {
 
       {/* Реклама строго между hero (1-й блок) и первым блоком из home_blocks (2-й блок) */}
       <HomeBetweenBlocksAd key="home-ad-between-hero-and-block-1" />
-   
+            <AutoMedia
+            base="/branding/qc_room"
+            exts={['jpg']}
+            className="quantum-shot"
+            alt="Quantum L7 AI — quantum computing lab. We are the future of the industry."
+            imgProps={{}}
+            videoProps={{}}
+          />      
       {content}
  
       <section className="marquee-wrap no-gutters" aria-hidden="true">

@@ -53,6 +53,9 @@ importers:
       '@web3modal/wagmi':
         specifier: ^5.1.11
         version: 5.1.11(f5de2815dea17b08d7ea1ed111918469)
+      deepl-node:
+        specifier: ^1.22.0
+        version: 1.22.0
       next:
         specifier: 14.2.5
         version: 14.2.5(@babel/core@7.28.5)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -2896,6 +2899,10 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
+  adm-zip@0.5.16:
+    resolution: {integrity: sha512-TGw5yVi4saajsSEgz25grObGHEUaDrniwvA2qwSC060KfqGPdglhvPMA2lPIoxs3PQIItj2iag35fONcQqgUaQ==}
+    engines: {node: '>=12.0'}
+
   agent-base@7.1.4:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
     engines: {node: '>= 14'}
@@ -3519,6 +3526,10 @@ packages:
   deep-is@0.1.4:
     resolution: {integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==}
 
+  deepl-node@1.22.0:
+    resolution: {integrity: sha512-NmaNAiOi7Ztw74wRMnPxhUEypxidHxSZ9hbVZNtjZKcjFyGfcbG7rqeYj13ln/BIisftK+FdGXwTDE4viBszrg==}
+    engines: {node: '>=12.0'}
+
   deepmerge@4.3.1:
     resolution: {integrity: sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==}
     engines: {node: '>=0.10.0'}
@@ -4000,6 +4011,10 @@ packages:
   foreground-child@3.3.1:
     resolution: {integrity: sha512-gIXjKqtFuWEgzFRJA9WCQeSJLZDjgJUOMCMzxtvFq/37KojM1BFGufqsCy0r4qSQmYLsZYMeyRqzIWOMup03sw==}
     engines: {node: '>=14'}
+
+  form-data@3.0.4:
+    resolution: {integrity: sha512-f0cRzm6dkyVYV3nPoooP8XlccPQukegwhAnpoLcXy+X+A8KfpGOoXwDr9FLZd3wzgLaBGQBE3lY93Zm/i1JvIQ==}
+    engines: {node: '>= 6'}
 
   form-data@4.0.4:
     resolution: {integrity: sha512-KrGhL9Q4zjj0kiUt5OO4Mr/A/jlI2jDYs5eHBpYHPcBEVSiipAvn2Ko2HnPe20rmcuuvMHNdZFp+4IlGTMF0Ow==}
@@ -11908,6 +11923,8 @@ snapshots:
 
   acorn@8.15.0: {}
 
+  adm-zip@0.5.16: {}
+
   agent-base@7.1.4: {}
 
   agentkeepalive@4.6.0:
@@ -12632,6 +12649,17 @@ snapshots:
 
   deep-is@0.1.4: {}
 
+  deepl-node@1.22.0:
+    dependencies:
+      '@types/node': 24.9.2
+      adm-zip: 0.5.16
+      axios: 1.13.1
+      form-data: 3.0.4
+      loglevel: 1.9.2
+      uuid: 8.3.2
+    transitivePeerDependencies:
+      - debug
+
   deepmerge@4.3.1: {}
 
   define-data-property@1.1.4:
@@ -13264,6 +13292,14 @@ snapshots:
     dependencies:
       cross-spawn: 7.0.6
       signal-exit: 4.1.0
+
+  form-data@3.0.4:
+    dependencies:
+      asynckit: 0.4.0
+      combined-stream: 1.0.8
+      es-set-tostringtag: 2.1.0
+      hasown: 2.0.2
+      mime-types: 2.1.35
 
   form-data@4.0.4:
     dependencies:
