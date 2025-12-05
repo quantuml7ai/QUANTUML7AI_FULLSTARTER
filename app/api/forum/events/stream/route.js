@@ -11,19 +11,28 @@ export const runtime = 'edge'
 
 // --- singleton-объект для защиты от двойных подписок в DEV/HMR и на инстансе ---
 const S = (globalThis.__forumSSE ||= {
-  clients: new Set(),         // Set<ReadableStreamDefaultController>
+  clients: new Set(),
   subscribed: false,
   subRunning: false,
   busHooked: false,
 })
 
+// один encoder на процесс
+const encoder = new TextEncoder()
+
 function safeEnqueue(controller, chunk) {
-  try { controller.enqueue(typeof chunk === 'string' ? chunk : String(chunk)) } catch { S.clients.delete(controller) }
+  try {
+    const str = typeof chunk === 'string' ? chunk : String(chunk)
+    controller.enqueue(encoder.encode(str)) // ← всегда байты
+  } catch {
+    S.clients.delete(controller)
+  }
 }
 
 function write(controller, obj) {
   safeEnqueue(controller, `data: ${JSON.stringify(obj)}\n\n`)
 }
+
 
 function broadcast(evt) {
   const chunk = `data: ${JSON.stringify(evt)}\n\n`

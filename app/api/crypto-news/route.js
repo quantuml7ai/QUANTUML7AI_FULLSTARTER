@@ -70,7 +70,7 @@ const IMPORTANCE_MIN = Number(
   process.env.CRYPTO_NEWS_MIN_SCORE || '5',
 )
 
-const MAX_ITEMS = Number(process.env.CRYPTO_NEWS_MAX_ITEMS || '100')
+const MAX_ITEMS = Number(process.env.CRYPTO_NEWS_MAX_ITEMS || '76')
 
 // Reddit
 const REDDIT_SUBS = (process.env.NEXT_PUBLIC_REDDIT_SUBS || '')

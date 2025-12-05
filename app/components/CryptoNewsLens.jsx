@@ -871,10 +871,7 @@ const activePreview = useNewsPreview(activeItem)
             </div>
 
             <div className="mobileSheetSection">
-              <div className="sheetLabel">
-                {t('crypto_news_filters_mode') ||
-                  'Режим просмотра'}
-              </div>
+
               <div className="modeToggle">
                 <button
                   type="button"
@@ -906,11 +903,7 @@ const activePreview = useNewsPreview(activeItem)
             </div>
 
             <div className="mobileSheetSection">
-              <div className="sheetLabel">
-                {t(
-                  'crypto_news_filters_only_important',
-                ) || 'Только важные'}
-              </div>
+
               <button
                 type="button"
                 className={cx(
