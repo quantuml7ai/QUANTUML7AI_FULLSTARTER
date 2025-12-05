@@ -183,7 +183,7 @@ async function translateText(text, targetLocale) {
     return text
   }
 }
-// ==== CLIENT FALLBACK (Reddit прямо из браузера) ====
+// ==== CLIENT FALLBACKS: Reddit + RSS (работают только в браузере) ====
 
 const FALLBACK_REDDIT_SUBS = [
   'CryptoCurrency',
@@ -194,7 +194,20 @@ const FALLBACK_REDDIT_SUBS = [
   'Solana',
 ]
 
-// очень простой анализ тикеров (копия с бэка, но без чересчур)
+// те же RSS, что у тебя на бэке по дефолту
+const FALLBACK_RSS_FEEDS = [
+  'https://www.coindesk.com/arc/outboundfeeds/rss/?outputType=xml',
+  'https://decrypt.co/feed',
+  'https://cointelegraph.com/rss',
+  'https://www.theblock.co/rss',
+  'https://bitcoinmagazine.com/.rss/full',
+  'https://www.coindesk.com/arc/outboundfeeds/rss/category/markets/?outputType=xml',
+  'https://www.coindesk.com/arc/outboundfeeds/rss/category/policy/?outputType=xml',
+  'https://www.coindesk.com/arc/outboundfeeds/rss/category/business/?outputType=xml',
+]
+
+// ---- общие хелперы для fallback ----
+
 const FALLBACK_TICKER_REGEX = /\b[A-Z]{2,6}\b/g
 const FALLBACK_TICKER_BLACKLIST = new Set([
   'NEWS',
@@ -222,8 +235,33 @@ function fallbackExtractTickersFromText(text) {
 
 function fallbackComputeSentiment(text) {
   const s = (text || '').toLowerCase()
-  const bull = ['soars', 'surge', 'rally', 'pump', 'bullish', 'approve', 'approval', 'etf approved', 'buy', 'upgrade']
-  const bear = ['drops', 'dump', 'fall', 'plunge', 'bearish', 'hack', 'exploit', 'ban', 'lawsuit', 'sue', 'sell', 'downgrade', 'liquidation']
+  const bull = [
+    'soars',
+    'surge',
+    'rally',
+    'pump',
+    'bullish',
+    'approve',
+    'approval',
+    'etf approved',
+    'buy',
+    'upgrade',
+  ]
+  const bear = [
+    'drops',
+    'dump',
+    'fall',
+    'plunge',
+    'bearish',
+    'hack',
+    'exploit',
+    'ban',
+    'lawsuit',
+    'sue',
+    'sell',
+    'downgrade',
+    'liquidation',
+  ]
   let score = 0
   for (const k of bull) if (s.includes(k)) score += 1
   for (const k of bear) if (s.includes(k)) score -= 1
@@ -232,7 +270,28 @@ function fallbackComputeSentiment(text) {
   return 'neutral'
 }
 
-// грубый importance из апвоутов/комментов
+// importance без голосов — просто по ключевым словам
+function fallbackComputeImportanceFromText(title, summary) {
+  let score = 10
+  const txt = `${title || ''} ${summary || ''}`.toLowerCase()
+
+  if (txt.includes('bitcoin') || txt.includes('btc')) score += 25
+  if (txt.includes('ethereum') || txt.includes('eth')) score += 20
+  if (
+    txt.includes('sec') ||
+    txt.includes('etf') ||
+    txt.includes('regulation') ||
+    txt.includes('lawsuit')
+  ) {
+    score += 15
+  }
+
+  if (score < 5) score = 5
+  if (score > 100) score = 100
+  return Math.round(score)
+}
+
+// importance для Reddit по апвоутам/комментам
 function fallbackComputeImportanceFromReddit(ups, comments, title) {
   const base = 10
   const upNorm = Math.min(ups || 0, 5000) / 5000
@@ -249,7 +308,15 @@ function fallbackComputeImportanceFromReddit(ups, comments, title) {
   return Math.round(score)
 }
 
-// ⚠️ вызывается ТОЛЬКО из браузера (client-side)
+// простая генерация id, чтобы React не ругался
+function fallbackMakeId(prefix, idx, extra) {
+  return `${prefix}-${idx}-${extra || ''}-${Date.now()}-${Math.random()
+    .toString(36)
+    .slice(2)}`
+}
+
+// ---- Reddit fallback: идёт напрямую из браузера в reddit.com ----
+
 async function fetchRedditClientFallback() {
   const out = []
 
@@ -264,15 +331,15 @@ async function fetchRedditClientFallback() {
         if (!res.ok) return
         const data = await res.json().catch(() => null)
         const posts = data?.data?.children || []
-        for (const p of posts) {
+        posts.forEach((p, idx) => {
           const d = p?.data
-          if (!d) continue
+          if (!d) return
 
           const postUrl = d.url_overridden_by_dest || d.url
-          if (!postUrl) continue
+          if (!postUrl) return
 
-          // игнорируем чисто текстовые посты
-          if (d.is_self && !/\.(jpe?g|png|webp|gif|avif)(\?|#|$)/i.test(postUrl)) continue
+          // игнорируем чисто текстовые посты без картинки
+          if (d.is_self && !/\.(jpe?g|png|webp|gif|avif)(\?|#|$)/i.test(postUrl)) return
 
           const title = d.title || ''
           const sourceName = `r/${sub}`
@@ -295,7 +362,7 @@ async function fetchRedditClientFallback() {
           const sentiment = fallbackComputeSentiment(title)
 
           out.push({
-            id: `reddit-fallback-${sub}-${d.id}`,
+            id: fallbackMakeId('reddit-fb', idx, sub),
             title,
             summary: '',
             sourceName,
@@ -311,15 +378,192 @@ async function fetchRedditClientFallback() {
             previewStep: 'init',
             previewQuality: 0,
           })
-        }
-      } catch (e) {
-        // в fallback тоже молча — но хотя бы часть сабов загрузится
+        })
+      } catch (e) { 
         console.error('reddit client fallback error for', sub, e)
       }
     }),
   )
 
   return out
+}
+
+// ---- RSS fallback: тянем RSS через CORS-френдли прокси (allorigins) ----
+
+// упрощённый парсер RSS/Atom — близкий к бэковому
+function parseRssItemsClient(xml, defaultSourceName) {
+  if (!xml) return []
+
+  const items = []
+  const itemRegex = /<item\b[\s\S]*?<\/item>/gi
+  const atomEntryRegex = /<entry\b[\s\S]*?<\/entry>/gi
+
+  const blocks = []
+  let m
+  while ((m = itemRegex.exec(xml))) blocks.push(m[0])
+  if (!blocks.length) {
+    while ((m = atomEntryRegex.exec(xml))) blocks.push(m[0])
+  }
+
+  blocks.slice(0, 40).forEach((block, idx) => {
+    const titleRaw =
+      (block.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1] || ''
+    const title = titleRaw
+      .replace(/<!\[CDATA\[|\]\]>/g, '')
+      .replace(/<[^>]*>/g, '')
+      .trim()
+
+    let link =
+      (block.match(/<link[^>]*>([^<]+)<\/link>/i) || [])[1] || ''
+    if (!link) {
+      const hrefMatch =
+        block.match(/<link[^>]+href="([^"]+)"[^>]*\/?>/i) || []
+      link = hrefMatch[1] || ''
+    }
+
+    const summaryRaw =
+      (block.match(
+        /<(description|summary)[^>]*>([\s\S]*?)<\/\1>/i,
+      ) || [])[2] || ''
+    const summary = summaryRaw
+      .replace(/<!\[CDATA\[|\]\]>/g, '')
+      .replace(/<[^>]*>/g, '')
+      .trim()
+
+    const pubRaw =
+      (block.match(
+        /<(pubDate|updated)[^>]*>([\s\S]*?)<\/\1>/i,
+      ) || [])[2] || ''
+
+    let url = null
+    try {
+      const u = new URL(link)
+      url = u.toString()
+    } catch {
+      // если линк кривой — пропускаем
+      return
+    }
+
+    let host = ''
+    try {
+      host = new URL(url).hostname.replace(/^www\./, '')
+    } catch {}
+
+    const sourceName = defaultSourceName || host || 'RSS'
+
+    let publishedAt
+    try {
+      const d = new Date(pubRaw || '')
+      publishedAt = d.toISOString()
+    } catch {
+      publishedAt = new Date().toISOString()
+    }
+
+    // пробуем вытащить картинку из enclosure / media:content
+    let img = null
+    const encMatch =
+      block.match(
+        /<(enclosure|media:content)[^>]+url="([^"]+)"[^>]*\/?>/i,
+      ) || []
+    if (encMatch[2]) img = encMatch[2]
+
+    const importanceScore = fallbackComputeImportanceFromText(
+      title,
+      summary,
+    )
+    const sentiment = fallbackComputeSentiment(`${title} ${summary}`)
+
+    items.push({
+      id: fallbackMakeId('rss-fb', idx, host),
+      title,
+      summary,
+      sourceName,
+      sourceUrl: url,
+      publishedAt,
+      importanceScore,
+      sentiment,
+      tags: fallbackExtractTickersFromText(title),
+      lang: 'en',
+      origin: 'rss-client',
+      imageUrl: img,
+      previewKind: 'placeholder',
+      previewStep: 'init',
+      previewQuality: 0,
+    })
+  })
+
+  return items
+}
+
+// сам RSS-fallback: ходим в публичный CORS-friendly прокси
+async function fetchRssClientFallback() {
+  const out = []
+
+  await Promise.all(
+    FALLBACK_RSS_FEEDS.map(async (feedUrl) => {
+      try {
+        // публичный прокси allorigins:
+        // можно заменить на свой /api/rss-proxy, если захочешь
+        const proxyUrl =
+          'https://api.allorigins.win/get?' +
+          new URLSearchParams({
+            url: feedUrl,
+            _: String(Date.now()),
+          }).toString()
+
+        const res = await fetch(proxyUrl, {
+          method: 'GET',
+          cache: 'no-store',
+        })
+        if (!res.ok) return
+
+        const data = await res.json().catch(() => null)
+        const xml = data?.contents || ''
+        if (!xml) return
+
+        let host = ''
+        try {
+          host = new URL(feedUrl).hostname.replace(/^www\./, '')
+        } catch {}
+
+        const items = parseRssItemsClient(xml, host)
+        out.push(...items)
+      } catch (e) {
+        console.error('rss client fallback error for', feedUrl, e)
+      }
+    }),
+  )
+
+  return out
+}
+
+// единая функция, которую будем дергать из loadNews
+async function loadClientFallbackFeed(setItems, setUpdatedAt, setActiveIndex, setProgress) {
+  try {
+    const [rssItems, redditItems] = await Promise.all([
+      fetchRssClientFallback(),
+      fetchRedditClientFallback(),
+    ])
+
+    const merged = [...rssItems, ...redditItems]
+
+    // сортируем по времени, чтобы было как на бэке
+    merged.sort(
+      (a, b) =>
+        new Date(b.publishedAt).getTime() -
+        new Date(a.publishedAt).getTime(),
+    )
+
+    setItems(merged)
+    setUpdatedAt(new Date().toISOString())
+    setActiveIndex(0)
+    setProgress(0)
+
+    return merged.length
+  } catch (e) {
+    console.error('loadClientFallbackFeed error', e)
+    return 0
+  }
 }
 
 /**
@@ -430,6 +674,7 @@ export default function CryptoNewsLens() {
     }
   }, [filteredItems, activeIndex])
 
+  
   // загрузка новостей
   async function loadNews() {
     try {
@@ -450,14 +695,18 @@ export default function CryptoNewsLens() {
         cache: 'no-store',
       })
 
-      // если сам роут упал — сразу в fallback
+      // если сам API упал — сразу в client fallback
       if (!res.ok) {
-        console.warn('crypto-news API error, fallback to client reddit')
-        const fbItems = await fetchRedditClientFallback()
-        setItems(fbItems)
-        setUpdatedAt(new Date().toISOString())
-        setActiveIndex(0)
-        setProgress(0)
+        console.warn('crypto-news API error, fallback to client (RSS + Reddit)')
+        const count = await loadClientFallbackFeed(
+          setItems,
+          setUpdatedAt,
+          setActiveIndex,
+          setProgress,
+        )
+        if (!count) {
+          setError(`HTTP ${res.status}`)
+        }
         return
       }
 
@@ -469,20 +718,26 @@ export default function CryptoNewsLens() {
         Object.keys(stats).length > 0 &&
         Object.values(stats).every((n) => !n)
 
-      // 🌟 КЛЮЧЕВОЙ МОМЕНТ:
-      // если сервер НИЧЕГО не смог достать (все источники 0 / лента пустая),
-      // мы считаем, что прод-сервер не видит интернет — и включаем client-fallback
+      // КЛЮЧ: бэк жив, но НИЧЕГО не достал → включаем client fallback
       if (!news.length || allStatsZero) {
-        console.warn('crypto-news API returned empty feed, fallback to client reddit')
-        const fbItems = await fetchRedditClientFallback()
-        setItems(fbItems)
-        setUpdatedAt(new Date().toISOString())
-        setActiveIndex(0)
-        setProgress(0)
+        console.warn(
+          'crypto-news API returned empty feed, fallback to client (RSS + Reddit)',
+        )
+        const count = await loadClientFallbackFeed(
+          setItems,
+          setUpdatedAt,
+          setActiveIndex,
+          setProgress,
+        )
+        if (!count) {
+          // совсем уж пусто — покажем пустой стейт
+          setItems([])
+          setUpdatedAt(new Date().toISOString())
+        }
         return
       }
 
-      // обычный успешный путь, как раньше
+      // нормальный успешный путь (как в DEV)
       setItems(news)
       setUpdatedAt(data?.meta?.updatedAt || data?.updatedAt || null)
       setActiveIndex(0)
@@ -491,19 +746,22 @@ export default function CryptoNewsLens() {
       console.error('loadNews error', e)
       setError(e?.message || 'error')
 
-      // на всякий случай: даже из catch пробуем показать хоть что-то
-      const fbItems = await fetchRedditClientFallback()
-      if (fbItems.length) {
-        setItems(fbItems)
+      // даже при реальной ошибке — стараемся хоть чем-то заполнить ленту
+      const count = await loadClientFallbackFeed(
+        setItems,
+        setUpdatedAt,
+        setActiveIndex,
+        setProgress,
+      )
+      if (!count) {
+        // если и fallback не смог — уже просто показываем ошибку + пусто
+        setItems([])
         setUpdatedAt(new Date().toISOString())
-        setActiveIndex(0)
-        setProgress(0)
-      }
+      } 
     } finally {
       setLoading(false)
     }
-  }
-
+  } 
 
   // первый запрос
   useEffect(() => {

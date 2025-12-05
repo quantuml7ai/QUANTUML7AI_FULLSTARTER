@@ -6,45 +6,6 @@ export const dynamic = 'force-dynamic'
 
 /* ========== ENV / CONFIG ========== */
 
-// дефолтные RSS (можно править тут, не трогая env)
-const DEFAULT_RSS_FEEDS = [
-  'https://www.coindesk.com/arc/outboundfeeds/rss/?outputType=xml',
-  'https://decrypt.co/feed',
-  'https://cointelegraph.com/rss',
-  'https://www.theblock.co/rss',
-  'https://bitcoinmagazine.com/.rss/full',
-  'https://www.coindesk.com/arc/outboundfeeds/rss/category/markets/?outputType=xml',
-  'https://www.coindesk.com/arc/outboundfeeds/rss/category/policy/?outputType=xml',
-  'https://www.coindesk.com/arc/outboundfeeds/rss/category/business/?outputType=xml',
-]
-
-// дефолтный whitelist доменов для превью/OG-картинок
-const DEFAULT_DOMAIN_WHITELIST = [
-  'coindesk.com',
-  'decrypt.co',
-  'cointelegraph.com',
-  'theblock.co',
-  'bitcoinmagazine.com',
-  'binance.com',
-  'blog.coinbase.com',
-  'coinbase.com',
-  'x.com',
-  'twitter.com',
-  'youtube.com',
-  'youtu.be',
-  'medium.com',
-]
-
-// дефолтные Reddit-сабреддиты
-const DEFAULT_REDDIT_SUBS = [
-  'CryptoCurrency',
-  'CryptoMarkets',
-  'ethfinance',
-  'Bitcoin',
-  'Ethereum',
-  'Solana',
-]
-
 const CRYPTOPANIC_ENABLED =
   process.env.CRYPTOPANIC_ENABLED === '1' ||
   process.env.CRYPTOPANIC_ENABLED === 'true'
@@ -59,21 +20,16 @@ const CRYPTOPANIC_TOKENS = Object.entries(process.env)
   .filter(Boolean)
 
 // RSS: сюда можно сунуть coindesk/decrypt/cointelegraph и т.д.
-// если env нет — берём DEFAULT_RSS_FEEDS
-const RSS_FEEDS = (
-  process.env.CRYPTO_NEWS_RSS_FEEDS ||
-  DEFAULT_RSS_FEEDS.join(',')
-)
+const RSS_FEEDS = (process.env.CRYPTO_NEWS_RSS_FEEDS || '')
   .split(/[,\s;]+/)
   .map((s) => s.replace(/#.*/, '').trim())
   .filter(Boolean)
 
 // whitelist доменов для превью-картинок (OG / twitter:image / и т.п.)
-// если env нет — используем DEFAULT_DOMAIN_WHITELIST
 const DOMAIN_WHITELIST = (
   process.env.NEXT_PUBLIC_CRYPTO_NEWS_SOURCES_WHITELIST ||
   process.env.CRYPTO_NEWS_DOMAIN_WHITELIST ||
-  DEFAULT_DOMAIN_WHITELIST.join(',')
+  ''
 )
   .split(/[,\s;]+/)
   .map((s) =>
@@ -117,19 +73,13 @@ const IMPORTANCE_MIN = Number(
 const MAX_ITEMS = Number(process.env.CRYPTO_NEWS_MAX_ITEMS || '100')
 
 // Reddit
-// если env нет — берём DEFAULT_REDDIT_SUBS
-const REDDIT_SUBS = (
-  process.env.NEXT_PUBLIC_REDDIT_SUBS ||
-  process.env.CRYPTO_NEWS_REDDIT_SUBS ||
-  DEFAULT_REDDIT_SUBS.join(',')
-)
+const REDDIT_SUBS = (process.env.NEXT_PUBLIC_REDDIT_SUBS || '')
   .split(/[,\s;]+/)
   .map((s) => s.trim())
   .filter(Boolean)
-
 const REDDIT_ENABLED = REDDIT_SUBS.length > 0
 
-// NewsAPI (тут дефолты по доменам/запросу можно оставить, но ключ — только из env)
+// NewsAPI
 const NEWSAPI_ENABLED =
   process.env.NEWSAPI_ENABLED === '1' ||
   process.env.NEWS_INGEST_ENABLED === '1'
