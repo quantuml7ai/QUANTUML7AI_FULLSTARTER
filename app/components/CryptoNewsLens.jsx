@@ -183,6 +183,144 @@ async function translateText(text, targetLocale) {
     return text
   }
 }
+// ==== CLIENT FALLBACK (Reddit прямо из браузера) ====
+
+const FALLBACK_REDDIT_SUBS = [
+  'CryptoCurrency',
+  'CryptoMarkets',
+  'ethfinance',
+  'Bitcoin',
+  'Ethereum',
+  'Solana',
+]
+
+// очень простой анализ тикеров (копия с бэка, но без чересчур)
+const FALLBACK_TICKER_REGEX = /\b[A-Z]{2,6}\b/g
+const FALLBACK_TICKER_BLACKLIST = new Set([
+  'NEWS',
+  'ETFS',
+  'ETF',
+  'SEC',
+  'AND',
+  'THE',
+  'WITH',
+  'THIS',
+  'FROM',
+  'CDATA',
+])
+
+function fallbackExtractTickersFromText(text) {
+  const s = (text || '').toUpperCase()
+  const matches = s.match(FALLBACK_TICKER_REGEX) || []
+  const uniq = new Set()
+  for (const t of matches) {
+    if (FALLBACK_TICKER_BLACKLIST.has(t)) continue
+    uniq.add(t)
+  }
+  return Array.from(uniq)
+}
+
+function fallbackComputeSentiment(text) {
+  const s = (text || '').toLowerCase()
+  const bull = ['soars', 'surge', 'rally', 'pump', 'bullish', 'approve', 'approval', 'etf approved', 'buy', 'upgrade']
+  const bear = ['drops', 'dump', 'fall', 'plunge', 'bearish', 'hack', 'exploit', 'ban', 'lawsuit', 'sue', 'sell', 'downgrade', 'liquidation']
+  let score = 0
+  for (const k of bull) if (s.includes(k)) score += 1
+  for (const k of bear) if (s.includes(k)) score -= 1
+  if (score > 0) return 'bullish'
+  if (score < 0) return 'bearish'
+  return 'neutral'
+}
+
+// грубый importance из апвоутов/комментов
+function fallbackComputeImportanceFromReddit(ups, comments, title) {
+  const base = 10
+  const upNorm = Math.min(ups || 0, 5000) / 5000
+  const comNorm = Math.min(comments || 0, 500) / 500
+  let score = base + upNorm * 60 + comNorm * 30
+
+  const s = (title || '').toLowerCase()
+  if (s.includes('btc') || s.includes('bitcoin') || s.includes('eth') || s.includes('ethereum')) {
+    score += 10
+  }
+
+  if (score < 5) score = 5
+  if (score > 100) score = 100
+  return Math.round(score)
+}
+
+// ⚠️ вызывается ТОЛЬКО из браузера (client-side)
+async function fetchRedditClientFallback() {
+  const out = []
+
+  await Promise.all(
+    FALLBACK_REDDIT_SUBS.map(async (sub) => {
+      const url = `https://www.reddit.com/r/${sub}/hot.json?limit=20`
+      try {
+        const res = await fetch(url, {
+          method: 'GET',
+          cache: 'no-store',
+        })
+        if (!res.ok) return
+        const data = await res.json().catch(() => null)
+        const posts = data?.data?.children || []
+        for (const p of posts) {
+          const d = p?.data
+          if (!d) continue
+
+          const postUrl = d.url_overridden_by_dest || d.url
+          if (!postUrl) continue
+
+          // игнорируем чисто текстовые посты
+          if (d.is_self && !/\.(jpe?g|png|webp|gif|avif)(\?|#|$)/i.test(postUrl)) continue
+
+          const title = d.title || ''
+          const sourceName = `r/${sub}`
+          const publishedAt = new Date(
+            (d.created_utc || d.created || Date.now() / 1000) * 1000,
+          ).toISOString()
+
+          let img = null
+          if (d.preview?.images?.[0]?.source?.url) {
+            img = d.preview.images[0].source.url
+          } else if (/\.(jpe?g|png|webp|gif|avif)(\?|#|$)/i.test(postUrl)) {
+            img = postUrl
+          }
+
+          const importanceScore = fallbackComputeImportanceFromReddit(
+            d.ups,
+            d.num_comments,
+            title,
+          )
+          const sentiment = fallbackComputeSentiment(title)
+
+          out.push({
+            id: `reddit-fallback-${sub}-${d.id}`,
+            title,
+            summary: '',
+            sourceName,
+            sourceUrl: postUrl,
+            publishedAt,
+            importanceScore,
+            sentiment,
+            tags: fallbackExtractTickersFromText(title),
+            lang: 'en',
+            origin: 'reddit-client',
+            imageUrl: img,
+            previewKind: 'placeholder',
+            previewStep: 'init',
+            previewQuality: 0,
+          })
+        }
+      } catch (e) {
+        // в fallback тоже молча — но хотя бы часть сабов загрузится
+        console.error('reddit client fallback error for', sub, e)
+      }
+    }),
+  )
+
+  return out
+}
 
 /**
  * Основной компонент квантового новостного хабла
@@ -297,13 +435,12 @@ export default function CryptoNewsLens() {
     try {
       setLoading(true)
       setError(null)
+
       const params = new URLSearchParams({
-        limit: '100',          // даём бэку шанс отдать много, до 100+
+        limit: '100',
         sortBy,
         timeRange,
       })
-      // если хочешь, чтобы бэк тоже фильтровал суперважные –
-      // можно пробрасывать importanceMin:
       if (onlyImportant) {
         params.set('importanceMin', String(IMPORTANT_THRESHOLD))
       }
@@ -312,21 +449,61 @@ export default function CryptoNewsLens() {
         method: 'GET',
         cache: 'no-store',
       })
+
+      // если сам роут упал — сразу в fallback
       if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`)
+        console.warn('crypto-news API error, fallback to client reddit')
+        const fbItems = await fetchRedditClientFallback()
+        setItems(fbItems)
+        setUpdatedAt(new Date().toISOString())
+        setActiveIndex(0)
+        setProgress(0)
+        return
       }
-      const data = await res.json()
+
+      const data = await res.json().catch(() => null)
       const news = Array.isArray(data?.items) ? data.items : []
+      const stats = data?.meta?.sourceStats || {}
+      const allStatsZero =
+        stats &&
+        Object.keys(stats).length > 0 &&
+        Object.values(stats).every((n) => !n)
+
+      // 🌟 КЛЮЧЕВОЙ МОМЕНТ:
+      // если сервер НИЧЕГО не смог достать (все источники 0 / лента пустая),
+      // мы считаем, что прод-сервер не видит интернет — и включаем client-fallback
+      if (!news.length || allStatsZero) {
+        console.warn('crypto-news API returned empty feed, fallback to client reddit')
+        const fbItems = await fetchRedditClientFallback()
+        setItems(fbItems)
+        setUpdatedAt(new Date().toISOString())
+        setActiveIndex(0)
+        setProgress(0)
+        return
+      }
+
+      // обычный успешный путь, как раньше
       setItems(news)
       setUpdatedAt(data?.meta?.updatedAt || data?.updatedAt || null)
       setActiveIndex(0)
       setProgress(0)
     } catch (e) {
+      console.error('loadNews error', e)
       setError(e?.message || 'error')
+
+      // на всякий случай: даже из catch пробуем показать хоть что-то
+      const fbItems = await fetchRedditClientFallback()
+      if (fbItems.length) {
+        setItems(fbItems)
+        setUpdatedAt(new Date().toISOString())
+        setActiveIndex(0)
+        setProgress(0)
+      }
     } finally {
       setLoading(false)
     }
   }
+
 
   // первый запрос
   useEffect(() => {
