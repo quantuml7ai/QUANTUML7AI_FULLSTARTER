@@ -8149,7 +8149,7 @@ const clientId =
 // гарантия, что interleaveAds всегда получит >0
 const adEvery = adConf?.EVERY && adConf.EVERY > 0 ? adConf.EVERY : 1;
 
-console.log('[ADS] adConf', adConf, 'adEvery=', adEvery);
+
 
 // одна сессия показа рекламы внутри одного тайм-слота (ROTATE_MIN)
 const adSessionRef = useRef({
@@ -8161,9 +8161,7 @@ const adSessionRef = useRef({
 
 // лог слотов (если нужно смотреть интерлив)
 function debugAdsSlots(label, slots) {
-  try {
-    console.log('[ADS] slots', label, slots);
-  } catch {}
+
   return slots;
 }
 
@@ -8230,9 +8228,9 @@ function pickAdUrlForSlot(slotKey, slotKind) {
     sess.bySlot = new Map();
   }
   sess.bySlot.set(slotKey, url);
-
+  console.log('[ADS] slot_pick', { slotKey, slotKind, url });
   try {
-   console.log('[ADS] slot_pick', { slotKey, slotKind, url });
+ 
 
   } catch {}
 

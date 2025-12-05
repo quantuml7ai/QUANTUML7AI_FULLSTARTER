@@ -107,10 +107,10 @@ function getWin() {
 }
 
 function debugLog(conf, ...args) {
-  if (conf?.DEBUG && typeof console !== 'undefined') {
-    console.log('[ADS]', ...args);
-  }
+  // ads debug disabled: no console output in browser
+  return;
 }
+
 
 function hash32(str) {
   str = String(str || '');

@@ -7,50 +7,126 @@ function normalizeLang(code, fallback = 'en') {
   return String(code).split('-')[0].toLowerCase()
 }
 
-// ---------- 1) Lingva (бесплатное зеркало Google Translate) ----------
-async function translateWithLingva(text, sourceLang, targetLang) {
+/**
+ * ---------- 1) Lingva (несколько зеркал) ----------
+ *
+ * Базовые хосты:
+ *   - process.env.LINGVA_BASE_URLS = "https://lingva.ml,https://lingva.garudalinux.org"
+ * Если env не задан — используем только https://lingva.ml
+ */
+async function translateWithLingvaMirrors(text, sourceLang, targetLang) {
   const src = sourceLang || 'auto'
   const tgt = targetLang
 
-  const url = `https://lingva.ml/api/v1/${encodeURIComponent(
-    src,
-  )}/${encodeURIComponent(tgt)}/${encodeURIComponent(text)}`
+  const bases =
+    process.env.LINGVA_BASE_URLS
+      ?.split(',')
+      .map((s) => s.trim())
+      .filter(Boolean) || ['https://lingva.ml']
+
+  let lastError = null
+
+  for (const base of bases) {
+    const baseUrl = base.replace(/\/+$/, '')
+    const url = `${baseUrl}/api/v1/${encodeURIComponent(
+      src,
+    )}/${encodeURIComponent(tgt)}/${encodeURIComponent(text)}`
+
+    try {
+      const res = await fetch(url, {
+        method: 'GET',
+        cache: 'no-store',
+      })
+
+      if (!res.ok) {
+        throw new Error(`Lingva[${baseUrl}] HTTP ${res.status}`)
+      }
+
+      const data = await res.json().catch(() => {
+        throw new Error('Lingva JSON parse error')
+      })
+
+      if (!data || !data.translation) {
+        throw new Error('Lingva: no translation field')
+      }
+
+      return {
+        text: data.translation,
+        provider: `lingva:${baseUrl}`,
+      }
+    } catch (e) {
+      lastError = e
+      console.error(
+        'translate provider Lingva mirror error',
+        base,
+        e?.message || e,
+      )
+      // идём к следующему зеркалу
+    }
+  }
+
+  throw lastError || new Error('All Lingva mirrors failed')
+}
+
+/**
+ * ---------- 2) LibreTranslate (общедоступное демо или своё) ----------
+ *
+ * Базовый URL:
+ *   - process.env.LIBRETRANSLATE_BASE_URL (например, https://libretranslate.com)
+ * Если не задан — используем https://libretranslate.com
+ *
+ * API: POST /translate { q, source, target }
+ */
+async function translateWithLibreTranslate(text, sourceLang, targetLang) {
+  const base =
+    process.env.LIBRETRANSLATE_BASE_URL?.trim() ||
+    'https://libretranslate.com'
+  const baseUrl = base.replace(/\/+$/, '')
+
+  const src = sourceLang || 'auto'
+  const tgt = targetLang
+
+  const url = `${baseUrl}/translate`
 
   const res = await fetch(url, {
-    method: 'GET',
-    // чтобы Next ничего не кешировал
+    method: 'POST',
     cache: 'no-store',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      q: text,
+      source: src,
+      target: tgt,
+      // api_key: process.env.LIBRETRANSLATE_API_KEY || undefined,
+    }),
   })
 
   if (!res.ok) {
-    throw new Error(`Lingva HTTP ${res.status}`)
+    throw new Error(`LibreTranslate HTTP ${res.status}`)
   }
 
-  let data
-  try {
-    data = await res.json()
-  } catch (e) {
-    throw new Error('Lingva JSON parse error')
-  }
+  const data = await res.json().catch(() => {
+    throw new Error('LibreTranslate JSON parse error')
+  })
 
-  if (!data || !data.translation) {
-    throw new Error('Lingva: no translation field')
+  if (!data || !data.translatedText) {
+    throw new Error('LibreTranslate: no translatedText')
   }
 
   return {
-    text: data.translation,
-    provider: 'lingva',
+    text: data.translatedText,
+    provider: `libre:${baseUrl}`,
   }
 }
 
-// ---------- 2) MyMemory (fallback) ----------
+/**
+ * ---------- 3) MyMemory (старый fallback) ----------
+ */
 async function translateWithMyMemory(text, sourceLang, targetLang) {
   let src = sourceLang
 
   // MyMemory не любит "auto" и одинаковые языки
-  // Поэтому если ничего не знаем — грубо считаем, что:
-  //  - если переводим на en → исходный ru
-  //  - иначе исходный en
   if (!src || src === 'auto' || src === targetLang) {
     src = targetLang === 'en' ? 'ru' : 'en'
   }
@@ -72,14 +148,10 @@ async function translateWithMyMemory(text, sourceLang, targetLang) {
     cache: 'no-store',
   })
 
-  let data
-  try {
-    data = await res.json()
-  } catch (e) {
+  const data = await res.json().catch(() => {
     throw new Error('MyMemory JSON parse error')
-  }
+  })
 
-  // пример ошибки, которую ты уже видел: "PLEASE SELECT TWO DISTINCT LANGUAGES" и т.п.
   if (!data || !data.responseData) {
     throw new Error('MyMemory: empty responseData')
   }
@@ -101,7 +173,9 @@ async function translateWithMyMemory(text, sourceLang, targetLang) {
   }
 }
 
-// ---------- Основной обработчик ----------
+/**
+ * ---------- Основной обработчик ----------
+ */
 export async function POST(req) {
   try {
     const body = await req.json().catch(() => ({}))
@@ -123,13 +197,8 @@ export async function POST(req) {
       )
     }
 
-    // берём либо targetLang, либо targetLocale
     let finalTarget = normalizeLang(targetLang || targetLocale || 'en')
-
-    // если вдруг после нормализации вообще ничего
-    if (!finalTarget) {
-      finalTarget = 'en'
-    }
+    if (!finalTarget) finalTarget = 'en'
 
     const finalSource =
       sourceLang && sourceLang !== 'auto'
@@ -140,6 +209,7 @@ export async function POST(req) {
       text: text.slice(0, 80) + (text.length > 80 ? '…' : ''),
       sourceLang: finalSource,
       targetLang: finalTarget,
+      env: process.env.NODE_ENV,
     })
 
     // Если язык исхода и цели одинаковый → просто вернуть текст
@@ -150,8 +220,15 @@ export async function POST(req) {
       })
     }
 
-    // Порядок провайдеров (всё бесплатно)
-    const providers = [translateWithLingva, translateWithMyMemory]
+    // порядок провайдеров:
+    // 1) Lingva (несколько зеркал)
+    // 2) LibreTranslate
+    // 3) MyMemory
+    const providers = [
+      translateWithLingvaMirrors,
+      translateWithLibreTranslate,
+      translateWithMyMemory,
+    ]
 
     for (const provider of providers) {
       try {
@@ -164,7 +241,7 @@ export async function POST(req) {
           `translate provider ${provider.name} error:`,
           e?.message || e,
         )
-        // просто пробуем следующий
+        // пробуем следующий
       }
     }
 
