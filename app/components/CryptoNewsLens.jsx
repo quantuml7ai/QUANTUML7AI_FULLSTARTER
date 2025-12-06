@@ -177,16 +177,26 @@ async function translateText(text, targetLocale) {
 }
 // ==== CLIENT FALLBACKS: Reddit + RSS (работают только в браузере) ====
 
+// жирный client-fallback Reddit, независимо от ENV
 const FALLBACK_REDDIT_SUBS = [
   'CryptoCurrency',
   'CryptoMarkets',
-  'ethfinance',
-  'Bitcoin',
+  'Bitcoin', 
+  'btc',
   'Ethereum',
+  'ethtrader',
+  'ethfinance',
   'Solana',
+  'solana',
+  'CryptoMoonShots',
+  'CryptoCurrencyTrading',
+  'Crypto_General',
+  'defi',
+  'binance',
+  'CryptoTechnology',
 ]
 
-// те же RSS, что у тебя на бэке по дефолту
+// жирный client-fallback RSS без API-ключей
 const FALLBACK_RSS_FEEDS = [
   'https://www.coindesk.com/arc/outboundfeeds/rss/?outputType=xml',
   'https://decrypt.co/feed',
@@ -196,6 +206,8 @@ const FALLBACK_RSS_FEEDS = [
   'https://www.coindesk.com/arc/outboundfeeds/rss/category/markets/?outputType=xml',
   'https://www.coindesk.com/arc/outboundfeeds/rss/category/policy/?outputType=xml',
   'https://www.coindesk.com/arc/outboundfeeds/rss/category/business/?outputType=xml',
+  'https://news.kucoin.com/rss',
+  'https://www.okx.com/rss',
 ]
 
 // ---- общие хелперы для fallback ----
@@ -298,6 +310,18 @@ function fallbackComputeImportanceFromReddit(ups, comments, title) {
   if (score < 5) score = 5
   if (score > 100) score = 100
   return Math.round(score)
+}
+// дедуп новостей по (sourceUrl + title), как на бэке
+function dedupeNewsItems(items) {
+  const seen = new Set()
+  const out = []
+  for (const it of items) {
+    const key = `${(it.sourceUrl || '').toLowerCase()}|${(it.title || '').toLowerCase()}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(it)
+  }
+  return out
 }
 
 // простая генерация id, чтобы React не ругался
@@ -530,28 +554,34 @@ async function fetchRssClientFallback() {
 }
 
 // единая функция, которую будем дергать из loadNews
-async function loadClientFallbackFeed(setItems, setUpdatedAt, setActiveIndex, setProgress) {
+// baseItems — то, что пришло с бэка (может быть null/undefined)
+async function loadClientFallbackFeed(baseItems, setItems, setUpdatedAt, setActiveIndex, setProgress) {
   try {
     const [rssItems, redditItems] = await Promise.all([
       fetchRssClientFallback(),
       fetchRedditClientFallback(),
     ])
 
-    const merged = [...rssItems, ...redditItems]
+    const fallbackMerged = [...rssItems, ...redditItems]
 
-    // сортируем по времени, чтобы было как на бэке
-    merged.sort(
+    // сортируем fallback по времени
+    fallbackMerged.sort(
       (a, b) =>
         new Date(b.publishedAt).getTime() -
         new Date(a.publishedAt).getTime(),
     )
 
-    setItems(merged)
+    const base = Array.isArray(baseItems) ? baseItems : []
+
+    // МЯСО: мерджим бэкенд + client fallback и дедупим
+    const final = dedupeNewsItems([...base, ...fallbackMerged])
+
+    setItems(final)
     setUpdatedAt(new Date().toISOString())
     setActiveIndex(0)
     setProgress(0)
 
-    return merged.length
+    return final.length
   } catch (e) {
     console.error('loadClientFallbackFeed error', e)
     return 0
@@ -682,15 +712,16 @@ export default function CryptoNewsLens() {
         params.set('importanceMin', String(IMPORTANT_THRESHOLD))
       }
 
-      const res = await fetch(`/api/crypto-news?${params.toString()}`, {
+       const res = await fetch(`/api/crypto-news?${params.toString()}`, {
         method: 'GET',
         cache: 'no-store',
       })
 
-      // если сам API упал — сразу в client fallback
+      // если сам API упал — сразу в client fallback (без бэка)
       if (!res.ok) {
         console.warn('crypto-news API error, fallback to client (RSS + Reddit)')
         const count = await loadClientFallbackFeed(
+          null, // нет базовых элементов, чистый fallback
           setItems,
           setUpdatedAt,
           setActiveIndex,
@@ -705,17 +736,22 @@ export default function CryptoNewsLens() {
       const data = await res.json().catch(() => null)
       const news = Array.isArray(data?.items) ? data.items : []
       const stats = data?.meta?.sourceStats || {}
-      const allStatsZero =
-        stats &&
-        Object.keys(stats).length > 0 &&
-        Object.values(stats).every((n) => !n)
 
-      // КЛЮЧ: бэк жив, но НИЧЕГО не достал → включаем client fallback
-      if (!news.length || allStatsZero) {
+      const nonEmptySourcesCount =
+        stats && Object.values(stats).filter((n) => n > 0).length
+
+      // критерий "фид слабый": пусто ИЛИ мало источников
+      const shouldFallbackMerge =
+        !news.length ||
+        !stats ||
+        nonEmptySourcesCount <= 1
+
+      if (shouldFallbackMerge) {
         console.warn(
-          'crypto-news API returned empty feed, fallback to client (RSS + Reddit)',
+          'crypto-news API returned weak feed, merging with client fallback (RSS + Reddit)',
         )
         const count = await loadClientFallbackFeed(
+          news, // то, что пришло с бэка, мерджим с клиентскими
           setItems,
           setUpdatedAt,
           setActiveIndex,
@@ -734,12 +770,14 @@ export default function CryptoNewsLens() {
       setUpdatedAt(data?.meta?.updatedAt || data?.updatedAt || null)
       setActiveIndex(0)
       setProgress(0)
+
     } catch (e) {
       console.error('loadNews error', e)
       setError(e?.message || 'error')
 
       // даже при реальной ошибке — стараемся хоть чем-то заполнить ленту
       const count = await loadClientFallbackFeed(
+        null, // нет базовых элементов, чистый fallback
         setItems,
         setUpdatedAt,
         setActiveIndex,
@@ -751,6 +789,7 @@ export default function CryptoNewsLens() {
         setUpdatedAt(new Date().toISOString())
       } 
     } finally {
+
       setLoading(false)
     }
   } 
