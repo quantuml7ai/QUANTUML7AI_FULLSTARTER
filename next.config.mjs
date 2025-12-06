@@ -84,18 +84,17 @@ images: {
         ],
       },
 
-      // (опционально) если хочешь, чтобы и /branding/* тоже не кешировали
-      // {
-      //   source: '/branding/:path*',
-      //   headers: [
-      //     {
-      //       key: 'Cache-Control',
-      //       value: 'no-store, no-cache, must-revalidate, max-age=0',
-      //     },
-      //     { key: 'Pragma', value: 'no-cache' },
-      //     { key: 'Expires', value: '0' },
-      //   ],
-      // },
+      {
+        source: '/branding/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, no-cache, must-revalidate, max-age=0',
+          },
+          { key: 'Pragma', value: 'no-cache' },
+          { key: 'Expires', value: '0' },
+        ],
+      },
 
       // 🔹 3) Глобальные заголовки и CSP для всех остальных путей
       {
