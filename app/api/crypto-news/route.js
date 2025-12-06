@@ -1,34 +1,65 @@
 // app/api/crypto-news/route.js
+
 import crypto from 'crypto'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-/* ========== ENV / CONFIG ========== */
+/* ========== OPEN CONFIG (RSS + REDDIT ВСЕГДА ВКЛЮЧЕНЫ) ========== */
 
-const CRYPTOPANIC_ENABLED =
-  process.env.CRYPTOPANIC_ENABLED === '1' ||
-  process.env.CRYPTOPANIC_ENABLED === 'true'
-
-const CRYPTOPANIC_BASE =
-  process.env.NEXT_PUBLIC_CRYPTOPANIC_BASE ||
-  'https://cryptopanic.com/api/v1/posts/'
-
-const CRYPTOPANIC_TOKENS = Object.entries(process.env)
+// CryptoPanic – необязателен, если нет токена, просто вернёт []
+const CRYPTOPANIC_ENABLED = true
+const CRYPTOPANIC_BASE = 'https://cryptopanic.com/api/v1/posts/'
+const CRYPTOPANIC_TOKENS = Object.entries(process.env || {})
   .filter(([k]) => k.startsWith('NEXT_PUBLIC_CRYPTOPANIC_TOKEN'))
   .map(([, v]) => v)
   .filter(Boolean)
 
-// RSS: сюда можно сунуть coindesk/decrypt/cointelegraph и т.д.
-const RSS_FEEDS = (process.env.CRYPTO_NEWS_RSS_FEEDS || '')
-  .split(/[,\s;]+/)
-  .map((s) => s.replace(/#.*/, '').trim())
-  .filter(Boolean)
+// ХАРДКОД НОРМАЛЬНЫХ КРИПТО-RSS, без ENV
+const RSS_FEEDS = [
+  'https://www.coindesk.com/arc/outboundfeeds/rss/?outputType=xml',
+  'https://decrypt.co/feed',
+  'https://cointelegraph.com/rss',
+  'https://www.theblock.co/rss',
+  'https://bitcoinmagazine.com/.rss/full',
+  'https://www.coindesk.com/arc/outboundfeeds/rss/category/markets/?outputType=xml',
+  'https://www.coindesk.com/arc/outboundfeeds/rss/category/policy/?outputType=xml',
+  'https://www.coindesk.com/arc/outboundfeeds/rss/category/business/?outputType=xml',
+  'https://news.kucoin.com/rss',
+  'https://www.okx.com/rss',
+].map((s) => s.replace(/#.*/, '').trim()).filter(Boolean)
 
-// whitelist доменов для превью-картинок (OG / twitter:image / и т.п.)
+// Reddit сабы – тоже хардкод, всегда включены
+const REDDIT_SUBS = [
+  'CryptoCurrency',
+  'CryptoMarkets',
+  'Bitcoin',
+  'btc',
+  'Ethereum',
+  'ethtrader',
+  'ethfinance',
+  'Solana',
+  'solana',
+  'CryptoMoonShots',
+  'CryptoCurrencyTrading',
+  'Crypto_General',
+  'defi',
+  'binance',
+  'CryptoTechnology',
+]
+const REDDIT_ENABLED = true
+
+// NewsAPI – только если реально есть ключ
+const NEWSAPI_KEY =
+  (typeof process !== 'undefined' && (process.env.NEWSAPI_KEY || process.env.NEXT_PUBLIC_NEWSAPI_KEY)) ||
+  ''
+const NEWSAPI_ENABLED = !!NEWSAPI_KEY
+
+// остальной конфиг как был
 const DOMAIN_WHITELIST = (
-  process.env.NEXT_PUBLIC_CRYPTO_NEWS_SOURCES_WHITELIST ||
-  process.env.CRYPTO_NEWS_DOMAIN_WHITELIST ||
+  (typeof process !== 'undefined' &&
+    (process.env.NEXT_PUBLIC_CRYPTO_NEWS_SOURCES_WHITELIST ||
+      process.env.CRYPTO_NEWS_DOMAIN_WHITELIST)) ||
   ''
 )
   .split(/[,\s;]+/)
@@ -37,59 +68,50 @@ const DOMAIN_WHITELIST = (
   )
   .filter(Boolean)
 
-const REFRESH_SEC = Number(process.env.CRYPTO_NEWS_REFRESH_SEC || '120')
+const REFRESH_SEC =
+  (typeof process !== 'undefined' &&
+    Number(process.env.CRYPTO_NEWS_REFRESH_SEC || '120')) || 120
 
 const PREVIEW_MODE = (
-  process.env.CRYPTO_NEWS_PREVIEW_MODE || 'smart'
+  (typeof process !== 'undefined' && process.env.CRYPTO_NEWS_PREVIEW_MODE) ||
+  'smart'
 ).toLowerCase()
 
 const MICROLINK_ENABLED =
-  process.env.CRYPTO_NEWS_MICROLINK_ENABLED === '1' ||
-  process.env.CRYPTO_NEWS_MICROLINK_ENABLED === 'true'
+  typeof process !== 'undefined' &&
+  (process.env.CRYPTO_NEWS_MICROLINK_ENABLED === '1' ||
+    process.env.CRYPTO_NEWS_MICROLINK_ENABLED === 'true')
 
-// screenshot-сервисы используем ТОЛЬКО если явно включён режим screenshot
 const THUMB_SERVICES =
-  (process.env.CRYPTO_NEWS_SCREENSHOT_SERVICES || '')
+  (typeof process !== 'undefined' &&
+    (process.env.CRYPTO_NEWS_SCREENSHOT_SERVICES || ''))
     .split(/[,\s;]+/)
     .map((s) => s.replace(/#.*/, '').trim())
     .filter(Boolean)
 
-const IMPORTANCE_BASE = Number(
-  process.env.CRYPTO_NEWS_IMPORTANCE_BASE || '10',
-)
-const IMPORTANCE_BREAKING_BONUS = Number(
-  process.env.CRYPTO_NEWS_IMPORTANCE_BREAKING_BONUS || '20',
-)
-const IMPORTANCE_KEYWORD_BONUS = Number(
-  process.env.CRYPTO_NEWS_IMPORTANCE_KEYWORD_BONUS || '20',
-)
-const IMPORTANCE_REACTIONS_WEIGHT = Number(
-  process.env.CRYPTO_NEWS_IMPORTANCE_REACTIONS_WEIGHT || '30',
-)
-const IMPORTANCE_MIN = Number(
-  process.env.CRYPTO_NEWS_MIN_SCORE || '5',
-)
+const IMPORTANCE_BASE =
+  (typeof process !== 'undefined' &&
+    Number(process.env.CRYPTO_NEWS_IMPORTANCE_BASE || '10')) || 10
+const IMPORTANCE_BREAKING_BONUS =
+  (typeof process !== 'undefined' &&
+    Number(process.env.CRYPTO_NEWS_IMPORTANCE_BREAKING_BONUS || '20')) || 20
+const IMPORTANCE_KEYWORD_BONUS =
+  (typeof process !== 'undefined' &&
+    Number(process.env.CRYPTO_NEWS_IMPORTANCE_KEYWORD_BONUS || '20')) || 20
+const IMPORTANCE_REACTIONS_WEIGHT =
+  (typeof process !== 'undefined' &&
+    Number(process.env.CRYPTO_NEWS_IMPORTANCE_REACTIONS_WEIGHT || '30')) || 30
+const IMPORTANCE_MIN =
+  (typeof process !== 'undefined' &&
+    Number(process.env.CRYPTO_NEWS_MIN_SCORE || '5')) || 5
 
-const MAX_ITEMS = Number(process.env.CRYPTO_NEWS_MAX_ITEMS || '100')
-
-// Reddit
-const REDDIT_SUBS = (process.env.NEXT_PUBLIC_REDDIT_SUBS || '')
-  .split(/[,\s;]+/)
-  .map((s) => s.trim())
-  .filter(Boolean)
-const REDDIT_ENABLED = REDDIT_SUBS.length > 0
-
-// NewsAPI
-const NEWSAPI_ENABLED =
-  process.env.NEWSAPI_ENABLED === '1' ||
-  process.env.NEWS_INGEST_ENABLED === '1'
-const NEWSAPI_KEY =
-  process.env.NEWSAPI_KEY || process.env.NEXT_PUBLIC_NEWSAPI_KEY || ''
+const MAX_ITEMS =
+  (typeof process !== 'undefined' &&
+    Number(process.env.CRYPTO_NEWS_MAX_ITEMS || '100')) || 100
 
 /* ========== IN-MEMORY CACHE ========== */
 
 const cache = new Map()
-// key -> { items, meta, expiresAt }
 
 function makeCacheKey(params) {
   return JSON.stringify(params)
@@ -253,7 +275,7 @@ function computeImportance(baseScore, { title, summary, flags, reactions }) {
   return Math.round(score)
 }
 
-/* ========== PREVIEW (OG image как в телеге/твиттере) ========== */
+/* ========== PREVIEW ========== */
 
 function isDirectImageUrl(u) {
   return /\.(jpe?g|png|webp|gif|avif)(\?|#|$)/i.test(u || '')
@@ -287,7 +309,6 @@ async function resolvePreviewForItem(item) {
   const src = item.sourceUrl || ''
   const host = getHost(src)
 
-  // whitelist доменов (если задан)
   if (DOMAIN_WHITELIST.length && host) {
     const allowed = DOMAIN_WHITELIST.some(
       (d) => host === d || host.endsWith('.' + d),
@@ -303,7 +324,6 @@ async function resolvePreviewForItem(item) {
     }
   }
 
-  // 0) у нас уже есть картинка (из CryptoPanic / Reddit / RSS enclosure)
   if (item.imageUrl && item.imageUrl.startsWith('http')) {
     return {
       ...item,
@@ -313,7 +333,6 @@ async function resolvePreviewForItem(item) {
     }
   }
 
-  // 1) YouTube
   if (PREVIEW_MODE !== 'favicon') {
     const ytThumb = resolveYoutubeThumb(src)
     if (ytThumb) {
@@ -327,7 +346,6 @@ async function resolvePreviewForItem(item) {
     }
   }
 
-  // 2) прямой image-URL
   if (PREVIEW_MODE !== 'favicon' && isDirectImageUrl(src)) {
     return {
       ...item,
@@ -338,22 +356,17 @@ async function resolvePreviewForItem(item) {
     }
   }
 
-  // 3) Microlink: тянем OG / twitter:image (как телега)
   if (MICROLINK_ENABLED && PREVIEW_MODE !== 'favicon') {
     try {
       const q =
         'https://api.microlink.io/?url=' +
         encodeURIComponent(src) +
-        '&meta=true' +
-        '&screenshot=false' +
-        '&video=false&audio=false&iframe=false'
+        '&meta=true&screenshot=false&video=false&audio=false&iframe=false'
 
       const resp = await fetch(q, { cache: 'no-store' })
       if (resp.ok) {
         const data = await resp.json().catch(() => null)
         const meta = data?.data || {}
-
-        // как в твиттер/телеге — сначала OG image, потом всё остальное
         const ogImage =
           meta.image?.url ||
           meta.logo?.url ||
@@ -370,12 +383,9 @@ async function resolvePreviewForItem(item) {
           }
         }
       }
-    } catch {
-      // Microlink отвалился — идём дальше
-    }
+    } catch {}
   }
 
-  // 4) только если явно включили screenshot-режим — делаем скриншот
   if (PREVIEW_MODE === 'screenshot' && THUMB_SERVICES.length) {
     const tpl = THUMB_SERVICES[0]
     const shotUrl = tpl.replace('{url}', encodeURIComponent(src))
@@ -388,7 +398,6 @@ async function resolvePreviewForItem(item) {
     }
   }
 
-  // 5) fallback – без картинки
   return {
     ...item,
     imageUrl: null,
@@ -405,8 +414,9 @@ async function fetchFromCryptoPanic() {
 
   const token =
     CRYPTOPANIC_TOKENS[0] ||
-    process.env.NEXT_PUBLIC_CRYPTOPANIC_TOKEN ||
-    ''
+    (typeof process !== 'undefined'
+      ? process.env.NEXT_PUBLIC_CRYPTOPANIC_TOKEN || ''
+      : '')
   if (!token) return []
 
   const params = new URLSearchParams({
@@ -423,9 +433,7 @@ async function fetchFromCryptoPanic() {
     const res = await fetch(url, { cache: 'no-store' })
     if (!res.ok) return []
     const data = await res.json().catch(() => null)
-    const results = Array.isArray(data?.results)
-      ? data.results
-      : []
+    const results = Array.isArray(data?.results) ? data.results : []
 
     const out = []
 
@@ -434,14 +442,10 @@ async function fetchFromCryptoPanic() {
       if (!postUrl) continue
       const host = getHost(postUrl)
       const sourceName =
-        raw.source?.title ||
-        host.replace(/^www\./, '') ||
-        'CryptoPanic'
+        raw.source?.title || host.replace(/^www\./, '') || 'CryptoPanic'
 
       const publishedAt = raw.published_at || raw.created_at
-      const summary = stripTags(
-        raw.title || raw.description || '',
-      )
+      const summary = stripTags(raw.title || raw.description || '')
 
       const currencies = Array.isArray(raw.currencies)
         ? raw.currencies.map((c) => c.code).filter(Boolean)
@@ -467,9 +471,7 @@ async function fetchFromCryptoPanic() {
       )
 
       const img =
-        raw?.metadata?.image ||
-        raw?.metadata?.thumbnail ||
-        null
+        raw?.metadata?.image || raw?.metadata?.thumbnail || null
 
       const id = hashId(`${postUrl}|${publishedAt}|${raw.title}`)
 
@@ -507,7 +509,6 @@ async function fetchFromCryptoPanic() {
 /* ========== RSS ========= */
 
 const TICKER_REGEX = /\b[A-Z]{2,6}\b/g
-
 const TICKER_BLACKLIST = new Set([
   'NEWS',
   'ETFS',
@@ -564,9 +565,7 @@ function parseRssItems(xml, defaultSourceName) {
       (block.match(
         /<(description|summary)[^>]*>([\s\S]*?)<\/\1>/i,
       ) || [])[2] || ''
-    const summary = decodeEntities(
-      stripCdata(summaryRaw).trim(),
-    )
+    const summary = decodeEntities(stripCdata(summaryRaw).trim())
 
     const pubRaw =
       (block.match(
@@ -577,9 +576,7 @@ function parseRssItems(xml, defaultSourceName) {
     if (!url) continue
     const host = getHost(url)
     const sourceName =
-      defaultSourceName ||
-      host.replace(/^www\./, '') ||
-      'RSS'
+      defaultSourceName || host.replace(/^www\./, '') || 'RSS'
 
     let publishedAt
     try {
@@ -591,7 +588,6 @@ function parseRssItems(xml, defaultSourceName) {
 
     const id = hashId(`${url}|${publishedAt}|${title}`)
 
-    // пробуем вытащить прямую картинку из enclosure / media:content
     let img = null
     const encMatch =
       block.match(
@@ -636,7 +632,7 @@ async function fetchFromRssFeeds() {
         const items = parseRssItems(text, name)
         out.push(...items)
       } catch {
-        // ignore feed errors
+        // ignore
       }
     }),
   )
@@ -647,7 +643,7 @@ async function fetchFromRssFeeds() {
 /* ========== REDDIT ========= */
 
 async function fetchFromReddit() {
-  if (!REDDIT_ENABLED) return []
+  if (!REDDIT_ENABLED || !REDDIT_SUBS.length) return []
   const out = []
 
   await Promise.all(
@@ -670,7 +666,6 @@ async function fetchFromReddit() {
           const postUrl = safeUrl(d.url_overridden_by_dest || d.url)
           if (!postUrl) continue
 
-          // игнорируем чисто текстовые посты
           if (d.is_self && !isDirectImageUrl(postUrl)) continue
 
           const title = decodeEntities(d.title || '')
@@ -679,7 +674,6 @@ async function fetchFromReddit() {
             (d.created_utc || d.created || Date.now() / 1000) * 1000,
           ).toISOString()
 
-          // пробуем взять картинку из превью реддита
           let img = null
           if (d.preview?.images?.[0]?.source?.url) {
             img = decodeEntities(d.preview.images[0].source.url)
@@ -737,10 +731,10 @@ async function fetchFromNewsApi() {
   if (!NEWSAPI_ENABLED || !NEWSAPI_KEY) return []
   try {
     const q =
-      process.env.NEWSAPI_QUERY ||
+      (typeof process !== 'undefined' && process.env.NEWSAPI_QUERY) ||
       '(crypto OR cryptocurrency OR bitcoin OR ethereum)'
     const domains =
-      process.env.NEWSAPI_DOMAINS ||
+      (typeof process !== 'undefined' && process.env.NEWSAPI_DOMAINS) ||
       'coindesk.com,cointelegraph.com,decrypt.co'
 
     const params = new URLSearchParams({
@@ -888,7 +882,6 @@ async function aggregateNews({
     )
   }
 
-  // пересчёт importance + sentiment
   items = items.map((it) => {
     const baseScore =
       it.origin === 'cryptopanic'
@@ -906,7 +899,6 @@ async function aggregateNews({
     return { ...it, importanceScore, sentiment }
   })
 
-  // растягиваем важность по всей шкале [IMPORTANCE_MIN; 100]
   if (items.length) {
     const scores = items.map((it) => it.importanceScore || 0)
     const minScore = Math.min(...scores)
@@ -937,7 +929,6 @@ async function aggregateNews({
 
   items = filterByTimeRangeBackend(items, timeRange)
 
-  // дедуп по (url + title)
   const seen = new Set()
   const deduped = []
   for (const it of items) {
@@ -951,7 +942,6 @@ async function aggregateNews({
 
   const sorted = sortNewsItems(deduped, sortBy)
 
-  // добавляем превью (OG image / youtube / и т.п.)
   const slice = sorted.slice(0, limit || MAX_ITEMS)
   const withPreviews = []
   for (const it of slice) {
@@ -1060,6 +1050,7 @@ export async function GET(request) {
           sourceStats: {},
           cache: { hit: false, ttlSec: REFRESH_SEC },
           error: 'internal_error',
+          message: e?.message || String(e),
         },
       }),
       {
