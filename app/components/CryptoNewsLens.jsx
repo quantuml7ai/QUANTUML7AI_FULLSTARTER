@@ -989,31 +989,7 @@ const activePreview = useNewsPreview(activeItem)
 
         {/* десктопный блок контролов */}
         <div className="controlsRow desktopControls">
-          {/* источники */}
-          <div className="controlGroup">
 
-            <div className="selectShell">
-              <span className="selectPrefix">🌐</span>
-              <select
-                className="select"
-                value={selectedSource}
-                onChange={(e) =>
-                  setSelectedSource(e.target.value || 'all')
-                }
-              >
-                <option value="all">
-                  {t('crypto_news_filters_source_all') ||
-                    'Все источники'}
-                </option>
-                {sourcesList.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-              <span className="selectChevron">▾</span>
-            </div>
-          </div>
 
           {/* сортировка с попапом */}
           <div className="controlGroup" ref={sortPopoverRef}>
@@ -1240,34 +1216,7 @@ const activePreview = useNewsPreview(activeItem)
               </button>
             </div>
 
-            <div className="mobileSheetSection">
-
-              <div className="selectShell fullWidth">
-                <span className="selectPrefix">🌐</span>
-                <select
-                  className="select"
-                  value={selectedSource}
-                  onChange={(e) =>
-                    setSelectedSource(
-                      e.target.value || 'all',
-                    )
-                  }
-                >
-                  <option value="all">
-                    {t(
-                      'crypto_news_filters_source_all',
-                    ) || 'Все источники'}
-                  </option>
-                  {sourcesList.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-                <span className="selectChevron">▾</span>
-              </div>
-            </div>
-
+ 
             <div className="mobileSheetSection">
               <div className="sheetLabel">
                 {t('crypto_news_filters_time_range') ||
