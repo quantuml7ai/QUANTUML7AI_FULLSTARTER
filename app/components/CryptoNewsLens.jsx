@@ -134,15 +134,7 @@ function useNewsPreview(item) {
       host,
       pathLabel,
     })
-  }, [
-    item?.id,
-    item?.imageUrl,
-    item?.previewKind,
-    item?.sourceUrl,
-    item?.url,
-    item?.link,
-    item?.source,
-  ])
+  }, [item])
 
   return state
 }
