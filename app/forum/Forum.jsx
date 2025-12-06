@@ -3835,7 +3835,7 @@ function QCoinInline({ t, userKey, vipActive, anchorRef }) {
   const clsVal = q.paused ? 'qcoinValue paused' : 'qcoinValue live'
 
   // ==== формат баланса: всегда 10 цифр, точка двигается ====
-  const TOTAL_DIGITS = 10
+  const TOTAL_DIGITS = 11
   const raw = Number(q.balanceDisplay ?? q.balance ?? 0)
 
   let formattedBalance
@@ -6629,12 +6629,12 @@ const walk = (n, level = 0) => {
     // Множество забаненных (по userId/accountId)
   const bannedSet = useMemo(() => new Set(data.bans || []), [data.bans])
 
-// ===== ПУНКТ 5: Агрегаты по темам (ЖЁСТКАЯ КОНСИСТЕНЦИЯ) =====
-// views берём ТОЛЬКО из server topics; посты дают posts/likes/dislikes
+// ===== ПУНКТ 5: Агрегаты по темам (полные счётчики) =====
+// Считаем ВСЕ сообщения и просмотры: тема + все посты/ответы внутри
 const aggregates = useMemo(() => {
   const byTopic = new Map();
 
-  // 1) Инициализируем views из data.topics
+  // 1) Базовые значения из темы (в т.ч. initial views самой темы)
   for (const t of (data.topics || [])) {
     byTopic.set(String(t.id), {
       posts: 0,
@@ -6644,18 +6644,28 @@ const aggregates = useMemo(() => {
     });
   }
 
-  // 2) Накидываем агрегацию по постам (без views!)
+  // 2) Накидываем агрегацию по ВСЕМ постам (включая вложенные)
   for (const p of (data.posts || [])) {
     const tid = String(p.topicId);
-    const a = byTopic.get(tid) || { posts: 0, likes: 0, dislikes: 0, views: 0 };
+    const a =
+      byTopic.get(tid) || { posts: 0, likes: 0, dislikes: 0, views: 0 };
+
+    // 🔹 каждое сообщение = +1 к общему количеству
     a.posts    += 1;
+   
+    // 🔹 суммируем реакции по всем постам
     a.likes    += Number(p.likes    || 0);
     a.dislikes += Number(p.dislikes || 0);
+
+    // 🔹 ДОБАВЛЯЕМ просмотры всех постов/ответов внутрь агрегата темы
+    a.views    += Number(p.views    || 0);
+
     byTopic.set(tid, a);
   }
 
   return byTopic;
 }, [data.topics, data.posts]);
+
 
 
   // результаты поиска (темы + посты)
@@ -9145,6 +9155,48 @@ onClick={()=>{
       </div>
     </div>
     <div className="slot-right">
+   <button
+    type="button"
+    className="iconBtn inviteGifBtn"
+    style={{
+      width: INVITE_BTN_SIZE,
+      height: INVITE_BTN_SIZE,
+      padding: 0,
+      marginRight: 8,
+      transform: `translate(${INVITE_BTN_OFFSET_X}px, ${INVITE_BTN_OFFSET_Y}px)`,
+    }}
+    onClick={() => {
+      try {
+        window.dispatchEvent(new CustomEvent('invite:open'));
+      } catch {}
+    }}
+    onMouseDown={(e) => e.preventDefault()}
+    aria-label="Invite friends"
+  >
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: INVITE_GIF_SIZE,
+        height: INVITE_GIF_SIZE,
+        borderRadius: '999px',
+        overflow: 'hidden',
+      }}
+    >
+      <img
+        src="/friends/invitation.gif"
+        alt=""
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          display: 'block',
+        }}
+        draggable={false}
+      />
+    </span>
+    </button>
       <button
         type="button"
         className="iconBtn inboxBtn"
@@ -9171,49 +9223,77 @@ onClick={()=>{
     </span>
   </div>
 
-{/* [INBOX:PANEL] — панель входящих ответов */}
+{/* [INBOX:PANEL] — панель входящих ответов (та же логика, что и в списке тем) */}
 {inboxOpen && (
   <div className="item mt-2">
-    <div className="title">{t('forum_inbox_title') || 'Ответы на ваши сообщения'}</div>
+    <div className="title">
+      {t('forum_inbox_title') || 'Ответы на ваши сообщения'}
+    </div>
+
     {repliesToMe.length === 0 ? (
-      <div className="inboxEmpty">{t('forum_inbox_empty') || 'Пока нет ответов'}</div>
+      <div className="inboxEmpty">
+        {t('forum_inbox_empty') || 'Пока нет ответов'}
+      </div>
     ) : (
       <div className="inboxList">
         {repliesToMe.map(p => {
-          const parent = (data.posts || []).find(x => String(x.id) === String(p.parentId));
+          // та же логика, что в верхнем инбоксе
+          const tt = (data.topics || []).find(
+            x => String(x.id) === String(p.topicId),
+          );
+          if (!tt) return null;
+
+          const parentAuthor =
+            (data.posts || []).find(
+              x => String(x.id) === String(p.parentId),
+            )?.nickname || '';
+
           return (
-            <div key={`inb:${p.id}`} className="item qshine" onClick={() => {
-              // перейти в тему и открыть ветку
-              const tt = (data.topics||[]).find(x => String(x.id) === String(p.topicId));
-              if (tt) {
-                setSel(tt);
-                setThreadRoot({ id: p.parentId || p.id });
-                // скролл к посту
-                setTimeout(() => { try{ document.getElementById(`post_${p.id}`)?.scrollIntoView({behavior:'smooth', block:'center'}) }catch{} }, 120);
-              }
-            }}>
-              {/* мини-«шапка», как в PostCard */}
-              <div className="flex items-center gap-2 mb-1">
-                <div className="avaMini">
-                  <AvatarEmoji userId={p.userId || p.accountId} pIcon={resolveIconForDisplay(p.userId || p.accountId, p.icon)} />
-                </div>
-                <span className="nick-badge"><span className="nick-text truncate">{p.nickname || shortId(p.userId || p.accountId || '')}</span></span>
-                <span className="meta"><HydrateText value={human(p.ts)} /></span>
-              </div>
-              {/* текст ответа (очищенный) + упоминание родителя */}
-              <div className="meta">
-                {t('forum_reply_to') || 'Ответ для'} @{parent?.nickname || shortId(parent?.userId || '')}
-              </div>
-              {(p.text||'').trim() && (
-                <div className="postBody text-[15px] whitespace-pre-wrap break-words">{(p.text||'').slice(0,180)}</div>
-              )}
-            </div>
+            <PostCard
+              key={`inb:${p.id}`}
+              p={p}
+              parentAuthor={parentAuthor}
+              onReport={() => toast.ok(t('forum_report_ok'))}
+              onOpenThread={clickP => {
+                // переходим в тему и открываем ветку
+                const topic = (data.topics || []).find(
+                  t => String(t.id) === String(p.topicId),
+                );
+                if (topic) {
+                  setSel(topic);
+                  setThreadRoot(clickP);   // корень треда
+                  setInboxOpen(false);
+
+                  // мягкий скролл к конкретному посту
+                  setTimeout(() => {
+                    try {
+                      document
+                        .getElementById(`post_${p.id}`)
+                        ?.scrollIntoView({
+                          behavior: 'smooth',
+                          block: 'center',
+                        });
+                    } catch {}
+                  }, 120);
+                }
+              }}
+              onReact={reactMut}
+              isAdmin={isAdmin}
+              onDeletePost={delPost}
+              onBanUser={banUser}
+              onUnbanUser={unbanUser}
+              isBanned={bannedSet.has(p.accountId || p.userId)}
+              authId={auth.asherId || auth.accountId}
+              markView={markViewPost}
+              t={t}
+            />
           );
         })}
       </div>
     )}
   </div>
 )}
+
 
       </div>
 

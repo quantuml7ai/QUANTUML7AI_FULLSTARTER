@@ -39,7 +39,7 @@ const IMPULSE_DAMPING = 0.95
 const SCROLL_IMPULSE_BASE = 100
 const CLICK_IMPULSE_BASE = 90
 
-const DEFAULT_INTERVAL_MS = 60_000  // раз в минуту
+const DEFAULT_INTERVAL_MS = 120_000  // раз в минуту
 const DEFAULT_MIN_SIZE = 25
 const DEFAULT_MAX_SIZE = 50
 
