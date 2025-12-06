@@ -735,41 +735,35 @@ export default function CryptoNewsLens() {
 
       const data = await res.json().catch(() => null)
       const news = Array.isArray(data?.items) ? data.items : []
-      const stats = data?.meta?.sourceStats || {}
+ 
+      // 🔥 ВСЕГДА мерджим бэкенд с client-fallback (RSS + Reddit)
+      console.warn(
+        'crypto-news API loaded, merging with client fallback (RSS + Reddit)',
+      )
 
-      const nonEmptySourcesCount =
-        stats && Object.values(stats).filter((n) => n > 0).length
+      const count = await loadClientFallbackFeed(
+        news, // то, что пришло с бэка, мерджим с клиентскими
+        setItems,
+        setUpdatedAt,
+        setActiveIndex,
+        setProgress,
+      )
 
-      // критерий "фид слабый": пусто ИЛИ мало источников
-      const shouldFallbackMerge =
-        !news.length ||
-        !stats ||
-        nonEmptySourcesCount <= 1
-
-      if (shouldFallbackMerge) {
-        console.warn(
-          'crypto-news API returned weak feed, merging with client fallback (RSS + Reddit)',
+      if (!count && news.length) {
+        // подстраховка: если fallback ничего не дал, а бэк что-то вернул — показываем хотя бы бэк
+        setItems(news)
+        setUpdatedAt(
+          data?.meta?.updatedAt ||
+            data?.updatedAt ||
+            new Date().toISOString(),
         )
-        const count = await loadClientFallbackFeed(
-          news, // то, что пришло с бэка, мерджим с клиентскими
-          setItems,
-          setUpdatedAt,
-          setActiveIndex,
-          setProgress,
-        )
-        if (!count) {
-          // совсем уж пусто — покажем пустой стейт
-          setItems([])
-          setUpdatedAt(new Date().toISOString())
-        }
-        return
+        setActiveIndex(0)
+        setProgress(0)
       }
 
-      // нормальный успешный путь (как в DEV)
-      setItems(news)
-      setUpdatedAt(data?.meta?.updatedAt || data?.updatedAt || null)
-      setActiveIndex(0)
-      setProgress(0)
+      // всё остальное уже сделал loadClientFallbackFeed
+      return
+
 
     } catch (e) {
       console.error('loadNews error', e)
