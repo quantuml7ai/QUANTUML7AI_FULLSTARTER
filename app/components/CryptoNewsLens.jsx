@@ -1125,7 +1125,7 @@ const activePreview = useNewsPreview(activeItem)
               }
             >
               <span className="pillIcon">
-                {autoPlayEnabled ? '⏵' : '⏸'}
+                {autoPlayEnabled ? '▶️' : '⏸️'}
               </span>
               <span>
                 {t('crypto_news_filters_autoplay') ||
@@ -1317,7 +1317,7 @@ const activePreview = useNewsPreview(activeItem)
                   }
                 >
                   <span className="pillIcon">
-                    {autoPlayEnabled ? '⏵' : '⏸'}
+                    {autoPlayEnabled ? '▶️' : '⏸️'}
                   </span>
                   <span>
                     {t(
@@ -2652,7 +2652,7 @@ const activePreview = useNewsPreview(activeItem)
         }
 
         .mobileSheet {
-          position: fixed;
+          position: auto;
           inset: 0;
           background: rgba(0, 0, 0, 0.6);
           backdrop-filter: blur(8px);
@@ -2762,8 +2762,8 @@ const activePreview = useNewsPreview(activeItem)
   .grid {
     display: grid;
     grid-auto-flow: column;                          /* идём по колонкам */
-    grid-auto-columns: minmax(0, 30vw);              /* ширина одной колонки = половина вьюпорта */
-    grid-template-rows: repeat(3, minmax(0, 1fr));   /* две строки => 2×2 */
+    grid-auto-columns: minmax(0, 35vw);              /* ширина одной колонки = половина вьюпорта */
+    grid-template-rows: repeat(2, minmax(0, 1fr));   /* две строки => 2×2 */
     gap: 10px;
     padding-bottom: 4px;
     width: max-content;                              /* чтобы грид мог быть шире контейнера */
