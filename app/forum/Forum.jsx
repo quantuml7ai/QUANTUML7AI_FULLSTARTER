@@ -662,7 +662,7 @@ function initForumAutosnapshot({ intervalMs = 60000, debounceMs = 1000 } = {}) {
   // Любое взаимодействие пользователя — триггерим снапшот (дёшево и сердито)
   const handler = () => doSnap();
   const evts = [
-    'pointerdown','pointerup','click','keydown','wheel','scroll',
+    'click','keydown',
     'touchstart','visibilitychange','focus'
   ];
 
@@ -863,14 +863,14 @@ function useQCoinLive(userKey, isVip){
     const onAny = () => { if (uid) markUi(); };
     const onVis = () => { if (uid && document.visibilityState === 'visible') markUi(); };
 
-    ['pointerdown','keydown','wheel','touchstart'].forEach((e)=>{
+    ['click','keydown'].forEach((e)=>{
       root.addEventListener(e, onAny, {passive:true});
     });
     document.addEventListener('visibilitychange', onVis);
     window.addEventListener('focus', onAny);
 
     return function(){
-      ['pointerdown','keydown','wheel','touchstart'].forEach((e)=>{
+      ['click','keydown'].forEach((e)=>{
         root.removeEventListener(e, onAny);
       });
       document.removeEventListener('visibilitychange', onVis);
@@ -5795,8 +5795,8 @@ const visibleRef = React.useRef(true);
 React.useEffect(()=>{
   const mark = ()=> { activeRef.current = true };
   const el = document.querySelector('.forum_root') || document.body;
-  ['pointerdown','keydown','wheel','touchstart'].forEach(e => el.addEventListener(e, mark, { passive:true }));
-  return ()=> ['pointerdown','keydown','wheel','touchstart'].forEach(e => el.removeEventListener(e, mark));
+  ['click','keydown'].forEach(e => el.addEventListener(e, mark, { passive:true }));
+  return ()=> ['click','keydown'].forEach(e => el.removeEventListener(e, mark));
 },[]);
 
 // следим за видимостью вкладки (если видима — считаем «мягкой активностью»)
@@ -5831,11 +5831,11 @@ React.useEffect(() => {
   if (!root) return;
   const kick = () => { try { schedulePullRef.current(80, false); } catch {} };
 
-  ['pointerdown','wheel','touchstart','keydown'].forEach(evt =>
+  ['pointerdown','touchstart','keydown'].forEach(evt =>
     root.addEventListener(evt, kick, { passive: true })
   );
   return () => {
-    ['pointerdown','wheel','touchstart','keydown'].forEach(evt =>
+    ['pointerdown','touchstart','keydown'].forEach(evt =>
       root.removeEventListener(evt, kick)
     );
   };
