@@ -953,8 +953,8 @@ const [tTitle, tSummary] = await Promise.all([
   )
   const importanceEmojiSymbol =
     importancePercent >= 70 ? '🔥'
-    : importancePercent >= 40 ? '⛓'
-    : '•'
+    : importancePercent >= 40 ? '⚡'
+    : '🤔'
 
   const sentimentClass =
     activeItem?.sentiment === 'bullish'
@@ -1661,8 +1661,8 @@ const activePreview = useNewsPreview(activeItem)
                   {cardImportance >= 70
                     ? '🔥'
                     : cardImportance >= 40
-                    ? '⛓'
-                    : '•'}{' '}
+                    ? '⚡'
+                    : '🤔'}{' '}
                   {Math.round(cardImportance)}%
                 </span>
                 <span className="gridImpBar">
