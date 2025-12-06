@@ -30,7 +30,8 @@ const BgAudio    = dynamic(() => import('../components/BgAudio'),    { ssr: fals
 const ScrollTopPulse = dynamic(() => import('../components/ScrollTopPulse'), { ssr: false })
 
 export const metadata = {
-  metadataBase: new URL('https://quantuml7ai.com'),
+  // чуть более строгий base (как ты пишешь ссылки)
+  metadataBase: new URL('https://www.quantuml7ai.com'),
 
   title: {
     default: 'Quantum L7 AI',
@@ -41,21 +42,26 @@ export const metadata = {
     'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©',
 
   applicationName: 'Quantum L7 AI',
-  keywords: ['crypto', 'research', 'signals', 'ai', 'quant', 'defi', 'exchange', 'alpha', 'quantum l7'],
-
+  keywords: ['crypto', 'research', 'signals', 'ai', 'quant', 'defi', 'exchange', 'alpha', 'quantum l7', 'forum', 'academy'],
+   
+  robots: {
+    index: true,
+    follow: true,
+  },
   openGraph: {
     type: 'website',
-    url: '/',
+    url: '/',                     // корень
     siteName: 'Quantum L7 AI',
     title: 'Quantum L7 AI',
     description:
       'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©',
     images: [
       {
-        url: '/branding/quantum_l7_global_og.png',  // <- твой новый общий баннер
+        // 🔹 глобально корень теперь = /meta/home.png
+        url: '/meta/home.png',
         width: 1200,
         height: 630,
-        alt: 'Quantum L7 AI — Global Crypto • AI • Web3 Ecosystem',
+        alt: 'Quantum L7 AI — Global AI • Exchange • Forum • Academy • Ads AI Rotator',
       },
     ],
   },
@@ -67,13 +73,15 @@ export const metadata = {
     title: 'Quantum L7 AI',
     description:
       'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©',
-    images: ['/branding/quantum_l7_global_og.png'], // тот же баннер
+    // 🔹 твиттер-картинка для корня та же
+    images: ['/meta/home.png'],
   },
 
+  // 🔹 лёгкий bust кэша для иконок (версии можно менять при билд-апдейтах)
   icons: {
-    icon: '/favicon-new.ico',
-    shortcut: '/favicon-new.ico',
-    apple: '/apple-touch-icon-new.png',
+    icon: '/favicon-new.ico?v=1',
+    shortcut: '/favicon-new.ico?v=1',
+    apple: '/apple-touch-icon-new.png?v=1',
   },
 
   alternates: {

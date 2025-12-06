@@ -1,0 +1,39 @@
+// app/forum/layout.js
+
+const GLOBAL_DESCRIPTION =
+  'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©'
+
+export const metadata = {
+  title: 'Forum',
+  description: GLOBAL_DESCRIPTION,
+  alternates: {
+    canonical: '/forum',
+  },
+  openGraph: {
+    type: 'website',
+    url: '/forum',
+    siteName: 'Quantum L7 AI',
+    title: 'Forum',
+    description: GLOBAL_DESCRIPTION,
+    images: [
+      {
+        url: '/meta/forum.png',
+        width: 1200,
+        height: 630,
+        alt: 'Quantum L7 AI — Forum',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@quantuml7ai',
+    creator: '@quantuml7ai',
+    title: 'Quantum L7 AI — Forum',
+    description: GLOBAL_DESCRIPTION,
+    images: ['/meta/forum.png'],
+  },
+}
+
+export default function ForumLayout({ children }) {
+  return children
+}

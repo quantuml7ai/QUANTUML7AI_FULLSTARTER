@@ -37,34 +37,74 @@ images: {
       // добавь при необходимости другие свои домены:
       // 'https://app.quantuml7ai.com',
       // 'https://*.your-domain.com'
-    ];
+    ]
 
-    // CSP под требования: запрет http:, upgrade-insecure-requests; либеральный img-src
- 
     const csp = [
       `upgrade-insecure-requests;`,
       `default-src 'self' https: data: blob:;`,
       `script-src 'self' https: 'unsafe-inline' 'unsafe-eval' blob:;`,
       `style-src 'self' https: 'unsafe-inline' blob:;`,
-      `img-src * data: blob:;`,  // либерально для совместимости скриншотов
+      `img-src * data: blob:;`, // либерально для совместимости скриншотов
       `font-src * data:;`,
       `media-src * data: blob:;`,
-     `connect-src * data: blob: ws: wss:;`,
+      `connect-src * data: blob: ws: wss:;`,
       `frame-src * data: blob:;`,
       `worker-src 'self' blob: https:;`,
       `manifest-src *;`,
       `base-uri *;`,
       `form-action *;`,
-      // object-src можно выключить для безопасности. Если вдруг нужен <object>, смени на: object-src * data: blob:;
       `object-src 'none';`,
-      `frame-ancestors ${FRAME_PARENTS.join(' ')};`
-    ].join(' ');
+      `frame-ancestors ${FRAME_PARENTS.join(' ')};`,
+    ].join(' ')
 
     return [
+      // 🔹 1) Фавиконки — без кеша
+      {
+        source: '/:file(favicon-new.ico|apple-touch-icon-new.png)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, no-cache, must-revalidate, max-age=0',
+          },
+          { key: 'Pragma', value: 'no-cache' },
+          { key: 'Expires', value: '0' },
+        ],
+      },
+
+      // 🔹 2) Все OG-картинки из /meta — без кеша
+      {
+        source: '/meta/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, no-cache, must-revalidate, max-age=0',
+          },
+          { key: 'Pragma', value: 'no-cache' },
+          { key: 'Expires', value: '0' },
+        ],
+      },
+
+      // (опционально) если хочешь, чтобы и /branding/* тоже не кешировали
+      // {
+      //   source: '/branding/:path*',
+      //   headers: [
+      //     {
+      //       key: 'Cache-Control',
+      //       value: 'no-store, no-cache, must-revalidate, max-age=0',
+      //     },
+      //     { key: 'Pragma', value: 'no-cache' },
+      //     { key: 'Expires', value: '0' },
+      //   ],
+      // },
+
+      // 🔹 3) Глобальные заголовки и CSP для всех остальных путей
       {
         source: '/(.*)',
         headers: [
-          { key: 'Referrer-Policy', value: 'no-referrer-when-downgrade' },
+          {
+            key: 'Referrer-Policy',
+            value: 'no-referrer-when-downgrade',
+          },
           // X-Frame-Options не ставим, чтобы не конфликтовать с frame-ancestors
           { key: 'X-Content-Type-Options', value: 'nosniff' },
 
@@ -73,11 +113,11 @@ images: {
           { key: 'Cross-Origin-Opener-Policy', value: 'unsafe-none' },
           { key: 'Cross-Origin-Resource-Policy', value: 'cross-origin' },
 
-          { key: 'Content-Security-Policy', value: csp }
-        ]
-      }
-    ];
-  }
-};
+          { key: 'Content-Security-Policy', value: csp },
+        ],
+      },
+    ]
+  },
+}
 
-export default nextConfig;
+export default nextConfig
