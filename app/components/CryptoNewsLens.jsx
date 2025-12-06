@@ -1336,14 +1336,15 @@ const activePreview = useNewsPreview(activeItem)
                       )
                     }
                   >
-                    <option value="10000">
-                      10s
-                    </option>
+
                     <option value="15000">
                       15s
                     </option>
                     <option value="30000">
                       30s
+                    </option>
+                    <option value="60000">
+                      60s
                     </option>
                   </select>
                   <span className="selectChevron">
