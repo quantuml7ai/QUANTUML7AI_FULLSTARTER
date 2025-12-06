@@ -2485,7 +2485,7 @@ const activePreview = useNewsPreview(activeItem)
 
         .gridMeta {
           margin-top: auto; /* прижимаем к низу карточки */
-          display: flex;
+          display: auto;
           justify-content: space-between;
           align-items: center;
           font-size: 0.75rem;
@@ -2508,8 +2508,7 @@ const activePreview = useNewsPreview(activeItem)
           border-radius: 999px;
           background: rgba(255, 255, 255, 0.12);
           overflow: hidden;
-        }
-
+        } 
         .gridImpBarInner {
           display: block;
           height: 100%;
