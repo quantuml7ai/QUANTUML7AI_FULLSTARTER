@@ -177,26 +177,16 @@ async function translateText(text, targetLocale) {
 }
 // ==== CLIENT FALLBACKS: Reddit + RSS (работают только в браузере) ====
 
-// жирный client-fallback Reddit, независимо от ENV
 const FALLBACK_REDDIT_SUBS = [
   'CryptoCurrency',
   'CryptoMarkets',
-  'Bitcoin', 
-  'btc',
-  'Ethereum',
-  'ethtrader',
   'ethfinance',
+  'Bitcoin',
+  'Ethereum',
   'Solana',
-  'solana',
-  'CryptoMoonShots',
-  'CryptoCurrencyTrading',
-  'Crypto_General',
-  'defi',
-  'binance',
-  'CryptoTechnology',
 ]
 
-// жирный client-fallback RSS без API-ключей
+// те же RSS, что у тебя на бэке по дефолту
 const FALLBACK_RSS_FEEDS = [
   'https://www.coindesk.com/arc/outboundfeeds/rss/?outputType=xml',
   'https://decrypt.co/feed',
@@ -206,8 +196,6 @@ const FALLBACK_RSS_FEEDS = [
   'https://www.coindesk.com/arc/outboundfeeds/rss/category/markets/?outputType=xml',
   'https://www.coindesk.com/arc/outboundfeeds/rss/category/policy/?outputType=xml',
   'https://www.coindesk.com/arc/outboundfeeds/rss/category/business/?outputType=xml',
-  'https://news.kucoin.com/rss',
-  'https://www.okx.com/rss',
 ]
 
 // ---- общие хелперы для fallback ----
@@ -310,18 +298,6 @@ function fallbackComputeImportanceFromReddit(ups, comments, title) {
   if (score < 5) score = 5
   if (score > 100) score = 100
   return Math.round(score)
-}
-// дедуп новостей по (sourceUrl + title), как на бэке
-function dedupeNewsItems(items) {
-  const seen = new Set()
-  const out = []
-  for (const it of items) {
-    const key = `${(it.sourceUrl || '').toLowerCase()}|${(it.title || '').toLowerCase()}`
-    if (seen.has(key)) continue
-    seen.add(key)
-    out.push(it)
-  }
-  return out
 }
 
 // простая генерация id, чтобы React не ругался
@@ -554,34 +530,28 @@ async function fetchRssClientFallback() {
 }
 
 // единая функция, которую будем дергать из loadNews
-// baseItems — то, что пришло с бэка (может быть null/undefined)
-async function loadClientFallbackFeed(baseItems, setItems, setUpdatedAt, setActiveIndex, setProgress) {
+async function loadClientFallbackFeed(setItems, setUpdatedAt, setActiveIndex, setProgress) {
   try {
     const [rssItems, redditItems] = await Promise.all([
       fetchRssClientFallback(),
       fetchRedditClientFallback(),
     ])
 
-    const fallbackMerged = [...rssItems, ...redditItems]
+    const merged = [...rssItems, ...redditItems]
 
-    // сортируем fallback по времени
-    fallbackMerged.sort(
+    // сортируем по времени, чтобы было как на бэке
+    merged.sort(
       (a, b) =>
         new Date(b.publishedAt).getTime() -
         new Date(a.publishedAt).getTime(),
     )
 
-    const base = Array.isArray(baseItems) ? baseItems : []
-
-    // МЯСО: мерджим бэкенд + client fallback и дедупим
-    const final = dedupeNewsItems([...base, ...fallbackMerged])
-
-    setItems(final)
+    setItems(merged)
     setUpdatedAt(new Date().toISOString())
     setActiveIndex(0)
     setProgress(0)
 
-    return final.length
+    return merged.length
   } catch (e) {
     console.error('loadClientFallbackFeed error', e)
     return 0
@@ -696,7 +666,8 @@ export default function CryptoNewsLens() {
     }
   }, [filteredItems, activeIndex])
 
-   
+  
+  // загрузка новостей
   async function loadNews() {
     try {
       setLoading(true)
@@ -716,11 +687,10 @@ export default function CryptoNewsLens() {
         cache: 'no-store',
       })
 
-      // если API совсем не отвечает — чистый клиентский фоллбек
+      // если сам API упал — сразу в client fallback
       if (!res.ok) {
         console.warn('crypto-news API error, fallback to client (RSS + Reddit)')
         const count = await loadClientFallbackFeed(
-          null,
           setItems,
           setUpdatedAt,
           setActiveIndex,
@@ -734,56 +704,56 @@ export default function CryptoNewsLens() {
 
       const data = await res.json().catch(() => null)
       const news = Array.isArray(data?.items) ? data.items : []
+      const stats = data?.meta?.sourceStats || {}
+      const allStatsZero =
+        stats &&
+        Object.keys(stats).length > 0 &&
+        Object.values(stats).every((n) => !n)
 
-      // 🔥 КЛЮЧЕВОЕ ИЗМЕНЕНИЕ:
-      // ВСЕГДА мерджим бэкенд с клиентским fallback (RSS + Reddit),
-      // никакого shouldFallbackMerge больше нет.
-      console.warn(
-        'crypto-news API loaded, merging with client fallback (RSS + Reddit)',
-      )
-
-      const count = await loadClientFallbackFeed(
-        news, // что пришло с бэка, мерджим с клиентскими
-        setItems,
-        setUpdatedAt,
-        setActiveIndex,
-        setProgress,
-      )
-
-      // подстраховка: если fallback вдруг ничего не дал, а бэк что-то вернул — показываем хотя бы бэк
-      if (!count && news.length) { 
-        setItems(news)
-        setUpdatedAt(
-          data?.meta?.updatedAt ||
-            data?.updatedAt ||
-            new Date().toISOString(),
+      // КЛЮЧ: бэк жив, но НИЧЕГО не достал → включаем client fallback
+      if (!news.length || allStatsZero) {
+        console.warn(
+          'crypto-news API returned empty feed, fallback to client (RSS + Reddit)',
         )
-        setActiveIndex(0)
-        setProgress(0)
+        const count = await loadClientFallbackFeed(
+          setItems,
+          setUpdatedAt,
+          setActiveIndex,
+          setProgress,
+        )
+        if (!count) {
+          // совсем уж пусто — покажем пустой стейт
+          setItems([])
+          setUpdatedAt(new Date().toISOString())
+        }
+        return
       }
 
-      return 
-    } catch (e) { 
+      // нормальный успешный путь (как в DEV)
+      setItems(news)
+      setUpdatedAt(data?.meta?.updatedAt || data?.updatedAt || null)
+      setActiveIndex(0)
+      setProgress(0)
+    } catch (e) {
       console.error('loadNews error', e)
       setError(e?.message || 'error')
 
-      // при ошибке всё равно пробуем забить ленту фоллбеком
+      // даже при реальной ошибке — стараемся хоть чем-то заполнить ленту
       const count = await loadClientFallbackFeed(
-        null,
         setItems,
         setUpdatedAt,
         setActiveIndex,
         setProgress,
       )
-      if (!count) { 
+      if (!count) {
+        // если и fallback не смог — уже просто показываем ошибку + пусто
         setItems([])
         setUpdatedAt(new Date().toISOString())
-      }
-    } finally { 
+      } 
+    } finally {
       setLoading(false)
     }
-  }
-
+  } 
 
   // первый запрос
   useEffect(() => {

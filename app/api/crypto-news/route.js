@@ -19,29 +19,8 @@ const CRYPTOPANIC_TOKENS = Object.entries(process.env)
   .map(([, v]) => v)
   .filter(Boolean)
 
-// RSS по умолчанию: жирный набор крипто-ленточек без всяких ENV
-const DEFAULT_RSS_FEEDS = [
-  'https://www.coindesk.com/arc/outboundfeeds/rss/?outputType=xml',
-  'https://decrypt.co/feed',
-  'https://cointelegraph.com/rss',
-  'https://www.theblock.co/rss',
-  'https://bitcoinmagazine.com/.rss/full',
-  'https://www.coindesk.com/arc/outboundfeeds/rss/category/markets/?outputType=xml',
-  'https://www.coindesk.com/arc/outboundfeeds/rss/category/policy/?outputType=xml',
-  'https://www.coindesk.com/arc/outboundfeeds/rss/category/business/?outputType=xml',
-  'https://www.binance.com/en/rss', // где работает
-  'https://news.kucoin.com/rss',
-  'https://www.okx.com/rss',
-]
-
-// если CRYPTO_NEWS_RSS_FEEDS задан – берём его,
-// если нет – берём DEFAULT_RSS_FEEDS
-const RSS_FEEDS = (
-  process.env.CRYPTO_NEWS_RSS_FEEDS &&
-  process.env.CRYPTO_NEWS_RSS_FEEDS.trim().length
-    ? process.env.CRYPTO_NEWS_RSS_FEEDS
-    : DEFAULT_RSS_FEEDS.join(',')
-)
+// RSS: сюда можно сунуть coindesk/decrypt/cointelegraph и т.д.
+const RSS_FEEDS = (process.env.CRYPTO_NEWS_RSS_FEEDS || '')
   .split(/[,\s;]+/)
   .map((s) => s.replace(/#.*/, '').trim())
   .filter(Boolean)
@@ -93,35 +72,11 @@ const IMPORTANCE_MIN = Number(
 
 const MAX_ITEMS = Number(process.env.CRYPTO_NEWS_MAX_ITEMS || '100')
 
-// Reddit: дефолтный жирный список, если ENV не задан
-const DEFAULT_REDDIT_SUBS = [
-  'CryptoCurrency',
-  'CryptoMarkets',
-  'Bitcoin',
-  'btc',
-  'Ethereum',
-  'ethtrader',
-  'ethfinance',
-  'Solana',
-  'solana',
-  'CryptoMoonShots',
-  'CryptoCurrencyTrading',
-  'Crypto_General',
-  'defi',
-  'binance',
-  'CryptoTechnology',
-]
-
-const REDDIT_SUBS_ENV = (process.env.NEXT_PUBLIC_REDDIT_SUBS || '')
+// Reddit
+const REDDIT_SUBS = (process.env.NEXT_PUBLIC_REDDIT_SUBS || '')
   .split(/[,\s;]+/)
   .map((s) => s.trim())
   .filter(Boolean)
-
-// если в ENV нет списка – берём дефолт
-const REDDIT_SUBS = REDDIT_SUBS_ENV.length
-  ? REDDIT_SUBS_ENV
-  : DEFAULT_REDDIT_SUBS
-
 const REDDIT_ENABLED = REDDIT_SUBS.length > 0
 
 // NewsAPI
