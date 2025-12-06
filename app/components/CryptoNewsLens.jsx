@@ -696,8 +696,7 @@ export default function CryptoNewsLens() {
     }
   }, [filteredItems, activeIndex])
 
-  
-  // загрузка новостей
+   
   async function loadNews() {
     try {
       setLoading(true)
@@ -712,16 +711,16 @@ export default function CryptoNewsLens() {
         params.set('importanceMin', String(IMPORTANT_THRESHOLD))
       }
 
-       const res = await fetch(`/api/crypto-news?${params.toString()}`, {
+      const res = await fetch(`/api/crypto-news?${params.toString()}`, {
         method: 'GET',
         cache: 'no-store',
       })
 
-      // если сам API упал — сразу в client fallback (без бэка)
+      // если API совсем не отвечает — чистый клиентский фоллбек
       if (!res.ok) {
         console.warn('crypto-news API error, fallback to client (RSS + Reddit)')
         const count = await loadClientFallbackFeed(
-          null, // нет базовых элементов, чистый fallback
+          null,
           setItems,
           setUpdatedAt,
           setActiveIndex,
@@ -735,22 +734,24 @@ export default function CryptoNewsLens() {
 
       const data = await res.json().catch(() => null)
       const news = Array.isArray(data?.items) ? data.items : []
- 
-      // 🔥 ВСЕГДА мерджим бэкенд с client-fallback (RSS + Reddit)
+
+      // 🔥 КЛЮЧЕВОЕ ИЗМЕНЕНИЕ:
+      // ВСЕГДА мерджим бэкенд с клиентским fallback (RSS + Reddit),
+      // никакого shouldFallbackMerge больше нет.
       console.warn(
         'crypto-news API loaded, merging with client fallback (RSS + Reddit)',
       )
 
       const count = await loadClientFallbackFeed(
-        news, // то, что пришло с бэка, мерджим с клиентскими
+        news, // что пришло с бэка, мерджим с клиентскими
         setItems,
         setUpdatedAt,
         setActiveIndex,
         setProgress,
       )
 
-      if (!count && news.length) {
-        // подстраховка: если fallback ничего не дал, а бэк что-то вернул — показываем хотя бы бэк
+      // подстраховка: если fallback вдруг ничего не дал, а бэк что-то вернул — показываем хотя бы бэк
+      if (!count && news.length) { 
         setItems(news)
         setUpdatedAt(
           data?.meta?.updatedAt ||
@@ -761,32 +762,28 @@ export default function CryptoNewsLens() {
         setProgress(0)
       }
 
-      // всё остальное уже сделал loadClientFallbackFeed
-      return
-
-
-    } catch (e) {
+      return 
+    } catch (e) { 
       console.error('loadNews error', e)
       setError(e?.message || 'error')
 
-      // даже при реальной ошибке — стараемся хоть чем-то заполнить ленту
+      // при ошибке всё равно пробуем забить ленту фоллбеком
       const count = await loadClientFallbackFeed(
-        null, // нет базовых элементов, чистый fallback
+        null,
         setItems,
         setUpdatedAt,
         setActiveIndex,
         setProgress,
       )
-      if (!count) {
-        // если и fallback не смог — уже просто показываем ошибку + пусто
+      if (!count) { 
         setItems([])
         setUpdatedAt(new Date().toISOString())
-      } 
-    } finally {
-
+      }
+    } finally { 
       setLoading(false)
     }
-  } 
+  }
+
 
   // первый запрос
   useEffect(() => {
