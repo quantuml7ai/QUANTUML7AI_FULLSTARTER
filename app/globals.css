@@ -96,11 +96,12 @@ body{
 .lang-switch:hover{background:rgba(157,220,255,.15)}
 
 /* компакт на узких экранах — можно переопределить переменные */
-@media (max-width: 480px){
+@media (max-width: 620px){
   .topbar{
     --nav-font-size: 20px;
     --nav-pad-y: 6px;
     --nav-pad-x: 4px;
+   
   }
   .lang-switch{ font-size:13px }
 }
@@ -623,7 +624,7 @@ html, body {
 :root { --gutter: 26px; --miniapp-top-offset: 70px; } /* ↑ докрути тут при необходимости */
 @media (min-width:1280px){ :root{ --gutter: 100px; } }
 /* Мобайл: микро-гаттер 8px, чтобы ничего не «резалось» по краям */
-@media (max-width:640px){ :root{ --gutter: 6px; --miniapp-top-offset: 30x; } }
+@media (max-width:680px){ :root{ --gutter: 6px; --miniapp-top-offset: 70x;} }
 
 /* База */
 html,body{ margin:0; padding:0; width:100%; min-height:100%; overflow-x:hidden; }
@@ -1695,7 +1696,7 @@ h1, h2, h3, h4, h5, h6{
   font-weight:900;
   letter-spacing:.08em;          /* меньше расстояние между буквами */
   text-transform:uppercase;
-  font-size:0.8em;                 /* базовый масштаб, сверху ещё orbitScale */
+  font-size:1em;                 /* базовый масштаб, сверху ещё orbitScale */
   paint-order:stroke;
   stroke:rgba(0,0,0,.9);
   stroke-width:1.4px;
@@ -1784,8 +1785,6 @@ h1, h2, h3, h4, h5, h6{
 
     /* 🔤 текст: +20% больше */
     --orbit-font-base: clamp(19px, 5.9vw, 28px);
-
-    /* 📏 расстояние сверху */
-    margin-top: 10px;
+ 
   }
 }
