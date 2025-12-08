@@ -1777,15 +1777,13 @@ h1, h2, h3, h4, h5, h6{
 @media (max-width: 680px) {
   .nav-orbit {
 
-    /* 🔵 орбита — БЕЗ ИЗМЕНЕНИЙ */
-    --orbit-size: min(293px, 75vw);
+    /* 🔵 орбита: −10% */
+    --orbit-size: min(264px, 67.5vw);
 
-    /* 🎮 центр: было clamp(80.5px, 27.6vw, 115px) → +15% */
-    --orbit-center-size: clamp(92.6px, 31.8vw, 132px);
+    /* 🎮 центр: −15% */
+    --orbit-center-size: clamp(78.7px, 27vw, 112px);
 
-    /* 🔤 текст — БЕЗ ИЗМЕНЕНИЙ */
-    --orbit-font-base: clamp(14.5px, 4.5vw, 21px);
+    /* 🔤 текст: −10% */
+    --orbit-font-base: clamp(13px, 4.1vw, 19px);
   }
 }
-
-
