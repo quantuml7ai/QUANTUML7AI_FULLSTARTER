@@ -39,8 +39,8 @@ export default function TopBar () {
   const items = [
     { href: '/',          label: t('nav_home') },
     { href: '/subscribe', label: t('nav_subscribe') },
-    { href: '/exchange',  label: t('nav_exchange') },
-    { href: '/forum',     label: t('forum_title') },
+    { href: '/forum',     label: t('forum_title') }, 
+    { href: '/exchange',  label: t('nav_exchange') }, 
     { href: '/academy',   label: t('nav_academy') },
     { href: '/about',     label: t('nav_about') },
   ] 
