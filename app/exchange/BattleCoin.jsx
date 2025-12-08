@@ -262,9 +262,13 @@ setIsVip(!!j.isVip)
         )
       }
 
-      // историю обновляем только при full
+      // историю берём только на full, чтобы light-пуллинг её не затирал
       if (scope === 'full') {
-        setOrders(Array.isArray(j.orders) ? j.orders : [])
+        if (Array.isArray(j.orders)) {
+          setOrders(j.orders)
+        } else {
+          setOrders([])
+        }
       }
 
       setSymbols(Array.isArray(j.symbols) ? j.symbols : [])
@@ -736,13 +740,7 @@ const filteredOrders = useMemo(() => {
                 </div>
                 <div className="symbol-select-row">
                   <div className="symbol-pill">
-<Image
-  src={`/coins/${selectedSymbol}.png`}
-  alt={selectedSymbol}
-  className="symbol-pill-icon"
-  width={30}
-  height={30}
-/>
+
 
                     <span className="symbol-pill-text">
                       {selectedSymbol}
@@ -1898,12 +1896,13 @@ const filteredOrders = useMemo(() => {
           border-radius: 999px;
         }
 
-        .symbol-pill-text {
-          font-size: 11px;
-          text-transform: uppercase;
-          letter-spacing: 0.16em;
-          color: #eaf2ff;
-        }
+.symbol-pill-text {
+
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: #eaf2ff;
+}
 
         .symbol-select {
           flex: 1;
@@ -2180,7 +2179,8 @@ const filteredOrders = useMemo(() => {
 
         /* ---------- market ---------- */
         .market-card {
-          max-height: 260px;
+          max-height: 360px;
+          min-height: 360px;
         }
 
         .market-table {
@@ -2196,12 +2196,12 @@ const filteredOrders = useMemo(() => {
           letter-spacing: 0.16em;
           color: rgba(167, 189, 255, 0.9);
           border-radius: 10px;
-          background: rgba(6, 12, 41, 0.95);
+          background: rgba(0, 0, 0, 1);
         }
 
         .market-body {
           margin-top: 4px;
-          max-height: 204px;
+          max-height: 220px;
           overflow-y: auto;
           padding-right: 2px;
         }
@@ -2280,7 +2280,7 @@ const filteredOrders = useMemo(() => {
 
         /* ---------- history ---------- */
         .history-card {
-          max-height: 270px;
+          max-height: 370px;
         }
 
         .history-header {
@@ -2291,8 +2291,8 @@ const filteredOrders = useMemo(() => {
           display: inline-flex;
           padding: 3px;
           border-radius: 999px;
-          background: rgba(7, 13, 48, 0.95);
-          box-shadow: inset 0 0 0 1px rgba(60, 89, 167, 0.9);
+          background: rgba(0, 0, 0, 0.95);
+          box-shadow: inset 0 0 0 1px rgba(6, 29, 32, 0.9);
           gap: 3px;
         }
 
@@ -2336,7 +2336,7 @@ const filteredOrders = useMemo(() => {
             32px minmax(0, 1.3fr) 0.9fr 0.7fr 0.9fr 1fr 0.9fr 0.9fr 0.9fr;
           padding: 5px 6px;
           border-radius: 10px;
-          background: rgba(7, 12, 39, 0.95);
+          background: rgba(0, 0, 0, 0.95);
           font-size: 10px;
           text-transform: uppercase;
           letter-spacing: 0.14em;
@@ -2345,7 +2345,7 @@ const filteredOrders = useMemo(() => {
 
         .history-body {
           margin-top: 3px;
-          max-height: 188px;
+          max-height: 130px;
           overflow-y: auto;
           padding-right: 2px;
         }
@@ -2444,6 +2444,30 @@ const filteredOrders = useMemo(() => {
           font-size: 11px;
           color: #ffc6d3;
         }
+  /* --- MOBILE: history table = единый горизонтальный скролл --- */
+
+  /* Горизонтальный скролл одной лентой: шапка + строки вместе */
+  .battlecoin-card.history-card {
+    overflow-x: auto;
+  }
+
+  /* Общая ширина таблицы истории */
+  .history-table {
+    min-width: 720px; /* при желании можно поменять число */
+  }
+
+  /* Вертикальный скролл только у списка, без второй горизонтальной полосы */
+  .history-body {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* Агрессивный перенос текста, чтобы подписи/значения держались в своих колонках */
+  .history-head .hh-col,
+  .history-body .hb-col {
+    white-space: normal;
+    word-break: break-all;
+  }
 
         /* ---------- animations ---------- */
         @keyframes spin {
@@ -2551,7 +2575,7 @@ const filteredOrders = useMemo(() => {
           }
         }
 
-        /* ---------- responsive ---------- */
+         /* ---------- responsive ---------- */
         @media (max-width: 1100px) {
           .battlecoin-layout {
             grid-template-columns: minmax(0, 1fr);
@@ -2579,9 +2603,9 @@ const filteredOrders = useMemo(() => {
           .history-card {
             max-height: none;
           }
-        }
+//      }  
 
-@media (max-width: 768px) {
+// @media (max-width: 1768px) {
   .battlecoin-panel {
     margin-top: 18px;
     padding: 14px 12px 16px;

@@ -1491,13 +1491,14 @@ export default function ExchangePage(){
       <AIQuotaGate onOpenUnlimit={handleOpenUnlimit}>
         <AIBox data={ai}/>
       </AIQuotaGate>
-
+      <BattleCoin />
       <OrderBook symbol={symbol}/>
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
        slotKind="exchange_after_orderbook"
      />
+           
       <section className="panel">
         <h2>{TX(t,'roadmap','Roadmap')}</h2>
         <div className="img16x9 panel-media">
@@ -1506,9 +1507,10 @@ export default function ExchangePage(){
         <ul className="bullets">{bullets.map((b,i)=><li key={i}>• {b}</li>)}</ul>
       </section>
 
-      <section className="panel">
-      <BattleCoin />
-      </section>
+
+
+
+   
 
 
       {sections.map((s, idx) => (

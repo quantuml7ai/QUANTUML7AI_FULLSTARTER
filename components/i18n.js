@@ -45375,6 +45375,276 @@ try {
   Object.assign(dict.ar, BATTLE_AR)
   Object.assign(dict.tr, BATTLE_TR)
 } catch (e) {}
+const GAME_EN = {
+auth_account: 'Authorized',
+
+game_title: 'QL7 AI GameVerse',
+game_hero_alt: 'Quantum L7 GameVerse — a multi-chain GameVerse powered by Quantum L7 AI and QCoin',
+
+game_p1: 'Welcome to the Quantum L7 GameVerse — the singularity point where gaming, crypto-economy, multi-chain infrastructure, AI engines, and quantum processes merge into one living metaverse. 🌌⚡ This is a space that doesn’t follow the old rules of the gaming industry — it creates its own protocols, its own worlds, and its own economy.',
+
+game_p2: 'Quantum L7 GameVerse is a living multiverse that reacts to player behavior, market dynamics, DeFi flows, liquidity conditions, NFT activity, and cross-chain events. It breathes through Quantum L7 AI, reshaping worlds, difficulty, rewards, and risks in real time. 🧬🤖',
+
+game_p3: 'Inside the GameVerse, millions of gaming directions await you: battle arenas, RTS clusters, cosmic roguelike corridors, cyber dungeons, VR expeditions, neural quests, sandbox realities, card systems, on-chain survival modes, AI-orchestrated missions, and hybrid fusion gameplay of the next generation. 🎮🚀',
+
+game_p4: 'Every gaming session is integrated with QCoin and lives within smart-contract logic. Your actions turn into a real value stream: victories, defeats, risk, strategy, team decisions, and individual moves push through the GameVerse tokenomics and influence the global parameters of the ecosystem. 💠💹',
+
+game_p5: 'The Quantum Engine continuously recalculates probabilistic scenarios, creates new game universes, adapts balance, spawn logic, loot tables, AI-entity behavior, and rare-drop mechanics. The GameVerse is not a linear set of levels — it is an ever-expanding, self-adjusting structure living in a mode of real-time recalculation. 🔮📡',
+
+game_p6: 'Game worlds may enter hyper-volatility, economy crash, dark-matter state, or aggressive-growth mode. Planets, hubs, and sectors synchronize with DeFi modules, change taxes, fees, rarity coefficients, resource availability, and entry thresholds. All of this happens with no pause, no restarts, no universe reload. ⚔️🌑',
+
+game_p7: 'Quantum L7 AI acts as a meta-coordinator: it analyzes big-data streams, on-chain metrics, player behavior, session time, win-rate curves, risk profiles, and cross-game activity, creating alignment between worlds and adapting the GameVerse to a living, constantly changing audience. 🧠📈',
+
+game_p8: 'In the Quantum L7 GameVerse, every item can be asset-linked: weapons, ships, lands, artifacts, collections, NFT characters, game territories, and personal AI companions exist as on-chain assets with their own liquidity, history, rarity, and market. Loot stops being just pixels — it becomes part of the crypto-economy. 🚀💎',
+
+game_p9: 'Games can launch as autonomous universes or as parts of a unified multi-realm complex, where the outcome of a battle in one sector changes rules, prices, access, and balance of power in another. This is a true metaverse: connected by logic, economy, and technology — not just a collection of separate projects. 🔗🌍',
+
+game_p10: 'The progression-sync system gives you a unified progress contour: account, levels, inventory, ranks, reputation, clans, perks, achievements, and even behavioral patterns can transfer between games, platforms, and devices. 🛰✨ One profile — an infinite line of worlds and modes synchronized through the Quantum L7 infrastructure.',
+
+game_p11: 'Quantum L7 GameVerse unfolds across the entire device stack: 🌐 web versions, 💻 Windows desktop clients, 📱 iOS and Android, 🎮 console interfaces, 🕶 VR/AR devices, future-ready metaverse platforms, and new form factors. Any entry point is a portal into the same quantum ecosystem.',
+
+game_p12: 'QCoin is the heartbeat of this gaming economy. In-game transactions, upgrades, customization, staking modules, access rights, cross-game value transfer, participation in governance, seasonal events, cross-chain campaigns, and rare-drop mechanics all flow through it. This is not just a token — it is the central energy stream of the GameVerse. 🪙⚡',
+
+game_p13: 'Quantum L7 GameVerse builds not just games, but crypto-civilizations: factions, empires, alliances, trade routes, fintech coalitions, guilds, DAO communities, and AI states. They form new political, economic, and social models within digital reality, where power is held not only by strength but also by data, liquidity, and influence. 🛸👑',
+
+game_p14: 'Every player here becomes part of the Quantum Epoch — an era in which gaming stops being mere entertainment and becomes a new digital order. Your decisions matter, your playstyle influences worlds, and your involvement shifts the metrics of the entire ecosystem. Universes are no longer limited by genres — they evolve together with you. 🧩🌠',
+
+game_p15: 'Prepare to become a pioneer. Quantum L7 GameVerse is not just another release — it is the launch of a new reality. 🚀🔥 Here, player energy, cryptocurrency, technologies, AI, and quantum architectures merge into one infinite structure. Take your place in this digital civilization while the GameVerse is only beginning to reveal its full potential.',
+
+}
+const GAME_RU = {
+auth_account: 'Авторизовано',  
+
+game_title: 'QL7 AI GameVerse',
+game_hero_alt: 'Quantum L7 GameVerse — multi-chain GameVerse на базе Quantum L7 AI и QCoin',
+
+game_p1: 'Добро пожаловать в Quantum L7 GameVerse — точку сингулярности, где гейминг, криптоэкономика, multi-chain инфраструктура, AI-движки и квантовые процессы сходятся в одну живую метавселенную. 🌌⚡ Здесь запускается пространство, которое не подчиняется старым правилам игровой индустрии — оно создаёт собственные протоколы, собственные миры и собственную экономику.',
+
+game_p2: 'Quantum L7 GameVerse — это living multiverse, реагирующий на поведение игрока, динамику рынка, DeFi-потоки, состояние ликвидности, NFT-активность и cross-chain события. Он дышит через Quantum L7 AI, перестраивая миры, сложности, награды и риски в реальном времени. 🧬🤖',
+
+game_p3: 'Внутри GameVerse тебя ждут миллионы игровых направлений: battle-арены, RTS-кластеры, cosmic roguelike-коридоры, cyber-dungeons, VR-экспедиции, neural-quests, sandbox-реальности, card-systems, on-chain survival-режимы, AI-orchestrated missions и гибридный fusion-геймплей следующего поколения. 🎮🚀',
+
+game_p4: 'Каждая игровая сессия интегрирована с QCoin и живёт внутри smart-contract логики. Твои действия превращаются в реальный value-stream: победы, поражения, риск, стратегия, командные решения и индивидуальные мувы пробивают себе дорогу через токеномику GameVerse и влияют на глобальные параметры экосистемы. 💠💹',
+
+game_p5: 'Quantum Engine непрерывно пересчитывает вероятностные сценарии, создаёт новые игровые вселенные, адаптирует баланс, спавн-логики, loot-таблицы, поведение AI-сущностей и rare-дропов. GameVerse — это не линейный набор уровней, а постоянно расширяющаяся, самонастраивающаяся структура, живущая в режиме real-time recalculation. 🔮📡',
+
+game_p6: 'Игровые миры могут уходить в hyper-volatility, economy crash, dark-matter state или режим агрессивного роста. Планеты, хабы и сектора синхронизируются с DeFi-модулями, изменяют налоги, комиссии, rarity-коэффициенты, доступность ресурсов и входные пороги. Всё это — без паузы, без рестартов, без перезагрузки вселенной. ⚔️🌑',
+
+game_p7: 'Quantum L7 AI выступает как meta-coordinator: анализирует big-data потоки, ончейн-метрики, поведение игроков, время сессий, winrate-кривые, риск-профили и cross-game активность, создавая alignment между мирами и подстраивая GameVerse под живую, постоянно меняющуюся аудиторию. 🧠📈',
+
+game_p8: 'В Quantum L7 GameVerse каждый предмет может быть asset-linked: оружие, корабли, земли, артефакты, коллекции, NFT-персонажи, игровые территории и персональные AI-компаньоны существуют как on-chain активы с собственной ликвидностью, историей, редкостью и рынком. Игровой лут перестаёт быть просто пикселями — он становится частью криптоэкономики. 🚀💎',
+
+game_p9: 'Игры могут запускаться как автономные вселенные или как части единого multi-realm комплекса, где исход битвы в одном секторе меняет правила, цены, доступы и баланс сил в другом. Это настоящая метавселенная: связанная логикой, экономикой и технологией, а не просто коллекция отдельных проектов. 🔗🌍',
+
+game_p10: 'Система progression-sync даёт тебе единый контур прогресса: аккаунт, уровни, инвентарь, ранги, репутация, кланы, перки, достижения и даже поведенческие паттерны могут переноситься между играми, платформами и устройствами. 🛰✨ Один профиль — бесконечная линейка миров и режимов, синхронизированных через Quantum L7 инфраструктуру.',
+
+game_p11: 'Quantum L7 GameVerse разворачивается сразу на всём стеке устройств: 🌐 Web-версии, 💻 desktop-клиенты под Windows, 📱 iOS и Android, 🎮 консольные интерфейсы, 🕶 VR/AR-девайсы, future-ready метаверс-платформы и новые форм-факторы. Любая точка входа — портал в одну и ту же квантовую экосистему.',
+
+game_p12: 'QCoin — сердцебиение этой игровой экономики. Через него проходят внутриигровые транзакции, апгрейды, кастомизация, staking-модули, access-права, межигровой перенос ценностей, участие в governance, сезонные ивенты, cross-chain кампании и rare-drop механики. Это не просто токен, а центральный энергетический поток GameVerse. 🪙⚡',
+
+game_p13: 'Quantum L7 GameVerse строит не просто игры, а криптовалютные цивилизации: фракции, империи, союзы, trade-routes, финтех-альянсы, гильдии, DAO-сообщества и AI-государства. Они формируют новые политические, экономические и социальные модели внутри цифровой реальности, где власть держится не только на силе, но и на данных, ликвидности и влиянии. 🛸👑',
+
+game_p14: 'Каждый игрок здесь становится частью Quantum Epoch — эпохи, в которой гейминг перестаёт быть просто развлечением и превращается в новый цифровой уклад. Здесь твои решения имеют вес, твой playstyle влияет на миры, а твоя вовлечённость меняет метрики всей экосистемы. Вселенные больше не ограничены жанрами — они эволюционируют вместе с тобой. 🧩🌠',
+
+game_p15: 'Приготовься стать первопроходцем. Quantum L7 GameVerse — это не очередной релиз, а запуск новой реальности. 🚀🔥 Здесь энергия игрока, криптовалюта, технологии, AI и квантовые архитектуры собираются в одну бесконечную структуру. Займи своё место в этой цифровой цивилизации, пока GameVerse только начинает раскрывать полный потенциал.',
+
+}
+const GAME_UK = {
+auth_account: 'Авторизовано',
+
+game_title: 'QL7 AI GameVerse',
+game_hero_alt: 'Quantum L7 GameVerse — multi-chain GameVerse на базі Quantum L7 AI та QCoin',
+
+game_p1: 'Ласкаво просимо до Quantum L7 GameVerse — точки сингулярності, де гейминг, криптоекономіка, multi-chain інфраструктура, AI-рушії та квантові процеси сходяться в одну живу метавсесвіт. 🌌⚡ Тут запускається простір, який не підкоряється старим правилам ігрової індустрії — він створює власні протоколи, власні світи та власну економіку.',
+
+game_p2: 'Quantum L7 GameVerse — це living multiverse, що реагує на поведінку гравця, динаміку ринку, DeFi-потоки, стан ліквідності, NFT-активність і cross-chain події. Він дихає через Quantum L7 AI, перебудовуючи світи, складність, нагороди та ризики в реальному часі. 🧬🤖',
+
+game_p3: 'Всередині GameVerse на тебе чекають мільйони ігрових напрямів: battle-арени, RTS-кластери, cosmic roguelike-коридори, cyber-dungeons, VR-експедиції, neural-quests, sandbox-реальності, card-systems, on-chain survival-режими, AI-orchestrated missions та гібридний fusion-геймплей наступного покоління. 🎮🚀',
+
+game_p4: 'Кожна ігрова сесія інтегрована з QCoin і живе всередині smart-contract логіки. Твої дії перетворюються на реальний value-stream: перемоги, поразки, ризик, стратегія, командні рішення та індивідуальні муви прокладають собі шлях через токеноміку GameVerse і впливають на глобальні параметри екосистеми. 💠💹',
+
+game_p5: 'Quantum Engine безперервно перераховує імовірнісні сценарії, створює нові ігрові всесвіти, адаптує баланс, спавн-логіки, loot-таблиці, поведінку AI-сутностей і rare-дропів. GameVerse — це не лінійний набір рівнів, а постійно розширювана, самоналаштовувана структура, що живе в режимі real-time recalculation. 🔮📡',
+
+game_p6: 'Ігрові світи можуть переходити в hyper-volatility, economy crash, dark-matter state або режим агресивного зростання. Планети, хаби й сектори синхронізуються з DeFi-модулями, змінюють податки, комісії, rarity-коефіцієнти, доступність ресурсів і вхідні пороги. Усе це — без паузи, без рестартів, без перезавантаження всесвіту. ⚔️🌑',
+
+game_p7: 'Quantum L7 AI виступає як meta-coordinator: аналізує big-data потоки, ончейн-метрики, поведінку гравців, час сесій, winrate-криві, ризик-профілі та cross-game активність, створюючи alignment між світами й підлаштовуючи GameVerse під живу, постійно мінливу аудиторію. 🧠📈',
+
+game_p8: 'У Quantum L7 GameVerse кожен предмет може бути asset-linked: зброя, кораблі, землі, артефакти, колекції, NFT-персонажі, ігрові території та персональні AI-компаньйони існують як on-chain активи з власною ліквідністю, історією, рідкістю та ринком. Ігровий лут перестає бути просто пікселями — він стає частиною криптоекономіки. 🚀💎',
+
+game_p9: 'Ігри можуть запускатися як автономні всесвіти або як частини єдиного multi-realm комплексу, де результат битви в одному секторі змінює правила, ціни, доступи та баланс сил в іншому. Це справжня метавсесвіт: пов’язана логікою, економікою й технологією, а не просто колекція окремих проєктів. 🔗🌍',
+
+game_p10: 'Система progression-sync дає тобі єдиний контур прогресу: акаунт, рівні, інвентар, ранги, репутація, клани, перки, досягнення й навіть поведінкові патерни можуть переноситися між іграми, платформами та пристроями. 🛰✨ Один профіль — безкінечна лінійка світів і режимів, синхронізованих через Quantum L7 інфраструктуру.',
+
+game_p11: 'Quantum L7 GameVerse розгортається одразу на всьому стеку пристроїв: 🌐 web-версії, 💻 desktop-клієнти під Windows, 📱 iOS та Android, 🎮 консольні інтерфейси, 🕶 VR/AR-девайси, future-ready метаверс-платформи та нові форм-фактори. Будь-яка точка входу — портал в одну й ту саму квантову екосистему.',
+
+game_p12: 'QCoin — серцебиття цієї ігрової економіки. Через нього проходять внутрішньоігрові транзакції, апгрейди, кастомізація, staking-модулі, access-права, міжігрове перенесення цінностей, участь у governance, сезонні івенти, cross-chain кампанії й rare-drop механіки. Це не просто токен, а центральний енергетичний потік GameVerse. 🪙⚡',
+
+game_p13: 'Quantum L7 GameVerse будує не просто ігри, а криптовалютні цивілізації: фракції, імперії, союзи, trade-routes, фінтех-альянси, гільдії, DAO-спільноти й AI-держави. Вони формують нові політичні, економічні та соціальні моделі всередині цифрової реальності, де влада тримається не лише на силі, а й на даних, ліквідності та впливі. 🛸👑',
+
+game_p14: 'Кожен гравець тут стає частиною Quantum Epoch — епохи, в якій гейминг перестає бути просто розвагою й перетворюється на новий цифровий уклад. Тут твої рішення мають вагу, твій playstyle впливає на світи, а твоя залученість змінює метрики всієї екосистеми. Всесвіти більше не обмежені жанрами — вони еволюціонують разом із тобою. 🧩🌠',
+
+game_p15: 'Приготуйся стати першопрохідцем. Quantum L7 GameVerse — це не черговий реліз, а запуск нової реальності. 🚀🔥 Тут енергія гравця, криптовалюта, технології, AI та квантові архітектури збираються в одну безкінечну структуру. Займи своє місце в цій цифровій цивілізації, поки GameVerse лише починає розкривати повний потенціал.',
+
+}
+const GAME_ES = {
+auth_account: 'Autorizado',
+
+game_title: 'QL7 AI GameVerse',
+game_hero_alt: 'Quantum L7 GameVerse — multi-chain GameVerse basado en Quantum L7 AI y QCoin',
+
+game_p1: 'Bienvenido a Quantum L7 GameVerse — el punto de singularidad donde el gaming, la criptoeconomía, la infraestructura multi-chain, los motores de AI y los procesos cuánticos convergen en un único metaverso vivo. 🌌⚡ Aquí se lanza un espacio que no se somete a las viejas reglas de la industria del videojuego: crea sus propios protocolos, sus propios mundos y su propia economía.',
+
+game_p2: 'Quantum L7 GameVerse — es un living multiverse que reacciona al comportamiento del jugador, a la dinámica del mercado, a los flujos DeFi, al estado de la liquidez, a la actividad NFT y a los eventos cross-chain. Respira a través de Quantum L7 AI, reconfigurando mundos, dificultades, recompensas y riesgos en tiempo real. 🧬🤖',
+
+game_p3: 'Dentro de GameVerse te esperan millones de direcciones de juego: battle-arenas, RTS-clusters, cosmic roguelike-corredores, cyber-dungeons, VR-expediciones, neural-quests, sandbox-realidades, card-systems, on-chain survival-modos, AI-orchestrated missions y un gameplay híbrido fusion de próxima generación. 🎮🚀',
+
+game_p4: 'Cada sesión de juego está integrada con QCoin y vive dentro de la lógica de smart-contract. Tus acciones se transforman en un verdadero value-stream: victorias, derrotas, riesgo, estrategia, decisiones de equipo y movimientos individuales se abren camino a través de la tokenomics de GameVerse e influyen en los parámetros globales del ecosistema. 💠💹',
+
+game_p5: 'Quantum Engine recalcula continuamente los escenarios probabilísticos, crea nuevos universos de juego, adapta el balance, las spawn-lógicas, las loot-tablas, el comportamiento de las AI-entidades y los rare-drops. GameVerse no es un conjunto lineal de niveles, sino una estructura en constante expansión y autoajuste que vive en modo de real-time recalculation. 🔮📡',
+
+game_p6: 'Los mundos de juego pueden entrar en hyper-volatility, economy crash, dark-matter state o en un modo de crecimiento agresivo. Planetas, hubs y sectores se sincronizan con los módulos DeFi, cambiando impuestos, comisiones, rarity-coeficientes, disponibilidad de recursos y umbrales de entrada. Todo esto — sin pausa, sin restarts, sin reinicio del universo. ⚔️🌑',
+
+game_p7: 'Quantum L7 AI actúa como meta-coordinator: analiza flujos de big-data, métricas on-chain, comportamiento de los jugadores, tiempo de las sesiones, winrate-curvas, perfiles de riesgo y actividad cross-game, creando un alignment entre los mundos y ajustando GameVerse a una audiencia viva y en constante cambio. 🧠📈',
+
+game_p8: 'En Quantum L7 GameVerse cada objeto puede ser asset-linked: armas, naves, tierras, artefactos, colecciones, personajes NFT, territorios de juego y compañeros personales de AI existen como activos on-chain con su propia liquidez, historia, rareza y mercado. El loot de juego deja de ser solo píxeles: se convierte en parte de la criptoeconomía. 🚀💎',
+
+game_p9: 'Los juegos pueden lanzarse como universos autónomos o como partes de un único complejo multi-realm, donde el resultado de la batalla en un sector cambia las reglas, los precios, los accesos y el balance de poder en otro. Es un metaverso real: conectado por lógica, economía y tecnología, y no solo una colección de proyectos separados. 🔗🌍',
+
+game_p10: 'El sistema de progression-sync te da un único contorno de progreso: cuenta, niveles, inventario, rangos, reputación, clanes, perks, logros e incluso patrones de comportamiento pueden transferirse entre juegos, plataformas y dispositivos. 🛰✨ Un perfil — una línea infinita de mundos y modos, sincronizados a través de la infraestructura de Quantum L7.',
+
+game_p11: 'Quantum L7 GameVerse se despliega de inmediato en toda la stack de dispositivos: 🌐 versiones web, 💻 desktop-clientes para Windows, 📱 iOS y Android, 🎮 interfaces de consola, 🕶 dispositivos VR/AR, plataformas de metaverso future-ready y nuevos factores de forma. Cualquier punto de entrada es un portal al mismo ecosistema cuántico.',
+
+game_p12: 'QCoin es el latido de esta economía de juego. A través de él pasan las transacciones dentro del juego, los upgrades, la customización, los staking-módulos, los access-derechos, la transferencia de valor entre juegos, la participación en governance, los eventos de temporada, las campañas cross-chain y las rare-drop mecánicas. No es solo un token, sino el flujo energético central de GameVerse. 🪙⚡',
+
+game_p13: 'Quantum L7 GameVerse construye no solo juegos, sino civilizaciones criptográficas: facciones, imperios, alianzas, trade-routes, alianzas fintech, guilds, comunidades DAO y estados de AI. Forman nuevos modelos políticos, económicos y sociales dentro de la realidad digital, donde el poder se sostiene no solo en la fuerza, sino también en los datos, la liquidez y la influencia. 🛸👑',
+
+game_p14: 'Cada jugador aquí se convierte en parte de la Quantum Epoch — una era en la que el gaming deja de ser solo entretenimiento y se transforma en un nuevo orden digital. Aquí tus decisiones tienen peso, tu playstyle influye en los mundos y tu implicación cambia las métricas de todo el ecosistema. Los universos ya no están limitados por géneros: evolucionan junto contigo. 🧩🌠',
+
+game_p15: 'Prepárate para convertirte en pionero. Quantum L7 GameVerse no es otro lanzamiento más, sino el inicio de una nueva realidad. 🚀🔥 Aquí la energía del jugador, la criptomoneda, la tecnología, la AI y las arquitecturas cuánticas se reúnen en una única estructura infinita. Toma tu lugar en esta civilización digital mientras GameVerse solo comienza a revelar todo su potencial.',
+
+}
+const GAME_ZH = {
+auth_account: '已授权',
+
+game_title: 'QL7 AI GameVerse',
+game_hero_alt: 'Quantum L7 GameVerse — multi-chain GameVerse 基于 Quantum L7 AI 和 QCoin',
+
+game_p1: '欢迎来到 Quantum L7 GameVerse——在这里，游戏、加密经济、multi-chain 基础设施、AI-引擎和量子过程在同一个活生生的元宇宙中汇聚到奇点。🌌⚡ 这里开启的是一个不受传统游戏行业旧规则约束的空间——它创造自己的协议、自己的世界和自己的经济。',
+
+game_p2: 'Quantum L7 GameVerse——这是一个 living multiverse，会对玩家行为、市场动态、DeFi 流、流动性状态、NFT 活动和 cross-chain 事件作出反应。它通过 Quantum L7 AI 呼吸，在实时中重构世界、难度、奖励和风险。🧬🤖',
+
+game_p3: '在 GameVerse 内，有数百万种游戏方向在等着你：battle-竞技场、RTS-集群、cosmic roguelike-走廊、cyber-dungeons、VR-远征、neural-quests、sandbox-现实、card-systems、on-chain survival-模式、AI-orchestrated missions，以及下一代的混合型 fusion-玩法。🎮🚀',
+
+game_p4: '每一场游戏会话都与 QCoin 集成，并运行在 smart-contract 逻辑之内。你的行为会转化为真实的 value-stream：胜利、失败、风险、策略、团队决策和个人动作，通过 GameVerse 的代币经济学开辟出自己的路径，并影响整个生态系统的全局参数。💠💹',
+
+game_p5: 'Quantum Engine 不断重新计算概率场景，创造新的游戏宇宙，调整平衡、spawn-逻辑、loot-表、AI-实体行为和 rare-掉落。GameVerse 不是线性的关卡集合，而是一个不断扩展、自我调节的结构，在 real-time recalculation 模式下运行。🔮📡',
+
+game_p6: '游戏世界可能会进入 hyper-volatility、economy crash、dark-matter state 或激进增长模式。行星、枢纽和扇区会与 DeFi-模块同步，改变税收、手续费、rarity-系数、资源可得性和进入门槛。所有这一切——没有暂停、没有重启、没有宇宙重置。⚔️🌑',
+
+game_p7: 'Quantum L7 AI 充当 meta-coordinator：分析 big-data 流、on-chain 指标、玩家行为、会话时长、winrate-曲线、风险画像和 cross-game 活动，在各个世界之间创建 alignment，并根据一个鲜活、不断变化的受众来调整 GameVerse。🧠📈',
+
+game_p8: '在 Quantum L7 GameVerse 中，每一件物品都可以是 asset-linked：武器、舰船、土地、神器、藏品、NFT-角色、游戏领地以及个人 AI-伙伴，都作为 on-chain 资产存在，拥有各自的流动性、历史、稀有度和市场。游戏战利品不再只是像素——它成为加密经济的一部分。🚀💎',
+
+game_p9: '游戏可以作为自治宇宙启动，也可以作为统一 multi-realm 复合体的一部分，在那里，一个扇区中的战斗结果会改变另一个扇区中的规则、价格、访问权限和力量平衡。这里是一个真正的元宇宙：由逻辑、经济和技术连接起来，而不仅仅是分散项目的集合。🔗🌍',
+
+game_p10: 'progression-sync 系统为你提供一个统一的进度轮廓：账号、等级、物品栏、段位、声望、公会、perks、成就，乃至行为模式，都可以在不同游戏、平台和设备之间迁移。🛰✨ 一个档案——通过 Quantum L7 基础设施同步的无限世界与模式序列。',
+
+game_p11: 'Quantum L7 GameVerse 同时在整个设备栈上展开：🌐 Web-版本，💻 面向 Windows 的 desktop-客户端，📱 iOS 和 Android，🎮 主机界面，🕶 VR/AR-设备、future-ready 元宇宙平台以及新的形态因子。任何一个入口都是通向同一个量子生态系统的门户。',
+
+game_p12: 'QCoin 是这套游戏经济的心跳。通过它流转的是游戏内交易、升级、定制化、staking-模块、access-权限、跨游戏价值转移、参与 governance、赛季活动、cross-chain 活动以及 rare-drop 机制。它不只是一个代币，而是 GameVerse 的中央能量流。🪙⚡',
+
+game_p13: 'Quantum L7 GameVerse 构建的不只是游戏，而是加密货币文明：派系、帝国、联盟、trade-routes、金融科技联盟、公会、DAO-社区和 AI-国家。它们在数字现实中形成新的政治、经济和社会模型，在这里，权力不仅依靠力量，也依靠数据、流动性和影响力。🛸👑',
+
+game_p14: '这里的每一位玩家都成为 Quantum Epoch 的一部分——在这一时代，游戏不再只是娱乐，而是演变成新的数字秩序。在这里，你的决策具有分量，你的 playstyle 影响着各个世界，而你的投入会改变整个生态系统的指标。诸多宇宙不再受制于类型——它们会与你一同进化。🧩🌠',
+
+game_p15: '准备好成为开拓者吧。Quantum L7 GameVerse 不是又一次普通的发行，而是一场新现实的启动。🚀🔥 在这里，玩家能量、加密货币、技术、AI 和量子架构汇聚成一个无尽的整体结构。趁着 GameVerse 刚刚开始展现其全部潜力，在这座数字文明中占据属于你的位置。',
+
+}
+const GAME_AR = {
+auth_account: 'مُخول',
+
+game_title: 'QL7 AI GameVerse',
+game_hero_alt: 'Quantum L7 GameVerse — multi-chain GameVerse على أساس Quantum L7 AI و QCoin',
+
+game_p1: 'مرحبًا بك في Quantum L7 GameVerse — نقطة التفرد التي يلتقي فيها الجيمينغ، والاقتصاد المشفر، وmulti-chain البنية التحتية، ومحركات AI والعمليات الكمية في ميتافيرس حي واحد. 🌌⚡ هنا ينطلق فضاء لا يخضع لقواعد صناعة الألعاب القديمة — بل يخلق بروتوكولاته الخاصة، وعوالمه الخاصة، واقتصاده الخاص.',
+
+game_p2: 'Quantum L7 GameVerse — هو living multiverse يتفاعل مع سلوك اللاعب، وديناميكيات السوق، وتدفقات DeFi، وحالة السيولة، ونشاط NFT، وأحداث cross-chain. يتنفس عبر Quantum L7 AI، معيدًا تشكيل العوالم، ومستويات الصعوبة، والمكافآت، والمخاطر في الزمن الحقيقي. 🧬🤖',
+
+game_p3: 'داخل GameVerse في انتظارك ملايين الاتجاهات اللعبية: battle-ساحات، RTS-عناقيد، cosmic roguelike-ممرات، cyber-dungeons، VR-بعثات استكشافية، neural-quests، sandbox-عوالم، card-systems، on-chain survival-أنماط، AI-orchestrated missions وجيمبلاي fusion-هجيني للجيل القادم. 🎮🚀',
+
+game_p4: 'كل جلسة لعب متكاملة مع QCoin وتعيش داخل منطق smart-contract. أفعالك تتحول إلى value-stream حقيقي: انتصارات، هزائم، مخاطرة، استراتيجية، قرارات جماعية وموفّات فردية تشق طريقها عبر توكنوميكس GameVerse وتؤثر في المعايير العالمية للنظام البيئي. 💠💹',
+
+game_p5: 'Quantum Engine يعيد حساب السيناريوهات الاحتمالية باستمرار، ويُنشئ عوالم لعب جديدة، ويُكيّف التوازن، وspawn-المنطق، وloot-الجداول، وسلوك AI-الكيانات وrare-الدروبات. GameVerse ليس مجموعة خطية من المستويات، بل بنية متوسعة باستمرار، ذاتية الضبط، تعيش في وضع real-time recalculation. 🔮📡',
+
+game_p6: 'عوالم اللعب يمكن أن تدخل في hyper-volatility، أو economy crash، أو dark-matter state أو وضع نمو عدواني. الكواكب، والهَبّات، والقطاعات تتزامن مع DeFi-الوحدات، وتغيّر الضرائب، والعمولات، وrarity-المعاملات، وتوافر الموارد، وعَتبات الدخول. كل ذلك — بدون إيقاف، بدون restarts، وبدون إعادة تحميل للكون. ⚔️🌑',
+
+game_p7: 'Quantum L7 AI يعمل كـ meta-coordinator: يحلل big-data-التدفقات، وonchain-المؤشرات، وسلوك اللاعبين، ومدة الجلسات، وwinrate-المنحنيات، وملفات المخاطر، والنشاط cross-game، خالقًا alignment بين العوالم وموائمًا GameVerse مع جمهور حي ومتغير باستمرار. 🧠📈',
+
+game_p8: 'في Quantum L7 GameVerse يمكن أن يكون كل عنصر asset-linked: أسلحة، سفن، أراضٍ، قطع أثرية، مجموعات، شخصيات NFT، مناطق لعب ورفاق AI شخصيون، كلها موجودة كأصول on-chain لها سيولتها وتاريخها وندرتها وسوقها الخاص. الغنائم في اللعبة تتوقف عن كونها مجرد بيكسلات — وتصبح جزءًا من الاقتصاد المشفر. 🚀💎',
+
+game_p9: 'يمكن للألعاب أن تُطلق كعوالم مستقلة أو كأجزاء من مجمع multi-realm موحّد، حيث نتيجة المعركة في أحد القطاعات تغيّر القواعد، والأسعار، وحقوق الوصول، وتوازن القوى في قطاع آخر. هذه هي الميتافيرس الحقيقية: مرتبطة بالمنطق والاقتصاد والتكنولوجيا، وليست مجرد مجموعة من المشاريع المنفصلة. 🔗🌍',
+
+game_p10: 'نظام progression-sync يمنحك مخطط تقدم موحّدًا: حساب، مستويات، جرد، رُتب، سمعة، عشائر، perks، إنجازات وحتى أنماط سلوكية يمكن نقلها بين الألعاب، والمنصات، والأجهزة. 🛰✨ ملف شخصي واحد — سلسلة لا نهائية من العوالم والأنماط المتزامنة عبر بنية Quantum L7 التحتية.',
+
+game_p11: 'Quantum L7 GameVerse ينفتح فورًا على كامل stack الأجهزة: 🌐 Web-إصدارات، 💻 desktop-عملاء على Windows، 📱 iOS و Android، 🎮 واجهات كونسول، 🕶 VR/AR-أجهزة، منصات ميتافيرس future-ready وصيغ شكلية جديدة. أي نقطة دخول — بوابة إلى نفس النظام البيئي الكمي.',
+
+game_p12: 'QCoin — هو نبض هذه الاقتصاديات اللعبية. من خلاله تمر المعاملات داخل اللعبة، والـ upgrades، والـ customization، وstaking-الوحدات، وaccess-الحقوق، ونقل القيم بين الألعاب، والمشاركة في governance، والفعاليات الموسمية، وحملات cross-chain وآليات rare-drop. إنه ليس مجرد توكن، بل التيار الطاقي المركزي لـ GameVerse. 🪙⚡',
+
+game_p13: 'Quantum L7 GameVerse لا يبني ألعابًا فقط، بل حضارات مشفرة: فصائل، إمبراطوريات، تحالفات، trade-routes، تحالفات فينتك، نقابات، DAO-مجتمعات وAI-دول. إنها تشكل نماذج سياسية واقتصادية واجتماعية جديدة داخل الواقع الرقمي، حيث تُحفظ السلطة ليس بالقوة فقط، بل بالبيانات، والسيولة، والنفوذ. 🛸👑',
+
+game_p14: 'كل لاعب هنا يصبح جزءًا من Quantum Epoch — عصر يتوقف فيه الجيمينغ عن كونه مجرد ترفيه ويتحوّل إلى نظام رقمي جديد. هنا لقراراتك وزن، وplaystyle الخاص بك يؤثر في العوالم، وانخراطك يغيّر مقاييس النظام البيئي بأكمله. العوالم لم تعد مقيدة بالأنواع — بل تتطور معك. 🧩🌠',
+
+game_p15: 'استعد لتصبح رائدًا. Quantum L7 GameVerse — ليس مجرد إصدار جديد، بل إطلاق لواقع جديد. 🚀🔥 هنا طاقة اللاعب، والعملات المشفرة، والتقنيات، وAI، والهياكل الكمية تتجمع في بنية لا نهائية واحدة. احجز مكانك في هذه الحضارة الرقمية بينما GameVerse لا يزال في بداية كشف كامل إمكاناته.',
+
+}
+const GAME_TR = {
+auth_account: 'Yetkilendirildi', 
+
+game_title: 'QL7 AI GameVerse',
+game_hero_alt: 'Quantum L7 GameVerse — multi-chain GameVerse, Quantum L7 AI ve QCoin tabanlı',
+
+game_p1: 'Quantum L7 GameVerse e hoş geldin — gaming, kriptoekonomi, multi-chain altyapı, AI motorları ve kuantum süreçlerinin tek bir yaşayan metaverse içinde kesiştiği tekillik noktası. 🌌⚡ Burada oyun endüstrisinin eski kurallarına boyun eğmeyen bir alan başlatılıyor — kendi protokollerini, kendi dünyalarını ve kendi ekonomisini yaratıyor.',
+
+game_p2: 'Quantum L7 GameVerse — oyuncu davranışına, piyasa dinamiklerine, DeFi akışlarına, likidite durumuna, NFT aktivitesine ve cross-chain olaylara tepki veren bir living multiverse. Quantum L7 AI üzerinden nefes alır, dünyaları, zorlukları, ödülleri ve riskleri gerçek zamanlı olarak yeniden şekillendirir. 🧬🤖',
+
+game_p3: 'GameVerse içinde seni milyonlarca oyun yönü bekliyor: battle arenalar, RTS kümeleri, cosmic roguelike koridorları, cyber-dungeons, VR seferleri, neural-quests, sandbox gerçeklikleri, card-systems, on-chain survival modları, AI-orchestrated missions ve sonraki nesil hibrit fusion gameplay. 🎮🚀',
+
+game_p4: 'Her oyun oturumu QCoin ile entegredir ve smart-contract mantığının içinde yaşar. Eylemlerin gerçek bir value-stream e dönüşür: zaferler, yenilgiler, risk, strateji, takım kararları ve bireysel movelar GameVerse tokenomiği üzerinden kendi yolunu açar ve ekosistemin küresel parametrelerini etkiler. 💠💹',
+
+game_p5: 'Quantum Engine olasılık senaryolarını sürekli yeniden hesaplar, yeni oyun evrenleri yaratır, dengeyi, spawn logikleri, loot tablolarını, AI varlıklarının davranışlarını ve rare dropları uyarlar. GameVerse, doğrusal bir seviye dizisi değil, real-time recalculation modunda yaşayan, sürekli genişleyen ve kendi kendini ayarlayan bir yapıdır. 🔮📡',
+
+game_p6: 'Oyun dünyaları hyper-volatility, economy crash, dark-matter state veya agresif büyüme moduna geçebilir. Gezegenler, hublar ve sektörler DeFi modülleri ile senkronize olur, vergileri, komisyonları, rarity katsayılarını, kaynak erişilebilirliğini ve giriş eşiklerini değiştirir. Tüm bunlar — duraklama olmadan, restarts olmadan, evrenin yeniden yüklenmesi olmadan gerçekleşir. ⚔️🌑',
+
+game_p7: 'Quantum L7 AI bir meta-coordinator olarak hareket eder: big-data akışlarını, onchain metrikleri, oyuncu davranışını, oturum süresini, winrate eğrilerini, risk profillerini ve cross-game aktiviteyi analiz ederek dünyalar arasında alignment oluşturur ve GameVerse i canlı, sürekli değişen bir kitleye göre ayarlar. 🧠📈',
+
+game_p8: 'Quantum L7 GameVerse içinde her öğe asset-linked olabilir: silahlar, gemiler, araziler, eserler, koleksiyonlar, NFT karakterler, oyun bölgeleri ve kişisel AI yoldaşları kendi likiditesine, geçmişine, nadirliğine ve pazarına sahip on-chain varlıklar olarak bulunur. Oyun loot u artık sadece pikseller olmaktan çıkar — kriptoekonominin bir parçası haline gelir. 🚀💎',
+
+game_p9: 'Oyunlar, bağımsız evrenler olarak ya da tek bir multi-realm kompleksinin parçaları olarak başlatılabilir; burada bir sektördeki savaşın sonucu başka bir sektördeki kuralları, fiyatları, erişimleri ve güç dengesini değiştirir. Bu, mantık, ekonomi ve teknoloji ile birbirine bağlanan gerçek bir metaverse dir, yalnızca ayrı projelerin bir koleksiyonu değildir. 🔗🌍',
+
+game_p10: 'Progression-sync sistemi sana tek bir ilerleme hattı verir: hesap, seviyeler, envanter, rütbeler, itibar, klanlar, perkler, başarılar ve hatta davranış kalıpları oyunlar, platformlar ve cihazlar arasında taşınabilir. 🛰✨ Tek bir profil, Quantum L7 altyapısı üzerinden senkronize edilen dünyaların ve modların sonsuz bir dizisidir.',
+
+game_p11: 'Quantum L7 GameVerse, cihaz yığınının tamamında aynı anda açılır: 🌐 Web versiyonları, 💻 Windows için desktop istemciler, 📱 iOS ve Android, 🎮 konsol arayüzleri, 🕶 VR/AR cihazları, future-ready metaverse platformları ve yeni form faktörleri. Herhangi bir giriş noktası, aynı kuantum ekosistemine açılan bir portaldır.',
+
+game_p12: 'QCoin — bu oyun ekonomisinin kalp atışıdır. Onun üzerinden oyun içi işlemler, upgrades, customization, staking modülleri, access hakları, oyunlar arası değer transferi, governance katılımı, sezonluk etkinlikler, cross-chain kampanyalar ve rare-drop mekanikleri geçer. Bu yalnızca bir token değil, GameVerse in merkezi enerji akışıdır. 🪙⚡',
+
+game_p13: 'Quantum L7 GameVerse yalnızca oyunlar değil, kripto para medeniyetleri inşa eder: fraksiyonlar, imparatorluklar, ittifaklar, trade-routes, fintech ittifakları, loncalar, DAO toplulukları ve AI devletleri. Bunlar, gücün yalnızca kuvvete değil, aynı zamanda verilere, likiditeye ve etkiye dayandığı dijital gerçeklik içinde yeni siyasi, ekonomik ve sosyal modeller oluşturur. 🛸👑',
+
+game_p14: 'Buradaki her oyuncu Quantum Epoch un bir parçası olur — gaming in sadece bir eğlence olmaktan çıkıp yeni bir dijital düzene dönüştüğü bir dönem. Burada kararların ağırlık taşır, playstyle in dünyaları etkiler ve katılımın tüm ekosistemin metriklerini değiştirir. Evrenler artık türlerle sınırlı değil — seninle birlikte evrim geçirir. 🧩🌠',
+
+game_p15: 'Öncü olmaya hazırlan. Quantum L7 GameVerse — sıradan bir yeni release değil, yeni bir gerçekliğin lansmanıdır. 🚀🔥 Burada oyuncu enerjisi, kripto para, teknolojiler, AI ve kuantum mimarileri tek bir sonsuz yapıda toplanır. GameVerse daha yeni tüm potansiyelini açığa çıkarmaya başlamışken, bu dijital medeniyette kendi yerini al.',
+
+}
+
+
+try {
+  Object.assign(dict.en, GAME_EN)
+  Object.assign(dict.ru, GAME_RU)
+  Object.assign(dict.uk, GAME_UK)
+  Object.assign(dict.es, GAME_ES)
+  Object.assign(dict.zh, GAME_ZH)
+  Object.assign(dict.ar, GAME_AR)
+  Object.assign(dict.tr, GAME_TR)
+} catch (e) {}
 export function I18nProvider({ children }) {
   const [lang, setLang] = useState('en')
   useEffect(() => {

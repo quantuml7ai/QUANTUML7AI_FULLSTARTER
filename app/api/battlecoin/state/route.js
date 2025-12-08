@@ -6,6 +6,23 @@ import { redis, safeParse } from '../../forum/_db.js'
 const qcoinKey   = (uid) => `qcoin:${uid}`
 const orderKey   = (uid) => `battlecoin:order:${uid}`
 const historyKey = (uid) => `battlecoin:history:${uid}`
+async function saveActiveOrder(uid, order) {
+  if (!order) {
+    try {
+      await redis.del(orderKey(uid))
+    } catch {}
+    return
+  }
+  await redis.set(orderKey(uid), JSON.stringify(order))
+}
+
+async function pushHistory(uid, order) {
+  if (!order) return
+  try {
+    await redis.lpush(historyKey(uid), JSON.stringify(order))
+    await redis.ltrim(historyKey(uid), 0, 99)
+  } catch {}
+}
 
 async function getUid(req) {
   const h1 = (req.headers.get('x-forum-user-id') || '').trim()
@@ -172,6 +189,65 @@ function enrichOrderWithMarket(order, priceMap) {
   o.pnl = pnl
   return o
 }
+// авто-settle на стороне state, с той же логикой, что в POST /battlecoin/order (op="settle")
+async function applyAutoSettlement(uid, enrichedOrder) {
+  const P0 = Number(enrichedOrder.entryPrice || 0)
+  const P1 = Number(enrichedOrder.markPrice || 0)
+  const stakeNum = Number(enrichedOrder.stake || 0)
+  const lev = Number(enrichedOrder.leverage || 1)
+  const side = String(enrichedOrder.side || '').toUpperCase()
+
+  if (
+    !Number.isFinite(P0) ||
+    !Number.isFinite(P1) ||
+    P0 <= 0 ||
+    stakeNum <= 0 ||
+    !Number.isFinite(lev) ||
+    lev <= 0
+  ) {
+    // если что-то поехало — просто вернём текущий баланс и ордер как есть
+    return {
+      balance: await readQcoinBalance(uid),
+      order: enrichedOrder,
+    }
+  }
+
+  const change = (P1 - P0) / P0
+  const signed = side === 'LONG' ? change : -change
+
+  let pnl = stakeNum * lev * signed
+  if (!Number.isFinite(pnl)) pnl = 0
+  if (pnl < -stakeNum) pnl = -stakeNum
+
+  const returned = stakeNum + pnl
+  const returnedClamped = returned < 0 ? 0 : returned
+
+  // та же схема, что в POST /order: на open мы списали stake,
+  // здесь возвращаем stake + pnl (не меньше 0)
+  const newBalance = await redis.hincrbyfloat(
+    qcoinKey(uid),
+    'balance',
+    returnedClamped
+  )
+
+  const now = Date.now()
+  const closed = {
+    ...enrichedOrder,
+    status: 'SETTLED',
+    closedAt: now,
+    closePrice: P1,
+    changePct: change * 100,
+    pnl,
+  }
+
+  await saveActiveOrder(uid, closed)
+  await pushHistory(uid, closed)
+
+  return {
+    balance: Number(newBalance || 0),
+    order: closed,
+  }
+}
 
 export async function GET(req) {
   try {
@@ -240,7 +316,32 @@ export async function GET(req) {
     )
 
     if (order && order.status === 'OPEN') {
-      order = enrichOrderWithMarket(order, priceMap)
+      const enriched = enrichOrderWithMarket(order, priceMap)
+
+      const now = Date.now()
+
+      // 1) автозакрытие по времени (если фронт не дёрнул /order/settle)
+      const expired =
+        typeof enriched.expiresAt === 'number' &&
+        enriched.expiresAt <= now
+
+      // 2) автоликвидация, если pnl просел до -stake (полный слив)
+      const stakeNum = Number(enriched.stake || 0)
+      const pnlNum = Number(enriched.pnl || 0)
+      const fullyLiquidated =
+        Number.isFinite(stakeNum) &&
+        stakeNum > 0 &&
+        Number.isFinite(pnlNum) &&
+        pnlNum <= -stakeNum + 1e-8
+
+      if (expired || fullyLiquidated) {
+        // делаем тот же settle, что и через POST /battlecoin/order
+        const result = await applyAutoSettlement(uid, enriched)
+        balance = result.balance
+        order = result.order
+      } else {
+        order = enriched
+      }
     }
 
     return NextResponse.json({
@@ -252,6 +353,7 @@ export async function GET(req) {
       orders,
       symbols,
     })
+
   } catch (e) {
     return NextResponse.json(
       { ok: false, error: String(e?.message || e) },

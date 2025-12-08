@@ -98,8 +98,8 @@ export default function ForumPage() {
       </div>
 
       {/* Нижняя маркиза */}
-      <div className="iso-forum-shell">
-        <section className="marquee-wrap no-gutters" aria-hidden="true">
+      
+       <section className="marquee-wrap no-gutters" aria-hidden="true">
           <div className="marquee" ref={marqueeRef}>
             <span>{t('marquee')}</span>
             <span>{t('marquee')}</span>
@@ -107,7 +107,7 @@ export default function ForumPage() {
             <span>{t('marquee')}</span>
           </div>
         </section>
-      </div>
+      
 
       {/* Иконки после маркизы */}
       <div className="icons-row">
