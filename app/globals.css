@@ -1774,20 +1774,13 @@ h1, h2, h3, h4, h5, h6{
   }
 }
 
-/* адаптация: уменьшили монету/текст на планшетах */
-@media (max-width:1720px){
-  .nav-orbit{
-    --orbit-size:clamp(210px, 44vw, 260px);
-    --orbit-center-size:clamp(80px, 18vw, 110px);
-    --orbit-font-base:clamp(15px, 4.1vw, 24px);
-  }
 
-}
 @media (max-width:680px){
   .nav-orbit{
-    --orbit-size:min(250px, 72vw);
+    --orbit-size:min(200px, 72vw);
    --orbit-center-size:clamp(80px, 18vw, 110px);
-    --orbit-font-base:clamp(15px, 4.1vw, 24px);
+    --orbit-font-base:clamp(15px, 4.1vw, 27px);
+     margin-top: 60px; /* 🔥 Меняешь 40px на сколько нужно */
   }
 
 }
