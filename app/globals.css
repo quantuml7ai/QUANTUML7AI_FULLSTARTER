@@ -1539,8 +1539,8 @@ h1, h2, h3, h4, h5, h6{
 .nav-orbit-center-btn:hover .nav-game-icon{
   transform:scale(1.08);
   filter:
-    drop-shadow(0 0 10px rgba(56,189,248,.9))
-    drop-shadow(0 0 26px rgba(251,191,36,.9));
+    drop-shadow(0 0 10px rgb(56, 191, 248))
+    drop-shadow(0 0 26px rgb(0, 255, 13));
 }
 
 /* убираем белую рамку фокуса у дуг (браузерный outline) */
