@@ -157,11 +157,8 @@ export default function TopBar () {
 
                 {/* золотой градиент для букв */}
                 <linearGradient id="ql7-orbit-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%"   stopColor="#fffb00ff" />
-                  <stop offset="25%"  stopColor="#00d9ffff" />
-                  <stop offset="50%"  stopColor="#fff4b3" />
-                  <stop offset="75%"  stopColor="#a200ffff" />
-                  <stop offset="120%" stopColor="#31ee5aff" />
+                  <stop offset="0%"   stopColor="#ffe600ff" />
+
                 </linearGradient>
               </defs>
 

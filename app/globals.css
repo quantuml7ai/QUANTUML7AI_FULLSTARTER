@@ -1775,15 +1775,17 @@ h1, h2, h3, h4, h5, h6{
 }
  
 @media (max-width: 680px) {
-  .nav-orbit { 
+  .nav-orbit {
 
-    /* 🔵 орбита: +10% */
-    --orbit-size: min(194px, 50vw);
+    /* 🔵 орбита — БЕЗ ИЗМЕНЕНИЙ */
+    --orbit-size: min(293px, 75vw);
 
-    /* 🎮 центр — БЕЗ ИЗМЕНЕНИЙ */
-    --orbit-center-size: clamp(70px, 24vw, 100px);
+    /* 🎮 центр: было clamp(80.5px, 27.6vw, 115px) → +15% */
+    --orbit-center-size: clamp(92.6px, 31.8vw, 132px);
 
     /* 🔤 текст — БЕЗ ИЗМЕНЕНИЙ */
-    --orbit-font-base: clamp(16px, 4.9vw, 23px);
+    --orbit-font-base: clamp(14.5px, 4.5vw, 21px);
   }
 }
+
+
