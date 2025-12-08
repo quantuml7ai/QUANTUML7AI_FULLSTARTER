@@ -66,6 +66,336 @@ async function fetchKlines(sym, tf, limit=750){
   for (const k of j){ o.push(+k[1]); h.push(+k[2]); l.push(+k[3]); c.push(+k[4]); v.push(+k[5]); t.push(+k[6]) }
   return {o,h,l,c,v,t, tf, symbol: sym}
 }
+// ==================== TradingView timezone helpers ====================
+
+// 1) "Зелёный список" таймзон, которые TradingView реально понимает (из официальной доки)
+const TV_SUPPORTED_TIMEZONES = new Set([
+  'Etc/UTC',
+  'Africa/Cairo',
+  'Africa/Casablanca',
+  'Africa/Johannesburg',
+  'Africa/Lagos',
+  'Africa/Nairobi',
+  'Africa/Tunis',
+  'America/Anchorage',
+  'America/Argentina/Buenos_Aires',
+  'America/Bogota',
+  'America/Caracas',
+  'America/Chicago',
+  'America/El_Salvador',
+  'America/Juneau',
+  'America/Lima',
+  'America/Los_Angeles',
+  'America/Mexico_City',
+  'America/New_York',
+  'America/Phoenix',
+  'America/Santiago',
+  'America/Sao_Paulo',
+  'America/Toronto',
+  'America/Vancouver',
+  'Asia/Almaty',
+  'Asia/Ashkhabad',
+  'Asia/Bahrain',
+  'Asia/Bangkok',
+  'Asia/Chongqing',
+  'Asia/Colombo',
+  'Asia/Dhaka',
+  'Asia/Dubai',
+  'Asia/Ho_Chi_Minh',
+  'Asia/Hong_Kong',
+  'Asia/Jakarta',
+  'Asia/Jerusalem',
+  'Asia/Kabul',
+  'Asia/Karachi',
+  'Asia/Kathmandu',
+  'Asia/Kolkata',
+  'Asia/Kuala_Lumpur',
+  'Asia/Kuwait',
+  'Asia/Manila',
+  'Asia/Muscat',
+  'Asia/Nicosia',
+  'Asia/Qatar',
+  'Asia/Riyadh',
+  'Asia/Seoul',
+  'Asia/Shanghai',
+  'Asia/Singapore',
+  'Asia/Taipei',
+  'Asia/Tehran',
+  'Asia/Tokyo',
+  'Asia/Yangon',
+  'Atlantic/Azores',
+  'Atlantic/Reykjavik',
+  'Australia/Adelaide',
+  'Australia/Brisbane',
+  'Australia/Perth',
+  'Australia/Sydney',
+  'Europe/Amsterdam',
+  'Europe/Athens',
+  'Europe/Belgrade',
+  'Europe/Berlin',
+  'Europe/Bratislava',
+  'Europe/Brussels',
+  'Europe/Bucharest',
+  'Europe/Budapest',
+  'Europe/Copenhagen',
+  'Europe/Dublin',
+  'Europe/Helsinki',
+  'Europe/Istanbul',
+  'Europe/Lisbon',
+  'Europe/London',
+  'Europe/Luxembourg',
+  'Europe/Madrid',
+  'Europe/Malta',
+  'Europe/Moscow',
+  'Europe/Oslo',
+  'Europe/Paris',
+  'Europe/Prague',
+  'Europe/Riga',
+  'Europe/Rome',
+  'Europe/Stockholm',
+  'Europe/Tallinn',
+  'Europe/Vienna',
+  'Europe/Vilnius',
+  'Europe/Warsaw',
+  'Europe/Zurich',
+  'Pacific/Auckland',
+  'Pacific/Chatham',
+  'Pacific/Fakaofo',
+  'Pacific/Honolulu',
+  'Pacific/Norfolk',
+  'US/Mountain',
+])
+
+// 2) Ручные алиасы для "странных" зон, у которых есть эквивалент в списке TV
+//    Здесь можно дописывать то, что лично вам нужно (Kyiv, Chisinau и т.д.)
+const TV_TIMEZONE_OVERRIDES = {
+  // ===== БАЗОВЫЕ UTC / GMT СИНОНИМЫ =====
+  'UTC': 'Etc/UTC',
+  'Etc/UTC': 'Etc/UTC',
+  'GMT': 'Etc/UTC',
+  'Etc/GMT': 'Etc/UTC',
+  'Etc/GMT+0': 'Etc/UTC',
+  'Etc/GMT-0': 'Etc/UTC',
+  'Etc/GMT0': 'Etc/UTC',
+  'GMT0': 'Etc/UTC',
+  'Etc/Universal': 'Etc/UTC',
+  'Etc/Zulu': 'Etc/UTC',
+
+  // ===== УКРАИНА / МОЛДОВА / ВОСТОЧНАЯ ЕВРОПА =====
+  'Europe/Kyiv': 'Europe/Bucharest',
+  'Europe/Kiev': 'Europe/Bucharest',
+  'Europe/Chisinau': 'Europe/Bucharest',
+
+  'Europe/Uzhgorod': 'Europe/Bucharest',
+  'Europe/Zaporozhye': 'Europe/Bucharest',
+
+  // иногда так встречается Киев/Москва в старых системах
+  'EET': 'Europe/Bucharest',   // generic Eastern European Time
+  'CET': 'Europe/Berlin',
+  'WET': 'Europe/Lisbon',
+  'MET': 'Europe/Berlin',
+
+  // мелкие страны, которых нет в списке TV, но они по сути EU-зоны
+  'Europe/Andorra': 'Europe/Madrid',
+  'Europe/Monaco': 'Europe/Paris',
+  'Europe/Vatican': 'Europe/Rome',
+  'Europe/San_Marino': 'Europe/Rome',
+
+  'Europe/Belfast': 'Europe/London',
+  'Europe/Guernsey': 'Europe/London',
+  'Europe/Jersey': 'Europe/London',
+  'Europe/Isle_of_Man': 'Europe/London',
+  'Europe/Greenwich': 'Europe/London',
+
+  // Балканы, которые иногда мапятся на Belgrade
+  'Europe/Sarajevo': 'Europe/Belgrade',
+  'Europe/Skopje': 'Europe/Belgrade',
+  'Europe/Podgorica': 'Europe/Belgrade',
+  'Europe/Ljubljana': 'Europe/Belgrade',
+
+  // Беларусь (сейчас без DST, но по UTC близко к Москве)
+  'Europe/Minsk': 'Europe/Moscow',
+
+  // ===== ТУРЦИЯ / БЛИЖНИЙ ВОСТОК =====
+  'Asia/Istanbul': 'Europe/Istanbul',
+  'Europe/Istanbul': 'Europe/Istanbul', // чтобы наверняка
+  'Asia/Tel_Aviv': 'Asia/Jerusalem',
+
+  // ===== АЗИЯ: СТАРЫЕ / АЛЬТЕРНАТИВНЫЕ НАЗВАНИЯ =====
+  'Asia/Calcutta': 'Asia/Kolkata',
+  'Asia/Katmandu': 'Asia/Kathmandu',
+
+  'Asia/Saigon': 'Asia/Ho_Chi_Minh',
+  'Asia/Phnom_Penh': 'Asia/Bangkok',
+  'Asia/Vientiane': 'Asia/Bangkok',
+
+  'Asia/Chungking': 'Asia/Chongqing',
+  'Asia/Harbin': 'Asia/Shanghai',
+  'Asia/Kashgar': 'Asia/Shanghai',
+  'Asia/Urumqi': 'Asia/Shanghai',
+
+  'Asia/Macao': 'Asia/Hong_Kong',
+  'Asia/Brunei': 'Asia/Singapore',
+
+  // Улан-Батор — у TV нет своей зоны, берём ближайший по UTC+8
+  'Asia/Ulan_Bator': 'Asia/Shanghai',
+  'Asia/Ulaanbaatar': 'Asia/Shanghai',
+
+  // разные "персистентные" варианты залива
+  'Asia/Qatar': 'Asia/Qatar',        // есть в TV, но оставим на всякий
+  'Asia/Bahrain': 'Asia/Qatar',
+  'Asia/Kuwait': 'Asia/Riyadh',
+
+  // ===== АВСТРАЛИЯ / ОКЕАНИЯ =====
+  'Australia/ACT': 'Australia/Sydney',
+  'Australia/NSW': 'Australia/Sydney',
+  'Australia/Victoria': 'Australia/Sydney',
+  'Australia/Canberra': 'Australia/Sydney',
+  'Australia/Tasmania': 'Australia/Sydney',
+  'Australia/Yancowinna': 'Australia/Sydney',
+
+  'Australia/Queensland': 'Australia/Brisbane',
+
+  'Australia/West': 'Australia/Perth',
+  'Australia/North': 'Australia/Darwin',
+
+  // Самоа / Мидуэй — у TV нет всех этих зон, берём ближайший Pacific
+  'Pacific/Samoa': 'Pacific/Honolulu',
+  'Pacific/Pago_Pago': 'Pacific/Honolulu',
+  'Pacific/Midway': 'Pacific/Honolulu',
+
+  // ===== США: LEGACY / ШТАТНЫЕ ИДЕНТИФИКАТОРЫ =====
+  'US/Pacific': 'America/Los_Angeles',
+  'US/Mountain': 'US/Mountain',          // есть в TV
+  'US/Central': 'America/Chicago',
+  'US/Eastern': 'America/New_York',
+  'US/Arizona': 'America/Phoenix',
+  'US/Alaska': 'America/Anchorage',
+  'US/Hawaii': 'Pacific/Honolulu',
+
+  // старые alias'ы для конкретных городов / штатов
+  'America/Detroit': 'America/New_York',
+  'America/Indianapolis': 'America/New_York',
+  'America/Fort_Wayne': 'America/New_York',
+  'America/Louisville': 'America/New_York',
+  'America/Kentucky/Louisville': 'America/New_York',
+  'America/Grand_Turk': 'America/New_York',
+
+  'America/Atka': 'America/Anchorage',
+  'America/Juneau': 'America/Juneau', // TV умеет
+  'America/Ensenada': 'America/Los_Angeles',
+  'America/Santa_Isabel': 'America/Los_Angeles',
+  'America/Tijuana': 'America/Los_Angeles',
+
+  // ===== ЛАТИНСКАЯ АМЕРИКА / АРГЕНТИНА =====
+  'America/Buenos_Aires': 'America/Argentina/Buenos_Aires',
+  'America/Cordoba': 'America/Argentina/Buenos_Aires',
+  'America/Rosario': 'America/Argentina/Buenos_Aires',
+  'America/Catamarca': 'America/Argentina/Buenos_Aires',
+  'America/Argentina/Cordoba': 'America/Argentina/Buenos_Aires',
+  'America/Argentina/Catamarca': 'America/Argentina/Buenos_Aires',
+  'America/Argentina/ComodRivadavia': 'America/Argentina/Buenos_Aires',
+  'America/Argentina/Jujuy': 'America/Argentina/Buenos_Aires',
+  'America/Jujuy': 'America/Argentina/Buenos_Aires',
+  'America/Mendoza': 'America/Argentina/Buenos_Aires',
+
+  // Центральная Америка — сводим к El_Salvador (UTC-6 без DST)
+  'America/Guatemala': 'America/El_Salvador',
+  'America/Belize': 'America/El_Salvador',
+  'America/Costa_Rica': 'America/El_Salvador',
+  'America/Managua': 'America/El_Salvador',
+  'America/Tegucigalpa': 'America/El_Salvador',
+
+  // Бразильские города, сводим к Sao_Paulo
+  'America/Belem': 'America/Sao_Paulo',
+  'America/Fortaleza': 'America/Sao_Paulo',
+  'America/Recife': 'America/Sao_Paulo',
+  'America/Maceio': 'America/Sao_Paulo',
+  'America/Araguaina': 'America/Sao_Paulo',
+  'America/Santarem': 'America/Sao_Paulo',
+
+  // ===== ПРОЧИЕ ОБЩИЕ ПСЕВДОНИМЫ =====
+  // иногда системы возвращают просто "Etc/GMT+N", но TV лучше даёт UTC
+  'Etc/GMT+1': 'Etc/UTC',
+  'Etc/GMT-1': 'Etc/UTC',
+
+  // «плавающие» europe-cites, которых нет в списке TV, но по смещению ок
+  'Africa/Tripoli': 'Europe/Athens',
+  'Africa/Ceuta': 'Europe/Madrid',
+}
+
+
+// 3) Считываем таймзону браузера
+function getBrowserTimezone() {
+  if (typeof window === 'undefined' || !window.Intl) return null
+  try {
+    const opts = Intl.DateTimeFormat().resolvedOptions()
+    return opts && opts.timeZone ? opts.timeZone : null
+  } catch {
+    return null
+  }
+}
+
+// 4) Переводим минутный offset в формат Etc/GMT±X, который понимает TV
+//    offsetMinutes — это смещение "от UTC" в минутах (для UTC+2 будет 120)
+function offsetMinutesToEtcGmt(offsetMinutes) {
+  const sign = offsetMinutes >= 0 ? '-' : '+' // у Etc/GMT знак инвертирован относительно нормального
+  const abs = Math.abs(offsetMinutes)
+  const hours = Math.floor(abs / 60)
+  const minutes = abs % 60
+  if (minutes === 0) {
+    return `Etc/GMT${sign}${hours}`
+  }
+  return `Etc/GMT${sign}${hours}:${String(minutes).padStart(2, '0')}`
+}
+
+// 5) Главный helper: возвращает конфиг для TradingView: { timezone, custom_timezones }
+function getTradingViewTimezoneConfig() {
+  const browserTz = getBrowserTimezone()
+
+  // Если браузер ничего не сказал — просто UTC
+  if (!browserTz) {
+    return {
+      timezone: 'Etc/UTC',
+      custom_timezones: [],
+    }
+  }
+
+  // Если таймзона прямо поддерживается TV — отдаем как есть
+  if (TV_SUPPORTED_TIMEZONES.has(browserTz)) {
+    return {
+      timezone: browserTz,
+      custom_timezones: [],
+    }
+  }
+
+  // Если есть ручной алиас — используем его
+  if (TV_TIMEZONE_OVERRIDES[browserTz]) {
+    return {
+      timezone: TV_TIMEZONE_OVERRIDES[browserTz],
+      custom_timezones: [],
+    }
+  }
+
+  // Универсальный fallback: регаем custom timezone с алиасом на ближайший Etc/GMT±X
+  // offset берём из текущей системной TZ (она же браузерная)
+  const offsetNowMinutes = -new Date().getTimezoneOffset() // +120 для UTC+2
+  const alias = offsetMinutesToEtcGmt(offsetNowMinutes)
+
+  const id = browserTz // используем строку браузера как id для custom timezone
+  const title = browserTz
+
+  return {
+    timezone: id,
+    custom_timezones: [
+      {
+        id,
+        alias,
+        title,
+      },
+    ],
+  }
+}
 
 /* ================================= TradingView ================================= */
 function useTVCore(){
@@ -277,28 +607,87 @@ function TVTicker({symbol}){
   return <Panel><div ref={boxRef} /></Panel>
 }
 
-function TVChart({symbol, tf}){
+function TVChart({ symbol, tf }) {
   useTVCore()
-  const ref = useRef(null)
-  useEffect(()=>{
-    onTVReady(()=>{
-      if (!ref.current) return
-      ref.current.innerHTML=''
+  const containerRef = useRef(null)
+  const widgetRef = useRef(null)
+
+  useEffect(() => {
+    let cancelled = false
+    const containerEl = containerRef.current   // <-- фикс
+
+    if (!containerEl) return
+
+    onTVReady(() => {
+      if (cancelled) return
+      if (!containerEl) return
+
+      containerEl.innerHTML = ''
+
+      const { timezone, custom_timezones } = getTradingViewTimezoneConfig()
+      // console.log('[TV] tz config ->', { browser: getBrowserTimezone(), timezone, custom_timezones })
+
       // eslint-disable-next-line no-undef
-      new window.TradingView.widget({
-        autosize:true,
+      const widget = new window.TradingView.widget({
+        autosize: true,
         symbol: MAP_TV(symbol),
         interval: TFmap[tf],
-        container_id: ref.current.id,
-        theme:'dark', style:'1', locale:'en',
-        hide_side_toolbar:false, hide_legend:false, allow_symbol_change:false,
+        container_id: containerEl.id,   // <-- тоже используем локальный
+        theme: 'dark',
+        style: '1',
+        locale: 'en',
+        hide_side_toolbar: false,
+        hide_legend: false,
+        allow_symbol_change: false,
+        timezone,
+        custom_timezones,
       })
+
+      widgetRef.current = widget
+
+      if (typeof widget.onChartReady === 'function') {
+        widget.onChartReady(() => {
+          try {
+            const { timezone: tzFinal } = getTradingViewTimezoneConfig()
+            widget
+              .activeChart()
+              .getTimezoneApi()
+              .setTimezone(tzFinal)
+          } catch (e) {
+            console.warn('[TV] failed to set timezone via API', e)
+          }
+        })
+      }
     })
-  },[symbol,tf])
-  return <Panel><div className="tvWrap"><div id="tv_chart" ref={ref}/></div>
+
+    // cleanup
+    return () => {
+      cancelled = true
+      try {
+        if (widgetRef.current && typeof widgetRef.current.remove === 'function') {
+          widgetRef.current.remove()
+        }
+      } catch {}
+      widgetRef.current = null
+
+      if (containerEl) {
+        containerEl.innerHTML = ''
+      }
+    }
+  }, [symbol, tf])
+
+  return (
+    <Panel>
+      <div className="tvWrap">
+        <div id="tv_chart" ref={containerRef} />
+      </div>
     <style jsx>{`.tvWrap{position:relative;width:100%;height:58vh;min-height:360px} .tvWrap :global(#tv_chart){position:absolute;inset:0}`}</style>
-  </Panel>
+
+    </Panel>
+  )
 }
+
+
 function useTypewriter(text, speed = 18) {
   const [value, setValue] = useState(text || '')
 
