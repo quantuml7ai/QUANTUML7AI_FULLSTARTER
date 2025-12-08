@@ -185,7 +185,7 @@ export default function TopBar () {
                   r={R + 7}
                   fill="none"
                   stroke="url(#ql7-orbit-band-grad)"
-                  strokeWidth="36"
+                  strokeWidth="42"
                   className="nav-orbit-band"
                 />
 
