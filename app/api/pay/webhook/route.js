@@ -84,13 +84,94 @@ function isSuccessStatus(rawStatus) {
   const successList = [
     'finished',
     'confirmed',
-    'sending',
-    'partially_paid',
+    'sending', 
     'completed',
     'paid',
     'done',
   ]
   return successList.some((x) => s.includes(x))
+}
+/* ========== Допуск по недоплате (< 1 цента) ========== */
+
+// допустимая недоплата в фиате (USD, т.к. price_currency у тебя = 'USD')
+const UNDERPAY_TOLERANCE_FIAT = 0.01 // 1 цент
+
+// безопасный парсер чисел: берём первый нормальный Number из списка
+function num(...vals) {
+  for (const v of vals) {
+    const n = Number(v)
+    if (Number.isFinite(n)) return n
+  }
+  return null
+}
+
+// считаем, насколько в фиате (USD) недоплатили
+function computeUnderpayFiat(payload) {
+  // сколько должны были получить в фиате
+  const priceUsd = num(
+    payload.price_amount,
+    payload.priceAmount,
+    payload.order_amount,
+  )
+
+  // сколько реально пришло в фиате (NOWPayments это тоже присылает)
+  const paidUsd = num(
+    payload.actually_paid_fiat,
+    payload.actuallyPaidFiat,
+    payload.pay_amount_fiat,
+  )
+
+  if (Number.isFinite(priceUsd) && Number.isFinite(paidUsd)) {
+    const diff = priceUsd - paidUsd
+    if (diff <= 0) return 0 // переплата или ровно
+    return diff
+  }
+
+  // fallback: считаем через крипту, если фиат не пришёл
+  const payCrypto = num(
+    payload.pay_amount,
+    payload.payAmount,
+  )
+  const paidCrypto = num(
+    payload.actually_paid,
+    payload.actuallyPaid,
+    payload.paid_amount,
+  )
+
+  if (
+    Number.isFinite(priceUsd) &&
+    Number.isFinite(payCrypto) &&
+    Number.isFinite(paidCrypto) &&
+    payCrypto > 0
+  ) {
+    const rate = priceUsd / payCrypto // USD за 1 единицу крипты
+    const diffCrypto = payCrypto - paidCrypto
+    if (diffCrypto <= 0) return 0
+    return diffCrypto * rate
+  }
+
+  // не смогли ничего посчитать — не рискуем
+  return null
+}
+
+// общий helper: реальный «успех» с учётом partial + допуска
+function isPaymentEffectivelySuccess(payload, rawStatus) {
+  const s = String(rawStatus || '').toLowerCase()
+
+  // обычные успехи (finished/paid/…)
+  if (isSuccessStatus(s)) return true
+
+  // не partial → точно не успех
+  if (!s.includes('partial')) return false
+
+  // partial: пытаемся понять, насколько недоплатили в USD
+  const underpayFiat = computeUnderpayFiat(payload)
+
+  // не смогли посчитать — не доверяем partial
+  if (underpayFiat === null) return false
+
+  // если недоплата <= 1 цент — считаем платёж успешным
+  return underpayFiat <= UNDERPAY_TOLERANCE_FIAT
 }
 
 /* ========== Основной обработчик ========== */
@@ -175,6 +256,9 @@ export async function POST(req) {
     const vipAccountId = extractVipAccountId(orderId)
     const adsInfo = parseAdsOrder(orderId)
 
+    // с учётом partial + допуска < 1 цента
+    const success = isPaymentEffectivelySuccess(payload, statusRaw)
+
     let type = null
     if (vipAccountId) {
       type = 'vip'
@@ -194,8 +278,7 @@ export async function POST(req) {
       const res = await handleNowPaymentsWebhook(payload)
       return NextResponse.json({ ...res, legacy: true })
     }
-
-    const success = isSuccessStatus(statusRaw)
+ 
 
     // ---------- Попытка найти новый invoice:* по externalId / orderId / paymentId ----------
     let internalId = null
@@ -221,7 +304,7 @@ export async function POST(req) {
       }
 
       const status = String(statusRaw || '').toLowerCase()
-      const finished = isSuccessStatus(status)
+      const finished = isPaymentEffectivelySuccess(payload, statusRaw)
 
       const legacyKey = `invoice:${externalInvoiceId || paymentId || orderId}`
 
