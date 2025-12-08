@@ -96,12 +96,11 @@ body{
 .lang-switch:hover{background:rgba(157,220,255,.15)}
 
 /* компакт на узких экранах — можно переопределить переменные */
-@media (max-width: 620px){
+@media (max-width: 480px){
   .topbar{
     --nav-font-size: 20px;
     --nav-pad-y: 6px;
     --nav-pad-x: 4px;
-   
   }
   .lang-switch{ font-size:13px }
 }
@@ -624,7 +623,7 @@ html, body {
 :root { --gutter: 26px; --miniapp-top-offset: 70px; } /* ↑ докрути тут при необходимости */
 @media (min-width:1280px){ :root{ --gutter: 100px; } }
 /* Мобайл: микро-гаттер 8px, чтобы ничего не «резалось» по краям */
-@media (max-width:680px){ :root{ --gutter: 6px; --miniapp-top-offset: 70x;} }
+@media (max-width:640px){ :root{ --gutter: 6px; --miniapp-top-offset: 70px; } }
 
 /* База */
 html,body{ margin:0; padding:0; width:100%; min-height:100%; overflow-x:hidden; }
