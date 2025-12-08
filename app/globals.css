@@ -1777,14 +1777,34 @@ h1, h2, h3, h4, h5, h6{
 @media (max-width: 680px) {
   .nav-orbit {
 
-    /* 🔵 орбита: было 264px → −15% → ≈ 224px */
+    /* 🔵 орбита — БЕЗ ИЗМЕНЕНИЙ */
     --orbit-size: min(224px, 57.4vw);
 
     /* 🎮 центр — БЕЗ ИЗМЕНЕНИЙ */
     --orbit-center-size: clamp(78.7px, 27vw, 112px);
 
-    /* 🔤 текст: +15% по сравнению с 13 / 4.1vw / 19 */
-    --orbit-font-base: clamp(15px, 4.7vw, 22px);
+    /* 🔤 текст: ещё +15% */
+    --orbit-font-base: clamp(17px, 5.4vw, 25px);
   }
 }
 
+/* Убираем синий tap-highlight на орбите ТОЛЬКО на мобиле */
+@media (max-width: 680px){
+  .nav-orbit,
+  .nav-orbit *,
+  .nav-orbit-svg,
+  .nav-orbit-svg *,
+  .nav-orbit-arc,
+  .nav-orbit-arc * {
+    -webkit-tap-highlight-color: transparent; /* убирает квадратный синий блик */
+  }
+
+  /* на всякий — глушим фокус-рамку и box-shadow у SVG-дуг */
+  .nav-orbit-arc:focus,
+  .nav-orbit-arc:focus-visible,
+  .nav-orbit-arc:active {
+    outline: none;
+    box-shadow: none;
+  }
+}
+ 

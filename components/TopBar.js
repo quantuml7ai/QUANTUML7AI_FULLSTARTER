@@ -37,12 +37,11 @@ export default function TopBar () {
   }
 
   const items = [
-
-    { href: '/subscribe', label: t('nav_subscribe') },
-    { href: '/forum',     label: t('forum_title') }, 
-    { href: '/exchange',  label: t('nav_exchange') }, 
-    { href: '/academy',   label: t('nav_academy') },
+    { href: '/exchange',  label: t('nav_exchange') },
+    { href: '/academy',   label: t('nav_academy') },  
     { href: '/about',     label: t('nav_about') },
+    { href: '/subscribe', label: t('nav_subscribe') }, 
+    { href: '/forum',     label: t('forum_title') },    
   ] 
  
   const isActive = (href) => {
