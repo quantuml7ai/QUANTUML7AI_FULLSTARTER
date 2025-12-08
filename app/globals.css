@@ -620,10 +620,10 @@ html, body {
 @media (max-width:640px){ .page-center{ padding:14px 12px; } }
 
 /* === Глобальные гаттеры === */
-:root { --gutter: 26px; --miniapp-top-offset: 30px; } /* ↑ докрути тут при необходимости */
+:root { --gutter: 26px; --miniapp-top-offset: 70px; } /* ↑ докрути тут при необходимости */
 @media (min-width:1280px){ :root{ --gutter: 100px; } }
 /* Мобайл: микро-гаттер 8px, чтобы ничего не «резалось» по краям */
-@media (max-width:640px){ :root{ --gutter: 6px; --miniapp-top-offset: 70px; } }
+@media (max-width:640px){ :root{ --gutter: 6px; --miniapp-top-offset: 30x; } }
 
 /* База */
 html,body{ margin:0; padding:0; width:100%; min-height:100%; overflow-x:hidden; }
@@ -1773,22 +1773,19 @@ h1, h2, h3, h4, h5, h6{
       drop-shadow(0 0 32px rgba(56,189,248,.95));
   }
 }
-
-
+ 
 @media (max-width: 680px) {
   .nav-orbit {
-    /* 🔵 орбита: была 160px → стала на 10% больше ≈ 176px */
+    /* 🔵 орбита: 176px (как было) */
     --orbit-size: min(176px, 46vw);
 
-    /* 🎮 центр оставил как был */
+    /* 🎮 центр без изменений */
     --orbit-center-size: clamp(70px, 24vw, 100px);
 
-    /* 🔤 текст: было clamp(13px…) → +20% ≈ clamp(15.6px…) */
-    --orbit-font-base: clamp(16px, 4.9vw, 23px);
+    /* 🔤 текст: +20% больше */
+    --orbit-font-base: clamp(19px, 5.9vw, 28px);
 
     /* 📏 расстояние сверху */
     margin-top: 10px;
   }
 }
-
- 
