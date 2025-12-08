@@ -37,7 +37,7 @@ export default function TopBar () {
   }
 
   const items = [
-    { href: '/',          label: t('nav_home') },
+
     { href: '/subscribe', label: t('nav_subscribe') },
     { href: '/forum',     label: t('forum_title') }, 
     { href: '/exchange',  label: t('nav_exchange') }, 
@@ -185,7 +185,7 @@ export default function TopBar () {
                   r={R + 7}
                   fill="none"
                   stroke="url(#ql7-orbit-band-grad)"
-                  strokeWidth="42"
+                  strokeWidth="60"
                   className="nav-orbit-band"
                 />
 
