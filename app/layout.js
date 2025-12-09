@@ -58,7 +58,7 @@ export const metadata = {
     images: [
       {
         // 🔹 глобально корень теперь = /meta/home.png
-        url: '/meta/home.png',
+        url: '/meta/home1.png',
         width: 1200,
         height: 630,
         alt: 'Quantum L7 AI — Global AI • Exchange • Forum • Academy • Ads AI Rotator',
@@ -74,7 +74,7 @@ export const metadata = {
     description:
       'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©',
     // 🔹 твиттер-картинка для корня та же
-    images: ['/meta/home.png'],
+    images: ['/meta/home1.png'],
   },
 
   // 🔹 лёгкий bust кэша для иконок (версии можно менять при билд-апдейтах)

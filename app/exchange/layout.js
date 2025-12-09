@@ -17,7 +17,7 @@ export const metadata = {
     description: GLOBAL_DESCRIPTION,
     images: [
       {
-        url: '/meta/exchange.png',
+        url: '/meta/exchange1.png',
         width: 1200,
         height: 630,
         alt: 'Quantum L7 AI — Exchange',
@@ -30,7 +30,7 @@ export const metadata = {
     creator: '@quantuml7ai',
     title: 'Quantum L7 AI — Exchange',
     description: GLOBAL_DESCRIPTION,
-    images: ['/meta/exchange.png'],
+    images: ['/meta/exchange1.png'],
   },
 }
 

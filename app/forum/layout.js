@@ -17,7 +17,7 @@ export const metadata = {
     description: GLOBAL_DESCRIPTION,
     images: [
       {
-        url: '/meta/forum.png',
+        url: '/meta/forum1.png',
         width: 1200,
         height: 630,
         alt: 'Quantum L7 AI — Forum',
@@ -30,7 +30,7 @@ export const metadata = {
     creator: '@quantuml7ai',
     title: 'Quantum L7 AI — Forum',
     description: GLOBAL_DESCRIPTION,
-    images: ['/meta/forum.png'],
+    images: ['/meta/forum1.png'],
   },
 }
 
