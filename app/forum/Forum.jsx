@@ -9139,11 +9139,7 @@ onClick={()=>{
     <div className="grid gap-2 mt-2" suppressHydrationWarning>
       {(sortedTopics || [])
        .slice()
-        .sort((a,b) => {
-          const at = Number(a?.ts || 0), bt = Number(b?.ts || 0);
-          if (bt !== at) return bt - at;
-          return String(b?.id || '').localeCompare(String(a?.id || ''));
-        })
+
         .map(x => {
           const agg = aggregates.get(x.id) || { posts:0, likes:0, dislikes:0, views:0 };
           return (
