@@ -1,4 +1,5 @@
 // app/api/pay/webhook/route.js
+
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { Redis } from '@upstash/redis'
@@ -8,8 +9,17 @@ import {
   grantAdsPackageForAccount, // для новых Ads через invoice:*
 } from '@/lib/adsCore'
 
+export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
+
 const redis = Redis.fromEnv()
+
+// ✅ один раз читаем секрет из ENV на уровне модуля
+const NOWPAYMENTS_IPN_SECRET = process.env.NOWPAYMENTS_IPN_SECRET || ''
+
+// (опционально) дебаг-логи
+console.log('[webhook] START', new Date().toISOString())
+console.log('[webhook] IPN_SECRET_SET:', !!NOWPAYMENTS_IPN_SECRET)
 
 /* ========== HMAC ========== */
 
@@ -176,8 +186,7 @@ function isPaymentEffectivelySuccess(payload, rawStatus) {
 
 /* ========== Основной обработчик ========== */
 
-export async function POST(req) {
-  const NOWPAYMENTS_IPN_SECRET = process.env.NOWPAYMENTS_IPN_SECRET || ''
+export async function POST(req) { 
   if (!NOWPAYMENTS_IPN_SECRET) {
     return NextResponse.json(
       { ok: false, error: 'NO_IPN_SECRET' },
@@ -185,8 +194,12 @@ export async function POST(req) {
     )
   }
 
+
   // ВАЖНО: сырой текст для HMAC
   const rawBody = await req.text()
+  // 🔍 ДОБАВЬ ЭТИ ЛОГИ:
+  console.log('[webhook] RAW_BODY:', JSON.stringify(rawBody), 'len=', rawBody.length)
+  console.log('[webhook] SECRET_DEBUG:', JSON.stringify(NOWPAYMENTS_IPN_SECRET), 'len=', NOWPAYMENTS_IPN_SECRET.length)
 
   try {
     const sigHeader =
@@ -195,6 +208,10 @@ export async function POST(req) {
       ''
 
     const calc = hmacSHA512(rawBody, NOWPAYMENTS_IPN_SECRET)
+    // 🔍 И ЕЩЁ ЭТИ:
+    console.log('[webhook] SIG_HEADER:', sigHeader)
+    console.log('[webhook] CALC_SIG  :', calc)
+
     const okSig =
       String(sigHeader || '').toLowerCase() === String(calc || '').toLowerCase()
 
@@ -348,6 +365,66 @@ export async function POST(req) {
         })
       }
     }
+    // ---------- ЛЕГАСИ Ads: adspkg:<accountId>:<pkgType>:<ts> БЕЗ invoice ----------
+    if (!internalId && type === 'ads') {
+      if (!adsInfo?.accountId || !adsInfo?.pkgType) {
+        return NextResponse.json(
+          { ok: false, error: 'BAD_ADS_ORDER', orderId },
+          { status: 400 },
+        )
+      }
+
+      const accountId = adsInfo.accountId
+      const pkgType   = adsInfo.pkgType
+      const finished  = isPaymentEffectivelySuccess(payload, statusRaw)
+      const legacyKey = `ads:legacy:${orderId}`
+
+      // просто логируем неуспешные, но не активируем
+      if (!finished) {
+        await redis.hset(legacyKey, {
+          accountId,
+          pkgType,
+          lastStatus: String(statusRaw || '').toLowerCase(),
+          updatedAt: new Date().toISOString(),
+        })
+
+        return NextResponse.json({
+          ok: true,
+          legacy: true,
+          type: 'ads',
+          activated: false,
+          accountId,
+          pkgType,
+          status: String(statusRaw || '').toLowerCase(),
+        })
+      }
+
+      // успешный платёж → сразу выдаём пакет
+      const pkg = await grantAdsPackageForAccount({
+        accountId,
+        pkgType,
+        note: `legacy-webhook:${orderId}`,
+      })
+
+      await redis.hset(legacyKey, {
+        accountId,
+        pkgType,
+        packageId: pkg?.id || '',
+        lastStatus: String(statusRaw || '').toLowerCase(),
+        activatedAt: new Date().toISOString(),
+      })
+
+      return NextResponse.json({
+        ok: true,
+        legacy: true,
+        type: 'ads',
+        activated: !!pkg,
+        accountId,
+        pkgType,
+        packageId: pkg?.id || null,
+        status: String(statusRaw || '').toLowerCase(),
+      })
+    }
 
     // Если до сюда дошли и internalId всё ещё не найден — это ошибка для нового потока
     if (!internalId) {
@@ -489,7 +566,7 @@ export async function POST(req) {
       })
     }
 
-    /* ===== ADS (новый поток) ===== */
+    /* ===== ADS (новый поток) ===== */  
     if (type === 'ads') {
       if (!invoice.meta) invoice.meta = {}
 
