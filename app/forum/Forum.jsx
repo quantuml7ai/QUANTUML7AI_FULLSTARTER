@@ -4538,15 +4538,15 @@ function PostCard({
             {p.nickname || shortId((p.userId || p.accountId || ''))}
           </span>
         </span>
+
+      </div>
         {p.parentId && (
           <span className="tag ml-1 replyTag" aria-label={t?.('forum_reply_to') || 'Ответ для'}>
             {(t?.('forum_reply_to') || 'ответ для') + ' '}
             {parentAuthor ? '@' + parentAuthor : '…'}
             {parentSnippet && <>: “{parentSnippet}”</>}
           </span>
-        )}
-      </div>
-
+        )} 
       {/* тело поста — крупные эмодзи (VIP/MOZI) как картинка, иначе очищенный текст */}
       {(/^\[(VIP_EMOJI|MOZI):\/[^\]]+\]$/).test(p.text || '') ? (
         <div className="postBody emojiPostWrap">
