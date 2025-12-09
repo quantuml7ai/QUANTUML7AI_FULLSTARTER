@@ -1060,6 +1060,35 @@ const Styles = () => (
 
     /* компактный вариант для action-кнопок на карточке */
     .btnSm { padding: 6px 8px; font-size: 12px; line-height: 1; }
+/* ----- Reply-chip около ника ----- */
+
+@media (max-width: 680px) {
+  /* строка с аватаром и ником + чипом ответа */
+  .postUserRow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap; /* разрешаем перенос на новую строку */
+  }
+
+  /* ник не даём сжимать вообще */
+  .postUserRow .nick-badge {
+    flex-shrink: 0;
+  }
+
+  /* сам чип "Ответ для ..." */
+  .postUserRow .replyTag {
+    font-size: 10px;          /* поменьше шрифт на мобиле */
+    line-height: 1.1;
+    white-space: normal;      /* разрешаем перенос по словам */
+    word-break: normal;
+    overflow-wrap: break-word;/* если очень длинный ник/текст – переносим, но не по буквам */
+
+    max-width: 100%;
+    flex-basis: 100%;         /* при нехватке места уходит НА СЛЕДУЮЩУЮ СТРОКУ под ником */
+    margin-left: 0;           /* под ником, а не сбоку */
+    margin-top: 2px;
+  }
+}
 
 /* --- header: ... --- */
 .head{
@@ -4510,7 +4539,7 @@ function PostCard({
           </span>
         </span>
         {p.parentId && (
-          <span className="tag ml-1" aria-label={t?.('forum_reply_to') || 'Ответ для'}>
+          <span className="tag ml-1 replyTag" aria-label={t?.('forum_reply_to') || 'Ответ для'}>
             {(t?.('forum_reply_to') || 'ответ для') + ' '}
             {parentAuthor ? '@' + parentAuthor : '…'}
             {parentSnippet && <>: “{parentSnippet}”</>}
