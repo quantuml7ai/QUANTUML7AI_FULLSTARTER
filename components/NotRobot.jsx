@@ -688,7 +688,7 @@ export default function NotRobot() {
           }
 
           .rb-field-wrapper {
-            height: 500px;
+            height: 400px;
               width: 100%;
              aspect-ratio: 9 / 16;
              max-width: 100%;
