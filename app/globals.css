@@ -223,7 +223,7 @@ ul.bullets li{margin:6px 0}
   --text-gradient: linear-gradient(120deg, #ffffff, #d7f3ff, #ffffff);
   --text-speed: 4s;
 
-  width: 62px;
+  width: 58px;
   height: var(--size);
   border-radius: 999px;
   display: inline-grid;
