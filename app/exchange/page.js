@@ -1874,16 +1874,18 @@ export default function ExchangePage(){
       <BadgeTitle/>
  
       <TVTicker symbol={symbol}/>
+      <BattleCoin />
       <TVChart symbol={symbol} tf={tf}/>
+
       <SymbolTFSelector current={{symbol,tf}} symbols={symbols} onChange={(s,tf2)=>{setSymbol(s); setTf(tf2)}}/>
 
       <AIQuotaGate onOpenUnlimit={handleOpenUnlimit}>
-        <AIBox data={ai}/>
+      <AIBox data={ai}/>
       </AIQuotaGate>
-      <BattleCoin />
+
       <OrderBook symbol={symbol}/>
      {/* Реклама сразу после биржевого стакана (Order Book) */}
-     <HomeBetweenBlocksAd
+      <HomeBetweenBlocksAd
       slotKey="exchange_after_orderbook"
        slotKind="exchange_after_orderbook"
      />
@@ -1895,13 +1897,7 @@ export default function ExchangePage(){
         </div>
         <ul className="bullets">{bullets.map((b,i)=><li key={i}>• {b}</li>)}</ul>
       </section>
-
-
-
-
-   
-
-
+ 
       {sections.map((s, idx) => (
         <section key={idx} className="panel">
           <h2>{s.title}</h2>
