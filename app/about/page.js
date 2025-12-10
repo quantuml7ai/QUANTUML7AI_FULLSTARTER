@@ -271,8 +271,8 @@ export default function AboutPage() {
       </main>
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
-      slotKey="exchange_after_orderbook"
-       slotKind="exchange_after_orderbook"
+      slotKey="about_after"
+       slotKind="about_after"
      />
       {/* Хвост страницы: бегущая строка во всю ширину */}
       <PageMarqueeTail />

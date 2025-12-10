@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useI18n } from '../../components/i18n'
-
+import HomeBetweenBlocksAd from '../ads'
 export default function GamePage() {
   const { t } = useI18n()
   const marqueeRef = useRef(null)
@@ -243,9 +243,9 @@ export default function GamePage() {
               text-transform: uppercase;
               background: linear-gradient(
                 90deg,
-                #e0f2fe,
-                #a5b4fc,
-                #22d3ee,
+                #fffb01ff,
+                #fc7c04ff,
+                #00fff2ff,
                 #f97316,
                 #facc15
               );
@@ -253,7 +253,7 @@ export default function GamePage() {
               -webkit-background-clip: text;
               background-clip: text;
               color: transparent;
-              animation: titleGradient 22s
+              animation: titleGradient 10s
                 linear infinite;
               text-shadow:
                 0 0 16px rgba(15, 23, 42, 0.9),
@@ -345,10 +345,10 @@ export default function GamePage() {
               /* чуть ослабили, чтобы лучше видеть SVG под низом */
               background: linear-gradient(
                 120deg,
-                rgba(56, 189, 248, 0.65),
-                rgba(129, 140, 248, 0.55),
-                rgba(16, 185, 129, 0.6),
-                rgba(244, 114, 182, 0.65)
+                rgba(56, 191, 248, 0.36),
+                rgba(129, 141, 248, 0.34),
+                rgba(16, 185, 129, 0.32),
+                rgba(244, 114, 181, 0.32)
               );
               background-size: 200% 200%;
               animation: borderFlow 18s
@@ -522,12 +522,16 @@ export default function GamePage() {
           `}</style>
         </section>
       </main>
-
+       <HomeBetweenBlocksAd
+         slotKey="ads_between_2_3"
+         slotKind="ads_between"
+       />
       {/* МАРКИЗА (классы как на главной, стили — из globals.css) */}
       <section
         className="marquee-wrap no-gutters"
         aria-hidden="true"
       >
+
         <div className="marquee" ref={marqueeRef}>
           <span>{t('marquee')}</span>
           <span>{t('marquee')}</span>

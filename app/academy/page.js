@@ -1396,8 +1396,8 @@ function AcademyContent() {
 
      {/* Реклама сразу после биржевого стакана (Order Book) */}
      <HomeBetweenBlocksAd
-      slotKey="exchange_after_orderbook"
-       slotKind="exchange_after_orderbook"
+      slotKey="academy_after_exam_1_2_3"
+       slotKind="academy_after"
      />
      </AcademyPaginator>
       {/* Маркиза: использует глобальные стили из layout/home */}
