@@ -1911,10 +1911,8 @@ h1, h2, h3, h4, h5, h6{
   letter-spacing:.08em;          /* меньше расстояние между буквами */
   text-transform:uppercase;
   font-size:1em;                 /* базовый масштаб, сверху ещё orbitScale */
-  paint-order:stroke;
-  stroke:rgba(0,0,0,.9);
-  stroke-width:1.4px;
-  fill:url(#ql7-orbit-grad);
+
+  fill:#ffe600;
 }
 
 /* hover – лёгкий неон */
@@ -2023,12 +2021,4 @@ h1, h2, h3, h4, h5, h6{
     box-shadow: none;
   }
 }
- /* iOS / Safari fix: SVG-текст без stroke, чтобы не было чёрных/пустотелых букв */
-@supports (-webkit-touch-callout: none) {
-  .nav-orbit-arc-text{
-    stroke: none;
-    paint-order: normal;
-    /* чуть усилим сам цвет текста, чтобы без обводки было читабельно */
-    fill: url(#ql7-orbit-grad);
-  }
-}
+ 
