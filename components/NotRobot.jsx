@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useI18n } from "@/components/i18n";
 
 // Конфиг таймингов
-const RB_FIRST_SHOW_DELAY_MS = 3 * 60 * 1000;      // 3 секунды (для теста)
+const RB_FIRST_SHOW_DELAY_MS = 1 * 60 * 1000;      // 3 секунды (для теста)
 const RB_IDLE_TIMEOUT_MS = 15 * 60 * 1000;          // 5 секунд бездействия (для теста)
 const RB_CHECK_TIMEOUT_MS = 60 * 1000;        // 30 секунд на проверку
 
