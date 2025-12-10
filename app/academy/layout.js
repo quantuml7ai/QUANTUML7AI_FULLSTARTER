@@ -17,7 +17,7 @@ export const metadata = {
     description: GLOBAL_DESCRIPTION,
     images: [
       {
-        url: '/meta/academy1.png',
+        url: '/metab/academy1.png',
         width: 1200,
         height: 630,
         alt: 'Quantum L7 AI — Academy',
@@ -30,7 +30,7 @@ export const metadata = {
     creator: '@quantuml7ai',
     title: 'Quantum L7 AI — Academy',
     description: GLOBAL_DESCRIPTION,
-    images: ['/meta/academy1.png'],
+    images: ['/metab/academy1.png'],
   },
 }
 

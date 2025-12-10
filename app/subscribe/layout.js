@@ -17,7 +17,7 @@ export const metadata = {
     description: GLOBAL_DESCRIPTION,
     images: [
       {
-        url: '/meta/subscription1.png',
+        url: '/metab/subscription1.png',
         width: 1200,
         height: 630,
         alt: 'Subscription',
@@ -30,7 +30,7 @@ export const metadata = {
     creator: '@quantuml7ai',
     title: 'Quantum L7 AI — Subscription',
     description: GLOBAL_DESCRIPTION,
-    images: ['/meta/subscription1.png'],
+    images: ['/metab/subscription1.png'],
   },
 }
 

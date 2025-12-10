@@ -73,7 +73,7 @@ images: {
 
       // 🔹 2) Все OG-картинки из /meta — без кеша
       {
-        source: '/meta/:path*',
+        source: '/metab/:path*',
         headers: [
           {
             key: 'Cache-Control',
