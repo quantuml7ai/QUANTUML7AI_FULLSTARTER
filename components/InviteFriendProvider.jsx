@@ -24,7 +24,7 @@ function readUnifiedAccountId() {
   return null
 }
 
-const FIRST_DELAY_MS = 5 * 60 * 1000      // 5 минут после авторизации
+const FIRST_DELAY_MS = 7 * 60 * 1000      // 5 минут после авторизации
 const INTERVAL_MS = 60 * 60 * 1000        // каждый час
 const ACTIVE_WINDOW_MS = 10 * 60 * 1000   // пользователь активен в последние 10 минут
 

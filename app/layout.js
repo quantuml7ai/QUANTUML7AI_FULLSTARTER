@@ -3,6 +3,7 @@ import './globals.css'
 import dynamic from 'next/dynamic'
 import { I18nProvider } from '../components/i18n'
 import TopBar from '../components/TopBar'
+import NotRobot from "@/components/NotRobot";
 import Providers from './providers'
 
 // ✅ Vercel Analytics & Speed Insights
@@ -160,12 +161,16 @@ export default function RootLayout({ children }) {
               <TopBar />
               {children}
             </div>
-
+            <NotRobot 
+         
+            /> {/* <- сюда вставляем компонент-оверлей */}
             {/* фон. аудио (кнопка снизу — «Выключить аудио») */}
             <BgAudio src="/audio/cosmic.mp3" defaultVolume={1.35} />
 
             {/* 🔹 Глобальный поп-ап «Пригласи друга» */}
-            <InviteFriendProvider />            
+            <InviteFriendProvider 
+       
+            />            
            <ScrollTopPulse />
           </I18nProvider>
         </Providers>

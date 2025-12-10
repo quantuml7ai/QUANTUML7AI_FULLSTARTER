@@ -45645,6 +45645,93 @@ try {
   Object.assign(dict.ar, GAME_AR)
   Object.assign(dict.tr, GAME_TR)
 } catch (e) {}
+const ROBOT_EN = {
+not_robot_title:'🤖 I AM NOT A ROBOT 🤖',
+not_robot_subtitle:'Confirm that you are human to continue using the platform.',
+not_robot_instruction:'Select the coin on the field below that matches the one shown.',
+not_robot_target_label:'Target coin 👈',
+not_robot_timer_label:'Time remaining ⏳',
+not_robot_success:'Verification complete. Access granted.',
+not_robot_error_timeout:'Verification time has expired ⏰ Please try again later.',
+not_robot_error_wrong_coin:'Incorrect coin selection ❌ Please try again.',
+
+}
+const ROBOT_RU = {
+not_robot_title:'🤖 Я НЕ РОБОТ 🤖',
+not_robot_subtitle:'Подтвердите, что вы человек, чтобы продолжить работу с платформой.',
+not_robot_instruction:'Выберите на поле ниже монету, которая совпадает с указанной',
+not_robot_target_label:'Искомая монета 👈',
+not_robot_timer_label:'Осталось времени ⏳',
+not_robot_success:'Проверка пройдена. Доступ открыт.',
+not_robot_error_timeout:'Время проверки истекло ⏰ Попробуйте позже.',
+not_robot_error_wrong_coin:'Неверный выбор монеты ❌ Попробуйте ещё раз.',
+
+}
+const ROBOT_UK = {
+not_robot_title:'🤖 Я НЕ РОБОТ 🤖',
+not_robot_subtitle:'Підтвердіть, що ви людина, щоб продовжити роботу з платформою.',
+not_robot_instruction:'Виберіть на полі нижче монету, яка співпадає із зазначеною.',
+not_robot_target_label:'Потрібна монета 👈',
+not_robot_timer_label:'Залишилось часу ⏳',
+not_robot_success:'Перевірку пройдено. Доступ відкрито.',
+not_robot_error_timeout:'Час перевірки вичерпано ⏰ Спробуйте пізніше.',
+not_robot_error_wrong_coin:'Неправильний вибір монети ❌ Спробуйте ще раз.',
+
+}
+const ROBOT_ES = {
+not_robot_title:'🤖 NO SOY UN ROBOT 🤖',
+not_robot_subtitle:'Confirme que usted es una persona para continuar utilizando la plataforma.',
+not_robot_instruction:'Seleccione en el campo de abajo la moneda que coincide con la indicada.',
+not_robot_target_label:'Moneda requerida 👈',
+not_robot_timer_label:'Tiempo restante ⏳',
+not_robot_success:'Verificación completada. Acceso concedido.',
+not_robot_error_timeout:'El tiempo de verificación ha expirado ⏰ Inténtelo más tarde.',
+not_robot_error_wrong_coin:'Selección incorrecta de moneda ❌ Inténtelo de nuevo.',
+
+}
+const ROBOT_ZH = {
+not_robot_title:'🤖 我不是机器人 🤖',
+not_robot_subtitle:'请确认您是人类，以继续使用平台。',
+not_robot_instruction:'请在下方区域选择与所示一致的币种。',
+not_robot_target_label:'目标币种 👈',
+not_robot_timer_label:'剩余时间 ⏳',
+not_robot_success:'验证通过。访问已开放。',
+not_robot_error_timeout:'验证时间已结束 ⏰ 请稍后再试。',
+not_robot_error_wrong_coin:'币种选择错误 ❌ 请重试。',
+
+}
+const ROBOT_AR = {
+not_robot_title:'🤖 لستُ روبوتًا 🤖',
+not_robot_subtitle:'يرجى تأكيد أنك إنسان لمتابعة العمل على المنصة.',
+not_robot_instruction:'اختر من الحقل أدناه العملة المطابقة للعملة المعروضة.',
+not_robot_target_label:'العملة المطلوبة 👉',
+not_robot_timer_label:'الوقت المتبقي ⏳',
+not_robot_success:'تم التحقق بنجاح. تم فتح الوصول.',
+not_robot_error_timeout:'انتهى وقت التحقق ⏰ يرجى المحاولة لاحقًا.',
+not_robot_error_wrong_coin:'اختيار عملة غير صحيح ❌ يرجى المحاولة مرة أخرى.',
+
+}
+const ROBOT_TR = {
+not_robot_title:'🤖 ROBOT DEĞİLİM 🤖',
+not_robot_subtitle:'Platformu kullanmaya devam etmek için lütfen insan olduğunuzu doğrulayın.',
+not_robot_instruction:'Aşağıdaki alandan belirtilenle eşleşen coin’i seçin.',
+not_robot_target_label:'Aranan coin 👈',
+not_robot_timer_label:'Kalan süre ⏳',
+not_robot_success:'Doğrulama başarılı. Erişim açıldı.',
+not_robot_error_timeout:'Doğrulama süresi doldu ⏰ Lütfen daha sonra tekrar deneyin.',
+not_robot_error_wrong_coin:'Yanlış coin seçildi ❌ Lütfen tekrar deneyin.',
+
+}
+
+try {
+  Object.assign(dict.en, ROBOT_EN)
+  Object.assign(dict.ru, ROBOT_RU)
+  Object.assign(dict.uk, ROBOT_UK)
+  Object.assign(dict.es, ROBOT_ES)
+  Object.assign(dict.zh, ROBOT_ZH)
+  Object.assign(dict.ar, ROBOT_AR)
+  Object.assign(dict.tr, ROBOT_TR)
+} catch (e) {}
 export function I18nProvider({ children }) {
   const [lang, setLang] = useState('en')
   useEffect(() => {
