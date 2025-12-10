@@ -2023,4 +2023,12 @@ h1, h2, h3, h4, h5, h6{
     box-shadow: none;
   }
 }
- 
+ /* iOS / Safari fix: SVG-текст без stroke, чтобы не было чёрных/пустотелых букв */
+@supports (-webkit-touch-callout: none) {
+  .nav-orbit-arc-text{
+    stroke: none;
+    paint-order: normal;
+    /* чуть усилим сам цвет текста, чтобы без обводки было читабельно */
+    fill: url(#ql7-orbit-grad);
+  }
+}
