@@ -1026,52 +1026,256 @@ async function ensureAuthorized() {
   return acc || null
 }
 
-/* ====== ДОБАВЛЕНО: модалка VIP+ (только UI) ====== */
+/* ====== VIP+ модалка без тайпрайтера, со скроллом ====== */
 function UnlimitModal({ open, onClose, onPay }) {
   const { t } = useI18n()
+
   if (!open) return null
+
+  const desc =
+    t('ai_unlimit_desc') ||
+    'VIP+ снимает дневной лимит на аналитику, ускоряет обновление сигналов и открывает расширенные горизонты прогнозов.'
+
+  const benefitsRaw = t('ai_unlimit_benefits')
+  const benefits = Array.isArray(benefitsRaw) ? benefitsRaw : []
+
   return (
-    <div className="unlimit-overlay" role="dialog" aria-modal="true" aria-labelledby="unlimit-title">
-      <div className="unlimit-modal">
-        <h3 id="unlimit-title">{t('ai_unlimit_title')}</h3>
-        <p className="muted">{t('ai_unlimit_price')}</p>
-        <p className="desc">{t('ai_unlimit_desc')}</p>
-        <ul className="benefits">
-          {(t('ai_unlimit_benefits') || []).map((x, i) => <li key={i}>{x}</li>)}
-        </ul>
-        <div className="row">
-          <button className="btn primary" onClick={onPay}>{t('ai_unlimit_pay_now')}</button>
-          <button className="btn ghost" onClick={onClose}>{t('ai_unlimit_cancel')}</button>
+    <div
+      className="unlimit-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="unlimit-title"
+      onClick={onClose}
+    >
+      <div
+        className="unlimit-modal"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Внутренняя карточка — как панель */}
+        <div className="unlimit-card">
+          {/* Шапка */}
+          <header className="unlimit-header">
+            <h3 id="unlimit-title">
+              {t('ai_unlimit_title') || 'Remove Limit — VIP+'}
+            </h3>
+            <p className="unlimit-muted">
+              {t('ai_unlimit_price') || 'Unlock full access to AI Box without daily quota.'}
+            </p>
+          </header>
+
+          {/* Скроллимое тело */}
+          <div className="unlimit-body">
+            <p className="unlimit-desc">
+              {desc}
+            </p>
+
+            {!!benefits.length && (
+              <ul className="unlimit-benefits">
+                {benefits.map((x, i) => (
+                  <li key={i}>{x}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Футер с кнопками */}
+          <footer className="unlimit-footer">
+            <button
+              type="button"
+              className="unlimit-btn unlimit-btn-primary"
+              onClick={onPay}
+            >
+              {t('ai_unlimit_pay_now') || 'Pay $59.99'}
+            </button>
+            <button
+              type="button"
+              className="unlimit-btn unlimit-btn-ghost"
+              onClick={onClose}
+            >
+              {t('ai_unlimit_cancel') || 'Cancel'}
+            </button>
+          </footer>
         </div>
+
+        <style jsx>{`
+          .unlimit-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 16px 8px;
+            z-index: 9999;
+          }
+
+          /* Внешняя оболочка модалки — повторяет ширину .wrap */
+          .unlimit-modal {
+            width: 100%;
+            max-width: 1200px;
+            max-height: 100vh;
+            margin: 0 auto;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          /* Внутренняя карточка — сама “панель” модалки */
+          .unlimit-card {
+            position: relative;
+            width: 100%;
+            max-width: 1920px; /* сама карточка как аккуратная панель внутри колонки */
+            max-height: min(400px, 70vh - 48px);
+            background:
+              radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 55%),
+              rgba(9, 10, 15, 0.98);
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.65);
+            box-shadow:
+              0 18px 50px rgba(0, 0, 0, 0.9),
+              0 0 0 1px rgba(15, 23, 42, 0.9);
+            padding: 16px 18px 14px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+          }
+
+          .unlimit-header {
+            margin-bottom: 8px;
+          }
+
+          .unlimit-header h3 {
+            margin: 0 0 4px 0;
+            font-size: 19px;
+            font-weight: 800;
+          }
+
+          .unlimit-muted {
+            margin: 0;
+            opacity: 0.85;
+            font-size: 13px;
+          }
+
+          .unlimit-body {
+            flex: 1 1 auto;
+            margin-top: 10px;
+            padding-right: 6px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(148, 163, 184, 0.8) transparent;
+          }
+
+          .unlimit-body::-webkit-scrollbar {
+            width: 6px;
+          }
+
+          .unlimit-body::-webkit-scrollbar-track {
+            background: transparent;
+          }
+
+          .unlimit-body::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.8);
+            border-radius: 999px;
+          }
+
+          .unlimit-desc {
+            margin: 0;
+            font-size: 13px;
+            line-height: 1.6;
+            opacity: 0.96;
+          }
+
+          .unlimit-benefits {
+            margin: 12px 0 0 18px;
+            padding: 0;
+            font-size: 13px;
+            line-height: 1.5;
+          }
+
+          .unlimit-benefits li + li {
+            margin-top: 4px;
+          }
+
+          .unlimit-footer {
+            flex: 0 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+            justify-content: flex-end;
+          }
+
+          .unlimit-btn {
+            padding: 9px 16px;
+            border-radius: 999px;
+            border: 1px solid rgba(248, 250, 252, 0.14);
+            background: #020617;
+            color: #e5f0ff;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          .unlimit-btn-primary {
+            background: linear-gradient(135deg, #0ea5e9, #22c55e);
+            color: #f9fafb;
+            border-color: rgba(56, 189, 248, 0.7);
+            box-shadow:
+              0 0 0 1px rgba(56, 189, 248, 0.3),
+              0 10px 24px rgba(15, 23, 42, 0.9);
+          }
+
+          .unlimit-btn-ghost {
+            background: transparent;
+            border-color: rgba(148, 163, 184, 0.5);
+            color: #cbd5f5;
+          }
+
+          @media (max-width: 680px) {
+            .unlimit-overlay {
+              align-items: flex-end;
+              padding: 0 8px 8px;
+            }
+
+            .unlimit-modal {
+              max-width: 100%;
+            }
+
+            .unlimit-card {
+              max-width: 100%;
+              max-height: 60vh;
+              border-radius: 18px 18px 16px 16px;
+              padding: 14px 14px 12px;
+            }
+
+            .unlimit-header h3 {
+              font-size: 16px;
+            }
+
+            .unlimit-muted,
+            .unlimit-desc {
+              font-size: 12px;
+            }
+
+            .unlimit-benefits {
+              font-size: 12px;
+            }
+
+            .unlimit-footer {
+              justify-content: stretch;
+            }
+
+            .unlimit-btn {
+              flex: 1 1 auto;
+            }
+          }
+        `}</style>
       </div>
-      <style jsx>{`
-        .unlimit-overlay{
-          position: fixed; inset: 0; background: rgba(0, 0, 0, 0.48);
-          display: grid; place-items: center; z-index: 1000;
-        }
-        .unlimit-modal{
-          width: min(720px, calc(100% - 24px));
-          background: rgba(10,10,12,.96);
-          border: 1px solid rgba(255,255,255,.08);
-          border-radius: 14px; padding: 16px;
-          box-shadow: 0 12px 40px rgba(0,0,0,.45);
-        }
-        h3{ margin: 0 0 4px 0; }
-        .muted{ opacity: .8; margin: 0 0 10px 0; }
-        .desc{ opacity: .9; }
-        .benefits{ margin: 10px 0 14px 20px; }
-        .row{ display:flex; gap:10px; flex-wrap:wrap }
-        .btn{
-          padding:10px 14px; border-radius:10px; cursor:pointer;
-          border:1px solid rgba(255,255,255,.18); background:#0f1116; color:#eaf6ff;
-          font-weight:700;
-        }
-        .btn.primary{
-          border-color:#00d2ff; color:#baf1ff;
-          box-shadow: 0 0 0 1px rgba(0,210,255,.22), inset 0 0 18px rgba(0,210,255,.18);
-        }
-        .btn.ghost{ background:transparent; }
-      `}</style>
     </div>
   )
 }
@@ -1880,9 +2084,15 @@ export default function ExchangePage(){
       <SymbolTFSelector current={{symbol,tf}} symbols={symbols} onChange={(s,tf2)=>{setSymbol(s); setTf(tf2)}}/>
 
       <AIQuotaGate onOpenUnlimit={handleOpenUnlimit}>
+   
       <AIBox data={ai}/>
       </AIQuotaGate>
-
+      <UnlimitModal
+        open={openUnlimit}
+        onClose={() => setOpenUnlimit(false)}
+        onPay={handlePayClick}
+      />
+     
       <OrderBook symbol={symbol}/>
      {/* Реклама сразу после биржевого стакана (Order Book) */}
       <HomeBetweenBlocksAd
@@ -1903,13 +2113,8 @@ export default function ExchangePage(){
           <h2>{s.title}</h2>
           {Array.isArray(s.paras)? s.paras.map((p,i)=>(<p key={i} style={{whiteSpace:'pre-line'}}>{p}</p>)) : null}
         </section>
-      ))}
-
-      <UnlimitModal
-        open={openUnlimit}
-        onClose={() => setOpenUnlimit(false)}
-        onPay={handlePayClick}
-      />
+      ))} 
+ 
      {/* Реклама перед финальным блоком (маркиза + иконки) */}
      <HomeBetweenBlocksAd
        slotKey="exchange_before_footer"
