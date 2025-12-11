@@ -6447,7 +6447,7 @@ const UNLIMIT_EN = {
   ai_unlimit_btn: 'Remove limit',
   ai_unlimit_vip_badge: 'VIP+',
   ai_unlimit_title: 'Remove Limit — VIP+',
-  ai_unlimit_price: 'Price: $30 / month',
+  ai_unlimit_price: 'Price: $59.99 / month',
   ai_unlimit_desc:
     'Unlock 24/7 access to AI Box on this account and enable the extended VIP perimeter across the entire Quantum L7 ecosystem. The daily browser quota is disabled for 30 days after on-chain payment confirmation via NowPayments — activation is automatic, with no screenshots or messaging required. VIP status is synchronized between the web version, MiniApp and the Telegram bot: AI analytics without blockers, queue priority, access to media posting on the Forum (video/images/audio) and boosted QCoin mining. VIP gets a ×2 multiplier for time and quests, and content is scored by QuantumLCM-AI (quality/engagement/anti-spam/anti-sybil) and earns additional QCoin. Accruals are counted in the overall QCoin economy and prepare for the launch of the next-generation L7 blockchain — VIP receives elevated priority for distributions and an earlier withdrawal queue.',
   ai_unlimit_benefits: [
@@ -6470,7 +6470,7 @@ const UNLIMIT_EN = {
     'Status synchronization across devices: desktop/mobile/Telegram work in sync.',
     'Quota removal takes effect immediately — no session restart or additional confirmations.'
   ],
-  ai_unlimit_pay_now: 'Pay $30',
+  ai_unlimit_pay_now: 'Pay $59.99',
   ai_unlimit_cancel: 'Cancel',
   ai_unlimit_learn_more: 'Learn more',
   ai_unlimit_status_waiting: 'Waiting for payment confirmation…',
@@ -6487,7 +6487,7 @@ const UNLIMIT_RU = {
   ai_unlimit_btn: 'Снять лимит',
   ai_unlimit_vip_badge: 'VIP+',
   ai_unlimit_title: 'Снять лимит — VIP+',
-  ai_unlimit_price: 'Цена: $30 / месяц',
+  ai_unlimit_price: 'Цена: $59.99 / месяц',
   ai_unlimit_desc:
     'Откройте круглосуточный доступ к AI Box на этом аккаунте и подключите расширенный VIP-контур всей экосистемы Quantum L7. Дневная квота в браузере отключается на 30 дней после on-chain подтверждения платежа через NowPayments — активация проходит автоматически, без скриншотов и переписки. Статус VIP синхронизируется между веб-версией, MiniApp и Telegram-ботом: AI-аналитика без стопоров, приоритет в очередях, доступ к медиапостингу на Форуме (видео/изображения/аудио) и усиленный QCoin-майнинг. Для VIP действует X2 множитель по времени и квестам, а контент проходит скоринг QuantumLCM-AI (качество/вовлечённость/anti-spam/anti-sybil) и приносит дополнительные QCoin. Накопления учитываются в общей экономике QCoin и готовят к запуску L7-блокчейна нового поколения — VIP получает повышенный приоритет на распределения и более раннюю очередь вывода.',
   ai_unlimit_benefits: [
@@ -6510,7 +6510,7 @@ const UNLIMIT_RU = {
     'Синхронизация статуса между устройствами: десктоп/мобайл/Telegram работают согласованно.',
     'Отмена квоты действует сразу — без перезапуска сессии и доп. подтверждений.'
   ],
-  ai_unlimit_pay_now: 'Оплатить $30',
+  ai_unlimit_pay_now: 'Оплатить $59.99',
   ai_unlimit_cancel: 'Отмена',
   ai_unlimit_learn_more: 'Подробнее',
   ai_unlimit_status_waiting: 'Ждём подтверждение платежа…',
@@ -6527,7 +6527,7 @@ const UNLIMIT_UK = {
   ai_unlimit_btn: 'Зняти ліміт',
   ai_unlimit_vip_badge: 'VIP+',
   ai_unlimit_title: 'Зняти ліміт — VIP+',
-  ai_unlimit_price: 'Ціна: $30 / місяць',
+  ai_unlimit_price: 'Ціна: $59.99 / місяць',
   ai_unlimit_desc:
     'Відкрийте цілодобовий доступ до AI Box на цьому акаунті та підключіть розширений VIP-контур усієї екосистеми Quantum L7. Денна квота у браузері вимикається на 30 днів після on-chain підтвердження платежу через NowPayments — активація проходить автоматично, без скріншотів і листування. Статус VIP синхронізується між веб-версією, MiniApp і Telegram-ботом: AI-аналітика без стопів, пріоритет у чергах, доступ до медіапостингу на Форумі (відео/зображення/аудіо) та посилений QCoin-майнінг. Для VIP діє X2 множник за часом і квестами, а контент проходить скоринг QuantumLCM-AI (якість/залученість/anti-spam/anti-sybil) і приносить додаткові QCoin. Накопичення враховуються в загальній економіці QCoin і готують до запуску L7-блокчейна нового покоління — VIP отримує підвищений пріоритет у розподіленнях і більш ранню чергу виведення.',
   ai_unlimit_benefits: [
@@ -6550,7 +6550,7 @@ const UNLIMIT_UK = {
     'Синхронізація статусу між пристроями: десктоп/мобайл/Telegram працюють узгоджено.',
     'Скасування квоти діє одразу — без перезапуску сесії та додаткових підтверджень.'
   ],
-  ai_unlimit_pay_now: 'Сплатити $30',
+  ai_unlimit_pay_now: 'Сплатити $59.99',
   ai_unlimit_cancel: 'Скасувати',
   ai_unlimit_learn_more: 'Докладніше',
   ai_unlimit_status_waiting: 'Чекаємо підтвердження платежу…',
@@ -6568,7 +6568,7 @@ const UNLIMIT_ES = {
   ai_unlimit_btn: 'Eliminar límite',
   ai_unlimit_vip_badge: 'VIP+',
   ai_unlimit_title: 'Eliminar límite — VIP+',
-  ai_unlimit_price: 'Precio: $30 / mes',
+  ai_unlimit_price: 'Precio: $59.99 / mes',
   ai_unlimit_desc:
     'Obtén acceso las 24 horas al AI Box en esta cuenta y activa el perímetro VIP ampliado de todo el ecosistema Quantum L7. La cuota diaria en el navegador se desactiva durante 30 días después de la confirmación on-chain del pago a través de NowPayments — la activación se realiza automáticamente, sin capturas de pantalla ni correspondencia. El estado VIP se sincroniza entre la versión web, MiniApp y el bot de Telegram: analítica de IA sin interrupciones, prioridad en las colas, acceso a publicación multimedia en el Foro (video/imagenes/audio) y minería de QCoin mejorada. Para los VIP se aplica un multiplicador X2 en tiempo y misiones, y el contenido pasa la puntuación de QuantumLCM-AI (calidad/participación/anti-spam/anti-sybil) generando QCoin adicional. Las acumulaciones se tienen en cuenta en la economía general de QCoin y preparan el lanzamiento del blockchain L7 de nueva generación — el VIP recibe mayor prioridad en las distribuciones y una cola de retiro anticipada.',
   ai_unlimit_benefits: [
@@ -6591,7 +6591,7 @@ const UNLIMIT_ES = {
     'Sincronización de estado entre dispositivos: escritorio/móvil/Telegram funcionan de forma coordinada.',
     'La cancelación de la cuota entra en vigor de inmediato — sin reiniciar sesión ni confirmaciones adicionales.'
   ],
-  ai_unlimit_pay_now: 'Pagar $30',
+  ai_unlimit_pay_now: 'Pagar $59.99',
   ai_unlimit_cancel: 'Cancelar',
   ai_unlimit_learn_more: 'Más información',
   ai_unlimit_status_waiting: 'Esperando confirmación del pago…',
@@ -6609,7 +6609,7 @@ const UNLIMIT_ZH = {
   ai_unlimit_btn: '解除限额',
   ai_unlimit_vip_badge: 'VIP+',
   ai_unlimit_title: '解除限额 — VIP+',
-  ai_unlimit_price: '价格：$30 / 月',
+  ai_unlimit_price: '价格：$59.99 / 月',
   ai_unlimit_desc:
     '为此账号开启 AI Box 的 24/7 不间断访问，并接入 Quantum L7 全生态的扩展 VIP 边界。通过 NowPayments 完成链上支付确认后，浏览器中的每日配额将停用 30 天——激活全程自动完成，无需截图与往返沟通。VIP 状态在网页版、MiniApp 与 Telegram 机器人之间同步：AI 分析无阻塞、队列优先、可在论坛发布媒体（视频/图片/音频），并强化 QCoin 挖矿。VIP 享有 X2 时间与任务倍增，内容将通过 QuantumLCM-AI 评分（质量/参与度/anti-spam/anti-sybil）并获得额外 QCoin。累积计入 QCoin 整体经济，为下一代 L7 区块链上线做准备——VIP 在分配与提现队列中获得更高优先级与更早通道。',
   ai_unlimit_benefits: [
@@ -6632,7 +6632,7 @@ const UNLIMIT_ZH = {
     '跨设备状态同步：桌面/移动端/Telegram 协同工作。',
     '配额取消即时生效——无需重启会话或额外确认。'
   ],
-  ai_unlimit_pay_now: '支付 $30',
+  ai_unlimit_pay_now: '支付 $59.99',
   ai_unlimit_cancel: '取消',
   ai_unlimit_learn_more: '了解更多',
   ai_unlimit_status_waiting: '等待支付确认…',
@@ -6650,7 +6650,7 @@ const UNLIMIT_AR = {
   ai_unlimit_btn: 'إزالة الحد',
   ai_unlimit_vip_badge: 'VIP+',
   ai_unlimit_title: 'إزالة الحد — VIP+',
-  ai_unlimit_price: 'السعر: $30 / شهر',
+  ai_unlimit_price: 'السعر: $59.99 / شهر',
   ai_unlimit_desc:
     'افتح وصولاً على مدار الساعة إلى AI Box على هذا الحساب وفعّل نطاق VIP الموسّع عبر منظومة Quantum L7 بأكملها. يتم تعطيل الحصة اليومية في المتصفح لمدة 30 يوماً بعد تأكيد الدفع على السلسلة عبر NowPayments — تتم عملية التفعيل تلقائياً، دون لقطات شاشة أو مراسلات. تتزامن حالة VIP بين الإصدار الويب وMiniApp وروبوت Telegram: تحليلات الذكاء الاصطناعي بلا توقفات، أولوية في الطوابير، إمكانية نشر الوسائط في المنتدى (فيديو/صور/صوت) وتعدين QCoin معزّز. يحصل VIP على مُضاعِف X2 للوقت والمهام، ويخضع المحتوى لتقييم QuantumLCM-AI (الجودة/التفاعل/anti-spam/anti-sybil) ويُولّد QCoin إضافية. تُحتسب التراكمات ضمن اقتصاد QCoin العام وتُهيّئ لإطلاق بلوكتشين L7 من الجيل الجديد — يحصل VIP على أولوية أعلى في التوزيعات وطابور سحب أبكر.',
   ai_unlimit_benefits: [
@@ -6673,7 +6673,7 @@ const UNLIMIT_AR = {
     'مزامنة الحالة بين الأجهزة: سطح المكتب/الهاتف/Telegram تعمل بانسجام.',
     'إلغاء الحصة يسري فوراً — دون إعادة تشغيل الجلسة أو تأكيدات إضافية.'
   ],
-  ai_unlimit_pay_now: 'ادفع $30',
+  ai_unlimit_pay_now: 'ادفع $59.99',
   ai_unlimit_cancel: 'إلغاء',
   ai_unlimit_learn_more: 'اعرف المزيد',
   ai_unlimit_status_waiting: 'ننتظر تأكيد الدفع…',
@@ -6691,7 +6691,7 @@ const UNLIMIT_TR = {
   ai_unlimit_btn: 'Limiti kaldır',
   ai_unlimit_vip_badge: 'VIP+',
   ai_unlimit_title: 'Limiti kaldır — VIP+',
-  ai_unlimit_price: 'Fiyat: $30 / ay',
+  ai_unlimit_price: 'Fiyat: $59.99 / ay',
   ai_unlimit_desc:
     'Bu hesapta AI Box’a 7/24 erişim sağlayın ve Quantum L7 ekosisteminin tamamında genişletilmiş VIP çevresini etkinleştirin. NowPayments üzerinden zincir üzeri ödeme onayından sonra tarayıcıdaki günlük kota 30 gün boyunca devre dışı bırakılır — etkinleştirme otomatik olarak gerçekleşir, ekran görüntüsü veya yazışma gerekmez. VIP durumu web sürümü, MiniApp ve Telegram bot arasında senkronize edilir: kesintisiz AI analitiği, kuyruk önceliği, Forumda medya paylaşımı (video/görseller/ses) erişimi ve güçlendirilmiş QCoin madenciliği. VIP kullanıcıları için zaman ve görevlerde X2 çarpanı geçerlidir, içerik QuantumLCM-AI (kalite/katılım/anti-spam/anti-sybil) tarafından puanlanır ve ek QCoin kazandırır. Birikimler genel QCoin ekonomisine dahil edilir ve yeni nesil L7 blok zincirinin lansmanına hazırlanır — VIP, dağıtımlarda ve para çekme sıralarında daha yüksek öncelik elde eder.',
   ai_unlimit_benefits: [
@@ -6714,7 +6714,7 @@ const UNLIMIT_TR = {
     'Cihazlar arasında durum senkronizasyonu: masaüstü/mobil/Telegram uyumlu çalışır.',
     'Kota iptali anında geçerlidir — oturum yeniden başlatma veya ek onay gerekmez.'
   ],
-  ai_unlimit_pay_now: '$30 öde',
+  ai_unlimit_pay_now: '$59.99 öde',
   ai_unlimit_cancel: 'İptal',
   ai_unlimit_learn_more: 'Daha fazla bilgi',
   ai_unlimit_status_waiting: 'Ödeme onayı bekleniyor…',
