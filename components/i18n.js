@@ -5407,7 +5407,7 @@ const SUBSCRIBE_EN = {
   sub_plans_title: 'Plans',
 
   sub_vip_title: 'VIP+ — X2 QCoin, premium AI channel, media posting, L7 network priority',
-  sub_vip_price: 'Price: 30 USDT / month',
+  sub_vip_price: 'Price: 59.99 USD / month',
   sub_vip_desc: `
     • Unified VIP layer: MiniApp + Telegram + Web — status and limits everywhere, with no discrepancies or delays.<br/>
     • Forum mining: every 4 hours confirm your activity and record QCoin; VIP gets X2 to time and X2 quest multiplier.<br/>
@@ -5506,7 +5506,7 @@ const SUBSCRIBE_RU = {
   sub_plans_title: 'Тарифы',
 
   sub_vip_title: 'VIP+ — X2 QCoin, премиальный AI-канал, медиапостинг, приоритет L7-сети',
-  sub_vip_price: 'Цена: 30 USDT / месяц',
+  sub_vip_price: 'Цена: 59.99 USD / месяц',
   sub_vip_desc: `
     • Единый VIP-слой: MiniApp + Telegram + Веб — статус и лимиты везде, без расхождений и задержек.<br/>
     • Форум-майнинг: каждые 4 часа подтверждай активность и фиксируй QCoin; VIP получает X2 ко времени и X2 квест-мультипликатор.<br/>
@@ -5605,7 +5605,7 @@ const SUBSCRIBE_UK = {
   sub_plans_title: 'Тарифи',
 
   sub_vip_title: 'VIP+ — X2 QCoin, преміальний AI-канал, медіапостинг, пріоритет L7-мережі',
-  sub_vip_price: 'Ціна: 30 USDT / місяць',
+  sub_vip_price: 'Ціна: 59.99 USD / місяць',
   sub_vip_desc: `
     • Єдиний VIP-рівень: MiniApp + Telegram + Веб — статус і ліміти всюди, без розбіжностей і затримок.<br/>
     • Форум-майнінг: кожні 4 години підтверджуй активність і фіксуй QCoin; VIP отримує X2 до часу та X2 квест-мультиплікатор.<br/>
@@ -5705,7 +5705,7 @@ const SUBSCRIBE_TR = {
   sub_plans_title: 'Tarifeler',
 
   sub_vip_title: 'VIP+ — X2 QCoin, premium AI kanal, medya gönderimi, L7 ağı önceliği',
-  sub_vip_price: 'Fiyat: 30 USDT / ay',
+  sub_vip_price: 'Fiyat: 59.99 USD / ay',
   sub_vip_desc: `
     • Tekil VIP katmanı: MiniApp + Telegram + Web — statü ve limitler her yerde, sapma ve gecikme olmadan.<br/>
     • Forum madenciliği: her 4 saatte bir aktiviteyi onayla ve QCoin’i sabitle; VIP zaman için X2 ve görev/quest çarpanı için X2 alır.<br/>
@@ -5805,7 +5805,7 @@ const SUBSCRIBE_ES = {
   sub_plans_title: 'Planes',
 
   sub_vip_title: 'VIP+ — X2 QCoin, canal premium de IA, publicación multimedia, prioridad de la red L7',
-  sub_vip_price: 'Precio: 30 USDT / mes',
+  sub_vip_price: 'Precio: 59.99 USD / mes',
   sub_vip_desc: `
     • Capa VIP unificada: MiniApp + Telegram + Web — estado y límites en todas partes, sin discrepancias ni demoras.<br/>
     • Minería del foro: cada 4 horas confirma actividad y fija QCoin; el VIP recibe X2 en tiempo y X2 multiplicador de misiones.<br/>
@@ -5905,7 +5905,7 @@ const SUBSCRIBE_AR = {
   sub_plans_title: 'الخطط',
 
   sub_vip_title: 'VIP+ — X2 QCoin، قناة ذكاء اصطناعي مميزة، نشر وسائط، أولوية شبكة L7',
-  sub_vip_price: 'السعر: 30 USDT / شهرياً',
+  sub_vip_price: 'السعر: 59.99 USD / شهرياً',
   sub_vip_desc: `
     • طبقة VIP موحدة: MiniApp + تيليجرام + الويب — الحالة والحدود في كل مكان، بدون تأخير أو اختلاف.<br/>
     • تعدين المنتدى: كل 4 ساعات أكد النشاط وثبت QCoin؛ يحصل VIP على X2 في الوقت وX2 في مضاعف المهام.<br/>
@@ -6005,7 +6005,7 @@ const SUBSCRIBE_ZH = {
   sub_plans_title: '套餐',
 
   sub_vip_title: 'VIP+ — X2 QCoin，高级 AI 频道，媒体发布，L7 网络优先级',
-  sub_vip_price: '价格: 30 USDT / 月',
+  sub_vip_price: '价格: 59.99 USD / 月',
   sub_vip_desc: `
     • 统一的 VIP 层：MiniApp + Telegram + Web —— 各处同一状态与限额，无差异无延迟。<br/>
     • 论坛挖矿：每 4 小时确认活跃并记账 QCoin；VIP 获得时间 X2 与任务倍增 X2。<br/>
@@ -7040,7 +7040,7 @@ forum_vip_required: 'Потрібен VIP+',
 forum_vip_already_active: 'VIP уже активний',
 forum_vip_activated: 'VIP активовано',
 forum_vip_pending: 'Платіж обробляється…',
-
+forum_vip_title: 'VIP+',
 
   // Header / Search / Sort
   forum_search_ph: 'Введіть ключове слово…',
