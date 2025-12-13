@@ -56,7 +56,7 @@ export default function HeroAvatar({ videoSrc='/avatar.mp4', poster='/avatar.jpg
 
   useEffect(() => {
     let killed = false
-    const spawnEvery = 2500 / density
+    const spawnEvery = 4500 / density
     const spawn = () => {
       if (killed) return
       setItems(prev => {
@@ -71,7 +71,7 @@ export default function HeroAvatar({ videoSrc='/avatar.mp4', poster='/avatar.jpg
           floatx: rnd(10,22),
           op: rnd(.8,1).toFixed(2)
         }]
-        return next.slice(-Math.round(13 * density))
+        return next.slice(-Math.round(5 * density))
       })
       setTimeout(spawn, spawnEvery)
     }
