@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import Image from 'next/image'
+const ENABLE_HERO_VIDEO = 0
 const TICKERS = [
   'BTC','ETH','SOL','BNB','XRP','ADA','DOGE','TRX','TON','AVAX',
   'DOT','LINK','LTC','BCH','XLM','NEAR','HBAR','ICP','ARB','OP',
@@ -134,31 +134,37 @@ export default function HeroAvatar({ videoSrc='/avatar.mp4', poster='/avatar.jpg
 
   return (
     <div ref={wrapRef} className="scene" aria-hidden="true">
-      {/* видео-аватар: без loop, циклы контролируем сами */}
-      <video
-        ref={videoRef}
-        className="bg-video"
-        src={videoSrc}
-        {...(poster ? { poster } : {})}
-        autoPlay
-        muted
-        playsInline
-        onEnded={handleVideoEnded}
-        style={{ opacity: showPoster ? 0 : opacity, transition: 'opacity .5s ease' }}
-      />
-  
-      {/* постер-аватар поверх, включается после 3-х циклов видео */}
+      {/* ВИДЕО: рендерим только если включено тумблером */}
+      {ENABLE_HERO_VIDEO && (
+        <video
+          ref={videoRef}
+          className="bg-video"
+          src={videoSrc}
+          {...(poster ? { poster } : {})}
+          autoPlay
+          muted
+          playsInline
+          preload="metadata"
+          onEnded={handleVideoEnded}
+          style={{ opacity: showPoster ? 0 : opacity, transition: 'opacity .5s ease' }}
+        />
+      )}
+
+      {/* ПОСТЕР: всегда обычный <img>, без next/image оптимизации */}
       {poster && (
-        <Image
+        <img
           src={poster}
           alt=""
           className="bg-video"
-          aria-hidden="true"
-          fill
-          priority
+          aria-hidden="true" 
           style={{
-            opacity: showPoster ? opacity : 0,
+            opacity: (!ENABLE_HERO_VIDEO || showPoster) ? opacity : 0,
             transition: 'opacity .5s ease',
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
           }}
         />
       )}

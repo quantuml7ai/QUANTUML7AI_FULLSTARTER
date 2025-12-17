@@ -5,8 +5,8 @@ export default function HeroSection() {
   return (
     <section className="hero-wrap">
       <div className="hero-sticky">
-        {/* Видео видно целиком — fit="contain" */}
-        <HeroAvatar src="/avatar.mp4" fit="contain" />
+
+        <HeroAvatar videoSrc="/avatar.mp4" poster="/avatar.jpg" />
       </div>
 
       {/* Контент поверх */}
