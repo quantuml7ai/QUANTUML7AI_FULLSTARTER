@@ -1715,8 +1715,13 @@ h1, h2, h3, h4, h5, h6{
   justify-content:flex-end;         /* центрируем под орбитой */
   gap:16px;
   width:100%;
+ flex-wrap: wrap;
 }
-
+/* ✅ язык не сжимается */
+.nav-orbit-controls .planet-lang{
+  flex: 0 0 auto;
+  flex-shrink: 0;
+}
 /* на маленьких экранах поведение то же: всё справа,
    если хочешь по центру – тут можно поменять align-items / justify-content */
 @media (max-width:640px){
@@ -2000,8 +2005,11 @@ h1, h2, h3, h4, h5, h6{
     --orbit-font-base: clamp(17.85px, 5.67vw, 26.25px);
   }
 }
-
-
+@media (max-width: 680px){
+  .nav-orbit-controls .planet-lang{
+    margin-left: auto;        /* при переносе прижмётся вправо */
+  }
+}
 /* Убираем синий tap-highlight на орбите ТОЛЬКО на мобиле */
 @media (max-width: 680px){
   .nav-orbit,
