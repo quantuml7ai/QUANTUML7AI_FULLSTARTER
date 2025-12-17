@@ -1,4 +1,3 @@
-// components/AuthNavClient.jsx
 'use client'
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -8,6 +7,7 @@ import { useAccount } from 'wagmi'
 import { useI18n } from './i18n'
 
 const shortAddr = (a) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '')
+
 // Единая выборка корректного EVM-провайдера (EIP-1193 / EIP-6963)
 function pickEthereum() {
   try {
@@ -15,9 +15,9 @@ function pickEthereum() {
     const eth = window.ethereum
     if (!eth) return null
     if (Array.isArray(eth.providers) && eth.providers.length) {
-      const mm   = eth.providers.find(p => p && p.isMetaMask)
-      const brave= eth.providers.find(p => p && p.isBraveWallet)
-      const okx  = eth.providers.find(p => p && p.isOkxWallet)
+      const mm = eth.providers.find(p => p && p.isMetaMask)
+      const brave = eth.providers.find(p => p && p.isBraveWallet)
+      const okx = eth.providers.find(p => p && p.isOkxWallet)
       return (mm || brave || okx || eth)
     }
     return eth
@@ -27,7 +27,6 @@ function pickEthereum() {
 // ---------- helpers ----------
 function readCookie(name) {
   try {
-    // ВАЖНО: экранирования в RegExp должны быть ровно такие
     const m = document.cookie.match(
       new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()[\]\\/+^])/g, '\\$1') + '=([^;]*)')
     )
@@ -101,7 +100,6 @@ function safeOpenExternal(url) {
   }
 }
 
-
 function readAccountId() {
   try {
     if (typeof window === 'undefined') return null
@@ -147,6 +145,11 @@ export default function AuthNavClient() {
   // TG link status
   const [tgLinked, setTgLinked] = useState(false)
   const checkingRef = useRef(false)
+
+  // ===== BRIDGE refs (чтобы главная могла дергать без красноты/зависимостей) =====
+  const tgLinkedRef = useRef(false)
+  const linkFnRef = useRef(null)
+  const refreshFnRef = useRef(null)
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -224,7 +227,7 @@ export default function AuthNavClient() {
     if (typeof window === 'undefined') return
     const eth = pickEthereum()
     if (!eth || typeof eth.on !== 'function') return
-    const onAccountsChanged = (accs=[]) => {
+    const onAccountsChanged = (accs = []) => {
       if (!accs || accs.length === 0) {
         try {
           window.dispatchEvent(new Event('aiquota:flush'))
@@ -245,10 +248,10 @@ export default function AuthNavClient() {
     return () => {
       try { eth.removeListener && eth.removeListener('accountsChanged', onAccountsChanged) } catch {}
       try { eth.removeListener && eth.removeListener('disconnect', onDisconnect) } catch {}
-     }
+    }
   }, [])
 
-  // ===== Проверка статуса привязки TG (СТАБИЛИЗИРОВАНО) =====
+  // ===== Проверка статуса привязки TG (как было) =====
   const refreshTgLinkStatus = useCallback(async () => {
     if (checkingRef.current) return false
     checkingRef.current = true
@@ -283,7 +286,7 @@ export default function AuthNavClient() {
     return v && v !== 'auth_signin' ? v : 'Sign in'
   }, [isAuthedWallet, address, authMethod, t])
 
-  // ===== Связка Telegram (веб)
+  // ===== Связка Telegram (как было) =====
   async function onLinkTelegram() {
     try {
       const accountId = readAccountId() || address || null
@@ -295,21 +298,21 @@ export default function AuthNavClient() {
       }
 
       const r = await fetch('/api/telegram/link/start', {
-        method:'POST',
-        headers:{'content-type':'application/json'},
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ accountId })
       })
       const j = await r.json().catch(() => null)
       if (!j || !j.ok) { alert((j && j.error) || 'Error'); return }
 
       const botName = (process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || '@l7ai_bot')
-      const deepLink = j.deepLink || `https://t.me/${botName.replace('@','')}?start=ql7link_${j.token}`
+      const deepLink = j.deepLink || `https://t.me/${botName.replace('@', '')}?start=ql7link_${j.token}`
       safeOpenExternal(deepLink)
 
       // лёгкий поллинг статуса
       const deadline = Date.now() + 15000
-      const delay = (ms)=>new Promise(r=>setTimeout(r,ms))
-      while(Date.now() < deadline) {
+      const delay = (ms) => new Promise(r => setTimeout(r, ms))
+      while (Date.now() < deadline) {
         await delay(1200)
         const linked = await refreshTgLinkStatus()
         if (linked) break
@@ -318,6 +321,44 @@ export default function AuthNavClient() {
       alert('Network error')
     }
   }
+
+  // ===== BRIDGE: публикуем состояние + функции в window =====
+  // 1) синхронизируем ref + шлём событие для главной
+  useEffect(() => {
+    tgLinkedRef.current = !!tgLinked
+    try {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('tg:link-status', { detail: { linked: !!tgLinked } }))
+      }
+    } catch {}
+  }, [tgLinked])
+
+  // 2) держим актуальные функции в ref
+  useEffect(() => {
+    linkFnRef.current = onLinkTelegram
+    refreshFnRef.current = refreshTgLinkStatus
+  })
+
+  // 3) публикуем глобальные хелперы один раз
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    window.__QL7_TG_LINK_START__ = () => {
+      try { linkFnRef.current && linkFnRef.current() } catch {}
+    }
+    window.__QL7_TG_LINK_REFRESH__ = async () => {
+      try { return await (refreshFnRef.current ? refreshFnRef.current() : false) } catch { return false }
+    }
+    window.__QL7_TG_LINK_GET__ = () => {
+      try { return !!tgLinkedRef.current } catch { return false }
+    }
+
+    return () => {
+      try { delete window.__QL7_TG_LINK_START__ } catch {}
+      try { delete window.__QL7_TG_LINK_REFRESH__ } catch {}
+      try { delete window.__QL7_TG_LINK_GET__ } catch {}
+    }
+  }, [])
 
   // ===== Мини-апп: прячем auth-UI ТОЛЬКО когда есть авторизация
   if (isTMA && tmaAuthed) return null
@@ -334,7 +375,7 @@ export default function AuthNavClient() {
         data-auth={isAuthedWallet ? 'true' : 'false'}
         title={isAuthedWallet ? (t('auth_account') || 'Account') : (t('auth_signin') || 'Sign in')}
         translate="no"
-     >
+      >
         {authLabel}
       </button>
 
@@ -347,8 +388,8 @@ export default function AuthNavClient() {
           role="button"
           tabIndex={0}
           style={{ width: 43, height: 43, cursor: 'pointer', display: 'inline-block', pointerEvents: 'auto' }}
-          onClick={(e) => { e.preventDefault(); onLinkTelegram(); }}
-          onTouchEnd={(e) => { e.preventDefault(); onLinkTelegram(); }}
+          onClick={(e) => { e.preventDefault(); onLinkTelegram() }}
+          onTouchEnd={(e) => { e.preventDefault(); onLinkTelegram() }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onLinkTelegram() }
           }}

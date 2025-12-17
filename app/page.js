@@ -1,5 +1,3 @@
-// app/page.js
-
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
@@ -130,9 +128,45 @@ export default function Home() {
   const { t } = useI18n() 
   const marqueeRef = useRef(null)
 
+  // === TG link status for hero button ===
+  const [tgLinked, setTgLinked] = useState(false)
+
   useEffect(() => {
     if (marqueeRef.current) {
       marqueeRef.current.innerHTML += marqueeRef.current.innerHTML
+    }
+  }, [])
+
+  // === слушаем статус связки, который сообщает AuthNavClient ===
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const onStatus = (ev) => {
+      try { setTgLinked(!!ev?.detail?.linked) } catch {}
+    }
+    window.addEventListener('tg:link-status', onStatus)
+
+    // если AuthNavClient уже положил кэш-статус — заберём сразу
+    try {
+      const get = window.__QL7_TG_LINK_GET__
+      if (typeof get === 'function') setTgLinked(!!get())
+    } catch {}
+
+    // попросим AuthNavClient обновить статус (когда он появится)
+    let tries = 0
+    const tmr = setInterval(() => {
+      tries += 1
+      const refresh = window.__QL7_TG_LINK_REFRESH__
+      if (typeof refresh === 'function') {
+        try { refresh() } catch {}
+        clearInterval(tmr)
+      }
+      if (tries > 25) clearInterval(tmr) // ~2.5 сек
+    }, 100)
+
+    return () => {
+      window.removeEventListener('tg:link-status', onStatus)
+      clearInterval(tmr)
     }
   }, [])
  
@@ -169,8 +203,6 @@ export default function Home() {
           />
         </section>
       )
-
-
     }
   })
 
@@ -189,14 +221,27 @@ export default function Home() {
         <p className="prewrap">{t('hero_subtitle')}</p>
 
         <div className="row">
-          <a
+          {/* заменили только эту кнопку */}
+          <button
+            type="button"
             className="btn"
-            href={t('links').bot}
-            target="_blank"
-            rel="noopener noreferrer"
+            onClick={() => {
+              // если уже связано — связку НЕ запускаем,
+              // ведём на бота как и раньше
+              if (tgLinked) {
+                const url = t('links')?.bot
+                if (url) window.open(url, '_blank', 'noopener,noreferrer')
+                return
+              }
+
+              // если не связано — триггерим связку из AuthNavClient
+              const fn = typeof window !== 'undefined' && window.__QL7_TG_LINK_START__
+              if (typeof fn === 'function') fn()
+            }}
           >
-            {t('hero_cta')}
-          </a>
+            {tgLinked ? t('tg_link_done') : t('tg_link_cta')}
+          </button>
+
           <Link className="qcoinLabel" href="/forum">
             {t('QCoin')}
           </Link>
@@ -259,6 +304,7 @@ export default function Home() {
         </Link>
       </div>
 
+      {/* ✅ стили ВОЗВРАЩЕНЫ 1:1 как у тебя */}
       <style jsx>{`
         .center-wrap { display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%;}
         .panel { width:100%; max-width:960px; text-align:center; }

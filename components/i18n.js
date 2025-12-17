@@ -45654,6 +45654,8 @@ not_robot_timer_label:'Time remaining ⏳',
 not_robot_success:'Verification complete. Access granted.',
 not_robot_error_timeout:'Verification time has expired ⏰ Please try again later.',
 not_robot_error_wrong_coin:'Incorrect coin selection ❌ Please try again.',
+tg_link_cta: 'Link with Telegram',
+tg_link_done: 'Linked with Telegram',
 
 }
 const ROBOT_RU = {
@@ -45665,6 +45667,8 @@ not_robot_timer_label:'Осталось времени ⏳',
 not_robot_success:'Проверка пройдена. Доступ открыт.',
 not_robot_error_timeout:'Время проверки истекло ⏰ Попробуйте позже.',
 not_robot_error_wrong_coin:'Неверный выбор монеты ❌ Попробуйте ещё раз.',
+tg_link_cta: 'Связать с Telegram',
+tg_link_done: 'Связано с Telegram',
 
 }
 const ROBOT_UK = {
@@ -45676,6 +45680,8 @@ not_robot_timer_label:'Залишилось часу ⏳',
 not_robot_success:'Перевірку пройдено. Доступ відкрито.',
 not_robot_error_timeout:'Час перевірки вичерпано ⏰ Спробуйте пізніше.',
 not_robot_error_wrong_coin:'Неправильний вибір монети ❌ Спробуйте ще раз.',
+tg_link_cta: 'Звʼязати з Telegram',
+tg_link_done: 'Повʼязано з Telegram',
 
 }
 const ROBOT_ES = {
@@ -45687,6 +45693,8 @@ not_robot_timer_label:'Tiempo restante ⏳',
 not_robot_success:'Verificación completada. Acceso concedido.',
 not_robot_error_timeout:'El tiempo de verificación ha expirado ⏰ Inténtelo más tarde.',
 not_robot_error_wrong_coin:'Selección incorrecta de moneda ❌ Inténtelo de nuevo.',
+tg_link_cta: 'Vincular con Telegram',
+tg_link_done: 'Vinculado con Telegram',
 
 }
 const ROBOT_ZH = {
@@ -45698,6 +45706,8 @@ not_robot_timer_label:'剩余时间 ⏳',
 not_robot_success:'验证通过。访问已开放。',
 not_robot_error_timeout:'验证时间已结束 ⏰ 请稍后再试。',
 not_robot_error_wrong_coin:'币种选择错误 ❌ 请重试。',
+tg_link_cta: '绑定 Telegram',
+tg_link_done: '已绑定 Telegram',
 
 }
 const ROBOT_AR = {
@@ -45709,6 +45719,8 @@ not_robot_timer_label:'الوقت المتبقي ⏳',
 not_robot_success:'تم التحقق بنجاح. تم فتح الوصول.',
 not_robot_error_timeout:'انتهى وقت التحقق ⏰ يرجى المحاولة لاحقًا.',
 not_robot_error_wrong_coin:'اختيار عملة غير صحيح ❌ يرجى المحاولة مرة أخرى.',
+tg_link_cta: 'الربط مع تيليجرام',
+tg_link_done: 'تم الربط مع تيليجرام',
 
 }
 const ROBOT_TR = {
@@ -45720,6 +45732,8 @@ not_robot_timer_label:'Kalan süre ⏳',
 not_robot_success:'Doğrulama başarılı. Erişim açıldı.',
 not_robot_error_timeout:'Doğrulama süresi doldu ⏰ Lütfen daha sonra tekrar deneyin.',
 not_robot_error_wrong_coin:'Yanlış coin seçildi ❌ Lütfen tekrar deneyin.',
+tg_link_cta: 'Telegram ile bağla',
+tg_link_done: 'Telegram ile bağlı',
 
 }
 
