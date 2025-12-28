@@ -7,7 +7,7 @@ import { useI18n } from '../../components/i18n';
 import { useRouter } from 'next/navigation';
 
 /* ======================= CAMPAIGN META ======================= */
-
+const AD_LABEL_FONT_SIZE_PX = 20;
 const CAMPAIGN_ID = 'forum_ads_v1';
 const FALLBACK_CAMPAIGN_SEED = 'forum_ads_seed';
 
@@ -1264,7 +1264,10 @@ export function AdCard({ url, slotKind, nearId }) {
             }}
           >
             <div className="flex items-center gap-2">
-              <span className="qcoinLabel">
+            <span
+                className="qcoinLabel"
+                style={{ fontSize: `${AD_LABEL_FONT_SIZE_PX}px` }}
+             >
                 {label}
               </span>
               <span className="truncate max-w-[140px] font-medium">
