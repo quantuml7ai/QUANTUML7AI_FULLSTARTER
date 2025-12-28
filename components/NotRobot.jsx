@@ -452,7 +452,7 @@ export default function NotRobot() {
 
         .rb-card {
           position: relative;
-          max-width: 400px;
+          max-width: 350px;
           width: 200%;
           background: radial-gradient(
                 circle at top left,
