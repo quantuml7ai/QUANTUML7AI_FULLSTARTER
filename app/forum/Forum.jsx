@@ -4327,8 +4327,11 @@ function PostCard({
 
   const IMG_RE = /^(?:\/uploads\/[A-Za-z0-9._\-\/]+?\.(?:webp|png|jpe?g|gif)|https?:\/\/[^\s]+?\.(?:webp|png|jpe?g|gif))(?:[?#].*)?$/i;
   // видео: blob: (локальный превью) или публичные ссылки /video-*.webm|.mp4 (и любые .mp4)
+
+  // видео: blob: (локальный превью) или публичные ссылки /video-*.webm|.mp4 (и любые .mp4)
   const VIDEO_RE =
     /^(?:blob:[^\s]+|https?:\/\/[^\s]+(?:\/video-\d+\.(?:webm|mp4)|\.mp4)(?:[?#].*)?)$/i;
+
   // YouTube: обычные watch + короткие youtu.be
   const YT_RE =
     /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{6,})/i;
@@ -4336,7 +4339,8 @@ function PostCard({
   // TikTok: базовые форматы ссылок на видео
   const TIKTOK_RE =
     /^(?:https?:\/\/)?(?:www\.)?tiktok\.com\/(@[\w.\-]+\/video\/(\d+)|t\/[A-Za-z0-9]+)(?:[?#].*)?$/i;
-  // аудио: поддерживаем https и blob: (blob используется только локально, но подстрахуемся)
+
+// аудио: поддерживаем https и blob: (blob используется только локально, но подстрахуемся)
   const AUDIO_EXT = /\.(?:webm|ogg|mp3|m4a|wav)(?:$|[?#])/i;
   const isAudioLine = (s) => {
     const t = String(s).trim();
@@ -4674,8 +4678,8 @@ function PostCard({
             try {
               const u = new URL(src);
               // Формат /@user/video/1234567890
-              const m = u.pathname.match(/\/video\/(\d+)/);
-              if (m) videoId = m[1];
+               const m = u.pathname.match(/\/video\/(\d+)/);
+               if (m) videoId = m[1];
             } catch {}
             if (!videoId) return null;
 
@@ -7688,60 +7692,108 @@ const onFilesChosen = React.useCallback(async (e) => {
 // === VIDEO FEED: состояние + хелперы =====================
 const [videoFeedOpen, setVideoFeedOpen] = React.useState(false);
 const [videoFeed, setVideoFeed] = React.useState([]);
+const [feedSort, setFeedSort] = React.useState('new'); // new/top/likes/views/replies
 
-/** URL указывает на видео? — учитываем blob:, vercel-storage и классические расширения */
-function isVideoUrl(url) {
-  const s = String(url || '').trim();
+// ВАЖНО: в ленте нужно уметь находить ссылки внутри текста (даже если не отдельной строкой)
+const FEED_URL_RE = /(https?:\/\/[^\s<>'")]+)/ig;
+
+function extractUrlsFromText(text) {
+  const s = String(text || '');
+  if (!s) return [];
+  const out = [];
+ try {
+    for (const m of s.matchAll(FEED_URL_RE)) {
+      const u = String(m?.[1] || '').trim();
+      if (u) out.push(u);
+    }
+  } catch {}
+  return out;
+}
+
+function isVideoUrl(u) {
+  const s = String(u || '').trim();
   if (!s) return false;
-  // одиночный токен
-  if (!/^\S+$/.test(s)) return false;
 
-  if (/^blob:/.test(s)) return true; // локальный превью
-
-  // обычные расширения
+  // локальный превью
+  if (/^blob:/i.test(s)) return true;
+  // прямые видео по расширениям
   if (/\.(webm|mp4|mov|m4v|mkv)(?:$|[?#])/i.test(s)) return true;
 
   // filename=video.ext
-  if (/[?&]filename=.*\.(webm|mp4|mov|m4v|mkv)(?:$|[&#])/i.test(s)) return true;
+  if (/[?&]filename=[^&#]+\.(webm|mp4|mov|m4v|mkv)(?:$|[&#])/i.test(s)) return true;
 
-  // публичные vercel-storage / твои пути без расширений
+  // твои/публичные источники без расширения (vercel storage, upload endpoints и т.п.)
   if (/vercel[-]?storage|vercel[-]?blob|\/uploads\/video|\/forum\/video|\/api\/forum\/uploadVideo/i.test(s)) return true;
 
   return false;
 }
 
-/** пост содержит видео? — сканируем поля, вложения и КАЖДУЮ строку текста */
-function isVideoPost(p) {
+function isImageUrl(u) {
+  const s = String(u || '').trim();
+  if (!s) return false;
+  return /\.(png|jpe?g|gif|webp|avif|svg)(?:$|[?#])/i.test(s);
+}
+
+function isAudioUrl(u) {
+  const s = String(u || '').trim();
+  if (!s) return false;
+  // если нужно, webm можно оставить (у вас уже есть audio/webm записи)
+  return /\.(ogg|mp3|m4a|wav|webm)(?:$|[?#])/i.test(s) || /\/uploads\/audio\//i.test(s) || /\/forum\/voice/i.test(s);
+}
+
+function isYouTubeUrl(u) {
+  const s = String(u || '').trim();
+  if (!s) return false;
+  // watch?v= / youtu.be / shorts / embed
+  return /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)[A-Za-z0-9_-]{6,}/i.test(s);
+}
+
+function isTikTokUrl(u) {
+  const s = String(u || '').trim();
+  if (!s) return false;
+  // www.tiktok.com/@.../video/ID  +  vm.tiktok.com/...  +  m.tiktok.com/...
+  return /^(?:https?:\/\/)?(?:(?:www|m)\.)?tiktok\.com\/.+/i.test(s) || /^(?:https?:\/\/)?vm\.tiktok\.com\/.+/i.test(s);
+}
+
+function isMediaUrl(u) {
+  return isVideoUrl(u) || isImageUrl(u) || isAudioUrl(u) || isYouTubeUrl(u) || isTikTokUrl(u);
+}
+
+/** пост содержит медиа? (видео/аудио/картинки/YouTube/TikTok) */
+function isMediaPost(p) {
   if (!p) return false;
 
-  // явные поля
-  if (p.type === 'video') return true;
-  if (p.videoUrl || p.posterUrl) return true;
-  if (p.mime && String(p.mime).toLowerCase().startsWith('video/')) return true;
-  if (p.media && (p.media.type === 'video' || p.media.videoUrl)) return true;
-
+  // явные поля (если у вас есть такие структуры)
+  if (p.type === 'video' || p.type === 'audio' || p.type === 'image') return true;
+  if (p.videoUrl || p.posterUrl || p.audioUrl || p.imageUrl) return true;
+  if (p.mime && /^(video|audio|image)\//i.test(String(p.mime))) return true;
+  if (p.media && (p.media.type === 'video' || p.media.type === 'audio' || p.media.type === 'image' || p.media.videoUrl || p.media.audioUrl || p.media.imageUrl)) return true;
+ 
   // контейнеры вложений
   if (Array.isArray(p.files) && p.files.some(f =>
-    f?.type === 'video' ||
-    String(f?.mime || '').toLowerCase().startsWith('video/') ||
-    isVideoUrl(f?.url)
+    ['video','audio','image'].includes(String(f?.type || '').toLowerCase()) ||
+    /^(video|audio|image)\//i.test(String(f?.mime || '')) ||
+    isMediaUrl(f?.url)
   )) return true;
 
   if (Array.isArray(p.attachments) && p.attachments.some(a =>
-    a?.type === 'video' ||
-    String(a?.mime || '').toLowerCase().startsWith('video/') ||
-    a?.videoUrl || isVideoUrl(a?.url)
+    ['video','audio','image'].includes(String(a?.type || '').toLowerCase()) ||
+    /^(video|audio|image)\//i.test(String(a?.mime || '')) ||
+    a?.videoUrl || a?.audioUrl || a?.imageUrl || isMediaUrl(a?.url)
   )) return true;
 
-  // текст/боди — важно: ссылки идут КАЖДОЙ СВОЕЙ строкой
+  // текст/боди — вытаскиваем URL в любом месте строки
   const text = String(p.text ?? p.body ?? '').trim();
   if (text) {
+    const urls = extractUrlsFromText(text);
+    if (urls.some(isMediaUrl)) return true;
+    // на всякий: если человек вставил прямую ссылку отдельной строкой
     const lines = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-    if (lines.some(isVideoUrl)) return true;
+    if (lines.some(isMediaUrl)) return true;
   }
 
   // html как запасной вариант
-  if (typeof p.html === 'string' && /<\s*video[\s>]/i.test(p.html)) return true;
+  if (typeof p.html === 'string' && (/<\s*video[\s>]/i.test(p.html) || /<\s*img[\s>]/i.test(p.html) || /<\s*audio[\s>]/i.test(p.html) || /tiktok\.com|youtube\.com|youtu\.be/i.test(p.html))) return true;
 
   return false;
 }
@@ -7786,8 +7838,33 @@ function buildAndSetVideoFeed() {
     all.push(p);
   }
 
-  const only = all.filter(isVideoPost)
-                  .sort((a,b) => Number(b?.ts || 0) - Number(a?.ts || 0));
+  // replies count map: parentId -> count
+  const repliesMap = new Map();
+  for (const p of all) {
+    const pid = p?.parentId;
+    if (!pid) continue;
+    const key = String(pid);
+    repliesMap.set(key, (repliesMap.get(key) || 0) + 1);
+  }
+
+  const score = (p) => {
+    const likes = Number(p?.likes || 0);
+    const views = Number(p?.views || 0);
+    const replies = repliesMap.get(String(p?.id)) || 0;
+    switch (feedSort) {
+      case 'new':     return Number(p?.ts || 0);
+      case 'likes':   return likes;
+      case 'views':   return views;
+      case 'replies': return replies;
+      case 'top':
+      default:
+        return (likes * 2) + replies + Math.floor(views * 0.2);
+    }
+  };
+
+  const only = all
+    .filter(isMediaPost)
+    .sort((a,b) => (score(b) - score(a)) || (Number(b?.ts||0) - Number(a?.ts||0)));
 
   setVideoFeed(only);
 }
@@ -7811,7 +7888,7 @@ React.useEffect(() => {
   if (!videoFeedOpen) return;
   buildAndSetVideoFeed();
   // зависимости: любые сигналы обновления снапшота/постов у тебя в состоянии
-}, [videoFeedOpen, data?.rev, data?.posts, data?.messages, data?.topics, allPosts]);
+}, [videoFeedOpen, data?.rev, data?.posts, data?.messages, data?.topics, allPosts, feedSort]);
 
 // [VIDEO_FEED:OPEN_THREAD] — открыть полноценную ветку из ленты
 function openThreadFromPost(p){
@@ -8717,7 +8794,9 @@ function pickAdUrlForSlot(slotKey, slotKind) {
     className="item w-full text-left mb-1"
 // [SORT_MENU:CLICK]
 onClick={()=>{
-  if (sel) setPostSort(k); else setTopicSort(k);
+  if (videoFeedOpen) setFeedSort(k);
+  else if (sel) setPostSort(k);
+  else setTopicSort(k);
   setSortOpen(false);
 }}
 
