@@ -4299,6 +4299,37 @@ function PostCard({
   // берём locale из того же хука, что и в новостном хабе
   const { locale } = useI18n();
 
+  // ===== PORTRAIT (9:16 etc) MAX HEIGHT TUNING =====
+ // Настраиваешь ТОЛЬКО эти две константы:
+  const PORTRAIT_MAX_H_DESKTOP_PX = 520; // ← max высота (десктоп)
+  const PORTRAIT_MAX_H_MOBILE_PX  = 360; // ← max высота (мобила)
+
+  const getPortraitMaxH = () => {
+    if (typeof window === 'undefined') return PORTRAIT_MAX_H_DESKTOP_PX;
+    const isMobile = window.matchMedia?.('(max-width: 640px)')?.matches;
+    return isMobile ? PORTRAIT_MAX_H_MOBILE_PX : PORTRAIT_MAX_H_DESKTOP_PX;
+  };
+
+  // что считаем "портретом": высота заметно больше ширины
+  const isPortraitRatio = (w, h) => !!w && !!h && (h / w) >= 1.15;
+
+  // Применяем ограничение высоты ТОЛЬКО для портретных, без кропа
+  const applyPortraitClamp = (el, w, h) => {
+    if (!el) return;
+    if (isPortraitRatio(w, h)) {
+      const mh = getPortraitMaxH();
+      el.style.maxHeight = mh + 'px';
+      el.style.width = 'auto';
+      el.style.maxWidth = '100%';
+      el.style.margin = '0 auto';
+    } else {
+      // для обычных (горизонтальных) — как было
+      el.style.maxHeight = '';
+      el.style.width = '100%';
+      el.style.maxWidth = '100%';
+      el.style.margin = '0';
+    }
+  };
   // сниппет текста родителя (до 40 символов)
   const parentSnippet = (() => {
     const raw = p?.parentText || p?._parentText || '';
@@ -4587,7 +4618,26 @@ function PostCard({
               border:'1px solid rgba(140,170,255,.25)', borderRadius:10, overflow:'hidden'
             }}
             onClick={(e)=>{ e.stopPropagation(); setLightbox({ open:true, src, idx:i, list:imgLines }); }}>
-              <Image src={src} alt="" width={1200} height={800} unoptimized loading="lazy" style={{ display:'block', width:'100%', height:'auto', objectFit:'contain', borderRadius:6 }}/>
+             <Image
+                src={src}
+                alt=""
+               width={1200}
+                height={800}
+                unoptimized
+                loading="lazy"
+                onLoadingComplete={(img) => {
+                  const w = img?.naturalWidth || 0;
+                  const h = img?.naturalHeight || 0;
+                  applyPortraitClamp(img, w, h);
+                }}
+                style={{
+                  display:'block',
+                  width:'100%',
+                  height:'auto',
+                  objectFit:'contain',
+                  borderRadius:6
+                }}
+              />
             </figure>
           ))}
         </div>
@@ -4614,6 +4664,8 @@ function PostCard({
             if (w && h) {
               v.style.aspectRatio = `${w} / ${h}`;
             }
+            // портретное видео — ограничиваем max-height, без кропа (contain)
+            applyPortraitClamp(v, w, h);
             v.style.height = 'auto';
           }}
           style={{
@@ -4706,7 +4758,12 @@ function PostCard({
                     display:'block',
                     width:'100%',
                     aspectRatio:'9 / 16',
-                    borderRadius:6
+                    borderRadius:6,
+                    maxHeight: getPortraitMaxH() + 'px',
+                    height: 'auto',
+                    width: 'auto',
+                    maxWidth: '100%',
+                    margin: '0 auto'
                   }}
                 />
               </div>
@@ -5638,7 +5695,131 @@ export default function Forum(){
       io.disconnect();
     };
   }, []);
+  // === Shorts-like autoplay: play when in focus, pause when out ===
+  // Требования:
+  // - когда видео становится "главным" в зоне видимости → autoplay (muted)
+  // - когда уходит из внимания/скроллим дальше → pause
+  // - одновременно играет только одно (у тебя уже есть глобальный play-controller; тут дополнительно контролим по IO)
+  useEffect(() => {
+    if (!isBrowser()) return;
 
+    const selector = 'video[data-forum-video="post"]';
+
+    const ratios = new Map(); // videoEl -> intersectionRatio
+    let active = null;        // текущий "главный" видео-элемент
+
+    const safePause = (v) => {
+      if (!(v instanceof HTMLVideoElement)) return;
+      try { v.pause(); } catch {}
+    };
+
+    const safePlay = (v) => {
+      if (!(v instanceof HTMLVideoElement)) return;
+      try {
+        // autoplay в браузерах работает стабильно только muted
+        v.muted = true;
+        v.playsInline = true;
+        // можно оставить loop как "шортсы"
+        // если не хочешь луп — убери следующую строку
+        v.loop = true;
+        const p = v.play?.();
+        if (p && typeof p.catch === 'function') p.catch(() => {});
+      } catch {}
+    };
+
+    const pickMostVisible = () => {
+      let best = null;
+      let bestRatio = 0;
+      for (const [el, r] of ratios.entries()) {
+        if (!(el instanceof HTMLVideoElement)) continue;
+        if (r > bestRatio) {
+          bestRatio = r;
+          best = el;
+        }
+      }
+      return { el: best, ratio: bestRatio };
+    };
+
+    // fallback без IO: ничего не автоплеим (иначе будет играть всё подряд)
+    if (!('IntersectionObserver' in window)) {
+      return;
+    }
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        // обновляем ratios
+        for (const entry of entries) {
+          const el = entry.target;
+          if (!(el instanceof HTMLVideoElement)) continue;
+
+          const r = entry.isIntersecting ? (entry.intersectionRatio || 0) : 0;
+          if (r <= 0) {
+            ratios.delete(el);
+            // если ушёл активный — сразу пауза
+            if (active === el) {
+              safePause(el);
+              active = null;
+            } else {
+              // чтобы при скролле вниз не оставались играющие “вне экрана”
+              safePause(el);
+            }
+          } else {
+            ratios.set(el, r);
+          }
+        }
+
+        // выбираем самый видимый
+        const { el: candidate, ratio } = pickMostVisible();
+
+        // порог "в фокусе" — можно крутить
+        const FOCUS_RATIO = 0.60;
+
+        if (!candidate || ratio < FOCUS_RATIO) {
+          if (active) {
+            safePause(active);
+            active = null;
+          }
+          return;
+        }
+
+        if (active && active !== candidate) {
+          safePause(active);
+        }
+
+        active = candidate;
+        safePlay(candidate);
+      },
+      {
+        // thresholds чтобы чаще обновлялось при плавном скролле
+        threshold: [0, 0.15, 0.35, 0.6, 0.85, 1],
+        // чуть “подталкиваем” фокус к центру экрана (можно подправить)
+        rootMargin: '0px 0px -20% 0px',
+      }
+    );
+
+    const observeAll = () => {
+      try {
+        document.querySelectorAll(selector).forEach((v) => {
+          if (!(v instanceof HTMLVideoElement)) return;
+          io.observe(v);
+        });
+      } catch {}
+    };
+
+    observeAll();
+
+    // если у тебя лента динамически меняется (допостинг/подгрузка) —
+    // можно иногда переобозначать наблюдение (дешево)
+    const tick = setInterval(observeAll, 1500);
+
+    return () => {
+      clearInterval(tick);
+      io.disconnect();
+      if (active) safePause(active);
+      active = null;
+      ratios.clear();
+    };
+  }, []);
  
 const requireAuthStrict = async () => {
   const cur = readAuth();
