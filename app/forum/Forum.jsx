@@ -4302,7 +4302,7 @@ function PostCard({
   // ===== PORTRAIT (9:16 etc) MAX HEIGHT TUNING =====
  // Настраиваешь ТОЛЬКО эти две константы:
   const PORTRAIT_MAX_H_DESKTOP_PX = 520; // ← max высота (десктоп)
-  const PORTRAIT_MAX_H_MOBILE_PX  = 520; // ← max высота (мобила)
+  const PORTRAIT_MAX_H_MOBILE_PX  = 570; // ← max высота (мобила)
 
   const getPortraitMaxH = () => {
     if (typeof window === 'undefined') return PORTRAIT_MAX_H_DESKTOP_PX;
