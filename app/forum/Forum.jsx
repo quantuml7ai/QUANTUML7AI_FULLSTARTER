@@ -4536,17 +4536,25 @@ function PostCard({
     } catch {}
   };
 
-  return (
-    <article
-      className="item qshine"
-      onClick={(e) => {
-        if (e.target.closest('button,.tag,a,svg')) return;
-        onOpenThread?.(p);
-      }}
-      role="article"
-      aria-label="Пост форума"
-      style={{ position: 'relative' }}
-    >
+// 👇 добавь рядом с PostCard (прямо над return), как константу
+const NO_THREAD_OPEN_SELECTOR =
+  'button,.tag,a,svg,' +
+  'video,audio,iframe,' +                 // медиа-элементы
+  '.imgWrap,.videoCard,.audioCard,' +     // твои карточки/обёртки
+  '[data-no-thread-open="1"]';            // универсальный флажок на будущее
+
+return (
+  <article
+    className="item qshine"
+    onClick={(e) => {
+      if (e.target.closest(NO_THREAD_OPEN_SELECTOR)) return;
+      onOpenThread?.(p);
+    }}
+    role="article"
+    aria-label="Пост форума"
+    style={{ position: 'relative' }}
+  >
+
       {/* OWNER kebab (⋮) в правом верхнем углу — не трогаем существующую разметку */}
       {isOwner && (
         <div className="ownerKebab" onClick={(e)=>{ e.stopPropagation(); }} style={{ position:'absolute', right:8, top:8 }}>
