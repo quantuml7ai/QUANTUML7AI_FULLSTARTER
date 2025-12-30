@@ -5717,7 +5717,7 @@ export default function Forum(){
       if (!(v instanceof HTMLVideoElement)) return;
       try {
         // autoplay в браузерах работает стабильно только muted
-        v.muted = true;
+        v.muted = false;
         v.playsInline = true;
         // можно оставить loop как "шортсы"
         // если не хочешь луп — убери следующую строку
