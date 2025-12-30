@@ -11,9 +11,11 @@ export default function BgAudio({
   const audioRef = useRef(null)
   const [vol, setVol] = useState(defaultVolume)
   const [playing, setPlaying] = useState(false)
-  const [locked, setLocked] = useState(true) // true = браузер не дал играть со звуком
+  const [locked, setLocked] = useState(true) // браузер запретил autoplay со звуком
 
-  // Громкость держим актуальной
+  /* =========================
+     ГРОМКОСТЬ
+  ========================= */
   useEffect(() => {
     if (audioRef.current) {
       try {
@@ -22,7 +24,9 @@ export default function BgAudio({
     }
   }, [vol])
 
-  // 1) При МОНТАЖЕ сразу пробуем играть СО ЗВУКОМ (но БЕЗ loop)
+  /* =========================
+     1) АВТОСТАРТ ПРИ МОНТАЖЕ
+  ========================= */
   useEffect(() => {
     const a = audioRef.current
     if (!a) return
@@ -33,12 +37,20 @@ export default function BgAudio({
       try {
         a.muted = false
         a.playsInline = true
-        await a.play()                // попытка громко
+        await a.play()
         if (cancelled) return
+
         setPlaying(true)
         setLocked(false)
+
+        // сообщаем: BG Audio играет
+        window.dispatchEvent(
+          new CustomEvent('site-media-play', {
+            detail: { source: 'bg-audio' },
+          })
+        )
       } catch {
-        // Браузер зарубил — крутим ТИХО и ждём жест
+        // autoplay со звуком запрещён → играем тихо
         try {
           a.muted = true
           a.playsInline = true
@@ -55,11 +67,12 @@ export default function BgAudio({
     }
   }, [src])
 
-  // 2) Если locked === true → первый жест юзера включает звук
+  /* =========================
+     2) РАЗБЛОКИРОВКА ПО ЖЕСТУ
+  ========================= */
   useEffect(() => {
     const a = audioRef.current
-    if (!a) return
-    if (!locked) return  // уже разблокировано — ничего не вешаем
+    if (!a || !locked) return
 
     let removed = false
 
@@ -70,43 +83,83 @@ export default function BgAudio({
         await audioRef.current.play()
         setPlaying(true)
         setLocked(false)
+
+        window.dispatchEvent(
+          new CustomEvent('site-media-play', {
+            detail: { source: 'bg-audio' },
+          })
+        )
+
         detach()
-      } catch {
-        // всё ещё заблокировано — оставляем слушатели, попробуем на следующем жесте
-      }
+      } catch {}
     }
 
-    const onGesture = () => {
-      // любой жест → пробуем включить звук
-      enableSound()
-    }
+    const onGesture = () => enableSound()
 
     function attach() {
       if (removed) return
       window.addEventListener('pointerdown', onGesture, true)
-      window.addEventListener('click',       onGesture, true)
-      window.addEventListener('keydown',     onGesture, true)
-      window.addEventListener('wheel',       onGesture, { passive: true, capture: true })
-      window.addEventListener('touchstart',  onGesture, { passive: true, capture: true })
-      window.addEventListener('touchmove',   onGesture, { passive: true, capture: true })
+      window.addEventListener('click', onGesture, true)
+      window.addEventListener('keydown', onGesture, true)
+      window.addEventListener('wheel', onGesture, { passive: true, capture: true })
+      window.addEventListener('touchstart', onGesture, { passive: true, capture: true })
+      window.addEventListener('touchmove', onGesture, { passive: true, capture: true })
     }
 
     function detach() {
       if (removed) return
       removed = true
       window.removeEventListener('pointerdown', onGesture, true)
-      window.removeEventListener('click',       onGesture, true)
-      window.removeEventListener('keydown',     onGesture, true)
-      window.removeEventListener('wheel',       onGesture, true)
-      window.removeEventListener('touchstart',  onGesture, true)
-      window.removeEventListener('touchmove',   onGesture, true)
+      window.removeEventListener('click', onGesture, true)
+      window.removeEventListener('keydown', onGesture, true)
+      window.removeEventListener('wheel', onGesture, true)
+      window.removeEventListener('touchstart', onGesture, true)
+      window.removeEventListener('touchmove', onGesture, true)
     }
 
     attach()
     return detach
   }, [locked])
 
-  // 3) Кнопка-динамик: локальный on/off
+  /* =========================
+     3) КООРДИНАЦИЯ АУДИО
+     (основной + fallback)
+  ========================= */
+  useEffect(() => {
+    const a = audioRef.current
+    if (!a) return
+
+    // A) основной путь — кастомное событие
+    const onMediaPlay = (e) => {
+      if (e?.detail?.source === 'bg-audio') return
+      if (!a.paused) {
+        try { a.pause() } catch {}
+        setPlaying(false)
+      }
+    }
+
+    // B) fallback — любой play в документе
+    const onAnyPlay = (e) => {
+      const target = e.target
+      if (target === a) return
+      if (!a.paused) {
+        try { a.pause() } catch {}
+        setPlaying(false)
+      }
+    }
+
+    window.addEventListener('site-media-play', onMediaPlay)
+    document.addEventListener('play', onAnyPlay, true)
+
+    return () => {
+      window.removeEventListener('site-media-play', onMediaPlay)
+      document.removeEventListener('play', onAnyPlay, true)
+    }
+  }, [])
+
+  /* =========================
+     4) КНОПКА ВКЛ / ВЫКЛ
+  ========================= */
   const toggle = async () => {
     const a = audioRef.current
     if (!a) return
@@ -120,13 +173,19 @@ export default function BgAudio({
         await a.play()
         setPlaying(true)
         setLocked(false)
-      } catch {
-        // если опять зарубили — оставим как есть, жест всё равно уже был
-      }
+
+        window.dispatchEvent(
+          new CustomEvent('site-media-play', {
+            detail: { source: 'bg-audio' },
+          })
+        )
+      } catch {}
     }
   }
 
-  // 4) Колёсико — громкость
+  /* =========================
+     5) КОЛЁСИКО — ГРОМКОСТЬ
+  ========================= */
   const onWheelVolume = (e) => {
     const delta = e.deltaY > 0 ? -0.05 : 0.05
     const nv = Math.max(0, Math.min(1, +(vol + delta).toFixed(2)))
