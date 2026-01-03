@@ -347,7 +347,7 @@ const sigPost  = (p) => `${(p.text||'').slice(0,120)}|${p.userId||p.accountId||'
 const CFG = (typeof window!=='undefined' && window.__FORUM_CONF__) || {};
 const MIN_INTERVAL_MS   = Math.max(0, Number(CFG.FORUM_MIN_INTERVAL_SEC   ?? 1)*1000);
 const REACTS_PER_MINUTE = Number(CFG.FORUM_REACTS_PER_MINUTE ?? 120);
-const VIEW_TTL_SEC      = Number(CFG.FORUM_VIEW_TTL_SEC      ?? 0);
+const VIEW_TTL_SEC      = Number(CFG.FORUM_VIEW_TTL_SEC      ?? 60);
 
 
 function getBucket(ttlSec=VIEW_TTL_SEC){ return Math.floor((Date.now()/1000)/ttlSec) }
