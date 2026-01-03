@@ -21,6 +21,14 @@ export const getInt = async (key, def = 0) => {
 
 const DAY_MS = 24 * 60 * 60 * 1000
 const dayBucket = (ts = Date.now()) => Math.floor(ts / DAY_MS)
+
+// Дедупликация просмотров не «навсегда», а в окне TTL (по умолчанию берём env или 1800 сек)
+const VIEW_TTL_SEC = Number(process.env.FORUM_VIEW_TTL_SEC ?? 1800)
+const winBucket = (ttlSec = VIEW_TTL_SEC, ts = Date.now()) => {
+  const s = Math.max(1, Number(ttlSec) || VIEW_TTL_SEC)
+  return Math.floor((ts / 1000) / s)
+}
+
 const str = (x) => String(x ?? '').trim()
 
 /* =========================
@@ -253,21 +261,25 @@ export async function reactPostUnique(postId, userId, kind) {
 /* =========================
    Строгая бизнес-логика
 ========================= */
-export async function incrementTopicViewsUnique(topicId, userId) {
+export async function incrementTopicViewsUnique(topicId, userId, ttlSec = VIEW_TTL_SEC) {
+
   const tid = str(topicId), uid = str(userId)
   if (!tid || !uid) return { inc: false, views: await getInt(K.topicViews(tid), 0) }
-  const key = K.dedupViewTopic(tid, uid, dayBucket())
-  const ok = await redis.set(key, '1', { nx: true, ex: 24*60*60 })
+  const ttl = Math.min(24 * 60 * 60, Math.max(1, Number(ttlSec) || VIEW_TTL_SEC))
+  const key = K.dedupViewTopic(tid, uid, winBucket(ttl))
+  const ok = await redis.set(key, '1', { nx: true, ex: ttl })
   if (ok) await incrementTopicViews(tid, 1)
   const views = await getInt(K.topicViews(tid), 0)
   return { inc: !!ok, views }
 }
-
-export async function incrementPostViewsUnique(postId, userId) {
+export async function incrementPostViewsUnique(postId, userId, ttlSec = VIEW_TTL_SEC) {
+ 
   const pid = str(postId), uid = str(userId)
   if (!pid || !uid) return { inc: false, views: await getInt(K.postViews(pid), 0) }
-  const key = K.dedupViewPost(pid, uid, dayBucket())
-  const ok = await redis.set(key, '1', { nx: true, ex: 24*60*60 })
+  const ttl = Math.min(24 * 60 * 60, Math.max(1, Number(ttlSec) || VIEW_TTL_SEC))
+  const key = K.dedupViewPost(pid, uid, winBucket(ttl))
+  const ok = await redis.set(key, '1', { nx: true, ex: ttl })
+
   if (ok) await incrementPostViews(pid, 1)
   const views = await getInt(K.postViews(pid), 0)
   return { inc: !!ok, views }

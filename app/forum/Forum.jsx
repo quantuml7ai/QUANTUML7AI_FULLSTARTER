@@ -347,7 +347,7 @@ const sigPost  = (p) => `${(p.text||'').slice(0,120)}|${p.userId||p.accountId||'
 const CFG = (typeof window!=='undefined' && window.__FORUM_CONF__) || {};
 const MIN_INTERVAL_MS   = Math.max(0, Number(CFG.FORUM_MIN_INTERVAL_SEC   ?? 1)*1000);
 const REACTS_PER_MINUTE = Number(CFG.FORUM_REACTS_PER_MINUTE ?? 120);
-const VIEW_TTL_SEC      = Number(CFG.FORUM_VIEW_TTL_SEC      ?? 1800);
+const VIEW_TTL_SEC      = Number(CFG.FORUM_VIEW_TTL_SEC      ?? 0);
 
 
 function getBucket(ttlSec=VIEW_TTL_SEC){ return Math.floor((Date.now()/1000)/ttlSec) }
@@ -373,13 +373,34 @@ function rateLimiter(){
    toasts (single)
 ========================================================= */
 function useToast(){
-  const [t,set] = useState(null)
-  useEffect(()=>{ if(!t) return; const id = setTimeout(()=>set(null), 1800); return ()=>clearTimeout(id) },[t])
+  const [t, set] = useState(null);
+
+  useEffect(() => {
+    if (!t) return;
+    const id = setTimeout(() => set(null), 6500);
+    return () => clearTimeout(id);
+  }, [t]);
+
+  const show = (kind, m) => {
+    const msg = (m == null) ? '' : String(m);
+    set({ kind, msg });
+  };
+
   return {
-    view: t ? <div className="qft_toast_wrap"><div className={cls('qft_toast', t.kind)}>{t.msg}</div></div> : null,
-    ok:(m)=>set({kind:'ok',msg:m}), warn:(m)=>set({kind:'warn',msg:m}), err:(m)=>set({kind:'err',msg:m}),
-  }
+    view: t ? (
+      <div className="qft_toast_wrap">
+        <div className={cls('qft_toast', t.kind)}>{t.msg}</div>
+      </div>
+    ) : null,
+
+    ok: (m) => show('ok', m),
+    success: (m) => show('ok', m),     // alias, чтобы toast.success работал
+    warn: (m) => show('warn', m),
+    err: (m) => show('err', m),
+    info: (m) => show('info', m),      // ВОТ ЭТО КЛЮЧЕВО ДЛЯ ТВОЕГО “в обработке”
+  };
 }
+
 // === helpers: images in post text ==========================================
 function hasImageLines(text) {
   const lines = String(text || '').split(/\r?\n/);
@@ -2277,11 +2298,11 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 .audioCard audio::-webkit-media-controls{ background:transparent !important; }
 
 .audioRemove{
-  position:absolute; top:6px; right:6px;
+  position:absolute; top:30px; left:5px;
   width:18px; height:18px; border-radius:50%;
   display:inline-flex; align-items:center; justify-content:center;
-  font-size:12px; line-height:1;
-  background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.12);
+  font-size:18px; line-height:1;
+  background:rgba(0, 0, 0, 0.51); border:1px solid rgba(255, 255, 255, 0.27);
 }
 /* --- avatar + nick (ник всегда под аватаром) --- */
 .avaNick{
@@ -4179,10 +4200,35 @@ const save = async () => {
    UI: посты/темы
 ========================================================= */
 
-function TopicItem({ t, agg, onOpen, isAdmin, onDelete, authId, onOwnerDelete }) {
+function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerDelete }) {
   const { posts, likes, dislikes, views } = agg || {};
+
+  // считаем просмотр темы, когда карточка попадает в viewport (не чаще 1 раза на bucket в LS)
+  const ref = React.useRef(null);
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!ref.current) return;
+    if (typeof onView !== 'function') return;
+
+    const el = ref.current;
+    let fired = false;
+    const io = new IntersectionObserver((entries) => {
+      const e = entries && entries[0];
+      if (!e) return;
+      if (fired) return;
+      if (e.isIntersecting && e.intersectionRatio >= 0.6) {
+        fired = true;
+        onView(t?.id);
+       io.disconnect();
+      }
+    }, { threshold: [0.6] });
+
+    io.observe(el);
+    return () => { try { io.disconnect(); } catch {} };
+ }, [onView, t?.id]);
+
   return (
-    <div className="item qshine cursor-pointer" onClick={() => onOpen?.(t)} style={{ position: 'relative' }}>
+    <div ref={ref} className="item qshine cursor-pointer" onClick={() => onOpen?.(t)} style={{ position: 'relative' }}>
       <div className="flex flex-col gap-3">
         {/* верх: аватар → ник */}
         {(t.nickname || t.icon) && (
@@ -4240,10 +4286,10 @@ function TopicItem({ t, agg, onOpen, isAdmin, onDelete, authId, onOwnerDelete })
 
         {/* низ: счётчики/кнопки (как было) */}
         <div className="flex items-center gap-2 pt-1">
-          <span className="tag">👁 <HydrateText value={formatCount(views)} /></span>
-          <span className="tag">💬 <HydrateText value={formatCount(posts)} /></span>
-          <span className="tag">👍 <HydrateText value={formatCount(likes)} /></span>
-          <span className="tag">👎 <HydrateText value={formatCount(dislikes)} /></span>
+          <span className="tag">👓 <HydrateText value={formatCount(views)} /></span>
+          <span className="tag">📣 <HydrateText value={formatCount(posts)} /></span>
+          <span className="tag">💕 <HydrateText value={formatCount(likes)} /></span>
+          <span className="tag">🤮 <HydrateText value={formatCount(dislikes)} /></span>
           {isAdmin && (
             <button
               className="tag"
@@ -4295,7 +4341,9 @@ function PostCard({
   authId,
   markView,
   t, // локализация
+  isVideoFeed = false, // ✅ NEW
 }) {
+
   // берём locale из того же хука, что и в новостном хабе
   const { locale } = useI18n();
 
@@ -4340,11 +4388,6 @@ function PostCard({
     return s.length > 40 ? s.slice(0, 40) + '…' : s;
   })();
 
-  // учёт просмотра
-  useEffect(() => {
-    if (!p?.id || !authId || typeof window === 'undefined') return;
-    markView?.(p.id);
-  }, [p?.id, authId, markView]);
 
   const [lightbox, setLightbox] = React.useState({ open:false, src:null, idx:0, list:[] });
 
@@ -4436,30 +4479,48 @@ function PostCard({
   ]));
 
   // очищаем текст: убираем из строк видео/yt/tiktok/аудио/картинки, но оставляем обычные ссылки
-  const cleanedText = allLines
-    .map((s) => {
-      let line = String(s ?? '');
-      if (!line.trim()) return '';
+const cleanedText = allLines
+  .map((s) => {
+    let line = String(s ?? '');
+    const raw = line.trim();
+    if (!raw) return '';
 
-      // вырезаем из строки все "медийные" URL (видео, yt, tiktok, аудио, картинки)
-      line = line.replace(URL_RE, (u) => {
-        const uTrim = u.trim();
-        if (
-          IMG_RE.test(uTrim) ||
-          VIDEO_RE.test(uTrim) ||
-          isAudioLine(uTrim) ||
-          YT_RE.test(uTrim) ||
-          TIKTOK_RE.test(uTrim)
-        ) {
-          return ''; // саму ссылку убираем
-        }
-        return u;    // обычные URL остаются
-      });
+    // ✅ NEW: в видеоленте скрываем строки, которые состоят ТОЛЬКО из "не-медиа" ссылки
+    if (isVideoFeed) {
+      const mOnlyUrl = raw.match(/^(https?:\/\/\S+)$/i);
+      if (mOnlyUrl) {
+        const u = mOnlyUrl[1];
+        const playable =
+          IMG_RE.test(u) ||
+          VIDEO_RE.test(u) ||
+          isAudioLine(u) ||
+          YT_RE.test(u) ||
+          // TikTok playable только /@.../video/ID
+          /^(?:https?:\/\/)?(?:(?:www|m)\.)?tiktok\.com\/@[\w.\-]+\/video\/\d+(?:[?#].*)?$/i.test(u);
 
-      // чистим лишние пробелы после вырезания ссылок
-      line = line.replace(/\s{2,}/g, ' ').trim();
-      return line;
-    })
+        if (!playable) return ''; // 👈 вот это убирает голые ссылки в видеоленте
+      }
+    }
+
+    // вырезаем из строки все "медийные" URL ...
+    line = line.replace(URL_RE, (u) => {
+      const uTrim = u.trim();
+      if (
+        IMG_RE.test(uTrim) ||
+        VIDEO_RE.test(uTrim) ||
+        isAudioLine(uTrim) ||
+        YT_RE.test(uTrim) ||
+        TIKTOK_RE.test(uTrim)
+      ) {
+        return '';
+      }
+      return u;
+    });
+
+    line = line.replace(/\s{2,}/g, ' ').trim();
+    return line;
+  })
+
     // и дополнительно отсекаем пустые строки и строки, которые всё ещё состоят только из вложений
     .filter((line) => {
       if (!line) return false;
@@ -4543,18 +4604,18 @@ const NO_THREAD_OPEN_SELECTOR =
   '.imgWrap,.videoCard,.audioCard,' +     // твои карточки/обёртки
   '[data-no-thread-open="1"]';            // универсальный флажок на будущее
 
-return (
-  <article
-    className="item qshine"
-    onClick={(e) => {
-      if (e.target.closest(NO_THREAD_OPEN_SELECTOR)) return;
-      onOpenThread?.(p);
-    }}
-    role="article"
-    aria-label="Пост форума"
-    style={{ position: 'relative' }}
-  >
-
+  return (
+    <article
+      className="item qshine"
+      data-forum-post-card="1"
+      data-forum-post-id={String(p?.id || '')}
+      onClick={(e) => {
+        if (e.target.closest(NO_THREAD_OPEN_SELECTOR)) return;
+        onOpenThread?.(p);
+      }}
+      role="article"
+      aria-label="Пост форума"
+>
       {/* OWNER kebab (⋮) в правом верхнем углу — не трогаем существующую разметку */}
       {isOwner && (
         <div className="ownerKebab" onClick={(e)=>{ e.stopPropagation(); }} style={{ position:'absolute', right:8, top:8 }}>
@@ -4732,51 +4793,88 @@ return (
       {/* TikTok-видео: встраиваем через iframe */}
       {tiktokLines.length > 0 && (
         <div className="postVideo" style={{display:'grid', gap:8, marginTop:8}}>
-          {tiktokLines.map((src, i) => {
-            // Пробуем вытащить ID через URL API
-            let videoId = null;
-            try {
-              const u = new URL(src);
-              // Формат /@user/video/1234567890
-               const m = u.pathname.match(/\/video\/(\d+)/);
-               if (m) videoId = m[1];
-            } catch {}
-            if (!videoId) return null;
+{tiktokLines.map((src, i) => {
+  // Пробуем вытащить ID (работает для /@user/video/ID)
+  let videoId = null;
+  try {
+    const u = new URL(src);
+    const m = u.pathname.match(/\/video\/(\d+)/);
+    if (m) videoId = m[1];
+  } catch {}
 
-            return (
-              <div
-                key={`tt${i}`}
-                className="videoCard"
-                style={{
-                  margin:0,
-                  padding:8,
-                  background:'rgba(10,16,28,.35)',
-                  border:'1px solid rgba(140,170,255,.25)',
-                  borderRadius:10,
-                  overflow:'hidden'
-                }}
-              >
-                <iframe
-                  src={`https://www.tiktok.com/embed/v2/${videoId}`}
-                  title="TikTok video"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  style={{
-                    display:'block',
-                    width:'100%',
-                    aspectRatio:'9 / 16',
-                    borderRadius:6,
-                    maxHeight: getPortraitMaxH() + 'px',
-                    height: 'auto',
-                    width: 'auto',
-                    maxWidth: '100%',
-                    margin: '0 auto'
-                  }}
-                />
-              </div>
-            );
-          })}
+  // ✅ если ID нет (например, vm.tiktok.com/....) — не рендерим iframe,
+  // а показываем аккуратную карточку-ссылку (НЕ голый URL в тексте)
+  if (!videoId) {
+    return (
+      <div
+        key={`tt_link_${i}`}
+        className="videoCard"
+        style={{
+          margin:0,
+          padding:10,
+          background:'rgba(10,16,28,.35)',
+          border:'1px solid rgba(140,170,255,.25)',
+          borderRadius:10,
+          overflow:'hidden',
+          display:'flex',
+          alignItems:'center',
+          justifyContent:'space-between',
+          gap:10
+        }}
+      >
+        <div style={{minWidth:0}}>
+          <div style={{fontWeight:700, fontSize:14}}>TikTok</div>
+          <div style={{opacity:.75, fontSize:12, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>
+            {src}
+          </div>
+        </div>
+
+        <a
+          className="btn btnGhost btnSm"
+          href={src}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e)=>e.stopPropagation()}
+          style={{flex:'0 0 auto'}}
+          title="Open"
+        >
+          Open
+        </a>
+      </div>
+    );
+  }
+
+  // ✅ обычный embed по ID
+  return (
+    <div
+      key={`tt${i}`}
+      className="videoCard"
+      style={{
+        margin:0,
+        padding:8,
+        background:'rgba(10,16,28,.35)',
+        border:'1px solid rgba(140,170,255,.25)',
+        borderRadius:10,
+        overflow:'hidden'
+      }}
+    >
+      <iframe
+        src={`https://www.tiktok.com/embed/v2/${videoId}`}
+        title="TikTok video"
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+        style={{
+          display:'block',
+          width:'100%',
+          aspectRatio:'9 / 16',
+          borderRadius:12
+        }}
+      />
+    </div>
+  );
+})}
+
         </div>
       )}
 
@@ -4822,7 +4920,7 @@ return (
         }}
       >
         <span className="tag" title={t?.('forum_views') || 'Просмотры'} suppressHydrationWarning>
-          👁 <HydrateText value={views} />
+          🔎 <HydrateText value={views} />
         </span>
 
         <span
@@ -4839,7 +4937,7 @@ return (
           title={t?.('forum_like') || 'Лайк'}
           onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); onReact?.(p,'like'); }}
         >
-          👍 <HydrateText value={likes} />
+          💘 <HydrateText value={likes} />
         </button>
 
         <button
@@ -4936,12 +5034,14 @@ function LivePreview({ streamRef, mirror }) {
       autoPlay
       playsInline
       muted
-      style={{
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-        borderRadius: 12,
-        background: '#000',
+style={{
+  width: '100%',
+  height: '100%',
+  // ВАЖНО: в оверлее НИЧЕГО не обрезаем ни в 9:16, ни в 16:9.
+  // Должны быть «чёрные поля» если аспект не совпадает с экраном.
+  objectFit: 'contain',
+  borderRadius: 12,
+  background: '#000',
         // mirror=true → визуально раззеркаливаем системную фронталку
         transform: mirror ? 'scaleX(-1)' : 'none'
       }}
@@ -4960,6 +5060,8 @@ export function VideoOverlay({
   onResetConfirm,        // ← закрыть/сбросить
   streamRef,
   previewUrl,
+  mediaKind = 'video',   // 'video' | 'image'  (для fullscreen-превью загруженного медиа)
+  onAccept,              // ← зелёная галочка: принять (перенести в маленькое превью под композером)
   t,
 }) {
   const tt = t || ((k)=>k);
@@ -5284,14 +5386,36 @@ export function VideoOverlay({
   </div>
 ) : (
   <div className={fixMirrorClass}>
-    <video
-      ref={previewVidRef}
-      src={previewUrl || ''}
-      controls
-      playsInline
-      onLoadedMetadata={onMeta}
-      style={{ width:'100%', height:'100%', objectFit:'cover', background:'#000' }}
-    />
+    {mediaKind === 'image' ? (
+      <img
+        src={previewUrl || ''}
+        alt=""
+        draggable={false}
+        onLoad={(e) => {
+          try {
+            const img = e?.currentTarget;
+            const w = img?.naturalWidth || 0;
+            const h = img?.naturalHeight || 0;
+            if (w && h) setAspect(w < h ? '9 / 16' : '16 / 9');
+          } catch {}
+        }}
+        style={{ width:'100%', height:'100%', objectFit:'contain', background:'#000' }}
+      />
+    ) : (
+      <video
+        ref={previewVidRef}
+        src={previewUrl || ''}
+        controls
+        playsInline
+        onLoadedMetadata={onMeta}
+        style={{
+  width: '100%',
+  height: '100%',
+  objectFit:'contain',
+  background: '#000'
+}}
+      />
+    )}
   </div>
 )}
 
@@ -5415,7 +5539,7 @@ export function VideoOverlay({
             className="voBtn voAccept"
             aria-label={tt('forum_video_accept') || 'Accept & send'}
             title={tt('forum_video_accept') || 'Accept & send'}
-            onClick={pressComposerSend}
+            onClick={() => { if (onAccept) onAccept(); else pressComposerSend(); }}
           >
             <svg viewBox="0 0 24 24" className="ico ok">
               <path d="M4 12.5l5 5L20 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -5713,6 +5837,46 @@ export default function Forum(){
 
     const selector = 'video[data-forum-video="post"]';
 
+    // === Persist sound choice (mute/unmute) ================================
+    // - если выбора ещё нет → звук ВКЛ (muted=false)
+    // - если юзер выключил звук на одном видео → следующие тоже muted=true
+    // - если включил → следующие muted=false
+    const LS_VIDEO_MUTED_KEY = 'forum:videoMuted';
+    const readMutedPref = () => {
+      try {
+        const v = localStorage.getItem(LS_VIDEO_MUTED_KEY);
+        if (v == null) return null;       // ещё не сохраняли
+        return v === '1' || v === 'true';  // true => muted
+      } catch { return null; }
+    };
+    const writeMutedPref = (val) => {
+      try { localStorage.setItem(LS_VIDEO_MUTED_KEY, val ? '1' : '0'); } catch {}
+    };
+    let mutedPref = readMutedPref(); // null => дефолт (звук ВКЛ)
+
+    const desiredMuted = () => (mutedPref == null ? false : !!mutedPref);
+    const applyMutedPref = (v) => {
+      const want = desiredMuted();
+      if (v.muted !== want) v.muted = want;
+    };
+
+    // volumechange НЕ bubble → вешаем слушатель на каждый video
+    const volHandlers = new WeakMap(); // videoEl -> handler
+    const bindVolumeListener = (v) => {
+      if (!(v instanceof HTMLVideoElement)) return;
+      if (v.dataset.forumSoundBound === '1') return;
+      v.dataset.forumSoundBound = '1';
+
+      // применяем предпочтение сразу при появлении видео
+applyMutedPref(v);
+
+      const h = () => {
+        mutedPref = !!v.muted;
+        writeMutedPref(mutedPref);
+      };
+      volHandlers.set(v, h);
+      v.addEventListener('volumechange', h, { passive: true });
+    };
     const ratios = new Map(); // videoEl -> intersectionRatio
     let active = null;        // текущий "главный" видео-элемент
 
@@ -5724,8 +5888,8 @@ export default function Forum(){
     const safePlay = (v) => {
       if (!(v instanceof HTMLVideoElement)) return;
       try {
-        // autoplay в браузерах работает стабильно только muted
-        v.muted = false;
+        // ✅ применяем сохранённый выбор (или дефолт: звук ВКЛ)
+        applyMutedPref(v);
         v.playsInline = true;
         // можно оставить loop как "шортсы"
         // если не хочешь луп — убери следующую строку
@@ -5809,6 +5973,7 @@ export default function Forum(){
       try {
         document.querySelectorAll(selector).forEach((v) => {
           if (!(v instanceof HTMLVideoElement)) return;
+          bindVolumeListener(v);
           io.observe(v);
         });
       } catch {}
@@ -5826,6 +5991,15 @@ export default function Forum(){
       if (active) safePause(active);
       active = null;
       ratios.clear();
+
+      // снимаем volumechange listeners (аккуратно)
+      try {
+        document.querySelectorAll(selector).forEach((v) => {
+          if (!(v instanceof HTMLVideoElement)) return;
+          const h = volHandlers.get(v);
+          if (h) v.removeEventListener('volumechange', h);
+        });
+      } catch {}      
     };
   }, []);
  
@@ -5951,7 +6125,36 @@ const sendBatch = (immediate = false) => {
     busyRef.current = true;
     try {
       const userId = authRef.current?.accountId || authRef.current?.asherId || getForumUserId();
-      const resp = await api.mutate({ ops: snapshot }, userId);
+      
+   // ⚠️ Защита от 413: схлопываем дубли view_* и режем батч по размеру
+      const MAX_MUTATION_OPS = 120;
+      const compactOps = (ops) => {
+        const out = [];
+        const seen = new Set();
+        // идём с конца, чтобы сохранить «последнее» view_* для одного id
+        for (let i = ops.length - 1; i >= 0; i--) {
+          const op = ops[i];
+          const t = op?.type;
+          const p = op?.payload || {};
+          if (t === 'view_post') {
+            const k = `vp:${String(p.postId ?? '')}`;
+            if (seen.has(k)) continue;
+            seen.add(k);
+          } else if (t === 'view_topic') {
+           const k = `vt:${String(p.topicId ?? '')}`;
+            if (seen.has(k)) continue;
+            seen.add(k);
+          }
+          out.push(op);
+        }
+        out.reverse();
+        return out;
+      };
+
+      // 1) сначала схлопываем (уменьшаем JSON), 2) потом ограничиваем размер запроса
+      const toSend = compactOps(snapshot).slice(0, MAX_MUTATION_OPS);
+
+      const resp = await api.mutate({ ops: toSend }, userId);
 
       if (resp && Array.isArray(resp.applied)) {
         // ✅ Мгновенно вливаем подтверждённые сущности из applied в локальный снапшот
@@ -6024,7 +6227,7 @@ const cids = new Set(
         });
 
         // 2) Удаляем из очереди ТОЛЬКО те элементы, которые отправили
-        const sentIds = new Set(snapshot.map(x => x.opId));
+        const sentIds = new Set(toSend.map(x => x.opId));
         const current = Array.isArray(queueRef.current) ? queueRef.current : [];
         const leftover = current.filter(x => !sentIds.has(x.opId));
         saveQueue(leftover);
@@ -7043,7 +7246,11 @@ useEffect(() => {
  const videoStreamRef = useRef(null);   // MediaStream
  const videoRecRef    = useRef(null);   // MediaRecorder
  const videoChunksRef = useRef([]);     // BlobParts
- const [pendingVideo, setPendingVideo] = useState(null); // blob: URL готового ролика (preview)
+const [pendingVideo, setPendingVideo] = useState(null);
+
+// fullscreen overlay для загруженных файлов (видео/картинка)
+const [overlayMediaKind, setOverlayMediaKind] = useState('video'); // 'video' | 'image'
+const [overlayMediaUrl, setOverlayMediaUrl] = useState(null);      // string | null
 const videoCancelRef = useRef(false); // true => onstop не собирает blob (отмена)
 const videoMirrorRef = useRef(null);  // вспомогательный незеркальный front-поток для записи
  
@@ -7350,6 +7557,330 @@ const resetVideo = () => {
   setVideoElapsed(0);
 };
 
+// === fullscreen overlay (и для видео, и для изображения) ===
+const closeMediaOverlay = () => {
+  try { setVideoOpen(false); } catch {}
+  try { setOverlayMediaUrl(null); } catch {}
+  try { setOverlayMediaKind('video'); } catch {}
+  // если мы открывали overlay ради картинки — возвращаем видео-состояние в idle
+  try {
+    if (!pendingVideo && overlayMediaKind === 'image') setVideoState('idle');
+  } catch {}
+};
+
+// зелёная галочка: НЕ отправляем пост сразу, а закрываем fullscreen и оставляем маленькое превью под композером
+const acceptMediaFromOverlay = () => {
+  closeMediaOverlay();
+};
+
+// крестик: для камеры (live/recording) — полный resetVideo; для preview выбранного файла — просто закрыть
+const resetOrCloseOverlay = () => {
+  if (videoState === 'live' || videoState === 'recording') {
+    resetVideo();
+    return;
+  }
+  closeMediaOverlay();
+};
+// =========================================================
+// MODERATION (client): images + video frames -> /api/forum/moderate
+// No native deps. All decoding/resizing done in browser via canvas.
+// =========================================================
+
+// Режимы: STRICT = review трактуем как block; BALANCED = review пропускаем
+// Можно переключать через NEXT_PUBLIC_FORUM_MODERATION_MODE=STRICT|BALANCED
+const FORUM_MODERATION_MODE =
+  (typeof process !== 'undefined' && process?.env?.NEXT_PUBLIC_FORUM_MODERATION_MODE) ||
+  'BALANCED';
+
+const isStrictModeration = String(FORUM_MODERATION_MODE || '').toUpperCase() === 'STRICT';
+
+// Тост-хелпер: строго i18n-key + EN fallback (без RU прямых переводов)
+const toastI18n = React.useCallback((kind, key, enFallback) => {
+  const msg = (t?.(key) || enFallback || '').toString();
+  try {
+    if (kind === 'ok')   return toast?.ok?.(msg);
+    if (kind === 'warn') return toast?.warn?.(msg);
+    if (kind === 'err')  return toast?.err?.(msg);
+    if (kind === 'info') return toast?.info?.(msg);
+    return toast?.info?.(msg);
+  } catch {}
+}, [t, toast]);
+
+const reasonKey = (reason) => {
+  const r = String(reason || 'unknown').toLowerCase();
+  if (r === 'porn') return 'forum_moderation_reason_porn';
+  if (r === 'explicit_nudity') return 'forum_moderation_reason_explicit_nudity';
+  if (r === 'sexual') return 'forum_moderation_reason_sexual';
+  if (r === 'hentai') return 'forum_moderation_reason_hentai';
+  if (r === 'violence') return 'forum_moderation_reason_violence';
+  if (r === 'gore') return 'forum_moderation_reason_gore';
+  return 'forum_moderation_reason_unknown';
+};
+
+const reasonFallbackEN = (reason) => {
+  const r = String(reason || 'unknown').toLowerCase();
+  if (r === 'porn') return 'Pornography / explicit sexual content';
+  if (r === 'explicit_nudity') return 'Explicit nudity';
+  if (r === 'sexual') return 'Adult / sexual content';
+  if (r === 'hentai') return 'Hentai / explicit drawings';
+  if (r === 'violence') return 'Violence';
+  if (r === 'gore') return 'Gore / graphic content';
+  return 'Restricted content';
+};
+
+// ---- Image normalize: any input -> JPEG blob via canvas (fast + predictable) ----
+const fileToJpegBlob = React.useCallback(async (file, opts = {}) => {
+  const maxWidth = Number(opts.maxWidth || 640);
+  const quality  = Number(opts.quality ?? 0.82);
+
+  // read as bitmap (GIF will usually give first frame - good enough for upload moderation)
+  const src = await createImageBitmap(file);
+
+  // scale
+  const w0 = src.width || 1;
+  const h0 = src.height || 1;
+
+  let w = w0, h = h0;
+  if (w0 > maxWidth) {
+    w = maxWidth;
+    h = Math.round((h0 * maxWidth) / w0);
+  }
+
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, w);
+  canvas.height = Math.max(1, h);
+
+  const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
+  ctx.drawImage(src, 0, 0, canvas.width, canvas.height);
+
+  const blob = await new Promise((resolve) => {
+    canvas.toBlob(
+      (b) => resolve(b),
+      'image/jpeg',
+      Math.min(0.92, Math.max(0.6, quality))
+    );
+  });
+
+  try { src.close?.(); } catch {}
+  if (!blob) throw new Error('jpeg_encode_failed');
+
+  return blob;
+}, []);
+
+// ---- Call server moderation with FormData(files[]) ----
+const moderateViaApi = React.useCallback(async (blobs, meta = {}) => {
+  // blobs: [{ blob, name, source? , timeSec? }]
+  const fd = new FormData();
+  for (const it of (blobs || [])) {
+    if (!it?.blob) continue;
+    fd.append('files', it.blob, it.name || `frame-${Date.now()}.jpg`);
+  }
+
+  // server meta (optional)
+  if (meta?.source) fd.append('source', String(meta.source));
+  if (meta?.clientRequestId) fd.append('clientRequestId', String(meta.clientRequestId));
+  // server returns allow/block/review; STRICT/BALANCED applied on client
+  try {
+    const res = await fetch('/api/forum/moderate', { method: 'POST', body: fd, cache: 'no-store' });
+    const j = await res.json().catch(() => null);
+    if (!res.ok || !j) {
+      const errMsg = (j && j.error) ? String(j.error) : 'moderation_http_error';
+      const e = new Error(errMsg);
+      e.status = res.status;
+      throw e;
+    }
+    return j;
+  } catch (e) {
+    throw e;
+  }
+}, []);
+
+// ---- Image moderation (files[]) ----
+const moderateImageFiles = React.useCallback(async (files) => {
+  if (!Array.isArray(files) || !files.length) return { decision: 'allow', reason: 'unknown' };
+
+  toastI18n('info', 'forum_moderation_checking', 'Checking content…');
+
+  // normalize -> jpeg
+  const pack = [];
+  for (const f of files.slice(0, 20)) {
+    const jpeg = await fileToJpegBlob(f, { maxWidth: 640, quality: 0.82 });
+    pack.push({ blob: jpeg, name: (f.name || 'image').replace(/\.(png|jpe?g|webp|gif)$/i, '.jpg') });
+  }
+
+  const r = await moderateViaApi(pack, { source: 'image' });
+  let decision = String(r?.decision || 'allow');
+  const reason = String(r?.reason || 'unknown');
+
+  // STRICT: review => block
+  if (isStrictModeration && decision === 'review') decision = 'block';
+
+  return { decision, reason, raw: r };
+}, [toastI18n, fileToJpegBlob, moderateViaApi, isStrictModeration]);
+
+// ---- Video frame extraction (browser) ----
+const extractVideoFrames = React.useCallback(async (videoSource, opts = {}) => {
+  const framesCount = Math.min(20, Math.max(10, Number(opts.framesCount || 14)));
+  const minGapSec = Math.max(0.2, Number(opts.minGapSec || 0.6));
+  const excludeHeadTail = Math.max(0, Math.min(0.15, Number(opts.excludeHeadTail ?? 0.05)));
+  const maxWidth = Math.max(240, Math.min(960, Number(opts.maxWidth || 640)));
+  const quality = Math.min(0.92, Math.max(0.6, Number(opts.quality ?? 0.82)));
+
+  const url =
+    (typeof videoSource === 'string')
+      ? videoSource
+      : URL.createObjectURL(videoSource);
+
+  const video = document.createElement('video');
+  video.muted = true;
+  video.playsInline = true;
+  video.preload = 'metadata';
+  video.src = url;
+
+  // wait metadata
+  await new Promise((resolve) => {
+    const done = () => resolve();
+    if (video.readyState >= 1) return done();
+    video.addEventListener('loadedmetadata', done, { once: true });
+    setTimeout(done, 1200); // fallback
+  });
+
+  const duration = Number(video.duration || 0);
+  const vw = Number(video.videoWidth || 0);
+  const vh = Number(video.videoHeight || 0);
+
+  // fallback if duration is unavailable
+  const effectiveDuration = (duration && Number.isFinite(duration) && duration > 0) ? duration : 5;
+
+  // compute times
+  const head = effectiveDuration * excludeHeadTail;
+  const tail = effectiveDuration * (1 - excludeHeadTail);
+  const span = Math.max(0.1, tail - head);
+
+  const times = [];
+  const tryAdd = (tSec) => {
+    const t = Math.max(0, Math.min(effectiveDuration, tSec));
+    for (const x of times) if (Math.abs(x - t) < minGapSec) return false;
+    times.push(t);
+    return true;
+  };
+
+  // base uniform + random jitter
+  const baseN = framesCount;
+  for (let i = 0; i < baseN; i++) {
+    const p = (i + 0.5) / baseN;
+    const base = head + span * p;
+    const jitter = (Math.random() - 0.5) * Math.min(0.8, span / baseN);
+    tryAdd(base + jitter);
+  }
+
+  // if too few due to minGap, relax by adding random
+  let guard = 0;
+  while (times.length < Math.min(framesCount, Math.max(5, Math.floor(baseN * 0.8))) && guard++ < 50) {
+    const r = head + Math.random() * span;
+    tryAdd(r);
+  }
+
+  times.sort((a, b) => a - b);
+
+  // handle very short video
+  if (effectiveDuration < 2.0 && times.length > 8) times.length = 8;
+
+  // prepare canvas
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
+
+  const out = [];
+
+  const seekTo = (tSec) => new Promise((resolve) => {
+    const onSeeked = () => resolve(true);
+    video.currentTime = Math.max(0, Math.min(effectiveDuration, tSec));
+    video.addEventListener('seeked', onSeeked, { once: true });
+    // fallback if seeked doesn't fire
+    setTimeout(() => resolve(false), 900);
+  });
+
+  // ensure can play frames
+  try { await video.play().catch(() => null); } catch {}
+
+  for (const tSec of times) {
+    const okSeek = await seekTo(tSec);
+
+    const w0 = (video.videoWidth || vw || 1);
+    const h0 = (video.videoHeight || vh || 1);
+
+    let w = w0, h = h0;
+    if (w0 > maxWidth) {
+      w = maxWidth;
+      h = Math.round((h0 * maxWidth) / w0);
+    }
+    canvas.width = Math.max(1, w);
+    canvas.height = Math.max(1, h);
+
+    try {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const blob = await new Promise((resolve) => {
+        canvas.toBlob((b) => resolve(b), 'image/jpeg', quality);
+      });
+      if (blob) out.push({ blob, timeSec: tSec, okSeek });
+    } catch {
+      // ignore individual frame
+    }
+  }
+
+  // cleanup
+  try { video.pause(); } catch {}
+  try { video.removeAttribute('src'); video.load(); } catch {}
+  try { video.remove(); } catch {}
+  if (typeof videoSource !== 'string') {
+    try { URL.revokeObjectURL(url); } catch {}
+  }
+
+  return out;
+}, []);
+
+// ---- Video moderation (extract N frames, send to same API) ----
+const moderateVideoSource = React.useCallback(async (videoSource) => {
+  toastI18n('info', 'forum_moderation_checking', 'Checking content…');
+
+  // Extract frames
+  let frames = [];
+  try {
+    frames = await extractVideoFrames(videoSource, {
+      framesCount: 14,
+      minGapSec: 0.6,
+      excludeHeadTail: 0.05,
+      maxWidth: 640,
+      quality: 0.82,
+    });
+  } catch {
+    frames = [];
+  }
+
+  // If cannot extract - STRICT blocks, BALANCED allows with warning/log
+  if (!frames.length) {
+    if (isStrictModeration) {
+      return { decision: 'block', reason: 'unknown', raw: null, hard: true };
+    }
+    // balanced: allow + log
+    try { console.warn('[moderation] video frames extraction failed -> allow (balanced)'); } catch {}
+    return { decision: 'allow', reason: 'unknown', raw: null, hard: false };
+  }
+
+  const pack = frames.slice(0, 20).map((f, idx) => ({
+    blob: f.blob,
+    name: `frame-${idx + 1}.jpg`,
+    timeSec: f.timeSec,
+  }));
+
+  const r = await moderateViaApi(pack, { source: 'video_frame' });
+
+  let decision = String(r?.decision || 'allow');
+  const reason = String(r?.reason || 'unknown');
+  if (isStrictModeration && decision === 'review') decision = 'block';
+
+  return { decision, reason, raw: r };
+}, [toastI18n, extractVideoFrames, moderateViaApi, isStrictModeration]);
 
 // отправлять можно, если есть текст ИЛИ хотя бы одна картинка
  const canSend = (String(text || '').trim().length > 0)
@@ -7481,6 +8012,38 @@ const createPost = async () => {
   };
 
   if (!rl.allowAction()) return _fail(t('forum_too_fast') || 'Слишком часто');
+  // 0) VIDEO MODERATION (frames) BEFORE ANY UPLOAD
+  if (pendingVideo) {
+    try {
+      // если pendingVideo = blob: -> достаём Blob и модерируем по кадрам
+      if (/^blob:/.test(pendingVideo)) {
+        const resp = await fetch(pendingVideo);
+        const fileBlob = await resp.blob();
+
+        const mod = await moderateVideoSource(fileBlob);
+
+        if (mod?.decision === 'block') {
+          toastI18n('warn', 'forum_video_blocked', 'Video rejected by community rules');
+          toastI18n('info', reasonKey(mod?.reason), reasonFallbackEN(mod?.reason));
+          try { resetVideo(); } catch {}
+          return _fail();
+        }
+
+        if (mod?.decision === 'review') {
+          // STRICT уже превратил review -> block в moderateVideoSource()
+          // BALANCED: allow + лог
+          try { console.warn('[moderation] video review -> allow (balanced)', mod?.reason, mod?.raw); } catch {}
+        }
+      }
+    } catch (e) {
+      console.error('[moderation] video check failed', e);
+      // как в соцсетях: если модерация недоступна — сообщаем, но не валим всё подряд.
+      // В STRICT можно блокировать, но мы уже сделали STRICT=block если кадры не извлеклись.
+      toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
+      toastI18n('info', 'forum_moderation_try_again', 'Please try again');
+      return _fail();
+    }
+  }
 
   // 0) ВИДЕО: прямая загрузка в Vercel Blob через /api/forum/blobUploadUrl
   let videoUrlToSend = '';
@@ -7784,30 +8347,146 @@ if(!localStorage.getItem(key)){
 }
 
 }
+// === Views by focus (>=60% visible) for ANY post card + prefetch videos around ===
+useEffect(() => {
+  if (!isBrowser()) return;
+  if (!('IntersectionObserver' in window)) return;
+
+  const FOCUS_RATIO = 0.60;
+  const CARD_SELECTOR = 'article[data-forum-post-card="1"][data-forum-post-id]';
+
+  // postId -> { el, t }
+  const focused = new Map();
+
+  const clearFocusedTimer = (postId) => {
+    const rec = focused.get(postId);
+    if (rec?.t) clearTimeout(rec.t);
+    if (rec) rec.t = null;
+  };
+
+  // повторный view ровно на границе следующего TTL-бакета, пока пост в фокусе
+  const scheduleNextBucketTick = (postId) => {
+    clearFocusedTimer(postId);
+
+    const ttl = Number(FORUM_VIEW_TTL_SEC || VIEW_TTL_SEC || 1800);
+    const bucket = getBucket(ttl);
+    const nextAtMs = (bucket + 1) * ttl * 1000;
+
+    const delay = Math.max(250, nextAtMs - Date.now());
+    const rec = focused.get(postId);
+    if (!rec?.el) return;
+
+    rec.t = setTimeout(() => {
+      const cur = focused.get(postId);
+      if (!cur?.el) return; // уже не в фокусе
+      markViewPost(postId); // внутри уже TTL+LS дедуп
+      scheduleNextBucketTick(postId);
+    }, delay);
+  };
+
+  // префетчим видео на ±5 карточек вокруг текущей
+  const prefetchVideosAround = (centerEl) => {
+    try {
+      const cards = Array.from(document.querySelectorAll(CARD_SELECTOR));
+      const idx = cards.indexOf(centerEl);
+      if (idx < 0) return;
+
+      const from = Math.max(0, idx - 5);
+      const to = Math.min(cards.length - 1, idx + 5);
+
+      for (let i = from; i <= to; i++) {
+        const card = cards[i];
+        card
+          .querySelectorAll('video[data-forum-video="post"]')
+          .forEach((v) => {
+            try {
+              // достаточно метаданных/первого кадра, чтобы не лагало при подходе
+              v.preload = 'metadata';
+              v.load?.();
+            } catch {}
+          });
+      }
+    } catch {}
+  };
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        const el = entry.target;
+        const postId = el.getAttribute('data-forum-post-id');
+        if (!postId) continue;
+
+        const ratio = entry.isIntersecting ? (entry.intersectionRatio || 0) : 0;
+        const inFocus = ratio >= FOCUS_RATIO;
+
+        if (inFocus) {
+          if (!focused.has(postId)) focused.set(postId, { el, t: null });
+          else focused.get(postId).el = el;
+
+          // мгновенно считаем просмотр при попадании в фокус
+          markViewPost(postId);
+
+          // префетч медиа вокруг
+          prefetchVideosAround(el);
+
+          // и держим TTL-повторы, пока пост в фокусе
+          scheduleNextBucketTick(postId);
+        } else {
+          clearFocusedTimer(postId);
+          focused.delete(postId);
+        }
+      }
+    },
+    {
+      threshold: [0, FOCUS_RATIO, 1],
+      // оставляем твою “психологию фокуса” (как у видео): чуть тянем фокус к центру
+      rootMargin: '0px 0px -20% 0px',
+    }
+  );
+
+  const observeAll = () => {
+    try {
+      document.querySelectorAll(CARD_SELECTOR).forEach((el) => io.observe(el));
+    } catch {}
+  };
+
+  observeAll();
+
+  // DOM динамический (подгрузка/ветки/ответы) — периодически подцепляем новые карточки
+  const tick = setInterval(observeAll, 900);
+
+  return () => {
+    clearInterval(tick);
+    try { io.disconnect(); } catch {}
+    for (const [postId] of focused) clearFocusedTimer(postId);
+    focused.clear();
+  };
+}, [auth?.asherId, auth?.accountId]);
+
+const markViewTopic = (topicId) => {
+  if(!isBrowser()) return
+  const uid = auth.asherId || auth.accountId || ''
+  if(!uid || !topicId) return
+  const bucket = getBucket(FORUM_VIEW_TTL_SEC || VIEW_TTL_SEC)
+  const key = `topic:${topicId}:viewed:${uid}:${bucket}`
+
+  try {
+    if(!localStorage.getItem(key)){
+      localStorage.setItem(key,'1')
+      pushOp('view_topic', { topicId: String(topicId) })
+     sendBatch(true)
+    }
+  } catch {}
+}
  // keep refs in sync so effects can call them safely
 useEffect(() => { markViewPostRef.current  = markViewPost  }, [markViewPost]);
 
 // Просмотр темы: раз в bucket; только отправка на бэк, БЕЗ локального инкремента
-useEffect(() => {
-  if (!isBrowser()) return;
+useEffect(() => { 
   const id = String(sel?.id || '');
   if (!id) return;
-
-  const bucket = getBucket(FORUM_VIEW_TTL_SEC || VIEW_TTL_SEC); // одинаковый TTL, что и для постов
-  const key = `topic:${id}:viewed:${bucket}`;
-
-  try {
-    if (!localStorage.getItem(key)) {
-      localStorage.setItem(key, '1');
-      pushOp('view_topic', { topicId: id });
-      sendBatch(true); // сразу дожимаем батч, чтобы серверный views пришёл быстрее
-    }
-  } catch {
-    // молча игнорируем сбой доступа к LS (Safari private / ITP)
-  }
-}, [sel?.id]);
-
-
+  markViewTopic(id);
+}, [sel?.id]); 
 
   /* ---- эмодзи ---- */
   
@@ -7825,49 +8504,170 @@ useEffect(() => {
     }
   };
 /* ---- вложения (скрепка) — VIP gate ---- */
-const fileRef = React.useRef(null);
+const fileInputRef = React.useRef(null);
 
 const handleAttachClick = React.useCallback((e) => {
-  e?.preventDefault?.(); e?.stopPropagation?.();
-  if (!vipActive) {
-    try { toast?.warn?.(t?.('forum_vip_only') || 'Функция доступна только VIP+'); } catch {}
-    return;
-  }
-  fileRef.current?.click();
-}, [vipActive, t, toast]);
+  e?.preventDefault?.(); 
+  e?.stopPropagation?.();
+  fileInputRef.current?.click();
+}, []);
 
 const onFilesChosen = React.useCallback(async (e) => {
-  try{
-    const files = Array.from(e.target?.files || [])
-      .filter(f => /\.(png|jpe?g|webp|gif)$/i.test(f.name || ''));
+  try {
+    const picked = Array.from(e.target?.files || []);
+    if (!picked.length) return;
 
-    if (files.length === 0) {
-      try { toast?.info?.(t?.('forum_attach_info', { types: 'PNG, JPG, JPEG, WEBP, GIF' }) || 'Можно загружать: PNG, JPG, JPEG, WEBP, GIF'); } catch {}
+    // разделяем на картинки и видео по mime/имени
+    const imgFiles = picked.filter(f =>
+      /^image\//i.test(String(f?.type || '')) ||
+      /\.(png|jpe?g|webp|gif)$/i.test(String(f?.name || ''))
+    );
+    const vidFiles = picked.filter(f =>
+      /^video\//i.test(String(f?.type || '')) ||
+      /\.(mp4|webm|mov|m4v|mkv)$/i.test(String(f?.name || ''))
+    );
+
+  // сразу показываем тост (до модерации/загрузки), что медиа обрабатывается
+  try {
+    if (vidFiles.length) {
+      toast?.info?.(t?.('forum_video_processing_wait') || 'Подождите, видео обрабатывается');
+    } else if (imgFiles.length) {
+      toast?.info?.(t?.('forum_image_processing_wait') || 'Подождите, изображение обрабатывается');
+    }
+  } catch {}
+    if (!imgFiles.length && !vidFiles.length) {
+      try {
+        toast?.info?.(
+          (t?.('forum_attach_info', { types: 'PNG, JPG, JPEG, WEBP, GIF, MP4, WEBM, MOV' }) ||
+            'Allowed types: PNG, JPG, JPEG, WEBP, GIF, MP4, WEBM, MOV')
+        );
+      } catch {}
       return;
     }
 
-    const fd = new FormData();
-    for (const f of files) fd.append('files', f, f.name);
+    // =========================
+    // 1) IMAGES: moderation -> /api/forum/upload
+    // =========================
+    if (imgFiles.length) {
+      let modImg = null;
+      try {
+        modImg = await moderateImageFiles(imgFiles);
+      } catch (err) {
+        console.error('[moderation] image check failed', err);
+        toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
+        toastI18n('info', 'forum_moderation_try_again', 'Please try again');
+        return;
+      }
 
-    const res = await fetch('/api/forum/upload', { method:'POST', body: fd, cache:'no-store' });
-    if (!res.ok) throw new Error('upload_failed');
+      if (modImg?.decision === 'block') {
+        toastI18n('warn', 'forum_image_blocked', 'Image rejected by community rules');
+        toastI18n('info', reasonKey(modImg?.reason), reasonFallbackEN(modImg?.reason));
+        return;
+      }
 
-    const data = await res.json().catch(() => ({ urls: [] }));
-    const urls = Array.isArray(data?.urls) ? data.urls : [];
+      if (modImg?.decision === 'review') {
+        try { console.warn('[moderation] image review -> allow (balanced)', modImg?.reason, modImg?.raw); } catch {}
+      }
 
-    if (urls.length) {
-      // подставляем относительные пути в композер (по одному в строке)
-      setPendingImgs(prev => [...prev, ...urls]);
-      try { toast?.success?.(t?.('forum_files_uploaded') || 'Файлы загружены'); } catch {}
+      const fd = new FormData();
+      for (const f of imgFiles.slice(0, 20)) fd.append('files', f, f.name);
+
+      const res = await fetch('/api/forum/upload', { method: 'POST', body: fd, cache: 'no-store' });
+      if (!res.ok) throw new Error('upload_failed');
+
+      const up = await res.json().catch(() => ({ urls: [] }));
+      const urls = Array.isArray(up?.urls) ? up.urls : [];
+      if (urls.length) 
+        setPendingImgs(prev => [...prev, ...urls]);
+      // если загрузили ТОЛЬКО картинки — открываем fullscreen overlay (как для видео)
+      if (!vidFiles.length && urls.length) {
+        try { setOverlayMediaKind('image'); } catch {}
+        try { setOverlayMediaUrl(urls[0]); } catch {}
+        try { setVideoState('preview'); } catch {}   // используем preview-режим оверлея
+        try { setVideoOpen(true); } catch {}
+      }
     }
-  } catch(err) {
+
+    // =========================
+    // 2) VIDEOS: moderation (frames) -> Vercel Blob upload
+    // =========================
+    if (vidFiles.length) {
+      // берём первое видео (multiple включён, но UX лучше 1 за раз)
+      const vf = vidFiles[0];
+      const mime = String(vf?.type || '').split(';')[0].trim().toLowerCase();
+      const okMime = /^video\/(mp4|webm|quicktime)$/i.test(mime) || /\.(mp4|webm|mov)$/i.test(String(vf?.name || ''));
+      if (!okMime) {
+        try { toast?.warn?.(t?.('forum_video_bad_type') || 'Unsupported video type'); } catch {}
+        return;
+      }
+      if (Number(vf.size || 0) > 300 * 1024 * 1024) {
+        try { toast?.err?.(t?.('forum_video_too_big') || 'Video is larger than 300MB'); } catch {}
+        return;
+      }
+
+      // MODERATION BEFORE UPLOAD (как у тебя в createPost для pendingVideo)
+      try {
+        const modV = await moderateVideoSource(vf);
+        if (modV?.decision === 'block') {
+          toastI18n('warn', 'forum_video_blocked', 'Video rejected by community rules');
+          toastI18n('info', reasonKey(modV?.reason), reasonFallbackEN(modV?.reason));
+          return;
+        }
+        if (modV?.decision === 'review') {
+          try { console.warn('[moderation] video review -> allow (balanced)', modV?.reason, modV?.raw); } catch {}
+        }
+      } catch (e2) {
+        console.error('[moderation] video check failed', e2);
+        toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
+        toastI18n('info', 'forum_moderation_try_again', 'Please try again');
+        return;
+      }
+
+      // UPLOAD TO VERCEL BLOB (тот же роут, что у записи с камеры)
+      try {
+        const ext =
+          /quicktime/i.test(mime) || /\.(mov)$/i.test(String(vf?.name || '')) ? 'mov'
+          : /mp4/i.test(mime)     || /\.(mp4)$/i.test(String(vf?.name || '')) ? 'mp4'
+          : 'webm';
+        const name = `forum/video-${Date.now()}.${ext}`;
+
+        const { upload } = await import('@vercel/blob/client');
+        const result = await upload(name, vf, {
+          access: 'public',
+          handleUploadUrl: '/api/forum/blobUploadUrl',
+          multipart: true,
+          contentType: (mime || (ext === 'mp4' ? 'video/mp4' : (ext === 'mov' ? 'video/quicktime' : 'video/webm'))),
+        });
+
+        const url = result?.url || '';
+        if (url) {
+          setPendingVideo(url);
+          // fullscreen overlay для загруженного видео
+          try { setOverlayMediaKind('video'); } catch {}
+          try { setOverlayMediaUrl(null); } catch {} // видео берём из pendingVideo
+          try { setVideoState?.('preview'); } catch {}
+          try { setVideoOpen?.(true); } catch {}
+        } else {
+          throw new Error('no_url');
+        }   
+   } catch (e3) {
+        console.error('video_client_upload_failed', e3);
+        try { toast?.err?.(t?.('forum_video_upload_failed') || 'Failed to upload video'); } catch {}
+        return;
+      }
+    }
+
+    // общий success toast (если что-то реально добавили)
+    if (imgFiles.length || vidFiles.length) {
+      try { toast?.success?.(t?.('forum_files_uploaded') || 'Files uploaded'); } catch {}
+    }
+  } catch (err) {
     console.error(err);
-    try { toast?.error?.(t?.('forum_files_upload_failed') || 'Ошибка загрузки'); } catch {}
+    try { toast?.error?.(t?.('forum_files_upload_failed') || 'Upload failed'); } catch {}
   } finally {
     if (e?.target) e.target.value = '';
   }
-}, [t, toast]);
-
+}, [t, toast, moderateImageFiles, moderateVideoSource, toastI18n, reasonKey, reasonFallbackEN]);
 
   /* ---- профиль (поповер у аватара) ---- */
   const idShown = auth.asherId || auth.accountId || ''
@@ -7940,9 +8740,10 @@ function isYouTubeUrl(u) {
 function isTikTokUrl(u) {
   const s = String(u || '').trim();
   if (!s) return false;
-  // www.tiktok.com/@.../video/ID  +  vm.tiktok.com/...  +  m.tiktok.com/...
-  return /^(?:https?:\/\/)?(?:(?:www|m)\.)?tiktok\.com\/.+/i.test(s) || /^(?:https?:\/\/)?vm\.tiktok\.com\/.+/i.test(s);
+  // ✅ только /@user/video/123.. (то, что реально умеем embed'ить)
+  return /^(?:https?:\/\/)?(?:(?:www|m)\.)?tiktok\.com\/@[\w.\-]+\/video\/\d+(?:[?#].*)?$/i.test(s);
 }
+
 
 function isMediaUrl(u) {
   return isVideoUrl(u) || isImageUrl(u) || isAudioUrl(u) || isYouTubeUrl(u) || isTikTokUrl(u);
@@ -7982,7 +8783,16 @@ function isMediaPost(p) {
   }
 
   // html как запасной вариант
-  if (typeof p.html === 'string' && (/<\s*video[\s>]/i.test(p.html) || /<\s*img[\s>]/i.test(p.html) || /<\s*audio[\s>]/i.test(p.html) || /tiktok\.com|youtube\.com|youtu\.be/i.test(p.html))) return true;
+  if (
+  typeof p.html === 'string' && (
+    /<\s*video[\s>]/i.test(p.html) ||
+    /<\s*img[\s>]/i.test(p.html) ||
+    /<\s*audio[\s>]/i.test(p.html) ||
+    /(?:youtube\.com|youtu\.be)/i.test(p.html) ||
+    /tiktok\.com\/@[\w.\-]+\/video\/\d+/i.test(p.html) // ✅ только playable tiktok
+  )
+) return true;
+
 
   return false;
 }
@@ -8664,10 +9474,12 @@ function pickAdUrlForSlot(slotKey, slotKind) {
   }
   elapsed={videoElapsed}
   streamRef={videoStreamRef}
-  previewUrl={pendingVideo}
+  previewUrl={overlayMediaUrl || pendingVideo}
+  mediaKind={overlayMediaKind}
+  onAccept={acceptMediaFromOverlay}
   onStart={startVideo}          // ← добавили
   onStop={stopVideo}
-  onResetConfirm={resetVideo}
+  onResetConfirm={resetOrCloseOverlay}
   t={t}
 />
 
@@ -9272,21 +10084,23 @@ onClick={()=>{
 
     return (
       <div key={slot.key} id={`post_${p?.id || ''}`}>
-        <PostCard
-          p={p}
-          parentAuthor={parent?.nickname || (parent ? shortId(parent.userId || '') : null)}
-          onReport={() => toast.ok(t('forum_report_ok'))}
-          onOpenThread={openThreadHere}
-          onReact={reactMut}
-          isAdmin={isAdmin}
-          onDeletePost={delPost}
-          onBanUser={banUser}
-          onUnbanUser={unbanUser}
-          isBanned={bannedSet.has(p?.accountId || p?.userId)}
-          authId={auth.asherId || auth.accountId}
-          markView={markViewPost}
-          t={t}
-        />
+<PostCard
+  p={p}
+  parentAuthor={parent?.nickname || (parent ? shortId(parent.userId || '') : null)}
+  onReport={() => toast.ok(t('forum_report_ok'))}
+  onOpenThread={openThreadHere}
+  onReact={reactMut}
+  isAdmin={isAdmin}
+  onDeletePost={delPost}
+  onBanUser={banUser}
+  onUnbanUser={unbanUser}
+  isBanned={bannedSet.has(p?.accountId || p?.userId)}
+  authId={auth.asherId || auth.accountId}
+  markView={markViewPost}
+  t={t}
+  isVideoFeed={true}   // ✅ NEW
+/>
+
       </div>
     );
   }
@@ -9416,6 +10230,7 @@ onClick={()=>{
               t={x}
               agg={agg}
               onOpen={(tt)=>{ setSel(tt); setThreadRoot(null) }}
+              onView={markViewTopic}
               isAdmin={isAdmin}
               onDelete={delTopic}
               authId={auth.asherId || auth.accountId}
@@ -9739,32 +10554,24 @@ onClick={()=>{
           </div>
 
           {/* 2) Скрепка */}
-          <div className="railItem">
-            <button
-              type="button"
-              className="iconBtn ghost lockable"
-              data-locked={!vipActive}
-              aria-label={t('forum_attach') || 'Прикрепить'}
-              title={t('forum_attach') || 'Прикрепить'}
-              onClick={(e)=>{
-                if (!vipActive){
-                  try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ only') } catch {}
-                  try { setVipOpen?.(true) } catch {}
-                  return;
-                }
-                handleAttachClick(e);
-              }}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden>
-                <path
-                  d="M7 13.5l6.5-6.5a3.5 3.5 0 115 5L10 20a6 6 0 11-8.5-8.5"
-                  stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" fill="none"
-                />
-              </svg>
-       {!vipActive && <span className="lockBadge" aria-hidden>🔒</span>}
+{/* 2) Скрепка */}
+<div className="railItem">
+  <button
+    type="button"
+    className="iconBtn ghost"
+    aria-label={t('forum_attach') || 'Прикрепить'}
+    title={t('forum_attach') || 'Прикрепить'}
+    onClick={handleAttachClick}
+  >
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <path
+        d="M7 13.5l6.5-6.5a3.5 3.5 0 115 5L10 20a6 6 0 11-8.5-8.5"
+        stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" fill="none"
+      />
+    </svg>
+  </button>
+</div>
 
-            </button>
-          </div>
 
           {/* 3) Смайл */}
           <div className="railItem">
@@ -9784,39 +10591,29 @@ onClick={()=>{
             </button>
           </div>
 
-          {/* 4) Видео */}
-          <div className="railItem">
-            <button
-              type="button"
-              className={cls(
-                'iconBtn camBtn',
-                videoState==='recording' && 'rec',
-                (videoState==='uploading') && 'disabled',
-                !vipActive && 'locked'
-              )}
-              aria-label={videoState==='recording' ? 'Stop' : (videoState==='preview' ? 'Снять заново' : 'Снять видео')}
-              title={videoState==='recording' ? 'Stop' : (videoState==='preview' ? 'Снять заново' : 'Снять видео')}
-onClick={(e)=>{
-  e.preventDefault();
-  if (!vipActive){
-    try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ only') } catch {}
-    try { setVipOpen?.(true) } catch {}
-    try { setComposerActive(false) } catch {}
-    try { document.activeElement?.blur?.() } catch {}
-    return;
-  }
-  if (videoState==='uploading') return;
+{/* 4) Видео */}
+<div className="railItem">
+  <button
+    type="button"
+    className={cls(
+      'iconBtn camBtn',
+      videoState==='recording' && 'rec',
+      (videoState==='uploading') && 'disabled'
+    )}
+    aria-label={videoState==='recording' ? 'Stop' : (videoState==='preview' ? 'Снять заново' : 'Снять видео')}
+    title={videoState==='recording' ? 'Stop' : (videoState==='preview' ? 'Снять заново' : 'Снять видео')}
+    onClick={(e)=>{
+      e.preventDefault();
+      if (videoState==='uploading') return;
 
-  // ТОЛЬКО открыть оверлей и включить live-превью
-  try { setVideoOpen(true); } catch {}
- 
-  try { setVideoOpen(true); } catch {}
-  try { setVideoState('live'); } catch {}
-  try { setComposerActive(false); } catch {}
-  try { document.activeElement?.blur?.() } catch {}
-}}
-
-            >
+      try { setOverlayMediaKind('video'); } catch {}
+      try { setOverlayMediaUrl(null); } catch {}
+      try { setVideoOpen(true); } catch {}
+      try { setVideoState('live'); } catch {}
+      try { setComposerActive(false); } catch {}
+      try { document.activeElement?.blur?.() } catch {}
+    }}
+  >
               {videoState==='recording'
                 ? <span style={{display:'inline-flex',alignItems:'center',gap:6}}>
                     <span style={{width:12,height:12,borderRadius:'50%',background:'#FF4D4F',display:'inline-block'}}/>
@@ -9829,7 +10626,7 @@ onClick={(e)=>{
                   </svg>
                 )
               }
-              {!vipActive && <span className="lockBadge" aria-hidden>🔒</span>}
+             
             </button>
           </div>
 
@@ -9946,7 +10743,8 @@ onClick={(e)=>{
 
     {/* превью вложений (оставляем как было) */}
     {pendingImgs.length > 0 && (
-      <div className="inline-flex items-center gap-2 mt-2 overflow-x-auto" style={{ maxWidth: 'min(50%, 320px)' }}>
+      <div className="attachPreviewRow mt-2" 
+      style={{ maxWidth: 'min(50%, 320px)' }}>
         {pendingImgs.map((u, i) => (
           <button
             key={i}
@@ -9956,13 +10754,117 @@ onClick={(e)=>{
             onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); setPendingImgs(prev => prev.filter((_,idx)=>idx!==i)); }}
           >
             <Image src={u} alt="" loading="lazy" unoptimized width={96} height={32} className="h-8 w-auto max-w-[96px] rounded-md ring-1 ring-white/10" />
-            <span className="absolute -top-1 -right-1 hidden group-hover:inline-flex items-center justify-center text-[10px] leading-none px-1 rounded bg-black/70">✕</span>
+            <span className="absolute -top-1 -right-1 hidden group-hover:inline-flex items-center justify-center text-[10px] leading-none px-1 rounded bg-black/70">❌</span>
           </button>
         ))}
       </div>
     )}
 
-    {pendingAudio && (
+{pendingVideo && (
+  <div className="attachPreviewRow mt-2">
+    <div
+      className="videoCard preview"
+      style={{
+        position: 'relative',
+        maxWidth: 'min(70%, 420px)',
+        borderRadius: 12,
+        overflow: 'hidden',
+        border: '1px solid rgba(255,255,255,.12)',
+        background: '#000',
+      }}
+    >
+      {/* ВАЖНО: controls должны работать и НЕ открывать fullscreen */}
+      <video
+        src={pendingVideo}
+        controls
+        playsInline
+        preload="metadata"
+        style={{
+          width: '100%',
+          height: 'auto',
+          maxHeight: 220,
+          display: 'block',
+          objectFit: 'contain',
+          background: '#000',
+        }}
+        onClick={(e) => {
+          // чтобы клик по видео/контролам НЕ открывал оверлей
+          e.stopPropagation();
+        }}
+      />
+
+      {/* Кнопка “открыть fullscreen overlay” отдельно */}
+      <button
+        type="button"
+        title={t?.('forum_open_fullscreen') || 'Открыть на весь экран'}
+onClick={() => {
+  // открываем ТОТ ЖЕ VideoOverlay, что и для камеры/превью
+  try { setOverlayMediaKind?.('video'); } catch {}
+  // pendingVideo уже пробрасывается в previewUrl через props, поэтому url можно не дублировать
+  try { setOverlayMediaUrl?.(null); } catch {}
+  try { setVideoState?.('preview'); } catch {}
+  try { setVideoOpen?.(true); } catch {}
+}}
+        style={{
+          position: 'absolute',
+          right: 8,
+          top: 8,
+          width: 34,
+          height: 34,
+          borderRadius: 10,
+          border: '1px solid rgba(255,255,255,.18)',
+          background: 'rgba(0,0,0,.55)',
+          color: '#fff',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        ⤢
+      </button>
+
+      {/* удалить видео */}
+      <button
+        type="button"
+        title={t?.('forum_remove') || 'Убрать'}
+        onClick={() => {
+  // Должно вести себя как крестик внутри fullscreen-оверлея: полностью очищаем состояние видео.
+  try {
+    if (pendingVideo && /^blob:/i.test(String(pendingVideo))) {
+      URL.revokeObjectURL(pendingVideo);
+    }
+  } catch {}
+  try { setPendingVideo?.(null); } catch {}
+  try { setOverlayMediaUrl?.(null); } catch {}
+  try { setOverlayMediaKind?.('video'); } catch {}
+  try { setVideoOpen?.(false); } catch {}
+  try { setVideoState?.('idle'); } catch {}
+  try { resetVideo?.(); } catch {}
+}}
+
+        style={{
+          fontSize: '20px',
+          position: 'absolute',
+          left: 5,
+          bottom: 170,
+          width: 54,
+          height: 54,
+          borderRadius: 10,
+          border: '1px solid rgba(255, 255, 255, 0.4)',
+          background: 'rgba(0, 0, 0, 0.52)',
+          color: '#ff0000ff',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        ❌
+      </button>
+    </div>
+  </div>
+)}
+
+{pendingAudio && (
       <div className="attachPreviewRow mt-2">
         <div className="audioCard preview">
           <div className="audioIcon" aria-hidden>
@@ -10060,14 +10962,16 @@ onClick={(e)=>{
   </div>
 
   {/* скрытый инпут для загрузки файлов */}
-  <input
-    ref={fileRef}
-    type="file"
-    accept=".png,.jpg,.jpeg,.webp,.gif,image/png,image/jpeg,image/webp,image/gif"
-    multiple
-    style={{ display:'none' }}
-    onChange={onFilesChosen}
-  />
+<input
+  id="file-input"
+  ref={fileInputRef}
+  type="file"
+  accept="image/*,image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov"
+  multiple
+  style={{ display: 'none' }}
+  onChange={onFilesChosen}
+/>
+
   </div>
   {/* FAB: синяя кнопка с карандашом */}
   <button

@@ -1,3 +1,7 @@
+ignoredBuiltDependencies:
+  - core-js
+  - unrs-resolver
+
 onlyBuiltDependencies:
   - '@vercel/speed-insights'
   - blake-hash

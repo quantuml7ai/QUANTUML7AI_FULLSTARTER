@@ -45656,7 +45656,9 @@ not_robot_error_timeout:'Verification time has expired ⏰ Please try again late
 not_robot_error_wrong_coin:'Incorrect coin selection ❌ Please try again.',
 tg_link_cta: 'Link with Telegram',
 tg_link_done: 'Linked with Telegram',
-
+forum_moderation_checking: 'Media is being processed. Please wait...',
+forum_files_uploaded: 'Upload started',
+forum_files_upload_failed: 'Upload failed',
 }
 const ROBOT_RU = {
 not_robot_title:'🤖 Я НЕ РОБОТ 🤖',
@@ -45669,7 +45671,9 @@ not_robot_error_timeout:'Время проверки истекло ⏰ Попр
 not_robot_error_wrong_coin:'Неверный выбор монеты ❌ Попробуйте ещё раз.',
 tg_link_cta: 'Связать с Telegram',
 tg_link_done: 'Связано с Telegram',
-
+forum_moderation_checking: 'Медиа в обработке. Подождите...',
+forum_files_uploaded: 'Началась загрузка',
+forum_files_upload_failed: 'Ошибка загрузки',
 }
 const ROBOT_UK = {
 not_robot_title:'🤖 Я НЕ РОБОТ 🤖',
@@ -45682,7 +45686,9 @@ not_robot_error_timeout:'Час перевірки вичерпано ⏰ Спр
 not_robot_error_wrong_coin:'Неправильний вибір монети ❌ Спробуйте ще раз.',
 tg_link_cta: 'Звʼязати з Telegram',
 tg_link_done: 'Повʼязано з Telegram',
-
+forum_moderation_checking: 'Медіа в обробці. Зачекайте...',
+forum_files_uploaded: 'Розпочато завантаження',
+forum_files_upload_failed: 'Помилка завантаження',
 }
 const ROBOT_ES = {
 not_robot_title:'🤖 NO SOY UN ROBOT 🤖',
@@ -45695,7 +45701,9 @@ not_robot_error_timeout:'El tiempo de verificación ha expirado ⏰ Inténtelo m
 not_robot_error_wrong_coin:'Selección incorrecta de moneda ❌ Inténtelo de nuevo.',
 tg_link_cta: 'Vincular con Telegram',
 tg_link_done: 'Vinculado con Telegram',
-
+forum_moderation_checking: 'El contenido multimedia se está procesando. Espere...',
+forum_files_uploaded: 'La carga ha comenzado',
+forum_files_upload_failed: 'Error de carga',
 }
 const ROBOT_ZH = {
 not_robot_title:'🤖 我不是机器人 🤖',
@@ -45708,7 +45716,9 @@ not_robot_error_timeout:'验证时间已结束 ⏰ 请稍后再试。',
 not_robot_error_wrong_coin:'币种选择错误 ❌ 请重试。',
 tg_link_cta: '绑定 Telegram',
 tg_link_done: '已绑定 Telegram',
-
+forum_moderation_checking: '媒体正在处理中。请稍候...',
+forum_files_uploaded: '上传已开始',
+forum_files_upload_failed: '上传失败',
 }
 const ROBOT_AR = {
 not_robot_title:'🤖 لستُ روبوتًا 🤖',
@@ -45721,7 +45731,9 @@ not_robot_error_timeout:'انتهى وقت التحقق ⏰ يرجى المحا�
 not_robot_error_wrong_coin:'اختيار عملة غير صحيح ❌ يرجى المحاولة مرة أخرى.',
 tg_link_cta: 'الربط مع تيليجرام',
 tg_link_done: 'تم الربط مع تيليجرام',
-
+forum_moderation_checking: 'يتم معالجة الوسائط. يرجى الانتظار...',
+forum_files_uploaded: 'بدأ التحميل',
+forum_files_upload_failed: 'فشل التحميل',
 }
 const ROBOT_TR = {
 not_robot_title:'🤖 ROBOT DEĞİLİM 🤖',
@@ -45734,7 +45746,9 @@ not_robot_error_timeout:'Doğrulama süresi doldu ⏰ Lütfen daha sonra tekrar 
 not_robot_error_wrong_coin:'Yanlış coin seçildi ❌ Lütfen tekrar deneyin.',
 tg_link_cta: 'Telegram ile bağla',
 tg_link_done: 'Telegram ile bağlı',
-
+forum_moderation_checking: 'Medya işleniyor. Lütfen bekleyin...',
+forum_files_uploaded: 'Yükleme başladı',
+forum_files_upload_failed: 'Yükleme hatası',
 }
 
 try {
