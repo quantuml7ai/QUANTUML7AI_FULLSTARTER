@@ -5103,7 +5103,7 @@ if (uploadFile) {
           <div className="profileAvatarHead">
             <div className="meta">{t('forum_profile_avatar')}</div>
             <div className="meta" style={{ opacity: .7 }}>
-              {uploadFile ? `${imgInfo.w || 0}×${imgInfo.h || 0}` : (t('forum_profile_avatar_hint') || '')}
+              {uploadFile ? `${imgInfo.w || 0}×${imgInfo.h || 0}` : (t('') || '')}
             </div>
           </div>
 <div className="profileList">
