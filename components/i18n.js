@@ -164,7 +164,7 @@ about_paragraphs: [
 
   `Security and privacy. Non-custodial: we do not request or store private keys/seeds. Roles restrict access, actions are logged, personal data is minimized and encrypted in transit and at rest. Anti-sybil/anti-fraud pipelines protect the QCoin economy and the forum’s reputation mechanics; session validation is gentle yet strict, maintaining access integrity.`,
 
-  `Forum and QCoin mining. The forum is not a “social network,” but a production line of knowledge. Every 4 hours, you confirm activity and lock in rewards; posts with media (video/images/audio) go through QuantumLCM-AI scoring (quality, engagement, anti-spam/anti-sybil) and are converted into QCoin. VIP+ receives X2 in time and X2 in quests, priority in ranking, extended media limits, and accelerated moderation. Reputation and contribution are not empty noise but economically meaningful values.`,
+  `Forum and QCoin mining. The forum is not a “social network,” but a production line of knowledge. Every 4 hours, you confirm activity and lock in rewards; posts with media (video/images/audio) go through Quantum L7 AI scoring (quality, engagement, anti-spam/anti-sybil) and are converted into QCoin. VIP+ receives X2 in time and X2 in quests, priority in ranking, extended media limits, and accelerated moderation. Reputation and contribution are not empty noise but economically meaningful values.`,
 
   `Exchange (in development) and recommendations. The trading core and execution are being connected step by step; AI-based recommendations by symbols/timeframes, order book depth, and liquidity profiles are already available. We are designing smart routing, delay/slippage protection, portfolio constraints, and PnL attribution. VIP+ gains access to experimental indicators, what-if/backtest modes, and extended analytical horizons.`,
 
@@ -590,7 +590,7 @@ about_paragraphs: [
 
   `Безопасность и приватность. Некостодиально: приватные ключи/seed не запрашиваем и не храним. Роли ограничивают доступ, действия логируются, персональные данные минимизируются и шифруются в передаче и хранении. Анти-sybil/anti-fraud пайплайны защищают экономику QCoin и репутационные механики форума; валидация сессий бережно, но строго поддерживает целостность доступа.`,
 
-  `Форум и QCoin-майнинг. Форум — это не «соцсеть», а производственная линия знаний. Каждые 4 часа вы подтверждаете активность и лочите награду; посты с медиа (видео/изображения/аудио) проходят скоринг QuantumLCM-AI (качество, вовлечённость, анти-спам/анти-sybil) и конвертятся в QCoin. VIP+ получает X2 по времени и X2 по квестам, приоритет в выдаче, расширенные лимиты на медиа и ускоренную модерацию. Репутация и вклад — не пустой шум, а экономически значимая величина.`,
+  `Форум и QCoin-майнинг. Форум — это не «соцсеть», а производственная линия знаний. Каждые 4 часа вы подтверждаете активность и лочите награду; посты с медиа (видео/изображения/аудио) проходят скоринг Quantum L7 AI (качество, вовлечённость, анти-спам/анти-sybil) и конвертятся в QCoin. VIP+ получает X2 по времени и X2 по квестам, приоритет в выдаче, расширенные лимиты на медиа и ускоренную модерацию. Репутация и вклад — не пустой шум, а экономически значимая величина.`,
 
   `Биржа (в разработке) и рекомендации. Торговое ядро и исполнение подключаются поэтапно; уже доступны ИИ-рекомендации по символам/таймфреймам, глубина стакана и профиль ликвидности. Мы проектируем smart-routing, защиту от задержек/проскальзывания, портфельные ограничения и атрибуцию PnL. VIP+ получает доступ к экспериментальным индикаторам, режимам what-if/backtest и расширенным горизонтам анализа.`,
 
@@ -1014,7 +1014,7 @@ about_paragraphs: [
 
   `Безпека та приватність. Некостодіально: приватні ключі/seed не запитуємо й не зберігаємо. Ролі обмежують доступ, дії логуються, персональні дані мінімізуються та шифруються під час передавання і зберігання. Anti-sybil/anti-fraud пайплайни захищають економіку QCoin і репутаційні механіки форуму; валідація сесій дбайливо, але суворо підтримує цілісність доступу.`,
 
-  `Форум і майнінг QCoin. Форум — це не «соцмережа», а виробнича лінія знань. Кожні 4 години ви підтверджуєте активність і фіксуєте винагороду; пости з медіа (відео/зображення/аудіо) проходять скоринг QuantumLCM-AI (якість, залученість, анти-спам/anti-sybil) і конвертуються в QCoin. VIP+ отримує X2 за часом і X2 за квестами, пріоритет у видачі, розширені ліміти на медіа та пришвидшену модерацію. Репутація і внесок — не порожній шум, а економічно значуща величина.`,
+  `Форум і майнінг QCoin. Форум — це не «соцмережа», а виробнича лінія знань. Кожні 4 години ви підтверджуєте активність і фіксуєте винагороду; пости з медіа (відео/зображення/аудіо) проходять скоринг Quantum L7 AI (якість, залученість, анти-спам/anti-sybil) і конвертуються в QCoin. VIP+ отримує X2 за часом і X2 за квестами, пріоритет у видачі, розширені ліміти на медіа та пришвидшену модерацію. Репутація і внесок — не порожній шум, а економічно значуща величина.`,
 
   `Біржа (в розробці) і рекомендації. Торговельне ядро та виконання під’єднуються поетапно; уже доступні ІІ-рекомендації за символами/таймфреймами, глибина стакана й профіль ліквідності. Ми проєктуємо smart-routing, захист від затримок/прослизання, портфельні обмеження й атрибуцію PnL. VIP+ отримує доступ до експериментальних індикаторів, режимів what-if/backtest і розширених горизонтів аналізу.`,
 
@@ -1438,7 +1438,7 @@ about_paragraphs: [
 
   `Seguridad y privacidad. No custodial: no solicitamos ni almacenamos claves privadas/seed. Los roles restringen el acceso, las acciones se registran, los datos personales se minimizan y se cifran en tránsito y en reposo. Los pipelines anti-sybil/anti-fraude protegen la economía de QCoin y los mecanismos de reputación del foro; la validación de sesiones mantiene con cuidado, pero con rigor, la integridad del acceso.`,
 
-  `Foro y minería de QCoin. El foro no es una «red social», sino una línea de producción de conocimiento. Cada 4 horas confirmas actividad y bloqueas la recompensa; las publicaciones con medios (video/imagen/audio) pasan el scoring de QuantumLCM-AI (calidad, engagement, anti-spam/anti-sybil) y se convierten en QCoin. VIP+ obtiene X2 en tiempo y X2 en misiones, prioridad en la exposición, límites ampliados para medios y moderación acelerada. Reputación y contribución no son ruido vacío, sino una magnitud económicamente significativa.`,
+  `Foro y minería de QCoin. El foro no es una «red social», sino una línea de producción de conocimiento. Cada 4 horas confirmas actividad y bloqueas la recompensa; las publicaciones con medios (video/imagen/audio) pasan el scoring de Quantum L7 AI (calidad, engagement, anti-spam/anti-sybil) y se convierten en QCoin. VIP+ obtiene X2 en tiempo y X2 en misiones, prioridad en la exposición, límites ampliados para medios y moderación acelerada. Reputación y contribución no son ruido vacío, sino una magnitud económicamente significativa.`,
 
   `Exchange (en desarrollo) y recomendaciones. El núcleo de trading y la ejecución se conectan por etapas; ya están disponibles recomendaciones con IA por símbolos/marcos temporales, profundidad de libro y perfil de liquidez. Diseñamos smart-routing, protección frente a latencias/deslizamiento, restricciones de cartera y atribución de PnL. VIP+ obtiene acceso a indicadores experimentales, modos what-if/backtest y horizontes de análisis ampliados.`,
 
@@ -1864,7 +1864,7 @@ about_paragraphs: [
 
   `安全与隐私。非托管：我们不请求也不存储私钥/seed。通过角色限制访问、记录操作，个人数据最小化，并在传输与存储中加密。anti-sybil/anti-fraud 流水线保护 QCoin 经济与论坛的声誉机制；会话校验在温和且严格的前提下维护访问完整性。`,
 
-  `论坛与 QCoin 挖矿。论坛不是“社交网络”，而是知识生产线。每 4 小时你确认活跃度并锁定奖励；含媒体（视频/图片/音频）的帖子通过 QuantumLCM-AI 的评分（质量、参与度、反垃圾/反女巫）并转化为 QCoin。VIP+ 获得时间 X2 与任务 X2、曝光优先、扩展的媒体限额与加速审核。声誉与贡献不是空噪声，而是具有经济意义的量。`,
+  `论坛与 QCoin 挖矿。论坛不是“社交网络”，而是知识生产线。每 4 小时你确认活跃度并锁定奖励；含媒体（视频/图片/音频）的帖子通过 Quantum L7 AI 的评分（质量、参与度、反垃圾/反女巫）并转化为 QCoin。VIP+ 获得时间 X2 与任务 X2、曝光优先、扩展的媒体限额与加速审核。声誉与贡献不是空噪声，而是具有经济意义的量。`,
 
   `交易所（开发中）与推荐。交易内核与执行会分阶段接入；已提供按品种/周期的 AI 推荐、订单簿深度与流动性画像。我们设计智能路由、延迟/滑点防护、组合约束与 PnL 归因。VIP+ 可访问实验性指标、what-if/回测模式与更宽的分析视野。`,
 
@@ -2288,7 +2288,7 @@ about_paragraphs: [
 
   `الأمان والخصوصية. غير وصائي: لا نطلب ولا نخزّن المفاتيح الخاصة/seed. تُقيَّد الصلاحيات عبر الأدوار، وتُسجَّل الأفعال، وتُقلّل البيانات الشخصية وتُشفّر في النقل والتخزين. خطوط anti-sybil/anti-fraud تحمي اقتصاد QCoin وآليات السمعة في المنتدى؛ والتحقّق من الجلسات يحافظ بعناية — ولكن بصرامة — على سلامة الوصول.`,
 
-  `المنتدى وتعدين QCoin. المنتدى ليس «شبكة اجتماعية»، بل خط إنتاج للمعرفة. كل 4 ساعات تؤكّد النشاط وتُقفل المكافأة؛ المنشورات ذات الوسائط (فيديو/صور/صوت) تمر بتقييم QuantumLCM-AI (جودة، تفاعل، مضاد للسبام/للسيبيل) وتتحوّل إلى QCoin. يحصل VIP+ على ×2 في الوقت و×2 في المهام، أولوية في الظهور، حدود موسّعة للوسائط وتدقيقًا مُسرَّعًا. السمعة والمساهمة ليست ضجيجًا فارغًا، بل مقدار ذو دلالة اقتصادية.`,
+  `المنتدى وتعدين QCoin. المنتدى ليس «شبكة اجتماعية»، بل خط إنتاج للمعرفة. كل 4 ساعات تؤكّد النشاط وتُقفل المكافأة؛ المنشورات ذات الوسائط (فيديو/صور/صوت) تمر بتقييم Quantum L7 AI (جودة، تفاعل، مضاد للسبام/للسيبيل) وتتحوّل إلى QCoin. يحصل VIP+ على ×2 في الوقت و×2 في المهام، أولوية في الظهور، حدود موسّعة للوسائط وتدقيقًا مُسرَّعًا. السمعة والمساهمة ليست ضجيجًا فارغًا، بل مقدار ذو دلالة اقتصادية.`,
 
   `البورصة (قيد التطوير) والتوصيات. نواة التداول والتنفيذ تُربطان تدريجيًا؛ تتوفر بالفعل توصيات ذكاء اصطناعي بحسب الرموز/الأُطر الزمنية، وعمق دفتر الأوامر وبروفايل السيولة. نُصمّم توجيهًا ذكيًا، وحماية من التأخّر/الانزلاق، وقيود محفظية، ونَسب PnL. يحصل VIP+ على مؤشرات تجريبية، وأنماط what-if/backtest، وآفاق تحليل موسّعة.`,
 
@@ -2714,7 +2714,7 @@ about_paragraphs: [
 
   `Güvenlik ve gizlilik. Saklama yapılmaz: özel anahtarlar/seed istenmez veya saklanmaz. Roller erişimi sınırlar, eylemler kaydedilir, kişisel veriler en aza indirilir ve iletim/depolama sırasında şifrelenir. Anti-sybil/anti-fraud hatları QCoin ekonomisini ve forumun itibar mekanizmalarını korur; oturum doğrulaması dikkatli ama sıkı bir şekilde erişim bütünlüğünü sürdürür.`,
 
-  `Forum ve QCoin madenciliği. Forum bir “sosyal ağ” değil, bilgi üretim hattıdır. Her 4 saatte bir etkinliği onaylar ve ödülü kilitlersiniz; medya içeren gönderiler (video/görsel/ses) QuantumLCM-AI tarafından (kalite, etkileşim, anti-spam/anti-sybil) puanlanır ve QCoin’e dönüştürülür. VIP+ zaman açısından ×2 ve görevlerde ×2 alır, listelerde öncelik, genişletilmiş medya limitleri ve hızlandırılmış moderasyon elde eder. İtibar ve katkı, boş bir gürültü değil, ekonomik olarak anlamlı bir değerdir.`,
+  `Forum ve QCoin madenciliği. Forum bir “sosyal ağ” değil, bilgi üretim hattıdır. Her 4 saatte bir etkinliği onaylar ve ödülü kilitlersiniz; medya içeren gönderiler (video/görsel/ses) Quantum L7 AI tarafından (kalite, etkileşim, anti-spam/anti-sybil) puanlanır ve QCoin’e dönüştürülür. VIP+ zaman açısından ×2 ve görevlerde ×2 alır, listelerde öncelik, genişletilmiş medya limitleri ve hızlandırılmış moderasyon elde eder. İtibar ve katkı, boş bir gürültü değil, ekonomik olarak anlamlı bir değerdir.`,
 
   `Borsa (geliştirme aşamasında) ve öneriler. Ticaret çekirdeği ve yürütme kademeli olarak bağlanır; şu anda sembol/zaman aralıkları, emir defteri derinliği ve likidite profiline göre yapay zekâ önerileri mevcuttur. Akıllı yönlendirme, gecikme/kayma koruması, portföy kısıtlamaları ve PnL atfı tasarlıyoruz. VIP+ deneysel göstergelere, what-if/backtest modlarına ve genişletilmiş analiz ufuklarına erişim sağlar.`,
 
@@ -6449,14 +6449,14 @@ const UNLIMIT_EN = {
   ai_unlimit_title: 'Remove Limit — VIP+',
   ai_unlimit_price: 'Price: $59.99 / month',
   ai_unlimit_desc:
-    'Unlock 24/7 access to AI Box on this account and enable the extended VIP perimeter across the entire Quantum L7 ecosystem. The daily browser quota is disabled for 30 days after on-chain payment confirmation via NowPayments — activation is automatic, with no screenshots or messaging required. VIP status is synchronized between the web version, MiniApp and the Telegram bot: AI analytics without blockers, queue priority, access to media posting on the Forum (video/images/audio) and boosted QCoin mining. VIP gets a ×2 multiplier for time and quests, and content is scored by QuantumLCM-AI (quality/engagement/anti-spam/anti-sybil) and earns additional QCoin. Accruals are counted in the overall QCoin economy and prepare for the launch of the next-generation L7 blockchain — VIP receives elevated priority for distributions and an earlier withdrawal queue.',
+    'Unlock 24/7 access to AI Box on this account and enable the extended VIP perimeter across the entire Quantum L7 ecosystem. The daily browser quota is disabled for 30 days after on-chain payment confirmation via NowPayments — activation is automatic, with no screenshots or messaging required. VIP status is synchronized between the web version, MiniApp and the Telegram bot: AI analytics without blockers, queue priority, access to media posting on the Forum (video/images/audio) and boosted QCoin mining. VIP gets a ×2 multiplier for time and quests, and content is scored by Quantum L7 AI (quality/engagement/anti-spam/anti-sybil) and earns additional QCoin. Accruals are counted in the overall QCoin economy and prepare for the launch of the next-generation L7 blockchain — VIP receives elevated priority for distributions and an earlier withdrawal queue.',
   ai_unlimit_benefits: [
     'No daily quota — AI Box is available 24/7 for 30 days.',
     'Auto-activation via NowPayments: the webhook enables VIP+ immediately after on-chain confirmation.',
     'Status is linked to the current authentication/wallet; works in the web version, MiniApp and Telegram bot.',
     'Forum: media posting (video/images/audio) is allowed for VIP — content is ranked higher.',
     'QCoin mining every 4 hours: VIP gets ×2 time and ×2 quest multiplier.',
-    'Bonus QCoin for media content based on QuantumLCM-AI scoring (quality/engagement/anti-sybil).',
+    'Bonus QCoin for media content based on Quantum L7 AI scoring (quality/engagement/anti-sybil).',
     'Additional QCoin accruals for views and engagement of your posts based on transparent metrics.',
     'Priority servicing of the AI channel: higher limits, lower latency, faster responses.',
     'Exchange recommendations are already available: expanded analysis horizons, early access to experimental modes.',
@@ -6489,14 +6489,14 @@ const UNLIMIT_RU = {
   ai_unlimit_title: 'Снять лимит — VIP+',
   ai_unlimit_price: 'Цена: $59.99 / месяц',
   ai_unlimit_desc:
-    'Откройте круглосуточный доступ к AI Box на этом аккаунте и подключите расширенный VIP-контур всей экосистемы Quantum L7. Дневная квота в браузере отключается на 30 дней после on-chain подтверждения платежа через NowPayments — активация проходит автоматически, без скриншотов и переписки. Статус VIP синхронизируется между веб-версией, MiniApp и Telegram-ботом: AI-аналитика без стопоров, приоритет в очередях, доступ к медиапостингу на Форуме (видео/изображения/аудио) и усиленный QCoin-майнинг. Для VIP действует X2 множитель по времени и квестам, а контент проходит скоринг QuantumLCM-AI (качество/вовлечённость/anti-spam/anti-sybil) и приносит дополнительные QCoin. Накопления учитываются в общей экономике QCoin и готовят к запуску L7-блокчейна нового поколения — VIP получает повышенный приоритет на распределения и более раннюю очередь вывода.',
+    'Откройте круглосуточный доступ к AI Box на этом аккаунте и подключите расширенный VIP-контур всей экосистемы Quantum L7. Дневная квота в браузере отключается на 30 дней после on-chain подтверждения платежа через NowPayments — активация проходит автоматически, без скриншотов и переписки. Статус VIP синхронизируется между веб-версией, MiniApp и Telegram-ботом: AI-аналитика без стопоров, приоритет в очередях, доступ к медиапостингу на Форуме (видео/изображения/аудио) и усиленный QCoin-майнинг. Для VIP действует X2 множитель по времени и квестам, а контент проходит скоринг Quantum L7 AI (качество/вовлечённость/anti-spam/anti-sybil) и приносит дополнительные QCoin. Накопления учитываются в общей экономике QCoin и готовят к запуску L7-блокчейна нового поколения — VIP получает повышенный приоритет на распределения и более раннюю очередь вывода.',
   ai_unlimit_benefits: [
     'Без дневной квоты — AI Box доступен 24/7 на протяжении 30 дней.',
     'Автоактивация через NowPayments: вебхук включает VIP+ сразу после on-chain подтверждения.',
     'Статус привязан к текущей авторизации/кошельку; работает в веб-версии, MiniApp и Telegram-боте.',
     'Форум: разрешён медиапостинг (видео/изображения/аудио) для VIP — контент ранжируется выше.',
     'QCoin-майнинг каждые 4 часа: VIP получает X2 по времени и X2 квест-множитель.',
-    'Бонусные QCoin за медиаконтент по скорингу QuantumLCM-AI (quality/engagement/anti-sybil).',
+    'Бонусные QCoin за медиаконтент по скорингу Quantum L7 AI (quality/engagement/anti-sybil).',
     'Дополнительные QCoin начисления за просмотры и вовлечённость ваших постов по прозрачным метрикам.',
     'Приоритетное обслуживание AI-канала: выше лимиты, меньше задержки, ускоренные ответы.',
     'Рекомендации на бирже уже доступны: расширенные горизонты анализа, ранний доступ к экспериментальным режимам.',
@@ -6529,14 +6529,14 @@ const UNLIMIT_UK = {
   ai_unlimit_title: 'Зняти ліміт — VIP+',
   ai_unlimit_price: 'Ціна: $59.99 / місяць',
   ai_unlimit_desc:
-    'Відкрийте цілодобовий доступ до AI Box на цьому акаунті та підключіть розширений VIP-контур усієї екосистеми Quantum L7. Денна квота у браузері вимикається на 30 днів після on-chain підтвердження платежу через NowPayments — активація проходить автоматично, без скріншотів і листування. Статус VIP синхронізується між веб-версією, MiniApp і Telegram-ботом: AI-аналітика без стопів, пріоритет у чергах, доступ до медіапостингу на Форумі (відео/зображення/аудіо) та посилений QCoin-майнінг. Для VIP діє X2 множник за часом і квестами, а контент проходить скоринг QuantumLCM-AI (якість/залученість/anti-spam/anti-sybil) і приносить додаткові QCoin. Накопичення враховуються в загальній економіці QCoin і готують до запуску L7-блокчейна нового покоління — VIP отримує підвищений пріоритет у розподіленнях і більш ранню чергу виведення.',
+    'Відкрийте цілодобовий доступ до AI Box на цьому акаунті та підключіть розширений VIP-контур усієї екосистеми Quantum L7. Денна квота у браузері вимикається на 30 днів після on-chain підтвердження платежу через NowPayments — активація проходить автоматично, без скріншотів і листування. Статус VIP синхронізується між веб-версією, MiniApp і Telegram-ботом: AI-аналітика без стопів, пріоритет у чергах, доступ до медіапостингу на Форумі (відео/зображення/аудіо) та посилений QCoin-майнінг. Для VIP діє X2 множник за часом і квестами, а контент проходить скоринг Quantum L7 AI (якість/залученість/anti-spam/anti-sybil) і приносить додаткові QCoin. Накопичення враховуються в загальній економіці QCoin і готують до запуску L7-блокчейна нового покоління — VIP отримує підвищений пріоритет у розподіленнях і більш ранню чергу виведення.',
   ai_unlimit_benefits: [
     'Без денної квоти — AI Box доступний 24/7 протягом 30 днів.',
     'Автоактивація через NowPayments: вебхук вмикає VIP+ одразу після on-chain підтвердження.',
     'Статус прив’язаний до поточної авторизації/гаманця; працює у веб-версії, MiniApp і Telegram-боті.',
     'Форум: дозволено медіапостинг (відео/зображення/аудіо) для VIP — контент ранжується вище.',
     'QCoin-майнінг кожні 4 години: VIP отримує X2 за часом і X2 квест-множник.',
-    'Бонусні QCoin за медіаконтент за скорингом QuantumLCM-AI (quality/engagement/anti-sybil).',
+    'Бонусні QCoin за медіаконтент за скорингом Quantum L7 AI (quality/engagement/anti-sybil).',
     'Додаткові QCoin нарахування за перегляди та залученість ваших постів за прозорими метриками.',
     'Пріоритетне обслуговування AI-каналу: вищі ліміти, менше затримок, прискорені відповіді.',
     'Рекомендації на біржі вже доступні: розширені горизонти аналізу, ранній доступ до експериментальних режимів.',
@@ -6570,14 +6570,14 @@ const UNLIMIT_ES = {
   ai_unlimit_title: 'Eliminar límite — VIP+',
   ai_unlimit_price: 'Precio: $59.99 / mes',
   ai_unlimit_desc:
-    'Obtén acceso las 24 horas al AI Box en esta cuenta y activa el perímetro VIP ampliado de todo el ecosistema Quantum L7. La cuota diaria en el navegador se desactiva durante 30 días después de la confirmación on-chain del pago a través de NowPayments — la activación se realiza automáticamente, sin capturas de pantalla ni correspondencia. El estado VIP se sincroniza entre la versión web, MiniApp y el bot de Telegram: analítica de IA sin interrupciones, prioridad en las colas, acceso a publicación multimedia en el Foro (video/imagenes/audio) y minería de QCoin mejorada. Para los VIP se aplica un multiplicador X2 en tiempo y misiones, y el contenido pasa la puntuación de QuantumLCM-AI (calidad/participación/anti-spam/anti-sybil) generando QCoin adicional. Las acumulaciones se tienen en cuenta en la economía general de QCoin y preparan el lanzamiento del blockchain L7 de nueva generación — el VIP recibe mayor prioridad en las distribuciones y una cola de retiro anticipada.',
+    'Obtén acceso las 24 horas al AI Box en esta cuenta y activa el perímetro VIP ampliado de todo el ecosistema Quantum L7. La cuota diaria en el navegador se desactiva durante 30 días después de la confirmación on-chain del pago a través de NowPayments — la activación se realiza automáticamente, sin capturas de pantalla ni correspondencia. El estado VIP se sincroniza entre la versión web, MiniApp y el bot de Telegram: analítica de IA sin interrupciones, prioridad en las colas, acceso a publicación multimedia en el Foro (video/imagenes/audio) y minería de QCoin mejorada. Para los VIP se aplica un multiplicador X2 en tiempo y misiones, y el contenido pasa la puntuación de Quantum L7 AI (calidad/participación/anti-spam/anti-sybil) generando QCoin adicional. Las acumulaciones se tienen en cuenta en la economía general de QCoin y preparan el lanzamiento del blockchain L7 de nueva generación — el VIP recibe mayor prioridad en las distribuciones y una cola de retiro anticipada.',
   ai_unlimit_benefits: [
     'Sin cuota diaria — AI Box disponible 24/7 durante 30 días.',
     'Activación automática a través de NowPayments: el webhook habilita VIP+ inmediatamente después de la confirmación on-chain.',
     'El estado está vinculado a la autenticación/cartera actual; funciona en la versión web, MiniApp y bot de Telegram.',
     'Foro: publicación multimedia (video/imagenes/audio) permitida para VIP — el contenido se clasifica más alto.',
     'Minería de QCoin cada 4 horas: el VIP recibe X2 en tiempo y X2 multiplicador de misiones.',
-    'Bonificación de QCoin por contenido multimedia según la puntuación QuantumLCM-AI (quality/engagement/anti-sybil).',
+    'Bonificación de QCoin por contenido multimedia según la puntuación Quantum L7 AI (quality/engagement/anti-sybil).',
     'Acreditaciones adicionales de QCoin por vistas y participación en tus publicaciones según métricas transparentes.',
     'Atención prioritaria del canal de IA: límites más altos, menor latencia, respuestas aceleradas.',
     'Las recomendaciones en el intercambio ya están disponibles: horizontes de análisis ampliados, acceso anticipado a modos experimentales.',
@@ -6611,14 +6611,14 @@ const UNLIMIT_ZH = {
   ai_unlimit_title: '解除限额 — VIP+',
   ai_unlimit_price: '价格：$59.99 / 月',
   ai_unlimit_desc:
-    '为此账号开启 AI Box 的 24/7 不间断访问，并接入 Quantum L7 全生态的扩展 VIP 边界。通过 NowPayments 完成链上支付确认后，浏览器中的每日配额将停用 30 天——激活全程自动完成，无需截图与往返沟通。VIP 状态在网页版、MiniApp 与 Telegram 机器人之间同步：AI 分析无阻塞、队列优先、可在论坛发布媒体（视频/图片/音频），并强化 QCoin 挖矿。VIP 享有 X2 时间与任务倍增，内容将通过 QuantumLCM-AI 评分（质量/参与度/anti-spam/anti-sybil）并获得额外 QCoin。累积计入 QCoin 整体经济，为下一代 L7 区块链上线做准备——VIP 在分配与提现队列中获得更高优先级与更早通道。',
+    '为此账号开启 AI Box 的 24/7 不间断访问，并接入 Quantum L7 全生态的扩展 VIP 边界。通过 NowPayments 完成链上支付确认后，浏览器中的每日配额将停用 30 天——激活全程自动完成，无需截图与往返沟通。VIP 状态在网页版、MiniApp 与 Telegram 机器人之间同步：AI 分析无阻塞、队列优先、可在论坛发布媒体（视频/图片/音频），并强化 QCoin 挖矿。VIP 享有 X2 时间与任务倍增，内容将通过 Quantum L7 AI 评分（质量/参与度/anti-spam/anti-sybil）并获得额外 QCoin。累积计入 QCoin 整体经济，为下一代 L7 区块链上线做准备——VIP 在分配与提现队列中获得更高优先级与更早通道。',
   ai_unlimit_benefits: [
     '无日配额——AI Box 在 30 天内 24/7 可用。',
     '通过 NowPayments 自动激活：webhook 在链上确认后立即开启 VIP+。',
     '状态绑定到当前授权/钱包；适用于网页版、MiniApp 与 Telegram 机器人。',
     '论坛：VIP 可发布媒体（视频/图片/音频）——内容排名更靠前。',
     'QCoin 挖矿每 4 小时一次：VIP 获得 X2 时间与 X2 任务倍增。',
-    '基于 QuantumLCM-AI 评分（quality/engagement/anti-sybil）的媒体内容可获额外 QCoin 奖励。',
+    '基于 Quantum L7 AI 评分（quality/engagement/anti-sybil）的媒体内容可获额外 QCoin 奖励。',
     '依据透明指标，按帖子浏览与参与度获得额外 QCoin 计入。',
     'AI 通道优先服务：更高限额、更低延迟、更快响应。',
     '交易所推荐已可用：更广的分析视野，抢先体验实验模式。',
@@ -6652,14 +6652,14 @@ const UNLIMIT_AR = {
   ai_unlimit_title: 'إزالة الحد — VIP+',
   ai_unlimit_price: 'السعر: $59.99 / شهر',
   ai_unlimit_desc:
-    'افتح وصولاً على مدار الساعة إلى AI Box على هذا الحساب وفعّل نطاق VIP الموسّع عبر منظومة Quantum L7 بأكملها. يتم تعطيل الحصة اليومية في المتصفح لمدة 30 يوماً بعد تأكيد الدفع على السلسلة عبر NowPayments — تتم عملية التفعيل تلقائياً، دون لقطات شاشة أو مراسلات. تتزامن حالة VIP بين الإصدار الويب وMiniApp وروبوت Telegram: تحليلات الذكاء الاصطناعي بلا توقفات، أولوية في الطوابير، إمكانية نشر الوسائط في المنتدى (فيديو/صور/صوت) وتعدين QCoin معزّز. يحصل VIP على مُضاعِف X2 للوقت والمهام، ويخضع المحتوى لتقييم QuantumLCM-AI (الجودة/التفاعل/anti-spam/anti-sybil) ويُولّد QCoin إضافية. تُحتسب التراكمات ضمن اقتصاد QCoin العام وتُهيّئ لإطلاق بلوكتشين L7 من الجيل الجديد — يحصل VIP على أولوية أعلى في التوزيعات وطابور سحب أبكر.',
+    'افتح وصولاً على مدار الساعة إلى AI Box على هذا الحساب وفعّل نطاق VIP الموسّع عبر منظومة Quantum L7 بأكملها. يتم تعطيل الحصة اليومية في المتصفح لمدة 30 يوماً بعد تأكيد الدفع على السلسلة عبر NowPayments — تتم عملية التفعيل تلقائياً، دون لقطات شاشة أو مراسلات. تتزامن حالة VIP بين الإصدار الويب وMiniApp وروبوت Telegram: تحليلات الذكاء الاصطناعي بلا توقفات، أولوية في الطوابير، إمكانية نشر الوسائط في المنتدى (فيديو/صور/صوت) وتعدين QCoin معزّز. يحصل VIP على مُضاعِف X2 للوقت والمهام، ويخضع المحتوى لتقييم Quantum L7 AI (الجودة/التفاعل/anti-spam/anti-sybil) ويُولّد QCoin إضافية. تُحتسب التراكمات ضمن اقتصاد QCoin العام وتُهيّئ لإطلاق بلوكتشين L7 من الجيل الجديد — يحصل VIP على أولوية أعلى في التوزيعات وطابور سحب أبكر.',
   ai_unlimit_benefits: [
     'بدون حصة يومية — AI Box متاح 24/7 لمدة 30 يوماً.',
     'تفعيل تلقائي عبر NowPayments: يفعّل الـ VIP+ مباشرة بعد التأكيد على السلسلة عبر webhook.',
     'الحالة مرتبطة بعملية المصادقة/المحفظة الحالية؛ تعمل في الإصدار الويب وMiniApp وروبوت Telegram.',
     'المنتدى: مسموح نشر الوسائط (فيديو/صور/صوت) لمستخدمي VIP — يتم ترتيب المحتوى أعلى.',
     'تعدين QCoin كل 4 ساعات: يحصل VIP على X2 للوقت وX2 مُضاعِف المهام.',
-    'QCoin إضافية لمحتوى الوسائط وفق تقييم QuantumLCM-AI (quality/engagement/anti-sybil).',
+    'QCoin إضافية لمحتوى الوسائط وفق تقييم Quantum L7 AI (quality/engagement/anti-sybil).',
     'اعتمادات QCoin إضافية مقابل المشاهدات والتفاعل مع منشوراتك وفق مقاييس شفافة.',
     'خدمة أولوية لقناة الذكاء الاصطناعي: حدود أعلى، كمون أقل، واستجابات أسرع.',
     'توصيات البورصة متاحة بالفعل: آفاق تحليل موسّعة، وصول مبكر للأوضاع التجريبية.',
@@ -6693,14 +6693,14 @@ const UNLIMIT_TR = {
   ai_unlimit_title: 'Limiti kaldır — VIP+',
   ai_unlimit_price: 'Fiyat: $59.99 / ay',
   ai_unlimit_desc:
-    'Bu hesapta AI Box’a 7/24 erişim sağlayın ve Quantum L7 ekosisteminin tamamında genişletilmiş VIP çevresini etkinleştirin. NowPayments üzerinden zincir üzeri ödeme onayından sonra tarayıcıdaki günlük kota 30 gün boyunca devre dışı bırakılır — etkinleştirme otomatik olarak gerçekleşir, ekran görüntüsü veya yazışma gerekmez. VIP durumu web sürümü, MiniApp ve Telegram bot arasında senkronize edilir: kesintisiz AI analitiği, kuyruk önceliği, Forumda medya paylaşımı (video/görseller/ses) erişimi ve güçlendirilmiş QCoin madenciliği. VIP kullanıcıları için zaman ve görevlerde X2 çarpanı geçerlidir, içerik QuantumLCM-AI (kalite/katılım/anti-spam/anti-sybil) tarafından puanlanır ve ek QCoin kazandırır. Birikimler genel QCoin ekonomisine dahil edilir ve yeni nesil L7 blok zincirinin lansmanına hazırlanır — VIP, dağıtımlarda ve para çekme sıralarında daha yüksek öncelik elde eder.',
+    'Bu hesapta AI Box’a 7/24 erişim sağlayın ve Quantum L7 ekosisteminin tamamında genişletilmiş VIP çevresini etkinleştirin. NowPayments üzerinden zincir üzeri ödeme onayından sonra tarayıcıdaki günlük kota 30 gün boyunca devre dışı bırakılır — etkinleştirme otomatik olarak gerçekleşir, ekran görüntüsü veya yazışma gerekmez. VIP durumu web sürümü, MiniApp ve Telegram bot arasında senkronize edilir: kesintisiz AI analitiği, kuyruk önceliği, Forumda medya paylaşımı (video/görseller/ses) erişimi ve güçlendirilmiş QCoin madenciliği. VIP kullanıcıları için zaman ve görevlerde X2 çarpanı geçerlidir, içerik Quantum L7 AI (kalite/katılım/anti-spam/anti-sybil) tarafından puanlanır ve ek QCoin kazandırır. Birikimler genel QCoin ekonomisine dahil edilir ve yeni nesil L7 blok zincirinin lansmanına hazırlanır — VIP, dağıtımlarda ve para çekme sıralarında daha yüksek öncelik elde eder.',
   ai_unlimit_benefits: [
     'Günlük kota olmadan — AI Box 30 gün boyunca 7/24 kullanılabilir.',
     'NowPayments üzerinden otomatik etkinleştirme: webhook, zincir üzeri onaydan hemen sonra VIP+’ı etkinleştirir.',
     'Durum mevcut oturum açma/cüzdanla ilişkilidir; web sürümünde, MiniApp ve Telegram botta çalışır.',
     'Forum: VIP kullanıcıları için medya paylaşımı (video/görseller/ses) serbesttir — içerik daha üst sıralarda görünür.',
     'QCoin madenciliği her 4 saatte bir: VIP kullanıcıları zaman ve görevlerde X2 çarpan alır.',
-    'QuantumLCM-AI puanlamasına (quality/engagement/anti-sybil) göre medya içeriği için bonus QCoin.',
+    'Quantum L7 AI puanlamasına (quality/engagement/anti-sybil) göre medya içeriği için bonus QCoin.',
     'Gönderilerinizin görüntülenmesi ve etkileşimine göre şeffaf metriklerle ek QCoin kazançları.',
     'AI kanalında öncelikli hizmet: daha yüksek limitler, daha az gecikme, daha hızlı yanıtlar.',
     'Borsa önerileri zaten mevcut: genişletilmiş analiz ufukları, deneysel modlara erken erişim.',

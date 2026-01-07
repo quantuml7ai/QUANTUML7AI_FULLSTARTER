@@ -347,7 +347,7 @@ const sigPost  = (p) => `${(p.text||'').slice(0,120)}|${p.userId||p.accountId||'
 const CFG = (typeof window!=='undefined' && window.__FORUM_CONF__) || {};
 const MIN_INTERVAL_MS   = Math.max(0, Number(CFG.FORUM_MIN_INTERVAL_SEC   ?? 1)*1000);
 const REACTS_PER_MINUTE = Number(CFG.FORUM_REACTS_PER_MINUTE ?? 120);
-const VIEW_TTL_SEC      = Number(CFG.FORUM_VIEW_TTL_SEC      ?? 60);
+const VIEW_TTL_SEC      = Number(CFG.FORUM_VIEW_TTL_SEC      ?? 0);
 
 
 function getBucket(ttlSec=VIEW_TTL_SEC){ return Math.floor((Date.now()/1000)/ttlSec) }
@@ -665,8 +665,63 @@ const api = {
     } catch {
       return { ok: false, error: 'network' }
     }
-  }, 
+  },
+
+  // ===== SUBSCRIPTIONS (author subscribe) =====
+  async subsList(viewerId) {
+    try {
+      const r = await fetch('/api/forum/subs/list', {
+        method: 'GET',
+        headers: { 'x-forum-user-id': String(viewerId || '') },
+        cache: 'no-store',
+      })
+      return await r.json().catch(() => ({ ok: false, authors: [] }))
+    } catch {
+      return { ok: false, error: 'network', authors: [] }
+    }
+  },
+
+  async subsToggle(viewerId, authorId) {
+    try {
+      const r = await fetch('/api/forum/subs/toggle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-forum-user-id': String(viewerId || ''),
+        },
+        cache: 'no-store',
+        body: JSON.stringify({ authorId: String(authorId || '') }),
+      })
+      return await r.json().catch(() => ({ ok: false }))
+    } catch {
+      return { ok: false, error: 'network' }
+    }
+  },
+
+  async subsMyCount(viewerId) {
+    try {
+      const r = await fetch('/api/forum/subs/my-count', {
+        method: 'GET',
+        headers: { 'x-forum-user-id': String(viewerId || '') },
+        cache: 'no-store',
+      })
+      return await r.json().catch(() => ({ ok: false, count: 0 }))
+    } catch {
+      return { ok: false, error: 'network', count: 0 }
+    }
+  },
+
+  async subsCount(authorId) {
+    try {
+      const params = new URLSearchParams({ authorId: String(authorId || '') })
+      const r = await fetch('/api/forum/subs/count?' + params.toString(), { cache: 'no-store' })
+      return await r.json().catch(() => ({ ok: false, count: 0 }))
+    } catch {
+      return { ok: false, error: 'network', count: 0 }
+    }
+  },
 };
+
 
 function initForumAutosnapshot({ intervalMs = 60000, debounceMs = 1000 } = {}) {
   if (!isBrowser()) return () => {};
@@ -1317,6 +1372,203 @@ const Styles = () => (
       outline: 2px solid rgba(15, 118, 110, .8);
       outline-offset: 0;
     }
+/* ===== Profile popover: badge + avatar upload (header) ===== */
+.profileTopRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin: 4px 0 10px;
+}
+
+.profileTopRow .profileBadgeLeft{ min-width:0; }
+
+/* квадратная кнопка справа: по клику — выбор файла; после выбора — превью внутри */
+.avaUploadSquare{
+  --s: clamp(74px, 14vw, 96px);
+  width: var(--s);
+  height: var(--s);
+  flex: 0 0 auto;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.14);
+  background:
+    radial-gradient(120% 120% at 30% 20%, rgba(80,167,255,.20), rgba(0,0,0,0) 60%),
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.06),
+    0 10px 26px rgba(0,0,0,.35);
+  overflow:hidden;
+  display:grid;
+  place-items:center;
+  padding:0;
+  position:relative;
+  cursor:pointer;
+  user-select:none;
+  touch-action:none;
+}
+.avaUploadSquare:focus-visible{
+  outline:none;
+  box-shadow:
+    0 0 0 2px rgba(80,167,255,.35),
+    inset 0 0 0 1px rgba(255,255,255,.06),
+    0 10px 26px rgba(0,0,0,.35);
+}
+.avaUploadSquare::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  border-radius: 16px;
+  pointer-events:none;
+  background: conic-gradient(
+    from 180deg,
+    rgba(80,167,255,0) 0deg,
+    rgba(80,167,255,.65) 40deg,
+    rgba(80,167,255,0) 95deg,
+    rgba(155,91,255,.55) 150deg,
+    rgba(80,167,255,0) 240deg,
+    rgba(80,167,255,.65) 320deg,
+    rgba(80,167,255,0) 360deg
+  );
+  opacity:.35;
+  filter: blur(.2px);
+  mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  -webkit-mask-composite:xor;
+  padding:2px;
+}
+
+.avaUploadSquareCanvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+.avaUploadSquareTxt{
+  position:relative;
+  z-index:1;
+  text-align:center;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  opacity:.78;
+  line-height:1.2;
+  text-shadow: 0 0 12px rgba(80,167,255,.22);
+}
+
+.avaUploadSquareBusy{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  font-size:11px;
+  letter-spacing:.08em;
+  background: rgba(0,0,0,.35);
+  backdrop-filter: blur(3px);
+}
+
+/* Зум-строка: всегда следующей строкой и на всю ширину поповера */
+.avaZoomWideRow{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin: 2px 0 12px;
+}
+.avaZoomWideRow .avaZoomLbl{
+  flex:0 0 auto;
+  font-size:11px;
+  opacity:.78;
+  width:44px;
+}
+
+/* cyber range */
+.cyberRange{
+  -webkit-appearance:none;
+  appearance:none;
+  width:100%;
+  height: 28px;
+  background: transparent;
+  cursor: pointer;
+}
+.cyberRange:disabled{ opacity:.45; cursor:not-allowed; }
+.cyberRange::-webkit-slider-runnable-track{
+  height: 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  background:
+    linear-gradient(90deg, rgba(80,167,255,.45), rgba(155,91,255,.35));
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.35), 0 0 18px rgba(80,167,255,.14);
+}
+.cyberRange::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  appearance:none;
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.22);
+  background:
+    radial-gradient(120% 120% at 30% 30%, rgba(255,255,255,.40), rgba(255,255,255,.08) 60%),
+    linear-gradient(180deg, rgba(80,167,255,.55), rgba(155,91,255,.35));
+  box-shadow:
+    0 0 0 3px rgba(80,167,255,.12),
+    0 10px 20px rgba(0,0,0,.35);
+}
+.cyberRange::-moz-range-track{
+  height: 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: linear-gradient(90deg, rgba(80,167,255,.45), rgba(155,91,255,.35));
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.35), 0 0 18px rgba(80,167,255,.14);
+}
+.cyberRange::-moz-range-thumb{
+  width: 18px;
+  height: 18px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.22);
+  background: radial-gradient(120% 120% at 30% 30%, rgba(255,255,255,.40), rgba(255,255,255,.08) 60%),
+              linear-gradient(180deg, rgba(80,167,255,.55), rgba(155,91,255,.35));
+  box-shadow: 0 0 0 3px rgba(80,167,255,.12), 0 10px 20px rgba(0,0,0,.35);
+}
+
+.avaFileInput{ display:none; }
+
+.avaUploadMini{
+  --u:44px;
+  width:var(--u);
+  height:var(--u);
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(8,10,16,.72);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06), 0 10px 22px rgba(0,0,0,.35);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  cursor:pointer;
+  overflow:hidden;
+}
+
+.avaUploadMiniTxt{
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.14em;
+  opacity:.65;
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  text-transform:uppercase;
+}
+
+.avaUploadMiniImg{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+/* NOTE: duplicate legacy rule removed (was breaking layout with display:absolute) */
 
 /* 1) Контейнер: ничего не меняем кроме обрезки и контекста позиционирования */
 .avaBig,
@@ -1351,6 +1603,19 @@ const Styles = () => (
 .avaMini :is(span, div):has(> img){
   position: absolute;       /* заполняет всю кнопку */
   inset: 0;
+}
+.avaCropStage{
+  position:absolute;
+  inset:0;
+  transform-origin:center;
+  will-change:transform;
+}
+.avaCropImg{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  pointer-events:none;
+  display:block;
 }
 
 /* ====== НОВОЕ: правый блок управления в хедере ====== */
@@ -1392,7 +1657,119 @@ const Styles = () => (
 .searchDrop{ position:absolute; top:48px; right:0; width:100%; max-height:360px; overflow:auto; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:8px; z-index:3000 }
 .sortDrop{ position:absolute; top:48px; right:-4px; width:220px; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:6px; z-index:3000 }
 
+.starBtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:30px;
+  height:30px;
+  margin-left:6px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(10,16,28,.25);
+}
+.starBtn .starPath{
+  fill:none;
+  stroke:rgba(255,255,255,.75);
+  stroke-width:1.8;
+  stroke-linejoin:round;
+}
+.starBtn.on{
+  border-color:rgba(255,215,90,.55);
+  background:rgba(255,215,90,.12);
+}
+.starBtn.on .starPath{
+  fill:rgba(255,215,90,.95);
+  stroke:rgba(255,215,90,.95);
+}
+.starBtn.dis{ opacity:.45; pointer-events:none; }
 
+.subsCounter{
+
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 50px;
+  margin-left:0px;
+  border-radius:999px;
+  border:1px solid rgba(255,215,90,.22);
+  background:rgba(10,16,28,.25);
+  white-space:nowrap;
+  overflow:hidden;
+}
+.subsCounter .subsRing{
+  position:absolute;
+  inset:-2px;
+  border-radius:999px;
+  pointer-events:none;
+  background:conic-gradient(
+    from 180deg,
+    rgba(255,215,90,0) 0deg,
+    rgba(255,215,90,.85) 40deg,
+    rgba(255,215,90,0) 90deg,
+    rgba(255,215,90,.55) 140deg,
+    rgba(255,215,90,0) 220deg,
+    rgba(255,215,90,.85) 290deg,
+    rgba(255,215,90,0) 360deg
+  );
+  filter:blur(.2px);
+  opacity:.75;
+  animation:subsRingSpin 2.6s linear infinite;
+  mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  -webkit-mask-composite:xor;
+  padding:2px;
+}
+@keyframes subsRingSpin{ to{ transform:rotate(360deg); } }
+
+.subsCounter.noAuth{
+  border-color:rgba(255,80,80,.35);
+  animation:subsNoAuthPulse 1.2s ease-in-out infinite;
+}
+@keyframes subsNoAuthPulse{
+  0%,100%{ box-shadow:0 0 0 0 rgba(255,80,80,.0); }
+  50%{ box-shadow:0 0 0 6px rgba(255,80,80,.12); }
+}
+
+.subsCounter .subsStar{ color:rgba(255,215,90,.98); font-size:16px; line-height:1; position:relative; z-index:1; }
+.subsCounter .subsValue{ font-variant-numeric:tabular-nums; font-size:12px; position:relative; z-index:1; }
+
+@media (max-width:520px){
+  .subsCounter{ margin-left:0; margin-top:8px; }
+  .qRowRight{ flex-wrap:wrap; }
+}
+.subsCounter.noAuth{
+  border-color:rgba(255,70,70,.55);
+  box-shadow:0 0 0 0 rgba(255,70,70,.35);
+  animation:subsPulse 1.2s infinite;
+}
+.subsCounter.noAuth .starDot{ color:rgba(255,70,70,.95); }
+
+@keyframes subsPulse{
+  0%{ box-shadow:0 0 0 0 rgba(255,70,70,.35); }
+  70%{ box-shadow:0 0 0 10px rgba(255,70,70,0); }
+  100%{ box-shadow:0 0 0 0 rgba(255,70,70,0); }
+}
+
+.starModeIcon{ color:rgba(255,215,90,.95); }
+.starModeOn{ border-color:rgba(255,215,90,.55) !important; }
+
+.starModeBtn{
+  width:44px;
+  height:34px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(10,16,28,.25);
+}
+.starModeBtn .starPath{ fill:none; stroke:rgba(255,215,90,.8); stroke-width:1.8; stroke-linejoin:round; }
+.starModeBtn.on{ border-color:rgba(255,215,90,.55); box-shadow:0 0 0 3px rgba(255,215,90,.08); }
+
+.starModeBtn.on .starPath{ fill:rgba(255,215,90,.95); stroke:rgba(255,215,90,.95); }
     .adminWrap{ position:relative; flex:0 0 auto } /* справа от поиска, в рамках .controls */
     .adminBtn{ border:1px solid rgba(255,255,255,.16); border-radius:12px; padding:.55rem .8rem; font-weight:700; letter-spacing:.4px }
     .adminOff{ background:rgba(255,90,90,.10); border-color:rgba(255,120,120,.45); color:#ffb1a1 }
@@ -1401,15 +1778,135 @@ const Styles = () => (
     .qft_toast_wrap{ position:fixed; right:16px; bottom:16px; z-index:4000 }
     .qft_toast{ max-width:min(420px,90vw); padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(10,14,22,.94); color:#eaf4ff; box-shadow:0 10px 28px rgba(0,0,0,.45) }
     .qft_toast.ok{ border-color:rgba(70,220,130,.5) } .qft_toast.warn{ border-color:rgba(255,200,80,.5) } .qft_toast.err{ border-color:rgba(255,90,90,.5) }
-    
+
     /* мини-поповеры */
-    .adminPop, .profilePop{
+    .adminPop{
       position:absolute; width: min(62vw, 360px);
+      border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98);
+      border-radius:12px; padding:10px; z-index:3200; box-shadow:0 10px 30px rgba(0,0,0,.45)
+    }
+      .profilePop{
+
+      position:absolute; width: min(75vw, 500px);
       border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98);
       border-radius:12px; padding:10px; z-index:3200; box-shadow:0 10px 30px rgba(0,0,0,.45)
     }
     .profileList{ max-height:260px; overflow:auto; padding:4px; border:1px solid rgba(255,255,255,.08); border-radius:10px; background:rgba(255,255,255,.03) }
 
+    /* ===== Avatar Upload UI (ProfilePopover) ===== */
+    .profileAvatarHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:6px;
+    }
+
+    .avaUploadCard{
+      flex:0 0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    .avaUploadBtn{
+      width:96px;
+      height:34px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(10,16,28,.25);
+      color:#eaf4ff;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:0;
+      line-height:1;
+      cursor:pointer;
+      user-select:none;
+    }
+    .avaUploadLabel{ font-weight:900; letter-spacing:.12em; font-size:11px; opacity:.95; }
+    .avaUploadSub{ font-size:10px; opacity:.65; margin-top:2px; }
+    @media (hover:hover){
+      .avaUploadBtn:hover{ transform:translateY(-1px); filter:saturate(1.15); }
+      .avaUploadBtn:active{ transform:translateY(0); }
+    }
+
+    .avaCropPanel{
+      margin:6px 0 10px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.03);
+      border-radius:12px;
+      padding:10px;
+      display:grid;
+      grid-template-columns: 120px 1fr;
+      gap:10px;
+      align-items:stretch;
+    }
+
+    .avaCropBox{
+      width:120px;
+      height:120px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.35);
+      overflow:hidden;
+      position:relative;
+      touch-action:none;
+    }
+
+    .avaCropImg{
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      transform-origin:center center;
+      width:auto;
+      height:auto;
+      max-width:none;
+      max-height:none;
+      user-select:none;
+      pointer-events:none;
+    }
+
+    .avaCropHint{
+      position:absolute;
+      left:8px;
+      bottom:8px;
+      font-size:10px;
+      padding:4px 6px;
+      border-radius:10px;
+      background:rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.10);
+      color:rgba(240,248,255,.85);
+    }
+
+    .avaCropRight{ display:flex; flex-direction:column; gap:8px; min-width:0; }
+    .avaCropMeta{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+    .avaCropName{ font-weight:800; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .avaCropDims{ font-size:11px; opacity:.7; flex:0 0 auto; }
+
+    .avaZoomRow{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .avaZoomTxt{ font-size:11px; opacity:.8; width:44px; }
+    .avaZoomRow input[type="range"]{ width:100%; }
+
+    .avaCropBtns{ display:flex; gap:8px; justify-content:flex-end; }
+
+    /* На мобиле делаем превью “выше/ниже”, как ты просил */
+    @media (max-width:520px){
+      .avaUploadBtn{ width:86px; height:32px; border-radius:12px; }
+      .avaCropPanel{
+        grid-template-columns: 1fr;
+      }
+      .avaCropBox{
+        width:100%;
+        height:140px;   /* чуть выше на мобиле */
+      }
+    }
 /* Вьюпорты: переносим ВЕСЬ ряд под аватар, но внутри — одна строка */
 @media (max-width:860px){
   .controls{
@@ -3677,8 +4174,37 @@ function AdminPopover({ anchorRef, open, onClose, t, isActive, onActivated, onDe
   useEffect(() => { if (open) setPass(''); }, [open]);
   if (!open || !anchorRef?.current) return null;
 
-  const top = anchorRef.current.offsetTop + anchorRef.current.offsetHeight + 8;
-  const right = 0;
+const btn = anchorRef.current;
+
+const isRtl =
+  typeof document !== 'undefined' &&
+  (document.documentElement?.dir === 'rtl' ||
+    getComputedStyle(document.documentElement).direction === 'rtl');
+
+const GAP = 8;
+const WANT_W = 260;
+
+// родитель, относительно которого работает absolute
+const parent = btn.offsetParent || btn.parentElement;
+const pRect = parent?.getBoundingClientRect?.() || { left: 0, right: window.innerWidth };
+const r = btn.getBoundingClientRect();
+
+// ширину ограничиваем экраном
+const maxW = Math.max(200, Math.min(WANT_W, window.innerWidth - GAP * 2));
+
+// top в координатах parent (важно!)
+const top = Math.round((r.bottom - (parent?.getBoundingClientRect?.()?.top || 0)) + GAP);
+
+// “идеальная” привязка к кнопке:
+// LTR — правым краем к правому краю кнопки
+// RTL — левым краем к левому краю кнопки
+let leftAbs = isRtl ? r.left : (r.right - maxW);
+
+// clamp в пределах viewport
+leftAbs = Math.max(GAP, Math.min(leftAbs, window.innerWidth - maxW - GAP));
+
+// переводим в координаты parent
+const left = Math.round(leftAbs - pRect.left);
 
   const activate = async () => {
     const password = pass.trim();
@@ -3715,7 +4241,7 @@ function AdminPopover({ anchorRef, open, onClose, t, isActive, onActivated, onDe
   };
 
   return (
-    <div className="adminPop" style={{ top, right }}>
+<div className="adminPop" style={{ top, left, width: maxW }}>
       {isActive ? (
         <div className="grid gap-2">
           <div className="meta">{t('forum_admin_active')}</div>
@@ -3749,10 +4275,39 @@ function AdminPopover({ anchorRef, open, onClose, t, isActive, onActivated, onDe
 function VipPopover({ anchorRef, open, onClose, t, vipActive, onPay }){
   const el = anchorRef?.current
   if (!open || !el) return null
-  const top = (el.offsetTop || 0) + (el.offsetHeight || 0) + 8
-  const right = -90
-  return (
-    <div className="adminPop" style={{ top, right }}>
+const btn = el;
+
+const isRtl =
+  typeof document !== 'undefined' &&
+  (document.documentElement?.dir === 'rtl' ||
+    getComputedStyle(document.documentElement).direction === 'rtl');
+
+const GAP = 8;
+const WANT_W = 280;
+
+// absolute относительно offsetParent (якорный контейнер кнопки)
+const parent = btn.offsetParent || btn.parentElement;
+const pRect = parent?.getBoundingClientRect?.() || { left: 0, right: window.innerWidth };
+const r = btn.getBoundingClientRect();
+
+// ширина + защита от вылезания за экран
+const maxW = Math.max(220, Math.min(WANT_W, window.innerWidth - GAP * 2));
+
+// top в координатах parent
+const top = Math.round((r.bottom - (parent?.getBoundingClientRect?.()?.top || 0)) + GAP);
+
+// идеальная привязка к кнопке
+let leftAbs = isRtl ? r.left : (r.right - maxW);
+
+// clamp по viewport
+leftAbs = Math.max(GAP, Math.min(leftAbs, window.innerWidth - maxW - GAP));
+
+// в координаты parent
+const left = Math.round(leftAbs - pRect.left);
+
+return (
+  <div className="adminPop" style={{ top, left, width: maxW }}>
+
       {vipActive ? (
         <div className="grid gap-2">
           <div className="meta">{t('forum_vip_active')}</div>
@@ -3992,9 +4547,51 @@ function QCoinInline({ t, userKey, vipActive, anchorRef }) {
   )
 }
 
+function FollowersCounterInline({ t, viewerId, count, loading }) {
+  const noAuth = !String(viewerId || '').trim()
+  const v = noAuth ? 0 : Number(count || 0)
+
+  return (
+    <button
+      type="button"
+      className={`subsCounter ${noAuth ? 'noAuth' : 'authed'}`}
+      onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); }}
+      title={t?.('forum_followers') || 'Подписчики'}
+     aria-label="Followers count"
+      aria-disabled={noAuth}
+    >
+      <span className="subsRing" aria-hidden />
+      <span className="subsStar" aria-hidden>★</span>
+<span className="subsValue" suppressHydrationWarning>
+  {loading ? '…' : <HydrateText value={formatCount(v)} />}
+</span>
+
+    </button>
+  )
+}
 
 /** мини-поповер профиля рядом с аватаром */
-function ProfilePopover({ anchorRef, open, onClose, t, auth, vipActive, onSaved }) {
+function ProfilePopover({
+  anchorRef,
+  open,
+  onClose,
+  t,
+  auth,
+  vipActive,
+  onSaved,
+
+  viewerId,
+  myFollowersCount,
+  myFollowersLoading,
+
+  // 👇 deps from Forum scope (moderation + toasts)
+  moderateImageFiles,
+  toastI18n,
+  reasonKey,
+  reasonFallbackEN,
+}) {
+
+
   // нормализуем UID через общий хелпер, чтобы TG и веб совпадали
   const baseAuth = auth || {};
   const base = baseAuth.asherId || baseAuth.accountId || '';
@@ -4013,7 +4610,238 @@ function ProfilePopover({ anchorRef, open, onClose, t, auth, vipActive, onSaved 
   const initialLocal = readLocal() || {};
   const [nick, setNick] = useState(initialLocal.nickname || '');
   const [icon, setIcon] = useState(initialLocal.icon || ICONS[0]);
-    // валидация ника
+ 
+  // ===== Upload Avatar (custom photo) =====
+  // ВАЖНО: превью и сохранение используют ОДИН И ТОТ ЖЕ canvas-рендер -> идеальное совпадение.
+  const fileRef = useRef(null);
+  const avaBoxRef = useRef(null);
+  const avaCanvasRef = useRef(null);
+
+  const [uploadFile, setUploadFile] = useState(null);      // File выбранный пользователем
+  const [imgInfo, setImgInfo] = useState({ w: 0, h: 0 });  // натуральные размеры
+  const [crop, setCrop] = useState({ x: 0, y: 0, z: 1 });  // translate(px) + zoom(mult)
+  const [uploadBusy, setUploadBusy] = useState(false);
+  const dragRef = useRef({ on: false, x: 0, y: 0, sx: 0, sy: 0 });
+
+  const bmpRef = useRef(null); // ImageBitmap
+  const boxSizeRef = useRef(0);
+
+  // финальная уборка (на размонтирование)
+  useEffect(() => {
+    return () => {
+      try { bmpRef.current?.close?.(); } catch {}
+      bmpRef.current = null;
+    };
+  }, []);
+  // когда поповер открывается — сбрасываем превью (чтобы не "тащилось" по страницам)
+  useEffect(() => {
+    if (!open) return;
+    // не трогаем icon/nick (они уже выставляются ниже)
+    // сбрасываем только upload-панель
+    setUploadFile(null);
+    setImgInfo({ w: 0, h: 0 });
+    setCrop({ x: 0, y: 0, z: 1 });
+    setUploadBusy(false);
+    try { bmpRef.current?.close?.(); } catch {}
+    bmpRef.current = null;
+  }, [open]);
+
+  // resize: держим canvas = размеру квадрата (адаптив)
+  useEffect(() => {
+    if (!open) return;
+    const el = avaBoxRef.current;
+    if (!el) return;
+
+    const applySize = () => {
+      const r = el.getBoundingClientRect();
+      const sz = Math.max(1, Math.round(Math.min(r.width, r.height)));
+      boxSizeRef.current = sz;
+      const c = avaCanvasRef.current;
+      if (c) {
+        // devicePixelRatio для чёткой отрисовки
+        const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        c.width = Math.round(sz * dpr);
+        c.height = Math.round(sz * dpr);
+        c.style.width = sz + 'px';
+        c.style.height = sz + 'px';
+      }
+      // перерисуем
+      try { drawAvatarPreview(); } catch {}
+    };
+
+    applySize();
+    const ro = new ResizeObserver(() => applySize());
+    ro.observe(el);
+    window.addEventListener('resize', applySize, { passive: true });
+    return () => {
+      try { ro.disconnect(); } catch {}
+      window.removeEventListener('resize', applySize);
+    };
+  }, [open]);
+
+  const clampCrop = React.useCallback((next) => {
+    const bmp = bmpRef.current;
+    const size = boxSizeRef.current || 0;
+    if (!bmp || !size) return next;
+    const iw = bmp.width || 1;
+    const ih = bmp.height || 1;
+    const base = Math.max(size / iw, size / ih);
+    const scale = base * Math.max(1, Number(next?.z || 1));
+    const drawW = iw * scale;
+    const drawH = ih * scale;
+    const maxX = Math.max(0, (drawW - size) / 2);
+    const maxY = Math.max(0, (drawH - size) / 2);
+    const x = Math.min(maxX, Math.max(-maxX, Number(next?.x || 0)));
+    const y = Math.min(maxY, Math.max(-maxY, Number(next?.y || 0)));
+    return { x, y, z: Math.max(1, Number(next?.z || 1)) };
+  }, []);
+
+  const drawAvatarPreview = React.useCallback(() => {
+    const bmp = bmpRef.current;
+    const c = avaCanvasRef.current;
+    if (!c) return;
+
+    const ctx = c.getContext('2d');
+    if (!ctx) return;
+
+    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    const size = Math.max(1, Math.round((boxSizeRef.current || 0) * dpr));
+
+    ctx.clearRect(0, 0, c.width, c.height);
+    if (!bmp) return;
+
+    const iw = bmp.width || 1;
+    const ih = bmp.height || 1;
+    const base = Math.max(size / iw, size / ih);
+    const z = Math.max(1, Number(crop?.z || 1));
+    const scale = base * z;
+
+    const dx = (size / 2) + (Number(crop?.x || 0) * dpr);
+    const dy = (size / 2) + (Number(crop?.y || 0) * dpr);
+
+    const dw = iw * scale;
+    const dh = ih * scale;
+
+    ctx.save();
+    ctx.translate(dx, dy);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(bmp, -dw / 2, -dh / 2, dw, dh);
+    ctx.restore();
+  }, [crop]);
+
+  const openFilePicker = () => fileRef.current?.click?.();
+
+  const onPickFile = async (e) => {
+    const f = e?.target?.files?.[0];
+    if (!f) return;
+    try {
+      setUploadFile(f);
+      setCrop({ x: 0, y: 0, z: 1 });
+      setImgInfo({ w: 0, h: 0 });
+
+      try { bmpRef.current?.close?.(); } catch {}
+      bmpRef.current = await createImageBitmap(f);
+      setImgInfo({ w: bmpRef.current?.width || 0, h: bmpRef.current?.height || 0 });
+      requestAnimationFrame(() => {
+        try { drawAvatarPreview(); } catch {}
+      });
+    } finally {
+      try { e.target.value = ''; } catch {}
+    }
+  };
+
+  const onPointerDown = (e) => {
+    if (!uploadFile || !bmpRef.current) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const p = dragRef.current;
+    p.on = true;
+    p.x = e.clientX;
+    p.y = e.clientY;
+    p.sx = crop.x;
+    p.sy = crop.y;
+    try { e.currentTarget.setPointerCapture?.(e.pointerId); } catch {}
+  };
+  const onPointerMove = (e) => {
+    const p = dragRef.current;
+    if (!p.on) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const dx = e.clientX - p.x;
+    const dy = e.clientY - p.y;
+    setCrop((c) => ({ ...c, x: p.sx + dx, y: p.sy + dy }));
+  };
+  const onPointerUp = (e) => {
+    const p = dragRef.current;
+    if (!p.on) return;
+    p.on = false;
+    try { e.currentTarget.releasePointerCapture?.(e.pointerId); } catch {}
+  };
+
+  // делаем квадратный PNG из превью (клиентский кроп)
+  const makeCroppedPngBlob = async ({ size = 512 } = {}) => {
+    const bmp = bmpRef.current;
+    if (!bmp) return null;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    const iw = bmp.width || 1;
+    const ih = bmp.height || 1;
+    const base = Math.max(size / iw, size / ih);
+    const z = Math.max(1, Number(crop?.z || 1));
+    const scale = base * z;
+    const dw = iw * scale;
+    const dh = ih * scale;
+    const cx = size / 2 + Number(crop?.x || 0);
+    const cy = size / 2 + Number(crop?.y || 0);
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(bmp, -dw / 2, -dh / 2, dw, dh);
+    ctx.restore();
+
+    return new Promise((resolve) => {
+      canvas.toBlob((b) => resolve(b), 'image/png', 0.92);
+    });
+  };
+
+  // Перерисовка превью при изменении параметров
+  useEffect(() => {
+    if (!open) return;
+    if (!bmpRef.current) return;
+    requestAnimationFrame(() => { try { drawAvatarPreview(); } catch {} });
+  }, [open, crop, drawAvatarPreview]);
+  // грузим на сервер и ставим icon=url (но НЕ сохраняем профиль — это сделает основной Save)
+  const useUploadedPhoto = async () => {
+    if (!uid || !uploadSrc || uploadBusy) return;
+    setUploadBusy(true);
+    try {
+      const blob = await makeCroppedPngBlob({ size: 512 });
+      if (!blob) return;
+
+      const fd = new FormData();
+      fd.append('uid', uid);
+      fd.append('file', blob, 'avatar.png');
+
+      const r = await fetch('/api/profile/upload-avatar', { method: 'POST', body: fd });
+      const j = await r.json().catch(() => null);
+      if (!r.ok || !j?.ok || !j?.url) return;
+
+      // важно: icon становится url, но сохранение только по главной кнопке Save
+      setIcon(j.url);
+    } finally {
+      setUploadBusy(false);
+    }
+  };
+
+  // валидация ника
   const [nickFree, setNickFree] = useState(null)   // null|true|false
   const [nickBusy, setNickBusy] = useState(false)  // идет проверка
   const [busy, setBusy] = useState(false)          // сохранение
@@ -4066,8 +4894,32 @@ useEffect(() => {
 
 if (!open || !anchorRef?.current || !uid) return null;
 
-const top  = (anchorRef.current.offsetTop || 0) + (anchorRef.current.offsetHeight || 0) + 8;
-const left = (anchorRef.current.offsetLeft || 0);
+// ===== позиционирование попапа (LTR/RTL) =====
+const isRtl =
+  typeof document !== 'undefined' &&
+  (document.documentElement?.dir === 'rtl' ||
+    getComputedStyle(document.documentElement).direction === 'rtl');
+
+const el = anchorRef.current;
+
+// ищем ближайшего “контейнерного” родителя, относительно которого будет absolute-позиционирование
+const parent =
+  el.offsetParent ||
+  el.parentElement ||
+  el.closest('section') ||
+  document.body;
+
+const parentRect = parent?.getBoundingClientRect?.() || { top: 0, left: 0, right: 0 };
+const rect = el.getBoundingClientRect();
+
+// top/left/right — теперь ВНУТРИ parent (а не в координатах окна)
+const top = Math.round((rect.bottom - parentRect.top) + 8);
+
+// LTR — обычный left
+const left = isRtl ? undefined : Math.round(rect.left - parentRect.left);
+
+// RTL — прижимаем по правому краю parent
+const right = isRtl ? Math.round(parentRect.right - rect.right) : undefined;
 
 const save = async () => {
   const n = String(nick || '').trim();
@@ -4075,12 +4927,58 @@ const save = async () => {
 
   setBusy(true);
   try { 
+let iconToSend = icon;
+
+// Если выбрано пользовательское фото — модерируем (как загрузка по скрепке),
+// потом кропаем и грузим через /api/forum/upload.
+if (uploadFile) {
+   setUploadBusy(true);
+   try {
+    // 0) MODERATION: точно так же, как в attach (paperclip)
+    try {
+      const mod = await moderateImageFiles([uploadFile]);
+      if (mod?.decision === 'block') {
+        toastI18n('warn', 'forum_image_blocked', 'Image rejected by community rules');
+        toastI18n('info', reasonKey(mod?.reason), reasonFallbackEN(mod?.reason));
+        return;
+      }
+      if (mod?.decision === 'review') {
+        try { console.warn('[moderation] avatar review -> allow (balanced)', mod?.reason, mod?.raw); } catch {}
+      }
+    } catch (err) {
+      console.error('[moderation] avatar check failed', err);
+      toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
+      toastI18n('info', 'forum_moderation_try_again', 'Please try again');
+      return;
+    }
+
+    const blob = await makeCroppedPngBlob({ size: 512 });
+    if (!blob) throw new Error('no_blob');
+
+    const file = new File([blob], `avatar-${uid}-${Date.now()}.png`, { type: 'image/png' });
+    const fd = new FormData();
+    fd.append('files', file);
+
+    const up = await fetch('/api/forum/upload', { method: 'POST', body: fd, cache: 'no-store' });
+    const uj = await up.json().catch(() => ({}));
+
+    if (!up.ok || !uj?.urls?.[0]) {
+      console.warn('avatar upload failed', uj);
+      return;
+    }
+
+    iconToSend = uj.urls[0];
+  } finally {
+    setUploadBusy(false);
+  }
+}
+
     const r = await fetch('/api/profile/save-nick', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         nick: n,
-        icon,
+        icon: iconToSend,
         accountId: uid,  // основной ID
         asherId: uid,    // зеркало, чтоб бэку было всё равно
       }),
@@ -4113,11 +5011,74 @@ const save = async () => {
   return (
 
     <div className="profilePop" 
-    style={{ top, left }}
+    style={{ top, left, right }}
     translate="no"
     >
   
       <div className="text-lg font-bold mb-2">{t('forum_account_settings')}</div>
+
+      {/* Под заголовком: слева бейдж со звездой, справа квадратный Upload Avatar (одна линия) */}
+      <div className="profileTopRow">
+        <div className="profileBadgeLeft">
+          <FollowersCounterInline
+            t={t}
+            viewerId={viewerId}
+            count={myFollowersCount}
+            loading={myFollowersLoading}
+          />
+        </div>
+
+        <button
+          type="button"
+          ref={avaBoxRef}
+          className="avaUploadSquare"
+          onClick={openFilePicker}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          title="Upload avatar"
+          aria-label="Upload avatar"
+        >
+          <canvas ref={avaCanvasRef} className="avaUploadSquareCanvas" />
+          {!uploadFile && (
+            <div className="avaUploadSquareTxt">UPLOAD<br/>AVATAR</div>
+          )}
+          {uploadBusy && (
+            <div className="avaUploadSquareBusy">{t('saving') || 'Saving…'}</div>
+          )}
+        </button>
+
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          className="avaFileInput"
+          onChange={onPickFile}
+        />
+      </div>
+
+      {/* Zoom: следующей строкой, на всю ширину, адаптив */}
+      <div className="avaZoomWideRow">
+        <span className="avaZoomLbl">Zoom</span>
+        <input
+          type="range"
+          className="cyberRange"
+          min="1"
+          max="3"
+          step="0.01"
+          value={crop.z}
+          disabled={!uploadFile}
+          onChange={(e) => {
+            const v = Number(e.target.value);
+            setCrop((c) => {
+              const next = clampCrop({ ...c, z: v });
+              requestAnimationFrame(() => { try { drawAvatarPreview(); } catch {} });
+              return next;
+            });
+          }}
+        />
+      </div>
       <div className="grid gap-2">
         <label className="block">
           <div className="meta mb-1">{t('forum_profile_nickname')}</div>
@@ -4139,7 +5100,12 @@ const save = async () => {
         </label>
         <div>
            
-          <div className="meta mb-1">{t('forum_profile_avatar')}</div>
+          <div className="profileAvatarHead">
+            <div className="meta">{t('forum_profile_avatar')}</div>
+            <div className="meta" style={{ opacity: .7 }}>
+              {uploadFile ? `${imgInfo.w || 0}×${imgInfo.h || 0}` : (t('forum_profile_avatar_hint') || '')}
+            </div>
+          </div>
 <div className="profileList">
   {/* VIP блок (верхняя строка) */}
   <div className="p-1">
@@ -4200,8 +5166,12 @@ const save = async () => {
    UI: посты/темы
 ========================================================= */
 
-function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerDelete }) {
+function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerDelete, viewerId, starredAuthors, onToggleStar }) {
+
   const { posts, likes, dislikes, views } = agg || {};
+  const authorId = String(t?.userId || t?.accountId || '').trim();
+  const isSelf = !!viewerId && authorId && (String(viewerId) === authorId);
+  const isStarred = !!authorId && !!starredAuthors?.has?.(authorId);
 
   // считаем просмотр темы, когда карточка попадает в viewport (не чаще 1 раза на bucket в LS)
   const ref = React.useRef(null);
@@ -4251,7 +5221,16 @@ function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerD
         {t.nickname || shortId(t.userId || t.accountId || '')}
       </span>
     </button>
+
+    {!!authorId && !isSelf && (
+      <StarButton
+        on={isStarred}
+        onClick={() => onToggleStar?.(authorId)}
+        title={isStarred ? 'Вы подписаны' : 'Подписаться на автора'}
+      />
+    )}
   </div>
+
         )}
 
         {/* контент: заголовок → описание → время */}
@@ -4325,6 +5304,26 @@ function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerD
   );
 }
 
+function StarButton({ on, onClick, title, disabled=false }) {
+  return (
+    <button
+      type="button"
+      className={`starBtn ${on ? 'on' : 'off'} ${disabled ? 'dis' : ''}`}
+      title={title || (on ? 'Отписаться' : 'Подписаться')}
+      onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); if(!disabled) onClick?.(e); }}
+      data-no-thread-open="1"
+      aria-pressed={!!on}
+      aria-disabled={disabled}
+    >
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden>
+        <path
+          d="M12 17.3l-5.4 3.2 1.5-6.2-4.9-4.1 6.4-.5L12 3.8l2.4 5.9 6.4.5-4.9 4.1 1.5 6.2L12 17.3Z"
+          className="starPath"
+        />
+      </svg>
+    </button>
+  );
+}
 
 
 function PostCard({
@@ -4342,7 +5341,11 @@ function PostCard({
   markView,
   t, // локализация
   isVideoFeed = false, // ✅ NEW
+  viewerId,
+  starredAuthors,
+  onToggleStar,
 }) {
+
 
   // берём locale из того же хука, что и в новостном хабе
   const { locale } = useI18n();
@@ -4393,8 +5396,17 @@ function PostCard({
 
   // безопасные числовые поля
   const views    = Number(p?.views ?? 0);
-  const replies  = Number(
-    p?.replies ?? p?.repliesCount ?? p?.childrenCount ?? p?.answers ?? p?.comments ?? 0
+    const authorId = String(p?.userId || p?.accountId || '').trim();
+  const isSelf = !!viewerId && authorId && (String(viewerId) === authorId);
+  const isStarred = !!authorId && !!starredAuthors?.has?.(authorId);
+
+  const replies  =   Number(
+    p?.replyCount ??
+    p?.repliesCount ??
+    p?.answersCount ??
+    p?.commentsCount ??
+    p?.__repliesCount ??
+    0
   );
   const likes    = Number(p?.likes ?? 0);
   const dislikes = Number(p?.dislikes ?? 0);
@@ -4643,7 +5655,16 @@ const NO_THREAD_OPEN_SELECTOR =
           </span>
         </span>
 
+        {!!authorId && !isSelf && (
+          <StarButton
+            on={isStarred}
+            onClick={() => onToggleStar?.(authorId)}
+            title={isStarred ? 'Вы подписаны' : 'Подписаться на автора'}
+          />
+        )}
+
       </div>
+
         {p.parentId && (
           <span className="tag ml-1 replyTag" aria-label={t?.('forum_reply_to') || 'Ответ для'}>
             {(t?.('forum_reply_to') || 'ответ для') + ' '}
@@ -5735,6 +6756,13 @@ export default function Forum(){
   const rl = useMemo(rateLimiter, [])
   /* ---- auth ---- */
   const [auth,setAuth] = useState(()=>readAuth())
+  const viewerId = String((auth?.asherId || auth?.accountId) || '').trim()
+
+  const [starredAuthors, setStarredAuthors] = useState(() => new Set())
+  const [starMode, setStarMode] = useState(false)
+
+  const [myFollowersCount, setMyFollowersCount] = useState(0)
+  const [myFollowersLoading, setMyFollowersLoading] = useState(false)
 
   useEffect(()=>{
     const upd=()=>setAuth(readAuth())
@@ -6002,7 +7030,84 @@ applyMutedPref(v);
       } catch {}      
     };
   }, []);
- 
+    useEffect(() => {
+    let alive = true
+
+    if (!viewerId) {
+      setStarredAuthors(new Set())
+      setMyFollowersCount(0)
+      return
+    }
+
+    ;(async () => {
+      const list = await api.subsList(viewerId)
+      if (!alive) return
+      const arr = Array.isArray(list?.authors) ? list.authors : []
+      setStarredAuthors(new Set(arr.map(x => String(x).trim()).filter(Boolean)))
+
+      setMyFollowersLoading(true)
+      const mc = await api.subsMyCount(viewerId)
+      if (!alive) return
+      setMyFollowersCount(Number(mc?.count || 0))
+      setMyFollowersLoading(false)
+    })()
+
+    return () => { alive = false }
+  }, [viewerId])
+
+  const toggleAuthorStar = useCallback(async (authorIdRaw) => {
+    const authorId = String(authorIdRaw || '').trim()
+    if (!authorId) return
+    if (viewerId && authorId === viewerId) return
+
+    if (!viewerId) {
+      // у тебя уже есть requireAuthStrict — используем его
+      try { await requireAuthStrict() } catch {}
+      return
+    }
+
+    // optimistic flip
+    setStarredAuthors(prev => {
+      const next = new Set(prev)
+      if (next.has(authorId)) next.delete(authorId)
+      else next.add(authorId)
+      return next
+    })
+
+    const res = await api.subsToggle(viewerId, authorId)
+    if (!res?.ok) {
+      // rollback
+      setStarredAuthors(prev => {
+        const next = new Set(prev)
+        if (next.has(authorId)) next.delete(authorId)
+        else next.add(authorId)
+        return next
+      })
+      return
+    }
+
+    // reconcile from server truth
+    setStarredAuthors(prev => {
+      const next = new Set(prev)
+      if (res.subscribed) next.add(authorId)
+      else next.delete(authorId)
+      return next
+    })
+  }, [viewerId])
+   const starredFirst = useCallback((arr, getAuthorId) => {
+    if (!starMode) return arr
+    if (!starredAuthors || starredAuthors.size === 0) return arr
+
+    const a = []
+    const b = []
+    for (const it of arr) {
+      const id = String(getAuthorId(it) || '').trim()
+      if (id && starredAuthors.has(id)) a.push(it)
+      else b.push(it)
+    }
+    return a.concat(b)
+  }, [starMode, starredAuthors])
+
 const requireAuthStrict = async () => {
   const cur = readAuth();
   if (cur?.asherId || cur?.accountId) { setAuth(cur); return cur; }
@@ -6013,7 +7118,7 @@ const requireAuthStrict = async () => {
 };
 // QCoin: управлялка модалкой из инлайна
 React.useEffect(()=>{
-  const open = ()=> setQcoinModalOpen(true)
+  const open = ()=> openOnly('qcoin')
   window.addEventListener('qcoin:open', open)
   return ()=> window.removeEventListener('qcoin:open', open)
 },[])
@@ -6021,7 +7126,7 @@ React.useEffect(()=>{
 
 // VIP: открывать VipPopover по событию из бейджа ×2
 React.useEffect(()=>{
-  const openVip = () => setVipOpen(true)
+  const openVip = () => openOnly('vip')
   window.addEventListener('vip:open', openVip)
   return () => window.removeEventListener('vip:open', openVip)
 },[])
@@ -6786,6 +7891,26 @@ useEffect(() => {
   window.addEventListener('storage', onStorage)
   return () => window.removeEventListener('storage', onStorage)
 }, [auth?.accountId])
+// ===== ONE-POPOVER-AT-A-TIME (exclusive open) =====
+const openOnly = React.useCallback((name) => {
+  // закрываем всё
+  setProfileOpen(false);
+  setVipOpen(false);
+  setAdminOpen(false);
+  setQcoinModalOpen(false);
+  setSortOpen(false);
+  setDrop(false);
+  // если есть ещё попапы (inbox и т.п.) — добавь сюда по желанию:
+  // setInboxOpen(false);
+
+  // открываем только один
+  if (name === 'profile') setProfileOpen(true);
+  else if (name === 'vip') setVipOpen(true);
+  else if (name === 'admin') setAdminOpen(true);
+  else if (name === 'qcoin') setQcoinModalOpen(true);
+  else if (name === 'sort') setSortOpen(true);
+  else if (name === 'search') setDrop(true);
+}, []);
 
 /* ---- admin ---- */
 const [adminOpen, setAdminOpen] = useState(false)
@@ -7169,8 +8294,10 @@ const aggregates = useMemo(() => {
           return (agg.likes * 2) + agg.posts + Math.floor(agg.views * 0.2);
       }
     };
-    return topics.sort((a,b) => (score(b) - score(a)) || ((b.ts||0) - (a.ts||0)));
-  }, [data.topics, aggregates, topicSort, topicFilterId]);
+    const base = topics.sort((a,b) => (score(b) - score(a)) || ((b.ts||0) - (a.ts||0)));
+    return starredFirst(base, (x) => x?.userId || x?.accountId);
+  }, [data.topics, aggregates, topicSort, topicFilterId, starredFirst]);
+
 
 
   /* ---- composer ---- */
@@ -8820,7 +9947,16 @@ function gatherAllPosts(data, allPosts) {
 /** построить и сохранить ленту видео */
 function buildAndSetVideoFeed() {
   const pool = gatherAllPosts(data, allPosts);
+  // ✅ единый id для постов/реплаев (иначе parentId не матчится с id)
+  const pidOf = (x) => {
+    const v = (x?.id ?? x?._id ?? x?.uuid ?? x?.key ?? null);
+    return v == null ? '' : String(v);
+  };
 
+  const parentIdOf = (x) => {
+    const v = (x?.parentId ?? x?._parentId ?? null);
+    return v == null ? '' : String(v);
+  };
   // мягкий дедуп по стабильному ключу, но без выкидывания «безидешных»
   const seen = new Set();
   const all = [];
@@ -8837,19 +9973,19 @@ function buildAndSetVideoFeed() {
     all.push(p);
   }
 
-  // replies count map: parentId -> count
-  const repliesMap = new Map();
-  for (const p of all) {
-    const pid = p?.parentId;
-    if (!pid) continue;
-    const key = String(pid);
-    repliesMap.set(key, (repliesMap.get(key) || 0) + 1);
-  }
+// replies count map: parentId -> count
+const repliesMap = new Map();
+for (const p of all) {
+  const pid = parentIdOf(p);
+  if (!pid) continue;
+  repliesMap.set(pid, (repliesMap.get(pid) || 0) + 1);
+}
+
 
   const score = (p) => {
     const likes = Number(p?.likes || 0);
     const views = Number(p?.views || 0);
-    const replies = repliesMap.get(String(p?.id)) || 0;
+    const replies = repliesMap.get(pidOf(p)) || 0;
     switch (feedSort) {
       case 'new':     return Number(p?.ts || 0);
       case 'likes':   return likes;
@@ -8861,11 +9997,24 @@ function buildAndSetVideoFeed() {
     }
   };
 
-  const only = all
-    .filter(isMediaPost)
-    .sort((a,b) => (score(b) - score(a)) || (Number(b?.ts||0) - Number(a?.ts||0)));
+const only = all
+  .filter(isMediaPost)
+  .sort((a,b) => (score(b) - score(a)) || (Number(b?.ts||0) - Number(a?.ts||0)));
 
-  setVideoFeed(only);
+// ✅ прокидываем количество ответов прямо в объект поста для UI
+const onlyWithReplyCounts = only.map((p) => {
+  const id = pidOf(p);
+  const replyCount = id ? (repliesMap.get(id) || 0) : 0;
+  return {
+    ...p,
+    replyCount,          // 👈 можно так (если в UI ждёшь replyCount)
+    __repliesCount: replyCount, // 👈 и так (если хочешь безопасный резерв)
+  };
+});
+
+const withStars = starredFirst(onlyWithReplyCounts, (p) => (p?.userId || p?.accountId));
+setVideoFeed(withStars);
+
 }
 
 /** открыть ленту видео */
@@ -8887,7 +10036,7 @@ React.useEffect(() => {
   if (!videoFeedOpen) return;
   buildAndSetVideoFeed();
   // зависимости: любые сигналы обновления снапшота/постов у тебя в состоянии
-}, [videoFeedOpen, data?.rev, data?.posts, data?.messages, data?.topics, allPosts, feedSort]);
+}, [videoFeedOpen, data?.rev, data?.posts, data?.messages, data?.topics, allPosts, feedSort, starMode, starredAuthors]);
 
 // [VIDEO_FEED:OPEN_THREAD] — открыть полноценную ветку из ленты
 function openThreadFromPost(p){
@@ -9482,11 +10631,7 @@ function pickAdUrlForSlot(slotKey, slotKind) {
   onResetConfirm={resetOrCloseOverlay}
   t={t}
 />
-
-
-
-
-
+ 
       {/* шапка */}
       <section className="glass neon p-3" style={{ position:'relative', zIndex:40, overflow:'visible' }}>
         <div className="head" style={{ position:'relative', width:'100%' }}>
@@ -9496,21 +10641,32 @@ function pickAdUrlForSlot(slotKey, slotKind) {
               className={cls('avaBig neon', (!nickShown || iconShown==='👤') && 'pulse')}
               title={nickShown || t('forum_account')}
               onClick={async()=>{
-                const a = await requireAuthStrict();
-                if (!a) return;
+                openOnly(profileOpen ? null : 'profile')
+                if (!profileOpen) return;
+
                 setProfileOpen(v=>!v)
               }}>
               <AvatarEmoji userId={idShown} pIcon={iconShown} />
             </button>
-            <ProfilePopover
-              anchorRef={avatarRef}
-              open={profileOpen}
-              onClose={()=>setProfileOpen(false)}
-              t={t}
-              auth={auth}
-              vipActive={vipActive}
-              onSaved={()=>{}}
-            />
+<ProfilePopover
+  anchorRef={avatarRef}
+  open={profileOpen}
+  onClose={()=>setProfileOpen(false)}
+  t={t}
+  auth={auth}
+  vipActive={vipActive}
+  onSaved={()=>{}}
+
+  viewerId={viewerId}
+  myFollowersCount={myFollowersCount}
+  myFollowersLoading={myFollowersLoading}
+
+  moderateImageFiles={moderateImageFiles}
+  toastI18n={toastI18n}
+  reasonKey={reasonKey}
+  reasonFallbackEN={reasonFallbackEN}
+/>
+       
   {/* ник ВСЕГДА под аватаром */}
   <button
     className="nick-badge nick-animate avaNick"
@@ -9543,8 +10699,7 @@ function pickAdUrlForSlot(slotKey, slotKind) {
      <QCoinInline t={t} userKey={idShown} vipActive={vipActive} />
    </div>
  </div>
-
-
+ 
 
           {/* === НОВОЕ: правый встроенный контейнер управления === */}
           <div className="controls">
@@ -9553,16 +10708,16 @@ function pickAdUrlForSlot(slotKey, slotKind) {
               <input
                 className="searchInput"
                 value={q}
-                onChange={e=>{ setQ(e.target.value); setDrop(true) }}
-                onFocus={()=>setDrop(true)}
+                onChange={e=>{ setQ(e.target.value); openOnly('search') }}
+                onFocus={()=>openOnly('search')}
                 placeholder={t('forum_search_ph') || 'Поиск по темам и сообщениям…'}
               />
-              <button className="iconBtn" aria-label="search" onClick={()=>setDrop(v=>!v)}>
+              <button className="iconBtn" aria-label="search" onClick={()=> openOnly(drop ? null : 'search')}>
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
                   <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.7"/><path d="M16 16l4 4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
                 </svg>
               </button>
-              <button className="iconBtn" title={t('forum_sort')||'Сортировка'} onClick={()=>setSortOpen(v=>!v)}>
+              <button className="iconBtn" title={t('forum_sort')||'Сортировка'} onClick={()=> openOnly(sortOpen ? null : 'sort')}>
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
                   <path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
                 </svg>
@@ -9805,17 +10960,31 @@ onClick={()=>{
     {txt}
   </button>
 ))}
+  {/* ⭐ Star-mode toggle (icon-only) */}
+  <button
+    type="button"
+    className={`starModeBtn ${starMode ? 'on' : ''}`}
+   onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); setStarMode(v=>!v); }}
+
+    title="Star mode: авторы, на которых вы подписаны — первыми"
+    aria-pressed={starMode}
+    aria-label="Star mode"
+  >
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden>
+      <path className="starPath" d="M12 2.6l2.9 6.2 6.8.6-5.1 4.4 1.6 6.6L12 16.9 5.8 20.4l1.6-6.6-5.1-4.4 6.8-.6L12 2.6Z" />
+   </svg>
+  </button>
 
                 </div>
               )}
-            </div>
+           </div>
 {/* ---- VIP+ ---- */}
 <div className="vipWrap">
   <button
     ref={vipBtnRef}
     className={cls('iconBtn', vipActive ? 'vip' : 'vipGray', 'pulse', 'hoverPop')}
     title={t('forum_vip_plus') || 'VIP+'}
-    onClick={() => setVipOpen(v => !v)}
+    onClick={()=> openOnly(vipOpen ? null : 'vip')}
   >
     VIP+
   </button>
@@ -9902,7 +11071,7 @@ onClick={()=>{
               <button
                 ref={adminBtnRef}
                 className={cls('adminBtn', isAdmin ? 'adminOn' : 'adminOff', 'pulse', 'hoverPop')}
-                onClick={()=>setAdminOpen(v=>!v)}>
+                onClick={()=> openOnly(adminOpen ? null : 'admin')}>
                 {t('forum_admin')}
               </button>
               <AdminPopover
@@ -10099,6 +11268,9 @@ onClick={()=>{
   markView={markViewPost}
   t={t}
   isVideoFeed={true}   // ✅ NEW
+    viewerId={viewerId}
+  starredAuthors={starredAuthors}
+  onToggleStar={toggleAuthorStar}
 />
 
       </div>
@@ -10187,6 +11359,9 @@ onClick={()=>{
           authId={auth.asherId || auth.accountId}
           markView={markViewPost}
           t={t}
+            viewerId={viewerId}
+  starredAuthors={starredAuthors}
+  onToggleStar={toggleAuthorStar}
         />
       </div>
     );
@@ -10225,17 +11400,21 @@ onClick={()=>{
         .map(x => {
           const agg = aggregates.get(x.id) || { posts:0, likes:0, dislikes:0, views:0 };
           return (
-            <TopicItem
-              key={`t:${x.id}`}
-              t={x}
-              agg={agg}
-              onOpen={(tt)=>{ setSel(tt); setThreadRoot(null) }}
-              onView={markViewTopic}
-              isAdmin={isAdmin}
-              onDelete={delTopic}
-              authId={auth.asherId || auth.accountId}
-              onOwnerDelete={delTopicOwn}
-            />
+<TopicItem
+  key={`t:${x.id}`}
+  t={x}
+  agg={agg}
+  onOpen={(tt)=>{ setSel(tt); setThreadRoot(null) }}
+  onView={markViewTopic}
+  isAdmin={isAdmin}
+  onDelete={delTopic}
+  authId={auth.asherId || auth.accountId}
+  onOwnerDelete={delTopicOwn}
+  viewerId={viewerId}
+  starredAuthors={starredAuthors}
+  onToggleStar={toggleAuthorStar}
+/>
+
           )
         })}
     </div>
@@ -10429,16 +11608,19 @@ onClick={()=>{
                   }, 120);
                 }
               }}
-              onReact={reactMut}
-              isAdmin={isAdmin}
-              onDeletePost={delPost}
-              onBanUser={banUser}
-              onUnbanUser={unbanUser}
-              isBanned={bannedSet.has(p.accountId || p.userId)}
-              authId={auth.asherId || auth.accountId}
-              markView={markViewPost}
-              t={t}
-            />
+  onReact={reactMut}
+  isAdmin={isAdmin}
+  onDeletePost={delPost}
+  onBanUser={banUser}
+  onUnbanUser={unbanUser}
+  isBanned={bannedSet.has(p.accountId || p.userId)}
+  authId={auth.asherId || auth.accountId}
+  markView={markViewPost}
+  t={t}
+  viewerId={viewerId}
+  starredAuthors={starredAuthors}
+  onToggleStar={toggleAuthorStar}
+/>
           );
         })}
       </div>
@@ -10479,25 +11661,29 @@ onClick={()=>{
         id={`post_${p.id}`}
         style={{ marginLeft: (p._lvl || 0) * 18 }}
       >
-        <PostCard
-          p={p}
-          parentAuthor={
-            parent?.nickname ||
-            (parent ? shortId(parent.userId || '') : null)
-          }
-          onReport={() => toast.ok(t('forum_report_ok'))}
-          onReply={() => setReplyTo(p)}
-          onOpenThread={(clickP) => { setThreadRoot(clickP); }}
-          onReact={reactMut}
-          isAdmin={isAdmin}
-          onDeletePost={delPost}
-          onBanUser={banUser}
-          onUnbanUser={unbanUser}
-          isBanned={bannedSet.has(p.accountId || p.userId)}
-          authId={auth.asherId || auth.accountId}
-          markView={markViewPost}
-          t={t}
-        />
+<PostCard
+  p={p}
+  parentAuthor={
+    parent?.nickname ||
+    (parent ? shortId(parent.userId || '') : null)
+  }
+  onReport={() => toast.ok(t('forum_report_ok'))}
+  onReply={() => setReplyTo(p)}
+  onOpenThread={(clickP) => { setThreadRoot(clickP); }}
+  onReact={reactMut}
+  isAdmin={isAdmin}
+  onDeletePost={delPost}
+  onBanUser={banUser}
+  onUnbanUser={unbanUser}
+  isBanned={bannedSet.has(p.accountId || p.userId)}
+  authId={auth.asherId || auth.accountId}
+  markView={markViewPost}
+  t={t}
+  viewerId={viewerId}
+  starredAuthors={starredAuthors}
+  onToggleStar={toggleAuthorStar}
+/>
+
       </div>
     );
   }

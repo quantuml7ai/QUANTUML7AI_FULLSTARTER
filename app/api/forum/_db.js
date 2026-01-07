@@ -81,6 +81,10 @@ export const K = {
   dedupViewTopic: (topicId, userId, day) => `forum:dedup:view:topic:${topicId}:${userId}:${day}`,
   dedupViewPost:  (postId, userId, day)  => `forum:dedup:view:post:${postId}:${userId}:${day}`,
   reactStateDay:  (postId, userId, day)  => `forum:react:state:${postId}:${userId}:${day}`,
+
+  // ===== SUBSCRIPTIONS (viewer -> authors) =====
+  subsViewerSet:      (viewerId) => `forum:subs:viewer:${viewerId}`,
+  subsFollowersCount: (authorId) => `forum:subs:followers_count:${authorId}`,
 }
 
 /* =========================
@@ -609,9 +613,10 @@ export async function getUserAvatar(userId) {
 export function normAvatar(raw) {
   const s0 = str(raw)
   if (!s0) return ''
-  // до 64 символов, хватит и для эмодзи/иконки/URL
-  return s0.slice(0, 64)
+  // URL для /uploads/... часто длиннее 64. Режем мягко, но безопасно.
+  return s0.slice(0, 256)
 }
+
 
 export async function setUserAvatar(userId, icon) {
   const v = normAvatar(icon)
@@ -651,4 +656,54 @@ export async function setUserProfile(userId, { nickname, icon } = {}) {
   }
 
   return out
+}
+/* =========================
+   SUBSCRIPTIONS (viewer -> authors)
+========================= */
+
+const normId = (x) => String(x ?? '').trim()
+
+export async function listSubscriptions(viewerId) {
+  const vid = normId(viewerId)
+  if (!vid) return []
+  const arr = await redis.smembers(K.subsViewerSet(vid))
+  return (arr || []).map(normId).filter(Boolean)
+}
+
+export async function getFollowersCount(authorId) {
+  const aid = normId(authorId)
+  if (!aid) return 0
+  return await getInt(K.subsFollowersCount(aid), 0)
+}
+
+/**
+ * toggle subscribe/unsubscribe
+ * returns: { ok:true, subscribed:boolean, followersCount:number } OR { ok:false, error:string }
+ */
+export async function toggleSubscription(viewerId, authorId) {
+  const vid = normId(viewerId)
+  const aid = normId(authorId)
+  if (!vid) return { ok:false, error:'no_viewer' }
+  if (!aid) return { ok:false, error:'no_author' }
+  if (vid === aid) return { ok:false, error:'self_subscribe' }
+
+  const setKey = K.subsViewerSet(vid)
+  const cntKey = K.subsFollowersCount(aid)
+
+  const isMember = await redis.sismember(setKey, aid)
+
+  if (!isMember) {
+    const added = await redis.sadd(setKey, aid) // 1 if new
+    if (added === 1) await redis.incr(cntKey)
+    const followersCount = await getInt(cntKey, 0)
+    return { ok:true, subscribed:true, followersCount }
+  } else {
+    const removed = await redis.srem(setKey, aid) // 1 if removed
+    if (removed === 1) {
+      const v = await redis.decr(cntKey)
+      if ((Number(v) || 0) < 0) await redis.set(cntKey, 0)
+    }
+    const followersCount = await getInt(cntKey, 0)
+    return { ok:true, subscribed:false, followersCount }
+  }
 }
