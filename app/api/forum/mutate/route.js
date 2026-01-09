@@ -108,11 +108,9 @@ async function getTopicObj(id) {
   } catch { return null }
 }
 
-async function delPostHard(id, postObj = null) {
+async function delPostHard(id) {
   try { await redisDirect.srem(postsSetKey, String(id)) } catch {}
   const base = postKey(id)
-  const topicId = postObj?.topicId ? String(postObj.topicId) : null
-  const rootId = postObj?.rootId ? String(postObj.rootId) : null
   try {
     await Promise.allSettled([
       redisDirect.del(base),
@@ -125,12 +123,7 @@ async function delPostHard(id, postObj = null) {
       redisDirect.del(
         typeof K?.postDislikesSet === 'function' ? K.postDislikesSet(id) : (K?.postDislikesSet || `post:${id}:dislikes:set`)
       ),
-      topicId && K?.topicPostsIdxTs ? redisDirect.zrem(K.topicPostsIdxTs(topicId), String(id)) : null,
-      K?.videoPostsIdxTs ? redisDirect.zrem(K.videoPostsIdxTs, String(id)) : null,
-      rootId && K?.repliesIdxTs ? redisDirect.zrem(K.repliesIdxTs(rootId), String(id)) : null,
-      K?.postsIdxLikes ? redisDirect.zrem(K.postsIdxLikes, String(id)) : null,
-      K?.postsIdxViews ? redisDirect.zrem(K.postsIdxViews, String(id)) : null,
-    ].filter(Boolean))
+    ])
   } catch {}
 }
 
@@ -261,26 +254,6 @@ export async function POST(request) {
             hasImages,
             rev,
           })
-          if (parentId) {
-            try {
-              const parent = await getPostObj(parentId)
-              const ownerId = parent?.userId || parent?.accountId
-              if (ownerId) {
-                await Promise.allSettled([
-                  redisDirect.zadd(K.inboxIdxTs(ownerId), { score: post.ts, member: String(post.id) }),
-                  redisDirect.sadd(K.inboxUnreadSet(ownerId), String(post.id)),
-                ])
-              }
-            } catch {}
-          }
-
-          try {
-            const count = await redisDirect.get(topicPostsCountKey(topicId))
-            const repliesScore = Number(count || 0)
-            if (K?.topicsIdxReplies) {
-              await redisDirect.zadd(K.topicsIdxReplies, { score: repliesScore, member: String(topicId) })
-            }
-          } catch {}
 
         } else if (op.type === 'view_topic') {
           const { topicId } = p
@@ -289,11 +262,7 @@ export async function POST(request) {
           await pushChange({ rev, kind: 'topic', id: String(topicId), data: { views }, ts: Date.now() })
           results.push({ op: 'view_topic', topicId, views, delta: inc ? 1 : 0, rev })
           await publishForumEvent({ type: 'view_topic', topicId, views, rev })
-          try {
-            if (K?.topicsIdxViews) {
-              await redisDirect.zadd(K.topicsIdxViews, { score: Number(views || 0), member: String(topicId) })
-            }
-          } catch {}
+
         } else if (op.type === 'view_post') {
           const { postId } = p
           const { inc, views } = await incrementPostViewsUnique(postId, userId)
@@ -301,11 +270,7 @@ export async function POST(request) {
           await pushChange({ rev, kind: 'post', id: String(postId), data: { views }, ts: Date.now() })
           results.push({ op: 'view_post', postId, views, delta: inc ? 1 : 0, rev })
           await publishForumEvent({ type: 'view_post', postId, views, rev })
-          try {
-            if (K?.postsIdxViews) {
-              await redisDirect.zadd(K.postsIdxViews, { score: Number(views || 0), member: String(postId) })
-            }
-          } catch {}
+
         } else if (op.type === 'react') {
           const { postId, kind } = p
           const r = await reactPostExclusiveDaily(postId, userId, kind)
@@ -313,11 +278,7 @@ export async function POST(request) {
           await pushChange({ rev, kind: 'post', id: String(postId), data: { likes: r.likes, dislikes: r.dislikes }, ts: Date.now() })
           results.push({ op: 'react', postId, state: r.state, likes: r.likes, dislikes: r.dislikes, changed: !!r.changed, rev })
           await publishForumEvent({ type: 'react', postId, state: r.state, likes: r.likes, dislikes: r.dislikes, rev })
-          try {
-            if (K?.postsIdxLikes) {
-              await redisDirect.zadd(K.postsIdxLikes, { score: Number(r?.likes || 0), member: String(postId) })
-            }
-          } catch {}
+
         } else if (op.type === 'edit_post') {
           const postId = String(p.id)
           const newText = trimStr(p.text, MAX_TEXT)
@@ -341,22 +302,10 @@ export async function POST(request) {
             results.push({ op: 'delete_post', duplicate: true })
           } else {
             const branch = await collectPostBranch(postId)
-            const affectedTopics = new Set()            
             for (const pid of branch) {
               const pObj = (pid === String(postId)) ? po : await getPostObj(pid)
-              await delPostHard(pid, pObj)
-              if (pObj?.topicId) {
-                await decTopicPostsCount(pObj.topicId)
-                affectedTopics.add(String(pObj.topicId))
-              }
-            }
-            if (affectedTopics.size && K?.topicsIdxReplies) {
-              await Promise.allSettled(
-                Array.from(affectedTopics).map(async (tid) => {
-                  const count = await redisDirect.get(topicPostsCountKey(tid))
-                  await redisDirect.zadd(K.topicsIdxReplies, { score: Number(count || 0), member: String(tid) })
-                })
-              )
+              await delPostHard(pid)
+              if (pObj?.topicId) await decTopicPostsCount(pObj.topicId)
             }
             const rev = await nextRev()
             await pushChange({ rev, kind: 'post',         id: postId, _del: 1, deleted: branch, ts: Date.now() })
@@ -382,8 +331,7 @@ export async function POST(request) {
               }
             } catch {}
             for (const pid of affected) {
-               const po = await getPostObj(pid)
-              await delPostHard(pid, po)
+              await delPostHard(pid)
             }
             try { await redisDirect.srem(topicsSetKey, topicId) } catch {}
             try {
@@ -391,10 +339,6 @@ export async function POST(request) {
                 redisDirect.del(topicKey(topicId)),
                 redisDirect.del(K?.topicViews ? K.topicViews(topicId) : `forum:topic:${topicId}:views`),
                 redisDirect.del(topicPostsCountKey(topicId)),
-                K?.topicsIdxTs ? redisDirect.zrem(K.topicsIdxTs, String(topicId)) : null,
-                K?.topicsIdxViews ? redisDirect.zrem(K.topicsIdxViews, String(topicId)) : null,
-                K?.topicsIdxReplies ? redisDirect.zrem(K.topicsIdxReplies, String(topicId)) : null,
-                K?.topicPostsIdxTs ? redisDirect.del(K.topicPostsIdxTs(topicId)) : null,                
               ])
             } catch {}
             const rev = await nextRev()
