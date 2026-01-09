@@ -124,6 +124,7 @@ export const K = {
   zParentReplies:  (parentId) => `forum:z:parent:${parentId}:replies`,
   zInbox:          (userId) => `forum:z:user:${userId}:inbox`,
   zVideoFeed:      'forum:z:feed:video',
+  paginationReady: 'forum:pagination:ready',
   // IP-баны (дополнительно к общему списку)
   bannedIpsSet:    'forum:banned:ips',
 
@@ -622,8 +623,8 @@ export async function getBannedUsers() {
 }
 export async function ensurePaginationIndexes() {
   try {
-    const exists = await redis.exists(K.zTopics)
-    if (exists) return
+    const ready = await redis.get(K.paginationReady)
+    if (ready) return
   } catch {}
 
   try {
@@ -656,14 +657,14 @@ export async function ensurePaginationIndexes() {
       const score = scoreWithId(topic.ts, tid)
       if (pipe) {
         ops.zadd(K.zTopics, { score, member: String(tid) })
-        ops.set(K.topicLikes(tid), 0)
-        ops.set(K.topicDislikes(tid), 0)
-        ops.set(K.topicViewsTotal(tid), await getInt(K.topicViews(tid), 0))
+        ops.set(K.topicLikes(tid), 0, { nx: true })
+        ops.set(K.topicDislikes(tid), 0, { nx: true })
+        ops.set(K.topicViewsTotal(tid), await getInt(K.topicViews(tid), 0), { nx: true })
       } else {
         await ops.zadd(K.zTopics, { score, member: String(tid) })
-        await ops.set(K.topicLikes(tid), 0)
-        await ops.set(K.topicDislikes(tid), 0)
-        await ops.set(K.topicViewsTotal(tid), await getInt(K.topicViews(tid), 0))
+        await ops.set(K.topicLikes(tid), 0, { nx: true })
+        await ops.set(K.topicDislikes(tid), 0, { nx: true })
+        await ops.set(K.topicViewsTotal(tid), await getInt(K.topicViews(tid), 0), { nx: true })
       }
     }
 
@@ -717,6 +718,7 @@ export async function ensurePaginationIndexes() {
     }
 
     if (pipe) await pipe.exec()
+       await redis.set(K.paginationReady, '1')   
   } catch (e) {
     console.warn('ensurePaginationIndexes failed', e?.message || e)
   }

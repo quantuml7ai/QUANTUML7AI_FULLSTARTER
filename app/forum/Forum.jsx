@@ -8400,20 +8400,23 @@ const unreadCount = useMemo(() => {
 
 // при открытии Inbox — пометить как прочитанные и сразу обновить state
 useEffect(() => {
-if (!mounted || !inboxOpen || !seenKey) return;
-  const allIds = new Set([
-    ...repliesToMe.map(p => String(p.id)),
-    ...Array.from(readSet)
-  ]);
-  try { localStorage.setItem(seenKey, JSON.stringify(Array.from(allIds))); } catch {}
-  setReadSet(allIds); // чтобы бейдж погас сразу без повторного чтения из LS
-}, [mounted, inboxOpen, seenKey, repliesToMe, readSet]);
-
-
-
-// выбранный корень ветки (null = режим списка корней)
+  if (!mounted || !inboxOpen || !seenKey) return;
+  setReadSet((prev) => {
+    const next = new Set(prev);
+    let changed = false;
+    for (const p of repliesToMe) {
+      const id = String(p.id);
+      if (!next.has(id)) {
+        next.add(id);
+        changed = true;
+      }
+    }
+    if (!changed) return prev;
+    try { localStorage.setItem(seenKey, JSON.stringify(Array.from(next))); } catch {}
+    return next;
+  });
+}, [mounted, inboxOpen, seenKey, repliesToMe]);
  
-
  // === Views: refs to avoid TDZ when effects run before callbacks are initialized ===
 
  const markViewPostRef  = React.useRef(null);
@@ -8461,8 +8464,7 @@ const flat = useMemo(() => {
       _lvl: 0,
       repliesCount: Number(item?.repliesCount || item?.replies || 0),
     }))
-
-
+return base
 }, [sel?.id, threadRoot, rootsFeed.items, repliesFeed.items, postSort])
 // === END flat ===
 
