@@ -8117,6 +8117,12 @@ const [drop, setDrop] = useState(false);
 const [sortOpen, setSortOpen] = useState(false);
 // [INBOX:STATE] — безопасно для SSR (никакого localStorage в рендере)
 const [inboxOpen, setInboxOpen] = useState(false);
+// === VIDEO FEED: состояние + хелперы =====================
+const [videoFeedOpen, setVideoFeedOpen] = React.useState(false);
+const [videoFeed, setVideoFeed] = React.useState([]);
+// === QUESTS: вкладка квестов (полупассивный режим) ===
+const [questOpen, setQuestOpen] = React.useState(false);
+const [questSel,  setQuestSel]  = React.useState(null);   // текущая карточка квеста
 const [mounted, setMounted] = useState(false);           // ← флаг «мы на клиенте»
 useEffect(()=>{ setMounted(true) }, []);
 
@@ -10149,9 +10155,6 @@ const onFilesChosen = React.useCallback(async (e) => {
 
   const [profileOpen, setProfileOpen] = useState(false)
   const avatarRef = useRef(null)
-// === VIDEO FEED: состояние + хелперы =====================
-const [videoFeedOpen, setVideoFeedOpen] = React.useState(false);
-const [videoFeed, setVideoFeed] = React.useState([]);
 
 
 // ВАЖНО: в ленте нужно уметь находить ссылки внутри текста (даже если не отдельной строкой)
@@ -10334,9 +10337,6 @@ function openThreadFromPost(p){
     try { document.getElementById(`post_${p.id}`)?.scrollIntoView({ behavior:'smooth', block:'center' }) } catch {}
   }, 120);
 }
-// === QUESTS: вкладка квестов (полупассивный режим) ===
-const [questOpen, setQuestOpen] = React.useState(false);
-const [questSel,  setQuestSel]  = React.useState(null);   // текущая карточка квеста
 
 // === QUEST ENV loader (client) ===
 const [questEnv,  setQuestEnv]  = React.useState(null);
