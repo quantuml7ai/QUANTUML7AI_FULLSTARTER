@@ -30,46 +30,7 @@ const winBucket = (ttlSec = VIEW_TTL_SEC, ts = Date.now()) => {
 }
 
 const str = (x) => String(x ?? '').trim()
-const scoreWithId = (ts, id) => {
-  const base = Number(ts || 0)
-  const num = Number.parseInt(String(id || '').replace(/\D+/g, ''), 10)
-  const frac = Number.isFinite(num) ? (num % 1000000) / 1000000 : (Math.random() / 1000000)
-  return base + frac
-}
 
-const VIDEO_URL_RE =
-  /(https?:\/\/[^\s<>'")]+?\.(?:mp4|webm|mov|m4v|mkv)(?:[?#][^\s<>'")]+)?)/i
-const VIDEO_HINT_RE =
-  /(vercel[-]?storage|vercel[-]?blob|\/uploads\/video|\/forum\/video|\/api\/forum\/uploadVideo)/i
-const hasVideoInText = (text) => {
-  const s = String(text || '')
-  if (!s) return false
-  return VIDEO_URL_RE.test(s) || VIDEO_HINT_RE.test(s)
-}
-
-async function getPostById(id) {
-  try {
-    const raw = await redis.get(K.postKey(id))
-    return safeParse(raw)
-  } catch {
-    return null
-  }
-}
-
-async function updateTopicAggregateViews(topicId, delta) {
-  if (!topicId) return
-  try {
-    await redis.incrby(K.topicViewsTotal(topicId), delta)
-  } catch {}
-}
-
-async function updateTopicAggregateReacts(topicId, kind, delta) {
-  if (!topicId || !delta) return
-  const key = kind === 'dislike' ? K.topicDislikes(topicId) : K.topicLikes(topicId)
-  try {
-    await redis.incrby(key, delta)
-  } catch {}
-}
 /* =========================
    Ключи (BACKWARD-COMPAT)
 ========================= */
@@ -101,9 +62,6 @@ export const K = {
   // per-topic
   topicPostsCount: (topicId) => `forum:topic:${topicId}:posts_count`,
   topicViews:      (topicId) => `forum:topic:${topicId}:views`,
-  topicLikes:      (topicId) => `forum:topic:${topicId}:likes`,
-  topicDislikes:   (topicId) => `forum:topic:${topicId}:dislikes`,
-  topicViewsTotal: (topicId) => `forum:topic:${topicId}:views_total`,
 
   // per-post
   postViews:    (postId) => `forum:post:${postId}:views`,
@@ -116,15 +74,6 @@ export const K = {
 
   // опциональный индекс постов темы
   topicPostsSet:   (topicId) => `forum:topic:${topicId}:posts`,
-
-  // pagination indexes (ZSET)
-  zTopics:         'forum:z:topics',
-  zTopicAll:       (topicId) => `forum:z:topic:${topicId}:all`,
-  zTopicRoots:     (topicId) => `forum:z:topic:${topicId}:roots`,
-  zParentReplies:  (parentId) => `forum:z:parent:${parentId}:replies`,
-  zInbox:          (userId) => `forum:z:user:${userId}:inbox`,
-  zVideoFeed:      'forum:z:feed:video',
-  paginationReady: 'forum:pagination:ready',
   // IP-баны (дополнительно к общему списку)
   bannedIpsSet:    'forum:banned:ips',
 
@@ -231,10 +180,6 @@ export async function createTopic({ title, description, userId, nickname, icon, 
     .set(K.topicKey(topicId), JSON.stringify(t))
     .set(K.topicPostsCount(topicId), 0)
     .set(K.topicViews(topicId), 0)
-    .set(K.topicLikes(topicId), 0)
-    .set(K.topicDislikes(topicId), 0)
-    .set(K.topicViewsTotal(topicId), 0)
-    .zadd(K.zTopics, { score: scoreWithId(t.ts, topicId), member: topicId })
     .exec()
 
   await pushChange({ rev, kind: 'topic', id: topicId, data: t, ts: t.ts })
@@ -264,30 +209,8 @@ export async function createPost({ topicId, parentId, text, userId, nickname, ic
     .set(K.postLikes(postId), 0)
     .set(K.postDislikes(postId), 0)
     .sadd(K.topicPostsSet(p.topicId), postId)
-    .zadd(K.zTopicAll(p.topicId), { score: scoreWithId(p.ts, postId), member: postId })
     .exec()
-  if (!p.parentId) {
-    try {
-      await redis.zadd(K.zTopicRoots(p.topicId), { score: scoreWithId(p.ts, postId), member: postId })
-    } catch {}
-  } else {
-    try {
-      await redis.zadd(K.zParentReplies(p.parentId), { score: scoreWithId(p.ts, postId), member: postId })
-    } catch {}
-    try {
-      const parent = await getPostById(p.parentId)
-      const parentAuthorId = String(parent?.userId || parent?.accountId || '')
-      if (parentAuthorId && parentAuthorId !== p.userId) {
-        await redis.zadd(K.zInbox(parentAuthorId), { score: scoreWithId(p.ts, postId), member: postId })
-      }
-    } catch {}
-  }
 
-  if (hasVideoInText(p.text)) {
-    try {
-      await redis.zadd(K.zVideoFeed, { score: scoreWithId(p.ts, postId), member: postId })
-    } catch {}
-  }
   await pushChange({ rev, kind: 'post', id: postId, data: p, ts: p.ts })
   return { post: p, rev }
 }
@@ -349,10 +272,7 @@ export async function incrementTopicViewsUnique(topicId, userId, ttlSec = VIEW_T
   const ttl = Math.min(24 * 60 * 60, Math.max(1, Number(ttlSec) || VIEW_TTL_SEC))
   const key = K.dedupViewTopic(tid, uid, winBucket(ttl))
   const ok = await redis.set(key, '1', { nx: true, ex: ttl })
-  if (ok) {
-    await incrementTopicViews(tid, 1)
-    await updateTopicAggregateViews(tid, 1)
-  }
+  if (ok) await incrementTopicViews(tid, 1)
   const views = await getInt(K.topicViews(tid), 0)
   return { inc: !!ok, views }
 }
@@ -364,14 +284,7 @@ export async function incrementPostViewsUnique(postId, userId, ttlSec = VIEW_TTL
   const key = K.dedupViewPost(pid, uid, winBucket(ttl))
   const ok = await redis.set(key, '1', { nx: true, ex: ttl })
 
-  if (ok) {
-    await incrementPostViews(pid, 1)
-    try {
-      const post = await getPostById(pid)
-      const topicId = String(post?.topicId || '')
-      if (topicId) await updateTopicAggregateViews(topicId, 1)
-    } catch {}
-  }
+  if (ok) await incrementPostViews(pid, 1)
   const views = await getInt(K.postViews(pid), 0)
   return { inc: !!ok, views }
 }
@@ -411,15 +324,6 @@ export async function reactPostExclusiveDaily(postId, userId, kind) {
     getInt(K.postLikes(pid), 0),
     getInt(K.postDislikes(pid), 0),
   ])
-  try {
-    const post = await getPostById(pid)
-    const topicId = String(post?.topicId || '')
-    if (topicId) {
-      if (prev === 'like') await updateTopicAggregateReacts(topicId, 'like', -1)
-      if (prev === 'dislike') await updateTopicAggregateReacts(topicId, 'dislike', -1)
-      await updateTopicAggregateReacts(topicId, target, 1)
-    }
-  } catch {}
 
   const rev = await nextRev()
   await pushChange({ rev, kind: 'post', id: pid, data: { likes, dislikes }, ts: now() })
@@ -583,21 +487,12 @@ export async function dbDeleteTopicHard(topicId) {
     ops.push(['del', K.postViews(pid)])
     ops.push(['del', K.postLikes(pid)])
     ops.push(['del', K.postDislikes(pid)])
-    ops.push(['zrem', K.zTopicAll(tid), pid])
-    ops.push(['zrem', K.zTopicRoots(tid), pid])
-    ops.push(['zrem', K.zVideoFeed, pid])
   }
   ops.push(['del', K.topicPostsSet(tid)])
   ops.push(['del', K.topicKey(tid)])
   ops.push(['srem', K.topicsSet, tid])
   ops.push(['del', K.topicViews(tid)])
-  ops.push(['del', K.topicLikes(tid)])
-  ops.push(['del', K.topicDislikes(tid)])
-  ops.push(['del', K.topicViewsTotal(tid)])
   ops.push(['del', K.topicPostsCount(tid)])
-  ops.push(['zrem', K.zTopics, tid])
-  ops.push(['del', K.zTopicRoots(tid)])
-  ops.push(['del', K.zTopicAll(tid)])
 
   if (ops.length) {
     const pipe = redis.pipeline ? redis.pipeline() : null
@@ -620,236 +515,6 @@ export async function dbDeleteTopicHard(topicId) {
 export async function getBannedUsers() {
   const ids = await redis.smembers(K.bannedSet)
   return new Set(ids || [])
-}
-export async function ensurePaginationIndexes() {
-  try {
-    const ready = await redis.get(K.paginationReady)
-    if (ready) return
-  } catch {}
-
-  try {
-    const topicIds = await redis.smembers(K.topicsSet)
-    const postIds = await redis.smembers(K.postsSet)
-
-    const postMap = new Map()
-    for (const pid of postIds || []) {
-      try {
-        const raw = await redis.get(K.postKey(pid))
-        const post = safeParse(raw)
-        if (!post) continue
-        const views = await getInt(K.postViews(pid), 0)
-        const likes = await getInt(K.postLikes(pid), 0)
-        const dislikes = await getInt(K.postDislikes(pid), 0)
-        post.views = views
-        post.likes = likes
-        post.dislikes = dislikes
-        postMap.set(String(pid), post)
-      } catch {}
-    }
-
-    const pipe = redis.pipeline ? redis.pipeline() : null
-    const ops = pipe || redis
-
-    for (const tid of topicIds || []) {
-      const topicRaw = await redis.get(K.topicKey(tid))
-      const topic = safeParse(topicRaw)
-      if (!topic) continue
-      const score = scoreWithId(topic.ts, tid)
-      if (pipe) {
-        ops.zadd(K.zTopics, { score, member: String(tid) })
-        ops.set(K.topicLikes(tid), 0, { nx: true })
-        ops.set(K.topicDislikes(tid), 0, { nx: true })
-        ops.set(K.topicViewsTotal(tid), await getInt(K.topicViews(tid), 0), { nx: true })
-      } else {
-        await ops.zadd(K.zTopics, { score, member: String(tid) })
-        await ops.set(K.topicLikes(tid), 0, { nx: true })
-        await ops.set(K.topicDislikes(tid), 0, { nx: true })
-        await ops.set(K.topicViewsTotal(tid), await getInt(K.topicViews(tid), 0), { nx: true })
-      }
-    }
-
-    for (const [pid, post] of postMap.entries()) {
-      const topicId = String(post.topicId || '')
-      if (!topicId) continue
-      const score = scoreWithId(post.ts, pid)
-      if (pipe) {
-        ops.zadd(K.zTopicAll(topicId), { score, member: pid })
-      } else {
-        await ops.zadd(K.zTopicAll(topicId), { score, member: pid })
-      }
-
-      if (!post.parentId) {
-        if (pipe) {
-          ops.zadd(K.zTopicRoots(topicId), { score, member: pid })
-        } else {
-          await ops.zadd(K.zTopicRoots(topicId), { score, member: pid })
-        }
-      } else {
-        if (pipe) {
-          ops.zadd(K.zParentReplies(String(post.parentId)), { score, member: pid })
-        } else {
-          await ops.zadd(K.zParentReplies(String(post.parentId)), { score, member: pid })
-        }
-        const parent = postMap.get(String(post.parentId))
-        const parentAuthorId = String(parent?.userId || parent?.accountId || '')
-        if (parentAuthorId && parentAuthorId !== String(post.userId || post.accountId || '')) {
-          if (pipe) {
-            ops.zadd(K.zInbox(parentAuthorId), { score, member: pid })
-          } else {
-            await ops.zadd(K.zInbox(parentAuthorId), { score, member: pid })
-          }
-        }
-      }
-
-      if (hasVideoInText(post.text)) {
-        if (pipe) {
-          ops.zadd(K.zVideoFeed, { score, member: pid })
-        } else {
-          await ops.zadd(K.zVideoFeed, { score, member: pid })
-        }
-      }
-
-      const likes = Number(post.likes || 0)
-      const dislikes = Number(post.dislikes || 0)
-      const views = Number(post.views || 0)
-      if (likes) await updateTopicAggregateReacts(topicId, 'like', likes)
-      if (dislikes) await updateTopicAggregateReacts(topicId, 'dislike', dislikes)
-      if (views) await updateTopicAggregateViews(topicId, views)
-    }
-
-    if (pipe) await pipe.exec()
-       await redis.set(K.paginationReady, '1')   
-  } catch (e) {
-    console.warn('ensurePaginationIndexes failed', e?.message || e)
-  }
-}
-
-async function loadPostsByIds(ids) {
-  if (!ids.length) return []
-  const pipe = redis.pipeline ? redis.pipeline() : null
-  const ops = pipe || redis
-  for (const id of ids) {
-    ops.get(K.postKey(id))
-    ops.get(K.postViews(id))
-    ops.get(K.postLikes(id))
-    ops.get(K.postDislikes(id))
-  }
-  const raw = pipe ? await pipe.exec() : []
-  const items = []
-  for (let i = 0; i < ids.length; i++) {
-    const baseIndex = i * 4
-    const postRaw = pipe ? raw[baseIndex]?.[1] : raw[baseIndex]
-    const viewsRaw = pipe ? raw[baseIndex + 1]?.[1] : raw[baseIndex + 1]
-    const likesRaw = pipe ? raw[baseIndex + 2]?.[1] : raw[baseIndex + 2]
-    const dislikesRaw = pipe ? raw[baseIndex + 3]?.[1] : raw[baseIndex + 3]
-    const post = safeParse(postRaw)
-    if (!post) continue
-    post.views = parseIntSafe(viewsRaw, 0)
-    post.likes = parseIntSafe(likesRaw, 0)
-    post.dislikes = parseIntSafe(dislikesRaw, 0)
-    items.push(post)
-  }
-  return items
-}
-
-async function loadTopicsByIds(ids) {
-  if (!ids.length) return []
-  const pipe = redis.pipeline ? redis.pipeline() : null
-  const ops = pipe || redis
-  for (const id of ids) {
-    ops.get(K.topicKey(id))
-    ops.get(K.topicPostsCount(id))
-    ops.get(K.topicViewsTotal(id))
-    ops.get(K.topicLikes(id))
-    ops.get(K.topicDislikes(id))
-  }
-  const raw = pipe ? await pipe.exec() : []
-  const items = []
-  for (let i = 0; i < ids.length; i++) {
-    const baseIndex = i * 5
-    const topicRaw = pipe ? raw[baseIndex]?.[1] : raw[baseIndex]
-    const postsRaw = pipe ? raw[baseIndex + 1]?.[1] : raw[baseIndex + 1]
-    const viewsRaw = pipe ? raw[baseIndex + 2]?.[1] : raw[baseIndex + 2]
-    const likesRaw = pipe ? raw[baseIndex + 3]?.[1] : raw[baseIndex + 3]
-    const dislikesRaw = pipe ? raw[baseIndex + 4]?.[1] : raw[baseIndex + 4]
-    const topic = safeParse(topicRaw)
-    if (!topic) continue
-    topic.postsCount = parseIntSafe(postsRaw, 0)
-    topic.views = parseIntSafe(viewsRaw, 0)
-    topic.likes = parseIntSafe(likesRaw, 0)
-    topic.dislikes = parseIntSafe(dislikesRaw, 0)
-    items.push(topic)
-  }
-  return items
-}
-
-export async function readFeed({ kind, limit = 25, cursor, sort, topicId, parentId, userId }) {
-  await ensurePaginationIndexes()
-
-  const maxLimit = Number(process.env.FORUM_FEED_MAX_LIMIT ?? 50)
-  const take = Math.max(1, Math.min(Number(limit) || 25, maxLimit))
-  const offset = Math.max(0, Number(cursor) || 0)
-
-  let zkey = ''
-  if (kind === 'topics') zkey = K.zTopics
-  if (kind === 'topic_roots' && topicId) zkey = K.zTopicRoots(String(topicId))
-  if (kind === 'replies' && parentId) zkey = K.zParentReplies(String(parentId))
-  if (kind === 'inbox' && userId) zkey = K.zInbox(String(userId))
-  if (kind === 'video') zkey = K.zVideoFeed
-
-  if (!zkey) return { items: [], hasMore: false, nextCursor: null, rev: await getInt(K.rev, 0), total: 0 }
-
-  const [total, ids] = await Promise.all([
-    redis.zcard(zkey),
-    redis.zrange(zkey, offset, offset + take - 1, { rev: true }),
-  ])
-  const list = Array.isArray(ids) ? ids.map(String) : []
-  let items = []
-  if (kind === 'topics') {
-    items = await loadTopicsByIds(list)
-  } else {
-    items = await loadPostsByIds(list)
-  }
-
-  if (kind === 'inbox') {
-    const parentIds = Array.from(new Set(items.map((p) => String(p.parentId || '')).filter(Boolean)))
-    if (parentIds.length) {
-      const parents = await loadPostsByIds(parentIds)
-      const byId = new Map(parents.map((p) => [String(p.id), p]))
-      items = items.map((p) => {
-        const parent = byId.get(String(p.parentId || ''))
-        return {
-          ...p,
-          parentAuthor: parent?.nickname || '',
-          parentAuthorId: parent?.userId || parent?.accountId || '',
-        }
-      })
-    }
-  }
-
-  if (kind === 'topic_roots') {
-    const pipe = redis.pipeline ? redis.pipeline() : null
-    const ops = pipe || redis
-    for (const item of items) {
-      ops.zcard(K.zParentReplies(String(item.id)))
-    }
-    const repliesRaw = pipe ? await pipe.exec() : []
-    items = items.map((item, idx) => {
-      const raw = pipe ? repliesRaw[idx]?.[1] : repliesRaw[idx]
-      const count = parseIntSafe(raw, 0)
-      return { ...item, repliesCount: count, replies: count }
-    })
-  }
-
-  const hasMore = offset + list.length < Number(total || 0)
-  const nextCursor = hasMore ? String(offset + list.length) : null
-  const rev = await getInt(K.rev, 0)
-
-  const payload = { items, hasMore, nextCursor, rev }
-  if (kind === 'inbox') payload.total = Number(total || 0)
-  if (kind === 'topics') payload.total = Number(total || 0)
-  if (kind === 'video') payload.total = Number(total || 0)
-  return payload
 }
 
 export async function snapshot(sinceRev = 0, limit = 10000) {
