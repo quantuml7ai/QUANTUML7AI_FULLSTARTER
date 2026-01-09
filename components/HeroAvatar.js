@@ -71,7 +71,7 @@ export default function HeroAvatar({ videoSrc='/avatar.mp4', poster='/avatar.jpg
           floatx: rnd(10,22),
           op: rnd(.8,1).toFixed(2)
         }]
-        return next.slice(-Math.round(5 * density))
+        return next.slice(-Math.round(1 * density))
       })
       setTimeout(spawn, spawnEvery)
     }
@@ -134,22 +134,7 @@ export default function HeroAvatar({ videoSrc='/avatar.mp4', poster='/avatar.jpg
 
   return (
     <div ref={wrapRef} className="scene" aria-hidden="true">
-      {/* ВИДЕО: рендерим только если включено тумблером */}
-      {ENABLE_HERO_VIDEO && (
-        <video
-          ref={videoRef}
-          className="bg-video"
-          src={videoSrc}
-          {...(poster ? { poster } : {})}
-          autoPlay
-          muted
-          playsInline
-          preload="metadata"
-          onEnded={handleVideoEnded}
-          style={{ opacity: showPoster ? 0 : opacity, transition: 'opacity .5s ease' }}
-        />
-      )}
-
+ 
       {/* ПОСТЕР: всегда обычный <img>, без next/image оптимизации */}
       {poster && (
         <img
@@ -170,23 +155,7 @@ export default function HeroAvatar({ videoSrc='/avatar.mp4', poster='/avatar.jpg
       )}
 
 
-      <div className="stars" />
-      <div className="tickers">
-        {items.map(i=>(
-          <div key={i.id} className="ticker"
-               style={{
-                 left:`${i.left}vw`,
-                 fontSize:`calc(${i.sz}rem + .7vw)`,
-                 ['--dx']:`${i.drift}px`,
-                 ['--dur']:`${i.dur}s`,
-                 ['--delay']:`${i.delay}s`,
-                 ['--floatx']:`${i.floatx}px`,
-                 ['--opacity']:i.op
-               }}>
-            {i.txt}
-          </div>
-        ))}
-      </div>
+
       <div className="glow eye left" />
       <div className="glow eye right" />
       <div className="glow chest" />
