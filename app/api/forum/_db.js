@@ -58,7 +58,21 @@ export const K = {
 
   userAvatar: (userId)   => `forum:user:${userId}:avatar`,
 
-  
+    // ===== индексы (ZSET) =====
+  topicsIdxTs: 'forum:idx:topics:ts',
+  topicPostsIdxTs: (topicId) => `forum:idx:posts:topic:${topicId}:ts`,
+  videoPostsIdxTs: 'forum:idx:posts:video:ts',
+  repliesIdxTs:    (rootId) => `forum:idx:posts:root:${rootId}:ts`,
+
+  // ===== inbox =====
+  inboxIdxTs:       (viewerId) => `forum:inbox:viewer:${viewerId}:ts`,
+  inboxUnreadSet:   (viewerId) => `forum:inbox:unread:viewer:${viewerId}`,
+
+  // ===== сортировки (агрегаты) =====
+  topicsIdxViews:   'forum:idx:topics:views',
+  topicsIdxReplies: 'forum:idx:topics:replies',
+  postsIdxLikes:    'forum:idx:posts:likes',
+  postsIdxViews:    'forum:idx:posts:views',
   // per-topic
   topicPostsCount: (topicId) => `forum:topic:${topicId}:posts_count`,
   topicViews:      (topicId) => `forum:topic:${topicId}:views`,
@@ -85,6 +99,13 @@ export const K = {
   // ===== SUBSCRIPTIONS (viewer -> authors) =====
   subsViewerSet:      (viewerId) => `forum:subs:viewer:${viewerId}`,
   subsFollowersCount: (authorId) => `forum:subs:followers_count:${authorId}`,
+}
+const VIDEO_TEXT_RE =
+  /(https?:\/\/[^\s<>'")]+?\.(?:mp4|webm|mov|m4v|mkv)(?:$|[?#])|\/uploads\/video\/|\/forum\/video\/|vercel[-]?blob|vercel[-]?storage|youtube\.com\/watch\?v=|youtu\.be\/|tiktok\.com\/@[\w.\-]+\/video\/\d+)/i
+
+const textHasVideo = (s) => {
+  if (!s) return false
+  return VIDEO_TEXT_RE.test(String(s))
 }
 
 /* =========================
@@ -180,6 +201,9 @@ export async function createTopic({ title, description, userId, nickname, icon, 
     .set(K.topicKey(topicId), JSON.stringify(t))
     .set(K.topicPostsCount(topicId), 0)
     .set(K.topicViews(topicId), 0)
+    .zadd(K.topicsIdxTs, { score: t.ts, member: topicId })
+    .zadd(K.topicsIdxViews, { score: 0, member: topicId })
+    .zadd(K.topicsIdxReplies, { score: 0, member: topicId })
     .exec()
 
   await pushChange({ rev, kind: 'topic', id: topicId, data: t, ts: t.ts })
@@ -189,10 +213,21 @@ export async function createTopic({ title, description, userId, nickname, icon, 
 export async function createPost({ topicId, parentId, text, userId, nickname, icon, ts }) {
   const postId = String(await nextPostId())
   const rev = await nextRev()
+    let rootId = postId
+  if (parentId) {
+    try {
+      const raw = await redis.get(K.postKey(parentId))
+      const parent = safeParse(raw)
+      rootId = String(parent?.rootId || parent?.parentId || parent?.id || parentId)
+    } catch {
+      rootId = String(parentId)
+    }
+  }
   const p = {
     id:       postId,
     topicId:  String(topicId),
     parentId: parentId ? String(parentId) : null,
+    rootId:   rootId ? String(rootId) : postId,    
     text:     toStr(text),
     ts:       ts ?? now(),
     userId:   toStr(userId),
@@ -209,7 +244,15 @@ export async function createPost({ topicId, parentId, text, userId, nickname, ic
     .set(K.postLikes(postId), 0)
     .set(K.postDislikes(postId), 0)
     .sadd(K.topicPostsSet(p.topicId), postId)
+    .zadd(K.topicPostsIdxTs(p.topicId), { score: p.ts, member: postId })
+    .zadd(K.repliesIdxTs(p.rootId), { score: p.ts, member: postId })
+    .zadd(K.postsIdxLikes, { score: 0, member: postId })
+    .zadd(K.postsIdxViews, { score: 0, member: postId })
+    .zadd(K.topicsIdxReplies, { score: 1, member: p.topicId })
     .exec()
+  if (textHasVideo(p.text)) {
+    try { await redis.zadd(K.videoPostsIdxTs, { score: p.ts, member: postId }) } catch {}
+  }
 
   await pushChange({ rev, kind: 'post', id: postId, data: p, ts: p.ts })
   return { post: p, rev }

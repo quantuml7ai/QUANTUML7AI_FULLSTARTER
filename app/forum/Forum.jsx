@@ -557,7 +557,30 @@ const api = {
       return { ok: false, error: 'network' };
     }
   },
-
+  async feed(params = {}, userId) {
+    try {
+      const qs = new URLSearchParams()
+      Object.entries(params || {}).forEach(([k, v]) => {
+        if (v == null || v === '') return
+        qs.set(k, String(v))
+      })
+      const headers = {}
+      const actorId =
+        userId ??
+        params?.viewerId ??
+        (typeof getForumUserId === 'function' ? getForumUserId() : '')
+      if (actorId) headers['x-forum-user-id'] = String(actorId)
+      const url = `/api/forum/feed${qs.toString() ? `?${qs}` : ''}`
+      const r = await fetch(url, { cache: 'no-store', headers })
+      const text = await r.text().catch(() => '')
+      let json = null
+      try { json = text ? JSON.parse(text) : null } catch {}
+      return json ?? { ok: r.ok, status: r.status }
+    } catch (e) {
+      console.error('feed error', e)
+      return { ok: false, error: 'network' }
+    }
+  },
   // Удалить тему (со всем деревом)
   async adminDeleteTopic(id) {
     try {
@@ -7198,7 +7221,49 @@ const persist = (patch) => setData(prev => {
   return next
 })
 const withdrawBtnRef = useRef(null);
+const mergeTopics = useCallback((items = []) => {
+  if (!items.length) return
+  persist(prev => {
+    const map = new Map((prev.topics || []).map(t => [String(t.id), t]))
+    for (const t of items) {
+      if (!t?.id) continue
+      map.set(String(t.id), { ...(map.get(String(t.id)) || {}), ...t })
+    }
+    return { ...prev, topics: Array.from(map.values()) }
+  })
+}, [persist])
 
+const mergePosts = useCallback((items = []) => {
+  if (!items.length) return
+  persist(prev => {
+    const map = new Map((prev.posts || []).map(p => [String(p.id), p]))
+    for (const p of items) {
+      if (!p?.id) continue
+      map.set(String(p.id), { ...(map.get(String(p.id)) || {}), ...p })
+    }
+    return { ...prev, posts: Array.from(map.values()) }
+  })
+}, [persist])
+
+const feedCacheRef = useRef(new Map())
+const touchFeedCache = useCallback((key, value) => {
+  const cache = feedCacheRef.current
+  cache.delete(key)
+  cache.set(key, value)
+  const MAX_KEYS = 10
+  while (cache.size > MAX_KEYS) {
+    const oldest = cache.keys().next().value
+    cache.delete(oldest)
+  }
+}, [])
+const readFeedCache = useCallback((key) => {
+  const cache = feedCacheRef.current
+  if (!cache.has(key)) return null
+  const value = cache.get(key)
+  cache.delete(key)
+  cache.set(key, value)
+  return value
+}, [])
 const [qcoinModalOpen, setQcoinModalOpen] = useState(false);
 
 const [queue,setQueue] = useState(()=>{
@@ -8047,6 +8112,7 @@ const [q, setQ] = useState('');
 const [topicFilterId, setTopicFilterId] = useState(null);
 const [topicSort, setTopicSort] = useState('top');   // сортировка тем
 const [postSort,  setPostSort]  = useState('new');   // сортировка сообщений  ← ДОЛЖНА быть объявлена до flat
+const [feedSort, setFeedSort] = React.useState('new'); // new/top/likes/views/replies
 const [drop, setDrop] = useState(false);
 const [sortOpen, setSortOpen] = useState(false);
 // [INBOX:STATE] — безопасно для SSR (никакого localStorage в рендере)
@@ -8055,27 +8121,307 @@ const [mounted, setMounted] = useState(false);           // ← флаг «мы 
 useEffect(()=>{ setMounted(true) }, []);
 
 const meId = auth?.asherId || auth?.accountId || '';
+
+const [topicsFeed, setTopicsFeed] = useState({ items: [], cursor: null, hasMore: true, loading: false })
+const [postsFeed, setPostsFeed] = useState({ items: [], cursor: null, hasMore: true, loading: false })
+const [repliesFeed, setRepliesFeed] = useState({ items: [], cursor: null, hasMore: true, loading: false })
+const [inboxFeed, setInboxFeed] = useState({ items: [], cursor: null, hasMore: true, loading: false })
+const [videoFeedState, setVideoFeedState] = useState({ items: [], cursor: null, hasMore: true, loading: false })
+const [inboxUnread, setInboxUnread] = useState(0)
+
+const topicsSentinelRef = useRef(null)
+const postsSentinelRef = useRef(null)
+const repliesSentinelRef = useRef(null)
+const inboxSentinelRef = useRef(null)
+const videoSentinelRef = useRef(null)
+
+// выбранный корень ветки (null = режим списка корней)
+const [threadRoot, setThreadRoot] = useState(null)
+
+// при смене темы выходим из веточного режима
+useEffect(() => { setThreadRoot(null) }, [sel?.id])
+
+const topicsFeedKey = useMemo(() => `topics|${topicSort}`, [topicSort])
+const postsFeedKey = useMemo(() => `posts|${sel?.id || ''}|${postSort}`, [sel?.id, postSort])
+const repliesFeedKey = useMemo(() => `replies|${threadRoot?.id || ''}`, [threadRoot?.id])
+const inboxFeedKey = useMemo(() => `inbox|${meId || ''}`, [meId])
+const videoFeedKey = useMemo(() => `video|${feedSort}`, [feedSort])
+
+useEffect(() => {
+  const cached = readFeedCache(topicsFeedKey)
+  if (cached) setTopicsFeed(cached)
+  else setTopicsFeed({ items: [], cursor: null, hasMore: true, loading: false })
+}, [topicsFeedKey, readFeedCache])
+
+useEffect(() => {
+  const cached = readFeedCache(postsFeedKey)
+  if (cached) setPostsFeed(cached)
+  else setPostsFeed({ items: [], cursor: null, hasMore: true, loading: false })
+}, [postsFeedKey, readFeedCache])
+
+useEffect(() => {
+  const cached = readFeedCache(repliesFeedKey)
+  if (cached) setRepliesFeed(cached)
+  else setRepliesFeed({ items: [], cursor: null, hasMore: true, loading: false })
+}, [repliesFeedKey, readFeedCache])
+
+useEffect(() => {
+  const cached = readFeedCache(inboxFeedKey)
+  if (cached) setInboxFeed(cached)
+  else setInboxFeed({ items: [], cursor: null, hasMore: true, loading: false })
+}, [inboxFeedKey, readFeedCache])
+
+useEffect(() => {
+  const cached = readFeedCache(videoFeedKey)
+  if (cached) setVideoFeedState(cached)
+  else setVideoFeedState({ items: [], cursor: null, hasMore: true, loading: false })
+}, [videoFeedKey, readFeedCache])
+
+const loadTopicsPage = useCallback(async (reset = false) => {
+  if (sel || videoFeedOpen || inboxOpen || questOpen) return
+  if (topicsFeed.loading) return
+  if (!topicsFeed.hasMore && !reset) return
+  setTopicsFeed(prev => ({ ...prev, loading: true }))
+  const res = await api.feed({
+    mode: 'topics',
+    limit: 30,
+    cursor: reset ? null : topicsFeed.cursor,
+    sort: topicSort,
+  })
+  const items = Array.isArray(res?.items) ? res.items : []
+  setTopicsFeed(prev => {
+    const next = {
+      items: reset ? items : [...(prev.items || []), ...items],
+      cursor: res?.nextCursor ?? null,
+      hasMore: !!res?.hasMore,
+      loading: false,
+    }
+    touchFeedCache(topicsFeedKey, next)
+    return next
+  })
+  mergeTopics(items)
+}, [sel, videoFeedOpen, inboxOpen, questOpen, topicsFeed, topicSort, topicsFeedKey, touchFeedCache, mergeTopics])
+
+const loadPostsPage = useCallback(async (reset = false) => {
+  if (!sel?.id) return
+  if (threadRoot) return
+  if (postsFeed.loading) return
+  if (!postsFeed.hasMore && !reset) return
+  setPostsFeed(prev => ({ ...prev, loading: true }))
+  const res = await api.feed({
+    mode: 'posts',
+    topicId: String(sel.id),
+    level: 'roots',
+    limit: 30,
+    cursor: reset ? null : postsFeed.cursor,
+    sort: postSort,
+  })
+  const items = Array.isArray(res?.items) ? res.items : []
+  setPostsFeed(prev => {
+    const next = {
+      items: reset ? items : [...(prev.items || []), ...items],
+      cursor: res?.nextCursor ?? null,
+      hasMore: !!res?.hasMore,
+      loading: false,
+    }
+    touchFeedCache(postsFeedKey, next)
+    return next
+  })
+  mergePosts(items)
+}, [sel?.id, threadRoot, postsFeed, postSort, postsFeedKey, touchFeedCache, mergePosts])
+
+const loadRepliesPage = useCallback(async (reset = false) => {
+  if (!threadRoot?.id) return
+  if (repliesFeed.loading) return
+  if (!repliesFeed.hasMore && !reset) return
+  setRepliesFeed(prev => ({ ...prev, loading: true }))
+  const res = await api.feed({
+    mode: 'replies',
+    rootId: String(threadRoot.id),
+    limit: 30,
+    cursor: reset ? null : repliesFeed.cursor,
+  })
+  const items = Array.isArray(res?.items) ? res.items : []
+  setRepliesFeed(prev => {
+    const next = {
+      items: reset ? items : [...(prev.items || []), ...items],
+      cursor: res?.nextCursor ?? null,
+      hasMore: !!res?.hasMore,
+      loading: false,
+    }
+    touchFeedCache(repliesFeedKey, next)
+    return next
+  })
+  mergePosts(items)
+}, [threadRoot?.id, repliesFeed, repliesFeedKey, touchFeedCache, mergePosts])
+
+const loadInboxPage = useCallback(async (reset = false) => {
+  if (!meId) return
+  if (!inboxOpen) return
+  if (inboxFeed.loading) return
+  if (!inboxFeed.hasMore && !reset) return
+  setInboxFeed(prev => ({ ...prev, loading: true }))
+  const res = await api.feed({
+    mode: 'inbox',
+    viewerId: String(meId),
+    limit: 30,
+    cursor: reset ? null : inboxFeed.cursor,
+  }, meId)
+  const items = Array.isArray(res?.items) ? res.items : []
+  setInboxFeed(prev => {
+    const next = {
+      items: reset ? items : [...(prev.items || []), ...items],
+      cursor: res?.nextCursor ?? null,
+      hasMore: !!res?.hasMore,
+      loading: false,
+    }
+    touchFeedCache(inboxFeedKey, next)
+    return next
+  })
+  mergePosts(items)
+}, [meId, inboxOpen, inboxFeed, inboxFeedKey, touchFeedCache, mergePosts])
+
+const loadVideoPage = useCallback(async (reset = false) => {
+  if (!videoFeedOpen) return
+  if (videoFeedState.loading) return
+  if (!videoFeedState.hasMore && !reset) return
+  setVideoFeedState(prev => ({ ...prev, loading: true }))
+  const res = await api.feed({
+    mode: 'video',
+    limit: 30,
+    cursor: reset ? null : videoFeedState.cursor,
+    sort: feedSort,
+  })
+  const items = Array.isArray(res?.items) ? res.items : []
+  setVideoFeedState(prev => {
+    const next = {
+      items: reset ? items : [...(prev.items || []), ...items],
+      cursor: res?.nextCursor ?? null,
+      hasMore: !!res?.hasMore,
+      loading: false,
+    }
+    touchFeedCache(videoFeedKey, next)
+    return next
+  })
+  mergePosts(items)
+}, [videoFeedOpen, videoFeedState, feedSort, videoFeedKey, touchFeedCache, mergePosts])
+
+useEffect(() => {
+  if (sel || videoFeedOpen || inboxOpen || questOpen) return
+  if (topicsFeed.items.length) return
+  loadTopicsPage(true)
+}, [sel, videoFeedOpen, inboxOpen, questOpen, topicsFeed.items.length, loadTopicsPage])
+
+useEffect(() => {
+  if (!sel?.id || threadRoot) return
+  if (postsFeed.items.length) return
+  loadPostsPage(true)
+}, [sel?.id, threadRoot, postsFeed.items.length, loadPostsPage])
+
+useEffect(() => {
+  if (!threadRoot?.id) return
+  if (repliesFeed.items.length) return
+  loadRepliesPage(true)
+}, [threadRoot?.id, repliesFeed.items.length, loadRepliesPage])
+
+useEffect(() => {
+  if (!inboxOpen) return
+  if (inboxFeed.items.length) return
+  loadInboxPage(true)
+}, [inboxOpen, inboxFeed.items.length, loadInboxPage])
+
+useEffect(() => {
+  if (!videoFeedOpen) return
+  if (videoFeedState.items.length) return
+  loadVideoPage(true)
+}, [videoFeedOpen, videoFeedState.items.length, loadVideoPage])
+
+useEffect(() => {
+  if (!meId) return
+  let alive = true
+  api.feed({ mode: 'inbox_badge', viewerId: String(meId) }, meId).then((res) => {
+    if (!alive) return
+    setInboxUnread(Number(res?.unread || 0))
+  }).catch(() => {})
+  return () => { alive = false }
+}, [meId, inboxOpen])
+
+useEffect(() => {
+  if (!isBrowser()) return
+  const el = topicsSentinelRef.current
+  if (!el) return
+  const io = new IntersectionObserver(
+    (entries) => {
+      if (entries.some(e => e.isIntersecting)) loadTopicsPage(false)
+    },
+    { rootMargin: '200px' }
+  )
+  io.observe(el)
+  return () => io.disconnect()
+}, [loadTopicsPage])
+
+useEffect(() => {
+  if (!isBrowser()) return
+  const el = postsSentinelRef.current
+  if (!el) return
+  const io = new IntersectionObserver(
+    (entries) => {
+      if (entries.some(e => e.isIntersecting)) loadPostsPage(false)
+    },
+    { rootMargin: '200px' }
+  )
+  io.observe(el)
+  return () => io.disconnect()
+}, [loadPostsPage])
+
+useEffect(() => {
+  if (!isBrowser()) return
+  const el = repliesSentinelRef.current
+  if (!el) return
+  const io = new IntersectionObserver(
+    (entries) => {
+      if (entries.some(e => e.isIntersecting)) loadRepliesPage(false)
+    },
+    { rootMargin: '200px' }
+  )
+  io.observe(el)
+  return () => io.disconnect()
+}, [loadRepliesPage])
+
+useEffect(() => {
+  if (!isBrowser()) return
+  const el = inboxSentinelRef.current
+  if (!el) return
+  const io = new IntersectionObserver(
+    (entries) => {
+      if (entries.some(e => e.isIntersecting)) loadInboxPage(false)
+    },
+    { rootMargin: '200px' }
+  )
+  io.observe(el)
+  return () => io.disconnect()
+}, [loadInboxPage])
+
+useEffect(() => {
+  if (!isBrowser()) return
+  const el = videoSentinelRef.current
+  if (!el) return
+  const io = new IntersectionObserver(
+    (entries) => {
+      if (entries.some(e => e.isIntersecting)) loadVideoPage(false)
+    },
+    { rootMargin: '200px' }
+  )
+  io.observe(el)
+  return () => io.disconnect()
+}, [loadVideoPage])
+
 const seenKey = meId ? `forum:seenReplies:${meId}` : null;
 
-// все мои посты (id)
-const myPostIds = useMemo(() => {
-  if (!meId) return new Set();
-  const s = new Set();
-  for (const p of (data.posts || [])) {
-    if (String(p.userId || p.accountId || '') === String(meId)) s.add(String(p.id));
-  }
-  return s;
-}, [data.posts, meId]);
-
-// ответы на мои посты (не я автор)
-const repliesToMe = useMemo(() => {
-  if (!meId || !myPostIds.size) return [];
-  return (data.posts || []).filter(p =>
-    p.parentId &&
-    myPostIds.has(String(p.parentId)) &&
-    String(p.userId || p.accountId || '') !== String(meId)
-  );
-}, [data.posts, myPostIds, meId]);
+// ответы на мои посты (через feed/inbox)
+const repliesToMe = useMemo(() => (
+  Array.isArray(inboxFeed.items) ? inboxFeed.items : []
+), [inboxFeed.items]);
 
 // прочитанные — храним в state, загружаем/сохраняем только на клиенте
 const [readSet, setReadSet] = useState(() => new Set());
@@ -8090,11 +8436,12 @@ useEffect(() => {
 }, [seenKey]);
 
 const unreadCount = useMemo(() => {
-  if (!mounted) return 0; // до монтирования не подсвечиваем бейдж
-  let n = 0;
-  for (const p of repliesToMe) if (!readSet.has(String(p.id))) n++;
-  return n;
-}, [mounted, repliesToMe, readSet]);
+  if (!mounted) return 0
+  if (Number.isFinite(inboxUnread) && inboxUnread > 0) return inboxUnread
+  let n = 0
+  for (const p of repliesToMe) if (!readSet.has(String(p.id))) n++
+  return n
+}, [mounted, repliesToMe, readSet, inboxUnread]);
 
 // при открытии Inbox — пометить как прочитанные и сразу обновить state
 useEffect(() => {
@@ -8105,6 +8452,7 @@ if (!mounted || !inboxOpen || !seenKey) return;
   ]);
   try { localStorage.setItem(seenKey, JSON.stringify(Array.from(allIds))); } catch {}
   setReadSet(allIds); // чтобы бейдж погас сразу без повторного чтения из LS
+    setInboxUnread(0)
 }, [mounted, inboxOpen, seenKey, repliesToMe, readSet]);
 
 // все посты выбранной темы (строго сравниваем как строки)
@@ -8130,12 +8478,7 @@ const idMap = useMemo(() => {
   }
   return m;
 }, [allPosts]);
-
-// выбранный корень ветки (null = режим списка корней)
-const [threadRoot, setThreadRoot] = useState(null);
-
-// при смене темы выходим из веточного режима
-useEffect(() => { setThreadRoot(null); }, [sel?.id]);
+ 
 
  // === Views: refs to avoid TDZ when effects run before callbacks are initialized ===
 
@@ -8280,7 +8623,8 @@ const aggregates = useMemo(() => {
 
   // ===== ПУНКТ 5: Сортировка тем с использованием агрегатов =====
   const sortedTopics = useMemo(()=>{
-    let topics = [...(data.topics || [])];
+       const source = (topicsFeed.items?.length ? topicsFeed.items : (data.topics || []))
+    let topics = [...source];
     if (topicFilterId) topics = topics.filter(t => String(t.id) === String(topicFilterId));
     const score = (t) => {
       const agg = aggregates.get(t.id) || { posts:0, likes:0, dislikes:0, views:0 };
@@ -8296,7 +8640,7 @@ const aggregates = useMemo(() => {
     };
     const base = topics.sort((a,b) => (score(b) - score(a)) || ((b.ts||0) - (a.ts||0)));
     return starredFirst(base, (x) => x?.userId || x?.accountId);
-  }, [data.topics, aggregates, topicSort, topicFilterId, starredFirst]);
+  }, [data.topics, topicsFeed.items, aggregates, topicSort, topicFilterId, starredFirst]);
 
 
 
@@ -9808,7 +10152,7 @@ const onFilesChosen = React.useCallback(async (e) => {
 // === VIDEO FEED: состояние + хелперы =====================
 const [videoFeedOpen, setVideoFeedOpen] = React.useState(false);
 const [videoFeed, setVideoFeed] = React.useState([]);
-const [feedSort, setFeedSort] = React.useState('new'); // new/top/likes/views/replies
+
 
 // ВАЖНО: в ленте нужно уметь находить ссылки внутри текста (даже если не отдельной строкой)
 const FEED_URL_RE = /(https?:\/\/[^\s<>'")]+)/ig;
@@ -9942,79 +10286,12 @@ function gatherAllPosts(data, allPosts) {
   }
 
   return pool;
-}
-
-/** построить и сохранить ленту видео */
+} 
 function buildAndSetVideoFeed() {
-  const pool = gatherAllPosts(data, allPosts);
-  // ✅ единый id для постов/реплаев (иначе parentId не матчится с id)
-  const pidOf = (x) => {
-    const v = (x?.id ?? x?._id ?? x?.uuid ?? x?.key ?? null);
-    return v == null ? '' : String(v);
-  };
-
-  const parentIdOf = (x) => {
-    const v = (x?.parentId ?? x?._parentId ?? null);
-    return v == null ? '' : String(v);
-  };
-  // мягкий дедуп по стабильному ключу, но без выкидывания «безидешных»
-  const seen = new Set();
-  const all = [];
-  for (const p of pool) {
-    if (!p) continue;
-    const base = (p.id ?? p._id ?? p.uuid ?? p.key ?? null);
-    const topic = (p.topicId ?? p.threadId ?? null);
-    const key = base != null ? String(base) : (topic != null ? `${topic}:${String(base)}` : null);
-
-    if (key) {
-      if (seen.has(key)) continue;
-      seen.add(key);
-    }
-    all.push(p);
-  }
-
-// replies count map: parentId -> count
-const repliesMap = new Map();
-for (const p of all) {
-  const pid = parentIdOf(p);
-  if (!pid) continue;
-  repliesMap.set(pid, (repliesMap.get(pid) || 0) + 1);
-}
-
-
-  const score = (p) => {
-    const likes = Number(p?.likes || 0);
-    const views = Number(p?.views || 0);
-    const replies = repliesMap.get(pidOf(p)) || 0;
-    switch (feedSort) {
-      case 'new':     return Number(p?.ts || 0);
-      case 'likes':   return likes;
-      case 'views':   return views;
-      case 'replies': return replies;
-      case 'top':
-      default:
-        return (likes * 2) + replies + Math.floor(views * 0.2);
-    }
-  };
-
-const only = all
-  .filter(isMediaPost)
-  .sort((a,b) => (score(b) - score(a)) || (Number(b?.ts||0) - Number(a?.ts||0)));
-
-// ✅ прокидываем количество ответов прямо в объект поста для UI
-const onlyWithReplyCounts = only.map((p) => {
-  const id = pidOf(p);
-  const replyCount = id ? (repliesMap.get(id) || 0) : 0;
-  return {
-    ...p,
-    replyCount,          // 👈 можно так (если в UI ждёшь replyCount)
-    __repliesCount: replyCount, // 👈 и так (если хочешь безопасный резерв)
-  };
-});
-
-const withStars = starredFirst(onlyWithReplyCounts, (p) => (p?.userId || p?.accountId));
-setVideoFeed(withStars);
-
+/** построить и сохранить ленту видео */
+  const base = Array.isArray(videoFeedState.items) ? videoFeedState.items : []
+  const withStars = starredFirst(base, (p) => (p?.userId || p?.accountId))
+  setVideoFeed(withStars)
 }
 
 /** открыть ленту видео */
@@ -10036,7 +10313,7 @@ React.useEffect(() => {
   if (!videoFeedOpen) return;
   buildAndSetVideoFeed();
   // зависимости: любые сигналы обновления снапшота/постов у тебя в состоянии
-}, [videoFeedOpen, data?.rev, data?.posts, data?.messages, data?.topics, allPosts, feedSort, starMode, starredAuthors]);
+}, [videoFeedOpen, videoFeedState.items, feedSort, starMode, starredAuthors]);
 
 // [VIDEO_FEED:OPEN_THREAD] — открыть полноценную ветку из ленты
 function openThreadFromPost(p){
@@ -11289,10 +11566,10 @@ onClick={()=>{
     />
   );
 })}
-
-
-
-
+      <div ref={videoSentinelRef} style={{ height: 1 }} />
+      {videoFeedState.loading && (
+        <div className="meta">{t('forum_loading') || 'Загрузка...'}</div>
+      )}
       {videoFeed?.length === 0 && (
         <div className="meta">
           {t('forum_search_empty') || 'Ничего не найдено'}
@@ -11379,9 +11656,10 @@ onClick={()=>{
     />
   );
 })}
-
-
-
+      <div ref={inboxSentinelRef} style={{ height: 1 }} />
+      {inboxFeed.loading && (
+        <div className="meta">{t('forum_loading') || 'Загрузка...'}</div>
+      )}
       {(repliesToMe || []).length === 0 && (
         <div className="meta">
           {t('forum_inbox_empty') || 'Новых ответов нет'}
@@ -11417,6 +11695,10 @@ onClick={()=>{
 
           )
         })}
+              <div ref={topicsSentinelRef} style={{ height: 1 }} />
+      {topicsFeed.loading && (
+        <div className="meta">{t('forum_loading') || 'Загрузка...'}</div>
+      )}
     </div>
   </>
 )}
@@ -11700,9 +11982,11 @@ onClick={()=>{
     />
   );
 })}
-
-
-
+          {!threadRoot && <div ref={postsSentinelRef} style={{ height: 1 }} />}
+          {threadRoot && <div ref={repliesSentinelRef} style={{ height: 1 }} />}
+          {(postsFeed.loading || repliesFeed.loading) && (
+            <div className="meta">{t('forum_loading') || 'Загрузка...'}</div>
+          )}
           {(!threadRoot && (flat || []).length === 0) && (
             <div className="meta">
               {t('forum_no_posts_yet') || 'Пока нет сообщений'}
