@@ -38,6 +38,16 @@ function textHasImages(s) {
   return lines.some(line => IMG_LINE_RE.test(line))
 }
 
+const VIDEO_URL_RE =
+  /(https?:\/\/[^\s<>'")]+?\.(?:mp4|webm|mov|m4v|mkv)(?:[?#][^\s<>'")]+)?)/i
+const VIDEO_HINT_RE =
+  /(vercel[-]?storage|vercel[-]?blob|\/uploads\/video|\/forum\/video|\/api\/forum\/uploadVideo)/i
+function textHasVideo(s) {
+  const str = String(s || '')
+  if (!str) return false
+  return VIDEO_URL_RE.test(str) || VIDEO_HINT_RE.test(str)
+}
+
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const fetchCache = 'force-no-store'
@@ -126,7 +136,41 @@ async function delPostHard(id) {
     ])
   } catch {}
 }
-
+async function removePostIndexes(po) {
+  if (!po) return
+  const pid = String(po.id || '')
+  const tid = String(po.topicId || '')
+  if (!pid || !tid) return
+  try { await redisDirect.zrem(K.zTopicAll(tid), pid) } catch {}
+  if (po.parentId) {
+    try { await redisDirect.zrem(K.zParentReplies(String(po.parentId)), pid) } catch {}
+    try {
+      const parent = await getPostObj(String(po.parentId))
+      const parentAuthorId = String(parent?.userId || parent?.accountId || '')
+      if (parentAuthorId) {
+        await redisDirect.zrem(K.zInbox(parentAuthorId), pid)
+      }
+    } catch {}
+  } else {
+    try { await redisDirect.zrem(K.zTopicRoots(tid), pid) } catch {}
+  }
+  if (textHasVideo(po.text)) {
+    try { await redisDirect.zrem(K.zVideoFeed, pid) } catch {}
+  }
+  try {
+    const [views, likes, dislikes] = await Promise.all([
+      redisDirect.get(K.postViews(pid)),
+      redisDirect.get(K.postLikes(pid)),
+      redisDirect.get(K.postDislikes(pid)),
+    ])
+    const v = parseInt(views, 10) || 0
+    const l = parseInt(likes, 10) || 0
+    const d = parseInt(dislikes, 10) || 0
+    if (v) await redisDirect.decrby(K.topicViewsTotal(tid), v)
+    if (l) await redisDirect.decrby(K.topicLikes(tid), l)
+    if (d) await redisDirect.decrby(K.topicDislikes(tid), d)
+  } catch {}
+}
 async function decTopicPostsCount(topicId) {
   const key = topicPostsCountKey(topicId)
   try {
@@ -304,6 +348,7 @@ export async function POST(request) {
             const branch = await collectPostBranch(postId)
             for (const pid of branch) {
               const pObj = (pid === String(postId)) ? po : await getPostObj(pid)
+             await removePostIndexes(pObj)
               await delPostHard(pid)
               if (pObj?.topicId) await decTopicPostsCount(pObj.topicId)
             }
@@ -331,6 +376,9 @@ export async function POST(request) {
               }
             } catch {}
             for (const pid of affected) {
+             const pObj = await getPostObj(pid)
+              await removePostIndexes(pObj)
+
               await delPostHard(pid)
             }
             try { await redisDirect.srem(topicsSetKey, topicId) } catch {}
@@ -338,7 +386,13 @@ export async function POST(request) {
               await Promise.allSettled([
                 redisDirect.del(topicKey(topicId)),
                 redisDirect.del(K?.topicViews ? K.topicViews(topicId) : `forum:topic:${topicId}:views`),
+                redisDirect.del(K?.topicLikes ? K.topicLikes(topicId) : `forum:topic:${topicId}:likes`),
+                redisDirect.del(K?.topicDislikes ? K.topicDislikes(topicId) : `forum:topic:${topicId}:dislikes`),
+                redisDirect.del(K?.topicViewsTotal ? K.topicViewsTotal(topicId) : `forum:topic:${topicId}:views_total`),
                 redisDirect.del(topicPostsCountKey(topicId)),
+                redisDirect.zrem(K?.zTopics || 'forum:z:topics', topicId),
+                redisDirect.del(K?.zTopicRoots ? K.zTopicRoots(topicId) : `forum:z:topic:${topicId}:roots`),
+                redisDirect.del(K?.zTopicAll ? K.zTopicAll(topicId) : `forum:z:topic:${topicId}:all`),
               ])
             } catch {}
             const rev = await nextRev()

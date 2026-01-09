@@ -16,7 +16,24 @@ const postLikesSet = (id) => (typeof K?.postLikesSet === 'function' ? K.postLike
 const postDislikesSet = (id) => (typeof K?.postDislikesSet === 'function' ? K.postDislikesSet(id) : (K?.postDislikesSet || `post:${id}:dislikes:set`))
 const topicPostsCount = (id) => (K?.topicPostsCount ? K.topicPostsCount(id) : `forum:topic:${id}:posts_count`)
 const topicPostsSet   = (id) => (typeof K?.topicPostsSet === 'function' ? K.topicPostsSet(id) : K?.topicPostsSet)
+const topicLikes = (id) => (K?.topicLikes ? K.topicLikes(id) : `forum:topic:${id}:likes`)
+const topicDislikes = (id) => (K?.topicDislikes ? K.topicDislikes(id) : `forum:topic:${id}:dislikes`)
+const topicViewsTotal = (id) => (K?.topicViewsTotal ? K.topicViewsTotal(id) : `forum:topic:${id}:views_total`)
+const zTopicAll = (id) => (K?.zTopicAll ? K.zTopicAll(id) : `forum:z:topic:${id}:all`)
+const zTopicRoots = (id) => (K?.zTopicRoots ? K.zTopicRoots(id) : `forum:z:topic:${id}:roots`)
+const zParentReplies = (id) => (K?.zParentReplies ? K.zParentReplies(id) : `forum:z:parent:${id}:replies`)
+const zInbox = (id) => (K?.zInbox ? K.zInbox(id) : `forum:z:user:${id}:inbox`)
+const zVideoFeed = (K?.zVideoFeed || 'forum:z:feed:video')
 
+const VIDEO_URL_RE =
+  /(https?:\/\/[^\s<>'")]+?\.(?:mp4|webm|mov|m4v|mkv)(?:[?#][^\s<>'")]+)?)/i
+const VIDEO_HINT_RE =
+  /(vercel[-]?storage|vercel[-]?blob|\/uploads\/video|\/forum\/video|\/api\/forum\/uploadVideo)/i
+const textHasVideo = (s) => {
+  const str = String(s || '')
+  if (!str) return false
+  return VIDEO_URL_RE.test(str) || VIDEO_HINT_RE.test(str)
+}
 export async function POST(req) {
   try {
     await requireAdmin(req) // cookie forum_admin=1
@@ -51,6 +68,18 @@ export async function POST(req) {
     }
 
     const topicId = String(postObj.topicId || '')
+        const parentId = postObj.parentId ? String(postObj.parentId) : ''
+    let parentAuthorId = ''
+    if (parentId) {
+      try {
+        const parentRaw = await redis.get(postKey(parentId))
+        const parentObj = safeParse(parentRaw)
+        parentAuthorId = String(parentObj?.userId || parentObj?.accountId || '')
+      } catch {}
+    }
+    const views = parseInt(await redis.get(postViews(postId)), 10) || 0
+    const likes = parseInt(await redis.get(postLikes(postId)), 10) || 0
+    const dislikes = parseInt(await redis.get(postDislikes(postId)), 10) || 0
     // 1) Удаляем сам пост и счётчики/сеты
     const ops = [
       redis.srem(postsSetKey, postId),
@@ -61,7 +90,25 @@ export async function POST(req) {
       redis.del(postLikesSet(postId)),
       redis.del(postDislikesSet(postId)),
     ]
-
+    if (topicId) {
+      ops.push(
+        redis.zrem(zTopicAll(topicId), postId),
+      )
+      if (parentId) {
+        ops.push(redis.zrem(zParentReplies(parentId), postId))
+      } else {
+        ops.push(redis.zrem(zTopicRoots(topicId), postId))
+      }
+      if (parentAuthorId) {
+        ops.push(redis.zrem(zInbox(parentAuthorId), postId))
+      }
+      if (views) ops.push(redis.decrby(topicViewsTotal(topicId), views))
+      if (likes) ops.push(redis.decrby(topicLikes(topicId), likes))
+      if (dislikes) ops.push(redis.decrby(topicDislikes(topicId), dislikes))
+    }
+    if (textHasVideo(postObj.text)) {
+      ops.push(redis.zrem(zVideoFeed, postId))
+    }
     // 1.1) Если есть индекс topicPostsSet — вычистим из индекса
     const idxKey = topicPostsSet?.(topicId)
     if (idxKey) ops.push(redis.srem(idxKey, postId))

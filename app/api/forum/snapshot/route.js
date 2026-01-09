@@ -1,5 +1,5 @@
 // app/api/forum/snapshot/route.js
-import { snapshot, rebuildSnapshot, redis as redisDirect } from '../_db.js'
+import { snapshot, rebuildSnapshot, redis as redisDirect, readFeed, K } from '../_db.js'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -12,10 +12,51 @@ const TTL_MS = 2000 // 2 секунды
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url)
+    const kind = searchParams.get('kind') || ''
+    const limitParam = searchParams.get('limit') || ''
+    const cursor = searchParams.get('cursor') || ''
+    const sort = searchParams.get('sort') || ''
+    const topicId = searchParams.get('topicId') || ''
+    const parentId = searchParams.get('parentId') || ''
+    const userId = searchParams.get('userId') || ''
+
     const sinceParam = searchParams.get('since') || ''
     const revParam   = searchParams.get('rev')   || ''   // барьер по ревизии
     const bust       = searchParams.get('b')     || ''   // клиентский «бастер» (любой)
+    if (kind === 'meta') {
+      const banned = await redisDirect.smembers(K.bannedSet)
+      const rev = await redisDirect.get(K.rev)
+      const body = JSON.stringify({ ok: true, banned, rev: Number(rev || 0) })
+      return new Response(body, {
+        status: 200,
+        headers: {
+          'content-type': 'application/json; charset=utf-8',
+          'cache-control': 'no-store, max-age=0',
+        },
+      })
+    }
 
+    if (kind) {
+      const limit = Number(limitParam || '') || undefined
+      const data = await readFeed({
+        kind,
+        limit,
+        cursor: cursor || undefined,
+        sort: sort || undefined,
+        topicId: topicId || undefined,
+        parentId: parentId || undefined,
+        userId: userId || undefined,
+      })
+
+      const body = JSON.stringify({ ok: true, ...data })
+      return new Response(body, {
+        status: 200,
+        headers: {
+          'content-type': 'application/json; charset=utf-8',
+          'cache-control': 'no-store, max-age=0',
+        },
+      })
+    }
     const since = Number.isFinite(+sinceParam) ? +sinceParam : 0
     const revTarget = Number.isFinite(+revParam) ? +revParam : 0
 

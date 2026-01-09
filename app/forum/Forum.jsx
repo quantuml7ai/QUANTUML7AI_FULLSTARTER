@@ -5,6 +5,7 @@
 
 
 import React, { useEffect, useMemo, useRef, useCallback, useState } from 'react'
+import { Virtuoso } from 'react-virtuoso'
 import { useI18n } from '../../components/i18n'
 import { useRouter } from 'next/navigation'
 import { broadcast as forumBroadcast } from './events/bus'
@@ -30,6 +31,9 @@ const INVITE_BTN_SIZE = 50        // общий размер кнопки
 const INVITE_GIF_SIZE = 40        // размер самой гифки внутри
 const INVITE_BTN_OFFSET_X = 0     // при необходимости сдвиг по X
 const INVITE_BTN_OFFSET_Y = 0     // при необходимости сдвиг по Y
+const FEED_PAGE_SIZE = Number(process.env.NEXT_PUBLIC_FORUM_PAGE_SIZE ?? 25)
+const FEED_CACHE_MAX = Number(process.env.NEXT_PUBLIC_FORUM_FEED_CACHE_MAX ?? 10)
+const FEED_CACHE_ITEMS_MAX = Number(process.env.NEXT_PUBLIC_FORUM_FEED_ITEMS_MAX ?? 500)
 
 /* =========================================================
    helpers
@@ -66,6 +70,18 @@ const safeHtml = s => String(s || '')
   .replace(/(https?:\/\/[^\s<]+)(?=\s|$)/g,'<a target="_blank" rel="noreferrer noopener nofollow ugc" href="$1">$1</a>')
   .replace(/\n/g,'<br/>')
 const rich = s => safeHtml(s).replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\*(.*?)\*/g,'<i>$1</i>')
+const mergeFeedItems = (prevItems = [], nextItems = []) => {
+  const out = Array.isArray(prevItems) ? prevItems.slice() : []
+  const seen = new Set(out.map((item) => String(item?.id || '')))
+  for (const item of nextItems || []) {
+    const id = String(item?.id || '')
+    if (!id || !seen.has(id)) {
+      out.push(item)
+      if (id) seen.add(id)
+    }
+  }
+  return out
+}
 // детектор любых ссылок/адресов (URL/email/markdown/localhost/IP/укороченные)
 const hasAnyLink = (s) => {
   const str = String(s || '');
@@ -483,6 +499,8 @@ const api = {
   async snapshot(q = {}) {
     try {
       const params = new URLSearchParams();
+      const kind = q.kind || 'meta'
+      if (kind) params.set('kind', String(kind))      
       if (q.b)   params.set('b',   String(q.b));
       if (q.rev) params.set('rev', String(q.rev));
       const url = '/api/forum/snapshot' + (params.toString() ? `?${params}` : '');
@@ -492,8 +510,8 @@ const api = {
       let data = {};
       try { data = raw ? JSON.parse(raw) : {}; } catch {}
 
-      const topics = Array.isArray(data?.topics) ? data.topics : [];
-      const posts  = Array.isArray(data?.posts)  ? data.posts  : [];
+      const topics = Array.isArray(data?.topics) ? data.topics : undefined;
+      const posts  = Array.isArray(data?.posts)  ? data.posts  : undefined;
       // server -> 'banned'; поддерживаем обратную совместимость с 'bans'
       const bans   = Array.isArray(data?.banned) ? data.banned
                     : Array.isArray(data?.bans)  ? data.bans : [];
@@ -502,15 +520,42 @@ const api = {
 
       // «пустой» ответ => можно делать жёсткий ресет
       // В текущей реализации клиент НИ РАЗУ не запрашивает инкрементальные снапшоты.
-      // Каждый вызов /api/forum/snapshot — ПОЛНЫЙ снимок состояния форума,
-      // значит локальный forum:snap должен полностью под него подстраиваться.
-      const __reset = true;
+      // Базовый /api/forum/snapshot теперь работает в режиме meta,
+      // чтобы не тянуть весь снапшот при обычном чтении.
+      const __reset = kind !== 'meta';
       return { ok: r.ok, status: r.status, topics, posts, bans, rev, cursor, __reset };
     } catch {
       return { ok:false, error:'network', topics:[], posts:[], bans:[], rev:0, cursor:null, __reset:false };
     }
   },
-
+  async feed(q = {}) {
+    try {
+      const params = new URLSearchParams()
+      if (q.kind) params.set('kind', String(q.kind))
+      if (q.limit) params.set('limit', String(q.limit))
+      if (q.cursor) params.set('cursor', String(q.cursor))
+      if (q.sort) params.set('sort', String(q.sort))
+      if (q.topicId) params.set('topicId', String(q.topicId))
+      if (q.parentId) params.set('parentId', String(q.parentId))
+      if (q.userId) params.set('userId', String(q.userId))
+      const url = '/api/forum/snapshot' + (params.toString() ? `?${params}` : '')
+      const r = await fetch(url, { cache: 'no-store' })
+      const raw = await r.text()
+      let data = {}
+      try { data = raw ? JSON.parse(raw) : {} } catch {}
+      return {
+        ok: r.ok,
+        status: r.status,
+        items: Array.isArray(data?.items) ? data.items : [],
+        hasMore: !!data?.hasMore,
+        nextCursor: data?.nextCursor ?? null,
+        rev: Number.isFinite(+data?.rev) ? +data.rev : 0,
+        total: Number.isFinite(+data?.total) ? +data.total : null,
+      }
+    } catch {
+      return { ok: false, items: [], hasMore: false, nextCursor: null, rev: 0, total: null }
+    }
+  },
   // Батч-мутации
   async mutate(batch, userId) {
     try {
@@ -7198,6 +7243,32 @@ const persist = (patch) => setData(prev => {
   return next
 })
 const withdrawBtnRef = useRef(null);
+const feedCacheRef = useRef(new Map())
+const readFeedCache = useCallback((key) => {
+  if (!key) return null
+  const cache = feedCacheRef.current
+  if (!cache.has(key)) return null
+  const value = cache.get(key)
+  cache.delete(key)
+  cache.set(key, value)
+  return value
+}, [])
+const writeFeedCache = useCallback((key, value) => {
+  if (!key) return
+  const cache = feedCacheRef.current
+  const trimmed = {
+    ...value,
+    items: Array.isArray(value?.items)
+      ? value.items.slice(0, Math.max(1, FEED_CACHE_ITEMS_MAX))
+      : [],
+  }
+  if (cache.has(key)) cache.delete(key)
+  cache.set(key, trimmed)
+  while (cache.size > Math.max(1, FEED_CACHE_MAX)) {
+    const oldest = cache.keys().next().value
+    cache.delete(oldest)
+  }
+}, [])
 
 const [qcoinModalOpen, setQcoinModalOpen] = useState(false);
 
@@ -7812,7 +7883,7 @@ return () => {
       if (didManualKickRef.current || sseAliveRef.current) return
       didManualKickRef.current = true
       // принудительно подтягиваем свежий снапшот и обновляем
-      fetch('/api/forum/snapshot?kick=1', { cache: 'no-store' })
+            fetch('/api/forum/snapshot?kick=1&kind=meta', { cache: 'no-store' })
         .catch(() => null)
         .finally(() => router.refresh())
     }
@@ -7936,6 +8007,16 @@ const delTopic = async (t) => {
       topics: prev.topics.filter(x => x.id !== t.id),
       posts:  prev.posts.filter(p => p.topicId !== t.id),
     }))
+    setTopicsFeed(prev => {
+      const items = prev.items.filter(x => String(x.id) !== String(t.id))
+      const next = { ...prev, items }
+      writeFeedCache(prev.key, next)
+      return next
+    })
+    if (sel?.id && String(sel.id) === String(t.id)) {
+      setSel(null)
+      setThreadRoot(null)
+    }    
     toast.ok('Topic removed')
     forumBroadcast({ type: 'post_deleted' }); // без id — просто триггерим перечитку
 
@@ -7963,6 +8044,41 @@ const delPost = async (p) => {
       }
       return { ...prev, posts: prev.posts.filter(x => !del.has(x.id)) }
     })
+    const delIds = new Set([String(p.id)])
+    setRootsFeed(prev => {
+      const items = prev.items.filter(x => !delIds.has(String(x.id)))
+      const next = { ...prev, items }
+      writeFeedCache(prev.key, next)
+      return next
+    })
+    setRepliesFeed(prev => {
+      const items = prev.items.filter(x => !delIds.has(String(x.id)))
+      const next = { ...prev, items }
+      writeFeedCache(prev.key, next)
+      return next
+    })
+    setInboxFeed(prev => {
+      const items = prev.items.filter(x => !delIds.has(String(x.id)))
+      const next = { ...prev, items }
+      writeFeedCache(prev.key, next)
+      return next
+    })
+    setVideoFeedState(prev => {
+      const items = prev.items.filter(x => !delIds.has(String(x.id)))
+      const next = { ...prev, items }
+      writeFeedCache(prev.key, next)
+      return next
+    })
+    setTopicsFeed(prev => {
+      const items = prev.items.map(t => {
+        if (String(t.id) !== String(p.topicId)) return t
+        const postsCount = Math.max(0, Number(t.postsCount ?? t.posts ?? 0) - 1)
+        return { ...t, postsCount, posts: postsCount }
+      })
+      const next = { ...prev, items }
+      writeFeedCache(prev.key, next)
+      return next
+    })    
     toast.ok('Post removed')
     emitDeleted(p.id, p.topicId);   // ← сообщить об удалении
 
@@ -8027,7 +8143,16 @@ const delTopicOwn = async (topic) => {
       const topics = (prev.topics || []).filter(x => String(x.id) !== String(topic.id));
       return { ...prev, posts, topics };
     });
-
+    setTopicsFeed(prev => {
+      const items = prev.items.filter(x => String(x.id) !== String(topic.id))
+      const next = { ...prev, items }
+      writeFeedCache(prev.key, next)
+      return next
+    })
+    if (sel?.id && String(sel.id) === String(topic.id)) {
+      setSel(null)
+      setThreadRoot(null)
+    }
     // поддержим оба варианта ключа (на случай старого словаря)
     toast.ok(t('forum_delete_ok') || 'Удалено');
 
@@ -8041,6 +8166,10 @@ const delTopicOwn = async (topic) => {
 /* ---- выбор темы и построение данных ---- */
 const [sel, setSel] = useState(null);
 
+const [threadRoot, setThreadRoot] = useState(null);
+
+// при смене темы выходим из веточного режима
+useEffect(() => { setThreadRoot(null); }, [sel?.id]);
 
 // [SORT_STATE:AFTER]
 const [q, setQ] = useState('');
@@ -8054,28 +8183,197 @@ const [inboxOpen, setInboxOpen] = useState(false);
 const [mounted, setMounted] = useState(false);           // ← флаг «мы на клиенте»
 useEffect(()=>{ setMounted(true) }, []);
 
+const [videoFeedOpen, setVideoFeedOpen] = React.useState(false);
+const [videoFeed, setVideoFeed] = React.useState([]);
+const [feedSort, setFeedSort] = React.useState('new'); // new/top/likes/views/replies
+
 const meId = auth?.asherId || auth?.accountId || '';
 const seenKey = meId ? `forum:seenReplies:${meId}` : null;
 
-// все мои посты (id)
-const myPostIds = useMemo(() => {
-  if (!meId) return new Set();
-  const s = new Set();
-  for (const p of (data.posts || [])) {
-    if (String(p.userId || p.accountId || '') === String(meId)) s.add(String(p.id));
-  }
-  return s;
-}, [data.posts, meId]);
+const topicsFeedKey = useMemo(
+  () => `topics:${topicSort}:${topicFilterId || 'all'}`,
+  [topicSort, topicFilterId],
+)
+const rootsFeedKey = useMemo(
+  () => (sel?.id ? `topic:${sel.id}:roots:${postSort}` : ''),
+  [sel?.id, postSort],
+)
+const repliesFeedKey = useMemo(
+  () => (threadRoot?.id ? `replies:${threadRoot.id}:${postSort}` : ''),
+  [threadRoot?.id, postSort],
+)
+const inboxFeedKey = useMemo(
+  () => (meId ? `inbox:${meId}` : ''),
+  [meId],
+)
+const videoFeedKey = useMemo(
+  () => `video:${feedSort}`,
+  [feedSort],
+)
 
-// ответы на мои посты (не я автор)
+const [topicsFeed, setTopicsFeed] = useState({ key: topicsFeedKey, items: [], cursor: null, hasMore: true, loading: false, total: null })
+const [rootsFeed, setRootsFeed] = useState({ key: rootsFeedKey, items: [], cursor: null, hasMore: true, loading: false, total: null })
+const [repliesFeed, setRepliesFeed] = useState({ key: repliesFeedKey, items: [], cursor: null, hasMore: true, loading: false, total: null })
+const [inboxFeed, setInboxFeed] = useState({ key: inboxFeedKey, items: [], cursor: null, hasMore: true, loading: false, total: null })
+const [videoFeedState, setVideoFeedState] = useState({ key: videoFeedKey, items: [], cursor: null, hasMore: true, loading: false, total: null })
+
+const topicsLoadingRef = useRef(false)
+const rootsLoadingRef = useRef(false)
+const repliesLoadingRef = useRef(false)
+const inboxLoadingRef = useRef(false)
+const videoLoadingRef = useRef(false)
+
+const loadFeedPage = useCallback(async (state, setState, params, key, loadingRef) => {
+  if (!key || loadingRef.current || !state.hasMore) return
+  loadingRef.current = true
+  setState(prev => ({ ...prev, loading: true }))
+  try {
+    const res = await api.feed({
+      ...params,
+      cursor: state.cursor,
+      limit: FEED_PAGE_SIZE,
+    })
+    if (res?.ok) {
+      setState(prev => {
+        const merged = mergeFeedItems(prev.items, res.items || [])
+        const nextState = {
+          ...prev,
+          items: merged,
+          cursor: res.nextCursor ?? prev.cursor,
+          hasMore: !!res.hasMore,
+          loading: false,
+          total: res.total ?? prev.total,
+        }
+        writeFeedCache(key, nextState)
+        return nextState
+      })
+    } else {
+      setState(prev => ({ ...prev, loading: false }))
+    }
+  } finally {
+    loadingRef.current = false
+  }
+}, [writeFeedCache])
+
+const loadMoreTopics = useCallback(
+  () => loadFeedPage(topicsFeed, setTopicsFeed, { kind: 'topics', sort: topicSort }, topicsFeedKey, topicsLoadingRef),
+  [loadFeedPage, topicsFeed, topicSort, topicsFeedKey],
+)
+const loadMoreRoots = useCallback(
+  () => loadFeedPage(rootsFeed, setRootsFeed, { kind: 'topic_roots', topicId: sel?.id, sort: postSort }, rootsFeedKey, rootsLoadingRef),
+  [loadFeedPage, rootsFeed, sel?.id, postSort, rootsFeedKey],
+)
+const loadMoreReplies = useCallback(
+  () => loadFeedPage(repliesFeed, setRepliesFeed, { kind: 'replies', parentId: threadRoot?.id, sort: postSort }, repliesFeedKey, repliesLoadingRef),
+  [loadFeedPage, repliesFeed, threadRoot?.id, postSort, repliesFeedKey],
+)
+const loadMoreInbox = useCallback(
+  () => loadFeedPage(inboxFeed, setInboxFeed, { kind: 'inbox', userId: meId }, inboxFeedKey, inboxLoadingRef),
+  [loadFeedPage, inboxFeed, meId, inboxFeedKey],
+)
+const loadMoreVideo = useCallback(
+  () => loadFeedPage(videoFeedState, setVideoFeedState, { kind: 'video', sort: feedSort }, videoFeedKey, videoLoadingRef),
+  [loadFeedPage, videoFeedState, feedSort, videoFeedKey],
+)
+
+useEffect(() => {
+  if (!topicsFeedKey) return
+  const cached = readFeedCache(topicsFeedKey)
+  if (cached) {
+    setTopicsFeed({ ...cached, key: topicsFeedKey, loading: false })
+    return
+  }
+  setTopicsFeed({ key: topicsFeedKey, items: [], cursor: null, hasMore: true, loading: false, total: null })
+  loadFeedPage(
+    { key: topicsFeedKey, items: [], cursor: null, hasMore: true },
+    setTopicsFeed,
+    { kind: 'topics', sort: topicSort },
+    topicsFeedKey,
+    topicsLoadingRef,
+  )
+}, [topicsFeedKey, topicSort, readFeedCache, loadFeedPage])
+
+useEffect(() => {
+  if (!rootsFeedKey) {
+    setRootsFeed({ key: rootsFeedKey, items: [], cursor: null, hasMore: true, loading: false, total: null })
+    return
+  }
+  const cached = readFeedCache(rootsFeedKey)
+  if (cached) {
+    setRootsFeed({ ...cached, key: rootsFeedKey, loading: false })
+    return
+  }
+  setRootsFeed({ key: rootsFeedKey, items: [], cursor: null, hasMore: true, loading: false, total: null })
+  loadFeedPage(
+    { key: rootsFeedKey, items: [], cursor: null, hasMore: true },
+    setRootsFeed,
+    { kind: 'topic_roots', topicId: sel?.id, sort: postSort },
+    rootsFeedKey,
+    rootsLoadingRef,
+  )
+}, [rootsFeedKey, sel?.id, postSort, readFeedCache, loadFeedPage])
+
+useEffect(() => {
+  if (!repliesFeedKey) {
+    setRepliesFeed({ key: repliesFeedKey, items: [], cursor: null, hasMore: true, loading: false, total: null })
+    return
+  }
+  const cached = readFeedCache(repliesFeedKey)
+  if (cached) {
+    setRepliesFeed({ ...cached, key: repliesFeedKey, loading: false })
+    return
+  }
+  setRepliesFeed({ key: repliesFeedKey, items: [], cursor: null, hasMore: true, loading: false, total: null })
+  loadFeedPage(
+    { key: repliesFeedKey, items: [], cursor: null, hasMore: true },
+    setRepliesFeed,
+    { kind: 'replies', parentId: threadRoot?.id, sort: postSort },
+    repliesFeedKey,
+    repliesLoadingRef,
+  )
+}, [repliesFeedKey, threadRoot?.id, postSort, readFeedCache, loadFeedPage])
+
+useEffect(() => {
+  if (!inboxFeedKey || !meId) {
+    setInboxFeed({ key: inboxFeedKey, items: [], cursor: null, hasMore: true, loading: false, total: null })
+    return
+  }
+  const cached = readFeedCache(inboxFeedKey)
+  if (cached) {
+    setInboxFeed({ ...cached, key: inboxFeedKey, loading: false })
+    return
+  }
+  setInboxFeed({ key: inboxFeedKey, items: [], cursor: null, hasMore: true, loading: false, total: null })
+  loadFeedPage(
+    { key: inboxFeedKey, items: [], cursor: null, hasMore: true },
+    setInboxFeed,
+    { kind: 'inbox', userId: meId },
+    inboxFeedKey,
+    inboxLoadingRef,
+  )
+}, [inboxFeedKey, meId, readFeedCache, loadFeedPage])
+
+useEffect(() => {
+  if (!videoFeedKey || !videoFeedOpen) return
+  const cached = readFeedCache(videoFeedKey)
+  if (cached) {
+    setVideoFeedState({ ...cached, key: videoFeedKey, loading: false })
+    return
+  }
+  setVideoFeedState({ key: videoFeedKey, items: [], cursor: null, hasMore: true, loading: false, total: null })
+  loadFeedPage(
+    { key: videoFeedKey, items: [], cursor: null, hasMore: true },
+    setVideoFeedState,
+    { kind: 'video', sort: feedSort },
+    videoFeedKey,
+    videoLoadingRef,
+  )
+}, [videoFeedKey, feedSort, videoFeedOpen, readFeedCache, loadFeedPage])
+
+// ответы на мои посты (пагинация inbox)
 const repliesToMe = useMemo(() => {
-  if (!meId || !myPostIds.size) return [];
-  return (data.posts || []).filter(p =>
-    p.parentId &&
-    myPostIds.has(String(p.parentId)) &&
-    String(p.userId || p.accountId || '') !== String(meId)
-  );
-}, [data.posts, myPostIds, meId]);
+  return (inboxFeed.items || []).slice().sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0))
+}, [inboxFeed.items]);
 
 // прочитанные — храним в state, загружаем/сохраняем только на клиенте
 const [readSet, setReadSet] = useState(() => new Set());
@@ -8090,11 +8388,15 @@ useEffect(() => {
 }, [seenKey]);
 
 const unreadCount = useMemo(() => {
+
   if (!mounted) return 0; // до монтирования не подсвечиваем бейдж
+    if (Number.isFinite(inboxFeed.total) && inboxFeed.total > (repliesToMe || []).length) {
+    return Math.max(0, Number(inboxFeed.total) - (readSet?.size || 0))
+  }
   let n = 0;
   for (const p of repliesToMe) if (!readSet.has(String(p.id))) n++;
   return n;
-}, [mounted, repliesToMe, readSet]);
+}, [mounted, repliesToMe, readSet, inboxFeed.total]);
 
 // при открытии Inbox — пометить как прочитанные и сразу обновить state
 useEffect(() => {
@@ -8107,35 +8409,10 @@ if (!mounted || !inboxOpen || !seenKey) return;
   setReadSet(allIds); // чтобы бейдж погас сразу без повторного чтения из LS
 }, [mounted, inboxOpen, seenKey, repliesToMe, readSet]);
 
-// все посты выбранной темы (строго сравниваем как строки)
-const allPosts = useMemo(() => (
-  sel?.id ? (data.posts || []).filter(p => String(p.topicId) === String(sel.id)) : []
-), [data.posts, sel?.id]);
 
-// корневые посты (без parentId), новые сверху
-const rootPosts = useMemo(
-  () => allPosts
-        .filter(p => !p.parentId)
-        .sort((a, b) => Number(b?.ts || 0) - Number(a?.ts || 0)),
-  [allPosts]
-);
-
-// индекс по id и подготовка узлов с children — ВСЕГДА ключ как String
-const idMap = useMemo(() => {
-  const m = new Map(allPosts.map(p => [String(p.id), { ...p, children: [] }]));
-  // связываем детей с родителями (детерминированно, без setState)
-  for (const node of m.values()) {
-    const pid = node.parentId != null ? String(node.parentId) : null;
-    if (pid && m.has(pid)) m.get(pid).children.push(node);
-  }
-  return m;
-}, [allPosts]);
 
 // выбранный корень ветки (null = режим списка корней)
-const [threadRoot, setThreadRoot] = useState(null);
-
-// при смене темы выходим из веточного режима
-useEffect(() => { setThreadRoot(null); }, [sel?.id]);
+ 
 
  // === Views: refs to avoid TDZ when effects run before callbacks are initialized ===
 
@@ -8149,130 +8426,77 @@ const threadRootRef = React.useRef(null);
 React.useEffect(() => { selRef.current = sel }, [sel]);
 React.useEffect(() => { threadRootRef.current = threadRoot }, [threadRoot]);
  
-// === BEGIN flat (REPLACE WHOLE BLOCK) ===
+// === BEGIN flat (paged root/replies) ===
 const flat = useMemo(() => {
-  if (!sel?.id) return [];
-  // общий «вес» поста для сортировки (и для корней, и для детей)
+  if (!sel?.id) return []
+  const source = threadRoot ? repliesFeed.items : rootsFeed.items
   const postScore = (p) => {
-    // для корней берём «детей» из idMap (чтобы корректно работал 'replies')
-    const node = p?.children ? p : (idMap.get(String(p.id)) || p);
-    const ts = Number(node.ts || 0);
-    const lk = Number(node.likes || 0);
-    const vw = Number(node.views || 0);
-    const rc = Number((node.children || []).length || 0);
+    const ts = Number(p?.ts || 0)
+    const lk = Number(p?.likes || 0)
+    const vw = Number(p?.views || 0)
+    const rc = Number(p?.repliesCount || p?.replies || 0)
     switch (postSort) {
-      case 'likes':   return lk;
-      case 'views':   return vw;
-      case 'replies': return rc;
-      case 'top':     return (lk * 2) + rc + Math.floor(vw * 0.2);
+      case 'likes':   return lk
+      case 'views':   return vw
+      case 'replies': return rc
+      case 'top':     return (lk * 2) + rc + Math.floor(vw * 0.2)
       case 'new':
-      default:        return ts;
+      default:        return ts
     }
-  };
+  }
 
- // без ветки: только корни — но уже отсортированные по postSort
-if (!threadRoot) {
-  const roots = rootPosts
+  const base = (source || [])
     .slice()
     .sort((a, b) => {
-      const sb = postScore(b), sa = postScore(a);
-      if (sb !== sa) return sb - sa;                         // основной ключ
-      const tb = Number(b.ts || 0), ta = Number(a.ts || 0);   // тай-брейк: новее выше
-      if (tb !== ta) return tb - ta;
-      return String(b.id || '').localeCompare(String(a.id || '')); // стабильность
+      const sb = postScore(b)
+      const sa = postScore(a)
+      if (sb !== sa) return sb - sa
+      const tb = Number(b?.ts || 0)
+      const ta = Number(a?.ts || 0)
+      if (tb !== ta) return tb - ta
+      return String(b?.id || '').localeCompare(String(a?.id || ''))
     })
-    .map(r => ({
-      ...r,
+    .map((item) => ({
+      ...item,
       _lvl: 0,
-      repliesCount: (idMap.get(String(r.id))?.children || []).length,
-    }));
-  return roots;
-}
+      repliesCount: Number(item?.repliesCount || item?.replies || 0),
+    }))
 
 
-  // выбрана ветка: обходим всё поддерево
-  const start = idMap.get(String(threadRoot.id));
-  if (!start) return [];
-
-  const out = [];
-  const countDeep = (n) =>
-    (n.children || []).reduce((a, ch) => a + 1 + countDeep(ch), 0);
-
-// [FLAT_WALK:AFTER] 
-
-const walk = (n, level = 0) => {
-  out.push({ ...n, _lvl: level, repliesCount: countDeep(n) });
-  // сортируем детей перед обходом
-  const kids = [...(n.children || [])].sort((a,b) => {
-    const sa = postScore(a), sb = postScore(b);
-    if (sb !== sa) return sb - sa;        // по убыванию «веса»
-    const ta = Number(a.ts || 0), tb = Number(b.ts || 0);
-    if (tb !== ta) return tb - ta;        // тай-брейк: новее выше
-    return String(b.id || '').localeCompare(String(a.id || '')); // стабильность
-  });
-  kids.forEach(c => walk(c, level + 1));
-};
-
-
-  walk(start, 0);
-  return out;
-}, [sel?.id, threadRoot, rootPosts, idMap, postSort]);
-
+}, [sel?.id, threadRoot, rootsFeed.items, repliesFeed.items, postSort])
 // === END flat ===
 
     // Множество забаненных (по userId/accountId)
   const bannedSet = useMemo(() => new Set(data.bans || []), [data.bans])
 
-// ===== ПУНКТ 5: Агрегаты по темам (полные счётчики) =====
-// Считаем ВСЕ сообщения и просмотры: тема + все посты/ответы внутри
+// ===== ПУНКТ 5: Агрегаты по темам (серверные счётчики) =====
 const aggregates = useMemo(() => {
-  const byTopic = new Map();
-
-  // 1) Базовые значения из темы (в т.ч. initial views самой темы)
-  for (const t of (data.topics || [])) {
+  const byTopic = new Map()
+  for (const t of (topicsFeed.items || [])) {
     byTopic.set(String(t.id), {
-      posts: 0,
-      likes: 0,
-      dislikes: 0,
+      posts: Number(t?.postsCount ?? t?.posts ?? 0),
+      likes: Number(t?.likes ?? 0),
+      dislikes: Number(t?.dislikes ?? 0),
       views: Number(t?.views ?? 0),
-    });
+ })
   }
 
-  // 2) Накидываем агрегацию по ВСЕМ постам (включая вложенные)
-  for (const p of (data.posts || [])) {
-    const tid = String(p.topicId);
-    const a =
-      byTopic.get(tid) || { posts: 0, likes: 0, dislikes: 0, views: 0 };
-
-    // 🔹 каждое сообщение = +1 к общему количеству
-    a.posts    += 1;
-   
-    // 🔹 суммируем реакции по всем постам
-    a.likes    += Number(p.likes    || 0);
-    a.dislikes += Number(p.dislikes || 0);
-
-    // 🔹 ДОБАВЛЯЕМ просмотры всех постов/ответов внутрь агрегата темы
-    a.views    += Number(p.views    || 0);
-
-    byTopic.set(tid, a);
-  }
-
-  return byTopic;
-}, [data.topics, data.posts]);
+  return byTopic
+}, [topicsFeed.items])
 
 
 
   // результаты поиска (темы + посты)
   const results = useMemo(()=>{
     const term = q.trim().toLowerCase(); if(!term) return [];
-    const ts = (data.topics||[])
+    const ts = (topicsFeed.items||[])
       .filter(x => (x.title||'').toLowerCase().includes(term) || (x.description||'').toLowerCase().includes(term))
       .slice(0,20).map(x => ({ k:'t', id:x.id, title:x.title, desc:x.description }));
-    const ps = (data.posts||[])
+    const ps = (flat || [])
       .filter(p => (p.text||'').toLowerCase().includes(term))
       .slice(0,40).map(p => ({ k:'p', id:p.id, topicId:p.topicId, text:(p.text||'').slice(0,140) }));
     return [...ts, ...ps];
-  }, [q, data.topics, data.posts]);
+  }, [q, topicsFeed.items, flat]);
 
 
   // очистка фильтра при очистке поля поиска
@@ -8280,7 +8504,7 @@ const aggregates = useMemo(() => {
 
   // ===== ПУНКТ 5: Сортировка тем с использованием агрегатов =====
   const sortedTopics = useMemo(()=>{
-    let topics = [...(data.topics || [])];
+    let topics = [...(topicsFeed.items || [])];
     if (topicFilterId) topics = topics.filter(t => String(t.id) === String(topicFilterId));
     const score = (t) => {
       const agg = aggregates.get(t.id) || { posts:0, likes:0, dislikes:0, views:0 };
@@ -8296,7 +8520,7 @@ const aggregates = useMemo(() => {
     };
     const base = topics.sort((a,b) => (score(b) - score(a)) || ((b.ts||0) - (a.ts||0)));
     return starredFirst(base, (x) => x?.userId || x?.accountId);
-  }, [data.topics, aggregates, topicSort, topicFilterId, starredFirst]);
+  }, [topicsFeed.items, topicFilterId, aggregates, topicSort, starredFirst]);
 
 
 
@@ -9065,6 +9289,16 @@ const hasImageLines = React.useMemo(() => {
 // оптимистично кладём в локальный снап
 persist(prev => dedupeAll({ ...prev, topics:[t0, ...prev.topics], posts:[...prev.posts, p0] }))
 setSel(t0)
+const tmpRootsKey = `topic:${tmpT}:roots:${postSort}`
+const tmpRootsState = { key: tmpRootsKey, items: [p0], cursor: null, hasMore: true, loading: false, total: null }
+setRootsFeed(tmpRootsState)
+writeFeedCache(tmpRootsKey, tmpRootsState)
+setTopicsFeed(prev => {
+  const items = mergeFeedItems([t0], prev.items)
+  const next = { ...prev, items }
+  writeFeedCache(prev.key, next)
+  return next
+})
 toast.ok(t('forum_create_ok') ||'Тема создана')
 
    
@@ -9083,7 +9317,21 @@ toast.ok(t('forum_create_ok') ||'Тема создана')
       const posts  = prev.posts.map(x => x.topicId===tmpT ? { ...x, topicId:String(realTopicId) } : x)
       return dedupeAll({ ...prev, topics, posts })
     })
-
+    setTopicsFeed(prev => {
+      const items = prev.items.map(x => x.id===tmpT ? { ...x, id:String(realTopicId) } : x)
+      const next = { ...prev, items }
+      writeFeedCache(prev.key, next)
+      return next
+    })
+    setRootsFeed(prev => {
+      const items = prev.items.map(x => x.topicId===tmpT ? { ...x, topicId:String(realTopicId) } : x)
+      const nextKey = prev.key.includes(`topic:${tmpT}:`)
+        ? `topic:${String(realTopicId)}:roots:${postSort}`
+        : prev.key
+      const next = { ...prev, key: nextKey, items }
+      writeFeedCache(nextKey, next)
+      return next
+    })
     // 2) создаём первый пост (отдельной операцией, уже с реальным topicId)
     await api.mutate({
       ops:[{ type:'create_post', payload:{ topicId:String(realTopicId), text:safeFirst, nickname:t0.nickname, icon:t0.icon, parentId:null, cid: tmpP } }]
@@ -9119,6 +9367,30 @@ const createPost = async () => {
           ...prev,
           posts: (prev.posts || []).map(p => String(p.id) === String(editPostId) ? { ...p, text: safeText } : p)
         }));
+        setRootsFeed(prev => {
+          const items = prev.items.map(p => String(p.id) === String(editPostId) ? { ...p, text: safeText } : p)
+          const next = { ...prev, items }
+          writeFeedCache(prev.key, next)
+          return next
+        })
+        setRepliesFeed(prev => {
+          const items = prev.items.map(p => String(p.id) === String(editPostId) ? { ...p, text: safeText } : p)
+          const next = { ...prev, items }
+          writeFeedCache(prev.key, next)
+          return next
+        })
+        setInboxFeed(prev => {
+          const items = prev.items.map(p => String(p.id) === String(editPostId) ? { ...p, text: safeText } : p)
+          const next = { ...prev, items }
+          writeFeedCache(prev.key, next)
+          return next
+        })
+        setVideoFeedState(prev => {
+          const items = prev.items.map(p => String(p.id) === String(editPostId) ? { ...p, text: safeText } : p)
+          const next = { ...prev, items }
+          writeFeedCache(prev.key, next)
+          return next
+        })        
         setEditPostId(null);
         try { setText(''); } catch {}
         try { toast?.ok?.('Изменено'); } catch {}
@@ -9338,10 +9610,53 @@ const createPost = async () => {
     }
     return dedupeAll(next);
   });
- 
+  setTopicsFeed(prev => {
+    const items = prev.items.map(t => {
+      if (String(t.id) !== String(sel?.id)) return t
+      const postsCount = Number(t.postsCount ?? t.posts ?? 0) + 1
+      return { ...t, postsCount, posts: postsCount }
+    })
+    const next = { ...prev, items }
+    writeFeedCache(prev.key, next)
+    return next
+  })
+
   if (isReply) {
-    const parentPost = (data?.posts || []).find(x => String(x.id) === String(parentId));
-    setThreadRoot(parentPost || { id: String(parentId) });
+    setRepliesFeed(prev => {
+      const items = mergeFeedItems([p], prev.items)
+      const next = { ...prev, items }
+      writeFeedCache(prev.key, next)
+      return next
+    })
+    setRootsFeed(prev => {
+      const items = prev.items.map(x => {
+        if (String(x.id) !== String(parentId)) return x
+        const replies = Number(x.replies ?? x.repliesCount ?? 0) + 1
+        return { ...x, replies, repliesCount: replies }
+      })
+      const next = { ...prev, items }
+      writeFeedCache(prev.key, next)
+      return next
+    })
+  } else {
+    setRootsFeed(prev => {
+      const items = mergeFeedItems([p], prev.items)
+      const next = { ...prev, items }
+      writeFeedCache(prev.key, next)
+      return next
+    })
+  }
+
+  if (isMediaPost(p)) {
+    setVideoFeedState(prev => {
+      const items = mergeFeedItems([p], prev.items)
+      const next = { ...prev, items }
+      writeFeedCache(prev.key, next)
+      return next
+    })
+  } 
+  if (isReply) {
+    setThreadRoot(threadRoot || { id: String(parentId) });
     setTimeout(() => {
       try { document.querySelector('.body')?.scrollTo?.({ top: 9e9, behavior: 'smooth' }); } catch {}
     }, 60);
@@ -9806,10 +10121,7 @@ const onFilesChosen = React.useCallback(async (e) => {
   const [profileOpen, setProfileOpen] = useState(false)
   const avatarRef = useRef(null)
 // === VIDEO FEED: состояние + хелперы =====================
-const [videoFeedOpen, setVideoFeedOpen] = React.useState(false);
-const [videoFeed, setVideoFeed] = React.useState([]);
-const [feedSort, setFeedSort] = React.useState('new'); // new/top/likes/views/replies
-
+ 
 // ВАЖНО: в ленте нужно уметь находить ссылки внутри текста (даже если не отдельной строкой)
 const FEED_URL_RE = /(https?:\/\/[^\s<>'")]+)/ig;
 
@@ -9923,100 +10235,7 @@ function isMediaPost(p) {
 
   return false;
 }
-
-/** собрать все посты откуда только можно */
-function gatherAllPosts(data, allPosts) {
-  const pool = [];
-
-  if (Array.isArray(allPosts)) pool.push(...allPosts);
-  if (Array.isArray(data?.posts)) pool.push(...data.posts);
-  if (Array.isArray(data?.messages)) pool.push(...data.messages);
-  if (Array.isArray(data?.feed)) pool.push(...data.feed);
-
-  if (Array.isArray(data?.topics)) {
-    for (const t of data.topics) {
-      if (Array.isArray(t?.posts)) pool.push(...t.posts);
-      if (Array.isArray(t?.messages)) pool.push(...t.messages);
-      if (Array.isArray(t?.feed)) pool.push(...t.feed);
-    }
-  }
-
-  return pool;
-}
-
-/** построить и сохранить ленту видео */
-function buildAndSetVideoFeed() {
-  const pool = gatherAllPosts(data, allPosts);
-  // ✅ единый id для постов/реплаев (иначе parentId не матчится с id)
-  const pidOf = (x) => {
-    const v = (x?.id ?? x?._id ?? x?.uuid ?? x?.key ?? null);
-    return v == null ? '' : String(v);
-  };
-
-  const parentIdOf = (x) => {
-    const v = (x?.parentId ?? x?._parentId ?? null);
-    return v == null ? '' : String(v);
-  };
-  // мягкий дедуп по стабильному ключу, но без выкидывания «безидешных»
-  const seen = new Set();
-  const all = [];
-  for (const p of pool) {
-    if (!p) continue;
-    const base = (p.id ?? p._id ?? p.uuid ?? p.key ?? null);
-    const topic = (p.topicId ?? p.threadId ?? null);
-    const key = base != null ? String(base) : (topic != null ? `${topic}:${String(base)}` : null);
-
-    if (key) {
-      if (seen.has(key)) continue;
-      seen.add(key);
-    }
-    all.push(p);
-  }
-
-// replies count map: parentId -> count
-const repliesMap = new Map();
-for (const p of all) {
-  const pid = parentIdOf(p);
-  if (!pid) continue;
-  repliesMap.set(pid, (repliesMap.get(pid) || 0) + 1);
-}
-
-
-  const score = (p) => {
-    const likes = Number(p?.likes || 0);
-    const views = Number(p?.views || 0);
-    const replies = repliesMap.get(pidOf(p)) || 0;
-    switch (feedSort) {
-      case 'new':     return Number(p?.ts || 0);
-      case 'likes':   return likes;
-      case 'views':   return views;
-      case 'replies': return replies;
-      case 'top':
-      default:
-        return (likes * 2) + replies + Math.floor(views * 0.2);
-    }
-  };
-
-const only = all
-  .filter(isMediaPost)
-  .sort((a,b) => (score(b) - score(a)) || (Number(b?.ts||0) - Number(a?.ts||0)));
-
-// ✅ прокидываем количество ответов прямо в объект поста для UI
-const onlyWithReplyCounts = only.map((p) => {
-  const id = pidOf(p);
-  const replyCount = id ? (repliesMap.get(id) || 0) : 0;
-  return {
-    ...p,
-    replyCount,          // 👈 можно так (если в UI ждёшь replyCount)
-    __repliesCount: replyCount, // 👈 и так (если хочешь безопасный резерв)
-  };
-});
-
-const withStars = starredFirst(onlyWithReplyCounts, (p) => (p?.userId || p?.accountId));
-setVideoFeed(withStars);
-
-}
-
+ 
 /** открыть ленту видео */
 function openVideoFeed() {
   setVideoFeedOpen(true);
@@ -10031,12 +10250,38 @@ function closeVideoFeed() {
   setVideoFeedOpen(false);
 }
 
-// авто-обновление ленты, когда лента открыта и что-то меняется в снапшоте
+// авто-обновление ленты, когда лента открыта и что-то меняется в странице
 React.useEffect(() => {
   if (!videoFeedOpen) return;
-  buildAndSetVideoFeed();
-  // зависимости: любые сигналы обновления снапшота/постов у тебя в состоянии
-}, [videoFeedOpen, data?.rev, data?.posts, data?.messages, data?.topics, allPosts, feedSort, starMode, starredAuthors]);
+  const items = (videoFeedState.items || [])
+    .filter(isMediaPost)
+    .slice()
+    .sort((a, b) => {
+      const likesA = Number(a?.likes || 0)
+      const likesB = Number(b?.likes || 0)
+      const viewsA = Number(a?.views || 0)
+      const viewsB = Number(b?.views || 0)
+      const repliesA = Number(a?.repliesCount || a?.replies || 0)
+      const repliesB = Number(b?.repliesCount || b?.replies || 0)
+      const score = (pLikes, pViews, pReplies, pTs) => {
+        switch (feedSort) {
+          case 'likes': return pLikes
+          case 'views': return pViews
+          case 'replies': return pReplies
+          case 'top': return (pLikes * 2) + pReplies + Math.floor(pViews * 0.2)
+          case 'new':
+          default: return pTs
+        }
+      }
+      const sa = score(likesA, viewsA, repliesA, Number(a?.ts || 0))
+      const sb = score(likesB, viewsB, repliesB, Number(b?.ts || 0))
+      if (sb !== sa) return sb - sa
+      return Number(b?.ts || 0) - Number(a?.ts || 0)
+    })
+
+  const withStars = starredFirst(items, (p) => (p?.userId || p?.accountId))
+  setVideoFeed(withStars)
+}, [videoFeedOpen, videoFeedState.items, feedSort, starMode, starredAuthors, starredFirst]);
 
 // [VIDEO_FEED:OPEN_THREAD] — открыть полноценную ветку из ленты
 function openThreadFromPost(p){
@@ -10044,11 +10289,11 @@ function openThreadFromPost(p){
   try { setInboxOpen?.(false); } catch {}
 
   // находим тему, к которой относится пост
-  const tt = (data?.topics || []).find(x => String(x.id) === String(p.topicId));
-  if (!tt) return;
+  const tt = (topicsFeed.items || []).find(x => String(x.id) === String(p.topicId));
+  if (!tt && !p?.topicId) return;
 
   // переключаемся в обычный режим ветки
-  setSel(tt);
+  setSel(tt || { id: String(p.topicId), title: '' });
   setThreadRoot({ id: p.parentId || p.id }); // фокус на корневом/самом посте
   setVideoFeedOpen(false);
 
@@ -10457,6 +10702,62 @@ const clientId =
 // гарантия, что interleaveAds всегда получит >0
 const adEvery = adConf?.EVERY && adConf.EVERY > 0 ? adConf.EVERY : 1;
 
+const topicSlots = useMemo(
+  () => debugAdsSlots(
+    'topics',
+    interleaveAds(
+      sortedTopics || [],
+      adEvery,
+      {
+        isSkippable: (t) => !t || !t.id,
+        getId: (t) => t?.id || `${t?.ts || 0}`,
+      },
+    ),
+  ),
+  [sortedTopics, adEvery],
+)
+const inboxSlots = useMemo(
+  () => debugAdsSlots(
+    'inbox',
+    interleaveAds(
+      repliesToMe || [],
+      adEvery,
+      {
+        isSkippable: (p) => !p || !p.id,
+        getId: (p) => p?.id || `${p?.topicId || 'ib'}:${p?.ts || 0}`,
+      },
+    ),
+  ),
+  [repliesToMe, adEvery],
+)
+const repliesSlots = useMemo(
+  () => debugAdsSlots(
+    'replies',
+    interleaveAds(
+      flat || [],
+      adEvery,
+      {
+        isSkippable: (p) => !p || !p.id,
+        getId: (p) => p?.id,
+      },
+    ),
+  ),
+  [flat, adEvery],
+)
+const videoSlots = useMemo(
+  () => debugAdsSlots(
+    'video',
+    interleaveAds(
+      videoFeed || [],
+      adEvery,
+      {
+        isSkippable: (p) => !p || !p.id,
+        getId: (p) => p?.id || `${p?.topicId || 'vf'}:${p?.ts || 0}`,
+      },
+    ),
+  ),
+  [videoFeed, adEvery],
+)
 
 
 // одна сессия показа рекламы внутри одного тайм-слота (ROTATE_MIN)
@@ -10761,12 +11062,12 @@ function pickAdUrlForSlot(slotKey, slotKind) {
                       onClick={()=>{
                         setDrop(false)
                         if(r.k==='t'){
-                          const tt = (data.topics||[]).find(x=>x.id===r.id)
+                          const tt = (topicsFeed.items||[]).find(x=>x.id===r.id)
                           if(tt){ setTopicFilterId(tt.id); setSel(tt); setThreadRoot(null) }
                         }else{
-                          const p = (data.posts||[]).find(x=>x.id===r.id)
+                          const p = (flat || []).find(x=>x.id===r.id)
                           if(p){
-                            const tt = (data.topics||[]).find(x=>x.id===p.topicId)
+                            const tt = (topicsFeed.items||[]).find(x=>x.id===p.topicId)
                             if(tt){ setTopicFilterId(tt.id); setSel(tt); setThreadRoot({ id:p.parentId||p.id }); setTimeout(()=>{ document.getElementById(`post_${p.id}`)?.scrollIntoView?.({behavior:'smooth', block:'center'}) }, 80) }
                           }
                         }
@@ -11149,7 +11450,7 @@ onClick={()=>{
 
     <div className="slot-center">
       <div className="forumTotal">
-        {t('forum_total')}: {(data.topics||[]).length}
+        {t('forum_total')}: {(topicsFeed.total ?? (topicsFeed.items||[]).length)}
       </div>
     </div>
     <div className="slot-right">
@@ -11218,78 +11519,69 @@ onClick={()=>{
 {/* ВЕТКА-ЛЕНТА: медиа (видео/аудио/изображения) */}
 <div className="meta mt-1">{t('') || ''}</div>
     <div className="grid gap-2 mt-2" suppressHydrationWarning>
-{debugAdsSlots(
-  'video',
-  interleaveAds(
-    videoFeed || [],
-    adEvery,
-    {
-      isSkippable: (p) => !p || !p.id,
-      getId: (p) => p?.id || `${p?.topicId || 'vf'}:${p?.ts || 0}`,
-    }
-  )
-).map((slot) => {
-  if (slot.type === 'item') {
-    const p = slot.item;
-    const parent = p?.parentId
-      ? (data?.posts || []).find(x => String(x.id) === String(p.parentId))
-      : null;
+      <Virtuoso
+        data={videoSlots}
+        useWindowScroll
+        endReached={loadMoreVideo}
+        itemKey={(index, slot) => (slot.type === 'item' ? `post:${slot.item?.id}` : `ad:${slot.key}`)}
+        itemContent={(index, slot) => {
+          if (slot.type === 'item') {
+            const p = slot.item;
+            const parentAuthor = p?.parentAuthor || '';
 
-    const openThreadHere = () => {
-      try { setInboxOpen?.(false); } catch {}
-      const tt = (data?.topics || []).find(x => String(x.id) === String(p?.topicId));
-      if (!tt) return;
-      try { setSel(tt); } catch {}
-      try { setThreadRoot({ id: p?.parentId || p?.id }); } catch {}
-      try { setVideoFeedOpen(false); } catch {}
-      setTimeout(() => {
-        try {
-          document
-            .getElementById(`post_${p?.id}`)
-            ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } catch {}
-      }, 120);
-    };
+            const openThreadHere = () => {
+              try { setInboxOpen?.(false); } catch {}
+              const tt = (topicsFeed.items || []).find(x => String(x.id) === String(p?.topicId));
+              if (!tt && !p?.topicId) return;
+              try { setSel(tt || { id: String(p.topicId), title: '' }); } catch {}
+              try { setThreadRoot({ id: p?.parentId || p?.id }); } catch {}
+              try { setVideoFeedOpen(false); } catch {}
+              setTimeout(() => {
+                try {
+                  document
+                    .getElementById(`post_${p?.id}`)
+                    ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } catch {}
+              }, 120);
+            };
 
-    return (
-      <div key={slot.key} id={`post_${p?.id || ''}`}>
-<PostCard
-  p={p}
-  parentAuthor={parent?.nickname || (parent ? shortId(parent.userId || '') : null)}
-  onReport={() => toast.ok(t('forum_report_ok'))}
-  onOpenThread={openThreadHere}
-  onReact={reactMut}
-  isAdmin={isAdmin}
-  onDeletePost={delPost}
-  onBanUser={banUser}
-  onUnbanUser={unbanUser}
-  isBanned={bannedSet.has(p?.accountId || p?.userId)}
-  authId={auth.asherId || auth.accountId}
-  markView={markViewPost}
-  t={t}
-  isVideoFeed={true}   // ✅ NEW
-    viewerId={viewerId}
-  starredAuthors={starredAuthors}
-  onToggleStar={toggleAuthorStar}
-/>
+            return (
+              <div id={`post_${p?.id || ''}`}>
+                <PostCard
+                  p={p}
+                  parentAuthor={parentAuthor}
+                  onReport={() => toast.ok(t('forum_report_ok'))}
+                  onOpenThread={openThreadHere}
+                  onReact={reactMut}
+                  isAdmin={isAdmin}
+                  onDeletePost={delPost}
+                  onBanUser={banUser}
+                  onUnbanUser={unbanUser}
+                  isBanned={bannedSet.has(p?.accountId || p?.userId)}
+                  authId={auth.asherId || auth.accountId}
+                  markView={markViewPost}
+                  t={t}
+                  isVideoFeed={true}
+                  viewerId={viewerId}
+                  starredAuthors={starredAuthors}
+                  onToggleStar={toggleAuthorStar}
+                />
+              </div>
+            );
+          }
 
-      </div>
-    );
-  }
+          const url = pickAdUrlForSlot(slot.key, 'video');
+          if (!url) return null;
 
-  const url = pickAdUrlForSlot(slot.key, 'video');
-  if (!url) return null;
-
-  return (
-    <AdCard
-      key={slot.key}
-      url={url}
-      slotKind="video"
-      nearId={slot.nearId}
-    />
-  );
-})}
-
+          return (
+            <AdCard
+              url={url}
+              slotKind="video"
+              nearId={slot.nearId}
+            />
+          );
+        }}
+      />
 
 
 
@@ -11325,61 +11617,59 @@ onClick={()=>{
 
 ) : inboxOpen ? (
   <>
-    <div className="meta mt-1">{t('forum_inbox_title') || 'Ответы на ваши сообщения'}</div>
-    <div className="grid gap-2 mt-2" suppressHydrationWarning>
-{debugAdsSlots(
-  'inbox',
-  interleaveAds(
-    (repliesToMe || []).slice().sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0)),
-    adEvery,
-    {
-      isSkippable: (p) => !p || !p.id,
-      getId: (p) => p?.id || `${p?.topicId || 'ib'}:${p?.ts || 0}`,
-    }
-  )
-).map((slot) => {
-  if (slot.type === 'item') {
-    const p = slot.item;
-    return (
-      <div key={slot.key} id={`post_${p.id}`}>
-        <PostCard
-          p={p}
-          parentAuthor={(data.posts || []).find(x => String(x.id) === String(p.parentId))?.nickname || ''}
-          onReport={() => toast.ok(t('forum_report_ok'))}
-          onOpenThread={(clickP) => {
-            const tt = (data.topics || []).find(t => String(t.id) === String(p.topicId));
-            if (tt) { setSel(tt); setThreadRoot(clickP); setInboxOpen(false); }
-          }}
-          onReact={reactMut}
-          isAdmin={isAdmin}
-          onDeletePost={delPost}
-          onBanUser={banUser}
-          onUnbanUser={unbanUser}
-          isBanned={bannedSet.has(p.accountId || p.userId)}
-          authId={auth.asherId || auth.accountId}
-          markView={markViewPost}
-          t={t}
-            viewerId={viewerId}
-  starredAuthors={starredAuthors}
-  onToggleStar={toggleAuthorStar}
-        />
-      </div>
-    );
-  }
+  <div className="meta mt-1">{t('forum_inbox_title') || 'Ответы на ваши сообщения'}</div>
+      <div className="grid gap-2 mt-2" suppressHydrationWarning>
+      <Virtuoso
+        data={inboxSlots}
+        useWindowScroll
+        endReached={loadMoreInbox}
+        itemKey={(index, slot) => (slot.type === 'item' ? `post:${slot.item?.id}` : `ad:${slot.key}`)}
+        itemContent={(index, slot) => {
+          if (slot.type === 'item') {
+            const p = slot.item;
+            return (
+              <div id={`post_${p.id}`}>
+                <PostCard
+                  p={p}
+                  parentAuthor={p?.parentAuthor || ''}
+                  onReport={() => toast.ok(t('forum_report_ok'))}
+                  onOpenThread={(clickP) => {
+                    const tt = (topicsFeed.items || []).find(t => String(t.id) === String(p.topicId));
+                    if (tt || p?.topicId) {
+                      setSel(tt || { id: String(p.topicId), title: '' });
+                      setThreadRoot(clickP);
+                      setInboxOpen(false);
+                    }
+                  }}
+                  onReact={reactMut}
+                  isAdmin={isAdmin}
+                  onDeletePost={delPost}
+                  onBanUser={banUser}
+                  onUnbanUser={unbanUser}
+                  isBanned={bannedSet.has(p.accountId || p.userId)}
+                  authId={auth.asherId || auth.accountId}
+                  markView={markViewPost}
+                  t={t}
+                  viewerId={viewerId}
+                  starredAuthors={starredAuthors}
+                  onToggleStar={toggleAuthorStar}
+                />
+              </div>
+            );
+          }
 
-  const url = pickAdUrlForSlot(slot.key, 'inbox');
-  if (!url) return null;
+          const url = pickAdUrlForSlot(slot.key, 'inbox');
+          if (!url) return null;
 
-  return (
-    <AdCard
-      key={slot.key}
-      url={url}
-      slotKind="inbox"
-      nearId={slot.nearId}
-    />
-  );
-})}
-
+          return (
+            <AdCard
+              url={url}
+              slotKind="inbox"
+              nearId={slot.nearId}
+            />
+          );
+        }}
+      />
 
 
       {(repliesToMe || []).length === 0 && (
@@ -11394,29 +11684,44 @@ onClick={()=>{
   <>
     <CreateTopicCard t={t} onCreate={createTopic} onOpenVideoFeed={openVideoFeed} />
     <div className="grid gap-2 mt-2" suppressHydrationWarning>
-      {(sortedTopics || [])
-       .slice()
+      <Virtuoso
+        data={topicSlots}
+        useWindowScroll
+        endReached={loadMoreTopics}
+        itemKey={(index, slot) => (slot.type === 'item' ? `topic:${slot.item?.id}` : `ad:${slot.key}`)}
+        itemContent={(index, slot) => {
+          if (slot.type === 'item') {
+            const x = slot.item;
+            const agg = aggregates.get(x.id) || { posts:0, likes:0, dislikes:0, views:0 };
+            return (
+              <TopicItem
+                t={x}
+                agg={agg}
+                onOpen={(tt)=>{ setSel(tt); setThreadRoot(null) }}
+                onView={markViewTopic}
+                isAdmin={isAdmin}
+                onDelete={delTopic}
+                authId={auth.asherId || auth.accountId}
+                onOwnerDelete={delTopicOwn}
+                viewerId={viewerId}
+                starredAuthors={starredAuthors}
+                onToggleStar={toggleAuthorStar}
+              />
+            )
+          }
 
-        .map(x => {
-          const agg = aggregates.get(x.id) || { posts:0, likes:0, dislikes:0, views:0 };
+          const url = pickAdUrlForSlot(slot.key, 'topics');
+          if (!url) return null;
+
           return (
-<TopicItem
-  key={`t:${x.id}`}
-  t={x}
-  agg={agg}
-  onOpen={(tt)=>{ setSel(tt); setThreadRoot(null) }}
-  onView={markViewTopic}
-  isAdmin={isAdmin}
-  onDelete={delTopic}
-  authId={auth.asherId || auth.accountId}
-  onOwnerDelete={delTopicOwn}
-  viewerId={viewerId}
-  starredAuthors={starredAuthors}
-  onToggleStar={toggleAuthorStar}
-/>
-
-          )
-        })}
+            <AdCard
+              url={url}
+              slotKind="topics"
+              nearId={slot.nearId}
+            />
+          );
+        }}
+      />
     </div>
   </>
 )}
@@ -11482,7 +11787,7 @@ onClick={()=>{
     <div className="slot-center">
       <div className="forumTotal">
         {/* в режиме темы выводим "Ответы" / заголовок, но всё равно центрируем */}
-        {threadRoot ? (t('forum_open_replies') || 'Ответы') : (t('forum_total') + ': ' + (data.topics||[]).length)}
+        {threadRoot ? (t('forum_open_replies') || 'Ответы') : (t('forum_total') + ': ' + (topicsFeed.total ?? (topicsFeed.items||[]).length))}
       </div>
     </div>
     <div className="slot-right">
@@ -11567,62 +11872,74 @@ onClick={()=>{
       </div>
     ) : (
       <div className="inboxList">
-        {repliesToMe.map(p => {
-          // та же логика, что в верхнем инбоксе
-          const tt = (data.topics || []).find(
-            x => String(x.id) === String(p.topicId),
-          );
-          if (!tt) return null;
+        <Virtuoso
+          data={inboxSlots}
+          useWindowScroll
+          endReached={loadMoreInbox}
+          itemKey={(index, slot) => (slot.type === 'item' ? `post:${slot.item?.id}` : `ad:${slot.key}`)}
+          itemContent={(index, slot) => {
+            if (slot.type === 'item') {
+              const p = slot.item;
+              const tt = (topicsFeed.items || []).find(
+                x => String(x.id) === String(p.topicId),
+              );
+              if (!tt) return null;
 
-          const parentAuthor =
-            (data.posts || []).find(
-              x => String(x.id) === String(p.parentId),
-            )?.nickname || '';
+              const parentAuthor = p?.parentAuthor || '';
 
-          return (
-            <PostCard
-              key={`inb:${p.id}`}
-              p={p}
-              parentAuthor={parentAuthor}
-              onReport={() => toast.ok(t('forum_report_ok'))}
-              onOpenThread={clickP => {
-                // переходим в тему и открываем ветку
-                const topic = (data.topics || []).find(
-                  t => String(t.id) === String(p.topicId),
-                );
-                if (topic) {
-                  setSel(topic);
-                  setThreadRoot(clickP);   // корень треда
-                  setInboxOpen(false);
+              return (
+                <PostCard
+                  p={p}
+                  parentAuthor={parentAuthor}
+                  onReport={() => toast.ok(t('forum_report_ok'))}
+                  onOpenThread={clickP => {
+                    const topic = (topicsFeed.items || []).find(
+                      t => String(t.id) === String(p.topicId),
+                    );
+                    if (topic || p?.topicId) {
+                      setSel(topic || { id: String(p.topicId), title: '' });
+                      setThreadRoot(clickP);
+                      setInboxOpen(false);
+                      setTimeout(() => {
+                        try {
+                          document
+                            .getElementById(`post_${p.id}`)
+                            ?.scrollIntoView({
+                              behavior: 'smooth',
+                              block: 'center',
+                            });
+                        } catch {}
+                      }, 120);
+                    }
+                  }}
+                  onReact={reactMut}
+                  isAdmin={isAdmin}
+                  onDeletePost={delPost}
+                  onBanUser={banUser}
+                  onUnbanUser={unbanUser}
+                  isBanned={bannedSet.has(p.accountId || p.userId)}
+                  authId={auth.asherId || auth.accountId}
+                  markView={markViewPost}
+                  t={t}
+                  viewerId={viewerId}
+                  starredAuthors={starredAuthors}
+                  onToggleStar={toggleAuthorStar}
+                />
+              );
+            }
 
-                  // мягкий скролл к конкретному посту
-                  setTimeout(() => {
-                    try {
-                      document
-                        .getElementById(`post_${p.id}`)
-                        ?.scrollIntoView({
-                          behavior: 'smooth',
-                          block: 'center',
-                        });
-                    } catch {}
-                  }, 120);
-                }
-              }}
-  onReact={reactMut}
-  isAdmin={isAdmin}
-  onDeletePost={delPost}
-  onBanUser={banUser}
-  onUnbanUser={unbanUser}
-  isBanned={bannedSet.has(p.accountId || p.userId)}
-  authId={auth.asherId || auth.accountId}
-  markView={markViewPost}
-  t={t}
-  viewerId={viewerId}
-  starredAuthors={starredAuthors}
-  onToggleStar={toggleAuthorStar}
-/>
-          );
-        })}
+            const url = pickAdUrlForSlot(slot.key, 'inbox');
+            if (!url) return null;
+
+            return (
+              <AdCard
+                url={url}
+                slotKind="inbox"
+                nearId={slot.nearId}
+              />
+            );
+          }}
+        />
       </div>
     )}
   </div>
@@ -11638,72 +11955,64 @@ onClick={()=>{
 
 
         <div className="grid gap-2">
-{debugAdsSlots(
-  'replies',
-  interleaveAds(
-    flat || [],
-    adEvery,
-    {
-      isSkippable: (p) => !p || !p.id,
-      getId: (p) => p?.id,
-    }
-  )
-).map((slot) => {
-  if (slot.type === 'item') {
-    const p = slot.item;
-    const parent = p.parentId
-      ? allPosts.find(x => String(x.id) === String(p.parentId))
-      : null;
+          <Virtuoso
+            data={repliesSlots}
+            useWindowScroll
+            endReached={threadRoot ? loadMoreReplies : loadMoreRoots}
+            itemKey={(index, slot) => (slot.type === 'item' ? `post:${slot.item?.id}` : `ad:${slot.key}`)}
+            itemContent={(index, slot) => {
+              if (slot.type === 'item') {
+                const p = slot.item;
+                const parent = p.parentId
+                  ? (threadRoot && String(threadRoot.id) === String(p.parentId)
+                      ? threadRoot
+                      : (repliesFeed.items || []).find(x => String(x.id) === String(p.parentId)))
+                  : null;
 
-    return (
-      <div
-        key={slot.key}
-        id={`post_${p.id}`}
-        style={{ marginLeft: (p._lvl || 0) * 18 }}
-      >
-<PostCard
-  p={p}
-  parentAuthor={
-    parent?.nickname ||
-    (parent ? shortId(parent.userId || '') : null)
-  }
-  onReport={() => toast.ok(t('forum_report_ok'))}
-  onReply={() => setReplyTo(p)}
-  onOpenThread={(clickP) => { setThreadRoot(clickP); }}
-  onReact={reactMut}
-  isAdmin={isAdmin}
-  onDeletePost={delPost}
-  onBanUser={banUser}
-  onUnbanUser={unbanUser}
-  isBanned={bannedSet.has(p.accountId || p.userId)}
-  authId={auth.asherId || auth.accountId}
-  markView={markViewPost}
-  t={t}
-  viewerId={viewerId}
-  starredAuthors={starredAuthors}
-  onToggleStar={toggleAuthorStar}
-/>
+                return (
+                  <div
+                    id={`post_${p.id}`}
+                    style={{ marginLeft: (p._lvl || 0) * 18 }}
+                  >
+                    <PostCard
+                      p={p}
+                      parentAuthor={
+                        parent?.nickname ||
+                        (parent ? shortId(parent.userId || '') : null)
+                      }
+                      onReport={() => toast.ok(t('forum_report_ok'))}
+                      onReply={() => setReplyTo(p)}
+                      onOpenThread={(clickP) => { setThreadRoot(clickP); }}
+                      onReact={reactMut}
+                      isAdmin={isAdmin}
+                      onDeletePost={delPost}
+                      onBanUser={banUser}
+                      onUnbanUser={unbanUser}
+                      isBanned={bannedSet.has(p.accountId || p.userId)}
+                      authId={auth.asherId || auth.accountId}
+                      markView={markViewPost}
+                      t={t}
+                      viewerId={viewerId}
+                      starredAuthors={starredAuthors}
+                      onToggleStar={toggleAuthorStar}
+                    />
+                  </div>
+                );
+              }
 
-      </div>
-    );
-  }
+              const url = pickAdUrlForSlot(slot.key, 'replies');
+              if (!url) return null;
 
-  const url = pickAdUrlForSlot(slot.key, 'replies');
-  if (!url) return null;
-
-  return (
-    <AdCard
-      key={slot.key}
-      url={url}
-      slotKind="replies"
-      nearId={slot.nearId}
-    />
-  );
-})}
-
-
-
-          {(!threadRoot && (flat || []).length === 0) && (
+              return (
+                <AdCard
+                  url={url}
+                  slotKind="replies"
+                  nearId={slot.nearId}
+                />
+              );
+            }}
+          />        
+            {(!threadRoot && (flat || []).length === 0) && (
             <div className="meta">
               {t('forum_no_posts_yet') || 'Пока нет сообщений'}
             </div>
