@@ -30,7 +30,89 @@ const winBucket = (ttlSec = VIEW_TTL_SEC, ts = Date.now()) => {
 }
 
 const str = (x) => String(x ?? '').trim()
+const FEED_URL_RE = /(https?:\/\/[^\s<>'")]+)/ig
 
+const extractUrlsFromText = (text) => {
+  const s = String(text || '')
+  if (!s) return []
+  const out = []
+  try {
+    for (const m of s.matchAll(FEED_URL_RE)) {
+      const u = String(m?.[1] || '').trim()
+      if (u) out.push(u)
+    }
+  } catch {}
+  return out
+}
+
+const isVideoUrl = (u) => {
+  const s = String(u || '').trim()
+  if (!s) return false
+  if (/^blob:/i.test(s)) return true
+  if (/\.(webm|mp4|mov|m4v|mkv)(?:$|[?#])/i.test(s)) return true
+  if (/[?&]filename=[^&#]+\.(webm|mp4|mov|m4v|mkv)(?:$|[&#])/i.test(s)) return true
+  if (/vercel[-]?storage|vercel[-]?blob|\/uploads\/video|\/forum\/video|\/api\/forum\/uploadVideo/i.test(s)) return true
+  return false
+}
+
+const isImageUrl = (u) => {
+  const s = String(u || '').trim()
+  if (!s) return false
+  return /\.(png|jpe?g|gif|webp|avif|svg)(?:$|[?#])/i.test(s)
+}
+
+const isAudioUrl = (u) => {
+  const s = String(u || '').trim()
+  if (!s) return false
+  return /\.(ogg|mp3|m4a|wav|webm)(?:$|[?#])/i.test(s) || /\/uploads\/audio\//i.test(s) || /\/forum\/voice/i.test(s)
+}
+
+const isYouTubeUrl = (u) => {
+  const s = String(u || '').trim()
+  if (!s) return false
+  return /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)[A-Za-z0-9_-]{6,}/i.test(s)
+}
+
+const isTikTokUrl = (u) => {
+  const s = String(u || '').trim()
+  if (!s) return false
+  return /^(?:https?:\/\/)?(?:(?:www|m)\.)?tiktok\.com\/@[\w.\-]+\/video\/\d+(?:[?#].*)?$/i.test(s)
+}
+
+const isMediaUrl = (u) => isVideoUrl(u) || isImageUrl(u) || isAudioUrl(u) || isYouTubeUrl(u) || isTikTokUrl(u)
+
+export const isMediaPost = (p) => {
+  if (!p) return false
+  if (p.type === 'video' || p.type === 'audio' || p.type === 'image') return true
+  if (p.videoUrl || p.posterUrl || p.audioUrl || p.imageUrl) return true
+  if (p.mime && /^(video|audio|image)\//i.test(String(p.mime))) return true
+  if (p.media && (p.media.type === 'video' || p.media.type === 'audio' || p.media.type === 'image' || p.media.videoUrl || p.media.audioUrl || p.media.imageUrl)) return true
+  if (Array.isArray(p.files) && p.files.some(f =>
+    ['video', 'audio', 'image'].includes(String(f?.type || '').toLowerCase()) ||
+    /^(video|audio|image)\//i.test(String(f?.mime || '')) ||
+    isMediaUrl(f?.url)
+  )) return true
+  if (Array.isArray(p.attachments) && p.attachments.some(a =>
+    ['video', 'audio', 'image'].includes(String(a?.type || '').toLowerCase()) ||
+    /^(video|audio|image)\//i.test(String(a?.mime || '')) ||
+    a?.videoUrl || a?.audioUrl || a?.imageUrl || isMediaUrl(a?.url)
+  )) return true
+  const text = String(p.text ?? p.body ?? '').trim()
+  if (text) {
+    const urls = extractUrlsFromText(text)
+    if (urls.some(isMediaUrl)) return true
+    const lines = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean)
+    if (lines.some(isMediaUrl)) return true
+  }
+  if (typeof p.html === 'string' && (
+    /<\s*video[\s>]/i.test(p.html) ||
+    /<\s*img[\s>]/i.test(p.html) ||
+    /<\s*audio[\s>]/i.test(p.html) ||
+    /(?:youtube\.com|youtu\.be)/i.test(p.html) ||
+    /tiktok\.com\/@[\w.\-]+\/video\/\d+/i.test(p.html)
+  )) return true
+  return false
+}
 /* =========================
    Ключи (BACKWARD-COMPAT)
 ========================= */
@@ -85,6 +167,16 @@ export const K = {
   // ===== SUBSCRIPTIONS (viewer -> authors) =====
   subsViewerSet:      (viewerId) => `forum:subs:viewer:${viewerId}`,
   subsFollowersCount: (authorId) => `forum:subs:followers_count:${authorId}`,
+
+  // ===== ZSET индексы для пагинации =====
+  zTopics: 'forum:z:topics',
+   // маркер: миграция индексов выполнена (идемпотентно)
+  zMigratedV1: 'forum:z:migrated:v1',
+  zTopicRoots:  (topicId) => `forum:z:topic:${topicId}:roots`,
+  zTopicAll:    (topicId) => `forum:z:topic:${topicId}:all`,
+  zParentReplies: (parentId) => `forum:z:parent:${parentId}:replies`,
+  zUserInbox:   (userId) => `forum:z:user:${userId}:inbox`,
+  zVideoFeed:   'forum:z:feed:video',
 }
 
 /* =========================
@@ -180,6 +272,7 @@ export async function createTopic({ title, description, userId, nickname, icon, 
     .set(K.topicKey(topicId), JSON.stringify(t))
     .set(K.topicPostsCount(topicId), 0)
     .set(K.topicViews(topicId), 0)
+    .zadd(K.zTopics, { score: Number(t.ts || 0), member: topicId })
     .exec()
 
   await pushChange({ rev, kind: 'topic', id: topicId, data: t, ts: t.ts })
@@ -209,7 +302,34 @@ export async function createPost({ topicId, parentId, text, userId, nickname, ic
     .set(K.postLikes(postId), 0)
     .set(K.postDislikes(postId), 0)
     .sadd(K.topicPostsSet(p.topicId), postId)
+    .zadd(K.zTopicAll(p.topicId), { score: Number(p.ts || 0), member: postId })
     .exec()
+
+  try {
+    const zOps = []
+    if (p.parentId) {
+      zOps.push(redis.zadd(K.zParentReplies(p.parentId), { score: Number(p.ts || 0), member: postId }))
+    } else {
+      zOps.push(redis.zadd(K.zTopicRoots(p.topicId), { score: Number(p.ts || 0), member: postId }))
+    }
+
+    if (p.parentId) {
+      try {
+        const parentRaw = await redis.get(K.postKey(p.parentId))
+        const parent = safeParse(parentRaw)
+        const ownerId = parent?.userId || parent?.accountId
+        if (ownerId) {
+          zOps.push(redis.zadd(K.zUserInbox(String(ownerId)), { score: Number(p.ts || 0), member: postId }))
+        }
+      } catch {}
+    }
+
+    if (isMediaPost(p)) {
+      zOps.push(redis.zadd(K.zVideoFeed, { score: Number(p.ts || 0), member: postId }))
+    }
+
+    if (zOps.length) await Promise.allSettled(zOps)
+  } catch {}
 
   await pushChange({ rev, kind: 'post', id: postId, data: p, ts: p.ts })
   return { post: p, rev }
@@ -542,6 +662,103 @@ export async function snapshot(sinceRev = 0, limit = 10000) {
     .sort((a, b) => (a.rev || 0) - (b.rev || 0))
 
   return { rev: currentRev, events }
+}
+
+/* =========================
+   Pagination index migration
+========================= */
+const chunk = (arr, size = 200) => {
+  const out = []
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size))
+  return out
+}
+
+export async function ensurePaginationIndexes() {
+  const result = { ok: true, migrated: false, topics: 0, posts: 0 }
+  // если уже мигрировали (маркер стоит) — выходим
+  // ВАЖНО: нельзя проверять только zTopics, иначе roots/replies/inbox/video могут остаться пустыми.
+  try {
+    const migrated = await redis.get(K.zMigratedV1)
+   if (String(migrated || '') === '1') return result
+  } catch {}
+
+  let topicIds = []
+  let postIds = []
+  try { topicIds = await redis.smembers(K.topicsSet) } catch {}
+  try { postIds = await redis.smembers(K.postsSet) } catch {}
+
+  const topicMap = new Map()
+  const postMap = new Map()
+
+  for (const group of chunk(topicIds, 200)) {
+    try {
+      const raws = await redis.mget(...group.map(id => K.topicKey(id)))
+      raws.forEach((raw, idx) => {
+        const t = safeParse(raw)
+        if (t?.id != null) topicMap.set(String(t.id), t)
+      })
+    } catch {}
+  }
+
+  for (const group of chunk(postIds, 200)) {
+    try {
+      const raws = await redis.mget(...group.map(id => K.postKey(id)))
+      raws.forEach((raw, idx) => {
+        const p = safeParse(raw)
+        if (p?.id != null) postMap.set(String(p.id), p)
+      })
+    } catch {}
+  }
+
+  const zOps = []
+
+  for (const t of topicMap.values()) {
+    const tid = String(t.id)
+    const score = Number(t.ts || 0)
+    zOps.push(['zadd', K.zTopics, { score, member: tid }])
+  }
+
+  for (const p of postMap.values()) {
+    const pid = String(p.id)
+    const score = Number(p.ts || 0)
+    const topicId = String(p.topicId || '')
+    if (topicId) {
+      zOps.push(['zadd', K.zTopicAll(topicId), { score, member: pid }])
+      if (p.parentId) {
+        zOps.push(['zadd', K.zParentReplies(String(p.parentId)), { score, member: pid }])
+      } else {
+        zOps.push(['zadd', K.zTopicRoots(topicId), { score, member: pid }])
+      }
+    }
+
+    if (p.parentId) {
+      const parent = postMap.get(String(p.parentId))
+      const ownerId = parent?.userId || parent?.accountId
+      if (ownerId) {
+        zOps.push(['zadd', K.zUserInbox(String(ownerId)), { score, member: pid }])
+      }
+    }
+
+    if (isMediaPost(p)) {
+      zOps.push(['zadd', K.zVideoFeed, { score, member: pid }])
+    }
+  }
+
+  try {
+    const pipe = redis.pipeline()
+    for (const op of zOps) {
+      pipe[op[0]](op[1], op[2])
+    }
+    await pipe.exec()
+  } catch {}
+  // ставим маркер best-effort, чтобы не гонять миграцию на каждый GET
+  try {
+    await redis.set(K.zMigratedV1, '1')
+  } catch {}
+  result.migrated = true
+  result.topics = topicMap.size
+  result.posts = postMap.size
+  return result
 }
 // --- Nickname helpers (compat) ---
 export function normNick(raw) {

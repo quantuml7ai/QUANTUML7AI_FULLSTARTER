@@ -92,7 +92,12 @@ const topicsSetKey =
    : (K?.topicsSet || K?.TOPICS_SET || 'forum:topics'))
 const topicPostsCountKey = (id) =>
   (K?.topicPostsCount ? K.topicPostsCount(id) : `forum:topic:${id}:posts_count`)
-
+const zTopicsKey = K?.zTopics || 'forum:z:topics'
+const zTopicRootsKey = (id) => (K?.zTopicRoots ? K.zTopicRoots(id) : `forum:z:topic:${id}:roots`)
+const zTopicAllKey = (id) => (K?.zTopicAll ? K.zTopicAll(id) : `forum:z:topic:${id}:all`)
+const zParentRepliesKey = (id) => (K?.zParentReplies ? K.zParentReplies(id) : `forum:z:parent:${id}:replies`)
+const zUserInboxKey = (id) => (K?.zUserInbox ? K.zUserInbox(id) : `forum:z:user:${id}:inbox`)
+const zVideoFeedKey = K?.zVideoFeed || 'forum:z:feed:video'
 async function getPostObj(id) {
   try {
     const raw = await redisDirect.get(postKey(id))
@@ -306,6 +311,30 @@ export async function POST(request) {
               const pObj = (pid === String(postId)) ? po : await getPostObj(pid)
               await delPostHard(pid)
               if (pObj?.topicId) await decTopicPostsCount(pObj.topicId)
+              try {
+                const zOps = []
+                const topicId = String(pObj?.topicId || '')
+                if (topicId) {
+                  zOps.push(redisDirect.zrem(zTopicAllKey(topicId), String(pid)))
+                  if (pObj?.parentId) {
+                    zOps.push(redisDirect.zrem(zParentRepliesKey(String(pObj.parentId)), String(pid)))
+                  } else {
+                    zOps.push(redisDirect.zrem(zTopicRootsKey(topicId), String(pid)))
+                  }
+                }
+                zOps.push(redisDirect.zrem(zVideoFeedKey, String(pid)))
+                if (pObj?.parentId) {
+                  try {
+                    const parentRaw = await redisDirect.get(postKey(pObj.parentId))
+                    const parent = safeParse(parentRaw)
+                    const ownerId = parent?.userId || parent?.accountId
+                    if (ownerId) {
+                      zOps.push(redisDirect.zrem(zUserInboxKey(String(ownerId)), String(pid)))
+                    }
+                  } catch {}
+                }
+                if (zOps.length) await Promise.allSettled(zOps)
+              } catch {}                
             }
             const rev = await nextRev()
             await pushChange({ rev, kind: 'post',         id: postId, _del: 1, deleted: branch, ts: Date.now() })
@@ -331,7 +360,29 @@ export async function POST(request) {
               }
             } catch {}
             for (const pid of affected) {
+              const pObj = await getPostObj(pid)              
               await delPostHard(pid)
+              try {
+                const zOps = []
+                zOps.push(redisDirect.zrem(zVideoFeedKey, String(pid)))
+                if (pObj?.parentId) {
+                  zOps.push(redisDirect.zrem(zParentRepliesKey(String(pObj.parentId)), String(pid)))
+                  try {
+                    const parentRaw = await redisDirect.get(postKey(pObj.parentId))
+                    const parent = safeParse(parentRaw)
+                    const ownerId = parent?.userId || parent?.accountId
+                    if (ownerId) {
+                      zOps.push(redisDirect.zrem(zUserInboxKey(String(ownerId)), String(pid)))
+                    }
+                  } catch {}
+                } else if (pObj?.topicId) {
+                  zOps.push(redisDirect.zrem(zTopicRootsKey(String(pObj.topicId)), String(pid)))
+                }
+                if (pObj?.topicId) {
+                  zOps.push(redisDirect.zrem(zTopicAllKey(String(pObj.topicId)), String(pid)))
+                }
+                if (zOps.length) await Promise.allSettled(zOps)
+              } catch {}              
             }
             try { await redisDirect.srem(topicsSetKey, topicId) } catch {}
             try {
@@ -339,8 +390,11 @@ export async function POST(request) {
                 redisDirect.del(topicKey(topicId)),
                 redisDirect.del(K?.topicViews ? K.topicViews(topicId) : `forum:topic:${topicId}:views`),
                 redisDirect.del(topicPostsCountKey(topicId)),
+                redisDirect.del(zTopicRootsKey(topicId)),
+                redisDirect.del(zTopicAllKey(topicId)),
+                redisDirect.zrem(zTopicsKey, topicId),
               ])
-            } catch {}
+            } catch {}        
             const rev = await nextRev()
             await pushChange({ rev, kind: 'topic',         id: topicId, _del: 1, deletedPosts: affected, ts: Date.now() })
             await pushChange({ rev, kind: 'topic_deleted', id: topicId,        deletedPosts: affected, ts: Date.now() })

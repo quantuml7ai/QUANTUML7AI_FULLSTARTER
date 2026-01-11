@@ -16,7 +16,11 @@ const postLikesSet = (id) => (typeof K?.postLikesSet === 'function' ? K.postLike
 const postDislikesSet = (id) => (typeof K?.postDislikesSet === 'function' ? K.postDislikesSet(id) : (K?.postDislikesSet || `post:${id}:dislikes:set`))
 const topicPostsCount = (id) => (K?.topicPostsCount ? K.topicPostsCount(id) : `forum:topic:${id}:posts_count`)
 const topicPostsSet   = (id) => (typeof K?.topicPostsSet === 'function' ? K.topicPostsSet(id) : K?.topicPostsSet)
-
+const zTopicRootsKey = (id) => (K?.zTopicRoots ? K.zTopicRoots(id) : `forum:z:topic:${id}:roots`)
+const zTopicAllKey = (id) => (K?.zTopicAll ? K.zTopicAll(id) : `forum:z:topic:${id}:all`)
+const zParentRepliesKey = (id) => (K?.zParentReplies ? K.zParentReplies(id) : `forum:z:parent:${id}:replies`)
+const zUserInboxKey = (id) => (K?.zUserInbox ? K.zUserInbox(id) : `forum:z:user:${id}:inbox`)
+const zVideoFeedKey = K?.zVideoFeed || 'forum:z:feed:video'
 export async function POST(req) {
   try {
     await requireAdmin(req) // cookie forum_admin=1
@@ -74,7 +78,24 @@ export async function POST(req) {
         if (c > 0) ops.push(redis.decr(topicPostsCount(topicId)))
       } catch {}
     }
+    if (topicId) {
+      ops.push(redis.zrem(zTopicAllKey(topicId), postId))
+      if (postObj?.parentId) {
+        ops.push(redis.zrem(zParentRepliesKey(String(postObj.parentId)), postId))
+      } else {
+        ops.push(redis.zrem(zTopicRootsKey(topicId), postId))
+      }
+    }
+    ops.push(redis.zrem(zVideoFeedKey, postId))
 
+    if (postObj?.parentId) {
+      try {
+        const parentRaw = await redis.get(postKey(postObj.parentId))
+        const parent = safeParse(parentRaw)
+        const ownerId = parent?.userId || parent?.accountId
+        if (ownerId) ops.push(redis.zrem(zUserInboxKey(String(ownerId)), postId))
+      } catch {}
+    }
     await Promise.allSettled(ops)
 
     // 2) Ревизия + лента изменений
