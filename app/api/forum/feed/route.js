@@ -5,13 +5,14 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const fetchCache = 'force-no-store'
 
-const DEFAULT_LIMIT = Number(process.env.FORUM_FEED_LIMIT || process.env.NEXT_PUBLIC_FORUM_FEED_LIMIT || 25)
-const MAX_LIMIT = 50
+const FEED_LIMIT = 15
+const DEFAULT_LIMIT = FEED_LIMIT
+const MAX_LIMIT = FEED_LIMIT
 
 const clampLimit = (val) => {
   const n = Number(val)
-  if (!Number.isFinite(n) || n <= 0) return Math.min(MAX_LIMIT, Math.max(1, DEFAULT_LIMIT || 25))
-  return Math.min(MAX_LIMIT, Math.max(1, n))
+  if (!Number.isFinite(n) || n <= 0) return DEFAULT_LIMIT
+  return Math.min(MAX_LIMIT, Math.max(DEFAULT_LIMIT, n))
 }
 
 const decodeCursor = (cursor) => {

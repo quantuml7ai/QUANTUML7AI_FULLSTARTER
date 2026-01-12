@@ -42,7 +42,7 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const fetchCache = 'force-no-store'
 
-const MAX_OPS_PER_BATCH = 25
+const MAX_OPS_PER_BATCH = 120
 const MAX_TITLE = 180
 const MAX_TEXT  = 4000
 

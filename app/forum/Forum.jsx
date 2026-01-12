@@ -9,7 +9,6 @@ import { useI18n } from '../../components/i18n'
 import { useRouter } from 'next/navigation'
 import { broadcast as forumBroadcast } from './events/bus'
 import Image from 'next/image'
-import { Virtuoso } from 'react-virtuoso'
 // [ADS:IMPORT]
 import {
   getForumAdConf,
@@ -511,26 +510,7 @@ const api = {
       return { ok:false, error:'network', topics:[], posts:[], bans:[], rev:0, cursor:null, __reset:false };
     }
   },
-  // Пагинированная лента
-  async feed(q = {}) {
-    try {
-      const params = new URLSearchParams()
-      if (q.kind) params.set('kind', String(q.kind))
-      if (q.limit) params.set('limit', String(q.limit))
-      if (q.cursor) params.set('cursor', String(q.cursor))
-      if (q.sort) params.set('sort', String(q.sort))
-      if (q.topicId) params.set('topicId', String(q.topicId))
-      if (q.parentId) params.set('parentId', String(q.parentId))
-      if (q.userId) params.set('userId', String(q.userId))
 
-      const url = '/api/forum/feed' + (params.toString() ? `?${params}` : '')
-      const r = await fetch(url, { cache: 'no-store' })
-      const data = await r.json().catch(() => ({}))
-      return data || { ok: r.ok, status: r.status }
-    } catch {
-      return { ok: false, error: 'network' }
-    }
-  },
   // Батч-мутации
   async mutate(batch, userId) {
     try {
@@ -6780,42 +6760,7 @@ export default function Forum(){
 
   const [starredAuthors, setStarredAuthors] = useState(() => new Set())
   const [starMode, setStarMode] = useState(false)
-  // === QUESTS: вкладка квестов (полупассивный режим) ===
-const [questOpen, setQuestOpen] = React.useState(false);
-const [questSel,  setQuestSel]  = React.useState(null);   // текущая карточка квеста
 
-  const FEED_PAGE_LIMIT = useMemo(() => {
-    const raw = Number(process?.env?.NEXT_PUBLIC_FORUM_FEED_LIMIT || process?.env?.FORUM_FEED_LIMIT || 25)
-    const val = Number.isFinite(raw) && raw > 0 ? raw : 25
-    return Math.min(50, Math.max(1, val))
-  }, [])
-
-  const emptyFeedState = useMemo(() => ({
-    items: [],
-    cursor: null,
-    hasMore: true,
-    loading: false,
-    error: null,
-    lastRequested: null,
-  }), [])
-
-  const [feeds, setFeeds] = useState(() => ({}))
-  const feedsRef = useRef(feeds)
-  useEffect(() => { feedsRef.current = feeds }, [feeds])
-
-  const threadBodyRef = useRef(null)
-  // =========================================================
-  // READ transport: FEED (server pagination) vs SNAPSHOT (legacy)
-  // По ТЗ: transport чтения должен быть FEED. Snapshot оставляем только как fallback/debug.
-  // =========================================================
-  const FEED_ENABLED = useMemo(() => {
-    try {
-      const v = (typeof process !== 'undefined' && process?.env?.NEXT_PUBLIC_FORUM_USE_FEED != null)
-        ? String(process.env.NEXT_PUBLIC_FORUM_USE_FEED)
-       : '1'
-      return v !== '0'
-    } catch { return true }
-  }, [])
   const [myFollowersCount, setMyFollowersCount] = useState(0)
   const [myFollowersLoading, setMyFollowersLoading] = useState(false)
 
@@ -6827,15 +6772,13 @@ const [questSel,  setQuestSel]  = React.useState(null);   // текущая ка
     const id=setInterval(upd,3000)
     return ()=>{ window.removeEventListener('auth:ok',upd); window.removeEventListener('auth:success',upd); clearInterval(id) }
   },[])
-  // Snapshot autosync выключаем при FEED (иначе ты ВСЕГДА будешь видеть snapshot в логах и долбёж Redis)
-  useEffect(() => {
-    if (FEED_ENABLED) return
+    useEffect(() => {
     const stop = initForumAutosnapshot({
-      intervalMs: 60000,
-      debounceMs: 2000
-    })
-    return stop
-  }, [FEED_ENABLED])
+      intervalMs: 60000,   // ⬅️ можно 30000 (30 сек) если хочешь чаще
+      debounceMs: 2000     // ⬅️ чтобы не спамить при частом скролле
+    });
+    return stop; // снимем слушатели при размонтировании
+  }, []);
     // === Глобальный контроллер HTML5-видео в постах ===
   // В любой момент времени играет только один <video controls>.
   // Видео без controls (обложки, рекламные петельки и т.п.) не трогаем.
@@ -7511,73 +7454,6 @@ React.useEffect(() => {
     return { ...prev, topics, posts }
   }
   // <<<<<<<<<<< конец изменения
-  const mergeFeedItems = useCallback((prevItems, incoming, getId) => {
-    const map = new Map((prevItems || []).map(item => [getId(item), item]))
-    for (const item of (incoming || [])) {
-      const id = getId(item)
-      if (!id) continue
-      map.set(id, { ...(map.get(id) || {}), ...item })
-    }
-    return Array.from(map.values())
-  }, [])
-
-  const updateFeedState = useCallback((key, patch) => {
-    setFeeds(prev => {
-      const current = prev[key] || emptyFeedState
-      const next = (typeof patch === 'function') ? patch(current) : { ...current, ...patch }
-      return { ...prev, [key]: next }
-    })
-  }, [emptyFeedState])
-
-  const loadFeedPage = useCallback(async ({ key, kind, params = {}, reset = false }) => {
-    const current = feedsRef.current[key] || emptyFeedState
-    if (current.loading) return
-    if (!reset && !current.hasMore) return
-
-    const cursor = reset ? null : current.cursor
-    const requestKey = cursor ?? '__first__'
-    if (!reset && current.lastRequested === requestKey) return
-
-    updateFeedState(key, {
-      loading: true,
-      error: null,
-      lastRequested: requestKey,
-    })
-
-    const res = await api.feed({
-      kind,
-      limit: FEED_PAGE_LIMIT,
-      cursor,
-      ...params,
-    })
-
-    if (!res?.ok) {
-      updateFeedState(key, { loading: false, error: res?.error || 'feed_error' })
-      return
-    }
-
-    const items = Array.isArray(res?.items) ? res.items : []
-    updateFeedState(key, prev => ({
-      ...prev,
-      items: reset ? items : mergeFeedItems(prev.items, items, (it) => String(it?.id || '')),
-      cursor: res?.nextCursor ?? null,
-      hasMore: !!res?.hasMore,
-      loading: false,
-      error: null,
-    }))
-
-    if (items.length) {
-      persist(prev => {
-        const next = { ...prev }
-        if (kind === 'topics') {
-          next.topics = mergeFeedItems(prev.topics || [], items, (it) => String(it?.id || ''))
-        } else {
-          next.posts = mergeFeedItems(prev.posts || [], items, (it) => String(it?.id || ''))
-        }
-        return dedupeAll(next)
-      })
-    }
-  }, [FEED_PAGE_LIMIT, emptyFeedState, mergeFeedItems, updateFeedState, persist])
 
   function mergeDelta(prev, delta, cursor){
     const next = { ...prev }
@@ -7596,13 +7472,8 @@ React.useEffect(() => {
     next.cursor = cursor ?? prev.cursor
     return dedupeAll(next)
   }
-
 // === SILENT SYNC with cache-bust, backoff & hard-consistency ===
-// По ТЗ этот транспорт чтения НЕ должен быть основным при FEED.
 useEffect(() => {
-  if (FEED_ENABLED) {
-    return
-  }
   let stop = false;
   let pulling = false;
   let cooldownUntil = 0;         // до какого времени не дёргаем снапшот (бэк-офф)
@@ -7803,7 +7674,7 @@ const safeMerge = (prev, r) => {
     schedulePullRef.current = () => {}; // обнуляем ручку
     try { bc && bc.close(); } catch {}
   };
-}, [FEED_ENABLED]);
+}, []);
 
 
 // локальный shim: принудительное обновление страницы/данных
@@ -8225,36 +8096,16 @@ const unreadCount = useMemo(() => {
   return n;
 }, [mounted, repliesToMe, readSet]);
 
-// при открытии Inbox — пометить как прочитанные и сразу обновить state (без бесконечного цикла)
+// при открытии Inbox — пометить как прочитанные и сразу обновить state
 useEffect(() => {
-  if (!mounted || !inboxOpen || !seenKey) return;
-
-  // ids, которые нужно добавить в readSet
-  const incomingIds = (repliesToMe || []).map((p) => String(p.id));
-
-  setReadSet((prev) => {
-    // собираем union(prev, incomingIds)
-    const next = new Set(prev);
-    let changed = false;
-
-    for (const id of incomingIds) {
-      if (!next.has(id)) {
-        next.add(id);
-        changed = true;
-      }
-    }
-
-    // если ничего не изменилось — ВОЗВРАЩАЕМ prev (React не будет лишний раз перерендеривать)
-    if (!changed) return prev;
-
-    // persist только когда реально было изменение
-    try {
-      localStorage.setItem(seenKey, JSON.stringify(Array.from(next)));
-    } catch {}
-
-    return next;
-  });
-}, [mounted, inboxOpen, seenKey, repliesToMe]);
+if (!mounted || !inboxOpen || !seenKey) return;
+  const allIds = new Set([
+    ...repliesToMe.map(p => String(p.id)),
+    ...Array.from(readSet)
+  ]);
+  try { localStorage.setItem(seenKey, JSON.stringify(Array.from(allIds))); } catch {}
+  setReadSet(allIds); // чтобы бейдж погас сразу без повторного чтения из LS
+}, [mounted, inboxOpen, seenKey, repliesToMe, readSet]);
 
 // все посты выбранной темы (строго сравниваем как строки)
 const allPosts = useMemo(() => (
@@ -9590,19 +9441,19 @@ try {
       .pop() || 0
   );
 
-  // По ТЗ: optimistic updates должны жить без обязательной перезагрузки ленты.
-  // Snapshot-прогрев выключаем при FEED, иначе опять начинаем "transport = snapshot".
-  if (!FEED_ENABLED) {
-    try {
-      await api.snapshot({ b: Date.now(), rev: lastRev || undefined })
-    } catch {}
-  }
-  if (typeof refresh === 'function') await refresh()
+  // Мгновенно прогреваем снапшот с обходом микрокэша:
+  // передаём уникальный bust (b=Date.now()) и hint по ревизии
+  try {
+    await api.snapshot({ b: Date.now(), rev: lastRev || undefined });
+  } catch {}
+
+  // После прогрева снапшота — мягкий UI-рефреш
+  if (typeof refresh === 'function') await refresh();
 } catch (e) {
   console.warn('react mutate failed', e);
 }
 
-}, [auth, persist, FEED_ENABLED]);
+}, [auth, persist]);
 
 
 const FORUM_VIEW_TTL_SEC = VIEW_TTL_SEC
@@ -9958,42 +9809,7 @@ const onFilesChosen = React.useCallback(async (e) => {
 const [videoFeedOpen, setVideoFeedOpen] = React.useState(false);
 const [videoFeed, setVideoFeed] = React.useState([]);
 const [feedSort, setFeedSort] = React.useState('new'); // new/top/likes/views/replies
-useEffect(() => {
-  if (sel || videoFeedOpen || inboxOpen || questOpen) return
-  loadFeedPage({ key: 'topics', kind: 'topics' })
-}, [sel, videoFeedOpen, inboxOpen, questOpen, loadFeedPage])
 
-useEffect(() => {
-  if (!sel?.id || threadRoot) return
-  loadFeedPage({
-    key: `topic_roots:${sel.id}`,
-    kind: 'topic_roots',
-    params: { topicId: sel.id },
-  })
-}, [sel?.id, threadRoot, loadFeedPage])
-
-useEffect(() => {
-  if (!sel?.id || !threadRoot?.id) return
-  loadFeedPage({
-    key: `replies:${threadRoot.id}`,
-    kind: 'replies',
-    params: { parentId: threadRoot.id },
-  })
-}, [sel?.id, threadRoot?.id, loadFeedPage])
-
-useEffect(() => {
-  if (!inboxOpen || !viewerId) return
-  loadFeedPage({
-    key: `inbox:${viewerId}`,
-    kind: 'inbox',
-    params: { userId: viewerId },
-  })
-}, [inboxOpen, viewerId, loadFeedPage])
-
-useEffect(() => {
-  if (!videoFeedOpen) return
-  loadFeedPage({ key: 'video', kind: 'video' })
-}, [videoFeedOpen, loadFeedPage])
 // ВАЖНО: в ленте нужно уметь находить ссылки внутри текста (даже если не отдельной строкой)
 const FEED_URL_RE = /(https?:\/\/[^\s<>'")]+)/ig;
 
@@ -10241,6 +10057,9 @@ function openThreadFromPost(p){
     try { document.getElementById(`post_${p.id}`)?.scrollIntoView({ behavior:'smooth', block:'center' }) } catch {}
   }, 120);
 }
+// === QUESTS: вкладка квестов (полупассивный режим) ===
+const [questOpen, setQuestOpen] = React.useState(false);
+const [questSel,  setQuestSel]  = React.useState(null);   // текущая карточка квеста
 
 // === QUEST ENV loader (client) ===
 const [questEnv,  setQuestEnv]  = React.useState(null);
@@ -10637,68 +10456,6 @@ const clientId =
 
 // гарантия, что interleaveAds всегда получит >0
 const adEvery = adConf?.EVERY && adConf.EVERY > 0 ? adConf.EVERY : 1;
-
-const GridList = React.useMemo(() => React.forwardRef(function GridListInner(props, ref) {
-  return <div {...props} ref={ref} className="grid gap-2" />;
-}), []);
-
-const InboxList = React.useMemo(() => React.forwardRef(function InboxListInner(props, ref) {
-  return <div {...props} ref={ref} className="inboxList" />;
-}), []);
-
-const inboxSorted = React.useMemo(() => (
-  (repliesToMe || []).slice().sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0))
-), [repliesToMe]);
-
-const topicsSlots = React.useMemo(() => debugAdsSlots(
-  'topics',
-  interleaveAds(
-    sortedTopics || [],
-    adEvery,
-    {
-      isSkippable: (p) => !p || !p.id,
-      getId: (p) => p?.id || `${p?.ts || 0}`,
-    }
-  )
-), [sortedTopics, adEvery]);
-
-const inboxSlots = React.useMemo(() => debugAdsSlots(
-  'inbox',
-  interleaveAds(
-    inboxSorted || [],
-    adEvery,
-    {
-      isSkippable: (p) => !p || !p.id,
-      getId: (p) => p?.id || `${p?.topicId || 'ib'}:${p?.ts || 0}`,
-    }
-  )
-), [inboxSorted, adEvery]);
-
-const videoSlots = React.useMemo(() => debugAdsSlots(
-  'video',
-  interleaveAds(
-    videoFeed || [],
-    adEvery,
-    {
-      isSkippable: (p) => !p || !p.id,
-      getId: (p) => p?.id || `${p?.topicId || 'vf'}:${p?.ts || 0}`,
-    }
-  )
-), [videoFeed, adEvery]);
-
-const repliesSlots = React.useMemo(() => debugAdsSlots(
-  'replies',
-  interleaveAds(
-    flat || [],
-    adEvery,
-    {
-      isSkippable: (p) => !p || !p.id,
-      getId: (p) => p?.id,
-    }
-  )
-), [flat, adEvery]);
-
-const inboxPanelSlots = React.useMemo(() => inboxSorted || [], [inboxSorted]);
 
 
 
@@ -11442,23 +11199,7 @@ onClick={()=>{
         type="button"
         className="iconBtn inboxBtn"
         title={t('forum_inbox') || 'Ответы мне'}
-        onClick={() => {
-  setInboxOpen(v => {
-    const next = !v;
-    if (next) {
-      // ВСЕГДА открываем "главный inbox-экран", как в списке тем
-      // поэтому выходим из любых веток (thread/replies/video/quest)
-      try { setVideoFeedOpen(false); } catch {}
-      try { setQuestOpen(false); } catch {}
-      try { setThreadRoot(null); } catch {}
-      try { setSel(null); } catch {}
-      try { setReplyTo(null); } catch {}
-      try { window.scrollTo({ top: 800, behavior: 'smooth' }); } catch {}
-    }
-    return next;
-  });
-}}
-
+        onClick={() => setInboxOpen(v => !v)}
         aria-pressed={inboxOpen}
       >
         <svg viewBox="0 0 24 24" aria-hidden>
@@ -11476,77 +11217,82 @@ onClick={()=>{
   <>
 {/* ВЕТКА-ЛЕНТА: медиа (видео/аудио/изображения) */}
 <div className="meta mt-1">{t('') || ''}</div>
-    <div className="mt-2" suppressHydrationWarning>
-      <Virtuoso
-        data={videoSlots}
-        useWindowScroll
-        components={{ List: GridList }}
-        endReached={() => loadFeedPage({ key: 'video', kind: 'video' })}
-        itemKey={(index, slot) => (
-          slot.type === 'ad'
-            ? `ad:${slot.key}`
-            : `post:${slot.item?.id || slot.nearId || index}`
-        )}
-        itemContent={(index, slot) => {
-          if (slot.type === 'item') {
-            const p = slot.item;
-            const parent = p?.parentId
-              ? (data?.posts || []).find(x => String(x.id) === String(p.parentId))
-              : null;
+    <div className="grid gap-2 mt-2" suppressHydrationWarning>
+{debugAdsSlots(
+  'video',
+  interleaveAds(
+    videoFeed || [],
+    adEvery,
+    {
+      isSkippable: (p) => !p || !p.id,
+      getId: (p) => p?.id || `${p?.topicId || 'vf'}:${p?.ts || 0}`,
+    }
+  )
+).map((slot) => {
+  if (slot.type === 'item') {
+    const p = slot.item;
+    const parent = p?.parentId
+      ? (data?.posts || []).find(x => String(x.id) === String(p.parentId))
+      : null;
 
-            const openThreadHere = () => {
-              try { setInboxOpen?.(false); } catch {}
-              const tt = (data?.topics || []).find(x => String(x.id) === String(p?.topicId));
-              if (!tt) return;
-              try { setSel(tt); } catch {}
-              try { setThreadRoot({ id: p?.parentId || p?.id }); } catch {}
-              try { setVideoFeedOpen(false); } catch {}
-              setTimeout(() => {
-                try {
-                  document
-                    .getElementById(`post_${p?.id}`)
-                    ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                } catch {}
-              }, 120);
-            };
+    const openThreadHere = () => {
+      try { setInboxOpen?.(false); } catch {}
+      const tt = (data?.topics || []).find(x => String(x.id) === String(p?.topicId));
+      if (!tt) return;
+      try { setSel(tt); } catch {}
+      try { setThreadRoot({ id: p?.parentId || p?.id }); } catch {}
+      try { setVideoFeedOpen(false); } catch {}
+      setTimeout(() => {
+        try {
+          document
+            .getElementById(`post_${p?.id}`)
+            ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } catch {}
+      }, 120);
+    };
 
-            return (
-              <div id={`post_${p?.id || ''}`}>
-                <PostCard
-                  p={p}
-                  parentAuthor={parent?.nickname || (parent ? shortId(parent.userId || '') : null)}
-                  onReport={() => toast.ok(t('forum_report_ok'))}
-                  onOpenThread={openThreadHere}
-                  onReact={reactMut}
-                  isAdmin={isAdmin}
-                  onDeletePost={delPost}
-                  onBanUser={banUser}
-                  onUnbanUser={unbanUser}
-                  isBanned={bannedSet.has(p?.accountId || p?.userId)}
-                  authId={auth.asherId || auth.accountId}
-                  markView={markViewPost}
-                  t={t}
-                  isVideoFeed={true}
-                  viewerId={viewerId}
-                  starredAuthors={starredAuthors}
-                  onToggleStar={toggleAuthorStar}
-                />
-              </div>
-            );
-          }
+    return (
+      <div key={slot.key} id={`post_${p?.id || ''}`}>
+<PostCard
+  p={p}
+  parentAuthor={parent?.nickname || (parent ? shortId(parent.userId || '') : null)}
+  onReport={() => toast.ok(t('forum_report_ok'))}
+  onOpenThread={openThreadHere}
+  onReact={reactMut}
+  isAdmin={isAdmin}
+  onDeletePost={delPost}
+  onBanUser={banUser}
+  onUnbanUser={unbanUser}
+  isBanned={bannedSet.has(p?.accountId || p?.userId)}
+  authId={auth.asherId || auth.accountId}
+  markView={markViewPost}
+  t={t}
+  isVideoFeed={true}   // ✅ NEW
+    viewerId={viewerId}
+  starredAuthors={starredAuthors}
+  onToggleStar={toggleAuthorStar}
+/>
 
-          const url = pickAdUrlForSlot(slot.key, 'video');
-          if (!url) return null;
+      </div>
+    );
+  }
 
-          return (
-            <AdCard
-              url={url}
-              slotKind="video"
-              nearId={slot.nearId}
-            />
-          );
-        }}
-      />
+  const url = pickAdUrlForSlot(slot.key, 'video');
+  if (!url) return null;
+
+  return (
+    <AdCard
+      key={slot.key}
+      url={url}
+      slotKind="video"
+      nearId={slot.nearId}
+    />
+  );
+})}
+
+
+
+
       {videoFeed?.length === 0 && (
         <div className="meta">
           {t('forum_search_empty') || 'Ничего не найдено'}
@@ -11580,66 +11326,62 @@ onClick={()=>{
 ) : inboxOpen ? (
   <>
     <div className="meta mt-1">{t('forum_inbox_title') || 'Ответы на ваши сообщения'}</div>
-    <div className="mt-2" suppressHydrationWarning>
-      <Virtuoso
-        data={inboxSlots}
-        useWindowScroll
-        components={{ List: GridList }}
-        endReached={() => {
-          if (!viewerId) return
-          loadFeedPage({
-            key: `inbox:${viewerId}`,
-            kind: 'inbox',
-            params: { userId: viewerId },
-          })
-        }}
-        itemKey={(index, slot) => (
-          slot.type === 'ad'
-            ? `ad:${slot.key}`
-            : `post:${slot.item?.id || slot.nearId || index}`
-        )}
-        itemContent={(index, slot) => {
-          if (slot.type === 'item') {
-            const p = slot.item;
-            return (
-              <div id={`post_${p.id}`}>
-                <PostCard
-                  p={p}
-                  parentAuthor={(data.posts || []).find(x => String(x.id) === String(p.parentId))?.nickname || ''}
-                  onReport={() => toast.ok(t('forum_report_ok'))}
-                  onOpenThread={(clickP) => {
-                    const tt = (data.topics || []).find(t => String(t.id) === String(p.topicId));
-                    if (tt) { setSel(tt); setThreadRoot(clickP); setInboxOpen(false); }
-                  }}
-                  onReact={reactMut}
-                  isAdmin={isAdmin}
-                  onDeletePost={delPost}
-                  onBanUser={banUser}
-                  onUnbanUser={unbanUser}
-                  isBanned={bannedSet.has(p.accountId || p.userId)}
-                  authId={auth.asherId || auth.accountId}
-                  markView={markViewPost}
-                  t={t}
-                  viewerId={viewerId}
-                  starredAuthors={starredAuthors}
-                  onToggleStar={toggleAuthorStar}
-                />
-              </div>
-            );
-          }
+    <div className="grid gap-2 mt-2" suppressHydrationWarning>
+{debugAdsSlots(
+  'inbox',
+  interleaveAds(
+    (repliesToMe || []).slice().sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0)),
+    adEvery,
+    {
+      isSkippable: (p) => !p || !p.id,
+      getId: (p) => p?.id || `${p?.topicId || 'ib'}:${p?.ts || 0}`,
+    }
+  )
+).map((slot) => {
+  if (slot.type === 'item') {
+    const p = slot.item;
+    return (
+      <div key={slot.key} id={`post_${p.id}`}>
+        <PostCard
+          p={p}
+          parentAuthor={(data.posts || []).find(x => String(x.id) === String(p.parentId))?.nickname || ''}
+          onReport={() => toast.ok(t('forum_report_ok'))}
+          onOpenThread={(clickP) => {
+            const tt = (data.topics || []).find(t => String(t.id) === String(p.topicId));
+            if (tt) { setSel(tt); setThreadRoot(clickP); setInboxOpen(false); }
+          }}
+          onReact={reactMut}
+          isAdmin={isAdmin}
+          onDeletePost={delPost}
+          onBanUser={banUser}
+          onUnbanUser={unbanUser}
+          isBanned={bannedSet.has(p.accountId || p.userId)}
+          authId={auth.asherId || auth.accountId}
+          markView={markViewPost}
+          t={t}
+            viewerId={viewerId}
+  starredAuthors={starredAuthors}
+  onToggleStar={toggleAuthorStar}
+        />
+      </div>
+    );
+  }
 
-          const url = pickAdUrlForSlot(slot.key, 'inbox');
-          if (!url) return null;
+  const url = pickAdUrlForSlot(slot.key, 'inbox');
+  if (!url) return null;
 
-          return (
-            <AdCard
-              url={url}
-              slotKind="inbox"
-              nearId={slot.nearId}
-            />
-          );
-        }}
-      />
+  return (
+    <AdCard
+      key={slot.key}
+      url={url}
+      slotKind="inbox"
+      nearId={slot.nearId}
+    />
+  );
+})}
+
+
+
       {(repliesToMe || []).length === 0 && (
         <div className="meta">
           {t('forum_inbox_empty') || 'Новых ответов нет'}
@@ -11651,50 +11393,30 @@ onClick={()=>{
 ) : (
   <>
     <CreateTopicCard t={t} onCreate={createTopic} onOpenVideoFeed={openVideoFeed} />
-    <div className="mt-2" suppressHydrationWarning>
-      <Virtuoso
-        data={topicsSlots}
-        useWindowScroll
-        components={{ List: GridList }}
-        endReached={() => loadFeedPage({ key: 'topics', kind: 'topics' })}
-        itemKey={(index, slot) => (
-          slot.type === 'ad'
-            ? `ad:${slot.key}`
-            : `topic:${slot.item?.id || slot.nearId || index}`
-        )}
-        itemContent={(index, slot) => {
-          if (slot.type === 'item') {
-            const x = slot.item;
-            const agg = aggregates.get(x.id) || { posts:0, likes:0, dislikes:0, views:0 };
-            return (
-              <TopicItem
-                t={x}
-                agg={agg}
-                onOpen={(tt)=>{ setSel(tt); setThreadRoot(null) }}
-                onView={markViewTopic}
-                isAdmin={isAdmin}
-                onDelete={delTopic}
-                authId={auth.asherId || auth.accountId}
-                onOwnerDelete={delTopicOwn}
-                viewerId={viewerId}
-                starredAuthors={starredAuthors}
-                onToggleStar={toggleAuthorStar}
-              />
-            );
-          }
+    <div className="grid gap-2 mt-2" suppressHydrationWarning>
+      {(sortedTopics || [])
+       .slice()
 
-          const url = pickAdUrlForSlot(slot.key, 'topics');
-          if (!url) return null;
-
+        .map(x => {
+          const agg = aggregates.get(x.id) || { posts:0, likes:0, dislikes:0, views:0 };
           return (
-            <AdCard
-              url={url}
-              slotKind="topics"
-              nearId={slot.nearId}
-            />
-          );
-        }}
-      />
+<TopicItem
+  key={`t:${x.id}`}
+  t={x}
+  agg={agg}
+  onOpen={(tt)=>{ setSel(tt); setThreadRoot(null) }}
+  onView={markViewTopic}
+  isAdmin={isAdmin}
+  onDelete={delTopic}
+  authId={auth.asherId || auth.accountId}
+  onOwnerDelete={delTopicOwn}
+  viewerId={viewerId}
+  starredAuthors={starredAuthors}
+  onToggleStar={toggleAuthorStar}
+/>
+
+          )
+        })}
     </div>
   </>
 )}
@@ -11810,23 +11532,7 @@ onClick={()=>{
         type="button"
         className="iconBtn inboxBtn"
         title={t('forum_inbox') || 'Ответы мне'}
-        onClick={() => {
-  setInboxOpen(v => {
-    const next = !v;
-    if (next) {
-      // ВСЕГДА открываем "главный inbox-экран", как в списке тем
-      // поэтому выходим из любых веток (thread/replies/video/quest)
-      try { setVideoFeedOpen(false); } catch {}
-      try { setQuestOpen(false); } catch {}
-      try { setThreadRoot(null); } catch {}
-      try { setSel(null); } catch {}
-      try { setReplyTo(null); } catch {}
-      try { window.scrollTo({ top: 800, behavior: 'smooth' }); } catch {}
-    }
-    return next;
-  });
-}}
-
+        onClick={() => setInboxOpen(v => !v)}
         aria-pressed={inboxOpen}
       >
         <svg viewBox="0 0 24 24" aria-hidden>
@@ -11860,15 +11566,13 @@ onClick={()=>{
         {t('forum_inbox_empty') || 'Пока нет ответов'}
       </div>
     ) : (
-      <Virtuoso
-        data={inboxPanelSlots}
-        components={{ List: InboxList }}
-        itemKey={(index, p) => `inb:${p?.id || index}`}
-        itemContent={(index, p) => {
-          const topic = (data.topics || []).find(
-            t => String(t.id) === String(p.topicId),
+      <div className="inboxList">
+        {repliesToMe.map(p => {
+          // та же логика, что в верхнем инбоксе
+          const tt = (data.topics || []).find(
+            x => String(x.id) === String(p.topicId),
           );
-          if (!topic) return null;
+          if (!tt) return null;
 
           const parentAuthor =
             (data.posts || []).find(
@@ -11877,13 +11581,15 @@ onClick={()=>{
 
           return (
             <PostCard
-
+              key={`inb:${p.id}`}
               p={p}
               parentAuthor={parentAuthor}
               onReport={() => toast.ok(t('forum_report_ok'))}
               onOpenThread={clickP => {
                 // переходим в тему и открываем ветку
-
+                const topic = (data.topics || []).find(
+                  t => String(t.id) === String(p.topicId),
+                );
                 if (topic) {
                   setSel(topic);
                   setThreadRoot(clickP);   // корень треда
@@ -11902,22 +11608,22 @@ onClick={()=>{
                   }, 120);
                 }
               }}
-              onReact={reactMut}
-              isAdmin={isAdmin}
-              onDeletePost={delPost}
-              onBanUser={banUser}
-              onUnbanUser={unbanUser}
-              isBanned={bannedSet.has(p.accountId || p.userId)}
-              authId={auth.asherId || auth.accountId}
-              markView={markViewPost}
-              t={t}
-              viewerId={viewerId}
-              starredAuthors={starredAuthors}
-              onToggleStar={toggleAuthorStar}
-            />
+  onReact={reactMut}
+  isAdmin={isAdmin}
+  onDeletePost={delPost}
+  onBanUser={banUser}
+  onUnbanUser={unbanUser}
+  isBanned={bannedSet.has(p.accountId || p.userId)}
+  authId={auth.asherId || auth.accountId}
+  markView={markViewPost}
+  t={t}
+  viewerId={viewerId}
+  starredAuthors={starredAuthors}
+  onToggleStar={toggleAuthorStar}
+/>
           );
-        }}
-      />
+        })}
+      </div>
     )}
   </div>
 )}
@@ -11926,91 +11632,83 @@ onClick={()=>{
       </div>
 
       <div
-        className="body"
-        ref={threadBodyRef}
-        style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
+  className="body"
+  style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
+>
+
+
+        <div className="grid gap-2">
+{debugAdsSlots(
+  'replies',
+  interleaveAds(
+    flat || [],
+    adEvery,
+    {
+      isSkippable: (p) => !p || !p.id,
+      getId: (p) => p?.id,
+    }
+  )
+).map((slot) => {
+  if (slot.type === 'item') {
+    const p = slot.item;
+    const parent = p.parentId
+      ? allPosts.find(x => String(x.id) === String(p.parentId))
+      : null;
+
+    return (
+      <div
+        key={slot.key}
+        id={`post_${p.id}`}
+        style={{ marginLeft: (p._lvl || 0) * 18 }}
       >
-        <Virtuoso
-          data={repliesSlots}
-          style={{ height: '100%' }}
-          components={{ List: GridList }}
-          customScrollParent={threadBodyRef.current || undefined}
-          endReached={() => {
-            if (!sel?.id) return
-            if (threadRoot?.id) {
-              loadFeedPage({
-                key: `replies:${threadRoot.id}`,
-                kind: 'replies',
-                params: { parentId: threadRoot.id },
-              })
-            } else {
-              loadFeedPage({
-                key: `topic_roots:${sel.id}`,
-                kind: 'topic_roots',
-                params: { topicId: sel.id },
-              })
-            }
-          }}
-          itemKey={(index, slot) => (
-            slot.type === 'ad'
-              ? `ad:${slot.key}`
-              : `post:${slot.item?.id || slot.nearId || index}`
+<PostCard
+  p={p}
+  parentAuthor={
+    parent?.nickname ||
+    (parent ? shortId(parent.userId || '') : null)
+  }
+  onReport={() => toast.ok(t('forum_report_ok'))}
+  onReply={() => setReplyTo(p)}
+  onOpenThread={(clickP) => { setThreadRoot(clickP); }}
+  onReact={reactMut}
+  isAdmin={isAdmin}
+  onDeletePost={delPost}
+  onBanUser={banUser}
+  onUnbanUser={unbanUser}
+  isBanned={bannedSet.has(p.accountId || p.userId)}
+  authId={auth.asherId || auth.accountId}
+  markView={markViewPost}
+  t={t}
+  viewerId={viewerId}
+  starredAuthors={starredAuthors}
+  onToggleStar={toggleAuthorStar}
+/>
+
+      </div>
+    );
+  }
+
+  const url = pickAdUrlForSlot(slot.key, 'replies');
+  if (!url) return null;
+
+  return (
+    <AdCard
+      key={slot.key}
+      url={url}
+      slotKind="replies"
+      nearId={slot.nearId}
+    />
+  );
+})}
+
+
+
+          {(!threadRoot && (flat || []).length === 0) && (
+            <div className="meta">
+              {t('forum_no_posts_yet') || 'Пока нет сообщений'}
+            </div>
           )}
-          itemContent={(index, slot) => {
-            if (slot.type === 'item') {
-              const p = slot.item;
-              const parent = p.parentId
-                ? allPosts.find(x => String(x.id) === String(p.parentId))
-                : null;
-
-              return (
-                <div
-                  id={`post_${p.id}`}
-                  style={{ marginLeft: (p._lvl || 0) * 18 }}
-                >
-                  <PostCard
-                    p={p}
-                    parentAuthor={
-                      parent?.nickname ||
-                      (parent ? shortId(parent.userId || '') : null)
-                    }
-                    onReport={() => toast.ok(t('forum_report_ok'))}
-                    onReply={() => setReplyTo(p)}
-                    onOpenThread={(clickP) => { setThreadRoot(clickP); }}
-                    onReact={reactMut}
-                    isAdmin={isAdmin}
-                    onDeletePost={delPost}
-                    onBanUser={banUser}
-                    onUnbanUser={unbanUser}
-                    isBanned={bannedSet.has(p.accountId || p.userId)}
-                    authId={auth.asherId || auth.accountId}
-                    markView={markViewPost}
-                    t={t}
-                    viewerId={viewerId}
-                    starredAuthors={starredAuthors}
-                    onToggleStar={toggleAuthorStar}
-                  />
-                </div>
-              );
-            }
-
-            const url = pickAdUrlForSlot(slot.key, 'replies');
-            if (!url) return null;
-            return (
-              <AdCard
-                url={url}
-                slotKind="replies"
-                nearId={slot.nearId}
-              />
-            );
-          }}
-        />
-
-        {(!threadRoot && (flat || []).length === 0) && (
-          <div className="meta">
-            {t('forum_no_posts_yet') || 'Пока нет сообщений'}
-          </div>
-        )}
+        </div>
 
       </div>
 <div className="composeDock">
@@ -12929,8 +12627,8 @@ function CreateTopicCard({ t, onCreate, onOpenVideoFeed }){
       {/* [VIDEO_FEED:BUTTON] — камера рядом с плюсом */}
       <button
         type="button"
-        className="iconBtn bigPlus"  
-        onClick={() => onOpenVideoFeed?.()}
+        className="iconBtn bigPlus"
+         onClick={() => onOpenVideoFeed?.()}
         title={t('forum_video_feed') || 'Видео'}
         aria-label={t('forum_video_feed') || 'Видео'}
       >
