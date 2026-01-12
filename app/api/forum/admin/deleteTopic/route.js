@@ -19,12 +19,7 @@ const topicPostsCount = (id) => (K?.topicPostsCount ? K.topicPostsCount(id) : `f
 const postLikesSet = (id) => (typeof K?.postLikesSet === 'function' ? K.postLikesSet(id) : (K?.postLikesSet || `post:${id}:likes:set`))
 const postDislikesSet = (id) => (typeof K?.postDislikesSet === 'function' ? K.postDislikesSet(id) : (K?.postDislikesSet || `post:${id}:dislikes:set`))
 const topicPostsSet  = (id) => (typeof K?.topicPostsSet === 'function' ? K.topicPostsSet(id) : K?.topicPostsSet) // может быть undefined
-const zTopicsKey = K?.zTopics || 'forum:z:topics'
-const zTopicRootsKey = (id) => (K?.zTopicRoots ? K.zTopicRoots(id) : `forum:z:topic:${id}:roots`)
-const zTopicAllKey = (id) => (K?.zTopicAll ? K.zTopicAll(id) : `forum:z:topic:${id}:all`)
-const zParentRepliesKey = (id) => (K?.zParentReplies ? K.zParentReplies(id) : `forum:z:parent:${id}:replies`)
-const zUserInboxKey = (id) => (K?.zUserInbox ? K.zUserInbox(id) : `forum:z:user:${id}:inbox`)
-const zVideoFeedKey = K?.zVideoFeed || 'forum:z:feed:video'
+
 export async function POST(req) {
   try {
     await requireAdmin(req) // только cookie forum_admin=1
@@ -54,11 +49,6 @@ export async function POST(req) {
     // 2) Удаляем посты темы и связанные счётчики/сеты
     const ops = []
     for (const pid of postIds) {
-      let postObj = null
-      try {
-        const raw = await redis.get(postKey(pid))
-        postObj = safeParse(raw)
-      } catch {}      
       ops.push(
         redis.srem(postsSetKey, pid),
         redis.del(postKey(pid)),
@@ -69,16 +59,6 @@ export async function POST(req) {
         redis.del(postLikesSet(pid)),
         redis.del(postDislikesSet(pid)),
       )
-      ops.push(redis.zrem(zVideoFeedKey, pid))
-      if (postObj?.parentId) {
-        ops.push(redis.zrem(zParentRepliesKey(String(postObj.parentId)), pid))
-        try {
-          const parentRaw = await redis.get(postKey(postObj.parentId))
-          const parent = safeParse(parentRaw)
-          const ownerId = parent?.userId || parent?.accountId
-          if (ownerId) ops.push(redis.zrem(zUserInboxKey(String(ownerId)), pid))
-        } catch {}
-      }
     }
 
     // 3) Удаляем саму тему и её счётчики
@@ -86,10 +66,7 @@ export async function POST(req) {
       redis.srem(topicsSetKey, topicId),
       redis.del(topicKey(topicId)),
       redis.del(topicViews(topicId)),
-     redis.del(topicPostsCount(topicId)),
-      redis.del(zTopicRootsKey(topicId)),
-      redis.del(zTopicAllKey(topicId)),
-      redis.zrem(zTopicsKey, topicId)
+      redis.del(topicPostsCount(topicId))
     )
 
     // 3.1) Если есть индекс topicPostsSet — почистим сам индекс
