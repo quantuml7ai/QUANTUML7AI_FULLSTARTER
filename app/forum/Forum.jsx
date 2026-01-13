@@ -1086,6 +1086,89 @@ const Styles = () => (
     .glass{ background:rgba(8,13,20,.94); border:1px solid rgba(255,255,255,.10); border-radius:16px; backdrop-filter: blur(12px) }
     .neon{ box-shadow:0 0 28px rgba(25,129,255,.14), inset 0 0 18px rgba(25,129,255,.06) }
     .postBody{ white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word }
+    .forum_root{
+      --mb-video-h-mobile: 550px;
+      --mb-video-h-tablet: 520px;
+      --mb-video-h-desktop: 520px;
+      --mb-image-h-mobile: 550px;
+      --mb-image-h-tablet: 520px;
+      --mb-image-h-desktop: 520px;
+      --mb-iframe-h-mobile: 500px;
+      --mb-iframe-h-tablet: 500px;
+      --mb-iframe-h-desktop: 500px;
+      --mb-audio-h-mobile: 550px;
+      --mb-audio-h-tablet: 520px;
+      --mb-audio-h-desktop: 520px;
+      --mb-ad-h-mobile: 200px;
+      --mb-ad-h-tablet: 260px;
+      --mb-ad-h-desktop: 320px;
+      --mb-video-h: var(--mb-video-h-mobile);
+      --mb-image-h: var(--mb-image-h-mobile);
+      --mb-iframe-h: var(--mb-iframe-h-mobile);
+      --mb-audio-h: var(--mb-audio-h-mobile);
+      --mb-ad-h: var(--mb-ad-h-mobile);
+    }
+    @media (min-width: 640px){
+      .forum_root{
+        --mb-video-h: var(--mb-video-h-tablet);
+        --mb-image-h: var(--mb-image-h-tablet);
+        --mb-iframe-h: var(--mb-iframe-h-tablet);
+        --mb-audio-h: var(--mb-audio-h-tablet);
+        --mb-ad-h: var(--mb-ad-h-tablet);
+      }
+    }
+    @media (min-width: 1024px){
+      .forum_root{
+        --mb-video-h: var(--mb-video-h-desktop);
+        --mb-image-h: var(--mb-image-h-desktop);
+        --mb-iframe-h: var(--mb-iframe-h-desktop);
+        --mb-audio-h: var(--mb-audio-h-desktop);
+        --mb-ad-h: var(--mb-ad-h-desktop);
+      }
+    }
+
+    .mediaBox{
+      position:relative;
+      width:100%;
+      height:var(--mb-h, 240px);
+      overflow:hidden;
+      border-radius:12px;
+      background:rgba(8,12,20,.7);
+      border:1px solid rgba(140,170,255,.25);
+      contain: layout paint;
+    }
+    .mediaBox[data-kind="video"]{ --mb-h: var(--mb-video-h); background:#000; }
+    .mediaBox[data-kind="image"]{ --mb-h: var(--mb-image-h); }
+    .mediaBox[data-kind="iframe"]{ --mb-h: var(--mb-iframe-h); background:#000; }
+    .mediaBox[data-kind="audio"]{ --mb-h: var(--mb-audio-h); }
+    .mediaBox[data-kind="ad"]{ --mb-h: var(--mb-ad-h); background:rgba(2,8,23,.7); }
+
+    .mediaBoxItem{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+    }
+    .mediaBox > img,
+    .mediaBox > video{
+      object-fit:contain;
+    }
+    .mediaBox > iframe{
+      border:0;
+    }
+    .mediaBoxInner{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 14px;
+    }
+    .mediaBoxAudio{
+      width:100%;
+      height:auto;
+      color-scheme:dark;
+    }   
     :root{
   --vip-emoji-size: 48px;      /* можно быстро настроить под себя */
   --vip-emoji-size-sm: 48px;   /* на мобильных */
@@ -2782,11 +2865,25 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.03), 0 10px 30px rgba(10,20,40,.22);
   backdrop-filter: blur(8px) saturate(120%);
 }
+  .audioCard.mediaBox{
+  display:block;
+  padding:0;
+  border-radius:12px;
+}
 .audioCard.preview{ max-width:min(90%, 520px); }
 
 .audioIcon{
   width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center;
   color:#9fb7ff; opacity:.95;
+}
+  .audioCard.mediaBox .audioIcon{
+  position:absolute;
+  top:10px;
+  left:12px;
+  z-index:2;
+  background:rgba(5,10,18,.4);
+  border-radius:8px;
+  padding:4px;
 }
 .audioCard audio{ display:block; width:100%; color-scheme:dark; }
 /* убираем серую плашку у Chromium */
@@ -2801,6 +2898,41 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   font-size:18px; line-height:1;
   background:rgba(0, 0, 0, 0.51); border:1px solid rgba(255, 255, 255, 0.27);
 }
+  
+.loadMoreFooter{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:12px 0 4px;
+  color:#cfe0ff;
+  font-size:12px;
+  opacity:.85;
+}
+.loadMoreShimmer{
+  position:relative;
+  overflow:hidden;
+  padding:6px 16px;
+  border-radius:999px;
+  border:1px solid rgba(140,170,255,.25);
+  background:rgba(8,12,20,.6);
+  box-shadow: inset 0 0 18px rgba(80,167,255,.08);
+}
+.loadMoreShimmer::after{
+  content:'';
+  position:absolute;
+  inset:-40% -60%;
+  background:linear-gradient(110deg, transparent 35%, rgba(140,170,255,.35) 50%, transparent 65%);
+  animation: shimmer 1.6s linear infinite;
+}
+@media (prefers-reduced-motion: reduce){
+  .loadMoreShimmer::after{ animation: none; }
+}
+@keyframes shimmer{
+  0%{ transform: translateX(-60%); }
+  100%{ transform: translateX(60%); }
+}
+.loadMoreSentinel{ width:100%; height:1px; }
 /* --- avatar + nick (ник всегда под аватаром) --- */
 .avaNick{
   display:inline-flex;
@@ -5349,38 +5481,7 @@ function PostCard({
 
   // берём locale из того же хука, что и в новостном хабе
   const { locale } = useI18n();
-
-  // ===== PORTRAIT (9:16 etc) MAX HEIGHT TUNING =====
- // Настраиваешь ТОЛЬКО эти две константы:
-  const PORTRAIT_MAX_H_DESKTOP_PX = 520; // ← max высота (десктоп)
-  const PORTRAIT_MAX_H_MOBILE_PX  = 570; // ← max высота (мобила)
-
-  const getPortraitMaxH = () => {
-    if (typeof window === 'undefined') return PORTRAIT_MAX_H_DESKTOP_PX;
-    const isMobile = window.matchMedia?.('(max-width: 640px)')?.matches;
-    return isMobile ? PORTRAIT_MAX_H_MOBILE_PX : PORTRAIT_MAX_H_DESKTOP_PX;
-  };
-
-  // что считаем "портретом": высота заметно больше ширины
-  const isPortraitRatio = (w, h) => !!w && !!h && (h / w) >= 1.15;
-
-  // Применяем ограничение высоты ТОЛЬКО для портретных, без кропа
-  const applyPortraitClamp = (el, w, h) => {
-    if (!el) return;
-    if (isPortraitRatio(w, h)) {
-      const mh = getPortraitMaxH();
-      el.style.maxHeight = mh + 'px';
-      el.style.width = 'auto';
-      el.style.maxWidth = '100%';
-      el.style.margin = '0 auto';
-    } else {
-      // для обычных (горизонтальных) — как было
-      el.style.maxHeight = '';
-      el.style.width = '100%';
-      el.style.maxWidth = '100%';
-      el.style.margin = '0';
-    }
-  };
+ 
   // сниппет текста родителя (до 40 символов)
   const parentSnippet = (() => {
     const raw = p?.parentText || p?._parentText || '';
@@ -5589,6 +5690,21 @@ const cleanedText = allLines
     : isTranslated
       ? (t?.('crypto_news_show_original') || 'Показать оригинал')
       : (t?.('crypto_news_translate') || 'Перевести');
+        const hasCleanedText = !!cleanedText.trim();
+  const ytOrigin = React.useMemo(
+    () => (typeof window !== 'undefined' ? window.location.origin : ''),
+    []
+  );
+  const ytEmbedParams = React.useMemo(() => {
+    const params = new URLSearchParams({
+      enablejsapi: '1',
+      playsinline: '1',
+      rel: '0',
+      modestbranding: '1',
+    });
+    if (ytOrigin) params.set('origin', ytOrigin);
+    return params.toString();
+  }, [ytOrigin]);
   // ===== OWNER-меню (⋮) — только если владелец поста =====
   const isOwner = !!authId && (String(authId) === String(p?.userId || p?.accountId));
   const ownerEdit = (e) => {
@@ -5703,10 +5819,11 @@ const NO_THREAD_OPEN_SELECTOR =
       {imgLines.length > 0 && (
         <div className="postImages" style={{display:'grid', gap:8, marginTop:8}}>
           {imgLines.map((src, i) => (
-            <figure key={i} className="imgWrap" style={{
-              margin:0, padding:8, background:'rgba(10,16,28,.35)',
-              border:'1px solid rgba(140,170,255,.25)', borderRadius:10, overflow:'hidden'
-            }}
+            <figure
+              key={i}
+              className="imgWrap mediaBox"
+              data-kind="image"
+              style={{ margin: 0 }}
             onClick={(e)=>{ e.stopPropagation(); setLightbox({ open:true, src, idx:i, list:imgLines }); }}>
              <Image
                 src={src}
@@ -5715,18 +5832,8 @@ const NO_THREAD_OPEN_SELECTOR =
                 height={800}
                 unoptimized
                 loading="lazy"
-                onLoadingComplete={(img) => {
-                  const w = img?.naturalWidth || 0;
-                  const h = img?.naturalHeight || 0;
-                  applyPortraitClamp(img, w, h);
-                }}
-                style={{
-                  display:'block',
-                  width:'100%',
-                  height:'auto',
-                  objectFit:'contain',
-                  borderRadius:6
-                }}
+                className="mediaBoxItem"
+                style={{ objectFit: 'contain' }}
               />
             </figure>
           ))}
@@ -5737,38 +5844,21 @@ const NO_THREAD_OPEN_SELECTOR =
       {videoLines.length > 0 && (
         <div className="postVideo" style={{display:'grid', gap:8, marginTop:8}}>
           {videoLines.map((src, i) => (
-            <div key={`v${i}`} className="videoCard" style={{
-              margin:0, padding:8, background:'rgba(10,16,28,.35)',
-              border:'1px solid rgba(140,170,255,.25)', borderRadius:10, overflow:'hidden'
-            }}>
+            <div key={`v${i}`} className="videoCard mediaBox" data-kind="video" style={{ margin: 0 }}>
         <video
           data-forum-video="post"   // ← помечаем, что это плеер из поста
+          data-forum-media="video"
           src={src}
           controls
           playsInline
           preload="metadata"       // обратно metadata, без "none"
-          onLoadedMetadata={(e) => {
-            const v = e.currentTarget;
-            const w = v.videoWidth || 0;
-            const h = v.videoHeight || 0;
-            if (w && h) {
-              v.style.aspectRatio = `${w} / ${h}`;
-            }
-            // портретное видео — ограничиваем max-height, без кропа (contain)
-            applyPortraitClamp(v, w, h);
-            v.style.height = 'auto';
-          }}
+          className="mediaBoxItem"
           style={{
-            display: 'block',
-            width: '100%',
-            height: 'auto',
-            objectFit: 'contain',
-            borderRadius: 6,
+            objectFit: 'contain', 
             background: '#000'
           }}
-        />
-
-
+        /> 
+ 
             </div>
           ))}
         </div>
@@ -5783,28 +5873,20 @@ const NO_THREAD_OPEN_SELECTOR =
             return (
               <div
                 key={`yt${i}`}
-                className="videoCard"
-                style={{
-                  margin:0,
-                  padding:8,
-                  background:'rgba(10,16,28,.35)',
-                  border:'1px solid rgba(140,170,255,.25)',
-                  borderRadius:10,
-                  overflow:'hidden'
-                }}
+                className="videoCard mediaBox"
+                data-kind="iframe"
+                style={{ margin: 0 }}
               >
                 <iframe
-                  src={`https://www.youtube.com/embed/${videoId}`}
+                  src={`https://www.youtube.com/embed/${videoId}?${ytEmbedParams}`}
                   title="YouTube video"
+                  id={`yt_${p?.id || 'post'}_${i}`}
+                  data-yt-id={videoId}
+                  data-forum-media="youtube"                  
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
-                  style={{
-                    display:'block',
-                    width:'100%',
-                    aspectRatio:'16 / 9',
-                    borderRadius:6
-                  }}
+                  className="mediaBoxItem"
                 />
               </div>
             );
@@ -5869,28 +5951,19 @@ const NO_THREAD_OPEN_SELECTOR =
   return (
     <div
       key={`tt${i}`}
-      className="videoCard"
-      style={{
-        margin:0,
-        padding:8,
-        background:'rgba(10,16,28,.35)',
-        border:'1px solid rgba(140,170,255,.25)',
-        borderRadius:10,
-        overflow:'hidden'
-      }}
+      className="videoCard mediaBox"
+      data-kind="iframe"
+      style={{ margin: 0 }}
     >
       <iframe
         src={`https://www.tiktok.com/embed/v2/${videoId}`}
         title="TikTok video"
+        data-forum-media="tiktok"
+        data-src={`https://www.tiktok.com/embed/v2/${videoId}`}        
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen
-        style={{
-          display:'block',
-          width:'100%',
-          aspectRatio:'9 / 16',
-          borderRadius:12
-        }}
+        className="mediaBoxItem"
       />
     </div>
   );
@@ -5903,14 +5976,22 @@ const NO_THREAD_OPEN_SELECTOR =
       {audioLines.length > 0 && (
         <div className="postAudio" style={{display:'grid', gap:8, marginTop:8}}>
           {audioLines.map((src, i) => (
-            <div key={i} className="audioCard">
+            <div key={i} className="audioCard mediaBox" data-kind="audio">
               <div className="audioIcon" aria-hidden>
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
                   <path d="M12 14a3 3 0 003-3V7a3 3 0 10-6 0v4a3 3 0 003 3Z" stroke="currentColor" strokeWidth="1.6"/>
                   <path d="M5 11a7 7 0 0014 0M12 18v3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
                 </svg>
               </div>
-              <audio src={src} controls preload="metadata" />
+              <div className="mediaBoxInner">
+                <audio
+                  src={src}
+                  controls
+                  preload="metadata"
+                  data-forum-media="audio"
+                  className="mediaBoxAudio"
+                />
+              </div>
             </div>
           ))}
         </div>
@@ -6008,20 +6089,52 @@ const NO_THREAD_OPEN_SELECTOR =
           </>
         )}
       </div>
-              {cleanedText.trim() && (
-          <button
-            type="button"
-            className={`btn translateToggleBtn  ${isTranslated ? 'translateToggleBtnOn' : ''}`}
-            onClick={handleToggleTranslate}
-            disabled={translateLoading}
-          >
-            <span className="translateToggleIcon">🌐</span>
-            <span className="translateToggleText">{translateBtnLabel}</span>
-             <span className="translateToggleIcon">🌐</span>
-          </button>
-        )}
+      <button
+        type="button"
+        className={`btn translateToggleBtn  ${isTranslated ? 'translateToggleBtnOn' : ''}`}
+        onClick={handleToggleTranslate}
+        disabled={translateLoading || !hasCleanedText}
+      >
+        <span className="translateToggleIcon">🌐</span>
+        <span className="translateToggleText">{translateBtnLabel}</span>
+        <span className="translateToggleIcon">🌐</span>
+      </button>
     </article>
   );
+}
+function LoadMoreSentinel({ onVisible, disabled = false, rootMargin = '200px 0px' }) {
+  const ref = React.useRef(null);
+  const handlerRef = React.useRef(onVisible);
+
+  React.useEffect(() => {
+    handlerRef.current = onVisible;
+  }, [onVisible]);
+
+  React.useEffect(() => {
+    if (disabled) return;
+    if (typeof window === 'undefined') return;
+    const el = ref.current;
+    if (!el) return;
+
+    if (!('IntersectionObserver' in window)) {
+      handlerRef.current?.();
+      return;
+    }
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) handlerRef.current?.();
+        });
+      },
+      { root: null, rootMargin, threshold: 0 }
+    );
+
+    io.observe(el);
+    return () => io.disconnect();
+  }, [disabled, rootMargin]);
+
+  return <div ref={ref} className="loadMoreSentinel" aria-hidden="true" />;
 }
 
 // --- helper: стабилизирует текст на время гидрации ---
@@ -6779,26 +6892,37 @@ export default function Forum(){
     });
     return stop; // снимем слушатели при размонтировании
   }, []);
-    // === Глобальный контроллер HTML5-видео в постах ===
-  // В любой момент времени играет только один <video controls>.
+  // === Глобальный контроллер HTML5-медиа в постах ===
+  // В любой момент времени играет только один <video>/<audio> controls.
   // Видео без controls (обложки, рекламные петельки и т.п.) не трогаем.
   useEffect(() => {
     if (!isBrowser()) return;
 
     const handlePlay = (e) => {
       const target = e.target;
-      // интересуют только обычные HTML5-видео с контролами
-      if (!(target instanceof HTMLVideoElement)) return;
-      if (!target.controls) return;
+      const isVideo = target instanceof HTMLVideoElement;
+      const isAudio = target instanceof HTMLAudioElement;
+      if (!isVideo && !isAudio) return;
+      if (isVideo && !target.controls) return;
+
 
       try {
-        const vids = document.querySelectorAll('video');
-        vids.forEach((v) => {
+        document.querySelectorAll('video').forEach((v) => {
           if (v === target) return;
           if (!(v instanceof HTMLVideoElement)) return;
-          if (!v.controls) return;      // не трогаем рекламу/обложки без контролов
+          if (!v.controls) return;
           v.pause();
         });
+        document.querySelectorAll('audio').forEach((a) => {
+          if (a === target) return;
+          if (!(a instanceof HTMLAudioElement)) return;
+          a.pause();
+        });
+        if (window.__forumYtPlayers && window.__forumYtPlayers instanceof Map) {
+          window.__forumYtPlayers.forEach((player) => {
+            try { player?.pauseVideo?.(); } catch {}
+          });
+        }        
       } catch {
         // чтобы в случае чего не уронить UI
       }
@@ -6856,82 +6980,154 @@ export default function Forum(){
     };
   }, []);
   // === Shorts-like autoplay: play when in focus, pause when out ===
-  // Требования:
-  // - когда видео становится "главным" в зоне видимости → autoplay (muted)
-  // - когда уходит из внимания/скроллим дальше → pause
-  // - одновременно играет только одно (у тебя уже есть глобальный play-controller; тут дополнительно контролим по IO)
+  // Расширено для video + audio + iframe (YouTube/TikTok best-effort).
   useEffect(() => {
     if (!isBrowser()) return;
 
-    const selector = 'video[data-forum-video="post"]';
-
-    // === Persist sound choice (mute/unmute) ================================
-    // - если выбора ещё нет → звук ВКЛ (muted=false)
-    // - если юзер выключил звук на одном видео → следующие тоже muted=true
-    // - если включил → следующие muted=false
+    const selector = '[data-forum-media]';
+    const LS_MEDIA_MUTED_KEY = 'forum:mediaMuted';
     const LS_VIDEO_MUTED_KEY = 'forum:videoMuted';
+
     const readMutedPref = () => {
       try {
-        const v = localStorage.getItem(LS_VIDEO_MUTED_KEY);
-        if (v == null) return null;       // ещё не сохраняли
-        return v === '1' || v === 'true';  // true => muted
-      } catch { return null; }
+        let v = localStorage.getItem(LS_MEDIA_MUTED_KEY);
+        if (v == null) v = localStorage.getItem(LS_VIDEO_MUTED_KEY);
+        if (v == null) return null;
+        return v === '1' || v === 'true';
+      } catch {
+        return null;
+      }
     };
     const writeMutedPref = (val) => {
-      try { localStorage.setItem(LS_VIDEO_MUTED_KEY, val ? '1' : '0'); } catch {}
+      try { localStorage.setItem(LS_MEDIA_MUTED_KEY, val ? '1' : '0'); } catch {}
     };
-    let mutedPref = readMutedPref(); // null => дефолт (звук ВКЛ)
+    let mutedPref = readMutedPref();
 
     const desiredMuted = () => (mutedPref == null ? false : !!mutedPref);
-    const applyMutedPref = (v) => {
+
+    const applyMutedPref = (el) => {
+      if (!(el instanceof HTMLMediaElement)) return;
       const want = desiredMuted();
-      if (v.muted !== want) v.muted = want;
+      if (el.muted !== want) el.muted = want;
     };
 
-    // volumechange НЕ bubble → вешаем слушатель на каждый video
-    const volHandlers = new WeakMap(); // videoEl -> handler
-    const bindVolumeListener = (v) => {
-      if (!(v instanceof HTMLVideoElement)) return;
-      if (v.dataset.forumSoundBound === '1') return;
-      v.dataset.forumSoundBound = '1';
-
-      // применяем предпочтение сразу при появлении видео
-applyMutedPref(v);
-
+    const volHandlers = new WeakMap();
+    const bindVolumeListener = (el) => {
+      const isMedia =
+        el instanceof HTMLVideoElement || el instanceof HTMLAudioElement;
+      if (!isMedia) return;
+      if (el.dataset.forumSoundBound === '1') return;
+      el.dataset.forumSoundBound = '1';
+      applyMutedPref(el);
       const h = () => {
-        mutedPref = !!v.muted;
+        mutedPref = !!el.muted;
         writeMutedPref(mutedPref);
       };
-      volHandlers.set(v, h);
-      v.addEventListener('volumechange', h, { passive: true });
-    };
-    const ratios = new Map(); // videoEl -> intersectionRatio
-    let active = null;        // текущий "главный" видео-элемент
-
-    const safePause = (v) => {
-      if (!(v instanceof HTMLVideoElement)) return;
-      try { v.pause(); } catch {}
+      volHandlers.set(el, h);
+      el.addEventListener('volumechange', h, { passive: true });
     };
 
-    const safePlay = (v) => {
-      if (!(v instanceof HTMLVideoElement)) return;
-      try {
-        // ✅ применяем сохранённый выбор (или дефолт: звук ВКЛ)
-        applyMutedPref(v);
-        v.playsInline = true;
-        // можно оставить loop как "шортсы"
-        // если не хочешь луп — убери следующую строку
-        v.loop = true;
-        const p = v.play?.();
-        if (p && typeof p.catch === 'function') p.catch(() => {});
-      } catch {}
+    let ytApiPromise = null;
+    const ensureYouTubeAPI = () => {
+      if (window.YT && window.YT.Player) return Promise.resolve(window.YT);
+      if (ytApiPromise) return ytApiPromise;
+      ytApiPromise = new Promise((resolve) => {
+        const existing = document.querySelector('script[data-forum-yt="1"]');
+        if (existing) {
+          const check = () => {
+            if (window.YT && window.YT.Player) resolve(window.YT);
+            else setTimeout(check, 60);
+          };
+          check();
+          return;
+        }
+        const tag = document.createElement('script');
+        tag.src = 'https://www.youtube.com/iframe_api';
+        tag.async = true;
+        tag.dataset.forumYt = '1';
+        const prev = window.onYouTubeIframeAPIReady;
+        window.onYouTubeIframeAPIReady = function () {
+          try { if (typeof prev === 'function') prev(); } catch {}
+          resolve(window.YT);
+        };
+        document.head.appendChild(tag);
+      });
+      return ytApiPromise;
+    };
+    const ytPlayers = new Map();
+    try { window.__forumYtPlayers = ytPlayers; } catch {}
+    const initYouTubePlayer = async (iframe) => {
+      if (!iframe || !(iframe instanceof HTMLIFrameElement)) return null;
+      if (ytPlayers.has(iframe)) return ytPlayers.get(iframe);
+      const YT = await ensureYouTubeAPI();
+      if (!YT?.Player) return null;
+      return new Promise((resolve) => {
+        try {
+          const player = new YT.Player(iframe, {
+            events: {
+              onReady: () => resolve(player),
+            },
+          });
+          ytPlayers.set(iframe, player);
+        } catch {
+          resolve(null);
+        }
+      });
+    };
+
+    const ratios = new Map();
+    let active = null;
+
+    const pauseMedia = (el) => {
+      if (!el) return;
+      if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
+        try { el.pause(); } catch {}
+        return;
+      }
+      const kind = el.getAttribute('data-forum-media');
+      if (kind === 'youtube') {
+        const player = ytPlayers.get(el);
+        try { player?.pauseVideo?.(); } catch {}
+        return;
+      }
+      if (kind === 'tiktok' || kind === 'iframe') {
+        const src = el.getAttribute('data-src') || '';
+        if (src && el.getAttribute('src')) el.setAttribute('src', '');
+      }
+    };
+
+    const playMedia = async (el) => {
+      if (!el) return;
+      if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
+        try {
+          applyMutedPref(el);
+          el.playsInline = true;
+          if (el instanceof HTMLVideoElement) el.loop = true;
+          const p = el.play?.();
+          if (p && typeof p.catch === 'function') p.catch(() => {});
+        } catch {}
+        return;
+      }
+      const kind = el.getAttribute('data-forum-media');
+      if (kind === 'youtube') {
+        const player = await initYouTubePlayer(el);
+        try {
+          if (desiredMuted()) player?.mute?.();
+          else player?.unMute?.();
+          player?.playVideo?.();
+        } catch {}
+        return;
+      }
+      if (kind === 'tiktok' || kind === 'iframe') {
+        const src = el.getAttribute('data-src');
+        if (src && el.getAttribute('src') !== src) el.setAttribute('src', src);
+      }
     };
 
     const pickMostVisible = () => {
       let best = null;
       let bestRatio = 0;
-      for (const [el, r] of ratios.entries()) {
-        if (!(el instanceof HTMLVideoElement)) continue;
+      for (const [el, r] of ratios.entries()) { 
         if (r > bestRatio) {
           bestRatio = r;
           best = el;
@@ -6940,93 +7136,88 @@ applyMutedPref(v);
       return { el: best, ratio: bestRatio };
     };
 
-    // fallback без IO: ничего не автоплеим (иначе будет играть всё подряд)
-    if (!('IntersectionObserver' in window)) {
-      return;
-    }
+    if (!('IntersectionObserver' in window)) return;
 
     const io = new IntersectionObserver(
       (entries) => {
-        // обновляем ratios
+
         for (const entry of entries) {
-          const el = entry.target;
-          if (!(el instanceof HTMLVideoElement)) continue;
+          const el = entry.target; 
 
           const r = entry.isIntersecting ? (entry.intersectionRatio || 0) : 0;
           if (r <= 0) {
             ratios.delete(el);
-            // если ушёл активный — сразу пауза
+
             if (active === el) {
-              safePause(el);
+              pauseMedia(el);
               active = null;
             } else {
-              // чтобы при скролле вниз не оставались играющие “вне экрана”
-              safePause(el);
+              pauseMedia(el);
             }
           } else {
             ratios.set(el, r);
           }
         }
-
-        // выбираем самый видимый
+ 
         const { el: candidate, ratio } = pickMostVisible();
 
-        // порог "в фокусе" — можно крутить
-        const FOCUS_RATIO = 0.60;
+        const FOCUS_RATIO = 0.6;
 
         if (!candidate || ratio < FOCUS_RATIO) {
           if (active) {
-            safePause(active);
+            pauseMedia(active);
             active = null;
           }
           return;
         }
 
         if (active && active !== candidate) {
-          safePause(active);
+          pauseMedia(active);
         }
 
         active = candidate;
-        safePlay(candidate);
+        playMedia(candidate)
       },
-      {
-        // thresholds чтобы чаще обновлялось при плавном скролле
+      { 
         threshold: [0, 0.15, 0.35, 0.6, 0.85, 1],
-        // чуть “подталкиваем” фокус к центру экрана (можно подправить)
+
         rootMargin: '0px 0px -20% 0px',
       }
     );
 
     const observeAll = () => {
       try {
-        document.querySelectorAll(selector).forEach((v) => {
-          if (!(v instanceof HTMLVideoElement)) return;
-          bindVolumeListener(v);
-          io.observe(v);
+        document.querySelectorAll(selector).forEach((el) => {
+          if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
+            bindVolumeListener(el);
+          }
+          io.observe(el);
         });
       } catch {}
     };
 
     observeAll();
-
-    // если у тебя лента динамически меняется (допостинг/подгрузка) —
-    // можно иногда переобозначать наблюдение (дешево)
+ 
     const tick = setInterval(observeAll, 1500);
 
     return () => {
       clearInterval(tick);
       io.disconnect();
-      if (active) safePause(active);
+      if (active) pauseMedia(active);
       active = null;
       ratios.clear();
-
-      // снимаем volumechange listeners (аккуратно)
+ 
       try {
-        document.querySelectorAll(selector).forEach((v) => {
-          if (!(v instanceof HTMLVideoElement)) return;
-          const h = volHandlers.get(v);
-          if (h) v.removeEventListener('volumechange', h);
+        document.querySelectorAll(selector).forEach((el) => {
+          if (!(el instanceof HTMLVideoElement || el instanceof HTMLAudioElement)) return;
+          const h = volHandlers.get(el);
+          if (h) el.removeEventListener('volumechange', h);
         });
+      } catch {}
+      try {
+        if (window.__forumYtPlayers === ytPlayers) {
+          delete window.__forumYtPlayers;
+        }
       } catch {}      
     };
   }, []);
@@ -8049,11 +8240,21 @@ const [topicSort, setTopicSort] = useState('top');   // сортировка т�
 const [postSort,  setPostSort]  = useState('new');   // сортировка сообщений  ← ДОЛЖНА быть объявлена до flat
 const [drop, setDrop] = useState(false);
 const [sortOpen, setSortOpen] = useState(false);
+const VIDEO_PAGE_SIZE = 5;
+const TOPIC_PAGE_SIZE = 10;
+const REPLIES_PAGE_SIZE = 5;
+const THREAD_PAGE_SIZE = 5;
+const [visibleVideoCount, setVisibleVideoCount] = useState(VIDEO_PAGE_SIZE);
+const [visibleTopicsCount, setVisibleTopicsCount] = useState(TOPIC_PAGE_SIZE);
+const [visibleRepliesCount, setVisibleRepliesCount] = useState(REPLIES_PAGE_SIZE);
+const [visibleThreadPostsCount, setVisibleThreadPostsCount] = useState(THREAD_PAGE_SIZE);
 // [INBOX:STATE] — безопасно для SSR (никакого localStorage в рендере)
 const [inboxOpen, setInboxOpen] = useState(false);
 const [mounted, setMounted] = useState(false);           // ← флаг «мы на клиенте»
 useEffect(()=>{ setMounted(true) }, []);
-
+useEffect(() => {
+  setVisibleTopicsCount(TOPIC_PAGE_SIZE);
+}, [topicSort, topicFilterId, starMode, starredAuthors]);
 const meId = auth?.asherId || auth?.accountId || '';
 const seenKey = meId ? `forum:seenReplies:${meId}` : null;
 
@@ -8076,7 +8277,19 @@ const repliesToMe = useMemo(() => {
     String(p.userId || p.accountId || '') !== String(meId)
   );
 }, [data.posts, myPostIds, meId]);
-
+useEffect(() => {
+  if (!inboxOpen) return;
+  setVisibleRepliesCount(REPLIES_PAGE_SIZE);
+}, [inboxOpen, repliesToMe.length]);
+const sortedRepliesToMe = useMemo(
+  () => (repliesToMe || []).slice().sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0)),
+  [repliesToMe]
+);
+const visibleRepliesToMe = useMemo(
+  () => sortedRepliesToMe.slice(0, visibleRepliesCount),
+  [sortedRepliesToMe, visibleRepliesCount]
+);
+const repliesHasMore = visibleRepliesToMe.length < sortedRepliesToMe.length;
 // прочитанные — храним в state, загружаем/сохраняем только на клиенте
 const [readSet, setReadSet] = useState(() => new Set());
 useEffect(() => {
@@ -8136,7 +8349,9 @@ const [threadRoot, setThreadRoot] = useState(null);
 
 // при смене темы выходим из веточного режима
 useEffect(() => { setThreadRoot(null); }, [sel?.id]);
-
+useEffect(() => {
+  setVisibleThreadPostsCount(THREAD_PAGE_SIZE);
+}, [sel?.id, threadRoot, postSort]);
  // === Views: refs to avoid TDZ when effects run before callbacks are initialized ===
 
  const markViewPostRef  = React.useRef(null);
@@ -8219,7 +8434,11 @@ const walk = (n, level = 0) => {
 }, [sel?.id, threadRoot, rootPosts, idMap, postSort]);
 
 // === END flat ===
-
+const visibleFlat = useMemo(
+  () => (flat || []).slice(0, visibleThreadPostsCount),
+  [flat, visibleThreadPostsCount]
+);
+const threadHasMore = visibleFlat.length < (flat || []).length;
     // Множество забаненных (по userId/accountId)
   const bannedSet = useMemo(() => new Set(data.bans || []), [data.bans])
 
@@ -8298,7 +8517,11 @@ const aggregates = useMemo(() => {
     return starredFirst(base, (x) => x?.userId || x?.accountId);
   }, [data.topics, aggregates, topicSort, topicFilterId, starredFirst]);
 
-
+  const visibleTopics = useMemo(
+    () => (sortedTopics || []).slice(0, visibleTopicsCount),
+    [sortedTopics, visibleTopicsCount]
+  );
+  const topicsHasMore = visibleTopics.length < (sortedTopics || []).length;
 
   /* ---- composer ---- */
   const [text,setText] = useState('')
@@ -9809,7 +10032,15 @@ const onFilesChosen = React.useCallback(async (e) => {
 const [videoFeedOpen, setVideoFeedOpen] = React.useState(false);
 const [videoFeed, setVideoFeed] = React.useState([]);
 const [feedSort, setFeedSort] = React.useState('new'); // new/top/likes/views/replies
-
+useEffect(() => {
+  if (!videoFeedOpen) return;
+  setVisibleVideoCount(VIDEO_PAGE_SIZE);
+}, [videoFeedOpen, feedSort, starMode, starredAuthors]);
+const visibleVideoFeed = React.useMemo(
+  () => (videoFeed || []).slice(0, visibleVideoCount),
+  [videoFeed, visibleVideoCount]
+);
+const videoHasMore = visibleVideoFeed.length < (videoFeed || []).length;
 // ВАЖНО: в ленте нужно уметь находить ссылки внутри текста (даже если не отдельной строкой)
 const FEED_URL_RE = /(https?:\/\/[^\s<>'")]+)/ig;
 
@@ -11221,7 +11452,7 @@ onClick={()=>{
 {debugAdsSlots(
   'video',
   interleaveAds(
-    videoFeed || [],
+    visibleVideoFeed || [],
     adEvery,
     {
       isSkippable: (p) => !p || !p.id,
@@ -11289,10 +11520,20 @@ onClick={()=>{
     />
   );
 })}
-
-
-
-
+      {videoHasMore && (
+        <div className="loadMoreFooter">
+          <div className="loadMoreShimmer">
+            {t?.('loading') || 'Loading…'}
+          </div>
+          <LoadMoreSentinel
+            onVisible={() =>
+              setVisibleVideoCount((c) =>
+                Math.min(c + VIDEO_PAGE_SIZE, (videoFeed || []).length)
+              )
+            }
+          />
+        </div>
+      )}
       {videoFeed?.length === 0 && (
         <div className="meta">
           {t('forum_search_empty') || 'Ничего не найдено'}
@@ -11330,7 +11571,7 @@ onClick={()=>{
 {debugAdsSlots(
   'inbox',
   interleaveAds(
-    (repliesToMe || []).slice().sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0)),
+    visibleRepliesToMe || [],
     adEvery,
     {
       isSkippable: (p) => !p || !p.id,
@@ -11380,9 +11621,21 @@ onClick={()=>{
   );
 })}
 
-
-
-      {(repliesToMe || []).length === 0 && (
+      {repliesHasMore && (
+        <div className="loadMoreFooter">
+          <div className="loadMoreShimmer">
+            {t?.('loading') || 'Loading…'}
+          </div>
+          <LoadMoreSentinel
+            onVisible={() =>
+              setVisibleRepliesCount((c) =>
+                Math.min(c + REPLIES_PAGE_SIZE, sortedRepliesToMe.length)
+              )
+            }
+          />
+        </div>
+      )}
+      {sortedRepliesToMe.length === 0 && (
         <div className="meta">
           {t('forum_inbox_empty') || 'Новых ответов нет'}
         </div>
@@ -11394,10 +11647,7 @@ onClick={()=>{
   <>
     <CreateTopicCard t={t} onCreate={createTopic} onOpenVideoFeed={openVideoFeed} />
     <div className="grid gap-2 mt-2" suppressHydrationWarning>
-      {(sortedTopics || [])
-       .slice()
-
-        .map(x => {
+      {(visibleTopics || []).map(x => {
           const agg = aggregates.get(x.id) || { posts:0, likes:0, dislikes:0, views:0 };
           return (
 <TopicItem
@@ -11418,6 +11668,20 @@ onClick={()=>{
           )
         })}
     </div>
+    {topicsHasMore && (
+      <div className="loadMoreFooter">
+        <div className="loadMoreShimmer">
+          {t?.('loading') || 'Loading…'}
+        </div>
+        <LoadMoreSentinel
+          onVisible={() =>
+            setVisibleTopicsCount((c) =>
+              Math.min(c + TOPIC_PAGE_SIZE, (sortedTopics || []).length)
+            )
+          }
+        />
+      </div>
+    )}    
   </>
 )}
 
@@ -11561,13 +11825,13 @@ onClick={()=>{
       {t('forum_inbox_title') || 'Ответы на ваши сообщения'}
     </div>
 
-    {repliesToMe.length === 0 ? (
+    {sortedRepliesToMe.length === 0 ? (
       <div className="inboxEmpty">
         {t('forum_inbox_empty') || 'Пока нет ответов'}
       </div>
     ) : (
       <div className="inboxList">
-        {repliesToMe.map(p => {
+        {visibleRepliesToMe.map(p => {
           // та же логика, что в верхнем инбоксе
           const tt = (data.topics || []).find(
             x => String(x.id) === String(p.topicId),
@@ -11623,6 +11887,20 @@ onClick={()=>{
 />
           );
         })}
+        {repliesHasMore && (
+          <div className="loadMoreFooter">
+            <div className="loadMoreShimmer">
+              {t?.('loading') || 'Loading…'}
+            </div>
+            <LoadMoreSentinel
+              onVisible={() =>
+                setVisibleRepliesCount((c) =>
+                  Math.min(c + REPLIES_PAGE_SIZE, sortedRepliesToMe.length)
+                )
+              }
+            />
+          </div>
+        )}        
       </div>
     )}
   </div>
@@ -11641,7 +11919,7 @@ onClick={()=>{
 {debugAdsSlots(
   'replies',
   interleaveAds(
-    flat || [],
+    visibleFlat || [],
     adEvery,
     {
       isSkippable: (p) => !p || !p.id,
@@ -11700,9 +11978,20 @@ onClick={()=>{
     />
   );
 })}
-
-
-
+        {threadHasMore && (
+          <div className="loadMoreFooter">
+            <div className="loadMoreShimmer">
+              {t?.('loading') || 'Loading…'}
+            </div>
+            <LoadMoreSentinel
+              onVisible={() =>
+                setVisibleThreadPostsCount((c) =>
+                  Math.min(c + THREAD_PAGE_SIZE, (flat || []).length)
+                )
+              }
+            />
+          </div>
+        )}
           {(!threadRoot && (flat || []).length === 0) && (
             <div className="meta">
               {t('forum_no_posts_yet') || 'Пока нет сообщений'}
