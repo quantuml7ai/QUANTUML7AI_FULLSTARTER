@@ -480,36 +480,60 @@ if (typeof window !== 'undefined') {
 const api = {
 
   // Снимок базы (полный), поддерживает cache-bust b и подсказку rev
-  async snapshot(q = {}) {
-    try {
-      const params = new URLSearchParams();
-      if (q.b)   params.set('b',   String(q.b));
-      if (q.rev) params.set('rev', String(q.rev));
-      const url = '/api/forum/snapshot' + (params.toString() ? `?${params}` : '');
-      const r   = await fetch(url, { cache: 'no-store' });
+async snapshot(q = {}) {
+  try {
+    const params = new URLSearchParams();
 
-      const raw = await r.text();
-      let data = {};
-      try { data = raw ? JSON.parse(raw) : {}; } catch {}
+    // ✅ NEW: инкрементальный режим
+    if (q.since != null) params.set('since', String(q.since));
 
-      const topics = Array.isArray(data?.topics) ? data.topics : [];
-      const posts  = Array.isArray(data?.posts)  ? data.posts  : [];
-      // server -> 'banned'; поддерживаем обратную совместимость с 'bans'
-      const bans   = Array.isArray(data?.banned) ? data.banned
-                    : Array.isArray(data?.bans)  ? data.bans : [];
-      const rev    = Number.isFinite(+data?.rev) ? +data.rev   : 0;
-      const cursor = data?.cursor ?? null;
+    // как было
+    if (q.b)   params.set('b',   String(q.b));
+    if (q.rev) params.set('rev', String(q.rev));
 
-      // «пустой» ответ => можно делать жёсткий ресет
-      // В текущей реализации клиент НИ РАЗУ не запрашивает инкрементальные снапшоты.
-      // Каждый вызов /api/forum/snapshot — ПОЛНЫЙ снимок состояния форума,
-      // значит локальный forum:snap должен полностью под него подстраиваться.
-      const __reset = true;
-      return { ok: r.ok, status: r.status, topics, posts, bans, rev, cursor, __reset };
-    } catch {
-      return { ok:false, error:'network', topics:[], posts:[], bans:[], rev:0, cursor:null, __reset:false };
+    const url = '/api/forum/snapshot' + (params.toString() ? `?${params}` : '');
+    const r   = await fetch(url, { cache: 'no-store' });
+
+    const raw = await r.text();
+    let data = {};
+    try { data = raw ? JSON.parse(raw) : {}; } catch {}
+
+    // ✅ поддержка двух форм ответа:
+    // 1) full: { topics, posts, banned, rev }
+    // 2) inc : { events, rev }
+    const rev = Number.isFinite(+data?.rev) ? +data.rev : 0;
+
+    // ---- INCREMENTAL ----
+    if (Array.isArray(data?.events)) {
+      return {
+        ok: r.ok,
+        status: r.status,
+        rev,
+        events: data.events,
+        __reset: false,   // ❗️важно: это НЕ полный снимок
+      };
     }
-  },
+
+    // ---- FULL SNAPSHOT ----
+    const topics = Array.isArray(data?.topics) ? data.topics : [];
+    const posts  = Array.isArray(data?.posts)  ? data.posts  : [];
+    const bans   = Array.isArray(data?.banned) ? data.banned
+                : Array.isArray(data?.bans)   ? data.bans : [];
+
+    return {
+      ok: r.ok,
+      status: r.status,
+      topics,
+      posts,
+      bans,
+      rev,
+      __reset: true,     // ✅ полный снимок
+    };
+  } catch {
+    return { ok:false, error:'network', topics:[], posts:[], bans:[], events:[], rev:0, __reset:false };
+  }
+},
+
 
   // Батч-мутации
   async mutate(batch, userId) {
@@ -8312,7 +8336,98 @@ useEffect(() => {
 const safeMerge = (prev, r) => {
   const out = { ...prev };
   const hardReset = r && r.__reset === true;
+ // ✅ NEW: инкрементальные события (journal-based)
+  if (!hardReset && Array.isArray(r?.events)) {
+    const tMap = new Map((out.topics || []).map(t => [String(t.id), t]));
+    const pMap = new Map((out.posts  || []).map(p => [String(p.id), p]));
+    const bansSet = new Set(out.bans || []);
 
+    for (const e of r.events) {
+      if (!e || !e.kind) continue;
+
+      // ---- TOPIC UPSERT/DELETE ----
+      if (e.kind === 'topic') {
+        const id = String(e.id || '');
+        if (!id) continue;
+
+        if (e._del) {
+          tMap.delete(id);
+          // если сервер приложил список удалённых постов — уберём их
+          if (Array.isArray(e.deletedPosts)) {
+            for (const pid of e.deletedPosts) pMap.delete(String(pid));
+          } else {
+            // fallback: убрать все посты этой темы (если есть topicId в постах)
+            for (const [pid, pp] of pMap.entries()) {
+              if (String(pp.topicId || '') === id) pMap.delete(pid);
+            }
+          }
+        } else if (e.data && typeof e.data === 'object') {
+          const cur = tMap.get(id) || {};
+          tMap.set(id, { ...cur, ...e.data });
+        }
+        continue;
+      }
+
+      // ---- POST UPSERT/DELETE ----
+      if (e.kind === 'post') {
+        const id = String(e.id || '');
+        if (!id) continue;
+
+        if (e._del) {
+          pMap.delete(id);
+        } else if (e.data && typeof e.data === 'object') {
+          const cur = pMap.get(id) || {};
+          // если это "счётчики" (likes/dislikes/views) — аккуратно вольём
+          const next = { ...cur, ...e.data };
+          if (e.data.likes != null)    next.likes    = Number(e.data.likes)    || 0;
+          if (e.data.dislikes != null) next.dislikes = Number(e.data.dislikes) || 0;
+          if (e.data.views != null)    next.views    = Number(e.data.views)    || 0;
+          pMap.set(id, next);
+        }
+        continue;
+      }
+
+      // ---- REACT DELTA ----
+      if (e.kind === 'react') {
+        const id = String(e.id || '');
+        const post = pMap.get(id);
+        if (!post) continue;
+
+        const kind = String(e.data?.kind || '');
+        const delta = Number(e.data?.delta || 0);
+        if (!delta) continue;
+
+        if (kind === 'like') {
+          const cur = Number(post.likes || 0);
+          pMap.set(id, { ...post, likes: Math.max(0, cur + delta) });
+        } else if (kind === 'dislike') {
+          const cur = Number(post.dislikes || 0);
+          pMap.set(id, { ...post, dislikes: Math.max(0, cur + delta) });
+        }
+        continue;
+      }
+
+      // ---- BANS ----
+      if (e.kind === 'ban' || e.kind === 'ban_ip') {
+        const id = String(e.id || '');
+        if (id) bansSet.add(id);
+        continue;
+      }
+      if (e.kind === 'unban' || e.kind === 'unban_ip') {
+        const id = String(e.id || '');
+        if (id) bansSet.delete(id);
+        continue;
+      }
+    }
+
+    out.topics = Array.from(tMap.values());
+    out.posts  = Array.from(pMap.values());
+    out.bans   = Array.from(bansSet);
+
+    if (r.rev !== undefined) out.rev = r.rev;
+
+    return dedupeAll(out);
+  }
   // ---- TOPICS ----
   if (Array.isArray(r.topics)) {
     const prevList = prev.topics || [];
@@ -8422,7 +8537,16 @@ const safeMerge = (prev, r) => {
     pulling = true;
     try {
       // важно: прокидываем bustRef для обхода серверного микрокэша
-      const r = await api.snapshot({ b: bustRef });
+// берём текущий rev из localStorage (самый дешёвый источник истины для "since")
+const curRev = (() => {
+  try { return (JSON.parse(localStorage.getItem('forum:snap') || '{}').rev) || 0; }
+  catch { return 0; }
+})();
+
+// ✅ since=0 -> сервер отдаст полный снапшот (как раньше)
+// ✅ since>0 -> сервер отдаст только events
+const r = await api.snapshot({ since: curRev, b: bustRef });
+
       if (r?.ok) persist(prev => safeMerge(prev, r));
     } catch (e) {
       if (isOverLimit(e)) {
