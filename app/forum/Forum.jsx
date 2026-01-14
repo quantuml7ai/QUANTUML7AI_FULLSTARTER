@@ -841,7 +841,75 @@ function useQCoinLive(userKey, isVip){
     lastUiRef.current = Date.now();
     becameActiveRef.current = true;
   }, []);
+  // === Next-up video warmup (preload the next video while current plays) ===
+  useEffect(() => {
+    if (!isBrowser()) return;
 
+    const selector = 'video[data-forum-video="post"]';
+    let warmed = null;
+
+    const isSlowNetwork = () => {
+      try {
+        const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        const type = String(conn?.effectiveType || '');
+        return !!conn?.saveData || /(^|-)2g/.test(type);
+      } catch {
+        return false;
+      }
+    };
+
+    const clearWarm = () => {
+      if (!(warmed instanceof HTMLVideoElement)) { warmed = null; return; }
+      try {
+        warmed.preload = 'metadata';
+        warmed.removeAttribute('data-forum-warm');
+        warmed.load();
+      } catch {}
+      warmed = null;
+    };
+
+    const warmNext = (current) => {
+      if (!(current instanceof HTMLVideoElement)) return;
+      const list = Array.from(document.querySelectorAll(selector));
+      const idx = list.indexOf(current);
+      if (idx < 0) return;
+      const next = list[idx + 1];
+      if (!next || next === warmed) return;
+      clearWarm();
+      warmed = next;
+      const slow = isSlowNetwork();
+      try {
+        warmed.preload = slow ? 'metadata' : 'auto';
+        warmed.setAttribute('data-forum-warm', '1');
+        warmed.load();
+      } catch {}
+    };
+
+    const onPlay = (e) => {
+      const target = e.target;
+      if (!(target instanceof HTMLVideoElement)) return;
+      if (target.getAttribute('data-forum-video') !== 'post') return;
+      warmNext(target);
+    };
+
+    const onStop = (e) => {
+      const target = e.target;
+      if (!(target instanceof HTMLVideoElement)) return;
+      if (target.getAttribute('data-forum-video') !== 'post') return;
+      clearWarm();
+    };
+
+    document.addEventListener('play', onPlay, true);
+    document.addEventListener('pause', onStop, true);
+    document.addEventListener('ended', onStop, true);
+
+    return () => {
+      document.removeEventListener('play', onPlay, true);
+      document.removeEventListener('pause', onStop, true);
+      document.removeEventListener('ended', onStop, true);
+      clearWarm();
+    };
+  }, []);
   // Считаем открытие страницы «активностью», чтобы тикер сразу начал тикать
   React.useEffect(function(){
     lastUiRef.current = Date.now();
@@ -1097,8 +1165,8 @@ const Styles = () => (
       --mb-iframe-h-tablet: 500px;
       --mb-iframe-h-desktop: 500px;
       --mb-audio-h-mobile: 550px;
-      --mb-audio-h-tablet: 520px;
-      --mb-audio-h-desktop: 520px;
+      --mb-audio-h-tablet: 550px;
+      --mb-audio-h-desktop: 600px;
       --mb-ad-h-mobile: 200px;
       --mb-ad-h-tablet: 260px;
       --mb-ad-h-desktop: 320px;
@@ -2898,7 +2966,128 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   font-size:18px; line-height:1;
   background:rgba(0, 0, 0, 0.51); border:1px solid rgba(255, 255, 255, 0.27);
 }
-  
+
+.qcastPlayer{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:stretch;
+  justify-content:center;
+  background:#060b16;
+  cursor:pointer;
+}
+.qcastCover{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.qcastAudio{
+  position:absolute;
+  width:1px;
+  height:1px;
+  opacity:0;
+  pointer-events:none;
+}
+.qcastControls{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  padding:12px 14px 10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  background:linear-gradient(180deg, rgba(5,8,16,0) 0%, rgba(5,8,16,.78) 35%, rgba(5,8,16,.92) 100%);
+  opacity:0;
+  transform:translateY(8px);
+  transition:opacity .2s ease, transform .2s ease;
+  pointer-events:none;
+}
+.qcastControls[data-visible="1"]{
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:auto;
+}
+.qcastRow{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.qcastRowTop{
+  justify-content:flex-start;
+}
+.qcastBtn{
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(10,14,26,.6);
+  color:#eaf2ff;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  transition:transform .12s ease, box-shadow .2s ease;
+}
+.qcastBtn:hover{ transform:translateY(-1px); box-shadow:0 0 12px rgba(124,161,255,.35); }
+.qcastIcon{ width:18px; height:18px; fill:currentColor; }
+.qcastRowTimeline{
+  gap:8px;
+}
+.qcastTime{
+  font:600 11px/1 ui-monospace,monospace;
+  color:#d8e4ff;
+  min-width:42px;
+  text-align:center;
+}
+.qcastRange{
+  flex:1;
+  appearance:none;
+  height:4px;
+  border-radius:999px;
+  background:rgba(255,255,255,.25);
+  outline:none;
+}
+.qcastRange::-webkit-slider-thumb{
+  appearance:none;
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 10px rgba(255,255,255,.45);
+}
+.qcastRange::-moz-range-thumb{
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:#fff;
+  border:0;
+}
+.qcastRowSpeed{
+  gap:6px;
+  flex-wrap:wrap;
+}
+.qcastSpeed{
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.2);
+  background:rgba(10,14,26,.55);
+  color:#dbe7ff;
+  font-size:11px;
+}
+.qcastSpeed.active{
+  background:rgba(140,170,255,.85);
+  color:#091227;
+  border-color:rgba(180,210,255,.95);
+}
+.qcastRemove{
+  font-size:20px;
+  margin-left:auto;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.25);
+  background:rgba(10,14,26,.65);
+  color:#fff;
+  padding:4px 10px;
+}  
 .loadMoreFooter{
   display:flex;
   align-items:center;
@@ -5877,17 +6066,19 @@ const NO_THREAD_OPEN_SELECTOR =
                 data-kind="iframe"
                 style={{ margin: 0 }}
               >
-                <iframe
-                  src={`https://www.youtube.com/embed/${videoId}?${ytEmbedParams}`}
-                  title="YouTube video"
-                  id={`yt_${p?.id || 'post'}_${i}`}
-                  data-yt-id={videoId}
-                  data-forum-media="youtube"                  
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  className="mediaBoxItem"
-                />
+<iframe
+  src={`https://www.youtube.com/embed/${videoId}?${ytEmbedParams}`}
+  data-src={`https://www.youtube.com/embed/${videoId}?${ytEmbedParams}`}
+  title="YouTube video"
+  id={`yt_${p?.id || 'post'}_${i}`}
+  data-yt-id={videoId}
+  data-forum-media="youtube"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  allowFullScreen
+  className="mediaBoxItem"
+/>
+
               </div>
             );
           })}
@@ -5977,21 +6168,7 @@ const NO_THREAD_OPEN_SELECTOR =
         <div className="postAudio" style={{display:'grid', gap:8, marginTop:8}}>
           {audioLines.map((src, i) => (
             <div key={i} className="audioCard mediaBox" data-kind="audio">
-              <div className="audioIcon" aria-hidden>
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-                  <path d="M12 14a3 3 0 003-3V7a3 3 0 10-6 0v4a3 3 0 003 3Z" stroke="currentColor" strokeWidth="1.6"/>
-                  <path d="M5 11a7 7 0 0014 0M12 18v3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
-                </svg>
-              </div>
-              <div className="mediaBoxInner">
-                <audio
-                  src={src}
-                  controls
-                  preload="metadata"
-                  data-forum-media="audio"
-                  className="mediaBoxAudio"
-                />
-              </div>
+              <QCastPlayer src={src} />
             </div>
           ))}
         </div>
@@ -6858,6 +7035,250 @@ function useHtmlFlag(attr, value) {
   }, [attr, value]);
 }
 
+const MEDIA_MUTED_KEY = 'forum:mediaMuted';
+const MEDIA_VIDEO_MUTED_KEY = 'forum:videoMuted';
+const MEDIA_MUTED_EVENT = 'forum:media-mute';
+
+function readMutedPrefFromStorage() {
+  try {
+    let v = localStorage.getItem(MEDIA_MUTED_KEY);
+    if (v == null) v = localStorage.getItem(MEDIA_VIDEO_MUTED_KEY);
+    if (v == null) return null;
+    return v === '1' || v === 'true';
+  } catch {
+    return null;
+  }
+}
+
+function formatMediaTime(value) {
+  const total = Math.max(0, Math.floor(value || 0));
+  const mins = Math.floor(total / 60);
+  const secs = total % 60;
+  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+function QCastPlayer({ src, onRemove, preview = false }) {
+  const audioRef = React.useRef(null);
+  const playerIdRef = React.useRef(`qcast_${Math.random().toString(36).slice(2)}`);
+  const hideTimerRef = React.useRef(null);
+
+  const [isPlaying, setIsPlaying] = React.useState(false);
+  const [duration, setDuration] = React.useState(0);
+  const [currentTime, setCurrentTime] = React.useState(0);
+  const [rate, setRate] = React.useState(1);
+  const [showControls, setShowControls] = React.useState(false);
+  const [muted, setMuted] = React.useState(false);
+
+  const bumpControls = React.useCallback(() => {
+    setShowControls(true);
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    hideTimerRef.current = setTimeout(() => {
+      setShowControls(false);
+    }, 5000);
+  }, []);
+
+  React.useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return undefined;
+
+const initialMuted = readMutedPrefFromStorage();
+// ВАЖНО: автоплей аудио в браузерах почти всегда разрешён только в muted.
+// Поэтому если преф не задан — стартуем в muted, чтобы Q-Cast участвовал в автоплее.
+audio.muted = (initialMuted == null) ? true : initialMuted;
+setMuted(!!audio.muted);
+
+    const onMeta = () => setDuration(audio.duration || 0);
+    const onTime = () => setCurrentTime(audio.currentTime || 0);
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
+    const onVolume = () => setMuted(!!audio.muted);
+
+    audio.addEventListener('loadedmetadata', onMeta);
+    audio.addEventListener('durationchange', onMeta);
+    audio.addEventListener('timeupdate', onTime);
+    audio.addEventListener('play', onPlay);
+    audio.addEventListener('pause', onPause);
+    audio.addEventListener('volumechange', onVolume);
+
+    const onMutedEvent = (e) => {
+      if (!audioRef.current) return;
+      if (e?.detail?.id && e.detail.id === playerIdRef.current) return;
+      if (typeof e?.detail?.muted !== 'boolean') return;
+      if (audioRef.current.muted !== e.detail.muted) {
+        audioRef.current.muted = e.detail.muted;
+      }
+    };
+
+    window.addEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
+
+    return () => {
+      audio.removeEventListener('loadedmetadata', onMeta);
+      audio.removeEventListener('durationchange', onMeta);
+      audio.removeEventListener('timeupdate', onTime);
+      audio.removeEventListener('play', onPlay);
+      audio.removeEventListener('pause', onPause);
+      audio.removeEventListener('volumechange', onVolume);
+      window.removeEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.playbackRate = rate;
+  }, [rate]);
+
+  React.useEffect(() => () => {
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+  }, []);
+
+  const togglePlay = async (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    bumpControls();
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (audio.paused) {
+      try {
+        const p = audio.play();
+        if (p && typeof p.catch === 'function') p.catch(() => {});
+      } catch {}
+    } else {
+      try { audio.pause(); } catch {}
+    }
+  };
+
+  const skipBy = (delta) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    bumpControls();
+    const next = Math.min(Math.max(0, audio.currentTime + delta), audio.duration || audio.currentTime + delta);
+    audio.currentTime = next;
+    setCurrentTime(next);
+  };
+
+  const onSeek = (e) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    bumpControls();
+    const next = Number(e.target.value || 0);
+    audio.currentTime = next;
+    setCurrentTime(next);
+  };
+
+  const toggleMute = (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    bumpControls();
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.muted = !audio.muted;
+    window.dispatchEvent(new CustomEvent(MEDIA_MUTED_EVENT, {
+      detail: { muted: audio.muted, source: 'qcast', id: playerIdRef.current }
+    }));
+  };
+
+  return (
+<div
+  className="qcastPlayer"
+  onClick={() => bumpControls()}
+  data-preview={preview ? '1' : '0'}
+  // делаем ВИДИМЫЙ контейнер объектом автоплея (а не <audio>, который может быть 0x0)
+  data-forum-media="qcast"
+  data-qcast="1"
+>
+
+      <img className="qcastCover" src="/audio/Q-Cast.png" alt="Q-Cast" />
+
+<audio
+  ref={audioRef}
+  src={src}
+  preload="metadata"
+  playsInline
+  data-qcast-audio="1"
+  className="qcastAudio"
+/>
+
+      <div className="qcastControls" data-visible={showControls ? '1' : '0'} onClick={(e) => e.stopPropagation()}>
+        <div className="qcastRow qcastRowTop">
+          <button type="button" className="qcastBtn" onClick={togglePlay} aria-label="Play/Pause">
+            {isPlaying ? (
+              <svg viewBox="0 0 24 24" className="qcastIcon" aria-hidden>
+                <rect x="6" y="5" width="4" height="14" rx="1.2" />
+                <rect x="14" y="5" width="4" height="14" rx="1.2" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" className="qcastIcon" aria-hidden>
+                <path d="M7 5l12 7-12 7z" />
+              </svg>
+            )}
+          </button>
+          <button type="button" className="qcastBtn" onClick={() => skipBy(-10)} aria-label="Back 10 seconds">
+            <svg viewBox="0 0 24 24" className="qcastIcon" aria-hidden>
+              <path d="M11 6l-5 6 5 6V6zm1 6c0-2.2 1.8-4 4-4v2c-1.1 0-2 .9-2 2 0 1.1.9 2 2 2v2c-2.2 0-4-1.8-4-4z" />
+            </svg>
+          </button>
+          <button type="button" className="qcastBtn" onClick={() => skipBy(10)} aria-label="Forward 10 seconds">
+            <svg viewBox="0 0 24 24" className="qcastIcon" aria-hidden>
+              <path d="M13 6v12l5-6-5-6zm-1 6c0 2.2-1.8 4-4 4v-2c1.1 0 2-.9 2-2 0-1.1-.9-2-2-2V8c2.2 0 4 1.8 4 4z" />
+            </svg>
+          </button>
+          <button type="button" className="qcastBtn" onClick={toggleMute} aria-label="Mute">
+            {muted ? (
+              <svg viewBox="0 0 24 24" className="qcastIcon" aria-hidden>
+                <path d="M4 9v6h4l5 4V5L8 9H4z" />
+                <path d="M16 8l4 8M20 8l-4 8" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" className="qcastIcon" aria-hidden>
+                <path d="M4 9v6h4l5 4V5L8 9H4z" />
+                <path d="M16 9a4 4 0 010 6" fill="none" stroke="currentColor" strokeWidth="1.6" />
+              </svg>
+            )}
+          </button>
+        </div>
+
+        <div className="qcastRow qcastRowTimeline">
+          <span className="qcastTime">{formatMediaTime(currentTime)}</span>
+          <input
+            type="range"
+            min="0"
+            max={duration || 0}
+            step="0.1"
+            value={Math.min(currentTime, duration || 0)}
+            onChange={onSeek}
+            className="qcastRange"
+            aria-label="Seek"
+          />
+          <span className="qcastTime">{formatMediaTime(duration)}</span>
+        </div>
+
+        <div className="qcastRow qcastRowSpeed">
+          {[0.5, 0.75, 1, 1.25, 1.5, 2].map((val) => (
+            <button
+              key={val}
+              type="button"
+              className={`qcastSpeed ${rate === val ? 'active' : ''}`}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                bumpControls();
+                setRate(val);
+              }}
+            >
+              {val}x
+            </button>
+          ))}
+          {preview && (
+            <button type="button" className="qcastRemove" onClick={onRemove} title="Remove">
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /* =========================================================
    Основной компонент
@@ -6897,7 +7318,45 @@ export default function Forum(){
   // Видео без controls (обложки, рекламные петельки и т.п.) не трогаем.
   useEffect(() => {
     if (!isBrowser()) return;
+    const pauseOtherIframes = (activeEl) => {
+      try {
+        document.querySelectorAll('iframe[data-forum-media]').forEach((frame) => {
+          if (!(frame instanceof HTMLIFrameElement)) return;
+          if (frame === activeEl) return;
+          const kind = frame.getAttribute('data-forum-media');
+          if (kind === 'youtube') {
+            if (window.__forumYtPlayers && window.__forumYtPlayers instanceof Map) {
+              const player = window.__forumYtPlayers.get(frame);
+              try { player?.pauseVideo?.(); } catch {}
+            }
+            return;
+          }
+          const src = frame.getAttribute('data-src');
+          if (src && frame.getAttribute('src')) frame.setAttribute('src', '');
+        });
+      } catch {}
+    };
 
+    const onSiteMediaPlay = (e) => {
+      if (e?.detail?.source === 'bg-audio') return;
+      const activeEl = e?.detail?.element || null;
+      const source = e?.detail?.source || '';
+      if (!['youtube', 'tiktok', 'iframe'].includes(source)) return;
+      try {
+        document.querySelectorAll('video').forEach((v) => {
+          if (v === activeEl) return;
+          if (!(v instanceof HTMLVideoElement)) return;
+          if (!v.controls) return;
+          v.pause();
+        });
+        document.querySelectorAll('audio').forEach((a) => {
+          if (a === activeEl) return;
+          if (!(a instanceof HTMLAudioElement)) return;
+          a.pause();
+        });
+        pauseOtherIframes(activeEl);
+      } catch {}
+    };
     const handlePlay = (e) => {
       const target = e.target;
       const isVideo = target instanceof HTMLVideoElement;
@@ -6922,7 +7381,11 @@ export default function Forum(){
           window.__forumYtPlayers.forEach((player) => {
             try { player?.pauseVideo?.(); } catch {}
           });
-        }        
+        }   
+        pauseOtherIframes(target);
+        window.dispatchEvent(new CustomEvent('site-media-play', {
+          detail: { source: 'html5', element: target }
+        }));             
       } catch {
         // чтобы в случае чего не уронить UI
       }
@@ -6930,8 +7393,10 @@ export default function Forum(){
 
     // ловим play на CAPTURE-фазе, чтобы сработать раньше всяких слушателей глубже
     document.addEventListener('play', handlePlay, true);
+    window.addEventListener('site-media-play', onSiteMediaPlay);    
     return () => {
       document.removeEventListener('play', handlePlay, true);
+      window.removeEventListener('site-media-play', onSiteMediaPlay);      
     };
   },[])
   // === Ленивая подгрузка превью видео в постах ===
@@ -6985,32 +7450,52 @@ export default function Forum(){
     if (!isBrowser()) return;
 
     const selector = '[data-forum-media]';
-    const LS_MEDIA_MUTED_KEY = 'forum:mediaMuted';
-    const LS_VIDEO_MUTED_KEY = 'forum:videoMuted';
 
-    const readMutedPref = () => {
-      try {
-        let v = localStorage.getItem(LS_MEDIA_MUTED_KEY);
-        if (v == null) v = localStorage.getItem(LS_VIDEO_MUTED_KEY);
-        if (v == null) return null;
-        return v === '1' || v === 'true';
-      } catch {
-        return null;
-      }
-    };
     const writeMutedPref = (val) => {
-      try { localStorage.setItem(LS_MEDIA_MUTED_KEY, val ? '1' : '0'); } catch {}
+      try { localStorage.setItem(MEDIA_MUTED_KEY, val ? '1' : '0'); } catch {}
     };
-    let mutedPref = readMutedPref();
+    let mutedPref = readMutedPrefFromStorage();
 
-    const desiredMuted = () => (mutedPref == null ? false : !!mutedPref);
+    const desiredMuted = () => (mutedPref == null ? true : !!mutedPref);
+
 
     const applyMutedPref = (el) => {
       if (!(el instanceof HTMLMediaElement)) return;
       const want = desiredMuted();
       if (el.muted !== want) el.muted = want;
     };
+    const applyMutedPrefToAll = () => {
+      try {
+        const want = desiredMuted();
+        document.querySelectorAll('[data-forum-media]').forEach((el) => {
+          if (!(el instanceof HTMLMediaElement)) return;
+          if (el.muted !== want) el.muted = want;
+        });
+        if (window.__forumYtPlayers && window.__forumYtPlayers instanceof Map) {
+          window.__forumYtPlayers.forEach((player) => {
+            try {
+              if (want) player?.mute?.();
+              else player?.unMute?.();
+            } catch {}
+          });
+        }
+      } catch {}
+    };
 
+    const setMutedPref = (val, source = 'forum-coordinator', emit = true) => {
+      const next = !!val;
+      if (mutedPref === next && source === 'forum-coordinator') return;
+      mutedPref = next;
+      writeMutedPref(next);
+      applyMutedPrefToAll();
+      if (emit) {
+        try {
+          window.dispatchEvent(new CustomEvent(MEDIA_MUTED_EVENT, {
+            detail: { muted: next, source }
+          }));
+        } catch {}
+      }
+    };
     const volHandlers = new WeakMap();
     const bindVolumeListener = (el) => {
       const isMedia =
@@ -7020,13 +7505,16 @@ export default function Forum(){
       el.dataset.forumSoundBound = '1';
       applyMutedPref(el);
       const h = () => {
-        mutedPref = !!el.muted;
-        writeMutedPref(mutedPref);
+        setMutedPref(!!el.muted);
       };
       volHandlers.set(el, h);
       el.addEventListener('volumechange', h, { passive: true });
     };
-
+    const onMutedEvent = (e) => {
+      if (e?.detail?.source === 'forum-coordinator') return;
+      if (typeof e?.detail?.muted !== 'boolean') return;
+      setMutedPref(e.detail.muted, e.detail.source || 'external', false);
+    };
     let ytApiPromise = null;
     const ensureYouTubeAPI = () => {
       if (window.YT && window.YT.Player) return Promise.resolve(window.YT);
@@ -7055,7 +7543,28 @@ export default function Forum(){
       return ytApiPromise;
     };
     const ytPlayers = new Map();
+    const ytMutePolls = new Map();
+    const ytMuteLast = new Map();    
     try { window.__forumYtPlayers = ytPlayers; } catch {}
+    const stopYtMutePoll = (player) => {
+      const id = ytMutePolls.get(player);
+      if (id) clearInterval(id);
+      ytMutePolls.delete(player);
+    };
+    const startYtMutePoll = (player) => {
+      if (!player || ytMutePolls.has(player)) return;
+      const id = setInterval(() => {
+        try {
+          const muted = !!player?.isMuted?.();
+          const last = ytMuteLast.get(player);
+          if (last !== muted) {
+            ytMuteLast.set(player, muted);
+            setMutedPref(muted, 'youtube');
+          }
+        } catch {}
+      }, 650);
+      ytMutePolls.set(player, id);
+    };    
     const initYouTubePlayer = async (iframe) => {
       if (!iframe || !(iframe instanceof HTMLIFrameElement)) return null;
       if (ytPlayers.has(iframe)) return ytPlayers.get(iframe);
@@ -7065,7 +7574,27 @@ export default function Forum(){
         try {
           const player = new YT.Player(iframe, {
             events: {
-              onReady: () => resolve(player),
+              onReady: () => {
+                try {
+                  if (desiredMuted()) player?.mute?.();
+                  else player?.unMute?.();
+                } catch {}
+                resolve(player);
+              },
+              onStateChange: (evt) => {
+                try {
+                  const state = evt?.data;
+                  if (state === YT.PlayerState?.PLAYING) {
+                    startYtMutePoll(player);
+                    window.dispatchEvent(new CustomEvent('site-media-play', {
+                      detail: { source: 'youtube', element: iframe }
+                    }));
+                  }
+                  if (state === YT.PlayerState?.PAUSED || state === YT.PlayerState?.ENDED) {
+                    stopYtMutePoll(player);
+                  }
+                } catch {}
+              }
             },
           });
           ytPlayers.set(iframe, player);
@@ -7085,15 +7614,29 @@ export default function Forum(){
         return;
       }
       const kind = el.getAttribute('data-forum-media');
+ if (kind === 'qcast') {
+  // Q-Cast: управляем скрытым <audio> внутри видимого контейнера
+  const a = el.querySelector?.('audio');
+  if (a instanceof HTMLAudioElement) {
+    try { a.pause(); } catch {}
+  }
+  return;
+}
+     
       if (kind === 'youtube') {
         const player = ytPlayers.get(el);
         try { player?.pauseVideo?.(); } catch {}
+        stopYtMutePoll(player);        
         return;
       }
-      if (kind === 'tiktok' || kind === 'iframe') {
-        const src = el.getAttribute('data-src') || '';
-        if (src && el.getAttribute('src')) el.setAttribute('src', '');
-      }
+if (kind === 'tiktok' || kind === 'iframe') {
+  // ВАЖНО: для iframe мы не можем управлять play/pause внутри,
+  // поэтому «пауза» = выгрузить src, а «play» = перезагрузить src.
+  const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
+  if (src && !el.getAttribute('data-src')) el.setAttribute('data-src', src);
+  if (el.getAttribute('src')) el.setAttribute('src', '');
+}
+
     };
 
     const playMedia = async (el) => {
@@ -7109,19 +7652,57 @@ export default function Forum(){
         return;
       }
       const kind = el.getAttribute('data-forum-media');
+if (kind === 'qcast') {
+  // Q-Cast: управляем скрытым <audio> внутри видимого контейнера
+  const a = el.querySelector?.('audio');
+  if (a instanceof HTMLAudioElement) {
+    try {
+      applyMutedPref(a);
+      const p = a.play?.();
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+      window.dispatchEvent(new CustomEvent('site-media-play', {
+        detail: { source: 'qcast', element: el }
+      }));
+    } catch {}
+  }
+  return;
+}
+
       if (kind === 'youtube') {
         const player = await initYouTubePlayer(el);
         try {
           if (desiredMuted()) player?.mute?.();
           else player?.unMute?.();
           player?.playVideo?.();
+          window.dispatchEvent(new CustomEvent('site-media-play', {
+            detail: { source: 'youtube', element: el }
+          }));          
         } catch {}
         return;
       }
-      if (kind === 'tiktok' || kind === 'iframe') {
-        const src = el.getAttribute('data-src');
-        if (src && el.getAttribute('src') !== src) el.setAttribute('src', src);
-      }
+if (kind === 'tiktok' || kind === 'iframe') {
+  // ВАЖНО: если пользователь вручную нажал pause/play внутри iframe,
+  // то единственный надёжный способ «вернуть в автоплей» — перезагрузить embed.
+  const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
+  if (!src) return;
+  if (!el.getAttribute('data-src')) el.setAttribute('data-src', src);
+
+  const cur = el.getAttribute('src') || '';
+  if (cur === src) {
+    // форс-ресет (убирает «запомненную» паузу)
+    try { el.setAttribute('src', ''); } catch {}
+    try { requestAnimationFrame(() => { try { el.setAttribute('src', src); } catch {} }); } catch {
+      try { el.setAttribute('src', src); } catch {}
+    }
+  } else {
+    try { el.setAttribute('src', src); } catch {}
+  }
+
+  window.dispatchEvent(new CustomEvent('site-media-play', {
+    detail: { source: kind, element: el }
+  }));      
+}
+
     };
 
     const pickMostVisible = () => {
@@ -7185,23 +7766,43 @@ export default function Forum(){
       }
     );
 
-    const observeAll = () => {
-      try {
-        document.querySelectorAll(selector).forEach((el) => {
-          if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
-            bindVolumeListener(el);
-          }
-          io.observe(el);
-        });
-      } catch {}
-    };
+const observeAll = () => {
+  try {
+document.querySelectorAll(selector).forEach((el) => {
+  // аудио/видео: следим за mute, чтобы запоминать выбор
+  if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
+    bindVolumeListener(el);
+  }
+
+  // Q-Cast: наблюдаем за видимым контейнером, а mute/unmute берём с вложенного <audio>
+  const kind = el?.getAttribute?.('data-forum-media');
+  if (kind === 'qcast') {
+    const a = el.querySelector?.('audio');
+    if (a instanceof HTMLAudioElement) bindVolumeListener(a);
+  }
+
+  // iframe/tiktok: гарантируем data-src...
+  if ((kind === 'tiktok' || kind === 'iframe') && el?.getAttribute) {
+    const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
+    if (src && !el.getAttribute('data-src')) {
+      try { el.setAttribute('data-src', src); } catch {}
+    }
+  }
+
+  io.observe(el);
+});
+
+  } catch {}
+};
+
 
     observeAll();
  
     const tick = setInterval(observeAll, 1500);
-
+    window.addEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
     return () => {
       clearInterval(tick);
+      window.removeEventListener(MEDIA_MUTED_EVENT, onMutedEvent);      
       io.disconnect();
       if (active) pauseMedia(active);
       active = null;
@@ -7218,7 +7819,10 @@ export default function Forum(){
         if (window.__forumYtPlayers === ytPlayers) {
           delete window.__forumYtPlayers;
         }
-      } catch {}      
+      } catch {}   
+      ytMutePolls.forEach((id) => clearInterval(id));
+      ytMutePolls.clear();
+      ytMuteLast.clear();        
     };
   }, []);
     useEffect(() => {
@@ -12349,7 +12953,7 @@ onClick={() => {
             </svg>
           </div>
           <audio controls src={pendingAudio} />
-          <button type="button" className="audioRemove" title={t('forum_remove')||'Убрать'} onClick={()=> setPendingAudio(null)}>✕</button>
+          <button type="button" className="audioRemove" title={t('forum_remove')||'Убрать'} onClick={()=> setPendingAudio(null)}>❌</button>
         </div>
       </div>
     )}
