@@ -216,7 +216,7 @@ export default function Home() {
           // явно: только картинки, без видео
           exts={['jpg', 'png', 'webp']}
           className="tg-tape"
-          alt="Telegram card sample"
+          alt="WELLCOME"
         />
         <p className="prewrap">{t('hero_subtitle')}</p>
 
