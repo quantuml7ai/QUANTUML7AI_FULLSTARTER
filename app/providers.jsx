@@ -11,20 +11,6 @@ export default function Providers({ children }) {
 
     (async () => {
       try {
-        const hasInjected = typeof window !== 'undefined' && !!window.ethereum;
-        if (!hasInjected) {
-          try {
-            const connected = localStorage.getItem('W3M_CONNECTED_CONNECTOR');
-            if (connected) {
-              localStorage.removeItem('W3M_CONNECTED_CONNECTOR');
-              localStorage.removeItem('w3m-auth-provider');
-              localStorage.removeItem('w3m-last-used-connector');
-            }
-          } catch (storageError) {
-            console.warn('[providers] unable to clear wallet connector cache', storageError);
-          }
-        }
-
         // Все из одного пакета /react
         const [{ createWeb3Modal, defaultWagmiConfig }, { WagmiProvider }, chains] =
           await Promise.all([

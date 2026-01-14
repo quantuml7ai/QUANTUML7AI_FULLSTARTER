@@ -6067,12 +6067,13 @@ const NO_THREAD_OPEN_SELECTOR =
                 style={{ margin: 0 }}
               >
 <iframe
-  src={`https://www.youtube.com/embed/${videoId}?${ytEmbedParams}`}
+  src=""
   data-src={`https://www.youtube.com/embed/${videoId}?${ytEmbedParams}`}
   title="YouTube video"
   id={`yt_${p?.id || 'post'}_${i}`}
   data-yt-id={videoId}
   data-forum-media="youtube"
+  loading="lazy"
   frameBorder="0"
   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
   allowFullScreen
@@ -6147,10 +6148,11 @@ const NO_THREAD_OPEN_SELECTOR =
       style={{ margin: 0 }}
     >
       <iframe
-        src={`https://www.tiktok.com/embed/v2/${videoId}`}
+        src=""
         title="TikTok video"
         data-forum-media="tiktok"
-        data-src={`https://www.tiktok.com/embed/v2/${videoId}`}        
+        data-src={`https://www.tiktok.com/embed/v2/${videoId}`} 
+        loading="lazy"       
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen
@@ -7626,7 +7628,16 @@ export default function Forum(){
       if (kind === 'youtube') {
         const player = ytPlayers.get(el);
         try { player?.pauseVideo?.(); } catch {}
-        stopYtMutePoll(player);        
+        stopYtMutePoll(player);
+        // ВАЖНО: YouTube iframe держит GPU/WebGL ресурсы даже на pause.
+        // Для ленты (Shorts/TikTok-style) нужно освобождать ресурсы полностью.
+        try { player?.destroy?.(); } catch {}
+        try { ytPlayers.delete(el); } catch {}
+        // выгружаем iframe, чтобы не копились WebGL контексты при пагинации/скролле
+        try {
+          const cur = el.getAttribute('src');
+          if (cur) el.setAttribute('src', '');
+        } catch {}     
         return;
       }
 if (kind === 'tiktok' || kind === 'iframe') {
@@ -7669,6 +7680,13 @@ if (kind === 'qcast') {
 }
 
       if (kind === 'youtube') {
+        // iframe по умолчанию src="" (ленивая загрузка). При активации возвращаем src.
+        try {
+          const ds = el.getAttribute('data-src') || '';
+          const cur = el.getAttribute('src') || '';
+          if (ds && !cur) el.setAttribute('src', ds);
+        } catch {}
+
         const player = await initYouTubePlayer(el);
         try {
           if (desiredMuted()) player?.mute?.();
@@ -7819,7 +7837,16 @@ document.querySelectorAll(selector).forEach((el) => {
         if (window.__forumYtPlayers === ytPlayers) {
           delete window.__forumYtPlayers;
         }
-      } catch {}   
+      } catch {}  
+      // Полная очистка YouTube player'ов, чтобы не держать WebGL/GPU ресурсы
+      try {
+        ytPlayers.forEach((player, iframe) => {
+          try { stopYtMutePoll(player); } catch {}
+          try { player?.destroy?.(); } catch {}
+          try { if (iframe?.getAttribute?.('src')) iframe.setAttribute('src', ''); } catch {}
+        });
+      } catch {}
+      try { ytPlayers.clear(); } catch {}       
       ytMutePolls.forEach((id) => clearInterval(id));
       ytMutePolls.clear();
       ytMuteLast.clear();        

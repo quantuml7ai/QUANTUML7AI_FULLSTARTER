@@ -11,7 +11,7 @@ export default function WalletEVM(){
   }
   const disabled = typeof window !== 'undefined' && !window.ethereum;
   return (
-    <button className="btn" disabled={isPending || disabled} onClick={()=>{ if (!disabled) connect(); }}>
+    <button className="btn" disabled={isPending} onClick={()=>connect()}>
       {disabled ? 'No EVM provider' : (isPending ? 'Connecting…' : 'Connect EVM (MetaMask/Trust)')}
       {connectError ? ' · Retry' : null}
     </button>
