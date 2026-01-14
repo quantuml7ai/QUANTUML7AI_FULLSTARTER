@@ -723,7 +723,7 @@ const api = {
 };
 
 
-function initForumAutosnapshot({ intervalMs = 60000, debounceMs = 1000 } = {}) {
+function initForumAutosnapshot({ intervalMs = 30000, debounceMs = 1000 } = {}) {
   if (!isBrowser()) return () => {};
 
   let last = 0;
@@ -731,15 +731,14 @@ function initForumAutosnapshot({ intervalMs = 60000, debounceMs = 1000 } = {}) {
     const now = Date.now();
     if (now - last < debounceMs) return;       // простая защита от «дребезга»
     last = now;
-    // bust: гарантируем полный снимок, даже если сервер кеширует
-    api.snapshot({ b: Date.now() }).catch(() => {});
+    // НЕ bust-им: пусть работает серверный микрокэш и инкрементальные механики
+    api.snapshot({}).catch(() => {});
   };
 
-  // Любое взаимодействие пользователя — триггерим снапшот (дёшево и сердито)
+// Триггерим снапшот только на "возврат внимания" (это реально нужно)
   const handler = () => doSnap();
   const evts = [
-    'click','keydown',
-    'touchstart','visibilitychange','focus'
+'visibilitychange','focus'
   ];
 
   evts.forEach((e) => window.addEventListener(e, handler, { passive: true }));
@@ -8583,7 +8582,7 @@ es.onmessage = (e) => {
     }
 
     // --- [EVENTS REQUIRING SOFT REFRESH] ---
- const needRefresh = new Set(['topic_created','topic_deleted','post_created','post_deleted','react','view_post','view_topic','ban','unban']);
+ const needRefresh = new Set(['topic_created','topic_deleted','post_created','post_deleted','react','ban','unban']);
     if (needRefresh.has(evt.type)) {
        // игнорим «локальные» или временные id
   if (evt.local === true) return;

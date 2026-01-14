@@ -395,8 +395,24 @@ export async function POST(request) {
         results.push({ op: op?.type || 'unknown', error: String(e?.message || e || 'error') })
       }
     }
+    // Пересборка снапшота — ТОЛЬКО когда меняются данные форума,
+    // а не на "шум" (просмотры).
+    const SNAPSHOT_REBUILD_OPS = new Set([
+      'create_topic',
+      'create_post',
+      'edit_post',
+      'delete_post',
+      'delete_topic',
+      'ban_user',
+      'unban_user',
+      'ban_ip',
+      'unban_ip',
+      'react',
+    ])
 
-    if (results.some(r => !r.error)) {
+    const needRebuild = results.some(r => !r?.error && SNAPSHOT_REBUILD_OPS.has(String(r?.op || '')))
+
+    if (needRebuild) {
       await rebuildSnapshot()
       try { await redisDirect.ltrim("forum:changes", -50000, -1) } catch (e) {
         console.error("failed to trim changes log", e)
