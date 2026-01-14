@@ -57,6 +57,9 @@ async function ensureSubscribed() {
   const loop = async () => {
     // бесконечный цикл переподключения (на случай разрывов)
     // Upstash Redis SDK в Edge поддерживает subscribe
+   const BASE_RETRY_MS = 30_000;  // ✅ вместо 1s: не чаще, чем раз в 30s
+   const MAX_RETRY_MS  = 30_000;  // ✅ жёсткий потолок (по твоему требованию)
+   let attempt = 0;    
     for (;;) {
       try {
         const redis = Redis.fromEnv()
@@ -70,12 +73,18 @@ async function ensureSubscribed() {
         })
         // если subscribe завершился (обычно не должен) — перепробуем
       } catch {
-        // провал — подождём и повторим
-        await new Promise((r) => setTimeout(r, 1000))
+       // провал — подождём и повторим (30s, с небольшим jitter)
+       attempt = Math.min(attempt + 1, 10);
+       const jitter = Math.floor(Math.random() * 750); // 0..750ms
+       const waitMs = Math.min(MAX_RETRY_MS, BASE_RETRY_MS) + jitter;
+       await new Promise((r) => setTimeout(r, waitMs))
         continue
       }
-      // На случай “тихого” завершения — маленькая задержка и переподписка
-      await new Promise((r) => setTimeout(r, 1000))
+     // На случай “тихого” завершения — тоже не чаще 30s
+     attempt = Math.min(attempt + 1, 10);
+     const jitter = Math.floor(Math.random() * 750);
+     const waitMs = Math.min(MAX_RETRY_MS, BASE_RETRY_MS) + jitter;
+     await new Promise((r) => setTimeout(r, waitMs))
     }
   }
 
@@ -97,7 +106,7 @@ export async function GET(req) {
       S.clients.add(controller)
 
       // подсказка клиенту о времени повторного коннекта
-      safeEnqueue(controller, `retry: 1000\n\n`)
+      safeEnqueue(controller, `retry: 30000\n\n`)
 
       // сразу отправим "connected" + текущую ревизию (чтобы клиент мог догнаться)
       let rev = 0
