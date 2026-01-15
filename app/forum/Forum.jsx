@@ -5967,8 +5967,7 @@ const NO_THREAD_OPEN_SELECTOR =
           />
         )}
 
-      </div>
-
+      </div> 
         {p.parentId && (
           <span className="tag ml-1 replyTag" aria-label={t?.('forum_reply_to') || 'Ответ для'}>
             {(t?.('forum_reply_to') || 'ответ для') + ' '}
@@ -5976,33 +5975,7 @@ const NO_THREAD_OPEN_SELECTOR =
             {parentSnippet && <>: “{parentSnippet}”</>}
           </span>
         )} 
-      {/* тело поста — крупные эмодзи (VIP/MOZI) как картинка, иначе очищенный текст */}
-      {(/^\[(VIP_EMOJI|MOZI):\/[^\]]+\]$/).test(p.text || '') ? (
-        <div className="postBody emojiPostWrap">
-          <Image
-            src={(p.text || '').replace(/^\[(VIP_EMOJI|MOZI):(.*?)\]$/, '$2')}
-            alt=""
-            width={512}
-            height={512}
-            unoptimized
-            className={
-              (p.text || '').startsWith('[MOZI:')
-                ? 'moziEmojiBig emojiPostBig'
-                : 'vipEmojiBig emojiPostBig'
-            }
-            style={{ width: '100%', height: 'auto' }}
-          />
-        </div>
-      ) : (
-        displayText.trim() && (
-          <div
-            className="text-[15px] leading-relaxed postBody whitespace-pre-wrap break-words"
-            dangerouslySetInnerHTML={{ __html: rich(displayText) }}
-          />
-        )
-      )}
-
-
+ 
       {/* изображения: естественные пропорции, без квадратного кропа */}
       {imgLines.length > 0 && (
         <div className="postImages" style={{display:'grid', gap:8, marginTop:8}}>
@@ -6184,7 +6157,31 @@ const NO_THREAD_OPEN_SELECTOR =
 
       </div>
 
-
+      {/* тело поста — крупные эмодзи (VIP/MOZI) как картинка, иначе очищенный текст */}
+      {(/^\[(VIP_EMOJI|MOZI):\/[^\]]+\]$/).test(p.text || '') ? (
+        <div className="postBody emojiPostWrap">
+          <Image
+            src={(p.text || '').replace(/^\[(VIP_EMOJI|MOZI):(.*?)\]$/, '$2')}
+            alt=""
+            width={512}
+            height={512}
+            unoptimized
+            className={
+              (p.text || '').startsWith('[MOZI:')
+                ? 'moziEmojiBig emojiPostBig'
+                : 'vipEmojiBig emojiPostBig'
+            }
+            style={{ width: '100%', height: 'auto' }}
+          />
+        </div>
+      ) : (
+        displayText.trim() && (
+          <div
+            className="text-[15px] leading-relaxed postBody whitespace-pre-wrap break-words"
+            dangerouslySetInnerHTML={{ __html: rich(displayText) }}
+          />
+        )
+      )}
       {/* нижняя полоса: СЧЁТЧИКИ + РЕАКЦИИ + (ПЕРЕНЕСЁННЫЕ) ДЕЙСТВИЯ — В ОДНУ СТРОКУ */}
       <div
         className="mt-3 flex items-center gap-2 text-[13px] opacity-80 actionBar"
@@ -11847,7 +11844,7 @@ onClick={()=>{
     title={t('forum_vip_plus') || 'VIP+'}
     onClick={()=> openOnly(vipOpen ? null : 'vip')}
   >
-   VIP+
+    VIP+
   </button>
 
   <VipPopover
