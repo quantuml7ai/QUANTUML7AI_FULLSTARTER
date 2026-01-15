@@ -11847,7 +11847,7 @@ onClick={()=>{
     title={t('forum_vip_plus') || 'VIP+'}
     onClick={()=> openOnly(vipOpen ? null : 'vip')}
   >
-    VIP+
+   VIP+
   </button>
 
   <VipPopover
