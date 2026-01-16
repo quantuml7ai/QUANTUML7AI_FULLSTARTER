@@ -7471,7 +7471,7 @@ export default function Forum(){
       try {
         document.querySelectorAll('iframe[data-forum-media]').forEach((frame) => {
           if (!(frame instanceof HTMLIFrameElement)) return;
-          if (frame === activeEl) return;
+          if (frame.getAttribute('data-forum-warm') === '1') return;
           const kind = frame.getAttribute('data-forum-media');
           if (kind === 'youtube') {
             if (window.__forumYtPlayers && window.__forumYtPlayers instanceof Map) {
@@ -7755,7 +7755,65 @@ export default function Forum(){
 
     const ratios = new Map();
     let active = null;
-
+    const WARM_IFRAME_NEIGHBORS = 2;
+    const isIframeMedia = (el) => {
+      if (!(el instanceof HTMLIFrameElement)) return false;
+      const kind = el.getAttribute('data-forum-media');
+      return kind === 'youtube' || kind === 'tiktok' || kind === 'iframe';
+    };
+    const ensureIframeDataSrc = (el) => {
+      if (!el?.getAttribute) return '';
+      const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
+      if (src && !el.getAttribute('data-src')) {
+        try { el.setAttribute('data-src', src); } catch {}
+      }
+      return src;
+    };
+    const warmIframe = (el) => {
+      if (!isIframeMedia(el)) return;
+      const src = ensureIframeDataSrc(el);
+      if (src && !el.getAttribute('src')) {
+        try { el.setAttribute('src', src); } catch {}
+      }
+    };
+    const unloadIframe = (el) => {
+      if (!isIframeMedia(el)) return;
+      try {
+        const kind = el.getAttribute('data-forum-media');
+        if (kind === 'youtube') {
+          const player = ytPlayers.get(el);
+          try { stopYtMutePoll(player); } catch {}
+          try { player?.destroy?.(); } catch {}
+          try { ytPlayers.delete(el); } catch {}
+        }
+        const src = ensureIframeDataSrc(el);
+        if (src && el.getAttribute('src')) el.setAttribute('src', '');
+      } catch {}
+    };
+    const updateIframeWarmSet = (activeEl) => {
+      try {
+        const iframes = Array.from(document.querySelectorAll('iframe[data-forum-media]'))
+          .filter(isIframeMedia);
+        const warm = new Set();
+        if (activeEl && isIframeMedia(activeEl)) {
+          const idx = iframes.indexOf(activeEl);
+          if (idx >= 0) {
+            const from = Math.max(0, idx - WARM_IFRAME_NEIGHBORS);
+            const to = Math.min(iframes.length - 1, idx + WARM_IFRAME_NEIGHBORS);
+            for (let i = from; i <= to; i++) warm.add(iframes[i]);
+          }
+        }
+        iframes.forEach((el) => {
+          if (warm.has(el)) {
+            try { el.setAttribute('data-forum-warm', '1'); } catch {}
+            warmIframe(el);
+          } else {
+            try { el.removeAttribute('data-forum-warm'); } catch {}
+            unloadIframe(el);
+          }
+        });
+      } catch {}
+    };
     const pauseMedia = (el) => {
       if (!el) return;
       if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
@@ -7787,7 +7845,7 @@ export default function Forum(){
         } catch {}     
         return;
       }
-if (kind === 'tiktok' || kind === 'iframe') {
+      if (kind === 'tiktok' || kind === 'iframe') {
   // ВАЖНО: для iframe мы не можем управлять play/pause внутри,
   // поэтому «пауза» = выгрузить src, а «play» = перезагрузить src.
   const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
@@ -7797,7 +7855,8 @@ if (kind === 'tiktok' || kind === 'iframe') {
 
     };
 
-    const playMedia = async (el) => {
+    const playMedia = async (el, opts = {}) => {
+      const forceReset = !!opts.forceReset;
       if (!el) return;
       if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
         try {
@@ -7853,13 +7912,13 @@ if (kind === 'tiktok' || kind === 'iframe') {
   if (!el.getAttribute('data-src')) el.setAttribute('data-src', src);
 
   const cur = el.getAttribute('src') || '';
-  if (cur === src) {
-    // форс-ресет (убирает «запомненную» паузу)
+  if (cur === src && forceReset) {
+    // форс-ресет (убирает «запомненную» паузу) — ТОЛЬКО при смене active
     try { el.setAttribute('src', ''); } catch {}
     try { requestAnimationFrame(() => { try { el.setAttribute('src', src); } catch {} }); } catch {
       try { el.setAttribute('src', src); } catch {}
     }
-  } else {
+  } else if (!cur) {
     try { el.setAttribute('src', src); } catch {}
   }
 
@@ -7914,15 +7973,17 @@ if (kind === 'tiktok' || kind === 'iframe') {
             pauseMedia(active);
             active = null;
           }
+          updateIframeWarmSet(null);          
           return;
         }
 
         if (active && active !== candidate) {
           pauseMedia(active);
         }
-
+        const isNewActive = active !== candidate;
         active = candidate;
-        playMedia(candidate)
+        updateIframeWarmSet(candidate);
+        if (isNewActive) playMedia(candidate, { forceReset: true });
       },
       { 
         threshold: [0, 0.15, 0.35, 0.6, 0.85, 1],
@@ -8236,7 +8297,11 @@ const [queue,setQueue] = useState(()=>{
   if(!isBrowser()) return []
   try{ return JSON.parse(localStorage.getItem('forum:queue')||'[]') }catch{ return [] }
 })
-const saveQueue = q => { setQueue(q); try{ localStorage.setItem('forum:queue', JSON.stringify(q)) }catch{} }
+const saveQueue = q => {
+  setQueue(q);
+  try { localStorage.setItem('forum:queue', JSON.stringify(q)); } catch {}
+  try { queueRef.current = q; } catch {}
+}
 const makeOpId = () => `${Date.now()}_${Math.random().toString(36).slice(2)}`;
 const pushOp = (type, payload) => {
   const cur = Array.isArray(queueRef.current) ? queueRef.current : [];
