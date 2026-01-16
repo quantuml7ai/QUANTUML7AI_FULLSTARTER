@@ -8712,11 +8712,11 @@ React.useEffect(()=>{
 
 
 
-// === Incremental sync loop: 30s flush + snapshot ===
+// === Incremental sync loop: 2m flush + snapshot ===
 useEffect(() => {
   if (!isBrowser()) return;
   let stop = false;
-  const TICK_MS = 30_000;
+  const TICK_MS = 120_000;
   const FULL_EVERY_MS = 10 * 60 * 1000;
 
   const runTick = async () => {
