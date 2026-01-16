@@ -202,11 +202,17 @@ function useSyncForumProfileOnMount() {
         let cur = {}
         try { cur = JSON.parse(localStorage.getItem(key) || '{}') || {} } catch { cur = {} }
 
-        const next = {
-          ...cur,
-          nickname: j.nickname || j.nick || cur.nickname || '',
-          icon: j.icon || cur.icon || '',
-        }
+const vipUntil = Number(j?.vipUntil ?? j?.vipExpiresAt ?? j?.vip_until ?? j?.vip_exp ?? 0) || 0;
+const vipActive = !!(j?.vipActive ?? j?.isVip ?? j?.vip ?? false) || (vipUntil && vipUntil > Date.now());
+
+const next = {
+  ...cur,
+  nickname: j.nickname || j.nick || cur.nickname || '',
+  icon: j.icon || cur.icon || '',
+  vipActive,
+  vipUntil,
+}
+
 
         localStorage.setItem(key, JSON.stringify(next))
       } catch {
@@ -225,6 +231,116 @@ function resolveIconForDisplay(userId, pIcon) {
   // приоритет: vipIcon (URL) → vipEmoji (эмодзи) → то, что пришло с сервера
   return prof.vipIcon || prof.vipEmoji || pIcon || '👤';
 }
+// =========================================================
+// VIP badge над ником (1.png 20s / 2.png 5s) — только для VIP
+// =========================================================
+const VIP_BADGE_IMG_1 = '/isvip/1.png';
+const VIP_BADGE_IMG_2 = '/isvip/2.png';
+
+// не даём бомбить /api/profile/get-profile по 100 раз
+const __vipProbeOnce = new Set();
+
+function __vipFromHint(h) {
+  if (h === true) return true;
+  if (h === false) return false;
+  // иногда бэк может прислать timestamp (vipUntil)
+  if (typeof h === 'number' && Number.isFinite(h)) return h > Date.now();
+  if (typeof h === 'string' && /^\d{10,}$/.test(h)) {
+    const n = Number(h);
+    if (Number.isFinite(n)) return n > Date.now();
+  }
+  return null;
+}
+
+function __vipFromProfile(prof) {
+  if (!prof || typeof prof !== 'object') return null;
+
+  // явные флаги
+  if (prof.vipActive === true || prof.isVip === true || prof.vip === true) return true;
+  if (prof.vipActive === false || prof.isVip === false || prof.vip === false) return false;
+
+  // timestamp-истечение
+  const until = Number(prof.vipUntil ?? prof.vipExpiresAt ?? prof.vip_until ?? prof.vip_exp ?? 0);
+  if (Number.isFinite(until) && until > Date.now()) return true;
+
+  // иногда отдают уровень
+  const lvl = Number(prof.vipLevel ?? prof.vip_level ?? 0);
+  if (Number.isFinite(lvl) && lvl > 0) return true;
+
+  // fallback: если твой бек кладёт эти поля только VIP-пользователям
+  if (prof.vipIcon || prof.vipEmoji) return true;
+
+  return null;
+}
+
+function useVipFlag(userId, hint) {
+  const uid = String(userId || '').trim();
+
+  const [vip, setVip] = React.useState(() => {
+    const fromHint = __vipFromHint(hint);
+    if (fromHint !== null) return fromHint;
+    const fromProf = __vipFromProfile(safeReadProfile(uid));
+    return fromProf; // true | false | null
+  });
+
+  React.useEffect(() => {
+    const uid = String(userId || '').trim();
+    if (!uid) { setVip(false); return; }
+
+    const fromHint = __vipFromHint(hint);
+    if (fromHint !== null) { setVip(fromHint); return; }
+
+    const fromProf = __vipFromProfile(safeReadProfile(uid));
+    if (fromProf !== null) { setVip(fromProf); return; }
+
+    // неизвестно → один раз попробуем спросить профиль
+    if (__vipProbeOnce.has(uid)) return;
+    __vipProbeOnce.add(uid);
+
+    let cancelled = false;
+    (async () => {
+      try {
+const r = await fetch('/api/forum/vip/batch', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  cache: 'no-store',
+  body: JSON.stringify({ ids: [uid] }),
+});
+const j = await r.json().catch(() => null);
+if (!j?.ok || cancelled) return;
+
+const v = j?.map?.[uid] || null;
+const vipUntil = Number(v?.untilMs || 0) || 0;
+const vipActive = !!v?.active || (vipUntil && vipUntil > Date.now());
+        // сохраним в localStorage, чтобы дальше не гадать
+        try {
+          const key = 'profile:' + uid;
+          let cur = {};
+          try { cur = JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch { cur = {}; }
+          localStorage.setItem(key, JSON.stringify({ ...cur, vipActive, vipUntil }));
+        } catch {}
+
+        setVip(vipActive);
+      } catch {
+        // no-op
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [userId, hint]);
+
+  return vip === true;
+}
+
+function VipFlipBadge({ className = '' }) {
+  return (
+    <span className={cls('vipFlip', className)} aria-label="VIP" title="VIP">
+      <img className="vipFlipImg vip1" src={VIP_BADGE_IMG_1} alt="" loading="lazy" />
+      <img className="vipFlipImg vip2" src={VIP_BADGE_IMG_2} alt="" loading="lazy" />
+    </span>
+  );
+}
+
 // iconId → канон
 function normalizeIconId(v) {
   if (!v) return ''
@@ -720,6 +836,22 @@ const api = {
       return { ok: false, error: 'network', count: 0 }
     }
   },
+
+  // ===== VIP (batch) =====
+  async vipBatch(ids) {
+    try {
+      const arr = Array.isArray(ids) ? ids : []
+      const r = await fetch('/api/forum/vip/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        body: JSON.stringify({ ids: arr }),
+      })
+      return await r.json().catch(() => ({ ok: false, map: {} }))
+    } catch {
+      return { ok: false, error: 'network', map: {} }
+    }
+  },  
 };
 
 
@@ -2156,6 +2288,65 @@ const Styles = () => (
 @media (max-width:640px){
   .nick-text{ max-width:16ch; }
 }
+/* --- VIP badge над ником (20s / 5s) ---
+   Настройка позиционирования/размера:
+   --vip-badge-w, --vip-badge-h  (размер)
+   --vip-badge-gap              (расстояние между бейджем и ником)
+   --vip-badge-shift-x/y        (сдвиг бейджа)
+*/
+:root{
+  --vip-badge-w: clamp(42px, 9vw, 54px);
+  --vip-badge-h: clamp(42px, 8.2vw, 58px);
+  --vip-badge-gap: 2px;
+  --vip-badge-shift-x: 0px;
+  --vip-badge-shift-y: 0px;
+}
+
+.nick-badge.vipNick{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap: var(--vip-badge-gap);
+  line-height: 1.1;
+}
+
+.vipFlip{
+
+  position:relative;
+  width: var(--vip-badge-w);
+  height: var(--vip-badge-h);
+  transform: translate(var(--vip-badge-shift-x), var(--vip-badge-shift-y));
+}
+
+.vipFlipImg{
+ 
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  will-change: opacity;
+}
+
+/* общий цикл 25s: 1.png видно 0..20s (80%), 2.png видно 20..25s (20%) */
+@keyframes vipFlipA{
+  0%, 79.99% { opacity: 1; }
+  80%, 100%  { opacity: 0; }
+}
+@keyframes vipFlipB{
+  0%, 79.99% { opacity: 0; }
+  80%, 100%  { opacity: 1; }
+}
+.vipFlipImg.vip1{ animation: vipFlipA 25s infinite linear; }
+.vipFlipImg.vip2{ animation: vipFlipB 25s infinite linear; }
+
+@media (prefers-reduced-motion: reduce){
+  .vipFlipImg.vip1, .vipFlipImg.vip2{ animation:none; }
+  .vipFlipImg.vip2{ opacity:0; }
+}
+
+
 /* ====== АНИМАЦИЯ НИКА ====== */
 .nick-animate{
   position: relative;
@@ -5492,6 +5683,7 @@ function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerD
   const authorId = String(t?.userId || t?.accountId || '').trim();
   const isSelf = !!viewerId && authorId && (String(viewerId) === authorId);
   const isStarred = !!authorId && !!starredAuthors?.has?.(authorId);
+  const isVipAuthor = useVipFlag(authorId, t?.vipActive ?? t?.isVip ?? t?.vip ?? t?.vipUntil ?? null);
 
   // считаем просмотр темы, когда карточка попадает в viewport (не чаще 1 раза на bucket в LS)
   const ref = React.useRef(null);
@@ -5529,14 +5721,16 @@ function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerD
         pIcon={resolveIconForDisplay(t.userId || t.accountId, t.icon)}
       />
     </div>
+
     <button
       type="button"
-      className="nick-badge nick-animate"
+      className={cls('nick-badge nick-animate', isVipAuthor && 'vipNick')}
       onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); }}
       title={t.userId || t.accountId || ''}
       style={{ flex: '0 1 auto', minWidth: 0 }}
       translate="no"
    >
+    
       <span className="nick-text">
         {t.nickname || shortId(t.userId || t.accountId || '')}
       </span>
@@ -5549,6 +5743,7 @@ function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerD
         title={isStarred ? 'Вы подписаны' : 'Подписаться на автора'}
       />
     )}
+{isVipAuthor && <VipFlipBadge />}   
   </div>
 
         )}
@@ -5685,9 +5880,10 @@ function PostCard({
 
   // безопасные числовые поля
   const views    = Number(p?.views ?? 0);
-    const authorId = String(p?.userId || p?.accountId || '').trim();
+  const authorId = String(p?.userId || p?.accountId || '').trim();
   const isSelf = !!viewerId && authorId && (String(viewerId) === authorId);
   const isStarred = !!authorId && !!starredAuthors?.has?.(authorId);
+  const isVipAuthor = useVipFlag(authorId, p?.vipActive ?? p?.isVip ?? p?.vip ?? p?.vipUntil ?? null);
 
   const replies  =   Number(
     p?.replyCount ??
@@ -5951,13 +6147,14 @@ const NO_THREAD_OPEN_SELECTOR =
             pIcon={resolveIconForDisplay(p.userId || p.accountId, p.icon)}
           />
         </div>
-        <span className="nick-badge nick-animate"
-        translate="no"
-        >
-          <span className="nick-text truncate">
-            {p.nickname || shortId((p.userId || p.accountId || ''))}
-          </span>
-        </span>
+      
+<span className={cls('nick-badge nick-animate', isVipAuthor && 'vipNick')} translate="no">
+
+  <span className="nick-text truncate">
+    {p.nickname || shortId((p.userId || p.accountId || ''))}
+  </span>
+</span>
+
 
         {!!authorId && !isSelf && (
           <StarButton
@@ -5966,7 +6163,7 @@ const NO_THREAD_OPEN_SELECTOR =
             title={isStarred ? 'Вы подписаны' : 'Подписаться на автора'}
           />
         )}
-
+{isVipAuthor && <VipFlipBadge />}
       </div> 
         {p.parentId && (
           <span className="tag ml-1 replyTag" aria-label={t?.('forum_reply_to') || 'Ответ для'}>
@@ -8404,7 +8601,8 @@ const safeMerge = (prev, r) => {
   if (Array.isArray(r.admins)) out.admins = r.admins;
   if (r.rev    !== undefined)  out.rev    = r.rev;
   if (r.cursor !== undefined)  out.cursor = r.cursor;
-
+// VIP карта (чтобы не терялась между перерисовками/частичными снапами)
+if (r.vipMap && typeof r.vipMap === 'object') out.vipMap = r.vipMap;
   // Схлопываем tmp_* и реальные дубли по сигнатурам/ID
   return dedupeAll(out);
 };
@@ -8420,7 +8618,62 @@ const safeMerge = (prev, r) => {
     try {
       // важно: прокидываем bustRef для обхода серверного микрокэша
       const r = await api.snapshot({ b: bustRef });
-      if (r?.ok) persist(prev => safeMerge(prev, r));
+if (r?.ok) {
+  // --- соберём authorId из topics/posts ---
+  const idsSet = new Set();
+  try {
+    for (const t of (r.topics || [])) {
+      const id = String(t?.authorId || t?.userId || t?.ownerId || t?.uid || '').trim();
+      if (id) idsSet.add(id);
+    }
+    for (const p of (r.posts || [])) {
+      const id = String(p?.authorId || p?.userId || p?.ownerId || p?.uid || '').trim();
+      if (id) idsSet.add(id);
+    }
+  } catch {}
+
+  const ids = Array.from(idsSet);
+  if (ids.length) {    
+  const vm = await api.vipBatch(ids);
+    if (vm?.ok && vm?.map && typeof vm.map === 'object') {
+      const vipMap = vm.map;
+      // (опционально) сохраним карту в снапшоте
+      r.vipMap = vipMap;
+
+      // проставим VIP-поля прямо в topics/posts, чтобы твой UI/бейдж работал ВЕЗДЕ
+      if (Array.isArray(r.topics)) {
+        r.topics = r.topics.map(t => {
+          const aid = String(t?.authorId || t?.userId || t?.ownerId || t?.uid || '').trim();
+          if (!aid) return t;
+          const v = vipMap[aid];
+          if (!v) return t;
+          return {
+            ...t,
+            vipActive: !!v.active,
+            vipUntil: Number(v.untilMs || 0),  // важно: number (ms), чтобы useVipFlag понял
+            isVip: !!v.active,                 // совместимость с проверками t.isVip
+          };
+        });
+      }
+      if (Array.isArray(r.posts)) {
+        r.posts = r.posts.map(p => {
+          const aid = String(p?.authorId || p?.userId || p?.ownerId || p?.uid || '').trim();
+          if (!aid) return p;
+          const v = vipMap[aid];
+          if (!v) return p;
+          return {
+            ...p,
+            vipActive: !!v.active,
+            vipUntil: Number(v.untilMs || 0),
+            isVip: !!v.active,
+          };
+        });
+      }
+    }
+  }
+
+  persist(prev => safeMerge(prev, r));
+}
     } catch (e) {
       if (isOverLimit(e)) {
         cooldownUntil = now() + COOLDOWN_MS;
@@ -8459,21 +8712,38 @@ const safeMerge = (prev, r) => {
   window.addEventListener('online', kick);
   document.addEventListener('visibilitychange', kick);
 
-  // перехват ЛЮБОГО POST на /api/forum/*: ставим bust и делаем форс-пул
-  const _fetch = window.fetch;
-  window.fetch = async (...args) => {
-    const res = await _fetch(...args);
-    try {
-      const req    = args[0];
-      const url    = typeof req === 'string' ? req : req?.url;
-      const method = (typeof req === 'string' ? (args[1]?.method || 'GET') : (req.method || 'GET')).toUpperCase();
-      if (method !== 'GET' && /\/api\/forum\//.test(String(url || ''))) {
-        bustRef = Date.now();         // новый ключ кэша
-        schedulePullRef.current(120, true);      // быстрый форс-пул для подтверждения мутации
-      }
-    } catch {}
-    return res;
-  };
+// перехват НЕ-GET только на МУТАЦИИ /api/forum/*
+// (vip/batch — это “чтение”, его НЕ должно триггерить pull)
+const _fetch = window.fetch;
+window.fetch = async (...args) => {
+  const res = await _fetch(...args);
+  try {
+    const req = args[0];
+    const url = typeof req === 'string' ? req : req?.url;
+    const method = (typeof req === 'string'
+      ? (args[1]?.method || 'GET')
+      : (req?.method || 'GET')
+    ).toUpperCase();
+
+    const u = String(url || '');
+
+    // 1) стопаем “служебные POST-чтения”, иначе будет бесконечная петля
+    if (/\/api\/forum\/vip\//.test(u)) return res;
+
+    // 2) триггерим форс-пул только там, где реально меняем данные
+    const isMutation =
+      /\/api\/forum\/mutate\b/.test(u) ||
+      /\/api\/forum\/admin\//.test(u) ||
+      /\/api\/forum\/own\b/.test(u) ||
+      /\/api\/forum\/subs\/toggle\b/.test(u);
+
+    if (method !== 'GET' && isMutation) {
+      bustRef = Date.now();
+      schedulePullRef.current(120, true);
+    }
+  } catch {}
+  return res;
+};
 
   // кросс-вкладочный “пинок” (опционально, но полезно)
   let bc = null;
