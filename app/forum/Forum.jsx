@@ -8716,7 +8716,7 @@ React.useEffect(()=>{
 useEffect(() => {
   if (!isBrowser()) return;
   let stop = false;
-  const TICK_MS = 500_000;
+  const TICK_MS = 120_000;
   const FULL_EVERY_MS = 10 * 60 * 1000;
 
   const runTick = async () => {
