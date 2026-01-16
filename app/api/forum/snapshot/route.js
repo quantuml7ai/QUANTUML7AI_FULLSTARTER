@@ -1,5 +1,5 @@
 // app/api/forum/snapshot/route.js
-import { snapshot, rebuildSnapshot, redis as redisDirect } from '../_db.js'
+import { snapshot, rebuildSnapshot } from '../_db.js'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -61,13 +61,7 @@ export async function GET(req) {
         }
       }
     }
-
-    // Подрезаем журнал изменений в обеих ветках (best effort)
-    try {
-      await redisDirect.ltrim('forum:changes', -50000, -1)
-    } catch {
-      /* no-op */
-    }
+ 
 
     const body = JSON.stringify({ ok: true, ...data })
     const headers = new Headers({
