@@ -851,40 +851,8 @@ const api = {
     }
   },  
 };
-
-
-function initForumAutosnapshot({ intervalMs = 30000, debounceMs = 1000 } = {}) {
-  if (!isBrowser()) return () => {};
-
-  let last = 0;
-  const doSnap = () => {
-    const now = Date.now();
-    if (now - last < debounceMs) return;       // простая защита от «дребезга»
-    last = now;
-    // НЕ bust-им: пусть работает серверный микрокэш и инкрементальные механики
-    api.snapshot({}).catch(() => {});
-  };
-
-// Триггерим снапшот только на "возврат внимания" (это реально нужно)
-  const handler = () => doSnap();
-  const evts = [
-'visibilitychange','focus'
-  ];
-
-  evts.forEach((e) => window.addEventListener(e, handler, { passive: true }));
-
-  // Параллельно — периодический «heartbeat», если надо
-  const id = intervalMs ? setInterval(() => {
-    api.snapshot().catch(() => {});
-  }, intervalMs) : null;
-
-  // снятие слушателей при размонтировании
-  return () => {
-    evts.forEach((e) => window.removeEventListener(e, handler));
-    if (id) clearInterval(id);
-  };
-}
-
+ 
+ 
 /* =========================================================
    КОНЕЦ API
 ========================================================= */
@@ -8377,10 +8345,10 @@ const flushMutations = useCallback(async () => {
   const pendingPosts = Array.from(pendingViewsPostsRef.current || []);
   const pendingTopics = Array.from(pendingViewsTopicsRef.current || []);
   if (pendingPosts.length) {
-    snapshot.push({ type: 'view_posts', payload: { ids: pendingPosts } });
+    snapshot.push({ type: 'view_posts', payload: { ids: pendingPosts }, opId: makeOpId() });
   }
   if (pendingTopics.length) {
-    snapshot.push({ type: 'view_topics', payload: { ids: pendingTopics } });
+    snapshot.push({ type: 'view_topics', payload: { ids: pendingTopics }, opId: makeOpId() });
   }
 
   const toSend = compactOps(snapshot);
@@ -8667,7 +8635,8 @@ React.useEffect(()=>{
     const postsById = new Map((prev.posts || []).map(p => [String(p.id), { ...p }]));
     const deletedTopics = new Set();
     const deletedPosts = new Set();
-
+    const pendingReactions = overlay?.reactions || {};
+    const pendingViews = overlay?.views || { topics: {}, posts: {} };
     for (const evt of events || []) {
       const kind = evt?.kind;
       if (kind === 'topic') {
@@ -8691,12 +8660,39 @@ React.useEffect(()=>{
         }
         const data = evt.data || {};
         const prior = postsById.get(id) || {};
-        postsById.set(id, { ...prior, ...data, id, myReaction: prior.myReaction ?? data.myReaction ?? null });
+        const next = { ...prior, ...data, id, myReaction: prior.myReaction ?? data.myReaction ?? null };
+        if (pendingReactions[String(id)]) {
+          next.likes = prior.likes;
+          next.dislikes = prior.dislikes;
+          next.myReaction = prior.myReaction ?? next.myReaction ?? null;
+        }
+        postsById.set(id, next);
       }
-      for (const [id, p] of mergedById.entries()) {
-        if (!used.has(id)) mergedList.push(p);
+
+      if (kind === 'views') {
+        const posts = evt.posts && typeof evt.posts === 'object' ? evt.posts : {};
+        const topics = evt.topics && typeof evt.topics === 'object' ? evt.topics : {};
+
+        for (const [idRaw, val] of Object.entries(posts)) {
+          const id = String(idRaw);
+          if (!id || isTomb('posts', id)) continue;
+          if (typeof pendingViews.posts?.[id] === 'number') continue;
+          const views = Number(val);
+          if (!Number.isFinite(views)) continue;
+          const prior = postsById.get(id);
+          if (prior) postsById.set(id, { ...prior, views });
+        }
+
+        for (const [idRaw, val] of Object.entries(topics)) {
+          const id = String(idRaw);
+          if (!id || isTomb('topics', id)) continue;
+          if (typeof pendingViews.topics?.[id] === 'number') continue;
+          const views = Number(val);
+          if (!Number.isFinite(views)) continue;
+          const prior = topicsById.get(id);
+          if (prior) topicsById.set(id, { ...prior, views });
+        }
       }
-      out.posts = mergedList;
     }
     deletedTopics.forEach(id => {
       topicsById.delete(id);
