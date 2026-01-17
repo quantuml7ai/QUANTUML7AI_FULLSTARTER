@@ -6,9 +6,15 @@ export default function HeroSection() {
     <section className="hero-wrap">
       <div className="hero-sticky">
 
-        <HeroAvatar poster="/avatar.jpg" />
-      </div> 
- 
+        <HeroAvatar videoSrc="/avatar.mp4" poster="/avatar.jpg" />
+      </div>
+
+      {/* Контент поверх */}
+      <div className="hero-content panel">
+        <h1 style={{ marginTop: 0 }}>Космический интеллект для аналитики</h1>
+        <p>Авторизация через криптокошельки и подписки PRO/VIP.</p>
+        <p><a className="btn" href="/subscribe">Перейти к подписке</a></p>
+      </div>
     </section>
   );
 }

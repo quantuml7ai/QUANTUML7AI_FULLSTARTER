@@ -1,5 +1,5 @@
 // app/api/forum/snapshot/route.js
-import { snapshot } from '../_db.js'
+import { snapshot, rebuildSnapshot, redis as redisDirect } from '../_db.js'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -37,22 +37,37 @@ export async function GET(req) {
       data = await snapshot(since)
       // ожидание: { rev, events }
       if (!data || typeof data !== 'object' || typeof data.rev !== 'number' || !('events' in data)) {
-        data = { rev: since, events: [] }
+        // починка и вторая попытка
+        await rebuildSnapshot()
+        data = await snapshot(since)
       }
     } else {
       // === ПОЛНЫЙ СНЭП ===
       data = await snapshot(0)
       // ожидание: { rev, topics, posts, banned, errors }
       if (!data || typeof data !== 'object' || typeof data.rev !== 'number' || (!('topics' in data) && !('events' in data))) {
-        data = { rev: 0, topics: [], posts: [], banned: [] }
+        // починка и вторая попытка
+        const snap = await rebuildSnapshot()
+        data = { rev: snap.rev, ...snap.payload }
       }
 
-      // Барьер по ревизии: если клиент знает, что есть новее — отдаём как есть, без rebuild
+      // Барьер по ревизии: если клиент знает, что есть новее — догонимся
       if (revTarget > 0 && Number.isFinite(data.rev) && data.rev < revTarget) {
-        data = { ...data }
+        try {
+          const snap2 = await rebuildSnapshot()
+          data = { rev: snap2.rev, ...snap2.payload }
+        } catch {
+          // no-op: отдаём текущее, даже если не догнали
+        }
       }
     }
- 
+
+    // Подрезаем журнал изменений в обеих ветках (best effort)
+    try {
+      await redisDirect.ltrim('forum:changes', -50000, -1)
+    } catch {
+      /* no-op */
+    }
 
     const body = JSON.stringify({ ok: true, ...data })
     const headers = new Headers({
