@@ -7922,13 +7922,16 @@ if (kind === 'tiktok' || kind === 'iframe') {
           if (!['youtube', 'tiktok', 'iframe'].includes(kind)) return;
           const inWindow = i >= keepStart && i <= keepEnd;
           const src = frame.getAttribute('data-src') || frame.getAttribute('src') || '';
+          const shouldForce =
+            (frame.getAttribute('data-forum-unloaded') === '1') ||
+            iframeUnloaded.has(frame);         
           if (inWindow) {
             if (src && !frame.getAttribute('data-src')) {
               try { frame.setAttribute('data-src', src); } catch {}
             }
             if (!frame.getAttribute('src') && frame.getAttribute('data-src')) {
-               ensureIframeSrc(frame, shouldForce);
-                           } else if (shouldForce) {
+              ensureIframeSrc(frame, true);
+            } else if (shouldForce) {
               ensureIframeSrc(frame, true);
             }
             if (shouldForce) {
@@ -8045,6 +8048,8 @@ document.querySelectorAll(selector).forEach((el) => {
       if (!target.getAttribute('src')) {
         try { target.setAttribute('src', src); } catch {}
       }
+      try { target.removeAttribute('data-forum-unloaded'); } catch {}
+      try { iframeUnloaded.delete(target); } catch {}      
       playMedia(target);
     }; 
     const tick = setInterval(observeAll, 1500);
@@ -10292,6 +10297,8 @@ toast.ok(t('forum_create_ok') ||'Тема создана')
       cid: tmpP,
       id: tmpP,
     });
+    // важное событие: отправляем сразу
+    try { await flushMutations(); } catch {}    
   // жёсткая очистка и подтягиваем свежий снапшот
   try { setText(''); } catch {}
   try { setPendingImgs([]); } catch {}
