@@ -5188,7 +5188,7 @@ function ProfilePopover({
 
   const clampCrop = React.useCallback((next) => {
     const bmp = bmpRef.current;
-    const size = 512;
+    const size = boxSizeRef.current || 0;
     if (!bmp || !size) return next;
     const iw = bmp.width || 1;
     const ih = bmp.height || 1;
@@ -5218,7 +5218,7 @@ function ProfilePopover({
       }
       const nextPreviewUrl = URL.createObjectURL(f);
       previewUrlRef.current = nextPreviewUrl;
-      setPreviewUrl(nextPreviewUrl);
+      setP
       try { bmpRef.current?.close?.(); } catch {}
       bmpRef.current = await createImageBitmap(f);
       setImgInfo({ w: bmpRef.current?.width || 0, h: bmpRef.current?.height || 0 });
@@ -5247,10 +5247,7 @@ function ProfilePopover({
     e.stopPropagation();
     const dx = e.clientX - p.x;
     const dy = e.clientY - p.y;
-    const scaleFactor = (boxSizeRef.current || 1) / 512;
-    const nx = p.sx + (dx / scaleFactor);
-    const ny = p.sy + (dy / scaleFactor);
-    setCrop((c) => clampCrop({ ...c, x: nx, y: ny }));
+    setCrop((c) => ({ ...c, x: p.sx + dx, y: p.sy + dy }));
   };
   const onPointerUp = (e) => {
     const p = dragRef.current;
@@ -11162,7 +11159,6 @@ setVideoFeed(withStars);
 
 /** открыть ленту видео */
 function openVideoFeed() {
-  if (!videoFeedOpen) pushNavState();  
   setVideoFeedOpen(true);
   try { setInboxOpen?.(false); } catch {}
   try { setSel?.(null); setThreadRoot?.(null); } catch {}
@@ -11185,157 +11181,26 @@ React.useEffect(() => {
 // [VIDEO_FEED:OPEN_THREAD] — открыть полноценную ветку из ленты
 function openThreadFromPost(p){
   if (!p) return;
-  openThreadAtPost(p, { closeInbox: true, closeVideo: true, scrollToId: p.id });
-}
+  try { setInboxOpen?.(false); } catch {}
 
+  // находим тему, к которой относится пост
+  const tt = (data?.topics || []).find(x => String(x.id) === String(p.topicId));
+  if (!tt) return;
+
+  // переключаемся в обычный режим ветки
+  setSel(tt);
+  setThreadRoot({ id: p.parentId || p.id }); // фокус на корневом/самом посте
+  setVideoFeedOpen(false);
+
+  // мягкий скролл к посту в открытой ветке
+  setTimeout(() => {
+    try { document.getElementById(`post_${p.id}`)?.scrollIntoView({ behavior:'smooth', block:'center' }) } catch {}
+  }, 120);
+}
 // === QUESTS: вкладка квестов (полупассивный режим) ===
 const [questOpen, setQuestOpen] = React.useState(false);
 const [questSel,  setQuestSel]  = React.useState(null);   // текущая карточка квеста
-const listBodyRef = React.useRef(null);
-const threadBodyRef = React.useRef(null);
-const navStackRef = React.useRef([]);
-const navRestoreRef = React.useRef(null);
-const navRestoringRef = React.useRef(false);
-const questListRef = React.useRef([]);
 
-const readScrollTop = React.useCallback(() => {
-  if (typeof window === 'undefined') return 0;
-  if (sel?.id) {
-    const el = threadBodyRef.current;
-    return el ? el.scrollTop : (window.scrollY || document.documentElement?.scrollTop || 0);
-  }
-  const listEl = listBodyRef.current;
-  if (listEl && listEl.scrollHeight > listEl.clientHeight + 2) return listEl.scrollTop;
-  return window.scrollY || document.documentElement?.scrollTop || 0;
-}, [sel?.id]);
-
-const pushNavState = React.useCallback(() => {
-  if (navRestoringRef.current) return;
-  navStackRef.current.push({
-    selId: sel?.id || null,
-    threadRootId: threadRoot?.id || null,
-    inboxOpen,
-    videoFeedOpen,
-    questOpen,
-    questSelId: questSel?.id || null,
-    scrollTop: readScrollTop(),
-  });
-}, [sel?.id, threadRoot?.id, inboxOpen, videoFeedOpen, questOpen, questSel?.id, readScrollTop]);
-
-const restoreNavState = React.useCallback((snap) => {
-  if (!snap) return;
-  navRestoringRef.current = true;
-  const nextSel = snap.selId
-    ? (data?.topics || []).find(t => String(t.id) === String(snap.selId))
-    : null;
-  const nextThreadRoot = snap.threadRootId
-    ? (data?.posts || []).find(p => String(p.id) === String(snap.threadRootId)) || { id: snap.threadRootId }
-    : null;
-  const nextQuestSel = snap.questSelId
-    ? (questListRef.current || []).find(q => String(q.id) === String(snap.questSelId))
-    : null;
-  setSel(nextSel || null);
-  setThreadRoot(nextThreadRoot || null);
-  setInboxOpen(!!snap.inboxOpen);
-  setVideoFeedOpen(!!snap.videoFeedOpen);
-  setQuestOpen(!!snap.questOpen);
-  setQuestSel(nextQuestSel || null);
-  navRestoreRef.current = {
-    scrollTop: Number(snap.scrollTop || 0),
-    selId: snap.selId || null,
-  };
-  navRestoringRef.current = false;
-}, [data?.topics, data?.posts]);
-
-const scrollToTop = React.useCallback(() => {
-  if (typeof window === 'undefined') return;
-  const listEl = listBodyRef.current;
-  if (listEl) listEl.scrollTop = 0;
-  window.scrollTo({ top: 0, behavior: 'auto' });
-}, []);
-
-React.useEffect(() => {
-  if (!navRestoreRef.current) return;
-  const { scrollTop, selId } = navRestoreRef.current;
-  navRestoreRef.current = null;
-  requestAnimationFrame(() => {
-    if (selId) {
-      const el = threadBodyRef.current;
-      if (el) { el.scrollTop = scrollTop; return; }
-    } else {
-      const listEl = listBodyRef.current;
-      if (listEl && listEl.scrollHeight > listEl.clientHeight + 2) {
-        listEl.scrollTop = scrollTop;
-        return;
-      }
-    }
-    if (typeof window !== 'undefined') window.scrollTo({ top: scrollTop, behavior: 'auto' });
-  });
-}, [sel?.id, threadRoot?.id, inboxOpen, videoFeedOpen, questOpen]);
-
-const openThreadAtPost = React.useCallback((post, opts = {}) => {
-  if (!post) return;
-  if (!opts.skipPush) pushNavState();
-
-  const topicId = opts.topicId ?? post.topicId ?? post.threadId ?? null;
-  const topic = topicId
-    ? (data?.topics || []).find(t => String(t.id) === String(topicId))
-    : null;
-  if (topic) setSel(topic);
-
-  const fullPost =
-    (data?.posts || []).find(p => String(p.id) === String(post.id)) || post;
-  setThreadRoot(fullPost);
-  setReplyTo(null);
-
-  if (opts.closeInbox) setInboxOpen(false);
-  if (opts.closeVideo) setVideoFeedOpen(false);
-  if (opts.closeQuests) {
-    setQuestSel(null);
-    setQuestOpen(false);
-  }
-
-  const scrollTargetId = opts.scrollToId || post.id;
-  if (scrollTargetId) {
-    setTimeout(() => {
-      try {
-        document
-          .getElementById(`post_${scrollTargetId}`)
-          ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } catch {}
-    }, 120);
-  }
-}, [data?.topics, data?.posts, pushNavState, setSel, setThreadRoot, setReplyTo]);
-
-const handleBack = React.useCallback(() => {
-  const snap = navStackRef.current.pop();
-  if (snap) {
-    restoreNavState(snap);
-    return;
-  }
-  if (videoFeedOpen) { try { closeVideoFeed?.(); } catch {}; return; }
-  if (questOpen) {
-    if (questSel) { try { setQuestSel(null); } catch {} ; return; }
-    try { closeQuests?.(); } catch {}
-    return;
-  }
-  if (inboxOpen) { setInboxOpen(false); return; }
-  if (threadRoot) { setReplyTo(null); setThreadRoot(null); return; }
-  if (sel) { setReplyTo(null); setSel(null); return; }
-}, [restoreNavState, videoFeedOpen, questOpen, questSel, inboxOpen, threadRoot, sel, closeQuests, closeVideoFeed]);
-
-const goHome = React.useCallback(() => {
-  navStackRef.current = [];
-  setInboxOpen(false);
-  setVideoFeedOpen(false);
-  setQuestOpen(false);
-  setQuestSel(null);
-  setReplyTo(null);
-  setThreadRoot(null);
-  setSel(null);
-  scrollToTop();
-}, [scrollToTop]);
-const canGoBack = !!(videoFeedOpen || inboxOpen || questOpen || threadRoot || sel || navStackRef.current.length);
 // === QUEST ENV loader (client) ===
 const [questEnv,  setQuestEnv]  = React.useState(null);
 const [questMeta, setQuestMeta] = React.useState(null);
@@ -11451,9 +11316,7 @@ const QUESTS = React.useMemo(() => {
   // Покарточное включение
  return all.filter((_, i) => isCardEnabled(i + 1));
 }, [readEnv, tasksPerCard, QUEST_CARDS, cardMediaExt, cardMediaName]);
-React.useEffect(() => {
-  questListRef.current = QUESTS || [];
-}, [QUESTS]);
+
 // Прогресс: LS-ключ зависит от пользователя
 const meUid   = auth?.accountId || auth?.asherId || '';
 const QUEST_LS = meUid ? `quest:v1:${meUid}` : `quest:v1:anonymous`;
@@ -11705,7 +11568,7 @@ const entry = Object.entries(questProg||{}).find(([qid, v]) => {
 const openQuests = React.useCallback(() => {
   // не открываем, если квесты отключены в ENV
   if (readEnv?.('NEXT_PUBLIC_QUEST_ENABLED', '1') !== '1') return;
-  if (!questOpen) pushNavState();
+
   setInboxOpen(false);
   setVideoFeedOpen(false);
   setSel(null);
@@ -12383,8 +12246,17 @@ onClick={()=>{
     type="button"
     className="iconBtn ghost"
     aria-label={t?.('forum_back') || 'Назад'}
-      disabled={!canGoBack}
-    onClick={handleBack}
+      disabled={!videoFeedOpen && !inboxOpen && !questOpen}
+    onClick={()=>{ 
+      if (videoFeedOpen) { try{ closeVideoFeed?.() }catch{}; return; } 
+      if (inboxOpen)    { try{ setInboxOpen(false) }catch{}; return; }
+  if (questOpen) {
+    // если внутри раздела квестов открыта карточка — просто закрываем её
+    if (questSel) { try{ setQuestSel(null) }catch{}; return; }
+    // иначе выходим из раздела квестов целиком
+    try{ closeQuests?.() }catch{}; return;
+  }     
+ }}
        title={t?.('forum_back') || 'Назад'}
    
       >
@@ -12398,7 +12270,14 @@ onClick={()=>{
     type="button"
     className="iconBtn ghost"
     aria-label={t?.('forum_home') || 'На главную'}
-    onClick={goHome}
+    onClick={()=>{
+    if (videoFeedOpen) { try{ closeVideoFeed?.() }catch{} }
+    if (questOpen)     { try{ closeQuests?.() }catch{} }
+    try{ setInboxOpen(false) }catch{};
+    try{ setReplyTo(null) }catch{};
+    try{ setThreadRoot(null) }catch{};
+    try{ setSel(null) }catch{};
+  }}
     title={t?.('forum_home') || 'На главную'}
   >
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
@@ -12460,10 +12339,7 @@ onClick={()=>{
         type="button"
         className="iconBtn inboxBtn"
         title={t('forum_inbox') || 'Ответы мне'}
-        onClick={() => {
-          if (!inboxOpen) pushNavState();
-          setInboxOpen(v => !v);
-        }}
+        onClick={() => setInboxOpen(v => !v)}
         aria-pressed={inboxOpen}
       >
         <svg viewBox="0 0 24 24" aria-hidden>
@@ -12500,7 +12376,19 @@ onClick={()=>{
       : null;
 
     const openThreadHere = () => {
-      openThreadAtPost(p, { closeInbox: true, closeVideo: true, scrollToId: p?.id });
+      try { setInboxOpen?.(false); } catch {}
+      const tt = (data?.topics || []).find(x => String(x.id) === String(p?.topicId));
+      if (!tt) return;
+      try { setSel(tt); } catch {}
+      try { setThreadRoot({ id: p?.parentId || p?.id }); } catch {}
+      try { setVideoFeedOpen(false); } catch {}
+      setTimeout(() => {
+        try {
+          document
+            .getElementById(`post_${p?.id}`)
+            ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } catch {}
+      }, 120);
     };
 
     return (
@@ -12613,7 +12501,8 @@ onClick={()=>{
           })()}
           onReport={() => toast.ok(t('forum_report_ok'))}
           onOpenThread={(clickP) => {
-            openThreadAtPost(clickP, { closeInbox: true, scrollToId: p?.id });
+            const tt = (data.topics || []).find(t => String(t.id) === String(p.topicId));
+            if (tt) { setSel(tt); setThreadRoot(clickP); setInboxOpen(false); }
           }}
           onReact={reactMut}
           isAdmin={isAdmin}
@@ -12679,7 +12568,7 @@ onClick={()=>{
   key={`t:${x.id}`}
   t={x}
   agg={agg}
-  onOpen={(tt)=>{ pushNavState(); setReplyTo(null); setThreadRoot(null); setSel(tt); }}
+  onOpen={(tt)=>{ setSel(tt); setThreadRoot(null) }}
   onView={markViewTopic}
   isAdmin={isAdmin}
   onDelete={delTopic}
@@ -12714,7 +12603,6 @@ onClick={()=>{
 <div
   className="body"
   style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
-  ref={listBodyRef}
 >
 
 
@@ -12736,7 +12624,12 @@ onClick={()=>{
     type="button"
     className="iconBtn ghost"
     aria-label={t?.('forum_back') || 'Назад'}
-  onClick={handleBack}
+  onClick={()=>{
+    if (inboxOpen)   { try{ setInboxOpen(false) }catch{}; return; }
+    if (threadRoot)  { try{ setReplyTo(null) }catch{}; try{ setThreadRoot(null) }catch{}; return; }
+    try{ setReplyTo(null) }catch{};
+    try{ setSel(null) }catch{};
+  }}
     title={t?.('forum_back') || 'Назад'}
   >
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
@@ -12749,7 +12642,11 @@ onClick={()=>{
     type="button"
     className="iconBtn ghost"
     aria-label={t?.('forum_home') || 'На главную'}
-    onClick={goHome}
+    onClick={()=>{ 
+      try{ setInboxOpen(false) }catch{};
+      try{ setReplyTo(null) }catch{}; 
+      try{ setThreadRoot(null) }catch{}; 
+      try{ setSel(null) }catch{}; }}
     title={t?.('forum_home') || 'На главную'}
   >
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
@@ -12813,10 +12710,7 @@ onClick={()=>{
         type="button"
         className="iconBtn inboxBtn"
         title={t('forum_inbox') || 'Ответы мне'}
-        onClick={() => {
-          if (!inboxOpen) pushNavState();
-          setInboxOpen(v => !v);
-        }}
+        onClick={() => setInboxOpen(v => !v)}
         aria-pressed={inboxOpen}
       >
         <svg viewBox="0 0 24 24" aria-hidden>
@@ -12873,7 +12767,26 @@ onClick={()=>{
               onReport={() => toast.ok(t('forum_report_ok'))}
               onOpenThread={clickP => {
                 // переходим в тему и открываем ветку
-                openThreadAtPost(clickP, { closeInbox: true, scrollToId: p?.id });
+                const topic = (data.topics || []).find(
+                  t => String(t.id) === String(p.topicId),
+                );
+                if (topic) {
+                  setSel(topic);
+                  setThreadRoot(clickP);   // корень треда
+                  setInboxOpen(false);
+
+                  // мягкий скролл к конкретному посту
+                  setTimeout(() => {
+                    try {
+                      document
+                        .getElementById(`post_${p.id}`)
+                        ?.scrollIntoView({
+                          behavior: 'smooth',
+                          block: 'center',
+                        });
+                    } catch {}
+                  }, 120);
+                }
               }}
   onReact={reactMut}
   isAdmin={isAdmin}
@@ -12913,10 +12826,9 @@ onClick={()=>{
 
       </div>
 
-<div
+      <div
   className="body"
   style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
-  ref={threadBodyRef}
 >
 
 
@@ -12949,7 +12861,7 @@ onClick={()=>{
   parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}
   onReport={() => toast.ok(t('forum_report_ok'))}
   onReply={() => setReplyTo(p)}
-  onOpenThread={(clickP) => { openThreadAtPost(clickP, { scrollToId: clickP?.id }); }}
+  onOpenThread={(clickP) => { setThreadRoot(clickP); }}
   onReact={reactMut}
   isAdmin={isAdmin}
   onDeletePost={delPost}
