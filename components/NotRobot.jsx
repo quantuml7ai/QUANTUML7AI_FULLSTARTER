@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useI18n } from "@/components/i18n";
 
@@ -83,36 +83,36 @@ export default function NotRobot() {
 
   // ====== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ======
 
-  const rbRedirectOut = () => {
+  const rbRedirectOut = useCallback(() => {
     if (typeof window !== "undefined") {
       window.location.href = RB_DEFAULT_REDIRECT_URL;
     } else {
       router.push("/");
     }
-  };
+   }, [router]);
 
-  const rbClearCountdown = () => {
+  const rbClearCountdown = useCallback(() => {
     if (rbCountdownIntervalRef.current) {
       clearInterval(rbCountdownIntervalRef.current);
       rbCountdownIntervalRef.current = null;
     }
-  };
+  }, []);
 
-  const rbClearIdleTimeout = () => {
+  const rbClearIdleTimeout = useCallback(() => {
     if (rbIdleTimeoutRef.current) {
       clearTimeout(rbIdleTimeoutRef.current);
       rbIdleTimeoutRef.current = null;
     }
-  };
+ }, []);
 
-  const rbClearFirstShowTimeout = () => {
+  const rbClearFirstShowTimeout = useCallback(() => {
     if (rbFirstShowTimeoutRef.current) {
       clearTimeout(rbFirstShowTimeoutRef.current);
       rbFirstShowTimeoutRef.current = null;
     }
-  };
+  }, []);
 
-  const rbStartCheckTimer = () => {
+  const rbStartCheckTimer = useCallback(() => {
     rbClearCountdown();
     setRbRemainingSeconds(RB_CHECK_TIMEOUT_MS / 1000);
     rbCountdownIntervalRef.current = setInterval(() => {
@@ -129,9 +129,9 @@ export default function NotRobot() {
         return prev - 1;
       });
     }, 1000);
-  };
+  }, [rbClearCountdown, rbRedirectOut]);
 
-  const rbGenerateRound = () => {
+  const rbGenerateRound = useCallback(() => {
     if (!RB_COINS.length) return;
 
     const targetIndex = getRandomInt(RB_COINS.length);
@@ -180,17 +180,17 @@ export default function NotRobot() {
     setRbVisibleCoins(withPositions);
     setRbErrorKey(null);
     setRbStatus("running");
-  };
+  }, []);
 
-  const rbOpenOverlay = () => {
+  const rbOpenOverlay = useCallback(() => {
     setRbErrorKey(null);
     setRbStatus("running");
     setRbIsOverlayOpen(true);
     rbStartCheckTimer();
     rbGenerateRound();
-  };
+  }, [rbGenerateRound, rbStartCheckTimer]);
 
-  const rbScheduleIdleCheck = () => {
+  const rbScheduleIdleCheck = useCallback(() => {
     rbClearIdleTimeout();
     rbIdleTimeoutRef.current = setTimeout(() => {
       // перед запуском ещё раз проверим актуальное состояние
@@ -198,17 +198,17 @@ export default function NotRobot() {
       if (rbOverlayOpenRef.current) return;
       rbOpenOverlay();
     }, RB_IDLE_TIMEOUT_MS);
-  };
+  }, [rbClearIdleTimeout, rbOpenOverlay]);
 
-  const rbMarkActivity = () => {
+  const rbMarkActivity = useCallback(() => {
     rbLastActivityRef.current = Date.now();
     // важно — смотрим на рефы, а не на стейт
     if (rbFirstCompletedRef.current && !rbOverlayOpenRef.current) {
       rbScheduleIdleCheck();
     }
-  };
+  }, [rbScheduleIdleCheck]);
 
-  const rbHandleCoinClick = (coin) => {
+  const rbHandleCoinClick = useCallback((coin) => {
     if (rbStatus !== "running" || !rbTargetCoin) return;
 
     if (coin.id === rbTargetCoin.id) {
@@ -242,7 +242,7 @@ export default function NotRobot() {
       setRbErrorKey("not_robot_error_wrong_coin");
       rbGenerateRound();
     }
-  };
+  }, [rbClearCountdown, rbGenerateRound, rbScheduleIdleCheck, rbStatus, rbTargetCoin]);
 
   // ====== INITIAL MOUNT / UNMOUNT ======
 
@@ -302,12 +302,12 @@ export default function NotRobot() {
       rbClearIdleTimeout();
       rbClearFirstShowTimeout();
     };
-  }, []);
+  }, [rbClearCountdown, rbClearFirstShowTimeout, rbClearIdleTimeout, rbMarkActivity, rbOpenOverlay, rbScheduleIdleCheck]);
 
   // Навигация по страницам тоже считается активностью
   useEffect(() => {
     rbMarkActivity();
-  }, [pathname]);
+  }, [pathname, rbMarkActivity]);
 
   // Блокируем скролл body при открытом оверлее
   useEffect(() => {
@@ -358,6 +358,7 @@ export default function NotRobot() {
             <div className="rb-target-coin-preview">
               {rbTargetCoin && (
                 <>
+                  {/* eslint-disable-next-line @next/next/no-img-element -- canvas-like positioning with dynamic local assets */}                
                   <img
                     src={rbTargetCoin.imagePath}
                     alt={rbTargetCoin.code}
@@ -384,6 +385,7 @@ export default function NotRobot() {
                     }}
                     onClick={() => rbHandleCoinClick(coin)}
                   >
+                    {/* eslint-disable-next-line @next/next/no-img-element -- absolute-positioned sprites in game grid */}                    
                     <img
                       src={coin.imagePath}
                       alt={coin.code}

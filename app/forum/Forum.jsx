@@ -3,7 +3,7 @@
 
 'use client'
 
-
+/* eslint-disable @next/next/no-img-element -- forum renders user-provided URLs/blobs where next/image is unsuitable */
 import React, { useEffect, useMemo, useRef, useCallback, useState } from 'react'
 import { useI18n } from '../../components/i18n' 
 import { broadcast as forumBroadcast } from './events/bus'
@@ -1738,9 +1738,8 @@ const Styles = () => (
 
 .avaUploadSquareCanvas{
   position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
+  max-width:none;
+  max-height:none;
   display:block;
 }
 
@@ -5144,22 +5143,21 @@ function ProfilePopover({
   const [imgInfo, setImgInfo] = useState({ w: 0, h: 0 });  // натуральные размеры
   const [crop, setCrop] = useState({ x: 0, y: 0, z: 1 });  // translate(px) + zoom(mult)
   const [uploadBusy, setUploadBusy] = useState(false);
-  const [finalAvatarBlob, setFinalAvatarBlob] = useState(null);
-  const [finalAvatarUrl, setFinalAvatarUrl] = useState('');
-  const finalAvatarUrlRef = useRef('');
+  const [previewUrl, setPreviewUrl] = useState('');
+  const previewUrlRef = useRef('');
   const dragRef = useRef({ on: false, x: 0, y: 0, sx: 0, sy: 0 });
 
   const bmpRef = useRef(null); // ImageBitmap
   const boxSizeRef = useRef(0);
-
+  const [boxSize, setBoxSize] = useState(0);
   // финальная уборка (на размонтирование)
   useEffect(() => {
     return () => {
       try { bmpRef.current?.close?.(); } catch {}
       bmpRef.current = null;
-      if (finalAvatarUrlRef.current) {
-        try { URL.revokeObjectURL(finalAvatarUrlRef.current); } catch {}
-        finalAvatarUrlRef.current = '';
+      if (previewUrlRef.current) {
+        try { URL.revokeObjectURL(previewUrlRef.current); } catch {}
+        previewUrlRef.current = '';
       }
     };
   }, []);
@@ -5172,11 +5170,10 @@ function ProfilePopover({
     setImgInfo({ w: 0, h: 0 });
     setCrop({ x: 0, y: 0, z: 1 });
     setUploadBusy(false);
-    setFinalAvatarBlob(null);
-    setFinalAvatarUrl('');
-    if (finalAvatarUrlRef.current) {
-      try { URL.revokeObjectURL(finalAvatarUrlRef.current); } catch {}
-      finalAvatarUrlRef.current = '';
+    setPreviewUrl('');
+    if (previewUrlRef.current) {
+      try { URL.revokeObjectURL(previewUrlRef.current); } catch {}
+      previewUrlRef.current = '';
     }    
     try { bmpRef.current?.close?.(); } catch {}
     bmpRef.current = null;
@@ -5192,7 +5189,7 @@ function ProfilePopover({
       const r = el.getBoundingClientRect();
       const sz = Math.max(1, Math.round(Math.min(r.width, r.height)));
       boxSizeRef.current = sz;
-
+      setBoxSize(sz);
     };
 
     applySize();
@@ -5232,7 +5229,12 @@ function ProfilePopover({
       setUploadFile(f);
       setCrop({ x: 0, y: 0, z: 1 });
       setImgInfo({ w: 0, h: 0 });
-
+      if (previewUrlRef.current) {
+        try { URL.revokeObjectURL(previewUrlRef.current); } catch {}
+      }
+      const nextPreviewUrl = URL.createObjectURL(f);
+      previewUrlRef.current = nextPreviewUrl;
+      setP
       try { bmpRef.current?.close?.(); } catch {}
       bmpRef.current = await createImageBitmap(f);
       setImgInfo({ w: bmpRef.current?.width || 0, h: bmpRef.current?.height || 0 });
@@ -5303,42 +5305,17 @@ function ProfilePopover({
     });
  }, [crop]);
 
-  // Перерисовка превью при изменении параметров
-  useEffect(() => {
-    let cancelled = false;
-    if (!open || !bmpRef.current || !uploadFile) {
-      setFinalAvatarBlob(null);
-      if (finalAvatarUrlRef.current) {
-        try { URL.revokeObjectURL(finalAvatarUrlRef.current); } catch {}
-        finalAvatarUrlRef.current = '';
-      }
-      setFinalAvatarUrl('');
-      return () => {};
-    }
 
-    (async () => {
-      const blob = await makeCroppedPngBlob({ size: 512 });
-      if (!blob || cancelled) return;
-      const nextUrl = URL.createObjectURL(blob);
-      if (finalAvatarUrlRef.current) {
-        try { URL.revokeObjectURL(finalAvatarUrlRef.current); } catch {}
-      }
-      finalAvatarUrlRef.current = nextUrl;
-      setFinalAvatarBlob(blob);
-      setFinalAvatarUrl(nextUrl);
-    })();
-
-    return () => { cancelled = true; };
-  }, [open, crop, uploadFile, makeCroppedPngBlob]);
   // грузим на сервер и ставим icon=url (но НЕ сохраняем профиль — это сделает основной Save)
   const useUploadedPhoto = async () => {
-    if (!uid || !finalAvatarBlob || uploadBusy) return;
+    if (!uid || uploadBusy) return;
     setUploadBusy(true);
     try {
- 
+      const blob = await makeCroppedPngBlob({ size: 512 });
+      if (!blob) return; 
       const fd = new FormData();
       fd.append('uid', uid);
-      fd.append('file', finalAvatarBlob, 'avatar.png');
+      fd.append('file', blob, 'avatar.png');
 
       const r = await fetch('/api/profile/upload-avatar', { method: 'POST', body: fd });
       const j = await r.json().catch(() => null);
@@ -5441,13 +5418,14 @@ let iconToSend = icon;
 
 // Если выбрано пользовательское фото — модерируем (как загрузка по скрепке),
 // потом кропаем и грузим через /api/forum/upload.
-if (uploadFile) {
-   if (!finalAvatarBlob) {
-     toastI18n('warn', 'forum_avatar_pending', 'Please wait until the avatar preview is ready');
-     return;
-   }  
+    if (uploadFile) {
    setUploadBusy(true);
    try {
+    const finalAvatarBlob = await makeCroppedPngBlob({ size: 512 });
+    if (!finalAvatarBlob) {
+      toastI18n('warn', 'forum_avatar_pending', 'Please wait until the avatar preview is ready');
+      return;
+    }    
     // 0) MODERATION: точно так же, как в attach (paperclip)
     try {
       const mod = await moderateImageFiles([uploadFile]);
@@ -5548,20 +5526,40 @@ if (uploadFile) {
           title="Upload avatar"
           aria-label="Upload avatar"
         >
-          {finalAvatarUrl && (
-            <img
-              src={finalAvatarUrl}
-              alt=""
-              className="avaUploadSquareCanvas"
-              onError={() => setFinalAvatarUrl('')}
-            />
+          {previewUrl && (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element -- local blob preview with drag/zoom */}
+              <img
+                src={previewUrl}
+                alt=""
+                className="avaUploadSquareCanvas"
+                onError={() => setPreviewUrl('')}
+                style={{
+                  width: `${Math.max(1, imgInfo.w || 1)}px`,
+                  height: `${Math.max(1, imgInfo.h || 1)}px`,
+                  transform: (() => {
+                    const base = imgInfo.w && imgInfo.h
+                      ? Math.max(512 / imgInfo.w, 512 / imgInfo.h)
+                      : 1;
+                    const scaleFactor = (boxSize || 1) / 512;
+                    const x = Number(crop?.x || 0) * scaleFactor;
+                    const y = Number(crop?.y || 0) * scaleFactor;
+                    const z = Math.max(1, Number(crop?.z || 1));
+                    return `translate(-50%, -50%) translate(${x}px, ${y}px) scale(${base * z * scaleFactor})`;
+                  })(),
+                  transformOrigin: 'center',
+                  position: 'absolute',
+                  left: '50%',
+                  top: '50%',
+                  willChange: 'transform',
+                }}
+              />
+            </>
           )}
           {!uploadFile && (
             <div className="avaUploadSquareTxt">UPLOAD<br/>AVATAR</div>
           )}
-          {uploadFile && !finalAvatarUrl && (
-            <div className="avaUploadSquareTxt">PROCESSING…</div>
-          )}          
+        
           {uploadBusy && (
             <div className="avaUploadSquareBusy">{t('saving') || 'Saving…'}</div>
           )}
@@ -6400,7 +6398,19 @@ const NO_THREAD_OPEN_SELECTOR =
         <span
           className="tag cursor-pointer"
           title={t?.('forum_replies') || 'Ответы'}
-          onClick={(e) => { e.stopPropagation(); onOpenThread?.(p); }}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onOpenThread?.(p);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onOpenThread?.(p);
+            }
+          }}
+          role="button"
+          tabIndex={0}
           suppressHydrationWarning>
           💬 <HydrateText value={replies} />
         </span>
