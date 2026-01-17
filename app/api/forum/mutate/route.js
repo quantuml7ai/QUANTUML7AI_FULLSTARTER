@@ -10,7 +10,7 @@ import {
   rebuildSnapshot,
   redis as redisDirect,
   K,
-  getBannedUsers,
+  getInt,
   reactPostExclusiveDaily,
   isBanned,
   safeParse, // ← добавили
@@ -58,13 +58,18 @@ function validateOp(op) {
   if (t === 'create_topic') {
     if (!p.title) throw new Error('missing_title')
   } else if (t === 'create_post') {
-    if (!p.topicId) throw new Error('missing_topicId')
+    if (!p.topicId && !p.topicCid) throw new Error('missing_topicId')
     if (!p.text)    throw new Error('missing_text')
   } else if (t === 'react') {
     if (!p.postId) throw new Error('missing_postId')
     if (!['like','dislike'].includes(p.kind)) throw new Error('bad_reaction_kind')
+  } else if (t === 'set_reaction') {
+    if (!p.postId) throw new Error('missing_postId')
+    if (!['like','dislike',null].includes(p.state ?? null)) throw new Error('bad_reaction_state')
   } else if (t === 'view_topic' || t === 'view_post') {
     // ok
+  } else if (t === 'view_topics' || t === 'view_posts') {
+    if (!Array.isArray(p.ids) || !p.ids.length) throw new Error('missing_ids')    
   } else if (t === 'edit_post') {
     if (!p.id)   throw new Error('missing_postId')
     if (!p.text) throw new Error('missing_text')
@@ -106,6 +111,56 @@ async function getTopicObj(id) {
     const obj = safeParse(raw) // ← фикс
     return obj || null
   } catch { return null }
+}
+async function setPostReaction(postId, userId, state) {
+  const pid = String(postId || '').trim()
+  const uid = String(userId || '').trim()
+  if (!pid || !uid) throw new Error('bad_react_args')
+
+  const likeSet = typeof K?.postLikesSet === 'function' ? K.postLikesSet(pid) : `forum:post:${pid}:likes:set`
+  const disSet = typeof K?.postDislikesSet === 'function' ? K.postDislikesSet(pid) : `forum:post:${pid}:dislikes:set`
+  const likeKey = typeof K?.postLikes === 'function' ? K.postLikes(pid) : `forum:post:${pid}:likes`
+  const disKey = typeof K?.postDislikes === 'function' ? K.postDislikes(pid) : `forum:post:${pid}:dislikes`
+
+  const [hasLike, hasDis] = await Promise.all([
+    redisDirect.sismember(likeSet, uid),
+    redisDirect.sismember(disSet, uid),
+  ])
+  const prev = hasLike ? 'like' : (hasDis ? 'dislike' : null)
+  const next = state === 'like' || state === 'dislike' ? state : null
+
+  if (prev === next) {
+    const [likes, dislikes] = await Promise.all([
+      getInt(likeKey, 0),
+      getInt(disKey, 0),
+    ])
+    return { state: next, likes, dislikes, changed: false }
+  }
+
+  const pipe = redisDirect.multi()
+  if (prev === 'like') {
+    pipe.srem(likeSet, uid)
+    pipe.decr(likeKey)
+  }
+  if (prev === 'dislike') {
+    pipe.srem(disSet, uid)
+    pipe.decr(disKey)
+  }
+  if (next === 'like') {
+    pipe.sadd(likeSet, uid)
+    pipe.incr(likeKey)
+  }
+  if (next === 'dislike') {
+    pipe.sadd(disSet, uid)
+    pipe.incr(disKey)
+  }
+  await pipe.exec().catch(() => {})
+
+  const [likes, dislikes] = await Promise.all([
+    getInt(likeKey, 0),
+    getInt(disKey, 0),
+  ])
+  return { state: next, likes, dislikes, changed: true }
 }
 
 async function delPostHard(id) {
@@ -185,7 +240,7 @@ export async function POST(request) {
     if (ops.length > MAX_OPS_PER_BATCH) return bad('too_many_ops', 413)
 
     const results = []
-
+    const topicCidMap = new Map()
     for (const op of ops) {
       try {
         validateOp(op)
@@ -202,24 +257,33 @@ export async function POST(request) {
           if (cid) {
             try {
               const ok = await redisDirect.set(`forum:dedup:${cid}`, '1', { nx: true, ex: 60 })
-              if (!ok) { results.push({ op: 'create_topic', duplicate: true, cid }); continue }
+              if (!ok) { results.push({ op: 'create_topic', duplicate: true, cid, opId: op.opId }); continue }
             } catch {}
           } else {
             const autoKey = `forum:dedup:auto:topic:${sha1(`${userId.toLowerCase()}|${title}|${description}`)}`
             try {
               const ok = await redisDirect.set(autoKey, '1', { nx: true, ex: 10 })
-              if (!ok) { results.push({ op: 'create_topic', duplicate: true, auto: true }); continue }
+              if (!ok) { results.push({ op: 'create_topic', duplicate: true, auto: true, opId: op.opId }); continue }
             } catch {}
           }
 
           const { topic, rev } = await createTopic({
             title, description, userId, nickname, icon, ts: Date.now(),
           })
-          results.push({ op: 'create_topic', topic, rev })
+          const cidVal = String(p.cid || p.id || '')
+          if (cidVal) topicCidMap.set(cidVal, String(topic?.id || ''))
+          results.push({ op: 'create_topic', topic, rev, cid: cidVal || undefined, opId: op.opId })
           await publishForumEvent({ type: 'topic_created', topicId: topic?.id, title: topic?.title ?? '', rev })
 
         } else if (op.type === 'create_post') {
-          const topicId   = p.topicId
+          const topicCid  = String(p.topicCid || '')
+          let topicId     = String(p.topicId || topicCid || '')
+          if (topicCidMap.has(topicId)) topicId = topicCidMap.get(topicId)
+          else if (topicCid && topicCidMap.has(topicCid)) topicId = topicCidMap.get(topicCid)
+          if (!topicId || topicId.startsWith('tmp_t_')) {
+            results.push({ op: 'create_post', error: 'missing_topicId', opId: op.opId })
+            continue
+          }
           const parentId  = p.parentId ?? null
           const text      = trimStr(p.text, MAX_TEXT)
           const nickname  = trimStr(p.nickname || '', 80)
@@ -230,7 +294,7 @@ export async function POST(request) {
           if (cid) {
             try {
               const ok = await redisDirect.set(`forum:dedup:${cid}`, '1', { nx: true, ex: 60 })
-              if (!ok) { results.push({ op: 'create_post', duplicate: true, cid }); continue }
+              if (!ok) { results.push({ op: 'create_post', duplicate: true, auto: true, opId: op.opId }); continue }
             } catch {}
           } else {
             const autoKey = `forum:dedup:auto:post:${sha1(`${userId.toLowerCase()}|${topicId}|${text}`)}`
@@ -243,7 +307,8 @@ export async function POST(request) {
           const { post, rev } = await createPost({
             topicId, parentId, text, userId, nickname, icon, ts: Date.now(),
           })
-          results.push({ op: 'create_post', post, rev })
+          const postCid = String(p.cid || p.id || '')
+          results.push({ op: 'create_post', post, rev, cid: postCid || undefined, opId: op.opId })
 
           const hasImages = textHasImages?.(text) === true
           await publishForumEvent({
@@ -258,27 +323,85 @@ export async function POST(request) {
         } else if (op.type === 'view_topic') {
           const { topicId } = p
           const { inc, views } = await incrementTopicViewsUnique(topicId, userId)
-          const rev = await nextRev()
-          await pushChange({ rev, kind: 'topic', id: String(topicId), data: { views }, ts: Date.now() })
-          results.push({ op: 'view_topic', topicId, views, delta: inc ? 1 : 0, rev })
-          await publishForumEvent({ type: 'view_topic', topicId, views, rev })
+          if (inc) {
+            const rev = await nextRev()
+            await pushChange({ rev, kind: 'views', topics: { [String(topicId)]: views }, ts: Date.now() })
+            results.push({ op: 'view_topic', topicId, views, delta: 1, rev, opId: op.opId })
+            await publishForumEvent({ type: 'view_topic', topicId, views, rev })
+          } else {
+            results.push({ op: 'view_topic', topicId, views, delta: 0, opId: op.opId })
+          }
 
         } else if (op.type === 'view_post') {
           const { postId } = p
           const { inc, views } = await incrementPostViewsUnique(postId, userId)
-          const rev = await nextRev()
-          await pushChange({ rev, kind: 'post', id: String(postId), data: { views }, ts: Date.now() })
-          results.push({ op: 'view_post', postId, views, delta: inc ? 1 : 0, rev })
-          await publishForumEvent({ type: 'view_post', postId, views, rev })
+          if (inc) {
+            const rev = await nextRev()
+            await pushChange({ rev, kind: 'views', posts: { [String(postId)]: views }, ts: Date.now() })
+            results.push({ op: 'view_post', postId, views, delta: 1, rev, opId: op.opId })
+            await publishForumEvent({ type: 'view_post', postId, views, rev })
+          } else {
+            results.push({ op: 'view_post', postId, views, delta: 0, opId: op.opId })
+          }
 
+        } else if (op.type === 'view_topics') {
+          const ids = Array.from(new Set((Array.isArray(p.ids) ? p.ids : []).map(String).filter(Boolean)))
+          const viewsMap = {}
+          let changed = false
+          for (const id of ids) {
+            const { inc, views } = await incrementTopicViewsUnique(id, userId)
+            viewsMap[id] = views
+            if (inc) changed = true
+          }
+          if (changed) {
+            const rev = await nextRev()
+            await pushChange({ rev, kind: 'views', topics: viewsMap, ts: Date.now() })
+            results.push({ op: 'view_topics', ids, views: viewsMap, rev, opId: op.opId })
+            await publishForumEvent({ type: 'view_topics', ids, views: viewsMap, rev })
+          } else {
+            results.push({ op: 'view_topics', ids, views: viewsMap, delta: 0, opId: op.opId })
+          }
+
+        } else if (op.type === 'view_posts') {
+          const ids = Array.from(new Set((Array.isArray(p.ids) ? p.ids : []).map(String).filter(Boolean)))
+          const viewsMap = {}
+          let changed = false
+          for (const id of ids) {
+            const { inc, views } = await incrementPostViewsUnique(id, userId)
+            viewsMap[id] = views
+            if (inc) changed = true
+          }
+          if (changed) {
+            const rev = await nextRev()
+            await pushChange({ rev, kind: 'views', posts: viewsMap, ts: Date.now() })
+            results.push({ op: 'view_posts', ids, views: viewsMap, rev, opId: op.opId })
+            await publishForumEvent({ type: 'view_posts', ids, views: viewsMap, rev })
+          } else {
+            results.push({ op: 'view_posts', ids, views: viewsMap, delta: 0, opId: op.opId })
+          }
+
+        } else if (op.type === 'set_reaction') {
+          const { postId, state } = p
+          const r = await setPostReaction(postId, userId, state ?? null)
+          if (r?.changed) {
+            const rev = await nextRev()
+            await pushChange({ rev, kind: 'post', id: String(postId), data: { likes: r.likes, dislikes: r.dislikes }, ts: Date.now() })
+            results.push({ op: 'set_reaction', postId, state: r.state, likes: r.likes, dislikes: r.dislikes, changed: true, rev, opId: op.opId })
+            await publishForumEvent({ type: 'react', postId, state: r.state, likes: r.likes, dislikes: r.dislikes, rev })
+          } else {
+            results.push({ op: 'set_reaction', postId, state: r.state, likes: r.likes, dislikes: r.dislikes, changed: false, opId: op.opId })
+          }
         } else if (op.type === 'react') {
           const { postId, kind } = p
           const r = await reactPostExclusiveDaily(postId, userId, kind)
-          const rev = r?.rev ?? await nextRev()
-          await pushChange({ rev, kind: 'post', id: String(postId), data: { likes: r.likes, dislikes: r.dislikes }, ts: Date.now() })
-          results.push({ op: 'react', postId, state: r.state, likes: r.likes, dislikes: r.dislikes, changed: !!r.changed, rev })
-          await publishForumEvent({ type: 'react', postId, state: r.state, likes: r.likes, dislikes: r.dislikes, rev })
-
+          if (r?.changed) {
+            const rev = r?.rev ?? await nextRev()
+            await pushChange({ rev, kind: 'post', id: String(postId), data: { likes: r.likes, dislikes: r.dislikes }, ts: Date.now() })
+            results.push({ op: 'react', postId, state: r.state, likes: r.likes, dislikes: r.dislikes, changed: true, rev, opId: op.opId })
+            await publishForumEvent({ type: 'react', postId, state: r.state, likes: r.likes, dislikes: r.dislikes, rev })
+          } else {
+            results.push({ op: 'react', postId, state: r.state, likes: r.likes, dislikes: r.dislikes, changed: false, opId: op.opId })
+          }
         } else if (op.type === 'edit_post') {
           const postId = String(p.id)
           const newText = trimStr(p.text, MAX_TEXT)
@@ -291,7 +414,7 @@ export async function POST(request) {
             await redisDirect.set(postKey(postId), JSON.stringify(po))
             const rev = await nextRev()
             await pushChange({ rev, kind: 'post_edit', id: postId, data: { text: newText }, ts: Date.now() })
-            results.push({ op: 'edit_post', postId, rev })
+            results.push({ op: 'edit_post', postId, text: newText, rev, opId: op.opId })
             await publishForumEvent({ type: 'post_edited', postId, rev })
           }
 
@@ -310,7 +433,7 @@ export async function POST(request) {
             const rev = await nextRev()
             await pushChange({ rev, kind: 'post',         id: postId, _del: 1, deleted: branch, ts: Date.now() })
             await pushChange({ rev, kind: 'post_deleted', id: postId,        deleted: branch, ts: Date.now() })
-            results.push({ op: 'delete_post', postId, deleted: branch, rev })
+            results.push({ op: 'delete_post', postId, deleted: branch, rev, opId: op.opId })
             await publishForumEvent({ type: 'post_deleted', postId, deleted: branch, rev })
           }
 
@@ -344,7 +467,7 @@ export async function POST(request) {
             const rev = await nextRev()
             await pushChange({ rev, kind: 'topic',         id: topicId, _del: 1, deletedPosts: affected, ts: Date.now() })
             await pushChange({ rev, kind: 'topic_deleted', id: topicId,        deletedPosts: affected, ts: Date.now() })
-            results.push({ op: 'delete_topic', topicId, removedPosts: affected.length, rev })
+            results.push({ op: 'delete_topic', topicId, removedPosts: affected.length, rev, opId: op.opId })
             await publishForumEvent({ type: 'topic_deleted', topicId, removedPosts: affected.length, rev })
           }
 
@@ -356,7 +479,7 @@ export async function POST(request) {
           await redisDirect.sadd(K.bannedSet, targetLc)
           const rev = await nextRev()
           await pushChange({ rev, kind: 'ban_user', id: targetLc, data: { userId: targetLc }, ts: Date.now() })
-          results.push({ op: 'ban_user', userId: targetRaw, rev })
+          results.push({ op: 'ban_user', userId: targetRaw, rev, opId: op.opId })
           await publishForumEvent({ type: 'ban_user', userId: targetLc, rev })
 
         } else if (op.type === 'unban_user') {
@@ -367,7 +490,7 @@ export async function POST(request) {
           await redisDirect.srem(K.bannedSet, targetLc)
           const rev = await nextRev()
           await pushChange({ rev, kind: 'unban_user', id: targetLc, data: { userId: targetLc }, ts: Date.now() })
-          results.push({ op: 'unban_user', userId: targetRaw, rev })
+          results.push({ op: 'unban_user', userId: targetRaw, rev, opId: op.opId })
           await publishForumEvent({ type: 'unban_user', userId: targetLc, rev })
 
         } else if (op.type === 'ban_ip') {
@@ -376,7 +499,7 @@ export async function POST(request) {
           await redisDirect.sadd(K.bannedIpsSet || 'forum:banned:ips', ipVal)
           const rev = await nextRev()
           await pushChange({ rev, kind: 'ban_ip', id: ipVal, data: { ip: ipVal }, ts: Date.now() })
-          results.push({ op: 'ban_ip', ip: ipVal, rev })
+          results.push({ op: 'ban_ip', ip: ipVal, rev, opId: op.opId })
           await publishForumEvent({ type: 'ban_ip', ip: ipVal, rev })
 
         } else if (op.type === 'unban_ip') {
@@ -385,7 +508,7 @@ export async function POST(request) {
           await redisDirect.srem(K.bannedIpsSet || 'forum:banned:ips', ipVal)
           const rev = await nextRev()
           await pushChange({ rev, kind: 'unban_ip', id: ipVal, data: { ip: ipVal }, ts: Date.now() })
-          results.push({ op: 'unban_ip', ip: ipVal, rev })
+          results.push({ op: 'unban_ip', ip: ipVal, rev, opId: op.opId })
           await publishForumEvent({ type: 'unban_ip', ip: ipVal, rev })
 
         } else {
@@ -406,8 +529,7 @@ export async function POST(request) {
       'ban_user',
       'unban_user',
       'ban_ip',
-      'unban_ip',
-      'react',
+      'unban_ip', 
     ])
 
     const needRebuild = results.some(r => !r?.error && SNAPSHOT_REBUILD_OPS.has(String(r?.op || '')))
