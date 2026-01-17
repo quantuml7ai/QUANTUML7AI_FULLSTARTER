@@ -13225,6 +13225,9 @@ onClick={()=>{
 
       </div>
 <div className="composeDock">
+
+{/* нижний композер */}
+<div className="composer" data-active={composerActive} ref={composerRef}>
   {uploadFlow.active && (
   <div className="composerProgress" role="status" aria-live="polite">
     <div className="composerProgressHeader">
@@ -13258,29 +13261,6 @@ onClick={()=>{
     </div>
   </div>
 )}
-{/* нижний композер */}
-<div className="composer" data-active={composerActive} ref={composerRef}>
-  {uploadStatus.active && (
-    <div className="uploadProgress" aria-live="polite">
-      <div className="uploadProgressHeader">
-        <span>{t?.('forum_upload_title') || 'Media upload'}</span>
-        <span>{Math.round(Math.min(100, Math.max(0, uploadStatus.percent || 0)))}%</span>
-      </div>
-      <div className="uploadProgressSteps">
-        {uploadSteps.map((step) => (
-          <span key={step.key} data-active={uploadStatus.stage === step.key}>
-            {step.label}
-          </span>
-        ))}
-      </div>
-      <div className="uploadProgressTrack" aria-hidden>
-        <span
-          className="uploadProgressFill"
-          style={{ width: `${Math.min(100, Math.max(0, uploadStatus.percent || 0))}%` }}
-        />
-      </div>
-    </div>
-  )}
   <div className="meta mb-2">
     {replyTo
       ? `${t('forum_reply_to')||'Ответ для'} ${replyTo.nickname||shortId(replyTo.userId||'')}`
