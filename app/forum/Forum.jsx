@@ -1525,7 +1525,57 @@ const Styles = () => (
 
 
     .composer{ position:sticky; bottom:0; z-index:5; border-top:1px solid rgba(255,255,255,.1); background:rgba(10,14,22,.96); padding:.8rem }
-
+    .uploadProgress{
+      margin: 0 0 8px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(8,13,20,.85);
+      box-shadow: inset 0 0 0 1px rgba(80,167,255,.08);
+      display: grid;
+      gap: 8px;
+    }
+    .uploadProgressHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      font-size:.82rem;
+      opacity:.85;
+      letter-spacing:.2px;
+    }
+    .uploadProgressSteps{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap:6px;
+      font-size:.72rem;
+      text-transform:uppercase;
+      opacity:.6;
+    }
+    .uploadProgressSteps span{
+      white-space:nowrap;
+      text-align:center;
+      border-bottom:1px solid rgba(255,255,255,.12);
+      padding-bottom:4px;
+    }
+    .uploadProgressSteps span[data-active="true"]{
+      opacity:1;
+      color:#bfe3ff;
+      border-color: rgba(80,167,255,.55);
+    }
+    .uploadProgressTrack{
+      position:relative;
+      height:6px;
+      border-radius:999px;
+      background:rgba(255,255,255,.12);
+      overflow:hidden;
+    }
+    .uploadProgressFill{
+      position:absolute;
+      inset:0 auto 0 0;
+      width:0%;
+      background:linear-gradient(90deg, rgba(90,180,255,.9), rgba(155,91,255,.9));
+      transition: width .2s ease;
+    }
     .emojiPanel{ margin-top:10px; background:rgba(10,14,20,.98); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:10px; max-height:300px; overflow:auto }
     .emojiTitle{ font-size:.86rem; opacity:.8; margin:2px 2px 6px }
     .emojiGrid{ display:grid; grid-template-columns: repeat(auto-fit, 38px); gap:6px }
@@ -6048,6 +6098,8 @@ const cleanedText = allLines
   );
   const ytEmbedParams = React.useMemo(() => {
     const params = new URLSearchParams({
+      autoplay: '1',
+      mute: '1',      
       enablejsapi: '1',
       playsinline: '1',
       rel: '0',
@@ -6280,7 +6332,7 @@ const NO_THREAD_OPEN_SELECTOR =
         src=""
         title="TikTok video"
         data-forum-media="tiktok"
-        data-src={`https://www.tiktok.com/embed/v2/${videoId}`} 
+        data-src={`https://www.tiktok.com/embed/v2/${videoId}?autoplay=1&muted=1`} 
         loading="lazy"       
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -9526,6 +9578,11 @@ useEffect(() => {
 const startSendCooldown = React.useCallback((sec = 10) => {
   setCooldownLeft(sec);
 }, []);
+const uploadSteps = [
+  { key: 'moderation', label: t?.('forum_upload_stage_moderation') || 'Moderation' },
+  { key: 'upload', label: t?.('forum_upload_stage_upload') || 'Upload' },
+  { key: 'preview', label: t?.('forum_upload_stage_preview') || 'Preview' },
+];
 // по клику вне композера — закрываем
 useEffect(() => {
   if (!composerActive) return;
@@ -9575,7 +9632,37 @@ const [overlayMediaKind, setOverlayMediaKind] = useState('video'); // 'video' | 
 const [overlayMediaUrl, setOverlayMediaUrl] = useState(null);      // string | null
 const videoCancelRef = useRef(false); // true => onstop не собирает blob (отмена)
 const videoMirrorRef = useRef(null);  // вспомогательный незеркальный front-поток для записи
- 
+ const [uploadStatus, setUploadStatus] = useState({
+  active: false,
+  stage: 'idle',
+  percent: 0,
+});
+const uploadTimerRef = useRef(null);
+const clearUploadTimer = useCallback(() => {
+  if (uploadTimerRef.current) {
+    clearTimeout(uploadTimerRef.current);
+    uploadTimerRef.current = null;
+  }
+}, []);
+const setUploadStage = useCallback((stage, percent) => {
+  setUploadStatus(prev => ({
+    active: true,
+    stage,
+    percent: Math.max(Number(percent ?? prev.percent ?? 0), 0),
+  }));
+}, []);
+const finishUpload = useCallback((delayMs = 900) => {
+  clearUploadTimer();
+  setUploadStatus({ active: true, stage: 'preview', percent: 100 });
+  uploadTimerRef.current = setTimeout(() => {
+    setUploadStatus(prev => ({ ...prev, active: false }));
+    uploadTimerRef.current = null;
+  }, delayMs);
+}, []);
+const resetUploadStatus = useCallback(() => {
+  clearUploadTimer();
+  setUploadStatus({ active: false, stage: 'idle', percent: 0 });
+}, [clearUploadTimer]);
 // --- voice handlers (зажал/держишь/отпустил) ---
    const startRecord = async () => {
      if (recState === 'rec') return;
@@ -10322,6 +10409,7 @@ toast.ok(t('forum_create_ok') ||'Тема создана')
 const createPost = async () => {
   if (postingRef.current) return;
   postingRef.current = true;
+  const hadUpload = !!(pendingVideo || pendingAudio);  
   // === Режим редактирования поста владельцем ===
   if (editPostId) {
     const _done = () => { postingRef.current = false; };
@@ -10346,6 +10434,7 @@ const createPost = async () => {
   // === Обычный режим: создание поста ===
   const _fail = (msg) => {
     if (msg) { try { toast?.warn?.(msg) } catch {} }
+        if (hadUpload) resetUploadStatus();
     postingRef.current = false;
   };
 
@@ -10353,6 +10442,8 @@ const createPost = async () => {
   // 0) VIDEO MODERATION (frames) BEFORE ANY UPLOAD
   if (pendingVideo) {
     try {
+      clearUploadTimer();
+      setUploadStage('moderation', 8);      
       // если pendingVideo = blob: -> достаём Blob и модерируем по кадрам
       if (/^blob:/.test(pendingVideo)) {
         const resp = await fetch(pendingVideo);
@@ -10388,6 +10479,7 @@ const createPost = async () => {
   if (pendingVideo) {
     try {
       if (/^blob:/.test(pendingVideo)) {
+        setUploadStage('upload', 18);        
         // получаем Blob из локального blob:-URL
         const resp = await fetch(pendingVideo);
         const fileBlob = await resp.blob(); // type: video/webm|mp4|quicktime
@@ -10406,7 +10498,10 @@ const createPost = async () => {
           handleUploadUrl: '/api/forum/blobUploadUrl', // ← наш единственный роут
           multipart: true,                                // надёжно для больших файлов
           contentType: mime,
-          onUploadProgress: (p) => { try { setVideoProgress?.(p.percentage || 0) } catch {} },
+          onUploadProgress: (p) => {
+            const percent = Number(p?.percentage ?? 0);
+            if (Number.isFinite(percent)) setUploadStage('upload', Math.min(96, Math.max(18, percent)));
+          },
         });
         videoUrlToSend = result?.url || '';
         if (!videoUrlToSend) throw new Error('no_url');
@@ -10424,7 +10519,8 @@ const createPost = async () => {
   let audioUrlToSend = '';
   if (pendingAudio) {
     try {
-      if (/^blob:/.test(pendingAudio)) {
+      if (/^blob:/.test(pendingAudio)) {      
+        setUploadStage('upload', 22);
         const resp = await fetch(pendingAudio);
         const blob = await resp.blob();
         const fd = new FormData();
@@ -10583,6 +10679,7 @@ const createPost = async () => {
  } catch {}
  try { setPendingVideo(null); } catch {}
  try { setVideoOpen(false); setVideoState('idle'); } catch {}
+  if (hadUpload) finishUpload();
 };
 
 
@@ -10848,9 +10945,11 @@ const onFilesChosen = React.useCallback(async (e) => {
             'Allowed types: PNG, JPG, JPEG, WEBP, GIF, MP4, WEBM, MOV')
         );
       } catch {}
+      resetUploadStatus();      
       return;
     }
-
+    clearUploadTimer();
+    setUploadStage('moderation', 8);
     // =========================
     // 1) IMAGES: moderation -> /api/forum/upload
     // =========================
@@ -10862,19 +10961,21 @@ const onFilesChosen = React.useCallback(async (e) => {
         console.error('[moderation] image check failed', err);
         toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
         toastI18n('info', 'forum_moderation_try_again', 'Please try again');
+        resetUploadStatus();       
         return;
       }
 
       if (modImg?.decision === 'block') {
         toastI18n('warn', 'forum_image_blocked', 'Image rejected by community rules');
         toastI18n('info', reasonKey(modImg?.reason), reasonFallbackEN(modImg?.reason));
+        resetUploadStatus();       
         return;
       }
 
       if (modImg?.decision === 'review') {
         try { console.warn('[moderation] image review -> allow (balanced)', modImg?.reason, modImg?.raw); } catch {}
       }
-
+      setUploadStage('upload', 28);
       const fd = new FormData();
       for (const f of imgFiles.slice(0, 20)) fd.append('files', f, f.name);
 
@@ -10885,6 +10986,7 @@ const onFilesChosen = React.useCallback(async (e) => {
       const urls = Array.isArray(up?.urls) ? up.urls : [];
       if (urls.length) 
         setPendingImgs(prev => [...prev, ...urls]);
+       setUploadStage('preview', 90);     
       // если загрузили ТОЛЬКО картинки — открываем fullscreen overlay (как для видео)
       if (!vidFiles.length && urls.length) {
         try { setOverlayMediaKind('image'); } catch {}
@@ -10917,6 +11019,7 @@ const onFilesChosen = React.useCallback(async (e) => {
         if (modV?.decision === 'block') {
           toastI18n('warn', 'forum_video_blocked', 'Video rejected by community rules');
           toastI18n('info', reasonKey(modV?.reason), reasonFallbackEN(modV?.reason));
+          resetUploadStatus();        
           return;
         }
         if (modV?.decision === 'review') {
@@ -10926,6 +11029,7 @@ const onFilesChosen = React.useCallback(async (e) => {
         console.error('[moderation] video check failed', e2);
         toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
         toastI18n('info', 'forum_moderation_try_again', 'Please try again');
+        resetUploadStatus();       
         return;
       }
 
@@ -10938,11 +11042,16 @@ const onFilesChosen = React.useCallback(async (e) => {
         const name = `forum/video-${Date.now()}.${ext}`;
 
         const { upload } = await import('@vercel/blob/client');
+        setUploadStage('upload', 34);        
         const result = await upload(name, vf, {
           access: 'public',
           handleUploadUrl: '/api/forum/blobUploadUrl',
           multipart: true,
           contentType: (mime || (ext === 'mp4' ? 'video/mp4' : (ext === 'mov' ? 'video/quicktime' : 'video/webm'))),
+          onUploadProgress: (p) => {
+            const percent = Number(p?.percentage ?? 0);
+            if (Number.isFinite(percent)) setUploadStage('upload', Math.min(92, Math.max(34, percent)));
+          },       
         });
 
         const url = result?.url || '';
@@ -10959,6 +11068,7 @@ const onFilesChosen = React.useCallback(async (e) => {
    } catch (e3) {
         console.error('video_client_upload_failed', e3);
         try { toast?.err?.(t?.('forum_video_upload_failed') || 'Failed to upload video'); } catch {}
+        resetUploadStatus();     
         return;
       }
     }
@@ -10966,15 +11076,16 @@ const onFilesChosen = React.useCallback(async (e) => {
     // общий success toast (если что-то реально добавили)
     if (imgFiles.length || vidFiles.length) {
       try { toast?.success?.(t?.('forum_files_uploaded') || 'Files uploaded'); } catch {}
+       finishUpload();  
     }
   } catch (err) {
     console.error(err);
     try { toast?.error?.(t?.('forum_files_upload_failed') || 'Upload failed'); } catch {}
+    finishUpload(300); 
   } finally {
     if (e?.target) e.target.value = '';
   }
-}, [t, toast, moderateImageFiles, moderateVideoSource, toastI18n, reasonKey, reasonFallbackEN]);
-
+}, [t, toast, moderateImageFiles, moderateVideoSource, toastI18n, reasonKey, reasonFallbackEN, clearUploadTimer, setUploadStage, finishUpload, resetUploadStatus]);
   /* ---- профиль (поповер у аватара) ---- */
   const idShown = auth.asherId || auth.accountId || ''
   const profile = (()=>{ if(!isBrowser()) return null; try{ return JSON.parse(localStorage.getItem('profile:'+idShown)||'null') }catch{return null} })()
@@ -12963,6 +13074,27 @@ onClick={()=>{
 <div className="composeDock">
 {/* нижний композер */}
 <div className="composer" data-active={composerActive} ref={composerRef}>
+  {uploadStatus.active && (
+    <div className="uploadProgress" aria-live="polite">
+      <div className="uploadProgressHeader">
+        <span>{t?.('forum_upload_title') || 'Media upload'}</span>
+        <span>{Math.round(Math.min(100, Math.max(0, uploadStatus.percent || 0)))}%</span>
+      </div>
+      <div className="uploadProgressSteps">
+        {uploadSteps.map((step) => (
+          <span key={step.key} data-active={uploadStatus.stage === step.key}>
+            {step.label}
+          </span>
+        ))}
+      </div>
+      <div className="uploadProgressTrack" aria-hidden>
+        <span
+          className="uploadProgressFill"
+          style={{ width: `${Math.min(100, Math.max(0, uploadStatus.percent || 0))}%` }}
+        />
+      </div>
+    </div>
+  )}
   <div className="meta mb-2">
     {replyTo
       ? `${t('forum_reply_to')||'Ответ для'} ${replyTo.nickname||shortId(replyTo.userId||'')}`
