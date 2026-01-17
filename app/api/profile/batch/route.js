@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server'
 import { Redis } from '@upstash/redis'
 import { K } from '../../forum/_db.js'
-
+import { resolveCanonicalAccountIds } from '../_identity.js'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const fetchCache = 'force-no-store'
@@ -24,14 +24,19 @@ const unwrapResult = (value) => {
 export async function POST(req) {
   try {
     const body = await req.json().catch(() => ({}))
-    const ids = normalizeIdList(body?.ids)
+    const rawIds = normalizeIdList(body?.ids)
     const map = {}
 
-    if (!ids.length) {
-      return NextResponse.json({ ok: true, map })
+    if (!rawIds.length) {
+      return NextResponse.json({ ok: true, map, aliases: {} })
     }
 
     const redis = Redis.fromEnv()
+    const { ids, aliases } = await resolveCanonicalAccountIds(rawIds, redis)
+    // WHY: normalize non-canonical ids (tgUid/hasher) to canonical accountId for a single source of truth.
+    if (!ids.length) {
+      return NextResponse.json({ ok: true, map, aliases })
+    }    
     const pipe = redis.multi()
     ids.forEach((uid) => {
       pipe.get(K.userNick(uid))
@@ -47,7 +52,7 @@ export async function POST(req) {
       map[uid] = { nickname: nick, icon }
     })
 
-    return NextResponse.json({ ok: true, map })
+    return NextResponse.json({ ok: true, map, aliases })
   } catch (e) {
     return NextResponse.json(
       { ok: false, error: String(e?.message || e) },

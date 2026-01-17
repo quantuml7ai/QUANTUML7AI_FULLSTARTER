@@ -171,14 +171,44 @@ function ensureClientId(){
     return v
   }catch{ return `c_${Date.now()}` }
 }
+const PROFILE_ALIAS_PREFIX = 'profile:alias:'
+
+function resolveProfileAccountId(userId) {
+  const raw = String(userId || '').trim()
+  if (!raw || typeof window === 'undefined') return raw
+  try {
+    const alias = localStorage.getItem(PROFILE_ALIAS_PREFIX + raw)
+    return alias ? String(alias).trim() : raw
+  } catch {
+    return raw
+  }
+}
 // --- hydration-safe helpers (вставь выше разметки) ---
 function safeReadProfile(userId) {
   if (typeof window === 'undefined' || !userId) return {};
-  try { return JSON.parse(localStorage.getItem('profile:' + userId) || '{}'); }
+  const uid = resolveProfileAccountId(userId)
+  try { return JSON.parse(localStorage.getItem('profile:' + uid) || '{}'); }
   catch { return {}; }
 }
+function writeProfileAlias(rawId, accountId) {
+  if (!rawId || !accountId || typeof window === 'undefined') return
+  const from = String(rawId).trim()
+  const to = String(accountId).trim()
+  if (!from || !to || from === to) return
+  try { localStorage.setItem(PROFILE_ALIAS_PREFIX + from, to) } catch {}
+}
+
+function mergeProfileCache(accountId, patch) {
+  if (!accountId || typeof window === 'undefined') return null
+  const key = 'profile:' + accountId
+  let cur = {}
+  try { cur = JSON.parse(localStorage.getItem(key) || '{}') || {} } catch { cur = {} }
+  const next = { ...cur, ...(patch || {}) }
+  try { localStorage.setItem(key, JSON.stringify(next)) } catch {}
+  return next
+}
 // --- Профиль: подтянуть ник/аватар с бэка и записать в localStorage ---
-function useSyncForumProfileOnMount() {
+function useSyncForumProfileOnMount(onProfileUpdate) {
   React.useEffect(() => {
     if (!isBrowser()) return
 
@@ -186,7 +216,7 @@ function useSyncForumProfileOnMount() {
     const uid = asherId || accountId
     if (!uid) return
 
-    const key = 'profile:' + uid
+
     let cancelled = false
 
     async function sync() {
@@ -197,10 +227,10 @@ function useSyncForumProfileOnMount() {
         })
         const j = await r.json().catch(() => null)
         if (!j?.ok || cancelled) return
-
+        const resolvedAccountId = String(j.accountId || uid).trim()
+        if (resolvedAccountId) writeProfileAlias(uid, resolvedAccountId)
         let cur = {}
-        try { cur = JSON.parse(localStorage.getItem(key) || '{}') || {} } catch { cur = {} }
-
+        try { cur = JSON.parse(localStorage.getItem('profile:' + resolvedAccountId) || '{}') || {} } catch { cur = {} }
 const vipUntil = Number(j?.vipUntil ?? j?.vipExpiresAt ?? j?.vip_until ?? j?.vip_exp ?? 0) || 0;
 const vipActive = !!(j?.vipActive ?? j?.isVip ?? j?.vip ?? false) || (vipUntil && vipUntil > Date.now());
 
@@ -213,7 +243,8 @@ const next = {
 }
 
 
-        localStorage.setItem(key, JSON.stringify(next))
+        mergeProfileCache(resolvedAccountId, next)
+        onProfileUpdate?.()
       } catch {
         // сеть/бэк лёг — просто молча игнорим
       }
@@ -225,10 +256,17 @@ const next = {
 }
 
 // [VIP AVATAR FIX] выбираем, что показывать на карточках
+function resolveNickForDisplay(userId, fallbackNick) {
+  const uid = resolveProfileAccountId(userId)
+  const prof = safeReadProfile(uid) || {}
+  // WHY: nickname must always come from canonical profile cache, props are fallback only.
+  return prof.nickname || fallbackNick || (uid ? shortId(uid) : '')
+}
 function resolveIconForDisplay(userId, pIcon) {
-  const prof = safeReadProfile(userId) || {};
+  const uid = resolveProfileAccountId(userId)
+  const prof = safeReadProfile(uid) || {};
   // приоритет: vipIcon (URL) → vipEmoji (эмодзи) → то, что пришло с сервера
-  return prof.vipIcon || prof.vipEmoji || pIcon || '👤';
+  return prof.vipIcon || prof.vipEmoji || prof.icon || pIcon || '👤';
 }
 // =========================================================
 // VIP badge над ником (1.png 20s / 2.png 5s) — только для VIP
@@ -273,7 +311,7 @@ function __vipFromProfile(prof) {
 }
 
 function useVipFlag(userId, hint) {
-  const uid = String(userId || '').trim();
+  const uid = String(resolveProfileAccountId(userId) || '').trim();
 
   const [vip, setVip] = React.useState(() => {
     const fromHint = __vipFromHint(hint);
@@ -283,7 +321,7 @@ function useVipFlag(userId, hint) {
   });
 
   React.useEffect(() => {
-    const uid = String(userId || '').trim();
+    const uid = String(resolveProfileAccountId(userId) || '').trim();
     if (!uid) { setVip(false); return; }
 
     const fromHint = __vipFromHint(hint);
@@ -313,10 +351,7 @@ const vipUntil = Number(v?.untilMs || 0) || 0;
 const vipActive = !!v?.active || (vipUntil && vipUntil > Date.now());
         // сохраним в localStorage, чтобы дальше не гадать
         try {
-          const key = 'profile:' + uid;
-          let cur = {};
-          try { cur = JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch { cur = {}; }
-          localStorage.setItem(key, JSON.stringify({ ...cur, vipActive, vipUntil }));
+          mergeProfileCache(uid, { vipActive, vipUntil });
         } catch {}
 
         setVip(vipActive);
@@ -421,7 +456,7 @@ function AvatarEmoji({ userId, pIcon, className }) {
     [pIcon, userId]
   )
   const [url, setUrl] = React.useState(initialUrl)
-
+  const fallbackUrl = React.useMemo(() => defaultAvatarUrl(userId), [userId])
   // 2) после mount можно «уточнить» из локального профиля, но структура не меняется
   React.useEffect(() => {
     try {
@@ -441,6 +476,7 @@ function AvatarEmoji({ userId, pIcon, className }) {
         width={64}
         height={64}
         unoptimized
+        onError={() => setUrl(fallbackUrl)}        
         style={{
           width: '100%',
           height: '100%',
@@ -850,6 +886,20 @@ const api = {
       return { ok: false, error: 'network', map: {} }
     }
   },  
+  async profileBatch(ids) {
+    try {
+      const arr = Array.isArray(ids) ? ids : []
+      const r = await fetch('/api/profile/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        body: JSON.stringify({ ids: arr }),
+      })
+      return await r.json().catch(() => ({ ok: false, map: {}, aliases: {} }))
+    } catch {
+      return { ok: false, error: 'network', map: {}, aliases: {} }
+    }
+  },
 };
  
  
@@ -5073,15 +5123,11 @@ function ProfilePopover({
   const baseAuth = auth || {};
   const base = baseAuth.asherId || baseAuth.accountId || '';
   const resolved = resolveForumUserId(base);
-  const uid = typeof resolved === 'string' ? resolved.trim() : '';
+  const uid = resolveProfileAccountId(resolved);
 
   const readLocal = React.useCallback(() => {
     if (!uid || typeof window === 'undefined') return null;
-    try {
-      return JSON.parse(localStorage.getItem('profile:' + uid) || 'null');
-    } catch {
-      return null;
-    }
+    return safeReadProfile(uid) || null;
   }, [uid]);
 
   const initialLocal = readLocal() || {};
@@ -5092,12 +5138,15 @@ function ProfilePopover({
   // ВАЖНО: превью и сохранение используют ОДИН И ТОТ ЖЕ canvas-рендер -> идеальное совпадение.
   const fileRef = useRef(null);
   const avaBoxRef = useRef(null);
-  const avaCanvasRef = useRef(null);
+
 
   const [uploadFile, setUploadFile] = useState(null);      // File выбранный пользователем
   const [imgInfo, setImgInfo] = useState({ w: 0, h: 0 });  // натуральные размеры
   const [crop, setCrop] = useState({ x: 0, y: 0, z: 1 });  // translate(px) + zoom(mult)
   const [uploadBusy, setUploadBusy] = useState(false);
+  const [finalAvatarBlob, setFinalAvatarBlob] = useState(null);
+  const [finalAvatarUrl, setFinalAvatarUrl] = useState('');
+  const finalAvatarUrlRef = useRef('');
   const dragRef = useRef({ on: false, x: 0, y: 0, sx: 0, sy: 0 });
 
   const bmpRef = useRef(null); // ImageBitmap
@@ -5108,6 +5157,10 @@ function ProfilePopover({
     return () => {
       try { bmpRef.current?.close?.(); } catch {}
       bmpRef.current = null;
+      if (finalAvatarUrlRef.current) {
+        try { URL.revokeObjectURL(finalAvatarUrlRef.current); } catch {}
+        finalAvatarUrlRef.current = '';
+      }
     };
   }, []);
   // когда поповер открывается — сбрасываем превью (чтобы не "тащилось" по страницам)
@@ -5119,6 +5172,12 @@ function ProfilePopover({
     setImgInfo({ w: 0, h: 0 });
     setCrop({ x: 0, y: 0, z: 1 });
     setUploadBusy(false);
+    setFinalAvatarBlob(null);
+    setFinalAvatarUrl('');
+    if (finalAvatarUrlRef.current) {
+      try { URL.revokeObjectURL(finalAvatarUrlRef.current); } catch {}
+      finalAvatarUrlRef.current = '';
+    }    
     try { bmpRef.current?.close?.(); } catch {}
     bmpRef.current = null;
   }, [open]);
@@ -5133,17 +5192,7 @@ function ProfilePopover({
       const r = el.getBoundingClientRect();
       const sz = Math.max(1, Math.round(Math.min(r.width, r.height)));
       boxSizeRef.current = sz;
-      const c = avaCanvasRef.current;
-      if (c) {
-        // devicePixelRatio для чёткой отрисовки
-        const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-        c.width = Math.round(sz * dpr);
-        c.height = Math.round(sz * dpr);
-        c.style.width = sz + 'px';
-        c.style.height = sz + 'px';
-      }
-      // перерисуем
-      try { drawAvatarPreview(); } catch {}
+
     };
 
     applySize();
@@ -5173,40 +5222,7 @@ function ProfilePopover({
     return { x, y, z: Math.max(1, Number(next?.z || 1)) };
   }, []);
 
-  const drawAvatarPreview = React.useCallback(() => {
-    const bmp = bmpRef.current;
-    const c = avaCanvasRef.current;
-    if (!c) return;
-
-    const ctx = c.getContext('2d');
-    if (!ctx) return;
-
-    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-    const size = Math.max(1, Math.round((boxSizeRef.current || 0) * dpr));
-
-    ctx.clearRect(0, 0, c.width, c.height);
-    if (!bmp) return;
-
-    const iw = bmp.width || 1;
-    const ih = bmp.height || 1;
-    const base = Math.max(size / iw, size / ih);
-    const z = Math.max(1, Number(crop?.z || 1));
-    const scale = base * z;
-
-    const dx = (size / 2) + (Number(crop?.x || 0) * dpr);
-    const dy = (size / 2) + (Number(crop?.y || 0) * dpr);
-
-    const dw = iw * scale;
-    const dh = ih * scale;
-
-    ctx.save();
-    ctx.translate(dx, dy);
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(bmp, -dw / 2, -dh / 2, dw, dh);
-    ctx.restore();
-  }, [crop]);
-
+ 
   const openFilePicker = () => fileRef.current?.click?.();
 
   const onPickFile = async (e) => {
@@ -5220,9 +5236,7 @@ function ProfilePopover({
       try { bmpRef.current?.close?.(); } catch {}
       bmpRef.current = await createImageBitmap(f);
       setImgInfo({ w: bmpRef.current?.width || 0, h: bmpRef.current?.height || 0 });
-      requestAnimationFrame(() => {
-        try { drawAvatarPreview(); } catch {}
-      });
+
     } finally {
       try { e.target.value = ''; } catch {}
     }
@@ -5257,7 +5271,7 @@ function ProfilePopover({
   };
 
   // делаем квадратный PNG из превью (клиентский кроп)
-  const makeCroppedPngBlob = async ({ size = 512 } = {}) => {
+  const makeCroppedPngBlob = React.useCallback(async ({ size = 512 } = {}) => {
     const bmp = bmpRef.current;
     if (!bmp) return null;
 
@@ -5287,25 +5301,44 @@ function ProfilePopover({
     return new Promise((resolve) => {
       canvas.toBlob((b) => resolve(b), 'image/png', 0.92);
     });
-  };
+ }, [crop]);
 
   // Перерисовка превью при изменении параметров
   useEffect(() => {
-    if (!open) return;
-    if (!bmpRef.current) return;
-    requestAnimationFrame(() => { try { drawAvatarPreview(); } catch {} });
-  }, [open, crop, drawAvatarPreview]);
+    let cancelled = false;
+    if (!open || !bmpRef.current || !uploadFile) {
+      setFinalAvatarBlob(null);
+      if (finalAvatarUrlRef.current) {
+        try { URL.revokeObjectURL(finalAvatarUrlRef.current); } catch {}
+        finalAvatarUrlRef.current = '';
+      }
+      setFinalAvatarUrl('');
+      return () => {};
+    }
+
+    (async () => {
+      const blob = await makeCroppedPngBlob({ size: 512 });
+      if (!blob || cancelled) return;
+      const nextUrl = URL.createObjectURL(blob);
+      if (finalAvatarUrlRef.current) {
+        try { URL.revokeObjectURL(finalAvatarUrlRef.current); } catch {}
+      }
+      finalAvatarUrlRef.current = nextUrl;
+      setFinalAvatarBlob(blob);
+      setFinalAvatarUrl(nextUrl);
+    })();
+
+    return () => { cancelled = true; };
+  }, [open, crop, uploadFile, makeCroppedPngBlob]);
   // грузим на сервер и ставим icon=url (но НЕ сохраняем профиль — это сделает основной Save)
   const useUploadedPhoto = async () => {
-    if (!uid || !uploadSrc || uploadBusy) return;
+    if (!uid || !finalAvatarBlob || uploadBusy) return;
     setUploadBusy(true);
     try {
-      const blob = await makeCroppedPngBlob({ size: 512 });
-      if (!blob) return;
-
+ 
       const fd = new FormData();
       fd.append('uid', uid);
-      fd.append('file', blob, 'avatar.png');
+      fd.append('file', finalAvatarBlob, 'avatar.png');
 
       const r = await fetch('/api/profile/upload-avatar', { method: 'POST', body: fd });
       const j = await r.json().catch(() => null);
@@ -5409,6 +5442,10 @@ let iconToSend = icon;
 // Если выбрано пользовательское фото — модерируем (как загрузка по скрепке),
 // потом кропаем и грузим через /api/forum/upload.
 if (uploadFile) {
+   if (!finalAvatarBlob) {
+     toastI18n('warn', 'forum_avatar_pending', 'Please wait until the avatar preview is ready');
+     return;
+   }  
    setUploadBusy(true);
    try {
     // 0) MODERATION: точно так же, как в attach (paperclip)
@@ -5429,10 +5466,7 @@ if (uploadFile) {
       return;
     }
 
-    const blob = await makeCroppedPngBlob({ size: 512 });
-    if (!blob) throw new Error('no_blob');
-
-    const file = new File([blob], `avatar-${uid}-${Date.now()}.png`, { type: 'image/png' });
+    const file = new File([finalAvatarBlob], `avatar-${uid}-${Date.now()}.png`, { type: 'image/png' });
     const fd = new FormData();
     fd.append('files', file);
 
@@ -5469,13 +5503,10 @@ if (uploadFile) {
 
     const savedNick = j.nick || n;
     const savedIcon = j.icon || icon;
- 
-    try {
-      localStorage.setItem(
-        'profile:' + uid,
-        JSON.stringify({ nickname: savedNick, icon: savedIcon }),
-      );
-    } catch {}
+    const savedAccountId = String(j.accountId || uid || '').trim();
+
+    writeProfileAlias(uid, savedAccountId);
+    mergeProfileCache(savedAccountId, { nickname: savedNick, icon: savedIcon, updatedAt: Date.now() });
 
     onSaved?.({ nickname: savedNick, icon: savedIcon });
     onClose?.();
@@ -5517,10 +5548,20 @@ if (uploadFile) {
           title="Upload avatar"
           aria-label="Upload avatar"
         >
-          <canvas ref={avaCanvasRef} className="avaUploadSquareCanvas" />
+          {finalAvatarUrl && (
+            <img
+              src={finalAvatarUrl}
+              alt=""
+              className="avaUploadSquareCanvas"
+              onError={() => setFinalAvatarUrl('')}
+            />
+          )}
           {!uploadFile && (
             <div className="avaUploadSquareTxt">UPLOAD<br/>AVATAR</div>
           )}
+          {uploadFile && !finalAvatarUrl && (
+            <div className="avaUploadSquareTxt">PROCESSING…</div>
+          )}          
           {uploadBusy && (
             <div className="avaUploadSquareBusy">{t('saving') || 'Saving…'}</div>
           )}
@@ -5550,7 +5591,7 @@ if (uploadFile) {
             const v = Number(e.target.value);
             setCrop((c) => {
               const next = clampCrop({ ...c, z: v });
-              requestAnimationFrame(() => { try { drawAvatarPreview(); } catch {} });
+
               return next;
             });
           }}
@@ -5646,7 +5687,7 @@ if (uploadFile) {
 function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerDelete, viewerId, starredAuthors, onToggleStar }) {
 
   const { posts, likes, dislikes, views } = agg || {};
-  const authorId = String(t?.userId || t?.accountId || '').trim();
+  const authorId = String(resolveProfileAccountId(t?.userId || t?.accountId) || '').trim();
   const isSelf = !!viewerId && authorId && (String(viewerId) === authorId);
   const isStarred = !!authorId && !!starredAuthors?.has?.(authorId);
   const isVipAuthor = useVipFlag(authorId, t?.vipActive ?? t?.isVip ?? t?.vip ?? t?.vipUntil ?? null);
@@ -5683,22 +5724,21 @@ function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerD
   <div className="topicUserRow">
     <div className="avaMini">
       <AvatarEmoji
-        userId={t.userId || t.accountId}
-        pIcon={resolveIconForDisplay(t.userId || t.accountId, t.icon)}
+        userId={authorId}
+        pIcon={resolveIconForDisplay(authorId, t.icon)}
       />
-    </div>
-
+    </div> 
     <button
       type="button"
       className={cls('nick-badge nick-animate', isVipAuthor && 'vipNick')}
       onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); }}
-      title={t.userId || t.accountId || ''}
+      title={authorId || ''}
       style={{ flex: '0 1 auto', minWidth: 0 }}
       translate="no"
    >
     
       <span className="nick-text">
-        {t.nickname || shortId(t.userId || t.accountId || '')}
+        {resolveNickForDisplay(authorId, t.nickname)}
       </span>
     </button>
 
@@ -5847,7 +5887,7 @@ function PostCard({
 
   // безопасные числовые поля
   const views    = Number(p?.views ?? 0);
-  const authorId = String(p?.userId || p?.accountId || '').trim();
+  const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim();
   const isSelf = !!viewerId && authorId && (String(viewerId) === authorId);
   const isStarred = !!authorId && !!starredAuthors?.has?.(authorId);
   const isVipAuthor = useVipFlag(authorId, p?.vipActive ?? p?.isVip ?? p?.vip ?? p?.vipUntil ?? null);
@@ -6057,7 +6097,7 @@ const cleanedText = allLines
     return params.toString();
   }, [ytOrigin]);
   // ===== OWNER-меню (⋮) — только если владелец поста =====
-  const isOwner = !!authId && (String(authId) === String(p?.userId || p?.accountId));
+  const isOwner = !!authId && (String(authId) === String(resolveProfileAccountId(p?.userId || p?.accountId)));
   const ownerEdit = (e) => {
     e?.preventDefault?.(); e?.stopPropagation?.();
     if (typeof window !== 'undefined') {
@@ -6103,15 +6143,15 @@ const NO_THREAD_OPEN_SELECTOR =
       <div className="postUserRow mb-2">
         <div className="avaMini">
           <AvatarEmoji
-            userId={p.userId || p.accountId}
-            pIcon={resolveIconForDisplay(p.userId || p.accountId, p.icon)}
+            userId={authorId}
+            pIcon={resolveIconForDisplay(authorId, p.icon)}
           />
         </div>
       
 <span className={cls('nick-badge nick-animate', isVipAuthor && 'vipNick')} translate="no">
 
   <span className="nick-text truncate">
-    {p.nickname || shortId((p.userId || p.accountId || ''))}
+    {resolveNickForDisplay(authorId, p.nickname)}
   </span>
 </span>
 
@@ -7439,13 +7479,15 @@ setMuted(!!audio.muted);
    Основной компонент
 ========================================================= */
 export default function Forum(){
-  useSyncForumProfileOnMount()
+  const [profileBump, setProfileBump] = useState(0)
+  useSyncForumProfileOnMount(() => setProfileBump((x) => x + 1))
+  void profileBump
   const { t } = useI18n()
   const toast = useToast()
   const rl = useMemo(rateLimiter, [])
   /* ---- auth ---- */
   const [auth,setAuth] = useState(()=>readAuth())
-  const viewerId = String((auth?.asherId || auth?.accountId) || '').trim()
+  const viewerId = String(resolveProfileAccountId(auth?.asherId || auth?.accountId) || '').trim()
 
   const [starredAuthors, setStarredAuthors] = useState(() => new Set())
   const [starMode, setStarMode] = useState(false)
@@ -8794,6 +8836,25 @@ useEffect(() => {
                 });
               }
             }
+
+            const pm = await api.profileBatch(ids)
+            if (pm?.ok && pm?.map && typeof pm.map === 'object') {
+              // WHY: hydrate canonical profile cache for all authors after a full snapshot.
+              try {
+                const aliases = pm.aliases && typeof pm.aliases === 'object' ? pm.aliases : {}
+                Object.entries(aliases).forEach(([rawId, accountId]) => {
+                  writeProfileAlias(rawId, accountId)
+                })
+                Object.entries(pm.map).forEach(([accountId, profile]) => {
+                  mergeProfileCache(accountId, {
+                    nickname: profile?.nickname || '',
+                    icon: profile?.icon || '',
+                    updatedAt: Date.now(),
+                  })
+                })
+                setProfileBump((x) => x + 1)
+              } catch {}
+            }          
           }
           lastFullSnapshotRef.current = now;
           persistSnap(prev => applyFullSnapshot(prev, r, tombstones));
@@ -8849,18 +8910,20 @@ es.onmessage = (e) => {
   if (!evt?.type) return; 
     // --- [PROFILE AVATAR LIVE SYNC] ---
     // Если пришло событие обновления аватара — кладём в локальный профиль и мягко перерисовываем UI.
-    if (evt.type === 'profile.avatar' && evt.accountId) {
-      try {
-        const key = 'profile:' + String(evt.accountId);
-        const cur = JSON.parse(localStorage.getItem(key) || '{}');
-        const next = { ...cur };
-        // Поддерживаем возможные имена поля
-        if (evt.icon)    next.icon = evt.icon;
-        if (evt.avatar)  next.icon = evt.avatar;   // если бек шлёт "avatar" вместо "icon"
-        if (evt.vipIcon) next.vipIcon = evt.vipIcon;
-
-        localStorage.setItem(key, JSON.stringify(next));
-      } catch { /* no-op */ }
+    if ((evt.type === 'profile.avatar' || evt.type === 'profile.updated') && (evt.accountId || evt.userId)) {
+      const accountId = String(evt.accountId || evt.userId || '').trim()
+      if (accountId) {
+        try {
+          writeProfileAlias(evt.userId, accountId)
+          mergeProfileCache(accountId, {
+            nickname: evt.nickname || evt.nick,
+            icon: evt.icon || evt.avatar,
+            vipIcon: evt.vipIcon,
+            updatedAt: evt.ts || Date.now(),
+          })
+        } catch { /* no-op */ }
+        setProfileBump((x) => x + 1)
+      }
 
       // hint only, без немедленного fetch
       return; // дальше ничего не делаем — снапшоты/ревизии не нужны для этого события
@@ -10140,9 +10203,10 @@ const hasImageLines = React.useMemo(() => {
   const createTopic = async (title, description, first) => {
      if (!rl.allowAction()) { toast.warn(t('forum_too_fast') || 'Слишком часто'); return; }
     const r = await requireAuthStrict(); if (!r) return;
-    const uid = r.asherId || r.accountId || ''
-    const prof = (()=>{ if(!isBrowser()) return {}; try{ return JSON.parse(localStorage.getItem('profile:'+uid)||'{}') }catch{return{}} })()
-
+    const uid = resolveProfileAccountId(r.asherId || r.accountId || '')
+    const prof = safeReadProfile(uid) || {}
+    const nickForSend = resolveNickForDisplay(uid, prof.nickname)
+    const iconForSend = resolveIconForDisplay(uid, prof.icon)
     // лимиты по ТЗ
     const safeTitle = String(title||'')
     const safeDesc  = String(description||'').slice(0,90)
@@ -10166,8 +10230,8 @@ const hasImageLines = React.useMemo(() => {
 
     const t0 = {
       id: tmpT, title: safeTitle, description: safeDesc, ts: Date.now(),
-      userId: uid, nickname: prof.nickname || shortId(uid),
-      icon: prof.icon || '👤', isAdmin: isAdm, views: 0
+      userId: uid, nickname: nickForSend,
+      icon: iconForSend, isAdmin: isAdm, views: 0
     }
     const p0 = {
      id: tmpP, cid: tmpP, topicId: tmpT, parentId: null, text: safeFirst, ts: Date.now(),
@@ -10351,7 +10415,7 @@ const createPost = async () => {
   // 2) auth
   const r = await requireAuthStrict(); 
   if (!r) return _fail();
-  const uid  = r.asherId || r.accountId || '';
+  const uid  = resolveProfileAccountId(r.asherId || r.accountId || '');
   const isAdm = (typeof window !== 'undefined') && localStorage.getItem('ql7_admin') === '1';
   const isVip = !!vipActive;
 
@@ -10408,11 +10472,9 @@ const createPost = async () => {
   // --- /белый список ---
 
   // профиль
-  const prof = (() => {
-    if (typeof window === 'undefined') return {};
-    try { return JSON.parse(localStorage.getItem('profile:' + uid) || '{}'); }
-    catch { return {}; }
-  })();
+  const prof = safeReadProfile(uid) || {}
+  const nickForSend = resolveNickForDisplay(uid, prof.nickname)
+  const iconForSend = resolveIconForDisplay(uid, prof.icon)
 
   // родитель
   const parentId = (replyTo?.id) || (threadRoot?.id) || null;
@@ -10428,8 +10490,8 @@ const createPost = async () => {
     text: body,
     ts: Date.now(),
     userId: uid,
-    nickname: prof.nickname || shortId(uid),
-    icon: prof.icon || '👤',
+    nickname: nickForSend,
+    icon: iconForSend,
     isAdmin: isAdm,
     likes: 0, dislikes: 0, views: 0,
     myReaction: null,
@@ -10873,10 +10935,10 @@ const onFilesChosen = React.useCallback(async (e) => {
 }, [t, toast, moderateImageFiles, moderateVideoSource, toastI18n, reasonKey, reasonFallbackEN]);
 
   /* ---- профиль (поповер у аватара) ---- */
-  const idShown = auth.asherId || auth.accountId || ''
-  const profile = (()=>{ if(!isBrowser()) return null; try{ return JSON.parse(localStorage.getItem('profile:'+idShown)||'null') }catch{return null} })()
-  const nickShown = profile?.nickname || (idShown ? shortId(idShown) : null)
-  const iconShown = profile?.icon || '👤'
+  const idShown = resolveProfileAccountId(auth.asherId || auth.accountId || '')
+  const profile = safeReadProfile(idShown)
+  const nickShown = resolveNickForDisplay(idShown, profile?.nickname)
+  const iconShown = resolveIconForDisplay(idShown, profile?.icon)
   const copyId = async () => { try{ await navigator.clipboard.writeText(idShown) }catch{} }
 
   const [profileOpen, setProfileOpen] = useState(false)
@@ -11739,7 +11801,7 @@ function pickAdUrlForSlot(slotKey, slotKind) {
   t={t}
   auth={auth}
   vipActive={vipActive}
-  onSaved={()=>{}}
+  onSaved={() => setProfileBump((x) => x + 1)}
 
   viewerId={viewerId}
   myFollowersCount={myFollowersCount}
@@ -12339,7 +12401,7 @@ onClick={()=>{
       <div key={slot.key} id={`post_${p?.id || ''}`}>
 <PostCard
   p={p}
-  parentAuthor={parent?.nickname || (parent ? shortId(parent.userId || '') : null)}
+  parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}
   onReport={() => toast.ok(t('forum_report_ok'))}
   onOpenThread={openThreadHere}
   onReact={reactMut}
@@ -12349,7 +12411,7 @@ onClick={()=>{
   onBanUser={banUser}
   onUnbanUser={unbanUser}
   isBanned={bannedSet.has(p?.accountId || p?.userId)}
-  authId={auth.asherId || auth.accountId}
+  authId={viewerId}
   markView={markViewPost}
   t={t}
   isVideoFeed={true}   // ✅ NEW
@@ -12439,7 +12501,10 @@ onClick={()=>{
       <div key={slot.key} id={`post_${p.id}`}>
         <PostCard
           p={p}
-          parentAuthor={(data.posts || []).find(x => String(x.id) === String(p.parentId))?.nickname || ''}
+          parentAuthor={(() => {
+            const parent = (data.posts || []).find(x => String(x.id) === String(p.parentId))
+            return parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''
+          })()}
           onReport={() => toast.ok(t('forum_report_ok'))}
           onOpenThread={(clickP) => {
             const tt = (data.topics || []).find(t => String(t.id) === String(p.topicId));
@@ -12452,7 +12517,7 @@ onClick={()=>{
           onBanUser={banUser}
           onUnbanUser={unbanUser}
           isBanned={bannedSet.has(p.accountId || p.userId)}
-          authId={auth.asherId || auth.accountId}
+          authId={viewerId}
           markView={markViewPost}
           t={t}
             viewerId={viewerId}
@@ -12513,7 +12578,7 @@ onClick={()=>{
   onView={markViewTopic}
   isAdmin={isAdmin}
   onDelete={delTopic}
-  authId={auth.asherId || auth.accountId}
+  authId={viewerId}
   onOwnerDelete={delTopicOwn}
   viewerId={viewerId}
   starredAuthors={starredAuthors}
@@ -12693,10 +12758,12 @@ onClick={()=>{
           );
           if (!tt) return null;
 
-          const parentAuthor =
-            (data.posts || []).find(
+          const parentAuthor = (() => {
+            const parent = (data.posts || []).find(
               x => String(x.id) === String(p.parentId),
-            )?.nickname || '';
+            )
+            return parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''
+          })();
 
           return (
             <PostCard
@@ -12734,7 +12801,7 @@ onClick={()=>{
   onBanUser={banUser}
   onUnbanUser={unbanUser}
   isBanned={bannedSet.has(p.accountId || p.userId)}
-  authId={auth.asherId || auth.accountId}
+  authId={viewerId}
   markView={markViewPost}
   t={t}
   viewerId={viewerId}
@@ -12797,10 +12864,7 @@ onClick={()=>{
       >
 <PostCard
   p={p}
-  parentAuthor={
-    parent?.nickname ||
-    (parent ? shortId(parent.userId || '') : null)
-  }
+  parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}
   onReport={() => toast.ok(t('forum_report_ok'))}
   onReply={() => setReplyTo(p)}
   onOpenThread={(clickP) => { setThreadRoot(clickP); }}
@@ -12811,7 +12875,7 @@ onClick={()=>{
   onBanUser={banUser}
   onUnbanUser={unbanUser}
   isBanned={bannedSet.has(p.accountId || p.userId)}
-  authId={auth.asherId || auth.accountId}
+  authId={viewerId}
   markView={markViewPost}
   t={t}
   viewerId={viewerId}
@@ -12862,9 +12926,9 @@ onClick={()=>{
 <div className="composer" data-active={composerActive} ref={composerRef}>
   <div className="meta mb-2">
     {replyTo
-      ? `${t('forum_reply_to')||'Ответ для'} ${replyTo.nickname||shortId(replyTo.userId||'')}`
+      ? `${t('forum_reply_to')||'Ответ для'} ${resolveNickForDisplay(replyTo.userId || replyTo.accountId, replyTo.nickname)}`
       : threadRoot
-        ? `${t('forum_replying_to')||'Ответ к'} ${shortId(threadRoot.userId||'')}`
+        ? `${t('forum_replying_to')||'Ответ к'} ${resolveNickForDisplay(threadRoot.userId || threadRoot.accountId, threadRoot.nickname)}`
         : t('')}
   </div>
 
