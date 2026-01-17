@@ -177,6 +177,10 @@ function safeReadProfile(userId) {
   try { return JSON.parse(localStorage.getItem('profile:' + userId) || '{}'); }
   catch { return {}; }
 }
+function resolveNickForDisplay(userId, pNick) {
+  const prof = safeReadProfile(userId) || {};
+  return prof.nickname || prof.nick || pNick || shortId(userId);
+}
 // --- Профиль: подтянуть ник/аватар с бэка и записать в localStorage ---
 function useSyncForumProfileOnMount() {
   React.useEffect(() => {
@@ -228,7 +232,8 @@ const next = {
 function resolveIconForDisplay(userId, pIcon) {
   const prof = safeReadProfile(userId) || {};
   // приоритет: vipIcon (URL) → vipEmoji (эмодзи) → то, что пришло с сервера
-  return prof.vipIcon || prof.vipEmoji || pIcon || '👤';
+  // WHY: localStorage профиль — единственная истина для иконки между снапшотами.
+  return prof.vipIcon || prof.vipEmoji || prof.icon || pIcon || '👤';
 }
 // =========================================================
 // VIP badge над ником (1.png 20s / 2.png 5s) — только для VIP
@@ -834,7 +839,21 @@ const api = {
       return { ok: false, error: 'network', count: 0 }
     }
   },
-
+  // ===== Profiles (batch) =====
+  async profileBatch(ids) {
+    try {
+      const arr = Array.isArray(ids) ? ids : []
+      const r = await fetch('/api/profile/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        body: JSON.stringify({ ids: arr }),
+      })
+      return await r.json().catch(() => ({ ok: false, map: {} }))
+    } catch {
+      return { ok: false, error: 'network', map: {} }
+    }
+  },
   // ===== VIP (batch) =====
   async vipBatch(ids) {
     try {
@@ -5647,6 +5666,7 @@ function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerD
 
   const { posts, likes, dislikes, views } = agg || {};
   const authorId = String(t?.userId || t?.accountId || '').trim();
+  const displayNick = resolveNickForDisplay(authorId, t?.nickname);
   const isSelf = !!viewerId && authorId && (String(viewerId) === authorId);
   const isStarred = !!authorId && !!starredAuthors?.has?.(authorId);
   const isVipAuthor = useVipFlag(authorId, t?.vipActive ?? t?.isVip ?? t?.vip ?? t?.vipUntil ?? null);
@@ -5679,7 +5699,7 @@ function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerD
     <div ref={ref} className="item qshine cursor-pointer" onClick={() => onOpen?.(t)} style={{ position: 'relative' }}>
       <div className="flex flex-col gap-3">
         {/* верх: аватар → ник */}
-        {(t.nickname || t.icon) && (
+        {(authorId || t.nickname || t.icon) && (
   <div className="topicUserRow">
     <div className="avaMini">
       <AvatarEmoji
@@ -5698,7 +5718,7 @@ function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerD
    >
     
       <span className="nick-text">
-        {t.nickname || shortId(t.userId || t.accountId || '')}
+        {displayNick}
       </span>
     </button>
 
@@ -5848,6 +5868,7 @@ function PostCard({
   // безопасные числовые поля
   const views    = Number(p?.views ?? 0);
   const authorId = String(p?.userId || p?.accountId || '').trim();
+  const displayNick = resolveNickForDisplay(authorId, p?.nickname);
   const isSelf = !!viewerId && authorId && (String(viewerId) === authorId);
   const isStarred = !!authorId && !!starredAuthors?.has?.(authorId);
   const isVipAuthor = useVipFlag(authorId, p?.vipActive ?? p?.isVip ?? p?.vip ?? p?.vipUntil ?? null);
@@ -6111,7 +6132,7 @@ const NO_THREAD_OPEN_SELECTOR =
 <span className={cls('nick-badge nick-animate', isVipAuthor && 'vipNick')} translate="no">
 
   <span className="nick-text truncate">
-    {p.nickname || shortId((p.userId || p.accountId || ''))}
+    {displayNick}
   </span>
 </span>
 
@@ -7446,7 +7467,7 @@ export default function Forum(){
   /* ---- auth ---- */
   const [auth,setAuth] = useState(()=>readAuth())
   const viewerId = String((auth?.asherId || auth?.accountId) || '').trim()
-
+  const [profileBump, setProfileBump] = useState(0)
   const [starredAuthors, setStarredAuthors] = useState(() => new Set())
   const [starMode, setStarMode] = useState(false)
 
@@ -8777,6 +8798,25 @@ useEffect(() => {
                 });
               }
             }
+            const pm = await api.profileBatch(ids);
+            if (pm?.ok && pm?.map && typeof pm.map === 'object') {
+              // WHY: снапшот должен подхватывать актуальные профили в localStorage.
+              Object.entries(pm.map).forEach(([uid, prof]) => {
+                if (!uid) return;
+                try {
+                  const key = 'profile:' + uid;
+                  let cur = {};
+                  try { cur = JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch { cur = {}; }
+                  const next = {
+                    ...cur,
+                    nickname: typeof prof?.nickname === 'string' ? prof.nickname : (cur.nickname || ''),
+                    icon: typeof prof?.icon === 'string' ? prof.icon : (cur.icon || ''),
+                  };
+                  localStorage.setItem(key, JSON.stringify(next));
+                } catch {}
+              });
+              setProfileBump((x) => x + 1);
+            }        
           }
           lastFullSnapshotRef.current = now;
           persistSnap(prev => applyFullSnapshot(prev, r, tombstones));
@@ -8830,9 +8870,9 @@ es.onmessage = (e) => {
   if (e.data.startsWith(':')) return; 
  try { const evt = JSON.parse(e.data); 
   if (!evt?.type) return; 
-    // --- [PROFILE AVATAR LIVE SYNC] ---
-    // Если пришло событие обновления аватара — кладём в локальный профиль и мягко перерисовываем UI.
-    if (evt.type === 'profile.avatar' && evt.accountId) {
+    // --- [PROFILE LIVE SYNC] ---
+    // Если пришло событие обновления профиля — кладём в локальный профиль и мягко перерисовываем UI.
+    if ((evt.type === 'profile.avatar' || evt.type === 'profile.updated') && evt.accountId) {
       try {
         const key = 'profile:' + String(evt.accountId);
         const cur = JSON.parse(localStorage.getItem(key) || '{}');
@@ -8840,11 +8880,13 @@ es.onmessage = (e) => {
         // Поддерживаем возможные имена поля
         if (evt.icon)    next.icon = evt.icon;
         if (evt.avatar)  next.icon = evt.avatar;   // если бек шлёт "avatar" вместо "icon"
+        if (evt.nickname) next.nickname = evt.nickname;
+        if (evt.nick)     next.nickname = evt.nick;       
         if (evt.vipIcon) next.vipIcon = evt.vipIcon;
 
         localStorage.setItem(key, JSON.stringify(next));
       } catch { /* no-op */ }
-
+      setProfileBump((x) => x + 1);
       // hint only, без немедленного fetch
       return; // дальше ничего не делаем — снапшоты/ревизии не нужны для этого события
     }
@@ -10858,7 +10900,7 @@ const onFilesChosen = React.useCallback(async (e) => {
   /* ---- профиль (поповер у аватара) ---- */
   const idShown = auth.asherId || auth.accountId || ''
   const profile = (()=>{ if(!isBrowser()) return null; try{ return JSON.parse(localStorage.getItem('profile:'+idShown)||'null') }catch{return null} })()
-  const nickShown = profile?.nickname || (idShown ? shortId(idShown) : null)
+  const nickShown = resolveNickForDisplay(idShown, profile?.nickname)
   const iconShown = profile?.icon || '👤'
   const copyId = async () => { try{ await navigator.clipboard.writeText(idShown) }catch{} }
 
@@ -12301,7 +12343,9 @@ onClick={()=>{
     const parent = p?.parentId
       ? (data?.posts || []).find(x => String(x.id) === String(p.parentId))
       : null;
-
+    const parentAuthor = parent
+      ? resolveNickForDisplay(parent.userId || parent.accountId || '', parent.nickname)
+      : null;
     const openThreadHere = () => {
       try { setInboxOpen?.(false); } catch {}
       const tt = (data?.topics || []).find(x => String(x.id) === String(p?.topicId));
@@ -12322,7 +12366,7 @@ onClick={()=>{
       <div key={slot.key} id={`post_${p?.id || ''}`}>
 <PostCard
   p={p}
-  parentAuthor={parent?.nickname || (parent ? shortId(parent.userId || '') : null)}
+  parentAuthor={parentAuthor}
   onReport={() => toast.ok(t('forum_report_ok'))}
   onOpenThread={openThreadHere}
   onReact={reactMut}
@@ -12418,11 +12462,15 @@ onClick={()=>{
 ).map((slot) => {
   if (slot.type === 'item') {
     const p = slot.item;
+    const parent = (data.posts || []).find(x => String(x.id) === String(p.parentId));
+    const parentAuthor = parent
+      ? resolveNickForDisplay(parent.userId || parent.accountId || '', parent.nickname)
+      : '';    
     return (
       <div key={slot.key} id={`post_${p.id}`}>
         <PostCard
           p={p}
-          parentAuthor={(data.posts || []).find(x => String(x.id) === String(p.parentId))?.nickname || ''}
+          parentAuthor={parentAuthor}
           onReport={() => toast.ok(t('forum_report_ok'))}
           onOpenThread={(clickP) => {
             const tt = (data.topics || []).find(t => String(t.id) === String(p.topicId));
@@ -12677,9 +12725,16 @@ onClick={()=>{
           if (!tt) return null;
 
           const parentAuthor =
-            (data.posts || []).find(
-              x => String(x.id) === String(p.parentId),
-            )?.nickname || '';
+            (() => {
+              const parent = (data.posts || []).find(
+                x => String(x.id) === String(p.parentId),
+              );
+              if (!parent) return '';
+              return resolveNickForDisplay(
+                parent.userId || parent.accountId || '',
+                parent.nickname,
+              );
+            })();
 
           return (
             <PostCard
@@ -12781,8 +12836,9 @@ onClick={()=>{
 <PostCard
   p={p}
   parentAuthor={
-    parent?.nickname ||
-    (parent ? shortId(parent.userId || '') : null)
+    parent
+      ? resolveNickForDisplay(parent.userId || parent.accountId || '', parent.nickname)
+      : null
   }
   onReport={() => toast.ok(t('forum_report_ok'))}
   onReply={() => setReplyTo(p)}
@@ -12845,9 +12901,9 @@ onClick={()=>{
 <div className="composer" data-active={composerActive} ref={composerRef}>
   <div className="meta mb-2">
     {replyTo
-      ? `${t('forum_reply_to')||'Ответ для'} ${replyTo.nickname||shortId(replyTo.userId||'')}`
+      ? `${t('forum_reply_to')||'Ответ для'} ${resolveNickForDisplay(replyTo.userId || replyTo.accountId || '', replyTo.nickname)}`
       : threadRoot
-        ? `${t('forum_replying_to')||'Ответ к'} ${shortId(threadRoot.userId||'')}`
+        ? `${t('forum_replying_to')||'Ответ к'} ${resolveNickForDisplay(threadRoot.userId || threadRoot.accountId || '', threadRoot.nickname)}`
         : t('')}
   </div>
 

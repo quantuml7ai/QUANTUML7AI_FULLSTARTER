@@ -7,7 +7,7 @@ import {
   getUserNick,
   setUserAvatar,
 } from '../../forum/_db.js'
-
+import { Redis } from '@upstash/redis'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const fetchCache = 'force-no-store'
@@ -34,6 +34,19 @@ const iconRaw = body?.icon || body?.avatar || ''
 
 const saved = await setUserNick(userId, nick) // бросит 'nick_taken' если занято
 const savedIcon = await setUserAvatar(userId, iconRaw)
+// WHY: profile updates must propagate to all devices immediately.
+try {
+  const redis = Redis.fromEnv()
+  await redis.publish('forum:events', JSON.stringify({
+    type: 'profile.updated',
+    accountId: userId,
+    nickname: saved,
+    nick: saved,
+    icon: savedIcon,
+    avatar: savedIcon,
+    ts: Date.now(),
+  }))
+} catch {}
 
 return NextResponse.json({ ok:true, nick: saved, icon: savedIcon })
 

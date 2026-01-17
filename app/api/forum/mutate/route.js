@@ -45,7 +45,7 @@ export const fetchCache = 'force-no-store'
 const MAX_OPS_PER_BATCH = 25
 const MAX_TITLE = 180
 const MAX_TEXT  = 4000
-
+const MAX_ICON  = 256
 function trimStr(v, max) {
   const s = String(v ?? '').trim()
   return s.length > max ? s.slice(0, max) : s
@@ -250,7 +250,7 @@ export async function POST(request) {
           const title       = trimStr(p.title, MAX_TITLE)
           const description = trimStr(p.description || '', MAX_TEXT)
           const nickname    = trimStr(p.nickname || '', 80)
-          const icon        = trimStr(p.icon || '', 32)
+          const icon        = trimStr(p.icon || '', MAX_ICON)
 
           // anti-dup (cid или авто)
           const cid = String(p.cid || '')
@@ -287,7 +287,7 @@ export async function POST(request) {
           const parentId  = p.parentId ?? null
           const text      = trimStr(p.text, MAX_TEXT)
           const nickname  = trimStr(p.nickname || '', 80)
-          const icon      = trimStr(p.icon || '', 32)
+          const icon      = trimStr(p.icon || '', MAX_ICON)
 
           // anti-dup (cid или авто)
           const cid = String(p.cid || '')
