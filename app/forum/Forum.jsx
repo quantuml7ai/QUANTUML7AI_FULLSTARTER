@@ -1523,7 +1523,72 @@ const Styles = () => (
   -webkit-overflow-scrolling:touch;
 }
 
-
+    .composeDock{ position: sticky; bottom: 0; z-index: 6; }
+    .composerProgress{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin: 0 0 8px;
+      padding:10px 12px;
+      background:rgba(10,14,22,.96);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:12px;
+      box-shadow:0 10px 24px rgba(0,0,0,.35);
+    }
+    .composerProgressHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      opacity:.85;
+    }
+    .composerProgressTrack{
+      position:relative;
+      width:100%;
+      height:6px;
+      border-radius:999px;
+      overflow:hidden;
+      background:rgba(255,255,255,.08);
+    }
+    .composerProgressFill{
+      position:absolute;
+      inset:0 auto 0 0;
+      width:0%;
+      background:linear-gradient(90deg, rgba(80,167,255,.6), rgba(74,222,128,.8));
+      box-shadow:0 0 12px rgba(80,167,255,.45);
+      border-radius:999px;
+      transition:width .25s ease;
+    }
+    .composerProgressStages{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap:6px;
+      font-size:11px;
+      text-align:center;
+    }
+    .composerProgressStage{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:4px;
+      opacity:.5;
+    }
+    .composerProgressStage.active{ opacity:1; }
+    .composerProgressStage.done{ opacity:.85; }
+    .composerProgressDot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:rgba(255,255,255,.2);
+      box-shadow:0 0 0 1px rgba(255,255,255,.2);
+    }
+    .composerProgressStage.active .composerProgressDot,
+    .composerProgressStage.done .composerProgressDot{
+      background:#4ade80;
+      box-shadow:0 0 0 1px rgba(74,222,128,.65);
+    }
     .composer{ position:sticky; bottom:0; z-index:5; border-top:1px solid rgba(255,255,255,.1); background:rgba(10,14,22,.96); padding:.8rem }
     .uploadProgress{
       margin: 0 0 8px;
@@ -5476,6 +5541,7 @@ if (uploadFile) {
       console.error('[moderation] avatar check failed', err);
       toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
       toastI18n('info', 'forum_moderation_try_again', 'Please try again');
+      resetUploadFlow();     
       return;
     }
 
@@ -7817,7 +7883,8 @@ export default function Forum(){
         try { el.setAttribute('data-src', src); } catch {}
       }
       const cur = el.getAttribute('src') || '';
-      if (cur !== src) {
+      const isBlank = !cur || cur === 'about:blank';
+      if (cur !== src || isBlank) {
         try { el.setAttribute('src', src); } catch {}
         return;
       }
@@ -7825,7 +7892,7 @@ export default function Forum(){
       const last = iframeReloadAt.get(el) || 0;
       if (Date.now() - last < 500) return;
       iframeReloadAt.set(el, Date.now());
-      try { el.setAttribute('src', ''); } catch {}
+      try { el.setAttribute('src', 'about:blank'); } catch {}
       try {
         requestAnimationFrame(() => {
           try { el.setAttribute('src', src); } catch {}
@@ -8105,12 +8172,16 @@ document.querySelectorAll(selector).forEach((el) => {
       if (!['youtube', 'tiktok', 'iframe'].includes(kind)) return;
       const src = target.getAttribute('data-src') || target.getAttribute('src') || '';
       if (!src) return;
-      if (!target.getAttribute('src')) {
+      if (!target.getAttribute('src') || target.getAttribute('src') === 'about:blank') {
         try { target.setAttribute('src', src); } catch {}
       }
       try { target.removeAttribute('data-forum-unloaded'); } catch {}
       try { iframeUnloaded.delete(target); } catch {}      
-      playMedia(target);
+      try {
+        requestAnimationFrame(() => playMedia(target));
+      } catch {
+        playMedia(target);
+      }
     }; 
     const tick = setInterval(observeAll, 1500);
     window.addEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
@@ -9549,9 +9620,56 @@ const aggregates = useMemo(() => {
 
   /* ---- composer ---- */
   const [text,setText] = useState('')
-  const [replyTo,setReplyTo] = useState(null)
+const [replyTo,setReplyTo] = useState(null)
 // превью прикреплённых картинок (НЕ пишем URL в текст)
 const [pendingImgs, setPendingImgs] = useState([]);
+const uploadFlowTimerRef = React.useRef(null);
+const [uploadFlow, setUploadFlow] = useState(() => ({
+  active: false,
+  stage: null,
+  progress: 0,
+}));
+const uploadSteps = React.useMemo(() => ([
+  { id: 'moderation', label: t?.('forum_upload_stage_moderation') || 'Moderation' },
+  { id: 'upload', label: t?.('forum_upload_stage_upload') || 'Upload' },
+  { id: 'preview', label: t?.('forum_upload_stage_preview') || 'Preview' },
+  { id: 'publish', label: t?.('forum_upload_stage_publish') || 'Publish' },
+]), [t]);
+const activeUploadIndex = React.useMemo(
+  () => uploadSteps.findIndex((step) => step.id === uploadFlow.stage),
+  [uploadSteps, uploadFlow.stage],
+);
+const uploadProgressValue = React.useMemo(() => {
+  if (!uploadFlow.active) return 0;
+  const stepSize = 100 / Math.max(1, uploadSteps.length);
+  const idx = Math.max(0, activeUploadIndex);
+  const local = Math.min(100, Math.max(0, Number(uploadFlow.progress || 0)));
+  return Math.min(100, (idx * stepSize) + (local * stepSize / 100));
+}, [uploadFlow.active, uploadFlow.progress, uploadSteps.length, activeUploadIndex]);
+const resetUploadFlow = React.useCallback(() => {
+  if (uploadFlowTimerRef.current) {
+    clearTimeout(uploadFlowTimerRef.current);
+    uploadFlowTimerRef.current = null;
+  }
+  setUploadFlow({ active: false, stage: null, progress: 0 });
+}, []);
+const updateUploadFlow = React.useCallback((stage, progress = 0) => {
+  if (uploadFlowTimerRef.current) {
+    clearTimeout(uploadFlowTimerRef.current);
+    uploadFlowTimerRef.current = null;
+  }
+  setUploadFlow({ active: true, stage, progress });
+}, []);
+const finishUploadFlow = React.useCallback((stage = 'preview') => {
+  setUploadFlow({ active: true, stage, progress: 100 });
+  if (uploadFlowTimerRef.current) clearTimeout(uploadFlowTimerRef.current);
+  uploadFlowTimerRef.current = setTimeout(() => {
+    setUploadFlow({ active: false, stage: null, progress: 0 });
+  }, 1400);
+}, []);
+const setVideoProgress = React.useCallback((pct) => {
+  updateUploadFlow('upload', Math.min(100, Math.max(0, Number(pct || 0))));
+}, [updateUploadFlow]);
 // [FOCUS_TOOLS_STATE:BEGIN]
 const [composerActive, setComposerActive] = useState(false);
 const composerRef = React.useRef(null);
@@ -9577,12 +9695,7 @@ useEffect(() => {
 
 const startSendCooldown = React.useCallback((sec = 10) => {
   setCooldownLeft(sec);
-}, []);
-const uploadSteps = [
-  { key: 'moderation', label: t?.('forum_upload_stage_moderation') || 'Moderation' },
-  { key: 'upload', label: t?.('forum_upload_stage_upload') || 'Upload' },
-  { key: 'preview', label: t?.('forum_upload_stage_preview') || 'Preview' },
-];
+}, []); 
 // по клику вне композера — закрываем
 useEffect(() => {
   if (!composerActive) return;
@@ -10088,8 +10201,7 @@ const moderateViaApi = React.useCallback(async (blobs, meta = {}) => {
   // server meta (optional)
   if (meta?.source) fd.append('source', String(meta.source));
   if (meta?.clientRequestId) fd.append('clientRequestId', String(meta.clientRequestId));
-  // server returns allow/block/review; STRICT/BALANCED applied on client
-  try {
+  const attemptModeration = async () => {
     const res = await fetch('/api/forum/moderate', { method: 'POST', body: fd, cache: 'no-store' });
     const j = await res.json().catch(() => null);
     if (!res.ok || !j) {
@@ -10099,8 +10211,16 @@ const moderateViaApi = React.useCallback(async (blobs, meta = {}) => {
       throw e;
     }
     return j;
+  };
+
+  // server returns allow/block/review; STRICT/BALANCED applied on client
+  try {
+    return await attemptModeration();
   } catch (e) {
-    throw e;
+
+    // 1 retry для устойчивости (без спама запросами)
+    try { await new Promise((r) => setTimeout(r, 450)); } catch {}
+    return await attemptModeration();
   }
 }, []);
 
@@ -10434,6 +10554,7 @@ const createPost = async () => {
   // === Обычный режим: создание поста ===
   const _fail = (msg) => {
     if (msg) { try { toast?.warn?.(msg) } catch {} }
+        resetUploadFlow();
         if (hadUpload) resetUploadStatus();
     postingRef.current = false;
   };
@@ -10446,6 +10567,7 @@ const createPost = async () => {
       setUploadStage('moderation', 8);      
       // если pendingVideo = blob: -> достаём Blob и модерируем по кадрам
       if (/^blob:/.test(pendingVideo)) {
+                updateUploadFlow('moderation', 5);
         const resp = await fetch(pendingVideo);
         const fileBlob = await resp.blob();
 
@@ -10455,6 +10577,7 @@ const createPost = async () => {
           toastI18n('warn', 'forum_video_blocked', 'Video rejected by community rules');
           toastI18n('info', reasonKey(mod?.reason), reasonFallbackEN(mod?.reason));
           try { resetVideo(); } catch {}
+           resetUploadFlow();        
           return _fail();
         }
 
@@ -10493,6 +10616,7 @@ const createPost = async () => {
 
         // динамический импорт клиентского uploader
         const { upload } = await import('@vercel/blob/client');
+        updateUploadFlow('upload', 3);        
         const result = await upload(name, fileBlob, {
           access: 'public',
           handleUploadUrl: '/api/forum/blobUploadUrl', // ← наш единственный роут
@@ -10505,6 +10629,7 @@ const createPost = async () => {
         });
         videoUrlToSend = result?.url || '';
         if (!videoUrlToSend) throw new Error('no_url');
+                updateUploadFlow('preview', 100);
       } else {
         // уже готовый https-URL
         videoUrlToSend = pendingVideo;
@@ -10512,6 +10637,7 @@ const createPost = async () => {
     } catch (e) {
       console.error('video_client_upload_failed', e);
       try { toast?.err?.('Не удалось загрузить видео'); } catch {}
+            resetUploadFlow();
       return _fail();
     }
   }
@@ -10519,6 +10645,7 @@ const createPost = async () => {
   let audioUrlToSend = '';
   if (pendingAudio) {
     try {
+            updateUploadFlow('upload', 2);
       if (/^blob:/.test(pendingAudio)) {      
         setUploadStage('upload', 22);
         const resp = await fetch(pendingAudio);
@@ -10531,6 +10658,7 @@ const createPost = async () => {
       } else {
         audioUrlToSend = pendingAudio;
       }
+            updateUploadFlow('preview', 100);
     } catch { audioUrlToSend = ''; }
   }
 
@@ -10660,6 +10788,9 @@ const createPost = async () => {
     id: tmpId,
   });
 // важное исключение: отправка сообщений уходит немедленно
+  if (pendingImgs.length || pendingAudio || pendingVideo) {
+    updateUploadFlow('publish', 100);
+  }
   try { await flushMutations(); } catch {}
   setComposerActive(false);
   emitCreated(p.id, sel.id);
@@ -10671,6 +10802,9 @@ const createPost = async () => {
   setPendingAudio(null);
   setReplyTo(null);
   toast.ok(t('forum_post_sent') || 'Отправлено');
+    if (pendingImgs.length || pendingAudio || pendingVideo) {
+    finishUploadFlow('publish');
+  }
   postingRef.current = false;
  // ← важный сброс видео-оверлея и состояния после отправки
  try { resetVideo(); } catch {}
@@ -10950,6 +11084,9 @@ const onFilesChosen = React.useCallback(async (e) => {
     }
     clearUploadTimer();
     setUploadStage('moderation', 8);
+    const hasAnyMedia = imgFiles.length || vidFiles.length;
+    if (hasAnyMedia) updateUploadFlow('moderation', 5);
+
     // =========================
     // 1) IMAGES: moderation -> /api/forum/upload
     // =========================
@@ -10962,6 +11099,7 @@ const onFilesChosen = React.useCallback(async (e) => {
         toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
         toastI18n('info', 'forum_moderation_try_again', 'Please try again');
         resetUploadStatus();       
+         resetUploadFlow();     
         return;
       }
 
@@ -10969,6 +11107,7 @@ const onFilesChosen = React.useCallback(async (e) => {
         toastI18n('warn', 'forum_image_blocked', 'Image rejected by community rules');
         toastI18n('info', reasonKey(modImg?.reason), reasonFallbackEN(modImg?.reason));
         resetUploadStatus();       
+         resetUploadFlow();     
         return;
       }
 
@@ -10976,6 +11115,7 @@ const onFilesChosen = React.useCallback(async (e) => {
         try { console.warn('[moderation] image review -> allow (balanced)', modImg?.reason, modImg?.raw); } catch {}
       }
       setUploadStage('upload', 28);
+      updateUploadFlow('upload', 15);   
       const fd = new FormData();
       for (const f of imgFiles.slice(0, 20)) fd.append('files', f, f.name);
 
@@ -10986,6 +11126,7 @@ const onFilesChosen = React.useCallback(async (e) => {
       const urls = Array.isArray(up?.urls) ? up.urls : [];
       if (urls.length) 
         setPendingImgs(prev => [...prev, ...urls]);
+      updateUploadFlow('preview', 100);      
        setUploadStage('preview', 90);     
       // если загрузили ТОЛЬКО картинки — открываем fullscreen overlay (как для видео)
       if (!vidFiles.length && urls.length) {
@@ -11000,16 +11141,19 @@ const onFilesChosen = React.useCallback(async (e) => {
     // 2) VIDEOS: moderation (frames) -> Vercel Blob upload
     // =========================
     if (vidFiles.length) {
+            updateUploadFlow('moderation', 5);
       // берём первое видео (multiple включён, но UX лучше 1 за раз)
       const vf = vidFiles[0];
       const mime = String(vf?.type || '').split(';')[0].trim().toLowerCase();
       const okMime = /^video\/(mp4|webm|quicktime)$/i.test(mime) || /\.(mp4|webm|mov)$/i.test(String(vf?.name || ''));
       if (!okMime) {
         try { toast?.warn?.(t?.('forum_video_bad_type') || 'Unsupported video type'); } catch {}
+        resetUploadFlow();      
         return;
       }
       if (Number(vf.size || 0) > 300 * 1024 * 1024) {
         try { toast?.err?.(t?.('forum_video_too_big') || 'Video is larger than 300MB'); } catch {}
+        resetUploadFlow();      
         return;
       }
 
@@ -11019,7 +11163,9 @@ const onFilesChosen = React.useCallback(async (e) => {
         if (modV?.decision === 'block') {
           toastI18n('warn', 'forum_video_blocked', 'Video rejected by community rules');
           toastI18n('info', reasonKey(modV?.reason), reasonFallbackEN(modV?.reason));
-          resetUploadStatus();        
+        
+          resetUploadStatus();  
+                    resetUploadFlow();      
           return;
         }
         if (modV?.decision === 'review') {
@@ -11029,12 +11175,14 @@ const onFilesChosen = React.useCallback(async (e) => {
         console.error('[moderation] video check failed', e2);
         toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
         toastI18n('info', 'forum_moderation_try_again', 'Please try again');
-        resetUploadStatus();       
+        resetUploadStatus();  
+                resetUploadFlow();     
         return;
       }
 
       // UPLOAD TO VERCEL BLOB (тот же роут, что у записи с камеры)
       try {
+                updateUploadFlow('upload', 3);
         const ext =
           /quicktime/i.test(mime) || /\.(mov)$/i.test(String(vf?.name || '')) ? 'mov'
           : /mp4/i.test(mime)     || /\.(mp4)$/i.test(String(vf?.name || '')) ? 'mp4'
@@ -11048,6 +11196,7 @@ const onFilesChosen = React.useCallback(async (e) => {
           handleUploadUrl: '/api/forum/blobUploadUrl',
           multipart: true,
           contentType: (mime || (ext === 'mp4' ? 'video/mp4' : (ext === 'mov' ? 'video/quicktime' : 'video/webm'))),
+          onUploadProgress: (p) => { try { setVideoProgress(p?.percentage || 0); } catch {} },         
           onUploadProgress: (p) => {
             const percent = Number(p?.percentage ?? 0);
             if (Number.isFinite(percent)) setUploadStage('upload', Math.min(92, Math.max(34, percent)));
@@ -11062,6 +11211,7 @@ const onFilesChosen = React.useCallback(async (e) => {
           try { setOverlayMediaUrl(null); } catch {} // видео берём из pendingVideo
           try { setVideoState?.('preview'); } catch {}
           try { setVideoOpen?.(true); } catch {}
+          updateUploadFlow('preview', 100);  
         } else {
           throw new Error('no_url');
         }   
@@ -11069,6 +11219,7 @@ const onFilesChosen = React.useCallback(async (e) => {
         console.error('video_client_upload_failed', e3);
         try { toast?.err?.(t?.('forum_video_upload_failed') || 'Failed to upload video'); } catch {}
         resetUploadStatus();     
+        resetUploadFlow();       
         return;
       }
     }
@@ -11076,17 +11227,19 @@ const onFilesChosen = React.useCallback(async (e) => {
     // общий success toast (если что-то реально добавили)
     if (imgFiles.length || vidFiles.length) {
       try { toast?.success?.(t?.('forum_files_uploaded') || 'Files uploaded'); } catch {}
-       finishUpload();  
+       finishUpload(); 
+             finishUploadFlow('preview'); 
     }
   } catch (err) {
     console.error(err);
     try { toast?.error?.(t?.('forum_files_upload_failed') || 'Upload failed'); } catch {}
     finishUpload(300); 
+    resetUploadFlow(); 
   } finally {
     if (e?.target) e.target.value = '';
   }
-}, [t, toast, moderateImageFiles, moderateVideoSource, toastI18n, reasonKey, reasonFallbackEN, clearUploadTimer, setUploadStage, finishUpload, resetUploadStatus]);
-  /* ---- профиль (поповер у аватара) ---- */
+}, [t, toast, moderateImageFiles, moderateVideoSource, toastI18n, reasonKey, reasonFallbackEN, updateUploadFlow, resetUploadFlow, finishUploadFlow, setVideoProgress]);
+/* ---- профиль (поповер у аватара) ---- */
   const idShown = auth.asherId || auth.accountId || ''
   const profile = (()=>{ if(!isBrowser()) return null; try{ return JSON.parse(localStorage.getItem('profile:'+idShown)||'null') }catch{return null} })()
   const nickShown = profile?.nickname || (idShown ? shortId(idShown) : null)
@@ -13072,6 +13225,39 @@ onClick={()=>{
 
       </div>
 <div className="composeDock">
+  {uploadFlow.active && (
+  <div className="composerProgress" role="status" aria-live="polite">
+    <div className="composerProgressHeader">
+      <span className="composerProgressLabel">
+        {uploadSteps[activeUploadIndex]?.label || ''}
+      </span>
+      <span className="composerProgressPct">
+        {Math.round(uploadProgressValue)}%
+      </span>
+    </div>
+    <div className="composerProgressTrack">
+      <span
+        className="composerProgressFill"
+        style={{ width: `${uploadProgressValue}%` }}
+      />
+    </div>
+    <div className="composerProgressStages">
+      {uploadSteps.map((step, idx) => (
+        <div
+          key={step.id}
+          className={cls(
+            'composerProgressStage',
+            idx < activeUploadIndex && 'done',
+            idx === activeUploadIndex && 'active'
+          )}
+        >
+          <span className="composerProgressDot" />
+          <span className="composerProgressText">{step.label}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 {/* нижний композер */}
 <div className="composer" data-active={composerActive} ref={composerRef}>
   {uploadStatus.active && (
