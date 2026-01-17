@@ -2547,14 +2547,11 @@ useEffect(() => {
                     playsInline
                   />
                 ) : primaryCreative.imagePreviewUrl ? (
-                     <>
-                    {/* eslint-disable-next-line @next/next/no-img-element -- creative preview can be blob/external */}
-                    <img
-                      src={primaryCreative.imagePreviewUrl}
-                      alt="preview"
-                      className="ads-preview-img"
-                    />
-                  </>
+                  <img
+                    src={primaryCreative.imagePreviewUrl}
+                    alt="preview"
+                    className="ads-preview-img"
+                  />
                 ) : primaryCreative.clickUrl ? (
                   <div className="ads-preview-placeholder">
                     <div className="ads-preview-url">
@@ -3006,13 +3003,10 @@ useEffect(() => {
                             />
                           ) : selectedCampaign.mediaType === 'image' &&
                             selectedCampaign.mediaUrl ? (
-                            <>
-                              {/* eslint-disable-next-line @next/next/no-img-element -- analytics preview may be external */}
-                              <img
-                                src={selectedCampaign.mediaUrl}
-                                alt="preview"
-                              />
-                            </>
+                            <img
+                              src={selectedCampaign.mediaUrl}
+                              alt="preview"
+                            />
                           ) : (
                             <div className="ads-analytics-preview-empty">
                               <span>

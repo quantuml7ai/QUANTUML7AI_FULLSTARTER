@@ -137,24 +137,21 @@ export default function HeroAvatar({ videoSrc='/avatar.mp4', poster='/avatar.jpg
  
       {/* ПОСТЕР: всегда обычный <img>, без next/image оптимизации */}
       {poster && (
-        <>
-          {/* eslint-disable-next-line @next/next/no-img-element -- poster image needs absolute fill + no optimization */}
-          <img
-            src={poster}
-            alt=""
-            className="bg-video"
-            aria-hidden="true" 
-            style={{
-              opacity: (!ENABLE_HERO_VIDEO || showPoster) ? opacity : 0,
-              transition: 'opacity .5s ease',
-              position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-            }}
-          />
-        </>
+        <img
+          src={poster}
+          alt=""
+          className="bg-video"
+          aria-hidden="true" 
+          style={{
+            opacity: (!ENABLE_HERO_VIDEO || showPoster) ? opacity : 0,
+            transition: 'opacity .5s ease',
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+          }}
+        />
       )}
 
 

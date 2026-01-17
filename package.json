@@ -2,10 +2,6 @@
   "name": "quantuml7ai-fullstarter",
   "version": "0.3.0",
   "private": true,
-  "engines": {
-    "node": "22.x"
-  },
-  "packageManager": "pnpm@10.28.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
