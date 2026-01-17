@@ -12276,9 +12276,7 @@ onClick={()=>{
 </div>
 
     <div className="slot-center">
-      <div className="forumTotal">
-        {t('forum_total')}: {(data.topics||[]).length}
-      </div>
+
     </div>
     <div className="slot-right">
    <button
@@ -12642,16 +12640,15 @@ onClick={()=>{
       <path d="M5 10v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   </button>
+ 
 </div>
 
 
     <div className="slot-center">
-      <div className="forumTotal">
-        {/* в режиме темы выводим "Ответы" / заголовок, но всё равно центрируем */}
-        {threadRoot ? (t('forum_open_replies') || 'Ответы') : (t('forum_total') + ': ' + (data.topics||[]).length)}
-      </div>
+
     </div>
     <div className="slot-right">
+
    <button
     type="button"
     className="iconBtn inviteGifBtn"
