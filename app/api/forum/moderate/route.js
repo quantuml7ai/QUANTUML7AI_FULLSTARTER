@@ -349,9 +349,17 @@ export async function POST(req) {
       });
     } catch {}
 
-    return Response.json(
-      { ok: false, error: 'Moderation failed' },
-      { status: 500 }
-    );
+    return Response.json({
+      ok: true,
+      decision: 'allow',
+      reason: 'unknown',
+      softFail: true,
+      error: 'moderation_unavailable',
+      meta: {
+        source,
+        clientRequestId,
+        tookMs: ms
+      }
+    });
   }
 }

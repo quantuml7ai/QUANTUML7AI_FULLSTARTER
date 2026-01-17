@@ -7805,6 +7805,12 @@ export default function Forum(){
         stopYtMutePoll(player);
         // ВАЖНО: YouTube iframe держит GPU/WebGL ресурсы даже на pause.
         // Для ленты (Shorts/TikTok-style) нужно освобождать ресурсы полностью.
+        try {
+          const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
+          if (src && !el.getAttribute('data-src')) el.setAttribute('data-src', src);
+          el.setAttribute('data-forum-unloaded', '1');
+          iframeUnloaded.add(el);
+        } catch {}        
         try { player?.destroy?.(); } catch {}
         try { ytPlayers.delete(el); } catch {}
         // выгружаем iframe, чтобы не копились WebGL контексты при пагинации/скролле
@@ -7872,6 +7878,8 @@ if (kind === 'qcast') {
             detail: { source: 'youtube', element: el }
           }));          
         } catch {}
+        try { el.removeAttribute('data-forum-unloaded'); } catch {}
+        try { iframeUnloaded.delete(el); } catch {}
         return;
       }
 if (kind === 'tiktok' || kind === 'iframe') {
@@ -8023,7 +8031,7 @@ document.querySelectorAll(selector).forEach((el) => {
   }
 
   // iframe/tiktok: гарантируем data-src...
-  if ((kind === 'tiktok' || kind === 'iframe') && el?.getAttribute) {
+  if ((kind === 'tiktok' || kind === 'iframe' || kind === 'youtube') && el?.getAttribute) {
     const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
     if (src && !el.getAttribute('data-src')) {
       try { el.setAttribute('data-src', src); } catch {}
