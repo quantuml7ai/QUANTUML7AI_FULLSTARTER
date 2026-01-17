@@ -7754,7 +7754,8 @@ export default function Forum(){
     };
 
     const ratios = new Map();
-    const iframeReloadAt = new WeakMap();    
+    const iframeReloadAt = new WeakMap();
+    const iframeUnloaded = new WeakSet();
     let active = null;
     const ensureIframeSrc = (el, force = false) => {
       if (!(el instanceof HTMLIFrameElement)) return;
@@ -7818,7 +7819,8 @@ if (kind === 'tiktok' || kind === 'iframe') {
   // поэтому «пауза» = выгрузить src, а «play» = перезагрузить src.
   const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
   if (src && !el.getAttribute('data-src')) el.setAttribute('data-src', src);
-  if (el.getAttribute('src')) el.setAttribute('src', '');
+  try { el.setAttribute('data-forum-unloaded', '1'); } catch {}
+  try { iframeUnloaded.add(el); } catch {}
 }
 
     };
@@ -7875,6 +7877,8 @@ if (kind === 'tiktok' || kind === 'iframe') {
   // ВАЖНО: если пользователь вручную нажал pause/play внутри iframe,
   // то единственный надёжный способ «вернуть в автоплей» — перезагрузить embed.
   ensureIframeSrc(el, true);
+  try { el.removeAttribute('data-forum-unloaded'); } catch {}
+  try { iframeUnloaded.delete(el); } catch {}
 
   window.dispatchEvent(new CustomEvent('site-media-play', {
     detail: { source: kind, element: el }
@@ -7922,7 +7926,12 @@ if (kind === 'tiktok' || kind === 'iframe') {
               try { frame.setAttribute('data-src', src); } catch {}
             }
             if (!frame.getAttribute('src') && frame.getAttribute('data-src')) {
-              ensureIframeSrc(frame, false);
+              const shouldForce = iframeUnloaded.has(frame) || frame.getAttribute('data-forum-unloaded') === '1';
+              ensureIframeSrc(frame, shouldForce);
+              if (shouldForce) {
+                try { frame.removeAttribute('data-forum-unloaded'); } catch {}
+                try { iframeUnloaded.delete(frame); } catch {}
+              }
             }
           } else if (frame !== active) {
             pauseMedia(frame);
