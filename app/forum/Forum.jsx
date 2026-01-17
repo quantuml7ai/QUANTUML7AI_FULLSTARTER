@@ -7754,7 +7754,33 @@ export default function Forum(){
     };
 
     const ratios = new Map();
+    const iframeReloadAt = new WeakMap();    
     let active = null;
+    const ensureIframeSrc = (el, force = false) => {
+      if (!(el instanceof HTMLIFrameElement)) return;
+      const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
+      if (!src) return;
+      if (!el.getAttribute('data-src')) {
+        try { el.setAttribute('data-src', src); } catch {}
+      }
+      const cur = el.getAttribute('src') || '';
+      if (cur !== src) {
+        try { el.setAttribute('src', src); } catch {}
+        return;
+      }
+      if (!force) return;
+      const last = iframeReloadAt.get(el) || 0;
+      if (Date.now() - last < 500) return;
+      iframeReloadAt.set(el, Date.now());
+      try { el.setAttribute('src', ''); } catch {}
+      try {
+        requestAnimationFrame(() => {
+          try { el.setAttribute('src', src); } catch {}
+        });
+      } catch {
+        try { el.setAttribute('src', src); } catch {}
+      }
+    };
 
     const pauseMedia = (el) => {
       if (!el) return;
@@ -7848,20 +7874,7 @@ if (kind === 'qcast') {
 if (kind === 'tiktok' || kind === 'iframe') {
   // ВАЖНО: если пользователь вручную нажал pause/play внутри iframe,
   // то единственный надёжный способ «вернуть в автоплей» — перезагрузить embed.
-  const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
-  if (!src) return;
-  if (!el.getAttribute('data-src')) el.setAttribute('data-src', src);
-
-  const cur = el.getAttribute('src') || '';
-  if (cur === src) {
-    // форс-ресет (убирает «запомненную» паузу)
-    try { el.setAttribute('src', ''); } catch {}
-    try { requestAnimationFrame(() => { try { el.setAttribute('src', src); } catch {} }); } catch {
-      try { el.setAttribute('src', src); } catch {}
-    }
-  } else {
-    try { el.setAttribute('src', src); } catch {}
-  }
+  ensureIframeSrc(el, true);
 
   window.dispatchEvent(new CustomEvent('site-media-play', {
     detail: { source: kind, element: el }
@@ -7909,7 +7922,7 @@ if (kind === 'tiktok' || kind === 'iframe') {
               try { frame.setAttribute('data-src', src); } catch {}
             }
             if (!frame.getAttribute('src') && frame.getAttribute('data-src')) {
-              try { frame.setAttribute('src', frame.getAttribute('data-src')); } catch {}
+              ensureIframeSrc(frame, false);
             }
           } else if (frame !== active) {
             pauseMedia(frame);
@@ -9993,7 +10006,16 @@ const moderateImageFiles = React.useCallback(async (files) => {
     pack.push({ blob: jpeg, name: (f.name || 'image').replace(/\.(png|jpe?g|webp|gif)$/i, '.jpg') });
   }
 
-  const r = await moderateViaApi(pack, { source: 'image' });
+  let r = null;
+  try {
+    r = await moderateViaApi(pack, { source: 'image' });
+  } catch (e) {
+    if (!isStrictModeration) {
+      try { console.warn('[moderation] image check failed -> allow (balanced)', e?.message || e); } catch {}
+      return { decision: 'allow', reason: 'unknown', raw: null, softFail: true };
+    }
+    throw e;
+  }
   let decision = String(r?.decision || 'allow');
   const reason = String(r?.reason || 'unknown');
 
@@ -10132,11 +10154,11 @@ const moderateVideoSource = React.useCallback(async (videoSource) => {
   let frames = [];
   try {
     frames = await extractVideoFrames(videoSource, {
-      framesCount: 14,
-      minGapSec: 0.6,
+      framesCount: 10,
+      minGapSec: 0.7,
       excludeHeadTail: 0.05,
-      maxWidth: 640,
-      quality: 0.82,
+      maxWidth: 560,
+      quality: 0.78,
     });
   } catch {
     frames = [];
@@ -10158,7 +10180,16 @@ const moderateVideoSource = React.useCallback(async (videoSource) => {
     timeSec: f.timeSec,
   }));
 
-  const r = await moderateViaApi(pack, { source: 'video_frame' });
+  let r = null;
+  try {
+    r = await moderateViaApi(pack, { source: 'video_frame' });
+  } catch (e) {
+    if (!isStrictModeration) {
+      try { console.warn('[moderation] video check failed -> allow (balanced)', e?.message || e); } catch {}
+      return { decision: 'allow', reason: 'unknown', raw: null, softFail: true };
+    }
+    throw e;
+  }
 
   let decision = String(r?.decision || 'allow');
   const reason = String(r?.reason || 'unknown');
