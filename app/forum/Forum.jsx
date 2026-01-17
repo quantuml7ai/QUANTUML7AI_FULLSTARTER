@@ -7821,6 +7821,7 @@ if (kind === 'tiktok' || kind === 'iframe') {
   if (src && !el.getAttribute('data-src')) el.setAttribute('data-src', src);
   try { el.setAttribute('data-forum-unloaded', '1'); } catch {}
   try { iframeUnloaded.add(el); } catch {}
+  try { if (el.getAttribute('src')) el.setAttribute('src', ''); } catch {}
 }
 
     };
@@ -7926,12 +7927,13 @@ if (kind === 'tiktok' || kind === 'iframe') {
               try { frame.setAttribute('data-src', src); } catch {}
             }
             if (!frame.getAttribute('src') && frame.getAttribute('data-src')) {
-              const shouldForce = iframeUnloaded.has(frame) || frame.getAttribute('data-forum-unloaded') === '1';
-              ensureIframeSrc(frame, shouldForce);
-              if (shouldForce) {
-                try { frame.removeAttribute('data-forum-unloaded'); } catch {}
-                try { iframeUnloaded.delete(frame); } catch {}
-              }
+               ensureIframeSrc(frame, shouldForce);
+                           } else if (shouldForce) {
+              ensureIframeSrc(frame, true);
+            }
+            if (shouldForce) {
+              try { frame.removeAttribute('data-forum-unloaded'); } catch {}
+              try { iframeUnloaded.delete(frame); } catch {}
             }
           } else if (frame !== active) {
             pauseMedia(frame);
