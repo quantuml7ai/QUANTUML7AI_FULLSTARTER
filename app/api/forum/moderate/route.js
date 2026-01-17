@@ -10,12 +10,12 @@ import jpeg from 'jpeg-js';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-export const maxDuration = 15;
+export const maxDuration = 30;
 
 const LIMITS = {
   maxFiles: 20,
-  maxOneBytes: 4 * 1024 * 1024,   // 4MB
-  maxTotalBytes: 25 * 1024 * 1024 // 25MB
+  maxOneBytes : 8 * 1024 * 1024 ,    // 8 МБ
+  maxTotalBytes : 40 * 1024 * 1024 // 40 MB 
 };
 
 // ----------

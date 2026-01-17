@@ -7869,7 +7869,54 @@ if (kind === 'tiktok' || kind === 'iframe') {
 }
 
     };
-
+    const getFocusedIframe = () => {
+      let best = null;
+      let bestRatio = 0;
+      for (const [el, r] of ratios.entries()) {
+        if (!(el instanceof HTMLIFrameElement)) continue;
+        const kind = el.getAttribute('data-forum-media');
+        if (!['youtube', 'tiktok', 'iframe'].includes(kind)) continue;
+        if (r > bestRatio) {
+          bestRatio = r;
+          best = el;
+        }
+      }
+      return best;
+    };
+    const manageIframeWindow = (centerIframe) => {
+      try {
+        const frames = Array.from(document.querySelectorAll('iframe[data-forum-media]'))
+          .filter((frame) => frame instanceof HTMLIFrameElement);
+        if (!frames.length) return;
+        if (!centerIframe || !frames.includes(centerIframe)) {
+          frames.forEach((frame) => {
+            const kind = frame.getAttribute('data-forum-media');
+            if (!['youtube', 'tiktok', 'iframe'].includes(kind)) return;
+            pauseMedia(frame);
+          });
+          return;
+        }
+        const idx = frames.indexOf(centerIframe);
+        const keepStart = Math.max(0, idx - 2);
+        const keepEnd = Math.min(frames.length - 1, idx + 2);
+        frames.forEach((frame, i) => {
+          const kind = frame.getAttribute('data-forum-media');
+          if (!['youtube', 'tiktok', 'iframe'].includes(kind)) return;
+          const inWindow = i >= keepStart && i <= keepEnd;
+          const src = frame.getAttribute('data-src') || frame.getAttribute('src') || '';
+          if (inWindow) {
+            if (src && !frame.getAttribute('data-src')) {
+              try { frame.setAttribute('data-src', src); } catch {}
+            }
+            if (!frame.getAttribute('src') && frame.getAttribute('data-src')) {
+              try { frame.setAttribute('src', frame.getAttribute('data-src')); } catch {}
+            }
+          } else if (frame !== active) {
+            pauseMedia(frame);
+          }
+        });
+      } catch {}
+    };
     const pickMostVisible = () => {
       let best = null;
       let bestRatio = 0;
@@ -7914,6 +7961,7 @@ if (kind === 'tiktok' || kind === 'iframe') {
             pauseMedia(active);
             active = null;
           }
+          manageIframeWindow(null);          
           return;
         }
 
@@ -7922,7 +7970,8 @@ if (kind === 'tiktok' || kind === 'iframe') {
         }
 
         active = candidate;
-        playMedia(candidate)
+        playMedia(candidate);
+        manageIframeWindow(getFocusedIframe() || (candidate instanceof HTMLIFrameElement ? candidate : null));
       },
       { 
         threshold: [0, 0.15, 0.35, 0.6, 0.85, 1],
@@ -7962,12 +8011,25 @@ document.querySelectorAll(selector).forEach((el) => {
 
 
     observeAll();
- 
+    const onIframeClick = (e) => {
+      const target = e?.target;
+      if (!(target instanceof HTMLIFrameElement)) return;
+      const kind = target.getAttribute('data-forum-media');
+      if (!['youtube', 'tiktok', 'iframe'].includes(kind)) return;
+      const src = target.getAttribute('data-src') || target.getAttribute('src') || '';
+      if (!src) return;
+      if (!target.getAttribute('src')) {
+        try { target.setAttribute('src', src); } catch {}
+      }
+      playMedia(target);
+    }; 
     const tick = setInterval(observeAll, 1500);
     window.addEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
+        document.addEventListener('click', onIframeClick, true);
     return () => {
       clearInterval(tick);
-      window.removeEventListener(MEDIA_MUTED_EVENT, onMutedEvent);      
+      window.removeEventListener(MEDIA_MUTED_EVENT, onMutedEvent);  
+      document.removeEventListener('click', onIframeClick, true);          
       io.disconnect();
       if (active) pauseMedia(active);
       active = null;
@@ -8716,7 +8778,7 @@ React.useEffect(()=>{
 useEffect(() => {
   if (!isBrowser()) return;
   let stop = false;
-  const TICK_MS = 500_000;
+  const TICK_MS = 120_000;
   const FULL_EVERY_MS = 10 * 60 * 1000;
 
   const runTick = async () => {
@@ -10444,7 +10506,8 @@ const createPost = async () => {
     cid:  tmpId,
     id: tmpId,
   });
-
+// важное исключение: отправка сообщений уходит немедленно
+  try { await flushMutations(); } catch {}
   setComposerActive(false);
   emitCreated(p.id, sel.id);
  
