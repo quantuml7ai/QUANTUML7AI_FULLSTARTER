@@ -7762,59 +7762,7 @@ export default function Forum(){
       const kind = el.getAttribute('data-forum-media');
       return kind === 'youtube' || kind === 'tiktok' || kind === 'iframe';
     };
-    const ensureIframeDataSrc = (el) => {
-      if (!el?.getAttribute) return '';
-      const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
-      if (src && !el.getAttribute('data-src')) {
-        try { el.setAttribute('data-src', src); } catch {}
-      }
-      return src;
-    };
-    const warmIframe = (el) => {
-      if (!isIframeMedia(el)) return;
-      const src = ensureIframeDataSrc(el);
-      if (src && !el.getAttribute('src')) {
-        try { el.setAttribute('src', src); } catch {}
-      }
-    };
-    const unloadIframe = (el) => {
-      if (!isIframeMedia(el)) return;
-      try {
-        const kind = el.getAttribute('data-forum-media');
-        if (kind === 'youtube') {
-          const player = ytPlayers.get(el);
-          try { stopYtMutePoll(player); } catch {}
-          try { player?.destroy?.(); } catch {}
-          try { ytPlayers.delete(el); } catch {}
-        }
-        const src = ensureIframeDataSrc(el);
-        if (src && el.getAttribute('src')) el.setAttribute('src', '');
-      } catch {}
-    };
-    const updateIframeWarmSet = (activeEl) => {
-      try {
-        const iframes = Array.from(document.querySelectorAll('iframe[data-forum-media]'))
-          .filter(isIframeMedia);
-        const warm = new Set();
-        if (activeEl && isIframeMedia(activeEl)) {
-          const idx = iframes.indexOf(activeEl);
-          if (idx >= 0) {
-            const from = Math.max(0, idx - WARM_IFRAME_NEIGHBORS);
-            const to = Math.min(iframes.length - 1, idx + WARM_IFRAME_NEIGHBORS);
-            for (let i = from; i <= to; i++) warm.add(iframes[i]);
-          }
-        }
-        iframes.forEach((el) => {
-          if (warm.has(el)) {
-            try { el.setAttribute('data-forum-warm', '1'); } catch {}
-            warmIframe(el);
-          } else {
-            try { el.removeAttribute('data-forum-warm'); } catch {}
-            unloadIframe(el);
-          }
-        });
-      } catch {}
-    };
+
     const pauseMedia = (el) => {
       if (!el) return;
       if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
@@ -7870,28 +7818,41 @@ export default function Forum(){
     const unloadAllIframes = () => {
       try {
         document.querySelectorAll('iframe[data-forum-media]').forEach((frame) => {
+         try { frame.removeAttribute('data-forum-warm'); } catch {}
           pauseMedia(frame);
         });
       } catch {}
     };
 
     const updateIframeWindow = (anchorEl) => {
-      if (!anchorEl || !anchorEl.closest) return;
+      if (!anchorEl || !anchorEl.closest) {
+        unloadAllIframes();
+        return;
+      }
       const card = anchorEl.closest(CARD_SELECTOR);
-      if (!card) return;
+      if (!card) {
+        unloadAllIframes();
+        return;
+      }
       const cards = Array.from(document.querySelectorAll(CARD_SELECTOR));
       const idx = cards.indexOf(card);
       if (idx < 0) return;
-      const from = Math.max(0, idx - 2);
-      const to = Math.min(cards.length - 1, idx + 2);
+      const from = Math.max(0, idx - WARM_IFRAME_NEIGHBORS);
+      const to = Math.min(cards.length - 1, idx + WARM_IFRAME_NEIGHBORS);
       const keep = new Set(cards.slice(from, to + 1));
       for (const el of cards) {
         const iframes = el.querySelectorAll('iframe[data-forum-media]');
         if (!iframes.length) continue;
         if (keep.has(el)) {
-          iframes.forEach((frame) => ensureIframeLoaded(frame));
+          iframes.forEach((frame) => {
+            try { frame.setAttribute('data-forum-warm', '1'); } catch {}
+            ensureIframeLoaded(frame);
+          });
         } else {
-          iframes.forEach((frame) => pauseMedia(frame));
+          iframes.forEach((frame) => {
+            try { frame.removeAttribute('data-forum-warm'); } catch {}
+            pauseMedia(frame);
+          });
         }
       }
     };
@@ -8013,8 +7974,7 @@ if (kind === 'tiktok' || kind === 'iframe') {
             pauseMedia(active);
             active = null;
           }
-          updateIframeWarmSet(null); 
-          unloadAllIframes();         
+          updateIframeWindow(null);     
           return;
         }
 
@@ -8023,7 +7983,7 @@ if (kind === 'tiktok' || kind === 'iframe') {
         }
         const isNewActive = active !== candidate;
         active = candidate;
-        updateIframeWarmSet(candidate);
+        updateIframeWindow(candidate);
         if (isNewActive) playMedia(candidate, { forceReset: true });
       },
       { 
@@ -8344,11 +8304,12 @@ const saveQueue = q => {
   try { queueRef.current = q; } catch {}
 }
 const makeOpId = () => `${Date.now()}_${Math.random().toString(36).slice(2)}`;
-const pushOp = (type, payload) => {
+const pushOp = (type, payload, opId = makeOpId()) => {
   const cur = Array.isArray(queueRef.current) ? queueRef.current : [];
-  const op  = { type, payload, opId: makeOpId() };
+  const op  = { type, payload, opId };
   const next = [...cur, op];
   saveQueue(next);
+   return op;
 }// всегда иметь «свежие» значения внутри async-кода (без устаревших замыканий)
 const queueRef = useRef(queue);  useEffect(()=>{ queueRef.current = queue }, [queue])
 const authRef  = useRef(auth);   useEffect(()=>{ authRef.current  = auth  }, [auth])
@@ -8433,6 +8394,163 @@ const compactOps = (ops) => {
   if (viewTopics.size) out.push({ type: 'view_topics', payload: { ids: Array.from(viewTopics) }, opId: makeOpId() });
   return out;
 };
+const dropOpsById = (ids) => {
+  const list = Array.isArray(ids) ? ids.filter(Boolean) : [];
+  if (!list.length) return;
+  const current = Array.isArray(queueRef.current) ? queueRef.current : [];
+  const drop = new Set(list);
+  const next = current.filter(op => !drop.has(op?.opId));
+  saveQueue(next);
+};
+const applyServerOps = (applied) => {
+  if (!Array.isArray(applied) || !applied.length) return;
+  const clearOverlay = {
+    reactions: new Set(),
+    edits: new Set(),
+    viewPosts: new Set(),
+    viewTopics: new Set(),
+    createTopics: new Set(),
+    createPosts: new Set(),
+    deletePosts: new Set(),
+    deleteTopics: new Set(),
+  };
+
+  persistSnap(prev => {
+    const next = { ...prev };
+    for (const it of applied) {
+      if (it.op === 'create_topic' && it.topic) {
+        next.topics = [ ...(next.topics || []), it.topic ];
+        if (it.cid) clearOverlay.createTopics.add(String(it.cid));
+      }
+      if (it.op === 'create_topic' && it.duplicate && it.cid) {
+        clearOverlay.createTopics.add(String(it.cid));
+      }
+      if (it.op === 'create_post' && it.post) {
+        next.posts  = [ ...(next.posts  || []), it.post  ];
+        if (it.cid) clearOverlay.createPosts.add(String(it.cid));
+      }
+      if (it.op === 'create_post' && it.duplicate && it.cid) {
+        clearOverlay.createPosts.add(String(it.cid));
+      }
+      if (it.op === 'delete_topic' && it.topicId) {
+        const id = String(it.topicId);
+        next.topics = (next.topics || []).filter(t => String(t.id) !== id);
+        next.posts  = (next.posts  || []).filter(p => String(p.topicId) !== id);
+        clearOverlay.deleteTopics.add(id);
+      }
+      if (it.op === 'delete_post') {
+        const ids = Array.isArray(it.deleted) ? it.deleted.map(String) : [String(it.postId || it.id || '')];
+        const delSet = new Set(ids.filter(Boolean));
+        next.posts = (next.posts || []).filter(p => !delSet.has(String(p.id)));
+        ids.forEach(id => clearOverlay.deletePosts.add(String(id)));
+      }
+      if (it.op === 'edit_post' && it.postId) {
+        const id = String(it.postId);
+        if (it.text) {
+          next.posts = (next.posts || []).map(p => String(p.id) === id ? { ...p, text: it.text } : p);
+        }
+        clearOverlay.edits.add(id);
+      }
+      if (it.op === 'set_reaction' && it.postId) {
+        const id = String(it.postId);
+        next.posts = (next.posts || []).map(p => {
+          if (String(p.id) !== id) return p;
+          return {
+            ...p,
+            likes: Number(it.likes ?? p.likes ?? 0),
+            dislikes: Number(it.dislikes ?? p.dislikes ?? 0),
+            myReaction: it.state ?? p.myReaction ?? null,
+          };
+        });
+        clearOverlay.reactions.add(id);
+      }
+      if (it.op === 'view_posts' && it.views && typeof it.views === 'object') {
+        next.posts = (next.posts || []).map(p => {
+          const v = it.views[String(p.id)];
+          if (!Number.isFinite(v)) return p;
+          return { ...p, views: v };
+        });
+        Object.keys(it.views || {}).forEach(id => clearOverlay.viewPosts.add(String(id)));
+      }
+      if (it.op === 'view_post' && it.postId != null) {
+        const id = String(it.postId);
+        const views = Number(it.views ?? 0);
+        if (Number.isFinite(views)) {
+          next.posts = (next.posts || []).map(p => String(p.id) === id ? { ...p, views } : p);
+        }
+
+        clearOverlay.viewPosts.add(id);
+      }
+      if (it.op === 'view_topics' && it.views && typeof it.views === 'object') {
+        next.topics = (next.topics || []).map(t => {
+          const v = it.views[String(t.id)];
+          if (!Number.isFinite(v)) return t;
+          return { ...t, views: v };
+        });
+        Object.keys(it.views || {}).forEach(id => clearOverlay.viewTopics.add(String(id)));
+      }
+      if (it.op === 'view_topic' && it.topicId != null) {
+        const id = String(it.topicId);
+        const views = Number(it.views ?? 0);
+        if (Number.isFinite(views)) {
+          next.topics = (next.topics || []).map(t => String(t.id) === id ? { ...t, views } : t);
+        }
+       clearOverlay.viewTopics.add(id);
+      }
+      if (it.op === 'ban_user' && it.accountId) {
+        const bans = new Set(next.bans || []);
+        bans.add(it.accountId);
+        next.bans = Array.from(bans);
+      }
+      if (it.op === 'unban_user' && it.accountId) {
+        next.bans = (next.bans || []).filter(b => b !== it.accountId);
+      }
+    }
+
+    return dedupeAll(next);
+  });
+
+  setOverlay(prev => {
+    const next = { ...prev };
+    if (clearOverlay.reactions.size) {
+      const reactions = { ...next.reactions };
+      clearOverlay.reactions.forEach(id => { delete reactions[id]; });
+      next.reactions = reactions;
+    }
+    if (clearOverlay.edits.size) {
+      const edits = { ...next.edits };
+      clearOverlay.edits.forEach(id => { delete edits[id]; });
+      next.edits = edits;
+    }
+    if (clearOverlay.viewPosts.size || clearOverlay.viewTopics.size) {
+      const views = {
+        topics: { ...next.views.topics },
+        posts: { ...next.views.posts },
+      };
+      clearOverlay.viewPosts.forEach(id => { delete views.posts[id]; });
+      clearOverlay.viewTopics.forEach(id => { delete views.topics[id]; });
+      next.views = views;
+    }
+    if (clearOverlay.createTopics.size || clearOverlay.createPosts.size) {
+      const creates = {
+        topics: (next.creates.topics || []).filter(t => !clearOverlay.createTopics.has(String(t.id || t.cid || ''))),
+        posts: (next.creates.posts || []).filter(p => !clearOverlay.createPosts.has(String(p.id || p.cid || ''))),
+      };
+      next.creates = creates;
+    }
+    return next;
+  });
+
+  if (clearOverlay.deletePosts.size || clearOverlay.deleteTopics.size) {
+    persistTombstones(prev => {
+      const posts = { ...prev.posts };
+      const topics = { ...prev.topics };
+      clearOverlay.deletePosts.forEach(id => { delete posts[id]; });
+      clearOverlay.deleteTopics.forEach(id => { delete topics[id]; });
+      return { posts, topics };
+    });
+  }
+};
 const flushMutations = useCallback(async () => {
   if (busyRef.current) return;
 
@@ -8475,153 +8593,7 @@ const flushMutations = useCallback(async () => {
       if (pendingPosts.length) pendingPosts.forEach(id => pendingViewsPostsRef.current.delete(id));
       if (pendingTopics.length) pendingTopics.forEach(id => pendingViewsTopicsRef.current.delete(id));
 
-      const clearOverlay = {
-        reactions: new Set(),
-        edits: new Set(),
-        viewPosts: new Set(),
-        viewTopics: new Set(),
-        createTopics: new Set(),
-        createPosts: new Set(),
-        deletePosts: new Set(),
-        deleteTopics: new Set(),
-      };
-
-      persistSnap(prev => {
-        const next = { ...prev };
-        for (const it of applied) {
-          if (it.op === 'create_topic' && it.topic) {
-            next.topics = [ ...(next.topics || []), it.topic ];
-            if (it.cid) clearOverlay.createTopics.add(String(it.cid));
-          }
-          if (it.op === 'create_topic' && it.duplicate && it.cid) {
-            clearOverlay.createTopics.add(String(it.cid));
-          }
-          if (it.op === 'create_post' && it.post) {
-            next.posts  = [ ...(next.posts  || []), it.post  ];
-            if (it.cid) clearOverlay.createPosts.add(String(it.cid));
-          }
-          if (it.op === 'create_post' && it.duplicate && it.cid) {
-            clearOverlay.createPosts.add(String(it.cid));
-          }
-          if (it.op === 'delete_topic' && it.topicId) {
-            const id = String(it.topicId);
-            next.topics = (next.topics || []).filter(t => String(t.id) !== id);
-            next.posts  = (next.posts  || []).filter(p => String(p.topicId) !== id);
-            clearOverlay.deleteTopics.add(id);
-          }
-          if (it.op === 'delete_post') {
-            const ids = Array.isArray(it.deleted) ? it.deleted.map(String) : [String(it.postId || it.id || '')];
-            const delSet = new Set(ids.filter(Boolean));
-            next.posts = (next.posts || []).filter(p => !delSet.has(String(p.id)));
-            ids.forEach(id => clearOverlay.deletePosts.add(String(id)));
-          }
-          if (it.op === 'edit_post' && it.postId) {
-            const id = String(it.postId);
-            if (it.text) {
-              next.posts = (next.posts || []).map(p => String(p.id) === id ? { ...p, text: it.text } : p);
-            }
-            clearOverlay.edits.add(id);
-          }
-          if (it.op === 'set_reaction' && it.postId) {
-            const id = String(it.postId);
-            next.posts = (next.posts || []).map(p => {
-              if (String(p.id) !== id) return p;
-              return {
-                ...p,
-                likes: Number(it.likes ?? p.likes ?? 0),
-                dislikes: Number(it.dislikes ?? p.dislikes ?? 0),
-                myReaction: it.state ?? p.myReaction ?? null,
-              };
-            });
-            clearOverlay.reactions.add(id);
-          }
-          if (it.op === 'view_posts' && it.views && typeof it.views === 'object') {
-            next.posts = (next.posts || []).map(p => {
-              const v = it.views[String(p.id)];
-              if (!Number.isFinite(v)) return p;
-              return { ...p, views: v };
-            });
-            Object.keys(it.views || {}).forEach(id => clearOverlay.viewPosts.add(String(id)));
-          }
-          if (it.op === 'view_post' && it.postId != null) {
-            const id = String(it.postId);
-            const views = Number(it.views ?? 0);
-            if (Number.isFinite(views)) {
-              next.posts = (next.posts || []).map(p => String(p.id) === id ? { ...p, views } : p);
-            }
-
-            clearOverlay.viewPosts.add(id);
-          }
-          if (it.op === 'view_topics' && it.views && typeof it.views === 'object') {
-            next.topics = (next.topics || []).map(t => {
-              const v = it.views[String(t.id)];
-              if (!Number.isFinite(v)) return t;
-              return { ...t, views: v };
-            });
-            Object.keys(it.views || {}).forEach(id => clearOverlay.viewTopics.add(String(id)));
-          }
-          if (it.op === 'view_topic' && it.topicId != null) {
-            const id = String(it.topicId);
-            const views = Number(it.views ?? 0);
-            if (Number.isFinite(views)) {
-              next.topics = (next.topics || []).map(t => String(t.id) === id ? { ...t, views } : t);
-            }
-           clearOverlay.viewTopics.add(id);
-          }
-          if (it.op === 'ban_user' && it.accountId) {
-            const bans = new Set(next.bans || []);
-            bans.add(it.accountId);
-            next.bans = Array.from(bans);
-          }
-          if (it.op === 'unban_user' && it.accountId) {
-            next.bans = (next.bans || []).filter(b => b !== it.accountId);
-          }
-        }
-
-        return dedupeAll(next);
-      });
-
-      setOverlay(prev => {
-        const next = { ...prev };
-        if (clearOverlay.reactions.size) {
-          const reactions = { ...next.reactions };
-          clearOverlay.reactions.forEach(id => { delete reactions[id]; });
-          next.reactions = reactions;
-        }
-        if (clearOverlay.edits.size) {
-          const edits = { ...next.edits };
-          clearOverlay.edits.forEach(id => { delete edits[id]; });
-          next.edits = edits;
-        }
-        if (clearOverlay.viewPosts.size || clearOverlay.viewTopics.size) {
-          const views = {
-            topics: { ...next.views.topics },
-            posts: { ...next.views.posts },
-          };
-          clearOverlay.viewPosts.forEach(id => { delete views.posts[id]; });
-          clearOverlay.viewTopics.forEach(id => { delete views.topics[id]; });
-          next.views = views;
-        }
-        if (clearOverlay.createTopics.size || clearOverlay.createPosts.size) {
-          const creates = {
-            topics: (next.creates.topics || []).filter(t => !clearOverlay.createTopics.has(String(t.id || t.cid || ''))),
-            posts: (next.creates.posts || []).filter(p => !clearOverlay.createPosts.has(String(p.id || p.cid || ''))),
-          };
-          next.creates = creates;
-        }
-        return next;
-      });
-
-      if (clearOverlay.deletePosts.size || clearOverlay.deleteTopics.size) {
-        persistTombstones(prev => {
-          const posts = { ...prev.posts };
-          const topics = { ...prev.topics };
-          clearOverlay.deletePosts.forEach(id => { delete posts[id]; });
-          clearOverlay.deleteTopics.forEach(id => { delete topics[id]; });
-          return { posts, topics };
-        });
-      }
-
+      applyServerOps(applied);
     }
   } catch (e) {
     console.error('flushMutations', e);
@@ -10276,7 +10248,7 @@ setSel(t0)
 toast.ok(t('forum_create_ok') ||'Тема создана')
 
    
-    pushOp('create_topic', {
+    const topicOp = pushOp('create_topic', {
       title: safeTitle,
       description: safeDesc,
       nickname: t0.nickname,
@@ -10284,7 +10256,7 @@ toast.ok(t('forum_create_ok') ||'Тема создана')
       cid: tmpT,
       id: tmpT,
     });
-    pushOp('create_post', {
+    const postOp = pushOp('create_post', {
       topicId: tmpT,
       topicCid: tmpT,
       text: safeFirst,
@@ -10294,6 +10266,13 @@ toast.ok(t('forum_create_ok') ||'Тема создана')
       cid: tmpP,
       id: tmpP,
     });
+        try {
+      const resp = await api.mutate({ ops: [topicOp, postOp] }, uid);
+      if (resp && Array.isArray(resp.applied)) {
+        dropOpsById([topicOp.opId, postOp.opId]);
+        applyServerOps(resp.applied);
+      }
+    } catch {}
   // жёсткая очистка и подтягиваем свежий снапшот
   try { setText(''); } catch {}
   try { setPendingImgs([]); } catch {}
@@ -10544,7 +10523,7 @@ const createPost = async () => {
   }
 
   // батч на бэк
-  pushOp('create_post', {
+  const postOp = pushOp('create_post', {
     topicId: sel.id,
     text: body,
     parentId,
@@ -10553,7 +10532,13 @@ const createPost = async () => {
     cid:  tmpId,
     id: tmpId,
   });
-  try { await flushMutations(); } catch {}
+  try {
+    const resp = await api.mutate({ ops: [postOp] }, uid);
+    if (resp && Array.isArray(resp.applied)) {
+      dropOpsById([postOp.opId]);
+      applyServerOps(resp.applied);
+    }
+  } catch {}
   setComposerActive(false);
   emitCreated(p.id, sel.id);
  
