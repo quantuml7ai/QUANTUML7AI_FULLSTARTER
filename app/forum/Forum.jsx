@@ -1302,18 +1302,18 @@ const Styles = () => (
     .neon{ box-shadow:0 0 28px rgba(25,129,255,.14), inset 0 0 18px rgba(25,129,255,.06) }
     .postBody{ white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word }
     .forum_root{
-      --mb-video-h-mobile: 550px;
-      --mb-video-h-tablet: 520px;
-      --mb-video-h-desktop: 520px;
-      --mb-image-h-mobile: 550px;
-      --mb-image-h-tablet: 520px;
-      --mb-image-h-desktop: 520px;
-      --mb-iframe-h-mobile: 500px;
-      --mb-iframe-h-tablet: 500px;
-      --mb-iframe-h-desktop: 500px;
-      --mb-audio-h-mobile: 550px;
-      --mb-audio-h-tablet: 550px;
-      --mb-audio-h-desktop: 600px;
+      --mb-video-h-mobile: 730px;
+      --mb-video-h-tablet: 650px;
+      --mb-video-h-desktop: 700px;
+      --mb-image-h-mobile: 730px;
+      --mb-image-h-tablet: 650px;
+      --mb-image-h-desktop: 700px;
+      --mb-iframe-h-mobile: 730px;
+      --mb-iframe-h-tablet: 650px;
+      --mb-iframe-h-desktop: 700px;
+      --mb-audio-h-mobile: 730px;
+      --mb-audio-h-tablet: 650px;
+      --mb-audio-h-desktop: 700px;
       --mb-ad-h-mobile: 200px;
       --mb-ad-h-tablet: 260px;
       --mb-ad-h-desktop: 320px;
@@ -4037,25 +4037,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   opacity:.6;
   animation: qshine-rotate 9s linear infinite;
 }
-
-/* движущийся «солнечный зайчик» */
-.qshine::after{
-  content:"";
-  position:absolute; inset:-30%; pointer-events:none; border-radius:inherit;
-  background:
-    linear-gradient(115deg,
-      rgba(255,255,255,0) 0%,
-      rgba(255,240,200,.06) 35%,
-      rgba(255,220,140,.17) 50%,
-      rgba(255,240,200,.06) 65%,
-      rgba(255,255,255,0) 100%);
-  transform: translateX(-60%) rotate(8deg);
-  mix-blend-mode: screen;
-  filter: blur(.4px);
-  animation: qshine-sweep 3.8s ease-in-out infinite;
-  opacity:.66;
-}
-
+ 
 /* вариант: блик только на hover/focus — добавь класс .qshine-hover вместо .qshine */
 .qshine-hover::after{ opacity:0; transform: translateX(-70%) rotate(8deg); }
 .qshine-hover:hover::after,
@@ -7966,7 +7948,7 @@ if (kind === 'tiktok' || kind === 'iframe') {
  
         const { el: candidate, ratio } = pickMostVisible();
 
-        const FOCUS_RATIO = 0.6;
+        const FOCUS_RATIO = 0.40;
 
         if (!candidate || ratio < FOCUS_RATIO) {
           if (active) {
