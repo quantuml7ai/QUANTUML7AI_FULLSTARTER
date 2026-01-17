@@ -4037,23 +4037,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   animation: qshine-rotate 9s linear infinite;
 }
 
-/* движущийся «солнечный зайчик» */
-.qshine::after{
-  content:"";
-  position:absolute; inset:-30%; pointer-events:none; border-radius:inherit;
-  background:
-    linear-gradient(115deg,
-      rgba(255,255,255,0) 0%,
-      rgba(255,240,200,.06) 35%,
-      rgba(255,220,140,.17) 50%,
-      rgba(255,240,200,.06) 65%,
-      rgba(255,255,255,0) 100%);
-  transform: translateX(-60%) rotate(8deg);
-  mix-blend-mode: screen;
-  filter: blur(.4px);
-  animation: qshine-sweep 3.8s ease-in-out infinite;
-  opacity:.66;
-}
+
 
 /* вариант: блик только на hover/focus — добавь класс .qshine-hover вместо .qshine */
 .qshine-hover::after{ opacity:0; transform: translateX(-70%) rotate(8deg); }
