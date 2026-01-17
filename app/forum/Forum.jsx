@@ -5,7 +5,8 @@
 
 
 import React, { useEffect, useMemo, useRef, useCallback, useState } from 'react'
-import { useI18n } from '../../components/i18n' 
+import { useI18n } from '../../components/i18n'
+import { useRouter } from 'next/navigation'
 import { broadcast as forumBroadcast } from './events/bus'
 import Image from 'next/image'
 // [ADS:IMPORT]
@@ -201,17 +202,11 @@ function useSyncForumProfileOnMount() {
         let cur = {}
         try { cur = JSON.parse(localStorage.getItem(key) || '{}') || {} } catch { cur = {} }
 
-const vipUntil = Number(j?.vipUntil ?? j?.vipExpiresAt ?? j?.vip_until ?? j?.vip_exp ?? 0) || 0;
-const vipActive = !!(j?.vipActive ?? j?.isVip ?? j?.vip ?? false) || (vipUntil && vipUntil > Date.now());
-
-const next = {
-  ...cur,
-  nickname: j.nickname || j.nick || cur.nickname || '',
-  icon: j.icon || cur.icon || '',
-  vipActive,
-  vipUntil,
-}
-
+        const next = {
+          ...cur,
+          nickname: j.nickname || j.nick || cur.nickname || '',
+          icon: j.icon || cur.icon || '',
+        }
 
         localStorage.setItem(key, JSON.stringify(next))
       } catch {
@@ -230,116 +225,6 @@ function resolveIconForDisplay(userId, pIcon) {
   // приоритет: vipIcon (URL) → vipEmoji (эмодзи) → то, что пришло с сервера
   return prof.vipIcon || prof.vipEmoji || pIcon || '👤';
 }
-// =========================================================
-// VIP badge над ником (1.png 20s / 2.png 5s) — только для VIP
-// =========================================================
-const VIP_BADGE_IMG_1 = '/isvip/1.png';
-const VIP_BADGE_IMG_2 = '/isvip/2.png';
-
-// не даём бомбить /api/profile/get-profile по 100 раз
-const __vipProbeOnce = new Set();
-
-function __vipFromHint(h) {
-  if (h === true) return true;
-  if (h === false) return false;
-  // иногда бэк может прислать timestamp (vipUntil)
-  if (typeof h === 'number' && Number.isFinite(h)) return h > Date.now();
-  if (typeof h === 'string' && /^\d{10,}$/.test(h)) {
-    const n = Number(h);
-    if (Number.isFinite(n)) return n > Date.now();
-  }
-  return null;
-}
-
-function __vipFromProfile(prof) {
-  if (!prof || typeof prof !== 'object') return null;
-
-  // явные флаги
-  if (prof.vipActive === true || prof.isVip === true || prof.vip === true) return true;
-  if (prof.vipActive === false || prof.isVip === false || prof.vip === false) return false;
-
-  // timestamp-истечение
-  const until = Number(prof.vipUntil ?? prof.vipExpiresAt ?? prof.vip_until ?? prof.vip_exp ?? 0);
-  if (Number.isFinite(until) && until > Date.now()) return true;
-
-  // иногда отдают уровень
-  const lvl = Number(prof.vipLevel ?? prof.vip_level ?? 0);
-  if (Number.isFinite(lvl) && lvl > 0) return true;
-
-  // fallback: если твой бек кладёт эти поля только VIP-пользователям
-  if (prof.vipIcon || prof.vipEmoji) return true;
-
-  return null;
-}
-
-function useVipFlag(userId, hint) {
-  const uid = String(userId || '').trim();
-
-  const [vip, setVip] = React.useState(() => {
-    const fromHint = __vipFromHint(hint);
-    if (fromHint !== null) return fromHint;
-    const fromProf = __vipFromProfile(safeReadProfile(uid));
-    return fromProf; // true | false | null
-  });
-
-  React.useEffect(() => {
-    const uid = String(userId || '').trim();
-    if (!uid) { setVip(false); return; }
-
-    const fromHint = __vipFromHint(hint);
-    if (fromHint !== null) { setVip(fromHint); return; }
-
-    const fromProf = __vipFromProfile(safeReadProfile(uid));
-    if (fromProf !== null) { setVip(fromProf); return; }
-
-    // неизвестно → один раз попробуем спросить профиль
-    if (__vipProbeOnce.has(uid)) return;
-    __vipProbeOnce.add(uid);
-
-    let cancelled = false;
-    (async () => {
-      try {
-const r = await fetch('/api/forum/vip/batch', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  cache: 'no-store',
-  body: JSON.stringify({ ids: [uid] }),
-});
-const j = await r.json().catch(() => null);
-if (!j?.ok || cancelled) return;
-
-const v = j?.map?.[uid] || null;
-const vipUntil = Number(v?.untilMs || 0) || 0;
-const vipActive = !!v?.active || (vipUntil && vipUntil > Date.now());
-        // сохраним в localStorage, чтобы дальше не гадать
-        try {
-          const key = 'profile:' + uid;
-          let cur = {};
-          try { cur = JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch { cur = {}; }
-          localStorage.setItem(key, JSON.stringify({ ...cur, vipActive, vipUntil }));
-        } catch {}
-
-        setVip(vipActive);
-      } catch {
-        // no-op
-      }
-    })();
-
-    return () => { cancelled = true; };
-  }, [userId, hint]);
-
-  return vip === true;
-}
-
-function VipFlipBadge({ className = '' }) {
-  return (
-    <span className={cls('vipFlip', className)} aria-label="VIP" title="VIP">
-      <img className="vipFlipImg vip1" src={VIP_BADGE_IMG_1} alt="" loading="lazy" />
-      <img className="vipFlipImg vip2" src={VIP_BADGE_IMG_2} alt="" loading="lazy" />
-    </span>
-  );
-}
-
 // iconId → канон
 function normalizeIconId(v) {
   if (!v) return ''
@@ -594,14 +479,12 @@ if (typeof window !== 'undefined') {
 // ==== API (клиент) ====
 const api = {
 
-  // Снимок базы: full или инкрементальный (since)
+  // Снимок базы (полный), поддерживает cache-bust b и подсказку rev
   async snapshot(q = {}) {
     try {
       const params = new URLSearchParams();
-      if (q.b)     params.set('b',     String(q.b));
-      if (q.rev)   params.set('rev',   String(q.rev));
-      if (q.since) params.set('since', String(q.since));
-      if (q.full)  params.set('full',  '1');
+      if (q.b)   params.set('b',   String(q.b));
+      if (q.rev) params.set('rev', String(q.rev));
       const url = '/api/forum/snapshot' + (params.toString() ? `?${params}` : '');
       const r   = await fetch(url, { cache: 'no-store' });
 
@@ -611,17 +494,20 @@ const api = {
 
       const topics = Array.isArray(data?.topics) ? data.topics : [];
       const posts  = Array.isArray(data?.posts)  ? data.posts  : [];
-      const events = Array.isArray(data?.events) ? data.events : [];      
       // server -> 'banned'; поддерживаем обратную совместимость с 'bans'
       const bans   = Array.isArray(data?.banned) ? data.banned
                     : Array.isArray(data?.bans)  ? data.bans : [];
       const rev    = Number.isFinite(+data?.rev) ? +data.rev   : 0;
       const cursor = data?.cursor ?? null;
 
-      const __reset = !!q.full;
-      return { ok: r.ok, status: r.status, topics, posts, bans, rev, cursor, events, __reset };
+      // «пустой» ответ => можно делать жёсткий ресет
+      // В текущей реализации клиент НИ РАЗУ не запрашивает инкрементальные снапшоты.
+      // Каждый вызов /api/forum/snapshot — ПОЛНЫЙ снимок состояния форума,
+      // значит локальный forum:snap должен полностью под него подстраиваться.
+      const __reset = true;
+      return { ok: r.ok, status: r.status, topics, posts, bans, rev, cursor, __reset };
     } catch {
-      return { ok:false, error:'network', topics:[], posts:[], bans:[], rev:0, cursor:null, events:[], __reset:false };
+      return { ok:false, error:'network', topics:[], posts:[], bans:[], rev:0, cursor:null, __reset:false };
     }
   },
 
@@ -834,25 +720,41 @@ const api = {
       return { ok: false, error: 'network', count: 0 }
     }
   },
-
-  // ===== VIP (batch) =====
-  async vipBatch(ids) {
-    try {
-      const arr = Array.isArray(ids) ? ids : []
-      const r = await fetch('/api/forum/vip/batch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        cache: 'no-store',
-        body: JSON.stringify({ ids: arr }),
-      })
-      return await r.json().catch(() => ({ ok: false, map: {} }))
-    } catch {
-      return { ok: false, error: 'network', map: {} }
-    }
-  },  
 };
- 
- 
+
+
+function initForumAutosnapshot({ intervalMs = 30000, debounceMs = 1000 } = {}) {
+  if (!isBrowser()) return () => {};
+
+  let last = 0;
+  const doSnap = () => {
+    const now = Date.now();
+    if (now - last < debounceMs) return;       // простая защита от «дребезга»
+    last = now;
+    // НЕ bust-им: пусть работает серверный микрокэш и инкрементальные механики
+    api.snapshot({}).catch(() => {});
+  };
+
+// Триггерим снапшот только на "возврат внимания" (это реально нужно)
+  const handler = () => doSnap();
+  const evts = [
+'visibilitychange','focus'
+  ];
+
+  evts.forEach((e) => window.addEventListener(e, handler, { passive: true }));
+
+  // Параллельно — периодический «heartbeat», если надо
+  const id = intervalMs ? setInterval(() => {
+    api.snapshot().catch(() => {});
+  }, intervalMs) : null;
+
+  // снятие слушателей при размонтировании
+  return () => {
+    evts.forEach((e) => window.removeEventListener(e, handler));
+    if (id) clearInterval(id);
+  };
+}
+
 /* =========================================================
    КОНЕЦ API
 ========================================================= */
@@ -1523,124 +1425,9 @@ const Styles = () => (
   -webkit-overflow-scrolling:touch;
 }
 
-    .composeDock{ position: sticky; bottom: 0; z-index: 6; }
-    .composerProgress{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      margin: 0 0 8px;
-      padding:10px 12px;
-      background:rgba(10,14,22,.96);
-      border:1px solid rgba(255,255,255,.12);
-      border-radius:12px;
-      box-shadow:0 10px 24px rgba(0,0,0,.35);
-    }
-    .composerProgressHeader{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      font-size:12px;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      opacity:.85;
-    }
-    .composerProgressTrack{
-      position:relative;
-      width:100%;
-      height:6px;
-      border-radius:999px;
-      overflow:hidden;
-      background:rgba(255,255,255,.08);
-    }
-    .composerProgressFill{
-      position:absolute;
-      inset:0 auto 0 0;
-      width:0%;
-      background:linear-gradient(90deg, rgba(80,167,255,.6), rgba(74,222,128,.8));
-      box-shadow:0 0 12px rgba(80,167,255,.45);
-      border-radius:999px;
-      transition:width .25s ease;
-    }
-    .composerProgressStages{
-      display:grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap:6px;
-      font-size:11px;
-      text-align:center;
-    }
-    .composerProgressStage{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:4px;
-      opacity:.5;
-    }
-    .composerProgressStage.active{ opacity:1; }
-    .composerProgressStage.done{ opacity:.85; }
-    .composerProgressDot{
-      width:8px;
-      height:8px;
-      border-radius:50%;
-      background:rgba(255,255,255,.2);
-      box-shadow:0 0 0 1px rgba(255,255,255,.2);
-    }
-    .composerProgressStage.active .composerProgressDot,
-    .composerProgressStage.done .composerProgressDot{
-      background:#4ade80;
-      box-shadow:0 0 0 1px rgba(74,222,128,.65);
-    }
+
     .composer{ position:sticky; bottom:0; z-index:5; border-top:1px solid rgba(255,255,255,.1); background:rgba(10,14,22,.96); padding:.8rem }
-    .uploadProgress{
-      margin: 0 0 8px;
-      padding: 8px 10px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(8,13,20,.85);
-      box-shadow: inset 0 0 0 1px rgba(80,167,255,.08);
-      display: grid;
-      gap: 8px;
-    }
-    .uploadProgressHeader{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      font-size:.82rem;
-      opacity:.85;
-      letter-spacing:.2px;
-    }
-    .uploadProgressSteps{
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap:6px;
-      font-size:.72rem;
-      text-transform:uppercase;
-      opacity:.6;
-    }
-    .uploadProgressSteps span{
-      white-space:nowrap;
-      text-align:center;
-      border-bottom:1px solid rgba(255,255,255,.12);
-      padding-bottom:4px;
-    }
-    .uploadProgressSteps span[data-active="true"]{
-      opacity:1;
-      color:#bfe3ff;
-      border-color: rgba(80,167,255,.55);
-    }
-    .uploadProgressTrack{
-      position:relative;
-      height:6px;
-      border-radius:999px;
-      background:rgba(255,255,255,.12);
-      overflow:hidden;
-    }
-    .uploadProgressFill{
-      position:absolute;
-      inset:0 auto 0 0;
-      width:0%;
-      background:linear-gradient(90deg, rgba(90,180,255,.9), rgba(155,91,255,.9));
-      transition: width .2s ease;
-    }
+
     .emojiPanel{ margin-top:10px; background:rgba(10,14,20,.98); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:10px; max-height:300px; overflow:auto }
     .emojiTitle{ font-size:.86rem; opacity:.8; margin:2px 2px 6px }
     .emojiGrid{ display:grid; grid-template-columns: repeat(auto-fit, 38px); gap:6px }
@@ -2369,65 +2156,6 @@ const Styles = () => (
 @media (max-width:640px){
   .nick-text{ max-width:16ch; }
 }
-/* --- VIP badge над ником (20s / 5s) ---
-   Настройка позиционирования/размера:
-   --vip-badge-w, --vip-badge-h  (размер)
-   --vip-badge-gap              (расстояние между бейджем и ником)
-   --vip-badge-shift-x/y        (сдвиг бейджа)
-*/
-:root{
-  --vip-badge-w: clamp(42px, 9vw, 54px);
-  --vip-badge-h: clamp(42px, 8.2vw, 58px);
-  --vip-badge-gap: 2px;
-  --vip-badge-shift-x: 0px;
-  --vip-badge-shift-y: 0px;
-}
-
-.nick-badge.vipNick{
-  display:flex;
-  flex-direction:column;
-  align-items:flex-start;
-  gap: var(--vip-badge-gap);
-  line-height: 1.1;
-}
-
-.vipFlip{
-
-  position:relative;
-  width: var(--vip-badge-w);
-  height: var(--vip-badge-h);
-  transform: translate(var(--vip-badge-shift-x), var(--vip-badge-shift-y));
-}
-
-.vipFlipImg{
- 
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  display:block;
-  will-change: opacity;
-}
-
-/* общий цикл 25s: 1.png видно 0..20s (80%), 2.png видно 20..25s (20%) */
-@keyframes vipFlipA{
-  0%, 79.99% { opacity: 1; }
-  80%, 100%  { opacity: 0; }
-}
-@keyframes vipFlipB{
-  0%, 79.99% { opacity: 0; }
-  80%, 100%  { opacity: 1; }
-}
-.vipFlipImg.vip1{ animation: vipFlipA 25s infinite linear; }
-.vipFlipImg.vip2{ animation: vipFlipB 25s infinite linear; }
-
-@media (prefers-reduced-motion: reduce){
-  .vipFlipImg.vip1, .vipFlipImg.vip2{ animation:none; }
-  .vipFlipImg.vip2{ opacity:0; }
-}
-
-
 /* ====== АНИМАЦИЯ НИКА ====== */
 .nick-animate{
   position: relative;
@@ -5541,7 +5269,6 @@ if (uploadFile) {
       console.error('[moderation] avatar check failed', err);
       toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
       toastI18n('info', 'forum_moderation_try_again', 'Please try again');
-      resetUploadFlow();     
       return;
     }
 
@@ -5765,7 +5492,6 @@ function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerD
   const authorId = String(t?.userId || t?.accountId || '').trim();
   const isSelf = !!viewerId && authorId && (String(viewerId) === authorId);
   const isStarred = !!authorId && !!starredAuthors?.has?.(authorId);
-  const isVipAuthor = useVipFlag(authorId, t?.vipActive ?? t?.isVip ?? t?.vip ?? t?.vipUntil ?? null);
 
   // считаем просмотр темы, когда карточка попадает в viewport (не чаще 1 раза на bucket в LS)
   const ref = React.useRef(null);
@@ -5803,16 +5529,14 @@ function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerD
         pIcon={resolveIconForDisplay(t.userId || t.accountId, t.icon)}
       />
     </div>
-
     <button
       type="button"
-      className={cls('nick-badge nick-animate', isVipAuthor && 'vipNick')}
+      className="nick-badge nick-animate"
       onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); }}
       title={t.userId || t.accountId || ''}
       style={{ flex: '0 1 auto', minWidth: 0 }}
       translate="no"
    >
-    
       <span className="nick-text">
         {t.nickname || shortId(t.userId || t.accountId || '')}
       </span>
@@ -5825,7 +5549,6 @@ function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerD
         title={isStarred ? 'Вы подписаны' : 'Подписаться на автора'}
       />
     )}
-{isVipAuthor && <VipFlipBadge />}   
   </div>
 
         )}
@@ -5931,7 +5654,6 @@ function PostCard({
   onReact,
   isAdmin,
   onDeletePost,
-  onOwnerDelete,  
   onBanUser,
   onUnbanUser,
   isBanned,
@@ -5963,10 +5685,9 @@ function PostCard({
 
   // безопасные числовые поля
   const views    = Number(p?.views ?? 0);
-  const authorId = String(p?.userId || p?.accountId || '').trim();
+    const authorId = String(p?.userId || p?.accountId || '').trim();
   const isSelf = !!viewerId && authorId && (String(viewerId) === authorId);
   const isStarred = !!authorId && !!starredAuthors?.has?.(authorId);
-  const isVipAuthor = useVipFlag(authorId, p?.vipActive ?? p?.isVip ?? p?.vip ?? p?.vipUntil ?? null);
 
   const replies  =   Number(
     p?.replyCount ??
@@ -6164,8 +5885,6 @@ const cleanedText = allLines
   );
   const ytEmbedParams = React.useMemo(() => {
     const params = new URLSearchParams({
-      autoplay: '1',
-      mute: '1',      
       enablejsapi: '1',
       playsinline: '1',
       rel: '0',
@@ -6184,7 +5903,14 @@ const cleanedText = allLines
   };
   const ownerDelete = async (e) => {
     e?.preventDefault?.(); e?.stopPropagation?.();
-    onOwnerDelete?.(p);
+    try {
+      await fetch('/api/forum/own', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-forum-user-id': String(authId || '') },
+        body: JSON.stringify({ action: 'delete_post', postId: String(p.id) }),
+      });
+      // тут специально без локального удаления — снапшот/инкременты подтянут актуал
+    } catch {}
   };
 
 // 👇 добавь рядом с PostCard (прямо над return), как константу
@@ -6225,14 +5951,13 @@ const NO_THREAD_OPEN_SELECTOR =
             pIcon={resolveIconForDisplay(p.userId || p.accountId, p.icon)}
           />
         </div>
-      
-<span className={cls('nick-badge nick-animate', isVipAuthor && 'vipNick')} translate="no">
-
-  <span className="nick-text truncate">
-    {p.nickname || shortId((p.userId || p.accountId || ''))}
-  </span>
-</span>
-
+        <span className="nick-badge nick-animate"
+        translate="no"
+        >
+          <span className="nick-text truncate">
+            {p.nickname || shortId((p.userId || p.accountId || ''))}
+          </span>
+        </span>
 
         {!!authorId && !isSelf && (
           <StarButton
@@ -6241,7 +5966,7 @@ const NO_THREAD_OPEN_SELECTOR =
             title={isStarred ? 'Вы подписаны' : 'Подписаться на автора'}
           />
         )}
-{isVipAuthor && <VipFlipBadge />}
+
       </div> 
         {p.parentId && (
           <span className="tag ml-1 replyTag" aria-label={t?.('forum_reply_to') || 'Ответ для'}>
@@ -6398,7 +6123,7 @@ const NO_THREAD_OPEN_SELECTOR =
         src=""
         title="TikTok video"
         data-forum-media="tiktok"
-        data-src={`https://www.tiktok.com/embed/v2/${videoId}?autoplay=1&muted=1`} 
+        data-src={`https://www.tiktok.com/embed/v2/${videoId}`} 
         loading="lazy"       
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -7579,7 +7304,13 @@ export default function Forum(){
     const id=setInterval(upd,3000)
     return ()=>{ window.removeEventListener('auth:ok',upd); window.removeEventListener('auth:success',upd); clearInterval(id) }
   },[])
-
+    useEffect(() => {
+    const stop = initForumAutosnapshot({
+      intervalMs: 60000,   // ⬅️ можно 30000 (30 сек) если хочешь чаще
+      debounceMs: 2000     // ⬅️ чтобы не спамить при частом скролле
+    });
+    return stop; // снимем слушатели при размонтировании
+  }, []);
   // === Глобальный контроллер HTML5-медиа в постах ===
   // В любой момент времени играет только один <video>/<audio> controls.
   // Видео без controls (обложки, рекламные петельки и т.п.) не трогаем.
@@ -7872,35 +7603,7 @@ export default function Forum(){
     };
 
     const ratios = new Map();
-    const iframeReloadAt = new WeakMap();
-    const iframeUnloaded = new WeakSet();
     let active = null;
-    const ensureIframeSrc = (el, force = false) => {
-      if (!(el instanceof HTMLIFrameElement)) return;
-      const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
-      if (!src) return;
-      if (!el.getAttribute('data-src')) {
-        try { el.setAttribute('data-src', src); } catch {}
-      }
-      const cur = el.getAttribute('src') || '';
-      const isBlank = !cur || cur === 'about:blank';
-      if (cur !== src || isBlank) {
-        try { el.setAttribute('src', src); } catch {}
-        return;
-      }
-      if (!force) return;
-      const last = iframeReloadAt.get(el) || 0;
-      if (Date.now() - last < 500) return;
-      iframeReloadAt.set(el, Date.now());
-      try { el.setAttribute('src', 'about:blank'); } catch {}
-      try {
-        requestAnimationFrame(() => {
-          try { el.setAttribute('src', src); } catch {}
-        });
-      } catch {
-        try { el.setAttribute('src', src); } catch {}
-      }
-    };
 
     const pauseMedia = (el) => {
       if (!el) return;
@@ -7924,12 +7627,6 @@ export default function Forum(){
         stopYtMutePoll(player);
         // ВАЖНО: YouTube iframe держит GPU/WebGL ресурсы даже на pause.
         // Для ленты (Shorts/TikTok-style) нужно освобождать ресурсы полностью.
-        try {
-          const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
-          if (src && !el.getAttribute('data-src')) el.setAttribute('data-src', src);
-          el.setAttribute('data-forum-unloaded', '1');
-          iframeUnloaded.add(el);
-        } catch {}        
         try { player?.destroy?.(); } catch {}
         try { ytPlayers.delete(el); } catch {}
         // выгружаем iframe, чтобы не копились WebGL контексты при пагинации/скролле
@@ -7944,9 +7641,7 @@ if (kind === 'tiktok' || kind === 'iframe') {
   // поэтому «пауза» = выгрузить src, а «play» = перезагрузить src.
   const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
   if (src && !el.getAttribute('data-src')) el.setAttribute('data-src', src);
-  try { el.setAttribute('data-forum-unloaded', '1'); } catch {}
-  try { iframeUnloaded.add(el); } catch {}
-  try { if (el.getAttribute('src')) el.setAttribute('src', ''); } catch {}
+  if (el.getAttribute('src')) el.setAttribute('src', '');
 }
 
     };
@@ -7997,16 +7692,25 @@ if (kind === 'qcast') {
             detail: { source: 'youtube', element: el }
           }));          
         } catch {}
-        try { el.removeAttribute('data-forum-unloaded'); } catch {}
-        try { iframeUnloaded.delete(el); } catch {}
         return;
       }
 if (kind === 'tiktok' || kind === 'iframe') {
   // ВАЖНО: если пользователь вручную нажал pause/play внутри iframe,
   // то единственный надёжный способ «вернуть в автоплей» — перезагрузить embed.
-  ensureIframeSrc(el, true);
-  try { el.removeAttribute('data-forum-unloaded'); } catch {}
-  try { iframeUnloaded.delete(el); } catch {}
+  const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
+  if (!src) return;
+  if (!el.getAttribute('data-src')) el.setAttribute('data-src', src);
+
+  const cur = el.getAttribute('src') || '';
+  if (cur === src) {
+    // форс-ресет (убирает «запомненную» паузу)
+    try { el.setAttribute('src', ''); } catch {}
+    try { requestAnimationFrame(() => { try { el.setAttribute('src', src); } catch {} }); } catch {
+      try { el.setAttribute('src', src); } catch {}
+    }
+  } else {
+    try { el.setAttribute('src', src); } catch {}
+  }
 
   window.dispatchEvent(new CustomEvent('site-media-play', {
     detail: { source: kind, element: el }
@@ -8014,63 +7718,7 @@ if (kind === 'tiktok' || kind === 'iframe') {
 }
 
     };
-    const getFocusedIframe = () => {
-      let best = null;
-      let bestRatio = 0;
-      for (const [el, r] of ratios.entries()) {
-        if (!(el instanceof HTMLIFrameElement)) continue;
-        const kind = el.getAttribute('data-forum-media');
-        if (!['youtube', 'tiktok', 'iframe'].includes(kind)) continue;
-        if (r > bestRatio) {
-          bestRatio = r;
-          best = el;
-        }
-      }
-      return best;
-    };
-    const manageIframeWindow = (centerIframe) => {
-      try {
-        const frames = Array.from(document.querySelectorAll('iframe[data-forum-media]'))
-          .filter((frame) => frame instanceof HTMLIFrameElement);
-        if (!frames.length) return;
-        if (!centerIframe || !frames.includes(centerIframe)) {
-          frames.forEach((frame) => {
-            const kind = frame.getAttribute('data-forum-media');
-            if (!['youtube', 'tiktok', 'iframe'].includes(kind)) return;
-            pauseMedia(frame);
-          });
-          return;
-        }
-        const idx = frames.indexOf(centerIframe);
-        const keepStart = Math.max(0, idx - 2);
-        const keepEnd = Math.min(frames.length - 1, idx + 2);
-        frames.forEach((frame, i) => {
-          const kind = frame.getAttribute('data-forum-media');
-          if (!['youtube', 'tiktok', 'iframe'].includes(kind)) return;
-          const inWindow = i >= keepStart && i <= keepEnd;
-          const src = frame.getAttribute('data-src') || frame.getAttribute('src') || '';
-          const shouldForce =
-            (frame.getAttribute('data-forum-unloaded') === '1') ||
-            iframeUnloaded.has(frame);         
-          if (inWindow) {
-            if (src && !frame.getAttribute('data-src')) {
-              try { frame.setAttribute('data-src', src); } catch {}
-            }
-            if (!frame.getAttribute('src') && frame.getAttribute('data-src')) {
-              ensureIframeSrc(frame, true);
-            } else if (shouldForce) {
-              ensureIframeSrc(frame, true);
-            }
-            if (shouldForce) {
-              try { frame.removeAttribute('data-forum-unloaded'); } catch {}
-              try { iframeUnloaded.delete(frame); } catch {}
-            }
-          } else if (frame !== active) {
-            pauseMedia(frame);
-          }
-        });
-      } catch {}
-    };
+
     const pickMostVisible = () => {
       let best = null;
       let bestRatio = 0;
@@ -8115,7 +7763,6 @@ if (kind === 'tiktok' || kind === 'iframe') {
             pauseMedia(active);
             active = null;
           }
-          manageIframeWindow(null);          
           return;
         }
 
@@ -8124,8 +7771,7 @@ if (kind === 'tiktok' || kind === 'iframe') {
         }
 
         active = candidate;
-        playMedia(candidate);
-        manageIframeWindow(getFocusedIframe() || (candidate instanceof HTMLIFrameElement ? candidate : null));
+        playMedia(candidate)
       },
       { 
         threshold: [0, 0.15, 0.35, 0.6, 0.85, 1],
@@ -8150,7 +7796,7 @@ document.querySelectorAll(selector).forEach((el) => {
   }
 
   // iframe/tiktok: гарантируем data-src...
-  if ((kind === 'tiktok' || kind === 'iframe' || kind === 'youtube') && el?.getAttribute) {
+  if ((kind === 'tiktok' || kind === 'iframe') && el?.getAttribute) {
     const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
     if (src && !el.getAttribute('data-src')) {
       try { el.setAttribute('data-src', src); } catch {}
@@ -8165,31 +7811,12 @@ document.querySelectorAll(selector).forEach((el) => {
 
 
     observeAll();
-    const onIframeClick = (e) => {
-      const target = e?.target;
-      if (!(target instanceof HTMLIFrameElement)) return;
-      const kind = target.getAttribute('data-forum-media');
-      if (!['youtube', 'tiktok', 'iframe'].includes(kind)) return;
-      const src = target.getAttribute('data-src') || target.getAttribute('src') || '';
-      if (!src) return;
-      if (!target.getAttribute('src') || target.getAttribute('src') === 'about:blank') {
-        try { target.setAttribute('src', src); } catch {}
-      }
-      try { target.removeAttribute('data-forum-unloaded'); } catch {}
-      try { iframeUnloaded.delete(target); } catch {}      
-      try {
-        requestAnimationFrame(() => playMedia(target));
-      } catch {
-        playMedia(target);
-      }
-    }; 
+ 
     const tick = setInterval(observeAll, 1500);
     window.addEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
-        document.addEventListener('click', onIframeClick, true);
     return () => {
       clearInterval(tick);
-      window.removeEventListener(MEDIA_MUTED_EVENT, onMutedEvent);  
-      document.removeEventListener('click', onIframeClick, true);          
+      window.removeEventListener(MEDIA_MUTED_EVENT, onMutedEvent);      
       io.disconnect();
       if (active) pauseMedia(active);
       active = null;
@@ -8374,8 +8001,8 @@ React.useEffect(() => {
   }
 }, [t, toast]); // ВАЖНО: без setComposerActive и composerRef
 
-/* ---- локальный снап, overlay, tombstones и очередь ---- */
-const [snap,setSnap] = useState(()=>{
+/* ---- локальный снап и очередь ---- */
+const [data,setData] = useState(()=>{
   if(!isBrowser()) return { topics:[], posts:[], bans:[], admins:[], rev:null }
   try{
     return JSON.parse(localStorage.getItem('forum:snap')||'null') || { topics:[], posts:[], bans:[], admins:[], rev:null }
@@ -8383,73 +8010,11 @@ const [snap,setSnap] = useState(()=>{
     return { topics:[], posts:[], bans:[], admins:[], rev:null }
   }
 })
-const persistSnap = useCallback((patch) => {
-  setSnap(prev => {
-    const next = typeof patch==='function' ? patch(prev) : ({ ...prev, ...patch })
-    try{ localStorage.setItem('forum:snap', JSON.stringify(next)) }catch{}
-    return next
-  })
-}, [])
-const TOMBSTONE_TTL_MS = 10 * 60 * 1000;
-const [tombstones, setTombstones] = useState(() => {
-  if (!isBrowser()) return { topics: {}, posts: {} };
-  try {
-    const raw = JSON.parse(localStorage.getItem('forum:tombstones') || 'null');
-    return raw && typeof raw === 'object'
-      ? { topics: raw.topics || {}, posts: raw.posts || {} }
-      : { topics: {}, posts: {} };
-  } catch {
-    return { topics: {}, posts: {} };
-  }
-});
-const persistTombstones = useCallback((patch) => {
-  setTombstones((prev) => {
-    const next = typeof patch === 'function' ? patch(prev) : { ...prev, ...patch };
-    try { localStorage.setItem('forum:tombstones', JSON.stringify(next)); } catch {}
-    return next;
-  });
-}, []);
-const [overlay, setOverlay] = useState(() => ({
-  reactions: {},
-  edits: {},
-  creates: { topics: [], posts: [] },
-  views: { topics: {}, posts: {} },
-}));
-const data = useMemo(() => {
-  const isTomb = (bucket, id) => !!tombstones?.[bucket]?.[String(id)];
-  const applyEdits = (p) => {
-    const edit = overlay.edits[String(p.id)];
-    return edit ? { ...p, text: edit.text } : p;
-  };
-  const applyReactions = (p) => {
-    const pending = overlay.reactions[String(p.id)];
-    if (!pending) return p;
-    return {
-      ...p,
-      myReaction: pending.state ?? null,
-      likes: pending.likes ?? p.likes,
-      dislikes: pending.dislikes ?? p.dislikes,
-    };
-  };
-  const applyViews = (p) => {
-    const view = overlay.views.posts[String(p.id)];
-    return typeof view === 'number' ? { ...p, views: view } : p;
-  };
-  const baseTopics = (snap.topics || []).filter(t => !isTomb('topics', t.id));
-  const basePosts  = (snap.posts  || []).filter(p => !isTomb('posts',  p.id));
-  const nextTopics = baseTopics.map(t => {
-    const view = overlay.views.topics[String(t.id)];
-    return typeof view === 'number' ? { ...t, views: view } : t;
-  });
-  const nextPosts = basePosts.map(p => applyViews(applyReactions(applyEdits(p))));
-  const createdTopics = (overlay.creates.topics || []).filter(t => !isTomb('topics', t.id));
-  const createdPosts = (overlay.creates.posts || []).filter(p => !isTomb('posts', p.id));
-  return {
-    ...snap,
-    topics: [...createdTopics, ...nextTopics],
-    posts: [...nextPosts, ...createdPosts],
-  };
-}, [snap, overlay, tombstones]);
+const persist = (patch) => setData(prev => {
+  const next = typeof patch==='function' ? patch(prev) : ({ ...prev, ...patch })
+  try{ localStorage.setItem('forum:snap', JSON.stringify(next)) }catch{}
+  return next
+})
 const withdrawBtnRef = useRef(null);
 
 const [qcoinModalOpen, setQcoinModalOpen] = useState(false);
@@ -8459,292 +8024,161 @@ const [queue,setQueue] = useState(()=>{
   try{ return JSON.parse(localStorage.getItem('forum:queue')||'[]') }catch{ return [] }
 })
 const saveQueue = q => { setQueue(q); try{ localStorage.setItem('forum:queue', JSON.stringify(q)) }catch{} }
-const makeOpId = () => `${Date.now()}_${Math.random().toString(36).slice(2)}`;
 const pushOp = (type, payload) => {
   const cur = Array.isArray(queueRef.current) ? queueRef.current : [];
-  const op  = { type, payload, opId: makeOpId() };
+  const op  = { type, payload, opId: `${Date.now()}_${Math.random().toString(36).slice(2)}` };
   const next = [...cur, op];
   saveQueue(next);
 }// всегда иметь «свежие» значения внутри async-кода (без устаревших замыканий)
 const queueRef = useRef(queue);  useEffect(()=>{ queueRef.current = queue }, [queue])
 const authRef  = useRef(auth);   useEffect(()=>{ authRef.current  = auth  }, [auth])
-const snapRef  = useRef(snap);   useEffect(()=>{ snapRef.current  = snap  }, [snap])
-const lastFullSnapshotRef = useRef(0);
-const syncInFlightRef = useRef(false);
-const sseHintRef = useRef(0);
-const pendingViewsPostsRef = useRef(new Set());
-const pendingViewsTopicsRef = useRef(new Set());
-const busyRef=useRef(false)
-const compactOps = (ops) => {
-  const out = [];
-  const seenReactions = new Set();
-  const seenEdits = new Set();
-  const deletedPosts = new Set();
-  const deletedTopics = new Set();
-  const viewPosts = new Set();
-  const viewTopics = new Set();
-
-  for (let i = ops.length - 1; i >= 0; i--) {
-    const op = ops[i];
-    const t = op?.type;
-    const p = op?.payload || {};
-
-    if (t === 'delete_post') {
-      const id = String(p.id ?? p.postId ?? '');
-      if (!id || deletedPosts.has(id)) continue;
-      deletedPosts.add(id);
-      out.push(op);
-      continue;
-    }
-    if (t === 'delete_topic') {
-      const id = String(p.id ?? p.topicId ?? '');
-      if (!id || deletedTopics.has(id)) continue;
-      deletedTopics.add(id);
-      out.push(op);
-      continue;
-    }
-    if (t === 'set_reaction') {
-      const id = String(p.postId ?? '');
-      if (!id || deletedPosts.has(id) || seenReactions.has(id)) continue;
-      seenReactions.add(id);
-      out.push(op);
-      continue;
-    }
-    if (t === 'edit_post') {
-      const id = String(p.id ?? '');
-      if (!id || deletedPosts.has(id) || seenEdits.has(id)) continue;
-      seenEdits.add(id);
-      out.push(op);
-      continue;
-    }
-    if (t === 'view_posts') {
-      (Array.isArray(p.ids) ? p.ids : []).forEach((id) => {
-        const pid = String(id);
-        if (pid && !deletedPosts.has(pid)) viewPosts.add(pid);
-      });
-      continue;
-    }
-    if (t === 'view_topics') {
-      (Array.isArray(p.ids) ? p.ids : []).forEach((id) => {
-        const tid = String(id);
-        if (tid && !deletedTopics.has(tid)) viewTopics.add(tid);
-      });
-      continue;
-    }
-    if (t === 'create_topic') {
-      const id = String(p.id ?? p.cid ?? '');
-      if (id && deletedTopics.has(id)) continue;
-    }
-    if (t === 'create_post') {
-      const id = String(p.id ?? p.cid ?? '');
-      if (id && deletedPosts.has(id)) continue;
-      const tid = String(p.topicId ?? p.topicCid ?? '');
-      if (tid && deletedTopics.has(tid)) continue;
-    }
-    out.push(op);
-  }
-
-  out.reverse();
-  if (viewPosts.size) out.push({ type: 'view_posts', payload: { ids: Array.from(viewPosts) }, opId: makeOpId() });
-  if (viewTopics.size) out.push({ type: 'view_topics', payload: { ids: Array.from(viewTopics) }, opId: makeOpId() });
-  return out;
-};
-const flushMutations = useCallback(async () => {
+const busyRef=useRef(false), debRef=useRef(null)
+const sendBatch = (immediate = false) => {
   if (busyRef.current) return;
 
-  let snapshot = Array.isArray(queueRef.current) ? queueRef.current.slice() : [];
-  if (!snapshot.length) {
-    try { snapshot = JSON.parse(localStorage.getItem('forum:queue')||'[]') || [] } catch {}
-  }
-  let patched = false;
-  snapshot = snapshot.map(op => {
-    if (op?.opId) return op;
-    patched = true;
-    return { ...op, opId: makeOpId() };
-  });
-  if (patched) saveQueue(snapshot);
+  const run = async () => {
+    // 1) берём честный снапшот очереди (не из устаревшего state)
+    let snapshot = Array.isArray(queueRef.current) ? queueRef.current.slice() : [];
+    // fallback: иногда setState ещё не применился — подстрахуемся локалстораджем
+    if (!snapshot.length) {
+      try { snapshot = JSON.parse(localStorage.getItem('forum:queue')||'[]') || [] } catch {}
+    }
+    if (!snapshot.length) return;
 
-  const pendingPosts = Array.from(pendingViewsPostsRef.current || []);
-  const pendingTopics = Array.from(pendingViewsTopicsRef.current || []);
-  if (pendingPosts.length) {
-    snapshot.push({ type: 'view_posts', payload: { ids: pendingPosts }, opId: makeOpId() });
-  }
-  if (pendingTopics.length) {
-    snapshot.push({ type: 'view_topics', payload: { ids: pendingTopics }, opId: makeOpId() });
-  }
-
-  const toSend = compactOps(snapshot);
-  if (!toSend.length) return;
-
-  busyRef.current = true;
-  try {
-    const userId = authRef.current?.accountId || authRef.current?.asherId || getForumUserId();
-    const resp = await api.mutate({ ops: toSend }, userId);
-
-    if (resp && Array.isArray(resp.applied)) {
-      const applied = resp.applied || [];
-      const sentIds = new Set(toSend.map(x => x.opId).filter(Boolean));
-      const current = Array.isArray(queueRef.current) ? queueRef.current : [];
-      const leftover = current.filter(x => !sentIds.has(x.opId));
-      saveQueue(leftover);
-
-      if (pendingPosts.length) pendingPosts.forEach(id => pendingViewsPostsRef.current.delete(id));
-      if (pendingTopics.length) pendingTopics.forEach(id => pendingViewsTopicsRef.current.delete(id));
-
-      const clearOverlay = {
-        reactions: new Set(),
-        edits: new Set(),
-        viewPosts: new Set(),
-        viewTopics: new Set(),
-        createTopics: new Set(),
-        createPosts: new Set(),
-        deletePosts: new Set(),
-        deleteTopics: new Set(),
+    busyRef.current = true;
+    try {
+      const userId = authRef.current?.accountId || authRef.current?.asherId || getForumUserId();
+      
+   // ⚠️ Защита от 413: схлопываем дубли view_* и режем батч по размеру
+      const MAX_MUTATION_OPS = 120;
+      const compactOps = (ops) => {
+        const out = [];
+        const seen = new Set();
+        // идём с конца, чтобы сохранить «последнее» view_* для одного id
+        for (let i = ops.length - 1; i >= 0; i--) {
+          const op = ops[i];
+          const t = op?.type;
+          const p = op?.payload || {};
+          if (t === 'view_post') {
+            const k = `vp:${String(p.postId ?? '')}`;
+            if (seen.has(k)) continue;
+            seen.add(k);
+          } else if (t === 'view_topic') {
+           const k = `vt:${String(p.topicId ?? '')}`;
+            if (seen.has(k)) continue;
+            seen.add(k);
+          }
+          out.push(op);
+        }
+        out.reverse();
+        return out;
       };
 
-      persistSnap(prev => {
-        const next = { ...prev };
-        for (const it of applied) {
-          if (it.op === 'create_topic' && it.topic) {
-            next.topics = [ ...(next.topics || []), it.topic ];
-            if (it.cid) clearOverlay.createTopics.add(String(it.cid));
-          }
-          if (it.op === 'create_topic' && it.duplicate && it.cid) {
-            clearOverlay.createTopics.add(String(it.cid));
-          }
-          if (it.op === 'create_post' && it.post) {
-            next.posts  = [ ...(next.posts  || []), it.post  ];
-            if (it.cid) clearOverlay.createPosts.add(String(it.cid));
-          }
-          if (it.op === 'create_post' && it.duplicate && it.cid) {
-            clearOverlay.createPosts.add(String(it.cid));
-          }
-          if (it.op === 'delete_topic' && it.topicId) {
-            const id = String(it.topicId);
-            next.topics = (next.topics || []).filter(t => String(t.id) !== id);
-            next.posts  = (next.posts  || []).filter(p => String(p.topicId) !== id);
-            clearOverlay.deleteTopics.add(id);
-          }
-          if (it.op === 'delete_post') {
-            const ids = Array.isArray(it.deleted) ? it.deleted.map(String) : [String(it.postId || it.id || '')];
-            const delSet = new Set(ids.filter(Boolean));
-            next.posts = (next.posts || []).filter(p => !delSet.has(String(p.id)));
-            ids.forEach(id => clearOverlay.deletePosts.add(String(id)));
-          }
-          if (it.op === 'edit_post' && it.postId) {
-            const id = String(it.postId);
-            if (it.text) {
-              next.posts = (next.posts || []).map(p => String(p.id) === id ? { ...p, text: it.text } : p);
+      // 1) сначала схлопываем (уменьшаем JSON), 2) потом ограничиваем размер запроса
+      const toSend = compactOps(snapshot).slice(0, MAX_MUTATION_OPS);
+
+      const resp = await api.mutate({ ops: toSend }, userId);
+
+      if (resp && Array.isArray(resp.applied)) {
+        // ✅ Мгновенно вливаем подтверждённые сущности из applied в локальный снапшот
+       const applied = resp.applied || [];
+        persist(prev => {
+          const next = { ...prev };
+
+          for (const it of applied) {
+            // создание
+            if (it.op === 'create_topic' && it.topic) {
+              next.topics = [ ...(next.topics || []), it.topic ];
             }
-            clearOverlay.edits.add(id);
-          }
-          if (it.op === 'set_reaction' && it.postId) {
-            const id = String(it.postId);
-            next.posts = (next.posts || []).map(p => {
-              if (String(p.id) !== id) return p;
-              return {
-                ...p,
-                likes: Number(it.likes ?? p.likes ?? 0),
-                dislikes: Number(it.dislikes ?? p.dislikes ?? 0),
-                myReaction: it.state ?? p.myReaction ?? null,
-              };
-            });
-            clearOverlay.reactions.add(id);
-          }
-          if (it.op === 'view_posts' && it.views && typeof it.views === 'object') {
-            next.posts = (next.posts || []).map(p => {
-              const v = it.views[String(p.id)];
-              if (!Number.isFinite(v)) return p;
-              return { ...p, views: v };
-            });
-            Object.keys(it.views || {}).forEach(id => clearOverlay.viewPosts.add(String(id)));
-          }
-          if (it.op === 'view_post' && it.postId != null) {
-            const id = String(it.postId);
-            const views = Number(it.views ?? 0);
-            if (Number.isFinite(views)) {
-              next.posts = (next.posts || []).map(p => String(p.id) === id ? { ...p, views } : p);
+            if (it.op === 'create_post' && it.post) {
+              next.posts  = [ ...(next.posts  || []), it.post  ];
             }
 
-            clearOverlay.viewPosts.add(id);
-          }
-          if (it.op === 'view_topics' && it.views && typeof it.views === 'object') {
-            next.topics = (next.topics || []).map(t => {
-              const v = it.views[String(t.id)];
-              if (!Number.isFinite(v)) return t;
-              return { ...t, views: v };
-            });
-            Object.keys(it.views || {}).forEach(id => clearOverlay.viewTopics.add(String(id)));
-          }
-          if (it.op === 'view_topic' && it.topicId != null) {
-            const id = String(it.topicId);
-            const views = Number(it.views ?? 0);
-            if (Number.isFinite(views)) {
-              next.topics = (next.topics || []).map(t => String(t.id) === id ? { ...t, views } : t);
+            // удаление (на всякий случай поддержим и это)
+            if (it.op === 'delete_topic' && it.id) {
+              next.topics = (next.topics || []).filter(t => t.id !== it.id);
             }
-           clearOverlay.viewTopics.add(id);
-          }
-          if (it.op === 'ban_user' && it.accountId) {
-            const bans = new Set(next.bans || []);
-            bans.add(it.accountId);
-            next.bans = Array.from(bans);
-          }
-          if (it.op === 'unban_user' && it.accountId) {
-            next.bans = (next.bans || []).filter(b => b !== it.accountId);
-          }
-        }
+            if (it.op === 'delete_post' && it.id) {
+              next.posts  = (next.posts  || []).filter(p => p.id !== it.id);
+            }
 
-        return dedupeAll(next);
-      });
+            // бан/разбан (если сервер это возвращает в applied)
+            if (it.op === 'ban_user' && it.accountId) {
+              const bans = new Set(next.bans || []);
+              bans.add(it.accountId);
+              next.bans = Array.from(bans);
+            }
+            if (it.op === 'unban_user' && it.accountId) {
+              next.bans = (next.bans || []).filter(b => b !== it.accountId);
+            }
 
-      setOverlay(prev => {
-        const next = { ...prev };
-        if (clearOverlay.reactions.size) {
-          const reactions = { ...next.reactions };
-          clearOverlay.reactions.forEach(id => { delete reactions[id]; });
-          next.reactions = reactions;
-        }
-        if (clearOverlay.edits.size) {
-          const edits = { ...next.edits };
-          clearOverlay.edits.forEach(id => { delete edits[id]; });
-          next.edits = edits;
-        }
-        if (clearOverlay.viewPosts.size || clearOverlay.viewTopics.size) {
-          const views = {
-            topics: { ...next.views.topics },
-            posts: { ...next.views.posts },
-          };
-          clearOverlay.viewPosts.forEach(id => { delete views.posts[id]; });
-          clearOverlay.viewTopics.forEach(id => { delete views.topics[id]; });
-          next.views = views;
-        }
-        if (clearOverlay.createTopics.size || clearOverlay.createPosts.size) {
-          const creates = {
-            topics: (next.creates.topics || []).filter(t => !clearOverlay.createTopics.has(String(t.id || t.cid || ''))),
-            posts: (next.creates.posts || []).filter(p => !clearOverlay.createPosts.has(String(p.id || p.cid || ''))),
-          };
-          next.creates = creates;
-        }
-        return next;
-      });
+            // === Точные просмотры из applied (теперь внутри цикла!) ===
+            if (it.op === 'view_topic' && it.topicId != null) {
+              const id = String(it.topicId);
+              const views = Number(it.views ?? 0);
+              if (Number.isFinite(views) && views >= 0) {
+                next.topics = (next.topics || []).map(
+                  t => String(t.id) === id ? { ...t, views } : t
+                );
+              }
+            }
+            if (it.op === 'view_post' && it.postId != null) {
+              const id = String(it.postId);
+              const views = Number(it.views ?? 0);
+              if (Number.isFinite(views) && views >= 0) {
+                next.posts = (next.posts || []).map(
+                  p => String(p.id) === id ? { ...p, views } : p
+                );
+              }
+            }         
+          }
+ // жёстко схлопнём tmp по cid, если бэк его вернул
+const cids = new Set(
+   (applied || [])
+     .map(x => x.post?.cid)
+     .filter(Boolean)
+     .map(String)
+ )
+ if (cids.size) {
+   next.posts = (next.posts || []).filter(p =>
+     !(String(p.id).startsWith('tmp_p_') && cids.has(String(p.cid || '')))
+   )
+ }
 
-      if (clearOverlay.deletePosts.size || clearOverlay.deleteTopics.size) {
-        persistTombstones(prev => {
-          const posts = { ...prev.posts };
-          const topics = { ...prev.topics };
-          clearOverlay.deletePosts.forEach(id => { delete posts[id]; });
-          clearOverlay.deleteTopics.forEach(id => { delete topics[id]; });
-          return { posts, topics };
+          // Схлопываем tmp_* с реальными и убираем дубли по сигнатурам
+          return dedupeAll(next);
         });
-      }
 
+        // 2) Удаляем из очереди ТОЛЬКО те элементы, которые отправили
+        const sentIds = new Set(toSend.map(x => x.opId));
+        const current = Array.isArray(queueRef.current) ? queueRef.current : [];
+        const leftover = current.filter(x => !sentIds.has(x.opId));
+        saveQueue(leftover);
+        // если что-то осталось — мягко дотолкаем следующей итерацией
+        if (leftover.length) setTimeout(() => sendBatch(true), 0);
+
+        // опционально: локальный «хук» на ручной рефреш, если вернёшь функцию
+        if (typeof refresh === 'function') await refresh();
+      } else {
+        // неуспех (напр., 400). Чтобы не застревать — выкидываем первую операцию.
+        // На практике это часто невалидная react/view по tmp-id.
+        saveQueue(snapshot.slice(1));
+      }
+    } catch (e) {
+      console.error('sendBatch', e);
+    } finally {
+      busyRef.current = false;
     }
-  } catch (e) {
-    console.error('flushMutations', e);
-  } finally {
-    busyRef.current = false;
+  };
+
+  if (immediate) run();
+  else {
+    clearTimeout(debRef.current);
+    debRef.current = setTimeout(run, 650);
   }
-}, [persistSnap, persistTombstones]);
+};
+// публичная «ручка» для планирования pull из любых эффектов
+const schedulePullRef = React.useRef((/*delay, force*/) => {});
 // === QCOIN: автопинг активности (CLIENT) ===
 const activeRef  = React.useRef(false);
 const visibleRef = React.useRef(true);
@@ -8776,7 +8210,28 @@ React.useEffect(()=>{
   const id = setInterval(()=>{ if (visibleRef.current) activeRef.current = true }, 20000);
   return ()=> clearInterval(id);
 },[]);
+// [PERIODIC-PULL] — периодический пул даже при открытом SSE
+React.useEffect(() => {
+  const id = setInterval(() => {
+    try { schedulePullRef.current(120, false); } catch {}
+  }, 2 * 60 * 1000);  // каждые 2 минуты
+  return () => clearInterval(id);
+}, []);
+// [TOUCH-PULL] — любой пользовательский жест внутри форума
+React.useEffect(() => {
+  const root = document.querySelector('.forum_root') || document.body;
+  if (!root) return;
+  const kick = () => { try { schedulePullRef.current(80, false); } catch {} };
 
+  ['pointerdown','touchstart','keydown'].forEach(evt =>
+    root.addEventListener(evt, kick, { passive: true })
+  );
+  return () => {
+    ['pointerdown','touchstart','keydown'].forEach(evt =>
+      root.removeEventListener(evt, kick)
+    );
+  };
+}, []);
  
   // >>>>>>>>> Единственное изменение логики: усиленные антидубликаты
   function dedupeAll(prev){
@@ -8818,224 +8273,235 @@ React.useEffect(()=>{
   }
   // <<<<<<<<<<< конец изменения
 
-  const pruneTombstones = (next) => {
-    const now = Date.now();
-    const dropExpired = (bucket) => {
-      const out = {};
-      for (const [id, ts] of Object.entries(bucket || {})) {
-        if (now - Number(ts || 0) < TOMBSTONE_TTL_MS) out[id] = ts;
-      }
-      return out;
-    };
-    return { topics: dropExpired(next.topics), posts: dropExpired(next.posts) };
-  };
-  const applyFullSnapshot = (prev, r, ts) => {
-    const isTomb = (bucket, id) => !!ts?.[bucket]?.[String(id)];
-    const topics = (r.topics || []).filter(t => !isTomb('topics', t.id));
-    const prevPosts = new Map((prev.posts || []).map(p => [String(p.id), p]));
-    const posts = (r.posts || []).filter(p => !isTomb('posts', p.id)).map(p => {
-      const prior = prevPosts.get(String(p.id));
-      return { ...p, myReaction: prior?.myReaction ?? p.myReaction ?? null };
-    });
-    const out = {
-      ...prev,
-      topics,
-      posts,
-      bans: Array.isArray(r.bans) ? r.bans : prev.bans,
-      admins: Array.isArray(r.admins) ? r.admins : prev.admins,
-      rev: r.rev,
-      cursor: r.cursor ?? prev.cursor,
-    };
-    if (r.vipMap && typeof r.vipMap === 'object') out.vipMap = r.vipMap;
-    return dedupeAll(out);
-  };
-
-
-  const applyEvents = (prev, events, ts) => {
-    const isTomb = (bucket, id) => !!ts?.[bucket]?.[String(id)];
-    const topicsById = new Map((prev.topics || []).map(t => [String(t.id), { ...t }]));
-    const postsById = new Map((prev.posts || []).map(p => [String(p.id), { ...p }]));
-    const deletedTopics = new Set();
-    const deletedPosts = new Set();
-    const pendingReactions = overlay?.reactions || {};
-    const pendingViews = overlay?.views || { topics: {}, posts: {} };
-    for (const evt of events || []) {
-      const kind = evt?.kind;
-      if (kind === 'topic') {
-        const id = String(evt.id || '');
-        if (!id || isTomb('topics', id)) continue;
-        if (evt._del) {
-          deletedTopics.add(id);
-          continue;
-        }
-        const data = evt.data || {};
-        topicsById.set(id, { ...(topicsById.get(id) || {}), ...data, id });
-      }
-
-      if (kind === 'post') {
-        const id = String(evt.id || '');
-        if (!id || isTomb('posts', id)) continue;
-        if (evt._del) {
-          const ids = Array.isArray(evt.deleted) ? evt.deleted.map(String) : [id];
-          ids.forEach(pid => deletedPosts.add(pid));
-          continue;
-        }
-        const data = evt.data || {};
-        const prior = postsById.get(id) || {};
-        const next = { ...prior, ...data, id, myReaction: prior.myReaction ?? data.myReaction ?? null };
-        if (pendingReactions[String(id)]) {
-          next.likes = prior.likes;
-          next.dislikes = prior.dislikes;
-          next.myReaction = prior.myReaction ?? next.myReaction ?? null;
-        }
-        postsById.set(id, next);
-      }
-
-      if (kind === 'views') {
-        const posts = evt.posts && typeof evt.posts === 'object' ? evt.posts : {};
-        const topics = evt.topics && typeof evt.topics === 'object' ? evt.topics : {};
-
-        for (const [idRaw, val] of Object.entries(posts)) {
-          const id = String(idRaw);
-          if (!id || isTomb('posts', id)) continue;
-          if (typeof pendingViews.posts?.[id] === 'number') continue;
-          const views = Number(val);
-          if (!Number.isFinite(views)) continue;
-          const prior = postsById.get(id);
-          if (prior) postsById.set(id, { ...prior, views });
-        }
-
-        for (const [idRaw, val] of Object.entries(topics)) {
-          const id = String(idRaw);
-          if (!id || isTomb('topics', id)) continue;
-          if (typeof pendingViews.topics?.[id] === 'number') continue;
-          const views = Number(val);
-          if (!Number.isFinite(views)) continue;
-          const prior = topicsById.get(id);
-          if (prior) topicsById.set(id, { ...prior, views });
-        }
-      }
+  function mergeDelta(prev, delta, cursor){
+    const next = { ...prev }
+    if(delta.topics){
+      const map = new Map(prev.topics.map(x=>[x.id,x]))
+      for(const d of delta.topics){ if(d._del) map.delete(d.id); else map.set(d.id, { ...(map.get(d.id)||{}), ...d }) }
+      next.topics = Array.from(map.values())
     }
-    deletedTopics.forEach(id => {
-      topicsById.delete(id);
-      for (const [pid, p] of postsById.entries()) {
-        if (String(p.topicId) === id) postsById.delete(pid);
-      }
-    });
-    deletedPosts.forEach(id => postsById.delete(String(id)));
-
-    const out = {
-      ...prev,
-      topics: Array.from(topicsById.values()).filter(t => !isTomb('topics', t.id)),
-      posts: Array.from(postsById.values()).filter(p => !isTomb('posts', p.id)),
-    };
-    return dedupeAll(out);
-  };
-
-
-
-// === Incremental sync loop: 2m flush + snapshot ===
+    if(delta.posts){
+      const map = new Map(prev.posts.map(x=>[x.id,x]))
+      for(const d of delta.posts){ if(d._del) map.delete(d.id); else map.set(d.id, { ...(map.get(d.id)||{}), ...d }) }
+      next.posts = Array.from(map.values())
+    }
+    if(delta.bans)   next.bans   = delta.bans
+    if(delta.admins) next.admins = delta.admins
+    next.cursor = cursor ?? prev.cursor
+    return dedupeAll(next)
+  }
+// === SILENT SYNC with cache-bust, backoff & hard-consistency ===
 useEffect(() => {
-  if (!isBrowser()) return;
   let stop = false;
-  const TICK_MS = 120_000;
-  const FULL_EVERY_MS = 10 * 60 * 1000;
+  let pulling = false;
+  let cooldownUntil = 0;         // до какого времени не дёргаем снапшот (бэк-офф)
+  let debounceTimer = null;      // дебаунс для pull() после POST
+  let bustRef = 0;               // volatile ключ для обхода микрокэша на сервере
 
-  const runTick = async () => {
-    if (stop || syncInFlightRef.current) return;
-    syncInFlightRef.current = true;
-    try {
-      await flushMutations();
+  const BASE_INTERVAL = 60000;   // фолбэк-опрос (SSE-first; 60с достаточно) 
+  const COOLDOWN_MS   = 60_000;  // пауза при превышении лимита
+  const TMP_GRACE_MS  = 10_000;  // сколько держим неподтверждённые tmp_*
 
-      const now = Date.now();
-      const needFull = !snapRef.current?.rev || (now - (lastFullSnapshotRef.current || 0) > FULL_EVERY_MS);
-      if (needFull) {
-        const r = await api.snapshot({ full: 1 });
-        if (r?.ok) {
-          const idsSet = new Set();
-          try {
-            for (const t of (r.topics || [])) {
-              const id = String(t?.authorId || t?.userId || t?.ownerId || t?.uid || '').trim();
-              if (id) idsSet.add(id);
-            }
-            for (const p of (r.posts || [])) {
-              const id = String(p?.authorId || p?.userId || p?.ownerId || p?.uid || '').trim();
-              if (id) idsSet.add(id);
-            }
-          } catch {}
+  const now = () => Date.now();
+  const isOverLimit = (err) => /max requests limit exceeded/i.test(String(err?.message || err || ''));
 
-          const ids = Array.from(idsSet);
-          if (ids.length) {
-            const vm = await api.vipBatch(ids);
-            if (vm?.ok && vm?.map && typeof vm.map === 'object') {
-              const vipMap = vm.map;
-              r.vipMap = vipMap;
-              if (Array.isArray(r.topics)) {
-                r.topics = r.topics.map(t => {
-                  const aid = String(t?.authorId || t?.userId || t?.ownerId || t?.uid || '').trim();
-                  if (!aid) return t;
-                  const v = vipMap[aid];
-                  if (!v) return t;
-                  return {
-                    ...t,
-                    vipActive: !!v.active,
-                    vipUntil: Number(v.untilMs || 0),
-                    isVip: !!v.active,
-                  };
-                });
-              }
-              if (Array.isArray(r.posts)) {
-                r.posts = r.posts.map(p => {
-                  const aid = String(p?.authorId || p?.userId || p?.ownerId || p?.uid || '').trim();
-                  if (!aid) return p;
-                  const v = vipMap[aid];
-                  if (!v) return p;
-                  return {
-                    ...p,
-                    vipActive: !!v.active,
-                    vipUntil: Number(v.untilMs || 0),
-                    isVip: !!v.active,
-                  };
-                });
-              }
-            }
-          }
-          lastFullSnapshotRef.current = now;
-          persistSnap(prev => applyFullSnapshot(prev, r, tombstones));
-        }
-      } else {
-        const since = Number(snapRef.current?.rev || 0);
-        const r = await api.snapshot({ since });
-        if (r?.ok) {
-          persistSnap(prev => {
-            const next = applyEvents(prev, r.events || [], tombstones);
-            return { ...next, rev: r.rev ?? next.rev };
-          });
+// безопасное слияние снапшота с локальным состоянием (НЕ теряем данные на частичных снапах)
+const safeMerge = (prev, r) => {
+  const out = { ...prev };
+  const hardReset = r && r.__reset === true;
+
+  // ---- TOPICS ----
+  if (Array.isArray(r.topics)) {
+    const prevList = prev.topics || [];
+    const prevById = new Map(prevList.map((t, i) => [String(t.id), { ...t, __idx: i }]));
+    const srvList  = r.topics || [];
+    const srvById  = new Map(srvList.map((t) => [String(t.id), t]));
+    const srvIds   = new Set(Array.from(srvById.keys()));
+
+    // Накат серверных полей поверх локальных
+    for (const [id, srv] of srvById) {
+      const base = prevById.get(id) || { __idx: 9e9 };
+      prevById.set(id, { ...base, ...srv });
+    }
+
+    if (hardReset) {
+      // Жёсткая замена: оставляем только то, что пришло с сервера (сохраняя старые индексы)
+      out.topics = Array.from(prevById.entries())
+        .filter(([id]) => srvIds.has(id))
+        .sort((a, b) => a[1].__idx - b[1].__idx)
+        .map(([, t]) => { const { __idx, ...rest } = t; return rest; });
+    } else {
+      // Частичный снап: никого не выкидываем. Обновляем существующих, новые — в конец.
+      const used = new Set();
+      const merged = [];
+
+      // 1) Сохраняем порядок существующих
+      for (const t of prevList) {
+        const id = String(t.id);
+        if (prevById.has(id)) {
+          const v = prevById.get(id);
+          const { __idx, ...rest } = v;   // ✅ исправление
+          merged.push(rest);              // ✅ исправление
+          used.add(id);
         }
       }
-      const cleaned = pruneTombstones(tombstones);
-      const same =
-        JSON.stringify(cleaned.topics) === JSON.stringify(tombstones.topics) &&
-        JSON.stringify(cleaned.posts) === JSON.stringify(tombstones.posts);
-      if (!same) persistTombstones(cleaned);
+      // 2) Добавляем новые, которых не было
+      for (const [id, v] of prevById.entries()) {
+        if (!used.has(id) && srvIds.has(id)) {
+          const { __idx, ...rest } = v;
+          merged.push(rest);
+        }
+      }
+      out.topics = merged;
+    }
+  }
+
+  // ---- POSTS ----
+  if (Array.isArray(r.posts)) {
+    const prevList   = prev.posts || [];
+    const srvList    = r.posts || [];
+
+    // Полный снапшот: просто доверяем серверу, выкидываем локальное старьё
+    if (hardReset) {
+      out.posts = srvList.slice();
+    } else {
+      const srvMap     = new Map(srvList.map(p => [String(p.id), p]));
+      const mergedById = new Map(prevList.map(p => [String(p.id), { ...p }]));
+
+      // Накат серверных поверх локальных; жёсткая консистентность по счётчикам
+      for (const [id, srv] of srvMap) {
+        const loc = mergedById.get(id) || {};
+        const likes    = Number(srv.likes    ?? 0);
+        const dislikes = Number(srv.dislikes ?? 0);
+        const views    = Number(srv.views    ?? 0);
+        mergedById.set(id, {
+          ...loc,
+          ...srv,
+          likes,
+          dislikes,
+          views,
+          myReaction: (loc.myReaction ?? srv.myReaction ?? null),
+        });
+      }
+
+      const used = new Set();
+      const mergedList = [];
+      for (const p of prevList) {
+        const id = String(p.id);
+        if (mergedById.has(id)) {
+          mergedList.push(mergedById.get(id));
+          used.add(id);
+        }
+      }
+      for (const [id, p] of mergedById.entries()) {
+        if (!used.has(id)) mergedList.push(p);
+      }
+      out.posts = mergedList;
+    }
+  }
+
+  if (Array.isArray(r.bans))   out.bans   = r.bans;
+  if (Array.isArray(r.admins)) out.admins = r.admins;
+  if (r.rev    !== undefined)  out.rev    = r.rev;
+  if (r.cursor !== undefined)  out.cursor = r.cursor;
+
+  // Схлопываем tmp_* и реальные дубли по сигнатурам/ID
+  return dedupeAll(out);
+};
+
+
+
+  // один запрос снапшота; force=true — игнорируем cooldown (для подтверждения мутаций)
+  const pull = async (force = false) => {
+    if (pulling) return;
+    if (!force && now() < cooldownUntil) return;
+
+    pulling = true;
+    try {
+      // важно: прокидываем bustRef для обхода серверного микрокэша
+      const r = await api.snapshot({ b: bustRef });
+      if (r?.ok) persist(prev => safeMerge(prev, r));
     } catch (e) {
-      console.error('sync tick error', e);      
+      if (isOverLimit(e)) {
+        cooldownUntil = now() + COOLDOWN_MS;
+        try { toast?.warn?.('Backend cooldown: Redis limit reached'); } catch {}
+      } else {
+        console.error('snapshot error:', e);
+      }
     } finally {
-      syncInFlightRef.current = false;;
+      pulling = false;
     }
   };
 
-  runTick();
-  const id = setInterval(runTick, TICK_MS);
+  const schedulePull = (delay = 180, force = false) => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => { debounceTimer = null; pull(force); }, delay);
+  };
+   schedulePullRef.current = schedulePull;
+  // основной цикл
+  (async function loop(){
+    schedulePull(80);
+    while (!stop) {
+    // Фолбэк: если SSE не подключён/не в readyState=1 — дёрнем pull()
+    await new Promise(r => setTimeout(r, BASE_INTERVAL));
+    try {
+      const ok = typeof window !== 'undefined'
+        && window.__forumSSE
+        && Number(window.__forumSSE.readyState) === 1;   // 1 = OPEN
+      if (!ok) await pull(false);
+    } catch {}
+    }
+  })();
+
+  // "пинки" по событиям среды
+  const kick = () => schedulePull(80, false);
+  window.addEventListener('focus', kick);
+  window.addEventListener('online', kick);
+  document.addEventListener('visibilitychange', kick);
+
+  // перехват ЛЮБОГО POST на /api/forum/*: ставим bust и делаем форс-пул
+  const _fetch = window.fetch;
+  window.fetch = async (...args) => {
+    const res = await _fetch(...args);
+    try {
+      const req    = args[0];
+      const url    = typeof req === 'string' ? req : req?.url;
+      const method = (typeof req === 'string' ? (args[1]?.method || 'GET') : (req.method || 'GET')).toUpperCase();
+      if (method !== 'GET' && /\/api\/forum\//.test(String(url || ''))) {
+        bustRef = Date.now();         // новый ключ кэша
+        schedulePullRef.current(120, true);      // быстрый форс-пул для подтверждения мутации
+      }
+    } catch {}
+    return res;
+  };
+
+  // кросс-вкладочный “пинок” (опционально, но полезно)
+  let bc = null;
+  try {
+    bc = new BroadcastChannel('forum-sync');
+    bc.onmessage = (ev) => { if (ev?.data === 'bump') schedulePull(120, true); };
+  } catch {}
 
   return () => {
     stop = true;
-    clearInterval(id);
+    if (debounceTimer) { clearTimeout(debounceTimer); debounceTimer = null; }
+    window.removeEventListener('focus', kick);
+    window.removeEventListener('online', kick);
+    document.removeEventListener('visibilitychange', kick);
+    window.fetch = _fetch;
+    schedulePullRef.current = () => {}; // обнуляем ручку
+    try { bc && bc.close(); } catch {}
   };
-}, [flushMutations, tombstones]);
+}, []);
 
 
+// локальный shim: принудительное обновление страницы/данных
+const router = useRouter();
 const sseAliveRef = useRef(false)
+const didManualKickRef = useRef(false)
+const refresh = React.useCallback(() => {
+  try { router.refresh?.(); } catch {}
+}, [router]);
 
 React.useEffect(() => {
   if (typeof window === 'undefined') return;
@@ -9045,6 +8511,46 @@ React.useEffect(() => {
   const es = new EventSource('/api/forum/events/stream', { withCredentials: false });
   window.__forumSSE = es;
 
+  // === антидребезг + ограничение частоты ===
+  const lastRefreshAtRef = { current: 0 };
+  let debTimer = null;
+
+  // базовая задержка и доп. задержки для «тяжёлых» событий
+  const REFRESH_BASE_DELAY = 350; // было 160 → стало 350 мс
+  const EXTRA_DELAY_BY_TYPE = {
+    post_created: 250,
+    topic_created: 250,
+    post_deleted: 150,
+    topic_deleted: 150,
+    react: 0,
+    view_post: 0,
+    view_topic: 0,
+    ban: 0,
+    unban: 0,
+    'profile.avatar': 0,
+  };
+  const MIN_INTERVAL_MS = 600; // не чаще, чем раз в 600 мс
+
+  const scheduleRefresh = (evtType) => {
+    const extra = EXTRA_DELAY_BY_TYPE[evtType] || 0;
+    const delay = REFRESH_BASE_DELAY + extra;
+
+    clearTimeout(debTimer);
+    debTimer = setTimeout(() => {
+      const now = Date.now();
+      if (now - (lastRefreshAtRef.current || 0) < MIN_INTERVAL_MS) {
+        // если слишком часто — докидаем паузу до MIN_INTERVAL_MS
+        const leftover = MIN_INTERVAL_MS - (now - (lastRefreshAtRef.current || 0));
+        setTimeout(() => {
+          lastRefreshAtRef.current = Date.now();
+          refresh?.();
+        }, Math.max(60, leftover));
+      } else {
+        lastRefreshAtRef.current = now;
+        refresh?.();
+      }
+    }, delay);
+  };
 
 es.onmessage = (e) => { 
   sseAliveRef.current = true 
@@ -9067,27 +8573,74 @@ es.onmessage = (e) => {
         localStorage.setItem(key, JSON.stringify(next));
       } catch { /* no-op */ }
 
-      // hint only, без немедленного fetch
+      // Лёгкий рефреш компонентов, которые читают профиль
+      scheduleRefresh('profile.avatar');
       return; // дальше ничего не делаем — снапшоты/ревизии не нужны для этого события
     }
 
+    // --- [EVENTS REQUIRING SOFT REFRESH] ---
+ const needRefresh = new Set(['topic_created','topic_deleted','post_created','post_deleted','react','ban','unban']);
+    if (needRefresh.has(evt.type)) {
+       // игнорим «локальные» или временные id
+  if (evt.local === true) return;
+  if (String(evt.postId || '').startsWith('tmp_')) return;
+  if (String(evt.topicId || '').startsWith('tmp_')) return; 
+      scheduleRefresh(evt.type);
+      return;
+    }
 
+    // ...ниже остаётся твоя существующая логика, если она есть (rev/snapshot и т.п.)
+
+
+    // Тянем снапшот ТОЛЬКО если ревизия реально выросла
+    const curRev = (() => {
+      try { return (JSON.parse(localStorage.getItem('forum:snap') || '{}').rev) || 0; }
+      catch { return 0; }
+    })();
     const nextRev = Number(evt?.rev || 0);
-    if (Number.isFinite(nextRev) && nextRev > 0) {
-      sseHintRef.current = Math.max(sseHintRef.current, nextRev);
+    if (nextRev > curRev) {
+      // Один запрос снапшота через готовый pull() → persist(safeMerge)
+      // Немного подождём, чтобы схлопнуть серии событий
+      schedulePullRef.current(120, true);
     }
    } catch {}
  };
 
 
-es.onerror = () => { /* no-op */ }
+let fallbackTimer = null;
+es.onerror = () => { /* оставляем молча; fallback подтянет снапшот */ }
+
+es.onopen = () => {
+  // как только SSE поднялся — вырубаем fallback
+  if (fallbackTimer) { clearInterval(fallbackTimer); fallbackTimer = null; }
+};
 
 return () => {
   try { es.close(); } catch {}
-  if (window.__forumSSE === es) window.__forumSSE = null; 
+  if (window.__forumSSE === es) window.__forumSSE = null;
+  if (fallbackTimer) { clearInterval(fallbackTimer); fallbackTimer = null; }
+  clearTimeout(debTimer);
 };
-}, []);
+}, [refresh]);
 
+  // Fallback: если SSE молчит — на первый gesture принудительно тянем снапшот
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    function kickOnce() {
+      if (didManualKickRef.current || sseAliveRef.current) return
+      didManualKickRef.current = true
+      // принудительно подтягиваем свежий снапшот и обновляем
+      fetch('/api/forum/snapshot?kick=1', { cache: 'no-store' })
+        .catch(() => null)
+        .finally(() => router.refresh())
+    }
+    window.addEventListener('pointerdown', kickOnce, { once: true, capture: true })
+    window.addEventListener('keydown',     kickOnce, { once: true, capture: true })
+    return () => {
+      try { window.removeEventListener('pointerdown', kickOnce, { capture: true }) } catch {}
+      try { window.removeEventListener('keydown',     kickOnce, { capture: true }) } catch {}
+    }
+  }, [router])
 
 // ---- VIP ----
 const [vipOpen, setVipOpen] = useState(false)
@@ -9196,13 +8749,15 @@ const delTopic = async (t) => {
   if (!isAdmin) return
   const r = await api.adminDeleteTopic(t.id)
   if (r?.ok) {
-    persistSnap(prev => ({
+    persist(prev => ({
       ...prev,
       topics: prev.topics.filter(x => x.id !== t.id),
       posts:  prev.posts.filter(p => p.topicId !== t.id),
     }))
     toast.ok('Topic removed')
-    forumBroadcast({ type: 'post_deleted' }); // без id — просто триггерим перечитку 
+    forumBroadcast({ type: 'post_deleted' }); // без id — просто триггерим перечитку
+
+    if (typeof refresh === 'function') await refresh()   // ← добавили
   } else {
     console.error('adminDeleteTopic error:', r)
     toast.err(r?.error || 'Admin endpoint error')
@@ -9214,7 +8769,7 @@ const delPost = async (p) => {
   if (!isAdmin) return
   const r = await api.adminDeletePost(p.id)
   if (r?.ok) {
-    persistSnap(prev => {
+    persist(prev => {
       const del = new Set([p.id]); let grow = true
       while (grow) {
         grow = false
@@ -9227,7 +8782,9 @@ const delPost = async (p) => {
       return { ...prev, posts: prev.posts.filter(x => !del.has(x.id)) }
     })
     toast.ok('Post removed')
-    emitDeleted(p.id, p.topicId);   // ← сообщить об удалении 
+    emitDeleted(p.id, p.topicId);   // ← сообщить об удалении
+
+    if (typeof refresh === 'function') await refresh()   // ← добавили
   } else {
     console.error('adminDeletePost error:', r)
     toast.err(r?.error || 'Admin endpoint error')
@@ -9240,12 +8797,13 @@ const banUser = async (p) => {
   const id = p.accountId || p.userId
   const r = await api.adminBanUser(id)
   if (r?.ok) {
-    persistSnap(prev => {
+    persist(prev => {
       const bans = new Set(prev.bans || [])
       bans.add(id)
       return { ...prev, bans: Array.from(bans) }
     })
-    toast.ok(t('forum_banned_ok') || 'User banned') 
+    toast.ok(t('forum_banned_ok') || 'User banned')
+    if (typeof refresh === 'function') await refresh()   // ← добавили
   } else {
     console.error('adminBanUser error:', r)
     toast.err(r?.error || 'Admin endpoint error')
@@ -9258,12 +8816,13 @@ const unbanUser = async (p) => {
   const id = p.accountId || p.userId
   const r = await api.adminUnbanUser(id)
   if (r?.ok) {
-    persistSnap(prev => {
+    persist(prev => {
       const bans = new Set(prev.bans || [])
       bans.delete(id)
       return { ...prev, bans: Array.from(bans) }
     })
-    toast.ok(t('forum_unbanned_ok') || 'User unbanned') 
+    toast.ok(t('forum_unbanned_ok') || 'User unbanned')
+    if (typeof refresh === 'function') await refresh()   // ← добавили
   } else {
     console.error('adminUnbanUser error:', r)
     toast.err(r?.error || 'Admin endpoint error')
@@ -9278,49 +8837,22 @@ const delTopicOwn = async (topic) => {
     return;
   }
 
-  const topicId = String(topic?.id || '');
-  if (!topicId) return;
-  if (topicId.startsWith('tmp_t_')) {
-    setOverlay(prev => ({
-      ...prev,
-      creates: {
-        ...prev.creates,
-        topics: (prev.creates.topics || []).filter(t => String(t.id) !== topicId),
-        posts: (prev.creates.posts || []).filter(p => String(p.topicId) !== topicId),
-      },
-    }));
-    return;
-  }
+  const r = await api.ownerDeleteTopic(topic.id, uid);
 
-  persistTombstones(prev => {
-    const topics = { ...prev.topics, [topicId]: Date.now() };
-    return { ...prev, topics };
-  });
-  pushOp('delete_topic', { id: topicId });
-  if (String(sel?.id || '') === topicId) {
-    try { setSel(null); } catch {}
+  if (r?.ok) {
+    persist(prev => {
+      const posts  = (prev.posts  || []).filter(p => String(p.topicId) !== String(topic.id));
+      const topics = (prev.topics || []).filter(x => String(x.id) !== String(topic.id));
+      return { ...prev, posts, topics };
+    });
+
+    // поддержим оба варианта ключа (на случай старого словаря)
+    toast.ok(t('forum_delete_ok') || 'Удалено');
+
+    try { if (typeof refresh === 'function') await refresh(); } catch {}
+  } else {
+    toast.err(t('forum_error_delete') || 'Ошибка удаления');
   }
-  toast.ok(t('forum_delete_ok') || 'Удалено');
-};
-const delPostOwn = (post) => {
-  const postId = String(post?.id || '');
-  if (!postId) return;
-  if (postId.startsWith('tmp_p_')) {
-    setOverlay(prev => ({
-      ...prev,
-      creates: {
-        ...prev.creates,
-        posts: (prev.creates.posts || []).filter(p => String(p.id) !== postId),
-      },
-    }));
-    return;
-  }
-  persistTombstones(prev => {
-    const posts = { ...prev.posts, [postId]: Date.now() };
-    return { ...prev, posts };
-  });
-  pushOp('delete_post', { id: postId });
-  toast.ok(t('forum_delete_ok') || 'Удалено');
 };
 
 
@@ -9620,56 +9152,9 @@ const aggregates = useMemo(() => {
 
   /* ---- composer ---- */
   const [text,setText] = useState('')
-const [replyTo,setReplyTo] = useState(null)
+  const [replyTo,setReplyTo] = useState(null)
 // превью прикреплённых картинок (НЕ пишем URL в текст)
 const [pendingImgs, setPendingImgs] = useState([]);
-const uploadFlowTimerRef = React.useRef(null);
-const [uploadFlow, setUploadFlow] = useState(() => ({
-  active: false,
-  stage: null,
-  progress: 0,
-}));
-const uploadSteps = React.useMemo(() => ([
-  { id: 'moderation', label: t?.('forum_upload_stage_moderation') || 'Moderation' },
-  { id: 'upload', label: t?.('forum_upload_stage_upload') || 'Upload' },
-  { id: 'preview', label: t?.('forum_upload_stage_preview') || 'Preview' },
-  { id: 'publish', label: t?.('forum_upload_stage_publish') || 'Publish' },
-]), [t]);
-const activeUploadIndex = React.useMemo(
-  () => uploadSteps.findIndex((step) => step.id === uploadFlow.stage),
-  [uploadSteps, uploadFlow.stage],
-);
-const uploadProgressValue = React.useMemo(() => {
-  if (!uploadFlow.active) return 0;
-  const stepSize = 100 / Math.max(1, uploadSteps.length);
-  const idx = Math.max(0, activeUploadIndex);
-  const local = Math.min(100, Math.max(0, Number(uploadFlow.progress || 0)));
-  return Math.min(100, (idx * stepSize) + (local * stepSize / 100));
-}, [uploadFlow.active, uploadFlow.progress, uploadSteps.length, activeUploadIndex]);
-const resetUploadFlow = React.useCallback(() => {
-  if (uploadFlowTimerRef.current) {
-    clearTimeout(uploadFlowTimerRef.current);
-    uploadFlowTimerRef.current = null;
-  }
-  setUploadFlow({ active: false, stage: null, progress: 0 });
-}, []);
-const updateUploadFlow = React.useCallback((stage, progress = 0) => {
-  if (uploadFlowTimerRef.current) {
-    clearTimeout(uploadFlowTimerRef.current);
-    uploadFlowTimerRef.current = null;
-  }
-  setUploadFlow({ active: true, stage, progress });
-}, []);
-const finishUploadFlow = React.useCallback((stage = 'preview') => {
-  setUploadFlow({ active: true, stage, progress: 100 });
-  if (uploadFlowTimerRef.current) clearTimeout(uploadFlowTimerRef.current);
-  uploadFlowTimerRef.current = setTimeout(() => {
-    setUploadFlow({ active: false, stage: null, progress: 0 });
-  }, 1400);
-}, []);
-const setVideoProgress = React.useCallback((pct) => {
-  updateUploadFlow('upload', Math.min(100, Math.max(0, Number(pct || 0))));
-}, [updateUploadFlow]);
 // [FOCUS_TOOLS_STATE:BEGIN]
 const [composerActive, setComposerActive] = useState(false);
 const composerRef = React.useRef(null);
@@ -9695,7 +9180,7 @@ useEffect(() => {
 
 const startSendCooldown = React.useCallback((sec = 10) => {
   setCooldownLeft(sec);
-}, []); 
+}, []);
 // по клику вне композера — закрываем
 useEffect(() => {
   if (!composerActive) return;
@@ -9745,37 +9230,7 @@ const [overlayMediaKind, setOverlayMediaKind] = useState('video'); // 'video' | 
 const [overlayMediaUrl, setOverlayMediaUrl] = useState(null);      // string | null
 const videoCancelRef = useRef(false); // true => onstop не собирает blob (отмена)
 const videoMirrorRef = useRef(null);  // вспомогательный незеркальный front-поток для записи
- const [uploadStatus, setUploadStatus] = useState({
-  active: false,
-  stage: 'idle',
-  percent: 0,
-});
-const uploadTimerRef = useRef(null);
-const clearUploadTimer = useCallback(() => {
-  if (uploadTimerRef.current) {
-    clearTimeout(uploadTimerRef.current);
-    uploadTimerRef.current = null;
-  }
-}, []);
-const setUploadStage = useCallback((stage, percent) => {
-  setUploadStatus(prev => ({
-    active: true,
-    stage,
-    percent: Math.max(Number(percent ?? prev.percent ?? 0), 0),
-  }));
-}, []);
-const finishUpload = useCallback((delayMs = 900) => {
-  clearUploadTimer();
-  setUploadStatus({ active: true, stage: 'preview', percent: 100 });
-  uploadTimerRef.current = setTimeout(() => {
-    setUploadStatus(prev => ({ ...prev, active: false }));
-    uploadTimerRef.current = null;
-  }, delayMs);
-}, []);
-const resetUploadStatus = useCallback(() => {
-  clearUploadTimer();
-  setUploadStatus({ active: false, stage: 'idle', percent: 0 });
-}, [clearUploadTimer]);
+ 
 // --- voice handlers (зажал/держишь/отпустил) ---
    const startRecord = async () => {
      if (recState === 'rec') return;
@@ -10201,7 +9656,8 @@ const moderateViaApi = React.useCallback(async (blobs, meta = {}) => {
   // server meta (optional)
   if (meta?.source) fd.append('source', String(meta.source));
   if (meta?.clientRequestId) fd.append('clientRequestId', String(meta.clientRequestId));
-  const attemptModeration = async () => {
+  // server returns allow/block/review; STRICT/BALANCED applied on client
+  try {
     const res = await fetch('/api/forum/moderate', { method: 'POST', body: fd, cache: 'no-store' });
     const j = await res.json().catch(() => null);
     if (!res.ok || !j) {
@@ -10211,16 +9667,8 @@ const moderateViaApi = React.useCallback(async (blobs, meta = {}) => {
       throw e;
     }
     return j;
-  };
-
-  // server returns allow/block/review; STRICT/BALANCED applied on client
-  try {
-    return await attemptModeration();
   } catch (e) {
-
-    // 1 retry для устойчивости (без спама запросами)
-    try { await new Promise((r) => setTimeout(r, 450)); } catch {}
-    return await attemptModeration();
+    throw e;
   }
 }, []);
 
@@ -10237,16 +9685,7 @@ const moderateImageFiles = React.useCallback(async (files) => {
     pack.push({ blob: jpeg, name: (f.name || 'image').replace(/\.(png|jpe?g|webp|gif)$/i, '.jpg') });
   }
 
-  let r = null;
-  try {
-    r = await moderateViaApi(pack, { source: 'image' });
-  } catch (e) {
-    if (!isStrictModeration) {
-      try { console.warn('[moderation] image check failed -> allow (balanced)', e?.message || e); } catch {}
-      return { decision: 'allow', reason: 'unknown', raw: null, softFail: true };
-    }
-    throw e;
-  }
+  const r = await moderateViaApi(pack, { source: 'image' });
   let decision = String(r?.decision || 'allow');
   const reason = String(r?.reason || 'unknown');
 
@@ -10385,11 +9824,11 @@ const moderateVideoSource = React.useCallback(async (videoSource) => {
   let frames = [];
   try {
     frames = await extractVideoFrames(videoSource, {
-      framesCount: 10,
-      minGapSec: 0.7,
+      framesCount: 14,
+      minGapSec: 0.6,
       excludeHeadTail: 0.05,
-      maxWidth: 560,
-      quality: 0.78,
+      maxWidth: 640,
+      quality: 0.82,
     });
   } catch {
     frames = [];
@@ -10411,16 +9850,7 @@ const moderateVideoSource = React.useCallback(async (videoSource) => {
     timeSec: f.timeSec,
   }));
 
-  let r = null;
-  try {
-    r = await moderateViaApi(pack, { source: 'video_frame' });
-  } catch (e) {
-    if (!isStrictModeration) {
-      try { console.warn('[moderation] video check failed -> allow (balanced)', e?.message || e); } catch {}
-      return { decision: 'allow', reason: 'unknown', raw: null, softFail: true };
-    }
-    throw e;
-  }
+  const r = await moderateViaApi(pack, { source: 'video_frame' });
 
   let decision = String(r?.decision || 'allow');
   const reason = String(r?.reason || 'unknown');
@@ -10482,44 +9912,40 @@ const hasImageLines = React.useMemo(() => {
       likes: 0, dislikes: 0, views: 0, myReaction: null
     }
 
-// оптимистично кладём в overlay
-setOverlay(prev => ({
-  ...prev,
-  creates: {
-    topics: [t0, ...(prev.creates.topics || [])],
-    posts: [ ...(prev.creates.posts || []), p0 ],
-  },
-}))
+// оптимистично кладём в локальный снап
+persist(prev => dedupeAll({ ...prev, topics:[t0, ...prev.topics], posts:[...prev.posts, p0] }))
 setSel(t0)
 toast.ok(t('forum_create_ok') ||'Тема создана')
 
    
-    pushOp('create_topic', {
-      title: safeTitle,
-      description: safeDesc,
-      nickname: t0.nickname,
-      icon: t0.icon,
-      cid: tmpT,
-      id: tmpT,
-    });
-    pushOp('create_post', {
-      topicId: tmpT,
-      topicCid: tmpT,
-      text: safeFirst,
-      nickname: t0.nickname,
-      icon: t0.icon,
-      parentId: null,
-      cid: tmpP,
-      id: tmpP,
-    });
-    // важное событие: отправляем сразу
-    try { await flushMutations(); } catch {}    
+    // 1) создаём тему на бэке
+    const createTopicResp = await api.mutate({
+      ops:[{ type:'create_topic', payload:{ title: safeTitle, description: safeDesc, nickname: t0.nickname, icon: t0.icon } }]
+    }, uid)
+
+    const realTopicId = createTopicResp?.applied?.find(x=>x.op==='create_topic')?.topic?.id
+    if (!realTopicId) { if (typeof refresh === 'function') await refresh();
+      return }
+
+    // ремап tmp -> real локально
+    persist(prev=>{
+      const topics = prev.topics.map(x => x.id===tmpT ? { ...x, id:String(realTopicId) } : x)
+      const posts  = prev.posts.map(x => x.topicId===tmpT ? { ...x, topicId:String(realTopicId) } : x)
+      return dedupeAll({ ...prev, topics, posts })
+    })
+
+    // 2) создаём первый пост (отдельной операцией, уже с реальным topicId)
+    await api.mutate({
+      ops:[{ type:'create_post', payload:{ topicId:String(realTopicId), text:safeFirst, nickname:t0.nickname, icon:t0.icon, parentId:null, cid: tmpP } }]
+    }, uid)
   // жёсткая очистка и подтягиваем свежий снапшот
   try { setText(''); } catch {}
   try { setPendingImgs([]); } catch {}
   try { setPendingAudio(null); } catch {}
   try { resetVideo(); } catch {}
-  try { setReplyTo(null); } catch {} 
+  try { setReplyTo(null); } catch {}
+    // подтянуть свежий снапшот
+    if (typeof refresh === 'function') await refresh()
   }
 
 
@@ -10529,7 +9955,6 @@ toast.ok(t('forum_create_ok') ||'Тема создана')
 const createPost = async () => {
   if (postingRef.current) return;
   postingRef.current = true;
-  const hadUpload = !!(pendingVideo || pendingAudio);  
   // === Режим редактирования поста владельцем ===
   if (editPostId) {
     const _done = () => { postingRef.current = false; };
@@ -10537,14 +9962,20 @@ const createPost = async () => {
       const uid = (auth?.asherId || auth?.accountId || getForumUserId());
       const safeText = String(text || '').slice(0, 8000);
       if (!safeText.trim()) { _done(); return; }
-      setOverlay(prev => ({
-        ...prev,
-        edits: { ...prev.edits, [String(editPostId)]: { text: safeText } },
-      }));
-      pushOp('edit_post', { id: String(editPostId), text: safeText });
-      setEditPostId(null);
-      try { setText(''); } catch {}
-      try { toast?.ok?.('Изменено'); } catch {}
+      const r = await api.ownerEditPost(editPostId, safeText, uid);
+      if (r?.ok) {
+        // локально подменим текст
+        persist(prev => ({
+          ...prev,
+          posts: (prev.posts || []).map(p => String(p.id) === String(editPostId) ? { ...p, text: safeText } : p)
+        }));
+        setEditPostId(null);
+        try { setText(''); } catch {}
+        try { toast?.ok?.('Изменено'); } catch {}
+        try { if (typeof refresh === 'function') await refresh(); } catch {}
+      } else {
+        try { toast?.err?.(r?.error || 'Ошибка редактирования'); } catch {}
+      }
     } finally {
       _done();
     }
@@ -10554,8 +9985,6 @@ const createPost = async () => {
   // === Обычный режим: создание поста ===
   const _fail = (msg) => {
     if (msg) { try { toast?.warn?.(msg) } catch {} }
-        resetUploadFlow();
-        if (hadUpload) resetUploadStatus();
     postingRef.current = false;
   };
 
@@ -10563,11 +9992,8 @@ const createPost = async () => {
   // 0) VIDEO MODERATION (frames) BEFORE ANY UPLOAD
   if (pendingVideo) {
     try {
-      clearUploadTimer();
-      setUploadStage('moderation', 8);      
       // если pendingVideo = blob: -> достаём Blob и модерируем по кадрам
       if (/^blob:/.test(pendingVideo)) {
-                updateUploadFlow('moderation', 5);
         const resp = await fetch(pendingVideo);
         const fileBlob = await resp.blob();
 
@@ -10577,7 +10003,6 @@ const createPost = async () => {
           toastI18n('warn', 'forum_video_blocked', 'Video rejected by community rules');
           toastI18n('info', reasonKey(mod?.reason), reasonFallbackEN(mod?.reason));
           try { resetVideo(); } catch {}
-           resetUploadFlow();        
           return _fail();
         }
 
@@ -10602,7 +10027,6 @@ const createPost = async () => {
   if (pendingVideo) {
     try {
       if (/^blob:/.test(pendingVideo)) {
-        setUploadStage('upload', 18);        
         // получаем Blob из локального blob:-URL
         const resp = await fetch(pendingVideo);
         const fileBlob = await resp.blob(); // type: video/webm|mp4|quicktime
@@ -10616,20 +10040,15 @@ const createPost = async () => {
 
         // динамический импорт клиентского uploader
         const { upload } = await import('@vercel/blob/client');
-        updateUploadFlow('upload', 3);        
         const result = await upload(name, fileBlob, {
           access: 'public',
           handleUploadUrl: '/api/forum/blobUploadUrl', // ← наш единственный роут
           multipart: true,                                // надёжно для больших файлов
           contentType: mime,
-          onUploadProgress: (p) => {
-            const percent = Number(p?.percentage ?? 0);
-            if (Number.isFinite(percent)) setUploadStage('upload', Math.min(96, Math.max(18, percent)));
-          },
+          onUploadProgress: (p) => { try { setVideoProgress?.(p.percentage || 0) } catch {} },
         });
         videoUrlToSend = result?.url || '';
         if (!videoUrlToSend) throw new Error('no_url');
-                updateUploadFlow('preview', 100);
       } else {
         // уже готовый https-URL
         videoUrlToSend = pendingVideo;
@@ -10637,7 +10056,6 @@ const createPost = async () => {
     } catch (e) {
       console.error('video_client_upload_failed', e);
       try { toast?.err?.('Не удалось загрузить видео'); } catch {}
-            resetUploadFlow();
       return _fail();
     }
   }
@@ -10645,9 +10063,7 @@ const createPost = async () => {
   let audioUrlToSend = '';
   if (pendingAudio) {
     try {
-            updateUploadFlow('upload', 2);
-      if (/^blob:/.test(pendingAudio)) {      
-        setUploadStage('upload', 22);
+      if (/^blob:/.test(pendingAudio)) {
         const resp = await fetch(pendingAudio);
         const blob = await resp.blob();
         const fd = new FormData();
@@ -10658,7 +10074,6 @@ const createPost = async () => {
       } else {
         audioUrlToSend = pendingAudio;
       }
-            updateUploadFlow('preview', 100);
     } catch { audioUrlToSend = ''; }
   }
 
@@ -10761,13 +10176,18 @@ const createPost = async () => {
     myReaction: null,
   };
  
-  setOverlay(prev => ({
-    ...prev,
-    creates: {
-      ...prev.creates,
-      posts: [ ...(prev.creates.posts || []), p ],
-    },
-  }));
+  persist(prev => {
+    const next = { ...prev, posts: [ ...(prev.posts || []), p ] };
+    if (isReply && Array.isArray(prev.posts)) {
+      const pid = String(parentId);
+      next.posts = next.posts.map(x => {
+        if (String(x.id) !== pid) return x;
+        const replies = Number(x.replies ?? x.repliesCount ?? 0) + 1;
+        return { ...x, replies, repliesCount: replies };
+      });
+    }
+    return dedupeAll(next);
+  });
  
   if (isReply) {
     const parentPost = (data?.posts || []).find(x => String(x.id) === String(parentId));
@@ -10784,17 +10204,15 @@ const createPost = async () => {
     parentId,
     nickname: p.nickname,
     icon: p.icon,
-    cid:  tmpId,
-    id: tmpId,
+    cid:  tmpId 
   });
-// важное исключение: отправка сообщений уходит немедленно
-  if (pendingImgs.length || pendingAudio || pendingVideo) {
-    updateUploadFlow('publish', 100);
-  }
-  try { await flushMutations(); } catch {}
+  sendBatch(true);
   setComposerActive(false);
   emitCreated(p.id, sel.id);
- 
+
+  // мягкий догон
+  setTimeout(() => { try { if (typeof refresh === 'function') refresh(); } catch {} }, 200);
+
   // сброс UI
   setText('');
   setPendingImgs([]);
@@ -10802,9 +10220,6 @@ const createPost = async () => {
   setPendingAudio(null);
   setReplyTo(null);
   toast.ok(t('forum_post_sent') || 'Отправлено');
-    if (pendingImgs.length || pendingAudio || pendingVideo) {
-    finishUploadFlow('publish');
-  }
   postingRef.current = false;
  // ← важный сброс видео-оверлея и состояния после отправки
  try { resetVideo(); } catch {}
@@ -10813,7 +10228,6 @@ const createPost = async () => {
  } catch {}
  try { setPendingVideo(null); } catch {}
  try { setVideoOpen(false); setVideoState('idle'); } catch {}
-  if (hadUpload) finishUpload();
 };
 
 
@@ -10821,30 +10235,75 @@ const createPost = async () => {
 const reactMut = useCallback(async (post, kind) => {
   if (!rl.allowAction()) { if (toast?.warn) toast.warn(t('forum_too_fast') || 'Слишком часто'); return; }
   const r = await requireAuthStrict(); if (!r) return;
-
+  // kind: 'like' | 'dislike'
   if (!post?.id) return;
-  const current = post.myReaction || null;
-  const nextState = current === kind ? null : kind;
-  const baseLikes = Number(post.likes ?? 0);
-  const baseDislikes = Number(post.dislikes ?? 0);
+  const uid = (auth?.asherId || auth?.accountId || (typeof getForumUserId==='function' ? getForumUserId() : 'web'));
 
-  let likes = baseLikes;
-  let dislikes = baseDislikes;
-  if (current === 'like') likes = Math.max(0, likes - 1);
-  if (current === 'dislike') dislikes = Math.max(0, dislikes - 1);
-  if (nextState === 'like') likes += 1;
-  if (nextState === 'dislike') dislikes += 1;
+  const current = post.myReaction || null;        // что стоит у пользователя сейчас
+  const ops = [];
 
-  setOverlay(prev => ({
-    ...prev,
-    reactions: {
-      ...prev.reactions,
-      [String(post.id)]: { state: nextState, likes, dislikes },
-    },
-  }));
+  if (current === kind) {
+    // повторный клик по тому же — снимаем реакцию
+    ops.push({ type: 'react', payload: { postId: String(post.id), kind, delta: -1 } });
+  } else {
+    // если стояло другое — сначала снимаем предыдущее
+    if (current === 'like')     ops.push({ type: 'react', payload: { postId: String(post.id), kind: 'like',     delta: -1 } });
+    if (current === 'dislike')  ops.push({ type: 'react', payload: { postId: String(post.id), kind: 'dislike',  delta: -1 } });
+    // затем ставим новое
+    ops.push({ type: 'react', payload: { postId: String(post.id), kind, delta: +1 } });
+  }
 
-  pushOp('set_reaction', { postId: String(post.id), state: nextState });
-}, [auth, setOverlay]);
+  // --- оптимистическое обновление локального снапа ---
+  persist(prev => {
+    const posts = (prev.posts || []).map(p => {
+      if (p.id !== post.id) return p;
+      let likes    = Number(p.likes    ?? 0);
+      let dislikes = Number(p.dislikes ?? 0);
+      let myReaction = p.myReaction || null;
+
+      if (current === kind) {
+        // снимаем
+        if (kind === 'like')    likes    = Math.max(0, likes - 1);
+        if (kind === 'dislike') dislikes = Math.max(0, dislikes - 1);
+        myReaction = null;
+      } else {
+        // переключение
+        if (current === 'like')    likes    = Math.max(0, likes - 1);
+        if (current === 'dislike') dislikes = Math.max(0, dislikes - 1);
+        if (kind === 'like')       likes    = likes + 1;
+        if (kind === 'dislike')    dislikes = dislikes + 1;
+        myReaction = kind;
+      }
+      return { ...p, likes, dislikes, myReaction };
+    });
+    return { ...prev, posts };
+  });
+
+// --- батч на сервер ---
+try {
+  const r = await api.mutate({ ops }, uid);
+
+  // Барьер по rev: берём последний rev из применённых операций
+  const lastRev = Number(
+    (r?.applied || [])
+      .map(x => x?.rev)
+      .filter(v => Number.isFinite(v))
+      .pop() || 0
+  );
+
+  // Мгновенно прогреваем снапшот с обходом микрокэша:
+  // передаём уникальный bust (b=Date.now()) и hint по ревизии
+  try {
+    await api.snapshot({ b: Date.now(), rev: lastRev || undefined });
+  } catch {}
+
+  // После прогрева снапшота — мягкий UI-рефреш
+  if (typeof refresh === 'function') await refresh();
+} catch (e) {
+  console.warn('react mutate failed', e);
+}
+
+}, [auth, persist]);
 
 
 const FORUM_VIEW_TTL_SEC = VIEW_TTL_SEC
@@ -10859,18 +10318,9 @@ const markViewPost = (postId) => {
 
 if(!localStorage.getItem(key)){
   localStorage.setItem(key,'1')
-  pendingViewsPostsRef.current.add(String(postId));
-  setOverlay(prev => {
-    const cur = (data?.posts || []).find(p => String(p.id) === String(postId));
-    const base = Number(prev.views.posts[String(postId)] ?? cur?.views ?? 0);
-    return {
-      ...prev,
-      views: {
-        ...prev.views,
-        posts: { ...prev.views.posts, [String(postId)]: base + 1 },
-      },
-    };
-  });
+  // без оптимизма — только отправка на бэк
+  pushOp('view_post', { postId: String(postId) })
+  sendBatch(true)
 }
 
 }
@@ -10906,7 +10356,7 @@ useEffect(() => {
     rec.t = setTimeout(() => {
       const cur = focused.get(postId);
       if (!cur?.el) return; // уже не в фокусе
-      markViewPostRef.current?.(postId); // внутри уже TTL+LS дедуп
+      markViewPost(postId); // внутри уже TTL+LS дедуп
       scheduleNextBucketTick(postId);
     }, delay);
   };
@@ -10951,7 +10401,7 @@ useEffect(() => {
           else focused.get(postId).el = el;
 
           // мгновенно считаем просмотр при попадании в фокус
-          markViewPostRef.current?.(postId);
+          markViewPost(postId);
 
           // префетч медиа вокруг
           prefetchVideosAround(el);
@@ -11000,18 +10450,8 @@ const markViewTopic = (topicId) => {
   try {
     if(!localStorage.getItem(key)){
       localStorage.setItem(key,'1')
-      pendingViewsTopicsRef.current.add(String(topicId));
-      setOverlay(prev => {
-        const cur = (data?.topics || []).find(t => String(t.id) === String(topicId));
-        const base = Number(prev.views.topics[String(topicId)] ?? cur?.views ?? 0);
-        return {
-          ...prev,
-          views: {
-            ...prev.views,
-            topics: { ...prev.views.topics, [String(topicId)]: base + 1 },
-          },
-        };
-      });
+      pushOp('view_topic', { topicId: String(topicId) })
+     sendBatch(true)
     }
   } catch {}
 }
@@ -11079,13 +10519,8 @@ const onFilesChosen = React.useCallback(async (e) => {
             'Allowed types: PNG, JPG, JPEG, WEBP, GIF, MP4, WEBM, MOV')
         );
       } catch {}
-      resetUploadStatus();      
       return;
     }
-    clearUploadTimer();
-    setUploadStage('moderation', 8);
-    const hasAnyMedia = imgFiles.length || vidFiles.length;
-    if (hasAnyMedia) updateUploadFlow('moderation', 5);
 
     // =========================
     // 1) IMAGES: moderation -> /api/forum/upload
@@ -11098,24 +10533,19 @@ const onFilesChosen = React.useCallback(async (e) => {
         console.error('[moderation] image check failed', err);
         toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
         toastI18n('info', 'forum_moderation_try_again', 'Please try again');
-        resetUploadStatus();       
-         resetUploadFlow();     
         return;
       }
 
       if (modImg?.decision === 'block') {
         toastI18n('warn', 'forum_image_blocked', 'Image rejected by community rules');
         toastI18n('info', reasonKey(modImg?.reason), reasonFallbackEN(modImg?.reason));
-        resetUploadStatus();       
-         resetUploadFlow();     
         return;
       }
 
       if (modImg?.decision === 'review') {
         try { console.warn('[moderation] image review -> allow (balanced)', modImg?.reason, modImg?.raw); } catch {}
       }
-      setUploadStage('upload', 28);
-      updateUploadFlow('upload', 15);   
+
       const fd = new FormData();
       for (const f of imgFiles.slice(0, 20)) fd.append('files', f, f.name);
 
@@ -11126,8 +10556,6 @@ const onFilesChosen = React.useCallback(async (e) => {
       const urls = Array.isArray(up?.urls) ? up.urls : [];
       if (urls.length) 
         setPendingImgs(prev => [...prev, ...urls]);
-      updateUploadFlow('preview', 100);      
-       setUploadStage('preview', 90);     
       // если загрузили ТОЛЬКО картинки — открываем fullscreen overlay (как для видео)
       if (!vidFiles.length && urls.length) {
         try { setOverlayMediaKind('image'); } catch {}
@@ -11141,19 +10569,16 @@ const onFilesChosen = React.useCallback(async (e) => {
     // 2) VIDEOS: moderation (frames) -> Vercel Blob upload
     // =========================
     if (vidFiles.length) {
-            updateUploadFlow('moderation', 5);
       // берём первое видео (multiple включён, но UX лучше 1 за раз)
       const vf = vidFiles[0];
       const mime = String(vf?.type || '').split(';')[0].trim().toLowerCase();
       const okMime = /^video\/(mp4|webm|quicktime)$/i.test(mime) || /\.(mp4|webm|mov)$/i.test(String(vf?.name || ''));
       if (!okMime) {
         try { toast?.warn?.(t?.('forum_video_bad_type') || 'Unsupported video type'); } catch {}
-        resetUploadFlow();      
         return;
       }
       if (Number(vf.size || 0) > 300 * 1024 * 1024) {
         try { toast?.err?.(t?.('forum_video_too_big') || 'Video is larger than 300MB'); } catch {}
-        resetUploadFlow();      
         return;
       }
 
@@ -11163,9 +10588,6 @@ const onFilesChosen = React.useCallback(async (e) => {
         if (modV?.decision === 'block') {
           toastI18n('warn', 'forum_video_blocked', 'Video rejected by community rules');
           toastI18n('info', reasonKey(modV?.reason), reasonFallbackEN(modV?.reason));
-        
-          resetUploadStatus();  
-                    resetUploadFlow();      
           return;
         }
         if (modV?.decision === 'review') {
@@ -11175,14 +10597,11 @@ const onFilesChosen = React.useCallback(async (e) => {
         console.error('[moderation] video check failed', e2);
         toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
         toastI18n('info', 'forum_moderation_try_again', 'Please try again');
-        resetUploadStatus();  
-                resetUploadFlow();     
         return;
       }
 
       // UPLOAD TO VERCEL BLOB (тот же роут, что у записи с камеры)
       try {
-                updateUploadFlow('upload', 3);
         const ext =
           /quicktime/i.test(mime) || /\.(mov)$/i.test(String(vf?.name || '')) ? 'mov'
           : /mp4/i.test(mime)     || /\.(mp4)$/i.test(String(vf?.name || '')) ? 'mp4'
@@ -11190,17 +10609,11 @@ const onFilesChosen = React.useCallback(async (e) => {
         const name = `forum/video-${Date.now()}.${ext}`;
 
         const { upload } = await import('@vercel/blob/client');
-        setUploadStage('upload', 34);        
         const result = await upload(name, vf, {
           access: 'public',
           handleUploadUrl: '/api/forum/blobUploadUrl',
           multipart: true,
           contentType: (mime || (ext === 'mp4' ? 'video/mp4' : (ext === 'mov' ? 'video/quicktime' : 'video/webm'))),
-          onUploadProgress: (p) => { try { setVideoProgress(p?.percentage || 0); } catch {} },         
-          onUploadProgress: (p) => {
-            const percent = Number(p?.percentage ?? 0);
-            if (Number.isFinite(percent)) setUploadStage('upload', Math.min(92, Math.max(34, percent)));
-          },       
         });
 
         const url = result?.url || '';
@@ -11211,15 +10624,12 @@ const onFilesChosen = React.useCallback(async (e) => {
           try { setOverlayMediaUrl(null); } catch {} // видео берём из pendingVideo
           try { setVideoState?.('preview'); } catch {}
           try { setVideoOpen?.(true); } catch {}
-          updateUploadFlow('preview', 100);  
         } else {
           throw new Error('no_url');
         }   
    } catch (e3) {
         console.error('video_client_upload_failed', e3);
         try { toast?.err?.(t?.('forum_video_upload_failed') || 'Failed to upload video'); } catch {}
-        resetUploadStatus();     
-        resetUploadFlow();       
         return;
       }
     }
@@ -11227,19 +10637,16 @@ const onFilesChosen = React.useCallback(async (e) => {
     // общий success toast (если что-то реально добавили)
     if (imgFiles.length || vidFiles.length) {
       try { toast?.success?.(t?.('forum_files_uploaded') || 'Files uploaded'); } catch {}
-       finishUpload(); 
-             finishUploadFlow('preview'); 
     }
   } catch (err) {
     console.error(err);
     try { toast?.error?.(t?.('forum_files_upload_failed') || 'Upload failed'); } catch {}
-    finishUpload(300); 
-    resetUploadFlow(); 
   } finally {
     if (e?.target) e.target.value = '';
   }
-}, [t, toast, moderateImageFiles, moderateVideoSource, toastI18n, reasonKey, reasonFallbackEN, updateUploadFlow, resetUploadFlow, finishUploadFlow, setVideoProgress]);
-/* ---- профиль (поповер у аватара) ---- */
+}, [t, toast, moderateImageFiles, moderateVideoSource, toastI18n, reasonKey, reasonFallbackEN]);
+
+  /* ---- профиль (поповер у аватара) ---- */
   const idShown = auth.asherId || auth.accountId || ''
   const profile = (()=>{ if(!isBrowser()) return null; try{ return JSON.parse(localStorage.getItem('profile:'+idShown)||'null') }catch{return null} })()
   const nickShown = profile?.nickname || (idShown ? shortId(idShown) : null)
@@ -12712,7 +12119,6 @@ onClick={()=>{
   onReact={reactMut}
   isAdmin={isAdmin}
   onDeletePost={delPost}
-  onOwnerDelete={delPostOwn}  
   onBanUser={banUser}
   onUnbanUser={unbanUser}
   isBanned={bannedSet.has(p?.accountId || p?.userId)}
@@ -12815,7 +12221,6 @@ onClick={()=>{
           onReact={reactMut}
           isAdmin={isAdmin}
           onDeletePost={delPost}
-          onOwnerDelete={delPostOwn}          
           onBanUser={banUser}
           onUnbanUser={unbanUser}
           isBanned={bannedSet.has(p.accountId || p.userId)}
@@ -13097,7 +12502,6 @@ onClick={()=>{
   onReact={reactMut}
   isAdmin={isAdmin}
   onDeletePost={delPost}
-  onOwnerDelete={delPostOwn}  
   onBanUser={banUser}
   onUnbanUser={unbanUser}
   isBanned={bannedSet.has(p.accountId || p.userId)}
@@ -13174,7 +12578,6 @@ onClick={()=>{
   onReact={reactMut}
   isAdmin={isAdmin}
   onDeletePost={delPost}
-  onOwnerDelete={delPostOwn}  
   onBanUser={banUser}
   onUnbanUser={unbanUser}
   isBanned={bannedSet.has(p.accountId || p.userId)}
@@ -13225,42 +12628,8 @@ onClick={()=>{
 
       </div>
 <div className="composeDock">
-
 {/* нижний композер */}
 <div className="composer" data-active={composerActive} ref={composerRef}>
-  {uploadFlow.active && (
-  <div className="composerProgress" role="status" aria-live="polite">
-    <div className="composerProgressHeader">
-      <span className="composerProgressLabel">
-        {uploadSteps[activeUploadIndex]?.label || ''}
-      </span>
-      <span className="composerProgressPct">
-        {Math.round(uploadProgressValue)}%
-      </span>
-    </div>
-    <div className="composerProgressTrack">
-      <span
-        className="composerProgressFill"
-        style={{ width: `${uploadProgressValue}%` }}
-      />
-    </div>
-    <div className="composerProgressStages">
-      {uploadSteps.map((step, idx) => (
-        <div
-          key={step.id}
-          className={cls(
-            'composerProgressStage',
-            idx < activeUploadIndex && 'done',
-            idx === activeUploadIndex && 'active'
-          )}
-        >
-          <span className="composerProgressDot" />
-          <span className="composerProgressText">{step.label}</span>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
   <div className="meta mb-2">
     {replyTo
       ? `${t('forum_reply_to')||'Ответ для'} ${replyTo.nickname||shortId(replyTo.userId||'')}`
