@@ -5,8 +5,7 @@
 
 
 import React, { useEffect, useMemo, useRef, useCallback, useState } from 'react'
-import { useI18n } from '../../components/i18n'
-import { useRouter } from 'next/navigation'
+import { useI18n } from '../../components/i18n' 
 import { broadcast as forumBroadcast } from './events/bus'
 import Image from 'next/image'
 // [ADS:IMPORT]
@@ -202,11 +201,17 @@ function useSyncForumProfileOnMount() {
         let cur = {}
         try { cur = JSON.parse(localStorage.getItem(key) || '{}') || {} } catch { cur = {} }
 
-        const next = {
-          ...cur,
-          nickname: j.nickname || j.nick || cur.nickname || '',
-          icon: j.icon || cur.icon || '',
-        }
+const vipUntil = Number(j?.vipUntil ?? j?.vipExpiresAt ?? j?.vip_until ?? j?.vip_exp ?? 0) || 0;
+const vipActive = !!(j?.vipActive ?? j?.isVip ?? j?.vip ?? false) || (vipUntil && vipUntil > Date.now());
+
+const next = {
+  ...cur,
+  nickname: j.nickname || j.nick || cur.nickname || '',
+  icon: j.icon || cur.icon || '',
+  vipActive,
+  vipUntil,
+}
+
 
         localStorage.setItem(key, JSON.stringify(next))
       } catch {
@@ -225,6 +230,116 @@ function resolveIconForDisplay(userId, pIcon) {
   // приоритет: vipIcon (URL) → vipEmoji (эмодзи) → то, что пришло с сервера
   return prof.vipIcon || prof.vipEmoji || pIcon || '👤';
 }
+// =========================================================
+// VIP badge над ником (1.png 20s / 2.png 5s) — только для VIP
+// =========================================================
+const VIP_BADGE_IMG_1 = '/isvip/1.png';
+const VIP_BADGE_IMG_2 = '/isvip/2.png';
+
+// не даём бомбить /api/profile/get-profile по 100 раз
+const __vipProbeOnce = new Set();
+
+function __vipFromHint(h) {
+  if (h === true) return true;
+  if (h === false) return false;
+  // иногда бэк может прислать timestamp (vipUntil)
+  if (typeof h === 'number' && Number.isFinite(h)) return h > Date.now();
+  if (typeof h === 'string' && /^\d{10,}$/.test(h)) {
+    const n = Number(h);
+    if (Number.isFinite(n)) return n > Date.now();
+  }
+  return null;
+}
+
+function __vipFromProfile(prof) {
+  if (!prof || typeof prof !== 'object') return null;
+
+  // явные флаги
+  if (prof.vipActive === true || prof.isVip === true || prof.vip === true) return true;
+  if (prof.vipActive === false || prof.isVip === false || prof.vip === false) return false;
+
+  // timestamp-истечение
+  const until = Number(prof.vipUntil ?? prof.vipExpiresAt ?? prof.vip_until ?? prof.vip_exp ?? 0);
+  if (Number.isFinite(until) && until > Date.now()) return true;
+
+  // иногда отдают уровень
+  const lvl = Number(prof.vipLevel ?? prof.vip_level ?? 0);
+  if (Number.isFinite(lvl) && lvl > 0) return true;
+
+  // fallback: если твой бек кладёт эти поля только VIP-пользователям
+  if (prof.vipIcon || prof.vipEmoji) return true;
+
+  return null;
+}
+
+function useVipFlag(userId, hint) {
+  const uid = String(userId || '').trim();
+
+  const [vip, setVip] = React.useState(() => {
+    const fromHint = __vipFromHint(hint);
+    if (fromHint !== null) return fromHint;
+    const fromProf = __vipFromProfile(safeReadProfile(uid));
+    return fromProf; // true | false | null
+  });
+
+  React.useEffect(() => {
+    const uid = String(userId || '').trim();
+    if (!uid) { setVip(false); return; }
+
+    const fromHint = __vipFromHint(hint);
+    if (fromHint !== null) { setVip(fromHint); return; }
+
+    const fromProf = __vipFromProfile(safeReadProfile(uid));
+    if (fromProf !== null) { setVip(fromProf); return; }
+
+    // неизвестно → один раз попробуем спросить профиль
+    if (__vipProbeOnce.has(uid)) return;
+    __vipProbeOnce.add(uid);
+
+    let cancelled = false;
+    (async () => {
+      try {
+const r = await fetch('/api/forum/vip/batch', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  cache: 'no-store',
+  body: JSON.stringify({ ids: [uid] }),
+});
+const j = await r.json().catch(() => null);
+if (!j?.ok || cancelled) return;
+
+const v = j?.map?.[uid] || null;
+const vipUntil = Number(v?.untilMs || 0) || 0;
+const vipActive = !!v?.active || (vipUntil && vipUntil > Date.now());
+        // сохраним в localStorage, чтобы дальше не гадать
+        try {
+          const key = 'profile:' + uid;
+          let cur = {};
+          try { cur = JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch { cur = {}; }
+          localStorage.setItem(key, JSON.stringify({ ...cur, vipActive, vipUntil }));
+        } catch {}
+
+        setVip(vipActive);
+      } catch {
+        // no-op
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [userId, hint]);
+
+  return vip === true;
+}
+
+function VipFlipBadge({ className = '' }) {
+  return (
+    <span className={cls('vipFlip', className)} aria-label="VIP" title="VIP">
+      <img className="vipFlipImg vip1" src={VIP_BADGE_IMG_1} alt="" loading="lazy" />
+      <img className="vipFlipImg vip2" src={VIP_BADGE_IMG_2} alt="" loading="lazy" />
+    </span>
+  );
+}
+
 // iconId → канон
 function normalizeIconId(v) {
   if (!v) return ''
@@ -479,12 +594,14 @@ if (typeof window !== 'undefined') {
 // ==== API (клиент) ====
 const api = {
 
-  // Снимок базы (полный), поддерживает cache-bust b и подсказку rev
+  // Снимок базы: full или инкрементальный (since)
   async snapshot(q = {}) {
     try {
       const params = new URLSearchParams();
-      if (q.b)   params.set('b',   String(q.b));
-      if (q.rev) params.set('rev', String(q.rev));
+      if (q.b)     params.set('b',     String(q.b));
+      if (q.rev)   params.set('rev',   String(q.rev));
+      if (q.since) params.set('since', String(q.since));
+      if (q.full)  params.set('full',  '1');
       const url = '/api/forum/snapshot' + (params.toString() ? `?${params}` : '');
       const r   = await fetch(url, { cache: 'no-store' });
 
@@ -494,20 +611,17 @@ const api = {
 
       const topics = Array.isArray(data?.topics) ? data.topics : [];
       const posts  = Array.isArray(data?.posts)  ? data.posts  : [];
+      const events = Array.isArray(data?.events) ? data.events : [];      
       // server -> 'banned'; поддерживаем обратную совместимость с 'bans'
       const bans   = Array.isArray(data?.banned) ? data.banned
                     : Array.isArray(data?.bans)  ? data.bans : [];
       const rev    = Number.isFinite(+data?.rev) ? +data.rev   : 0;
       const cursor = data?.cursor ?? null;
 
-      // «пустой» ответ => можно делать жёсткий ресет
-      // В текущей реализации клиент НИ РАЗУ не запрашивает инкрементальные снапшоты.
-      // Каждый вызов /api/forum/snapshot — ПОЛНЫЙ снимок состояния форума,
-      // значит локальный forum:snap должен полностью под него подстраиваться.
-      const __reset = true;
-      return { ok: r.ok, status: r.status, topics, posts, bans, rev, cursor, __reset };
+      const __reset = !!q.full;
+      return { ok: r.ok, status: r.status, topics, posts, bans, rev, cursor, events, __reset };
     } catch {
-      return { ok:false, error:'network', topics:[], posts:[], bans:[], rev:0, cursor:null, __reset:false };
+      return { ok:false, error:'network', topics:[], posts:[], bans:[], rev:0, cursor:null, events:[], __reset:false };
     }
   },
 
@@ -720,42 +834,25 @@ const api = {
       return { ok: false, error: 'network', count: 0 }
     }
   },
+
+  // ===== VIP (batch) =====
+  async vipBatch(ids) {
+    try {
+      const arr = Array.isArray(ids) ? ids : []
+      const r = await fetch('/api/forum/vip/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        body: JSON.stringify({ ids: arr }),
+      })
+      return await r.json().catch(() => ({ ok: false, map: {} }))
+    } catch {
+      return { ok: false, error: 'network', map: {} }
+    }
+  },  
 };
-
-
-function initForumAutosnapshot({ intervalMs = 60000, debounceMs = 1000 } = {}) {
-  if (!isBrowser()) return () => {};
-
-  let last = 0;
-  const doSnap = () => {
-    const now = Date.now();
-    if (now - last < debounceMs) return;       // простая защита от «дребезга»
-    last = now;
-    // bust: гарантируем полный снимок, даже если сервер кеширует
-    api.snapshot({ b: Date.now() }).catch(() => {});
-  };
-
-  // Любое взаимодействие пользователя — триггерим снапшот (дёшево и сердито)
-  const handler = () => doSnap();
-  const evts = [
-    'click','keydown',
-    'touchstart','visibilitychange','focus'
-  ];
-
-  evts.forEach((e) => window.addEventListener(e, handler, { passive: true }));
-
-  // Параллельно — периодический «heartbeat», если надо
-  const id = intervalMs ? setInterval(() => {
-    api.snapshot().catch(() => {});
-  }, intervalMs) : null;
-
-  // снятие слушателей при размонтировании
-  return () => {
-    evts.forEach((e) => window.removeEventListener(e, handler));
-    if (id) clearInterval(id);
-  };
-}
-
+ 
+ 
 /* =========================================================
    КОНЕЦ API
 ========================================================= */
@@ -841,7 +938,75 @@ function useQCoinLive(userKey, isVip){
     lastUiRef.current = Date.now();
     becameActiveRef.current = true;
   }, []);
+  // === Next-up video warmup (preload the next video while current plays) ===
+  useEffect(() => {
+    if (!isBrowser()) return;
 
+    const selector = 'video[data-forum-video="post"]';
+    let warmed = null;
+
+    const isSlowNetwork = () => {
+      try {
+        const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        const type = String(conn?.effectiveType || '');
+        return !!conn?.saveData || /(^|-)2g/.test(type);
+      } catch {
+        return false;
+      }
+    };
+
+    const clearWarm = () => {
+      if (!(warmed instanceof HTMLVideoElement)) { warmed = null; return; }
+      try {
+        warmed.preload = 'metadata';
+        warmed.removeAttribute('data-forum-warm');
+        warmed.load();
+      } catch {}
+      warmed = null;
+    };
+
+    const warmNext = (current) => {
+      if (!(current instanceof HTMLVideoElement)) return;
+      const list = Array.from(document.querySelectorAll(selector));
+      const idx = list.indexOf(current);
+      if (idx < 0) return;
+      const next = list[idx + 1];
+      if (!next || next === warmed) return;
+      clearWarm();
+      warmed = next;
+      const slow = isSlowNetwork();
+      try {
+        warmed.preload = slow ? 'metadata' : 'auto';
+        warmed.setAttribute('data-forum-warm', '1');
+        warmed.load();
+      } catch {}
+    };
+
+    const onPlay = (e) => {
+      const target = e.target;
+      if (!(target instanceof HTMLVideoElement)) return;
+      if (target.getAttribute('data-forum-video') !== 'post') return;
+      warmNext(target);
+    };
+
+    const onStop = (e) => {
+      const target = e.target;
+      if (!(target instanceof HTMLVideoElement)) return;
+      if (target.getAttribute('data-forum-video') !== 'post') return;
+      clearWarm();
+    };
+
+    document.addEventListener('play', onPlay, true);
+    document.addEventListener('pause', onStop, true);
+    document.addEventListener('ended', onStop, true);
+
+    return () => {
+      document.removeEventListener('play', onPlay, true);
+      document.removeEventListener('pause', onStop, true);
+      document.removeEventListener('ended', onStop, true);
+      clearWarm();
+    };
+  }, []);
   // Считаем открытие страницы «активностью», чтобы тикер сразу начал тикать
   React.useEffect(function(){
     lastUiRef.current = Date.now();
@@ -1086,6 +1251,89 @@ const Styles = () => (
     .glass{ background:rgba(8,13,20,.94); border:1px solid rgba(255,255,255,.10); border-radius:16px; backdrop-filter: blur(12px) }
     .neon{ box-shadow:0 0 28px rgba(25,129,255,.14), inset 0 0 18px rgba(25,129,255,.06) }
     .postBody{ white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word }
+    .forum_root{
+      --mb-video-h-mobile: 550px;
+      --mb-video-h-tablet: 520px;
+      --mb-video-h-desktop: 520px;
+      --mb-image-h-mobile: 550px;
+      --mb-image-h-tablet: 520px;
+      --mb-image-h-desktop: 520px;
+      --mb-iframe-h-mobile: 500px;
+      --mb-iframe-h-tablet: 500px;
+      --mb-iframe-h-desktop: 500px;
+      --mb-audio-h-mobile: 550px;
+      --mb-audio-h-tablet: 550px;
+      --mb-audio-h-desktop: 600px;
+      --mb-ad-h-mobile: 200px;
+      --mb-ad-h-tablet: 260px;
+      --mb-ad-h-desktop: 320px;
+      --mb-video-h: var(--mb-video-h-mobile);
+      --mb-image-h: var(--mb-image-h-mobile);
+      --mb-iframe-h: var(--mb-iframe-h-mobile);
+      --mb-audio-h: var(--mb-audio-h-mobile);
+      --mb-ad-h: var(--mb-ad-h-mobile);
+    }
+    @media (min-width: 640px){
+      .forum_root{
+        --mb-video-h: var(--mb-video-h-tablet);
+        --mb-image-h: var(--mb-image-h-tablet);
+        --mb-iframe-h: var(--mb-iframe-h-tablet);
+        --mb-audio-h: var(--mb-audio-h-tablet);
+        --mb-ad-h: var(--mb-ad-h-tablet);
+      }
+    }
+    @media (min-width: 1024px){
+      .forum_root{
+        --mb-video-h: var(--mb-video-h-desktop);
+        --mb-image-h: var(--mb-image-h-desktop);
+        --mb-iframe-h: var(--mb-iframe-h-desktop);
+        --mb-audio-h: var(--mb-audio-h-desktop);
+        --mb-ad-h: var(--mb-ad-h-desktop);
+      }
+    }
+
+    .mediaBox{
+      position:relative;
+      width:100%;
+      height:var(--mb-h, 240px);
+      overflow:hidden;
+      border-radius:12px;
+      background:rgba(8,12,20,.7);
+      border:1px solid rgba(140,170,255,.25);
+      contain: layout paint;
+    }
+    .mediaBox[data-kind="video"]{ --mb-h: var(--mb-video-h); background:#000; }
+    .mediaBox[data-kind="image"]{ --mb-h: var(--mb-image-h); }
+    .mediaBox[data-kind="iframe"]{ --mb-h: var(--mb-iframe-h); background:#000; }
+    .mediaBox[data-kind="audio"]{ --mb-h: var(--mb-audio-h); }
+    .mediaBox[data-kind="ad"]{ --mb-h: var(--mb-ad-h); background:rgba(2,8,23,.7); }
+
+    .mediaBoxItem{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+    }
+    .mediaBox > img,
+    .mediaBox > video{
+      object-fit:contain;
+    }
+    .mediaBox > iframe{
+      border:0;
+    }
+    .mediaBoxInner{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 14px;
+    }
+    .mediaBoxAudio{
+      width:100%;
+      height:auto;
+      color-scheme:dark;
+    }   
     :root{
   --vip-emoji-size: 48px;      /* можно быстро настроить под себя */
   --vip-emoji-size-sm: 48px;   /* на мобильных */
@@ -2006,6 +2254,65 @@ const Styles = () => (
 @media (max-width:640px){
   .nick-text{ max-width:16ch; }
 }
+/* --- VIP badge над ником (20s / 5s) ---
+   Настройка позиционирования/размера:
+   --vip-badge-w, --vip-badge-h  (размер)
+   --vip-badge-gap              (расстояние между бейджем и ником)
+   --vip-badge-shift-x/y        (сдвиг бейджа)
+*/
+:root{
+  --vip-badge-w: clamp(42px, 9vw, 54px);
+  --vip-badge-h: clamp(42px, 8.2vw, 58px);
+  --vip-badge-gap: 2px;
+  --vip-badge-shift-x: 0px;
+  --vip-badge-shift-y: 0px;
+}
+
+.nick-badge.vipNick{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap: var(--vip-badge-gap);
+  line-height: 1.1;
+}
+
+.vipFlip{
+
+  position:relative;
+  width: var(--vip-badge-w);
+  height: var(--vip-badge-h);
+  transform: translate(var(--vip-badge-shift-x), var(--vip-badge-shift-y));
+}
+
+.vipFlipImg{
+ 
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  will-change: opacity;
+}
+
+/* общий цикл 25s: 1.png видно 0..20s (80%), 2.png видно 20..25s (20%) */
+@keyframes vipFlipA{
+  0%, 79.99% { opacity: 1; }
+  80%, 100%  { opacity: 0; }
+}
+@keyframes vipFlipB{
+  0%, 79.99% { opacity: 0; }
+  80%, 100%  { opacity: 1; }
+}
+.vipFlipImg.vip1{ animation: vipFlipA 25s infinite linear; }
+.vipFlipImg.vip2{ animation: vipFlipB 25s infinite linear; }
+
+@media (prefers-reduced-motion: reduce){
+  .vipFlipImg.vip1, .vipFlipImg.vip2{ animation:none; }
+  .vipFlipImg.vip2{ opacity:0; }
+}
+
+
 /* ====== АНИМАЦИЯ НИКА ====== */
 .nick-animate{
   position: relative;
@@ -2782,11 +3089,25 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.03), 0 10px 30px rgba(10,20,40,.22);
   backdrop-filter: blur(8px) saturate(120%);
 }
+  .audioCard.mediaBox{
+  display:block;
+  padding:0;
+  border-radius:12px;
+}
 .audioCard.preview{ max-width:min(90%, 520px); }
 
 .audioIcon{
   width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center;
   color:#9fb7ff; opacity:.95;
+}
+  .audioCard.mediaBox .audioIcon{
+  position:absolute;
+  top:10px;
+  left:12px;
+  z-index:2;
+  background:rgba(5,10,18,.4);
+  border-radius:8px;
+  padding:4px;
 }
 .audioCard audio{ display:block; width:100%; color-scheme:dark; }
 /* убираем серую плашку у Chromium */
@@ -2801,6 +3122,162 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   font-size:18px; line-height:1;
   background:rgba(0, 0, 0, 0.51); border:1px solid rgba(255, 255, 255, 0.27);
 }
+
+.qcastPlayer{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:stretch;
+  justify-content:center;
+  background:#060b16;
+  cursor:pointer;
+}
+.qcastCover{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.qcastAudio{
+  position:absolute;
+  width:1px;
+  height:1px;
+  opacity:0;
+  pointer-events:none;
+}
+.qcastControls{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  padding:12px 14px 10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  background:linear-gradient(180deg, rgba(5,8,16,0) 0%, rgba(5,8,16,.78) 35%, rgba(5,8,16,.92) 100%);
+  opacity:0;
+  transform:translateY(8px);
+  transition:opacity .2s ease, transform .2s ease;
+  pointer-events:none;
+}
+.qcastControls[data-visible="1"]{
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:auto;
+}
+.qcastRow{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.qcastRowTop{
+  justify-content:flex-start;
+}
+.qcastBtn{
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(10,14,26,.6);
+  color:#eaf2ff;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  transition:transform .12s ease, box-shadow .2s ease;
+}
+.qcastBtn:hover{ transform:translateY(-1px); box-shadow:0 0 12px rgba(124,161,255,.35); }
+.qcastIcon{ width:18px; height:18px; fill:currentColor; }
+.qcastRowTimeline{
+  gap:8px;
+}
+.qcastTime{
+  font:600 11px/1 ui-monospace,monospace;
+  color:#d8e4ff;
+  min-width:42px;
+  text-align:center;
+}
+.qcastRange{
+  flex:1;
+  appearance:none;
+  height:4px;
+  border-radius:999px;
+  background:rgba(255,255,255,.25);
+  outline:none;
+}
+.qcastRange::-webkit-slider-thumb{
+  appearance:none;
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 10px rgba(255,255,255,.45);
+}
+.qcastRange::-moz-range-thumb{
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:#fff;
+  border:0;
+}
+.qcastRowSpeed{
+  gap:6px;
+  flex-wrap:wrap;
+}
+.qcastSpeed{
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.2);
+  background:rgba(10,14,26,.55);
+  color:#dbe7ff;
+  font-size:11px;
+}
+.qcastSpeed.active{
+  background:rgba(140,170,255,.85);
+  color:#091227;
+  border-color:rgba(180,210,255,.95);
+}
+.qcastRemove{
+  font-size:20px;
+  margin-left:auto;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.25);
+  background:rgba(10,14,26,.65);
+  color:#fff;
+  padding:4px 10px;
+}  
+.loadMoreFooter{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:12px 0 4px;
+  color:#cfe0ff;
+  font-size:12px;
+  opacity:.85;
+}
+.loadMoreShimmer{
+  position:relative;
+  overflow:hidden;
+  padding:6px 16px;
+  border-radius:999px;
+  border:1px solid rgba(140,170,255,.25);
+  background:rgba(8,12,20,.6);
+  box-shadow: inset 0 0 18px rgba(80,167,255,.08);
+}
+.loadMoreShimmer::after{
+  content:'';
+  position:absolute;
+  inset:-40% -60%;
+  background:linear-gradient(110deg, transparent 35%, rgba(140,170,255,.35) 50%, transparent 65%);
+  animation: shimmer 1.6s linear infinite;
+}
+@media (prefers-reduced-motion: reduce){
+  .loadMoreShimmer::after{ animation: none; }
+}
+@keyframes shimmer{
+  0%{ transform: translateX(-60%); }
+  100%{ transform: translateX(60%); }
+}
+.loadMoreSentinel{ width:100%; height:1px; }
 /* --- avatar + nick (ник всегда под аватаром) --- */
 .avaNick{
   display:inline-flex;
@@ -5172,6 +5649,7 @@ function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerD
   const authorId = String(t?.userId || t?.accountId || '').trim();
   const isSelf = !!viewerId && authorId && (String(viewerId) === authorId);
   const isStarred = !!authorId && !!starredAuthors?.has?.(authorId);
+  const isVipAuthor = useVipFlag(authorId, t?.vipActive ?? t?.isVip ?? t?.vip ?? t?.vipUntil ?? null);
 
   // считаем просмотр темы, когда карточка попадает в viewport (не чаще 1 раза на bucket в LS)
   const ref = React.useRef(null);
@@ -5209,14 +5687,16 @@ function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerD
         pIcon={resolveIconForDisplay(t.userId || t.accountId, t.icon)}
       />
     </div>
+
     <button
       type="button"
-      className="nick-badge nick-animate"
+      className={cls('nick-badge nick-animate', isVipAuthor && 'vipNick')}
       onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); }}
       title={t.userId || t.accountId || ''}
       style={{ flex: '0 1 auto', minWidth: 0 }}
       translate="no"
    >
+    
       <span className="nick-text">
         {t.nickname || shortId(t.userId || t.accountId || '')}
       </span>
@@ -5229,6 +5709,7 @@ function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerD
         title={isStarred ? 'Вы подписаны' : 'Подписаться на автора'}
       />
     )}
+{isVipAuthor && <VipFlipBadge />}   
   </div>
 
         )}
@@ -5334,6 +5815,7 @@ function PostCard({
   onReact,
   isAdmin,
   onDeletePost,
+  onOwnerDelete,  
   onBanUser,
   onUnbanUser,
   isBanned,
@@ -5349,38 +5831,7 @@ function PostCard({
 
   // берём locale из того же хука, что и в новостном хабе
   const { locale } = useI18n();
-
-  // ===== PORTRAIT (9:16 etc) MAX HEIGHT TUNING =====
- // Настраиваешь ТОЛЬКО эти две константы:
-  const PORTRAIT_MAX_H_DESKTOP_PX = 520; // ← max высота (десктоп)
-  const PORTRAIT_MAX_H_MOBILE_PX  = 570; // ← max высота (мобила)
-
-  const getPortraitMaxH = () => {
-    if (typeof window === 'undefined') return PORTRAIT_MAX_H_DESKTOP_PX;
-    const isMobile = window.matchMedia?.('(max-width: 640px)')?.matches;
-    return isMobile ? PORTRAIT_MAX_H_MOBILE_PX : PORTRAIT_MAX_H_DESKTOP_PX;
-  };
-
-  // что считаем "портретом": высота заметно больше ширины
-  const isPortraitRatio = (w, h) => !!w && !!h && (h / w) >= 1.15;
-
-  // Применяем ограничение высоты ТОЛЬКО для портретных, без кропа
-  const applyPortraitClamp = (el, w, h) => {
-    if (!el) return;
-    if (isPortraitRatio(w, h)) {
-      const mh = getPortraitMaxH();
-      el.style.maxHeight = mh + 'px';
-      el.style.width = 'auto';
-      el.style.maxWidth = '100%';
-      el.style.margin = '0 auto';
-    } else {
-      // для обычных (горизонтальных) — как было
-      el.style.maxHeight = '';
-      el.style.width = '100%';
-      el.style.maxWidth = '100%';
-      el.style.margin = '0';
-    }
-  };
+ 
   // сниппет текста родителя (до 40 символов)
   const parentSnippet = (() => {
     const raw = p?.parentText || p?._parentText || '';
@@ -5396,9 +5847,10 @@ function PostCard({
 
   // безопасные числовые поля
   const views    = Number(p?.views ?? 0);
-    const authorId = String(p?.userId || p?.accountId || '').trim();
+  const authorId = String(p?.userId || p?.accountId || '').trim();
   const isSelf = !!viewerId && authorId && (String(viewerId) === authorId);
   const isStarred = !!authorId && !!starredAuthors?.has?.(authorId);
+  const isVipAuthor = useVipFlag(authorId, p?.vipActive ?? p?.isVip ?? p?.vip ?? p?.vipUntil ?? null);
 
   const replies  =   Number(
     p?.replyCount ??
@@ -5589,6 +6041,21 @@ const cleanedText = allLines
     : isTranslated
       ? (t?.('crypto_news_show_original') || 'Показать оригинал')
       : (t?.('crypto_news_translate') || 'Перевести');
+        const hasCleanedText = !!cleanedText.trim();
+  const ytOrigin = React.useMemo(
+    () => (typeof window !== 'undefined' ? window.location.origin : ''),
+    []
+  );
+  const ytEmbedParams = React.useMemo(() => {
+    const params = new URLSearchParams({
+      enablejsapi: '1',
+      playsinline: '1',
+      rel: '0',
+      modestbranding: '1',
+    });
+    if (ytOrigin) params.set('origin', ytOrigin);
+    return params.toString();
+  }, [ytOrigin]);
   // ===== OWNER-меню (⋮) — только если владелец поста =====
   const isOwner = !!authId && (String(authId) === String(p?.userId || p?.accountId));
   const ownerEdit = (e) => {
@@ -5599,14 +6066,7 @@ const cleanedText = allLines
   };
   const ownerDelete = async (e) => {
     e?.preventDefault?.(); e?.stopPropagation?.();
-    try {
-      await fetch('/api/forum/own', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-forum-user-id': String(authId || '') },
-        body: JSON.stringify({ action: 'delete_post', postId: String(p.id) }),
-      });
-      // тут специально без локального удаления — снапшот/инкременты подтянут актуал
-    } catch {}
+    onOwnerDelete?.(p);
   };
 
 // 👇 добавь рядом с PostCard (прямо над return), как константу
@@ -5647,13 +6107,14 @@ const NO_THREAD_OPEN_SELECTOR =
             pIcon={resolveIconForDisplay(p.userId || p.accountId, p.icon)}
           />
         </div>
-        <span className="nick-badge nick-animate"
-        translate="no"
-        >
-          <span className="nick-text truncate">
-            {p.nickname || shortId((p.userId || p.accountId || ''))}
-          </span>
-        </span>
+      
+<span className={cls('nick-badge nick-animate', isVipAuthor && 'vipNick')} translate="no">
+
+  <span className="nick-text truncate">
+    {p.nickname || shortId((p.userId || p.accountId || ''))}
+  </span>
+</span>
+
 
         {!!authorId && !isSelf && (
           <StarButton
@@ -5662,9 +6123,8 @@ const NO_THREAD_OPEN_SELECTOR =
             title={isStarred ? 'Вы подписаны' : 'Подписаться на автора'}
           />
         )}
-
-      </div>
-
+{isVipAuthor && <VipFlipBadge />}
+      </div> 
         {p.parentId && (
           <span className="tag ml-1 replyTag" aria-label={t?.('forum_reply_to') || 'Ответ для'}>
             {(t?.('forum_reply_to') || 'ответ для') + ' '}
@@ -5672,41 +6132,16 @@ const NO_THREAD_OPEN_SELECTOR =
             {parentSnippet && <>: “{parentSnippet}”</>}
           </span>
         )} 
-      {/* тело поста — крупные эмодзи (VIP/MOZI) как картинка, иначе очищенный текст */}
-      {(/^\[(VIP_EMOJI|MOZI):\/[^\]]+\]$/).test(p.text || '') ? (
-        <div className="postBody emojiPostWrap">
-          <Image
-            src={(p.text || '').replace(/^\[(VIP_EMOJI|MOZI):(.*?)\]$/, '$2')}
-            alt=""
-            width={512}
-            height={512}
-            unoptimized
-            className={
-              (p.text || '').startsWith('[MOZI:')
-                ? 'moziEmojiBig emojiPostBig'
-                : 'vipEmojiBig emojiPostBig'
-            }
-            style={{ width: '100%', height: 'auto' }}
-          />
-        </div>
-      ) : (
-        displayText.trim() && (
-          <div
-            className="text-[15px] leading-relaxed postBody whitespace-pre-wrap break-words"
-            dangerouslySetInnerHTML={{ __html: rich(displayText) }}
-          />
-        )
-      )}
-
-
+ 
       {/* изображения: естественные пропорции, без квадратного кропа */}
       {imgLines.length > 0 && (
         <div className="postImages" style={{display:'grid', gap:8, marginTop:8}}>
           {imgLines.map((src, i) => (
-            <figure key={i} className="imgWrap" style={{
-              margin:0, padding:8, background:'rgba(10,16,28,.35)',
-              border:'1px solid rgba(140,170,255,.25)', borderRadius:10, overflow:'hidden'
-            }}
+            <figure
+              key={i}
+              className="imgWrap mediaBox"
+              data-kind="image"
+              style={{ margin: 0 }}
             onClick={(e)=>{ e.stopPropagation(); setLightbox({ open:true, src, idx:i, list:imgLines }); }}>
              <Image
                 src={src}
@@ -5715,18 +6150,8 @@ const NO_THREAD_OPEN_SELECTOR =
                 height={800}
                 unoptimized
                 loading="lazy"
-                onLoadingComplete={(img) => {
-                  const w = img?.naturalWidth || 0;
-                  const h = img?.naturalHeight || 0;
-                  applyPortraitClamp(img, w, h);
-                }}
-                style={{
-                  display:'block',
-                  width:'100%',
-                  height:'auto',
-                  objectFit:'contain',
-                  borderRadius:6
-                }}
+                className="mediaBoxItem"
+                style={{ objectFit: 'contain' }}
               />
             </figure>
           ))}
@@ -5737,38 +6162,21 @@ const NO_THREAD_OPEN_SELECTOR =
       {videoLines.length > 0 && (
         <div className="postVideo" style={{display:'grid', gap:8, marginTop:8}}>
           {videoLines.map((src, i) => (
-            <div key={`v${i}`} className="videoCard" style={{
-              margin:0, padding:8, background:'rgba(10,16,28,.35)',
-              border:'1px solid rgba(140,170,255,.25)', borderRadius:10, overflow:'hidden'
-            }}>
+            <div key={`v${i}`} className="videoCard mediaBox" data-kind="video" style={{ margin: 0 }}>
         <video
           data-forum-video="post"   // ← помечаем, что это плеер из поста
+          data-forum-media="video"
           src={src}
           controls
           playsInline
           preload="metadata"       // обратно metadata, без "none"
-          onLoadedMetadata={(e) => {
-            const v = e.currentTarget;
-            const w = v.videoWidth || 0;
-            const h = v.videoHeight || 0;
-            if (w && h) {
-              v.style.aspectRatio = `${w} / ${h}`;
-            }
-            // портретное видео — ограничиваем max-height, без кропа (contain)
-            applyPortraitClamp(v, w, h);
-            v.style.height = 'auto';
-          }}
+          className="mediaBoxItem"
           style={{
-            display: 'block',
-            width: '100%',
-            height: 'auto',
-            objectFit: 'contain',
-            borderRadius: 6,
+            objectFit: 'contain', 
             background: '#000'
           }}
-        />
-
-
+        /> 
+ 
             </div>
           ))}
         </div>
@@ -5783,29 +6191,24 @@ const NO_THREAD_OPEN_SELECTOR =
             return (
               <div
                 key={`yt${i}`}
-                className="videoCard"
-                style={{
-                  margin:0,
-                  padding:8,
-                  background:'rgba(10,16,28,.35)',
-                  border:'1px solid rgba(140,170,255,.25)',
-                  borderRadius:10,
-                  overflow:'hidden'
-                }}
+                className="videoCard mediaBox"
+                data-kind="iframe"
+                style={{ margin: 0 }}
               >
-                <iframe
-                  src={`https://www.youtube.com/embed/${videoId}`}
-                  title="YouTube video"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  style={{
-                    display:'block',
-                    width:'100%',
-                    aspectRatio:'16 / 9',
-                    borderRadius:6
-                  }}
-                />
+<iframe
+  src=""
+  data-src={`https://www.youtube.com/embed/${videoId}?${ytEmbedParams}`}
+  title="YouTube video"
+  id={`yt_${p?.id || 'post'}_${i}`}
+  data-yt-id={videoId}
+  data-forum-media="youtube"
+  loading="lazy"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  allowFullScreen
+  className="mediaBoxItem"
+/>
+
               </div>
             );
           })}
@@ -5869,28 +6272,20 @@ const NO_THREAD_OPEN_SELECTOR =
   return (
     <div
       key={`tt${i}`}
-      className="videoCard"
-      style={{
-        margin:0,
-        padding:8,
-        background:'rgba(10,16,28,.35)',
-        border:'1px solid rgba(140,170,255,.25)',
-        borderRadius:10,
-        overflow:'hidden'
-      }}
+      className="videoCard mediaBox"
+      data-kind="iframe"
+      style={{ margin: 0 }}
     >
       <iframe
-        src={`https://www.tiktok.com/embed/v2/${videoId}`}
+        src=""
         title="TikTok video"
+        data-forum-media="tiktok"
+        data-src={`https://www.tiktok.com/embed/v2/${videoId}`} 
+        loading="lazy"       
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen
-        style={{
-          display:'block',
-          width:'100%',
-          aspectRatio:'9 / 16',
-          borderRadius:12
-        }}
+        className="mediaBoxItem"
       />
     </div>
   );
@@ -5903,14 +6298,8 @@ const NO_THREAD_OPEN_SELECTOR =
       {audioLines.length > 0 && (
         <div className="postAudio" style={{display:'grid', gap:8, marginTop:8}}>
           {audioLines.map((src, i) => (
-            <div key={i} className="audioCard">
-              <div className="audioIcon" aria-hidden>
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-                  <path d="M12 14a3 3 0 003-3V7a3 3 0 10-6 0v4a3 3 0 003 3Z" stroke="currentColor" strokeWidth="1.6"/>
-                  <path d="M5 11a7 7 0 0014 0M12 18v3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
-                </svg>
-              </div>
-              <audio src={src} controls preload="metadata" />
+            <div key={i} className="audioCard mediaBox" data-kind="audio">
+              <QCastPlayer src={src} />
             </div>
           ))}
         </div>
@@ -5925,7 +6314,31 @@ const NO_THREAD_OPEN_SELECTOR =
 
       </div>
 
-
+      {/* тело поста — крупные эмодзи (VIP/MOZI) как картинка, иначе очищенный текст */}
+      {(/^\[(VIP_EMOJI|MOZI):\/[^\]]+\]$/).test(p.text || '') ? (
+        <div className="postBody emojiPostWrap">
+          <Image
+            src={(p.text || '').replace(/^\[(VIP_EMOJI|MOZI):(.*?)\]$/, '$2')}
+            alt=""
+            width={512}
+            height={512}
+            unoptimized
+            className={
+              (p.text || '').startsWith('[MOZI:')
+                ? 'moziEmojiBig emojiPostBig'
+                : 'vipEmojiBig emojiPostBig'
+            }
+            style={{ width: '100%', height: 'auto' }}
+          />
+        </div>
+      ) : (
+        displayText.trim() && (
+          <div
+            className="text-[15px] leading-relaxed postBody whitespace-pre-wrap break-words"
+            dangerouslySetInnerHTML={{ __html: rich(displayText) }}
+          />
+        )
+      )}
       {/* нижняя полоса: СЧЁТЧИКИ + РЕАКЦИИ + (ПЕРЕНЕСЁННЫЕ) ДЕЙСТВИЯ — В ОДНУ СТРОКУ */}
       <div
         className="mt-3 flex items-center gap-2 text-[13px] opacity-80 actionBar"
@@ -6008,20 +6421,52 @@ const NO_THREAD_OPEN_SELECTOR =
           </>
         )}
       </div>
-              {cleanedText.trim() && (
-          <button
-            type="button"
-            className={`btn translateToggleBtn  ${isTranslated ? 'translateToggleBtnOn' : ''}`}
-            onClick={handleToggleTranslate}
-            disabled={translateLoading}
-          >
-            <span className="translateToggleIcon">🌐</span>
-            <span className="translateToggleText">{translateBtnLabel}</span>
-             <span className="translateToggleIcon">🌐</span>
-          </button>
-        )}
+      <button
+        type="button"
+        className={`btn translateToggleBtn  ${isTranslated ? 'translateToggleBtnOn' : ''}`}
+        onClick={handleToggleTranslate}
+        disabled={translateLoading || !hasCleanedText}
+      >
+        <span className="translateToggleIcon">🌐</span>
+        <span className="translateToggleText">{translateBtnLabel}</span>
+        <span className="translateToggleIcon">🌐</span>
+      </button>
     </article>
   );
+}
+function LoadMoreSentinel({ onVisible, disabled = false, rootMargin = '200px 0px' }) {
+  const ref = React.useRef(null);
+  const handlerRef = React.useRef(onVisible);
+
+  React.useEffect(() => {
+    handlerRef.current = onVisible;
+  }, [onVisible]);
+
+  React.useEffect(() => {
+    if (disabled) return;
+    if (typeof window === 'undefined') return;
+    const el = ref.current;
+    if (!el) return;
+
+    if (!('IntersectionObserver' in window)) {
+      handlerRef.current?.();
+      return;
+    }
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) handlerRef.current?.();
+        });
+      },
+      { root: null, rootMargin, threshold: 0 }
+    );
+
+    io.observe(el);
+    return () => io.disconnect();
+  }, [disabled, rootMargin]);
+
+  return <div ref={ref} className="loadMoreSentinel" aria-hidden="true" />;
 }
 
 // --- helper: стабилизирует текст на время гидрации ---
@@ -6745,6 +7190,250 @@ function useHtmlFlag(attr, value) {
   }, [attr, value]);
 }
 
+const MEDIA_MUTED_KEY = 'forum:mediaMuted';
+const MEDIA_VIDEO_MUTED_KEY = 'forum:videoMuted';
+const MEDIA_MUTED_EVENT = 'forum:media-mute';
+
+function readMutedPrefFromStorage() {
+  try {
+    let v = localStorage.getItem(MEDIA_MUTED_KEY);
+    if (v == null) v = localStorage.getItem(MEDIA_VIDEO_MUTED_KEY);
+    if (v == null) return null;
+    return v === '1' || v === 'true';
+  } catch {
+    return null;
+  }
+}
+
+function formatMediaTime(value) {
+  const total = Math.max(0, Math.floor(value || 0));
+  const mins = Math.floor(total / 60);
+  const secs = total % 60;
+  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+function QCastPlayer({ src, onRemove, preview = false }) {
+  const audioRef = React.useRef(null);
+  const playerIdRef = React.useRef(`qcast_${Math.random().toString(36).slice(2)}`);
+  const hideTimerRef = React.useRef(null);
+
+  const [isPlaying, setIsPlaying] = React.useState(false);
+  const [duration, setDuration] = React.useState(0);
+  const [currentTime, setCurrentTime] = React.useState(0);
+  const [rate, setRate] = React.useState(1);
+  const [showControls, setShowControls] = React.useState(false);
+  const [muted, setMuted] = React.useState(false);
+
+  const bumpControls = React.useCallback(() => {
+    setShowControls(true);
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    hideTimerRef.current = setTimeout(() => {
+      setShowControls(false);
+    }, 5000);
+  }, []);
+
+  React.useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return undefined;
+
+const initialMuted = readMutedPrefFromStorage();
+// ВАЖНО: автоплей аудио в браузерах почти всегда разрешён только в muted.
+// Поэтому если преф не задан — стартуем в muted, чтобы Q-Cast участвовал в автоплее.
+audio.muted = (initialMuted == null) ? true : initialMuted;
+setMuted(!!audio.muted);
+
+    const onMeta = () => setDuration(audio.duration || 0);
+    const onTime = () => setCurrentTime(audio.currentTime || 0);
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
+    const onVolume = () => setMuted(!!audio.muted);
+
+    audio.addEventListener('loadedmetadata', onMeta);
+    audio.addEventListener('durationchange', onMeta);
+    audio.addEventListener('timeupdate', onTime);
+    audio.addEventListener('play', onPlay);
+    audio.addEventListener('pause', onPause);
+    audio.addEventListener('volumechange', onVolume);
+
+    const onMutedEvent = (e) => {
+      if (!audioRef.current) return;
+      if (e?.detail?.id && e.detail.id === playerIdRef.current) return;
+      if (typeof e?.detail?.muted !== 'boolean') return;
+      if (audioRef.current.muted !== e.detail.muted) {
+        audioRef.current.muted = e.detail.muted;
+      }
+    };
+
+    window.addEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
+
+    return () => {
+      audio.removeEventListener('loadedmetadata', onMeta);
+      audio.removeEventListener('durationchange', onMeta);
+      audio.removeEventListener('timeupdate', onTime);
+      audio.removeEventListener('play', onPlay);
+      audio.removeEventListener('pause', onPause);
+      audio.removeEventListener('volumechange', onVolume);
+      window.removeEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.playbackRate = rate;
+  }, [rate]);
+
+  React.useEffect(() => () => {
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+  }, []);
+
+  const togglePlay = async (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    bumpControls();
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (audio.paused) {
+      try {
+        const p = audio.play();
+        if (p && typeof p.catch === 'function') p.catch(() => {});
+      } catch {}
+    } else {
+      try { audio.pause(); } catch {}
+    }
+  };
+
+  const skipBy = (delta) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    bumpControls();
+    const next = Math.min(Math.max(0, audio.currentTime + delta), audio.duration || audio.currentTime + delta);
+    audio.currentTime = next;
+    setCurrentTime(next);
+  };
+
+  const onSeek = (e) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    bumpControls();
+    const next = Number(e.target.value || 0);
+    audio.currentTime = next;
+    setCurrentTime(next);
+  };
+
+  const toggleMute = (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    bumpControls();
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.muted = !audio.muted;
+    window.dispatchEvent(new CustomEvent(MEDIA_MUTED_EVENT, {
+      detail: { muted: audio.muted, source: 'qcast', id: playerIdRef.current }
+    }));
+  };
+
+  return (
+<div
+  className="qcastPlayer"
+  onClick={() => bumpControls()}
+  data-preview={preview ? '1' : '0'}
+  // делаем ВИДИМЫЙ контейнер объектом автоплея (а не <audio>, который может быть 0x0)
+  data-forum-media="qcast"
+  data-qcast="1"
+>
+
+      <img className="qcastCover" src="/audio/Q-Cast.png" alt="Q-Cast" />
+
+<audio
+  ref={audioRef}
+  src={src}
+  preload="metadata"
+  playsInline
+  data-qcast-audio="1"
+  className="qcastAudio"
+/>
+
+      <div className="qcastControls" data-visible={showControls ? '1' : '0'} onClick={(e) => e.stopPropagation()}>
+        <div className="qcastRow qcastRowTop">
+          <button type="button" className="qcastBtn" onClick={togglePlay} aria-label="Play/Pause">
+            {isPlaying ? (
+              <svg viewBox="0 0 24 24" className="qcastIcon" aria-hidden>
+                <rect x="6" y="5" width="4" height="14" rx="1.2" />
+                <rect x="14" y="5" width="4" height="14" rx="1.2" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" className="qcastIcon" aria-hidden>
+                <path d="M7 5l12 7-12 7z" />
+              </svg>
+            )}
+          </button>
+          <button type="button" className="qcastBtn" onClick={() => skipBy(-10)} aria-label="Back 10 seconds">
+            <svg viewBox="0 0 24 24" className="qcastIcon" aria-hidden>
+              <path d="M11 6l-5 6 5 6V6zm1 6c0-2.2 1.8-4 4-4v2c-1.1 0-2 .9-2 2 0 1.1.9 2 2 2v2c-2.2 0-4-1.8-4-4z" />
+            </svg>
+          </button>
+          <button type="button" className="qcastBtn" onClick={() => skipBy(10)} aria-label="Forward 10 seconds">
+            <svg viewBox="0 0 24 24" className="qcastIcon" aria-hidden>
+              <path d="M13 6v12l5-6-5-6zm-1 6c0 2.2-1.8 4-4 4v-2c1.1 0 2-.9 2-2 0-1.1-.9-2-2-2V8c2.2 0 4 1.8 4 4z" />
+            </svg>
+          </button>
+          <button type="button" className="qcastBtn" onClick={toggleMute} aria-label="Mute">
+            {muted ? (
+              <svg viewBox="0 0 24 24" className="qcastIcon" aria-hidden>
+                <path d="M4 9v6h4l5 4V5L8 9H4z" />
+                <path d="M16 8l4 8M20 8l-4 8" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" className="qcastIcon" aria-hidden>
+                <path d="M4 9v6h4l5 4V5L8 9H4z" />
+                <path d="M16 9a4 4 0 010 6" fill="none" stroke="currentColor" strokeWidth="1.6" />
+              </svg>
+            )}
+          </button>
+        </div>
+
+        <div className="qcastRow qcastRowTimeline">
+          <span className="qcastTime">{formatMediaTime(currentTime)}</span>
+          <input
+            type="range"
+            min="0"
+            max={duration || 0}
+            step="0.1"
+            value={Math.min(currentTime, duration || 0)}
+            onChange={onSeek}
+            className="qcastRange"
+            aria-label="Seek"
+          />
+          <span className="qcastTime">{formatMediaTime(duration)}</span>
+        </div>
+
+        <div className="qcastRow qcastRowSpeed">
+          {[0.5, 0.75, 1, 1.25, 1.5, 2].map((val) => (
+            <button
+              key={val}
+              type="button"
+              className={`qcastSpeed ${rate === val ? 'active' : ''}`}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                bumpControls();
+                setRate(val);
+              }}
+            >
+              {val}x
+            </button>
+          ))}
+          {preview && (
+            <button type="button" className="qcastRemove" onClick={onRemove} title="Remove">
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /* =========================================================
    Основной компонент
@@ -6772,33 +7461,80 @@ export default function Forum(){
     const id=setInterval(upd,3000)
     return ()=>{ window.removeEventListener('auth:ok',upd); window.removeEventListener('auth:success',upd); clearInterval(id) }
   },[])
-    useEffect(() => {
-    const stop = initForumAutosnapshot({
-      intervalMs: 60000,   // ⬅️ можно 30000 (30 сек) если хочешь чаще
-      debounceMs: 2000     // ⬅️ чтобы не спамить при частом скролле
-    });
-    return stop; // снимем слушатели при размонтировании
-  }, []);
-    // === Глобальный контроллер HTML5-видео в постах ===
-  // В любой момент времени играет только один <video controls>.
+
+  // === Глобальный контроллер HTML5-медиа в постах ===
+  // В любой момент времени играет только один <video>/<audio> controls.
   // Видео без controls (обложки, рекламные петельки и т.п.) не трогаем.
   useEffect(() => {
     if (!isBrowser()) return;
-
-    const handlePlay = (e) => {
-      const target = e.target;
-      // интересуют только обычные HTML5-видео с контролами
-      if (!(target instanceof HTMLVideoElement)) return;
-      if (!target.controls) return;
-
+    const pauseOtherIframes = (activeEl) => {
       try {
-        const vids = document.querySelectorAll('video');
-        vids.forEach((v) => {
-          if (v === target) return;
+        document.querySelectorAll('iframe[data-forum-media]').forEach((frame) => {
+          if (!(frame instanceof HTMLIFrameElement)) return;
+          if (frame === activeEl) return;
+          const kind = frame.getAttribute('data-forum-media');
+          if (kind === 'youtube') {
+            if (window.__forumYtPlayers && window.__forumYtPlayers instanceof Map) {
+              const player = window.__forumYtPlayers.get(frame);
+              try { player?.pauseVideo?.(); } catch {}
+            }
+            return;
+          }
+          const src = frame.getAttribute('data-src');
+          if (src && frame.getAttribute('src')) frame.setAttribute('src', '');
+        });
+      } catch {}
+    };
+
+    const onSiteMediaPlay = (e) => {
+      if (e?.detail?.source === 'bg-audio') return;
+      const activeEl = e?.detail?.element || null;
+      const source = e?.detail?.source || '';
+      if (!['youtube', 'tiktok', 'iframe'].includes(source)) return;
+      try {
+        document.querySelectorAll('video').forEach((v) => {
+          if (v === activeEl) return;
           if (!(v instanceof HTMLVideoElement)) return;
-          if (!v.controls) return;      // не трогаем рекламу/обложки без контролов
+          if (!v.controls) return;
           v.pause();
         });
+        document.querySelectorAll('audio').forEach((a) => {
+          if (a === activeEl) return;
+          if (!(a instanceof HTMLAudioElement)) return;
+          a.pause();
+        });
+        pauseOtherIframes(activeEl);
+      } catch {}
+    };
+    const handlePlay = (e) => {
+      const target = e.target;
+      const isVideo = target instanceof HTMLVideoElement;
+      const isAudio = target instanceof HTMLAudioElement;
+      if (!isVideo && !isAudio) return;
+      if (isVideo && !target.controls) return;
+
+
+      try {
+        document.querySelectorAll('video').forEach((v) => {
+          if (v === target) return;
+          if (!(v instanceof HTMLVideoElement)) return;
+          if (!v.controls) return;
+          v.pause();
+        });
+        document.querySelectorAll('audio').forEach((a) => {
+          if (a === target) return;
+          if (!(a instanceof HTMLAudioElement)) return;
+          a.pause();
+        });
+        if (window.__forumYtPlayers && window.__forumYtPlayers instanceof Map) {
+          window.__forumYtPlayers.forEach((player) => {
+            try { player?.pauseVideo?.(); } catch {}
+          });
+        }   
+        pauseOtherIframes(target);
+        window.dispatchEvent(new CustomEvent('site-media-play', {
+          detail: { source: 'html5', element: target }
+        }));             
       } catch {
         // чтобы в случае чего не уронить UI
       }
@@ -6806,8 +7542,10 @@ export default function Forum(){
 
     // ловим play на CAPTURE-фазе, чтобы сработать раньше всяких слушателей глубже
     document.addEventListener('play', handlePlay, true);
+    window.addEventListener('site-media-play', onSiteMediaPlay);    
     return () => {
       document.removeEventListener('play', handlePlay, true);
+      window.removeEventListener('site-media-play', onSiteMediaPlay);      
     };
   },[])
   // === Ленивая подгрузка превью видео в постах ===
@@ -6856,82 +7594,286 @@ export default function Forum(){
     };
   }, []);
   // === Shorts-like autoplay: play when in focus, pause when out ===
-  // Требования:
-  // - когда видео становится "главным" в зоне видимости → autoplay (muted)
-  // - когда уходит из внимания/скроллим дальше → pause
-  // - одновременно играет только одно (у тебя уже есть глобальный play-controller; тут дополнительно контролим по IO)
+  // Расширено для video + audio + iframe (YouTube/TikTok best-effort).
   useEffect(() => {
     if (!isBrowser()) return;
 
-    const selector = 'video[data-forum-video="post"]';
+    const selector = '[data-forum-media]';
 
-    // === Persist sound choice (mute/unmute) ================================
-    // - если выбора ещё нет → звук ВКЛ (muted=false)
-    // - если юзер выключил звук на одном видео → следующие тоже muted=true
-    // - если включил → следующие muted=false
-    const LS_VIDEO_MUTED_KEY = 'forum:videoMuted';
-    const readMutedPref = () => {
-      try {
-        const v = localStorage.getItem(LS_VIDEO_MUTED_KEY);
-        if (v == null) return null;       // ещё не сохраняли
-        return v === '1' || v === 'true';  // true => muted
-      } catch { return null; }
-    };
     const writeMutedPref = (val) => {
-      try { localStorage.setItem(LS_VIDEO_MUTED_KEY, val ? '1' : '0'); } catch {}
+      try { localStorage.setItem(MEDIA_MUTED_KEY, val ? '1' : '0'); } catch {}
     };
-    let mutedPref = readMutedPref(); // null => дефолт (звук ВКЛ)
+    let mutedPref = readMutedPrefFromStorage();
 
-    const desiredMuted = () => (mutedPref == null ? false : !!mutedPref);
-    const applyMutedPref = (v) => {
+    const desiredMuted = () => (mutedPref == null ? true : !!mutedPref);
+
+
+    const applyMutedPref = (el) => {
+      if (!(el instanceof HTMLMediaElement)) return;
       const want = desiredMuted();
-      if (v.muted !== want) v.muted = want;
+      if (el.muted !== want) el.muted = want;
     };
-
-    // volumechange НЕ bubble → вешаем слушатель на каждый video
-    const volHandlers = new WeakMap(); // videoEl -> handler
-    const bindVolumeListener = (v) => {
-      if (!(v instanceof HTMLVideoElement)) return;
-      if (v.dataset.forumSoundBound === '1') return;
-      v.dataset.forumSoundBound = '1';
-
-      // применяем предпочтение сразу при появлении видео
-applyMutedPref(v);
-
-      const h = () => {
-        mutedPref = !!v.muted;
-        writeMutedPref(mutedPref);
-      };
-      volHandlers.set(v, h);
-      v.addEventListener('volumechange', h, { passive: true });
-    };
-    const ratios = new Map(); // videoEl -> intersectionRatio
-    let active = null;        // текущий "главный" видео-элемент
-
-    const safePause = (v) => {
-      if (!(v instanceof HTMLVideoElement)) return;
-      try { v.pause(); } catch {}
-    };
-
-    const safePlay = (v) => {
-      if (!(v instanceof HTMLVideoElement)) return;
+    const applyMutedPrefToAll = () => {
       try {
-        // ✅ применяем сохранённый выбор (или дефолт: звук ВКЛ)
-        applyMutedPref(v);
-        v.playsInline = true;
-        // можно оставить loop как "шортсы"
-        // если не хочешь луп — убери следующую строку
-        v.loop = true;
-        const p = v.play?.();
-        if (p && typeof p.catch === 'function') p.catch(() => {});
+        const want = desiredMuted();
+        document.querySelectorAll('[data-forum-media]').forEach((el) => {
+          if (!(el instanceof HTMLMediaElement)) return;
+          if (el.muted !== want) el.muted = want;
+        });
+        if (window.__forumYtPlayers && window.__forumYtPlayers instanceof Map) {
+          window.__forumYtPlayers.forEach((player) => {
+            try {
+              if (want) player?.mute?.();
+              else player?.unMute?.();
+            } catch {}
+          });
+        }
       } catch {}
+    };
+
+    const setMutedPref = (val, source = 'forum-coordinator', emit = true) => {
+      const next = !!val;
+      if (mutedPref === next && source === 'forum-coordinator') return;
+      mutedPref = next;
+      writeMutedPref(next);
+      applyMutedPrefToAll();
+      if (emit) {
+        try {
+          window.dispatchEvent(new CustomEvent(MEDIA_MUTED_EVENT, {
+            detail: { muted: next, source }
+          }));
+        } catch {}
+      }
+    };
+    const volHandlers = new WeakMap();
+    const bindVolumeListener = (el) => {
+      const isMedia =
+        el instanceof HTMLVideoElement || el instanceof HTMLAudioElement;
+      if (!isMedia) return;
+      if (el.dataset.forumSoundBound === '1') return;
+      el.dataset.forumSoundBound = '1';
+      applyMutedPref(el);
+      const h = () => {
+        setMutedPref(!!el.muted);
+      };
+      volHandlers.set(el, h);
+      el.addEventListener('volumechange', h, { passive: true });
+    };
+    const onMutedEvent = (e) => {
+      if (e?.detail?.source === 'forum-coordinator') return;
+      if (typeof e?.detail?.muted !== 'boolean') return;
+      setMutedPref(e.detail.muted, e.detail.source || 'external', false);
+    };
+    let ytApiPromise = null;
+    const ensureYouTubeAPI = () => {
+      if (window.YT && window.YT.Player) return Promise.resolve(window.YT);
+      if (ytApiPromise) return ytApiPromise;
+      ytApiPromise = new Promise((resolve) => {
+        const existing = document.querySelector('script[data-forum-yt="1"]');
+        if (existing) {
+          const check = () => {
+            if (window.YT && window.YT.Player) resolve(window.YT);
+            else setTimeout(check, 60);
+          };
+          check();
+          return;
+        }
+        const tag = document.createElement('script');
+        tag.src = 'https://www.youtube.com/iframe_api';
+        tag.async = true;
+        tag.dataset.forumYt = '1';
+        const prev = window.onYouTubeIframeAPIReady;
+        window.onYouTubeIframeAPIReady = function () {
+          try { if (typeof prev === 'function') prev(); } catch {}
+          resolve(window.YT);
+        };
+        document.head.appendChild(tag);
+      });
+      return ytApiPromise;
+    };
+    const ytPlayers = new Map();
+    const ytMutePolls = new Map();
+    const ytMuteLast = new Map();    
+    try { window.__forumYtPlayers = ytPlayers; } catch {}
+    const stopYtMutePoll = (player) => {
+      const id = ytMutePolls.get(player);
+      if (id) clearInterval(id);
+      ytMutePolls.delete(player);
+    };
+    const startYtMutePoll = (player) => {
+      if (!player || ytMutePolls.has(player)) return;
+      const id = setInterval(() => {
+        try {
+          const muted = !!player?.isMuted?.();
+          const last = ytMuteLast.get(player);
+          if (last !== muted) {
+            ytMuteLast.set(player, muted);
+            setMutedPref(muted, 'youtube');
+          }
+        } catch {}
+      }, 650);
+      ytMutePolls.set(player, id);
+    };    
+    const initYouTubePlayer = async (iframe) => {
+      if (!iframe || !(iframe instanceof HTMLIFrameElement)) return null;
+      if (ytPlayers.has(iframe)) return ytPlayers.get(iframe);
+      const YT = await ensureYouTubeAPI();
+      if (!YT?.Player) return null;
+      return new Promise((resolve) => {
+        try {
+          const player = new YT.Player(iframe, {
+            events: {
+              onReady: () => {
+                try {
+                  if (desiredMuted()) player?.mute?.();
+                  else player?.unMute?.();
+                } catch {}
+                resolve(player);
+              },
+              onStateChange: (evt) => {
+                try {
+                  const state = evt?.data;
+                  if (state === YT.PlayerState?.PLAYING) {
+                    startYtMutePoll(player);
+                    window.dispatchEvent(new CustomEvent('site-media-play', {
+                      detail: { source: 'youtube', element: iframe }
+                    }));
+                  }
+                  if (state === YT.PlayerState?.PAUSED || state === YT.PlayerState?.ENDED) {
+                    stopYtMutePoll(player);
+                  }
+                } catch {}
+              }
+            },
+          });
+          ytPlayers.set(iframe, player);
+        } catch {
+          resolve(null);
+        }
+      });
+    };
+
+    const ratios = new Map();
+    let active = null;
+
+    const pauseMedia = (el) => {
+      if (!el) return;
+      if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
+        try { el.pause(); } catch {}
+        return;
+      }
+      const kind = el.getAttribute('data-forum-media');
+ if (kind === 'qcast') {
+  // Q-Cast: управляем скрытым <audio> внутри видимого контейнера
+  const a = el.querySelector?.('audio');
+  if (a instanceof HTMLAudioElement) {
+    try { a.pause(); } catch {}
+  }
+  return;
+}
+     
+      if (kind === 'youtube') {
+        const player = ytPlayers.get(el);
+        try { player?.pauseVideo?.(); } catch {}
+        stopYtMutePoll(player);
+        // ВАЖНО: YouTube iframe держит GPU/WebGL ресурсы даже на pause.
+        // Для ленты (Shorts/TikTok-style) нужно освобождать ресурсы полностью.
+        try { player?.destroy?.(); } catch {}
+        try { ytPlayers.delete(el); } catch {}
+        // выгружаем iframe, чтобы не копились WebGL контексты при пагинации/скролле
+        try {
+          const cur = el.getAttribute('src');
+          if (cur) el.setAttribute('src', '');
+        } catch {}     
+        return;
+      }
+if (kind === 'tiktok' || kind === 'iframe') {
+  // ВАЖНО: для iframe мы не можем управлять play/pause внутри,
+  // поэтому «пауза» = выгрузить src, а «play» = перезагрузить src.
+  const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
+  if (src && !el.getAttribute('data-src')) el.setAttribute('data-src', src);
+  if (el.getAttribute('src')) el.setAttribute('src', '');
+}
+
+    };
+
+    const playMedia = async (el) => {
+      if (!el) return;
+      if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
+        try {
+          applyMutedPref(el);
+          el.playsInline = true;
+          if (el instanceof HTMLVideoElement) el.loop = true;
+          const p = el.play?.();
+          if (p && typeof p.catch === 'function') p.catch(() => {});
+        } catch {}
+        return;
+      }
+      const kind = el.getAttribute('data-forum-media');
+if (kind === 'qcast') {
+  // Q-Cast: управляем скрытым <audio> внутри видимого контейнера
+  const a = el.querySelector?.('audio');
+  if (a instanceof HTMLAudioElement) {
+    try {
+      applyMutedPref(a);
+      const p = a.play?.();
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+      window.dispatchEvent(new CustomEvent('site-media-play', {
+        detail: { source: 'qcast', element: el }
+      }));
+    } catch {}
+  }
+  return;
+}
+
+      if (kind === 'youtube') {
+        // iframe по умолчанию src="" (ленивая загрузка). При активации возвращаем src.
+        try {
+          const ds = el.getAttribute('data-src') || '';
+          const cur = el.getAttribute('src') || '';
+          if (ds && !cur) el.setAttribute('src', ds);
+        } catch {}
+
+        const player = await initYouTubePlayer(el);
+        try {
+          if (desiredMuted()) player?.mute?.();
+          else player?.unMute?.();
+          player?.playVideo?.();
+          window.dispatchEvent(new CustomEvent('site-media-play', {
+            detail: { source: 'youtube', element: el }
+          }));          
+        } catch {}
+        return;
+      }
+if (kind === 'tiktok' || kind === 'iframe') {
+  // ВАЖНО: если пользователь вручную нажал pause/play внутри iframe,
+  // то единственный надёжный способ «вернуть в автоплей» — перезагрузить embed.
+  const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
+  if (!src) return;
+  if (!el.getAttribute('data-src')) el.setAttribute('data-src', src);
+
+  const cur = el.getAttribute('src') || '';
+  if (cur === src) {
+    // форс-ресет (убирает «запомненную» паузу)
+    try { el.setAttribute('src', ''); } catch {}
+    try { requestAnimationFrame(() => { try { el.setAttribute('src', src); } catch {} }); } catch {
+      try { el.setAttribute('src', src); } catch {}
+    }
+  } else {
+    try { el.setAttribute('src', src); } catch {}
+  }
+
+  window.dispatchEvent(new CustomEvent('site-media-play', {
+    detail: { source: kind, element: el }
+  }));      
+}
+
     };
 
     const pickMostVisible = () => {
       let best = null;
       let bestRatio = 0;
-      for (const [el, r] of ratios.entries()) {
-        if (!(el instanceof HTMLVideoElement)) continue;
+      for (const [el, r] of ratios.entries()) { 
         if (r > bestRatio) {
           bestRatio = r;
           best = el;
@@ -6940,94 +7882,121 @@ applyMutedPref(v);
       return { el: best, ratio: bestRatio };
     };
 
-    // fallback без IO: ничего не автоплеим (иначе будет играть всё подряд)
-    if (!('IntersectionObserver' in window)) {
-      return;
-    }
+    if (!('IntersectionObserver' in window)) return;
 
     const io = new IntersectionObserver(
       (entries) => {
-        // обновляем ratios
+
         for (const entry of entries) {
-          const el = entry.target;
-          if (!(el instanceof HTMLVideoElement)) continue;
+          const el = entry.target; 
 
           const r = entry.isIntersecting ? (entry.intersectionRatio || 0) : 0;
           if (r <= 0) {
             ratios.delete(el);
-            // если ушёл активный — сразу пауза
+
             if (active === el) {
-              safePause(el);
+              pauseMedia(el);
               active = null;
             } else {
-              // чтобы при скролле вниз не оставались играющие “вне экрана”
-              safePause(el);
+              pauseMedia(el);
             }
           } else {
             ratios.set(el, r);
           }
         }
-
-        // выбираем самый видимый
+ 
         const { el: candidate, ratio } = pickMostVisible();
 
-        // порог "в фокусе" — можно крутить
-        const FOCUS_RATIO = 0.60;
+        const FOCUS_RATIO = 0.6;
 
         if (!candidate || ratio < FOCUS_RATIO) {
           if (active) {
-            safePause(active);
+            pauseMedia(active);
             active = null;
           }
           return;
         }
 
         if (active && active !== candidate) {
-          safePause(active);
+          pauseMedia(active);
         }
 
         active = candidate;
-        safePlay(candidate);
+        playMedia(candidate)
       },
-      {
-        // thresholds чтобы чаще обновлялось при плавном скролле
+      { 
         threshold: [0, 0.15, 0.35, 0.6, 0.85, 1],
-        // чуть “подталкиваем” фокус к центру экрана (можно подправить)
+
         rootMargin: '0px 0px -20% 0px',
       }
     );
 
-    const observeAll = () => {
-      try {
-        document.querySelectorAll(selector).forEach((v) => {
-          if (!(v instanceof HTMLVideoElement)) return;
-          bindVolumeListener(v);
-          io.observe(v);
-        });
-      } catch {}
-    };
+const observeAll = () => {
+  try {
+document.querySelectorAll(selector).forEach((el) => {
+  // аудио/видео: следим за mute, чтобы запоминать выбор
+  if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
+    bindVolumeListener(el);
+  }
+
+  // Q-Cast: наблюдаем за видимым контейнером, а mute/unmute берём с вложенного <audio>
+  const kind = el?.getAttribute?.('data-forum-media');
+  if (kind === 'qcast') {
+    const a = el.querySelector?.('audio');
+    if (a instanceof HTMLAudioElement) bindVolumeListener(a);
+  }
+
+  // iframe/tiktok: гарантируем data-src...
+  if ((kind === 'tiktok' || kind === 'iframe') && el?.getAttribute) {
+    const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
+    if (src && !el.getAttribute('data-src')) {
+      try { el.setAttribute('data-src', src); } catch {}
+    }
+  }
+
+  io.observe(el);
+});
+
+  } catch {}
+};
+
 
     observeAll();
-
-    // если у тебя лента динамически меняется (допостинг/подгрузка) —
-    // можно иногда переобозначать наблюдение (дешево)
+ 
     const tick = setInterval(observeAll, 1500);
-
+    window.addEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
     return () => {
       clearInterval(tick);
+      window.removeEventListener(MEDIA_MUTED_EVENT, onMutedEvent);      
       io.disconnect();
-      if (active) safePause(active);
+      if (active) pauseMedia(active);
       active = null;
       ratios.clear();
-
-      // снимаем volumechange listeners (аккуратно)
+ 
       try {
-        document.querySelectorAll(selector).forEach((v) => {
-          if (!(v instanceof HTMLVideoElement)) return;
-          const h = volHandlers.get(v);
-          if (h) v.removeEventListener('volumechange', h);
+        document.querySelectorAll(selector).forEach((el) => {
+          if (!(el instanceof HTMLVideoElement || el instanceof HTMLAudioElement)) return;
+          const h = volHandlers.get(el);
+          if (h) el.removeEventListener('volumechange', h);
         });
-      } catch {}      
+      } catch {}
+      try {
+        if (window.__forumYtPlayers === ytPlayers) {
+          delete window.__forumYtPlayers;
+        }
+      } catch {}  
+      // Полная очистка YouTube player'ов, чтобы не держать WebGL/GPU ресурсы
+      try {
+        ytPlayers.forEach((player, iframe) => {
+          try { stopYtMutePoll(player); } catch {}
+          try { player?.destroy?.(); } catch {}
+          try { if (iframe?.getAttribute?.('src')) iframe.setAttribute('src', ''); } catch {}
+        });
+      } catch {}
+      try { ytPlayers.clear(); } catch {}       
+      ytMutePolls.forEach((id) => clearInterval(id));
+      ytMutePolls.clear();
+      ytMuteLast.clear();        
     };
   }, []);
     useEffect(() => {
@@ -7183,8 +8152,8 @@ React.useEffect(() => {
   }
 }, [t, toast]); // ВАЖНО: без setComposerActive и composerRef
 
-/* ---- локальный снап и очередь ---- */
-const [data,setData] = useState(()=>{
+/* ---- локальный снап, overlay, tombstones и очередь ---- */
+const [snap,setSnap] = useState(()=>{
   if(!isBrowser()) return { topics:[], posts:[], bans:[], admins:[], rev:null }
   try{
     return JSON.parse(localStorage.getItem('forum:snap')||'null') || { topics:[], posts:[], bans:[], admins:[], rev:null }
@@ -7192,11 +8161,73 @@ const [data,setData] = useState(()=>{
     return { topics:[], posts:[], bans:[], admins:[], rev:null }
   }
 })
-const persist = (patch) => setData(prev => {
-  const next = typeof patch==='function' ? patch(prev) : ({ ...prev, ...patch })
-  try{ localStorage.setItem('forum:snap', JSON.stringify(next)) }catch{}
-  return next
-})
+const persistSnap = useCallback((patch) => {
+  setSnap(prev => {
+    const next = typeof patch==='function' ? patch(prev) : ({ ...prev, ...patch })
+    try{ localStorage.setItem('forum:snap', JSON.stringify(next)) }catch{}
+    return next
+  })
+}, [])
+const TOMBSTONE_TTL_MS = 10 * 60 * 1000;
+const [tombstones, setTombstones] = useState(() => {
+  if (!isBrowser()) return { topics: {}, posts: {} };
+  try {
+    const raw = JSON.parse(localStorage.getItem('forum:tombstones') || 'null');
+    return raw && typeof raw === 'object'
+      ? { topics: raw.topics || {}, posts: raw.posts || {} }
+      : { topics: {}, posts: {} };
+  } catch {
+    return { topics: {}, posts: {} };
+  }
+});
+const persistTombstones = useCallback((patch) => {
+  setTombstones((prev) => {
+    const next = typeof patch === 'function' ? patch(prev) : { ...prev, ...patch };
+    try { localStorage.setItem('forum:tombstones', JSON.stringify(next)); } catch {}
+    return next;
+  });
+}, []);
+const [overlay, setOverlay] = useState(() => ({
+  reactions: {},
+  edits: {},
+  creates: { topics: [], posts: [] },
+  views: { topics: {}, posts: {} },
+}));
+const data = useMemo(() => {
+  const isTomb = (bucket, id) => !!tombstones?.[bucket]?.[String(id)];
+  const applyEdits = (p) => {
+    const edit = overlay.edits[String(p.id)];
+    return edit ? { ...p, text: edit.text } : p;
+  };
+  const applyReactions = (p) => {
+    const pending = overlay.reactions[String(p.id)];
+    if (!pending) return p;
+    return {
+      ...p,
+      myReaction: pending.state ?? null,
+      likes: pending.likes ?? p.likes,
+      dislikes: pending.dislikes ?? p.dislikes,
+    };
+  };
+  const applyViews = (p) => {
+    const view = overlay.views.posts[String(p.id)];
+    return typeof view === 'number' ? { ...p, views: view } : p;
+  };
+  const baseTopics = (snap.topics || []).filter(t => !isTomb('topics', t.id));
+  const basePosts  = (snap.posts  || []).filter(p => !isTomb('posts',  p.id));
+  const nextTopics = baseTopics.map(t => {
+    const view = overlay.views.topics[String(t.id)];
+    return typeof view === 'number' ? { ...t, views: view } : t;
+  });
+  const nextPosts = basePosts.map(p => applyViews(applyReactions(applyEdits(p))));
+  const createdTopics = (overlay.creates.topics || []).filter(t => !isTomb('topics', t.id));
+  const createdPosts = (overlay.creates.posts || []).filter(p => !isTomb('posts', p.id));
+  return {
+    ...snap,
+    topics: [...createdTopics, ...nextTopics],
+    posts: [...nextPosts, ...createdPosts],
+  };
+}, [snap, overlay, tombstones]);
 const withdrawBtnRef = useRef(null);
 
 const [qcoinModalOpen, setQcoinModalOpen] = useState(false);
@@ -7206,161 +8237,292 @@ const [queue,setQueue] = useState(()=>{
   try{ return JSON.parse(localStorage.getItem('forum:queue')||'[]') }catch{ return [] }
 })
 const saveQueue = q => { setQueue(q); try{ localStorage.setItem('forum:queue', JSON.stringify(q)) }catch{} }
+const makeOpId = () => `${Date.now()}_${Math.random().toString(36).slice(2)}`;
 const pushOp = (type, payload) => {
   const cur = Array.isArray(queueRef.current) ? queueRef.current : [];
-  const op  = { type, payload, opId: `${Date.now()}_${Math.random().toString(36).slice(2)}` };
+  const op  = { type, payload, opId: makeOpId() };
   const next = [...cur, op];
   saveQueue(next);
 }// всегда иметь «свежие» значения внутри async-кода (без устаревших замыканий)
 const queueRef = useRef(queue);  useEffect(()=>{ queueRef.current = queue }, [queue])
 const authRef  = useRef(auth);   useEffect(()=>{ authRef.current  = auth  }, [auth])
-const busyRef=useRef(false), debRef=useRef(null)
-const sendBatch = (immediate = false) => {
+const snapRef  = useRef(snap);   useEffect(()=>{ snapRef.current  = snap  }, [snap])
+const lastFullSnapshotRef = useRef(0);
+const syncInFlightRef = useRef(false);
+const sseHintRef = useRef(0);
+const pendingViewsPostsRef = useRef(new Set());
+const pendingViewsTopicsRef = useRef(new Set());
+const busyRef=useRef(false)
+const compactOps = (ops) => {
+  const out = [];
+  const seenReactions = new Set();
+  const seenEdits = new Set();
+  const deletedPosts = new Set();
+  const deletedTopics = new Set();
+  const viewPosts = new Set();
+  const viewTopics = new Set();
+
+  for (let i = ops.length - 1; i >= 0; i--) {
+    const op = ops[i];
+    const t = op?.type;
+    const p = op?.payload || {};
+
+    if (t === 'delete_post') {
+      const id = String(p.id ?? p.postId ?? '');
+      if (!id || deletedPosts.has(id)) continue;
+      deletedPosts.add(id);
+      out.push(op);
+      continue;
+    }
+    if (t === 'delete_topic') {
+      const id = String(p.id ?? p.topicId ?? '');
+      if (!id || deletedTopics.has(id)) continue;
+      deletedTopics.add(id);
+      out.push(op);
+      continue;
+    }
+    if (t === 'set_reaction') {
+      const id = String(p.postId ?? '');
+      if (!id || deletedPosts.has(id) || seenReactions.has(id)) continue;
+      seenReactions.add(id);
+      out.push(op);
+      continue;
+    }
+    if (t === 'edit_post') {
+      const id = String(p.id ?? '');
+      if (!id || deletedPosts.has(id) || seenEdits.has(id)) continue;
+      seenEdits.add(id);
+      out.push(op);
+      continue;
+    }
+    if (t === 'view_posts') {
+      (Array.isArray(p.ids) ? p.ids : []).forEach((id) => {
+        const pid = String(id);
+        if (pid && !deletedPosts.has(pid)) viewPosts.add(pid);
+      });
+      continue;
+    }
+    if (t === 'view_topics') {
+      (Array.isArray(p.ids) ? p.ids : []).forEach((id) => {
+        const tid = String(id);
+        if (tid && !deletedTopics.has(tid)) viewTopics.add(tid);
+      });
+      continue;
+    }
+    if (t === 'create_topic') {
+      const id = String(p.id ?? p.cid ?? '');
+      if (id && deletedTopics.has(id)) continue;
+    }
+    if (t === 'create_post') {
+      const id = String(p.id ?? p.cid ?? '');
+      if (id && deletedPosts.has(id)) continue;
+      const tid = String(p.topicId ?? p.topicCid ?? '');
+      if (tid && deletedTopics.has(tid)) continue;
+    }
+    out.push(op);
+  }
+
+  out.reverse();
+  if (viewPosts.size) out.push({ type: 'view_posts', payload: { ids: Array.from(viewPosts) }, opId: makeOpId() });
+  if (viewTopics.size) out.push({ type: 'view_topics', payload: { ids: Array.from(viewTopics) }, opId: makeOpId() });
+  return out;
+};
+const flushMutations = useCallback(async () => {
   if (busyRef.current) return;
 
-  const run = async () => {
-    // 1) берём честный снапшот очереди (не из устаревшего state)
-    let snapshot = Array.isArray(queueRef.current) ? queueRef.current.slice() : [];
-    // fallback: иногда setState ещё не применился — подстрахуемся локалстораджем
-    if (!snapshot.length) {
-      try { snapshot = JSON.parse(localStorage.getItem('forum:queue')||'[]') || [] } catch {}
-    }
-    if (!snapshot.length) return;
+  let snapshot = Array.isArray(queueRef.current) ? queueRef.current.slice() : [];
+  if (!snapshot.length) {
+    try { snapshot = JSON.parse(localStorage.getItem('forum:queue')||'[]') || [] } catch {}
+  }
+  let patched = false;
+  snapshot = snapshot.map(op => {
+    if (op?.opId) return op;
+    patched = true;
+    return { ...op, opId: makeOpId() };
+  });
+  if (patched) saveQueue(snapshot);
 
-    busyRef.current = true;
-    try {
-      const userId = authRef.current?.accountId || authRef.current?.asherId || getForumUserId();
-      
-   // ⚠️ Защита от 413: схлопываем дубли view_* и режем батч по размеру
-      const MAX_MUTATION_OPS = 120;
-      const compactOps = (ops) => {
-        const out = [];
-        const seen = new Set();
-        // идём с конца, чтобы сохранить «последнее» view_* для одного id
-        for (let i = ops.length - 1; i >= 0; i--) {
-          const op = ops[i];
-          const t = op?.type;
-          const p = op?.payload || {};
-          if (t === 'view_post') {
-            const k = `vp:${String(p.postId ?? '')}`;
-            if (seen.has(k)) continue;
-            seen.add(k);
-          } else if (t === 'view_topic') {
-           const k = `vt:${String(p.topicId ?? '')}`;
-            if (seen.has(k)) continue;
-            seen.add(k);
-          }
-          out.push(op);
-        }
-        out.reverse();
-        return out;
+  const pendingPosts = Array.from(pendingViewsPostsRef.current || []);
+  const pendingTopics = Array.from(pendingViewsTopicsRef.current || []);
+  if (pendingPosts.length) {
+    snapshot.push({ type: 'view_posts', payload: { ids: pendingPosts }, opId: makeOpId() });
+  }
+  if (pendingTopics.length) {
+    snapshot.push({ type: 'view_topics', payload: { ids: pendingTopics }, opId: makeOpId() });
+  }
+
+  const toSend = compactOps(snapshot);
+  if (!toSend.length) return;
+
+  busyRef.current = true;
+  try {
+    const userId = authRef.current?.accountId || authRef.current?.asherId || getForumUserId();
+    const resp = await api.mutate({ ops: toSend }, userId);
+
+    if (resp && Array.isArray(resp.applied)) {
+      const applied = resp.applied || [];
+      const sentIds = new Set(toSend.map(x => x.opId).filter(Boolean));
+      const current = Array.isArray(queueRef.current) ? queueRef.current : [];
+      const leftover = current.filter(x => !sentIds.has(x.opId));
+      saveQueue(leftover);
+
+      if (pendingPosts.length) pendingPosts.forEach(id => pendingViewsPostsRef.current.delete(id));
+      if (pendingTopics.length) pendingTopics.forEach(id => pendingViewsTopicsRef.current.delete(id));
+
+      const clearOverlay = {
+        reactions: new Set(),
+        edits: new Set(),
+        viewPosts: new Set(),
+        viewTopics: new Set(),
+        createTopics: new Set(),
+        createPosts: new Set(),
+        deletePosts: new Set(),
+        deleteTopics: new Set(),
       };
 
-      // 1) сначала схлопываем (уменьшаем JSON), 2) потом ограничиваем размер запроса
-      const toSend = compactOps(snapshot).slice(0, MAX_MUTATION_OPS);
-
-      const resp = await api.mutate({ ops: toSend }, userId);
-
-      if (resp && Array.isArray(resp.applied)) {
-        // ✅ Мгновенно вливаем подтверждённые сущности из applied в локальный снапшот
-       const applied = resp.applied || [];
-        persist(prev => {
-          const next = { ...prev };
-
-          for (const it of applied) {
-            // создание
-            if (it.op === 'create_topic' && it.topic) {
-              next.topics = [ ...(next.topics || []), it.topic ];
-            }
-            if (it.op === 'create_post' && it.post) {
-              next.posts  = [ ...(next.posts  || []), it.post  ];
-            }
-
-            // удаление (на всякий случай поддержим и это)
-            if (it.op === 'delete_topic' && it.id) {
-              next.topics = (next.topics || []).filter(t => t.id !== it.id);
-            }
-            if (it.op === 'delete_post' && it.id) {
-              next.posts  = (next.posts  || []).filter(p => p.id !== it.id);
-            }
-
-            // бан/разбан (если сервер это возвращает в applied)
-            if (it.op === 'ban_user' && it.accountId) {
-              const bans = new Set(next.bans || []);
-              bans.add(it.accountId);
-              next.bans = Array.from(bans);
-            }
-            if (it.op === 'unban_user' && it.accountId) {
-              next.bans = (next.bans || []).filter(b => b !== it.accountId);
-            }
-
-            // === Точные просмотры из applied (теперь внутри цикла!) ===
-            if (it.op === 'view_topic' && it.topicId != null) {
-              const id = String(it.topicId);
-              const views = Number(it.views ?? 0);
-              if (Number.isFinite(views) && views >= 0) {
-                next.topics = (next.topics || []).map(
-                  t => String(t.id) === id ? { ...t, views } : t
-                );
-              }
-            }
-            if (it.op === 'view_post' && it.postId != null) {
-              const id = String(it.postId);
-              const views = Number(it.views ?? 0);
-              if (Number.isFinite(views) && views >= 0) {
-                next.posts = (next.posts || []).map(
-                  p => String(p.id) === id ? { ...p, views } : p
-                );
-              }
-            }         
+      persistSnap(prev => {
+        const next = { ...prev };
+        for (const it of applied) {
+          if (it.op === 'create_topic' && it.topic) {
+            next.topics = [ ...(next.topics || []), it.topic ];
+            if (it.cid) clearOverlay.createTopics.add(String(it.cid));
           }
- // жёстко схлопнём tmp по cid, если бэк его вернул
-const cids = new Set(
-   (applied || [])
-     .map(x => x.post?.cid)
-     .filter(Boolean)
-     .map(String)
- )
- if (cids.size) {
-   next.posts = (next.posts || []).filter(p =>
-     !(String(p.id).startsWith('tmp_p_') && cids.has(String(p.cid || '')))
-   )
- }
+          if (it.op === 'create_topic' && it.duplicate && it.cid) {
+            clearOverlay.createTopics.add(String(it.cid));
+          }
+          if (it.op === 'create_post' && it.post) {
+            next.posts  = [ ...(next.posts  || []), it.post  ];
+            if (it.cid) clearOverlay.createPosts.add(String(it.cid));
+          }
+          if (it.op === 'create_post' && it.duplicate && it.cid) {
+            clearOverlay.createPosts.add(String(it.cid));
+          }
+          if (it.op === 'delete_topic' && it.topicId) {
+            const id = String(it.topicId);
+            next.topics = (next.topics || []).filter(t => String(t.id) !== id);
+            next.posts  = (next.posts  || []).filter(p => String(p.topicId) !== id);
+            clearOverlay.deleteTopics.add(id);
+          }
+          if (it.op === 'delete_post') {
+            const ids = Array.isArray(it.deleted) ? it.deleted.map(String) : [String(it.postId || it.id || '')];
+            const delSet = new Set(ids.filter(Boolean));
+            next.posts = (next.posts || []).filter(p => !delSet.has(String(p.id)));
+            ids.forEach(id => clearOverlay.deletePosts.add(String(id)));
+          }
+          if (it.op === 'edit_post' && it.postId) {
+            const id = String(it.postId);
+            if (it.text) {
+              next.posts = (next.posts || []).map(p => String(p.id) === id ? { ...p, text: it.text } : p);
+            }
+            clearOverlay.edits.add(id);
+          }
+          if (it.op === 'set_reaction' && it.postId) {
+            const id = String(it.postId);
+            next.posts = (next.posts || []).map(p => {
+              if (String(p.id) !== id) return p;
+              return {
+                ...p,
+                likes: Number(it.likes ?? p.likes ?? 0),
+                dislikes: Number(it.dislikes ?? p.dislikes ?? 0),
+                myReaction: it.state ?? p.myReaction ?? null,
+              };
+            });
+            clearOverlay.reactions.add(id);
+          }
+          if (it.op === 'view_posts' && it.views && typeof it.views === 'object') {
+            next.posts = (next.posts || []).map(p => {
+              const v = it.views[String(p.id)];
+              if (!Number.isFinite(v)) return p;
+              return { ...p, views: v };
+            });
+            Object.keys(it.views || {}).forEach(id => clearOverlay.viewPosts.add(String(id)));
+          }
+          if (it.op === 'view_post' && it.postId != null) {
+            const id = String(it.postId);
+            const views = Number(it.views ?? 0);
+            if (Number.isFinite(views)) {
+              next.posts = (next.posts || []).map(p => String(p.id) === id ? { ...p, views } : p);
+            }
 
-          // Схлопываем tmp_* с реальными и убираем дубли по сигнатурам
-          return dedupeAll(next);
+            clearOverlay.viewPosts.add(id);
+          }
+          if (it.op === 'view_topics' && it.views && typeof it.views === 'object') {
+            next.topics = (next.topics || []).map(t => {
+              const v = it.views[String(t.id)];
+              if (!Number.isFinite(v)) return t;
+              return { ...t, views: v };
+            });
+            Object.keys(it.views || {}).forEach(id => clearOverlay.viewTopics.add(String(id)));
+          }
+          if (it.op === 'view_topic' && it.topicId != null) {
+            const id = String(it.topicId);
+            const views = Number(it.views ?? 0);
+            if (Number.isFinite(views)) {
+              next.topics = (next.topics || []).map(t => String(t.id) === id ? { ...t, views } : t);
+            }
+           clearOverlay.viewTopics.add(id);
+          }
+          if (it.op === 'ban_user' && it.accountId) {
+            const bans = new Set(next.bans || []);
+            bans.add(it.accountId);
+            next.bans = Array.from(bans);
+          }
+          if (it.op === 'unban_user' && it.accountId) {
+            next.bans = (next.bans || []).filter(b => b !== it.accountId);
+          }
+        }
+
+        return dedupeAll(next);
+      });
+
+      setOverlay(prev => {
+        const next = { ...prev };
+        if (clearOverlay.reactions.size) {
+          const reactions = { ...next.reactions };
+          clearOverlay.reactions.forEach(id => { delete reactions[id]; });
+          next.reactions = reactions;
+        }
+        if (clearOverlay.edits.size) {
+          const edits = { ...next.edits };
+          clearOverlay.edits.forEach(id => { delete edits[id]; });
+          next.edits = edits;
+        }
+        if (clearOverlay.viewPosts.size || clearOverlay.viewTopics.size) {
+          const views = {
+            topics: { ...next.views.topics },
+            posts: { ...next.views.posts },
+          };
+          clearOverlay.viewPosts.forEach(id => { delete views.posts[id]; });
+          clearOverlay.viewTopics.forEach(id => { delete views.topics[id]; });
+          next.views = views;
+        }
+        if (clearOverlay.createTopics.size || clearOverlay.createPosts.size) {
+          const creates = {
+            topics: (next.creates.topics || []).filter(t => !clearOverlay.createTopics.has(String(t.id || t.cid || ''))),
+            posts: (next.creates.posts || []).filter(p => !clearOverlay.createPosts.has(String(p.id || p.cid || ''))),
+          };
+          next.creates = creates;
+        }
+        return next;
+      });
+
+      if (clearOverlay.deletePosts.size || clearOverlay.deleteTopics.size) {
+        persistTombstones(prev => {
+          const posts = { ...prev.posts };
+          const topics = { ...prev.topics };
+          clearOverlay.deletePosts.forEach(id => { delete posts[id]; });
+          clearOverlay.deleteTopics.forEach(id => { delete topics[id]; });
+          return { posts, topics };
         });
-
-        // 2) Удаляем из очереди ТОЛЬКО те элементы, которые отправили
-        const sentIds = new Set(toSend.map(x => x.opId));
-        const current = Array.isArray(queueRef.current) ? queueRef.current : [];
-        const leftover = current.filter(x => !sentIds.has(x.opId));
-        saveQueue(leftover);
-        // если что-то осталось — мягко дотолкаем следующей итерацией
-        if (leftover.length) setTimeout(() => sendBatch(true), 0);
-
-        // опционально: локальный «хук» на ручной рефреш, если вернёшь функцию
-        if (typeof refresh === 'function') await refresh();
-      } else {
-        // неуспех (напр., 400). Чтобы не застревать — выкидываем первую операцию.
-        // На практике это часто невалидная react/view по tmp-id.
-        saveQueue(snapshot.slice(1));
       }
-    } catch (e) {
-      console.error('sendBatch', e);
-    } finally {
-      busyRef.current = false;
-    }
-  };
 
-  if (immediate) run();
-  else {
-    clearTimeout(debRef.current);
-    debRef.current = setTimeout(run, 650);
+    }
+  } catch (e) {
+    console.error('flushMutations', e);
+  } finally {
+    busyRef.current = false;
   }
-};
-// публичная «ручка» для планирования pull из любых эффектов
-const schedulePullRef = React.useRef((/*delay, force*/) => {});
+}, [persistSnap, persistTombstones]);
 // === QCOIN: автопинг активности (CLIENT) ===
 const activeRef  = React.useRef(false);
 const visibleRef = React.useRef(true);
@@ -7392,28 +8554,7 @@ React.useEffect(()=>{
   const id = setInterval(()=>{ if (visibleRef.current) activeRef.current = true }, 20000);
   return ()=> clearInterval(id);
 },[]);
-// [PERIODIC-PULL] — периодический пул даже при открытом SSE
-React.useEffect(() => {
-  const id = setInterval(() => {
-    try { schedulePullRef.current(120, false); } catch {}
-  }, 2 * 60 * 1000);  // каждые 2 минуты
-  return () => clearInterval(id);
-}, []);
-// [TOUCH-PULL] — любой пользовательский жест внутри форума
-React.useEffect(() => {
-  const root = document.querySelector('.forum_root') || document.body;
-  if (!root) return;
-  const kick = () => { try { schedulePullRef.current(80, false); } catch {} };
 
-  ['pointerdown','touchstart','keydown'].forEach(evt =>
-    root.addEventListener(evt, kick, { passive: true })
-  );
-  return () => {
-    ['pointerdown','touchstart','keydown'].forEach(evt =>
-      root.removeEventListener(evt, kick)
-    );
-  };
-}, []);
  
   // >>>>>>>>> Единственное изменение логики: усиленные антидубликаты
   function dedupeAll(prev){
@@ -7455,235 +8596,224 @@ React.useEffect(() => {
   }
   // <<<<<<<<<<< конец изменения
 
-  function mergeDelta(prev, delta, cursor){
-    const next = { ...prev }
-    if(delta.topics){
-      const map = new Map(prev.topics.map(x=>[x.id,x]))
-      for(const d of delta.topics){ if(d._del) map.delete(d.id); else map.set(d.id, { ...(map.get(d.id)||{}), ...d }) }
-      next.topics = Array.from(map.values())
+  const pruneTombstones = (next) => {
+    const now = Date.now();
+    const dropExpired = (bucket) => {
+      const out = {};
+      for (const [id, ts] of Object.entries(bucket || {})) {
+        if (now - Number(ts || 0) < TOMBSTONE_TTL_MS) out[id] = ts;
+      }
+      return out;
+    };
+    return { topics: dropExpired(next.topics), posts: dropExpired(next.posts) };
+  };
+  const applyFullSnapshot = (prev, r, ts) => {
+    const isTomb = (bucket, id) => !!ts?.[bucket]?.[String(id)];
+    const topics = (r.topics || []).filter(t => !isTomb('topics', t.id));
+    const prevPosts = new Map((prev.posts || []).map(p => [String(p.id), p]));
+    const posts = (r.posts || []).filter(p => !isTomb('posts', p.id)).map(p => {
+      const prior = prevPosts.get(String(p.id));
+      return { ...p, myReaction: prior?.myReaction ?? p.myReaction ?? null };
+    });
+    const out = {
+      ...prev,
+      topics,
+      posts,
+      bans: Array.isArray(r.bans) ? r.bans : prev.bans,
+      admins: Array.isArray(r.admins) ? r.admins : prev.admins,
+      rev: r.rev,
+      cursor: r.cursor ?? prev.cursor,
+    };
+    if (r.vipMap && typeof r.vipMap === 'object') out.vipMap = r.vipMap;
+    return dedupeAll(out);
+  };
+
+
+  const applyEvents = (prev, events, ts) => {
+    const isTomb = (bucket, id) => !!ts?.[bucket]?.[String(id)];
+    const topicsById = new Map((prev.topics || []).map(t => [String(t.id), { ...t }]));
+    const postsById = new Map((prev.posts || []).map(p => [String(p.id), { ...p }]));
+    const deletedTopics = new Set();
+    const deletedPosts = new Set();
+    const pendingReactions = overlay?.reactions || {};
+    const pendingViews = overlay?.views || { topics: {}, posts: {} };
+    for (const evt of events || []) {
+      const kind = evt?.kind;
+      if (kind === 'topic') {
+        const id = String(evt.id || '');
+        if (!id || isTomb('topics', id)) continue;
+        if (evt._del) {
+          deletedTopics.add(id);
+          continue;
+        }
+        const data = evt.data || {};
+        topicsById.set(id, { ...(topicsById.get(id) || {}), ...data, id });
+      }
+
+      if (kind === 'post') {
+        const id = String(evt.id || '');
+        if (!id || isTomb('posts', id)) continue;
+        if (evt._del) {
+          const ids = Array.isArray(evt.deleted) ? evt.deleted.map(String) : [id];
+          ids.forEach(pid => deletedPosts.add(pid));
+          continue;
+        }
+        const data = evt.data || {};
+        const prior = postsById.get(id) || {};
+        const next = { ...prior, ...data, id, myReaction: prior.myReaction ?? data.myReaction ?? null };
+        if (pendingReactions[String(id)]) {
+          next.likes = prior.likes;
+          next.dislikes = prior.dislikes;
+          next.myReaction = prior.myReaction ?? next.myReaction ?? null;
+        }
+        postsById.set(id, next);
+      }
+
+      if (kind === 'views') {
+        const posts = evt.posts && typeof evt.posts === 'object' ? evt.posts : {};
+        const topics = evt.topics && typeof evt.topics === 'object' ? evt.topics : {};
+
+        for (const [idRaw, val] of Object.entries(posts)) {
+          const id = String(idRaw);
+          if (!id || isTomb('posts', id)) continue;
+          if (typeof pendingViews.posts?.[id] === 'number') continue;
+          const views = Number(val);
+          if (!Number.isFinite(views)) continue;
+          const prior = postsById.get(id);
+          if (prior) postsById.set(id, { ...prior, views });
+        }
+
+        for (const [idRaw, val] of Object.entries(topics)) {
+          const id = String(idRaw);
+          if (!id || isTomb('topics', id)) continue;
+          if (typeof pendingViews.topics?.[id] === 'number') continue;
+          const views = Number(val);
+          if (!Number.isFinite(views)) continue;
+          const prior = topicsById.get(id);
+          if (prior) topicsById.set(id, { ...prior, views });
+        }
+      }
     }
-    if(delta.posts){
-      const map = new Map(prev.posts.map(x=>[x.id,x]))
-      for(const d of delta.posts){ if(d._del) map.delete(d.id); else map.set(d.id, { ...(map.get(d.id)||{}), ...d }) }
-      next.posts = Array.from(map.values())
-    }
-    if(delta.bans)   next.bans   = delta.bans
-    if(delta.admins) next.admins = delta.admins
-    next.cursor = cursor ?? prev.cursor
-    return dedupeAll(next)
-  }
-// === SILENT SYNC with cache-bust, backoff & hard-consistency ===
+    deletedTopics.forEach(id => {
+      topicsById.delete(id);
+      for (const [pid, p] of postsById.entries()) {
+        if (String(p.topicId) === id) postsById.delete(pid);
+      }
+    });
+    deletedPosts.forEach(id => postsById.delete(String(id)));
+
+    const out = {
+      ...prev,
+      topics: Array.from(topicsById.values()).filter(t => !isTomb('topics', t.id)),
+      posts: Array.from(postsById.values()).filter(p => !isTomb('posts', p.id)),
+    };
+    return dedupeAll(out);
+  };
+
+
+
+// === Incremental sync loop: 2m flush + snapshot ===
 useEffect(() => {
+  if (!isBrowser()) return;
   let stop = false;
-  let pulling = false;
-  let cooldownUntil = 0;         // до какого времени не дёргаем снапшот (бэк-офф)
-  let debounceTimer = null;      // дебаунс для pull() после POST
-  let bustRef = 0;               // volatile ключ для обхода микрокэша на сервере
+  const TICK_MS = 500_000;
+  const FULL_EVERY_MS = 10 * 60 * 1000;
 
-  const BASE_INTERVAL = 60000;   // фолбэк-опрос (SSE-first; 60с достаточно) 
-  const COOLDOWN_MS   = 60_000;  // пауза при превышении лимита
-  const TMP_GRACE_MS  = 10_000;  // сколько держим неподтверждённые tmp_*
-
-  const now = () => Date.now();
-  const isOverLimit = (err) => /max requests limit exceeded/i.test(String(err?.message || err || ''));
-
-// безопасное слияние снапшота с локальным состоянием (НЕ теряем данные на частичных снапах)
-const safeMerge = (prev, r) => {
-  const out = { ...prev };
-  const hardReset = r && r.__reset === true;
-
-  // ---- TOPICS ----
-  if (Array.isArray(r.topics)) {
-    const prevList = prev.topics || [];
-    const prevById = new Map(prevList.map((t, i) => [String(t.id), { ...t, __idx: i }]));
-    const srvList  = r.topics || [];
-    const srvById  = new Map(srvList.map((t) => [String(t.id), t]));
-    const srvIds   = new Set(Array.from(srvById.keys()));
-
-    // Накат серверных полей поверх локальных
-    for (const [id, srv] of srvById) {
-      const base = prevById.get(id) || { __idx: 9e9 };
-      prevById.set(id, { ...base, ...srv });
-    }
-
-    if (hardReset) {
-      // Жёсткая замена: оставляем только то, что пришло с сервера (сохраняя старые индексы)
-      out.topics = Array.from(prevById.entries())
-        .filter(([id]) => srvIds.has(id))
-        .sort((a, b) => a[1].__idx - b[1].__idx)
-        .map(([, t]) => { const { __idx, ...rest } = t; return rest; });
-    } else {
-      // Частичный снап: никого не выкидываем. Обновляем существующих, новые — в конец.
-      const used = new Set();
-      const merged = [];
-
-      // 1) Сохраняем порядок существующих
-      for (const t of prevList) {
-        const id = String(t.id);
-        if (prevById.has(id)) {
-          const v = prevById.get(id);
-          const { __idx, ...rest } = v;   // ✅ исправление
-          merged.push(rest);              // ✅ исправление
-          used.add(id);
-        }
-      }
-      // 2) Добавляем новые, которых не было
-      for (const [id, v] of prevById.entries()) {
-        if (!used.has(id) && srvIds.has(id)) {
-          const { __idx, ...rest } = v;
-          merged.push(rest);
-        }
-      }
-      out.topics = merged;
-    }
-  }
-
-  // ---- POSTS ----
-  if (Array.isArray(r.posts)) {
-    const prevList   = prev.posts || [];
-    const srvList    = r.posts || [];
-
-    // Полный снапшот: просто доверяем серверу, выкидываем локальное старьё
-    if (hardReset) {
-      out.posts = srvList.slice();
-    } else {
-      const srvMap     = new Map(srvList.map(p => [String(p.id), p]));
-      const mergedById = new Map(prevList.map(p => [String(p.id), { ...p }]));
-
-      // Накат серверных поверх локальных; жёсткая консистентность по счётчикам
-      for (const [id, srv] of srvMap) {
-        const loc = mergedById.get(id) || {};
-        const likes    = Number(srv.likes    ?? 0);
-        const dislikes = Number(srv.dislikes ?? 0);
-        const views    = Number(srv.views    ?? 0);
-        mergedById.set(id, {
-          ...loc,
-          ...srv,
-          likes,
-          dislikes,
-          views,
-          myReaction: (loc.myReaction ?? srv.myReaction ?? null),
-        });
-      }
-
-      const used = new Set();
-      const mergedList = [];
-      for (const p of prevList) {
-        const id = String(p.id);
-        if (mergedById.has(id)) {
-          mergedList.push(mergedById.get(id));
-          used.add(id);
-        }
-      }
-      for (const [id, p] of mergedById.entries()) {
-        if (!used.has(id)) mergedList.push(p);
-      }
-      out.posts = mergedList;
-    }
-  }
-
-  if (Array.isArray(r.bans))   out.bans   = r.bans;
-  if (Array.isArray(r.admins)) out.admins = r.admins;
-  if (r.rev    !== undefined)  out.rev    = r.rev;
-  if (r.cursor !== undefined)  out.cursor = r.cursor;
-
-  // Схлопываем tmp_* и реальные дубли по сигнатурам/ID
-  return dedupeAll(out);
-};
-
-
-
-  // один запрос снапшота; force=true — игнорируем cooldown (для подтверждения мутаций)
-  const pull = async (force = false) => {
-    if (pulling) return;
-    if (!force && now() < cooldownUntil) return;
-
-    pulling = true;
+  const runTick = async () => {
+    if (stop || syncInFlightRef.current) return;
+    syncInFlightRef.current = true;
     try {
-      // важно: прокидываем bustRef для обхода серверного микрокэша
-      const r = await api.snapshot({ b: bustRef });
-      if (r?.ok) persist(prev => safeMerge(prev, r));
-    } catch (e) {
-      if (isOverLimit(e)) {
-        cooldownUntil = now() + COOLDOWN_MS;
-        try { toast?.warn?.('Backend cooldown: Redis limit reached'); } catch {}
+      await flushMutations();
+
+      const now = Date.now();
+      const needFull = !snapRef.current?.rev || (now - (lastFullSnapshotRef.current || 0) > FULL_EVERY_MS);
+      if (needFull) {
+        const r = await api.snapshot({ full: 1 });
+        if (r?.ok) {
+          const idsSet = new Set();
+          try {
+            for (const t of (r.topics || [])) {
+              const id = String(t?.authorId || t?.userId || t?.ownerId || t?.uid || '').trim();
+              if (id) idsSet.add(id);
+            }
+            for (const p of (r.posts || [])) {
+              const id = String(p?.authorId || p?.userId || p?.ownerId || p?.uid || '').trim();
+              if (id) idsSet.add(id);
+            }
+          } catch {}
+
+          const ids = Array.from(idsSet);
+          if (ids.length) {
+            const vm = await api.vipBatch(ids);
+            if (vm?.ok && vm?.map && typeof vm.map === 'object') {
+              const vipMap = vm.map;
+              r.vipMap = vipMap;
+              if (Array.isArray(r.topics)) {
+                r.topics = r.topics.map(t => {
+                  const aid = String(t?.authorId || t?.userId || t?.ownerId || t?.uid || '').trim();
+                  if (!aid) return t;
+                  const v = vipMap[aid];
+                  if (!v) return t;
+                  return {
+                    ...t,
+                    vipActive: !!v.active,
+                    vipUntil: Number(v.untilMs || 0),
+                    isVip: !!v.active,
+                  };
+                });
+              }
+              if (Array.isArray(r.posts)) {
+                r.posts = r.posts.map(p => {
+                  const aid = String(p?.authorId || p?.userId || p?.ownerId || p?.uid || '').trim();
+                  if (!aid) return p;
+                  const v = vipMap[aid];
+                  if (!v) return p;
+                  return {
+                    ...p,
+                    vipActive: !!v.active,
+                    vipUntil: Number(v.untilMs || 0),
+                    isVip: !!v.active,
+                  };
+                });
+              }
+            }
+          }
+          lastFullSnapshotRef.current = now;
+          persistSnap(prev => applyFullSnapshot(prev, r, tombstones));
+        }
       } else {
-        console.error('snapshot error:', e);
+        const since = Number(snapRef.current?.rev || 0);
+        const r = await api.snapshot({ since });
+        if (r?.ok) {
+          persistSnap(prev => {
+            const next = applyEvents(prev, r.events || [], tombstones);
+            return { ...next, rev: r.rev ?? next.rev };
+          });
+        }
       }
+      const cleaned = pruneTombstones(tombstones);
+      const same =
+        JSON.stringify(cleaned.topics) === JSON.stringify(tombstones.topics) &&
+        JSON.stringify(cleaned.posts) === JSON.stringify(tombstones.posts);
+      if (!same) persistTombstones(cleaned);
+    } catch (e) {
+      console.error('sync tick error', e);      
     } finally {
-      pulling = false;
+      syncInFlightRef.current = false;;
     }
   };
 
-  const schedulePull = (delay = 180, force = false) => {
-    if (debounceTimer) clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => { debounceTimer = null; pull(force); }, delay);
-  };
-   schedulePullRef.current = schedulePull;
-  // основной цикл
-  (async function loop(){
-    schedulePull(80);
-    while (!stop) {
-    // Фолбэк: если SSE не подключён/не в readyState=1 — дёрнем pull()
-    await new Promise(r => setTimeout(r, BASE_INTERVAL));
-    try {
-      const ok = typeof window !== 'undefined'
-        && window.__forumSSE
-        && Number(window.__forumSSE.readyState) === 1;   // 1 = OPEN
-      if (!ok) await pull(false);
-    } catch {}
-    }
-  })();
-
-  // "пинки" по событиям среды
-  const kick = () => schedulePull(80, false);
-  window.addEventListener('focus', kick);
-  window.addEventListener('online', kick);
-  document.addEventListener('visibilitychange', kick);
-
-  // перехват ЛЮБОГО POST на /api/forum/*: ставим bust и делаем форс-пул
-  const _fetch = window.fetch;
-  window.fetch = async (...args) => {
-    const res = await _fetch(...args);
-    try {
-      const req    = args[0];
-      const url    = typeof req === 'string' ? req : req?.url;
-      const method = (typeof req === 'string' ? (args[1]?.method || 'GET') : (req.method || 'GET')).toUpperCase();
-      if (method !== 'GET' && /\/api\/forum\//.test(String(url || ''))) {
-        bustRef = Date.now();         // новый ключ кэша
-        schedulePullRef.current(120, true);      // быстрый форс-пул для подтверждения мутации
-      }
-    } catch {}
-    return res;
-  };
-
-  // кросс-вкладочный “пинок” (опционально, но полезно)
-  let bc = null;
-  try {
-    bc = new BroadcastChannel('forum-sync');
-    bc.onmessage = (ev) => { if (ev?.data === 'bump') schedulePull(120, true); };
-  } catch {}
+  runTick();
+  const id = setInterval(runTick, TICK_MS);
 
   return () => {
     stop = true;
-    if (debounceTimer) { clearTimeout(debounceTimer); debounceTimer = null; }
-    window.removeEventListener('focus', kick);
-    window.removeEventListener('online', kick);
-    document.removeEventListener('visibilitychange', kick);
-    window.fetch = _fetch;
-    schedulePullRef.current = () => {}; // обнуляем ручку
-    try { bc && bc.close(); } catch {}
+    clearInterval(id);
   };
-}, []);
+}, [flushMutations, tombstones]);
 
 
-// локальный shim: принудительное обновление страницы/данных
-const router = useRouter();
 const sseAliveRef = useRef(false)
-const didManualKickRef = useRef(false)
-const refresh = React.useCallback(() => {
-  try { router.refresh?.(); } catch {}
-}, [router]);
 
 React.useEffect(() => {
   if (typeof window === 'undefined') return;
@@ -7693,46 +8823,6 @@ React.useEffect(() => {
   const es = new EventSource('/api/forum/events/stream', { withCredentials: false });
   window.__forumSSE = es;
 
-  // === антидребезг + ограничение частоты ===
-  const lastRefreshAtRef = { current: 0 };
-  let debTimer = null;
-
-  // базовая задержка и доп. задержки для «тяжёлых» событий
-  const REFRESH_BASE_DELAY = 350; // было 160 → стало 350 мс
-  const EXTRA_DELAY_BY_TYPE = {
-    post_created: 250,
-    topic_created: 250,
-    post_deleted: 150,
-    topic_deleted: 150,
-    react: 0,
-    view_post: 0,
-    view_topic: 0,
-    ban: 0,
-    unban: 0,
-    'profile.avatar': 0,
-  };
-  const MIN_INTERVAL_MS = 600; // не чаще, чем раз в 600 мс
-
-  const scheduleRefresh = (evtType) => {
-    const extra = EXTRA_DELAY_BY_TYPE[evtType] || 0;
-    const delay = REFRESH_BASE_DELAY + extra;
-
-    clearTimeout(debTimer);
-    debTimer = setTimeout(() => {
-      const now = Date.now();
-      if (now - (lastRefreshAtRef.current || 0) < MIN_INTERVAL_MS) {
-        // если слишком часто — докидаем паузу до MIN_INTERVAL_MS
-        const leftover = MIN_INTERVAL_MS - (now - (lastRefreshAtRef.current || 0));
-        setTimeout(() => {
-          lastRefreshAtRef.current = Date.now();
-          refresh?.();
-        }, Math.max(60, leftover));
-      } else {
-        lastRefreshAtRef.current = now;
-        refresh?.();
-      }
-    }, delay);
-  };
 
 es.onmessage = (e) => { 
   sseAliveRef.current = true 
@@ -7755,74 +8845,27 @@ es.onmessage = (e) => {
         localStorage.setItem(key, JSON.stringify(next));
       } catch { /* no-op */ }
 
-      // Лёгкий рефреш компонентов, которые читают профиль
-      scheduleRefresh('profile.avatar');
+      // hint only, без немедленного fetch
       return; // дальше ничего не делаем — снапшоты/ревизии не нужны для этого события
     }
 
-    // --- [EVENTS REQUIRING SOFT REFRESH] ---
- const needRefresh = new Set(['topic_created','topic_deleted','post_created','post_deleted','react','view_post','view_topic','ban','unban']);
-    if (needRefresh.has(evt.type)) {
-       // игнорим «локальные» или временные id
-  if (evt.local === true) return;
-  if (String(evt.postId || '').startsWith('tmp_')) return;
-  if (String(evt.topicId || '').startsWith('tmp_')) return; 
-      scheduleRefresh(evt.type);
-      return;
-    }
 
-    // ...ниже остаётся твоя существующая логика, если она есть (rev/snapshot и т.п.)
-
-
-    // Тянем снапшот ТОЛЬКО если ревизия реально выросла
-    const curRev = (() => {
-      try { return (JSON.parse(localStorage.getItem('forum:snap') || '{}').rev) || 0; }
-      catch { return 0; }
-    })();
     const nextRev = Number(evt?.rev || 0);
-    if (nextRev > curRev) {
-      // Один запрос снапшота через готовый pull() → persist(safeMerge)
-      // Немного подождём, чтобы схлопнуть серии событий
-      schedulePullRef.current(120, true);
+    if (Number.isFinite(nextRev) && nextRev > 0) {
+      sseHintRef.current = Math.max(sseHintRef.current, nextRev);
     }
    } catch {}
  };
 
 
-let fallbackTimer = null;
-es.onerror = () => { /* оставляем молча; fallback подтянет снапшот */ }
-
-es.onopen = () => {
-  // как только SSE поднялся — вырубаем fallback
-  if (fallbackTimer) { clearInterval(fallbackTimer); fallbackTimer = null; }
-};
+es.onerror = () => { /* no-op */ }
 
 return () => {
   try { es.close(); } catch {}
-  if (window.__forumSSE === es) window.__forumSSE = null;
-  if (fallbackTimer) { clearInterval(fallbackTimer); fallbackTimer = null; }
-  clearTimeout(debTimer);
+  if (window.__forumSSE === es) window.__forumSSE = null; 
 };
-}, [refresh]);
+}, []);
 
-  // Fallback: если SSE молчит — на первый gesture принудительно тянем снапшот
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    function kickOnce() {
-      if (didManualKickRef.current || sseAliveRef.current) return
-      didManualKickRef.current = true
-      // принудительно подтягиваем свежий снапшот и обновляем
-      fetch('/api/forum/snapshot?kick=1', { cache: 'no-store' })
-        .catch(() => null)
-        .finally(() => router.refresh())
-    }
-    window.addEventListener('pointerdown', kickOnce, { once: true, capture: true })
-    window.addEventListener('keydown',     kickOnce, { once: true, capture: true })
-    return () => {
-      try { window.removeEventListener('pointerdown', kickOnce, { capture: true }) } catch {}
-      try { window.removeEventListener('keydown',     kickOnce, { capture: true }) } catch {}
-    }
-  }, [router])
 
 // ---- VIP ----
 const [vipOpen, setVipOpen] = useState(false)
@@ -7931,15 +8974,13 @@ const delTopic = async (t) => {
   if (!isAdmin) return
   const r = await api.adminDeleteTopic(t.id)
   if (r?.ok) {
-    persist(prev => ({
+    persistSnap(prev => ({
       ...prev,
       topics: prev.topics.filter(x => x.id !== t.id),
       posts:  prev.posts.filter(p => p.topicId !== t.id),
     }))
     toast.ok('Topic removed')
-    forumBroadcast({ type: 'post_deleted' }); // без id — просто триггерим перечитку
-
-    if (typeof refresh === 'function') await refresh()   // ← добавили
+    forumBroadcast({ type: 'post_deleted' }); // без id — просто триггерим перечитку 
   } else {
     console.error('adminDeleteTopic error:', r)
     toast.err(r?.error || 'Admin endpoint error')
@@ -7951,7 +8992,7 @@ const delPost = async (p) => {
   if (!isAdmin) return
   const r = await api.adminDeletePost(p.id)
   if (r?.ok) {
-    persist(prev => {
+    persistSnap(prev => {
       const del = new Set([p.id]); let grow = true
       while (grow) {
         grow = false
@@ -7964,9 +9005,7 @@ const delPost = async (p) => {
       return { ...prev, posts: prev.posts.filter(x => !del.has(x.id)) }
     })
     toast.ok('Post removed')
-    emitDeleted(p.id, p.topicId);   // ← сообщить об удалении
-
-    if (typeof refresh === 'function') await refresh()   // ← добавили
+    emitDeleted(p.id, p.topicId);   // ← сообщить об удалении 
   } else {
     console.error('adminDeletePost error:', r)
     toast.err(r?.error || 'Admin endpoint error')
@@ -7979,13 +9018,12 @@ const banUser = async (p) => {
   const id = p.accountId || p.userId
   const r = await api.adminBanUser(id)
   if (r?.ok) {
-    persist(prev => {
+    persistSnap(prev => {
       const bans = new Set(prev.bans || [])
       bans.add(id)
       return { ...prev, bans: Array.from(bans) }
     })
-    toast.ok(t('forum_banned_ok') || 'User banned')
-    if (typeof refresh === 'function') await refresh()   // ← добавили
+    toast.ok(t('forum_banned_ok') || 'User banned') 
   } else {
     console.error('adminBanUser error:', r)
     toast.err(r?.error || 'Admin endpoint error')
@@ -7998,13 +9036,12 @@ const unbanUser = async (p) => {
   const id = p.accountId || p.userId
   const r = await api.adminUnbanUser(id)
   if (r?.ok) {
-    persist(prev => {
+    persistSnap(prev => {
       const bans = new Set(prev.bans || [])
       bans.delete(id)
       return { ...prev, bans: Array.from(bans) }
     })
-    toast.ok(t('forum_unbanned_ok') || 'User unbanned')
-    if (typeof refresh === 'function') await refresh()   // ← добавили
+    toast.ok(t('forum_unbanned_ok') || 'User unbanned') 
   } else {
     console.error('adminUnbanUser error:', r)
     toast.err(r?.error || 'Admin endpoint error')
@@ -8019,22 +9056,49 @@ const delTopicOwn = async (topic) => {
     return;
   }
 
-  const r = await api.ownerDeleteTopic(topic.id, uid);
-
-  if (r?.ok) {
-    persist(prev => {
-      const posts  = (prev.posts  || []).filter(p => String(p.topicId) !== String(topic.id));
-      const topics = (prev.topics || []).filter(x => String(x.id) !== String(topic.id));
-      return { ...prev, posts, topics };
-    });
-
-    // поддержим оба варианта ключа (на случай старого словаря)
-    toast.ok(t('forum_delete_ok') || 'Удалено');
-
-    try { if (typeof refresh === 'function') await refresh(); } catch {}
-  } else {
-    toast.err(t('forum_error_delete') || 'Ошибка удаления');
+  const topicId = String(topic?.id || '');
+  if (!topicId) return;
+  if (topicId.startsWith('tmp_t_')) {
+    setOverlay(prev => ({
+      ...prev,
+      creates: {
+        ...prev.creates,
+        topics: (prev.creates.topics || []).filter(t => String(t.id) !== topicId),
+        posts: (prev.creates.posts || []).filter(p => String(p.topicId) !== topicId),
+      },
+    }));
+    return;
   }
+
+  persistTombstones(prev => {
+    const topics = { ...prev.topics, [topicId]: Date.now() };
+    return { ...prev, topics };
+  });
+  pushOp('delete_topic', { id: topicId });
+  if (String(sel?.id || '') === topicId) {
+    try { setSel(null); } catch {}
+  }
+  toast.ok(t('forum_delete_ok') || 'Удалено');
+};
+const delPostOwn = (post) => {
+  const postId = String(post?.id || '');
+  if (!postId) return;
+  if (postId.startsWith('tmp_p_')) {
+    setOverlay(prev => ({
+      ...prev,
+      creates: {
+        ...prev.creates,
+        posts: (prev.creates.posts || []).filter(p => String(p.id) !== postId),
+      },
+    }));
+    return;
+  }
+  persistTombstones(prev => {
+    const posts = { ...prev.posts, [postId]: Date.now() };
+    return { ...prev, posts };
+  });
+  pushOp('delete_post', { id: postId });
+  toast.ok(t('forum_delete_ok') || 'Удалено');
 };
 
 
@@ -8049,11 +9113,21 @@ const [topicSort, setTopicSort] = useState('top');   // сортировка т�
 const [postSort,  setPostSort]  = useState('new');   // сортировка сообщений  ← ДОЛЖНА быть объявлена до flat
 const [drop, setDrop] = useState(false);
 const [sortOpen, setSortOpen] = useState(false);
+const VIDEO_PAGE_SIZE = 5;
+const TOPIC_PAGE_SIZE = 10;
+const REPLIES_PAGE_SIZE = 5;
+const THREAD_PAGE_SIZE = 5;
+const [visibleVideoCount, setVisibleVideoCount] = useState(VIDEO_PAGE_SIZE);
+const [visibleTopicsCount, setVisibleTopicsCount] = useState(TOPIC_PAGE_SIZE);
+const [visibleRepliesCount, setVisibleRepliesCount] = useState(REPLIES_PAGE_SIZE);
+const [visibleThreadPostsCount, setVisibleThreadPostsCount] = useState(THREAD_PAGE_SIZE);
 // [INBOX:STATE] — безопасно для SSR (никакого localStorage в рендере)
 const [inboxOpen, setInboxOpen] = useState(false);
 const [mounted, setMounted] = useState(false);           // ← флаг «мы на клиенте»
 useEffect(()=>{ setMounted(true) }, []);
-
+useEffect(() => {
+  setVisibleTopicsCount(TOPIC_PAGE_SIZE);
+}, [topicSort, topicFilterId, starMode, starredAuthors]);
 const meId = auth?.asherId || auth?.accountId || '';
 const seenKey = meId ? `forum:seenReplies:${meId}` : null;
 
@@ -8076,7 +9150,19 @@ const repliesToMe = useMemo(() => {
     String(p.userId || p.accountId || '') !== String(meId)
   );
 }, [data.posts, myPostIds, meId]);
-
+useEffect(() => {
+  if (!inboxOpen) return;
+  setVisibleRepliesCount(REPLIES_PAGE_SIZE);
+}, [inboxOpen, repliesToMe.length]);
+const sortedRepliesToMe = useMemo(
+  () => (repliesToMe || []).slice().sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0)),
+  [repliesToMe]
+);
+const visibleRepliesToMe = useMemo(
+  () => sortedRepliesToMe.slice(0, visibleRepliesCount),
+  [sortedRepliesToMe, visibleRepliesCount]
+);
+const repliesHasMore = visibleRepliesToMe.length < sortedRepliesToMe.length;
 // прочитанные — храним в state, загружаем/сохраняем только на клиенте
 const [readSet, setReadSet] = useState(() => new Set());
 useEffect(() => {
@@ -8136,7 +9222,9 @@ const [threadRoot, setThreadRoot] = useState(null);
 
 // при смене темы выходим из веточного режима
 useEffect(() => { setThreadRoot(null); }, [sel?.id]);
-
+useEffect(() => {
+  setVisibleThreadPostsCount(THREAD_PAGE_SIZE);
+}, [sel?.id, threadRoot, postSort]);
  // === Views: refs to avoid TDZ when effects run before callbacks are initialized ===
 
  const markViewPostRef  = React.useRef(null);
@@ -8219,7 +9307,11 @@ const walk = (n, level = 0) => {
 }, [sel?.id, threadRoot, rootPosts, idMap, postSort]);
 
 // === END flat ===
-
+const visibleFlat = useMemo(
+  () => (flat || []).slice(0, visibleThreadPostsCount),
+  [flat, visibleThreadPostsCount]
+);
+const threadHasMore = visibleFlat.length < (flat || []).length;
     // Множество забаненных (по userId/accountId)
   const bannedSet = useMemo(() => new Set(data.bans || []), [data.bans])
 
@@ -8298,7 +9390,11 @@ const aggregates = useMemo(() => {
     return starredFirst(base, (x) => x?.userId || x?.accountId);
   }, [data.topics, aggregates, topicSort, topicFilterId, starredFirst]);
 
-
+  const visibleTopics = useMemo(
+    () => (sortedTopics || []).slice(0, visibleTopicsCount),
+    [sortedTopics, visibleTopicsCount]
+  );
+  const topicsHasMore = visibleTopics.length < (sortedTopics || []).length;
 
   /* ---- composer ---- */
   const [text,setText] = useState('')
@@ -9062,40 +10158,42 @@ const hasImageLines = React.useMemo(() => {
       likes: 0, dislikes: 0, views: 0, myReaction: null
     }
 
-// оптимистично кладём в локальный снап
-persist(prev => dedupeAll({ ...prev, topics:[t0, ...prev.topics], posts:[...prev.posts, p0] }))
+// оптимистично кладём в overlay
+setOverlay(prev => ({
+  ...prev,
+  creates: {
+    topics: [t0, ...(prev.creates.topics || [])],
+    posts: [ ...(prev.creates.posts || []), p0 ],
+  },
+}))
 setSel(t0)
 toast.ok(t('forum_create_ok') ||'Тема создана')
 
    
-    // 1) создаём тему на бэке
-    const createTopicResp = await api.mutate({
-      ops:[{ type:'create_topic', payload:{ title: safeTitle, description: safeDesc, nickname: t0.nickname, icon: t0.icon } }]
-    }, uid)
-
-    const realTopicId = createTopicResp?.applied?.find(x=>x.op==='create_topic')?.topic?.id
-    if (!realTopicId) { if (typeof refresh === 'function') await refresh();
-      return }
-
-    // ремап tmp -> real локально
-    persist(prev=>{
-      const topics = prev.topics.map(x => x.id===tmpT ? { ...x, id:String(realTopicId) } : x)
-      const posts  = prev.posts.map(x => x.topicId===tmpT ? { ...x, topicId:String(realTopicId) } : x)
-      return dedupeAll({ ...prev, topics, posts })
-    })
-
-    // 2) создаём первый пост (отдельной операцией, уже с реальным topicId)
-    await api.mutate({
-      ops:[{ type:'create_post', payload:{ topicId:String(realTopicId), text:safeFirst, nickname:t0.nickname, icon:t0.icon, parentId:null, cid: tmpP } }]
-    }, uid)
+    pushOp('create_topic', {
+      title: safeTitle,
+      description: safeDesc,
+      nickname: t0.nickname,
+      icon: t0.icon,
+      cid: tmpT,
+      id: tmpT,
+    });
+    pushOp('create_post', {
+      topicId: tmpT,
+      topicCid: tmpT,
+      text: safeFirst,
+      nickname: t0.nickname,
+      icon: t0.icon,
+      parentId: null,
+      cid: tmpP,
+      id: tmpP,
+    });
   // жёсткая очистка и подтягиваем свежий снапшот
   try { setText(''); } catch {}
   try { setPendingImgs([]); } catch {}
   try { setPendingAudio(null); } catch {}
   try { resetVideo(); } catch {}
-  try { setReplyTo(null); } catch {}
-    // подтянуть свежий снапшот
-    if (typeof refresh === 'function') await refresh()
+  try { setReplyTo(null); } catch {} 
   }
 
 
@@ -9112,20 +10210,14 @@ const createPost = async () => {
       const uid = (auth?.asherId || auth?.accountId || getForumUserId());
       const safeText = String(text || '').slice(0, 8000);
       if (!safeText.trim()) { _done(); return; }
-      const r = await api.ownerEditPost(editPostId, safeText, uid);
-      if (r?.ok) {
-        // локально подменим текст
-        persist(prev => ({
-          ...prev,
-          posts: (prev.posts || []).map(p => String(p.id) === String(editPostId) ? { ...p, text: safeText } : p)
-        }));
-        setEditPostId(null);
-        try { setText(''); } catch {}
-        try { toast?.ok?.('Изменено'); } catch {}
-        try { if (typeof refresh === 'function') await refresh(); } catch {}
-      } else {
-        try { toast?.err?.(r?.error || 'Ошибка редактирования'); } catch {}
-      }
+      setOverlay(prev => ({
+        ...prev,
+        edits: { ...prev.edits, [String(editPostId)]: { text: safeText } },
+      }));
+      pushOp('edit_post', { id: String(editPostId), text: safeText });
+      setEditPostId(null);
+      try { setText(''); } catch {}
+      try { toast?.ok?.('Изменено'); } catch {}
     } finally {
       _done();
     }
@@ -9326,18 +10418,13 @@ const createPost = async () => {
     myReaction: null,
   };
  
-  persist(prev => {
-    const next = { ...prev, posts: [ ...(prev.posts || []), p ] };
-    if (isReply && Array.isArray(prev.posts)) {
-      const pid = String(parentId);
-      next.posts = next.posts.map(x => {
-        if (String(x.id) !== pid) return x;
-        const replies = Number(x.replies ?? x.repliesCount ?? 0) + 1;
-        return { ...x, replies, repliesCount: replies };
-      });
-    }
-    return dedupeAll(next);
-  });
+  setOverlay(prev => ({
+    ...prev,
+    creates: {
+      ...prev.creates,
+      posts: [ ...(prev.creates.posts || []), p ],
+    },
+  }));
  
   if (isReply) {
     const parentPost = (data?.posts || []).find(x => String(x.id) === String(parentId));
@@ -9354,15 +10441,13 @@ const createPost = async () => {
     parentId,
     nickname: p.nickname,
     icon: p.icon,
-    cid:  tmpId 
+    cid:  tmpId,
+    id: tmpId,
   });
-  sendBatch(true);
+
   setComposerActive(false);
   emitCreated(p.id, sel.id);
-
-  // мягкий догон
-  setTimeout(() => { try { if (typeof refresh === 'function') refresh(); } catch {} }, 200);
-
+ 
   // сброс UI
   setText('');
   setPendingImgs([]);
@@ -9385,75 +10470,30 @@ const createPost = async () => {
 const reactMut = useCallback(async (post, kind) => {
   if (!rl.allowAction()) { if (toast?.warn) toast.warn(t('forum_too_fast') || 'Слишком часто'); return; }
   const r = await requireAuthStrict(); if (!r) return;
-  // kind: 'like' | 'dislike'
+
   if (!post?.id) return;
-  const uid = (auth?.asherId || auth?.accountId || (typeof getForumUserId==='function' ? getForumUserId() : 'web'));
+  const current = post.myReaction || null;
+  const nextState = current === kind ? null : kind;
+  const baseLikes = Number(post.likes ?? 0);
+  const baseDislikes = Number(post.dislikes ?? 0);
 
-  const current = post.myReaction || null;        // что стоит у пользователя сейчас
-  const ops = [];
+  let likes = baseLikes;
+  let dislikes = baseDislikes;
+  if (current === 'like') likes = Math.max(0, likes - 1);
+  if (current === 'dislike') dislikes = Math.max(0, dislikes - 1);
+  if (nextState === 'like') likes += 1;
+  if (nextState === 'dislike') dislikes += 1;
 
-  if (current === kind) {
-    // повторный клик по тому же — снимаем реакцию
-    ops.push({ type: 'react', payload: { postId: String(post.id), kind, delta: -1 } });
-  } else {
-    // если стояло другое — сначала снимаем предыдущее
-    if (current === 'like')     ops.push({ type: 'react', payload: { postId: String(post.id), kind: 'like',     delta: -1 } });
-    if (current === 'dislike')  ops.push({ type: 'react', payload: { postId: String(post.id), kind: 'dislike',  delta: -1 } });
-    // затем ставим новое
-    ops.push({ type: 'react', payload: { postId: String(post.id), kind, delta: +1 } });
-  }
+  setOverlay(prev => ({
+    ...prev,
+    reactions: {
+      ...prev.reactions,
+      [String(post.id)]: { state: nextState, likes, dislikes },
+    },
+  }));
 
-  // --- оптимистическое обновление локального снапа ---
-  persist(prev => {
-    const posts = (prev.posts || []).map(p => {
-      if (p.id !== post.id) return p;
-      let likes    = Number(p.likes    ?? 0);
-      let dislikes = Number(p.dislikes ?? 0);
-      let myReaction = p.myReaction || null;
-
-      if (current === kind) {
-        // снимаем
-        if (kind === 'like')    likes    = Math.max(0, likes - 1);
-        if (kind === 'dislike') dislikes = Math.max(0, dislikes - 1);
-        myReaction = null;
-      } else {
-        // переключение
-        if (current === 'like')    likes    = Math.max(0, likes - 1);
-        if (current === 'dislike') dislikes = Math.max(0, dislikes - 1);
-        if (kind === 'like')       likes    = likes + 1;
-        if (kind === 'dislike')    dislikes = dislikes + 1;
-        myReaction = kind;
-      }
-      return { ...p, likes, dislikes, myReaction };
-    });
-    return { ...prev, posts };
-  });
-
-// --- батч на сервер ---
-try {
-  const r = await api.mutate({ ops }, uid);
-
-  // Барьер по rev: берём последний rev из применённых операций
-  const lastRev = Number(
-    (r?.applied || [])
-      .map(x => x?.rev)
-      .filter(v => Number.isFinite(v))
-      .pop() || 0
-  );
-
-  // Мгновенно прогреваем снапшот с обходом микрокэша:
-  // передаём уникальный bust (b=Date.now()) и hint по ревизии
-  try {
-    await api.snapshot({ b: Date.now(), rev: lastRev || undefined });
-  } catch {}
-
-  // После прогрева снапшота — мягкий UI-рефреш
-  if (typeof refresh === 'function') await refresh();
-} catch (e) {
-  console.warn('react mutate failed', e);
-}
-
-}, [auth, persist]);
+  pushOp('set_reaction', { postId: String(post.id), state: nextState });
+}, [auth, setOverlay]);
 
 
 const FORUM_VIEW_TTL_SEC = VIEW_TTL_SEC
@@ -9468,9 +10508,18 @@ const markViewPost = (postId) => {
 
 if(!localStorage.getItem(key)){
   localStorage.setItem(key,'1')
-  // без оптимизма — только отправка на бэк
-  pushOp('view_post', { postId: String(postId) })
-  sendBatch(true)
+  pendingViewsPostsRef.current.add(String(postId));
+  setOverlay(prev => {
+    const cur = (data?.posts || []).find(p => String(p.id) === String(postId));
+    const base = Number(prev.views.posts[String(postId)] ?? cur?.views ?? 0);
+    return {
+      ...prev,
+      views: {
+        ...prev.views,
+        posts: { ...prev.views.posts, [String(postId)]: base + 1 },
+      },
+    };
+  });
 }
 
 }
@@ -9506,7 +10555,7 @@ useEffect(() => {
     rec.t = setTimeout(() => {
       const cur = focused.get(postId);
       if (!cur?.el) return; // уже не в фокусе
-      markViewPost(postId); // внутри уже TTL+LS дедуп
+      markViewPostRef.current?.(postId); // внутри уже TTL+LS дедуп
       scheduleNextBucketTick(postId);
     }, delay);
   };
@@ -9551,7 +10600,7 @@ useEffect(() => {
           else focused.get(postId).el = el;
 
           // мгновенно считаем просмотр при попадании в фокус
-          markViewPost(postId);
+          markViewPostRef.current?.(postId);
 
           // префетч медиа вокруг
           prefetchVideosAround(el);
@@ -9600,8 +10649,18 @@ const markViewTopic = (topicId) => {
   try {
     if(!localStorage.getItem(key)){
       localStorage.setItem(key,'1')
-      pushOp('view_topic', { topicId: String(topicId) })
-     sendBatch(true)
+      pendingViewsTopicsRef.current.add(String(topicId));
+      setOverlay(prev => {
+        const cur = (data?.topics || []).find(t => String(t.id) === String(topicId));
+        const base = Number(prev.views.topics[String(topicId)] ?? cur?.views ?? 0);
+        return {
+          ...prev,
+          views: {
+            ...prev.views,
+            topics: { ...prev.views.topics, [String(topicId)]: base + 1 },
+          },
+        };
+      });
     }
   } catch {}
 }
@@ -9809,7 +10868,15 @@ const onFilesChosen = React.useCallback(async (e) => {
 const [videoFeedOpen, setVideoFeedOpen] = React.useState(false);
 const [videoFeed, setVideoFeed] = React.useState([]);
 const [feedSort, setFeedSort] = React.useState('new'); // new/top/likes/views/replies
-
+useEffect(() => {
+  if (!videoFeedOpen) return;
+  setVisibleVideoCount(VIDEO_PAGE_SIZE);
+}, [videoFeedOpen, feedSort, starMode, starredAuthors]);
+const visibleVideoFeed = React.useMemo(
+  () => (videoFeed || []).slice(0, visibleVideoCount),
+  [videoFeed, visibleVideoCount]
+);
+const videoHasMore = visibleVideoFeed.length < (videoFeed || []).length;
 // ВАЖНО: в ленте нужно уметь находить ссылки внутри текста (даже если не отдельной строкой)
 const FEED_URL_RE = /(https?:\/\/[^\s<>'")]+)/ig;
 
@@ -11221,7 +12288,7 @@ onClick={()=>{
 {debugAdsSlots(
   'video',
   interleaveAds(
-    videoFeed || [],
+    visibleVideoFeed || [],
     adEvery,
     {
       isSkippable: (p) => !p || !p.id,
@@ -11261,6 +12328,7 @@ onClick={()=>{
   onReact={reactMut}
   isAdmin={isAdmin}
   onDeletePost={delPost}
+  onOwnerDelete={delPostOwn}  
   onBanUser={banUser}
   onUnbanUser={unbanUser}
   isBanned={bannedSet.has(p?.accountId || p?.userId)}
@@ -11289,10 +12357,20 @@ onClick={()=>{
     />
   );
 })}
-
-
-
-
+      {videoHasMore && (
+        <div className="loadMoreFooter">
+          <div className="loadMoreShimmer">
+            {t?.('loading') || 'Loading…'}
+          </div>
+          <LoadMoreSentinel
+            onVisible={() =>
+              setVisibleVideoCount((c) =>
+                Math.min(c + VIDEO_PAGE_SIZE, (videoFeed || []).length)
+              )
+            }
+          />
+        </div>
+      )}
       {videoFeed?.length === 0 && (
         <div className="meta">
           {t('forum_search_empty') || 'Ничего не найдено'}
@@ -11330,7 +12408,7 @@ onClick={()=>{
 {debugAdsSlots(
   'inbox',
   interleaveAds(
-    (repliesToMe || []).slice().sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0)),
+    visibleRepliesToMe || [],
     adEvery,
     {
       isSkippable: (p) => !p || !p.id,
@@ -11353,6 +12431,7 @@ onClick={()=>{
           onReact={reactMut}
           isAdmin={isAdmin}
           onDeletePost={delPost}
+          onOwnerDelete={delPostOwn}          
           onBanUser={banUser}
           onUnbanUser={unbanUser}
           isBanned={bannedSet.has(p.accountId || p.userId)}
@@ -11380,9 +12459,21 @@ onClick={()=>{
   );
 })}
 
-
-
-      {(repliesToMe || []).length === 0 && (
+      {repliesHasMore && (
+        <div className="loadMoreFooter">
+          <div className="loadMoreShimmer">
+            {t?.('loading') || 'Loading…'}
+          </div>
+          <LoadMoreSentinel
+            onVisible={() =>
+              setVisibleRepliesCount((c) =>
+                Math.min(c + REPLIES_PAGE_SIZE, sortedRepliesToMe.length)
+              )
+            }
+          />
+        </div>
+      )}
+      {sortedRepliesToMe.length === 0 && (
         <div className="meta">
           {t('forum_inbox_empty') || 'Новых ответов нет'}
         </div>
@@ -11394,10 +12485,7 @@ onClick={()=>{
   <>
     <CreateTopicCard t={t} onCreate={createTopic} onOpenVideoFeed={openVideoFeed} />
     <div className="grid gap-2 mt-2" suppressHydrationWarning>
-      {(sortedTopics || [])
-       .slice()
-
-        .map(x => {
+      {(visibleTopics || []).map(x => {
           const agg = aggregates.get(x.id) || { posts:0, likes:0, dislikes:0, views:0 };
           return (
 <TopicItem
@@ -11418,6 +12506,20 @@ onClick={()=>{
           )
         })}
     </div>
+    {topicsHasMore && (
+      <div className="loadMoreFooter">
+        <div className="loadMoreShimmer">
+          {t?.('loading') || 'Loading…'}
+        </div>
+        <LoadMoreSentinel
+          onVisible={() =>
+            setVisibleTopicsCount((c) =>
+              Math.min(c + TOPIC_PAGE_SIZE, (sortedTopics || []).length)
+            )
+          }
+        />
+      </div>
+    )}    
   </>
 )}
 
@@ -11561,13 +12663,13 @@ onClick={()=>{
       {t('forum_inbox_title') || 'Ответы на ваши сообщения'}
     </div>
 
-    {repliesToMe.length === 0 ? (
+    {sortedRepliesToMe.length === 0 ? (
       <div className="inboxEmpty">
         {t('forum_inbox_empty') || 'Пока нет ответов'}
       </div>
     ) : (
       <div className="inboxList">
-        {repliesToMe.map(p => {
+        {visibleRepliesToMe.map(p => {
           // та же логика, что в верхнем инбоксе
           const tt = (data.topics || []).find(
             x => String(x.id) === String(p.topicId),
@@ -11611,6 +12713,7 @@ onClick={()=>{
   onReact={reactMut}
   isAdmin={isAdmin}
   onDeletePost={delPost}
+  onOwnerDelete={delPostOwn}  
   onBanUser={banUser}
   onUnbanUser={unbanUser}
   isBanned={bannedSet.has(p.accountId || p.userId)}
@@ -11623,6 +12726,20 @@ onClick={()=>{
 />
           );
         })}
+        {repliesHasMore && (
+          <div className="loadMoreFooter">
+            <div className="loadMoreShimmer">
+              {t?.('loading') || 'Loading…'}
+            </div>
+            <LoadMoreSentinel
+              onVisible={() =>
+                setVisibleRepliesCount((c) =>
+                  Math.min(c + REPLIES_PAGE_SIZE, sortedRepliesToMe.length)
+                )
+              }
+            />
+          </div>
+        )}        
       </div>
     )}
   </div>
@@ -11641,7 +12758,7 @@ onClick={()=>{
 {debugAdsSlots(
   'replies',
   interleaveAds(
-    flat || [],
+    visibleFlat || [],
     adEvery,
     {
       isSkippable: (p) => !p || !p.id,
@@ -11673,6 +12790,7 @@ onClick={()=>{
   onReact={reactMut}
   isAdmin={isAdmin}
   onDeletePost={delPost}
+  onOwnerDelete={delPostOwn}  
   onBanUser={banUser}
   onUnbanUser={unbanUser}
   isBanned={bannedSet.has(p.accountId || p.userId)}
@@ -11700,9 +12818,20 @@ onClick={()=>{
     />
   );
 })}
-
-
-
+        {threadHasMore && (
+          <div className="loadMoreFooter">
+            <div className="loadMoreShimmer">
+              {t?.('loading') || 'Loading…'}
+            </div>
+            <LoadMoreSentinel
+              onVisible={() =>
+                setVisibleThreadPostsCount((c) =>
+                  Math.min(c + THREAD_PAGE_SIZE, (flat || []).length)
+                )
+              }
+            />
+          </div>
+        )}
           {(!threadRoot && (flat || []).length === 0) && (
             <div className="meta">
               {t('forum_no_posts_yet') || 'Пока нет сообщений'}
@@ -12060,7 +13189,7 @@ onClick={() => {
             </svg>
           </div>
           <audio controls src={pendingAudio} />
-          <button type="button" className="audioRemove" title={t('forum_remove')||'Убрать'} onClick={()=> setPendingAudio(null)}>✕</button>
+          <button type="button" className="audioRemove" title={t('forum_remove')||'Убрать'} onClick={()=> setPendingAudio(null)}>❌</button>
         </div>
       </div>
     )}
