@@ -7755,6 +7755,7 @@ export default function Forum(){
 
     const ratios = new Map();
     let active = null;
+     const CARD_SELECTOR = 'article[data-forum-post-card="1"][data-forum-post-id]';   
     const WARM_IFRAME_NEIGHBORS = 2;
     const isIframeMedia = (el) => {
       if (!(el instanceof HTMLIFrameElement)) return false;
@@ -7854,7 +7855,46 @@ export default function Forum(){
 }
 
     };
+    const ensureIframeLoaded = (el) => {
+      if (!(el instanceof HTMLIFrameElement)) return;
+      const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
+      if (!src) return;
+      if (!el.getAttribute('data-src')) {
+        try { el.setAttribute('data-src', src); } catch {}
+      }
+      if (!el.getAttribute('src')) {
+        try { el.setAttribute('src', src); } catch {}
+      }
+    };
 
+    const unloadAllIframes = () => {
+      try {
+        document.querySelectorAll('iframe[data-forum-media]').forEach((frame) => {
+          pauseMedia(frame);
+        });
+      } catch {}
+    };
+
+    const updateIframeWindow = (anchorEl) => {
+      if (!anchorEl || !anchorEl.closest) return;
+      const card = anchorEl.closest(CARD_SELECTOR);
+      if (!card) return;
+      const cards = Array.from(document.querySelectorAll(CARD_SELECTOR));
+      const idx = cards.indexOf(card);
+      if (idx < 0) return;
+      const from = Math.max(0, idx - 2);
+      const to = Math.min(cards.length - 1, idx + 2);
+      const keep = new Set(cards.slice(from, to + 1));
+      for (const el of cards) {
+        const iframes = el.querySelectorAll('iframe[data-forum-media]');
+        if (!iframes.length) continue;
+        if (keep.has(el)) {
+          iframes.forEach((frame) => ensureIframeLoaded(frame));
+        } else {
+          iframes.forEach((frame) => pauseMedia(frame));
+        }
+      }
+    };
     const playMedia = async (el, opts = {}) => {
       const forceReset = !!opts.forceReset;
       if (!el) return;
@@ -7973,7 +8013,8 @@ if (kind === 'tiktok' || kind === 'iframe') {
             pauseMedia(active);
             active = null;
           }
-          updateIframeWarmSet(null);          
+          updateIframeWarmSet(null); 
+          unloadAllIframes();         
           return;
         }
 
@@ -10321,11 +10362,14 @@ const createPost = async () => {
       }
     } catch (e) {
       console.error('[moderation] video check failed', e);
-      // как в соцсетях: если модерация недоступна — сообщаем, но не валим всё подряд.
-      // В STRICT можно блокировать, но мы уже сделали STRICT=block если кадры не извлеклись.
-      toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
-      toastI18n('info', 'forum_moderation_try_again', 'Please try again');
-      return _fail();
+      if (isStrictModeration) {
+        // STRICT: не пропускаем без проверки
+        toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
+        toastI18n('info', 'forum_moderation_try_again', 'Please try again');
+        return _fail();
+      }
+      // BALANCED: не блокируем публикацию при сбое модерации
+      try { toastI18n('info', 'forum_moderation_try_again', 'Please try again'); } catch {}
     }
   }
 
@@ -10509,7 +10553,7 @@ const createPost = async () => {
     cid:  tmpId,
     id: tmpId,
   });
-
+  try { await flushMutations(); } catch {}
   setComposerActive(false);
   emitCreated(p.id, sel.id);
  
@@ -10869,9 +10913,12 @@ const onFilesChosen = React.useCallback(async (e) => {
         }
       } catch (e2) {
         console.error('[moderation] video check failed', e2);
-        toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
-        toastI18n('info', 'forum_moderation_try_again', 'Please try again');
-        return;
+        if (isStrictModeration) {
+          toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
+          toastI18n('info', 'forum_moderation_try_again', 'Please try again');
+          return;
+        }
+        try { toastI18n('info', 'forum_moderation_try_again', 'Please try again'); } catch {}
       }
 
       // UPLOAD TO VERCEL BLOB (тот же роут, что у записи с камеры)
