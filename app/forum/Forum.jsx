@@ -1302,16 +1302,16 @@ const Styles = () => (
     .neon{ box-shadow:0 0 28px rgba(25,129,255,.14), inset 0 0 18px rgba(25,129,255,.06) }
     .postBody{ white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word }
     .forum_root{
-      --mb-video-h-mobile: 730px;
+      --mb-video-h-mobile: 690px;
       --mb-video-h-tablet: 650px;
       --mb-video-h-desktop: 700px;
-      --mb-image-h-mobile: 730px;
+      --mb-image-h-mobile: 690px;
       --mb-image-h-tablet: 650px;
       --mb-image-h-desktop: 700px;
-      --mb-iframe-h-mobile: 730px;
+      --mb-iframe-h-mobile: 690px;
       --mb-iframe-h-tablet: 650px;
       --mb-iframe-h-desktop: 700px;
-      --mb-audio-h-mobile: 730px;
+      --mb-audio-h-mobile: 690px;
       --mb-audio-h-tablet: 650px;
       --mb-audio-h-desktop: 700px;
       --mb-ad-h-mobile: 200px;
@@ -2253,14 +2253,18 @@ const Styles = () => (
 
 /* лёгкое подпрыгивание на hover */
 .hoverPop {
-  transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
-  will-change: transform;
+  transition: filter .12s ease, color .12s ease, background-color .12s ease, border-color .12s ease;
+  will-change: auto;
 }
 @media (hover:hover) {
-  .hoverPop:hover {
-    transform: translateY(-2px) scale(1.04);
-    filter: saturate(1.15);
-  }
+@media (hover:hover) and (pointer:fine){
+  .hoverPop:hover{ filter: brightness(1.06); }
+}
+.hoverPop:active{ filter: brightness(0.98); }
+.hoverPop:focus-visible{
+  outline: 2px solid rgba(120, 200, 255, .55);
+  outline-offset: 2px;
+}
   .hoverPop:active {
     transform: translateY(0) scale(0.98);
   }
@@ -2990,7 +2994,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 }
 
 .translateToggleBtn:hover:not(:disabled) {
-  transform: translateY(-1px);
+
   box-shadow: 0 0 18px rgba(0, 200, 255, 0.75);
   border-color: rgba(0, 200, 255, 0.95);
   background:
