@@ -817,10 +817,17 @@ html, body, #__next {
   max-height: 100dvh !important; /* чтобы не обрезалось на мобильных */
 }
 
-/* если где-то стоит глобальный overflow:hidden у html/body — снимем */
-html, body {
-  overflow: visible !important;
+/* FIX: убираем прыжок от горизонтального скролла, но НЕ ломаем вертикальный скролл/кнопку */
+html, body{
+  overflow-y: visible !important;   /* оставляем как у тебя было */
+  overflow-x: clip !important;      /* режем только горизонталь (главный источник "прыжка") */
 }
+
+/* fallback для браузеров без clip (на всякий) */
+@supports not (overflow: clip){
+  html, body{ overflow-x: hidden !important; }
+}
+
 /* Пример (опционально): чтобы вписалась как таб */
 .nav-auth-btn {
   margin-left: 0.5rem;
