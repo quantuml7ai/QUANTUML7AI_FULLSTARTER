@@ -994,6 +994,23 @@ function useQCoinLive(userKey, isVip){
 
     const selector = 'video[data-forum-video="post"]';
     let warmed = null;
+    const warmedOnce = new WeakSet();
+    let warmIdleId = null;
+
+    const idle = (fn) => {
+      try {
+        if ('requestIdleCallback' in window) {
+          return window.requestIdleCallback(fn, { timeout: 1200 });
+        }
+      } catch {}
+      return setTimeout(fn, 120);
+    };
+    const cancelIdle = (id) => {
+      try {
+        if ('cancelIdleCallback' in window) return window.cancelIdleCallback(id);
+      } catch {}
+      clearTimeout(id);
+    };
 
     const isSlowNetwork = () => {
       try {
@@ -1008,9 +1025,24 @@ function useQCoinLive(userKey, isVip){
     const clearWarm = () => {
       if (!(warmed instanceof HTMLVideoElement)) { warmed = null; return; }
       try {
-        warmed.preload = 'metadata';
-        warmed.removeAttribute('data-forum-warm');
-        warmed.load();
+        if (warmIdleId != null) { try { cancelIdle(warmIdleId); } catch {} warmIdleId = null; }
+       
+        warmed.preload = slow ? 'metadata' : 'auto';
+        warmed.setAttribute('data-forum-warm', '1');
+
+        // НЕ дергаем load() на каждом play (это и даёт дерганье/CPU).
+        // Подогреваем мягко и ОДИН раз на видео, в idle, только если совсем "холодное".
+        if (!warmedOnce.has(warmed)) {
+          warmedOnce.add(warmed);
+          warmIdleId = idle(() => {
+            warmIdleId = null;
+            try {
+              const cold = (warmed.readyState === 0 || !warmed.currentSrc);
+              const safe = cold && warmed.paused && (warmed.currentTime === 0);
+              if (safe) warmed.load?.();
+            } catch {}
+          });
+        }
       } catch {}
       warmed = null;
     };
@@ -6195,7 +6227,7 @@ const NO_THREAD_OPEN_SELECTOR =
           src={src}
           controls
           playsInline
-          preload="metadata"       // обратно metadata, без "none"
+          preload="none"
           className="mediaBoxItem"
           style={{
             objectFit: 'contain', 
@@ -7582,24 +7614,57 @@ export default function Forum(){
 
     const selector = 'video[data-forum-video="post"]';
 
+    const pending = new WeakMap();
+    const idle = (fn) => {
+      try {
+        if ('requestIdleCallback' in window) {
+          return window.requestIdleCallback(fn, { timeout: 1500 });
+        }
+      } catch {}
+      return setTimeout(fn, 120);
+    };
+    const cancelIdle = (id) => {
+      try {
+        if ('cancelIdleCallback' in window) return window.cancelIdleCallback(id);
+      } catch {}
+      clearTimeout(id);
+    };
+
     const prepare = (video) => {
       if (!(video instanceof HTMLVideoElement)) return;
       if (video.dataset.previewInit === '1') return;
       video.dataset.previewInit = '1';
 
       try {
-        // просим браузер подтянуть метаданные и первый кадр
+        // Мягко просим метаданные (без постоянных reset/load на скролле)
         video.preload = 'metadata';
-        video.load();
-      } catch {
-        // если что-то пошло не так — просто молча пропускаем
-      }
+
+        // Если метаданные уже есть — ничего не делаем
+        if (video.readyState >= 1) return;
+
+        // Тяжёлый load() — только в idle и только если видео реально "холодное"
+        if (pending.has(video)) return;
+        const id = idle(() => {
+          pending.delete(video);
+          try {
+            const cold = (video.readyState === 0 || !video.currentSrc);
+            const safe = cold && video.paused && (video.currentTime === 0);
+            if (safe) video.load?.();
+          } catch {}
+        });
+        pending.set(video, id);
+      } catch {}
     };
 
     // если нет IntersectionObserver — готовим всё сразу
     if (!('IntersectionObserver' in window)) {
       document.querySelectorAll(selector).forEach(prepare);
-      return;
+      return () => {
+        try {
+          pending.forEach((id) => { try { cancelIdle(id); } catch {} });
+          pending.clear?.();
+        } catch {}
+      };
     }
 
     const io = new IntersectionObserver(
@@ -7619,6 +7684,10 @@ export default function Forum(){
 
     return () => {
       io.disconnect();
+            try {
+        pending.forEach((id) => { try { cancelIdle(id); } catch {} });
+        pending.clear?.();
+      } catch {}     
     };
   }, []);
   // === Shorts-like autoplay: play when in focus, pause when out ===
@@ -7783,32 +7852,57 @@ export default function Forum(){
 
     const ratios = new Map();
     let active = null;
+    let rafId = 0;
+    let io = null;
 
-    const pauseMedia = (el) => {
+    const observed = new WeakSet();
+    const unloadTimers = new WeakMap(); // el -> timeoutId
+
+    const cancelUnload = (el) => {
+      const id = unloadTimers.get(el);
+      if (id) clearTimeout(id);
+      unloadTimers.delete(el);
+    };
+
+    const softPauseMedia = (el) => {
       if (!el) return;
       if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
-        try { el.pause(); } catch {}
+        try { if (!el.paused) el.pause(); } catch {}
         return;
       }
       const kind = el.getAttribute('data-forum-media');
- if (kind === 'qcast') {
-  // Q-Cast: управляем скрытым <audio> внутри видимого контейнера
-  const a = el.querySelector?.('audio');
-  if (a instanceof HTMLAudioElement) {
-    try { a.pause(); } catch {}
-  }
-  return;
-}
-     
+      if (kind === 'qcast') {
+        const a = el.querySelector?.('audio');
+        if (a instanceof HTMLAudioElement) { try { if (!a.paused) a.pause(); } catch {} }
+        return;
+      }
       if (kind === 'youtube') {
         const player = ytPlayers.get(el);
         try { player?.pauseVideo?.(); } catch {}
-        stopYtMutePoll(player);
-        // ВАЖНО: YT.Player#destroy() может удалить/заменить исходный <iframe> в DOM.
-        // Если это происходит, IntersectionObserver продолжает следить за «мертвым» узлом,
-        // и при возврате к ролику автозапуск больше не срабатывает.
-        // Решение: перед destroy() заменить iframe на «чистый» клон с теми же атрибутами,
-        // чтобы DOM-узел оставался на месте и его можно было снова активировать.
+        try { stopYtMutePoll(player); } catch {}
+        return;
+      }
+      // iframe/tiktok: softPause ничего не делает (иначе будет reload thrash)
+    };
+
+    const hardUnloadMedia = (el) => {
+      if (!el) return;
+      if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
+        try { if (!el.paused) el.pause(); } catch {}
+        return;
+      }
+      const kind = el.getAttribute('data-forum-media');
+      if (kind === 'qcast') {
+        const a = el.querySelector?.('audio');
+        if (a instanceof HTMLAudioElement) { try { if (!a.paused) a.pause(); } catch {} }
+        return;
+      }
+      if (kind === 'youtube') {
+        const player = ytPlayers.get(el);
+        try { player?.pauseVideo?.(); } catch {}
+        try { stopYtMutePoll(player); } catch {}
+
+        // Destroy ТОЛЬКО при hardUnload (debounce), чтобы не дёргать при микроскролле
         try {
           const ds = el.getAttribute('data-src') || el.getAttribute('src') || '';
           const parent = el.parentNode;
@@ -7819,66 +7913,75 @@ export default function Forum(){
               try { clean.setAttribute('data-src', ds); } catch {}
             }
             parent.replaceChild(clean, el);
-            // снимаем наблюдение со старого узла и сразу цепляем новый
             try { io?.unobserve?.(el); } catch {}
             try { io?.observe?.(clean); } catch {}
           }
-        } catch {}        
-        // ВАЖНО: YouTube iframe держит GPU/WebGL ресурсы даже на pause.
-        // Для ленты (Shorts/TikTok-style) нужно освобождать ресурсы полностью.
+        } catch {}
+
         try { player?.destroy?.(); } catch {}
         try { ytPlayers.delete(el); } catch {}
-        // (src уже сброшен на clean-iframe выше; для старого узла дополнительно не нужно)
-    
         return;
       }
-if (kind === 'tiktok' || kind === 'iframe') {
-  // ВАЖНО: для iframe мы не можем управлять play/pause внутри,
-  // поэтому «пауза» = выгрузить src, а «play» = перезагрузить src.
-  const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
-  if (src && !el.getAttribute('data-src')) el.setAttribute('data-src', src);
-  if (el.getAttribute('src')) el.setAttribute('src', '');
-}
+      if (kind === 'tiktok' || kind === 'iframe') {
+        const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
+        if (src && !el.getAttribute('data-src')) { try { el.setAttribute('data-src', src); } catch {} }
+        try { el.removeAttribute('data-forum-iframe-active'); } catch {}
+        if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }
+        return;
+      }
+    };
 
+    const scheduleHardUnload = (el, ms = 800) => {
+      if (!el) return;
+      cancelUnload(el);
+      const id = setTimeout(() => {
+        unloadTimers.delete(el);
+        hardUnloadMedia(el);
+      }, ms);
+      unloadTimers.set(el, id);
     };
 
     const playMedia = async (el) => {
       if (!el) return;
+      cancelUnload(el);
+
       if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
         try {
           applyMutedPref(el);
           el.playsInline = true;
-          if (el instanceof HTMLVideoElement) el.loop = true;
-          const p = el.play?.();
-          if (p && typeof p.catch === 'function') p.catch(() => {});
+          // НЕ выставляем loop=true (это ломает пользовательский контроль)
+          if (el.paused) {
+            const p = el.play?.();
+            if (p && typeof p.catch === 'function') p.catch(() => {});
+          }
         } catch {}
         return;
       }
+
       const kind = el.getAttribute('data-forum-media');
-if (kind === 'qcast') {
-  // Q-Cast: управляем скрытым <audio> внутри видимого контейнера
-  const a = el.querySelector?.('audio');
-  if (a instanceof HTMLAudioElement) {
-    try {
-      applyMutedPref(a);
-      const p = a.play?.();
-      if (p && typeof p.catch === 'function') p.catch(() => {});
-      window.dispatchEvent(new CustomEvent('site-media-play', {
-        detail: { source: 'qcast', element: el }
-      }));
-    } catch {}
-  }
-  return;
-}
+      if (kind === 'qcast') {
+        const a = el.querySelector?.('audio');
+        if (a instanceof HTMLAudioElement) {
+          try {
+            applyMutedPref(a);
+            if (a.paused) {
+              const p = a.play?.();
+              if (p && typeof p.catch === 'function') p.catch(() => {});
+            }
+            window.dispatchEvent(new CustomEvent('site-media-play', {
+              detail: { source: 'qcast', element: el }
+            }));
+          } catch {}
+        }
+        return;
+      }
 
       if (kind === 'youtube') {
-        // iframe по умолчанию src="" (ленивая загрузка). При активации возвращаем src.
         try {
           const ds = el.getAttribute('data-src') || '';
           const cur = el.getAttribute('src') || '';
           if (ds && !cur) el.setAttribute('src', ds);
         } catch {}
-
         const player = await initYouTubePlayer(el);
         try {
           if (desiredMuted()) player?.mute?.();
@@ -7886,33 +7989,26 @@ if (kind === 'qcast') {
           player?.playVideo?.();
           window.dispatchEvent(new CustomEvent('site-media-play', {
             detail: { source: 'youtube', element: el }
-          }));          
+          }));
         } catch {}
         return;
       }
-if (kind === 'tiktok' || kind === 'iframe') {
-  // ВАЖНО: если пользователь вручную нажал pause/play внутри iframe,
-  // то единственный надёжный способ «вернуть в автоплей» — перезагрузить embed.
-  const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
-  if (!src) return;
-  if (!el.getAttribute('data-src')) el.setAttribute('data-src', src);
 
-  const cur = el.getAttribute('src') || '';
-  if (cur === src) {
-    // форс-ресет (убирает «запомненную» паузу)
-    try { el.setAttribute('src', ''); } catch {}
-    try { requestAnimationFrame(() => { try { el.setAttribute('src', src); } catch {} }); } catch {
-      try { el.setAttribute('src', src); } catch {}
-    }
-  } else {
-    try { el.setAttribute('src', src); } catch {}
-  }
-
-  window.dispatchEvent(new CustomEvent('site-media-play', {
-    detail: { source: kind, element: el }
-  }));      
-}
-
+      if (kind === 'tiktok' || kind === 'iframe') {
+        // ВАЖНО: НЕ делаем force-reset на каждом "фокусе" — это и есть перезапуск при микроскролле.
+        const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
+        if (!src) return;
+        if (!el.getAttribute('data-src')) { try { el.setAttribute('data-src', src); } catch {} }
+        const alreadyActive = el.getAttribute('data-forum-iframe-active') === '1';
+        const cur = el.getAttribute('src') || '';
+        if (!alreadyActive || !cur) {
+          try { el.setAttribute('data-forum-iframe-active', '1'); } catch {}
+          try { el.setAttribute('src', src); } catch {}
+        }
+        window.dispatchEvent(new CustomEvent('site-media-play', {
+          detail: { source: kind, element: el }
+        }));
+      }
     };
 
     const pickMostVisible = () => {
@@ -7929,92 +8025,123 @@ if (kind === 'tiktok' || kind === 'iframe') {
 
     if (!('IntersectionObserver' in window)) return;
 
-    const io = new IntersectionObserver(
+    io = new IntersectionObserver(
       (entries) => {
-
+        // обновляем ratios
         for (const entry of entries) {
-          const el = entry.target; 
-
+          const el = entry.target;
           const r = entry.isIntersecting ? (entry.intersectionRatio || 0) : 0;
           if (r <= 0) {
             ratios.delete(el);
-
+            // ВАЖНО: НЕ трогаем неактивные элементы (иначе unload/reload thrash)
             if (active === el) {
-              pauseMedia(el);
+              softPauseMedia(el);
+              // iframe/youtube — освобождаем ресурсы с задержкой (анти-микроскролл)
+              scheduleHardUnload(el, 900);
               active = null;
-            } else {
-              pauseMedia(el);
             }
           } else {
             ratios.set(el, r);
           }
         }
- 
-        const { el: candidate, ratio } = pickMostVisible();
 
-        const FOCUS_RATIO = 0.40;
+        if (rafId) return;
+        rafId = requestAnimationFrame(() => {
+          rafId = 0;
+          const { el: candidate, ratio } = pickMostVisible();
+          const FOCUS_RATIO = 0.40;
 
-        if (!candidate || ratio < FOCUS_RATIO) {
-          if (active) {
-            pauseMedia(active);
-            active = null;
+          if (!candidate || ratio < FOCUS_RATIO) {
+            if (active) {
+              softPauseMedia(active);
+              scheduleHardUnload(active, 900);
+              active = null;
+            }
+            return;
           }
-          return;
-        }
 
-        if (active && active !== candidate) {
-          pauseMedia(active);
-        }
+          if (active && active !== candidate) {
+            // старый — мягко стоп + hard unload с задержкой
+            softPauseMedia(active);
+            scheduleHardUnload(active, 900);
+          }
 
-        active = candidate;
-        playMedia(candidate)
+          active = candidate;
+          cancelUnload(active);
+          playMedia(active);
+        });
       },
-      { 
+      {
         threshold: [0, 0.15, 0.35, 0.6, 0.85, 1],
-
         rootMargin: '0px 0px -20% 0px',
       }
     );
 
-const observeAll = () => {
-  try {
-document.querySelectorAll(selector).forEach((el) => {
-  // аудио/видео: следим за mute, чтобы запоминать выбор
-  if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
-    bindVolumeListener(el);
-  }
+    const observeOne = (el) => {
+      try {
+        if (!(el instanceof Element)) return;
+        if (observed.has(el)) return;
+        observed.add(el);
 
-  // Q-Cast: наблюдаем за видимым контейнером, а mute/unmute берём с вложенного <audio>
-  const kind = el?.getAttribute?.('data-forum-media');
-  if (kind === 'qcast') {
-    const a = el.querySelector?.('audio');
-    if (a instanceof HTMLAudioElement) bindVolumeListener(a);
-  }
+        // аудио/видео: следим за mute, чтобы запоминать выбор
+        if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
+          bindVolumeListener(el);
+        }
 
-  // iframe/tiktok: гарантируем data-src...
-  if ((kind === 'tiktok' || kind === 'iframe') && el?.getAttribute) {
-    const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
-    if (src && !el.getAttribute('data-src')) {
-      try { el.setAttribute('data-src', src); } catch {}
-    }
-  }
+        // Q-Cast: mute/unmute берём с вложенного <audio>
+        const kind = el?.getAttribute?.('data-forum-media');
+        if (kind === 'qcast') {
+          const a = el.querySelector?.('audio');
+          if (a instanceof HTMLAudioElement) bindVolumeListener(a);
+        }
 
-  io.observe(el);
-});
+        // iframe/tiktok: гарантируем data-src
+        if ((kind === 'tiktok' || kind === 'iframe') && el?.getAttribute) {
+          const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
+          if (src && !el.getAttribute('data-src')) {
+            try { el.setAttribute('data-src', src); } catch {}
+          }
+        }
 
-  } catch {}
-};
+        io?.observe?.(el);
+      } catch {}
+    };
 
+    const observeAll = () => {
+      try { document.querySelectorAll(selector).forEach(observeOne); } catch {}
+    };
 
     observeAll();
- 
-    const tick = setInterval(observeAll, 1500);
+
+    // Вместо setInterval(querySelectorAll...) — MutationObserver на новые медиа-узлы
+    let mo = null;
+    try {
+      mo = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+          for (const n of (m.addedNodes || [])) {
+            if (!(n instanceof Element)) continue;
+            if (n.matches?.(selector)) observeOne(n);
+            try { n.querySelectorAll?.(selector)?.forEach?.(observeOne); } catch {}
+          }
+        }
+      });
+      mo.observe(document.body, { childList: true, subtree: true });
+    } catch { mo = null; }
     window.addEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
     return () => {
-      clearInterval(tick);
+      try { mo?.disconnect?.(); } catch {}
       window.removeEventListener(MEDIA_MUTED_EVENT, onMutedEvent);      
-      io.disconnect();
-      if (active) pauseMedia(active);
+      try { if (rafId) cancelAnimationFrame(rafId); } catch {}
+      io?.disconnect?.();
+
+      try {
+        unloadTimers.forEach?.((id) => clearTimeout(id));
+      } catch {}
+
+      if (active) {
+        softPauseMedia(active);
+        scheduleHardUnload(active, 0);
+      }
       active = null;
       ratios.clear();
  
