@@ -752,6 +752,68 @@ export function AdCard({ url, slotKind, nearId }) {
   const videoRef = useRef(null);
   const ytIframeRef = useRef(null);
   const ytPlayerRef = useRef(null);
+  // ===== Focus / attention gating =====
+  // isNear: блок рядом (можно подгружать, но не играть)
+  // isFocused: блок реально в зоне внимания (играем)
+  // isPageActive: вкладка/окно активно (иначе всегда пауза)
+  const [isNear, setIsNear] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const [isPageActive, setIsPageActive] = useState(true);
+
+  const shouldPlay = isFocused && isPageActive;
+  const shouldPlayRef = useRef(false);
+
+  useEffect(() => {
+    shouldPlayRef.current = shouldPlay;
+  }, [shouldPlay]);
+
+  // Page visibility + focus/blur
+  useEffect(() => {
+    if (!isBrowser()) return;
+
+    const sync = () => {
+      const visible = document.visibilityState === 'visible';
+      setIsPageActive(visible);
+    };
+
+    sync();
+    document.addEventListener('visibilitychange', sync);
+    window.addEventListener('focus', sync);
+    window.addEventListener('blur', sync);
+
+    return () => {
+      document.removeEventListener('visibilitychange', sync);
+      window.removeEventListener('focus', sync);
+      window.removeEventListener('blur', sync);
+    };
+  }, []);
+
+  // Intersection: near + focused
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el || !isBrowser() || typeof IntersectionObserver === 'undefined')
+      return;
+
+    // near: заранее «подойти» к блоку (без игры)
+    const nearObs = new IntersectionObserver(
+      ([e]) => setIsNear(!!e?.isIntersecting),
+      { rootMargin: '800px 0px', threshold: 0 }
+    );
+
+    // focused: реально видно (>= 60% площади)
+    const focusObs = new IntersectionObserver(
+      ([e]) => setIsFocused((e?.intersectionRatio || 0) >= 0.6),
+      { threshold: [0, 0.25, 0.6, 0.75, 1] }
+    );
+
+    nearObs.observe(el);
+    focusObs.observe(el);
+
+    return () => {
+      nearObs.disconnect();
+      focusObs.disconnect();
+    };
+  }, []);
 
   const safeClick = useMemo(() => {
     try {
@@ -1075,7 +1137,7 @@ export function AdCard({ url, slotKind, nearId }) {
         const player = new window.YT.Player(ytIframeRef.current, {
           videoId: media.src,
           playerVars: {
-            autoplay: 1,
+            autoplay: 0,
             controls: 0,
             mute: 1,
             rel: 0,
@@ -1091,11 +1153,14 @@ export function AdCard({ url, slotKind, nearId }) {
               ytPlayerRef.current = ev.target;
               try {
                 ev.target.mute();
-                ev.target.playVideo();
+                // Играем только если реально в фокусе внимания
+                if (shouldPlayRef.current) ev.target.playVideo();
+                else ev.target.pauseVideo();
               } catch {}
             },
           },
         });
+
         ytPlayerRef.current = player;
       } catch {}
     }
@@ -1120,6 +1185,31 @@ export function AdCard({ url, slotKind, nearId }) {
       cancelled = true;
     };
   }, [media]);
+  // ===== Hard stop / resume playback depending on attention =====
+  useEffect(() => {
+    // HTML5 video
+    if (media.kind === 'video' && videoRef.current) {
+      const v = videoRef.current;
+      if (shouldPlay) {
+        v.play?.().catch(() => {});
+      } else {
+        v.pause?.();
+      }
+    }
+
+    // YouTube player (Iframe API)
+    if (media.kind === 'youtube' && ytPlayerRef.current) {
+      const p = ytPlayerRef.current;
+      try {
+        if (shouldPlay) {
+          if (muted) p.mute?.();
+          p.playVideo?.();
+        } else {
+          p.pauseVideo?.();
+        }
+      } catch {}
+    }
+  }, [shouldPlay, media.kind, muted]);
 
   // Impression tracking
   useEffect(() => {
@@ -1216,7 +1306,10 @@ export function AdCard({ url, slotKind, nearId }) {
       const v = videoRef.current;
       const next = !muted;
       v.muted = next;
-      if (v.paused && !next) v.play?.().catch(() => {});
+
+      // Не запускаем видео, если блок не в фокусе внимания
+      if (v.paused && !next && shouldPlayRef.current) v.play?.().catch(() => {});
+
       setMuted(next);
     } else if (media.kind === 'youtube' && ytPlayerRef.current) {
       const p = ytPlayerRef.current;
@@ -1226,11 +1319,13 @@ export function AdCard({ url, slotKind, nearId }) {
           p.mute();
         } else {
           p.unMute();
-          p.playVideo();
+          // Тоже не запускаем вне фокуса
+          if (shouldPlayRef.current) p.playVideo();
         }
       } catch {}
       setMuted(next);
     }
+
   };
 
   const showSoundButton =
@@ -1304,13 +1399,14 @@ export function AdCard({ url, slotKind, nearId }) {
               <video
                 ref={videoRef}
                 src={media.src}
-                className="w-full h-full object-cover"
-                autoPlay
+                className="w-full h-full object-cover" 
                 muted={muted}
                 loop
                 playsInline
+                preload={isNear ? 'metadata' : 'none'}
               />
             )}
+
 
             {media.kind === 'youtube' && media.src && (
               <div
@@ -1341,7 +1437,7 @@ export function AdCard({ url, slotKind, nearId }) {
               </div>
             )}
 
-            {media.kind === 'tiktok' && media.src && (
+            {media.kind === 'tiktok' && media.src && shouldPlay && (
               <div
                 className="w-full h-full"
                 style={{
@@ -1367,6 +1463,13 @@ export function AdCard({ url, slotKind, nearId }) {
                 />
               </div>
             )}
+
+            {media.kind === 'tiktok' && media.src && !shouldPlay && (
+              <div className="w-full h-full flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)]">
+                {host}
+              </div>
+            )}
+
 
             {media.kind === 'image' && media.src && (
            <div className="w-full h-full flex items-center justify-center">

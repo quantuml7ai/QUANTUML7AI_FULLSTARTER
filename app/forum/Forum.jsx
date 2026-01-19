@@ -5165,6 +5165,17 @@ function ProfilePopover({
   const [finalAvatarBlob, setFinalAvatarBlob] = useState(null);
   const [finalAvatarUrl, setFinalAvatarUrl] = useState('');
   const finalAvatarUrlRef = useRef('');
+  // ✅ мгновенное превью сразу после выбора файла (до canvas-crop)
+  const [rawAvatarUrl, setRawAvatarUrl] = useState('');
+  const rawAvatarUrlRef = useRef('');
+  const pickTokenRef = useRef(0); // защита от гонок при быстром выборе файлов
+
+  // ✅ защита от setState после unmount (save может продолжаться после onClose)
+  const mountedRef = useRef(false);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
   const dragRef = useRef({ on: false, x: 0, y: 0, sx: 0, sy: 0 });
 
   const bmpRef = useRef(null); // ImageBitmap
@@ -5177,9 +5188,13 @@ function ProfilePopover({
       bmpRef.current = null;
       if (finalAvatarUrlRef.current) {
         try { URL.revokeObjectURL(finalAvatarUrlRef.current); } catch {}
-        finalAvatarUrlRef.current = '';
-      }
-    };
+        finalAvatarUrlRef.current = '';             
+       }
+      if (rawAvatarUrlRef.current) {
+        try { URL.revokeObjectURL(rawAvatarUrlRef.current); } catch {}
+        rawAvatarUrlRef.current = '';
+      }   
+      };
   }, []);
   // когда поповер открывается — сбрасываем превью (чтобы не "тащилось" по страницам)
   useEffect(() => {
@@ -5195,7 +5210,13 @@ function ProfilePopover({
     if (finalAvatarUrlRef.current) {
       try { URL.revokeObjectURL(finalAvatarUrlRef.current); } catch {}
       finalAvatarUrlRef.current = '';
-    }    
+    }  
+
+    setRawAvatarUrl('');
+    if (rawAvatarUrlRef.current) {
+      try { URL.revokeObjectURL(rawAvatarUrlRef.current); } catch {}
+      rawAvatarUrlRef.current = '';
+    }      
     try { bmpRef.current?.close?.(); } catch {}
     bmpRef.current = null;
   }, [open]);
@@ -5243,21 +5264,44 @@ function ProfilePopover({
  
   const openFilePicker = () => fileRef.current?.click?.();
 
-  const onPickFile = async (e) => {
+  const onPickFile = (e) => {
     const f = e?.target?.files?.[0];
     if (!f) return;
+    // 1) мгновенно показываем выбранное изображение (без "PROCESSING")
+    const token = ++pickTokenRef.current;  
     try {
-      setUploadFile(f);
-      setCrop({ x: 0, y: 0, z: 1 });
-      setImgInfo({ w: 0, h: 0 });
+      if (rawAvatarUrlRef.current) {
+        try { URL.revokeObjectURL(rawAvatarUrlRef.current); } catch {}
+        rawAvatarUrlRef.current = '';
+      }
+      const url = URL.createObjectURL(f);
+      rawAvatarUrlRef.current = url;
+      setRawAvatarUrl(url);
+      setFinalAvatarUrl(url); // в квадрате сразу будет превью
+      finalAvatarUrlRef.current = url; // пока это raw-URL; заменим после canvas-crop
+    } catch {}
 
-      try { bmpRef.current?.close?.(); } catch {}
-      bmpRef.current = await createImageBitmap(f);
-      setImgInfo({ w: bmpRef.current?.width || 0, h: bmpRef.current?.height || 0 });
+    // 2) базовые стейты
+    setUploadFile(f);
+    setCrop({ x: 0, y: 0, z: 1 });
+    setImgInfo({ w: 0, h: 0 });
+    // 3) декод в bitmap + натуральные размеры (асинхронно)
+    (async () => {
+      try {
+        try { bmpRef.current?.close?.(); } catch {}
+        const bmp = await createImageBitmap(f);
+        if (pickTokenRef.current !== token) {
+          try { bmp?.close?.(); } catch {}
+          return;
+        }
+        bmpRef.current = bmp;
+        setImgInfo({ w: bmp?.width || 0, h: bmp?.height || 0 });
+      } catch {
+        // если bitmap не создался — оставляем raw превью
+      }
+    })();
 
-    } finally {
-      try { e.target.value = ''; } catch {}
-    }
+    try { e.target.value = ''; } catch {}
   };
 
   const onPointerDown = (e) => {
@@ -5324,16 +5368,25 @@ function ProfilePopover({
   // Перерисовка превью при изменении параметров
   useEffect(() => {
     let cancelled = false;
-    if (!open || !bmpRef.current || !uploadFile) {
+    // нет выбранного файла/поповер закрыт -> чистим превью
+    if (!open || !uploadFile) {
       setFinalAvatarBlob(null);
       if (finalAvatarUrlRef.current) {
         try { URL.revokeObjectURL(finalAvatarUrlRef.current); } catch {}
         finalAvatarUrlRef.current = '';
       }
       setFinalAvatarUrl('');
+      setRawAvatarUrl('');
+      if (rawAvatarUrlRef.current) {
+        try { URL.revokeObjectURL(rawAvatarUrlRef.current); } catch {}
+        rawAvatarUrlRef.current = '';
+      }      
       return () => {};
     }
-
+    // bitmap ещё не готов -> оставляем raw-превью без "PROCESSING"
+    if (!bmpRef.current) {
+      return () => { cancelled = true; };
+    }
     (async () => {
       const blob = await makeCroppedPngBlob({ size: 512 });
       if (!blob || cancelled) return;
@@ -5344,6 +5397,12 @@ function ProfilePopover({
       finalAvatarUrlRef.current = nextUrl;
       setFinalAvatarBlob(blob);
       setFinalAvatarUrl(nextUrl);
+      // raw-превью больше не нужно
+      setRawAvatarUrl('');
+      if (rawAvatarUrlRef.current) {
+        try { URL.revokeObjectURL(rawAvatarUrlRef.current); } catch {}
+        rawAvatarUrlRef.current = '';
+      }      
     })();
 
     return () => { cancelled = true; };
@@ -5453,54 +5512,87 @@ const save = async () => {
   const n = String(nick || '').trim();
   if (!n || nickFree === false || busy || !uid) return;
 
-  setBusy(true);
-  try { 
-let iconToSend = icon;
+  // ===== OPTIMISTIC UI (сразу обновляем всё в интерфейсе пользователя) =====
+  const prevLocal = readLocal() || {};
+  const prevNick = prevLocal.nickname || '';
+  const prevIcon = prevLocal.icon || ICONS[0];
 
-// Если выбрано пользовательское фото — модерируем (как загрузка по скрепке),
-// потом кропаем и грузим через /api/forum/upload.
-if (uploadFile) {
-   if (!finalAvatarBlob) {
-     toastI18n('warn', 'forum_avatar_pending', 'Please wait until the avatar preview is ready');
-     return;
-   }  
-   setUploadBusy(true);
-   try {
-    // 0) MODERATION: точно так же, как в attach (paperclip)
-    try {
-      const mod = await moderateImageFiles([uploadFile]);
-      if (mod?.decision === 'block') {
-        toastI18n('warn', 'forum_image_blocked', 'Image rejected by community rules');
-        toastI18n('info', reasonKey(mod?.reason), reasonFallbackEN(mod?.reason));
-        return;
+  // если выбран файл — показываем везде то, что уже есть в превью
+  const optimisticIcon = uploadFile ? (finalAvatarUrl || rawAvatarUrl || icon) : icon;
+
+  mergeProfileCache(uid, { nickname: n, icon: optimisticIcon, updatedAt: Date.now() });
+  onSaved?.({ nickname: n, icon: optimisticIcon });
+
+  // закрываем поповер мгновенно (дальше всё догружается в фоне)
+  onClose?.();
+
+  // ===== серверная часть (в фоне): загрузка аватара + сохранение =====
+  if (mountedRef.current) setBusy(true);
+  try {
+    let iconToSend = icon;
+
+    // Если выбрано пользовательское фото — модерируем и грузим в /api/forum/upload.
+    if (uploadFile) {
+      if (mountedRef.current) setUploadBusy(true);
+      try {
+        // 0) MODERATION: точно так же, как в attach (paperclip)
+        try {
+          const mod = await moderateImageFiles([uploadFile]);
+          if (mod?.decision === 'block') {
+            toastI18n('warn', 'forum_image_blocked', 'Image rejected by community rules');
+            toastI18n('info', reasonKey(mod?.reason), reasonFallbackEN(mod?.reason));
+            // rollback optimistic
+            mergeProfileCache(uid, { nickname: prevNick, icon: prevIcon, updatedAt: Date.now() });
+            onSaved?.({ nickname: prevNick, icon: prevIcon });
+            return;
+          }
+          if (mod?.decision === 'review') {
+            try { console.warn('[moderation] avatar review -> allow (balanced)', mod?.reason, mod?.raw); } catch {}
+          }
+        } catch (err) {
+          console.error('[moderation] avatar check failed', err);
+          toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');          toastI18n('info', 'forum_moderation_try_again', 'Please try again');
+          // rollback optimistic
+          mergeProfileCache(uid, { nickname: prevNick, icon: prevIcon, updatedAt: Date.now() });
+          onSaved?.({ nickname: prevNick, icon: prevIcon });
+          return;
+        }
+
+        // 1) берём финальный кроп-blob; если ещё не готов — пробуем собрать прямо сейчас
+        let blob = finalAvatarBlob;
+        if (!blob) blob = await makeCroppedPngBlob({ size: 512 });
+
+        const fd = new FormData();
+        if (blob) {
+          const file = new File([blob], `avatar-${uid}-${Date.now()}.png`, { type: 'image/png' });
+          fd.append('files', file);
+        } else {
+          // крайний случай: отправляем исходный файл (без кропа), чтобы не стопорить UX
+          fd.append('files', uploadFile);
+        }
+
+        const up = await fetch('/api/forum/upload', { method: 'POST', body: fd, cache: 'no-store' });
+        const uj = await up.json().catch(() => ({}));
+        if (!up.ok || !uj?.urls?.[0]) {
+          console.warn('avatar upload failed', uj);
+          // rollback optimistic
+          mergeProfileCache(uid, { nickname: prevNick, icon: prevIcon, updatedAt: Date.now() });
+          onSaved?.({ nickname: prevNick, icon: prevIcon });
+          return;
+        }
+
+        iconToSend = uj.urls[0];
+
+        // ✅ reconcile: подменяем blob-превью на реальный URL (чтобы пережило перезагрузку)
+        mergeProfileCache(uid, { icon: iconToSend, updatedAt: Date.now() });
+        onSaved?.({ nickname: n, icon: iconToSend });
+      } finally {
+        if (mountedRef.current) setUploadBusy(false);
       }
-      if (mod?.decision === 'review') {
-        try { console.warn('[moderation] avatar review -> allow (balanced)', mod?.reason, mod?.raw); } catch {}
-      }
-    } catch (err) {
-      console.error('[moderation] avatar check failed', err);
-      toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
-      toastI18n('info', 'forum_moderation_try_again', 'Please try again');
-      return;
+    } else {
+      iconToSend = icon;
     }
 
-    const file = new File([finalAvatarBlob], `avatar-${uid}-${Date.now()}.png`, { type: 'image/png' });
-    const fd = new FormData();
-    fd.append('files', file);
-
-    const up = await fetch('/api/forum/upload', { method: 'POST', body: fd, cache: 'no-store' });
-    const uj = await up.json().catch(() => ({}));
-
-    if (!up.ok || !uj?.urls?.[0]) {
-      console.warn('avatar upload failed', uj);
-      return;
-    }
-
-    iconToSend = uj.urls[0];
-  } finally {
-    setUploadBusy(false);
-  }
-}
 
     const r = await fetch('/api/profile/save-nick', {
       method: 'POST',
@@ -5515,21 +5607,24 @@ if (uploadFile) {
 
     const j = await r.json().catch(() => null);
     if (!r.ok || !j?.ok) {
-      if (j?.error === 'nick_taken') setNickFree(false);
+      if (j?.error === 'nick_taken' && mountedRef.current) setNickFree(false);
+      // rollback optimistic
+      mergeProfileCache(uid, { nickname: prevNick, icon: prevIcon, updatedAt: Date.now() });
+      onSaved?.({ nickname: prevNick, icon: prevIcon });
       return;
     }
 
     const savedNick = j.nick || n;
-    const savedIcon = j.icon || icon;
+    const savedIcon = j.icon || iconToSend || optimisticIcon;
     const savedAccountId = String(j.accountId || uid || '').trim();
 
     writeProfileAlias(uid, savedAccountId);
     mergeProfileCache(savedAccountId, { nickname: savedNick, icon: savedIcon, updatedAt: Date.now() });
-
+  // финальный reconcile на ответ бэка
     onSaved?.({ nickname: savedNick, icon: savedIcon });
-    onClose?.();
+
   } finally {
-    setBusy(false);
+if (mountedRef.current) setBusy(false);
   }
 };
 
@@ -5577,7 +5672,7 @@ if (uploadFile) {
           {!uploadFile && (
             <div className="avaUploadSquareTxt">UPLOAD<br/>AVATAR</div>
           )}
-          {uploadFile && !finalAvatarUrl && (
+          {uploadFile && !finalAvatarUrl && !rawAvatarUrl && (
             <div className="avaUploadSquareTxt">PROCESSING…</div>
           )}          
           {uploadBusy && (
