@@ -796,14 +796,16 @@ html, body, #__next {
 
 /* Не даём приложению «резать» порталы на мобилках */
 @media (max-width: 768px) {
-  /* overflow НЕ трогаем вообще — иначе снова появится горизонтальный скролл */
-
+  html, body, #__next {
+    overflow: visible !important;
+  }
+  /* если где-то стоит transform/filter, это создаёт новый stacking context.
+     Сбрасываем его для корневых оболочек, чтобы порталы были поверх */
   main, .container, .panel {
     transform: none !important;
     will-change: auto !important;
   }
 }
-
 /* --- Web3Modal mobile safety fixes --- */
 #w3m-modal, .w3m-modal {
   position: fixed !important;
@@ -815,12 +817,10 @@ html, body, #__next {
   max-height: 100dvh !important; /* чтобы не обрезалось на мобильных */
 }
 
-/* НЕ даём появляться горизонтальному скроллу (именно он делает "прыжок" ширины) */
+/* если где-то стоит глобальный overflow:hidden у html/body — снимем */
 html, body {
-  overflow-x: clip !important;   /* лучше чем hidden: не создаёт лишнюю прокрутку */
-  overflow-y: auto !important;
+  overflow: visible !important;
 }
-
 /* Пример (опционально): чтобы вписалась как таб */
 .nav-auth-btn {
   margin-left: 0.5rem;
