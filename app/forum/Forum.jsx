@@ -1,9 +1,7 @@
 // app/forum/Forum.jsx
-
-
+ 
 'use client'
-
-
+ 
 import React, { useEffect, useMemo, useRef, useCallback, useState } from 'react'
 import { useI18n } from '../../components/i18n' 
 import { broadcast as forumBroadcast } from './events/bus'
@@ -415,10 +413,9 @@ function resolveIconUrl(iconId, userId = '') {
     return `/vip/${name}.webp`
   }
 
-  // stock (s:N) → /avatars/N.webp
+  // stock (s:N) → upload.jpg
   if (iconId.startsWith('s:')) {
-    const n = Math.max(0, parseInt(iconId.slice(2), 10) || 0)
-    return `/avatars/${n}.webp`
+    return `/upload.jpg`
   }
 
   // emoji (e:1f60a-1f44d) → twemoji svg (стабильно на SSR/CSR)
@@ -438,9 +435,7 @@ function resolveIconUrl(iconId, userId = '') {
 
 function defaultAvatarUrl(userId = '') {
   // детерминированный fallback по userId
-  const h = [...String(userId)].reduce((a,c)=>((a<<5)-a+c.charCodeAt(0))|0,0)
-  const i = Math.abs(h) % 8
-  return `/avatars/${i}.webp`
+  return `/upload.jpg`
 }
 
 /**
@@ -1774,6 +1769,9 @@ const Styles = () => (
   width:100%;
   height:100%;
   display:block;
+  object-fit: cover;
+  transform-origin: center;
+  will-change: transform;  
 }
 
 .avaUploadSquareTxt{
@@ -5176,23 +5174,50 @@ function ProfilePopover({
     mountedRef.current = true;
     return () => { mountedRef.current = false; };
   }, []);
-  const dragRef = useRef({ on: false, x: 0, y: 0, sx: 0, sy: 0 });
+  const dragRef = useRef({ on: false, moved: false, canDrag: false, x: 0, y: 0, sx: 0, sy: 0 });
 
   const bmpRef = useRef(null); // ImageBitmap
   const boxSizeRef = useRef(0);
-
+  const shouldKeepObjectUrl = (url) => {
+    if (!url || typeof window === 'undefined' || !uid) return false;
+    try {
+      const prof = safeReadProfile(uid);
+      return prof?.icon === url;
+    } catch {
+      return false;
+    }
+  };
+  const revokeObjectUrlIfSafe = (url) => {
+    if (!url || shouldKeepObjectUrl(url)) return false;
+    try {
+      URL.revokeObjectURL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  const cleanupObjectUrlsIfStale = () => {
+    if (finalAvatarUrlRef.current && revokeObjectUrlIfSafe(finalAvatarUrlRef.current)) {
+      finalAvatarUrlRef.current = '';
+    }
+    if (rawAvatarUrlRef.current && revokeObjectUrlIfSafe(rawAvatarUrlRef.current)) {
+      rawAvatarUrlRef.current = '';
+    }
+  };
   // финальная уборка (на размонтирование)
   useEffect(() => {
     return () => {
       try { bmpRef.current?.close?.(); } catch {}
       bmpRef.current = null;
       if (finalAvatarUrlRef.current) {
-        try { URL.revokeObjectURL(finalAvatarUrlRef.current); } catch {}
-        finalAvatarUrlRef.current = '';             
+        if (revokeObjectUrlIfSafe(finalAvatarUrlRef.current)) {
+          finalAvatarUrlRef.current = '';
+        }          
        }
       if (rawAvatarUrlRef.current) {
-        try { URL.revokeObjectURL(rawAvatarUrlRef.current); } catch {}
-        rawAvatarUrlRef.current = '';
+        if (revokeObjectUrlIfSafe(finalAvatarUrlRef.current)) {
+          finalAvatarUrlRef.current = '';
+        }
       }   
       };
   }, []);
@@ -5208,14 +5233,16 @@ function ProfilePopover({
     setFinalAvatarBlob(null);
     setFinalAvatarUrl('');
     if (finalAvatarUrlRef.current) {
-      try { URL.revokeObjectURL(finalAvatarUrlRef.current); } catch {}
-      finalAvatarUrlRef.current = '';
+      if (revokeObjectUrlIfSafe(finalAvatarUrlRef.current)) {
+        finalAvatarUrlRef.current = '';
+      }
     }  
 
     setRawAvatarUrl('');
     if (rawAvatarUrlRef.current) {
-      try { URL.revokeObjectURL(rawAvatarUrlRef.current); } catch {}
-      rawAvatarUrlRef.current = '';
+      if (revokeObjectUrlIfSafe(rawAvatarUrlRef.current)) {
+        rawAvatarUrlRef.current = '';
+      }
     }      
     try { bmpRef.current?.close?.(); } catch {}
     bmpRef.current = null;
@@ -5270,19 +5297,25 @@ function ProfilePopover({
     // 1) мгновенно показываем выбранное изображение (без "PROCESSING")
     const token = ++pickTokenRef.current;  
     try {
+      if (finalAvatarUrlRef.current) {
+        if (revokeObjectUrlIfSafe(finalAvatarUrlRef.current)) {
+          finalAvatarUrlRef.current = '';
+        }
+      }      
       if (rawAvatarUrlRef.current) {
-        try { URL.revokeObjectURL(rawAvatarUrlRef.current); } catch {}
-        rawAvatarUrlRef.current = '';
+        if (revokeObjectUrlIfSafe(rawAvatarUrlRef.current)) {
+          rawAvatarUrlRef.current = '';
+        }
       }
       const url = URL.createObjectURL(f);
       rawAvatarUrlRef.current = url;
       setRawAvatarUrl(url);
-      setFinalAvatarUrl(url); // в квадрате сразу будет превью
-      finalAvatarUrlRef.current = url; // пока это raw-URL; заменим после canvas-crop
-    } catch {}
+      setFinalAvatarUrl('');
+      finalAvatarUrlRef.current = ''; } catch {}
 
     // 2) базовые стейты
     setUploadFile(f);
+    setFinalAvatarBlob(null);    
     setCrop({ x: 0, y: 0, z: 1 });
     setImgInfo({ w: 0, h: 0 });
     // 3) декод в bitmap + натуральные размеры (асинхронно)
@@ -5305,11 +5338,13 @@ function ProfilePopover({
   };
 
   const onPointerDown = (e) => {
-    if (!uploadFile || !bmpRef.current) return;
+
     e.preventDefault();
     e.stopPropagation();
     const p = dragRef.current;
     p.on = true;
+    p.moved = false;
+    p.canDrag = !!uploadFile && !!bmpRef.current;    
     p.x = e.clientX;
     p.y = e.clientY;
     p.sx = crop.x;
@@ -5323,13 +5358,23 @@ function ProfilePopover({
     e.stopPropagation();
     const dx = e.clientX - p.x;
     const dy = e.clientY - p.y;
+    if (!p.moved && (dx * dx + dy * dy > 9)) {
+      p.moved = true;
+    }
+    if (!p.moved || !p.canDrag) return;    
     setCrop((c) => ({ ...c, x: p.sx + dx, y: p.sy + dy }));
   };
   const onPointerUp = (e) => {
     const p = dragRef.current;
     if (!p.on) return;
     p.on = false;
+    p.canDrag = false;   
     try { e.currentTarget.releasePointerCapture?.(e.pointerId); } catch {}
+    if (!p.moved) {
+      openFilePicker();
+      return;
+    }
+    setCrop((c) => clampCrop(c));    
   };
 
   // делаем квадратный PNG из превью (клиентский кроп)
@@ -5365,48 +5410,7 @@ function ProfilePopover({
     });
  }, [crop]);
 
-  // Перерисовка превью при изменении параметров
-  useEffect(() => {
-    let cancelled = false;
-    // нет выбранного файла/поповер закрыт -> чистим превью
-    if (!open || !uploadFile) {
-      setFinalAvatarBlob(null);
-      if (finalAvatarUrlRef.current) {
-        try { URL.revokeObjectURL(finalAvatarUrlRef.current); } catch {}
-        finalAvatarUrlRef.current = '';
-      }
-      setFinalAvatarUrl('');
-      setRawAvatarUrl('');
-      if (rawAvatarUrlRef.current) {
-        try { URL.revokeObjectURL(rawAvatarUrlRef.current); } catch {}
-        rawAvatarUrlRef.current = '';
-      }      
-      return () => {};
-    }
-    // bitmap ещё не готов -> оставляем raw-превью без "PROCESSING"
-    if (!bmpRef.current) {
-      return () => { cancelled = true; };
-    }
-    (async () => {
-      const blob = await makeCroppedPngBlob({ size: 512 });
-      if (!blob || cancelled) return;
-      const nextUrl = URL.createObjectURL(blob);
-      if (finalAvatarUrlRef.current) {
-        try { URL.revokeObjectURL(finalAvatarUrlRef.current); } catch {}
-      }
-      finalAvatarUrlRef.current = nextUrl;
-      setFinalAvatarBlob(blob);
-      setFinalAvatarUrl(nextUrl);
-      // raw-превью больше не нужно
-      setRawAvatarUrl('');
-      if (rawAvatarUrlRef.current) {
-        try { URL.revokeObjectURL(rawAvatarUrlRef.current); } catch {}
-        rawAvatarUrlRef.current = '';
-      }      
-    })();
 
-    return () => { cancelled = true; };
-  }, [open, crop, uploadFile, makeCroppedPngBlob]);
   // грузим на сервер и ставим icon=url (но НЕ сохраняем профиль — это сделает основной Save)
   const useUploadedPhoto = async () => {
     if (!uid || !finalAvatarBlob || uploadBusy) return;
@@ -5544,6 +5548,7 @@ const save = async () => {
             // rollback optimistic
             mergeProfileCache(uid, { nickname: prevNick, icon: prevIcon, updatedAt: Date.now() });
             onSaved?.({ nickname: prevNick, icon: prevIcon });
+            cleanupObjectUrlsIfStale();      
             return;
           }
           if (mod?.decision === 'review') {
@@ -5555,6 +5560,7 @@ const save = async () => {
           // rollback optimistic
           mergeProfileCache(uid, { nickname: prevNick, icon: prevIcon, updatedAt: Date.now() });
           onSaved?.({ nickname: prevNick, icon: prevIcon });
+           cleanupObjectUrlsIfStale();     
           return;
         }
 
@@ -5578,6 +5584,7 @@ const save = async () => {
           // rollback optimistic
           mergeProfileCache(uid, { nickname: prevNick, icon: prevIcon, updatedAt: Date.now() });
           onSaved?.({ nickname: prevNick, icon: prevIcon });
+          cleanupObjectUrlsIfStale();     
           return;
         }
 
@@ -5586,6 +5593,7 @@ const save = async () => {
         // ✅ reconcile: подменяем blob-превью на реальный URL (чтобы пережило перезагрузку)
         mergeProfileCache(uid, { icon: iconToSend, updatedAt: Date.now() });
         onSaved?.({ nickname: n, icon: iconToSend });
+        cleanupObjectUrlsIfStale();     
       } finally {
         if (mountedRef.current) setUploadBusy(false);
       }
@@ -5611,6 +5619,7 @@ const save = async () => {
       // rollback optimistic
       mergeProfileCache(uid, { nickname: prevNick, icon: prevIcon, updatedAt: Date.now() });
       onSaved?.({ nickname: prevNick, icon: prevIcon });
+      cleanupObjectUrlsIfStale();    
       return;
     }
 
@@ -5622,7 +5631,7 @@ const save = async () => {
     mergeProfileCache(savedAccountId, { nickname: savedNick, icon: savedIcon, updatedAt: Date.now() });
   // финальный reconcile на ответ бэка
     onSaved?.({ nickname: savedNick, icon: savedIcon });
-
+    cleanupObjectUrlsIfStale();
   } finally {
 if (mountedRef.current) setBusy(false);
   }
@@ -5652,21 +5661,28 @@ if (mountedRef.current) setBusy(false);
         <button
           type="button"
           ref={avaBoxRef}
-          className="avaUploadSquare"
-          onClick={openFilePicker}
+          className="avaUploadSquare" 
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              openFilePicker();
+            }
+          }}       
           title="Upload avatar"
           aria-label="Upload avatar"
         >
-          {finalAvatarUrl && (
+          {rawAvatarUrl && (
             <img
-              src={finalAvatarUrl}
+              src={rawAvatarUrl}
               alt=""
               className="avaUploadSquareCanvas"
-              onError={() => setFinalAvatarUrl('')}
+              style={{
+                transform: `translate3d(${crop.x}px, ${crop.y}px, 0) scale(${crop.z})`,
+              }}
             />
           )}
           {!uploadFile && (
@@ -12045,9 +12061,844 @@ function pickAdUrlForSlot(slotKey, slotKind) {
   onResetConfirm={resetOrCloseOverlay}
   t={t}
 />
- 
+
+<div
+  className="grid2"
+  style={{ display:'flex', flexDirection:'column', gridTemplateColumns: '1fr', flex: '1 1 auto', minHeight: 0 }}
+>
+
+  {/* ОДНА КОЛОНКА: если тема не выбрана — список тем; если выбрана — посты темы */}
+  {!sel ? (
+    /* === СПИСОК ТЕМ === */
+    <section className="glass neon" style={{ display:'flex', flexDirection:'column', flex:'1 1 auto', minHeight: 0 }}>
+<div className="head">
       {/* шапка */}
-      <section className="glass neon p-3" style={{ position:'relative', zIndex:40, overflow:'visible' }}>
+         <div className="head" style={{ position:'relative', width:'100%' }}>
+          <div style={{ position:'relative' }}>
+            <button
+              ref={avatarRef}
+              className={cls('avaBig neon', (!nickShown || iconShown==='👤') && 'pulse')}
+              title={nickShown || t('forum_account')}
+              onClick={async()=>{
+                openOnly(profileOpen ? null : 'profile')
+                if (!profileOpen) return;
+
+                setProfileOpen(v=>!v)
+              }}>
+              <AvatarEmoji userId={idShown} pIcon={iconShown} />
+            </button>
+<ProfilePopover
+  anchorRef={avatarRef}
+  open={profileOpen}
+  onClose={()=>setProfileOpen(false)}
+  t={t}
+  auth={auth}
+  vipActive={vipActive}
+  onSaved={() => setProfileBump((x) => x + 1)}
+
+  viewerId={viewerId}
+  myFollowersCount={myFollowersCount}
+  myFollowersLoading={myFollowersLoading}
+
+  moderateImageFiles={moderateImageFiles}
+  toastI18n={toastI18n}
+  reasonKey={reasonKey}
+  reasonFallbackEN={reasonFallbackEN}
+/>
+       
+  {/* ник ВСЕГДА под аватаром */}
+  <button
+    className="nick-badge nick-animate avaNick"
+    title={idShown||'—'}
+    onClick={copyId}
+    translate="no"
+ >
+    <span className="nick-text">{nickShown || t('forum_not_signed')}</span>
+  </button>            
+          </div>
+
+  {/* ← ВОТ СЮДА ВСТАВЬ ПОПОВЕР */}
+  {qcoinModalOpen && (
+    <QCoinWithdrawPopover
+      anchorRef={withdrawBtnRef}
+      onClose={() => setQcoinModalOpen(false)}
+      onOpenQuests={openQuests}
+      t={t}
+      questEnabled={QUEST_ENABLED}
+      isAuthed={!!meUid}
+    />
+  )}
+
+
+ <div className="min-w-0">
+   <div
+     className="qRowRight"
+     style={{ '--qcoin-offset':'6px', '--qcoin-y': '10px', '--qcoin-scale':'1.15' }}  /* ← здесь настраиваешь */
+   >
+     <QCoinInline t={t} userKey={idShown} vipActive={vipActive} />
+   </div>
+ </div>
+ 
+
+          {/* === НОВОЕ: правый встроенный контейнер управления === */}
+          <div className="controls">
+            {/* поиск + сорт */}
+            <div className="search">
+              <input
+                className="searchInput"
+                value={q}
+                onChange={e=>{ setQ(e.target.value); openOnly('search') }}
+                onFocus={()=>openOnly('search')}
+                placeholder={t('forum_search_ph') || 'Поиск по темам и сообщениям…'}
+              />
+              <button className="iconBtn" aria-label="search" onClick={()=> openOnly(drop ? null : 'search')}>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+                  <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.7"/><path d="M16 16l4 4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
+                </svg>
+              </button>
+              <button className="iconBtn" title={t('forum_sort')||'Сортировка'} onClick={()=> openOnly(sortOpen ? null : 'sort')}>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+                  <path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
+                </svg>
+              </button>
+{/* ⬇️ КВЕСТ-ИКОНКА МЕЖДУ СОРТИРОВКОЙ И VIP+ */}
+<Image
+  src="/click/quest.gif"
+  unoptimized width={52} height={52}
+  alt=""
+  role="button"
+  aria-label={t('quest_open') || 'Quests'}
+  aria-disabled={!QUEST_ENABLED}
+  tabIndex={QUEST_ENABLED ? 0 : -1}
+  onClick={QUEST_ENABLED ? openQuests : undefined}
+  onKeyDown={(e) => {
+    if (!QUEST_ENABLED) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openQuests?.();
+    }
+  }}
+  draggable={false}
+  className={
+    `questIconPure ${typeof questBtnClass !== 'undefined' ? questBtnClass : ''}`
+  }
+  style={{
+    ['--quest-w']: '52px',   // меняй по желанию: '96px' | '3rem' | 'auto'
+    ['--quest-h']: 'auto',
+    ['--quest-cursor']: QUEST_ENABLED ? 'pointer' : 'default',
+    ['--quest-y']: '-14px',
+ }}
+/>
+{/* ⬆️ КОНЕЦ ВСТАВКИ */}
+                {drop && q.trim() && (
+                <div className="searchDrop" onMouseLeave={()=>setDrop(false)}>
+                  {results.length===0 && <div className="meta px-1 py-1">{t('forum_search_empty') || 'Ничего не найдено'}</div>}
+                  {results.map(r=>(
+                    <button
+                      key={`${r.k}:${r.id}`}
+                      className="item w-full text-left mb-1"
+                      onClick={()=>{
+                        setDrop(false)
+                        if(r.k==='t'){
+                          const tt = (data.topics||[]).find(x=>x.id===r.id)
+                          if(tt){ setTopicFilterId(tt.id); setSel(tt); setThreadRoot(null) }
+                        }else{
+                          const p = (data.posts||[]).find(x=>x.id===r.id)
+                          if(p){
+                            const tt = (data.topics||[]).find(x=>x.id===p.topicId)
+if (tt) {
+  setTopicFilterId(tt.id);
+  // ✅ сразу открыть ветку ответов с заголовком = найденное сообщение
+  openThreadForPost(p);
+}
+
+                          }
+                        }
+                      }}>
+                      {r.k==='t'
+                        ? (<div><div className="title">Тема: {r.title}</div>{r.desc && <div className="meta">{r.desc}</div>}</div>)
+                        : (<div><div className="title">Сообщение</div><div className="meta">{r.text}</div></div>)
+                      }
+                    </button>
+                  ))}
+                </div>
+              )}
+{claimFx.open && (
+  <div className="coinBurstOverlay" onClick={() => setClaimFx(s => ({ ...s, open: false }))}>
+    {claimFx.pieces.map(p => (
+      <div
+        key={p.id}
+        className="coinPiece"
+        style={{ marginLeft: `${p.x}vw`, animationDelay: `${p.delay}ms`, width: p.size, height: p.size }}
+      />
+    ))}
+    <div className="coinBurstBox" onClick={e => e.stopPropagation()}>
+      <div className="coinCongrats">{t('quest_reward_claimed') || 'Награда зачислена'}</div>
+      <div className="coinSum">+ {Number(claimFx.amount).toFixed(10)}</div>
+
+      <button
+        className="btn"
+        onClick={async (e) => {
+          const btn = e.currentTarget;
+          if (btn.dataset.loading === '1') return;            // антидубль
+          btn.dataset.loading = '1';
+
+          if (!window.__claimingRef) window.__claimingRef = new Set();
+          const claimKey = `${auth?.accountId || auth?.asherId || ''}::${claimFx.cardId}`;
+          if (window.__claimingRef.has(claimKey)) return;
+          window.__claimingRef.add(claimKey);
+
+          const finish = (reset = true) => {
+            if (reset) {
+              setClaimFx({ open: false, cardId: '', amount: '', pieces: [] });
+              try { lastClaimFxRef.current = { cardId: '', ts: Date.now() } } catch {}
+            }
+            btn.dataset.loading = '0';
+            window.__claimingRef.delete(claimKey);
+          };
+
+          try {
+            // 1) UID
+            let uid = auth?.accountId || auth?.asherId || '';
+            if (!uid) {
+              const ok = await (typeof requireAuthStrict === 'function' ? requireAuthStrict() : openAuth?.());
+              if (!ok) return finish(false);
+              uid = auth?.accountId || auth?.asherId || '';
+              if (!uid) return finish(false);
+            }
+            uid = String(uid).replace(/[^\x20-\x7E]/g, '');
+
+            const clientCardId = claimFx.cardId;                 // "quest-1"
+            const serverCardId = normalizeCardId(clientCardId);   // "1"                                                   // "1"
+            if (!serverCardId || serverCardId === '0') return finish(false);
+            const qq = QUESTS?.find(q => q.id === clientCardId);
+            if (!qq || !qq.rewardKey) return finish(false);
+
+           // ===== helpers
+            const normalizeTaskId = (x) => {
+              const s = String(x ?? '');
+              const m = s.match(/(\d+)$/);
+              return m ? String(Number(m[1])) : s;
+            };
+            const postTask = async (numStr) => {
+              const common = {
+                method: 'POST',
+                headers: {
+                  'content-type': 'application/json',
+                  'x-forum-user': uid,
+                  'x-forum-vip': vipActive ? '1' : '0',
+                },
+                cache: 'no-store',
+              };
+            
+              // сервер ждёт ЧИСЛОВОЙ cardId и ЧИСЛОВОЙ taskId
+              const r = await fetch('/api/quest/progress', {                ...common,
+                body: JSON.stringify({ cardId: serverCardId, taskId: numStr, accountId: uid }),
+              });
+              return r.ok;
+            };
+
+            // 2) синхронизация недостающих задач
+            const progRes = await fetch('/api/quest/progress', {
+              method: 'GET',
+              headers: { 'x-forum-user': uid, 'x-forum-vip': vipActive ? '1' : '0' },
+              cache: 'no-store',
+            });
+            let prog = {}; try { prog = await progRes.json(); } catch {}
+            const serverCard = prog?.progress?.[serverCardId] || {};
+            const serverDoneRaw = Array.isArray(serverCard.done) ? serverCard.done : [];
+            const serverDone = new Set(serverDoneRaw.map(normalizeTaskId));
+
+            const totalTasks = getCardTotalTasks(clientCardId);
+            const allIds = Array.from({ length: totalTasks }, (_, i) => String(i + 1));
+            const missing = allIds.filter(id => !serverDone.has(id));
+
+            for (const id of missing) { try { await postTask(id); } catch {} }
+
+            // 3) клейм
+            const doClaim = async () => {
+              const res = await fetch('/api/quest/progress', {
+                method: 'POST',
+                headers: {
+                  'content-type': 'application/json',
+                  'x-forum-user': uid,
+                  'x-forum-vip': vipActive ? '1' : '0',
+                },
+                cache: 'no-store',
+                body: JSON.stringify({
+                  cardId: serverCardId,
+                  claim: true,
+                  rewardKey: qq.rewardKey,
+                  accountId: uid,
+                }),              });
+              let j = null; try { j = await res.json(); } catch {}
+              return { res, j };
+            };
+
+            const { res, j } = await doClaim();
+
+            // успех: 200/ok или 409/already_claimed
+            if ((res.ok && j?.ok) || res.status === 409 || j?.error === 'already_claimed') {
+             const allNumIds = Array.from({ length: getCardTotalTasks(clientCardId) }, (_, i) => String(i + 1));
+              writeQuestProg(prev => {
+                const card = { ...(prev[clientCardId] || {}) };
+                card.claimed = true;
+                card.claimTs = Date.now();
+                // обеспечиваем числовые id
+                if (!Array.isArray(card.done) || card.done.length < allNumIds.length) {
+                  card.done = allNumIds.slice();
+                } else {
+                  card.done = card.done.map(normalizeTaskId);
+                }
+                if (!card.claimReadyTs) card.claimReadyTs = Date.now();
+                return { ...prev, [clientCardId]: card };
+              });
+              if (j?.awarded != null) {
+                try { toast.show({ type: 'ok', text: `+${Number(j.awarded).toFixed(10)} QCoin` }) } catch {}
+              }
+              finish(true);
+              return;
+            }
+
+            const msg = j?.error || `http_${res?.status || 0}`;
+            try { toast.show({ type: 'warn', text: msg }) } catch {}
+            console.warn('[claim] status=', res?.status, 'json=', j);
+            finish(false);
+          } catch (err) {
+            console.error('[claim] unexpected', err);
+            try { toast.show({ type: 'warn', text: 'client_error' }) } catch {}
+            finish(false);
+          }
+        }}
+      >
+        {t('quest_do') || 'Забрать'}
+      </button>
+    </div>
+  </div>
+)}
+
+
+
+              {sortOpen && (
+                <div className="sortDrop" onMouseLeave={()=>setSortOpen(false)}>
+
+{[
+  ['new',     t('forum_sort_new')     || 'Новые'],
+  ['top',     t('forum_sort_top')     || 'Топ'],
+  ['likes',   t('forum_sort_likes')   || 'Лайки'],
+  ['views',   t('forum_sort_views')   || 'Просмотры'],
+  ['replies', t('forum_sort_replies') || 'Ответы'],
+].map(([k,txt])=>(
+  <button
+    key={k}
+    className="item w-full text-left mb-1"
+// [SORT_MENU:CLICK]
+onClick={()=>{
+  if (videoFeedOpen) setFeedSort(k);
+  else if (sel) setPostSort(k);
+  else setTopicSort(k);
+  setSortOpen(false);
+}}
+
+  >
+    {txt}
+  </button>
+))}
+  {/* ⭐ Star-mode toggle (icon-only) */}
+  <button
+    type="button"
+    className={`starModeBtn ${starMode ? 'on' : ''}`}
+   onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); setStarMode(v=>!v); }}
+
+    title="Star mode: авторы, на которых вы подписаны — первыми"
+    aria-pressed={starMode}
+    aria-label="Star mode"
+  >
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden>
+      <path className="starPath" d="M12 2.6l2.9 6.2 6.8.6-5.1 4.4 1.6 6.6L12 16.9 5.8 20.4l1.6-6.6-5.1-4.4 6.8-.6L12 2.6Z" />
+   </svg>
+  </button>
+
+                </div>
+              )}
+           </div>
+{/* ---- VIP+ ---- */}
+<div className="vipWrap">
+  <button
+    ref={vipBtnRef}
+    className={cls('iconBtn', vipActive ? 'vip' : 'vipGray', 'pulse', 'hoverPop')}
+    title={t('forum_vip_plus') || 'VIP+'}
+    onClick={()=> openOnly(vipOpen ? null : 'vip')}
+  >
+    VIP+
+  </button>
+
+  <VipPopover
+    anchorRef={vipBtnRef}
+    open={vipOpen}
+    onClose={() => setVipOpen(false)}
+    t={t}
+    vipActive={vipActive}
+    onPay={async () => {
+      try {
+        const accountId = auth?.accountId || auth?.asherId || '';
+        if (!accountId) { 
+          toast?.err?.(t('forum_need_auth') || 'Authorization required'); 
+          return; 
+        }
+
+        // 1) Проверяем текущий статус через ТВОЮ ручку AI-квоты
+        {
+          const r0 = await fetch('/api/subscription/status', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ accountId }),
+          });
+          const j0 = await r0.json().catch(() => null);
+          if (j0?.isVip) {
+            // уже VIP — просто подсветим кнопку и закроем поповер
+            try { setVipActive?.(true); } catch {}
+            toast?.ok?.(t('forum_vip_already_active') || 'VIP already active');
+            setVipOpen(false);
+            return;
+          }
+        }
+
+        // 2) Запускаем ТОТ ЖЕ платёж, что и для AI-квоты
+        const r = await fetch('/api/pay/create', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ accountId }), // только accountId — без выдуманных полей
+        });
+
+        const j = await r.json().catch(() => null);
+        if (j?.url) {
+          // открываем NowPayments (как на бирже)
+         openPaymentWindow(j.url);
+          // 3) Короткий опрос статуса, пока webhook не запишет в базу
+          const started = Date.now();
+          let active = false;
+          while (!active && Date.now() - started < 60_000) {
+            await new Promise(r => setTimeout(r, 2000));
+            const rs = await fetch('/api/subscription/status', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ accountId }),
+            });
+            const js = await rs.json().catch(() => null);
+            active = !!js?.isVip;
+          }
+
+          if (active) {
+            try { setVipActive?.(true); } catch {}
+            toast?.ok?.(t('forum_vip_activated') || 'VIP activated');
+          } else {
+            // не успели получить webhook за минуту — просто сообщаем,
+            // дальше подтянется твоим общим циклом/при следующем заходе
+            toast?.warn?.(t('forum_vip_pending') || 'Payment pending…');
+          }
+        } else {
+          toast?.err?.(t('forum_vip_pay_fail') || 'Payment init failed');
+        }
+      } catch {
+        toast?.err?.(t('forum_vip_pay_fail') || 'Payment init failed');
+      } finally {
+        setVipOpen(false);
+      }
+    }}
+  />
+</div>
+
+
+            {/* админ */}
+            <div className="adminWrap">
+              <button
+                ref={adminBtnRef}
+                className={cls('adminBtn', isAdmin ? 'adminOn' : 'adminOff', 'pulse', 'hoverPop')}
+                onClick={()=> openOnly(adminOpen ? null : 'admin')}>
+                {t('forum_admin')}
+              </button>
+              <AdminPopover
+                anchorRef={adminBtnRef}
+                open={adminOpen}
+                onClose={()=>setAdminOpen(false)}
+                t={t}
+                isActive={isAdmin}
+                onActivated={()=> setIsAdmin(true)}
+                onDeactivated={()=> setIsAdmin(false)}
+              />
+            </div>
+          </div>
+        </div>
+  
+ {/* ЕДИНАЯ ГОРИЗОНТАЛЬНАЯ ЛИНЕЙКА: ЛЕВО — ЦЕНТР — ПРАВО */}
+  <div className="forumRowBar">
+    <div className="slot-left">
+  {/* Назад (иконка) — в режиме videoFeedOpen закрывает видео-ленту */}
+  <button
+    type="button"
+    className="iconBtn ghost"
+    aria-label={t?.('forum_back') || 'Назад'}
+      disabled={!videoFeedOpen && !inboxOpen && !questOpen}
+    onClick={()=>{ 
+      if (videoFeedOpen) { try{ closeVideoFeed?.() }catch{}; return; } 
+      if (inboxOpen)    { try{ setInboxOpen(false) }catch{}; return; }
+  if (questOpen) {
+    // если внутри раздела квестов открыта карточка — просто закрываем её
+    if (questSel) { try{ setQuestSel(null) }catch{}; return; }
+    // иначе выходим из раздела квестов целиком
+    try{ closeQuests?.() }catch{}; return;
+  }     
+ }}
+       title={t?.('forum_back') || 'Назад'}
+   
+      >
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
+      <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  </button>
+
+  {/* Домой (иконка) */}
+  <button
+    type="button"
+    className="iconBtn ghost"
+    aria-label={t?.('forum_home') || 'На главную'}
+    onClick={()=>{
+    if (videoFeedOpen) { try{ closeVideoFeed?.() }catch{} }
+    if (questOpen)     { try{ closeQuests?.() }catch{} }
+    try{ setInboxOpen(false) }catch{};
+    try{ setReplyTo(null) }catch{};
+    try{ setThreadRoot(null) }catch{};
+    try{ setSel(null) }catch{};
+  }}
+    title={t?.('forum_home') || 'На главную'}
+  >
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
+      <path d="M3 10l9-7 9 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M5 10v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  </button>
+</div>
+
+    <div className="slot-center">
+
+    </div>
+    <div className="slot-right">
+   <button
+    type="button"
+    className="iconBtn inviteGifBtn"
+    style={{
+      width: INVITE_BTN_SIZE,
+      height: INVITE_BTN_SIZE,
+      padding: 0,
+      marginRight: 8,
+      transform: `translate(${INVITE_BTN_OFFSET_X}px, ${INVITE_BTN_OFFSET_Y}px)`,
+    }}
+    onClick={() => {
+      try {
+        window.dispatchEvent(new CustomEvent('invite:open'));
+      } catch {}
+    }}
+    onMouseDown={(e) => e.preventDefault()}
+    aria-label="Invite friends"
+  >
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: INVITE_GIF_SIZE,
+        height: INVITE_GIF_SIZE,
+        borderRadius: '999px',
+        overflow: 'hidden',
+      }}
+    >
+      <img
+        src="/friends/invitation.gif"
+        alt=""
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          display: 'block',
+        }}
+        draggable={false}
+      />
+    </span>
+  </button>     
+      <button
+        type="button"
+        className="iconBtn inboxBtn"
+        title={t('forum_inbox') || 'Ответы мне'}
+        onClick={() => setInboxOpen(v => !v)}
+        aria-pressed={inboxOpen}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden>
+          <path d="M3 7h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.6" fill="none"/>
+          <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        {mounted && unreadCount > 0 && (
+          <span className="inboxBadge" suppressHydrationWarning>{unreadCount}</span>
+        )}
+      </button>
+    </div>
+  </div>
+      </div>
+{videoFeedOpen ? (
+  <>
+{/* ВЕТКА-ЛЕНТА: медиа (видео/аудио/изображения) */}
+<div className="meta mt-1">{t('') || ''}</div>
+    <div className="grid gap-2 mt-2" suppressHydrationWarning>
+{debugAdsSlots(
+  'video',
+  interleaveAds(
+    visibleVideoFeed || [],
+    adEvery,
+    {
+      isSkippable: (p) => !p || !p.id,
+      getId: (p) => p?.id || `${p?.topicId || 'vf'}:${p?.ts || 0}`,
+    }
+  )
+).map((slot) => {
+  if (slot.type === 'item') {
+    const p = slot.item;
+    const parent = p?.parentId
+      ? (data?.posts || []).find(x => String(x.id) === String(p.parentId))
+      : null;
+
+const openThreadHere = (clickP) => {
+  // ✅ ветка открывается с заголовком = тот пост, по которому кликнули
+  openThreadForPost(clickP || p, { closeInbox: true, closeVideoFeed: true });
+};
+
+
+    return (
+      <div key={slot.key} id={`post_${p?.id || ''}`}>
+<PostCard
+  p={p}
+  parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}
+  onReport={() => toast.ok(t('forum_report_ok'))}
+  onOpenThread={openThreadHere}
+  onReact={reactMut}
+  isAdmin={isAdmin}
+  onDeletePost={delPost}
+  onOwnerDelete={delPostOwn}  
+  onBanUser={banUser}
+  onUnbanUser={unbanUser}
+  isBanned={bannedSet.has(p?.accountId || p?.userId)}
+  authId={viewerId}
+  markView={markViewPost}
+  t={t}
+  isVideoFeed={true}   // ✅ NEW
+    viewerId={viewerId}
+  starredAuthors={starredAuthors}
+  onToggleStar={toggleAuthorStar}
+/>
+
+      </div>
+    );
+  }
+
+  const url = pickAdUrlForSlot(slot.key, 'video');
+  if (!url) return null;
+
+  return (
+    <AdCard
+      key={slot.key}
+      url={url}
+      slotKind="video"
+      nearId={slot.nearId}
+    />
+  );
+})}
+      {videoHasMore && (
+        <div className="loadMoreFooter">
+          <div className="loadMoreShimmer">
+            {t?.('loading') || 'Loading…'}
+          </div>
+          <LoadMoreSentinel
+            onVisible={() =>
+              setVisibleVideoCount((c) =>
+                Math.min(c + VIDEO_PAGE_SIZE, (videoFeed || []).length)
+              )
+            }
+          />
+        </div>
+      )}
+      {videoFeed?.length === 0 && (
+        <div className="meta">
+          {t('forum_search_empty') || 'Ничего не найдено'}
+        </div>
+      )}
+    </div>
+
+
+  </>
+) : (questOpen && QUEST_ENABLED) ? (
+  <>
+    <div className="meta mt-1">{t('') || ''}</div>
+    <QuestHub
+      t={t}
+      quests={QUESTS}
+      questProg={questProg}
+      isCardCompleted={isCardCompleted}
+      isCardClaimable={isCardClaimable}
+      readEnv={readEnv}
+      vipActive={vipActive}
+      getTaskRemainMs={getTaskRemainMs}     // ← добавили
+      taskDelayMs={TASK_DELAY_MS}           // ← добавили      
+      onOpenCard={openQuestCardChecked}
+      onCloseCard={() => setQuestSel(null)}
+      onMarkDone={(qid, tid) => markTaskDone(qid, tid)}
+      selected={questSel}
+    />
+  </>
+
+
+) : inboxOpen ? (
+  <>
+    <div className="meta mt-1">{t('forum_inbox_title') || 'Ответы на ваши сообщения'}</div>
+    <div className="grid gap-2 mt-2" suppressHydrationWarning>
+{debugAdsSlots(
+  'inbox',
+  interleaveAds(
+    visibleRepliesToMe || [],
+    adEvery,
+    {
+      isSkippable: (p) => !p || !p.id,
+      getId: (p) => p?.id || `${p?.topicId || 'ib'}:${p?.ts || 0}`,
+    }
+  )
+).map((slot) => {
+  if (slot.type === 'item') {
+    const p = slot.item;
+    return (
+      <div key={slot.key} id={`post_${p.id}`}>
+        <PostCard
+          p={p}
+          parentAuthor={(() => {
+            const parent = (data.posts || []).find(x => String(x.id) === String(p.parentId))
+            return parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''
+          })()}
+          onReport={() => toast.ok(t('forum_report_ok'))}
+onOpenThread={(clickP) => {
+  // ✅ из любой карточки: открыть сразу ветку ответов по клику на счётчик
+  openThreadForPost(clickP || p, { closeInbox: true });
+}}
+
+          onReact={reactMut}
+          isAdmin={isAdmin}
+          onDeletePost={delPost}
+          onOwnerDelete={delPostOwn}          
+          onBanUser={banUser}
+          onUnbanUser={unbanUser}
+          isBanned={bannedSet.has(p.accountId || p.userId)}
+          authId={viewerId}
+          markView={markViewPost}
+          t={t}
+            viewerId={viewerId}
+  starredAuthors={starredAuthors}
+  onToggleStar={toggleAuthorStar}
+        />
+      </div>
+    );
+  }
+
+  const url = pickAdUrlForSlot(slot.key, 'inbox');
+  if (!url) return null;
+
+  return (
+    <AdCard
+      key={slot.key}
+      url={url}
+      slotKind="inbox"
+      nearId={slot.nearId}
+    />
+  );
+})}
+
+      {repliesHasMore && (
+        <div className="loadMoreFooter">
+          <div className="loadMoreShimmer">
+            {t?.('loading') || 'Loading…'}
+          </div>
+          <LoadMoreSentinel
+            onVisible={() =>
+              setVisibleRepliesCount((c) =>
+                Math.min(c + REPLIES_PAGE_SIZE, sortedRepliesToMe.length)
+              )
+            }
+          />
+        </div>
+      )}
+      {sortedRepliesToMe.length === 0 && (
+        <div className="meta">
+          {t('forum_inbox_empty') || 'Новых ответов нет'}
+        </div>
+      )}
+    </div>
+
+  </>
+) : (
+  <>
+    <CreateTopicCard t={t} onCreate={createTopic} onOpenVideoFeed={openVideoFeed} />
+    <div className="grid gap-2 mt-2" suppressHydrationWarning>
+      {(visibleTopics || []).map(x => {
+          const agg = aggregates.get(x.id) || { posts:0, likes:0, dislikes:0, views:0 };
+          return (
+<TopicItem
+  key={`t:${x.id}`}
+  t={x}
+  agg={agg}
+  onOpen={(tt)=>{ setSel(tt); setThreadRoot(null) }}
+  onView={markViewTopic}
+  isAdmin={isAdmin}
+  onDelete={delTopic}
+  authId={viewerId}
+  onOwnerDelete={delTopicOwn}
+  viewerId={viewerId}
+  starredAuthors={starredAuthors}
+  onToggleStar={toggleAuthorStar}
+/>
+
+          )
+        })}
+    </div>
+    {topicsHasMore && (
+      <div className="loadMoreFooter">
+        <div className="loadMoreShimmer">
+          {t?.('loading') || 'Loading…'}
+        </div>
+        <LoadMoreSentinel
+          onVisible={() =>
+            setVisibleTopicsCount((c) =>
+              Math.min(c + TOPIC_PAGE_SIZE, (sortedTopics || []).length)
+            )
+          }
+        />
+      </div>
+    )}    
+  </>
+)}
+
+
+<div
+  className="body"
+  style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
+>
+
+
+
+</div>
+
+    </section>
+  ) : (
+    /* === ВЫБРАННАЯ ТЕМА: посты + композер === */
+    <section className="glass neon" style={{ display:'flex', flexDirection:'column', flex:'1 1 auto', minHeight: 0 }}>
+
+ 
+       <div className="head">
+      {/* шапка */}
         <div className="head" style={{ position:'relative', width:'100%' }}>
           <div style={{ position:'relative' }}>
             <button
@@ -12505,385 +13356,7 @@ onClick={()=>{
             </div>
           </div>
         </div>
-      </section>
-
-<div
-  className="grid2"
-  style={{ display:'flex', flexDirection:'column', gridTemplateColumns: '1fr', flex: '1 1 auto', minHeight: 0 }}
->
-
-  {/* ОДНА КОЛОНКА: если тема не выбрана — список тем; если выбрана — посты темы */}
-  {!sel ? (
-    /* === СПИСОК ТЕМ === */
-    <section className="glass neon" style={{ display:'flex', flexDirection:'column', flex:'1 1 auto', minHeight: 0 }}>
-<div className="head">
- {/* ЕДИНАЯ ГОРИЗОНТАЛЬНАЯ ЛИНЕЙКА: ЛЕВО — ЦЕНТР — ПРАВО */}
-  <div className="forumRowBar">
-    <div className="slot-left">
-  {/* Назад (иконка) — в режиме videoFeedOpen закрывает видео-ленту */}
-  <button
-    type="button"
-    className="iconBtn ghost"
-    aria-label={t?.('forum_back') || 'Назад'}
-      disabled={!videoFeedOpen && !inboxOpen && !questOpen}
-    onClick={()=>{ 
-      if (videoFeedOpen) { try{ closeVideoFeed?.() }catch{}; return; } 
-      if (inboxOpen)    { try{ setInboxOpen(false) }catch{}; return; }
-  if (questOpen) {
-    // если внутри раздела квестов открыта карточка — просто закрываем её
-    if (questSel) { try{ setQuestSel(null) }catch{}; return; }
-    // иначе выходим из раздела квестов целиком
-    try{ closeQuests?.() }catch{}; return;
-  }     
- }}
-       title={t?.('forum_back') || 'Назад'}
-   
-      >
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
-      <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  </button>
-
-  {/* Домой (иконка) */}
-  <button
-    type="button"
-    className="iconBtn ghost"
-    aria-label={t?.('forum_home') || 'На главную'}
-    onClick={()=>{
-    if (videoFeedOpen) { try{ closeVideoFeed?.() }catch{} }
-    if (questOpen)     { try{ closeQuests?.() }catch{} }
-    try{ setInboxOpen(false) }catch{};
-    try{ setReplyTo(null) }catch{};
-    try{ setThreadRoot(null) }catch{};
-    try{ setSel(null) }catch{};
-  }}
-    title={t?.('forum_home') || 'На главную'}
-  >
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
-      <path d="M3 10l9-7 9 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M5 10v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  </button>
-</div>
-
-    <div className="slot-center">
-
-    </div>
-    <div className="slot-right">
-   <button
-    type="button"
-    className="iconBtn inviteGifBtn"
-    style={{
-      width: INVITE_BTN_SIZE,
-      height: INVITE_BTN_SIZE,
-      padding: 0,
-      marginRight: 8,
-      transform: `translate(${INVITE_BTN_OFFSET_X}px, ${INVITE_BTN_OFFSET_Y}px)`,
-    }}
-    onClick={() => {
-      try {
-        window.dispatchEvent(new CustomEvent('invite:open'));
-      } catch {}
-    }}
-    onMouseDown={(e) => e.preventDefault()}
-    aria-label="Invite friends"
-  >
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: INVITE_GIF_SIZE,
-        height: INVITE_GIF_SIZE,
-        borderRadius: '999px',
-        overflow: 'hidden',
-      }}
-    >
-      <img
-        src="/friends/invitation.gif"
-        alt=""
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          display: 'block',
-        }}
-        draggable={false}
-      />
-    </span>
-  </button>     
-      <button
-        type="button"
-        className="iconBtn inboxBtn"
-        title={t('forum_inbox') || 'Ответы мне'}
-        onClick={() => setInboxOpen(v => !v)}
-        aria-pressed={inboxOpen}
-      >
-        <svg viewBox="0 0 24 24" aria-hidden>
-          <path d="M3 7h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.6" fill="none"/>
-          <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-        {mounted && unreadCount > 0 && (
-          <span className="inboxBadge" suppressHydrationWarning>{unreadCount}</span>
-        )}
-      </button>
-    </div>
-  </div>
-      </div>
-{videoFeedOpen ? (
-  <>
-{/* ВЕТКА-ЛЕНТА: медиа (видео/аудио/изображения) */}
-<div className="meta mt-1">{t('') || ''}</div>
-    <div className="grid gap-2 mt-2" suppressHydrationWarning>
-{debugAdsSlots(
-  'video',
-  interleaveAds(
-    visibleVideoFeed || [],
-    adEvery,
-    {
-      isSkippable: (p) => !p || !p.id,
-      getId: (p) => p?.id || `${p?.topicId || 'vf'}:${p?.ts || 0}`,
-    }
-  )
-).map((slot) => {
-  if (slot.type === 'item') {
-    const p = slot.item;
-    const parent = p?.parentId
-      ? (data?.posts || []).find(x => String(x.id) === String(p.parentId))
-      : null;
-
-const openThreadHere = (clickP) => {
-  // ✅ ветка открывается с заголовком = тот пост, по которому кликнули
-  openThreadForPost(clickP || p, { closeInbox: true, closeVideoFeed: true });
-};
-
-
-    return (
-      <div key={slot.key} id={`post_${p?.id || ''}`}>
-<PostCard
-  p={p}
-  parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}
-  onReport={() => toast.ok(t('forum_report_ok'))}
-  onOpenThread={openThreadHere}
-  onReact={reactMut}
-  isAdmin={isAdmin}
-  onDeletePost={delPost}
-  onOwnerDelete={delPostOwn}  
-  onBanUser={banUser}
-  onUnbanUser={unbanUser}
-  isBanned={bannedSet.has(p?.accountId || p?.userId)}
-  authId={viewerId}
-  markView={markViewPost}
-  t={t}
-  isVideoFeed={true}   // ✅ NEW
-    viewerId={viewerId}
-  starredAuthors={starredAuthors}
-  onToggleStar={toggleAuthorStar}
-/>
-
-      </div>
-    );
-  }
-
-  const url = pickAdUrlForSlot(slot.key, 'video');
-  if (!url) return null;
-
-  return (
-    <AdCard
-      key={slot.key}
-      url={url}
-      slotKind="video"
-      nearId={slot.nearId}
-    />
-  );
-})}
-      {videoHasMore && (
-        <div className="loadMoreFooter">
-          <div className="loadMoreShimmer">
-            {t?.('loading') || 'Loading…'}
-          </div>
-          <LoadMoreSentinel
-            onVisible={() =>
-              setVisibleVideoCount((c) =>
-                Math.min(c + VIDEO_PAGE_SIZE, (videoFeed || []).length)
-              )
-            }
-          />
-        </div>
-      )}
-      {videoFeed?.length === 0 && (
-        <div className="meta">
-          {t('forum_search_empty') || 'Ничего не найдено'}
-        </div>
-      )}
-    </div>
-
-
-  </>
-) : (questOpen && QUEST_ENABLED) ? (
-  <>
-    <div className="meta mt-1">{t('') || ''}</div>
-    <QuestHub
-      t={t}
-      quests={QUESTS}
-      questProg={questProg}
-      isCardCompleted={isCardCompleted}
-      isCardClaimable={isCardClaimable}
-      readEnv={readEnv}
-      vipActive={vipActive}
-      getTaskRemainMs={getTaskRemainMs}     // ← добавили
-      taskDelayMs={TASK_DELAY_MS}           // ← добавили      
-      onOpenCard={openQuestCardChecked}
-      onCloseCard={() => setQuestSel(null)}
-      onMarkDone={(qid, tid) => markTaskDone(qid, tid)}
-      selected={questSel}
-    />
-  </>
-
-
-) : inboxOpen ? (
-  <>
-    <div className="meta mt-1">{t('forum_inbox_title') || 'Ответы на ваши сообщения'}</div>
-    <div className="grid gap-2 mt-2" suppressHydrationWarning>
-{debugAdsSlots(
-  'inbox',
-  interleaveAds(
-    visibleRepliesToMe || [],
-    adEvery,
-    {
-      isSkippable: (p) => !p || !p.id,
-      getId: (p) => p?.id || `${p?.topicId || 'ib'}:${p?.ts || 0}`,
-    }
-  )
-).map((slot) => {
-  if (slot.type === 'item') {
-    const p = slot.item;
-    return (
-      <div key={slot.key} id={`post_${p.id}`}>
-        <PostCard
-          p={p}
-          parentAuthor={(() => {
-            const parent = (data.posts || []).find(x => String(x.id) === String(p.parentId))
-            return parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''
-          })()}
-          onReport={() => toast.ok(t('forum_report_ok'))}
-onOpenThread={(clickP) => {
-  // ✅ из любой карточки: открыть сразу ветку ответов по клику на счётчик
-  openThreadForPost(clickP || p, { closeInbox: true });
-}}
-
-          onReact={reactMut}
-          isAdmin={isAdmin}
-          onDeletePost={delPost}
-          onOwnerDelete={delPostOwn}          
-          onBanUser={banUser}
-          onUnbanUser={unbanUser}
-          isBanned={bannedSet.has(p.accountId || p.userId)}
-          authId={viewerId}
-          markView={markViewPost}
-          t={t}
-            viewerId={viewerId}
-  starredAuthors={starredAuthors}
-  onToggleStar={toggleAuthorStar}
-        />
-      </div>
-    );
-  }
-
-  const url = pickAdUrlForSlot(slot.key, 'inbox');
-  if (!url) return null;
-
-  return (
-    <AdCard
-      key={slot.key}
-      url={url}
-      slotKind="inbox"
-      nearId={slot.nearId}
-    />
-  );
-})}
-
-      {repliesHasMore && (
-        <div className="loadMoreFooter">
-          <div className="loadMoreShimmer">
-            {t?.('loading') || 'Loading…'}
-          </div>
-          <LoadMoreSentinel
-            onVisible={() =>
-              setVisibleRepliesCount((c) =>
-                Math.min(c + REPLIES_PAGE_SIZE, sortedRepliesToMe.length)
-              )
-            }
-          />
-        </div>
-      )}
-      {sortedRepliesToMe.length === 0 && (
-        <div className="meta">
-          {t('forum_inbox_empty') || 'Новых ответов нет'}
-        </div>
-      )}
-    </div>
-
-  </>
-) : (
-  <>
-    <CreateTopicCard t={t} onCreate={createTopic} onOpenVideoFeed={openVideoFeed} />
-    <div className="grid gap-2 mt-2" suppressHydrationWarning>
-      {(visibleTopics || []).map(x => {
-          const agg = aggregates.get(x.id) || { posts:0, likes:0, dislikes:0, views:0 };
-          return (
-<TopicItem
-  key={`t:${x.id}`}
-  t={x}
-  agg={agg}
-  onOpen={(tt)=>{ setSel(tt); setThreadRoot(null) }}
-  onView={markViewTopic}
-  isAdmin={isAdmin}
-  onDelete={delTopic}
-  authId={viewerId}
-  onOwnerDelete={delTopicOwn}
-  viewerId={viewerId}
-  starredAuthors={starredAuthors}
-  onToggleStar={toggleAuthorStar}
-/>
-
-          )
-        })}
-    </div>
-    {topicsHasMore && (
-      <div className="loadMoreFooter">
-        <div className="loadMoreShimmer">
-          {t?.('loading') || 'Loading…'}
-        </div>
-        <LoadMoreSentinel
-          onVisible={() =>
-            setVisibleTopicsCount((c) =>
-              Math.min(c + TOPIC_PAGE_SIZE, (sortedTopics || []).length)
-            )
-          }
-        />
-      </div>
-    )}    
-  </>
-)}
-
-
-<div
-  className="body"
-  style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
->
-
-
-
-</div>
-
-    </section>
-  ) : (
-    /* === ВЫБРАННАЯ ТЕМА: посты + композер === */
-    <section className="glass neon" style={{ display:'flex', flexDirection:'column', flex:'1 1 auto', minHeight: 0 }}>
-
- 
-       <div className="head">
+        
   {/* ЕДИНАЯ ГОРИЗОНТАЛЬНАЯ ЛИНЕЙКА: ЛЕВО — ЦЕНТР — ПРАВО */}
   <div className="forumRowBar">
     <div className="slot-left">
