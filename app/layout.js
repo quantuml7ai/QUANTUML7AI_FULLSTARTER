@@ -5,7 +5,7 @@ import { I18nProvider } from '../components/i18n'
 import TopBar from '../components/TopBar'
 import NotRobot from "@/components/NotRobot";
 import Providers from './providers'
-
+import HeroAvatar from '../components/HeroAvatar'
 // ✅ Vercel Analytics & Speed Insights
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
@@ -25,8 +25,7 @@ const forumTitleFont = Montserrat({
 
 
 
-// Рендерим тяжёлые/интерактивные вещи только на клиенте
-const HeroAvatar = dynamic(() => import('../components/HeroAvatar'), { ssr: false })
+// Рендерим тяжёлые/интерактивные вещи только на клиенте 
 const BgAudio    = dynamic(() => import('../components/BgAudio'),    { ssr: false })
 const ScrollTopPulse = dynamic(() => import('../components/ScrollTopPulse'), { ssr: false })
 
