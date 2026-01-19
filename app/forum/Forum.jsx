@@ -9413,8 +9413,68 @@ const idMap = useMemo(() => {
 // выбранный корень ветки (null = режим списка корней)
 const [threadRoot, setThreadRoot] = useState(null);
 
-// при смене темы выходим из веточного режима
-useEffect(() => { setThreadRoot(null); }, [sel?.id]);
+// --- OPEN THREAD: сохраняем открытие ветки при переходе в другую тему ---
+// Иначе эффект на смену sel?.id сбрасывает threadRoot и получается «просто список темы».
+const pendingThreadRootIdRef = useRef(null);
+const pendingScrollToPostIdRef = useRef(null);
+
+// единая точка: открыть ветку по посту (хед = именно пост, по которому кликнули)
+const openThreadForPost = useCallback((post, opts = {}) => {
+  if (!post || !post.id) return;
+  const topicId = post.topicId;
+  const rootId = String(post.id);
+
+  pendingScrollToPostIdRef.current = rootId;
+
+  // закрываем панели, если попросили
+  try { if (opts.closeInbox) setInboxOpen(false); } catch {}
+  try { if (opts.closeVideoFeed) setVideoFeedOpen(false); } catch {}
+
+  // если уже в нужной теме — открываем ветку сразу
+  if (sel?.id && String(sel.id) === String(topicId)) {
+    const node = idMap?.get?.(rootId) || post;
+    try { setThreadRoot(node); } catch {}
+    return;
+  }
+
+  // иначе: сначала переключаем тему, а threadRoot применится после смены sel?.id
+  const tt = (data?.topics || []).find(t => String(t.id) === String(topicId));
+  if (!tt) return;
+  pendingThreadRootIdRef.current = rootId;
+  try { setSel(tt); } catch {}
+}, [sel?.id, data?.topics, idMap]);
+
+// при смене темы: либо выходим из ветки, либо применяем «ожидаемое» открытие ветки
+useEffect(() => {
+  const pendingId = pendingThreadRootIdRef.current;
+  if (pendingId) {
+    pendingThreadRootIdRef.current = null;
+    const node = idMap?.get?.(String(pendingId))
+      || (data?.posts || []).find(x => String(x.id) === String(pendingId))
+      || null;
+    try { setThreadRoot(node || { id: String(pendingId) }); } catch {}
+  } else {
+    try { setThreadRoot(null); } catch {}
+  }
+}, [sel?.id]); // намеренно только sel?.id
+
+// мягкий скролл к посту после открытия ветки/темы
+useEffect(() => {
+  const pid = pendingScrollToPostIdRef.current;
+  if (!pid) return;
+  if (!threadRoot) return;
+  if (!isBrowser?.()) return;
+  pendingScrollToPostIdRef.current = null;
+
+  setTimeout(() => {
+    try {
+      document.getElementById(`post_${pid}`)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    } catch {}
+  }, 120);
+}, [sel?.id, threadRoot]);
 useEffect(() => {
   setVisibleThreadPostsCount(THREAD_PAGE_SIZE);
 }, [sel?.id, threadRoot, postSort]);
@@ -12026,7 +12086,12 @@ function pickAdUrlForSlot(slotKey, slotKind) {
                           const p = (data.posts||[]).find(x=>x.id===r.id)
                           if(p){
                             const tt = (data.topics||[]).find(x=>x.id===p.topicId)
-                            if(tt){ setTopicFilterId(tt.id); setSel(tt); setThreadRoot({ id:p.parentId||p.id }); setTimeout(()=>{ document.getElementById(`post_${p.id}`)?.scrollIntoView?.({behavior:'smooth', block:'center'}) }, 80) }
+if (tt) {
+  setTopicFilterId(tt.id);
+  // ✅ сразу открыть ветку ответов с заголовком = найденное сообщение
+  openThreadForPost(p);
+}
+
                           }
                         }
                       }}>
@@ -12492,21 +12557,11 @@ onClick={()=>{
       ? (data?.posts || []).find(x => String(x.id) === String(p.parentId))
       : null;
 
-    const openThreadHere = () => {
-      try { setInboxOpen?.(false); } catch {}
-      const tt = (data?.topics || []).find(x => String(x.id) === String(p?.topicId));
-      if (!tt) return;
-      try { setSel(tt); } catch {}
-      try { setThreadRoot({ id: p?.parentId || p?.id }); } catch {}
-      try { setVideoFeedOpen(false); } catch {}
-      setTimeout(() => {
-        try {
-          document
-            .getElementById(`post_${p?.id}`)
-            ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } catch {}
-      }, 120);
-    };
+const openThreadHere = (clickP) => {
+  // ✅ ветка открывается с заголовком = тот пост, по которому кликнули
+  openThreadForPost(clickP || p, { closeInbox: true, closeVideoFeed: true });
+};
+
 
     return (
       <div key={slot.key} id={`post_${p?.id || ''}`}>
@@ -12617,10 +12672,11 @@ onClick={()=>{
             return parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''
           })()}
           onReport={() => toast.ok(t('forum_report_ok'))}
-          onOpenThread={(clickP) => {
-            const tt = (data.topics || []).find(t => String(t.id) === String(p.topicId));
-            if (tt) { setSel(tt); setThreadRoot(clickP); setInboxOpen(false); }
-          }}
+onOpenThread={(clickP) => {
+  // ✅ из любой карточки: открыть сразу ветку ответов по клику на счётчик
+  openThreadForPost(clickP || p, { closeInbox: true });
+}}
+
           onReact={reactMut}
           isAdmin={isAdmin}
           onDeletePost={delPost}
@@ -12881,29 +12937,11 @@ onClick={()=>{
               p={p}
               parentAuthor={parentAuthor}
               onReport={() => toast.ok(t('forum_report_ok'))}
-              onOpenThread={clickP => {
-                // переходим в тему и открываем ветку
-                const topic = (data.topics || []).find(
-                  t => String(t.id) === String(p.topicId),
-                );
-                if (topic) {
-                  setSel(topic);
-                  setThreadRoot(clickP);   // корень треда
-                  setInboxOpen(false);
+onOpenThread={(clickP) => {
+  // ✅ из любой карточки: открыть сразу ветку ответов по клику на счётчик
+  openThreadForPost(clickP || p, { closeInbox: true });
+}}
 
-                  // мягкий скролл к конкретному посту
-                  setTimeout(() => {
-                    try {
-                      document
-                        .getElementById(`post_${p.id}`)
-                        ?.scrollIntoView({
-                          behavior: 'smooth',
-                          block: 'center',
-                        });
-                    } catch {}
-                  }, 120);
-                }
-              }}
   onReact={reactMut}
   isAdmin={isAdmin}
   onDeletePost={delPost}
