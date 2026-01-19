@@ -190,20 +190,7 @@ export default function Home() {
           </ul>
         )}
       </section>
-    )
-
-    if (idx === 0) { 
-      content.push(
-        <section className="panel" key="live-bloomberg">
-          <CryptoNewsLens />   
-     
-          <ResponsiveEmbed
-            src={'https://www.bloomberg.com/live/us'}
-            title="Bloomberg US — Live"
-          />
-        </section>
-      )
-    }
+    ) 
   })
 
   return (
@@ -247,7 +234,14 @@ export default function Home() {
           </Link>
         </div> 
       </section>
-
+      <section className="panel" key="live-bloomberg">
+        <CryptoNewsLens />   
+   
+        <ResponsiveEmbed
+          src={'https://www.bloomberg.com/live/us'}
+          title="Bloomberg US — Live"
+        />
+      </section>
       {/* Реклама строго между hero (1-й блок) и первым блоком из home_blocks (2-й блок) */}
       <HomeBetweenBlocksAd key="home-ad-between-hero-and-block-1" />
             <AutoMedia
