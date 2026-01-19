@@ -1334,16 +1334,16 @@ const Styles = () => (
     .neon{ box-shadow:0 0 28px rgba(25,129,255,.14), inset 0 0 18px rgba(25,129,255,.06) }
     .postBody{ white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word }
     .forum_root{
-      --mb-video-h-mobile: 650px;
+      --mb-video-h-mobile: 630px;
       --mb-video-h-tablet: 650px;
       --mb-video-h-desktop: 700px;
-      --mb-image-h-mobile: 650px;
+      --mb-image-h-mobile: 630px;
       --mb-image-h-tablet: 650px;
       --mb-image-h-desktop: 700px;
-      --mb-iframe-h-mobile: 650px;
+      --mb-iframe-h-mobile: 630px;
       --mb-iframe-h-tablet: 650px;
       --mb-iframe-h-desktop: 700px;
-      --mb-audio-h-mobile: 650px;
+      --mb-audio-h-mobile: 630px;
       --mb-audio-h-tablet: 650px;
       --mb-audio-h-desktop: 700px;
       --mb-ad-h-mobile: 200px;
