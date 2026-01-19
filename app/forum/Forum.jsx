@@ -1027,8 +1027,8 @@ function useQCoinLive(userKey, isVip){
       try {
         if (warmIdleId != null) { try { cancelIdle(warmIdleId); } catch {} warmIdleId = null; }
        
-        warmed.preload = slow ? 'metadata' : 'auto';
-        warmed.setAttribute('data-forum-warm', '1');
+        const slow = isSlowNetwork();
+        warmed.preload = slow ? 'metadata' : 'auto'; 
 
         // НЕ дергаем load() на каждом play (это и даёт дерганье/CPU).
         // Подогреваем мягко и ОДИН раз на видео, в idle, только если совсем "холодное".
