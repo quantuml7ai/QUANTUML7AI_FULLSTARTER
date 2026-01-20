@@ -5926,18 +5926,27 @@ if (mountedRef.current) setBusy(false);
         <button
           key={src}
           className={cls('avaMini', icon===src && 'tag', 'hoverPop')}
-          onClick={()=>{ setIcon(src) }}
+          onClick={()=>{
+
+  if (!vipActive){
+    try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ only') } catch {}
+    try { document.activeElement?.blur?.() } catch {}
+    return;
+  }
+  
+            setIcon(src) }}
           title={vipActive ? '' : (t('forum_vip_only') || 'Только для VIP+')}
           style={{ position:'relative', width:40, height:40, padding:0 }}
         >
           <Image src={src} alt="" width={40} height={40} unoptimized style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:10 }}/>
+         {!vipActive && <span className="lockBadge" aria-hidden>🔒</span>}
         </button>       
       ))}
     </div>
   </div>
 
   {/* разделитель между VIP и обычными */}
-  <div style={{height:1,opacity:.12,background:'currentColor',margin:'6px 4px'}} />
+  <div style={{height:1,opacity:.2,background:'currentColor',margin:'20px 4px'}} />
 
   {/* обычные эмодзи-аватары ниже (как было) */}
   <div className="iconWrap p-1">

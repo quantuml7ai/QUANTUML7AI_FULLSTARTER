@@ -6781,7 +6781,7 @@ forum_admin_pass: 'Enter the Admin password to gain access. ⚠️ WARNING ⚠�
   forum_account_settings: 'Account settings',
   forum_profile_nickname: 'Nickname',
   forum_profile_nickname_ph: 'How should we call you?',
-  forum_profile_avatar: 'Avatar',
+  forum_profile_avatar: 'VIP+ Avatar',
   forum_avatar_vip: 'VIP+ avatars',
 
   // VIP+
@@ -6902,7 +6902,7 @@ forum_admin_pass: 'Для доступа введите Админ-пароль.
   forum_account_settings: 'Настройки аккаунта',
   forum_profile_nickname: 'Ник',
   forum_profile_nickname_ph: 'Как вас называть?',
-  forum_profile_avatar: 'Аватар',
+  forum_profile_avatar: 'VIP+ Аватар',
   forum_avatar_vip: 'VIP+ аватары',
 
   // VIP+
@@ -7025,7 +7025,7 @@ forum_admin_pass: 'Для доступу введіть Адмін-пароль.
   forum_account_settings: 'Налаштування облікового запису',
   forum_profile_nickname: 'Нікнейм',
   forum_profile_nickname_ph: 'Як до вас звертатися?',
-  forum_profile_avatar: 'Аватар',
+  forum_profile_avatar: 'VIP+ Аватар',
   forum_avatar_vip: 'VIP+ аватари',
 
   // VIP+
@@ -7144,7 +7144,7 @@ forum_admin_pass: 'Ingrese la contraseña de administrador para acceder. ⚠️ 
   forum_account_settings: 'Ajustes de la cuenta',
   forum_profile_nickname: 'Apodo',
   forum_profile_nickname_ph: '¿Cómo te llamamos?',
-  forum_profile_avatar: 'Avatar',
+  forum_profile_avatar: 'VIP+ Avatar',
   forum_avatar_vip: 'Avatares VIP+',
 
   // VIP+
@@ -7264,7 +7264,7 @@ forum_admin_pass: '请输入管理员密码以获得访问权限。⚠️ 警告
   forum_account_settings: '账号设置',
   forum_profile_nickname: '昵称',
   forum_profile_nickname_ph: '我们如何称呼你？',
-  forum_profile_avatar: '头像',
+  forum_profile_avatar: 'VIP+ 头像',
   forum_avatar_vip: 'VIP+ 头像',
 
   // VIP+
@@ -7390,7 +7390,7 @@ forum_admin_pass: 'أدخل كلمة مرور المسؤول للوصول. ⚠�
   forum_account_settings: 'إعدادات الحساب',
   forum_profile_nickname: 'الاسم المستعار',
   forum_profile_nickname_ph: 'بماذا نناديك؟',
-  forum_profile_avatar: 'الصورة الرمزية',
+  forum_profile_avatar: 'الصورة الرمزيةVIP+ ',
   forum_avatar_vip: 'صور VIP+',
 
   // VIP+
@@ -7510,7 +7510,7 @@ forum_admin_pass: 'Erişim için yönetici şifresini girin. ⚠️ UYARI ⚠️
   forum_account_settings: 'Hesap ayarları',
   forum_profile_nickname: 'Takma ad',
   forum_profile_nickname_ph: 'Sana nasıl hitap edelim?',
-  forum_profile_avatar: 'Avatar',
+  forum_profile_avatar: 'VIP+ Avatar',
   forum_avatar_vip: 'VIP+ avatarlar',
 
   // VIP+
