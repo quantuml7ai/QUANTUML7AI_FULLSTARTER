@@ -2441,11 +2441,11 @@ const Styles = () => (
 .lockable[data-locked="true"]{ opacity:.6; cursor:not-allowed; }
 .lockable[data-locked="true"] .clipSvg{ filter:grayscale(1); opacity:.8 }
 .lockBadge{
-  position:absolute; right:-6px; top:-6px;
-  font-size:12px; line-height:1;
-  background:rgba(15,25,45,.9); border:1px solid rgba(140,170,255,.35);
+  position:absolute; right:-6px; top:0px;
+  font-size:14px; line-height:1;
+  background:rgba(15, 25, 45, 0); border:1px solid rgba(255, 140, 140, 0);
   border-radius:8px; padding:2px 4px;
-  box-shadow:0 0 10px rgba(90,120,255,.25);
+  box-shadow:0 0 10px rgba(90, 120, 255, 0);
 }
 /* галерея изображений в посте */
 .postGallery{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin-top:8px }
