@@ -1769,10 +1769,12 @@ const Styles = () => (
   width:100%;
   height:100%;
   display:block;
-  object-fit: cover;
-  transform-origin: center;
-  will-change: transform;  
+  pointer-events:none;
+  /* canvas: внутри рисуем сами, поэтому object-fit НЕ нужен */
+  will-change: contents;
 }
+
+
 
 .avaUploadSquareTxt{
   position:relative;
@@ -1983,12 +1985,13 @@ const Styles = () => (
 .iconBtn:hover{ box-shadow:0 0 18px rgba(80,167,255,.25) } .iconBtn:active{ transform:scale(.96) }
 
 .searchDrop{ position:absolute; top:48px; right:0; width:100%; max-height:360px; overflow:auto; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:8px; z-index:3000 }
-.sortDrop{ position:absolute; top:48px; right:-4px; width:220px; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:6px; z-index:3000 }
+.sortDrop{display:flex; position:absolute; top:68px; center:-40px; width:440px; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:6px; z-index:3000 }
 
 .starBtn{
   display:inline-flex;
   align-items:center;
   justify-content:center;
+  
   width:30px;
   height:30px;
   margin-left:6px;
@@ -2086,7 +2089,7 @@ const Styles = () => (
 
 .starModeBtn{
   width:44px;
-  height:34px;
+  height:44px;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -5158,8 +5161,10 @@ function ProfilePopover({
 
   const [uploadFile, setUploadFile] = useState(null);      // File выбранный пользователем
   const [imgInfo, setImgInfo] = useState({ w: 0, h: 0 });  // натуральные размеры
-  const [crop, setCrop] = useState({ x: 0, y: 0, z: 1 });  // translate(px) + zoom(mult)
-  const [uploadBusy, setUploadBusy] = useState(false);
+  // crop:
+  //  - x/y: относительный сдвиг (доля от стороны квадрата превью), чтобы одинаково смотрелось на desktop/mobile
+  //  - z: zoom (mult)
+  const [crop, setCrop] = useState({ x: 0, y: 0, z: 1 });  const [uploadBusy, setUploadBusy] = useState(false);
   const [finalAvatarBlob, setFinalAvatarBlob] = useState(null);
   const [finalAvatarUrl, setFinalAvatarUrl] = useState('');
   const finalAvatarUrlRef = useRef('');
@@ -5174,10 +5179,110 @@ function ProfilePopover({
     mountedRef.current = true;
     return () => { mountedRef.current = false; };
   }, []);
-  const dragRef = useRef({ on: false, moved: false, canDrag: false, x: 0, y: 0, sx: 0, sy: 0 });
-
+  const dragRef = useRef({ on: false, moved: false, canDrag: false, x: 0, y: 0, sx: 0, sy: 0, sz: 1 });
+ 
   const bmpRef = useRef(null); // ImageBitmap
   const boxSizeRef = useRef(0);
+
+  // ===== Avatar preview (canvas) =====
+  // WHY: <img> + object-fit:cover обрезает картинку в квадрат сразу после выбора.
+  // Canvas-рендер рисует ПОЛНОЕ изображение и режет только при Save.
+  const previewCanvasRef = useRef(null);
+  const rafRef = useRef(0);
+  const drawPendingRef = useRef(false);
+  const dprRef = useRef(1);
+  const cropLiveRef = useRef({ x: 0, y: 0, z: 1 });
+  // x/y храним как долю от стороны квадрата (относительно),
+  // чтобы превью не плавало между desktop/mobile и точно совпадало с сохранением.
+  const relToPx = (rel, size) => (Number(rel) || 0) * (Number(size) || 0);
+  const pxToRel = (px, size) => {
+    const s = Number(size) || 0;
+    if (!s) return 0;
+    return (Number(px) || 0) / s;
+  };
+
+  const getDpr = () => {
+    try {
+      const v = (typeof window !== 'undefined' && window.devicePixelRatio) ? window.devicePixelRatio : 1;
+      // clamp: 1..2 (retina, но без лишней нагрузки)
+      return Math.max(1, Math.min(2, Number(v) || 1));
+    } catch {     
+   return 1;
+    }
+  };
+
+  const ensurePreviewCanvasSize = useCallback(() => {
+    const canvas = previewCanvasRef.current;
+    const size = boxSizeRef.current || 0;
+    if (!canvas || !size) return;
+
+    const dpr = getDpr();
+    dprRef.current = dpr;
+
+    const w = Math.max(1, Math.round(size * dpr));
+    const h = Math.max(1, Math.round(size * dpr));
+    if (canvas.width !== w) canvas.width = w;
+    if (canvas.height !== h) canvas.height = h;
+
+    // css size — в CSS-пикселях
+    canvas.style.width = size + 'px';
+    canvas.style.height = size + 'px';
+  }, []);
+
+  const drawAvatarPreview = useCallback(() => {
+    const canvas = previewCanvasRef.current;
+    const bmp = bmpRef.current;
+    const size = boxSizeRef.current || 0;
+    if (!canvas || !bmp || !size) return;
+
+    ensurePreviewCanvasSize();
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const dpr = dprRef.current || 1;
+    // рисуем в CSS-пикселях, масштаб задаём transform-ом
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, size, size);
+
+    const iw = bmp.width || 1;
+    const ih = bmp.height || 1;
+    const base = Math.max(size / iw, size / ih);
+
+    const c = cropLiveRef.current || { x: 0, y: 0, z: 1 };
+    const z = Math.max(1, Number(c.z || 1));
+    const scale = base * z;
+
+    const dw = iw * scale;
+    const dh = ih * scale;
+	    const cx = size / 2 + relToPx(c.x, size);
+	    const cy = size / 2 + relToPx(c.y, size);
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(bmp, -dw / 2, -dh / 2, dw, dh);
+    ctx.restore();
+  }, [ensurePreviewCanvasSize]);
+
+  const requestPreviewDraw = useCallback(() => {
+    if (drawPendingRef.current) return;
+    drawPendingRef.current = true;
+    try {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    } catch {}
+    rafRef.current = requestAnimationFrame(() => {
+      drawPendingRef.current = false;
+      drawAvatarPreview();
+    });
+  }, [drawAvatarPreview]);
+
+  // держим live-crop в ref (drag обновляет ref без лишних re-render)
+  useEffect(() => {
+    cropLiveRef.current = crop;
+    requestPreviewDraw();
+  }, [crop, requestPreviewDraw]);
   const shouldKeepObjectUrl = (url) => {
     if (!url || typeof window === 'undefined' || !uid) return false;
     try {
@@ -5215,8 +5320,8 @@ function ProfilePopover({
         }          
        }
       if (rawAvatarUrlRef.current) {
-        if (revokeObjectUrlIfSafe(finalAvatarUrlRef.current)) {
-          finalAvatarUrlRef.current = '';
+        if (revokeObjectUrlIfSafe(rawAvatarUrlRef.current)) {
+          rawAvatarUrlRef.current = '';
         }
       }   
       };
@@ -5248,7 +5353,7 @@ function ProfilePopover({
     bmpRef.current = null;
   }, [open]);
 
-  // resize: держим canvas = размеру квадрата (адаптив)
+  // resize: держим превью-канвас = размеру квадрата (адаптив)
   useEffect(() => {
     if (!open) return;
     const el = avaBoxRef.current;
@@ -5258,7 +5363,21 @@ function ProfilePopover({
       const r = el.getBoundingClientRect();
       const sz = Math.max(1, Math.round(Math.min(r.width, r.height)));
       boxSizeRef.current = sz;
-
+      // если квадрат по размеру поменялся (desktop<->mobile/ресайз),
+      // кроп мог оказаться вне границ -> клэмпим лайв сразу.
+      try {
+        const cur = cropLiveRef.current || { x: 0, y: 0, z: 1 };
+        const clamped = clampCrop(cur);
+        cropLiveRef.current = clamped;
+        // синхронизируем state только если не тащим прямо сейчас
+        if (!dragRef.current?.on) {
+          if (clamped.x !== cur.x || clamped.y !== cur.y || clamped.z !== cur.z) {
+            setCrop(clamped);
+          }
+        }
+      } catch {}      
+      try { ensurePreviewCanvasSize(); } catch {}
+      try { requestPreviewDraw(); } catch {}
     };
 
     applySize();
@@ -5283,8 +5402,11 @@ function ProfilePopover({
     const drawH = ih * scale;
     const maxX = Math.max(0, (drawW - size) / 2);
     const maxY = Math.max(0, (drawH - size) / 2);
-    const x = Math.min(maxX, Math.max(-maxX, Number(next?.x || 0)));
-    const y = Math.min(maxY, Math.max(-maxY, Number(next?.y || 0)));
+    // x/y тут в относительных единицах (1.0 = ширинаквадрата)
+    const maxXRel = maxX / size;
+    const maxYRel = maxY / size;
+    const x = Math.min(maxXRel, Math.max(-maxXRel, Number(next?.x || 0)));
+    const y = Math.min(maxYRel, Math.max(-maxYRel, Number(next?.y || 0)));
     return { x, y, z: Math.max(1, Number(next?.z || 1)) };
   }, []);
 
@@ -5329,6 +5451,7 @@ function ProfilePopover({
         }
         bmpRef.current = bmp;
         setImgInfo({ w: bmp?.width || 0, h: bmp?.height || 0 });
+        try { requestPreviewDraw(); } catch {}
       } catch {
         // если bitmap не создался — оставляем raw превью
       }
@@ -5347,8 +5470,13 @@ function ProfilePopover({
     p.canDrag = !!uploadFile && !!bmpRef.current;    
     p.x = e.clientX;
     p.y = e.clientY;
-    p.sx = crop.x;
-    p.sy = crop.y;
+    // фиксируем размер квадрата на момент начала drag,
+    // чтобы расчёт dx/dy был стабильным даже если layout чуть "дышит".
+    p.sz = boxSizeRef.current || 1;    
+    // стартуем от актуального live-crop (а не от стейта, чтобы всё совпадало с canvas)
+    const c0 = cropLiveRef.current || crop;
+    p.sx = Number(c0?.x || 0);
+    p.sy = Number(c0?.y || 0);
     try { e.currentTarget.setPointerCapture?.(e.pointerId); } catch {}
   };
   const onPointerMove = (e) => {
@@ -5362,7 +5490,17 @@ function ProfilePopover({
       p.moved = true;
     }
     if (!p.moved || !p.canDrag) return;    
-    setCrop((c) => ({ ...c, x: p.sx + dx, y: p.sy + dy }));
+    // PERF: не setState на каждом пикселе — обновляем ref и перерисовываем в rAF
+    const sz = p.sz || boxSizeRef.current || 1;
+    const dxRel = dx / sz;
+    const dyRel = dy / sz;    
+    const next = clampCrop({
+      ...(cropLiveRef.current || crop),
+      x: p.sx + dxRel,
+      y: p.sy + dyRel,
+    });
+    cropLiveRef.current = next;
+    requestPreviewDraw();
   };
   const onPointerUp = (e) => {
     const p = dragRef.current;
@@ -5374,11 +5512,16 @@ function ProfilePopover({
       openFilePicker();
       return;
     }
-    setCrop((c) => clampCrop(c));    
+
+    // commit: один setState на release
+    const committed = clampCrop(cropLiveRef.current || crop);
+    cropLiveRef.current = committed;
+    setCrop(committed);
+    requestPreviewDraw();  
   };
 
   // делаем квадратный PNG из превью (клиентский кроп)
-  const makeCroppedPngBlob = React.useCallback(async ({ size = 512 } = {}) => {
+const makeCroppedPngBlob = React.useCallback(async ({ size = 512 } = {}) => {
     const bmp = bmpRef.current;
     if (!bmp) return null;
 
@@ -5391,12 +5534,15 @@ function ProfilePopover({
     const iw = bmp.width || 1;
     const ih = bmp.height || 1;
     const base = Math.max(size / iw, size / ih);
-    const z = Math.max(1, Number(crop?.z || 1));
+
+    // IMPORTANT: берём live-crop (drag может ещё не успеть прожечь setState)
+    const c = cropLiveRef.current || { x: 0, y: 0, z: 1 };
+    const z = Math.max(1, Number(c?.z || 1));
     const scale = base * z;
     const dw = iw * scale;
     const dh = ih * scale;
-    const cx = size / 2 + Number(crop?.x || 0);
-    const cy = size / 2 + Number(crop?.y || 0);
+    const cx = size / 2 + relToPx(c?.x, size);
+    const cy = size / 2 + relToPx(c?.y, size);
 
     ctx.save();
     ctx.translate(cx, cy);
@@ -5408,7 +5554,7 @@ function ProfilePopover({
     return new Promise((resolve) => {
       canvas.toBlob((b) => resolve(b), 'image/png', 0.92);
     });
- }, [crop]);
+ }, []);
 
 
   // грузим на сервер и ставим icon=url (но НЕ сохраняем профиль — это сделает основной Save)
@@ -5675,14 +5821,31 @@ if (mountedRef.current) setBusy(false);
           title="Upload avatar"
           aria-label="Upload avatar"
         >
-          {rawAvatarUrl && (
+          {/* PREVIEW:
+              - до декода показываем исходник (без квадратного object-fit crop)
+              - после декода рисуем на canvas (полное изображение + drag/zoom),
+                а кроп в PNG делаем ТОЛЬКО при Save.
+          */}
+          {rawAvatarUrl && !uploadFile && (
             <img
               src={rawAvatarUrl}
               alt=""
-              className="avaUploadSquareCanvas"
-              style={{
-                transform: `translate3d(${crop.x}px, ${crop.y}px, 0) scale(${crop.z})`,
-              }}
+              className="avaUploadSquareImgFallback"
+            />
+          )}
+
+          {rawAvatarUrl && uploadFile && !(imgInfo.w && imgInfo.h) && (
+            <img
+              src={rawAvatarUrl}
+              alt=""
+              className="avaUploadSquareImgFallback"
+            />
+          )}
+
+          {uploadFile && (imgInfo.w && imgInfo.h) && (
+            <canvas
+              ref={previewCanvasRef}
+              className="avaUploadSquareCanvas" 
             />
           )}
           {!uploadFile && (
@@ -5720,7 +5883,8 @@ if (mountedRef.current) setBusy(false);
             const v = Number(e.target.value);
             setCrop((c) => {
               const next = clampCrop({ ...c, z: v });
-
+              cropLiveRef.current = next;
+              try { requestPreviewDraw(); } catch {}
               return next;
             });
           }}
@@ -12160,7 +12324,11 @@ function pickAdUrlForSlot(slotKey, slotKind) {
   aria-label={t('quest_open') || 'Quests'}
   aria-disabled={!QUEST_ENABLED}
   tabIndex={QUEST_ENABLED ? 0 : -1}
-  onClick={QUEST_ENABLED ? openQuests : undefined}
+  onClick={() => {
+    try { window.dispatchEvent(new Event('qcoin:open')) } catch {}
+          try { q.open?.() } catch {}
+        }}
+  // onClick={QUEST_ENABLED ? openQuests : undefined}
   onKeyDown={(e) => {
     if (!QUEST_ENABLED) return;
     if (e.key === 'Enter' || e.key === ' ') {
@@ -12393,7 +12561,9 @@ onClick={()=>{
   >
     {txt}
   </button>
+
 ))}
+
   {/* ⭐ Star-mode toggle (icon-only) */}
   <button
     type="button"
@@ -12407,8 +12577,7 @@ onClick={()=>{
     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden>
       <path className="starPath" d="M12 2.6l2.9 6.2 6.8.6-5.1 4.4 1.6 6.6L12 16.9 5.8 20.4l1.6-6.6-5.1-4.4 6.8-.6L12 2.6Z" />
    </svg>
-  </button>
-
+  </button> 
                 </div>
               )}
            </div>
@@ -12498,9 +12667,7 @@ onClick={()=>{
     }}
   />
 </div>
-
-
-            {/* админ */}
+             {/* админ
             <div className="adminWrap">
               <button
                 ref={adminBtnRef}
@@ -12517,7 +12684,7 @@ onClick={()=>{
                 onActivated={()=> setIsAdmin(true)}
                 onDeactivated={()=> setIsAdmin(false)}
               />
-            </div>
+            </div> */}
           </div>
         </div>
       </section>
