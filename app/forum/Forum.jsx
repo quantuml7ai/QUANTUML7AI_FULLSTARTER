@@ -11256,18 +11256,31 @@ useEffect(() => {
       const from = Math.max(0, idx - 2);
       const to = Math.min(cards.length - 1, idx + 2);
 
-      for (let i = from; i <= to; i++) {
-        const card = cards[i];
-        card
-          .querySelectorAll('video[data-forum-video="post"]')
-          .forEach((v) => {
-            try {
-              // достаточно метаданных/первого кадра, чтобы не лагало при подходе
-              v.preload = 'metadata';
-              v.load?.();
-            } catch {}
-          });
-      }
+       for (let i = from; i <= to; i++) {
+         const card = cards[i];
+         card
+           .querySelectorAll('video[data-forum-video="post"]')
+           .forEach((v) => {
+             try {
+               // ВАЖНО:
+               // v.load() сбрасывает позицию (currentTime -> 0) и может заново дернуть сеть.
+               // Поэтому:
+               // 1) если видео уже начато (есть прогресс) — НЕ трогаем (сохраняем позицию и кэш)
+               // 2) если метаданные уже есть (readyState >= 1) — НЕ дергаем load()
+               const hasProgress =
+                 Number.isFinite(v.currentTime) && v.currentTime > 0.05 && !v.ended;
+               const hasMetadata = (v.readyState || 0) >= 1;
+
+               // preload можно поднять до metadata, но без load() (чтобы не было сброса)
+               v.preload = 'metadata';
+
+               if (hasProgress || hasMetadata) return;
+
+               // Только для совсем "пустых" — аккуратно просим метаданные
+               v.load?.();
+             } catch {}
+           });
+       }
     } catch {}
   };
 
