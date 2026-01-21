@@ -1538,7 +1538,7 @@ const Styles = () => (
   left: 50%;
   bottom: -45px;
   transform: translateX(-50%);
-  z-index: 91;
+  z-index: 60;
   width: 54px;
   height: 44px;
   border-radius: 999px;
@@ -2059,7 +2059,7 @@ const Styles = () => (
 .iconBtn:hover{ box-shadow:0 0 18px rgba(80,167,255,.25) } .iconBtn:active{ transform:scale(.96) }
 
 .searchDrop{ position:absolute; top:48px; right:0; width:100%; max-height:360px; overflow:auto; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:8px; z-index:3000 }
-.sortDrop{ position:absolute; top:68px; right:30px; width:120px; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:6px; z-index:3000 }
+.sortDrop{ position:absolute; top:68px; right:100px; width:120px; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:6px; z-index:3000 }
 
 .starBtn{
   display:inline-flex;
