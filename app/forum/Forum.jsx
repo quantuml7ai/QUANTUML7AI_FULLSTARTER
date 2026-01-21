@@ -1756,7 +1756,7 @@ const Styles = () => (
 }
 
     .iconWrap{ display:flex; flex-wrap:wrap; gap:10px }
-    .avaBig{ width:112px; height:112px; border-radius:34px; border:1px solid rgba(80,167,255,.45); display:grid; place-items:center; font-size:48px; background:rgba(25,129,255,.10) }
+    .avaBig{ width:112px; height:112px; border-radius:16px; border:1px solid rgba(1, 204, 255, 0.31); display:grid; place-items:center; font-size:48px; background:rgba(119, 0, 255, 0.09) }
     .avaMini{ width:60px; height:60px; border-radius:10px; font-size:18px }
 /* === AVATAR FILL (добавка) ============================= */
     /* плавность для мелких аватарок */
