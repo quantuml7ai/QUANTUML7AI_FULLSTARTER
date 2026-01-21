@@ -1493,12 +1493,85 @@ const Styles = () => (
 
 /* --- header: ... --- */
 .head{
-  position:sticky; top:0; z-index:50; overflow:visible;
-  display:flex; align-items:center; gap:12px; padding:12px 14px;
+  position:sticky; top:0; z-index:70; overflow:visible;
+  padding:12px 14px;
   border-bottom:1px solid rgba(255,255,255,.1);
-  flex-wrap:wrap;
+  /* collapse animation */
+  transition: transform 220ms ease, opacity 160ms ease;
+  will-change: transform;
+  transform: translateY(0);
+  opacity: 1;
 }
+.headInner{
+  display:flex; align-items:center; gap:12px;
+  flex-wrap:wrap;
+  width:100%;
+}
+.head.head--collapsed{
+  transform: translateY(calc(-100% - 12px));
+  opacity: 0;
+  pointer-events: none;
+}
+.headPeekBtn{
+  position: fixed;
+  left: 50%;
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  transform: translateX(-50%);
+  z-index: 90;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(120, 200, 255, .35);
+  background: rgba(10, 16, 26, .58);
+  color: rgba(205, 235, 255, .95);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 22px rgba(80, 167, 255, .24), inset 0 0 16px rgba(80, 167, 255, .14);
+  cursor:pointer;
+}
+.headPeekBtn:active{ transform: translateX(-50%) scale(.97); }
+.headCollapseBtn{
+  position: absolute;
+  left: 50%;
+  bottom: -18px;
+  transform: translateX(-50%);
+  z-index: 91;
+  width: 48px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(120, 200, 255, .28);
+  background: rgba(10, 16, 26, .55);
+  color: rgba(205, 235, 255, .95);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 22px rgba(80, 167, 255, .18), inset 0 0 16px rgba(80, 167, 255, .10);
+  cursor:pointer;
+}
+.headCollapseBtn:active{ transform: translateX(-50%) scale(.97); }
 
+.headArrowSvg{ width: 26px; height: 26px; display:block; }
+.headArrowSvg.up{ transform: rotate(180deg); transform-origin: 50% 50%; }
+.headArrowSvg .chev{
+  opacity: .20;
+  filter: drop-shadow(0 0 0 rgba(80,167,255,0));
+  animation: headChev 1.1s infinite ease-in-out;
+}
+.headArrowSvg .chev2{ animation-delay: .12s; }
+.headArrowSvg .chev3{ animation-delay: .24s; }
+@keyframes headChev{
+  0%{ opacity:.15; filter: drop-shadow(0 0 0 rgba(80,167,255,0)); }
+  35%{ opacity: 1; filter: drop-shadow(0 0 8px rgba(80,167,255,.75)); }
+  70%{ opacity:.15; filter: drop-shadow(0 0 0 rgba(80,167,255,0)); }
+  100%{ opacity:.15; filter: drop-shadow(0 0 0 rgba(80,167,255,0)); }
+}
+@media (prefers-reduced-motion: reduce){
+  .head{ transition: none; }
+  .headArrowSvg .chev{ animation: none; opacity: .85; }
+}
 /* [STYLES:BODY-SCOPE] — ограничиваем область действия .body только форумом */
 .forum_root .body{ padding:12px; overflow:visible }
 
@@ -7776,7 +7849,24 @@ setMuted(!!audio.muted);
     </div>
   );
 }
-
+function HeadChevronIcon({ dir = 'down' }) {
+  const isUp = dir === 'up';
+  return (
+    <svg
+      className={cls('headArrowSvg', isUp && 'up')}
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path className="chev chev1" d="M6 6l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path className="chev chev2" d="M6 11l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path className="chev chev3" d="M6 16l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 /* =========================================================
    Основной компонент
 ========================================================= */
@@ -9581,7 +9671,66 @@ const delPostOwn = (post) => {
 
 /* ---- выбор темы и построение данных ---- */
 const [sel, setSel] = useState(null);
+// [HEAD_COLLAPSE:STATE]
+const bodyRef = useRef(null);
+const [headHidden, setHeadHidden] = useState(false);
+const [headPinned, setHeadPinned] = useState(false);
+const headHiddenRef = useRef(false);
+const headPinnedRef = useRef(false);
+useEffect(() => { headHiddenRef.current = headHidden }, [headHidden]);
+useEffect(() => { headPinnedRef.current = headPinned }, [headPinned]);
 
+// сброс при смене вида (список тем ↔ тред)
+useEffect(() => {
+  setHeadPinned(false);
+  setHeadHidden(false);
+}, [sel?.id]);
+
+// авто-скрытие по скроллу (лёгкий listener + rAF)
+useEffect(() => {
+  if (!isBrowser()) return;
+
+  const HIDE_THRESHOLD = 800;
+  const TOP_THRESHOLD = 800;
+
+  const getScrollTop = () => {
+    const el = bodyRef.current;
+    if (el && el.scrollHeight > el.clientHeight + 1) return el.scrollTop || 0;
+    return (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0);
+  };
+
+  let raf = 0;
+  const onScroll = () => {
+    if (headPinnedRef.current) return;
+    if (raf) return;
+    raf = window.requestAnimationFrame(() => {
+      raf = 0;
+      const st = getScrollTop();
+      if (st > HIDE_THRESHOLD) {
+        if (!headHiddenRef.current) setHeadHidden(true);
+      } else if (st <= TOP_THRESHOLD) {
+        if (headHiddenRef.current) setHeadHidden(false);
+      }
+    });
+  };
+
+  const el = bodyRef.current;
+  const opts = { passive: true };
+
+  // слушаем и body (если скролл внутри), и window (если скролл на странице)
+  try { el?.addEventListener?.('scroll', onScroll, opts); } catch {}
+  window.addEventListener('scroll', onScroll, opts);
+
+  // initial sync
+  onScroll();
+
+  return () => {
+    try { el?.removeEventListener?.('scroll', onScroll); } catch {}
+    window.removeEventListener('scroll', onScroll);
+    if (raf) { try { window.cancelAnimationFrame(raf) } catch {} raf = 0; }
+  };
+}, [sel?.id]);
+ 
 
 // [SORT_STATE:AFTER]
 const [q, setQ] = useState('');
@@ -12244,9 +12393,31 @@ function pickAdUrlForSlot(slotKey, slotKind) {
   {!sel ? (
     /* === СПИСОК ТЕМ === */
     <section className="glass neon" style={{ display:'flex', flexDirection:'column', flex:'1 1 auto', minHeight: 0 }}>
-<div className="head">
-      {/* шапка */} 
-         <div className="head" style={{ position:'relative', width:'100%' }}>
+
+{headHidden && !headPinned && (
+  <button
+    type="button"
+    className="headPeekBtn"
+    aria-label={t('forum_show_header') || 'Show header'}
+    onClick={() => { setHeadPinned(true); setHeadHidden(false); }}
+  >
+    <HeadChevronIcon dir="down" />
+  </button>
+)}
+
+<div className={cls('head', headHidden && !headPinned && 'head--collapsed')}>
+  {/* шапка */}
+  <div className="headInner" style={{ position:'relative', width:'100%' }}>
+    {headPinned && (
+      <button
+        type="button"
+        className="headCollapseBtn"
+        aria-label={t('forum_hide_header') || 'Hide header'}
+        onClick={() => { setHeadPinned(false); setHeadHidden(true); }}
+      >
+        <HeadChevronIcon dir="up" />
+      </button>
+    )}
           <div style={{ position:'relative' }}>
             <button
               ref={avatarRef}
@@ -13060,6 +13231,7 @@ onOpenThread={(clickP) => {
 
 <div
   className="body"
+  ref={bodyRef}
   style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
 >
 
@@ -13072,10 +13244,30 @@ onOpenThread={(clickP) => {
     /* === ВЫБРАННАЯ ТЕМА: посты + композер === */
     <section className="glass neon" style={{ display:'flex', flexDirection:'column', flex:'1 1 auto', minHeight: 0 }}>
 
- 
-       <div className="head"> 
-      {/* шапка */}
-         <div className="head" style={{ position:'relative', width:'100%' }}>
+{headHidden && !headPinned && (
+  <button
+    type="button"
+    className="headPeekBtn"
+    aria-label={t('forum_show_header') || 'Show header'}
+    onClick={() => { setHeadPinned(true); setHeadHidden(false); }}
+  >
+    <HeadChevronIcon dir="down" />
+  </button>
+)}
+
+<div className={cls('head', headHidden && !headPinned && 'head--collapsed')}>
+  {/* шапка */}
+  <div className="headInner" style={{ position:'relative', width:'100%' }}>
+    {headPinned && (
+      <button
+        type="button"
+        className="headCollapseBtn"
+        aria-label={t('forum_hide_header') || 'Hide header'}
+        onClick={() => { setHeadPinned(false); setHeadHidden(true); }}
+      >
+        <HeadChevronIcon dir="up" />
+      </button>
+    )}
           <div style={{ position:'relative' }}>
             <button
               ref={avatarRef}
@@ -13728,6 +13920,7 @@ onOpenThread={(clickP) => {
 
       <div
   className="body"
+  ref={bodyRef}
   style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
 >
 
