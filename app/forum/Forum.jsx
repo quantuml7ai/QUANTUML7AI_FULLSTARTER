@@ -1516,7 +1516,7 @@ const Styles = () => (
 .headPeekBtn{
   position: fixed;
   left: 50%;
-  top: calc(10px + env(safe-area-inset-top, 0px));
+  top: calc(15px + env(safe-area-inset-top, 0px));
   transform: translateX(-50%);
   z-index: 91;
   width: 54px;
@@ -1571,7 +1571,7 @@ const Styles = () => (
 }
 @media (prefers-reduced-motion: reduce){
   .head{ transition: none; }
-  .headArrowSvg .chev{ animation: none; opacity: .85; }
+  .headArrowSvg .chev{ opacity: .85; }
 }
 /* [STYLES:BODY-SCOPE] — ограничиваем область действия .body только форумом */
 .forum_root .body{ padding:12px; overflow:visible }
