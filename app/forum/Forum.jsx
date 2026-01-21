@@ -8333,7 +8333,7 @@ export default function Forum(){
         rafId = requestAnimationFrame(() => {
           rafId = 0;
           const { el: candidate, ratio } = pickMostVisible();
-          const FOCUS_RATIO = 0.40;
+          const FOCUS_RATIO = 0.5;
 
           if (!candidate || ratio < FOCUS_RATIO) {
             if (active) {
@@ -11064,7 +11064,7 @@ useEffect(() => {
   if (!isBrowser()) return;
   if (!('IntersectionObserver' in window)) return;
 
-  const FOCUS_RATIO = 0.60;
+  const FOCUS_RATIO = 0.5;
   const CARD_SELECTOR = 'article[data-forum-post-card="1"][data-forum-post-id]';
 
   // postId -> { el, t }
@@ -11103,8 +11103,8 @@ useEffect(() => {
       const idx = cards.indexOf(centerEl);
       if (idx < 0) return;
 
-      const from = Math.max(0, idx - 5);
-      const to = Math.min(cards.length - 1, idx + 5);
+      const from = Math.max(0, idx - 2);
+      const to = Math.min(cards.length - 1, idx + 2);
 
       for (let i = from; i <= to; i++) {
         const card = cards[i];
@@ -12234,8 +12234,18 @@ function pickAdUrlForSlot(slotKey, slotKind) {
   onResetConfirm={resetOrCloseOverlay}
   t={t}
 />
-      {/* шапка */}
-      <section className="glass neon p-3" style={{ position:'relative', zIndex:40, overflow:'visible' }}>
+
+<div
+  className="grid2"
+  style={{ display:'flex', flexDirection:'column', gridTemplateColumns: '1fr', flex: '1 1 auto', minHeight: 0 }}
+>
+
+  {/* ОДНА КОЛОНКА: если тема не выбрана — список тем; если выбрана — посты темы */}
+  {!sel ? (
+    /* === СПИСОК ТЕМ === */
+    <section className="glass neon" style={{ display:'flex', flexDirection:'column', flex:'1 1 auto', minHeight: 0 }}>
+<div className="head">
+      {/* шапка */} 
          <div className="head" style={{ position:'relative', width:'100%' }}>
           <div style={{ position:'relative' }}>
             <button
@@ -12695,18 +12705,7 @@ onClick={()=>{
               />
             </div> */}
           </div>
-        </div>
-      </section>
-<div
-  className="grid2"
-  style={{ display:'flex', flexDirection:'column', gridTemplateColumns: '1fr', flex: '1 1 auto', minHeight: 0 }}
->
-
-  {/* ОДНА КОЛОНКА: если тема не выбрана — список тем; если выбрана — посты темы */}
-  {!sel ? (
-    /* === СПИСОК ТЕМ === */
-    <section className="glass neon" style={{ display:'flex', flexDirection:'column', flex:'1 1 auto', minHeight: 0 }}>
-<div className="head">
+        </div> 
 
  {/* ЕДИНАЯ ГОРИЗОНТАЛЬНАЯ ЛИНЕЙКА: ЛЕВО — ЦЕНТР — ПРАВО */}
   <div className="forumRowBar">
@@ -13075,7 +13074,467 @@ onOpenThread={(clickP) => {
 
  
        <div className="head"> 
-        
+      {/* шапка */}
+         <div className="head" style={{ position:'relative', width:'100%' }}>
+          <div style={{ position:'relative' }}>
+            <button
+              ref={avatarRef}
+              className={cls('avaBig neon', (!nickShown || iconShown==='👤') && 'pulse')}
+              title={nickShown || t('forum_account')}
+              onClick={async()=>{
+                openOnly(profileOpen ? null : 'profile')
+                if (!profileOpen) return;
+
+                setProfileOpen(v=>!v)
+              }}>
+              <AvatarEmoji userId={idShown} pIcon={iconShown} />
+            </button>
+<ProfilePopover
+  anchorRef={avatarRef}
+  open={profileOpen}
+  onClose={()=>setProfileOpen(false)}
+  t={t}
+  auth={auth}
+  vipActive={vipActive}
+  onSaved={() => setProfileBump((x) => x + 1)}
+
+  viewerId={viewerId}
+  myFollowersCount={myFollowersCount}
+  myFollowersLoading={myFollowersLoading}
+
+  moderateImageFiles={moderateImageFiles}
+  toastI18n={toastI18n}
+  reasonKey={reasonKey}
+  reasonFallbackEN={reasonFallbackEN}
+/>
+       
+  {/* ник ВСЕГДА под аватаром */}
+  <button
+    className="nick-badge nick-animate avaNick"
+    title={idShown||'—'}
+    onClick={copyId}
+    translate="no"
+ >
+    <span className="nick-text">{nickShown || t('forum_not_signed')}</span>
+  </button>            
+          </div>
+
+  {/* ← ВОТ СЮДА ВСТАВЬ ПОПОВЕР */}
+  {qcoinModalOpen && (
+    <QCoinWithdrawPopover
+      anchorRef={withdrawBtnRef}
+      onClose={() => setQcoinModalOpen(false)}
+      onOpenQuests={openQuests}
+      t={t}
+      questEnabled={QUEST_ENABLED}
+      isAuthed={!!meUid}
+    />
+  )}
+
+
+ <div className="min-w-0">
+   <div
+     className="qRowRight"
+     style={{ '--qcoin-offset':'6px', '--qcoin-y': '10px', '--qcoin-scale':'1.15' }}  /* ← здесь настраиваешь */
+   >
+     <QCoinInline t={t} userKey={idShown} vipActive={vipActive} />
+   </div>
+ </div>
+ 
+
+          {/* === НОВОЕ: правый встроенный контейнер управления === */}
+          <div className="controls">
+            {/* поиск + сорт */}
+            <div className="search">
+              <input
+                className="searchInput"
+                value={q}
+                onChange={e=>{ setQ(e.target.value); openOnly('search') }}
+                onFocus={()=>openOnly('search')}
+                placeholder={t('forum_search_ph') || 'Поиск по темам и сообщениям…'}
+              />
+              <button className="iconBtn" aria-label="search" onClick={()=> openOnly(drop ? null : 'search')}>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+                  <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.7"/><path d="M16 16l4 4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
+                </svg>
+              </button>
+              <button className="iconBtn" title={t('forum_sort')||'Сортировка'} onClick={()=> openOnly(sortOpen ? null : 'sort')}>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+                  <path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
+                </svg>
+              </button>
+{/* ⬇️ КВЕСТ-ИКОНКА МЕЖДУ СОРТИРОВКОЙ И VIP+ */}
+<Image
+  src="/click/quest.gif"
+  unoptimized width={52} height={52}
+  alt=""
+  role="button"
+  aria-label={t('quest_open') || 'Quests'}
+  aria-disabled={!QUEST_ENABLED}
+  tabIndex={QUEST_ENABLED ? 0 : -1}
+  onClick={() => {
+    try { window.dispatchEvent(new Event('qcoin:open')) } catch {}
+          try { q.open?.() } catch {}
+        }}
+  // onClick={QUEST_ENABLED ? openQuests : undefined}
+  onKeyDown={(e) => {
+    if (!QUEST_ENABLED) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openQuests?.();
+    }
+  }}
+  draggable={false}
+  className={
+    `questIconPure ${typeof questBtnClass !== 'undefined' ? questBtnClass : ''}`
+  }
+  style={{
+    ['--quest-w']: '52px',   // меняй по желанию: '96px' | '3rem' | 'auto'
+    ['--quest-h']: 'auto',
+    ['--quest-cursor']: QUEST_ENABLED ? 'pointer' : 'default',
+    ['--quest-y']: '-14px',
+ }}
+/>
+{/* ⬆️ КОНЕЦ ВСТАВКИ */}
+                {drop && q.trim() && (
+                <div className="searchDrop" onMouseLeave={()=>setDrop(false)}>
+                  {results.length===0 && <div className="meta px-1 py-1">{t('forum_search_empty') || 'Ничего не найдено'}</div>}
+                  {results.map(r=>(
+                    <button
+                      key={`${r.k}:${r.id}`}
+                      className="item w-full text-left mb-1"
+                      onClick={()=>{
+                        setDrop(false)
+                        if(r.k==='t'){
+                          const tt = (data.topics||[]).find(x=>x.id===r.id)
+                          if(tt){ setTopicFilterId(tt.id); setSel(tt); setThreadRoot(null) }
+                        }else{
+                          const p = (data.posts||[]).find(x=>x.id===r.id)
+                          if(p){
+                            const tt = (data.topics||[]).find(x=>x.id===p.topicId)
+if (tt) {
+  setTopicFilterId(tt.id);
+  // ✅ сразу открыть ветку ответов с заголовком = найденное сообщение
+  openThreadForPost(p);
+}
+
+                          }
+                        }
+                      }}>
+                      {r.k==='t'
+                        ? (<div><div className="title">Тема: {r.title}</div>{r.desc && <div className="meta">{r.desc}</div>}</div>)
+                        : (<div><div className="title">Сообщение</div><div className="meta">{r.text}</div></div>)
+                      }
+                    </button>
+                  ))}
+                </div>
+              )}
+{claimFx.open && (
+  <div className="coinBurstOverlay" onClick={() => setClaimFx(s => ({ ...s, open: false }))}>
+    {claimFx.pieces.map(p => (
+      <div
+        key={p.id}
+        className="coinPiece"
+        style={{ marginLeft: `${p.x}vw`, animationDelay: `${p.delay}ms`, width: p.size, height: p.size }}
+      />
+    ))}
+    <div className="coinBurstBox" onClick={e => e.stopPropagation()}>
+      <div className="coinCongrats">{t('quest_reward_claimed') || 'Награда зачислена'}</div>
+      <div className="coinSum">+ {Number(claimFx.amount).toFixed(10)}</div>
+
+      <button
+        className="btn"
+        onClick={async (e) => {
+          const btn = e.currentTarget;
+          if (btn.dataset.loading === '1') return;            // антидубль
+          btn.dataset.loading = '1';
+
+          if (!window.__claimingRef) window.__claimingRef = new Set();
+          const claimKey = `${auth?.accountId || auth?.asherId || ''}::${claimFx.cardId}`;
+          if (window.__claimingRef.has(claimKey)) return;
+          window.__claimingRef.add(claimKey);
+
+          const finish = (reset = true) => {
+            if (reset) {
+              setClaimFx({ open: false, cardId: '', amount: '', pieces: [] });
+              try { lastClaimFxRef.current = { cardId: '', ts: Date.now() } } catch {}
+            }
+            btn.dataset.loading = '0';
+            window.__claimingRef.delete(claimKey);
+          };
+
+          try {
+            // 1) UID
+            let uid = auth?.accountId || auth?.asherId || '';
+            if (!uid) {
+              const ok = await (typeof requireAuthStrict === 'function' ? requireAuthStrict() : openAuth?.());
+              if (!ok) return finish(false);
+              uid = auth?.accountId || auth?.asherId || '';
+              if (!uid) return finish(false);
+            }
+            uid = String(uid).replace(/[^\x20-\x7E]/g, '');
+
+            const clientCardId = claimFx.cardId;                 // "quest-1"
+            const serverCardId = normalizeCardId(clientCardId);   // "1"                                                   // "1"
+            if (!serverCardId || serverCardId === '0') return finish(false);
+            const qq = QUESTS?.find(q => q.id === clientCardId);
+            if (!qq || !qq.rewardKey) return finish(false);
+
+           // ===== helpers
+            const normalizeTaskId = (x) => {
+              const s = String(x ?? '');
+              const m = s.match(/(\d+)$/);
+              return m ? String(Number(m[1])) : s;
+            };
+            const postTask = async (numStr) => {
+              const common = {
+                method: 'POST',
+                headers: {
+                  'content-type': 'application/json',
+                  'x-forum-user': uid,
+                  'x-forum-vip': vipActive ? '1' : '0',
+                },
+                cache: 'no-store',
+              };
+            
+              // сервер ждёт ЧИСЛОВОЙ cardId и ЧИСЛОВОЙ taskId
+              const r = await fetch('/api/quest/progress', {                ...common,
+                body: JSON.stringify({ cardId: serverCardId, taskId: numStr, accountId: uid }),
+              });
+              return r.ok;
+            };
+
+            // 2) синхронизация недостающих задач
+            const progRes = await fetch('/api/quest/progress', {
+              method: 'GET',
+              headers: { 'x-forum-user': uid, 'x-forum-vip': vipActive ? '1' : '0' },
+              cache: 'no-store',
+            });
+            let prog = {}; try { prog = await progRes.json(); } catch {}
+            const serverCard = prog?.progress?.[serverCardId] || {};
+            const serverDoneRaw = Array.isArray(serverCard.done) ? serverCard.done : [];
+            const serverDone = new Set(serverDoneRaw.map(normalizeTaskId));
+
+            const totalTasks = getCardTotalTasks(clientCardId);
+            const allIds = Array.from({ length: totalTasks }, (_, i) => String(i + 1));
+            const missing = allIds.filter(id => !serverDone.has(id));
+
+            for (const id of missing) { try { await postTask(id); } catch {} }
+
+            // 3) клейм
+            const doClaim = async () => {
+              const res = await fetch('/api/quest/progress', {
+                method: 'POST',
+                headers: {
+                  'content-type': 'application/json',
+                  'x-forum-user': uid,
+                  'x-forum-vip': vipActive ? '1' : '0',
+                },
+                cache: 'no-store',
+                body: JSON.stringify({
+                  cardId: serverCardId,
+                  claim: true,
+                  rewardKey: qq.rewardKey,
+                  accountId: uid,
+                }),              });
+              let j = null; try { j = await res.json(); } catch {}
+              return { res, j };
+            };
+
+            const { res, j } = await doClaim();
+
+            // успех: 200/ok или 409/already_claimed
+            if ((res.ok && j?.ok) || res.status === 409 || j?.error === 'already_claimed') {
+             const allNumIds = Array.from({ length: getCardTotalTasks(clientCardId) }, (_, i) => String(i + 1));
+              writeQuestProg(prev => {
+                const card = { ...(prev[clientCardId] || {}) };
+                card.claimed = true;
+                card.claimTs = Date.now();
+                // обеспечиваем числовые id
+                if (!Array.isArray(card.done) || card.done.length < allNumIds.length) {
+                  card.done = allNumIds.slice();
+                } else {
+                  card.done = card.done.map(normalizeTaskId);
+                }
+                if (!card.claimReadyTs) card.claimReadyTs = Date.now();
+                return { ...prev, [clientCardId]: card };
+              });
+              if (j?.awarded != null) {
+                try { toast.show({ type: 'ok', text: `+${Number(j.awarded).toFixed(10)} QCoin` }) } catch {}
+              }
+              finish(true);
+              return;
+            }
+
+            const msg = j?.error || `http_${res?.status || 0}`;
+            try { toast.show({ type: 'warn', text: msg }) } catch {}
+            console.warn('[claim] status=', res?.status, 'json=', j);
+            finish(false);
+          } catch (err) {
+            console.error('[claim] unexpected', err);
+            try { toast.show({ type: 'warn', text: 'client_error' }) } catch {}
+            finish(false);
+          }
+        }}
+      >
+        {t('quest_do') || 'Забрать'}
+      </button>
+    </div>
+  </div>
+)}
+
+
+
+              {sortOpen && (
+                <div className="sortDrop" onMouseLeave={()=>setSortOpen(false)}>
+
+{[
+  ['new',     t('forum_sort_new')     || 'Новые'],
+  ['top',     t('forum_sort_top')     || 'Топ'],
+  ['likes',   t('forum_sort_likes')   || 'Лайки'],
+  ['views',   t('forum_sort_views')   || 'Просмотры'],
+  ['replies', t('forum_sort_replies') || 'Ответы'],
+].map(([k,txt])=>(
+  <button
+    key={k}
+    className="item w-full text-left mb-1"
+// [SORT_MENU:CLICK]
+onClick={()=>{
+  if (videoFeedOpen) setFeedSort(k);
+  else if (sel) setPostSort(k);
+  else setTopicSort(k);
+  setSortOpen(false);
+}}
+
+  >
+    {txt}
+  </button>
+
+))}
+
+  {/* ⭐ Star-mode toggle (icon-only) */}
+  <button
+    type="button"
+    className={`starModeBtn ${starMode ? 'on' : ''}`}
+   onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); setStarMode(v=>!v); }}
+
+    title="Star mode: авторы, на которых вы подписаны — первыми"
+    aria-pressed={starMode}
+    aria-label="Star mode"
+  >
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden>
+      <path className="starPath" d="M12 2.6l2.9 6.2 6.8.6-5.1 4.4 1.6 6.6L12 16.9 5.8 20.4l1.6-6.6-5.1-4.4 6.8-.6L12 2.6Z" />
+   </svg>
+  </button> 
+                </div>
+              )}
+           </div>
+{/* ---- VIP+ ---- */}
+<div className="vipWrap">
+  <button
+    ref={vipBtnRef}
+    className={cls('iconBtn', vipActive ? 'vip' : 'vipGray', 'pulse', 'hoverPop')}
+    title={t('forum_vip_plus') || 'VIP+'}
+    onClick={()=> openOnly(vipOpen ? null : 'vip')}
+  >
+    VIP+
+  </button>
+
+  <VipPopover
+    anchorRef={vipBtnRef}
+    open={vipOpen}
+    onClose={() => setVipOpen(false)}
+    t={t}
+    vipActive={vipActive}
+    onPay={async () => {
+      try {
+        const accountId = auth?.accountId || auth?.asherId || '';
+        if (!accountId) { 
+          toast?.err?.(t('forum_need_auth') || 'Authorization required'); 
+          return; 
+        }
+
+        // 1) Проверяем текущий статус через ТВОЮ ручку AI-квоты
+        {
+          const r0 = await fetch('/api/subscription/status', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ accountId }),
+          });
+          const j0 = await r0.json().catch(() => null);
+          if (j0?.isVip) {
+            // уже VIP — просто подсветим кнопку и закроем поповер
+            try { setVipActive?.(true); } catch {}
+            toast?.ok?.(t('forum_vip_already_active') || 'VIP already active');
+            setVipOpen(false);
+            return;
+          }
+        }
+
+        // 2) Запускаем ТОТ ЖЕ платёж, что и для AI-квоты
+        const r = await fetch('/api/pay/create', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ accountId }), // только accountId — без выдуманных полей
+        });
+
+        const j = await r.json().catch(() => null);
+        if (j?.url) {
+          // открываем NowPayments (как на бирже)
+         openPaymentWindow(j.url);
+          // 3) Короткий опрос статуса, пока webhook не запишет в базу
+          const started = Date.now();
+          let active = false;
+          while (!active && Date.now() - started < 60_000) {
+            await new Promise(r => setTimeout(r, 2000));
+            const rs = await fetch('/api/subscription/status', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ accountId }),
+            });
+            const js = await rs.json().catch(() => null);
+            active = !!js?.isVip;
+          }
+
+          if (active) {
+            try { setVipActive?.(true); } catch {}
+            toast?.ok?.(t('forum_vip_activated') || 'VIP activated');
+          } else {
+            // не успели получить webhook за минуту — просто сообщаем,
+            // дальше подтянется твоим общим циклом/при следующем заходе
+            toast?.warn?.(t('forum_vip_pending') || 'Payment pending…');
+          }
+        } else {
+          toast?.err?.(t('forum_vip_pay_fail') || 'Payment init failed');
+        }
+      } catch {
+        toast?.err?.(t('forum_vip_pay_fail') || 'Payment init failed');
+      } finally {
+        setVipOpen(false);
+      }
+    }}
+  />
+</div>
+             {/* админ
+            <div className="adminWrap">
+              <button
+                ref={adminBtnRef}
+                className={cls('adminBtn', isAdmin ? 'adminOn' : 'adminOff', 'pulse', 'hoverPop')}
+                onClick={()=> openOnly(adminOpen ? null : 'admin')}>
+                {t('forum_admin')}
+              </button>
+              <AdminPopover
+                anchorRef={adminBtnRef}
+                open={adminOpen}
+                onClose={()=>setAdminOpen(false)}
+                t={t}
+                isActive={isAdmin}
+                onActivated={()=> setIsAdmin(true)}
+                onDeactivated={()=> setIsAdmin(false)}
+              />
+            </div> */}
+          </div>
+        </div>        
   {/* ЕДИНАЯ ГОРИЗОНТАЛЬНАЯ ЛИНЕЙКА: ЛЕВО — ЦЕНТР — ПРАВО */}
   <div className="forumRowBar">
     <div className="slot-left">
