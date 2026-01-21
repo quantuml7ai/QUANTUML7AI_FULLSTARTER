@@ -1516,7 +1516,7 @@ const Styles = () => (
 .headPeekBtn{
   position: fixed;
   left: 50%;
-  top: calc(20px + env(safe-area-inset-top, 0px));
+  top: calc(25px + env(safe-area-inset-top, 0px));
   transform: translateX(-50%);
   z-index: 91;
   width: 54px;
@@ -1536,7 +1536,7 @@ const Styles = () => (
 .headCollapseBtn{
   position: absolute;
   left: 50%;
-  bottom: -18px;
+  bottom: -45px;
   transform: translateX(-50%);
   z-index: 91;
   width: 54px;
