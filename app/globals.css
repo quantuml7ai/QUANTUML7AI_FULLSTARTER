@@ -843,9 +843,10 @@ html, body{
 
 /* === Глобальные гаттеры === */
 :root { --gutter: 26px; --miniapp-top-offset: 70px; } /* ↑ докрути тут при необходимости */
-@media (min-width:1280px){ :root{ --gutter: 100px; } }
+@media (min-width:1780px){ :root{ --gutter: 180px; } }
+@media (max-width:1780px){ :root{ --gutter: 120px; } }
 /* Мобайл: микро-гаттер 8px, чтобы ничего не «резалось» по краям */
-@media (max-width:640px){ :root{ --gutter: 6px; --miniapp-top-offset: 70px; } }
+@media (max-width:1180px){ :root{ --gutter: 6px; --miniapp-top-offset: 70px; } }
 
 /* База */
 html,body{ margin:0; padding:0; width:100%; min-height:100%; overflow-x:hidden; }
@@ -857,18 +858,31 @@ main,section,header,footer,nav,article,aside,
 figure,.panel,.container,.content,.wrap,.wrapper,.page,.block,.hero,.card{
   width:100% !important; max-width:100% !important; margin-left:auto !important; margin-right:auto !important;
 }
+ 
+/* === Глобальные гаттеры: ТОЛЬКО внешний отступ от краёв экрана === */
+/* Важно: НЕ трогаем вложенные элементы внутри .panel и других блоков */
 
-/* 2) Гаттеры (с учётом моб. 8px) */
-body > :not(style):not(script):not(.no-gutters),
-.page-content,
-main:not(.no-gutters),section:not(.no-gutters),header:not(.no-gutters),footer:not(.no-gutters),
-nav:not(.no-gutters),article:not(.no-gutters),aside:not(.no-gutters),
-figure:not(.no-gutters),.container:not(.no-gutters),.content:not(.no-gutters),
-.wrap:not(.no-gutters),.wrapper:not(.no-gutters),.page:not(.no-gutters),
-.block:not(.no-gutters),.hero:not(.no-gutters),.card:not(.no-gutters){
-  padding-left:var(--gutter) !important;
-  padding-right:var(--gutter) !important;
+:where(body) > :is(
+  .page-content,
+  main, section, header, footer, nav, article, aside, figure,
+  .container, .content, .wrap, .wrapper, .page, .block, .hero, .card,
+  .center-wrap
+):not(.no-gutters){
+  padding-left: var(--gutter) !important;
+  padding-right: var(--gutter) !important;
 }
+
+/* Если у тебя есть layout-контейнеры прямо внутри .page-content,
+   и ты хочешь гаттер именно им (но всё равно только на первом уровне) */
+:where(.page-content) > :is(
+  main, section, header, footer, nav, article, aside, figure,
+  .container, .content, .wrap, .wrapper, .page, .block, .hero, .card
+):not(.no-gutters){
+  padding-left: var(--gutter) !important;
+  padding-right: var(--gutter) !important;
+}
+
+
 
 
 /* 3) ТОЛЬКО контейнеры в .page-content тянем на 100% */

@@ -3,6 +3,7 @@
 'use client'
  
 import React, { useEffect, useMemo, useRef, useCallback, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useI18n } from '../../components/i18n' 
 import { broadcast as forumBroadcast } from './events/bus'
 import Image from 'next/image'
@@ -1517,18 +1518,18 @@ const Styles = () => (
   left: 50%;
   top: calc(10px + env(safe-area-inset-top, 0px));
   transform: translateX(-50%);
-  z-index: 90;
-  width: 44px;
+  z-index: 91;
+  width: 54px;
   height: 44px;
   border-radius: 999px;
-  border: 1px solid rgba(120, 200, 255, .35);
-  background: rgba(10, 16, 26, .58);
-  color: rgba(205, 235, 255, .95);
+  border: 1px solid rgba(0, 255, 255, 0);
+  background: rgba(10, 16, 26, 0.21);
+  color: rgb(255, 255, 255);
   display:flex;
   align-items:center;
   justify-content:center;
   backdrop-filter: blur(10px);
-  box-shadow: 0 0 22px rgba(80, 167, 255, .24), inset 0 0 16px rgba(80, 167, 255, .14);
+  box-shadow: 0 0 22px rgb(80, 205, 255), inset 0 0 16px rgba(80, 167, 255, .14);
   cursor:pointer;
 }
 .headPeekBtn:active{ transform: translateX(-50%) scale(.97); }
@@ -1538,17 +1539,17 @@ const Styles = () => (
   bottom: -18px;
   transform: translateX(-50%);
   z-index: 91;
-  width: 48px;
-  height: 36px;
+  width: 54px;
+  height: 44px;
   border-radius: 999px;
-  border: 1px solid rgba(120, 200, 255, .28);
-  background: rgba(10, 16, 26, .55);
-  color: rgba(205, 235, 255, .95);
+  border: 1px solid rgba(120, 201, 255, 0);
+  background: rgb(10, 16, 26);
+  color: rgb(255, 255, 255);
   display:flex;
   align-items:center;
   justify-content:center;
   backdrop-filter: blur(10px);
-  box-shadow: 0 0 22px rgba(80, 167, 255, .18), inset 0 0 16px rgba(80, 167, 255, .10);
+  box-shadow: 0 0 22px rgb(80, 205, 255), inset 0 0 16px rgba(80, 167, 255, .10);
   cursor:pointer;
 }
 .headCollapseBtn:active{ transform: translateX(-50%) scale(.97); }
@@ -12394,7 +12395,7 @@ function pickAdUrlForSlot(slotKey, slotKind) {
     /* === СПИСОК ТЕМ === */
     <section className="glass neon" style={{ display:'flex', flexDirection:'column', flex:'1 1 auto', minHeight: 0 }}>
 
-{headHidden && !headPinned && (
+{headHidden && !headPinned && isBrowser() && createPortal(
   <button
     type="button"
     className="headPeekBtn"
@@ -12402,12 +12403,13 @@ function pickAdUrlForSlot(slotKey, slotKind) {
     onClick={() => { setHeadPinned(true); setHeadHidden(false); }}
   >
     <HeadChevronIcon dir="down" />
-  </button>
+  </button>,
+  document.body
 )}
 
 <div className={cls('head', headHidden && !headPinned && 'head--collapsed')}>
   {/* шапка */}
-  <div className="headInner" style={{ position:'relative', width:'100%' }}>
+  <div className="headInner" style={{ width:'100%' }}>
     {headPinned && (
       <button
         type="button"
@@ -13244,7 +13246,7 @@ onOpenThread={(clickP) => {
     /* === ВЫБРАННАЯ ТЕМА: посты + композер === */
     <section className="glass neon" style={{ display:'flex', flexDirection:'column', flex:'1 1 auto', minHeight: 0 }}>
 
-{headHidden && !headPinned && (
+{headHidden && !headPinned && isBrowser() && createPortal(
   <button
     type="button"
     className="headPeekBtn"
@@ -13252,12 +13254,13 @@ onOpenThread={(clickP) => {
     onClick={() => { setHeadPinned(true); setHeadHidden(false); }}
   >
     <HeadChevronIcon dir="down" />
-  </button>
+  </button>,
+  document.body
 )}
 
 <div className={cls('head', headHidden && !headPinned && 'head--collapsed')}>
   {/* шапка */}
-  <div className="headInner" style={{ position:'relative', width:'100%' }}>
+  <div className="headInner" style={{ width:'100%' }}>
     {headPinned && (
       <button
         type="button"
