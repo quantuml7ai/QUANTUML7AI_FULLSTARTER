@@ -13900,7 +13900,12 @@ onClick={()=>{
         </div>
 
   {/* Заголовок темы оставляем ниже, как был */}
-  <div className="title mt-2 whitespace-normal break-words [overflow-wrap:anywhere] [line-break:anywhere] min-w-0" suppressHydrationWarning>
+  <div   className="
+    topicTitle text-[#eaf4ff]
+    !whitespace-normal break-words
+    [overflow-wrap:anywhere]
+    max-w-full"
+ suppressHydrationWarning>
     <span className="whitespace-normal break-words [overflow-wrap:anywhere] [line-break:anywhere]">
       {threadRoot ? (t('forum_open_replies') || 'Ответы') : (sel?.title || '')}
     </span>
