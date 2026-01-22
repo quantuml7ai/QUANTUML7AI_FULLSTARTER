@@ -1345,12 +1345,23 @@ const Styles = () => (
       --mb-ad-h-mobile: 200px;
       --mb-ad-h-tablet: 260px;
       --mb-ad-h-desktop: 320px;
+
+  /* VIP emoji / MOZI sticker cards fixed height (как mediaBox) */
+  --mb-vip-emoji-h-mobile: 260px;
+  --mb-vip-emoji-h-tablet: 320px;
+  --mb-vip-emoji-h-desktop: 380px;
+
+  --mb-sticker-h-mobile: 260px;
+  --mb-sticker-h-tablet: 320px;
+  --mb-sticker-h-desktop: 380px;      
       --mb-video-h: var(--mb-video-h-mobile);
       --mb-image-h: var(--mb-image-h-mobile);
       --mb-iframe-h: var(--mb-iframe-h-mobile);
       --mb-audio-h: var(--mb-audio-h-mobile);
       --mb-ad-h: var(--mb-ad-h-mobile);
-    }
+ --mb-vip-emoji-h: var(--mb-vip-emoji-h-mobile);
+  --mb-sticker-h: var(--mb-sticker-h-mobile);   
+      }
     @media (min-width: 640px){
       .forum_root{
         --mb-video-h: var(--mb-video-h-tablet);
@@ -1358,6 +1369,9 @@ const Styles = () => (
         --mb-iframe-h: var(--mb-iframe-h-tablet);
         --mb-audio-h: var(--mb-audio-h-tablet);
         --mb-ad-h: var(--mb-ad-h-tablet);
+
+    --mb-vip-emoji-h: var(--mb-vip-emoji-h-tablet);
+    --mb-sticker-h: var(--mb-sticker-h-tablet);        
       }
     }
     @media (min-width: 1024px){
@@ -1367,9 +1381,41 @@ const Styles = () => (
         --mb-iframe-h: var(--mb-iframe-h-desktop);
         --mb-audio-h: var(--mb-audio-h-desktop);
         --mb-ad-h: var(--mb-ad-h-desktop);
+
+    --mb-vip-emoji-h: var(--mb-vip-emoji-h-desktop);
+    --mb-sticker-h: var(--mb-sticker-h-desktop);        
       }
     }
+    /* =========================================================
+       VIP emoji / MOZI sticker fixed card (аналог mediaBox)
+    ========================================================= */
+    .vipMediaBox{
+      position: relative;
+      width: 100%;
+      height: var(--vipmb-h, 260px);
+      overflow: hidden;
+      border-radius: 12px;
+      background: rgba(8,12,20,.7);
+      border: 1px solid rgba(140,170,255,.25);
+      contain: layout paint;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 10px;
+    }
 
+    .vipMediaBox[data-kind="vip-emoji"]{ --vipmb-h: var(--mb-vip-emoji-h); }
+    .vipMediaBox[data-kind="sticker"]{  --vipmb-h: var(--mb-sticker-h); }
+
+    .vipMediaBox > img{
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display:block;
+      border-radius: 10px;
+    }
     .mediaBox{
       position:relative;
       width:100%;
@@ -6733,6 +6779,7 @@ const NO_THREAD_OPEN_SELECTOR =
       {/* тело поста — крупные эмодзи (VIP/MOZI) как картинка, иначе очищенный текст */}
       {(/^\[(VIP_EMOJI|MOZI):\/[^\]]+\]$/).test(p.text || '') ? (
         <div className="postBody emojiPostWrap">
+          <div className="vipMediaBox" data-kind="sticker">
           <Image
             src={(p.text || '').replace(/^\[(VIP_EMOJI|MOZI):(.*?)\]$/, '$2')}
             alt=""
@@ -6746,6 +6793,7 @@ const NO_THREAD_OPEN_SELECTOR =
             }
             style={{ width: '100%', height: 'auto' }}
           />
+          </div>
         </div>
       ) : (
         displayText.trim() && (
