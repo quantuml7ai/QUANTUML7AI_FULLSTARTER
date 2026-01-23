@@ -12944,6 +12944,7 @@ onClick={()=>{
 
  {/* ЕДИНАЯ ГОРИЗОНТАЛЬНАЯ ЛИНЕЙКА: ЛЕВО — ЦЕНТР — ПРАВО */}
   <div className="forumRowBar">
+
     <div className="slot-left">
 
   {/* Центр: быстрые действия (создать тему / открыть видео-ленту) */}
@@ -12957,7 +12958,7 @@ onClick={()=>{
   try { setInboxOpen?.(false) } catch {}
   try { setReplyTo?.(null) } catch {}
   try { setThreadRoot?.(null) } catch {}
-  try { setSel?.(null) } catch {}
+  // ✅ НЕ выходим из темы (иначе iPhone прыгает наверх)
   setTimeout(() => { try { window.__forumToggleCreateTopic?.() } catch {} }, 0)
 }}
   >
@@ -13094,7 +13095,11 @@ onClick={()=>{
   </button>
     </div>
   </div>
+  <CreateTopicCard t={t} onCreate={createTopic} onOpenVideoFeed={openVideoFeed} />
+
       </div>
+      
+
 {videoFeedOpen ? (
   <>
 {/* ВЕТКА-ЛЕНТА: медиа (видео/аудио/изображения) */}
@@ -13292,7 +13297,7 @@ onOpenThread={(clickP) => {
   </>
 ) : (
   <>
-    <CreateTopicCard t={t} onCreate={createTopic} onOpenVideoFeed={openVideoFeed} />
+    
     <div className="grid gap-2 mt-2" suppressHydrationWarning>
       {(visibleTopics || []).map(x => {
           const agg = aggregates.get(x.id) || { posts:0, likes:0, dislikes:0, views:0 };
@@ -13835,6 +13840,7 @@ onClick={()=>{
         </div>        
   {/* ЕДИНАЯ ГОРИЗОНТАЛЬНАЯ ЛИНЕЙКА: ЛЕВО — ЦЕНТР — ПРАВО */}
   <div className="forumRowBar">
+
     <div className="slot-left">
 
   {/* Центр: быстрые действия (создать тему / открыть видео-ленту) */}
@@ -13975,6 +13981,7 @@ onClick={()=>{
     </svg>
   </button>
     </div>
+<CreateTopicCard t={t} onCreate={createTopic} onOpenVideoFeed={openVideoFeed} />
 
         </div>
 
