@@ -12966,6 +12966,27 @@ onClick={()=>{
         </svg>
   </button>
 
+
+        <button
+        type="button"
+        className="iconBtn inboxBtn"
+        title={t('forum_inbox') || 'Ответы мне'}
+        onClick={() => setInboxOpen(v => !v)}
+        aria-pressed={inboxOpen}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden>
+          <path d="M3 7h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.6" fill="none"/>
+          <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        {mounted && unreadCount > 0 && (
+          <span className="inboxBadge" suppressHydrationWarning>{unreadCount}</span>
+      )}
+      </button>
+</div>
+
+
+    <div className="slot-center">
+
   <button
     type="button"
     className="iconBtn bigPlus"
@@ -12981,50 +13002,6 @@ onClick={()=>{
           <path d="M17 9l4-2v10l-4-2z" strokeLinejoin="round" />
         </svg>
   </button> 
-</div>
-
-
-    <div className="slot-center">
-
-      <button
-        type="button"
-        className="iconBtn inboxBtn"
-        title={t('forum_inbox') || 'Ответы мне'}
-        onClick={() => setInboxOpen(v => !v)}
-        aria-pressed={inboxOpen}
-      >
-        <svg viewBox="0 0 24 24" aria-hidden>
-          <path d="M3 7h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.6" fill="none"/>
-          <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-        {mounted && unreadCount > 0 && (
-          <span className="inboxBadge" suppressHydrationWarning>{unreadCount}</span>
-      )}
-      </button>
-  {/* Домой (иконка) */}
-  <button
-    type="button"
-    className="iconBtn bigPlus"
-    aria-label={t?.('forum_home') || 'На главную'}
-    onClick={()=>{
-    if (videoFeedOpen) { try{ closeVideoFeed?.() }catch{} }
-    if (questOpen)     { try{ closeQuests?.() }catch{} }
-    try{ setInboxOpen(false) }catch{};
-    try{ setReplyTo(null) }catch{};
-    try{ setThreadRoot(null) }catch{};
-    try{ setSel(null) }catch{};
-  }}
-    title={t?.('forum_home') || 'На главную'}
-  >
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
-      <path d="M3 10l9-7 9 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M5 10v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  </button>     
-
-    </div>
-    <div className="slot-right">
-
    <button
     type="button"
     className="iconBtn inviteGifBtn"
@@ -13066,7 +13043,32 @@ onClick={()=>{
         draggable={false}
       />
     </span>
-    </button>
+    </button>    
+
+    </div>
+    <div className="slot-right">
+
+
+      {/* Домой (иконка) */}
+  <button
+    type="button"
+    className="iconBtn bigPlus"
+    aria-label={t?.('forum_home') || 'На главную'}
+    onClick={()=>{
+    if (videoFeedOpen) { try{ closeVideoFeed?.() }catch{} }
+    if (questOpen)     { try{ closeQuests?.() }catch{} }
+    try{ setInboxOpen(false) }catch{};
+    try{ setReplyTo(null) }catch{};
+    try{ setThreadRoot(null) }catch{};
+    try{ setSel(null) }catch{};
+  }}
+    title={t?.('forum_home') || 'На главную'}
+  >
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
+      <path d="M3 10l9-7 9 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M5 10v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  </button>
   {/* Назад (иконка) */}
   <button
     type="button"
@@ -13856,26 +13858,6 @@ onClick={()=>{
         </svg>
   </button>
 
-  <button
-    type="button"
-    className="iconBtn bigPlus"
-   title={t('forum_video_feed') || 'Видео'}
-    aria-label={t('forum_video_feed') || 'Видео'}
-    onClick={() => {
-      if (videoFeedOpen) { try { closeVideoFeed?.() } catch {} ; return; }
-      try { openVideoFeed?.() } catch {}
-    }}
-  >
-        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <rect x="3" y="5" width="14" height="14" rx="3"></rect>
-          <path d="M17 9l4-2v10l-4-2z" strokeLinejoin="round" />
-        </svg>
-  </button> 
-</div>
-
-
-    <div className="slot-center">
-
       <button
         type="button"
         className="iconBtn inboxBtn"
@@ -13891,26 +13873,25 @@ onClick={()=>{
           <span className="inboxBadge" suppressHydrationWarning>{unreadCount}</span>
       )}
       </button>
-  {/* Домой (иконка) */}
+</div>
+
+
+    <div className="slot-center">
   <button
     type="button"
     className="iconBtn bigPlus"
-    aria-label={t?.('forum_home') || 'На главную'}
-    onClick={()=>{ 
-      try{ setInboxOpen(false) }catch{};
-      try{ setReplyTo(null) }catch{}; 
-      try{ setThreadRoot(null) }catch{}; 
-      try{ setSel(null) }catch{}; }}
-    title={t?.('forum_home') || 'На главную'}
+   title={t('forum_video_feed') || 'Видео'}
+    aria-label={t('forum_video_feed') || 'Видео'}
+    onClick={() => {
+      if (videoFeedOpen) { try { closeVideoFeed?.() } catch {} ; return; }
+      try { openVideoFeed?.() } catch {}
+    }}
   >
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
-      <path d="M3 10l9-7 9 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M5 10v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  </button>     
-
-    </div>
-    <div className="slot-right">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8">
+          <rect x="3" y="5" width="14" height="14" rx="3"></rect>
+          <path d="M17 9l4-2v10l-4-2z" strokeLinejoin="round" />
+        </svg>
+  </button> 
 
    <button
     type="button"
@@ -13953,7 +13934,29 @@ onClick={()=>{
         draggable={false}
       />
     </span>
-    </button>
+    </button>    
+
+    </div>
+    <div className="slot-right">
+
+
+      {/* Домой (иконка) */}
+  <button
+    type="button"
+    className="iconBtn bigPlus"
+    aria-label={t?.('forum_home') || 'На главную'}
+    onClick={()=>{ 
+      try{ setInboxOpen(false) }catch{};
+      try{ setReplyTo(null) }catch{}; 
+      try{ setThreadRoot(null) }catch{}; 
+      try{ setSel(null) }catch{}; }}
+    title={t?.('forum_home') || 'На главную'}
+  >
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
+      <path d="M3 10l9-7 9 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M5 10v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  </button> 
   {/* Назад (иконка) */}
   <button
     type="button"
