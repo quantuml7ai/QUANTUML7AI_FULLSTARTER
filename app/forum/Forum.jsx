@@ -12947,25 +12947,7 @@ onClick={()=>{
 
     <div className="slot-left">
 
-  {/* Центр: быстрые действия (создать тему / открыть видео-ленту) */}
-  <button
-    type="button"
-    className="iconBtn bigPlus"
-        title={t('forum_create') || 'Создать'}
-        aria-label={t('forum_create') || 'Создать'}
-    onClick={() => {
-  try { if (videoFeedOpen) closeVideoFeed?.() } catch {}
-  try { setInboxOpen?.(false) } catch {}
-  try { setReplyTo?.(null) } catch {}
-  try { setThreadRoot?.(null) } catch {}
-  // ✅ НЕ выходим из темы (иначе iPhone прыгает наверх)
-  setTimeout(() => { try { window.__forumToggleCreateTopic?.() } catch {} }, 0)
-}}
-  >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-        </svg>
-  </button>
+
 
 
         <button
@@ -12983,27 +12965,8 @@ onClick={()=>{
           <span className="inboxBadge" suppressHydrationWarning>{unreadCount}</span>
       )}
       </button>
-</div>
 
-
-    <div className="slot-center">
-
-  <button
-    type="button"
-    className="iconBtn bigPlus"
-   title={t('forum_video_feed') || 'Видео'}
-    aria-label={t('forum_video_feed') || 'Видео'}
-    onClick={() => {
-      if (videoFeedOpen) { try { closeVideoFeed?.() } catch {} ; return; }
-      try { openVideoFeed?.() } catch {}
-    }}
-  >
-        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <rect x="3" y="5" width="14" height="14" rx="3"></rect>
-          <path d="M17 9l4-2v10l-4-2z" strokeLinejoin="round" />
-        </svg>
-  </button> 
-   <button
+     <button
     type="button"
     className="iconBtn inviteGifBtn"
     style={{
@@ -13044,7 +13007,46 @@ onClick={()=>{
         draggable={false}
       />
     </span>
-    </button>    
+    </button> 
+</div>
+
+
+    <div className="slot-center">
+
+  {/* Центр: быстрые действия (создать тему / открыть видео-ленту) */}
+  <button
+    type="button"
+    className="iconBtn bigPlus"
+        title={t('forum_create') || 'Создать'}
+        aria-label={t('forum_create') || 'Создать'}
+    onClick={() => {
+  try { if (videoFeedOpen) closeVideoFeed?.() } catch {}
+  try { setInboxOpen?.(false) } catch {}
+  try { setReplyTo?.(null) } catch {}
+  try { setThreadRoot?.(null) } catch {}
+  // ✅ НЕ выходим из темы (иначе iPhone прыгает наверх)
+  setTimeout(() => { try { window.__forumToggleCreateTopic?.() } catch {} }, 0)
+}}
+  >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+        </svg>
+  </button>
+           <button
+    type="button"
+    className="iconBtn bigPlus"
+   title={t('forum_video_feed') || 'Видео'}
+    aria-label={t('forum_video_feed') || 'Видео'}
+    onClick={() => {
+      if (videoFeedOpen) { try { closeVideoFeed?.() } catch {} ; return; }
+      try { openVideoFeed?.() } catch {}
+    }}
+  >
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8">
+          <rect x="3" y="5" width="14" height="14" rx="3"></rect>
+          <path d="M17 9l4-2v10l-4-2z" strokeLinejoin="round" />
+        </svg>
+  </button> 
 
     </div>
     <div className="slot-right">
@@ -13841,28 +13843,7 @@ onClick={()=>{
   {/* ЕДИНАЯ ГОРИЗОНТАЛЬНАЯ ЛИНЕЙКА: ЛЕВО — ЦЕНТР — ПРАВО */}
   <div className="forumRowBar">
 
-    <div className="slot-left">
-
-  {/* Центр: быстрые действия (создать тему / открыть видео-ленту) */}
-  <button
-    type="button"
-    className="iconBtn bigPlus"
-        title={t('forum_create') || 'Создать'}
-        aria-label={t('forum_create') || 'Создать'}
-    onClick={() => {
-  try { if (videoFeedOpen) closeVideoFeed?.() } catch {}
-  try { setInboxOpen?.(false) } catch {}
-  try { setReplyTo?.(null) } catch {}
-  try { setThreadRoot?.(null) } catch {}
-  try { setSel?.(null) } catch {}
-  setTimeout(() => { try { window.__forumToggleCreateTopic?.() } catch {} }, 0)
-}}
-
-  >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-        </svg>
-  </button>
+    <div className="slot-left"> 
 
       <button
         type="button"
@@ -13879,27 +13860,8 @@ onClick={()=>{
           <span className="inboxBadge" suppressHydrationWarning>{unreadCount}</span>
       )}
       </button>
-</div>
-
-
-    <div className="slot-center">
-  <button
-    type="button"
-    className="iconBtn bigPlus"
-   title={t('forum_video_feed') || 'Видео'}
-    aria-label={t('forum_video_feed') || 'Видео'}
-    onClick={() => {
-      if (videoFeedOpen) { try { closeVideoFeed?.() } catch {} ; return; }
-      try { openVideoFeed?.() } catch {}
-    }}
-  >
-        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <rect x="3" y="5" width="14" height="14" rx="3"></rect>
-          <path d="M17 9l4-2v10l-4-2z" strokeLinejoin="round" />
-        </svg>
-  </button> 
-
-   <button
+ 
+     <button
     type="button"
     className="iconBtn inviteGifBtn"
     style={{
@@ -13940,8 +13902,48 @@ onClick={()=>{
         draggable={false}
       />
     </span>
-    </button>    
+    </button> 
+</div>
 
+
+    <div className="slot-center">
+
+  {/* Центр: быстрые действия (создать тему / открыть видео-ленту) */}
+  <button
+    type="button"
+    className="iconBtn bigPlus"
+        title={t('forum_create') || 'Создать'}
+        aria-label={t('forum_create') || 'Создать'}
+    onClick={() => {
+  try { if (videoFeedOpen) closeVideoFeed?.() } catch {}
+  try { setInboxOpen?.(false) } catch {}
+  try { setReplyTo?.(null) } catch {}
+  try { setThreadRoot?.(null) } catch {}
+  try { setSel?.(null) } catch {}
+  setTimeout(() => { try { window.__forumToggleCreateTopic?.() } catch {} }, 0)
+}}
+
+  >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+        </svg>
+  </button>
+ 
+        <button
+    type="button"
+    className="iconBtn bigPlus"
+   title={t('forum_video_feed') || 'Видео'}
+    aria-label={t('forum_video_feed') || 'Видео'}
+    onClick={() => {
+      if (videoFeedOpen) { try { closeVideoFeed?.() } catch {} ; return; }
+      try { openVideoFeed?.() } catch {}
+    }}
+  >
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8">
+          <rect x="3" y="5" width="14" height="14" rx="3"></rect>
+          <path d="M17 9l4-2v10l-4-2z" strokeLinejoin="round" />
+        </svg>
+  </button> 
     </div>
     <div className="slot-right">
 
