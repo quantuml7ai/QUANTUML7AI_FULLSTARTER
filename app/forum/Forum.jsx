@@ -12952,7 +12952,14 @@ onClick={()=>{
     className="iconBtn bigPlus"
         title={t('forum_create') || 'Создать'}
         aria-label={t('forum_create') || 'Создать'}
-    onClick={() => { try { window.__forumToggleCreateTopic?.() } catch {} }}
+    onClick={() => {
+  try { if (videoFeedOpen) closeVideoFeed?.() } catch {}
+  try { setInboxOpen?.(false) } catch {}
+  try { setReplyTo?.(null) } catch {}
+  try { setThreadRoot?.(null) } catch {}
+  try { setSel?.(null) } catch {}
+  setTimeout(() => { try { window.__forumToggleCreateTopic?.() } catch {} }, 0)
+}}
   >
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
@@ -12978,30 +12985,22 @@ onClick={()=>{
 
 
     <div className="slot-center">
-  {/* Назад (иконка) */}
-  <button
-    type="button"
-    className="iconBtn bigPlus"
-    aria-label={t?.('forum_back') || 'Назад'}
-      disabled={!videoFeedOpen && !inboxOpen && !questOpen}
-    onClick={()=>{ 
-      if (videoFeedOpen) { try{ closeVideoFeed?.() }catch{}; return; } 
-      if (inboxOpen)    { try{ setInboxOpen(false) }catch{}; return; }
-  if (questOpen) {
-    // если внутри раздела квестов открыта карточка — просто закрываем её
-    if (questSel) { try{ setQuestSel(null) }catch{}; return; }
-    // иначе выходим из раздела квестов целиком
-    try{ closeQuests?.() }catch{}; return;
-  }     
- }}
-       title={t?.('forum_back') || 'Назад'}
-   
-      >
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
-      <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  </button>
 
+      <button
+        type="button"
+        className="iconBtn inboxBtn"
+        title={t('forum_inbox') || 'Ответы мне'}
+        onClick={() => setInboxOpen(v => !v)}
+        aria-pressed={inboxOpen}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden>
+          <path d="M3 7h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.6" fill="none"/>
+          <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        {mounted && unreadCount > 0 && (
+          <span className="inboxBadge" suppressHydrationWarning>{unreadCount}</span>
+      )}
+      </button>
   {/* Домой (иконка) */}
   <button
     type="button"
@@ -13021,10 +13020,11 @@ onClick={()=>{
       <path d="M3 10l9-7 9 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
       <path d="M5 10v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
-  </button>  
+  </button>     
 
     </div>
     <div className="slot-right">
+
    <button
     type="button"
     className="iconBtn inviteGifBtn"
@@ -13066,22 +13066,30 @@ onClick={()=>{
         draggable={false}
       />
     </span>
-  </button>     
-      <button
-        type="button"
-        className="iconBtn inboxBtn"
-        title={t('forum_inbox') || 'Ответы мне'}
-        onClick={() => setInboxOpen(v => !v)}
-        aria-pressed={inboxOpen}
+    </button>
+  {/* Назад (иконка) */}
+  <button
+    type="button"
+    className="iconBtn bigPlus"
+    aria-label={t?.('forum_back') || 'Назад'}
+      disabled={!videoFeedOpen && !inboxOpen && !questOpen}
+    onClick={()=>{ 
+      if (videoFeedOpen) { try{ closeVideoFeed?.() }catch{}; return; } 
+      if (inboxOpen)    { try{ setInboxOpen(false) }catch{}; return; }
+  if (questOpen) {
+    // если внутри раздела квестов открыта карточка — просто закрываем её
+    if (questSel) { try{ setQuestSel(null) }catch{}; return; }
+    // иначе выходим из раздела квестов целиком
+    try{ closeQuests?.() }catch{}; return;
+  }     
+ }}
+       title={t?.('forum_back') || 'Назад'}
+   
       >
-        <svg viewBox="0 0 24 24" aria-hidden>
-          <path d="M3 7h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.6" fill="none"/>
-          <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-        {mounted && unreadCount > 0 && (
-          <span className="inboxBadge" suppressHydrationWarning>{unreadCount}</span>
-        )}
-      </button>
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
+      <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  </button>
     </div>
   </div>
       </div>
@@ -13833,7 +13841,15 @@ onClick={()=>{
     className="iconBtn bigPlus"
         title={t('forum_create') || 'Создать'}
         aria-label={t('forum_create') || 'Создать'}
-    onClick={() => { try { window.__forumToggleCreateTopic?.() } catch {} }}
+    onClick={() => {
+  try { if (videoFeedOpen) closeVideoFeed?.() } catch {}
+  try { setInboxOpen?.(false) } catch {}
+  try { setReplyTo?.(null) } catch {}
+  try { setThreadRoot?.(null) } catch {}
+  try { setSel?.(null) } catch {}
+  setTimeout(() => { try { window.__forumToggleCreateTopic?.() } catch {} }, 0)
+}}
+
   >
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
@@ -13859,24 +13875,22 @@ onClick={()=>{
 
 
     <div className="slot-center">
-  {/* Назад (иконка) */}
-  <button
-    type="button"
-    className="iconBtn bigPlus"
-    aria-label={t?.('forum_back') || 'Назад'}
-  onClick={()=>{
-    if (inboxOpen)   { try{ setInboxOpen(false) }catch{}; return; }
-    if (threadRoot)  { try{ setReplyTo(null) }catch{}; try{ setThreadRoot(null) }catch{}; return; }
-    try{ setReplyTo(null) }catch{};
-    try{ setSel(null) }catch{};
-  }}
-    title={t?.('forum_back') || 'Назад'}
-  >
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
-      <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  </button>
 
+      <button
+        type="button"
+        className="iconBtn inboxBtn"
+        title={t('forum_inbox') || 'Ответы мне'}
+        onClick={() => setInboxOpen(v => !v)}
+        aria-pressed={inboxOpen}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden>
+          <path d="M3 7h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.6" fill="none"/>
+          <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        {mounted && unreadCount > 0 && (
+          <span className="inboxBadge" suppressHydrationWarning>{unreadCount}</span>
+      )}
+      </button>
   {/* Домой (иконка) */}
   <button
     type="button"
@@ -13940,21 +13954,23 @@ onClick={()=>{
       />
     </span>
     </button>
-      <button
-        type="button"
-        className="iconBtn inboxBtn"
-        title={t('forum_inbox') || 'Ответы мне'}
-        onClick={() => setInboxOpen(v => !v)}
-        aria-pressed={inboxOpen}
-      >
-        <svg viewBox="0 0 24 24" aria-hidden>
-          <path d="M3 7h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.6" fill="none"/>
-          <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-        {mounted && unreadCount > 0 && (
-          <span className="inboxBadge" suppressHydrationWarning>{unreadCount}</span>
-      )}
-      </button>
+  {/* Назад (иконка) */}
+  <button
+    type="button"
+    className="iconBtn bigPlus"
+    aria-label={t?.('forum_back') || 'Назад'}
+  onClick={()=>{
+    if (inboxOpen)   { try{ setInboxOpen(false) }catch{}; return; }
+    if (threadRoot)  { try{ setReplyTo(null) }catch{}; try{ setThreadRoot(null) }catch{}; return; }
+    try{ setReplyTo(null) }catch{};
+    try{ setSel(null) }catch{};
+  }}
+    title={t?.('forum_back') || 'Назад'}
+  >
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
+      <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  </button>
     </div>
 
         </div>
@@ -15039,7 +15055,7 @@ function CreateTopicCard({ t, onCreate, onOpenVideoFeed }){
   // даём глобальный (но безопасный) хук для верхних кнопок в шапке
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const fn = () => setOpen(v => !v);
+    const fn = () => setOpen(true);
     window.__forumToggleCreateTopic = fn;
     return () => {
       try { if (window.__forumToggleCreateTopic === fn) delete window.__forumToggleCreateTopic; } catch {}
