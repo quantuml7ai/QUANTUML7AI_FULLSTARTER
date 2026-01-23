@@ -117,6 +117,7 @@ images: {
       },
     ]
   },
+
 }
 
 export default nextConfig

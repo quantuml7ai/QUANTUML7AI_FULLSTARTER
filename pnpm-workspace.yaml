@@ -1,5 +1,6 @@
 ignoredBuiltDependencies:
   - core-js
+  - ffmpeg-static
   - unrs-resolver
 
 onlyBuiltDependencies:

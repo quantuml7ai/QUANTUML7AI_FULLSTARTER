@@ -2,7 +2,7 @@
   "name": "quantuml7ai-fullstarter",
   "version": "0.3.0",
   "private": true,
-    "engines": {
+  "engines": {
     "node": "22.x"
   },
   "scripts": {
@@ -11,6 +11,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@react-three/drei": "^9.114.0",
     "@react-three/fiber": "^8.15.13",
     "@solana/wallet-adapter-react": "^0.15.39",
@@ -32,6 +33,7 @@
     "@web3modal/wagmi": "^5.1.11",
     "deepl-node": "^1.22.0",
     "dotenv": "^17.2.3",
+    "ffmpeg-static": "^5.3.0",
     "jpeg-js": "^0.4.4",
     "next": "14.2.5",
     "nodemailer": "^7.0.10",
