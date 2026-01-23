@@ -2026,7 +2026,21 @@ const Styles = () => (
   overflow: hidden;         /* чтобы лишнее обрезалось по рамке */
   position: relative;       /* нужно, чтобы next/image не «убежал» */
 }
-
+/* pencil overlay on avabig */
+.avaEditPencil{
+  position:absolute;
+  right:6px;
+  bottom:6px;
+  width:16px;
+  height:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+  opacity:.95;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.65));
+}
+.avaEditPencil svg{ display:block; }
 /* 2) Обычные <img>/<video>/<canvas>/<svg> внутри — растянуть и покрыть */
 .avaBig :is(img, video, canvas, svg),
 .avaMini :is(img, video, canvas, svg){
@@ -12487,13 +12501,19 @@ function pickAdUrlForSlot(slotKey, slotKind) {
               ref={avatarRef}
               className={cls('avaBig neon', (!nickShown || iconShown==='👤') && 'pulse')}
               title={nickShown || t('forum_account')}
-              onClick={async()=>{
-                openOnly(profileOpen ? null : 'profile')
-                if (!profileOpen) return;
-
-                setProfileOpen(v=>!v)
-              }}>
+ onClick={() => {
+   const next = !profileOpen;
+   openOnly(next ? 'profile' : null);
+   setProfileOpen(next);
+ }}>
               <AvatarEmoji userId={idShown} pIcon={iconShown} />
+ <span className="avaEditPencil" aria-hidden="true">
+   <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+     <path d="M12 20h9" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+     <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5z"
+           stroke="white" strokeWidth="2" strokeLinejoin="round"/>
+   </svg>
+ </span>             
             </button>
 <ProfilePopover
   anchorRef={avatarRef}
@@ -13387,13 +13407,19 @@ onOpenThread={(clickP) => {
               ref={avatarRef}
               className={cls('avaBig neon', (!nickShown || iconShown==='👤') && 'pulse')}
               title={nickShown || t('forum_account')}
-              onClick={async()=>{
-                openOnly(profileOpen ? null : 'profile')
-                if (!profileOpen) return;
-
-                setProfileOpen(v=>!v)
-              }}>
+ onClick={() => {
+   const next = !profileOpen;
+   openOnly(next ? 'profile' : null);
+   setProfileOpen(next);
+ }}>
               <AvatarEmoji userId={idShown} pIcon={iconShown} />
+ <span className="avaEditPencil" aria-hidden="true">
+   <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+     <path d="M12 20h9" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+     <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5z"
+           stroke="white" strokeWidth="2" strokeLinejoin="round"/>
+   </svg>
+ </span>              
             </button>
 <ProfilePopover
   anchorRef={avatarRef}
