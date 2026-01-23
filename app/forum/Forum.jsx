@@ -12983,14 +12983,20 @@ onClick={()=>{
     type="button"
     className="iconBtn bigPlus"
     aria-label={t?.('forum_back') || 'Назад'}
-  onClick={()=>{
-    if (inboxOpen)   { try{ setInboxOpen(false) }catch{}; return; }
-    if (threadRoot)  { try{ setReplyTo(null) }catch{}; try{ setThreadRoot(null) }catch{}; return; }
-    try{ setReplyTo(null) }catch{};
-    try{ setSel(null) }catch{};
-  }}
-    title={t?.('forum_back') || 'Назад'}
-  >
+      disabled={!videoFeedOpen && !inboxOpen && !questOpen}
+    onClick={()=>{ 
+      if (videoFeedOpen) { try{ closeVideoFeed?.() }catch{}; return; } 
+      if (inboxOpen)    { try{ setInboxOpen(false) }catch{}; return; }
+  if (questOpen) {
+    // если внутри раздела квестов открыта карточка — просто закрываем её
+    if (questSel) { try{ setQuestSel(null) }catch{}; return; }
+    // иначе выходим из раздела квестов целиком
+    try{ closeQuests?.() }catch{}; return;
+  }     
+ }}
+       title={t?.('forum_back') || 'Назад'}
+   
+      >
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
       <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
@@ -13001,18 +13007,21 @@ onClick={()=>{
     type="button"
     className="iconBtn bigPlus"
     aria-label={t?.('forum_home') || 'На главную'}
-    onClick={()=>{ 
-      try{ setInboxOpen(false) }catch{};
-      try{ setReplyTo(null) }catch{}; 
-      try{ setThreadRoot(null) }catch{}; 
-      try{ setSel(null) }catch{}; }}
+    onClick={()=>{
+    if (videoFeedOpen) { try{ closeVideoFeed?.() }catch{} }
+    if (questOpen)     { try{ closeQuests?.() }catch{} }
+    try{ setInboxOpen(false) }catch{};
+    try{ setReplyTo(null) }catch{};
+    try{ setThreadRoot(null) }catch{};
+    try{ setSel(null) }catch{};
+  }}
     title={t?.('forum_home') || 'На главную'}
   >
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
       <path d="M3 10l9-7 9 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
       <path d="M5 10v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
-  </button>      
+  </button>  
 
     </div>
     <div className="slot-right">
@@ -13884,7 +13893,7 @@ onClick={()=>{
       <path d="M3 10l9-7 9 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
       <path d="M5 10v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
-  </button>      
+  </button>     
 
     </div>
     <div className="slot-right">
