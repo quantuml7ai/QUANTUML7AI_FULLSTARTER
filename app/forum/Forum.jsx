@@ -15,7 +15,7 @@ import {
   AdCard,
   AdsCoordinator,
 } from './ForumAds';
-
+import { useWindowedPagination, WINDOWING_CONSTANTS } from './useWindowedPagination';
 // хелперы для отправки событий (строки, защита от undefined)
 function emitCreated(pId, tId) {
   try { forumBroadcast({ type: 'post_created', postId: String(pId), topicId: String(tId) }); } catch {}
@@ -9802,10 +9802,11 @@ const [topicSort, setTopicSort] = useState('top');   // сортировка т�
 const [postSort,  setPostSort]  = useState('new');   // сортировка сообщений  ← ДОЛЖНА быть объявлена до flat
 const [drop, setDrop] = useState(false);
 const [sortOpen, setSortOpen] = useState(false);
-const VIDEO_PAGE_SIZE = 5;
-const TOPIC_PAGE_SIZE = 10;
-const REPLIES_PAGE_SIZE = 5;
-const THREAD_PAGE_SIZE = 5;
+const { PAGE_SIZE } = WINDOWING_CONSTANTS;
+const VIDEO_PAGE_SIZE = PAGE_SIZE;
+const TOPIC_PAGE_SIZE = PAGE_SIZE;
+const REPLIES_PAGE_SIZE = PAGE_SIZE;
+const THREAD_PAGE_SIZE = PAGE_SIZE;
 const [visibleVideoCount, setVisibleVideoCount] = useState(VIDEO_PAGE_SIZE);
 const [visibleTopicsCount, setVisibleTopicsCount] = useState(TOPIC_PAGE_SIZE);
 const [visibleRepliesCount, setVisibleRepliesCount] = useState(REPLIES_PAGE_SIZE);
@@ -9847,11 +9848,11 @@ const sortedRepliesToMe = useMemo(
   () => (repliesToMe || []).slice().sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0)),
   [repliesToMe]
 );
-const visibleRepliesToMe = useMemo(
+const loadedRepliesToMe = useMemo(
   () => sortedRepliesToMe.slice(0, visibleRepliesCount),
   [sortedRepliesToMe, visibleRepliesCount]
 );
-const repliesHasMore = visibleRepliesToMe.length < sortedRepliesToMe.length;
+const repliesHasMore = loadedRepliesToMe.length < sortedRepliesToMe.length;
 // прочитанные — храним в state, загружаем/сохраняем только на клиенте
 const [readSet, setReadSet] = useState(() => new Set());
 useEffect(() => {
@@ -10056,11 +10057,11 @@ const walk = (n, level = 0) => {
 }, [sel?.id, threadRoot, rootPosts, idMap, postSort]);
 
 // === END flat ===
-const visibleFlat = useMemo(
+const loadedFlat = useMemo(
   () => (flat || []).slice(0, visibleThreadPostsCount),
   [flat, visibleThreadPostsCount]
 );
-const threadHasMore = visibleFlat.length < (flat || []).length;
+const threadHasMore = loadedFlat.length < (flat || []).length;
     // Множество забаненных (по userId/accountId)
   const bannedSet = useMemo(() => new Set(data.bans || []), [data.bans])
 
@@ -10139,11 +10140,11 @@ const aggregates = useMemo(() => {
     return starredFirst(base, (x) => x?.userId || x?.accountId);
   }, [data.topics, aggregates, topicSort, topicFilterId, starredFirst]);
 
-  const visibleTopics = useMemo(
+  const loadedTopics = useMemo(
     () => (sortedTopics || []).slice(0, visibleTopicsCount),
     [sortedTopics, visibleTopicsCount]
   );
-  const topicsHasMore = visibleTopics.length < (sortedTopics || []).length;
+  const topicsHasMore = loadedTopics.length < (sortedTopics || []).length;
 
   /* ---- composer ---- */
   const [text,setText] = useState('')
@@ -11633,11 +11634,11 @@ useEffect(() => {
   if (!videoFeedOpen) return;
   setVisibleVideoCount(VIDEO_PAGE_SIZE);
 }, [videoFeedOpen, feedSort, starMode, starredAuthors]);
-const visibleVideoFeed = React.useMemo(
+const loadedVideoFeed = React.useMemo(
   () => (videoFeed || []).slice(0, visibleVideoCount),
   [videoFeed, visibleVideoCount]
 );
-const videoHasMore = visibleVideoFeed.length < (videoFeed || []).length;
+const videoHasMore = loadedVideoFeed.length < (videoFeed || []).length;
 // ВАЖНО: в ленте нужно уметь находить ссылки внутри текста (даже если не отдельной строкой)
 const FEED_URL_RE = /(https?:\/\/[^\s<>'")]+)/ig;
 
@@ -12285,6 +12286,155 @@ const clientId =
 // гарантия, что interleaveAds всегда получит >0
 const adEvery = adConf?.EVERY && adConf.EVERY > 0 ? adConf.EVERY : 1;
 
+const videoWindowResetKey = useMemo(
+  () => `video:${videoFeedOpen ? 'open' : 'closed'}:${feedSort}:${starMode}:${starredAuthors?.size || 0}`,
+  [videoFeedOpen, feedSort, starMode, starredAuthors],
+);
+const inboxWindowResetKey = useMemo(
+  () => `inbox:${inboxOpen ? 'open' : 'closed'}:${repliesToMe.length}`,
+  [inboxOpen, repliesToMe.length],
+);
+const topicsWindowResetKey = useMemo(
+  () => `topics:${topicSort}:${topicFilterId || 'all'}:${starMode}`,
+  [topicSort, topicFilterId, starMode],
+);
+const threadWindowResetKey = useMemo(
+  () => `thread:${sel?.id || 'none'}:${threadRoot?.id || 'root'}:${postSort}`,
+  [sel?.id, threadRoot?.id, postSort],
+);
+
+const loadMoreVideo = useCallback(() => {
+  setVisibleVideoCount((c) =>
+    Math.min(c + VIDEO_PAGE_SIZE, (videoFeed || []).length),
+  );
+}, [videoFeed]);
+
+const loadMoreReplies = useCallback(() => {
+  setVisibleRepliesCount((c) =>
+    Math.min(c + REPLIES_PAGE_SIZE, sortedRepliesToMe.length),
+  );
+}, [sortedRepliesToMe.length]);
+
+const loadMoreTopics = useCallback(() => {
+  setVisibleTopicsCount((c) =>
+    Math.min(c + TOPIC_PAGE_SIZE, (sortedTopics || []).length),
+  );
+}, [sortedTopics]);
+
+const loadMoreThreadPosts = useCallback(() => {
+  setVisibleThreadPostsCount((c) =>
+    Math.min(c + THREAD_PAGE_SIZE, (flat || []).length),
+  );
+}, [flat]);
+
+const videoSlots = useMemo(
+  () =>
+    debugAdsSlots(
+      'video',
+      interleaveAds(loadedVideoFeed || [], adEvery, {
+        isSkippable: (p) => !p || !p.id,
+        getId: (p) => p?.id || `${p?.topicId || 'vf'}:${p?.ts || 0}`,
+      }),
+    ),
+  [loadedVideoFeed, adEvery],
+);
+
+const inboxSlots = useMemo(
+  () =>
+    debugAdsSlots(
+      'inbox',
+      interleaveAds(loadedRepliesToMe || [], adEvery, {
+        isSkippable: (p) => !p || !p.id,
+        getId: (p) => p?.id || `${p?.topicId || 'ib'}:${p?.ts || 0}`,
+      }),
+    ),
+  [loadedRepliesToMe, adEvery],
+);
+
+const topicsSlots = useMemo(
+  () =>
+    debugAdsSlots(
+      'topics',
+      interleaveAds(loadedTopics || [], adEvery, {
+        isSkippable: (t) => !t || !t.id,
+        getId: (t) => t?.id || `${t?.ts || 0}`,
+      }),
+    ),
+  [loadedTopics, adEvery],
+);
+
+const threadSlots = useMemo(
+  () =>
+    debugAdsSlots(
+      'replies',
+      interleaveAds(loadedFlat || [], adEvery, {
+        isSkippable: (p) => !p || !p.id,
+        getId: (p) => p?.id,
+      }),
+    ),
+  [loadedFlat, adEvery],
+);
+
+const videoWindow = useWindowedPagination({
+  allItems: videoSlots,
+  getKey: (slot) => String(slot.key),
+  scrollElRef: bodyRef,
+  mode: 'media',
+  hasMore: videoHasMore,
+  isLoadingMore: false,
+  loadMore: loadMoreVideo,
+  resetKey: videoWindowResetKey,
+});
+
+const inboxWindow = useWindowedPagination({
+  allItems: inboxSlots,
+  getKey: (slot) => String(slot.key),
+  scrollElRef: bodyRef,
+  mode: 'media',
+  hasMore: repliesHasMore,
+  isLoadingMore: false,
+  loadMore: loadMoreReplies,
+  resetKey: inboxWindowResetKey,
+});
+
+const topicsWindow = useWindowedPagination({
+  allItems: topicsSlots,
+  getKey: (slot) => String(slot.key),
+  scrollElRef: bodyRef,
+  mode: 'default',
+  hasMore: topicsHasMore,
+  isLoadingMore: false,
+  loadMore: loadMoreTopics,
+  resetKey: topicsWindowResetKey,
+});
+
+const threadWindow = useWindowedPagination({
+  allItems: threadSlots,
+  getKey: (slot) => String(slot.key),
+  scrollElRef: bodyRef,
+  mode: 'media',
+  hasMore: threadHasMore,
+  isLoadingMore: false,
+  loadMore: loadMoreThreadPosts,
+  resetKey: threadWindowResetKey,
+});
+
+const visibleVideoSlots = useMemo(
+  () => videoSlots.slice(videoWindow.windowStart, videoWindow.windowEnd),
+  [videoSlots, videoWindow.windowStart, videoWindow.windowEnd],
+);
+const visibleInboxSlots = useMemo(
+  () => inboxSlots.slice(inboxWindow.windowStart, inboxWindow.windowEnd),
+  [inboxSlots, inboxWindow.windowStart, inboxWindow.windowEnd],
+);
+const visibleTopicSlots = useMemo(
+  () => topicsSlots.slice(topicsWindow.windowStart, topicsWindow.windowEnd),
+  [topicsSlots, topicsWindow.windowStart, topicsWindow.windowEnd],
+);
+const visibleThreadSlots = useMemo(
+  () => threadSlots.slice(threadWindow.windowStart, threadWindow.windowEnd),
+  [threadSlots, threadWindow.windowStart, threadWindow.windowEnd],
+);
 
 
 // одна сессия показа рекламы внутри одного тайм-слота (ROTATE_MIN)
@@ -13121,7 +13271,11 @@ onClick={()=>{
   <CreateTopicCard t={t} onCreate={createTopic} onOpenVideoFeed={openVideoFeed} />
 
       </div>
-      
+<div
+  className="body"
+  ref={bodyRef}
+  style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
+>     
 <div data-forum-topics-start="1" />
 {videoFeedOpen ? (
   <>
@@ -13129,17 +13283,10 @@ onClick={()=>{
 {/* ВЕТКА-ЛЕНТА: медиа (видео/аудио/изображения) */}
 <div className="meta mt-1">{t('') || ''}</div>
     <div className="grid gap-2 mt-2" suppressHydrationWarning>
-{debugAdsSlots(
-  'video',
-  interleaveAds(
-    visibleVideoFeed || [],
-    adEvery,
-    {
-      isSkippable: (p) => !p || !p.id,
-      getId: (p) => p?.id || `${p?.topicId || 'vf'}:${p?.ts || 0}`,
-    }
-  )
-).map((slot) => {
+      <div style={{ height: videoWindow.trimmedHeightPx }} data-role="top-spacer" />
+{visibleVideoSlots.map((slot, idx) => {
+  const absoluteIndex = videoWindow.windowStart + idx;
+  const slotKey = String(slot.key);
   if (slot.type === 'item') {
     const p = slot.item;
     const parent = p?.parentId
@@ -13153,7 +13300,13 @@ const openThreadHere = (clickP) => {
 
 
     return (
-      <div key={slot.key} id={`post_${p?.id || ''}`}>
+      <div
+        key={slotKey}
+        id={`post_${p?.id || ''}`}
+        ref={(el) => videoWindow.setItemRef(slotKey, el)}
+        data-window-key={slotKey}
+        data-window-index={absoluteIndex}
+      >
 <PostCard
   p={p}
   parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}
@@ -13179,16 +13332,22 @@ const openThreadHere = (clickP) => {
     );
   }
 
-  const url = pickAdUrlForSlot(slot.key, 'video');
+  const url = pickAdUrlForSlot(slotKey, 'video');
   if (!url) return null;
 
   return (
-    <AdCard
-      key={slot.key}
-      url={url}
-      slotKind="video"
-      nearId={slot.nearId}
-    />
+    <div
+      key={slotKey}
+      ref={(el) => videoWindow.setItemRef(slotKey, el)}
+      data-window-key={slotKey}
+      data-window-index={absoluteIndex}
+    >
+      <AdCard
+        url={url}
+        slotKind="video"
+        nearId={slot.nearId}
+      />
+    </div>
   );
 })}
       {videoHasMore && (
@@ -13196,13 +13355,7 @@ const openThreadHere = (clickP) => {
           <div className="loadMoreShimmer">
             {t?.('loading') || 'Loading…'}
           </div>
-          <LoadMoreSentinel
-            onVisible={() =>
-              setVisibleVideoCount((c) =>
-                Math.min(c + VIDEO_PAGE_SIZE, (videoFeed || []).length)
-              )
-            }
-          />
+          <div ref={videoWindow.bottomSentinelRef} data-role="bottom-sentinel" />
         </div>
       )}
       {videoFeed?.length === 0 && (
@@ -13239,21 +13392,20 @@ const openThreadHere = (clickP) => {
   <>
     <div className="meta mt-1">{t('forum_inbox_title') || 'Ответы на ваши сообщения'}</div>
     <div className="grid gap-2 mt-2" suppressHydrationWarning>
-{debugAdsSlots(
-  'inbox',
-  interleaveAds(
-    visibleRepliesToMe || [],
-    adEvery,
-    {
-      isSkippable: (p) => !p || !p.id,
-      getId: (p) => p?.id || `${p?.topicId || 'ib'}:${p?.ts || 0}`,
-    }
-  )
-).map((slot) => {
+      <div style={{ height: inboxWindow.trimmedHeightPx }} data-role="top-spacer" />
+{visibleInboxSlots.map((slot, idx) => {
+  const absoluteIndex = inboxWindow.windowStart + idx;
+  const slotKey = String(slot.key);
   if (slot.type === 'item') {
     const p = slot.item;
     return (
-      <div key={slot.key} id={`post_${p.id}`}>
+      <div
+        key={slotKey}
+        id={`post_${p.id}`}
+        ref={(el) => inboxWindow.setItemRef(slotKey, el)}
+        data-window-key={slotKey}
+        data-window-index={absoluteIndex}
+      >
         <PostCard
           p={p}
           parentAuthor={(() => {
@@ -13284,16 +13436,22 @@ onOpenThread={(clickP) => {
     );
   }
 
-  const url = pickAdUrlForSlot(slot.key, 'inbox');
+  const url = pickAdUrlForSlot(slotKey, 'inbox');
   if (!url) return null;
 
   return (
-    <AdCard
-      key={slot.key}
-      url={url}
-      slotKind="inbox"
-      nearId={slot.nearId}
-    />
+    <div
+      key={slotKey}
+      ref={(el) => inboxWindow.setItemRef(slotKey, el)}
+      data-window-key={slotKey}
+      data-window-index={absoluteIndex}
+    >
+      <AdCard
+        url={url}
+        slotKind="inbox"
+        nearId={slot.nearId}
+      />
+    </div>
   );
 })}
 
@@ -13302,13 +13460,7 @@ onOpenThread={(clickP) => {
           <div className="loadMoreShimmer">
             {t?.('loading') || 'Loading…'}
           </div>
-          <LoadMoreSentinel
-            onVisible={() =>
-              setVisibleRepliesCount((c) =>
-                Math.min(c + REPLIES_PAGE_SIZE, sortedRepliesToMe.length)
-              )
-            }
-          />
+          <div ref={inboxWindow.bottomSentinelRef} data-role="bottom-sentinel" />
         </div>
       )}
       {sortedRepliesToMe.length === 0 && (
@@ -13323,23 +13475,51 @@ onOpenThread={(clickP) => {
   <>
     
     <div className="grid gap-2 mt-2" suppressHydrationWarning>
-      {(visibleTopics || []).map(x => {
+      <div style={{ height: topicsWindow.trimmedHeightPx }} data-role="top-spacer" />
+      {visibleTopicSlots.map((slot, idx) => {
+          const absoluteIndex = topicsWindow.windowStart + idx;
+          const slotKey = String(slot.key);
+          if (slot.type !== 'item') {
+            const url = pickAdUrlForSlot(slotKey, 'topics');
+            if (!url) return null;
+            return (
+              <div
+                key={slotKey}
+                ref={(el) => topicsWindow.setItemRef(slotKey, el)}
+                data-window-key={slotKey}
+                data-window-index={absoluteIndex}
+              >
+                <AdCard
+                  url={url}
+                  slotKind="topics"
+                  nearId={slot.nearId}
+                />
+              </div>
+            );
+          }
+          const x = slot.item;
           const agg = aggregates.get(x.id) || { posts:0, likes:0, dislikes:0, views:0 };
           return (
-<TopicItem
-  key={`t:${x.id}`}
-  t={x}
-  agg={agg}
-  onOpen={(tt)=>{ setSel(tt); setThreadRoot(null) }}
-  onView={markViewTopic}
-  isAdmin={isAdmin}
-  onDelete={delTopic}
-  authId={viewerId}
-  onOwnerDelete={delTopicOwn}
-  viewerId={viewerId}
-  starredAuthors={starredAuthors}
-  onToggleStar={toggleAuthorStar}
-/>
+            <div
+              key={slotKey}
+              ref={(el) => topicsWindow.setItemRef(slotKey, el)}
+              data-window-key={slotKey}
+              data-window-index={absoluteIndex}
+            >
+              <TopicItem
+                t={x}
+                agg={agg}
+                onOpen={(tt)=>{ setSel(tt); setThreadRoot(null) }}
+                onView={markViewTopic}
+                isAdmin={isAdmin}
+                onDelete={delTopic}
+                authId={viewerId}
+                onOwnerDelete={delTopicOwn}
+                viewerId={viewerId}
+                starredAuthors={starredAuthors}
+                onToggleStar={toggleAuthorStar}
+              />
+            </div>
 
           )
         })}
@@ -13349,27 +13529,12 @@ onOpenThread={(clickP) => {
         <div className="loadMoreShimmer">
           {t?.('loading') || 'Loading…'}
         </div>
-        <LoadMoreSentinel
-          onVisible={() =>
-            setVisibleTopicsCount((c) =>
-              Math.min(c + TOPIC_PAGE_SIZE, (sortedTopics || []).length)
-            )
-          }
-        />
+        <div ref={topicsWindow.bottomSentinelRef} data-role="bottom-sentinel" />
       </div>
     )}    
   </>
 )}
-
-
-<div
-  className="body"
-  ref={bodyRef}
-  style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
->
-
-
-
+ 
 </div>
 
     </section>
@@ -14042,7 +14207,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
       </div>
     ) : (
       <div className="inboxList">
-        {visibleRepliesToMe.map(p => {
+        {loadedRepliesToMe.map(p => {
           // та же логика, что в верхнем инбоксе
           const tt = (data.topics || []).find(
             x => String(x.id) === String(p.topicId),
@@ -14113,17 +14278,10 @@ onOpenThread={(clickP) => {
 
 
         <div className="grid gap-2">
-{debugAdsSlots(
-  'replies',
-  interleaveAds(
-    visibleFlat || [],
-    adEvery,
-    {
-      isSkippable: (p) => !p || !p.id,
-      getId: (p) => p?.id,
-    }
-  )
-).map((slot) => {
+          <div style={{ height: threadWindow.trimmedHeightPx }} data-role="top-spacer" />
+{visibleThreadSlots.map((slot, idx) => {
+  const absoluteIndex = threadWindow.windowStart + idx;
+  const slotKey = String(slot.key);
   if (slot.type === 'item') {
     const p = slot.item;
     const parent = p.parentId
@@ -14132,9 +14290,12 @@ onOpenThread={(clickP) => {
 
     return (
       <div
-        key={slot.key}
+        key={slotKey}
         id={`post_${p.id}`}
         style={{ marginLeft: (p._lvl || 0) * 18 }}
+        ref={(el) => threadWindow.setItemRef(slotKey, el)}
+        data-window-key={slotKey}
+        data-window-index={absoluteIndex}
       >
 <PostCard
   p={p}
@@ -14161,16 +14322,22 @@ onOpenThread={(clickP) => {
     );
   }
 
-  const url = pickAdUrlForSlot(slot.key, 'replies');
+  const url = pickAdUrlForSlot(slotKey, 'replies');
   if (!url) return null;
 
   return (
-    <AdCard
-      key={slot.key}
-      url={url}
-      slotKind="replies"
-      nearId={slot.nearId}
-    />
+    <div
+      key={slotKey}
+      ref={(el) => threadWindow.setItemRef(slotKey, el)}
+      data-window-key={slotKey}
+      data-window-index={absoluteIndex}
+    >
+      <AdCard
+        url={url}
+        slotKind="replies"
+        nearId={slot.nearId}
+      />
+    </div>
   );
 })}
         {threadHasMore && (
@@ -14178,13 +14345,7 @@ onOpenThread={(clickP) => {
             <div className="loadMoreShimmer">
               {t?.('loading') || 'Loading…'}
             </div>
-            <LoadMoreSentinel
-              onVisible={() =>
-                setVisibleThreadPostsCount((c) =>
-                  Math.min(c + THREAD_PAGE_SIZE, (flat || []).length)
-                )
-              }
-            />
+            <div ref={threadWindow.bottomSentinelRef} data-role="bottom-sentinel" />
           </div>
         )}
           {(!threadRoot && (flat || []).length === 0) && (
