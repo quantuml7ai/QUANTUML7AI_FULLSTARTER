@@ -11851,7 +11851,7 @@ function openVideoFeed() {
   try { setInboxOpen?.(false); } catch {}
   try { setSel?.(null); setThreadRoot?.(null); } catch {}
   try { setTopicFilterId?.(null); } catch {}
-  try { requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'smooth' })); } catch {}
+   try { setTimeout(() => document.querySelector('[data-forum-video-start="1"]')?.scrollIntoView({ behavior:'smooth', block:'start' }), 0); } catch {}
 }
 
 /** закрыть ленту видео */
@@ -13125,6 +13125,7 @@ onClick={()=>{
 <div data-forum-topics-start="1" />
 {videoFeedOpen ? (
   <>
+  <div data-forum-video-start="1" />
 {/* ВЕТКА-ЛЕНТА: медиа (видео/аудио/изображения) */}
 <div className="meta mt-1">{t('') || ''}</div>
     <div className="grid gap-2 mt-2" suppressHydrationWarning>
