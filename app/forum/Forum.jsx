@@ -1562,7 +1562,7 @@ const Styles = () => (
 .headPeekBtn{
   position: fixed;
   left: 50%;
-  top: calc(25px + env(safe-area-inset-top, 0px));
+  top: calc(70px + env(safe-area-inset-top, 0px));
   transform: translateX(-50%);
   z-index: 91;
   width: 54px;
@@ -13064,6 +13064,7 @@ onClick={()=>{
     try{ setReplyTo(null) }catch{};
     try{ setThreadRoot(null) }catch{};
     try{ setSel(null) }catch{};
+    setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIntoView({block:'start'}),0);
   }}
     title={t?.('forum_home') || 'На главную'}
   >
@@ -13101,7 +13102,7 @@ onClick={()=>{
 
       </div>
       
-
+<div data-forum-topics-start="1" />
 {videoFeedOpen ? (
   <>
 {/* ВЕТКА-ЛЕНТА: медиа (видео/аудио/изображения) */}
@@ -13957,7 +13958,9 @@ onClick={()=>{
       try{ setInboxOpen(false) }catch{};
       try{ setReplyTo(null) }catch{}; 
       try{ setThreadRoot(null) }catch{}; 
-      try{ setSel(null) }catch{}; }}
+      try{ setSel(null) }catch{};
+setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIntoView({block:'start'}),0);    
+    }}
     title={t?.('forum_home') || 'На главную'}
   >
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
@@ -13986,7 +13989,7 @@ onClick={()=>{
 <CreateTopicCard t={t} onCreate={createTopic} onOpenVideoFeed={openVideoFeed} />
 
         </div>
-
+<div data-forum-topics-start="1" />
   {/* Заголовок темы оставляем ниже, как был */}
   <div   className="
     topicTitle text-[#eaf4ff]
