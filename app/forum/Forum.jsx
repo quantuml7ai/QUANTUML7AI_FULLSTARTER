@@ -12461,6 +12461,7 @@ function pickAdUrlForSlot(slotKey, slotKind) {
     type="button"
     className="headPeekBtn"
     aria-label={t('forum_show_header') || 'Show header'}
+    onPointerDown={(e) => e.preventDefault()}
     onClick={() => { setHeadPinned(true); setHeadHidden(false); }}
   >
     <HeadChevronIcon dir="down" />
@@ -13312,6 +13313,7 @@ onOpenThread={(clickP) => {
     type="button"
     className="headPeekBtn"
     aria-label={t('forum_show_header') || 'Show header'}
+    onPointerDown={(e) => e.preventDefault()}
     onClick={() => { setHeadPinned(true); setHeadHidden(false); }}
   >
     <HeadChevronIcon dir="down" />
