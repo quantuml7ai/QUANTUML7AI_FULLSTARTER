@@ -16,6 +16,49 @@ import {
   AdsCoordinator,
 } from './ForumAds';
 
+ /* =========================================================
+    Scroll Focus Lock for variable-height ad/media blocks
+    - НЕ фиксируем высоту
+    - удерживаем "фокус" (линию внимания) при изменении DOM-роста
+ ========================================================= */
+ function ForumAdSlot({ url, slotKind, nearId, slotKey, onResizeDelta }) {
+   const hostRef = useRef(null);
+   const lastHRef = useRef(0);
+   const initedRef = useRef(false);
+
+   React.useLayoutEffect(() => {
+     const el = hostRef.current;
+     if (!el) return;
+     if (typeof window === 'undefined') return;
+     if (typeof ResizeObserver === 'undefined') return;
+
+     // стартовая высота
+     try { lastHRef.current = el.getBoundingClientRect().height || 0; } catch {}
+     initedRef.current = true;
+
+     const ro = new ResizeObserver(() => {
+       const node = hostRef.current;
+       if (!node || !initedRef.current) return;
+       let h = 0;
+       try { h = node.getBoundingClientRect().height || 0; } catch { h = 0; }
+       const prev = lastHRef.current || 0;
+       const delta = h - prev;
+       if (delta) {
+         lastHRef.current = h;
+         try { onResizeDelta?.(node, delta, { slotKind, slotKey }); } catch {}
+       }
+     });
+
+     try { ro.observe(el); } catch {}
+     return () => { try { ro.disconnect(); } catch {} };
+   }, [slotKind, slotKey, onResizeDelta]);
+
+   return (
+     <div ref={hostRef} className="forumAdSlot" data-slotkind={slotKind} data-slotkey={slotKey}>
+       <AdCard url={url} slotKind={slotKind} nearId={nearId} />
+     </div>
+   );
+ }
 // хелперы для отправки событий (строки, защита от undefined)
 function emitCreated(pId, tId) {
   try { forumBroadcast({ type: 'post_created', postId: String(pId), topicId: String(tId) }); } catch {}
@@ -6783,7 +6826,10 @@ const NO_THREAD_OPEN_SELECTOR =
 
       {/* время создания + переключатель перевода — ниже контента */}
       <div
-        className="meta mt-2 flex items-center justify-between gap-2"
+        className="topicTitle text-[#eaf4ff]
+    !whitespace-normal break-words
+    [overflow-wrap:anywhere]
+    max-w-full"
         suppressHydrationWarning
       >
         <HydrateText value={human(p.ts)} />
@@ -12318,7 +12364,8 @@ function pickAdUrlForSlot(slotKey, slotKind) {
     sess.used = new Set();
     sess.bySlot = new Map();
   }
-
+   // NOTE: выбор url стабилен в рамках bucket, но высота креатива может меняться —
+   // поэтому ниже (в render) будет "scroll focus lock" через ForumAdSlot.
   // Если для этого слота уже выбрали урл в текущем bucket — возвращаем его как есть
   if (sess.bySlot && sess.bySlot.has(slotKey)) {
     const stable = sess.bySlot.get(slotKey);
@@ -12373,6 +12420,44 @@ function pickAdUrlForSlot(slotKey, slotKind) {
   return url;
 }
 
+   // =========================================================
+   // Scroll Focus Lock (компенсация scroll при росте/сжатии блоков)
+   // =========================================================
+   const lastUserScrollTsRef = useRef(0);
+   const rafGuardRef = useRef(0);
+
+   useEffect(() => {
+     if (typeof window === 'undefined') return;
+     const onScroll = () => { lastUserScrollTsRef.current = Date.now(); };
+     window.addEventListener('scroll', onScroll, { passive: true });
+     return () => window.removeEventListener('scroll', onScroll);   
+}, []);
+
+   const compensateScrollOnResize = useCallback((el, deltaH) => {
+     if (!el || !deltaH) return;
+     if (typeof window === 'undefined') return;
+     if (document?.hidden) return;
+
+     // если пользователь сейчас скроллит — НЕ вмешиваемся
+     const nowTs = Date.now();
+     if (nowTs - (lastUserScrollTsRef.current || 0) < 140) return;
+
+     // анти-дребезг: один компесатор на кадр
+     if (rafGuardRef.current) return;
+     rafGuardRef.current = window.requestAnimationFrame(() => {
+       rafGuardRef.current = 0;
+       try {
+         const rect = el.getBoundingClientRect();
+         const focusY = Math.round(window.innerHeight * 0.33); // линия внимания
+
+         // если блок выше линии внимания — компенсируем, чтобы фокус остался на месте
+         // (включая кейс когда блок уже выше viewport)
+         if (rect.top < focusY) {
+           window.scrollBy(0, deltaH);
+         }
+       } catch {}
+     });
+   }, []);
   /* ---- render ---- */
   return (
 <div
@@ -13183,12 +13268,14 @@ const openThreadHere = (clickP) => {
   if (!url) return null;
 
   return (
-    <AdCard
-      key={slot.key}
-      url={url}
-      slotKind="video"
-      nearId={slot.nearId}
-    />
+     <ForumAdSlot
+       key={slot.key}
+       slotKey={slot.key}
+       url={url}
+       slotKind="video"
+       nearId={slot.nearId}
+       onResizeDelta={compensateScrollOnResize}
+     />
   );
 })}
       {videoHasMore && (
@@ -13288,12 +13375,14 @@ onOpenThread={(clickP) => {
   if (!url) return null;
 
   return (
-    <AdCard
-      key={slot.key}
-      url={url}
-      slotKind="inbox"
-      nearId={slot.nearId}
-    />
+     <ForumAdSlot
+       key={slot.key}
+       slotKey={slot.key}
+       url={url}
+       slotKind="inbox"
+       nearId={slot.nearId}
+       onResizeDelta={compensateScrollOnResize}
+     />
   );
 })}
 
@@ -14165,12 +14254,14 @@ onOpenThread={(clickP) => {
   if (!url) return null;
 
   return (
-    <AdCard
-      key={slot.key}
-      url={url}
-      slotKind="replies"
-      nearId={slot.nearId}
-    />
+     <ForumAdSlot
+       key={slot.key}
+       slotKey={slot.key}
+       url={url}
+       slotKind="replies"
+       nearId={slot.nearId}
+       onResizeDelta={compensateScrollOnResize}
+     />
   );
 })}
         {threadHasMore && (
