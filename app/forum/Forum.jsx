@@ -5389,8 +5389,8 @@ function ProfilePopover({
 
     const dw = iw * scale;
     const dh = ih * scale;
-	    const cx = size / 2 + relToPx(c.x, size);
-	    const cy = size / 2 + relToPx(c.y, size);
+      const cx = size / 2 + relToPx(c.x, size);
+      const cy = size / 2 + relToPx(c.y, size);
 
     ctx.save();
     ctx.translate(cx, cy);
@@ -14516,7 +14516,7 @@ onClick={() => {
           fontSize: '20px',
           position: 'absolute',
           left: 5,
-          bottom: 170,
+          bottom: 60,
           width: 54,
           height: 54,
           borderRadius: 10,
