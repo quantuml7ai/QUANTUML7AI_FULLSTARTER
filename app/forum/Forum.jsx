@@ -6645,7 +6645,7 @@ const NO_THREAD_OPEN_SELECTOR =
           src={src}
           controls
           playsInline
-          preload="metadata"
+          preload="none"
           className="mediaBoxItem"
           style={{
             objectFit: 'contain', 
@@ -6679,7 +6679,6 @@ const NO_THREAD_OPEN_SELECTOR =
   data-yt-id={videoId}
   data-forum-media="youtube"
   loading="lazy"
-  preload="metadata"
   frameBorder="0"
   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
   allowFullScreen
@@ -6758,8 +6757,7 @@ const NO_THREAD_OPEN_SELECTOR =
         title="TikTok video"
         data-forum-media="tiktok"
         data-src={`https://www.tiktok.com/embed/v2/${videoId}`} 
-        loading="lazy"
-        preload="metadata"       
+        loading="lazy"       
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen
