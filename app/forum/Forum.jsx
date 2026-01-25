@@ -3927,98 +3927,98 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   /* лёгкий "сканлайн" поверх рельсы */
   .cmbTrack::after{ ... animation: cmbScan ... }
 
-	/* =========================================================
-	   Composer media progress bar (над контролами)
-	   - видна от момента выбора/записи до отправки или сброса медиа
-	   - слева мигает "Loading" (EN)
-	========================================================= */
-	.composerMediaBar{
-	  display:flex;
-	  align-items:stretch;
-	  gap:10px;
-	  margin: 0 0 10px 0;
-	  padding: 10px 10px;
-	  border-radius: 12px;
-	  border: 1px solid rgba(160,180,255,.18);
-	  background: linear-gradient(180deg, rgba(8,12,20,.55), rgba(10,16,24,.35));
-	  box-shadow: 0 14px 32px rgba(25,129,255,.10), inset 0 0 0 1px rgba(255,255,255,.03);
-	  backdrop-filter: blur(10px) saturate(120%);
-	}
-	.cmbLeft{
-	  display:flex;
-	  align-items:center;
-	  justify-content:center;
-	  width: 86px;
-	  border-radius: 10px;
-	  border: 1px solid rgba(255,255,255,.08);
-	  background: rgba(0,0,0,.18);
-	}
-	.cmbLoading{
-	  font-size: 12px;
-	  letter-spacing: .08em;
-	  text-transform: uppercase;
-	  color: rgba(234,244,255,.82);
-	  animation: cmbBlink 1.05s ease-in-out infinite;
-	}
-	@keyframes cmbBlink{
-	  0%, 100% { opacity: .25; }
-	  50% { opacity: 1; }
-	}
-	.cmbMain{ flex: 1; min-width: 0; }
-	.cmbTop{
-	  display:flex;
-	  align-items:baseline;
-	  justify-content:space-between;
-	  gap:10px;
-	  margin-bottom: 6px;
-	}
-	.cmbPhase{
-	  font-size: 12px;
-	  color: rgba(234,244,255,.86);
-	}
-	.cmbPct{
-	  font-size: 12px;
-	  color: rgba(234,244,255,.90);
-	  font-variant-numeric: tabular-nums;
-	}
-	.cmbTrack{
-	  position:relative;
-	  height: 10px;
-	  border-radius: 999px;
-	  overflow:hidden;
-	  background: rgba(255,255,255,.08);
-	  border: 1px solid rgba(255,255,255,.08);
-	}
-	.cmbFill{
-	  position:absolute;
-	  left:0;
-	  top:0;
-	  bottom:0;
-	  width: 0%;
-	  border-radius: 999px;
-	  background: linear-gradient(90deg, rgba(43,140,255,.75), rgba(122,93,255,.65), rgba(43,140,255,.75));
-	  box-shadow: 0 0 18px rgba(43,140,255,.24);
-	  transition: width .22s ease;
-	}
-	.cmbTicks{
-	  position:absolute;
-	  inset:0;
-	  pointer-events:none;
-	  background:
-	    repeating-linear-gradient(
-	      90deg,
-	      rgba(255,255,255,.0) 0,
-	      rgba(255,255,255,.0) 9px,
-	      rgba(255,255,255,.14) 10px
-	    );
-	  mix-blend-mode: overlay;
-	  opacity: .35;
-	}
-	/* компактнее на мобилке */
-	@media (max-width: 520px){
-	  .cmbLeft{ width: 72px; }
-	  .composerMediaBar{ gap:8px; padding:9px 9px; }
-	}
+  /* =========================================================
+     Composer media progress bar (над контролами)
+     - видна от момента выбора/записи до отправки или сброса медиа
+     - слева мигает "Loading" (EN)
+  ========================================================= */
+  .composerMediaBar{
+    display:flex;
+    align-items:stretch;
+    gap:10px;
+    margin: 0 0 10px 0;
+    padding: 10px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(160,180,255,.18);
+    background: linear-gradient(180deg, rgba(8,12,20,.55), rgba(10,16,24,.35));
+    box-shadow: 0 14px 32px rgba(25,129,255,.10), inset 0 0 0 1px rgba(255,255,255,.03);
+    backdrop-filter: blur(10px) saturate(120%);
+  }
+  .cmbLeft{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width: 86px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.08);
+    background: rgba(0,0,0,.18);
+  }
+  .cmbLoading{
+    font-size: 12px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: rgba(234,244,255,.82);
+    animation: cmbBlink 1.05s ease-in-out infinite;
+  }
+  @keyframes cmbBlink{
+    0%, 100% { opacity: .25; }
+    50% { opacity: 1; }
+  }
+  .cmbMain{ flex: 1; min-width: 0; }
+  .cmbTop{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom: 6px;
+  }
+  .cmbPhase{
+    font-size: 12px;
+    color: rgba(234,244,255,.86);
+  }
+  .cmbPct{
+    font-size: 12px;
+    color: rgba(234,244,255,.90);
+    font-variant-numeric: tabular-nums;
+  }
+  .cmbTrack{
+    position:relative;
+    height: 10px;
+    border-radius: 999px;
+    overflow:hidden;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.08);
+  }
+  .cmbFill{
+    position:absolute;
+    left:0;
+    top:0;
+    bottom:0;
+    width: 0%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(43,140,255,.75), rgba(122,93,255,.65), rgba(43,140,255,.75));
+    box-shadow: 0 0 18px rgba(43,140,255,.24);
+    transition: width .22s ease;
+  }
+  .cmbTicks{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        rgba(255,255,255,.0) 0,
+        rgba(255,255,255,.0) 9px,
+        rgba(255,255,255,.14) 10px
+      );
+    mix-blend-mode: overlay;
+    opacity: .35;
+  }
+  /* компактнее на мобилке */
+  @media (max-width: 520px){
+    .cmbLeft{ width: 72px; }
+    .composerMediaBar{ gap:8px; padding:9px 9px; }
+  }
 .taWrap{
   position: relative;
   display: grid;
@@ -6933,9 +6933,11 @@ const NO_THREAD_OPEN_SELECTOR =
 
       {/* время создания + переключатель перевода — ниже контента */}
       <div
-        className="qcoinLabel "
+        className="topicTitle text-[#eaf4ff]
+    !whitespace-normal break-words
+    [overflow-wrap:anywhere]
+    max-w-full"
         suppressHydrationWarning
-        style={{display:'grid', fontSize: 16, gap:8, marginTop:8}}
       >
         <HydrateText value={human(p.ts)} />
 
@@ -10452,10 +10454,10 @@ useEffect(() => {
  const videoRecRef    = useRef(null);   // MediaRecorder
  const videoChunksRef = useRef([]);     // BlobParts
 const [pendingVideo, setPendingVideo] = useState(null);
-	// =========================================================
-	// Composer media progress UI (bar над контролами)
-	// показываем от выбора файла/окончания записи до send/reset
-	// =========================================================
+  // =========================================================
+  // Composer media progress UI (bar над контролами)
+  // показываем от выбора файла/окончания записи до send/reset
+  // =========================================================
   const [videoProgress, setVideoProgress] = useState(0); // 0..100 (для аплоада видео)
   const [mediaBarOn, setMediaBarOn] = useState(false);
   const [mediaPhase, setMediaPhase] = useState('idle'); // 'idle'|'Ready'|'Moderating'|'Uploading'|'Sending'
@@ -11419,9 +11421,9 @@ const createPost = async () => {
   if (pendingAudio) {
     try {
       if (/^blob:/.test(pendingAudio)) {
-	      // UI: аплоад голоса (без прогресса на fetch) — двигаем шкалу вперёд
-	      try { setMediaPhase('Uploading'); } catch {}
-	      try { setMediaPct(p => Math.max(45, Number(p || 0))); } catch {}        
+        // UI: аплоад голоса (без прогресса на fetch) — двигаем шкалу вперёд
+        try { setMediaPhase('Uploading'); } catch {}
+        try { setMediaPct(p => Math.max(45, Number(p || 0))); } catch {}        
         const resp = await fetch(pendingAudio);
         const blob = await resp.blob();
         const fd = new FormData();
@@ -11549,9 +11551,9 @@ const createPost = async () => {
   }
 
   // батч на бэк
-	try { if (hasComposerMedia) setMediaPhase('Sending'); } catch {}
-	try { if (hasComposerMedia) setMediaPct(p => Math.max(98, Number(p || 0))); } catch {}
- 	pushOp('create_post', {
+  try { if (hasComposerMedia) setMediaPhase('Sending'); } catch {}
+  try { if (hasComposerMedia) setMediaPct(p => Math.max(98, Number(p || 0))); } catch {}
+  pushOp('create_post', {
     topicId: sel.id,
     text: body,
     parentId,
@@ -11574,10 +11576,10 @@ const createPost = async () => {
   try { stopMediaProg(); } catch {}
   try { setMediaPipelineOn(false); } catch {}
   
-	try { setMediaBarOn(false); } catch {}
-	try { setMediaPhase('idle'); } catch {}
-	try { setMediaPct(0); } catch {}
-	try { setVideoProgress(0); } catch {}  
+  try { setMediaBarOn(false); } catch {}
+  try { setMediaPhase('idle'); } catch {}
+  try { setMediaPct(0); } catch {}
+  try { setVideoProgress(0); } catch {}  
   setReplyTo(null);
   toast.ok(t('forum_post_sent') || 'Отправлено');
   postingRef.current = false;
@@ -12772,86 +12774,42 @@ function pickAdUrlForSlot(slotKey, slotKind) {
 
    // =========================================================
    // Scroll Focus Lock (компенсация scroll при росте/сжатии блоков)
-  // =========================================================
-  const lastUserScrollTsRef = useRef(0);
-  const rafGuardRef = useRef(0);
+   // =========================================================
+   const lastUserScrollTsRef = useRef(0);
+   const rafGuardRef = useRef(0);
 
-  // единый источник скролла: если лента в собственном контейнере — используем его,
-  // иначе — window (для старых раскладок/SSR)
-  const getScrollHost = useCallback(() => {
-    try {
-      const el = bodyRef?.current;
-      if (el && el.scrollHeight > el.clientHeight + 1) return el;
-    } catch {}
-    return (typeof window !== 'undefined') ? window : null;
-  }, []);
+   useEffect(() => {
+     if (typeof window === 'undefined') return;
+     const onScroll = () => { lastUserScrollTsRef.current = Date.now(); };
+     window.addEventListener('scroll', onScroll, { passive: true });
+     return () => window.removeEventListener('scroll', onScroll);   
+}, []);
 
-  // отмечаем "пользователь скроллит" и в window, и в bodyRef (если он скроллится)
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
+   const compensateScrollOnResize = useCallback((el, deltaH) => {
+     if (!el || !deltaH) return;
+     if (typeof window === 'undefined') return;
+     if (document?.hidden) return;
 
-    const mark = () => { lastUserScrollTsRef.current = Date.now(); };
+     // если пользователь сейчас скроллит — НЕ вмешиваемся
+     const nowTs = Date.now();
+     if (nowTs - (lastUserScrollTsRef.current || 0) < 140) return;
 
-    window.addEventListener('scroll', mark, { passive: true });
+     // анти-дребезг: один компесатор на кадр
+     if (rafGuardRef.current) return;
+     rafGuardRef.current = window.requestAnimationFrame(() => {
+       rafGuardRef.current = 0;
+       try {
+         const rect = el.getBoundingClientRect();
+         const focusY = Math.round(window.innerHeight * 0.33); // линия внимания
 
-    const sc = bodyRef?.current;
-    if (sc && sc !== window) {
-      try { sc.addEventListener('scroll', mark, { passive: true }); } catch {}
-    }
-
-    return () => {
-      window.removeEventListener('scroll', mark);
-      if (sc && sc !== window) {
-        try { sc.removeEventListener('scroll', mark); } catch {}
-      }
-    };
-  }, []);
-
-  // Основная компенсация: если блок меняет высоту ВЫШЕ зоны внимания — сдвигаем scrollTop на deltaH,
-  // чтобы пиксель под "линией внимания" остался на месте. Работает и для window, и для внутреннего скролла.
-  const compensateScrollOnResize = useCallback((el, deltaH) => {
-    if (!el || !deltaH) return;
-    if (typeof window === 'undefined') return;
-    if (document?.hidden) return;
-
-    // если пользователь сейчас скроллит — НЕ вмешиваемся
-    const nowTs = Date.now();
-    if (nowTs - (lastUserScrollTsRef.current || 0) < 140) return;
-
-    const host = getScrollHost();
-    if (!host) return;
-
-    // анти-дребезг: один компесатор на кадр
-    if (rafGuardRef.current) return;
-    rafGuardRef.current = window.requestAnimationFrame(() => {
-      rafGuardRef.current = 0;
-      try {
-        const rect = el.getBoundingClientRect();
-
-        // window-скролл
-        if (host === window) {
-          const focusY = Math.round(window.innerHeight * 0.33); // линия внимания
-          if (rect.top < focusY) {
-            window.scrollBy(0, deltaH);
-          }
-          return;
-        }
-
-        // контейнерный скролл
-        const sc = host;
-        const sRect = sc.getBoundingClientRect();
-        const focusY = Math.round(sRect.top + sRect.height * 0.33);
-
-        // IMPORTANT:
-        // 1) если блок выше линии внимания в пределах контейнера — компенсируем
-        // 2) если блок полностью ниже — не трогаем (иначе будет ощущение "подтаскивания")
-        if (rect.top < focusY) {
-          const next = (sc.scrollTop || 0) + deltaH;
-          sc.scrollTop = Math.max(0, next);
-        }
-      } catch {}
-    });
-  }, [getScrollHost]);
+         // если блок выше линии внимания — компенсируем, чтобы фокус остался на месте
+         // (включая кейс когда блок уже выше viewport)
+         if (rect.top < focusY) {
+           window.scrollBy(0, deltaH);
+         }
+       } catch {}
+     });
+   }, []);
   /* ---- render ---- */
   return (
 <div
@@ -14698,27 +14656,27 @@ onOpenThread={(clickP) => {
   <div className="forumComposer">
     <div className="taWrap" data-active={composerActive}>
 
-			{/* media progress (над контролами): показываем с момента выбора файла/записи до отправки/сброса */}
-			{mediaBarOn && (
-				<div className="composerMediaBar" role="status" aria-live="polite" data-phase={String(mediaPhase || '').toLowerCase()}>
-					<div className="cmbLeft">
-						<span className="cmbLoading">Loading</span>
-					</div>
-					<div className="cmbMain">
-						<div className="cmbTop">
-							<span className="cmbPhase">{mediaPhase === 'idle' ? 'Ready' : mediaPhase}</span>
-							<span className="cmbPct">{Math.round(Math.max(0, Math.min(100, Number(mediaPct || 0))))}%</span>
-						</div>
-						<div className="cmbTrack" aria-hidden="true">
-							<div
-								className="cmbFill"
-								style={{ width: `${Math.max(0, Math.min(100, Number(mediaPct || 0)))}%` }}
-							/>
-							<div className="cmbTicks" />
-						</div>
-					</div>
-				</div>
-			)}
+      {/* media progress (над контролами): показываем с момента выбора файла/записи до отправки/сброса */}
+      {mediaBarOn && (
+        <div className="composerMediaBar" role="status" aria-live="polite" data-phase={String(mediaPhase || '').toLowerCase()}>
+          <div className="cmbLeft">
+            <span className="cmbLoading">Loading</span>
+          </div>
+          <div className="cmbMain">
+            <div className="cmbTop">
+              <span className="cmbPhase">{mediaPhase === 'idle' ? 'Ready' : mediaPhase}</span>
+              <span className="cmbPct">{Math.round(Math.max(0, Math.min(100, Number(mediaPct || 0))))}%</span>
+            </div>
+            <div className="cmbTrack" aria-hidden="true">
+              <div
+                className="cmbFill"
+                style={{ width: `${Math.max(0, Math.min(100, Number(mediaPct || 0)))}%` }}
+              />
+              <div className="cmbTicks" />
+            </div>
+          </div>
+        </div>
+      )}
       {/* ЕДИНАЯ ГОРИЗОНТАЛЬНАЯ РЕЛЬСА (вместо боковых) */}
       <div className="topRail" role="toolbar" aria-label="Composer actions">
         <div className="railInner">
