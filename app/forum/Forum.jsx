@@ -3919,7 +3919,106 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 .iconBtn svg{ display:block; width:30px; height:30px; }
 /* встроенный композер */
 .forumComposer { position: relative; }
+  /* phase accents (кибер-подсветка по этапам) */
+  .composerMediaBar[data-phase="moderating"]{ ... }
+  .composerMediaBar[data-phase="uploading"]{ ... }
+  .composerMediaBar[data-phase="sending"]{ ... }
 
+  /* лёгкий "сканлайн" поверх рельсы */
+  .cmbTrack::after{ ... animation: cmbScan ... }
+
+	/* =========================================================
+	   Composer media progress bar (над контролами)
+	   - видна от момента выбора/записи до отправки или сброса медиа
+	   - слева мигает "Loading" (EN)
+	========================================================= */
+	.composerMediaBar{
+	  display:flex;
+	  align-items:stretch;
+	  gap:10px;
+	  margin: 0 0 10px 0;
+	  padding: 10px 10px;
+	  border-radius: 12px;
+	  border: 1px solid rgba(160,180,255,.18);
+	  background: linear-gradient(180deg, rgba(8,12,20,.55), rgba(10,16,24,.35));
+	  box-shadow: 0 14px 32px rgba(25,129,255,.10), inset 0 0 0 1px rgba(255,255,255,.03);
+	  backdrop-filter: blur(10px) saturate(120%);
+	}
+	.cmbLeft{
+	  display:flex;
+	  align-items:center;
+	  justify-content:center;
+	  width: 86px;
+	  border-radius: 10px;
+	  border: 1px solid rgba(255,255,255,.08);
+	  background: rgba(0,0,0,.18);
+	}
+	.cmbLoading{
+	  font-size: 12px;
+	  letter-spacing: .08em;
+	  text-transform: uppercase;
+	  color: rgba(234,244,255,.82);
+	  animation: cmbBlink 1.05s ease-in-out infinite;
+	}
+	@keyframes cmbBlink{
+	  0%, 100% { opacity: .25; }
+	  50% { opacity: 1; }
+	}
+	.cmbMain{ flex: 1; min-width: 0; }
+	.cmbTop{
+	  display:flex;
+	  align-items:baseline;
+	  justify-content:space-between;
+	  gap:10px;
+	  margin-bottom: 6px;
+	}
+	.cmbPhase{
+	  font-size: 12px;
+	  color: rgba(234,244,255,.86);
+	}
+	.cmbPct{
+	  font-size: 12px;
+	  color: rgba(234,244,255,.90);
+	  font-variant-numeric: tabular-nums;
+	}
+	.cmbTrack{
+	  position:relative;
+	  height: 10px;
+	  border-radius: 999px;
+	  overflow:hidden;
+	  background: rgba(255,255,255,.08);
+	  border: 1px solid rgba(255,255,255,.08);
+	}
+	.cmbFill{
+	  position:absolute;
+	  left:0;
+	  top:0;
+	  bottom:0;
+	  width: 0%;
+	  border-radius: 999px;
+	  background: linear-gradient(90deg, rgba(43,140,255,.75), rgba(122,93,255,.65), rgba(43,140,255,.75));
+	  box-shadow: 0 0 18px rgba(43,140,255,.24);
+	  transition: width .22s ease;
+	}
+	.cmbTicks{
+	  position:absolute;
+	  inset:0;
+	  pointer-events:none;
+	  background:
+	    repeating-linear-gradient(
+	      90deg,
+	      rgba(255,255,255,.0) 0,
+	      rgba(255,255,255,.0) 9px,
+	      rgba(255,255,255,.14) 10px
+	    );
+	  mix-blend-mode: overlay;
+	  opacity: .35;
+	}
+	/* компактнее на мобилке */
+	@media (max-width: 520px){
+	  .cmbLeft{ width: 72px; }
+	  .composerMediaBar{ gap:8px; padding:9px 9px; }
+	}
 .taWrap{
   position: relative;
   display: grid;
@@ -10265,6 +10364,106 @@ useEffect(() => {
  const videoRecRef    = useRef(null);   // MediaRecorder
  const videoChunksRef = useRef([]);     // BlobParts
 const [pendingVideo, setPendingVideo] = useState(null);
+	// =========================================================
+	// Composer media progress UI (bar над контролами)
+	// показываем от выбора файла/окончания записи до send/reset
+	// =========================================================
+  const [videoProgress, setVideoProgress] = useState(0); // 0..100 (для аплоада видео)
+  const [mediaBarOn, setMediaBarOn] = useState(false);
+  const [mediaPhase, setMediaPhase] = useState('idle'); // 'idle'|'Ready'|'Moderating'|'Uploading'|'Sending'
+  const [mediaPct, setMediaPct] = useState(0);
+
+  // отдельный флаг: чтобы бар появлялся СРАЗУ при выборе файла (ещё до модерации/аплоада),
+  // даже когда pending* ещё не успели заполниться
+  const [mediaPipelineOn, setMediaPipelineOn] = useState(false);
+
+  // таймер/сессия для «плавного» прогресса без реального процента (moderation/fetch upload)
+  const mediaProgRef = useRef({ id: 0, timer: null, cap: 0 });
+
+  const hasComposerMedia =
+    (pendingImgs?.length || 0) > 0 || !!pendingAudio || !!pendingVideo || !!mediaPipelineOn;
+
+  const stopMediaProg = useCallback(() => {
+    const t = mediaProgRef.current?.timer;
+    if (t) { try { clearInterval(t); } catch {} }
+    if (mediaProgRef.current) mediaProgRef.current.timer = null;
+  }, []);
+
+  // “кибер-живой” софт-прогресс: быстрее тикает + микро-джиттер, выше cap (чтоб не залипать на 18%)
+  const startSoftProgress = useCallback((cap = 32, stepMs = 120) => {
+    stopMediaProg();
+    mediaProgRef.current.id = (mediaProgRef.current.id || 0) + 1;
+    const myId = mediaProgRef.current.id;
+    mediaProgRef.current.cap = cap;
+
+    // важно: начинаем минимум с 1%, чтобы не «залипать» на 0
+    try { setMediaPct(p => Math.max(1, Number(p || 0))); } catch {}
+
+    mediaProgRef.current.timer = setInterval(() => {
+      if (mediaProgRef.current.id !== myId) return;
+      setMediaPct((p) => {
+        const cur = Math.max(0, Math.min(100, Number(p || 0)));
+        if (cur >= cap) return cur;
+        // чем ближе к cap — тем медленнее, но никогда не “замираем”
+        const base =
+          cur < 8  ? 1.6 :
+          cur < 16 ? 1.15 :
+          cur < 24 ? 0.85 :
+          0.55;
+        const jitter = (Math.random() * 0.35); // “кибер-живость”
+        return Math.min(cap, cur + base + jitter);
+      });
+    }, stepMs);
+  }, [stopMediaProg]);
+
+  const beginMediaPipeline = useCallback((phase = 'Moderating') => {
+    // включаем бар сразу, даже если pending* ещё пустые
+    setMediaPipelineOn(true);
+    setMediaBarOn(true);
+    setMediaPhase(phase);
+    setMediaPct(1);
+     startSoftProgress(32, 120); // до ~32% “едем” во время модерации (без залипания)
+  }, [startSoftProgress]);
+
+  const endMediaPipeline = useCallback(() => {
+    stopMediaProg();
+    setMediaPipelineOn(false);
+  }, [stopMediaProg]);
+  // фикс: как только медиа реально готово (превью/прикреплено) — ставим Ready/100 и выключаем пайплайн
+  const markMediaReady = useCallback(() => {
+    try { stopMediaProg(); } catch {}
+    try { setMediaPipelineOn(false); } catch {}
+    try { setMediaBarOn(true); } catch {}
+    try { setMediaPhase('Ready'); } catch {}
+    try { setMediaPct(100); } catch {}
+  }, [stopMediaProg]);
+
+  useEffect(() => {
+    const hasRealMedia =
+      ((pendingImgs?.length || 0) > 0) || !!pendingAudio || !!pendingVideo;
+    if (!hasRealMedia) return;
+
+    // если мы были в модерации/аплоаде — теперь “готово к отправке”
+    if (mediaPhase === 'Moderating' || mediaPhase === 'Uploading') {
+      markMediaReady();
+    }
+  }, [pendingImgs, pendingAudio, pendingVideo, mediaPhase, markMediaReady]);
+  // авто-включение/выключение бара по факту наличия медиа ИЛИ активной пайплайны
+  useEffect(() => {
+    if (!hasComposerMedia) {
+      stopMediaProg();
+      setMediaBarOn(false);
+      setMediaPipelineOn(false);
+      setMediaPhase('idle');
+      setMediaPct(0);
+      setVideoProgress(0);
+      return;
+    }
+    setMediaBarOn(true);
+    // если фаза ещё не задана — считаем, что медиа уже готово к отправке
+    setMediaPhase((p) => (p && p !== 'idle' ? p : 'Ready'));
+    setMediaPct((p) => (Number(p || 0) > 0 ? p : 1));
+  }, [hasComposerMedia, stopMediaProg]);
 
 // fullscreen overlay для загруженных файлов (видео/картинка)
 const [overlayMediaKind, setOverlayMediaKind] = useState('video'); // 'video' | 'image'
@@ -10573,7 +10772,13 @@ const resetVideo = () => {
   setVideoOpen(false);
   setVideoState('idle');
   setVideoElapsed(0);
-};
+   try { setVideoProgress(0); } catch {}
+
+  // важный добив: если видео было причиной пайплайна — выключаем его, иначе бар может “висеть”
+  try { stopMediaProg(); } catch {}
+  try { setMediaPipelineOn(false); } catch {}
+  // бар сам исчезнет useEffect'ом когда pending* пустые, но пайплайн должен быть false
+ };
 
 // === fullscreen overlay (и для видео, и для изображения) ===
 const closeMediaOverlay = () => {
@@ -11027,6 +11232,15 @@ const createPost = async () => {
   };
 
   if (!rl.allowAction()) return _fail(t('forum_too_fast') || 'Слишком часто');
+
+// === media progress UI: start phase (shown from pick/record until send/reset) ===
+  // === media progress UI: отправка (бар остаётся до очистки композера) ===
+  // NOTE: если видео ещё blob:-URL, ниже мы переключим фазу обратно на Moderating.
+  if (hasComposerMedia) {
+    try { setMediaBarOn(true); } catch {}
+    try { setMediaPhase('Sending'); } catch {}
+    try { setMediaPct(p => Math.max(92, Number(p || 0))); } catch {}
+  }
   // 0) VIDEO MODERATION (frames) BEFORE ANY UPLOAD
   if (pendingVideo) {
     try {
@@ -11083,7 +11297,14 @@ const createPost = async () => {
           handleUploadUrl: '/api/forum/blobUploadUrl', // ← наш единственный роут
           multipart: true,                                // надёжно для больших файлов
           contentType: mime,
-          onUploadProgress: (p) => { try { setVideoProgress?.(p.percentage || 0) } catch {} },
+          onUploadProgress: (p) => {
+            const upPct = Math.max(0, Math.min(100, Number(p?.percentage || 0)));
+            // общий прогресс: Uploading занимает 30..85%
+            const overall = 30 + (upPct * 0.55);
+            try { setMediaPhase('Uploading'); } catch {}
+            try { setVideoProgress(upPct); } catch {}
+            try { setMediaPct(prev => Math.max(Number(prev || 0), overall)); } catch {}
+          },      
         });
         videoUrlToSend = result?.url || '';
         if (!videoUrlToSend) throw new Error('no_url');
@@ -11102,6 +11323,9 @@ const createPost = async () => {
   if (pendingAudio) {
     try {
       if (/^blob:/.test(pendingAudio)) {
+	      // UI: аплоад голоса (без прогресса на fetch) — двигаем шкалу вперёд
+	      try { setMediaPhase('Uploading'); } catch {}
+	      try { setMediaPct(p => Math.max(45, Number(p || 0))); } catch {}        
         const resp = await fetch(pendingAudio);
         const blob = await resp.blob();
         const fd = new FormData();
@@ -11229,7 +11453,9 @@ const createPost = async () => {
   }
 
   // батч на бэк
-  pushOp('create_post', {
+	try { if (hasComposerMedia) setMediaPhase('Sending'); } catch {}
+	try { if (hasComposerMedia) setMediaPct(p => Math.max(98, Number(p || 0))); } catch {}
+ 	pushOp('create_post', {
     topicId: sel.id,
     text: body,
     parentId,
@@ -11247,6 +11473,15 @@ const createPost = async () => {
   setPendingImgs([]);
   try { if (pendingAudio && /^blob:/.test(pendingAudio)) URL.revokeObjectURL(pendingAudio) } catch {}
   setPendingAudio(null);
+
+  // добив прогресса: таймер/пайплайн MUST die после отправки
+  try { stopMediaProg(); } catch {}
+  try { setMediaPipelineOn(false); } catch {}
+  
+	try { setMediaBarOn(false); } catch {}
+	try { setMediaPhase('idle'); } catch {}
+	try { setMediaPct(0); } catch {}
+	try { setVideoProgress(0); } catch {}  
   setReplyTo(null);
   toast.ok(t('forum_post_sent') || 'Отправлено');
   postingRef.current = false;
@@ -11520,6 +11755,15 @@ const onFilesChosen = React.useCallback(async (e) => {
       /\.(mp4|webm|mov|m4v|mkv)$/i.test(String(f?.name || ''))
     );
 
+  // === MEDIA PIPELINE: показываем прогресс сразу (ещё до модерации) ===
+  if ((imgFiles?.length || 0) > 0 || (vidFiles?.length || 0) > 0) {
+    // стартуем с «Moderating» и мягким движением к ~18%
+    try { beginMediaPipeline?.('Moderating'); } catch {}
+  } else {
+    // если невалидные файлы — пайплайн не нужен
+    try { endMediaPipeline?.(); } catch {}
+  }
+
   // сразу показываем тост (до модерации/загрузки), что медиа обрабатывается
   try {
     if (vidFiles.length) {
@@ -11549,6 +11793,7 @@ const onFilesChosen = React.useCallback(async (e) => {
         console.error('[moderation] image check failed', err);
         toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
         toastI18n('info', 'forum_moderation_try_again', 'Please try again');
+       try { endMediaPipeline?.(); } catch {}
         return;
       }
 
@@ -11561,7 +11806,11 @@ const onFilesChosen = React.useCallback(async (e) => {
       if (modImg?.decision === 'review') {
         try { console.warn('[moderation] image review -> allow (balanced)', modImg?.reason, modImg?.raw); } catch {}
       }
-
+      // UI: модерация пройдена → аплоад
+      try { stopMediaProg?.(); } catch {}
+      try { setMediaPhase('Uploading'); } catch {}
+      try { setMediaPct(p => Math.max(20, Number(p || 0))); } catch {}
+      try { startSoftProgress?.(72, 200); } catch {}  // мягко едем к ~72% пока грузим
       const fd = new FormData();
       for (const f of imgFiles.slice(0, 20)) fd.append('files', f, f.name);
 
@@ -11570,6 +11819,11 @@ const onFilesChosen = React.useCallback(async (e) => {
 
       const up = await res.json().catch(() => ({ urls: [] }));
       const urls = Array.isArray(up?.urls) ? up.urls : [];
+      // UI: аплоад завершён → превью/готово к отправке
+      try { stopMediaProg?.(); } catch {}
+      try { setMediaPhase('Ready'); } catch {}
+      try { setMediaPct(p => Math.max(85, Number(p || 0))); } catch {}
+      try { endMediaPipeline?.(); } catch {}      
       if (urls.length) 
         setPendingImgs(prev => [...prev, ...urls]);
       // если загрузили ТОЛЬКО картинки — открываем fullscreen overlay (как для видео)
@@ -14302,6 +14556,27 @@ onOpenThread={(clickP) => {
   <div className="forumComposer">
     <div className="taWrap" data-active={composerActive}>
 
+			{/* media progress (над контролами): показываем с момента выбора файла/записи до отправки/сброса */}
+			{mediaBarOn && (
+				<div className="composerMediaBar" role="status" aria-live="polite" data-phase={String(mediaPhase || '').toLowerCase()}>
+					<div className="cmbLeft">
+						<span className="cmbLoading">Loading</span>
+					</div>
+					<div className="cmbMain">
+						<div className="cmbTop">
+							<span className="cmbPhase">{mediaPhase === 'idle' ? 'Ready' : mediaPhase}</span>
+							<span className="cmbPct">{Math.round(Math.max(0, Math.min(100, Number(mediaPct || 0))))}%</span>
+						</div>
+						<div className="cmbTrack" aria-hidden="true">
+							<div
+								className="cmbFill"
+								style={{ width: `${Math.max(0, Math.min(100, Number(mediaPct || 0)))}%` }}
+							/>
+							<div className="cmbTicks" />
+						</div>
+					</div>
+				</div>
+			)}
       {/* ЕДИНАЯ ГОРИЗОНТАЛЬНАЯ РЕЛЬСА (вместо боковых) */}
       <div className="topRail" role="toolbar" aria-label="Composer actions">
         <div className="railInner">
