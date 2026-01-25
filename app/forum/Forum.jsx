@@ -6498,7 +6498,7 @@ const { t: tt } = useI18n();
 )}
 
 
-          <div className="meta mt-1" suppressHydrationWarning>
+          <div className="btn btnGhost btnXs" suppressHydrationWarning>
             <HydrateText value={human(t.ts)} />
           </div> 
         </div>
@@ -10078,6 +10078,7 @@ const delTopicOwn = async (topic) => {
 
   const topicId = String(topic?.id || '');
   if (!topicId) return;
+  // локальные tmp_* ещё не на сервере — просто убираем из overlay
   if (topicId.startsWith('tmp_t_')) {
     setOverlay(prev => ({
       ...prev,
@@ -10089,20 +10090,43 @@ const delTopicOwn = async (topic) => {
     }));
     return;
   }
-
+// 1) оптимистично прячем (чтобы UI не «мигал»)
   persistTombstones(prev => {
     const topics = { ...prev.topics, [topicId]: Date.now() };
     return { ...prev, topics };
   });
-  pushOp('delete_topic', { id: topicId });
+
   if (String(sel?.id || '') === topicId) {
     try { setSel(null); } catch {}
   }
-  toast.ok(t('forum_delete_ok') || 'Удалено');
-};
-const delPostOwn = (post) => {
+
+
+  // 2) реально удаляем на сервере (чтобы исчезло на других устройствах)
+  const r = await api.ownerDeleteTopic(topicId, uid);
+  if (r?.ok) {
+    toast.ok(t('forum_delete_ok') || 'Удалено');
+    return;
+  }
+
+  // 3) rollback если сервер отказал/упал
+  persistTombstones(prev => {
+    const topics = { ...prev.topics };
+    delete topics[topicId];
+    return { ...prev, topics };
+  });
+  console.error('ownerDeleteTopic error:', r);
+  toast.err((r?.error && String(r.error)) || (t('forum_delete_failed') || 'Не удалось удалить'));
+ };
+const delPostOwn = async (post) => {
+  const uid = auth?.asherId || auth?.accountId || '';
+  if (!uid) {
+    toast.warn(t('forum_auth_required') || 'Нужна авторизация');
+    return;
+  }
+
   const postId = String(post?.id || '');
   if (!postId) return;
+  // локальные tmp_* ещё не на сервере — просто убираем из overlay
   if (postId.startsWith('tmp_p_')) {
     setOverlay(prev => ({
       ...prev,
@@ -10113,13 +10137,29 @@ const delPostOwn = (post) => {
     }));
     return;
   }
+  // 1) оптимистично прячем
   persistTombstones(prev => {
     const posts = { ...prev.posts, [postId]: Date.now() };
     return { ...prev, posts };
   });
-  pushOp('delete_post', { id: postId });
-  toast.ok(t('forum_delete_ok') || 'Удалено');
-};
+
+  // 2) реально удаляем на сервере
+  const r = await api.ownerDeletePost(postId, uid);
+  if (r?.ok) {
+    try { emitDeleted(postId, post?.topicId); } catch {}
+    toast.ok(t('forum_delete_ok') || 'Удалено');
+    return;
+  }
+
+ // 3) rollback если сервер отказал/упал
+  persistTombstones(prev => {
+    const posts = { ...prev.posts };
+    delete posts[postId];
+    return { ...prev, posts };
+  });
+  console.error('ownerDeletePost error:', r);
+  toast.err((r?.error && String(r.error)) || (t('forum_delete_failed') || 'Не удалось удалить'));
+ };
 
 
 /* ---- выбор темы и построение данных ---- */
