@@ -7767,20 +7767,46 @@ function usePageLock(active) {
     if (!active || typeof window === 'undefined') return;
 
     const { body, documentElement } = document;
-    const y = window.scrollY || window.pageYOffset;
+
+    // В форуме основной скролл живёт во внутреннем контейнере .body (overflowY:auto).
+    // Если он есть — лочим именно его, чтобы после закрытия оверлея НЕ прыгать в самый верх.
+    const scrollEl =
+      document.querySelector('[data-forum-scroll="1"]') ||
+      document.querySelector('.forum_root .grid2 > section > .body') ||
+      null;
+
+    const winY = window.scrollY || window.pageYOffset || 0;
+    const innerY = scrollEl ? (scrollEl.scrollTop || 0) : 0;
+
+    const useInner =
+      !!scrollEl &&
+      scrollEl !== body &&
+      (scrollEl.scrollHeight - scrollEl.clientHeight) > 2;
+
     const prev = {
-      overflow: body.style.overflow,
-      position: body.style.position,
-      top: body.style.top,
-      width: body.style.width,
-      overscroll: documentElement.style.overscrollBehaviorY,
+      bodyOverflow: body.style.overflow,
+      bodyPosition: body.style.position,
+      bodyTop: body.style.top,
+      bodyWidth: body.style.width,
+      htmlOverscroll: documentElement.style.overscrollBehaviorY,
+      innerOverflow: useInner ? scrollEl.style.overflow : null,
+      innerOverscroll: useInner ? scrollEl.style.overscrollBehaviorY : null,
     };
 
-    body.style.position = 'fixed';
-    body.style.top = `-${y}px`;
-    body.style.width = '100%';
-    body.style.overflow = 'hidden';
-    documentElement.style.overscrollBehaviorY = 'none';
+    if (useInner) {
+      // Лочим внутренний скролл-контейнер без body:fixed (иначе возможны прыжки).
+      body.style.overflow = 'hidden';
+      documentElement.style.overscrollBehaviorY = 'none';
+      scrollEl.style.overflow = 'hidden';
+      scrollEl.style.overscrollBehaviorY = 'none';
+    } else {
+      // Фолбэк: обычная страница со скроллом окна.
+      body.style.position = 'fixed';
+      body.style.top = `-${winY}px`;
+      body.style.width = '100%';
+      body.style.overflow = 'hidden';
+      documentElement.style.overscrollBehaviorY = 'none';
+    }
 
     const prevent = (e) => e.preventDefault();
     window.addEventListener('wheel', prevent, { passive: false });
@@ -7789,15 +7815,28 @@ function usePageLock(active) {
     return () => {
       window.removeEventListener('wheel', prevent);
       window.removeEventListener('touchmove', prevent);
-      body.style.position = prev.position;
-      body.style.top = prev.top;
-      body.style.width = prev.width;
-      body.style.overflow = prev.overflow;
-      documentElement.style.overscrollBehaviorY = prev.overscroll;
-      window.scrollTo(0, y);
+
+      body.style.overflow = prev.bodyOverflow;
+      body.style.position = prev.bodyPosition;
+      body.style.top = prev.bodyTop;
+      body.style.width = prev.bodyWidth;
+      documentElement.style.overscrollBehaviorY = prev.htmlOverscroll;
+
+      if (useInner && scrollEl) {
+        scrollEl.style.overflow = prev.innerOverflow || '';
+        scrollEl.style.overscrollBehaviorY = prev.innerOverscroll || '';
+        requestAnimationFrame(() => {
+          try { scrollEl.scrollTop = innerY; } catch {}
+        });
+      } else {
+        requestAnimationFrame(() => {
+          try { window.scrollTo(0, winY); } catch {}
+        });
+      }
     };
   }, [active]);
 }
+
 
 // Ставит/снимает атрибут на <html> (для глобального CSS-правила)
 function useHtmlFlag(attr, value) {
@@ -13706,6 +13745,7 @@ onOpenThread={(clickP) => {
 
 <div
   className="body"
+  data-forum-scroll="1"
   ref={bodyRef}
   style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
 >
@@ -14449,6 +14489,7 @@ onOpenThread={(clickP) => {
 
       <div
   className="body"
+  data-forum-scroll="1"
   ref={bodyRef}
   style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
 >
