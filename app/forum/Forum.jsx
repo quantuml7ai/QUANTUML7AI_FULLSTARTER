@@ -3114,6 +3114,57 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   padding:8px 10px; border-radius:8px; background:rgba(255,60,60,.12); color:#ff6a6a; border:1px solid rgba(255,80,80,.25);
 }
 .ownerMenu .danger:hover{ filter:brightness(1.1) saturate(1.05); }
+
+/* === confirm delete mini-overlay (portal) === */
+.confirmOverlayRoot{
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(0,0,0,0); /* прозрачная ловушка кликов */
+}
+.confirmPop{
+  position: absolute;
+  width: 270px;
+  max-width: calc(100vw - 16px);
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(12,18,34,.98);
+  border: 1px solid rgba(170,200,255,.16);
+  box-shadow: 0 10px 30px rgba(0,0,0,.45);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.confirmPopText{
+  font-size: 13px;
+  color: rgba(234,244,255,.92);
+  line-height: 1.25;
+}
+.confirmPopBtns{
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.confirmPopBtn{
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid rgba(170,200,255,.16);
+  background: rgba(255,255,255,.06);
+  color: #eaf4ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.confirmPopBtn:hover{ filter: brightness(1.08); }
+.confirmPopBtn.ok{
+  border-color: rgba(120,255,170,.25);
+  background: rgba(90,255,140,.10);
+}
+.confirmPopBtn.ok:hover{ filter: brightness(1.12) saturate(1.08); }
+.confirmPopBtn svg{ width: 18px; height: 18px; }
 /* [FOCUS_TOOLS_STYLES:BEGIN] — панель инструментов композера по фокусу */
 .composer .tools{
   max-height: 0;
@@ -6262,14 +6313,104 @@ if (mountedRef.current) setBusy(false);
    UI: посты/темы
 ========================================================= */
 
-function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerDelete, viewerId, starredAuthors, onToggleStar }) {
+function ConfirmDeleteOverlay({ open, rect, text, onCancel, onConfirm }) {
+  const [pos, setPos] = React.useState({ top: 0, left: 0 });
 
+  React.useLayoutEffect(() => {
+    if (!open || !rect) return;
+    if (typeof window === 'undefined') return;
+
+    const W = 270;
+    const H = 96;
+    const pad = 8;
+    const vw = window.innerWidth || 0;
+    const vh = window.innerHeight || 0;
+
+    const r = rect || {};
+    let left = (r.right ?? 0) - W;
+    left = Math.max(pad, Math.min(left, vw - W - pad));
+
+    let top = (r.bottom ?? 0) + 8;
+    if (top + H > vh - pad) top = (r.top ?? 0) - H - 8;
+    top = Math.max(pad, Math.min(top, vh - H - pad));
+
+    setPos({ top, left });
+  }, [open, rect]);
+
+  React.useEffect(() => {
+    if (!open) return;
+    if (typeof window === 'undefined') return;
+    const onKey = (e) => { if (e.key === 'Escape') onCancel?.(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onCancel]);
+
+  if (!open || typeof document === 'undefined') return null;
+
+  return createPortal(
+    <div
+      className="confirmOverlayRoot"
+      role="presentation"
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onCancel?.(); }}
+      onTouchStart={(e) => { if (e.target === e.currentTarget) onCancel?.(); }}
+    >
+      <div
+        className="confirmPop"
+        style={{ top: pos.top, left: pos.left }}
+        role="dialog"
+        aria-modal="true"
+      >
+        <div className="confirmPopText">{text}</div>
+        <div className="confirmPopBtns">
+          <button
+            type="button"
+            className="confirmPopBtn"
+            aria-label="Cancel"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onCancel?.(); }}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="confirmPopBtn ok"
+            aria-label="Confirm"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onConfirm?.(); }}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerDelete, viewerId, starredAuthors, onToggleStar }) {
+const { t: tt } = useI18n();
   const { posts, likes, dislikes, views } = agg || {};
   const authorId = String(resolveProfileAccountId(t?.userId || t?.accountId) || '').trim();
   const isSelf = !!viewerId && authorId && (String(viewerId) === authorId);
   const isStarred = !!authorId && !!starredAuthors?.has?.(authorId);
   const isVipAuthor = useVipFlag(authorId, t?.vipActive ?? t?.isVip ?? t?.vip ?? t?.vipUntil ?? null);
 
+  const [ownDelConfirm, setOwnDelConfirm] = React.useState(null);
+  const requestOwnerDelete = (e) => {
+    e?.preventDefault?.(); e?.stopPropagation?.();
+    let r = null;
+    try {
+      const b = e?.currentTarget?.getBoundingClientRect?.();
+      if (b) r = { top: b.top, left: b.left, right: b.right, bottom: b.bottom, width: b.width, height: b.height };
+    } catch {}
+    setOwnDelConfirm(r || { top: 0, left: 0, right: 0, bottom: 0 });
+  };
+  const confirmOwnerDelete = () => {
+    setOwnDelConfirm(null);
+    onOwnerDelete?.(t);
+  };
   // считаем просмотр темы, когда карточка попадает в viewport (не чаще 1 раза на bucket в LS)
   const ref = React.useRef(null);
   React.useEffect(() => {
@@ -6388,16 +6529,24 @@ function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerD
           <div className="ownerKebab" onClick={(e)=>{ e.stopPropagation(); }}>
             <button className="kebabBtn" type="button" aria-label="Меню темы">⋮</button>     
             <div className="ownerMenu">
-              <button
-                type="button"
-                className="danger"
-                onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); onOwnerDelete?.(t); }}
-              >
-                🗑
-              </button>
+<button
+  type="button"
+ className="danger"
+  onClick={requestOwnerDelete}
+>
+  🗑
+</button>
             </div>
           </div>
         )}        
+
+<ConfirmDeleteOverlay
+  open={!!ownDelConfirm}
+  rect={ownDelConfirm}
+  text={tt?.('forum_delete_confirm') || 'Подтверждение: вы действительно хотите удалить?'}
+  onCancel={() => setOwnDelConfirm(null)}
+  onConfirm={confirmOwnerDelete}
+/>      
       </div>
     </div>
   );
@@ -6676,16 +6825,26 @@ const cleanedText = allLines
   }, [ytOrigin]);
   // ===== OWNER-меню (⋮) — только если владелец поста =====
   const isOwner = !!authId && (String(authId) === String(resolveProfileAccountId(p?.userId || p?.accountId)));
+const [ownDelConfirm, setOwnDelConfirm] = React.useState(null);
   const ownerEdit = (e) => {
     e?.preventDefault?.(); e?.stopPropagation?.();
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('forum:edit', { detail: { postId: p.id, text: p.text } }));
     }
   };
-  const ownerDelete = async (e) => {
-    e?.preventDefault?.(); e?.stopPropagation?.();
-    onOwnerDelete?.(p);
-  };
+const ownerDelete = (e) => {
+  e?.preventDefault?.(); e?.stopPropagation?.();
+  let r = null;
+  try {
+    const b = e?.currentTarget?.getBoundingClientRect?.();
+    if (b) r = { top: b.top, left: b.left, right: b.right, bottom: b.bottom, width: b.width, height: b.height };
+  } catch {}
+  setOwnDelConfirm(r || { top: 0, left: 0, right: 0, bottom: 0 });
+};
+const confirmOwnerDelete = () => {
+  setOwnDelConfirm(null);
+  onOwnerDelete?.(p);
+};
 
 // 👇 добавь рядом с PostCard (прямо над return), как константу
 const NO_THREAD_OPEN_SELECTOR =
@@ -6716,7 +6875,13 @@ const NO_THREAD_OPEN_SELECTOR =
           </div>
         </div>
       )}
-
+<ConfirmDeleteOverlay
+  open={!!ownDelConfirm}
+  rect={ownDelConfirm}
+  text={t?.('forum_delete_confirm') || 'Подтверждение: вы действительно хотите удалить?'}
+  onCancel={() => setOwnDelConfirm(null)}
+  onConfirm={confirmOwnerDelete}
+/>
       {/* шапка: Аватар слева, Ник справа (в одну строку), без времени */}
       <div className="postUserRow mb-2">
         <div className="avaMini">

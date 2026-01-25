@@ -45646,6 +45646,7 @@ try {
   Object.assign(dict.tr, GAME_TR)
 } catch (e) {}
 const ROBOT_EN = {
+forum_delete_confirm: '⚠️Are you sure you want to delete forever?⚠️',  
 not_robot_title:'🤖 I AM NOT A ROBOT 🤖',
 not_robot_subtitle:'Confirm that you are human to continue using the platform.',
 not_robot_instruction:'Select the coin on the field below that matches the one shown.',
@@ -45661,6 +45662,7 @@ forum_files_uploaded: 'Upload started',
 forum_files_upload_failed: 'Upload failed',
 }
 const ROBOT_RU = {
+forum_delete_confirm: '⚠️Вы Действительно хотите удалить навсегда?⚠️',  
 not_robot_title:'🤖 Я НЕ РОБОТ 🤖',
 not_robot_subtitle:'Подтвердите, что вы человек, чтобы продолжить работу с платформой.',
 not_robot_instruction:'Выберите на поле ниже монету, которая совпадает с указанной',
@@ -45676,6 +45678,7 @@ forum_files_uploaded: 'Началась загрузка',
 forum_files_upload_failed: 'Ошибка загрузки',
 }
 const ROBOT_UK = {
+forum_delete_confirm: '⚠️Ви дійсно хочете видалити назавжди?⚠️',  
 not_robot_title:'🤖 Я НЕ РОБОТ 🤖',
 not_robot_subtitle:'Підтвердіть, що ви людина, щоб продовжити роботу з платформою.',
 not_robot_instruction:'Виберіть на полі нижче монету, яка співпадає із зазначеною.',
@@ -45691,6 +45694,7 @@ forum_files_uploaded: 'Розпочато завантаження',
 forum_files_upload_failed: 'Помилка завантаження',
 }
 const ROBOT_ES = {
+forum_delete_confirm: '⚠️¿Seguro que quieres eliminarlo para siempre?⚠️',  
 not_robot_title:'🤖 NO SOY UN ROBOT 🤖',
 not_robot_subtitle:'Confirme que usted es una persona para continuar utilizando la plataforma.',
 not_robot_instruction:'Seleccione en el campo de abajo la moneda que coincide con la indicada.',
@@ -45706,6 +45710,7 @@ forum_files_uploaded: 'La carga ha comenzado',
 forum_files_upload_failed: 'Error de carga',
 }
 const ROBOT_ZH = {
+forum_delete_confirm: '⚠️您确定要永久删除吗？⚠️',  
 not_robot_title:'🤖 我不是机器人 🤖',
 not_robot_subtitle:'请确认您是人类，以继续使用平台。',
 not_robot_instruction:'请在下方区域选择与所示一致的币种。',
@@ -45721,6 +45726,7 @@ forum_files_uploaded: '上传已开始',
 forum_files_upload_failed: '上传失败',
 }
 const ROBOT_AR = {
+forum_delete_confirm: '⚠️هل أنت متأكد أنك تريد الحذف نهائيًا؟⚠️',  
 not_robot_title:'🤖 لستُ روبوتًا 🤖',
 not_robot_subtitle:'يرجى تأكيد أنك إنسان لمتابعة العمل على المنصة.',
 not_robot_instruction:'اختر من الحقل أدناه العملة المطابقة للعملة المعروضة.',
@@ -45736,6 +45742,7 @@ forum_files_uploaded: 'بدأ التحميل',
 forum_files_upload_failed: 'فشل التحميل',
 }
 const ROBOT_TR = {
+forum_delete_confirm: '⚠️Bunu sonsuza kadar silmek istediğinizden emin misiniz?⚠️',  
 not_robot_title:'🤖 ROBOT DEĞİLİM 🤖',
 not_robot_subtitle:'Platformu kullanmaya devam etmek için lütfen insan olduğunuzu doğrulayın.',
 not_robot_instruction:'Aşağıdaki alandan belirtilenle eşleşen coin’i seçin.',
