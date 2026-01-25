@@ -12772,42 +12772,86 @@ function pickAdUrlForSlot(slotKey, slotKind) {
 
    // =========================================================
    // Scroll Focus Lock (компенсация scroll при росте/сжатии блоков)
-   // =========================================================
-   const lastUserScrollTsRef = useRef(0);
-   const rafGuardRef = useRef(0);
+  // =========================================================
+  const lastUserScrollTsRef = useRef(0);
+  const rafGuardRef = useRef(0);
 
-   useEffect(() => {
-     if (typeof window === 'undefined') return;
-     const onScroll = () => { lastUserScrollTsRef.current = Date.now(); };
-     window.addEventListener('scroll', onScroll, { passive: true });
-     return () => window.removeEventListener('scroll', onScroll);   
-}, []);
+  // единый источник скролла: если лента в собственном контейнере — используем его,
+  // иначе — window (для старых раскладок/SSR)
+  const getScrollHost = useCallback(() => {
+    try {
+      const el = bodyRef?.current;
+      if (el && el.scrollHeight > el.clientHeight + 1) return el;
+    } catch {}
+    return (typeof window !== 'undefined') ? window : null;
+  }, []);
 
-   const compensateScrollOnResize = useCallback((el, deltaH) => {
-     if (!el || !deltaH) return;
-     if (typeof window === 'undefined') return;
-     if (document?.hidden) return;
+  // отмечаем "пользователь скроллит" и в window, и в bodyRef (если он скроллится)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
 
-     // если пользователь сейчас скроллит — НЕ вмешиваемся
-     const nowTs = Date.now();
-     if (nowTs - (lastUserScrollTsRef.current || 0) < 140) return;
+    const mark = () => { lastUserScrollTsRef.current = Date.now(); };
 
-     // анти-дребезг: один компесатор на кадр
-     if (rafGuardRef.current) return;
-     rafGuardRef.current = window.requestAnimationFrame(() => {
-       rafGuardRef.current = 0;
-       try {
-         const rect = el.getBoundingClientRect();
-         const focusY = Math.round(window.innerHeight * 0.33); // линия внимания
+    window.addEventListener('scroll', mark, { passive: true });
 
-         // если блок выше линии внимания — компенсируем, чтобы фокус остался на месте
-         // (включая кейс когда блок уже выше viewport)
-         if (rect.top < focusY) {
-           window.scrollBy(0, deltaH);
-         }
-       } catch {}
-     });
-   }, []);
+    const sc = bodyRef?.current;
+    if (sc && sc !== window) {
+      try { sc.addEventListener('scroll', mark, { passive: true }); } catch {}
+    }
+
+    return () => {
+      window.removeEventListener('scroll', mark);
+      if (sc && sc !== window) {
+        try { sc.removeEventListener('scroll', mark); } catch {}
+      }
+    };
+  }, []);
+
+  // Основная компенсация: если блок меняет высоту ВЫШЕ зоны внимания — сдвигаем scrollTop на deltaH,
+  // чтобы пиксель под "линией внимания" остался на месте. Работает и для window, и для внутреннего скролла.
+  const compensateScrollOnResize = useCallback((el, deltaH) => {
+    if (!el || !deltaH) return;
+    if (typeof window === 'undefined') return;
+    if (document?.hidden) return;
+
+    // если пользователь сейчас скроллит — НЕ вмешиваемся
+    const nowTs = Date.now();
+    if (nowTs - (lastUserScrollTsRef.current || 0) < 140) return;
+
+    const host = getScrollHost();
+    if (!host) return;
+
+    // анти-дребезг: один компесатор на кадр
+    if (rafGuardRef.current) return;
+    rafGuardRef.current = window.requestAnimationFrame(() => {
+      rafGuardRef.current = 0;
+      try {
+        const rect = el.getBoundingClientRect();
+
+        // window-скролл
+        if (host === window) {
+          const focusY = Math.round(window.innerHeight * 0.33); // линия внимания
+          if (rect.top < focusY) {
+            window.scrollBy(0, deltaH);
+          }
+          return;
+        }
+
+        // контейнерный скролл
+        const sc = host;
+        const sRect = sc.getBoundingClientRect();
+        const focusY = Math.round(sRect.top + sRect.height * 0.33);
+
+        // IMPORTANT:
+        // 1) если блок выше линии внимания в пределах контейнера — компенсируем
+        // 2) если блок полностью ниже — не трогаем (иначе будет ощущение "подтаскивания")
+        if (rect.top < focusY) {
+          const next = (sc.scrollTop || 0) + deltaH;
+          sc.scrollTop = Math.max(0, next);
+        }
+      } catch {}
+    });
+  }, [getScrollHost]);
   /* ---- render ---- */
   return (
 <div
