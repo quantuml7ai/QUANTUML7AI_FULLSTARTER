@@ -6785,14 +6785,22 @@ const NO_THREAD_OPEN_SELECTOR =
           data-forum-video="post"   // ← помечаем, что это плеер из поста
           data-forum-media="video"
           src={src}
-          controls
+
           playsInline
-          preload="none"
+          preload="metadata"
+          controlsList="nodownload noplaybackrate noremoteplayback"
+          disablePictureInPicture          
           className="mediaBoxItem"
           style={{
             objectFit: 'contain', 
             background: '#000'
           }}
+          onPointerDown={(e) => {
+            // включаем controls только по первому тапу пользователя
+            enableVideoControlsOnTap(e);
+            // и не даём клику улететь в parent (если там open overlay)
+            e.stopPropagation();
+          }}        
         /> 
  
             </div>
@@ -8113,6 +8121,40 @@ function HeadChevronIcon({ dir = 'down' }) {
       <path className="chev chev3" d="M6 16l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
+}
+
+// =========================================================
+// Native <video> controls: ONLY after user interaction (tap/click)
+// =========================================================
+function enableVideoControlsOnTap(e) {
+  try {
+    const v = e?.currentTarget;
+    if (!v) return;
+    // важно: handler дергается только в браузере
+    if (typeof window === 'undefined') return;
+    // если это не video — выходим
+    if (!(v instanceof HTMLVideoElement)) return;
+
+    // уже включено — ничего не делаем
+    if (v.controls) return;
+
+    // включаем нативные контролы только сейчас (по первому тапу)
+    v.controls = true;
+    try { v.setAttribute('controls', ''); } catch {}
+
+    // удерживаем inline на iOS (чтобы не улетало в fullscreen)
+    try { v.playsInline = true; } catch {}
+    try { v.setAttribute('playsinline', ''); } catch {}
+    try { v.setAttribute('webkit-playsinline', ''); } catch {}
+
+    // если видео было на паузе — мягко пробуем запустить
+    try {
+      if (v.paused) {
+        const p = v.play?.();
+        if (p && typeof p.catch === 'function') p.catch(() => {});
+      }
+    } catch {}
+  } catch {}
 }
 /* =========================================================
    Основной компонент
@@ -10337,6 +10379,20 @@ const [pendingImgs, setPendingImgs] = useState([]);
 // [FOCUS_TOOLS_STATE:BEGIN]
 const [composerActive, setComposerActive] = useState(false);
 const composerRef = React.useRef(null);
+const composerScrollYRef = React.useRef(0);
+// сохраняем позицию скролла перед fullscreen-превью, чтобы после закрытия не прыгало наверх
+const saveComposerScroll = React.useCallback(() => {
+  try { composerScrollYRef.current = window.scrollY || 0; } catch {}
+}, []);
+const restoreComposerScroll = React.useCallback(() => {
+  try {
+    const y = Number(composerScrollYRef.current || 0);
+    // двойной RAF — чтобы отработали setState/unmount портала и лэйаут не дёргался
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      try { window.scrollTo({ top: y, behavior: 'auto' }); } catch { try { window.scrollTo(0, y); } catch {} }
+    }));
+  } catch {}
+}, []);
 // LOCK: пока выбран файл / идёт модерация / аплоад / открыт превью-оверлей — композер нельзя закрывать кликом снаружи
 const composerLockRef = React.useRef(false);
 
@@ -10827,6 +10883,10 @@ const closeMediaOverlay = () => {
   try {
     if (!pendingVideo && overlayMediaKind === 'image') setVideoState('idle');
   } catch {}
+
+  // держим композер «живым» и возвращаем скролл туда, где юзер начал аттачить медиа
+  try { if (hasComposerMedia) setComposerActive(true); } catch {}
+  try { restoreComposerScroll(); } catch {}
 };
 
 // зелёная галочка: НЕ отправляем пост сразу, а закрываем fullscreen и оставляем маленькое превью под композером
@@ -14681,12 +14741,14 @@ onOpenThread={(clickP) => {
     onClick={(e)=>{
       e.preventDefault();
       if (videoState==='uploading') return;
-
+  // фикс: композер НЕ закрываем (иначе прыжок вверх). Сохраняем текущий скролл и держим composerActive=true
+  try { saveComposerScroll(); } catch {}
+  try { setComposerActive(true); } catch {}
       try { setOverlayMediaKind('video'); } catch {}
       try { setOverlayMediaUrl(null); } catch {}
       try { setVideoOpen(true); } catch {}
       try { setVideoState('live'); } catch {}
-      try { setComposerActive(false); } catch {}
+
       try { document.activeElement?.blur?.() } catch {}
     }}
   >
@@ -14849,12 +14911,14 @@ onOpenThread={(clickP) => {
         background: '#000',
       }}
     >
-      {/* ВАЖНО: controls должны работать и НЕ открывать fullscreen */}
+      {/* ВАЖНО: controls включаем ТОЛЬКО по первому тапу (чтобы не всплывали сами) */}
       <video
         src={pendingVideo}
-        controls
+
         playsInline
         preload="metadata"
+        controlsList="nodownload noplaybackrate noremoteplayback"
+        disablePictureInPicture        
         style={{
           width: '100%',
           height: 'auto',
@@ -14863,6 +14927,12 @@ onOpenThread={(clickP) => {
           objectFit: 'contain',
           background: '#000',
         }}
+        onPointerDown={(e) => {
+          // включаем controls только по взаимодействию
+          enableVideoControlsOnTap(e);
+          // чтобы тап по видео/контролам НЕ открывал оверлей
+          e.stopPropagation();
+        }}        
         onClick={(e) => {
           // чтобы клик по видео/контролам НЕ открывал оверлей
           e.stopPropagation();
