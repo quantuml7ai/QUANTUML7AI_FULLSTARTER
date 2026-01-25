@@ -6933,11 +6933,10 @@ const NO_THREAD_OPEN_SELECTOR =
 
       {/* время создания + переключатель перевода — ниже контента */}
       <div
-        className="topicTitle text-[#eaf4ff]
-    !whitespace-normal break-words
-    [overflow-wrap:anywhere]
-    max-w-full"
+        className="btn btnGhost btnXs"
+        
         suppressHydrationWarning
+        
       >
         <HydrateText value={human(p.ts)} />
 
