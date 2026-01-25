@@ -10298,16 +10298,9 @@ const [pendingImgs, setPendingImgs] = useState([]);
 // [FOCUS_TOOLS_STATE:BEGIN]
 const [composerActive, setComposerActive] = useState(false);
 const composerRef = React.useRef(null);
+// LOCK: пока выбран файл / идёт модерация / аплоад / открыт превью-оверлей — композер нельзя закрывать кликом снаружи
+const composerLockRef = React.useRef(false);
 
-// закрывать панель инструментов при клике вне композера
-React.useEffect(() => {
-  const onPointerDown = (e) => {
-    const el = composerRef.current;
-    if (el && !el.contains(e.target)) setComposerActive(false);
-  };
-  document.addEventListener('pointerdown', onPointerDown);
-  return () => document.removeEventListener('pointerdown', onPointerDown);
-}, []);
 // [FOCUS_TOOLS_STATE:END]
 // [SEND_COOLDOWN:STATE]
 const [cooldownLeft, setCooldownLeft] = useState(0);
@@ -10325,6 +10318,8 @@ const startSendCooldown = React.useCallback((sec = 10) => {
 useEffect(() => {
   if (!composerActive) return;
   const onDown = (e) => {
+    // пока идёт медиа-процесс — не даём закрыться композеру (иначе прыжок/скролл и пропажа шкалы)
+    if (composerLockRef.current) return;    
     const el = composerRef?.current;
     if (el && !el.contains(e.target)) {
       setComposerActive(false);
@@ -10468,6 +10463,10 @@ const [pendingVideo, setPendingVideo] = useState(null);
 // fullscreen overlay для загруженных файлов (видео/картинка)
 const [overlayMediaKind, setOverlayMediaKind] = useState('video'); // 'video' | 'image'
 const [overlayMediaUrl, setOverlayMediaUrl] = useState(null);      // string | null
+// держим LOCK актуальным: если есть медиа в композере или открыт fullscreen-превью — не закрываем композер кликом снаружи
+useEffect(() => {
+  composerLockRef.current = !!hasComposerMedia || !!overlayMediaUrl || !!videoOpen;
+}, [hasComposerMedia, overlayMediaUrl, videoOpen]);
 const videoCancelRef = useRef(false); // true => onstop не собирает blob (отмена)
 const videoMirrorRef = useRef(null);  // вспомогательный незеркальный front-поток для записи
  
