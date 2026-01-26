@@ -1372,6 +1372,36 @@ const Styles = () => (
     .glass{ background:rgba(8,13,20,.94); border:1px solid rgba(255,255,255,.10); border-radius:16px; backdrop-filter: blur(12px) }
     .neon{ box-shadow:0 0 28px rgba(25,129,255,.14), inset 0 0 18px rgba(25,129,255,.06) }
     .postBody{ white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word }
+
+    /* === Post message window (rounded frame for post body text) === */
+    .postBodyFrame{
+      position: relative;
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(10, 16, 24, .55);
+      backdrop-filter: blur(10px) saturate(125%);
+      border: 1px solid rgba(160, 180, 255, .18);
+      box-shadow:
+        0 10px 30px rgba(0,0,0,.28),
+        inset 0 0 0 1px rgba(255,255,255,.06);
+    }
+    .postBodyFrame::before{
+      content:"";
+      position:absolute;
+      inset: 1px;
+      border-radius: 15px;
+      pointer-events:none;
+      background: radial-gradient(120% 140% at 10% 0%, rgba(80,167,255,.18), rgba(0,0,0,0) 60%);
+      opacity: .9;
+    }
+    .postBodyContent{
+      position: relative; /* поверх ::before */
+      min-height: 22px;
+      color: #eaf1ff;
+    }
     .forum_root{
       --mb-video-h-mobile: 630px;
       --mb-video-h-tablet: 650px;
@@ -7126,10 +7156,12 @@ const NO_THREAD_OPEN_SELECTOR =
         </div>
       ) : (
         displayText.trim() && (
-          <div
-            className="text-[15px] leading-relaxed postBody whitespace-pre-wrap break-words"
-            dangerouslySetInnerHTML={{ __html: rich(displayText) }}
-          />
+          <div className="postBodyFrame">
+            <div
+              className="postBodyContent text-[15px] leading-relaxed postBody whitespace-pre-wrap break-words"
+              dangerouslySetInnerHTML={{ __html: rich(displayText) }}
+            />
+          </div>
         )
       )}
       {/* нижняя полоса: СЧЁТЧИКИ + РЕАКЦИИ + (ПЕРЕНЕСЁННЫЕ) ДЕЙСТВИЯ — В ОДНУ СТРОКУ */}
