@@ -4431,7 +4431,23 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   opacity:.6;
   animation: qshine-rotate 9s linear infinite;
 }
- 
+ /* движущийся «солнечный зайчик» */
+ .qshine::after{
+   content:"";
+   position:absolute; inset:-30%; pointer-events:none; border-radius:inherit;
+   background:
+     linear-gradient(115deg,
+       rgba(255,255,255,0) 0%,
+       rgba(255, 240, 200, 0.01) 35%,
+       rgba(255, 220, 140, 0.03) 50%,
+       rgba(255, 240, 200, 0.04) 65%,
+       rgba(255,255,255,0) 100%);
+   transform: translateX(-60%) rotate(8deg);
+   mix-blend-mode: screen;
+   filter: blur(.4px);
+   animation: qshine-sweep 3.8s ease-in-out infinite;
+   opacity:.66;
+ }
 /* вариант: блик только на hover/focus — добавь класс .qshine-hover вместо .qshine */
 .qshine-hover::after{ opacity:0; transform: translateX(-70%) rotate(8deg); }
 .qshine-hover:hover::after,
@@ -6467,10 +6483,13 @@ const { t: tt } = useI18n();
 
   return (
     <div ref={ref} className="item qshine cursor-pointer" onClick={() => onOpen?.(t)} style={{ position: 'relative' }}>
+<div className="postBodyFrame">    
       <div className="flex flex-col gap-3">
         {/* верх: аватар → ник */}
         {(t.nickname || t.icon) && (
-  <div className="topicUserRow">
+
+<div className="topicUserRow">
+  
     <div className="avaMini">
       <AvatarEmoji
         userId={authorId}
@@ -6527,7 +6546,7 @@ const { t: tt } = useI18n();
   </div>
 )}
 
-
+</div>
           <div className="btn btnGhost btnXs" suppressHydrationWarning>
             <HydrateText value={human(t.ts)} />
           </div> 
@@ -6895,6 +6914,7 @@ const NO_THREAD_OPEN_SELECTOR =
       role="article"
       aria-label="Пост форума"
 >
+<div className="postBodyFrame"> 
       {/* OWNER kebab (⋮) в правом верхнем углу — не трогаем существующую разметку */}
       {isOwner && (
         <div className="ownerKebab" onClick={(e)=>{ e.stopPropagation(); }} style={{ position:'absolute', right:8, top:8 }}>
@@ -6954,6 +6974,7 @@ const NO_THREAD_OPEN_SELECTOR =
       >
         <HydrateText value={human(p.ts)} />
 
+      </div> 
       </div> 
       {/* изображения: естественные пропорции, без квадратного кропа */}
       {imgLines.length > 0 && (
