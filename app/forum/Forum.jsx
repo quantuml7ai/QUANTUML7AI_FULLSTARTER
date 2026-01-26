@@ -3137,8 +3137,8 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   gap: 10px;
 }
 .confirmPopText{
-  font-size: 13px;
-  color: rgba(234,244,255,.92);
+  font-size: 15px;
+  color: rgb(255, 0, 0);
   line-height: 1.25;
 }
 .confirmPopBtns{
@@ -3160,8 +3160,8 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 }
 .confirmPopBtn:hover{ filter: brightness(1.08); }
 .confirmPopBtn.ok{
-  border-color: rgba(120,255,170,.25);
-  background: rgba(90,255,140,.10);
+  border-color: rgb(43, 255, 0);
+  background: rgba(255, 0, 0, 0.29);
 }
 .confirmPopBtn.ok:hover{ filter: brightness(1.12) saturate(1.08); }
 .confirmPopBtn svg{ width: 18px; height: 18px; }
