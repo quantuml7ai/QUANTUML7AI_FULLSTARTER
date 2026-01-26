@@ -7148,12 +7148,12 @@ const NO_THREAD_OPEN_SELECTOR =
           fontSize: 'clamp(9px, 1.1vw, 13px)' // можно оставить как было
         }}
       >
-        <span className="tag" title={t?.('forum_views') || 'Просмотры'} suppressHydrationWarning>
+        <span className="btn btnGhost btnXs" title={t?.('forum_views') || 'Просмотры'} suppressHydrationWarning>
           🔎 <HydrateText value={views} />
         </span>
 
         <span
-          className="tag cursor-pointer"
+          className="btn btnGhost btnXs"
           title={t?.('forum_replies') || 'Ответы'}
           onClick={(e) => { e.stopPropagation(); onOpenThread?.(p); }}
           suppressHydrationWarning>
@@ -7184,7 +7184,7 @@ const NO_THREAD_OPEN_SELECTOR =
         {/* действия (пожаловаться, ответить, бан/разбан, удалить) — справа в той же строке */}
         <button
           type="button"
-          className="btn btnGhost btnXs"
+          className="tag"
           title={t?.('forum_report') || 'Пожаловаться'}
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); onReport?.(p); }}
         >⚠️</button>
