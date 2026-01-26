@@ -6915,7 +6915,16 @@ const NO_THREAD_OPEN_SELECTOR =
             {parentSnippet && <>: “{parentSnippet}”</>}
           </span>
         )} 
- 
+      {/* время создания + переключатель перевода — ниже контента */}
+      <div
+        className="btn btnGhost btnXs"
+        
+        suppressHydrationWarning
+        
+      >
+        <HydrateText value={human(p.ts)} />
+
+      </div> 
       {/* изображения: естественные пропорции, без квадратного кропа */}
       {imgLines.length > 0 && (
         <div className="postImages" style={{display:'grid', gap:8, marginTop:8}}>
@@ -7095,18 +7104,7 @@ const NO_THREAD_OPEN_SELECTOR =
           ))}
         </div>
       )}
-
-      {/* время создания + переключатель перевода — ниже контента */}
-      <div
-        className="btn btnGhost btnXs"
-        
-        suppressHydrationWarning
-        
-      >
-        <HydrateText value={human(p.ts)} />
-
-      </div>
-
+ 
       {/* тело поста — крупные эмодзи (VIP/MOZI) как картинка, иначе очищенный текст */}
       {(/^\[(VIP_EMOJI|MOZI):\/[^\]]+\]$/).test(p.text || '') ? (
         <div className="postBody emojiPostWrap">
