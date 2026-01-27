@@ -13796,11 +13796,7 @@ onClick={()=>{
  {/* ЕДИНАЯ ГОРИЗОНТАЛЬНАЯ ЛИНЕЙКА: ЛЕВО — ЦЕНТР — ПРАВО */}
   <div className="forumRowBar">
 
-    <div className="slot-left">
-
-
-
-
+    <div className="slot-left"> 
         <button
         type="button"
         className="iconBtn inboxBtn"
