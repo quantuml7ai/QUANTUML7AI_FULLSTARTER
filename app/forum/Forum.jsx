@@ -1620,6 +1620,7 @@ const Styles = () => (
   }
 /* reply badge (кликабельный) */
 .replyTagBtn{
+font-size: 12px;
   cursor: pointer;
   text-align: left;
   display: inline-flex;
@@ -1637,7 +1638,7 @@ const Styles = () => (
   font-size: 8px;
   line-height: 1.15;
   opacity: .75;
-  max-width: 100%;
+  max-width: 60%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
