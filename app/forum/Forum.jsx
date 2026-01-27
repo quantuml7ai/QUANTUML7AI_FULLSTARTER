@@ -12632,7 +12632,25 @@ function openVideoFeed() {
 function closeVideoFeed() {
   setVideoFeedOpen(false);
 }
+// [INBOX:OPEN_GLOBAL] — всегда открываем "полный" инбокс (как в списке тем),
+// даже если сейчас в видео-фиде или в ветке.
+// Логика: если уже на странице инбокса — закрыть, иначе: закрыть видео/ветку и открыть инбокс.
+const openInboxGlobal = React.useCallback(() => {
+  const alreadyOnInbox = !!inboxOpen && !sel && !threadRoot && !videoFeedOpen;
+  if (alreadyOnInbox) { setInboxOpen(false); return; }
 
+  try { if (videoFeedOpen) closeVideoFeed?.(); } catch {}
+  try { setReplyTo?.(null); } catch {}
+  try { setThreadRoot?.(null); } catch {}
+  try { setSel?.(null); } catch {}
+
+  setInboxOpen(true);
+
+  // мягко поднимаем к началу, чтобы страница инбокса была видна сразу
+  setTimeout(() => {
+    try { document.querySelector('[data-forum-topics-start="1"]')?.scrollIntoView?.({ block: 'start' }); } catch {}
+  }, 0);
+}, [inboxOpen, sel, threadRoot, videoFeedOpen]);
 // авто-обновление ленты, когда лента открыта и что-то меняется в снапшоте
 React.useEffect(() => {
   if (!videoFeedOpen) return;
@@ -13787,7 +13805,7 @@ onClick={()=>{
         type="button"
         className="iconBtn inboxBtn"
         title={t('forum_inbox') || 'Ответы мне'}
-        onClick={() => setInboxOpen(v => !v)}
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); openInboxGlobal(); }}
         aria-pressed={inboxOpen}
       >
         <svg viewBox="0 0 24 24" aria-hidden>
@@ -14053,7 +14071,10 @@ const openThreadHere = (clickP) => {
 
 ) : inboxOpen ? (
   <>
-    <div className="meta mt-1">{t('forum_inbox_title') || 'Ответы на ваши сообщения'}</div>
+    <div className="topicTitle text-[#eaf4ff]
+    !whitespace-normal break-words
+    [overflow-wrap:anywhere]
+    max-w-full">{t('forum_inbox_title') || 'Ответы на ваши сообщения'}</div>
     <div className="grid gap-2 mt-2" suppressHydrationWarning>
 {debugAdsSlots(
   'inbox',
@@ -14703,7 +14724,7 @@ onClick={()=>{
         type="button"
         className="iconBtn inboxBtn"
         title={t('forum_inbox') || 'Ответы мне'}
-        onClick={() => setInboxOpen(v => !v)}
+        onClick={openInboxGlobal}
         aria-pressed={inboxOpen}
       >
         <svg viewBox="0 0 24 24" aria-hidden>
@@ -14856,81 +14877,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
     <span className="whitespace-normal break-words [overflow-wrap:anywhere] [line-break:anywhere]">
       {threadRoot ? (t('forum_open_replies') || 'Ответы') : (sel?.title || '')}
     </span>
-  </div>
-
-{/* [INBOX:PANEL] — панель входящих ответов (та же логика, что и в списке тем) */}
-{inboxOpen && (
-  <div className="item mt-2">
-    <div className="title">
-      {t('forum_inbox_title') || 'Ответы на ваши сообщения'}
-    </div>
-
-    {sortedRepliesToMe.length === 0 ? (
-      <div className="inboxEmpty">
-        {t('forum_inbox_empty') || 'Пока нет ответов'}
-      </div>
-    ) : (
-      <div className="inboxList">
-        {visibleRepliesToMe.map(p => {
-          // та же логика, что в верхнем инбоксе
-          const tt = (data.topics || []).find(
-            x => String(x.id) === String(p.topicId),
-          );
-          if (!tt) return null;
-
-const parent = (data.posts || []).find(
-  x => String(x.id) === String(p.parentId),
-);
-const parentAuthor = parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : '';
-
-
-          return (
-            <PostCard
-              key={`inb:${p.id}`}
-              p={p}
-              parentPost={parent || null}
-              parentAuthor={parentAuthor}
-              parentText={parent ? (parent.text || parent.message || parent.body || '') : ''}
-              onReport={() => toast.ok(t('forum_report_ok'))}
-onOpenThread={(clickP) => {
-  // ✅ из любой карточки: открыть сразу ветку ответов по клику на счётчик
-  openThreadForPost(clickP || p, { closeInbox: true });
-}}
-
-  onReact={reactMut}
-  isAdmin={isAdmin}
-  onDeletePost={delPost}
-  onOwnerDelete={delPostOwn}  
-  onBanUser={banUser}
-  onUnbanUser={unbanUser}
-  isBanned={bannedSet.has(p.accountId || p.userId)}
-  authId={viewerId}
-  markView={markViewPost}
-  t={t}
-  viewerId={viewerId}
-  starredAuthors={starredAuthors}
-  onToggleStar={toggleAuthorStar}
-/>
-          );
-        })}
-        {repliesHasMore && (
-          <div className="loadMoreFooter">
-            <div className="loadMoreShimmer">
-              {t?.('loading') || 'Loading…'}
-            </div>
-            <LoadMoreSentinel
-              onVisible={() =>
-                setVisibleRepliesCount((c) =>
-                  Math.min(c + REPLIES_PAGE_SIZE, sortedRepliesToMe.length)
-                )
-              }
-            />
-          </div>
-        )}        
-      </div>
-    )}
-  </div>
-)} 
+  </div> 
       </div>
 
       <div
