@@ -4,7 +4,7 @@ import { requireUserId } from '../../forum/_utils.js'
 import {
   setUserNick,
   normNick,
-  setUserAbout,
+  getUserNick,
   setUserAvatar,
 } from '../../forum/_db.js'
 import { resolveCanonicalAccountId } from '../_identity.js'
@@ -36,20 +36,14 @@ if (!nick) {
 
 // аватар может приходить под разными именами
 const iconRaw = body?.icon || body?.avatar || ''
-const hasAbout =
-  Object.prototype.hasOwnProperty.call(body, 'about') ||
-  Object.prototype.hasOwnProperty.call(body, 'bio') ||
-  Object.prototype.hasOwnProperty.call(body, 'aboutMe')
-const aboutRaw = body?.about ?? body?.bio ?? body?.aboutMe
 
 // WHY: store profile on canonical accountId so all identities resolve to one source of truth.
 const saved = await setUserNick(accountId, nick) // бросит 'nick_taken' если занято
 const savedIcon = await setUserAvatar(accountId, iconRaw)
-const savedAbout = hasAbout ? await setUserAbout(accountId, aboutRaw) : undefined
 // WHY: profile updates must propagate to all devices immediately.
 try {
   const redis = Redis.fromEnv()
-  const payload = {
+  await redis.publish('forum:events', JSON.stringify({
     type: 'profile.updated',
     accountId,
     userId: accountId,
@@ -57,15 +51,11 @@ try {
     nick: saved,
     icon: savedIcon,
     avatar: savedIcon,
-  }
-  if (hasAbout) {
-    payload.about = savedAbout
-    payload.bio = savedAbout
-  }
-  await redis.publish('forum:events', JSON.stringify(payload))
+    ts: Date.now(),
+  }))
 } catch {}
 
-return NextResponse.json({ ok:true, nick: saved, icon: savedIcon, about: savedAbout, accountId })
+return NextResponse.json({ ok:true, nick: saved, icon: savedIcon, accountId })
 
   } catch (e) {
     const msg = String(e?.message || e)

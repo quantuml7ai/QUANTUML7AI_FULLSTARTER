@@ -281,7 +281,6 @@ const next = {
   ...cur,
   nickname: j.nickname || j.nick || cur.nickname || '',
   icon: j.icon || cur.icon || '',
-    about: (j.about ?? cur.about ?? ''),
   vipActive,
   vipUntil,
 }
@@ -3685,10 +3684,8 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   /* контейнер QCoin занимает всю правую часть и по высоте ровно аватар */
   flex:1 1 auto; min-width:0; width:100%;
   align-self:center;                      /* центр по колонке аватара */
-  height:auto;
+  height:var(--ava-size);
   display:flex; align-items:center; justify-content:flex-end; /* прижимаем контент вправо */
-  gap:12px;
-  flex-wrap:wrap;
   /* тонкая вертикальная подстройка от середины аватара (можно крутить инлайном) */
   --qcoin-y: 0px;
   transform: translateY(var(--qcoin-y));
@@ -3697,113 +3694,13 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 
 /* сам блок QCoin растягивается на всю доступную ширину,
    но не переносится и не вылазит */
-.qRowRightMain{
+.qRowRight > *{
   flex:1 1 auto; min-width:0; width:100%;
   display:inline-flex; align-items:center; justify-content:flex-end;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   text-align:right;
   font-size:clamp(12px, 2.8vw, 24px);     /* адаптивный размер шрифта */
   max-width:100%;
-}
-.aboutCard{
-  height:clamp(60px, 24vw, 165px);
-  flex:0 0 auto;
-  width:clamp(420px, 24vw, 320px);
-  background:linear-gradient(140deg, rgba(8,12,20,0.95), rgba(20,26,40,0.9));
-  border:1px solid rgba(120,160,255,0.25);
-  box-shadow: inset 0 0 18px rgba(90,140,255,0.12), 0 0 22px rgba(60,120,255,0.18);
-  border-radius:14px;
-  padding:10px 12px;
-  color:#d8e7ff;
-  cursor:pointer;
-  transition: box-shadow .2s ease, border-color .2s ease;
-}
-.aboutCard.isEditing{
-  border-color:rgba(160,200,255,0.55);
-  box-shadow: inset 0 0 22px rgba(120,170,255,0.22), 0 0 30px rgba(80,140,255,0.28);
-}
-.aboutCard.isDisabled{
-  opacity:.65;
-  cursor:default;
-}
-.aboutText{
-  font-size:13px;
-  line-height:1.3;
-  display:-webkit-box;
-  -webkit-line-clamp:2;
-  -webkit-box-orient:vertical;
-  overflow:hidden;
-  min-height:2.4em;
-  word-break:break-word;
-}
-.aboutText.isPlaceholder{
-  color:rgba(190,210,255,0.6);
-}
-.aboutTextarea{
-  width:100%;
-  min-height:60px;
-  resize:none;
-  background:transparent;
-  border:none;
-  outline:none;
-  color:#e8f1ff;
-  font-size:13px;
-  line-height:1.3;
-}
-.aboutActions{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-top:6px;
-  gap:8px;
-}
-.aboutCounter{
-  font-size:11px;
-  color:rgba(200,220,255,0.75);
-}
-.aboutButtons{
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-.aboutBtn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:30px;
-  height:30px;
-  border-radius:9px;
-  border:1px solid rgba(120,160,255,0.3);
-  background:rgba(18,24,36,0.75);
-  color:#d7e6ff;
-  transition: border-color .2s ease, box-shadow .2s ease, transform .1s ease;
-}
-.aboutBtn:hover:not(:disabled){
-  border-color:rgba(160,200,255,0.6);
-  box-shadow:0 0 14px rgba(90,150,255,0.25);
-}
-.aboutBtn:active:not(:disabled){
-  transform:scale(0.96);
-}
-.aboutBtn:disabled{
-  opacity:.45;
-  cursor:not-allowed;
-}
-
-@media (max-width: 820px){
-  .qRowRight{
-    justify-content:flex-start;
-
-  }
-  .qRowRightMain{
-    order:1;
-    justify-content:flex-start;
-  }
-  .aboutCard{
-    order:2;
-    height:clamp(40px, 15vw, 100px);
-    width:100%;
-  }
 }
 
 /* --- Поповер QCoin контейнер --- */
@@ -10130,15 +10027,11 @@ es.onmessage = (e) => {
       if (accountId) {
         try {
           writeProfileAlias(evt.userId, accountId)
-          const aboutPatch = (evt.about !== undefined || evt.bio !== undefined)
-            ? { about: evt.about ?? evt.bio }
-            : {}          
           mergeProfileCache(accountId, {
             nickname: evt.nickname || evt.nick,
             icon: evt.icon || evt.avatar,
             vipIcon: evt.vipIcon,
             updatedAt: evt.ts || Date.now(),
-            ...aboutPatch,       
           })
         } catch { /* no-op */ }
         setProfileBump((x) => x + 1)
@@ -12503,153 +12396,7 @@ const onFilesChosen = React.useCallback(async (e) => {
   const nickShown = resolveNickForDisplay(idShown, profile?.nickname)
   const iconShown = resolveIconForDisplay(idShown, profile?.icon)
   const copyId = async () => { try{ await navigator.clipboard.writeText(idShown) }catch{} }
-  const aboutSaved = String(profile?.about ?? '')
-  const [aboutEditing, setAboutEditing] = useState(false)
-  const [aboutDraft, setAboutDraft] = useState(aboutSaved)
-  const [aboutBusy, setAboutBusy] = useState(false)
-  const ABOUT_LIMIT = 200
 
-  useEffect(() => {
-    if (!aboutEditing) setAboutDraft(aboutSaved)
-  }, [aboutSaved, aboutEditing])
-
-  const enterAboutEdit = async () => {
-    if (!idShown) {
-      const ok = await (typeof requireAuthStrict === 'function' ? requireAuthStrict() : openAuth?.())
-      if (!ok) return
-    }
-    setAboutDraft(aboutSaved)
-    setAboutEditing(true)
-  }
-
-  const cancelAboutEdit = () => {
-    setAboutDraft(aboutSaved)
-    setAboutEditing(false)
-  }
-
-  const saveAbout = async () => {
-    if (aboutBusy) return
-    let uid = resolveProfileAccountId(auth?.asherId || auth?.accountId || '')
-    if (!uid) {
-      const ok = await (typeof requireAuthStrict === 'function' ? requireAuthStrict() : openAuth?.())
-      if (!ok) return
-      const fresh = readAuth()
-      uid = resolveProfileAccountId(fresh?.asherId || fresh?.accountId || '')
-      if (!uid) return
-    }
-
-    const aboutToSend = String(aboutDraft || '').slice(0, ABOUT_LIMIT)
-    const nickToSend = profile?.nickname || nickShown || ''
-    const iconToSend = profile?.icon || ''
-    if (!nickToSend) {
-      toast?.error?.(t('forum_need_auth') || 'Authorization required')
-      return
-    }
-
-    setAboutBusy(true)
-    try {
-      const r = await fetch('/api/profile/save-nick', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          nick: nickToSend,
-          icon: iconToSend,
-          about: aboutToSend,
-          accountId: uid,
-          asherId: uid,
-        }),
-      })
-      const j = await r.json().catch(() => null)
-      if (!r.ok || !j?.ok) {
-        toast?.error?.(t('forum_about_save_failed') || 'Failed to save')
-        return
-      }
-      const savedAbout = String(j.about ?? aboutToSend ?? '')
-      const savedAccountId = String(j.accountId || uid || '').trim()
-      writeProfileAlias(uid, savedAccountId)
-      mergeProfileCache(savedAccountId, { about: savedAbout, updatedAt: Date.now() })
-      setAboutDraft(savedAbout)
-      setAboutEditing(false)
-      toast?.success?.(t('forum_about_saved') || 'Saved')
-    } catch (e) {
-      toast?.error?.(t('forum_about_save_failed') || 'Failed to save')
-    } finally {
-      setAboutBusy(false)
-    }
-  }
-
-  const renderAboutCard = () => {
-    const aboutDraftTrimmed = String(aboutDraft || '').slice(0, ABOUT_LIMIT)
-    const canSave = !aboutBusy && aboutDraftTrimmed !== aboutSaved
-    return (
-      <div
-        className={cls('aboutCard', aboutEditing && 'isEditing', !idShown && 'isDisabled')}
-        role="button"
-        tabIndex={0}
-        onClick={() => { if (!aboutEditing) enterAboutEdit() }}
-        onKeyDown={(e) => {
-          if (aboutEditing) return
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            enterAboutEdit()
-          }
-        }}
-      >
-        {!aboutEditing ? (
-          <div className={cls('aboutText', !aboutSaved && 'isPlaceholder')}>
-            {aboutSaved || t('forum_about_placeholder')}
-          </div>
-        ) : (
-          <>
-            <textarea
-              className="aboutTextarea"
-              value={aboutDraft}
-              onChange={(e) => {
-                const next = String(e.target.value || '').slice(0, ABOUT_LIMIT)
-                setAboutDraft(next)
-              }}
-              rows={3}
-              maxLength={ABOUT_LIMIT}
-              placeholder={t('forum_about_placeholder')}
-            />
-            <div className="aboutActions">
-              <span
-                className="aboutCounter"
-                title={t('forum_about_limit') || 'Max. 200 characters'}
-              >
-                {aboutDraftTrimmed.length}/{ABOUT_LIMIT}
-              </span>
-              <div className="aboutButtons">
-                <button
-                  type="button"
-                  className="aboutBtn"
-                  onClick={(e) => { e.stopPropagation(); cancelAboutEdit() }}
-                  title={t('forum_about_reset') || 'Reset'}
-                  aria-label={t('forum_about_reset') || 'Reset'}
-                >
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-                    <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  className="aboutBtn"
-                  onClick={(e) => { e.stopPropagation(); if (canSave) saveAbout() }}
-                  title={t('forum_about_save') || 'Save'}
-                  aria-label={t('forum_about_save') || 'Save'}
-                  disabled={!canSave}
-                >
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-                    <path d="M5 12l4 4L19 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-    )
-  }
   const [profileOpen, setProfileOpen] = useState(false)
   const avatarRef = useRef(null)
 // === VIDEO FEED: состояние + хелперы =====================
@@ -13644,16 +13391,12 @@ function pickAdUrlForSlot(slotKey, slotKind) {
 
  <div className="min-w-0">
    <div
-     className="qRowRight qRowRight--withAbout"
+     className="qRowRight"
      style={{ '--qcoin-offset':'6px', '--qcoin-y': '10px', '--qcoin-scale':'1.15' }}  /* ← здесь настраиваешь */
    >
-     <div className="qRowRightMain">
-       <QCoinInline t={t} userKey={idShown} vipActive={vipActive} />
-     </div>
-
+     <QCoinInline t={t} userKey={idShown} vipActive={vipActive} />
    </div>
  </div> 
- {renderAboutCard()}
           {/* === НОВОЕ: правый встроенный контейнер управления === */}
           <div className="controls">
             {/* поиск + сорт */}
@@ -14565,16 +14308,13 @@ onOpenThread={(clickP) => {
 
  <div className="min-w-0">
    <div
-     className="qRowRight qRowRight--withAbout"
+     className="qRowRight"
      style={{ '--qcoin-offset':'6px', '--qcoin-y': '10px', '--qcoin-scale':'1.15' }}  /* ← здесь настраиваешь */
    >
-     <div className="qRowRightMain">
-       <QCoinInline t={t} userKey={idShown} vipActive={vipActive} />
-     </div>
-
+     <QCoinInline t={t} userKey={idShown} vipActive={vipActive} />
    </div>
  </div>
- {renderAboutCard()}
+ 
           {/* === НОВОЕ: правый встроенный контейнер управления === */}
           <div className="controls">
             {/* поиск + сорт */}
