@@ -6783,10 +6783,6 @@ forum_admin_pass: 'Enter the Admin password to gain access. ⚠️ WARNING ⚠�
   forum_profile_nickname_ph: 'How should we call you?',
   forum_profile_avatar: 'VIP+ Avatar',
   forum_avatar_vip: 'VIP+ avatars',
-  forum_about_placeholder: 'Tap to tell about yourself',
-  forum_about_save: 'Save',
-  forum_about_cancel: 'Cancel',
-  forum_about_limit: 'Limit',
 
   // VIP+
 forum_vip_only: 'VIP+ only',
@@ -6908,10 +6904,7 @@ forum_admin_pass: 'Для доступа введите Админ-пароль.
   forum_profile_nickname_ph: 'Как вас называть?',
   forum_profile_avatar: 'VIP+ Аватар',
   forum_avatar_vip: 'VIP+ аватары',
-  forum_about_placeholder: 'прикоснись, чтобы рассказать о себе',
-  forum_about_save: 'Сохранить',
-  forum_about_cancel: 'Отмена',
-  forum_about_limit: 'Лимит',
+
   // VIP+
 forum_vip_only: 'Только для VIP+',
 forum_vip_plus: 'VIP+',
@@ -7034,10 +7027,7 @@ forum_admin_pass: 'Для доступу введіть Адмін-пароль.
   forum_profile_nickname_ph: 'Як до вас звертатися?',
   forum_profile_avatar: 'VIP+ Аватар',
   forum_avatar_vip: 'VIP+ аватари',
-  forum_about_placeholder: 'торкнись, щоб розповісти про себе',
-  forum_about_save: 'Зберегти',
-  forum_about_cancel: 'Скасувати',
-  forum_about_limit: 'Ліміт',
+
   // VIP+
 forum_vip_only: 'Лише для VIP+',
 forum_vip_plus: 'VIP+',
@@ -7156,10 +7146,7 @@ forum_admin_pass: 'Ingrese la contraseña de administrador para acceder. ⚠️ 
   forum_profile_nickname_ph: '¿Cómo te llamamos?',
   forum_profile_avatar: 'VIP+ Avatar',
   forum_avatar_vip: 'Avatares VIP+',
-  forum_about_placeholder: 'toca para contar sobre ti',
-  forum_about_save: 'Guardar',
-  forum_about_cancel: 'Cancelar',
-  forum_about_limit: 'Límite',
+
   // VIP+
 forum_vip_only: 'Solo VIP+',
 forum_vip_plus: 'VIP+',
@@ -7279,10 +7266,7 @@ forum_admin_pass: '请输入管理员密码以获得访问权限。⚠️ 警告
   forum_profile_nickname_ph: '我们如何称呼你？',
   forum_profile_avatar: 'VIP+ 头像',
   forum_avatar_vip: 'VIP+ 头像',
-  forum_about_placeholder: '轻触以介绍自己',
-  forum_about_save: '保存',
-  forum_about_cancel: '取消',
-  forum_about_limit: '限制',
+
   // VIP+
 forum_vip_only: '仅限 VIP+',
 forum_vip_plus: 'VIP+',
@@ -7408,10 +7392,7 @@ forum_admin_pass: 'أدخل كلمة مرور المسؤول للوصول. ⚠�
   forum_profile_nickname_ph: 'بماذا نناديك؟',
   forum_profile_avatar: 'الصورة الرمزيةVIP+ ',
   forum_avatar_vip: 'صور VIP+',
-  forum_about_placeholder: 'المس لتخبرنا عنك',
-  forum_about_save: 'حفظ',
-  forum_about_cancel: 'إلغاء',
-  forum_about_limit: 'الحد',
+
   // VIP+
 forum_vip_only: 'خاص بـ VIP+',
 forum_vip_plus: 'VIP+',
@@ -7531,10 +7512,7 @@ forum_admin_pass: 'Erişim için yönetici şifresini girin. ⚠️ UYARI ⚠️
   forum_profile_nickname_ph: 'Sana nasıl hitap edelim?',
   forum_profile_avatar: 'VIP+ Avatar',
   forum_avatar_vip: 'VIP+ avatarlar',
-  forum_about_placeholder: 'kendin hakkında anlatmak için dokun',
-  forum_about_save: 'Kaydet',
-  forum_about_cancel: 'İptal',
-  forum_about_limit: 'Sınır',
+
   // VIP+
 forum_vip_only: 'Sadece VIP+',
 forum_vip_plus: 'VIP+',

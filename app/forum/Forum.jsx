@@ -281,7 +281,6 @@ const next = {
   ...cur,
   nickname: j.nickname || j.nick || cur.nickname || '',
   icon: j.icon || cur.icon || '',
-  about: j.about || cur.about || '', 
   vipActive,
   vipUntil,
 }
@@ -2206,137 +2205,7 @@ font-size: 12px;
   flex: 1 1 auto;
   min-width: 0;                 /* ← можно ужиматься */
   max-width: 100%;
-  order: 3;
-}
-
-.aboutWrap{
-
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  flex:1 1 260px;
-  min-width: 180px; 
   order: 2;
-    align-self: stretch;
-}
-.aboutArea{
-  position:relative;
-  display:flex;
-  flex-direction:column;
-  justify-content:flex-end;
-  width:100%;
-  min-height:66px;
-  padding:6px 0 0;
-  background:transparent;
-  border:none;
-  text-align:left;
-  cursor:pointer;
-}
-.aboutArea:focus-visible{
-  outline:none;
-  box-shadow:0 0 0 2px rgba(80,167,255,.25);
-  border-radius:10px;
-}
-.aboutArea.aboutEditing{
-  cursor:default;
-}
-.aboutText{
-  font-size:14px;
-  line-height:1.25;
-  max-width:100%;
-  display:-webkit-box;
-  -webkit-line-clamp:2;
-  -webkit-box-orient:vertical;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  margin-bottom:6px;
-}
-.aboutPlaceholder{
-  color:rgba(234,244,255,.55);
-}
-.aboutRail{
-  position:relative;
-  height:2px;
-  width:100%;
-  background:linear-gradient(90deg, rgba(80,167,255,.55), rgba(155,91,255,.35));
-  box-shadow:0 0 12px rgba(80,167,255,.35);
-}
-.aboutPencil{
-  position:absolute;
-  right:0;
-  top:-450%;
-  transform:translateY(-50%);
-  color:rgba(234,244,255,.85);
-}
-.aboutTextarea{
-  width:100%;
-  min-height:52px;
-  resize:none;
-  background:transparent;
-  border:none;
-  outline:none;
-  color:#eaf4ff;
-  font-size:14px;
-  line-height:1.25;
-  padding:0 0 6px 0;
-}
-.aboutActions{
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
-  gap:8px;
-}
-.aboutCount{
-  font-size:12px;
-  opacity:.7;
-  margin-right:auto;
-}
-.aboutActionBtn{
-  width:32px;
-  height:32px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(10,16,28,.25);
-  display:grid;
-  place-items:center;
-  color:#eaf4ff;
-  cursor:pointer;
-}
-.aboutActionBtn:disabled{
-  opacity:.5;
-  cursor:not-allowed;
-}
-
-.aboutGradientText{
-  background:linear-gradient(
-    120deg,
-    #00eaff,
-    #6a5cff,
-    #b84bff,
-    #ff4fd8,
-    #ffd36a,
-    #00eaff
-  );
-  background-size:300% 300%;
-  animation:aboutGradientFlow 8s ease-in-out infinite;
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
-}
-@keyframes aboutGradientFlow{
-  0%{ background-position:0% 50%; }
-  50%{ background-position:100% 50%; }
-  100%{ background-position:0% 50%; }
-}
-@media (prefers-reduced-motion: reduce){
-  .aboutGradientText{ animation:none; }
-}
-
-@media (max-width:720px){
-  .aboutWrap{
-    flex-basis:100%;
-    min-width:100%;
-  }
 }
 
 /* Поиск встроен в .controls и сжимается по ширине на узких экранах */
@@ -10089,14 +9958,11 @@ useEffect(() => {
                   writeProfileAlias(rawId, accountId)
                 })
                 Object.entries(pm.map).forEach(([accountId, profile]) => {
-                  const patch = {
+                  mergeProfileCache(accountId, {
                     nickname: profile?.nickname || '',
                     icon: profile?.icon || '',
-                    about: profile?.about || '',                    
                     updatedAt: Date.now(),
-          }
-          if (evt.about !== undefined) patch.about = evt.about
-          mergeProfileCache(accountId, patch)
+                  })
                 })
                 setProfileBump((x) => x + 1)
               } catch {}
@@ -12530,82 +12396,6 @@ const onFilesChosen = React.useCallback(async (e) => {
   const nickShown = resolveNickForDisplay(idShown, profile?.nickname)
   const iconShown = resolveIconForDisplay(idShown, profile?.icon)
   const copyId = async () => { try{ await navigator.clipboard.writeText(idShown) }catch{} }
-  const aboutLimit = 200
-  const [aboutSaved, setAboutSaved] = useState(() => String(profile?.about || ''))
-  const [aboutDraft, setAboutDraft] = useState(() => String(profile?.about || ''))
-  const [aboutEditing, setAboutEditing] = useState(false)
-  const [aboutBusy, setAboutBusy] = useState(false)
-  const aboutTextareaRef = useRef(null)
-
-  useEffect(() => {
-    const next = String(profile?.about || '')
-    setAboutSaved(next)
-    if (!aboutEditing) setAboutDraft(next)
-  }, [idShown, profile?.about, aboutEditing])
-
-  useEffect(() => {
-    if (aboutEditing) {
-      requestAnimationFrame(() => aboutTextareaRef.current?.focus?.())
-    }
-  }, [aboutEditing])
-
-  const aboutVisible = !!idShown
-  const aboutChanged = aboutDraft !== aboutSaved
-  const canSaveAbout = aboutChanged && !aboutBusy
-
-  const startAboutEdit = () => {
-    if (!aboutVisible || aboutBusy) return
-    setAboutEditing(true)
-  }
-
-  const cancelAboutEdit = () => {
-    setAboutDraft(aboutSaved)
-    setAboutEditing(false)
-  }
-
-  const saveAbout = async () => {
-    if (!aboutVisible || aboutBusy) return
-    const nextAbout = String(aboutDraft || '').slice(0, aboutLimit)
-    if (nextAbout === aboutSaved) {
-      setAboutEditing(false)
-      return
-    }
-    const payloadNick = profile?.nickname || nickShown || ''
-    if (!payloadNick) return
-
-    setAboutBusy(true)
-    try {
-      const r = await fetch('/api/profile/save-nick', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          nick: payloadNick,
-          icon: profile?.icon || '',
-          about: nextAbout,
-          accountId: idShown,
-          asherId: idShown,
-        }),
-      })
-
-      const j = await r.json().catch(() => null)
-      if (!r.ok || !j?.ok) return
-
-      const savedAbout = String(j.about ?? nextAbout)
-      const savedAccountId = String(j.accountId || idShown || '').trim()
-      writeProfileAlias(idShown, savedAccountId)
-      mergeProfileCache(savedAccountId, {
-        nickname: j.nick || payloadNick,
-        icon: j.icon || profile?.icon || '',
-        about: savedAbout,
-        updatedAt: Date.now(),
-      })
-      setAboutSaved(savedAbout)
-      setAboutDraft(savedAbout)
-      setAboutEditing(false)
-    } finally {
-      setAboutBusy(false)
-    }
-  }
 
   const [profileOpen, setProfileOpen] = useState(false)
   const avatarRef = useRef(null)
@@ -13607,82 +13397,6 @@ function pickAdUrlForSlot(slotKey, slotKind) {
      <QCoinInline t={t} userKey={idShown} vipActive={vipActive} />
    </div>
  </div> 
-  {aboutVisible && (
-   <div className="aboutWrap">
-     {!aboutEditing ? (
-       <button
-         type="button"
-         className="aboutArea"
-         onClick={startAboutEdit}
-         aria-label={t('forum_about_placeholder')}
-       >
-         <div className={cls('aboutText', aboutSaved ? 'aboutGradientText' : 'aboutPlaceholder')}>
-           {aboutSaved || t('forum_about_placeholder')}
-         </div>
-         <div className="aboutRail">
-           <span className="aboutPencil" aria-hidden="true">
-             <svg viewBox="0 0 24 24" width="14" height="14" fill="none">
-               <path d="M12 20h9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-               <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5z"
-                 stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
-             </svg>
-           </span>
-         </div>
-       </button>
-     ) : (
-       <div className="aboutArea aboutEditing">
-         <textarea
-           ref={aboutTextareaRef}
-           className="aboutTextarea"
-           value={aboutDraft}
-           onChange={(e) => setAboutDraft(String(e.target.value || '').slice(0, aboutLimit))}
-           maxLength={aboutLimit}
-           rows={2}
-         />
-         <div className="aboutRail">
-           <span className="aboutPencil" aria-hidden="true">
-             <svg viewBox="0 0 24 24" width="14" height="14" fill="none">
-               <path d="M12 20h9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-               <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5z"
-                 stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
-             </svg>
-           </span>
-         </div>
-       </div>
-     )}
-     {aboutEditing && (
-       <div className="aboutActions">
-         <span
-           className="aboutCount"
-           title={`${t('forum_about_limit')} ${aboutLimit}`}
-         >
-           {aboutDraft.length} / {aboutLimit}
-         </span>
-         <button
-           type="button"
-           className="aboutActionBtn"
-           onClick={cancelAboutEdit}
-           title={t('forum_about_cancel')}
-         >
-           <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-             <path d="M6 6l12 12M18 6l-12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-           </svg>
-         </button>
-         <button
-           type="button"
-           className="aboutActionBtn"
-           onClick={saveAbout}
-           disabled={!canSaveAbout}
-           title={t('forum_about_save')}
-         >
-           <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-             <path d="M5 12l4 4L19 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-           </svg>
-         </button>
-       </div>
-     )}
-   </div>
- )}
           {/* === НОВОЕ: правый встроенный контейнер управления === */}
           <div className="controls">
             {/* поиск + сорт */}
@@ -14600,82 +14314,7 @@ onOpenThread={(clickP) => {
      <QCoinInline t={t} userKey={idShown} vipActive={vipActive} />
    </div>
  </div>
-  {aboutVisible && (
-   <div className="aboutWrap">
-     {!aboutEditing ? (
-       <button
-         type="button"
-         className="aboutArea"
-         onClick={startAboutEdit}
-         aria-label={t('forum_about_placeholder')}
-       >
-         <div className={cls('aboutText', aboutSaved ? 'aboutGradientText' : 'aboutPlaceholder')}>
-           {aboutSaved || t('forum_about_placeholder')}
-         </div>
-         <div className="aboutRail">
-           <span className="aboutPencil" aria-hidden="true">
-             <svg viewBox="0 0 24 24" width="14" height="14" fill="none">
-               <path d="M12 20h9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-               <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5z"
-                 stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
-             </svg>
-           </span>
-         </div>
-       </button>
-     ) : (
-       <div className="aboutArea aboutEditing">
-         <textarea
-           ref={aboutTextareaRef}
-           className="aboutTextarea"
-           value={aboutDraft}
-           onChange={(e) => setAboutDraft(String(e.target.value || '').slice(0, aboutLimit))}
-           maxLength={aboutLimit}
-           rows={2}
-         />
-         <div className="aboutRail">
-           <span className="aboutPencil" aria-hidden="true">
-             <svg viewBox="0 0 24 24" width="14" height="14" fill="none">
-               <path d="M12 20h9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-               <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5z"
-                 stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
-             </svg>
-           </span>
-         </div>
-       </div>
-     )}
-     {aboutEditing && (
-       <div className="aboutActions">
-         <span
-           className="aboutCount"
-           title={`${t('forum_about_limit')} ${aboutLimit}`}
-         >
-           {aboutDraft.length} / {aboutLimit}
-         </span>
-         <button
-           type="button"
-           className="aboutActionBtn"
-           onClick={cancelAboutEdit}
-           title={t('forum_about_cancel')}
-         >
-           <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-             <path d="M6 6l12 12M18 6l-12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-           </svg>
-         </button>
-         <button
-           type="button"
-           className="aboutActionBtn"
-           onClick={saveAbout}
-           disabled={!canSaveAbout}
-           title={t('forum_about_save')}
-         >
-           <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-             <path d="M5 12l4 4L19 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-           </svg>
-         </button>
-       </div>
-     )}
-   </div>
- )}
+ 
           {/* === НОВОЕ: правый встроенный контейнер управления === */}
           <div className="controls">
             {/* поиск + сорт */}
