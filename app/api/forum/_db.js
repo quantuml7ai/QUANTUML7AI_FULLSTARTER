@@ -664,11 +664,12 @@ export async function getUserProfile(userId) {
   const [nick, avatar, about] = await Promise.all([
     getUserNick(userId),
     getUserAvatar(userId),
+    getUserAbout(userId),
   ])
   return {
     nickname: str(nick || ''),
     icon: str(avatar || ''),
-        about: str(about || ''),
+    about: str(about || ''),
   }
 }
 
