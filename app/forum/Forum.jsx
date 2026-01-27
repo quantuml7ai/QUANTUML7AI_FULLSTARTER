@@ -1622,7 +1622,7 @@ const Styles = () => (
 .replyTagBtn{
 font-size: 12px;
   cursor: pointer;
-  text-align: left;
+  text-align: center;
   display: inline-flex;
   flex-direction: column;
   align-items: flex-start;
@@ -1637,9 +1637,9 @@ font-size: 12px;
   display:block;
   font-size: 8px;
   line-height: 1.15;
-  opacity: .75;
-  max-width: 60%;
-  white-space: nowrap;
+  opacity: .65;
+  max-width: 100%;
+  white-space: wrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
