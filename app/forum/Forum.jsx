@@ -9704,7 +9704,6 @@ const syncInFlightRef = useRef(false);
 const sseHintRef = useRef(0);
 const pendingViewsPostsRef = useRef(new Set());
 const pendingViewsTopicsRef = useRef(new Set());
-const viewFlushTimerRef = useRef(null);
 const busyRef=useRef(false)
 const compactOps = (ops) => {
   const out = [];
@@ -9976,46 +9975,8 @@ const flushMutations = useCallback(async () => {
     busyRef.current = false;
   }
 }, [persistSnap, persistTombstones]);
-
-// =========================================================
-// FAST UX: flush queue almost immediately after enqueue
-// - messages/reactions/deletes go to DB quickly
-// - still keeps offline-queue behavior (localStorage) intact
-// =========================================================
-const flushDebounceRef = React.useRef(null);
-React.useEffect(() => {
-  if (!isBrowser()) return;
-  if (!queue || !queue.length) return;
-  if (busyRef.current) return;
-
-  // debounce: allow batching multiple quick ops into one /mutate
-  if (flushDebounceRef.current) return;
-  flushDebounceRef.current = setTimeout(() => {
-    flushDebounceRef.current = null;
-    flushMutations();
-  }, 80);
-
-  return () => {
-    if (flushDebounceRef.current) {
-      clearTimeout(flushDebounceRef.current);
-      flushDebounceRef.current = null;
-    }
-  };
-}, [queue, flushMutations]);
-
-// views are collected in refs (not in queue state) → flush them too (debounced)
-const scheduleViewFlush = React.useCallback(() => {
-  if (!isBrowser()) return;
-  if (viewFlushTimerRef.current) return;
-  viewFlushTimerRef.current = setTimeout(() => {
-    viewFlushTimerRef.current = null;
-    flushMutations();
-  }, 450);
-}, [flushMutations]);
-
 // === QCOIN: автопинг активности (CLIENT) ===
 const activeRef  = React.useRef(false);
-
 const visibleRef = React.useRef(true);
 
 // отмечаем ручную активность в пределах форума
@@ -10207,7 +10168,7 @@ React.useEffect(()=>{
 useEffect(() => {
   if (!isBrowser()) return;
   let stop = false;
-  const TICK_MS = 30_000;
+  const TICK_MS = 60_000;
   const FULL_EVERY_MS = 10 * 60 * 1000;
 
   const runTick = async () => {
@@ -12356,9 +12317,7 @@ if(!localStorage.getItem(key)){
       },
     };
   });
-  scheduleViewFlush();
 }
-
 
 }
 // === Views by focus (>=60% visible) for ANY post card + prefetch videos around ===
@@ -12498,23 +12457,21 @@ const markViewTopic = (topicId) => {
   const key = `topic:${topicId}:viewed:${uid}:${bucket}`
 
   try {
-if(!localStorage.getItem(key)){
-  localStorage.setItem(key,'1')
-  pendingViewsTopicsRef.current.add(String(topicId));
-  setOverlay(prev => {
-    const cur = (data?.topics || []).find(t => String(t.id) === String(topicId));
-    const base = Number(prev.views.topics[String(topicId)] ?? cur?.views ?? 0);
-    return {
-      ...prev,
-      views: {
-        ...prev.views,
-        topics: { ...prev.views.topics, [String(topicId)]: base + 1 },
-      },
-    };
-  });
-  scheduleViewFlush();
-}
-
+    if(!localStorage.getItem(key)){
+      localStorage.setItem(key,'1')
+      pendingViewsTopicsRef.current.add(String(topicId));
+      setOverlay(prev => {
+        const cur = (data?.topics || []).find(t => String(t.id) === String(topicId));
+        const base = Number(prev.views.topics[String(topicId)] ?? cur?.views ?? 0);
+        return {
+          ...prev,
+          views: {
+            ...prev.views,
+            topics: { ...prev.views.topics, [String(topicId)]: base + 1 },
+          },
+        };
+      });
+    }
   } catch {}
 }
  // keep refs in sync so effects can call them safely
