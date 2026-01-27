@@ -7401,9 +7401,137 @@ const NO_THREAD_OPEN_SELECTOR =
     </article>
   );
 }
-function LoadMoreSentinel({ onVisible, disabled = false, rootMargin = '200px 0px' }) {
+function updateHeightMap(heightMapRef, key, el) {
+  if (!el) return;
+  if (!heightMapRef?.current) return;
+  if (key == null) return;
+  const rect = el.getBoundingClientRect?.();
+  const h = rect?.height || el.offsetHeight || 0;
+  heightMapRef.current.set(String(key), h);
+}
+
+function calcTrimDeltaPx(keys, heightMap) {
+  if (!Array.isArray(keys)) return 0;
+  if (!heightMap) return 0;
+  let total = 0;
+  keys.forEach((k) => {
+    const h = heightMap.get(String(k));
+    if (h) total += Number(h) || 0;
+  });
+  return total;
+}
+
+function trimTopIfNeeded(windowing) {
+  if (!windowing?.enabled) return;
+  const itemsRef = windowing.itemsRef;
+  const setItems = windowing.setItems;
+  const keep = Number(windowing.keep || 0);
+  const step = Number(windowing.step || 0);
+  const getKey = windowing.getKey;
+  const heightMapRef = windowing.heightMapRef;
+  const bodyRef = windowing.bodyRef;
+
+  if (!itemsRef?.current) return;
+  if (typeof setItems !== 'function') return;
+  if (!keep || !step || typeof getKey !== 'function') return;
+
+  const items = itemsRef.current;
+  if (!Array.isArray(items)) return;
+  if (items.length <= keep) return;
+
+  const trimCount = Math.min(step, items.length - keep);
+  if (trimCount <= 0) return;
+
+  const keysToRemove = items
+    .slice(0, trimCount)
+    .map((item) => getKey(item))
+    .filter((k) => k != null);
+
+  const heightMap = heightMapRef?.current;
+  const deltaPx = heightMap ? calcTrimDeltaPx(keysToRemove, heightMap) : 0;
+  const bodyEl = bodyRef?.current;
+  const prevScrollTop = bodyEl ? bodyEl.scrollTop || 0 : 0;
+
+  setItems((prev) => {
+    if (!Array.isArray(prev)) return prev;
+    const next = prev.slice(trimCount);
+    if (itemsRef) itemsRef.current = next;
+    return next;
+  });
+
+  if (heightMap) {
+    keysToRemove.forEach((k) => heightMap.delete(String(k)));
+  }
+
+  if (bodyEl && typeof window !== 'undefined') {
+    requestAnimationFrame(() => {
+      try {
+        bodyEl.scrollTop = Math.max(0, (prevScrollTop || 0) - (deltaPx || 0));
+      } catch {}
+    });
+  }
+}
+
+function resetWindowingState({
+  items,
+  setItems,
+  itemsRef,
+  loadedCountRef,
+  setLoadedCount,
+  heightMapRef,
+  bodyRef,
+}) {
+  const initial = Array.isArray(items) ? items : [];
+  if (typeof setItems === 'function') setItems(initial);
+  if (itemsRef) itemsRef.current = initial;
+  if (loadedCountRef) loadedCountRef.current = initial.length;
+  if (typeof setLoadedCount === 'function') setLoadedCount(initial.length);
+  if (heightMapRef?.current) heightMapRef.current.clear();
+  const bodyEl = bodyRef?.current;
+  if (bodyEl && typeof window !== 'undefined') {
+    requestAnimationFrame(() => {
+      try { bodyEl.scrollTop = 0; } catch {}
+    });
+  }
+}
+
+function appendWindowItems({
+  source,
+  itemsRef,
+  setItems,
+  step,
+  loadedCountRef,
+  setLoadedCount,
+}) {
+  if (!Array.isArray(source)) return;
+  if (!itemsRef) return;
+  if (typeof setItems !== 'function') return;
+  const start = loadedCountRef?.current || itemsRef.current?.length || 0;
+  if (start >= source.length) return;
+  const nextItems = source.slice(start, start + step);
+  if (!nextItems.length) return;
+  setItems((prev) => {
+    const base = Array.isArray(prev) ? prev : [];
+    const merged = base.concat(nextItems);
+    if (itemsRef) itemsRef.current = merged;
+    return merged;
+  });
+  const nextCount = start + nextItems.length;
+  if (loadedCountRef) loadedCountRef.current = nextCount;
+  if (typeof setLoadedCount === 'function') setLoadedCount(nextCount);
+}
+
+function LoadMoreSentinel({
+  onVisible,
+  disabled = false,
+  rootMargin = '200px 0px',
+  rootEl = null,
+  windowing,
+}) {
   const ref = React.useRef(null);
   const handlerRef = React.useRef(onVisible);
+  const inFlightRef = React.useRef(false);
+  const windowingRef = React.useRef(windowing);
 
   React.useEffect(() => {
     handlerRef.current = onVisible;
@@ -7414,24 +7542,39 @@ function LoadMoreSentinel({ onVisible, disabled = false, rootMargin = '200px 0px
     if (typeof window === 'undefined') return;
     const el = ref.current;
     if (!el) return;
+    const root = rootEl || null;
 
+    const runHandler = () => {
+      if (inFlightRef.current) return;
+      const handler = handlerRef.current;
+      if (typeof handler !== 'function') return;
+      inFlightRef.current = true;
+      Promise.resolve(handler())
+        .catch(() => {})
+        .finally(() => {
+          inFlightRef.current = false;
+          trimTopIfNeeded(windowingRef.current);
+        });
+    };
     if (!('IntersectionObserver' in window)) {
-      handlerRef.current?.();
+      runHandler();
       return;
     }
 
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) handlerRef.current?.();
+          if (!entry.isIntersecting) return;
+          if (disabled) return;
+          runHandler();
         });
       },
-      { root: null, rootMargin, threshold: 0 }
+      { root, rootMargin, threshold: 0 }
     );
 
     io.observe(el);
     return () => io.disconnect();
-  }, [disabled, rootMargin]);
+  }, [disabled, rootEl, rootMargin]);
 
   return <div ref={ref} className="loadMoreSentinel" aria-hidden="true" />;
 }
@@ -10408,17 +10551,39 @@ const VIDEO_PAGE_SIZE = 5;
 const TOPIC_PAGE_SIZE = 10;
 const REPLIES_PAGE_SIZE = 5;
 const THREAD_PAGE_SIZE = 5;
-const [visibleVideoCount, setVisibleVideoCount] = useState(VIDEO_PAGE_SIZE);
-const [visibleTopicsCount, setVisibleTopicsCount] = useState(TOPIC_PAGE_SIZE);
-const [visibleRepliesCount, setVisibleRepliesCount] = useState(REPLIES_PAGE_SIZE);
-const [visibleThreadPostsCount, setVisibleThreadPostsCount] = useState(THREAD_PAGE_SIZE);
+const WINDOW_KEEP = 10;
+const [visibleVideoFeed, setVisibleVideoFeed] = useState([]);
+const [visibleTopics, setVisibleTopics] = useState([]);
+const [visibleRepliesToMe, setVisibleRepliesToMe] = useState([]);
+const [visibleFlat, setVisibleFlat] = useState([]);
+const [videoLoadedCount, setVideoLoadedCount] = useState(0);
+const [topicsLoadedCount, setTopicsLoadedCount] = useState(0);
+const [repliesLoadedCount, setRepliesLoadedCount] = useState(0);
+const [threadLoadedCount, setThreadLoadedCount] = useState(0);
+const videoItemsRef = useRef([]);
+const topicsItemsRef = useRef([]);
+const repliesItemsRef = useRef([]);
+const threadItemsRef = useRef([]);
+const videoHeightMapRef = useRef(new Map());
+const topicsHeightMapRef = useRef(new Map());
+const repliesHeightMapRef = useRef(new Map());
+const threadHeightMapRef = useRef(new Map());
+const videoLoadedCountRef = useRef(0);
+const topicsLoadedCountRef = useRef(0);
+const repliesLoadedCountRef = useRef(0);
+const threadLoadedCountRef = useRef(0);
 // [INBOX:STATE] — безопасно для SSR (никакого localStorage в рендере)
 const [inboxOpen, setInboxOpen] = useState(false);
 const [mounted, setMounted] = useState(false);           // ← флаг «мы на клиенте»
 useEffect(()=>{ setMounted(true) }, []);
-useEffect(() => {
-  setVisibleTopicsCount(TOPIC_PAGE_SIZE);
-}, [topicSort, topicFilterId, starMode, starredAuthors]);
+useEffect(() => { videoItemsRef.current = visibleVideoFeed; }, [visibleVideoFeed]);
+useEffect(() => { topicsItemsRef.current = visibleTopics; }, [visibleTopics]);
+useEffect(() => { repliesItemsRef.current = visibleRepliesToMe; }, [visibleRepliesToMe]);
+useEffect(() => { threadItemsRef.current = visibleFlat; }, [visibleFlat]);
+useEffect(() => { videoLoadedCountRef.current = videoLoadedCount; }, [videoLoadedCount]);
+useEffect(() => { topicsLoadedCountRef.current = topicsLoadedCount; }, [topicsLoadedCount]);
+useEffect(() => { repliesLoadedCountRef.current = repliesLoadedCount; }, [repliesLoadedCount]);
+useEffect(() => { threadLoadedCountRef.current = threadLoadedCount; }, [threadLoadedCount]);
 const meId = auth?.asherId || auth?.accountId || '';
 const seenKey = meId ? `forum:seenReplies:${meId}` : null;
 
@@ -10441,19 +10606,35 @@ const repliesToMe = useMemo(() => {
     String(p.userId || p.accountId || '') !== String(meId)
   );
 }, [data.posts, myPostIds, meId]);
-useEffect(() => {
-  if (!inboxOpen) return;
-  setVisibleRepliesCount(REPLIES_PAGE_SIZE);
-}, [inboxOpen, repliesToMe.length]);
+
 const sortedRepliesToMe = useMemo(
   () => (repliesToMe || []).slice().sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0)),
   [repliesToMe]
 );
-const visibleRepliesToMe = useMemo(
-  () => sortedRepliesToMe.slice(0, visibleRepliesCount),
-  [sortedRepliesToMe, visibleRepliesCount]
-);
-const repliesHasMore = visibleRepliesToMe.length < sortedRepliesToMe.length;
+useEffect(() => {
+  if (!inboxOpen) return;
+  const initial = sortedRepliesToMe.slice(0, WINDOW_KEEP);
+  resetWindowingState({
+    items: initial,
+    setItems: setVisibleRepliesToMe,
+    itemsRef: repliesItemsRef,
+    loadedCountRef: repliesLoadedCountRef,
+    setLoadedCount: setRepliesLoadedCount,
+    heightMapRef: repliesHeightMapRef,
+    bodyRef,
+  });
+}, [inboxOpen, sortedRepliesToMe]);
+const repliesHasMore = repliesLoadedCount < sortedRepliesToMe.length;
+function loadMoreRepliesWindow() {
+  appendWindowItems({
+    source: sortedRepliesToMe,
+    itemsRef: repliesItemsRef,
+    setItems: setVisibleRepliesToMe,
+    step: REPLIES_PAGE_SIZE,
+    loadedCountRef: repliesLoadedCountRef,
+    setLoadedCount: setRepliesLoadedCount,
+  });
+}
 // прочитанные — храним в state, загружаем/сохраняем только на клиенте
 const [readSet, setReadSet] = useState(() => new Set());
 useEffect(() => {
@@ -10573,9 +10754,7 @@ useEffect(() => {
     } catch {}
   }, 120);
 }, [sel?.id, threadRoot]);
-useEffect(() => {
-  setVisibleThreadPostsCount(THREAD_PAGE_SIZE);
-}, [sel?.id, threadRoot, postSort]);
+
  // === Views: refs to avoid TDZ when effects run before callbacks are initialized ===
 
  const markViewPostRef  = React.useRef(null);
@@ -10658,11 +10837,29 @@ const walk = (n, level = 0) => {
 }, [sel?.id, threadRoot, rootPosts, idMap, postSort]);
 
 // === END flat ===
-const visibleFlat = useMemo(
-  () => (flat || []).slice(0, visibleThreadPostsCount),
-  [flat, visibleThreadPostsCount]
-);
-const threadHasMore = visibleFlat.length < (flat || []).length;
+useEffect(() => {
+  const initial = (flat || []).slice(0, WINDOW_KEEP);
+  resetWindowingState({
+    items: initial,
+    setItems: setVisibleFlat,
+    itemsRef: threadItemsRef,
+    loadedCountRef: threadLoadedCountRef,
+    setLoadedCount: setThreadLoadedCount,
+    heightMapRef: threadHeightMapRef,
+    bodyRef,
+  });
+}, [sel?.id, threadRoot, postSort, flat]);
+const threadHasMore = threadLoadedCount < (flat || []).length;
+function loadMoreThreadWindow() {
+  appendWindowItems({
+    source: flat || [],
+    itemsRef: threadItemsRef,
+    setItems: setVisibleFlat,
+    step: THREAD_PAGE_SIZE,
+    loadedCountRef: threadLoadedCountRef,
+    setLoadedCount: setThreadLoadedCount,
+  });
+}
     // Множество забаненных (по userId/accountId)
   const bannedSet = useMemo(() => new Set(data.bans || []), [data.bans])
 
@@ -10741,11 +10938,29 @@ const aggregates = useMemo(() => {
     return starredFirst(base, (x) => x?.userId || x?.accountId);
   }, [data.topics, aggregates, topicSort, topicFilterId, starredFirst]);
 
-  const visibleTopics = useMemo(
-    () => (sortedTopics || []).slice(0, visibleTopicsCount),
-    [sortedTopics, visibleTopicsCount]
-  );
-  const topicsHasMore = visibleTopics.length < (sortedTopics || []).length;
+  useEffect(() => {
+    const initial = (sortedTopics || []).slice(0, WINDOW_KEEP);
+    resetWindowingState({
+      items: initial,
+      setItems: setVisibleTopics,
+      itemsRef: topicsItemsRef,
+      loadedCountRef: topicsLoadedCountRef,
+      setLoadedCount: setTopicsLoadedCount,
+      heightMapRef: topicsHeightMapRef,
+      bodyRef,
+    });
+  }, [sortedTopics, topicSort, topicFilterId, starMode, starredAuthors]);
+  const topicsHasMore = topicsLoadedCount < (sortedTopics || []).length;
+  function loadMoreTopicsWindow() {
+    appendWindowItems({
+      source: sortedTopics || [],
+      itemsRef: topicsItemsRef,
+      setItems: setVisibleTopics,
+      step: TOPIC_PAGE_SIZE,
+      loadedCountRef: topicsLoadedCountRef,
+      setLoadedCount: setTopicsLoadedCount,
+    });
+  }
 
   /* ---- composer ---- */
   const [text,setText] = useState('')
@@ -12405,13 +12620,28 @@ const [videoFeed, setVideoFeed] = React.useState([]);
 const [feedSort, setFeedSort] = React.useState('new'); // new/top/likes/views/replies
 useEffect(() => {
   if (!videoFeedOpen) return;
-  setVisibleVideoCount(VIDEO_PAGE_SIZE);
-}, [videoFeedOpen, feedSort, starMode, starredAuthors]);
-const visibleVideoFeed = React.useMemo(
-  () => (videoFeed || []).slice(0, visibleVideoCount),
-  [videoFeed, visibleVideoCount]
-);
-const videoHasMore = visibleVideoFeed.length < (videoFeed || []).length;
+  const initial = (videoFeed || []).slice(0, WINDOW_KEEP);
+  resetWindowingState({
+    items: initial,
+    setItems: setVisibleVideoFeed,
+    itemsRef: videoItemsRef,
+    loadedCountRef: videoLoadedCountRef,
+    setLoadedCount: setVideoLoadedCount,
+    heightMapRef: videoHeightMapRef,
+    bodyRef,
+  });
+}, [videoFeedOpen, feedSort, starMode, starredAuthors, videoFeed]);
+const videoHasMore = videoLoadedCount < (videoFeed || []).length;
+function loadMoreVideoWindow() {
+  appendWindowItems({
+    source: videoFeed || [],
+    itemsRef: videoItemsRef,
+    setItems: setVisibleVideoFeed,
+    step: VIDEO_PAGE_SIZE,
+    loadedCountRef: videoLoadedCountRef,
+    setLoadedCount: setVideoLoadedCount,
+  });
+}
 // ВАЖНО: в ленте нужно уметь находить ссылки внутри текста (даже если не отдельной строкой)
 const FEED_URL_RE = /(https?:\/\/[^\s<>'")]+)/ig;
 
@@ -13946,8 +14176,13 @@ onClick={()=>{
     </div>
   </div>
   <CreateTopicCard t={t} onCreate={createTopic} onOpenVideoFeed={openVideoFeed} />
-
-      </div> 
+      </div>
+<div
+  className="body"
+  data-forum-scroll="1"
+  ref={bodyRef}
+  style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
+>
 <div data-forum-topics-start="1" />
 {videoFeedOpen ? (
   <>
@@ -13979,7 +14214,12 @@ const openThreadHere = (clickP) => {
 
 
     return (
-      <div key={slot.key} id={`post_${p?.id || ''}`}>
+      <div
+        key={slot.key}
+        id={`post_${p?.id || ''}`}
+        data-key={p?.id}
+        ref={(el) => updateHeightMap(videoHeightMapRef, p?.id, el)}
+      >
 <PostCard
   p={p}
   parentPost={parent}
@@ -14027,11 +14267,19 @@ const openThreadHere = (clickP) => {
             {t?.('loading') || 'Loading…'}
           </div>
           <LoadMoreSentinel
-            onVisible={() =>
-              setVisibleVideoCount((c) =>
-                Math.min(c + VIDEO_PAGE_SIZE, (videoFeed || []).length)
-              )
-            }
+            rootEl={bodyRef.current}
+            disabled={!videoHasMore}
+            onVisible={loadMoreVideoWindow}
+            windowing={{
+              enabled: true,
+              keep: WINDOW_KEEP,
+              step: VIDEO_PAGE_SIZE,
+              getKey: (item) => item?.id,
+              itemsRef: videoItemsRef,
+              setItems: setVisibleVideoFeed,
+              heightMapRef: videoHeightMapRef,
+              bodyRef,
+            }}
           />
         </div>
       )}
@@ -14086,7 +14334,12 @@ const openThreadHere = (clickP) => {
   if (slot.type === 'item') {
     const p = slot.item;
     return (
-      <div key={slot.key} id={`post_${p.id}`}>
+      <div
+        key={slot.key}
+        id={`post_${p.id}`}
+        data-key={p?.id}
+        ref={(el) => updateHeightMap(repliesHeightMapRef, p?.id, el)}
+      >
 {(() => {
   const parent = (data.posts || []).find(x => String(x.id) === String(p.parentId));
   return (
@@ -14143,11 +14396,19 @@ onOpenThread={(clickP) => {
             {t?.('loading') || 'Loading…'}
           </div>
           <LoadMoreSentinel
-            onVisible={() =>
-              setVisibleRepliesCount((c) =>
-                Math.min(c + REPLIES_PAGE_SIZE, sortedRepliesToMe.length)
-              )
-            }
+            rootEl={bodyRef.current}
+            disabled={!repliesHasMore}
+            onVisible={loadMoreRepliesWindow}
+            windowing={{
+              enabled: true,
+              keep: WINDOW_KEEP,
+              step: REPLIES_PAGE_SIZE,
+              getKey: (item) => item?.id,
+              itemsRef: repliesItemsRef,
+              setItems: setVisibleRepliesToMe,
+              heightMapRef: repliesHeightMapRef,
+              bodyRef,
+            }}
           />
         </div>
       )}
@@ -14166,20 +14427,25 @@ onOpenThread={(clickP) => {
       {(visibleTopics || []).map(x => {
           const agg = aggregates.get(x.id) || { posts:0, likes:0, dislikes:0, views:0 };
           return (
-<TopicItem
-  key={`t:${x.id}`}
-  t={x}
-  agg={agg}
-  onOpen={(tt)=>{ setSel(tt); setThreadRoot(null) }}
-  onView={markViewTopic}
-  isAdmin={isAdmin}
-  onDelete={delTopic}
-  authId={viewerId}
-  onOwnerDelete={delTopicOwn}
-  viewerId={viewerId}
-  starredAuthors={starredAuthors}
-  onToggleStar={toggleAuthorStar}
-/>
+            <div
+              key={`t:${x.id}`}
+              data-key={x?.id}
+              ref={(el) => updateHeightMap(topicsHeightMapRef, x?.id, el)}
+            >
+              <TopicItem
+                t={x}
+                agg={agg}
+                onOpen={(tt)=>{ setSel(tt); setThreadRoot(null) }}
+                onView={markViewTopic}
+                isAdmin={isAdmin}
+                onDelete={delTopic}
+                authId={viewerId}
+                onOwnerDelete={delTopicOwn}
+                viewerId={viewerId}
+                starredAuthors={starredAuthors}
+                onToggleStar={toggleAuthorStar}
+              />
+            </div>
 
           )
         })}
@@ -14190,27 +14456,25 @@ onOpenThread={(clickP) => {
           {t?.('loading') || 'Loading…'}
         </div>
         <LoadMoreSentinel
-          onVisible={() =>
-            setVisibleTopicsCount((c) =>
-              Math.min(c + TOPIC_PAGE_SIZE, (sortedTopics || []).length)
-            )
-          }
+          rootEl={bodyRef.current}
+          disabled={!topicsHasMore}
+          onVisible={loadMoreTopicsWindow}
+          windowing={{
+            enabled: true,
+            keep: WINDOW_KEEP,
+            step: TOPIC_PAGE_SIZE,
+            getKey: (item) => item?.id,
+            itemsRef: topicsItemsRef,
+            setItems: setVisibleTopics,
+            heightMapRef: topicsHeightMapRef,
+            bodyRef,
+          }}
         />
       </div>
     )}    
   </>
 )}
-
-
-<div
-  className="body"
-  data-forum-scroll="1"
-  ref={bodyRef}
-  style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
->
-
-
-
+ 
 </div>
 
     </section>
@@ -14906,7 +15170,8 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
       <div
         key={slot.key}
         id={`post_${p.id}`}
-        style={{ marginLeft: (p._lvl || 0) * 18 }}
+        data-key={p?.id}
+        ref={(el) => updateHeightMap(threadHeightMapRef, p?.id, el)}
       >
 <PostCard
   p={p}
@@ -14955,11 +15220,19 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
               {t?.('loading') || 'Loading…'}
             </div>
             <LoadMoreSentinel
-              onVisible={() =>
-                setVisibleThreadPostsCount((c) =>
-                  Math.min(c + THREAD_PAGE_SIZE, (flat || []).length)
-                )
-              }
+              rootEl={bodyRef.current}
+              disabled={!threadHasMore}
+              onVisible={loadMoreThreadWindow}
+              windowing={{
+                enabled: true,
+                keep: WINDOW_KEEP,
+                step: THREAD_PAGE_SIZE,
+                getKey: (item) => item?.id,
+                itemsRef: threadItemsRef,
+                setItems: setVisibleFlat,
+                heightMapRef: threadHeightMapRef,
+                bodyRef,
+              }}
             />
           </div>
         )}
