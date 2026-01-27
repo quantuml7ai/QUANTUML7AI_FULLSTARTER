@@ -2210,6 +2210,7 @@ font-size: 12px;
 }
 
 .aboutWrap{
+
   display:flex;
   flex-direction:column;
   gap:6px;
@@ -2224,7 +2225,7 @@ font-size: 12px;
   flex-direction:column;
   justify-content:flex-end;
   width:100%;
-  min-height:56px;
+  min-height:66px;
   padding:6px 0 0;
   background:transparent;
   border:none;
