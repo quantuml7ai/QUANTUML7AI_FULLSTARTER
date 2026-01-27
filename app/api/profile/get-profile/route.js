@@ -44,6 +44,7 @@ export async function GET(req) {
       accountId,
       nickname: profile.nickname || '',
       icon: profile.icon || '',
+            about: profile.about || '',
     })
   } catch (e) {
     return NextResponse.json(

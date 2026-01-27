@@ -4,7 +4,8 @@ import { requireUserId } from '../../forum/_utils.js'
 import {
   setUserNick,
   normNick,
-  getUserNick,
+  setUserAbout,
+  getUserAbout,
   setUserAvatar,
 } from '../../forum/_db.js'
 import { resolveCanonicalAccountId } from '../_identity.js'
@@ -36,10 +37,13 @@ if (!nick) {
 
 // аватар может приходить под разными именами
 const iconRaw = body?.icon || body?.avatar || ''
-
+const aboutRaw = body?.about
 // WHY: store profile on canonical accountId so all identities resolve to one source of truth.
 const saved = await setUserNick(accountId, nick) // бросит 'nick_taken' если занято
 const savedIcon = await setUserAvatar(accountId, iconRaw)
+const savedAbout = aboutRaw !== undefined
+  ? await setUserAbout(accountId, aboutRaw)
+  : await getUserAbout(accountId)
 // WHY: profile updates must propagate to all devices immediately.
 try {
   const redis = Redis.fromEnv()
@@ -51,11 +55,12 @@ try {
     nick: saved,
     icon: savedIcon,
     avatar: savedIcon,
+        about: savedAbout,
     ts: Date.now(),
   }))
 } catch {}
 
-return NextResponse.json({ ok:true, nick: saved, icon: savedIcon, accountId })
+return NextResponse.json({ ok:true, nick: saved, icon: savedIcon, about: savedAbout, accountId })
 
   } catch (e) {
     const msg = String(e?.message || e)

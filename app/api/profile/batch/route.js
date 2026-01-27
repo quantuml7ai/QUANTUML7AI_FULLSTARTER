@@ -41,15 +41,17 @@ export async function POST(req) {
     ids.forEach((uid) => {
       pipe.get(K.userNick(uid))
       pipe.get(K.userAvatar(uid))
+            pipe.get(K.userAbout(uid))
     })
 
     const raw = await pipe.exec()
     const flat = Array.isArray(raw) ? raw.map(unwrapResult) : []
 
     ids.forEach((uid, idx) => {
-      const nick = String(flat[idx * 2] || '').trim()
-      const icon = String(flat[idx * 2 + 1] || '').trim()
-      map[uid] = { nickname: nick, icon }
+      const nick = String(flat[idx * 3] || '').trim()
+      const icon = String(flat[idx * 3 + 1] || '').trim()
+      const about = String(flat[idx * 3 + 2] || '').trim()
+      map[uid] = { nickname: nick, icon, about }
     })
 
     return NextResponse.json({ ok: true, map, aliases })

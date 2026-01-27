@@ -58,7 +58,7 @@ export const K = {
 
   userAvatar: (userId)   => `forum:user:${userId}:avatar`,
 
-  
+    userAbout:  (userId)   => `forum:user:${userId}:about`,
   // per-topic
   topicPostsCount: (topicId) => `forum:topic:${topicId}:posts_count`,
   topicViews:      (topicId) => `forum:topic:${topicId}:views`,
@@ -609,6 +609,33 @@ export async function getUserAvatar(userId) {
     return ''
   }
 }
+export function normAbout(raw) {
+  const s = String(raw ?? '')
+  return s.trim().slice(0, 200)
+}
+
+export async function getUserAbout(userId) {
+  try {
+    const v = await redis.get(K.userAbout(userId))
+    return str(v || '')
+  } catch {
+    return ''
+  }
+}
+
+export async function setUserAbout(userId, about) {
+  const v = normAbout(about)
+  try {
+    if (!v) {
+      await redis.del(K.userAbout(userId))
+      return ''
+    }
+    await redis.set(K.userAbout(userId), v)
+    return v
+  } catch {
+    return v
+  }
+}
 
 export function normAvatar(raw) {
   const s0 = str(raw)
@@ -634,17 +661,18 @@ export async function setUserAvatar(userId, icon) {
 }
 
 export async function getUserProfile(userId) {
-  const [nick, avatar] = await Promise.all([
+  const [nick, avatar, about] = await Promise.all([
     getUserNick(userId),
     getUserAvatar(userId),
   ])
   return {
     nickname: str(nick || ''),
     icon: str(avatar || ''),
+        about: str(about || ''),
   }
 }
 
-export async function setUserProfile(userId, { nickname, icon } = {}) {
+export async function setUserProfile(userId, { nickname, icon, about } = {}) {
   const out = {}
 
   if (nickname != null && nickname !== '') {
@@ -653,6 +681,9 @@ export async function setUserProfile(userId, { nickname, icon } = {}) {
 
   if (icon != null) {
     out.icon = await setUserAvatar(userId, icon)
+  }
+  if (about != null) {
+    out.about = await setUserAbout(userId, about)
   }
 
   return out
