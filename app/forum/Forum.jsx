@@ -11138,7 +11138,7 @@ const [pendingVideo, setPendingVideo] = useState(null);
   const [mediaPipelineOn, setMediaPipelineOn] = useState(false);
 
   // таймер/сессия для «плавного» прогресса без реального процента (moderation/fetch upload)
-  const mediaProgRef = useRef({ id: 0, timer: null, cap: 0 });
+  const mediaProgRef = useRef({ id: 0, timer: null, cap: 0, capMax: 0, stallUntil: 0 });
 
   const hasComposerMedia =
     (pendingImgs?.length || 0) > 0 || !!pendingAudio || !!pendingVideo || !!mediaPipelineOn;
@@ -11149,40 +11149,67 @@ const [pendingVideo, setPendingVideo] = useState(null);
     if (mediaProgRef.current) mediaProgRef.current.timer = null;
   }, []);
 
-  // “кибер-живой” софт-прогресс: быстрее тикает + микро-джиттер, выше cap (чтоб не залипать на 18%)
-  const startSoftProgress = useCallback((cap = 32, stepMs = 120) => {
-    stopMediaProg();
-    mediaProgRef.current.id = (mediaProgRef.current.id || 0) + 1;
-    const myId = mediaProgRef.current.id;
-    mediaProgRef.current.cap = cap;
+// “кибер-живой” софт-прогресс:
+// - когда реального процента нет (moderation / fetch), проценты НЕ должны "залипать" на cap
+// - cap плавно растёт до capMax, иногда может "притормозить" на пару секунд (как сеть), но в целом всегда движется
+const startSoftProgress = useCallback((cap = 32, stepMs = 120, capMax = 92) => {
+  stopMediaProg();
+  mediaProgRef.current.id = (mediaProgRef.current.id || 0) + 1;
+  const myId = mediaProgRef.current.id;
 
-    // важно: начинаем минимум с 1%, чтобы не «залипать» на 0
-    try { setMediaPct(p => Math.max(1, Number(p || 0))); } catch {}
+  mediaProgRef.current.cap = Math.max(1, Number(cap || 0));
+  mediaProgRef.current.capMax = Math.max(mediaProgRef.current.cap, Number(capMax || 0));
+  mediaProgRef.current.stallUntil = 0;
 
-    mediaProgRef.current.timer = setInterval(() => {
-      if (mediaProgRef.current.id !== myId) return;
-      setMediaPct((p) => {
-        const cur = Math.max(0, Math.min(100, Number(p || 0)));
-        if (cur >= cap) return cur;
-        // чем ближе к cap — тем медленнее, но никогда не “замираем”
-        const base =
-          cur < 8  ? 1.6 :
-          cur < 16 ? 1.15 :
-          cur < 24 ? 0.85 :
-          0.55;
-        const jitter = (Math.random() * 0.35); // “кибер-живость”
-        return Math.min(cap, cur + base + jitter);
-      });
-    }, stepMs);
-  }, [stopMediaProg]);
+  // важно: начинаем минимум с 1%, чтобы не «залипать» на 0
+  try { setMediaPct(p => Math.max(1, Number(p || 0))); } catch {}
+  mediaProgRef.current.timer = setInterval(() => {
+    if (mediaProgRef.current.id !== myId) return;
 
+    // редкие микро-паузы (до ~2с), но не чаще чем нужно
+    const nowTs = Date.now();
+    if (mediaProgRef.current.stallUntil && nowTs < mediaProgRef.current.stallUntil) return;
+
+    setMediaPct((p) => {
+      const cur = Math.max(0, Math.min(100, Number(p || 0)));
+      let capNow = Math.max(1, Number(mediaProgRef.current.cap || 0));
+      const capMaxNow = Math.max(capNow, Number(mediaProgRef.current.capMax || 0));
+
+      // если упёрлись в cap — постепенно поднимаем "потолок", чтобы проценты продолжали тикать
+      if (cur >= capNow && capNow < capMaxNow) {
+        // иногда делаем короткую паузу, чтобы не выглядело "слишком идеально"
+        if (Math.random() < 0.06) {
+          mediaProgRef.current.stallUntil = nowTs + (800 + Math.random() * 1200);
+          return cur;
+        }
+        capNow = Math.min(capMaxNow, capNow + (0.25 + Math.random() * 0.35));
+        mediaProgRef.current.cap = capNow;
+      }
+
+      const hardCap = Math.min(99, capNow);
+      if (cur >= hardCap) return cur;
+
+      // чем ближе к cap — тем медленнее, но всегда есть микродвижение
+      const remain = hardCap - cur;
+      const base =
+        remain > 30 ? 1.35 :
+        remain > 18 ? 1.05 :
+        remain > 10 ? 0.75 :
+        remain > 5  ? 0.45 :
+        0.18;
+
+      const jitter = (Math.random() * 0.22); // “живость”
+      return Math.min(hardCap, cur + base + jitter);
+    });
+  }, stepMs);
+}, [stopMediaProg]);
   const beginMediaPipeline = useCallback((phase = 'Moderating') => {
     // включаем бар сразу, даже если pending* ещё пустые
     setMediaPipelineOn(true);
     setMediaBarOn(true);
     setMediaPhase(phase);
     setMediaPct(1);
-     startSoftProgress(32, 120); // до ~32% “едем” во время модерации (без залипания)
+     startSoftProgress(32, 120, 45); // во время модерации “едем” и не залипаем (32→45%)
   }, [startSoftProgress]);
 
   const endMediaPipeline = useCallback(() => {
@@ -12001,13 +12028,18 @@ const createPost = async () => {
 
   if (!rl.allowAction()) return _fail(t('forum_too_fast') || 'Слишком часто');
 
-// === media progress UI: start phase (shown from pick/record until send/reset) ===
-  // === media progress UI: отправка (бар остаётся до очистки композера) ===
-  // NOTE: если видео ещё blob:-URL, ниже мы переключим фазу обратно на Moderating.
-  if (hasComposerMedia) {
+// === media progress UI:
+// - если есть локальные blob-медиа (камера/голос) — показываем реальный пайплайн (Moderating → Uploading)
+// - фазу "Sending" поднимем уже прямо перед pushOp (см. ниже), чтобы не убивать прогресс аплоада
+  const hasLocalBlobMedia =
+    (pendingVideo && /^blob:/.test(pendingVideo)) ||
+    (pendingAudio && /^blob:/.test(pendingAudio));
+
+  if (hasLocalBlobMedia) {
     try { setMediaBarOn(true); } catch {}
-    try { setMediaPhase('Sending'); } catch {}
-    try { setMediaPct(p => Math.max(92, Number(p || 0))); } catch {}
+    try { setMediaPhase('Moderating'); } catch {}
+    try { setMediaPct(1); } catch {}
+    try { startSoftProgress(32, 120, 45); } catch {}
   }
   // 0) VIDEO MODERATION (frames) BEFORE ANY UPLOAD
   if (pendingVideo) {
@@ -12069,6 +12101,7 @@ const createPost = async () => {
             const upPct = Math.max(0, Math.min(100, Number(p?.percentage || 0)));
             // общий прогресс: Uploading занимает 30..85%
             const overall = 30 + (upPct * 0.55);
+            try { stopMediaProg(); } catch {}
             try { setMediaPhase('Uploading'); } catch {}
             try { setVideoProgress(upPct); } catch {}
             try { setMediaPct(prev => Math.max(Number(prev || 0), overall)); } catch {}
@@ -12578,7 +12611,7 @@ const onFilesChosen = React.useCallback(async (e) => {
       try { stopMediaProg?.(); } catch {}
       try { setMediaPhase('Uploading'); } catch {}
       try { setMediaPct(p => Math.max(20, Number(p || 0))); } catch {}
-      try { startSoftProgress?.(72, 200); } catch {}  // мягко едем к ~72% пока грузим
+try { startSoftProgress?.(72, 200, 88); } catch {}  // мягко едем к ~88% пока грузим (без залипания)
       const fd = new FormData();
       for (const f of imgFiles.slice(0, 20)) fd.append('files', f, f.name);
 
@@ -12647,6 +12680,11 @@ const onFilesChosen = React.useCallback(async (e) => {
         const name = `forum/video-${Date.now()}.${ext}`;
 
         const { upload } = await import('@vercel/blob/client');
+        // UI: аплоад видео — реальный прогресс + мягкая подложка (если onUploadProgress приходит рывками)
+        try { stopMediaProg?.(); } catch {}
+        try { setMediaPhase?.('Uploading'); } catch {}
+        try { setMediaPct?.(p => Math.max(40, Number(p || 0))); } catch {}
+        try { startSoftProgress?.(55, 140, 92); } catch {}        
         const result = await upload(name, vf, {
           access: 'public',
           handleUploadUrl: '/api/forum/blobUploadUrl',
@@ -12662,6 +12700,11 @@ const onFilesChosen = React.useCallback(async (e) => {
           try { setOverlayMediaUrl(null); } catch {} // видео берём из pendingVideo
           try { setVideoState?.('preview'); } catch {}
           try { setVideoOpen?.(true); } catch {}
+          // UI: аплоад завершён → готово к отправке
+          try { stopMediaProg?.(); } catch {}
+          try { setMediaPhase?.('Ready'); } catch {}
+          try { setMediaPct?.(100); } catch {}
+          try { endMediaPipeline?.(); } catch {}      
         } else {
           throw new Error('no_url');
         }   
@@ -12682,7 +12725,7 @@ const onFilesChosen = React.useCallback(async (e) => {
   } finally {
     if (e?.target) e.target.value = '';
   }
-}, [t, toast, moderateImageFiles, moderateVideoSource, toastI18n, reasonKey, reasonFallbackEN]);
+}, [t, toast, moderateImageFiles, moderateVideoSource, toastI18n, reasonKey, reasonFallbackEN, beginMediaPipeline, endMediaPipeline, stopMediaProg, startSoftProgress]);
 
   /* ---- профиль (поповер у аватара) ---- */
   const idShown = resolveProfileAccountId(auth.asherId || auth.accountId || '')
