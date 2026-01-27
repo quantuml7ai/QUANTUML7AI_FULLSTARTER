@@ -1599,7 +1599,7 @@ const Styles = () => (
 
   /* сам чип "Ответ для ..." */
   .postUserRow .replyTag {
-    font-size: 10px;          /* поменьше шрифт на мобиле */
+    font-size: 7px;          /* поменьше шрифт на мобиле */
     line-height: 1.1;
     white-space: normal;      /* разрешаем перенос по словам */
     word-break: normal;
@@ -1610,8 +1610,48 @@ const Styles = () => (
     margin-left: 0;           /* под ником, а не сбоку */
     margin-top: 2px;
   }
+  .postUserRow .replyTagSnippet{
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  }
+/* reply badge (кликабельный) */
+.replyTagBtn{
+  cursor: pointer;
+  text-align: left;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+.replyTagBtn:active{ transform: translateY(0) scale(.97); }
+
+.replyTagMain{
+  display:block;
+}
+.replyTagSnippet{
+  display:block;
+  font-size: 8px;
+  line-height: 1.15;
+  opacity: .75;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+/* подсветка сообщения-цели при переходе */
+.replyTargetFlash{
+  animation: replyTargetFlash 1.1s ease-out;
+}
+@keyframes replyTargetFlash{
+  0%   { box-shadow: 0 0 0 0 rgba(255,255,255,.0); transform: scale(1); }
+  20%  { box-shadow: 0 0 0 3px rgba(255,255,255,.18); transform: scale(1.01); }
+  100% { box-shadow: 0 0 0 0 rgba(255,255,255,.0); transform: scale(1); }
+}
 /* --- header: ... --- */
 .head{
   position:sticky; top:0; z-index:70; overflow:visible;
@@ -6641,6 +6681,8 @@ function StarButton({ on, onClick, title, disabled=false }) {
 function PostCard({
   p,
   parentAuthor,
+  parentText,
+  parentPost,
   onReport, 
   onOpenThread,
   onReact,
@@ -6665,7 +6707,7 @@ function PostCard({
  
   // сниппет текста родителя (до 40 символов)
   const parentSnippet = (() => {
-    const raw = p?.parentText || p?._parentText || '';
+    const raw = parentText || p?.parentText || p?._parentText || '';
  
 
     if (!raw) return null;
@@ -6673,6 +6715,47 @@ function PostCard({
     return s.length > 40 ? s.slice(0, 40) + '…' : s;
   })();
 
+  // перейти к сообщению-родителю (к которому это ответ)
+  const jumpToParent = React.useCallback((e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    const pid = p?.parentId;
+    if (!pid) return;
+    if (typeof document === 'undefined') return;
+
+    const scrollAndFlash = (node) => {
+      if (!node) return;
+      try {
+        node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } catch {
+        try { node.scrollIntoView(); } catch {}
+      }
+      try {
+        node.classList.add('replyTargetFlash');
+        window.setTimeout(() => node.classList.remove('replyTargetFlash'), 1100);
+      } catch {}
+    };
+
+    const el = document.getElementById(`post_${pid}`);
+    if (el) return scrollAndFlash(el);
+
+    // fallback: если родитель НЕ в текущей ленте (video feed / inbox / replies и т.д.) —
+    // открываем ветку с родителем во главе, и уже в ней делаем скролл.
+    try {
+      const root = parentPost || (pid ? { id: pid, topicId: p?.topicId } : null);
+      if (root && typeof onOpenThread === 'function') onOpenThread(root);
+    } catch {}
+
+    // после открытия ветки DOM появится не сразу
+    try {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const el2 = document.getElementById(`post_${pid}`);
+          if (el2) scrollAndFlash(el2);
+        });
+      });
+    } catch {}
+  }, [p?.parentId, p?.topicId, parentPost, onOpenThread]);
 
   const [lightbox, setLightbox] = React.useState({ open:false, src:null, idx:0, list:[] });
 
@@ -6973,23 +7056,7 @@ const NO_THREAD_OPEN_SELECTOR =
         )}
 {isVipAuthor && <VipFlipBadge />}
       </div> 
-        {p.parentId && (
-          <span className="tag ml-1 replyTag" aria-label={t?.('forum_reply_to') || 'Ответ для'}>
-            {(t?.('forum_reply_to') || 'ответ для') + ' '}
-            {parentAuthor ? '@' + parentAuthor : '…'}
-            {parentSnippet && <>: “{parentSnippet}”</>}
-          </span>
-        )} 
-      {/* время создания + переключатель перевода — ниже контента */}
-      <div
-        className="btn btnGhost btnXs"
-        
-        suppressHydrationWarning
-        
-      >
-        <HydrateText value={human(p.ts)} />
 
-      </div> 
       </div> 
       {/* изображения: естественные пропорции, без квадратного кропа */}
       {imgLines.length > 0 && (
@@ -7193,6 +7260,44 @@ const NO_THREAD_OPEN_SELECTOR =
       ) : (
         displayText.trim() && (
           <div className="postBodyFrame">
+                  {/* время создания + переключатель перевода — ниже контента */}
+  <div className="forumRowBar">
+
+    <div className="slot-left">
+    <div className="btn btnGhost btnXs"
+        
+        suppressHydrationWarning
+        
+      >
+        <HydrateText value={human(p.ts)} />
+</div>
+</div>
+
+        {p.parentId && (
+
+          <button
+            type="button"
+            className="tag ml-1 replyTag replyTagBtn"
+            aria-label={t?.('forum_reply_to') || 'Ответ для'}
+            title={t?.('forum_reply_to') || 'Ответ для'}
+            data-no-thread-open="1"
+            onClick={jumpToParent}
+          >
+            <span className="replyTagMain">
+              {(t?.('forum_reply_to') || 'ответ для') + ' '}
+              {parentAuthor ? '@' + parentAuthor : '…'}
+            </span>
+            {parentSnippet && (
+              <span className="replyTagSnippet">“{parentSnippet}”</span>
+            )}
+          </button>
+        )} 
+
+ </div> 
+   
+  {/* разделитель между VIP и обычными */}
+  <div style={{height:1,opacity:.2,background:'currentColor',margin:'7px 4px'}} />
+
             <div
               className="postBodyContent text-[15px] leading-relaxed postBody whitespace-pre-wrap break-words"
               dangerouslySetInnerHTML={{ __html: rich(displayText) }}
@@ -13862,7 +13967,9 @@ const openThreadHere = (clickP) => {
       <div key={slot.key} id={`post_${p?.id || ''}`}>
 <PostCard
   p={p}
+  parentPost={parent}
   parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}
+  parentText={parent ? (parent.text || parent.message || parent.body || '') : ''} 
   onReport={() => toast.ok(t('forum_report_ok'))}
   onOpenThread={openThreadHere}
   onReact={reactMut}
@@ -13962,12 +14069,15 @@ const openThreadHere = (clickP) => {
     const p = slot.item;
     return (
       <div key={slot.key} id={`post_${p.id}`}>
-        <PostCard
-          p={p}
-          parentAuthor={(() => {
-            const parent = (data.posts || []).find(x => String(x.id) === String(p.parentId))
-            return parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''
-          })()}
+{(() => {
+  const parent = (data.posts || []).find(x => String(x.id) === String(p.parentId));
+  return (
+    <PostCard
+      p={p}
+      parentPost={parent || null}
+      parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''}
+      parentText={parent ? (parent.text || parent.message || parent.body || '') : ''}
+     
           onReport={() => toast.ok(t('forum_report_ok'))}
 onOpenThread={(clickP) => {
   // ✅ из любой карточки: открыть сразу ветку ответов по клику на счётчик
@@ -13987,7 +14097,9 @@ onOpenThread={(clickP) => {
             viewerId={viewerId}
   starredAuthors={starredAuthors}
   onToggleStar={toggleAuthorStar}
-        />
+    />
+  );
+})()}
       </div>
     );
   }
@@ -14765,18 +14877,19 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
           );
           if (!tt) return null;
 
-          const parentAuthor = (() => {
-            const parent = (data.posts || []).find(
-              x => String(x.id) === String(p.parentId),
-            )
-            return parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''
-          })();
+const parent = (data.posts || []).find(
+  x => String(x.id) === String(p.parentId),
+);
+const parentAuthor = parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : '';
+
 
           return (
             <PostCard
               key={`inb:${p.id}`}
               p={p}
+              parentPost={parent || null}
               parentAuthor={parentAuthor}
+              parentText={parent ? (parent.text || parent.message || parent.body || '') : ''}
               onReport={() => toast.ok(t('forum_report_ok'))}
 onOpenThread={(clickP) => {
   // ✅ из любой карточки: открыть сразу ветку ответов по клику на счётчик
@@ -14853,7 +14966,9 @@ onOpenThread={(clickP) => {
       >
 <PostCard
   p={p}
+  parentPost={parent}
   parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}
+  parentText={parent ? (parent.text || parent.message || parent.body || '') : ''}
   onReport={() => toast.ok(t('forum_report_ok'))}
   onReply={() => setReplyTo(p)}
   onOpenThread={(clickP) => { setThreadRoot(clickP); }}
