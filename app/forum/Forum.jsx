@@ -7,6 +7,7 @@ import { createPortal } from 'react-dom'
 import { useI18n } from '../../components/i18n' 
 import { broadcast as forumBroadcast } from './events/bus'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 // [ADS:IMPORT]
 import {
   getForumAdConf,
@@ -5247,7 +5248,21 @@ return (
   )
 }
 function QCoinWithdrawPopover({ anchorRef, onClose, onOpenQuests, t, questEnabled = false, isAuthed = false }) {
+  const router = useRouter();
   const [pos, setPos] = useState({ top: 0, left: 0, maxW: 520, maxH: 600 });
+
+  const handleExchangeClick = (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    try { onClose?.(); } catch {}
+    try {
+      // ВНУТРЕННИЙ ПЕРЕХОД (как в топ-баре)
+      router.push('/exchange');
+    } catch {
+      // fallback на всякий случай
+      try { window.location.assign('/exchange'); } catch {}
+    }
+  };
 
   useEffect(() => {
     const btn = anchorRef?.current;
@@ -5373,15 +5388,15 @@ function QCoinWithdrawPopover({ anchorRef, onClose, onOpenQuests, t, questEnable
 
         {/* ДЕЙСТВИЯ: всегда в одну строку, адаптивные */}
         <div className="qcActions">
-          <a
-            className="btn qcBtn qcExchange"
-            href="https://www.quantuml7ai.com/exchange"
-            target="_blank"
-            rel="noopener noreferrer"
-            title={t('forum_qcoin_exchange') || 'Биржа'}
-          >
-            {t('forum_qcoin_exchange') || 'Биржа'}
-          </a>
+<button
+  type="button"
+  className="btn qcBtn qcExchange"
+  onClick={handleExchangeClick}
+  title={t('forum_qcoin_exchange') || 'Биржа'}
+>
+  {t('forum_qcoin_exchange') || 'Биржа'}
+</button>
+
           <button
             type="button"
             className="btn qcBtn qcWithdraw"
