@@ -13257,9 +13257,7 @@ function pickAdUrlForSlot(slotKey, slotKind) {
    >
      <QCoinInline t={t} userKey={idShown} vipActive={vipActive} />
    </div>
- </div>
- 
-
+ </div> 
           {/* === НОВОЕ: правый встроенный контейнер управления === */}
           <div className="controls">
             {/* поиск + сорт */}
@@ -13653,6 +13651,8 @@ onClick={()=>{
             </div> */}
           </div>
         </div> 
+  {/* разделитель между VIP и обычными */}
+  <div style={{height:1,opacity:.2,background:'currentColor',margin:'7px 4px'}} />
 
  {/* ЕДИНАЯ ГОРИЗОНТАЛЬНАЯ ЛИНЕЙКА: ЛЕВО — ЦЕНТР — ПРАВО */}
   <div className="forumRowBar">
@@ -13812,8 +13812,7 @@ onClick={()=>{
   </div>
   <CreateTopicCard t={t} onCreate={createTopic} onOpenVideoFeed={openVideoFeed} />
 
-      </div>
-      
+      </div> 
 <div data-forum-topics-start="1" />
 {videoFeedOpen ? (
   <>
@@ -14171,7 +14170,6 @@ onOpenThread={(clickP) => {
    </div>
  </div>
  
-
           {/* === НОВОЕ: правый встроенный контейнер управления === */}
           <div className="controls">
             {/* поиск + сорт */}
@@ -14564,7 +14562,10 @@ onClick={()=>{
               />
             </div> */}
           </div>
-        </div>        
+        </div>     
+   {/* разделитель между VIP и обычными */}
+  <div style={{height:1,opacity:.2,background:'currentColor',margin:'7px 4px'}} />
+          
   {/* ЕДИНАЯ ГОРИЗОНТАЛЬНАЯ ЛИНЕЙКА: ЛЕВО — ЦЕНТР — ПРАВО */}
   <div className="forumRowBar">
 
@@ -14713,6 +14714,9 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
 <CreateTopicCard t={t} onCreate={createTopic} onOpenVideoFeed={openVideoFeed} />
 
         </div>
+  {/* разделитель между VIP и обычными */}
+  <div style={{height:1,opacity:.2,background:'currentColor',margin:'7px 4px'}} />
+
 <div data-forum-topics-start="1" />
   {/* Заголовок темы оставляем ниже, как был */}
   <div   className="
@@ -14797,9 +14801,7 @@ onOpenThread={(clickP) => {
       </div>
     )}
   </div>
-)}
-
-
+)} 
       </div>
 
       <div
