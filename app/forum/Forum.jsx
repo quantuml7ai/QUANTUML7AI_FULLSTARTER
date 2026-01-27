@@ -9695,6 +9695,16 @@ const pushOp = (type, payload) => {
   const op  = { type, payload, opId: makeOpId() };
   const next = [...cur, op];
   saveQueue(next);
+
+ // ✅ ВАЖНО: “серьёзные” операции уходим на сервер сразу (без ожидания 60s тика)
+  // просмотры пусть остаются батчем, чтобы не DDOS’ить mutate.
+  const critical =
+    type === 'create_post' || type === 'create_topic' ||
+    type === 'edit_post'   || type === 'delete_post' || type === 'delete_topic' ||
+    type === 'set_reaction';
+  if (critical) {
+    Promise.resolve().then(() => flushNowRef.current?.()).catch(() => {});
+  }
 }// всегда иметь «свежие» значения внутри async-кода (без устаревших замыканий)
 const queueRef = useRef(queue);  useEffect(()=>{ queueRef.current = queue }, [queue])
 const authRef  = useRef(auth);   useEffect(()=>{ authRef.current  = auth  }, [auth])
@@ -9705,6 +9715,7 @@ const sseHintRef = useRef(0);
 const pendingViewsPostsRef = useRef(new Set());
 const pendingViewsTopicsRef = useRef(new Set());
 const busyRef=useRef(false)
+const flushNowRef = useRef(null); // ✅ мгновенный flush без ожидания тика
 const compactOps = (ops) => {
   const out = [];
   const seenReactions = new Set();
@@ -9975,6 +9986,11 @@ const flushMutations = useCallback(async () => {
     busyRef.current = false;
   }
 }, [persistSnap, persistTombstones]);
+
+// ✅ привязываем актуальную flushMutations к ref, чтобы pushOp мог дергать мгновенный flush
+useEffect(() => {
+  flushNowRef.current = flushMutations;
+}, [flushMutations]);
 // === QCOIN: автопинг активности (CLIENT) ===
 const activeRef  = React.useRef(false);
 const visibleRef = React.useRef(true);
@@ -10283,7 +10299,30 @@ useEffect(() => {
   };
 }, [flushMutations, tombstones]);
 
-
+// ✅ Fast incremental sync по SSE (оживляет все ветки/типы постов)
+const fastSyncTimerRef = useRef(null);
+const requestFastSync = useCallback(() => {
+  if (fastSyncTimerRef.current) return;
+  fastSyncTimerRef.current = setTimeout(async () => {
+    fastSyncTimerRef.current = null;
+    if (syncInFlightRef.current) return;
+    syncInFlightRef.current = true;
+    try {
+      const since = Number(snapRef.current?.rev || 0);
+      const r = await api.snapshot({ since });
+      if (r?.ok) {
+        persistSnap(prev => {
+          const next = applyEvents(prev, r.events || [], tombstones);
+          return { ...next, rev: r.rev ?? next.rev };
+        });
+      }
+    } catch (e) {
+      // тихо: SSE может шуметь, не ломаем UI
+    } finally {
+      syncInFlightRef.current = false;
+    }
+  }, 120); // небольшой throttle, но “живость” сохраняется
+}, [persistSnap, tombstones]);
 const sseAliveRef = useRef(false)
 
 React.useEffect(() => {
@@ -10340,6 +10379,9 @@ es.onmessage = (e) => {
     if (Number.isFinite(nextRev) && nextRev > 0) {
       sseHintRef.current = Math.max(sseHintRef.current, nextRev);
     }
+
+ // ✅ главное: по любому событию форума подтягиваем инкрементально изменения
+ requestFastSync();
    } catch {}
  };
 
