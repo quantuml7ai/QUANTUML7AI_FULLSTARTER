@@ -58,7 +58,7 @@ export const K = {
 
   userAvatar: (userId)   => `forum:user:${userId}:avatar`,
 
-  
+    userAbout:  (userId)   => `forum:user:${userId}:about`,
   // per-topic
   topicPostsCount: (topicId) => `forum:topic:${topicId}:posts_count`,
   topicViews:      (topicId) => `forum:topic:${topicId}:views`,
@@ -627,6 +627,34 @@ export async function setUserAvatar(userId, icon) {
       return ''
     }
     await redis.set(K.userAvatar(userId), v)
+    return v
+  } catch {
+    return v
+  }
+}
+export function normAbout(raw) {
+  const s = String(raw ?? '').replace(/\r\n/g, '\n')
+  const trimmed = s.replace(/^[ \t]+|[ \t]+$/g, '')
+  return trimmed.slice(0, 200)
+}
+
+export async function getUserAbout(userId) {
+  try {
+    const v = await redis.get(K.userAbout(userId))
+    return str(v || '')
+  } catch {
+    return ''
+  }
+}
+
+export async function setUserAbout(userId, about) {
+  const v = normAbout(about)
+  try {
+    if (!v) {
+      await redis.del(K.userAbout(userId))
+      return ''
+    }
+    await redis.set(K.userAbout(userId), v)
     return v
   } catch {
     return v

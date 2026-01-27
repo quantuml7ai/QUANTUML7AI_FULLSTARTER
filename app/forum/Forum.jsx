@@ -297,7 +297,40 @@ const next = {
     return () => { cancelled = true }
   }, [])
 }
+function useSyncForumAboutOnMount(onProfileUpdate) {
+  React.useEffect(() => {
+    if (!isBrowser()) return
 
+    const { accountId, asherId } = readAuth()
+    const uid = asherId || accountId
+    if (!uid) return
+
+    let cancelled = false
+
+    async function sync() {
+      try {
+        const r = await fetch(`/api/profile/get-about?uid=${encodeURIComponent(uid)}`, {
+          method: 'GET',
+          cache: 'no-store',
+        })
+        const j = await r.json().catch(() => null)
+        if (!j?.ok || cancelled) return
+        const resolvedAccountId = String(j.accountId || uid).trim()
+        if (resolvedAccountId) writeProfileAlias(uid, resolvedAccountId)
+        mergeProfileCache(resolvedAccountId, {
+          about: j.about || '',
+          updatedAt: Date.now(),
+        })
+        onProfileUpdate?.()
+      } catch {
+        // ignore network errors
+      }
+    }
+
+    sync()
+    return () => { cancelled = true }
+  }, [])
+}
 // [VIP AVATAR FIX] выбираем, что показывать на карточках
 function resolveNickForDisplay(userId, fallbackNick) {
   const uid = resolveProfileAccountId(userId)
@@ -2205,7 +2238,128 @@ font-size: 12px;
   flex: 1 1 auto;
   min-width: 0;                 /* ← можно ужиматься */
   max-width: 100%;
-  order: 2;
+  order: 3;
+}
+
+.aboutRail{
+  position: relative;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  gap:8px;
+  flex: 1 1 260px;
+  min-width: 220px;
+  max-width: 100%;
+  min-height: 96px;
+  padding: 8px 12px 6px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.aboutRail.is-editing{ cursor: default; }
+.aboutRailContent{
+  min-height: 20px;
+}
+.aboutText{
+  font-size: .98rem;
+  line-height: 1.35;
+  white-space: pre-wrap;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+.aboutText--placeholder{
+  color: rgba(255,255,255,.45);
+}
+.aboutText--live{
+  background: linear-gradient(120deg, #00f6ff, #7b61ff, #ff4fd8, #ff9a3d, #7bffb4, #2b7fff);
+  background-size: 320% 320%;
+  animation: aboutFlow 9s linear infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+.aboutTextarea{
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #eaf4ff;
+  font-size: .98rem;
+  line-height: 1.35;
+  resize: none;
+  overflow: hidden;
+  padding: 0;
+}
+.aboutTextarea:focus{ outline: none; }
+.aboutActions{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.aboutLimit{
+  font-size: .72rem;
+  opacity: .6;
+}
+.aboutButtons{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.aboutActionBtn{
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(12,16,24,.35);
+  color: #eaf4ff;
+  display:grid;
+  place-items:center;
+  transition: transform .08s, box-shadow .2s, opacity .2s;
+}
+.aboutActionBtn:hover{
+  box-shadow: 0 0 16px rgba(80,167,255,.25);
+}
+.aboutActionBtn:active{ transform: scale(.97); }
+.aboutActionBtn:disabled{
+  opacity: .4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.aboutRailLine{
+  position: relative;
+  height: 2px;
+  width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255,255,255,.18), rgba(255,255,255,.45), rgba(255,255,255,.18));
+}
+.aboutRailPencil{
+  position:absolute;
+  right: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255,255,255,.9);
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,.5));
+}
+@keyframes aboutFlow{
+  0%{ background-position: 0% 50%; }
+  100%{ background-position: 200% 50%; }
+}
+@media (prefers-reduced-motion: reduce){
+  .aboutText--live{ animation: none; }
+}
+
+@media (max-width: 900px){
+  .aboutRail{
+    flex-basis: 100%;
+    min-height: 74px;
+    order: 2;
+    padding: 6px 10px 6px;
+  }
+  .aboutText,
+  .aboutTextarea{ font-size: .92rem; }
+  .aboutActions{ flex-wrap: wrap; }
+  .aboutLimit{ order: 2; }
 }
 
 /* Поиск встроен в .controls и сжимается по ширине на узких экранах */
@@ -8492,12 +8646,139 @@ function enableVideoControlsOnTap(e) {
     } catch {}
   } catch {}
 }
+const ABOUT_LIMIT = 200
+
+function normalizeAboutDraft(raw) {
+  return String(raw ?? '').replace(/\r\n/g, '\n').slice(0, ABOUT_LIMIT)
+}
+
+function normalizeAboutForSave(raw) {
+  const s = String(raw ?? '').replace(/\r\n/g, '\n')
+  const trimmed = s.replace(/^[ \t]+|[ \t]+$/g, '')
+  return trimmed.slice(0, ABOUT_LIMIT)
+}
+
+function AboutRail({
+  t,
+  value,
+  draft,
+  editing,
+  saving,
+  onStartEdit,
+  onChange,
+  onCancel,
+  onSave,
+}) {
+  const taRef = React.useRef(null)
+  const hasText = Boolean(value)
+  const canSave = !saving && normalizeAboutForSave(draft) !== normalizeAboutForSave(value)
+
+  React.useEffect(() => {
+    if (!editing) return
+    const el = taRef.current
+    if (!el) return
+    try {
+      el.focus()
+      const len = el.value.length
+      el.setSelectionRange(len, len)
+    } catch {}
+  }, [editing])
+
+  React.useEffect(() => {
+    if (!editing) return
+    const el = taRef.current
+    if (!el) return
+    try {
+      el.style.height = '0px'
+      el.style.height = `${el.scrollHeight}px`
+    } catch {}
+  }, [draft, editing])
+
+  return (
+    <div
+      className={cls('aboutRail', editing && 'is-editing')}
+      role={!editing ? 'button' : undefined}
+      tabIndex={!editing ? 0 : -1}
+      onClick={!editing ? onStartEdit : undefined}
+      onKeyDown={
+        !editing
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onStartEdit?.()
+              }
+            }
+          : undefined
+      }
+    >
+      <div className="aboutRailContent">
+        {editing ? (
+          <textarea
+            ref={taRef}
+            className="aboutTextarea"
+            value={draft}
+            rows={1}
+            maxLength={ABOUT_LIMIT}
+            onChange={(e) => onChange?.(normalizeAboutDraft(e.target.value))}
+          />
+        ) : (
+          <div className={cls('aboutText', hasText ? 'aboutText--live' : 'aboutText--placeholder')}>
+            {hasText ? value : (t('forum_about_placeholder') || '')}
+          </div>
+        )}
+      </div>
+
+      {editing && (
+        <div className="aboutActions">
+          <div className="aboutLimit">
+            {t('forum_about_limit') || 'Limit:'} {draft.length}/{ABOUT_LIMIT}
+          </div>
+          <div className="aboutButtons">
+            <button
+              type="button"
+              className="aboutActionBtn"
+              onClick={onCancel}
+              title={t('forum_about_cancel') || 'Cancel'}
+              aria-label={t('forum_about_cancel') || 'Cancel'}
+            >
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+                <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
+            <button
+              type="button"
+              className="aboutActionBtn"
+              disabled={!canSave}
+              onClick={onSave}
+              title={t('forum_about_save') || 'Save'}
+              aria-label={t('forum_about_save') || 'Save'}
+            >
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+                <path d="M5 12l4 4L19 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="aboutRailLine" aria-hidden="true">
+        <span className="aboutRailPencil">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+            <path d="M12 20h9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+          </svg>
+        </span>
+      </div>
+    </div>
+  )
+}
 /* =========================================================
    Основной компонент
 ========================================================= */
 export default function Forum(){
   const [profileBump, setProfileBump] = useState(0)
   useSyncForumProfileOnMount(() => setProfileBump((x) => x + 1))
+    useSyncForumAboutOnMount(() => setProfileBump((x) => x + 1))
   void profileBump
   const { t } = useI18n()
   const toast = useToast()
@@ -10040,7 +10321,20 @@ es.onmessage = (e) => {
       // hint only, без немедленного fetch
       return; // дальше ничего не делаем — снапшоты/ревизии не нужны для этого события
     }
-
+    if (evt.type === 'profile.about.updated' && (evt.accountId || evt.userId)) {
+      const accountId = String(evt.accountId || evt.userId || '').trim()
+      if (accountId) {
+        try {
+          writeProfileAlias(evt.userId, accountId)
+          mergeProfileCache(accountId, {
+            about: evt.about || '',
+            updatedAt: evt.ts || Date.now(),
+          })
+        } catch {}
+        setProfileBump((x) => x + 1)
+      }
+      return
+    }
 
     const nextRev = Number(evt?.rev || 0);
     if (Number.isFinite(nextRev) && nextRev > 0) {
@@ -12397,6 +12691,63 @@ const onFilesChosen = React.useCallback(async (e) => {
   const iconShown = resolveIconForDisplay(idShown, profile?.icon)
   const copyId = async () => { try{ await navigator.clipboard.writeText(idShown) }catch{} }
 
+  const [aboutEditing, setAboutEditing] = useState(false)
+  const [aboutDraft, setAboutDraft] = useState('')
+  const [aboutSaved, setAboutSaved] = useState('')
+  const [aboutSaving, setAboutSaving] = useState(false)
+
+  useEffect(() => {
+    const cached = safeReadProfile(idShown)?.about || ''
+    setAboutSaved(cached)
+    if (!aboutEditing) setAboutDraft(cached)
+  }, [idShown, profileBump, aboutEditing])
+
+  const startAboutEdit = React.useCallback(() => {
+    setAboutDraft(aboutSaved || '')
+    setAboutEditing(true)
+  }, [aboutSaved])
+
+  const cancelAboutEdit = React.useCallback(() => {
+    setAboutDraft(aboutSaved || '')
+    setAboutEditing(false)
+  }, [aboutSaved])
+
+  const saveAbout = React.useCallback(async () => {
+    if (!idShown || aboutSaving) return
+    const next = normalizeAboutForSave(aboutDraft)
+    const prev = aboutSaved
+    if (next === normalizeAboutForSave(prev)) {
+      setAboutEditing(false)
+      return
+    }
+    setAboutSaving(true)
+    mergeProfileCache(idShown, { about: next, updatedAt: Date.now() })
+    setAboutSaved(next)
+    try {
+      const r = await fetch('/api/profile/set-about', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          about: next,
+          accountId: idShown,
+          asherId: idShown,
+        }),
+      })
+      const j = await r.json().catch(() => null)
+      if (!r.ok || !j?.ok) throw new Error(j?.error || 'save_failed')
+      const savedAccountId = String(j.accountId || idShown).trim()
+      writeProfileAlias(idShown, savedAccountId)
+      mergeProfileCache(savedAccountId, { about: j.about || next, updatedAt: Date.now() })
+      setAboutSaved(j.about || next)
+      setAboutEditing(false)
+    } catch {
+      mergeProfileCache(idShown, { about: prev, updatedAt: Date.now() })
+      setAboutSaved(prev)
+    } finally {
+      setAboutSaving(false)
+    }
+  }, [aboutDraft, aboutSaved, aboutSaving, idShown])
+
   const [profileOpen, setProfileOpen] = useState(false)
   const avatarRef = useRef(null)
 // === VIDEO FEED: состояние + хелперы =====================
@@ -13397,6 +13748,17 @@ function pickAdUrlForSlot(slotKey, slotKind) {
      <QCoinInline t={t} userKey={idShown} vipActive={vipActive} />
    </div>
  </div> 
+  <AboutRail
+   t={t}
+   value={aboutSaved}
+   draft={aboutDraft}
+   editing={aboutEditing}
+   saving={aboutSaving}
+   onStartEdit={startAboutEdit}
+   onChange={setAboutDraft}
+   onCancel={cancelAboutEdit}
+   onSave={saveAbout}
+ />
           {/* === НОВОЕ: правый встроенный контейнер управления === */}
           <div className="controls">
             {/* поиск + сорт */}
@@ -14314,7 +14676,17 @@ onOpenThread={(clickP) => {
      <QCoinInline t={t} userKey={idShown} vipActive={vipActive} />
    </div>
  </div>
- 
+  <AboutRail
+   t={t}
+   value={aboutSaved}
+   draft={aboutDraft}
+   editing={aboutEditing}
+   saving={aboutSaving}
+   onStartEdit={startAboutEdit}
+   onChange={setAboutDraft}
+   onCancel={cancelAboutEdit}
+   onSave={saveAbout}
+ />
           {/* === НОВОЕ: правый встроенный контейнер управления === */}
           <div className="controls">
             {/* поиск + сорт */}
