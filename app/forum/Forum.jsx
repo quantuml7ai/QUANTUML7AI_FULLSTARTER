@@ -12843,10 +12843,53 @@ try { startSoftProgress?.(72, 200, 88); } catch {}  // мягко едем к ~8
 const [videoFeedOpen, setVideoFeedOpen] = React.useState(false);
 const [videoFeed, setVideoFeed] = React.useState([]);
 const [feedSort, setFeedSort] = React.useState('new'); // new/top/likes/views/replies
+
+// ✅ VIDEO_FEED: при каждом входе в ленту сначала показываем «перетасованную» (рандомную) выдачу.
+// После ручного выбора сортировки — работаем в обычном режиме.
+const [videoFeedEntryToken, setVideoFeedEntryToken] = React.useState(0);
+const [videoFeedUserSortLocked, setVideoFeedUserSortLocked] = React.useState(false);
+
+// детерминированный shuffle (стабилен в рамках одного входа в ленту)
+function __vfHash32(str) {
+  // FNV-1a 32bit
+  let h = 0x811c9dc5;
+  const s = String(str || '');
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0);
+}
+
+function __vfMulberry32(seed) {
+  let a = (seed >>> 0) || 1;
+  return function rnd() {
+    a |= 0;
+    a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function __vfShuffleStable(list, seedStr) {
+  const arr = Array.isArray(list) ? list.slice() : [];
+  if (arr.length <= 1) return arr;
+  const rnd = __vfMulberry32(__vfHash32(seedStr));
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    const tmp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = tmp;
+  }
+  return arr;
+}
+
 useEffect(() => {
   if (!videoFeedOpen) return;
   setVisibleVideoCount(VIDEO_PAGE_SIZE);
 }, [videoFeedOpen, feedSort, starMode, starredAuthors]);
+
 const visibleVideoFeed = React.useMemo(
   () => (videoFeed || []).slice(0, visibleVideoCount),
   [videoFeed, visibleVideoCount]
@@ -13024,24 +13067,41 @@ for (const p of all) {
 }
 
 
-  const score = (p) => {
-    const likes = Number(p?.likes || 0);
-    const views = Number(p?.views || 0);
-    const replies = repliesMap.get(pidOf(p)) || 0;
-    switch (feedSort) {
-      case 'new':     return Number(p?.ts || 0);
-      case 'likes':   return likes;
-      case 'views':   return views;
-      case 'replies': return replies;
-      case 'top':
-      default:
-        return (likes * 2) + replies + Math.floor(views * 0.2);
-    }
-  };
+// ✅ при каждом входе в видео-ленту: сначала работаем в «random»,
+// пока юзер не кликнул сортировку вручную.
+const effectiveFeedSort = videoFeedUserSortLocked ? feedSort : 'random';
 
-const only = all
-  .filter(isMediaPost)
-  .sort((a,b) => (score(b) - score(a)) || (Number(b?.ts||0) - Number(a?.ts||0)));
+const score = (p) => {
+  const likes = Number(p?.likes || 0);
+  const views = Number(p?.views || 0);
+  const replies = repliesMap.get(pidOf(p)) || 0;
+  switch (effectiveFeedSort) {
+    case 'new':     return Number(p?.ts || 0);
+    case 'likes':   return likes;
+    case 'views':   return views;
+    case 'replies': return replies;
+    case 'top':
+      return (likes * 2) + replies + Math.floor(views * 0.2);
+    case 'random':
+    default:
+      return 0;
+  }
+};
+
+let only = all
+  .filter(isMediaPost);
+
+if (effectiveFeedSort === 'random') {
+  // ⚠️ важное: shuffle должен быть стабильным, иначе при любом setState/рендере
+  // лента будет «прыгать». Поэтому seed завязан на вход (token) и пользователя.
+  const seedStr = `${String(viewerId || '')}|${String(videoFeedEntryToken || 0)}`;
+  // слегка стабилизируем базовый порядок перед shuffle, чтобы новые посты
+  // не «вклинивались» случайно в разные места на каждом билде.
+  const base = only.slice().sort((a,b) => (Number(b?.ts||0) - Number(a?.ts||0)));
+  only = __vfShuffleStable(base, seedStr);
+} else {
+  only = only.sort((a,b) => (score(b) - score(a)) || (Number(b?.ts||0) - Number(a?.ts||0)));
+}
 
 // ✅ прокидываем количество ответов прямо в объект поста для UI
 const onlyWithReplyCounts = only.map((p) => {
@@ -13061,11 +13121,16 @@ setVideoFeed(withStars);
 
 /** открыть ленту видео */
 function openVideoFeed() {
+  // ✅ каждый вход в видео-ленту стартует с «перетасованной» выдачи
+  // (даже если в прошлый раз юзер ставил сортировку по лайкам/топу).
+  setVideoFeedUserSortLocked(false);
+  setVideoFeedEntryToken((x) => x + 1);
+
   setVideoFeedOpen(true);
   try { setInboxOpen?.(false); } catch {}
   try { setSel?.(null); setThreadRoot?.(null); } catch {}
   try { setTopicFilterId?.(null); } catch {}
-   try { setTimeout(() => document.querySelector('[data-forum-video-start="1"]')?.scrollIntoView({ behavior:'smooth', block:'start' }), 0); } catch {}
+  try { setTimeout(() => document.querySelector('[data-forum-video-start="1"]')?.scrollIntoView({ behavior:'smooth', block:'start' }), 0); } catch {}
 }
 
 /** закрыть ленту видео */
@@ -14106,7 +14171,12 @@ if (tt) {
     className="item w-full text-left mb-1"
 // [SORT_MENU:CLICK]
 onClick={()=>{
-  if (videoFeedOpen) setFeedSort(k);
+  if (videoFeedOpen) {
+    // ✅ как только юзер выбрал сортировку вручную — выходим из «рандомного входа»
+    // и дальше сортируем в обычном режиме (new/top/likes/...)
+    setVideoFeedUserSortLocked(true);
+    setFeedSort(k);
+  }
   else if (sel) setPostSort(k);
   else setTopicSort(k);
   setSortOpen(false);
@@ -15034,11 +15104,17 @@ if (tt) {
     className="item w-full text-left mb-1"
 // [SORT_MENU:CLICK]
 onClick={()=>{
-  if (videoFeedOpen) setFeedSort(k);
+  if (videoFeedOpen) {
+    // ✅ как только юзер выбрал сортировку вручную — выходим из «рандомного входа»
+    // и дальше сортируем в обычном режиме (new/top/likes/...)
+    setVideoFeedUserSortLocked(true);
+    setFeedSort(k);
+  }
   else if (sel) setPostSort(k);
   else setTopicSort(k);
   setSortOpen(false);
 }}
+
 
   >
     {txt}
