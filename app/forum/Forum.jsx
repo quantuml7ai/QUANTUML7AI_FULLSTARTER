@@ -4242,6 +4242,29 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
     50% { opacity: 1; }
   }
   .cmbMain{ flex: 1; min-width: 0; }
+
+  .cmbCancel{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width: 30px;
+    min-width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 80, 80, .42);
+    background: rgba(255, 40, 40, .14);
+    color: rgba(255, 140, 140, .98);
+    cursor:pointer;
+    transition: transform .12s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
+  }
+  .cmbCancel:hover{
+    transform: translateY(-1px);
+    background: rgba(255, 40, 40, .22);
+    border-color: rgba(255, 80, 80, .62);
+    box-shadow: 0 10px 26px rgba(255, 60, 60, .18);
+  }
+  .cmbCancel:active{ transform: translateY(0px) scale(.98); }
+  .cmbCancel svg{ width: 18px; height: 18px; display:block; }  
   .cmbTop{
     display:flex;
     align-items:baseline;
@@ -11136,6 +11159,24 @@ const [pendingVideo, setPendingVideo] = useState(null);
   // отдельный флаг: чтобы бар появлялся СРАЗУ при выборе файла (ещё до модерации/аплоада),
   // даже когда pending* ещё не успели заполниться
   const [mediaPipelineOn, setMediaPipelineOn] = useState(false);
+  // AbortController для текущей операции (модерация картинок / аплоад видео/аудио)
+  // Нужен для кнопки ✕ (Cancel) в прогресс-баре.
+  const mediaAbortRef = useRef(null);   // AbortController | null
+  const mediaCancelRef = useRef(false); // boolean
+
+  const ensureMediaAbortController = useCallback(() => {
+    // гасим предыдущую сессию, если она ещё жива
+    try { mediaAbortRef.current?.abort?.(); } catch {}
+    const ac = new AbortController();
+    mediaAbortRef.current = ac;
+    try { mediaCancelRef.current = false; } catch {}
+    return ac;
+  }, []);
+
+  const clearMediaAbortController = useCallback(() => {
+    try { mediaAbortRef.current = null; } catch {}
+    try { mediaCancelRef.current = false; } catch {}
+  }, []);
 
   // таймер/сессия для «плавного» прогресса без реального процента (moderation/fetch upload)
   const mediaProgRef = useRef({ id: 0, timer: null, cap: 0, capMax: 0, stallUntil: 0 });
@@ -11204,13 +11245,25 @@ const startSoftProgress = useCallback((cap = 32, stepMs = 120, capMax = 92) => {
   }, stepMs);
 }, [stopMediaProg]);
   const beginMediaPipeline = useCallback((phase = 'Moderating') => {
+    // IMPORTANT: стартуем новую "сессию" (AbortController) под эту операцию,
+    // чтобы можно было отменить модерацию/аплоад через красный ✕.
+    const ac = ensureMediaAbortController();
+
     // включаем бар сразу, даже если pending* ещё пустые
     setMediaPipelineOn(true);
     setMediaBarOn(true);
     setMediaPhase(phase);
     setMediaPct(1);
-     startSoftProgress(32, 120, 45); // во время модерации “едем” и не залипаем (32→45%)
-  }, [startSoftProgress]);
+
+    // мягкая подложка прогресса: разные траектории для Moderating vs Uploading
+    if (String(phase || '').toLowerCase() === 'uploading') {
+      startSoftProgress(55, 140, 92);
+    } else {
+      startSoftProgress(32, 120, 45); // во время модерации “едем” и не залипаем (32→45%)
+    }
+
+    return ac;
+  }, [startSoftProgress, ensureMediaAbortController]);
 
   const endMediaPipeline = useCallback(() => {
     stopMediaProg();
@@ -11570,6 +11623,34 @@ const resetVideo = () => {
   try { setMediaPipelineOn(false); } catch {}
   // бар сам исчезнет useEffect'ом когда pending* пустые, но пайплайн должен быть false
  };
+// красный ✕ в прогресс-баре: отмена модерации/аплоада и полный сброс состояния медиа
+const cancelMediaOperation = React.useCallback(() => {
+  // 1) Абортим сетевые запросы/аплоады (модерация картинок, аплоад видео/аудио)
+  try { mediaCancelRef.current = true; } catch {}
+  try { mediaAbortRef.current?.abort?.(); } catch {}
+  try { clearMediaAbortController?.(); } catch {}
+
+  // 2) Гасим "мягкий" прогресс и выключаем пайплайн
+  try { stopMediaProg?.(); } catch {}
+  try { setMediaPipelineOn(false); } catch {}
+  try { setMediaBarOn(false); } catch {}
+  try { setMediaPhase('idle'); } catch {}
+  try { setMediaPct(0); } catch {}
+  try { setVideoProgress(0); } catch {}
+
+  // 3) Сбрасываем прикреплённые медиа
+  try { setPendingImgs([]); } catch {}
+  try {
+    if (pendingAudio && /^blob:/.test(pendingAudio)) URL.revokeObjectURL(pendingAudio);
+  } catch {}
+  try { setPendingAudio(null); } catch {}
+  try { resetVideo(); } catch {}
+
+  // 4) Закрываем fullscreen overlay (если был)
+  try { setVideoOpen(false); } catch {}
+  try { setOverlayMediaUrl(null); } catch {}
+  try { setOverlayMediaKind('video'); } catch {}
+}, [pendingAudio, resetVideo, stopMediaProg, clearMediaAbortController]);
 
 // === fullscreen overlay (и для видео, и для изображения) ===
 const closeMediaOverlay = () => {
@@ -11686,7 +11767,7 @@ const fileToJpegBlob = React.useCallback(async (file, opts = {}) => {
 }, []);
 
 // ---- Call server moderation with FormData(files[]) ----
-const moderateViaApi = React.useCallback(async (blobs, meta = {}) => {
+const moderateViaApi = React.useCallback(async (blobs, meta = {}, opts = {}) => {
   // blobs: [{ blob, name, source? , timeSec? }]
   const fd = new FormData();
   for (const it of (blobs || [])) {
@@ -11699,7 +11780,7 @@ const moderateViaApi = React.useCallback(async (blobs, meta = {}) => {
   if (meta?.clientRequestId) fd.append('clientRequestId', String(meta.clientRequestId));
   // server returns allow/block/review; STRICT/BALANCED applied on client
   try {
-    const res = await fetch('/api/forum/moderate', { method: 'POST', body: fd, cache: 'no-store' });
+    const res = await fetch('/api/forum/moderate', { method: 'POST', body: fd, cache: 'no-store', signal: opts?.signal });
     const j = await res.json().catch(() => null);
     if (!res.ok || !j) {
       const errMsg = (j && j.error) ? String(j.error) : 'moderation_http_error';
@@ -11714,7 +11795,7 @@ const moderateViaApi = React.useCallback(async (blobs, meta = {}) => {
 }, []);
 
 // ---- Image moderation (files[]) ----
-const moderateImageFiles = React.useCallback(async (files) => {
+const moderateImageFiles = React.useCallback(async (files, opts = {}) => {
   if (!Array.isArray(files) || !files.length) return { decision: 'allow', reason: 'unknown' };
 
   toastI18n('info', 'forum_moderation_checking', 'Checking content…');
@@ -11726,7 +11807,7 @@ const moderateImageFiles = React.useCallback(async (files) => {
     pack.push({ blob: jpeg, name: (f.name || 'image').replace(/\.(png|jpe?g|webp|gif)$/i, '.jpg') });
   }
 
-  const r = await moderateViaApi(pack, { source: 'image' });
+  const r = await moderateViaApi(pack, { source: 'image' }, opts);
   let decision = String(r?.decision || 'allow');
   const reason = String(r?.reason || 'unknown');
 
@@ -12029,58 +12110,24 @@ const createPost = async () => {
   if (!rl.allowAction()) return _fail(t('forum_too_fast') || 'Слишком часто');
 
 // === media progress UI:
-// - если есть локальные blob-медиа (камера/голос) — показываем реальный пайплайн (Moderating → Uploading)
+// - если есть локальные blob-медиа (камера/голос) — показываем реальный пайплайн (Uploading → Sending)
 // - фазу "Sending" поднимем уже прямо перед pushOp (см. ниже), чтобы не убивать прогресс аплоада
   const hasLocalBlobMedia =
     (pendingVideo && /^blob:/.test(pendingVideo)) ||
     (pendingAudio && /^blob:/.test(pendingAudio));
 
+  let signal = undefined;
   if (hasLocalBlobMedia) {
-    try { setMediaBarOn(true); } catch {}
-    try { setMediaPhase('Moderating'); } catch {}
-    try { setMediaPct(1); } catch {}
-    try { startSoftProgress(32, 120, 45); } catch {}
+    const ac = (() => { try { return beginMediaPipeline?.('Uploading'); } catch { return null; } })();
+    signal = ac?.signal;
   }
-  // 0) VIDEO MODERATION (frames) BEFORE ANY UPLOAD
-  if (pendingVideo) {
-    try {
-      // если pendingVideo = blob: -> достаём Blob и модерируем по кадрам
-      if (/^blob:/.test(pendingVideo)) {
-        const resp = await fetch(pendingVideo);
-        const fileBlob = await resp.blob();
-
-        const mod = await moderateVideoSource(fileBlob);
-
-        if (mod?.decision === 'block') {
-          toastI18n('warn', 'forum_video_blocked', 'Video rejected by community rules');
-          toastI18n('info', reasonKey(mod?.reason), reasonFallbackEN(mod?.reason));
-          try { resetVideo(); } catch {}
-          return _fail();
-        }
-
-        if (mod?.decision === 'review') {
-          // STRICT уже превратил review -> block в moderateVideoSource()
-          // BALANCED: allow + лог
-          try { console.warn('[moderation] video review -> allow (balanced)', mod?.reason, mod?.raw); } catch {}
-        }
-      }
-    } catch (e) {
-      console.error('[moderation] video check failed', e);
-      // как в соцсетях: если модерация недоступна — сообщаем, но не валим всё подряд.
-      // В STRICT можно блокировать, но мы уже сделали STRICT=block если кадры не извлеклись.
-      toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
-      toastI18n('info', 'forum_moderation_try_again', 'Please try again');
-      return _fail();
-    }
-  }
-
   // 0) ВИДЕО: прямая загрузка в Vercel Blob через /api/forum/blobUploadUrl
   let videoUrlToSend = '';
   if (pendingVideo) {
     try {
       if (/^blob:/.test(pendingVideo)) {
         // получаем Blob из локального blob:-URL
-        const resp = await fetch(pendingVideo);
+        const resp = await fetch(pendingVideo, { signal });
         const fileBlob = await resp.blob(); // type: video/webm|mp4|quicktime
         const mime = String(fileBlob.type || '').split(';')[0].trim().toLowerCase();
         if (!/^video\/(mp4|webm|quicktime)$/.test(mime)) throw new Error('bad_type');
@@ -12095,7 +12142,8 @@ const createPost = async () => {
         const result = await upload(name, fileBlob, {
           access: 'public',
           handleUploadUrl: '/api/forum/blobUploadUrl', // ← наш единственный роут
-          multipart: true,                                // надёжно для больших файлов
+          multipart: true,
+          signal,                                // надёжно для больших файлов
           contentType: mime,
           onUploadProgress: (p) => {
             const upPct = Math.max(0, Math.min(100, Number(p?.percentage || 0)));
@@ -12113,11 +12161,12 @@ const createPost = async () => {
         // уже готовый https-URL
         videoUrlToSend = pendingVideo;
       }
-    } catch (e) {
-      console.error('video_client_upload_failed', e);
-      try { toast?.err?.('Не удалось загрузить видео'); } catch {}
-      return _fail();
-    }
+      } catch (e) {
+        if (e?.name === 'AbortError' || signal?.aborted) return _fail();
+        console.error('video_client_upload_failed', e);
+        try { toast?.err?.('Не удалось загрузить видео'); } catch {}
+        return _fail();
+      }
   }
   // 0b) аудио: blob -> https
   let audioUrlToSend = '';
@@ -12127,7 +12176,7 @@ const createPost = async () => {
         // UI: аплоад голоса (без прогресса на fetch) — двигаем шкалу вперёд
         try { setMediaPhase('Uploading'); } catch {}
         try { setMediaPct(p => Math.max(45, Number(p || 0))); } catch {}        
-        const resp = await fetch(pendingAudio);
+        const resp = await fetch(pendingAudio, { signal });
         const blob = await resp.blob();
         const fd = new FormData();
         fd.append('file', blob, `voice-${Date.now()}.webm`);
@@ -12557,9 +12606,12 @@ const onFilesChosen = React.useCallback(async (e) => {
     );
 
   // === MEDIA PIPELINE: показываем прогресс сразу (ещё до модерации) ===
+ // ВАЖНО: signal должен быть В ЭТОЙ ФУНКЦИИ (а не в блочном scope), иначе video-upload падает до вызова Blob-роута.
+ let signal = undefined;
   if ((imgFiles?.length || 0) > 0 || (vidFiles?.length || 0) > 0) {
     // стартуем с «Moderating» и мягким движением к ~18%
-    try { beginMediaPipeline?.('Moderating'); } catch {}
+    const ac = (() => { try { return beginMediaPipeline?.(imgFiles.length ? 'Moderating' : (vidFiles.length ? 'Uploading' : 'Moderating')); } catch { return null; } })();
+    signal = ac?.signal;
   } else {
     // если невалидные файлы — пайплайн не нужен
     try { endMediaPipeline?.(); } catch {}
@@ -12589,8 +12641,9 @@ const onFilesChosen = React.useCallback(async (e) => {
     if (imgFiles.length) {
       let modImg = null;
       try {
-        modImg = await moderateImageFiles(imgFiles);
+        modImg = await moderateImageFiles(imgFiles, { signal });
       } catch (err) {
+        if (err?.name === 'AbortError' || signal?.aborted) { try { endMediaPipeline?.(); } catch {} return; }
         console.error('[moderation] image check failed', err);
         toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
         toastI18n('info', 'forum_moderation_try_again', 'Please try again');
@@ -12615,7 +12668,7 @@ try { startSoftProgress?.(72, 200, 88); } catch {}  // мягко едем к ~8
       const fd = new FormData();
       for (const f of imgFiles.slice(0, 20)) fd.append('files', f, f.name);
 
-      const res = await fetch('/api/forum/upload', { method: 'POST', body: fd, cache: 'no-store' });
+      const res = await fetch('/api/forum/upload', { method: 'POST', body: fd, cache: 'no-store', signal });
       if (!res.ok) throw new Error('upload_failed');
 
       const up = await res.json().catch(() => ({ urls: [] }));
@@ -12651,25 +12704,7 @@ try { startSoftProgress?.(72, 200, 88); } catch {}  // мягко едем к ~8
       if (Number(vf.size || 0) > 300 * 1024 * 1024) {
         try { toast?.err?.(t?.('forum_video_too_big') || 'Video is larger than 300MB'); } catch {}
         return;
-      }
-
-      // MODERATION BEFORE UPLOAD (как у тебя в createPost для pendingVideo)
-      try {
-        const modV = await moderateVideoSource(vf);
-        if (modV?.decision === 'block') {
-          toastI18n('warn', 'forum_video_blocked', 'Video rejected by community rules');
-          toastI18n('info', reasonKey(modV?.reason), reasonFallbackEN(modV?.reason));
-          return;
-        }
-        if (modV?.decision === 'review') {
-          try { console.warn('[moderation] video review -> allow (balanced)', modV?.reason, modV?.raw); } catch {}
-        }
-      } catch (e2) {
-        console.error('[moderation] video check failed', e2);
-        toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
-        toastI18n('info', 'forum_moderation_try_again', 'Please try again');
-        return;
-      }
+      } 
 
       // UPLOAD TO VERCEL BLOB (тот же роут, что у записи с камеры)
       try {
@@ -12689,7 +12724,17 @@ try { startSoftProgress?.(72, 200, 88); } catch {}  // мягко едем к ~8
           access: 'public',
           handleUploadUrl: '/api/forum/blobUploadUrl',
           multipart: true,
-          contentType: (mime || (ext === 'mp4' ? 'video/mp4' : (ext === 'mov' ? 'video/quicktime' : 'video/webm'))),
+          signal,
+         contentType: (mime || (ext === 'mp4' ? 'video/mp4' : (ext === 'mov' ? 'video/quicktime' : 'video/webm'))),
+         onUploadProgress: (p) => {
+           const upPct = Math.max(0, Math.min(100, Number(p?.percentage || 0)));
+           // Uploading занимает ~40..95% в общей шкале
+           const overall = 40 + (upPct * 0.55);
+           try { stopMediaProg?.(); } catch {}
+           try { setMediaPhase?.('Uploading'); } catch {}
+           try { setVideoProgress?.(upPct); } catch {}
+           try { setMediaPct?.(prev => Math.max(Number(prev || 0), overall)); } catch {}
+         },      
         });
 
         const url = result?.url || '';
@@ -12708,8 +12753,9 @@ try { startSoftProgress?.(72, 200, 88); } catch {}  // мягко едем к ~8
         } else {
           throw new Error('no_url');
         }   
-   } catch (e3) {
-        console.error('video_client_upload_failed', e3);
+        } catch (e3) {
+          if (e3?.name === 'AbortError' || signal?.aborted) { try { endMediaPipeline?.(); } catch {} return; }
+          console.error('video_client_upload_failed', e3);
         try { toast?.err?.(t?.('forum_video_upload_failed') || 'Failed to upload video'); } catch {}
         return;
       }
@@ -12725,7 +12771,7 @@ try { startSoftProgress?.(72, 200, 88); } catch {}  // мягко едем к ~8
   } finally {
     if (e?.target) e.target.value = '';
   }
-}, [t, toast, moderateImageFiles, moderateVideoSource, toastI18n, reasonKey, reasonFallbackEN, beginMediaPipeline, endMediaPipeline, stopMediaProg, startSoftProgress]);
+}, [t, toast, moderateImageFiles, toastI18n, reasonKey, reasonFallbackEN, beginMediaPipeline, endMediaPipeline, setPendingImgs, setPendingVideo, markMediaReady, startSoftProgress, stopMediaProg, setMediaPhase, setMediaPct, setVideoProgress]);
 
   /* ---- профиль (поповер у аватара) ---- */
   const idShown = resolveProfileAccountId(auth.asherId || auth.accountId || '')
@@ -15421,6 +15467,18 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
               <div className="cmbTicks" />
             </div>
           </div>
+
+          <button
+            type="button"
+            className="cmbCancel"
+            title="Cancel"
+            aria-label="Cancel upload"
+            onClick={cancelMediaOperation}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 7l10 10M17 7L7 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </button>          
         </div>
       )}
       {/* ЕДИНАЯ ГОРИЗОНТАЛЬНАЯ РЕЛЬСА (вместо боковых) */}
