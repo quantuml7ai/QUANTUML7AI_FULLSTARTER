@@ -137,29 +137,38 @@ async function setPostReaction(postId, userId, state) {
     return { state: next, likes, dislikes, changed: false }
   }
 
-  const pipe = redisDirect.multi()
-  if (prev === 'like') {
-    pipe.srem(likeSet, uid)
-    pipe.decr(likeKey)
-  }
-  if (prev === 'dislike') {
-    pipe.srem(disSet, uid)
-    pipe.decr(disKey)
-  }
-  if (next === 'like') {
-    pipe.sadd(likeSet, uid)
-    pipe.incr(likeKey)
-  }
-  if (next === 'dislike') {
-    pipe.sadd(disSet, uid)
-    pipe.incr(disKey)
-  }
-  await pipe.exec().catch(() => {})
+  // 1) применяем изменение множеств
+  const pipe1 = redisDirect.multi()
+  if (prev === 'like')    pipe1.srem(likeSet, uid)
+  if (prev === 'dislike') pipe1.srem(disSet,  uid)
+  if (next === 'like')    pipe1.sadd(likeSet, uid)
+  if (next === 'dislike') pipe1.sadd(disSet,  uid)
+  try { await pipe1.exec() } catch {}
 
-  const [likes, dislikes] = await Promise.all([
-    getInt(likeKey, 0),
-    getInt(disKey, 0),
-  ])
+  // 2) истина = размеры множеств (SCARD), а не incr/decr
+  let likes = 0, dislikes = 0
+  try {
+    const res = await redisDirect.multi()
+      .scard(likeSet)
+      .scard(disSet)
+      .exec()
+    likes    = Number(res?.[0] ?? 0) || 0
+    dislikes = Number(res?.[1] ?? 0) || 0
+  } catch {
+    // fallback
+    const r = await Promise.allSettled([redisDirect.scard(likeSet), redisDirect.scard(disSet)])
+    likes    = (r[0].status === 'fulfilled' ? Number(r[0].value) : 0) || 0
+    dislikes = (r[1].status === 'fulfilled' ? Number(r[1].value) : 0) || 0
+  }
+
+  // 3) пишем числовые ключи как кеш-значения
+  try {
+    await redisDirect.multi()
+      .set(likeKey, String(likes))
+      .set(disKey,  String(dislikes))
+      .exec()
+  } catch {}
+
   return { state: next, likes, dislikes, changed: true }
 }
 
