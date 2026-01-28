@@ -4878,15 +4878,6 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 .composer[data-active="true"] ~ .fabCompose{
   opacity: 0; transform: translateY(4px) scale(.98); pointer-events: none;
 }
-.actionBar .btnXs{
-  font-variant-numeric: tabular-nums; /* чтобы цифры не “плясали” */
-}
-
-/* фиксируем габарит реакций, чтобы кнопки не сдвигались при росте числа */
-.actionBar button.btnXs{
-  min-width: 68px;
-  justify-content: center;
-}
 
 
 `}</style>
@@ -10007,25 +9998,6 @@ const flushMutations = useCallback(async () => {
     busyRef.current = false;
   }
 }, [persistSnap, persistTombstones]);
-// ===== Debounced flush: мгновенно для важных действий, редко для просмотров =====
-const flushTimerFastRef = useRef(0);
-const flushTimerViewsRef = useRef(0);
-
-const scheduleFlushFast = useCallback(() => {
-  if (flushTimerFastRef.current) return;
-  flushTimerFastRef.current = window.setTimeout(() => {
-    flushTimerFastRef.current = 0;
-    try { flushMutations(); } catch {}
-  }, 120); // почти сразу, но без дребезга
-}, [flushMutations]);
-
-const scheduleFlushViews = useCallback(() => {
-  if (flushTimerViewsRef.current) return;
-  flushTimerViewsRef.current = window.setTimeout(() => {
-    flushTimerViewsRef.current = 0;
-    try { flushMutations(); } catch {}
-  }, 1500); // просмотры отправляем пачкой, не спамим
-}, [flushMutations]);
 // === QCOIN: автопинг активности (CLIENT) ===
 const activeRef  = React.useRef(false);
 const visibleRef = React.useRef(true);
@@ -10219,7 +10191,7 @@ React.useEffect(()=>{
 useEffect(() => {
   if (!isBrowser()) return;
   let stop = false;
-  const TICK_MS = 20_000; // гарантируем подхват максимум ~20-30 сек даже без SSE
+  const TICK_MS = 15_000;
   const FULL_EVERY_MS = 10 * 60 * 1000;
 
   const runTick = async () => {
@@ -12342,7 +12314,7 @@ const createPost = async () => {
     cid:  tmpId,
     id: tmpId,
   });
-scheduleFlushFast();
+
   setComposerActive(false);
   emitCreated(p.id, sel.id);
  
@@ -12400,7 +12372,6 @@ const reactMut = useCallback(async (post, kind) => {
   }));
 
   pushOp('set_reaction', { postId: String(post.id), state: nextState });
-  scheduleFlushFast();
 }, [auth, setOverlay]);
 
 
@@ -12428,7 +12399,6 @@ if(!localStorage.getItem(key)){
       },
     };
   });
-  scheduleFlushViews();
 }
 
 }
