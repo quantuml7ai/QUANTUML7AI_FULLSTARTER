@@ -520,17 +520,21 @@ export async function POST(request) {
     }
     // Пересборка снапшота — ТОЛЬКО когда меняются данные форума,
     // а не на "шум" (просмотры).
-    const SNAPSHOT_REBUILD_OPS = new Set([
-      'create_topic',
-      'create_post',
-      'edit_post',
-      'delete_post',
-      'delete_topic',
-      'ban_user',
-      'unban_user',
-      'ban_ip',
-      'unban_ip', 
-    ])
+const SNAPSHOT_REBUILD_OPS = new Set([
+  'create_topic',
+  'create_post',
+  'edit_post',
+  'delete_post',
+  'delete_topic',
+  'ban_user',
+  'unban_user',
+  'ban_ip',
+  'unban_ip',
+
+  // ✅ ВОТ ОНО — чтобы лайки/дизлайки попадали в полный снапшот
+  'react',
+  'set_reaction',
+])
 
     const needRebuild = results.some(r => !r?.error && SNAPSHOT_REBUILD_OPS.has(String(r?.op || '')))
 

@@ -20,9 +20,9 @@ export async function GET(req) {
     const revTarget = Number.isFinite(+revParam) ? +revParam : 0
 
     // Ключ кэша различает режимы и параметры
-    const key = (since > 0)
-      ? `ince:${since}:${revTarget}:${bust}`
-      : `full:${revTarget}:${bust}`
+const key = (since > 0)
+  ? `since:${since}:${revTarget}:${bust}`
+  : `full:${revTarget}:${bust}`
 
     const now = Date.now()
     const hit = cache.get(key)
