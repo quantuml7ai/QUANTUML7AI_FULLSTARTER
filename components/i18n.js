@@ -45672,6 +45672,9 @@ try {
   Object.assign(dict.tr, GAME_TR)
 } catch (e) {}
 const ROBOT_EN = {
+  forum_video_processing_wait: 'Please wait, the video is being processed',
+forum_image_processing_wait: 'Please wait, the image is being processed',
+
 forum_delete_confirm: '⚠️Delete permanently?⚠️',  
 not_robot_title:'🤖 I AM NOT A ROBOT 🤖',
 not_robot_subtitle:'Confirm that you are human to continue using the platform.',
@@ -45688,6 +45691,9 @@ forum_files_uploaded: 'Upload started',
 forum_files_upload_failed: 'Upload failed',
 }
 const ROBOT_RU = {
+  forum_video_processing_wait: 'Подождите, видео обрабатывается',
+forum_image_processing_wait: 'Подождите, изображение обрабатывается',
+
 forum_delete_confirm: '⚠️Удалить навсегда?⚠️',  
 not_robot_title:'🤖 Я НЕ РОБОТ 🤖',
 not_robot_subtitle:'Подтвердите, что вы человек, чтобы продолжить работу с платформой.',
@@ -45704,6 +45710,9 @@ forum_files_uploaded: 'Началась загрузка',
 forum_files_upload_failed: 'Ошибка загрузки',
 }
 const ROBOT_UK = {
+  forum_video_processing_wait: 'Зачекайте, відео обробляється',
+forum_image_processing_wait: 'Зачекайте, зображення обробляється',
+
 forum_delete_confirm: '⚠️Видалити назавжди?⚠️',  
 not_robot_title:'🤖 Я НЕ РОБОТ 🤖',
 not_robot_subtitle:'Підтвердіть, що ви людина, щоб продовжити роботу з платформою.',
@@ -45720,6 +45729,9 @@ forum_files_uploaded: 'Розпочато завантаження',
 forum_files_upload_failed: 'Помилка завантаження',
 }
 const ROBOT_ES = {
+  forum_video_processing_wait: 'Espere, el video se está procesando',
+forum_image_processing_wait: 'Espere, la imagen se está procesando',
+
 forum_delete_confirm: '⚠️¿Eliminar permanentemente?⚠️',  
 not_robot_title:'🤖 NO SOY UN ROBOT 🤖',
 not_robot_subtitle:'Confirme que usted es una persona para continuar utilizando la plataforma.',
@@ -45736,6 +45748,9 @@ forum_files_uploaded: 'La carga ha comenzado',
 forum_files_upload_failed: 'Error de carga',
 }
 const ROBOT_ZH = {
+  forum_video_processing_wait: '请稍候，视频正在处理中',
+forum_image_processing_wait: '请稍候，图像正在处理中',
+
 forum_delete_confirm: '⚠️永久删除？⚠️',  
 not_robot_title:'🤖 我不是机器人 🤖',
 not_robot_subtitle:'请确认您是人类，以继续使用平台。',
@@ -45752,6 +45767,9 @@ forum_files_uploaded: '上传已开始',
 forum_files_upload_failed: '上传失败',
 }
 const ROBOT_AR = {
+  forum_video_processing_wait: 'يرجى الانتظار، يتم معالجة الفيديو',
+forum_image_processing_wait: 'يرجى الانتظار، تتم معالجة الصورة',
+
 forum_delete_confirm: '⚠️حذف نهائي؟⚠️',  
 not_robot_title:'🤖 لستُ روبوتًا 🤖',
 not_robot_subtitle:'يرجى تأكيد أنك إنسان لمتابعة العمل على المنصة.',
@@ -45768,6 +45786,9 @@ forum_files_uploaded: 'بدأ التحميل',
 forum_files_upload_failed: 'فشل التحميل',
 }
 const ROBOT_TR = {
+  forum_video_processing_wait: 'Lütfen bekleyin, video işleniyor',
+forum_image_processing_wait: 'Lütfen bekleyin, görüntü işleniyor',
+
 forum_delete_confirm: '⚠️Kalıcı olarak silinsin mi?⚠️',  
 not_robot_title:'🤖 ROBOT DEĞİLİM 🤖',
 not_robot_subtitle:'Platformu kullanmaya devam etmek için lütfen insan olduğunuzu doğrulayın.',
