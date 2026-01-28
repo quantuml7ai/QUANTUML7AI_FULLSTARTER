@@ -3330,10 +3330,11 @@ font-size: 12px;
 }
 .kebabBtn:hover{ filter:brightness(1.1); }
 .ownerMenu{
-position:absolute; right:0; top:30px; display:flex; flex-direction:column; gap:6px;
+position:absolute; right:30px; top:0px; display:flex; flex-direction:column; gap:6px; 
 padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.14);
   border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.35); z-index:20; visibility:hidden;
 }
+
 .ownerKebab:focus-within .ownerMenu,
 .ownerKebab:hover .ownerMenu{ visibility:visible; }
 .ownerMenu .danger{
@@ -6498,7 +6499,10 @@ if (mountedRef.current) setBusy(false);
       </div>
       <div className="grid gap-2">
         <label className="block">
-          <div className="meta mb-1">{t('forum_profile_nickname')}</div>
+          <div className="topicDesc text-[#eaf4ff]/75 text-sm
+      !whitespace-normal break-words
+      [overflow-wrap:anywhere]
+      max-w-full mt-1">{t('forum_profile_nickname')}</div>
           <input
             className={['input',
               nickFree===true ? 'ok' : '',
@@ -6516,6 +6520,7 @@ if (mountedRef.current) setBusy(false);
           </div>
         </label>
         <div>
+      <div style={{height:1,opacity:.2,background:'currentColor',margin:'20px 4px'}} />
            
           <div className="profileAvatarHead">
             <div className="meta">{t('forum_profile_avatar')}</div>
@@ -6523,10 +6528,12 @@ if (mountedRef.current) setBusy(false);
               {uploadFile ? `${imgInfo.w || 0}×${imgInfo.h || 0}` : (t('') || '')}
             </div>
           </div>
+
 <div className="profileList">
   {/* VIP блок (верхняя строка) */}
   <div className="p-1">
     <div className="emojiTitle">{t('') /* "VIP+ аватары" */}</div>
+
     <div className="iconWrap">
       {VIP_AVATARS.slice(0,130).map(src => (
         <button
