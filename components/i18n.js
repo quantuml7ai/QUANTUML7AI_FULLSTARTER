@@ -7035,7 +7035,10 @@ forum_admin_pass: 'Для доступу введіть Адмін-пароль.
   forum_profile_nickname_ph: 'Як до вас звертатися?',
   forum_profile_avatar: 'VIP+ Аватар',
   forum_avatar_vip: 'VIP+ аватари',
-
+forum_about_placeholder: 'Натисніть, щоб розповісти про себе',
+forum_about_save: 'Зберегти',
+forum_about_cancel: 'Скасувати',
+forum_about_limit: 'Ліміт:',
   // VIP+
 forum_vip_only: 'Лише для VIP+',
 forum_vip_plus: 'VIP+',
@@ -7278,6 +7281,10 @@ forum_admin_pass: '请输入管理员密码以获得访问权限。⚠️ 警告
   forum_profile_nickname_ph: '我们如何称呼你？',
   forum_profile_avatar: 'VIP+ 头像',
   forum_avatar_vip: 'VIP+ 头像',
+forum_about_placeholder: '点击这里介绍你自己',
+forum_about_save: '保存',
+forum_about_cancel: '取消',
+forum_about_limit: '限制:',
 
   // VIP+
 forum_vip_only: '仅限 VIP+',
