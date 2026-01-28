@@ -8,8 +8,58 @@ import { useRouter } from 'next/navigation';
 
 /* ======================= CAMPAIGN META ======================= */
 const AD_LABEL_FONT_SIZE_PX = 20;
+
+/* ======================= GLOBAL SOUND MEMORY (Forum.jsx-compatible) ======================= */
+// ДОЛЖНО совпадать со схемой форума:
+const MEDIA_MUTED_KEY = 'forum:mediaMuted';
+const MEDIA_VIDEO_MUTED_KEY = 'forum:videoMuted'; // fallback совместимости
+const MEDIA_MUTED_EVENT = 'forum:media-mute';
+
+function readMutedPrefFromStorage() {
+  if (!isBrowser()) return null;
+  try {
+    let v = window.localStorage?.getItem(MEDIA_MUTED_KEY);
+    if (v == null) v = window.localStorage?.getItem(MEDIA_VIDEO_MUTED_KEY);
+    if (v == null) return null;
+    return v === '1' || v === 'true';
+  } catch {
+    return null;
+  }
+}
+
+function writeMutedPrefToStorage(val) {
+  if (!isBrowser()) return;
+  try {
+    window.localStorage?.setItem(MEDIA_MUTED_KEY, val ? '1' : '0');
+  } catch {}
+}
+
+function emitMutedPref(val, id, source = 'forum-ads') {
+  if (!isBrowser()) return;
+  try {
+    window.dispatchEvent(
+      new CustomEvent(MEDIA_MUTED_EVENT, {
+        detail: { muted: !!val, id, source },
+      })
+    );
+  } catch {}
+}
+
+function desiredMutedFromPref(pref) {
+  // Если префа нет — стартуем muted=true (иначе автоплей часто будет блокироваться браузером).
+  return pref == null ? true : !!pref;
+}
+// ===== FIXED AD SLOT HEIGHT (px) =====
+// Контент внутри вписывается, но высота/ширина слота не растут.
+const AD_SLOT_HEIGHT_PX = {
+  mobile: 520,   // < 640px
+  tablet: 620,   // 640..1023px
+  desktop: 650,  // >= 1024px
+};
+
 const CAMPAIGN_ID = 'forum_ads_v1';
 const FALLBACK_CAMPAIGN_SEED = 'forum_ads_seed';
+
 
 const DEFAULT_THUMB_SERVICES = [
   'https://image.thum.io/get/width/960/{url}',
@@ -745,6 +795,17 @@ export function AdCard({ url, slotKind, nearId }) {
   const [media, setMedia] = useState({ kind: 'skeleton', src: null });
   const [muted, setMuted] = useState(true);
 
+  // уникальный id инстанса, чтобы не ловить свой же event
+  const playerIdRef = useRef(
+    `ad_${Math.random().toString(36).slice(2)}_${Date.now()}`
+  );
+
+  // init muted from global pref (forum scheme)
+  useEffect(() => {
+    const pref = readMutedPrefFromStorage();
+    const want = desiredMutedFromPref(pref);
+    setMuted(want);
+  }, []);
   // текущий выбранный mediaHref (конкретный youtube / картинка и т.п.)
   const [mediaHref, setMediaHref] = useState(null);
 
@@ -762,6 +823,11 @@ export function AdCard({ url, slotKind, nearId }) {
 
   const shouldPlay = isFocused && isPageActive;
   const shouldPlayRef = useRef(false);
+  const slotCssVars = {
+    '--ad-slot-h-m': `${AD_SLOT_HEIGHT_PX.mobile}px`,
+    '--ad-slot-h-t': `${AD_SLOT_HEIGHT_PX.tablet}px`,
+    '--ad-slot-h-d': `${AD_SLOT_HEIGHT_PX.desktop}px`,
+  };
 
   useEffect(() => {
     shouldPlayRef.current = shouldPlay;
@@ -815,6 +881,37 @@ export function AdCard({ url, slotKind, nearId }) {
     };
   }, []);
 
+  // ===== Global mute sync from forum =====
+  useEffect(() => {
+    if (!isBrowser()) return;
+
+    const onMuted = (e) => {
+      const d = e?.detail || {};
+      if (d?.id && d.id === playerIdRef.current) return; // ignore self
+      if (typeof d?.muted !== 'boolean') return;
+
+      const next = !!d.muted;
+      setMuted(next);
+
+      // HTML5
+      if (videoRef.current) {
+        try {
+          videoRef.current.muted = next;
+        } catch {}
+      }
+
+      // YouTube
+      if (ytPlayerRef.current) {
+        try {
+          if (next) ytPlayerRef.current.mute?.();
+          else ytPlayerRef.current.unMute?.();
+        } catch {}
+      }
+    };
+
+    window.addEventListener(MEDIA_MUTED_EVENT, onMuted);
+    return () => window.removeEventListener(MEDIA_MUTED_EVENT, onMuted);
+  }, []);
   const safeClick = useMemo(() => {
     try {
       const u = new URL(url);
@@ -1139,7 +1236,7 @@ export function AdCard({ url, slotKind, nearId }) {
           playerVars: {
             autoplay: 0,
             controls: 0,
-            mute: 1,
+            mute: muted ? 1 : 0,
             rel: 0,
             fs: 0,
             modestbranding: 1,
@@ -1152,10 +1249,11 @@ export function AdCard({ url, slotKind, nearId }) {
               if (cancelled) return;
               ytPlayerRef.current = ev.target;
               try {
-                ev.target.mute();
+                if (muted) ev.target.mute?.();
+                else ev.target.unMute?.();
                 // Играем только если реально в фокусе внимания
-                if (shouldPlayRef.current) ev.target.playVideo();
-                else ev.target.pauseVideo();
+                if (shouldPlayRef.current) ev.target.playVideo?.();
+                else ev.target.pauseVideo?.();
               } catch {}
             },
           },
@@ -1184,14 +1282,27 @@ export function AdCard({ url, slotKind, nearId }) {
     return () => {
       cancelled = true;
     };
-  }, [media]);
+  }, [media, muted]);
   // ===== Hard stop / resume playback depending on attention =====
   useEffect(() => {
     // HTML5 video
     if (media.kind === 'video' && videoRef.current) {
       const v = videoRef.current;
       if (shouldPlay) {
-        v.play?.().catch(() => {});
+        // синхроним mute ДО play
+        try {
+          v.muted = !!muted;
+        } catch {}
+
+        v.play?.().catch(() => {
+          // если пробовали со звуком и браузер запретил — откатим в mute глобально
+          if (!muted) {
+            writeMutedPrefToStorage(true);
+            emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback');
+            setMuted(true);
+            try { v.muted = true; } catch {}
+          }
+        });
       } else {
         v.pause?.();
       }
@@ -1301,43 +1412,80 @@ export function AdCard({ url, slotKind, nearId }) {
   const handleToggleSound = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    const next = !muted;
 
+    // 1) сохранить глобально + оповестить всех
+    writeMutedPrefToStorage(next);
+    emitMutedPref(next, playerIdRef.current, 'forum-ads-toggle');
+
+    // 2) локально
+    setMuted(next);
+
+    // HTML5
     if (media.kind === 'video' && videoRef.current) {
       const v = videoRef.current;
-      const next = !muted;
-      v.muted = next;
-
-      // Не запускаем видео, если блок не в фокусе внимания
-      if (v.paused && !next && shouldPlayRef.current) v.play?.().catch(() => {});
-
-      setMuted(next);
-    } else if (media.kind === 'youtube' && ytPlayerRef.current) {
-      const p = ytPlayerRef.current;
-      const next = !muted;
       try {
-        if (next) {
-          p.mute();
-        } else {
-          p.unMute();
-          // Тоже не запускаем вне фокуса
-          if (shouldPlayRef.current) p.playVideo();
-        }
+        v.muted = next;
       } catch {}
-      setMuted(next);
+      if (v.paused && !next && shouldPlayRef.current) v.play?.().catch(() => {});
+      return;
     }
 
+    // YouTube
+    if (media.kind === 'youtube' && ytPlayerRef.current) {
+      const p = ytPlayerRef.current;
+      try { 
+        if (next) p.mute?.();
+        else {
+          p.unMute?.();
+          if (shouldPlayRef.current) p.playVideo?.();
+        }
+      } catch {} 
+    } 
   };
 
   const showSoundButton =
     media.kind === 'video' || media.kind === 'youtube';
 
   return (
-    <div
-      ref={rootRef}
-      className="item forum-ad-card"
-      data-slot-kind={slotKind}
-      data-ads="1"
-    >
+<div
+  ref={rootRef}
+  className="item forum-ad-card"
+  data-slot-kind={slotKind}
+  data-ads="1"
+  style={slotCssVars}
+>
+  <style jsx>{`
+    .forum-ad-media-slot {
+      width: 100%;
+      height: var(--ad-slot-h-m);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: 0.5rem;
+      background: var(--bg-soft, #020817);
+    }
+    @media (min-width: 640px) {
+      .forum-ad-media-slot {
+        height: var(--ad-slot-h-t);
+      }
+    }
+    @media (min-width: 1024px) {
+      .forum-ad-media-slot {
+        height: var(--ad-slot-h-d);
+      }
+    }
+
+    /* Вписать целиком, без обрезки */
+    .forum-ad-fit {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+    }
+  `}</style>
+
       <a
         href={clickHref}
         target="_blank"
@@ -1390,78 +1538,67 @@ export function AdCard({ url, slotKind, nearId }) {
 
           {/* media: заполняет карточку */}
 <div
-  className="relative mt-0.5 overflow-hidden rounded-lg border border-[color:var(--border,#27272a)] bg-[color:var(--bg-soft,#020817)] flex-1 min-h-[140px] max-h-[400px] flex items-center justify-center"
->            {media.kind === 'skeleton' && (
+  className="relative mt-0.5 border border-[color:var(--border,#27272a)] forum-ad-media-slot"
+>
+          
+ {media.kind === 'skeleton' && (
               <div className="animate-pulse w-full h-full bg-[color:var(--skeleton,#111827)]" />
             )}
 
             {media.kind === 'video' && media.src && (
-              <video
-                ref={videoRef}
-                src={media.src}
-                className="w-full h-full object-cover" 
-                muted={muted}
-                loop
-                playsInline
-                preload={isNear ? 'metadata' : 'none'}
-              />
+<video
+  ref={videoRef}
+  src={media.src}
+  className="forum-ad-fit"
+  muted={muted}
+  loop
+  playsInline
+  preload={isNear ? 'metadata' : 'none'}
+/>
+
             )}
 
 
             {media.kind === 'youtube' && media.src && (
-              <div
-                className="w-full h-full"
-                style={{
-                  position: 'relative',
-                  paddingBottom: '56.25%',
-                  overflow: 'hidden',
-                  borderRadius: 10,
-                }}
-              >
-                <iframe
-                  ref={ytIframeRef}
-                  src={`https://www.youtube.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}
-                  title="YouTube video"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: 10,
-                    pointerEvents: 'none', // не реагируем на мышку, все клики уходят в <a>
-                  }}
-                />
-              </div>
+<div className="w-full h-full relative overflow-hidden rounded-lg">
+  <iframe
+    ref={ytIframeRef}
+    src={`https://www.youtube.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}
+    title="YouTube video"
+    frameBorder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    allowFullScreen
+    style={{
+      position: 'absolute',
+      inset: 0,
+      width: '100%',
+      height: '100%',
+      borderRadius: 10,
+      pointerEvents: 'none',
+    }}
+  />
+</div>
+
             )}
 
             {media.kind === 'tiktok' && media.src && shouldPlay && (
-              <div
-                className="w-full h-full"
-                style={{
-                  position: 'relative',
-                  paddingBottom: '177.78%',
-                  overflow: 'hidden',
-                  borderRadius: 10,
-                }}
-              >
-                <iframe
-                  src={`https://www.tiktok.com/embed/v2/${media.src}`}
-                  title="TikTok video"
-                  frameBorder="0"
-                  allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: 10,
-                    pointerEvents: 'none',
-                  }}
-                />
-              </div>
+<div className="w-full h-full relative overflow-hidden rounded-lg">
+  <iframe
+    src={`https://www.tiktok.com/embed/v2/${media.src}`}
+    title="TikTok video"
+    frameBorder="0"
+    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+    style={{
+      position: 'absolute',
+      inset: 0,
+      width: '100%',
+      height: '100%',
+      borderRadius: 10,
+      pointerEvents: 'none',
+    }}
+  />
+</div>
+
             )}
 
             {media.kind === 'tiktok' && media.src && !shouldPlay && (
@@ -1473,14 +1610,15 @@ export function AdCard({ url, slotKind, nearId }) {
 
             {media.kind === 'image' && media.src && (
            <div className="w-full h-full flex items-center justify-center">
-              <NextImage
-                src={media.src}
-                alt={host}
-                width={1920}
-                height={1080}
-                className="w-full h-full object-cover transition-opacity duration-200"
-                unoptimized
-              />
+<NextImage
+  src={media.src}
+  alt={host}
+  width={1920}
+  height={1080}
+  className="forum-ad-fit transition-opacity duration-200"
+  unoptimized
+/>
+
                 </div>
             )}
 

@@ -13578,6 +13578,39 @@ const closeQuests = React.useCallback(() => {
 }, []);
 // конфиг рекламы
 const adConf = getForumAdConf();
+ 
+// ===== ADS ROTATION TICK =====
+// Важно: resolveCurrentAdUrl / pickAdUrlForSlot используют Date.now() и bucket по ROTATE_MIN.
+// Без перерендера React "сам" не пересчитает bucket через минуту — поэтому ротация визуально замирает.
+// Этот тик форсит перерендер строго на границе bucket'ов.
+const [adsRotateTick, setAdsRotateTick] = useState(0);
+useEffect(() => {
+  const rotateMin = Number(adConf?.ROTATE_MIN || 1);
+  const periodMs = Math.max(1, rotateMin) * 60_000;
+
+  let tAlign = null;
+  let tInterval = null;
+
+  const schedule = () => {
+    const now = Date.now();
+    const nextBoundary = (Math.floor(now / periodMs) + 1) * periodMs;
+    const delay = Math.max(0, nextBoundary - now + 25); // +25ms чтобы гарантированно попасть в новый bucket
+
+    tAlign = setTimeout(() => {
+      setAdsRotateTick((x) => x + 1);
+      // дальше стабильно пинаем каждые periodMs
+      tInterval = setInterval(() => {
+        setAdsRotateTick((x) => x + 1);
+      }, periodMs);
+    }, delay);
+  };
+
+  schedule();
+  return () => {
+    if (tAlign) clearTimeout(tAlign);
+    if (tInterval) clearInterval(tInterval);
+  };
+}, [adConf?.ROTATE_MIN]);
 
 // clientId для детерминизма
 const clientId =
@@ -13598,6 +13631,10 @@ const adSessionRef = useRef({
   bySlot: new Map(),        // slotKey -> url (стабильный выбор для каждого слота в рамках bucket)
 });
 
+ 
+// Используем тик, чтобы ESLint не ругался на "unused" и чтобы зависимость была явной.
+// Рендер = новый вызов pickAdUrlForSlot() = новый bucket при смене ROTATE_MIN слота.
+void adsRotateTick;
 
 // лог слотов (если нужно смотреть интерлив)
 function debugAdsSlots(label, slots) {

@@ -157,6 +157,39 @@ export async function rebuildSnapshot() {
 
   return { rev, payload }
 }
+// ===== SNAPSHOT PATCH (точечное обновление без rebuild O(N)) =====
+export async function patchSnapshotPartial({ rev, patch = {} }) {
+  try {
+    const raw = await redis.get(K.snapshot)
+    const snap = safeParse(raw)
+    if (!snap || !snap.payload) return false
+
+    const payload = snap.payload || {}
+    const topics = Array.isArray(payload.topics) ? payload.topics : []
+    const posts  = Array.isArray(payload.posts)  ? payload.posts  : []
+
+    // patch: { topics: { [id]: {views?, postsCount?} }, posts: { [id]: {views?, likes?, dislikes?} } }
+    if (patch.topics && typeof patch.topics === 'object') {
+      for (const [id, v] of Object.entries(patch.topics)) {
+        const t = topics.find(x => String(x?.id) === String(id))
+        if (t && v && typeof v === 'object') Object.assign(t, v)
+      }
+    }
+
+    if (patch.posts && typeof patch.posts === 'object') {
+      for (const [id, v] of Object.entries(patch.posts)) {
+        const p = posts.find(x => String(x?.id) === String(id))
+        if (p && v && typeof v === 'object') Object.assign(p, v)
+      }
+    }
+
+    const next = { rev: Number(rev) || snap.rev || 0, payload }
+    await redis.set(K.snapshot, JSON.stringify(next))
+    return true
+  } catch {
+    return false
+  }
+}
 
 /* =========================
    CRUD: темы / посты
@@ -533,7 +566,7 @@ export async function snapshot(sinceRev = 0, limit = 10000) {
   }
 
   const end = -1
-  const start = Math.max(-limit, -10000)
+  const start = Math.max(-limit, -2000)
   const rawList = await redis.lrange(K.changes, start, end)
   const events = rawList
     .map(r => { try { return JSON.parse(r) } catch { return null } })

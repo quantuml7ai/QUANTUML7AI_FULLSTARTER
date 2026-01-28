@@ -7,7 +7,7 @@ export const fetchCache = 'force-no-store'
 
 // Лёгкий процессный микрокэш (на инстанс)
 const cache = new Map()
-const TTL_MS = 2000 // 2 секунды
+const TTL_MS = 15000
 
 export async function GET(req) {
   try {
@@ -21,8 +21,8 @@ export async function GET(req) {
 
     // Ключ кэша различает режимы и параметры
 const key = (since > 0)
-  ? `since:${since}:${revTarget}:${bust}`
-  : `full:${revTarget}:${bust}`
+  ? `since:${since}:${revTarget}`
+  : `full:${revTarget}`
 
     const now = Date.now()
     const hit = cache.get(key)

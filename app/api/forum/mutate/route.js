@@ -14,6 +14,7 @@ import {
   reactPostExclusiveDaily,
   isBanned,
   safeParse, // ← добавили
+  patchSnapshotPartial,
 } from '../_db.js'
 import { Redis } from '@upstash/redis'
 import { bus } from '../_bus.js'
@@ -118,50 +119,50 @@ async function setPostReaction(postId, userId, state) {
   if (!pid || !uid) throw new Error('bad_react_args')
 
   const likeSet = typeof K?.postLikesSet === 'function' ? K.postLikesSet(pid) : `forum:post:${pid}:likes:set`
-  const disSet = typeof K?.postDislikesSet === 'function' ? K.postDislikesSet(pid) : `forum:post:${pid}:dislikes:set`
+  const disSet  = typeof K?.postDislikesSet === 'function' ? K.postDislikesSet(pid) : `forum:post:${pid}:dislikes:set`
   const likeKey = typeof K?.postLikes === 'function' ? K.postLikes(pid) : `forum:post:${pid}:likes`
-  const disKey = typeof K?.postDislikes === 'function' ? K.postDislikes(pid) : `forum:post:${pid}:dislikes`
+  const disKey  = typeof K?.postDislikes === 'function' ? K.postDislikes(pid) : `forum:post:${pid}:dislikes`
 
   const [hasLike, hasDis] = await Promise.all([
     redisDirect.sismember(likeSet, uid),
-    redisDirect.sismember(disSet, uid),
+    redisDirect.sismember(disSet,  uid),
   ])
   const prev = hasLike ? 'like' : (hasDis ? 'dislike' : null)
-  const next = state === 'like' || state === 'dislike' ? state : null
+  const next = (state === 'like' || state === 'dislike') ? state : null
 
   if (prev === next) {
-    const [likes, dislikes] = await Promise.all([
-      getInt(likeKey, 0),
-      getInt(disKey, 0),
-    ])
+    const [likes, dislikes] = await Promise.all([ getInt(likeKey, 0), getInt(disKey, 0) ])
     return { state: next, likes, dislikes, changed: false }
   }
 
-  const pipe = redisDirect.multi()
-  if (prev === 'like') {
-    pipe.srem(likeSet, uid)
-    pipe.decr(likeKey)
-  }
-  if (prev === 'dislike') {
-    pipe.srem(disSet, uid)
-    pipe.decr(disKey)
-  }
-  if (next === 'like') {
-    pipe.sadd(likeSet, uid)
-    pipe.incr(likeKey)
-  }
-  if (next === 'dislike') {
-    pipe.sadd(disSet, uid)
-    pipe.incr(disKey)
-  }
-  await pipe.exec().catch(() => {})
+  // 1) обновляем множества
+  const pipe1 = redisDirect.multi()
+  if (prev === 'like')    pipe1.srem(likeSet, uid)
+  if (prev === 'dislike') pipe1.srem(disSet,  uid)
+  if (next === 'like')    pipe1.sadd(likeSet, uid)
+  if (next === 'dislike') pipe1.sadd(disSet,  uid)
+  try { await pipe1.exec() } catch {}
 
-  const [likes, dislikes] = await Promise.all([
-    getInt(likeKey, 0),
-    getInt(disKey, 0),
-  ])
+  // 2) истина = SCARD
+  let likes = 0, dislikes = 0
+  try {
+    const res = await redisDirect.multi().scard(likeSet).scard(disSet).exec()
+    likes    = Number(res?.[0] ?? 0) || 0
+    dislikes = Number(res?.[1] ?? 0) || 0
+  } catch {
+    const r = await Promise.allSettled([redisDirect.scard(likeSet), redisDirect.scard(disSet)])
+    likes    = (r[0].status === 'fulfilled' ? Number(r[0].value) : 0) || 0
+    dislikes = (r[1].status === 'fulfilled' ? Number(r[1].value) : 0) || 0
+  }
+
+  // 3) пишем кеш-числа
+  try {
+    await redisDirect.multi().set(likeKey, String(likes)).set(disKey, String(dislikes)).exec()
+  } catch {}
+
   return { state: next, likes, dislikes, changed: true }
 }
+
 
 async function delPostHard(id) {
   try { await redisDirect.srem(postsSetKey, String(id)) } catch {}
@@ -337,7 +338,13 @@ export async function POST(request) {
           const { inc, views } = await incrementPostViewsUnique(postId, userId)
           if (inc) {
             const rev = await nextRev()
-            await pushChange({ rev, kind: 'views', posts: { [String(postId)]: views }, ts: Date.now() })
+await pushChange({ rev, kind: 'views', posts: { [String(postId)]: views }, ts: Date.now() })
+
+// ✅ точечно обновим full snapshot, без rebuild
+try {
+  await patchSnapshotPartial({ rev, patch: { posts: { [String(postId)]: { views } } } })
+} catch {}
+
             results.push({ op: 'view_post', postId, views, delta: 1, rev, opId: op.opId })
             await publishForumEvent({ type: 'view_post', postId, views, rev })
           } else {
@@ -386,6 +393,15 @@ export async function POST(request) {
           if (r?.changed) {
             const rev = await nextRev()
             await pushChange({ rev, kind: 'post', id: String(postId), data: { likes: r.likes, dislikes: r.dislikes }, ts: Date.now() })
+
+// ✅ точечно обновим full snapshot, без rebuild
+try {
+  await patchSnapshotPartial({
+    rev,
+    patch: { posts: { [String(postId)]: { likes: r.likes, dislikes: r.dislikes } } }
+  })
+} catch {}
+
             results.push({ op: 'set_reaction', postId, state: r.state, likes: r.likes, dislikes: r.dislikes, changed: true, rev, opId: op.opId })
             await publishForumEvent({ type: 'react', postId, state: r.state, likes: r.likes, dislikes: r.dislikes, rev })
           } else {
@@ -397,6 +413,15 @@ export async function POST(request) {
           if (r?.changed) {
             const rev = r?.rev ?? await nextRev()
             await pushChange({ rev, kind: 'post', id: String(postId), data: { likes: r.likes, dislikes: r.dislikes }, ts: Date.now() })
+
+// ✅ точечно обновим full snapshot, без rebuild
+try {
+  await patchSnapshotPartial({
+    rev,
+    patch: { posts: { [String(postId)]: { likes: r.likes, dislikes: r.dislikes } } }
+  })
+} catch {}
+
             results.push({ op: 'react', postId, state: r.state, likes: r.likes, dislikes: r.dislikes, changed: true, rev, opId: op.opId })
             await publishForumEvent({ type: 'react', postId, state: r.state, likes: r.likes, dislikes: r.dislikes, rev })
           } else {
@@ -530,10 +555,7 @@ const SNAPSHOT_REBUILD_OPS = new Set([
   'unban_user',
   'ban_ip',
   'unban_ip',
-
-  // ✅ ВОТ ОНО — чтобы лайки/дизлайки попадали в полный снапшот
-  'react',
-  'set_reaction',
+ 
 ])
 
     const needRebuild = results.some(r => !r?.error && SNAPSHOT_REBUILD_OPS.has(String(r?.op || '')))
