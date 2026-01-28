@@ -12,7 +12,7 @@ export const metadata = {
   openGraph: {
     type: 'website',
     url: '/forum',
-    siteName: 'Quantum L7 AI',
+    siteName: 'Q-Line',
     title: 'Q-Line',
     description: GLOBAL_DESCRIPTION,
     images: [
@@ -20,7 +20,7 @@ export const metadata = {
         url: '/metab/forum1.png',
         width: 1200,
         height: 630,
-        alt: 'Quantum L7 AI — Q-Line',
+        alt: 'Q-Line',
       },
     ],
   },
@@ -28,7 +28,7 @@ export const metadata = {
     card: 'summary_large_image',
     site: '@quantuml7ai',
     creator: '@quantuml7ai',
-    title: 'Quantum L7 AI — Q-Line',
+    title: 'Q-Line',
     description: GLOBAL_DESCRIPTION,
     images: ['/metab/forum1.png'],
   },

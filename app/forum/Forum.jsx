@@ -10198,7 +10198,7 @@ React.useEffect(()=>{
 useEffect(() => {
   if (!isBrowser()) return;
   let stop = false;
-  const TICK_MS = 15_000;
+  const TICK_MS = 30_000;
   const FULL_EVERY_MS = 10 * 60 * 1000;
 
   const runTick = async () => {
@@ -10208,6 +10208,11 @@ useEffect(() => {
       await flushMutations();
 
       const now = Date.now();
+      // ✅ не долбим /snapshot когда вкладка в фоне (экономит Redis + убирает “дерганья”)
+      try {
+        if (typeof document !== 'undefined' && document.hidden) return;
+      } catch {}
+      
       const needFull = !snapRef.current?.rev || (now - (lastFullSnapshotRef.current || 0) > FULL_EVERY_MS);
       if (needFull) {
         const r = await api.snapshot({ full: 1 });
