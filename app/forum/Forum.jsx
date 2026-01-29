@@ -2409,6 +2409,7 @@ font-size: 12px;
   background:#0b1018; color:var(--ink); border:1px solid rgba(255,255,255,.16);
 }
 
+
 /* кнопки/чипы — фикс. ширина, не сжимаются и не переносятся */
 .iconBtn,
 .sortWrap,
@@ -7397,12 +7398,14 @@ const confirmOwnerDelete = () => {
 const NO_THREAD_OPEN_SELECTOR =
   'button,.tag,a,svg,' +
   'video,audio,iframe,' +                 // медиа-элементы
-  '.imgWrap,.videoCard,.audioCard,' +     // твои карточки/обёртки
+  '.imgWrap,.videoCard,.audioCard,' +       // твои карточки/обёртки
+  '.ownerKebab,.ownerMenu,' +
   '[data-no-thread-open="1"]';            // универсальный флажок на будущее
 
   return (
     <article
       className="item qshine"
+      style={{ position: 'relative' }}
       data-forum-post-card="1"
       data-forum-post-id={String(p?.id || '')}
       onClick={(e) => {
@@ -7415,9 +7418,19 @@ const NO_THREAD_OPEN_SELECTOR =
 <div className="postBodyFrame"> 
       {/* OWNER kebab (⋮) в правом верхнем углу — не трогаем существующую разметку */}
       {isOwner && (
-        <div className="ownerKebab" onClick={(e)=>{ e.stopPropagation(); }} style={{ position:'absolute', right:8, top:8 }}>
-          <button className="kebabBtn" type="button" aria-label="Меню поста">⋮</button>
-          <div className="ownerMenu">
+      <div
+        className="ownerKebab"
+        data-no-thread-open="1"
+        onClick={(e)=>{ e.stopPropagation(); }}
+        style={{ position:'absolute', right:8, top:8 }}
+      >        
+        <button
+          className="kebabBtn"
+          type="button"
+          aria-label="Меню поста"
+          data-no-thread-open="1"
+        >⋮</button>
+        <div className="ownerMenu" data-no-thread-open="1">
             <button type="button" onClick={ownerEdit}>✏️</button>
             <button type="button" className="danger" onClick={ownerDelete}>🗑</button>
           </div>
