@@ -2551,7 +2551,7 @@ font-size: 12px;
       border-radius:12px; padding:10px; z-index:3200; box-shadow:0 10px 30px rgba(0,0,0,.45)
      }
     .reportPopover{
-      position:fixed;
+      position:sticky;
       min-width:200px;
       padding:10px;
       border-radius:14px;
@@ -2561,6 +2561,20 @@ font-size: 12px;
       z-index:3600;
       backdrop-filter: blur(12px) saturate(140%);
     }
+    .reportTitle{
+      font-weight:600;
+      font-size:14px;
+      opacity:.95;
+      padding:6px 8px;
+      color:#eaf4ff;
+    }
+    .reportDivider{
+      height:1px;
+      width:100%;
+      margin:6px 0 8px;
+      background:linear-gradient(90deg, rgba(80,167,255,.05), rgba(80,167,255,.5), rgba(80,167,255,.05));
+      box-shadow:0 0 10px rgba(80,167,255,.18);
+    }   
     .reportItem{
       display:flex;
       align-items:center;
@@ -2584,6 +2598,12 @@ font-size: 12px;
       cursor:not-allowed;
       box-shadow:none;
     }
+    .reportPopover[data-dir="rtl"]{
+      direction:rtl;
+    }
+    .reportPopover[data-dir="rtl"] .reportItem{
+      text-align:right;
+    }      
     .lockable{ position:relative; }
     .lockBadge{
       position:absolute;
@@ -5404,32 +5424,58 @@ function ReportPopover({
   t,
   busy,
   popoverRef,
+   dir,
 }) {
-  if (!open || !anchorRect || typeof window === 'undefined') return null
+  const [size, setSize] = useState({ width: 220, height: 160 })
+  const isReady = !!(open && anchorRect && typeof window !== 'undefined')
+  const dirAttr = dir === 'rtl' ? 'rtl' : 'ltr'
+  const clamp = (v, min, max) => Math.min(max, Math.max(min, v))
 
-  const GAP = 8
-  const EST_W = 220
-  const EST_H = 160
-  const maxW = Math.min(260, Math.max(200, window.innerWidth - GAP * 2))
-  const left = Math.max(GAP, Math.min(anchorRect.left, window.innerWidth - maxW - GAP))
-  const placeAbove = anchorRect.bottom + EST_H > window.innerHeight - GAP
-  const top = placeAbove
-    ? Math.max(GAP, anchorRect.top - EST_H - 6)
-    : anchorRect.bottom + 6
+  useEffect(() => {
+    if (!isReady) return
+    const el = popoverRef?.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    if (!rect?.width || !rect?.height) return
+    setSize((prev) => {
+      if (Math.abs(prev.width - rect.width) < 0.5 && Math.abs(prev.height - rect.height) < 0.5) return prev
+      return { width: rect.width, height: rect.height }
+    })
+  }, [isReady, anchorRect, popoverRef])
+
+  const style = useMemo(() => {
+    if (!isReady) return {}
+    const GAP = 8
+    const SAFE = 12
+    const winW = window.innerWidth || 0
+    const winH = window.innerHeight || 0
+    const popW = clamp(size.width || 220, 200, Math.max(200, winW - SAFE * 2))
+    const popH = Math.max(140, size.height || 160)
+    const baseLeft = dirAttr === 'rtl' ? anchorRect.right - popW : anchorRect.left
+    const left = clamp(baseLeft, SAFE, Math.max(SAFE, winW - popW - SAFE))
+    const placeBelow = anchorRect.bottom + GAP + popH <= winH - SAFE
+    const baseTop = placeBelow ? anchorRect.bottom + GAP : anchorRect.top - popH - GAP
+    const top = clamp(baseTop, SAFE, Math.max(SAFE, winH - popH - SAFE))
+    return { top, left, width: popW }
+  }, [isReady, anchorRect, size, dirAttr])
+
+  if (!isReady) return null
 
   return (
     <div
       ref={popoverRef}
       className="reportPopover neon glass"
+      data-dir={dirAttr}      
       role="menu"
-      aria-label={t?.('forum_report_close') || 'Close'}
-      title={t?.('forum_report_close') || 'Close'}
-      style={{ top, left, width: maxW }}
+      aria-label={t?.('forum_report_title') || 'Report content'}
+      style={style}
       onClick={(e) => {
         e.preventDefault()
         e.stopPropagation()
       }}
     >
+      <div className="reportTitle">{t?.('forum_report_title') || 'Report content'}</div>
+      <div className="reportDivider" />    
       <button
         type="button"
         className="reportItem"
@@ -7715,7 +7761,7 @@ const NO_THREAD_OPEN_SELECTOR =
             e.preventDefault()
             e.stopPropagation()
             const rect = e.currentTarget?.getBoundingClientRect?.()
-            onReport?.(p, rect)
+            onReport?.(p, rect, e.currentTarget)
           }}
         >⚠️</button>
 
@@ -8986,6 +9032,11 @@ export default function Forum(){
   void profileBump
   const { t } = useI18n()
   const toast = useToast()
+  const uiDir = (isBrowser() &&
+    (document.documentElement?.dir === 'rtl' ||
+      getComputedStyle(document.documentElement).direction === 'rtl'))
+    ? 'rtl'
+    : 'ltr'  
   const rl = useMemo(rateLimiter, [])
   /* ---- auth ---- */
   const [auth,setAuth] = useState(()=>readAuth())
@@ -8997,6 +9048,7 @@ export default function Forum(){
  const [reportUI, setReportUI] = useState({ open: false, postId: null, anchorRect: null })
 const [reportBusy, setReportBusy] = useState(false)
 const reportPopoverRef = useRef(null)
+const reportAnchorRef = useRef(null)
 const [starredAuthors, setStarredAuthors] = useState(() => new Set())
 
 // ==== tombstones (ДОЛЖНЫ быть объявлены до handleReportSelect) ====
@@ -9050,18 +9102,50 @@ const persistTombstones = useCallback((patch) => {
     }).catch(() => {})
     return () => { alive = false }
   }, [viewerId])
+  const closeReportPopover = useCallback(() => {
+    setReportUI({ open: false, postId: null, anchorRect: null })
+    reportAnchorRef.current = null
+  }, [])
+
+  const syncReportAnchorRect = useCallback(() => {
+    if (!reportUI.open) return
+    const anchorEl = reportAnchorRef.current
+    if (!anchorEl || typeof anchorEl.getBoundingClientRect !== 'function') {
+      closeReportPopover()
+      return
+    }
+    const rect = anchorEl.getBoundingClientRect()
+    if (!rect) {
+      closeReportPopover()
+      return
+    }
+    setReportUI((prev) => {
+      if (!prev.open) return prev
+      return {
+        ...prev,
+        anchorRect: {
+          top: rect.top,
+          bottom: rect.bottom,
+          left: rect.left,
+          right: rect.right,
+          width: rect.width,
+          height: rect.height,
+        },
+      }
+    })
+  }, [closeReportPopover, reportUI.open])
 
   useEffect(() => {
     if (!reportUI.open) return
     const onDown = (e) => {
       const el = reportPopoverRef.current
       if (el && el.contains(e.target)) return
-      setReportUI({ open: false, postId: null, anchorRect: null })
+      closeReportPopover()
     }
     const onKey = (e) => {
-      if (e.key === 'Escape') setReportUI({ open: false, postId: null, anchorRect: null })
+      if (e.key === 'Escape') closeReportPopover()
     }
-    const onScroll = () => setReportUI({ open: false, postId: null, anchorRect: null })
+    const onScroll = () => syncReportAnchorRect()
     document.addEventListener('pointerdown', onDown, true)
     document.addEventListener('keydown', onKey, true)
     window.addEventListener('scroll', onScroll, true)
@@ -9072,10 +9156,11 @@ const persistTombstones = useCallback((patch) => {
       window.removeEventListener('scroll', onScroll, true)
       window.removeEventListener('resize', onScroll, true)
     }
-  }, [reportUI.open])
+  }, [closeReportPopover, reportUI.open, syncReportAnchorRect])
 
-  const openReportPopover = useCallback((post, rect) => {
+  const openReportPopover = useCallback((post, rect, anchorEl) => {
     if (!rect || !post?.id) return
+     if (anchorEl) reportAnchorRef.current = anchorEl   
     setReportUI({
       open: true,
       postId: String(post.id),
@@ -9114,6 +9199,8 @@ const persistTombstones = useCallback((patch) => {
       if (!res?.ok) {
         if (res?.error === 'self_report') {
           toast?.warn?.(t?.('forum_report_self') || 'You cannot report your own post')
+        } else if (res?.error === 'media_locked') {
+          toast?.warn?.(t?.('forum_report_media_locked') || 'Media locked')
         } else {
           toast?.err?.(t?.('forum_report_error') || 'Report failed')
         }
@@ -9131,6 +9218,10 @@ const persistTombstones = useCallback((patch) => {
         }))
         if (res?.action === 'deleted_and_locked' && res?.lockedUntil) {
           setMediaLock({ locked: true, untilMs: Number(res.lockedUntil || 0) })
+          const untilLabel = human(Number(res.lockedUntil || 0))
+          const lockText = t?.('forum_report_media_locked') || 'Media locked until'
+          toast?.warn?.(`${lockText} ${untilLabel}`)
+          return      
         }
       }
       toast?.ok?.(t?.('forum_report_sent') || 'Report sent')
@@ -14151,11 +14242,12 @@ function pickAdUrlForSlot(slotKey, slotKind) {
 <ReportPopover
   open={reportUI.open}
   anchorRect={reportUI.anchorRect}
-  onClose={() => setReportUI({ open: false, postId: null, anchorRect: null })}
+  onClose={closeReportPopover}
   onSelect={handleReportSelect}
   t={t}
   busy={reportBusy}
   popoverRef={reportPopoverRef}
+    dir={uiDir}
 />
 <div
   className="grid2"
@@ -14867,7 +14959,7 @@ const openThreadHere = (clickP) => {
   parentPost={parent}
   parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}
   parentText={parent ? (parent.text || parent.message || parent.body || '') : ''} 
-  onReport={(post, rect) => openReportPopover(post, rect)}
+  onReport={(post, rect, anchorEl) => openReportPopover(post, rect, anchorEl)}
   onOpenThread={openThreadHere}
   onReact={reactMut}
   isAdmin={isAdmin}
@@ -14978,7 +15070,7 @@ const openThreadHere = (clickP) => {
       parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''}
       parentText={parent ? (parent.text || parent.message || parent.body || '') : ''}
      
-          onReport={(post, rect) => openReportPopover(post, rect)}
+          onReport={(post, rect, anchorEl) => openReportPopover(post, rect, anchorEl)}
 onOpenThread={(clickP) => {
   // ✅ из любой карточки: открыть сразу ветку ответов по клику на счётчик
   openThreadForPost(clickP || p, { closeInbox: true });
@@ -15811,7 +15903,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
   parentPost={parent}
   parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}
   parentText={parent ? (parent.text || parent.message || parent.body || '') : ''}
-  onReport={(post, rect) => openReportPopover(post, rect)}
+  onReport={(post, rect, anchorEl) => openReportPopover(post, rect, anchorEl)}
   onReply={() => setReplyTo(p)}
   onOpenThread={(clickP) => { setThreadRoot(clickP); }}
   onReact={reactMut}

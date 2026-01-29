@@ -45720,6 +45720,109 @@ try {
   Object.assign(dict.ar, GAME_AR)
   Object.assign(dict.tr, GAME_TR)
 } catch (e) {}
+/* ============================================================
+   FORUM REPORT — I18N (7 languages)
+   ============================================================ */
+const REPORT_EN = {
+  forum_report_title: 'Report content',
+  forum_report_reason_porn: 'Pornography',
+  forum_report_reason_violence: 'Violence',
+  forum_report_reason_boring: 'Not interesting',
+  forum_report_sent: 'Report sent',
+  forum_report_error: 'Report failed',
+  forum_report_already: 'Already reported',
+  forum_report_self: "You can't report your own post",
+  forum_report_close: 'Close',
+  forum_report_media_locked: 'Media locked until',
+}
+
+const REPORT_RU = {
+  forum_report_title: 'Пожаловаться на контент',
+  forum_report_reason_porn: 'Порно',
+  forum_report_reason_violence: 'Насилие',
+  forum_report_reason_boring: 'Неинтересно',
+  forum_report_sent: 'Жалоба отправлена',
+  forum_report_error: 'Не удалось отправить жалобу',
+  forum_report_already: 'Вы уже пожаловались',
+  forum_report_self: 'Нельзя жаловаться на свой пост',
+  forum_report_close: 'Закрыть',
+  forum_report_media_locked: 'Медиа заблокированы до',
+}
+
+const REPORT_UK = {
+  forum_report_title: 'Поскаржитися на контент',
+  forum_report_reason_porn: 'Порнографія',
+  forum_report_reason_violence: 'Насильство',
+  forum_report_reason_boring: 'Нецікаво',
+  forum_report_sent: 'Скаргу надіслано',
+  forum_report_error: 'Не вдалося надіслати скаргу',
+  forum_report_already: 'Ви вже поскаржилися',
+  forum_report_self: 'Не можна скаржитися на власний пост',
+  forum_report_close: 'Закрити',
+  forum_report_media_locked: 'Медіа заблоковано до',
+}
+
+const REPORT_ES = {
+  forum_report_title: 'Denunciar contenido',
+  forum_report_reason_porn: 'Pornografía',
+  forum_report_reason_violence: 'Violencia',
+  forum_report_reason_boring: 'No es interesante',
+  forum_report_sent: 'Denuncia enviada',
+  forum_report_error: 'No se pudo enviar la denuncia',
+  forum_report_already: 'Ya has denunciado',
+  forum_report_self: 'No puedes denunciar tu propia publicación',
+  forum_report_close: 'Cerrar',
+  forum_report_media_locked: 'Contenido multimedia bloqueado hasta',
+}
+
+const REPORT_ZH = {
+  forum_report_title: '举报内容',
+  forum_report_reason_porn: '色情',
+  forum_report_reason_violence: '暴力',
+  forum_report_reason_boring: '不感兴趣',
+  forum_report_sent: '举报已发送',
+  forum_report_error: '举报失败',
+  forum_report_already: '已举报',
+  forum_report_self: '不能举报自己的帖子',
+  forum_report_close: '关闭',
+  forum_report_media_locked: '媒体已封锁至',
+}
+
+const REPORT_AR = {
+  forum_report_title: 'الإبلاغ عن محتوى',
+  forum_report_reason_porn: 'مواد إباحية',
+  forum_report_reason_violence: 'عنف',
+  forum_report_reason_boring: 'غير مهم',
+  forum_report_sent: 'تم إرسال البلاغ',
+  forum_report_error: 'فشل إرسال البلاغ',
+  forum_report_already: 'تم الإبلاغ بالفعل',
+  forum_report_self: 'لا يمكنك الإبلاغ عن منشورك',
+  forum_report_close: 'إغلاق',
+  forum_report_media_locked: 'الوسائط مقفلة حتى',
+}
+
+const REPORT_TR = {
+  forum_report_title: 'İçeriği bildir',
+  forum_report_reason_porn: 'Pornografi',
+  forum_report_reason_violence: 'Şiddet',
+  forum_report_reason_boring: 'İlgi çekmiyor',
+  forum_report_sent: 'Bildirildi',
+  forum_report_error: 'Bildirim gönderilemedi',
+  forum_report_already: 'Zaten bildirdin',
+  forum_report_self: 'Kendi gönderini bildiremezsin',
+  forum_report_close: 'Kapat',
+  forum_report_media_locked: 'Medya kilitli, şu tarihe kadar',
+}
+
+try {
+  Object.assign(dict.en, REPORT_EN)
+  Object.assign(dict.ru, REPORT_RU)
+  Object.assign(dict.uk, REPORT_UK)
+  Object.assign(dict.es, REPORT_ES)
+  Object.assign(dict.zh, REPORT_ZH)
+  Object.assign(dict.ar, REPORT_AR)
+  Object.assign(dict.tr, REPORT_TR)
+} catch {}
 const ROBOT_EN = {
   forum_video_processing_wait: 'Please wait, the video is being processed',
 forum_image_processing_wait: 'Please wait, the image is being processed',

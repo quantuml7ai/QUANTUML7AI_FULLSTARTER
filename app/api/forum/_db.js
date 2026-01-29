@@ -621,6 +621,8 @@ export async function deletePostBranchHard(rootId) {
     ops.push(['del', K.postViews(pid)])
     ops.push(['del', K.postLikes(pid)])
     ops.push(['del', K.postDislikes(pid)])
+    if (typeof K.postLikesSet === 'function') ops.push(['del', K.postLikesSet(pid)])
+    if (typeof K.postDislikesSet === 'function') ops.push(['del', K.postDislikesSet(pid)])    
     if (topicId) ops.push(['srem', K.topicPostsSet(topicId), String(pid)])
   }
 
