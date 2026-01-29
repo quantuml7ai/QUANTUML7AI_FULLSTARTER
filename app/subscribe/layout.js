@@ -1,7 +1,7 @@
 // app/subscribe/layout.js
 
 const GLOBAL_DESCRIPTION =
-  'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©'
+  'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Q-Line Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©'
 
 export const metadata = {
   title: 'Subscribe',
@@ -13,7 +13,7 @@ export const metadata = {
     type: 'website',
     url: '/subscribe',
     siteName: 'Quantum L7 AI',
-    title: 'Quantum L7 AI — Subscription',
+    title: 'Subscription',
     description: GLOBAL_DESCRIPTION,
     images: [
       {
@@ -28,7 +28,7 @@ export const metadata = {
     card: 'summary_large_image',
     site: '@quantuml7ai',
     creator: '@quantuml7ai',
-    title: 'Quantum L7 AI — Subscription',
+    title: 'Subscription',
     description: GLOBAL_DESCRIPTION,
     images: ['/metab/subscription1.png'],
   },

@@ -1,3 +1,5 @@
+ // app/api/forum/upload/route.js 
+
 import { NextResponse } from 'next/server'
 import { put } from '@vercel/blob'
 import sharp from 'sharp'
