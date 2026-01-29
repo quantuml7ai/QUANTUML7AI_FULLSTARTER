@@ -1,7 +1,7 @@
 // app/api/forum/blobUploadUrl/route.js
 import { NextResponse } from 'next/server'
 import { handleUpload } from '@vercel/blob/client'
-
+import { isMediaLocked } from '../_db.js'
 export const runtime = 'nodejs'
 
 // Разрешаем iPhone .mov и ставим лимит 300 МБ
@@ -23,7 +23,33 @@ export async function POST(req) {
     )
 
   try {
-    // 1) RW-токен (обязателен для @vercel/blob/client)
+    // 1) Попробуем разобрать JSON тела (клиент upload() шлёт filename/size/mime)
+    let j = {}
+    try {
+      j = (await req.json()) || {}
+    } catch {
+      // не валим — handleUpload сам справится; но для логов вернём подробности
+      j = {}
+    }
+
+    const headerId = req.headers.get('x-forum-user-id') || ''
+    const bodyId =
+      j?.userId ||
+      j?.accountId ||
+      j?.asherId ||
+      j?.payload?.clientPayload?.userId ||
+      j?.payload?.clientPayload?.accountId ||
+      j?.payload?.clientPayload?.asherId
+    const userId = String(headerId || bodyId || '').trim()
+    if (!userId) {
+      return respond(401, { error: { code: 'missing_user_id', message: 'User id required' } })
+    }
+    const lock = await isMediaLocked(userId)
+    if (lock.locked) {
+      return respond(403, { error: { code: 'media_locked', message: 'Media upload locked', untilMs: lock.untilMs } })
+    }
+
+    // 2) RW-токен (обязателен для @vercel/blob/client)
     const token =
       process.env.FORUM_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN
     if (!token) {
@@ -37,16 +63,7 @@ export async function POST(req) {
         },
       })
     }
-
-    // 2) Попробуем разобрать JSON тела (клиент upload() шлёт filename/size/mime)
-    let j = {}
-    try {
-      j = (await req.json()) || {}
-    } catch {
-      // не валим — handleUpload сам справится; но для логов вернём подробности
-      j = {}
-    }
-
+ 
     const mimeRaw = String(j?.mime || j?.contentType || '').trim()
     const mime = mimeRaw.split(';')[0].toLowerCase()
     const size = Number(j?.size || 0)

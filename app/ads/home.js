@@ -1425,6 +1425,7 @@ const [campaignMetrics, setCampaignMetrics] = useState({})
       const res = await blobUpload(uniqueName, file, {
         access: 'public',
         handleUploadUrl: '/api/forum/blobUploadUrl',
+        headers: { 'x-forum-user-id': String(accountId || '') },        
       })
 
       const mediaUrl = res?.url

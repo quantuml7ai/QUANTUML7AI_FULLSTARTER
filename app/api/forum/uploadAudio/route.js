@@ -1,7 +1,7 @@
  // app/api/forum/uploadAudio/route.js
  import { NextResponse } from 'next/server'
  import { put } from '@vercel/blob'
- 
+ import { isMediaLocked } from '../_db.js'
  export const runtime = 'nodejs'
   const ALLOWED_MIME = /^(audio\/webm|audio\/mpeg|audio\/mp4|audio\/wav)$/i
  const MAX_SIZE_BYTES = 10 * 1024 * 1024 // 10MB
@@ -9,6 +9,17 @@
  export async function POST(req) {
    try {
      const form = await req.formData()
+     const headerId = req.headers.get('x-forum-user-id')
+     const formId = form.get('userId') || form.get('accountId') || form.get('asherId')
+     const userId = String(headerId || formId || '').trim()
+     if (!userId) {
+       return NextResponse.json({ ok: false, error: 'missing_user_id' }, { status: 401, headers: { 'cache-control': 'no-store' } })
+     }
+     const lock = await isMediaLocked(userId)
+     if (lock.locked) {
+       return NextResponse.json({ ok: false, error: 'media_locked', untilMs: lock.untilMs }, { status: 403, headers: { 'cache-control': 'no-store' } })
+     }
+
      const f = form.get('file')
      if (!f) return NextResponse.json({ urls: [], errors: ['no_file'] }, { status: 400, headers:{'cache-control':'no-store'} })
  

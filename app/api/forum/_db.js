@@ -85,7 +85,16 @@ export const K = {
   // ===== SUBSCRIPTIONS (viewer -> authors) =====
   subsViewerSet:      (viewerId) => `forum:subs:viewer:${viewerId}`,
   subsFollowersCount: (authorId) => `forum:subs:followers_count:${authorId}`,
+
+  // ===== REPORTS / MEDIA LOCKS =====
+  reportPostReasonSet: (postId, reason) => `forum:report:post:${postId}:${reason}:users`,
+  reportPostAnySet:    (postId) => `forum:report:post:${postId}:users`,
+  mediaLockKey:        (userId) => `forum:lock:media:${userId}`,  
 }
+const PORN_THRESHOLD = Number(process.env.FORUM_REPORT_PORN_THRESHOLD ?? 3)
+const VIOLENCE_THRESHOLD = Number(process.env.FORUM_REPORT_VIOLENCE_THRESHOLD ?? 3)
+const BORING_THRESHOLD = Number(process.env.FORUM_REPORT_BORING_THRESHOLD ?? 20)
+const MEDIA_LOCK_MS = Number(process.env.FORUM_MEDIA_LOCK_MS ?? (3 * 24 * 60 * 60 * 1000))
 
 /* =========================
    Ревизии / изменения
@@ -540,6 +549,169 @@ export async function dbDeleteTopicHard(topicId) {
   const rev = await nextRev()
   await pushChange({ rev, kind: 'topic', id: tid, _del: 1, ts: now(), deletedPosts: pids })
   return { rev, deletedPosts: pids }
+}
+/* =========================
+   Reports / Media Locks
+========================= */
+export async function getMediaLockUntil(userId) {
+  const key = K.mediaLockKey(str(userId))
+  const raw = await redis.get(key)
+  return parseIntSafe(raw, 0)
+}
+
+export async function setMediaLockUntil(userId, untilMs) {
+  const key = K.mediaLockKey(str(userId))
+  await redis.set(key, String(Number(untilMs || 0)))
+  return { ok: true, untilMs: Number(untilMs || 0) }
+}
+
+export async function isMediaLocked(userId) {
+  const untilMs = await getMediaLockUntil(userId)
+  const locked = Number(untilMs || 0) > now()
+  if (!locked && untilMs) {
+    try { await redis.del(K.mediaLockKey(str(userId))) } catch {}
+  }
+  return { locked, untilMs: locked ? Number(untilMs || 0) : 0 }
+}
+
+// O(N) обход по всем постам — соответствует текущей схеме
+export async function collectPostBranch(rootId) {
+  const root = str(rootId)
+  const toDelete = new Set([root])
+  try {
+    const all = await redis.smembers(K.postsSet)
+    let grow = true
+    while (grow) {
+      grow = false
+      for (const pid of all || []) {
+        const pidStr = String(pid)
+        if (toDelete.has(pidStr)) continue
+        const raw = await redis.get(K.postKey(pidStr))
+        const po = safeParse(raw)
+        if (po?.parentId && toDelete.has(String(po.parentId))) {
+          toDelete.add(pidStr)
+          grow = true
+        }
+      }
+    }
+  } catch {}
+  return Array.from(toDelete)
+}
+
+export async function deletePostBranchHard(rootId) {
+  const branch = await collectPostBranch(rootId)
+  const deleted = []
+  const topicCounts = new Map()
+  const ops = []
+
+  for (const pid of branch) {
+    const raw = await redis.get(K.postKey(pid))
+    if (!raw) continue
+    const post = safeParse(raw)
+    if (!post) continue
+
+    deleted.push(String(pid))
+    const topicId = post?.topicId ? String(post.topicId) : null
+    if (topicId) {
+      topicCounts.set(topicId, (topicCounts.get(topicId) || 0) + 1)
+    }
+
+    ops.push(['srem', K.postsSet, String(pid)])
+    ops.push(['del', K.postKey(pid)])
+    ops.push(['del', K.postViews(pid)])
+    ops.push(['del', K.postLikes(pid)])
+    ops.push(['del', K.postDislikes(pid)])
+    if (topicId) ops.push(['srem', K.topicPostsSet(topicId), String(pid)])
+  }
+
+  if (ops.length) {
+    const pipe = redis.pipeline ? redis.pipeline() : null
+    if (pipe) {
+      for (const op of ops) pipe[op[0]].apply(pipe, op.slice(1))
+      await pipe.exec()
+    } else {
+      for (const op of ops) await redis[op[0]](...op.slice(1))
+    }
+  }
+
+  for (const [topicId, dec] of topicCounts.entries()) {
+    const key = K.topicPostsCount(topicId)
+    const current = await getInt(key, 0)
+    const next = Math.max(0, current - dec)
+    await redis.set(key, String(next))
+  }
+
+  return { deleted }
+}
+
+export async function reportPost({ postId, reporterId, reason }) {
+  const pid = str(postId)
+  const rid = str(reporterId)
+  const rsn = str(reason).toLowerCase()
+  if (!pid || !rid) {
+    const err = new Error('bad_request')
+    err.status = 400
+    throw err
+  }
+  if (!['porn', 'violence', 'boring'].includes(rsn)) {
+    const err = new Error('bad_reason')
+    err.status = 400
+    throw err
+  }
+
+  const raw = await redis.get(K.postKey(pid))
+  const post = safeParse(raw)
+  if (!post) {
+    const err = new Error('post_not_found')
+    err.status = 404
+    throw err
+  }
+
+  const authorId = str(post?.userId || post?.accountId)
+  if (authorId && authorId === rid) {
+    const err = new Error('self_report')
+    err.status = 403
+    throw err
+  }
+
+  if (K.reportPostAnySet) {
+    const anyAdded = await redis.sadd(K.reportPostAnySet(pid), rid)
+    if (anyAdded !== 1) {
+      return { ok: true, duplicate: true }
+    }
+  }
+
+  const reasonKey = K.reportPostReasonSet(pid, rsn)
+  const res = await redis.multi().sadd(reasonKey, rid).scard(reasonKey).exec()
+  const added = Number(res?.[0] ?? 0)
+  const count = Number(res?.[1] ?? 0)
+  if (added !== 1) return { ok: true, duplicate: true }
+
+  const shouldDelete =
+    (rsn === 'porn' && count >= PORN_THRESHOLD) ||
+    (rsn === 'violence' && count >= VIOLENCE_THRESHOLD) ||
+    (rsn === 'boring' && count >= BORING_THRESHOLD)
+
+  if (!shouldDelete) {
+    return { ok: true, action: 'counted', count }
+  }
+
+  const { deleted } = await deletePostBranchHard(pid)
+  const rev = await nextRev()
+  await pushChange({ rev, kind: 'post', id: pid, _del: 1, deleted, ts: now() })
+  await pushChange({ rev, kind: 'post_deleted', id: pid, deleted, ts: now() })
+  await rebuildSnapshot()
+
+  if (rsn === 'porn' || rsn === 'violence') {
+    const lockedUntil = now() + MEDIA_LOCK_MS
+    if (authorId) {
+      await setMediaLockUntil(authorId, lockedUntil)
+      return { ok: true, action: 'deleted_and_locked', count, lockedUntil, deleted, rev }
+    }
+    return { ok: true, action: 'deleted', count, deleted, rev }
+  }
+
+  return { ok: true, action: 'deleted', count, deleted, rev }
 }
 
 /* =========================

@@ -973,6 +973,37 @@ const api = {
       return { ok: false, error: 'network', map: {}, aliases: {} }
     }
   },
+
+  async reportPost({ postId, reason, userId }) {
+    try {
+      const r = await fetch('/api/forum/report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-forum-user-id': String(userId || ''),
+        },
+        cache: 'no-store',
+        body: JSON.stringify({ postId: String(postId || ''), reason: String(reason || '') }),
+      })
+      const data = await r.json().catch(() => ({}))
+      return data || { ok: r.ok, status: r.status }
+    } catch {
+      return { ok: false, error: 'network' }
+    }
+  },
+
+  async mediaLock({ userId }) {
+    try {
+      const r = await fetch('/api/forum/mediaLock', {
+        method: 'GET',
+        headers: { 'x-forum-user-id': String(userId || '') },
+        cache: 'no-store',
+      })
+      return await r.json().catch(() => ({ ok: false, locked: false, untilMs: 0 }))
+    } catch {
+      return { ok: false, error: 'network', locked: false, untilMs: 0 }
+    }
+  },
 };
  
  
@@ -2518,6 +2549,63 @@ font-size: 12px;
       position:absolute; width: min(62vw, 360px);
       border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98);
       border-radius:12px; padding:10px; z-index:3200; box-shadow:0 10px 30px rgba(0,0,0,.45)
+     }
+    .reportPopover{
+      position:fixed;
+      min-width:200px;
+      padding:10px;
+      border-radius:14px;
+      border:1px solid rgba(80,167,255,.35);
+      background:rgba(8,14,24,.9);
+      box-shadow:0 12px 32px rgba(0,0,0,.45), 0 0 24px rgba(80,167,255,.14);
+      z-index:3600;
+      backdrop-filter: blur(12px) saturate(140%);
+    }
+    .reportItem{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      width:100%;
+      text-align:left;
+      padding:8px 10px;
+      border-radius:10px;
+      background:transparent;
+      border:1px solid transparent;
+      color:#eaf4ff;
+      font-size:13px;
+    }
+    .reportItem:hover{
+      background:rgba(255,255,255,.08);
+      border-color:rgba(80,167,255,.3);
+    }
+    .reportItem:active{ transform: scale(.99); }
+    .reportItem:disabled{
+      opacity:.5;
+      cursor:not-allowed;
+      box-shadow:none;
+    }
+    .lockable{ position:relative; }
+    .lockBadge{
+      position:absolute;
+      right:-4px;
+      top:-4px;
+      width:16px;
+      height:16px;
+      border-radius:999px;
+      background:rgba(10,14,22,.9);
+      border:1px solid rgba(255,255,255,.35);
+      display:grid;
+      place-items:center;
+      font-size:10px;
+      line-height:1;
+      box-shadow:0 0 10px rgba(80,167,255,.2);
+      pointer-events:none;
+    }
+    .iconBtn.isLocked{
+      opacity:.55;
+      cursor:not-allowed;
+      border-color:rgba(255,255,255,.12);
+      box-shadow:none;
     }
       .profilePop{
 
@@ -5308,6 +5396,82 @@ const VIP_AVATARS = [
 /* =========================================================
    маленькие поповеры
 ========================================================= */
+function ReportPopover({
+  open,
+  anchorRect,
+  onClose,
+  onSelect,
+  t,
+  busy,
+  popoverRef,
+}) {
+  if (!open || !anchorRect || typeof window === 'undefined') return null
+
+  const GAP = 8
+  const EST_W = 220
+  const EST_H = 160
+  const maxW = Math.min(260, Math.max(200, window.innerWidth - GAP * 2))
+  const left = Math.max(GAP, Math.min(anchorRect.left, window.innerWidth - maxW - GAP))
+  const placeAbove = anchorRect.bottom + EST_H > window.innerHeight - GAP
+  const top = placeAbove
+    ? Math.max(GAP, anchorRect.top - EST_H - 6)
+    : anchorRect.bottom + 6
+
+  return (
+    <div
+      ref={popoverRef}
+      className="reportPopover neon glass"
+      role="menu"
+      aria-label={t?.('forum_report_close') || 'Close'}
+      title={t?.('forum_report_close') || 'Close'}
+      style={{ top, left, width: maxW }}
+      onClick={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+      }}
+    >
+      <button
+        type="button"
+        className="reportItem"
+        role="menuitem"
+        disabled={busy}
+        onClick={() => {
+          onClose?.()
+          onSelect?.('porn')
+        }}
+      >
+        <span aria-hidden="true">🔞</span>
+        <span>{t?.('forum_report_reason_porn') || 'Порно'}</span>
+      </button>
+      <button
+        type="button"
+        className="reportItem"
+        role="menuitem"
+        disabled={busy}
+        onClick={() => {
+          onClose?.()
+          onSelect?.('violence')
+        }}
+      >
+        <span aria-hidden="true">⚔️</span>
+        <span>{t?.('forum_report_reason_violence') || 'Насилие'}</span>
+      </button>
+      <button
+        type="button"
+        className="reportItem"
+        role="menuitem"
+        disabled={busy}
+        onClick={() => {
+          onClose?.()
+          onSelect?.('boring')
+        }}
+      >
+        <span aria-hidden="true">🙈</span>
+        <span>{t?.('forum_report_reason_boring') || 'Неинтересно'}</span>
+      </button>
+    </div>
+  )
+}
 function AdminPopover({ anchorRef, open, onClose, t, isActive, onActivated, onDeactivated }) {
   const [pass, setPass] = useState('');
   useEffect(() => { if (open) setPass(''); }, [open]);
@@ -6330,7 +6494,12 @@ const save = async () => {
           fd.append('files', uploadFile);
         }
 
-        const up = await fetch('/api/forum/upload', { method: 'POST', body: fd, cache: 'no-store' });
+        const up = await fetch('/api/forum/upload', {
+          method: 'POST',
+          body: fd,
+          cache: 'no-store',
+          headers: { 'x-forum-user-id': String(uid || '') },
+        });
         const uj = await up.json().catch(() => ({}));
         if (!up.ok || !uj?.urls?.[0]) {
           console.warn('avatar upload failed', uj);
@@ -7542,7 +7711,12 @@ const NO_THREAD_OPEN_SELECTOR =
           type="button"
           className="tag"
           title={t?.('forum_report') || 'Пожаловаться'}
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onReport?.(p); }}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            const rect = e.currentTarget?.getBoundingClientRect?.()
+            onReport?.(p, rect)
+          }}
         >⚠️</button>
 
         {isAdmin && (
@@ -8816,8 +8990,36 @@ export default function Forum(){
   /* ---- auth ---- */
   const [auth,setAuth] = useState(()=>readAuth())
   const viewerId = String(resolveProfileAccountId(auth?.asherId || auth?.accountId) || '').trim()
+  const [mediaLock, setMediaLock] = useState({ locked: false, untilMs: 0 })
+  const mediaLocked = mediaLock.locked && mediaLock.untilMs > Date.now()
 
-  const [starredAuthors, setStarredAuthors] = useState(() => new Set())
+
+ const [reportUI, setReportUI] = useState({ open: false, postId: null, anchorRect: null })
+const [reportBusy, setReportBusy] = useState(false)
+const reportPopoverRef = useRef(null)
+const [starredAuthors, setStarredAuthors] = useState(() => new Set())
+
+// ==== tombstones (ДОЛЖНЫ быть объявлены до handleReportSelect) ====
+const TOMBSTONE_TTL_MS = 10 * 60 * 1000;
+const [tombstones, setTombstones] = useState(() => {
+  if (!isBrowser()) return { topics: {}, posts: {} };
+  try {
+    const raw = JSON.parse(localStorage.getItem('forum:tombstones') || 'null');
+    return raw && typeof raw === 'object'
+      ? { topics: raw.topics || {}, posts: raw.posts || {} }
+      : { topics: {}, posts: {} };
+  } catch {
+    return { topics: {}, posts: {} };
+  }
+});
+const persistTombstones = useCallback((patch) => {
+  setTombstones((prev) => {
+    const next = typeof patch === 'function' ? patch(prev) : { ...prev, ...patch };
+    try { localStorage.setItem('forum:tombstones', JSON.stringify(next)); } catch {}
+    return next;
+  });
+}, []);
+ 
   const [starMode, setStarMode] = useState(false)
 
   const [myFollowersCount, setMyFollowersCount] = useState(0)
@@ -8831,7 +9033,113 @@ export default function Forum(){
     const id=setInterval(upd,3000)
     return ()=>{ window.removeEventListener('auth:ok',upd); window.removeEventListener('auth:success',upd); clearInterval(id) }
   },[])
+  useEffect(() => {
+    let alive = true
+    if (!viewerId) {
+      setMediaLock({ locked: false, untilMs: 0 })
+      return () => { alive = false }
+    }
+    api.mediaLock({ userId: viewerId }).then((res) => {
+      if (!alive) return
+      if (res?.ok) {
+        setMediaLock({
+          locked: !!res.locked && Number(res.untilMs || 0) > Date.now(),
+          untilMs: Number(res.untilMs || 0),
+        })
+      }
+    }).catch(() => {})
+    return () => { alive = false }
+  }, [viewerId])
 
+  useEffect(() => {
+    if (!reportUI.open) return
+    const onDown = (e) => {
+      const el = reportPopoverRef.current
+      if (el && el.contains(e.target)) return
+      setReportUI({ open: false, postId: null, anchorRect: null })
+    }
+    const onKey = (e) => {
+      if (e.key === 'Escape') setReportUI({ open: false, postId: null, anchorRect: null })
+    }
+    const onScroll = () => setReportUI({ open: false, postId: null, anchorRect: null })
+    document.addEventListener('pointerdown', onDown, true)
+    document.addEventListener('keydown', onKey, true)
+    window.addEventListener('scroll', onScroll, true)
+    window.addEventListener('resize', onScroll, true)
+    return () => {
+      document.removeEventListener('pointerdown', onDown, true)
+      document.removeEventListener('keydown', onKey, true)
+      window.removeEventListener('scroll', onScroll, true)
+      window.removeEventListener('resize', onScroll, true)
+    }
+  }, [reportUI.open])
+
+  const openReportPopover = useCallback((post, rect) => {
+    if (!rect || !post?.id) return
+    setReportUI({
+      open: true,
+      postId: String(post.id),
+      anchorRect: {
+        top: rect.top,
+        bottom: rect.bottom,
+        left: rect.left,
+        right: rect.right,
+        width: rect.width,
+        height: rect.height,
+      },
+    })
+  }, [])
+
+  const handleReportSelect = useCallback(async (reason) => {
+    if (!reportUI.postId || reportBusy) return
+    let authNow = readAuth()
+    let userId = authNow?.asherId || authNow?.accountId
+    if (!userId && isBrowser()) {
+      const res = await openAuth()
+      authNow = res || readAuth()
+      userId = authNow?.asherId || authNow?.accountId
+    }
+    if (!userId) {
+      toast?.warn?.(t?.('forum_auth_required') || 'Sign in required')
+      return
+    }
+
+    setReportBusy(true)
+    try {
+      const res = await api.reportPost({
+        postId: reportUI.postId,
+        reason,
+        userId,
+      })
+      if (!res?.ok) {
+        if (res?.error === 'self_report') {
+          toast?.warn?.(t?.('forum_report_self') || 'You cannot report your own post')
+        } else {
+          toast?.err?.(t?.('forum_report_error') || 'Report failed')
+        }
+        return
+      }
+      if (res?.duplicate) {
+        toast?.info?.(t?.('forum_report_already') || 'Already reported')
+        return
+      }
+
+      if (res?.action === 'deleted' || res?.action === 'deleted_and_locked') {
+        persistTombstones(prev => ({
+          ...prev,
+          posts: { ...(prev?.posts || {}), [String(reportUI.postId)]: Date.now() + TOMBSTONE_TTL_MS },
+        }))
+        if (res?.action === 'deleted_and_locked' && res?.lockedUntil) {
+          setMediaLock({ locked: true, untilMs: Number(res.lockedUntil || 0) })
+        }
+      }
+      toast?.ok?.(t?.('forum_report_sent') || 'Report sent')
+    } catch {
+      toast?.err?.(t?.('forum_report_error') || 'Report failed')
+    } finally {
+      setReportBusy(false)
+    }
+  }, [persistTombstones, reportUI.postId, reportBusy, setMediaLock, t, toast])
   // === Глобальный контроллер HTML5-медиа в постах ===
   // В любой момент времени играет только один <video>/<audio> controls.
   // Видео без controls (обложки, рекламные петельки и т.п.) не трогаем.
@@ -9650,25 +9958,7 @@ const persistSnap = useCallback((patch) => {
     return next
   })
 }, [])
-const TOMBSTONE_TTL_MS = 10 * 60 * 1000;
-const [tombstones, setTombstones] = useState(() => {
-  if (!isBrowser()) return { topics: {}, posts: {} };
-  try {
-    const raw = JSON.parse(localStorage.getItem('forum:tombstones') || 'null');
-    return raw && typeof raw === 'object'
-      ? { topics: raw.topics || {}, posts: raw.posts || {} }
-      : { topics: {}, posts: {} };
-  } catch {
-    return { topics: {}, posts: {} };
-  }
-});
-const persistTombstones = useCallback((patch) => {
-  setTombstones((prev) => {
-    const next = typeof patch === 'function' ? patch(prev) : { ...prev, ...patch };
-    try { localStorage.setItem('forum:tombstones', JSON.stringify(next)); } catch {}
-    return next;
-  });
-}, []);
+
 const [overlay, setOverlay] = useState(() => ({
   reactions: {},
   edits: {},
@@ -12157,6 +12447,7 @@ const createPost = async () => {
           multipart: true,
           signal,                                // надёжно для больших файлов
           contentType: mime,
+          headers: { 'x-forum-user-id': String(viewerId || '') },          
           onUploadProgress: (p) => {
             const upPct = Math.max(0, Math.min(100, Number(p?.percentage || 0)));
             // общий прогресс: Uploading занимает 30..85%
@@ -12192,7 +12483,12 @@ const createPost = async () => {
         const blob = await resp.blob();
         const fd = new FormData();
         fd.append('file', blob, `voice-${Date.now()}.webm`);
-        const up = await fetch('/api/forum/uploadAudio', { method:'POST', body: fd, cache:'no-store' });
+        const up = await fetch('/api/forum/uploadAudio', {
+          method:'POST',
+          body: fd,
+          cache:'no-store',
+          headers: { 'x-forum-user-id': String(viewerId || '') },
+        });
         const uj = await up.json().catch(()=>null);
         audioUrlToSend = (uj && Array.isArray(uj.urls) && uj.urls[0]) ? uj.urls[0] : '';
       } else {
@@ -12599,8 +12895,9 @@ const fileInputRef = React.useRef(null);
 const handleAttachClick = React.useCallback((e) => {
   e?.preventDefault?.(); 
   e?.stopPropagation?.();
+  if (mediaLocked) return;  
   fileInputRef.current?.click();
-}, []);
+}, [mediaLocked]);
 
 const onFilesChosen = React.useCallback(async (e) => {
   try {
@@ -12680,7 +12977,13 @@ try { startSoftProgress?.(72, 200, 88); } catch {}  // мягко едем к ~8
       const fd = new FormData();
       for (const f of imgFiles.slice(0, 20)) fd.append('files', f, f.name);
 
-      const res = await fetch('/api/forum/upload', { method: 'POST', body: fd, cache: 'no-store', signal });
+      const res = await fetch('/api/forum/upload', {
+        method: 'POST',
+        body: fd,
+        cache: 'no-store',
+        signal,
+        headers: { 'x-forum-user-id': String(viewerId || '') },
+      });
       if (!res.ok) throw new Error('upload_failed');
 
       const up = await res.json().catch(() => ({ urls: [] }));
@@ -12737,7 +13040,8 @@ try { startSoftProgress?.(72, 200, 88); } catch {}  // мягко едем к ~8
           handleUploadUrl: '/api/forum/blobUploadUrl',
           multipart: true,
           signal,
-         contentType: (mime || (ext === 'mp4' ? 'video/mp4' : (ext === 'mov' ? 'video/quicktime' : 'video/webm'))),
+         contentType: (mime || (ext === 'mp4' ? 'video/mp4' : (ext === 'mov' ? 'video/quicktime' : 'video/webm'))),          
+          headers: { 'x-forum-user-id': String(viewerId || '') },
          onUploadProgress: (p) => {
            const upPct = Math.max(0, Math.min(100, Number(p?.percentage || 0)));
            // Uploading занимает ~40..95% в общей шкале
@@ -12783,7 +13087,7 @@ try { startSoftProgress?.(72, 200, 88); } catch {}  // мягко едем к ~8
   } finally {
     if (e?.target) e.target.value = '';
   }
-}, [t, toast, moderateImageFiles, toastI18n, reasonKey, reasonFallbackEN, beginMediaPipeline, endMediaPipeline, setPendingImgs, setPendingVideo, markMediaReady, startSoftProgress, stopMediaProg, setMediaPhase, setMediaPct, setVideoProgress]);
+}, [t, toast, moderateImageFiles, toastI18n, reasonKey, reasonFallbackEN, beginMediaPipeline, endMediaPipeline, setPendingImgs, setPendingVideo, markMediaReady, startSoftProgress, stopMediaProg, setMediaPhase, setMediaPct, setVideoProgress, viewerId]);
 
   /* ---- профиль (поповер у аватара) ---- */
   const idShown = resolveProfileAccountId(auth.asherId || auth.accountId || '')
@@ -13844,7 +14148,15 @@ function pickAdUrlForSlot(slotKey, slotKind) {
   onResetConfirm={resetOrCloseOverlay}
   t={t}
 />
-
+<ReportPopover
+  open={reportUI.open}
+  anchorRect={reportUI.anchorRect}
+  onClose={() => setReportUI({ open: false, postId: null, anchorRect: null })}
+  onSelect={handleReportSelect}
+  t={t}
+  busy={reportBusy}
+  popoverRef={reportPopoverRef}
+/>
 <div
   className="grid2"
   style={{ display:'flex', flexDirection:'column', gridTemplateColumns: '1fr', flex: '1 1 auto', minHeight: 0 }}
@@ -14555,7 +14867,7 @@ const openThreadHere = (clickP) => {
   parentPost={parent}
   parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}
   parentText={parent ? (parent.text || parent.message || parent.body || '') : ''} 
-  onReport={() => toast.ok(t('forum_report_ok'))}
+  onReport={(post, rect) => openReportPopover(post, rect)}
   onOpenThread={openThreadHere}
   onReact={reactMut}
   isAdmin={isAdmin}
@@ -14666,7 +14978,7 @@ const openThreadHere = (clickP) => {
       parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''}
       parentText={parent ? (parent.text || parent.message || parent.body || '') : ''}
      
-          onReport={() => toast.ok(t('forum_report_ok'))}
+          onReport={(post, rect) => openReportPopover(post, rect)}
 onOpenThread={(clickP) => {
   // ✅ из любой карточки: открыть сразу ветку ответов по клику на счётчик
   openThreadForPost(clickP || p, { closeInbox: true });
@@ -15499,7 +15811,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
   parentPost={parent}
   parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}
   parentText={parent ? (parent.text || parent.message || parent.body || '') : ''}
-  onReport={() => toast.ok(t('forum_report_ok'))}
+  onReport={(post, rect) => openReportPopover(post, rect)}
   onReply={() => setReplyTo(p)}
   onOpenThread={(clickP) => { setThreadRoot(clickP); }}
   onReact={reactMut}
@@ -15623,10 +15935,12 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
 <div className="railItem">
   <button
     type="button"
-    className="iconBtn ghost"
+    className={cls('iconBtn ghost lockable', mediaLocked && 'isLocked')}
     aria-label={t('forum_attach') || 'Прикрепить'}
     title={t('forum_attach') || 'Прикрепить'}
     onClick={handleAttachClick}
+    disabled={mediaLocked}
+    aria-disabled={mediaLocked ? 'true' : 'false'}    
   >
     <svg viewBox="0 0 24 24" aria-hidden>
       <path
@@ -15634,6 +15948,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
         stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" fill="none"
       />
     </svg>
+        {mediaLocked && <span className="lockBadge" aria-hidden="true">🔒</span>}
   </button>
 </div>
 
@@ -15661,15 +15976,16 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
   <button
     type="button"
     className={cls(
-      'iconBtn camBtn',
+      'iconBtn camBtn lockable',
       videoState==='recording' && 'rec',
-      (videoState==='uploading') && 'disabled'
+      (videoState==='uploading') && 'disabled',
+      mediaLocked && 'isLocked'
     )}
     aria-label={videoState==='recording' ? 'Stop' : (videoState==='preview' ? 'Снять заново' : 'Снять видео')}
     title={videoState==='recording' ? 'Stop' : (videoState==='preview' ? 'Снять заново' : 'Снять видео')}
     onClick={(e)=>{
       e.preventDefault();
-      if (videoState==='uploading') return;
+      if (mediaLocked || videoState==='uploading') return;
   // фикс: композер НЕ закрываем (иначе прыжок вверх). Сохраняем текущий скролл и держим composerActive=true
   try { saveComposerScroll(); } catch {}
   try { setComposerActive(true); } catch {}
@@ -15680,6 +15996,8 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
 
       try { document.activeElement?.blur?.() } catch {}
     }}
+    disabled={mediaLocked || videoState==='uploading'}
+    aria-disabled={mediaLocked || videoState==='uploading' ? 'true' : 'false'}    
   >
               {videoState==='recording'
                 ? <span style={{display:'inline-flex',alignItems:'center',gap:6}}>
@@ -15693,7 +16011,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
                   </svg>
                 )
               }
-             
+          {mediaLocked && <span className="lockBadge" aria-hidden="true">🔒</span>}
             </button>
           </div>
 
@@ -15701,16 +16019,20 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
 <div className="railItem">
   <button
     type="button"
-    className={cls('iconBtn ghost micBtn', recState==='rec' && 'rec')}
+    className={cls('iconBtn ghost micBtn lockable', recState==='rec' && 'rec', mediaLocked && 'isLocked')}
     aria-label="Hold to record voice"
+    disabled={mediaLocked}
+    aria-disabled={mediaLocked ? 'true' : 'false'}    
     onMouseDown={(e)=>{
       e.preventDefault();
+      if (mediaLocked) return;      
       startRecord();
     }}
     onMouseUp={()=>{ if (recState==='rec') stopRecord(); }}
     onMouseLeave={()=>{ if (recState==='rec') stopRecord(); }}
     onTouchStart={(e)=>{
       e.preventDefault();
+      if (mediaLocked) return;      
       startRecord();
     }}
     onTouchEnd={()=>{ if (recState==='rec') stopRecord(); }}
@@ -15721,7 +16043,8 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
     </svg>
           {recState === 'rec' && (
             <span className="micTimer" aria-live="polite">{fmtSec(recElapsed)}</span>
-          )}    
+          )}  
+       {mediaLocked && <span className="lockBadge" aria-hidden="true">🔒</span>}  
   </button>
 </div>
 
@@ -16045,6 +16368,8 @@ onClick={() => {
   multiple
   style={{ display: 'none' }}
   onChange={onFilesChosen}
+  disabled={mediaLocked}
+  aria-disabled={mediaLocked ? 'true' : 'false'}  
 />
 
   </div>

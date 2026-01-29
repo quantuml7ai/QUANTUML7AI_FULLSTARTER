@@ -3,7 +3,7 @@
 import { NextResponse } from 'next/server'
 import { put } from '@vercel/blob'
 import sharp from 'sharp'
-
+import { isMediaLocked } from '../_db.js'
 export const runtime = 'nodejs' // нужен nodejs-рантайм
 
 // Допустимые типы (расширения/мимы)
@@ -17,6 +17,16 @@ const MAX_SIZE_BYTES = 5 * 1024 * 1024 // 5 MB
 export async function POST(req) {
   try {
     const form = await req.formData()
+    const headerId = req.headers.get('x-forum-user-id')
+    const formId = form.get('userId') || form.get('accountId') || form.get('asherId')
+    const userId = String(headerId || formId || '').trim()
+    if (!userId) {
+      return NextResponse.json({ ok: false, error: 'missing_user_id' }, { status: 401, headers: { 'cache-control': 'no-store' } })
+    }
+    const lock = await isMediaLocked(userId)
+    if (lock.locked) {
+      return NextResponse.json({ ok: false, error: 'media_locked', untilMs: lock.untilMs }, { status: 403, headers: { 'cache-control': 'no-store' } })
+    }    
     // поддерживаем и 'file', и 'files'
     const files = [
       ...form.getAll('files'),
