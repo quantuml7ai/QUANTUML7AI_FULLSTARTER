@@ -4188,7 +4188,28 @@ useEffect(() => {
           }
         }
         @media (max-width: 640px) {
-     
+          /* MOBILE FULL-BLEED:
+             убираем боковые гуттеры, которые даёт глобальный layout (.page-center / .page-content)
+             ТОЛЬКО внутри AdsHome */
+          .ads-page-root {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+          }
+
+          .ads-page-root > .page-center.ads-home {
+            max-width: none !important;
+            width: 100vw !important;
+            margin-left: calc(50% - 50vw) !important;
+            margin-right: calc(50% - 50vw) !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+          }
+
+          .ads-page-root .ads-panel {
+            border-left: 0 !important;
+            border-right: 0 !important;
+            border-radius: 0 !important;
+          }     
           .ads-header-metrics {
             justify-content: flex-start;
           }
