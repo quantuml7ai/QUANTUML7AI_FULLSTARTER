@@ -9,11 +9,10 @@ const TX = (t, key, fb) => {
     const v = t?.(key)
     if (!v || v === key) return fb
     return v
-  } catch {
+  }catch { 
     return fb
   }
-}
-
+} 
 /* Локализация стран по коду */
 function localizeCountry(t, code) {
   if (!code) {
@@ -3070,11 +3069,11 @@ useEffect(() => {
                   'ads_analytics_duration_label',
                   'Длительность кампании'
                 )}
-                value={TX(
-                  t,
-                  'ads_analytics_duration_value',
-                  `${campaignDurationDays} д`
-                )}
+ value={TX(
+   t,
+   'ads_analytics_duration_value',
+   '{days} д'
+ ).replace('{days}', campaignDurationDays)}
               />
             )}
                         </div>
@@ -3231,16 +3230,15 @@ useEffect(() => {
                           </span>
                         </div>
                       )}
-
-                      {/* ГЛАВНЫЙ ГРАФИК */}
-                      {!analyticsLoading && analytics && (
-                        <>
-                           <ChartContainer
-                            title={TX(
+                            {TX(
                               t,
                               'ads_analytics_main_chart_title',
                               'Временная аналитика кампании'
                             )}
+                      {/* ГЛАВНЫЙ ГРАФИК */}
+                      {!analyticsLoading && analytics && (
+                        <>
+                           <ChartContainer
                             right={
                               <>
                                 <TabsGroup
@@ -4190,6 +4188,7 @@ useEffect(() => {
           }
         }
         @media (max-width: 640px) {
+     
           .ads-header-metrics {
             justify-content: flex-start;
           }
