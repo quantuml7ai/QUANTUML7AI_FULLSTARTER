@@ -846,8 +846,8 @@ html, body{
 @media (min-width:1780px){ :root{ --gutter: 180px; } }
 @media (max-width:1780px){ :root{ --gutter: 120px; } }
 /* Мобайл: микро-гаттер 8px, чтобы ничего не «резалось» по краям */
-@media (max-width:1180px){ :root{ --gutter: 6px; --miniapp-top-offset: 70px; } }
-
+@media (max-width:900px){ :root{ --gutter: 1px; --miniapp-top-offset: 70px; } }
+@media (min-width:900px){ :root{ --gutter: 26px; --miniapp-top-offset: 70px; } }
 /* База */
 html,body{ margin:0; padding:0; width:100%; min-height:100%; overflow-x:hidden; }
 *,*::before,*::after{ box-sizing:border-box; }
@@ -881,10 +881,7 @@ figure,.panel,.container,.content,.wrap,.wrapper,.page,.block,.hero,.card{
   padding-left: var(--gutter) !important;
   padding-right: var(--gutter) !important;
 }
-
-
-
-
+ 
 /* 3) ТОЛЬКО контейнеры в .page-content тянем на 100% */
 .page-content > :is(main,section,header,footer,nav,article,aside,div){
   width:100% !important; max-width:100% !important; flex:0 0 auto !important; align-self:stretch !important;

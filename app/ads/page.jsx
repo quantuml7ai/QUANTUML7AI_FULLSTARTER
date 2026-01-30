@@ -1404,12 +1404,35 @@ export default function AdsPage() {
         }
 
         @media (max-width: 640px) {
+          /* MOBILE FULL-BLEED:
+             убираем внешние гуттеры layout (.page-content/.page-center)
+             и прижимаем все панели к краям экрана */
+          .page-content {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+          }
+
+          .page-center.ads-landing {
+            max-width: none !important;
+            width: 100vw !important;
+            margin-left: calc(50% - 50vw) !important;
+            margin-right: calc(50% - 50vw) !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+          }
+
+          /* Сами панели — без боковых бордеров/скруглений, чтобы выглядело как full-width */
+          .page-center.ads-landing .panel {
+            border-left: 0 !important;
+            border-right: 0 !important;
+            border-radius: 0 !important;
+          }        
           .ads-pack-grid {
             grid-template-columns: minmax(0, 1fr);
           }
 
           .ads-how-grid {
-            grid-template-columns: minmax(0, 1fr);
+            grid-template-columns: minmax(0, 1fr);            
           }
 
           .ads-hero-meta {
