@@ -70,13 +70,13 @@ export async function GET(req) {
 
     // Строки ссылок для форума (ForumAds → /api/ads?action=links)
     if (action === 'links') {
-      const res = await getLinksForForum()
+      const res = await getLinksForForum(req)
       return jsonOk(res)
     }
 
     // Отдать одну активную кампанию
     if (action === 'serve') {
-      const res = await serveAd()
+      const res = await serveAd(req)
       return jsonOk(res)
     }
 
@@ -157,6 +157,8 @@ export async function POST(req) {
         mediaUrl,
         mediaType,
         creatives,
+        targetCountries,
+        targetRegions,        
       } = body || {}
 
       // Нормализация мультикреативов (совместимо с legacy)
@@ -177,6 +179,8 @@ export async function POST(req) {
         clickUrl: (clickUrl || '').trim(),
         mediaUrl: mediaUrl || '',
         mediaType: (mediaType || '').toLowerCase() || 'link',
+        targetCountries,
+        targetRegions,        
       }
 
       if (normalizedCreatives && normalizedCreatives.length) {

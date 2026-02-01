@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react'
 import { useI18n } from '../../components/i18n'
 import { upload as blobUpload } from '@vercel/blob/client'
+import GeoTargetingPicker from './GeoTargetingPicker'
 /* ===== Вспомогалки i18n ===== */
 const TX = (t, key, fb) => {
   try {
@@ -1273,7 +1274,8 @@ export default function AdsHome() {
   const [creative, setCreative] = useState(() => makeEmptyCreative())
   const [creating, setCreating] = useState(false)
   const [newError, setNewError] = useState(null)
-
+  const [targetCountries, setTargetCountries] = useState([])
+  const [targetRegions, setTargetRegions] = useState({})
   // Аналитика
   const [selectedId, setSelectedId] = useState(null)
   const [analytics, setAnalytics] = useState(null)
@@ -1386,6 +1388,10 @@ const [campaignMetrics, setCampaignMetrics] = useState({})
     const used = Number(pkgInfo.usedCampaigns || 0)
     return Math.max(0, max - used)
   }, [pkgInfo])
+  const geoSpend = targetCountries.length
+  const geoLimitExceeded =
+    remainingCampaigns != null && geoSpend > remainingCampaigns
+  const geoSelectionMissing = geoSpend === 0
 
   /* ===== Upload media (для одного креатива) ===== */
   async function uploadMediaForCreative(cr) {
@@ -1477,9 +1483,19 @@ const [campaignMetrics, setCampaignMetrics] = useState({})
       setNewError(TX(t, 'ads_new_err_required', 'Название обязательно.'))
       return
     }
-    if (remainingCampaigns != null && remainingCampaigns <= 0) {
+    if (geoSelectionMissing) {
       setNewError(
-        TX(t, 'ads_new_err_limit', 'Лимит кампаний для пакета исчерпан.')
+        TX(t, 'ads_geo_required', 'Выберите хотя бы одну страну.')
+      )
+      return
+    }
+    if (remainingCampaigns != null && geoSpend > remainingCampaigns) {
+      setNewError(
+        TX(
+          t,
+          'ads_geo_limit_exceeded',
+          'Недостаточно кампаний в пакете.'
+        )
       )
       return
     }
@@ -1533,6 +1549,8 @@ const [campaignMetrics, setCampaignMetrics] = useState({})
         clickUrl: cleanedCreative.clickUrl,
         mediaUrl,
         mediaType,
+        targetCountries,
+        targetRegions,        
       }
 
       const r = await fetch('/api/ads', {
@@ -1551,7 +1569,8 @@ const [campaignMetrics, setCampaignMetrics] = useState({})
 
       setNewName('')
       setCreative(makeEmptyCreative())
-
+      setTargetCountries([])
+      setTargetRegions({})
     } catch (e) {
       console.error('[ADS] create campaign error', e)
       setNewError(
@@ -2485,8 +2504,7 @@ useEffect(() => {
                   </div>
                 </label>
               </div>
-
-
+ 
               {newError && (
                 <div className="ads-error inline">
                   <span>{newError}</span>
@@ -2497,7 +2515,9 @@ useEffect(() => {
                 <button
                   type="button"
                   className="btn ads-submit-btn"
-                  disabled={creating}
+                  disabled={
+                    creating || geoSelectionMissing || geoLimitExceeded
+                  }
                   onClick={handleCreateCampaign}
                 >
                   {creating
@@ -2579,6 +2599,16 @@ useEffect(() => {
               </div>
             </div>
           </div>
+              <GeoTargetingPicker
+                t={t}
+                selectedCountries={targetCountries}
+                selectedRegions={targetRegions}
+                remaining={remainingCampaigns}
+                onSelectionChange={({ countries, regions }) => {
+                  setTargetCountries(countries)
+                  setTargetRegions(regions)
+                }}
+              />          
         </section>
 
         {/* ===== СПИСОК КАМПАНИЙ + АНАЛИТИКА ===== */}

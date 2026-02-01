@@ -846,8 +846,8 @@ html, body{
 @media (min-width:1780px){ :root{ --gutter: 180px; } }
 @media (max-width:1780px){ :root{ --gutter: 120px; } }
 /* Мобайл: микро-гаттер 8px, чтобы ничего не «резалось» по краям */
-@media (max-width:900px){ :root{ --gutter: 1px; --miniapp-top-offset: 70px; } }
-@media (min-width:900px){ :root{ --gutter: 26px; --miniapp-top-offset: 70px; } }
+@media (max-width:1100px){ :root{ --gutter: 1px; --miniapp-top-offset: 70px; } }
+
 /* База */
 html,body{ margin:0; padding:0; width:100%; min-height:100%; overflow-x:hidden; }
 *,*::before,*::after{ box-sizing:border-box; }

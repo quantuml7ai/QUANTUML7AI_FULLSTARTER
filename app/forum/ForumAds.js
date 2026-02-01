@@ -1455,36 +1455,46 @@ export function AdCard({ url, slotKind, nearId }) {
   data-ads="1"
   style={slotCssVars}
 >
-  <style jsx>{`
-    .forum-ad-media-slot {
-      width: 100%;
-      height: var(--ad-slot-h-m);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      border-radius: 0.5rem;
-      background: var(--bg-soft, #020817);
-    }
-    @media (min-width: 640px) {
-      .forum-ad-media-slot {
-        height: var(--ad-slot-h-t);
-      }
-    }
-    @media (min-width: 1024px) {
-      .forum-ad-media-slot {
-        height: var(--ad-slot-h-d);
-      }
-    }
+<style jsx>{`
+  .forum-ad-media-slot {
+    width: 100%;
+    height: var(--ad-slot-h-m);
+    position: relative;         /* ключ: якорь для absolute медиа */
+    overflow: hidden;
+    border-radius: 0.5rem;
+    background: var(--bg-soft, #020817);
+  }
 
-    /* Вписать целиком, без обрезки */
-    .forum-ad-fit {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      object-position: center;
+  @media (min-width: 640px) {
+    .forum-ad-media-slot {
+      height: var(--ad-slot-h-t);
     }
-  `}</style>
+  }
+
+  @media (min-width: 1024px) {
+    .forum-ad-media-slot {
+      height: var(--ad-slot-h-d);
+    }
+  }
+
+  /* Универсальный слой под любое медиа */
+  .forum-ad-media-fill {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Вписать полностью (9:16, 16:9 и любое) по центру */
+  .forum-ad-fit {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+  }
+`}</style>
+
 
       <a
         href={clickHref}
@@ -1545,18 +1555,20 @@ export function AdCard({ url, slotKind, nearId }) {
               <div className="animate-pulse w-full h-full bg-[color:var(--skeleton,#111827)]" />
             )}
 
-            {media.kind === 'video' && media.src && (
-<video
-  ref={videoRef}
-  src={media.src}
-  className="forum-ad-fit"
-  muted={muted}
-  loop
-  playsInline
-  preload={isNear ? 'metadata' : 'none'}
-/>
+{media.kind === 'video' && media.src && (
+  <div className="forum-ad-media-fill">
+    <video
+      ref={videoRef}
+      src={media.src}
+      className="forum-ad-fit"
+      muted={muted}
+      loop
+      playsInline
+      preload={isNear ? 'metadata' : 'none'}
+    />
+  </div>
+)}
 
-            )}
 
 
             {media.kind === 'youtube' && media.src && (
@@ -1608,19 +1620,19 @@ export function AdCard({ url, slotKind, nearId }) {
             )}
 
 
-            {media.kind === 'image' && media.src && (
-           <div className="w-full h-full flex items-center justify-center">
-<NextImage
-  src={media.src}
-  alt={host}
-  width={1920}
-  height={1080}
-  className="forum-ad-fit transition-opacity duration-200"
-  unoptimized
-/>
+{media.kind === 'image' && media.src && (
+  <div className="forum-ad-media-fill">
+    <NextImage
+      src={media.src}
+      alt={host}
+      fill
+      className="forum-ad-fit transition-opacity duration-200"
+      style={{ objectFit: 'contain', objectPosition: 'center' }}
+      unoptimized
+    />
+  </div>
+)}
 
-                </div>
-            )}
 
             {media.kind === 'favicon' && media.src && (
               <div className="w-full h-full flex items-center justify-center bg-[color:var(--bg-soft,#020817)]">
