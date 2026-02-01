@@ -78,7 +78,9 @@ export default function NotRobot() {
   const rbIdleTimeoutRef = useRef(null);
   const rbCountdownIntervalRef = useRef(null);
   const rbLastActivityRef = useRef(Date.now());
-
+  // ✅ троттлим "дорогую" часть рескейджула idle-таймера
+  const rbLastIdleRescheduleRef = useRef(0);
+  const RB_ACTIVITY_THROTTLE_MS = 500;
   // рефы для актуальных значений (чтобы не ловить stale state в обработчиках)
   const rbFirstCompletedRef = useRef(false);
   const rbOverlayOpenRef = useRef(false);
@@ -213,11 +215,15 @@ export default function NotRobot() {
 
   const rbMarkActivity = () => {
     rbLastActivityRef.current = Date.now();
+
     // важно — смотрим на рефы, а не на стейт
-    if (rbFirstCompletedRef.current && !rbOverlayOpenRef.current) {
-      rbScheduleIdleCheck();
-    }
+    if (!rbFirstCompletedRef.current) return;
+    if (rbOverlayOpenRef.current) return;
+
+    rbScheduleIdleCheck();
   };
+
+
 
   const rbHandleCoinClick = (coin) => {
     if (rbStatus !== "running" || !rbTargetCoin) return;
@@ -284,17 +290,17 @@ export default function NotRobot() {
     }
 
     const activityEvents = [
-      "click",
-      "scroll",
-      "keydown",
-      "mousemove",
-      "touchstart",
-      "pointerdown",
+      "click",       // мышь/тап по элементу
+      "keydown",     // клавиатура
+      "touchstart",  // тач
+      "pointerdown", // универсальный pointer (мышь/перо/тач)
     ];
+
 
     const activityHandler = () => {
       rbMarkActivity();
     };
+
 
     if (typeof window !== "undefined") {
       activityEvents.forEach((evt) =>
@@ -448,6 +454,13 @@ export default function NotRobot() {
           background: rgba(0, 0, 0, 0.88);
           backdrop-filter: blur(8px);
         }
+
+        @media (max-width: 680px) {
+          .rb-backdrop {
+            backdrop-filter: none;
+          }
+        }
+
 
         .rb-container {
           position: relative;
@@ -612,7 +625,7 @@ export default function NotRobot() {
         }
 
         .rb-coin-image {
-          width: 80x;
+          width: 80px;
           height: 80px;
           object-fit: contain;
         }
