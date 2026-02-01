@@ -29,6 +29,17 @@ const RB_COINS = [
   { id: 10, code: "AVAX", imagePath: "/robot/10.png" },
   { id: 11, code: "LINC", imagePath: "/robot/11.png" },
   { id: 12, code: "TETHER", imagePath: "/robot/12.png" },
+  { id: 13, code: "BNB", imagePath: "/robot/13.png" },
+  { id: 14, code: "MATIC", imagePath: "/robot/14.png" },
+  { id: 15, code: "TRX", imagePath: "/robot/15.png" }, 
+  { id: 16, code: "DOT", imagePath: "/robot/16.png" },
+  { id: 17, code: "ATOM", imagePath: "/robot/17.png" },
+  { id: 18, code: "NEAR", imagePath: "/robot/18.png" },
+  { id: 19, code: "ICP", imagePath: "/robot/19.png" },
+  { id: 20, code: "FIL", imagePath: "/robot/20.png" },
+  { id: 21, code: "SUI", imagePath: "/robot/21.png" },
+  { id: 22, code: "OP", imagePath: "/robot/22.png" },
+  { id: 23, code: "APT", imagePath: "/robot/23.png" },
 ];
 
 const RB_VISIBLE_COINS_PER_ROUND = 5;
@@ -704,4 +715,4 @@ export default function NotRobot() {
       `}</style>
     </>
   );
-}
+} 
