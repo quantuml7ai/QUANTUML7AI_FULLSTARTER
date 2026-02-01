@@ -3023,9 +3023,8 @@ useEffect(() => {
                               })()}
                             </span>
                           </div>
-                        </div>
-
- <div
+                        </div> 
+  <div
    className="ads-analytics-preview"
    style={
      analyticsPreviewAspect
@@ -3071,7 +3070,7 @@ useEffect(() => {
                               </span>
                             </div>
                           )}
-                        </div>
+                        </div>                       
                       </div>
 
                       {/* Сводка по цифрам кампании */}
