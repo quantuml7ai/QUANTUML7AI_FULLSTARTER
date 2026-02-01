@@ -1256,7 +1256,7 @@ function CampaignCard({
 /* ====== Основной компонент кабинета ====== */
 
 export default function AdsHome() {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   // NOTE: t используется также во вложенных компонентах через TX
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -1283,6 +1283,7 @@ export default function AdsHome() {
   const [analyticsError, setAnalyticsError] = useState(null)
   const [range, setRange] = useState('7d')
   const [metricTab, setMetricTab] = useState('impressions') // impressions | clicks | ctr
+ const [analyticsPreviewAspect, setAnalyticsPreviewAspect] = useState(null) // например "4 / 3", "16 / 9", "9 / 16"
   // Общие метрики по всем кампаниям для верхних таблеток
   const [overallTotals, setOverallTotals] = useState({
     impressions: 0,
@@ -1590,7 +1591,10 @@ const [campaignMetrics, setCampaignMetrics] = useState({})
     () => campaigns.find((c) => (c.id || c.campaignId) === selectedId),
     [campaigns, selectedId]
   )
-
+ useEffect(() => {
+   // чтобы не "прилипало" соотношение от предыдущей кампании
+   setAnalyticsPreviewAspect(null)
+ }, [selectedId])
   // Общий helper для действий с кампанией
   async function performCampaignAction(actionName, id) {
     if (!id) return
@@ -2600,7 +2604,7 @@ useEffect(() => {
             </div>
           </div>
               <GeoTargetingPicker
-                t={t}
+                lang={lang}
                 selectedCountries={targetCountries}
                 selectedRegions={targetRegions}
                 remaining={remainingCampaigns}
@@ -3021,7 +3025,14 @@ useEffect(() => {
                           </div>
                         </div>
 
-                        <div className="ads-analytics-preview">
+ <div
+   className="ads-analytics-preview"
+   style={
+     analyticsPreviewAspect
+       ? { aspectRatio: analyticsPreviewAspect }
+       : undefined
+   }
+ >
                           {selectedCampaign.mediaType === 'video' &&
                           selectedCampaign.mediaUrl ? (
                             <video
@@ -3030,12 +3041,24 @@ useEffect(() => {
                               muted
                               loop
                               playsInline
+       onLoadedMetadata={(e) => {
+         const v = e.currentTarget
+         const w = Number(v.videoWidth || 0)
+         const h = Number(v.videoHeight || 0)
+         if (w > 0 && h > 0) setAnalyticsPreviewAspect(`${w} / ${h}`)
+       }}                              
                             />
                           ) : selectedCampaign.mediaType === 'image' &&
                             selectedCampaign.mediaUrl ? (
                             <img
                               src={selectedCampaign.mediaUrl}
                               alt="preview"
+       onLoad={(e) => {
+         const img = e.currentTarget
+         const w = Number(img.naturalWidth || 0)
+         const h = Number(img.naturalHeight || 0)
+        if (w > 0 && h > 0) setAnalyticsPreviewAspect(`${w} / ${h}`)
+       }}                              
                             />
                           ) : (
                             <div className="ads-analytics-preview-empty">
@@ -4022,8 +4045,9 @@ useEffect(() => {
         }
 
         .ads-analytics-preview {
-          width: 190px;
-          height: 120px;
+          width: 120px;
+   height: auto;
+   aspect-ratio: 16 / 9; /* дефолт, пока реальный размер не подгрузился */
           border-radius: 12px;
           overflow: hidden;
           border: 1px solid rgba(148, 163, 184, 0.9);
@@ -4252,8 +4276,8 @@ useEffect(() => {
             background: transparent;
           }
           .ads-analytics-preview {
-            width: 110px;
-            height: 70px;
+            width: 80px;
+            height: auto;
           }
           .ads-geo-table {
             min-width: 0;

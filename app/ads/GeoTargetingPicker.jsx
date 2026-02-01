@@ -25,6 +25,7 @@ function clampRemaining(value) {
 
 export default function GeoTargetingPicker({
   t,
+  lang,
   selectedCountries,
   selectedRegions,
   remaining,
@@ -44,14 +45,24 @@ export default function GeoTargetingPicker({
       ),
     )
   }, [selectedCountries])
-
+  const displayNames = useMemo(() => {
+    if (typeof Intl === 'undefined' || !lang) return null
+    try {
+      return new Intl.DisplayNames([lang], { type: 'region' })
+    } catch {
+      return null
+    }
+  }, [lang])
   const getCountryLabel = useCallback(
     (country) => {
-      const key = `country_${String(country.code).toLowerCase()}`
+      const code = String(country.code || '').toUpperCase()
+      const localized = displayNames?.of(code)
+      if (localized && localized !== code) return localized
+      const key = `country_${code.toLowerCase()}`
       const fallback = country.name_en
       return tx(t, key, fallback)
     },
-    [t],
+    [displayNames, t],
   )
 
   const filteredCountries = useMemo(() => {
@@ -482,7 +493,7 @@ export default function GeoTargetingPicker({
           border-radius: 14px;
           border: 1px solid rgba(255, 255, 255, 0.08);
           background: rgba(10, 14, 24, 0.55);
-          max-height: 320px;
+          max-height: 520px;
           overflow-y: auto;
         }
 
@@ -619,7 +630,7 @@ export default function GeoTargetingPicker({
             padding: 14px;
           }
           .ads-geo-list {
-            max-height: 280px;
+            max-height: 480px;
           }
         }
       `}</style>
