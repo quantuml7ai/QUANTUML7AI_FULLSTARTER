@@ -10,8 +10,7 @@ import {
   rebuildSnapshot,
   redis as redisDirect,
   K,
-  getInt,
-  reactPostExclusiveDaily,
+  getInt, 
   isBanned,
   safeParse, // ← добавили
   patchSnapshotPartial,
@@ -409,7 +408,7 @@ try {
           }
         } else if (op.type === 'react') {
           const { postId, kind } = p
-          const r = await reactPostExclusiveDaily(postId, userId, kind)
+          const r = await setPostReaction(postId, userId, kind)
           if (r?.changed) {
             const rev = r?.rev ?? await nextRev()
             await pushChange({ rev, kind: 'post', id: String(postId), data: { likes: r.likes, dislikes: r.dislikes }, ts: Date.now() })
