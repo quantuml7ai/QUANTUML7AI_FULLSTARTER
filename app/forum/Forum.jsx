@@ -2722,7 +2722,7 @@ font-size: 12px;
       color:#eaf4ff;
     }
     .userInfoStarBadge{
-
+ 
       position:relative;
       width:100%;
       height:26px;
@@ -2731,7 +2731,17 @@ font-size: 12px;
       justify-content:center;
       border-radius:999px;
       border:1px solid rgba(0, 217, 255, 0);      
-      background:rgba(27, 78, 99, 0.45);
+  background:conic-gradient(
+    from 180deg,
+    rgb(90, 255, 255) 0deg,
+    rgba(0, 178, 248, 0.53) 40deg,
+    rgba(217, 90, 255, 0.18) 90deg,
+    rgba(90, 255, 233, 0.92) 140deg,
+    rgba(90, 230, 255, 0.56) 220deg,
+    rgba(190, 67, 238, 0.23) 290deg,
+    rgba(0, 247, 255, 0.84) 360deg
+  );      
+      // background:rgba(27, 78, 99, 0.45);
       overflow:hidden;
     }
     .userInfoStarBadge .subsRing{
@@ -2740,7 +2750,7 @@ font-size: 12px;
       animation-duration:3.4s;
     }
     .userInfoStarBadge .subsStar{
-      font-size:18px;
+      font-size:22px;
       color:rgb(255, 208, 0);
     }      
     .userInfoSkeleton{
