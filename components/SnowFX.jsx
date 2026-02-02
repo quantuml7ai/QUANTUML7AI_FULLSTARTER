@@ -13,6 +13,10 @@ import { useEffect, useRef, useState } from 'react'
  *     • контент идёт вверх → снежинки вверх
  * - Порывы от клика: локальный «взрыв ветра» вокруг курсора/тача
  * - Плавный возврат к гравитации, без резких обрывов
+ *
+ * ✅ ДОБАВЛЕНО (хирургически, без ломания движка):
+ * - Контроль “частоты появления сверху” через кулдаун респавна
+ * - Настраивается одним параметром: RESPAWN_COOLDOWN_MULT (в 5 раз реже = 5)
  */
 
 /* ===== БАЗОВАЯ ФИЗИКА ===== */
@@ -36,34 +40,57 @@ const IMPULSE_DURATION_MS = 1500
 const IMPULSE_DAMPING = 0.95
 
 // сила порыва ОТ СКРОЛЛА (вертикаль)
-const SCROLL_IMPULSE_BASE = 100   // чем больше — тем сильнее сдувает
+const SCROLL_IMPULSE_BASE = 100 // чем больше — тем сильнее сдувает
 
 // сила порыва ОТ КЛИКА (локальный взрыв)
-const CLICK_IMPULSE_BASE  = 90  // уменьши, если хочешь ещё мягче
+const CLICK_IMPULSE_BASE = 90 // уменьши, если хочешь ещё мягче
 
 /* ===== КОЛ-ВО И РАЗМЕРЫ СНЕЖИНОК ===== */
 
-const DEFAULT_COUNT   = 1
+const DEFAULT_COUNT = 1
 const DEFAULT_MINSIZE = 1
 const DEFAULT_MAXSIZE = 20
 
+/* ===== ЧАСТОТА “ПОЯВЛЕНИЯ СВЕРХУ” (РЕСПАВН) =====
+ *
+ * Идея: снежинки не “спавнятся по таймеру” — они всегда живут в массиве,
+ * а “новая сверху” появляется, когда снежинка вышла за границы и мы делаем respawnFlake().
+ *
+ * Чтобы “падали в 5 раз реже”, мы добавляем каждой снежинке кулдаун:
+ * после респавна она НЕ может респавниться снова до nextRespawnAt.
+ *
+ * Настройка:
+ *  - 5  = в 5 раз реже
+ *  - 3  = в 3 раза реже
+ *  - 10 = в 10 раз реже
+ */
+const RESPAWN_COOLDOWN_MULT = 5
+
+// маленький джиттер (рандомизация), чтобы респавны не были слишком “стройными”
+const RESPAWN_COOLDOWN_JITTER = 0.18 // 0..0.5 (0.18 = мягко)
+
+/* ===== УТИЛИТЫ ===== */
+
+const nowMs = () =>
+  typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now()
+
 export default function SnowFX({
-  zIndex  = 9996,
-  count   = DEFAULT_COUNT,
+  zIndex = 9996,
+  count = DEFAULT_COUNT,
   minSize = DEFAULT_MINSIZE,
   maxSize = DEFAULT_MAXSIZE,
 }) {
   // просто «тик», чтобы форсировать перерисовку React
   const [, setTick] = useState(0)
 
-  const flakesRef       = useRef([])
-  const animFrameRef    = useRef(null)
-  const lastTimeRef     = useRef(0)
-  const worldRef        = useRef({ w: 0, h: 0 })
-  const lastScrollYRef  = useRef(0)
+  const flakesRef = useRef([])
+  const animFrameRef = useRef(null)
+  const lastTimeRef = useRef(0)
+  const worldRef = useRef({ w: 0, h: 0 })
+  const lastScrollYRef = useRef(0)
 
   // до какого времени импульс ещё считается живым
-  const impulseUntilRef  = useRef(0)
+  const impulseUntilRef = useRef(0)
   // для более плавного затухания импульса (0..1)
   const impulseStrengthRef = useRef(0)
 
@@ -75,32 +102,49 @@ export default function SnowFX({
     }
   }
 
+  const scheduleNextRespawn = (flake) => {
+    const { h } = worldRef.current
+
+    // Оценка “времени пролёта” экрана — чем медленнее baseVy, тем дольше.
+    // Это стабильно и естественно: крупные/ближние обычно быстрее, дальние медленнее.
+    const vy = Math.max(8, flake.baseVy || 14)
+    const travelMs = (h / vy) * 1000
+
+    // Рандомизируем, чтобы не было синхронных “пачек”
+    const jitter = 1 + (Math.random() * 2 - 1) * RESPAWN_COOLDOWN_JITTER
+
+    flake.nextRespawnAt = nowMs() + travelMs * RESPAWN_COOLDOWN_MULT * jitter
+  }
+
   const respawnFlake = (flake, fromTop = true) => {
     const { w, h } = worldRef.current
     const depth = 0.25 + Math.random() * 0.75
-    const size  = minSize + depth * (maxSize - minSize)
+    const size = minSize + depth * (maxSize - minSize)
 
     flake.depth = depth
-    flake.size  = size
+    flake.size = size
 
     flake.x = Math.random() * w
-    flake.y = fromTop ? (-Math.random() * h * 0.25) : (Math.random() * h)
+    flake.y = fromTop ? -Math.random() * h * 0.25 : Math.random() * h
 
     const baseVy = 14 + 30 * depth
     flake.baseVy = baseVy
-    flake.vx     = (Math.random() * 2 - 1) * (6 + 12 * depth)
-    flake.vy     = baseVy
+    flake.vx = (Math.random() * 2 - 1) * (6 + 12 * depth)
+    flake.vy = baseVy
 
-    flake.spinDir   = Math.random() < 0.5 ? -1 : 1
+    flake.spinDir = Math.random() < 0.5 ? -1 : 1
     flake.spinSpeed = 14 + Math.random() * 40
-    flake.angle     = Math.random() * 360
+    flake.angle = Math.random() * 360
 
     flake.swayPhase = Math.random() * Math.PI * 2
     flake.swaySpeed = 0.4 + Math.random() * 1.2
-    flake.swayAmp   = 4 + 12 * depth
+    flake.swayAmp = 4 + 12 * depth
 
     // ближние/крупные — ярче, дальние — тусклее
     flake.opacity = 0.28 + 0.6 * depth
+
+    // ✅ важно: после каждого респавна ставим кулдаун “когда можно следующий”
+    scheduleNextRespawn(flake)
   }
 
   /* ===== ИНИЦИАЛИЗАЦИЯ СНЕЖИНОК ===== */
@@ -114,9 +158,9 @@ export default function SnowFX({
     const arr = []
     for (let i = 0; i < count; i += 1) {
       const depth = 0.25 + Math.random() * 0.75
-      const size  = minSize + depth * (maxSize - minSize)
-      const x     = Math.random() * w
-      const y     = Math.random() * h
+      const size = minSize + depth * (maxSize - minSize)
+      const x = Math.random() * w
+      const y = Math.random() * h
 
       const baseVy = 14 + 30 * depth
 
@@ -136,11 +180,20 @@ export default function SnowFX({
         swaySpeed: 0.4 + Math.random() * 1.2,
         swayAmp: 4 + 12 * depth,
         opacity: 0.28 + 0.6 * depth,
+
+        // ✅ кулдаун респавна (0 = можно сразу)
+        nextRespawnAt: 0,
       })
     }
 
+    // ✅ сразу назначим nextRespawnAt всем, чтобы поведение было предсказуемым
+    // (иначе первые респавны могут быть “частыми”, пока снежинки не выйдут за экран)
     flakesRef.current = arr
-    setTick((x) => x + 1)
+    for (let i = 0; i < flakesRef.current.length; i += 1) {
+      scheduleNextRespawn(flakesRef.current[i])
+    }
+
+    setTick((x0) => x0 + 1)
 
     const onResize = () => {
       initWorld()
@@ -157,7 +210,7 @@ export default function SnowFX({
     if (!flakesRef.current.length) return
 
     lastScrollYRef.current = window.scrollY || 0
-    lastTimeRef.current    = 0
+    lastTimeRef.current = 0
 
     let stopped = false
 
@@ -182,8 +235,8 @@ export default function SnowFX({
       }
 
       const bottom = h + 40
-      const left   = -40
-      const right  = w + 40
+      const left = -40
+      const right = w + 40
 
       // плавное затухание импульса (0..1)
       const now = ts
@@ -192,10 +245,11 @@ export default function SnowFX({
       const targetStrength = impulsePhase
       const currentStrength = impulseStrengthRef.current
       // сглаженный переход к нужной силе
-      impulseStrengthRef.current =
-        currentStrength + (targetStrength - currentStrength) * 0.18
+      impulseStrengthRef.current = currentStrength + (targetStrength - currentStrength) * 0.18
 
       const impulseK = impulseStrengthRef.current
+
+      const tNow = nowMs()
 
       for (let i = 0; i < flakes.length; i += 1) {
         const f = flakes[i]
@@ -226,15 +280,20 @@ export default function SnowFX({
         // вращение вокруг своей оси
         f.angle += f.spinDir * f.spinSpeed * dt
         if (f.angle > 360) f.angle -= 360
-        if (f.angle < 0)   f.angle += 360
+        if (f.angle < 0) f.angle += 360
 
-        // ушли за границы — спавним сверху
+        // ушли за границы — респавним сверху, НО не чаще кулдауна
         if (f.y > bottom || f.x < left || f.x > right) {
-          respawnFlake(f, true)
+          if (tNow >= (f.nextRespawnAt || 0)) {
+            respawnFlake(f, true)
+          } else {
+            // держим за границей, чтобы не “дёргалось” у нижней границы
+            f.y = bottom + 10
+          }
         }
       }
 
-      setTick((x) => x + 1)
+      setTick((x0) => x0 + 1)
       animFrameRef.current = requestAnimationFrame(loop)
     }
 
@@ -244,7 +303,7 @@ export default function SnowFX({
       stopped = true
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current)
     }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   /* ===== КЛИК: ЛОКАЛЬНЫЙ ВЗРЫВ ВЕТРА ВОКРУГ ТАЧА/КУРСОРА ===== */
@@ -261,7 +320,7 @@ export default function SnowFX({
       const cx = e.clientX ?? w / 2
       const cy = e.clientY ?? h / 2
 
-      const radius    = Math.min(w, h) * 0.34
+      const radius = Math.min(w, h) * 0.34
       const basePower = CLICK_IMPULSE_BASE
 
       for (let i = 0; i < flakes.length; i += 1) {
@@ -272,7 +331,7 @@ export default function SnowFX({
         if (dist > radius || dist === 0) continue
 
         const depthFactor = 0.5 + f.depth * 0.7
-        const k  = (1 - dist / radius) * depthFactor
+        const k = (1 - dist / radius) * depthFactor
         const nx = dx / dist
         const ny = dy / dist
 
@@ -286,19 +345,13 @@ export default function SnowFX({
         f.spinSpeed *= 1.04 + Math.random() * 0.08
       }
 
-      const now =
-        typeof performance !== 'undefined' && performance.now
-          ? performance.now()
-          : Date.now()
+      const now = nowMs()
       impulseUntilRef.current = now + IMPULSE_DURATION_MS
 
       // сразу даём пику импульса
-      impulseStrengthRef.current = Math.min(
-        1,
-        impulseStrengthRef.current + 0.6,
-      )
+      impulseStrengthRef.current = Math.min(1, impulseStrengthRef.current + 0.6)
 
-      setTick((x) => x + 1)
+      setTick((x0) => x0 + 1)
     }
 
     window.addEventListener('pointerdown', onPointerDown, { passive: true })
@@ -313,7 +366,7 @@ export default function SnowFX({
     lastScrollYRef.current = window.scrollY || 0
 
     const onScroll = () => {
-      const y    = window.scrollY || 0
+      const y = window.scrollY || 0
       const last = lastScrollYRef.current
       lastScrollYRef.current = y
 
@@ -338,10 +391,7 @@ export default function SnowFX({
       const contentDir = dy > 0 ? -1 : 1 // +1 = визуально вниз, -1 = визуально вверх
 
       // мягкий коэффициент силы порыва
-      const magBase = Math.min(
-        SCROLL_IMPULSE_BASE,
-        Math.abs(dy) * 2.2,
-      )
+      const magBase = Math.min(SCROLL_IMPULSE_BASE, Math.abs(dy) * 2.2)
 
       for (let i = 0; i < flakes.length; i += 1) {
         const f = flakes[i]
@@ -354,19 +404,13 @@ export default function SnowFX({
         f.vx += (Math.random() * 2 - 1) * magBase * 0.16 * depthFactor
       }
 
-      const now =
-        typeof performance !== 'undefined' && performance.now
-          ? performance.now()
-          : Date.now()
+      const now = nowMs()
       impulseUntilRef.current = now + IMPULSE_DURATION_MS
 
       // добавляем силу импульса поверх существующей
-      impulseStrengthRef.current = Math.min(
-        1,
-        impulseStrengthRef.current + 0.4,
-      )
+      impulseStrengthRef.current = Math.min(1, impulseStrengthRef.current + 0.4)
 
-      setTick((x) => x + 1)
+      setTick((x0) => x0 + 1)
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -394,9 +438,7 @@ export default function SnowFX({
             key={f.id}
             className="ql7-snowflake-wrap"
             style={{
-              transform: `translate3d(${(f.x + swayX).toFixed(
-                1,
-              )}px, ${f.y.toFixed(1)}px, 0)`,
+              transform: `translate3d(${(f.x + swayX).toFixed(1)}px, ${f.y.toFixed(1)}px, 0)`,
             }}
           >
             <div
