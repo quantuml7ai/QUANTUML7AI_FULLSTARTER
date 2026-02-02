@@ -149,13 +149,13 @@ export default function RootLayout({ children }) {
           <I18nProvider>
             {/* фон/герой (клиент-рендер) */}
             <HeroAvatar />
-      {/* ❄ ЗАДНИЙ СЛОЙ СНЕГА — за контентом (виден сквозь полупрозрачные панели) */}
+      {/* ❄ ЗАДНИЙ СЛОЙ СНЕГА — за контентом (виден сквозь полупрозрачные панели)
       <SnowFX
         zIndex={1}
         count={3}
         minSize={40}
         maxSize={100}
-      />
+      /> */}
             <div className="page-content">
               <TopBar />
               {children}

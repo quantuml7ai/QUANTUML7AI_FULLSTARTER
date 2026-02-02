@@ -2722,24 +2722,26 @@ font-size: 12px;
       color:#eaf4ff;
     }
     .userInfoStarBadge{
+
       position:relative;
-      width:26px;
+      width:100%;
       height:26px;
       display:inline-flex;
       align-items:center;
       justify-content:center;
       border-radius:999px;
-      border:1px solid rgb(255, 191, 0);
-      background:rgba(12,16,24,.45);
+      border:1px solid rgba(0, 217, 255, 0);      
+      background:rgba(27, 78, 99, 0.45);
       overflow:hidden;
     }
     .userInfoStarBadge .subsRing{
       inset:-4px;
-      opacity:.8;
+      opacity:.9;    
       animation-duration:3.4s;
     }
     .userInfoStarBadge .subsStar{
-      font-size:14px;
+      font-size:18px;
+      color:rgb(255, 208, 0);
     }      
     .userInfoSkeleton{
       height:12px;
@@ -15487,22 +15489,23 @@ onClick={()=>{
   aria-hidden="true"
   fill="none"
   stroke="currentColor"
-  strokeWidth="1.2"
+  strokeWidth="0.8"
   strokeLinecap="round"
   strokeLinejoin="round"
   style={{ width: 58, height: 58 }}
 >
   {/* внешний контур (чуть более "капсула") */}
-  <rect x="0.8" y="4.0" width="22.4" height="16.0" rx="6.0" opacity="0.90" />
+  <rect x="0.8" y="0.5" width="22.4" height="22.4" rx="6.0" opacity="0.90" />
 
   {/* play — крупнее, плотнее */}
 <path
   d="M10.7 10.2L15.2 12.0L10.7 13.8Z"
-  fill="currentColor"
-  opacity="0.40"
+  fill="red"
+  opacity="0.80"
   stroke="none"
   transform="translate(12 12) scale(2) translate(-12 -12)"
 />
+
 
 </svg>
 
@@ -16447,22 +16450,23 @@ onClick={()=>{
   aria-hidden="true"
   fill="none"
   stroke="currentColor"
-  strokeWidth="1.2"
+  strokeWidth="0.8"
   strokeLinecap="round"
   strokeLinejoin="round"
   style={{ width: 58, height: 58 }}
 >
   {/* внешний контур (чуть более "капсула") */}
-  <rect x="0.8" y="4.0" width="22.4" height="16.0" rx="6.0" opacity="0.90" />
+  <rect x="0.8" y="0.5" width="22.4" height="22.4" rx="6.0" opacity="0.90" />
 
   {/* play — крупнее, плотнее */}
 <path
   d="M10.7 10.2L15.2 12.0L10.7 13.8Z"
-  fill="currentColor"
-  opacity="0.40"
+  fill="red"
+  opacity="0.80"
   stroke="none"
   transform="translate(12 12) scale(2) translate(-12 -12)"
 />
+
 
 </svg>
   </button> 
