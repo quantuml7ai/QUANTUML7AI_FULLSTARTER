@@ -14,7 +14,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import Script from 'next/script'
 import { Montserrat } from 'next/font/google'
 import InviteFriendProvider from '../components/InviteFriendProvider'
-// import SnowFX from '../components/SnowFX'
+import SnowFX from '../components/SnowFX'
 import QCoinDropFX from '../components/QCoinDropFX'
 const forumTitleFont = Montserrat({
   subsets: ['latin', 'cyrillic'],
@@ -149,13 +149,13 @@ export default function RootLayout({ children }) {
           <I18nProvider>
             {/* фон/герой (клиент-рендер) */}
             <HeroAvatar />
-      {/* ❄ ЗАДНИЙ СЛОЙ СНЕГА — за контентом (виден сквозь полупрозрачные панели)
+      {/* ❄ ЗАДНИЙ СЛОЙ СНЕГА — за контентом (виден сквозь полупрозрачные панели) */}
       <SnowFX
         zIndex={1}
-        count={10}
-        minSize={4}
-        maxSize={14}
-      /> */}
+        count={3}
+        minSize={40}
+        maxSize={100}
+      />
             <div className="page-content">
               <TopBar />
               {children}
@@ -174,13 +174,13 @@ export default function RootLayout({ children }) {
           </I18nProvider>
         </Providers>
        <QCoinDropFX />
-  {/* ❄ ПЕРЕДНИЙ СЛОЙ СНЕГА — лёгкая вуаль поверх всего
+  {/* ❄ ПЕРЕДНИЙ СЛОЙ СНЕГА — лёгкая вуаль поверх всего */}
   <SnowFX
     zIndex={9998}
-    count={5}
-    minSize={1}
-    maxSize={20}
-  /> */}
+    count={1}
+    minSize={10}
+    maxSize={80}
+  />
         {/* ✅ Включаем аналитику Vercel */}
         <Analytics />
         <SpeedInsights />

@@ -234,7 +234,10 @@ export default function SubscribePage() {
       try { window.dispatchEvent(new CustomEvent('open-auth')) } catch {}
       return
     }
-    openW3M()
+    try {
+      const res = openW3M()
+      if (res && typeof res.catch === 'function') res.catch(() => {})
+    } catch {}
   }
 
   return (

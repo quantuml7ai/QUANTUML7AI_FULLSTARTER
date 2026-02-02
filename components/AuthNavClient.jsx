@@ -191,7 +191,12 @@ export default function AuthNavClient() {
   // глобальный вызов web3modal (как было)
   useEffect(() => {
     if (typeof window === 'undefined') return
-    const handler = () => { try { open() } catch {} }
+    const handler = () => {
+      try {
+        const res = open?.()
+        if (res && typeof res.catch === 'function') res.catch(() => {})
+      } catch {}
+    }
     window.addEventListener('open-auth', handler)
     return () => window.removeEventListener('open-auth', handler)
   }, [open])

@@ -2635,14 +2635,17 @@ font-size: 12px;
       border-radius:12px; padding:10px; z-index:3200; box-shadow:0 10px 30px rgba(0,0,0,.45)
     }
     .userInfoPopover{
-      position:absolute;
-      width:min(72vw, 360px);
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(10,14,20,.98);
-      border-radius:12px;
-      padding:12px;
-      z-index:3200;
-      box-shadow:0 12px 30px rgba(0,0,0,.45);
+      position:fixed;
+      width:min(78vw, 380px);
+      border:1px solid rgba(120,170,255,.35);
+      background:
+        radial-gradient(circle at top, rgba(120,180,255,.18), rgba(10,16,28,.82) 55%),
+        linear-gradient(140deg, rgba(8,14,24,.86), rgba(12,20,32,.95));
+      border-radius:16px;
+      padding:14px;
+      z-index:2147483000;
+      box-shadow:0 16px 40px rgba(0,0,0,.55), 0 0 28px rgba(80,167,255,.18);
+      backdrop-filter: blur(16px) saturate(140%);
     }
     .userInfoBioRow{
       display:flex;
@@ -2653,17 +2656,22 @@ font-size: 12px;
     }
     .userInfoTranslateToggle{
       border:1px solid rgba(140,170,255,.35);
-      background:rgba(10,16,28,.35);
-      color:#cfe0ff;
-      padding:4px 10px;
+      background:linear-gradient(120deg, rgba(10,18,32,.55), rgba(60,120,255,.18));
+      color:#e6f0ff;
+      padding:6px 12px;
       border-radius:999px;
       font-size:12px;
       line-height:1;
       white-space:nowrap;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      box-shadow:0 0 18px rgba(80,167,255,.12);      
     }
     .userInfoTranslateToggle[disabled]{
       opacity:.6;
       cursor:default;
+      box-shadow:none;      
     }
     .userInfoBioText{
       font-size:13px;
@@ -2671,6 +2679,21 @@ font-size: 12px;
       color:#eaf4ff;
       white-space:pre-wrap;
     }
+    .userInfoTranslateShimmer{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      background:linear-gradient(120deg, rgba(120,180,255,.2), rgba(255,255,255,.7), rgba(120,180,255,.2));
+      background-size:200% 100%;
+      animation: shimmer 1.4s linear infinite;
+    }
+    .userInfoRail{
+      height:1px;
+      width:100%;
+      margin:10px 0 8px;
+      background:linear-gradient(90deg, rgba(120,180,255,.08), rgba(120,180,255,.6), rgba(120,180,255,.08));
+      box-shadow:0 0 16px rgba(120,180,255,.18);
+    }      
     .userInfoStats{
       display:grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2683,25 +2706,56 @@ font-size: 12px;
       gap:4px;
       padding:8px 10px;
       border-radius:10px;
-      border:1px solid rgba(140,170,255,.18);
-      background:rgba(10,16,28,.28);
+      border:1px solid rgba(140,170,255,.22);
+      background:rgba(10,16,28,.35);
     }
     .userInfoStatLabel{
       font-size:11px;
       color:rgba(200,220,255,.7);
+      display:flex;
+      align-items:center;
+      gap:6px;      
     }
     .userInfoStatValue{
       font-weight:700;
-      font-size:14px;
+      font-size:15px;
       color:#eaf4ff;
     }
+    .userInfoStarBadge{
+      position:relative;
+      width:26px;
+      height:26px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:999px;
+      border:1px solid rgb(255, 191, 0);
+      background:rgba(12,16,24,.45);
+      overflow:hidden;
+    }
+    .userInfoStarBadge .subsRing{
+      inset:-4px;
+      opacity:.8;
+      animation-duration:3.4s;
+    }
+    .userInfoStarBadge .subsStar{
+      font-size:14px;
+    }      
     .userInfoSkeleton{
       height:12px;
       border-radius:999px;
       background:linear-gradient(90deg, rgba(140,170,255,.08), rgba(140,170,255,.22), rgba(140,170,255,.08));
       background-size:200% 100%;
       animation: shimmer 1.6s linear infinite;
-    }     
+    }    
+    .srOnly{
+      position:absolute !important;
+      height:1px;
+      width:1px;
+      overflow:hidden;
+      clip:rect(1px,1px,1px,1px);
+      white-space:nowrap;
+    }       
     .profileList{ max-height:260px; overflow:auto; padding:4px; border:1px solid rgba(255,255,255,.08); border-radius:10px; background:rgba(255,255,255,.03) }
 
     /* ===== Avatar Upload UI (ProfilePopover) ===== */
@@ -6013,14 +6067,15 @@ function UserInfoPopover({
   const inFlightRef = useRef(new Map())
   const timerRef = useRef(null)
   const popoverRef = useRef(null)
-
+  const rafRef = useRef(null)
+  const positionRef = useRef({ top: 0, left: 0, placement: 'bottom', ready: false })
   const [status, setStatus] = useState('idle')
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
   const [translatedBio, setTranslatedBio] = useState(null)
   const [showOriginal, setShowOriginal] = useState(false)
   const [translateBusy, setTranslateBusy] = useState(false)
-
+  const [position, setPosition] = useState(positionRef.current)
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
       clearTimeout(timerRef.current)
@@ -6033,7 +6088,7 @@ function UserInfoPopover({
     if (!open) return
     timerRef.current = setTimeout(() => {
       onClose?.()
-    }, 15000)
+    }, 30000)
   }, [clearTimer, onClose, open])
 
   const registerAction = useCallback(() => {
@@ -6043,7 +6098,8 @@ function UserInfoPopover({
   const getCachedUserInfo = useCallback((uid) => {
     const rawKey = String(uid || '').trim()
     if (!rawKey) return null
-    const accountId = aliasRef.current.get(rawKey)
+    const resolved = resolveProfileAccountId(rawKey)
+    const accountId = aliasRef.current.get(rawKey) || (resolved && resolved !== rawKey ? resolved : null)
     if (accountId && cacheRef.current.has(accountId)) {
       return cacheRef.current.get(accountId)
     }
@@ -6057,9 +6113,13 @@ function UserInfoPopover({
     const cached = getCachedUserInfo(rawKey)
     if (cached) return cached
 
-    if (inFlightRef.current.has(rawKey)) {
-      return inFlightRef.current.get(rawKey)
+    const resolved = resolveProfileAccountId(rawKey)
+    const aliasKey = aliasRef.current.get(rawKey) || (resolved && resolved !== rawKey ? resolved : null)
+    const inFlightKey = aliasKey || rawKey
+    if (inFlightRef.current.has(inFlightKey)) {
+      return inFlightRef.current.get(inFlightKey)
     }
+
 
     const promise = (async () => {
       const res = await fetch(`/api/profile/user-popover?uid=${encodeURIComponent(rawKey)}`, {
@@ -6086,21 +6146,23 @@ function UserInfoPopover({
       if (accountId) {
         cacheRef.current.set(accountId, payload)
         aliasRef.current.set(rawKey, accountId)
+        writeProfileAlias(rawKey, accountId)        
       }
 
       return payload
     })()
 
-    inFlightRef.current.set(rawKey, promise)
+    inFlightRef.current.set(inFlightKey, promise)
     try {
       return await promise
     } finally {
-      inFlightRef.current.delete(rawKey)
+      inFlightRef.current.delete(inFlightKey)
     }
   }, [getCachedUserInfo])
 
   const handleRetry = useCallback(() => {
     if (!rawUserId) return
+    registerAction()    
     setStatus('loading')
     setError(null)
     setData(null)
@@ -6163,6 +6225,97 @@ function UserInfoPopover({
     setShowOriginal(false)
     setTranslateBusy(false)
   }, [rawUserId, open])
+  useEffect(() => {
+    if (!open) return
+    const next = { ...positionRef.current, ready: false }
+    positionRef.current = next
+    setPosition(next)
+  }, [open, rawUserId])
+
+  const isRtl = useMemo(() => {
+    if (typeof document === 'undefined') return false
+    return (
+      document.documentElement?.dir === 'rtl' ||
+      getComputedStyle(document.documentElement).direction === 'rtl'
+    )
+  }, [])
+
+  const clamp = useCallback((value, min, max) => {
+    return Math.min(Math.max(value, min), max)
+  }, [])
+
+  const updatePosition = useCallback(() => {
+    if (typeof window === 'undefined') return
+    const anchorEl = anchorRef?.current
+    const popEl = popoverRef.current
+    if (!anchorEl || !popEl) return
+    const rect = anchorEl.getBoundingClientRect()
+    const popRect = popEl.getBoundingClientRect()
+    const gap = 10
+    const viewportW = window.innerWidth
+    const viewportH = window.innerHeight
+    const popW = popRect.width || 320
+    const popH = popRect.height || 200
+
+    let top = rect.bottom + gap
+    let placement = 'bottom'
+    if (top + popH > viewportH - 8) {
+      top = rect.top - popH - gap
+      placement = 'top'
+    }
+    top = clamp(top, 8, Math.max(8, viewportH - popH - 8))
+
+    let left = isRtl ? rect.right - popW : rect.left
+    left = clamp(left, 8, Math.max(8, viewportW - popW - 8))
+
+    const next = {
+      top: Math.round(top),
+      left: Math.round(left),
+      placement,
+      ready: true,
+    }
+
+    if (
+      positionRef.current.top === next.top &&
+      positionRef.current.left === next.left &&
+      positionRef.current.placement === next.placement &&
+      positionRef.current.ready === next.ready
+    ) {
+      return
+    }
+
+    positionRef.current = next
+    setPosition(next)
+  }, [anchorRef, clamp, isRtl])
+
+  const schedulePositionUpdate = useCallback(() => {
+    if (typeof window === 'undefined') return
+    if (rafRef.current) return
+    rafRef.current = window.requestAnimationFrame(() => {
+      rafRef.current = null
+      updatePosition()
+    })
+  }, [updatePosition])
+
+  useEffect(() => {
+    if (!open) return
+    schedulePositionUpdate()
+  }, [open, schedulePositionUpdate, status, data, translatedBio, showOriginal])
+
+  useEffect(() => {
+    if (!open) return
+    const onScroll = () => schedulePositionUpdate()
+    window.addEventListener('scroll', onScroll, true)
+    window.addEventListener('resize', onScroll, true)
+    return () => {
+      window.removeEventListener('scroll', onScroll, true)
+      window.removeEventListener('resize', onScroll, true)
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current)
+        rafRef.current = null
+      }
+    }
+  }, [open, schedulePositionUpdate])
 
   useEffect(() => {
     if (!open) return
@@ -6204,25 +6357,7 @@ function UserInfoPopover({
   }, [data?.about, registerAction, translatedBio])
 
   if (!open || !anchorRef?.current || !rawUserId) return null
-
-  const isRtl =
-    typeof document !== 'undefined' &&
-    (document.documentElement?.dir === 'rtl' ||
-      getComputedStyle(document.documentElement).direction === 'rtl')
-
-  const el = anchorRef.current
-  const parent =
-    el.offsetParent ||
-    el.parentElement ||
-    el.closest('section') ||
-    document.body
-
-  const parentRect = parent?.getBoundingClientRect?.() || { top: 0, left: 0, right: 0 }
-  const rect = el.getBoundingClientRect()
-  const top = Math.round((rect.bottom - parentRect.top) + 8)
-  const left = isRtl ? undefined : Math.round(rect.left - parentRect.left)
-  const right = isRtl ? Math.round(parentRect.right - rect.right) : undefined
-
+ 
   const stats = data?.stats || {}
   const showTranslated = translatedBio && !showOriginal
   const displayBio = showTranslated ? translatedBio : (data?.about || '')
@@ -6231,7 +6366,12 @@ function UserInfoPopover({
     <div
       ref={popoverRef}
       className="userInfoPopover"
-      style={{ top, left, right }}
+      data-placement={position.placement}
+      style={{
+        top: position.top,
+        left: position.left,
+        visibility: position.ready ? 'visible' : 'hidden',
+      }}
       onPointerDown={registerAction}
       onKeyDown={registerAction}
       onClick={registerAction}
@@ -6246,11 +6386,18 @@ function UserInfoPopover({
           onClick={handleToggleTranslate}
           disabled={translateBusy || status !== 'ready' || !data?.about}
         >
-          {translateBusy
-            ? (t?.('forum_user_popover_loading') || 'Loading…')
-            : (showTranslated
+          {translateBusy ? (
+            <>
+              <span>{t?.('forum_user_popover_loading') || 'Loading…'}</span>
+              <span className="userInfoTranslateShimmer" aria-hidden="true" />
+            </>
+          ) : (
+            <span>
+              {showTranslated
                 ? (t?.('forum_user_popover_show_original') || 'Show original')
-                : (t?.('forum_user_popover_translate') || 'Translate'))}
+                : (t?.('forum_user_popover_translate') || 'Translate')}
+            </span>
+          )}
         </button>
       </div>
 
@@ -6272,9 +6419,12 @@ function UserInfoPopover({
       )}
 
       {status === 'ready' && (
-        <div className="userInfoBioText" dangerouslySetInnerHTML={{ __html: rich(displayBio) }} />
+        <div
+          className="userInfoBioText aboutText--live"
+          dangerouslySetInnerHTML={{ __html: rich(displayBio) }}
+        />
       )}
-
+      <div className="userInfoRail" aria-hidden="true" />
       <div className="userInfoStats">
         {status === 'loading' ? (
           <>
@@ -6286,7 +6436,13 @@ function UserInfoPopover({
         ) : (
           <>
             <div className="userInfoStat">
-              <div className="userInfoStatLabel">{t?.('forum_user_popover_stars') || 'Stars'}</div>
+              <div className="userInfoStatLabel">
+                <span className="userInfoStarBadge" aria-hidden="true">
+                  <span className="subsRing" aria-hidden="true" />
+                  <span className="subsStar" aria-hidden="true">★</span>
+                </span>
+                <span className="srOnly">{t?.('forum_user_popover_stars') || 'Stars'}</span>
+              </div>
               <div className="userInfoStatValue"><HydrateText value={formatCount(stats.followers)} /></div>
             </div>
             <div className="userInfoStat">
@@ -6307,7 +6463,7 @@ function UserInfoPopover({
     </div>
   )
 
-  return createPortal(popover, parent || document.body)
+  return createPortal(popover, document.body)
 }
 
 /** мини-поповер профиля рядом с аватаром */
@@ -15326,10 +15482,30 @@ onClick={()=>{
       try { openVideoFeed?.() } catch {}
     }}
   >
-        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <rect x="3" y="5" width="14" height="14" rx="3"></rect>
-          <path d="M17 9l4-2v10l-4-2z" strokeLinejoin="round" />
-        </svg>
+<svg
+  viewBox="0 0 24 24"
+  aria-hidden="true"
+  fill="none"
+  stroke="currentColor"
+  strokeWidth="1.2"
+  strokeLinecap="round"
+  strokeLinejoin="round"
+  style={{ width: 58, height: 58 }}
+>
+  {/* внешний контур (чуть более "капсула") */}
+  <rect x="0.8" y="4.0" width="22.4" height="16.0" rx="6.0" opacity="0.90" />
+
+  {/* play — крупнее, плотнее */}
+<path
+  d="M10.7 10.2L15.2 12.0L10.7 13.8Z"
+  fill="currentColor"
+  opacity="0.40"
+  stroke="none"
+  transform="translate(12 12) scale(2) translate(-12 -12)"
+/>
+
+</svg>
+
   </button> 
 
     </div>
@@ -16266,10 +16442,29 @@ onClick={()=>{
       try { openVideoFeed?.() } catch {}
     }}
   >
-        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <rect x="3" y="5" width="14" height="14" rx="3"></rect>
-          <path d="M17 9l4-2v10l-4-2z" strokeLinejoin="round" />
-        </svg>
+<svg
+  viewBox="0 0 24 24"
+  aria-hidden="true"
+  fill="none"
+  stroke="currentColor"
+  strokeWidth="1.2"
+  strokeLinecap="round"
+  strokeLinejoin="round"
+  style={{ width: 58, height: 58 }}
+>
+  {/* внешний контур (чуть более "капсула") */}
+  <rect x="0.8" y="4.0" width="22.4" height="16.0" rx="6.0" opacity="0.90" />
+
+  {/* play — крупнее, плотнее */}
+<path
+  d="M10.7 10.2L15.2 12.0L10.7 13.8Z"
+  fill="currentColor"
+  opacity="0.40"
+  stroke="none"
+  transform="translate(12 12) scale(2) translate(-12 -12)"
+/>
+
+</svg>
   </button> 
     </div>
     <div className="slot-right">
