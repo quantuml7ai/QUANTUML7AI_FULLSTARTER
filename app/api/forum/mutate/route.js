@@ -14,6 +14,7 @@ import {
   isBanned,
   safeParse, // ← добавили
   patchSnapshotPartial,
+  incrUserLikesTotal,  
 } from '../_db.js'
 import { Redis } from '@upstash/redis'
 import { bus } from '../_bus.js'
@@ -128,10 +129,10 @@ async function setPostReaction(postId, userId, state) {
   ])
   const prev = hasLike ? 'like' : (hasDis ? 'dislike' : null)
   const next = (state === 'like' || state === 'dislike') ? state : null
-
+  const likeDelta = (next === 'like' ? 1 : 0) - (prev === 'like' ? 1 : 0)
   if (prev === next) {
     const [likes, dislikes] = await Promise.all([ getInt(likeKey, 0), getInt(disKey, 0) ])
-    return { state: next, likes, dislikes, changed: false }
+    return { state: next, likes, dislikes, changed: false, likeDelta: 0, authorId: null }
   }
 
   // 1) обновляем множества
@@ -159,7 +160,13 @@ async function setPostReaction(postId, userId, state) {
     await redisDirect.multi().set(likeKey, String(likes)).set(disKey, String(dislikes)).exec()
   } catch {}
 
-  return { state: next, likes, dislikes, changed: true }
+  let authorId = null
+  if (likeDelta) {
+    const postObj = await getPostObj(pid)
+    authorId = String(postObj?.userId || postObj?.accountId || '').trim() || null
+  }
+
+  return { state: next, likes, dislikes, changed: true, likeDelta, authorId }
 }
 
 
@@ -390,6 +397,9 @@ try {
           const { postId, state } = p
           const r = await setPostReaction(postId, userId, state ?? null)
           if (r?.changed) {
+            if (r.likeDelta && r.authorId) {
+              try { await incrUserLikesTotal(r.authorId, r.likeDelta) } catch {}
+            }            
             const rev = await nextRev()
             await pushChange({ rev, kind: 'post', id: String(postId), data: { likes: r.likes, dislikes: r.dislikes }, ts: Date.now() })
 
@@ -410,6 +420,9 @@ try {
           const { postId, kind } = p
           const r = await setPostReaction(postId, userId, kind)
           if (r?.changed) {
+            if (r.likeDelta && r.authorId) {
+              try { await incrUserLikesTotal(r.authorId, r.likeDelta) } catch {}
+            }            
             const rev = r?.rev ?? await nextRev()
             await pushChange({ rev, kind: 'post', id: String(postId), data: { likes: r.likes, dislikes: r.dislikes }, ts: Date.now() })
 

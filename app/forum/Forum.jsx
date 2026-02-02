@@ -2628,12 +2628,80 @@ font-size: 12px;
       border-color:rgba(255,255,255,.12);
       box-shadow:none;
     }
-      .profilePop{
+    .profilePop{
 
       position:absolute; width: min(75vw, 500px);
       border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98);
       border-radius:12px; padding:10px; z-index:3200; box-shadow:0 10px 30px rgba(0,0,0,.45)
     }
+    .userInfoPopover{
+      position:absolute;
+      width:min(72vw, 360px);
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(10,14,20,.98);
+      border-radius:12px;
+      padding:12px;
+      z-index:3200;
+      box-shadow:0 12px 30px rgba(0,0,0,.45);
+    }
+    .userInfoBioRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:8px;
+    }
+    .userInfoTranslateToggle{
+      border:1px solid rgba(140,170,255,.35);
+      background:rgba(10,16,28,.35);
+      color:#cfe0ff;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:12px;
+      line-height:1;
+      white-space:nowrap;
+    }
+    .userInfoTranslateToggle[disabled]{
+      opacity:.6;
+      cursor:default;
+    }
+    .userInfoBioText{
+      font-size:13px;
+      line-height:1.45;
+      color:#eaf4ff;
+      white-space:pre-wrap;
+    }
+    .userInfoStats{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap:8px;
+      margin-top:12px;
+    }
+    .userInfoStat{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid rgba(140,170,255,.18);
+      background:rgba(10,16,28,.28);
+    }
+    .userInfoStatLabel{
+      font-size:11px;
+      color:rgba(200,220,255,.7);
+    }
+    .userInfoStatValue{
+      font-weight:700;
+      font-size:14px;
+      color:#eaf4ff;
+    }
+    .userInfoSkeleton{
+      height:12px;
+      border-radius:999px;
+      background:linear-gradient(90deg, rgba(140,170,255,.08), rgba(140,170,255,.22), rgba(140,170,255,.08));
+      background-size:200% 100%;
+      animation: shimmer 1.6s linear infinite;
+    }     
     .profileList{ max-height:260px; overflow:auto; padding:4px; border:1px solid rgba(255,255,255,.08); border-radius:10px; background:rgba(255,255,255,.03) }
 
     /* ===== Avatar Upload UI (ProfilePopover) ===== */
@@ -5933,6 +6001,314 @@ function FollowersCounterInline({ t, viewerId, count, loading }) {
     </button>
   )
 }
+function UserInfoPopover({
+  anchorRef,
+  open,
+  onClose,
+  rawUserId,
+  t,
+}) {
+  const cacheRef = useRef(new Map())
+  const aliasRef = useRef(new Map())
+  const inFlightRef = useRef(new Map())
+  const timerRef = useRef(null)
+  const popoverRef = useRef(null)
+
+  const [status, setStatus] = useState('idle')
+  const [data, setData] = useState(null)
+  const [error, setError] = useState(null)
+  const [translatedBio, setTranslatedBio] = useState(null)
+  const [showOriginal, setShowOriginal] = useState(false)
+  const [translateBusy, setTranslateBusy] = useState(false)
+
+  const clearTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+  }, [])
+
+  const startTimer = useCallback(() => {
+    clearTimer()
+    if (!open) return
+    timerRef.current = setTimeout(() => {
+      onClose?.()
+    }, 15000)
+  }, [clearTimer, onClose, open])
+
+  const registerAction = useCallback(() => {
+    startTimer()
+  }, [startTimer])
+
+  const getCachedUserInfo = useCallback((uid) => {
+    const rawKey = String(uid || '').trim()
+    if (!rawKey) return null
+    const accountId = aliasRef.current.get(rawKey)
+    if (accountId && cacheRef.current.has(accountId)) {
+      return cacheRef.current.get(accountId)
+    }
+    return null
+  }, [])
+
+  const fetchUserInfo = useCallback(async (uid) => {
+    const rawKey = String(uid || '').trim()
+    if (!rawKey) throw new Error('missing_user_id')
+
+    const cached = getCachedUserInfo(rawKey)
+    if (cached) return cached
+
+    if (inFlightRef.current.has(rawKey)) {
+      return inFlightRef.current.get(rawKey)
+    }
+
+    const promise = (async () => {
+      const res = await fetch(`/api/profile/user-popover?uid=${encodeURIComponent(rawKey)}`, {
+        method: 'GET',
+        cache: 'no-store',
+      })
+      const json = await res.json().catch(() => null)
+      if (!res.ok || !json?.ok) {
+        throw new Error(json?.error || `HTTP ${res.status}`)
+      }
+
+      const accountId = String(json.accountId || json.userId || rawKey).trim()
+      const payload = {
+        accountId,
+        about: json?.about || '',
+        stats: {
+          followers: Number(json?.stats?.followers || 0),
+          posts: Number(json?.stats?.posts || 0),
+          topics: Number(json?.stats?.topics || 0),
+          likes: Number(json?.stats?.likes || 0),
+        },
+      }
+
+      if (accountId) {
+        cacheRef.current.set(accountId, payload)
+        aliasRef.current.set(rawKey, accountId)
+      }
+
+      return payload
+    })()
+
+    inFlightRef.current.set(rawKey, promise)
+    try {
+      return await promise
+    } finally {
+      inFlightRef.current.delete(rawKey)
+    }
+  }, [getCachedUserInfo])
+
+  const handleRetry = useCallback(() => {
+    if (!rawUserId) return
+    setStatus('loading')
+    setError(null)
+    setData(null)
+    fetchUserInfo(rawUserId)
+      .then((payload) => {
+        setData(payload)
+        setStatus('ready')
+      })
+      .catch((err) => {
+        setError(err?.message || 'error')
+        setStatus('error')
+      })
+  }, [fetchUserInfo, rawUserId])
+
+  useEffect(() => {
+    if (!open) {
+      clearTimer()
+      return
+    }
+    startTimer()
+    return () => clearTimer()
+  }, [clearTimer, open, startTimer])
+
+  useEffect(() => {
+    if (!open || !rawUserId) {
+      setStatus('idle')
+      setError(null)
+      setData(null)
+      return
+    }
+
+    const cached = getCachedUserInfo(rawUserId)
+    if (cached) {
+      setData(cached)
+      setStatus('ready')
+      return
+    }
+
+    let alive = true
+    setStatus('loading')
+    setError(null)
+    setData(null)
+    fetchUserInfo(rawUserId)
+      .then((payload) => {
+        if (!alive) return
+        setData(payload)
+        setStatus('ready')
+      })
+      .catch((err) => {
+        if (!alive) return
+        setError(err?.message || 'error')
+        setStatus('error')
+      })
+
+    return () => { alive = false }
+  }, [fetchUserInfo, getCachedUserInfo, open, rawUserId])
+
+  useEffect(() => {
+    setTranslatedBio(null)
+    setShowOriginal(false)
+    setTranslateBusy(false)
+  }, [rawUserId, open])
+
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e) => {
+      const pop = popoverRef.current
+      const anchorEl = anchorRef?.current
+      if (pop && pop.contains(e.target)) return
+      if (anchorEl && anchorEl.contains(e.target)) return
+      onClose?.()
+    }
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose?.()
+    }
+    document.addEventListener('pointerdown', onDown, true)
+    document.addEventListener('keydown', onKey, true)
+    return () => {
+      document.removeEventListener('pointerdown', onDown, true)
+      document.removeEventListener('keydown', onKey, true)
+    }
+  }, [anchorRef, onClose, open])
+
+  const handleToggleTranslate = useCallback(async (e) => {
+    e?.preventDefault?.()
+    e?.stopPropagation?.()
+    registerAction()
+    if (!data?.about) return
+    if (translatedBio) {
+      setShowOriginal((prev) => !prev)
+      return
+    }
+    setTranslateBusy(true)
+    try {
+      const translated = await translateText(data.about)
+      setTranslatedBio(translated)
+      setShowOriginal(false)
+    } finally {
+      setTranslateBusy(false)
+    }
+  }, [data?.about, registerAction, translatedBio])
+
+  if (!open || !anchorRef?.current || !rawUserId) return null
+
+  const isRtl =
+    typeof document !== 'undefined' &&
+    (document.documentElement?.dir === 'rtl' ||
+      getComputedStyle(document.documentElement).direction === 'rtl')
+
+  const el = anchorRef.current
+  const parent =
+    el.offsetParent ||
+    el.parentElement ||
+    el.closest('section') ||
+    document.body
+
+  const parentRect = parent?.getBoundingClientRect?.() || { top: 0, left: 0, right: 0 }
+  const rect = el.getBoundingClientRect()
+  const top = Math.round((rect.bottom - parentRect.top) + 8)
+  const left = isRtl ? undefined : Math.round(rect.left - parentRect.left)
+  const right = isRtl ? Math.round(parentRect.right - rect.right) : undefined
+
+  const stats = data?.stats || {}
+  const showTranslated = translatedBio && !showOriginal
+  const displayBio = showTranslated ? translatedBio : (data?.about || '')
+
+  const popover = (
+    <div
+      ref={popoverRef}
+      className="userInfoPopover"
+      style={{ top, left, right }}
+      onPointerDown={registerAction}
+      onKeyDown={registerAction}
+      onClick={registerAction}
+    >
+      <div className="userInfoBioRow">
+        <div className="text-sm font-semibold">
+          {t?.('forum_user_popover_bio') || 'Bio'}
+        </div>
+        <button
+          type="button"
+          className="userInfoTranslateToggle"
+          onClick={handleToggleTranslate}
+          disabled={translateBusy || status !== 'ready' || !data?.about}
+        >
+          {translateBusy
+            ? (t?.('forum_user_popover_loading') || 'Loading…')
+            : (showTranslated
+                ? (t?.('forum_user_popover_show_original') || 'Show original')
+                : (t?.('forum_user_popover_translate') || 'Translate'))}
+        </button>
+      </div>
+
+      {status === 'loading' && (
+        <div className="userInfoSkeleton" style={{ width: '100%', height: 48 }} />
+      )}
+
+      {status === 'error' && (
+        <div className="text-sm text-red-200">
+          <div>{t?.('forum_user_popover_error') || 'Failed to load user info'}</div>
+          <button
+            type="button"
+            className="userInfoTranslateToggle"
+            onClick={handleRetry}
+          >
+            {t?.('forum_retry') || 'Retry'}
+          </button>
+        </div>
+      )}
+
+      {status === 'ready' && (
+        <div className="userInfoBioText" dangerouslySetInnerHTML={{ __html: rich(displayBio) }} />
+      )}
+
+      <div className="userInfoStats">
+        {status === 'loading' ? (
+          <>
+            <div className="userInfoStat"><div className="userInfoSkeleton" /></div>
+            <div className="userInfoStat"><div className="userInfoSkeleton" /></div>
+            <div className="userInfoStat"><div className="userInfoSkeleton" /></div>
+            <div className="userInfoStat"><div className="userInfoSkeleton" /></div>
+          </>
+        ) : (
+          <>
+            <div className="userInfoStat">
+              <div className="userInfoStatLabel">{t?.('forum_user_popover_stars') || 'Stars'}</div>
+              <div className="userInfoStatValue"><HydrateText value={formatCount(stats.followers)} /></div>
+            </div>
+            <div className="userInfoStat">
+              <div className="userInfoStatLabel">{t?.('forum_user_popover_posts') || 'Posts'}</div>
+              <div className="userInfoStatValue"><HydrateText value={formatCount(stats.posts)} /></div>
+            </div>
+            <div className="userInfoStat">
+              <div className="userInfoStatLabel">{t?.('forum_user_popover_topics') || 'Topics'}</div>
+              <div className="userInfoStatValue"><HydrateText value={formatCount(stats.topics)} /></div>
+            </div>
+            <div className="userInfoStat">
+              <div className="userInfoStatLabel">{t?.('forum_user_popover_likes') || 'Likes'}</div>
+              <div className="userInfoStatValue"><HydrateText value={formatCount(stats.likes)} /></div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+
+  return createPortal(popover, parent || document.body)
+}
 
 /** мини-поповер профиля рядом с аватаром */
 function ProfilePopover({
@@ -6891,10 +7267,12 @@ function ConfirmDeleteOverlay({ open, rect, text, onCancel, onConfirm }) {
   );
 }
 
-function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerDelete, viewerId, starredAuthors, onToggleStar }) {
+function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerDelete, viewerId, starredAuthors, onToggleStar, onUserInfoToggle }) {
 const { t: tt } = useI18n();
+  const avatarRef = React.useRef(null);
   const { posts, likes, dislikes, views } = agg || {};
   const authorId = String(resolveProfileAccountId(t?.userId || t?.accountId) || '').trim();
+  const rawUserId = String(t?.userId || t?.accountId || '').trim();  
   const isSelf = !!viewerId && authorId && (String(viewerId) === authorId);
   const isStarred = !!authorId && !!starredAuthors?.has?.(authorId);
   const isVipAuthor = useVipFlag(authorId, t?.vipActive ?? t?.isVip ?? t?.vip ?? t?.vipUntil ?? null);
@@ -6946,7 +7324,16 @@ const { t: tt } = useI18n();
 
 <div className="topicUserRow">
   
-    <div className="avaMini">
+    <div
+      ref={avatarRef}
+      className="avaMini"
+      data-no-thread-open="1"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onUserInfoToggle?.(rawUserId, avatarRef.current);
+      }}
+    >
       <AvatarEmoji
         userId={authorId}
         pIcon={resolveIconForDisplay(authorId, t.icon)}
@@ -6955,7 +7342,7 @@ const { t: tt } = useI18n();
     <button
       type="button"
       className={cls('nick-badge nick-animate', isVipAuthor && 'vipNick')}
-      onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); }}
+      onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); onUserInfoToggle?.(rawUserId, avatarRef.current); }}
       title={authorId || ''}
       style={{ flex: '0 1 auto', minWidth: 0 }}
       translate="no"
@@ -7100,12 +7487,14 @@ function PostCard({
   viewerId,
   starredAuthors,
   onToggleStar,
+  onUserInfoToggle,  
 }) {
 
 
   // берём locale из того же хука, что и в новостном хабе
   const { locale } = useI18n();
- 
+  const avatarRef = React.useRef(null);
+
   // сниппет текста родителя (до 40 символов)
   const parentSnippet = (() => {
     const raw = parentText || p?.parentText || p?._parentText || '';
@@ -7163,6 +7552,7 @@ function PostCard({
   // безопасные числовые поля
   const views    = Number(p?.views ?? 0);
   const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim();
+  const rawUserId = String(p?.userId || p?.accountId || '').trim(); 
   const isSelf = !!viewerId && authorId && (String(viewerId) === authorId);
   const isStarred = !!authorId && !!starredAuthors?.has?.(authorId);
   const isVipAuthor = useVipFlag(authorId, p?.vipActive ?? p?.isVip ?? p?.vip ?? p?.vipUntil ?? null);
@@ -7445,19 +7835,39 @@ const NO_THREAD_OPEN_SELECTOR =
 />
       {/* шапка: Аватар слева, Ник справа (в одну строку), без времени */}
       <div className="postUserRow mb-2">
-        <div className="avaMini">
+        <div
+          ref={avatarRef}
+          className="avaMini"
+          data-no-thread-open="1"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onUserInfoToggle?.(rawUserId, avatarRef.current);
+          }}
+        >
           <AvatarEmoji
             userId={authorId}
             pIcon={resolveIconForDisplay(authorId, p.icon)}
           />
         </div>
       
-<span className={cls('nick-badge nick-animate', isVipAuthor && 'vipNick')} translate="no">
+
+<button
+  type="button"
+  className={cls('nick-badge nick-animate', isVipAuthor && 'vipNick')}
+  translate="no"
+  data-no-thread-open="1"
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onUserInfoToggle?.(rawUserId, avatarRef.current);
+  }}
+>
 
   <span className="nick-text truncate">
     {resolveNickForDisplay(authorId, p.nickname)}
   </span>
-</span>
+</button>
 
 
         {!!authorId && !isSelf && (
@@ -9058,7 +9468,12 @@ export default function Forum(){
   const mediaLocked = mediaLock.locked && mediaLock.untilMs > Date.now()
 
 
- const [reportUI, setReportUI] = useState({ open: false, postId: null, anchorRect: null })
+const [reportUI, setReportUI] = useState({ open: false, postId: null, anchorRect: null })
+const [userInfoOpen, setUserInfoOpen] = useState(false)
+const [userInfoUid, setUserInfoUid] = useState(null)
+const userInfoAnchorRef = useRef(null)
+const userInfoOpenRef = useRef(false)
+const userInfoUidRef = useRef(null)
 const [reportBusy, setReportBusy] = useState(false)
 const reportPopoverRef = useRef(null)
 const reportAnchorRef = useRef(null)
@@ -9115,6 +9530,34 @@ const persistTombstones = useCallback((patch) => {
     }).catch(() => {})
     return () => { alive = false }
   }, [viewerId])
+
+  useEffect(() => {
+    userInfoOpenRef.current = userInfoOpen
+    userInfoUidRef.current = userInfoUid
+  }, [userInfoOpen, userInfoUid])
+
+  const closeUserInfoPopover = useCallback(() => {
+    setUserInfoOpen(false)
+    setUserInfoUid(null)
+    userInfoAnchorRef.current = null
+    userInfoOpenRef.current = false
+    userInfoUidRef.current = null
+  }, [])
+
+  const handleUserInfoToggle = useCallback((rawUid, anchorEl) => {
+    const uid = String(rawUid || '').trim()
+    if (!uid || !anchorEl) return
+    const isSame = userInfoOpenRef.current && userInfoUidRef.current === uid
+    if (isSame) {
+      closeUserInfoPopover()
+      return
+    }
+    userInfoAnchorRef.current = anchorEl
+    userInfoOpenRef.current = true
+    userInfoUidRef.current = uid
+    setUserInfoUid(uid)
+    setUserInfoOpen(true)
+  }, [closeUserInfoPopover])  
   const closeReportPopover = useCallback(() => {
     setReportUI({ open: false, postId: null, anchorRect: null })
     reportAnchorRef.current = null
@@ -14262,6 +14705,13 @@ function pickAdUrlForSlot(slotKey, slotKind) {
   popoverRef={reportPopoverRef}
     dir={uiDir}
 />
+<UserInfoPopover
+  anchorRef={userInfoAnchorRef}
+  open={userInfoOpen}
+  onClose={closeUserInfoPopover}
+  rawUserId={userInfoUid}
+  t={t}
+/>
 <div
   className="grid2"
   style={{ display:'flex', flexDirection:'column', gridTemplateColumns: '1fr', flex: '1 1 auto', minHeight: 0 }}
@@ -14988,6 +15438,7 @@ const openThreadHere = (clickP) => {
     viewerId={viewerId}
   starredAuthors={starredAuthors}
   onToggleStar={toggleAuthorStar}
+  onUserInfoToggle={handleUserInfoToggle}
 />
 
       </div>
@@ -15098,11 +15549,12 @@ onOpenThread={(clickP) => {
           isBanned={bannedSet.has(p.accountId || p.userId)}
           authId={viewerId}
           markView={markViewPost}
-          t={t}
-            viewerId={viewerId}
-  starredAuthors={starredAuthors}
-  onToggleStar={toggleAuthorStar}
-    />
+            t={t}
+              viewerId={viewerId}
+    starredAuthors={starredAuthors}
+    onToggleStar={toggleAuthorStar}
+    onUserInfoToggle={handleUserInfoToggle}
+      />
   );
 })()}
       </div>
@@ -15166,6 +15618,7 @@ onOpenThread={(clickP) => {
   viewerId={viewerId}
   starredAuthors={starredAuthors}
   onToggleStar={toggleAuthorStar}
+  onUserInfoToggle={handleUserInfoToggle}  
 />
 
           )
@@ -15932,6 +16385,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
   viewerId={viewerId}
   starredAuthors={starredAuthors}
   onToggleStar={toggleAuthorStar}
+  onUserInfoToggle={handleUserInfoToggle}  
 />
 
       </div>

@@ -24,12 +24,110 @@ const dayBucket = (ts = Date.now()) => Math.floor(ts / DAY_MS)
 
 // Дедупликация просмотров не «навсегда», а в окне TTL (по умолчанию берём env или 1800 сек)
 const VIEW_TTL_SEC = Number(process.env.FORUM_VIEW_TTL_SEC ?? 1800)
+const TOTALS_INIT_LOCK_TTL = Number(process.env.FORUM_TOTALS_INIT_LOCK_TTL ?? 20)
 const winBucket = (ttlSec = VIEW_TTL_SEC, ts = Date.now()) => {
   const s = Math.max(1, Number(ttlSec) || VIEW_TTL_SEC)
   return Math.floor((ts / 1000) / s)
 }
 
 const str = (x) => String(x ?? '').trim()
+async function initUserTotalsFromSnapshot(userId) {
+  const uid = str(userId)
+  if (!uid) return null
+
+  const lockTtl = Math.max(5, Number(TOTALS_INIT_LOCK_TTL) || 20)
+  const lockKey = K.userTotalsInitLock(uid)
+  const ok = await redis.set(lockKey, '1', { nx: true, ex: lockTtl })
+  if (!ok) return null
+
+  let postsTotal = 0
+  let topicsTotal = 0
+  let likesTotal = 0
+
+  try {
+    const raw = await redis.get(K.snapshot)
+    const snap = safeParse(raw)
+    const payload = snap?.payload || {}
+    const posts = Array.isArray(payload.posts) ? payload.posts : []
+    const topics = Array.isArray(payload.topics) ? payload.topics : []
+
+    for (const post of posts) {
+      if (!post || post._del) continue
+      const authorId = str(post.userId || post.accountId)
+      if (!authorId || authorId !== uid) continue
+      postsTotal += 1
+      likesTotal += Number(post.likes || 0)
+    }
+
+    for (const topic of topics) {
+      if (!topic || topic._del) continue
+      const authorId = str(topic.userId || topic.accountId)
+      if (!authorId || authorId !== uid) continue
+      topicsTotal += 1
+    }
+  } catch {}
+
+  try {
+    await redis
+      .multi()
+      .set(K.userPostsTotal(uid), String(postsTotal))
+      .set(K.userTopicsTotal(uid), String(topicsTotal))
+      .set(K.userLikesTotal(uid), String(likesTotal))
+      .exec()
+  } catch {}
+
+  try { await redis.del(lockKey) } catch {}
+
+  return { postsTotal, topicsTotal, likesTotal }
+}
+
+export async function getUserPostsTotal(userId) {
+  const uid = str(userId)
+  if (!uid) return 0
+  const key = K.userPostsTotal(uid)
+  const raw = await redis.get(key)
+  if (raw != null) return parseIntSafe(raw, 0)
+  await initUserTotalsFromSnapshot(uid)
+  return getInt(key, 0)
+}
+
+export async function getUserTopicsTotal(userId) {
+  const uid = str(userId)
+  if (!uid) return 0
+  const key = K.userTopicsTotal(uid)
+  const raw = await redis.get(key)
+  if (raw != null) return parseIntSafe(raw, 0)
+  await initUserTotalsFromSnapshot(uid)
+  return getInt(key, 0)
+}
+
+export async function getUserLikesTotal(userId) {
+  const uid = str(userId)
+  if (!uid) return 0
+  const key = K.userLikesTotal(uid)
+  const raw = await redis.get(key)
+  if (raw != null) return parseIntSafe(raw, 0)
+  await initUserTotalsFromSnapshot(uid)
+  return getInt(key, 0)
+}
+
+export async function incrUserPostsTotal(userId, delta = 1) {
+  const uid = str(userId)
+  if (!uid) return 0
+  return redis.incrby(K.userPostsTotal(uid), Number(delta) || 0)
+}
+
+export async function incrUserTopicsTotal(userId, delta = 1) {
+  const uid = str(userId)
+  if (!uid) return 0
+  return redis.incrby(K.userTopicsTotal(uid), Number(delta) || 0)
+}
+
+export async function incrUserLikesTotal(userId, delta = 1) {
+  const uid = str(userId)
+  if (!uid) return 0
+  return redis.incrby(K.userLikesTotal(uid), Number(delta) || 0)
+}
 
 /* =========================
    Ключи (BACKWARD-COMPAT)
@@ -59,6 +157,10 @@ export const K = {
   userAvatar: (userId)   => `forum:user:${userId}:avatar`,
 
     userAbout:  (userId)   => `forum:user:${userId}:about`,
+  userPostsTotal: (userId) => `forum:user:${userId}:posts_total`,
+  userTopicsTotal: (userId) => `forum:user:${userId}:topics_total`,
+  userLikesTotal: (userId) => `forum:user:${userId}:likes_total`,
+  userTotalsInitLock: (userId) => `forum:user:${userId}:totals_init_lock`,    
   // per-topic
   topicPostsCount: (topicId) => `forum:topic:${topicId}:posts_count`,
   topicViews:      (topicId) => `forum:topic:${topicId}:views`,
@@ -224,6 +326,8 @@ export async function createTopic({ title, description, userId, nickname, icon, 
     .set(K.topicViews(topicId), 0)
     .exec()
 
+  try { await incrUserTopicsTotal(t.userId, 1) } catch {}
+
   await pushChange({ rev, kind: 'topic', id: topicId, data: t, ts: t.ts })
   return { topic: t, rev }
 }
@@ -252,6 +356,8 @@ export async function createPost({ topicId, parentId, text, userId, nickname, ic
     .set(K.postDislikes(postId), 0)
     .sadd(K.topicPostsSet(p.topicId), postId)
     .exec()
+
+  try { await incrUserPostsTotal(p.userId, 1) } catch {}
 
   await pushChange({ rev, kind: 'post', id: postId, data: p, ts: p.ts })
   return { post: p, rev }
