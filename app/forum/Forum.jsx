@@ -4271,7 +4271,130 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 /* тело «Inbox» — карточки ровно как посты */
 .inboxList{ display:grid; gap:10px; }
 .inboxEmpty{ opacity:.75; padding:8px 2px; }
-
+.inboxPanel{ display:flex; flex-direction:column; gap:10px; }
+.inboxTabs{
+  display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  padding:8px;
+  border-radius:14px;
+  background: linear-gradient(180deg, rgba(18,28,48,.6), rgba(12,18,32,.45));
+  border:1px solid rgba(120,160,255,.22);
+  box-shadow: 0 10px 30px rgba(0,0,0,.28), inset 0 0 18px rgba(120,180,255,.08);
+  backdrop-filter: blur(12px) saturate(140%);
+}
+.inboxTabBtn{
+  appearance:none; border:1px solid rgba(120,160,255,.2);
+  padding:8px 14px; border-radius:999px;
+  background: rgba(12,16,28,.35);
+  color:#cfe6ff; font-weight:600; font-size:13px; letter-spacing:.2px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), 0 0 0 rgba(0,0,0,0);
+  transition: all .18s ease;
+}
+.inboxTabBtn:hover{ filter:brightness(1.08); box-shadow:0 0 16px rgba(96,160,255,.22); }
+.inboxTabBtn[data-active="true"]{
+  background: linear-gradient(135deg, rgba(80,120,255,.8), rgba(140,200,255,.65));
+  color:#0a101c;
+  border-color: rgba(180,220,255,.6);
+  box-shadow: 0 0 22px rgba(120,180,255,.45), inset 0 0 16px rgba(255,255,255,.28);
+}
+.inboxRail{
+  height:1px; width:100%;
+  background: linear-gradient(90deg, rgba(90,140,255,0), rgba(120,180,255,.65), rgba(90,140,255,0));
+  box-shadow: 0 0 12px rgba(120,180,255,.45);
+}
+.dmCard{
+  border-radius:14px;
+  border:1px solid rgba(120,160,255,.18);
+  background: linear-gradient(180deg, rgba(12,18,32,.6), rgba(8,12,22,.55));
+  padding:12px 14px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.03), 0 12px 24px rgba(0,0,0,.25);
+}
+.dmCard[data-unread="true"]{
+  border-color: rgba(120,200,255,.5);
+  box-shadow: 0 0 18px rgba(80,160,255,.35), inset 0 0 12px rgba(120,200,255,.2);
+}
+.dmCardHead{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px; }
+.dmCardFrom{ font-weight:600; color:#e8f2ff; }
+.dmCardTs{ font-size:12px; opacity:.7; }
+.dmCardBody{ font-size:14px; color:#cfe0ff; line-height:1.5; white-space:pre-wrap; }
+.dmCardAttach{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+.dmCardAttach img, .dmCardAttach video{
+  max-width:160px; max-height:120px; border-radius:10px;
+  border:1px solid rgba(255,255,255,.12);
+  background:#000;
+}
+.dmCardAttach audio{ width: 220px; }
+.dmLoadMore{
+  align-self:flex-start;
+  padding:8px 16px;
+  border-radius:999px;
+  border:1px solid rgba(120,160,255,.25);
+  background: rgba(12,18,32,.55);
+  color:#cfe6ff;
+  font-weight:600;
+  transition: all .18s ease;
+}
+.dmLoadMore:hover{ filter:brightness(1.08); box-shadow:0 0 16px rgba(96,160,255,.2); }
+.dmComposerPopover{
+  position:fixed;
+  width:min(420px, 92vw);
+  background: linear-gradient(180deg, rgba(10,16,28,.92), rgba(8,12,22,.9));
+  border:1px solid rgba(120,160,255,.28);
+  border-radius:16px;
+  padding:14px;
+  z-index:999999;
+  box-shadow: 0 20px 60px rgba(0,0,0,.45), inset 0 0 16px rgba(120,180,255,.1);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+.dmComposerHeader{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; }
+.dmComposerTo{ font-weight:600; color:#eaf4ff; font-size:14px; }
+.dmComposerClose{
+  border:1px solid rgba(120,160,255,.25);
+  background: rgba(12,18,32,.55);
+  color:#cfe6ff;
+  border-radius:999px;
+  padding:4px 10px;
+  font-size:12px;
+}
+.dmComposerRail{
+  display:flex; align-items:center; gap:10px; justify-content:space-between;
+  margin-bottom:10px;
+}
+.dmComposerInput{
+  width:100%; min-height:90px; resize:vertical;
+  border-radius:12px;
+  border:1px solid rgba(120,160,255,.2);
+  background: rgba(8,12,20,.6);
+  color:#e5f1ff;
+  padding:10px 12px;
+  font-size:14px;
+}
+.dmComposerActions{ display:flex; gap:8px; align-items:center; justify-content:flex-end; }
+.dmComposerActionBtn{
+  border:1px solid rgba(120,160,255,.28);
+  background: rgba(12,18,32,.6);
+  color:#cfe6ff;
+  border-radius:999px;
+  padding:6px 12px;
+  font-weight:600;
+  transition: all .18s ease;
+}
+.dmComposerActionBtn:hover{ filter:brightness(1.1); box-shadow:0 0 14px rgba(96,160,255,.25); }
+.userInfoActions{
+  display:flex; gap:10px; align-items:center; justify-content:flex-end;
+  margin-top:10px;
+}
+.userInfoActionBtn{
+  width:34px; height:34px;
+  border-radius:10px;
+  border:1px solid rgba(120,160,255,.25);
+  background: rgba(12,18,32,.6);
+  color:#cfe6ff;
+  display:inline-flex; align-items:center; justify-content:center;
+  box-shadow: inset 0 0 12px rgba(120,180,255,.08);
+  transition: all .18s ease;
+}
+.userInfoActionBtn:hover{ filter:brightness(1.1); box-shadow:0 0 14px rgba(96,160,255,.25); }
+.userInfoActionBtn:disabled{ opacity:.5; cursor:not-allowed; filter:saturate(.6); box-shadow:none; }
 /* ---- INBOX button ---- */
 .iconBtn.inboxBtn{
   position:relative;
@@ -6073,6 +6196,8 @@ function UserInfoPopover({
   onClose,
   rawUserId,
   t,
+  viewerId,
+  onOpenDm,  
 }) {
   const cacheRef = useRef(new Map())
   const aliasRef = useRef(new Map())
@@ -6472,10 +6597,404 @@ function UserInfoPopover({
           </>
         )}
       </div>
+      <div className="userInfoActions">
+        <button
+          type="button"
+          className="userInfoActionBtn"
+          onClick={(e) => {
+            e?.preventDefault?.();
+            e?.stopPropagation?.();
+            registerAction();
+            if (!data?.accountId) return;
+            onOpenDm?.(e, {
+              accountId: String(data.accountId || ''),
+              label: resolveNickForDisplay(data.accountId, ''),
+            });
+          }}
+          title={
+            !viewerId
+              ? (t?.('forum_need_auth') || 'Authorization required')
+              : (String(data?.accountId || '') === String(viewerId))
+                ? (t?.('dm_self_send_forbidden') || 'Cannot send to yourself')
+                : (t?.('dm_send') || 'Send DM')
+          }
+          aria-label={t?.('dm_send') || 'Send DM'}
+          disabled={!viewerId || String(data?.accountId || '') === String(viewerId)}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 7h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.6" fill="none"/>
+            <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      </div>      
     </div>
   )
 
   return createPortal(popover, document.body)
+}
+function DmComposerPopover({
+  anchorRef,
+  open,
+  onClose,
+  toUserId,
+  toLabel,
+  viewerId,
+  t,
+  requireAuthStrict,
+  toast,
+}) {
+  const popoverRef = useRef(null)
+  const rafRef = useRef(null)
+  const [position, setPosition] = useState({ top: 0, left: 0, placement: 'bottom', ready: false })
+  const [text, setText] = useState('')
+  const [attachments, setAttachments] = useState([])
+  const [sending, setSending] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef(null)
+
+  useEffect(() => {
+    if (!open) return
+    setText('')
+    setAttachments([])
+    setSending(false)
+    setUploading(false)
+  }, [open, toUserId])
+
+  const updatePosition = useCallback(() => {
+    if (typeof window === 'undefined') return
+    const anchorEl = anchorRef?.current
+    const popEl = popoverRef.current
+    if (!anchorEl || !popEl) return
+    const rect = anchorEl.getBoundingClientRect()
+    const popRect = popEl.getBoundingClientRect()
+    const gap = 10
+    const viewportW = window.innerWidth
+    const viewportH = window.innerHeight
+    const popW = popRect.width || 320
+    const popH = popRect.height || 200
+
+    let top = rect.bottom + gap
+    let placement = 'bottom'
+    if (top + popH > viewportH - 8) {
+      top = rect.top - popH - gap
+      placement = 'top'
+    }
+    top = Math.min(Math.max(top, 8), Math.max(8, viewportH - popH - 8))
+
+    let left = rect.left
+    left = Math.min(Math.max(left, 8), Math.max(8, viewportW - popW - 8))
+
+    setPosition({ top: Math.round(top), left: Math.round(left), placement, ready: true })
+  }, [anchorRef])
+
+  const schedulePositionUpdate = useCallback(() => {
+    if (typeof window === 'undefined') return
+    if (rafRef.current) return
+    rafRef.current = window.requestAnimationFrame(() => {
+      rafRef.current = null
+      updatePosition()
+    })
+  }, [updatePosition])
+
+  useEffect(() => {
+    if (!open) return
+    schedulePositionUpdate()
+  }, [open, schedulePositionUpdate, attachments.length])
+
+  useEffect(() => {
+    if (!open) return
+    const onScroll = () => schedulePositionUpdate()
+    window.addEventListener('scroll', onScroll, true)
+    window.addEventListener('resize', onScroll, true)
+    return () => {
+      window.removeEventListener('scroll', onScroll, true)
+      window.removeEventListener('resize', onScroll, true)
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current)
+        rafRef.current = null
+      }
+    }
+  }, [open, schedulePositionUpdate])
+
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e) => {
+      const pop = popoverRef.current
+      const anchorEl = anchorRef?.current
+      if (pop && pop.contains(e.target)) return
+      if (anchorEl && anchorEl.contains(e.target)) return
+      onClose?.()
+    }
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose?.()
+    }
+    document.addEventListener('pointerdown', onDown, true)
+    document.addEventListener('keydown', onKey, true)
+    return () => {
+      document.removeEventListener('pointerdown', onDown, true)
+      document.removeEventListener('keydown', onKey, true)
+    }
+  }, [anchorRef, onClose, open])
+
+  const handleFilesChosen = useCallback(async (e) => {
+    const picked = Array.from(e.target?.files || [])
+    if (!picked.length) return
+    setUploading(true)
+    try {
+      const imgFiles = picked.filter(f =>
+        /^image\//i.test(String(f?.type || '')) ||
+        /\.(png|jpe?g|webp|gif)$/i.test(String(f?.name || ''))
+      )
+      const vidFiles = picked.filter(f =>
+        /^video\//i.test(String(f?.type || '')) ||
+        /\.(mp4|webm|mov|m4v|mkv)$/i.test(String(f?.name || ''))
+      )
+      const audFiles = picked.filter(f =>
+        /^audio\//i.test(String(f?.type || '')) ||
+        /\.(mp3|webm|ogg|wav|m4a)$/i.test(String(f?.name || ''))
+      )
+
+      if (imgFiles.length) {
+        const fd = new FormData()
+        imgFiles.slice(0, 10).forEach((f) => fd.append('files', f, f.name))
+        const res = await fetch('/api/forum/upload', {
+          method: 'POST',
+          body: fd,
+          cache: 'no-store',
+          headers: { 'x-forum-user-id': String(viewerId || '') },
+        })
+        const up = await res.json().catch(() => ({ urls: [] }))
+        const urls = Array.isArray(up?.urls) ? up.urls : []
+        if (urls.length) setAttachments((prev) => [...prev, ...urls])
+      }
+
+      if (vidFiles.length) {
+        const vf = vidFiles[0]
+        const mime = String(vf?.type || '').split(';')[0].trim().toLowerCase()
+        const ext =
+          /quicktime/i.test(mime) || /\.(mov)$/i.test(String(vf?.name || '')) ? 'mov'
+          : /mp4/i.test(mime) || /\.(mp4)$/i.test(String(vf?.name || '')) ? 'mp4'
+          : 'webm'
+        const { upload } = await import('@vercel/blob/client')
+        const name = `forum/dm-video-${Date.now()}.${ext}`
+        const result = await upload(name, vf, {
+          access: 'public',
+          handleUploadUrl: '/api/forum/blobUploadUrl',
+          multipart: true,
+          contentType: mime || (ext === 'mp4' ? 'video/mp4' : (ext === 'mov' ? 'video/quicktime' : 'video/webm')),
+          headers: { 'x-forum-user-id': String(viewerId || '') },
+        })
+        if (result?.url) setAttachments((prev) => [...prev, result.url])
+      }
+
+      if (audFiles.length) {
+        const af = audFiles[0]
+        const fd = new FormData()
+        fd.append('file', af, af.name || `audio-${Date.now()}.webm`)
+        const res = await fetch('/api/forum/uploadAudio', {
+          method: 'POST',
+          body: fd,
+          cache: 'no-store',
+          headers: { 'x-forum-user-id': String(viewerId || '') },
+        })
+        const up = await res.json().catch(() => ({ urls: [] }))
+        const urls = Array.isArray(up?.urls) ? up.urls : []
+        if (urls.length) setAttachments((prev) => [...prev, ...urls])
+      }
+    } catch (err) {
+      console.error('dm_upload_failed', err)
+      try { toast?.error?.(t?.('dm_error') || 'Failed to send'); } catch {}
+    } finally {
+      setUploading(false)
+      if (e?.target) e.target.value = ''
+    }
+  }, [t, toast, viewerId])
+
+  const handleSend = useCallback(async () => {
+    if (sending || uploading) return
+    if (!toUserId) return
+    const trimmed = String(text || '').trim()
+    const safeAttachments = attachments.filter(Boolean)
+    if (!trimmed && !safeAttachments.length) return
+
+    const auth = await requireAuthStrict?.()
+    if (!auth) return
+
+    if (String(toUserId) === String(viewerId)) {
+      try { toast?.warn?.(t?.('dm_self_send_forbidden') || 'Cannot send to yourself'); } catch {}
+      return
+    }
+
+    setSending(true)
+    try {
+      const res = await fetch('/api/dm/send', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-forum-user-id': String(viewerId || ''),
+        },
+        body: JSON.stringify({
+          to: String(toUserId),
+          text: trimmed,
+          attachments: safeAttachments,
+        }),
+      })
+      const json = await res.json().catch(() => null)
+      if (!res.ok || !json?.ok) {
+        throw new Error(json?.error || `HTTP ${res.status}`)
+      }
+      try { toast?.success?.(t?.('dm_sent') || 'Sent'); } catch {}
+      setText('')
+      setAttachments([])
+      onClose?.()
+    } catch (err) {
+      console.error('dm_send_failed', err)
+      try { toast?.error?.(t?.('dm_error') || 'Failed to send'); } catch {}
+    } finally {
+      setSending(false)
+    }
+  }, [attachments, onClose, requireAuthStrict, sending, t, text, toUserId, toast, uploading, viewerId])
+
+  if (!open || !anchorRef?.current) return null
+
+  const renderPreview = (url) => {
+    const src = String(url || '')
+    if (!src) return null
+    if (/\.(png|jpe?g|gif|webp)(\?.*)?$/i.test(src)) {
+      return <img src={src} alt="" loading="lazy" />
+    }
+    if (/\.(mp4|webm|mov|m4v|mkv)(\?.*)?$/i.test(src)) {
+      return <video src={src} controls preload="metadata" playsInline />
+    }
+    if (/\.(mp3|webm|ogg|wav|m4a)(\?.*)?$/i.test(src)) {
+      return <audio src={src} controls preload="metadata" />
+    }
+    return (
+      <a href={src} target="_blank" rel="noreferrer">
+        {src}
+      </a>
+    )
+  }
+
+  const popover = (
+    <div
+      ref={popoverRef}
+      className="dmComposerPopover"
+      data-placement={position.placement}
+      style={{
+        top: position.top,
+        left: position.left,
+        visibility: position.ready ? 'visible' : 'hidden',
+      }}
+    >
+      <div className="dmComposerHeader">
+        <div className="dmComposerTo">
+          {t?.('dm_to') || 'To'}: {toLabel || toUserId}
+        </div>
+        <button type="button" className="dmComposerClose" onClick={onClose}>
+          {t?.('common_close') || 'Close'}
+        </button>
+      </div>
+      <div className="dmComposerRail">
+        <button
+          type="button"
+          className="dmComposerActionBtn"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading || sending}
+        >
+          {t?.('forum_attach') || 'Attach'}
+        </button>
+        <div className="dmComposerActions">
+          <button
+            type="button"
+            className="dmComposerActionBtn"
+            onClick={handleSend}
+            disabled={sending || uploading}
+          >
+            {sending ? (t?.('dm_sending') || 'Sending…') : (t?.('dm_send') || 'Send')}
+          </button>
+        </div>
+      </div>
+      <textarea
+        className="dmComposerInput"
+        value={text}
+        maxLength={400}
+        placeholder={t?.('forum_composer_placeholder') || 'Write a message…'}
+        onChange={(e) => setText(e.target.value.slice(0, 400))}
+      />
+      {attachments.length > 0 && (
+        <div className="dmCardAttach">
+          {attachments.map((url, idx) => (
+            <div key={`${url}_${idx}`} style={{ position: 'relative' }}>
+              {renderPreview(url)}
+              <button
+                type="button"
+                className="userInfoActionBtn"
+                onClick={() => setAttachments((prev) => prev.filter((_, i) => i !== idx))}
+                title={t?.('forum_remove') || 'Remove'}
+                style={{ position: 'absolute', top: 6, right: 6 }}
+              >
+                <span aria-hidden>✕</span>
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept="image/*,video/*,audio/*"
+        onChange={handleFilesChosen}
+        style={{ display: 'none' }}
+      />
+    </div>
+  )
+
+  return createPortal(popover, document.body)
+}
+
+function DmMessageCard({ msg, isUnread }) {
+  const fromId = String(msg?.from || '')
+  const fromName = resolveNickForDisplay(fromId, '')
+  const ts = msg?.ts ? new Date(Number(msg.ts)).toLocaleString() : ''
+  const attachments = Array.isArray(msg?.attachments) ? msg.attachments : []
+
+  const renderAttachment = (url) => {
+    const src = String(url || '')
+    if (!src) return null
+    if (/\.(png|jpe?g|gif|webp)(\?.*)?$/i.test(src)) {
+      return <img key={src} src={src} alt="" loading="lazy" />
+    }
+    if (/\.(mp4|webm|mov|m4v|mkv)(\?.*)?$/i.test(src)) {
+      return (
+        <video key={src} src={src} controls preload="metadata" playsInline />
+      )
+    }
+    if (/\.(mp3|webm|ogg|wav|m4a)(\?.*)?$/i.test(src)) {
+      return <audio key={src} src={src} controls preload="metadata" />
+    }
+    return (
+      <a key={src} href={src} target="_blank" rel="noreferrer">
+        {src}
+      </a>
+    )
+  }
+
+  return (
+    <div className="dmCard" data-unread={isUnread ? 'true' : 'false'}>
+      <div className="dmCardHead">
+        <div className="dmCardFrom">{fromName || fromId}</div>
+        <div className="dmCardTs">{ts}</div>
+      </div>
+      <div className="dmCardBody">{String(msg?.text || '')}</div>
+      {attachments.length > 0 && (
+        <div className="dmCardAttach">
+          {attachments.map(renderAttachment)}
+        </div>
+      )}
+    </div>
+  )
 }
 
 /** мини-поповер профиля рядом с аватаром */
@@ -9642,6 +10161,9 @@ const [userInfoUid, setUserInfoUid] = useState(null)
 const userInfoAnchorRef = useRef(null)
 const userInfoOpenRef = useRef(false)
 const userInfoUidRef = useRef(null)
+const [dmComposerOpen, setDmComposerOpen] = useState(false)
+const [dmComposerTarget, setDmComposerTarget] = useState({ accountId: '', label: '' })
+const dmComposerAnchorRef = useRef(null)
 const [reportBusy, setReportBusy] = useState(false)
 const reportPopoverRef = useRef(null)
 const reportAnchorRef = useRef(null)
@@ -9711,7 +10233,19 @@ const persistTombstones = useCallback((patch) => {
     userInfoOpenRef.current = false
     userInfoUidRef.current = null
   }, [])
+  const closeDmComposer = useCallback(() => {
+    setDmComposerOpen(false)
+    setDmComposerTarget({ accountId: '', label: '' })
+    dmComposerAnchorRef.current = null
+  }, [])
 
+  const openDmComposer = useCallback((e, payload) => {
+    const targetId = String(payload?.accountId || '').trim()
+    if (!targetId) return
+    dmComposerAnchorRef.current = e?.currentTarget || e?.target || null
+    setDmComposerTarget({ accountId: targetId, label: payload?.label || '' })
+    setDmComposerOpen(true)
+  }, [])
   const handleUserInfoToggle = useCallback((rawUid, anchorEl) => {
     const uid = String(rawUid || '').trim()
     if (!uid || !anchorEl) return
@@ -11742,12 +12276,15 @@ const VIDEO_PAGE_SIZE = 5;
 const TOPIC_PAGE_SIZE = 10;
 const REPLIES_PAGE_SIZE = 5;
 const THREAD_PAGE_SIZE = 5;
+const MY_MESSAGES_PAGE_SIZE = 6;
+const DM_PAGE_SIZE = 6;
 const [visibleVideoCount, setVisibleVideoCount] = useState(VIDEO_PAGE_SIZE);
 const [visibleTopicsCount, setVisibleTopicsCount] = useState(TOPIC_PAGE_SIZE);
 const [visibleRepliesCount, setVisibleRepliesCount] = useState(REPLIES_PAGE_SIZE);
 const [visibleThreadPostsCount, setVisibleThreadPostsCount] = useState(THREAD_PAGE_SIZE);
 // [INBOX:STATE] — безопасно для SSR (никакого localStorage в рендере)
 const [inboxOpen, setInboxOpen] = useState(false);
+const [inboxTab, setInboxTab] = useState('replies');
 const [mounted, setMounted] = useState(false);           // ← флаг «мы на клиенте»
 useEffect(()=>{ setMounted(true) }, []);
 useEffect(() => {
@@ -11779,6 +12316,12 @@ useEffect(() => {
   if (!inboxOpen) return;
   setVisibleRepliesCount(REPLIES_PAGE_SIZE);
 }, [inboxOpen, repliesToMe.length]);
+const [visibleMyMessagesCount, setVisibleMyMessagesCount] = useState(MY_MESSAGES_PAGE_SIZE);
+useEffect(() => {
+  if (!inboxOpen) return;
+  if (inboxTab !== 'my') return;
+  setVisibleMyMessagesCount(MY_MESSAGES_PAGE_SIZE);
+}, [inboxOpen, inboxTab, meId]);
 const sortedRepliesToMe = useMemo(
   () => (repliesToMe || []).slice().sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0)),
   [repliesToMe]
@@ -11788,8 +12331,22 @@ const visibleRepliesToMe = useMemo(
   [sortedRepliesToMe, visibleRepliesCount]
 );
 const repliesHasMore = visibleRepliesToMe.length < sortedRepliesToMe.length;
+const myMessages = useMemo(() => {
+  if (!meId) return [];
+  return (data.posts || [])
+    .filter(p => String(p.userId || p.accountId || '') === String(meId))
+    .slice()
+    .sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0));
+}, [data.posts, meId]);
+const visibleMyMessages = useMemo(
+  () => myMessages.slice(0, visibleMyMessagesCount),
+  [myMessages, visibleMyMessagesCount]
+);
+const myMessagesHasMore = visibleMyMessages.length < myMessages.length;
 // прочитанные — храним в state, загружаем/сохраняем только на клиенте
 const [readSet, setReadSet] = useState(() => new Set());
+const dmSeenKey = meId ? `forum:seenDM:${meId}` : null;
+const [dmReadSet, setDmReadSet] = useState(() => new Set());
 useEffect(() => {
   if (!seenKey) { setReadSet(new Set()); return; }
   try {
@@ -11799,24 +12356,133 @@ useEffect(() => {
     setReadSet(new Set());
   }
 }, [seenKey]);
+useEffect(() => {
+  if (!dmSeenKey) { setDmReadSet(new Set()); return; }
+  try {
+    const arr = JSON.parse(localStorage.getItem(dmSeenKey) || '[]');
+    setDmReadSet(new Set(Array.isArray(arr) ? arr.map(String) : []));
+  } catch {
+    setDmReadSet(new Set());
+  }
+}, [dmSeenKey]);
 
-const unreadCount = useMemo(() => {
+const [dmItems, setDmItems] = useState([]);
+const [dmCursor, setDmCursor] = useState(0);
+const [dmHasMore, setDmHasMore] = useState(true);
+const [dmLoading, setDmLoading] = useState(false);
+const [dmError, setDmError] = useState(null);
+const dmInFlightRef = useRef(false);
+const dmIdsRef = useRef(new Set());
+
+useEffect(() => {
+  setDmItems([]);
+  setDmCursor(0);
+  setDmHasMore(true);
+  setDmError(null);
+  dmIdsRef.current = new Set();
+}, [viewerId]);
+
+const fetchDmInbox = useCallback(async ({ reset = false } = {}) => {
+  if (!viewerId) return;
+  if (dmInFlightRef.current) return;
+  if (!dmHasMore && !reset) return;
+  dmInFlightRef.current = true;
+  setDmLoading(true);
+  setDmError(null);
+  try {
+    const cursor = reset ? 0 : Number(dmCursor || 0);
+    const limit = DM_PAGE_SIZE;
+    const res = await fetch(`/api/dm/inbox?cursor=${cursor}&limit=${limit}`, {
+      method: 'GET',
+      cache: 'no-store',
+      headers: { 'x-forum-user-id': String(viewerId || '') },
+    });
+    const json = await res.json().catch(() => null);
+    if (!res.ok || !json?.ok) {
+      throw new Error(json?.error || `HTTP ${res.status}`);
+    }
+    const items = Array.isArray(json.items) ? json.items : [];
+    const nextCursor = json.nextCursor ?? null;
+    setDmHasMore(Boolean(nextCursor));
+    setDmCursor(nextCursor ?? cursor);
+    setDmItems((prev) => {
+      const next = reset ? [] : prev.slice();
+      const seen = reset ? new Set() : new Set(dmIdsRef.current);
+      for (const it of items) {
+        const id = String(it?.id || '');
+        if (!id || seen.has(id)) continue;
+        seen.add(id);
+        next.push(it);
+      }
+      dmIdsRef.current = seen;
+      return next;
+    });
+  } catch (err) {
+    setDmError(err?.message || 'error');
+  } finally {
+    dmInFlightRef.current = false;
+    setDmLoading(false);
+  }
+}, [dmCursor, dmHasMore, viewerId]);
+
+useEffect(() => {
+  if (!mounted || !viewerId) return;
+  if (dmItems.length) return;
+  fetchDmInbox({ reset: true });
+}, [mounted, viewerId, dmItems.length, fetchDmInbox]);
+
+useEffect(() => {
+  if (!inboxOpen || inboxTab !== 'dm') return;
+  if (dmItems.length) return;
+  fetchDmInbox({ reset: true });
+}, [inboxOpen, inboxTab, dmItems.length, fetchDmInbox]);
+
+const unreadRepliesCount = useMemo(() => {
   if (!mounted) return 0; // до монтирования не подсвечиваем бейдж
   let n = 0;
   for (const p of repliesToMe) if (!readSet.has(String(p.id))) n++;
   return n;
 }, [mounted, repliesToMe, readSet]);
 
-// при открытии Inbox — пометить как прочитанные и сразу обновить state
+const unreadDmCount = useMemo(() => {
+  if (!mounted) return 0;
+  let n = 0;
+  for (const m of dmItems) if (!dmReadSet.has(String(m.id))) n++;
+  return n;
+}, [mounted, dmItems, dmReadSet]);
+const unreadCount = unreadRepliesCount + unreadDmCount;
+
+// при входе в таб replies — пометить как прочитанные и сразу обновить state
 useEffect(() => {
-if (!mounted || !inboxOpen || !seenKey) return;
-  const allIds = new Set([
-    ...repliesToMe.map(p => String(p.id)),
-    ...Array.from(readSet)
-  ]);
-  try { localStorage.setItem(seenKey, JSON.stringify(Array.from(allIds))); } catch {}
-  setReadSet(allIds); // чтобы бейдж погас сразу без повторного чтения из LS
-}, [mounted, inboxOpen, seenKey, repliesToMe, readSet]);
+if (!mounted || !inboxOpen || inboxTab !== 'replies' || !seenKey) return;
+  let changed = false;
+  const next = new Set(readSet);
+  for (const p of repliesToMe) {
+    const id = String(p.id);
+    if (!next.has(id)) {
+      next.add(id);
+      changed = true;
+    }
+  }
+  if (!changed) return;
+  try { localStorage.setItem(seenKey, JSON.stringify(Array.from(next))); } catch {}
+  setReadSet(next); // чтобы бейдж погас сразу без повторного чтения из LS
+}, [mounted, inboxOpen, inboxTab, seenKey, repliesToMe, readSet]);
+useEffect(() => {
+  if (!mounted || !inboxOpen || inboxTab !== 'dm' || !dmSeenKey) return;
+  let changed = false;
+  const next = new Set(dmReadSet);
+  for (const m of dmItems) {
+    const id = String(m.id);
+    if (!next.has(id)) {
+      next.add(id);
+      changed = true;
+    }
+  }
+  if (!changed) return;
+  try { localStorage.setItem(dmSeenKey, JSON.stringify(Array.from(next))); } catch {}
+  setDmReadSet(next);
+}, [mounted, inboxOpen, inboxTab, dmSeenKey, dmItems, dmReadSet]);
 
 // все посты выбранной темы (строго сравниваем как строки)
 const allPosts = useMemo(() => (
@@ -14879,6 +15545,19 @@ function pickAdUrlForSlot(slotKey, slotKind) {
   onClose={closeUserInfoPopover}
   rawUserId={userInfoUid}
   t={t}
+    viewerId={viewerId}
+  onOpenDm={openDmComposer}
+/>
+<DmComposerPopover
+  anchorRef={dmComposerAnchorRef}
+  open={dmComposerOpen}
+  onClose={closeDmComposer}
+  toUserId={dmComposerTarget.accountId}
+  toLabel={dmComposerTarget.label}
+  viewerId={viewerId}
+  t={t}
+  requireAuthStrict={requireAuthStrict}
+  toast={toast}
 />
 <div
   className="grid2"
@@ -15694,94 +16373,216 @@ const openThreadHere = (clickP) => {
 
 ) : inboxOpen ? (
   <>
-    <div className="topicTitle text-[#eaf4ff]
-    !whitespace-normal break-words
-    [overflow-wrap:anywhere]
-    max-w-full">{t('forum_inbox_title') || 'Ответы на ваши сообщения'}</div>
-    <div className="grid gap-2 mt-2" suppressHydrationWarning>
-{debugAdsSlots(
-  'inbox',
-  interleaveAds(
-    visibleRepliesToMe || [],
-    adEvery,
-    {
-      isSkippable: (p) => !p || !p.id,
-      getId: (p) => p?.id || `${p?.topicId || 'ib'}:${p?.ts || 0}`,
-    }
-  )
-).map((slot) => {
-  if (slot.type === 'item') {
-    const p = slot.item;
-    return (
-      <div key={slot.key} id={`post_${p.id}`}>
-{(() => {
-  const parent = (data.posts || []).find(x => String(x.id) === String(p.parentId));
-  return (
-    <PostCard
-      p={p}
-      parentPost={parent || null}
-      parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''}
-      parentText={parent ? (parent.text || parent.message || parent.body || '') : ''}
-     
-          onReport={(post, rect, anchorEl) => openReportPopover(post, rect, anchorEl)}
-onOpenThread={(clickP) => {
-  // ✅ из любой карточки: открыть сразу ветку ответов по клику на счётчик
-  openThreadForPost(clickP || p, { closeInbox: true });
-}}
-
-          onReact={reactMut}
-          isAdmin={isAdmin}
-          onDeletePost={delPost}
-          onOwnerDelete={delPostOwn}          
-          onBanUser={banUser}
-          onUnbanUser={unbanUser}
-          isBanned={bannedSet.has(p.accountId || p.userId)}
-          authId={viewerId}
-          markView={markViewPost}
-            t={t}
-              viewerId={viewerId}
-    starredAuthors={starredAuthors}
-    onToggleStar={toggleAuthorStar}
-    onUserInfoToggle={handleUserInfoToggle}
-      />
-  );
-})()}
+    <div className="inboxPanel">
+      <div className="topicTitle text-[#eaf4ff]
+      !whitespace-normal break-words
+      [overflow-wrap:anywhere]
+      max-w-full">{t('forum_inbox_title') || 'Ответы на ваши сообщения'}</div>
+      <div className="inboxTabs" role="tablist" aria-label={t('forum_inbox') || 'Inbox'}>
+        <button
+          type="button"
+          className="inboxTabBtn"
+          data-active={inboxTab === 'replies'}
+          onClick={() => setInboxTab('replies')}
+        >
+          {t('inbox_tab_replies_to_me') || 'Replies to me'}
+        </button>
+        <button
+          type="button"
+          className="inboxTabBtn"
+          data-active={inboxTab === 'my'}
+          onClick={() => setInboxTab('my')}
+        >
+          {t('inbox_tab_my_messages') || 'My messages'}
+        </button>
+        <button
+          type="button"
+          className="inboxTabBtn"
+          data-active={inboxTab === 'dm'}
+          onClick={() => setInboxTab('dm')}
+        >
+          {t('inbox_tab_dm_to_me') || 'Messages to me'}
+        </button>
       </div>
-    );
-  }
 
-  const url = pickAdUrlForSlot(slot.key, 'inbox');
-  if (!url) return null;
-
-  return (
-     <ForumAdSlot
-       key={slot.key}
-       slotKey={slot.key}
-       url={url}
-       slotKind="inbox"
-       nearId={slot.nearId}
-       onResizeDelta={compensateScrollOnResize}
-     />
-  );
-})}
-
-      {repliesHasMore && (
-        <div className="loadMoreFooter">
-          <div className="loadMoreShimmer">
-            {t?.('loading') || 'Loading…'}
-          </div>
-          <LoadMoreSentinel
-            onVisible={() =>
-              setVisibleRepliesCount((c) =>
-                Math.min(c + REPLIES_PAGE_SIZE, sortedRepliesToMe.length)
-              )
+      <div className="inboxRail" aria-hidden="true" />
+      {inboxTab === 'replies' && (
+        <div className="grid gap-2 mt-2" suppressHydrationWarning>
+          {debugAdsSlots(
+            'inbox',
+            interleaveAds(
+              visibleRepliesToMe || [],
+              adEvery,
+              {
+                isSkippable: (p) => !p || !p.id,
+                getId: (p) => p?.id || `${p?.topicId || 'ib'}:${p?.ts || 0}`,
+              }
+            )
+          ).map((slot) => {
+            if (slot.type === 'item') {
+              const p = slot.item;
+              return (
+                <div key={slot.key} id={`post_${p.id}`}>
+                  {(() => {
+                    const parent = (data.posts || []).find(x => String(x.id) === String(p.parentId));
+                    return (
+                      <PostCard
+                        p={p}
+                        parentPost={parent || null}
+                        parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''}
+                        parentText={parent ? (parent.text || parent.message || parent.body || '') : ''}
+                        onReport={(post, rect, anchorEl) => openReportPopover(post, rect, anchorEl)}
+                        onOpenThread={(clickP) => {
+                          openThreadForPost(clickP || p, { closeInbox: true });
+                        }}
+                        onReact={reactMut}
+                        isAdmin={isAdmin}
+                        onDeletePost={delPost}
+                        onOwnerDelete={delPostOwn}
+                        onBanUser={banUser}
+                        onUnbanUser={unbanUser}
+                        isBanned={bannedSet.has(p.accountId || p.userId)}
+                        authId={viewerId}
+                        markView={markViewPost}
+                        t={t}
+                        viewerId={viewerId}
+                        starredAuthors={starredAuthors}
+                        onToggleStar={toggleAuthorStar}
+                        onUserInfoToggle={handleUserInfoToggle}
+                      />
+                    );
+                  })()}
+                </div>
+              );
             }
-          />
+
+            const url = pickAdUrlForSlot(slot.key, 'inbox');
+            if (!url) return null;
+
+            return (
+              <ForumAdSlot
+                key={slot.key}
+                slotKey={slot.key}
+                url={url}
+                slotKind="inbox"
+                nearId={slot.nearId}
+                onResizeDelta={compensateScrollOnResize}
+              />
+            );
+          })}
+
+          {repliesHasMore && (
+            <div className="loadMoreFooter">
+              <div className="loadMoreShimmer">
+                {t?.('loading') || 'Loading…'}
+              </div>
+              <LoadMoreSentinel
+                onVisible={() =>
+                  setVisibleRepliesCount((c) =>
+                    Math.min(c + REPLIES_PAGE_SIZE, sortedRepliesToMe.length)
+                  )
+                }
+              />
+            </div>
+          )}
+          {sortedRepliesToMe.length === 0 && (
+            <div className="meta">
+              {t('inbox_empty_replies') || 'No new replies'}
+            </div>
+          )}
         </div>
       )}
-      {sortedRepliesToMe.length === 0 && (
-        <div className="meta">
-          {t('forum_inbox_empty') || 'Новых ответов нет'}
+      {inboxTab === 'my' && (
+        <div className="grid gap-2 mt-2" suppressHydrationWarning>
+          {(visibleMyMessages || []).map((p) => {
+            const parent = p.parentId
+              ? (data.posts || []).find(x => String(x.id) === String(p.parentId))
+              : null
+            return (
+              <div key={p.id} id={`post_${p.id}`}>
+                <PostCard
+                  p={p}
+                  parentPost={parent || null}
+                  parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''}
+                  parentText={parent ? (parent.text || parent.message || parent.body || '') : ''}
+                  onReport={(post, rect, anchorEl) => openReportPopover(post, rect, anchorEl)}
+                  onOpenThread={(clickP) => {
+                    openThreadForPost(clickP || p, { closeInbox: true });
+                  }}
+                  onReact={reactMut}
+                  isAdmin={isAdmin}
+                  onDeletePost={delPost}
+                  onOwnerDelete={delPostOwn}
+                  onBanUser={banUser}
+                  onUnbanUser={unbanUser}
+                  isBanned={bannedSet.has(p.accountId || p.userId)}
+                  authId={viewerId}
+                  markView={markViewPost}
+                  t={t}
+                  viewerId={viewerId}
+                  starredAuthors={starredAuthors}
+                  onToggleStar={toggleAuthorStar}
+                  onUserInfoToggle={handleUserInfoToggle}
+                />
+              </div>
+            )
+          })}
+          {myMessagesHasMore && (
+            <button
+              type="button"
+              className="dmLoadMore"
+              onClick={() =>
+                setVisibleMyMessagesCount((c) =>
+                  Math.min(c + MY_MESSAGES_PAGE_SIZE, myMessages.length)
+                )
+              }
+            >
+              {t('inbox_load_more') || 'Load more'}
+            </button>
+          )}
+          {myMessages.length === 0 && (
+            <div className="meta">
+              {t('inbox_empty_my_messages') || 'No messages yet'}
+            </div>
+          )}
+        </div>
+      )}
+      {inboxTab === 'dm' && (
+        <div className="grid gap-2 mt-2" suppressHydrationWarning>
+          {dmError && (
+            <div className="meta">
+              {t('dm_error') || 'Failed to send'}
+              <button
+                type="button"
+                className="dmLoadMore"
+                onClick={() => fetchDmInbox({ reset: true })}
+              >
+                {t('common_retry') || 'Retry'}
+              </button>
+            </div>
+          )}
+          {dmItems.map((msg) => (
+            <DmMessageCard
+              key={msg.id}
+              msg={msg}
+              isUnread={!dmReadSet.has(String(msg.id))}
+            />
+          ))}
+          {dmHasMore && (
+            <button
+              type="button"
+              className="dmLoadMore"
+              disabled={dmLoading}
+              onClick={() => fetchDmInbox()}
+            >
+              {t('inbox_load_more') || 'Load more'}
+            </button>
+          )}
+          {!dmLoading && dmItems.length === 0 && !dmError && (
+            <div className="meta">
+              {t('inbox_empty_dm') || 'No direct messages'}
+            </div>
+          )}
         </div>
       )}
     </div>

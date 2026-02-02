@@ -43,7 +43,7 @@ const CLICK_IMPULSE_BASE  = 90  // уменьши, если хочешь ещё 
 
 /* ===== КОЛ-ВО И РАЗМЕРЫ СНЕЖИНОК ===== */
 
-const DEFAULT_COUNT   = 100
+const DEFAULT_COUNT   = 1
 const DEFAULT_MINSIZE = 1
 const DEFAULT_MAXSIZE = 20
 
