@@ -5,7 +5,7 @@
 import React, { useMemo, useState, useCallback, useEffect } from 'react'
 import { countries } from '@/lib/geo/countries'
 import { regions as regionsByCountry } from '@/lib/geo/regions'
-
+import { useI18n } from '../../components/i18n'
 const tx = (t, key, fb) => {
   try {
     const v = t?.(key)
@@ -23,14 +23,13 @@ function clampRemaining(value) {
   return Math.max(0, Math.floor(num))
 }
 
-export default function GeoTargetingPicker({
-  t,
-  lang,
+export default function GeoTargetingPicker({ 
   selectedCountries,
   selectedRegions,
   remaining,
   onSelectionChange,
 }) {
+  const { t, lang } = useI18n()
   const [search, setSearch] = useState('')
   const [expanded, setExpanded] = useState(() => new Set())
   const [limitNotice, setLimitNotice] = useState('')
