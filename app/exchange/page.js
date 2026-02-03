@@ -1335,8 +1335,25 @@ function LimitBanner({ tr, onOpen }) {
 const QUOTA_LIMIT = QUOTA_LIMIT_SEC
 const HEARTBEAT = QUOTA_HEARTBEAT_MS
 
+// ===== refresh policy (как ты сказал): 1 раз в минуту =====
+const STATUS_REFRESH_MS = 60_000
+
+// ===== localStorage cache helpers =====
+function lsGetJSON(key) {
+  if (typeof window === 'undefined') return null
+  try { return JSON.parse(localStorage.getItem(key) || 'null') } catch { return null }
+}
+function lsSetJSON(key, val) {
+  if (typeof window === 'undefined') return
+  try { localStorage.setItem(key, JSON.stringify(val)) } catch {}
+}
+function isFresh(ts, ttlMs) {
+  return Number.isFinite(ts) && (Date.now() - ts) < ttlMs
+}
 /* ===== ДОБАВЛЕНО: серверное хранилище квоты (GET/POST) ===== */
 const AIQ_API = '/api/aiquota/usage'
+const SUB_API = '/api/subscription/status'
+const SUB_CACHE_KEY = 'subStatus:last'
 let __aiq_lastKnown = 0
 let __aiq_dayKey = null
 function ensureDayKey() {
@@ -1349,12 +1366,21 @@ function ensureDayKey() {
 }
 async function quotaGet() {
   ensureDayKey()
+  const cacheKey = `aiQuotaSrv:${todayKey()}`
+  const cached = lsGetJSON(cacheKey)
+  if (cached && isFresh(cached.ts, STATUS_REFRESH_MS) && Number.isFinite(cached.usedSec)) {
+    const u = Math.min(QUOTA_LIMIT, cached.usedSec | 0)
+    __aiq_lastKnown = u
+    setUsedSec(u)
+    return u
+  }  
   try {
     const r = await fetch(AIQ_API, { credentials:'include', cache:'no-store' })
     const j = await r.json().catch(()=>null)
     if (j?.ok && Number.isFinite(j.usedSec)) {
       __aiq_lastKnown = Math.min(QUOTA_LIMIT, j.usedSec|0)
       setUsedSec(__aiq_lastKnown)
+      lsSetJSON(cacheKey, { ts: Date.now(), usedSec: __aiq_lastKnown })
       return __aiq_lastKnown
     }
   } catch {}
@@ -1378,6 +1404,8 @@ async function quotaPost(deltaSec) {
     if (j?.ok && Number.isFinite(j.usedSec)) {
       __aiq_lastKnown = Math.min(QUOTA_LIMIT, j.usedSec|0)
       setUsedSec(__aiq_lastKnown)
+      // обновим и серверный кэш, чтобы следующее quotaGet не дернуло сеть
+      lsSetJSON(`aiQuotaSrv:${todayKey()}`, { ts: Date.now(), usedSec: __aiq_lastKnown })      
       return __aiq_lastKnown
     }
   } catch {}
@@ -1396,7 +1424,26 @@ function AIQuotaGate({ children, onOpenUnlimit }) {
   const batchSecRef = useRef(0)
   const tickerRef = useRef(null)
   const lastSyncRef = useRef(0)
+  const flushInFlightRef = useRef(false)
 
+  const flushQuota = useCallback(async () => {
+    if (!Number.isFinite(limit)) return
+    if (flushInFlightRef.current) return
+    const pending = batchSecRef.current | 0
+    if (pending <= 0) return
+    flushInFlightRef.current = true
+    try {
+      batchSecRef.current = 0
+      lastSyncRef.current = Date.now()
+      const delta = Math.min(pending, Math.max(0, QUOTA_LIMIT - used))
+      const srvUsed = await quotaPost(delta)
+      if (Number.isFinite(srvUsed)) {
+        setUsed(srvUsed)
+      }
+    } finally {
+      flushInFlightRef.current = false
+    }
+  }, [limit, used])
   // init counters (локально) + первичная подгрузка квоты с бэка
   useEffect(() => {
     setLimit(QUOTA_LIMIT)
@@ -1446,13 +1493,13 @@ function AIQuotaGate({ children, onOpenUnlimit }) {
         batchSecRef.current += whole
       }
 
-      // батч в базу раз в ~5 сек или когда накопилось ≥1 сек
+      // серверный sync делаем НЕ ЧАЩЕ 1 раза в минуту (как ты сказал)
       const nowTs = Date.now()
-      if (batchSecRef.current >= 1 && (batchSecRef.current >= 5 || nowTs - lastSyncRef.current > 4500)) {
+      if (batchSecRef.current >= 1 && (nowTs - lastSyncRef.current >= STATUS_REFRESH_MS)) {
         const delta = Math.min(batchSecRef.current, Math.max(0, QUOTA_LIMIT - used))
         batchSecRef.current = 0
+        lastSyncRef.current = nowTs 
         const srvUsed = await quotaPost(delta)
-        lastSyncRef.current = nowTs
         if (Number.isFinite(srvUsed)) {
           setUsed(srvUsed)
           if (srvUsed >= QUOTA_LIMIT) { accMsRef.current = 0 }
@@ -1466,7 +1513,8 @@ function AIQuotaGate({ children, onOpenUnlimit }) {
   }, [used, limit])
 
   const checkingRef = useRef(false)
-  const refreshVip = useRef(async function () {
+  const refreshVip = useRef(async function (opts = {}) {
+    const force = !!opts.force
     if (checkingRef.current) return
     checkingRef.current = true
     try {
@@ -1474,11 +1522,30 @@ function AIQuotaGate({ children, onOpenUnlimit }) {
         (typeof window !== 'undefined' && window.__AUTH_ACCOUNT__) ||
         localStorage.getItem('wallet')
       if (!accountId) return
-      const r = await fetch('/api/subscription/status', {
+
+      // 1) localStorage cache (если свежий — не дергаем сеть)
+      const cached = lsGetJSON(SUB_CACHE_KEY)
+      if (!force && cached && isFresh(cached.ts, STATUS_REFRESH_MS) && cached.accountId === accountId) {
+        const j = cached.data || {}
+        if (j?.isVip) {
+          setUsed(0); setUsedSec(0)
+          setLimit(Number.POSITIVE_INFINITY)
+          setVipUntil(j.untilISO || null)
+        } else {
+          setVipUntil(null)
+          setLimit(QUOTA_LIMIT)
+        }
+        return
+      }      
+       const r = await fetch(SUB_API, {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ accountId })
       })
       const j = await r.json().catch(()=> ({}))
+
+      // 2) сохраняем кэш на минуту
+      lsSetJSON(SUB_CACHE_KEY, { ts: Date.now(), accountId, data: j })
+      
       if (j?.isVip) {
         setUsed(0); setUsedSec(0)
         setLimit(Number.POSITIVE_INFINITY)
@@ -1494,12 +1561,46 @@ function AIQuotaGate({ children, onOpenUnlimit }) {
   }).current
 
   // первичная проверка VIP
-  useEffect(() => { refreshVip() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    // немедленно при входе: subscription + quota
+    refreshVip({ force: true })
+    quotaGet().then((u) => setUsed(u)).catch(()=>{})
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  // flush квоты: 1 раз в минуту + при уходе/скрытии вкладки
+  useEffect(() => {
+    if (!Number.isFinite(limit)) return
+    const id = setInterval(() => {
+      if (document.visibilityState !== 'visible') return
+      flushQuota()
+    }, STATUS_REFRESH_MS)
+
+    const onHide = () => { flushQuota() }
+    window.addEventListener('pagehide', onHide)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') onHide()
+    })
+
+    return () => {
+      clearInterval(id)
+      window.removeEventListener('pagehide', onHide)
+    }
+  }, [limit, flushQuota])
+  // строгий refresh 1 раз в минуту (subscription + quota)
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (document.visibilityState !== 'visible') return
+      refreshVip({ force: true })
+      if (Number.isFinite(limit)) {
+        quotaGet().then((u) => setUsed(u)).catch(()=>{})
+      }
+    }, STATUS_REFRESH_MS)
+    return () => clearInterval(id)
+  }, [limit, refreshVip])
 
   // авто-обновление на клики/фокус/видимость
   useEffect(() => {
     const onRefresh = async () => {
-      await refreshVip()
+      await refreshVip({ force: false })
       if (Number.isFinite(limit)) {
         const srvUsed = await quotaGet()
         setUsed(srvUsed)
@@ -1518,19 +1619,7 @@ function AIQuotaGate({ children, onOpenUnlimit }) {
       window.removeEventListener('auth:ok', onRefresh)
     }
   }, [limit, refreshVip])
-
-  // + мягкий фоновой опрос первые 3 минуты (на случай оплаты в соседней вкладке)
-  useEffect(() => {
-    const started = Date.now()
-    let timer = setTimeout(function tick(){
-      if (Date.now() - started > 3*60*1000) return
-      refreshVip()
-      if (Number.isFinite(limit)) quotaGet().then((u)=> setUsed(u))
-      timer = setTimeout(tick, 7000)
-    }, 7000)
-    return () => clearTimeout(timer)
-  }, [limit, refreshVip])
-
+ 
   // формат
   const fmtDate = (iso) => {
     try {

@@ -5116,7 +5116,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   z-index: 4000;
   transition: transform .12s ease, filter .14s ease, box-shadow .18s ease;
 }
-.fabCompose svg{ width: 28px; height: 28px; display:block; }
+.fabCompose svg{ width: 28px; height: 28px; display:block; fill: currentColor; }
 
 /* прячем FAB, когда композер активен */
 .composer[data-active="true"] ~ .fabCompose{

@@ -251,9 +251,10 @@ const fetchState = useCallback(
       if (!j || !j.ok) {
         throw new Error(j?.error || 'BattleCoin state error')
       }
-setAuth(!!j.auth)
-// VIP теперь приходит с бэка вместе со стейтом
-setIsVip(!!j.isVip)
+      setAuth(!!j.auth)
+      if (scope === 'full') setAuth(!!j.auth)
+      // VIP: обновляем ТОЛЬКО на full, чтобы light-поллинг не моргал
+      if (scope === 'full') setIsVip(!!j.isVip)
 
       // баланс обновляем и на full, и на light
       if (typeof j.balance !== 'undefined') {
@@ -298,7 +299,30 @@ setIsVip(!!j.isVip)
   useEffect(() => {
     fetchState('full')
   }, [fetchState])
+ // ✅ ВАЖНО: после авторизации сразу подгружаем FULL (история, баланс, ордера)
+ useEffect(() => {
+   const onAuthOk = () => {
+     // auth появился → нужен полный state, иначе история не загрузится никогда
+     fetchState('full')
+   }
+   const onLogout = () => {
+     setAuth(false)
+     setIsVip(false)
+     setBalance(null)
+     setOrders([])        // можно оставить историю пустой для гостя
+     setActiveOrder(null)
+   }
 
+   try {
+     window.addEventListener('auth:ok', onAuthOk)
+     window.addEventListener('auth:logout', onLogout)
+   } catch {}
+
+   return () => {
+     try { window.removeEventListener('auth:ok', onAuthOk) } catch {}
+     try { window.removeEventListener('auth:logout', onLogout) } catch {}
+   }
+ }, [fetchState])
   // --- lightweight polling for prices/PnL ---
   useEffect(() => {
     const id = setInterval(() => {
@@ -987,13 +1011,7 @@ const filteredOrders = useMemo(() => {
                   >
                     {formatTimer(timeLeftSec)}
                   </div>
-                  <button
-                    type="button"
-                    className="timer-settle-btn"
-                    onClick={handleSettle}
-                  >
-{tf(t, 'battlecoin_settle_now', 'Settle now')}
-                  </button>
+
                 </div>
               </div>
             )}

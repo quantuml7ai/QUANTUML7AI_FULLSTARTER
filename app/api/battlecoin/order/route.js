@@ -7,7 +7,64 @@ const qcoinKey   = (uid) => `qcoin:${uid}`
 const orderKey   = (uid) => `battlecoin:order:${uid}`
 const historyKey = (uid) => `battlecoin:history:${uid}`
 const orderIdKey = (uid) => `battlecoin:orderId:${uid}`
+// ---------------- VIP cache (robust) ----------------
+const vipKey = (uid) => `battlecoin:vip:${uid}`
+const vipLockKey = (uid) => `battlecoin:viplock:${uid}`
+const VIP_TTL_SEC = 60
+const VIP_LOCK_TTL_SEC = 5
 
+async function redisSetTTL(key, value, ttlSec) {
+  try { return await redis.set(key, value, { ex: ttlSec }) } catch {}
+  try { return await redis.set(key, value, 'EX', ttlSec) } catch {}
+  try { if (typeof redis.setex === 'function') return await redis.setex(key, ttlSec, value) } catch {}
+}
+
+async function readVipCached(uid) {
+  if (!uid) return null
+  try {
+    const v = await redis.get(vipKey(uid))
+    if (v === '1') return true
+    if (v === '0') return false
+    return null
+  } catch { return null }
+}
+
+async function writeVipCached(uid, isVip) {
+  if (!uid) return
+  await redisSetTTL(vipKey(uid), isVip ? '1' : '0', VIP_TTL_SEC)
+}
+
+async function tryAcquireVipLock(uid) {
+  if (!uid) return false
+  try { return !!(await redis.set(vipLockKey(uid), '1', { nx: true, ex: VIP_LOCK_TTL_SEC })) } catch {}
+  try { const r = await redis.set(vipLockKey(uid), '1', 'NX', 'EX', VIP_LOCK_TTL_SEC); return r === 'OK' } catch { return false }
+}
+
+async function resolveVipOncePerMinute(req, uid, headerVip) {
+  if (headerVip) return true
+  const cached = await readVipCached(uid)
+  if (cached !== null) return cached
+
+  const locked = await tryAcquireVipLock(uid)
+  if (!locked) return false
+
+  let isVip = false
+  try {
+    const url = new URL(req.url)
+    const origin = url.origin
+    const res = await fetch(`${origin}/api/subscription/status`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ accountId: uid }),
+      cache: 'no-store',
+    })
+    const j = await res.json().catch(() => null)
+    isVip = !!(j && j.ok && j.isVip)
+  } catch { isVip = false }
+
+  await writeVipCached(uid, isVip)
+  return isVip
+}
 async function getUid(req, body = {}) {
   // сначала явные хедеры от фронта
   const h1 = (req.headers.get('x-forum-user-id') || '').trim()
@@ -103,24 +160,8 @@ export async function POST(req) {
 
     // VIP-флаг: сперва из заголовка (если его кто-то проставил),
     // затем — тот же /api/subscription/status, что использует Exchange / AI Box
-    let isVip = req.headers.get('x-forum-vip') === '1'
-    if (!isVip) {
-      try {
-        const url = new URL(req.url)
-        const origin = url.origin
-        const res = await fetch(`${origin}/api/subscription/status`, {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ accountId: uid }),
-        })
-        const j = await res.json().catch(() => null)
-        if (j && j.ok && j.isVip) {
-          isVip = true
-        }
-      } catch {
-        // если упало — просто считаем, что не VIP
-      }
-    }
+    const headerVip = req.headers.get('x-forum-vip') === '1'
+    const isVip = await resolveVipOncePerMinute(req, uid, headerVip)
 
     const maxLev = isVip ? 100 : 5
 

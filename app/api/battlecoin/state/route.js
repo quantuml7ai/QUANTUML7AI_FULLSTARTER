@@ -6,6 +6,97 @@ import { redis, safeParse } from '../../forum/_db.js'
 const qcoinKey   = (uid) => `qcoin:${uid}`
 const orderKey   = (uid) => `battlecoin:order:${uid}`
 const historyKey = (uid) => `battlecoin:history:${uid}`
+// ---------------- VIP cache (robust) ----------------
+const vipKey = (uid) => `battlecoin:vip:${uid}`
+const vipLockKey = (uid) => `battlecoin:viplock:${uid}`
+const VIP_TTL_SEC = 60
+const VIP_LOCK_TTL_SEC = 5
+
+async function redisSetTTL(key, value, ttlSec) {
+  // поддержка разных клиентов: upstash / ioredis / node-redis
+  try {
+    // upstash: set(key, val, { ex })
+    return await redis.set(key, value, { ex: ttlSec })
+  } catch {}
+  try {
+    // ioredis: set(key, val, 'EX', ttl)
+    return await redis.set(key, value, 'EX', ttlSec)
+  } catch {}
+  try {
+    // node-redis / ioredis: setex(key, ttl, val)    
+    if (typeof redis.setex === 'function') {
+      return await redis.setex(key, ttlSec, value)
+    }
+  } catch {}
+  // если ничего не вышло — молча
+}
+
+async function readVipCached(uid) {
+  if (!uid) return null
+  try {
+    const v = await redis.get(vipKey(uid))
+    if (v === '1') return true
+    if (v === '0') return false
+    return null
+  } catch {
+    return null
+  }
+}
+
+async function writeVipCached(uid, isVip) {
+  if (!uid) return
+  await redisSetTTL(vipKey(uid), isVip ? '1' : '0', VIP_TTL_SEC)
+}
+
+async function tryAcquireVipLock(uid) {
+  if (!uid) return false
+  try {
+    // upstash: set(key, val, { nx: true, ex })
+    return !!(await redis.set(vipLockKey(uid), '1', { nx: true, ex: VIP_LOCK_TTL_SEC }))
+  } catch {}
+  try {
+    // ioredis: set(key, val, 'NX', 'EX', ttl)
+    const r = await redis.set(vipLockKey(uid), '1', 'NX', 'EX', VIP_LOCK_TTL_SEC)
+    return r === 'OK'
+  } catch {
+    return false
+  }
+}
+
+async function resolveVipOncePerMinute(url, uid, headerVip) {
+  // 1) если слой выше прокинул — доверяем
+  if (headerVip) return true
+  if (!uid) return false
+
+  // 2) кэш
+  const cached = await readVipCached(uid)
+  if (cached !== null) return cached
+
+  // 3) защита от stampede: только один запрос в status, остальные ждут кэш
+  const locked = await tryAcquireVipLock(uid)
+  if (!locked) {
+    // кто-то другой уже обновляет — вернём false/или прошлое, но не идём в сеть
+    return false
+  }
+
+  // 4) сеть (1 раз), потом кэшируем
+  let isVip = false
+  try {
+    const origin = url.origin
+    const res = await fetch(`${origin}/api/subscription/status`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ accountId: uid }),
+      cache: 'no-store',
+    })
+    const j = await res.json().catch(() => null)
+    isVip = !!(j && j.ok && j.isVip)
+  } catch {
+    isVip = false
+  }
+  await writeVipCached(uid, isVip)
+  return isVip
+}
 async function saveActiveOrder(uid, order) {
   if (!order) {
     try {
@@ -257,25 +348,15 @@ export async function GET(req) {
     const uid = await getUid(req)
 
     // VIP-флаг из заголовка (если прокинули с другого слоя)
-    let isVip = req.headers.get('x-forum-vip') === '1'
+    const headerVip = req.headers.get('x-forum-vip') === '1'
+    let isVip = false
 
-    // если заголовка нет — просим тот же /api/subscription/status,
-    // который использует Exchange / AI box
-    if (uid && !isVip) {
-      try {
-        const origin = url.origin
-        const res = await fetch(`${origin}/api/subscription/status`, {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ accountId: uid }),
-        })
-        const j = await res.json().catch(() => null)
-        if (j && j.ok && j.isVip) {
-          isVip = true
-        }
-      } catch {
-        // если упало – просто считаем, что не VIP, UI от этого не развалится
-      }
+    // ВАЖНО: scope=light не должен каждый раз вызывать status.
+    // Мы всё равно можем обновлять VIP, но только через resolveVipOncePerMinute (кэш 60с).
+    if (uid) {
+      isVip = await resolveVipOncePerMinute(url, uid, headerVip)
+    } else {
+      isVip = false
     }
 
     // гость: отдаём монеты, но без баланса/ордера
