@@ -1,5 +1,5 @@
 import { K, redis, getMessage, normalizeMessage, addAliasesFor, expandAliasIds } from '../_db.js'
-import { bad, ok, requireUserIdCanonical, canonicalizeUserId, parseIntSafe, getUserIdFromReq, normalizeRawUserId } from '../_utils.js'
+import { bad, ok, requireUserIdCanonical, canonicalizeUserId, parseIntSafe, getUserIdFromReq, normalizeRawUserId, normalizeZrangeWithScores } from '../_utils.js'
 
 function parseCursor(raw) {
   if (!raw) return null
@@ -33,11 +33,12 @@ export async function GET(req) {
     }
     const perKey = Math.max(limit * 2, 20)
     const keyList = Array.from(threadKeys)
-    const ranges = await Promise.all(
+    const rangesRaw = await Promise.all(
       keyList.map((k) =>
         redis.zrange(k, start, stop, { byScore: true, rev: true, withScores: true, limit: { offset: 0, count: perKey } })
       )
     )
+    const ranges = rangesRaw.map(normalizeZrangeWithScores)
     const scoreById = new Map()
     for (const list of ranges) {
       for (const it of (list || [])) {
@@ -69,6 +70,7 @@ export async function GET(req) {
       const msgRaw = await getMessage(it.id)
       const msg = normalizeMessage(msgRaw)
       if (!msg?.id) continue
+      const msgScore = Number(it?.score || msg?.ts || 0)
       const fromCanonical = await toCanon(msg.from)
       const toCanonical = await toCanon(msg.to)
       let deliveredTs = 0
@@ -82,7 +84,14 @@ export async function GET(req) {
         }
       } catch {}
       items.push({ ...msg, deliveredTs, fromCanonical, toCanonical })
-      lastCursor = `${msg.ts || it.score || 0}|${msg.id || it.id}`
+      lastCursor = `${msgScore || 0}|${msg.id || it.id}`
+    }
+
+    // гарантируем порядок (новые -> старые), даже если zrange вернул плоский формат
+    items.sort((a, b) => Number(b?.ts || 0) - Number(a?.ts || 0))
+    if (items.length) {
+      const last = items[items.length - 1]
+      lastCursor = `${Number(last?.ts || 0)}|${String(last?.id || '')}`
     }
 
     const seenKeys = []

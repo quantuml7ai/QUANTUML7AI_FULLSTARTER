@@ -17,6 +17,48 @@ export function safeParse(raw, fallback = null) {
   try { return JSON.parse(String(raw)) } catch { return fallback }
 }
 
+// Normalize zrange(withScores) output across client versions:
+// - [{ member, score }]
+// - [[member, score]]
+// - [member, score, member, score]
+export function normalizeZrangeWithScores(raw) {
+  const list = Array.isArray(raw) ? raw : []
+  const out = []
+  const push = (member, score) => {
+    const m = String(member ?? '').trim()
+    if (!m) return
+    const s = Number(score ?? 0)
+    out.push({ member: m, score: Number.isFinite(s) ? s : 0 })
+  }
+  if (!list.length) return out
+
+  if (list[0] && typeof list[0] === 'object' && !Array.isArray(list[0])) {
+    for (const it of list) {
+      if (!it) continue
+      if (Array.isArray(it)) { push(it[0], it[1]); continue }
+      if (typeof it === 'object' && ('member' in it || 'score' in it)) {
+        push(it.member, it.score)
+        continue
+      }
+      push(it, 0)
+    }
+    return out
+  }
+
+  if (Array.isArray(list[0])) {
+    for (const it of list) if (Array.isArray(it)) push(it[0], it[1])
+    return out
+  }
+
+  if (list.length % 2 === 0) {
+    for (let i = 0; i < list.length; i += 2) push(list[i], list[i + 1])
+    return out
+  }
+
+  for (const it of list) push(it, 0)
+  return out
+}
+
 export function json(data, status = 200, extraHeaders = {}) {
   const headers = { 'content-type': 'application/json; charset=utf-8', ...extraHeaders }
   return new Response(JSON.stringify(data), { status, headers })

@@ -117,7 +117,7 @@ const DM_AUDIO_HINT_RE = /(?:\/uploads\/audio\/|\/forum\/voice[-/]|\/voice[-/])/
 const DM_VIDEO_HINT_RE = /(?:\/forum\/video[-/]|\/video[-/])/i;
 const DM_VIDEO_HOST_RE = /vercel[-]?storage|vercel[-]?blob|\/uploads\/video|\/forum\/video|\/api\/forum\/uploadVideo/i;
 const DM_STICKER_PATH_RE = /\/(?:vip-emoji|vip\/emoji|emoji|stickers|assets\/emoji|mozi|quest)\//i;
-const DM_STICKER_TAG_RE = /\[(VIP_EMOJI|MOZI|STICKER):([^\]]+)\]/g;
+const DM_STICKER_TAG_RE = /\[(VIP_EMOJI|MOZI|STICKER):([^\]]+)\]/gi;
 const DM_URL_RE = /(https?:\/\/[^\s<>'")]+|\/[^\s<>'")]+)/ig;
 
 const normalizeDmUrl = (u) => String(u || '').trim();
@@ -166,9 +166,15 @@ const isDmImageUrl = (u) => {
 
 const getDmMediaKind = (url, typeHint = '') => {
   const t = String(typeHint || '').toLowerCase();
-  if (t === 'video' || t.startsWith('video/')) return 'video';
-  if (t === 'audio' || t.startsWith('audio/')) return 'audio';
-  if (t === 'image' || t.startsWith('image/')) return 'image';
+  if (t) {
+    if (t === 'video' || t.startsWith('video/')) return 'video';
+    if (t === 'image' || t.startsWith('image/')) return 'image';
+    if (t === 'audio' || t.startsWith('audio/')) {
+      // аудио-метка иногда приходит на webm-видео — если URL похож на видео, показываем как видео
+      if (isDmVideoUrl(url)) return 'video';
+      return 'audio';
+    }
+  }
   if (isDmVideoUrl(url)) return 'video';
   if (isDmAudioUrl(url)) return 'audio';
   if (isDmImageUrl(url)) return 'image';
@@ -12078,7 +12084,7 @@ const TOPIC_PAGE_SIZE = 10;
 const REPLIES_PAGE_SIZE = 5;
 const THREAD_PAGE_SIZE = 5;
 const DM_PAGE_SIZE = 5;
-const DM_ACTIVE_THROTTLE_MS = 10000;
+const DM_ACTIVE_THROTTLE_MS = 30000;
 const DM_BG_THROTTLE_MS = 60000;
 const PUBLISHED_PAGE_SIZE = 5;
 const [visibleVideoCount, setVisibleVideoCount] = useState(VIDEO_PAGE_SIZE);
@@ -12500,7 +12506,7 @@ useEffect(() => {
     try {
       if (dmWithUserId) loadDmThread(dmWithUserId, null, { force: true, refresh: true });
     } catch {}
-  }, 10000);
+  }, 30000);
   return () => { try { clearInterval(t); } catch {} };
 }, [inboxOpen, inboxTab, dmWithUserId, loadDmDialogs, loadDmThread]);
 
@@ -14085,11 +14091,14 @@ const createPost = async () => {
       const j = await resp.json().catch(() => null);
       if (!resp.ok || !j?.ok) {
         const blockedByReceiver = j?.error === 'blocked_by_receiver';
-        const errKey = blockedByReceiver ? 'dm_blocked_by_receiver' : 'dm_blocked';
+        const blockedByMe = j?.error === 'blocked' || j?.error === 'dm_blocked' || j?.error === 'blocked_by_you';
+        const errKey = blockedByReceiver
+          ? 'dm_blocked_by_receiver'
+          : (blockedByMe ? 'dm_blocked' : 'dm_send_failed');
         if (blockedByReceiver) {
           setDmBlockedByReceiverMap(prev => ({ ...(prev || {}), [String(dmTarget)]: 1 }));
         }
-        try { toast?.warn?.(t(errKey) || 'Blocked'); } catch {}
+        try { toast?.warn?.(t(errKey) || 'Failed'); } catch {}
       } else {
         const realId = String(j?.id || tmpId);
         const realTs = Number(j?.ts || optimistic.ts);

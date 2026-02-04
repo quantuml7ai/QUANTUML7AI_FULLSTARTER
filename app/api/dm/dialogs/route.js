@@ -1,5 +1,5 @@
 import { K, redis, getMessage, normalizeMessage, addAliasesFor, expandAliasIds } from '../_db.js'
-import { bad, ok, requireUserIdCanonical, parseIntSafe, getUserIdFromReq, normalizeRawUserId, canonicalizeUserId } from '../_utils.js'
+import { bad, ok, requireUserIdCanonical, parseIntSafe, getUserIdFromReq, normalizeRawUserId, canonicalizeUserId, normalizeZrangeWithScores } from '../_utils.js'
 
 function parseCursor(raw) {
   if (!raw) return null
@@ -33,7 +33,8 @@ export async function GET(req) {
         redis.zrange(K.outboxZ(id), start, stop, { byScore: true, rev: true, withScores: true, limit: { offset: 0, count: maxFetch } })
       )
     }
-    const ranges = await Promise.all(rangePromises)
+    const rangesRaw = await Promise.all(rangePromises)
+    const ranges = rangesRaw.map(normalizeZrangeWithScores)
 
     const scoreById = new Map()
     for (const list of ranges) {
@@ -49,7 +50,8 @@ export async function GET(req) {
     merge.sort((a, b) => (b.score || 0) - (a.score || 0))
 
     const dialogsMap = new Map()
-    let lastCursor = null
+    let lastCursorScore = null
+    let lastCursorId = ''
     const myIds = new Set(Array.from(uidSet).map(String))
     const canonCache = new Map()
     const toCanon = async (val) => {
@@ -61,10 +63,14 @@ export async function GET(req) {
       return out
     }
     for (const it of merge) {
-      if (dialogsMap.size >= limit) break
       const msgRaw = await getMessage(it.id)
       const msg = normalizeMessage(msgRaw)
       if (!msg?.id) continue
+      const msgScore = Number(it?.score || msg?.ts || 0)
+      if (lastCursorScore == null || msgScore < lastCursorScore) {
+        lastCursorScore = msgScore
+        lastCursorId = String(msg.id || it.id || '')
+      }
       const fromCanonical = await toCanon(msg.from)
       const toCanonical = await toCanon(msg.to)
       const msgOut = { ...msg, fromCanonical, toCanonical }
@@ -81,14 +87,19 @@ export async function GET(req) {
       const otherCanonical = await toCanon(otherRaw)
       const otherId = otherCanonical || otherRaw
       if (!otherId) continue
-      if (!dialogsMap.has(otherId)) {
+      const prev = dialogsMap.get(otherId)
+      const prevTs = Number(prev?.lastMessage?.ts || 0)
+      const nextTs = Number(msg?.ts || msgScore || 0)
+      if (!prev || nextTs >= prevTs) {
         dialogsMap.set(otherId, { userId: otherId, lastMessage: msgOut })
       }
-      lastCursor = `${msg.ts || it.score}|${msg.id || it.id}`
     }
 
-    const items = Array.from(dialogsMap.values()).sort((a, b) => Number(b?.lastMessage?.ts || 0) - Number(a?.lastMessage?.ts || 0))
-    const hasMore = !!(merge && merge.length >= maxFetch)
+    const sorted = Array.from(dialogsMap.values())
+      .sort((a, b) => Number(b?.lastMessage?.ts || 0) - Number(a?.lastMessage?.ts || 0))
+    const items = sorted.slice(0, limit)
+    const hasMore = sorted.length > limit || (merge && merge.length >= maxFetch) || ranges.some((list) => list.length >= maxFetch)
+    const lastCursor = lastCursorId ? `${lastCursorScore || 0}|${lastCursorId}` : null
 
     return ok({ items, nextCursor: lastCursor, hasMore })
   } catch (e) {
