@@ -785,13 +785,13 @@ const lastMediaIndexByKey = new Map();
  * Превью тянет карточку на всю доступную высоту.
  */
 
-export function AdCard({ url, slotKind, nearId }) {
+export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   const conf = getForumAdConf();
   useAdPreconnect(conf);
   const i18n = useI18n();
   const t = i18n?.t;
   const router = useRouter();
-
+ const isFluid = layout === 'fluid';
   const [media, setMedia] = useState({ kind: 'skeleton', src: null });
   const [muted, setMuted] = useState(true);
 
@@ -1457,16 +1457,18 @@ export function AdCard({ url, slotKind, nearId }) {
 >
 <style jsx>{`
   .forum-ad-media-slot {
-    width: 100%;
-    height: var(--ad-slot-h-m);
+    width: 100%; 
     position: relative;         /* ключ: якорь для absolute медиа */
     overflow: hidden;
     border-radius: 0.5rem;
     background: var(--bg-soft, #020817);
   }
-
+  /* ===== FIXED (как в форуме сейчас) ===== */
+  .forum-ad-media-slot[data-layout="fixed"] {
+    height: var(--ad-slot-h-m);
+  }
   @media (min-width: 640px) {
-    .forum-ad-media-slot {
+.forum-ad-media-slot[data-layout="fixed"] {
       height: var(--ad-slot-h-t);
     }
   }
@@ -1477,22 +1479,41 @@ export function AdCard({ url, slotKind, nearId }) {
     }
   }
 
-  /* Универсальный слой под любое медиа */
-  .forum-ad-media-fill {
+  /* ===== FLUID (для рендера по всему сайту) ===== */
+  .forum-ad-media-slot[data-layout="fluid"] {
+    height: auto;
+    overflow: visible;
+  }
+
+  /* fixed: слой медиа растягиваем на весь слот */
+  .forum-ad-media-slot[data-layout="fixed"] .forum-ad-media-fill {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
   }
 
-  /* Вписать полностью (9:16, 16:9 и любое) по центру */
-  .forum-ad-fit {
+.forum-ad-media-slot[data-layout="fixed"] .forum-ad-fit {
     width: 100%;
     height: 100%;
     object-fit: contain;
     object-position: center;
     display: block;
   }
+
+  /* fluid: слой медиа не absolute — иначе высота не считается */
+  .forum-ad-media-slot[data-layout="fluid"] .forum-ad-media-fill {
+    position: static;
+    width: 100%;
+    height: auto;
+  }
+
+  .forum-ad-media-slot[data-layout="fluid"] .forum-ad-fit {
+    width: 100%;
+    height: auto;
+   object-fit: contain;
+    display: block;
+  }    
 `}</style>
 
 
@@ -1549,6 +1570,7 @@ export function AdCard({ url, slotKind, nearId }) {
           {/* media: заполняет карточку */}
 <div
   className="relative mt-0.5 border border-[color:var(--border,#27272a)] forum-ad-media-slot"
+data-layout={isFluid ? 'fluid' : 'fixed'}
 >
           
  {media.kind === 'skeleton' && (
@@ -1572,7 +1594,10 @@ export function AdCard({ url, slotKind, nearId }) {
 
 
             {media.kind === 'youtube' && media.src && (
-<div className="w-full h-full relative overflow-hidden rounded-lg">
+<div
+  className="relative overflow-hidden rounded-lg"
+  style={isFluid ? { width: '100%', aspectRatio: '16 / 9' } : { width: '100%', height: '100%' }}
+>
   <iframe
     ref={ytIframeRef}
     src={`https://www.youtube.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}
@@ -1594,7 +1619,10 @@ export function AdCard({ url, slotKind, nearId }) {
             )}
 
             {media.kind === 'tiktok' && media.src && shouldPlay && (
-<div className="w-full h-full relative overflow-hidden rounded-lg">
+<div
+  className="relative overflow-hidden rounded-lg"
+  style={isFluid ? { width: '100%', aspectRatio: '9 / 16' } : { width: '100%', height: '100%' }}
+>
   <iframe
     src={`https://www.tiktok.com/embed/v2/${media.src}`}
     title="TikTok video"
@@ -1622,14 +1650,24 @@ export function AdCard({ url, slotKind, nearId }) {
 
 {media.kind === 'image' && media.src && (
   <div className="forum-ad-media-fill">
-    <NextImage
-      src={media.src}
-      alt={host}
-      fill
-      className="forum-ad-fit transition-opacity duration-200"
-      style={{ objectFit: 'contain', objectPosition: 'center' }}
-      unoptimized
-    />
+    {isFluid ? (
+      <img
+        src={media.src}
+        alt={host}
+        className="forum-ad-fit"
+        loading="lazy"
+        decoding="async"
+      />
+    ) : (
+      <NextImage
+        src={media.src}
+        alt={host}
+        fill
+        className="forum-ad-fit transition-opacity duration-200"
+        style={{ objectFit: 'contain', objectPosition: 'center' }}
+        unoptimized
+      />
+    )}
   </div>
 )}
 

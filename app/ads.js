@@ -165,6 +165,7 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
           url={url}
           slotKind={effectiveSlotKind}
           nearId={internalSlotKey}
+           layout="fluid"
         />
       </section>
 

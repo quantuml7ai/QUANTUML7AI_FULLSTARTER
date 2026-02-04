@@ -108,6 +108,108 @@ const safeHtml = s => String(s || '')
   .replace(/(https?:\/\/[^\s<]+)(?=\s|$)/g,'<a target="_blank" rel="noreferrer noopener nofollow ugc" href="$1">$1</a>')
   .replace(/\n/g,'<br/>')
 const rich = s => safeHtml(s).replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\*(.*?)\*/g,'<i>$1</i>')
+// --- DM media detectors (shared in Inbox thread) ---
+const DM_IMG_RE = /\.(?:webp|png|jpe?g|gif)(?:$|[?#])/i;
+const DM_VIDEO_RE = /\.(?:mp4|webm|mov|m4v|ogv)(?:$|[?#])/i;
+// audio: exclude webm by default (webm can be video); add webm only for audio-specific paths
+const DM_AUDIO_RE = /\.(?:ogg|mp3|m4a|wav|webm)(?:$|[?#])/i;
+const DM_AUDIO_HINT_RE = /(?:\/uploads\/audio\/|\/forum\/voice[-/]|\/voice[-/])/i;
+const DM_VIDEO_HINT_RE = /(?:\/forum\/video[-/]|\/video[-/])/i;
+const DM_VIDEO_HOST_RE = /vercel[-]?storage|vercel[-]?blob|\/uploads\/video|\/forum\/video|\/api\/forum\/uploadVideo/i;
+const DM_STICKER_PATH_RE = /\/(?:vip-emoji|vip\/emoji|emoji|stickers|assets\/emoji|mozi|quest)\//i;
+const DM_STICKER_TAG_RE = /\[(VIP_EMOJI|MOZI|STICKER):([^\]]+)\]/g;
+const DM_URL_RE = /(https?:\/\/[^\s<>'")]+|\/[^\s<>'")]+)/ig;
+
+const normalizeDmUrl = (u) => String(u || '').trim();
+
+const inferDmStickerKind = (url, fallback = 'sticker') => {
+  const s = String(url || '').toLowerCase();
+  if (s.includes('/mozi/')) return 'mozi';
+  if (/\/vip(\/|-)emoji\//i.test(s)) return 'vip';
+  return fallback || 'sticker';
+};
+
+const isDmStickerUrl = (u) => {
+  const s = normalizeDmUrl(u);
+  if (!s) return false;
+  return DM_STICKER_PATH_RE.test(s) && DM_IMG_RE.test(s);
+};
+
+const isDmVideoUrl = (u) => {
+  const s = normalizeDmUrl(u);
+  if (!s) return false;
+  if (typeof isVideoUrl === 'function' && isVideoUrl(s)) return true;
+  if (DM_AUDIO_HINT_RE.test(s)) return false;
+  if (DM_VIDEO_HINT_RE.test(s)) return true;
+  if (DM_VIDEO_RE.test(s)) return true;
+  if (/[?&]filename=.*\.(mp4|webm|mov|m4v|ogv)(?:$|[&#])/i.test(s)) return true;
+  if (DM_VIDEO_HOST_RE.test(s)) return true;
+  return false;
+};
+
+const isDmAudioUrl = (u) => {
+  const s = normalizeDmUrl(u);
+  if (!s) return false;
+  if (typeof isAudioUrl === 'function' && isAudioUrl(s)) return true;
+  if (DM_AUDIO_RE.test(s)) return true;
+  if (DM_AUDIO_HINT_RE.test(s)) return true;
+  if (/[?&]filename=.*\.(webm|ogg|mp3|m4a|wav)(?:$|[&#])/i.test(s)) return true;
+  return false;
+};
+
+const isDmImageUrl = (u) => {
+  const s = normalizeDmUrl(u);
+  if (!s) return false;
+  if (typeof isImageUrl === 'function' && isImageUrl(s)) return true;
+  return DM_IMG_RE.test(s);
+};
+
+const getDmMediaKind = (url, typeHint = '') => {
+  const t = String(typeHint || '').toLowerCase();
+  if (t === 'video' || t.startsWith('video/')) return 'video';
+  if (t === 'audio' || t.startsWith('audio/')) return 'audio';
+  if (t === 'image' || t.startsWith('image/')) return 'image';
+  if (isDmVideoUrl(url)) return 'video';
+  if (isDmAudioUrl(url)) return 'audio';
+  if (isDmImageUrl(url)) return 'image';
+  return 'other';
+};
+
+const extractDmStickersFromText = (rawText) => {
+  const stickers = [];
+  let text = String(rawText || '');
+  if (!text) return { text: '', stickers: [] };
+
+  text = text.replace(DM_STICKER_TAG_RE, (_m, kind, url) => {
+    const u = normalizeDmUrl(url);
+    if (u) {
+      const k = String(kind || '').toUpperCase();
+      const stickerKind = k === 'MOZI' ? 'mozi' : (k === 'VIP_EMOJI' ? 'vip' : 'sticker');
+      stickers.push({ url: u, kind: stickerKind });
+    }
+    return '';
+  });
+
+  text = text.replace(DM_URL_RE, (u) => {
+    const url = normalizeDmUrl(u);
+    if (isDmStickerUrl(url)) {
+      stickers.push({ url, kind: inferDmStickerKind(url) });
+      return '';
+    }
+    return u;
+  });
+
+  text = text.replace(/\s{2,}/g, ' ').trim();
+
+  const uniq = [];
+  const seen = new Set();
+  for (const s of stickers) {
+    if (!s?.url || seen.has(s.url)) continue;
+    seen.add(s.url);
+    uniq.push(s);
+  }
+  return { text, stickers: uniq };
+};
 // детектор любых ссылок/адресов (URL/email/markdown/localhost/IP/укороченные)
 const hasAnyLink = (s) => {
   const str = String(s || '');
@@ -1756,8 +1858,12 @@ font-size: 12px;
   backdrop-filter: blur(10px);
   box-shadow: 0 0 22px rgb(80, 205, 255), inset 0 0 16px rgba(80, 167, 255, .14);
   cursor:pointer;
+  transition: top .18s ease, transform .12s ease;
 }
 .headPeekBtn:active{ transform: translateX(-50%) scale(.97); }
+html[data-inbox-open="1"] .headPeekBtn{
+  top: calc(110px + env(safe-area-inset-top, 0px));
+}
 .headCollapseBtn{
   position: absolute;
   left: 50%;
@@ -2653,6 +2759,34 @@ font-size: 12px;
       justify-content:space-between;
       gap:10px;
       margin-bottom:8px;
+    }
+    .userInfoDmBtn{
+      width:46px; height:46px;
+      border-radius:999px;
+      display:inline-flex; align-items:center; justify-content:center;
+      position:relative;
+      border:1px solid rgba(140,190,255,.45);
+      background:linear-gradient(120deg, rgba(12,20,34,.7), rgba(60,120,255,.18));
+      color:#eaf4ff;
+      box-shadow:0 0 22px rgba(80,167,255,.35), inset 0 0 10px rgba(120,180,255,.15);
+      transition: transform .12s ease, filter .14s ease, box-shadow .18s ease;
+      animation: dmBeacon 2.8s ease-in-out infinite;
+    }
+    .userInfoDmBtn::before{
+      content:'';
+      position:absolute; inset:-6px;
+      border-radius:999px;
+      background:radial-gradient(circle, rgba(120,190,255,.35), transparent 65%);
+      opacity:.6;
+      pointer-events:none;
+      animation: dmBeacon 2.8s ease-in-out infinite;
+    }
+    .userInfoDmBtn svg{ width:24px; height:24px; }
+    .userInfoDmBtn:hover{ filter:brightness(1.08) saturate(1.1); }
+    .userInfoDmBtn:active{ transform:translateY(1px) scale(.98); }
+    @keyframes dmBeacon{
+      0%,100%{ transform:scale(1); filter:brightness(1); opacity:.9; }
+      50%{ transform:scale(1.04); filter:brightness(1.15); opacity:1; }
     }
     .userInfoTranslateToggle{
       border:1px solid rgba(140,170,255,.35);
@@ -4256,8 +4390,8 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 .iconBtn.inboxBtn:hover{ filter:brightness(1.08) saturate(1.08); }
 .iconBtn.inboxBtn:active{ transform:translateY(1px) scale(.98); }
 
-/* красный бейдж непрочитанного */
-.inboxBadge{
+/* красный бейдж непрочитанного (Replies) */
+.inboxBadgeReplies{
   position:absolute; right:-2px; top:-2px;
   min-width:16px; height:16px; padding:0 4px;
   display:inline-flex; align-items:center; justify-content:center;
@@ -4266,6 +4400,17 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   border:1px solid rgba(255,255,255,.45);
   border-radius:999px;
   box-shadow:0 0 10px rgba(255,60,60,.5);
+}
+/* зелёный/оранжевый бейдж непрочитанного (DM) */
+.inboxBadgeDM{
+  position:absolute; left:-2px; top:-2px;
+  min-width:16px; height:16px; padding:0 4px;
+  display:inline-flex; align-items:center; justify-content:center;
+  font:600 10px/1 ui-monospace,monospace;
+  color:#0d1b12; background:#35d07f;
+  border:1px solid rgba(255,255,255,.55);
+  border-radius:999px;
+  box-shadow:0 0 10px rgba(53,208,127,.5);
 }
 
 /* тело «Inbox» — карточки ровно как посты */
@@ -4294,8 +4439,8 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 .iconBtn.inboxBtn:hover{ filter:brightness(1.08) saturate(1.08); }
 .iconBtn.inboxBtn:active{ transform: translateY(1px) scale(.98); }
 
-/* красный бейдж */
-.inboxBadge{
+/* красный бейдж (Replies) */
+.inboxBadgeReplies{
   position:absolute; right:-2px; top:-2px;
   min-width:16px; height:16px; padding:0 4px;
   display:inline-flex; align-items:center; justify-content:center;
@@ -4305,6 +4450,179 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   border-radius:999px;
   box-shadow:0 0 10px rgba(255,60,60,.5);
 }
+/* зелёный/оранжевый бейдж (DM) */
+.inboxBadgeDM{
+  position:absolute; left:-2px; top:-2px;
+  min-width:16px; height:16px; padding:0 4px;
+  display:inline-flex; align-items:center; justify-content:center;
+  font:600 10px/1 ui-monospace,monospace;
+  color:#0d1b12; background:#35d07f;
+  border:1px solid rgba(255,255,255,.55);
+  border-radius:999px;
+  box-shadow:0 0 10px rgba(53,208,127,.5);
+}
+
+/* ---- INBOX tabs ---- */
+.inboxHeader{
+  position:sticky; top:0; z-index:8;
+  display:flex; flex-direction:column; gap:6px;
+  padding:8px 0 6px;
+  background:
+    radial-gradient(70% 120% at 50% 0%, rgba(120,180,255,.18), rgba(10,16,28,.86) 60%),
+    linear-gradient(180deg, rgba(10,16,28,.95), rgba(10,16,28,.55));
+  backdrop-filter: blur(14px) saturate(140%);
+}
+.inboxTitleLine{
+  font-size: clamp(16px, 2.6vw, 24px);
+  font-weight:900; line-height:1.1;
+  text-align:center; letter-spacing:1.2px;
+  text-transform:none;
+  display:flex; align-items:center; justify-content:center;
+  background: linear-gradient(120deg, #f9dc8f 0%, #fff4c4 30%, #d9a34b 60%, #ffe8a8 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 16px rgba(255, 210, 120, .45);
+  animation: inboxGoldShift 6s linear infinite;
+}
+@keyframes inboxGoldShift{
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+.inboxTabs{
+  position:sticky; top:0; z-index:9;
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  white-space:nowrap; flex-wrap:nowrap;
+  padding:6px 0 4px;
+}
+.inboxTabBtn{
+  position:relative;
+  display:inline-flex; align-items:center; gap:8px;
+  border:1px solid rgba(140,190,255,.35);
+  background:linear-gradient(120deg, rgba(12,20,34,.7), rgba(60,120,255,.18));
+  color:#eaf4ff; border-radius:999px;
+  padding:6px 12px; font-weight:800;
+  font-size:clamp(11px, 2.8vw, 13px);
+  box-shadow:0 0 16px rgba(80,167,255,.14);
+  transition:transform .12s ease, filter .12s ease, box-shadow .18s ease;
+}
+.inboxTabBtn:hover{ filter:brightness(1.08) saturate(1.1); }
+.inboxTabBtn:active{ transform:translateY(1px) scale(.98); }
+.inboxTabBtn[data-active="1"]{
+  background:linear-gradient(120deg, rgba(40,120,255,.35), rgba(120,200,255,.2));
+  border-color:rgba(170,220,255,.75);
+  box-shadow:0 0 22px rgba(80,167,255,.35);
+}
+.inboxTabLabel{ display:inline-flex; align-items:center; }
+.inboxTabBadge{
+  min-width:18px; height:18px; padding:0 6px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:999px; font-size:10px; font-weight:900;
+  letter-spacing:.2px;
+  border:1px solid rgba(255,255,255,.55);
+  box-shadow:0 0 10px rgba(0,0,0,.25);
+}
+.inboxTabBadge[data-kind="replies"]{ background:#ff4d4d; color:#fff; box-shadow:0 0 12px rgba(255,80,80,.55); }
+.inboxTabBadge[data-kind="messages"]{ background:#35d07f; color:#0d1b12; box-shadow:0 0 12px rgba(53,208,127,.6); }
+.inboxTabBadge[data-kind="published"]{
+  background:linear-gradient(120deg, #f9dc8f, #d9a34b);
+  color:#2a1b00;
+  box-shadow:0 0 12px rgba(220,170,70,.6);
+}
+.inboxTabsRail{
+  height:1px; opacity:.28;
+  background:linear-gradient(90deg, rgba(120,180,255,.05), rgba(120,180,255,.6), rgba(120,180,255,.05));
+}
+.dmRow{
+  display:flex; gap:10px; align-items:center; text-align:left;
+  width:100%;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid rgba(140,190,255,.16);
+  background:
+    linear-gradient(140deg, rgba(12,20,34,.85), rgba(18,30,48,.65));
+  box-shadow: 0 10px 22px rgba(0,0,0,.25), inset 0 0 18px rgba(120,180,255,.08);
+  transition: transform .14s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.dmRow:hover{
+  transform: translateY(-1px);
+  border-color: rgba(160,210,255,.35);
+  box-shadow: 0 12px 28px rgba(0,0,0,.32), inset 0 0 24px rgba(120,180,255,.12);
+}
+.dmRowAvatar{
+  width:44px; height:44px; border-radius:14px;
+  padding:2px;
+  background: linear-gradient(135deg, rgba(255,215,130,.4), rgba(120,180,255,.4));
+  box-shadow:0 0 16px rgba(120,180,255,.35), inset 0 0 8px rgba(255,220,150,.35);
+}
+.dmRowAvatarImg{
+  width:100%; height:100%; border-radius:12px; overflow:hidden;
+}
+.dmRowMain{ flex:1 1 auto; min-width:0; }
+.dmRowTop{ display:flex; align-items:center; gap:8px; }
+.dmRowName{ font-weight:700; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.dmRowTime{ font-size:12px; opacity:.7; margin-left:auto; white-space:nowrap; }
+.dmRowPreview{ opacity:.8; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dmUnreadDot{ width:12px; height:12px; border-radius:999px; background:#35d07f; box-shadow:0 0 12px rgba(53,208,127,.7); flex:0 0 auto; }
+.dmThreadHeader{
+  display:flex; align-items:center; gap:10px;
+  padding:8px 10px;
+  border-radius:14px;
+  background: linear-gradient(140deg, rgba(12,20,34,.75), rgba(18,30,48,.55));
+  border:1px solid rgba(140,190,255,.2);
+  box-shadow:0 10px 22px rgba(0,0,0,.22), inset 0 0 16px rgba(120,180,255,.1);
+}
+.dmThreadAvatar{
+  width:46px; height:46px; border-radius:16px; padding:2px;
+  background: linear-gradient(135deg, rgba(255,215,130,.45), rgba(120,180,255,.45));
+  box-shadow:0 0 18px rgba(120,180,255,.4), inset 0 0 8px rgba(255,220,150,.35);
+}
+.dmThreadAvatarImg{ width:100%; height:100%; border-radius:14px; overflow:hidden; }
+.dmThreadMeta{ min-width:0; display:flex; flex-direction:column; }
+.dmThreadName{ font-weight:800; letter-spacing:.3px; }
+.dmThreadId{ font-size:12px; opacity:.7; }
+.dmThread{ display:flex; flex-direction:column; gap:8px; }
+.dmBackBtn{ margin-bottom:6px; }
+.dmMsgRow{ display:flex; }
+.dmMsgRow.me{ justify-content:flex-end; }
+.dmMsgBubble{
+  width:min(92%, 860px);
+  max-width:100%;
+  padding:10px 12px;
+  border-radius:14px;
+  background:
+    linear-gradient(160deg, rgba(16,26,42,.92), rgba(10,18,30,.85));
+  border:1px solid rgba(140,190,255,.22);
+  box-shadow: 0 10px 24px rgba(0,0,0,.28), inset 0 0 18px rgba(120,180,255,.08);
+}
+.dmMsgBubble.me{
+  background:
+    linear-gradient(160deg, rgba(40,120,255,.28), rgba(20,40,70,.9));
+  border-color:rgba(140,190,255,.45);
+  box-shadow: 0 12px 26px rgba(0,0,0,.3), inset 0 0 20px rgba(120,180,255,.18);
+}
+.dmMsgMeta{ margin-top:6px; font-size:11px; opacity:.8; white-space:nowrap; display:flex; align-items:center; gap:6px; }
+.dmStatus{ margin-left:8px; font-weight:700; letter-spacing:.02em; }
+.dmStatus.seen{ color:#7fd7ff; text-shadow:0 0 8px rgba(120,200,255,.5); }
+.dmMediaGrid{ display:grid; gap:8px; margin-top:8px; }
+.dmMediaBox{ margin:0; }
+.dmAttachLinks{ margin-top:8px; display:grid; gap:4px; }
+.dmAttachLinks a{ color:#9fd1ff; word-break:break-all; }
+.dmMsgActions{ margin-top:6px; display:flex; gap:8px; }
+.dmActionBtn{
+  border:1px solid rgba(140,190,255,.28);
+  background:linear-gradient(120deg, rgba(12,20,34,.7), rgba(60,120,255,.18));
+  color:#eaf4ff;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.02em;
+  box-shadow:0 0 14px rgba(80,167,255,.18);
+  transition:transform .12s ease, filter .12s ease, box-shadow .18s ease;
+}
+.dmActionBtn:hover{ filter:brightness(1.08) saturate(1.08); box-shadow:0 0 18px rgba(80,167,255,.28); }
+.dmActionBtn:active{ transform:translateY(1px) scale(.98); }
 /* ---- ATTACH (скрепка) — стиль как у voiceBtn ---- */
 .attachBtn{
   position:relative; display:inline-flex; align-items:center; justify-content:center;
@@ -6392,6 +6710,23 @@ function UserInfoPopover({
         <div className="text-sm font-semibold">
           {t?.('forum_user_popover_bio') || 'Bio'}
         </div>
+        <button
+          type="button"
+          className="userInfoDmBtn"
+          onClick={() => {
+            try {
+              window.dispatchEvent(new CustomEvent('inbox:open-dm', { detail: { userId: rawUserId } }));
+            } catch {}
+            onClose?.();
+          }}
+          title={t?.('inbox_tab_messages') || 'Messages'}
+          aria-label={t?.('inbox_tab_messages') || 'Messages'}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden>
+            <path d="M3 7h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.6" fill="none"/>
+            <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
         <button
           type="button"
           className="userInfoTranslateToggle"
@@ -11742,26 +12077,67 @@ const VIDEO_PAGE_SIZE = 5;
 const TOPIC_PAGE_SIZE = 10;
 const REPLIES_PAGE_SIZE = 5;
 const THREAD_PAGE_SIZE = 5;
+const DM_PAGE_SIZE = 5;
+const DM_ACTIVE_THROTTLE_MS = 10000;
+const DM_BG_THROTTLE_MS = 60000;
+const PUBLISHED_PAGE_SIZE = 5;
 const [visibleVideoCount, setVisibleVideoCount] = useState(VIDEO_PAGE_SIZE);
 const [visibleTopicsCount, setVisibleTopicsCount] = useState(TOPIC_PAGE_SIZE);
 const [visibleRepliesCount, setVisibleRepliesCount] = useState(REPLIES_PAGE_SIZE);
 const [visibleThreadPostsCount, setVisibleThreadPostsCount] = useState(THREAD_PAGE_SIZE);
+const [visiblePublishedCount, setVisiblePublishedCount] = useState(PUBLISHED_PAGE_SIZE);
 // [INBOX:STATE] — безопасно для SSR (никакого localStorage в рендере)
 const [inboxOpen, setInboxOpen] = useState(false);
+const [inboxTab, setInboxTab] = useState('replies'); // 'replies'|'messages'|'published'
+const [dmWithUserId, setDmWithUserId] = useState('');
+const dmMode = inboxOpen && inboxTab === 'messages' && !!dmWithUserId;
+const textLimit = dmMode ? 600 : 400;
+useHtmlFlag('data-inbox-open', inboxOpen ? '1' : null);
+const [dmDialogs, setDmDialogs] = useState([]);
+const [dmDialogsCursor, setDmDialogsCursor] = useState(null);
+const [dmDialogsHasMore, setDmDialogsHasMore] = useState(true);
+const [dmDialogsLoading, setDmDialogsLoading] = useState(false);
+const [dmDialogsLoaded, setDmDialogsLoaded] = useState(false);
+const [dmThreadItems, setDmThreadItems] = useState([]);
+const [dmThreadCursor, setDmThreadCursor] = useState(null);
+const [dmThreadHasMore, setDmThreadHasMore] = useState(true);
+const [dmThreadLoading, setDmThreadLoading] = useState(false);
+const [dmThreadSeenTs, setDmThreadSeenTs] = useState(0);
+const dmDialogsCacheRef = useRef(new Map());
+const dmDialogsInFlightRef = useRef(new Map());
+const dmThreadCacheRef = useRef(new Map());
+const dmThreadInFlightRef = useRef(new Map());
+const dmDialogsLastFetchRef = useRef({ active: 0, bg: 0 });
+const dmThreadLastFetchRef = useRef(new Map());
+const [dmSeenMap, setDmSeenMap] = useState({});
+const [dmBlockedMap, setDmBlockedMap] = useState({});
+const [dmBlockedByReceiverMap, setDmBlockedByReceiverMap] = useState({});
+const [dmDeletedMap, setDmDeletedMap] = useState({});
+const dmSeenSentRef = useRef({});
+const dmSeenObserverRef = useRef(null);
+const repliesSeenObserverRef = useRef(null);
+const dmDialogsLoadingRef = useRef(false);
+const dmThreadLoadingRef = useRef(false);
 const [mounted, setMounted] = useState(false);           // ← флаг «мы на клиенте»
 useEffect(()=>{ setMounted(true) }, []);
+useEffect(() => { dmDialogsLoadingRef.current = !!dmDialogsLoading; }, [dmDialogsLoading]);
+useEffect(() => { dmThreadLoadingRef.current = !!dmThreadLoading; }, [dmThreadLoading]);
 useEffect(() => {
   setVisibleTopicsCount(TOPIC_PAGE_SIZE);
 }, [topicSort, topicFilterId, starMode, starredAuthors]);
-const meId = auth?.asherId || auth?.accountId || '';
+const meId = String(resolveProfileAccountId(auth?.asherId || auth?.accountId || '') || '').trim();
 const seenKey = meId ? `forum:seenReplies:${meId}` : null;
+const seenDmKey = meId ? `seenDM:${meId}` : null;
+const dmBlockedKey = meId ? `dm:blocked:${meId}` : null;
+const dmDeletedKey = meId ? `dm:deleted:${meId}` : null;
 
 // все мои посты (id)
 const myPostIds = useMemo(() => {
   if (!meId) return new Set();
   const s = new Set();
   for (const p of (data.posts || [])) {
-    if (String(p.userId || p.accountId || '') === String(meId)) s.add(String(p.id));
+    const pid = resolveProfileAccountId(p.userId || p.accountId || '');
+    if (String(pid) === String(meId)) s.add(String(p.id));
   }
   return s;
 }, [data.posts, meId]);
@@ -11769,16 +12145,24 @@ const myPostIds = useMemo(() => {
 // ответы на мои посты (не я автор)
 const repliesToMe = useMemo(() => {
   if (!meId || !myPostIds.size) return [];
-  return (data.posts || []).filter(p =>
-    p.parentId &&
-    myPostIds.has(String(p.parentId)) &&
-    String(p.userId || p.accountId || '') !== String(meId)
-  );
+  return (data.posts || []).filter(p => {
+    const authorId = resolveProfileAccountId(p.userId || p.accountId || '');
+    return p.parentId &&
+      myPostIds.has(String(p.parentId)) &&
+      String(authorId) !== String(meId);
+  });
 }, [data.posts, myPostIds, meId]);
 useEffect(() => {
   if (!inboxOpen) return;
   setVisibleRepliesCount(REPLIES_PAGE_SIZE);
 }, [inboxOpen, repliesToMe.length]);
+useEffect(() => {
+  if (!inboxOpen) return;
+  setVisiblePublishedCount(PUBLISHED_PAGE_SIZE);
+}, [inboxOpen, meId, data.posts?.length]);
+useEffect(() => {
+  if (!inboxOpen) { setDmWithUserId(''); return; }
+}, [inboxOpen]);
 const sortedRepliesToMe = useMemo(
   () => (repliesToMe || []).slice().sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0)),
   [repliesToMe]
@@ -11807,16 +12191,429 @@ const unreadCount = useMemo(() => {
   return n;
 }, [mounted, repliesToMe, readSet]);
 
-// при открытии Inbox — пометить как прочитанные и сразу обновить state
+const markRepliesSeen = useCallback((ids) => {
+  if (!seenKey) return;
+  const list = Array.isArray(ids) ? ids : [];
+  if (!list.length) return;
+  setReadSet((prev) => {
+    const next = new Set(prev || []);
+    let changed = false;
+    for (const id of list) {
+      const key = String(id || '');
+      if (!key) continue;
+      if (!next.has(key)) { next.add(key); changed = true; }
+    }
+    if (changed) {
+      try { localStorage.setItem(seenKey, JSON.stringify(Array.from(next))); } catch {}
+      return next;
+    }
+    return prev;
+  });
+}, [seenKey]);
+
+// помечаем прочитанные по мере фактического попадания в фокус (IntersectionObserver)
 useEffect(() => {
-if (!mounted || !inboxOpen || !seenKey) return;
-  const allIds = new Set([
-    ...repliesToMe.map(p => String(p.id)),
-    ...Array.from(readSet)
-  ]);
-  try { localStorage.setItem(seenKey, JSON.stringify(Array.from(allIds))); } catch {}
-  setReadSet(allIds); // чтобы бейдж погас сразу без повторного чтения из LS
-}, [mounted, inboxOpen, seenKey, repliesToMe, readSet]);
+  if (!mounted || !inboxOpen || inboxTab !== 'replies' || !seenKey) return;
+  if (typeof IntersectionObserver === 'undefined') return;
+  const io = new IntersectionObserver((entries) => {
+    const ids = [];
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      const id = e.target?.getAttribute?.('data-reply-id');
+      if (id) ids.push(id);
+    }
+    if (ids.length) markRepliesSeen(ids);
+  }, { threshold: 0.6 });
+  repliesSeenObserverRef.current = io;
+  const nodes = document.querySelectorAll('.inboxReplyItem[data-reply-id]');
+  nodes.forEach((n) => io.observe(n));
+  return () => { try { io.disconnect(); } catch {} };
+}, [mounted, inboxOpen, inboxTab, seenKey, visibleRepliesToMe, markRepliesSeen]);
+
+useEffect(() => {
+  if (!seenDmKey) { setDmSeenMap({}); return; }
+  try {
+    const raw = JSON.parse(localStorage.getItem(seenDmKey) || '{}') || {};
+    setDmSeenMap((raw && typeof raw === 'object') ? raw : {});
+  } catch {
+    setDmSeenMap({});
+  }
+}, [seenDmKey]);
+
+const markDmSeen = useCallback((uid, lastTs) => {
+  if (!seenDmKey) return;
+  const rawId = String(uid || '').trim();
+  const id = String(resolveProfileAccountId(rawId) || rawId || '').trim();
+  const ts = Number(lastTs || 0);
+  if (!id || !ts) return;
+  setDmSeenMap((prev) => {
+    const next = { ...(prev || {}) };
+    if (Number(next[id] || 0) >= ts) return prev;
+    next[id] = ts;
+    try { localStorage.setItem(seenDmKey, JSON.stringify(next)); } catch {}
+    return next;
+  });
+}, [seenDmKey]);
+
+useEffect(() => {
+  if (!dmBlockedKey) { setDmBlockedMap({}); return; }
+  try {
+    const raw = JSON.parse(localStorage.getItem(dmBlockedKey) || '{}') || {};
+    setDmBlockedMap((raw && typeof raw === 'object') ? raw : {});
+  } catch {
+    setDmBlockedMap({});
+  }
+}, [dmBlockedKey]);
+
+useEffect(() => {
+  if (!dmDeletedKey) { setDmDeletedMap({}); return; }
+  try {
+    const raw = JSON.parse(localStorage.getItem(dmDeletedKey) || '{}') || {};
+    setDmDeletedMap((raw && typeof raw === 'object') ? raw : {});
+  } catch {
+    setDmDeletedMap({});
+  }
+}, [dmDeletedKey]);
+
+const dmUnreadCount = useMemo(() => {
+  if (!mounted) return 0;
+  let n = 0;
+  for (const d of (dmDialogs || [])) {
+    const uid = String(d?.userId || '');
+    if (dmDeletedMap?.[uid]) continue;
+    const last = d?.lastMessage || null;
+    if (!uid || !last) continue;
+    const lastTs = Number(last.ts || 0);
+    const seenTs = Number(dmSeenMap?.[uid] || 0);
+    const lastFromRaw = String(last?.fromCanonical || last?.from || '');
+    const lastFrom = String(resolveProfileAccountId(lastFromRaw) || lastFromRaw || '').trim();
+    if (lastFrom && lastFrom !== String(meId) && lastTs > seenTs) n++;
+  }
+  return n;
+}, [mounted, dmDialogs, dmSeenMap, dmDeletedMap, meId]);
+
+const dmFetchCached = useCallback(async (cacheRef, inflightRef, key, url, opts = {}) => {
+  if (!meId) return null;
+  if (opts?.force) cacheRef.current.delete(key);
+  if (!opts?.force && cacheRef.current.has(key)) return cacheRef.current.get(key);
+  if (inflightRef.current.has(key)) return inflightRef.current.get(key);
+  const p = (async () => {
+    const r = await fetch(url, {
+      method: 'GET',
+      cache: 'no-store',
+      headers: { 'x-forum-user-id': String(meId) },
+    });
+    const j = await r.json().catch(() => null);
+    return j;
+  })();
+  inflightRef.current.set(key, p);
+  try {
+    const j = await p;
+    cacheRef.current.set(key, j);
+    return j;
+  } finally {
+    inflightRef.current.delete(key);
+  }
+}, [meId]);
+
+const loadDmDialogs = useCallback(async (cursor = null, opts = {}) => {
+  if (!meId) return;
+  const isPaginating = !!cursor;
+  if (cursor && !dmDialogsHasMore && !opts.force) return;
+  if (dmDialogsLoadingRef.current) return;
+  const nowTs = Date.now();
+  const isBackground = !!opts.background;
+  const throttleMs = Number(opts.throttleMs || (isBackground ? DM_BG_THROTTLE_MS : DM_ACTIVE_THROTTLE_MS));
+  const shouldThrottle = !isPaginating && (opts.refresh || isBackground);
+  if (shouldThrottle && throttleMs > 0) {
+    const key = isBackground ? 'bg' : 'active';
+    const last = Number(dmDialogsLastFetchRef.current?.[key] || 0);
+    if ((nowTs - last) < throttleMs) return;
+    dmDialogsLastFetchRef.current = { ...(dmDialogsLastFetchRef.current || {}), [key]: nowTs };
+  }
+  dmDialogsLoadingRef.current = true;
+  setDmDialogsLoading(true);
+  const qs = new URLSearchParams();
+  qs.set('limit', String(DM_PAGE_SIZE));
+  if (cursor) qs.set('cursor', String(cursor));
+  const key = `dlg:${meId}:${cursor || ''}:${DM_PAGE_SIZE}`;
+  try {
+    const j = await dmFetchCached(dmDialogsCacheRef, dmDialogsInFlightRef, key, `/api/dm/dialogs?${qs.toString()}`, opts);
+    if (j?.ok) {
+      const incoming = Array.isArray(j.items) ? j.items : [];
+      setDmDialogs((prev) => {
+        const existing = Array.isArray(prev) ? prev : [];
+        if (cursor) return [ ...existing, ...incoming ];
+        if (!existing.length) return incoming;
+        const byUid = new Map(incoming.map(d => [String(d?.userId || ''), d]));
+        const merged = [];
+        const used = new Set();
+        for (const d of existing) {
+          const uid = String(d?.userId || '');
+          if (!uid) { merged.push(d); continue; }
+          const inc = byUid.get(uid);
+          if (inc) {
+            const prevLast = d?.lastMessage || null;
+            const nextLast = inc?.lastMessage || null;
+            let lastMessage = nextLast || prevLast;
+            if (prevLast && nextLast) {
+              const prevSending = String(prevLast.status || '') === 'sending';
+              const prevTs = Number(prevLast.ts || 0);
+              const nextTs = Number(nextLast.ts || 0);
+              if (prevSending && prevTs >= nextTs) lastMessage = prevLast;
+              else lastMessage = nextTs >= prevTs ? nextLast : prevLast;
+            }
+            merged.push({ ...inc, lastMessage });
+            used.add(uid);
+          } else {
+            merged.push(d);
+            used.add(uid);
+          }
+        }
+        for (const d of incoming) {
+          const uid = String(d?.userId || '');
+          if (!uid || used.has(uid)) continue;
+          merged.push(d);
+          used.add(uid);
+        }
+        merged.sort((a, b) => Number(b?.lastMessage?.ts || 0) - Number(a?.lastMessage?.ts || 0));
+        return merged;
+      });
+      setDmDialogsCursor(j.nextCursor || null);
+      setDmDialogsHasMore(!!j.hasMore);
+      setDmDialogsLoaded(true);
+    }
+  } finally {
+    dmDialogsLoadingRef.current = false;
+    setDmDialogsLoading(false);
+  }
+}, [meId, dmFetchCached, dmDialogsHasMore]);
+
+const loadDmThread = useCallback(async (withUserId, cursor = null, opts = {}) => {
+  const uid = String(withUserId || '').trim();
+  if (!meId || !uid) return;
+  const isPaginating = !!cursor;
+  if (cursor && !dmThreadHasMore && !opts.force) return;
+  if (dmThreadLoadingRef.current) return;
+  const nowTs = Date.now();
+  const throttleMs = Number(opts.throttleMs || DM_ACTIVE_THROTTLE_MS);
+  const shouldThrottle = !isPaginating && !!opts.refresh;
+  if (shouldThrottle && throttleMs > 0) {
+    const tKey = `refresh:${uid}`;
+    const lastTs = Number(dmThreadLastFetchRef.current.get(tKey) || 0);
+    if ((nowTs - lastTs) < throttleMs) return;
+    dmThreadLastFetchRef.current.set(tKey, nowTs);
+  }
+  dmThreadLoadingRef.current = true;
+  setDmThreadLoading(true);
+  const qs = new URLSearchParams();
+  qs.set('limit', String(DM_PAGE_SIZE));
+  qs.set('dir', 'older');
+  qs.set('with', uid);
+  if (cursor) qs.set('cursor', String(cursor));
+  const key = `thr:${meId}:${uid}:${cursor || ''}:${DM_PAGE_SIZE}`;
+  try {
+    const j = await dmFetchCached(dmThreadCacheRef, dmThreadInFlightRef, key, `/api/dm/thread?${qs.toString()}`, opts);
+    if (j?.ok) {
+      const items = Array.isArray(j.items) ? j.items : [];
+      const itemsAsc = items.slice().reverse();
+      setDmThreadItems((prev) => {
+        const existing = Array.isArray(prev) ? prev : [];
+        if (cursor) return [ ...itemsAsc, ...existing ];
+        if (opts?.refresh) {
+          const byId = new Map(itemsAsc.map(m => [String(m?.id || ''), m]));
+          const merged = existing.map((m) => {
+            const id = String(m?.id || '');
+            return byId.has(id) ? { ...m, ...byId.get(id) } : m;
+          });
+          const existingIds = new Set(merged.map(m => String(m?.id || '')));
+          for (const m of itemsAsc) {
+            const id = String(m?.id || '');
+            if (id && !existingIds.has(id)) merged.push(m);
+          }
+          return merged;
+        }
+        if (!existing.length) return itemsAsc;
+        const pending = existing.filter(m =>
+          String(m?.status || '') === 'sending' || String(m?.id || '').startsWith('tmp_dm_')
+        );
+        if (!pending.length) return itemsAsc;
+        const existingIds = new Set(itemsAsc.map(m => String(m?.id || '')));
+        const add = pending
+          .filter(m => {
+            const id = String(m?.id || '');
+            return id && !existingIds.has(id);
+          })
+          .sort((a, b) => Number(a?.ts || 0) - Number(b?.ts || 0));
+        return add.length ? [ ...itemsAsc, ...add ] : itemsAsc;
+      });
+      setDmThreadCursor(j.nextCursor || null);
+      setDmThreadHasMore(!!j.hasMore);
+      setDmThreadSeenTs(Number(j.peerSeenTs || j.seenTs || 0));
+    }
+  } finally {
+    dmThreadLoadingRef.current = false;
+    setDmThreadLoading(false);
+  }
+}, [meId, dmFetchCached, dmThreadHasMore]);
+
+useEffect(() => {
+  if (!mounted || !meId) return;
+  loadDmDialogs(null, { force: true });
+}, [mounted, meId, loadDmDialogs]);
+
+useEffect(() => {
+  if (!inboxOpen || inboxTab !== 'messages') return;
+  if (dmDialogsLoaded) return;
+  if ((dmDialogs || []).length === 0) loadDmDialogs(null, { force: true });
+}, [inboxOpen, inboxTab, dmDialogs?.length, dmDialogsLoaded, loadDmDialogs]);
+
+useEffect(() => {
+  if (!inboxOpen || inboxTab !== 'messages') { setDmWithUserId(''); return; }
+}, [inboxOpen, inboxTab]);
+
+useEffect(() => {
+  const uid = String(dmWithUserId || '').trim();
+  if (!uid) { setDmThreadItems([]); setDmThreadCursor(null); setDmThreadHasMore(true); setDmThreadSeenTs(0); return; }
+  loadDmThread(uid, null, { force: true });
+}, [dmWithUserId, loadDmThread]);
+
+// фоновая проверка новых DM (для бейджа), без спама
+useEffect(() => {
+  if (!mounted || !meId) return;
+  if (inboxOpen && inboxTab === 'messages') return;
+  if (typeof document === 'undefined') return;
+  const t = setInterval(() => {
+    if (document.hidden) return;
+    try { loadDmDialogs(null, { force: true, refresh: true, background: true }); } catch {}
+  }, 60000);
+  return () => { try { clearInterval(t); } catch {} };
+}, [mounted, meId, inboxOpen, inboxTab, loadDmDialogs]);
+
+// мягкий polling для мгновенных DM
+useEffect(() => {
+  if (!inboxOpen || inboxTab !== 'messages') return;
+  if (typeof document === 'undefined') return;
+  const t = setInterval(() => {
+    if (document.hidden) return;
+    try { loadDmDialogs(null, { force: true, refresh: true }); } catch {}
+    try {
+      if (dmWithUserId) loadDmThread(dmWithUserId, null, { force: true, refresh: true });
+    } catch {}
+  }, 10000);
+  return () => { try { clearInterval(t); } catch {} };
+}, [inboxOpen, inboxTab, dmWithUserId, loadDmDialogs, loadDmThread]);
+
+useEffect(() => {
+  const uid = String(dmWithUserId || '').trim();
+  if (!uid || !meId || !dmThreadItems?.length) return;
+  const last = dmThreadItems[dmThreadItems.length - 1];
+  const lastTs = Number(last?.ts || 0);
+  if (!lastTs) return;
+  const key = String(resolveProfileAccountId(uid) || uid || '').trim();
+  if (Number(dmSeenSentRef.current?.[key] || 0) >= lastTs) return;
+  dmSeenSentRef.current[key] = lastTs;
+  (async () => {
+    try {
+      await fetch('/api/dm/seen', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-forum-user-id': String(meId) },
+        body: JSON.stringify({ with: uid, lastSeenTs: lastTs }),
+      });
+    } catch {}
+  })();
+  const next = { ...(dmSeenMap || {}) };
+  if (key && (!next[key] || Number(next[key]) < lastTs)) {
+    next[key] = lastTs;
+    try { if (seenDmKey) localStorage.setItem(seenDmKey, JSON.stringify(next)); } catch {}
+    setDmSeenMap(next);
+  }
+}, [dmWithUserId, dmThreadItems, meId, dmSeenMap, seenDmKey]);
+
+useEffect(() => {
+  if (!mounted || !inboxOpen || inboxTab !== 'messages' || !seenDmKey) return;
+  if (!dmDialogs || !dmDialogs.length) return;
+  if (typeof IntersectionObserver === 'undefined') return;
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      const el = e.target;
+      const uid = String(el?.getAttribute?.('data-dm-uid') || '').trim();
+      const lastFromRaw = String(el?.getAttribute?.('data-dm-lastfrom') || '').trim();
+      const lastFrom = String(resolveProfileAccountId(lastFromRaw) || lastFromRaw || '').trim();
+      const lastTs = Number(el?.getAttribute?.('data-dm-lastts') || 0);
+      if (!uid || !lastTs) continue;
+      if (dmDeletedMap?.[uid]) continue;
+      if (lastFrom && String(lastFrom) !== String(meId || '')) {
+        markDmSeen(uid, lastTs);
+      }
+    }
+  }, { threshold: 0.6 });
+  dmSeenObserverRef.current = io;
+  const nodes = document.querySelectorAll('.dmRow[data-dm-uid]');
+  nodes.forEach((n) => io.observe(n));
+  return () => { try { io.disconnect(); } catch {} };
+}, [mounted, inboxOpen, inboxTab, dmDialogs, dmDeletedMap, meId, seenDmKey, markDmSeen]);
+
+useEffect(() => {
+  if (!isBrowser()) return;
+  const onOpenDm = (e) => {
+    const rawUid = String(e?.detail?.userId || '').trim();
+    const uid = String(resolveProfileAccountId(rawUid) || rawUid || '').trim();
+    if (!uid) return;
+    try { setInboxOpen(true); } catch {}
+    try { setInboxTab('messages'); } catch {}
+    try { setDmWithUserId(uid); } catch {}
+  };
+  window.addEventListener('inbox:open-dm', onOpenDm);
+  return () => window.removeEventListener('inbox:open-dm', onOpenDm);
+}, []);
+
+const myPublishedPosts = useMemo(() => {
+  if (!meId) return [];
+  return (data.posts || [])
+    .filter(p => {
+      const pid = resolveProfileAccountId(p.userId || p.accountId || '');
+      return !p?._del && String(pid) === String(meId);
+    })
+    .slice()
+    .sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0));
+}, [data.posts, meId]);
+const visiblePublishedPosts = useMemo(
+  () => myPublishedPosts.slice(0, visiblePublishedCount),
+  [myPublishedPosts, visiblePublishedCount]
+);
+const publishedHasMore = visiblePublishedPosts.length < myPublishedPosts.length;
+
+const toggleDmBlock = useCallback(async (uid, nextBlock) => {
+  const id = String(uid || '').trim();
+  if (!id || !meId) return;
+  try {
+    const url = nextBlock ? '/api/dm/block' : '/api/dm/unblock';
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-forum-user-id': String(meId) },
+      body: JSON.stringify({ userId: id }),
+    });
+    const j = await res.json().catch(() => null);
+    if (!res.ok || !j?.ok) throw new Error(j?.error || 'dm_block_failed');
+    const next = { ...(dmBlockedMap || {}) };
+    if (nextBlock) next[id] = 1; else delete next[id];
+    try { if (dmBlockedKey) localStorage.setItem(dmBlockedKey, JSON.stringify(next)); } catch {}
+    setDmBlockedMap(next);
+  } catch {}
+}, [meId, dmBlockedMap, dmBlockedKey]);
+
+const deleteDmDialog = useCallback((uid) => {
+  const id = String(uid || '').trim();
+  if (!id) return;
+  const next = { ...(dmDeletedMap || {}) };
+  next[id] = 1;
+  try { if (dmDeletedKey) localStorage.setItem(dmDeletedKey, JSON.stringify(next)); } catch {}
+  setDmDeletedMap(next);
+  setDmDialogs(prev => (prev || []).filter(d => String(d?.userId || '') !== id));
+  if (String(dmWithUserId || '') === id) setDmWithUserId('');
+}, [dmDeletedMap, dmDeletedKey, dmWithUserId]);
 
 // все посты выбранной темы (строго сравниваем как строки)
 const allPosts = useMemo(() => (
@@ -12133,6 +12930,10 @@ useEffect(() => {
   document.addEventListener('pointerdown', onDown, true);
   return () => document.removeEventListener('pointerdown', onDown, true);
 }, [composerActive, composerRef, setComposerActive]);
+useEffect(() => {
+  if (!dmMode) return;
+  setComposerActive(true);
+}, [dmMode]);
 useEffect(() => {
   const sendBtn = document.querySelector('[data-composer-send], .forumComposer .planeBtn');
   if (!sendBtn) return;
@@ -13215,24 +14016,122 @@ const createPost = async () => {
   // 1) собираем текст
   const plain = (String(text || '').trim()
     || ((pendingImgs.length>0 || audioUrlToSend || videoUrlToSend) ? '\u200B' : '')
-  ).slice(0,400);
+  ).slice(0, textLimit);
 
   const body = [plain, ...pendingImgs,
     ...(audioUrlToSend ? [audioUrlToSend] : []),
     ...(videoUrlToSend ? [videoUrlToSend] : []),
   ].filter(Boolean).join('\n');
 
-  if (!body || !sel?.id) return _fail();
+  const dmTarget = dmMode ? String(resolveProfileAccountId(dmWithUserId) || '').trim() : '';
+  const isDm = !!dmTarget;
+  if (!body || (!isDm && !sel?.id)) return _fail();
 
   // 2) auth
   const r = await requireAuthStrict(); 
   if (!r) return _fail();
-  const uid  = resolveProfileAccountId(r.asherId || r.accountId || '');
+  const uid  = String(resolveProfileAccountId(r.asherId || r.accountId || '') || '').trim();
+  const rawFromId = String(r.asherId || r.accountId || '').trim();
   const isAdm = (typeof window !== 'undefined') && localStorage.getItem('ql7_admin') === '1';
   const isVip = !!vipActive;
 
+  // === DM send ===
+  if (isDm) {
+    if (String(uid) === String(dmTarget)) return _fail(t('dm_blocked') || 'Blocked');
+    if (dmBlockedMap?.[dmTarget]) return _fail(t('dm_you_blocked') || 'Blocked');
+    if (dmBlockedByReceiverMap?.[dmTarget]) return _fail(t('dm_blocked_by_receiver') || 'Blocked');
+    const dmText = String(text || '').trim();
+    const rawToId = String(dmWithUserId || '').trim();
+    const attachments = [
+      ...pendingImgs.map((u) => ({ url: u, type: 'image' })),
+      ...(audioUrlToSend ? [{ url: audioUrlToSend, type: 'audio' }] : []),
+      ...(videoUrlToSend ? [{ url: videoUrlToSend, type: 'video' }] : []),
+    ].filter(Boolean);
+    if (!dmText && !attachments.length) return _fail();
+
+    const tmpId = `tmp_dm_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const optimistic = {
+      id: tmpId,
+      from: uid,
+      to: dmTarget,
+      text: dmText,
+      attachments,
+      ts: Date.now(),
+      status: 'sending',
+    };
+    setDmThreadItems(prev => [ ...(prev || []), optimistic ]);
+    setDmDialogs(prev => {
+      const list = Array.isArray(prev) ? prev.slice() : [];
+      const idx = list.findIndex(x => String(x?.userId || '') === String(dmTarget));
+      const lastMessage = { ...optimistic };
+      if (idx >= 0) {
+        const next = { ...list[idx], lastMessage };
+        list.splice(idx, 1);
+        return [ next, ...list ];
+      }
+      return [ { userId: dmTarget, lastMessage }, ...list ];
+    });
+    dmDialogsCacheRef.current.clear();
+    dmThreadCacheRef.current.clear();
+    try {
+      const payload = { to: dmTarget, text: dmText, attachments };
+      if (rawToId && rawToId !== dmTarget) payload.toRaw = rawToId;
+      if (rawFromId && rawFromId !== uid) payload.fromRaw = rawFromId;
+      const resp = await fetch('/api/dm/send', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-forum-user-id': String(uid) },
+        body: JSON.stringify(payload),
+      });
+      const j = await resp.json().catch(() => null);
+      if (!resp.ok || !j?.ok) {
+        const blockedByReceiver = j?.error === 'blocked_by_receiver';
+        const errKey = blockedByReceiver ? 'dm_blocked_by_receiver' : 'dm_blocked';
+        if (blockedByReceiver) {
+          setDmBlockedByReceiverMap(prev => ({ ...(prev || {}), [String(dmTarget)]: 1 }));
+        }
+        try { toast?.warn?.(t(errKey) || 'Blocked'); } catch {}
+      } else {
+        const realId = String(j?.id || tmpId);
+        const realTs = Number(j?.ts || optimistic.ts);
+        setDmThreadItems(prev => (prev || []).map(m =>
+          (String(m.id) === String(tmpId))
+            ? { ...m, id: realId, ts: realTs, status: 'sent' }
+            : m
+        ));
+        setDmDialogs(prev => (prev || []).map(d => {
+          if (String(d?.userId || '') !== String(dmTarget)) return d;
+          const last = d?.lastMessage || null;
+          if (!last || String(last.id) !== String(tmpId)) return d;
+          return { ...d, lastMessage: { ...last, id: realId, ts: realTs, status: 'sent' } };
+        }));
+      }
+    } catch {}
+
+    setComposerActive(false);
+    try { setText(''); } catch {}
+    try { setPendingImgs([]); } catch {}
+    try { if (pendingAudio && /^blob:/.test(pendingAudio)) URL.revokeObjectURL(pendingAudio) } catch {}
+    try { setPendingAudio(null); } catch {}
+    try { stopMediaProg(); } catch {}
+    try { setMediaPipelineOn(false); } catch {}
+    try { setMediaBarOn(false); } catch {}
+    try { setMediaPhase('idle'); } catch {}
+    try { setMediaPct(0); } catch {}
+    try { setVideoProgress(0); } catch {}
+    try { setReplyTo(null); } catch {}
+    try { toast?.ok?.(t('dm_sent') || 'Sent'); } catch {}
+    postingRef.current = false;
+    try { resetVideo(); } catch {}
+    try {
+      if (pendingVideo && /^blob:/.test(pendingVideo)) URL.revokeObjectURL(pendingVideo);
+    } catch {}
+    try { setPendingVideo(null); } catch {}
+    try { setVideoOpen(false); setVideoState('idle'); } catch {}
+    return;
+  }
+
   // --- БЕЛЫЙ СПИСОК ДЛЯ НЕ-VIP/НЕ-АДМИНОВ ---
-  if (!isAdm && !isVip && hasAnyLink(body)) {
+  if (!isDm && !isAdm && !isVip && hasAnyLink(body)) {
     const sameHost = (typeof location !== 'undefined' ? location.host : '') || '';
     const URL_RE   = /https?:\/\/[^\s<>"')]+/gi;
     const ST_PREFIX = ['/vip-emoji/','/emoji/','/stickers/','/assets/emoji/','/Quest/'];
@@ -13289,8 +14188,8 @@ const createPost = async () => {
   const iconForSend = resolveIconForDisplay(uid, prof.icon)
 
   // родитель
-  const parentId = (replyTo?.id) || (threadRoot?.id) || null;
-  const isReply  = !!parentId;
+  const parentId = isDm ? null : ((replyTo?.id) || (threadRoot?.id) || null);
+  const isReply  = !isDm && !!parentId;
 
   // OPTIMISTIC
   const tmpId = `tmp_p_${Date.now()}_${Math.random().toString(36).slice(2)}`;
@@ -14803,7 +15702,8 @@ function pickAdUrlForSlot(slotKey, slotKind) {
  }
  /* keep badge on inbox button pinned visually */
  .forumRowBar .inboxBtn{ position:relative; }
- .forumRowBar .inboxBtn .inboxBadge{
+ .forumRowBar .inboxBtn .inboxBadgeReplies,
+ .forumRowBar .inboxBtn .inboxBadgeDM{
    position:absolute; top:-6px; right:-6px;
  }
  /* RTL: зеркалим только порядок слотов, центр остаётся центром */
@@ -15414,8 +16314,11 @@ onClick={()=>{
           <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
         {mounted && unreadCount > 0 && (
-          <span className="inboxBadge" suppressHydrationWarning>{unreadCount}</span>
-      )}
+          <span className="inboxBadgeReplies" suppressHydrationWarning>{unreadCount}</span>
+        )}
+        {mounted && dmUnreadCount > 0 && (
+          <span className="inboxBadgeDM" suppressHydrationWarning>{dmUnreadCount}</span>
+        )}
       </button>
 
      <button
@@ -15694,11 +16597,48 @@ const openThreadHere = (clickP) => {
 
 ) : inboxOpen ? (
   <>
-    <div className="topicTitle text-[#eaf4ff]
-    !whitespace-normal break-words
-    [overflow-wrap:anywhere]
-    max-w-full">{t('forum_inbox_title') || 'Ответы на ваши сообщения'}</div>
+    <div className="inboxHeader">
+      <div className="inboxTitleLine">Quantum Messenger</div>
+      <div className="inboxTabs" role="tablist" aria-label="Inbox tabs">
+        <button
+          type="button"
+          className="inboxTabBtn"
+          data-active={inboxTab === 'replies' ? '1' : '0'}
+          onClick={() => { setInboxTab('replies'); setDmWithUserId(''); }}
+        >
+          <span className="inboxTabLabel">{t('inbox_tab_replies_to_me') || 'Ответы мне'}</span>
+          {mounted && unreadCount > 0 && (
+            <span className="inboxTabBadge" data-kind="replies">{unreadCount}</span>
+          )}
+        </button>
+        <button
+          type="button"
+          className="inboxTabBtn"
+          data-active={inboxTab === 'messages' ? '1' : '0'}
+          onClick={() => setInboxTab('messages')}
+        >
+          <span className="inboxTabLabel">{t('inbox_tab_messages') || 'Сообщения'}</span>
+          {mounted && dmUnreadCount > 0 && (
+            <span className="inboxTabBadge" data-kind="messages">{dmUnreadCount}</span>
+          )}
+        </button>
+        <button
+          type="button"
+          className="inboxTabBtn"
+          data-active={inboxTab === 'published' ? '1' : '0'}
+          onClick={() => { setInboxTab('published'); setDmWithUserId(''); }}
+        >
+          <span className="inboxTabLabel">{t('inbox_tab_published') || 'Опубликованные'}</span>
+          {mounted && (myPublishedPosts?.length || 0) > 0 && (
+            <span className="inboxTabBadge" data-kind="published">{myPublishedPosts?.length || 0}</span>
+          )}
+        </button>
+      </div>
+      <div className="inboxTabsRail" aria-hidden="true" />
+    </div>
     <div className="grid gap-2 mt-2" suppressHydrationWarning>
+      {inboxTab === 'replies' && (
+        <>
 {debugAdsSlots(
   'inbox',
   interleaveAds(
@@ -15713,7 +16653,7 @@ const openThreadHere = (clickP) => {
   if (slot.type === 'item') {
     const p = slot.item;
     return (
-      <div key={slot.key} id={`post_${p.id}`}>
+      <div key={slot.key} id={`post_${p.id}`} className="inboxReplyItem" data-reply-id={String(p.id || '')}>
 {(() => {
   const parent = (data.posts || []).find(x => String(x.id) === String(p.parentId));
   return (
@@ -15783,6 +16723,345 @@ onOpenThread={(clickP) => {
         <div className="meta">
           {t('forum_inbox_empty') || 'Новых ответов нет'}
         </div>
+      )}
+        </>
+      )}
+
+      {inboxTab === 'messages' && (
+        <>
+          {dmWithUserId ? (
+            <>
+              {dmBlockedMap?.[String(dmWithUserId || '').trim()] && (
+                <div className="meta">{t('dm_you_blocked') || 'You blocked this user'}</div>
+              )}
+              {dmBlockedByReceiverMap?.[String(dmWithUserId || '').trim()] && (
+                <div className="meta">{t('dm_blocked_by_receiver') || 'You are blocked by this user'}</div>
+              )}
+              <button
+                type="button"
+                className="btn btnGhost dmBackBtn"
+                onClick={() => setDmWithUserId('')}
+              >
+                {t('inbox_back_to_list') || 'Back to list'}
+              </button>
+              {(() => {
+                const threadUid = String(dmWithUserId || '').trim();
+                const threadNick = resolveNickForDisplay(threadUid, '');
+                return (
+                  <div className="dmThreadHeader">
+                    <div className="dmThreadAvatar">
+                      <AvatarEmoji userId={threadUid} pIcon={resolveIconForDisplay(threadUid, '')} className="dmThreadAvatarImg" />
+                    </div>
+                    <div className="dmThreadMeta">
+                      <div className="dmThreadName">{threadNick || shortId(threadUid)}</div>
+                      <div className="dmThreadId">{shortId(threadUid)}</div>
+                    </div>
+                  </div>
+                );
+              })()}
+              <div className="dmThread">
+                {dmThreadHasMore && (
+                  <div className="loadMoreFooter">
+                    <div className="loadMoreShimmer">
+                      {t?.('loading') || 'Loading…'}
+                    </div>
+                    <LoadMoreSentinel
+                      disabled={dmThreadLoading || !dmThreadHasMore}
+                      onVisible={() => {
+                        if (dmThreadCursor) loadDmThread(dmWithUserId, dmThreadCursor);
+                      }}
+                    />
+                  </div>
+                )}
+                {(dmThreadItems || []).map((m) => {
+                  const fromRaw = String(m?.fromCanonical || m?.from || '').trim();
+                  const fromId = String(resolveProfileAccountId(fromRaw) || fromRaw || '').trim();
+                  const mine = !!fromId && (String(fromId) === String(meId || '') || String(fromRaw) === String(meId || ''));
+                  const rawText = String(m?.text || '');
+                  const { text: cleanedText, stickers: textStickers } = extractDmStickersFromText(rawText);
+                  const atts = Array.isArray(m?.attachments) ? m.attachments : [];
+                  const attMap = new Map();
+                  for (const a of atts) {
+                    if (!a) continue;
+                    let url = '';
+                    let typeHint = '';
+                    if (typeof a === 'string') {
+                      url = a;
+                    } else if (typeof a === 'object') {
+                      url = a.url || a.src || a.href || a.file || '';
+                      typeHint = a.type || a.mime || a.mediaType || '';
+                    }
+                    const cleanUrl = normalizeDmUrl(url);
+                    if (!cleanUrl) continue;
+                    if (!attMap.has(cleanUrl)) attMap.set(cleanUrl, { url: cleanUrl, type: typeHint });
+                  }
+                  const attItems = Array.from(attMap.values());
+                  const stickerEntries = Array.isArray(textStickers) ? textStickers.slice() : [];
+                  for (const it of attItems) {
+                    if (isDmStickerUrl(it.url)) {
+                      stickerEntries.push({ url: it.url, kind: inferDmStickerKind(it.url) });
+                    }
+                  }
+                  const stickerSet = new Set();
+                  const stickers = [];
+                  for (const s of stickerEntries) {
+                    if (!s?.url || stickerSet.has(s.url)) continue;
+                    stickerSet.add(s.url);
+                    stickers.push(s);
+                  }
+                  const mediaItems = attItems.filter((it) => !stickerSet.has(it.url));
+                  const imgUrls = [];
+                  const audioUrls = [];
+                  const videoUrls = [];
+                  const otherUrls = [];
+                  const seenMedia = new Set();
+                  for (const it of mediaItems) {
+                    const url = it.url;
+                    if (!url || seenMedia.has(url)) continue;
+                    seenMedia.add(url);
+                    const kind = getDmMediaKind(url, it.type);
+                    if (kind === 'video') videoUrls.push(url);
+                    else if (kind === 'audio') audioUrls.push(url);
+                    else if (kind === 'image') imgUrls.push(url);
+                    else otherUrls.push(url);
+                  }
+                  const threadUid = String(dmWithUserId || '').trim();
+                  const threadBlocked = !!dmBlockedMap?.[threadUid];
+                  const seen = mine && dmThreadSeenTs && Number(m?.ts || 0) <= Number(dmThreadSeenTs || 0);
+                  const delivered = mine && (seen || Number(m?.deliveredTs || 0) > 0 || String(m?.status || '') === 'sent');
+                  const statusTitle = (m?.status === 'sending')
+                    ? (t('dm_sending') || 'Sending…')
+                    : (seen ? (t('dm_seen') || 'Seen') : (delivered ? (t('dm_delivered') || 'Delivered') : (t('dm_sent') || 'Sent')));
+                  return (
+                    <div key={m?.id || `${m?.ts || 0}`} className={cls('dmMsgRow', mine && 'me')}>
+                      <div className={cls('dmMsgBubble', mine && 'me', 'item', 'qshine')}>
+                        {!!cleanedText && (
+                          <div dangerouslySetInnerHTML={{ __html: safeHtml(cleanedText) }} />
+                        )}
+                        {!!(stickers && stickers.length) && (
+                          <div className="dmMediaGrid">
+                            {stickers.map((s, i) => (
+                              <div key={`${m?.id || 'm'}:stk:${i}`} className="vipMediaBox dmMediaBox" data-kind="sticker">
+                                <Image
+                                  src={s.url}
+                                  alt=""
+                                  width={512}
+                                  height={512}
+                                  unoptimized
+                                  loading="lazy"
+                                  className={s.kind === 'mozi' ? 'moziEmojiBig emojiPostBig' : 'vipEmojiBig emojiPostBig'}
+                                  style={{ width: '100%', height: 'auto' }}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {!!imgUrls.length && (
+                          <div className="dmMediaGrid">
+                            {imgUrls.map((src, i) => (
+                              <figure key={`${m?.id || 'm'}:img:${i}`} className="mediaBox dmMediaBox" data-kind="image">
+                                <Image
+                                  src={src}
+                                  alt=""
+                                  width={1200}
+                                  height={800}
+                                  unoptimized
+                                  loading="lazy"
+                                  className="mediaBoxItem"
+                                  style={{ objectFit: 'contain' }}
+                                />
+                              </figure>
+                            ))}
+                          </div>
+                        )}
+                        {!!videoUrls.length && (
+                          <div className="dmMediaGrid">
+                            {videoUrls.map((src, i) => (
+                              <div key={`${m?.id || 'm'}:vid:${i}`} className="videoCard mediaBox dmMediaBox" data-kind="video">
+                                <video
+                                  data-forum-media="video"
+                                  src={src}
+                                  playsInline
+                                  preload="metadata"
+                                  controls
+                                  controlsList="nodownload noplaybackrate noremoteplayback"
+                                  disablePictureInPicture
+                                  className="mediaBoxItem"
+                                  style={{ objectFit: 'contain', background: '#000' }}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {!!audioUrls.length && (
+                          <div className="dmMediaGrid">
+                            {audioUrls.map((src, i) => (
+                              <div key={`${m?.id || 'm'}:aud:${i}`} className="audioCard mediaBox dmMediaBox" data-kind="audio">
+                                <QCastPlayer src={src} />
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {!!otherUrls.length && (
+                          <div className="dmAttachLinks">
+                            {otherUrls.map((u, i) => (
+                              <div key={`${m?.id || 'm'}:link:${i}`}>
+                                <a href={u} target="_blank" rel="noreferrer noopener">{u}</a>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <div className="dmMsgMeta">
+                          <HydrateText value={human(m?.ts)} />
+                          {mine && (
+                            <span className={cls('dmStatus', seen && 'seen')} title={statusTitle} aria-label={statusTitle}>
+                              {m?.status === 'sending'
+                                ? (t('dm_sending') || 'Sending…')
+                                : (seen ? '✓✓' : (delivered ? '✓' : (t('dm_sent') || 'Sent')))}
+                            </span>
+                          )}
+                        </div>
+                        {!!threadUid && (
+                          <div className="dmMsgActions">
+                            <button
+                              type="button"
+                              className="dmActionBtn"
+                              onClick={() => toggleDmBlock(threadUid, !threadBlocked)}
+                            >
+                              {threadBlocked ? (t('dm_unblock') || 'Unblock') : (t('dm_block') || 'Block')}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+                {(dmThreadItems || []).length === 0 && !dmThreadLoading && (
+                  <div className="meta">{t('empty_messages') || 'Нет сообщений'}</div>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              {(dmDialogs || []).map((d) => {
+                const uid = String(d?.userId || '');
+                if (dmDeletedMap?.[uid]) return null;
+                const last = d?.lastMessage || null;
+                const lastTs = Number(last?.ts || 0);
+                const seenTs = Number(dmSeenMap?.[uid] || 0);
+                const lastFromRaw = String(last?.fromCanonical || last?.from || '');
+                const lastFrom = String(resolveProfileAccountId(lastFromRaw) || lastFromRaw || '').trim();
+                const unread = !!uid && lastFrom && lastFrom !== String(meId) && lastTs > seenTs;
+                const preview = (last?.text || '').trim() || (Array.isArray(last?.attachments) && last.attachments.length ? (t('forum_attach') || 'Attach') : '');
+                return (
+                  <button
+                    key={`dm:${uid}`}
+                    type="button"
+                    className="item dmRow hoverPop text-left"
+                    data-dm-uid={uid}
+                    data-dm-lastts={lastTs}
+                    data-dm-lastfrom={lastFromRaw || lastFrom}
+                    onClick={() => { setInboxTab('messages'); setDmWithUserId(uid); }}
+                  >
+                    <div className="dmRowAvatar">
+                      <AvatarEmoji userId={uid} pIcon={resolveIconForDisplay(uid, '')} className="dmRowAvatarImg" />
+                    </div>
+                    <div className="dmRowMain">
+                      <div className="dmRowTop">
+                        <div className="dmRowName">{resolveNickForDisplay(uid, '')}</div>
+                        <div className="dmRowTime"><HydrateText value={human(lastTs)} /></div>
+                      </div>
+                      <div className="dmRowPreview">{preview || ''}</div>
+                    </div>
+                    <button
+                      type="button"
+                      className="iconBtn ghost"
+                      aria-label={t('dm_delete_dialog') || 'Delete dialog'}
+                      title={t('dm_delete_dialog') || 'Delete dialog'}
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); deleteDmDialog(uid); }}
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden>
+                        <path d="M6 7h12M9 7V5h6v2M8 7l1 12h6l1-12" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round"/>
+                      </svg>
+                    </button>
+                    {unread && <span className="dmUnreadDot" aria-hidden="true" />}
+                  </button>
+                );
+              })}
+              {dmDialogsHasMore && (
+                <div className="loadMoreFooter">
+                  <div className="loadMoreShimmer">
+                    {t?.('loading') || 'Loading…'}
+                  </div>
+                  <LoadMoreSentinel
+                    disabled={dmDialogsLoading || !dmDialogsHasMore}
+                    onVisible={() => {
+                      if (dmDialogsCursor) loadDmDialogs(dmDialogsCursor);
+                    }}
+                  />
+                </div>
+              )}
+                {(dmDialogs || []).length === 0 && !dmDialogsLoading && (
+                <div className="meta">
+                  {dmDialogsLoaded ? (t('empty_messages') || 'Нет сообщений') : (t('loading') || 'Loading…')}
+                </div>
+              )}
+            </>
+          )}
+        </>
+      )}
+
+      {inboxTab === 'published' && (
+        <>
+          {(visiblePublishedPosts || []).map((p) => {
+            const parent = p?.parentId ? (data.posts || []).find(x => String(x.id) === String(p.parentId)) : null;
+            return (
+              <div key={`pub:${p?.id || ''}`} id={`post_${p?.id || ''}`}>
+                <PostCard
+                  p={p}
+                  parentPost={parent || null}
+                  parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''}
+                  parentText={parent ? (parent.text || parent.message || parent.body || '') : ''}
+                  onReport={(post, rect, anchorEl) => openReportPopover(post, rect, anchorEl)}
+                  onOpenThread={(clickP) => { openThreadForPost(clickP || p, { closeInbox: true }); }}
+                  onReact={reactMut}
+                  isAdmin={isAdmin}
+                  onDeletePost={delPost}
+                  onOwnerDelete={delPostOwn}
+                  onBanUser={banUser}
+                  onUnbanUser={unbanUser}
+                  isBanned={bannedSet.has(p.accountId || p.userId)}
+                  authId={viewerId}
+                  markView={markViewPost}
+                  t={t}
+                  viewerId={viewerId}
+                  starredAuthors={starredAuthors}
+                  onToggleStar={toggleAuthorStar}
+                  onUserInfoToggle={handleUserInfoToggle}
+                />
+              </div>
+            );
+          })}
+          {publishedHasMore && (
+            <div className="loadMoreFooter">
+              <div className="loadMoreShimmer">
+                {t?.('loading') || 'Loading…'}
+              </div>
+              <LoadMoreSentinel
+                onVisible={() =>
+                  setVisiblePublishedCount((c) =>
+                    Math.min(c + PUBLISHED_PAGE_SIZE, (myPublishedPosts || []).length)
+                  )
+                }
+              />
+            </div>
+          )}
+          {myPublishedPosts.length === 0 && (
+            <div className="meta">
+              {t('empty_published') || 'Публикаций нет'}
+            </div>
+          )}
+        </>
       )}
     </div>
 
@@ -16373,8 +17652,11 @@ onClick={()=>{
           <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
         {mounted && unreadCount > 0 && (
-          <span className="inboxBadge" suppressHydrationWarning>{unreadCount}</span>
-      )}
+          <span className="inboxBadgeReplies" suppressHydrationWarning>{unreadCount}</span>
+        )}
+        {mounted && dmUnreadCount > 0 && (
+          <span className="inboxBadgeDM" suppressHydrationWarning>{dmUnreadCount}</span>
+        )}
       </button>
  
      <button
@@ -16509,6 +17791,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
     className="iconBtn bigPlus"
     aria-label={t?.('forum_back') || 'Назад'}
   onClick={()=>{
+    if (inboxOpen && dmWithUserId) { try{ setDmWithUserId('') }catch{}; try{ setInboxTab('messages') }catch{}; return; }
     if (inboxOpen)   { try{ setInboxOpen(false) }catch{}; return; }
     if (threadRoot)  { try{ setReplyTo(null) }catch{}; try{ setThreadRoot(null) }catch{}; return; }
     try{ setReplyTo(null) }catch{};
@@ -16634,9 +17917,12 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
               {t('forum_no_posts_yet') || 'Пока нет сообщений'}
             </div>
           )}
-        </div>
+      </div>
 
       </div>
+</section>
+)}
+{(sel || dmMode) && (
 <div className="composeDock">
 {/* нижний композер */}
 <div className="composer" data-active={composerActive} ref={composerRef}>
@@ -16694,7 +17980,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
             <div className="miniCounter" aria-live="polite">
               <span>{String(text || '').trim().length}</span>
               <span className="sep">/</span>
-              <span className={(String(text || '').trim().length > 400) ? 'max over' : 'max'}>400</span>
+              <span className={(String(text || '').trim().length > textLimit) ? 'max over' : 'max'}>{textLimit}</span>
             </div>
           </div>
 
@@ -16822,11 +18108,11 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
               type="button"
               className={cls(
                 'iconBtn planeBtn',
-                (postingRef.current || cooldownLeft>0 || !canSend || String(text||'').trim().length>400) && 'disabled'
+                (postingRef.current || cooldownLeft>0 || !canSend || String(text||'').trim().length>textLimit) && 'disabled'
               )}
-              title={cooldownLeft>0 ? `${cooldownLeft}s` : (t('forum_send')||'Send')}
-              aria-label={t('forum_send')||'Send'}
-              disabled={postingRef.current || cooldownLeft>0 || !canSend || String(text||'').trim().length>400}
+              title={cooldownLeft>0 ? `${cooldownLeft}s` : (dmMode ? (t('dm_send')||'Send') : (t('forum_send')||'Send'))}
+              aria-label={dmMode ? (t('dm_send')||'Send') : (t('forum_send')||'Send')}
+              disabled={postingRef.current || cooldownLeft>0 || !canSend || String(text||'').trim().length>textLimit}
               onClick={async ()=>{
                 if (postingRef.current || cooldownLeft>0) return;
                 try{
@@ -16857,12 +18143,12 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
           if ((/^\[(VIP_EMOJI|MOZI):\/[^\]]+\]$/).test(text || '')) {
             setText(text);
           } else {
-            setText(e.target.value.slice(0,400));
+            setText(e.target.value.slice(0, textLimit));
           }
         }}
         onFocus={() => setComposerActive(true)}
         readOnly={(/^\[(VIP_EMOJI|MOZI):\/[^\]]+\]$/).test(text || '')}
-        maxLength={400}
+        maxLength={textLimit}
         placeholder={
           (/^\[(VIP_EMOJI|MOZI):\/[^\]]+\]$/).test(text || '')
             ? (t('forum_more_emoji') || 'VIP emoji selected')
@@ -17153,8 +18439,7 @@ onClick={() => {
       <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm14.71-9.04c.39-.39.39-1.02 0-1.41l-2.5-2.5a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.99-1.67z"/>
     </svg>
   </button> 
-</div>{/* /composeDock */}
-</section>
+</div>
 )}
 </div>
 </div>
