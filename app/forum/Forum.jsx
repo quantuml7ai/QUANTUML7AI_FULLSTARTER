@@ -1540,7 +1540,12 @@ function openPaymentWindow(url) {
 ========================================================= */
 const Styles = () => (
   <style jsx global>{`
-    :root{ --ink:#eaf4ff; --b:rgba(80,167,255,.32) }
+    :root{
+      --ink:#eaf4ff;
+      --b:rgba(80,167,255,.32);
+      /* Telegram Mini App: подними/опусти липкую панель Quantum Messenger */
+      --tma-inbox-sticky-top: 45px;
+    }
     .forum_root{ color:var(--ink) }
     .glass{ background:rgba(8,13,20,.94); border:1px solid rgba(255,255,255,.10); border-radius:16px; backdrop-filter: blur(12px) }
     .neon{ box-shadow:0 0 28px rgba(25,129,255,.14), inset 0 0 18px rgba(25,129,255,.06) }
@@ -4500,6 +4505,11 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   display:flex; align-items:center; justify-content:center; gap:6px;
   white-space:nowrap; flex-wrap:nowrap;
   padding:6px 0 4px;
+}
+/* TMA: отдельная ручная докрутка липкой панели */
+html[data-tma="1"] .inboxHeader,
+html[data-tma="1"] .inboxTabs{
+  top: var(--tma-inbox-sticky-top, 0px);
 }
 .inboxTabBtn{
   position:relative;

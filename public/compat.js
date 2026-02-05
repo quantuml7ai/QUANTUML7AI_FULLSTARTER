@@ -11,6 +11,11 @@
   const isGSA = /\bGSA\b/i.test(navigator.userAgent || '');
   const isWebView = isGSA || /\bwv\b/.test(ua) || (isIOS && !/safari/.test(ua));
 
+  // --- Telegram Mini App flag (for CSS hooks)
+  if (isTG) {
+    try { document.documentElement.setAttribute('data-tma', '1'); } catch {}
+  }
+
   // --- 100vh fix
   function setVhVars() {
     const vh = window.innerHeight * 0.01;
