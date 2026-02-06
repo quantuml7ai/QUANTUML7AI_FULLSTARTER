@@ -216,6 +216,80 @@ const extractDmStickersFromText = (rawText) => {
   }
   return { text, stickers: uniq };
 };
+// ВАЖНО: в ленте нужно уметь находить ссылки внутри текста (даже если не отдельной строкой)
+const FEED_URL_RE = /(https?:\/\/[^\s<>'")]+)/ig;
+
+function extractUrlsFromText(text) {
+  const s = String(text || '');
+  if (!s) return [];
+  const out = [];
+  try {
+    for (const m of s.matchAll(FEED_URL_RE)) {
+      const u = String(m?.[1] || '').trim();
+      if (u) out.push(u);
+    }
+  } catch {}
+  return out;
+}
+
+function isVideoUrl(u) {
+  const s = String(u || '').trim();
+  if (!s) return false;
+
+  // локальный превью
+  if (/^blob:/i.test(s)) return true;
+  // прямые видео по расширениям
+  if (/\.(webm|mp4|mov|m4v|mkv)(?:$|[?#])/i.test(s)) return true;
+
+  // filename=video.ext
+  if (/[?&]filename=[^&#]+\.(webm|mp4|mov|m4v|mkv)(?:$|[&#])/i.test(s)) return true;
+
+  // твои/публичные источники без расширения (vercel storage, upload endpoints и т.п.)
+  if (/vercel[-]?storage|vercel[-]?blob|\/uploads\/video|\/forum\/video|\/api\/forum\/uploadVideo/i.test(s)) return true;
+
+  return false;
+}
+
+function isImageUrl(u) {
+  const s = String(u || '').trim();
+  if (!s) return false;
+  return /\.(png|jpe?g|gif|webp|avif|svg)(?:$|[?#])/i.test(s);
+}
+
+function isAudioUrl(u) {
+  const s = String(u || '').trim();
+  if (!s) return false;
+  // если нужно, webm можно оставить (у вас уже есть audio/webm записи)
+  return /\.(ogg|mp3|m4a|wav|webm)(?:$|[?#])/i.test(s) || /\/uploads\/audio\//i.test(s) || /\/forum\/voice/i.test(s);
+}
+
+function isYouTubeUrl(u) {
+  const s = String(u || '').trim();
+  if (!s) return false;
+  // watch?v= / youtu.be / shorts / embed
+  return /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)[A-Za-z0-9_-]{6,}/i.test(s);
+}
+
+function isTikTokUrl(u) {
+  const s = String(u || '').trim();
+  if (!s) return false;
+  // ✅ только /@user/video/123.. (то, что реально умеем embed'ить)
+  return /^(?:https?:\/\/)?(?:(?:www|m)\.)?tiktok\.com\/@[\w.\-]+\/video\/\d+(?:[?#].*)?$/i.test(s);
+}
+
+function isMediaUrl(u) {
+  return isVideoUrl(u) || isImageUrl(u) || isAudioUrl(u) || isYouTubeUrl(u) || isTikTokUrl(u);
+}
+
+// Убираем ТОЛЬКО media-URL из текста (оставляем обычные ссылки и слова)
+function stripMediaUrlsFromText(text) {
+  const s = String(text || '');
+  if (!s) return '';
+  return s
+    .replace(FEED_URL_RE, (u) => (isMediaUrl(u) ? '' : u))
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
 // детектор любых ссылок/адресов (URL/email/markdown/localhost/IP/укороченные)
 const hasAnyLink = (s) => {
   const str = String(s || '');
@@ -551,8 +625,9 @@ const vipActive = !!v?.active || (vipUntil && vipUntil > Date.now());
 }
 
 function VipFlipBadge({ className = '' }) {
+  const { t } = useI18n();
   return (
-    <span className={cls('vipFlip', className)} aria-label="VIP" title="VIP">
+    <span className={cls('vipFlip', className)} aria-label={t?.('forum_vip_label')} title={t?.('forum_vip_label')}>
       <img className="vipFlipImg vip1" src={VIP_BADGE_IMG_1} alt="" loading="lazy" />
       <img className="vipFlipImg vip2" src={VIP_BADGE_IMG_2} alt="" loading="lazy" />
     </span>
@@ -1559,12 +1634,15 @@ const Styles = () => (
       margin-top: 10px;
       padding: 12px 14px;
       border-radius: 16px;
-      background: rgba(10, 16, 24, .55);
-      backdrop-filter: blur(10px) saturate(125%);
-      border: 1px solid rgba(160, 180, 255, .18);
+      background:
+        radial-gradient(140% 160% at 8% 0%, rgba(120,200,255,.18), rgba(10,16,24,.7) 55%),
+        linear-gradient(160deg, rgba(8,12,22,.92), rgba(16,26,42,.86));
+      backdrop-filter: blur(12px) saturate(135%);
+      border: 1px solid rgba(140, 190, 255, .26);
       box-shadow:
-        0 10px 30px rgba(0,0,0,.28),
-        inset 0 0 0 1px rgba(255,255,255,.06);
+        0 14px 34px rgba(0,0,0,.3),
+        inset 0 0 0 1px rgba(255,255,255,.06),
+        0 0 24px rgba(80,160,255,.16);
     }
     .postBodyFrame::before{
       content:"";
@@ -1572,8 +1650,21 @@ const Styles = () => (
       inset: 1px;
       border-radius: 15px;
       pointer-events:none;
-      background: radial-gradient(120% 140% at 10% 0%, rgba(80,167,255,.18), rgba(0,0,0,0) 60%);
-      opacity: .9;
+      background: radial-gradient(140% 140% at 0% 0%, rgba(120,200,255,.22), rgba(0,0,0,0) 62%);
+      opacity: .85;
+    }
+    .postBodyFrame::after{
+      content:"";
+      position:absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events:none;
+      background: linear-gradient(120deg, rgba(255,255,255,.04), transparent 35%, rgba(120,200,255,.08));
+      opacity:.7;
+    }
+    .postBodyFrame > *{
+      position: relative;
+      z-index: 1;
     }
     .postBodyContent{
       position: relative; /* поверх ::before */
@@ -1847,9 +1938,26 @@ font-size: 12px;
   width:100%;
 }
 .head.head--collapsed{
-  transform: translateY(calc(-100% - 12px));
+  transform: translateY(-100%);
   opacity: 0;
   pointer-events: none;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  height: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+html[data-video-feed="1"] .head.head--collapsed{
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  height: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 .headPeekBtn{
   position: fixed;
@@ -1873,8 +1981,12 @@ font-size: 12px;
 }
 .headPeekBtn:active{ transform: translateX(-50%) scale(.97); }
 html[data-inbox-open="1"] .headPeekBtn{
-  top: calc(110px + env(safe-area-inset-top, 0px));
+  top: calc(90px + env(safe-area-inset-top, 0px));
 }
+/* ✅ Telegram Mini App: опускаем стрелку чуть ниже, чтобы не налезала на табы */
+html[data-tma="1"][data-inbox-open="1"] .headPeekBtn{
+  top: calc(120px + env(safe-area-inset-top, 0px)); /* +8px */
+}  
 .headCollapseBtn{
   position: absolute;
   left: 50%;
@@ -1917,6 +2029,8 @@ html[data-inbox-open="1"] .headPeekBtn{
 }
 /* [STYLES:BODY-SCOPE] — ограничиваем область действия .body только форумом */
 .forum_root .body{ padding:12px; overflow:visible }
+html[data-head-hidden="1"] .forum_root .body{ padding-top:0; margin-top:0; }
+html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 
 /* [STYLES:LAYOUT-FLEX] — делаем «коридор» высоты и скроллящиеся тела секций */
 .forum_root{
@@ -2536,7 +2650,70 @@ html[data-inbox-open="1"] .headPeekBtn{
 .iconBtn{ width:40px; height:40px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:transparent; display:grid; place-items:center; transition:transform .08s, box-shadow .2s }
 .iconBtn:hover{ box-shadow:0 0 18px rgba(80,167,255,.25) } .iconBtn:active{ transform:scale(.96) }
 
-.searchDrop{ position:absolute; top:48px; right:0; width:100%; max-height:360px; overflow:auto; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:8px; z-index:3000 }
+.searchDrop{ position:absolute; top:calc(100% + 10px); right:0; inset-inline-end:0; width:100%; max-height:460px; overflow:auto; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:8px; z-index:3000 }
+.searchResultItem{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  padding:14px 14px;
+  min-height:72px;
+}
+.searchResultMedia{
+  width:64px; height:64px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.16);
+  background: radial-gradient(120% 120% at 10% 0%, rgba(120,200,255,.18), rgba(10,16,30,.9));
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  flex:0 0 auto;
+  position:relative;
+}
+.searchResultThumb{ width:100%; height:100%; object-fit:cover; display:block; }
+.searchResultIcon{ font-size:22px; line-height:1; }
+.searchResultPlay{
+  position:absolute;
+  right:4px;
+  bottom:4px;
+  font-size:10px;
+  line-height:1;
+  padding:2px 4px;
+  border-radius:8px;
+  background:rgba(0,0,0,.55);
+  color:#fff;
+}
+.searchResultContent{ min-width:0; display:flex; flex-direction:column; gap:4px; }
+.searchResultTitle{
+  font-weight:900;
+  font-size:1.08rem;
+  color:#ffd36a;
+  text-shadow:0 2px 12px rgba(255,190,60,.35);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  white-space:normal;
+  word-break:normal;
+  overflow-wrap:break-word;
+  text-align:start;
+}
+.searchResultKind{
+  color:#ffcc55;
+  font-weight:900;
+  letter-spacing:.3px;
+}
+.searchResultTitleText{
+  color:#ffd36a;
+}
+.searchResultText{
+  font-size:.9rem;
+  color:rgba(234,244,255,.92);
+  white-space:normal;
+  word-break:normal;
+  overflow-wrap:break-word;
+  text-align:start;
+}
 .sortDrop{ position:absolute; top:68px; right:100px; width:120px; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:6px; z-index:3000 }
 
 .starBtn{
@@ -3780,6 +3957,90 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 }
 .confirmPopBtn.ok:hover{ filter: brightness(1.12) saturate(1.08); }
 .confirmPopBtn svg{ width: 18px; height: 18px; }
+.dmConfirmOverlay{
+  background: rgba(5,8,14,.35);
+  backdrop-filter: blur(2px);
+}
+.dmConfirmPop{
+  position:absolute;
+  width:320px;
+  max-width:calc(100vw - 16px);
+  padding:12px 14px;
+  border-radius:14px;
+  background: linear-gradient(160deg, rgba(12,20,34,.98), rgba(6,10,18,.98));
+  border:1px solid rgba(140,190,255,.22);
+  box-shadow: 0 18px 36px rgba(0,0,0,.45), 0 0 26px rgba(80,160,255,.18);
+  backdrop-filter: blur(10px) saturate(140%);
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  animation: dmPopIn .16s ease-out;
+}
+.dmConfirmPop::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  background: radial-gradient(140% 120% at 0% 0%, rgba(120,200,255,.22), transparent 55%);
+  opacity:.7;
+  pointer-events:none;
+}
+.dmConfirmPop > *{ position:relative; z-index:1; }
+.dmConfirmTitle{
+  font-size:14px;
+  font-weight:900;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  color:#eaf4ff;
+}
+.dmConfirmText{
+  font-size:13px;
+  line-height:1.35;
+  color:#d9ecff;
+}
+.dmConfirmCheck{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  color:#cfe4ff;
+}
+.dmConfirmCheck input{
+  width:16px;
+  height:16px;
+  accent-color:#7fd7ff;
+}
+.dmConfirmActions{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+}
+.dmConfirmBtn{
+  border:1px solid rgba(140,190,255,.25);
+  background: rgba(255,255,255,.05);
+  color:#eaf4ff;
+  padding:6px 12px;
+  border-radius:10px;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.02em;
+  cursor:pointer;
+  transition: transform .12s ease, filter .12s ease, box-shadow .18s ease;
+}
+.dmConfirmBtn:hover{ filter:brightness(1.08) saturate(1.08); box-shadow:0 0 16px rgba(80,167,255,.25); }
+.dmConfirmBtn:active{ transform:translateY(1px) scale(.98); }
+.dmConfirmBtn.primary{
+  border-color: rgba(140,200,255,.65);
+  background: linear-gradient(120deg, rgba(40,140,255,.65), rgba(100,200,255,.35));
+  color:#0b1b2e;
+  text-shadow:0 0 8px rgba(255,255,255,.4);
+}
+.dmConfirmBtn.primary:hover{ filter:brightness(1.1) saturate(1.1); }
+.dmConfirmBtn.ghost{ background: transparent; color:#d6e9ff; }
+@keyframes dmPopIn{
+  0%{ opacity:0; transform: translateY(6px) scale(.98); }
+  100%{ opacity:1; transform: translateY(0) scale(1); }
+}
 /* [FOCUS_TOOLS_STYLES:BEGIN] — панель инструментов композера по фокусу */
 .composer .tools{
   max-height: 0;
@@ -4403,25 +4664,27 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 
 /* красный бейдж непрочитанного (Replies) */
 .inboxBadgeReplies{
-  position:absolute; right:-2px; top:-2px;
-  min-width:16px; height:16px; padding:0 4px;
+  position:absolute; right:-6px; top:-6px;
+  min-width:18px; height:18px; padding:0 5px;
   display:inline-flex; align-items:center; justify-content:center;
   font:600 10px/1 ui-monospace,monospace;
   color:#fff; background:#ff4d4d;
   border:1px solid rgba(255,255,255,.45);
   border-radius:999px;
   box-shadow:0 0 10px rgba(255,60,60,.5);
+  z-index:3;
 }
 /* зелёный/оранжевый бейдж непрочитанного (DM) */
 .inboxBadgeDM{
-  position:absolute; left:-2px; top:-2px;
-  min-width:16px; height:16px; padding:0 4px;
+  position:absolute; left:-6px; top:-6px;
+  min-width:18px; height:18px; padding:0 5px;
   display:inline-flex; align-items:center; justify-content:center;
   font:600 10px/1 ui-monospace,monospace;
   color:#0d1b12; background:#35d07f;
   border:1px solid rgba(255,255,255,.55);
   border-radius:999px;
   box-shadow:0 0 10px rgba(53,208,127,.5);
+  z-index:2;
 }
 
 /* тело «Inbox» — карточки ровно как посты */
@@ -4452,32 +4715,34 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 
 /* красный бейдж (Replies) */
 .inboxBadgeReplies{
-  position:absolute; right:-2px; top:-2px;
-  min-width:16px; height:16px; padding:0 4px;
+  position:absolute; right:-6px; top:-6px;
+  min-width:18px; height:18px; padding:0 5px;
   display:inline-flex; align-items:center; justify-content:center;
   font:600 10px/1 ui-monospace,monospace;
   color:#fff; background:#ff4d4d;
   border:1px solid rgba(255,255,255,.45);
   border-radius:999px;
   box-shadow:0 0 10px rgba(255,60,60,.5);
+  z-index:3;
 }
 /* зелёный/оранжевый бейдж (DM) */
 .inboxBadgeDM{
-  position:absolute; left:-2px; top:-2px;
-  min-width:16px; height:16px; padding:0 4px;
+  position:absolute; left:-6px; top:-6px;
+  min-width:18px; height:18px; padding:0 5px;
   display:inline-flex; align-items:center; justify-content:center;
   font:600 10px/1 ui-monospace,monospace;
   color:#0d1b12; background:#35d07f;
   border:1px solid rgba(255,255,255,.55);
   border-radius:999px;
   box-shadow:0 0 10px rgba(53,208,127,.5);
+  z-index:2;
 }
 
 /* ---- INBOX tabs ---- */
 .inboxHeader{
   position:sticky; top:0; z-index:8;
   display:flex; flex-direction:column; gap:6px;
-  padding:8px 0 6px;
+  padding:8px 6px 6px;
   background:
     radial-gradient(70% 120% at 50% 0%, rgba(120,180,255,.18), rgba(10,16,28,.86) 60%),
     linear-gradient(180deg, rgba(10,16,28,.95), rgba(10,16,28,.55));
@@ -4502,10 +4767,11 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 }
 .inboxTabs{
   position:sticky; top:0; z-index:9;
-  display:flex; align-items:center; justify-content:center; gap:6px;
+  display:flex; align-items:center; justify-content:center; gap:4px;
   white-space:nowrap; flex-wrap:nowrap;
   padding:6px 0 4px;
 }
+.inboxBody{ padding:0 6px 6px; }
 /* TMA: отдельная ручная докрутка липкой панели */
 html[data-tma="1"] .inboxHeader,
 html[data-tma="1"] .inboxTabs{
@@ -4513,12 +4779,15 @@ html[data-tma="1"] .inboxTabs{
 }
 .inboxTabBtn{
   position:relative;
-  display:inline-flex; align-items:center; gap:8px;
+  display:inline-flex; align-items:center; gap:6px;
+  flex:1 1 0;
+  min-width:0;
+  justify-content:center;
   border:1px solid rgba(140,190,255,.35);
   background:linear-gradient(120deg, rgba(12,20,34,.7), rgba(60,120,255,.18));
   color:#eaf4ff; border-radius:999px;
-  padding:6px 12px; font-weight:800;
-  font-size:clamp(11px, 2.8vw, 13px);
+  padding:6px 8px; font-weight:800;
+  font-size:clamp(10px, 2.6vw, 12px);
   box-shadow:0 0 16px rgba(80,167,255,.14);
   transition:transform .12s ease, filter .12s ease, box-shadow .18s ease;
 }
@@ -4529,7 +4798,7 @@ html[data-tma="1"] .inboxTabs{
   border-color:rgba(170,220,255,.75);
   box-shadow:0 0 22px rgba(80,167,255,.35);
 }
-.inboxTabLabel{ display:inline-flex; align-items:center; }
+.inboxTabLabel{ display:inline-flex; align-items:center; white-space:nowrap; min-width:0; }
 .inboxTabBadge{
   min-width:18px; height:18px; padding:0 6px;
   display:inline-flex; align-items:center; justify-content:center;
@@ -4537,6 +4806,7 @@ html[data-tma="1"] .inboxTabs{
   letter-spacing:.2px;
   border:1px solid rgba(255,255,255,.55);
   box-shadow:0 0 10px rgba(0,0,0,.25);
+  flex:0 0 auto;
 }
 .inboxTabBadge[data-kind="replies"]{ background:#ff4d4d; color:#fff; box-shadow:0 0 12px rgba(255,80,80,.55); }
 .inboxTabBadge[data-kind="messages"]{ background:#35d07f; color:#0d1b12; box-shadow:0 0 12px rgba(53,208,127,.6); }
@@ -4549,40 +4819,106 @@ html[data-tma="1"] .inboxTabs{
   height:1px; opacity:.28;
   background:linear-gradient(90deg, rgba(120,180,255,.05), rgba(120,180,255,.6), rgba(120,180,255,.05));
 }
+@media (max-width: 420px){
+  .inboxTabBtn{ padding:5px 6px; font-size:10px; gap:4px; }
+  .inboxTabBadge{ min-width:16px; height:16px; padding:0 5px; font-size:9px; }
+}
 .dmRow{
-  display:flex; gap:10px; align-items:center; text-align:left;
+  display:flex; gap:10px; align-items:center; text-align:start;
   width:100%;
   padding:10px 12px;
   border-radius:14px;
-  border:1px solid rgba(140,190,255,.16);
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(120,200,255,.22);
   background:
-    linear-gradient(140deg, rgba(12,20,34,.85), rgba(18,30,48,.65));
-  box-shadow: 0 10px 22px rgba(0,0,0,.25), inset 0 0 18px rgba(120,180,255,.08);
+    radial-gradient(120% 120% at 10% 0%, rgba(120,220,255,.18), rgba(10,16,30,.92) 48%),
+    linear-gradient(140deg, rgba(8,14,28,.96), rgba(22,36,62,.8));
+  box-shadow: 0 12px 26px rgba(0,0,0,.3), inset 0 0 22px rgba(120,200,255,.12);
   transition: transform .14s ease, box-shadow .18s ease, border-color .18s ease;
 }
 .dmRow:hover{
   transform: translateY(-1px);
-  border-color: rgba(160,210,255,.35);
-  box-shadow: 0 12px 28px rgba(0,0,0,.32), inset 0 0 24px rgba(120,180,255,.12);
+  border-color: rgba(160,210,255,.45);
+  box-shadow: 0 16px 32px rgba(0,0,0,.35), inset 0 0 28px rgba(120,190,255,.16);
 }
+.dmRow::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg, transparent, rgba(140,220,255,.24), transparent);
+  transform: translateX(-120%);
+  animation: dmRowScan 12s ease-in-out infinite;
+  opacity:.55;
+  pointer-events:none;
+}
+.dmRow:hover::after{ opacity:.8; }
 .dmRowAvatar{
   width:44px; height:44px; border-radius:14px;
   padding:2px;
-  background: linear-gradient(135deg, rgba(255,215,130,.4), rgba(120,180,255,.4));
-  box-shadow:0 0 16px rgba(120,180,255,.35), inset 0 0 8px rgba(255,220,150,.35);
+  background: linear-gradient(135deg, rgba(255,215,130,.45), rgba(120,200,255,.55));
+  box-shadow:0 0 18px rgba(120,200,255,.45), inset 0 0 10px rgba(255,220,150,.35);
+  cursor:pointer;
 }
 .dmRowAvatarImg{
   width:100%; height:100%; border-radius:12px; overflow:hidden;
 }
+.dmRowName{ font-weight:800; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#eaf4ff; text-shadow:0 0 12px rgba(120,200,255,.35); }
+.dmRowTime{ font-size:12px; opacity:.75; margin-inline-start:auto; white-space:nowrap; font-variant-numeric: tabular-nums; }
+.dmRowPreview{ font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#cde6ff; }
+.dmPreviewFrame{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:4px 8px;
+  border-radius:10px;
+  background:
+    linear-gradient(160deg, rgba(10,18,32,.82), rgba(14,28,48,.65));
+  border:1px solid rgba(120,180,255,.2);
+  box-shadow: inset 0 0 12px rgba(80,140,255,.12);
+  color:#cfe4ff;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.dmPreviewMedia{
+  width:32px; height:32px;
+  border-radius:8px;
+  overflow:hidden;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  position:relative;
+  background: radial-gradient(120% 120% at 10% 0%, rgba(120,200,255,.25), rgba(12,18,30,.9));
+  border:1px solid rgba(120,180,255,.25);
+}
+.dmPreviewImg{ width:100%; height:100%; object-fit:cover; display:block; }
+.dmPreviewIcon{ font-size:14px; line-height:1; }
+.dmPreviewPlay{
+  position:absolute;
+  right:2px;
+  bottom:2px;
+  font-size:9px;
+  line-height:1;
+  padding:1px 3px;
+  border-radius:6px;
+  background:rgba(0,0,0,.55);
+  color:#fff;
+}
+.dmPreviewText{ min-width:0; overflow:hidden; text-overflow:ellipsis; }
+.dmUnreadDot{ width:12px; height:12px; border-radius:999px; background:#35d07f; box-shadow:0 0 12px rgba(53,208,127,.7); flex:0 0 auto; animation: dmPulse 2.6s ease-in-out infinite; }
 .dmRowMain{ flex:1 1 auto; min-width:0; }
 .dmRowTop{ display:flex; align-items:center; gap:8px; }
-.dmRowName{ font-weight:700; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.dmRowTime{ font-size:12px; opacity:.7; margin-left:auto; white-space:nowrap; }
-.dmRowPreview{ opacity:.8; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.dmUnreadDot{ width:12px; height:12px; border-radius:999px; background:#35d07f; box-shadow:0 0 12px rgba(53,208,127,.7); flex:0 0 auto; }
+.dmRowUser{ display:flex; align-items:center; gap:8px; min-width:0; flex:1 1 auto; flex-wrap:wrap; }
+.dmRowNick{ font-size:.95rem; padding:.22rem .5rem; }
+.dmRow .nick-badge .nick-text{ max-width:16ch; }
+.dmRow{ --vip-badge-w: 34px; --vip-badge-h: 36px; }
+.dmThreadHeader{ --vip-badge-w: 38px; --vip-badge-h: 40px; }
 .dmThreadHeader{
   display:flex; align-items:center; gap:10px;
   padding:8px 10px;
+  margin:0 6px;
   border-radius:14px;
   background: linear-gradient(140deg, rgba(12,20,34,.75), rgba(18,30,48,.55));
   border:1px solid rgba(140,190,255,.2);
@@ -4592,12 +4928,15 @@ html[data-tma="1"] .inboxTabs{
   width:46px; height:46px; border-radius:16px; padding:2px;
   background: linear-gradient(135deg, rgba(255,215,130,.45), rgba(120,180,255,.45));
   box-shadow:0 0 18px rgba(120,180,255,.4), inset 0 0 8px rgba(255,220,150,.35);
+  cursor:pointer;
 }
 .dmThreadAvatarImg{ width:100%; height:100%; border-radius:14px; overflow:hidden; }
 .dmThreadMeta{ min-width:0; display:flex; flex-direction:column; }
-.dmThreadName{ font-weight:800; letter-spacing:.3px; }
-.dmThreadId{ font-size:12px; opacity:.7; }
-.dmThread{ display:flex; flex-direction:column; gap:8px; }
+.dmThreadName{ font-weight:800; letter-spacing:.3px; color:#eaf4ff; text-shadow:0 0 12px rgba(120,190,255,.35); }
+.dmThreadId{ font-size:12px; opacity:.7; color:#b6cce4; }
+.dmThreadUser{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.dmThreadNick{ font-size:1.05rem; padding:.3rem .6rem; }
+.dmThread{ display:flex; flex-direction:column; gap:8px; padding:0 6px; }
 .dmBackBtn{ margin-bottom:6px; }
 .dmMsgRow{ display:flex; }
 .dmMsgRow.me{ justify-content:flex-end; }
@@ -4606,25 +4945,85 @@ html[data-tma="1"] .inboxTabs{
   max-width:100%;
   padding:10px 12px;
   border-radius:14px;
+  position:relative;
+  overflow:hidden;
+  color:#eaf4ff;
   background:
+    radial-gradient(120% 140% at 12% 0%, rgba(120,200,255,.16), rgba(12,18,30,.88) 55%),
     linear-gradient(160deg, rgba(16,26,42,.92), rgba(10,18,30,.85));
   border:1px solid rgba(140,190,255,.22);
   box-shadow: 0 10px 24px rgba(0,0,0,.28), inset 0 0 18px rgba(120,180,255,.08);
 }
 .dmMsgBubble.me{
   background:
-    linear-gradient(160deg, rgba(40,120,255,.28), rgba(20,40,70,.9));
+    radial-gradient(120% 140% at 88% 0%, rgba(120,200,255,.26), rgba(16,28,46,.86) 58%),
+    linear-gradient(160deg, rgba(40,120,255,.3), rgba(20,40,70,.9));
   border-color:rgba(140,190,255,.45);
   box-shadow: 0 12px 26px rgba(0,0,0,.3), inset 0 0 20px rgba(120,180,255,.18);
 }
-.dmMsgMeta{ margin-top:6px; font-size:11px; opacity:.8; white-space:nowrap; display:flex; align-items:center; gap:6px; }
+.dmMsgHeader{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:8px;
+}
+.dmMsgHeader.me{ justify-content:flex-end; }
+.dmMsgAvatar{
+  width:34px;
+  height:34px;
+  border-radius:12px;
+  overflow:hidden;
+  background:transparent;
+  border:none;
+  box-shadow:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.dmMsgAvatarImg{ width:100%; height:100%; border-radius:12px; overflow:hidden; background:transparent; border:0; }
+.dmMsgNick{ font-size:.95rem; padding:.22rem .52rem; }
+.dmFileCard{
+  width:64px;
+  height:64px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.18);
+  background:
+    radial-gradient(120% 120% at 10% 0%, rgba(120,200,255,.22), rgba(10,16,30,.92));
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 8px 18px rgba(0,0,0,.28), inset 0 0 14px rgba(120,180,255,.12);
+}
+.dmFileIcon{ font-size:22px; line-height:1; }
+.mediaBox[data-kind="file"]{ text-decoration:none; }
+.dmTextFrame{
+  position:relative;
+  padding:8px 10px;
+  border-radius:12px;
+  background:
+    linear-gradient(160deg, rgba(12,20,34,.88), rgba(8,14,24,.8));
+  border:1px solid rgba(120,180,255,.22);
+  box-shadow: inset 0 0 12px rgba(80,140,255,.12);
+}
+.dmTextFrame::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  background: radial-gradient(140% 140% at 0% 0%, rgba(120,200,255,.18), transparent 60%);
+  opacity:.8;
+  pointer-events:none;
+}
+.dmTextContent{ position:relative; z-index:1; }
+.dmMsgFooter{ margin-top:6px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.dmMsgMeta{ font-size:11px; opacity:.8; white-space:nowrap; display:flex; align-items:center; gap:6px; margin-left:auto; }
 .dmStatus{ margin-left:8px; font-weight:700; letter-spacing:.02em; }
 .dmStatus.seen{ color:#7fd7ff; text-shadow:0 0 8px rgba(120,200,255,.5); }
 .dmMediaGrid{ display:grid; gap:8px; margin-top:8px; }
 .dmMediaBox{ margin:0; }
 .dmAttachLinks{ margin-top:8px; display:grid; gap:4px; }
 .dmAttachLinks a{ color:#9fd1ff; word-break:break-all; }
-.dmMsgActions{ margin-top:6px; display:flex; gap:8px; }
+.dmMsgActions{ display:flex; gap:8px; flex-wrap:wrap; }
 .dmActionBtn{
   border:1px solid rgba(140,190,255,.28);
   background:linear-gradient(120deg, rgba(12,20,34,.7), rgba(60,120,255,.18));
@@ -4636,9 +5035,31 @@ html[data-tma="1"] .inboxTabs{
   letter-spacing:.02em;
   box-shadow:0 0 14px rgba(80,167,255,.18);
   transition:transform .12s ease, filter .12s ease, box-shadow .18s ease;
+  cursor:pointer;
 }
 .dmActionBtn:hover{ filter:brightness(1.08) saturate(1.08); box-shadow:0 0 18px rgba(80,167,255,.28); }
 .dmActionBtn:active{ transform:translateY(1px) scale(.98); }
+.dmActionBtn.danger{
+  border-color:rgba(255,110,110,.5);
+  background:linear-gradient(120deg, rgba(42,10,16,.92), rgba(120,40,55,.55));
+  color:#ffd6d6;
+  box-shadow:0 0 14px rgba(255,90,90,.25);
+}
+.dmActionBtn.danger:hover{ filter:brightness(1.08) saturate(1.1); box-shadow:0 0 18px rgba(255,90,90,.32); }
+@keyframes dmRowScan{
+  0%{ transform: translateX(-120%); }
+  45%{ transform: translateX(120%); }
+  100%{ transform: translateX(120%); }
+}
+@keyframes dmPulse{
+  0%, 100%{ transform:scale(1); box-shadow:0 0 12px rgba(53,208,127,.7); }
+  50%{ transform:scale(1.18); box-shadow:0 0 18px rgba(53,208,127,.85); }
+}
+@media (prefers-reduced-motion: reduce){
+  .dmRow, .dmActionBtn, .dmConfirmPop{ transition: none !important; }
+  .dmConfirmPop{ animation: none !important; }
+  .dmRow::after, .dmUnreadDot{ animation: none !important; }
+}
 /* ---- ATTACH (скрепка) — стиль как у voiceBtn ---- */
 .attachBtn{
   position:relative; display:inline-flex; align-items:center; justify-content:center;
@@ -5641,8 +6062,7 @@ const VIP_EMOJI = [
   '/vip/emoji/e48.gif',
   '/vip/emoji/e49.gif',
   '/vip/emoji/e50.gif',
-  '/vip/emoji/e51.gif',
-  '/vip/emoji/e52.gif',
+  '/vip/emoji/e51.gif', 
   '/vip/emoji/e53.gif',
   '/vip/emoji/e54.gif',
   '/vip/emoji/e55.gif',
@@ -5936,14 +6356,14 @@ function ReportPopover({
       className="reportPopover neon glass"
       data-dir={dirAttr}      
       role="menu"
-      aria-label={t?.('forum_report_title') || 'Report content'}
+      aria-label={t?.('forum_report_title')}
       style={style}
       onClick={(e) => {
         e.preventDefault()
         e.stopPropagation()
       }}
     >
-      <div className="reportTitle">{t?.('forum_report_title') || 'Report content'}</div>
+      <div className="reportTitle">{t?.('forum_report_title')}</div>
       <div className="reportDivider" />    
       <button
         type="button"
@@ -5956,7 +6376,7 @@ function ReportPopover({
         }}
       >
         <span aria-hidden="true">🔞</span>
-        <span>{t?.('forum_report_reason_porn') || 'Порно'}</span>
+        <span>{t?.('forum_report_reason_porn')}</span>
       </button>
       <button
         type="button"
@@ -5969,7 +6389,7 @@ function ReportPopover({
         }}
       >
         <span aria-hidden="true">⚔️</span>
-        <span>{t?.('forum_report_reason_violence') || 'Насилие'}</span>
+        <span>{t?.('forum_report_reason_violence')}</span>
       </button>
       <button
         type="button"
@@ -5982,7 +6402,7 @@ function ReportPopover({
         }}
       >
         <span aria-hidden="true">🙈</span>
-        <span>{t?.('forum_report_reason_boring') || 'Неинтересно'}</span>
+        <span>{t?.('forum_report_reason_boring')}</span>
       </button>
     </div>
   )
@@ -6247,7 +6667,7 @@ function QCoinWithdrawPopover({ anchorRef, onClose, onOpenQuests, t, questEnable
   height={72}
   unoptimized
   role="button"
-  aria-label={t('quest_open') || 'Quests'}
+  aria-label={t('quest_open')}
   aria-disabled={!questEnabled}
   tabIndex={questEnabled ? 0 : -1}
   onClick={questEnabled ? handleQuestClick : undefined}
@@ -6280,7 +6700,7 @@ function QCoinWithdrawPopover({ anchorRef, onClose, onOpenQuests, t, questEnable
 
         {/* тело — скроллимое */}
         <div className="qcoinPopBody">
-          <div className="meta">{t('forum_qcoin_withdraw_note') || ''}</div>
+          <div className="meta">{t('forum_qcoin_withdraw_note')}</div>
           {/* ...тут может быть длинное описание/правила и т.д. ... */}
         </div>
 
@@ -6290,9 +6710,9 @@ function QCoinWithdrawPopover({ anchorRef, onClose, onOpenQuests, t, questEnable
   type="button"
   className="btn qcBtn qcExchange"
   onClick={handleExchangeClick}
-  title={t('forum_qcoin_exchange') || 'Биржа'}
+  title={t('forum_qcoin_exchange')}
 >
-  {t('forum_qcoin_exchange') || 'Биржа'}
+  {t('forum_qcoin_exchange')}
 </button>
 
           <button
@@ -6344,11 +6764,11 @@ function QCoinInline({ t, userKey, vipActive, anchorRef }) {
           className={cls('qcoinX2', vipActive ? 'vip' : 'needVip', 'hoverPop')}
           role="button"
           tabIndex={0}
-          aria-label="x2 VIP"
+          aria-label={t('forum_qcoin_x2_label')}
           title={
             vipActive
-              ? (t('forum_qcoin_x2_active') || '×2 за VIP — активно')
-              : (t('forum_qcoin_x2_get') || 'Купить VIP+ чтобы получить ×2')
+              ? t('forum_qcoin_x2_active')
+              : t('forum_qcoin_x2_get')
           }
           onClick={() => { try { window.dispatchEvent(new Event('vip:open')) } catch {} }}
           onKeyDown={(e) => {
@@ -6370,7 +6790,7 @@ function QCoinInline({ t, userKey, vipActive, anchorRef }) {
           try { q.open?.() } catch {}
         }}
         style={{ cursor: 'pointer' }}
-        title={t('forum_qcoin_open_hint') || 'Открыть Q COIN'}
+        title={t('forum_qcoin_open_hint')}
         suppressHydrationWarning
       >
         {formattedBalance}
@@ -6388,8 +6808,8 @@ function FollowersCounterInline({ t, viewerId, count, loading }) {
       type="button"
       className={`subsCounter ${noAuth ? 'noAuth' : 'authed'}`}
       onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); }}
-      title={t?.('forum_followers') || 'Подписчики'}
-     aria-label="Followers count"
+      title={t?.('forum_followers')}
+     aria-label={t?.('forum_followers')}
       aria-disabled={noAuth}
     >
       <span className="subsRing" aria-hidden />
@@ -6724,7 +7144,7 @@ function UserInfoPopover({
     >
       <div className="userInfoBioRow">
         <div className="text-sm font-semibold">
-          {t?.('forum_user_popover_bio') || 'Bio'}
+          {t?.('forum_user_popover_bio')}
         </div>
         <button
           type="button"
@@ -6735,8 +7155,8 @@ function UserInfoPopover({
             } catch {}
             onClose?.();
           }}
-          title={t?.('inbox_tab_messages') || 'Messages'}
-          aria-label={t?.('inbox_tab_messages') || 'Messages'}
+          title={t?.('inbox_tab_messages')}
+          aria-label={t?.('inbox_tab_messages')}
         >
           <svg viewBox="0 0 24 24" aria-hidden>
             <path d="M3 7h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.6" fill="none"/>
@@ -6751,14 +7171,14 @@ function UserInfoPopover({
         >
           {translateBusy ? (
             <>
-              <span>{t?.('forum_user_popover_loading') || 'Loading…'}</span>
+              <span>{t?.('forum_user_popover_loading')}</span>
               <span className="userInfoTranslateShimmer" aria-hidden="true" />
             </>
           ) : (
             <span>
               {showTranslated
-                ? (t?.('forum_user_popover_show_original') || 'Show original')
-                : (t?.('forum_user_popover_translate') || 'Translate')}
+                ? t?.('forum_user_popover_show_original')
+                : t?.('forum_user_popover_translate')}
             </span>
           )}
         </button>
@@ -6770,13 +7190,13 @@ function UserInfoPopover({
 
       {status === 'error' && (
         <div className="text-sm text-red-200">
-          <div>{t?.('forum_user_popover_error') || 'Failed to load user info'}</div>
+          <div>{t?.('forum_user_popover_error')}</div>
           <button
             type="button"
             className="userInfoTranslateToggle"
             onClick={handleRetry}
           >
-            {t?.('forum_retry') || 'Retry'}
+            {t?.('forum_retry')}
           </button>
         </div>
       )}
@@ -6804,20 +7224,20 @@ function UserInfoPopover({
                   <span className="subsRing" aria-hidden="true" />
                   <span className="subsStar" aria-hidden="true">★</span>
                 </span>
-                <span className="srOnly">{t?.('forum_user_popover_stars') || 'Stars'}</span>
+                <span className="srOnly">{t?.('forum_user_popover_stars')}</span>
               </div>
               <div className="userInfoStatValue"><HydrateText value={formatCount(stats.followers)} /></div>
             </div>
             <div className="userInfoStat">
-              <div className="userInfoStatLabel">{t?.('forum_user_popover_posts') || 'Posts'}</div>
+              <div className="userInfoStatLabel">{t?.('forum_user_popover_posts')}</div>
               <div className="userInfoStatValue"><HydrateText value={formatCount(stats.posts)} /></div>
             </div>
             <div className="userInfoStat">
-              <div className="userInfoStatLabel">{t?.('forum_user_popover_topics') || 'Topics'}</div>
+              <div className="userInfoStatLabel">{t?.('forum_user_popover_topics')}</div>
               <div className="userInfoStatValue"><HydrateText value={formatCount(stats.topics)} /></div>
             </div>
             <div className="userInfoStat">
-              <div className="userInfoStatLabel">{t?.('forum_user_popover_likes') || 'Likes'}</div>
+              <div className="userInfoStatLabel">{t?.('forum_user_popover_likes')}</div>
               <div className="userInfoStatValue"><HydrateText value={formatCount(stats.likes)} /></div>
             </div>
           </>
@@ -7402,8 +7822,8 @@ const save = async () => {
         try {
           const mod = await moderateImageFiles([uploadFile]);
           if (mod?.decision === 'block') {
-            toastI18n('warn', 'forum_image_blocked', 'Image rejected by community rules');
-            toastI18n('info', reasonKey(mod?.reason), reasonFallbackEN(mod?.reason));
+            toastI18n('warn', 'forum_image_blocked');
+            toastI18n('info', reasonKey(mod?.reason));
             // rollback optimistic
             mergeProfileCache(uid, { nickname: prevNick, icon: prevIcon, updatedAt: Date.now() });
             onSaved?.({ nickname: prevNick, icon: prevIcon });
@@ -7415,7 +7835,8 @@ const save = async () => {
           }
         } catch (err) {
           console.error('[moderation] avatar check failed', err);
-          toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');          toastI18n('info', 'forum_moderation_try_again', 'Please try again');
+          toastI18n('err', 'forum_moderation_error');
+          toastI18n('info', 'forum_moderation_try_again');
           // rollback optimistic
           mergeProfileCache(uid, { nickname: prevNick, icon: prevIcon, updatedAt: Date.now() });
           onSaved?.({ nickname: prevNick, icon: prevIcon });
@@ -7567,13 +7988,17 @@ if (mountedRef.current) setBusy(false);
             />
           )}
           {!uploadFile && (
-            <div className="avaUploadSquareTxt">UPLOAD<br/>AVATAR</div>
+            <div className="avaUploadSquareTxt">
+              {t('forum_avatar_upload_top')}
+              <br/>
+              {t('forum_avatar_upload_bottom')}
+            </div>
           )}
           {uploadFile && !finalAvatarUrl && !rawAvatarUrl && (
-            <div className="avaUploadSquareTxt">PROCESSING…</div>
+            <div className="avaUploadSquareTxt">{t('forum_processing')}</div>
           )}          
           {uploadBusy && (
-            <div className="avaUploadSquareBusy">{t('saving') || 'Saving…'}</div>
+            <div className="avaUploadSquareBusy">{t('saving')}</div>
           )}
         </button>
 
@@ -7588,7 +8013,7 @@ if (mountedRef.current) setBusy(false);
 
       {/* Zoom: следующей строкой, на всю ширину, адаптив */}
       <div className="avaZoomWideRow">
-        <span className="avaZoomLbl">Zoom</span>
+        <span className="avaZoomLbl">{t('forum_zoom')}</span>
         <input
           type="range"
           className="cyberRange"
@@ -7625,9 +8050,9 @@ if (mountedRef.current) setBusy(false);
             placeholder={t('forum_profile_nickname_ph')}
           />
         <div className="meta mt-1">
-            {nickBusy && (t('checking') || 'Проверяю…')}
-            {!nickBusy && nickFree===true  && (t('nick_free')  || 'Ник свободен')}
-            {!nickBusy && nickFree===false && (t('nick_taken') || 'Ник уже занят')}
+            {nickBusy && t('checking')}
+            {!nickBusy && nickFree===true  && t('nick_free')}
+            {!nickBusy && nickFree===false && t('nick_taken')}
           </div>
         </label>
         <div>
@@ -7636,7 +8061,7 @@ if (mountedRef.current) setBusy(false);
           <div className="profileAvatarHead">
             <div className="meta">{t('forum_profile_avatar')}</div>
             <div className="meta" style={{ opacity: .7 }}>
-              {uploadFile ? `${imgInfo.w || 0}×${imgInfo.h || 0}` : (t('') || '')}
+              {uploadFile ? `${imgInfo.w || 0}×${imgInfo.h || 0}` : t('')}
             </div>
           </div>
 
@@ -7653,13 +8078,13 @@ if (mountedRef.current) setBusy(false);
           onClick={()=>{
 
   if (!vipActive){
-    try { toast?.warn?.(t?.('forum_vip_required') || 'VIP+ only') } catch {}
+    try { toast?.warn?.(t?.('forum_vip_required')) } catch {}
     try { document.activeElement?.blur?.() } catch {}
     return;
   }
   
             setIcon(src) }}
-          title={vipActive ? '' : (t('forum_vip_only') || 'Только для VIP+')}
+          title={vipActive ? '' : t('forum_vip_only')}
           style={{ position:'relative', width:40, height:40, padding:0 }}
         >
           <Image src={src} alt="" width={40} height={40} unoptimized style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:10 }}/>
@@ -7696,7 +8121,7 @@ if (mountedRef.current) setBusy(false);
             disabled={busy || nickBusy || !String(nick||'').trim() || nickFree===false}
             onClick={save}
           >
-            {busy ? (t('saving')||'Сохраняю…') : t('forum_save')}
+            {busy ? t('saving') : t('forum_save')}
           </button>
         </div>
       </div>
@@ -7711,6 +8136,7 @@ if (mountedRef.current) setBusy(false);
 ========================================================= */
 
 function ConfirmDeleteOverlay({ open, rect, text, onCancel, onConfirm }) {
+  const { t } = useI18n();
   const [pos, setPos] = React.useState({ top: 0, left: 0 });
 
   React.useLayoutEffect(() => {
@@ -7762,7 +8188,7 @@ function ConfirmDeleteOverlay({ open, rect, text, onCancel, onConfirm }) {
           <button
             type="button"
             className="confirmPopBtn"
-            aria-label="Cancel"
+            aria-label={t('forum_cancel')}
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); onCancel?.(); }}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -7772,7 +8198,7 @@ function ConfirmDeleteOverlay({ open, rect, text, onCancel, onConfirm }) {
           <button
             type="button"
             className="confirmPopBtn ok"
-            aria-label="Confirm"
+            aria-label={t('forum_confirm')}
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); onConfirm?.(); }}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -7786,10 +8212,107 @@ function ConfirmDeleteOverlay({ open, rect, text, onCancel, onConfirm }) {
   );
 }
 
+function DmDeletePopover({
+  open,
+  rect,
+  text,
+  checkboxLabel,
+  checked,
+  onChecked,
+  onCancel,
+  onConfirm,
+  cancelLabel,
+  confirmLabel,
+  title,
+}) {
+  const [pos, setPos] = React.useState({ top: 0, left: 0 });
+  const popRef = React.useRef(null);
+
+  React.useLayoutEffect(() => {
+    if (!open || !rect) return;
+    if (typeof window === 'undefined') return;
+
+    const pad = 8;
+    const vw = window.innerWidth || 0;
+    const vh = window.innerHeight || 0;
+    const popW = popRef.current?.offsetWidth || 320;
+    const popH = popRef.current?.offsetHeight || 180;
+    const r = rect || {};
+
+    let left = (r.left ?? 0);
+    if (left + popW > vw - pad) left = (r.right ?? 0) - popW;
+    left = Math.max(pad, Math.min(left, vw - popW - pad));
+
+    let top = (r.bottom ?? 0) + 8;
+    if (top + popH > vh - pad) top = (r.top ?? 0) - popH - 8;
+    top = Math.max(pad, Math.min(top, vh - popH - pad));
+
+    setPos({ top, left });
+  }, [open, rect, text, checkboxLabel, title]);
+
+  React.useEffect(() => {
+    if (!open) return;
+    if (typeof window === 'undefined') return;
+    const onKey = (e) => { if (e.key === 'Escape') onCancel?.(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onCancel]);
+
+  if (!open || typeof document === 'undefined') return null;
+
+  return createPortal(
+    <div
+      className="confirmOverlayRoot dmConfirmOverlay"
+      role="presentation"
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onCancel?.(); }}
+      onTouchStart={(e) => { if (e.target === e.currentTarget) onCancel?.(); }}
+    >
+      <div
+        ref={popRef}
+        className="dmConfirmPop"
+        style={{ top: pos.top, left: pos.left }}
+        role="dialog"
+        aria-modal="true"
+      >
+        {title ? <div className="dmConfirmTitle">{title}</div> : null}
+        <div className="dmConfirmText">{text}</div>
+        {checkboxLabel ? (
+          <label className="dmConfirmCheck">
+            <input
+              type="checkbox"
+              checked={!!checked}
+              onChange={(e) => onChecked?.(!!e.target.checked)}
+            />
+            <span>{checkboxLabel}</span>
+          </label>
+        ) : null}
+        <div className="dmConfirmActions">
+          <button
+            type="button"
+            className="dmConfirmBtn ghost"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onCancel?.(); }}
+          >
+            {cancelLabel}
+          </button>
+          <button
+            type="button"
+            className="dmConfirmBtn primary"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onConfirm?.(); }}
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerDelete, viewerId, starredAuthors, onToggleStar, onUserInfoToggle }) {
 const { t: tt } = useI18n();
   const avatarRef = React.useRef(null);
   const { posts, likes, dislikes, views } = agg || {};
+  const entryId = t?.id != null ? `topic_${t.id}` : '';
   const authorId = String(resolveProfileAccountId(t?.userId || t?.accountId) || '').trim();
   const rawUserId = String(t?.userId || t?.accountId || '').trim();  
   const isSelf = !!viewerId && authorId && (String(viewerId) === authorId);
@@ -7835,7 +8358,7 @@ const { t: tt } = useI18n();
  }, [onView, t?.id]);
 
   return (
-    <div ref={ref} className="item qshine cursor-pointer" onClick={() => onOpen?.(t)} style={{ position: 'relative' }}>
+    <div ref={ref} id={entryId || undefined} className="item qshine cursor-pointer" onClick={() => onOpen?.(t, entryId)} style={{ position: 'relative' }}>
 <div className="postBodyFrame">    
       <div className="flex flex-col gap-3">
         {/* верх: аватар → ник */}
@@ -7876,7 +8399,7 @@ const { t: tt } = useI18n();
       <StarButton
         on={isStarred}
         onClick={() => onToggleStar?.(authorId)}
-        title={isStarred ? 'Вы подписаны' : 'Подписаться на автора'}
+        title={isStarred ? tt('forum_subscribed') : tt('forum_subscribe_author')}
       />
     )}
 {isVipAuthor && <VipFlipBadge />}   
@@ -7954,7 +8477,7 @@ const { t: tt } = useI18n();
 <ConfirmDeleteOverlay
   open={!!ownDelConfirm}
   rect={ownDelConfirm}
-  text={tt?.('forum_delete_confirm') || 'Подтверждение: вы действительно хотите удалить?'}
+text={tt?.('forum_delete_confirm')}
   onCancel={() => setOwnDelConfirm(null)}
   onConfirm={confirmOwnerDelete}
 />      
@@ -7963,12 +8486,12 @@ const { t: tt } = useI18n();
   );
 }
 
-function StarButton({ on, onClick, title, disabled=false }) {
+function StarButton({ on, onClick, title = '', disabled=false }) {
   return (
     <button
       type="button"
       className={`starBtn ${on ? 'on' : 'off'} ${disabled ? 'dis' : ''}`}
-      title={title || (on ? 'Отписаться' : 'Подписаться')}
+      title={title}
       onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); if(!disabled) onClick?.(e); }}
       data-no-thread-open="1"
       aria-pressed={!!on}
@@ -7984,6 +8507,231 @@ function StarButton({ on, onClick, title, disabled=false }) {
   );
 }
 
+function DmThreadHeader({
+  uid,
+  meId,
+  t,
+  starredAuthors,
+  onToggleStar,
+  onUserInfoToggle,
+}) {
+  const threadUid = String(uid || '').trim();
+  const prof = safeReadProfile(threadUid) || {};
+  const isVipAuthor = useVipFlag(
+    threadUid,
+    prof.vipActive ?? prof.isVip ?? prof.vip ?? prof.vipUntil ?? null
+  );
+  if (!threadUid) return null;
+  const nick = resolveNickForDisplay(threadUid, '');
+  const isSelf = !!meId && String(meId) === String(threadUid);
+  const isStarred = !!threadUid && !!starredAuthors?.has?.(threadUid);
+  const openProfile = (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    const anchor =
+      e?.currentTarget?.closest?.('.dmThreadHeader')?.querySelector?.('.dmThreadAvatar') ||
+      e?.currentTarget;
+    onUserInfoToggle?.(threadUid, anchor);
+  };
+
+  return (
+    <div className="dmThreadHeader">
+      <div className="dmThreadAvatar" onClick={openProfile}>
+        <AvatarEmoji
+          userId={threadUid}
+          pIcon={resolveIconForDisplay(threadUid, '')}
+          className="dmThreadAvatarImg"
+        />
+      </div>
+      <div className="dmThreadMeta">
+        <div className="dmThreadUser">
+          <button
+            type="button"
+            className={cls('nick-badge nick-animate dmThreadNick', isVipAuthor && 'vipNick')}
+            translate="no"
+            onClick={openProfile}
+          >
+            <span className="nick-text">{nick || shortId(threadUid)}</span>
+          </button>
+          {!!threadUid && !isSelf && (
+            <StarButton
+              on={isStarred}
+              onClick={() => onToggleStar?.(threadUid)}
+              title={isStarred ? t?.('forum_subscribed') : t?.('forum_subscribe')}
+            />
+          )}
+          {isVipAuthor && <VipFlipBadge />}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DmDialogRow({
+  dialog,
+  meId,
+  dmDeletedMap,
+  dmSeenMap,
+  t,
+  onOpen,
+  onDelete,
+  starredAuthors,
+  onToggleStar,
+  onUserInfoToggle,
+}) {
+  const uid = String(dialog?.userId || '').trim();
+  const prof = safeReadProfile(uid) || {};
+  const isVipAuthor = useVipFlag(uid, prof.vipActive ?? prof.isVip ?? prof.vip ?? prof.vipUntil ?? null);
+  if (!uid) return null;
+  const entryId = `dm_${uid}`;
+  const last = dialog?.lastMessage || null;
+  const lastTs = Number(last?.ts || 0);
+  const deletedAt = Number(dmDeletedMap?.[uid] || 0);
+  if (deletedAt && (!lastTs || lastTs <= deletedAt)) return null;
+
+  const lastFromRaw = String(last?.fromCanonical || last?.from || '');
+  const lastFrom = String(resolveProfileAccountId(lastFromRaw) || lastFromRaw || '').trim();
+  const seenTs = Number(dmSeenMap?.[uid] || 0);
+  const unread = !!uid && lastFrom && lastFrom !== String(meId) && lastTs > seenTs;
+  const nick = resolveNickForDisplay(uid, '');
+  const lastTextRaw = String(last?.text || '');
+  const { text: lastCleanText, stickers: lastTextStickers } = extractDmStickersFromText(lastTextRaw);
+  const lastAtts = Array.isArray(last?.attachments) ? last.attachments : [];
+  const lastAttMap = new Map();
+  for (const a of lastAtts) {
+    if (!a) continue;
+    let url = '';
+    let typeHint = '';
+    if (typeof a === 'string') {
+      url = a;
+    } else if (typeof a === 'object') {
+      url = a.url || a.src || a.href || a.file || '';
+      typeHint = a.type || a.mime || a.mediaType || '';
+    }
+    const cleanUrl = normalizeDmUrl(url);
+    if (!cleanUrl) continue;
+    if (!lastAttMap.has(cleanUrl)) lastAttMap.set(cleanUrl, { url: cleanUrl, type: typeHint });
+  }
+  const previewMedia = (() => {
+    if (Array.isArray(lastTextStickers)) {
+      for (const s of lastTextStickers) {
+        if (s?.url) return { kind: 'sticker', url: s.url };
+      }
+    }
+    let videoUrl = '';
+    let audioUrl = '';
+    let otherUrl = '';
+    for (const it of lastAttMap.values()) {
+      const url = it?.url;
+      if (!url) continue;
+      if (isDmStickerUrl(url)) return { kind: 'sticker', url };
+      const kind = getDmMediaKind(url, it?.type);
+      if (kind === 'image') return { kind: 'image', url };
+      if (kind === 'video' && !videoUrl) videoUrl = url;
+      else if (kind === 'audio' && !audioUrl) audioUrl = url;
+      else if (kind === 'other' && !otherUrl) otherUrl = url;
+    }
+    if (videoUrl) return { kind: 'video', url: videoUrl };
+    if (audioUrl) return { kind: 'audio', url: audioUrl };
+    if (otherUrl) return { kind: 'file', url: otherUrl };
+    return null;
+  })();
+  const previewText = stripMediaUrlsFromText(lastCleanText);
+  const hasPreviewText = !!previewText;
+
+  const isSelf = !!meId && String(meId) === String(uid);
+  const isStarred = !!uid && !!starredAuthors?.has?.(uid);
+
+  const openProfile = (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    const anchor =
+      e?.currentTarget?.closest?.('.dmRow')?.querySelector?.('.dmRowAvatar') ||
+      e?.currentTarget;
+    onUserInfoToggle?.(uid, anchor);
+  };
+
+  return (
+    <button
+      type="button"
+      id={entryId}
+      className="item dmRow hoverPop text-left"
+      data-dm-uid={uid}
+      data-dm-lastts={lastTs}
+      data-dm-lastfrom={lastFromRaw || lastFrom}
+      onClick={() => onOpen?.(uid, entryId)}
+    >
+      <div className="dmRowMain">
+        <div className="dmRowTop">
+          <div className="dmRowUser">
+          <div className="dmRowAvatar" onClick={openProfile}>
+              <AvatarEmoji userId={uid} pIcon={resolveIconForDisplay(uid, '')} className="dmRowAvatarImg" />
+            </div>
+            <button
+              type="button"
+              className={cls('nick-badge nick-animate dmRowNick', isVipAuthor && 'vipNick')}
+              translate="no"
+              onClick={openProfile}
+            >
+              <span className="nick-text">{nick || shortId(uid)}</span>
+            </button>
+            {!!uid && !isSelf && (
+              <StarButton
+                on={isStarred}
+                onClick={() => onToggleStar?.(uid)}
+                title={isStarred ? t?.('forum_subscribed') : t?.('forum_subscribe')}
+              />
+            )}
+            {isVipAuthor && <VipFlipBadge />}
+
+          </div>
+          <div className="dmRowTime"><HydrateText value={human(lastTs)} /></div>
+        </div>
+        {(previewMedia || hasPreviewText) && (
+          <div className="dmRowPreview">
+            <div className="dmPreviewFrame">
+              {previewMedia && (
+                <span className={cls('dmPreviewMedia', `dmPreviewMedia-${previewMedia.kind}`)}>
+                  {(previewMedia.kind === 'image' || previewMedia.kind === 'sticker') ? (
+                    <Image
+                      src={previewMedia.url}
+                      alt=""
+                      width={64}
+                      height={64}
+                      unoptimized
+                      loading="lazy"
+                      className="dmPreviewImg"
+                    />
+                  ) : (
+                    <span className="dmPreviewIcon" aria-hidden>
+                      {previewMedia.kind === 'video'
+                        ? '🎬'
+                        : (previewMedia.kind === 'audio' ? '🎵' : '📎')}
+                    </span>
+                  )}
+                  {previewMedia.kind === 'video' && <span className="dmPreviewPlay" aria-hidden>▶</span>}
+                </span>
+              )}
+              {hasPreviewText && <span className="dmPreviewText">{previewText}</span>}
+            </div>
+          </div>
+        )}
+      </div>
+      <button
+        type="button"
+        className="iconBtn ghost"
+        aria-label={t('dm_delete_dialog')}
+        title={t('dm_delete_dialog')}
+        onClick={(e) => onDelete?.(uid, nick || shortId(uid), e)}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden>
+          <path d="M6 7h12M9 7V5h6v2M8 7l1 12h6l1-12" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round"/>
+        </svg>
+      </button>
+      {unread && <span className="dmUnreadDot" aria-hidden="true" />}
+    </button>
+  );
+}
 
 function PostCard({
   p,
@@ -8236,13 +8984,14 @@ const cleanedText = allLines
   }, [p?.id, cleanedText]);
 
   // какой текст сейчас показывать в теле поста
+  const cleanedTextVisible = String(cleanedText || '').replace(/\u200B/g, '').trim();
   const displayText =
-    isTranslated && translatedBody ? translatedBody : cleanedText;
+    isTranslated && translatedBody ? translatedBody : cleanedTextVisible;
 
   async function handleToggleTranslate(e) {
     e?.preventDefault?.();
     e?.stopPropagation?.();
-    if (!cleanedText?.trim()) return;
+    if (!cleanedTextVisible) return;
 
     // если уже перевели — просто показываем оригинал
     if (isTranslated) {
@@ -8252,7 +9001,7 @@ const cleanedText = allLines
 
     setTranslateLoading(true);
     try {
-      const tBody = await translateText(cleanedText, locale);
+      const tBody = await translateText(cleanedTextVisible, locale);
       setTranslatedBody(tBody);
       setIsTranslated(true);
     } finally {
@@ -8261,11 +9010,11 @@ const cleanedText = allLines
   }
 
   const translateBtnLabel = translateLoading
-    ? (t?.('crypto_news_translate_loading') || 'Перевод...')
+    ? t?.('crypto_news_translate_loading')
     : isTranslated
-      ? (t?.('crypto_news_show_original') || 'Показать оригинал')
-      : (t?.('crypto_news_translate') || 'Перевести');
-        const hasCleanedText = !!cleanedText.trim();
+      ? t?.('crypto_news_show_original')
+      : t?.('crypto_news_translate');
+        const hasCleanedText = !!cleanedTextVisible;
   const ytOrigin = React.useMemo(
     () => (typeof window !== 'undefined' ? window.location.origin : ''),
     []
@@ -8322,7 +9071,7 @@ const NO_THREAD_OPEN_SELECTOR =
         onOpenThread?.(p);
       }}
       role="article"
-      aria-label="Пост форума"
+      aria-label={t('forum_post_aria')}
 >
 <div className="postBodyFrame"> 
       {/* OWNER kebab (⋮) в правом верхнем углу — не трогаем существующую разметку */}
@@ -8348,7 +9097,7 @@ const NO_THREAD_OPEN_SELECTOR =
 <ConfirmDeleteOverlay
   open={!!ownDelConfirm}
   rect={ownDelConfirm}
-  text={t?.('forum_delete_confirm') || 'Подтверждение: вы действительно хотите удалить?'}
+text={t?.('forum_delete_confirm')}
   onCancel={() => setOwnDelConfirm(null)}
   onConfirm={confirmOwnerDelete}
 />
@@ -8393,7 +9142,7 @@ const NO_THREAD_OPEN_SELECTOR =
           <StarButton
             on={isStarred}
             onClick={() => onToggleStar?.(authorId)}
-            title={isStarred ? 'Вы подписаны' : 'Подписаться на автора'}
+            title={isStarred ? t('forum_subscribed') : t('forum_subscribe_author')}
           />
         )}
 {isVipAuthor && <VipFlipBadge />}
@@ -8620,13 +9369,13 @@ const NO_THREAD_OPEN_SELECTOR =
           <button
             type="button"
             className="tag ml-1 replyTag replyTagBtn"
-            aria-label={t?.('forum_reply_to') || 'Ответ для'}
-            title={t?.('forum_reply_to') || 'Ответ для'}
+            aria-label={t?.('forum_reply_to')}
+            title={t?.('forum_reply_to')}
             data-no-thread-open="1"
             onClick={jumpToParent}
           >
             <span className="replyTagMain">
-              {(t?.('forum_reply_to') || 'ответ для') + ' '}
+              {t?.('forum_reply_to') + ' '}
               {parentAuthor ? '@' + parentAuthor : '…'}
             </span>
             {parentSnippet && (
@@ -8661,13 +9410,13 @@ const NO_THREAD_OPEN_SELECTOR =
           fontSize: 'clamp(9px, 1.1vw, 13px)' // можно оставить как было
         }}
       >
-        <span className="btn btnGhost btnXs" title={t?.('forum_views') || 'Просмотры'} suppressHydrationWarning>
+        <span className="btn btnGhost btnXs" title={t?.('forum_views')} suppressHydrationWarning>
           🔎 <HydrateText value={views} />
         </span>
 
         <span
           className="btn btnGhost btnXs"
-          title={t?.('forum_replies') || 'Ответы'}
+          title={t?.('forum_replies')}
           onClick={(e) => { e.stopPropagation(); onOpenThread?.(p); }}
           suppressHydrationWarning>
           💬 <HydrateText value={replies} />
@@ -8676,7 +9425,7 @@ const NO_THREAD_OPEN_SELECTOR =
         <button
           type="button"
           className="btn btnGhost btnXs"
-          title={t?.('forum_like') || 'Лайк'}
+          title={t?.('forum_like')}
           onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); onReact?.(p,'like'); }}
         >
           💘 <HydrateText value={likes} />
@@ -8685,7 +9434,7 @@ const NO_THREAD_OPEN_SELECTOR =
         <button
           type="button"
           className="btn btnGhost btnXs"
-          title={t?.('forum_dislike') || 'Дизлайк'}
+          title={t?.('forum_dislike')}
           onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); onReact?.(p,'dislike'); }}
         >
           👎 <HydrateText value={dislikes} />
@@ -8698,7 +9447,7 @@ const NO_THREAD_OPEN_SELECTOR =
         <button
           type="button"
           className="tag"
-          title={t?.('forum_report') || 'Пожаловаться'}
+          title={t?.('forum_report')}
           onClick={(e) => {
             e.preventDefault()
             e.stopPropagation()
@@ -8712,7 +9461,7 @@ const NO_THREAD_OPEN_SELECTOR =
             <button
               type="button"
               className="btn btnGhost btnXs"
-              title={t?.('forum_delete') || 'Удалить'}
+              title={t?.('forum_delete')}
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDeletePost?.(p); }}
             >🗑</button>
 
@@ -8720,30 +9469,32 @@ const NO_THREAD_OPEN_SELECTOR =
               <button
                 type="button"
                 className="btn btnGhost btnXs"
-                title={t?.('forum_unban') || 'Снять бан'}
+                title={t?.('forum_unban')}
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); onUnbanUser?.(p); }}
               >✅</button>
             ) : (
               <button
                 type="button"
                 className="btn btnGhost btnXs"
-                title={t?.('forum_ban') || 'Забанить'}
+                title={t?.('forum_ban')}
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); onBanUser?.(p); }}
               >⛔</button>
             )}
           </>
         )}
       </div>
-      <button
-        type="button"
-        className={`btn translateToggleBtn  ${isTranslated ? 'translateToggleBtnOn' : ''}`}
-        onClick={handleToggleTranslate}
-        disabled={translateLoading || !hasCleanedText}
-      >
-        <span className="translateToggleIcon">🌐</span>
-        <span className="translateToggleText">{translateBtnLabel}</span>
-        <span className="translateToggleIcon">🌐</span>
-      </button>
+      {hasCleanedText && (
+        <button
+          type="button"
+          className={`btn translateToggleBtn  ${isTranslated ? 'translateToggleBtnOn' : ''}`}
+          onClick={handleToggleTranslate}
+          disabled={translateLoading || !hasCleanedText}
+        >
+          <span className="translateToggleIcon">🌐</span>
+          <span className="translateToggleText">{translateBtnLabel}</span>
+          <span className="translateToggleIcon">🌐</span>
+        </button>
+      )}
     </article>
   );
 }
@@ -9207,8 +9958,8 @@ export function VideoOverlay({
           <button
             type="button"
             className="voBtn voSwitch"
-            aria-label={tt('forum_camera_switch') || 'Switch camera'}
-            title={tt('forum_camera_switch') || 'Switch camera'}
+            aria-label={tt('forum_camera_switch')}
+            title={tt('forum_camera_switch')}
             onClick={flipCamera}
             disabled={st === 'recording'}
             aria-disabled={st === 'recording' ? 'true' : undefined}
@@ -9225,8 +9976,8 @@ export function VideoOverlay({
             <button
               type="button"
               className="voRec idle"
-              aria-label={tt('forum_record')||'Record'}
-              title={tt('forum_record')||'Record'}
+              aria-label={tt('forum_record')}
+              title={tt('forum_record')}
               onClick={()=>{
                 if (blockClicksRef.current) return;
                 blockClicksRef.current = true;
@@ -9243,8 +9994,8 @@ export function VideoOverlay({
             <button
               type="button"
               className="voRec rec"
-              aria-label={tt('forum_stop')||'Stop'}
-              title={tt('forum_stop')||'Stop'}
+              aria-label={tt('forum_stop')}
+              title={tt('forum_stop')}
               onClick={()=>{
                 if (blockClicksRef.current) return;
                 blockClicksRef.current = true;
@@ -9277,8 +10028,8 @@ export function VideoOverlay({
           <button
             type="button"
             className="voBtn voFlash"
-            aria-label={tt('forum_flash') || 'Flash'}
-            title={tt('forum_flash') || 'Flash'}
+            aria-label={tt('forum_flash')}
+            title={tt('forum_flash')}
             data-on={torchOn ? '1' : '0'}
             onClick={toggleTorch}
           >
@@ -9292,8 +10043,8 @@ export function VideoOverlay({
         <button
           type="button"
           className="voBtn voClose"
-          aria-label={tt('forum_video_reset') || 'Close'}
-          title={tt('forum_video_reset') || 'Close'}
+          aria-label={tt('forum_video_reset')}
+          title={tt('forum_video_reset')}
           onClick={()=>{
             if (st === 'recording') {
               if (confirm(tt('forum_video_reset_confirm'))) onResetConfirm?.();
@@ -9316,8 +10067,8 @@ export function VideoOverlay({
           <button
             type="button"
             className="voBtn voAccept"
-            aria-label={tt('forum_video_accept') || 'Accept & send'}
-            title={tt('forum_video_accept') || 'Accept & send'}
+            aria-label={tt('forum_video_accept')}
+            title={tt('forum_video_accept')}
             onClick={() => { if (onAccept) onAccept(); else pressComposerSend(); }}
           >
             <svg viewBox="0 0 24 24" className="ico ok">
@@ -9915,7 +10666,7 @@ function AboutRail({
           />
         ) : (
           <div className={cls('aboutText', hasText ? 'aboutText--live' : 'aboutText--placeholder')}>
-            {hasText ? value : (t('forum_about_placeholder') || '')}
+            {hasText ? value : t('forum_about_placeholder')}
           </div>
         )}
       </div>
@@ -9923,15 +10674,15 @@ function AboutRail({
       {editing && (
         <div className="aboutActions">
           <div className="aboutLimit">
-            {t('forum_about_limit') || 'Limit:'} {draft.length}/{ABOUT_LIMIT}
+            {t('forum_about_limit')} {draft.length}/{ABOUT_LIMIT}
           </div>
           <div className="aboutButtons">
             <button
               type="button"
               className="aboutActionBtn"
               onClick={onCancel}
-              title={t('forum_about_cancel') || 'Cancel'}
-              aria-label={t('forum_about_cancel') || 'Cancel'}
+              title={t('forum_about_cancel')}
+              aria-label={t('forum_about_cancel')}
             >
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
                 <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
@@ -9942,8 +10693,8 @@ function AboutRail({
               className="aboutActionBtn"
               disabled={!canSave}
               onClick={onSave}
-              title={t('forum_about_save') || 'Save'}
-              aria-label={t('forum_about_save') || 'Save'}
+              title={t('forum_about_save')}
+              aria-label={t('forum_about_save')}
             >
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
                 <path d="M5 12l4 4L19 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -9972,7 +10723,7 @@ export default function Forum(){
   useSyncForumProfileOnMount(() => setProfileBump((x) => x + 1))
     useSyncForumAboutOnMount(() => setProfileBump((x) => x + 1))
   void profileBump
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const toast = useToast()
   const uiDir = (isBrowser() &&
     (document.documentElement?.dir === 'rtl' ||
@@ -10160,7 +10911,7 @@ const persistTombstones = useCallback((patch) => {
       userId = authNow?.asherId || authNow?.accountId
     }
     if (!userId) {
-      toast?.warn?.(t?.('forum_auth_required') || 'Sign in required')
+      toast?.warn?.(t?.('forum_auth_required'))
       return
     }
 
@@ -10173,16 +10924,16 @@ const persistTombstones = useCallback((patch) => {
       })
       if (!res?.ok) {
         if (res?.error === 'self_report') {
-          toast?.warn?.(t?.('forum_report_self') || 'You cannot report your own post')
+          toast?.warn?.(t?.('forum_report_self'))
         } else if (res?.error === 'media_locked') {
-          toast?.warn?.(t?.('forum_report_media_locked') || 'Media locked')
+          toast?.warn?.(t?.('forum_report_media_locked'))
         } else {
-          toast?.err?.(t?.('forum_report_error') || 'Report failed')
+          toast?.err?.(t?.('forum_report_error'))
         }
         return
       }
       if (res?.duplicate) {
-        toast?.info?.(t?.('forum_report_already') || 'Already reported')
+        toast?.info?.(t?.('forum_report_already'))
         return
       }
 
@@ -10194,14 +10945,14 @@ const persistTombstones = useCallback((patch) => {
         if (res?.action === 'deleted_and_locked' && res?.lockedUntil) {
           setMediaLock({ locked: true, untilMs: Number(res.lockedUntil || 0) })
           const untilLabel = human(Number(res.lockedUntil || 0))
-          const lockText = t?.('forum_report_media_locked') || 'Media locked until'
+          const lockText = t?.('forum_report_media_locked')
           toast?.warn?.(`${lockText} ${untilLabel}`)
           return      
         }
       }
-      toast?.ok?.(t?.('forum_report_sent') || 'Report sent')
+      toast?.ok?.(t?.('forum_report_sent'))
     } catch {
-      toast?.err?.(t?.('forum_report_error') || 'Report failed')
+      toast?.err?.(t?.('forum_report_error'))
     } finally {
       setReportBusy(false)
     }
@@ -10938,7 +11689,7 @@ const requireAuthStrict = async () => {
   if (cur?.asherId || cur?.accountId) { setAuth(cur); return cur; }
   const r = await openAuth({ timeoutMs: 20000 });
   if (r?.asherId || r?.accountId) { setAuth(r); return r; }
-  toast.warn(t('forum_auth_required') || 'Нужна авторизация');
+  toast.warn(t('forum_auth_required'));
   return null;
 };
 // QCoin: управлялка модалкой из инлайна
@@ -10997,7 +11748,7 @@ React.useEffect(() => {
 
       // тост про режим редактирования
       try {
-        toast?.ok?.(t?.('forum_edit_mode') || 'Режим редактирования');
+        toast?.ok?.(t?.('forum_edit_mode'));
       } catch {}
     } catch {}
   };
@@ -11900,10 +12651,10 @@ const banUser = async (p) => {
       bans.add(id)
       return { ...prev, bans: Array.from(bans) }
     })
-    toast.ok(t('forum_banned_ok') || 'User banned') 
+    toast.ok(t('forum_banned_ok')) 
   } else {
     console.error('adminBanUser error:', r)
-    toast.err(r?.error || 'Admin endpoint error')
+    toast.err(r?.error || t('forum_admin_error'))
   }
 }
 
@@ -11918,10 +12669,10 @@ const unbanUser = async (p) => {
       bans.delete(id)
       return { ...prev, bans: Array.from(bans) }
     })
-    toast.ok(t('forum_unbanned_ok') || 'User unbanned') 
+    toast.ok(t('forum_unbanned_ok')) 
   } else {
     console.error('adminUnbanUser error:', r)
-    toast.err(r?.error || 'Admin endpoint error')
+    toast.err(r?.error || t('forum_admin_error'))
   }
 }
 
@@ -11929,7 +12680,7 @@ const unbanUser = async (p) => {
 const delTopicOwn = async (topic) => {
   const uid = auth?.asherId || auth?.accountId || '';
   if (!uid) {
-    toast.warn(t('forum_auth_required') || 'Нужна авторизация');
+    toast.warn(t('forum_auth_required'));
     return;
   }
 
@@ -11961,7 +12712,7 @@ const delTopicOwn = async (topic) => {
   // 2) реально удаляем на сервере (чтобы исчезло на других устройствах)
   const r = await api.ownerDeleteTopic(topicId, uid);
   if (r?.ok) {
-    toast.ok(t('forum_delete_ok') || 'Удалено');
+    toast.ok(t('forum_delete_ok'));
     return;
   }
 
@@ -11972,12 +12723,12 @@ const delTopicOwn = async (topic) => {
     return { ...prev, topics };
   });
   console.error('ownerDeleteTopic error:', r);
-  toast.err((r?.error && String(r.error)) || (t('forum_delete_failed') || 'Не удалось удалить'));
+  toast.err((r?.error && String(r.error)) || t('forum_delete_failed'));
  };
 const delPostOwn = async (post) => {
   const uid = auth?.asherId || auth?.accountId || '';
   if (!uid) {
-    toast.warn(t('forum_auth_required') || 'Нужна авторизация');
+    toast.warn(t('forum_auth_required'));
     return;
   }
 
@@ -12004,7 +12755,7 @@ const delPostOwn = async (post) => {
   const r = await api.ownerDeletePost(postId, uid);
   if (r?.ok) {
     try { emitDeleted(postId, post?.topicId); } catch {}
-    toast.ok(t('forum_delete_ok') || 'Удалено');
+    toast.ok(t('forum_delete_ok'));
     return;
   }
 
@@ -12015,7 +12766,7 @@ const delPostOwn = async (post) => {
     return { ...prev, posts };
   });
   console.error('ownerDeletePost error:', r);
-  toast.err((r?.error && String(r.error)) || (t('forum_delete_failed') || 'Не удалось удалить'));
+  toast.err((r?.error && String(r.error)) || t('forum_delete_failed'));
  };
 
 
@@ -12027,21 +12778,23 @@ const [headHidden, setHeadHidden] = useState(false);
 const [headPinned, setHeadPinned] = useState(false);
 const headHiddenRef = useRef(false);
 const headPinnedRef = useRef(false);
+const headAutoOpenRef = useRef(false);
+const videoFeedOpenRef = useRef(false);
 useEffect(() => { headHiddenRef.current = headHidden }, [headHidden]);
 useEffect(() => { headPinnedRef.current = headPinned }, [headPinned]);
+useHtmlFlag('data-head-hidden', headHidden && !headPinned ? '1' : null);
 
 // сброс при смене вида (список тем ↔ тред)
 useEffect(() => {
-  setHeadPinned(false);
-  setHeadHidden(false);
+  if (navRestoringRef.current) return;
+  headAutoOpenRef.current = false;
 }, [sel?.id]);
 
 // авто-скрытие по скроллу (лёгкий listener + rAF)
 useEffect(() => {
   if (!isBrowser()) return;
 
-  const HIDE_THRESHOLD = 800;
-  const TOP_THRESHOLD = 800;
+  const TOP_EPS = 500;
 
   const getScrollTop = () => {
     const el = bodyRef.current;
@@ -12050,17 +12803,38 @@ useEffect(() => {
   };
 
   let raf = 0;
+  let lastTop = getScrollTop();
   const onScroll = () => {
-    if (headPinnedRef.current) return;
+    if (navRestoringRef.current) return;
     if (raf) return;
     raf = window.requestAnimationFrame(() => {
       raf = 0;
       const st = getScrollTop();
-      if (st > HIDE_THRESHOLD) {
-        if (!headHiddenRef.current) setHeadHidden(true);
-      } else if (st <= TOP_THRESHOLD) {
-        if (headHiddenRef.current) setHeadHidden(false);
+      const delta = st - lastTop;
+      const scrollingDown = delta > 0;
+      const atTop = st <= TOP_EPS;
+
+      // если шапка закреплена вручную — ничего не трогаем
+      if (headPinnedRef.current) {
+        headAutoOpenRef.current = false;
+        lastTop = st;
+        return;
       }
+
+      // Как только упираемся в верх — сразу открываем шапку
+      if (!videoFeedOpenRef.current && atTop) {
+        if (headHiddenRef.current) {
+          setHeadPinned(false);
+          setHeadHidden(false);
+        }
+        headAutoOpenRef.current = false;
+      } else if (!headHiddenRef.current && scrollingDown) {
+        // Первый же скролл вниз — скрываем, чтобы карточки ушли под самый верх
+        setHeadPinned(false);
+        setHeadHidden(true);
+      }
+
+      lastTop = st;
     });
   };
 
@@ -12094,7 +12868,7 @@ const TOPIC_PAGE_SIZE = 10;
 const REPLIES_PAGE_SIZE = 5;
 const THREAD_PAGE_SIZE = 5;
 const DM_PAGE_SIZE = 5;
-const DM_ACTIVE_THROTTLE_MS = 30000;
+const DM_ACTIVE_THROTTLE_MS = 60000;
 const DM_BG_THROTTLE_MS = 60000;
 const PUBLISHED_PAGE_SIZE = 5;
 const [visibleVideoCount, setVisibleVideoCount] = useState(VIDEO_PAGE_SIZE);
@@ -12109,6 +12883,18 @@ const [dmWithUserId, setDmWithUserId] = useState('');
 const dmMode = inboxOpen && inboxTab === 'messages' && !!dmWithUserId;
 const textLimit = dmMode ? 600 : 400;
 useHtmlFlag('data-inbox-open', inboxOpen ? '1' : null);
+const dmListEnterRef = useRef(false);
+const dmThreadRef = useRef(null);
+const dmAutoScrollRef = useRef(false);
+useEffect(() => {
+  const isDmList = !!inboxOpen && inboxTab === 'messages' && !dmWithUserId;
+  if (isDmList && !dmListEnterRef.current) {
+    headAutoOpenRef.current = false;
+    try { setHeadPinned(false); } catch {}
+    try { setHeadHidden(true); } catch {}
+  }
+  dmListEnterRef.current = isDmList;
+}, [inboxOpen, inboxTab, dmWithUserId]);
 const [dmDialogs, setDmDialogs] = useState([]);
 const [dmDialogsCursor, setDmDialogsCursor] = useState(null);
 const [dmDialogsHasMore, setDmDialogsHasMore] = useState(true);
@@ -12119,21 +12905,27 @@ const [dmThreadCursor, setDmThreadCursor] = useState(null);
 const [dmThreadHasMore, setDmThreadHasMore] = useState(true);
 const [dmThreadLoading, setDmThreadLoading] = useState(false);
 const [dmThreadSeenTs, setDmThreadSeenTs] = useState(0);
+const [dmTranslateMap, setDmTranslateMap] = useState({});
 const dmDialogsCacheRef = useRef(new Map());
 const dmDialogsInFlightRef = useRef(new Map());
 const dmThreadCacheRef = useRef(new Map());
 const dmThreadInFlightRef = useRef(new Map());
 const dmDialogsLastFetchRef = useRef({ active: 0, bg: 0 });
 const dmThreadLastFetchRef = useRef(new Map());
+const dmVipProbeRef = useRef({ key: '', ts: 0 });
 const [dmSeenMap, setDmSeenMap] = useState({});
 const [dmBlockedMap, setDmBlockedMap] = useState({});
 const [dmBlockedByReceiverMap, setDmBlockedByReceiverMap] = useState({});
 const [dmDeletedMap, setDmDeletedMap] = useState({});
+const [dmDeletedMsgMap, setDmDeletedMsgMap] = useState({});
+const [dmDeletePopover, setDmDeletePopover] = useState(null);
+const [dmDeleteForAll, setDmDeleteForAll] = useState(false);
 const dmSeenSentRef = useRef({});
 const dmSeenObserverRef = useRef(null);
 const repliesSeenObserverRef = useRef(null);
 const dmDialogsLoadingRef = useRef(false);
 const dmThreadLoadingRef = useRef(false);
+const [, setVipPulse] = useState(0);
 const [mounted, setMounted] = useState(false);           // ← флаг «мы на клиенте»
 useEffect(()=>{ setMounted(true) }, []);
 useEffect(() => { dmDialogsLoadingRef.current = !!dmDialogsLoading; }, [dmDialogsLoading]);
@@ -12146,6 +12938,42 @@ const seenKey = meId ? `forum:seenReplies:${meId}` : null;
 const seenDmKey = meId ? `seenDM:${meId}` : null;
 const dmBlockedKey = meId ? `dm:blocked:${meId}` : null;
 const dmDeletedKey = meId ? `dm:deleted:${meId}` : null;
+const dmDeletedMsgKey = meId ? `dm:deleted_msg:${meId}` : null;
+
+// всегда показываем самое свежее сообщение при входе в переписку
+useEffect(() => {
+  if (!inboxOpen || inboxTab !== 'messages' || !dmWithUserId) return;
+  dmAutoScrollRef.current = true;
+}, [inboxOpen, inboxTab, dmWithUserId]);
+
+useEffect(() => {
+  if (!inboxOpen || inboxTab !== 'messages' || !dmWithUserId) return;
+  const items = dmThreadItems || [];
+  if (!items.length) return;
+  const last = items[items.length - 1] || null;
+  const fromRaw = String(last?.fromCanonical || last?.from || '').trim();
+  const fromId = String(resolveProfileAccountId(fromRaw) || fromRaw || '').trim();
+  const mine = !!fromId && (String(fromId) === String(meId || '') || String(fromRaw) === String(meId || ''));
+  const status = String(last?.status || '');
+  const shouldScroll = !!dmAutoScrollRef.current || mine || status === 'sending';
+  if (!shouldScroll) return;
+  dmAutoScrollRef.current = false;
+  const node = dmThreadRef.current?.querySelector?.('.dmMsgRow:last-child');
+  if (node?.scrollIntoView) {
+    try { node.scrollIntoView({ block: 'end', behavior: 'auto' }); } catch { try { node.scrollIntoView(); } catch {} }
+    return;
+  }
+  try {
+    const scrollEl =
+      bodyRef.current ||
+      (typeof document !== 'undefined' ? document.querySelector('[data-forum-scroll="1"]') : null);
+    if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {
+      scrollEl.scrollTop = scrollEl.scrollHeight;
+    } else {
+      window.scrollTo(0, document.body.scrollHeight || 0);
+    }
+  } catch {}
+}, [dmThreadItems, inboxOpen, inboxTab, dmWithUserId, meId]);
 
 // все мои посты (id)
 const myPostIds = useMemo(() => {
@@ -12179,6 +13007,51 @@ useEffect(() => {
 useEffect(() => {
   if (!inboxOpen) { setDmWithUserId(''); return; }
 }, [inboxOpen]);
+useEffect(() => {
+  setDmTranslateMap({});
+}, [dmWithUserId]);
+
+// === VIP badge: принудительная проверка VIP для диалогов/ветки (чтобы бейдж точно появился) ===
+useEffect(() => {
+  if (!inboxOpen || inboxTab !== 'messages') return;
+  if (!meId) return;
+
+  const ids = new Set();
+  const addId = (raw) => {
+    const id = String(resolveProfileAccountId(raw) || raw || '').trim();
+    if (id) ids.add(id);
+  };
+  if (dmWithUserId) addId(dmWithUserId);
+  for (const d of (dmDialogs || [])) addId(d?.userId);
+
+  const list = Array.from(ids).filter(Boolean);
+  if (!list.length) return;
+
+  const key = list.slice().sort().join(',');
+  const now = Date.now();
+  const last = dmVipProbeRef.current || {};
+  if (last.key === key && (now - Number(last.ts || 0)) < 60000) return;
+  dmVipProbeRef.current = { key, ts: now };
+
+  let cancelled = false;
+  (async () => {
+    try {
+      const j = await api.vipBatch(list);
+      if (!j?.ok || cancelled) return;
+      const map = j?.map || {};
+      for (const id of list) {
+        const v = map?.[id] || null;
+        const vipUntil = Number(v?.untilMs || 0) || 0;
+        const vipActive = !!v?.active || (vipUntil && vipUntil > Date.now());
+        try { mergeProfileCache(id, { vipActive, vipUntil }); } catch {}
+      }
+      setVipPulse((n) => n + 1);
+    } catch {}
+  })();
+
+  return () => { cancelled = true; };
+}, [inboxOpen, inboxTab, dmWithUserId, dmDialogs, meId]);
+
 const sortedRepliesToMe = useMemo(
   () => (repliesToMe || []).slice().sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0)),
   [repliesToMe]
@@ -12281,25 +13154,51 @@ useEffect(() => {
   }
 }, [dmBlockedKey]);
 
+const normalizeDmDeletedMap = (raw) => {
+  const out = {};
+  const now = Date.now();
+  if (!raw || typeof raw !== 'object') return out;
+  for (const [k, v] of Object.entries(raw)) {
+    if (!k) continue;
+    const n = Number(v || 0);
+    if (Number.isFinite(n) && n > 1e11) out[k] = n;
+    else if (v) out[k] = now;
+  }
+  return out;
+};
+
 useEffect(() => {
   if (!dmDeletedKey) { setDmDeletedMap({}); return; }
   try {
     const raw = JSON.parse(localStorage.getItem(dmDeletedKey) || '{}') || {};
-    setDmDeletedMap((raw && typeof raw === 'object') ? raw : {});
+    const next = normalizeDmDeletedMap(raw);
+    setDmDeletedMap(next);
+    try { localStorage.setItem(dmDeletedKey, JSON.stringify(next)); } catch {}
   } catch {
     setDmDeletedMap({});
   }
 }, [dmDeletedKey]);
+
+useEffect(() => {
+  if (!dmDeletedMsgKey) { setDmDeletedMsgMap({}); return; }
+  try {
+    const raw = JSON.parse(localStorage.getItem(dmDeletedMsgKey) || '{}') || {};
+    setDmDeletedMsgMap((raw && typeof raw === 'object') ? raw : {});
+  } catch {
+    setDmDeletedMsgMap({});
+  }
+}, [dmDeletedMsgKey]);
 
 const dmUnreadCount = useMemo(() => {
   if (!mounted) return 0;
   let n = 0;
   for (const d of (dmDialogs || [])) {
     const uid = String(d?.userId || '');
-    if (dmDeletedMap?.[uid]) continue;
     const last = d?.lastMessage || null;
     if (!uid || !last) continue;
     const lastTs = Number(last.ts || 0);
+    const deletedAt = Number(dmDeletedMap?.[uid] || 0);
+    if (deletedAt && (!lastTs || lastTs <= deletedAt)) continue;
     const seenTs = Number(dmSeenMap?.[uid] || 0);
     const lastFromRaw = String(last?.fromCanonical || last?.from || '');
     const lastFrom = String(resolveProfileAccountId(lastFromRaw) || lastFromRaw || '').trim();
@@ -12307,6 +13206,29 @@ const dmUnreadCount = useMemo(() => {
   }
   return n;
 }, [mounted, dmDialogs, dmSeenMap, dmDeletedMap, meId]);
+
+useEffect(() => {
+  if (!dmDeletedKey) return;
+  if (!dmDialogs || !dmDialogs.length) return;
+  if (!dmDeletedMap || !Object.keys(dmDeletedMap || {}).length) return;
+  let changed = false;
+  const next = { ...(dmDeletedMap || {}) };
+  for (const d of dmDialogs) {
+    const uid = String(d?.userId || '');
+    if (!uid) continue;
+    const deletedAt = Number(next?.[uid] || 0);
+    if (!deletedAt) continue;
+    const lastTs = Number(d?.lastMessage?.ts || 0);
+    if (lastTs && lastTs > deletedAt) {
+      delete next[uid];
+      changed = true;
+    }
+  }
+  if (changed) {
+    setDmDeletedMap(next);
+    try { localStorage.setItem(dmDeletedKey, JSON.stringify(next)); } catch {}
+  }
+}, [dmDialogs, dmDeletedMap, dmDeletedKey]);
 
 const dmFetchCached = useCallback(async (cacheRef, inflightRef, key, url, opts = {}) => {
   if (!meId) return null;
@@ -12347,8 +13269,9 @@ const loadDmDialogs = useCallback(async (cursor = null, opts = {}) => {
     if ((nowTs - last) < throttleMs) return;
     dmDialogsLastFetchRef.current = { ...(dmDialogsLastFetchRef.current || {}), [key]: nowTs };
   }
+  const showLoading = !opts.refresh && !opts.background && !isPaginating;
   dmDialogsLoadingRef.current = true;
-  setDmDialogsLoading(true);
+  if (showLoading) setDmDialogsLoading(true);
   const qs = new URLSearchParams();
   qs.set('limit', String(DM_PAGE_SIZE));
   if (cursor) qs.set('cursor', String(cursor));
@@ -12401,7 +13324,7 @@ const loadDmDialogs = useCallback(async (cursor = null, opts = {}) => {
     }
   } finally {
     dmDialogsLoadingRef.current = false;
-    setDmDialogsLoading(false);
+    if (showLoading) setDmDialogsLoading(false);
   }
 }, [meId, dmFetchCached, dmDialogsHasMore]);
 
@@ -12420,8 +13343,9 @@ const loadDmThread = useCallback(async (withUserId, cursor = null, opts = {}) =>
     if ((nowTs - lastTs) < throttleMs) return;
     dmThreadLastFetchRef.current.set(tKey, nowTs);
   }
+  const showLoading = !opts.refresh && !isPaginating;
   dmThreadLoadingRef.current = true;
-  setDmThreadLoading(true);
+  if (showLoading) setDmThreadLoading(true);
   const qs = new URLSearchParams();
   qs.set('limit', String(DM_PAGE_SIZE));
   qs.set('dir', 'older');
@@ -12431,7 +13355,9 @@ const loadDmThread = useCallback(async (withUserId, cursor = null, opts = {}) =>
   try {
     const j = await dmFetchCached(dmThreadCacheRef, dmThreadInFlightRef, key, `/api/dm/thread?${qs.toString()}`, opts);
     if (j?.ok) {
-      const items = Array.isArray(j.items) ? j.items : [];
+      const deletedMap = dmDeletedMsgMap || {};
+      const rawItems = Array.isArray(j.items) ? j.items : [];
+      const items = rawItems.filter((m) => !deletedMap[String(m?.id || '')]);
       const itemsAsc = items.slice().reverse();
       setDmThreadItems((prev) => {
         const existing = Array.isArray(prev) ? prev : [];
@@ -12447,7 +13373,7 @@ const loadDmThread = useCallback(async (withUserId, cursor = null, opts = {}) =>
             const id = String(m?.id || '');
             if (id && !existingIds.has(id)) merged.push(m);
           }
-          return merged;
+          return merged.filter((m) => !deletedMap[String(m?.id || '')]);
         }
         if (!existing.length) return itemsAsc;
         const pending = existing.filter(m =>
@@ -12461,17 +13387,18 @@ const loadDmThread = useCallback(async (withUserId, cursor = null, opts = {}) =>
             return id && !existingIds.has(id);
           })
           .sort((a, b) => Number(a?.ts || 0) - Number(b?.ts || 0));
-        return add.length ? [ ...itemsAsc, ...add ] : itemsAsc;
+        const next = add.length ? [ ...itemsAsc, ...add ] : itemsAsc;
+        return next.filter((m) => !deletedMap[String(m?.id || '')]);
       });
       setDmThreadCursor(j.nextCursor || null);
       setDmThreadHasMore(!!j.hasMore);
-      setDmThreadSeenTs(Number(j.peerSeenTs || j.seenTs || 0));
+      setDmThreadSeenTs(Number(j.peerSeenTs || 0));
     }
   } finally {
     dmThreadLoadingRef.current = false;
-    setDmThreadLoading(false);
+    if (showLoading) setDmThreadLoading(false);
   }
-}, [meId, dmFetchCached, dmThreadHasMore]);
+}, [meId, dmFetchCached, dmThreadHasMore, dmDeletedMsgMap]);
 
 useEffect(() => {
   if (!mounted || !meId) return;
@@ -12502,7 +13429,7 @@ useEffect(() => {
   const t = setInterval(() => {
     if (document.hidden) return;
     try { loadDmDialogs(null, { force: true, refresh: true, background: true }); } catch {}
-  }, 60000);
+  }, DM_BG_THROTTLE_MS);
   return () => { try { clearInterval(t); } catch {} };
 }, [mounted, meId, inboxOpen, inboxTab, loadDmDialogs]);
 
@@ -12516,35 +13443,48 @@ useEffect(() => {
     try {
       if (dmWithUserId) loadDmThread(dmWithUserId, null, { force: true, refresh: true });
     } catch {}
-  }, 30000);
+  }, DM_ACTIVE_THROTTLE_MS);
   return () => { try { clearInterval(t); } catch {} };
 }, [inboxOpen, inboxTab, dmWithUserId, loadDmDialogs, loadDmThread]);
 
 useEffect(() => {
-  const uid = String(dmWithUserId || '').trim();
-  if (!uid || !meId || !dmThreadItems?.length) return;
-  const last = dmThreadItems[dmThreadItems.length - 1];
-  const lastTs = Number(last?.ts || 0);
-  if (!lastTs) return;
-  const key = String(resolveProfileAccountId(uid) || uid || '').trim();
-  if (Number(dmSeenSentRef.current?.[key] || 0) >= lastTs) return;
-  dmSeenSentRef.current[key] = lastTs;
-  (async () => {
-    try {
-      await fetch('/api/dm/seen', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-forum-user-id': String(meId) },
-        body: JSON.stringify({ with: uid, lastSeenTs: lastTs }),
-      });
-    } catch {}
-  })();
-  const next = { ...(dmSeenMap || {}) };
-  if (key && (!next[key] || Number(next[key]) < lastTs)) {
-    next[key] = lastTs;
-    try { if (seenDmKey) localStorage.setItem(seenDmKey, JSON.stringify(next)); } catch {}
-    setDmSeenMap(next);
-  }
-}, [dmWithUserId, dmThreadItems, meId, dmSeenMap, seenDmKey]);
+  if (!mounted || !inboxOpen || inboxTab !== 'messages') return;
+  const uidRaw = String(dmWithUserId || '').trim();
+  if (!uidRaw || !meId || !dmThreadItems?.length) return;
+  if (typeof IntersectionObserver === 'undefined') return;
+  const key = String(resolveProfileAccountId(uidRaw) || uidRaw || '').trim();
+  if (!key) return;
+
+  const io = new IntersectionObserver((entries) => {
+    let maxTs = 0;
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      const el = e.target;
+      const ts = Number(el?.getAttribute?.('data-dm-ts') || 0);
+      if (!ts) continue;
+      const isMine = String(el?.getAttribute?.('data-dm-mine') || '') === '1';
+      if (isMine) continue;
+      if (ts > maxTs) maxTs = ts;
+    }
+    if (!maxTs) return;
+    if (Number(dmSeenSentRef.current?.[key] || 0) >= maxTs) return;
+    dmSeenSentRef.current[key] = maxTs;
+    markDmSeen(key, maxTs);
+    (async () => {
+      try {
+        await fetch('/api/dm/seen', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', 'x-forum-user-id': String(meId) },
+          body: JSON.stringify({ with: uidRaw, lastSeenTs: maxTs }),
+        });
+      } catch {}
+    })();
+  }, { threshold: 0.6 });
+
+  const nodes = document.querySelectorAll('.dmMsgRow[data-dm-ts]');
+  nodes.forEach((n) => io.observe(n));
+  return () => { try { io.disconnect(); } catch {} };
+}, [mounted, inboxOpen, inboxTab, dmWithUserId, dmThreadItems, meId, markDmSeen]);
 
 useEffect(() => {
   if (!mounted || !inboxOpen || inboxTab !== 'messages' || !seenDmKey) return;
@@ -12559,7 +13499,8 @@ useEffect(() => {
       const lastFrom = String(resolveProfileAccountId(lastFromRaw) || lastFromRaw || '').trim();
       const lastTs = Number(el?.getAttribute?.('data-dm-lastts') || 0);
       if (!uid || !lastTs) continue;
-      if (dmDeletedMap?.[uid]) continue;
+      const deletedAt = Number(dmDeletedMap?.[uid] || 0);
+      if (deletedAt && lastTs <= deletedAt) continue;
       if (lastFrom && String(lastFrom) !== String(meId || '')) {
         markDmSeen(uid, lastTs);
       }
@@ -12620,16 +13561,111 @@ const toggleDmBlock = useCallback(async (uid, nextBlock) => {
   } catch {}
 }, [meId, dmBlockedMap, dmBlockedKey]);
 
-const deleteDmDialog = useCallback((uid) => {
+const removeDmDialogFromState = useCallback((uid) => {
+  const id = String(uid || '').trim();
+  if (!id) return;
+  setDmDialogs(prev => (prev || []).filter(d => String(d?.userId || '') !== id));
+  if (String(dmWithUserId || '') === id) setDmWithUserId('');
+}, [dmWithUserId]);
+
+const deleteDmDialogLocal = useCallback((uid, ts = Date.now()) => {
   const id = String(uid || '').trim();
   if (!id) return;
   const next = { ...(dmDeletedMap || {}) };
-  next[id] = 1;
+  next[id] = Number(ts || Date.now());
   try { if (dmDeletedKey) localStorage.setItem(dmDeletedKey, JSON.stringify(next)); } catch {}
   setDmDeletedMap(next);
-  setDmDialogs(prev => (prev || []).filter(d => String(d?.userId || '') !== id));
-  if (String(dmWithUserId || '') === id) setDmWithUserId('');
-}, [dmDeletedMap, dmDeletedKey, dmWithUserId]);
+  removeDmDialogFromState(id);
+}, [dmDeletedMap, dmDeletedKey, removeDmDialogFromState]);
+
+const deleteDmMessageLocal = useCallback((msgId) => {
+  const id = String(msgId || '').trim();
+  if (!id) return;
+  const next = { ...(dmDeletedMsgMap || {}) };
+  next[id] = 1;
+  try { if (dmDeletedMsgKey) localStorage.setItem(dmDeletedMsgKey, JSON.stringify(next)); } catch {}
+  setDmDeletedMsgMap(next);
+  setDmThreadItems(prev => (prev || []).filter(m => String(m?.id || '') !== id));
+}, [dmDeletedMsgMap, dmDeletedMsgKey]);
+
+const deleteDmDialogServer = useCallback(async (uid) => {
+  const id = String(uid || '').trim();
+  if (!id || !meId) return false;
+  const res = await fetch('/api/dm/delete', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-forum-user-id': String(meId) },
+    body: JSON.stringify({ action: 'dialog', with: id, deleteForAll: true }),
+  });
+  const j = await res.json().catch(() => null);
+  if (!res.ok || !j?.ok) throw new Error(j?.error || 'dm_delete_failed');
+  return true;
+}, [meId]);
+
+const deleteDmMessageServer = useCallback(async (msgId) => {
+  const id = String(msgId || '').trim();
+  if (!id || !meId) return false;
+  const res = await fetch('/api/dm/delete', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-forum-user-id': String(meId) },
+    body: JSON.stringify({ action: 'message', messageId: id, deleteForAll: true }),
+  });
+  const j = await res.json().catch(() => null);
+  if (!res.ok || !j?.ok) throw new Error(j?.error || 'dm_delete_failed');
+  return true;
+}, [meId]);
+
+const openDmDeletePopover = useCallback((kind, payload, e) => {
+  try { e?.preventDefault?.(); e?.stopPropagation?.(); } catch {}
+  let rect = null;
+  try {
+    const b = e?.currentTarget?.getBoundingClientRect?.();
+    if (b) rect = { top: b.top, left: b.left, right: b.right, bottom: b.bottom, width: b.width, height: b.height };
+  } catch {}
+  setDmDeleteForAll(false);
+  setDmDeletePopover({ kind, rect, ...payload });
+}, []);
+
+const closeDmDeletePopover = useCallback(() => {
+  setDmDeletePopover(null);
+  setDmDeleteForAll(false);
+}, []);
+
+const confirmDmDelete = useCallback(async () => {
+  const info = dmDeletePopover;
+  if (!info) return;
+  const kind = String(info.kind || '').trim();
+  let forAll = !!dmDeleteForAll;
+  try {
+    if (kind === 'dialog') {
+      const uid = String(info.uid || '').trim();
+      if (!uid) return;
+      if (forAll) {
+        await deleteDmDialogServer(uid);
+        deleteDmDialogLocal(uid, Date.now());
+        if (String(dmWithUserId || '') === uid) { setDmThreadItems([]); setDmWithUserId(''); }
+        try { loadDmDialogs(null, { force: true, refresh: true }); } catch {}
+      } else {
+        deleteDmDialogLocal(uid);
+      }
+    } else if (kind === 'message') {
+      const msgId = String(info.msgId || '').trim();
+      if (!msgId) return;
+      if (forAll && String(msgId).startsWith('tmp_dm_')) forAll = false;
+      if (forAll) {
+        await deleteDmMessageServer(msgId);
+        deleteDmMessageLocal(msgId);
+        try { loadDmDialogs(null, { force: true, refresh: true }); } catch {}
+      } else {
+        deleteDmMessageLocal(msgId);
+      }
+      setDmThreadItems(prev => (prev || []).filter(m => String(m?.id || '') !== msgId));
+    }
+  } catch (e) {
+    try { toast?.err?.(t('forum_delete_failed')); } catch {}
+  } finally {
+    closeDmDeletePopover();
+  }
+}, [dmDeletePopover, dmDeleteForAll, deleteDmDialogServer, deleteDmMessageServer, deleteDmDialogLocal, deleteDmMessageLocal, removeDmDialogFromState, loadDmDialogs, dmWithUserId, closeDmDeletePopover, t, toast]);
 
 // все посты выбранной темы (строго сравниваем как строки)
 const allPosts = useMemo(() => (
@@ -12657,6 +13693,12 @@ const idMap = useMemo(() => {
 
 // выбранный корень ветки (null = режим списка корней)
 const [threadRoot, setThreadRoot] = useState(null);
+// [NAV_STACK:STATE] — глобальный back-stack
+const navStackRef = useRef([]);
+const [navDepth, setNavDepth] = useState(0);
+const navRestoringRef = useRef(false);
+const navPendingThreadRootRef = useRef(null);
+const navStateRef = useRef({});
 
 // --- OPEN THREAD: сохраняем открытие ветки при переходе в другую тему ---
 // Иначе эффект на смену sel?.id сбрасывает threadRoot и получается «просто список темы».
@@ -12668,6 +13710,11 @@ const openThreadForPost = useCallback((post, opts = {}) => {
   if (!post || !post.id) return;
   const topicId = post.topicId;
   const rootId = String(post.id);
+  const entryId = String(opts.entryId || (post?.id ? `post_${post.id}` : '') || '');
+
+  if (!opts.skipNav) {
+    try { pushNavState(entryId); } catch {}
+  }
 
   pendingScrollToPostIdRef.current = rootId;
 
@@ -12691,14 +13738,17 @@ const openThreadForPost = useCallback((post, opts = {}) => {
 
 // при смене темы: либо выходим из ветки, либо применяем «ожидаемое» открытие ветки
 useEffect(() => {
-  const pendingId = pendingThreadRootIdRef.current;
+  const navPendingId = navPendingThreadRootRef.current;
+  const pendingId = navPendingId || pendingThreadRootIdRef.current;
   if (pendingId) {
-    pendingThreadRootIdRef.current = null;
+    if (navPendingId) navPendingThreadRootRef.current = null;
+    else pendingThreadRootIdRef.current = null;
     const node = idMap?.get?.(String(pendingId))
       || (data?.posts || []).find(x => String(x.id) === String(pendingId))
       || null;
     try { setThreadRoot(node || { id: String(pendingId) }); } catch {}
   } else {
+    if (navRestoringRef.current) return;
     try { setThreadRoot(null); } catch {}
   }
 }, [sel?.id]); // намеренно только sel?.id
@@ -12853,16 +13903,102 @@ const aggregates = useMemo(() => {
 
 
   // результаты поиска (темы + посты)
-  const results = useMemo(()=>{
-    const term = q.trim().toLowerCase(); if(!term) return [];
-    const ts = (data.topics||[])
-      .filter(x => (x.title||'').toLowerCase().includes(term) || (x.description||'').toLowerCase().includes(term))
-      .slice(0,20).map(x => ({ k:'t', id:x.id, title:x.title, desc:x.description }));
-    const ps = (data.posts||[])
-      .filter(p => (p.text||'').toLowerCase().includes(term))
-      .slice(0,40).map(p => ({ k:'p', id:p.id, topicId:p.topicId, text:(p.text||'').slice(0,140) }));
+  const results = useMemo(() => {
+    const raw = q.trim();
+    if (!raw) return [];
+
+    const term = raw.toLowerCase();
+    const isNickSearch = term.startsWith('@') && term.length > 1;
+    const nickNeedle = isNickSearch ? term.slice(1).trim() : '';
+
+    const matchNick = (userId, fallbackNick) => {
+      if (!nickNeedle) return false;
+      const nick = resolveNickForDisplay(userId, fallbackNick);
+      return !!nick && String(nick).toLowerCase() === nickNeedle;
+    };
+
+    const pickMedia = (p, rawText, stickers = []) => {
+      if (Array.isArray(stickers)) {
+        for (const s of stickers) {
+          if (s?.url) return { kind: 'sticker', url: s.url };
+        }
+      }
+
+      // attachments/media fields
+      const attLists = [];
+      if (Array.isArray(p?.attachments)) attLists.push(p.attachments);
+      if (Array.isArray(p?.files)) attLists.push(p.files);
+      const mediaList = attLists.flat().filter(Boolean);
+      for (const a of mediaList) {
+        const url = String(a?.url || a?.src || a?.href || a?.file || '').trim();
+        const typeHint = String(a?.type || a?.mime || a?.mediaType || '').toLowerCase();
+        if (!url) continue;
+        if (typeHint.startsWith('image/') || typeHint === 'image' || isImageUrl(url)) return { kind: 'image', url };
+        if (typeHint.startsWith('video/') || typeHint === 'video' || isVideoUrl(url) || isYouTubeUrl(url) || isTikTokUrl(url)) return { kind: 'video', url };
+        if (typeHint.startsWith('audio/') || typeHint === 'audio' || isAudioUrl(url)) return { kind: 'audio', url };
+      }
+
+      // direct media fields
+      const imgUrl = String(p?.imageUrl || p?.media?.imageUrl || '').trim();
+      if (imgUrl) return { kind: 'image', url: imgUrl };
+      const vidUrl = String(p?.videoUrl || p?.media?.videoUrl || '').trim();
+      if (vidUrl) return { kind: 'video', url: vidUrl };
+      const audUrl = String(p?.audioUrl || p?.media?.audioUrl || '').trim();
+      if (audUrl) return { kind: 'audio', url: audUrl };
+
+      // scan text URLs
+      const urls = extractUrlsFromText(rawText || '');
+      for (const u of urls) {
+        if (isImageUrl(u)) return { kind: 'image', url: u };
+      }
+      for (const u of urls) {
+        if (isVideoUrl(u) || isYouTubeUrl(u) || isTikTokUrl(u)) return { kind: 'video', url: u };
+      }
+      for (const u of urls) {
+        if (isAudioUrl(u)) return { kind: 'audio', url: u };
+      }
+
+      return null;
+    };
+
+    const ts = (data.topics || [])
+      .filter((x) => {
+        if (isNickSearch) return matchNick(x?.userId || x?.accountId, x?.nickname);
+        const title = String(x?.title || '').toLowerCase();
+        const desc = String(x?.description || '').toLowerCase();
+        return title.includes(term) || desc.includes(term);
+      })
+      .slice(0, 20)
+      .map((x) => ({
+        k: 't',
+        id: x.id,
+        title: x.title || '',
+        desc: x.description || '',
+      }));
+
+    const ps = (data.posts || [])
+      .filter((p) => {
+        if (isNickSearch) return matchNick(p?.userId || p?.accountId, p?.nickname);
+        const text = String(p?.text || p?.body || '').toLowerCase();
+        return text.includes(term);
+      })
+      .slice(0, 40)
+      .map((p) => {
+        const rawText = String(p?.text || p?.body || '');
+        const { text: cleanText, stickers } = extractDmStickersFromText(rawText);
+        const textNoMedia = stripMediaUrlsFromText(cleanText);
+        const media = pickMedia(p, rawText, stickers);
+        return {
+          k: 'p',
+          id: p.id,
+          topicId: p.topicId,
+          text: textNoMedia,
+          media,
+        };
+      });
+
     return [...ts, ...ps];
-  }, [q, data.topics, data.posts]);
+  }, [q, data.topics, data.posts, profileBump]);
 
 
   // очистка фильтра при очистке поля поиска
@@ -12902,18 +14038,37 @@ const [pendingImgs, setPendingImgs] = useState([]);
 // [FOCUS_TOOLS_STATE:BEGIN]
 const [composerActive, setComposerActive] = useState(false);
 const composerRef = React.useRef(null);
-const composerScrollYRef = React.useRef(0);
+const composerScrollYRef = React.useRef({ useInner: false, y: 0 });
 // сохраняем позицию скролла перед fullscreen-превью, чтобы после закрытия не прыгало наверх
 const saveComposerScroll = React.useCallback(() => {
-  try { composerScrollYRef.current = window.scrollY || 0; } catch {}
+  try {
+    const scrollEl =
+      bodyRef.current ||
+      (typeof document !== 'undefined' ? document.querySelector('[data-forum-scroll="1"]') : null);
+    const useInner = !!scrollEl && (scrollEl.scrollHeight > scrollEl.clientHeight + 1);
+    const y = useInner
+      ? (scrollEl.scrollTop || 0)
+      : (window.scrollY || window.pageYOffset || 0);
+    composerScrollYRef.current = { useInner, y };
+  } catch {}
 }, []);
 const restoreComposerScroll = React.useCallback(() => {
   try {
-    const y = Number(composerScrollYRef.current || 0);
+    const snap = composerScrollYRef.current || {};
+    const y = Number(snap.y || 0);
+    const useInner = !!snap.useInner;
+    const apply = () => {
+      const scrollEl = useInner
+        ? (bodyRef.current || (typeof document !== 'undefined' ? document.querySelector('[data-forum-scroll="1"]') : null))
+        : null;
+      if (useInner && scrollEl) {
+        try { scrollEl.scrollTop = y; } catch {}
+      } else {
+        try { window.scrollTo({ top: y, behavior: 'auto' }); } catch { try { window.scrollTo(0, y); } catch {} }
+      }
+    };
     // двойной RAF — чтобы отработали setState/unmount портала и лэйаут не дёргался
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      try { window.scrollTo({ top: y, behavior: 'auto' }); } catch { try { window.scrollTo(0, y); } catch {} }
-    }));
+    requestAnimationFrame(() => requestAnimationFrame(apply));
   } catch {}
 }, []);
 // LOCK: пока выбран файл / идёт модерация / аплоад / открыт превью-оверлей — композер нельзя закрывать кликом снаружи
@@ -12989,6 +14144,14 @@ const [pendingVideo, setPendingVideo] = useState(null);
   const [mediaBarOn, setMediaBarOn] = useState(false);
   const [mediaPhase, setMediaPhase] = useState('idle'); // 'idle'|'Ready'|'Moderating'|'Uploading'|'Sending'
   const [mediaPct, setMediaPct] = useState(0);
+  const formatMediaPhase = (phase) => {
+    const p = String(phase || '');
+    if (!p || p === 'idle' || p === 'Ready') return t('forum_media_ready');
+    if (p === 'Moderating') return t('forum_media_moderating');
+    if (p === 'Uploading') return t('forum_media_uploading');
+    if (p === 'Sending') return t('forum_media_sending');
+    return p;
+  };
 
   // отдельный флаг: чтобы бар появлялся СРАЗУ при выборе файла (ещё до модерации/аплоада),
   // даже когда pending* ещё не успели заполниться
@@ -13153,6 +14316,7 @@ const videoMirrorRef = useRef(null);  // вспомогательный незе
    const startRecord = async () => {
      if (recState === 'rec') return;
      try {
+       try { saveComposerScroll(); } catch {}
        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
        const mr = new MediaRecorder(stream, { mimeType: 'audio/webm' });
        chunksRef.current = [];
@@ -13162,6 +14326,7 @@ const videoMirrorRef = useRef(null);  // вспомогательный незе
            const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
            const url  = URL.createObjectURL(blob);
            setPendingAudio(url);
+           try { restoreComposerScroll(); } catch {}
          } catch {}
        };
        mr.start();
@@ -13189,6 +14354,7 @@ const videoMirrorRef = useRef(null);  // вспомогательный незе
     clearInterval(recTimerRef.current);
     recTimerRef.current = null;    
     setRecElapsed(0);
+    try { restoreComposerScroll(); } catch {}
    };
 
    // ==== CAMERA: открыть → запись → стоп → превью (фиксы для старта из overlay 'live') ====
@@ -13295,6 +14461,7 @@ async function createUnmirroredFrontStream(baseStream) {
   if (badStates.has(videoState)) return;
 
   try {
+    try { saveComposerScroll(); } catch {}
     // Оверлей может быть уже открыт — это ок
     setVideoOpen(true);
     setVideoState('opening');
@@ -13387,6 +14554,7 @@ async function createUnmirroredFrontStream(baseStream) {
 
         setPendingVideo(url);
         setVideoState('preview');
+        try { restoreComposerScroll(); } catch {}
       } catch {
         setVideoState('idle');
       }
@@ -13408,7 +14576,7 @@ async function createUnmirroredFrontStream(baseStream) {
     }, 200);
   } catch (e) {
     setVideoState('idle'); setVideoOpen(false);
-    try { toast?.warn?.(t?.('forum_camera_denied') || 'Нет доступа к камере/микрофону') } catch {}
+    try { toast?.warn?.(t?.('forum_camera_denied')) } catch {}
   }
 };
 
@@ -13422,6 +14590,7 @@ const stopVideo = () => {
     if (videoMirrorRef.current?.__stopMirror) videoMirrorRef.current.__stopMirror();
   } catch {}
   videoMirrorRef.current = null;  clearInterval(videoTimerRef.current); videoTimerRef.current = null;
+  try { restoreComposerScroll(); } catch {}
 };
 
 const resetVideo = () => {
@@ -13451,6 +14620,7 @@ const resetVideo = () => {
   setVideoState('idle');
   setVideoElapsed(0);
    try { setVideoProgress(0); } catch {}
+  try { restoreComposerScroll(); } catch {}
 
   // важный добив: если видео было причиной пайплайна — выключаем его, иначе бар может “висеть”
   try { stopMediaProg(); } catch {}
@@ -13550,16 +14720,7 @@ const reasonKey = (reason) => {
   return 'forum_moderation_reason_unknown';
 };
 
-const reasonFallbackEN = (reason) => {
-  const r = String(reason || 'unknown').toLowerCase();
-  if (r === 'porn') return 'Pornography / explicit sexual content';
-  if (r === 'explicit_nudity') return 'Explicit nudity';
-  if (r === 'sexual') return 'Adult / sexual content';
-  if (r === 'hentai') return 'Hentai / explicit drawings';
-  if (r === 'violence') return 'Violence';
-  if (r === 'gore') return 'Gore / graphic content';
-  return 'Restricted content';
-};
+const reasonFallbackEN = (reason) => reasonKey(reason);
 
 // ---- Image normalize: any input -> JPEG blob via canvas (fast + predictable) ----
 const fileToJpegBlob = React.useCallback(async (file, opts = {}) => {
@@ -13632,7 +14793,7 @@ const moderateViaApi = React.useCallback(async (blobs, meta = {}, opts = {}) => 
 const moderateImageFiles = React.useCallback(async (files, opts = {}) => {
   if (!Array.isArray(files) || !files.length) return { decision: 'allow', reason: 'unknown' };
 
-  toastI18n('info', 'forum_moderation_checking', 'Checking content…');
+  toastI18n('info', 'forum_moderation_checking');
 
   // normalize -> jpeg
   const pack = [];
@@ -13774,7 +14935,7 @@ const extractVideoFrames = React.useCallback(async (videoSource, opts = {}) => {
 
 // ---- Video moderation (extract N frames, send to same API) ----
 const moderateVideoSource = React.useCallback(async (videoSource) => {
-  toastI18n('info', 'forum_moderation_checking', 'Checking content…');
+  toastI18n('info', 'forum_moderation_checking');
 
   // Extract frames
   let frames = [];
@@ -13831,7 +14992,7 @@ const hasImageLines = React.useMemo(() => {
 }, [text]);
 
   const createTopic = async (title, description, first) => {
-     if (!rl.allowAction()) { toast.warn(t('forum_too_fast') || 'Слишком часто'); return; }
+     if (!rl.allowAction()) { toast.warn(t('forum_too_fast')); return; }
     const r = await requireAuthStrict(); if (!r) return;
     const uid = resolveProfileAccountId(r.asherId || r.accountId || '')
     const prof = safeReadProfile(uid) || {}
@@ -13852,7 +15013,7 @@ const hasImageLines = React.useMemo(() => {
       const rawDesc  = String(description || '');
       const rawFirst = String(first || '');
       if (hasAnyLink(rawTitle) || hasAnyLink(rawDesc) || hasAnyLink(rawFirst)) {
-        toast.warn(t('forum_links_admin_only') || 'Ссылки в теме может добавлять только администратор');
+        toast.warn(t('forum_links_admin_only'));
         return;
       }
     }
@@ -13878,7 +15039,7 @@ setOverlay(prev => ({
   },
 }))
 setSel(t0)
-toast.ok(t('forum_create_ok') ||'Тема создана')
+toast.ok(t('forum_create_ok'))
 
    
     pushOp('create_topic', {
@@ -13914,6 +15075,7 @@ toast.ok(t('forum_create_ok') ||'Тема создана')
 const createPost = async () => {
   if (postingRef.current) return;
   postingRef.current = true;
+  try { saveComposerScroll(); } catch {}
   // === Режим редактирования поста владельцем ===
   if (editPostId) {
     const _done = () => { postingRef.current = false; };
@@ -13928,9 +15090,10 @@ const createPost = async () => {
       pushOp('edit_post', { id: String(editPostId), text: safeText });
       setEditPostId(null);
       try { setText(''); } catch {}
-      try { toast?.ok?.('Изменено'); } catch {}
+      try { toast?.ok?.(t?.('forum_ok_post_edited')); } catch {}
     } finally {
       _done();
+      try { restoreComposerScroll(); } catch {}
     }
     return;
   }
@@ -13939,9 +15102,10 @@ const createPost = async () => {
   const _fail = (msg) => {
     if (msg) { try { toast?.warn?.(msg) } catch {} }
     postingRef.current = false;
+    try { restoreComposerScroll(); } catch {}
   };
 
-  if (!rl.allowAction()) return _fail(t('forum_too_fast') || 'Слишком часто');
+  if (!rl.allowAction()) return _fail(t('forum_too_fast'));
 
 // === media progress UI:
 // - если есть локальные blob-медиа (камера/голос) — показываем реальный пайплайн (Uploading → Sending)
@@ -13965,7 +15129,7 @@ const createPost = async () => {
         const fileBlob = await resp.blob(); // type: video/webm|mp4|quicktime
         const mime = String(fileBlob.type || '').split(';')[0].trim().toLowerCase();
         if (!/^video\/(mp4|webm|quicktime)$/.test(mime)) throw new Error('bad_type');
-        if (fileBlob.size > 300 * 1024 * 1024) { try { toast?.err?.('Видео больше 300 МБ'); } catch {} ; return _fail(); }
+        if (fileBlob.size > 300 * 1024 * 1024) { try { toast?.err?.(t?.('forum_video_too_big')); } catch {} ; return _fail(); }
 
         // имя с правильным расширением
         const ext = mime.includes('mp4') ? 'mp4' : (mime.includes('quicktime') ? 'mov' : 'webm');
@@ -13999,7 +15163,7 @@ const createPost = async () => {
       } catch (e) {
         if (e?.name === 'AbortError' || signal?.aborted) return _fail();
         console.error('video_client_upload_failed', e);
-        try { toast?.err?.('Не удалось загрузить видео'); } catch {}
+        try { toast?.err?.(t?.('forum_video_upload_failed')); } catch {}
         return _fail();
       }
   }
@@ -14053,9 +15217,8 @@ const createPost = async () => {
 
   // === DM send ===
   if (isDm) {
-    if (String(uid) === String(dmTarget)) return _fail(t('dm_blocked') || 'Blocked');
-    if (dmBlockedMap?.[dmTarget]) return _fail(t('dm_you_blocked') || 'Blocked');
-    if (dmBlockedByReceiverMap?.[dmTarget]) return _fail(t('dm_blocked_by_receiver') || 'Blocked');
+    if (String(uid) === String(dmTarget)) return _fail(t('dm_blocked'));
+    if (dmBlockedMap?.[dmTarget]) return _fail(t('dm_you_blocked'));
     const dmText = String(text || '').trim();
     const rawToId = String(dmWithUserId || '').trim();
     const attachments = [
@@ -14089,6 +15252,7 @@ const createPost = async () => {
     });
     dmDialogsCacheRef.current.clear();
     dmThreadCacheRef.current.clear();
+    let dmSendOk = false;
     try {
       const payload = { to: dmTarget, text: dmText, attachments };
       if (rawToId && rawToId !== dmTarget) payload.toRaw = rawToId;
@@ -14108,10 +15272,29 @@ const createPost = async () => {
         if (blockedByReceiver) {
           setDmBlockedByReceiverMap(prev => ({ ...(prev || {}), [String(dmTarget)]: 1 }));
         }
-        try { toast?.warn?.(t(errKey) || 'Failed'); } catch {}
+        if (blockedByReceiver || blockedByMe) {
+          // Снимем оптимистичный месседж, если сервер запретил отправку
+          setDmThreadItems(prev => (prev || []).filter(m => String(m?.id || '') !== String(tmpId)));
+          try { loadDmDialogs(null, { force: true, refresh: true, throttleMs: 0 }); } catch {}
+        }
+        if (blockedByReceiver) {
+          toastI18n('warn', 'dm_blocked_by_receiver');
+        } else if (blockedByMe) {
+          toastI18n('warn', 'dm_you_blocked');
+        } else {
+          toastI18n('warn', errKey);
+        }
       } else {
         const realId = String(j?.id || tmpId);
         const realTs = Number(j?.ts || optimistic.ts);
+        dmSendOk = true;
+        // Если ранее висел флаг "blocked_by_receiver", уберём его после успешной отправки
+        setDmBlockedByReceiverMap(prev => {
+          if (!prev || !prev[String(dmTarget)]) return prev;
+          const next = { ...(prev || {}) };
+          delete next[String(dmTarget)];
+          return next;
+        });
         setDmThreadItems(prev => (prev || []).map(m =>
           (String(m.id) === String(tmpId))
             ? { ...m, id: realId, ts: realTs, status: 'sent' }
@@ -14138,7 +15321,9 @@ const createPost = async () => {
     try { setMediaPct(0); } catch {}
     try { setVideoProgress(0); } catch {}
     try { setReplyTo(null); } catch {}
-    try { toast?.ok?.(t('dm_sent') || 'Sent'); } catch {}
+    if (dmSendOk) {
+      try { toast?.ok?.(t('dm_sent')); } catch {}
+    }
     postingRef.current = false;
     try { resetVideo(); } catch {}
     try {
@@ -14146,6 +15331,7 @@ const createPost = async () => {
     } catch {}
     try { setPendingVideo(null); } catch {}
     try { setVideoOpen(false); setVideoState('idle'); } catch {}
+    try { restoreComposerScroll(); } catch {}
     return;
   }
 
@@ -14196,7 +15382,7 @@ const createPost = async () => {
     const urls = extractUrls(body);
     const forbidden = justSticker ? false : urls.some(u => !isAllowed(u));
     if (forbidden) {
-      return _fail(t('forum_links_admin_vip_only') || 'Ссылки доступны только администратору и VIP');
+      return _fail(t('forum_links_admin_vip_only'));
     }
   }
   // --- /белый список ---
@@ -14274,7 +15460,7 @@ const createPost = async () => {
   try { setMediaPct(0); } catch {}
   try { setVideoProgress(0); } catch {}  
   setReplyTo(null);
-  toast.ok(t('forum_post_sent') || 'Отправлено');
+  toast.ok(t('forum_post_sent'));
   postingRef.current = false;
  // ← важный сброс видео-оверлея и состояния после отправки
  try { resetVideo(); } catch {}
@@ -14283,12 +15469,13 @@ const createPost = async () => {
  } catch {}
  try { setPendingVideo(null); } catch {}
  try { setVideoOpen(false); setVideoState('idle'); } catch {}
+ try { restoreComposerScroll(); } catch {}
 };
 
 
 /* === REACT: поставить/снять лайк/дизлайк c оптимистикой === */
 const reactMut = useCallback(async (post, kind) => {
-  if (!rl.allowAction()) { if (toast?.warn) toast.warn(t('forum_too_fast') || 'Слишком часто'); return; }
+  if (!rl.allowAction()) { if (toast?.warn) toast.warn(t('forum_too_fast')); return; }
   const r = await requireAuthStrict(); if (!r) return;
 
   if (!post?.id) return;
@@ -14529,11 +15716,13 @@ const handleAttachClick = React.useCallback((e) => {
   e?.preventDefault?.(); 
   e?.stopPropagation?.();
   if (mediaLocked) return;  
+  try { saveComposerScroll(); } catch {}
   fileInputRef.current?.click();
-}, [mediaLocked]);
+}, [mediaLocked, saveComposerScroll]);
 
 const onFilesChosen = React.useCallback(async (e) => {
   try {
+    try { saveComposerScroll(); } catch {}
     const picked = Array.from(e.target?.files || []);
     if (!picked.length) return;
 
@@ -14562,17 +15751,14 @@ const onFilesChosen = React.useCallback(async (e) => {
   // сразу показываем тост (до модерации/загрузки), что медиа обрабатывается
   try {
     if (vidFiles.length) {
-      toast?.info?.(t?.('forum_video_processing_wait') || 'Подождите, видео обрабатывается');
+      toast?.info?.(t?.('forum_video_processing_wait'));
     } else if (imgFiles.length) {
-      toast?.info?.(t?.('forum_image_processing_wait') || 'Подождите, изображение обрабатывается');
+      toast?.info?.(t?.('forum_image_processing_wait'));
     }
   } catch {}
     if (!imgFiles.length && !vidFiles.length) {
       try {
-        toast?.info?.(
-          (t?.('forum_attach_info', { types: 'PNG, JPG, JPEG, WEBP, GIF, MP4, WEBM, MOV' }) ||
-            'Allowed types: PNG, JPG, JPEG, WEBP, GIF, MP4, WEBM, MOV')
-        );
+        toast?.info?.(t?.('forum_attach_info', { types: 'PNG, JPG, JPEG, WEBP, GIF, MP4, WEBM, MOV' }));
       } catch {}
       return;
     }
@@ -14587,15 +15773,15 @@ const onFilesChosen = React.useCallback(async (e) => {
       } catch (err) {
         if (err?.name === 'AbortError' || signal?.aborted) { try { endMediaPipeline?.(); } catch {} return; }
         console.error('[moderation] image check failed', err);
-        toastI18n('err', 'forum_moderation_error', 'Moderation service is temporarily unavailable');
-        toastI18n('info', 'forum_moderation_try_again', 'Please try again');
+        toastI18n('err', 'forum_moderation_error');
+        toastI18n('info', 'forum_moderation_try_again');
        try { endMediaPipeline?.(); } catch {}
         return;
       }
 
       if (modImg?.decision === 'block') {
-        toastI18n('warn', 'forum_image_blocked', 'Image rejected by community rules');
-        toastI18n('info', reasonKey(modImg?.reason), reasonFallbackEN(modImg?.reason));
+        toastI18n('warn', 'forum_image_blocked');
+        toastI18n('info', reasonKey(modImg?.reason));
         return;
       }
 
@@ -14646,11 +15832,11 @@ try { startSoftProgress?.(72, 200, 88); } catch {}  // мягко едем к ~8
       const mime = String(vf?.type || '').split(';')[0].trim().toLowerCase();
       const okMime = /^video\/(mp4|webm|quicktime)$/i.test(mime) || /\.(mp4|webm|mov)$/i.test(String(vf?.name || ''));
       if (!okMime) {
-        try { toast?.warn?.(t?.('forum_video_bad_type') || 'Unsupported video type'); } catch {}
+        try { toast?.warn?.(t?.('forum_video_bad_type')); } catch {}
         return;
       }
       if (Number(vf.size || 0) > 300 * 1024 * 1024) {
-        try { toast?.err?.(t?.('forum_video_too_big') || 'Video is larger than 300MB'); } catch {}
+        try { toast?.err?.(t?.('forum_video_too_big')); } catch {}
         return;
       } 
 
@@ -14705,22 +15891,23 @@ try { startSoftProgress?.(72, 200, 88); } catch {}  // мягко едем к ~8
         } catch (e3) {
           if (e3?.name === 'AbortError' || signal?.aborted) { try { endMediaPipeline?.(); } catch {} return; }
           console.error('video_client_upload_failed', e3);
-        try { toast?.err?.(t?.('forum_video_upload_failed') || 'Failed to upload video'); } catch {}
+        try { toast?.err?.(t?.('forum_video_upload_failed')); } catch {}
         return;
       }
     }
 
     // общий success toast (если что-то реально добавили)
     if (imgFiles.length || vidFiles.length) {
-      try { toast?.success?.(t?.('forum_files_uploaded') || 'Files uploaded'); } catch {}
+      try { toast?.success?.(t?.('forum_files_uploaded')); } catch {}
     }
   } catch (err) {
     console.error(err);
-    try { toast?.error?.(t?.('forum_files_upload_failed') || 'Upload failed'); } catch {}
+    try { toast?.error?.(t?.('forum_files_upload_failed')); } catch {}
   } finally {
     if (e?.target) e.target.value = '';
+    try { restoreComposerScroll(); } catch {}
   }
-}, [t, toast, moderateImageFiles, toastI18n, reasonKey, reasonFallbackEN, beginMediaPipeline, endMediaPipeline, setPendingImgs, setPendingVideo, markMediaReady, startSoftProgress, stopMediaProg, setMediaPhase, setMediaPct, setVideoProgress, viewerId]);
+}, [t, toast, moderateImageFiles, toastI18n, reasonKey, reasonFallbackEN, beginMediaPipeline, endMediaPipeline, setPendingImgs, setPendingVideo, markMediaReady, startSoftProgress, stopMediaProg, setMediaPhase, setMediaPct, setVideoProgress, viewerId, saveComposerScroll, restoreComposerScroll]);
 
   /* ---- профиль (поповер у аватара) ---- */
   const idShown = resolveProfileAccountId(auth.asherId || auth.accountId || '')
@@ -14792,6 +15979,8 @@ try { startSoftProgress?.(72, 200, 88); } catch {}  // мягко едем к ~8
 const [videoFeedOpen, setVideoFeedOpen] = React.useState(false);
 const [videoFeed, setVideoFeed] = React.useState([]);
 const [feedSort, setFeedSort] = React.useState('new'); // new/top/likes/views/replies
+useEffect(() => { videoFeedOpenRef.current = videoFeedOpen; }, [videoFeedOpen]);
+useHtmlFlag('data-video-feed', videoFeedOpen ? '1' : null);
 
 // ✅ VIDEO_FEED: при каждом входе в ленту сначала показываем «перетасованную» (рандомную) выдачу.
 // После ручного выбора сортировки — работаем в обычном режиме.
@@ -14836,6 +16025,7 @@ function __vfShuffleStable(list, seedStr) {
 
 useEffect(() => {
   if (!videoFeedOpen) return;
+  if (navRestoringRef.current) return;
   setVisibleVideoCount(VIDEO_PAGE_SIZE);
 }, [videoFeedOpen, feedSort, starMode, starredAuthors]);
 
@@ -14844,72 +16034,6 @@ const visibleVideoFeed = React.useMemo(
   [videoFeed, visibleVideoCount]
 );
 const videoHasMore = visibleVideoFeed.length < (videoFeed || []).length;
-// ВАЖНО: в ленте нужно уметь находить ссылки внутри текста (даже если не отдельной строкой)
-const FEED_URL_RE = /(https?:\/\/[^\s<>'")]+)/ig;
-
-function extractUrlsFromText(text) {
-  const s = String(text || '');
-  if (!s) return [];
-  const out = [];
- try {
-    for (const m of s.matchAll(FEED_URL_RE)) {
-      const u = String(m?.[1] || '').trim();
-      if (u) out.push(u);
-    }
-  } catch {}
-  return out;
-}
-
-function isVideoUrl(u) {
-  const s = String(u || '').trim();
-  if (!s) return false;
-
-  // локальный превью
-  if (/^blob:/i.test(s)) return true;
-  // прямые видео по расширениям
-  if (/\.(webm|mp4|mov|m4v|mkv)(?:$|[?#])/i.test(s)) return true;
-
-  // filename=video.ext
-  if (/[?&]filename=[^&#]+\.(webm|mp4|mov|m4v|mkv)(?:$|[&#])/i.test(s)) return true;
-
-  // твои/публичные источники без расширения (vercel storage, upload endpoints и т.п.)
-  if (/vercel[-]?storage|vercel[-]?blob|\/uploads\/video|\/forum\/video|\/api\/forum\/uploadVideo/i.test(s)) return true;
-
-  return false;
-}
-
-function isImageUrl(u) {
-  const s = String(u || '').trim();
-  if (!s) return false;
-  return /\.(png|jpe?g|gif|webp|avif|svg)(?:$|[?#])/i.test(s);
-}
-
-function isAudioUrl(u) {
-  const s = String(u || '').trim();
-  if (!s) return false;
-  // если нужно, webm можно оставить (у вас уже есть audio/webm записи)
-  return /\.(ogg|mp3|m4a|wav|webm)(?:$|[?#])/i.test(s) || /\/uploads\/audio\//i.test(s) || /\/forum\/voice/i.test(s);
-}
-
-function isYouTubeUrl(u) {
-  const s = String(u || '').trim();
-  if (!s) return false;
-  // watch?v= / youtu.be / shorts / embed
-  return /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)[A-Za-z0-9_-]{6,}/i.test(s);
-}
-
-function isTikTokUrl(u) {
-  const s = String(u || '').trim();
-  if (!s) return false;
-  // ✅ только /@user/video/123.. (то, что реально умеем embed'ить)
-  return /^(?:https?:\/\/)?(?:(?:www|m)\.)?tiktok\.com\/@[\w.\-]+\/video\/\d+(?:[?#].*)?$/i.test(s);
-}
-
-
-function isMediaUrl(u) {
-  return isVideoUrl(u) || isImageUrl(u) || isAudioUrl(u) || isYouTubeUrl(u) || isTikTokUrl(u);
-}
-
 /** пост содержит медиа? (видео/аудио/картинки/YouTube/TikTok) */
 function isMediaPost(p) {
   if (!p) return false;
@@ -15069,30 +16193,37 @@ setVideoFeed(withStars);
 }
 
 /** открыть ленту видео */
-function openVideoFeed() {
+function openVideoFeed(entryId) {
   // ✅ каждый вход в видео-ленту стартует с «перетасованной» выдачи
   // (даже если в прошлый раз юзер ставил сортировку по лайкам/топу).
   setVideoFeedUserSortLocked(false);
   setVideoFeedEntryToken((x) => x + 1);
 
+  try { pushNavState(entryId || 'video_feed_btn'); } catch {}
+  try { headAutoOpenRef.current = false; } catch {}
+  try { setHeadPinned(false); } catch {}
+  try { setHeadHidden(true); } catch {}
+  try { videoFeedOpenRef.current = true; } catch {}
   setVideoFeedOpen(true);
   try { setInboxOpen?.(false); } catch {}
   try { setSel?.(null); setThreadRoot?.(null); } catch {}
   try { setTopicFilterId?.(null); } catch {}
-  try { setTimeout(() => document.querySelector('[data-forum-video-start="1"]')?.scrollIntoView({ behavior:'smooth', block:'start' }), 0); } catch {}
+  try { setTimeout(() => document.querySelector('[data-forum-video-start="1"]')?.scrollIntoView({ behavior:'auto', block:'start' }), 0); } catch {}
 }
 
 /** закрыть ленту видео */
 function closeVideoFeed() {
+  try { videoFeedOpenRef.current = false; } catch {}
   setVideoFeedOpen(false);
 }
 // [INBOX:OPEN_GLOBAL] — всегда открываем "полный" инбокс (как в списке тем),
 // даже если сейчас в видео-фиде или в ветке.
 // Логика: если уже на странице инбокса — закрыть, иначе: закрыть видео/ветку и открыть инбокс.
-const openInboxGlobal = React.useCallback(() => {
+const openInboxGlobal = React.useCallback((entryId) => {
   const alreadyOnInbox = !!inboxOpen && !sel && !threadRoot && !videoFeedOpen;
   if (alreadyOnInbox) { setInboxOpen(false); return; }
 
+  try { pushNavState(entryId || 'inbox_btn'); } catch {}
   try { if (videoFeedOpen) closeVideoFeed?.(); } catch {}
   try { setReplyTo?.(null); } catch {}
   try { setThreadRoot?.(null); } catch {}
@@ -15104,7 +16235,7 @@ const openInboxGlobal = React.useCallback(() => {
   setTimeout(() => {
     try { document.querySelector('[data-forum-topics-start="1"]')?.scrollIntoView?.({ block: 'start' }); } catch {}
   }, 0);
-}, [inboxOpen, sel, threadRoot, videoFeedOpen]);
+}, [inboxOpen, sel, threadRoot, videoFeedOpen, pushNavState]);
 // авто-обновление ленты, когда лента открыта и что-то меняется в снапшоте
 React.useEffect(() => {
   if (!videoFeedOpen) return;
@@ -15134,6 +16265,262 @@ function openThreadFromPost(p){
 // === QUESTS: вкладка квестов (полупассивный режим) ===
 const [questOpen, setQuestOpen] = React.useState(false);
 const [questSel,  setQuestSel]  = React.useState(null);   // текущая карточка квеста
+
+// [NAV_STACK:SNAPSHOT] — актуальное состояние UI для back-stack
+navStateRef.current = {
+  headHidden,
+  headPinned,
+  selId: sel?.id ?? null,
+  threadRootId: threadRoot?.id ?? null,
+  inboxOpen,
+  inboxTab,
+  dmWithUserId,
+  videoFeedOpen,
+  questOpen,
+  questSelId: questSel?.id ?? null,
+  topicFilterId,
+  topicSort,
+  postSort,
+  feedSort,
+  starMode,
+  q,
+  drop,
+  sortOpen,
+  replyToId: replyTo?.id ?? null,
+};
+
+function getScrollEl() {
+  if (!isBrowser()) return null;
+  return (
+    bodyRef.current ||
+    document.querySelector('[data-forum-scroll="1"]') ||
+    null
+  );
+}
+
+function getScrollSnapshot() {
+  if (!isBrowser()) return { useInner: false, y: 0 };
+  try {
+    const scrollEl = getScrollEl();
+    const useInner = !!scrollEl && (scrollEl.scrollHeight > scrollEl.clientHeight + 1);
+    if (useInner) return { useInner: true, y: (scrollEl.scrollTop || 0) };
+  } catch {}
+  const winY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+  return { useInner: false, y: winY };
+}
+
+function getEntryOffset(entryId, useInner) {
+  if (!isBrowser() || !entryId) return null;
+  try {
+    const el = document.getElementById(entryId);
+    if (!el) return null;
+    const rect = el.getBoundingClientRect();
+    if (useInner) {
+      const scrollEl = getScrollEl();
+      const contRect = scrollEl?.getBoundingClientRect?.() || { top: 0 };
+      return rect.top - contRect.top;
+    }
+    return rect.top;
+  } catch {
+    return null;
+  }
+}
+
+function restoreScrollSnapshot(snapshot) {
+  if (!isBrowser() || !snapshot) return;
+  const y = Number(snapshot?.y || 0);
+  const useInner = !!snapshot?.useInner;
+  const apply = () => {
+    const scrollEl = useInner ? getScrollEl() : null;
+    if (useInner && scrollEl) {
+      try { scrollEl.scrollTop = y; } catch {}
+    } else {
+      try { window.scrollTo({ top: y, behavior: 'auto' }); } catch { try { window.scrollTo(0, y); } catch {} }
+    }
+  };
+  try { requestAnimationFrame(() => requestAnimationFrame(apply)); } catch { try { setTimeout(apply, 0); } catch {} }
+}
+
+function restoreEntryPosition(state) {
+  if (!isBrowser() || !state?.entryId) return false;
+  const entryId = String(state.entryId || '').trim();
+  if (!entryId) return false;
+  const el = document.getElementById(entryId);
+  if (!el) return false;
+
+  const useInner = !!state?.scroll?.useInner;
+  const offset = Number(state?.entryOffset);
+  const apply = () => {
+    try {
+      if (useInner) {
+        const scrollEl = getScrollEl();
+        if (scrollEl) {
+          if (Number.isFinite(offset)) {
+            const rect = el.getBoundingClientRect();
+            const contRect = scrollEl.getBoundingClientRect();
+            const delta = (rect.top - contRect.top) - offset;
+            scrollEl.scrollTop += delta;
+          } else {
+            el.scrollIntoView({ behavior: 'auto', block: 'center' });
+          }
+          return true;
+        }
+      } else {
+        if (Number.isFinite(offset)) {
+          const rect = el.getBoundingClientRect();
+          const delta = rect.top - offset;
+          try { window.scrollTo({ top: (window.pageYOffset || 0) + delta, behavior: 'auto' }); } catch {}
+        } else {
+          el.scrollIntoView({ behavior: 'auto', block: 'center' });
+        }
+        return true;
+      }
+    } catch {}
+    return false;
+  };
+  return apply();
+}
+
+function captureNavState(entryId) {
+  const base = navStateRef.current || {};
+  const scroll = getScrollSnapshot();
+  const entryOffset = getEntryOffset(String(entryId || ''), !!scroll.useInner);
+  return {
+    ...base,
+    entryId: String(entryId || ''),
+    entryOffset,
+    scroll,
+  };
+}
+
+function pushNavState(entryId) {
+  if (navRestoringRef.current) return;
+  const state = captureNavState(entryId);
+  navStackRef.current = [...(navStackRef.current || []), state];
+  setNavDepth(navStackRef.current.length);
+}
+
+function applyNavState(state) {
+  if (!state) return;
+  navRestoringRef.current = true;
+
+  try { setHeadHidden(!!state.headHidden); } catch {}
+  try { setHeadPinned(!!state.headPinned); } catch {}
+  try { headAutoOpenRef.current = false; } catch {}
+
+  try { setInboxOpen(!!state.inboxOpen); } catch {}
+  try { setInboxTab(state.inboxTab || 'replies'); } catch {}
+  try { setDmWithUserId(state.dmWithUserId || ''); } catch {}
+
+  try { setVideoFeedOpen(!!state.videoFeedOpen); } catch {}
+  try { setQuestOpen(!!state.questOpen); } catch {}
+  try {
+    if (state.questSelId) {
+      const q = (QUESTS || []).find(x => String(x.id) === String(state.questSelId));
+      setQuestSel(q || null);
+    } else {
+      setQuestSel(null);
+    }
+  } catch { try { setQuestSel(null); } catch {} }
+
+  try { setTopicFilterId(state.topicFilterId ?? null); } catch {}
+  try { if (state.topicSort) setTopicSort(state.topicSort); } catch {}
+  try { if (state.postSort) setPostSort(state.postSort); } catch {}
+  try { if (state.feedSort) setFeedSort(state.feedSort); } catch {}
+  try { setStarMode(!!state.starMode); } catch {}
+  try { setQ(state.q || ''); } catch {}
+  try { setDrop(!!state.drop); } catch {}
+  try { setSortOpen(!!state.sortOpen); } catch {}
+
+  try {
+    if (state.replyToId) {
+      const rp = (data?.posts || []).find(x => String(x.id) === String(state.replyToId));
+      setReplyTo(rp || null);
+    } else {
+      setReplyTo(null);
+    }
+  } catch {}
+
+  const nextSelId = state.selId != null ? String(state.selId) : '';
+  if (!nextSelId) {
+    try { setSel(null); } catch {}
+    try { setThreadRoot(null); } catch {}
+  } else {
+    const tt = (data?.topics || []).find(x => String(x.id) === nextSelId);
+    if (!tt) {
+      try { setSel(null); } catch {}
+      try { setThreadRoot(null); } catch {}
+    } else if (!sel || String(sel.id) !== nextSelId) {
+      navPendingThreadRootRef.current = state.threadRootId ? String(state.threadRootId) : null;
+      try { setSel(tt); } catch {}
+    } else if (state.threadRootId) {
+      const node = idMap?.get?.(String(state.threadRootId))
+        || (data?.posts || []).find(x => String(x.id) === String(state.threadRootId))
+        || null;
+      try { setThreadRoot(node || { id: String(state.threadRootId) }); } catch {}
+    } else {
+      try { setThreadRoot(null); } catch {}
+    }
+  }
+
+  setTimeout(() => {
+    let restored = false;
+    try { restored = restoreEntryPosition(state); } catch {}
+    if (!restored) {
+      try { restoreScrollSnapshot(state.scroll); } catch {}
+    }
+    try { navRestoringRef.current = false; } catch {}
+    if (!restored && state?.entryId) {
+      setTimeout(() => {
+        try { restoreEntryPosition(state); } catch {}
+      }, 120);
+    }
+  }, 0);
+}
+
+function handleGlobalBack() {
+  try {
+    if (videoOpen || overlayMediaUrl) {
+      resetOrCloseOverlay();
+      return;
+    }
+  } catch {}
+
+  const stack = navStackRef.current || [];
+  if (stack.length) {
+    const prev = stack.pop();
+    navStackRef.current = stack;
+    setNavDepth(stack.length);
+    applyNavState(prev);
+    return;
+  }
+
+  if (videoFeedOpen) { try { closeVideoFeed?.() } catch {} ; return; }
+  if (inboxOpen) {
+    if (dmWithUserId) { try { setDmWithUserId('') } catch {} ; try { setInboxTab('messages') } catch {} ; return; }
+    try { setInboxOpen(false); } catch {}
+    return;
+  }
+  if (questOpen) {
+    if (questSel) { try { setQuestSel(null); } catch {} ; return; }
+    try { closeQuests?.(); } catch {}
+    return;
+  }
+  if (threadRoot) { try { setReplyTo(null); } catch {} ; try { setThreadRoot(null); } catch {} ; return; }
+  if (sel) { try { setReplyTo(null); } catch {} ; try { setSel(null); } catch {} ; return; }
+}
+
+const canGlobalBack = !!(
+  navDepth > 0 ||
+  videoOpen ||
+  overlayMediaUrl ||
+  videoFeedOpen ||
+  inboxOpen ||
+  questOpen ||
+  threadRoot ||
+  sel ||
+  dmWithUserId
+);
 
 // === QUEST ENV loader (client) ===
 const [questEnv,  setQuestEnv]  = React.useState(null);
@@ -15322,7 +16709,7 @@ const openQuestCardChecked = React.useCallback(async (card) => {
           claimTs: Date.now(),
         },
       }))
-      try { toast?.ok?.(t('quest_done') || 'Готово') } catch {}
+      try { toast?.ok?.(t('quest_done')) } catch {}
       return
     }
 
@@ -15695,6 +17082,14 @@ function pickAdUrlForSlot(slotKey, slotKind) {
        } catch {}
      });
    }, []);
+
+  const dmDeleteName = dmDeletePopover?.nick || (dmDeletePopover?.uid ? shortId(dmDeletePopover.uid) : '');
+  const dmDeleteText = dmDeletePopover?.kind === 'dialog'
+    ? t('dm_delete_dialog_warning')
+    : t('dm_delete_msg_warning');
+  const dmDeleteCheckboxLabel = dmDeletePopover
+    ? t('dm_delete_for_all').replace('{name}', dmDeleteName || shortId(dmDeletePopover?.uid || ''))
+    : '';
   /* ---- render ---- */
   return (
 <div
@@ -15721,9 +17116,11 @@ function pickAdUrlForSlot(slotKey, slotKind) {
  }
  /* keep badge on inbox button pinned visually */
  .forumRowBar .inboxBtn{ position:relative; }
- .forumRowBar .inboxBtn .inboxBadgeReplies,
+ .forumRowBar .inboxBtn .inboxBadgeReplies{
+   position:absolute; top:-6px; right:-6px; z-index:3;
+ }
  .forumRowBar .inboxBtn .inboxBadgeDM{
-   position:absolute; top:-6px; right:-6px;
+   position:absolute; top:-6px; left:-6px; z-index:2;
  }
  /* RTL: зеркалим только порядок слотов, центр остаётся центром */
  [dir="rtl"] .forumRowBar{ direction:ltr; } /* чтобы иконки не переворачивались */
@@ -15762,6 +17159,19 @@ function pickAdUrlForSlot(slotKey, slotKind) {
 `} </style>
 
       <Styles />{toast.view}
+      <DmDeletePopover
+        open={!!dmDeletePopover}
+        rect={dmDeletePopover?.rect}
+        title=""
+        text={dmDeleteText}
+        checkboxLabel={dmDeleteCheckboxLabel}
+        checked={dmDeleteForAll}
+        onChecked={setDmDeleteForAll}
+        onCancel={closeDmDeletePopover}
+        onConfirm={confirmDmDelete}
+        cancelLabel={t('dm_delete_cancel') || t('forum_cancel')}
+        confirmLabel={t('dm_delete_confirm') || t('forum_delete')}
+      />
        {/* Overlay камеры/плеера */}
 <VideoOverlay
   open={videoOpen}
@@ -15809,13 +17219,13 @@ function pickAdUrlForSlot(slotKey, slotKind) {
     /* === СПИСОК ТЕМ === */
     <section className="glass neon" style={{ display:'flex', flexDirection:'column', flex:'1 1 auto', minHeight: 0 }}>
 
-{headHidden && !headPinned && isBrowser() && createPortal(
+{headHidden && !headPinned && isBrowser() && videoState !== 'recording' && createPortal(
   <button
     type="button"
     className="headPeekBtn"
-    aria-label={t('forum_show_header') || 'Show header'}
+    aria-label={t('forum_show_header')}
     onPointerDown={(e) => e.preventDefault()}
-    onClick={() => { setHeadPinned(true); setHeadHidden(false); }}
+    onClick={() => { headAutoOpenRef.current = false; setHeadPinned(true); setHeadHidden(false); }}
   >
     <HeadChevronIcon dir="down" />
   </button>,
@@ -15829,8 +17239,8 @@ function pickAdUrlForSlot(slotKey, slotKind) {
       <button
         type="button"
         className="headCollapseBtn"
-        aria-label={t('forum_hide_header') || 'Hide header'}
-        onClick={() => { setHeadPinned(false); setHeadHidden(true); }}
+        aria-label={t('forum_hide_header')}
+        onClick={() => { headAutoOpenRef.current = false; setHeadPinned(false); setHeadHidden(true); }}
       >
         <HeadChevronIcon dir="up" />
       </button>
@@ -15925,14 +17335,14 @@ function pickAdUrlForSlot(slotKey, slotKind) {
                 value={q}
                 onChange={e=>{ setQ(e.target.value); openOnly('search') }}
                 onFocus={()=>openOnly('search')}
-                placeholder={t('forum_search_ph') || 'Поиск по темам и сообщениям…'}
+                placeholder={t('forum_search_ph')}
               />
-              <button className="iconBtn" aria-label="search" onClick={()=> openOnly(drop ? null : 'search')}>
+              <button className="iconBtn" aria-label={t('forum_search')} onClick={()=> openOnly(drop ? null : 'search')}>
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
                   <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.7"/><path d="M16 16l4 4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
                 </svg>
               </button>
-              <button className="iconBtn" title={t('forum_sort')||'Сортировка'} onClick={()=> openOnly(sortOpen ? null : 'sort')}>
+              <button className="iconBtn" title={t('forum_sort')} onClick={()=> openOnly(sortOpen ? null : 'sort')}>
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
                   <path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
                 </svg>
@@ -15943,7 +17353,7 @@ function pickAdUrlForSlot(slotKey, slotKind) {
   unoptimized width={52} height={52}
   alt=""
   role="button"
-  aria-label={t('quest_open') || 'Quests'}
+  aria-label={t('quest_open')}
   aria-disabled={!QUEST_ENABLED}
   tabIndex={QUEST_ENABLED ? 0 : -1}
   onClick={() => {
@@ -15972,33 +17382,76 @@ function pickAdUrlForSlot(slotKey, slotKind) {
 {/* ⬆️ КОНЕЦ ВСТАВКИ */}
                 {drop && q.trim() && (
                 <div className="searchDrop" onMouseLeave={()=>setDrop(false)}>
-                  {results.length===0 && <div className="meta px-1 py-1">{t('forum_search_empty') || 'Ничего не найдено'}</div>}
+                  {results.length===0 && <div className="meta px-1 py-1">{t('forum_search_empty')}</div>}
                   {results.map(r=>(
                     <button
                       key={`${r.k}:${r.id}`}
-                      className="item w-full text-left mb-1"
+                      id={`search_${r.k}_${r.id}`}
+                      className="item w-full text-left mb-1 searchResultItem"
                       onClick={()=>{
-                        setDrop(false)
+                        setDrop(false);
+                        setQ('');
                         if(r.k==='t'){
                           const tt = (data.topics||[]).find(x=>x.id===r.id)
-                          if(tt){ setTopicFilterId(tt.id); setSel(tt); setThreadRoot(null) }
+                          if(tt){
+                            pushNavState(`search_${r.k}_${r.id}`);
+                            setTopicFilterId(tt.id);
+                            setSel(tt);
+                            setThreadRoot(null);
+                          }
                         }else{
                           const p = (data.posts||[]).find(x=>x.id===r.id)
                           if(p){
                             const tt = (data.topics||[]).find(x=>x.id===p.topicId)
-if (tt) {
-  setTopicFilterId(tt.id);
-  // ✅ сразу открыть ветку ответов с заголовком = найденное сообщение
-  openThreadForPost(p);
-}
-
+                            if (tt) {
+                              setTopicFilterId(tt.id);
+                              // ✅ сразу открыть ветку ответов с заголовком = найденное сообщение
+                              openThreadForPost(p, { entryId: `search_${r.k}_${r.id}` });
+                            }
                           }
                         }
                       }}>
-                      {r.k==='t'
-                        ? (<div><div className="title">Тема: {r.title}</div>{r.desc && <div className="meta">{r.desc}</div>}</div>)
-                        : (<div><div className="title">Сообщение</div><div className="meta">{r.text}</div></div>)
-                      }
+                      {r.media && (
+                        <span
+                          className={cls('searchResultMedia', `searchResultMedia-${r.media.kind}`)}
+                          data-kind={r.media.kind}
+                        >
+                          {(r.media.kind === 'image' || r.media.kind === 'sticker') ? (
+                            <Image
+                              src={r.media.url}
+                              alt=""
+                              width={56}
+                              height={56}
+                              unoptimized
+                              loading="lazy"
+                              className="searchResultThumb"
+                            />
+                          ) : (
+                            <span className="searchResultIcon" aria-hidden>
+                              {r.media.kind === 'video'
+                                ? '🎬'
+                                : (r.media.kind === 'audio' ? '🎵' : '📎')}
+                            </span>
+                          )}
+                          {r.media.kind === 'video' && <span className="searchResultPlay" aria-hidden>▶</span>}
+                        </span>
+                      )}
+                      {r.k==='t' ? (
+                        <span className="searchResultContent">
+                          <span className="searchResultTitle">
+                            <span className="searchResultKind">{t('forum_search_kind_topic')}</span>
+                            <span className="searchResultTitleText">{r.title}</span>
+                          </span>
+                          {r.desc && <span className="searchResultText">{r.desc}</span>}
+                        </span>
+                      ) : (
+                        <span className="searchResultContent">
+                          <span className="searchResultTitle">
+                            <span className="searchResultKind">{t('forum_search_kind_post')}</span>
+                          </span>
+                          {!!r.text && <span className="searchResultText">{r.text}</span>}
+                        </span>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -16013,7 +17466,7 @@ if (tt) {
       />
     ))}
     <div className="coinBurstBox" onClick={e => e.stopPropagation()}>
-      <div className="coinCongrats">{t('quest_reward_claimed') || 'Награда зачислена'}</div>
+      <div className="coinCongrats">{t('quest_reward_claimed')}</div>
       <div className="coinSum">+ {Number(claimFx.amount).toFixed(10)}</div>
 
       <button
@@ -16151,7 +17604,7 @@ if (tt) {
           }
         }}
       >
-        {t('quest_do') || 'Забрать'}
+        {t('quest_do')}
       </button>
     </div>
   </div>
@@ -16163,11 +17616,11 @@ if (tt) {
                 <div className="sortDrop" onMouseLeave={()=>setSortOpen(false)}>
 
 {[
-  ['new',     t('forum_sort_new')     || 'Новые'],
-  ['top',     t('forum_sort_top')     || 'Топ'],
-  ['likes',   t('forum_sort_likes')   || 'Лайки'],
-  ['views',   t('forum_sort_views')   || 'Просмотры'],
-  ['replies', t('forum_sort_replies') || 'Ответы'],
+  ['new',     t('forum_sort_new')],
+  ['top',     t('forum_sort_top')],
+  ['likes',   t('forum_sort_likes')],
+  ['views',   t('forum_sort_views')],
+  ['replies', t('forum_sort_replies')],
 ].map(([k,txt])=>(
   <button
     key={k}
@@ -16197,9 +17650,9 @@ onClick={()=>{
     className={`starModeBtn ${starMode ? 'on' : ''}`}
    onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); setStarMode(v=>!v); }}
 
-    title="Star mode: авторы, на которых вы подписаны — первыми"
+    title={t('forum_star_mode_title')}
     aria-pressed={starMode}
-    aria-label="Star mode"
+    aria-label={t('forum_star_mode')}
   >
     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden>
       <path className="starPath" d="M12 2.6l2.9 6.2 6.8.6-5.1 4.4 1.6 6.6L12 16.9 5.8 20.4l1.6-6.6-5.1-4.4 6.8-.6L12 2.6Z" />
@@ -16213,7 +17666,7 @@ onClick={()=>{
   <button
     ref={vipBtnRef}
     className={cls('iconBtn', vipActive ? 'vip' : 'vipGray', 'pulse', 'hoverPop')}
-    title={t('forum_vip_plus') || 'VIP+'}
+    title={t('forum_vip_plus')}
     onClick={()=> openOnly(vipOpen ? null : 'vip')}
   >
     VIP+
@@ -16229,7 +17682,7 @@ onClick={()=>{
       try {
         const accountId = auth?.accountId || auth?.asherId || '';
         if (!accountId) { 
-          toast?.err?.(t('forum_need_auth') || 'Authorization required'); 
+          toast?.err?.(t('forum_need_auth')); 
           return; 
         }
 
@@ -16244,7 +17697,7 @@ onClick={()=>{
           if (j0?.isVip) {
             // уже VIP — просто подсветим кнопку и закроем поповер
             try { setVipActive?.(true); } catch {}
-            toast?.ok?.(t('forum_vip_already_active') || 'VIP already active');
+            toast?.ok?.(t('forum_vip_already_active'));
             setVipOpen(false);
             return;
           }
@@ -16277,17 +17730,17 @@ onClick={()=>{
 
           if (active) {
             try { setVipActive?.(true); } catch {}
-            toast?.ok?.(t('forum_vip_activated') || 'VIP activated');
+            toast?.ok?.(t('forum_vip_activated'));
           } else {
             // не успели получить webhook за минуту — просто сообщаем,
             // дальше подтянется твоим общим циклом/при следующем заходе
-            toast?.warn?.(t('forum_vip_pending') || 'Payment pending…');
+            toast?.warn?.(t('forum_vip_pending'));
           }
         } else {
-          toast?.err?.(t('forum_vip_pay_fail') || 'Payment init failed');
+          toast?.err?.(t('forum_vip_pay_fail'));
         }
       } catch {
-        toast?.err?.(t('forum_vip_pay_fail') || 'Payment init failed');
+        toast?.err?.(t('forum_vip_pay_fail'));
       } finally {
         setVipOpen(false);
       }
@@ -16324,8 +17777,9 @@ onClick={()=>{
         <button
         type="button"
         className="iconBtn inboxBtn"
-        title={t('forum_inbox') || 'Ответы мне'}
-        onClick={(e) => { e.preventDefault(); e.stopPropagation(); openInboxGlobal(); }}
+        title={t('forum_inbox')}
+        id="inbox_btn_main"
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); openInboxGlobal('inbox_btn_main'); }}
         aria-pressed={inboxOpen}
       >
         <svg viewBox="0 0 24 24" aria-hidden>
@@ -16333,10 +17787,10 @@ onClick={()=>{
           <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
         {mounted && unreadCount > 0 && (
-          <span className="inboxBadgeReplies" suppressHydrationWarning>{unreadCount}</span>
+          <span className="inboxBadgeReplies" suppressHydrationWarning>{formatCount(unreadCount)}</span>
         )}
         {mounted && dmUnreadCount > 0 && (
-          <span className="inboxBadgeDM" suppressHydrationWarning>{dmUnreadCount}</span>
+          <span className="inboxBadgeDM" suppressHydrationWarning>{formatCount(dmUnreadCount)}</span>
         )}
       </button>
 
@@ -16356,7 +17810,7 @@ onClick={()=>{
       } catch {}
     }}
     onMouseDown={(e) => e.preventDefault()}
-    aria-label="Invite friends"
+    aria-label={t('forum_invite_friends')}
   >
     <span
       style={{
@@ -16391,8 +17845,8 @@ onClick={()=>{
   <button
     type="button"
     className="iconBtn bigPlus"
-        title={t('forum_create') || 'Создать'}
-        aria-label={t('forum_create') || 'Создать'}
+        title={t('forum_create')}
+        aria-label={t('forum_create')}
     onClick={() => {
   try { if (videoFeedOpen) closeVideoFeed?.() } catch {}
   try { setInboxOpen?.(false) } catch {}
@@ -16409,11 +17863,12 @@ onClick={()=>{
            <button
     type="button"
     className="iconBtn bigPlus"
-   title={t('forum_video_feed') || 'Видео'}
-    aria-label={t('forum_video_feed') || 'Видео'}
+   title={t('forum_video_feed')}
+    aria-label={t('forum_video_feed')}
+    id="video_feed_btn_main"
     onClick={() => {
       if (videoFeedOpen) { try { closeVideoFeed?.() } catch {} ; return; }
-      try { openVideoFeed?.() } catch {}
+      try { openVideoFeed?.('video_feed_btn_main') } catch {}
     }}
   >
 <svg
@@ -16451,7 +17906,7 @@ onClick={()=>{
   <button
     type="button"
     className="iconBtn bigPlus"
-    aria-label={t?.('forum_home') || 'На главную'}
+    aria-label={t?.('forum_home')}
     onClick={()=>{
     if (videoFeedOpen) { try{ closeVideoFeed?.() }catch{} }
     if (questOpen)     { try{ closeQuests?.() }catch{} }
@@ -16461,7 +17916,7 @@ onClick={()=>{
     try{ setSel(null) }catch{};
     setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIntoView({block:'start'}),0);
   }}
-    title={t?.('forum_home') || 'На главную'}
+    title={t?.('forum_home')}
   >
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
       <path d="M3 10l9-7 9 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
@@ -16472,19 +17927,10 @@ onClick={()=>{
   <button
     type="button"
     className="iconBtn bigPlus"
-    aria-label={t?.('forum_back') || 'Назад'}
-      disabled={!videoFeedOpen && !inboxOpen && !questOpen}
-    onClick={()=>{ 
-      if (videoFeedOpen) { try{ closeVideoFeed?.() }catch{}; return; } 
-      if (inboxOpen)    { try{ setInboxOpen(false) }catch{}; return; }
-  if (questOpen) {
-    // если внутри раздела квестов открыта карточка — просто закрываем её
-    if (questSel) { try{ setQuestSel(null) }catch{}; return; }
-    // иначе выходим из раздела квестов целиком
-    try{ closeQuests?.() }catch{}; return;
-  }     
- }}
-       title={t?.('forum_back') || 'Назад'}
+    aria-label={t?.('forum_back')}
+    disabled={!canGlobalBack}
+    onClick={handleGlobalBack}
+       title={t?.('forum_back')}
    
       >
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
@@ -16501,8 +17947,8 @@ onClick={()=>{
   <>
   <div data-forum-video-start="1" />
 {/* ВЕТКА-ЛЕНТА: медиа (видео/аудио/изображения) */}
-<div className="meta mt-1">{t('') || ''}</div>
-    <div className="grid gap-2 mt-2" suppressHydrationWarning>
+<div className="meta">{t('')}</div>
+    <div className="grid gap-2" suppressHydrationWarning>
 {debugAdsSlots(
   'video',
   interleaveAds(
@@ -16573,7 +18019,7 @@ const openThreadHere = (clickP) => {
       {videoHasMore && (
         <div className="loadMoreFooter">
           <div className="loadMoreShimmer">
-            {t?.('loading') || 'Loading…'}
+            {t?.('loading')}
           </div>
           <LoadMoreSentinel
             onVisible={() =>
@@ -16586,7 +18032,7 @@ const openThreadHere = (clickP) => {
       )}
       {videoFeed?.length === 0 && (
         <div className="meta">
-          {t('forum_search_empty') || 'Ничего не найдено'}
+          {t('forum_search_empty')}
         </div>
       )}
     </div>
@@ -16595,7 +18041,7 @@ const openThreadHere = (clickP) => {
   </>
 ) : (questOpen && QUEST_ENABLED) ? (
   <>
-    <div className="meta mt-1">{t('') || ''}</div>
+    <div className="meta mt-1">{t('')}</div>
     <QuestHub
       t={t}
       quests={QUESTS}
@@ -16618,16 +18064,16 @@ const openThreadHere = (clickP) => {
   <>
     <div className="inboxHeader">
       <div className="inboxTitleLine">Quantum Messenger</div>
-      <div className="inboxTabs" role="tablist" aria-label="Inbox tabs">
+      <div className="inboxTabs" role="tablist" aria-label={t('forum_inbox_tabs')}>
         <button
           type="button"
           className="inboxTabBtn"
           data-active={inboxTab === 'replies' ? '1' : '0'}
           onClick={() => { setInboxTab('replies'); setDmWithUserId(''); }}
         >
-          <span className="inboxTabLabel">{t('inbox_tab_replies_to_me') || 'Ответы мне'}</span>
+          <span className="inboxTabLabel">{t('inbox_tab_replies_to_me')}</span>
           {mounted && unreadCount > 0 && (
-            <span className="inboxTabBadge" data-kind="replies">{unreadCount}</span>
+            <span className="inboxTabBadge" data-kind="replies">{formatCount(unreadCount)}</span>
           )}
         </button>
         <button
@@ -16636,9 +18082,9 @@ const openThreadHere = (clickP) => {
           data-active={inboxTab === 'messages' ? '1' : '0'}
           onClick={() => setInboxTab('messages')}
         >
-          <span className="inboxTabLabel">{t('inbox_tab_messages') || 'Сообщения'}</span>
+          <span className="inboxTabLabel">{t('inbox_tab_messages')}</span>
           {mounted && dmUnreadCount > 0 && (
-            <span className="inboxTabBadge" data-kind="messages">{dmUnreadCount}</span>
+            <span className="inboxTabBadge" data-kind="messages">{formatCount(dmUnreadCount)}</span>
           )}
         </button>
         <button
@@ -16647,15 +18093,15 @@ const openThreadHere = (clickP) => {
           data-active={inboxTab === 'published' ? '1' : '0'}
           onClick={() => { setInboxTab('published'); setDmWithUserId(''); }}
         >
-          <span className="inboxTabLabel">{t('inbox_tab_published') || 'Опубликованные'}</span>
+          <span className="inboxTabLabel">{t('inbox_tab_published')}</span>
           {mounted && (myPublishedPosts?.length || 0) > 0 && (
-            <span className="inboxTabBadge" data-kind="published">{myPublishedPosts?.length || 0}</span>
+            <span className="inboxTabBadge" data-kind="published">{formatCount(myPublishedPosts?.length || 0)}</span>
           )}
         </button>
       </div>
       <div className="inboxTabsRail" aria-hidden="true" />
     </div>
-    <div className="grid gap-2 mt-2" suppressHydrationWarning>
+    <div className="grid gap-2 mt-2 inboxBody" suppressHydrationWarning>
       {inboxTab === 'replies' && (
         <>
 {debugAdsSlots(
@@ -16727,7 +18173,7 @@ onOpenThread={(clickP) => {
       {repliesHasMore && (
         <div className="loadMoreFooter">
           <div className="loadMoreShimmer">
-            {t?.('loading') || 'Loading…'}
+            {t?.('loading')}
           </div>
           <LoadMoreSentinel
             onVisible={() =>
@@ -16740,7 +18186,7 @@ onOpenThread={(clickP) => {
       )}
       {sortedRepliesToMe.length === 0 && (
         <div className="meta">
-          {t('forum_inbox_empty') || 'Новых ответов нет'}
+          {t('forum_inbox_empty')}
         </div>
       )}
         </>
@@ -16751,38 +18197,24 @@ onOpenThread={(clickP) => {
           {dmWithUserId ? (
             <>
               {dmBlockedMap?.[String(dmWithUserId || '').trim()] && (
-                <div className="meta">{t('dm_you_blocked') || 'You blocked this user'}</div>
+                <div className="meta">{t('dm_you_blocked')}</div>
               )}
               {dmBlockedByReceiverMap?.[String(dmWithUserId || '').trim()] && (
-                <div className="meta">{t('dm_blocked_by_receiver') || 'You are blocked by this user'}</div>
+                <div className="meta">{t('dm_blocked_by_receiver')}</div>
               )}
-              <button
-                type="button"
-                className="btn btnGhost dmBackBtn"
-                onClick={() => setDmWithUserId('')}
-              >
-                {t('inbox_back_to_list') || 'Back to list'}
-              </button>
-              {(() => {
-                const threadUid = String(dmWithUserId || '').trim();
-                const threadNick = resolveNickForDisplay(threadUid, '');
-                return (
-                  <div className="dmThreadHeader">
-                    <div className="dmThreadAvatar">
-                      <AvatarEmoji userId={threadUid} pIcon={resolveIconForDisplay(threadUid, '')} className="dmThreadAvatarImg" />
-                    </div>
-                    <div className="dmThreadMeta">
-                      <div className="dmThreadName">{threadNick || shortId(threadUid)}</div>
-                      <div className="dmThreadId">{shortId(threadUid)}</div>
-                    </div>
-                  </div>
-                );
-              })()}
-              <div className="dmThread">
+              <DmThreadHeader
+                uid={dmWithUserId}
+                meId={meId}
+                t={t}
+                starredAuthors={starredAuthors}
+                onToggleStar={toggleAuthorStar}
+                onUserInfoToggle={handleUserInfoToggle}
+              />
+              <div className="dmThread" ref={dmThreadRef}>
                 {dmThreadHasMore && (
                   <div className="loadMoreFooter">
                     <div className="loadMoreShimmer">
-                      {t?.('loading') || 'Loading…'}
+                      {t?.('loading')}
                     </div>
                     <LoadMoreSentinel
                       disabled={dmThreadLoading || !dmThreadHasMore}
@@ -16793,6 +18225,8 @@ onOpenThread={(clickP) => {
                   </div>
                 )}
                 {(dmThreadItems || []).map((m) => {
+                  const msgId = String(m?.id || '');
+                  if (dmDeletedMsgMap?.[msgId]) return null;
                   const fromRaw = String(m?.fromCanonical || m?.from || '').trim();
                   const fromId = String(resolveProfileAccountId(fromRaw) || fromRaw || '').trim();
                   const mine = !!fromId && (String(fromId) === String(meId || '') || String(fromRaw) === String(meId || ''));
@@ -16845,18 +18279,109 @@ onOpenThread={(clickP) => {
                     else otherUrls.push(url);
                   }
                   const threadUid = String(dmWithUserId || '').trim();
+                  const threadNick = resolveNickForDisplay(threadUid, '');
                   const threadBlocked = !!dmBlockedMap?.[threadUid];
+                  const msgNick = resolveNickForDisplay(fromId, '');
+                  const msgIcon = resolveIconForDisplay(fromId, '');
                   const seen = mine && dmThreadSeenTs && Number(m?.ts || 0) <= Number(dmThreadSeenTs || 0);
                   const delivered = mine && (seen || Number(m?.deliveredTs || 0) > 0 || String(m?.status || '') === 'sent');
                   const statusTitle = (m?.status === 'sending')
-                    ? (t('dm_sending') || 'Sending…')
-                    : (seen ? (t('dm_seen') || 'Seen') : (delivered ? (t('dm_delivered') || 'Delivered') : (t('dm_sent') || 'Sent')));
+                    ? t('dm_sending')
+                    : (seen ? t('dm_seen') : (delivered ? t('dm_delivered') : t('dm_sent')));
+                  const msgTs = Number(m?.ts || 0);
+                  const dmTextBase = stripMediaUrlsFromText(cleanedText);
+                  const dmTrState = (() => {
+                    const s = (dmTranslateMap && msgId) ? dmTranslateMap[msgId] : null;
+                    if (!s || s.src !== dmTextBase) return { isTranslated: false, loading: false, text: null, src: dmTextBase };
+                    return s;
+                  })();
+                  const dmHasText = !!(dmTextBase && dmTextBase.trim());
+                  const dmDisplayText =
+                    (dmTrState?.isTranslated && dmTrState?.text) ? dmTrState.text : dmTextBase;
+                  const dmTranslateLabel = dmTrState?.loading
+                    ? t?.('crypto_news_translate_loading')
+                    : (dmTrState?.isTranslated
+                      ? t?.('crypto_news_show_original')
+                      : t?.('crypto_news_translate'));
+                  const onDmTranslateToggle = async (e) => {
+                    e?.preventDefault?.();
+                    e?.stopPropagation?.();
+                    if (!dmHasText) return;
+                    if (dmTrState?.isTranslated) {
+                      setDmTranslateMap(prev => ({
+                        ...(prev || {}),
+                        [msgId]: { ...(prev?.[msgId] || {}), isTranslated: false, loading: false, src: dmTextBase },
+                      }));
+                      return;
+                    }
+                    setDmTranslateMap(prev => ({
+                      ...(prev || {}),
+                      [msgId]: { ...(prev?.[msgId] || {}), loading: true, src: dmTextBase },
+                    }));
+                    try {
+                      const tBody = await translateText(dmTextBase, locale);
+                      setDmTranslateMap(prev => {
+                        const cur = prev?.[msgId];
+                        if (cur && cur.src !== dmTextBase) return prev;
+                        return {
+                          ...(prev || {}),
+                          [msgId]: {
+                            ...(cur || {}),
+                            text: tBody,
+                            isTranslated: true,
+                            loading: false,
+                            src: dmTextBase,
+                          },
+                        };
+                      });
+                    } catch {
+                      setDmTranslateMap(prev => {
+                        const cur = prev?.[msgId];
+                        if (cur && cur.src !== dmTextBase) return prev;
+                        return {
+                          ...(prev || {}),
+                          [msgId]: { ...(cur || {}), loading: false, src: dmTextBase },
+                        };
+                      });
+                    }
+                  };
                   return (
-                    <div key={m?.id || `${m?.ts || 0}`} className={cls('dmMsgRow', mine && 'me')}>
+                    <div
+                      key={m?.id || `${m?.ts || 0}`}
+                      className={cls('dmMsgRow', mine && 'me')}
+                      data-dm-ts={msgTs}
+                      data-dm-from={fromId}
+                      data-dm-mine={mine ? '1' : '0'}
+                    >
                       <div className={cls('dmMsgBubble', mine && 'me', 'item', 'qshine')}>
-                        {!!cleanedText && (
-                          <div dangerouslySetInnerHTML={{ __html: safeHtml(cleanedText) }} />
-                        )}
+                        <div className={cls('dmMsgHeader', mine && 'me')}>
+                          <div
+                            className="dmMsgAvatar"
+                            onClick={(e) => {
+                              e?.preventDefault?.();
+                              e?.stopPropagation?.();
+                              handleUserInfoToggle?.(fromId, e?.currentTarget);
+                            }}
+                          >
+                            <AvatarEmoji
+                              userId={fromId}
+                              pIcon={msgIcon}
+                              className="dmMsgAvatarImg"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            className={cls('nick-badge nick-animate dmMsgNick')}
+                            translate="no"
+                            onClick={(e) => {
+                              e?.preventDefault?.();
+                              e?.stopPropagation?.();
+                              handleUserInfoToggle?.(fromId, e?.currentTarget);
+                            }}
+                          >
+                            <span className="nick-text">{msgNick || shortId(fromId)}</span>
+                          </button>
+                        </div>
                         {!!(stickers && stickers.length) && (
                           <div className="dmMediaGrid">
                             {stickers.map((s, i) => (
@@ -16921,96 +18446,114 @@ onOpenThread={(clickP) => {
                             ))}
                           </div>
                         )}
-                        {!!otherUrls.length && (
-                          <div className="dmAttachLinks">
+                        {!!otherUrls.length && !dmHasText && (
+                          <div className="dmMediaGrid">
                             {otherUrls.map((u, i) => (
-                              <div key={`${m?.id || 'm'}:link:${i}`}>
-                                <a href={u} target="_blank" rel="noreferrer noopener">{u}</a>
-                              </div>
+                              <a
+                                key={`${m?.id || 'm'}:file:${i}`}
+                                className="dmFileCard mediaBox dmMediaBox"
+                                data-kind="file"
+                                href={u}
+                                target="_blank"
+                                rel="noreferrer noopener"
+                                onClick={(e) => e.stopPropagation()}
+                                aria-label={t('forum_attachment')}
+                              >
+                                <span className="dmFileIcon" aria-hidden>📎</span>
+                              </a>
                             ))}
                           </div>
                         )}
-                        <div className="dmMsgMeta">
-                          <HydrateText value={human(m?.ts)} />
-                          {mine && (
-                            <span className={cls('dmStatus', seen && 'seen')} title={statusTitle} aria-label={statusTitle}>
-                              {m?.status === 'sending'
-                                ? (t('dm_sending') || 'Sending…')
-                                : (seen ? '✓✓' : (delivered ? '✓' : (t('dm_sent') || 'Sent')))}
-                            </span>
-                          )}
-                        </div>
-                        {!!threadUid && (
-                          <div className="dmMsgActions">
-                            <button
-                              type="button"
-                              className="dmActionBtn"
-                              onClick={() => toggleDmBlock(threadUid, !threadBlocked)}
-                            >
-                              {threadBlocked ? (t('dm_unblock') || 'Unblock') : (t('dm_block') || 'Block')}
-                            </button>
+                        {dmHasText && (
+                          <div className="dmTextFrame">
+                            {!!dmHasText && (
+                              <div className="dmTextContent" dangerouslySetInnerHTML={{ __html: safeHtml(dmDisplayText) }} />
+                            )}
+                            {!!otherUrls.length && (
+                              <div className="dmAttachLinks">
+                                {otherUrls.map((u, i) => (
+                                  <div key={`${m?.id || 'm'}:link:${i}`}>
+                                    <a href={u} target="_blank" rel="noreferrer noopener">{u}</a>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         )}
+                        {dmHasText && (
+                          <button
+                            type="button"
+                            className={`btn translateToggleBtn ${dmTrState?.isTranslated ? 'translateToggleBtnOn' : ''}`}
+                            onClick={onDmTranslateToggle}
+                            disabled={dmTrState?.loading || !dmHasText}
+                          >
+                            <span className="translateToggleIcon">🌐</span>
+                            <span className="translateToggleText">{dmTranslateLabel}</span>
+                            <span className="translateToggleIcon">🌐</span>
+                          </button>
+                        )}
+                        <div className="dmMsgFooter">
+                          {!!threadUid && (
+                            <div className="dmMsgActions">
+                              {!!msgId && (
+                                <button
+                                  type="button"
+                                  className="dmActionBtn danger"
+                                  onClick={(e) => openDmDeletePopover('message', { uid: threadUid, msgId, nick: threadNick || shortId(threadUid) }, e)}
+                                >
+                                  {t('forum_delete')}
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                className="dmActionBtn"
+                                onClick={() => toggleDmBlock(threadUid, !threadBlocked)}
+                              >
+                                {threadBlocked ? t('dm_unblock') : t('dm_block')}
+                              </button>
+                            </div>
+                          )}
+                          <div className="dmMsgMeta">
+                            <HydrateText value={human(m?.ts)} />
+                            {mine && (
+                              <span className={cls('dmStatus', seen && 'seen')} title={statusTitle} aria-label={statusTitle}>
+                                {m?.status === 'sending'
+                                  ? t('dm_sending')
+                                  : (seen ? '✓✓' : (delivered ? '✓' : t('dm_sent')))}
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   );
                 })}
                 {(dmThreadItems || []).length === 0 && !dmThreadLoading && (
-                  <div className="meta">{t('empty_messages') || 'Нет сообщений'}</div>
+                  <div className="meta">{t('empty_messages')}</div>
                 )}
               </div>
             </>
           ) : (
             <>
-              {(dmDialogs || []).map((d) => {
-                const uid = String(d?.userId || '');
-                if (dmDeletedMap?.[uid]) return null;
-                const last = d?.lastMessage || null;
-                const lastTs = Number(last?.ts || 0);
-                const seenTs = Number(dmSeenMap?.[uid] || 0);
-                const lastFromRaw = String(last?.fromCanonical || last?.from || '');
-                const lastFrom = String(resolveProfileAccountId(lastFromRaw) || lastFromRaw || '').trim();
-                const unread = !!uid && lastFrom && lastFrom !== String(meId) && lastTs > seenTs;
-                const preview = (last?.text || '').trim() || (Array.isArray(last?.attachments) && last.attachments.length ? (t('forum_attach') || 'Attach') : '');
-                return (
-                  <button
-                    key={`dm:${uid}`}
-                    type="button"
-                    className="item dmRow hoverPop text-left"
-                    data-dm-uid={uid}
-                    data-dm-lastts={lastTs}
-                    data-dm-lastfrom={lastFromRaw || lastFrom}
-                    onClick={() => { setInboxTab('messages'); setDmWithUserId(uid); }}
-                  >
-                    <div className="dmRowAvatar">
-                      <AvatarEmoji userId={uid} pIcon={resolveIconForDisplay(uid, '')} className="dmRowAvatarImg" />
-                    </div>
-                    <div className="dmRowMain">
-                      <div className="dmRowTop">
-                        <div className="dmRowName">{resolveNickForDisplay(uid, '')}</div>
-                        <div className="dmRowTime"><HydrateText value={human(lastTs)} /></div>
-                      </div>
-                      <div className="dmRowPreview">{preview || ''}</div>
-                    </div>
-                    <button
-                      type="button"
-                      className="iconBtn ghost"
-                      aria-label={t('dm_delete_dialog') || 'Delete dialog'}
-                      title={t('dm_delete_dialog') || 'Delete dialog'}
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); deleteDmDialog(uid); }}
-                    >
-                      <svg viewBox="0 0 24 24" aria-hidden>
-                        <path d="M6 7h12M9 7V5h6v2M8 7l1 12h6l1-12" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round"/>
-                      </svg>
-                    </button>
-                    {unread && <span className="dmUnreadDot" aria-hidden="true" />}
-                  </button>
-                );
-              })}
+              {(dmDialogs || []).map((d) => (
+                <DmDialogRow
+                  key={`dm:${String(d?.userId || '')}`}
+                  dialog={d}
+                  meId={meId}
+                  dmDeletedMap={dmDeletedMap}
+                  dmSeenMap={dmSeenMap}
+                  t={t}
+                  onOpen={(uid, entryId) => { pushNavState(entryId || `dm_${uid}`); setInboxTab('messages'); setDmWithUserId(uid); }}
+                  onDelete={(uid, nick, e) => openDmDeletePopover('dialog', { uid, nick }, e)}
+                  starredAuthors={starredAuthors}
+                  onToggleStar={toggleAuthorStar}
+                  onUserInfoToggle={handleUserInfoToggle}
+                />
+              ))}
               {dmDialogsHasMore && (
                 <div className="loadMoreFooter">
                   <div className="loadMoreShimmer">
-                    {t?.('loading') || 'Loading…'}
+                    {t?.('loading')}
                   </div>
                   <LoadMoreSentinel
                     disabled={dmDialogsLoading || !dmDialogsHasMore}
@@ -17022,7 +18565,7 @@ onOpenThread={(clickP) => {
               )}
                 {(dmDialogs || []).length === 0 && !dmDialogsLoading && (
                 <div className="meta">
-                  {dmDialogsLoaded ? (t('empty_messages') || 'Нет сообщений') : (t('loading') || 'Loading…')}
+                  {dmDialogsLoaded ? t('empty_messages') : t('loading')}
                 </div>
               )}
             </>
@@ -17064,7 +18607,7 @@ onOpenThread={(clickP) => {
           {publishedHasMore && (
             <div className="loadMoreFooter">
               <div className="loadMoreShimmer">
-                {t?.('loading') || 'Loading…'}
+                {t?.('loading')}
               </div>
               <LoadMoreSentinel
                 onVisible={() =>
@@ -17077,7 +18620,7 @@ onOpenThread={(clickP) => {
           )}
           {myPublishedPosts.length === 0 && (
             <div className="meta">
-              {t('empty_published') || 'Публикаций нет'}
+              {t('empty_published')}
             </div>
           )}
         </>
@@ -17096,7 +18639,7 @@ onOpenThread={(clickP) => {
   key={`t:${x.id}`}
   t={x}
   agg={agg}
-  onOpen={(tt)=>{ setSel(tt); setThreadRoot(null) }}
+  onOpen={(tt, entryId)=>{ pushNavState(entryId || `topic_${tt?.id}`); setSel(tt); setThreadRoot(null) }}
   onView={markViewTopic}
   isAdmin={isAdmin}
   onDelete={delTopic}
@@ -17114,7 +18657,7 @@ onOpenThread={(clickP) => {
     {topicsHasMore && (
       <div className="loadMoreFooter">
         <div className="loadMoreShimmer">
-          {t?.('loading') || 'Loading…'}
+          {t?.('loading')}
         </div>
         <LoadMoreSentinel
           onVisible={() =>
@@ -17145,13 +18688,13 @@ onOpenThread={(clickP) => {
     /* === ВЫБРАННАЯ ТЕМА: посты + композер === */
     <section className="glass neon" style={{ display:'flex', flexDirection:'column', flex:'1 1 auto', minHeight: 0 }}>
 
-{headHidden && !headPinned && isBrowser() && createPortal(
+{headHidden && !headPinned && isBrowser() && videoState !== 'recording' && createPortal(
   <button
     type="button"
     className="headPeekBtn"
-    aria-label={t('forum_show_header') || 'Show header'}
+    aria-label={t('forum_show_header')}
     onPointerDown={(e) => e.preventDefault()}
-    onClick={() => { setHeadPinned(true); setHeadHidden(false); }}
+    onClick={() => { headAutoOpenRef.current = false; setHeadPinned(true); setHeadHidden(false); }}
   >
     <HeadChevronIcon dir="down" />
   </button>,
@@ -17165,8 +18708,8 @@ onOpenThread={(clickP) => {
       <button
         type="button"
         className="headCollapseBtn"
-        aria-label={t('forum_hide_header') || 'Hide header'}
-        onClick={() => { setHeadPinned(false); setHeadHidden(true); }}
+        aria-label={t('forum_hide_header')}
+        onClick={() => { headAutoOpenRef.current = false; setHeadPinned(false); setHeadHidden(true); }}
       >
         <HeadChevronIcon dir="up" />
       </button>
@@ -17261,14 +18804,14 @@ onOpenThread={(clickP) => {
                 value={q}
                 onChange={e=>{ setQ(e.target.value); openOnly('search') }}
                 onFocus={()=>openOnly('search')}
-                placeholder={t('forum_search_ph') || 'Поиск по темам и сообщениям…'}
+                placeholder={t('forum_search_ph')}
               />
-              <button className="iconBtn" aria-label="search" onClick={()=> openOnly(drop ? null : 'search')}>
+              <button className="iconBtn" aria-label={t('forum_search')} onClick={()=> openOnly(drop ? null : 'search')}>
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
                   <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.7"/><path d="M16 16l4 4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
                 </svg>
               </button>
-              <button className="iconBtn" title={t('forum_sort')||'Сортировка'} onClick={()=> openOnly(sortOpen ? null : 'sort')}>
+              <button className="iconBtn" title={t('forum_sort')} onClick={()=> openOnly(sortOpen ? null : 'sort')}>
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
                   <path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
                 </svg>
@@ -17279,7 +18822,7 @@ onOpenThread={(clickP) => {
   unoptimized width={52} height={52}
   alt=""
   role="button"
-  aria-label={t('quest_open') || 'Quests'}
+  aria-label={t('quest_open')}
   aria-disabled={!QUEST_ENABLED}
   tabIndex={QUEST_ENABLED ? 0 : -1}
   onClick={() => {
@@ -17308,33 +18851,76 @@ onOpenThread={(clickP) => {
 {/* ⬆️ КОНЕЦ ВСТАВКИ */}
                 {drop && q.trim() && (
                 <div className="searchDrop" onMouseLeave={()=>setDrop(false)}>
-                  {results.length===0 && <div className="meta px-1 py-1">{t('forum_search_empty') || 'Ничего не найдено'}</div>}
+                  {results.length===0 && <div className="meta px-1 py-1">{t('forum_search_empty')}</div>}
                   {results.map(r=>(
                     <button
                       key={`${r.k}:${r.id}`}
-                      className="item w-full text-left mb-1"
+                      id={`search_${r.k}_${r.id}`}
+                      className="item w-full text-left mb-1 searchResultItem"
                       onClick={()=>{
-                        setDrop(false)
+                        setDrop(false);
+                        setQ('');
                         if(r.k==='t'){
                           const tt = (data.topics||[]).find(x=>x.id===r.id)
-                          if(tt){ setTopicFilterId(tt.id); setSel(tt); setThreadRoot(null) }
+                          if(tt){
+                            pushNavState(`search_${r.k}_${r.id}`);
+                            setTopicFilterId(tt.id);
+                            setSel(tt);
+                            setThreadRoot(null);
+                          }
                         }else{
                           const p = (data.posts||[]).find(x=>x.id===r.id)
                           if(p){
                             const tt = (data.topics||[]).find(x=>x.id===p.topicId)
-if (tt) {
-  setTopicFilterId(tt.id);
-  // ✅ сразу открыть ветку ответов с заголовком = найденное сообщение
-  openThreadForPost(p);
-}
-
+                            if (tt) {
+                              setTopicFilterId(tt.id);
+                              // ✅ сразу открыть ветку ответов с заголовком = найденное сообщение
+                              openThreadForPost(p, { entryId: `search_${r.k}_${r.id}` });
+                            }
                           }
                         }
                       }}>
-                      {r.k==='t'
-                        ? (<div><div className="title">Тема: {r.title}</div>{r.desc && <div className="meta">{r.desc}</div>}</div>)
-                        : (<div><div className="title">Сообщение</div><div className="meta">{r.text}</div></div>)
-                      }
+                      {r.media && (
+                        <span
+                          className={cls('searchResultMedia', `searchResultMedia-${r.media.kind}`)}
+                          data-kind={r.media.kind}
+                        >
+                          {(r.media.kind === 'image' || r.media.kind === 'sticker') ? (
+                            <Image
+                              src={r.media.url}
+                              alt=""
+                              width={56}
+                              height={56}
+                              unoptimized
+                              loading="lazy"
+                              className="searchResultThumb"
+                            />
+                          ) : (
+                            <span className="searchResultIcon" aria-hidden>
+                              {r.media.kind === 'video'
+                                ? '🎬'
+                                : (r.media.kind === 'audio' ? '🎵' : '📎')}
+                            </span>
+                          )}
+                          {r.media.kind === 'video' && <span className="searchResultPlay" aria-hidden>▶</span>}
+                        </span>
+                      )}
+                      {r.k==='t' ? (
+                        <span className="searchResultContent">
+                          <span className="searchResultTitle">
+                            <span className="searchResultKind">{t('forum_search_kind_topic')}</span>
+                            <span className="searchResultTitleText">{r.title}</span>
+                          </span>
+                          {r.desc && <span className="searchResultText">{r.desc}</span>}
+                        </span>
+                      ) : (
+                        <span className="searchResultContent">
+                          <span className="searchResultTitle">
+                            <span className="searchResultKind">{t('forum_search_kind_post')}</span>
+                          </span>
+                          {!!r.text && <span className="searchResultText">{r.text}</span>}
+                        </span>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -17349,7 +18935,7 @@ if (tt) {
       />
     ))}
     <div className="coinBurstBox" onClick={e => e.stopPropagation()}>
-      <div className="coinCongrats">{t('quest_reward_claimed') || 'Награда зачислена'}</div>
+      <div className="coinCongrats">{t('quest_reward_claimed')}</div>
       <div className="coinSum">+ {Number(claimFx.amount).toFixed(10)}</div>
 
       <button
@@ -17487,7 +19073,7 @@ if (tt) {
           }
         }}
       >
-        {t('quest_do') || 'Забрать'}
+        {t('quest_do')}
       </button>
     </div>
   </div>
@@ -17499,11 +19085,11 @@ if (tt) {
                 <div className="sortDrop" onMouseLeave={()=>setSortOpen(false)}>
 
 {[
-  ['new',     t('forum_sort_new')     || 'Новые'],
-  ['top',     t('forum_sort_top')     || 'Топ'],
-  ['likes',   t('forum_sort_likes')   || 'Лайки'],
-  ['views',   t('forum_sort_views')   || 'Просмотры'],
-  ['replies', t('forum_sort_replies') || 'Ответы'],
+  ['new',     t('forum_sort_new')],
+  ['top',     t('forum_sort_top')],
+  ['likes',   t('forum_sort_likes')],
+  ['views',   t('forum_sort_views')],
+  ['replies', t('forum_sort_replies')],
 ].map(([k,txt])=>(
   <button
     key={k}
@@ -17534,9 +19120,9 @@ onClick={()=>{
     className={`starModeBtn ${starMode ? 'on' : ''}`}
    onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); setStarMode(v=>!v); }}
 
-    title="Star mode: авторы, на которых вы подписаны — первыми"
+    title={t('forum_star_mode_title')}
     aria-pressed={starMode}
-    aria-label="Star mode"
+    aria-label={t('forum_star_mode')}
   >
     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden>
       <path className="starPath" d="M12 2.6l2.9 6.2 6.8.6-5.1 4.4 1.6 6.6L12 16.9 5.8 20.4l1.6-6.6-5.1-4.4 6.8-.6L12 2.6Z" />
@@ -17550,7 +19136,7 @@ onClick={()=>{
   <button
     ref={vipBtnRef}
     className={cls('iconBtn', vipActive ? 'vip' : 'vipGray', 'pulse', 'hoverPop')}
-    title={t('forum_vip_plus') || 'VIP+'}
+    title={t('forum_vip_plus')}
     onClick={()=> openOnly(vipOpen ? null : 'vip')}
   >
     VIP+
@@ -17566,7 +19152,7 @@ onClick={()=>{
       try {
         const accountId = auth?.accountId || auth?.asherId || '';
         if (!accountId) { 
-          toast?.err?.(t('forum_need_auth') || 'Authorization required'); 
+          toast?.err?.(t('forum_need_auth')); 
           return; 
         }
 
@@ -17581,7 +19167,7 @@ onClick={()=>{
           if (j0?.isVip) {
             // уже VIP — просто подсветим кнопку и закроем поповер
             try { setVipActive?.(true); } catch {}
-            toast?.ok?.(t('forum_vip_already_active') || 'VIP already active');
+            toast?.ok?.(t('forum_vip_already_active'));
             setVipOpen(false);
             return;
           }
@@ -17614,17 +19200,17 @@ onClick={()=>{
 
           if (active) {
             try { setVipActive?.(true); } catch {}
-            toast?.ok?.(t('forum_vip_activated') || 'VIP activated');
+            toast?.ok?.(t('forum_vip_activated'));
           } else {
             // не успели получить webhook за минуту — просто сообщаем,
             // дальше подтянется твоим общим циклом/при следующем заходе
-            toast?.warn?.(t('forum_vip_pending') || 'Payment pending…');
+            toast?.warn?.(t('forum_vip_pending'));
           }
         } else {
-          toast?.err?.(t('forum_vip_pay_fail') || 'Payment init failed');
+          toast?.err?.(t('forum_vip_pay_fail'));
         }
       } catch {
-        toast?.err?.(t('forum_vip_pay_fail') || 'Payment init failed');
+        toast?.err?.(t('forum_vip_pay_fail'));
       } finally {
         setVipOpen(false);
       }
@@ -17662,8 +19248,9 @@ onClick={()=>{
       <button
         type="button"
         className="iconBtn inboxBtn"
-        title={t('forum_inbox') || 'Ответы мне'}
-        onClick={openInboxGlobal}
+        title={t('forum_inbox')}
+        id="inbox_btn_thread"
+        onClick={() => openInboxGlobal('inbox_btn_thread')}
         aria-pressed={inboxOpen}
       >
         <svg viewBox="0 0 24 24" aria-hidden>
@@ -17671,10 +19258,10 @@ onClick={()=>{
           <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
         {mounted && unreadCount > 0 && (
-          <span className="inboxBadgeReplies" suppressHydrationWarning>{unreadCount}</span>
+          <span className="inboxBadgeReplies" suppressHydrationWarning>{formatCount(unreadCount)}</span>
         )}
         {mounted && dmUnreadCount > 0 && (
-          <span className="inboxBadgeDM" suppressHydrationWarning>{dmUnreadCount}</span>
+          <span className="inboxBadgeDM" suppressHydrationWarning>{formatCount(dmUnreadCount)}</span>
         )}
       </button>
  
@@ -17694,7 +19281,7 @@ onClick={()=>{
       } catch {}
     }}
     onMouseDown={(e) => e.preventDefault()}
-    aria-label="Invite friends"
+    aria-label={t('forum_invite_friends')}
   >
     <span
       style={{
@@ -17729,8 +19316,8 @@ onClick={()=>{
   <button
     type="button"
     className="iconBtn bigPlus"
-        title={t('forum_create') || 'Создать'}
-        aria-label={t('forum_create') || 'Создать'}
+        title={t('forum_create')}
+        aria-label={t('forum_create')}
     onClick={() => {
   try { if (videoFeedOpen) closeVideoFeed?.() } catch {}
   try { setInboxOpen?.(false) } catch {}
@@ -17746,14 +19333,15 @@ onClick={()=>{
         </svg>
   </button>
  
-        <button
+           <button
     type="button"
     className="iconBtn bigPlus"
-   title={t('forum_video_feed') || 'Видео'}
-    aria-label={t('forum_video_feed') || 'Видео'}
+   title={t('forum_video_feed')}
+    aria-label={t('forum_video_feed')}
+    id="video_feed_btn_thread"
     onClick={() => {
       if (videoFeedOpen) { try { closeVideoFeed?.() } catch {} ; return; }
-      try { openVideoFeed?.() } catch {}
+      try { openVideoFeed?.('video_feed_btn_thread') } catch {}
     }}
   >
 <svg
@@ -17789,7 +19377,7 @@ onClick={()=>{
   <button
     type="button"
     className="iconBtn bigPlus"
-    aria-label={t?.('forum_home') || 'На главную'}
+    aria-label={t?.('forum_home')}
     onClick={()=>{ 
       try{ setInboxOpen(false) }catch{};
       try{ setReplyTo(null) }catch{}; 
@@ -17797,7 +19385,7 @@ onClick={()=>{
       try{ setSel(null) }catch{};
 setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIntoView({block:'start'}),0);    
     }}
-    title={t?.('forum_home') || 'На главную'}
+    title={t?.('forum_home')}
   >
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
       <path d="M3 10l9-7 9 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
@@ -17808,15 +19396,10 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
   <button
     type="button"
     className="iconBtn bigPlus"
-    aria-label={t?.('forum_back') || 'Назад'}
-  onClick={()=>{
-    if (inboxOpen && dmWithUserId) { try{ setDmWithUserId('') }catch{}; try{ setInboxTab('messages') }catch{}; return; }
-    if (inboxOpen)   { try{ setInboxOpen(false) }catch{}; return; }
-    if (threadRoot)  { try{ setReplyTo(null) }catch{}; try{ setThreadRoot(null) }catch{}; return; }
-    try{ setReplyTo(null) }catch{};
-    try{ setSel(null) }catch{};
-  }}
-    title={t?.('forum_back') || 'Назад'}
+    aria-label={t?.('forum_back')}
+    disabled={!canGlobalBack}
+    onClick={handleGlobalBack}
+    title={t?.('forum_back')}
   >
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
       <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
@@ -17838,7 +19421,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
     max-w-full"
  suppressHydrationWarning>
     <span className="whitespace-normal break-words [overflow-wrap:anywhere] [line-break:anywhere]">
-      {threadRoot ? (t('forum_open_replies') || 'Ответы') : (sel?.title || '')}
+      {threadRoot ? t('forum_open_replies') : (sel?.title || '')}
     </span>
   </div> 
       </div>
@@ -17882,7 +19465,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
   parentText={parent ? (parent.text || parent.message || parent.body || '') : ''}
   onReport={(post, rect, anchorEl) => openReportPopover(post, rect, anchorEl)}
   onReply={() => setReplyTo(p)}
-  onOpenThread={(clickP) => { setThreadRoot(clickP); }}
+  onOpenThread={(clickP) => { openThreadForPost(clickP || p); }}
   onReact={reactMut}
   isAdmin={isAdmin}
   onDeletePost={delPost}
@@ -17920,7 +19503,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
         {threadHasMore && (
           <div className="loadMoreFooter">
             <div className="loadMoreShimmer">
-              {t?.('loading') || 'Loading…'}
+              {t?.('loading')}
             </div>
             <LoadMoreSentinel
               onVisible={() =>
@@ -17933,7 +19516,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
         )}
           {(!threadRoot && (flat || []).length === 0) && (
             <div className="meta">
-              {t('forum_no_posts_yet') || 'Пока нет сообщений'}
+              {t('forum_no_posts_yet')}
             </div>
           )}
       </div>
@@ -17947,9 +19530,9 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
 <div className="composer" data-active={composerActive} ref={composerRef}>
   <div className="meta mb-2">
     {replyTo
-      ? `${t('forum_reply_to')||'Ответ для'} ${resolveNickForDisplay(replyTo.userId || replyTo.accountId, replyTo.nickname)}`
+      ? `${t('forum_reply_to')} ${resolveNickForDisplay(replyTo.userId || replyTo.accountId, replyTo.nickname)}`
       : threadRoot
-        ? `${t('forum_replying_to')||'Ответ к'} ${resolveNickForDisplay(threadRoot.userId || threadRoot.accountId, threadRoot.nickname)}`
+        ? `${t('forum_replying_to')} ${resolveNickForDisplay(threadRoot.userId || threadRoot.accountId, threadRoot.nickname)}`
         : t('')}
   </div>
 
@@ -17962,11 +19545,11 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
       {mediaBarOn && (
         <div className="composerMediaBar" role="status" aria-live="polite" data-phase={String(mediaPhase || '').toLowerCase()}>
           <div className="cmbLeft">
-            <span className="cmbLoading">Loading</span>
+            <span className="cmbLoading">{t('loading')}</span>
           </div>
           <div className="cmbMain">
             <div className="cmbTop">
-              <span className="cmbPhase">{mediaPhase === 'idle' ? 'Ready' : mediaPhase}</span>
+              <span className="cmbPhase">{formatMediaPhase(mediaPhase)}</span>
               <span className="cmbPct">{Math.round(Math.max(0, Math.min(100, Number(mediaPct || 0))))}%</span>
             </div>
             <div className="cmbTrack" aria-hidden="true">
@@ -17981,8 +19564,8 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
           <button
             type="button"
             className="cmbCancel"
-            title="Cancel"
-            aria-label="Cancel upload"
+            title={t('forum_cancel')}
+            aria-label={t('forum_cancel_upload')}
             onClick={cancelMediaOperation}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -17992,7 +19575,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
         </div>
       )}
       {/* ЕДИНАЯ ГОРИЗОНТАЛЬНАЯ РЕЛЬСА (вместо боковых) */}
-      <div className="topRail" role="toolbar" aria-label="Composer actions">
+      <div className="topRail" role="toolbar" aria-label={t('forum_composer_actions')}>
         <div className="railInner">
           {/* 1) Счётчик */}
           <div className="railItem">
@@ -18009,8 +19592,8 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
   <button
     type="button"
     className={cls('iconBtn ghost lockable', mediaLocked && 'isLocked')}
-    aria-label={t('forum_attach') || 'Прикрепить'}
-    title={t('forum_attach') || 'Прикрепить'}
+    aria-label={t('forum_attach')}
+    title={t('forum_attach')}
     onClick={handleAttachClick}
     disabled={mediaLocked}
     aria-disabled={mediaLocked ? 'true' : 'false'}    
@@ -18054,8 +19637,8 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
       (videoState==='uploading') && 'disabled',
       mediaLocked && 'isLocked'
     )}
-    aria-label={videoState==='recording' ? 'Stop' : (videoState==='preview' ? 'Снять заново' : 'Снять видео')}
-    title={videoState==='recording' ? 'Stop' : (videoState==='preview' ? 'Снять заново' : 'Снять видео')}
+    aria-label={videoState==='recording' ? t('forum_stop') : (videoState==='preview' ? t('forum_video_retake') : t('forum_video_shoot'))}
+    title={videoState==='recording' ? t('forum_stop') : (videoState==='preview' ? t('forum_video_retake') : t('forum_video_shoot'))}
     onClick={(e)=>{
       e.preventDefault();
       if (mediaLocked || videoState==='uploading') return;
@@ -18075,7 +19658,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
               {videoState==='recording'
                 ? <span style={{display:'inline-flex',alignItems:'center',gap:6}}>
                     <span style={{width:12,height:12,borderRadius:'50%',background:'#FF4D4F',display:'inline-block'}}/>
-                    <b>REC</b>
+                    <b>{t('forum_rec_short')}</b>
                   </span>
                 : (
                   <svg viewBox="0 0 24 24" aria-hidden>
@@ -18093,7 +19676,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
   <button
     type="button"
     className={cls('iconBtn ghost micBtn lockable', recState==='rec' && 'rec', mediaLocked && 'isLocked')}
-    aria-label="Hold to record voice"
+    aria-label={t('forum_voice_hold')}
     disabled={mediaLocked}
     aria-disabled={mediaLocked ? 'true' : 'false'}    
     onMouseDown={(e)=>{
@@ -18129,8 +19712,8 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
                 'iconBtn planeBtn',
                 (postingRef.current || cooldownLeft>0 || !canSend || String(text||'').trim().length>textLimit) && 'disabled'
               )}
-              title={cooldownLeft>0 ? `${cooldownLeft}s` : (dmMode ? (t('dm_send')||'Send') : (t('forum_send')||'Send'))}
-              aria-label={dmMode ? (t('dm_send')||'Send') : (t('forum_send')||'Send')}
+              title={cooldownLeft>0 ? `${cooldownLeft}s` : (dmMode ? t('dm_send') : t('forum_send'))}
+              aria-label={dmMode ? t('dm_send') : t('forum_send')}
               disabled={postingRef.current || cooldownLeft>0 || !canSend || String(text||'').trim().length>textLimit}
               onClick={async ()=>{
                 if (postingRef.current || cooldownLeft>0) return;
@@ -18170,7 +19753,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
         maxLength={textLimit}
         placeholder={
           (/^\[(VIP_EMOJI|MOZI):\/[^\]]+\]$/).test(text || '')
-            ? (t('forum_more_emoji') || 'VIP emoji selected')
+            ? t('forum_more_emoji')
             : t('forum_composer_placeholder')
         }
       />
@@ -18190,7 +19773,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
     <button
       type="button"
       className="vipRemove emojiRemoveBtn"
-      title={t?.('forum_remove') || 'Убрать'}
+      title={t?.('forum_remove')}
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -18213,7 +19796,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
             key={i}
             type="button"
             className="relative group shrink-0"
-            title={t?.('forum_remove_attachment') || 'Убрать вложение'}
+            title={t?.('forum_remove_attachment')}
             onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); setPendingImgs(prev => prev.filter((_,idx)=>idx!==i)); }}
           >
             <Image src={u} alt="" loading="lazy" unoptimized width={96} height={32} className="h-8 w-auto max-w-[96px] rounded-md ring-1 ring-white/10" />
@@ -18267,9 +19850,10 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
       {/* Кнопка “открыть fullscreen overlay” отдельно */}
       <button
         type="button"
-        title={t?.('forum_open_fullscreen') || 'Открыть на весь экран'}
+        title={t?.('forum_open_fullscreen')}
 onClick={() => {
   // открываем ТОТ ЖЕ VideoOverlay, что и для камеры/превью
+  try { saveComposerScroll(); } catch {}
   try { setOverlayMediaKind?.('video'); } catch {}
   // pendingVideo уже пробрасывается в previewUrl через props, поэтому url можно не дублировать
   try { setOverlayMediaUrl?.(null); } catch {}
@@ -18297,7 +19881,7 @@ onClick={() => {
       {/* удалить видео */}
       <button
         type="button"
-        title={t?.('forum_remove') || 'Убрать'}
+        title={t?.('forum_remove')}
         onClick={() => {
   // Должно вести себя как крестик внутри fullscreen-оверлея: полностью очищаем состояние видео.
   try {
@@ -18345,7 +19929,7 @@ onClick={() => {
             </svg>
           </div>
           <audio controls src={pendingAudio} />
-          <button type="button" className="audioRemove" title={t('forum_remove')||'Убрать'} onClick={()=> setPendingAudio(null)}>❌</button>
+          <button type="button" className="audioRemove" title={t('forum_remove')} onClick={()=> setPendingAudio(null)}>❌</button>
         </div>
       </div>
     )}
@@ -18370,25 +19954,25 @@ onClick={() => {
               className="emojiTabBtn"
               aria-pressed={emojiTab==='emoji' ? 'true' : 'false'}
               onClick={() => setEmojiTab('emoji')}
-              title={t?.('forum_tab_emoji') || 'Emoji'}
+              title={t?.('forum_tab_emoji')}
             >
-              {t?.('forum_tab_emoji') || 'Emoji'}
+              {t?.('forum_tab_emoji')}
             </button>
             <button
               type="button"
               className="emojiTabBtn"
               aria-pressed={emojiTab==='stickers' ? 'true' : 'false'}
               onClick={() => setEmojiTab('stickers')}
-              title={t?.('forum_tab_stickers') || 'Stickers'}
+              title={t?.('forum_tab_stickers')}
             >
-              {t?.('forum_tab_stickers') || 'Stickers'}
+              {t?.('forum_tab_stickers')}
             </button>
           </div>
 
           {/* контент вкладок — только фильтрация, логика скролла неизменна */}
           {emojiTab === 'stickers' ? (
             <>
-              <div className="emojiTitle">{t?.('forum_emoji_vip') || 'VIP / MOZI'}</div>
+              <div className="emojiTitle">{t?.('forum_emoji_vip')}</div>
               <div className="emojiGrid">
                 {VIP_EMOJI.map((e) => (
                   <button
@@ -18450,8 +20034,8 @@ onClick={() => {
   <button
     type="button"
     className="fabCompose"
-    aria-label="Написать сообщение"
-    title="Написать сообщение"
+    aria-label={t('forum_compose_message')}
+    title={t('forum_compose_message')}
     onClick={() => setComposerActive(true)}
   >
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -18599,7 +20183,7 @@ function QuestHub({
             .cmrk .tick { animation: none; stroke-dashoffset: 0; }
           }
         `}</style>
-        <span className="cmrk" aria-label="done" title="Готово">
+        <span className="cmrk" aria-label={t('quest_done')} title={t('quest_done')}>
           <svg viewBox="0 0 24 24" aria-hidden>
             <path className="tick" d="M5 12.5l5 5L20 7.5" />
           </svg>
@@ -18691,18 +20275,18 @@ function QuestHub({
                     {t(q.i18nKey) || q.id}
                   </div>
                   <div className="questMeta">
-                    {(t('quest_tasks_done') || 'Выполни')}
+                    {t('quest_tasks_done')}
                     {reward ? (
                       <>
-                        {' • '}{(t('quest_reward') || 'Награда')}: <span className="goldReward big">{rewardShown}</span>
+                        {' • '}{t('quest_reward')}: <span className="goldReward big">{rewardShown}</span>
                         <span
                           className={cls('qcoinX2', vipActive ? 'vip' : 'needVip', 'hoverPop')}
                           role="button"
                           tabIndex={0}
-                          aria-label="x2 VIP"
+                          aria-label={t('forum_qcoin_x2_label')}
                           title={vipActive
-                            ? (t('forum_qcoin_x2_active') || '×2 за VIP — активно')
-                            : (t('forum_qcoin_x2_get')    || 'Купить VIP+ чтобы получить ×2')}
+                            ? t('forum_qcoin_x2_active')
+                            : t('forum_qcoin_x2_get')}
                           onClick={() => { if (!vipActive) { try { window.dispatchEvent(new Event('vip:open')) } catch {} } }}
                           onKeyDown={(e) => { if (!vipActive && (e.key === 'Enter' || e.key === ' ')) { try { window.dispatchEvent(new Event('vip:open')) } catch {} } }}
                           suppressHydrationWarning
@@ -18716,12 +20300,12 @@ function QuestHub({
                 {/* справа — бейдж/галочка, никогда не перекрывает контент */}
                 <div className="qRight">
                   {questProg?.[q.id]?.claimed || canClaim(q.id) ? (
-                    <span className="tag ok" title={t('quest_done') || 'Готово'}>✓</span>
+                    <span className="tag ok" title={t('quest_done')}>✓</span>
                     // если хочешь — можно заменить на <AnimatedCheckmark />
                   ) : (
                     <span
                       className={cls('tag', 'warn')}
-                      title={t('quest_tasks_left') || 'Осталось задач'}
+                      title={t('quest_tasks_left')}
                       aria-label="tasks-left"
                     >
                       {String(remain)}
@@ -18786,15 +20370,15 @@ function QuestHub({
 
             {reward && (
               <div className="meta">
-                {(t('quest_reward') || 'Награда')}: <span className="goldReward">{rewardShown}</span>
+                {t('quest_reward')}: <span className="goldReward">{rewardShown}</span>
                 <span
                   className={cls('qcoinX2', vipActive ? 'vip' : 'needVip', 'hoverPop')}
                   role="button"
                   tabIndex={0}
-                  aria-label="x2 VIP"
+                  aria-label={t('forum_qcoin_x2_label')}
                   title={vipActive
-                    ? (t('forum_qcoin_x2_active') || '×2 за VIP — активно')
-                    : (t('forum_qcoin_x2_get')    || 'Купить VIP+ чтобы получить ×2')}
+                    ? t('forum_qcoin_x2_active')
+                    : t('forum_qcoin_x2_get')}
                   onClick={() => { if (!vipActive) { try { window.dispatchEvent(new Event('vip:open')) } catch {} } }}
                   onKeyDown={(e) => { if (!vipActive && (e.key === 'Enter' || e.key === ' ')) { try { window.dispatchEvent(new Event('vip:open')) } catch {} } }}
                   suppressHydrationWarning
@@ -18840,7 +20424,7 @@ function QuestHub({
                             <span
                               className="tag warn"
                               data-tick={__questTick}
-                              title="Таймер"
+                              title={t('quest_timer')}
                             >
                               {sec}s
                             </span>
@@ -18857,7 +20441,7 @@ function QuestHub({
                           className="nick-badge"
                           onClick={() => { setTimeout(() => onMarkDone?.(q.id, tid), 0); }}
                         >
-                          {t('quest_do') || 'Сделать'}
+                          {t('quest_do')}
                         </a>
                       ) : (
                         <button
@@ -18865,7 +20449,7 @@ function QuestHub({
                           className="nick-badge"
                           onClick={() => { setTimeout(() => onMarkDone?.(q.id, tid), 0); }}
                         >
-                          {t('quest_do') || 'Сделать'}
+                          {t('quest_do')}
                         </button>
                       )
                     )}
@@ -18985,7 +20569,7 @@ function CreateTopicCard({ t, onCreate, onOpenVideoFeed }){
                     setTitle(''); setDescr(''); setFirst(''); setOpen(false)
                   }finally{ setBusy(false) }
                 }}>
-                {busy ? (t('forum_creating')||'Создаю…') : t('forum_create')}
+                {busy ? t('forum_creating') : t('forum_create')}
               </button>
 
             </div>
