@@ -14,12 +14,12 @@ const TOP_HIDE_Y      = 40
 // НЕ переключал мгновенно, мы специально "режем" вклад одного события,
 // поэтому переключение требует несколько подряд событий в одну сторону.
 // Настраивай это значение под себя (пример: 120–240).
-const DIR_SWITCH_PX   = 580
+const DIR_SWITCH_PX   = 500
 
 // === НАСТРОЙКА СКОРОСТИ СКРОЛЛА (ПОСТОЯННАЯ СКОРОСТЬ!) ===
 // px/сек: меньше = медленнее, больше = быстрее
 // Рекомендация для "премиально медленно": 350–650
-const SCROLL_PX_PER_SEC = 300
+const SCROLL_PX_PER_SEC = 200
 
 export default function ScrollTopPulse() {
   const [visible, setVisible] = useState(false)
@@ -240,29 +240,7 @@ export default function ScrollTopPulse() {
     if (typeof window === 'undefined') return
 
     // если уже было запущено — отменяем
-    cancelScroll()
-
-    const scrollEl =
-      document.scrollingElement ||
-      document.documentElement ||
-      document.body
-
-    // фиксируем высоту viewport НА СТАРТЕ (важно для iOS, чтобы не дёргало цель)
-    const lockedViewportH =
-      window.visualViewport?.height || window.innerHeight || 0
-
-    const clamp = (v, min, max) => Math.min(max, Math.max(min, v))
-
-    const getMaxYLocked = () => {
-      const sh = scrollEl.scrollHeight || 0
-      return Math.max(0, sh - lockedViewportH)
-    }
-
-    const getMaxYLive = () => {
-      const vh = window.visualViewport?.height || window.innerHeight || 0
-      const sh = scrollEl.scrollHeight || 0
-      return Math.max(0, sh - vh)
-    }
+    cancelScroll() 
 
     const getTargetY =
       typeof targetYOrGetter === 'function'
@@ -277,15 +255,13 @@ export default function ScrollTopPulse() {
     scrollingRef.current = true
     attachCancelListeners()
 
-    let lastTime = null
-    let lastAppliedY = null
+    let lastTime = null 
 
     const step = (time) => {
       if (!scrollingRef.current) return
 
       if (lastTime === null) {
-        lastTime = time
-        lastAppliedY = scrollEl.scrollTop || 0
+        lastTime = time 
         rafRef.current = requestAnimationFrame(step)
         return
       }
@@ -295,27 +271,15 @@ export default function ScrollTopPulse() {
       const dt = Math.min(Math.max(rawDt, 0.001), 0.033)
       lastTime = time
 
-      const currentY = scrollEl.scrollTop || 0
-
-      // цель + кламп (важно для iOS rubber-band)
-      const maxY = getMaxYLocked()
-      const rawTarget = getTargetY()
-      const targetY = clamp(rawTarget, 0, maxY)
+      const currentY = window.scrollY || 0
+      const targetY = getTargetY()
 
       const diff = targetY - currentY
       const dist = Math.abs(diff)
 
       // финиш
       if (dist <= 0.5) {
-        // финальный "дожим" уже по живому maxY, чтобы реально попасть в низ/верх
-        const finalMaxY = getMaxYLive()
-        const finalTarget =
-          typeof targetYOrGetter === 'function'
-            ? clamp(getTargetY(), 0, finalMaxY)
-            : clamp(targetY, 0, finalMaxY)
-
-        scrollEl.scrollTop = finalTarget
-
+        window.scrollTo(0, targetY)
         scrollingRef.current = false
         detachCancelListeners()
         teleportTargetGetterRef.current = null
@@ -328,32 +292,9 @@ export default function ScrollTopPulse() {
       if (move < 0.5) move = 0.5
 
       const applied = Math.min(dist, move)
-      const dir = Math.sign(diff)
+      const nextY = currentY + Math.sign(diff) * applied
 
-      // === КЛЮЧЕВОЙ ФИКС ДРОЖИ НА iOS ===
-      // делаем шаг ТОЛЬКО целыми пикселями и монотонно, чтобы Safari не округлял туда-сюда
-      let nextYFloat = currentY + dir * applied
-
-      // монотонное округление: вверх -> floor, вниз -> ceil
-      let nextYInt = dir > 0 ? Math.ceil(nextYFloat) : Math.floor(nextYFloat)
-
-      // доп.контроль: не допускаем отката относительно последнего применённого значения
-      if (lastAppliedY !== null) {
-        if (dir > 0) nextYInt = Math.max(nextYInt, lastAppliedY)
-        if (dir < 0) nextYInt = Math.min(nextYInt, lastAppliedY)
-      }
-
-      // кламп
-      nextYInt = clamp(nextYInt, 0, maxY)
-
-      // если округление “съело” движение — двигаем минимум на 1px, чтобы не зависнуть
-      if (nextYInt === currentY) {
-        const bump = dir > 0 ? currentY + 1 : currentY - 1
-        nextYInt = clamp(bump, 0, maxY)
-      }
-
-      scrollEl.scrollTop = nextYInt
-      lastAppliedY = nextYInt
+      window.scrollTo(0, nextY)
 
       rafRef.current = requestAnimationFrame(step)
     }
@@ -367,12 +308,7 @@ export default function ScrollTopPulse() {
 
     const getTarget = teleportTargetGetterRef.current
     if (!getTarget) return false
-
-    const scrollEl =
-      document.scrollingElement ||
-      document.documentElement ||
-      document.body
-
+ 
     // мгновенно остановить RAF и снять слушатели
     scrollingRef.current = false
     if (rafRef.current) {
@@ -382,10 +318,7 @@ export default function ScrollTopPulse() {
     detachCancelListeners()
 
     // телепорт к актуальной цели
-    const vh = window.visualViewport?.height || window.innerHeight || 0
-    const maxY = Math.max(0, (scrollEl.scrollHeight || 0) - vh)
-    const target = Math.min(maxY, Math.max(0, getTarget()))
-    scrollEl.scrollTop = target
+    window.scrollTo(0, getTarget())
 
     teleportTargetGetterRef.current = null
     return true
@@ -443,25 +376,21 @@ export default function ScrollTopPulse() {
     }
 
     try {
-      // "низ" считаем по viewport НА МОМЕНТ СТАРТА (важно для iOS, чтобы не дёргало)
-      const lockedVH = window.visualViewport?.height || window.innerHeight || 0
-
+      // "живой" низ: докрутит даже если страница растёт по пути
       smoothScrollTo(() => {
-        const scrollEl =
-          document.scrollingElement ||
-          document.documentElement ||
-          document.body
-        const sh = scrollEl.scrollHeight || 0
-        return Math.max(0, sh - lockedVH)
+        const doc = document.documentElement || document.body
+        return Math.max(
+          0,
+          (doc.scrollHeight || 0) - (window.innerHeight || 0),
+        )
       })
     } catch {
-      const scrollEl =
-        document.scrollingElement ||
-        document.documentElement ||
-        document.body
-      const vh = window.visualViewport?.height || window.innerHeight || 0
-      const maxY = Math.max(0, (scrollEl.scrollHeight || 0) - vh)
-      scrollEl.scrollTop = maxY
+      const doc = document.documentElement || document.body
+      const maxY = Math.max(
+        0,
+        (doc.scrollHeight || 0) - (window.innerHeight || 0),
+      )
+      window.scrollTo(0, maxY)
     }
 
     if (appearTimerRef.current) {
