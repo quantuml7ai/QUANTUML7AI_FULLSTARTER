@@ -8,6 +8,14 @@ const AUTO_HIDE_MS    = 2000
 const MIN_Y           = 260
 const TOP_HIDE_Y      = 40
 
+// === НАСТРОЙКА ПЕРЕКЛЮЧЕНИЯ НАПРАВЛЕНИЯ СТРЕЛКИ ===
+// Сколько пикселей "уверенного" движения нужно, чтобы стрелка сменила режим.
+// ВАЖНО: чтобы один щелчок колеса (который может дать большой скачок scrollY)
+// НЕ переключал мгновенно, мы специально "режем" вклад одного события,
+// поэтому переключение требует несколько подряд событий в одну сторону.
+// Настраивай это значение под себя (пример: 120–240).
+const DIR_SWITCH_PX   = 580
+
 // === НАСТРОЙКА СКОРОСТИ СКРОЛЛА (ПОСТОЯННАЯ СКОРОСТЬ!) ===
 // px/сек: меньше = медленнее, больше = быстрее
 // Рекомендация для "премиально медленно": 350–650
@@ -20,6 +28,7 @@ export default function ScrollTopPulse() {
   const visibleRef   = useRef(false)
   const modeRef      = useRef('up')
   const lastYRef     = useRef(0)
+  const dirAccumRef  = useRef(0)
   const appearTimerRef = useRef(null)
   const hideTimerRef   = useRef(null)
 
@@ -79,6 +88,7 @@ export default function ScrollTopPulse() {
     if (typeof window === 'undefined') return
 
     lastYRef.current = window.scrollY || 0
+    dirAccumRef.current = 0
 
     const clearAppear = () => {
       if (appearTimerRef.current) {
@@ -104,6 +114,7 @@ export default function ScrollTopPulse() {
     const hideNow = () => {
       clearAppear()
       clearHide()
+      dirAccumRef.current = 0
       if (visibleRef.current) {
         visibleRef.current = false
         setVisible(false)
@@ -120,10 +131,8 @@ export default function ScrollTopPulse() {
     const onScroll = () => {
       const y = window.scrollY || 0
       const lastY = lastYRef.current
+      const deltaY = y - lastY
       lastYRef.current = y
-
-      const goingUp   = y < lastY
-      const goingDown = y > lastY
 
       const doc = document.documentElement || document.body
       const docHeight = doc.scrollHeight || 0
@@ -137,11 +146,41 @@ export default function ScrollTopPulse() {
         return
       }
 
+      // === ФИКС ДЁРГАНЬЯ СТРЕЛКИ ===
+      // 1) Мы накапливаем движение только при стабильном направлении.
+      // 2) Мы ограничиваем вклад одного события (wheel tick может быть большим),
+      //    чтобы один "щёлчок" колеса не переключал режим мгновенно.
+      // 3) Переключаем режим только когда накопили DIR_SWITCH_PX.
+      const absDelta = Math.abs(deltaY)
+      if (absDelta >= 0.5) {
+        const sign = Math.sign(deltaY)
+
+        // если направление изменилось — сбрасываем накопление
+        if (dirAccumRef.current !== 0 && Math.sign(dirAccumRef.current) !== sign) {
+          dirAccumRef.current = 0
+        }
+
+        // режем вклад одного события, чтобы один тик не переворачивал стрелку
+        const maxStep = Math.max(6, Math.round(DIR_SWITCH_PX / 3))
+        const step = Math.min(absDelta, maxStep) * sign
+
+        dirAccumRef.current += step
+
+        // кап, чтобы не разгонялось бесконечно
+        const cap = DIR_SWITCH_PX * 2
+        if (dirAccumRef.current > cap) dirAccumRef.current = cap
+        if (dirAccumRef.current < -cap) dirAccumRef.current = -cap
+      }
+
+      const confirmedUp   = dirAccumRef.current <= -DIR_SWITCH_PX
+      const confirmedDown = dirAccumRef.current >=  DIR_SWITCH_PX
+
       // Движение ВВЕРХ → режим "стрелка вверх / скролл наверх"
-      if (goingUp && y > MIN_Y) {
+      if (confirmedUp && y > MIN_Y) {
         if (modeRef.current !== 'up') {
           modeRef.current = 'up'
           setMode('up')
+          dirAccumRef.current = 0
         }
 
         if (!visibleRef.current && !appearTimerRef.current) {
@@ -159,10 +198,11 @@ export default function ScrollTopPulse() {
       }
 
       // Движение ВНИЗ → режим "стрелка вниз / скролл вниз"
-      if (goingDown && y > MIN_Y) {
+      if (confirmedDown && y > MIN_Y) {
         if (modeRef.current !== 'down') {
           modeRef.current = 'down'
           setMode('down')
+          dirAccumRef.current = 0
         }
 
         if (!visibleRef.current && !appearTimerRef.current) {
