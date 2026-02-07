@@ -110,8 +110,9 @@ const safeHtml = s => String(s || '')
 const rich = s => safeHtml(s).replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\*(.*?)\*/g,'<i>$1</i>')
 // --- DM media detectors (shared in Inbox thread) ---
 const DM_IMG_RE = /\.(?:webp|png|jpe?g|gif)(?:$|[?#])/i;
-const DM_VIDEO_RE = /\.(?:mp4|webm|mov|m4v|ogv)(?:$|[?#])/i;
-// audio: exclude webm by default (webm can be video); add webm only for audio-specific paths
+// В DM voice чаще всего приходит как .webm (аудио). Поэтому webm НЕ считаем видео “по расширению”.
+const DM_VIDEO_RE = /\.(?:mp4|mov|m4v|ogv)(?:$|[?#])/i;
+// audio: webm разрешаем (voice)
 const DM_AUDIO_RE = /\.(?:ogg|mp3|m4a|wav|webm)(?:$|[?#])/i;
 const DM_AUDIO_HINT_RE = /(?:\/uploads\/audio\/|\/forum\/voice[-/]|\/voice[-/])/i;
 const DM_VIDEO_HINT_RE = /(?:\/forum\/video[-/]|\/video[-/])/i;
@@ -170,8 +171,8 @@ const getDmMediaKind = (url, typeHint = '') => {
     if (t === 'video' || t.startsWith('video/')) return 'video';
     if (t === 'image' || t.startsWith('image/')) return 'image';
     if (t === 'audio' || t.startsWith('audio/')) {
-      // аудио-метка иногда приходит на webm-видео — если URL похож на видео, показываем как видео
-      if (isDmVideoUrl(url)) return 'video';
+      // В DM если пришёл typeHint audio/* — это ВСЕГДА аудио.
+      // Иначе оно улетает в ветку video и рендерится нативным <video controls> (чёрный экран).
       return 'audio';
     }
   }
@@ -4353,7 +4354,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   padding:0;
   border-radius:12px;
 }
-.audioCard.preview{ max-width:min(100%); height:550px; }
+.audioCard.preview{ max-width:min(100%); height:100px; }
 
 .audioIcon{
   width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center;
@@ -5089,6 +5090,197 @@ html[data-tma="1"] .inboxTabs{
 .dmStatus.seen{ color:#7fd7ff; text-shadow:0 0 8px rgba(120,200,255,.5); }
 .dmMediaGrid{ display:grid; gap:8px; margin-top:8px; }
 .dmMediaBox{ margin:0; }
+/* ===== DM Voice Player (Quantum Neon) ===== */
+.dmVoice{
+  --qA: rgba(120,220,255,.92);
+  --qB: rgba(190,110,255,.92);
+  --qC: rgba(80,255,210,.70);
+
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px 12px;
+  border-radius:16px;
+  border:1px solid rgba(140,190,255,.22);
+  background:
+    radial-gradient(120% 180% at 20% 0%, rgba(120,220,255,.14), transparent 55%),
+    radial-gradient(140% 220% at 90% 10%, rgba(190,110,255,.12), transparent 60%),
+    linear-gradient(160deg, rgba(10,18,32,.88), rgba(6,12,22,.82));
+  box-shadow:
+    0 10px 22px rgba(0,0,0,.28),
+    inset 0 0 16px rgba(90,160,255,.10);
+  backdrop-filter: blur(6px);
+}
+
+.dmVoicePlaying{
+  border-color: rgba(150,210,255,.30);
+  box-shadow:
+    0 12px 26px rgba(0,0,0,.30),
+    0 0 0 1px rgba(120,220,255,.14),
+    inset 0 0 18px rgba(120,220,255,.10);
+}
+
+.dmVoiceBtn{
+  width:36px;
+  height:36px;
+  border-radius:999px;
+  border:1px solid rgba(140,220,255,.28);
+  background:
+    radial-gradient(120% 120% at 30% 25%, rgba(140,220,255,.40), rgba(70,120,255,.10)),
+    linear-gradient(160deg, rgba(20,30,55,.55), rgba(10,14,26,.55));
+  color:#ecf6ff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:
+    0 10px 20px rgba(0,0,0,.26),
+    inset 0 0 14px rgba(140,220,255,.14);
+  cursor:pointer;
+  flex:0 0 auto;
+  transition: transform .12s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.dmVoiceBtn:hover{
+  border-color: rgba(170,240,255,.36);
+  box-shadow:
+    0 12px 24px rgba(0,0,0,.28),
+    0 0 18px rgba(120,220,255,.12),
+    inset 0 0 16px rgba(140,220,255,.16);
+}
+.dmVoiceBtn:active{ transform: translateY(1px) scale(.99); }
+
+.dmVoiceMid{
+  flex:1 1 auto;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.dmVoiceWaveWrap{
+  position:relative;
+  width:100%;
+}
+
+/* “дорожка” прогресса под волной (неон, дешево по CPU) */
+.dmVoiceTrack{
+  position:absolute;
+  left:0; right:0;
+  top:50%;
+  transform: translateY(-50%);
+  height:6px;
+  border-radius:999px;
+  background: rgba(0,0,0,.22);
+  overflow:hidden;
+  pointer-events:none;
+  box-shadow: inset 0 0 10px rgba(0,0,0,.35);
+}
+.dmVoiceFill{
+  height:100%;
+  width:0%;
+  background: linear-gradient(90deg, var(--qA), var(--qB), var(--qC));
+  filter: drop-shadow(0 0 8px rgba(120,220,255,.26));
+  box-shadow: 0 0 18px rgba(120,220,255,.10);
+}
+.dmVoiceSpark{
+  position:absolute;
+  top:50%;
+  width:14px;
+  height:14px;
+  border-radius:999px;
+  transform: translate(-50%,-50%);
+  background: radial-gradient(circle, rgba(240,250,255,.95), rgba(140,220,255,.55), transparent 70%);
+  filter: drop-shadow(0 0 10px rgba(140,220,255,.28));
+  opacity:.9;
+}
+
+/* SVG волна */
+.dmVoiceWave{
+  position:relative;
+  z-index:1;
+  width:100%;
+  height:28px;
+  display:block;
+  border-radius:12px;
+  cursor:pointer;
+  overflow:hidden;
+  background: rgba(0,0,0,.10);
+  border:1px solid rgba(140,190,255,.14);
+  box-shadow: inset 0 0 14px rgba(0,0,0,.22);
+  touch-action: none; /* ✅ важно для pointer drag на мобиле */
+}
+
+/* Бар волны: базовый */
+.dmWaveBar{
+  fill: rgba(150,200,255,.28);
+  transition: fill .18s ease, filter .18s ease;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Активные бары (до прогресса) */
+.dmWaveBar.isActive{
+  fill: rgba(140,220,255,.92);
+  filter: drop-shadow(0 0 8px rgba(120,220,255,.18));
+}
+
+/* “под бит” — только когда играет (CSS-only, лёгкая анимация) */
+.dmVoicePlaying .dmWaveBar{
+  animation: dmWaveBounce 1.15s ease-in-out infinite;
+  animation-delay: var(--d);
+}
+
+/* Бары, которые уже “пройденные”, прыгают чуть ярче */
+.dmVoicePlaying .dmWaveBar.isActive{
+  animation: dmWaveBounceHot 1.05s ease-in-out infinite;
+  animation-delay: var(--d);
+  filter: drop-shadow(0 0 10px rgba(140,220,255,.20));
+}
+
+@keyframes dmWaveBounce{
+  0%,100% { transform: scaleY(0.88); opacity: .92; }
+  50%     { transform: scaleY(calc(0.92 + (var(--a) * 0.22))); opacity: 1; }
+}
+
+@keyframes dmWaveBounceHot{
+  0%,100% { transform: scaleY(0.92); }
+  50%     { transform: scaleY(calc(1.00 + (var(--a) * 0.30))); }
+}
+
+/* Метаданные */
+.dmVoiceMeta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  font-size:11px;
+  white-space:nowrap;
+  opacity:.92;
+}
+.dmVoiceTime{ opacity:.86; }
+
+.dmVoiceRate{
+  border:1px solid rgba(160,210,255,.22);
+  background:
+    linear-gradient(90deg, rgba(120,220,255,.18), rgba(190,110,255,.12));
+  color:#eaf6ff;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.02em;
+  cursor:pointer;
+  flex:0 0 auto;
+  box-shadow: inset 0 0 12px rgba(120,220,255,.08);
+  transition: transform .12s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.dmVoiceRate:hover{
+  border-color: rgba(190,240,255,.32);
+  box-shadow:
+    0 0 14px rgba(120,220,255,.10),
+    inset 0 0 14px rgba(140,220,255,.10);
+}
+.dmVoiceRate:active{ transform: translateY(1px) scale(.99); }
+
 .dmAttachLinks{ margin-top:8px; display:grid; gap:4px; }
 .dmAttachLinks a{ color:#9fd1ff; word-break:break-all; }
 .dmMsgActions{ display:flex; gap:8px; flex-wrap:wrap; }
@@ -10609,6 +10801,285 @@ setMuted(!!audio.muted);
     </div>
   );
 }
+
+// ===== DM Voice Player (Quantum neon, thin) =====
+function DmVoicePlayer({ src }) {
+  const audioRef = React.useRef(null);
+  const waveRef = React.useRef(null);
+
+  const rafRef = React.useRef(0);
+  const draggingRef = React.useRef(false);
+
+  const [playing, setPlaying] = React.useState(false);
+  const [dur, setDur] = React.useState(0);
+  const [pos, setPos] = React.useState(0);
+  const [rate, setRate] = React.useState(1);
+
+  const rates = React.useMemo(() => [0.75, 1, 1.25, 1.5, 2], []);
+
+  const fmt = (sec) => {
+    const s = Math.max(0, Number(sec) || 0);
+    const mm = Math.floor(s / 60);
+    const ss = Math.floor(s % 60);
+    return `${mm}:${String(ss).padStart(2, '0')}`;
+  };
+
+  // “волна” детерминированная от src (без анализа аудио — лёгкая)
+  const wave = React.useMemo(() => {
+    const s = String(src || '');
+    let h = 2166136261;
+    for (let i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    let x = h >>> 0;
+    const rnd = () => {
+      x ^= x << 13; x >>>= 0;
+      x ^= x >> 17; x >>>= 0;
+      x ^= x << 5;  x >>>= 0;
+      return (x >>> 0) / 4294967295;
+    };
+
+    const bars = 56; // чуть плотнее и красивее
+    const out = [];
+    for (let i = 0; i < bars; i++) {
+      // 0.22..1.0
+      const v = 0.22 + rnd() * 0.78;
+      out.push(v);
+    }
+    return out;
+  }, [src]);
+
+  const stopRaf = React.useCallback(() => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = 0;
+  }, []);
+
+  const startRaf = React.useCallback(() => {
+    stopRaf();
+    const tick = () => {
+      const a = audioRef.current;
+      if (a && !draggingRef.current) {
+        const t = Number(a.currentTime || 0) || 0;
+        setPos(t);
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+  }, [stopRaf]);
+
+  // ✅ ВАЖНО: при смене src — сброс и переподписки
+  React.useEffect(() => {
+    const a = audioRef.current;
+    if (!a) return;
+
+    // reset only on src change (НЕ на rate!)
+    setPlaying(false);
+    setDur(0);
+    setPos(0);
+    draggingRef.current = false;
+    stopRaf();
+
+    try { a.pause?.(); } catch {}
+    try { a.currentTime = 0; } catch {}
+    try { a.playbackRate = rate; } catch {}
+
+    const onLoaded = () => setDur(Number(a.duration || 0) || 0);
+    const onPlay = () => { setPlaying(true); startRaf(); };
+    const onPause = () => { setPlaying(false); stopRaf(); };
+    const onEnded = () => { setPlaying(false); stopRaf(); setPos(0); };
+
+    a.addEventListener('loadedmetadata', onLoaded);
+    a.addEventListener('play', onPlay);
+    a.addEventListener('pause', onPause);
+    a.addEventListener('ended', onEnded);
+
+    return () => {
+      a.removeEventListener('loadedmetadata', onLoaded);
+      a.removeEventListener('play', onPlay);
+      a.removeEventListener('pause', onPause);
+      a.removeEventListener('ended', onEnded);
+      stopRaf();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src]); // 👈 только src
+
+  // ✅ Изменение скорости — без ресета/переподписок (фикс твоего бага)
+  React.useEffect(() => {
+    const a = audioRef.current;
+    if (a) a.playbackRate = rate;
+  }, [rate]);
+
+  const toggle = (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    const a = audioRef.current;
+    if (!a) return;
+    if (a.paused) a.play?.();
+    else a.pause?.();
+  };
+
+  const cycleRate = (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    const idx = Math.max(0, rates.indexOf(rate));
+    const next = rates[(idx + 1) % rates.length];
+    setRate(next);
+  };
+
+  const progress = dur > 0 ? Math.min(1, Math.max(0, pos / dur)) : 0;
+
+  // ===== Seek (click/drag) =====
+  const seekToClientX = React.useCallback((clientX) => {
+    const a = audioRef.current;
+    const el = waveRef.current;
+    if (!a || !el || !dur) return;
+
+    const rect = el.getBoundingClientRect();
+    const x = Math.min(Math.max(0, clientX - rect.left), rect.width);
+    const p = rect.width ? (x / rect.width) : 0;
+    const t = p * dur;
+
+    try { a.currentTime = t; } catch {}
+    setPos(t);
+  }, [dur]);
+
+  const onWavePointerDown = (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    if (!dur) return;
+
+    draggingRef.current = true;
+    try { e.currentTarget.setPointerCapture?.(e.pointerId); } catch {}
+
+    seekToClientX(e.clientX);
+  };
+
+  const onWavePointerMove = (e) => {
+    if (!draggingRef.current) return;
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    seekToClientX(e.clientX);
+  };
+
+  const endDrag = (e) => {
+    if (!draggingRef.current) return;
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    draggingRef.current = false;
+  };
+
+  // ===== SVG layout (responsive, не фиксированный w/h на экране) =====
+  const bars = wave.length;
+  const W = 640;
+  const H = 26;
+  const gap = 2;
+  const bw = Math.max(2, Math.floor((W - (bars - 1) * gap) / bars));
+
+  return (
+    <div
+      className={`dmVoice ${playing ? 'dmVoicePlaying' : ''}`}
+      data-kind="dm-voice"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <button
+        type="button"
+        className="dmVoiceBtn"
+        onClick={toggle}
+        aria-label={playing ? 'Pause' : 'Play'}
+      >
+        {playing ? (
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden>
+            <path d="M7 5h3v14H7V5zm7 0h3v14h-3V5z" fill="currentColor" />
+          </svg>
+        ) : (
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden>
+            <path d="M8 5v14l12-7-12-7z" fill="currentColor" />
+          </svg>
+        )}
+      </button>
+
+      <div className="dmVoiceMid">
+        <div className="dmVoiceWaveWrap">
+          {/* неоновая “дорожка прогресса” + бегущая искра */}
+          <div className="dmVoiceTrack" aria-hidden="true">
+            <div className="dmVoiceFill" style={{ width: `${progress * 100}%` }} />
+            <div className="dmVoiceSpark" style={{ left: `${progress * 100}%` }} />
+          </div>
+
+          <svg
+            ref={waveRef}
+            className="dmVoiceWave"
+            viewBox={`0 0 ${W} ${H}`}
+            preserveAspectRatio="none"
+            role="slider"
+            aria-valuemin={0}
+            aria-valuemax={dur || 0}
+            aria-valuenow={pos || 0}
+            onPointerDown={onWavePointerDown}
+            onPointerMove={onWavePointerMove}
+            onPointerUp={endDrag}
+            onPointerCancel={endDrag}
+            onPointerLeave={endDrag}
+          >
+            {/* лёгкая “космическая” подложка */}
+            <defs>
+              <linearGradient id="qWaveBase" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stopColor="rgba(80,160,255,.12)" />
+                <stop offset=".5" stopColor="rgba(160,90,255,.12)" />
+                <stop offset="1" stopColor="rgba(60,220,255,.10)" />
+              </linearGradient>
+            </defs>
+
+            <rect x="0" y="0" width={W} height={H} fill="url(#qWaveBase)" />
+
+            {wave.map((v, i) => {
+              const x = i * (bw + gap);
+              const bh = Math.max(3, Math.round(v * (H - 6)));
+              const y = Math.round((H - bh) / 2);
+
+              const active = (i / Math.max(1, bars - 1)) <= progress;
+
+              return (
+                <rect
+                  key={i}
+                  className={`dmWaveBar ${active ? 'isActive' : ''}`}
+                  x={x}
+                  y={y}
+                  width={bw}
+                  height={bh}
+                  rx="2"
+                  style={{
+                    // параметры для “подпрыгивания” (CSS-only, дешёво)
+                    '--d': `${(i % 18) * 0.035}s`,
+                    '--a': String(v),
+                  }}
+                />
+              );
+            })}
+          </svg>
+        </div>
+
+        <div className="dmVoiceMeta">
+          <span className="dmVoiceTime">{fmt(pos)} / {fmt(dur)}</span>
+
+          <button
+            type="button"
+            className="dmVoiceRate"
+            onClick={cycleRate}
+            title="Speed"
+          >
+            {String(rate).replace(/\.0+$/, '')}x
+          </button>
+        </div>
+      </div>
+
+      {/* скрытый audio */}
+      <audio ref={audioRef} src={src} preload="metadata" />
+    </div>
+  );
+}
+
 function HeadChevronIcon({ dir = 'down' }) {
   const isUp = dir === 'up';
   return (
@@ -19007,8 +19478,8 @@ onOpenThread={(clickP) => {
                         {!!audioUrls.length && (
                           <div className="dmMediaGrid">
                             {audioUrls.map((src, i) => (
-                              <div key={`${m?.id || 'm'}:aud:${i}`} className="audioCard mediaBox dmMediaBox" data-kind="audio">
-                                <QCastPlayer src={src} />
+      <div key={`${m?.id || 'm'}:aud:${i}`} className="dmMediaBox" data-kind="audio">
+        <DmVoicePlayer src={src} />
                               </div>
                             ))}
                           </div>
@@ -20530,7 +21001,7 @@ onClick={() => {
               <path d="M5 11a7 7 0 0014 0M12 18v3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
             </svg>
           </div>
-          <QCastPlayer src={pendingAudio} preview />
+        <DmVoicePlayer src={pendingAudio} preview />
           <button type="button" className="audioRemove" title={t('forum_remove')} onClick={()=> setPendingAudio(null)}>❌</button>
         </div>
       </div>
