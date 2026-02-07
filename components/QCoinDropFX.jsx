@@ -3,9 +3,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 
-
 const isBrowser = () => typeof window !== 'undefined'
-
 
 // та же логика, что в InviteFriendProvider — единая точка для uid
 function readUnifiedAccountId () {
@@ -43,6 +41,11 @@ const DEFAULT_INTERVAL_MS = 120_000  // раз в минуту
 const DEFAULT_MIN_SIZE = 25
 const DEFAULT_MAX_SIZE = 50
 
+// === РАНДОМНЫЕ МНОЖИТЕЛИ ДЛЯ КАЖДОЙ МОНЕТЫ ===
+// 0x (ничего), 0.2x (в 5 раз меньше), 0.33x (~в 3 раза меньше),
+// 0.5x (в 2 раза меньше), 1x, 2x, 3x, 5x
+const COIN_MULTIPLIERS = [0, 0.2, 1 / 3, 0.5, 1, 2, 3, 5]
+
 const cn = (...parts) => parts.filter(Boolean).join(' ')
 
 export default function QCoinDropFX ({
@@ -52,7 +55,7 @@ export default function QCoinDropFX ({
 }) {
   const [uid, setUid] = useState(() => readUnifiedAccountId())
   const [, setTick] = useState(0)
-  const [toast, setToast] = useState(null) // { reward, error, x, y }
+  const [toast, setToast] = useState(null) // { reward, error, mult }
 
   const coinRef = useRef(null)
   const animFrameRef = useRef(null)
@@ -169,6 +172,9 @@ export default function QCoinDropFX ({
           const size = minSize + depth * (maxSize - minSize)
           const baseVy = 60 + 50 * depth
 
+          // === РАНДОМНЫЙ МНОЖИТЕЛЬ ДЛЯ ЭТОЙ МОНЕТЫ ===
+          const mult = COIN_MULTIPLIERS[(Math.random() * COIN_MULTIPLIERS.length) | 0]
+
           coin = {
             id: ts,
             depth,
@@ -186,6 +192,9 @@ export default function QCoinDropFX ({
             spinSpeed: 30 + Math.random() * 50,
             opacity: 0.98,
             exploding: false,
+
+            // множитель награды этой монеты
+            mult,
           }
 
           coinRef.current = coin
@@ -332,30 +341,37 @@ export default function QCoinDropFX ({
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  /* ===== клик по монете — зачисляем QCOIN и тост в точке клика ===== */
+  /* ===== клик по монете — зачисляем QCOIN и тост ===== */
   const handleCollect = async (e) => {
     const coin = coinRef.current
     if (!coin || !uid) return
 
-    const clickX = e?.clientX ?? (isBrowser() ? window.innerWidth / 2 : 0)
-    const clickY = e?.clientY ?? (isBrowser() ? window.innerHeight / 2 : 0)
-
     coin.exploding = true
     setTick((x) => (x + 1) & 1023)
 
-    let reward = 0
+    let rewardFromServer = 0
+    let multApplied = 1
     let isError = false
+
+    // множитель этой монеты (если вдруг отсутствует — считаем 1x)
+    const mult = Number.isFinite(coin.mult) ? coin.mult : 1
 
     try {
       const res = await fetch('/api/qcoin/drop', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accountId: uid }),
+        body: JSON.stringify({ accountId: uid, multiplier: mult }),
       })
       const data = await res.json().catch(() => null)
-      reward = Number(data?.rewardQcoin ?? data?.reward ?? 0) || 0
-      const balance = Number(data?.balance ?? 0) || null
 
+      // ✅ сервер теперь возвращает ФИНАЛЬНУЮ награду rewardQcoin (уже с множителем)
+      rewardFromServer = Number(data?.rewardQcoin ?? data?.reward ?? 0) || 0
+
+      // ✅ и множитель, который реально применён (сервер мог принудительно сделать x1)
+      multApplied = Number(data?.multiplierApplied ?? 1)
+      if (!Number.isFinite(multApplied)) multApplied = 1
+
+      const balance = Number(data?.balance ?? 0) || null
       if (Number.isFinite(balance)) {
         try {
           window.dispatchEvent(
@@ -367,11 +383,12 @@ export default function QCoinDropFX ({
       isError = true
     }
 
+    // ✅ ВАЖНО: НИКАКОГО reward * mult на клиенте больше нет.
+    // Показываем ровно то, что реально начислил сервер.
     setToast({
-      reward,
+      reward: rewardFromServer,
       error: isError,
-      x: clickX,
-      y: clickY,
+      mult: multApplied,
     })
 
     // чуть ждём, пока отыграет взрыв монеты
@@ -388,6 +405,18 @@ export default function QCoinDropFX ({
 
   const coin = coinRef.current
   if (!uid) return null
+
+  // маленький helper для подписи множителя (чтобы красиво)
+  const formatMult = (m) => {
+    if (m === 0) return 'x0'
+    if (m === 1) return 'x1'
+    if (m === 2 || m === 3 || m === 5) return `x${m}`
+    if (Math.abs(m - 0.5) < 1e-9) return 'x0.5'
+    if (Math.abs(m - (1 / 3)) < 1e-6) return 'x0.33'
+    if (Math.abs(m - 0.2) < 1e-9) return 'x0.2'
+    // fallback
+    return `x${Number(m).toFixed(2)}`
+  }
 
   return (
     <>
@@ -416,23 +445,21 @@ export default function QCoinDropFX ({
       )}
 
       {toast && (
-        <div
-          className="qdrop-toast"
-          style={{
-            left: toast.x,
-            top: toast.y,
-          }}
-        >
+        <div className="qdrop-toast">
           <div className="qdrop-toast-inner">
             <div className="qdrop-toast-title"></div>
             <div className="qdrop-toast-body">
               <span className="qcoinLabel">
-               🎉+{toast.reward.toLocaleString('en-US', {
+                🎉+{toast.reward.toLocaleString('en-US', {
                   maximumFractionDigits: 8,
                   minimumFractionDigits: 0,
                 })}{' '}
                 QCOIN 🎁
               </span>
+
+              {/* аккуратная подпись множителя (серверный, реально применённый) */}
+              <div className="qdrop-mult">{formatMult(toast.mult)}</div>
+
               {toast.error && (
                 <div className="qdrop-toast-error">
                   {tr(
@@ -445,6 +472,7 @@ export default function QCoinDropFX ({
           </div>
         </div>
       )}
+
       <style jsx>{`
         .qdrop-root {
           position: fixed;
@@ -536,59 +564,41 @@ export default function QCoinDropFX ({
         .qdrop-particle.p-9 { --dx: 0px;   --dy: -20px; }
 
         @keyframes qdrop-coin-pop {
-          0% {
-            transform: scale(1);
-            opacity: 1;
-          }
-          40% {
-            transform: scale(1.15);
-            opacity: 1;
-          }
-          100% {
-            transform: scale(0.6);
-            opacity: 0;
-          }
+          0% { transform: scale(1); opacity: 1; }
+          40% { transform: scale(1.15); opacity: 1; }
+          100% { transform: scale(0.6); opacity: 0; }
         }
 
         @keyframes qdrop-particle {
-          0% {
-            opacity: 0;
-            transform: translate3d(0, 0, 0) scale(0.4);
-          }
-          10% {
-            opacity: 1;
-          }
-          100% {
-            opacity: 0;
-            transform: translate3d(var(--dx), var(--dy), 0) scale(1.2);
-          }
+          0% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.4); }
+          10% { opacity: 1; }
+          100% { opacity: 0; transform: translate3d(var(--dx), var(--dy), 0) scale(1.2); }
         }
 
-        /* тост — прямо в месте, где поймал монету, немного выше */
+        /* ✅ тост — ВСЕГДА ПО ЦЕНТРУ ЭКРАНА */
         .qdrop-toast {
           position: fixed;
-          transform: translate(-50%, -120%);
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
           z-index: 9998;
           pointer-events: none;
         }
 
         .qdrop-toast-inner {
           min-width: 260px;
-          max-width: 360px;
+          max-width: min(360px, 92vw);
           padding: 12px 16px;
           border-radius: 14px;
           border: 1px solid rgba(255, 255, 255, 0);
           background:
-            radial-gradient(
-              circle at 0 0,
-              rgba(255, 255, 255, 0),
-              transparent 50%
-            ),
+            radial-gradient(circle at 0 0, rgba(255, 255, 255, 0), transparent 50%),
             rgba(10, 14, 24, 0);
           box-shadow: 0 14px 38px rgba(0, 0, 0, 0);
           color: #eaf4ff;
           pointer-events: auto;
           animation: qdrop-toast-in 0.22s ease-out forwards;
+          text-align: center;
         }
 
         .qdrop-toast-title {
@@ -602,7 +612,17 @@ export default function QCoinDropFX ({
         .qdrop-toast-body {
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: 6px;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .qdrop-mult {
+          font-size: 0.95rem;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          opacity: 0.9;
+          text-transform: uppercase;
         }
 
         .qdrop-toast-error {
@@ -631,8 +651,7 @@ export default function QCoinDropFX ({
           -webkit-background-clip: text;
           background-clip: text;
           color: transparent;
-          animation: qcoinShine 6s linear infinite,
-            qcoinGlow 2.8s ease-in-out infinite;
+          animation: qcoinShine 6s linear infinite, qcoinGlow 2.8s ease-in-out infinite;
           text-shadow:
             0 0 0.3rem rgba(255, 215, 0, 0.35),
             0 0 0.1rem rgba(255, 255, 180, 0.35);
@@ -640,12 +659,8 @@ export default function QCoinDropFX ({
         }
 
         @keyframes qcoinShine {
-          0% {
-            background-position: 0% 50%;
-          }
-          100% {
-            background-position: 200% 50%;
-          }
+          0% { background-position: 0% 50%; }
+          100% { background-position: 200% 50%; }
         }
 
         @keyframes qcoinGlow {
@@ -667,20 +682,14 @@ export default function QCoinDropFX ({
         }
 
         @keyframes qdrop-toast-in {
-          0% {
-            opacity: 0;
-            transform: translate(-50%, -108%);
-          }
-          100% {
-            opacity: 1;
-            transform: translate(-50%, -120%);
-          }
+          0% { opacity: 0; transform: translateY(8px); }
+          100% { opacity: 1; transform: translateY(0px); }
         }
 
         @media (max-width: 480px) {
           .qdrop-toast-inner {
             min-width: 220px;
-            max-width: 90vw;
+            max-width: 92vw;
           }
         }
 

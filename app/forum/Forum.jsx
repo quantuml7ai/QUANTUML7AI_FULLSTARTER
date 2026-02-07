@@ -277,6 +277,35 @@ function isTikTokUrl(u) {
   return /^(?:https?:\/\/)?(?:(?:www|m)\.)?tiktok\.com\/@[\w.\-]+\/video\/\d+(?:[?#].*)?$/i.test(s);
 }
 
+function getYouTubeId(u) {
+  const s = String(u || '').trim();
+  if (!s) return '';
+  const m = s.match(/(?:youtu\.be\/|watch\?v=|shorts\/|embed\/)([A-Za-z0-9_-]{6,})/i);
+  return m ? String(m[1] || '') : '';
+}
+
+function shortVideoMeta(u) {
+  const s = String(u || '').trim();
+  if (!s) return { label: 'Video', short: '' };
+
+  const ytId = getYouTubeId(s);
+  if (ytId) return { label: 'YouTube', short: `youtu.be/${ytId}` };
+  if (isTikTokUrl(s)) {
+    const m = s.match(/tiktok\.com\/(@[\w.\-]+\/video\/\d+)/i);
+    return { label: 'TikTok', short: m ? m[1] : s.replace(/^https?:\/\//i, '').slice(0, 40) };
+  }
+  if (/\.(mp4)(?:$|[?#])/i.test(s)) return { label: 'MP4', short: s.replace(/^https?:\/\//i, '').replace(/^www\./i, '').slice(0, 44) };
+  return { label: 'Video', short: s.replace(/^https?:\/\//i, '').replace(/^www\./i, '').slice(0, 44) };
+}
+
+function buildSearchVideoMedia(url) {
+  const u = String(url || '').trim();
+  const { label, short } = shortVideoMeta(u);
+  const ytId = getYouTubeId(u);
+  const thumb = ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : '';
+  return { kind: 'video', url: u, label, short, thumb };
+}
+
 function isMediaUrl(u) {
   return isVideoUrl(u) || isImageUrl(u) || isAudioUrl(u) || isYouTubeUrl(u) || isTikTokUrl(u);
 }
@@ -2632,9 +2661,15 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   flex: 1 1 auto;               /* ← поле поиска резиновое */
   min-width: 80px;              /* нижняя граница на очень узких экранах */
 }
+.searchInputWrap{
+  position:relative;
+  flex: 1 1 auto;
+  min-width:0;
+}
 
 /* инпут занимает всё оставшееся место и ужимается первым */
 .searchInput{
+  width:100%;
   flex: 1 1 auto; min-width: 60px; max-width:100%;
   height:40px; border-radius:12px; padding:.55rem .9rem;
   background:#0b1018; color:var(--ink); border:1px solid rgba(255,255,255,.16);
@@ -2650,7 +2685,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 .iconBtn{ width:40px; height:40px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:transparent; display:grid; place-items:center; transition:transform .08s, box-shadow .2s }
 .iconBtn:hover{ box-shadow:0 0 18px rgba(80,167,255,.25) } .iconBtn:active{ transform:scale(.96) }
 
-.searchDrop{ position:absolute; top:calc(100% + 10px); right:0; inset-inline-end:0; width:100%; max-height:460px; overflow:auto; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:8px; z-index:3000 }
+.searchDrop{ position:absolute; top:calc(100% + 6px); left:0; right:0; inset-inline-end:0; width:100%; max-height:460px; overflow:auto; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:8px; z-index:3000 }
 .searchResultItem{
   display:flex;
   align-items:flex-start;
@@ -2683,6 +2718,19 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   background:rgba(0,0,0,.55);
   color:#fff;
 }
+.searchResultBadge{
+  position:absolute;
+  right:6px;
+  bottom:6px;
+  font-size:9px;
+  line-height:1;
+  padding:2px 6px;
+  border-radius:999px;
+  background:rgba(0,0,0,.55);
+  color:#fff;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+}
 .searchResultContent{ min-width:0; display:flex; flex-direction:column; gap:4px; }
 .searchResultTitle{
   font-weight:900;
@@ -2714,6 +2762,13 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   overflow-wrap:break-word;
   text-align:start;
 }
+.searchResultMeta{
+  font-size:.78rem;
+  color:rgba(234,244,255,.70);
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
 .sortDrop{ position:absolute; top:68px; right:100px; width:120px; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:6px; z-index:3000 }
 
 .starBtn{
@@ -2728,6 +2783,19 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   border:1px solid rgba(255,255,255,.14);
   background:rgba(10,16,28,.25);
 }
+.dmMiniBtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:30px;
+  height:30px;
+  margin-left:6px;
+  border-radius:10px;
+  border:1px solid rgba(140,190,255,.28);
+  background:rgba(10,16,28,.18);
+  color:rgba(234,244,255,.92);
+}
+.dmMiniBtn svg{ width:18px; height:18px; }
 .starBtn .starPath{
   fill:none;
   stroke:rgba(255,255,255,.75);
@@ -4285,7 +4353,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   padding:0;
   border-radius:12px;
 }
-.audioCard.preview{ max-width:min(90%, 520px); }
+.audioCard.preview{ max-width:min(100%); height:550px; }
 
 .audioIcon{
   width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center;
@@ -4307,7 +4375,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 .audioCard audio::-webkit-media-controls{ background:transparent !important; }
 
 .audioRemove{
-  position:absolute; top:30px; left:5px;
+  position:absolute; top:10px; left:5px;
   width:18px; height:18px; border-radius:50%;
   display:inline-flex; align-items:center; justify-content:center;
   font-size:18px; line-height:1;
@@ -7991,7 +8059,7 @@ if (mountedRef.current) setBusy(false);
             <div className="avaUploadSquareTxt">
               {t('forum_avatar_upload_top')}
               <br/>
-              {t('forum_avatar_upload_bottom')}
+              
             </div>
           )}
           {uploadFile && !finalAvatarUrl && !rawAvatarUrl && (
@@ -8358,7 +8426,7 @@ const { t: tt } = useI18n();
  }, [onView, t?.id]);
 
   return (
-    <div ref={ref} id={entryId || undefined} className="item qshine cursor-pointer" onClick={() => onOpen?.(t, entryId)} style={{ position: 'relative' }}>
+    <div ref={ref} id={entryId || undefined} className="item qshine cursor-pointer" data-feed-card="1" data-feed-kind="topic" onClick={() => onOpen?.(t, entryId)} style={{ position: 'relative' }}>
 <div className="postBodyFrame">    
       <div className="flex flex-col gap-3">
         {/* верх: аватар → ник */}
@@ -8402,6 +8470,7 @@ const { t: tt } = useI18n();
         title={isStarred ? tt('forum_subscribed') : tt('forum_subscribe_author')}
       />
     )}
+
 {isVipAuthor && <VipFlipBadge />}   
   </div>
 
@@ -8656,6 +8725,8 @@ function DmDialogRow({
       type="button"
       id={entryId}
       className="item dmRow hoverPop text-left"
+      data-feed-card="1"
+      data-feed-kind="dm-dialog"
       data-dm-uid={uid}
       data-dm-lastts={lastTs}
       data-dm-lastfrom={lastFromRaw || lastFrom}
@@ -9145,6 +9216,7 @@ text={t?.('forum_delete_confirm')}
             title={isStarred ? t('forum_subscribed') : t('forum_subscribe_author')}
           />
         )}
+
 {isVipAuthor && <VipFlipBadge />}
       </div> 
 
@@ -10527,7 +10599,7 @@ setMuted(!!audio.muted);
               {val}x
             </button>
           ))}
-          {preview && (
+          {preview && typeof onRemove === 'function' && (
             <button type="button" className="qcastRemove" onClick={onRemove} title="Remove">
               ✕
             </button>
@@ -12780,6 +12852,8 @@ const headHiddenRef = useRef(false);
 const headPinnedRef = useRef(false);
 const headAutoOpenRef = useRef(false);
 const videoFeedOpenRef = useRef(false);
+const stickyFeedLockRef = useRef({ until: 0 });
+const stickyFeedTouchRef = useRef({ active: false, startY: 0, startX: 0 });
 useEffect(() => { headHiddenRef.current = headHidden }, [headHidden]);
 useEffect(() => { headPinnedRef.current = headPinned }, [headPinned]);
 useHtmlFlag('data-head-hidden', headHidden && !headPinned ? '1' : null);
@@ -12794,7 +12868,16 @@ useEffect(() => {
 useEffect(() => {
   if (!isBrowser()) return;
 
-  const TOP_EPS = 500;
+  const TOP_EPS_DESKTOP = 870;
+  const TOP_EPS_MOBILE = 550;
+  const getTopEps = () => {
+    try {
+      const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
+      const narrow = (Number(window?.innerWidth || 0) || 0) <= 720;
+      return (coarse || narrow) ? TOP_EPS_MOBILE : TOP_EPS_DESKTOP;
+    } catch {}
+    return TOP_EPS_DESKTOP;
+  };
 
   const getScrollTop = () => {
     const el = bodyRef.current;
@@ -12812,7 +12895,7 @@ useEffect(() => {
       const st = getScrollTop();
       const delta = st - lastTop;
       const scrollingDown = delta > 0;
-      const atTop = st <= TOP_EPS;
+      const atTop = st <= getTopEps();
 
       // если шапка закреплена вручную — ничего не трогаем
       if (headPinnedRef.current) {
@@ -12855,6 +12938,192 @@ useEffect(() => {
   };
 }, [sel?.id]);
  
+// ===== STICKY FEED (±1 карточка на жест) =====
+useEffect(() => {
+  if (!isBrowser()) return;
+
+  let attachedEl = null;
+  const optsWheel = { passive: false };
+  const optsTouch = { passive: false };
+
+  const isInIgnoredUi = (target) => {
+    try {
+      const el = target?.nodeType ? target : null;
+      if (!el?.closest) return false;
+      if (el.closest('.searchDrop')) return true;
+      if (el.closest('.emojiPanel')) return true;
+      if (el.closest('[data-sticky-feed-off="1"]')) return true;
+      // не ломаем ползунки/слайдеры
+      if (el.closest('input[type="range"]')) return true;
+    } catch {}
+    return false;
+  };
+
+  const getCards = (scrollEl) => {
+    try {
+      const nodes = scrollEl?.querySelectorAll?.('[data-feed-card="1"]') || [];
+      return Array.from(nodes).filter(Boolean);
+    } catch {}
+    return [];
+  };
+
+  const findClosestIndex = (cards, scrollEl) => {
+    if (!cards.length || !scrollEl) return 0;
+    const contRect = scrollEl.getBoundingClientRect();
+    const centerY = contRect.top + (contRect.height / 2);
+    let best = 0;
+    let bestDist = Infinity;
+    for (let i = 0; i < cards.length; i++) {
+      const r = cards[i].getBoundingClientRect();
+      const c = r.top + (r.height / 2);
+      const d = Math.abs(c - centerY);
+      if (d < bestDist) { bestDist = d; best = i; }
+    }
+    return best;
+  };
+
+  const scrollCardToCenter = (scrollEl, card, behavior = 'smooth') => {
+    if (!scrollEl || !card) return;
+    try {
+      const contRect = scrollEl.getBoundingClientRect();
+      const r = card.getBoundingClientRect();
+      const elCenterInView = (r.top - contRect.top) + (r.height / 2);
+      const desired = contRect.height / 2;
+      const delta = elCenterInView - desired;
+      if (!Number.isFinite(delta)) return;
+      const nextTop = Math.max(0, Math.min((scrollEl.scrollTop || 0) + delta, (scrollEl.scrollHeight || 0) - (scrollEl.clientHeight || 0)));
+      scrollEl.scrollTo?.({ top: nextTop, behavior });
+      // финальная фиксация по центру (анти-«дребезг» после smooth/изменения высот)
+      setTimeout(() => {
+        try {
+          const contRect2 = scrollEl.getBoundingClientRect();
+          const r2 = card.getBoundingClientRect();
+          const elCenter2 = (r2.top - contRect2.top) + (r2.height / 2);
+          const desired2 = contRect2.height / 2;
+          const delta2 = elCenter2 - desired2;
+          if (!Number.isFinite(delta2) || Math.abs(delta2) < 0.5) return;
+          const top2 = Math.max(0, Math.min((scrollEl.scrollTop || 0) + delta2, (scrollEl.scrollHeight || 0) - (scrollEl.clientHeight || 0)));
+          scrollEl.scrollTo?.({ top: top2, behavior: 'auto' });
+        } catch {}
+      }, 260);
+    } catch {}
+  };
+
+  const onWheel = (e) => {
+    try {
+      if (!e) return;
+      if (e.defaultPrevented) return;
+      if (e.ctrlKey) return; // zoom
+      if (isInIgnoredUi(e.target)) return;
+
+      const scrollEl = getScrollEl?.();
+      if (!scrollEl) return;
+
+      const cards = getCards(scrollEl);
+      if (cards.length < 2) return;
+
+      const dy = Number(e.deltaY || 0);
+      if (!dy || Math.abs(dy) < 3) return;
+
+      const nowTs = Date.now();
+      if ((stickyFeedLockRef.current?.until || 0) > nowTs) {
+        e.preventDefault();
+        return;
+      }
+      stickyFeedLockRef.current = { until: nowTs + 420 };
+
+      e.preventDefault();
+      const dir = dy > 0 ? 1 : -1;
+      const idx = findClosestIndex(cards, scrollEl);
+      const next = Math.max(0, Math.min(cards.length - 1, idx + dir));
+      const node = cards[next] || null;
+      if (!node) return;
+      scrollCardToCenter(scrollEl, node, 'smooth');
+    } catch {}
+  };
+
+  const onTouchStart = (e) => {
+    try {
+      if (!e?.touches || e.touches.length !== 1) return;
+      if (isInIgnoredUi(e.target)) return;
+      const t = e.touches[0];
+      stickyFeedTouchRef.current = { active: true, startY: t.clientY, startX: t.clientX };
+    } catch {}
+  };
+  const onTouchMove = (e) => {
+    try {
+      if (!stickyFeedTouchRef.current?.active) return;
+      if (!e?.touches || e.touches.length !== 1) return;
+      const t = e.touches[0];
+      const dy = t.clientY - (stickyFeedTouchRef.current.startY || 0);
+      const dx = t.clientX - (stickyFeedTouchRef.current.startX || 0);
+      // вертикальный свайп -> блокируем инерцию (1 жест = 1 карточка)
+      if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) {
+        e.preventDefault();
+      }
+    } catch {}
+  };
+  const onTouchEnd = (e) => {
+    try {
+      if (!stickyFeedTouchRef.current?.active) return;
+      stickyFeedTouchRef.current.active = false;
+      if (isInIgnoredUi(e.target)) return;
+
+      const changed = e?.changedTouches && e.changedTouches[0];
+      if (!changed) return;
+      const dy = changed.clientY - (stickyFeedTouchRef.current.startY || 0);
+      const dx = changed.clientX - (stickyFeedTouchRef.current.startX || 0);
+      if (Math.abs(dy) < 40 || Math.abs(dy) < Math.abs(dx)) return;
+
+      const nowTs = Date.now();
+      if ((stickyFeedLockRef.current?.until || 0) > nowTs) return;
+      stickyFeedLockRef.current = { until: nowTs + 480 };
+
+      const scrollEl = getScrollEl?.();
+      if (!scrollEl) return;
+      const cards = getCards(scrollEl);
+      if (cards.length < 2) return;
+      const dir = dy < 0 ? 1 : -1; // swipe up => next
+      const idx = findClosestIndex(cards, scrollEl);
+      const next = Math.max(0, Math.min(cards.length - 1, idx + dir));
+      const node = cards[next] || null;
+      if (!node) return;
+      scrollCardToCenter(scrollEl, node, 'smooth');
+    } catch {}
+  };
+
+  const attach = () => {
+    const scrollEl = getScrollEl?.();
+    if (!scrollEl) return;
+    if (attachedEl === scrollEl) return;
+    if (attachedEl) {
+      try { attachedEl.removeEventListener('wheel', onWheel); } catch {}
+      try { attachedEl.removeEventListener('touchstart', onTouchStart); } catch {}
+      try { attachedEl.removeEventListener('touchmove', onTouchMove); } catch {}
+      try { attachedEl.removeEventListener('touchend', onTouchEnd); } catch {}
+    }
+    attachedEl = scrollEl;
+    try { scrollEl.addEventListener('wheel', onWheel, optsWheel); } catch {}
+    try { scrollEl.addEventListener('touchstart', onTouchStart, optsTouch); } catch {}
+    try { scrollEl.addEventListener('touchmove', onTouchMove, optsTouch); } catch {}
+    try { scrollEl.addEventListener('touchend', onTouchEnd, optsTouch); } catch {}
+  };
+
+  attach();
+  const t = setInterval(attach, 700);
+
+  return () => {
+    try { clearInterval(t); } catch {}
+    if (attachedEl) {
+      try { attachedEl.removeEventListener('wheel', onWheel); } catch {}
+      try { attachedEl.removeEventListener('touchstart', onTouchStart); } catch {}
+      try { attachedEl.removeEventListener('touchmove', onTouchMove); } catch {}
+      try { attachedEl.removeEventListener('touchend', onTouchEnd); } catch {}
+    }
+    attachedEl = null;
+  };
+}, []);
+
 
 // [SORT_STATE:AFTER]
 const [q, setQ] = useState('');
@@ -12878,7 +13147,7 @@ const [visibleThreadPostsCount, setVisibleThreadPostsCount] = useState(THREAD_PA
 const [visiblePublishedCount, setVisiblePublishedCount] = useState(PUBLISHED_PAGE_SIZE);
 // [INBOX:STATE] — безопасно для SSR (никакого localStorage в рендере)
 const [inboxOpen, setInboxOpen] = useState(false);
-const [inboxTab, setInboxTab] = useState('replies'); // 'replies'|'messages'|'published'
+const [inboxTab, setInboxTab] = useState('messages'); // 'replies'|'messages'|'published'
 const [dmWithUserId, setDmWithUserId] = useState('');
 const dmMode = inboxOpen && inboxTab === 'messages' && !!dmWithUserId;
 const textLimit = dmMode ? 600 : 400;
@@ -13364,15 +13633,28 @@ const loadDmThread = useCallback(async (withUserId, cursor = null, opts = {}) =>
         if (cursor) return [ ...itemsAsc, ...existing ];
         if (opts?.refresh) {
           const byId = new Map(itemsAsc.map(m => [String(m?.id || ''), m]));
+          let changed = false;
           const merged = existing.map((m) => {
             const id = String(m?.id || '');
-            return byId.has(id) ? { ...m, ...byId.get(id) } : m;
+            if (!byId.has(id)) return m;
+            const inc = byId.get(id);
+            if (!changed) {
+              const prevTs = Number(m?.ts || 0);
+              const nextTs = Number(inc?.ts || 0);
+              const prevSt = String(m?.status || '');
+              const nextSt = String(inc?.status || '');
+              const prevTxt = String(m?.text || m?.message || m?.body || '');
+              const nextTxt = String(inc?.text || inc?.message || inc?.body || '');
+              if (prevTs !== nextTs || prevSt !== nextSt || prevTxt !== nextTxt) changed = true;
+            }
+            return { ...m, ...inc };
           });
           const existingIds = new Set(merged.map(m => String(m?.id || '')));
           for (const m of itemsAsc) {
             const id = String(m?.id || '');
-            if (id && !existingIds.has(id)) merged.push(m);
+            if (id && !existingIds.has(id)) { merged.push(m); changed = true; }
           }
+          if (!changed) return existing;
           return merged.filter((m) => !deletedMap[String(m?.id || '')]);
         }
         if (!existing.length) return itemsAsc;
@@ -13400,15 +13682,137 @@ const loadDmThread = useCallback(async (withUserId, cursor = null, opts = {}) =>
   }
 }, [meId, dmFetchCached, dmThreadHasMore, dmDeletedMsgMap]);
 
+// ===== DM localStorage cache (поверх in-memory) =====
+const DM_LS_DIALOGS_MAX = 150;
+const DM_LS_THREAD_MAX = 150;
+const dmActiveThreadUidRef = useRef('');
+const dmDialogsPersistTimerRef = useRef(null);
+const dmThreadPersistTimerRef = useRef(null);
+const dmThreadMemRef = useRef(new Map());
+
+React.useLayoutEffect(() => {
+  if (!isBrowser() || !meId) return;
+  try {
+    const key = `dm:dialogs:${meId}`;
+    const raw = localStorage.getItem(key);
+    const parsed = raw ? JSON.parse(raw) : null;
+    const items = Array.isArray(parsed?.items) ? parsed.items : [];
+    if (!items.length) return;
+    setDmDialogs((prev) => ((Array.isArray(prev) && prev.length) ? prev : items));
+    setDmDialogsCursor((prev) => (prev != null ? prev : (parsed?.cursor || null)));
+    setDmDialogsHasMore(typeof parsed?.hasMore === 'boolean' ? parsed.hasMore : true);
+    setDmDialogsLoaded(true);
+  } catch {}
+}, [meId]);
+
+React.useLayoutEffect(() => {
+  if (!isBrowser() || !meId) return;
+  const uid = String(dmWithUserId || '').trim();
+  if (!uid) {
+    dmActiveThreadUidRef.current = '';
+    setDmThreadItems([]);
+    setDmThreadCursor(null);
+    setDmThreadHasMore(true);
+    setDmThreadSeenTs(0);
+    return;
+  }
+  if (dmActiveThreadUidRef.current === uid) return;
+  dmActiveThreadUidRef.current = uid;
+
+  // быстрый старт: сначала in-memory, затем LS (до первого paint, чтобы не мигал чужой тред)
+  try {
+    const mem = dmThreadMemRef.current?.get?.(uid) || null;
+    if (mem && Array.isArray(mem.items)) {
+      setDmThreadItems(mem.items);
+      setDmThreadCursor(mem.cursor || null);
+      setDmThreadHasMore(typeof mem.hasMore === 'boolean' ? mem.hasMore : true);
+      setDmThreadSeenTs(Number(mem.peerSeenTs || 0));
+      setDmThreadLoading(false);
+      return;
+    }
+    const cacheKey = `dm:thread:thr:${meId}:${uid}`;
+    const raw = localStorage.getItem(cacheKey);
+    const parsed = raw ? JSON.parse(raw) : null;
+    const items = Array.isArray(parsed?.items) ? parsed.items : [];
+    setDmThreadItems(items);
+    setDmThreadCursor(parsed?.cursor || null);
+    setDmThreadHasMore(typeof parsed?.hasMore === 'boolean' ? parsed.hasMore : true);
+    setDmThreadSeenTs(Number(parsed?.peerSeenTs || 0));
+    setDmThreadLoading(false);
+  } catch {
+    setDmThreadItems([]);
+    setDmThreadCursor(null);
+    setDmThreadHasMore(true);
+    setDmThreadSeenTs(0);
+    setDmThreadLoading(false);
+  }
+}, [meId, dmWithUserId]);
+
+useEffect(() => {
+  if (!isBrowser() || !meId) return;
+  const uid = String(dmWithUserId || '').trim();
+  if (!uid) return;
+  try {
+    dmThreadMemRef.current.set(uid, {
+      items: Array.isArray(dmThreadItems) ? dmThreadItems : [],
+      cursor: dmThreadCursor || null,
+      hasMore: !!dmThreadHasMore,
+      peerSeenTs: Number(dmThreadSeenTs || 0),
+    });
+  } catch {}
+}, [meId, dmWithUserId, dmThreadItems, dmThreadCursor, dmThreadHasMore, dmThreadSeenTs]);
+
+useEffect(() => {
+  if (!isBrowser() || !meId) return;
+  if (!dmDialogsPersistTimerRef.current) dmDialogsPersistTimerRef.current = null;
+  try { if (dmDialogsPersistTimerRef.current) clearTimeout(dmDialogsPersistTimerRef.current); } catch {}
+  dmDialogsPersistTimerRef.current = setTimeout(() => {
+    try {
+      const key = `dm:dialogs:${meId}`;
+      const items = Array.isArray(dmDialogs) ? dmDialogs.slice(0, DM_LS_DIALOGS_MAX) : [];
+      localStorage.setItem(key, JSON.stringify({
+        ts: Date.now(),
+        cursor: dmDialogsCursor || null,
+        hasMore: !!dmDialogsHasMore,
+        items,
+      }));
+    } catch {}
+  }, 180);
+  return () => { try { if (dmDialogsPersistTimerRef.current) clearTimeout(dmDialogsPersistTimerRef.current); } catch {} };
+}, [meId, dmDialogs, dmDialogsCursor, dmDialogsHasMore]);
+
+useEffect(() => {
+  if (!isBrowser() || !meId) return;
+  const uid = String(dmWithUserId || '').trim();
+  if (!uid) return;
+  try { if (dmThreadPersistTimerRef.current) clearTimeout(dmThreadPersistTimerRef.current); } catch {}
+  dmThreadPersistTimerRef.current = setTimeout(() => {
+    try {
+      const cacheKey = `dm:thread:thr:${meId}:${uid}`;
+      const itemsAll = Array.isArray(dmThreadItems) ? dmThreadItems : [];
+      const items = itemsAll.length > DM_LS_THREAD_MAX ? itemsAll.slice(itemsAll.length - DM_LS_THREAD_MAX) : itemsAll;
+      localStorage.setItem(cacheKey, JSON.stringify({
+        ts: Date.now(),
+        cacheKey: `thr:${meId}:${uid}`,
+        cursor: dmThreadCursor || null,
+        hasMore: !!dmThreadHasMore,
+        peerSeenTs: Number(dmThreadSeenTs || 0),
+        items,
+      }));
+    } catch {}
+  }, 180);
+  return () => { try { if (dmThreadPersistTimerRef.current) clearTimeout(dmThreadPersistTimerRef.current); } catch {} };
+}, [meId, dmWithUserId, dmThreadItems, dmThreadCursor, dmThreadHasMore, dmThreadSeenTs]);
+
 useEffect(() => {
   if (!mounted || !meId) return;
-  loadDmDialogs(null, { force: true });
+  loadDmDialogs(null, { force: true, refresh: true });
 }, [mounted, meId, loadDmDialogs]);
 
 useEffect(() => {
   if (!inboxOpen || inboxTab !== 'messages') return;
   if (dmDialogsLoaded) return;
-  if ((dmDialogs || []).length === 0) loadDmDialogs(null, { force: true });
+  if ((dmDialogs || []).length === 0) loadDmDialogs(null, { force: true, refresh: true });
 }, [inboxOpen, inboxTab, dmDialogs?.length, dmDialogsLoaded, loadDmDialogs]);
 
 useEffect(() => {
@@ -13417,8 +13821,9 @@ useEffect(() => {
 
 useEffect(() => {
   const uid = String(dmWithUserId || '').trim();
-  if (!uid) { setDmThreadItems([]); setDmThreadCursor(null); setDmThreadHasMore(true); setDmThreadSeenTs(0); return; }
-  loadDmThread(uid, null, { force: true });
+  if (!uid) return;
+  // сначала показываем кэш (LS/in-memory), затем тихо обновляем "с конца"
+  loadDmThread(uid, null, { force: true, refresh: true });
 }, [dmWithUserId, loadDmThread]);
 
 // фоновая проверка новых DM (для бейджа), без спама
@@ -13518,13 +13923,34 @@ useEffect(() => {
     const rawUid = String(e?.detail?.userId || '').trim();
     const uid = String(resolveProfileAccountId(rawUid) || rawUid || '').trim();
     if (!uid) return;
+
+    // закрываем мешающие оверлеи/поповеры, чтобы не перекрывали Inbox
+    try { openOnly?.(null); } catch {}
+    try { closeUserInfoPopover?.(); } catch {}
+    try { closeReportPopover?.(); } catch {}
+    try { setDmDeletePopover?.(null); } catch {}
+    try { setDmDeleteForAll?.(false); } catch {}
+
+    // закрываем другие ветки/режимы (видео/тред/и т.п.) и открываем Quantum Messenger
+    try { if (videoFeedOpenRef.current) closeVideoFeed?.(); } catch {}
+    try { setReplyTo?.(null); } catch {}
+    try { setThreadRoot?.(null); } catch {}
+    try { setSel?.(null); } catch {}
+
+    // одноразово закрываем шапку при переходе в DM
+    try { headAutoOpenRef.current = false; } catch {}
+    try { setHeadPinned(false); } catch {}
+    try { setHeadHidden(true); } catch {}
+
+    try { pushNavState?.(`dm_${uid}`); } catch {}
     try { setInboxOpen(true); } catch {}
     try { setInboxTab('messages'); } catch {}
     try { setDmWithUserId(uid); } catch {}
+    setTimeout(() => { try { alignInboxStartUnderTabs(); } catch {} }, 0);
   };
   window.addEventListener('inbox:open-dm', onOpenDm);
   return () => window.removeEventListener('inbox:open-dm', onOpenDm);
-}, []);
+}, [openOnly, closeUserInfoPopover, closeReportPopover, pushNavState]);
 
 const myPublishedPosts = useMemo(() => {
   if (!meId) return [];
@@ -13736,6 +14162,44 @@ const openThreadForPost = useCallback((post, opts = {}) => {
   try { setSel(tt); } catch {}
 }, [sel?.id, data?.topics, idMap]);
 
+function centerNodeInScroll(node, behavior = 'smooth') {
+  if (!isBrowser?.() || !node) return;
+  try {
+    const scrollEl = getScrollEl?.();
+    if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {
+      const contRect = scrollEl.getBoundingClientRect();
+      const r = node.getBoundingClientRect();
+      const elCenterInView = (r.top - contRect.top) + (r.height / 2);
+      const desired = contRect.height / 2;
+      const delta = elCenterInView - desired;
+      if (!Number.isFinite(delta)) return;
+      const nextTop = Math.max(0, Math.min((scrollEl.scrollTop || 0) + delta, (scrollEl.scrollHeight || 0) - (scrollEl.clientHeight || 0)));
+      scrollEl.scrollTo?.({ top: nextTop, behavior });
+      return;
+    }
+  } catch {}
+  try { node.scrollIntoView?.({ behavior, block: 'center' }); } catch { try { node.scrollIntoView?.(); } catch {} }
+}
+
+function centerPostAfterDom(postId, behavior = 'smooth') {
+  const pid = String(postId || '').trim();
+  if (!pid || !isBrowser?.()) return;
+  let tries = 0;
+  const maxTries = 28;
+  const tick = () => {
+    tries += 1;
+    const node = document.getElementById(`post_${pid}`);
+    if (node) {
+      centerNodeInScroll(node, behavior);
+      return;
+    }
+    if (tries < maxTries) {
+      try { requestAnimationFrame(tick); } catch { try { setTimeout(tick, 16); } catch {} }
+    }
+  };
+  try { requestAnimationFrame(tick); } catch { try { setTimeout(tick, 0); } catch {} }
+}
+
 // при смене темы: либо выходим из ветки, либо применяем «ожидаемое» открытие ветки
 useEffect(() => {
   const navPendingId = navPendingThreadRootRef.current;
@@ -13934,7 +14398,7 @@ const aggregates = useMemo(() => {
         const typeHint = String(a?.type || a?.mime || a?.mediaType || '').toLowerCase();
         if (!url) continue;
         if (typeHint.startsWith('image/') || typeHint === 'image' || isImageUrl(url)) return { kind: 'image', url };
-        if (typeHint.startsWith('video/') || typeHint === 'video' || isVideoUrl(url) || isYouTubeUrl(url) || isTikTokUrl(url)) return { kind: 'video', url };
+        if (typeHint.startsWith('video/') || typeHint === 'video' || isVideoUrl(url) || isYouTubeUrl(url) || isTikTokUrl(url)) return buildSearchVideoMedia(url);
         if (typeHint.startsWith('audio/') || typeHint === 'audio' || isAudioUrl(url)) return { kind: 'audio', url };
       }
 
@@ -13942,7 +14406,7 @@ const aggregates = useMemo(() => {
       const imgUrl = String(p?.imageUrl || p?.media?.imageUrl || '').trim();
       if (imgUrl) return { kind: 'image', url: imgUrl };
       const vidUrl = String(p?.videoUrl || p?.media?.videoUrl || '').trim();
-      if (vidUrl) return { kind: 'video', url: vidUrl };
+      if (vidUrl) return buildSearchVideoMedia(vidUrl);
       const audUrl = String(p?.audioUrl || p?.media?.audioUrl || '').trim();
       if (audUrl) return { kind: 'audio', url: audUrl };
 
@@ -13952,7 +14416,7 @@ const aggregates = useMemo(() => {
         if (isImageUrl(u)) return { kind: 'image', url: u };
       }
       for (const u of urls) {
-        if (isVideoUrl(u) || isYouTubeUrl(u) || isTikTokUrl(u)) return { kind: 'video', url: u };
+        if (isVideoUrl(u) || isYouTubeUrl(u) || isTikTokUrl(u)) return buildSearchVideoMedia(u);
       }
       for (const u of urls) {
         if (isAudioUrl(u)) return { kind: 'audio', url: u };
@@ -15420,13 +15884,13 @@ const createPost = async () => {
       posts: [ ...(prev.creates.posts || []), p ],
     },
   }));
+
+  // после публикации — новый пост строго по центру (только после появления DOM)
+  try { centerPostAfterDom(tmpId, 'smooth'); } catch {}
  
   if (isReply) {
     const parentPost = (data?.posts || []).find(x => String(x.id) === String(parentId));
     setThreadRoot(parentPost || { id: String(parentId) });
-    setTimeout(() => {
-      try { document.querySelector('.body')?.scrollTo?.({ top: 9e9, behavior: 'smooth' }); } catch {}
-    }, 60);
   }
 
   // батч на бэк
@@ -16221,21 +16685,49 @@ function closeVideoFeed() {
 // Логика: если уже на странице инбокса — закрыть, иначе: закрыть видео/ветку и открыть инбокс.
 const openInboxGlobal = React.useCallback((entryId) => {
   const alreadyOnInbox = !!inboxOpen && !sel && !threadRoot && !videoFeedOpen;
-  if (alreadyOnInbox) { setInboxOpen(false); return; }
+  if (alreadyOnInbox) {
+    // если мы внутри диалога — возвращаемся в список диалогов, а не закрываем весь Inbox
+    if (dmWithUserId) {
+      // одноразово закрываем шапку при переходе контролом
+      try { headAutoOpenRef.current = false; } catch {}
+      try { setHeadPinned(false); } catch {}
+      try { setHeadHidden(true); } catch {}
+      try { openOnly?.(null); } catch {}
+      try { closeUserInfoPopover?.(); } catch {}
+      try { closeReportPopover?.(); } catch {}
+      try { setDmDeletePopover?.(null); } catch {}
+      try { setDmDeleteForAll?.(false); } catch {}
+      try { setInboxTab('messages'); } catch {}
+      try { setDmWithUserId(''); } catch {}
+      setTimeout(() => { try { alignInboxStartUnderTabs(); } catch {} }, 0);
+      return;
+    }
+    setInboxOpen(false);
+    return;
+  }
 
   try { pushNavState(entryId || 'inbox_btn'); } catch {}
+  try { openOnly?.(null); } catch {}
+  try { closeUserInfoPopover?.(); } catch {}
+  try { closeReportPopover?.(); } catch {}
+  try { setDmDeletePopover?.(null); } catch {}
+  try { setDmDeleteForAll?.(false); } catch {}
   try { if (videoFeedOpen) closeVideoFeed?.(); } catch {}
   try { setReplyTo?.(null); } catch {}
   try { setThreadRoot?.(null); } catch {}
   try { setSel?.(null); } catch {}
 
-  setInboxOpen(true);
+  // одноразово закрываем шапку при переходе контролом
+  try { headAutoOpenRef.current = false; } catch {}
+  try { setHeadPinned(false); } catch {}
+  try { setHeadHidden(true); } catch {}
 
-  // мягко поднимаем к началу, чтобы страница инбокса была видна сразу
-  setTimeout(() => {
-    try { document.querySelector('[data-forum-topics-start="1"]')?.scrollIntoView?.({ block: 'start' }); } catch {}
-  }, 0);
-}, [inboxOpen, sel, threadRoot, videoFeedOpen, pushNavState]);
+  setInboxOpen(true);
+  try { setInboxTab('messages'); } catch {}
+  try { setDmWithUserId(''); } catch {}
+
+  setTimeout(() => { try { alignInboxStartUnderTabs(); } catch {} }, 0);
+}, [inboxOpen, sel, threadRoot, videoFeedOpen, pushNavState, dmWithUserId]);
 // авто-обновление ленты, когда лента открыта и что-то меняется в снапшоте
 React.useEffect(() => {
   if (!videoFeedOpen) return;
@@ -16288,6 +16780,47 @@ navStateRef.current = {
   sortOpen,
   replyToId: replyTo?.id ?? null,
 };
+
+function alignInboxStartUnderTabs(attempt = 0) {
+  if (!isBrowser()) return;
+  try {
+    const scrollEl =
+      bodyRef.current ||
+      document.querySelector('[data-forum-scroll="1"]') ||
+      null;
+    if (!scrollEl) return;
+
+    const tabs = scrollEl.querySelector('.inboxTabs') || scrollEl.querySelector('.inboxHeader');
+    const inboxBody = scrollEl.querySelector('.inboxBody');
+    if (!tabs || !inboxBody) {
+      if (attempt < 12) {
+        try { requestAnimationFrame(() => alignInboxStartUnderTabs(attempt + 1)); } catch {}
+      }
+      return;
+    }
+
+    // В messages-диалоге первым "элементом списка" является header диалога.
+    const first =
+      inboxBody.querySelector('.dmThreadHeader') ||
+      inboxBody.querySelector('[data-feed-card="1"]') ||
+      inboxBody.querySelector('.dmRow') ||
+      inboxBody.querySelector('.dmMsgRow') ||
+      inboxBody.querySelector('[id^="post_"]') ||
+      null;
+    if (!first) {
+      if (attempt < 12) {
+        try { requestAnimationFrame(() => alignInboxStartUnderTabs(attempt + 1)); } catch {}
+      }
+      return;
+    }
+
+    const tabsRect = tabs.getBoundingClientRect();
+    const firstRect = first.getBoundingClientRect();
+    const delta = (firstRect.top - tabsRect.bottom);
+    if (!Number.isFinite(delta) || Math.abs(delta) < 1) return;
+    scrollEl.scrollTop += delta;
+  } catch {}
+}
 
 function getScrollEl() {
   if (!isBrowser()) return null;
@@ -16409,7 +16942,7 @@ function applyNavState(state) {
   try { headAutoOpenRef.current = false; } catch {}
 
   try { setInboxOpen(!!state.inboxOpen); } catch {}
-  try { setInboxTab(state.inboxTab || 'replies'); } catch {}
+  try { setInboxTab(state.inboxTab || 'messages'); } catch {}
   try { setDmWithUserId(state.dmWithUserId || ''); } catch {}
 
   try { setVideoFeedOpen(!!state.videoFeedOpen); } catch {}
@@ -17330,13 +17863,118 @@ function pickAdUrlForSlot(slotKey, slotKind) {
           <div className="controls">
             {/* поиск + сорт */}
             <div className="search">
-              <input
-                className="searchInput"
-                value={q}
-                onChange={e=>{ setQ(e.target.value); openOnly('search') }}
-                onFocus={()=>openOnly('search')}
-                placeholder={t('forum_search_ph')}
-              />
+              <div className="searchInputWrap">
+                <input
+                  className="searchInput"
+                  value={q}
+                  onChange={e=>{ setQ(e.target.value); openOnly('search') }}
+                  onFocus={()=>openOnly('search')}
+                  placeholder={t('forum_search_ph')}
+                />
+                {drop && q.trim() && (
+                <div className="searchDrop" onMouseLeave={()=>setDrop(false)}>
+                  {results.length===0 && <div className="meta px-1 py-1">{t('forum_search_empty')}</div>}
+                  {results.map(r=>(
+                    <button
+                      key={`${r.k}:${r.id}`}
+                      id={`search_${r.k}_${r.id}`}
+                      className="item w-full text-left mb-1 searchResultItem"
+                      onClick={()=>{
+                        setDrop(false);
+                        setQ('');
+                        // одноразово закрываем шапку при переходе через поиск
+                        try { headAutoOpenRef.current = false; } catch {}
+                        try { setHeadPinned(false); } catch {}
+                        try { setHeadHidden(true); } catch {}
+                        // выравниваем старт списка к верху (после перехода контролом)
+                        setTimeout(() => {
+                          try {
+                            const sc = getScrollEl?.();
+                            if (sc && sc.scrollHeight > sc.clientHeight + 1) sc.scrollTop = 0;
+                            else window.scrollTo({ top: 0, behavior: 'auto' });
+                          } catch {}
+                        }, 0);
+                        if(r.k==='t'){
+                          const tt = (data.topics||[]).find(x=>x.id===r.id)
+                          if(tt){
+                            pushNavState(`search_${r.k}_${r.id}`);
+                            setTopicFilterId(tt.id);
+                            setSel(tt);
+                            setThreadRoot(null);
+                          }
+                        }else{
+                          const p = (data.posts||[]).find(x=>x.id===r.id)
+                          if(p){
+                            const tt = (data.topics||[]).find(x=>x.id===p.topicId)
+                            if (tt) {
+                              setTopicFilterId(tt.id);
+                              // ✅ сразу открыть ветку ответов с заголовком = найденное сообщение
+                              openThreadForPost(p, { entryId: `search_${r.k}_${r.id}` });
+                            }
+                          }
+                        }
+                      }}>
+                      {r.media && (
+                        <span
+                          className={cls('searchResultMedia', `searchResultMedia-${r.media.kind}`)}
+                          data-kind={r.media.kind}
+                        >
+                          {(r.media.kind === 'image' || r.media.kind === 'sticker') ? (
+                            <Image
+                              src={r.media.url}
+                              alt=""
+                              width={56}
+                              height={56}
+                              unoptimized
+                              loading="lazy"
+                              className="searchResultThumb"
+                            />
+                          ) : (r.media.kind === 'video' && r.media.thumb) ? (
+                            <img
+                              src={r.media.thumb}
+                              alt=""
+                              loading="lazy"
+                              className="searchResultThumb"
+                              referrerPolicy="no-referrer"
+                            />
+                          ) : (
+                            <span className="searchResultIcon" aria-hidden>
+                              {r.media.kind === 'video'
+                                ? '🎬'
+                                : (r.media.kind === 'audio' ? '🎵' : '📎')}
+                            </span>
+                          )}
+                          {r.media.kind === 'video' && (
+                            <span className="searchResultBadge" aria-hidden>{String(r.media.label || 'Video')}</span>
+                          )}
+                        </span>
+                      )}
+                      {r.k==='t' ? (
+                        <span className="searchResultContent">
+                          <span className="searchResultTitle">
+                            <span className="searchResultKind">{t('forum_search_kind_topic')}</span>
+                            <span className="searchResultTitleText">{r.title}</span>
+                          </span>
+                          {r.desc && <span className="searchResultText">{r.desc}</span>}
+                        </span>
+                      ) : (
+                        <span className="searchResultContent">
+                          <span className="searchResultTitle">
+                            <span className="searchResultKind">{t('forum_search_kind_post')}</span>
+                          </span>
+                          {r.media?.kind === 'video' && (
+                            <span className="searchResultMeta">
+                              {String(r.media.label || 'Video')}{r.media.short ? ` · ${String(r.media.short)}` : ''}
+                            </span>
+                          )}
+                          {!!r.text && <span className="searchResultText">{r.text}</span>}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+              </div>
               <button className="iconBtn" aria-label={t('forum_search')} onClick={()=> openOnly(drop ? null : 'search')}>
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
                   <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.7"/><path d="M16 16l4 4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
@@ -17380,82 +18018,6 @@ function pickAdUrlForSlot(slotKey, slotKind) {
  }}
 />
 {/* ⬆️ КОНЕЦ ВСТАВКИ */}
-                {drop && q.trim() && (
-                <div className="searchDrop" onMouseLeave={()=>setDrop(false)}>
-                  {results.length===0 && <div className="meta px-1 py-1">{t('forum_search_empty')}</div>}
-                  {results.map(r=>(
-                    <button
-                      key={`${r.k}:${r.id}`}
-                      id={`search_${r.k}_${r.id}`}
-                      className="item w-full text-left mb-1 searchResultItem"
-                      onClick={()=>{
-                        setDrop(false);
-                        setQ('');
-                        if(r.k==='t'){
-                          const tt = (data.topics||[]).find(x=>x.id===r.id)
-                          if(tt){
-                            pushNavState(`search_${r.k}_${r.id}`);
-                            setTopicFilterId(tt.id);
-                            setSel(tt);
-                            setThreadRoot(null);
-                          }
-                        }else{
-                          const p = (data.posts||[]).find(x=>x.id===r.id)
-                          if(p){
-                            const tt = (data.topics||[]).find(x=>x.id===p.topicId)
-                            if (tt) {
-                              setTopicFilterId(tt.id);
-                              // ✅ сразу открыть ветку ответов с заголовком = найденное сообщение
-                              openThreadForPost(p, { entryId: `search_${r.k}_${r.id}` });
-                            }
-                          }
-                        }
-                      }}>
-                      {r.media && (
-                        <span
-                          className={cls('searchResultMedia', `searchResultMedia-${r.media.kind}`)}
-                          data-kind={r.media.kind}
-                        >
-                          {(r.media.kind === 'image' || r.media.kind === 'sticker') ? (
-                            <Image
-                              src={r.media.url}
-                              alt=""
-                              width={56}
-                              height={56}
-                              unoptimized
-                              loading="lazy"
-                              className="searchResultThumb"
-                            />
-                          ) : (
-                            <span className="searchResultIcon" aria-hidden>
-                              {r.media.kind === 'video'
-                                ? '🎬'
-                                : (r.media.kind === 'audio' ? '🎵' : '📎')}
-                            </span>
-                          )}
-                          {r.media.kind === 'video' && <span className="searchResultPlay" aria-hidden>▶</span>}
-                        </span>
-                      )}
-                      {r.k==='t' ? (
-                        <span className="searchResultContent">
-                          <span className="searchResultTitle">
-                            <span className="searchResultKind">{t('forum_search_kind_topic')}</span>
-                            <span className="searchResultTitleText">{r.title}</span>
-                          </span>
-                          {r.desc && <span className="searchResultText">{r.desc}</span>}
-                        </span>
-                      ) : (
-                        <span className="searchResultContent">
-                          <span className="searchResultTitle">
-                            <span className="searchResultKind">{t('forum_search_kind_post')}</span>
-                          </span>
-                          {!!r.text && <span className="searchResultText">{r.text}</span>}
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
 {claimFx.open && (
   <div className="coinBurstOverlay" onClick={() => setClaimFx(s => ({ ...s, open: false }))}>
     {claimFx.pieces.map(p => (
@@ -17908,6 +18470,9 @@ onClick={()=>{
     className="iconBtn bigPlus"
     aria-label={t?.('forum_home')}
     onClick={()=>{
+    try { headAutoOpenRef.current = false; } catch {}
+    try { setHeadPinned(false); } catch {}
+    try { setHeadHidden(true); } catch {}
     if (videoFeedOpen) { try{ closeVideoFeed?.() }catch{} }
     if (questOpen)     { try{ closeQuests?.() }catch{} }
     try{ setInboxOpen(false) }catch{};
@@ -17973,7 +18538,7 @@ const openThreadHere = (clickP) => {
 
 
     return (
-      <div key={slot.key} id={`post_${p?.id || ''}`}>
+      <div key={slot.key} id={`post_${p?.id || ''}`} data-feed-card="1" data-feed-kind="post">
 <PostCard
   p={p}
   parentPost={parent}
@@ -18118,7 +18683,7 @@ const openThreadHere = (clickP) => {
   if (slot.type === 'item') {
     const p = slot.item;
     return (
-      <div key={slot.key} id={`post_${p.id}`} className="inboxReplyItem" data-reply-id={String(p.id || '')}>
+      <div key={slot.key} id={`post_${p.id}`} className="inboxReplyItem" data-reply-id={String(p.id || '')} data-feed-card="1" data-feed-kind="post">
 {(() => {
   const parent = (data.posts || []).find(x => String(x.id) === String(p.parentId));
   return (
@@ -18349,6 +18914,8 @@ onOpenThread={(clickP) => {
                     <div
                       key={m?.id || `${m?.ts || 0}`}
                       className={cls('dmMsgRow', mine && 'me')}
+                      data-feed-card="1"
+                      data-feed-kind="dm-msg"
                       data-dm-ts={msgTs}
                       data-dm-from={fromId}
                       data-dm-mine={mine ? '1' : '0'}
@@ -18578,7 +19145,7 @@ onOpenThread={(clickP) => {
           {(visiblePublishedPosts || []).map((p) => {
             const parent = p?.parentId ? (data.posts || []).find(x => String(x.id) === String(p.parentId)) : null;
             return (
-              <div key={`pub:${p?.id || ''}`} id={`post_${p?.id || ''}`}>
+              <div key={`pub:${p?.id || ''}`} id={`post_${p?.id || ''}`} data-feed-card="1" data-feed-kind="post">
                 <PostCard
                   p={p}
                   parentPost={parent || null}
@@ -18678,9 +19245,7 @@ onOpenThread={(clickP) => {
   ref={bodyRef}
   style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
 >
-
-
-
+ 
 </div>
 
     </section>
@@ -18799,13 +19364,118 @@ onOpenThread={(clickP) => {
           <div className="controls">
             {/* поиск + сорт */}
             <div className="search">
-              <input
-                className="searchInput"
-                value={q}
-                onChange={e=>{ setQ(e.target.value); openOnly('search') }}
-                onFocus={()=>openOnly('search')}
-                placeholder={t('forum_search_ph')}
-              />
+              <div className="searchInputWrap">
+                <input
+                  className="searchInput"
+                  value={q}
+                  onChange={e=>{ setQ(e.target.value); openOnly('search') }}
+                  onFocus={()=>openOnly('search')}
+                  placeholder={t('forum_search_ph')}
+                />
+                {drop && q.trim() && (
+                <div className="searchDrop" onMouseLeave={()=>setDrop(false)}>
+                  {results.length===0 && <div className="meta px-1 py-1">{t('forum_search_empty')}</div>}
+                  {results.map(r=>(
+                    <button
+                      key={`${r.k}:${r.id}`}
+                      id={`search_${r.k}_${r.id}`}
+                      className="item w-full text-left mb-1 searchResultItem"
+                      onClick={()=>{
+                        setDrop(false);
+                        setQ('');
+                        // одноразово закрываем шапку при переходе через поиск
+                        try { headAutoOpenRef.current = false; } catch {}
+                        try { setHeadPinned(false); } catch {}
+                        try { setHeadHidden(true); } catch {}
+                        // выравниваем старт списка к верху (после перехода контролом)
+                        setTimeout(() => {
+                          try {
+                            const sc = getScrollEl?.();
+                            if (sc && sc.scrollHeight > sc.clientHeight + 1) sc.scrollTop = 0;
+                            else window.scrollTo({ top: 0, behavior: 'auto' });
+                          } catch {}
+                        }, 0);
+                        if(r.k==='t'){
+                          const tt = (data.topics||[]).find(x=>x.id===r.id)
+                          if(tt){
+                            pushNavState(`search_${r.k}_${r.id}`);
+                            setTopicFilterId(tt.id);
+                            setSel(tt);
+                            setThreadRoot(null);
+                          }
+                        }else{
+                          const p = (data.posts||[]).find(x=>x.id===r.id)
+                          if(p){
+                            const tt = (data.topics||[]).find(x=>x.id===p.topicId)
+                            if (tt) {
+                              setTopicFilterId(tt.id);
+                              // ✅ сразу открыть ветку ответов с заголовком = найденное сообщение
+                              openThreadForPost(p, { entryId: `search_${r.k}_${r.id}` });
+                            }
+                          }
+                        }
+                      }}>
+                      {r.media && (
+                        <span
+                          className={cls('searchResultMedia', `searchResultMedia-${r.media.kind}`)}
+                          data-kind={r.media.kind}
+                        >
+                          {(r.media.kind === 'image' || r.media.kind === 'sticker') ? (
+                            <Image
+                              src={r.media.url}
+                              alt=""
+                              width={56}
+                              height={56}
+                              unoptimized
+                              loading="lazy"
+                              className="searchResultThumb"
+                            />
+                          ) : (r.media.kind === 'video' && r.media.thumb) ? (
+                            <img
+                              src={r.media.thumb}
+                              alt=""
+                              loading="lazy"
+                              className="searchResultThumb"
+                              referrerPolicy="no-referrer"
+                            />
+                          ) : (
+                            <span className="searchResultIcon" aria-hidden>
+                              {r.media.kind === 'video'
+                                ? '🎬'
+                                : (r.media.kind === 'audio' ? '🎵' : '📎')}
+                            </span>
+                          )}
+                          {r.media.kind === 'video' && (
+                            <span className="searchResultBadge" aria-hidden>{String(r.media.label || 'Video')}</span>
+                          )}
+                        </span>
+                      )}
+                      {r.k==='t' ? (
+                        <span className="searchResultContent">
+                          <span className="searchResultTitle">
+                            <span className="searchResultKind">{t('forum_search_kind_topic')}</span>
+                            <span className="searchResultTitleText">{r.title}</span>
+                          </span>
+                          {r.desc && <span className="searchResultText">{r.desc}</span>}
+                        </span>
+                      ) : (
+                        <span className="searchResultContent">
+                          <span className="searchResultTitle">
+                            <span className="searchResultKind">{t('forum_search_kind_post')}</span>
+                          </span>
+                          {r.media?.kind === 'video' && (
+                            <span className="searchResultMeta">
+                              {String(r.media.label || 'Video')}{r.media.short ? ` · ${String(r.media.short)}` : ''}
+                            </span>
+                          )}
+                          {!!r.text && <span className="searchResultText">{r.text}</span>}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+              </div>
               <button className="iconBtn" aria-label={t('forum_search')} onClick={()=> openOnly(drop ? null : 'search')}>
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
                   <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.7"/><path d="M16 16l4 4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
@@ -18849,82 +19519,6 @@ onOpenThread={(clickP) => {
  }}
 />
 {/* ⬆️ КОНЕЦ ВСТАВКИ */}
-                {drop && q.trim() && (
-                <div className="searchDrop" onMouseLeave={()=>setDrop(false)}>
-                  {results.length===0 && <div className="meta px-1 py-1">{t('forum_search_empty')}</div>}
-                  {results.map(r=>(
-                    <button
-                      key={`${r.k}:${r.id}`}
-                      id={`search_${r.k}_${r.id}`}
-                      className="item w-full text-left mb-1 searchResultItem"
-                      onClick={()=>{
-                        setDrop(false);
-                        setQ('');
-                        if(r.k==='t'){
-                          const tt = (data.topics||[]).find(x=>x.id===r.id)
-                          if(tt){
-                            pushNavState(`search_${r.k}_${r.id}`);
-                            setTopicFilterId(tt.id);
-                            setSel(tt);
-                            setThreadRoot(null);
-                          }
-                        }else{
-                          const p = (data.posts||[]).find(x=>x.id===r.id)
-                          if(p){
-                            const tt = (data.topics||[]).find(x=>x.id===p.topicId)
-                            if (tt) {
-                              setTopicFilterId(tt.id);
-                              // ✅ сразу открыть ветку ответов с заголовком = найденное сообщение
-                              openThreadForPost(p, { entryId: `search_${r.k}_${r.id}` });
-                            }
-                          }
-                        }
-                      }}>
-                      {r.media && (
-                        <span
-                          className={cls('searchResultMedia', `searchResultMedia-${r.media.kind}`)}
-                          data-kind={r.media.kind}
-                        >
-                          {(r.media.kind === 'image' || r.media.kind === 'sticker') ? (
-                            <Image
-                              src={r.media.url}
-                              alt=""
-                              width={56}
-                              height={56}
-                              unoptimized
-                              loading="lazy"
-                              className="searchResultThumb"
-                            />
-                          ) : (
-                            <span className="searchResultIcon" aria-hidden>
-                              {r.media.kind === 'video'
-                                ? '🎬'
-                                : (r.media.kind === 'audio' ? '🎵' : '📎')}
-                            </span>
-                          )}
-                          {r.media.kind === 'video' && <span className="searchResultPlay" aria-hidden>▶</span>}
-                        </span>
-                      )}
-                      {r.k==='t' ? (
-                        <span className="searchResultContent">
-                          <span className="searchResultTitle">
-                            <span className="searchResultKind">{t('forum_search_kind_topic')}</span>
-                            <span className="searchResultTitleText">{r.title}</span>
-                          </span>
-                          {r.desc && <span className="searchResultText">{r.desc}</span>}
-                        </span>
-                      ) : (
-                        <span className="searchResultContent">
-                          <span className="searchResultTitle">
-                            <span className="searchResultKind">{t('forum_search_kind_post')}</span>
-                          </span>
-                          {!!r.text && <span className="searchResultText">{r.text}</span>}
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
 {claimFx.open && (
   <div className="coinBurstOverlay" onClick={() => setClaimFx(s => ({ ...s, open: false }))}>
     {claimFx.pieces.map(p => (
@@ -19379,6 +19973,11 @@ onClick={()=>{
     className="iconBtn bigPlus"
     aria-label={t?.('forum_home')}
     onClick={()=>{ 
+      try { headAutoOpenRef.current = false; } catch {}
+      try { setHeadPinned(false); } catch {}
+      try { setHeadHidden(true); } catch {}
+      if (videoFeedOpen) { try{ closeVideoFeed?.() }catch{} }
+      if (questOpen)     { try{ closeQuests?.() }catch{} }
       try{ setInboxOpen(false) }catch{};
       try{ setReplyTo(null) }catch{}; 
       try{ setThreadRoot(null) }catch{}; 
@@ -19429,6 +20028,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
       <div
   className="body"
   data-forum-scroll="1"
+  data-sticky-feed-off="1"
   ref={bodyRef}
   style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
 >
@@ -19456,6 +20056,8 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
       <div
         key={slot.key}
         id={`post_${p.id}`}
+        data-feed-card="1"
+        data-feed-kind="post"
         style={{ marginLeft: (p._lvl || 0) * 18 }}
       >
 <PostCard
@@ -19585,8 +20187,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
               <span className={(String(text || '').trim().length > textLimit) ? 'max over' : 'max'}>{textLimit}</span>
             </div>
           </div>
-
-          {/* 2) Скрепка */}
+ 
 {/* 2) Скрепка */}
 <div className="railItem">
   <button
@@ -19812,7 +20413,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
       className="videoCard preview"
       style={{
         position: 'relative',
-        maxWidth: 'min(70%, 420px)',
+        maxWidth: 'min(100%)',
         borderRadius: 12,
         overflow: 'hidden',
         border: '1px solid rgba(255,255,255,.12)',
@@ -19830,7 +20431,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
         style={{
           width: '100%',
           height: 'auto',
-          maxHeight: 220,
+          maxHeight: 620,
           display: 'block',
           objectFit: 'contain',
           background: '#000',
@@ -19900,6 +20501,7 @@ onClick={() => {
         style={{
           fontSize: '20px',
           position: 'absolute',
+          top: 10,
           left: 5,
           bottom: 60,
           width: 54,
@@ -19928,7 +20530,7 @@ onClick={() => {
               <path d="M5 11a7 7 0 0014 0M12 18v3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
             </svg>
           </div>
-          <audio controls src={pendingAudio} />
+          <QCastPlayer src={pendingAudio} preview />
           <button type="button" className="audioRemove" title={t('forum_remove')} onClick={()=> setPendingAudio(null)}>❌</button>
         </div>
       </div>

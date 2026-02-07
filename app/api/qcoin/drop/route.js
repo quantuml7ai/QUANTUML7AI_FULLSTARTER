@@ -22,6 +22,10 @@ const DROP_REWARD_QCOIN = readNumberEnv(
   0.01, // дефолт, если env не заданы
 )
 
+// Разрешённые множители награды (должны совпадать с клиентом)
+// Любые другие значения будут проигнорированы и заменены на 1
+const ALLOWED_MULTIPLIERS = [0, 0.2, 1 / 3, 0.5, 1, 2, 3, 5]
+
 const qcoinKey = (uid) => `qcoin:${uid}`
 
 export async function POST (req) {
@@ -47,10 +51,24 @@ export async function POST (req) {
     return bad('invalid_user_id', 400)
   }
 
-  const reward = DROP_REWARD_QCOIN
-  if (!Number.isFinite(reward) || reward <= 0) {
+  const baseReward = DROP_REWARD_QCOIN
+  if (!Number.isFinite(baseReward) || baseReward <= 0) {
     return bad('invalid_qcoin_reward', 500)
   }
+
+  // multiplier может прислать клиент, но мы применяем ТОЛЬКО из whitelist
+  // если не прислал или прислал мусор — считаем x1
+  let multRaw = body && typeof body === 'object' ? body.multiplier : undefined
+  let mult = Number(multRaw)
+  if (!Number.isFinite(mult)) mult = 1
+
+  // допускаем небольшую погрешность (на случай 0.3333333)
+  const EPS = 1e-6
+  const allowed = ALLOWED_MULTIPLIERS.find((m) => Math.abs(m - mult) <= EPS)
+  const multiplierApplied = Number.isFinite(allowed) ? allowed : 1
+
+  // итоговая награда, которая реально начисляется
+  const reward = baseReward * multiplierApplied
 
   const key = qcoinKey(uid)
 
@@ -83,7 +101,9 @@ export async function POST (req) {
   return json({
     ok: true,
     uid,
-    rewardQcoin: reward,
+    rewardQcoin: reward,          // ✅ финальная награда (уже с множителем)
+    multiplierApplied,            // ✅ множитель, который реально применили
+    baseRewardQcoin: baseReward,  // ✅ база (без множителя)
     balance,
     updatedAt: nowIso,
   })

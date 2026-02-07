@@ -1,12 +1,17 @@
 // components/ScrollTopPulse.js
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 const APPEAR_DELAY_MS = 800
 const AUTO_HIDE_MS    = 2000
 const MIN_Y           = 260
 const TOP_HIDE_Y      = 40
+
+// === НАСТРОЙКА СКОРОСТИ СКРОЛЛА (ПОСТОЯННАЯ СКОРОСТЬ!) ===
+// px/сек: меньше = медленнее, больше = быстрее
+// Рекомендация для "премиально медленно": 350–650
+const SCROLL_PX_PER_SEC = 1000
 
 export default function ScrollTopPulse() {
   const [visible, setVisible] = useState(false)
@@ -17,6 +22,58 @@ export default function ScrollTopPulse() {
   const lastYRef     = useRef(0)
   const appearTimerRef = useRef(null)
   const hideTimerRef   = useRef(null)
+
+  // === управление анимацией скролла (отмена) ===
+  const rafRef = useRef(0)
+  const scrollingRef = useRef(false)
+  const cancelListenersAttachedRef = useRef(false)
+
+  // хранит текущую цель (для телепорта по повторному клику)
+  const teleportTargetGetterRef = useRef(null)
+
+  const detachCancelListeners = useCallback(() => {
+    if (!cancelListenersAttachedRef.current) return
+    cancelListenersAttachedRef.current = false
+
+    window.removeEventListener('wheel', cancelScroll, { capture: true })
+    window.removeEventListener('touchstart', cancelScroll, { capture: true })
+    window.removeEventListener('touchmove', cancelScroll, { capture: true })
+    window.removeEventListener('pointerdown', cancelScroll, { capture: true })
+    window.removeEventListener('mousedown', cancelScroll, { capture: true })
+    window.removeEventListener('keydown', cancelScroll, { capture: true })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ВАЖНО: cancelScroll должен быть стабильным по ссылке, иначе removeEventListener не снимет старые хендлеры
+  const cancelScroll = useCallback((e) => {
+    // 🔥 КЛЮЧЕВАЯ ФИШКА:
+    // если пользователь нажал на саму кнопку — НЕ отменяем здесь,
+    // чтобы onClick смог сделать телепорт.
+    if (e?.target?.closest?.('.ql7-scroll-top')) return
+
+    if (!scrollingRef.current) return
+    scrollingRef.current = false
+
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = 0
+    }
+
+    teleportTargetGetterRef.current = null
+    detachCancelListeners()
+  }, [detachCancelListeners])
+
+  const attachCancelListeners = useCallback(() => {
+    if (cancelListenersAttachedRef.current) return
+    cancelListenersAttachedRef.current = true
+
+    // capture: true — чтобы ловить событие раньше (и изнутри любых элементов)
+    window.addEventListener('wheel', cancelScroll, { passive: true, capture: true })
+    window.addEventListener('touchstart', cancelScroll, { passive: true, capture: true })
+    window.addEventListener('touchmove', cancelScroll, { passive: true, capture: true })
+    window.addEventListener('pointerdown', cancelScroll, { passive: true, capture: true })
+    window.addEventListener('mousedown', cancelScroll, { passive: true, capture: true })
+    window.addEventListener('keydown', cancelScroll, { capture: true })
+  }, [cancelScroll])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -131,12 +188,120 @@ export default function ScrollTopPulse() {
       window.removeEventListener('scroll', onScroll)
       clearAppear()
       clearHide()
+
+      // на размонтировании — стопаем анимацию и снимаем слушатели
+      cancelScroll()
     }
-  }, [])
+  }, [cancelScroll])
+
+  // === ПОСТОЯННАЯ СКОРОСТЬ + ДОКРУТКА ДО РЕАЛЬНОГО КОНЦА ===
+  // targetYOrGetter: число или функция, возвращающая targetY
+  const smoothScrollTo = (targetYOrGetter) => {
+    if (typeof window === 'undefined') return
+
+    // если уже было запущено — отменяем
+    cancelScroll()
+
+    const getTargetY =
+      typeof targetYOrGetter === 'function'
+        ? targetYOrGetter
+        : () => targetYOrGetter
+
+    // сохраним цель для "телепорта" по повторному нажатию
+    teleportTargetGetterRef.current = getTargetY
+
+    const speed = Math.max(1, SCROLL_PX_PER_SEC) // px/сек
+
+    scrollingRef.current = true
+    attachCancelListeners()
+
+    let lastTime = null
+
+    const step = (time) => {
+      if (!scrollingRef.current) return
+
+      if (lastTime === null) {
+        lastTime = time
+        rafRef.current = requestAnimationFrame(step)
+        return
+      }
+
+      // dt clamp — чтобы не было скачков скорости после лагов
+      const rawDt = (time - lastTime) / 1000
+      const dt = Math.min(Math.max(rawDt, 0.001), 0.033)
+      lastTime = time
+
+      const currentY = window.scrollY || 0
+      const targetY = getTargetY()
+
+      const diff = targetY - currentY
+      const dist = Math.abs(diff)
+
+      // финиш
+      if (dist <= 0.5) {
+        window.scrollTo(0, targetY)
+        scrollingRef.current = false
+        detachCancelListeners()
+        teleportTargetGetterRef.current = null
+        rafRef.current = 0
+        return
+      }
+
+      // шаг строго по скорости
+      let move = speed * dt
+      if (move < 0.5) move = 0.5
+
+      const applied = Math.min(dist, move)
+      const nextY = currentY + Math.sign(diff) * applied
+
+      window.scrollTo(0, nextY)
+
+      rafRef.current = requestAnimationFrame(step)
+    }
+
+    rafRef.current = requestAnimationFrame(step)
+  }
+
+  // === ТЕЛЕПОРТ: если уже скроллим и жмём кнопку ещё раз — прыгаем в текущую цель ===
+  const teleportNowIfScrolling = () => {
+    if (!scrollingRef.current) return false
+
+    const getTarget = teleportTargetGetterRef.current
+    if (!getTarget) return false
+
+    // мгновенно остановить RAF и снять слушатели
+    scrollingRef.current = false
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = 0
+    }
+    detachCancelListeners()
+
+    // телепорт к актуальной цели
+    window.scrollTo(0, getTarget())
+
+    teleportTargetGetterRef.current = null
+    return true
+  }
 
   const scrollToTop = () => {
+    // второй клик во время движения = телепорт
+    if (teleportNowIfScrolling()) {
+      if (appearTimerRef.current) {
+        clearTimeout(appearTimerRef.current)
+        appearTimerRef.current = null
+      }
+      if (hideTimerRef.current) {
+        clearTimeout(hideTimerRef.current)
+        hideTimerRef.current = null
+      }
+      visibleRef.current = false
+      setVisible(false)
+      return
+    }
+
     try {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      smoothScrollTo(0)
     } catch {
       window.scrollTo(0, 0)
     }
@@ -155,13 +320,30 @@ export default function ScrollTopPulse() {
   }
 
   const scrollToBottom = () => {
+    // второй клик во время движения = телепорт
+    if (teleportNowIfScrolling()) {
+      if (appearTimerRef.current) {
+        clearTimeout(appearTimerRef.current)
+        appearTimerRef.current = null
+      }
+      if (hideTimerRef.current) {
+        clearTimeout(hideTimerRef.current)
+        hideTimerRef.current = null
+      }
+      visibleRef.current = false
+      setVisible(false)
+      return
+    }
+
     try {
-      const doc = document.documentElement || document.body
-      const maxY = Math.max(
-        0,
-        (doc.scrollHeight || 0) - (window.innerHeight || 0),
-      )
-      window.scrollTo({ top: maxY, behavior: 'smooth' })
+      // "живой" низ: докрутит даже если страница растёт по пути
+      smoothScrollTo(() => {
+        const doc = document.documentElement || document.body
+        return Math.max(
+          0,
+          (doc.scrollHeight || 0) - (window.innerHeight || 0),
+        )
+      })
     } catch {
       const doc = document.documentElement || document.body
       const maxY = Math.max(
