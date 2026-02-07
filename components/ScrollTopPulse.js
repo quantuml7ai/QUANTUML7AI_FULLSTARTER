@@ -4,33 +4,26 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 const APPEAR_DELAY_MS = 800
-const AUTO_HIDE_MS    = 2000
-const MIN_Y           = 260
-const TOP_HIDE_Y      = 40
+const AUTO_HIDE_MS = 2000
+const MIN_Y = 260
+const TOP_HIDE_Y = 40
 
 // === НАСТРОЙКА ПЕРЕКЛЮЧЕНИЯ НАПРАВЛЕНИЯ СТРЕЛКИ ===
-// Сколько пикселей "уверенного" движения нужно, чтобы стрелка сменила режим.
-// ВАЖНО: чтобы один щелчок колеса (который может дать большой скачок scrollY)
-// НЕ переключал мгновенно, мы специально "режем" вклад одного события,
-// поэтому переключение требует несколько подряд событий в одну сторону.
-// Настраивай это значение под себя (пример: 120–240).
-const DIR_SWITCH_PX   = 500
+const DIR_SWITCH_PX = 500
 
 // === НАСТРОЙКА СКОРОСТИ СКРОЛЛА (ПОСТОЯННАЯ СКОРОСТЬ!) ===
-// px/сек: меньше = медленнее, больше = быстрее
-// Рекомендация для "премиально медленно": 350–650
 const SCROLL_PX_PER_SEC = 200
 
 export default function ScrollTopPulse() {
   const [visible, setVisible] = useState(false)
   const [mode, setMode] = useState('up') // 'up' | 'down'
 
-  const visibleRef   = useRef(false)
-  const modeRef      = useRef('up')
-  const lastYRef     = useRef(0)
-  const dirAccumRef  = useRef(0)
+  const visibleRef = useRef(false)
+  const modeRef = useRef('up')
+  const lastYRef = useRef(0)
+  const dirAccumRef = useRef(0)
   const appearTimerRef = useRef(null)
-  const hideTimerRef   = useRef(null)
+  const hideTimerRef = useRef(null)
 
   // === управление анимацией скролла (отмена) ===
   const rafRef = useRef(0)
@@ -39,6 +32,28 @@ export default function ScrollTopPulse() {
 
   // хранит текущую цель (для телепорта по повторному клику)
   const teleportTargetGetterRef = useRef(null)
+
+  // ====== ВСПОМОГАТЕЛЬНОЕ: стабильный "скроллер" + снап к физическим пикселям ======
+  const getScroller = () => {
+    if (typeof document === 'undefined') return null
+    return document.scrollingElement || document.documentElement || document.body
+  }
+
+  const getMaxY = () => {
+    const doc = document.documentElement || document.body
+    const docHeight = doc.scrollHeight || 0
+    const viewportHeight = window.innerHeight || 0
+    return Math.max(0, docHeight - viewportHeight)
+  }
+
+  const clamp = (v, min, max) => Math.min(max, Math.max(min, v))
+
+  // Снапим позицию скролла к физическим пикселям.
+  // Это критично для iOS/Safari: дробные значения top дают "рябь" при автоскролле.
+  const snapToDevicePixels = (y) => {
+    const dpr = window.devicePixelRatio || 1
+    return Math.round(y * dpr) / dpr
+  }
 
   const detachCancelListeners = useCallback(() => {
     if (!cancelListenersAttachedRef.current) return
@@ -53,23 +68,24 @@ export default function ScrollTopPulse() {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ВАЖНО: cancelScroll должен быть стабильным по ссылке, иначе removeEventListener не снимет старые хендлеры
-  const cancelScroll = useCallback((e) => {
-    // 🔥 КЛЮЧЕВАЯ ФИШКА:
-    // если пользователь нажал на саму кнопку — НЕ отменяем здесь,
-    // чтобы onClick смог сделать телепорт.
-    if (e?.target?.closest?.('.ql7-scroll-top')) return
+  const cancelScroll = useCallback(
+    (e) => {
+      // если пользователь нажал на саму кнопку — НЕ отменяем здесь, чтобы onClick смог сделать телепорт
+      if (e?.target?.closest?.('.ql7-scroll-top')) return
 
-    if (!scrollingRef.current) return
-    scrollingRef.current = false
+      if (!scrollingRef.current) return
+      scrollingRef.current = false
 
-    if (rafRef.current) {
-      cancelAnimationFrame(rafRef.current)
-      rafRef.current = 0
-    }
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current)
+        rafRef.current = 0
+      }
 
-    teleportTargetGetterRef.current = null
-    detachCancelListeners()
-  }, [detachCancelListeners])
+      teleportTargetGetterRef.current = null
+      detachCancelListeners()
+    },
+    [detachCancelListeners],
+  )
 
   const attachCancelListeners = useCallback(() => {
     if (cancelListenersAttachedRef.current) return
@@ -134,10 +150,7 @@ export default function ScrollTopPulse() {
       const deltaY = y - lastY
       lastYRef.current = y
 
-      const doc = document.documentElement || document.body
-      const docHeight = doc.scrollHeight || 0
-      const viewportHeight = window.innerHeight || 0
-      const maxY = Math.max(0, docHeight - viewportHeight)
+      const maxY = getMaxY()
       const distanceToBottom = maxY - y
 
       // если мы почти в самом верху или почти внизу — кнопку прячем
@@ -147,10 +160,6 @@ export default function ScrollTopPulse() {
       }
 
       // === ФИКС ДЁРГАНЬЯ СТРЕЛКИ ===
-      // 1) Мы накапливаем движение только при стабильном направлении.
-      // 2) Мы ограничиваем вклад одного события (wheel tick может быть большим),
-      //    чтобы один "щёлчок" колеса не переключал режим мгновенно.
-      // 3) Переключаем режим только когда накопили DIR_SWITCH_PX.
       const absDelta = Math.abs(deltaY)
       if (absDelta >= 0.5) {
         const sign = Math.sign(deltaY)
@@ -172,8 +181,8 @@ export default function ScrollTopPulse() {
         if (dirAccumRef.current < -cap) dirAccumRef.current = -cap
       }
 
-      const confirmedUp   = dirAccumRef.current <= -DIR_SWITCH_PX
-      const confirmedDown = dirAccumRef.current >=  DIR_SWITCH_PX
+      const confirmedUp = dirAccumRef.current <= -DIR_SWITCH_PX
+      const confirmedDown = dirAccumRef.current >= DIR_SWITCH_PX
 
       // Движение ВВЕРХ → режим "стрелка вверх / скролл наверх"
       if (confirmedUp && y > MIN_Y) {
@@ -218,8 +227,6 @@ export default function ScrollTopPulse() {
         }
         return
       }
-
-      // если стоим на месте (нет движения) — просто ничего не делаем
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -239,8 +246,11 @@ export default function ScrollTopPulse() {
   const smoothScrollTo = (targetYOrGetter) => {
     if (typeof window === 'undefined') return
 
+    const scroller = getScroller()
+    if (!scroller) return
+
     // если уже было запущено — отменяем
-    cancelScroll() 
+    cancelScroll()
 
     const getTargetY =
       typeof targetYOrGetter === 'function'
@@ -251,17 +261,19 @@ export default function ScrollTopPulse() {
     teleportTargetGetterRef.current = getTargetY
 
     const speed = Math.max(1, SCROLL_PX_PER_SEC) // px/сек
+    const dpr = window.devicePixelRatio || 1
+    const minPhysicalStep = 1 / dpr // 1 физический пиксель
 
     scrollingRef.current = true
     attachCancelListeners()
 
-    let lastTime = null 
+    let lastTime = null
 
     const step = (time) => {
       if (!scrollingRef.current) return
 
       if (lastTime === null) {
-        lastTime = time 
+        lastTime = time
         rafRef.current = requestAnimationFrame(step)
         return
       }
@@ -271,15 +283,22 @@ export default function ScrollTopPulse() {
       const dt = Math.min(Math.max(rawDt, 0.001), 0.033)
       lastTime = time
 
-      const currentY = window.scrollY || 0
-      const targetY = getTargetY()
+      const currentYRaw = window.scrollY || scroller.scrollTop || 0
+      const currentY = snapToDevicePixels(currentYRaw)
+
+      // цель может меняться (для "живого" низа)
+      const targetRaw = getTargetY()
+      const maxY = getMaxY()
+      const targetY = snapToDevicePixels(clamp(targetRaw, 0, maxY))
 
       const diff = targetY - currentY
       const dist = Math.abs(diff)
 
-      // финиш
-      if (dist <= 0.5) {
-        window.scrollTo(0, targetY)
+      // финиш (с учётом физ. пикселя)
+      if (dist <= minPhysicalStep) {
+        const finalY = snapToDevicePixels(targetY)
+        // важное: ставим ровно в цель, без дробей
+        scroller.scrollTop = finalY
         scrollingRef.current = false
         detachCancelListeners()
         teleportTargetGetterRef.current = null
@@ -287,15 +306,24 @@ export default function ScrollTopPulse() {
         return
       }
 
-      // шаг строго по скорости
+      // шаг строго по скорости, но не меньше 1 физического пикселя
       let move = speed * dt
-      if (move < 0.5) move = 0.5
+      if (move < minPhysicalStep) move = minPhysicalStep
 
       const applied = Math.min(dist, move)
-      const nextY = currentY + Math.sign(diff) * applied
+      let nextY = currentY + Math.sign(diff) * applied
 
-      window.scrollTo(0, nextY)
+      // снап + clamp, чтобы не было микродрожи и резинового оверскролла
+      nextY = snapToDevicePixels(clamp(nextY, 0, maxY))
 
+      // если снап "съел" движение и мы стоим на месте — принудительно двинем на 1 физ. пиксель
+      if (nextY === currentY) {
+        nextY = snapToDevicePixels(
+          clamp(currentY + Math.sign(diff) * minPhysicalStep, 0, maxY),
+        )
+      }
+
+      scroller.scrollTop = nextY
       rafRef.current = requestAnimationFrame(step)
     }
 
@@ -308,7 +336,10 @@ export default function ScrollTopPulse() {
 
     const getTarget = teleportTargetGetterRef.current
     if (!getTarget) return false
- 
+
+    const scroller = getScroller()
+    if (!scroller) return false
+
     // мгновенно остановить RAF и снять слушатели
     scrollingRef.current = false
     if (rafRef.current) {
@@ -317,8 +348,10 @@ export default function ScrollTopPulse() {
     }
     detachCancelListeners()
 
-    // телепорт к актуальной цели
-    window.scrollTo(0, getTarget())
+    // телепорт к актуальной цели (clamp + snap)
+    const maxY = getMaxY()
+    const y = snapToDevicePixels(clamp(getTarget(), 0, maxY))
+    scroller.scrollTop = y
 
     teleportTargetGetterRef.current = null
     return true
@@ -343,7 +376,9 @@ export default function ScrollTopPulse() {
     try {
       smoothScrollTo(0)
     } catch {
-      window.scrollTo(0, 0)
+      const scroller = getScroller()
+      if (scroller) scroller.scrollTop = 0
+      else window.scrollTo(0, 0)
     }
 
     if (appearTimerRef.current) {
@@ -378,19 +413,13 @@ export default function ScrollTopPulse() {
     try {
       // "живой" низ: докрутит даже если страница растёт по пути
       smoothScrollTo(() => {
-        const doc = document.documentElement || document.body
-        return Math.max(
-          0,
-          (doc.scrollHeight || 0) - (window.innerHeight || 0),
-        )
+        return getMaxY()
       })
     } catch {
-      const doc = document.documentElement || document.body
-      const maxY = Math.max(
-        0,
-        (doc.scrollHeight || 0) - (window.innerHeight || 0),
-      )
-      window.scrollTo(0, maxY)
+      const scroller = getScroller()
+      const maxY = getMaxY()
+      if (scroller) scroller.scrollTop = maxY
+      else window.scrollTo(0, maxY)
     }
 
     if (appearTimerRef.current) {
@@ -433,28 +462,15 @@ export default function ScrollTopPulse() {
         onClick={handleClick}
         onKeyDown={onKeyDown}
       >
-<span className={mode === 'down' ? 'arrow arrow-down' : 'arrow'}>
-  <svg
-    viewBox="0 0 24 24"
-    width="28"
-    height="28"
-    aria-hidden="true"
-  >
-    {/* Стрелка в стиле ⮙: острый треугольник + ножка */}
-    <path
-      d="M12 3 L5 12 H10 V21 H14 V12 H19 Z"
-      fill="currentColor"
-    />
-  </svg>
-</span>
-
-
+        <span className={mode === 'down' ? 'arrow arrow-down' : 'arrow'}>
+          <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+            <path d="M12 3 L5 12 H10 V21 H14 V12 H19 Z" fill="currentColor" />
+          </svg>
+        </span>
       </div>
 
       <style jsx>{`
         .ql7-scroll-top {
-          /* Абсолютно изолированный шарик, без шансов растянуть */
-
           box-sizing: border-box !important;
           position: fixed !important;
           z-index: 70 !important;
@@ -480,15 +496,20 @@ export default function ScrollTopPulse() {
           border: 1px solid rgba(0, 229, 255, 0.55) !important;
           overflow: hidden !important;
 
-          background:
-            radial-gradient(120% 120% at 30% 30%, rgba(255,255,255,.14), rgba(255,255,255,0) 60%),
-            radial-gradient(100% 100% at 70% 70%, rgba(0,200,255,.22), rgba(0,200,255,0) 60%),
-            linear-gradient(180deg, rgba(0,20,40,.98), rgba(0,8,18,.98)) !important;
+          background: radial-gradient(
+              120% 120% at 30% 30%,
+              rgba(255, 255, 255, 0.14),
+              rgba(255, 255, 255, 0) 60%
+            ),
+            radial-gradient(
+              100% 100% at 70% 70%,
+              rgba(0, 200, 255, 0.22),
+              rgba(0, 200, 255, 0) 60%
+            ),
+            linear-gradient(180deg, rgba(0, 20, 40, 0.98), rgba(0, 8, 18, 0.98)) !important;
 
-          box-shadow:
-            0 0 0 1px rgba(0,229,255,.28) inset,
-            0 8px 22px rgba(0,0,0,.9),
-            0 0 22px rgba(0,229,255,.38) !important;
+          box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.28) inset, 0 8px 22px rgba(0, 0, 0, 0.9),
+            0 0 22px rgba(0, 229, 255, 0.38) !important;
 
           color: #e6f8ff !important;
           font-size: calc(var(--stp-size, 46px) * 0.5) !important;
@@ -502,68 +523,57 @@ export default function ScrollTopPulse() {
           backdrop-filter: blur(10px);
           -webkit-backdrop-filter: blur(10px);
 
-          transition:
-            transform .16s ease-out,
-            box-shadow .22s ease-out,
-            background .22s ease-out,
-            opacity .18s ease-out !important;
+          transition: transform 0.16s ease-out, box-shadow 0.22s ease-out, background 0.22s ease-out,
+            opacity 0.18s ease-out !important;
 
-          animation:
-            ql7-stp-pop .18s cubic-bezier(.22,1,.36,1),
+          animation: ql7-stp-pop 0.18s cubic-bezier(0.22, 1, 0.36, 1),
             ql7-stp-pulse 1.8s ease-in-out infinite;
         }
 
         .ql7-scroll-top .arrow {
           display: block;
           transform: translateY(-1px);
-          text-shadow:
-            0 0 8px rgba(0,229,255,.9),
-            0 0 18px rgba(0,229,255,.65);
+          text-shadow: 0 0 8px rgba(0, 229, 255, 0.9), 0 0 18px rgba(0, 229, 255, 0.65);
         }
 
-        /* вниз — та же стрелка, но повернута */
         .ql7-scroll-top .arrow.arrow-down {
           transform: rotate(180deg) translateY(1px);
         }
 
         .ql7-scroll-top:hover {
           transform: translateY(-2px) scale(1.06);
-          box-shadow:
-            0 0 0 1px rgba(56,189,248,.65) inset,
-            0 14px 30px rgba(0,0,0,1),
-            0 0 34px rgba(56,189,248,.9);
+          box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.65) inset, 0 14px 30px rgba(0, 0, 0, 1),
+            0 0 34px rgba(56, 189, 248, 0.9);
         }
 
         .ql7-scroll-top:active {
-          transform: translateY(1px) scale(.94);
-          box-shadow:
-            0 4px 14px rgba(0,0,0,.9),
-            0 0 18px rgba(0,229,255,.4);
+          transform: translateY(1px) scale(0.94);
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.9), 0 0 18px rgba(0, 229, 255, 0.4);
         }
 
         @keyframes ql7-stp-pop {
-          0%   { transform: scale(.4); opacity: 0; }
-          100% { transform: scale(1);  opacity: 1; }
+          0% {
+            transform: scale(0.4);
+            opacity: 0;
+          }
+          100% {
+            transform: scale(1);
+            opacity: 1;
+          }
         }
 
         @keyframes ql7-stp-pulse {
           0% {
-            box-shadow:
-              0 0 0 1px rgba(0,229,255,.32) inset,
-              0 8px 22px rgba(0,0,0,.9),
-              0 0 16px rgba(0,229,255,.42);
+            box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.32) inset, 0 8px 22px rgba(0, 0, 0, 0.9),
+              0 0 16px rgba(0, 229, 255, 0.42);
           }
           50% {
-            box-shadow:
-              0 0 0 1px rgba(148,233,255,.65) inset,
-              0 10px 26px rgba(0,0,0,1),
-              0 0 30px rgba(56,189,248,.95);
+            box-shadow: 0 0 0 1px rgba(148, 233, 255, 0.65) inset, 0 10px 26px rgba(0, 0, 0, 1),
+              0 0 30px rgba(56, 189, 248, 0.95);
           }
           100% {
-            box-shadow:
-              0 0 0 1px rgba(0,229,255,.32) inset,
-              0 8px 22px rgba(0,0,0,.9),
-              0 0 16px rgba(0,229,255,.42);
+            box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.32) inset, 0 8px 22px rgba(0, 0, 0, 0.9),
+              0 0 16px rgba(0, 229, 255, 0.42);
           }
         }
 
