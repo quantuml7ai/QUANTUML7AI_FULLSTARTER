@@ -601,7 +601,7 @@ export default function ScrollTopPulse() {
           </svg>
 
           {/* подпись ниже стрелки, чтобы не перекрывалась */}
-          <span className="auto">авто</span>
+          <span className="auto">auto</span>
         </span>
       </div>
 
