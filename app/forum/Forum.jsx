@@ -13522,8 +13522,13 @@ useEffect(() => {
 }, [sel?.id]);
  
 // ===== STICKY FEED (±1 карточка на жест) =====
+
 useEffect(() => {
   if (!isBrowser()) return;
+  // ⚠️ В треде темы (ветка сообщений) sticky-feed ломает тач-скролл:
+  // он гасит нативный скролл (touchAction:none + preventDefault), а "ручной" scrollTop
+  // может крутить не тот контейнер. Поэтому включаем sticky-feed только в режиме ленты.
+  if (sel?.id) return;
  
   // ✅ Новый sticky-feed: ТОЛЬКО TAЧ, строго 1 свайп = 1 карточка, без центрирования и без wheel.
   // Работает на iOS/Android/планшетах/тач-ноутах.
@@ -13753,14 +13758,18 @@ useEffect(() => {
 
   return () => {
     try { clearInterval(t); } catch {}
-    if (attachedEl) {
+    // ✅ Если эффект снимается при переходе (например, открыли тред),
+    // обязательно откатываем стили скролла, иначе touchAction может остаться 'none'.
+    try { restoreScrollStyles(stickyFeedTouchRef.current); } catch {}
+    try { stickyFeedTouchRef.current = { active: false, startY: 0, startX: 0 }; } catch {}
+     if (attachedEl) {
       try { attachedEl.removeEventListener('touchstart', onTouchStart, optsTouch); } catch {}
       try { attachedEl.removeEventListener('touchmove', onTouchMove, optsTouch); } catch {}
       try { attachedEl.removeEventListener('touchend', onTouchEnd, optsTouch); } catch {}
     }
     attachedEl = null;
   };
-}, []);
+}, [sel?.id]);
 
 
 // [SORT_STATE:AFTER]
