@@ -6160,8 +6160,8 @@ html[data-tma="1"] .inboxTabs{
 
 @media (max-width: 640px){
   :root{
-    --head-open-threshold-mobile: 500px;
-    --head-close-threshold-mobile: 400px;
+    --head-open-threshold-mobile: 400px;
+    --head-close-threshold-mobile:900px;
   }
 }
 
