@@ -174,13 +174,13 @@ export default function RootLayout({ children }) {
           </I18nProvider>
         </Providers>
        <QCoinDropFX />
-  {/* ❄ ПЕРЕДНИЙ СЛОЙ СНЕГА — лёгкая вуаль поверх всего */}
+  {/* ❄ ПЕРЕДНИЙ СЛОЙ СНЕГА — лёгкая вуаль поверх всего
   <SnowFX
     zIndex={9998}
     count={1}
     minSize={10}
     maxSize={80}
-  />
+  /> */}
         {/* ✅ Включаем аналитику Vercel */}
         <Analytics />
         <SpeedInsights />
