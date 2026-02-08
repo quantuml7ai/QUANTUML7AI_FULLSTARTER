@@ -6164,6 +6164,7 @@ html[data-tma="1"] .inboxTabs{
     --head-close-threshold-mobile: 900px;
   }
 }
+:root{ --feed-swipe-max-cards: 1; }
 
 `}</style>
 )
@@ -13525,10 +13526,9 @@ useEffect(() => {
 
 useEffect(() => {
   if (!isBrowser()) return;
-  // ⚠️ В треде темы (ветка сообщений) sticky-feed ломает тач-скролл:
-  // он гасит нативный скролл (touchAction:none + preventDefault), а "ручной" scrollTop
-  // может крутить не тот контейнер. Поэтому включаем sticky-feed только в режиме ленты.
-  if (sel?.id) return;
+  // ❗ Sticky-feed нужен ВЕЗДЕ где PostCard (видеофид + выбранная тема + список),
+  // но НЕ в личных сообщениях (DM), иначе ломает привычный чат-скролл.
+  if (dmMode) return;
  
   // ✅ Новый sticky-feed: ТОЛЬКО TAЧ, строго 1 свайп = 1 карточка, без центрирования и без wheel.
   // Работает на iOS/Android/планшетах/тач-ноутах.
@@ -13572,6 +13572,32 @@ useEffect(() => {
       return Array.from(nodes).filter(Boolean);
     } catch {}
     return [];
+  };
+  // Максимум карточек за один жест (по умолчанию 2; можешь поставить 1)
+  const getMaxCardsPerGesture = () => {
+    // можно переопределять через CSS: :root{ --feed-swipe-max-cards: 1; }
+    try {
+      const raw = window.getComputedStyle(document.documentElement).getPropertyValue('--feed-swipe-max-cards');
+      const v = String(raw || '').trim();
+      const n = parseInt(v, 10);
+      if (Number.isFinite(n) && n > 0) return Math.min(2, Math.max(1, n));
+    } catch {}
+    return 2;
+  };
+
+  // Оцениваем "шаг" в пикселях между карточками (top-to-top).
+  // Если не получилось — фолбэк.
+  const getStepPx = (cards, idx0) => {
+    try {
+      const a = cards[idx0];
+      const b = cards[Math.min(cards.length - 1, idx0 + 1)];
+      if (!a || !b || a === b) return 260;
+      const ra = a.getBoundingClientRect();
+      const rb = b.getBoundingClientRect();
+      const d = Math.abs(rb.top - ra.top);
+      return (Number.isFinite(d) && d > 10) ? d : 260;
+    } catch {}
+    return 260;
   };
 
   const readTopOffset = () => {
@@ -13644,6 +13670,10 @@ useEffect(() => {
       const cards = getCards(scrollEl);
       if (cards.length < 2) return; // если карточек нет — не вмешиваемся
 
+      const idx0 = findTopIndex(cards, scrollEl);
+      const stepPx = getStepPx(cards, idx0);
+      const maxCards = getMaxCardsPerGesture();      
+
       // iOS/Android: гасим overscroll/momentum на время жеста
       const prevWos = scrollEl.style.webkitOverflowScrolling;
       const prevOb = scrollEl.style.overscrollBehavior;
@@ -13659,6 +13689,10 @@ useEffect(() => {
         startX: t0.clientX,
         startTop: Number(scrollEl.scrollTop || 0),
         locked: false,
+        idx0,
+        stepPx,
+        maxCards,
+        lastDy: 0,        
         scrollEl,
         prevWos,
         prevOb,
@@ -13687,9 +13721,13 @@ useEffect(() => {
         st.locked = true;
         // полностью выключаем нативный скролл (иначе momentum улетит)
         try { e.preventDefault(); } catch {}
-        // ведём контейнер вручную, чтобы было ощущение "тащу ленту"
-        scrollEl.scrollTop = clampScrollTop(scrollEl, (st.startTop || 0) - dy);
-      }
+        // ✅ КЛЮЧ: ограничиваем движение максимум на 1–2 карточки за жест
+        const maxPx = (Number(st.stepPx) || 260) * (Number(st.maxCards) || 2);
+        const dyClamped = Math.max(-maxPx, Math.min(maxPx, dy));
+        st.lastDy = dyClamped;
+        // ведём контейнер вручную, но в пределах maxPx (никаких "улётов")
+        scrollEl.scrollTop = clampScrollTop(scrollEl, (st.startTop || 0) - dyClamped);
+       }
     } catch {}
   };
 
@@ -13713,7 +13751,8 @@ useEffect(() => {
 
       const changed = e?.changedTouches && e.changedTouches[0];
       if (!changed) return;
-      const dy = changed.clientY - (st.startY || 0);
+      // Берём уже клампнутый dy — именно он определяет, насколько можно пролететь
+      const dy = Number.isFinite(st.lastDy) ? st.lastDy : (changed.clientY - (st.startY || 0));
       const dx = changed.clientX - (st.startX || 0);
       if (Math.abs(dy) < 30 || Math.abs(dy) < Math.abs(dx)) {
         // слабый жест → просто снап на ближайшую текущую
@@ -13728,8 +13767,13 @@ useEffect(() => {
 
       const dir = dy < 0 ? 1 : -1; // swipe up => next
       const idx = findTopIndex(cards, scrollEl);
-      const next = Math.max(0, Math.min(cards.length - 1, idx + dir));
-      scrollCardToTop(scrollEl, cards[next]); // ✅ строго одна карточка
+      const stepPx = Number(st.stepPx) || 260;
+      const maxCards = Number(st.maxCards) || 2;
+      // ✅ сколько карточек пролистываем (1..maxCards)
+      const wantSteps = Math.max(1, Math.min(maxCards, Math.round(Math.abs(dy) / stepPx)));
+      const next = Math.max(0, Math.min(cards.length - 1, idx + dir * wantSteps));
+      // ✅ докручиваем к ТОРУ карточки (без центрирования)
+      scrollCardToTop(scrollEl, cards[next]);
     } catch {
       // на всякий случай восстановим стили даже при ошибке
       try { restoreScrollStyles(stickyFeedTouchRef.current); } catch {}
