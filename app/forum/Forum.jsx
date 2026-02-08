@@ -6164,15 +6164,11 @@ html[data-tma="1"] .inboxTabs{
     --head-close-threshold-mobile: 400px;
   }
 }
-:root{
-  --feed-touch-max-swipe-desktop: 1000px; /* если у тебя тач на больших экранах/планшетах */
-  --feed-touch-max-swipe-mobile:  1000px; /* основное */
-  --feed-touch-clamp-ms: 320px;           /* можно 240..420 */
-}
 
 `}</style>
 )
- 
+
+
 /* =========================================================
    constants (иконки/эмодзи)
 ========================================================= */
@@ -13596,119 +13592,89 @@ useEffect(() => {
     } catch {}
   };
 
-  // Настраиваемый лимит "пролёта" на тач-свайп (px).
-  // Идея: НЕ центрируем карточки, НЕ снапаем по 1 карточке.
-  // Просто ограничиваем инерцию/пролёт после быстрого свайпа до MAX_PX.
-  //
-  // CSS-переменные:
-  //  --feed-touch-max-swipe-desktop: 1000px;
-  //  --feed-touch-max-swipe-mobile:  1000px;
-  //  --feed-touch-clamp-ms: 320ms;   (как долго после touchend удерживать лимит)
-
-  const isMobileUiLocal = () => {
-    try {
-      const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
-      const narrow = (Number(window?.innerWidth || 0) || 0) <= 720;
-      return coarse || narrow;
-    } catch {}
-    return false;
-  };
-
-  const readCssPxLocal = (varName, fallback) => {
-    try {
-      const raw = window.getComputedStyle(document.documentElement).getPropertyValue(varName);
-      const v = String(raw || '').trim();
-      const n = parseFloat(v);
-      return Number.isFinite(n) ? n : fallback;
-    } catch {}
-    return fallback;
-  };
-
-  const getTouchMaxSwipePx = () => {
-    const mobile = isMobileUiLocal();
-    return readCssPxLocal(
-      mobile ? '--feed-touch-max-swipe-mobile' : '--feed-touch-max-swipe-desktop',
-      1000
-    );
-  };
-
-  const getTouchClampMs = () => {
-    return readCssPxLocal('--feed-touch-clamp-ms', 320);
-  };
-
-  // Колесо мыши: больше НЕ снапаем и НЕ центрируем.
-  // Оставляем нативный скролл (обработчик нужен только чтобы не ломать старый attach/remove).
   const onWheel = (e) => {
     try {
       if (!e) return;
       if (e.defaultPrevented) return;
       if (e.ctrlKey) return; // zoom
       if (isInIgnoredUi(e.target)) return;
-      // ничего не делаем: нативный wheel скролл
+
+      const scrollEl = getScrollEl?.();
+      if (!scrollEl) return;
+
+      const cards = getCards(scrollEl);
+      if (cards.length < 2) return;
+
+      const dy = Number(e.deltaY || 0);
+      if (!dy || Math.abs(dy) < 3) return;
+
+      const nowTs = Date.now();
+      if ((stickyFeedLockRef.current?.until || 0) > nowTs) {
+        e.preventDefault();
+        return;
+      }
+      stickyFeedLockRef.current = { until: nowTs + 420 };
+
+      e.preventDefault();
+      const dir = dy > 0 ? 1 : -1;
+      const idx = findClosestIndex(cards, scrollEl);
+      const next = Math.max(0, Math.min(cards.length - 1, idx + dir));
+      const node = cards[next] || null;
+      if (!node) return;
+      scrollCardToCenter(scrollEl, node, 'smooth');
     } catch {}
-  }; 
+  };
+
   const onTouchStart = (e) => {
     try {
       if (!e?.touches || e.touches.length !== 1) return;
       if (isInIgnoredUi(e.target)) return;
       const t = e.touches[0];
-      const scrollEl = getScrollEl?.();
-      const startTop = scrollEl ? (scrollEl.scrollTop || 0) : 0;
-      stickyFeedTouchRef.current = {
-        active: true,
-        startY: t.clientY,
-        startX: t.clientX,
-        startTop,
-        startTs: Date.now(),
-      };
+      stickyFeedTouchRef.current = { active: true, startY: t.clientY, startX: t.clientX };
     } catch {}
   };
-
-  // Ничего не блокируем: нативный тач-скролл остаётся.
   const onTouchMove = (e) => {
     try {
       if (!stickyFeedTouchRef.current?.active) return;
       if (!e?.touches || e.touches.length !== 1) return;
-      if (isInIgnoredUi(e.target)) return;
-      // intentionally empty (native scrolling)
+      const t = e.touches[0];
+      const dy = t.clientY - (stickyFeedTouchRef.current.startY || 0);
+      const dx = t.clientX - (stickyFeedTouchRef.current.startX || 0);
+      // вертикальный свайп -> блокируем инерцию (1 жест = 1 карточка)
+      if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) {
+        e.preventDefault();
+      }
     } catch {}
   };
-
   const onTouchEnd = (e) => {
     try {
       if (!stickyFeedTouchRef.current?.active) return;
       stickyFeedTouchRef.current.active = false;
-      if (isInIgnoredUi(e.target)) return; 
+      if (isInIgnoredUi(e.target)) return;
+
+      const changed = e?.changedTouches && e.changedTouches[0];
+      if (!changed) return;
+      const dy = changed.clientY - (stickyFeedTouchRef.current.startY || 0);
+      const dx = changed.clientX - (stickyFeedTouchRef.current.startX || 0);
+      if (Math.abs(dy) < 40 || Math.abs(dy) < Math.abs(dx)) return;
+
+      const nowTs = Date.now();
+      if ((stickyFeedLockRef.current?.until || 0) > nowTs) return;
+      stickyFeedLockRef.current = { until: nowTs + 480 };
 
       const scrollEl = getScrollEl?.();
       if (!scrollEl) return;
-
-      const startTop = Number(stickyFeedTouchRef.current.startTop || 0);
-      const maxPx = Math.max(0, Number(getTouchMaxSwipePx() || 0));
-      if (!maxPx) return;
-
-      const clampMs = Math.max(40, Number(getTouchClampMs() || 0));
-      const startedAt = Date.now();
-
-      // Удерживаем лимит короткое время после touchend,
-      // чтобы отрезать инерцию (iOS/Android momentum) и не улетать на 10–20 карточек.
-      const tick = () => {
-        try {
-          const now = Date.now();
-          const cur = Number(scrollEl.scrollTop || 0);
-          const delta = cur - startTop;
-          if (Math.abs(delta) > maxPx) {
-            const target = startTop + (delta > 0 ? maxPx : -maxPx);
-            scrollEl.scrollTop = Math.max(0, Math.min(target, (scrollEl.scrollHeight || 0) - (scrollEl.clientHeight || 0)));
-          }
-          if (now - startedAt < clampMs) {
-            requestAnimationFrame(tick);
-          }
-        } catch {}
-      };
-      try { requestAnimationFrame(tick); } catch {}
+      const cards = getCards(scrollEl);
+      if (cards.length < 2) return;
+      const dir = dy < 0 ? 1 : -1; // swipe up => next
+      const idx = findClosestIndex(cards, scrollEl);
+      const next = Math.max(0, Math.min(cards.length - 1, idx + dir));
+      const node = cards[next] || null;
+      if (!node) return;
+      scrollCardToCenter(scrollEl, node, 'smooth');
     } catch {}
-  }; 
+  };
+
   const attach = () => {
     const scrollEl = getScrollEl?.();
     if (!scrollEl) return;
