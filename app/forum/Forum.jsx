@@ -4840,6 +4840,18 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   white-space:nowrap; flex-wrap:nowrap;
   padding:6px 0 4px;
 }
+/* Отступ контента Inbox от контролов (заголовок/табы).
+   Настраивается через CSS-переменную:
+   --inbox-content-top-offset: 8px; (по умолчанию как было mt-2)
+*/
+:root{
+  --inbox-content-top-offset: 100px; /* сколько нужно */
+}
+:root{ --inbox-dm-list-start-desktop: 980px; }
+@media (max-width: 640px){
+  :root{ --inbox-dm-list-start-mobile: 620px; }
+}
+
 .inboxBody{ padding:0 6px 6px; }
 /* TMA: отдельная ручная докрутка липкой панели */
 html[data-tma="1"] .inboxHeader,
@@ -7411,6 +7423,7 @@ function UserInfoPopover({
           className="userInfoDmBtn"
           onClick={() => {
             try {
+              window.dispatchEvent(new CustomEvent('forum:head-hide-once'));
               window.dispatchEvent(new CustomEvent('inbox:open-dm', { detail: { userId: rawUserId } }));
             } catch {}
             onClose?.();
@@ -13632,7 +13645,49 @@ useEffect(() => {
     headAutoOpenRef.current = false;
     try { setHeadPinned(false); } catch {}
     try { setHeadHidden(true); } catch {}
-  }
+
+    // ✅ Всегда открываем список диалогов с начала, но НЕ обязаны ставить "0".
+    // Делаем настраиваемые стартовые позиции (px) отдельно для desktop и mobile,
+    // чтобы ты мог подобрать так, чтобы табы/верхняя панель НЕ перекрывали первый диалог.
+    //
+    // CSS-переменные:
+    //  --inbox-dm-list-start-desktop: 0px;
+    //  --inbox-dm-list-start-mobile:  0px;
+    try {
+      const isMobile = typeof window !== 'undefined'
+        ? window.matchMedia('(max-width: 768px)').matches
+        : false;
+
+      const cssVar = isMobile
+        ? '--inbox-dm-list-start-mobile'
+        : '--inbox-dm-list-start-desktop';
+
+      const raw = (typeof window !== 'undefined' && window.getComputedStyle)
+        ? window.getComputedStyle(document.documentElement).getPropertyValue(cssVar)
+        : '';
+
+      const startPx = (() => {
+        const v = String(raw || '').trim();
+        const n = parseFloat(v);
+        return Number.isFinite(n) ? n : 0;
+      })();
+
+      const scrollEl =
+        bodyRef.current ||
+        (typeof document !== 'undefined'
+          ? document.querySelector('[data-forum-scroll="1"]')
+          : null);
+
+      if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {
+        scrollEl.scrollTop = startPx;
+      } else if (typeof window !== 'undefined') {
+        window.scrollTo(0, startPx);
+      }
+    } catch {}
+
+    // Подравниваем старт под табами (учёт sticky/табов + твоего --inbox-content-top-offset)
+    setTimeout(() => { try { alignInboxStartUnderTabs(); } catch {} }, 0);
+   }
   dmListEnterRef.current = isDmList;
 }, [inboxOpen, inboxTab, dmWithUserId]);
 const [dmDialogs, setDmDialogs] = useState([]);
@@ -14390,6 +14445,13 @@ useEffect(() => {
 
 useEffect(() => {
   if (!isBrowser()) return;
+  const onHeadHideOnce = () => {
+    // Точно как в контролах шапки по нажатию на конверт:
+    // одноразово закрываем шапку перед открытием Inbox/DM
+    try { headAutoOpenRef.current = false; } catch {}
+    try { setHeadPinned(false); } catch {}
+    try { setHeadHidden(true); } catch {}
+  };  
   const onOpenDm = (e) => {
     const rawUid = String(e?.detail?.userId || '').trim();
     const uid = String(resolveProfileAccountId(rawUid) || rawUid || '').trim();
@@ -14419,8 +14481,12 @@ useEffect(() => {
     try { setDmWithUserId(uid); } catch {}
     setTimeout(() => { try { alignInboxStartUnderTabs(); } catch {} }, 0);
   };
+  window.addEventListener('forum:head-hide-once', onHeadHideOnce);
   window.addEventListener('inbox:open-dm', onOpenDm);
-  return () => window.removeEventListener('inbox:open-dm', onOpenDm);
+  return () => {
+    window.removeEventListener('forum:head-hide-once', onHeadHideOnce);
+    window.removeEventListener('inbox:open-dm', onOpenDm);
+  };  
 }, [openOnly, closeUserInfoPopover, closeReportPopover, pushNavState]);
 
 const myPublishedPosts = useMemo(() => {
@@ -19137,7 +19203,11 @@ const openThreadHere = (clickP) => {
       </div>
       <div className="inboxTabsRail" aria-hidden="true" />
     </div>
-    <div className="grid gap-2 mt-2 inboxBody" suppressHydrationWarning>
+    <div
+      className="grid gap-2 inboxBody"
+      style={{ marginTop: 'var(--inbox-content-top-offset, 8px)' }}
+      suppressHydrationWarning
+    >
       {inboxTab === 'replies' && (
         <>
 {debugAdsSlots(
