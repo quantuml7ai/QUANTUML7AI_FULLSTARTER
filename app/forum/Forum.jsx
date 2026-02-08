@@ -13546,6 +13546,8 @@ useEffect(() => {
       if (!el?.closest) return false;
       if (el.closest('.searchDrop')) return true;
       if (el.closest('.emojiPanel')) return true;
+      // ✅ если зона/ветка помечена как sticky-feed-off — вообще не вмешиваемся
+      if (el.closest('[data-sticky-feed-off="1"]')) return true;      
       // не ломаем поля ввода/кнопки/ползунки
       if (el.closest('input, textarea, select, button, a')) return true;
       if (el.closest('input[type="range"]')) return true;
@@ -13734,6 +13736,24 @@ useEffect(() => {
   const attach = () => {
     const scrollEl = getScrollEl();
     if (!scrollEl) return;
+
+    // ✅ В выбранной теме body помечен data-sticky-feed-off="1"
+    // → sticky-feed НЕ должен вообще вешать touch-перехват, иначе на мобиле ломается скролл.
+    try {
+      if (scrollEl.closest?.('[data-sticky-feed-off="1"]')) {
+        // если ранее уже цеплялись — снять и восстановить стили
+        if (attachedEl) {
+          try { attachedEl.removeEventListener('touchstart', onTouchStart, optsTouch); } catch {}
+          try { attachedEl.removeEventListener('touchmove', onTouchMove, optsTouch); } catch {}
+          try { attachedEl.removeEventListener('touchend', onTouchEnd, optsTouch); } catch {}
+        }
+        attachedEl = null;
+        try { restoreScrollStyles(stickyFeedTouchRef.current); } catch {}
+        try { stickyFeedTouchRef.current = null; } catch {}
+        return;
+      }
+    } catch {}
+    
     if (attachedEl === scrollEl) return;
     if (attachedEl) {
       try { attachedEl.removeEventListener('touchstart', onTouchStart, optsTouch); } catch {}
@@ -13759,6 +13779,9 @@ useEffect(() => {
       try { attachedEl.removeEventListener('touchend', onTouchEnd, optsTouch); } catch {}
     }
     attachedEl = null;
+    // ✅ страховка: не оставляем touchAction/overscroll/webkitOverflowScrolling в "битом" состоянии
+    try { restoreScrollStyles(stickyFeedTouchRef.current); } catch {}
+    try { stickyFeedTouchRef.current = null; } catch {}    
   };
 }, []);
 
@@ -15291,19 +15314,6 @@ useEffect(() => {
  const videoRecRef    = useRef(null);   // MediaRecorder
  const videoChunksRef = useRef([]);     // BlobParts
 const [pendingVideo, setPendingVideo] = useState(null);
-
-  // ✅ В выбранной теме (threadRoot) видеооверлей не должен жить вообще:
-  // иначе он может оставить невидимую подложку и page-lock, что "убивает" клики/скролл.
-  React.useEffect(() => {
-    if (!threadRoot) return;
-    if (!videoOpen && videoState === 'idle') return;
-    try { setVideoOpen(false); } catch {}
-    try { setVideoState('idle'); } catch {}
-    try { setPendingVideo(null); } catch {}
-    try { setOverlayMediaUrl(null); } catch {}
-    // overlayMediaKind можешь не трогать, но чистка не повредит:
-    try { setOverlayMediaKind('video'); } catch {}
-  }, [threadRoot]);
   // =========================================================
   // Composer media progress UI (bar над контролами)
   // показываем от выбора файла/окончания записи до send/reset
@@ -18411,9 +18421,9 @@ function pickAdUrlForSlot(slotKey, slotKind) {
       />
        {/* Overlay камеры/плеера */}
 <VideoOverlay
-  open={videoOpen && !threadRoot}
+  open={videoOpen}
   state={
-    !(videoOpen && !threadRoot)
+    !videoOpen
       ? 'hidden'
       : (videoState === 'recording'
           ? 'recording'
@@ -20735,7 +20745,8 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
 
 <div
   className="body"
-  data-forum-scroll="1" 
+  data-forum-scroll="1"
+  data-sticky-feed-off="1"
   ref={bodyRef}
   style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
 >
