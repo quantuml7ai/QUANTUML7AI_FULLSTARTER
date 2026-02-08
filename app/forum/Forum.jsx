@@ -6164,7 +6164,7 @@ html[data-tma="1"] .inboxTabs{
     --head-close-threshold-mobile: 900px;
   }
 }
- 
+
 `}</style>
 )
 
@@ -13521,22 +13521,23 @@ useEffect(() => {
   };
 }, [sel?.id]);
  
+
 // ===== STICKY FEED (±1 карточка на жест) =====
 
 useEffect(() => {
   if (!isBrowser()) return;
-  // ✅ Sticky-feed должен работать ВЕЗДЕ, где рендерятся PostCard (data-feed-card="1"):
-  // и в видеофиде, и в выбранной теме, и в списках.
-  // Ключевое: не давать нативному momentum/iOS “катиться”, поэтому гасим scroll на уровне document во время жеста.
-  
-  // ✅ Новый sticky-feed: ТОЛЬКО TAЧ, строго 1 свайп = 1 карточка, без центрирования и без wheel.
-  // Работает на iOS/Android/планшетах/тач-ноутах.
+
+  // ✅ Sticky-feed: для ТАЧ-скринов, строго 1 свайп = 1 карточка (макс 2 если включишь).
+  // Работает в видеофиде и в выбранной теме, везде где есть PostCard: [data-feed-card="1"].
+  // Ключ: во время жеста НЕ даём нативному скроллу/инерции стартовать (особенно iOS),
+  // поэтому полностью блокируем scroll на touchmove и пролистываем карточку только на touchend.
 
   let attachedEl = null;
-  const optsTouch = { passive: false, capture: true }; // iOS: только так preventDefault реально гасит momentum
-
+  const optsTouch = { passive: false, capture: true }; // iOS: только так preventDefault реально работает
   const optsDoc = { passive: false, capture: true };
-  const MAX_CARDS_PER_GESTURE = 2; // <-- хочешь строго 1 карточку? поставь 1
+
+  const MAX_CARDS_PER_GESTURE = 1; // ← хочешь максимум 2? поставь 2
+  const LOCK_PX = 6;
  
   const isTouchDevice = () => {
     try {
@@ -13581,19 +13582,7 @@ useEffect(() => {
     } catch {}
     return [];
   };
-  const getStepPx = (cards, idx0) => {
-    try {
-      const a = cards[idx0];
-      const b = cards[Math.min(cards.length - 1, idx0 + 1)];
-      if (!a || !b || a === b) return 260;
-      const ra = a.getBoundingClientRect();
-      const rb = b.getBoundingClientRect();
-      const d = Math.abs(rb.top - ra.top);
-      return (Number.isFinite(d) && d > 10) ? d : 260;
-    } catch {}
-    return 260;
-  };
- 
+
   const readTopOffset = () => {
     // если сверху есть sticky панели — чтобы карточка не уходила под них
     try {
@@ -13650,9 +13639,21 @@ useEffect(() => {
       el.style.overscrollBehavior = st.prevOb || '';
       el.style.touchAction = st.prevTa || '';
     } catch {}
+  }; 
+ 
+  const cancelMomentum = (scrollEl) => {
+    // Жёстко сбрасываем инерцию, если браузер успел её разогнать
+    try {
+      if (!scrollEl) return;
+      const prev = scrollEl.style.webkitOverflowScrolling;
+      scrollEl.style.webkitOverflowScrolling = 'auto';
+      // форс-рефлоу
+      void scrollEl.offsetHeight;
+      scrollEl.style.webkitOverflowScrolling = prev || 'touch';
+    } catch {}
   };
-  const killDocScroll = (e) => {
-    // Гасим нативный scroll/momentum страницы, пока мы ведём ленту вручную
+
+  const killDocScroll = (e) => { 
     try {
       const st = stickyFeedTouchRef.current;
       if (!st?.active || !st?.locked) return;
@@ -13665,6 +13666,10 @@ useEffect(() => {
       if (!isTouchDevice()) return;
       if (!e?.touches || e.touches.length !== 1) return;
       if (isInIgnoredUi(e.target)) return;
+      // Включаемся СТРОГО когда старт по PostCard (чтобы не ломать другие зоны)
+      try {
+        if (!e.target?.closest?.('[data-feed-card="1"]')) return;
+      } catch {}
 
       const scrollEl = getScrollEl();
       if (!scrollEl) return;
@@ -13672,11 +13677,6 @@ useEffect(() => {
       const cards = getCards(scrollEl);
       if (cards.length < 2) return; // если карточек нет — не вмешиваемся
 
-      // Включаемся ТОЛЬКО если тач начался по PostCard (чётко по требованию)
-      try {
-        if (!e.target?.closest?.('[data-feed-card="1"]')) return;
-      } catch {}
-  
       // iOS/Android: гасим overscroll/momentum на время жеста
       const prevWos = scrollEl.style.webkitOverflowScrolling;
       const prevOb = scrollEl.style.overscrollBehavior;
@@ -13684,20 +13684,16 @@ useEffect(() => {
       scrollEl.style.webkitOverflowScrolling = 'auto';
       scrollEl.style.overscrollBehavior = 'contain';
       scrollEl.style.touchAction = 'none';
-      const idx0 = findTopIndex(cards, scrollEl);
-      const stepPx = getStepPx(cards, idx0);
+
       const t0 = e.touches[0];
+      const idx0 = findTopIndex(cards, scrollEl);
       stickyFeedTouchRef.current = {
         active: true,
-        startY: t0.clientY,        
+        locked: false,
+        docKillOn: false,
+        startY: t0.clientY,       
         startX: t0.clientX,
-        startTop: Number(scrollEl.scrollTop || 0),
-        locked: false, 
         idx0,
-        stepPx,
-        maxCards: MAX_CARDS_PER_GESTURE,
-        lastDy: 0,
-        docKillerOn: false,        
         scrollEl,
         prevWos,
         prevOb,
@@ -13721,23 +13717,24 @@ useEffect(() => {
       const dy = t.clientY - (st.startY || 0);
       const dx = t.clientX - (st.startX || 0);
 
-      // Берём только вертикальный жест
-      if (Math.abs(dy) > 6 && Math.abs(dy) > Math.abs(dx)) {
-        st.locked = true;
-        // 1) полностью гасим нативный scroll, И НА document тоже (иначе iOS “катит страницу”)
-        try { e.preventDefault(); } catch {}
-        if (!st.docKillerOn) {
-          st.docKillerOn = true;
-          try { document.addEventListener('touchmove', killDocScroll, optsDoc); } catch {}
-        }
-        // 2) КЛАМП: максимум 1–2 карточки за жест (и на move, чтобы не было “улёта”)
-        const stepPx = Number(st.stepPx) || 260;
-        const maxCards = Number(st.maxCards) || 2;
-        const maxPx = stepPx * maxCards;
-        const dyClamped = Math.max(-maxPx, Math.min(maxPx, dy));
-        st.lastDy = dyClamped;
-        scrollEl.scrollTop = clampScrollTop(scrollEl, (st.startTop || 0) - dyClamped);
-       }
+      // Лочим вертикальный жест
+      if (!st.locked) {
+        if (Math.abs(dy) > LOCK_PX && Math.abs(dy) > Math.abs(dx)) st.locked = true;
+        else return;
+      }
+
+      // КЛЮЧ: полностью запрещаем нативный скролл (иначе будет "космос" от инерции)
+      try { e.preventDefault(); } catch {}
+
+      // Доп-страховка: блок на document, если тач-цепочка уходит выше контейнера
+      if (!st.docKillOn) {
+        st.docKillOn = true;
+        try { document.addEventListener('touchmove', killDocScroll, optsDoc); } catch {}
+      }
+
+      // НИКАКОГО scrollTop здесь — мы не даём ленте "катиться" вообще.
+      // Просто запоминаем направление/дистанцию.
+      st.lastDy = dy;
     } catch {}
   };
 
@@ -13748,13 +13745,16 @@ useEffect(() => {
       st.active = false;
 
       const scrollEl = st.scrollEl;
-      // восстановить стили нужно ВСЕГДА
-      restoreScrollStyles(st);
-      // снять document-killer
-      if (st.docKillerOn) {
-        st.docKillerOn = false;
+
+      // Снимаем document-killer
+      if (st.docKillOn) {
+        st.docKillOn = false;
         try { document.removeEventListener('touchmove', killDocScroll, optsDoc); } catch {}
       }
+      
+      // восстановить стили нужно ВСЕГДА
+      restoreScrollStyles(st);
+
       if (!isTouchDevice()) return;
       if (isInIgnoredUi(e.target)) return;
       if (!st.locked) return; // не вертикальный свайп — не мешаем
@@ -13764,33 +13764,24 @@ useEffect(() => {
       if (cards.length < 2) return;
 
       const changed = e?.changedTouches && e.changedTouches[0];
-      if (!changed) return;
-      // ✅ используем уже клампнутую дистанцию (иначе быстрый свайп снова даст “далеко”)
+      if (!changed) return; 
       const dy = Number.isFinite(st.lastDy) ? st.lastDy : (changed.clientY - (st.startY || 0));
-       const dx = changed.clientX - (st.startX || 0);
+      const dx = changed.clientX - (st.startX || 0);
       if (Math.abs(dy) < 30 || Math.abs(dy) < Math.abs(dx)) {
         // слабый жест → просто снап на ближайшую текущую
-        const idx0 = findTopIndex(cards, scrollEl);
-        scrollCardToTop(scrollEl, cards[idx0]);
+       scrollCardToTop(scrollEl, cards[st.idx0]);
+        cancelMomentum(scrollEl);
         return;
       }
-
-      const nowTs = Date.now();
-      if ((stickyFeedLockRef.current?.until || 0) > nowTs) return;
-      stickyFeedLockRef.current = { until: nowTs + 320 };
-
-      const dir = dy < 0 ? 1 : -1; // swipe up => next
-      const idx = findTopIndex(cards, scrollEl);
-      const stepPx = Number(st.stepPx) || 260;
-      const maxCards = Number(st.maxCards) || 2;
-      // 1..maxCards карточек, но никогда не больше maxCards
-      const wantSteps = Math.max(1, Math.min(maxCards, Math.round(Math.abs(dy) / stepPx)));
-      const next = Math.max(0, Math.min(cards.length - 1, idx + dir * wantSteps));
-      scrollCardToTop(scrollEl, cards[next]); // ✅ 1–2 карточки максимум, без центрирования
-     } catch {
+      const dir = dy < 0 ? 1 : -1; // swipe up => next 
+      const steps = Math.max(1, Math.min(MAX_CARDS_PER_GESTURE, 2));
+      const next = Math.max(0, Math.min(cards.length - 1, st.idx0 + dir * steps));
+      scrollCardToTop(scrollEl, cards[next]); // ✅ строго 1 карточка (или 2 если включишь)
+      cancelMomentum(scrollEl);
+    } catch {
       // на всякий случай восстановим стили даже при ошибке
       try { restoreScrollStyles(stickyFeedTouchRef.current); } catch {}
-      try { document.removeEventListener('touchmove', killDocScroll, optsDoc); } catch {}
+      try { document.removeEventListener('touchmove', killDocScroll, optsDoc); } catch {} 
     }
   };
   const onTouchCancel = (e) => {
@@ -13798,11 +13789,12 @@ useEffect(() => {
       const st = stickyFeedTouchRef.current;
       if (!st?.active) return;
       st.active = false;
-      restoreScrollStyles(st);
-      if (st.docKillerOn) {
-        st.docKillerOn = false;
+      if (st.docKillOn) {
+        st.docKillOn = false;
         try { document.removeEventListener('touchmove', killDocScroll, optsDoc); } catch {}
       }
+      restoreScrollStyles(st);
+      cancelMomentum(st.scrollEl);
     } catch {}
   };
 
@@ -13815,13 +13807,13 @@ useEffect(() => {
       try { attachedEl.removeEventListener('touchmove', onTouchMove, optsTouch); } catch {}
       try { attachedEl.removeEventListener('touchend', onTouchEnd, optsTouch); } catch {}
       try { attachedEl.removeEventListener('touchcancel', onTouchCancel, optsTouch); } catch {}
-    }
+     }
     attachedEl = scrollEl;
     try { scrollEl.addEventListener('touchstart', onTouchStart, optsTouch); } catch {}
     try { scrollEl.addEventListener('touchmove', onTouchMove, optsTouch); } catch {}
     try { scrollEl.addEventListener('touchend', onTouchEnd, optsTouch); } catch {}
     try { scrollEl.addEventListener('touchcancel', onTouchCancel, optsTouch); } catch {}
-  };
+   };
 
   attach();
 
@@ -13829,18 +13821,16 @@ useEffect(() => {
   const t = setInterval(attach, 700);
 
   return () => {
-    try { clearInterval(t); } catch {}
-    // ✅ Если эффект снимается при переходе (например, открыли тред),
-    // обязательно откатываем стили скролла, иначе touchAction может остаться 'none'.
-    try { restoreScrollStyles(stickyFeedTouchRef.current); } catch {}
+    try { clearInterval(t); } catch {} 
     try { document.removeEventListener('touchmove', killDocScroll, optsDoc); } catch {}
+    try { restoreScrollStyles(stickyFeedTouchRef.current); } catch {} 
     try { stickyFeedTouchRef.current = { active: false, startY: 0, startX: 0 }; } catch {}
      if (attachedEl) {
       try { attachedEl.removeEventListener('touchstart', onTouchStart, optsTouch); } catch {}
       try { attachedEl.removeEventListener('touchmove', onTouchMove, optsTouch); } catch {}
       try { attachedEl.removeEventListener('touchend', onTouchEnd, optsTouch); } catch {}
       try { attachedEl.removeEventListener('touchcancel', onTouchCancel, optsTouch); } catch {}
-    }
+     }
     attachedEl = null;
   };
 }, [sel?.id]);
@@ -20806,7 +20796,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
       <div
   className="body"
   data-forum-scroll="1"
-
+  data-sticky-feed-off="1"
   ref={bodyRef}
   style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
 >
