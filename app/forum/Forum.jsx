@@ -20735,8 +20735,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
 
 <div
   className="body"
-  data-forum-scroll="1"
-
+  data-forum-scroll="1" 
   ref={bodyRef}
   style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
 >
