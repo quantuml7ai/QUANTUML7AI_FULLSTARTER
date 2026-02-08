@@ -17,18 +17,6 @@ import {
   AdsCoordinator,
 } from './ForumAds';
 
-// =========================================================
-// FEED SNAP (TikTok/YouTube-style)
-// 1 wheel/touch fling => ровно 1 карточка, карточка центруется.
-// Работает для лент, где элементы размечены: data-feed-card="1"
-// =========================================================
-const FORUM_FEED_SNAP_LOCK_MS = 420;
-const FORUM_FEED_TOUCH_MIN_PX = 36;
-
-// HEAD AUTO-OPEN smoothing (anti-flicker)
-const FORUM_HEAD_HYSTERESIS_PX = 24;   // зазор между порогами открытия/закрытия
-const FORUM_HEAD_SCROLL_EPS_PX = 2;    // игнор микроскролла 1-2px (чтобы не "мельтешило")
-  
  /* =========================================================
     Scroll Focus Lock for variable-height ad/media blocks
     - НЕ фиксируем высоту
@@ -1969,7 +1957,7 @@ font-size: 12px;
   padding:12px 14px;
   border-bottom:1px solid rgba(255,255,255,.1);
   /* collapse animation */
-  transition: transform 360ms cubic-bezier(.2,.8,.2,1), opacity 260ms ease;
+  transition: transform 220ms ease, opacity 160ms ease;
   will-change: transform;
   transform: translateY(0);
   opacity: 1;
@@ -13329,29 +13317,12 @@ const delPostOwn = async (post) => {
 const [sel, setSel] = useState(null);
 // [HEAD_COLLAPSE:STATE]
 const bodyRef = useRef(null);
-
-// Единая точка получения scroll container для всего файла.
-// Важно: без этого getScrollEl?.() ломает эффект (ReferenceError), т.к. переменная не была объявлена.
-const getScrollEl = () => {
-  try {
-    return (
-      bodyRef.current ||
-      (typeof document !== 'undefined'
-        ? (document.querySelector('[data-forum-scroll="1"]') ||
-           document.querySelector('.forum_root .grid2 > section > .body'))
-        : null)
-    );
-  } catch {}
-  return null;
-};
-
 const [headHidden, setHeadHidden] = useState(false);
 const [headPinned, setHeadPinned] = useState(false);
 const headHiddenRef = useRef(false);
 const headPinnedRef = useRef(false);
 const headAutoOpenRef = useRef(false);
 const videoFeedOpenRef = useRef(false);
-const headAnimLockRef = useRef({ until: 0 }); // блокируем дерганье шапки на время снапа/анимаций
 const stickyFeedLockRef = useRef({ until: 0 });
 const stickyFeedTouchRef = useRef({ active: false, startY: 0, startX: 0 });
 useEffect(() => { headHiddenRef.current = headHidden }, [headHidden]);
@@ -13394,10 +13365,8 @@ useEffect(() => {
       raf = 0;
       const st = getScrollTop();
       const delta = st - lastTop;
-      const scrollingDown = delta > FORUM_HEAD_SCROLL_EPS_PX;
-      const scrollingUp = delta < -FORUM_HEAD_SCROLL_EPS_PX;
-      const openAt = getTopEps();
-      const closeAt = openAt + FORUM_HEAD_HYSTERESIS_PX;
+      const scrollingDown = delta > 0;
+      const atTop = st <= getTopEps();
 
       // если шапка закреплена вручную — ничего не трогаем
       if (headPinnedRef.current) {
@@ -13406,31 +13375,17 @@ useEffect(() => {
         return;
       }
 
-      // во время снапа карточек / плавного скролла — НЕ дергаем шапку
-      const nowTs = Date.now();
-      if ((headAnimLockRef.current?.until || 0) > nowTs) {
-        lastTop = st;
-        return;
-      }
       // Как только упираемся в верх — сразу открываем шапку
-      if (!videoFeedOpenRef.current && st <= openAt) {
+      if (!videoFeedOpenRef.current && atTop) {
         if (headHiddenRef.current) {
           setHeadPinned(false);
           setHeadHidden(false);
         }
         headAutoOpenRef.current = false;
-      } else {
-        // 1) Скрываем шапку только если ушли НИЖЕ closeAt и реально скроллим вниз
-        if (!headHiddenRef.current && scrollingDown && st > closeAt) {
-          setHeadPinned(false);
-          setHeadHidden(true);
-        }
-        // 2) Авто-открываем при скролле вверх, когда вернулись в диапазон closeAt
-        //    (это гасит "мельтешение" на одной и той же границе)
-        if (headHiddenRef.current && scrollingUp && st <= closeAt) {
-          setHeadPinned(false);
-          setHeadHidden(false);
-        }
+      } else if (!headHiddenRef.current && scrollingDown) {
+        // Первый же скролл вниз — скрываем, чтобы карточки ушли под самый верх
+        setHeadPinned(false);
+        setHeadHidden(true);
       }
 
       lastTop = st;
@@ -13461,73 +13416,6 @@ useEffect(() => {
   let attachedEl = null;
   const optsWheel = { passive: false };
   const optsTouch = { passive: false };
-  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-
-  // Верхняя зона (top-bar / auto-head): здесь snap НЕ должен вмешиваться,
-  // иначе preventDefault ломает автоматику открытия/закрытия шапки.
-  const getHeadZonePx = () => {
-    try {
-      const TOP_EPS_DESKTOP = 870;
-      const TOP_EPS_MOBILE = 550;
-      const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
-      const narrow = (Number(window?.innerWidth || 0) || 0) <= 720;
-      const openAt = (coarse || narrow) ? TOP_EPS_MOBILE : TOP_EPS_DESKTOP;
-      return openAt + FORUM_HEAD_HYSTERESIS_PX;
-    } catch {}
-    return 900;
-  };
-  const getScrollTopFromTarget = (tgt) => {
-    try { return (tgt?.kind === 'el') ? (tgt.el.scrollTop || 0) : (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0); } catch {}
-    return 0;
-  };
-
-  // Выбираем реальный скролл-контейнер:
-  // - если внутренний body действительно скроллится -> используем его
-  // - иначе (layout без фикс-высоты) скролл может быть на window
-  const getScrollTarget = () => {
-    try {
-      const el =
-        bodyRef.current ||
-        document.querySelector('[data-forum-scroll="1"]') ||
-        document.querySelector('.forum_root .grid2 > section > .body') ||
-        null;
-
-      if (el && (el.scrollHeight > el.clientHeight + 1)) return { kind: 'el', el };
-
-      const se = document.scrollingElement || document.documentElement || null;
-      if (se && (se.scrollHeight > window.innerHeight + 1)) return { kind: 'win', el: window, se };
-    } catch {}
-    return null;
-  };
-
-  // Если колесо/свайп сделан внутри вложенного скроллящегося блока (например, список сообщений),
-  // мы НЕ перехватываем — иначе preventDefault убьёт нативный скролл.
-  const findNestedScrollable = (target, stopEl) => {
-    try {
-      let el = target && target.nodeType === 1 ? target : null;
-      for (let i = 0; el && i < 25; i++) {
-        if (el === stopEl) return null;
-        const st = window.getComputedStyle(el);
-        const oy = st?.overflowY;
-        if (oy === 'auto' || oy === 'scroll') {
-          if ((el.scrollHeight - el.clientHeight) > 2) return el;
-        }
-        el = el.parentElement;
-      }
-    } catch {}
-    return null;
-  };
-
-  const scrollToY = (tgt, top, behavior = 'smooth') => {
-    try {
-      if (!tgt) return;
-      if (tgt.kind === 'el') {
-        tgt.el.scrollTo?.({ top, behavior });
-      } else if (tgt.kind === 'win') {
-        window.scrollTo?.({ top, behavior });
-      }
-    } catch {}
-  };
 
   const isInIgnoredUi = (target) => {
     try {
@@ -13542,20 +13430,18 @@ useEffect(() => {
     return false;
   };
 
-  const getCards = (tgt) => {
+  const getCards = (scrollEl) => {
     try {
-      const root = (tgt?.kind === 'el' && tgt.el) ? tgt.el : document;
-      const nodes = root?.querySelectorAll?.('[data-feed-card="1"]') || [];
+      const nodes = scrollEl?.querySelectorAll?.('[data-feed-card="1"]') || [];
       return Array.from(nodes).filter(Boolean);
     } catch {}
     return [];
   };
 
-  const findClosestIndex = (cards, tgt) => {
-    if (!cards.length || !tgt) return 0;
-    const centerY = (tgt.kind === 'el')
-      ? (() => { const r = tgt.el.getBoundingClientRect(); return r.top + (r.height / 2); })()
-      : (window.innerHeight / 2);
+  const findClosestIndex = (cards, scrollEl) => {
+    if (!cards.length || !scrollEl) return 0;
+    const contRect = scrollEl.getBoundingClientRect();
+    const centerY = contRect.top + (contRect.height / 2);
     let best = 0;
     let bestDist = Infinity;
     for (let i = 0; i < cards.length; i++) {
@@ -13567,59 +13453,30 @@ useEffect(() => {
     return best;
   };
 
-  const scrollCardToCenter = (tgt, card, behavior = 'smooth') => {
-    if (!tgt || !card) return;
+  const scrollCardToCenter = (scrollEl, card, behavior = 'smooth') => {
+    if (!scrollEl || !card) return;
     try {
-      if (tgt.kind === 'el') {
-        const scrollEl = tgt.el;
-        const contRect = scrollEl.getBoundingClientRect();
-        const r = card.getBoundingClientRect();        
-         const elCenterInView = (r.top - contRect.top) + (r.height / 2);
-        const desired = contRect.height / 2;
-        const delta = elCenterInView - desired;
-        if (!Number.isFinite(delta)) return;
-
-        const maxTop = Math.max(0, (scrollEl.scrollHeight || 0) - (scrollEl.clientHeight || 0));
-        const nextTop = clamp((scrollEl.scrollTop || 0) + delta, 0, maxTop);
-        scrollToY(tgt, nextTop, behavior);
-
-        setTimeout(() => {
-          try {
-            const contRect2 = scrollEl.getBoundingClientRect();
-            const r2 = card.getBoundingClientRect();
-            const elCenter2 = (r2.top - contRect2.top) + (r2.height / 2);
-            const desired2 = contRect2.height / 2;
-            const delta2 = elCenter2 - desired2;
-            if (!Number.isFinite(delta2) || Math.abs(delta2) < 0.5) return;
-            const top2 = clamp((scrollEl.scrollTop || 0) + delta2, 0, maxTop);
-            scrollToY(tgt, top2, 'auto');
-          } catch {}
-        }, 260);
-      } else {
-        const r = card.getBoundingClientRect();
-        const elCenterInView = r.top + (r.height / 2);
-        const desired = window.innerHeight / 2;
-        const delta = elCenterInView - desired;
-        if (!Number.isFinite(delta)) return;
-
-        const se = tgt.se || document.scrollingElement || document.documentElement;
-        const maxTop = Math.max(0, (se?.scrollHeight || 0) - window.innerHeight);
-        const curTop = window.scrollY || window.pageYOffset || 0;
-        const nextTop = clamp(curTop + delta, 0, maxTop);
-        scrollToY(tgt, nextTop, behavior);
-
-        setTimeout(() => {
-          try {
-            const r2 = card.getBoundingClientRect();
-            const elCenter2 = r2.top + (r2.height / 2);
-            const delta2 = elCenter2 - desired;
-            if (!Number.isFinite(delta2) || Math.abs(delta2) < 0.5) return;
-            const cur2 = window.scrollY || window.pageYOffset || 0;
-            const top2 = clamp(cur2 + delta2, 0, maxTop);
-            scrollToY(tgt, top2, 'auto');
-          } catch {}
-        }, 260);
-      }     
+      const contRect = scrollEl.getBoundingClientRect();
+      const r = card.getBoundingClientRect();
+      const elCenterInView = (r.top - contRect.top) + (r.height / 2);
+      const desired = contRect.height / 2;
+      const delta = elCenterInView - desired;
+      if (!Number.isFinite(delta)) return;
+      const nextTop = Math.max(0, Math.min((scrollEl.scrollTop || 0) + delta, (scrollEl.scrollHeight || 0) - (scrollEl.clientHeight || 0)));
+      scrollEl.scrollTo?.({ top: nextTop, behavior });
+      // финальная фиксация по центру (анти-«дребезг» после smooth/изменения высот)
+      setTimeout(() => {
+        try {
+          const contRect2 = scrollEl.getBoundingClientRect();
+          const r2 = card.getBoundingClientRect();
+          const elCenter2 = (r2.top - contRect2.top) + (r2.height / 2);
+          const desired2 = contRect2.height / 2;
+          const delta2 = elCenter2 - desired2;
+          if (!Number.isFinite(delta2) || Math.abs(delta2) < 0.5) return;
+          const top2 = Math.max(0, Math.min((scrollEl.scrollTop || 0) + delta2, (scrollEl.scrollHeight || 0) - (scrollEl.clientHeight || 0)));
+          scrollEl.scrollTo?.({ top: top2, behavior: 'auto' });
+        } catch {}
+      }, 260);
     } catch {}
   };
 
@@ -13630,50 +13487,29 @@ useEffect(() => {
       if (e.ctrlKey) return; // zoom
       if (isInIgnoredUi(e.target)) return;
 
-      const tgt = getScrollTarget();
-      if (!tgt) return;
+      const scrollEl = getScrollEl?.();
+      if (!scrollEl) return;
 
-      if (tgt.kind === 'el') {
-        const nested = findNestedScrollable(e.target, tgt.el);
-        if (nested) return;
-        if ((tgt.el.scrollHeight || 0) <= (tgt.el.clientHeight || 0) + 1) return;
-      }
-
-      const cards = getCards(tgt);
+      const cards = getCards(scrollEl);
       if (cards.length < 2) return;
 
       const dy = Number(e.deltaY || 0);
       if (!dy || Math.abs(dy) < 3) return;
-      // В верхней зоне даём нативный скролл — иначе шапка не сможет auto-open/auto-hide.
-      // Важно: здесь НЕТ preventDefault, чтобы onScroll работал естественно.
-      const dir = dy > 0 ? 1 : -1;
-      const stNow = getScrollTopFromTarget(tgt);
-      const headZone = getHeadZonePx();
-      if (stNow <= headZone) {
-        return;
-      }
+
       const nowTs = Date.now();
       if ((stickyFeedLockRef.current?.until || 0) > nowTs) {
         e.preventDefault();
         return;
       }
-      stickyFeedLockRef.current = { until: nowTs + FORUM_FEED_SNAP_LOCK_MS };
+      stickyFeedLockRef.current = { until: nowTs + 420 };
 
       e.preventDefault();
-      const idx = findClosestIndex(cards, tgt);
-
-      // ESCAPE TO TOP:
-      // Если мы на первой карточке и пользователь крутит/ведёт вверх — даём выйти к самому верху (top-bar).
-      if (dir < 0 && idx <= 0) {
-        headAnimLockRef.current = { until: nowTs + FORUM_FEED_SNAP_LOCK_MS };
-        scrollToY(tgt, 0, 'smooth');
-        return;
-      }      
+      const dir = dy > 0 ? 1 : -1;
+      const idx = findClosestIndex(cards, scrollEl);
       const next = Math.max(0, Math.min(cards.length - 1, idx + dir));
       const node = cards[next] || null;
       if (!node) return;
-      headAnimLockRef.current = { until: nowTs + FORUM_FEED_SNAP_LOCK_MS };      
-      scrollCardToCenter(tgt, node, 'smooth');
+      scrollCardToCenter(scrollEl, node, 'smooth');
     } catch {}
   };
 
@@ -13681,25 +13517,14 @@ useEffect(() => {
     try {
       if (!e?.touches || e.touches.length !== 1) return;
       if (isInIgnoredUi(e.target)) return;
-
-      const tgt = getScrollTarget();
-      if (!tgt) return;
-      if (tgt.kind === 'el') {
-        const nested = findNestedScrollable(e.target, tgt.el);
-        if (nested) return;
-        if ((tgt.el.scrollHeight || 0) <= (tgt.el.clientHeight || 0) + 1) return;
-      }
-      const cards = getCards(tgt);
-      if (cards.length < 2) return;
-
       const t = e.touches[0];
-      stickyFeedTouchRef.current = { active: true, enabled: true, startY: t.clientY, startX: t.clientX };
+      stickyFeedTouchRef.current = { active: true, startY: t.clientY, startX: t.clientX };
     } catch {}
   };
   const onTouchMove = (e) => {
     try {
       if (!stickyFeedTouchRef.current?.active) return;
-      if (!stickyFeedTouchRef.current?.enabled) return;
+      if (!e?.touches || e.touches.length !== 1) return;
       const t = e.touches[0];
       const dy = t.clientY - (stickyFeedTouchRef.current.startY || 0);
       const dx = t.clientX - (stickyFeedTouchRef.current.startX || 0);
@@ -13712,75 +13537,47 @@ useEffect(() => {
   const onTouchEnd = (e) => {
     try {
       if (!stickyFeedTouchRef.current?.active) return;
-      const wasEnabled = !!stickyFeedTouchRef.current?.enabled;
       stickyFeedTouchRef.current.active = false;
-      stickyFeedTouchRef.current.enabled = false;
-      if (!wasEnabled) return;      
       if (isInIgnoredUi(e.target)) return;
 
       const changed = e?.changedTouches && e.changedTouches[0];
       if (!changed) return;
       const dy = changed.clientY - (stickyFeedTouchRef.current.startY || 0);
       const dx = changed.clientX - (stickyFeedTouchRef.current.startX || 0);
-       if (Math.abs(dy) < FORUM_FEED_TOUCH_MIN_PX || Math.abs(dy) < Math.abs(dx)) return;
+      if (Math.abs(dy) < 40 || Math.abs(dy) < Math.abs(dx)) return;
 
       const nowTs = Date.now();
       if ((stickyFeedLockRef.current?.until || 0) > nowTs) return;
-      stickyFeedLockRef.current = { until: nowTs + FORUM_FEED_SNAP_LOCK_MS };
+      stickyFeedLockRef.current = { until: nowTs + 480 };
 
-      const tgt = getScrollTarget();
-      if (!tgt) return;
-      if (tgt.kind === 'el') {
-        const nested = findNestedScrollable(e.target, tgt.el);
-        if (nested) return;
-        if ((tgt.el.scrollHeight || 0) <= (tgt.el.clientHeight || 0) + 1) return;
-      }
-      const cards = getCards(tgt);
+      const scrollEl = getScrollEl?.();
+      if (!scrollEl) return;
+      const cards = getCards(scrollEl);
       if (cards.length < 2) return;
       const dir = dy < 0 ? 1 : -1; // swipe up => next
-
-      // В верхней зоне — не снапаем (пусть шапка работает и пользователь может "дойти" до top-bar).
-      const stNow = getScrollTopFromTarget(tgt);
-      const headZone = getHeadZonePx();
-      if (stNow <= headZone) {
-        return;
-      }
-
-      const idx = findClosestIndex(cards, tgt);
-
-      // ESCAPE TO TOP (touch):
-      // Если на первой карточке и пользователь тянет вниз (то есть идём вверх по ленте) —
-      // отдаём управление top-bar, прокручиваем в 0.
-      if (dir < 0 && idx <= 0) {
-        headAnimLockRef.current = { until: nowTs + FORUM_FEED_SNAP_LOCK_MS };
-        scrollToY(tgt, 0, 'smooth');
-        return;
-      }
-      
+      const idx = findClosestIndex(cards, scrollEl);
       const next = Math.max(0, Math.min(cards.length - 1, idx + dir));
       const node = cards[next] || null;
       if (!node) return;
-      headAnimLockRef.current = { until: Date.now() + FORUM_FEED_SNAP_LOCK_MS };
-      scrollCardToCenter(tgt, node, 'smooth');
+      scrollCardToCenter(scrollEl, node, 'smooth');
     } catch {}
   };
 
   const attach = () => {
-    const tgt = getScrollTarget();
-    const node = tgt?.kind === 'el' ? tgt.el : (tgt?.kind === 'win' ? window : null);
-    if (!node) return;
-    if (attachedEl === node) return;
+    const scrollEl = getScrollEl?.();
+    if (!scrollEl) return;
+    if (attachedEl === scrollEl) return;
     if (attachedEl) {
       try { attachedEl.removeEventListener('wheel', onWheel); } catch {}
       try { attachedEl.removeEventListener('touchstart', onTouchStart); } catch {}
       try { attachedEl.removeEventListener('touchmove', onTouchMove); } catch {}
       try { attachedEl.removeEventListener('touchend', onTouchEnd); } catch {}
     }
-    attachedEl = node;
-    try { node.addEventListener('wheel', onWheel, optsWheel); } catch {}
-    try { node.addEventListener('touchstart', onTouchStart, optsTouch); } catch {}
-    try { node.addEventListener('touchmove', onTouchMove, optsTouch); } catch {}
-    try { node.addEventListener('touchend', onTouchEnd, optsTouch); } catch {}
+    attachedEl = scrollEl;
+    try { scrollEl.addEventListener('wheel', onWheel, optsWheel); } catch {}
+    try { scrollEl.addEventListener('touchstart', onTouchStart, optsTouch); } catch {}
+    try { scrollEl.addEventListener('touchmove', onTouchMove, optsTouch); } catch {}
+    try { scrollEl.addEventListener('touchend', onTouchEnd, optsTouch); } catch {}
   };
 
   attach();
@@ -17495,7 +17292,16 @@ function alignInboxStartUnderTabs(attempt = 0) {
     scrollEl.scrollTop += delta;
   } catch {}
 }
- 
+
+function getScrollEl() {
+  if (!isBrowser()) return null;
+  return (
+    bodyRef.current ||
+    document.querySelector('[data-forum-scroll="1"]') ||
+    null
+  );
+}
+
 function getScrollSnapshot() {
   if (!isBrowser()) return { useInner: false, y: 0 };
   try {
@@ -20693,7 +20499,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
       <div
   className="body"
   data-forum-scroll="1"
-  
+  data-sticky-feed-off="1"
   ref={bodyRef}
   style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
 >
