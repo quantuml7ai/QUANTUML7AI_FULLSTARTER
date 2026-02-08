@@ -6150,6 +6150,20 @@ html[data-tma="1"] .inboxTabs{
   opacity: 0; transform: translateY(4px) scale(.98); pointer-events: none;
 }
 
+:root{
+  --head-open-threshold-desktop: 700px;
+  --head-close-threshold-desktop: 1100px;
+
+  --head-open-threshold-mobile: 400px;
+  --head-close-threshold-mobile: 900px;
+}
+
+@media (max-width: 640px){
+  :root{
+    --head-open-threshold-mobile: 500px;
+    --head-close-threshold-mobile: 400px;
+  }
+}
 
 `}</style>
 )
@@ -13352,15 +13366,75 @@ useEffect(() => {
 useEffect(() => {
   if (!isBrowser()) return;
 
-  const TOP_EPS_DESKTOP = 870;
-  const TOP_EPS_MOBILE = 550;
-  const getTopEps = () => {
+  // === HEAD AUTO OPEN/CLOSE: пороги + гистерезис + анти-дергание scrollTop ===
+  // CSS-переменные (px):
+  //  --head-open-threshold-desktop: 870px;
+  //  --head-close-threshold-desktop: 920px;  // обычно open + 40..120
+  //  --head-open-threshold-mobile: 550px;
+  //  --head-close-threshold-mobile: 610px;   // обычно open + 40..120
+  //
+  // Плюс: --head-collapse-scroll-compensate: 1;  (0/1) — компенсировать скролл при скрытии шапки
+
+  const DEFAULT_HEAD_OPEN_DESKTOP = 870;
+  const DEFAULT_HEAD_CLOSE_DESKTOP = 920;
+  const DEFAULT_HEAD_OPEN_MOBILE = 550;
+  const DEFAULT_HEAD_CLOSE_MOBILE = 610;
+
+  const isMobileUi = () => {
     try {
       const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
       const narrow = (Number(window?.innerWidth || 0) || 0) <= 720;
-      return (coarse || narrow) ? TOP_EPS_MOBILE : TOP_EPS_DESKTOP;
+      return coarse || narrow;   
+     } catch {}
+    return false;
+  };
+
+  const readCssPx = (varName, fallback) => {
+    try {
+      const raw = window.getComputedStyle(document.documentElement).getPropertyValue(varName);
+      const v = String(raw || '').trim();
+      const n = parseFloat(v);
+      return Number.isFinite(n) ? n : fallback;
     } catch {}
-    return TOP_EPS_DESKTOP;
+    return fallback;
+  };
+
+  const readCssFlag01 = (varName, fallback01) => {
+    try {
+      const raw = window.getComputedStyle(document.documentElement).getPropertyValue(varName);
+      const v = String(raw || '').trim();
+      if (v === '0') return 0;
+      if (v === '1') return 1;
+      const n = parseFloat(v);
+      return Number.isFinite(n) ? (n ? 1 : 0) : fallback01;
+    } catch {}
+    return fallback01;
+  };
+
+  const getHeadOpenAt = () => {
+    const m = isMobileUi();
+    return readCssPx(m ? '--head-open-threshold-mobile' : '--head-open-threshold-desktop',
+      m ? DEFAULT_HEAD_OPEN_MOBILE : DEFAULT_HEAD_OPEN_DESKTOP
+    );
+  };
+
+  const getHeadCloseAt = (openAt) => {
+    const m = isMobileUi();
+    const closeAt = readCssPx(m ? '--head-close-threshold-mobile' : '--head-close-threshold-desktop',
+      m ? DEFAULT_HEAD_CLOSE_MOBILE : DEFAULT_HEAD_CLOSE_DESKTOP
+    );
+    // гарантируем гистерезис: close > open хотя бы на 1px
+    return Math.max((Number(openAt) || 0) + 1, Number(closeAt) || 0);
+  };
+
+  const getHeadHeight = () => {
+    try {
+      // headInner — реальная шапка внутри контейнера .head
+      const el = document.querySelector('.headInner') || document.querySelector('.head');
+      const h = el?.getBoundingClientRect?.()?.height;
+      return Number.isFinite(h) ? h : 0;
+    } catch {}
+    return 0;
   };
 
   const getScrollTop = () => {
@@ -13379,7 +13453,9 @@ useEffect(() => {
       const st = getScrollTop();
       const delta = st - lastTop;
       const scrollingDown = delta > 0;
-      const atTop = st <= getTopEps();
+      const openAt = getHeadOpenAt();
+      const closeAt = getHeadCloseAt(openAt);
+      const atTopForOpen = st <= openAt;
 
       // если шапка закреплена вручную — ничего не трогаем
       if (headPinnedRef.current) {
@@ -13389,17 +13465,40 @@ useEffect(() => {
       }
 
       // Как только упираемся в верх — сразу открываем шапку
-      if (!videoFeedOpenRef.current && atTop) {
+      if (!videoFeedOpenRef.current && atTopForOpen) {
         if (headHiddenRef.current) {
           setHeadPinned(false);
           setHeadHidden(false);
         }
         headAutoOpenRef.current = false;
-      } else if (!headHiddenRef.current && scrollingDown) {
-        // Первый же скролл вниз — скрываем, чтобы карточки ушли под самый верх
+      } else if (!headHiddenRef.current && scrollingDown && st > closeAt) {
+        // Скрываем только ниже closeAt (гистерезис), чтобы не дергалось на пороге.
+        // И компенсируем скролл, чтобы при скрытии шапки scrollTop не "клампился" в 0.
+        const prevSt = st;
+        const headH = getHeadHeight();
+        const compensate = readCssFlag01('--head-collapse-scroll-compensate', 1);
         setHeadPinned(false);
         setHeadHidden(true);
-      }
+
+        if (compensate && headH > 1) {
+          // Двойной RAF — ждём, пока DOM применит collapsed-класс и пересчитает layout.
+          const applyComp = () => {
+            try {
+              const el = bodyRef.current;
+              const useInner = !!el && (el.scrollHeight > el.clientHeight + 1);
+              const target = prevSt + headH;
+              if (useInner && el) {
+                // важно: не даём улететь в 0 при "схлопывании" шапки
+                if ((el.scrollTop || 0) < 2) el.scrollTop = target;
+              } else {
+                const y = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+                if (y < 2) { try { window.scrollTo(0, target); } catch {} }
+              }
+            } catch {}
+          };
+          try { requestAnimationFrame(() => requestAnimationFrame(applyComp)); } catch { try { setTimeout(applyComp, 0); } catch {} }
+        }
+       }
 
       lastTop = st;
     });
