@@ -6161,7 +6161,7 @@ html[data-tma="1"] .inboxTabs{
 @media (max-width: 640px){
   :root{
     --head-open-threshold-mobile: 400px;
-    --head-close-threshold-mobile:900px;
+    --head-close-threshold-mobile: 900px;
   }
 }
 
@@ -13524,7 +13524,7 @@ useEffect(() => {
 // ===== STICKY FEED (±1 карточка на жест) =====
 useEffect(() => {
   if (!isBrowser()) return;
-
+ 
   // ✅ Новый sticky-feed: ТОЛЬКО TAЧ, строго 1 свайп = 1 карточка, без центрирования и без wheel.
   // Работает на iOS/Android/планшетах/тач-ноутах.
 
@@ -13554,7 +13554,7 @@ useEffect(() => {
   };
 
   // ВАЖНО: реальный скролл-контейнер форума — это bodyRef / data-forum-scroll="1"
-  const getScrollEl = () => { 
+  const getScrollEl = () => {
     try {
       return bodyRef?.current || document.querySelector('[data-forum-scroll="1"]') || null;
     } catch {}
@@ -13650,7 +13650,7 @@ useEffect(() => {
       const t0 = e.touches[0];
       stickyFeedTouchRef.current = {
         active: true,
-        startY: t0.clientY,
+        startY: t0.clientY,        
         startX: t0.clientX,
         startTop: Number(scrollEl.scrollTop || 0),
         locked: false,
@@ -13669,7 +13669,7 @@ useEffect(() => {
       if (!isTouchDevice()) return;
       if (!e?.touches || e.touches.length !== 1) return;
       if (isInIgnoredUi(e.target)) return;
- 
+
       const scrollEl = st.scrollEl;
       if (!scrollEl) return;
 
@@ -13699,7 +13699,7 @@ useEffect(() => {
       restoreScrollStyles(st);
 
       if (!isTouchDevice()) return;
-      if (isInIgnoredUi(e.target)) return; 
+      if (isInIgnoredUi(e.target)) return;
       if (!st.locked) return; // не вертикальный свайп — не мешаем
       if (!scrollEl) return;
 
