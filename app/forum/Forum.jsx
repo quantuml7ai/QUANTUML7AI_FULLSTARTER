@@ -15291,6 +15291,19 @@ useEffect(() => {
  const videoRecRef    = useRef(null);   // MediaRecorder
  const videoChunksRef = useRef([]);     // BlobParts
 const [pendingVideo, setPendingVideo] = useState(null);
+
+  // ✅ В выбранной теме (threadRoot) видеооверлей не должен жить вообще:
+  // иначе он может оставить невидимую подложку и page-lock, что "убивает" клики/скролл.
+  React.useEffect(() => {
+    if (!threadRoot) return;
+    if (!videoOpen && videoState === 'idle') return;
+    try { setVideoOpen(false); } catch {}
+    try { setVideoState('idle'); } catch {}
+    try { setPendingVideo(null); } catch {}
+    try { setOverlayMediaUrl(null); } catch {}
+    // overlayMediaKind можешь не трогать, но чистка не повредит:
+    try { setOverlayMediaKind('video'); } catch {}
+  }, [threadRoot]);
   // =========================================================
   // Composer media progress UI (bar над контролами)
   // показываем от выбора файла/окончания записи до send/reset
@@ -18398,9 +18411,9 @@ function pickAdUrlForSlot(slotKey, slotKind) {
       />
        {/* Overlay камеры/плеера */}
 <VideoOverlay
-  open={videoOpen}
+  open={videoOpen && !threadRoot}
   state={
-    !videoOpen
+    !(videoOpen && !threadRoot)
       ? 'hidden'
       : (videoState === 'recording'
           ? 'recording'
@@ -20720,10 +20733,10 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
   </div> 
       </div>
 
-      <div
+<div
   className="body"
   data-forum-scroll="1"
-  data-sticky-feed-off="1"
+
   ref={bodyRef}
   style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
 >
