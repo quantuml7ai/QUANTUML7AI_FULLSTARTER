@@ -4000,17 +4000,26 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 }
 
 /* OWNER kebab/menu — общий для тем и постов */
-.ownerKebab { position: absolute; right: 8px; top: 8px; }
+ .ownerKebab { 
+   position: absolute; 
+   right: 8px; 
+   top: 8px; 
+   z-index: 80;              /* выше кликабельных оверлеев карточки */
+   pointer-events: auto;     /* на случай если родитель/оверлей вмешивается */
+ }
 .kebabBtn{
   width:28px; height:28px; border:0; border-radius:6px;
   background:rgba(255,255,255,.06); color:#eaf4ff; cursor:pointer;
+   pointer-events: auto;
+   touch-action: manipulation; /* быстрее/чище клик на мобиле */  
 }
 .kebabBtn:hover{ filter:brightness(1.1); }
 .ownerMenu{
 position:absolute; right:30px; top:0px; display:flex; flex-direction:column; gap:6px; 
 padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.14);
   border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.35); z-index:20; visibility:hidden;
-}
+ pointer-events: auto;
+  }
 
 .ownerKebab:focus-within .ownerMenu,
 .ownerKebab:hover .ownerMenu{ visibility:visible; }
@@ -4042,7 +4051,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 }
 .confirmPopText{
   font-size: 15px;
-  color: rgb(255, 0, 0);
+  color: rgb(255, 255, 255);
   line-height: 1.25;
 }
 .confirmPopBtns{
@@ -8805,8 +8814,26 @@ const { t: tt } = useI18n();
 
         {/* OWNER: меню троеточия для владельца темы */}
         {(authId && (authId === (t.userId || t.accountId))) && (
-          <div className="ownerKebab" onClick={(e)=>{ e.stopPropagation(); }}>
-            <button className="kebabBtn" type="button" aria-label="Меню темы">⋮</button>     
+           <div
+             className="ownerKebab"
+             data-no-thread-open="1"
+             onClick={(e)=>{ e.stopPropagation(); }}
+             onPointerDownCapture={(e)=>{ e.stopPropagation(); }}
+             onMouseDownCapture={(e)=>{ e.stopPropagation(); }}
+             onTouchStartCapture={(e)=>{ e.stopPropagation(); }}
+           >
+             <button
+               className="kebabBtn"
+               type="button"
+               aria-label="Меню темы"
+               data-no-thread-open="1"
+               onClick={(e)=>{ e.stopPropagation(); }}
+               onPointerDownCapture={(e)=>{ e.stopPropagation(); }}
+               onMouseDownCapture={(e)=>{ e.stopPropagation(); }}
+               onTouchStartCapture={(e)=>{ e.stopPropagation(); }}
+             >
+               ⋮
+             </button>   
             <div className="ownerMenu">
 <button
   type="button"
@@ -9426,7 +9453,10 @@ const NO_THREAD_OPEN_SELECTOR =
       <div
         className="ownerKebab"
         data-no-thread-open="1"
-        onClick={(e)=>{ e.stopPropagation(); }}
+         onClick={(e)=>{ e.stopPropagation(); }}
+         onPointerDownCapture={(e)=>{ e.stopPropagation(); }}
+         onMouseDownCapture={(e)=>{ e.stopPropagation(); }}
+         onTouchStartCapture={(e)=>{ e.stopPropagation(); }}
         style={{ position:'absolute', right:8, top:8 }}
       >        
         <button
@@ -9434,6 +9464,10 @@ const NO_THREAD_OPEN_SELECTOR =
           type="button"
           aria-label="Меню поста"
           data-no-thread-open="1"
+           onClick={(e)=>{ e.stopPropagation(); }}
+           onPointerDownCapture={(e)=>{ e.stopPropagation(); }}
+           onMouseDownCapture={(e)=>{ e.stopPropagation(); }}
+           onTouchStartCapture={(e)=>{ e.stopPropagation(); }}          
         >⋮</button>
         <div className="ownerMenu" data-no-thread-open="1">
             <button type="button" onClick={ownerEdit}>✏️</button>
@@ -9495,7 +9529,43 @@ text={t?.('forum_delete_confirm')}
 
 {isVipAuthor && <VipFlipBadge />}
       </div> 
+                  {/* время создания + переключатель перевода — ниже контента */}
+  {/* разделитель между VIP и обычными */}
+  <div style={{height:1,opacity:.2,background:'currentColor',margin:'7px 4px'}} />
 
+  <div className="forumRowBar">
+
+    <div className="slot-left">
+    <div className="btn btnGhost btnXs"
+        
+        suppressHydrationWarning
+        
+      >
+        <HydrateText value={human(p.ts)} />
+</div>
+</div>
+
+        {p.parentId && (
+
+          <button
+            type="button"
+            className="tag ml-1 replyTag replyTagBtn"
+            aria-label={t?.('forum_reply_to')}
+            title={t?.('forum_reply_to')}
+            data-no-thread-open="1"
+            onClick={jumpToParent}
+          >
+            <span className="replyTagMain">
+              {t?.('forum_reply_to') + ' '}
+              {parentAuthor ? '@' + parentAuthor : '…'}
+            </span>
+            {parentSnippet && (
+              <span className="replyTagSnippet">“{parentSnippet}”</span>
+            )}
+          </button>
+        )} 
+
+ </div> 
       </div> 
       {/* изображения: естественные пропорции, без квадратного кропа */}
       {imgLines.length > 0 && (
@@ -9699,44 +9769,7 @@ text={t?.('forum_delete_confirm')}
       ) : (
         displayText.trim() && (
           <div className="postBodyFrame">
-                  {/* время создания + переключатель перевода — ниже контента */}
-  <div className="forumRowBar">
-
-    <div className="slot-left">
-    <div className="btn btnGhost btnXs"
-        
-        suppressHydrationWarning
-        
-      >
-        <HydrateText value={human(p.ts)} />
-</div>
-</div>
-
-        {p.parentId && (
-
-          <button
-            type="button"
-            className="tag ml-1 replyTag replyTagBtn"
-            aria-label={t?.('forum_reply_to')}
-            title={t?.('forum_reply_to')}
-            data-no-thread-open="1"
-            onClick={jumpToParent}
-          >
-            <span className="replyTagMain">
-              {t?.('forum_reply_to') + ' '}
-              {parentAuthor ? '@' + parentAuthor : '…'}
-            </span>
-            {parentSnippet && (
-              <span className="replyTagSnippet">“{parentSnippet}”</span>
-            )}
-          </button>
-        )} 
-
- </div> 
-   
-  {/* разделитель между VIP и обычными */}
-  <div style={{height:1,opacity:.2,background:'currentColor',margin:'7px 4px'}} />
-
+ 
             <div
               className="postBodyContent text-[15px] leading-relaxed postBody whitespace-pre-wrap break-words"
               dangerouslySetInnerHTML={{ __html: rich(displayText) }}
