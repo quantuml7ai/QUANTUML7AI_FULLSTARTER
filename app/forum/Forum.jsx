@@ -5810,9 +5810,12 @@ html[data-tma="1"] .inboxTabs{
 
 /* мини-счётчик */
 .miniCounter{
-  position:absolute; left:10px; bottom:6px;
+  position:absolute; left:10px; inset-inline-start:10px; bottom:6px;
   font-size:12px; opacity:.75; user-select:none;
 }
+
+/* RTL fallback for old browsers */
+[dir="rtl"] .miniCounter{ left:auto; right:10px; }
 .miniCounter .sep{ opacity:.6; padding:0 2px; }
 .miniCounter .max{ opacity:.75; }
 .miniCounter .over{ color:#ff7f7f; opacity:1; }
@@ -5893,6 +5896,32 @@ html[data-tma="1"] .inboxTabs{
     margin-block-start: 10px;
   }
 }
+/* =========================================================
+   Create Topic — всплывающая форма по центру экрана (без оверлея)
+   - НЕ занимает место под контроллами
+   - поверх всего (в т.ч. шапки), т.к. рендерится порталом в body
+========================================================= */
+.createTopicModal{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2147483000; /* максимально выше шапок/липких панелей */
+  width: min(92vw, 720px);
+  pointer-events: auto;
+}
+.createTopicModalInner{
+  width: 100%;
+  max-height: min(78vh, 720px);
+  overflow: auto;
+  border-radius: 14px;
+  box-shadow: 0 18px 55px rgba(0,0,0,.35);
+  /* ✅ чтобы не была прозрачной как .item */
+  background: rgba(10,14,22,.96);
+  border: 1px solid rgba(255,255,255,.12);
+ /* ✅ чтобы визуально было как у .item (если раньше она давала отступы) */
+  padding: 12px;
+}
 
 /* Единая горизонтальная рельса — визуально как сам композер */
 .topRail{
@@ -5928,9 +5957,12 @@ html[data-tma="1"] .inboxTabs{
 }
 
 .topRail .miniCounter{
+  position: static;
+  inset: auto;
   display:inline-flex; align-items:center; gap:4px;
   font-size:12px; opacity:.8;
 }
+
 
 /* Чтоб между рельсой и полем ввода было ровно как по бокам раньше */
 .taWrap { gap: 8px; display:flex; flex-direction:column; }
@@ -21655,6 +21687,8 @@ function CreateTopicCard({ t, onCreate, onOpenVideoFeed }){
   const [open,setOpen] = useState(false)
   const [busy,setBusy] = useState(false)
   const [title,setTitle] = useState(''), [descr,setDescr] = useState(''), [first,setFirst] = useState('')
+  const [mounted, setMounted] = useState(false)
+  const titleRef = useRef(null)
   // даём глобальный (но безопасный) хук для верхних кнопок в шапке
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -21664,95 +21698,118 @@ function CreateTopicCard({ t, onCreate, onOpenVideoFeed }){
       try { if (window.__forumToggleCreateTopic === fn) delete window.__forumToggleCreateTopic; } catch {}
     };
   }, []);
-  return (
-<div className="createTopicRow mb-2">    
-       {open && (
-        <div className="item w-full mt-2">
-          <div className="grid gap-2">
-            <label className="block">
-              <div className="meta mb-1">{t('forum_topic_title')}</div>
-              <input
-                className="input"
-                value={title}
-                onChange={e=>setTitle(e.target.value)}
-                placeholder={t('forum_topic_title_ph')}
-                maxLength={40}
-              />
-              <div className="charRow" aria-live="polite">
-                <span className="charNow">{title.trim().length}</span>
-                <span className="charSep">/</span>
-                <span className={title.trim().length > 40 ? 'charMax charOver' : 'charMax'}>40</span>
-              </div>  
-            </label>
-            <label className="block">
-              <div className="meta mb-1">{t('forum_topic_desc')}</div>
-              <textarea
-                className="input textarea"
-                value={descr}
-                onChange={e=>setDescr(e.target.value)}
-                placeholder={t('forum_topic_desc_ph')}
-                maxLength={90}
-              />
-              <div className="charRow" aria-live="polite">
-                <span className="charNow">{descr.trim().length}</span>
-                <span className="charSep">/</span>
-                <span className={descr.trim().length > 90 ? 'charMax charOver' : 'charMax'}>90</span>
-              </div>
 
-            </label>
-            <label className="block">
-              <div className="meta mb-1">{t('forum_topic_first_msg')}</div>
-              <textarea
-                className="ta"
-                rows={6}
-                value={first}
-                onChange={e=>setFirst(e.target.value.slice(0,400))}
-                maxLength={400}
-                placeholder={t('forum_topic_first_msg_ph')}
-              />
-              {/* L85 → ВСТАВИТЬ СЮДА */}
-              <div className="charRow" aria-live="polite">
-                <span className="charNow">{first.trim().length}</span>
-                <span className="charSep">/</span>
-                <span className={first.trim().length > 400 ? 'charMax charOver' : 'charMax'}>400</span>
-              </div>
-            </label>
-            <div className="flex items-center justify-end gap-2">
-              <button className="btn btnGhost" onClick={()=>setOpen(false)}>{t('forum_cancel')}</button>
-              <button
-                className="btn"
-                disabled={
+  // ✅ чтобы портал рендерился только на клиенте
+  useEffect(() => { setMounted(true) }, [])
+
+  // ✅ ESC закрывает форму
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [open])
+
+  // ✅ фокус в заголовок при открытии
+  useEffect(() => {
+    if (!open) return;
+    const id = setTimeout(() => { try { titleRef.current?.focus?.() } catch {} }, 0)
+    return () => clearTimeout(id)
+  }, [open])
+
+  const form = (
+    <div className="createTopicModal" role="dialog" aria-modal="true">
+      <div className="createTopicModalInner">
+        <div className="grid gap-2">
+          <label className="block">
+            <div className="meta mb-1">{t('forum_topic_title')}</div>
+            <input
+              ref={titleRef}
+              className="input"
+              value={title}
+              onChange={e=>setTitle(e.target.value)}
+              placeholder={t('forum_topic_title_ph')}
+              maxLength={40}
+            />
+            <div className="charRow" aria-live="polite">
+              <span className="charNow">{title.trim().length}</span>
+              <span className="charSep">/</span>
+              <span className={title.trim().length > 40 ? 'charMax charOver' : 'charMax'}>40</span>
+            </div>
+          </label>
+          <label className="block">
+            <div className="meta mb-1">{t('forum_topic_desc')}</div>
+            <textarea
+              className="input textarea"
+              value={descr}
+              onChange={e=>setDescr(e.target.value)}
+              placeholder={t('forum_topic_desc_ph')}
+              maxLength={90}
+            />
+            <div className="charRow" aria-live="polite">
+              <span className="charNow">{descr.trim().length}</span>
+              <span className="charSep">/</span>
+              <span className={descr.trim().length > 90 ? 'charMax charOver' : 'charMax'}>90</span>
+            </div>
+          </label>
+          <label className="block">
+            <div className="meta mb-1">{t('forum_topic_first_msg')}</div>
+            <textarea
+              className="ta"
+              rows={6}
+              value={first}
+              onChange={e=>setFirst(e.target.value.slice(0,400))}
+              maxLength={400}
+              placeholder={t('forum_topic_first_msg_ph')}
+            />
+            <div className="charRow" aria-live="polite">
+              <span className="charNow">{first.trim().length}</span>
+              <span className="charSep">/</span>
+              <span className={first.trim().length > 400 ? 'charMax charOver' : 'charMax'}>400</span>
+            </div>
+          </label>
+          <div className="flex items-center justify-end gap-2">
+            <button className="btn btnGhost" onClick={()=>setOpen(false)}>{t('forum_cancel')}</button>
+            <button
+              className="btn"
+              disabled={
+                busy
+                || !title.trim()
+                || !first.trim()
+                || title.trim().length > 40
+                || descr.trim().length > 90
+                || first.trim().length > 400
+              }
+              onClick={async()=>{
+                if (
                   busy
                   || !title.trim()
                   || !first.trim()
                   || title.trim().length > 40
                   || descr.trim().length > 90
                   || first.trim().length > 400
-                }
-                onClick={async()=>{
-                  if (
-                    busy
-                    || !title.trim()
-                    || !first.trim()
-                    || title.trim().length > 40
-                    || descr.trim().length > 90
-                    || first.trim().length > 400
-                  ) return;
-                  setBusy(true)
-                  try{
-                    await onCreate?.(title.trim(), descr.trim(), first.trim())
-                    setTitle(''); setDescr(''); setFirst(''); setOpen(false)
-                  }finally{ setBusy(false) }
-                }}>
-                {busy ? t('forum_creating') : t('forum_create')}
-              </button>
-
-            </div>
+                ) return;
+                setBusy(true)
+                try{
+                  await onCreate?.(title.trim(), descr.trim(), first.trim())
+                  setTitle(''); setDescr(''); setFirst(''); setOpen(false)
+                }finally{ setBusy(false) }
+              }}>
+              {busy ? t('forum_creating') : t('forum_create')}
+            </button>
           </div>
         </div>
-      )}
-      <div className="flex items-center gap-2"> 
-     </div>
+      </div>
+    </div>
+  )
+  
+  return (
+    <div className="createTopicRow mb-2">
+      {/* форма больше НЕ в потоке под контроллами — она всплывает поверх всего */}
+      {mounted && open ? createPortal(form, document.body) : null}
+      <div className="flex items-center gap-2"></div>
     </div>
   )
 } 
