@@ -4033,6 +4033,14 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 
 .ownerKebab:focus-within .ownerMenu,
 .ownerKebab:hover .ownerMenu{ visibility:visible; }
+
+ /* owner menu: обычные кнопки (например ✏️) — без серого фона */
+ .ownerMenu button:not(.danger){
+   background: transparent !important;
+   box-shadow: none !important;
+   -webkit-appearance: none;
+   appearance: none;
+ }
 .ownerMenu .danger{
   padding:8px 10px; border-radius:8px; background:rgba(255,60,60,.12); color:#ff6a6a; border:1px solid rgba(255,80,80,.25);
 }
@@ -13450,9 +13458,7 @@ const [headPinned, setHeadPinned] = useState(false);
 const headHiddenRef = useRef(false);
 const headPinnedRef = useRef(false);
 const headAutoOpenRef = useRef(false);
-const videoFeedOpenRef = useRef(false);
-const stickyFeedLockRef = useRef({ until: 0 });
-const stickyFeedTouchRef = useRef({ active: false, startY: 0, startX: 0 });
+const videoFeedOpenRef = useRef(false); 
 useEffect(() => { headHiddenRef.current = headHidden }, [headHidden]);
 useEffect(() => { headPinnedRef.current = headPinned }, [headPinned]);
 useHtmlFlag('data-head-hidden', headHidden && !headPinned ? '1' : null);
@@ -13622,257 +13628,6 @@ useEffect(() => {
   };
 }, [sel?.id]);
   
-// ===== STICKY FEED (±1 карточка на жест) =====
-
-useEffect(() => {
-  if (!isBrowser()) return;
-  // ⚠️ В треде темы (ветка сообщений) sticky-feed ломает тач-скролл:
-  // он гасит нативный скролл (touchAction:none + preventDefault), а "ручной" scrollTop
-  // может крутить не тот контейнер. Поэтому включаем sticky-feed только в режиме ленты.
-  if (sel?.id) return;
- 
-  // ✅ Новый sticky-feed: ТОЛЬКО TAЧ, строго 1 свайп = 1 карточка, без центрирования и без wheel.
-  // Работает на iOS/Android/планшетах/тач-ноутах.
-
-  let attachedEl = null;
-  const optsTouch = { passive: false, capture: true }; // iOS: только так preventDefault реально гасит momentum
-
-  const isTouchDevice = () => {
-    try {
-      const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
-      const mtp = Number(navigator?.maxTouchPoints || 0) > 0;
-      return coarse || mtp;
-    } catch {}
-    return false;
-  };
-
-  const isInIgnoredUi = (target) => {
-    try {
-      const el = target?.nodeType ? target : null;
-      if (!el?.closest) return false;
-      if (el.closest('.searchDrop')) return true;
-      if (el.closest('.emojiPanel')) return true;
-      // не ломаем поля ввода/кнопки/ползунки
-      if (el.closest('input, textarea, select, button, a')) return true;
-      if (el.closest('input[type="range"]')) return true;
-    } catch {}
-    return false;
-  };
-
-  // ВАЖНО: реальный скролл-контейнер форума — это bodyRef / data-forum-scroll="1"
-  const getScrollEl = () => {
-    try {
-      return bodyRef?.current || document.querySelector('[data-forum-scroll="1"]') || null;
-    } catch {}
-    return null;
-  };
-
-  const getCards = (scrollEl) => {
-    try {
-      const nodes = scrollEl?.querySelectorAll?.('[data-feed-card="1"]') || [];
-      return Array.from(nodes).filter(Boolean);
-    } catch {}
-    return [];
-  };
-
-  const readTopOffset = () => {
-    // если сверху есть sticky панели — чтобы карточка не уходила под них
-    try {
-      const raw = window.getComputedStyle(document.documentElement).getPropertyValue('--feed-snap-top-offset');
-      const v = String(raw || '').trim();
-      const n = parseFloat(v);
-      return Number.isFinite(n) ? n : 0;
-    } catch {}
-    return 0;
-  };
-
-  const clampScrollTop = (scrollEl, top) => {
-    try {
-      const maxTop = Math.max(0, (scrollEl.scrollHeight || 0) - (scrollEl.clientHeight || 0));
-      return Math.max(0, Math.min(Number(top) || 0, maxTop));
-    } catch {}
-    return Math.max(0, Number(top) || 0);
-  };
-
-  const findTopIndex = (cards, scrollEl) => {
-    if (!cards.length || !scrollEl) return 0;
-    try {
-      const contRect = scrollEl.getBoundingClientRect();
-      const topY = contRect.top + readTopOffset();
-      let best = 0;
-      let bestDist = Infinity;
-      for (let i = 0; i < cards.length; i++) {
-        const r = cards[i].getBoundingClientRect();
-        const d = Math.abs(r.top - topY);
-        if (d < bestDist) { bestDist = d; best = i; }
-      }
-      return best;
-    } catch {}
-    return 0;
-  };
-
-  const scrollCardToTop = (scrollEl, card) => {
-    if (!scrollEl || !card) return;
-    try {
-      const contRect = scrollEl.getBoundingClientRect();
-      const r = card.getBoundingClientRect();
-      const topOffset = readTopOffset();
-      const delta = (r.top - contRect.top) - topOffset;
-      const nextTop = clampScrollTop(scrollEl, (scrollEl.scrollTop || 0) + delta);
-      scrollEl.scrollTop = nextTop; // auto: мгновенно, чтобы не было инерции/улёта
-    } catch {}
-  };
-
-  const restoreScrollStyles = (st) => {
-    try {
-      const el = st?.scrollEl;
-      if (!el) return;
-      el.style.webkitOverflowScrolling = st.prevWos || '';
-      el.style.overscrollBehavior = st.prevOb || '';
-      el.style.touchAction = st.prevTa || '';
-    } catch {}
-  };
-
-  const onTouchStart = (e) => {
-    try {
-      if (!isTouchDevice()) return;
-      if (!e?.touches || e.touches.length !== 1) return;
-      if (isInIgnoredUi(e.target)) return;
-
-      const scrollEl = getScrollEl();
-      if (!scrollEl) return;
-
-      const cards = getCards(scrollEl);
-      if (cards.length < 2) return; // если карточек нет — не вмешиваемся
-
-      // iOS/Android: гасим overscroll/momentum на время жеста
-      const prevWos = scrollEl.style.webkitOverflowScrolling;
-      const prevOb = scrollEl.style.overscrollBehavior;
-      const prevTa = scrollEl.style.touchAction;
-      scrollEl.style.webkitOverflowScrolling = 'auto';
-      scrollEl.style.overscrollBehavior = 'contain';
-      scrollEl.style.touchAction = 'none';
-
-      const t0 = e.touches[0];
-      stickyFeedTouchRef.current = {
-        active: true,
-        startY: t0.clientY,        
-        startX: t0.clientX,
-        startTop: Number(scrollEl.scrollTop || 0),
-        locked: false,
-        scrollEl,
-        prevWos,
-        prevOb,
-        prevTa,
-      };
-    } catch {}
-  };
-
-  const onTouchMove = (e) => {
-    try {
-      const st = stickyFeedTouchRef.current;
-      if (!st?.active) return;
-      if (!isTouchDevice()) return;
-      if (!e?.touches || e.touches.length !== 1) return;
-      if (isInIgnoredUi(e.target)) return;
-
-      const scrollEl = st.scrollEl;
-      if (!scrollEl) return;
-
-      const t = e.touches[0];
-      const dy = t.clientY - (st.startY || 0);
-      const dx = t.clientX - (st.startX || 0);
-
-      // Берём только вертикальный жест
-      if (Math.abs(dy) > 6 && Math.abs(dy) > Math.abs(dx)) {
-        st.locked = true;
-        // полностью выключаем нативный скролл (иначе momentum улетит)
-        try { e.preventDefault(); } catch {}
-        // ведём контейнер вручную, чтобы было ощущение "тащу ленту"
-        scrollEl.scrollTop = clampScrollTop(scrollEl, (st.startTop || 0) - dy);
-      }
-    } catch {}
-  };
-
-  const onTouchEnd = (e) => {
-    try {
-      const st = stickyFeedTouchRef.current;
-      if (!st?.active) return;
-      st.active = false;
-
-      const scrollEl = st.scrollEl;
-      // восстановить стили нужно ВСЕГДА
-      restoreScrollStyles(st);
-
-      if (!isTouchDevice()) return;
-      if (isInIgnoredUi(e.target)) return;
-      if (!st.locked) return; // не вертикальный свайп — не мешаем
-      if (!scrollEl) return;
-
-      const cards = getCards(scrollEl);
-      if (cards.length < 2) return;
-
-      const changed = e?.changedTouches && e.changedTouches[0];
-      if (!changed) return;
-      const dy = changed.clientY - (st.startY || 0);
-      const dx = changed.clientX - (st.startX || 0);
-      if (Math.abs(dy) < 30 || Math.abs(dy) < Math.abs(dx)) {
-        // слабый жест → просто снап на ближайшую текущую
-        const idx0 = findTopIndex(cards, scrollEl);
-        scrollCardToTop(scrollEl, cards[idx0]);
-        return;
-      }
-
-      const nowTs = Date.now();
-      if ((stickyFeedLockRef.current?.until || 0) > nowTs) return;
-      stickyFeedLockRef.current = { until: nowTs + 320 };
-
-      const dir = dy < 0 ? 1 : -1; // swipe up => next
-      const idx = findTopIndex(cards, scrollEl);
-      const next = Math.max(0, Math.min(cards.length - 1, idx + dir));
-      scrollCardToTop(scrollEl, cards[next]); // ✅ строго одна карточка
-    } catch {
-      // на всякий случай восстановим стили даже при ошибке
-      try { restoreScrollStyles(stickyFeedTouchRef.current); } catch {}
-    }
-  };
-
-  const attach = () => {
-    const scrollEl = getScrollEl();
-    if (!scrollEl) return;
-    if (attachedEl === scrollEl) return;
-    if (attachedEl) {
-      try { attachedEl.removeEventListener('touchstart', onTouchStart, optsTouch); } catch {}
-      try { attachedEl.removeEventListener('touchmove', onTouchMove, optsTouch); } catch {}
-      try { attachedEl.removeEventListener('touchend', onTouchEnd, optsTouch); } catch {}
-    }
-    attachedEl = scrollEl;
-    try { scrollEl.addEventListener('touchstart', onTouchStart, optsTouch); } catch {}
-    try { scrollEl.addEventListener('touchmove', onTouchMove, optsTouch); } catch {}
-    try { scrollEl.addEventListener('touchend', onTouchEnd, optsTouch); } catch {}
-  };
-
-  attach();
-
-  // если bodyRef появится чуть позже — подхватим
-  const t = setInterval(attach, 700);
-
-  return () => {
-    try { clearInterval(t); } catch {}
-    // ✅ Если эффект снимается при переходе (например, открыли тред),
-    // обязательно откатываем стили скролла, иначе touchAction может остаться 'none'.
-    try { restoreScrollStyles(stickyFeedTouchRef.current); } catch {}
-    try { stickyFeedTouchRef.current = { active: false, startY: 0, startX: 0 }; } catch {}
-     if (attachedEl) {
-      try { attachedEl.removeEventListener('touchstart', onTouchStart, optsTouch); } catch {}
-      try { attachedEl.removeEventListener('touchmove', onTouchMove, optsTouch); } catch {}
-      try { attachedEl.removeEventListener('touchend', onTouchEnd, optsTouch); } catch {}
-    }
-    attachedEl = null;
-  };
-}, [sel?.id]);
-
-
 // [SORT_STATE:AFTER]
 const [q, setQ] = useState('');
 const [topicFilterId, setTopicFilterId] = useState(null);
