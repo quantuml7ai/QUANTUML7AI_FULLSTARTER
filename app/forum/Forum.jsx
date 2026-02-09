@@ -5496,21 +5496,35 @@ html[data-tma="1"] .inboxTabs{
     display:flex;
     align-items:center;
     justify-content:center;
-    width: 86px;
+    width: 36px;
+    padding-left: 18px;
     border-radius: 10px;
     border: 1px solid rgba(255,255,255,.08);
     background: rgba(0,0,0,.18);
   }
-  .cmbLoading{
-    font-size: 12px;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: rgba(234,244,255,.82);
-    animation: cmbBlink 1.05s ease-in-out infinite;
+  /* вместо мигающего текста — «точечное колечко» загрузки */
+  .cmbSpinner{
+    position: relative;
+    width: 22px;
+    height: 22px;
   }
-  @keyframes cmbBlink{
-    0%, 100% { opacity: .25; }
-    50% { opacity: 1; }
+  .cmbDot{
+    position: absolute;
+    top: 50%;
+
+    width: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(234,244,255,.88);
+    transform: translate(-50%, -50%) rotate(calc(var(--i) * 45deg)) translate(9px);
+    opacity: 0;
+    animation: cmbDotBuild 1.15s linear infinite;
+    animation-delay: calc(var(--i) * 0.085s);
+  }
+  @keyframes cmbDotBuild{
+    0%, 12% { opacity: 0; }
+    18%, 92% { opacity: 1; }
+    100% { opacity: 0; }
   }
   .cmbMain{ flex: 1; min-width: 0; }
 
@@ -13520,7 +13534,7 @@ useEffect(() => {
     if (raf) { try { window.cancelAnimationFrame(raf) } catch {} raf = 0; }
   };
 }, [sel?.id]);
- 
+  
 // ===== STICKY FEED (±1 карточка на жест) =====
 
 useEffect(() => {
@@ -20851,7 +20865,16 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
       {mediaBarOn && (
         <div className="composerMediaBar" role="status" aria-live="polite" data-phase={String(mediaPhase || '').toLowerCase()}>
           <div className="cmbLeft">
-            <span className="cmbLoading">{t('loading')}</span>
+            <div className="cmbSpinner" role="img" aria-label={t('loading')}>
+              {Array.from({ length: 8 }).map((_, i) => (
+                <span
+                  key={i}
+                 className="cmbDot"
+                  style={{ '--i': i }}
+                  aria-hidden="true"
+                />
+              ))}
+            </div>
           </div>
           <div className="cmbMain">
             <div className="cmbTop">
@@ -21104,7 +21127,8 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
             title={t?.('forum_remove_attachment')}
             onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); setPendingImgs(prev => prev.filter((_,idx)=>idx!==i)); }}
           >
-            <Image src={u} alt="" loading="lazy" unoptimized width={96} height={32} className="h-8 w-auto max-w-[96px] rounded-md ring-1 ring-white/10" />
+            <Image src={u} alt="" loading="lazy" unoptimized width={600} height={600} 
+            className="h-8 w-auto max-w-[96px] rounded-md ring-1 ring-white/10" />
             <span className="absolute -top-1 -right-1 hidden group-hover:inline-flex items-center justify-center text-[10px] leading-none px-1 rounded bg-black/70">❌</span>
           </button>
         ))}
