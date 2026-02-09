@@ -5372,7 +5372,7 @@ html[data-tma="1"] .inboxTabs{
   color:#eaf4ff;
   padding:4px 10px;
   border-radius:999px;
-  font-size:11px;
+  font-size:12px;
   font-weight:800;
   letter-spacing:.02em;
   box-shadow:0 0 14px rgba(80,167,255,.18);
@@ -19516,7 +19516,9 @@ onOpenThread={(clickP) => {
                       data-dm-mine={mine ? '1' : '0'}
                     >
                       <div className={cls('dmMsgBubble', mine && 'me', 'item', 'qshine')}>
+                       
                         <div className={cls('dmMsgHeader', mine && 'me')}>
+                      
                           <div
                             className="dmMsgAvatar"
                             onClick={(e) => {
@@ -19542,8 +19544,8 @@ onOpenThread={(clickP) => {
                             }}
                           >
                             <span className="nick-text">{msgNick || shortId(fromId)}</span>
-                          </button>
-                        </div>
+                          </button>                         
+                        </div>                       
                         {!!(stickers && stickers.length) && (
                           <div className="dmMediaGrid">
                             {stickers.map((s, i) => (
@@ -19651,10 +19653,18 @@ onOpenThread={(clickP) => {
                             <span className="translateToggleIcon">🌐</span>
                           </button>
                         )}
+  {/* разделитель между VIP и обычными */}
+  <div style={{height:1,opacity:.2,background:'currentColor',margin:'17px 4px'}} />
+
                         <div className="dmMsgFooter">
                           {!!threadUid && (
                             <div className="dmMsgActions">
-                              {!!msgId && (
+      {/*
+       DM actions rules:
+        - outgoing (mine): show Delete, hide Block (can't block yourself)
+        - incoming (not mine): show Block, hide Delete
+      */}
+      {!!msgId && mine && (
                                 <button
                                   type="button"
                                   className="dmActionBtn danger"
@@ -19663,17 +19673,19 @@ onOpenThread={(clickP) => {
                                   {t('forum_delete')}
                                 </button>
                               )}
-                              <button
-                                type="button"
-                                className="dmActionBtn"
-                                onClick={() => toggleDmBlock(threadUid, !threadBlocked)}
-                              >
-                                {threadBlocked ? t('dm_unblock') : t('dm_block')}
-                              </button>
+      {!mine && (
+        <button
+          type="button"
+          className="dmActionBtn"
+          onClick={() => toggleDmBlock(threadUid, !threadBlocked)}
+        >
+          {threadBlocked ? t('dm_unblock') : t('dm_block')}
+        </button>
+      )}
                             </div>
                           )}
                           <div className="dmMsgMeta">
-                            <HydrateText value={human(m?.ts)} />
+                            <HydrateText value={human(m?.ts)} /> 
                             {mine && (
                               <span className={cls('dmStatus', seen && 'seen')} title={statusTitle} aria-label={statusTitle}>
                                 {m?.status === 'sending'
