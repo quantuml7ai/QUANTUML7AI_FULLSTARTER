@@ -18482,7 +18482,7 @@ function pickAdUrlForSlot(slotKey, slotKind) {
 <div className={cls('head', headHidden && !headPinned && 'head--collapsed')}>
   {/* шапка */}
   <div className="headInner" style={{ width:'100%' }}>
-    {headPinned && (
+    {(!headHidden || headPinned) && (
       <button
         type="button"
         className="headCollapseBtn"
@@ -19987,7 +19987,7 @@ onOpenThread={(clickP) => {
 <div className={cls('head', headHidden && !headPinned && 'head--collapsed')}>
   {/* шапка */}
   <div className="headInner" style={{ width:'100%' }}>
-    {headPinned && (
+    {(!headHidden || headPinned) && (
       <button
         type="button"
         className="headCollapseBtn"
