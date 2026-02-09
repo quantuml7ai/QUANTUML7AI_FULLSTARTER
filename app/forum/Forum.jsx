@@ -181,6 +181,22 @@ const getDmMediaKind = (url, typeHint = '') => {
   if (isDmImageUrl(url)) return 'image';
   return 'other';
 };
+// ВАЖНО: В DM мы вырезаем из текста ТОЛЬКО то, что реально рендерим плеером/стикером (vercel/blob, upload endpoints, vip-emoji и т.п.)
+// А любые внешние ссылки (YouTube/TikTok/прочее) оставляем в тексте, чтобы они отображались как обычный текст/ссылка.
+const isDmPlayableUrlForRender = (u) => {
+  const url = normalizeDmUrl(u);
+  if (!url) return false;
+  return isDmVideoUrl(url) || isDmAudioUrl(url) || isDmImageUrl(url) || isDmStickerUrl(url);
+};
+
+const stripDmPlayableUrlsFromText = (raw) => {
+  const s = String(raw || '');
+  if (!s) return '';
+  return s
+    .replace(DM_URL_RE, (u) => (isDmPlayableUrlForRender(u) ? '' : u))
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+};
 
 const extractDmStickersFromText = (rawText) => {
   const stickers = [];
@@ -2686,7 +2702,24 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 .iconBtn{ width:40px; height:40px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:transparent; display:grid; place-items:center; transition:transform .08s, box-shadow .2s }
 .iconBtn:hover{ box-shadow:0 0 18px rgba(80,167,255,.25) } .iconBtn:active{ transform:scale(.96) }
 
-.searchDrop{ position:absolute; top:calc(100% + 6px); left:0; right:0; inset-inline-end:0; width:100%; max-height:460px; overflow:auto; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:8px; z-index:3000 }
+.searchDrop{
+  position:absolute;
+  top:calc(100% + 6px);
+  left:0;
+  right:auto;
+  /* НЕ привязываем к ширине инпута: делаем адаптивно */
+  width:clamp(250px, 92vw, 560px);
+  /* и не даём вылезти за экран */
+  max-width:calc(100vw - 24px);
+
+  max-height:520px;
+  overflow:auto;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(10,14,20,.98);
+  border-radius:12px;
+  padding:8px;
+  z-index:3000;
+}
 .searchResultItem{
   display:flex;
   align-items:flex-start;
@@ -19572,7 +19605,7 @@ onOpenThread={(clickP) => {
                     ? t('dm_sending')
                     : (seen ? t('dm_seen') : (delivered ? t('dm_delivered') : t('dm_sent')));
                   const msgTs = Number(m?.ts || 0);
-                  const dmTextBase = stripMediaUrlsFromText(cleanedText);
+                  const dmTextBase = stripDmPlayableUrlsFromText(cleanedText);
                   const dmTrState = (() => {
                     const s = (dmTranslateMap && msgId) ? dmTranslateMap[msgId] : null;
                     if (!s || s.src !== dmTextBase) return { isTranslated: false, loading: false, text: null, src: dmTextBase };
@@ -19731,38 +19764,35 @@ onOpenThread={(clickP) => {
                             ))}
                           </div>
                         )}
-                        {!!otherUrls.length && !dmHasText && (
-                          <div className="dmMediaGrid">
-                            {otherUrls.map((u, i) => (
-                              <a
-                                key={`${m?.id || 'm'}:file:${i}`}
-                                className="dmFileCard mediaBox dmMediaBox"
-                                data-kind="file"
-                                href={u}
-                                target="_blank"
-                                rel="noreferrer noopener"
-                                onClick={(e) => e.stopPropagation()}
-                                aria-label={t('forum_attachment')}
-                              >
-                                <span className="dmFileIcon" aria-hidden>📎</span>
-                              </a>
-                            ))}
-                          </div>
-                        )}
+  {!!otherUrls.length && !dmHasText && (
+    <div className="dmTextFrame">
+      <div className="dmTextContent">
+        {otherUrls.map((u, i) => (
+          <div key={`${m?.id || 'm'}:plainlink:${i}`}>
+            <a href={u} target="_blank" rel="noreferrer noopener" onClick={(e) => e.stopPropagation()}>
+              {u}
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
                         {dmHasText && (
                           <div className="dmTextFrame">
                             {!!dmHasText && (
                               <div className="dmTextContent" dangerouslySetInnerHTML={{ __html: safeHtml(dmDisplayText) }} />
                             )}
-                            {!!otherUrls.length && (
-                              <div className="dmAttachLinks">
-                                {otherUrls.map((u, i) => (
-                                  <div key={`${m?.id || 'm'}:link:${i}`}>
-                                    <a href={u} target="_blank" rel="noreferrer noopener">{u}</a>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+  {!!otherUrls.filter(u => !/^https?:\/\//i.test(String(u || ''))).length && (
+    <div className="dmAttachLinks">
+      {otherUrls
+        .filter(u => !/^https?:\/\//i.test(String(u || '')))
+        .map((u, i) => (
+          <div key={`${m?.id || 'm'}:link:${i}`}>
+            <a href={u} target="_blank" rel="noreferrer noopener">{u}</a>
+          </div>
+        ))}
+    </div>
+  )}
                           </div>
                         )}
                         {dmHasText && (
