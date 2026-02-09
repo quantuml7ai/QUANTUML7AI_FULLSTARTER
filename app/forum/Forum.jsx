@@ -2715,12 +2715,13 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 .searchDrop{
   position:absolute;
   top:calc(100% + 6px);
-  left:0;
-  right:auto;
-  /* НЕ привязываем к ширине инпута: делаем адаптивно */
-  width:clamp(250px, 92vw, 560px);
-  /* и не даём вылезти за экран */
-  max-width:calc(100vw - 24px);
+   left:0;
+   right:auto;
+   /* НЕ привязываем к ширине инпута: делаем адаптивно */
+   inline-size:clamp(250px, 92vw, 560px);
+   /* и не даём вылезти за экран */
+   max-inline-size:calc(100vw - 24px);
+   box-sizing:border-box;
 
   max-height:520px;
   overflow:auto;
@@ -2730,6 +2731,12 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   padding:8px;
   z-index:3000;
 }
+
+ /* RTL: дропдаун должен открываться от правого края поиска */
+ [dir="rtl"] .searchDrop{
+   left:auto;
+   right:0;
+ }  
 .searchResultItem{
   display:flex;
   align-items:flex-start;
@@ -4020,6 +4027,9 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.35); z-index:20; visibility:hidden;
  pointer-events: auto;
   }
+ /* RTL: зеркалим позиционирование ⋮ и выпадающего меню */
+ [dir="rtl"] .ownerKebab{ right:auto; left:8px; }
+ [dir="rtl"] .ownerMenu{ right:auto; left:30px; }
 
 .ownerKebab:focus-within .ownerMenu,
 .ownerKebab:hover .ownerMenu{ visibility:visible; }
@@ -8831,6 +8841,7 @@ const { t: tt } = useI18n();
                onPointerDownCapture={(e)=>{ e.stopPropagation(); }}
                onMouseDownCapture={(e)=>{ e.stopPropagation(); }}
                onTouchStartCapture={(e)=>{ e.stopPropagation(); }}
+               /* right убран — теперь RTL/LTR управляется через CSS .ownerKebab + [dir="rtl"] */
              >
                ⋮
              </button>   
@@ -9457,7 +9468,7 @@ const NO_THREAD_OPEN_SELECTOR =
          onPointerDownCapture={(e)=>{ e.stopPropagation(); }}
          onMouseDownCapture={(e)=>{ e.stopPropagation(); }}
          onTouchStartCapture={(e)=>{ e.stopPropagation(); }}
-        style={{ position:'absolute', right:8, top:8 }}
+        style={{ position:'absolute', top:8 }}
       >        
         <button
           className="kebabBtn"
