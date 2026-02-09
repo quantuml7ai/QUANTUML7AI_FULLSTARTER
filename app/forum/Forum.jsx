@@ -314,6 +314,16 @@ function shortVideoMeta(u) {
   if (/\.(mp4)(?:$|[?#])/i.test(s)) return { label: 'MP4', short: s.replace(/^https?:\/\//i, '').replace(/^www\./i, '').slice(0, 44) };
   return { label: 'Video', short: s.replace(/^https?:\/\//i, '').replace(/^www\./i, '').slice(0, 44) };
 }
+function isVercelStorageUrl(u) {
+  const s = String(u || '').trim();
+  if (!s) return false;
+  try {
+    const p = new URL(s, 'https://x.local');
+    return String(p.hostname || '').endsWith('vercel-storage.com');
+  } catch {
+    return /vercel-storage\.com/i.test(s);
+  }
+}
 
 function buildSearchVideoMedia(url) {
   const u = String(url || '').trim();
@@ -18711,7 +18721,10 @@ function pickAdUrlForSlot(slotKey, slotKind) {
                           </span>
                           {r.media?.kind === 'video' && (
                             <span className="searchResultMeta">
-                              {String(r.media.label || 'Video')}{r.media.short ? ` · ${String(r.media.short)}` : ''}
+                              {String(r.media.label || 'Video')}
+                              {r.media.short && !isVercelStorageUrl(r.media.url)
+                                ? ` · ${String(r.media.short)}`
+                                : ''}
                             </span>
                           )}
                           {!!r.text && <span className="searchResultText">{r.text}</span>}
@@ -20213,7 +20226,10 @@ onOpenThread={(clickP) => {
                           </span>
                           {r.media?.kind === 'video' && (
                             <span className="searchResultMeta">
-                              {String(r.media.label || 'Video')}{r.media.short ? ` · ${String(r.media.short)}` : ''}
+                              {String(r.media.label || 'Video')}
+                              {r.media.short && !isVercelStorageUrl(r.media.url)
+                                ? ` · ${String(r.media.short)}`
+                                : ''}
                             </span>
                           )}
                           {!!r.text && <span className="searchResultText">{r.text}</span>}
