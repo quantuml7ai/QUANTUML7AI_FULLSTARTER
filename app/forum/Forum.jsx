@@ -12027,7 +12027,13 @@ const persistTombstones = useCallback((patch) => {
                       detail: { source: 'youtube', element: iframe }
                     }));
                   }
-                  if (state === YT.PlayerState?.PAUSED || state === YT.PlayerState?.ENDED) {
+                  // LOOP: когда ролик закончился — стартуем заново без reload iframe
+                  if (state === YT.PlayerState?.ENDED) {
+                    try { player?.seekTo?.(0, true); } catch {}
+                    try { player?.playVideo?.(); } catch {}
+                    return;
+                  }
+                  if (state === YT.PlayerState?.PAUSED) {
                     stopYtMutePoll(player);
                   }
                 } catch {}
@@ -12131,6 +12137,17 @@ const persistTombstones = useCallback((patch) => {
       }, ms);
       unloadTimers.set(el, id);
     };
+    // Best-effort loop для iframe (Vimeo/встроенные плееры/прочее):
+    // добавляем loop=1 ОДИН РАЗ (не на каждом фокусе), чтобы не было дергания.
+    const ensureIframeLoopParam = (src) => {
+      try {
+        const u = new URL(src, window.location.href);
+        if (!u.searchParams.has('loop')) u.searchParams.set('loop', '1');
+        return u.toString();
+      } catch {
+        return src;
+      }
+    };
 
     const playMedia = async (el) => {
       if (!el) return;
@@ -12140,7 +12157,8 @@ const persistTombstones = useCallback((patch) => {
         try {
           applyMutedPref(el);
           el.playsInline = true;
-          // НЕ выставляем loop=true (это ломает пользовательский контроль)
+          // LOOP: автоплей всегда зацикленный
+          el.loop = true;
           if (el.paused) {
             const p = el.play?.();
             if (p && typeof p.catch === 'function') p.catch(() => {});
@@ -12155,6 +12173,8 @@ const persistTombstones = useCallback((patch) => {
         if (a instanceof HTMLAudioElement) {
           try {
             applyMutedPref(a);
+            // LOOP: qcast-аудио тоже зацикливаем
+            a.loop = true;            
             if (a.paused) {
               const p = a.play?.();
               if (p && typeof p.catch === 'function') p.catch(() => {});
@@ -12187,9 +12207,12 @@ const persistTombstones = useCallback((patch) => {
 
       if (kind === 'tiktok' || kind === 'iframe') {
         // ВАЖНО: НЕ делаем force-reset на каждом "фокусе" — это и есть перезапуск при микроскролле.
-        const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
+        const rawSrc = el.getAttribute('data-src') || el.getAttribute('src') || '';
+        const src = rawSrc ? ensureIframeLoopParam(rawSrc) : '';
         if (!src) return;
+        // сохраняем уже "loop-версию" в data-src, чтобы дальше не мутить url повторно
         if (!el.getAttribute('data-src')) { try { el.setAttribute('data-src', src); } catch {} }
+      
         const alreadyActive = el.getAttribute('data-forum-iframe-active') === '1';
         const cur = el.getAttribute('src') || '';
         if (!alreadyActive || !cur) {
