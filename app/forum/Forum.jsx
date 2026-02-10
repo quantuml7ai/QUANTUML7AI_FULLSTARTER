@@ -11865,7 +11865,9 @@ const persistTombstones = useCallback((patch) => {
         });
       },
       {
-        threshold: 0.25, // считается «в фокусе», когда ≥25% видно
+        // Чуть раньше подготавливаем медиа, чтобы автоплей не "спотыкался"
+        // при входе в зону фокуса на мобильных.
+        threshold: 0.15, // было 0.25
       }
     );
 
@@ -12238,16 +12240,38 @@ const persistTombstones = useCallback((patch) => {
         rafId = requestAnimationFrame(() => {
           rafId = 0;
           const { el: candidate, ratio } = pickMostVisible();
-          const FOCUS_RATIO = 0.5;
+          // Расширяем "зону удержания" автоплея примерно на 30–40%:
+          //  - раньше было 0.5 (нужно было видеть ≥50% элемента)
+          //  - теперь стартуем при ~35% и выключаемся только при падении ниже ~22%
+          // Это даёт широкий диапазон без дергания при микроскролле.
+          const START_RATIO = 0.35; // было 0.5
+          const STOP_RATIO  = 0.22; // гистерезис: не выключаемся сразу
 
-          if (!candidate || ratio < FOCUS_RATIO) {
-            if (active) {
-              softPauseMedia(active);
-              scheduleHardUnload(active, 900);
-              active = null;
+          // Если есть активный элемент — держим его, пока он не "выпал" ниже STOP_RATIO.
+          // Это убирает "стоп/плей" при лёгком смещении вверх/вниз.
+          if (active) {
+            const ar = ratios.get(active) || 0;
+            if (ar >= STOP_RATIO) {
+              // Если кандидат другой — переключаемся только когда он уверенно лучше.
+              // (иначе будет флаттер между двумя элементами рядом)
+              if (candidate && candidate !== active && ratio >= START_RATIO && ratio > ar + 0.08) {
+                softPauseMedia(active);
+                scheduleHardUnload(active, 900);
+                active = candidate;
+                cancelUnload(active);
+                playMedia(active);
+              }
+              return;
             }
-            return;
+            // Активный выпал ниже STOP_RATIO — мягко отпускаем
+            softPauseMedia(active);
+            scheduleHardUnload(active, 900);
+            active = null;
           }
+
+          // Нет активного — берём кандидата, только если он попал в расширенную зону
+          if (!candidate || ratio < START_RATIO) return;
+ 
 
           if (active && active !== candidate) {
             // старый — мягко стоп + hard unload с задержкой
@@ -12262,7 +12286,9 @@ const persistTombstones = useCallback((patch) => {
       },
       {
         threshold: [0, 0.15, 0.35, 0.6, 0.85, 1],
-        rootMargin: '0px 0px -20% 0px',
+        // Было: '0px 0px -20% 0px' → фокусная зона смещалась вверх (особенно на мобилках).
+        // Делаем симметрично, ближе к настоящему центру, и шире по ощущению.
+        rootMargin: '-10% 0px -10% 0px',
       }
     );
 
