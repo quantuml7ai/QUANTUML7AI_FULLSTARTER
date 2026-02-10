@@ -17,7 +17,7 @@ export const metadata = {
     description: GLOBAL_DESCRIPTION,
     images: [
       {
-        url: '/metab/game1.png',
+        url: '/metab/game1.png?v=20260210',
         width: 1200,
         height: 630,
         alt: 'Game',
@@ -30,7 +30,7 @@ export const metadata = {
     creator: '@quantuml7ai',
     title: 'Game',
     description: GLOBAL_DESCRIPTION,
-    images: ['/metab/game1.png'],
+    images: ['/metab/game1.png?v=20260210'],
   },
 }
 

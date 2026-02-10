@@ -17,7 +17,7 @@ export const metadata = {
     description: GLOBAL_DESCRIPTION,
     images: [
       {
-        url: '/metab/forum1.png',
+        url: '/metab/forum1.png?v=20260210',
         width: 1200,
         height: 630,
         alt: 'Q-Line',
@@ -30,7 +30,7 @@ export const metadata = {
     creator: '@quantuml7ai',
     title: 'Q-Line',
     description: GLOBAL_DESCRIPTION,
-    images: ['/metab/forum1.png'],
+    images: ['/metab/forum1.png?v=20260210'],
   },
 }
 
