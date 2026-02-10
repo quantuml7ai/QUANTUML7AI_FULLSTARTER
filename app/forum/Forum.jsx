@@ -5030,6 +5030,24 @@ html[data-tma="1"] .inboxTabs{
   box-shadow: 0 12px 26px rgba(0,0,0,.3), inset 0 0 22px rgba(120,200,255,.12);
   transition: transform .14s ease, box-shadow .18s ease, border-color .18s ease;
 } 
+.dmRow.dmRowUnread{
+  border-color: rgba(0,255,140,.9);
+  box-shadow:
+    0 0 0 1px rgba(0,255,140,.65),
+    0 0 18px rgba(0,255,140,.55),
+    0 0 44px rgba(0,255,140,.28),
+    0 12px 26px rgba(0,0,0,.3),
+    inset 0 0 24px rgba(0,255,140,.14);
+}
+.dmRow.dmRowUnread::before{
+  content:'';
+  position:absolute;
+  inset:-2px;
+  pointer-events:none;
+  background: radial-gradient(120% 120% at 10% 0%, rgba(0,255,140,.22), rgba(0,255,140,0) 60%);
+  opacity:.95;
+  mix-blend-mode: screen;
+}  
 .dmRow:hover{
   transform: translateY(-1px);
   border-color: rgba(160,210,255,.45);
@@ -9120,7 +9138,7 @@ function DmDialogRow({
     <button
       type="button"
       id={entryId}
-      className="item dmRow hoverPop text-left"
+      className={cls("item dmRow hoverPop text-left", unread && "dmRowUnread")}
       data-feed-card="1"
       data-feed-kind="dm-dialog"
       data-dm-uid={uid}
@@ -14575,9 +14593,10 @@ useEffect(() => {
       if (!uid || !lastTs) continue;
       const deletedAt = Number(dmDeletedMap?.[uid] || 0);
       if (deletedAt && lastTs <= deletedAt) continue;
-      if (lastFrom && String(lastFrom) !== String(meId || '')) {
-        markDmSeen(uid, lastTs);
-      }
+      // ВАЖНО:
+      // НЕЛЬЗЯ помечать диалог прочитанным просто потому, что строка видна в списке.
+      // Прочтение должно происходить только внутри открытой переписки, когда входящее сообщение
+      // реально попало в фокус (см. observer на .dmMsgRow[data-dm-ts]).
     }
   }, { threshold: 0.6 });
   dmSeenObserverRef.current = io;
