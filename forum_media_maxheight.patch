@@ -1,0 +1,372 @@
+--- app/forum/Forum.jsx
++++ app/forum/Forum.jsx
+@@ -300,6 +300,98 @@
+   const m = s.match(/(?:youtu\.be\/|watch\?v=|shorts\/|embed\/)([A-Za-z0-9_-]{6,})/i);
+   return m ? String(m[1] || '') : '';
+ }
++/* =========================================================
++   Media fit: iframe (YouTube/TikTok) without cropping
++   - keeps full content visible inside max-height
++   - if max-height is hit, we reduce width and center (side gaps allowed)
++========================================================= */
++function FitMediaIFrame({
++  ratioW = 16,
++  ratioH = 9,
++  className = '',
++  style,
++  ...iframeProps
++}) {
++  const wrapRef = React.useRef(null);
++  const [box, setBox] = React.useState({ w: '100%', h: 0 });
++
++  const recompute = React.useCallback(() => {
++    const wrap = wrapRef.current;
++    if (!wrap) return;
++
++    const mediaBox = wrap.closest?.('.mediaBox') || wrap.parentElement;
++    if (!mediaBox) return;
++
++    let maxH = 0;
++    try {
++      const cs = window.getComputedStyle(mediaBox);
++      const mh = cs.maxHeight || cs.getPropertyValue('max-height') || '';
++      maxH = parseFloat(String(mh).replace('px', '').trim()) || 0;
++      if (!maxH) {
++        const v = cs.getPropertyValue('--mb-h') || '';
++        maxH = parseFloat(String(v).replace('px', '').trim()) || 0;
++      }
++    } catch {}
++
++    if (!maxH) maxH = 700;
++
++    let w = 0;
++    try { w = mediaBox.getBoundingClientRect().width || 0; } catch { w = 0; }
++    if (!w) return;
++
++    // natural height based on container width
++    const naturalH = (w * ratioH) / ratioW;
++
++    if (naturalH <= maxH) {
++      setBox({ w: '100%', h: Math.max(1, Math.round(naturalH)) });
++      return;
++    }
++
++    // max-height reached → reduce width to keep full frame visible
++    const h = Math.max(1, Math.round(maxH));
++    const targetW = Math.max(1, Math.round((h * ratioW) / ratioH));
++    const finalW = Math.min(targetW, Math.round(w));
++    setBox({ w: `${finalW}px`, h });
++  }, [ratioW, ratioH]);
++
++  React.useLayoutEffect(() => {
++    if (typeof window === 'undefined') return undefined;
++    recompute();
++
++    const wrap = wrapRef.current;
++    const mediaBox = wrap?.closest?.('.mediaBox') || wrap?.parentElement;
++    if (!mediaBox || typeof ResizeObserver === 'undefined') return undefined;
++
++    const ro = new ResizeObserver(() => recompute());
++    try { ro.observe(mediaBox); } catch {}
++
++    const onWin = () => recompute();
++    window.addEventListener('resize', onWin);
++
++    return () => {
++      try { ro.disconnect(); } catch {}
++      window.removeEventListener('resize', onWin);
++    };
++  }, [recompute]);
++
++  return (
++    <div
++      ref={wrapRef}
++      className={cls('mediaBoxIframeWrap', className)}
++      style={{
++        width: box.w,
++        height: box.h ? `${box.h}px` : undefined,
++        ...style,
++      }}
++    >
++      <iframe
++        {...iframeProps}
++        className={cls('mediaBoxIframe', iframeProps?.className)}
++        style={undefined}
++      />
++    </div>
++  );
++}
+ 
+ function shortVideoMeta(u) {
+   const s = String(u || '').trim();
+@@ -1728,23 +1820,51 @@
+       color: #eaf1ff;
+     }
+     .forum_root{
+-      --mb-video-h-mobile: 630px;
+-      --mb-video-h-tablet: 650px;
+-      --mb-video-h-desktop: 700px;
+-      --mb-image-h-mobile: 630px;
+-      --mb-image-h-tablet: 650px;
+-      --mb-image-h-desktop: 700px;
+-      --mb-iframe-h-mobile: 630px;
+-      --mb-iframe-h-tablet: 650px;
+-      --mb-iframe-h-desktop: 700px;
+-      --mb-audio-h-mobile: 630px;
+-      --mb-audio-h-tablet: 650px;
+-      --mb-audio-h-desktop: 700px;
+-      --mb-ad-h-mobile: 200px;
+-      --mb-ad-h-tablet: 260px;
+-      --mb-ad-h-desktop: 320px;
+ 
+-  /* VIP emoji / MOZI sticker cards fixed height (как mediaBox) */
++/* =========================================================
++   Media max-height variables (2-level: mobile/desktop)
++   NOTE: tablet inherits mobile by default.
++   You can tweak ONLY these to control all media cards:
++ ========================================================= */
++--mb-video-max-h-mobile: 630px;
++--mb-video-max-h-desktop: 700px;
++
++--mb-image-max-h-mobile: 630px;
++--mb-image-max-h-desktop: 700px;
++
++--mb-iframe-max-h-mobile: 630px;
++--mb-iframe-max-h-desktop: 700px;
++
++/* QCast player (audio cover) max-height */
++--mb-qcast-max-h-mobile: 630px;
++--mb-qcast-max-h-desktop: 700px;
++
++/* Ads */
++--mb-ad-max-h-mobile: 200px;
++--mb-ad-max-h-desktop: 320px;
++
++/* Backward-compatible vars (used across the file) */
++--mb-video-h-mobile: var(--mb-video-max-h-mobile);
++--mb-video-h-tablet: var(--mb-video-max-h-mobile);
++--mb-video-h-desktop: var(--mb-video-max-h-desktop);
++
++--mb-image-h-mobile: var(--mb-image-max-h-mobile);
++--mb-image-h-tablet: var(--mb-image-max-h-mobile);
++--mb-image-h-desktop: var(--mb-image-max-h-desktop);
++
++--mb-iframe-h-mobile: var(--mb-iframe-max-h-mobile);
++--mb-iframe-h-tablet: var(--mb-iframe-max-h-mobile);
++--mb-iframe-h-desktop: var(--mb-iframe-max-h-desktop);
++
++--mb-audio-h-mobile: var(--mb-qcast-max-h-mobile);
++--mb-audio-h-tablet: var(--mb-qcast-max-h-mobile);
++--mb-audio-h-desktop: var(--mb-qcast-max-h-desktop);
++
++--mb-ad-h-mobile: var(--mb-ad-max-h-mobile);
++--mb-ad-h-tablet: var(--mb-ad-max-h-mobile);
++--mb-ad-h-desktop: var(--mb-ad-max-h-desktop);
++
++  /* VIP emoji / MOZI sticker cards fixed height (как mediaBox) */ (как mediaBox) */
+   --mb-vip-emoji-h-mobile: 260px;
+   --mb-vip-emoji-h-tablet: 320px;
+   --mb-vip-emoji-h-desktop: 380px;
+@@ -1814,49 +1934,73 @@
+       display:block;
+       border-radius: 10px;
+     }
+-    .mediaBox{
+-      position:relative;
+-      width:100%;
+-      height:var(--mb-h, 240px);
+-      overflow:hidden;
+-      border-radius:12px;
+-      background:rgba(8,12,20,.7);
+-      border:1px solid rgba(140,170,255,.25);
+-      contain: layout paint;
+-    }
+-    .mediaBox[data-kind="video"]{ --mb-h: var(--mb-video-h); background:#000; }
+-    .mediaBox[data-kind="image"]{ --mb-h: var(--mb-image-h); }
+-    .mediaBox[data-kind="iframe"]{ --mb-h: var(--mb-iframe-h); background:#000; }
+-    .mediaBox[data-kind="audio"]{ --mb-h: var(--mb-audio-h); }
+-    .mediaBox[data-kind="ad"]{ --mb-h: var(--mb-ad-h); background:rgba(2,8,23,.7); }
++    
++.mediaBox{
++  position:relative;
++  width:100%;
++  /* ✅ adaptive: grows with content, but never выше max-height переменной */
++  max-height:var(--mb-h, 240px);
++  height:auto;
++  overflow:hidden;
++  border-radius:12px;
++  background:rgba(8,12,20,.7);
++  border:1px solid rgba(140,170,255,.25);
++  contain: layout paint;
++  display:flex;
++  align-items:center;
++  justify-content:center;
++}
++.mediaBox[data-kind="video"]{ --mb-h: var(--mb-video-h); background:#000; }
++.mediaBox[data-kind="image"]{ --mb-h: var(--mb-image-h); }
++.mediaBox[data-kind="iframe"]{ --mb-h: var(--mb-iframe-h); background:#000; }
++.mediaBox[data-kind="audio"]{ --mb-h: var(--mb-audio-h); }
++.mediaBox[data-kind="ad"]{ --mb-h: var(--mb-ad-h); background:rgba(2,8,23,.7); }
+ 
+-    .mediaBoxItem{
+-      position:absolute;
+-      inset:0;
+-      width:100%;
+-      height:100%;
+-    }
+-    .mediaBox > img,
+-    .mediaBox > video{
+-      object-fit:contain;
+-    }
+-    .mediaBox > iframe{
+-      border:0;
+-    }
+-    .mediaBoxInner{
+-      position:absolute;
+-      inset:0;
+-      display:flex;
+-      align-items:center;
+-      justify-content:center;
+-      padding:0 14px;
+-    }
+-    .mediaBoxAudio{
+-      width:100%;
+-      height:auto;
+-      color-scheme:dark;
+-    }   
+-    :root{
++/* media element must be fully visible (no crop), container may show side gaps */
++.mediaBoxItem{
++  display:block;
++  max-width:100%;
++  max-height:100%;
++  width:auto;
++  height:auto;
++  object-fit:contain;
++}
++.mediaBox > img,
++.mediaBox > video{
++  object-fit:contain;
++}
++
++/* iframe: we compute box (w/h) in JS to avoid cropping and respect max-height */
++.mediaBoxIframeWrap{
++  display:inline-block;
++  max-width:100%;
++  max-height:100%;
++  overflow:hidden;
++  border-radius:12px;
++}
++.mediaBoxIframe{
++  display:block;
++  width:100%;
++  height:100%;
++  border:0;
++  background:#000;
++}
++
++.mediaBoxInner{
++  position:relative;
++  width:100%;
++  height:100%;
++  display:flex;
++  align-items:center;
++  justify-content:center;
++  padding:0 14px;
++}
++.mediaBoxAudio{
++  width:100%;
++  height:auto;
++  color-scheme:dark;
++}
++:root{
+   --vip-emoji-size: 48px;      /* можно быстро настроить под себя */
+   --vip-emoji-size-sm: 48px;   /* на мобильных */
+ }
+@@ -4453,19 +4597,25 @@
+   background:rgba(0, 0, 0, 0.51); border:1px solid rgba(255, 255, 255, 0.27);
+ }
+ 
++
+ .qcastPlayer{
+-  position:absolute;
+-  inset:0;
++  position:relative;
+   display:flex;
+-  align-items:stretch;
++  align-items:center;
+   justify-content:center;
++  width:100%;
++  max-height:100%;
+   background:#060b16;
+   cursor:pointer;
++  overflow:hidden;
+ }
+ .qcastCover{
+-  width:100%;
+-  height:100%;
+-  object-fit:cover;
++  display:block;
++  max-width:100%;
++  max-height:100%;
++  width:auto;
++  height:auto;
++  object-fit:contain; /* ✅ never crop */
+ }
+ .qcastAudio{
+   position:absolute;
+@@ -9688,7 +9838,9 @@
+                 data-kind="iframe"
+                 style={{ margin: 0 }}
+               >
+-<iframe
++<FitMediaIFrame
++  ratioW={16}
++  ratioH={9}
+   src=""
+   data-src={`https://www.youtube.com/embed/${videoId}?${ytEmbedParams}`}
+   title="YouTube video"
+@@ -9699,10 +9851,8 @@
+   frameBorder="0"
+   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+   allowFullScreen
+-  className="mediaBoxItem"
+ />
+-
+-              </div>
++</div>
+             );
+           })}
+         </div>
+@@ -9769,18 +9919,19 @@
+       data-kind="iframe"
+       style={{ margin: 0 }}
+     >
+-      <iframe
+-        src=""
+-        title="TikTok video"
+-        data-forum-media="tiktok"
+-        data-src={`https://www.tiktok.com/embed/v2/${videoId}`} 
+-        loading="lazy"       
+-        frameBorder="0"
+-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+-        allowFullScreen
+-        className="mediaBoxItem"
+-      />
+-    </div>
++      <FitMediaIFrame
++  ratioW={9}
++  ratioH={16}
++  src=""
++  title="TikTok video"
++  data-forum-media="tiktok"
++  data-src={`https://www.tiktok.com/embed/v2/${videoId}`}
++  loading="lazy"
++  frameBorder="0"
++  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
++  allowFullScreen
++/>
++</div>
+   );
+ })}
+ 
