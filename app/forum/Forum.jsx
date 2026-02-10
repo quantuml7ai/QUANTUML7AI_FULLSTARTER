@@ -1729,17 +1729,20 @@ const Styles = () => (
     }
     .forum_root{
       --mb-video-h-mobile: 630px;
-      --mb-video-h-tablet: 650px;
-      --mb-video-h-desktop: 700px;
-      --mb-image-h-mobile: 630px;
-      --mb-image-h-tablet: 650px;
-      --mb-image-h-desktop: 700px;
+      --mb-video-h-tablet: 550px;
+      --mb-video-h-desktop: 550px;
+      --mb-image-h-mobile: 650px;
+      --mb-image-h-tablet: 550px;
+      --mb-image-h-desktop: 550px;
       --mb-iframe-h-mobile: 630px;
       --mb-iframe-h-tablet: 650px;
       --mb-iframe-h-desktop: 700px;
       --mb-audio-h-mobile: 630px;
       --mb-audio-h-tablet: 650px;
       --mb-audio-h-desktop: 700px;
+      --mb-qcast-h-mobile: 400px;
+      --mb-qcast-h-tablet: 650px;
+      --mb-qcast-h-desktop: 650px;      
       --mb-ad-h-mobile: 200px;
       --mb-ad-h-tablet: 260px;
       --mb-ad-h-desktop: 320px;
@@ -1756,6 +1759,7 @@ const Styles = () => (
       --mb-image-h: var(--mb-image-h-mobile);
       --mb-iframe-h: var(--mb-iframe-h-mobile);
       --mb-audio-h: var(--mb-audio-h-mobile);
+      --mb-qcast-h: var(--mb-qcast-h-mobile);
       --mb-ad-h: var(--mb-ad-h-mobile);
  --mb-vip-emoji-h: var(--mb-vip-emoji-h-mobile);
   --mb-sticker-h: var(--mb-sticker-h-mobile);   
@@ -1766,6 +1770,7 @@ const Styles = () => (
         --mb-image-h: var(--mb-image-h-tablet);
         --mb-iframe-h: var(--mb-iframe-h-tablet);
         --mb-audio-h: var(--mb-audio-h-tablet);
+        --mb-qcast-h: var(--mb-qcast-h-tablet);
         --mb-ad-h: var(--mb-ad-h-tablet);
 
     --mb-vip-emoji-h: var(--mb-vip-emoji-h-tablet);
@@ -1778,6 +1783,7 @@ const Styles = () => (
         --mb-image-h: var(--mb-image-h-desktop);
         --mb-iframe-h: var(--mb-iframe-h-desktop);
         --mb-audio-h: var(--mb-audio-h-desktop);
+        --mb-qcast-h: var(--mb-qcast-h-desktop);
         --mb-ad-h: var(--mb-ad-h-desktop);
 
     --mb-vip-emoji-h: var(--mb-vip-emoji-h-desktop);
@@ -1817,35 +1823,66 @@ const Styles = () => (
     .mediaBox{
       position:relative;
       width:100%;
-      height:var(--mb-h, 240px);
+      /* Резиновая карточка: растёт по контенту, но не выше max-height (переменной) */
+      max-height:var(--mb-h, 240px);
+      height:auto;
       overflow:hidden;
       border-radius:12px;
       background:rgba(8,12,20,.7);
       border:1px solid rgba(140,170,255,.25);
       contain: layout paint;
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
     .mediaBox[data-kind="video"]{ --mb-h: var(--mb-video-h); background:#000; }
     .mediaBox[data-kind="image"]{ --mb-h: var(--mb-image-h); }
     .mediaBox[data-kind="iframe"]{ --mb-h: var(--mb-iframe-h); background:#000; }
     .mediaBox[data-kind="audio"]{ --mb-h: var(--mb-audio-h); }
+    /* QCast: отдельная максимальная высота */
+    .mediaBox[data-kind="qcast"]{ --mb-h: var(--mb-qcast-h); background:#060b16; }
     .mediaBox[data-kind="ad"]{ --mb-h: var(--mb-ad-h); background:rgba(2,8,23,.7); }
 
+    /* Универсальный элемент медиа: без absolute — чтобы контейнер мог ужиматься */
     .mediaBoxItem{
-      position:absolute;
-      inset:0;
+      position:relative;
+      display:block;
       width:100%;
-      height:100%;
+      height:auto;
+      max-width:100%;
+      max-height:100%;
     }
+
     .mediaBox > img,
     .mediaBox > video{
       object-fit:contain;
     }
-    .mediaBox > iframe{
-      border:0;
+    .mediaBox > video{
+      width:100%;
+      height:auto;
+      max-height:100%;
+      background:#000;
     }
+
+    /* iframe: по умолчанию 16:9, для TikTok — 9:16 */
+    .mediaBox > iframe{
+      width:100%;
+      height:auto;
+      max-height:100%;
+      border:0;
+      aspect-ratio:16/9;
+      display:block;
+      background:#000;
+    }
+    .mediaBox > iframe[data-forum-media="tiktok"]{
+      aspect-ratio:9/16;
+      background:#000;
+    }
+
     .mediaBoxInner{
-      position:absolute;
-      inset:0;
+      position:relative;
+      width:100%;
+      height:auto;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -1855,7 +1892,7 @@ const Styles = () => (
       width:100%;
       height:auto;
       color-scheme:dark;
-    }   
+    }
     :root{
   --vip-emoji-size: 48px;      /* можно быстро настроить под себя */
   --vip-emoji-size-sm: 48px;   /* на мобильных */
@@ -4454,8 +4491,11 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 }
 
 .qcastPlayer{
-  position:absolute;
-  inset:0;
+  /* больше НЕ absolute: контейнер сам задаёт высоту по контенту (до max-height) */
+  position:relative;
+  width:100%;
+  max-height:100%;
+  aspect-ratio:9/16;
   display:flex;
   align-items:stretch;
   justify-content:center;
@@ -4465,7 +4505,9 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 .qcastCover{
   width:100%;
   height:100%;
-  object-fit:cover;
+  /* подложка QCast всегда целиком, без кропа */
+  object-fit:contain;
+  display:block;
 }
 .qcastAudio{
   position:absolute;
@@ -9791,7 +9833,8 @@ text={t?.('forum_delete_confirm')}
       {audioLines.length > 0 && (
         <div className="postAudio" style={{display:'grid', gap:8, marginTop:8}}>
           {audioLines.map((src, i) => (
-            <div key={i} className="audioCard mediaBox" data-kind="audio">
+            <div key={i} className="audioCard mediaBox"
+              data-kind="qcast">
               <QCastPlayer src={src} />
             </div>
           ))}
