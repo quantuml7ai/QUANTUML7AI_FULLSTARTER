@@ -48861,6 +48861,157 @@ const MISSING_TR = {
   dm_delete_confirm: 'Onayla',
 }
 
+// ===== Forum: Share post (7 languages) =====
+const FORUM_SHARE_EN = {
+  forum_share: 'Share',
+  forum_share_post_by: 'Post by',
+  forum_share_post_generic: 'Forum post',
+  forum_share_tg: 'Telegram',
+  forum_share_ig: 'Instagram',
+  forum_share_wa: 'WhatsApp',
+  forum_share_viber: 'Viber',
+  forum_share_fb: 'Facebook',
+  forum_share_x: 'X',
+  forum_share_link: 'Post link',
+  forum_copy_link: 'Copy link',
+  forum_copied: 'Copied!',
+  forum_copy_fallback: 'Select the link and copy it manually',
+  forum_copy_manual: 'Select the link and copy (Ctrl+C / long press).',
+  forum_share_ig_hint: 'Instagram: use system share or copy the link',
+  forum_search_post: 'Finding post…',
+  forum_post_not_found: 'Post not found',
+}
+
+const FORUM_SHARE_RU = {
+  forum_share: 'Поделиться',
+  forum_share_post_by: 'Пост от',
+  forum_share_post_generic: 'Пост на форуме',
+  forum_share_tg: 'Telegram',
+  forum_share_ig: 'Instagram',
+  forum_share_wa: 'WhatsApp',
+  forum_share_viber: 'Viber',
+  forum_share_fb: 'Facebook',
+  forum_share_x: 'X',
+  forum_share_link: 'Ссылка на пост',
+  forum_copy_link: 'Скопировать ссылку',
+  forum_copied: 'Скопировано!',
+  forum_copy_fallback: 'Выделите ссылку и скопируйте вручную',
+  forum_copy_manual: 'Выделите ссылку и скопируйте (Ctrl+C / долгий тап).',
+  forum_share_ig_hint: 'Instagram: используйте системный шаринг или скопируйте ссылку',
+  forum_search_post: 'Поиск поста…',
+  forum_post_not_found: 'Пост не найден',
+}
+
+const FORUM_SHARE_UK = {
+  forum_share: 'Поділитися',
+  forum_share_post_by: 'Допис від',
+  forum_share_post_generic: 'Допис на форумі',
+  forum_share_tg: 'Telegram',
+  forum_share_ig: 'Instagram',
+  forum_share_wa: 'WhatsApp',
+  forum_share_viber: 'Viber',
+  forum_share_fb: 'Facebook',
+  forum_share_x: 'X',
+  forum_share_link: 'Посилання на допис',
+  forum_copy_link: 'Скопіювати посилання',
+  forum_copied: 'Скопійовано!',
+  forum_copy_fallback: 'Виділіть посилання та скопіюйте вручну',
+  forum_copy_manual: 'Виділіть посилання та скопіюйте (Ctrl+C / довгий дотик).',
+  forum_share_ig_hint: 'Instagram: використайте системний шеринг або скопіюйте посилання',
+  forum_search_post: 'Пошук допису…',
+  forum_post_not_found: 'Допис не знайдено',
+}
+
+const FORUM_SHARE_ES = {
+  forum_share: 'Compartir',
+  forum_share_post_by: 'Publicación de',
+  forum_share_post_generic: 'Publicación del foro',
+  forum_share_tg: 'Telegram',
+  forum_share_ig: 'Instagram',
+  forum_share_wa: 'WhatsApp',
+  forum_share_viber: 'Viber',
+  forum_share_fb: 'Facebook',
+  forum_share_x: 'X',
+  forum_share_link: 'Enlace al post',
+  forum_copy_link: 'Copiar enlace',
+  forum_copied: '¡Copiado!',
+  forum_copy_fallback: 'Selecciona el enlace y cópialo manualmente',
+  forum_copy_manual: 'Selecciona el enlace y copia (Ctrl+C / pulsación larga).',
+  forum_share_ig_hint: 'Instagram: usa el compartir del sistema o copia el enlace',
+  forum_search_post: 'Buscando el post…',
+  forum_post_not_found: 'Post no encontrado',
+}
+
+const FORUM_SHARE_ZH = {
+  forum_share: '分享',
+  forum_share_post_by: '来自',
+  forum_share_post_generic: '论坛帖子',
+  forum_share_tg: 'Telegram',
+  forum_share_ig: 'Instagram',
+  forum_share_wa: 'WhatsApp',
+  forum_share_viber: 'Viber',
+  forum_share_fb: 'Facebook',
+  forum_share_x: 'X',
+  forum_share_link: '帖子链接',
+  forum_copy_link: '复制链接',
+  forum_copied: '已复制！',
+  forum_copy_fallback: '请选中链接并手动复制',
+  forum_copy_manual: '请选中链接并复制（Ctrl+C / 长按）。',
+  forum_share_ig_hint: 'Instagram：使用系统分享或复制链接',
+  forum_search_post: '正在查找帖子…',
+  forum_post_not_found: '未找到帖子',
+}
+
+const FORUM_SHARE_AR = {
+  forum_share: 'مشاركة',
+  forum_share_post_by: 'منشور من',
+  forum_share_post_generic: 'منشور في المنتدى',
+  forum_share_tg: 'Telegram',
+  forum_share_ig: 'Instagram',
+  forum_share_wa: 'WhatsApp',
+  forum_share_viber: 'Viber',
+  forum_share_fb: 'Facebook',
+  forum_share_x: 'X',
+  forum_share_link: 'رابط المنشور',
+  forum_copy_link: 'نسخ الرابط',
+  forum_copied: 'تم النسخ!',
+  forum_copy_fallback: 'حدّد الرابط ثم انسخه يدويًا',
+  forum_copy_manual: 'حدّد الرابط ثم انسخ (Ctrl+C / ضغط مطوّل).',
+  forum_share_ig_hint: 'Instagram: استخدم مشاركة النظام أو انسخ الرابط',
+  forum_search_post: 'جارٍ البحث عن المنشور…',
+  forum_post_not_found: 'لم يتم العثور على المنشور',
+}
+
+const FORUM_SHARE_TR = {
+  forum_share: 'Paylaş',
+  forum_share_post_by: 'Gönderi sahibi',
+  forum_share_post_generic: 'Forum gönderisi',
+  forum_share_tg: 'Telegram',
+  forum_share_ig: 'Instagram',
+  forum_share_wa: 'WhatsApp',
+  forum_share_viber: 'Viber',
+  forum_share_fb: 'Facebook',
+  forum_share_x: 'X',
+  forum_share_link: 'Gönderi bağlantısı',
+  forum_copy_link: 'Bağlantıyı kopyala',
+  forum_copied: 'Kopyalandı!',
+  forum_copy_fallback: 'Bağlantıyı seçip manuel olarak kopyalayın',
+  forum_copy_manual: 'Bağlantıyı seçip kopyalayın (Ctrl+C / uzun basma).',
+  forum_share_ig_hint: 'Instagram: sistem paylaşımını kullanın veya bağlantıyı kopyalayın',
+  forum_search_post: 'Gönderi aranıyor…',
+  forum_post_not_found: 'Gönderi bulunamadı',
+}
+
+try {
+  Object.assign(dict.en, FORUM_SHARE_EN)
+  Object.assign(dict.ru, FORUM_SHARE_RU)
+  Object.assign(dict.uk, FORUM_SHARE_UK)
+  Object.assign(dict.es, FORUM_SHARE_ES)
+  Object.assign(dict.zh, FORUM_SHARE_ZH)
+  Object.assign(dict.ar, FORUM_SHARE_AR)
+  Object.assign(dict.tr, FORUM_SHARE_TR)
+} catch (e) {}
+
 try {
   ensureDict('en', MISSING_EN)
   ensureDict('ru', MISSING_RU)

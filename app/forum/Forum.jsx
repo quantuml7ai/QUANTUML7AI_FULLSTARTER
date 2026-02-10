@@ -8,6 +8,7 @@ import { useI18n } from '../../components/i18n'
 import { broadcast as forumBroadcast } from './events/bus'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import SharePopover from './SharePopover'
 // [ADS:IMPORT]
 import {
   getForumAdConf,
@@ -3055,6 +3056,230 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
     .reportPopover[data-dir="rtl"] .reportItem{
       text-align:right;
     }      
+
+    .deeplinkBanner{
+      position:fixed;
+      left:50%;
+      top:12px;
+      transform:translateX(-50%);
+      z-index:2147482400;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(80,167,255,.28);
+      background:rgba(8,14,24,.88);
+      color:#eaf4ff;
+      box-shadow:0 10px 28px rgba(0,0,0,.45);
+      backdrop-filter: blur(12px) saturate(140%);
+      max-width:min(520px, 92vw);
+      font-size:13px;
+      text-align:center;
+    }
+
+    /* Share post */
+    .shareBtn{ min-width:44px; }
+    .shareOverlay{
+      position:fixed;
+      inset:0;
+      z-index:2147482500;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      background:rgba(0,0,0,.45);
+      backdrop-filter: blur(6px);
+    }
+    .sharePopover{
+      width:min(520px, 92vw);
+      max-height:min(78vh, 520px);
+      overflow:auto;
+      -webkit-overflow-scrolling:touch;
+      overscroll-behavior:contain;
+      border-radius:16px;
+      padding:14px;
+      border:1px solid transparent;
+      background:
+        radial-gradient(120% 140% at 12% 0%, rgba(120,200,255,.22), rgba(10,16,28,.86) 55%),
+        linear-gradient(140deg, rgba(8,14,24,.92), rgba(12,20,32,.96)) padding-box,
+        linear-gradient(
+          90deg,
+          rgba(0,255,255,.75),
+          rgba(120,80,255,.90),
+          rgba(255,215,90,.80),
+          rgba(0,255,255,.75)
+        ) border-box;
+      background-size: auto, auto, 320% 100%;
+      background-position: 0 0, 0 0, 0% 50%;
+      animation: shareBorderFlow 7.5s linear infinite;
+      box-shadow:
+        0 18px 54px rgba(0,0,0,.62),
+        0 0 46px rgba(80,167,255,.22),
+        inset 0 0 0 1px rgba(255,255,255,.06);
+      backdrop-filter: blur(16px) saturate(140%);
+      position:relative;
+    }
+    @keyframes shareBorderFlow{
+      0%{ background-position: 0 0, 0 0, 0% 50%; }
+      100%{ background-position: 0 0, 0 0, 100% 50%; }
+    }
+    .sharePopover::after{
+      content:'';
+      position:absolute;
+      inset:0;
+      border-radius:16px;
+      pointer-events:none;
+      opacity:.22;
+      background:
+        radial-gradient(120% 120% at 10% 0%, rgba(120,190,255,.18), rgba(0,0,0,0) 60%),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 1px, rgba(255,255,255,0) 1px 10px);
+      mix-blend-mode: screen;
+      animation: sharePulse 4.2s ease-in-out infinite;
+    }
+    @keyframes sharePulse{
+      0%,100%{ opacity:.16; }
+      50%{ opacity:.28; }
+    }
+    @media (prefers-reduced-motion: reduce){
+      .sharePopover{ animation:none; }
+      .sharePopover::after{ animation:none; }
+    }
+    .shareHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:4px 2px 10px;
+      position:relative;
+      z-index:1;
+    }
+    .shareTitle{ font-weight:700; font-size:15px; color:#eaf4ff; }
+    .shareClose{
+      width:36px;
+      height:36px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(10,16,28,.25);
+      color:#eaf4ff;
+    }
+    .shareClose:hover{ background:rgba(255,255,255,.06); }
+    .shareClose:active{ transform:scale(.98); }
+    .shareClose:focus-visible{ outline:2px solid rgba(120,180,255,.55); outline-offset:2px; }
+
+    .shareGrid{
+      display:grid;
+      gap:10px;
+      grid-template-columns:repeat(6, minmax(0,1fr));
+      position:relative;
+      z-index:1;
+    }
+    @media (max-width:480px){
+      .shareGrid{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+    }
+    @media (min-width:481px) and (max-width:860px){
+      .shareGrid{ grid-template-columns:repeat(3, minmax(0,1fr)); }
+    }
+    .shareTarget{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      padding:10px 8px;
+      border-radius:14px;
+      border:1px solid transparent;
+      background:
+        linear-gradient(180deg, rgba(18,26,46,.72), rgba(8,14,24,.28)) padding-box,
+        linear-gradient(90deg, rgba(0,255,255,.55), rgba(120,80,255,.70), rgba(255,215,90,.55), rgba(0,255,255,.55)) border-box;
+      background-size: auto, 260% 100%;
+      background-position: 0 0, 0% 50%;
+      animation: shareBtnFlow 6.2s linear infinite;
+      color:#eaf4ff;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+      position:relative;
+      overflow:hidden;
+    }
+    .shareTarget:hover{
+      filter:brightness(1.08) saturate(1.08);
+      box-shadow:
+        0 0 0 1px rgba(140,190,255,.28),
+        0 0 18px rgba(80,167,255,.18);
+    }
+    .shareTarget:active{ transform:scale(.99); }
+    .shareTarget:focus-visible{ outline:2px solid rgba(120,180,255,.55); outline-offset:2px; }
+    @keyframes shareBtnFlow{
+      0%{ background-position: 0 0, 0% 50%; }
+      100%{ background-position: 0 0, 100% 50%; }
+    }
+    @media (prefers-reduced-motion: reduce){
+      .shareTarget{ animation:none; }
+    }
+    .shareIcon{
+      width:40px;
+      height:40px;
+      display:grid;
+      place-items:center;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:
+        radial-gradient(circle at 30% 20%, rgba(0,255,255,.18), rgba(0,0,0,0) 55%),
+        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.04),
+        0 0 18px rgba(80,167,255,.12);
+    }
+    .shareLabel{
+      font-size:12px;
+      opacity:.95;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:100%;
+    }
+    .shareCopyBlock{
+      margin-top:12px;
+      padding-top:12px;
+      border-top:1px solid rgba(255,255,255,.10);
+      position:relative;
+      z-index:1;
+    }
+    .shareCopyRow{ display:flex; gap:8px; align-items:center; }
+    .shareUrlInput{
+      flex:1 1 auto;
+      min-width:0;
+      height:40px;
+      border-radius:12px;
+      padding:0 10px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(10,16,28,.18);
+      color:#eaf4ff;
+      font-size:12px;
+    }
+    .shareUrlInput:focus{
+      outline:none;
+      border-color:rgba(120,180,255,.45);
+      box-shadow:0 0 0 3px rgba(120,180,255,.12);
+    }
+    .shareHint{ margin-top:8px; font-size:12px; opacity:.85; }
+    .shareCopyBtn{
+      height:40px;
+      border-radius:12px;
+      border:1px solid rgba(140,190,255,.22);
+      background:rgba(10,16,28,.18);
+      color:#eaf4ff;
+      padding:0 12px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+      transition: filter .14s ease, transform .12s ease, background .18s ease, border-color .18s ease;
+    }
+    .shareCopyBtn:hover{
+      filter:brightness(1.08) saturate(1.08);
+      box-shadow: 0 0 20px rgba(80,167,255,.16), inset 0 0 0 1px rgba(255,255,255,.06);
+    }
+    .shareCopyBtn:active{ transform:scale(.99); }
+    .shareCopyBtn.copied{
+      border-color:rgba(70,220,130,.55) !important;
+      background:linear-gradient(120deg, rgba(12,30,18,.75), rgba(70,210,120,.18)) !important;
+      color:#baf7d6 !important;
+      box-shadow: 0 0 26px rgba(70,220,130,.18), inset 0 0 0 1px rgba(255,255,255,.06);
+    }
     .lockable{ position:relative; }
     .lockBadge{
       position:absolute;
@@ -9224,6 +9449,7 @@ function PostCard({
   parentText,
   parentPost,
   onReport, 
+  onShare,
   onOpenThread,
   onReact,
   isAdmin,
@@ -9934,7 +10160,19 @@ text={t?.('forum_delete_confirm')}
         </button>
 
         {/* разделяем левый и правый края, но остаёмся в одном ряду */}
-        <div style={{ flex: '0 0 clamp(8px, 2vw, 16px)' }} />
+        <button
+          type="button"
+          className="btn btnGhost btnXs shareBtn"
+          title={t?.('forum_share') || 'Share'}
+          style={{ marginLeft: 'auto' }}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            onShare?.(p)
+          }}
+        >
+          ♻️
+        </button>
 
         {/* действия (пожаловаться, ответить, бан/разбан, удалить) — справа в той же строке */}
         <button
@@ -11511,6 +11749,8 @@ export default function Forum(){
 
 
 const [reportUI, setReportUI] = useState({ open: false, postId: null, anchorRect: null })
+const [shareUI, setShareUI] = useState({ open: false, post: null })
+const [deeplinkUI, setDeeplinkUI] = useState({ active: false, status: 'idle', postId: null, topicId: null })
 const [userInfoOpen, setUserInfoOpen] = useState(false)
 const [userInfoUid, setUserInfoUid] = useState(null)
 const userInfoAnchorRef = useRef(null)
@@ -11519,6 +11759,9 @@ const userInfoUidRef = useRef(null)
 const [reportBusy, setReportBusy] = useState(false)
 const reportPopoverRef = useRef(null)
 const reportAnchorRef = useRef(null)
+const closeSharePopover = useCallback(() => {
+  setShareUI({ open: false, post: null })
+}, [])
 const [starredAuthors, setStarredAuthors] = useState(() => new Set())
 
 // ==== tombstones (ДОЛЖНЫ быть объявлены до handleReportSelect) ====
@@ -11604,6 +11847,13 @@ const persistTombstones = useCallback((patch) => {
     setReportUI({ open: false, postId: null, anchorRect: null })
     reportAnchorRef.current = null
   }, [])
+
+  const openSharePopover = useCallback((post) => {
+    if (!post || !post.id) return
+    try { closeUserInfoPopover?.() } catch {}
+    try { closeReportPopover?.() } catch {}
+    setShareUI({ open: true, post })
+  }, [closeReportPopover, closeUserInfoPopover])
 
   const syncReportAnchorRect = useCallback(() => {
     if (!reportUI.open) return
@@ -13392,6 +13642,7 @@ const openOnly = React.useCallback((name) => {
   setQcoinModalOpen(false);
   setSortOpen(false);
   setDrop(false);
+  try { closeSharePopover?.() } catch {}
   // если есть ещё попапы (inbox и т.п.) — добавь сюда по желанию:
   // setInboxOpen(false);
 
@@ -14898,6 +15149,144 @@ function centerPostAfterDom(postId, behavior = 'smooth') {
   };
   try { requestAnimationFrame(tick); } catch { try { setTimeout(tick, 0); } catch {} }
 }
+
+function centerAndFlashPostAfterDom(postId, behavior = 'smooth') {
+  const pid = String(postId || '').trim();
+  if (!pid || !isBrowser?.()) return;
+  let tries = 0;
+  const maxTries = 40;
+  const tick = () => {
+    tries += 1;
+    const node = document.getElementById(`post_${pid}`);
+    if (node) {
+      try { centerNodeInScroll(node, behavior); } catch {}
+      try {
+        node.classList.add('replyTargetFlash');
+        window.setTimeout(() => node.classList.remove('replyTargetFlash'), 1100);
+      } catch {}
+      return;
+    }
+    if (tries < maxTries) {
+      try { requestAnimationFrame(tick); } catch { try { setTimeout(tick, 16); } catch {} }
+    }
+  };
+  try { requestAnimationFrame(tick); } catch { try { setTimeout(tick, 0); } catch {} }
+}
+
+// Deep-link: /forum?post=<postId>(&topic=<topicId>)
+const deeplinkRef = React.useRef({
+  started: false,
+  startedAt: 0,
+  postId: null,
+  topicId: null,
+  locateInFlight: false,
+  threadOpened: false,
+  done: false,
+})
+
+useEffect(() => {
+  if (!isBrowser?.()) return
+  if (deeplinkRef.current.started) return
+
+  const qs = new URLSearchParams(window.location.search || '')
+  const postId = String(qs.get('post') || '').trim()
+  if (!postId) return
+  const topicId = String(qs.get('topic') || '').trim() || null
+
+  deeplinkRef.current.started = true
+  deeplinkRef.current.startedAt = Date.now()
+  deeplinkRef.current.postId = postId
+  deeplinkRef.current.topicId = topicId
+  deeplinkRef.current.locateInFlight = false
+  deeplinkRef.current.threadOpened = false
+  deeplinkRef.current.done = false
+
+  setDeeplinkUI({ active: true, status: 'searching', postId, topicId })
+
+  if (!topicId) {
+    deeplinkRef.current.locateInFlight = true
+    fetch(`/api/forum/post-locate?postId=${encodeURIComponent(postId)}`, { cache: 'no-store' })
+      .then((r) => r.json().catch(() => null))
+      .then((j) => {
+        const tid = String(j?.topicId || '').trim()
+        if (!tid) return
+        deeplinkRef.current.topicId = tid
+        setDeeplinkUI((prev) => (prev?.active ? { ...prev, topicId: tid } : prev))
+      })
+      .catch(() => {})
+      .finally(() => {
+        deeplinkRef.current.locateInFlight = false
+      })
+  }
+}, [])
+
+useEffect(() => {
+  const st = deeplinkRef.current || {}
+  if (!st.started || st.done) return
+  const postId = String(st.postId || '').trim()
+  if (!postId) return
+
+  let topicId = st.topicId ? String(st.topicId) : ''
+  const posts = Array.isArray(data?.posts) ? data.posts : []
+  const topics = Array.isArray(data?.topics) ? data.topics : []
+
+  const postObj = posts.find((p) => String(p?.id) === String(postId)) || null
+  if (!topicId && postObj?.topicId) {
+    topicId = String(postObj.topicId)
+    st.topicId = topicId
+    setDeeplinkUI((prev) => (prev?.active ? { ...prev, topicId } : prev))
+  }
+
+  if (topicId) {
+    if (!sel?.id || String(sel.id) !== String(topicId)) {
+      const tt = topics.find((t) => String(t?.id) === String(topicId)) || null
+      if (tt) {
+        try { setTopicFilterId(String(topicId)) } catch {}
+        try { setSel(tt) } catch {}
+      }
+      return
+    }
+  }
+
+  if (!postObj) {
+    const revNum = Number(data?.rev || 0)
+    const age = Date.now() - Number(st.startedAt || 0)
+    if (revNum > 0 && age > 6500) {
+      st.done = true
+      setDeeplinkUI({ active: true, status: 'not_found', postId, topicId: topicId || null })
+      toast?.err?.(t?.('forum_post_not_found') || 'Post not found')
+
+      setTimeout(() => {
+        try { setDeeplinkUI({ active: false, status: 'idle', postId: null, topicId: null }) } catch {}
+      }, 3200)
+
+      try {
+        const u = new URL(window.location.href)
+        u.searchParams.delete('post')
+        u.searchParams.delete('topic')
+        window.history.replaceState({}, '', u.pathname + u.search + u.hash)
+      } catch {}
+    }
+    return
+  }
+
+  // If it's a reply, make it visible by opening a thread.
+  if (postObj?.parentId && !st.threadOpened) {
+    st.threadOpened = true
+    try { openThreadForPost(postObj, { skipNav: true, closeInbox: true, closeVideoFeed: true }) } catch {}
+    return
+  }
+
+  st.done = true
+  centerAndFlashPostAfterDom(postId, 'smooth')
+  setDeeplinkUI({ active: false, status: 'done', postId: null, topicId: null })
+  try {
+    const u = new URL(window.location.href)
+    u.searchParams.delete('post')
+    u.searchParams.delete('topic')
+    window.history.replaceState({}, '', u.pathname + u.search + u.hash)
+  } catch {}
+}, [sel?.id, threadRoot?.id, data?.rev, (data?.posts || []).length, (data?.topics || []).length, openThreadForPost])
 
 // при смене темы: либо выходим из ветки, либо применяем «ожидаемое» открытие ветки
 useEffect(() => {
@@ -18391,6 +18780,13 @@ function pickAdUrlForSlot(slotKey, slotKind) {
 `} </style>
 
       <Styles />{toast.view}
+      {deeplinkUI.active && (
+        <div className="deeplinkBanner">
+          {deeplinkUI.status === 'not_found'
+            ? (t?.('forum_post_not_found') || 'Post not found')
+            : (t?.('forum_search_post') || 'Finding post…')}
+        </div>
+      )}
       <DmDeletePopover
         open={!!dmDeletePopover}
         rect={dmDeletePopover?.rect}
@@ -18433,6 +18829,13 @@ function pickAdUrlForSlot(slotKey, slotKind) {
   busy={reportBusy}
   popoverRef={reportPopoverRef}
     dir={uiDir}
+/>
+<SharePopover
+  open={shareUI.open}
+  post={shareUI.post}
+  onClose={closeSharePopover}
+  t={t}
+  toast={toast}
 />
 <UserInfoPopover
   anchorRef={userInfoAnchorRef}
@@ -19247,6 +19650,7 @@ const openThreadHere = (clickP) => {
   parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}
   parentText={parent ? (parent.text || parent.message || parent.body || '') : ''} 
   onReport={(post, rect, anchorEl) => openReportPopover(post, rect, anchorEl)}
+  onShare={(post) => openSharePopover(post)}
   onOpenThread={openThreadHere}
   onReact={reactMut}
   isAdmin={isAdmin}
@@ -19400,6 +19804,7 @@ const openThreadHere = (clickP) => {
       parentText={parent ? (parent.text || parent.message || parent.body || '') : ''}
      
           onReport={(post, rect, anchorEl) => openReportPopover(post, rect, anchorEl)}
+          onShare={(post) => openSharePopover(post)}
 onOpenThread={(clickP) => {
   // ✅ из любой карточки: открыть сразу ветку ответов по клику на счётчик
   openThreadForPost(clickP || p, { closeInbox: true });
@@ -19867,6 +20272,7 @@ onOpenThread={(clickP) => {
                   parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''}
                   parentText={parent ? (parent.text || parent.message || parent.body || '') : ''}
                   onReport={(post, rect, anchorEl) => openReportPopover(post, rect, anchorEl)}
+                  onShare={(post) => openSharePopover(post)}
                   onOpenThread={(clickP) => { openThreadForPost(clickP || p, { closeInbox: true }); }}
                   onReact={reactMut}
                   isAdmin={isAdmin}
@@ -20784,6 +21190,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
   parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}
   parentText={parent ? (parent.text || parent.message || parent.body || '') : ''}
   onReport={(post, rect, anchorEl) => openReportPopover(post, rect, anchorEl)}
+  onShare={(post) => openSharePopover(post)}
   onReply={() => setReplyTo(p)}
   onOpenThread={(clickP) => { openThreadForPost(clickP || p); }}
   onReact={reactMut}

@@ -3,6 +3,12 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   productionBrowserSourceMaps: true,
+  webpack: (config, { dev }) => {
+    // On some Windows setups (e.g. synced folders), filesystem cache may become inconsistent
+    // and cause missing vendor chunks / random 404s for _next/static in dev.
+    if (dev) config.cache = false
+    return config
+  },
 images: {
   remotePatterns: [
     { protocol: 'https', hostname: 'i.ytimg.com' },
