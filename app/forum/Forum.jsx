@@ -1731,7 +1731,7 @@ const Styles = () => (
       --mb-video-h-mobile: 630px;
       --mb-video-h-tablet: 550px;
       --mb-video-h-desktop: 550px;
-      --mb-image-h-mobile: 650px;
+      --mb-image-h-mobile: 700px;
       --mb-image-h-tablet: 550px;
       --mb-image-h-desktop: 550px;
       --mb-iframe-h-mobile: 630px;
