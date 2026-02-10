@@ -1728,7 +1728,7 @@ const Styles = () => (
       color: #eaf1ff;
     }
     .forum_root{
-      --mb-video-h-mobile: 630px;
+      --mb-video-h-mobile: 700px;
       --mb-video-h-tablet: 550px;
       --mb-video-h-desktop: 550px;
       --mb-image-h-mobile: 700px;
@@ -5029,7 +5029,7 @@ html[data-tma="1"] .inboxTabs{
     linear-gradient(140deg, rgba(8,14,28,.96), rgba(22,36,62,.8));
   box-shadow: 0 12px 26px rgba(0,0,0,.3), inset 0 0 22px rgba(120,200,255,.12);
   transition: transform .14s ease, box-shadow .18s ease, border-color .18s ease;
-}
+} 
 .dmRow:hover{
   transform: translateY(-1px);
   border-color: rgba(160,210,255,.45);
