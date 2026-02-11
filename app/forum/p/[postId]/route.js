@@ -99,6 +99,15 @@ function extractPreviewVideoUrl(text) {
   return m ? String(m[0] || '').trim() : ''
 }
 
+function hasAudioInText(text) {
+  const s = String(text || '')
+  if (!s) return false
+  const re =
+    /(?:https?:\/\/[^\s<>'")]+?\.(?:webm|ogg|mp3|m4a|wav)(?:[?#][^\s<>'")]+)?|\/uploads\/audio\/[A-Za-z0-9._\-\/]+?\.(?:webm|ogg|mp3|m4a|wav)(?:[?#][^\s<>'")]+)?|\/forum\/voice[^\s<>'")]*\.(?:webm|ogg|mp3|m4a|wav)(?:[?#][^\s<>'")]+)?)/i
+  if (re.test(s)) return true
+  return /[?&]filename=.*\.(?:webm|ogg|mp3|m4a|wav)(?:$|[&#])/i.test(s)
+}
+
 function videoMime(url) {
   const s = String(url || '').toLowerCase()
   if (s.includes('.webm')) return 'video/webm'
@@ -140,10 +149,13 @@ export async function GET(req, { params }) {
     : 'This post does not exist or was deleted.'
 
   const ytId = found ? extractYouTubeId(post?.text || '') : ''
+  const isAudioPost = found ? hasAudioInText(post?.text || '') : false
   const imgRel = found
-    ? (extractPreviewImageUrl(post?.text || '') ||
-        (ytId ? `https://i.ytimg.com/vi/${encodeURIComponent(ytId)}/hqdefault.jpg` : '') ||
-        '/metab/forum1.png')
+    ? (isAudioPost
+        ? '/audio/Q-Cast.png'
+        : (extractPreviewImageUrl(post?.text || '') ||
+            (ytId ? `https://i.ytimg.com/vi/${encodeURIComponent(ytId)}/hqdefault.jpg` : '') ||
+            '/metab/forum1.png'))
     : '/metab/forum1.png'
   const imageUrl = absUrl(origin, imgRel)
   const vidRel = found ? extractPreviewVideoUrl(post?.text || '') : ''

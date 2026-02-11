@@ -15160,6 +15160,70 @@ function centerAndFlashPostAfterDom(postId, behavior = 'smooth') {
     const node = document.getElementById(`post_${pid}`);
     if (node) {
       try { centerNodeInScroll(node, behavior); } catch {}
+
+      // Secondary "settle" centering: after rerenders / media load / ad height changes.
+      try {
+        const computeDelta = () => {
+          try {
+            const r = node.getBoundingClientRect?.();
+            if (!r) return 0;
+            const scrollEl = getScrollEl?.();
+            if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {
+              const contRect = scrollEl.getBoundingClientRect?.();
+              if (!contRect) return 0;
+              const elCenterInView = (r.top - contRect.top) + (r.height / 2);
+              const desired = contRect.height / 2;
+              const d = elCenterInView - desired;
+              return Number.isFinite(d) ? d : 0;
+            }
+            const elCenter = r.top + (r.height / 2);
+            const vh = window.innerHeight || document.documentElement?.clientHeight || 0;
+            const d = elCenter - (vh / 2);
+            return Number.isFinite(d) ? d : 0;
+          } catch {
+            return 0;
+          }
+        };
+
+        const maybeRecenter = () => {
+          const d = computeDelta();
+          if (Number.isFinite(d) && Math.abs(d) > 2) {
+            try { centerNodeInScroll(node, 'auto'); } catch {}
+          }
+        };
+
+        try { requestAnimationFrame(maybeRecenter); } catch {}
+        try { setTimeout(maybeRecenter, 280); } catch {}
+        try { setTimeout(maybeRecenter, 900); } catch {}
+
+        try {
+          if (typeof ResizeObserver !== 'undefined') {
+            const scrollEl = getScrollEl?.();
+            let stopped = false;
+            let rafId = 0;
+            const schedule = () => {
+              if (stopped) return;
+              if (rafId) return;
+              try {
+                rafId = requestAnimationFrame(() => {
+                  rafId = 0;
+                  maybeRecenter();
+                });
+              } catch {}
+            };
+
+            const ro = new ResizeObserver(schedule);
+            try { ro.observe(node); } catch {}
+            if (scrollEl) { try { ro.observe(scrollEl); } catch {} }
+
+            setTimeout(() => {
+              stopped = true;
+              try { ro.disconnect(); } catch {}
+              if (rafId) { try { cancelAnimationFrame(rafId); } catch {} }
+            }, 1600);
+          }
+        } catch {}
+      } catch {}
       try {
         node.classList.add('replyTargetFlash');
         window.setTimeout(() => node.classList.remove('replyTargetFlash'), 1100);
