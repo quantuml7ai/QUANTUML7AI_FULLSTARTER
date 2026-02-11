@@ -15114,18 +15114,72 @@ const openThreadForPost = useCallback((post, opts = {}) => {
 
 function centerNodeInScroll(node, behavior = 'smooth') {
   if (!isBrowser?.() || !node) return;
+  const bottomOcclusionPx = (top, bottom) => {
+    try {
+      const t = Number(top || 0) || 0;
+      const b = Number(bottom || 0) || 0;
+      if (!(b > t)) return 0;
+      const dock = document.querySelector?.('.composeDock') || null;
+      if (!dock) return 0;
+      const dr = dock.getBoundingClientRect?.();
+      if (!dr) return 0;
+      const dockTop = Number(dr.top);
+      if (!Number.isFinite(dockTop)) return 0;
+      const clampedDockTop = Math.max(t, Math.min(b, dockTop));
+      const occ = b - clampedDockTop;
+      return Number.isFinite(occ) && occ > 0 ? Math.min(occ, b - t) : 0;
+    } catch {
+      return 0;
+    }
+  };
+
+  const getMarginY = () => {
+    try {
+      const cs = window.getComputedStyle?.(node);
+      const mt = cs ? parseFloat(cs.marginTop || '0') : 0;
+      const mb = cs ? parseFloat(cs.marginBottom || '0') : 0;
+      return {
+        mt: Number.isFinite(mt) ? mt : 0,
+        mb: Number.isFinite(mb) ? mb : 0,
+      };
+    } catch {
+      return { mt: 0, mb: 0 };
+    }
+  };
+
   try {
     const scrollEl = getScrollEl?.();
     if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {
       const contRect = scrollEl.getBoundingClientRect();
       const r = node.getBoundingClientRect();
-      const elCenterInView = (r.top - contRect.top) + (r.height / 2);
-      const desired = contRect.height / 2;
+      const { mt, mb } = getMarginY();
+      const elCenterInView = (r.top - contRect.top) - mt + ((r.height + mt + mb) / 2);
+      const occ = bottomOcclusionPx(contRect.top, contRect.bottom);
+      const visibleH = Math.max(1, contRect.height - occ);
+      const desired = visibleH / 2;
       const delta = elCenterInView - desired;
       if (!Number.isFinite(delta)) return;
       const nextTop = Math.max(0, Math.min((scrollEl.scrollTop || 0) + delta, (scrollEl.scrollHeight || 0) - (scrollEl.clientHeight || 0)));
       scrollEl.scrollTo?.({ top: nextTop, behavior });
       return;
+    }
+  } catch {}
+  try {
+    const r = node.getBoundingClientRect?.();
+    if (r) {
+      const { mt, mb } = getMarginY();
+      const elCenter = (r.top - mt) + ((r.height + mt + mb) / 2);
+      const vh = window.innerHeight || document.documentElement?.clientHeight || 0;
+      const occ = bottomOcclusionPx(0, vh);
+      const visibleH = Math.max(1, vh - occ);
+      const desired = visibleH / 2;
+      const delta = elCenter - desired;
+      if (Number.isFinite(delta) && Math.abs(delta) > 0.5) {
+        const curY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        const nextY = Math.max(0, curY + delta);
+        try { window.scrollTo({ top: nextY, behavior }); } catch { try { window.scrollTo(0, nextY); } catch {} }
+        return;
+      }
     }
   } catch {}
   try { node.scrollIntoView?.({ behavior, block: 'center' }); } catch { try { node.scrollIntoView?.(); } catch {} }
@@ -15153,8 +15207,18 @@ function centerPostAfterDom(postId, behavior = 'smooth') {
 function centerAndFlashPostAfterDom(postId, behavior = 'smooth') {
   const pid = String(postId || '').trim();
   if (!pid || !isBrowser?.()) return;
+
+  // Deep-linking via shared URL should work even when the post is outside the initial virtualized slice.
+  // We only bump the slice here (this helper is only used by share deep-link flow).
+  try {
+    const postsLen = Array.isArray(data?.posts) ? data.posts.length : 0;
+    if (postsLen > 0 && visibleThreadPostsCount < postsLen) {
+      try { setVisibleThreadPostsCount(postsLen); } catch {}
+    }
+  } catch {}
+
   let tries = 0;
-  const maxTries = 40;
+  const maxTries = 220;
   const tick = () => {
     tries += 1;
     const node = document.getElementById(`post_${pid}`);
@@ -15167,18 +15231,50 @@ function centerAndFlashPostAfterDom(postId, behavior = 'smooth') {
           try {
             const r = node.getBoundingClientRect?.();
             if (!r) return 0;
+            let mt = 0, mb = 0;
+            try {
+              const cs = window.getComputedStyle?.(node);
+              const a = cs ? parseFloat(cs.marginTop || '0') : 0;
+              const b = cs ? parseFloat(cs.marginBottom || '0') : 0;
+              mt = Number.isFinite(a) ? a : 0;
+              mb = Number.isFinite(b) ? b : 0;
+            } catch {}
+
+            const bottomOcclusionPx = (top, bottom) => {
+              try {
+                const t = Number(top || 0) || 0;
+                const b = Number(bottom || 0) || 0;
+                if (!(b > t)) return 0;
+                const dock = document.querySelector?.('.composeDock') || null;
+                if (!dock) return 0;
+                const dr = dock.getBoundingClientRect?.();
+                if (!dr) return 0;
+                const dockTop = Number(dr.top);
+                if (!Number.isFinite(dockTop)) return 0;
+                const clampedDockTop = Math.max(t, Math.min(b, dockTop));
+                const occ = b - clampedDockTop;
+                return Number.isFinite(occ) && occ > 0 ? Math.min(occ, b - t) : 0;
+              } catch {
+                return 0;
+              }
+            };
+
             const scrollEl = getScrollEl?.();
             if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {
               const contRect = scrollEl.getBoundingClientRect?.();
               if (!contRect) return 0;
-              const elCenterInView = (r.top - contRect.top) + (r.height / 2);
-              const desired = contRect.height / 2;
+              const elCenterInView = (r.top - contRect.top) - mt + ((r.height + mt + mb) / 2);
+              const occ = bottomOcclusionPx(contRect.top, contRect.bottom);
+              const visibleH = Math.max(1, contRect.height - occ);
+              const desired = visibleH / 2;
               const d = elCenterInView - desired;
               return Number.isFinite(d) ? d : 0;
             }
-            const elCenter = r.top + (r.height / 2);
+            const elCenter = (r.top - mt) + ((r.height + mt + mb) / 2);
             const vh = window.innerHeight || document.documentElement?.clientHeight || 0;
-            const d = elCenter - (vh / 2);
+            const occ = bottomOcclusionPx(0, vh);
+            const visibleH = Math.max(1, vh - occ);
+            const d = elCenter - (visibleH / 2);
             return Number.isFinite(d) ? d : 0;
           } catch {
             return 0;

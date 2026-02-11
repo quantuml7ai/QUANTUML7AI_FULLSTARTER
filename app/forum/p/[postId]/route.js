@@ -51,7 +51,7 @@ function extractPreviewImageUrl(text) {
   const s = String(text || '')
   if (!s) return ''
   const re =
-    /(?:https?:\/\/[^\s<>'")]+?\.(?:webp|png|jpe?g|gif)(?:[?#][^\s<>'")]+)?|\/uploads\/[A-Za-z0-9._\-\/]+?\.(?:webp|png|jpe?g|gif)(?:[?#][^\s<>'")]+)?)/i
+    /(?:https?:\/\/[^\s<>'")]+?\.(?:webp|png|jpe?g|gif|avif|bmp|svg)(?:[?#][^\s<>'")]+)?|\/uploads\/[A-Za-z0-9._\-\/]+?\.(?:webp|png|jpe?g|gif|avif|bmp|svg)(?:[?#][^\s<>'")]+)?)/i
   const m = s.match(re)
   return m ? String(m[0] || '').trim() : ''
 }
@@ -59,7 +59,9 @@ function extractPreviewImageUrl(text) {
 function extractYouTubeId(text) {
   const s = String(text || '')
   if (!s) return ''
-  const m = s.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{6,})/i)
+  const m = s.match(
+    /(?:youtube(?:-nocookie)?\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i,
+  )
   return m ? String(m[1] || '').trim() : ''
 }
 
@@ -148,19 +150,51 @@ export async function GET(req, { params }) {
     ? (truncateOnWord(plain, 220) || 'Forum post')
     : 'This post does not exist or was deleted.'
 
-  const ytId = found ? extractYouTubeId(post?.text || '') : ''
-  const isAudioPost = found ? hasAudioInText(post?.text || '') : false
-  const imgRel = found
-    ? (isAudioPost
-        ? '/audio/Q-Cast.png'
-        : (extractPreviewImageUrl(post?.text || '') ||
-            (ytId ? `https://i.ytimg.com/vi/${encodeURIComponent(ytId)}/hqdefault.jpg` : '') ||
-            '/metab/forum1.png'))
-    : '/metab/forum1.png'
-  const imageUrl = absUrl(origin, imgRel)
-  const vidRel = found ? extractPreviewVideoUrl(post?.text || '') : ''
-  const videoUrl = vidRel ? absUrl(origin, vidRel) : ''
-  const videoType = videoUrl ? videoMime(videoUrl) : ''
+  const textRaw = found ? String(post?.text || '') : ''
+  const ytId = found ? extractYouTubeId(textRaw) : ''
+  const ytEmbedUrl = ytId ? `https://www.youtube.com/embed/${encodeURIComponent(ytId)}` : ''
+  const ytThumbUrl = ytId ? `https://i.ytimg.com/vi/${encodeURIComponent(ytId)}/hqdefault.jpg` : ''
+
+  const isAudioPost = found ? hasAudioInText(textRaw) : false
+  const imgRel = found ? extractPreviewImageUrl(textRaw) : ''
+  const vidRel = found ? extractPreviewVideoUrl(textRaw) : ''
+
+  // Media priority for share previews:
+  // - YouTube: try to provide a playable embed via og:video (fallback thumbnail via og:image)
+  // - Video file: og:video points to the real file URL
+  // - Image: og:image points to the real image URL
+  // - Audio: use Q-Cast cover image
+  // - No media: forum default preview image
+  const chosen = (() => {
+    if (ytEmbedUrl) {
+      return {
+        kind: 'youtube',
+        imageRel: ytThumbUrl || '/metab/forum1.png',
+        videoUrl: ytEmbedUrl,
+        videoType: 'text/html',
+      }
+    }
+    if (vidRel) {
+      const v = absUrl(origin, vidRel)
+      return {
+        kind: 'video',
+        imageRel: imgRel || '/metab/forum1.png',
+        videoUrl: v,
+        videoType: videoMime(v),
+      }
+    }
+    if (imgRel) {
+      return { kind: 'image', imageRel: imgRel, videoUrl: '', videoType: '' }
+    }
+    if (isAudioPost) {
+      return { kind: 'audio', imageRel: '/audio/Q-Cast.png', videoUrl: '', videoType: '' }
+    }
+    return { kind: 'default', imageRel: '/metab/forum1.png', videoUrl: '', videoType: '' }
+  })()
+
+  const imageUrl = absUrl(origin, chosen.imageRel)
+  const videoUrl = String(chosen.videoUrl || '').trim()
+  const videoType = String(chosen.videoType || '').trim()
   const twitterCard = imageUrl ? 'summary_large_image' : 'summary'
 
   const lastModifiedMs = found ? Number(post?.ts || 0) || Date.now() : Date.now()
