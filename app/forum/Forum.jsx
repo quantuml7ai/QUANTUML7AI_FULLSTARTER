@@ -9395,7 +9395,7 @@ function DmDialogRow({
             {isVipAuthor && <VipFlipBadge />}
 
           </div>
-          <div className="dmRowTime"><HydrateText value={human(lastTs)} /></div>
+
         </div>
         {(previewMedia || hasPreviewText) && (
           <div className="dmRowPreview">
@@ -9426,6 +9426,7 @@ function DmDialogRow({
             </div>
           </div>
         )}
+      <div className="dmRowTime"><HydrateText value={human(lastTs)} /></div>
       </div>
       <button
         type="button"
