@@ -15120,19 +15120,7 @@ function centerNodeInScroll(node, behavior = 'smooth') {
       const contRect = scrollEl.getBoundingClientRect();
       const r = node.getBoundingClientRect();
       const elCenterInView = (r.top - contRect.top) + (r.height / 2);
-
-      // If TopBar overlaps scroll container, keep the target a bit lower to avoid cutting off the post.
-      let coverTop = 0;
-      try {
-        const topbar = document.querySelector?.('.topbar');
-        if (topbar) {
-          const tr = topbar.getBoundingClientRect?.();
-          coverTop = Math.max(0, Number(tr?.bottom || 0) - Number(contRect?.top || 0));
-        }
-      } catch {}
-
-      const usableH = Math.max(1, Number(contRect?.height || 0) - coverTop);
-      const desired = coverTop + (usableH * 0.58); // ~50–60% lower than center
+      const desired = contRect.height / 2;
       const delta = elCenterInView - desired;
       if (!Number.isFinite(delta)) return;
       const nextTop = Math.max(0, Math.min((scrollEl.scrollTop || 0) + delta, (scrollEl.scrollHeight || 0) - (scrollEl.clientHeight || 0)));
@@ -15327,8 +15315,10 @@ useEffect(() => {
 
   setTimeout(() => {
     try {
-      const node = document.getElementById(`post_${pid}`);
-      if (node) centerNodeInScroll(node, 'smooth');
+      document.getElementById(`post_${pid}`)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
     } catch {}
   }, 120);
 }, [sel?.id, threadRoot]);

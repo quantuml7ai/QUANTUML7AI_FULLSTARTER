@@ -63,68 +63,6 @@ function extractYouTubeId(text) {
   return m ? String(m[1] || '').trim() : ''
 }
 
-function extractUrlsFromText(text) {
-  const s = String(text || '')
-  if (!s) return []
-  const out = []
-  const re = /\bhttps?:\/\/[^\s<>'")]+/gi
-  let m
-  while ((m = re.exec(s))) {
-    const u = String(m[0] || '').trim()
-    if (u) out.push(u)
-  }
-  return out
-}
-
-function isImageUrl(url) {
-  const s = String(url || '').toLowerCase()
-  return /\.(webp|png|jpe?g|gif)(?:[?#]|$)/i.test(s)
-}
-
-function isVideoUrl(url) {
-  const s = String(url || '').toLowerCase()
-  return /\.(mp4|webm|mov|m4v|ogv)(?:[?#]|$)/i.test(s)
-}
-
-function isAudioUrl(url) {
-  const s = String(url || '').toLowerCase()
-  if (s.includes('/forum/voice-')) return true
-  return /\.(mp3|m4a|wav|ogg|opus)(?:[?#]|$)/i.test(s)
-}
-
-function pickCandidatesFromPost(post, combinedText) {
-  const out = { image: '', video: '', audio: '', poster: '' }
-  if (!post) return out
-
-  // attachments/media lists
-  const lists = []
-  if (Array.isArray(post?.attachments)) lists.push(post.attachments)
-  if (Array.isArray(post?.files)) lists.push(post.files)
-  const mediaList = lists.flat().filter(Boolean)
-  for (const a of mediaList) {
-    const url = String(a?.url || a?.src || a?.href || a?.file || '').trim()
-    const typeHint = String(a?.type || a?.mime || a?.mediaType || '').toLowerCase()
-    if (!url) continue
-    if (!out.image && (typeHint.startsWith('image/') || typeHint === 'image' || isImageUrl(url))) out.image = url
-    if (!out.video && (typeHint.startsWith('video/') || typeHint === 'video' || isVideoUrl(url))) out.video = url
-    if (!out.audio && (typeHint.startsWith('audio/') || typeHint === 'audio' || isAudioUrl(url))) out.audio = url
-  }
-
-  // direct media fields
-  if (!out.image) out.image = String(post?.imageUrl || post?.media?.imageUrl || '').trim()
-  if (!out.video) out.video = String(post?.videoUrl || post?.media?.videoUrl || '').trim()
-  if (!out.audio) out.audio = String(post?.audioUrl || post?.media?.audioUrl || '').trim()
-  out.poster = String(post?.posterUrl || post?.media?.posterUrl || '').trim()
-
-  // scan text URLs
-  const urls = extractUrlsFromText(combinedText || '')
-  if (!out.image) out.image = urls.find((u) => isImageUrl(u)) || ''
-  if (!out.video) out.video = urls.find((u) => isVideoUrl(u)) || ''
-  if (!out.audio) out.audio = urls.find((u) => isAudioUrl(u)) || ''
-
-  return out
-}
-
 function absUrl(origin, maybeRelative) {
   const v = String(maybeRelative || '').trim()
   if (!v) return ''
@@ -170,40 +108,6 @@ function videoMime(url) {
   return 'video/mp4'
 }
 
-function audioMime(url) {
-  const s = String(url || '').toLowerCase()
-  if (s.includes('.mp3')) return 'audio/mpeg'
-  if (s.includes('.m4a') || s.includes('.mp4')) return 'audio/mp4'
-  if (s.includes('.wav')) return 'audio/wav'
-  if (s.includes('.ogg') || s.includes('.opus')) return 'audio/ogg'
-  return 'audio/webm'
-}
-
-function guessVideoDims(videoUrl) {
-  const u = String(videoUrl || '')
-  if (!u) return { w: 1280, h: 720 }
-  if (/youtube\.com|youtu\.be/i.test(u)) return { w: 1280, h: 720 }
-  // Most user-uploaded forum videos are portrait; helps Telegram sizing.
-  if (/\/forum\/video-/i.test(u)) return { w: 720, h: 1280 }
-  return { w: 1280, h: 720 }
-}
-
-function maybeProxyOgImage(origin, imageUrlAbs) {
-  const u = String(imageUrlAbs || '').trim()
-  if (!u) return ''
-  try {
-    const nu = new URL(u)
-    const host = String(nu.hostname || '').toLowerCase()
-    const isBlob =
-      host.endsWith('public.blob.vercel-storage.com') ||
-      host.endsWith('blob.vercel-storage.com')
-    if (isBlob || /\.webp(?:[?#]|$)/i.test(u)) {
-      return `${origin}/api/forum/og-image?src=${encodeURIComponent(u)}`
-    }
-  } catch {}
-  return u
-}
-
 export async function GET(req, { params }) {
   const postId = String(params?.postId || '').trim()
   const url = new URL(req.url)
@@ -225,41 +129,30 @@ export async function GET(req, { params }) {
     topicId ? `&topic=${encodeURIComponent(topicId)}` : ''
   }`
 
-  const titleRaw = found ? 'Forum post' : 'Post not found'
+  const nick = found ? String(post?.nickname || '').trim() : ''
+  const titleRaw = found
+    ? (nick ? `Post by @${nick.replace(/^@/, '')}` : 'Forum post')
+    : 'Post not found'
 
-  const rawText = found ? String(post?.text || post?.body || '') : ''
-  const rawHtml = found ? String(post?.html || '') : ''
-  const combined = `${rawText}\n${rawHtml}`
-
-  const plain = found ? toPlainText(rawText) : ''
+  const plain = found ? toPlainText(post?.text || '') : ''
   const descRaw = found
     ? (truncateOnWord(plain, 220) || 'Forum post')
     : 'This post does not exist or was deleted.'
 
-  const ytId = found ? extractYouTubeId(combined) : ''
-  const c = found ? pickCandidatesFromPost(post, combined) : { image: '', video: '', audio: '', poster: '' }
-
-  const videoUrl = c.video ? absUrl(origin, c.video) : ''
+  const ytId = found ? extractYouTubeId(post?.text || '') : ''
+  const imgRel = found
+    ? (extractPreviewImageUrl(post?.text || '') ||
+        (ytId ? `https://i.ytimg.com/vi/${encodeURIComponent(ytId)}/hqdefault.jpg` : '') ||
+        '/metab/forum1.png')
+    : '/metab/forum1.png'
+  const imageUrl = absUrl(origin, imgRel)
+  const vidRel = found ? extractPreviewVideoUrl(post?.text || '') : ''
+  const videoUrl = vidRel ? absUrl(origin, vidRel) : ''
   const videoType = videoUrl ? videoMime(videoUrl) : ''
-  const audioUrl = c.audio ? absUrl(origin, c.audio) : ''
-  const audioType = audioUrl ? audioMime(audioUrl) : ''
-
-  const qcastCover = '/audio/Q-Cast.png'
-  const forumDefault = '/metab/forum1.png?v=20260210'
-
-  const imgRel =
-    (c.poster || c.image || '') ||
-    (ytId ? `https://i.ytimg.com/vi/${encodeURIComponent(ytId)}/hqdefault.jpg` : '') ||
-    (audioUrl ? qcastCover : '') ||
-    forumDefault
-
-  const imageUrlAbs = absUrl(origin, imgRel)
-  const imageUrl = maybeProxyOgImage(origin, imageUrlAbs)
-
   const twitterCard = imageUrl ? 'summary_large_image' : 'summary'
 
   const lastModifiedMs = found ? Number(post?.ts || 0) || Date.now() : Date.now()
-  const etag = mkEtag([postId, titleRaw, descRaw, imageUrl, videoUrl, audioUrl, String(lastModifiedMs)].join('|'))
+  const etag = mkEtag([postId, titleRaw, descRaw, imageUrl, String(lastModifiedMs)].join('|'))
 
   const cacheControl =
     'public, max-age=0, s-maxage=300, stale-while-revalidate=86400'
@@ -281,11 +174,7 @@ export async function GET(req, { params }) {
   const ogImg = escapeAttr(imageUrl)
   const ogVid = escapeAttr(videoUrl)
   const ogVidType = escapeAttr(videoType)
-  const ogAud = escapeAttr(audioUrl)
-  const ogAudType = escapeAttr(audioType)
   const redirectEsc = escapeAttr(redirectUrl)
-
-  const { w: vW, h: vH } = videoUrl ? guessVideoDims(videoUrl) : { w: 0, h: 0 }
 
   const html = `<!doctype html>
 <html lang="en">
@@ -298,18 +187,13 @@ export async function GET(req, { params }) {
     <meta property="og:title" content="${title}"/>
     <meta property="og:description" content="${desc}"/>
     <meta property="og:url" content="${ogUrl}"/>
-    <meta property="og:type" content="${videoUrl ? 'video.other' : (audioUrl ? 'music.song' : 'article')}"/>
+    <meta property="og:type" content="${videoUrl ? 'video.other' : 'article'}"/>
     <meta property="og:image" content="${ogImg}"/>
-    <meta property="og:image:width" content="1200"/>
-    <meta property="og:image:height" content="630"/>
     ${videoUrl ? `<meta property="og:video" content="${ogVid}"/>` : ''}
     ${videoUrl ? `<meta property="og:video:secure_url" content="${ogVid}"/>` : ''}
     ${videoUrl ? `<meta property="og:video:type" content="${ogVidType}"/>` : ''}
-    ${videoUrl ? `<meta property="og:video:width" content="${escapeAttr(String(vW || 1280))}"/>` : ''}
-    ${videoUrl ? `<meta property="og:video:height" content="${escapeAttr(String(vH || 720))}"/>` : ''}
-    ${audioUrl ? `<meta property="og:audio" content="${ogAud}"/>` : ''}
-    ${audioUrl ? `<meta property="og:audio:secure_url" content="${ogAud}"/>` : ''}
-    ${audioUrl ? `<meta property="og:audio:type" content="${ogAudType}"/>` : ''}
+    ${videoUrl ? `<meta property="og:video:width" content="1280"/>` : ''}
+    ${videoUrl ? `<meta property="og:video:height" content="720"/>` : ''}
 
     <meta name="twitter:card" content="${twitterCard}"/>
     <meta name="twitter:title" content="${title}"/>
