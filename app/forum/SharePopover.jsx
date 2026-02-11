@@ -5,7 +5,6 @@ import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import {
   buildCanonicalPostUrl,
-  buildShareSnippet,
   buildShareTitle,
   copyToClipboard,
   getShareTargets,
@@ -69,10 +68,9 @@ export default function SharePopover({ open, post, onClose, t, toast }) {
   const shareTitle = buildShareTitle(post, {
     generic: (t?.('forum_share_post_generic') || 'Forum post').trim(),
   })
-  const shareText = buildShareSnippet(post, { maxLen: 220 }) || ''
   const targets = getShareTargets({
     url: canonicalUrl,
-    text: shareText,
+    text: '',
     labels: {
       tg: t?.('forum_share_tg') || 'Telegram',
       ig: t?.('forum_share_ig') || 'Instagram',
@@ -104,7 +102,6 @@ export default function SharePopover({ open, post, onClose, t, toast }) {
     if (key === 'ig') {
       const ok = await tryNativeShare({
         title: shareTitle,
-        text: shareText || shareTitle,
         url: canonicalUrl,
       })
       if (ok) return

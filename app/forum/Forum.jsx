@@ -15128,6 +15128,29 @@ function centerNodeInScroll(node, behavior = 'smooth') {
       return;
     }
   } catch {}
+  try {
+    const r = node.getBoundingClientRect?.();
+    const vh =
+      (typeof window !== 'undefined' && window.visualViewport?.height) ||
+      (typeof window !== 'undefined' && window.innerHeight) ||
+      (typeof document !== 'undefined' && document.documentElement?.clientHeight) ||
+      0;
+    if (r && vh > 0) {
+      const elCenter = r.top + (r.height / 2);
+      const desired = vh / 2;
+      const delta = elCenter - desired;
+      if (Number.isFinite(delta) && Math.abs(delta) > 0.5) {
+        const y0 =
+          (window.pageYOffset || 0) ||
+          (document.documentElement?.scrollTop || 0) ||
+          (document.body?.scrollTop || 0) ||
+          0;
+        const nextY = Math.max(0, y0 + delta);
+        window.scrollTo?.({ top: nextY, behavior });
+        return;
+      }
+    }
+  } catch {}
   try { node.scrollIntoView?.({ behavior, block: 'center' }); } catch { try { node.scrollIntoView?.(); } catch {} }
 }
 
@@ -15141,6 +15164,9 @@ function centerPostAfterDom(postId, behavior = 'smooth') {
     const node = document.getElementById(`post_${pid}`);
     if (node) {
       centerNodeInScroll(node, behavior);
+      try { requestAnimationFrame(() => requestAnimationFrame(() => centerNodeInScroll(node, 'auto'))); } catch {}
+      try { setTimeout(() => centerNodeInScroll(node, 'auto'), 240); } catch {}
+      try { setTimeout(() => centerNodeInScroll(node, 'auto'), 900); } catch {}
       return;
     }
     if (tries < maxTries) {
@@ -15160,6 +15186,9 @@ function centerAndFlashPostAfterDom(postId, behavior = 'smooth') {
     const node = document.getElementById(`post_${pid}`);
     if (node) {
       try { centerNodeInScroll(node, behavior); } catch {}
+      try { requestAnimationFrame(() => requestAnimationFrame(() => centerNodeInScroll(node, 'auto'))); } catch {}
+      try { setTimeout(() => centerNodeInScroll(node, 'auto'), 240); } catch {}
+      try { setTimeout(() => centerNodeInScroll(node, 'auto'), 900); } catch {}
       try {
         node.classList.add('replyTargetFlash');
         window.setTimeout(() => node.classList.remove('replyTargetFlash'), 1100);
@@ -15314,12 +15343,7 @@ useEffect(() => {
   pendingScrollToPostIdRef.current = null;
 
   setTimeout(() => {
-    try {
-      document.getElementById(`post_${pid}`)?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      });
-    } catch {}
+    try { centerPostAfterDom(pid, 'smooth'); } catch {}
   }, 120);
 }, [sel?.id, threadRoot]);
 useEffect(() => {
