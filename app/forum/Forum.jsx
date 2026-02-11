@@ -1334,6 +1334,8 @@ function useQCoinLive(userKey, isVip){
   }, []);
   // === Next-up video warmup (preload the next video while current plays) ===
   useEffect(() => {
+    // Disabled: warmup is handled by the unified forum media coordinator.
+    return;
     if (!isBrowser()) return;
 
     const selector = 'video[data-forum-video="post"]';
@@ -1836,9 +1838,9 @@ const Styles = () => (
       align-items:center;
       justify-content:center;
     }
-    .mediaBox[data-kind="video"]{ --mb-h: var(--mb-video-h); background:#000; }
+    .mediaBox[data-kind="video"]{ --mb-h: var(--mb-video-h); }
     .mediaBox[data-kind="image"]{ --mb-h: var(--mb-image-h); }
-    .mediaBox[data-kind="iframe"]{ --mb-h: var(--mb-iframe-h); background:#000; }
+    .mediaBox[data-kind="iframe"]{ --mb-h: var(--mb-iframe-h); }
     .mediaBox[data-kind="audio"]{ --mb-h: var(--mb-audio-h); }
     /* QCast: отдельная максимальная высота */
     .mediaBox[data-kind="qcast"]{ --mb-h: var(--mb-qcast-h); background:#060b16; }
@@ -1862,7 +1864,7 @@ const Styles = () => (
       width:100%;
       height:auto;
       max-height:100%;
-      background:#000;
+      background:transparent;
     }
 
     /* iframe: по умолчанию 16:9, для TikTok — 9:16 */
@@ -1873,11 +1875,32 @@ const Styles = () => (
       border:0;
       aspect-ratio:16/9;
       display:block;
-      background:#000;
+      background:transparent;
     }
     .mediaBox > iframe[data-forum-media="tiktok"]{
       aspect-ratio:9/16;
-      background:#000;
+      background:transparent;
+    }
+
+    /* === No-black placeholders: iframe thumbs (YouTube/TikTok) === */
+    .mediaBox[data-kind="iframe"]{
+      position:relative;
+      isolation:isolate;
+    }
+    .mediaBox[data-kind="iframe"] .forumIframeThumb{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+      z-index:2;
+      background: radial-gradient(120% 120% at 0% 0%, rgba(120,200,255,.14), rgba(8,12,20,.65) 65%);
+      transition: opacity .22s ease;
+      pointer-events:none;
+    }
+    .mediaBox[data-kind="iframe"][data-ready="1"] .forumIframeThumb{
+      opacity:0;
     }
 
     .mediaBoxInner{
@@ -9946,8 +9969,7 @@ text={t?.('forum_delete_confirm')}
           disablePictureInPicture          
           className="mediaBoxItem"
           style={{
-            objectFit: 'contain', 
-            background: '#000'
+            objectFit: 'contain'
           }}
           onPointerDown={(e) => {
             // включаем controls только по первому тапу пользователя
@@ -9973,8 +9995,17 @@ text={t?.('forum_delete_confirm')}
                 key={`yt${i}`}
                 className="videoCard mediaBox"
                 data-kind="iframe"
+                data-iframe-kind="youtube"
+                data-ready="0"
                 style={{ margin: 0 }}
               >
+                <img
+                  className="forumIframeThumb"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  src={`https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`}
+                />
 <iframe
   src=""
   data-src={`https://www.youtube.com/embed/${videoId}?${ytEmbedParams}`}
@@ -9986,7 +10017,7 @@ text={t?.('forum_delete_confirm')}
   frameBorder="0"
   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
   allowFullScreen
-  className="mediaBoxItem"
+  className="mediaBoxItem forumIframe"
 />
 
               </div>
@@ -10054,18 +10085,29 @@ text={t?.('forum_delete_confirm')}
       key={`tt${i}`}
       className="videoCard mediaBox"
       data-kind="iframe"
+      data-iframe-kind="tiktok"
+      data-ready="0"
       style={{ margin: 0 }}
     >
+      <img
+        className="forumIframeThumb"
+        alt=""
+        loading="lazy"
+        decoding="async"
+        src="/metab/forum1.png"
+      />
       <iframe
         src=""
         title="TikTok video"
         data-forum-media="tiktok"
+        data-tiktok-url={src}
+        data-tiktok-id={videoId}
         data-src={`https://www.tiktok.com/embed/v2/${videoId}`} 
         loading="lazy"       
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen
-        className="mediaBoxItem"
+        className="mediaBoxItem forumIframe"
       />
     </div>
   );
@@ -11984,6 +12026,8 @@ const persistTombstones = useCallback((patch) => {
   // В любой момент времени играет только один <video>/<audio> controls.
   // Видео без controls (обложки, рекламные петельки и т.п.) не трогаем.
   useEffect(() => {
+    // Disabled: single source of truth is the unified forum media coordinator (autoplay/preload/pauses).
+    return;
     if (!isBrowser()) return;
     const pauseOtherIframes = (activeEl) => {
       try {
@@ -12068,6 +12112,8 @@ const persistTombstones = useCallback((patch) => {
   },[])
   // === Ленивая подгрузка превью видео в постах ===
   useEffect(() => {
+    // Disabled: warmup/preload is handled by the unified forum media coordinator.
+    return;
     if (!isBrowser()) return;
 
     const selector = 'video[data-forum-video="post"]';
@@ -12164,6 +12210,14 @@ const persistTombstones = useCallback((patch) => {
 
     const desiredMuted = () => (mutedPref == null ? true : !!mutedPref);
 
+    const setIframeReady = (iframeEl, ready) => {
+      try {
+        if (!iframeEl || !(iframeEl instanceof Element)) return;
+        const box = iframeEl.closest?.('.mediaBox[data-kind="iframe"]');
+        if (!(box instanceof HTMLElement)) return;
+        box.setAttribute('data-ready', ready ? '1' : '0');
+      } catch {}
+    };
 
     const applyMutedPref = (el) => {
       if (!(el instanceof HTMLMediaElement)) return;
@@ -12203,6 +12257,7 @@ const persistTombstones = useCallback((patch) => {
       }
     };
     const volHandlers = new WeakMap();
+    const iframeReadyHandlers = new WeakMap();
     const bindVolumeListener = (el) => {
       const isMedia =
         el instanceof HTMLVideoElement || el instanceof HTMLAudioElement;
@@ -12281,6 +12336,7 @@ const persistTombstones = useCallback((patch) => {
           const player = new YT.Player(iframe, {
             events: {
               onReady: () => {
+                try { setIframeReady(iframe, true); } catch {}
                 try {
                   if (desiredMuted()) player?.mute?.();
                   else player?.unMute?.();
@@ -12291,6 +12347,7 @@ const persistTombstones = useCallback((patch) => {
                 try {
                   const state = evt?.data;
                   if (state === YT.PlayerState?.PLAYING) {
+                    try { setIframeReady(iframe, true); } catch {}
                     startYtMutePoll(player);
                     window.dispatchEvent(new CustomEvent('site-media-play', {
                       detail: { source: 'youtube', element: iframe }
@@ -12323,6 +12380,388 @@ const persistTombstones = useCallback((patch) => {
 
     const observed = new WeakSet();
     const unloadTimers = new WeakMap(); // el -> timeoutId
+
+    // === Preload-before-focus + first-frame poster cache (LRU/TTL, bounded) ===
+    // We cache FIRST frames as Blob ObjectURLs (NOT dataURL) and revoke on eviction/unmount.
+    const POSTER_MAX_ITEMS = 18;
+    const POSTER_MAX_BYTES = 18 * 1024 * 1024; // ~18MB
+    const POSTER_TTL_MS = 15 * 60 * 1000;
+
+    const posterCache = new Map(); // src -> { url, bytes, ts }
+    let posterBytes = 0;
+    const posterInFlight = new Set(); // src
+    const posterFailUntil = new Map(); // src -> tsMs
+
+    const preloadAbort = new AbortController();
+    let warmupTimer = 0;
+    let lastWarmupCenter = null;
+
+    const revokePosterUrl = (u) => {
+      try { if (u && typeof u === 'string' && u.startsWith('blob:')) URL.revokeObjectURL(u); } catch {}
+    };
+
+    const evictPosterKey = (key) => {
+      const k = String(key || '').trim();
+      if (!k) return;
+      const ent = posterCache.get(k);
+      if (!ent) return;
+      posterCache.delete(k);
+      posterBytes -= Number(ent.bytes || 0) || 0;
+      revokePosterUrl(ent.url);
+    };
+
+    const prunePosterCache = () => {
+      const now = Date.now();
+      // TTL prune
+      for (const [k, ent] of posterCache.entries()) {
+        if (!ent || !ent.ts) continue;
+        if (now - Number(ent.ts || 0) > POSTER_TTL_MS) evictPosterKey(k);
+      }
+      // LRU/size prune (Map keeps insertion order; oldest = first)
+      while (
+        posterCache.size > POSTER_MAX_ITEMS ||
+        (posterBytes > POSTER_MAX_BYTES && posterCache.size > 0)
+      ) {
+        const oldestKey = posterCache.keys().next().value;
+        if (!oldestKey) break;
+        evictPosterKey(oldestKey);
+      }
+    };
+
+    const getCachedPoster = (src) => {
+      const k = String(src || '').trim();
+      if (!k) return null;
+      const ent = posterCache.get(k);
+      if (!ent) return null;
+      const now = Date.now();
+      if (now - Number(ent.ts || 0) > POSTER_TTL_MS) {
+        evictPosterKey(k);
+        return null;
+      }
+      // touch (move to end)
+      try {
+        posterCache.delete(k);
+        posterCache.set(k, ent);
+      } catch {}
+      return ent;
+    };
+
+    const setCachedPoster = (src, ent) => {
+      const k = String(src || '').trim();
+      if (!k || !ent?.url) return false;
+      if (posterCache.has(k)) evictPosterKey(k);
+      posterCache.set(k, {
+        url: String(ent.url),
+        bytes: Number(ent.bytes || 0) || 0,
+        ts: Date.now(),
+      });
+      posterBytes += Number(ent.bytes || 0) || 0;
+      prunePosterCache();
+      return posterCache.has(k);
+    };
+
+    // === TikTok thumbnail prefetch (oEmbed) cache (bounded) ===
+    const TIKTOK_THUMB_MAX_ITEMS = 120;
+    const TIKTOK_THUMB_TTL_MS = 24 * 60 * 60 * 1000;
+    const tiktokThumbCache = new Map(); // tiktokUrl -> { thumb, ts }
+    const tiktokThumbInFlight = new Set(); // tiktokUrl
+    const tiktokThumbFailUntil = new Map(); // tiktokUrl -> tsMs
+
+    const pruneTikTokThumbCache = () => {
+      const now = Date.now();
+      for (const [k, ent] of tiktokThumbCache.entries()) {
+        if (!ent || !ent.ts) continue;
+        if (now - Number(ent.ts || 0) > TIKTOK_THUMB_TTL_MS) tiktokThumbCache.delete(k);
+      }
+      while (tiktokThumbCache.size > TIKTOK_THUMB_MAX_ITEMS) {
+        const oldestKey = tiktokThumbCache.keys().next().value;
+        if (!oldestKey) break;
+        tiktokThumbCache.delete(oldestKey);
+      }
+    };
+
+    const getCachedTikTokThumb = (tiktokUrl) => {
+      const k = String(tiktokUrl || '').trim();
+      if (!k) return '';
+      const ent = tiktokThumbCache.get(k);
+      if (!ent) return '';
+      const now = Date.now();
+      if (now - Number(ent.ts || 0) > TIKTOK_THUMB_TTL_MS) {
+        tiktokThumbCache.delete(k);
+        return '';
+      }
+      // touch
+      try {
+        tiktokThumbCache.delete(k);
+        tiktokThumbCache.set(k, ent);
+      } catch {}
+      return String(ent.thumb || '').trim();
+    };
+
+    const setCachedTikTokThumb = (tiktokUrl, thumbUrl) => {
+      const k = String(tiktokUrl || '').trim();
+      const v = String(thumbUrl || '').trim();
+      if (!k || !v) return;
+      tiktokThumbCache.set(k, { thumb: v, ts: Date.now() });
+      pruneTikTokThumbCache();
+    };
+
+    const applyTikTokThumbToDom = (iframeEl, thumbUrl) => {
+      try {
+        if (!(iframeEl instanceof HTMLIFrameElement)) return;
+        const box = iframeEl.closest?.('.mediaBox[data-kind="iframe"]');
+        if (!(box instanceof HTMLElement)) return;
+        const img = box.querySelector?.('.forumIframeThumb');
+        if (!(img instanceof HTMLImageElement)) return;
+        if (img.src !== thumbUrl) img.src = thumbUrl;
+      } catch {}
+    };
+
+    const ensureTikTokThumb = (iframeEl) => {
+      try {
+        if (preloadAbort.signal.aborted) return;
+        if (!(iframeEl instanceof HTMLIFrameElement)) return;
+        const kind = iframeEl.getAttribute('data-forum-media');
+        if (kind !== 'tiktok') return;
+
+        const tiktokUrl = String(iframeEl.getAttribute('data-tiktok-url') || '').trim();
+        if (!tiktokUrl) return;
+
+        const cached = getCachedTikTokThumb(tiktokUrl);
+        if (cached) {
+          applyTikTokThumbToDom(iframeEl, cached);
+          return;
+        }
+
+        const failUntil = Number(tiktokThumbFailUntil.get(tiktokUrl) || 0) || 0;
+        if (failUntil && Date.now() < failUntil) return;
+        if (tiktokThumbInFlight.has(tiktokUrl)) return;
+        tiktokThumbInFlight.add(tiktokUrl);
+
+        fetch(`/api/forum/tiktok-oembed?url=${encodeURIComponent(tiktokUrl)}`, {
+          cache: 'no-store',
+          signal: preloadAbort.signal,
+        })
+          .then((r) => r.json().catch(() => null))
+          .then((j) => {
+            const thumb = String(j?.thumbnailUrl || '').trim();
+            if (!j?.ok || !thumb) throw new Error('no_thumb');
+            setCachedTikTokThumb(tiktokUrl, thumb);
+            applyTikTokThumbToDom(iframeEl, thumb);
+          })
+          .catch(() => {
+            tiktokThumbFailUntil.set(tiktokUrl, Date.now() + 10 * 60 * 1000);
+            try {
+              if (tiktokThumbFailUntil.size > 120) {
+                const it = tiktokThumbFailUntil.keys();
+                for (let i = 0; i < 40; i++) {
+                  const k = it.next().value;
+                  if (!k) break;
+                  tiktokThumbFailUntil.delete(k);
+                }
+              }
+            } catch {}
+          })
+          .finally(() => {
+            tiktokThumbInFlight.delete(tiktokUrl);
+          });
+      } catch {}
+    };
+
+    const waitForLoadedData = (video, timeoutMs = 1200) =>
+      new Promise((resolve) => {
+        if (!(video instanceof HTMLVideoElement)) return resolve(false);
+        if ((video.readyState || 0) >= 2 && (video.videoWidth || 0) > 0) return resolve(true);
+        let done = false;
+        const finish = (ok) => {
+          if (done) return;
+          done = true;
+          try { video.removeEventListener('loadeddata', onLd); } catch {}
+          try { video.removeEventListener('error', onErr); } catch {}
+          try { clearTimeout(t); } catch {}
+          resolve(!!ok);
+        };
+        const onLd = () => finish(true);
+        const onErr = () => finish(false);
+        const t = setTimeout(() => finish(false), Math.max(250, Number(timeoutMs || 0) || 1200));
+        try { video.addEventListener('loadeddata', onLd, { once: true }); } catch {}
+        try { video.addEventListener('error', onErr, { once: true }); } catch {}
+      });
+
+    const captureFirstFramePoster = async (video, srcKey) => {
+      if (preloadAbort.signal.aborted) return null;
+      if (!(video instanceof HTMLVideoElement)) return null;
+      const key = String(srcKey || '').trim();
+      if (!key) return null;
+
+      // Ensure some data is requested (but don't thrash already-playing videos).
+      try { video.preload = 'auto'; } catch {}
+      try {
+        const hasProgress = Number.isFinite(video.currentTime) && video.currentTime > 0.05 && !video.ended;
+        const cold = (video.readyState || 0) === 0 || !video.currentSrc;
+        const safe = cold && !hasProgress && video.paused && (Number(video.currentTime || 0) < 0.01);
+        if (safe) video.load?.();
+      } catch {}
+
+      const ok = await waitForLoadedData(video, 1400);
+      if (!ok || preloadAbort.signal.aborted) return null;
+
+      const vw = Number(video.videoWidth || 0);
+      const vh = Number(video.videoHeight || 0);
+      if (!(vw > 0 && vh > 0)) return null;
+
+      const maxW = 640;
+      const scale = Math.min(1, maxW / vw);
+      const w = Math.max(1, Math.round(vw * scale));
+      const h = Math.max(1, Math.round(vh * scale));
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
+      if (!ctx) return null;
+      try {
+        ctx.drawImage(video, 0, 0, w, h);
+      } catch {
+        return null; // likely CORS-tainted
+      }
+
+      const blob = await new Promise((resolve) => {
+        try {
+          canvas.toBlob(
+            (b) => resolve(b || null),
+            'image/jpeg',
+            0.82,
+          );
+        } catch {
+          resolve(null);
+        }
+      });
+      if (!blob || preloadAbort.signal.aborted) return null;
+
+      const url = URL.createObjectURL(blob);
+      return { url, bytes: blob.size || 0 };
+    };
+
+    const warmupVideo = (video) => {
+      if (!(video instanceof HTMLVideoElement)) return;
+      if (preloadAbort.signal.aborted) return;
+      // don't mess with active playback
+      try { if (!video.paused) return; } catch {}
+      try { video.preload = 'auto'; } catch {}
+
+      const srcKey = String(video.currentSrc || video.getAttribute('src') || '').trim();
+      if (!srcKey) return;
+
+      // cached poster -> apply immediately
+      const cached = getCachedPoster(srcKey);
+      if (cached?.url) {
+        try { if (video.poster !== cached.url) video.poster = cached.url; } catch {}
+        return;
+      }
+
+      const failUntil = Number(posterFailUntil.get(srcKey) || 0) || 0;
+      if (failUntil && Date.now() < failUntil) return;
+      if (posterInFlight.has(srcKey)) return;
+      posterInFlight.add(srcKey);
+
+      // capture in background (best-effort)
+      Promise.resolve()
+        .then(async () => {
+          const res = await captureFirstFramePoster(video, srcKey);
+          if (!res?.url) return null;
+          const kept = setCachedPoster(srcKey, res);
+          if (!kept) return null;
+          // apply only if still connected
+          try {
+            if (video.isConnected && !preloadAbort.signal.aborted) {
+              const url = getCachedPoster(srcKey)?.url || res.url;
+              if (url) video.poster = url;
+            }
+          } catch {}
+          return res;
+        })
+        .catch(() => null)
+        .finally(() => {
+          posterInFlight.delete(srcKey);
+          if (!getCachedPoster(srcKey)) {
+            // back off on repeated failures (CORS/unsupported decode)
+            posterFailUntil.set(srcKey, Date.now() + 6 * 60 * 1000);
+            // bound the "fail" map too (avoid unbounded growth on long scroll)
+            try {
+              if (posterFailUntil.size > 120) {
+                const it = posterFailUntil.keys();
+                for (let i = 0; i < 40; i++) {
+                  const k = it.next().value;
+                  if (!k) break;
+                  posterFailUntil.delete(k);
+                }
+              }
+            } catch {}
+          }
+        });
+    };
+
+    const warmupAround = (centerEl) => {
+      try {
+        if (!centerEl || !(centerEl instanceof Element)) return;
+        prunePosterCache();
+        const all = Array.from(document.querySelectorAll(selector));
+        const idx = all.indexOf(centerEl);
+        if (idx < 0) return;
+
+        const BEHIND = 2;
+        const AHEAD = 3;
+        const from = Math.max(0, idx - BEHIND);
+        const to = Math.min(all.length - 1, idx + AHEAD);
+        for (let i = from; i <= to; i++) {
+          const el = all[i];
+          if (el instanceof HTMLVideoElement) warmupVideo(el);
+          if (el instanceof HTMLIFrameElement) {
+            try { el.setAttribute('loading', 'lazy'); } catch {}
+            try { ensureTikTokThumb(el); } catch {}
+          }
+        }
+      } catch {}
+    };
+
+    const scheduleWarmupAround = (centerEl) => {
+      try {
+        if (!centerEl || !(centerEl instanceof Element)) return;
+        if (lastWarmupCenter === centerEl && warmupTimer) return;
+        lastWarmupCenter = centerEl;
+        if (warmupTimer) clearTimeout(warmupTimer);
+        warmupTimer = setTimeout(() => {
+          warmupTimer = 0;
+          warmupAround(centerEl);
+        }, 0);
+      } catch {}
+    };
+
+    // Unified autoplay delay (stabilizes micro-scroll and lets warmup/preload start first).
+    const AUTO_PLAY_DELAY_MS = 160;
+    let playTimer = 0;
+    let playTarget = null;
+
+    const cancelScheduledPlay = () => {
+      try { if (playTimer) clearTimeout(playTimer); } catch {}
+      playTimer = 0;
+      playTarget = null;
+    };
+
+    const schedulePlay = (el) => {
+      cancelScheduledPlay();
+      if (!el) return;
+      playTarget = el;
+      playTimer = setTimeout(() => {
+        const target = playTarget;
+        playTimer = 0;
+        playTarget = null;
+        if (!target || preloadAbort.signal.aborted) return;
+        if (active !== target) return;
+        try { playMedia(target); } catch {}
+      }, AUTO_PLAY_DELAY_MS);
+    };
 
     const cancelUnload = (el) => {
       const id = unloadTimers.get(el);
@@ -12364,6 +12803,7 @@ const persistTombstones = useCallback((patch) => {
         return;
       }
       if (kind === 'youtube') {
+        try { setIframeReady(el, false); } catch {}
         const player = ytPlayers.get(el);
         try { player?.pauseVideo?.(); } catch {}
         try { stopYtMutePoll(player); } catch {}
@@ -12389,6 +12829,7 @@ const persistTombstones = useCallback((patch) => {
         return;
       }
       if (kind === 'tiktok' || kind === 'iframe') {
+        try { setIframeReady(el, false); } catch {}
         const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
         if (src && !el.getAttribute('data-src')) { try { el.setAttribute('data-src', src); } catch {} }
         try { el.removeAttribute('data-forum-iframe-active'); } catch {}
@@ -12405,6 +12846,83 @@ const persistTombstones = useCallback((patch) => {
         hardUnloadMedia(el);
       }, ms);
       unloadTimers.set(el, id);
+    };
+
+    // === Single-source-of-truth: when one media starts playing, pause/unload others ===
+    const pauseOtherHtml5 = (keepEl) => {
+      try {
+        document.querySelectorAll('video').forEach((v) => {
+          if (v === keepEl) return;
+          if (!(v instanceof HTMLVideoElement)) return;
+          // don't touch coordinator-controlled autoplay videos (no controls)
+          if (!v.controls) return;
+          try { if (!v.paused) v.pause(); } catch {}
+        });
+        document.querySelectorAll('audio').forEach((a) => {
+          if (a === keepEl) return;
+          if (!(a instanceof HTMLAudioElement)) return;
+          try { if (!a.paused) a.pause(); } catch {}
+        });
+      } catch {}
+    };
+
+    const pauseOtherIframes = (keepEl) => {
+      try {
+        document.querySelectorAll('iframe[data-forum-media]').forEach((frame) => {
+          if (!(frame instanceof HTMLIFrameElement)) return;
+          if (frame === keepEl) return;
+          const kind = frame.getAttribute('data-forum-media');
+          if (kind === 'youtube') {
+            const player = ytPlayers.get(frame);
+            try { player?.pauseVideo?.(); } catch {}
+            try { stopYtMutePoll(player); } catch {}
+            // free resources (coordinator will re-init on demand)
+            scheduleHardUnload(frame, 0);
+            return;
+          }
+          const cur = frame.getAttribute('src') || '';
+          if (cur) {
+            try { frame.removeAttribute('data-forum-iframe-active'); } catch {}
+            try { setIframeReady(frame, false); } catch {}
+            try { frame.setAttribute('src', ''); } catch {}
+          }
+        });
+      } catch {}
+    };
+
+    const onSiteMediaPlay = (e) => {
+      try {
+        const d = e?.detail || {};
+        const source = String(d?.source || '');
+        if (source === 'bg-audio' || source === 'html5') return;
+
+        const el = d?.element || null;
+        let keep = el;
+        if (source === 'qcast' && el instanceof Element) {
+          const a = el.querySelector?.('audio');
+          if (a instanceof HTMLAudioElement) keep = a;
+        }
+
+        pauseOtherHtml5(keep instanceof Element ? keep : null);
+        pauseOtherIframes(el instanceof Element ? el : null);
+      } catch {}
+    };
+
+    const handlePlay = (e) => {
+      const target = e?.target;
+      const isVideo = target instanceof HTMLVideoElement;
+      const isAudio = target instanceof HTMLAudioElement;
+      if (!isVideo && !isAudio) return;
+      // don't touch coordinator autoplay videos (no controls)
+      if (isVideo && !target.controls) return;
+
+      try {
+        pauseOtherHtml5(target);
+        pauseOtherIframes(target);
+        window.dispatchEvent(new CustomEvent('site-media-play', {
+          detail: { source: 'html5', element: target }
+        }));
+      } catch {}
     };
     // Best-effort loop для iframe (Vimeo/встроенные плееры/прочее):
     // добавляем loop=1 ОДИН РАЗ (не на каждом фокусе), чтобы не было дергания.
@@ -12426,6 +12944,7 @@ const persistTombstones = useCallback((patch) => {
         try {
           applyMutedPref(el);
           el.playsInline = true;
+          if (el instanceof HTMLVideoElement) el.preload = 'auto';
           // LOOP: автоплей всегда зацикленный
           el.loop = true;
           if (el.paused) {
@@ -12460,6 +12979,7 @@ const persistTombstones = useCallback((patch) => {
         try {
           const ds = el.getAttribute('data-src') || '';
           const cur = el.getAttribute('src') || '';
+          setIframeReady(el, false);
           if (ds && !cur) el.setAttribute('src', ds);
         } catch {}
         const player = await initYouTubePlayer(el);
@@ -12485,6 +13005,7 @@ const persistTombstones = useCallback((patch) => {
         const alreadyActive = el.getAttribute('data-forum-iframe-active') === '1';
         const cur = el.getAttribute('src') || '';
         if (!alreadyActive || !cur) {
+          try { setIframeReady(el, false); } catch {}
           try { el.setAttribute('data-forum-iframe-active', '1'); } catch {}
           try { el.setAttribute('src', src); } catch {}
         }
@@ -12522,6 +13043,7 @@ const persistTombstones = useCallback((patch) => {
               // iframe/youtube — освобождаем ресурсы с задержкой (анти-микроскролл)
               scheduleHardUnload(el, 900);
               active = null;
+              cancelScheduledPlay();
             }
           } else {
             ratios.set(el, r);
@@ -12551,7 +13073,8 @@ const persistTombstones = useCallback((patch) => {
                 scheduleHardUnload(active, 900);
                 active = candidate;
                 cancelUnload(active);
-                playMedia(active);
+                scheduleWarmupAround(active);
+                schedulePlay(active);
               }
               return;
             }
@@ -12559,6 +13082,7 @@ const persistTombstones = useCallback((patch) => {
             softPauseMedia(active);
             scheduleHardUnload(active, 900);
             active = null;
+            cancelScheduledPlay();
           }
 
           // Нет активного — берём кандидата, только если он попал в расширенную зону
@@ -12573,7 +13097,8 @@ const persistTombstones = useCallback((patch) => {
 
           active = candidate;
           cancelUnload(active);
-          playMedia(active);
+          scheduleWarmupAround(active);
+          schedulePlay(active);
         });
       },
       {
@@ -12610,6 +13135,26 @@ const persistTombstones = useCallback((patch) => {
           }
         }
 
+        // iframe placeholders: thumbnail is visible until the iframe is actually loaded/ready
+        if (el instanceof HTMLIFrameElement) {
+          try {
+            if (el.dataset.forumReadyBound !== '1') {
+              el.dataset.forumReadyBound = '1';
+              setIframeReady(el, false);
+              const onLoad = () => setIframeReady(el, true);
+              const onError = () => setIframeReady(el, false);
+              iframeReadyHandlers.set(el, { onLoad, onError });
+              el.addEventListener('load', onLoad, { passive: true });
+              el.addEventListener('error', onError, { passive: true });
+            }
+          } catch {}
+        }
+
+        // TikTok: resolve a real thumbnail ASAP (oEmbed -> thumbnail_url)
+        if (kind === 'tiktok' && el instanceof HTMLIFrameElement) {
+          try { ensureTikTokThumb(el); } catch {}
+        }
+
         io?.observe?.(el);
       } catch {}
     };
@@ -12631,13 +13176,17 @@ const persistTombstones = useCallback((patch) => {
             try { n.querySelectorAll?.(selector)?.forEach?.(observeOne); } catch {}
           }
         }
-      });
+    });
       mo.observe(document.body, { childList: true, subtree: true });
     } catch { mo = null; }
     window.addEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
+    document.addEventListener('play', handlePlay, true);
+    window.addEventListener('site-media-play', onSiteMediaPlay);
     return () => {
       try { mo?.disconnect?.(); } catch {}
       window.removeEventListener(MEDIA_MUTED_EVENT, onMutedEvent);      
+      try { document.removeEventListener('play', handlePlay, true); } catch {}
+      try { window.removeEventListener('site-media-play', onSiteMediaPlay); } catch {}
       try { if (rafId) cancelAnimationFrame(rafId); } catch {}
       io?.disconnect?.();
 
@@ -12660,6 +13209,15 @@ const persistTombstones = useCallback((patch) => {
         });
       } catch {}
       try {
+        document.querySelectorAll('iframe[data-forum-media]').forEach((el) => {
+          if (!(el instanceof HTMLIFrameElement)) return;
+          const h = iframeReadyHandlers.get(el);
+          if (!h) return;
+          try { el.removeEventListener('load', h.onLoad); } catch {}
+          try { el.removeEventListener('error', h.onError); } catch {}
+        });
+      } catch {}
+      try {
         if (window.__forumYtPlayers === ytPlayers) {
           delete window.__forumYtPlayers;
         }
@@ -12676,6 +13234,23 @@ const persistTombstones = useCallback((patch) => {
       ytMutePolls.forEach((id) => clearInterval(id));
       ytMutePolls.clear();
       ytMuteLast.clear();        
+
+      // Preload/poster resources cleanup (bounded caches + abort)
+      try { cancelScheduledPlay(); } catch {}
+      try { if (warmupTimer) clearTimeout(warmupTimer); } catch {}
+      warmupTimer = 0;
+      lastWarmupCenter = null;
+      try { preloadAbort.abort(); } catch {}
+      try {
+        posterCache.forEach((ent) => revokePosterUrl(ent?.url));
+        posterCache.clear();
+      } catch {}
+      try { posterInFlight.clear(); } catch {}
+      try { posterFailUntil.clear(); } catch {}
+      try { tiktokThumbCache.clear(); } catch {}
+      try { tiktokThumbInFlight.clear(); } catch {}
+      try { tiktokThumbFailUntil.clear(); } catch {}
+      posterBytes = 0;
     };
   }, []);
     useEffect(() => {
@@ -15289,37 +15864,57 @@ function centerAndFlashPostAfterDom(postId, behavior = 'smooth') {
           }
         };
 
-        try { requestAnimationFrame(maybeRecenter); } catch {}
-        try { setTimeout(maybeRecenter, 280); } catch {}
-        try { setTimeout(maybeRecenter, 900); } catch {}
+        // Ограничиваем докалибровку: максимум 1–2 ре-центровки, без бесконечных наблюдателей.
+        const MAX_RECENTERS = 2;
+        let recentered = 0;
+        let settleTimer = 0;
+        let t1 = 0;
+        let t2 = 0;
+        let stopT = 0;
+        let cleaned = false;
+        let ro = null;
 
+        const cleanup = () => {
+          if (cleaned) return;
+          cleaned = true;
+          try { if (settleTimer) clearTimeout(settleTimer); } catch {}
+          try { if (t1) clearTimeout(t1); } catch {}
+          try { if (t2) clearTimeout(t2); } catch {}
+          try { if (stopT) clearTimeout(stopT); } catch {}
+          try { ro?.disconnect?.(); } catch {}
+          ro = null;
+        };
+
+        const requestRecenter = () => {
+          if (recentered >= MAX_RECENTERS) { cleanup(); return; }
+          if (settleTimer) return;
+          settleTimer = setTimeout(() => {
+            settleTimer = 0;
+            if (recentered >= MAX_RECENTERS) { cleanup(); return; }
+            const d = computeDelta();
+            if (Number.isFinite(d) && Math.abs(d) > 2) {
+              recentered += 1;
+              try { centerNodeInScroll(node, 'auto'); } catch {}
+            }
+            if (recentered >= MAX_RECENTERS) cleanup();
+          }, 90);
+        };
+
+        // Контролируемый тайминг (fallback), даже если ResizeObserver недоступен.
+        try { t1 = setTimeout(requestRecenter, 240); } catch {}
+        try { t2 = setTimeout(requestRecenter, 820); } catch {}
+
+        // ResizeObserver: реагируем на поздние изменения высот (медиа/реклама), но с тем же лимитом.
         try {
           if (typeof ResizeObserver !== 'undefined') {
             const scrollEl = getScrollEl?.();
-            let stopped = false;
-            let rafId = 0;
-            const schedule = () => {
-              if (stopped) return;
-              if (rafId) return;
-              try {
-                rafId = requestAnimationFrame(() => {
-                  rafId = 0;
-                  maybeRecenter();
-                });
-              } catch {}
-            };
-
-            const ro = new ResizeObserver(schedule);
+            ro = new ResizeObserver(() => requestRecenter());
             try { ro.observe(node); } catch {}
             if (scrollEl) { try { ro.observe(scrollEl); } catch {} }
-
-            setTimeout(() => {
-              stopped = true;
-              try { ro.disconnect(); } catch {}
-              if (rafId) { try { cancelAnimationFrame(rafId); } catch {} }
-            }, 1600);
           }
-        } catch {}
+        } catch { ro = null; }
+
+        try { stopT = setTimeout(cleanup, 1800); } catch {}
       } catch {}
       try {
         node.classList.add('replyTargetFlash');
@@ -17336,7 +17931,7 @@ useEffect(() => {
           markViewPostRef.current?.(postId);
 
           // префетч медиа вокруг
-          prefetchVideosAround(el);
+          // (prefetch handled by unified forum media coordinator)
 
           // и держим TTL-повторы, пока пост в фокусе
           scheduleNextBucketTick(postId);
@@ -17699,6 +18294,19 @@ useHtmlFlag('data-video-feed', videoFeedOpen ? '1' : null);
 // После ручного выбора сортировки — работаем в обычном режиме.
 const [videoFeedEntryToken, setVideoFeedEntryToken] = React.useState(0);
 const [videoFeedUserSortLocked, setVideoFeedUserSortLocked] = React.useState(false);
+// Сессионный seed (меняется при полной перезагрузке), чтобы "первый вход" не давал один и тот же порядок.
+const videoFeedSessionSeedRef = React.useRef('');
+if (!videoFeedSessionSeedRef.current) {
+  try {
+    const c = (typeof crypto !== 'undefined') ? crypto : null;
+    videoFeedSessionSeedRef.current =
+      (c && typeof c.randomUUID === 'function')
+        ? c.randomUUID()
+        : `vf_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`;
+  } catch {
+    videoFeedSessionSeedRef.current = `vf_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`;
+  }
+}
 
 // детерминированный shuffle (стабилен в рамках одного входа в ленту)
 function __vfHash32(str) {
@@ -17880,7 +18488,7 @@ let only = all
 if (effectiveFeedSort === 'random') {
   // ⚠️ важное: shuffle должен быть стабильным, иначе при любом setState/рендере
   // лента будет «прыгать». Поэтому seed завязан на вход (token) и пользователя.
-  const seedStr = `${String(viewerId || '')}|${String(videoFeedEntryToken || 0)}`;
+  const seedStr = `${String(viewerId || '')}|${String(videoFeedSessionSeedRef.current || '')}|${String(videoFeedEntryToken || 0)}`;
   // слегка стабилизируем базовый порядок перед shuffle, чтобы новые посты
   // не «вклинивались» случайно в разные места на каждом билде.
   const base = only.slice().sort((a,b) => (Number(b?.ts||0) - Number(a?.ts||0)));
@@ -20272,7 +20880,7 @@ onOpenThread={(clickP) => {
                                   controlsList="nodownload noplaybackrate noremoteplayback"
                                   disablePictureInPicture
                                   className="mediaBoxItem"
-                                  style={{ objectFit: 'contain', background: '#000' }}
+                                  style={{ objectFit: 'contain' }}
                                 />
                               </div>
                             ))}

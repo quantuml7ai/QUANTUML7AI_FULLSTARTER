@@ -9,6 +9,9 @@ export const revalidate = 0
 export const fetchCache = 'force-no-store'
 export const runtime = 'nodejs'
 
+const OG_DEFAULT_IMAGE = '/metab/forum1.png'
+const OG_AUDIO_IMAGE = '/audio/Q-Cast.png'
+
 function escapeAttr(s) {
   return String(s || '')
     .replace(/&/g, '&amp;')
@@ -47,13 +50,81 @@ function truncateOnWord(s, maxLen = 220) {
   return out ? `${out}…` : `${cut.trim()}…`
 }
 
-function extractPreviewImageUrl(text) {
+function dedupUrls(list) {
+  const out = []
+  const seen = new Set()
+  for (const it of Array.isArray(list) ? list : []) {
+    const u = String(it || '').trim()
+    if (!u) continue
+    if (seen.has(u)) continue
+    seen.add(u)
+    out.push(u)
+  }
+  return out
+}
+
+function isLikelyVercelBlobUrl(url) {
+  const s = String(url || '').toLowerCase()
+  return (
+    s.includes('vercel-storage') ||
+    s.includes('vercel-blob') ||
+    s.includes('blob.vercel-storage.com') ||
+    /https?:\/\/[^/]+\.public\.blob\.vercel-storage\.com\//i.test(url)
+  )
+}
+
+function imageMime(url) {
+  const s = String(url || '').toLowerCase()
+  if (s.includes('.png')) return 'image/png'
+  if (s.includes('.jpg') || s.includes('.jpeg')) return 'image/jpeg'
+  if (s.includes('.gif')) return 'image/gif'
+  if (s.includes('.webp')) return 'image/webp'
+  if (s.includes('.avif')) return 'image/avif'
+  if (s.includes('.bmp')) return 'image/bmp'
+  if (s.includes('.svg')) return 'image/svg+xml'
+  return ''
+}
+
+function extractPreviewImageUrls(text) {
   const s = String(text || '')
-  if (!s) return ''
+  if (!s) return []
   const re =
-    /(?:https?:\/\/[^\s<>'")]+?\.(?:webp|png|jpe?g|gif|avif|bmp|svg)(?:[?#][^\s<>'")]+)?|\/uploads\/[A-Za-z0-9._\-\/]+?\.(?:webp|png|jpe?g|gif|avif|bmp|svg)(?:[?#][^\s<>'")]+)?)/i
-  const m = s.match(re)
-  return m ? String(m[0] || '').trim() : ''
+    /(?:https?:\/\/[^\s<>'")]+?\.(?:webp|png|jpe?g|gif|avif|bmp|svg)(?:[?#][^\s<>'")]+)?|\/uploads\/[A-Za-z0-9._\-\/]+?\.(?:webp|png|jpe?g|gif|avif|bmp|svg)(?:[?#][^\s<>'")]+)?)/gi
+
+  const matches = []
+  try {
+    for (const m of s.matchAll(re)) {
+      const u = String(m?.[0] || '').trim()
+      if (u) matches.push(u)
+    }
+  } catch {
+    const m = s.match(re)
+    if (m && m[0]) matches.push(String(m[0]).trim())
+  }
+
+  const list = dedupUrls(matches)
+  if (!list.length) return []
+
+  const scored = list.map((u, idx) => {
+    let score = 0
+    if (isLikelyVercelBlobUrl(u)) score += 30
+    if (/^https:\/\//i.test(u)) score += 3
+    const mime = imageMime(u)
+    // Telegram/соцсети наиболее стабильно работают с jpg/png; webp оставляем, но чуть ниже.
+    if (mime === 'image/jpeg') score += 4
+    if (mime === 'image/png') score += 3
+    if (mime === 'image/gif') score += 2
+    if (mime === 'image/webp') score -= 1
+    if (mime === 'image/svg+xml') score -= 6
+    return { u, idx, score }
+  })
+
+  scored.sort((a, b) => (b.score - a.score) || (a.idx - b.idx))
+  return scored.map((x) => x.u)
+}
+
+function extractPreviewImageUrl(text) {
+  return extractPreviewImageUrls(text)[0] || ''
 }
 
 function extractYouTubeId(text) {
@@ -101,6 +172,15 @@ function extractPreviewVideoUrl(text) {
   return m ? String(m[0] || '').trim() : ''
 }
 
+function extractPreviewAudioUrl(text) {
+  const s = String(text || '')
+  if (!s) return ''
+  const re =
+    /(?:https?:\/\/[^\s<>'")]+?\.(?:webm|ogg|mp3|m4a|wav)(?:[?#][^\s<>'")]+)?|\/uploads\/audio\/[A-Za-z0-9._\-\/]+?\.(?:webm|ogg|mp3|m4a|wav)(?:[?#][^\s<>'")]+)?|\/forum\/voice[^\s<>'")]*\.(?:webm|ogg|mp3|m4a|wav)(?:[?#][^\s<>'")]+)?)/i
+  const m = s.match(re)
+  return m ? String(m[0] || '').trim() : ''
+}
+
 function hasAudioInText(text) {
   const s = String(text || '')
   if (!s) return false
@@ -108,6 +188,15 @@ function hasAudioInText(text) {
     /(?:https?:\/\/[^\s<>'")]+?\.(?:webm|ogg|mp3|m4a|wav)(?:[?#][^\s<>'")]+)?|\/uploads\/audio\/[A-Za-z0-9._\-\/]+?\.(?:webm|ogg|mp3|m4a|wav)(?:[?#][^\s<>'")]+)?|\/forum\/voice[^\s<>'")]*\.(?:webm|ogg|mp3|m4a|wav)(?:[?#][^\s<>'")]+)?)/i
   if (re.test(s)) return true
   return /[?&]filename=.*\.(?:webm|ogg|mp3|m4a|wav)(?:$|[&#])/i.test(s)
+}
+
+function audioMime(url) {
+  const s = String(url || '').toLowerCase()
+  if (s.includes('.mp3')) return 'audio/mpeg'
+  if (s.includes('.m4a')) return 'audio/mp4'
+  if (s.includes('.wav')) return 'audio/wav'
+  if (s.includes('.ogg')) return 'audio/ogg'
+  return 'audio/webm'
 }
 
 function videoMime(url) {
@@ -156,49 +245,90 @@ export async function GET(req, { params }) {
   const ytThumbUrl = ytId ? `https://i.ytimg.com/vi/${encodeURIComponent(ytId)}/hqdefault.jpg` : ''
 
   const isAudioPost = found ? hasAudioInText(textRaw) : false
-  const imgRel = found ? extractPreviewImageUrl(textRaw) : ''
+  const imgRels = found ? extractPreviewImageUrls(textRaw) : []
+  const imgRel = imgRels[0] || ''
   const vidRel = found ? extractPreviewVideoUrl(textRaw) : ''
+  const audRel = found ? extractPreviewAudioUrl(textRaw) : ''
 
   // Media priority for share previews:
   // - YouTube: try to provide a playable embed via og:video (fallback thumbnail via og:image)
   // - Video file: og:video points to the real file URL
+  // - Audio: always use Q-Cast cover image (and provide og:audio when possible)
   // - Image: og:image points to the real image URL
-  // - Audio: use Q-Cast cover image
   // - No media: forum default preview image
   const chosen = (() => {
     if (ytEmbedUrl) {
       return {
         kind: 'youtube',
-        imageRel: ytThumbUrl || '/metab/forum1.png',
+        images: dedupUrls([
+          `https://i.ytimg.com/vi/${encodeURIComponent(ytId)}/mqdefault.jpg`,
+          `https://i.ytimg.com/vi/${encodeURIComponent(ytId)}/maxresdefault.jpg`,
+          ytThumbUrl,
+          OG_DEFAULT_IMAGE,
+        ]),
         videoUrl: ytEmbedUrl,
         videoType: 'text/html',
+        audioUrl: '',
+        audioType: '',
+        ogType: 'video.other',
       }
     }
     if (vidRel) {
       const v = absUrl(origin, vidRel)
       return {
         kind: 'video',
-        imageRel: imgRel || '/metab/forum1.png',
+        images: dedupUrls([imgRel, OG_DEFAULT_IMAGE]),
         videoUrl: v,
         videoType: videoMime(v),
+        audioUrl: '',
+        audioType: '',
+        ogType: 'video.other',
+      }
+    }
+    if (isAudioPost) {
+      const a = audRel ? absUrl(origin, audRel) : ''
+      return {
+        kind: 'audio',
+        images: [OG_AUDIO_IMAGE],
+        videoUrl: '',
+        videoType: '',
+        audioUrl: a,
+        audioType: a ? audioMime(a) : '',
+        ogType: 'article',
       }
     }
     if (imgRel) {
-      return { kind: 'image', imageRel: imgRel, videoUrl: '', videoType: '' }
+      return {
+        kind: 'image',
+        images: dedupUrls([imgRel, OG_DEFAULT_IMAGE]),
+        videoUrl: '',
+        videoType: '',
+        audioUrl: '',
+        audioType: '',
+        ogType: 'article',
+      }
     }
-    if (isAudioPost) {
-      return { kind: 'audio', imageRel: '/audio/Q-Cast.png', videoUrl: '', videoType: '' }
+    return {
+      kind: 'default',
+      images: [OG_DEFAULT_IMAGE],
+      videoUrl: '',
+      videoType: '',
+      audioUrl: '',
+      audioType: '',
+      ogType: 'website',
     }
-    return { kind: 'default', imageRel: '/metab/forum1.png', videoUrl: '', videoType: '' }
   })()
 
-  const imageUrl = absUrl(origin, chosen.imageRel)
+  const imageUrls = dedupUrls((chosen?.images || []).map((x) => absUrl(origin, x))).filter(Boolean)
+  const imageUrl = imageUrls[0] || ''
   const videoUrl = String(chosen.videoUrl || '').trim()
   const videoType = String(chosen.videoType || '').trim()
+  const audioUrl = String(chosen.audioUrl || '').trim()
+  const audioType0 = String(chosen.audioType || '').trim()
   const twitterCard = imageUrl ? 'summary_large_image' : 'summary'
 
   const lastModifiedMs = found ? Number(post?.ts || 0) || Date.now() : Date.now()
-  const etag = mkEtag([postId, titleRaw, descRaw, imageUrl, String(lastModifiedMs)].join('|'))
+  const etag = mkEtag([postId, titleRaw, descRaw, imageUrls.join(','), videoUrl, audioUrl, String(lastModifiedMs)].join('|'))
 
   const cacheControl =
     'public, max-age=0, s-maxage=300, stale-while-revalidate=86400'
@@ -217,10 +347,13 @@ export async function GET(req, { params }) {
   const title = escapeAttr(titleRaw.slice(0, 80))
   const desc = escapeAttr(descRaw.slice(0, 240))
   const ogUrl = escapeAttr(canonicalUrl)
-  const ogImg = escapeAttr(imageUrl)
+  const ogImgs = imageUrls.map((u) => escapeAttr(u))
   const ogVid = escapeAttr(videoUrl)
   const ogVidType = escapeAttr(videoType)
+  const ogAud = escapeAttr(audioUrl)
+  const ogAudType = escapeAttr(audioType0)
   const redirectEsc = escapeAttr(redirectUrl)
+  const ogType = escapeAttr(String(chosen?.ogType || (videoUrl ? 'video.other' : 'article')))
 
   const html = `<!doctype html>
 <html lang="en">
@@ -233,18 +366,23 @@ export async function GET(req, { params }) {
     <meta property="og:title" content="${title}"/>
     <meta property="og:description" content="${desc}"/>
     <meta property="og:url" content="${ogUrl}"/>
-    <meta property="og:type" content="${videoUrl ? 'video.other' : 'article'}"/>
-    <meta property="og:image" content="${ogImg}"/>
+    <meta property="og:type" content="${ogType}"/>
+    <meta property="og:site_name" content="Q-Line"/>
+    ${ogImgs.map((u) => `<meta property="og:image" content="${u}"/>\n    <meta property="og:image:secure_url" content="${u}"/>`).join('\n    ')}
     ${videoUrl ? `<meta property="og:video" content="${ogVid}"/>` : ''}
+    ${videoUrl ? `<meta property="og:video:url" content="${ogVid}"/>` : ''}
     ${videoUrl ? `<meta property="og:video:secure_url" content="${ogVid}"/>` : ''}
     ${videoUrl ? `<meta property="og:video:type" content="${ogVidType}"/>` : ''}
     ${videoUrl ? `<meta property="og:video:width" content="1280"/>` : ''}
     ${videoUrl ? `<meta property="og:video:height" content="720"/>` : ''}
+    ${audioUrl ? `<meta property="og:audio" content="${ogAud}"/>` : ''}
+    ${audioUrl ? `<meta property="og:audio:secure_url" content="${ogAud}"/>` : ''}
+    ${audioUrl ? `<meta property="og:audio:type" content="${ogAudType}"/>` : ''}
 
     <meta name="twitter:card" content="${twitterCard}"/>
     <meta name="twitter:title" content="${title}"/>
     <meta name="twitter:description" content="${desc}"/>
-    <meta name="twitter:image" content="${ogImg}"/>
+    ${ogImgs[0] ? `<meta name="twitter:image" content="${ogImgs[0]}"/>` : ''}
 
     <meta http-equiv="refresh" content="1;url=${redirectEsc}"/>
     <style>
