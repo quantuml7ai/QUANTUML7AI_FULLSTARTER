@@ -33,7 +33,6 @@ function toPlainText(raw) {
     // remove urls and storage details from meta text (keep only meaningful body text)
     .replace(/\b(?:https?:\/\/|blob:|tg:\/\/|viber:\/\/|whatsapp:\/\/)[^\s<>'")]+/gi, ' ')
     .replace(/\/uploads\/[A-Za-z0-9._\-\/]+/g, ' ')
-    .replace(/\/vip\/[A-Za-z0-9._\-\/]+/gi, ' ')
     .replace(/\s+/g, ' ')
     .trim()
 }
@@ -52,18 +51,9 @@ function extractPreviewImageUrl(text) {
   const s = String(text || '')
   if (!s) return ''
   const re =
-    /(?:https?:\/\/[^\s<>'")]+?\.(?:webp|png|jpe?g|gif)(?:[?#][^\s<>'")]+)?|\/uploads\/[A-Za-z0-9._\-\/]+?\.(?:webp|png|jpe?g|gif)(?:[?#][^\s<>'")]+)?)/gi
-  try {
-    for (const m of s.matchAll(re)) {
-      const candidate = String(m?.[0] || '').trim()
-      if (!candidate) continue
-      if (/\/vip\//i.test(candidate)) continue
-      return candidate
-    }
-  } catch {
-    // fallthrough
-  }
-  return ''
+    /(?:https?:\/\/[^\s<>'")]+?\.(?:webp|png|jpe?g|gif)(?:[?#][^\s<>'")]+)?|\/uploads\/[A-Za-z0-9._\-\/]+?\.(?:webp|png|jpe?g|gif)(?:[?#][^\s<>'")]+)?)/i
+  const m = s.match(re)
+  return m ? String(m[0] || '').trim() : ''
 }
 
 function extractYouTubeId(text) {
