@@ -15340,120 +15340,254 @@ function centerAndFlashPostAfterDom(postId, behavior = 'smooth') {
   try { requestAnimationFrame(tick); } catch { try { setTimeout(tick, 0); } catch {} }
 }
 
-// Deep-link: /forum?post=<postId>(&topic=<topicId>)
+// Deep-link: /forum?post=<postId>(&topic=<topicId>&root=<rootId>)
+const DEEPLINK_MAX_DEPTH = 60
+const DEEPLINK_TIMEOUT_MS = 12000
+const DEEPLINK_POLL_MS = 80
+
 const deeplinkRef = React.useRef({
   started: false,
+  runId: 0,
   startedAt: 0,
+  deadlineAt: 0,
   postId: null,
   topicId: null,
-  locateInFlight: false,
-  threadOpened: false, 
+  rootId: null,
+  chain: null,
   done: false,
+  failed: false,
 })
+
+const deeplinkDataRef = React.useRef(null)
+const deeplinkSelIdRef = React.useRef('')
+const deeplinkIdMapRef = React.useRef(null)
+const deeplinkAllPostsLenRef = React.useRef(0)
+const openThreadForPostRef = React.useRef(null)
+
+useEffect(() => {
+  deeplinkDataRef.current = data
+}, [data])
+useEffect(() => {
+  deeplinkSelIdRef.current = sel?.id != null ? String(sel.id) : ''
+}, [sel?.id])
+useEffect(() => {
+  deeplinkIdMapRef.current = idMap
+}, [idMap])
+useEffect(() => {
+  deeplinkAllPostsLenRef.current = Array.isArray(allPosts) ? allPosts.length : 0
+}, [allPosts])
+useEffect(() => {
+  openThreadForPostRef.current = openThreadForPost
+}, [openThreadForPost])
 
 useEffect(() => {
   if (!isBrowser?.()) return
-  if (deeplinkRef.current.started) return
+  const st = deeplinkRef.current
+  if (st.started) return
 
   const qs = new URLSearchParams(window.location.search || '')
   const postId = String(qs.get('post') || '').trim()
   if (!postId) return
-  const topicId = String(qs.get('topic') || '').trim() || null
 
-  deeplinkRef.current.started = true
-  deeplinkRef.current.startedAt = Date.now()
-  deeplinkRef.current.postId = postId
-  deeplinkRef.current.topicId = topicId
-  deeplinkRef.current.locateInFlight = false
-  deeplinkRef.current.threadOpened = false 
-  deeplinkRef.current.done = false 
+  const topicHint = String(qs.get('topic') || '').trim() || null
+  const rootHint = String(qs.get('root') || '').trim() || null
 
-  setDeeplinkUI({ active: true, status: 'searching', postId, topicId })
+  st.started = true
+  st.runId += 1
+  const runId = st.runId
+  st.startedAt = Date.now()
+  st.deadlineAt = st.startedAt + DEEPLINK_TIMEOUT_MS
+  st.postId = postId
+  st.topicId = topicHint
+  st.rootId = rootHint
+  st.chain = null
+  st.done = false
+  st.failed = false
 
-  if (!topicId) {
-    deeplinkRef.current.locateInFlight = true
-    fetch(`/api/forum/post-locate?postId=${encodeURIComponent(postId)}`, { cache: 'no-store' })
-      .then((r) => r.json().catch(() => null))
-      .then((j) => {
-        const tid = String(j?.topicId || '').trim()
-        if (!tid) return
-        deeplinkRef.current.topicId = tid
-        setDeeplinkUI((prev) => (prev?.active ? { ...prev, topicId: tid } : prev))
-      })
-      .catch(() => {})
-      .finally(() => {
-        deeplinkRef.current.locateInFlight = false
-      })
+  setDeeplinkUI({ active: true, status: 'searching', postId, topicId: topicHint })
+
+  let cancelled = false
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+  const remainingMs = () => Math.max(0, Number(st.deadlineAt || 0) - Date.now())
+
+  const waitFor = async (check, timeoutMs, intervalMs = DEEPLINK_POLL_MS) => {
+    const until = Date.now() + Math.max(0, Number(timeoutMs || 0))
+    while (!cancelled && Date.now() < until) {
+      if (deeplinkRef.current.runId !== runId) return false
+      let ok = false
+      try { ok = !!check?.() } catch { ok = false }
+      if (ok) return true
+      await sleep(intervalMs)
+    }
+    if (cancelled || deeplinkRef.current.runId !== runId) return false
+    try { return !!check?.() } catch { return false }
   }
-}, [])
 
-useEffect(() => {
-  const st = deeplinkRef.current || {}
-  if (!st.started || st.done) return
-  const postId = String(st.postId || '').trim()
-  if (!postId) return
+  const fail = (reason = 'not_found') => {
+    if (cancelled) return
+    if (deeplinkRef.current.runId !== runId) return
+    if (st.done) return
+    st.done = true
+    st.failed = true
 
-  let topicId = st.topicId ? String(st.topicId) : ''
-  const posts = Array.isArray(data?.posts) ? data.posts : []
-  const topics = Array.isArray(data?.topics) ? data.topics : []
+    const tid = st.topicId ? String(st.topicId) : (topicHint || null)
+    setDeeplinkUI({ active: true, status: 'not_found', postId, topicId: tid })
 
-  const postObj = posts.find((p) => String(p?.id) === String(postId)) || null
-  if (!topicId && postObj?.topicId) {
-    topicId = String(postObj.topicId)
+    if (reason === 'too_deep') {
+      toast?.err?.(t?.('forum_post_not_found') || 'Post not found')
+    } else if (reason === 'timeout') {
+      toast?.err?.(t?.('forum_post_not_found') || 'Post not found')
+    } else {
+      toast?.err?.(t?.('forum_post_not_found') || 'Post not found')
+    }
+
+    setTimeout(() => {
+      try { setDeeplinkUI({ active: false, status: 'idle', postId: null, topicId: null }) } catch {}
+    }, 3200)
+  }
+
+  const clearDeepLinkQuery = () => {
+    try {
+      const u = new URL(window.location.href)
+      u.searchParams.delete('post')
+      u.searchParams.delete('topic')
+      u.searchParams.delete('root')
+      window.history.replaceState({}, '', u.pathname + u.search + u.hash)
+    } catch {}
+  }
+
+  ;(async () => {
+    // 1) Build chain (server-side via Redis)
+    let chainResp = null
+    try {
+      const r = await fetch(`/api/forum/post-chain?postId=${encodeURIComponent(postId)}`, {
+        cache: 'no-store',
+      })
+      const j = await r.json().catch(() => null)
+      if (cancelled || deeplinkRef.current.runId !== runId) return
+      if (!r.ok || !j?.ok) {
+        if (r.status === 404 || j?.error === 'not_found') return fail('not_found')
+        return fail('not_found')
+      }
+      chainResp = j
+    } catch {
+      return fail('not_found')
+    }
+
+    const topicId = String(chainResp?.topicId || topicHint || '').trim()
+    const chainRaw = Array.isArray(chainResp?.chain) ? chainResp.chain : []
+    const chain = chainRaw.map((x) => String(x || '').trim()).filter(Boolean)
+
+    if (!topicId || !chain.length) return fail('not_found')
+    if (String(chain[chain.length - 1]) !== String(postId)) chain.push(String(postId))
+    if (chain.length > DEEPLINK_MAX_DEPTH) return fail('too_deep')
+
     st.topicId = topicId
-    setDeeplinkUI((prev) => (prev?.active ? { ...prev, topicId } : prev))
-  }
+    st.rootId = String(chainResp?.rootId || rootHint || chain[0] || '').trim() || null
+    st.chain = chain
 
-  if (topicId) {
-    if (!sel?.id || String(sel.id) !== String(topicId)) {
-      const tt = topics.find((t) => String(t?.id) === String(topicId)) || null
+    setDeeplinkUI((prev) => (prev?.active ? { ...prev, topicId } : prev))
+
+    // 2) Switch to topicId and wait for UI to be ready.
+    if (String(deeplinkSelIdRef.current || '') !== String(topicId)) {
+      const topicsOk = await waitFor(() => {
+        const topics = Array.isArray(deeplinkDataRef.current?.topics)
+          ? deeplinkDataRef.current.topics
+          : []
+        return topics.some((tt) => String(tt?.id) === String(topicId))
+      }, Math.min(3500, remainingMs()))
+
+      if (!topicsOk) return fail('timeout')
+
+      const topics = Array.isArray(deeplinkDataRef.current?.topics)
+        ? deeplinkDataRef.current.topics
+        : []
+      const tt = topics.find((x) => String(x?.id) === String(topicId)) || null
       if (tt) {
         try { setTopicFilterId(String(topicId)) } catch {}
         try { setSel(tt) } catch {}
       }
-      return
+
+      const selOk = await waitFor(
+        () => String(deeplinkSelIdRef.current || '') === String(topicId),
+        Math.min(3500, remainingMs()),
+      )
+      if (!selOk) return fail('timeout')
     }
-  }
 
-  if (!postObj) {
-    const revNum = Number(data?.rev || 0) 
-    const age = Date.now() - Number(st.startedAt || 0)
-    if (revNum > 0 && age > 6500) {
-      st.done = true
-      setDeeplinkUI({ active: true, status: 'not_found', postId, topicId: topicId || null })
-      toast?.err?.(t?.('forum_post_not_found') || 'Post not found')
+    // 3) Expand chain step-by-step (like user clicks).
+    const bumpSlice = async () => {
+      // wait for other effects (incl. the THREAD_PAGE_SIZE reset) to complete
+      await sleep(0)
+      const postsLen = Number(deeplinkAllPostsLenRef.current || 0) || 0
+      if (postsLen > 0) {
+        try { setVisibleThreadPostsCount((c) => Math.max(Number(c || 0) || 0, postsLen)) } catch {}
+      }
+    }
 
-      setTimeout(() => {
-        try { setDeeplinkUI({ active: false, status: 'idle', postId: null, topicId: null }) } catch {}
-      }, 3200)
-
+    // Root-only deep link: still open the root thread to make the target card renderable everywhere.
+    if (chain.length === 1) {
       try {
-        const u = new URL(window.location.href)
-        u.searchParams.delete('post')
-        u.searchParams.delete('topic')
-        window.history.replaceState({}, '', u.pathname + u.search + u.hash)
+        openThreadForPostRef.current?.(
+          { id: String(postId), topicId: String(topicId) },
+          { skipNav: true, closeInbox: true, closeVideoFeed: true },
+        )
       } catch {}
+      await bumpSlice()
+    } else {
+      for (let i = 0; i < chain.length - 1; i += 1) {
+        if (remainingMs() <= 0) return fail('timeout')
+        const curId = String(chain[i] || '').trim()
+        const nextId = String(chain[i + 1] || '').trim()
+        if (!curId || !nextId) return fail('not_found')
+
+        const haveCur = await waitFor(
+          () => deeplinkIdMapRef.current?.has?.(String(curId)),
+          Math.min(2500, remainingMs()),
+        )
+        if (!haveCur) return fail('timeout')
+
+        try {
+          openThreadForPostRef.current?.(
+            { id: curId, topicId: String(topicId) },
+            { skipNav: true, closeInbox: true, closeVideoFeed: true, entryId: `post_${curId}` },
+          )
+        } catch {}
+
+        // wait until current node is on screen (render barrier)
+        await waitFor(
+          () => !!document.getElementById(`post_${curId}`),
+          Math.min(1600, remainingMs()),
+        )
+
+        await bumpSlice()
+
+        const nextOk = await waitFor(
+          () => !!document.getElementById(`post_${nextId}`),
+          Math.min(2400, remainingMs()),
+        )
+        if (!nextOk) return fail('timeout')
+      }
     }
-    return
-  }
 
-  // If it's a reply, make it visible by opening a thread.
-  if (postObj?.parentId && !st.threadOpened) {
-    st.threadOpened = true
-    try { openThreadForPost(postObj, { skipNav: true, closeInbox: true, closeVideoFeed: true }) } catch {}
-    return
-  }
+    // 4) Target visible -> center + re-center after media load.
+    await bumpSlice()
+    const targetOk = await waitFor(
+      () => !!document.getElementById(`post_${postId}`),
+      Math.min(2600, remainingMs()),
+    )
+    if (!targetOk) return fail('timeout')
 
-  st.done = true
-  centerAndFlashPostAfterDom(postId, 'smooth')
-  setDeeplinkUI({ active: false, status: 'done', postId: null, topicId: null })
-  try {
-    const u = new URL(window.location.href)
-    u.searchParams.delete('post')
-    u.searchParams.delete('topic')
-    window.history.replaceState({}, '', u.pathname + u.search + u.hash)
-  } catch {}
-}, [sel?.id, threadRoot?.id, data?.rev, (data?.posts || []).length, (data?.topics || []).length, openThreadForPost])
+    centerAndFlashPostAfterDom(postId, 'smooth')
+    st.done = true
+    setDeeplinkUI({ active: false, status: 'done', postId: null, topicId: null })
+    clearDeepLinkQuery()
+  })()
+
+  return () => {
+    cancelled = true
+  }
+}, [])
 
 // при смене темы: либо выходим из ветки, либо применяем «ожидаемое» открытие ветки
 useEffect(() => {

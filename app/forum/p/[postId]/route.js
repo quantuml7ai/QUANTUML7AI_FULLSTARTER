@@ -9,6 +9,10 @@ export const revalidate = 0
 export const fetchCache = 'force-no-store'
 export const runtime = 'nodejs'
 
+const QCAST_OG_IMAGE_REL = '/audio/Q-Cast.png'
+const FALLBACK_OG_IMAGE_REL = '/metab/forum1.png'
+const MAX_CHAIN_DEPTH = 60
+
 function escapeAttr(s) {
   return String(s || '')
     .replace(/&/g, '&amp;')
@@ -136,9 +140,35 @@ export async function GET(req, { params }) {
 
   const found = !!post && !!post?.id
   const topicId = found && post?.topicId != null ? String(post.topicId) : ''
+
+  let rootId = found ? String(post?.id || postId) : ''
+  if (found) {
+    try {
+      const visited = new Set([String(postId)])
+      let cur = post
+      for (let depth = 0; depth < MAX_CHAIN_DEPTH; depth += 1) {
+        const parentIdRaw = cur?.parentId
+        const parentId = parentIdRaw != null ? String(parentIdRaw).trim() : ''
+        if (!parentId) break
+        if (visited.has(parentId)) break
+        visited.add(parentId)
+
+        const rawParent = await redis.get(K.postKey(parentId))
+        const parent = rawParent ? safeParse(rawParent) : null
+        if (!parent) {
+          rootId = parentId
+          break
+        }
+
+        rootId = String(parent?.id || parentId).trim() || parentId
+        cur = parent
+      }
+    } catch {}
+  }
+
   const redirectUrl = `${origin}/forum?post=${encodeURIComponent(postId)}${
     topicId ? `&topic=${encodeURIComponent(topicId)}` : ''
-  }`
+  }${rootId ? `&root=${encodeURIComponent(rootId)}` : ''}`
 
   const nick = found ? String(post?.nickname || '').trim() : ''
   const titleRaw = found
@@ -166,10 +196,14 @@ export async function GET(req, { params }) {
   // - Audio: use Q-Cast cover image
   // - No media: forum default preview image
   const chosen = (() => {
+    if (isAudioPost) {
+      // IMPORTANT: audio posts must always use a fixed OG image (no dynamic media selection).
+      return { kind: 'audio', imageRel: QCAST_OG_IMAGE_REL, videoUrl: '', videoType: '' }
+    }
     if (ytEmbedUrl) {
       return {
         kind: 'youtube',
-        imageRel: ytThumbUrl || '/metab/forum1.png',
+        imageRel: ytThumbUrl || FALLBACK_OG_IMAGE_REL,
         videoUrl: ytEmbedUrl,
         videoType: 'text/html',
       }
@@ -178,7 +212,7 @@ export async function GET(req, { params }) {
       const v = absUrl(origin, vidRel)
       return {
         kind: 'video',
-        imageRel: imgRel || '/metab/forum1.png',
+        imageRel: imgRel || FALLBACK_OG_IMAGE_REL,
         videoUrl: v,
         videoType: videoMime(v),
       }
@@ -186,10 +220,7 @@ export async function GET(req, { params }) {
     if (imgRel) {
       return { kind: 'image', imageRel: imgRel, videoUrl: '', videoType: '' }
     }
-    if (isAudioPost) {
-      return { kind: 'audio', imageRel: '/audio/Q-Cast.png', videoUrl: '', videoType: '' }
-    }
-    return { kind: 'default', imageRel: '/metab/forum1.png', videoUrl: '', videoType: '' }
+    return { kind: 'default', imageRel: FALLBACK_OG_IMAGE_REL, videoUrl: '', videoType: '' }
   })()
 
   const imageUrl = absUrl(origin, chosen.imageRel)
