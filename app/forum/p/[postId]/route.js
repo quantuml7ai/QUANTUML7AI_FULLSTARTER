@@ -9,7 +9,7 @@ export const revalidate = 0
 export const fetchCache = 'force-no-store'
 export const runtime = 'nodejs'
 
-const SHARE_TITLE = 'Qline — the future is in your hands'
+const SHARE_TITLE = 'Q-Line — the future is in your hands'
 const FALLBACK_IMAGE_REL = '/metab/forum1.png'
 const QCAST_OG_IMAGE_REL = '/audio/Qcast.png'
 const FALLBACK_DESCRIPTION = 'Qline forum post.'
