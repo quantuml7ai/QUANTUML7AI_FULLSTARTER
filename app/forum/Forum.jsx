@@ -1831,7 +1831,7 @@ const Styles = () => (
       border-radius:12px;
       background:rgba(8,12,20,.7);
       border:1px solid rgba(140,170,255,.25);
-      contain: layout paint;
+      contain: none;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -1880,6 +1880,54 @@ const Styles = () => (
       background:#000;
     }
 
+     /* ===== Overlay controls (mute/fullscreen) ===== */
+     .mediaCtl{
+       position:absolute;
+       right:10px;
+       bottom:10px;
+       display:flex;
+       gap:8px;
+       z-index:5;
+       pointer-events:auto;
+     }
+     .mediaCtlBtn{
+       width:36px;
+       height:36px;
+       border-radius:10px;
+       border:1px solid rgba(255,255,255,.18);
+       background:rgba(0,0,0,.45);
+       color:#fff;
+       display:grid;
+       place-items:center;
+       cursor:pointer;
+       -webkit-tap-highlight-color: transparent;
+       user-select:none;
+     }
+     .mediaCtlBtn:active{ transform:scale(.98); }
+
+     /* ===== Fullscreen sizing ===== */
+     .mediaBox:fullscreen,
+     .mediaBox:-webkit-full-screen{
+       width:100% !important;
+       height:100% !important;
+       max-height:none !important;
+       border-radius:0 !important;
+       overflow:hidden !important;
+       background:#000 !important;
+     }
+     .mediaBox:fullscreen > iframe,
+     .mediaBox:-webkit-full-screen > iframe,
+     .mediaBox:fullscreen > video,
+     .mediaBox:-webkit-full-screen > video,
+     .mediaBox:fullscreen > img,
+     .mediaBox:-webkit-full-screen > img{
+       width:100% !important;
+       height:100% !important;
+       max-height:none !important;
+       aspect-ratio:auto !important;
+       object-fit:contain !important;
+       background:#000 !important;
+     }
     .mediaBoxInner{
       position:relative;
       width:100%;
@@ -9956,7 +10004,19 @@ text={t?.('forum_delete_confirm')}
             e.stopPropagation();
           }}        
         /> 
- 
+
+        {/* Fullscreen overlay button (Android-safe) */}
+        <div className="mediaCtl" onClick={(e)=>e.stopPropagation()}>
+          <button
+            type="button"
+            className="mediaCtlBtn"
+            aria-label="Fullscreen"
+            title="На весь экран"
+            onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); toggleFullscreenSafe(closestMediaBoxFromBtn(e.currentTarget)); }}
+          >
+            ⛶
+          </button>
+        </div>
             </div>
           ))}
         </div>
@@ -9984,11 +10044,52 @@ text={t?.('forum_delete_confirm')}
   data-forum-media="youtube"
   loading="lazy"
   frameBorder="0"
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
   allowFullScreen
   className="mediaBoxItem"
 />
 
+                {/* Mute + Fullscreen overlay buttons (sync with existing mute coordinator) */}
+                <div className="mediaCtl" onClick={(e)=>e.stopPropagation()}>
+                  <button
+                    type="button"
+                    className="mediaCtlBtn"
+                    aria-label={globalMuted ? 'Unmute' : 'Mute'}
+                    title={globalMuted ? 'Включить звук' : 'Выключить звук'}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const nextMuted = !globalMuted;
+                      setGlobalMutedPrefUI(nextMuted, 'ui-youtube');
+                      // Best-effort: если YT.Player уже создан координатором — дергаем его сразу
+                      try {
+                        const iframe = document.getElementById(`yt_${p?.id || 'post'}_${i}`);
+                        const map = window.__forumYtPlayers;
+                        const player = (map && typeof map.get === 'function') ? map.get(iframe) : null;
+                        if (player) {
+                          if (nextMuted) player.mute?.();
+                          else {
+                            player.unMute?.();
+                            player.setVolume?.(100);
+                          }
+                        }
+                      } catch {}
+                    }}
+                  >
+                    {globalMuted ? '🔇' : '🔊'}
+                  </button>
+
+                  <button
+                    type="button"
+                    className="mediaCtlBtn"
+                    aria-label="Fullscreen"
+                    title="На весь экран"
+                    onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); toggleFullscreenSafe(closestMediaBoxFromBtn(e.currentTarget)); }}
+                  >
+                    ⛶
+                  </button>
+                </div>
+ 
               </div>
             );
           })}
@@ -10063,10 +10164,23 @@ text={t?.('forum_delete_confirm')}
         data-src={`https://www.tiktok.com/embed/v2/${videoId}`} 
         loading="lazy"       
         frameBorder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
         allowFullScreen
         className="mediaBoxItem"
       />
+
+      {/* Fullscreen overlay button (for iframe too) */}
+      <div className="mediaCtl" onClick={(e)=>e.stopPropagation()}>
+        <button
+          type="button"
+          className="mediaCtlBtn"
+          aria-label="Fullscreen"
+          title="На весь экран"
+          onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); toggleFullscreenSafe(closestMediaBoxFromBtn(e.currentTarget)); }}
+        >
+          ⛶
+        </button>
+      </div>      
     </div>
   );
 })}
@@ -11754,6 +11868,44 @@ export default function Forum(){
   const [mediaLock, setMediaLock] = useState({ locked: false, untilMs: 0 })
   const mediaLocked = mediaLock.locked && mediaLock.untilMs > Date.now()
 
+  // =========================================================
+  // Global muted pref (sync with existing coordinator + storage)
+  // =========================================================
+  const [globalMuted, setGlobalMuted] = useState(() => {
+    if (!isBrowser()) return true;
+    const v = readMutedPrefFromStorage();
+    return v == null ? true : !!v;
+  });
+
+  useEffect(() => {
+    if (!isBrowser()) return;
+    const onMuted = (e) => {
+      if (typeof e?.detail?.muted !== 'boolean') return;
+      setGlobalMuted(!!e.detail.muted);
+    };
+    const onStorage = (e) => {
+      if (!e) return;
+      if (e.key !== MEDIA_MUTED_KEY && e.key !== MEDIA_VIDEO_MUTED_KEY) return;
+      const v = readMutedPrefFromStorage();
+      setGlobalMuted(v == null ? true : !!v);
+    };
+    window.addEventListener(MEDIA_MUTED_EVENT, onMuted);
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener(MEDIA_MUTED_EVENT, onMuted);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, []);
+
+  const setGlobalMutedPrefUI = useCallback((nextMuted, source = 'ui') => {
+    const next = !!nextMuted;
+    setGlobalMuted(next);
+    try {
+      window.dispatchEvent(new CustomEvent(MEDIA_MUTED_EVENT, {
+        detail: { muted: next, source }
+      }));
+    } catch {}
+  }, []);
 
 const [reportUI, setReportUI] = useState({ open: false, postId: null, anchorRect: null })
 const [shareUI, setShareUI] = useState({ open: false, post: null })
