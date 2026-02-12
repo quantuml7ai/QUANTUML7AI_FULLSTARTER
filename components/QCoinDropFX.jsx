@@ -510,8 +510,8 @@ export default function QCoinDropFX ({
           background-size: cover;
           background-repeat: no-repeat;
           box-shadow:
-            0 0 0 1px rgba(255, 215, 130, 0.35),
-            0 0 26px rgba(255, 211, 90, 0.55);
+            0 0 0 1px rgba(255, 215, 130, 0),
+            0 0 26px rgba(255, 211, 90, 0);
           filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.85));
           transition: transform 0.18s ease, opacity 0.18s ease;
         }
@@ -590,11 +590,11 @@ export default function QCoinDropFX ({
           max-width: min(360px, 92vw);
           padding: 12px 16px;
           border-radius: 14px;
-          border: 1px solid rgba(255, 255, 255, 0);
+          border: 1px solid rgba(255, 187, 0, 0.31);
           background:
-            radial-gradient(circle at 0 0, rgba(255, 255, 255, 0), transparent 50%),
-            rgba(10, 14, 24, 0);
-          box-shadow: 0 14px 38px rgba(0, 0, 0, 0);
+            radial-gradient(circle at 0 0, rgba(14, 12, 12, 0.27), transparent 50%),
+            rgba(10, 14, 24, 0.62);
+          box-shadow: 0 14px 38px rgba(0, 0, 0, 0.21);
           color: #eaf4ff;
           pointer-events: auto;
           animation: qdrop-toast-in 0.22s ease-out forwards;

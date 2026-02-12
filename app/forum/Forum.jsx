@@ -10158,6 +10158,9 @@ text={t?.('forum_delete_confirm')}
           </div>
         )
       )}
+        {/* разделитель между VIP и обычными */}
+  <div style={{height:1,opacity:.2,background:'currentColor',margin:'7px 4px'}} />
+
       {/* нижняя полоса: СЧЁТЧИКИ + РЕАКЦИИ + (ПЕРЕНЕСЁННЫЕ) ДЕЙСТВИЯ — В ОДНУ СТРОКУ */}
       <div
         className="mt-3 flex items-center gap-2 text-[13px] opacity-80 actionBar"
@@ -10256,7 +10259,11 @@ text={t?.('forum_delete_confirm')}
             )}
           </>
         )}
+
       </div>
+  {/* разделитель между VIP и обычными */}
+  <div style={{height:1,opacity:.2,background:'currentColor',margin:'7px 4px'}} />
+
       {hasCleanedText && (
         <button
           type="button"
@@ -15785,21 +15792,16 @@ function centerPostAfterDom(postId, behavior = 'smooth') {
   try { requestAnimationFrame(tick); } catch { try { setTimeout(tick, 0); } catch {} }
 }
 
-function centerAndFlashPostAfterDom(postId, behavior = 'smooth') {
+function centerAndFlashPostAfterDom(postId, behavior = 'smooth', opts = {}) {
   const pid = String(postId || '').trim();
   if (!pid || !isBrowser?.()) return;
 
-  // Deep-linking via shared URL should work even when the post is outside the initial virtualized slice.
-  // We only bump the slice here (this helper is only used by share deep-link flow).
-  try {
-    const postsLen = Array.isArray(data?.posts) ? data.posts.length : 0;
-    if (postsLen > 0 && visibleThreadPostsCount < postsLen) {
-      try { setVisibleThreadPostsCount(postsLen); } catch {}
-    }
-  } catch {}
+  const onFound = typeof opts?.onFound === 'function' ? opts.onFound : null;
+  const onTimeout = typeof opts?.onTimeout === 'function' ? opts.onTimeout : null;
 
   let tries = 0;
-  const maxTries = 220;
+  const maxTries = 260;
+  let timedOut = false;
   const tick = () => {
     tries += 1;
     const node = document.getElementById(`post_${pid}`);
@@ -15925,10 +15927,16 @@ function centerAndFlashPostAfterDom(postId, behavior = 'smooth') {
         node.classList.add('replyTargetFlash');
         window.setTimeout(() => node.classList.remove('replyTargetFlash'), 1100);
       } catch {}
+      try { onFound?.(node); } catch {}
       return;
     }
     if (tries < maxTries) {
       try { requestAnimationFrame(tick); } catch { try { setTimeout(tick, 16); } catch {} }
+      return;
+    }
+    if (!timedOut) {
+      timedOut = true;
+      try { onTimeout?.(); } catch {}
     }
   };
   try { requestAnimationFrame(tick); } catch { try { setTimeout(tick, 0); } catch {} }
@@ -15941,7 +15949,11 @@ const deeplinkRef = React.useRef({
   postId: null,
   topicId: null,
   locateInFlight: false,
+  postFetchInFlight: false,
+  postFetchTried: false,
   threadOpened: false,
+  threadRootId: null,
+  scrollStarted: false,
   done: false,
 })
 
@@ -15959,7 +15971,11 @@ useEffect(() => {
   deeplinkRef.current.postId = postId
   deeplinkRef.current.topicId = topicId
   deeplinkRef.current.locateInFlight = false
+  deeplinkRef.current.postFetchInFlight = false
+  deeplinkRef.current.postFetchTried = false
   deeplinkRef.current.threadOpened = false
+  deeplinkRef.current.threadRootId = null
+  deeplinkRef.current.scrollStarted = false
   deeplinkRef.current.done = false
 
   setDeeplinkUI({ active: true, status: 'searching', postId, topicId })
@@ -16010,9 +16026,62 @@ useEffect(() => {
   }
 
   if (!postObj) {
+    // Fallback: if the client snapshot is stale and doesn't contain the post yet, try to fetch it directly.
+    // This is especially important for freshly created nested replies shared right away.
+    try {
+      if (!st.postFetchTried && !st.postFetchInFlight) {
+        st.postFetchTried = true
+        st.postFetchInFlight = true
+        fetch(`/api/forum/post-by-id?postId=${encodeURIComponent(postId)}`, { cache: 'no-store' })
+          .then((r) => r.json().catch(() => null))
+          .then((j) => {
+            const p = j?.ok && j?.post ? j.post : null
+            if (!p || !p.id) return
+
+            // Inject into overlay so PostCard can render even before the next /snapshot catches up.
+            try {
+              setOverlay((prev) => {
+                const cur = prev || {}
+                const creates = cur.creates || {}
+                const list = Array.isArray(creates.posts) ? creates.posts : []
+                const pid0 = String(p?.id || '').trim()
+                if (!pid0) return prev
+                if (list.some((x) => String(x?.id || '') === pid0)) return prev
+
+                const enriched = {
+                  ...p,
+                  id: pid0,
+                  topicId: p?.topicId != null ? String(p.topicId) : null,
+                  parentId: p?.parentId != null ? String(p.parentId) : null,
+                  likes: Number(p?.likes || 0) || 0,
+                  dislikes: Number(p?.dislikes || 0) || 0,
+                  views: Number(p?.views || 0) || 0,
+                  myReaction: p?.myReaction ?? null,
+                }
+
+                return { ...cur, creates: { ...creates, posts: [...list, enriched] } }
+              })
+            } catch {}
+
+            // If we didn't know the topic yet, fill it from server truth.
+            try {
+              const tid = String(p?.topicId || '').trim()
+              if (tid) {
+                st.topicId = tid
+                setDeeplinkUI((prev) => (prev?.active ? { ...prev, topicId: tid } : prev))
+              }
+            } catch {}
+          })
+          .catch(() => {})
+          .finally(() => {
+            st.postFetchInFlight = false
+          })
+      }
+    } catch {}
+
     const revNum = Number(data?.rev || 0)
     const age = Date.now() - Number(st.startedAt || 0)
-    if (revNum > 0 && age > 6500) {
+    if (revNum > 0 && age > 9000 && !st.postFetchInFlight) {
       st.done = true
       setDeeplinkUI({ active: true, status: 'not_found', postId, topicId: topicId || null })
       toast?.err?.(t?.('forum_post_not_found') || 'Post not found')
@@ -16031,13 +16100,45 @@ useEffect(() => {
     return
   }
 
-  // Ensure ANY shared post becomes visible by opening a thread with this post as the root.
-  // This matches the regular UX: click a PostCard -> that post becomes the main card on top,
-  // with its nested replies shown below. Works for any depth (reply->reply->reply...).
-  if (!st.threadOpened) {
-    st.threadOpened = true
+  // For nested replies we must open the whole thread branch (root post) and then center the target reply.
+  // Otherwise the shared reply may be outside the initial THREAD_PAGE_SIZE slice and never mounts.
+  const byId = new Map()
+  try {
+    for (const p of posts) {
+      const id = String(p?.id || '').trim()
+      if (id) byId.set(id, p)
+    }
+  } catch {}
+
+  const rootPost = (() => {
     try {
-      openThreadForPost(postObj, {
+      let cur = postObj
+      const seen = new Set([String(cur?.id || '')])
+      for (let i = 0; i < 64; i += 1) {
+        const pid = cur?.parentId != null ? String(cur.parentId) : ''
+        const parentId = String(pid || '').trim()
+        if (!parentId) return cur
+        if (seen.has(parentId)) return cur
+        const parent = byId.get(parentId) || null
+        if (!parent) return cur
+        cur = parent
+        seen.add(parentId)
+      }
+      return cur
+    } catch {
+      return postObj
+    }
+  })()
+
+  const desiredRootId = String(rootPost?.id || postObj?.id || '').trim() || String(postObj?.id || '').trim()
+  if (!desiredRootId) return
+
+  if (!st.threadOpened || String(st.threadRootId || '') !== desiredRootId) {
+    st.threadOpened = true
+    st.threadRootId = desiredRootId
+    st.scrollStarted = false
+    try {
+      openThreadForPost(rootPost || postObj, {
         skipNav: true,
         closeInbox: true,
         closeVideoFeed: true,
@@ -16047,15 +16148,42 @@ useEffect(() => {
     return
   }
 
-  st.done = true
-  centerAndFlashPostAfterDom(postId, 'smooth')
-  setDeeplinkUI({ active: false, status: 'done', postId: null, topicId: null })
-  try {
-    const u = new URL(window.location.href)
-    u.searchParams.delete('post')
-    u.searchParams.delete('topic')
-    window.history.replaceState({}, '', u.pathname + u.search + u.hash)
-  } catch {}
+  // Wait until the requested thread root is actually mounted in state/DOM before starting the scroll/center loop.
+  if (!threadRoot?.id || String(threadRoot.id) !== desiredRootId) {
+    return
+  }
+
+  if (!st.scrollStarted) {
+    st.scrollStarted = true
+    centerAndFlashPostAfterDom(postId, 'smooth', {
+      onFound: () => {
+        if (st.done) return
+        st.done = true
+        try { setDeeplinkUI({ active: false, status: 'done', postId: null, topicId: null }) } catch {}
+        try {
+          const u = new URL(window.location.href)
+          u.searchParams.delete('post')
+          u.searchParams.delete('topic')
+          window.history.replaceState({}, '', u.pathname + u.search + u.hash)
+        } catch {}
+      },
+      onTimeout: () => {
+        if (st.done) return
+        st.done = true
+        try { setDeeplinkUI({ active: true, status: 'not_found', postId, topicId: topicId || null }) } catch {}
+        try { toast?.err?.(t?.('forum_post_not_found') || 'Post not found') } catch {}
+        setTimeout(() => {
+          try { setDeeplinkUI({ active: false, status: 'idle', postId: null, topicId: null }) } catch {}
+        }, 3200)
+        try {
+          const u = new URL(window.location.href)
+          u.searchParams.delete('post')
+          u.searchParams.delete('topic')
+          window.history.replaceState({}, '', u.pathname + u.search + u.hash)
+        } catch {}
+      },
+    })
+  }
 }, [sel?.id, threadRoot?.id, data?.rev, (data?.posts || []).length, (data?.topics || []).length, openThreadForPost])
 
 // при смене темы: либо выходим из ветки, либо применяем «ожидаемое» открытие ветки
@@ -16083,7 +16211,15 @@ useEffect(() => {
   if (!isBrowser?.()) return;
 
   let tries = 0;
-  const maxTries = 80;
+  const isDeeplinkScroll = (() => {
+    try {
+      const st = deeplinkRef.current || {};
+      return !!(st.started && !st.done && String(st.postId || '').trim() && String(st.postId) === String(pid));
+    } catch {
+      return false;
+    }
+  })();
+  const maxTries = isDeeplinkScroll ? 320 : 80;
   let raf = 0;
   let t120 = 0;
   let t420 = 0;
@@ -16127,8 +16263,9 @@ useEffect(() => {
 }, [sel?.id, threadRoot]);
 useEffect(() => {
   // During share deep-link we may need to render a deeply nested reply before we can scroll to it.
-  // Do NOT shrink the thread slice while deeplink UI is active, otherwise the target node may never mount.
-  if (deeplinkUI?.active && deeplinkUI?.postId) return;
+  // Do NOT reset the thread slice while deeplink is still in progress, otherwise the target node may never mount.
+  const st = deeplinkRef.current || {};
+  if (st.started && !st.done && st.postId) return;
   setVisibleThreadPostsCount(THREAD_PAGE_SIZE);
 }, [sel?.id, threadRoot, postSort]);
  // === Views: refs to avoid TDZ when effects run before callbacks are initialized ===
@@ -16218,6 +16355,26 @@ const visibleFlat = useMemo(
   [flat, visibleThreadPostsCount]
 );
 const threadHasMore = visibleFlat.length < (flat || []).length;
+
+// Deep-link: ensure the target post mounts even if it is far down the thread tree.
+// We bump the virtualized slice only as much as needed to include the shared post id in `flat`.
+useEffect(() => {
+  const st = deeplinkRef.current || {};
+  if (!st.started || st.done) return;
+  const pid = String(st.postId || '').trim();
+  if (!pid) return;
+  if (!threadRoot) return;
+  const arr = Array.isArray(flat) ? flat : [];
+  if (!arr.length) return;
+
+  const idx = arr.findIndex((p) => String(p?.id || '') === pid);
+  if (idx < 0) return;
+
+  const needed = Math.min(arr.length, idx + 3);
+  if (visibleThreadPostsCount < needed) {
+    try { setVisibleThreadPostsCount(needed); } catch {}
+  }
+}, [flat, threadRoot, visibleThreadPostsCount]);
     // Множество забаненных (по userId/accountId)
   const bannedSet = useMemo(() => new Set(data.bans || []), [data.bans])
 
