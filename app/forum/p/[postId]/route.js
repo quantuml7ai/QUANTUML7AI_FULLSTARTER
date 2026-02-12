@@ -136,14 +136,39 @@ export async function GET(req, { params }) {
 
   const found = !!post && !!post?.id
   const topicId = found && post?.topicId != null ? String(post.topicId) : ''
+
+  let rootId = found ? String(post?.id || postId) : ''
+  if (found) {
+    try {
+      let cur = post
+      let curId = String(cur?.id || postId)
+      rootId = curId
+      const seen = new Set([curId])
+      for (let i = 0; i < 80; i += 1) {
+        const pid = cur?.parentId != null ? String(cur.parentId).trim() : ''
+        if (!pid) break
+        if (seen.has(pid)) break
+        seen.add(pid)
+        const rawParent = await redis.get(K.postKey(pid))
+        const parent = rawParent ? safeParse(rawParent) : null
+        if (!parent || !parent.id) break
+        cur = parent
+        curId = String(parent.id)
+        rootId = curId
+      }
+    } catch {
+      rootId = found ? String(post?.id || postId) : ''
+    }
+  }
+
   const redirectUrl = `${origin}/forum?post=${encodeURIComponent(postId)}${
     topicId ? `&topic=${encodeURIComponent(topicId)}` : ''
-  }`
+  }${rootId ? `&root=${encodeURIComponent(rootId)}` : ''}`
 
   const nick = found ? String(post?.nickname || '').trim() : ''
   const titleRaw = found
-    ? (nick ? `Post by @${nick.replace(/^@/, '')}` : 'Forum post')
-    : 'Post not found'
+    ? (nick ? `Forum - Post by @${nick.replace(/^@/, '')}` : 'Forum - Post')
+    : 'Forum - Post not found'
 
   const plain = found ? toPlainText(post?.text || '') : ''
   const descRaw = found
@@ -198,7 +223,9 @@ export async function GET(req, { params }) {
   const twitterCard = imageUrl ? 'summary_large_image' : 'summary'
 
   const lastModifiedMs = found ? Number(post?.ts || 0) || Date.now() : Date.now()
-  const etag = mkEtag([postId, titleRaw, descRaw, imageUrl, String(lastModifiedMs)].join('|'))
+  const etag = mkEtag(
+    [postId, titleRaw, descRaw, imageUrl, String(rootId), String(lastModifiedMs)].join('|'),
+  )
 
   const cacheControl =
     'public, max-age=0, s-maxage=300, stale-while-revalidate=86400'
