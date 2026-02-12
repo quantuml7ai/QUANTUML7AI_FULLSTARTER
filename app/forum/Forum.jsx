@@ -9762,26 +9762,13 @@ const ownerDelete = (e) => {
 const confirmOwnerDelete = () => {
   setOwnDelConfirm(null);
   onOwnerDelete?.(p);
-};
-
-// 👇 добавь рядом с PostCard (прямо над return), как константу
-const NO_THREAD_OPEN_SELECTOR =
-  'button,.tag,a,svg,' +
-  'video,audio,iframe,' +                 // медиа-элементы
-  '.imgWrap,.videoCard,.audioCard,' +       // твои карточки/обёртки
-  '.ownerKebab,.ownerMenu,' +
-  '[data-no-thread-open="1"]';            // универсальный флажок на будущее
-
+}; 
   return (
     <article
       className="item qshine"
       style={{ position: 'relative' }}
       data-forum-post-card="1"
-      data-forum-post-id={String(p?.id || '')}
-      onClick={(e) => {
-        if (e.target.closest(NO_THREAD_OPEN_SELECTOR)) return;
-        onOpenThread?.(p);
-      }}
+      data-forum-post-id={String(p?.id || '')} 
       role="article"
       aria-label={t('forum_post_aria')}
 >
@@ -13868,7 +13855,65 @@ useEffect(() => {
   if (navRestoringRef.current) return;
   headAutoOpenRef.current = false;
 }, [sel?.id]);
+// =========================================================
+// THREAD ENTER: всегда открываем тему с начала (как "Домой")
+//  - шапка скрыта
+//  - первый пост/старт ленты ровно под верх экрана
+//  - НЕ мешаем deep-link / переходу к конкретному посту
+// =========================================================
+const prevSelIdRef = useRef(null);
+useEffect(() => {
+  if (!isBrowser()) return;
 
+  const cur = sel?.id ? String(sel.id) : null;
+  const prev = prevSelIdRef.current;
+  prevSelIdRef.current = cur;
+  if (!cur) return;
+
+  // если тема реально "вошла" (а не просто ре-рендер)
+  const entered = cur !== prev;
+
+  // Если сейчас идём по deep-link/открытию ветки конкретного поста — не перетираем скролл в начало
+  const hasPendingTarget =
+    !!pendingScrollToPostIdRef.current ||
+    !!pendingThreadRootIdRef.current;
+
+  // шапку — спрятать всегда при входе в тему (по твоему ТЗ)
+  try { headAutoOpenRef.current = false; } catch {}
+  try { setHeadPinned(false); } catch {}
+  try { setHeadHidden(true); } catch {}
+
+  if (!entered) return;
+  if (hasPendingTarget) return;
+
+  const scrollToThreadStart = () => {
+    try {
+      const scrollEl =
+        bodyRef.current ||
+        document.querySelector('[data-forum-scroll="1"]') ||
+        null;
+
+      // 1) сначала грубо в 0 (как "Домой")
+      if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {
+        scrollEl.scrollTop = 0;
+      } else {
+        window.scrollTo(0, 0);
+      }
+
+      // 2) затем точно якорем (чтобы первый элемент встал под верхнюю грань)
+      document
+        .querySelector('[data-forum-thread-start="1"]')
+        ?.scrollIntoView({ behavior: 'auto', block: 'start' });
+    } catch {}
+  };
+
+  // двойной RAF: ждём применения collapsed-шапки + layout
+  try {
+    requestAnimationFrame(() => requestAnimationFrame(scrollToThreadStart));
+  } catch {
+    setTimeout(scrollToThreadStart, 0);
+  }
+}, [sel?.id]);
 // авто-скрытие по скроллу (лёгкий listener + rAF)
 useEffect(() => {
   if (!isBrowser()) return;
@@ -21472,6 +21517,9 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
   style={{ flex: '1 1 auto', minHeight: 0, height:'100%', overflowY: 'auto', WebkitOverflowScrolling:'touch' }}
 >
 
+  {/* START ANCHOR: чтобы первый пост вставал ровно под верх экрана */}
+  <div data-forum-thread-start="1" />
+ 
 
         <div className="grid gap-2">
 {debugAdsSlots(
