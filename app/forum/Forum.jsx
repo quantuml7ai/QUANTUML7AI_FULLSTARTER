@@ -6575,16 +6575,16 @@ html[data-tma="1"] .inboxTabs{
 }
 
 :root{
-  --head-open-threshold-desktop: 700px;
+  --head-open-threshold-desktop: 350px;
   --head-close-threshold-desktop: 1100px;
 
-  --head-open-threshold-mobile: 400px;
+  --head-open-threshold-mobile: 300px;
   --head-close-threshold-mobile: 900px;
 }
 
 @media (max-width: 640px){
   :root{
-    --head-open-threshold-mobile: 400px;
+    --head-open-threshold-mobile: 300px;
     --head-close-threshold-mobile: 900px;
   }
 }
@@ -16031,29 +16031,13 @@ useEffect(() => {
     return
   }
 
-  // If it's a reply, make it visible by opening a thread.
-  if (postObj?.parentId && !st.threadOpened) {
+  // Ensure ANY shared post becomes visible by opening a thread with this post as the root.
+  // This matches the regular UX: click a PostCard -> that post becomes the main card on top,
+  // with its nested replies shown below. Works for any depth (reply->reply->reply...).
+  if (!st.threadOpened) {
     st.threadOpened = true
-
-    // Replies can be deeply nested (reply->reply->reply). For share deep-links we open the
-    // top-level ancestor thread, then scroll/center the exact target post inside it.
-    const pickById = (id) => {
-      const key = String(id || '').trim()
-      if (!key) return null
-      return idMap?.get?.(key) || posts.find((p) => String(p?.id) === key) || null
-    }
-
-    let root = pickById(postObj.id) || postObj
-    let guard = 0
-    while (root?.parentId && guard < 80) {
-      const next = pickById(root.parentId)
-      if (!next) break
-      root = next
-      guard += 1
-    }
-
     try {
-      openThreadForPost(root, {
+      openThreadForPost(postObj, {
         skipNav: true,
         closeInbox: true,
         closeVideoFeed: true,
@@ -16097,16 +16081,49 @@ useEffect(() => {
   if (!pid) return;
   if (!threadRoot) return;
   if (!isBrowser?.()) return;
-  pendingScrollToPostIdRef.current = null;
 
-  setTimeout(() => {
-    try {
-      document.getElementById(`post_${pid}`)?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      });
-    } catch {}
-  }, 120);
+  let tries = 0;
+  const maxTries = 80;
+  let raf = 0;
+  let t120 = 0;
+  let t420 = 0;
+
+  const cleanup = () => {
+    if (raf) { try { cancelAnimationFrame(raf) } catch {} raf = 0; }
+    if (t120) { try { clearTimeout(t120) } catch {} t120 = 0; }
+    if (t420) { try { clearTimeout(t420) } catch {} t420 = 0; }
+  };
+
+  const attempt = () => {
+    tries += 1;
+    const el = document.getElementById(`post_${pid}`);
+    if (el) {
+      pendingScrollToPostIdRef.current = null;
+      cleanup();
+      try {
+        el.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      } catch {
+        try { el.scrollIntoView?.(); } catch {}
+      }
+      return;
+    }
+    if (tries >= maxTries) {
+      pendingScrollToPostIdRef.current = null;
+      cleanup();
+      return;
+    }
+    try { raf = requestAnimationFrame(attempt); } catch {}
+  };
+
+  // Small controlled delays help when the DOM is still mounting after opening a thread/topic.
+  try { raf = requestAnimationFrame(attempt); } catch {}
+  try { t120 = setTimeout(attempt, 120); } catch {}
+  try { t420 = setTimeout(attempt, 420); } catch {}
+
+  return cleanup;
 }, [sel?.id, threadRoot]);
 useEffect(() => {
   // During share deep-link we may need to render a deeply nested reply before we can scroll to it.
