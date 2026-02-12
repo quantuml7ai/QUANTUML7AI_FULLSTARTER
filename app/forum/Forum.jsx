@@ -15662,13 +15662,18 @@ const openThreadForPost = useCallback((post, opts = {}) => {
   if (!post || !post.id) return;
   const topicId = post.topicId;
   const rootId = String(post.id);
+  const scrollToId = (() => {
+    const v = (opts && opts.scrollToId != null) ? String(opts.scrollToId) : '';
+    const s = String(v || '').trim();
+    return s || rootId;
+  })();
   const entryId = String(opts.entryId || (post?.id ? `post_${post.id}` : '') || '');
 
   if (!opts.skipNav) {
     try { pushNavState(entryId); } catch {}
   }
 
-  pendingScrollToPostIdRef.current = rootId;
+  pendingScrollToPostIdRef.current = scrollToId;
 
   // закрываем панели, если попросили
   try { if (opts.closeInbox) setInboxOpen(false); } catch {}
@@ -16029,7 +16034,32 @@ useEffect(() => {
   // If it's a reply, make it visible by opening a thread.
   if (postObj?.parentId && !st.threadOpened) {
     st.threadOpened = true
-    try { openThreadForPost(postObj, { skipNav: true, closeInbox: true, closeVideoFeed: true }) } catch {}
+
+    // Replies can be deeply nested (reply->reply->reply). For share deep-links we open the
+    // top-level ancestor thread, then scroll/center the exact target post inside it.
+    const pickById = (id) => {
+      const key = String(id || '').trim()
+      if (!key) return null
+      return idMap?.get?.(key) || posts.find((p) => String(p?.id) === key) || null
+    }
+
+    let root = pickById(postObj.id) || postObj
+    let guard = 0
+    while (root?.parentId && guard < 80) {
+      const next = pickById(root.parentId)
+      if (!next) break
+      root = next
+      guard += 1
+    }
+
+    try {
+      openThreadForPost(root, {
+        skipNav: true,
+        closeInbox: true,
+        closeVideoFeed: true,
+        scrollToId: postId,
+      })
+    } catch {}
     return
   }
 

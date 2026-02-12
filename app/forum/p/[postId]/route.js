@@ -11,6 +11,7 @@ export const runtime = 'nodejs'
 
 const OG_DEFAULT_IMAGE = '/metab/forum1.png'
 const OG_AUDIO_IMAGE = '/audio/Q-Cast.png'
+const SHARE_OG_TITLE = 'Q-Line Future is in your hands'
 
 function escapeAttr(s) {
   return String(s || '')
@@ -229,10 +230,7 @@ export async function GET(req, { params }) {
     topicId ? `&topic=${encodeURIComponent(topicId)}` : ''
   }`
 
-  const nick = found ? String(post?.nickname || '').trim() : ''
-  const titleRaw = found
-    ? (nick ? `Post by @${nick.replace(/^@/, '')}` : 'Forum post')
-    : 'Post not found'
+  const titleRaw = found ? SHARE_OG_TITLE : 'Post not found'
 
   const plain = found ? toPlainText(post?.text || '') : ''
   const descRaw = found
