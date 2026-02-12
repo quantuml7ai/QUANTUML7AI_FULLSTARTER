@@ -7,7 +7,7 @@ import { redis, K, safeParse } from '../../../api/forum/_db.js'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const fetchCache = 'force-no-store'
-export const runtime = 'nodejs' 
+export const runtime = 'nodejs'
 
 function escapeAttr(s) {
   return String(s || '')
@@ -63,7 +63,7 @@ function extractYouTubeId(text) {
     /(?:youtube(?:-nocookie)?\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i,
   )
   return m ? String(m[1] || '').trim() : ''
-} 
+}
 
 function absUrl(origin, maybeRelative) {
   const v = String(maybeRelative || '').trim()
@@ -99,7 +99,7 @@ function extractPreviewVideoUrl(text) {
     /(?:https?:\/\/[^\s<>'")]+?\.(?:mp4|webm|mov|m4v|ogv)(?:[?#][^\s<>'")]+)?|\/uploads\/[A-Za-z0-9._\-\/]+?\.(?:mp4|webm|mov|m4v|ogv)(?:[?#][^\s<>'")]+)?)/i
   const m = s.match(re)
   return m ? String(m[0] || '').trim() : ''
-} 
+}
 
 function hasAudioInText(text) {
   const s = String(text || '')
@@ -136,40 +136,14 @@ export async function GET(req, { params }) {
 
   const found = !!post && !!post?.id
   const topicId = found && post?.topicId != null ? String(post.topicId) : ''
-  let rootId = ''
-  if (found) {
-    try {
-      let cur = post
-      let rid = String(post?.id || postId).trim() || String(postId)
-      const seen = new Set([rid])
-      for (let i = 0; i < 256; i += 1) {
-        const pidRaw = cur?.parentId
-        if (pidRaw == null) break
-        const pid = String(pidRaw || '').trim()
-        if (!pid || seen.has(pid)) break
-        seen.add(pid)
-        let parent = null
-        try {
-          const raw = await redis.get(K.postKey(pid))
-          parent = raw ? safeParse(raw) : null
-        } catch {
-          parent = null
-        }
-        if (!parent || !parent?.id) break
-        rid = String(parent.id).trim() || rid
-        cur = parent
-      }
-      rootId = String(rid || '').trim() || ''
-    } catch {
-      rootId = ''
-    }
-  }
-
   const redirectUrl = `${origin}/forum?post=${encodeURIComponent(postId)}${
     topicId ? `&topic=${encodeURIComponent(topicId)}` : ''
-  }${rootId ? `&root=${encodeURIComponent(rootId)}` : ''}`
+  }`
 
-  const titleRaw = 'Forum post'
+  const nick = found ? String(post?.nickname || '').trim() : ''
+  const titleRaw = found
+    ? (nick ? `Post by @${nick.replace(/^@/, '')}` : 'Forum post')
+    : 'Post not found'
 
   const plain = found ? toPlainText(post?.text || '') : ''
   const descRaw = found
@@ -184,7 +158,7 @@ export async function GET(req, { params }) {
   const isAudioPost = found ? hasAudioInText(textRaw) : false
   const imgRel = found ? extractPreviewImageUrl(textRaw) : ''
   const vidRel = found ? extractPreviewVideoUrl(textRaw) : ''
- 
+
   // Media priority for share previews:
   // - YouTube: try to provide a playable embed via og:video (fallback thumbnail via og:image)
   // - Video file: og:video points to the real file URL
@@ -208,7 +182,7 @@ export async function GET(req, { params }) {
         videoUrl: v,
         videoType: videoMime(v),
       }
-    } 
+    }
     if (imgRel) {
       return { kind: 'image', imageRel: imgRel, videoUrl: '', videoType: '' }
     }
@@ -255,7 +229,7 @@ export async function GET(req, { params }) {
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>${title}</title>
     <link rel="canonical" href="${ogUrl}"/>
- 
+
     <meta property="og:title" content="${title}"/>
     <meta property="og:description" content="${desc}"/>
     <meta property="og:url" content="${ogUrl}"/>
