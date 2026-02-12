@@ -1,8 +1,12 @@
 // app/forum/p/[postId]/route.js
 // OG/Twitter preview + human redirect entrypoint.
 
-import { createHash } from 'crypto'
 import { redis, K, safeParse } from '../../../api/forum/_db.js'
+import {
+  META_VERSION,
+  buildMetaVersionToken,
+  withMetaVersion,
+} from '../../../../lib/metadataCache'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -75,25 +79,6 @@ function absUrl(origin, maybeRelative) {
   if (/^https?:\/\//i.test(v)) return v
   if (v.startsWith('/')) return `${origin}${v}`
   return v
-}
-
-function mkEtag(payload) {
-  const h = createHash('sha1').update(String(payload || '')).digest('hex')
-  return `"${h}"`
-}
-
-function isFreshByEtag(req, etag) {
-  const inm = req.headers.get('if-none-match') || ''
-  if (!inm) return false
-  return inm.split(',').map((s) => s.trim()).includes(etag)
-}
-
-function isFreshBySince(req, lastModifiedMs) {
-  const ims = req.headers.get('if-modified-since') || ''
-  if (!ims) return false
-  const t = Date.parse(ims)
-  if (!Number.isFinite(t)) return false
-  return Number(lastModifiedMs || 0) > 0 && t >= Number(lastModifiedMs || 0)
 }
 
 function extractPreviewVideoUrl(text) {
@@ -223,27 +208,29 @@ export async function GET(req, { params }) {
     return { kind: 'default', imageRel: FALLBACK_OG_IMAGE_REL, videoUrl: '', videoType: '' }
   })()
 
-  const imageUrl = absUrl(origin, chosen.imageRel)
+  const lastModifiedMs = found ? Number(post?.ts || 0) || Date.now() : Date.now()
+  const imageVersion = buildMetaVersionToken(
+    META_VERSION,
+    postId,
+    String(lastModifiedMs),
+    chosen.imageRel,
+  )
+  const imageBaseUrl = absUrl(origin, chosen.imageRel)
+  const imageUrl = imageBaseUrl ? withMetaVersion(imageBaseUrl, imageVersion) : ''
   const videoUrl = String(chosen.videoUrl || '').trim()
   const videoType = String(chosen.videoType || '').trim()
   const twitterCard = imageUrl ? 'summary_large_image' : 'summary'
 
-  const lastModifiedMs = found ? Number(post?.ts || 0) || Date.now() : Date.now()
-  const etag = mkEtag([postId, titleRaw, descRaw, imageUrl, String(lastModifiedMs)].join('|'))
-
-  const cacheControl =
-    'public, max-age=0, s-maxage=300, stale-while-revalidate=86400'
+  const cacheControl = 'no-store, no-cache, must-revalidate, max-age=0'
 
   const headers = new Headers({
     'content-type': 'text/html; charset=utf-8',
     'cache-control': cacheControl,
-    etag,
+    pragma: 'no-cache',
+    expires: '0',
     'last-modified': new Date(lastModifiedMs).toUTCString(),
+    'x-robots-tag': 'noindex, nofollow',
   })
-
-  if (isFreshByEtag(req, etag) || isFreshBySince(req, lastModifiedMs)) {
-    return new Response(null, { status: 304, headers })
-  }
 
   const title = escapeAttr(titleRaw.slice(0, 80))
   const desc = escapeAttr(descRaw.slice(0, 240))

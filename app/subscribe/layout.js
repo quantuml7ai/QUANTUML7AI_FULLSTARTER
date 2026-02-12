@@ -1,4 +1,5 @@
 // app/subscribe/layout.js
+import { withAssetVersion } from '../../lib/metadataCache'
 
 const GLOBAL_DESCRIPTION =
   'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Q-Line Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©'
@@ -17,7 +18,7 @@ export const metadata = {
     description: GLOBAL_DESCRIPTION,
     images: [
       {
-        url: '/metab/subscription1.png?v=20260210',
+        url: withAssetVersion('/metab/subscription1.png'),
         width: 1200,
         height: 630,
         alt: 'Subscription',
@@ -30,7 +31,7 @@ export const metadata = {
     creator: '@quantuml7ai',
     title: 'Subscription',
     description: GLOBAL_DESCRIPTION,
-    images: ['/metab/subscription1.png?v=20260210'],
+    images: [withAssetVersion('/metab/subscription1.png')],
   },
 }
 

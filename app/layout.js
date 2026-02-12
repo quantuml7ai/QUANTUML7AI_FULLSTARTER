@@ -6,6 +6,7 @@ import TopBar from '../components/TopBar'
 import NotRobot from "@/components/NotRobot";
 import Providers from './providers'
 import HeroAvatar from '../components/HeroAvatar'
+import { withAssetVersion } from '../lib/metadataCache'
 // ✅ Vercel Analytics & Speed Insights
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
@@ -58,7 +59,7 @@ export const metadata = {
     images: [
       {
         // 🔹 глобально корень теперь = /meta/home.png
-        url: '/metab/home1.png?v=20260210',
+        url: withAssetVersion('/metab/home1.png'),
         width: 1200,
         height: 630,
         alt: 'Quantum L7 AI — Global AI • Exchange • Q-Line Forum • Academy • Ads AI Rotator',
@@ -74,14 +75,14 @@ export const metadata = {
     description:
       'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Q-Line Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©',
     // 🔹 твиттер-картинка для корня та же
-    images: ['/metab/home1.png?v=20260210'],
+    images: [withAssetVersion('/metab/home1.png')],
   },
 
   // 🔹 лёгкий bust кэша для иконок (версии можно менять при билд-апдейтах)
   icons: {
-    icon: '/favicon-new.ico?v=2',
-    shortcut: '/favicon-new.ico?v=2',
-    apple: '/apple-touch-icon-new.png?v=2',
+    icon: withAssetVersion('/favicon-new.ico'),
+    shortcut: withAssetVersion('/favicon-new.ico'),
+    apple: withAssetVersion('/apple-touch-icon-new.png'),
   },
 
   alternates: {
