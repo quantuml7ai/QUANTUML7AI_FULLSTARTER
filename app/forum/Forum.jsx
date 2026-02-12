@@ -81,11 +81,6 @@ const INVITE_BTN_OFFSET_Y = 0     // при необходимости сдви�
 
 // ---- отображение имени/аватарки ---- 
 const isBrowser = () => typeof window !== 'undefined'
-// --- platform helpers (нужно для Android fullscreen + YouTube controls) ---
-const isAndroidUA = () =>
-  (typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent));
-const isIOSUA = () =>
-  (typeof navigator !== 'undefined' && /iPad|iPhone|iPod/i.test(navigator.userAgent));
 const cls = (...xs) => xs.filter(Boolean).join(' ')
 const shortId = id => id ? `${String(id).slice(0,6)}…${String(id).slice(-4)}` : '—'
 const human = ts => new Date(ts || Date.now()).toLocaleString()
@@ -1737,12 +1732,23 @@ const Styles = () => (
       --mb-video-h-mobile: 700px;
       --mb-video-h-tablet: 550px;
       --mb-video-h-desktop: 550px;
+  /* Video: минимальная высота */
+  --mb-video-min-h-mobile: 420px;
+  --mb-video-min-h-tablet: 550px;
+  --mb-video-min-h-desktop: 550px;      
       --mb-image-h-mobile: 700px;
       --mb-image-h-tablet: 550px;
       --mb-image-h-desktop: 550px;
-      --mb-iframe-h-mobile: 630px;
-      --mb-iframe-h-tablet: 650px;
-      --mb-iframe-h-desktop: 700px;
+      --mb-iframe-h-mobile: 700px;
+      --mb-iframe-h-tablet: 550px;
+      --mb-iframe-h-desktop: 550px;
+  /* YouTube iframe: минимальная высота (моб/планш/десктоп)
+     - max-height уже управляется через --mb-iframe-h-*
+     - это именно нижняя граница, чтобы карточка YouTube не была «слишком низкой»
+  */
+  --mb-yt-iframe-min-h-mobile: 420px;
+  --mb-yt-iframe-min-h-tablet: 550px;
+  --mb-yt-iframe-min-h-desktop: 550px;      
       --mb-audio-h-mobile: 630px;
       --mb-audio-h-tablet: 650px;
       --mb-audio-h-desktop: 700px;
@@ -1762,8 +1768,10 @@ const Styles = () => (
   --mb-sticker-h-tablet: 320px;
   --mb-sticker-h-desktop: 380px;      
       --mb-video-h: var(--mb-video-h-mobile);
+      --mb-video-min-h: var(--mb-video-min-h-mobile);
       --mb-image-h: var(--mb-image-h-mobile);
       --mb-iframe-h: var(--mb-iframe-h-mobile);
+      --mb-yt-iframe-min-h: var(--mb-yt-iframe-min-h-mobile);
       --mb-audio-h: var(--mb-audio-h-mobile);
       --mb-qcast-h: var(--mb-qcast-h-mobile);
       --mb-ad-h: var(--mb-ad-h-mobile);
@@ -1773,8 +1781,10 @@ const Styles = () => (
     @media (min-width: 640px){
       .forum_root{
         --mb-video-h: var(--mb-video-h-tablet);
+        --mb-video-min-h: var(--mb-video-min-h-tablet);
         --mb-image-h: var(--mb-image-h-tablet);
         --mb-iframe-h: var(--mb-iframe-h-tablet);
+        --mb-yt-iframe-min-h: var(--mb-yt-iframe-min-h-tablet);
         --mb-audio-h: var(--mb-audio-h-tablet);
         --mb-qcast-h: var(--mb-qcast-h-tablet);
         --mb-ad-h: var(--mb-ad-h-tablet);
@@ -1786,8 +1796,10 @@ const Styles = () => (
     @media (min-width: 1024px){
       .forum_root{
         --mb-video-h: var(--mb-video-h-desktop);
+        --mb-video-min-h: var(--mb-video-min-h-desktop);
         --mb-image-h: var(--mb-image-h-desktop);
         --mb-iframe-h: var(--mb-iframe-h-desktop);
+        --mb-yt-iframe-min-h: var(--mb-yt-iframe-min-h-desktop);
         --mb-audio-h: var(--mb-audio-h-desktop);
         --mb-qcast-h: var(--mb-qcast-h-desktop);
         --mb-ad-h: var(--mb-ad-h-desktop);
@@ -1841,19 +1853,6 @@ const Styles = () => (
       align-items:center;
       justify-content:center;
     }
-    /* Android fullscreen + YouTube controls:
-       - overflow:hidden/contain иногда ломают слои fullscreen и/или режут контролы */
-    .mediaBox[data-kind="video"],
-    .mediaBox[data-kind="iframe"]{
-      overflow: visible;
-      contain: none;
-    }
-
-    /* чтобы визуально не терять скругления когда overflow:visible */
-    .mediaBox[data-kind="video"] > video,
-    .mediaBox[data-kind="iframe"] > iframe{
-      border-radius: 12px;
-    }      
     .mediaBox[data-kind="video"]{ --mb-h: var(--mb-video-h); background:#000; }
     .mediaBox[data-kind="image"]{ --mb-h: var(--mb-image-h); }
     .mediaBox[data-kind="iframe"]{ --mb-h: var(--mb-iframe-h); background:#000; }
@@ -1879,6 +1878,7 @@ const Styles = () => (
     .mediaBox > video{
       width:100%;
       height:auto;
+      min-height: var(--mb-video-min-h, 0px);
       max-height:100%;
       background:#000;
     }
@@ -1893,6 +1893,10 @@ const Styles = () => (
       display:block;
       background:#000;
     }
+/* YouTube iframe: минимальная высота отдельно (переменная под моб/десктоп) */
+.mediaBox > iframe[data-forum-media="youtube"]{
+  min-height: var(--mb-yt-iframe-min-h, 0px);
+}      
     .mediaBox > iframe[data-forum-media="tiktok"]{
       aspect-ratio:9/16;
       background:#000;
@@ -9751,16 +9755,11 @@ const cleanedText = allLines
   );
   const ytEmbedParams = React.useMemo(() => {
     const params = new URLSearchParams({
-      enablejsapi: '1', 
+      enablejsapi: '1',
+      playsinline: '1',
       rel: '0',
       modestbranding: '1',
     });
-    // iOS: playsinline нужен, иначе Safari уводит в фулскрин/ломает UX
-    // Android: playsinline часто режет набор контролов YouTube (в т.ч. mute) и глючит fullscreen
-    try {
-      if (isAndroidUA()) params.set('playsinline', '0');
-      else params.set('playsinline', '1');
-    } catch {}
     if (ytOrigin) params.set('origin', ytOrigin);
     return params.toString();
   }, [ytOrigin]);
@@ -9950,11 +9949,8 @@ text={t?.('forum_delete_confirm')}
           data-forum-media="video"
           src={src}
 
-          // iOS: playsInline нужен, Android: пусть fullscreen работает нативно
-          playsInline={!isAndroidUA()}
+          playsInline
           preload="metadata"
-          // Android: включаем controls сразу, иначе fullscreen-кнопка часто "мертвая"/затемненная
-          controls={isAndroidUA()}          
           controlsList="nodownload noplaybackrate noremoteplayback"
           disablePictureInPicture          
           className="mediaBoxItem"
@@ -9986,6 +9982,7 @@ text={t?.('forum_delete_confirm')}
                 key={`yt${i}`}
                 className="videoCard mediaBox"
                 data-kind="iframe" 
+                data-subkind="youtube"
                 style={{ margin: 0 }}
                >
 <iframe
@@ -9997,8 +9994,7 @@ text={t?.('forum_delete_confirm')}
   data-forum-media="youtube"
   loading="lazy"
   frameBorder="0"
-  // fullscreen явно разрешаем для Android/WebView
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
   allowFullScreen
   className="mediaBoxItem"
 />
@@ -11606,17 +11602,11 @@ function enableVideoControlsOnTap(e) {
     v.controls = true;
     try { v.setAttribute('controls', ''); } catch {}
 
-    // iOS: удерживаем inline (чтобы не улетало в fullscreen самопроизвольно)
-    // Android: НЕ форсим playsinline — иначе fullscreen кнопка часто становится неактивной
-    if (isIOSUA()) {
-      try { v.playsInline = true; } catch {}
-      try { v.setAttribute('playsinline', ''); } catch {}
-      try { v.setAttribute('webkit-playsinline', ''); } catch {}
-    } else {
-      try { v.playsInline = false; } catch {}
-      try { v.removeAttribute('playsinline'); } catch {}
-      try { v.removeAttribute('webkit-playsinline'); } catch {}
-    }
+    // удерживаем inline на iOS (чтобы не улетало в fullscreen)
+    try { v.playsInline = true; } catch {}
+    try { v.setAttribute('playsinline', ''); } catch {}
+    try { v.setAttribute('webkit-playsinline', ''); } catch {}
+
     // если видео было на паузе — мягко пробуем запустить
     try {
       if (v.paused) {
