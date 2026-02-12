@@ -81,6 +81,11 @@ const INVITE_BTN_OFFSET_Y = 0     // при необходимости сдви�
 
 // ---- отображение имени/аватарки ---- 
 const isBrowser = () => typeof window !== 'undefined'
+// --- platform helpers (нужно для Android fullscreen + YouTube controls) ---
+const isAndroidUA = () =>
+  (typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent));
+const isIOSUA = () =>
+  (typeof navigator !== 'undefined' && /iPad|iPhone|iPod/i.test(navigator.userAgent));
 const cls = (...xs) => xs.filter(Boolean).join(' ')
 const shortId = id => id ? `${String(id).slice(0,6)}…${String(id).slice(-4)}` : '—'
 const human = ts => new Date(ts || Date.now()).toLocaleString()
@@ -1836,6 +1841,19 @@ const Styles = () => (
       align-items:center;
       justify-content:center;
     }
+    /* Android fullscreen + YouTube controls:
+       - overflow:hidden/contain иногда ломают слои fullscreen и/или режут контролы */
+    .mediaBox[data-kind="video"],
+    .mediaBox[data-kind="iframe"]{
+      overflow: visible;
+      contain: none;
+    }
+
+    /* чтобы визуально не терять скругления когда overflow:visible */
+    .mediaBox[data-kind="video"] > video,
+    .mediaBox[data-kind="iframe"] > iframe{
+      border-radius: 12px;
+    }      
     .mediaBox[data-kind="video"]{ --mb-h: var(--mb-video-h); background:#000; }
     .mediaBox[data-kind="image"]{ --mb-h: var(--mb-image-h); }
     .mediaBox[data-kind="iframe"]{ --mb-h: var(--mb-iframe-h); background:#000; }
@@ -9733,11 +9751,16 @@ const cleanedText = allLines
   );
   const ytEmbedParams = React.useMemo(() => {
     const params = new URLSearchParams({
-      enablejsapi: '1',
-      playsinline: '1',
+      enablejsapi: '1', 
       rel: '0',
       modestbranding: '1',
     });
+    // iOS: playsinline нужен, иначе Safari уводит в фулскрин/ломает UX
+    // Android: playsinline часто режет набор контролов YouTube (в т.ч. mute) и глючит fullscreen
+    try {
+      if (isAndroidUA()) params.set('playsinline', '0');
+      else params.set('playsinline', '1');
+    } catch {}
     if (ytOrigin) params.set('origin', ytOrigin);
     return params.toString();
   }, [ytOrigin]);
@@ -9927,8 +9950,11 @@ text={t?.('forum_delete_confirm')}
           data-forum-media="video"
           src={src}
 
-          playsInline
+          // iOS: playsInline нужен, Android: пусть fullscreen работает нативно
+          playsInline={!isAndroidUA()}
           preload="metadata"
+          // Android: включаем controls сразу, иначе fullscreen-кнопка часто "мертвая"/затемненная
+          controls={isAndroidUA()}          
           controlsList="nodownload noplaybackrate noremoteplayback"
           disablePictureInPicture          
           className="mediaBoxItem"
@@ -9971,7 +9997,8 @@ text={t?.('forum_delete_confirm')}
   data-forum-media="youtube"
   loading="lazy"
   frameBorder="0"
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  // fullscreen явно разрешаем для Android/WebView
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
   allowFullScreen
   className="mediaBoxItem"
 />
@@ -11579,11 +11606,17 @@ function enableVideoControlsOnTap(e) {
     v.controls = true;
     try { v.setAttribute('controls', ''); } catch {}
 
-    // удерживаем inline на iOS (чтобы не улетало в fullscreen)
-    try { v.playsInline = true; } catch {}
-    try { v.setAttribute('playsinline', ''); } catch {}
-    try { v.setAttribute('webkit-playsinline', ''); } catch {}
-
+    // iOS: удерживаем inline (чтобы не улетало в fullscreen самопроизвольно)
+    // Android: НЕ форсим playsinline — иначе fullscreen кнопка часто становится неактивной
+    if (isIOSUA()) {
+      try { v.playsInline = true; } catch {}
+      try { v.setAttribute('playsinline', ''); } catch {}
+      try { v.setAttribute('webkit-playsinline', ''); } catch {}
+    } else {
+      try { v.playsInline = false; } catch {}
+      try { v.removeAttribute('playsinline'); } catch {}
+      try { v.removeAttribute('webkit-playsinline'); } catch {}
+    }
     // если видео было на паузе — мягко пробуем запустить
     try {
       if (v.paused) {
