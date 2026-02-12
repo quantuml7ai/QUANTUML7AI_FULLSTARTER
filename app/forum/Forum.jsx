@@ -3283,7 +3283,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
     .lockable{ position:relative; }
     .lockBadge{
       position:absolute;
-      right:-4px;
+      left:-7px;
       top:-4px;
       width:16px;
       height:16px;
