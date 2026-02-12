@@ -17839,7 +17839,21 @@ useHtmlFlag('data-video-feed', videoFeedOpen ? '1' : null);
 // После ручного выбора сортировки — работаем в обычном режиме.
 const [videoFeedEntryToken, setVideoFeedEntryToken] = React.useState(0); 
 const [videoFeedUserSortLocked, setVideoFeedUserSortLocked] = React.useState(false); 
-
+// ✅ VIDEO_FEED: соль для рандомизации на каждую загрузку страницы
+// Нужна, чтобы после refresh первый запуск ленты НЕ начинался одинаково.
+// Важно: соль фиксируется на весь жизненный цикл текущей страницы, чтобы shuffle был стабильным и не "прыгал" на ререндере.
+const [videoFeedPageSalt] = React.useState(() => {
+  try {
+    // предпочтительно: крипто-рандом
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const a = new Uint32Array(4);
+      crypto.getRandomValues(a);
+      return Array.from(a).map((n) => n.toString(16).padStart(8, '0')).join('');
+    }
+  } catch {}
+  // fallback (на случай старых окружений)
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
+});
 // детерминированный shuffle (стабилен в рамках одного входа в ленту)
 function __vfHash32(str) {
   // FNV-1a 32bit
@@ -18020,7 +18034,7 @@ let only = all
 if (effectiveFeedSort === 'random') {
   // ⚠️ важное: shuffle должен быть стабильным, иначе при любом setState/рендере
   // лента будет «прыгать». Поэтому seed завязан на вход (token) и пользователя.
-  const seedStr = `${String(viewerId || '')}|${String(videoFeedEntryToken || 0)}`;
+  const seedStr = `${String(viewerId || '')}|${String(videoFeedPageSalt || '')}|${String(videoFeedEntryToken || 0)}`;
   // слегка стабилизируем базовый порядок перед shuffle, чтобы новые посты
   // не «вклинивались» случайно в разные места на каждом билде.
   const base = only.slice().sort((a,b) => (Number(b?.ts||0) - Number(a?.ts||0)));
