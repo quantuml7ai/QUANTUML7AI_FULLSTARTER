@@ -5,7 +5,6 @@ import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import {
   buildCanonicalPostUrl,
-  buildShareSnippet,
   buildShareTitle,
   copyToClipboard,
   getShareTargets,
@@ -69,7 +68,8 @@ export default function SharePopover({ open, post, onClose, t, toast }) {
   const shareTitle = buildShareTitle(post, {
     generic: (t?.('forum_share_post_generic') || 'Forum post').trim(),
   })
-  const shareText = buildShareSnippet(post, { maxLen: 220 }) || ''
+  const shareText = shareTitle
+  const sharePayload = `${shareTitle} ${canonicalUrl}`.trim()
   const targets = getShareTargets({
     url: canonicalUrl,
     text: shareText,
@@ -84,7 +84,7 @@ export default function SharePopover({ open, post, onClose, t, toast }) {
   })
 
   const copy = async () => {
-    const res = await copyToClipboard(canonicalUrl)
+    const res = await copyToClipboard(sharePayload)
     if (res?.ok) {
       setCopied(true)
       toast?.ok?.(t?.('forum_copied') || 'Copied!')
@@ -172,7 +172,7 @@ export default function SharePopover({ open, post, onClose, t, toast }) {
             <input
               ref={inputRef}
               className="shareUrlInput"
-              value={canonicalUrl}
+              value={sharePayload}
               readOnly
               aria-label={t?.('forum_share_link') || 'Post link'}
               onFocus={(e) => {
