@@ -16109,6 +16109,9 @@ useEffect(() => {
   }, 120);
 }, [sel?.id, threadRoot]);
 useEffect(() => {
+  // During share deep-link we may need to render a deeply nested reply before we can scroll to it.
+  // Do NOT shrink the thread slice while deeplink UI is active, otherwise the target node may never mount.
+  if (deeplinkUI?.active && deeplinkUI?.postId) return;
   setVisibleThreadPostsCount(THREAD_PAGE_SIZE);
 }, [sel?.id, threadRoot, postSort]);
  // === Views: refs to avoid TDZ when effects run before callbacks are initialized ===
