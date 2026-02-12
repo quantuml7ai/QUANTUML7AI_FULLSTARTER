@@ -3886,11 +3886,11 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 
 /* Само число — крупнее, с «стеклянной» подложкой */
 .qcoinValue{
-  font-size:1.5em;
+  font-size:1.6em;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-weight:800; padding:.20em .66em; border-radius:.36em;
-  border:1px solid rgba(255,255,255,.14);
-  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
+  border:1px solid rgba(162, 0, 255, 0.33);
+  background:linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0));
   backdrop-filter: blur(6px);
 }
 .qcoinValue.live{ color:#ffd700 }

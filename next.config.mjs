@@ -32,6 +32,17 @@ images: {
   formats: ['image/avif','image/webp'],
 },
 
+  async rewrites() {
+    // Strict OG requirement: audio posts must use `/audio/Qcast.png` in metadata.
+    // Keep the existing asset name (`Q-Cast.png`) and provide a stable alias path.
+    return [
+      {
+        source: '/audio/Qcast.png',
+        destination: '/audio/Q-Cast.png',
+      },
+    ]
+  },
+
   async headers() {
     // кто МОЖЕТ встраивать НАС (родители/host-страницы)
     const FRAME_PARENTS = [
