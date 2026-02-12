@@ -15092,14 +15092,15 @@ const pendingScrollToPostIdRef = useRef(null);
 const openThreadForPost = useCallback((post, opts = {}) => {
   if (!post || !post.id) return;
   const topicId = post.topicId;
-  const rootId = String(post.id); 
+  const rootId = String(opts?.rootId ?? post.id).trim() || String(post.id);
+  const scrollToPostId = String(opts?.scrollToPostId ?? rootId).trim() || rootId;
   const entryId = String(opts.entryId || (post?.id ? `post_${post.id}` : '') || '');
 
   if (!opts.skipNav) {
     try { pushNavState(entryId); } catch {}
   }
 
-  pendingScrollToPostIdRef.current = rootId;
+  pendingScrollToPostIdRef.current = scrollToPostId;
 
   // закрываем панели, если попросили
   try { if (opts.closeInbox) setInboxOpen(false); } catch {}
@@ -15107,7 +15108,7 @@ const openThreadForPost = useCallback((post, opts = {}) => {
 
   // если уже в нужной теме — открываем ветку сразу
   if (sel?.id && String(sel.id) === String(topicId)) {
-    const node = idMap?.get?.(rootId) || post;
+    const node = idMap?.get?.(rootId) || (String(post.id) === String(rootId) ? post : { id: rootId, topicId });
     try { setThreadRoot(node); } catch {}
     return;
   }
@@ -15340,13 +15341,16 @@ function centerAndFlashPostAfterDom(postId, behavior = 'smooth') {
   try { requestAnimationFrame(tick); } catch { try { setTimeout(tick, 0); } catch {} }
 }
 
-// Deep-link: /forum?post=<postId>(&topic=<topicId>)
+// Deep-link: /forum?post=<postId>(&topic=<topicId>&root=<rootId>)
 const deeplinkRef = React.useRef({
   started: false,
   startedAt: 0,
   postId: null,
   topicId: null,
+  rootId: null,
   locateInFlight: false,
+  hydrateInFlight: false,
+  chainReady: false,
   threadOpened: false, 
   done: false,
 })
@@ -15359,12 +15363,16 @@ useEffect(() => {
   const postId = String(qs.get('post') || '').trim()
   if (!postId) return
   const topicId = String(qs.get('topic') || '').trim() || null
+  const rootId = String(qs.get('root') || '').trim() || null
 
   deeplinkRef.current.started = true
   deeplinkRef.current.startedAt = Date.now()
   deeplinkRef.current.postId = postId
   deeplinkRef.current.topicId = topicId
+  deeplinkRef.current.rootId = rootId
   deeplinkRef.current.locateInFlight = false
+  deeplinkRef.current.hydrateInFlight = false
+  deeplinkRef.current.chainReady = false
   deeplinkRef.current.threadOpened = false 
   deeplinkRef.current.done = false 
 
@@ -15397,52 +15405,179 @@ useEffect(() => {
   const posts = Array.isArray(data?.posts) ? data.posts : []
   const topics = Array.isArray(data?.topics) ? data.topics : []
 
-  const postObj = posts.find((p) => String(p?.id) === String(postId)) || null
+  const byId = new Map()
+  for (const p of posts) {
+    const id = String(p?.id || '').trim()
+    if (id) byId.set(id, p)
+  }
+
+  let postObj = byId.get(String(postId)) || null
   if (!topicId && postObj?.topicId) {
     topicId = String(postObj.topicId)
     st.topicId = topicId
     setDeeplinkUI((prev) => (prev?.active ? { ...prev, topicId } : prev))
   }
 
-  if (topicId) {
-    if (!sel?.id || String(sel.id) !== String(topicId)) {
-      const tt = topics.find((t) => String(t?.id) === String(topicId)) || null
-      if (tt) {
-        try { setTopicFilterId(String(topicId)) } catch {}
-        try { setSel(tt) } catch {}
+  // 1) Ensure target post and its parentId-chain exist in the local snapshot.
+  if (!st.chainReady) {
+    const scan = () => {
+      const seen = new Set()
+      let curId = String(postId)
+      let rootId = ''
+      let chainTopicId = topicId
+      for (let i = 0; i < 256; i += 1) {
+        const id = String(curId || '').trim()
+        if (!id || seen.has(id)) break
+        seen.add(id)
+        const p = byId.get(id) || null
+        if (!p) return { ok: false, missingId: id }
+        if (!chainTopicId && p?.topicId) chainTopicId = String(p.topicId)
+        rootId = id
+        const pid = p?.parentId != null ? String(p.parentId).trim() : ''
+        if (!pid) return { ok: true, rootId, topicId: chainTopicId || '' }
+        curId = pid
+      }
+      return { ok: true, rootId: rootId || String(st.rootId || postId), topicId: chainTopicId || '' }
+    }
+
+    const scanned = scan()
+    if (scanned?.ok) {
+      st.chainReady = true
+      if (scanned.rootId) st.rootId = String(scanned.rootId)
+      if (scanned.topicId) st.topicId = String(scanned.topicId)
+      if (st.topicId) topicId = String(st.topicId)
+      if (st.topicId) {
+        setDeeplinkUI((prev) => (prev?.active ? { ...prev, topicId: String(st.topicId) } : prev))
+      }
+      // refresh locals
+      postObj = byId.get(String(postId)) || postObj
+    } else {
+      if (!st.hydrateInFlight) {
+        st.hydrateInFlight = true
+        ;(async () => {
+          const fetched = []
+          const seen = new Set()
+          let curId = String(postId)
+          let rootId = ''
+          let chainTopicId = topicId
+
+          for (let i = 0; i < 256; i += 1) {
+            const id = String(curId || '').trim()
+            if (!id || seen.has(id)) break
+            seen.add(id)
+
+            let p = byId.get(id) || null
+            if (!p) {
+              const res = await fetch(
+                `/api/forum/post-by-id?postId=${encodeURIComponent(id)}`,
+                { cache: 'no-store' },
+              ).catch(() => null)
+              const j = res ? await res.json().catch(() => null) : null
+              const ok = !!res?.ok && !!j?.ok && !!j?.post?.id
+              if (!ok) {
+                st.done = true
+                setDeeplinkUI({
+                  active: true,
+                  status: 'not_found',
+                  postId,
+                  topicId: chainTopicId || st.topicId || null,
+                })
+                toast?.err?.(t?.('forum_post_not_found') || 'Post not found')
+
+                setTimeout(() => {
+                  try { setDeeplinkUI({ active: false, status: 'idle', postId: null, topicId: null }) } catch {}
+                }, 3200)
+
+                try {
+                  const u = new URL(window.location.href)
+                  u.searchParams.delete('post')
+                  u.searchParams.delete('topic')
+                  u.searchParams.delete('root')
+                  window.history.replaceState({}, '', u.pathname + u.search + u.hash)
+                } catch {}
+                return
+              }
+
+              p = j.post
+              byId.set(String(p.id), p)
+              fetched.push(p)
+            }
+
+            if (!chainTopicId && p?.topicId) chainTopicId = String(p.topicId)
+            rootId = String(p?.id || rootId)
+
+            const pid = p?.parentId != null ? String(p.parentId).trim() : ''
+            if (!pid) break
+            curId = pid
+          }
+
+          if (fetched.length) {
+            persistSnap((prev) => {
+              const existing = new Map((prev?.posts || []).map((p) => [String(p?.id || ''), p]))
+              let changed = false
+              for (const p of fetched) {
+                const id = String(p?.id || '').trim()
+                if (!id) continue
+                if (!existing.has(id)) {
+                  existing.set(id, p)
+                  changed = true
+                }
+              }
+              if (!changed) return prev
+              return { ...prev, posts: Array.from(existing.values()) }
+            })
+          }
+
+          st.topicId = String(chainTopicId || st.topicId || '') || null
+          st.rootId = String(rootId || st.rootId || postId)
+          st.chainReady = true
+          if (st.topicId) {
+            setDeeplinkUI((prev) => (prev?.active ? { ...prev, topicId: String(st.topicId) } : prev))
+          }
+        })()
+          .catch(() => {})
+          .finally(() => {
+            st.hydrateInFlight = false
+          })
       }
       return
     }
   }
 
-  if (!postObj) {
-    const revNum = Number(data?.rev || 0) 
-    const age = Date.now() - Number(st.startedAt || 0)
-    if (revNum > 0 && age > 6500) {
-      st.done = true
-      setDeeplinkUI({ active: true, status: 'not_found', postId, topicId: topicId || null })
-      toast?.err?.(t?.('forum_post_not_found') || 'Post not found')
-
-      setTimeout(() => {
-        try { setDeeplinkUI({ active: false, status: 'idle', postId: null, topicId: null }) } catch {}
-      }, 3200)
-
-      try {
-        const u = new URL(window.location.href)
-        u.searchParams.delete('post')
-        u.searchParams.delete('topic')
-        window.history.replaceState({}, '', u.pathname + u.search + u.hash)
-      } catch {}
+  // 2) Ensure correct topic is selected.
+  if (topicId) {
+    if (!sel?.id || String(sel.id) !== String(topicId)) {
+      const tt = topics.find((t) => String(t?.id) === String(topicId)) || null
+      try { setTopicFilterId(String(topicId)) } catch {}
+      try { setSel(tt || { id: String(topicId) }) } catch {}
+      return
     }
+  } else {
+    // Still don't know topicId — wait (locate/post-by-id may fill it).
     return
   }
 
-  // If it's a reply, make it visible by opening a thread.
-  if (postObj?.parentId && !st.threadOpened) {
+  // 3) Always open the thread from the real root (not from target).
+  postObj = byId.get(String(postId)) || postObj
+  if (!postObj) return
+
+  const rootId = String(st.rootId || postId)
+  const isOpen = !!threadRoot?.id && String(threadRoot.id) === String(rootId)
+
+  if (!isOpen && !st.threadOpened) {
     st.threadOpened = true
-    try { openThreadForPost(postObj, { skipNav: true, closeInbox: true, closeVideoFeed: true }) } catch {}
+    try {
+      openThreadForPost(postObj, {
+        skipNav: true,
+        closeInbox: true,
+        closeVideoFeed: true,
+        rootId,
+        scrollToPostId: postId,
+      })
+    } catch {}
     return
   }
+  if (!isOpen) return
 
   st.done = true
   centerAndFlashPostAfterDom(postId, 'smooth')
@@ -15451,9 +15586,10 @@ useEffect(() => {
     const u = new URL(window.location.href)
     u.searchParams.delete('post')
     u.searchParams.delete('topic')
+    u.searchParams.delete('root')
     window.history.replaceState({}, '', u.pathname + u.search + u.hash)
   } catch {}
-}, [sel?.id, threadRoot?.id, data?.rev, (data?.posts || []).length, (data?.topics || []).length, openThreadForPost])
+}, [sel?.id, threadRoot?.id, data?.rev, (data?.posts || []).length, (data?.topics || []).length, openThreadForPost, persistSnap])
 
 // при смене темы: либо выходим из ветки, либо применяем «ожидаемое» открытие ветки
 useEffect(() => {
