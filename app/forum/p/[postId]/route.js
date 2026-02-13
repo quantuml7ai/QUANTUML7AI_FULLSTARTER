@@ -12,6 +12,7 @@ const QCAST_OG_IMAGE_REL = '/audio/Q-Cast.png'
 const FALLBACK_OG_IMAGE_REL = '/metab/forum1.png'
 const MAX_CHAIN_DEPTH = 60
 const VERSION_PARAM = 'v'
+const SHARE_VERSION_PARAM = 'sv'
 const RAW_META_VERSION =
   process.env.NEXT_PUBLIC_META_VERSION ||
   process.env.NEXT_PUBLIC_OG_VERSION ||
@@ -153,8 +154,12 @@ export async function GET(req, { params }) {
   const postId = String(params?.postId || '').trim()
   const url = new URL(req.url)
   const origin = url.origin
+  const shareVersion = normalizeVersion(url.searchParams.get(SHARE_VERSION_PARAM), '')
 
   const canonicalUrl = `${origin}/forum/p/${encodeURIComponent(postId)}`
+  const ogUrlRaw = shareVersion
+    ? withQueryParam(canonicalUrl, SHARE_VERSION_PARAM, shareVersion)
+    : canonicalUrl
 
   let post = null
   try {
@@ -252,6 +257,7 @@ export async function GET(req, { params }) {
   const lastModifiedMs = found ? Number(post?.ts || 0) || Date.now() : Date.now()
   const imageVersion = buildMetaVersionToken(
     META_VERSION,
+    shareVersion,
     postId,
     String(lastModifiedMs),
     chosen.imageRel,
@@ -275,7 +281,8 @@ export async function GET(req, { params }) {
 
   const title = escapeAttr(titleRaw.slice(0, 80))
   const desc = escapeAttr(descRaw.slice(0, 240))
-  const ogUrl = escapeAttr(canonicalUrl)
+  const canonicalEsc = escapeAttr(canonicalUrl)
+  const ogUrl = escapeAttr(ogUrlRaw)
   const ogImg = escapeAttr(imageUrl)
   const ogVid = escapeAttr(videoUrl)
   const ogVidType = escapeAttr(videoType)
@@ -287,7 +294,7 @@ export async function GET(req, { params }) {
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>${title}</title>
-    <link rel="canonical" href="${ogUrl}"/>
+    <link rel="canonical" href="${canonicalEsc}"/>
 
     <meta property="og:title" content="${title}"/>
     <meta property="og:description" content="${desc}"/>
