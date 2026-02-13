@@ -150,10 +150,30 @@ function videoMime(url) {
   return 'video/mp4'
 }
 
+function isWhatsAppCrawler(userAgentRaw) {
+  const ua = String(userAgentRaw || '').toLowerCase()
+  if (!ua) return false
+  return (
+    ua.includes('whatsapp') ||
+    ua.includes('facebookexternalhit') ||
+    ua.includes('facebot') ||
+    ua.includes('meta-externalagent') ||
+    ua.includes('meta-externalfetcher')
+  )
+}
+
+function buildWaPreviewImageUrl(origin, srcUrl, version) {
+  const base = `${origin}/api/forum/wa-preview`
+  const withSrc = withQueryParam(base, 'src', srcUrl)
+  return withQueryParam(withSrc, VERSION_PARAM, version)
+}
+
 export async function GET(req, { params }) {
   const postId = String(params?.postId || '').trim()
   const url = new URL(req.url)
   const origin = url.origin
+  const userAgent = req.headers.get('user-agent') || ''
+  const waCrawler = isWhatsAppCrawler(userAgent)
   const shareVersion = normalizeVersion(url.searchParams.get(SHARE_VERSION_PARAM), '')
 
   const canonicalUrl = `${origin}/forum/p/${encodeURIComponent(postId)}`
@@ -263,7 +283,11 @@ export async function GET(req, { params }) {
     chosen.imageRel,
   )
   const imageBaseUrl = absUrl(origin, chosen.imageRel)
-  const imageUrl = imageBaseUrl ? withMetaVersion(imageBaseUrl, imageVersion) : ''
+  const sourceForWa = imageBaseUrl || absUrl(origin, FALLBACK_OG_IMAGE_REL)
+  const waImageUrl = sourceForWa
+    ? buildWaPreviewImageUrl(origin, sourceForWa, imageVersion)
+    : ''
+  const imageUrl = waImageUrl || (imageBaseUrl ? withMetaVersion(imageBaseUrl, imageVersion) : '')
   const videoUrl = String(chosen.videoUrl || '').trim()
   const videoType = String(chosen.videoType || '').trim()
   const twitterCard = imageUrl ? 'summary_large_image' : 'summary'
@@ -276,8 +300,10 @@ export async function GET(req, { params }) {
     pragma: 'no-cache',
     expires: '0',
     'last-modified': new Date(lastModifiedMs).toUTCString(),
-    'x-robots-tag': 'noindex, nofollow',
   })
+  if (!waCrawler) {
+    headers.set('x-robots-tag', 'noindex, nofollow')
+  }
 
   const title = escapeAttr(titleRaw.slice(0, 80))
   const desc = escapeAttr(descRaw.slice(0, 240))
@@ -294,6 +320,7 @@ export async function GET(req, { params }) {
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>${title}</title>
+    <meta name="description" content="${desc}"/>
     <link rel="canonical" href="${canonicalEsc}"/>
 
     <meta property="og:title" content="${title}"/>
@@ -317,7 +344,7 @@ export async function GET(req, { params }) {
     <meta name="twitter:description" content="${desc}"/>
     <meta name="twitter:image" content="${ogImg}"/>
 
-    <meta http-equiv="refresh" content="1;url=${redirectEsc}"/>
+    ${waCrawler ? '' : `<meta http-equiv="refresh" content="1;url=${redirectEsc}"/>`}
     <style>
       body{margin:0;background:#060a12;color:#eaf4ff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
       .wrap{max-width:720px;margin:0 auto;padding:24px}
@@ -336,9 +363,9 @@ export async function GET(req, { params }) {
         <a class="btn" href="${redirectEsc}">Open post</a>
       </div>
     </div>
-    <script>
+    ${waCrawler ? '' : `<script>
       try{ window.location.replace(${JSON.stringify(redirectUrl)}); }catch(e){}
-    </script>
+    </script>`}
   </body>
 </html>`
 
