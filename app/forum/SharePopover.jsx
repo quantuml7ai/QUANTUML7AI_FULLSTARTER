@@ -101,7 +101,7 @@ export default function SharePopover({ open, post, onClose, t, toast }) {
 
   const onTarget = async (target) => {
     const key = String(target?.key || '')
-    const opened = openAppOrWeb(target, { delayMs: 1100 })
+    const opened = openAppOrWeb(target)
     if (opened) return
 
     if (key === 'ig') {
