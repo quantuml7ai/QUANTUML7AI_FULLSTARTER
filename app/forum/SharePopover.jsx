@@ -8,6 +8,7 @@ import {
   buildShareTitle,
   copyToClipboard,
   getShareTargets,
+  openAppOrWeb,
   safeOpen,
   tryNativeShare,
 } from '../../lib/forumShareManager'
@@ -100,6 +101,8 @@ export default function SharePopover({ open, post, onClose, t, toast }) {
 
   const onTarget = async (target) => {
     const key = String(target?.key || '')
+    const opened = openAppOrWeb(target, { delayMs: 1100 })
+    if (opened) return
 
     if (key === 'ig') {
       const ok = await tryNativeShare({
