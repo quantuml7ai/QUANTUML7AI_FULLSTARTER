@@ -2,11 +2,6 @@
 // OG/Twitter preview + human redirect entrypoint.
 
 import { redis, K, safeParse } from '../../../api/forum/_db.js'
-import {
-  META_VERSION,
-  buildMetaVersionToken,
-  withMetaVersion,
-} from '../../../../lib/metadataCache'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -16,6 +11,52 @@ export const runtime = 'nodejs'
 const QCAST_OG_IMAGE_REL = '/audio/Q-Cast.png'
 const FALLBACK_OG_IMAGE_REL = '/metab/forum1.png'
 const MAX_CHAIN_DEPTH = 60
+const VERSION_PARAM = 'v'
+const RAW_META_VERSION =
+  process.env.NEXT_PUBLIC_META_VERSION ||
+  process.env.NEXT_PUBLIC_OG_VERSION ||
+  process.env.VERCEL_GIT_COMMIT_SHA ||
+  process.env.VERCEL_DEPLOYMENT_ID ||
+  process.env.npm_package_version ||
+  '1'
+
+function normalizeVersion(value, fallback = '1') {
+  const out = String(value || '').trim().slice(0, 80)
+  return out || fallback
+}
+
+const META_VERSION = normalizeVersion(RAW_META_VERSION)
+
+function withQueryParam(rawUrl, key, value) {
+  const url = String(rawUrl || '').trim()
+  const paramKey = String(key || '').trim()
+  const paramValue = String(value || '').trim()
+  if (!url || !paramKey || !paramValue) return url
+
+  const hashIndex = url.indexOf('#')
+  const beforeHash = hashIndex >= 0 ? url.slice(0, hashIndex) : url
+  const hash = hashIndex >= 0 ? url.slice(hashIndex) : ''
+
+  const queryIndex = beforeHash.indexOf('?')
+  const pathname = queryIndex >= 0 ? beforeHash.slice(0, queryIndex) : beforeHash
+  const queryString = queryIndex >= 0 ? beforeHash.slice(queryIndex + 1) : ''
+
+  const params = new URLSearchParams(queryString)
+  params.set(paramKey, paramValue)
+  const nextQuery = params.toString()
+  return `${pathname}${nextQuery ? `?${nextQuery}` : ''}${hash}`
+}
+
+function withMetaVersion(rawUrl, version = META_VERSION) {
+  return withQueryParam(rawUrl, VERSION_PARAM, normalizeVersion(version, META_VERSION))
+}
+
+function buildMetaVersionToken(...parts) {
+  const items = parts
+    .map((x) => String(x || '').trim().slice(0, 80))
+    .filter(Boolean)
+  return normalizeVersion(items.join('-'), META_VERSION)
+}
 
 function escapeAttr(s) {
   return String(s || '')
