@@ -251,8 +251,12 @@ export async function GET(req, { params }) {
     <meta property="og:title" content="${title}"/>
     <meta property="og:description" content="${desc}"/>
     <meta property="og:url" content="${ogUrl}"/>
+    <meta property="og:site_name" content="Q-Line"/>
     <meta property="og:type" content="${videoUrl ? 'video.other' : 'article'}"/>
     <meta property="og:image" content="${ogImg}"/>
+    <meta property="og:image:secure_url" content="${ogImg}"/>
+    <meta property="og:image:width" content="1200"/>
+    <meta property="og:image:height" content="630"/>
     ${videoUrl ? `<meta property="og:video" content="${ogVid}"/>` : ''}
     ${videoUrl ? `<meta property="og:video:secure_url" content="${ogVid}"/>` : ''}
     ${videoUrl ? `<meta property="og:video:type" content="${ogVidType}"/>` : ''}
@@ -260,6 +264,7 @@ export async function GET(req, { params }) {
     ${videoUrl ? `<meta property="og:video:height" content="720"/>` : ''}
 
     <meta name="twitter:card" content="${twitterCard}"/>
+    <meta name="twitter:url" content="${ogUrl}"/>
     <meta name="twitter:title" content="${title}"/>
     <meta name="twitter:description" content="${desc}"/>
     <meta name="twitter:image" content="${ogImg}"/>
