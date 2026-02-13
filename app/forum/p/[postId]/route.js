@@ -283,13 +283,19 @@ export async function GET(req, { params }) {
     chosen.imageRel,
   )
   const imageBaseUrl = absUrl(origin, chosen.imageRel)
-  const sourceForWa = imageBaseUrl || absUrl(origin, FALLBACK_OG_IMAGE_REL)
+  const waVideoPost = waCrawler && (chosen.kind === 'video' || chosen.kind === 'youtube')
+  const sourceForWa = waVideoPost
+    ? absUrl(origin, FALLBACK_OG_IMAGE_REL)
+    : (imageBaseUrl || absUrl(origin, FALLBACK_OG_IMAGE_REL))
   const waImageUrl = sourceForWa
     ? buildWaPreviewImageUrl(origin, sourceForWa, imageVersion)
     : ''
   const imageUrl = waImageUrl || (imageBaseUrl ? withMetaVersion(imageBaseUrl, imageVersion) : '')
-  const videoUrl = String(chosen.videoUrl || '').trim()
-  const videoType = String(chosen.videoType || '').trim()
+  const videoUrlRaw = String(chosen.videoUrl || '').trim()
+  const videoTypeRaw = String(chosen.videoType || '').trim()
+  const exposeVideoMeta = !(waCrawler && videoUrlRaw)
+  const videoUrl = exposeVideoMeta ? videoUrlRaw : ''
+  const videoType = exposeVideoMeta ? videoTypeRaw : ''
   const twitterCard = imageUrl ? 'summary_large_image' : 'summary'
 
   const cacheControl = 'no-store, no-cache, must-revalidate, max-age=0'
