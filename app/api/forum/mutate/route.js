@@ -47,6 +47,7 @@ const MAX_OPS_PER_BATCH = 25
 const MAX_TITLE = 180
 const MAX_TEXT  = 4000
 const MAX_ICON  = 256
+const topicCidKey = (cid) => `forum:cid:topic:${String(cid || '').trim()}`
 function trimStr(v, max) {
   const s = String(v ?? '').trim()
   return s.length > max ? s.slice(0, max) : s
@@ -264,7 +265,13 @@ export async function POST(request) {
           if (cid) {
             try {
               const ok = await redisDirect.set(`forum:dedup:${cid}`, '1', { nx: true, ex: 60 })
-              if (!ok) { results.push({ op: 'create_topic', duplicate: true, cid, opId: op.opId }); continue }
+              if (!ok) {
+                let existingTopicId = ''
+                try { existingTopicId = String(await redisDirect.get(topicCidKey(cid)) || '').trim() } catch {}
+                if (existingTopicId) topicCidMap.set(cid, existingTopicId)
+                results.push({ op: 'create_topic', duplicate: true, cid, topicId: existingTopicId || undefined, opId: op.opId })
+                continue
+              }
             } catch {}
           } else {
             const autoKey = `forum:dedup:auto:topic:${sha1(`${userId.toLowerCase()}|${title}|${description}`)}`
@@ -278,7 +285,11 @@ export async function POST(request) {
             title, description, userId, nickname, icon, ts: Date.now(),
           })
           const cidVal = String(p.cid || p.id || '')
-          if (cidVal) topicCidMap.set(cidVal, String(topic?.id || ''))
+          if (cidVal) {
+            const mappedTopicId = String(topic?.id || '')
+            topicCidMap.set(cidVal, mappedTopicId)
+            try { await redisDirect.set(topicCidKey(cidVal), mappedTopicId, { ex: 86400 }) } catch {}
+          }
           results.push({ op: 'create_topic', topic, rev, cid: cidVal || undefined, opId: op.opId })
           await publishForumEvent({ type: 'topic_created', topicId: topic?.id, title: topic?.title ?? '', rev })
 
@@ -287,6 +298,15 @@ export async function POST(request) {
           let topicId     = String(p.topicId || topicCid || '')
           if (topicCidMap.has(topicId)) topicId = topicCidMap.get(topicId)
           else if (topicCid && topicCidMap.has(topicCid)) topicId = topicCidMap.get(topicCid)
+          if ((!topicId || topicId.startsWith('tmp_t_')) && topicCid) {
+            try {
+              const fromCid = String(await redisDirect.get(topicCidKey(topicCid)) || '').trim()
+              if (fromCid) {
+                topicId = fromCid
+                topicCidMap.set(topicCid, fromCid)
+              }
+            } catch {}
+          }
           if (!topicId || topicId.startsWith('tmp_t_')) {
             results.push({ op: 'create_post', error: 'missing_topicId', opId: op.opId })
             continue
@@ -307,7 +327,7 @@ export async function POST(request) {
             const autoKey = `forum:dedup:auto:post:${sha1(`${userId.toLowerCase()}|${topicId}|${text}`)}`
             try {
               const ok = await redisDirect.set(autoKey, '1', { nx: true, ex: 10 })
-              if (!ok) { results.push({ op: 'create_post', duplicate: true, auto: true }); continue }
+              if (!ok) { results.push({ op: 'create_post', duplicate: true, auto: true, opId: op.opId }); continue }
             } catch {}
           }
 
@@ -444,7 +464,7 @@ try {
           const newText = trimStr(p.text, MAX_TEXT)
           const po = await getPostObj(postId)
           if (!po) {
-            results.push({ op: 'edit_post', error: 'not_found' })
+            results.push({ op: 'edit_post', error: 'not_found', opId: op.opId })
           } else {
             po.text = newText
             po.tsEdited = Date.now()
@@ -459,7 +479,7 @@ try {
           const postId = String(p.id)
           const po = await getPostObj(postId)
           if (!po) {
-            results.push({ op: 'delete_post', duplicate: true })
+            results.push({ op: 'delete_post', duplicate: true, opId: op.opId })
           } else {
             const branch = await collectPostBranch(postId)
             for (const pid of branch) {
@@ -478,7 +498,7 @@ try {
           const topicId = String(p.id)
           const to = await getTopicObj(topicId)
           if (!to) {
-            results.push({ op: 'delete_topic', duplicate: true })
+            results.push({ op: 'delete_topic', duplicate: true, opId: op.opId })
           } else {
             let affected = []
             try {
@@ -549,10 +569,10 @@ try {
           await publishForumEvent({ type: 'unban_ip', ip: ipVal, rev })
 
         } else {
-          results.push({ op: op.type, error: 'unknown_op_type' })
+          results.push({ op: op.type, error: 'unknown_op_type', opId: op.opId })
         }
       } catch (e) {
-        results.push({ op: op?.type || 'unknown', error: String(e?.message || e || 'error') })
+        results.push({ op: op?.type || 'unknown', error: String(e?.message || e || 'error'), opId: op?.opId })
       }
     }
     // Пересборка снапшота — ТОЛЬКО когда меняются данные форума,

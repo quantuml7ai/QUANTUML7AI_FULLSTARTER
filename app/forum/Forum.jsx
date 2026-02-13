@@ -74,6 +74,14 @@ const INVITE_GIF_SIZE = 40        // размер самой гифки внут
 const INVITE_BTN_OFFSET_X = 0     // при необходимости сдвиг по X
 const INVITE_BTN_OFFSET_Y = 0     // при необходимости сдвиг по Y
 
+function useEvent(fn) {
+  const fnRef = React.useRef(fn)
+  React.useEffect(() => {
+    fnRef.current = fn
+  }, [fn])
+  return React.useCallback((...args) => fnRef.current?.(...args), [])
+}
+
 /* =========================================================
    helpers
 ========================================================= */
@@ -236,6 +244,7 @@ const extractDmStickersFromText = (rawText) => {
 };
 // ВАЖНО: в ленте нужно уметь находить ссылки внутри текста (даже если не отдельной строкой)
 const FEED_URL_RE = /(https?:\/\/[^\s<>'")]+)/ig;
+const IMG_LINE_RE = /^(\/uploads\/[A-Za-z0-9._\-\/]+?\.(webp|png|jpe?g|gif)$|https?:\/\/.+\.(webp|png|jpe?g|gif)(\?.*)?$)/i;
 
 function extractUrlsFromText(text) {
   const s = String(text || '');
@@ -491,6 +500,7 @@ function mergeProfileCache(accountId, patch) {
 }
 // --- Профиль: подтянуть ник/аватар с бэка и записать в localStorage ---
 function useSyncForumProfileOnMount(onProfileUpdate) {
+  const onProfileUpdateEvent = useEvent(onProfileUpdate)
   React.useEffect(() => {
     if (!isBrowser()) return
 
@@ -526,7 +536,7 @@ const next = {
 
 
         mergeProfileCache(resolvedAccountId, next)
-        onProfileUpdate?.()
+        onProfileUpdateEvent?.()
       } catch {
         // сеть/бэк лёг — просто молча игнорим
       }
@@ -534,9 +544,10 @@ const next = {
 
     sync()
     return () => { cancelled = true }
-  }, [])
+  }, [onProfileUpdateEvent])
 }
 function useSyncForumAboutOnMount(onProfileUpdate) {
+  const onProfileUpdateEvent = useEvent(onProfileUpdate)
   React.useEffect(() => {
     if (!isBrowser()) return
 
@@ -560,7 +571,7 @@ function useSyncForumAboutOnMount(onProfileUpdate) {
           about: j.about || '',
           updatedAt: Date.now(),
         })
-        onProfileUpdate?.()
+        onProfileUpdateEvent?.()
       } catch {
         // ignore network errors
       }
@@ -568,7 +579,7 @@ function useSyncForumAboutOnMount(onProfileUpdate) {
 
     sync()
     return () => { cancelled = true }
-  }, [])
+  }, [onProfileUpdateEvent])
 }
 // [VIP AVATAR FIX] выбираем, что показывать на карточках
 function resolveNickForDisplay(userId, fallbackNick) {
@@ -685,8 +696,8 @@ function VipFlipBadge({ className = '' }) {
   const { t } = useI18n();
   return (
     <span className={cls('vipFlip', className)} aria-label={t?.('forum_vip_label')} title={t?.('forum_vip_label')}>
-      <img className="vipFlipImg vip1" src={VIP_BADGE_IMG_1} alt="" loading="lazy" />
-      <img className="vipFlipImg vip2" src={VIP_BADGE_IMG_2} alt="" loading="lazy" />
+      <Image className="vipFlipImg vip1" src={VIP_BADGE_IMG_1} alt="" fill sizes="32px" />
+      <Image className="vipFlipImg vip2" src={VIP_BADGE_IMG_2} alt="" fill sizes="32px" />
     </span>
   );
 }
@@ -812,6 +823,11 @@ const CFG = (typeof window!=='undefined' && window.__FORUM_CONF__) || {};
 const MIN_INTERVAL_MS   = Math.max(0, Number(CFG.FORUM_MIN_INTERVAL_SEC   ?? 1)*1000);
 const REACTS_PER_MINUTE = Number(CFG.FORUM_REACTS_PER_MINUTE ?? 120);
 const VIEW_TTL_SEC      = Number(CFG.FORUM_VIEW_TTL_SEC      ?? 0);
+const FORUM_VIEW_TTL_SEC = VIEW_TTL_SEC
+const INC_PER_SEC = 1 / (365 * 24 * 60 * 60); // за 365 дней = 1
+const GRACE_MS = 4 * 60 * 60 * 1000; // 4 часа
+const SYNC_MS = 10 * 60 * 1000; // раз в 10 минут синк
+const TOMBSTONE_TTL_MS = 10 * 60 * 1000;
 
 
 function getBucket(ttlSec=VIEW_TTL_SEC){ return Math.floor((Date.now()/1000)/ttlSec) }
@@ -1297,12 +1313,7 @@ function useQCoinLive(userKey, isVip){
     } catch {
       cidRef.current = 'cid_' + Date.now().toString(36);
     }
-  }
-
-  // Константы модели
-  const INC_PER_SEC = 1 / (365 * 24 * 60 * 60); // за 365 дней = 1
-  const GRACE_MS    = 4 * 60 * 60 * 1000;       // 4 часа
-  const SYNC_MS     = 10 * 60 * 1000;           // раз в 10 минут синк
+  } 
 
   // Серверные значения (последний снимок)
   const [server, setServer] = React.useState({
@@ -7650,7 +7661,7 @@ function UserInfoPopover({
         setError(err?.message || 'error')
         setStatus('error')
       })
-  }, [fetchUserInfo, rawUserId])
+  }, [fetchUserInfo, rawUserId, registerAction])
 
   useEffect(() => {
     if (!open) {
@@ -8120,13 +8131,16 @@ function ProfilePopover({
       drawAvatarPreview();
     });
   }, [drawAvatarPreview]);
+  const clampCropRef = useRef((next) => next);
+  const ensurePreviewCanvasSizeRef = useRef(() => {});
+  const requestPreviewDrawRef = useRef(() => {});
 
   // держим live-crop в ref (drag обновляет ref без лишних re-render)
   useEffect(() => {
     cropLiveRef.current = crop;
     requestPreviewDraw();
   }, [crop, requestPreviewDraw]);
-  const shouldKeepObjectUrl = (url) => {
+  const shouldKeepObjectUrl = React.useCallback((url) => {
     if (!url || typeof window === 'undefined' || !uid) return false;
     try {
       const prof = safeReadProfile(uid);
@@ -8134,8 +8148,8 @@ function ProfilePopover({
     } catch {
       return false;
     }
-  };
-  const revokeObjectUrlIfSafe = (url) => {
+  }, [uid]);
+  const revokeObjectUrlIfSafe = React.useCallback((url) => {
     if (!url || shouldKeepObjectUrl(url)) return false;
     try {
       URL.revokeObjectURL(url);
@@ -8143,12 +8157,13 @@ function ProfilePopover({
     } catch {
       return false;
     }
-  };
+  }, [shouldKeepObjectUrl]);
+  const revokeObjectUrlIfSafeEvent = useEvent(revokeObjectUrlIfSafe)
   const cleanupObjectUrlsIfStale = () => {
-    if (finalAvatarUrlRef.current && revokeObjectUrlIfSafe(finalAvatarUrlRef.current)) {
+    if (finalAvatarUrlRef.current && revokeObjectUrlIfSafeEvent(finalAvatarUrlRef.current)) {
       finalAvatarUrlRef.current = '';
     }
-    if (rawAvatarUrlRef.current && revokeObjectUrlIfSafe(rawAvatarUrlRef.current)) {
+    if (rawAvatarUrlRef.current && revokeObjectUrlIfSafeEvent(rawAvatarUrlRef.current)) {
       rawAvatarUrlRef.current = '';
     }
   };
@@ -8158,17 +8173,17 @@ function ProfilePopover({
       try { bmpRef.current?.close?.(); } catch {}
       bmpRef.current = null;
       if (finalAvatarUrlRef.current) {
-        if (revokeObjectUrlIfSafe(finalAvatarUrlRef.current)) {
+        if (revokeObjectUrlIfSafeEvent(finalAvatarUrlRef.current)) {
           finalAvatarUrlRef.current = '';
         }          
        }
       if (rawAvatarUrlRef.current) {
-        if (revokeObjectUrlIfSafe(rawAvatarUrlRef.current)) {
+        if (revokeObjectUrlIfSafeEvent(rawAvatarUrlRef.current)) {
           rawAvatarUrlRef.current = '';
         }
       }   
       };
-  }, []);
+  }, [revokeObjectUrlIfSafeEvent]);
   // когда поповер открывается — сбрасываем превью (чтобы не "тащилось" по страницам)
   useEffect(() => {
     if (!open) return;
@@ -8181,20 +8196,20 @@ function ProfilePopover({
     setFinalAvatarBlob(null);
     setFinalAvatarUrl('');
     if (finalAvatarUrlRef.current) {
-      if (revokeObjectUrlIfSafe(finalAvatarUrlRef.current)) {
+      if (revokeObjectUrlIfSafeEvent(finalAvatarUrlRef.current)) {
         finalAvatarUrlRef.current = '';
       }
     }  
 
     setRawAvatarUrl('');
     if (rawAvatarUrlRef.current) {
-      if (revokeObjectUrlIfSafe(rawAvatarUrlRef.current)) {
+      if (revokeObjectUrlIfSafeEvent(rawAvatarUrlRef.current)) {
         rawAvatarUrlRef.current = '';
       }
     }      
     try { bmpRef.current?.close?.(); } catch {}
     bmpRef.current = null;
-  }, [open]);
+  }, [open, revokeObjectUrlIfSafeEvent]);
 
   // resize: держим превью-канвас = размеру квадрата (адаптив)
   useEffect(() => {
@@ -8210,7 +8225,7 @@ function ProfilePopover({
       // кроп мог оказаться вне границ -> клэмпим лайв сразу.
       try {
         const cur = cropLiveRef.current || { x: 0, y: 0, z: 1 };
-        const clamped = clampCrop(cur);
+        const clamped = clampCropRef.current(cur);
         cropLiveRef.current = clamped;
         // синхронизируем state только если не тащим прямо сейчас
         if (!dragRef.current?.on) {
@@ -8219,8 +8234,8 @@ function ProfilePopover({
           }
         }
       } catch {}      
-      try { ensurePreviewCanvasSize(); } catch {}
-      try { requestPreviewDraw(); } catch {}
+      try { ensurePreviewCanvasSizeRef.current(); } catch {}
+      try { requestPreviewDrawRef.current(); } catch {}
     };
 
     applySize();
@@ -8252,6 +8267,9 @@ function ProfilePopover({
     const y = Math.min(maxYRel, Math.max(-maxYRel, Number(next?.y || 0)));
     return { x, y, z: Math.max(1, Number(next?.z || 1)) };
   }, []);
+  useEffect(() => { clampCropRef.current = clampCrop; }, [clampCrop]);
+  useEffect(() => { ensurePreviewCanvasSizeRef.current = ensurePreviewCanvasSize; }, [ensurePreviewCanvasSize]);
+  useEffect(() => { requestPreviewDrawRef.current = requestPreviewDraw; }, [requestPreviewDraw]);
 
  
   const openFilePicker = () => fileRef.current?.click?.();
@@ -8676,6 +8694,7 @@ if (mountedRef.current) setBusy(false);
                 а кроп в PNG делаем ТОЛЬКО при Save.
           */}
           {rawAvatarUrl && !uploadFile && (
+            // eslint-disable-next-line @next/next/no-img-element -- blob/object URL preview from local file picker must render as raw img src.
             <img
               src={rawAvatarUrl}
               alt=""
@@ -8684,6 +8703,7 @@ if (mountedRef.current) setBusy(false);
           )}
 
           {rawAvatarUrl && uploadFile && !(imgInfo.w && imgInfo.h) && (
+            // eslint-disable-next-line @next/next/no-img-element -- blob/object URL preview from local file picker must render as raw img src.
             <img
               src={rawAvatarUrl}
               alt=""
@@ -10297,14 +10317,42 @@ function LivePreview({ streamRef, mirror }) {
   const ref = React.useRef(null);
 
   React.useEffect(() => {
-    const el = ref.current;
-    const s  = streamRef?.current;
-    if (!el || !s) return;
-    if (el.srcObject !== s) el.srcObject = s;
-    el.muted = true;
-    el.playsInline = true;
-    el.play?.();
-  }, [streamRef?.current]);
+    let rafId = 0;
+    let closed = false;
+    let boundEl = ref.current;
+
+    const bindStream = () => {
+      if (closed) return;
+      const el = ref.current;
+      if (el) {
+        boundEl = el;
+        const s = streamRef?.current || null;
+        if (el.srcObject !== s) {
+          try { el.srcObject = s; } catch {}
+        }
+        el.muted = true;
+        el.playsInline = true;
+        if (s) {
+          try {
+            const p = el.play?.();
+            if (p && typeof p.catch === 'function') p.catch(() => {});
+          } catch {}
+        }
+      }
+      rafId = requestAnimationFrame(bindStream);
+    };
+
+    bindStream();
+    return () => {
+      closed = true;
+      if (rafId) cancelAnimationFrame(rafId);
+      const el = boundEl;
+      if (el) {
+        try { el.pause?.(); } catch {}
+        try { el.srcObject = null; } catch {}
+      }
+    };
+  }, [streamRef]);
 
   return (
     <video
@@ -10423,8 +10471,9 @@ export function VideoOverlay({
   React.useEffect(() => {
     if (!open) return;
     const TOP_OFFSET = '52px'; // ← ЗАДАЙ СВОЙ ОТСТУП (px, %, calc(...))
-    try { rootRef.current?.style?.setProperty('--vo-top-offset', TOP_OFFSET); } catch {}
-    return () => { try { rootRef.current?.style?.removeProperty('--vo-top-offset'); } catch {} };
+    const rootNode = rootRef.current;
+    try { rootNode?.style?.setProperty('--vo-top-offset', TOP_OFFSET); } catch {}
+    return () => { try { rootNode?.style?.removeProperty('--vo-top-offset'); } catch {} };
   }, [open]);
 
   // аспект
@@ -10665,6 +10714,7 @@ export function VideoOverlay({
 ) : (
   <div className={fixMirrorClass}>
     {mediaKind === 'image' ? (
+      // eslint-disable-next-line @next/next/no-img-element -- preview can be blob/data URL from camera/file pipeline and must bypass next/image optimization.
       <img
         src={previewUrl || ''}
         alt=""
@@ -11194,7 +11244,7 @@ setMuted(!!audio.muted);
   data-qcast="1"
 >
 
-      <img className="qcastCover" src="/audio/Q-Cast.png" alt="Q-Cast" />
+      <Image className="qcastCover" src="/audio/Q-Cast.png" alt="Q-Cast" width={720} height={1280} unoptimized />
 
 <audio
   ref={audioRef}
@@ -11298,6 +11348,8 @@ function DmVoicePlayer({ src }) {
   const [dur, setDur] = React.useState(0);
   const [pos, setPos] = React.useState(0);
   const [rate, setRate] = React.useState(1);
+  const rateRef = React.useRef(rate);
+  React.useEffect(() => { rateRef.current = rate; }, [rate]);
 
   const rates = React.useMemo(() => [0.75, 1, 1.25, 1.5, 2], []);
 
@@ -11366,7 +11418,7 @@ function DmVoicePlayer({ src }) {
 
     try { a.pause?.(); } catch {}
     try { a.currentTime = 0; } catch {}
-    try { a.playbackRate = rate; } catch {}
+    try { a.playbackRate = rateRef.current; } catch {}
 
     const onLoaded = () => setDur(Number(a.duration || 0) || 0);
     const onPlay = () => { setPlaying(true); startRaf(); };
@@ -11385,8 +11437,7 @@ function DmVoicePlayer({ src }) {
       a.removeEventListener('ended', onEnded);
       stopRaf();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [src]); // 👈 только src
+  }, [src, startRaf, stopRaf]); // only src change should reset/rebind player
 
   // ✅ Изменение скорости — без ресета/переподписок (фикс твоего бага)
   React.useEffect(() => {
@@ -11781,8 +11832,7 @@ const closeSharePopover = useCallback(() => {
 }, [])
 const [starredAuthors, setStarredAuthors] = useState(() => new Set())
 
-// ==== tombstones (ДОЛЖНЫ быть объявлены до handleReportSelect) ====
-const TOMBSTONE_TTL_MS = 10 * 60 * 1000;
+// ==== tombstones (ДОЛЖНЫ быть объявлены до handleReportSelect) ==== 
 const [tombstones, setTombstones] = useState(() => {
   if (!isBrowser()) return { topics: {}, posts: {} };
   try {
@@ -11808,7 +11858,17 @@ const persistTombstones = useCallback((patch) => {
   const [myFollowersLoading, setMyFollowersLoading] = useState(false)
 
   useEffect(()=>{
-    const upd=()=>setAuth(readAuth())
+    const upd=()=> {
+      const next = readAuth()
+      setAuth((prev) => {
+        const prevAccount = String(prev?.accountId || '')
+        const prevAsher = String(prev?.asherId || '')
+        const nextAccount = String(next?.accountId || '')
+        const nextAsher = String(next?.asherId || '')
+        if (prevAccount === nextAccount && prevAsher === nextAsher) return prev
+        return next
+      })
+    }
     if(!isBrowser()) return
     window.addEventListener('auth:ok',upd)
     window.addEventListener('auth:success',upd)
@@ -12719,6 +12779,16 @@ const persistTombstones = useCallback((patch) => {
     return () => { alive = false }
   }, [viewerId])
 
+  const requireAuthStrict = React.useCallback(async () => {
+    const cur = readAuth();
+    if (cur?.asherId || cur?.accountId) { setAuth(cur); return cur; }
+    const r = await openAuth({ timeoutMs: 20000 });
+    if (r?.asherId || r?.accountId) { setAuth(r); return r; }
+    toast?.warn?.(t('forum_auth_required'));
+    return null;
+  }, [t, toast]);
+  const openOnlyRef = useRef(null)
+
   const toggleAuthorStar = useCallback(async (authorIdRaw) => {
     const authorId = String(authorIdRaw || '').trim()
     if (!authorId) return
@@ -12752,37 +12822,36 @@ const persistTombstones = useCallback((patch) => {
 
     // reconcile from server truth
     setStarredAuthors(prev => {
+      const shouldBeSubscribed = !!res.subscribed
+      const isNowSubscribed = prev.has(authorId)
+      if (shouldBeSubscribed === isNowSubscribed) return prev
       const next = new Set(prev)
-      if (res.subscribed) next.add(authorId)
+      if (shouldBeSubscribed) next.add(authorId)
       else next.delete(authorId)
       return next
     })
-  }, [viewerId])
+  }, [viewerId, requireAuthStrict])
+  const activeStarredAuthors = React.useMemo(() => {
+    if (!starMode) return null;
+    if (!starredAuthors || starredAuthors.size === 0) return null;
+    return starredAuthors;
+  }, [starMode, starredAuthors]);
    const starredFirst = useCallback((arr, getAuthorId) => {
-    if (!starMode) return arr
-    if (!starredAuthors || starredAuthors.size === 0) return arr
+    if (!activeStarredAuthors) return arr
 
     const a = []
     const b = []
     for (const it of arr) {
       const id = String(getAuthorId(it) || '').trim()
-      if (id && starredAuthors.has(id)) a.push(it)
+      if (id && activeStarredAuthors.has(id)) a.push(it)
       else b.push(it)
     }
     return a.concat(b)
-  }, [starMode, starredAuthors])
+  }, [activeStarredAuthors])
 
-const requireAuthStrict = async () => {
-  const cur = readAuth();
-  if (cur?.asherId || cur?.accountId) { setAuth(cur); return cur; }
-  const r = await openAuth({ timeoutMs: 20000 });
-  if (r?.asherId || r?.accountId) { setAuth(r); return r; }
-  toast.warn(t('forum_auth_required'));
-  return null;
-};
 // QCoin: управлялка модалкой из инлайна
 React.useEffect(()=>{
-  const open = ()=> openOnly('qcoin')
+  const open = ()=> openOnlyRef.current?.('qcoin')
   window.addEventListener('qcoin:open', open)
   return ()=> window.removeEventListener('qcoin:open', open)
 },[])
@@ -12790,7 +12859,7 @@ React.useEffect(()=>{
 
 // VIP: открывать VipPopover по событию из бейджа ×2
 React.useEffect(()=>{
-  const openVip = () => openOnly('vip')
+  const openVip = () => openOnlyRef.current?.('vip')
   window.addEventListener('vip:open', openVip)
   return () => window.removeEventListener('vip:open', openVip)
 },[])
@@ -12913,24 +12982,50 @@ const [queue,setQueue] = useState(()=>{
   if(!isBrowser()) return []
   try{ return JSON.parse(localStorage.getItem('forum:queue')||'[]') }catch{ return [] }
 })
-const saveQueue = q => { setQueue(q); try{ localStorage.setItem('forum:queue', JSON.stringify(q)) }catch{} }
-const makeOpId = () => `${Date.now()}_${Math.random().toString(36).slice(2)}`;
-const pushOp = (type, payload) => {
+const queueRef = useRef(queue);
+const saveQueue = React.useCallback((q) => {
+  const nextQueue = Array.isArray(q) ? q : [];
+  queueRef.current = nextQueue;
+  setQueue(nextQueue);
+  try { localStorage.setItem('forum:queue', JSON.stringify(nextQueue)) } catch {}
+}, [])
+const makeOpId = React.useCallback(() => `${Date.now()}_${Math.random().toString(36).slice(2)}`, []);
+const flushSoonTimerRef = useRef(null)
+const flushMutationsRef = useRef(null)
+const requestFlushSoon = React.useCallback((delayMs = 180) => {
+  if (flushSoonTimerRef.current) return
+  flushSoonTimerRef.current = setTimeout(() => {
+    flushSoonTimerRef.current = null
+    try { flushMutationsRef.current?.() } catch {}
+  }, Math.max(0, Number(delayMs || 0)))
+}, [])
+useEffect(() => {
+  return () => {
+    if (flushSoonTimerRef.current) clearTimeout(flushSoonTimerRef.current)
+    flushSoonTimerRef.current = null
+  }
+}, [])
+const pushOp = React.useCallback((type, payload) => {
   const cur = Array.isArray(queueRef.current) ? queueRef.current : [];
   const op  = { type, payload, opId: makeOpId() };
   const next = [...cur, op];
+  queueRef.current = next;
   saveQueue(next);
-}// всегда иметь «свежие» значения внутри async-кода (без устаревших замыканий)
-const queueRef = useRef(queue);  useEffect(()=>{ queueRef.current = queue }, [queue])
+  requestFlushSoon()
+}, [makeOpId, saveQueue, requestFlushSoon])
+useEffect(()=>{ queueRef.current = queue }, [queue])
 const authRef  = useRef(auth);   useEffect(()=>{ authRef.current  = auth  }, [auth])
 const snapRef  = useRef(snap);   useEffect(()=>{ snapRef.current  = snap  }, [snap])
 const lastFullSnapshotRef = useRef(0);
 const syncInFlightRef = useRef(false);
+const syncNowRef = useRef(() => {});
 const sseHintRef = useRef(0);
 const pendingViewsPostsRef = useRef(new Set());
 const pendingViewsTopicsRef = useRef(new Set());
+const tombstonesRef = useRef(tombstones);
+useEffect(() => { tombstonesRef.current = tombstones }, [tombstones]);
 const busyRef=useRef(false)
-const compactOps = (ops) => {
+const compactOps = React.useCallback((ops) => {
   const out = [];
   const seenReactions = new Set();
   const seenEdits = new Set();
@@ -13003,7 +13098,7 @@ const compactOps = (ops) => {
   if (viewPosts.size) out.push({ type: 'view_posts', payload: { ids: Array.from(viewPosts) }, opId: makeOpId() });
   if (viewTopics.size) out.push({ type: 'view_topics', payload: { ids: Array.from(viewTopics) }, opId: makeOpId() });
   return out;
-};
+}, [makeOpId]);
 const flushMutations = useCallback(async () => {
   if (busyRef.current) return;
 
@@ -13018,6 +13113,7 @@ const flushMutations = useCallback(async () => {
     return { ...op, opId: makeOpId() };
   });
   if (patched) saveQueue(snapshot);
+  const baseQueueIds = new Set(snapshot.map((op) => String(op?.opId || '').trim()).filter(Boolean));
 
   const pendingPosts = Array.from(pendingViewsPostsRef.current || []);
   const pendingTopics = Array.from(pendingViewsTopicsRef.current || []);
@@ -13038,13 +13134,32 @@ const flushMutations = useCallback(async () => {
 
     if (resp && Array.isArray(resp.applied)) {
       const applied = resp.applied || [];
-      const sentIds = new Set(toSend.map(x => x.opId).filter(Boolean));
+      const statusById = new Map();
+      toSend.forEach((op) => {
+        const id = String(op?.opId || '').trim();
+        if (id) statusById.set(id, 'unknown');
+      });
+      applied.forEach((it, idx) => {
+        const mappedId = String(it?.opId || toSend?.[idx]?.opId || '').trim();
+        if (!mappedId) return;
+        statusById.set(mappedId, it?.error ? 'error' : 'success');
+      });
+      const retryIds = new Set();
+      for (const [id, status] of statusById.entries()) {
+        if (status !== 'success' && baseQueueIds.has(id)) retryIds.add(id);
+      }
       const current = Array.isArray(queueRef.current) ? queueRef.current : [];
-      const leftover = current.filter(x => !sentIds.has(x.opId));
+      const leftover = current.filter((x) => {
+        const id = String(x?.opId || '').trim();
+        if (!id || !baseQueueIds.has(id)) return true;
+        return retryIds.has(id);
+      });
       saveQueue(leftover);
 
-      if (pendingPosts.length) pendingPosts.forEach(id => pendingViewsPostsRef.current.delete(id));
-      if (pendingTopics.length) pendingTopics.forEach(id => pendingViewsTopicsRef.current.delete(id));
+      const hasAckedPostViews = applied.some((it) => !it?.error && (it.op === 'view_posts' || it.op === 'view_post'));
+      const hasAckedTopicViews = applied.some((it) => !it?.error && (it.op === 'view_topics' || it.op === 'view_topic'));
+      if (pendingPosts.length && hasAckedPostViews) pendingPosts.forEach(id => pendingViewsPostsRef.current.delete(id));
+      if (pendingTopics.length && hasAckedTopicViews) pendingTopics.forEach(id => pendingViewsTopicsRef.current.delete(id));
 
       const clearOverlay = {
         reactions: new Set(),
@@ -13199,7 +13314,8 @@ const flushMutations = useCallback(async () => {
   } finally {
     busyRef.current = false;
   }
-}, [persistSnap, persistTombstones]);
+}, [compactOps, makeOpId, persistSnap, persistTombstones, saveQueue]);
+useEffect(() => { flushMutationsRef.current = flushMutations }, [flushMutations]);
 // === QCOIN: автопинг активности (CLIENT) ===
 const activeRef  = React.useRef(false);
 const visibleRef = React.useRef(true);
@@ -13386,10 +13502,21 @@ React.useEffect(()=>{
     };
     return dedupeAll(out);
   };
+  const applyEventsRef = useRef(applyEvents)
+  const applyFullSnapshotRef = useRef(applyFullSnapshot)
+  const pruneTombstonesRef = useRef(pruneTombstones)
+  const persistSnapRef = useRef(persistSnap)
+  const persistTombstonesRef = useRef(persistTombstones)
+  applyEventsRef.current = applyEvents
+  applyFullSnapshotRef.current = applyFullSnapshot
+  pruneTombstonesRef.current = pruneTombstones
+  persistSnapRef.current = persistSnap
+  persistTombstonesRef.current = persistTombstones
 
 
 
 // === Incremental sync loop: 2m flush + snapshot ===
+const pushNavStateStable = useEvent((entryId) => pushNavState(entryId));
 useEffect(() => {
   if (!isBrowser()) return;
   let stop = false;
@@ -13401,6 +13528,7 @@ useEffect(() => {
     syncInFlightRef.current = true;
     try {
       await flushMutations();
+      const tombstones = tombstonesRef.current || { topics: {}, posts: {} };
 
       const now = Date.now();
       // ✅ не долбим /snapshot когда вкладка в фоне (экономит Redis + убирает “дерганья”)
@@ -13480,23 +13608,31 @@ useEffect(() => {
             }          
           }
           lastFullSnapshotRef.current = now;
-          persistSnap(prev => applyFullSnapshot(prev, r, tombstones));
+          persistSnapRef.current(prev => applyFullSnapshotRef.current(prev, r, tombstones));
         }
       } else {
         const since = Number(snapRef.current?.rev || 0);
-        const r = await api.snapshot({ since });
+        const hintedRev = Number(sseHintRef.current || 0);
+        const shouldBypassCache = hintedRev > since;
+        const q = shouldBypassCache
+          ? { since, rev: hintedRev, b: `${hintedRev}:${Date.now()}` }
+          : { since };
+        const r = await api.snapshot(q);
         if (r?.ok) {
-          persistSnap(prev => {
-            const next = applyEvents(prev, r.events || [], tombstones);
+          persistSnapRef.current(prev => {
+            const next = applyEventsRef.current(prev, r.events || [], tombstones);
             return { ...next, rev: r.rev ?? next.rev };
           });
+          if (shouldBypassCache && Number(r?.rev || 0) >= hintedRev) {
+            sseHintRef.current = 0;
+          }
         }
       }
-      const cleaned = pruneTombstones(tombstones);
+      const cleaned = pruneTombstonesRef.current(tombstones);
       const same =
         JSON.stringify(cleaned.topics) === JSON.stringify(tombstones.topics) &&
         JSON.stringify(cleaned.posts) === JSON.stringify(tombstones.posts);
-      if (!same) persistTombstones(cleaned);
+      if (!same) persistTombstonesRef.current(cleaned);
     } catch (e) {
       console.error('sync tick error', e);      
     } finally {
@@ -13504,17 +13640,20 @@ useEffect(() => {
     }
   };
 
+  syncNowRef.current = runTick;
   runTick();
   const id = setInterval(runTick, TICK_MS);
 
   return () => {
     stop = true;
+    syncNowRef.current = () => {};
     clearInterval(id);
   };
-}, [flushMutations, tombstones]);
+}, [flushMutations]);
 
 
 const sseAliveRef = useRef(false)
+const sseSyncTimerRef = useRef(null)
 
 React.useEffect(() => {
   if (typeof window === 'undefined') return;
@@ -13569,6 +13708,13 @@ es.onmessage = (e) => {
     const nextRev = Number(evt?.rev || 0);
     if (Number.isFinite(nextRev) && nextRev > 0) {
       sseHintRef.current = Math.max(sseHintRef.current, nextRev);
+      const currentRev = Number(snapRef.current?.rev || 0)
+      if (nextRev > currentRev && !sseSyncTimerRef.current) {
+        sseSyncTimerRef.current = setTimeout(() => {
+          sseSyncTimerRef.current = null
+          try { syncNowRef.current?.() } catch {}
+        }, 120)
+      }
     }
    } catch {}
  };
@@ -13577,6 +13723,10 @@ es.onmessage = (e) => {
 es.onerror = () => { /* no-op */ }
 
 return () => {
+  if (sseSyncTimerRef.current) {
+    clearTimeout(sseSyncTimerRef.current)
+    sseSyncTimerRef.current = null
+  }
   try { es.close(); } catch {}
   if (window.__forumSSE === es) window.__forumSSE = null; 
 };
@@ -13649,7 +13799,7 @@ useEffect(() => {
   }
   window.addEventListener('storage', onStorage)
   return () => window.removeEventListener('storage', onStorage)
-}, [auth?.accountId])
+}, [auth?.accountId, auth?.asherId])
 // ===== ONE-POPOVER-AT-A-TIME (exclusive open) =====
 const openOnly = React.useCallback((name) => {
   // закрываем всё
@@ -13670,7 +13820,14 @@ const openOnly = React.useCallback((name) => {
   else if (name === 'qcoin') setQcoinModalOpen(true);
   else if (name === 'sort') setSortOpen(true);
   else if (name === 'search') setDrop(true);
-}, []);
+}, [closeSharePopover]);
+useEffect(() => {
+  openOnlyRef.current = openOnly
+}, [openOnly])
+const alignInboxStartUnderTabsEvent = useEvent((attempt = 0) => alignInboxStartUnderTabs(attempt))
+const requestAlignInboxStartUnderTabs = React.useCallback(() => {
+  setTimeout(() => { try { alignInboxStartUnderTabsEvent(); } catch {} }, 0);
+}, [alignInboxStartUnderTabsEvent])
 
 /* ---- admin ---- */
 const [adminOpen, setAdminOpen] = useState(false)
@@ -14173,11 +14330,12 @@ useEffect(() => {
     } catch {}
 
     // Подравниваем старт под табами (учёт sticky/табов + твоего --inbox-content-top-offset)
-    setTimeout(() => { try { alignInboxStartUnderTabs(); } catch {} }, 0);
+    requestAlignInboxStartUnderTabs();
    }
   dmListEnterRef.current = isDmList;
-}, [inboxOpen, inboxTab, dmWithUserId]);
+}, [inboxOpen, inboxTab, dmWithUserId, requestAlignInboxStartUnderTabs]);
 const [dmDialogs, setDmDialogs] = useState([]);
+const dmDialogsCount = dmDialogs?.length || 0;
 const [dmDialogsCursor, setDmDialogsCursor] = useState(null);
 const [dmDialogsHasMore, setDmDialogsHasMore] = useState(true);
 const [dmDialogsLoading, setDmDialogsLoading] = useState(false);
@@ -14214,7 +14372,7 @@ useEffect(() => { dmDialogsLoadingRef.current = !!dmDialogsLoading; }, [dmDialog
 useEffect(() => { dmThreadLoadingRef.current = !!dmThreadLoading; }, [dmThreadLoading]);
 useEffect(() => {
   setVisibleTopicsCount(TOPIC_PAGE_SIZE);
-}, [topicSort, topicFilterId, starMode, starredAuthors]);
+}, [topicSort, topicFilterId, starMode]);
 const meId = String(resolveProfileAccountId(auth?.asherId || auth?.accountId || '') || '').trim();
 const seenKey = meId ? `forum:seenReplies:${meId}` : null;
 const seenDmKey = meId ? `seenDM:${meId}` : null;
@@ -14825,8 +14983,8 @@ useEffect(() => {
 useEffect(() => {
   if (!inboxOpen || inboxTab !== 'messages') return;
   if (dmDialogsLoaded) return;
-  if ((dmDialogs || []).length === 0) loadDmDialogs(null, { force: true, refresh: true });
-}, [inboxOpen, inboxTab, dmDialogs?.length, dmDialogsLoaded, loadDmDialogs]);
+  if (dmDialogsCount === 0) loadDmDialogs(null, { force: true, refresh: true });
+}, [inboxOpen, inboxTab, dmDialogsCount, dmDialogsLoaded, loadDmDialogs]);
 
 useEffect(() => {
   if (!inboxOpen || inboxTab !== 'messages') { setDmWithUserId(''); return; }
@@ -14963,11 +15121,11 @@ useEffect(() => {
     try { setHeadPinned(false); } catch {}
     try { setHeadHidden(true); } catch {}
 
-    try { pushNavState?.(`dm_${uid}`); } catch {}
+    try { pushNavStateStable(`dm_${uid}`); } catch {}
     try { setInboxOpen(true); } catch {}
     try { setInboxTab('messages'); } catch {}
     try { setDmWithUserId(uid); } catch {}
-    setTimeout(() => { try { alignInboxStartUnderTabs(); } catch {} }, 0);
+    requestAlignInboxStartUnderTabs();
   };
   window.addEventListener('forum:head-hide-once', onHeadHideOnce);
   window.addEventListener('inbox:open-dm', onOpenDm);
@@ -14975,7 +15133,7 @@ useEffect(() => {
     window.removeEventListener('forum:head-hide-once', onHeadHideOnce);
     window.removeEventListener('inbox:open-dm', onOpenDm);
   };  
-}, [openOnly, closeUserInfoPopover, closeReportPopover, pushNavState]);
+}, [openOnly, closeUserInfoPopover, closeReportPopover, pushNavStateStable, requestAlignInboxStartUnderTabs]);
 
 const myPublishedPosts = useMemo(() => {
   if (!meId) return [];
@@ -15116,7 +15274,7 @@ const confirmDmDelete = useCallback(async () => {
   } finally {
     closeDmDeletePopover();
   }
-}, [dmDeletePopover, dmDeleteForAll, deleteDmDialogServer, deleteDmMessageServer, deleteDmDialogLocal, deleteDmMessageLocal, removeDmDialogFromState, loadDmDialogs, dmWithUserId, closeDmDeletePopover, t, toast]);
+}, [dmDeletePopover, dmDeleteForAll, deleteDmDialogServer, deleteDmMessageServer, deleteDmDialogLocal, deleteDmMessageLocal, loadDmDialogs, dmWithUserId, closeDmDeletePopover, t, toast]);
 
 // все посты выбранной темы (строго сравниваем как строки)
 const allPosts = useMemo(() => (
@@ -15154,8 +15312,7 @@ const navStateRef = useRef({});
 // --- OPEN THREAD: сохраняем открытие ветки при переходе в другую тему ---
 // Иначе эффект на смену sel?.id сбрасывает threadRoot и получается «просто список темы».
 const pendingThreadRootIdRef = useRef(null);
-const pendingScrollToPostIdRef = useRef(null);
-
+const pendingScrollToPostIdRef = useRef(null); 
 // единая точка: открыть ветку по посту (хед = именно пост, по которому кликнули)
 const openThreadForPost = useCallback((post, opts = {}) => {
   if (!post || !post.id) return;
@@ -15164,7 +15321,7 @@ const openThreadForPost = useCallback((post, opts = {}) => {
   const entryId = String(opts.entryId || (post?.id ? `post_${post.id}` : '') || '');
 
   if (!opts.skipNav) {
-    try { pushNavState(entryId); } catch {}
+    try { pushNavStateStable(entryId); } catch {}
   }
 
   pendingScrollToPostIdRef.current = rootId;
@@ -15185,7 +15342,7 @@ const openThreadForPost = useCallback((post, opts = {}) => {
   if (!tt) return;
   pendingThreadRootIdRef.current = rootId;
   try { setSel(tt); } catch {}
-}, [sel?.id, data?.topics, idMap]);
+}, [sel?.id, data?.topics, idMap, pushNavStateStable]);
 
 function centerNodeInScroll(node, behavior = 'smooth') {
   if (!isBrowser?.() || !node) return;
@@ -15447,6 +15604,12 @@ useEffect(() => {
 useEffect(() => {
   openThreadForPostRef.current = openThreadForPost
 }, [openThreadForPost])
+const showDeepLinkNotFoundError = useEvent(() => {
+  try { toast?.err?.(t?.('forum_post_not_found') || 'Post not found') } catch {}
+})
+const centerAndFlashPostAfterDomEvent = useEvent((postId, behavior = 'smooth') => {
+  centerAndFlashPostAfterDom(postId, behavior)
+})
 
 useEffect(() => {
   if (!isBrowser?.()) return
@@ -15501,13 +15664,7 @@ useEffect(() => {
     const tid = st.topicId ? String(st.topicId) : (topicHint || null)
     setDeeplinkUI({ active: true, status: 'not_found', postId, topicId: tid })
 
-    if (reason === 'too_deep') {
-      toast?.err?.(t?.('forum_post_not_found') || 'Post not found')
-    } else if (reason === 'timeout') {
-      toast?.err?.(t?.('forum_post_not_found') || 'Post not found')
-    } else {
-      toast?.err?.(t?.('forum_post_not_found') || 'Post not found')
-    }
+    showDeepLinkNotFoundError()
 
     setTimeout(() => {
       try { setDeeplinkUI({ active: false, status: 'idle', postId: null, topicId: null }) } catch {}
@@ -15646,7 +15803,7 @@ useEffect(() => {
     )
     if (!targetOk) return fail('timeout')
 
-    centerAndFlashPostAfterDom(postId, 'smooth')
+    centerAndFlashPostAfterDomEvent(postId, 'smooth')
     st.done = true
     setDeeplinkUI({ active: false, status: 'done', postId: null, topicId: null })
     clearDeepLinkQuery()
@@ -15655,17 +15812,21 @@ useEffect(() => {
   return () => {
     cancelled = true
   }
-}, [])
+}, [centerAndFlashPostAfterDomEvent, showDeepLinkNotFoundError])
 
 // при смене темы: либо выходим из ветки, либо применяем «ожидаемое» открытие ветки
+const idMapForPendingRootRef = useRef(idMap)
+const dataPostsForPendingRootRef = useRef(data?.posts)
+useEffect(() => { idMapForPendingRootRef.current = idMap }, [idMap])
+useEffect(() => { dataPostsForPendingRootRef.current = data?.posts }, [data?.posts])
 useEffect(() => {
   const navPendingId = navPendingThreadRootRef.current;
   const pendingId = navPendingId || pendingThreadRootIdRef.current;
   if (pendingId) {
     if (navPendingId) navPendingThreadRootRef.current = null;
     else pendingThreadRootIdRef.current = null;
-    const node = idMap?.get?.(String(pendingId))
-      || (data?.posts || []).find(x => String(x.id) === String(pendingId))
+    const node = idMapForPendingRootRef.current?.get?.(String(pendingId))
+      || (dataPostsForPendingRootRef.current || []).find(x => String(x.id) === String(pendingId))
       || null;
     try { setThreadRoot(node || { id: String(pendingId) }); } catch {}
   } else {
@@ -15726,12 +15887,19 @@ const flat = useMemo(() => {
       default:        return ts;
     }
   };
+  const starRank = (p) => {
+    if (!activeStarredAuthors?.size) return 0;
+    const aid = String(p?.userId || p?.accountId || '').trim();
+    return aid && activeStarredAuthors.has(aid) ? 1 : 0;
+  };
 
  // без ветки: только корни — но уже отсортированные по postSort
 if (!threadRoot) {
   const roots = rootPosts
     .slice()
     .sort((a, b) => {
+      const saStar = starRank(a), sbStar = starRank(b);
+      if (sbStar !== saStar) return sbStar - saStar;
       const sb = postScore(b), sa = postScore(a);
       if (sb !== sa) return sb - sa;                         // основной ключ
       const tb = Number(b.ts || 0), ta = Number(a.ts || 0);   // тай-брейк: новее выше
@@ -15761,6 +15929,8 @@ const walk = (n, level = 0) => {
   out.push({ ...n, _lvl: level, repliesCount: countDeep(n) });
   // сортируем детей перед обходом
   const kids = [...(n.children || [])].sort((a,b) => {
+    const saStar = starRank(a), sbStar = starRank(b);
+    if (sbStar !== saStar) return sbStar - saStar;
     const sa = postScore(a), sb = postScore(b);
     if (sb !== sa) return sb - sa;        // по убыванию «веса»
     const ta = Number(a.ts || 0), tb = Number(b.ts || 0);
@@ -15773,7 +15943,7 @@ const walk = (n, level = 0) => {
 
   walk(start, 0);
   return out;
-}, [sel?.id, threadRoot, rootPosts, idMap, postSort]);
+}, [sel?.id, threadRoot, rootPosts, idMap, postSort, activeStarredAuthors]);
 
 // === END flat ===
 const visibleFlat = useMemo(
@@ -15919,7 +16089,7 @@ const aggregates = useMemo(() => {
       });
 
     return [...ts, ...ps];
-  }, [q, data.topics, data.posts, profileBump]);
+  }, [q, data.topics, data.posts]);
 
 
   // очистка фильтра при очистке поля поиска
@@ -16514,7 +16684,7 @@ const stopVideo = () => {
   try { restoreComposerScroll(); } catch {}
 };
 
-const resetVideo = () => {
+const resetVideo = React.useCallback(() => {
   const rec = videoRecRef.current;
   const isActive = !!rec && (rec.state === 'recording' || rec.state === 'paused');
 
@@ -16547,7 +16717,7 @@ const resetVideo = () => {
   try { stopMediaProg(); } catch {}
   try { setMediaPipelineOn(false); } catch {}
   // бар сам исчезнет useEffect'ом когда pending* пустые, но пайплайн должен быть false
- };
+ }, [pendingVideo, restoreComposerScroll, stopMediaProg]);
 // красный ✕ в прогресс-баре: отмена модерации/аплоада и полный сброс состояния медиа
 const cancelMediaOperation = React.useCallback(() => {
   // 1) Абортим сетевые запросы/аплоады (модерация картинок, аплоад видео/аудио)
@@ -16630,7 +16800,7 @@ const toastI18n = React.useCallback((kind, key, enFallback) => {
   } catch {}
 }, [t, toast]);
 
-const reasonKey = (reason) => {
+const reasonKey = React.useCallback((reason) => {
   const r = String(reason || 'unknown').toLowerCase();
   if (r === 'porn') return 'forum_moderation_reason_porn';
   if (r === 'explicit_nudity') return 'forum_moderation_reason_explicit_nudity';
@@ -16639,7 +16809,7 @@ const reasonKey = (reason) => {
   if (r === 'violence') return 'forum_moderation_reason_violence';
   if (r === 'gore') return 'forum_moderation_reason_gore';
   return 'forum_moderation_reason_unknown';
-};
+}, []);
 
 const reasonFallbackEN = (reason) => reasonKey(reason);
 
@@ -16901,9 +17071,7 @@ const moderateVideoSource = React.useCallback(async (videoSource) => {
  const canSend = (String(text || '').trim().length > 0)
    || (pendingImgs.length > 0)
    || !!pendingAudio
-   || !!pendingVideo;  // === composer helpers (images) ===
-const IMG_LINE_RE = /^(\/uploads\/[A-Za-z0-9._\-\/]+?\.(webp|png|jpe?g|gif)$|https?:\/\/.+\.(webp|png|jpe?g|gif)(\?.*)?$)/i;
-
+   || !!pendingVideo;  // === composer helpers (images) === 
 const hasImageLines = React.useMemo(() => {
   const lines = String(text || '')
     .split(/\r?\n/)
@@ -16981,6 +17149,7 @@ toast.ok(t('forum_create_ok'))
       cid: tmpP,
       id: tmpP,
     });
+    try { syncNowRef.current?.(); } catch {}
   // жёсткая очистка и подтягиваем свежий снапшот
   try { setText(''); } catch {}
   try { setPendingImgs([]); } catch {}
@@ -17362,6 +17531,7 @@ const createPost = async () => {
     cid:  tmpId,
     id: tmpId,
   });
+  try { syncNowRef.current?.(); } catch {}
 
   setComposerActive(false);
   emitCreated(p.id, sel.id);
@@ -17421,13 +17591,12 @@ const reactMut = useCallback(async (post, kind) => {
   }));
 
   pushOp('set_reaction', { postId: String(post.id), state: nextState });
-}, [auth, setOverlay]);
+}, [pushOp, requireAuthStrict, rl, setOverlay, t, toast]);
 
 
-const FORUM_VIEW_TTL_SEC = VIEW_TTL_SEC
 const getBucket = (ttl) => Math.floor(Date.now()/1000 / (ttl||1800))
 
-const markViewPost = (postId) => {
+const markViewPost = React.useCallback((postId) => {
   if(!isBrowser()) return
   const uid = auth.asherId || auth.accountId || ''
   if(!uid || !postId) return
@@ -17437,6 +17606,7 @@ const markViewPost = (postId) => {
 if(!localStorage.getItem(key)){
   localStorage.setItem(key,'1')
   pendingViewsPostsRef.current.add(String(postId));
+  requestFlushSoon(220)
   setOverlay(prev => {
     const cur = (data?.posts || []).find(p => String(p.id) === String(postId));
     const base = Number(prev.views.posts[String(postId)] ?? cur?.views ?? 0);
@@ -17450,7 +17620,7 @@ if(!localStorage.getItem(key)){
   });
 }
 
-}
+}, [auth?.asherId, auth?.accountId, data?.posts, requestFlushSoon])
 // === Views by focus (>=60% visible) for ANY post card + prefetch videos around ===
 useEffect(() => {
   if (!isBrowser()) return;
@@ -17580,7 +17750,7 @@ useEffect(() => {
   };
 }, [auth?.asherId, auth?.accountId]);
 
-const markViewTopic = (topicId) => {
+const markViewTopic = React.useCallback((topicId) => {
   if(!isBrowser()) return
   const uid = auth.asherId || auth.accountId || ''
   if(!uid || !topicId) return
@@ -17591,6 +17761,7 @@ const markViewTopic = (topicId) => {
     if(!localStorage.getItem(key)){
       localStorage.setItem(key,'1')
       pendingViewsTopicsRef.current.add(String(topicId));
+      requestFlushSoon(220)
       setOverlay(prev => {
         const cur = (data?.topics || []).find(t => String(t.id) === String(topicId));
         const base = Number(prev.views.topics[String(topicId)] ?? cur?.views ?? 0);
@@ -17604,7 +17775,7 @@ const markViewTopic = (topicId) => {
       });
     }
   } catch {}
-}
+}, [auth?.asherId, auth?.accountId, data?.topics, requestFlushSoon])
  // keep refs in sync so effects can call them safely
 useEffect(() => { markViewPostRef.current  = markViewPost  }, [markViewPost]);
 
@@ -17613,7 +17784,7 @@ useEffect(() => {
   const id = String(sel?.id || '');
   if (!id) return;
   markViewTopic(id);
-}, [sel?.id]); 
+}, [sel?.id, markViewTopic]); 
 
   /* ---- эмодзи ---- */
   
@@ -17828,7 +17999,7 @@ try { startSoftProgress?.(72, 200, 88); } catch {}  // мягко едем к ~8
     if (e?.target) e.target.value = '';
     try { restoreComposerScroll(); } catch {}
   }
-}, [t, toast, moderateImageFiles, toastI18n, reasonKey, reasonFallbackEN, beginMediaPipeline, endMediaPipeline, setPendingImgs, setPendingVideo, markMediaReady, startSoftProgress, stopMediaProg, setMediaPhase, setMediaPct, setVideoProgress, viewerId, saveComposerScroll, restoreComposerScroll]);
+}, [t, toast, moderateImageFiles, toastI18n, reasonKey, beginMediaPipeline, endMediaPipeline, setPendingImgs, setPendingVideo, startSoftProgress, stopMediaProg, setMediaPhase, setMediaPct, setVideoProgress, viewerId, saveComposerScroll, restoreComposerScroll]);
 
   /* ---- профиль (поповер у аватара) ---- */
   const idShown = resolveProfileAccountId(auth.asherId || auth.accountId || '')
@@ -17962,7 +18133,7 @@ useEffect(() => {
   if (!videoFeedOpen) return;
   if (navRestoringRef.current) return;
   setVisibleVideoCount(VIDEO_PAGE_SIZE);
-}, [videoFeedOpen, feedSort, starMode, starredAuthors]);
+}, [videoFeedOpen, feedSort, activeStarredAuthors]);
 
 const visibleVideoFeed = React.useMemo(
   () => (videoFeed || []).slice(0, visibleVideoCount),
@@ -18151,6 +18322,7 @@ function closeVideoFeed() {
   try { videoFeedOpenRef.current = false; } catch {}
   setVideoFeedOpen(false);
 }
+const buildAndSetVideoFeedEvent = useEvent(buildAndSetVideoFeed)
 // [INBOX:OPEN_GLOBAL] — всегда открываем "полный" инбокс (как в списке тем),
 // даже если сейчас в видео-фиде или в ветке.
 // Логика: если уже на странице инбокса — закрыть, иначе: закрыть видео/ветку и открыть инбокс.
@@ -18170,14 +18342,14 @@ const openInboxGlobal = React.useCallback((entryId) => {
       try { setDmDeleteForAll?.(false); } catch {}
       try { setInboxTab('messages'); } catch {}
       try { setDmWithUserId(''); } catch {}
-      setTimeout(() => { try { alignInboxStartUnderTabs(); } catch {} }, 0);
+      requestAlignInboxStartUnderTabs();
       return;
     }
     setInboxOpen(false);
     return;
   }
 
-  try { pushNavState(entryId || 'inbox_btn'); } catch {}
+  try { pushNavStateStable(entryId || 'inbox_btn'); } catch {}
   try { openOnly?.(null); } catch {}
   try { closeUserInfoPopover?.(); } catch {}
   try { closeReportPopover?.(); } catch {}
@@ -18197,14 +18369,14 @@ const openInboxGlobal = React.useCallback((entryId) => {
   try { setInboxTab('messages'); } catch {}
   try { setDmWithUserId(''); } catch {}
 
-  setTimeout(() => { try { alignInboxStartUnderTabs(); } catch {} }, 0);
-}, [inboxOpen, sel, threadRoot, videoFeedOpen, pushNavState, dmWithUserId]);
+  requestAlignInboxStartUnderTabs();
+}, [inboxOpen, sel, threadRoot, videoFeedOpen, dmWithUserId, openOnly, closeReportPopover, closeUserInfoPopover, requestAlignInboxStartUnderTabs, pushNavStateStable]);
 // авто-обновление ленты, когда лента открыта и что-то меняется в снапшоте
 React.useEffect(() => {
   if (!videoFeedOpen) return;
-  buildAndSetVideoFeed();
+  buildAndSetVideoFeedEvent();
   // зависимости: любые сигналы обновления снапшота/постов у тебя в состоянии
-}, [videoFeedOpen, data?.rev, data?.posts, data?.messages, data?.topics, allPosts, feedSort, starMode, starredAuthors]);
+}, [videoFeedOpen, data?.rev, data?.posts, data?.messages, data?.topics, allPosts, feedSort, activeStarredAuthors, buildAndSetVideoFeedEvent]);
 
 // [VIDEO_FEED:OPEN_THREAD] — открыть полноценную ветку из ленты
 function openThreadFromPost(p){
@@ -18549,20 +18721,22 @@ React.useEffect(() => {
 }, []);
 // Синхронизация локального прогресса с серверным: если на сервере пусто — чистим LS
 React.useEffect(() => {
+  const uid = auth?.accountId || auth?.asherId || '';
+  const questLsKey = uid ? `quest:v1:${uid}` : `quest:v1:anonymous`;
+  const questTimersLsKey = uid ? `questTimers:v1:${uid}` : `questTimers:v1:anonymous`;
   (async () => {
     try {
       const res = await fetch('/api/quest/progress', { method: 'GET', cache: 'no-store' });
       const j = await res.json().catch(() => ({}));
       const serverEmpty = !j?.progress || Object.keys(j.progress).length === 0;
       if (serverEmpty) {
-        try { localStorage.removeItem(QUEST_LS); } catch {}
-        try { localStorage.removeItem(QUEST_TIMERS_LS); } catch {}
+        try { localStorage.removeItem(questLsKey); } catch {}
+        try { localStorage.removeItem(questTimersLsKey); } catch {}
         setQuestProg({});
         setTaskTimers({});
       }
     } catch {}
   })();
-// eslint-disable-next-line react-hooks/exhaustive-deps
 }, [auth?.accountId, auth?.asherId]);
 
 // === ENV helpers/flags for Quests (moved above to avoid TDZ) ===
@@ -18578,14 +18752,14 @@ const readEnv = React.useCallback((k, def='') => {
 }, [questEnv]);
 
  // per-card toggles & media (ENV)
- const isCardEnabled  = (n) => (readEnv(`NEXT_PUBLIC_QUEST_CARD_${n}_ENABLED`, '1') === '1');
- const cardMediaExt   = (n) => (readEnv(`NEXT_PUBLIC_QUEST_CARD_${n}_MEDIA_EXT`, 'png') || 'png').toLowerCase(); // png|gif|mp4
- const cardMediaName  = (n) => (readEnv(`NEXT_PUBLIC_QUEST_CARD_${n}_MEDIA_NAME`, `q${n}`) || `q${n}`);
+ const isCardEnabled  = React.useCallback((n) => (readEnv(`NEXT_PUBLIC_QUEST_CARD_${n}_ENABLED`, '1') === '1'), [readEnv]);
+ const cardMediaExt   = React.useCallback((n) => (readEnv(`NEXT_PUBLIC_QUEST_CARD_${n}_MEDIA_EXT`, 'png') || 'png').toLowerCase(), [readEnv]); // png|gif|mp4
+ const cardMediaName  = React.useCallback((n) => (readEnv(`NEXT_PUBLIC_QUEST_CARD_${n}_MEDIA_NAME`, `q${n}`) || `q${n}`), [readEnv]);
  // НОВОЕ: отдельное расширение для превью задач внутри карточки
- const taskMediaExt   = (n) => {
+ const taskMediaExt   = React.useCallback((n) => {
    const fallback = cardMediaExt(n);
    return (readEnv(`NEXT_PUBLIC_QUEST_CARD_${n}_TASK_MEDIA_EXT`, fallback) || fallback).toLowerCase();
- };
+ }, [cardMediaExt, readEnv]);
 const QUEST_ENABLED = (readEnv('NEXT_PUBLIC_QUEST_ENABLED', '1') === '1');
 // без верхнего предела по количеству карточек:
 const QUEST_CARDS   = Math.max(0, Number(readEnv('NEXT_PUBLIC_QUEST_CARDS', '10')) || 10);
@@ -18640,7 +18814,7 @@ const QUESTS = React.useMemo(() => {
   const all = Array.from({ length: QUEST_CARDS }, (_, i) => mk(i + 1));
   // Покарточное включение
  return all.filter((_, i) => isCardEnabled(i + 1));
-}, [readEnv, tasksPerCard, QUEST_CARDS, cardMediaExt, cardMediaName]);
+}, [readEnv, tasksPerCard, QUEST_CARDS, cardMediaExt, cardMediaName, isCardEnabled, taskMediaExt]);
 
 // Прогресс: LS-ключ зависит от пользователя
 const meUid   = auth?.accountId || auth?.asherId || '';
@@ -18718,12 +18892,14 @@ const openQuestCardChecked = React.useCallback(async (card) => {
     }
 
     // 5) иначе открываем список заданий
+    try { pushNavStateStable(`quest_card_${String(card?.id || '')}`); } catch {}
     setQuestSel(card)
   } catch {
     // на сбой — пусть откроется, чтобы не «глохло» UI
+    try { pushNavStateStable(`quest_card_${String(card?.id || '')}`); } catch {}
     setQuestSel(card)
   }
-}, [auth?.accountId, auth?.asherId, requireAuthStrict, openAuth, writeQuestProg, toast, t, setQuestSel, normalizeCardId])
+}, [auth?.accountId, auth?.asherId, requireAuthStrict, writeQuestProg, toast, t, setQuestSel, normalizeCardId, pushNavStateStable])
 
 // ← ДОБАВИТЬ: перечитываем прогресс/таймеры, если сменился LS-ключ (анон → юзер)
 React.useEffect(() => {
@@ -18847,7 +19023,7 @@ const markTaskDone = React.useCallback(async (qid, tid) => {
       }
     } catch {}
   }
-}, [writeQuestProg, writeTimers, auth?.accountId, auth?.asherId, vipActive, normalizeCardId]);
+}, [writeQuestProg, writeTimers, auth?.accountId, auth?.asherId, vipActive, normalizeCardId, getCardTotalTasks]);
 
 // Выполнены все 10 задач?
 const isCardCompleted = React.useCallback((qid) => {
@@ -18855,8 +19031,13 @@ const isCardCompleted = React.useCallback((qid) => {
   const total = getCardTotalTasks(qid);
   return !!(card && Array.isArray(card.done) && card.done.length >= total);
 }, [questProg, getCardTotalTasks]);
-// минимальная «пауза доверия» перед клеймом (мс)
-const MIN_CLAIM_DELAY_MS = TASK_DELAY_MS; // единая точка из ENV
+// Extra delay for claim overlay only (defaults to 0)
+const MIN_CLAIM_DELAY_MS = React.useMemo(() => {
+  const raw = String(readEnv?.('NEXT_PUBLIC_QUEST_CLAIM_OVERLAY_DELAY_MS', '0') || '0');
+  const normalized = raw.replace(/[\s_]+/g, '');
+  const parsed = Number(normalized);
+  return Math.max(0, Number.isFinite(parsed) ? parsed : 0);
+}, [readEnv]);
 // достигнута ли готовность к клейму (10/10 и выдержана пауза)?
 const isCardClaimable = React.useCallback((qid) => {
   const card = questProg?.[qid];
@@ -18887,23 +19068,55 @@ const entry = Object.entries(questProg||{}).find(([qid, v]) => {
   const amount = isVip ? String(Number(base)*2) : base;
 
   setClaimFx({ open:true, cardId, amount, pieces: spawnCoins(28) });
-}, [questProg, QUESTS, readEnv, vipActive, spawnCoins]);
+}, [questProg, QUESTS, readEnv, vipActive, spawnCoins, MIN_CLAIM_DELAY_MS, getCardTotalTasks]);
 
 // Открыть/закрыть вкладку квестов
-const openQuests = React.useCallback(() => {
+const openQuests = React.useCallback((entryId) => {
   // не открываем, если квесты отключены в ENV
   if (readEnv?.('NEXT_PUBLIC_QUEST_ENABLED', '1') !== '1') return;
+  if (questOpen && !questSel) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        try { document.querySelector('[data-forum-quest-start="1"]')?.scrollIntoView({ behavior: 'auto', block: 'start' }); } catch {}
+      });
+    });
+    return;
+  }
 
+  try { pushNavStateStable(entryId || 'quest_btn'); } catch {}
+  try { headAutoOpenRef.current = false; } catch {}
+  try { setHeadPinned(false); } catch {}
+  try { setHeadHidden(true); } catch {}
   setInboxOpen(false);
   setVideoFeedOpen(false);
   setSel(null);
   setThreadRoot(null);
   setQuestOpen(true);
+  setQuestSel(null);
 
   requestAnimationFrame(() => {
-    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
+    requestAnimationFrame(() => {
+      try {
+        const marker = document.querySelector('[data-forum-quest-start="1"]');
+        if (marker?.scrollIntoView) {
+          marker.scrollIntoView({ behavior: 'auto', block: 'start' });
+          return;
+        }
+      } catch {}
+      try {
+        const scrollEl =
+          bodyRef.current ||
+          document.querySelector('[data-forum-scroll="1"]') ||
+          null;
+        if (scrollEl) {
+          scrollEl.scrollTop = 0;
+          return;
+        }
+      } catch {}
+      try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch {}
+    });
   });
-}, [readEnv]);
+}, [readEnv, pushNavStateStable, questOpen, questSel]);
 
 const closeQuests = React.useCallback(() => {
   setQuestSel(null);
@@ -18916,34 +19129,9 @@ const adConf = getForumAdConf();
 // Важно: resolveCurrentAdUrl / pickAdUrlForSlot используют Date.now() и bucket по ROTATE_MIN.
 // Без перерендера React "сам" не пересчитает bucket через минуту — поэтому ротация визуально замирает.
 // Этот тик форсит перерендер строго на границе bucket'ов.
-const [adsRotateTick, setAdsRotateTick] = useState(0);
-useEffect(() => {
-  const rotateMin = Number(adConf?.ROTATE_MIN || 1);
-  const periodMs = Math.max(1, rotateMin) * 60_000;
-
-  let tAlign = null;
-  let tInterval = null;
-
-  const schedule = () => {
-    const now = Date.now();
-    const nextBoundary = (Math.floor(now / periodMs) + 1) * periodMs;
-    const delay = Math.max(0, nextBoundary - now + 25); // +25ms чтобы гарантированно попасть в новый bucket
-
-    tAlign = setTimeout(() => {
-      setAdsRotateTick((x) => x + 1);
-      // дальше стабильно пинаем каждые periodMs
-      tInterval = setInterval(() => {
-        setAdsRotateTick((x) => x + 1);
-      }, periodMs);
-    }, delay);
-  };
-
-  schedule();
-  return () => {
-    if (tAlign) clearTimeout(tAlign);
-    if (tInterval) clearInterval(tInterval);
-  };
-}, [adConf?.ROTATE_MIN]);
+// ===== ADS ROTATION =====
+// Do not force a global rerender by timer; this caused visible flicker on long feeds.
+// Ad bucket is recalculated in pickAdUrlForSlot via Date.now() during normal rerenders.
 
 // clientId для детерминизма
 const clientId =
@@ -18967,8 +19155,7 @@ const adSessionRef = useRef({
  
 // Используем тик, чтобы ESLint не ругался на "unused" и чтобы зависимость была явной.
 // Рендер = новый вызов pickAdUrlForSlot() = новый bucket при смене ROTATE_MIN слота.
-void adsRotateTick;
-
+ 
 // лог слотов (если нужно смотреть интерлив)
 function debugAdsSlots(label, slots) {
 
@@ -19415,6 +19602,7 @@ function pickAdUrlForSlot(slotKey, slotKind) {
                               className="searchResultThumb"
                             />
                           ) : (r.media.kind === 'video' && r.media.thumb) ? (
+                            // eslint-disable-next-line @next/next/no-img-element -- dynamic remote video thumbs may come from arbitrary hosts not configured in next/image.
                             <img
                               src={r.media.thumb}
                               alt=""
@@ -19654,7 +19842,7 @@ function pickAdUrlForSlot(slotKey, slotKind) {
           }
         }}
       >
-        {t('quest_do')}
+        {t('quest_claim')}
       </button>
     </div>
   </div>
@@ -19873,9 +20061,12 @@ onClick={()=>{
         overflow: 'hidden',
       }}
     >
-      <img
+      <Image
         src="/friends/invitation.gif"
         alt=""
+        width={INVITE_GIF_SIZE}
+        height={INVITE_GIF_SIZE}
+        unoptimized
         style={{
           width: '100%',
           height: '100%',
@@ -20096,6 +20287,7 @@ const openThreadHere = (clickP) => {
 ) : (questOpen && QUEST_ENABLED) ? (
   <>
     <div className="meta mt-1">{t('')}</div>
+    <div data-forum-quest-start="1" />
     <QuestHub
       t={t}
       quests={QUESTS}
@@ -20935,6 +21127,7 @@ onOpenThread={(clickP) => {
                               className="searchResultThumb"
                             />
                           ) : (r.media.kind === 'video' && r.media.thumb) ? (
+                            // eslint-disable-next-line @next/next/no-img-element -- dynamic remote video thumbs may come from arbitrary hosts not configured in next/image.
                             <img
                               src={r.media.thumb}
                               alt=""
@@ -21174,7 +21367,7 @@ onOpenThread={(clickP) => {
           }
         }}
       >
-        {t('quest_do')}
+        {t('quest_claim')}
       </button>
     </div>
   </div>
@@ -21395,9 +21588,12 @@ onClick={()=>{
         overflow: 'hidden',
       }}
     >
-      <img
+      <Image
         src="/friends/invitation.gif"
         alt=""
+        width={INVITE_GIF_SIZE}
+        height={INVITE_GIF_SIZE}
+        unoptimized
         style={{
           width: '100%',
           height: '100%',
@@ -22729,3 +22925,6 @@ function CreateTopicCard({ t, onCreate, onOpenVideoFeed }){
     </div>
   )
 } 
+
+
+

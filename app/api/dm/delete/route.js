@@ -58,8 +58,12 @@ export async function POST(req) {
 
       const meIds = new Set(await expandAliasIds([me, rawMeHeader, rawMe]))
       const withIds = new Set(await expandAliasIds([withId, rawWithInput, rawWith]))
+      const meIdList = Array.from(meIds).map(String).filter(Boolean)
+      const withIdList = Array.from(withIds).map(String).filter(Boolean)
+      const meIdSet = new Set(meIdList)
+      const withIdSet = new Set(withIdList)
       const threadKeys = new Set()
-      for (const a of meIds) for (const b of withIds) threadKeys.add(K.threadZ(a, b))
+      for (const a of meIdSet) for (const b of withIdSet) threadKeys.add(K.threadZ(a, b))
 
       const canonicalThread = K.threadZ(me, withId)
       const msgIdSet = new Set()
@@ -74,13 +78,66 @@ export async function POST(req) {
         }
       }
 
+      const collectMailboxIds = async (uids) => {
+        const out = new Set()
+        const list = Array.from(uids || []).map(String).filter(Boolean)
+        if (!list.length) return out
+        const pipe = redis.multi()
+        for (const uid of list) {
+          pipe.zrange(K.inboxZ(uid), 0, -1)
+          pipe.zrange(K.outboxZ(uid), 0, -1)
+        }
+        const raw = await pipe.exec().catch(() => null)
+        const rows = Array.isArray(raw) ? raw.map((v) => (v?.result ?? v)) : []
+        for (const row of rows) {
+          if (!Array.isArray(row)) continue
+          for (const id of row) {
+            const mid = String(id || '').trim()
+            if (mid) out.add(mid)
+          }
+        }
+        return out
+      }
+
+      // fallback: если thread-index рассинхронизирован, чистим и по inbox/outbox пересечению участников
+      const meMailboxIds = await collectMailboxIds(meIdSet)
+      const withMailboxIds = await collectMailboxIds(withIdSet)
+      const candidateMsgIds = new Set(msgIdSet)
+      for (const id of meMailboxIds) {
+        if (withMailboxIds.has(id)) candidateMsgIds.add(id)
+      }
+
+      if (candidateMsgIds.size) {
+        const checks = await Promise.all(
+          Array.from(candidateMsgIds).map(async (id) => {
+            const msg = await getMessage(id).catch(() => null)
+            return { id, msg }
+          })
+        )
+        for (const it of checks) {
+          const from = String(it?.msg?.from || '').trim()
+          const to = String(it?.msg?.to || '').trim()
+          if (!from || !to) continue
+          const between =
+            (meIdSet.has(from) && withIdSet.has(to)) ||
+            (meIdSet.has(to) && withIdSet.has(from))
+          if (between) msgIdSet.add(String(it.id))
+        }
+      }
+
       const pipe = redis.multi()
       for (const key of threadKeys) pipe.del(key)
+      for (const a of meIdSet) {
+        for (const b of withIdSet) {
+          pipe.del(K.lastSeen(a, b))
+          pipe.del(K.lastSeen(b, a))
+        }
+      }
       for (const id of msgIdSet) {
         pipe.del(K.msgKey(id))
         pipe.del(K.delivered(id))
-        for (const uid of meIds) { pipe.zrem(K.inboxZ(uid), id); pipe.zrem(K.outboxZ(uid), id) }
-        for (const uid of withIds) { pipe.zrem(K.inboxZ(uid), id); pipe.zrem(K.outboxZ(uid), id) }
+        for (const uid of meIdSet) { pipe.zrem(K.inboxZ(uid), id); pipe.zrem(K.outboxZ(uid), id) }
+        for (const uid of withIdSet) { pipe.zrem(K.inboxZ(uid), id); pipe.zrem(K.outboxZ(uid), id) }
       }
       await pipe.exec()
 

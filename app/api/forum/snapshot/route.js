@@ -21,11 +21,12 @@ export async function GET(req) {
 
     // Ключ кэша различает режимы и параметры
 const key = (since > 0)
-  ? `since:${since}:${revTarget}`
-  : `full:${revTarget}`
+  ? `since:${since}:${revTarget}:${bust}`
+  : `full:${revTarget}:${bust}`
+    const canUseCache = !bust
 
     const now = Date.now()
-    const hit = cache.get(key)
+    const hit = canUseCache ? cache.get(key) : null
     if (hit && hit.exp > now) {
       return new Response(hit.body, { status: 200, headers: hit.headers })
     }
@@ -60,7 +61,9 @@ const key = (since > 0)
       'cache-control': 'no-store, max-age=0',
     })
 
-    cache.set(key, { body, headers, exp: now + TTL_MS })
+    if (canUseCache) {
+      cache.set(key, { body, headers, exp: now + TTL_MS })
+    }
     return new Response(body, { status: 200, headers })
   } catch (e) {
     return new Response(
