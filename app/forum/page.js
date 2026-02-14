@@ -408,7 +408,7 @@ export default function ForumPage() {
           display: flex;
           justify-content: center;
           align-items: flex-start;
-          padding-top: 260px;      /* большой отступ — не перекрывает топ-бар */
+          padding-top: 200px;      /* большой отступ — не перекрывает топ-бар */
           background: transparent;
           pointer-events: none;    /* не блокируем клики вне модалки (топ-бар живой) */
         }
@@ -571,14 +571,14 @@ export default function ForumPage() {
 
         @media (max-width: 640px) {
           .forum-rules-overlay {
-            padding-top: 260px;
+            padding-top: 180px;
           }
           .forum-rules-modal {
             padding: 12px 10px 10px;
             border-radius: 14px;
           }
           .fr-body {
-            max-height: 300px;
+            max-height: 320px;
             padding: 8px 8px;
           }
           .fr-body-text,
