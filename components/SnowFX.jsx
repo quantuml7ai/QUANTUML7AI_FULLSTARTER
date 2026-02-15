@@ -230,7 +230,9 @@ export default function SnowFX({
 
       const flakes = flakesRef.current
       if (!flakes.length) {
-        animFrameRef.current = requestAnimationFrame(loop)
+        // если компонент уже размонтирован (cleanup выставил stopped),
+        // не планируем следующий кадр — иначе можно оставить "висящий" RAF
+        if (!stopped) animFrameRef.current = requestAnimationFrame(loop)
         return
       }
 
@@ -294,14 +296,19 @@ export default function SnowFX({
       }
 
       setTick((x0) => x0 + 1)
-      animFrameRef.current = requestAnimationFrame(loop)
+
+      // если компонент уже размонтирован (cleanup выставил stopped),
+      // не планируем следующий кадр
+      if (!stopped) animFrameRef.current = requestAnimationFrame(loop)
     }
 
     animFrameRef.current = requestAnimationFrame(loop)
 
     return () => {
       stopped = true
-      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current)
+      const rafId = animFrameRef.current
+      animFrameRef.current = null
+      if (rafId) cancelAnimationFrame(rafId)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

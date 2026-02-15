@@ -9959,37 +9959,37 @@ text={t?.('forum_delete_confirm')}
         </div>
       )}
 
-      {/* видео: отдельные карточки с <video controls> */}
+      {/* видео: отдельные карточки с <video>, но с безопасным lifecycle (очистка буфера вдали от viewport) */}
       {videoLines.length > 0 && (
-        <div className="postVideo" style={{display:'grid', gap:8, marginTop:8}}>
+        <div className="postVideo" style={{ display: 'grid', gap: 8, marginTop: 8 }}>
           {videoLines.map((src, i) => (
             <div key={`v${i}`} className="videoCard mediaBox" data-kind="video" style={{ margin: 0 }}>
-        <video
-          data-forum-video="post"   // ← помечаем, что это плеер из поста
-          data-forum-media="video"
-          src={src}
-
-          playsInline
-          preload="metadata"
-          controlsList="nodownload noplaybackrate noremoteplayback"
-          disablePictureInPicture          
-          className="mediaBoxItem"
-          style={{
-            objectFit: 'contain', 
-            background: '#000'
-          }}
-          onPointerDown={(e) => {
-            // включаем controls только по первому тапу пользователя
-            enableVideoControlsOnTap(e);
-            // и не даём клику улететь в parent (если там open overlay)
-            e.stopPropagation();
-          }}        
-        /> 
- 
+              <VideoMedia
+                data-forum-video="post"   // ← помечаем, что это плеер из поста
+                data-forum-media="video"
+                src={src}
+                playsInline
+                preload="metadata"
+                controls={false}
+                controlsList="nodownload noplaybackrate noremoteplayback"
+                disablePictureInPicture
+                className="mediaBoxItem"
+                style={{
+                  objectFit: 'contain',
+                  background: '#000'
+                }}
+                onPointerDown={(e) => {
+                  // включаем controls только по первому тапу пользователя
+                  enableVideoControlsOnTap(e);
+                  // и не даём клику улететь в parent (если там open overlay)
+                  e.stopPropagation();
+                }}
+              />
             </div>
           ))}
         </div>
       )}
+
       {/* YouTube-видео: рендерим в тех же карточках через iframe */}
       {ytLines.length > 0 && (
         <div className="postVideo" style={{display:'grid', gap:8, marginTop:8}}>
@@ -11106,12 +11106,270 @@ function readMutedPrefFromStorage() {
   }
 }
 
+// =========================================================
+// MEDIA LIFECYCLE: aggressive cleanup for mobile stability
+//  - unload <video> src when далеко от viewport (чистим декодер/буфер)
+//  - restore src when viewport приближается (быстрый старт сохраняем через preload=metadata)
+//  - сохраняем mute/unmute глобально (pause/time НЕ гарантируем, по ТЗ можно не помнить)
+// =========================================================
+
+//  keep alive window around viewport
+// Было 1800px — это часто держит слишком много видео "живыми" одновременно,
+// особенно при быстрой прокрутке + возврате назад (даёт скачки из-за переразметки).
+const __MEDIA_VIS_MARGIN_PX = 700;
+
+// Hard-cap: сколько видео вообще разрешаем держать "живыми" (с src/буфером) одновременно.
+// Это именно про memory/decoder pressure. Про "играет только одно" — у тебя уже отдельно.
+const __MAX_ACTIVE_VIDEO_ELEMENTS = 2;
+
+// LRU-учёт активных видео-элементов:
+// - Когда видео становится active => добавляем/обновляем в LRU
+// - Если превышаем лимит => выгружаем самый старый, кроме текущего
+const __activeVideoEls = new Set();
+const __activeVideoLRU = [];
+
+function __touchActiveVideoEl(el) {
+  if (!el) return;
+  if (!__activeVideoEls.has(el)) __activeVideoEls.add(el);
+  const idx = __activeVideoLRU.indexOf(el);
+  if (idx !== -1) __activeVideoLRU.splice(idx, 1);
+  __activeVideoLRU.push(el);
+}
+
+function __dropActiveVideoEl(el) {
+  if (!el) return;
+  __activeVideoEls.delete(el);
+  const idx = __activeVideoLRU.indexOf(el);
+  if (idx !== -1) __activeVideoLRU.splice(idx, 1);
+}
+
+function __enforceActiveVideoCap(exceptEl) {
+  try {
+    // чистим хвост, пока не уложимся в лимит
+    while (__activeVideoLRU.length > __MAX_ACTIVE_VIDEO_ELEMENTS) {
+      const victim = __activeVideoLRU[0];
+      // не трогаем текущий элемент (который только что активировался)
+      if (victim === exceptEl) {
+        // переносим его в конец и берём следующего
+        __activeVideoLRU.shift();
+        __activeVideoLRU.push(victim);
+        continue;
+      }
+      __activeVideoLRU.shift();
+      __activeVideoEls.delete(victim);
+      __unloadVideoEl(victim);
+    }
+  } catch {}
+}
+
+function __readMediaMutedPref() {
+  const v = readMutedPrefFromStorage();
+  if (typeof v === 'boolean') return v;
+  return null;
+}
+
+function __writeMediaMutedPref(nextMuted) {
+  try {
+    const v = nextMuted ? '1' : '0';
+    localStorage.setItem(MEDIA_MUTED_KEY, v);
+    localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, v);
+  } catch {}
+}
+
+function __unloadVideoEl(el) {
+  if (!el) return;
+  try { el.pause?.(); } catch {}
+  try {
+    // сохраняем src для восстановления
+    if (!el.dataset.__src && el.currentSrc) el.dataset.__src = el.currentSrc;
+    if (!el.dataset.__src && el.getAttribute('src')) el.dataset.__src = el.getAttribute('src');
+  } catch {}
+  try { el.removeAttribute('src'); } catch {}
+  try { el.src = ''; } catch {}
+  try { el.preload = 'none'; } catch {}
+  try { el.load?.(); } catch {}
+}
+
+function __restoreVideoEl(el) {
+  if (!el) return;
+  const src = el.dataset.__src || el.getAttribute('data-src') || '';
+  if (!src) return;
+  const cur = el.getAttribute('src') || '';
+  if (cur === src) return;
+  try { el.preload = 'metadata'; } catch {}
+  try { el.setAttribute('src', src); } catch {}
+  try { el.load?.(); } catch {}
+}
+
+/**
+ * VideoMedia — безопасный <video> для ленты/постов/DM:
+ * 1) держит muted синхронно по localStorage + событию MEDIA_MUTED_EVENT
+ * 2) чистит буфер, когда видео далеко от viewport
+ * 3) восстанавливает src при приближении к viewport (верх/низ не важно)
+ */
+function VideoMedia({
+  src,
+  className,
+  style,
+  preload = 'metadata',
+  playsInline = true,
+  controlsList,
+  disablePictureInPicture,
+  controls,
+  autoPlay,
+  loop,
+  'data-forum-media': dataForumMedia,
+  ...rest
+}) {
+  const ref = React.useRef(null);
+
+  // keep latest src without causing rerenders
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.dataset.__src = String(src || '');
+    try { el.setAttribute('src', String(src || '')); } catch {}
+  }, [src]);
+
+  // muted sync (storage + broadcast)
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof window === 'undefined') return;
+
+    const initial = __readMediaMutedPref();
+    const nextMuted =
+      typeof initial === 'boolean'
+        ? initial
+        : !!autoPlay; // если преф не задан — для autoplay безопаснее стартовать muted
+
+    try { el.muted = !!nextMuted; } catch {}
+
+    const onVol = () => {
+      try {
+        const m = !!el.muted;
+        __writeMediaMutedPref(m);
+        window.dispatchEvent(new CustomEvent(MEDIA_MUTED_EVENT, {
+          detail: { muted: m, source: 'video', id: el.dataset.__mid || null }
+        }));
+      } catch {}
+    };
+
+    const onMutedEvent = (e) => {
+      try {
+        if (!ref.current) return;
+        const m = e?.detail?.muted;
+        if (typeof m !== 'boolean') return;
+        if (ref.current.muted !== m) ref.current.muted = m;
+      } catch {}
+    };
+
+    try { el.dataset.__mid = el.dataset.__mid || (`v_${Math.random().toString(36).slice(2)}`); } catch {}
+
+    try { el.addEventListener('volumechange', onVol); } catch {}
+    window.addEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
+
+    return () => {
+      try { el.removeEventListener('volumechange', onVol); } catch {}
+      window.removeEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
+    };
+  }, [autoPlay]);
+
+  // viewport lifecycle: unload far-away videos (mobile memory killer)
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const el = ref.current;
+    if (!el) return;
+
+    let io = null;
+    let active = true;
+    let unloadTimer = null;
+
+    const setActive = (v) => {
+      const next = !!v;
+      if (next === active) return;
+      active = next;
+      if (active) {
+        // отменяем отложенную выгрузку, если пользователь вернулся чуть-чуть назад
+        if (unloadTimer) {
+          try { clearTimeout(unloadTimer); } catch {}
+          unloadTimer = null;
+        }
+
+        __restoreVideoEl(el);
+        __touchActiveVideoEl(el);
+        __enforceActiveVideoCap(el);
+      } else {
+        // НЕ выгружаем мгновенно — это часто даёт “подпрыгивания” при обратном скролле,
+        // потому что пользователь часто делает микродвижения вверх-вниз.
+        // Делам hysteresis: если реально ушёл — выгрузим через небольшой таймаут.
+        if (unloadTimer) {
+          try { clearTimeout(unloadTimer); } catch {}
+          unloadTimer = null;
+        }
+        unloadTimer = setTimeout(() => {
+          unloadTimer = null;
+          // если за время ожидания снова стало active — ничего не делаем
+          if (active) return;
+          __dropActiveVideoEl(el);
+          __unloadVideoEl(el);
+        }, 350);
+      }
+    };
+
+    try {
+      io = new IntersectionObserver(
+        (entries) => {
+          const ent = entries && entries[0];
+          const isOn = !!ent && (ent.isIntersecting || (ent.intersectionRatio || 0) > 0);
+          setActive(isOn);
+        },
+        {
+          root: null,
+          rootMargin: `${__MEDIA_VIS_MARGIN_PX}px 0px ${__MEDIA_VIS_MARGIN_PX}px 0px`,
+          threshold: 0.01,
+        }
+      );
+      io.observe(el);
+    } catch {
+      // без IO — хотя бы чистим на unmount
+    }
+
+    return () => {
+      try { io?.disconnect?.(); } catch {}
+      if (unloadTimer) {
+        try { clearTimeout(unloadTimer); } catch {}
+        unloadTimer = null;
+      }
+      __dropActiveVideoEl(el);      
+      __unloadVideoEl(el);
+    };
+  }, []);
+
+  return (
+    <video
+      ref={ref}
+      data-forum-media={dataForumMedia}
+      playsInline={playsInline}
+      preload={preload}
+      controls={controls}
+      autoPlay={autoPlay}
+      loop={loop}
+      controlsList={controlsList}
+      disablePictureInPicture={disablePictureInPicture}
+      className={className}
+      style={style}
+      {...rest}
+    />
+  );
+}
+
 function formatMediaTime(value) {
   const total = Math.max(0, Math.floor(value || 0));
   const mins = Math.floor(total / 60);
   const secs = total % 60;
   return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
+
 
 function QCastPlayer({ src, onRemove, preview = false }) {
   const audioRef = React.useRef(null);
@@ -11797,6 +12055,131 @@ function AboutRail({
    Основной компонент
 ========================================================= */
 export default function Forum(){
+  // ===== FORUM DIAG (writes to /forum-diag.jsonl via API) =====
+  const diagSeqRef = useRef(0);
+  const diagLastSentRef = useRef(0);
+
+  const emitDiag = useCallback(async (event, extra = {}) => {
+    try {
+      const now = Date.now();
+      // не спамим чаще чем раз в 1500мс (кроме ошибок)
+      if (event !== "error" && event !== "unhandledrejection") {
+        if (now - diagLastSentRef.current < 1500) return;
+        diagLastSentRef.current = now;
+      }
+
+      const videos = Array.from(document.querySelectorAll("video"));
+      let playing = 0;
+      for (const v of videos) {
+        try {
+          if (!v.paused && !v.ended && v.readyState >= 2) playing++;
+        } catch {}
+      }
+
+      const mem = (performance && performance.memory) ? {
+        usedJSHeapSize: performance.memory.usedJSHeapSize,
+        totalJSHeapSize: performance.memory.totalJSHeapSize,
+        jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
+      } : null;
+
+      const payload = {
+        seq: ++diagSeqRef.current,
+        event,
+        href: String(location?.href || ""),
+        vis: String(document?.visibilityState || ""),
+        ua: typeof navigator !== "undefined" ? navigator.userAgent : "",
+        deviceMemory: typeof navigator !== "undefined" ? navigator.deviceMemory : undefined,
+        // scroll snapshot
+        scrollY: typeof window !== "undefined" ? window.scrollY : undefined,
+        innerH: typeof window !== "undefined" ? window.innerHeight : undefined,
+        docH: document?.documentElement?.scrollHeight,
+        // media snapshot
+        videos: videos.length,
+        videosPlaying: playing,
+        // memory snapshot (only Chrome usually)
+        mem,
+        extra,
+      };
+
+      // Пишем и в консоль тоже (чтобы сразу видеть)
+      try { console.log("[FORUM-DIAG]", payload); } catch {}
+
+      // Отправка на сервер, который пишет forum-diag.jsonl в корень проекта
+      await fetch("/api/debug/forum-diag", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+        cache: "no-store",
+      }).catch(() => {});
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // стартовая отметка
+    emitDiag("mount");
+
+    const onErr = (e) => {
+      emitDiag("error", {
+        message: String(e?.message || ""),
+        filename: String(e?.filename || ""),
+        lineno: e?.lineno,
+        colno: e?.colno,
+        // stack иногда огромный — режем
+        stack: String(e?.error?.stack || "").slice(0, 4000),
+      });
+    };
+
+    const onRej = (e) => {
+      const r = e?.reason;
+      emitDiag("unhandledrejection", {
+        reason: typeof r === "string" ? r : (r?.message || "[non-string reason]"),
+        stack: String(r?.stack || "").slice(0, 4000),
+      });
+    };
+
+    const onVis = () => emitDiag("visibilitychange");
+    const onHide = (e) => emitDiag("pagehide", { persisted: !!e?.persisted });
+    const onBeforeUnload = () => emitDiag("beforeunload");
+
+    window.addEventListener("error", onErr);
+    window.addEventListener("unhandledrejection", onRej);
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("pagehide", onHide);
+    window.addEventListener("beforeunload", onBeforeUnload);
+
+    // периодический снимок, чтобы поймать рост памяти ДО “выбивания”
+    const id = setInterval(() => {
+      if (document.visibilityState !== "visible") return;
+      emitDiag("tick");
+    }, 5000);
+
+    // снимок после резкого скролла (throttle через raf)
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        emitDiag("scroll");
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      try { clearInterval(id); } catch {}
+      try { window.removeEventListener("error", onErr); } catch {}
+      try { window.removeEventListener("unhandledrejection", onRej); } catch {}
+      try { document.removeEventListener("visibilitychange", onVis); } catch {}
+      try { window.removeEventListener("pagehide", onHide); } catch {}
+      try { window.removeEventListener("beforeunload", onBeforeUnload); } catch {}
+      try { window.removeEventListener("scroll", onScroll); } catch {}
+      try { if (raf) cancelAnimationFrame(raf); } catch {}
+      emitDiag("unmount");
+    };
+  }, [emitDiag]);
+
+
   const [profileBump, setProfileBump] = useState(0)
   useSyncForumProfileOnMount(() => setProfileBump((x) => x + 1))
     useSyncForumAboutOnMount(() => setProfileBump((x) => x + 1))
@@ -18140,6 +18523,7 @@ const visibleVideoFeed = React.useMemo(
   [videoFeed, visibleVideoCount]
 );
 const videoHasMore = visibleVideoFeed.length < (videoFeed || []).length;
+
 /** пост содержит медиа? (видео/аудио/картинки/YouTube/TikTok) */
 function isMediaPost(p) {
   if (!p) return false;
@@ -19143,7 +19527,206 @@ const clientId =
 // гарантия, что interleaveAds всегда получит >0
 const adEvery = adConf?.EVERY && adConf.EVERY > 0 ? adConf.EVERY : 1;
 
+// =========================================================
+// VIDEO_FEED WINDOWING (виртуализация): держим в DOM только окно возле viewport
+// - решает "вкладка вылетает" на резких скроллах/долгом просмотре (особенно mobile)
+// - карточки далеко от viewport размонтируются => видео/буферы/DOM освобождаются
+// - при возврате вверх/вниз — карточки подгружаются заново без ломания автоплея/быстрого старта
+// =========================================================
+const VF_OVERSCAN_PX = 2200;
+const VF_MAX_RENDER = 15;        // целевой максимум одновременно в DOM (post+ads)
+const VF_EST_ITEM_H = 520;       // fallback, пока реальная высота не измерена
 
+const vfHeightsRef = React.useRef(new Map()); // idx -> px
+const vfRosRef = React.useRef(new Map());     // idx -> ResizeObserver
+const vfRafRef = React.useRef(0);
+
+const [vfWin, setVfWin] = React.useState(() => ({ start: 0, end: 0, top: 0, bottom: 0 }));
+
+const vfSlots = React.useMemo(() => {
+  return debugAdsSlots(
+    'video',
+    interleaveAds(
+      visibleVideoFeed || [],
+      adEvery,
+      {
+        isSkippable: (p) => !p || !p.id,
+        getId: (p) => p?.id || `${p?.topicId || 'vf'}:${p?.ts || 0}`,
+      }
+    )
+  );
+}, [visibleVideoFeed, adEvery]);
+
+const vfGetScrollEl = React.useCallback(() => {
+  try {
+    return (
+      bodyRef.current ||
+      document.querySelector('[data-forum-scroll="1"]') ||
+      null
+    );
+  } catch {}
+  return null;
+}, [bodyRef]);
+
+const vfGetScrollTop = React.useCallback(() => {
+  try {
+    const el = vfGetScrollEl();
+    if (el && el.scrollHeight > el.clientHeight + 1) return el.scrollTop || 0;
+  } catch {}
+  return (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0);
+}, [vfGetScrollEl]);
+
+const vfGetViewportH = React.useCallback(() => {
+  try {
+    const el = vfGetScrollEl();
+    if (el && el.scrollHeight > el.clientHeight + 1) return el.clientHeight || 0;
+  } catch {}
+  return (window.innerHeight || 0);
+}, [vfGetScrollEl]);
+// Унифицированный скролл для контейнера или окна
+const vfScrollBy = React.useCallback((dy) => {
+  if (!dy) return;
+  try {
+    const el = vfGetScrollEl();
+    if (el && el.scrollHeight > el.clientHeight + 1) {
+      el.scrollTop = (el.scrollTop || 0) + dy;
+      return;
+    }
+  } catch {}
+  try { window.scrollBy(0, dy); } catch {}
+}, [vfGetScrollEl]);
+
+const vfGetH = React.useCallback((i) => {
+  const h = vfHeightsRef.current.get(i);
+  return Number.isFinite(h) && h > 1 ? h : VF_EST_ITEM_H;
+}, []);
+
+const vfRecalcWindow = React.useCallback(() => {
+  if (!isBrowser()) return;
+  if (!videoFeedOpen) return;
+
+  const total = vfSlots.length || 0;
+  if (!total) {
+    setVfWin({ start: 0, end: 0, top: 0, bottom: 0 });
+    return;
+  }
+
+  const st = vfGetScrollTop();
+  const vh = vfGetViewportH();
+
+  const fromY = Math.max(0, st - VF_OVERSCAN_PX);
+  const toY = st + vh + VF_OVERSCAN_PX;
+
+  // linear scan (N обычно небольшой из-за пагинации), но безопасно даже на сотнях
+  let acc = 0;
+  let start = 0;
+  while (start < total && (acc + vfGetH(start)) < fromY) {
+    acc += vfGetH(start);
+    start++;
+  }
+
+  let end = start;
+  let acc2 = acc;
+  while (end < total && acc2 < toY) {
+    acc2 += vfGetH(end);
+    end++;
+  }
+
+  // ограничиваем окно по количеству элементов (чтобы DOM не раздувался)
+  if ((end - start) > VF_MAX_RENDER) {
+    const mid = Math.floor((start + end) / 2);
+    const half = Math.floor(VF_MAX_RENDER / 2);
+    start = Math.max(0, mid - half);
+    end = Math.min(total, start + VF_MAX_RENDER);
+  }
+
+  // top/bottom pad
+  let top = 0;
+  for (let i = 0; i < start; i++) top += vfGetH(i);
+  let bottom = 0;
+  for (let i = end; i < total; i++) bottom += vfGetH(i);
+
+  setVfWin((prev) => {
+    if (
+      prev.start === start &&
+      prev.end === end &&
+      prev.top === top &&
+      prev.bottom === bottom
+    ) return prev;
+    return { start, end, top, bottom };
+  });
+}, [
+  videoFeedOpen,
+  vfSlots.length,
+  vfGetScrollTop,
+  vfGetViewportH,
+  vfGetH
+]);
+
+React.useEffect(() => {
+  if (!isBrowser()) return;
+  if (!videoFeedOpen) return;
+
+  const onScroll = () => {
+    if (vfRafRef.current) return;
+    vfRafRef.current = requestAnimationFrame(() => {
+      vfRafRef.current = 0;
+      vfRecalcWindow();
+    });
+  };
+
+  const el = vfGetScrollEl();
+  const opts = { passive: true };
+
+  try { el?.addEventListener?.('scroll', onScroll, opts); } catch {}
+  window.addEventListener('scroll', onScroll, opts);
+  window.addEventListener('resize', onScroll, opts);
+
+  // initial
+  onScroll();
+
+  return () => {
+    try { el?.removeEventListener?.('scroll', onScroll); } catch {}
+    window.removeEventListener('scroll', onScroll);
+    window.removeEventListener('resize', onScroll);
+    if (vfRafRef.current) {
+      try { cancelAnimationFrame(vfRafRef.current); } catch {}
+      vfRafRef.current = 0;
+    }
+  };
+}, [videoFeedOpen, vfRecalcWindow, vfGetScrollEl]);
+
+// измеряем реальные высоты карточек, чтобы spacer'ы были точными (без прыжков скролла)
+const vfMeasureRef = React.useCallback((idx) => (node) => {
+  try {
+    // cleanup (unmount)
+    if (!node) {
+      const ro = vfRosRef.current.get(idx);
+      if (ro) { try { ro.disconnect(); } catch {} }
+      vfRosRef.current.delete(idx);
+      return;
+    }
+
+    const update = () => {
+      try {
+        const h = node.getBoundingClientRect?.()?.height;
+        if (!Number.isFinite(h) || h <= 1) return;
+        const prev = vfHeightsRef.current.get(idx);
+        if (prev === h) return;
+        vfHeightsRef.current.set(idx, h);
+        vfRecalcWindow();
+      } catch {}
+    };
+
+    update();
+
+    if (!vfRosRef.current.get(idx) && typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(() => update());
+      ro.observe(node);
+      vfRosRef.current.set(idx, ro);
+    }
+  } catch {}
+}, [vfRecalcWindow]);
 
 // одна сессия показа рекламы внутри одного тайм-слота (ROTATE_MIN)
 const adSessionRef = useRef({
@@ -20193,74 +20776,78 @@ onClick={()=>{
 {/* ВЕТКА-ЛЕНТА: медиа (видео/аудио/изображения) */}
 <div className="meta">{t('')}</div>
     <div className="grid gap-2" suppressHydrationWarning>
-{debugAdsSlots(
-  'video',
-  interleaveAds(
-    visibleVideoFeed || [],
-    adEvery,
-    {
-      isSkippable: (p) => !p || !p.id,
-      getId: (p) => p?.id || `${p?.topicId || 'vf'}:${p?.ts || 0}`,
-    }
-  )
-).map((slot) => {
-  if (slot.type === 'item') {
-    const p = slot.item;
-    const parent = p?.parentId
-      ? (data?.posts || []).find(x => String(x.id) === String(p.parentId))
-      : null;
 
-const openThreadHere = (clickP) => {
-  // ✅ ветка открывается с заголовком = тот пост, по которому кликнули
-  openThreadForPost(clickP || p, { closeInbox: true, closeVideoFeed: true });
-};
+      {/* windowing spacers */}
+      {vfWin.top > 0 && <div aria-hidden="true" style={{ height: vfWin.top }} />}
 
+      {vfSlots.slice(vfWin.start, vfWin.end).map((slot, __w) => {
+        const __idx = vfWin.start + __w;
 
-    return (
-      <div key={slot.key} id={`post_${p?.id || ''}`} data-feed-card="1" data-feed-kind="post">
-<PostCard
-  p={p}
-  parentPost={parent}
-  parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}
-  parentText={parent ? (parent.text || parent.message || parent.body || '') : ''} 
-  onReport={(post, rect, anchorEl) => openReportPopover(post, rect, anchorEl)}
-  onShare={(post) => openSharePopover(post)}
-  onOpenThread={openThreadHere}
-  onReact={reactMut}
-  isAdmin={isAdmin}
-  onDeletePost={delPost}
-  onOwnerDelete={delPostOwn}  
-  onBanUser={banUser}
-  onUnbanUser={unbanUser}
-  isBanned={bannedSet.has(p?.accountId || p?.userId)}
-  authId={viewerId}
-  markView={markViewPost}
-  t={t}
-  isVideoFeed={true}   // ✅ NEW
-    viewerId={viewerId}
-  starredAuthors={starredAuthors}
-  onToggleStar={toggleAuthorStar}
-  onUserInfoToggle={handleUserInfoToggle}
-/>
+        if (slot.type === 'item') {
+          const p = slot.item;
+          const parent = p?.parentId
+            ? (data?.posts || []).find(x => String(x.id) === String(p.parentId))
+            : null;
 
-      </div>
-    );
-  }
+          const openThreadHere = (clickP) => {
+            // ✅ ветка открывается с заголовком = тот пост, по которому кликнули
+            openThreadForPost(clickP || p, { closeInbox: true, closeVideoFeed: true });
+          };
 
-  const url = pickAdUrlForSlot(slot.key, 'video');
-  if (!url) return null;
+          return (
+            <div
+              key={slot.key}
+              ref={vfMeasureRef(__idx)}
+              id={`post_${p?.id || ''}`}
+              data-feed-card="1"
+              data-feed-kind="post"
+            >
+              <PostCard
+                p={p}
+                parentPost={parent}
+                parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}
+                parentText={parent ? (parent.text || parent.message || parent.body || '') : ''}
+                onReport={(post, rect, anchorEl) => openReportPopover(post, rect, anchorEl)}
+                onShare={(post) => openSharePopover(post)}
+                onOpenThread={openThreadHere}
+                onReact={reactMut}
+                isAdmin={isAdmin}
+                onDeletePost={delPost}
+                onOwnerDelete={delPostOwn}
+                onBanUser={banUser}
+                onUnbanUser={unbanUser}
+                isBanned={bannedSet.has(p?.accountId || p?.userId)}
+                authId={viewerId}
+                markView={markViewPost}
+                t={t}
+                isVideoFeed={true}
+                viewerId={viewerId}
+                starredAuthors={starredAuthors}
+                onToggleStar={toggleAuthorStar}
+                onUserInfoToggle={handleUserInfoToggle}
+              />
+            </div>
+          );
+        }
 
-  return (
-     <ForumAdSlot
-       key={slot.key}
-       slotKey={slot.key}
-       url={url}
-       slotKind="video"
-       nearId={slot.nearId}
-       onResizeDelta={compensateScrollOnResize}
-     />
-  );
-})}
+        const url = pickAdUrlForSlot(slot.key, 'video');
+        if (!url) return null;
+
+        return (
+          <div key={slot.key} ref={vfMeasureRef(__idx)}>
+            <ForumAdSlot
+              slotKey={slot.key}
+              url={url}
+              slotKind="video"
+              nearId={slot.nearId}
+              onResizeDelta={compensateScrollOnResize}
+            />
+          </div>
+        );
+      })}
+
+      {vfWin.bottom > 0 && <div aria-hidden="true" style={{ height: vfWin.bottom }} />}
+
       {videoHasMore && (
         <div className="loadMoreFooter">
           <div className="loadMoreShimmer">
@@ -20275,14 +20862,14 @@ const openThreadHere = (clickP) => {
           />
         </div>
       )}
+
       {videoFeed?.length === 0 && (
         <div className="meta">
           {t('forum_search_empty')}
         </div>
       )}
     </div>
-
-
+ 
   </>
 ) : (questOpen && QUEST_ENABLED) ? (
   <>
@@ -20677,7 +21264,7 @@ onOpenThread={(clickP) => {
                           <div className="dmMediaGrid">
                             {videoUrls.map((src, i) => (
                               <div key={`${m?.id || 'm'}:vid:${i}`} className="videoCard mediaBox dmMediaBox" data-kind="video">
-                                <video
+                                <VideoMedia
                                   data-forum-media="video"
                                   src={src}
                                   playsInline
@@ -20692,6 +21279,7 @@ onOpenThread={(clickP) => {
                             ))}
                           </div>
                         )}
+
                         {!!audioUrls.length && (
                           <div className="dmMediaGrid">
                             {audioUrls.map((src, i) => (
@@ -21605,26 +22193,24 @@ onClick={()=>{
     </span>
     </button> 
 </div>
-
-
-    <div className="slot-center">
+ 
+<div className="slot-center">
 
   {/* Центр: быстрые действия (создать тему / открыть видео-ленту) */}
-  <button
-    type="button"
-    className="iconBtn bigPlus"
+      <button
+        type="button"
+        className="iconBtn bigPlus"
         title={t('forum_create')}
         aria-label={t('forum_create')}
-    onClick={() => {
-  try { if (videoFeedOpen) closeVideoFeed?.() } catch {}
-  try { setInboxOpen?.(false) } catch {}
-  try { setReplyTo?.(null) } catch {}
-  try { setThreadRoot?.(null) } catch {}
-  try { setSel?.(null) } catch {}
-  setTimeout(() => { try { window.__forumToggleCreateTopic?.() } catch {} }, 0)
-}}
-
-  >
+        onClick={() => {
+          try { if (videoFeedOpen) closeVideoFeed?.() } catch {}
+          try { setInboxOpen?.(false) } catch {}
+          try { setReplyTo?.(null) } catch {}
+          try { setThreadRoot?.(null) } catch {}
+          try { setSel?.(null) } catch {}
+              setTimeout(() => { try { window.__forumToggleCreateTopic?.() } catch {} }, 0)
+        }}
+       >
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
         </svg>
@@ -21830,7 +22416,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
           )}
       </div>
 
-      </div>
+    </div>
 </section>
 )}
 {(sel || dmMode) && (
@@ -21984,7 +22570,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
                   </svg>
                 )
               }
-          {mediaLocked && <span className="lockBadge" aria-hidden="true">🔒</span>}
+              {mediaLocked && <span className="lockBadge" aria-hidden="true">🔒</span>}
             </button>
           </div>
 
@@ -22018,8 +22604,8 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
             <span className="micTimer" aria-live="polite">{fmtSec(recElapsed)}</span>
           )}  
        {mediaLocked && <span className="lockBadge" aria-hidden="true">🔒</span>}  
-  </button>
-</div>
+    </button>
+  </div>
 
           {/* 6) Отправка */}
           <div className="railItem">
@@ -22101,8 +22687,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
     </button>
   </div>
 )}
-
-    </div>
+  </div>
 
     {/* превью вложений (оставляем как было) */}
     {pendingImgs.length > 0 && (
@@ -22169,15 +22754,15 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
       <button
         type="button"
         title={t?.('forum_open_fullscreen')}
-onClick={() => {
-  // открываем ТОТ ЖЕ VideoOverlay, что и для камеры/превью
-  try { saveComposerScroll(); } catch {}
-  try { setOverlayMediaKind?.('video'); } catch {}
-  // pendingVideo уже пробрасывается в previewUrl через props, поэтому url можно не дублировать
-  try { setOverlayMediaUrl?.(null); } catch {}
-  try { setVideoState?.('preview'); } catch {}
-  try { setVideoOpen?.(true); } catch {}
-}}
+        onClick={() => {
+         // открываем ТОТ ЖЕ VideoOverlay, что и для камеры/превью
+           try { saveComposerScroll(); } catch {}
+           try { setOverlayMediaKind?.('video'); } catch {}
+        // pendingVideo уже пробрасывается в previewUrl через props, поэтому url можно не дублировать
+           try { setOverlayMediaUrl?.(null); } catch {}
+           try { setVideoState?.('preview'); } catch {}
+           try { setVideoOpen?.(true); } catch {}
+        }}
         style={{
           position: 'absolute',
           right: 8,
@@ -22238,7 +22823,7 @@ onClick={() => {
   </div>
 )}
 
-{pendingAudio && (
+    {pendingAudio && (
       <div className="attachPreviewRow mt-2">
         <div className="audioCard preview">
           <div className="audioIcon" aria-hidden>
@@ -22247,7 +22832,7 @@ onClick={() => {
               <path d="M5 11a7 7 0 0014 0M12 18v3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
             </svg>
           </div>
-        <DmVoicePlayer src={pendingAudio} preview />
+            <DmVoicePlayer src={pendingAudio} preview />
           <button type="button" className="audioRemove" title={t('forum_remove')} onClick={()=> setPendingAudio(null)}>❌</button>
         </div>
       </div>
@@ -22291,7 +22876,7 @@ onClick={() => {
           {/* контент вкладок — только фильтрация, логика скролла неизменна */}
           {emojiTab === 'stickers' ? (
             <>
-              <div className="emojiTitle">{t?.('forum_emoji_vip')}</div>
+            <div className="emojiTitle">{t?.('forum_emoji_vip')}</div>
               <div className="emojiGrid">
                 {VIP_EMOJI.map((e) => (
                   <button
@@ -22301,9 +22886,9 @@ onClick={() => {
                     onClick={() => { addEmoji(e); setEmojiOpen(false); }}
                     title=""
                   >
-  {typeof e === 'string' && e.startsWith('/')
-    ? <Image src={e} alt="" className="vipEmojiIcon" width={64} height={64} unoptimized />
-    : <span className="vipEmojiIcon">{e}</span>}
+                {typeof e === 'string' && e.startsWith('/')
+                    ? <Image src={e} alt="" className="vipEmojiIcon" width={64} height={64} unoptimized />
+                    : <span className="vipEmojiIcon">{e}</span>}
                   </button>
                 ))}
               </div>
@@ -22412,8 +22997,7 @@ function QuestHub({
       }
     `}</style>
   );
-
-
+ 
   /* === общий тик раз в секунду, хук — всегда, работа только при открытой карточке === */
   const [__questTick, __setQuestTick] = React.useState(0);
   React.useEffect(() => {
@@ -22637,10 +23221,7 @@ function QuestHub({
         })}
       </div>
     );
-  }
-
-
-
+  } 
 
   /* ===== Детали выбранной карточки ===== */
   const q = selected;
@@ -22788,14 +23369,12 @@ function QuestHub({
       </div>
     </div>
   );
-}
-
-
+} 
 
 /* =========================================================
    Карточка создания темы
 ========================================================= */
-function CreateTopicCard({ t, onCreate, onOpenVideoFeed }){
+function CreateTopicCard({ t, onCreate,}){
   const [open,setOpen] = useState(false)
   const [busy,setBusy] = useState(false)
   const [title,setTitle] = useState(''), [descr,setDescr] = useState(''), [first,setFirst] = useState('')
@@ -22925,6 +23504,4 @@ function CreateTopicCard({ t, onCreate, onOpenVideoFeed }){
     </div>
   )
 } 
-
-
-
+ 

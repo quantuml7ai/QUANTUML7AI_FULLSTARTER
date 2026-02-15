@@ -237,14 +237,19 @@ export default function QCoinDropFX ({
       }
 
       setTick((x) => (x + 1) & 1023)
-      animFrameRef.current = requestAnimationFrame(loop)
+
+      // ВАЖНО: если компонент уже размонтирован (cleanup выставил stopped),
+      // не планируем следующий кадр, чтобы не оставлять "висящий" RAF.
+      if (!stopped) animFrameRef.current = requestAnimationFrame(loop)
     }
 
     animFrameRef.current = requestAnimationFrame(loop)
 
     return () => {
       stopped = true
-      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current)
+      const rafId = animFrameRef.current
+      animFrameRef.current = null
+      if (rafId) cancelAnimationFrame(rafId)
     }
   }, [uid, intervalMs, minSize, maxSize, initWorld])
 
