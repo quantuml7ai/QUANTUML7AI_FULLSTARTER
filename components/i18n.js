@@ -48215,7 +48215,7 @@ const ROBOT_EN = {
   forum_video_processing_wait: 'Please wait, the video is being processed',
 forum_image_processing_wait: 'Please wait, the image is being processed',
 
-forum_delete_confirm: '⚠️Delete permanently?⚠️',  
+forum_delete_confirm: '☣️Delete permanently?☣️',  
 not_robot_title:'🤖 I AM NOT A ROBOT 🤖',
 not_robot_subtitle:'Confirm that you are human to continue using the platform.',
 not_robot_instruction:'Select the coin on the field below that matches the one shown.',
@@ -48234,7 +48234,7 @@ const ROBOT_RU = {
   forum_video_processing_wait: 'Подождите, видео обрабатывается',
 forum_image_processing_wait: 'Подождите, изображение обрабатывается',
 
-forum_delete_confirm: '⚠️Удалить навсегда?⚠️',  
+forum_delete_confirm: '☣️Удалить навсегда?☣️',  
 not_robot_title:'🤖 Я НЕ РОБОТ 🤖',
 not_robot_subtitle:'Подтвердите, что вы человек, чтобы продолжить работу с платформой.',
 not_robot_instruction:'Выберите на поле ниже монету, которая совпадает с указанной',
@@ -48253,7 +48253,7 @@ const ROBOT_UK = {
   forum_video_processing_wait: 'Зачекайте, відео обробляється',
 forum_image_processing_wait: 'Зачекайте, зображення обробляється',
 
-forum_delete_confirm: '⚠️Видалити назавжди?⚠️',  
+forum_delete_confirm: '☣️Видалити назавжди?☣️',  
 not_robot_title:'🤖 Я НЕ РОБОТ 🤖',
 not_robot_subtitle:'Підтвердіть, що ви людина, щоб продовжити роботу з платформою.',
 not_robot_instruction:'Виберіть на полі нижче монету, яка співпадає із зазначеною.',
@@ -48272,7 +48272,7 @@ const ROBOT_ES = {
   forum_video_processing_wait: 'Espere, el video se está procesando',
 forum_image_processing_wait: 'Espere, la imagen se está procesando',
 
-forum_delete_confirm: '⚠️¿Eliminar permanentemente?⚠️',  
+forum_delete_confirm: '☣️¿Eliminar permanentemente?☣️',  
 not_robot_title:'🤖 NO SOY UN ROBOT 🤖',
 not_robot_subtitle:'Confirme que usted es una persona para continuar utilizando la plataforma.',
 not_robot_instruction:'Seleccione en el campo de abajo la moneda que coincide con la indicada.',
@@ -48291,7 +48291,7 @@ const ROBOT_ZH = {
   forum_video_processing_wait: '请稍候，视频正在处理中',
 forum_image_processing_wait: '请稍候，图像正在处理中',
 
-forum_delete_confirm: '⚠️永久删除？⚠️',  
+forum_delete_confirm: '☣️永久删除？☣️',  
 not_robot_title:'🤖 我不是机器人 🤖',
 not_robot_subtitle:'请确认您是人类，以继续使用平台。',
 not_robot_instruction:'请在下方区域选择与所示一致的币种。',
@@ -48310,7 +48310,7 @@ const ROBOT_AR = {
   forum_video_processing_wait: 'يرجى الانتظار، يتم معالجة الفيديو',
 forum_image_processing_wait: 'يرجى الانتظار، تتم معالجة الصورة',
 
-forum_delete_confirm: '⚠️حذف نهائي؟⚠️',  
+forum_delete_confirm: '☣️حذف نهائي؟☣️',  
 not_robot_title:'🤖 لستُ روبوتًا 🤖',
 not_robot_subtitle:'يرجى تأكيد أنك إنسان لمتابعة العمل على المنصة.',
 not_robot_instruction:'اختر من الحقل أدناه العملة المطابقة للعملة المعروضة.',
@@ -48329,7 +48329,7 @@ const ROBOT_TR = {
   forum_video_processing_wait: 'Lütfen bekleyin, video işleniyor',
 forum_image_processing_wait: 'Lütfen bekleyin, görüntü işleniyor',
 
-forum_delete_confirm: '⚠️Kalıcı olarak silinsin mi?⚠️',  
+forum_delete_confirm: '☣️Kalıcı olarak silinsin mi?☣️',  
 not_robot_title:'🤖 ROBOT DEĞİLİM 🤖',
 not_robot_subtitle:'Platformu kullanmaya devam etmek için lütfen insan olduğunuzu doğrulayın.',
 not_robot_instruction:'Aşağıdaki alandan belirtilenle eşleşen coin’i seçin.',

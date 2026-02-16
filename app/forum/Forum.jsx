@@ -1864,7 +1864,7 @@ const Styles = () => (
       align-items:center;
       justify-content:center;
     }
-    .mediaBox[data-kind="video"]{ --mb-h: var(--mb-video-h); background:#000; }
+    .mediaBox[data-kind="video"]{ --mb-h: var(--mb-video-h); height: var(--mb-video-h); max-height: var(--mb-video-h); background:#000; }
     .mediaBox[data-kind="image"]{ --mb-h: var(--mb-image-h); }
     .mediaBox[data-kind="iframe"]{ --mb-h: var(--mb-iframe-h); background:#000; }
     .mediaBox[data-kind="audio"]{ --mb-h: var(--mb-audio-h); }
@@ -1892,6 +1892,12 @@ const Styles = () => (
       min-height: var(--mb-video-min-h, 0px);
       max-height:100%;
       background:#000;
+    }
+
+    /* Video/iframe cards: фиксируем внутренний плеер по высоте контейнера */
+    .mediaBox[data-kind="video"] > video{
+      height:100%;
+      min-height:100%;
     }
 
     /* iframe: по умолчанию 16:9, для TikTok — 9:16 */
@@ -12055,129 +12061,129 @@ function AboutRail({
    Основной компонент
 ========================================================= */
 export default function Forum(){
-  // ===== FORUM DIAG (writes to /forum-diag.jsonl via API) =====
-  const diagSeqRef = useRef(0);
-  const diagLastSentRef = useRef(0);
+  // // ===== FORUM DIAG (writes to /forum-diag.jsonl via API) =====
+  // const diagSeqRef = useRef(0);
+  // const diagLastSentRef = useRef(0);
 
-  const emitDiag = useCallback(async (event, extra = {}) => {
-    try {
-      const now = Date.now();
-      // не спамим чаще чем раз в 1500мс (кроме ошибок)
-      if (event !== "error" && event !== "unhandledrejection") {
-        if (now - diagLastSentRef.current < 1500) return;
-        diagLastSentRef.current = now;
-      }
+  // const emitDiag = useCallback(async (event, extra = {}) => {
+  //   try {
+  //     const now = Date.now();
+  //     // не спамим чаще чем раз в 1500мс (кроме ошибок)
+  //     if (event !== "error" && event !== "unhandledrejection") {
+  //       if (now - diagLastSentRef.current < 1500) return;
+  //       diagLastSentRef.current = now;
+  //     }
 
-      const videos = Array.from(document.querySelectorAll("video"));
-      let playing = 0;
-      for (const v of videos) {
-        try {
-          if (!v.paused && !v.ended && v.readyState >= 2) playing++;
-        } catch {}
-      }
+  //     const videos = Array.from(document.querySelectorAll("video"));
+  //     let playing = 0;
+  //     for (const v of videos) {
+  //       try {
+  //         if (!v.paused && !v.ended && v.readyState >= 2) playing++;
+  //       } catch {}
+  //     }
 
-      const mem = (performance && performance.memory) ? {
-        usedJSHeapSize: performance.memory.usedJSHeapSize,
-        totalJSHeapSize: performance.memory.totalJSHeapSize,
-        jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
-      } : null;
+  //     const mem = (performance && performance.memory) ? {
+  //       usedJSHeapSize: performance.memory.usedJSHeapSize,
+  //       totalJSHeapSize: performance.memory.totalJSHeapSize,
+  //       jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
+  //     } : null;
 
-      const payload = {
-        seq: ++diagSeqRef.current,
-        event,
-        href: String(location?.href || ""),
-        vis: String(document?.visibilityState || ""),
-        ua: typeof navigator !== "undefined" ? navigator.userAgent : "",
-        deviceMemory: typeof navigator !== "undefined" ? navigator.deviceMemory : undefined,
-        // scroll snapshot
-        scrollY: typeof window !== "undefined" ? window.scrollY : undefined,
-        innerH: typeof window !== "undefined" ? window.innerHeight : undefined,
-        docH: document?.documentElement?.scrollHeight,
-        // media snapshot
-        videos: videos.length,
-        videosPlaying: playing,
-        // memory snapshot (only Chrome usually)
-        mem,
-        extra,
-      };
+  //     const payload = {
+  //       seq: ++diagSeqRef.current,
+  //       event,
+  //       href: String(location?.href || ""),
+  //       vis: String(document?.visibilityState || ""),
+  //       ua: typeof navigator !== "undefined" ? navigator.userAgent : "",
+  //       deviceMemory: typeof navigator !== "undefined" ? navigator.deviceMemory : undefined,
+  //       // scroll snapshot
+  //       scrollY: typeof window !== "undefined" ? window.scrollY : undefined,
+  //       innerH: typeof window !== "undefined" ? window.innerHeight : undefined,
+  //       docH: document?.documentElement?.scrollHeight,
+  //       // media snapshot
+  //       videos: videos.length,
+  //       videosPlaying: playing,
+  //       // memory snapshot (only Chrome usually)
+  //       mem,
+  //       extra,
+  //     };
 
-      // Пишем и в консоль тоже (чтобы сразу видеть)
-      try { console.log("[FORUM-DIAG]", payload); } catch {}
+  //     // Пишем и в консоль тоже (чтобы сразу видеть)
+  //     try { console.log("[FORUM-DIAG]", payload); } catch {}
 
-      // Отправка на сервер, который пишет forum-diag.jsonl в корень проекта
-      await fetch("/api/debug/forum-diag", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(payload),
-        cache: "no-store",
-      }).catch(() => {});
-    } catch {}
-  }, []);
+  //     // Отправка на сервер, который пишет forum-diag.jsonl в корень проекта
+  //     await fetch("/api/debug/forum-diag", {
+  //       method: "POST",
+  //       headers: { "content-type": "application/json" },
+  //       body: JSON.stringify(payload),
+  //       cache: "no-store",
+  //     }).catch(() => {});
+  //   } catch {}
+  // }, []);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+  // useEffect(() => {
+  //   if (typeof window === "undefined") return;
 
-    // стартовая отметка
-    emitDiag("mount");
+  //   // стартовая отметка
+  //   emitDiag("mount");
 
-    const onErr = (e) => {
-      emitDiag("error", {
-        message: String(e?.message || ""),
-        filename: String(e?.filename || ""),
-        lineno: e?.lineno,
-        colno: e?.colno,
-        // stack иногда огромный — режем
-        stack: String(e?.error?.stack || "").slice(0, 4000),
-      });
-    };
+  //   const onErr = (e) => {
+  //     emitDiag("error", {
+  //       message: String(e?.message || ""),
+  //       filename: String(e?.filename || ""),
+  //       lineno: e?.lineno,
+  //       colno: e?.colno,
+  //       // stack иногда огромный — режем
+  //       stack: String(e?.error?.stack || "").slice(0, 4000),
+  //     });
+  //   };
 
-    const onRej = (e) => {
-      const r = e?.reason;
-      emitDiag("unhandledrejection", {
-        reason: typeof r === "string" ? r : (r?.message || "[non-string reason]"),
-        stack: String(r?.stack || "").slice(0, 4000),
-      });
-    };
+  //   const onRej = (e) => {
+  //     const r = e?.reason;
+  //     emitDiag("unhandledrejection", {
+  //       reason: typeof r === "string" ? r : (r?.message || "[non-string reason]"),
+  //       stack: String(r?.stack || "").slice(0, 4000),
+  //     });
+  //   };
 
-    const onVis = () => emitDiag("visibilitychange");
-    const onHide = (e) => emitDiag("pagehide", { persisted: !!e?.persisted });
-    const onBeforeUnload = () => emitDiag("beforeunload");
+  //   const onVis = () => emitDiag("visibilitychange");
+  //   const onHide = (e) => emitDiag("pagehide", { persisted: !!e?.persisted });
+  //   const onBeforeUnload = () => emitDiag("beforeunload");
 
-    window.addEventListener("error", onErr);
-    window.addEventListener("unhandledrejection", onRej);
-    document.addEventListener("visibilitychange", onVis);
-    window.addEventListener("pagehide", onHide);
-    window.addEventListener("beforeunload", onBeforeUnload);
+  //   window.addEventListener("error", onErr);
+  //   window.addEventListener("unhandledrejection", onRej);
+  //   document.addEventListener("visibilitychange", onVis);
+  //   window.addEventListener("pagehide", onHide);
+  //   window.addEventListener("beforeunload", onBeforeUnload);
 
-    // периодический снимок, чтобы поймать рост памяти ДО “выбивания”
-    const id = setInterval(() => {
-      if (document.visibilityState !== "visible") return;
-      emitDiag("tick");
-    }, 5000);
+  //   // периодический снимок, чтобы поймать рост памяти ДО “выбивания”
+  //   const id = setInterval(() => {
+  //     if (document.visibilityState !== "visible") return;
+  //     emitDiag("tick");
+  //   }, 5000);
 
-    // снимок после резкого скролла (throttle через raf)
-    let raf = 0;
-    const onScroll = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(() => {
-        raf = 0;
-        emitDiag("scroll");
-      });
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
+  //   // снимок после резкого скролла (throttle через raf)
+  //   let raf = 0;
+  //   const onScroll = () => {
+  //     if (raf) return;
+  //     raf = requestAnimationFrame(() => {
+  //       raf = 0;
+  //       emitDiag("scroll");
+  //     });
+  //   };
+  //   window.addEventListener("scroll", onScroll, { passive: true });
 
-    return () => {
-      try { clearInterval(id); } catch {}
-      try { window.removeEventListener("error", onErr); } catch {}
-      try { window.removeEventListener("unhandledrejection", onRej); } catch {}
-      try { document.removeEventListener("visibilitychange", onVis); } catch {}
-      try { window.removeEventListener("pagehide", onHide); } catch {}
-      try { window.removeEventListener("beforeunload", onBeforeUnload); } catch {}
-      try { window.removeEventListener("scroll", onScroll); } catch {}
-      try { if (raf) cancelAnimationFrame(raf); } catch {}
-      emitDiag("unmount");
-    };
-  }, [emitDiag]);
+  //   return () => {
+  //     try { clearInterval(id); } catch {}
+  //     try { window.removeEventListener("error", onErr); } catch {}
+  //     try { window.removeEventListener("unhandledrejection", onRej); } catch {}
+  //     try { document.removeEventListener("visibilitychange", onVis); } catch {}
+  //     try { window.removeEventListener("pagehide", onHide); } catch {}
+  //     try { window.removeEventListener("beforeunload", onBeforeUnload); } catch {}
+  //     try { window.removeEventListener("scroll", onScroll); } catch {}
+  //     try { if (raf) cancelAnimationFrame(raf); } catch {}
+  //     emitDiag("unmount");
+  //   };
+  // }, [emitDiag]);
 
 
   const [profileBump, setProfileBump] = useState(0)
@@ -19535,12 +19541,49 @@ const adEvery = adConf?.EVERY && adConf.EVERY > 0 ? adConf.EVERY : 1;
 // =========================================================
 const VF_OVERSCAN_PX = 2200;
 const VF_MAX_RENDER = 15;        // целевой максимум одновременно в DOM (post+ads)
-const VF_EST_ITEM_H = 520;       // fallback, пока реальная высота не измерена
+const VF_VIDEO_CARD_H_MOBILE = 700;  // совпадает с --mb-video-h-mobile
+const VF_VIDEO_CARD_H_TABLET = 550;  // совпадает с --mb-video-h-tablet
+const VF_VIDEO_CARD_H_DESKTOP = 550; // совпадает с --mb-video-h-desktop
 
-const vfHeightsRef = React.useRef(new Map()); // idx -> px
-const vfRosRef = React.useRef(new Map());     // idx -> ResizeObserver
-const vfRafRef = React.useRef(0);
+// высоты рекламных слотов (совпадает с --mb-ad-h-*)
+const VF_AD_CARD_H_MOBILE = 200;
+const VF_AD_CARD_H_TABLET = 260;
+const VF_AD_CARD_H_DESKTOP = 320;
 
+// оценка "хрома" посткарточки (шапка/текст/кнопки) для стартового windowing до измерения
+// важно: это НЕ резерв "пока не загрузилось видео", это оценка общей карточки до ResizeObserver
+const VF_ITEM_CHROME_EST = 240;
+
+
+// фиксированная высота карточки (без измерений / резервов «520px»)
+const vfGetFixedItemH = () => {
+  try {
+    if (!isBrowser()) return VF_VIDEO_CARD_H_TABLET;
+    const w = window?.innerWidth || 0;
+    if (w >= 1024) return VF_VIDEO_CARD_H_DESKTOP;
+    if (w >= 640) return VF_VIDEO_CARD_H_TABLET;
+    return VF_VIDEO_CARD_H_MOBILE;
+  } catch {
+    return VF_VIDEO_CARD_H_TABLET;
+  }
+};
+const vfGetFixedAdH = () => {
+  try {
+    if (!isBrowser()) return VF_AD_CARD_H_TABLET;
+    const w = window?.innerWidth || 0;
+    if (w >= 1024) return VF_AD_CARD_H_DESKTOP;
+    if (w >= 640) return VF_AD_CARD_H_TABLET;
+    return VF_AD_CARD_H_MOBILE;
+  } catch {
+    return VF_AD_CARD_H_TABLET;
+  }
+};
+
+// карта реальных измеренных высот (idx -> px)
+const vfHeightsRef = React.useRef(new Map());
+const vfRosRef = React.useRef(new Map());
+
+const vfRafRef = React.useRef(0); 
 const [vfWin, setVfWin] = React.useState(() => ({ start: 0, end: 0, top: 0, bottom: 0 }));
 
 const vfSlots = React.useMemo(() => {
@@ -19596,10 +19639,22 @@ const vfScrollBy = React.useCallback((dy) => {
   try { window.scrollBy(0, dy); } catch {}
 }, [vfGetScrollEl]);
 
+const vfEstimateH = React.useCallback((i) => {
+  const slot = vfSlots?.[i];
+  // реклама: берем фикс высоты рекламного блока
+  if (slot && slot.type !== 'item') {
+    return vfGetFixedAdH();
+  }
+  // пост: фикс медиабокса видео + оценка "хрома" карточки
+  return vfGetFixedItemH() + VF_ITEM_CHROME_EST;
+}, [vfSlots]);
+
 const vfGetH = React.useCallback((i) => {
   const h = vfHeightsRef.current.get(i);
-  return Number.isFinite(h) && h > 1 ? h : VF_EST_ITEM_H;
-}, []);
+  if (Number.isFinite(h) && h > 1) return h;
+  return vfEstimateH(i);
+}, [vfEstimateH]);
+
 
 const vfRecalcWindow = React.useCallback(() => {
   if (!isBrowser()) return;
@@ -19696,10 +19751,10 @@ React.useEffect(() => {
   };
 }, [videoFeedOpen, vfRecalcWindow, vfGetScrollEl]);
 
-// измеряем реальные высоты карточек, чтобы spacer'ы были точными (без прыжков скролла)
+// измеряем реальные высоты карточек (это стабилизирует windowing и убирает "вылеты")
 const vfMeasureRef = React.useCallback((idx) => (node) => {
   try {
-    // cleanup (unmount)
+    // unmount cleanup
     if (!node) {
       const ro = vfRosRef.current.get(idx);
       if (ro) { try { ro.disconnect(); } catch {} }
@@ -19727,6 +19782,21 @@ const vfMeasureRef = React.useCallback((idx) => (node) => {
     }
   } catch {}
 }, [vfRecalcWindow]);
+
+// при смене брейкпоинта очищаем кэш высот и пересчитываем окно (иначе возможны дерготня/рассинхрон)
+React.useEffect(() => {
+  if (!isBrowser()) return;
+  if (!videoFeedOpen) return;
+  const onResize = () => {
+    try {
+      vfHeightsRef.current.clear();
+      // observers оставляем: элементы в DOM переизмерятся сами
+    } catch {}
+    vfRecalcWindow();
+  };
+  window.addEventListener('resize', onResize, { passive: true });
+  return () => window.removeEventListener('resize', onResize);
+}, [videoFeedOpen, vfRecalcWindow]);
 
 // одна сессия показа рекламы внутри одного тайм-слота (ROTATE_MIN)
 const adSessionRef = useRef({
