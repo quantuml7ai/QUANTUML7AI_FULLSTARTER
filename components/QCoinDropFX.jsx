@@ -41,10 +41,7 @@ const DEFAULT_INTERVAL_MS = 120_000  // раз в минуту
 const DEFAULT_MIN_SIZE = 25
 const DEFAULT_MAX_SIZE = 50
 
-/* ===== УМНЫЕ МНОЖИТЕЛИ (ТОЛЬКО В ПЛЮС, ДО x100) =====
-   Идём от значения из ENV (минимум) и до xMAX вверх.
-   Редко, но возможно x100.
-*/
+/* ===== УМНЫЕ МНОЖИТЕЛИ (ТОЛЬКО В ПЛЮС, ДО x100) ===== */
 const ENV_BASE_MULT = (() => {
   const raw = (typeof process !== 'undefined' && process?.env)
     ? (process.env.NEXT_PUBLIC_QCOIN_DROP_BASE_MULT || process.env.NEXT_PUBLIC_QCOIN_BASE_MULT || '1')
@@ -63,7 +60,7 @@ const ENV_MAX_MULT = (() => {
 
 const clampInt = (v, a, b) => Math.max(a, Math.min(b, (v | 0)))
 
-// ✅ более “настоящий” рандом (crypto) + fallback
+// ✅ крипто-рандом + fallback
 function rng () {
   if (!isBrowser()) return Math.random()
   const c = window.crypto || window.msCrypto
@@ -77,37 +74,138 @@ function rng () {
 const rand = (a = 0, b = 1) => a + rng() * (b - a)
 const randInt = (a, b) => (a + ((rng() * (b - a + 1)) | 0))
 
-// ✅ Абсолютный рандом в диапазоне [base..max] с сильным упором на <=50,
-// и крайне редкими 51..100 (включая x100). Никаких “всегда lo”.
+/**
+ * ✅ АНТИ-ПОВТОРЫ (в т.ч. после перезагрузки):
+ * храним последние N множителей в localStorage и стараемся их избегать.
+ */
+const MULT_HIST_KEY = 'qdrop_mult_hist_v1'
+const MULT_HIST_MAX = 9
+const MULT_HIST_TTL_MS = 1000 * 60 * 60 * 24 // 24h
+
+function readMultHist () {
+  if (!isBrowser()) return []
+  try {
+    const raw = window.localStorage.getItem(MULT_HIST_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    const now = Date.now()
+    const arr = Array.isArray(parsed) ? parsed : []
+    // [{m:number, t:number}]
+    return arr
+      .filter((x) => x && Number.isFinite(x.m) && Number.isFinite(x.t) && (now - x.t) <= MULT_HIST_TTL_MS)
+      .slice(-MULT_HIST_MAX)
+  } catch {
+    return []
+  }
+}
+
+function writeMultHist (m) {
+  if (!isBrowser()) return
+  try {
+    const now = Date.now()
+    const prev = readMultHist()
+    const next = [...prev, { m: Math.floor(m), t: now }].slice(-MULT_HIST_MAX)
+    window.localStorage.setItem(MULT_HIST_KEY, JSON.stringify(next))
+  } catch {}
+}
+
+/**
+ * ✅ РАНДОМ "КАК ТЫ ХОЧЕШЬ":
+ * - x1 не залипает (если base=1 — делаем x1 ОЧЕНЬ редким)
+ * - чаще значения до x50 (и там почти равномерно, много разных: x34, x49, x12…)
+ * - редко 51..80
+ * - очень редко 81..99
+ * - ультра-редко x100 (если max>=100)
+ * + сверху анти-повтор (в т.ч. между перезагрузками)
+ */
 function pickSmartMultiplier (base = 1, max = 100) {
   const lo = Math.max(1, Math.floor(base))
   const hi = Math.max(lo, Math.floor(max))
   if (lo === hi) return lo
 
-  const cap50 = Math.min(hi, 50)
+  const hist = readMultHist().map((x) => x.m)
+  const inHist = (v) => hist.includes(v)
 
-  // если max <= 50 — skew к низким, но не фикс
-  if (hi <= 50) {
-    const span = Math.max(1, hi - lo)
-    const t = Math.pow(rng(), 2.1)
-    return clampInt(lo + Math.floor(t * span + 0.000001), lo, hi)
+  const pickOnce = () => {
+    // если base=1 — x1 делаем ультра-редким (0.6%)
+    if (lo === 1 && rng() < 0.006) return 1
+
+    // основной коридор, чтобы не было постоянных x1:
+    // минимальный "живой" низ — 2, но если lo>2, тогда lo
+    const lowMain = Math.max(lo, 2)
+    const hi50 = Math.min(hi, 50)
+    const hi80 = Math.min(hi, 80)
+    const hi99 = Math.min(hi, 99)
+
+    // если весь диапазон <=50 — просто почти равномерно по нему (без залипания в low)
+    if (hi <= 50) {
+      if (lowMain > hi) return clampInt(lo, lo, hi)
+      // лёгкий анти-край (чуть меньше шанса на lowMain и hi)
+      // трюк: берём среднее из 2 равномерных -> больше середины, меньше краёв
+      const u = (rng() + rng()) / 2
+      const span = Math.max(1, hi - lowMain)
+      return clampInt(lowMain + Math.floor(u * (span + 1)), lowMain, hi)
+    }
+
+    // диапазон >50:
+    const u = rng()
+
+    // 90% — [lowMain..50] (самая "богатая" зона по разнообразию)
+    if (u < 0.90 && lowMain <= hi50) {
+      // ближе к середине 2..50 (много разных значений), но всё равно широко
+      const v = (rng() + rng()) / 2
+      const span = Math.max(1, hi50 - lowMain)
+      return clampInt(lowMain + Math.floor(v * (span + 1)), lowMain, hi50)
+    }
+
+    // 8% — [51..80] (если доступно)
+    if (u < 0.98 && hi >= 51) {
+      const a = Math.max(lo, 51)
+      const b = Math.max(a, hi80)
+      // чуть чаще 60-75, чем ровно 51
+      const v = (rng() + rng() + rng()) / 3
+      const span = Math.max(1, b - a)
+      return clampInt(a + Math.floor(v * (span + 1)), a, b)
+    }
+
+    // 1.8% — [81..99] (если доступно)
+    if (u < 0.998 && hi >= 81) {
+      const a = Math.max(lo, 81)
+      const b = Math.max(a, hi99)
+      const v = (rng() + rng() + rng()) / 3
+      const span = Math.max(1, b - a)
+      return clampInt(a + Math.floor(v * (span + 1)), a, b)
+    }
+
+    // 0.2% — x100 (джекпот) если можно, иначе просто верх диапазона
+    if (hi >= 100) return 100
+
+    // если max < 100, но мы в "джекпот ветке" — даём верхнюю часть  (max-3..max)
+    const a = Math.max(lo, hi - 3)
+    return randInt(a, hi)
   }
 
-  // max > 50
-  const u = rng()
-
-  // 99.2% — из [lo..50] (если lo<=50)
-  if (lo <= 50 && u < 0.992) {
-    const span = Math.max(1, cap50 - lo)
-    const t = Math.pow(rng(), 2.0)
-    return clampInt(lo + Math.floor(t * span + 0.000001), lo, cap50)
+  // анти-повтор: пробуем несколько раз подобрать значение, которого не было недавно
+  let chosen = null
+  for (let i = 0; i < 16; i++) {
+    const v = pickOnce()
+    if (!inHist(v)) {
+      chosen = v
+      break
+    }
+    // если всё-таки попали в историю, чуть-чуть “подталкиваем” значение
+    // (не ломая диапазон)
+    const bump = (rng() < 0.5 ? -1 : 1) * (1 + ((rng() * 3) | 0))
+    const vb = clampInt(v + bump, lo, hi)
+    if (!inHist(vb)) {
+      chosen = vb
+      break
+    }
   }
+  if (chosen == null) chosen = pickOnce()
 
-  // 0.8% — из [51..hi] (или если lo>50)
-  const from = Math.max(lo, 51)
-  const span = Math.max(1, hi - from)
-  const t = Math.pow(rng(), 1.8)
-  return clampInt(from + Math.floor(t * span + 0.000001), from, hi)
+  writeMultHist(chosen)
+  return chosen
 }
 
 // Тир эффекта по множителю (визуал «пушка»)
@@ -318,7 +416,7 @@ export default function QCoinDropFX ({
           const size = minSize + depth * (maxSize - minSize)
           const baseVy = 60 + 50 * depth
 
-          // ✅ АБСОЛЮТНЫЙ РАНДОМ (от ENV_BASE до ENV_MAX), чаще до x50, редко до x100
+          // ✅ НОРМАЛЬНЫЙ РАНДОМ: много разных значений, x1 очень редко, до x50 чаще
           const mult = pickSmartMultiplier(ENV_BASE_MULT, ENV_MAX_MULT)
 
           coin = {
@@ -498,7 +596,7 @@ export default function QCoinDropFX ({
     return ''
   }
 
-  /* ===== ✅ typing-эффект награды (без CSS steps(var()) чтобы не было пусто) ===== */
+  /* ===== ✅ typing-эффект награды (никогда не пустой) ===== */
   useEffect(() => {
     if (!toast) {
       setTyped({ title: '', reward: '', mult: '' })
@@ -512,15 +610,21 @@ export default function QCoinDropFX ({
     })} QCoin 🎁`
     const fullMult = formatMult(toast.mult)
 
+    // ✅ сразу ставим текст (чтобы оверлей НЕ был пустой ни кадра),
+    // а затем "переигрываем" печатью
+    setTyped({
+      title: fullTitle ? fullTitle.slice(0, 1) : '',
+      reward: fullReward.slice(0, 1),
+      mult: fullMult.slice(0, 1),
+    })
+
     if (motionReducedRef.current) {
       setTyped({ title: fullTitle, reward: fullReward, mult: fullMult })
       return
     }
 
     let cancelled = false
-    let tId = null
-
-    setTyped({ title: '', reward: '', mult: '' })
+    let tId = null 
 
     const seq = [
       { key: 'title', text: fullTitle, speed: 26 },
@@ -537,6 +641,14 @@ export default function QCoinDropFX ({
       const s = seq[si]
       if (!s) return
 
+      // если строка пустая (например title может быть ''), перескакиваем
+      if (!s.text) {
+        si += 1
+        pos = 0
+        tId = setTimeout(step, 40)
+        return
+      }
+
       pos = Math.min(s.text.length, pos + 1)
       cur = { ...cur, [s.key]: s.text.slice(0, pos) }
       setTyped(cur)
@@ -551,7 +663,8 @@ export default function QCoinDropFX ({
       tId = setTimeout(step, s.speed)
     }
 
-    tId = setTimeout(step, 60)
+    // стартуем быстро, но уже не пусто
+    tId = setTimeout(step, 40)
 
     return () => {
       cancelled = true
@@ -631,6 +744,13 @@ export default function QCoinDropFX ({
 
   const coin = coinRef.current
   if (!uid) return null
+
+  // ✅ фолбеки: даже если печать ещё не дошла — оверлей не пустой
+  const toastTitle = toast ? (typed.title || tierTitle(toast.mult)) : ''
+  const toastReward = toast
+    ? (typed.reward || `🎉+${toast.reward.toLocaleString('en-US', { maximumFractionDigits: 8, minimumFractionDigits: 0 })} QCoin 🎁`)
+    : ''
+  const toastMult = toast ? (typed.mult || formatMult(toast.mult)) : ''
 
   return (
     <>
@@ -729,11 +849,11 @@ export default function QCoinDropFX ({
       {toast && (
         <div className="qdrop-toast">
           <div className={cn('qdrop-toast-inner', `tier-${getTierByMult(toast.mult)}`)}>
-            <div className="qdrop-toast-title">{typed.title}</div>
+            <div className="qdrop-toast-title">{toastTitle}</div>
 
             <div className="qdrop-toast-body">
-              <span className="qcoinLabel">{typed.reward}</span>
-              <div className="qdrop-mult">{typed.mult}</div>
+              <span className="qcoinLabel">{toastReward}</span>
+              <div className="qdrop-mult">{toastMult}</div>
 
               {toast.error && (
                 <div className="qdrop-toast-error">

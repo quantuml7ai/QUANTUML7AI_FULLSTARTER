@@ -13103,19 +13103,7 @@ const onPlayerPointerDown = React.useCallback((e) => {
 
             <button type="button" className={`qcastBtn ${muted ? 'isOn' : ''}`} onClick={toggleMute} aria-label="Mute">
               <IconVolume off={muted} />
-            </button>
-<div className="qcastSpeedRow">
-  {speedSteps.map((val) => (
-    <button
-      key={val}
-      type="button"
-      className={`qcastSpeed ${rate === val ? 'active' : ''}`}
-      onClick={(e) => { e.preventDefault(); e.stopPropagation(); openControls(); setRate(val); }}
-    >
-      {val}x
-    </button>
-  ))}
-</div>
+            </button> 
 
 <button
   type="button"
@@ -13147,6 +13135,21 @@ const onPlayerPointerDown = React.useCallback((e) => {
               <div className="qcastSettingVal">{Math.round(volume * 100)}%</div>
             </div>
             <div className="qcastSettingRow">
+ <div className="qcastSettingRow">
+   <div className="qcastSettingLabel">Speed</div>
+   <div className="qcastPresetChips" role="group" aria-label="Playback speed">
+     {speedSteps.map((val) => (
+       <button
+         key={val}
+         type="button"
+         className={`qcastChip ${rate === val ? 'active' : ''}`}
+         onClick={(e) => { e.preventDefault(); e.stopPropagation(); openControls(); setRate(val); }}
+       >
+         {val}x
+       </button>
+     ))}
+   </div>
+ </div>   
               <div className="qcastSettingLabel">Preset</div>
               <div className="qcastPresetChips" role="group" aria-label="EQ Preset">
                 {['custom','rock','pop','classic'].map((p) => (
@@ -13166,7 +13169,7 @@ const onPlayerPointerDown = React.useCallback((e) => {
               </button>
             </div>
             <div className="qcastSettingsHint">
-              Если источник не даёт WebAudio (CORS), звук всё равно играет нативно, а пресеты будут просто неактивны.
+              
             </div>
           </div>
         </div>
