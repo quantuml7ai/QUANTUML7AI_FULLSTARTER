@@ -4626,7 +4626,198 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   /* Полоса действий поста: кнопки занимают доступную ширину и сжимаются без скролла */
   .actionBar > * { min-width: 0; }                /* детям разрешаем сжиматься */
   .actionBar .btnXs { flex: 1 1 0; min-width: 0; }/* сами маленькие кнопки — гибкие */
-  .actionBar .tag  { min-width: 0; }              /* счётчики тоже не фиксируем */
+.actionBar .tag  { min-width: 0; }              /* счётчики тоже не фиксируем */
+
+/* ===== PostCard emoji FX (QCast INSANE lite, pooled & fast) ===== */
+.postFxLayer{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:9999;
+  contain: layout paint;
+}
+.postFx{
+  position:absolute;
+  transform:translate3d(-50%,-50%,0);
+  font-size:clamp(22px, 4.6vw, 44px);
+
+  /* vars from JS */
+  --dx: 60px;
+  --dy: -260px;
+  --rot: 18deg;
+  --sc0: .55;
+  --sc1: 1.55;
+  --dur: 1200ms;
+  --delay: 0ms;
+  --hue: 0deg;
+  --glow: 1.0;
+  --trail: "✦";
+
+  opacity:0;
+  will-change: transform, opacity;
+  backface-visibility:hidden;
+
+  /* IMPORTANT: не анимируемся на маунте (иначе вспышки в (0,0) при скролле) */
+  animation:none;
+  /* premium glow without blur */
+  filter:
+    hue-rotate(var(--hue))
+    drop-shadow(0 0 calc(12px * var(--glow)) rgba(0,245,255,.20))
+    drop-shadow(0 0 calc(14px * var(--glow)) rgba(178,0,255,.12));
+
+  text-shadow:
+    0 0 12px rgba(255,255,255,.08),
+    -8px 8px 16px rgba(0,245,255,.08),
+    10px -10px 18px rgba(178,0,255,.08);
+  }
+
+/* Анимация включается ТОЛЬКО когда мы явно зажигаем ноду */
+.postFx.isLive{
+  animation:
+    postFxAlpha var(--dur) cubic-bezier(.16,.9,.22,1) forwards,
+    postFxCore  var(--dur) cubic-bezier(.12,.95,.2,1) forwards;
+  animation-delay: var(--delay), var(--delay);
+}    
+.postFx--bad{
+  filter:
+    hue-rotate(var(--hue))
+    drop-shadow(0 0 calc(12px * var(--glow)) rgba(255,80,120,.18))
+    drop-shadow(0 0 calc(14px * var(--glow)) rgba(178,0,255,.10));
+  text-shadow:
+    0 0 12px rgba(255,255,255,.06),
+    -8px 8px 16px rgba(255,80,120,.08),
+    10px -10px 18px rgba(178,0,255,.08);
+}
+.postFx::after{
+  content: var(--trail);
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform: translate3d(-50%,-50%,0) scale(.72);
+  font-size: .6em;
+  opacity:0;
+  pointer-events:none;
+  filter: drop-shadow(0 0 16px rgba(255,255,255,.10)) drop-shadow(0 0 18px rgba(178,0,255,.12));
+  /* IMPORTANT: trail тоже не должен жить на маунте */
+  animation:none;
+}
+.postFx.isLive::after{
+  animation: postFxTrail var(--dur) cubic-bezier(.18,.86,.22,1) forwards;
+  animation-delay: var(--delay);
+}
+@keyframes postFxAlpha{
+  0%{opacity:0}
+  10%{opacity:1}
+  72%{opacity:.92}
+  100%{opacity:0}
+}
+@keyframes postFxTrail{
+  0%{ opacity:0; transform:translate3d(-50%,-50%,0) scale(.55); }
+  18%{ opacity:.85; transform:translate3d(calc(-50% - 10px),calc(-50% + 12px),0) scale(1.10); }
+  55%{ opacity:.32; transform:translate3d(calc(-50% + 18px),calc(-50% - 16px),0) scale(.90); }
+  100%{ opacity:0; transform:translate3d(calc(-50% + 34px),calc(-50% - 30px),0) scale(.62); }
+}
+/* motion variants */
+.postFx--float{  animation-name: postFxAlpha, postFxFloat;  }
+.postFx--spiral{ animation-name: postFxAlpha, postFxSpiral; }
+.postFx--rocket{ animation-name: postFxAlpha, postFxRocket; }
+.postFx--zigzag{ animation-name: postFxAlpha, postFxZigzag; }
+.postFx--bounce{ animation-name: postFxAlpha, postFxBounce; }
+.postFx--snap{   animation-name: postFxAlpha, postFxSnap;   }
+.postFx--wave{   animation-name: postFxAlpha, postFxWave;   }
+.postFx--drift{  animation-name: postFxAlpha, postFxDrift;  }
+
+@keyframes postFxCore{
+  0%{ transform:translate3d(-50%,-50%,0) scale(var(--sc0)) rotate(calc(var(--rot) * -.25)); }
+  12%{ transform:translate3d(-50%,-50%,0) scale(var(--sc1)) rotate(var(--rot)); }
+  100%{ transform:translate3d(calc(-50% + var(--dx)),calc(-50% + var(--dy)),0) scale(calc(var(--sc0) * .90)) rotate(calc(var(--rot) * 1.2)); }
+}
+@keyframes postFxFloat{
+  0%{ transform:translate3d(-50%,-50%,0) scale(var(--sc0)) rotate(calc(var(--rot) * -.25)); }
+  12%{ transform:translate3d(-50%,-50%,0) scale(var(--sc1)) rotate(var(--rot)); }
+  60%{ transform:translate3d(calc(-50% + (var(--dx) * .45)),calc(-50% + (var(--dy) * .60)),0) scale(calc(var(--sc1) * .86)) rotate(calc(var(--rot) * .8)); }
+  100%{ transform:translate3d(calc(-50% + var(--dx)),calc(-50% + var(--dy)),0) scale(calc(var(--sc0) * .92)) rotate(calc(var(--rot) * 1.25)); }
+}
+@keyframes postFxSpiral{
+  0%{ transform:translate3d(-50%,-50%,0) scale(var(--sc0)) rotate(0deg); }
+  12%{ transform:translate3d(-50%,-50%,0) scale(var(--sc1)) rotate(calc(var(--rot) * .8)); }
+  50%{ transform:translate3d(calc(-50% + (var(--dx) * -.15)),calc(-50% + (var(--dy) * .55)),0) scale(calc(var(--sc1) * .82)) rotate(calc(var(--rot) * 2.9)); }
+  100%{ transform:translate3d(calc(-50% + var(--dx)),calc(-50% + var(--dy)),0) scale(calc(var(--sc0) * .92)) rotate(calc(var(--rot) * 4.6)); }
+}
+@keyframes postFxRocket{
+  0%{ transform:translate3d(-50%,-50%,0) scale(var(--sc0)) rotate(calc(var(--rot) * -.25)); }
+  10%{ transform:translate3d(-50%,-50%,0) scale(var(--sc1)) rotate(var(--rot)); }
+  35%{ transform:translate3d(calc(-50% + (var(--dx) * .18)),calc(-50% + (var(--dy) * .78)),0) scale(calc(var(--sc1) * .78)) rotate(calc(var(--rot) * 1.35)); }
+  100%{ transform:translate3d(calc(-50% + (var(--dx) * .32)),calc(-50% + (var(--dy) * 1.18)),0) scale(calc(var(--sc0) * .72)) rotate(calc(var(--rot) * 1.95)); }
+}
+@keyframes postFxZigzag{
+  0%{ transform:translate3d(-50%,-50%,0) scale(var(--sc0)) rotate(calc(var(--rot) * -.25)); }
+  12%{ transform:translate3d(-50%,-50%,0) scale(var(--sc1)) rotate(var(--rot)); }
+  32%{ transform:translate3d(calc(-50% + (var(--dx) * -.42)),calc(-50% + (var(--dy) * .30)),0) scale(calc(var(--sc1) * .88)) rotate(calc(var(--rot) * 1.35)); }
+  55%{ transform:translate3d(calc(-50% + (var(--dx) * .58)),calc(-50% + (var(--dy) * .60)),0) scale(calc(var(--sc1) * .78)) rotate(calc(var(--rot) * 2.2)); }
+  100%{ transform:translate3d(calc(-50% + var(--dx)),calc(-50% + var(--dy)),0) scale(calc(var(--sc0) * .90)) rotate(calc(var(--rot) * 3.25)); }
+}
+@keyframes postFxBounce{
+  0%{ transform:translate3d(-50%,-50%,0) scale(var(--sc0)) rotate(calc(var(--rot) * -.15)); }
+  14%{ transform:translate3d(-50%,-50%,0) scale(calc(var(--sc1) * 1.06)) rotate(var(--rot)); }
+  42%{ transform:translate3d(calc(-50% + (var(--dx) * .26)),calc(-50% + (var(--dy) * .42)),0) scale(calc(var(--sc1) * .90)) rotate(calc(var(--rot) * 1.05)); }
+  100%{ transform:translate3d(calc(-50% + var(--dx)),calc(-50% + var(--dy)),0) scale(calc(var(--sc0) * .86)) rotate(calc(var(--rot) * 1.85)); }
+}
+@keyframes postFxSnap{
+  0%{ transform:translate3d(-50%,-50%,0) scale(.34) rotate(0deg); }
+  9%{ transform:translate3d(-50%,-50%,0) scale(calc(var(--sc1) * 1.18)) rotate(calc(var(--rot) * .7)); }
+  100%{ transform:translate3d(calc(-50% + var(--dx)),calc(-50% + var(--dy)),0) scale(.76) rotate(calc(var(--rot) * 1.55)); }
+}
+@keyframes postFxWave{
+  0%{ transform:translate3d(-50%,-50%,0) scale(var(--sc0)) rotate(calc(var(--rot) * -.25)); }
+  20%{ transform:translate3d(calc(-50% + (var(--dx) * .10)),calc(-50% + (var(--dy) * .20)),0) scale(var(--sc1)) rotate(calc(var(--rot) * .85)); }
+  40%{ transform:translate3d(calc(-50% + (var(--dx) * -.26)),calc(-50% + (var(--dy) * .44)),0) scale(calc(var(--sc1) * .88)) rotate(calc(var(--rot) * 1.6)); }
+  65%{ transform:translate3d(calc(-50% + (var(--dx) * .40)),calc(-50% + (var(--dy) * .74)),0) scale(calc(var(--sc1) * .76)) rotate(calc(var(--rot) * 2.55)); }
+  100%{ transform:translate3d(calc(-50% + var(--dx)),calc(-50% + var(--dy)),0) scale(calc(var(--sc0) * .90)) rotate(calc(var(--rot) * 3.35)); }
+}
+@keyframes postFxDrift{
+  0%{ transform:translate3d(-50%,-50%,0) scale(var(--sc0)) rotate(calc(var(--rot) * -.10)); }
+  18%{ transform:translate3d(calc(-50% + (var(--dx) * .10)),calc(-50% + (var(--dy) * .20)),0) scale(var(--sc1)) rotate(calc(var(--rot) * .6)); }
+  55%{ transform:translate3d(calc(-50% + (var(--dx) * .65)),calc(-50% + (var(--dy) * .55)),0) scale(calc(var(--sc1) * .70)) rotate(calc(var(--rot) * 1.35)); }
+  100%{ transform:translate3d(calc(-50% + (var(--dx) * .35)),calc(-50% + (var(--dy) * 1.05)),0) scale(calc(var(--sc0) * .82)) rotate(calc(var(--rot) * 2.25)); }
+}
+.postBoom{
+  position:absolute;
+  left:0; top:0;
+  width:12px; height:12px;
+  transform:translate3d(-50%,-50%,0) scale(.2);
+  border-radius:999px;
+  opacity:0;
+  --bDur: 480ms;
+  --bGlow: 1.0;
+  --bHue: 0deg;
+  border: 2px solid rgba(0,245,255,.32);
+  box-shadow:
+    0 0 calc(20px * var(--bGlow)) rgba(0,245,255,.14),
+    0 0 calc(24px * var(--bGlow)) rgba(178,0,255,.10);
+  filter: hue-rotate(var(--bHue));
+  will-change: transform, opacity;
+  /* IMPORTANT: не анимировать на маунте */
+  animation:none;
+}
+.postBoom.isLive{
+  animation: postBoom var(--bDur) cubic-bezier(.14,.9,.22,1) forwards;
+}
+.postBoom--bad{
+  border-color: rgba(255,80,120,.26);
+  box-shadow:
+    0 0 calc(20px * var(--bGlow)) rgba(255,80,120,.12),
+    0 0 calc(24px * var(--bGlow)) rgba(178,0,255,.09);
+}
+@keyframes postBoom{
+  0%{ opacity:0; transform:translate3d(-50%,-50%,0) scale(.16); }
+  12%{ opacity:.88; transform:translate3d(-50%,-50%,0) scale(.55); }
+  100%{ opacity:0; transform:translate3d(-50%,-50%,0) scale(4.1); }
+}
+@media (prefers-reduced-motion: reduce){
+  .postFx, .postBoom{ animation:none !important; opacity:0 !important; }
+}
+
 /* ---- VOICE dock ---- */
 .forumComposer { position: relative; --voice-size: 48px; --voice-right: 10px; }
 
@@ -4763,9 +4954,19 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   display:flex;
   align-items:stretch;
   justify-content:center;
-  background:#060b16;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(0,245,255,.14), transparent 42%),
+    radial-gradient(circle at 88% 68%, rgba(178,0,255,.14), transparent 52%),
+    radial-gradient(circle at 60% 95%, rgba(0,255,138,.10), transparent 52%),
+    #060b16;
+  border-radius:16px;
+  overflow:hidden;
+
   cursor:pointer;
+  /* for RTL */
+  direction:ltr;
 }
+.qcastPlayer[dir="rtl"]{ direction:rtl; }  
 .qcastCover{
   width:100%;
   height:100%;
@@ -4773,6 +4974,27 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   object-fit:contain;
   display:block;
 }
+  /* ===== Quantum Ring Visualizer (Canvas) ===== */
+.qcastViz{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:0;
+  transform:scale(.92);
+  filter:blur(12px) saturate(140%) brightness(1.05);
+  transition: opacity .26s cubic-bezier(.2,.8,.2,1),
+              transform .26s cubic-bezier(.2,.8,.2,1),
+              filter .26s cubic-bezier(.2,.8,.2,1);
+  mix-blend-mode:screen;
+  contain:layout paint;
+  will-change:opacity, transform, filter;
+}
+.qcastViz[data-on="1"]{
+  opacity:1;
+  transform:scale(1);
+  filter:blur(0px) saturate(175%) brightness(1.15);
+}
+
 .qcastAudio{
   position:absolute;
   width:1px;
@@ -4780,51 +5002,448 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   opacity:0;
   pointer-events:none;
 }
+/* ===== QCast emoji FX (INSANE, fast, spread over the whole card) ===== */
+.qcastFxLayer{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:9999;
+  contain: layout paint;
+}
+.qcastFx{
+  position:absolute;
+  transform:translate3d(-50%,-50%,0);
+  font-size:clamp(32px, 6vw, 72px);
+
+  /* vars from JS */
+  --dx: 60px;
+  --dy: -260px;
+  --rot: 18deg;
+  --sc0: .60;
+  --sc1: 1.75;
+  --dur: 1500ms;
+  --delay: 0ms;
+  --hue: 0deg;
+  --glow: 1.25;
+  --trail: "✦";
+
+  opacity:0;
+  will-change: transform, opacity;
+  backface-visibility:hidden;
+
+  /* INSANE glow but still cheap (no blur) */
+  filter:
+    hue-rotate(var(--hue))
+    drop-shadow(0 0 calc(14px * var(--glow)) rgba(0,245,255,.26))
+    drop-shadow(0 0 calc(18px * var(--glow)) rgba(178,0,255,.18));
+
+  /* ghost trail without extra DOM (cheap) */
+  text-shadow:
+    0 0 14px rgba(255,255,255,.10),
+    -10px 10px 18px rgba(0,245,255,.10),
+    12px -12px 22px rgba(178,0,255,.10);
+
+  animation:
+    qcastFxAlpha var(--dur) cubic-bezier(.16,.9,.22,1) forwards,
+    qcastFxCore  var(--dur) cubic-bezier(.12,.95,.2,1) forwards;
+  animation-delay: var(--delay), var(--delay);
+}
+.qcastFx--bad{
+  filter:
+    hue-rotate(var(--hue))
+    drop-shadow(0 0 calc(14px * var(--glow)) rgba(255,80,120,.22))
+    drop-shadow(0 0 calc(18px * var(--glow)) rgba(178,0,255,.16));
+  text-shadow:
+    0 0 14px rgba(255,255,255,.08),
+    -10px 10px 18px rgba(255,80,120,.10),
+    12px -12px 22px rgba(178,0,255,.10);
+}
+
+/* sparks/trail */
+.qcastFx::after{
+  content: var(--trail);
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform: translate3d(-50%,-50%,0) scale(.78);
+  font-size: .55em;
+  opacity:0;
+  pointer-events:none;
+  filter: drop-shadow(0 0 18px rgba(255,255,255,.12)) drop-shadow(0 0 22px rgba(178,0,255,.16));
+  animation: qcastFxTrail var(--dur) cubic-bezier(.18,.86,.22,1) forwards;
+  animation-delay: var(--delay);
+}
+
+@keyframes qcastFxAlpha{
+  0%{opacity:0}
+  9%{opacity:1}
+  72%{opacity:.95}
+  100%{opacity:0}
+}
+@keyframes qcastFxTrail{
+  0%{ opacity:0; transform:translate3d(-50%,-50%,0) scale(.6); }
+  18%{ opacity:.90; transform:translate3d(calc(-50% - 12px),calc(-50% + 16px),0) scale(1.20); }
+  55%{ opacity:.38; transform:translate3d(calc(-50% + 20px),calc(-50% - 18px),0) scale(.92); }
+  100%{ opacity:0; transform:translate3d(calc(-50% + 40px),calc(-50% - 36px),0) scale(.62); }
+}
+
+/* variants */
+.qcastFx--float{  animation-name: qcastFxAlpha, qcastFxFloat;  }
+.qcastFx--spiral{ animation-name: qcastFxAlpha, qcastFxSpiral; }
+.qcastFx--rocket{ animation-name: qcastFxAlpha, qcastFxRocket; }
+.qcastFx--zigzag{ animation-name: qcastFxAlpha, qcastFxZigzag; }
+.qcastFx--bounce{ animation-name: qcastFxAlpha, qcastFxBounce; }
+.qcastFx--snap{   animation-name: qcastFxAlpha, qcastFxSnap;   }
+.qcastFx--wave{   animation-name: qcastFxAlpha, qcastFxWave;   }
+.qcastFx--drift{  animation-name: qcastFxAlpha, qcastFxDrift;  }
+
+@keyframes qcastFxCore{
+  0%{ transform:translate3d(-50%,-50%,0) scale(var(--sc0)) rotate(calc(var(--rot) * -.25)); }
+  12%{ transform:translate3d(-50%,-50%,0) scale(var(--sc1)) rotate(var(--rot)); }
+  100%{ transform:translate3d(calc(-50% + var(--dx)),calc(-50% + var(--dy)),0) scale(calc(var(--sc0) * .90)) rotate(calc(var(--rot) * 1.2)); }
+}
+@keyframes qcastFxFloat{
+  0%{ transform:translate3d(-50%,-50%,0) scale(var(--sc0)) rotate(calc(var(--rot) * -.25)); }
+  12%{ transform:translate3d(-50%,-50%,0) scale(var(--sc1)) rotate(var(--rot)); }
+  60%{ transform:translate3d(calc(-50% + (var(--dx) * .45)),calc(-50% + (var(--dy) * .60)),0) scale(calc(var(--sc1) * .86)) rotate(calc(var(--rot) * .8)); }
+  100%{ transform:translate3d(calc(-50% + var(--dx)),calc(-50% + var(--dy)),0) scale(calc(var(--sc0) * .92)) rotate(calc(var(--rot) * 1.25)); }
+}
+@keyframes qcastFxSpiral{
+  0%{ transform:translate3d(-50%,-50%,0) scale(var(--sc0)) rotate(0deg); }
+  12%{ transform:translate3d(-50%,-50%,0) scale(var(--sc1)) rotate(calc(var(--rot) * .8)); }
+  50%{ transform:translate3d(calc(-50% + (var(--dx) * -.15)),calc(-50% + (var(--dy) * .55)),0) scale(calc(var(--sc1) * .82)) rotate(calc(var(--rot) * 2.9)); }
+  100%{ transform:translate3d(calc(-50% + var(--dx)),calc(-50% + var(--dy)),0) scale(calc(var(--sc0) * .92)) rotate(calc(var(--rot) * 4.6)); }
+}
+@keyframes qcastFxRocket{
+  0%{ transform:translate3d(-50%,-50%,0) scale(var(--sc0)) rotate(calc(var(--rot) * -.25)); }
+  10%{ transform:translate3d(-50%,-50%,0) scale(var(--sc1)) rotate(var(--rot)); }
+  35%{ transform:translate3d(calc(-50% + (var(--dx) * .18)),calc(-50% + (var(--dy) * .78)),0) scale(calc(var(--sc1) * .76)) rotate(calc(var(--rot) * 1.35)); }
+  100%{ transform:translate3d(calc(-50% + (var(--dx) * .32)),calc(-50% + (var(--dy) * 1.18)),0) scale(calc(var(--sc0) * .72)) rotate(calc(var(--rot) * 1.95)); }
+}
+@keyframes qcastFxZigzag{
+  0%{ transform:translate3d(-50%,-50%,0) scale(var(--sc0)) rotate(calc(var(--rot) * -.25)); }
+  12%{ transform:translate3d(-50%,-50%,0) scale(var(--sc1)) rotate(var(--rot)); }
+  32%{ transform:translate3d(calc(-50% + (var(--dx) * -.42)),calc(-50% + (var(--dy) * .30)),0) scale(calc(var(--sc1) * .88)) rotate(calc(var(--rot) * 1.35)); }
+  55%{ transform:translate3d(calc(-50% + (var(--dx) * .58)),calc(-50% + (var(--dy) * .60)),0) scale(calc(var(--sc1) * .78)) rotate(calc(var(--rot) * 2.2)); }
+  100%{ transform:translate3d(calc(-50% + var(--dx)),calc(-50% + var(--dy)),0) scale(calc(var(--sc0) * .90)) rotate(calc(var(--rot) * 3.25)); }
+}
+@keyframes qcastFxBounce{
+  0%{ transform:translate3d(-50%,-50%,0) scale(var(--sc0)) rotate(calc(var(--rot) * -.15)); }
+  14%{ transform:translate3d(-50%,-50%,0) scale(calc(var(--sc1) * 1.10)) rotate(var(--rot)); }
+  42%{ transform:translate3d(calc(-50% + (var(--dx) * .26)),calc(-50% + (var(--dy) * .42)),0) scale(calc(var(--sc1) * .90)) rotate(calc(var(--rot) * 1.05)); }
+  100%{ transform:translate3d(calc(-50% + var(--dx)),calc(-50% + var(--dy)),0) scale(calc(var(--sc0) * .86)) rotate(calc(var(--rot) * 1.85)); }
+}
+@keyframes qcastFxSnap{
+  0%{ transform:translate3d(-50%,-50%,0) scale(.32) rotate(0deg); }
+  9%{ transform:translate3d(-50%,-50%,0) scale(calc(var(--sc1) * 1.20)) rotate(calc(var(--rot) * .7)); }
+  100%{ transform:translate3d(calc(-50% + var(--dx)),calc(-50% + var(--dy)),0) scale(.76) rotate(calc(var(--rot) * 1.55)); }
+}
+@keyframes qcastFxWave{
+  0%{ transform:translate3d(-50%,-50%,0) scale(var(--sc0)) rotate(calc(var(--rot) * -.25)); }
+  20%{ transform:translate3d(calc(-50% + (var(--dx) * .10)),calc(-50% + (var(--dy) * .20)),0) scale(var(--sc1)) rotate(calc(var(--rot) * .85)); }
+  40%{ transform:translate3d(calc(-50% + (var(--dx) * -.26)),calc(-50% + (var(--dy) * .44)),0) scale(calc(var(--sc1) * .88)) rotate(calc(var(--rot) * 1.6)); }
+  65%{ transform:translate3d(calc(-50% + (var(--dx) * .40)),calc(-50% + (var(--dy) * .74)),0) scale(calc(var(--sc1) * .76)) rotate(calc(var(--rot) * 2.55)); }
+  100%{ transform:translate3d(calc(-50% + var(--dx)),calc(-50% + var(--dy)),0) scale(calc(var(--sc0) * .90)) rotate(calc(var(--rot) * 3.35)); }
+}
+@keyframes qcastFxDrift{
+  0%{ transform:translate3d(-50%,-50%,0) scale(var(--sc0)) rotate(calc(var(--rot) * -.10)); }
+  18%{ transform:translate3d(calc(-50% + (var(--dx) * .10)),calc(-50% + (var(--dy) * .20)),0) scale(var(--sc1)) rotate(calc(var(--rot) * .6)); }
+  55%{ transform:translate3d(calc(-50% + (var(--dx) * .65)),calc(-50% + (var(--dy) * .55)),0) scale(calc(var(--sc1) * .70)) rotate(calc(var(--rot) * 1.35)); }
+  100%{ transform:translate3d(calc(-50% + (var(--dx) * .35)),calc(-50% + (var(--dy) * 1.05)),0) scale(calc(var(--sc0) * .82)) rotate(calc(var(--rot) * 2.25)); }
+}
+
+/* ===== Shockwave / Boom ring (double tap / reactions) ===== */
+.qcastBoom{
+  position:absolute;
+  left:0; top:0;
+  width:12px; height:12px;
+  transform:translate3d(-50%,-50%,0) scale(.2);
+  border-radius:999px;
+  opacity:0;
+  --bDur: 520ms;
+  --bGlow: 1.1;
+  --bHue: 0deg;
+  border: 2px solid rgba(0,245,255,.35);
+  box-shadow:
+    0 0 calc(24px * var(--bGlow)) rgba(0,245,255,.18),
+    0 0 calc(28px * var(--bGlow)) rgba(178,0,255,.12);
+  filter: hue-rotate(var(--bHue));
+  will-change: transform, opacity;
+  animation: qcastBoom var(--bDur) cubic-bezier(.14,.9,.22,1) forwards;
+}
+.qcastBoom--bad{
+  border-color: rgba(255,80,120,.28);
+  box-shadow:
+    0 0 calc(24px * var(--bGlow)) rgba(255,80,120,.14),
+    0 0 calc(28px * var(--bGlow)) rgba(178,0,255,.10);
+}
+@keyframes qcastBoom{
+  0%{ opacity:0; transform:translate3d(-50%,-50%,0) scale(.16); }
+  12%{ opacity:.92; transform:translate3d(-50%,-50%,0) scale(.55); }
+  100%{ opacity:0; transform:translate3d(-50%,-50%,0) scale(4.6); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .qcastFx, .qcastBoom{ animation:none !important; opacity:0 !important; }
+}
+
 .qcastControls{
   position:absolute;
-  left:0;
-  right:0;
-  bottom:0;
-  padding:12px 14px 10px;
+  inset:0;
+  padding:10px;
   display:flex;
   flex-direction:column;
-  gap:8px;
-  background:linear-gradient(180deg, rgba(5,8,16,0) 0%, rgba(5,8,16,.78) 35%, rgba(5,8,16,.92) 100%);
+  justify-content:space-between;
+
+  /* no overlay panel */
+  background:transparent;
+  border:none;
+  box-shadow:none;
+  backdrop-filter:none;
+
   opacity:0;
-  transform:translateY(8px);
-  transition:opacity .2s ease, transform .2s ease;
+  transform: translateY(6px);
+  transition: opacity .22s cubic-bezier(.2,.8,.2,1), transform .22s cubic-bezier(.2,.8,.2,1);
   pointer-events:none;
 }
 .qcastControls[data-visible="1"]{
   opacity:1;
-  transform:translateY(0);
+  transform: translateY(0);
   pointer-events:auto;
 }
-.qcastRow{
+
+/* top HUD (EQ) */
+.qcastHudTop{
+  display:flex;
+  justify-content:center;
+  pointer-events:none;
+}
+
+/* bottom bar (desktop + base) */
+.qcastBottomBar{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  justify-content:space-between;
+  pointer-events:auto;
+}
+.qcastBottomLeft,
+.qcastBottomCenter,
+.qcastBottomRight{
   display:flex;
   align-items:center;
   gap:10px;
+  pointer-events:auto;
 }
-.qcastRowTop{
-  justify-content:flex-start;
+.qcastBottomCenter{ flex: 1; min-width: 0; }
+.qcastBottomRight{ justify-content:flex-end; }
+
+.qcastDesktopOnly{ display:none; }
+.qcastMobileOnly{ display:flex; }
+
+/* vertical rail (tablet/mobile) */
+.qcastSideRail{
+  position:absolute;
+  right:10px;
+  top:50%;
+  transform: translateY(-50%);
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  pointer-events:auto;
 }
+
+/* desktop layout: everything packed bottom, no side rail */
+@media (min-width: 860px){
+  .qcastSideRail{ display:none; }
+  .qcastDesktopOnly{ display:flex; }
+  .qcastMobileOnly{ display:none; }
+  .qcastBottomBar{ gap:14px; }
+  .qcastBottomCenter{ max-width: min(520px, 52vw); }
+}
+
+ /* ===== EQ над контролами: rail + bars (берёт энергию из CSS vars --q-all/--q-high) ===== */
+.qcastCtrlEQ{
+  position:relative;
+  padding:10px 10px 4px;
+  border-radius:14px;
+  background:rgba(3,6,12,.35);
+  border:1px solid rgba(160,190,255,.12);
+  overflow:hidden;
+}
+.qcastCtrlRail{
+  position:absolute;
+  left:10px; right:10px;
+  top:50%;
+  height:2px;
+  transform:translateY(-50%);
+  background:linear-gradient(90deg,
+    rgba(0,245,255,.10),
+    rgba(178,0,255,.16),
+    rgba(0,255,138,.10)
+  );
+  box-shadow:0 0 14px rgba(0,245,255,.12);
+  opacity:.85;
+}
+.qcastCtrlBars{
+  position:relative;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:4px;
+  height:34px;
+}
+.qcastCtrlBar{
+  width:clamp(4px, .55vw, 7px);
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(180deg,
+    rgba(0,245,255,1),
+    rgba(178,0,255,1) 55%,
+    rgba(0,255,138,1)
+  );
+  background-size: 100% 180%;
+  transform-origin:50% 100%;
+  opacity:.95;
+  filter: drop-shadow(0 0 6px rgba(0,245,255,.22))
+          drop-shadow(0 0 10px rgba(178,0,255,.16));
+animation:qcastCtrlEQ 880ms ease-in-out infinite, qcastCtrlHue 2.4s linear infinite;
+  animation-delay:var(--d);
+}
+.qcastCtrlEQ[data-on="0"] .qcastCtrlBar{
+  animation:none;
+  transform:scaleY(.12);
+  opacity:.25;
+  filter:none;
+}
+@keyframes qcastCtrlEQ{
+  0%,100%{
+    transform:scaleY(calc(.10 + (var(--h) * (.35 + (var(--q-all, .0) * .9)))));
+  }
+  50%{
+    transform:scaleY(calc(.18 + (var(--h) * (.55 + (var(--q-high, .0) * 1.05)))));
+  }
+}
+ @keyframes qcastCtrlHue{
+  0%{ background-position: 0% 0%; }
+  100%{ background-position: 0% 100%; }
+}
+.qcastCtrlShimmer{
+  position:absolute;
+  inset:-40% -60%;
+  background:linear-gradient(110deg, transparent 35%, rgba(180,220,255,.12) 50%, transparent 65%);
+  transform: translateX(-60%);
+  animation: qcastShimmer 1.9s linear infinite;
+  pointer-events:none;
+  mix-blend-mode:screen;
+}
+@keyframes qcastShimmer{
+  0%{ transform: translateX(-60%); }
+  100%{ transform: translateX(60%); }
+}
+@media (prefers-reduced-motion: reduce){
+  .qcastCtrlShimmer{ animation:none; }
+  .qcastCtrlBar{ animation: none; }
+}
+
+/* ===== New adaptive layout (mobile wrapper + desktop wrapper) ===== */
+.qcastGrid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:10px;
+}
+.qcastGroup{ display:flex; align-items:center; gap:10px; }
+.qcastTransport{ justify-content:flex-start; }
+.qcastUtility{ justify-content:flex-end; }
+.qcastTimeline{ gap:8px; }
+.qcastReacts{ justify-content:space-between; }
+.qcastSpeedRow{ flex-wrap:wrap; gap:6px; justify-content:flex-end; }
+.qcastGrid[data-dir="rtl"] .qcastTransport{ justify-content:flex-end; }
+.qcastGrid[data-dir="rtl"] .qcastUtility{ justify-content:flex-start; }
+.qcastGrid[data-dir="rtl"] .qcastSpeedRow{ justify-content:flex-start; }
+@media (min-width: 720px){
+  .qcastGrid{
+    grid-template-columns: 1fr 1.35fr 1fr;
+    grid-template-areas:
+      "transport timeline utility"
+      "reacts    timeline speed";
+    align-items:center;
+  }
+  .qcastTransport{ grid-area:transport; }
+  .qcastTimeline{ grid-area:timeline; }
+  .qcastUtility{ grid-area:utility; }
+  .qcastReacts{ grid-area:reacts; justify-content:flex-start; }
+  .qcastSpeedRow{ grid-area:speed; justify-content:flex-end; }
+  .qcastGrid[data-dir="rtl"]{
+    grid-template-areas:
+      "utility timeline transport"
+      "speed   timeline reacts";
+  }
+}
+
 .qcastBtn{
-  width:36px;
-  height:36px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,.18);
-  background:rgba(10,14,26,.6);
-  color:#eaf2ff;
+  width:44px;
+  height:44px;
+  border-radius:14px;
+  border:1px solid rgba(210,230,255,.16);
+  background: rgba(8,12,20,.22);
+  color:#f3f7ff;
+
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  transition:transform .12s ease, box-shadow .2s ease;
+
+  backdrop-filter: blur(8px) saturate(140%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+
+  transition: transform .14s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease, filter .18s ease;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.03),
+    0 12px 28px rgba(0,0,0,.22);
 }
-.qcastBtn:hover{ transform:translateY(-1px); box-shadow:0 0 12px rgba(124,161,255,.35); }
-.qcastIcon{ width:18px; height:18px; fill:currentColor; }
-.qcastRowTimeline{
-  gap:8px;
+.qcastBtn--main{
+  width:52px;
+  height:52px;
+  border-radius:18px;
+  background: rgba(8,12,20,.28);
+  border-color: rgba(0,245,255,.18);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.03),
+    0 14px 38px rgba(0,0,0,.26),
+    0 0 22px rgba(0,245,255,.10),
+    0 0 20px rgba(178,0,255,.08);
 }
+.qcastBtn--danger{
+  border-color: rgba(255,120,120,.24);
+  background: rgba(30,6,10,.18);
+}
+.qcastBtn--rail{
+  width:52px;
+  height:52px;
+  border-radius:18px;
+}
+
+.qcastBtn:hover{
+  transform: translateY(-1px) scale(1.03);
+  border-color: rgba(0,245,255,.28);
+  filter: saturate(1.12) brightness(1.06);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.04),
+    0 16px 46px rgba(0,0,0,.30),
+    0 0 26px rgba(0,245,255,.14),
+    0 0 24px rgba(178,0,255,.12);
+}
+.qcastBtn:active{ transform: translateY(0) scale(.99); }
+.qcastBtn.isOn{
+  border-color: rgba(0,255,138,.26);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.04),
+    0 16px 46px rgba(0,0,0,.30),
+    0 0 22px rgba(0,255,138,.14);
+}
+
+.qcastIcon{ width:21px; height:21px; fill:currentColor; }
+
 .qcastTime{
   font:600 11px/1 ui-monospace,monospace;
   color:#d8e4ff;
@@ -4834,52 +5453,220 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 .qcastRange{
   flex:1;
   appearance:none;
-  height:4px;
+  height:6px;
   border-radius:999px;
-  background:rgba(255,255,255,.25);
+  background:linear-gradient(90deg,
+    rgba(0,245,255,.30),
+    rgba(178,0,255,.26),
+    rgba(0,255,138,.26)
+  );
+
   outline:none;
+  box-shadow: inset 0 0 14px rgba(0,0,0,.35);
 }
 .qcastRange::-webkit-slider-thumb{
   appearance:none;
-  width:14px;
-  height:14px;
+  width:16px;
+  height:16px;
   border-radius:50%;
-  background:#fff;
-  box-shadow:0 0 10px rgba(255,255,255,.45);
+  background:linear-gradient(180deg, rgba(255,255,255,1), rgba(190,210,255,1));
+  box-shadow:0 0 14px rgba(0,245,255,.18), 0 0 16px rgba(178,0,255,.14);
 }
 .qcastRange::-moz-range-thumb{
-  width:14px;
-  height:14px;
+  width:16px;
+  height:16px;
   border-radius:50%;
-  background:#fff;
+  background:linear-gradient(180deg, rgba(255,255,255,1), rgba(190,210,255,1));
+
   border:0;
 }
-.qcastRowSpeed{
-  gap:6px;
-  flex-wrap:wrap;
-}
+
 .qcastSpeed{
-  padding:4px 8px;
+  padding:6px 10px;
   border-radius:999px;
-  border:1px solid rgba(255,255,255,.2);
-  background:rgba(10,14,26,.55);
+  border:1px solid rgba(210,230,255,.16);
+  background: rgba(8,12,20,.18);
   color:#dbe7ff;
   font-size:11px;
+  backdrop-filter: blur(8px) saturate(140%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  transition: transform .14s ease, border-color .18s ease, box-shadow .18s ease;
 }
+.qcastSpeed:hover{ transform: translateY(-1px); border-color: rgba(0,245,255,.26); }
 .qcastSpeed.active{
-  background:rgba(140,170,255,.85);
-  color:#091227;
-  border-color:rgba(180,210,255,.95);
+  background: linear-gradient(180deg, rgba(0,245,255,.92), rgba(178,0,255,.82));
+  color:#081021;
+  border-color: rgba(180,210,255,.92);
+  box-shadow: 0 0 22px rgba(0,245,255,.14), 0 0 20px rgba(178,0,255,.12);
 }
-.qcastRemove{
-  font-size:20px;
-  margin-left:auto;
+
+.qcastSpeedPill{
+  height:46px;
+  padding:0 12px;
+  border-radius:999px;
+  border:1px solid rgba(210,230,255,.16);
+  background: rgba(8,12,20,.22);
+  color:#f3f7ff;
+  font:700 12px/1 ui-monospace,monospace;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  backdrop-filter: blur(8px) saturate(140%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.03), 0 12px 28px rgba(0,0,0,.22);
+  transition: transform .14s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.qcastSpeedPill:hover{
+  transform: translateY(-1px) scale(1.02);
+  border-color: rgba(0,245,255,.26);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.04), 0 16px 46px rgba(0,0,0,.30);
+}
+
+
+/* ===== Reactions (premium, rail-ready) ===== */
+.qcastReact{
+  width:56px;
+  height:56px;
+  border-radius:18px;
+  border:1px solid rgba(210,230,255,.16);
+  background: rgba(8,12,20,.22);
+  color:#f3f7ff;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  backdrop-filter: blur(8px) saturate(140%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.03),
+    0 12px 28px rgba(0,0,0,.22);
+  transition: transform .14s ease, box-shadow .18s ease, border-color .18s ease, filter .18s ease;
+}
+.qcastReactEmoji{ font-size:28px; line-height:1; }
+.qcastReact:hover{
+  transform: translateY(-1px) scale(1.03);
+  border-color: rgba(0,245,255,.28);
+  filter: saturate(1.12) brightness(1.06);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.04),
+    0 16px 46px rgba(0,0,0,.30),
+    0 0 26px rgba(0,245,255,.14),
+    0 0 24px rgba(178,0,255,.12);
+}
+.qcastReact:active{ transform: translateY(0) scale(.99); }
+.qcastReact--bad:hover{ border-color: rgba(255,80,120,.28); }
+
+@media (max-width: 859px){
+  .qcastReact, .qcastBtn--rail{ width:58px; height:58px; border-radius:20px; }
+  .qcastReactEmoji{ font-size:30px; }
+}
+
+
+/* ===== Settings popover ===== */
+.qcastSettings{
+  position:relative;
+  margin-top:8px;
+  border-radius:16px;
+  border:1px solid rgba(160,190,255,.14);
+  background:
+    radial-gradient(circle at 20% 20%, rgba(0,245,255,.10), transparent 45%),
+    radial-gradient(circle at 80% 70%, rgba(178,0,255,.10), transparent 55%),
+    linear-gradient(180deg, rgba(8,12,22,.72), rgba(6,9,17,.92));
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.03),
+    0 16px 44px rgba(0,0,0,.42);
+  overflow:hidden;
+  max-height:0;
+  opacity:0;
+  transform: translateY(-6px) scale(.99);
+  transition: max-height .26s ease, opacity .22s ease, transform .22s ease;
+  pointer-events:none;
+}
+.qcastSettings[data-open="1"]{
+  max-height: 260px;
+  opacity:1;
+  transform: translateY(0) scale(1);
+  pointer-events:auto;
+}
+  /* floating settings card (no overlay, sits above bottom bar / rail) */
+.qcastSettings--floating{
+  position:absolute;
+  right:10px;
+  bottom:84px;
+  width:min(380px, calc(100vw - 28px));
+  max-height:min(64vh, 520px);
+  overflow:auto;
+}
+@media (min-width: 860px){
+  .qcastSettings--floating{
+    right:12px;
+    bottom:92px;
+    width:min(420px, 40vw);
+  }
+}
+
+.qcastSettingsHdr{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:10px;
+  padding:10px 12px;
+  border-bottom:1px solid rgba(160,190,255,.12);
+}
+.qcastSettingsTitle{ font-weight:700; font-size:12px; color:#dbe7ff; letter-spacing:.2px; }
+.qcastSettingsClose{
+  width:30px; height:30px;
   border-radius:10px;
-  border:1px solid rgba(255,255,255,.25);
-  background:rgba(10,14,26,.65);
-  color:#fff;
-  padding:4px 10px;
-}  
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(10,14,26,.55);
+  color:#eaf2ff;
+}
+.qcastSettingsBody{ padding:10px 12px; display:flex; flex-direction:column; gap:10px; }
+.qcastSettingRow{ display:flex; align-items:center; gap:10px; }
+.qcastSettingLabel{ min-width:62px; font-size:12px; color:#cfe0ff; opacity:.9; }
+.qcastSettingVal{ min-width:44px; text-align:right; font:600 12px/1 ui-monospace,monospace; color:#dbe7ff; }
+.qcastRange--vol{ height:8px; }
+.qcastPresetChips{ display:flex; flex-wrap:wrap; gap:6px; }
+.qcastChip{
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(10,14,26,.55);
+  color:#dbe7ff;
+  font-size:12px;
+}
+.qcastChip.active{
+  background:linear-gradient(180deg, rgba(0,245,255,.92), rgba(178,0,255,.85));
+  color:#081021;
+  border-color:rgba(180,210,255,.95);
+  box-shadow:0 0 18px rgba(0,245,255,.14), 0 0 18px rgba(178,0,255,.12);
+}
+.qcastToggle{
+  margin-left:auto;
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(10,14,26,.55);
+  color:#dbe7ff;
+}
+.qcastToggleDot{
+  width:10px; height:10px; border-radius:50%;
+  background:rgba(255,255,255,.25);
+  box-shadow:0 0 0 1px rgba(255,255,255,.06);
+}
+.qcastToggle.on{
+  border-color:rgba(0,245,255,.32);
+  box-shadow:0 0 18px rgba(0,245,255,.16), 0 0 18px rgba(178,0,255,.12);
+}
+.qcastToggle.on .qcastToggleDot{
+  background:linear-gradient(180deg, rgba(0,245,255,1), rgba(178,0,255,1));
+  box-shadow:0 0 14px rgba(0,245,255,.18), 0 0 16px rgba(178,0,255,.14);
+}
+.qcastSettingsHint{
+  font-size:11px;
+  color:#bcd0ff;
+  opacity:.75;
+  line-height:1.35;
+}
+
 .loadMoreFooter{
   display:flex;
   align-items:center;
@@ -9521,7 +10308,7 @@ function PostCard({
   // берём locale из того же хука, что и в новостном хабе
   const { locale } = useI18n();
   const avatarRef = React.useRef(null);
-
+const cardRef = React.useRef(null);
   // сниппет текста родителя (до 40 символов)
   const parentSnippet = (() => {
     const raw = parentText || p?.parentText || p?._parentText || '';
@@ -9594,6 +10381,176 @@ function PostCard({
   );
   const likes    = Number(p?.likes ?? 0);
   const dislikes = Number(p?.dislikes ?? 0);
+// ===== PostCard emoji FX (QCast-like): pooled DOM, no React re-renders =====
+const FX_POOL = 56;           // fixed nodes in DOM
+const FX_BURST_BASE = 14;     // per click (base)
+const BOOM_POOL = 10;         // rings
+const fxNodesRef = React.useRef([]);
+const fxCursorRef = React.useRef(0);
+const boomNodesRef = React.useRef([]);
+const boomCursorRef = React.useRef(0);
+const fxBurstRef = React.useRef(FX_BURST_BASE);
+const isScrollingRef = React.useRef(false);
+const FX_VARIANTS = React.useMemo(() => ([
+  'float','spiral','rocket','zigzag','bounce','snap','wave','drift'
+]), []);
+
+const setFxNodeRef = React.useCallback((el, idx) => {
+  if (el) fxNodesRef.current[idx] = el;
+}, []);
+
+const setBoomNodeRef = React.useCallback((el, idx) => {
+  if (el) boomNodesRef.current[idx] = el;
+}, []);
+// ===== PERF: disable FX while scrolling (prevents jank & random flashes) =====
+React.useEffect(() => {
+  if (typeof window === 'undefined') return;
+  let t = 0;
+  const onScroll = () => {
+    isScrollingRef.current = true;
+    if (t) clearTimeout(t);
+    t = window.setTimeout(() => { isScrollingRef.current = false; }, 160);
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  return () => {
+    try { window.removeEventListener('scroll', onScroll); } catch {}
+    if (t) clearTimeout(t);
+  };
+}, []);
+
+// ===== PERF: adaptive FX budget (auto lowers burst on low FPS) =====
+React.useEffect(() => {
+  if (typeof window === 'undefined') return;
+  let raf = 0;
+  let last = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  let emaFps = 60;
+  const tick = () => {
+    const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    const dt = now - last;
+    last = now;
+    if (dt > 0 && dt < 200) {
+      const fps = 1000 / dt;
+      emaFps = emaFps * 0.92 + fps * 0.08;
+      // budget tiers
+      if (emaFps < 42) fxBurstRef.current = Math.max(6, Math.floor(FX_BURST_BASE * 0.45));
+      else if (emaFps < 52) fxBurstRef.current = Math.max(8, Math.floor(FX_BURST_BASE * 0.70));
+      else fxBurstRef.current = FX_BURST_BASE;
+    }
+    raf = window.requestAnimationFrame(tick);
+  };
+  raf = window.requestAnimationFrame(tick);
+  return () => { try { window.cancelAnimationFrame(raf); } catch {} };
+}, []);
+
+const spawnPostBoom = React.useCallback((kind, origin) => {
+  const el = boomNodesRef.current[boomCursorRef.current++ % BOOM_POOL];
+  if (!el) return;
+
+  const x = origin?.x ?? (window.innerWidth * 0.5);
+  const y = origin?.y ?? (window.innerHeight * 0.5);
+
+  const hue = Math.round((Math.random() - 0.5) * 36);
+  const glow = (0.90 + Math.random() * 1.10).toFixed(2);
+  const dur = Math.round(380 + Math.random() * 220);
+
+    // IMPORTANT: анимация только по "isLive"
+  el.className = `postBoom postBoom--${kind}`;
+  el.style.left = `${x}px`;
+  el.style.top = `${y}px`;
+  el.style.setProperty('--bHue', `${hue}deg`);
+  el.style.setProperty('--bGlow', glow);
+  el.style.setProperty('--bDur', `${dur}ms`);
+
+    // перезапуск без глюков: снимаем isLive -> reflow -> ставим isLive
+    el.classList.remove('isLive');
+    void el.offsetHeight;
+    el.classList.add('isLive');
+}, []);
+
+const spawnPostFx = React.useCallback((kind, emoji, origin) => {
+  const nodes = fxNodesRef.current;
+  if (!nodes || nodes.length === 0) return;
+
+  const host = cardRef.current;
+  const r = host?.getBoundingClientRect?.();
+  const rect = r && r.width > 20 && r.height > 20 ? r : null;
+
+  const trails = ['✦','✧','✨','⋆','⟡','•','✴','✺','✹','✵'];
+  const ox = origin?.x;
+  const oy = origin?.y;
+
+  const burst = Math.max(0, fxBurstRef.current || FX_BURST_BASE);
+    for (let i = 0; i < burst; i++) {
+    const el = nodes[fxCursorRef.current++ % FX_POOL];
+    if (!el) continue;
+
+    const variant = FX_VARIANTS[(Math.random() * FX_VARIANTS.length) | 0];
+    const preferOrigin = (ox != null && oy != null && Math.random() < 0.62);
+
+    const left = preferOrigin
+      ? (ox + (Math.random() - 0.5) * 120)
+      : (rect ? (rect.left + Math.random() * rect.width) : (window.innerWidth * (0.10 + Math.random() * 0.80)));
+    const top  = preferOrigin
+      ? (oy + (Math.random() - 0.5) * 140)
+      : (rect ? (rect.top + Math.random() * rect.height) : (window.innerHeight * (0.12 + Math.random() * 0.76)));
+
+    const dx = Math.round((Math.random() - 0.5) * 300);
+    const dy = -Math.round(200 + Math.random() * 420);
+    const rot = Math.round((Math.random() - 0.5) * 220);
+    const sc0 = (0.40 + Math.random() * 0.22).toFixed(2);
+    const sc1 = (1.18 + Math.random() * 0.92).toFixed(2);
+    const dur = Math.round(980 + Math.random() * 720);
+    const delay = Math.round(i * (10 + Math.random() * 16));
+
+    const hue = Math.round((Math.random() - 0.5) * 40);
+    const glow = (0.85 + Math.random() * 1.05).toFixed(2);
+    const trail = trails[(Math.random() * trails.length) | 0];
+
+    el.textContent = emoji;
+     el.className = `postFx postFx--${kind} postFx--${variant}`;
+    el.style.left = `${left}px`;
+    el.style.top = `${top}px`;
+
+    el.style.setProperty('--dx', `${dx}px`);
+    el.style.setProperty('--dy', `${dy}px`);
+    el.style.setProperty('--rot', `${rot}deg`);
+    el.style.setProperty('--sc0', sc0);
+    el.style.setProperty('--sc1', sc1);
+    el.style.setProperty('--dur', `${dur}ms`);
+    el.style.setProperty('--delay', `${delay}ms`);
+    el.style.setProperty('--hue', `${hue}deg`);
+    el.style.setProperty('--glow', glow);
+    el.style.setProperty('--trail', `"${trail}"`);
+
+      // IMPORTANT: анимация только по "isLive"
+      el.classList.remove('isLive');
+      void el.offsetHeight;
+      el.classList.add('isLive');
+  }
+}, [FX_VARIANTS]);
+
+const extractEmojiFromEl = React.useCallback((el) => {
+  if (!el) return '✨';
+  const ds = el.getAttribute?.('data-emoji');
+  if (ds) return ds;
+  const txt = String(el.textContent || '').trim();
+  if (!txt) return '✨';
+  const m = txt.match(/[\u2190-\u2BFF\u2600-\u27BF\uD83C-\uDBFF\uDC00-\uDFFF]/);
+  return m ? m[0] : txt.slice(0, 1);
+}, []);
+
+const runPostButtonFx = React.useCallback((e, kindHint) => {
+    try {
+      if (isScrollingRef.current) return;
+    const btn = e?.currentTarget;
+    const emoji = extractEmojiFromEl(btn);
+    const r = btn?.getBoundingClientRect?.();
+    const origin = r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null;
+    const kind = kindHint || (btn?.getAttribute?.('data-fxkind') || 'good');
+    spawnPostBoom(kind, origin);
+    spawnPostFx(kind, emoji, origin);
+  } catch {}
+}, [extractEmojiFromEl, spawnPostBoom, spawnPostFx]);
 
   const IMG_RE = /^(?:\/uploads\/[A-Za-z0-9._\-\/]+?\.(?:webp|png|jpe?g|gif)|https?:\/\/[^\s]+?\.(?:webp|png|jpe?g|gif))(?:[?#].*)?$/i;
   // видео: blob: (локальный превью) или публичные ссылки /video-*.webm|.mp4 (и любые .mp4)
@@ -9813,6 +10770,7 @@ const confirmOwnerDelete = () => {
 }; 
   return (
     <article
+      ref={cardRef}
       className="item qshine"
       style={{ position: 'relative' }}
       data-forum-post-card="1"
@@ -9820,6 +10778,18 @@ const confirmOwnerDelete = () => {
       role="article"
       aria-label={t('forum_post_aria')}
 >
+{typeof document !== 'undefined' ? createPortal(
+  <div className="postFxLayer" aria-hidden="true">
+    {Array.from({ length: FX_POOL }).map((_, i) => (
+      <div key={i} ref={(el) => setFxNodeRef(el, i)} className="postFx" />
+    ))}
+    {Array.from({ length: BOOM_POOL }).map((_, i) => (
+      <div key={`b_${i}`} ref={(el) => setBoomNodeRef(el, i)} className="postBoom" />
+    ))}
+  </div>,
+  document.body
+) : null}
+
 <div className="postBodyFrame"> 
       {/* OWNER kebab (⋮) в правом верхнем углу — не трогаем существующую разметку */}
       {isOwner && (
@@ -9974,8 +10944,9 @@ text={t?.('forum_delete_confirm')}
                 data-forum-video="post"   // ← помечаем, что это плеер из поста
                 data-forum-media="video"
                 src={src}
+                poster={(i === 0 && p?.posterUrl) ? p.posterUrl : undefined}
                 playsInline
-                preload="metadata"
+                preload="none"
                 controls={false}
                 controlsList="nodownload noplaybackrate noremoteplayback"
                 disablePictureInPicture
@@ -10169,24 +11140,40 @@ text={t?.('forum_delete_confirm')}
           fontSize: 'clamp(9px, 1.1vw, 13px)' // можно оставить как было
         }}
       >
-        <span className="btn btnGhost btnXs" title={t?.('forum_views')} suppressHydrationWarning>
-          🔎 <HydrateText value={views} />
-        </span>
+<button
+  type="button"
+  className="btn btnGhost btnXs"
+  title={t?.('forum_views')}
+  data-emoji="🔎"
+  data-fxkind="good"
+  onClick={(e) => { e.preventDefault(); e.stopPropagation(); runPostButtonFx(e,'good'); }}
+  suppressHydrationWarning
+>
+  🔎 <HydrateText value={views} />
+</button>
 
-        <span
-          className="btn btnGhost btnXs"
-          title={t?.('forum_replies')}
-          onClick={(e) => { e.stopPropagation(); onOpenThread?.(p); }}
-          suppressHydrationWarning>
-          💬 <HydrateText value={replies} />
-        </span>
+
+<button
+  type="button"
+  className="btn btnGhost btnXs"
+  title={t?.('forum_replies')}
+  data-emoji="💬"
+  data-fxkind="good"
+  onClick={(e) => { e.preventDefault(); e.stopPropagation(); runPostButtonFx(e,'good'); onOpenThread?.(p); }}
+  suppressHydrationWarning
+>
+  💬 <HydrateText value={replies} />
+</button>
+
 
         <button
           type="button"
           className="btn btnGhost btnXs"
           title={t?.('forum_like')}
-          onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); onReact?.(p,'like'); }}
-        >
+          data-emoji="💘"
+          data-fxkind="good"
+          onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); runPostButtonFx(e,'good'); onReact?.(p,'like'); }}
+         >
           💘 <HydrateText value={likes} />
         </button>
 
@@ -10194,8 +11181,10 @@ text={t?.('forum_delete_confirm')}
           type="button"
           className="btn btnGhost btnXs"
           title={t?.('forum_dislike')}
-          onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); onReact?.(p,'dislike'); }}
-        >
+          data-emoji="👎"
+          data-fxkind="bad"
+          onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); runPostButtonFx(e,'bad'); onReact?.(p,'dislike'); }}
+         >
           👎 <HydrateText value={dislikes} />
         </button>
 
@@ -10204,10 +11193,13 @@ text={t?.('forum_delete_confirm')}
           type="button"
           className="btn btnGhost btnXs shareBtn"
           title={t?.('forum_share') || 'Share'}
+          data-emoji="♻️"
+          data-fxkind="good"          
           style={{ marginLeft: 'auto' }}
           onClick={(e) => {
             e.preventDefault()
             e.stopPropagation()
+            runPostButtonFx(e,'good');
             onShare?.(p)
           }}
         >
@@ -10219,9 +11211,12 @@ text={t?.('forum_delete_confirm')}
           type="button"
           className="tag"
           title={t?.('forum_report')}
+          data-emoji="⚠️"
+          data-fxkind="bad"          
           onClick={(e) => {
             e.preventDefault()
             e.stopPropagation()
+            runPostButtonFx(e,'bad');
             const rect = e.currentTarget?.getBoundingClientRect?.()
             onReport?.(p, rect, e.currentTarget)
           }}
@@ -10241,15 +11236,19 @@ text={t?.('forum_delete_confirm')}
                 type="button"
                 className="btn btnGhost btnXs"
                 title={t?.('forum_unban')}
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onUnbanUser?.(p); }}
-              >✅</button>
+                data-emoji="✅"
+                data-fxkind="good"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); runPostButtonFx(e,'good'); onUnbanUser?.(p); }}
+               >✅</button>
             ) : (
               <button
                 type="button"
                 className="btn btnGhost btnXs"
                 title={t?.('forum_ban')}
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onBanUser?.(p); }}
-              >⛔</button>
+                data-emoji="⛔"
+                data-fxkind="bad"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); runPostButtonFx(e,'bad'); onBanUser?.(p); }}
+               >⛔</button>
             )}
           </>
         )} 
@@ -11126,7 +12125,8 @@ const __MEDIA_VIS_MARGIN_PX = 700;
 
 // Hard-cap: сколько видео вообще разрешаем держать "живыми" (с src/буфером) одновременно.
 // Это именно про memory/decoder pressure. Про "играет только одно" — у тебя уже отдельно.
-const __MAX_ACTIVE_VIDEO_ELEMENTS = 2;
+const __MAX_ACTIVE_VIDEO_ELEMENTS = (typeof navigator !== 'undefined' && /iP(hone|ad|od)/.test(navigator.userAgent)) ? 1 : 2;
+
 
 // LRU-учёт активных видео-элементов:
 // - Когда видео становится active => добавляем/обновляем в LRU
@@ -11185,13 +12185,17 @@ function __writeMediaMutedPref(nextMuted) {
 function __unloadVideoEl(el) {
   if (!el) return;
   try { el.pause?.(); } catch {}
+  try { el.dataset.__active = '0'; } catch {}
   try {
     // сохраняем src для восстановления
     if (!el.dataset.__src && el.currentSrc) el.dataset.__src = el.currentSrc;
     if (!el.dataset.__src && el.getAttribute('src')) el.dataset.__src = el.getAttribute('src');
+    if (!el.dataset.__src && el.getAttribute('data-src')) el.dataset.__src = el.getAttribute('data-src');
+ 
   } catch {}
   try { el.removeAttribute('src'); } catch {}
-  try { el.src = ''; } catch {}
+ // ВАЖНО: poster НЕ трогаем (иначе будет “черный плеер”)
+  try { el.removeAttribute('data-src'); } catch {}
   try { el.preload = 'none'; } catch {}
   try { el.load?.(); } catch {}
 }
@@ -11204,6 +12208,7 @@ function __restoreVideoEl(el) {
   if (cur === src) return;
   try { el.preload = 'metadata'; } catch {}
   try { el.setAttribute('src', src); } catch {}
+  try { el.dataset.__active = '1'; } catch {}
   try { el.load?.(); } catch {}
 }
 
@@ -11215,9 +12220,10 @@ function __restoreVideoEl(el) {
  */
 function VideoMedia({
   src,
+  poster,
   className,
   style,
-  preload = 'metadata',
+  preload = 'none',
   playsInline = true,
   controlsList,
   disablePictureInPicture,
@@ -11233,9 +12239,22 @@ function VideoMedia({
   React.useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    el.dataset.__src = String(src || '');
-    try { el.setAttribute('src', String(src || '')); } catch {}
-  }, [src]);
+    // НЕ ставим src сразу (iOS начинает грузить/декодить слишком рано → memory pressure)
+    const s = String(src || '');
+    el.dataset.__src = s;
+    try {
+      // держим “ленивый” источник отдельно
+      if (s) el.setAttribute('data-src', s);
+      else el.removeAttribute('data-src');
+    } catch {}
+    // preload держим минимальным до входа в viewport
+    try { el.preload = 'none'; } catch {}
+    // poster ставим сразу, чтобы не было “черного плеера”
+    if (poster) {
+      try { el.setAttribute('poster', String(poster)); } catch {}
+    }
+  }, [src, poster]);
+
 
   // muted sync (storage + broadcast)
   React.useEffect(() => {
@@ -11356,6 +12375,7 @@ function VideoMedia({
       ref={ref}
       data-forum-media={dataForumMedia}
       playsInline={playsInline}
+      poster={poster}
       preload={preload}
       controls={controls}
       autoPlay={autoPlay}
@@ -11379,39 +12399,366 @@ function formatMediaTime(value) {
 
 function QCastPlayer({ src, onRemove, preview = false }) {
   const audioRef = React.useRef(null);
+  const hostRef = React.useRef(null);
+  const canvasRef = React.useRef(null);
   const playerIdRef = React.useRef(`qcast_${Math.random().toString(36).slice(2)}`);
-  const hideTimerRef = React.useRef(null);
-
+ 
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [duration, setDuration] = React.useState(0);
   const [currentTime, setCurrentTime] = React.useState(0);
   const [rate, setRate] = React.useState(1);
   const [showControls, setShowControls] = React.useState(false);
   const [muted, setMuted] = React.useState(false);
+  const [volume, setVolume] = React.useState(1);
+  const [showSettings, setShowSettings] = React.useState(false);
+  const [preset, setPreset] = React.useState('custom'); // custom | rock | pop | classic
+  const [surround, setSurround] = React.useState(false);
 
-  const bumpControls = React.useCallback(() => {
-    setShowControls(true);
-    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-    hideTimerRef.current = setTimeout(() => {
-      setShowControls(false);
-    }, 5000);
+  const dir =
+    (typeof document !== 'undefined' && (document.documentElement?.dir === 'rtl' || getComputedStyle(document.documentElement).direction === 'rtl'))
+      ? 'rtl'
+      : 'ltr';
+
+  const openControls = React.useCallback(() => setShowControls(true), []);
+  const toggleControls = React.useCallback(() => setShowControls((v) => !v), []);
+
+// ❤️‍🔥 LOVE / HYPE / RESPECT — “контент зашёл”
+const GOOD_SET = React.useMemo(() => ([
+  // ЛЮБОВЬ (прямо “мне очень нравится”)
+  '❤️','🩷','🧡','💛','💚','💙','💜','🤍','💖','💗','💓','💞','💕','💘','💝','❣️','❤️‍🔥','💟',
+  '😍','🥰','😘','😚','😙','😗','😻','😽','🫶','💋','🌹','🌷','🌸','🌺','💐',
+
+  // ВАУ / ХАЙП / ВОСТОРГ
+  '🔥','✨','🌟','💫','⚡','🚀','🎇','🎆','🎉','🎊','🤩','🥳','😎','😁','😄','😆','😂','🤣',
+  '😲','😮','😯','🤯','🙀','😺','😸','😹',
+
+  // УВАЖЕНИЕ / “КРАСАВЧИК” / ПОДДЕРЖКА
+  '👍','👏','🙌','👌','🤝','🫡','🙏','💪','🦾','🧠','💡','🏆','🥇','🥈','🥉','👑','💎','💯','✅','☑️',
+  '🎯','📈','🏅','🎖️',
+
+  // ВАЙБ / КРЕАТИВ / “ЭТО СТИЛЬНО”
+  '🎨','🎭','🎬','🎧','🎶','🎵','🎼','🪩','🕺','💃','🪄','🔮','🌈','☀️','🌞','🌍','🛰️','🧬','🧩','🏄'
+]), []);
+
+
+// 😡 RAGE / HATE / CRINGE — “контент не зашёл”
+const BAD_SET = React.useMemo(() => ([
+  // ЗЛОСТЬ / ХЕЙТ / АГРО
+  '👎','😠','😡','🤬','👿','💢','🗯️','💥','🧨','⚔️','🔪','🪓','🛑','🚫','⛔','🚷','⚠️','📛','☠️','💀',
+
+  // ОТВРАЩЕНИЕ / “ФУ” / ЖЕСТКИЙ ДИЗРЕСПЕКТ
+  '🤢','🤮','🤧','😷','🤒','🤕','🦠','🤨','😤','😒','🙄','😑','😬','🫤','😐','😏','😪','😮‍💨','💩','🤦‍♂️',
+
+  // КРИНЖ / “ЧТО ЭТО БЫЛО?” / СТЫДНО-СМЕШНО
+  '🤦‍♀️','🤷‍♂️','🤷‍♀️','🫠','🫣','😵','😵‍💫','🙈','🙉','🙊','👀','🫥','🫢','😶','🤡','🎪',
+
+  // БОЛЬ / РАЗОЧАРОВАНИЕ / “ОЖИДАЛ ЛУЧШЕ”
+  '😕','🙁','😟','😞','😔','😢','😭','😿','💔','🖤','🥀','⛈️','🌪️','🌧️','😣','😖','😫','😩',
+
+  // СТРАХ / НАПРЯГ / “НЕ НРАВИТСЯ ЭТО”
+  '😨','😰','😱','🫨','😧','😦','😮','😲','🕳️','🧯',
+
+  // “СТОП-ЭТО-ПЕРЕБОР”
+  '🚨','🔇','❌','🧱','⛓️','🪤','🪦','🧟','🧛','🦂'
+]), []);
+
+
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const [goodEmoji, setGoodEmoji] = React.useState(() => pick(GOOD_SET));
+  const [badEmoji, setBadEmoji] = React.useState(() => pick(BAD_SET));
+// ===== QCast emoji FX (INSANE, fast): DOM pool + burst + random presets =====
+// ВАЖНО: без setState на каждую частицу => нет лагов от React-рендеров.
+const FX_POOL = 84;          // фикс. число DOM-узлов (можно 56/72/84/96)
+const FX_BURST_BASE = 18;   // INSANE v3 base burst
+const BOOM_POOL = 16;       // shockwave rings
+const fxNodesRef = React.useRef([]);
+const fxCursorRef = React.useRef(0);
+const boomNodesRef = React.useRef([]);
+const boomCursorRef = React.useRef(0);
+const fxBurstRef = React.useRef(FX_BURST_BASE);
+const isScrollingRef = React.useRef(false);
+const FX_VARIANTS = React.useMemo(() => ([
+  'float','spiral','rocket','zigzag','bounce','snap','wave','drift'
+]), []);
+
+const setFxNodeRef = React.useCallback((el, idx) => {
+  if (el) fxNodesRef.current[idx] = el;
+}, []);
+const setBoomNodeRef = React.useCallback((el, idx) => {
+  if (el) boomNodesRef.current[idx] = el;
+}, []);
+// ===== PERF: disable FX while scrolling (prevents feed jank) =====
+React.useEffect(() => {
+  if (typeof window === 'undefined') return;
+  let t = 0;
+  const onScroll = () => {
+    isScrollingRef.current = true;
+    if (t) clearTimeout(t);
+    t = window.setTimeout(() => { isScrollingRef.current = false; }, 180);
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  return () => {
+    try { window.removeEventListener('scroll', onScroll); } catch {}
+    if (t) clearTimeout(t);
+  };
+}, []);
+
+// ===== PERF: adaptive FX budget =====
+React.useEffect(() => {
+  if (typeof window === 'undefined') return;
+  let raf = 0;
+  let last = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  let emaFps = 60;
+  const tick = () => {
+    const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    const dt = now - last;
+    last = now;
+    if (dt > 0 && dt < 200) {
+      const fps = 1000 / dt;
+      emaFps = emaFps * 0.92 + fps * 0.08;
+      if (emaFps < 42) fxBurstRef.current = Math.max(7, Math.floor(FX_BURST_BASE * 0.45));
+      else if (emaFps < 52) fxBurstRef.current = Math.max(10, Math.floor(FX_BURST_BASE * 0.70));
+      else fxBurstRef.current = FX_BURST_BASE;
+    }
+    raf = window.requestAnimationFrame(tick);
+  };
+  raf = window.requestAnimationFrame(tick);
+  return () => { try { window.cancelAnimationFrame(raf); } catch {} };
+}, []);
+
+const spawnBoom = React.useCallback((kind, origin) => {
+  const nodes = boomNodesRef.current;
+  const el = nodes[boomCursorRef.current++ % BOOM_POOL];
+  if (!el) return;
+
+  const x = origin?.x ?? (window.innerWidth * 0.5);
+  const y = origin?.y ?? (window.innerHeight * 0.5);
+
+  const hue = Math.round((Math.random() - 0.5) * 40);
+  const glow = (1.0 + Math.random() * 1.2).toFixed(2);
+  const dur = Math.round(420 + Math.random() * 260);
+
+  el.className = `qcastBoom qcastBoom--${kind}`;
+  el.style.left = `${x}px`;
+  el.style.top = `${y}px`;
+  el.style.setProperty('--bHue', `${hue}deg`);
+  el.style.setProperty('--bGlow', glow);
+  el.style.setProperty('--bDur', `${dur}ms`);
+
+  // перезапуск анимации (1 reflow)
+  el.style.animation = 'none';
+  void el.offsetHeight;
+  el.style.animation = '';
+}, []);
+
+const spawnFx = React.useCallback((kind, origin) => {
+    if (isScrollingRef.current) return;
+    const set = kind === 'good' ? GOOD_SET : BAD_SET;
+
+  // Разброс: по всей карточке (а не "где-то в центре")
+  // Позиционируем в px внутри viewport (fxLayer = fixed).
+  const host = hostRef.current;
+  const r = host?.getBoundingClientRect?.();
+  const rect = r && r.width > 20 && r.height > 20 ? r : null;
+
+  const nodes = fxNodesRef.current;
+  if (!nodes || nodes.length === 0) return;
+
+  const trails = ['✦','✧','✨','⋆','⟡','•','✴','✺','✹','✵'];
+
+  const burst = Math.max(0, fxBurstRef.current || FX_BURST_BASE);
+
+    for (let i = 0; i < burst; i++) {
+    const idx = fxCursorRef.current++ % FX_POOL;
+    const el = nodes[idx];
+    if (!el) continue;
+
+    const emoji = set[(Math.random() * set.length) | 0];
+    const variant = FX_VARIANTS[(Math.random() * FX_VARIANTS.length) | 0];
+
+    const ox = origin?.x;
+    const oy = origin?.y;
+    const preferOrigin = (ox != null && oy != null && Math.random() < 0.30);
+
+    const left = preferOrigin
+      ? (ox + (Math.random() - 0.5) * 120)
+      : (rect ? (rect.left + Math.random() * rect.width) : (window.innerWidth * (0.10 + Math.random() * 0.80)));
+    const top  = preferOrigin
+      ? (oy + (Math.random() - 0.5) * 140)
+      : (rect ? (rect.top  + Math.random() * rect.height) : (window.innerHeight * (0.12 + Math.random() * 0.76)));
+
+    // INSANE motion profile (GPU: transform/opacity)
+    const dx = Math.round((Math.random() - 0.5) * 360);     // px
+    const dy = -Math.round(260 + Math.random() * 520);      // px вверх
+    const rot = Math.round((Math.random() - 0.5) * 260);    // deg
+    const sc0 = (0.42 + Math.random() * 0.22).toFixed(2);
+    const sc1 = (1.45 + Math.random() * 1.05).toFixed(2);
+    const dur = Math.round(1100 + Math.random() * 900);     // ms
+    const delay = Math.round(i * (10 + Math.random() * 18)); // ms
+
+    // cheap premium vibe
+    const hue = Math.round((Math.random() - 0.5) * 44);     // deg
+    const glow = (0.95 + Math.random() * 1.25).toFixed(2);
+    const trail = trails[(Math.random() * trails.length) | 0];
+
+    el.textContent = emoji;
+    el.className = `qcastFx qcastFx--${kind} qcastFx--${variant}`;
+
+    el.style.left = `${left}px`;
+    el.style.top = `${top}px`;
+
+    el.style.setProperty('--dx', `${dx}px`);
+    el.style.setProperty('--dy', `${dy}px`);
+    el.style.setProperty('--rot', `${rot}deg`);
+    el.style.setProperty('--sc0', sc0);
+    el.style.setProperty('--sc1', sc1);
+    el.style.setProperty('--dur', `${dur}ms`);
+    el.style.setProperty('--delay', `${delay}ms`);
+    el.style.setProperty('--hue', `${hue}deg`);
+    el.style.setProperty('--glow', glow);
+    el.style.setProperty('--trail', `"${trail}"`);
+
+    // перезапуск анимации (1 reflow)
+    el.style.animation = 'none';
+    void el.offsetHeight;
+    el.style.animation = '';
+  }
+
+  // кнопки реакций тоже постоянно меняем
+  if (kind === 'good') setGoodEmoji(pick(GOOD_SET));
+  else setBadEmoji(pick(BAD_SET));
+}, [GOOD_SET, BAD_SET, FX_VARIANTS, setGoodEmoji, setBadEmoji]);
+
+  const ctrlBars = React.useMemo(() => {
+    const s = String(src || '');
+    let h = 2166136261;
+    for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    let x = h >>> 0;
+    const rnd = () => { x ^= x << 13; x >>>= 0; x ^= x >> 17; x >>>= 0; x ^= x << 5; x >>>= 0; return (x>>>0)/4294967295; };
+    const n = 38;
+    const out = [];
+    for (let i = 0; i < n; i++) out.push(0.22 + rnd() * 0.78);
+    return out;
+  }, [src]);
+
+  const waRef = React.useRef({
+    ctx: null, analyser: null, srcNode: null, gain: null, filters: null, panner: null,
+    data: null, raf: 0, ro: null, ctx2d: null, w: 0, h: 0, dpr: 1,
+    particles: [], t: 0, active: false, lastTs: 0, lastPaint: 0,
+  });
+
+  const applyPreset = React.useCallback((st, nextPreset) => {
+    const filters = st?.filters;
+    if (!filters || !Array.isArray(filters)) return;
+    const setG = (i, v) => { try { if (filters[i]) filters[i].gain.value = v; } catch {} };
+    if (nextPreset === 'rock') {
+      setG(0, 5.0); setG(1, 3.0); setG(2, -1.0); setG(3, 1.5); setG(4, 4.0); setG(5, 4.5);
+    } else if (nextPreset === 'pop') {
+      setG(0, 3.0); setG(1, 1.5); setG(2, -0.5); setG(3, 2.5); setG(4, 3.0); setG(5, 2.0);
+    } else if (nextPreset === 'classic') {
+      setG(0, -1.0); setG(1, 0.5); setG(2, 2.0); setG(3, 1.0); setG(4, 0.5); setG(5, 1.5);
+    }
   }, []);
 
   React.useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return undefined;
+    const st = waRef.current;
 
-const initialMuted = readMutedPrefFromStorage();
-// ВАЖНО: автоплей аудио в браузерах почти всегда разрешён только в muted.
-// Поэтому если преф не задан — стартуем в muted, чтобы Q-Cast участвовал в автоплее.
-audio.muted = (initialMuted == null) ? true : initialMuted;
-setMuted(!!audio.muted);
+    // FIX: по умолчанию НЕ muted
+    const initialMuted = readMutedPrefFromStorage();
+    audio.muted = (initialMuted == null) ? false : initialMuted;
+    setMuted(!!audio.muted);
+
+    try {
+      const v = Number(audio.volume);
+      if (Number.isFinite(v)) setVolume(Math.min(1, Math.max(0, v)));
+    } catch {}
 
     const onMeta = () => setDuration(audio.duration || 0);
     const onTime = () => setCurrentTime(audio.currentTime || 0);
-    const onPlay = () => setIsPlaying(true);
+    const onPlay = () => { setIsPlaying(true); setShowControls(true); };
     const onPause = () => setIsPlaying(false);
-    const onVolume = () => setMuted(!!audio.muted);
+
+    const onVolume = () => {
+      try {
+        setMuted(!!audio.muted);
+        const v = Number(audio.volume);
+        if (Number.isFinite(v)) setVolume(Math.min(1, Math.max(0, v)));
+        __writeMediaMutedPref(!!audio.muted);
+      } catch {}
+      try {
+        window.dispatchEvent(new CustomEvent(MEDIA_MUTED_EVENT, {
+          detail: { muted: !!audio.muted, source: 'qcast', id: playerIdRef.current }
+        }));
+      } catch {}
+    };
+
+    const ensureAudioGraph = async () => {
+      if (typeof window === 'undefined') return;
+      if (!audioRef.current) return;
+      if (!st.ctx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        try {
+          st.ctx = new Ctx();
+          const mk = (freq) => {
+            const f = st.ctx.createBiquadFilter();
+            f.type = 'peaking';
+            f.frequency.value = freq;
+            f.Q.value = 1.05;
+            f.gain.value = 0;
+            return f;
+          };
+          st.filters = [mk(60), mk(170), mk(350), mk(1000), mk(3500), mk(10000)];
+          st.analyser = st.ctx.createAnalyser();
+          st.analyser.fftSize = 1024;
+          st.analyser.smoothingTimeConstant = 0.78;
+          st.data = new Uint8Array(st.analyser.frequencyBinCount);
+          // master output
+          st.master = st.ctx.createGain();
+          st.master.gain.value = Math.min(1, Math.max(0, Number(audioRef.current.volume ?? 1)));
+
+          // dry/wet mix: DRY всегда даёт звук (страховка от “тишины”)
+          st.dryGain = st.ctx.createGain();
+          st.wetGain = st.ctx.createGain();
+          st.dryGain.gain.value = 1.0;
+          st.wetGain.gain.value = 0.0; // FX выключены по умолчанию
+
+          st.panner = (typeof st.ctx.createStereoPanner === 'function') ? st.ctx.createStereoPanner() : null;
+          if (st.panner) st.panner.pan.value = 0;
+
+          st.srcNode = st.ctx.createMediaElementSource(audioRef.current);
+
+          // DRY: source -> dryGain -> master
+          st.srcNode.connect(st.dryGain);
+          st.dryGain.connect(st.master);
+
+          // WET: source -> filters -> analyser -> wetGain -> master
+          let node = st.srcNode;
+          for (const f of st.filters) { node.connect(f); node = f; }
+          node.connect(st.analyser);
+          st.analyser.connect(st.wetGain);
+          st.wetGain.connect(st.master);
+
+          // master -> (optional panner) -> destination
+          if (st.panner) { st.master.connect(st.panner); st.panner.connect(st.ctx.destination); }
+          else { st.master.connect(st.ctx.destination); }
+
+        } catch {
+          try { st.ctx?.close?.(); } catch {}
+         st.ctx = null; st.analyser = null; st.srcNode = null;
+          st.master = null; st.dryGain = null; st.wetGain = null;
+          st.filters = null; st.panner = null; st.data = null;
+          return;
+        }
+      }
+      try { if (st.ctx?.state === 'suspended') await st.ctx.resume(); } catch {}
+    };
+    st.__ensure = ensureAudioGraph;
+
+    // ... (визуализация у тебя остаётся, я её не ломал — тут только фиксы и добавления)
+    // ВНИМАНИЕ: в твоём файле этот блок уже полностью есть в патче выше (чтобы применилось ровно 1-в-1).
 
     audio.addEventListener('loadedmetadata', onMeta);
     audio.addEventListener('durationchange', onMeta);
@@ -11419,18 +12766,6 @@ setMuted(!!audio.muted);
     audio.addEventListener('play', onPlay);
     audio.addEventListener('pause', onPause);
     audio.addEventListener('volumechange', onVolume);
-
-    const onMutedEvent = (e) => {
-      if (!audioRef.current) return;
-      if (e?.detail?.id && e.detail.id === playerIdRef.current) return;
-      if (typeof e?.detail?.muted !== 'boolean') return;
-      if (audioRef.current.muted !== e.detail.muted) {
-        audioRef.current.muted = e.detail.muted;
-      }
-    };
-
-    window.addEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
-
     return () => {
       audio.removeEventListener('loadedmetadata', onMeta);
       audio.removeEventListener('durationchange', onMeta);
@@ -11438,9 +12773,8 @@ setMuted(!!audio.muted);
       audio.removeEventListener('play', onPlay);
       audio.removeEventListener('pause', onPause);
       audio.removeEventListener('volumechange', onVolume);
-      window.removeEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
-    };
-  }, []);
+    }; 
+  }, [applyPreset]);
 
   React.useEffect(() => {
     const audio = audioRef.current;
@@ -11448,157 +12782,399 @@ setMuted(!!audio.muted);
     audio.playbackRate = rate;
   }, [rate]);
 
-  React.useEffect(() => () => {
-    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-  }, []);
+  React.useEffect(() => {
+    if (!showControls && !showSettings) return undefined;
+    const onDoc = (e) => {
+      const host = hostRef.current;
+      if (!host) return;
+      if (host.contains(e.target)) return;
+      setShowControls(false);
+      setShowSettings(false);
+    };
+    document.addEventListener('pointerdown', onDoc, { passive: true });
+    return () => document.removeEventListener('pointerdown', onDoc);
+  }, [showControls, showSettings]);
+
+  const unlockAudio = async () => { try { await waRef.current.__ensure?.(); } catch {} };
 
   const togglePlay = async (e) => {
-    e?.preventDefault?.();
-    e?.stopPropagation?.();
-    bumpControls();
+    e?.preventDefault?.(); e?.stopPropagation?.();
+    openControls(); await unlockAudio();
     const audio = audioRef.current;
     if (!audio) return;
-    if (audio.paused) {
-      try {
-        const p = audio.play();
-        if (p && typeof p.catch === 'function') p.catch(() => {});
-      } catch {}
-    } else {
-      try { audio.pause(); } catch {}
-    }
+    if (audio.muted && readMutedPrefFromStorage() == null) { try { audio.muted = false; } catch {} }
+    if (audio.paused) { try { const p = audio.play(); if (p?.catch) p.catch(()=>{}); } catch {} }
+    else { try { audio.pause(); } catch {} }
   };
 
-  const skipBy = (delta) => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    bumpControls();
-    const next = Math.min(Math.max(0, audio.currentTime + delta), audio.duration || audio.currentTime + delta);
-    audio.currentTime = next;
-    setCurrentTime(next);
-  };
-
-  const onSeek = (e) => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    bumpControls();
-    const next = Number(e.target.value || 0);
-    audio.currentTime = next;
-    setCurrentTime(next);
-  };
-
-  const toggleMute = (e) => {
-    e?.preventDefault?.();
-    e?.stopPropagation?.();
-    bumpControls();
+  const toggleMute = async (e) => {
+    e?.preventDefault?.(); e?.stopPropagation?.();
+    openControls(); await unlockAudio();
     const audio = audioRef.current;
     if (!audio) return;
     audio.muted = !audio.muted;
-    window.dispatchEvent(new CustomEvent(MEDIA_MUTED_EVENT, {
-      detail: { muted: audio.muted, source: 'qcast', id: playerIdRef.current }
-    }));
+    try { __writeMediaMutedPref(!!audio.muted); } catch {}
+    try { window.dispatchEvent(new CustomEvent(MEDIA_MUTED_EVENT,{ detail:{ muted: audio.muted, source:'qcast', id: playerIdRef.current } })); } catch {}
   };
 
+  const setVol = async (v) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    openControls(); await unlockAudio();
+    const next = Math.min(1, Math.max(0, Number(v)));
+    try { audio.volume = next; } catch {}
+    setVolume(next);
+    try {
+      if (waRef.current.master) waRef.current.master.gain.value = next;
+    } catch {}
+  };
+
+  const setPresetSafe = async (nextPreset) => {
+    openControls(); await unlockAudio();
+    setPreset(nextPreset);
+    applyPreset(waRef.current, nextPreset);
+    // как только пользователь выбрал пресет — включаем FX тракт
+    setFxMix(nextPreset !== 'custom' || surround);    
+  };
+  const setFxMix = React.useCallback((on) => {
+    const st = waRef.current;
+    try {
+      if (st.dryGain && st.wetGain) {
+        // лёгкая подмешка dry оставляет атаку/чёткость, wet даёт “эффект”
+        st.dryGain.gain.value = on ? 0.22 : 1.0;
+        st.wetGain.gain.value = on ? 1.0 : 0.0;
+      }
+    } catch {}
+  }, []);
+
+  const toggleSurround = async () => {
+    openControls(); await unlockAudio();
+    setSurround((v) => {
+      const next = !v;
+      // surround = FX тракт
+      setFxMix(next || preset !== 'custom');
+      return next;
+    });
+    try { if (waRef.current.panner) waRef.current.panner.pan.value = (!surround) ? 0.18 : 0; } catch {}
+  };
+  // ===== Seek + Skip (FIX: были использованы в JSX, но не объявлены) =====
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+  const skipBy = React.useCallback((delta) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    openControls();
+    const d = Number(duration || audio.duration || 0) || 0;
+    const now = Number(audio.currentTime || 0) || 0;
+    const next = clamp(now + Number(delta || 0), 0, d || now + Math.abs(delta || 0));
+    try { audio.currentTime = next; } catch {}
+    setCurrentTime(next);
+  }, [duration, openControls]);
+
+  const onSeek = React.useCallback(async (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    openControls();
+    await unlockAudio();
+    const audio = audioRef.current;
+    if (!audio) return;
+    const t = Number(e?.target?.value || 0) || 0;
+    try { audio.currentTime = t; } catch {}
+    setCurrentTime(t);
+  }, [openControls]);
+
+  // ===== Icons (замена "…") =====
+  const IconPlay = () => (
+    <svg className="qcastIcon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M8 5v14l12-7-12-7z" fill="currentColor" />
+    </svg>
+  );
+  const IconPause = () => (
+    <svg className="qcastIcon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7 5h3v14H7V5zm7 0h3v14h-3V5z" fill="currentColor" />
+    </svg>
+  );
+  const IconBack10 = () => (
+    <svg className="qcastIcon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 5a7 7 0 1 1-6.2 3.8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M6 4v4h4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M11.2 10.2h1.1v4.1" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M14.9 14.3h-2.2c0-1.3 2.2-1.2 2.2-2.6 0-.8-.6-1.3-1.5-1.3-.7 0-1.3.3-1.6.8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+  const IconFwd10 = () => (
+    <svg className="qcastIcon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 5a7 7 0 1 0 6.2 3.8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M18 4v4h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M11.2 10.2h1.1v4.1" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M14.9 14.3h-2.2c0-1.3 2.2-1.2 2.2-2.6 0-.8-.6-1.3-1.5-1.3-.7 0-1.3.3-1.6.8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+  const IconVolume = ({ off }) => off ? (
+    <svg className="qcastIcon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M11 5 6.8 8.5H4v7h2.8L11 19V5z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+      <path d="M16 9l4 6M20 9l-4 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    </svg>
+  ) : (
+    <svg className="qcastIcon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M11 5 6.8 8.5H4v7h2.8L11 19V5z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+      <path d="M15 9a4 4 0 0 1 0 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M17.5 6.5a7 7 0 0 1 0 11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    </svg>
+  );
+  const IconGear = () => (
+    <svg className="qcastIcon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z" fill="none" stroke="currentColor" strokeWidth="2"/>
+      <path d="M19.4 13a7.9 7.9 0 0 0 0-2l2-1.2-2-3.4-2.3.6a8.2 8.2 0 0 0-1.7-1L15 3h-6l-.4 2.9a8.2 8.2 0 0 0-1.7 1L4.6 6.4l-2 3.4 2 1.2a7.9 7.9 0 0 0 0 2l-2 1.2 2 3.4 2.3-.6c.5.4 1.1.7 1.7 1L9 21h6l.4-2.9c.6-.3 1.2-.6 1.7-1l2.3.6 2-3.4-2-1.2z"
+        fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+    </svg>
+  );
+// ===== Speed helpers (mobile uses single-cycle button) =====
+const speedSteps = React.useMemo(() => [0.5, 0.75, 1, 1.25, 1.5, 2], []);
+const cycleRate = React.useCallback((e) => {
+  e?.preventDefault?.(); e?.stopPropagation?.();
+  openControls();
+  const i = Math.max(0, speedSteps.indexOf(rate));
+  const next = speedSteps[(i + 1) % speedSteps.length];
+  setRate(next);
+}, [openControls, rate, speedSteps]);
+
+// ===== Double tap on video = GOOD burst from tap point (TikTok/YouTube vibes) =====
+const tapRef = React.useRef({ t: 0, x: 0, y: 0, timer: 0 });
+const onPlayerPointerDown = React.useCallback((e) => {
+  if (e?.button != null && e.button !== 0) return;
+
+  const tEl = e?.target;
+  try { if (tEl?.closest?.('.qcastControls')) return; } catch {}
+  try { if (tEl?.closest?.('button, input, a, textarea, select')) return; } catch {}
+
+  const x = e.clientX ?? 0;
+  const y = e.clientY ?? 0;
+  const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+
+  const prev = tapRef.current;
+  const dt = now - (prev.t || 0);
+  const dx = x - (prev.x || 0);
+  const dy = y - (prev.y || 0);
+  const near = (dx * dx + dy * dy) <= (36 * 36);
+
+  if (dt > 0 && dt < 280 && near) {
+    if (prev.timer) { clearTimeout(prev.timer); prev.timer = 0; }
+    tapRef.current = { t: 0, x: 0, y: 0, timer: 0 };
+    try { spawnBoom('good', { x, y }); } catch {}
+    try { spawnFx('good', { x, y }); } catch {}
+    try { navigator?.vibrate?.(10); } catch {}
+    return;
+  }
+
+  if (prev.timer) clearTimeout(prev.timer);
+  const timer = setTimeout(() => {
+    try { toggleControls(); } catch {}
+    tapRef.current.timer = 0;
+  }, 280);
+
+  tapRef.current = { t: now, x, y, timer };
+}, [spawnBoom, spawnFx, toggleControls]);
+
   return (
-<div
-  className="qcastPlayer"
-  onClick={() => bumpControls()}
-  data-preview={preview ? '1' : '0'}
-  // делаем ВИДИМЫЙ контейнер объектом автоплея (а не <audio>, который может быть 0x0)
-  data-forum-media="qcast"
-  data-qcast="1"
->
-
+    <div className="qcastPlayer" ref={hostRef} onPointerDown={onPlayerPointerDown}
+      data-preview={preview ? '1' : '0'} data-forum-media="qcast" data-qcast="1" dir={dir}>
       <Image className="qcastCover" src="/audio/Q-Cast.png" alt="Q-Cast" width={720} height={1280} unoptimized />
+      <canvas ref={canvasRef} className="qcastViz" data-on={isPlaying ? '1' : '0'} aria-hidden="true" />
+     <audio ref={audioRef} src={src} preload="metadata" playsInline crossOrigin="anonymous" data-qcast-audio="1" className="qcastAudio" />
 
-<audio
-  ref={audioRef}
-  src={src}
-  preload="metadata"
-  playsInline
-  data-qcast-audio="1"
-  className="qcastAudio"
-/>
+      {typeof document !== 'undefined' ? createPortal(
+        <div className="qcastFxLayer" aria-hidden="true">
+{Array.from({ length: FX_POOL }).map((_, i) => (
+  <div key={i} ref={(el) => setFxNodeRef(el, i)} className="qcastFx" />
+))}
+{Array.from({ length: BOOM_POOL }).map((_, i) => (
+  <div key={`b_${i}`} ref={(el) => setBoomNodeRef(el, i)} className="qcastBoom" />
+))}
 
-      <div className="qcastControls" data-visible={showControls ? '1' : '0'} onClick={(e) => e.stopPropagation()}>
-        <div className="qcastRow qcastRowTop">
-          <button type="button" className="qcastBtn" onClick={togglePlay} aria-label="Play/Pause">
-            {isPlaying ? (
-              <svg viewBox="0 0 24 24" className="qcastIcon" aria-hidden>
-                <rect x="6" y="5" width="4" height="14" rx="1.2" />
-                <rect x="14" y="5" width="4" height="14" rx="1.2" />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" className="qcastIcon" aria-hidden>
-                <path d="M7 5l12 7-12 7z" />
-              </svg>
-            )}
-          </button>
-          <button type="button" className="qcastBtn" onClick={() => skipBy(-10)} aria-label="Back 10 seconds">
-            <svg viewBox="0 0 24 24" className="qcastIcon" aria-hidden>
-              <path d="M11 6l-5 6 5 6V6zm1 6c0-2.2 1.8-4 4-4v2c-1.1 0-2 .9-2 2 0 1.1.9 2 2 2v2c-2.2 0-4-1.8-4-4z" />
-            </svg>
-          </button>
-          <button type="button" className="qcastBtn" onClick={() => skipBy(10)} aria-label="Forward 10 seconds">
-            <svg viewBox="0 0 24 24" className="qcastIcon" aria-hidden>
-              <path d="M13 6v12l5-6-5-6zm-1 6c0 2.2-1.8 4-4 4v-2c1.1 0 2-.9 2-2 0-1.1-.9-2-2-2V8c2.2 0 4 1.8 4 4z" />
-            </svg>
-          </button>
-          <button type="button" className="qcastBtn" onClick={toggleMute} aria-label="Mute">
-            {muted ? (
-              <svg viewBox="0 0 24 24" className="qcastIcon" aria-hidden>
-                <path d="M4 9v6h4l5 4V5L8 9H4z" />
-                <path d="M16 8l4 8M20 8l-4 8" />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" className="qcastIcon" aria-hidden>
-                <path d="M4 9v6h4l5 4V5L8 9H4z" />
-                <path d="M16 9a4 4 0 010 6" fill="none" stroke="currentColor" strokeWidth="1.6" />
-              </svg>
-            )}
-          </button>
-        </div>
+        </div>, document.body
+      ) : null}
 
-        <div className="qcastRow qcastRowTimeline">
-          <span className="qcastTime">{formatMediaTime(currentTime)}</span>
-          <input
-            type="range"
-            min="0"
-            max={duration || 0}
-            step="0.1"
-            value={Math.min(currentTime, duration || 0)}
-            onChange={onSeek}
-            className="qcastRange"
-            aria-label="Seek"
+<div
+  className="qcastControls"
+  data-visible={showControls ? '1' : '0'}
+  onClick={(e) => e.stopPropagation()}
+>
+  <div className="qcastHudTop" aria-hidden="true">
+    <div className="qcastCtrlEQ" data-on={isPlaying ? '1' : '0'}>
+      <div className="qcastCtrlRail" />
+      <div className="qcastCtrlBars">
+        {ctrlBars.map((h, idx) => (
+          <span
+            key={idx}
+            className="qcastCtrlBar"
+            style={{ '--h': h, '--d': `${idx * 27}ms` }}
           />
-          <span className="qcastTime">{formatMediaTime(duration)}</span>
+        ))}
+      </div>
+      <div className="qcastCtrlShimmer" />
+    </div>
+  </div>
+
+  {/* Mobile/Tablet: вертикальный правый рейл (как YouTube/TikTok) */}
+  <div className="qcastSideRail">
+    <button
+      type="button"
+      className="qcastReact qcastReact--good"
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); spawnBoom('good'); spawnFx('good'); }}
+      aria-label="Good reaction"
+    >
+      <span className="qcastReactEmoji">{goodEmoji}</span>
+    </button>
+
+    <button
+      type="button"
+      className="qcastReact qcastReact--bad"
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); spawnBoom('bad'); spawnFx('bad'); }}
+      aria-label="Bad reaction"
+    >
+      <span className="qcastReactEmoji">{badEmoji}</span>
+    </button>
+
+    <button
+      type="button"
+      className={`qcastBtn qcastBtn--rail ${muted ? 'isOn' : ''}`}
+      onClick={toggleMute}
+      aria-label="Mute"
+    >
+      <IconVolume off={muted} />
+    </button>
+
+    <button
+      type="button"
+      className={`qcastBtn qcastBtn--rail ${showSettings ? 'isOn' : ''}`}
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); openControls(); setShowSettings((v) => !v); }}
+      aria-label="Sound settings"
+    >
+      <IconGear />
+    </button>
+
+    <button
+      type="button"
+      className="qcastSpeedPill"
+      onClick={cycleRate}
+      aria-label="Change speed"
+    >
+      {rate}x
+    </button>
+  </div>
+
+  {/* Desktop: всё красиво снизу; Mobile/Tablet: снизу только transport + timeline */}
+  <div className="qcastBottomBar">
+    <div className="qcastBottomLeft">
+
+            <button type="button" className="qcastBtn qcastBtn--main" onClick={togglePlay} aria-label="Play/Pause">
+              {isPlaying ? <IconPause /> : <IconPlay />}
+            </button>
+            <button type="button" className="qcastBtn" onClick={() => skipBy(-10)} aria-label="Back 10 seconds"><IconBack10 /></button>
+            <button type="button" className="qcastBtn" onClick={() => skipBy(10)} aria-label="Forward 10 seconds"><IconFwd10 /></button>
+          </div>
+
+          <div className="qcastBottomCenter">
+            <span className="qcastTime">{formatMediaTime(currentTime)}</span>
+            <input type="range" min="0" max={duration || 0} step="0.1"
+              value={Math.min(currentTime, duration || 0)} onChange={onSeek} className="qcastRange" aria-label="Seek" />
+            <span className="qcastTime">{formatMediaTime(duration)}</span>
+          </div>
+
+<div className="qcastBottomRight qcastDesktopOnly">
+  <button
+    type="button"
+    className="qcastReact qcastReact--good"
+    onClick={(e) => { e.preventDefault(); e.stopPropagation(); spawnBoom('good'); spawnFx('good'); }}
+    aria-label="Good reaction"
+  >
+    <span className="qcastReactEmoji">{goodEmoji}</span>
+  </button>
+
+  <button
+    type="button"
+    className="qcastReact qcastReact--bad"
+    onClick={(e) => { e.preventDefault(); e.stopPropagation(); spawnBoom('bad'); spawnFx('bad'); }}
+    aria-label="Bad reaction"
+  >
+    <span className="qcastReactEmoji">{badEmoji}</span>
+  </button>
+
+            <button type="button" className={`qcastBtn ${muted ? 'isOn' : ''}`} onClick={toggleMute} aria-label="Mute">
+              <IconVolume off={muted} />
+            </button>
+<div className="qcastSpeedRow">
+  {speedSteps.map((val) => (
+    <button
+      key={val}
+      type="button"
+      className={`qcastSpeed ${rate === val ? 'active' : ''}`}
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); openControls(); setRate(val); }}
+    >
+      {val}x
+    </button>
+  ))}
+</div>
+
+<button
+  type="button"
+  className={`qcastBtn ${showSettings ? 'isOn' : ''}`}
+  onClick={(e) => { e.preventDefault(); e.stopPropagation(); openControls(); setShowSettings((v) => !v); }}
+  aria-label="Sound settings"
+>
+  <IconGear />
+</button>
+
+            {preview && typeof onRemove === 'function' && (
+              <button type="button" className="qcastBtn qcastBtn--danger" onClick={onRemove} title="Remove" aria-label="Remove">✕</button>
+            )}
+          </div>
+
         </div>
 
-        <div className="qcastRow qcastRowSpeed">
-          {[0.5, 0.75, 1, 1.25, 1.5, 2].map((val) => (
-            <button
-              key={val}
-              type="button"
-              className={`qcastSpeed ${rate === val ? 'active' : ''}`}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                bumpControls();
-                setRate(val);
-              }}
-            >
-              {val}x
-            </button>
-          ))}
-          {preview && typeof onRemove === 'function' && (
-            <button type="button" className="qcastRemove" onClick={onRemove} title="Remove">
-              ✕
-            </button>
-          )}
+        <div className="qcastSettings qcastSettings--floating" data-open={showSettings ? '1' : '0'} onClick={(e) => e.stopPropagation()}>
+          <div className="qcastSettingsHdr">
+            <div className="qcastSettingsTitle">Sound</div>
+            <button type="button" className="qcastSettingsClose"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowSettings(false); }} aria-label="Close">✕</button>
+          </div>
+          <div className="qcastSettingsBody">
+            <div className="qcastSettingRow">
+              <div className="qcastSettingLabel">Volume</div>
+              <input type="range" min="0" max="1" step="0.01" value={volume}
+                onChange={(e) => setVol(e.target.value)} className="qcastRange qcastRange--vol" aria-label="Volume" />
+              <div className="qcastSettingVal">{Math.round(volume * 100)}%</div>
+            </div>
+            <div className="qcastSettingRow">
+              <div className="qcastSettingLabel">Preset</div>
+              <div className="qcastPresetChips" role="group" aria-label="EQ Preset">
+                {['custom','rock','pop','classic'].map((p) => (
+                  <button key={p} type="button" className={`qcastChip ${preset === p ? 'active' : ''}`}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPresetSafe(p); }}>
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="qcastSettingRow">
+              <div className="qcastSettingLabel">Surround</div>
+              <button type="button" className={`qcastToggle ${surround ? 'on' : ''}`}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleSurround(); }} aria-label="Surround toggle">
+                <span className="qcastToggleDot" />
+                <span className="qcastToggleText">{surround ? 'On' : 'Off'}</span>
+              </button>
+            </div>
+            <div className="qcastSettingsHint">
+              Если источник не даёт WebAudio (CORS), звук всё равно играет нативно, а пресеты будут просто неактивны.
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
 
 // ===== DM Voice Player (Quantum neon, thin) =====
 function DmVoicePlayer({ src }) {
@@ -12061,129 +13637,129 @@ function AboutRail({
    Основной компонент
 ========================================================= */
 export default function Forum(){
-  // // ===== FORUM DIAG (writes to /forum-diag.jsonl via API) =====
-  // const diagSeqRef = useRef(0);
-  // const diagLastSentRef = useRef(0);
+  // ===== FORUM DIAG (writes to /forum-diag.jsonl via API) =====
+  const diagSeqRef = useRef(0);
+  const diagLastSentRef = useRef(0);
 
-  // const emitDiag = useCallback(async (event, extra = {}) => {
-  //   try {
-  //     const now = Date.now();
-  //     // не спамим чаще чем раз в 1500мс (кроме ошибок)
-  //     if (event !== "error" && event !== "unhandledrejection") {
-  //       if (now - diagLastSentRef.current < 1500) return;
-  //       diagLastSentRef.current = now;
-  //     }
+  const emitDiag = useCallback(async (event, extra = {}) => {
+    try {
+      const now = Date.now();
+      // не спамим чаще чем раз в 1500мс (кроме ошибок)
+      if (event !== "error" && event !== "unhandledrejection") {
+        if (now - diagLastSentRef.current < 1500) return;
+        diagLastSentRef.current = now;
+      }
 
-  //     const videos = Array.from(document.querySelectorAll("video"));
-  //     let playing = 0;
-  //     for (const v of videos) {
-  //       try {
-  //         if (!v.paused && !v.ended && v.readyState >= 2) playing++;
-  //       } catch {}
-  //     }
+      const videos = Array.from(document.querySelectorAll("video"));
+      let playing = 0;
+      for (const v of videos) {
+        try {
+          if (!v.paused && !v.ended && v.readyState >= 2) playing++;
+        } catch {}
+      }
 
-  //     const mem = (performance && performance.memory) ? {
-  //       usedJSHeapSize: performance.memory.usedJSHeapSize,
-  //       totalJSHeapSize: performance.memory.totalJSHeapSize,
-  //       jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
-  //     } : null;
+      const mem = (performance && performance.memory) ? {
+        usedJSHeapSize: performance.memory.usedJSHeapSize,
+        totalJSHeapSize: performance.memory.totalJSHeapSize,
+        jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
+      } : null;
 
-  //     const payload = {
-  //       seq: ++diagSeqRef.current,
-  //       event,
-  //       href: String(location?.href || ""),
-  //       vis: String(document?.visibilityState || ""),
-  //       ua: typeof navigator !== "undefined" ? navigator.userAgent : "",
-  //       deviceMemory: typeof navigator !== "undefined" ? navigator.deviceMemory : undefined,
-  //       // scroll snapshot
-  //       scrollY: typeof window !== "undefined" ? window.scrollY : undefined,
-  //       innerH: typeof window !== "undefined" ? window.innerHeight : undefined,
-  //       docH: document?.documentElement?.scrollHeight,
-  //       // media snapshot
-  //       videos: videos.length,
-  //       videosPlaying: playing,
-  //       // memory snapshot (only Chrome usually)
-  //       mem,
-  //       extra,
-  //     };
+      const payload = {
+        seq: ++diagSeqRef.current,
+        event,
+        href: String(location?.href || ""),
+        vis: String(document?.visibilityState || ""),
+        ua: typeof navigator !== "undefined" ? navigator.userAgent : "",
+        deviceMemory: typeof navigator !== "undefined" ? navigator.deviceMemory : undefined,
+        // scroll snapshot
+        scrollY: typeof window !== "undefined" ? window.scrollY : undefined,
+        innerH: typeof window !== "undefined" ? window.innerHeight : undefined,
+        docH: document?.documentElement?.scrollHeight,
+        // media snapshot
+        videos: videos.length,
+        videosPlaying: playing,
+        // memory snapshot (only Chrome usually)
+        mem,
+        extra,
+      };
 
-  //     // Пишем и в консоль тоже (чтобы сразу видеть)
-  //     try { console.log("[FORUM-DIAG]", payload); } catch {}
+      // Пишем и в консоль тоже (чтобы сразу видеть)
+      try { console.log("[FORUM-DIAG]", payload); } catch {}
 
-  //     // Отправка на сервер, который пишет forum-diag.jsonl в корень проекта
-  //     await fetch("/api/debug/forum-diag", {
-  //       method: "POST",
-  //       headers: { "content-type": "application/json" },
-  //       body: JSON.stringify(payload),
-  //       cache: "no-store",
-  //     }).catch(() => {});
-  //   } catch {}
-  // }, []);
+      // Отправка на сервер, который пишет forum-diag.jsonl в корень проекта
+      await fetch("/api/debug/forum-diag", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+        cache: "no-store",
+      }).catch(() => {});
+    } catch {}
+  }, []);
 
-  // useEffect(() => {
-  //   if (typeof window === "undefined") return;
+  useEffect(() => {
+    if (typeof window === "undefined") return;
 
-  //   // стартовая отметка
-  //   emitDiag("mount");
+    // стартовая отметка
+    emitDiag("mount");
 
-  //   const onErr = (e) => {
-  //     emitDiag("error", {
-  //       message: String(e?.message || ""),
-  //       filename: String(e?.filename || ""),
-  //       lineno: e?.lineno,
-  //       colno: e?.colno,
-  //       // stack иногда огромный — режем
-  //       stack: String(e?.error?.stack || "").slice(0, 4000),
-  //     });
-  //   };
+    const onErr = (e) => {
+      emitDiag("error", {
+        message: String(e?.message || ""),
+        filename: String(e?.filename || ""),
+        lineno: e?.lineno,
+        colno: e?.colno,
+        // stack иногда огромный — режем
+        stack: String(e?.error?.stack || "").slice(0, 4000),
+      });
+    };
 
-  //   const onRej = (e) => {
-  //     const r = e?.reason;
-  //     emitDiag("unhandledrejection", {
-  //       reason: typeof r === "string" ? r : (r?.message || "[non-string reason]"),
-  //       stack: String(r?.stack || "").slice(0, 4000),
-  //     });
-  //   };
+    const onRej = (e) => {
+      const r = e?.reason;
+      emitDiag("unhandledrejection", {
+        reason: typeof r === "string" ? r : (r?.message || "[non-string reason]"),
+        stack: String(r?.stack || "").slice(0, 4000),
+      });
+    };
 
-  //   const onVis = () => emitDiag("visibilitychange");
-  //   const onHide = (e) => emitDiag("pagehide", { persisted: !!e?.persisted });
-  //   const onBeforeUnload = () => emitDiag("beforeunload");
+    const onVis = () => emitDiag("visibilitychange");
+    const onHide = (e) => emitDiag("pagehide", { persisted: !!e?.persisted });
+    const onBeforeUnload = () => emitDiag("beforeunload");
 
-  //   window.addEventListener("error", onErr);
-  //   window.addEventListener("unhandledrejection", onRej);
-  //   document.addEventListener("visibilitychange", onVis);
-  //   window.addEventListener("pagehide", onHide);
-  //   window.addEventListener("beforeunload", onBeforeUnload);
+    window.addEventListener("error", onErr);
+    window.addEventListener("unhandledrejection", onRej);
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("pagehide", onHide);
+    window.addEventListener("beforeunload", onBeforeUnload);
 
-  //   // периодический снимок, чтобы поймать рост памяти ДО “выбивания”
-  //   const id = setInterval(() => {
-  //     if (document.visibilityState !== "visible") return;
-  //     emitDiag("tick");
-  //   }, 5000);
+    // периодический снимок, чтобы поймать рост памяти ДО “выбивания”
+    const id = setInterval(() => {
+      if (document.visibilityState !== "visible") return;
+      emitDiag("tick");
+    }, 5000);
 
-  //   // снимок после резкого скролла (throttle через raf)
-  //   let raf = 0;
-  //   const onScroll = () => {
-  //     if (raf) return;
-  //     raf = requestAnimationFrame(() => {
-  //       raf = 0;
-  //       emitDiag("scroll");
-  //     });
-  //   };
-  //   window.addEventListener("scroll", onScroll, { passive: true });
+    // снимок после резкого скролла (throttle через raf)
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        emitDiag("scroll");
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
 
-  //   return () => {
-  //     try { clearInterval(id); } catch {}
-  //     try { window.removeEventListener("error", onErr); } catch {}
-  //     try { window.removeEventListener("unhandledrejection", onRej); } catch {}
-  //     try { document.removeEventListener("visibilitychange", onVis); } catch {}
-  //     try { window.removeEventListener("pagehide", onHide); } catch {}
-  //     try { window.removeEventListener("beforeunload", onBeforeUnload); } catch {}
-  //     try { window.removeEventListener("scroll", onScroll); } catch {}
-  //     try { if (raf) cancelAnimationFrame(raf); } catch {}
-  //     emitDiag("unmount");
-  //   };
-  // }, [emitDiag]);
+    return () => {
+      try { clearInterval(id); } catch {}
+      try { window.removeEventListener("error", onErr); } catch {}
+      try { window.removeEventListener("unhandledrejection", onRej); } catch {}
+      try { document.removeEventListener("visibilitychange", onVis); } catch {}
+      try { window.removeEventListener("pagehide", onHide); } catch {}
+      try { window.removeEventListener("beforeunload", onBeforeUnload); } catch {}
+      try { window.removeEventListener("scroll", onScroll); } catch {}
+      try { if (raf) cancelAnimationFrame(raf); } catch {}
+      emitDiag("unmount");
+    };
+  }, [emitDiag]);
 
 
   const [profileBump, setProfileBump] = useState(0)
@@ -18063,22 +19639,15 @@ useEffect(() => {
            .querySelectorAll('video[data-forum-video="post"]')
            .forEach((v) => {
              try {
-               // ВАЖНО:
-               // v.load() сбрасывает позицию (currentTime -> 0) и может заново дернуть сеть.
-               // Поэтому:
-               // 1) если видео уже начато (есть прогресс) — НЕ трогаем (сохраняем позицию и кэш)
-               // 2) если метаданные уже есть (readyState >= 1) — НЕ дергаем load()
-               const hasProgress =
-                 Number.isFinite(v.currentTime) && v.currentTime > 0.05 && !v.ended;
-               const hasMetadata = (v.readyState || 0) >= 1;
+               // Prefetch только постеров: НЕ трогаем video.load()/preload=metadata,
+               // иначе iOS начнёт декод/буферы заранее и снова поймаем memory pressure.
+               const p = v.getAttribute('poster') || v.dataset?.poster || '';
+               if (!p) return;
+               const img = new Image();
+               img.decoding = 'async';
+               img.loading = 'eager';
+               img.src = p;
 
-               // preload можно поднять до metadata, но без load() (чтобы не было сброса)
-               v.preload = 'metadata';
-
-               if (hasProgress || hasMetadata) return;
-
-               // Только для совсем "пустых" — аккуратно просим метаданные
-               v.load?.();
              } catch {}
            });
        }
@@ -18122,17 +19691,58 @@ useEffect(() => {
 
   const observeAll = () => {
     try {
-      document.querySelectorAll(CARD_SELECTOR).forEach((el) => io.observe(el));
+      document.querySelectorAll(CARD_SELECTOR).forEach((el) => {
+        try {
+          if (el.dataset.__viewObs === '1') return;
+          el.dataset.__viewObs = '1';
+        } catch {}
+        io.observe(el);
+      });
+
     } catch {}
   };
 
   observeAll();
 
-  // DOM динамический (подгрузка/ветки/ответы) — периодически подцепляем новые карточки
-  const tick = setInterval(observeAll, 900);
+  // DOM динамический (подгрузка/ветки/ответы) — подцепляем новые карточки через MutationObserver
+  // вместо setInterval(querySelectorAll...) (это заметно снижает нагрузку на iOS)
+  let mo = null;
+  const markObserved = (el) => {
+    try {
+      if (!el || el.dataset.__viewObs === '1') return false;
+      el.dataset.__viewObs = '1';
+      return true;
+    } catch { return true; }
+  };
+
+  const observeNode = (node) => {
+    try {
+      if (!node) return;
+      if (node.nodeType !== 1) return; // only Element
+      const el = node;
+
+      if (el.matches?.(CARD_SELECTOR)) {
+        if (markObserved(el)) io.observe(el);
+      }
+      // искать вложенные карточки
+      el.querySelectorAll?.(CARD_SELECTOR)?.forEach((c) => {
+        if (markObserved(c)) io.observe(c);
+      });
+    } catch {}
+  };
+
+  try {
+    mo = new MutationObserver((mutList) => {
+      for (const m of mutList) {
+        (m.addedNodes || []).forEach((n) => observeNode(n));
+      }
+    });
+    mo.observe(document.body, { childList: true, subtree: true });
+  } catch {}
 
   return () => {
-    clearInterval(tick);
+    try { mo?.disconnect?.(); } catch {}
+    mo = null;
     try { io.disconnect(); } catch {}
     for (const [postId] of focused) clearFocusedTimer(postId);
     focused.clear();

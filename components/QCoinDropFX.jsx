@@ -41,10 +41,153 @@ const DEFAULT_INTERVAL_MS = 120_000  // раз в минуту
 const DEFAULT_MIN_SIZE = 25
 const DEFAULT_MAX_SIZE = 50
 
-// === РАНДОМНЫЕ МНОЖИТЕЛИ ДЛЯ КАЖДОЙ МОНЕТЫ ===
-// 0x (ничего), 0.2x (в 5 раз меньше), 0.33x (~в 3 раза меньше),
-// 0.5x (в 2 раза меньше), 1x, 2x, 3x, 5x
-const COIN_MULTIPLIERS = [0, 0.2, 1 / 3, 0.5, 1, 2, 3, 5]
+/* ===== УМНЫЕ МНОЖИТЕЛИ (ТОЛЬКО В ПЛЮС, ДО x100) =====
+   Идём от значения из ENV (минимум) и до xMAX вверх.
+   Редко, но возможно x100.
+*/
+const ENV_BASE_MULT = (() => {
+  const raw = (typeof process !== 'undefined' && process?.env)
+    ? (process.env.NEXT_PUBLIC_QCOIN_DROP_BASE_MULT || process.env.NEXT_PUBLIC_QCOIN_BASE_MULT || '1')
+    : '1'
+  const n = Number(raw)
+  return Number.isFinite(n) ? Math.max(1, Math.floor(n)) : 1
+})()
+
+const ENV_MAX_MULT = (() => {
+  const raw = (typeof process !== 'undefined' && process?.env)
+    ? (process.env.NEXT_PUBLIC_QCOIN_DROP_MAX_MULT || process.env.NEXT_PUBLIC_QCOIN_MAX_MULT || '100')
+    : '100'
+  const n = Number(raw)
+  return Number.isFinite(n) ? Math.max(1, Math.floor(n)) : 100
+})()
+
+const clampInt = (v, a, b) => Math.max(a, Math.min(b, (v | 0)))
+
+// ✅ более “настоящий” рандом (crypto) + fallback
+function rng () {
+  if (!isBrowser()) return Math.random()
+  const c = window.crypto || window.msCrypto
+  if (c && c.getRandomValues) {
+    const u = new Uint32Array(1)
+    c.getRandomValues(u)
+    return (u[0] >>> 0) / 4294967296
+  }
+  return Math.random()
+}
+const rand = (a = 0, b = 1) => a + rng() * (b - a)
+const randInt = (a, b) => (a + ((rng() * (b - a + 1)) | 0))
+
+// ✅ Абсолютный рандом в диапазоне [base..max] с сильным упором на <=50,
+// и крайне редкими 51..100 (включая x100). Никаких “всегда lo”.
+function pickSmartMultiplier (base = 1, max = 100) {
+  const lo = Math.max(1, Math.floor(base))
+  const hi = Math.max(lo, Math.floor(max))
+  if (lo === hi) return lo
+
+  const cap50 = Math.min(hi, 50)
+
+  // если max <= 50 — skew к низким, но не фикс
+  if (hi <= 50) {
+    const span = Math.max(1, hi - lo)
+    const t = Math.pow(rng(), 2.1)
+    return clampInt(lo + Math.floor(t * span + 0.000001), lo, hi)
+  }
+
+  // max > 50
+  const u = rng()
+
+  // 99.2% — из [lo..50] (если lo<=50)
+  if (lo <= 50 && u < 0.992) {
+    const span = Math.max(1, cap50 - lo)
+    const t = Math.pow(rng(), 2.0)
+    return clampInt(lo + Math.floor(t * span + 0.000001), lo, cap50)
+  }
+
+  // 0.8% — из [51..hi] (или если lo>50)
+  const from = Math.max(lo, 51)
+  const span = Math.max(1, hi - from)
+  const t = Math.pow(rng(), 1.8)
+  return clampInt(from + Math.floor(t * span + 0.000001), from, hi)
+}
+
+// Тир эффекта по множителю (визуал «пушка»)
+function getTierByMult (m) {
+  const mm = Number(m) || 1
+  if (mm >= 100) return 'JACKPOT'
+  if (mm >= 50) return 'MYTHIC'
+  if (mm >= 25) return 'LEGENDARY'
+  if (mm >= 12) return 'EPIC'
+  if (mm >= 6) return 'RARE'
+  if (mm >= 3) return 'UNCOMMON'
+  return 'COMMON'
+}
+
+function buildFxPack (tier) {
+  // Плотность эффектов по тирам
+  const confN =
+    tier === 'JACKPOT' ? 110 :
+    tier === 'MYTHIC' ? 90 :
+    tier === 'LEGENDARY' ? 70 :
+    tier === 'EPIC' ? 52 :
+    tier === 'RARE' ? 36 :
+    tier === 'UNCOMMON' ? 26 : 18
+
+  const coinN =
+    tier === 'JACKPOT' ? 46 :
+    tier === 'MYTHIC' ? 38 :
+    tier === 'LEGENDARY' ? 30 :
+    tier === 'EPIC' ? 22 :
+    tier === 'RARE' ? 14 :
+    tier === 'UNCOMMON' ? 10 : 8
+
+  const sparkN =
+    tier === 'JACKPOT' ? 34 :
+    tier === 'MYTHIC' ? 28 :
+    tier === 'LEGENDARY' ? 22 :
+    tier === 'EPIC' ? 16 :
+    tier === 'RARE' ? 12 :
+    tier === 'UNCOMMON' ? 10 : 8
+
+  const confetti = Array.from({ length: confN }).map((_, i) => {
+    const x = rand(0, 100)
+    const drift = rand(-22, 22)
+    const rot = rand(0, 360)
+    const delay = rand(0, 0.12)
+    const dur = rand(0.9, tier === 'JACKPOT' ? 1.55 : 1.25)
+    const size = rand(6, 11)
+    const wiggle = rand(120, 320)
+    const shape = rng() < 0.55 ? 'strip' : 'dot'
+    return { i, x, drift, rot, delay, dur, size, wiggle, shape }
+  })
+
+  const coins = Array.from({ length: coinN }).map((_, i) => {
+    const a = rand(0, Math.PI * 2)
+    const sp = rand(
+      tier === 'COMMON' ? 160 : 220,
+      tier === 'JACKPOT' ? 560 : 420,
+    )
+    const vx = Math.cos(a) * sp
+    const vy = Math.sin(a) * sp - rand(160, 320)
+    const rot = rand(0, 360)
+    const delay = rand(0, 0.08)
+    const dur = rand(0.75, tier === 'JACKPOT' ? 1.25 : 1.05)
+    const scale = rand(0.45, tier === 'JACKPOT' ? 1.1 : 0.95)
+    return { i, vx, vy, rot, delay, dur, scale }
+  })
+
+  const sparks = Array.from({ length: sparkN }).map((_, i) => {
+    const a = rand(0, Math.PI * 2)
+    const d = rand(26, tier === 'JACKPOT' ? 160 : 120)
+    const dx = Math.cos(a) * d
+    const dy = Math.sin(a) * d
+    const delay = rand(0, 0.08)
+    const dur = rand(0.45, tier === 'JACKPOT' ? 0.95 : 0.75)
+    const s = rand(6, 14)
+    return { i, dx, dy, delay, dur, s }
+  })
+
+  return { confetti, coins, sparks }
+}
 
 const cn = (...parts) => parts.filter(Boolean).join(' ')
 
@@ -56,6 +199,10 @@ export default function QCoinDropFX ({
   const [uid, setUid] = useState(() => readUnifiedAccountId())
   const [, setTick] = useState(0)
   const [toast, setToast] = useState(null) // { reward, error, mult }
+  const [fx, setFx] = useState(null) // { id, tier, mult, pack }
+
+  // ✅ typing overlay state
+  const [typed, setTyped] = useState({ title: '', reward: '', mult: '' })
 
   const coinRef = useRef(null)
   const animFrameRef = useRef(null)
@@ -105,7 +252,6 @@ export default function QCoinDropFX ({
     window.addEventListener('auth:ok', onAuth)
     window.addEventListener('auth:success', onAuth)
 
-    // если уже залогинен при монтировании
     const initial = readUnifiedAccountId()
     if (initial) {
       setUid(initial)
@@ -168,37 +314,34 @@ export default function QCoinDropFX ({
       if (uid && !coin) {
         const nextAt = spawnAtRef.current || 0
         if (!nextAt || ts >= nextAt) {
-          const depth = 0.4 + Math.random() * 0.6
+          const depth = 0.4 + rng() * 0.6
           const size = minSize + depth * (maxSize - minSize)
           const baseVy = 60 + 50 * depth
 
-          // === РАНДОМНЫЙ МНОЖИТЕЛЬ ДЛЯ ЭТОЙ МОНЕТЫ ===
-          const mult = COIN_MULTIPLIERS[(Math.random() * COIN_MULTIPLIERS.length) | 0]
+          // ✅ АБСОЛЮТНЫЙ РАНДОМ (от ENV_BASE до ENV_MAX), чаще до x50, редко до x100
+          const mult = pickSmartMultiplier(ENV_BASE_MULT, ENV_MAX_MULT)
 
           coin = {
             id: ts,
             depth,
             size,
-            x: Math.random() * w,
+            x: rng() * w,
             y: -size,
-            vx: (Math.random() * 2 - 1) * (10 + 20 * depth),
+            vx: (rng() * 2 - 1) * (10 + 20 * depth),
             vy: baseVy,
             baseVy,
-            swayPhase: Math.random() * Math.PI * 2,
-            swaySpeed: 0.4 + Math.random() * 1.2,
+            swayPhase: rng() * Math.PI * 2,
+            swaySpeed: 0.4 + rng() * 1.2,
             swayAmp: 8 + 18 * depth,
-            angle: Math.random() * 360,
-            spinDir: Math.random() < 0.5 ? -1 : 1,
-            spinSpeed: 30 + Math.random() * 50,
+            angle: rng() * 360,
+            spinDir: rng() < 0.5 ? -1 : 1,
+            spinSpeed: 30 + rng() * 50,
             opacity: 0.98,
             exploding: false,
-
-            // множитель награды этой монеты
             mult,
           }
 
           coinRef.current = coin
-          // следующая монета — ещё через intervalMs
           spawnAtRef.current = ts + intervalMs
         }
       }
@@ -207,22 +350,18 @@ export default function QCoinDropFX ({
         const f = coin
         const depthFactor = 0.5 + f.depth * 0.7
 
-        // гравитация + лёгкий боковой шум
         f.vy += GRAVITY * depthFactor * dt
-        f.vx += (Math.random() * 2 - 1) * WIND_NOISE * dt * depthFactor
+        f.vx += (rng() * 2 - 1) * WIND_NOISE * dt * depthFactor
 
         f.vx *= FRICTION_VX
         f.vy *= FRICTION_VY
 
-        // возврат к базовой скорости падения
         const relax = impulseK > 0.01 ? IMPULSE_DAMPING : 0.9
         f.vy = f.vy * relax + f.baseVy * (1 - relax)
 
-        // позиции
         f.x += f.vx * dt
         f.y += f.vy * dt
 
-        // sway + spin
         f.swayPhase += f.swaySpeed * dt
         f.angle += f.spinDir * f.spinSpeed * dt
         if (f.angle > 360) f.angle -= 360
@@ -237,9 +376,6 @@ export default function QCoinDropFX ({
       }
 
       setTick((x) => (x + 1) & 1023)
-
-      // ВАЖНО: если компонент уже размонтирован (cleanup выставил stopped),
-      // не планируем следующий кадр, чтобы не оставлять "висящий" RAF.
       if (!stopped) animFrameRef.current = requestAnimationFrame(loop)
     }
 
@@ -253,7 +389,7 @@ export default function QCoinDropFX ({
     }
   }, [uid, intervalMs, minSize, maxSize, initWorld])
 
-  /* ===== порывы от клика (как в SnowFX, но для одной монеты) ===== */
+  /* ===== порывы от клика ===== */
   useEffect(() => {
     if (!isBrowser()) return
     if (motionReducedRef.current) return
@@ -278,11 +414,11 @@ export default function QCoinDropFX ({
       const nx = dx / dist
       const ny = dy / dist
 
-      const rnd = 0.85 + Math.random() * 0.4
+      const rnd = 0.85 + rng() * 0.4
 
       coin.vx += nx * CLICK_IMPULSE_BASE * k * rnd
       coin.vy += ny * CLICK_IMPULSE_BASE * k * rnd
-      coin.spinSpeed *= 1.05 + Math.random() * 0.08
+      coin.spinSpeed *= 1.05 + rng() * 0.08
 
       const now =
         typeof performance !== 'undefined' && performance.now
@@ -301,7 +437,7 @@ export default function QCoinDropFX ({
     return () => window.removeEventListener('pointerdown', onPointerDown)
   }, [])
 
-  /* ===== порывы от скролла (как в SnowFX) ===== */
+  /* ===== порывы от скролла ===== */
   useEffect(() => {
     if (!isBrowser()) return
     if (motionReducedRef.current) return
@@ -317,7 +453,6 @@ export default function QCoinDropFX ({
       const coin = coinRef.current
       if (!coin) return
 
-      // контент вверх → снежинки/монета вверх, и наоборот
       const contentDir = dy > 0 ? -1 : 1
       const magBase = Math.min(
         SCROLL_IMPULSE_BASE,
@@ -327,7 +462,7 @@ export default function QCoinDropFX ({
       const depthFactor = 0.5 + coin.depth * 0.8
 
       coin.vy += contentDir * magBase * 0.35 * depthFactor
-      coin.vx += (Math.random() * 2 - 1) * magBase * 0.16 * depthFactor
+      coin.vx += (rng() * 2 - 1) * magBase * 0.16 * depthFactor
 
       const now =
         typeof performance !== 'undefined' && performance.now
@@ -346,7 +481,85 @@ export default function QCoinDropFX ({
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  /* ===== клик по монете — зачисляем QCOIN и тост ===== */
+  // helper для подписи множителя
+  const formatMult = (m) => {
+    const mm = Math.max(1, Math.floor(Number(m) || 1))
+    return `x${mm}`
+  }
+
+  const tierTitle = (m) => {
+    const t = getTierByMult(m)
+    if (t === 'JACKPOT') return 'JACKPOT!'
+    if (t === 'MYTHIC') return 'MYTHIC!'
+    if (t === 'LEGENDARY') return 'LEGENDARY!'
+    if (t === 'EPIC') return 'EPIC!'
+    if (t === 'RARE') return 'RARE!'
+    if (t === 'UNCOMMON') return 'NICE!'
+    return ''
+  }
+
+  /* ===== ✅ typing-эффект награды (без CSS steps(var()) чтобы не было пусто) ===== */
+  useEffect(() => {
+    if (!toast) {
+      setTyped({ title: '', reward: '', mult: '' })
+      return
+    }
+
+    const fullTitle = tierTitle(toast.mult)
+    const fullReward = `🎉+${toast.reward.toLocaleString('en-US', {
+      maximumFractionDigits: 8,
+      minimumFractionDigits: 0,
+    })} QCoin 🎁`
+    const fullMult = formatMult(toast.mult)
+
+    if (motionReducedRef.current) {
+      setTyped({ title: fullTitle, reward: fullReward, mult: fullMult })
+      return
+    }
+
+    let cancelled = false
+    let tId = null
+
+    setTyped({ title: '', reward: '', mult: '' })
+
+    const seq = [
+      { key: 'title', text: fullTitle, speed: 26 },
+      { key: 'reward', text: fullReward, speed: 14 },
+      { key: 'mult', text: fullMult, speed: 22 },
+    ]
+
+    let si = 0
+    let pos = 0
+    let cur = { title: '', reward: '', mult: '' }
+
+    const step = () => {
+      if (cancelled) return
+      const s = seq[si]
+      if (!s) return
+
+      pos = Math.min(s.text.length, pos + 1)
+      cur = { ...cur, [s.key]: s.text.slice(0, pos) }
+      setTyped(cur)
+
+      if (pos >= s.text.length) {
+        si += 1
+        pos = 0
+        tId = setTimeout(step, 90)
+        return
+      }
+
+      tId = setTimeout(step, s.speed)
+    }
+
+    tId = setTimeout(step, 60)
+
+    return () => {
+      cancelled = true
+      if (tId) clearTimeout(tId)
+    }
+  }, [toast])
+
+  /* ===== клик по монете — зачисляем QCOIN и тост + FX ===== */
   const handleCollect = async (e) => {
     const coin = coinRef.current
     if (!coin || !uid) return
@@ -358,8 +571,7 @@ export default function QCoinDropFX ({
     let multApplied = 1
     let isError = false
 
-    // множитель этой монеты (если вдруг отсутствует — считаем 1x)
-    const mult = Number.isFinite(coin.mult) ? coin.mult : 1
+    const mult = Number.isFinite(coin.mult) ? Math.max(1, Math.floor(coin.mult)) : 1
 
     try {
       const res = await fetch('/api/qcoin/drop', {
@@ -369,12 +581,11 @@ export default function QCoinDropFX ({
       })
       const data = await res.json().catch(() => null)
 
-      // ✅ сервер теперь возвращает ФИНАЛЬНУЮ награду rewardQcoin (уже с множителем)
       rewardFromServer = Number(data?.rewardQcoin ?? data?.reward ?? 0) || 0
 
-      // ✅ и множитель, который реально применён (сервер мог принудительно сделать x1)
       multApplied = Number(data?.multiplierApplied ?? 1)
       if (!Number.isFinite(multApplied)) multApplied = 1
+      multApplied = Math.max(1, Math.floor(multApplied))
 
       const balance = Number(data?.balance ?? 0) || null
       if (Number.isFinite(balance)) {
@@ -388,21 +599,31 @@ export default function QCoinDropFX ({
       isError = true
     }
 
-    // ✅ ВАЖНО: НИКАКОГО reward * mult на клиенте больше нет.
-    // Показываем ровно то, что реально начислил сервер.
     setToast({
       reward: rewardFromServer,
       error: isError,
       mult: multApplied,
     })
 
-    // чуть ждём, пока отыграет взрыв монеты
+    if (!motionReducedRef.current) {
+      const tier = getTierByMult(multApplied)
+      const pack = buildFxPack(tier)
+      const id =
+        (typeof performance !== 'undefined' && performance.now)
+          ? performance.now()
+          : Date.now()
+      setFx({ id, tier, mult: multApplied, pack })
+
+      setTimeout(() => {
+        setFx((prev) => (prev && prev.id === id ? null : prev))
+      }, tier === 'JACKPOT' ? 1900 : 1500)
+    }
+
     setTimeout(() => {
       coinRef.current = null
       setTick((x) => (x + 1) & 1023)
     }, 600)
 
-    // убираем тост через ~4 секунды
     setTimeout(() => {
       setToast(null)
     }, 4000)
@@ -411,20 +632,74 @@ export default function QCoinDropFX ({
   const coin = coinRef.current
   if (!uid) return null
 
-  // маленький helper для подписи множителя (чтобы красиво)
-  const formatMult = (m) => {
-    if (m === 0) return 'x0'
-    if (m === 1) return 'x1'
-    if (m === 2 || m === 3 || m === 5) return `x${m}`
-    if (Math.abs(m - 0.5) < 1e-9) return 'x0.5'
-    if (Math.abs(m - (1 / 3)) < 1e-6) return 'x0.33'
-    if (Math.abs(m - 0.2) < 1e-9) return 'x0.2'
-    // fallback
-    return `x${Number(m).toFixed(2)}`
-  }
-
   return (
     <>
+      {/* FX overlay */}
+      {fx && (
+        <div className={cn('qdrop-fx', `tier-${fx.tier}`)} aria-hidden="true">
+          <div className="qdrop-fx-flash" />
+          <div className="qdrop-fx-shockwave" />
+          <div className="qdrop-fx-coreglow" />
+
+          <div className="qdrop-fx-sparks">
+            {fx.pack.sparks.map((p) => (
+              <span
+                key={`s${p.i}`}
+                className="qdrop-fx-spark"
+                style={{
+                  '--dx': `${p.dx.toFixed(1)}px`,
+                  '--dy': `${p.dy.toFixed(1)}px`,
+                  '--d': `${p.dur.toFixed(2)}s`,
+                  '--dl': `${p.delay.toFixed(2)}s`,
+                  '--sz': `${p.s.toFixed(1)}px`,
+                }}
+              />
+            ))}
+          </div>
+
+          <div className="qdrop-fx-coins">
+            {fx.pack.coins.map((c) => (
+              <span
+                key={`c${c.i}`}
+                className="qdrop-fx-coin"
+                style={{
+                  '--vx': `${c.vx.toFixed(1)}px`,
+                  '--vy': `${c.vy.toFixed(1)}px`,
+                  '--rot': `${c.rot.toFixed(1)}deg`,
+                  '--d': `${c.dur.toFixed(2)}s`,
+                  '--dl': `${c.delay.toFixed(2)}s`,
+                  '--sc': `${c.scale.toFixed(2)}`,
+                }}
+              />
+            ))}
+          </div>
+
+          <div className="qdrop-fx-confetti">
+            {fx.pack.confetti.map((c) => (
+              <span
+                key={`f${c.i}`}
+                className={cn('qdrop-fx-conf', c.shape === 'dot' ? 'is-dot' : 'is-strip')}
+                style={{
+                  '--x': `${c.x.toFixed(2)}vw`,
+                  '--dr': `${c.drift.toFixed(1)}vw`,
+                  '--rot': `${c.rot.toFixed(1)}deg`,
+                  '--d': `${c.dur.toFixed(2)}s`,
+                  '--dl': `${c.delay.toFixed(2)}s`,
+                  '--sz': `${c.size.toFixed(1)}px`,
+                  '--wg': `${c.wiggle.toFixed(1)}deg`,
+                }}
+              />
+            ))}
+          </div>
+
+          <div className="qdrop-fx-badge">
+            <span className="qdrop-fx-badge-inner">
+              {tierTitle(fx.mult)} {formatMult(fx.mult)}
+            </span>
+          </div>
+        </div>
+      )}
+
       {coin && (
         <div className="qdrop-root" style={{ pointerEvents: 'none' }}>
           <div
@@ -440,10 +715,12 @@ export default function QCoinDropFX ({
             >
               <span className="qdrop-coin-img" />
               <span className="qdrop-burst">
-                {Array.from({ length: 10 }).map((_, i) => (
+                {Array.from({ length: 16 }).map((_, i) => (
                   <span key={i} className={cn('qdrop-particle', `p-${i}`)} />
                 ))}
               </span>
+
+              {/* multiplier badge removed from falling coin */}
             </button>
           </div>
         </div>
@@ -451,19 +728,12 @@ export default function QCoinDropFX ({
 
       {toast && (
         <div className="qdrop-toast">
-          <div className="qdrop-toast-inner">
-            <div className="qdrop-toast-title"></div>
-            <div className="qdrop-toast-body">
-              <span className="qcoinLabel">
-                🎉+{toast.reward.toLocaleString('en-US', {
-                  maximumFractionDigits: 8,
-                  minimumFractionDigits: 0,
-                })}{' '}
-                QCOIN 🎁
-              </span>
+          <div className={cn('qdrop-toast-inner', `tier-${getTierByMult(toast.mult)}`)}>
+            <div className="qdrop-toast-title">{typed.title}</div>
 
-              {/* аккуратная подпись множителя (серверный, реально применённый) */}
-              <div className="qdrop-mult">{formatMult(toast.mult)}</div>
+            <div className="qdrop-toast-body">
+              <span className="qcoinLabel">{typed.reward}</span>
+              <div className="qdrop-mult">{typed.mult}</div>
 
               {toast.error && (
                 <div className="qdrop-toast-error">
@@ -547,37 +817,43 @@ export default function QCoinDropFX ({
           );
           opacity: 0;
           transform: translate3d(0, 0, 0) scale(0.4);
+          filter: drop-shadow(0 6px 10px rgba(0,0,0,0.35));
         }
 
         .qdrop-coin-btn.is-exploding .qdrop-coin-img {
           animation: qdrop-coin-pop 0.55s ease-out forwards;
         }
         .qdrop-coin-btn.is-exploding .qdrop-particle {
-          animation: qdrop-particle 0.7s ease-out forwards;
+          animation: qdrop-particle 0.78s ease-out forwards;
         }
 
-        /* разлёт частиц по кругу через кастомные смещения */
-        .qdrop-particle.p-0 { --dx: 32px;  --dy: -4px; }
-        .qdrop-particle.p-1 { --dx: 18px;  --dy: -26px; }
-        .qdrop-particle.p-2 { --dx: -8px;  --dy: -32px; }
-        .qdrop-particle.p-3 { --dx: -30px; --dy: -14px; }
-        .qdrop-particle.p-4 { --dx: -34px; --dy: 10px; }
-        .qdrop-particle.p-5 { --dx: -18px; --dy: 26px; }
-        .qdrop-particle.p-6 { --dx: 6px;   --dy: 32px; }
-        .qdrop-particle.p-7 { --dx: 30px;  --dy: 20px; }
-        .qdrop-particle.p-8 { --dx: 20px;  --dy: 0px; }
-        .qdrop-particle.p-9 { --dx: 0px;   --dy: -20px; }
+        .qdrop-particle.p-0 { --dx: 36px;  --dy: -6px; }
+        .qdrop-particle.p-1 { --dx: 22px;  --dy: -30px; }
+        .qdrop-particle.p-2 { --dx: -10px; --dy: -36px; }
+        .qdrop-particle.p-3 { --dx: -34px; --dy: -16px; }
+        .qdrop-particle.p-4 { --dx: -38px; --dy: 12px; }
+        .qdrop-particle.p-5 { --dx: -22px; --dy: 30px; }
+        .qdrop-particle.p-6 { --dx: 8px;   --dy: 36px; }
+        .qdrop-particle.p-7 { --dx: 34px;  --dy: 22px; }
+        .qdrop-particle.p-8 { --dx: 26px;  --dy: 2px; }
+        .qdrop-particle.p-9 { --dx: 2px;   --dy: -26px; }
+        .qdrop-particle.p-10 { --dx: 18px;  --dy: 34px; }
+        .qdrop-particle.p-11 { --dx: -18px; --dy: 34px; }
+        .qdrop-particle.p-12 { --dx: 40px;  --dy: -22px; }
+        .qdrop-particle.p-13 { --dx: -40px; --dy: -22px; }
+        .qdrop-particle.p-14 { --dx: 0px;   --dy: 42px; }
+        .qdrop-particle.p-15 { --dx: 0px;   --dy: -42px; }
 
         @keyframes qdrop-coin-pop {
           0% { transform: scale(1); opacity: 1; }
-          40% { transform: scale(1.15); opacity: 1; }
-          100% { transform: scale(0.6); opacity: 0; }
+          35% { transform: scale(1.18); opacity: 1; filter: drop-shadow(0 10px 22px rgba(255,210,120,0.25)); }
+          100% { transform: scale(0.55); opacity: 0; }
         }
 
         @keyframes qdrop-particle {
           0% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.4); }
-          10% { opacity: 1; }
-          100% { opacity: 0; transform: translate3d(var(--dx), var(--dy), 0) scale(1.2); }
+          12% { opacity: 1; }
+          100% { opacity: 0; transform: translate3d(var(--dx), var(--dy), 0) scale(1.35); }
         }
 
         /* ✅ тост — ВСЕГДА ПО ЦЕНТРУ ЭКРАНА */
@@ -602,16 +878,27 @@ export default function QCoinDropFX ({
           box-shadow: 0 14px 38px rgba(0, 0, 0, 0.21);
           color: #eaf4ff;
           pointer-events: auto;
-          animation: qdrop-toast-in 0.22s ease-out forwards;
           text-align: center;
+
+          /* появление → удержание → красивое исчезновение */
+          animation: qdrop-toast-flow 3.85s ease-out forwards;
+        }
+
+        .qdrop-toast-inner.tier-JACKPOT,
+        .qdrop-toast-inner.tier-MYTHIC,
+        .qdrop-toast-inner.tier-LEGENDARY {
+          border-color: rgba(255, 225, 120, 0.55);
+          box-shadow: 0 18px 48px rgba(0,0,0,0.28), 0 0 46px rgba(255, 205, 95, 0.12);
         }
 
         .qdrop-toast-title {
-          font-weight: 800;
+          font-weight: 950;
           font-size: 1rem;
-          letter-spacing: 0.04em;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
           margin-bottom: 4px;
+          min-height: 1.2em;
+          filter: drop-shadow(0 10px 18px rgba(0,0,0,0.35));
         }
 
         .qdrop-toast-body {
@@ -620,14 +907,16 @@ export default function QCoinDropFX ({
           gap: 6px;
           align-items: center;
           justify-content: center;
+          min-height: 3.6em;
         }
 
         .qdrop-mult {
           font-size: 0.95rem;
-          font-weight: 900;
-          letter-spacing: 0.06em;
-          opacity: 0.9;
+          font-weight: 950;
+          letter-spacing: 0.08em;
+          opacity: 0.92;
           text-transform: uppercase;
+          min-height: 1.1em;
         }
 
         .qdrop-toast-error {
@@ -661,6 +950,7 @@ export default function QCoinDropFX ({
             0 0 0.3rem rgba(255, 215, 0, 0.35),
             0 0 0.1rem rgba(255, 255, 180, 0.35);
           white-space: nowrap;
+          min-height: 1.2em;
         }
 
         @keyframes qcoinShine {
@@ -682,13 +972,15 @@ export default function QCoinDropFX ({
           100% {
             text-shadow:
               0 0 0.3rem rgba(255, 215, 0, 0.35),
-              0 0 0.1remrgba(255, 255, 180, 0.35);
+              0 0 0.1rem rgba(255, 255, 180, 0.35);
           }
         }
 
-        @keyframes qdrop-toast-in {
-          0% { opacity: 0; transform: translateY(8px); }
-          100% { opacity: 1; transform: translateY(0px); }
+        @keyframes qdrop-toast-flow {
+          0% { opacity: 0; transform: translateY(10px) scale(0.985); }
+          10% { opacity: 1; transform: translateY(0px) scale(1); }
+          78% { opacity: 1; transform: translateY(0px) scale(1); }
+          100% { opacity: 0; transform: translateY(-14px) scale(1.02); }
         }
 
         @media (max-width: 480px) {
@@ -698,11 +990,220 @@ export default function QCoinDropFX ({
           }
         }
 
+        /* =======================
+           P U S H K A  F X
+        ======================= */
+        .qdrop-fx {
+          position: fixed;
+          inset: 0;
+          z-index: 9996;
+          pointer-events: none;
+          overflow: hidden;
+        }
+
+        .qdrop-fx-flash {
+          position: absolute;
+          inset: -20%;
+          background: radial-gradient(circle at 50% 50%, rgba(255, 220, 120, 0.22), rgba(0,0,0,0) 62%);
+          opacity: 0;
+          animation: qfxFlash 0.55s ease-out forwards;
+        }
+
+        .qdrop-fx-shockwave {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          width: 20px;
+          height: 20px;
+          border-radius: 999px;
+          transform: translate(-50%, -50%) scale(1);
+          opacity: 0;
+          border: 2px solid rgba(255, 220, 140, 0.45);
+          box-shadow: 0 0 40px rgba(255, 210, 120, 0.18);
+          animation: qfxWave 0.85s ease-out forwards;
+        }
+
+        .qdrop-fx-coreglow {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          width: 26px;
+          height: 26px;
+          border-radius: 999px;
+          transform: translate(-50%, -50%);
+          background: radial-gradient(circle, rgba(255, 240, 190, 0.55), rgba(255, 210, 120, 0.0) 70%);
+          filter: blur(0.2px);
+          opacity: 0;
+          animation: qfxCore 0.9s ease-out forwards;
+        }
+
+        @keyframes qfxFlash {
+          0% { opacity: 0; transform: scale(0.98); }
+          18% { opacity: 1; }
+          100% { opacity: 0; transform: scale(1.04); }
+        }
+
+        @keyframes qfxWave {
+          0% { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+          15% { opacity: 1; }
+          100% { opacity: 0; transform: translate(-50%, -50%) scale(18); }
+        }
+
+        @keyframes qfxCore {
+          0% { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+          20% { opacity: 1; }
+          100% { opacity: 0; transform: translate(-50%, -50%) scale(4.2); }
+        }
+
+        .qdrop-fx-badge {
+          position: absolute;
+          left: 50%;
+          top: calc(50% + 92px);
+          transform: translateX(-50%);
+          opacity: 0;
+          animation: qfxBadge 1.05s ease-out forwards;
+          filter: drop-shadow(0 16px 30px rgba(0,0,0,0.35));
+        }
+
+        .qdrop-fx-badge-inner {
+          display: inline-block;
+          padding: 8px 14px;
+          border-radius: 999px;
+          border: 1px solid rgba(255, 220, 140, 0.42);
+          background:
+            radial-gradient(circle at 20% 0%, rgba(255,255,255,0.18), transparent 45%),
+            rgba(10, 14, 24, 0.72);
+          color: rgba(255, 245, 225, 0.98);
+          font-weight: 950;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          backdrop-filter: blur(8px);
+        }
+
+        @keyframes qfxBadge {
+          0% { opacity: 0; transform: translateX(-50%) translateY(16px) scale(0.92); }
+          22% { opacity: 1; transform: translateX(-50%) translateY(0px) scale(1); }
+          100% { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(1.02); }
+        }
+
+        .qdrop-fx-sparks {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          width: 1px;
+          height: 1px;
+        }
+
+        .qdrop-fx-spark {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: var(--sz);
+          height: var(--sz);
+          border-radius: 999px;
+          background: radial-gradient(circle at 30% 30%, #fff, rgba(255, 232, 160, 0.92), rgba(255, 170, 80, 0.1));
+          transform: translate(-50%, -50%) translate3d(0,0,0) scale(0.6);
+          opacity: 0;
+          animation: qfxSpark var(--d) ease-out var(--dl) forwards;
+          filter: drop-shadow(0 10px 18px rgba(0,0,0,0.22));
+        }
+
+        @keyframes qfxSpark {
+          0% { opacity: 0; transform: translate(-50%, -50%) translate3d(0,0,0) scale(0.6); }
+          20% { opacity: 1; }
+          100% { opacity: 0; transform: translate(-50%, -50%) translate3d(var(--dx), var(--dy), 0) scale(1.15); }
+        }
+
+        .qdrop-fx-coins {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          width: 1px;
+          height: 1px;
+        }
+
+        .qdrop-fx-coin {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 24px;
+          height: 24px;
+          border-radius: 999px;
+          background-image: url('/qcoin-32.png');
+          background-size: cover;
+          background-repeat: no-repeat;
+          transform: translate(-50%, -50%) translate3d(0,0,0) rotate(0deg) scale(var(--sc));
+          opacity: 0;
+          animation: qfxCoin var(--d) cubic-bezier(0.18, 0.72, 0.24, 1) var(--dl) forwards;
+          filter: drop-shadow(0 10px 18px rgba(0,0,0,0.32));
+        }
+
+        @keyframes qfxCoin {
+          0% {
+            opacity: 0;
+            transform: translate(-50%, -50%) translate3d(0,0,0) rotate(0deg) scale(var(--sc));
+          }
+          10% { opacity: 1; }
+          100% {
+            opacity: 0;
+            transform: translate(-50%, -50%) translate3d(var(--vx), var(--vy), 0) rotate(var(--rot)) scale(calc(var(--sc) * 0.92));
+          }
+        }
+
+        .qdrop-fx-confetti {
+          position: absolute;
+          inset: 0;
+        }
+
+        .qdrop-fx-conf {
+          position: absolute;
+          left: var(--x);
+          top: -12vh;
+          width: calc(var(--sz) * 0.48);
+          height: calc(var(--sz) * 1.35);
+          border-radius: 4px;
+          background:
+            linear-gradient(135deg,
+              rgba(255,255,255,0.85),
+              rgba(255, 230, 150, 0.85),
+              rgba(255, 170, 80, 0.55)
+            );
+          opacity: 0;
+          transform: translate3d(0, 0, 0) rotate(var(--rot));
+          animation: qfxConf var(--d) ease-out var(--dl) forwards;
+          filter: drop-shadow(0 10px 18px rgba(0,0,0,0.22));
+        }
+
+        .qdrop-fx-conf.is-dot {
+          width: calc(var(--sz) * 0.9);
+          height: calc(var(--sz) * 0.9);
+          border-radius: 999px;
+          background: radial-gradient(circle at 30% 30%, #fff, rgba(255, 230, 150, 0.92), rgba(255, 170, 80, 0.1));
+        }
+
+        @keyframes qfxConf {
+          0% { opacity: 0; transform: translate3d(0, 0, 0) rotate(var(--rot)); }
+          12% { opacity: 1; }
+          100% {
+            opacity: 0;
+            transform:
+              translate3d(calc(var(--dr)), 120vh, 0)
+              rotate(calc(var(--rot) + var(--wg)));
+          }
+        }
+
+        .qdrop-fx.tier-JACKPOT .qdrop-fx-flash { animation-duration: 0.65s; }
+        .qdrop-fx.tier-JACKPOT .qdrop-fx-shockwave { animation-duration: 0.95s; }
+        .qdrop-fx.tier-JACKPOT .qdrop-fx-badge { animation-duration: 1.25s; }
+        .qdrop-fx.tier-MYTHIC .qdrop-fx-flash { animation-duration: 0.62s; }
+
         @media (prefers-reduced-motion: reduce) {
           .qdrop-coin-img,
           .qdrop-particle,
           .qcoinLabel,
-          .qdrop-toast-inner {
+          .qdrop-toast-inner,
+          .qdrop-fx,
+          .qdrop-fx * {
             animation: none !important;
             transition: none !important;
           }
