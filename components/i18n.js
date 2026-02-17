@@ -49029,16 +49029,64 @@ try {
   ensureDict('tr', MISSING_TR)
 } catch (e) {}
 export function I18nProvider({ children }) {
-  const [lang, setLang] = useState('en')
-  useEffect(() => {
-    try { const s = localStorage.getItem('ql7_lang'); if (['ru','en','uk','es','zh','ar','tr'].includes(s)) setLang(s) } catch {}
-  }, [])
+const SUPPORTED_LANGS = ['ru', 'en', 'zh', 'uk', 'ar', 'tr', 'es']
+const DEFAULT_LANG = 'en'
+
+const normalizeLang = (raw) => {
+  if (!raw) return null
+  const s = String(raw).trim().toLowerCase()
+  if (!s) return null
+  // "ru-RU" -> "ru", "en_US" -> "en"
+  const base = s.split(/[-_]/)[0]
+  // иногда встречается "ua" вместо "uk"
+  if (base === 'ua') return 'uk'
+  return base || null
+}
+
+const readStoredLang = () => {
+  try {
+    const s = localStorage.getItem('ql7_lang')
+    return SUPPORTED_LANGS.includes(s) ? s : null
+  } catch {
+    return null
+  }
+}
+
+const detectSystemLang = () => {
+  if (typeof navigator === 'undefined') return null
+  const prefs = []
+  try {
+    if (Array.isArray(navigator.languages)) prefs.push(...navigator.languages)
+    if (navigator.language) prefs.push(navigator.language)
+  } catch {
+    // ignore
+  }
+  for (const p of prefs) {
+    const n = normalizeLang(p)
+    if (n && SUPPORTED_LANGS.includes(n)) return n
+  }
+  return null
+}
+
+const getInitialLang = () => {
+  // SSR-safe: на сервере navigator/localStorage недоступны
+  if (typeof window === 'undefined') return DEFAULT_LANG
+  return readStoredLang() || detectSystemLang() || DEFAULT_LANG
+}
+
+const [lang, setLang] = useState(getInitialLang)
+
   useEffect(() => {
     try { localStorage.setItem('ql7_lang', lang) } catch {}
-    if (typeof document !== 'undefined') document.documentElement.setAttribute('lang', lang)
-  }, [lang])
+if (typeof document !== 'undefined') {
+  document.documentElement.setAttribute('lang', lang)
+  // держим направление письма на уровне провайдера (арабский = rtl)
+  document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr')
+}
 
-  const t = (k) => dict[lang][k] ?? k
+    }, [lang])
+
+  const t = (k) => dict?.[lang]?.[k] ?? dict?.[DEFAULT_LANG]?.[k] ?? k
   return <I18nContext.Provider value={{ t, lang, setLang }}>{children}</I18nContext.Provider>
 }
 export function useI18n() { return useContext(I18nContext) }
