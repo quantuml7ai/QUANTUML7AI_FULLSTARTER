@@ -96,6 +96,7 @@ const now = () => Date.now()
 const FORUM_VIDEO_MAX_SECONDS = 120;
 const FORUM_AUDIO_MAX_SECONDS = 600;
 const FORUM_VIDEO_MAX_BYTES = 300 * 1024 * 1024;
+const FORUM_VIDEO_CAMERA_RECORD_EPSILON_SEC = 2.0;
 const FORUM_VIDEO_LIMIT_I18N = {
   en: {
     title: 'Video limit: up to 2 minutes',
@@ -206,6 +207,98 @@ function getForumVideoLimitCopy(locale) {
   return FORUM_VIDEO_LIMIT_I18N[lang] || FORUM_VIDEO_LIMIT_I18N.en;
 }
 
+const FORUM_VIDEO_TRIM_I18N = {
+  en: {
+    title: 'Trim video to 2 minutes',
+    body: 'Select a 2-minute fragment and trim it before upload.',
+    range: 'Selected fragment',
+    start: 'Start',
+    end: 'End',
+    trim: 'Trim',
+    cancel: 'Cancel',
+    processing: 'Processing video…',
+    unsupported: 'This browser cannot trim video on-device. Please trim in gallery/editor and retry.',
+    failed: 'Trimming failed. Try another fragment or export the file in MP4/WebM.',
+  },
+  ru: {
+    title: 'Обрезка видео до 2 минут',
+    body: 'Выберите фрагмент длиной 2 минуты и обрежьте видео перед загрузкой.',
+    range: 'Выбранный фрагмент',
+    start: 'Начало',
+    end: 'Конец',
+    trim: 'Обрезать',
+    cancel: 'Отмена',
+    processing: 'Обработка видео…',
+    unsupported: 'Этот браузер не умеет обрезать видео на устройстве. Обрежьте в галерее/редакторе и повторите.',
+    failed: 'Не удалось обрезать видео. Попробуйте другой фрагмент или экспорт в MP4/WebM.',
+  },
+  uk: {
+    title: 'Обрізання відео до 2 хвилин',
+    body: 'Оберіть фрагмент тривалістю 2 хвилини та обріжте відео перед завантаженням.',
+    range: 'Обраний фрагмент',
+    start: 'Початок',
+    end: 'Кінець',
+    trim: 'Обрізати',
+    cancel: 'Скасувати',
+    processing: 'Обробка відео…',
+    unsupported: 'Цей браузер не підтримує обрізання відео на пристрої. Обріжте у галереї/редакторі та повторіть.',
+    failed: 'Не вдалося обрізати відео. Спробуйте інший фрагмент або експорт у MP4/WebM.',
+  },
+  es: {
+    title: 'Recortar video a 2 minutos',
+    body: 'Selecciona un fragmento de 2 minutos y recorta el video antes de subirlo.',
+    range: 'Fragmento seleccionado',
+    start: 'Inicio',
+    end: 'Fin',
+    trim: 'Recortar',
+    cancel: 'Cancelar',
+    processing: 'Procesando video…',
+    unsupported: 'Este navegador no puede recortar video en el dispositivo. Recórtalo en la galería/editor y vuelve a intentarlo.',
+    failed: 'No se pudo recortar el video. Prueba otro fragmento o exporta en MP4/WebM.',
+  },
+  zh: {
+    title: '将视频裁剪到 2 分钟',
+    body: '请选择一个 2 分钟片段，并在上传前裁剪视频。',
+    range: '已选片段',
+    start: '开始',
+    end: '结束',
+    trim: '裁剪',
+    cancel: '取消',
+    processing: '正在处理视频…',
+    unsupported: '当前浏览器不支持在设备端裁剪视频。请在相册/编辑器中裁剪后重试。',
+    failed: '视频裁剪失败。请尝试其他片段或导出为 MP4/WebM。',
+  },
+  ar: {
+    title: 'قص الفيديو إلى دقيقتين',
+    body: 'اختر مقطعًا لمدة دقيقتين وقم بقص الفيديو قبل الرفع.',
+    range: 'المقطع المحدد',
+    start: 'البداية',
+    end: 'النهاية',
+    trim: 'قص',
+    cancel: 'إلغاء',
+    processing: 'جارٍ معالجة الفيديو…',
+    unsupported: 'هذا المتصفح لا يدعم قص الفيديو على الجهاز. قصّه في المعرض/المحرر ثم أعد المحاولة.',
+    failed: 'فشل قص الفيديو. جرّب مقطعًا آخر أو صدّره بصيغة MP4/WebM.',
+  },
+  tr: {
+    title: 'Videoyu 2 dakikaya kırp',
+    body: 'Yüklemeden önce 2 dakikalık bir bölüm seçip videoyu kırpın.',
+    range: 'Seçilen bölüm',
+    start: 'Başlangıç',
+    end: 'Bitiş',
+    trim: 'Kırp',
+    cancel: 'İptal',
+    processing: 'Video işleniyor…',
+    unsupported: 'Bu tarayıcı cihaz üzerinde video kırpmayı desteklemiyor. Galeri/editörde kırpıp tekrar deneyin.',
+    failed: 'Video kırpma başarısız. Başka bir bölüm deneyin veya MP4/WebM olarak dışa aktarın.',
+  },
+};
+
+function getForumVideoTrimCopy(locale) {
+  const lang = resolveForumLang(locale);
+  return FORUM_VIDEO_TRIM_I18N[lang] || FORUM_VIDEO_TRIM_I18N.en;
+}
+
 const FORUM_VOICE_TAP_LABEL = {
   en: 'Record voice',
   ru: 'Запись голоса',
@@ -265,6 +358,207 @@ function readVideoDurationSec(videoSource, timeoutMs = 8000) {
     try { video.load?.(); } catch {}
     if (video.readyState >= 1) onLoaded();
   });
+}
+
+function fmtTrimClock(sec) {
+  const n = Math.max(0, Number(sec || 0));
+  const m = Math.floor(n / 60);
+  const s = Math.floor(n % 60);
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+function clampTrimNum(v, min, max) {
+  const x = Number(v);
+  if (!Number.isFinite(x)) return min;
+  return Math.max(min, Math.min(max, x));
+}
+
+function seekVideoToTime(video, timeSec) {
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      try { video.removeEventListener('seeked', onSeeked); } catch {}
+      try { clearTimeout(tid); } catch {}
+      resolve();
+    };
+    const onSeeked = () => finish();
+    const tid = setTimeout(finish, 1500);
+    try { video.addEventListener('seeked', onSeeked, { once: true }); } catch {}
+    try { video.currentTime = Math.max(0, Number(timeSec || 0)); } catch { finish(); }
+    try {
+      const cur = Number(video.currentTime || 0);
+      if (Math.abs(cur - Number(timeSec || 0)) < 0.05) finish();
+    } catch {}
+  });
+}
+
+function pickTrimRecorderMime(preferredMime = '') {
+  const cand = [
+    preferredMime,
+    'video/webm;codecs=vp9,opus',
+    'video/webm;codecs=vp8,opus',
+    'video/webm',
+    'video/mp4',
+  ].filter(Boolean);
+  for (const mime of cand) {
+    try {
+      if (!MediaRecorder?.isTypeSupported || MediaRecorder.isTypeSupported(mime)) return mime;
+    } catch {}
+  }
+  return '';
+}
+
+async function trimVideoBlobNative(inputBlob, opts = {}) {
+  if (typeof document === 'undefined') throw new Error('no_document');
+  if (typeof MediaRecorder === 'undefined') throw new Error('trim_unsupported');
+  const blob = inputBlob;
+  if (!blob || typeof blob !== 'object') throw new Error('bad_blob');
+
+  const maxDurationSec = Math.max(1, Number(opts.maxDurationSec || FORUM_VIDEO_MAX_SECONDS));
+  const startSecReq = Math.max(0, Number(opts.startSec || 0));
+  const onProgress = typeof opts.onProgress === 'function' ? opts.onProgress : null;
+
+  const url = URL.createObjectURL(blob);
+  const video = document.createElement('video');
+  video.preload = 'auto';
+  video.playsInline = true;
+  video.muted = false;
+  video.volume = 0;
+  video.controls = false;
+  video.style.position = 'fixed';
+  video.style.left = '-9999px';
+  video.style.top = '-9999px';
+  video.style.width = '1px';
+  video.style.height = '1px';
+  video.src = url;
+  try { document.body.appendChild(video); } catch {}
+
+  let raf = 0;
+  let timeoutId = 0;
+  let rec = null;
+  let stream = null;
+  const chunks = [];
+
+  const cleanup = () => {
+    try { if (raf) cancelAnimationFrame(raf); } catch {}
+    raf = 0;
+    try { if (timeoutId) clearTimeout(timeoutId); } catch {}
+    timeoutId = 0;
+    try { rec = null; } catch {}
+    try { stream?.getTracks?.().forEach((t) => t.stop()); } catch {}
+    stream = null;
+    try { video.pause?.(); } catch {}
+    try { video.removeAttribute('src'); } catch {}
+    try { video.load?.(); } catch {}
+    try { video.remove?.(); } catch {}
+    try { URL.revokeObjectURL(url); } catch {}
+  };
+
+  try {
+    await new Promise((resolve, reject) => {
+      let done = false;
+      const finish = (err) => {
+        if (done) return;
+        done = true;
+        try { video.removeEventListener('loadedmetadata', onMeta); } catch {}
+        try { video.removeEventListener('error', onErr); } catch {}
+        if (err) reject(err); else resolve();
+      };
+      const onMeta = () => finish();
+      const onErr = () => finish(new Error('video_metadata_error'));
+      video.addEventListener('loadedmetadata', onMeta, { once: true });
+      video.addEventListener('error', onErr, { once: true });
+      try { video.load?.(); } catch {}
+      if (video.readyState >= 1 && Number.isFinite(Number(video.duration || 0))) finish();
+    });
+
+    const total = Number(video.duration || 0);
+    if (!Number.isFinite(total) || total <= 0) throw new Error('video_duration_unavailable');
+
+    const maxStart = Math.max(0, total - Math.min(maxDurationSec, total));
+    const clipStart = clampTrimNum(startSecReq, 0, maxStart);
+    const clipEnd = Math.min(total, clipStart + maxDurationSec);
+    const clipDur = Math.max(0.1, clipEnd - clipStart);
+
+    await seekVideoToTime(video, clipStart);
+
+    const capture =
+      (typeof video.captureStream === 'function' ? video.captureStream() : null) ||
+      (typeof video.mozCaptureStream === 'function' ? video.mozCaptureStream() : null);
+    if (!capture) throw new Error('trim_unsupported');
+    stream = capture;
+
+    const recMime = pickTrimRecorderMime(String(blob.type || ''));
+    rec = recMime ? new MediaRecorder(stream, { mimeType: recMime }) : new MediaRecorder(stream);
+    rec.ondataavailable = (e) => {
+      if (e?.data?.size) chunks.push(e.data);
+    };
+
+    const outBlob = await new Promise(async (resolve, reject) => {
+      let stopped = false;
+      const stopNow = () => {
+        if (stopped) return;
+        stopped = true;
+        try { rec.requestData?.(); } catch {}
+        try { rec.stop?.(); } catch {}
+        try { video.pause?.(); } catch {}
+      };
+
+      rec.onerror = () => reject(new Error('trim_record_error'));
+      rec.onstop = () => {
+        try {
+          const b = new Blob(chunks, { type: rec.mimeType || recMime || String(blob.type || 'video/webm') });
+          resolve(b);
+        } catch (e) {
+          reject(e || new Error('trim_blob_error'));
+        }
+      };
+
+      const startTs = Date.now();
+      timeoutId = setTimeout(() => {
+        stopNow();
+      }, Math.max(8000, Math.ceil((clipDur + 8) * 1000)));
+
+      const checkStop = () => {
+        try {
+          const cur = Number(video.currentTime || 0);
+          const pct = Math.max(0, Math.min(1, (cur - clipStart) / clipDur));
+          try { onProgress?.(pct); } catch {}
+          if (cur >= (clipEnd - 0.04) || video.ended) {
+            stopNow();
+            return;
+          }
+        } catch {}
+        if ((Date.now() - startTs) > ((clipDur + 10) * 1000)) {
+          stopNow();
+          return;
+        }
+        raf = requestAnimationFrame(checkStop);
+      };
+
+      try { rec.start(250); } catch (e) { reject(e || new Error('trim_start_failed')); return; }
+      try {
+        await video.play();
+      } catch (e) {
+        stopNow();
+        reject(e || new Error('trim_play_failed'));
+        return;
+      }
+      raf = requestAnimationFrame(checkStop);
+    });
+
+    const outDur = await readVideoDurationSec(outBlob).catch(() => clipDur);
+    return {
+      blob: outBlob,
+      durationSec: Number.isFinite(outDur) ? outDur : clipDur,
+      startSec: clipStart,
+      endSec: clipEnd,
+    };
+  } finally {
+    cleanup();
+  }
 }
 
 function readAudioDurationSec(audioSource, timeoutMs = 8000) {
@@ -10162,14 +10456,14 @@ function VideoLimitOverlay({ open, copy, maxSec = FORUM_VIDEO_MAX_SECONDS, durat
       onTouchStart={(e) => { if (e.target === e.currentTarget) onClose?.(); }}
     >
       <div className="videoLimitPop" role="dialog" aria-modal="true" aria-live="polite">
-        <div className="videoLimitTitle">{copy?.title || 'Video limit: up to 2 minutes'}</div>
-        <div className="videoLimitBody">{copy?.body || 'Only videos up to 120 seconds are allowed.'}</div>
+        <div className="videoLimitTitle">{String(copy?.title || '')}</div>
+        <div className="videoLimitBody">{String(copy?.body || '')}</div>
         <div className="videoLimitMeta">
-          {hasDuration ? `Duration: ${seconds.toFixed(1)}s` : (copy?.badDuration || 'Cannot read video duration.')}
+          {hasDuration ? `${seconds.toFixed(1)}s` : String(copy?.badDuration || '')}
           {' · '}
-          {`Max: ${maxSec}s`}
+          {`${maxSec}s`}
         </div>
-        <div className="videoLimitTipsTitle">{copy?.tipsTitle || 'How to fix:'}</div>
+        <div className="videoLimitTipsTitle">{String(copy?.tipsTitle || '')}</div>
         <ul className="videoLimitTips">
           {(Array.isArray(copy?.tips) ? copy.tips : []).map((tip, i) => (
             <li key={i}>{tip}</li>
@@ -10177,10 +10471,228 @@ function VideoLimitOverlay({ open, copy, maxSec = FORUM_VIDEO_MAX_SECONDS, durat
         </ul>
         <div className="videoLimitActions">
           <button type="button" className="dmConfirmBtn primary" onClick={onClose}>
-            {copy?.ok || 'OK'}
+            {String(copy?.ok || '')}
           </button>
         </div>
       </div>
+    </div>,
+    document.body
+  );
+}
+
+function VideoTrimPopover({
+  open,
+  copy,
+  t,
+  sourceBlob,
+  durationSec,
+  maxSec = FORUM_VIDEO_MAX_SECONDS,
+  startSec = 0,
+  processing = false,
+  processPct = 0,
+  errorCode = '',
+  onStartChange,
+  onCancel,
+  onTrim,
+}) {
+  const [previewUrl, setPreviewUrl] = React.useState('');
+  const safeDuration = Math.max(0, Number(durationSec || 0));
+  const clipLen = Math.min(Number(maxSec || FORUM_VIDEO_MAX_SECONDS), safeDuration || Number(maxSec || FORUM_VIDEO_MAX_SECONDS));
+  const maxStart = Math.max(0, safeDuration - clipLen);
+  const curStart = clampTrimNum(startSec, 0, maxStart);
+  const curEnd = Math.min(safeDuration || clipLen, curStart + clipLen);
+
+  React.useEffect(() => {
+    if (!open || !sourceBlob) {
+      setPreviewUrl('');
+      return;
+    }
+    let url = '';
+    try {
+      url = URL.createObjectURL(sourceBlob);
+      setPreviewUrl(url);
+    } catch {
+      setPreviewUrl('');
+    }
+    return () => {
+      if (url) {
+        try { URL.revokeObjectURL(url); } catch {}
+      }
+    };
+  }, [open, sourceBlob]);
+
+  React.useEffect(() => {
+    if (!open || typeof window === 'undefined') return;
+    const onKey = (e) => {
+      if (e.key === 'Escape' && !processing) onCancel?.();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onCancel, processing]);
+
+  if (!open || typeof document === 'undefined') return null;
+
+  const errText = String(
+    errorCode === 'trim_unsupported'
+      ? (copy?.unsupported || '')
+      : (errorCode ? (copy?.failed || '') : '')
+  );
+
+  return createPortal(
+    <div
+      className="confirmOverlayRoot dmConfirmOverlay"
+      role="presentation"
+      onMouseDown={(e) => { if (!processing && e.target === e.currentTarget) onCancel?.(); }}
+      onTouchStart={(e) => { if (!processing && e.target === e.currentTarget) onCancel?.(); }}
+    >
+      <div className="videoTrimPop" role="dialog" aria-modal="true" aria-live="polite">
+        <div className="videoTrimTitle">{String(copy?.title || '')}</div>
+        <div className="videoTrimBody">{String(copy?.body || '')}</div>
+
+        <div className="videoTrimPreviewFrame">
+          {previewUrl ? (
+            <video
+              key={previewUrl}
+              src={previewUrl}
+              controls
+              playsInline
+              preload="metadata"
+              style={{ width: '100%', maxHeight: '36vh', background: '#000', borderRadius: 12, objectFit: 'contain' }}
+            />
+          ) : (
+            <div className="videoTrimPreviewEmpty">{String(t?.('loading') || '')}</div>
+          )}
+        </div>
+
+        <div className="videoTrimRangeWrap">
+          <div className="videoTrimRow">
+            <span>{String(copy?.range || '')}</span>
+            <strong>{fmtTrimClock(curStart)} - {fmtTrimClock(curEnd)}</strong>
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={Math.max(0, maxStart)}
+            step={0.1}
+            value={curStart}
+            disabled={processing || maxStart <= 0}
+            onChange={(e) => onStartChange?.(Number(e?.target?.value || 0))}
+            className="videoTrimSlider"
+          />
+          <div className="videoTrimTicks">
+            <span>{String(copy?.start || '')}: {fmtTrimClock(curStart)}</span>
+            <span>{String(copy?.end || '')}: {fmtTrimClock(curEnd)}</span>
+          </div>
+          <div className="videoTrimTotal">
+            {`${fmtTrimClock(safeDuration)} • ${Math.round((clipLen || 0))}s`}
+          </div>
+        </div>
+
+        {processing && (
+          <div className="videoTrimProc">
+            <div className="videoTrimProcBar">
+              <span style={{ width: `${Math.max(6, Math.min(100, Math.round(Number(processPct || 0) * 100)))}%` }} />
+            </div>
+            <div className="videoTrimProcText">{String(copy?.processing || '')}</div>
+          </div>
+        )}
+
+        {!!errText && !processing && (
+          <div className="videoTrimErr">{errText}</div>
+        )}
+
+        <div className="videoTrimActions">
+          <button type="button" className="dmConfirmBtn ghost" disabled={processing} onClick={onCancel}>
+            {String(copy?.cancel || t?.('forum_cancel') || '')}
+          </button>
+          <button
+            type="button"
+            className="dmConfirmBtn primary"
+            disabled={processing || !sourceBlob}
+            onClick={() => onTrim?.()}
+          >
+            {String(copy?.trim || '')}
+          </button>
+        </div>
+      </div>
+      <style jsx>{`
+        .videoTrimPop{
+          width:min(860px, 96vw);
+          max-height:min(92vh, 920px);
+          overflow:auto;
+          border-radius:18px;
+          padding:16px;
+          border:1px solid rgba(104,201,255,.25);
+          background:
+            radial-gradient(1000px 260px at 12% -10%, rgba(87,198,255,.18), transparent 60%),
+            radial-gradient(700px 240px at 100% 0%, rgba(74,120,255,.14), transparent 60%),
+            linear-gradient(180deg, rgba(6,12,28,.98), rgba(3,7,18,.98));
+          box-shadow: 0 18px 70px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.03);
+          color:#e9f5ff;
+        }
+        .videoTrimTitle{ font-weight:800; font-size:20px; line-height:1.2; margin-bottom:6px; }
+        .videoTrimBody{ color:rgba(233,245,255,.82); margin-bottom:12px; }
+        .videoTrimPreviewFrame{
+          border:1px solid rgba(104,201,255,.2);
+          border-radius:14px;
+          padding:10px;
+          background:rgba(2,8,22,.72);
+          box-shadow: inset 0 0 24px rgba(67,149,255,.08);
+        }
+        .videoTrimPreviewEmpty{
+          min-height:120px; display:flex; align-items:center; justify-content:center;
+          color:rgba(233,245,255,.72);
+        }
+        .videoTrimRangeWrap{
+          margin-top:12px;
+          border:1px solid rgba(104,201,255,.16);
+          border-radius:14px;
+          padding:12px;
+          background:rgba(255,255,255,.02);
+        }
+        .videoTrimRow{
+          display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+          font-size:13px; color:rgba(233,245,255,.85); margin-bottom:8px;
+        }
+        .videoTrimRow strong{ color:#fff; font-weight:800; letter-spacing:.3px; }
+        .videoTrimSlider{
+          width:100%;
+          accent-color:#47c2ff;
+        }
+        .videoTrimTicks{
+          margin-top:8px;
+          display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+          color:rgba(233,245,255,.7); font-size:12px;
+        }
+        .videoTrimTotal{
+          margin-top:6px;
+          color:rgba(233,245,255,.55);
+          font-size:12px;
+        }
+        .videoTrimProc{ margin-top:12px; }
+        .videoTrimProcBar{
+          height:10px; border-radius:999px; overflow:hidden;
+          background:rgba(255,255,255,.08); border:1px solid rgba(104,201,255,.18);
+        }
+        .videoTrimProcBar > span{
+          display:block; height:100%;
+          background:linear-gradient(90deg, #35b3ff, #78e2ff);
+          box-shadow:0 0 18px rgba(53,179,255,.45);
+          transition:width .18s ease;
+        }
+        .videoTrimProcText{
+          margin-top:7px; font-size:12px; color:rgba(233,245,255,.8);
+        }
+        .videoTrimErr{
+          margin-top:12px; color:#ffd0d0; border:1px solid rgba(255,90,90,.25);
+          background:rgba(68,8,8,.35); border-radius:12px; padding:10px 12px;
+          font-size:13px;
+        }
+        .videoTrimActions{
+          margin-top:14px;
+          display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap;
+        }
+      `}</style>
     </div>,
     document.body
   );
@@ -12091,7 +12603,7 @@ export function VideoOverlay({
         pointerEvents: st === 'preview' ? 'auto' : 'none'
       }}>
         <div style={{ width:'100%', height:'100%', aspectRatio: aspect, overflow:'hidden' }}>
-{(st === 'live' || st === 'recording') ? (
+{(st === 'live' || st === 'recording' || st === 'processing') ? (
   <div className={fixMirrorClass}>
     <LivePreview
       streamRef={streamRef}
@@ -14733,6 +15245,7 @@ export default function Forum(){
   const { t, locale } = useI18n()
   const toast = useToast()
   const videoLimitCopy = useMemo(() => getForumVideoLimitCopy(locale), [locale]);
+  const videoTrimCopy = useMemo(() => getForumVideoTrimCopy(locale), [locale]);
   const voiceTapLabel = useMemo(() => getForumVoiceTapLabel(locale), [locale]);
   const [videoLimitOverlay, setVideoLimitOverlay] = useState({
     open: false,
@@ -14743,6 +15256,63 @@ export default function Forum(){
   const closeVideoLimitOverlay = useCallback(() => {
     setVideoLimitOverlay({ open: false, durationSec: null, source: '', reason: '' });
   }, []);
+  const [videoTrimPopover, setVideoTrimPopover] = useState({
+    open: false,
+    source: '',
+    blob: null,
+    name: '',
+    mime: '',
+    durationSec: 0,
+    startSec: 0,
+    processing: false,
+    processPct: 0,
+    errorCode: '',
+  });
+  const closeVideoTrimPopover = useCallback(() => {
+    setVideoTrimPopover((prev) => {
+      if (prev?.processing) return prev;
+      return {
+        open: false,
+        source: '',
+        blob: null,
+        name: '',
+        mime: '',
+        durationSec: 0,
+        startSec: 0,
+        processing: false,
+        processPct: 0,
+        errorCode: '',
+      };
+    });
+  }, []);
+  const openVideoTrimPopover = useCallback((payload = {}) => {
+    const blob = payload?.blob || payload?.file || null;
+    if (!blob) return false;
+    const durationSec = Number(payload?.durationSec || 0);
+    const d = Number.isFinite(durationSec) && durationSec > 0 ? durationSec : 0;
+    try { setVideoLimitOverlay({ open: false, durationSec: null, source: '', reason: '' }); } catch {}
+    setVideoTrimPopover({
+      open: true,
+      source: String(payload?.source || ''),
+      blob,
+      name: String(payload?.name || blob?.name || ''),
+      mime: String(payload?.mime || blob?.type || ''),
+      durationSec: d,
+      startSec: 0,
+      processing: false,
+      processPct: 0,
+      errorCode: '',
+    });
+    try {
+      emitDiag('video_trim_open', {
+        source: String(payload?.source || ''),
+        durationSec: d || null,
+        maxSec: FORUM_VIDEO_MAX_SECONDS,
+        size: Number(blob?.size || 0) || null,
+      });
+    } catch {}
+    return true;
+  }, [emitDiag]);
   const showVideoLimitOverlay = useCallback((payload = {}) => {
     const durationSec = Number(payload?.durationSec);
     const reason = String(payload?.reason || (Number.isFinite(durationSec) && durationSec > FORUM_VIDEO_MAX_SECONDS ? 'too_long' : 'bad_duration'));
@@ -14752,10 +15322,6 @@ export default function Forum(){
       source: String(payload?.source || ''),
       reason,
     });
-    const msg = reason === 'too_long'
-      ? (videoLimitCopy?.tooLong || 'Video is longer than 2 minutes. Trim it and try again.')
-      : (videoLimitCopy?.badDuration || 'Cannot read video duration. Use MP4/WebM up to 2 minutes.');
-    try { toast?.warn?.(msg); } catch {}
     try {
       emitDiag('video_limit_reject', {
         source: String(payload?.source || ''),
@@ -14764,7 +15330,7 @@ export default function Forum(){
         maxSec: FORUM_VIDEO_MAX_SECONDS,
       });
     } catch {}
-  }, [emitDiag, toast, videoLimitCopy]);
+  }, [emitDiag]);
   const uiDir = (isBrowser() &&
     (document.documentElement?.dir === 'rtl' ||
       getComputedStyle(document.documentElement).direction === 'rtl'))
@@ -19573,6 +20139,95 @@ useEffect(() => {
 }, [hasComposerMedia, overlayMediaUrl, videoOpen]);
 const videoCancelRef = useRef(false); // true => onstop не собирает blob (отмена)
 const videoMirrorRef = useRef(null);  // вспомогательный незеркальный front-поток для записи
+const videoStopRequestedRef = useRef(false);
+
+const setVideoTrimStartSec = React.useCallback((nextSec) => {
+  setVideoTrimPopover((prev) => {
+    if (!prev?.open || prev?.processing) return prev;
+    const total = Math.max(0, Number(prev.durationSec || 0));
+    const maxStart = Math.max(0, total - FORUM_VIDEO_MAX_SECONDS);
+    return { ...prev, startSec: clampTrimNum(nextSec, 0, maxStart), errorCode: '' };
+  });
+}, []);
+
+const applyVideoTrimPopover = React.useCallback(async () => {
+  const snap = videoTrimPopover;
+  if (!snap?.open || snap?.processing || !snap?.blob) return;
+  const srcBlob = snap.blob;
+  const totalDur = Number(snap.durationSec || 0);
+  const startSec = clampTrimNum(snap.startSec, 0, Math.max(0, totalDur - FORUM_VIDEO_MAX_SECONDS));
+  setVideoTrimPopover((prev) => ({ ...prev, processing: true, processPct: 0.02, errorCode: '' }));
+  try {
+    try { saveComposerScroll(); } catch {}
+    try {
+      emitDiag('video_trim_begin', {
+        source: String(snap.source || ''),
+        startSec: Math.round(startSec * 100) / 100,
+        durationSec: Number.isFinite(totalDur) ? Math.round(totalDur * 100) / 100 : null,
+        maxSec: FORUM_VIDEO_MAX_SECONDS,
+      });
+    } catch {}
+    const out = await trimVideoBlobNative(srcBlob, {
+      startSec,
+      maxDurationSec: FORUM_VIDEO_MAX_SECONDS,
+      onProgress: (p) => {
+        setVideoTrimPopover((prev) => prev?.open ? ({
+          ...prev,
+          processPct: Math.max(0.02, Math.min(0.96, Number(p || 0))),
+        }) : prev);
+      },
+    });
+    const outBlob = out?.blob;
+    if (!outBlob || !Number(outBlob?.size || 0)) throw new Error('trim_empty');
+    let outDur = Number(out?.durationSec || 0);
+    if (!Number.isFinite(outDur) || outDur <= 0) {
+      try { outDur = await readVideoDurationSec(outBlob); } catch {}
+    }
+    if (!Number.isFinite(outDur) || outDur <= 0 || outDur > (FORUM_VIDEO_MAX_SECONDS + 0.35)) {
+      throw new Error('trim_bad_duration');
+    }
+    const outUrl = URL.createObjectURL(outBlob);
+    try {
+      const prev = pendingVideo;
+      if (prev && /^blob:/.test(prev)) URL.revokeObjectURL(prev);
+    } catch {}
+    setPendingVideo(outUrl);
+    try { setOverlayMediaKind('video'); } catch {}
+    try { setOverlayMediaUrl(null); } catch {}
+    try { setVideoOpen(true); } catch {}
+    try { setVideoState('preview'); } catch {}
+    setVideoTrimPopover({
+      open: false,
+      source: '',
+      blob: null,
+      name: '',
+      mime: '',
+      durationSec: 0,
+      startSec: 0,
+      processing: false,
+      processPct: 0,
+      errorCode: '',
+    });
+    try {
+      emitDiag('video_trim_done', {
+        source: String(snap.source || ''),
+        outputSec: Number.isFinite(outDur) ? Math.round(outDur * 100) / 100 : null,
+        startSec: Math.round(startSec * 100) / 100,
+      });
+    } catch {}
+    try { restoreComposerScroll(); } catch {}
+  } catch (e) {
+    const code = String(e?.message || '').includes('unsupported') ? 'trim_unsupported' : 'trim_failed';
+    setVideoTrimPopover((prev) => prev?.open ? ({ ...prev, processing: false, processPct: 0, errorCode: code }) : prev);
+    try {
+      emitDiag('video_trim_fail', {
+        source: String(snap?.source || ''),
+        code,
+        message: String(e?.message || 'unknown'),
+      });
+    } catch {}
+  }
+}, [videoTrimPopover, saveComposerScroll, restoreComposerScroll, emitDiag, pendingVideo]);
  
 // --- voice handlers (зажал/держишь/отпустил) ---
    const startRecord = async () => {
@@ -19750,8 +20405,9 @@ async function createUnmirroredFrontStream(baseStream) {
     let baseStream = videoStreamRef.current;
     const hasTracks = !!baseStream && (baseStream.getTracks?.().length || 0) > 0;
 
+    try { videoCancelRef.current = false; } catch {}
+    try { videoStopRequestedRef.current = false; } catch {}
     if (!hasTracks) {
-      try { videoCancelRef.current = false; } catch {}
       baseStream = await navigator.mediaDevices.getUserMedia({
         video: { width: 1280, height: 720, facingMode: { ideal: 'user' } },
         audio: true,
@@ -19807,12 +20463,16 @@ async function createUnmirroredFrontStream(baseStream) {
 
     mr.onstop = async () => {
       clearInterval(videoTimerRef.current); videoTimerRef.current = null;
+      try { videoRecRef.current = null; } catch {}
+      try { videoStopRequestedRef.current = false; } catch {}
 
       // в любом случае гасим вспомогательный зеркальный поток (если был)
       try {
         if (videoMirrorRef.current?.__stopMirror) videoMirrorRef.current.__stopMirror();
       } catch {}
       videoMirrorRef.current = null;
+      try { videoStreamRef.current?.getTracks?.().forEach(tr => tr.stop()); } catch {}
+      try { videoStreamRef.current = null; } catch {}
       try {
         if (videoCancelRef.current) {
           // отмена — ничего не собираем
@@ -19824,21 +20484,40 @@ async function createUnmirroredFrontStream(baseStream) {
         }
 
         const blob = new Blob(videoChunksRef.current, { type: mr.mimeType || 'video/webm' });
+        videoChunksRef.current = [];
         let recordedDurationSec = NaN;
         try {
           recordedDurationSec = await readVideoDurationSec(blob);
         } catch {}
-        if (!Number.isFinite(recordedDurationSec) || recordedDurationSec <= 0 || recordedDurationSec > FORUM_VIDEO_MAX_SECONDS) {
+        if (!Number.isFinite(recordedDurationSec) || recordedDurationSec <= 0) {
           try {
             showVideoLimitOverlay({
               source: 'camera_record',
-              durationSec: Number.isFinite(recordedDurationSec) ? recordedDurationSec : null,
-              reason: Number.isFinite(recordedDurationSec) && recordedDurationSec > FORUM_VIDEO_MAX_SECONDS ? 'too_long' : 'bad_duration',
+              durationSec: null,
+              reason: 'bad_duration',
             });
           } catch {}
           videoChunksRef.current = [];
           setPendingVideo(null);
+          setVideoOpen(false);
           setVideoState('idle');
+          try { restoreComposerScroll(); } catch {}
+          return;
+        }
+        if (recordedDurationSec > (FORUM_VIDEO_MAX_SECONDS + FORUM_VIDEO_CAMERA_RECORD_EPSILON_SEC)) {
+          try {
+            setVideoOpen(false);
+            setVideoState('idle');
+            openVideoTrimPopover({
+              source: 'camera_record',
+              blob,
+              mime: String(blob?.type || ''),
+              durationSec: recordedDurationSec,
+              name: `camera-${Date.now()}.webm`,
+            });
+          } catch {}
+          videoChunksRef.current = [];
+          setPendingVideo(null);
           try { restoreComposerScroll(); } catch {}
           return;
         }
@@ -19854,6 +20533,7 @@ async function createUnmirroredFrontStream(baseStream) {
         setVideoState('preview');
         try { restoreComposerScroll(); } catch {}
       } catch {
+        try { videoChunksRef.current = []; } catch {}
         setVideoState('idle');
       }
     };
@@ -19881,18 +20561,18 @@ async function createUnmirroredFrontStream(baseStream) {
 };
 
 const stopVideo = () => {
+  if (videoStopRequestedRef.current) return;
   const rec = videoRecRef.current;
   const isActive = !!rec && (rec.state === 'recording' || rec.state === 'paused');
   if (!isActive) return;
+  videoStopRequestedRef.current = true;
   setVideoState('processing');
-  try { videoRecRef.current?.stop?.(); } catch {}
-  // основной стрим и спец-потоки гасим здесь: камера реально выключается
-  try { videoStreamRef.current?.getTracks?.().forEach(tr => tr.stop()); } catch {}
-  try {
-    if (videoMirrorRef.current?.__stopMirror) videoMirrorRef.current.__stopMirror();
-  } catch {}
-  videoMirrorRef.current = null;  clearInterval(videoTimerRef.current); videoTimerRef.current = null;
-  try { restoreComposerScroll(); } catch {}
+  try { rec.requestData?.(); } catch {}
+  try { rec.stop?.(); } catch {
+    try { setVideoState('idle'); } catch {}
+    try { videoStopRequestedRef.current = false; } catch {}
+  }
+  clearInterval(videoTimerRef.current); videoTimerRef.current = null;
 };
 
 const resetVideo = React.useCallback(() => {
@@ -19901,9 +20581,11 @@ const resetVideo = React.useCallback(() => {
 
   if (isActive) {
     try { videoCancelRef.current = true; } catch {}
+    try { videoStopRequestedRef.current = true; } catch {}
     try { rec.stop(); } catch {}
   } else {
     try { videoCancelRef.current = false; } catch {}
+    try { videoStopRequestedRef.current = false; } catch {}
   }
 
   try { videoStreamRef.current?.getTracks?.().forEach(tr => tr.stop()); } catch {}
@@ -19913,6 +20595,7 @@ const resetVideo = React.useCallback(() => {
   videoRecRef.current = null;
   videoStreamRef.current = null;
   videoMirrorRef.current = null;
+  try { videoStopRequestedRef.current = false; } catch {}
   if (pendingVideo && /^blob:/.test(pendingVideo)) {
     try { URL.revokeObjectURL(pendingVideo) } catch {}
   }
@@ -20437,19 +21120,29 @@ const createPost = async () => {
         }
         let durationSec = NaN;
         try { durationSec = await readVideoDurationSec(fileBlob); } catch {}
-        if (!Number.isFinite(durationSec) || durationSec <= 0 || durationSec > FORUM_VIDEO_MAX_SECONDS) {
+        if (!Number.isFinite(durationSec) || durationSec <= 0) {
           try {
             showVideoLimitOverlay({
               source: 'post_blob_upload',
-              durationSec: Number.isFinite(durationSec) ? durationSec : null,
-              reason: Number.isFinite(durationSec) && durationSec > FORUM_VIDEO_MAX_SECONDS ? 'too_long' : 'bad_duration',
+              durationSec: null,
+              reason: 'bad_duration',
             });
           } catch {}
           try { endMediaPipeline?.(); } catch {}
-          return _fail((Number.isFinite(durationSec) && durationSec > FORUM_VIDEO_MAX_SECONDS)
-            ? (videoLimitCopy?.tooLong || '')
-            : (videoLimitCopy?.badDuration || '')
-          );
+          return _fail();
+        }
+        if (durationSec > FORUM_VIDEO_MAX_SECONDS) {
+          try {
+            openVideoTrimPopover({
+              source: 'post_blob_upload',
+              blob: fileBlob,
+              mime,
+              durationSec,
+              name: `composer-${Date.now()}.${mime.includes('mp4') ? 'mp4' : (mime.includes('quicktime') ? 'mov' : 'webm')}`,
+            });
+          } catch {}
+          try { endMediaPipeline?.(); } catch {}
+          return _fail();
         }
 
         // имя с правильным расширением
@@ -21229,12 +21922,25 @@ try { startSoftProgress?.(72, 200, 88); } catch {}  // мягко едем к ~8
       }
       let pickedDurationSec = NaN;
       try { pickedDurationSec = await readVideoDurationSec(vf); } catch {}
-      if (!Number.isFinite(pickedDurationSec) || pickedDurationSec <= 0 || pickedDurationSec > FORUM_VIDEO_MAX_SECONDS) {
+      if (!Number.isFinite(pickedDurationSec) || pickedDurationSec <= 0) {
         try {
           showVideoLimitOverlay({
             source: 'attach_picker',
-            durationSec: Number.isFinite(pickedDurationSec) ? pickedDurationSec : null,
-            reason: Number.isFinite(pickedDurationSec) && pickedDurationSec > FORUM_VIDEO_MAX_SECONDS ? 'too_long' : 'bad_duration',
+            durationSec: null,
+            reason: 'bad_duration',
+          });
+        } catch {}
+        try { endMediaPipeline?.(); } catch {}
+        return;
+      }
+      if (pickedDurationSec > FORUM_VIDEO_MAX_SECONDS) {
+        try {
+          openVideoTrimPopover({
+            source: 'attach_picker',
+            blob: vf,
+            mime,
+            durationSec: pickedDurationSec,
+            name: String(vf?.name || ''),
           });
         } catch {}
         try { endMediaPipeline?.(); } catch {}
@@ -21308,7 +22014,7 @@ try { startSoftProgress?.(72, 200, 88); } catch {}  // мягко едем к ~8
     if (e?.target) e.target.value = '';
     try { restoreComposerScroll(); } catch {}
   }
-}, [t, toast, moderateImageFiles, toastI18n, reasonKey, beginMediaPipeline, endMediaPipeline, setPendingImgs, setPendingVideo, startSoftProgress, stopMediaProg, setMediaPhase, setMediaPct, setVideoProgress, viewerId, showVideoLimitOverlay, saveComposerScroll, restoreComposerScroll]);
+}, [t, toast, moderateImageFiles, toastI18n, reasonKey, beginMediaPipeline, endMediaPipeline, setPendingImgs, setPendingVideo, startSoftProgress, stopMediaProg, setMediaPhase, setMediaPct, setVideoProgress, viewerId, showVideoLimitOverlay, openVideoTrimPopover, saveComposerScroll, restoreComposerScroll]);
 
   /* ---- профиль (поповер у аватара) ---- */
   const idShown = resolveProfileAccountId(auth.asherId || auth.accountId || '')
@@ -21612,6 +22318,7 @@ setVideoFeed(withStars);
 const snapVideoFeedToFirstCardTop = React.useCallback((opts = {}) => {
   if (!isBrowser()) return;
   const hideHeader = opts?.hideHeader !== false;
+  const anchorOnly = opts?.anchorOnly === true;
   if (hideHeader) {
     try { headAutoOpenRef.current = false; } catch {}
     try { setHeadPinned(false); } catch {}
@@ -21621,6 +22328,21 @@ const snapVideoFeedToFirstCardTop = React.useCallback((opts = {}) => {
     try {
       const scrollEl = bodyRef.current || document.querySelector('[data-forum-scroll="1"]') || null;
       const anchor = document.querySelector('[data-forum-video-start="1"]');
+      if (anchorOnly && anchor) {
+        const anchorRect = anchor.getBoundingClientRect?.();
+        if (anchorRect) {
+          const useInner = !!scrollEl && (scrollEl.scrollHeight > scrollEl.clientHeight + 1);
+          if (useInner) {
+            const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 };
+            const targetTop = (scrollEl.scrollTop || 0) + (anchorRect.top - Number(hostRect.top || 0));
+            scrollEl.scrollTop = Math.max(0, targetTop);
+          } else {
+            const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + anchorRect.top;
+            try { window.scrollTo({ top: y, behavior: 'auto' }); } catch { try { window.scrollTo(0, y); } catch {} }
+          }
+          return;
+        }
+      }
       const root = anchor?.parentElement || document;
       const card =
         root.querySelector?.('[data-forum-video-start="1"] ~ .grid [data-feed-card="1"][data-feed-kind="post"]') ||
@@ -21635,7 +22357,8 @@ const snapVideoFeedToFirstCardTop = React.useCallback((opts = {}) => {
       const useInner = !!scrollEl && (scrollEl.scrollHeight > scrollEl.clientHeight + 1);
       if (useInner) {
         const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 };
-        scrollEl.scrollTop += (cardRect.top - Number(hostRect.top || 0));
+        const targetTop = (scrollEl.scrollTop || 0) + (cardRect.top - Number(hostRect.top || 0));
+        scrollEl.scrollTop = Math.max(0, targetTop);
       } else {
         const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + cardRect.top;
         try { window.scrollTo({ top: y, behavior: 'auto' }); } catch { try { window.scrollTo(0, y); } catch {} }
@@ -21645,11 +22368,21 @@ const snapVideoFeedToFirstCardTop = React.useCallback((opts = {}) => {
   try { requestAnimationFrame(() => requestAnimationFrame(run)); } catch { try { setTimeout(run, 0); } catch {} }
 }, [setHeadHidden, setHeadPinned]);
 
+const videoFeedRefreshTeleportPendingRef = React.useRef(false);
+const videoFeedHardResetRef = React.useRef(null);
 const refreshVideoFeedWithoutReload = React.useCallback(() => {
+  try { videoFeedRefreshTeleportPendingRef.current = true; } catch {}
   try { setVideoFeedUserSortLocked(false); } catch {}
+  try { headAutoOpenRef.current = false; } catch {}
+  try { setHeadPinned(false); } catch {}
+  try { setHeadHidden(true); } catch {}
+  try { setVisibleVideoCount(VIDEO_PAGE_SIZE); } catch {}
+  try { videoFeedHardResetRef.current?.(); } catch {}
+  // мгновенный teleport к якорю старта ленты (не к первой смонтированной карточке)
+  snapVideoFeedToFirstCardTop({ hideHeader: true, anchorOnly: true });
+  // затем пересобираем ленту (shuffle/random) и после рендера выравниваем ещё раз ровно один раз
   try { setVideoFeedEntryToken((x) => x + 1); } catch {}
-  snapVideoFeedToFirstCardTop({ hideHeader: true });
-}, [snapVideoFeedToFirstCardTop]);
+}, [snapVideoFeedToFirstCardTop, setHeadHidden, setHeadPinned]);
 
 function openVideoFeed(entryId, opts = {}) {
   // ✅ каждый вход в видео-ленту стартует с «перетасованной» выдачи
@@ -21740,8 +22473,22 @@ const openInboxGlobal = React.useCallback((entryId) => {
 React.useEffect(() => {
   if (!videoFeedOpen) return;
   buildAndSetVideoFeedEvent();
+  if (videoFeedRefreshTeleportPendingRef.current) {
+    try {
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        if (!videoFeedRefreshTeleportPendingRef.current) return;
+        try { headAutoOpenRef.current = false; } catch {}
+        try { setHeadPinned(false); } catch {}
+        try { setHeadHidden(true); } catch {}
+        try { setVisibleVideoCount(VIDEO_PAGE_SIZE); } catch {}
+        try { videoFeedHardResetRef.current?.(); } catch {}
+        snapVideoFeedToFirstCardTop({ hideHeader: true, anchorOnly: true });
+        videoFeedRefreshTeleportPendingRef.current = false;
+      }));
+    } catch {}
+  }
   // зависимости: любые сигналы обновления снапшота/постов у тебя в состоянии
-}, [videoFeedOpen, videoFeedEntryToken, data?.rev, data?.posts, data?.messages, data?.topics, allPosts, feedSort, activeStarredAuthors, buildAndSetVideoFeedEvent]);
+}, [videoFeedOpen, videoFeedEntryToken, data?.rev, data?.posts, data?.messages, data?.topics, allPosts, feedSort, activeStarredAuthors, buildAndSetVideoFeedEvent, snapVideoFeedToFirstCardTop, setHeadHidden, setHeadPinned]);
 
 // [VIDEO_FEED:OPEN_THREAD] — открыть полноценную ветку из ленты
 function openThreadFromPost(p){
@@ -22707,6 +23454,27 @@ const vfRecalcWindow = React.useCallback(() => {
 ]);
 
 React.useEffect(() => {
+  videoFeedHardResetRef.current = () => {
+    try { vfHeightsRef.current.clear(); } catch {}
+    try {
+      setVfWin({ start: 0, end: Math.min(VF_MAX_RENDER, Math.max(0, vfSlots.length || 0)), top: 0, bottom: 0 });
+    } catch {}
+    try {
+      const el = vfGetScrollEl();
+      if (el && el.scrollHeight > el.clientHeight + 1) {
+        el.scrollTop = 0;
+      } else {
+        window.scrollTo(0, 0);
+      }
+    } catch {}
+    try { requestAnimationFrame(() => requestAnimationFrame(() => { try { vfRecalcWindow(); } catch {} })); } catch {}
+  };
+  return () => {
+    try { videoFeedHardResetRef.current = null; } catch {}
+  };
+}, [vfSlots.length, vfGetScrollEl, vfRecalcWindow]);
+
+React.useEffect(() => {
   if (!isBrowser()) return;
   if (!videoFeedOpen) return;
 
@@ -23019,7 +23787,9 @@ function pickAdUrlForSlot(slotKey, slotKind) {
       ? 'hidden'
       : (videoState === 'recording'
           ? 'recording'
-          : (videoState === 'preview' ? 'preview' : 'live'))
+          : (videoState === 'preview'
+              ? 'preview'
+              : (videoState === 'processing' ? 'processing' : 'live')))
   }
   elapsed={videoElapsed}
   streamRef={videoStreamRef}
@@ -23037,6 +23807,21 @@ function pickAdUrlForSlot(slotKey, slotKind) {
   maxSec={FORUM_VIDEO_MAX_SECONDS}
   durationSec={videoLimitOverlay?.durationSec}
   onClose={closeVideoLimitOverlay}
+/>
+<VideoTrimPopover
+  open={!!videoTrimPopover?.open}
+  copy={videoTrimCopy}
+  t={t}
+  sourceBlob={videoTrimPopover?.blob}
+  durationSec={videoTrimPopover?.durationSec}
+  maxSec={FORUM_VIDEO_MAX_SECONDS}
+  startSec={videoTrimPopover?.startSec}
+  processing={!!videoTrimPopover?.processing}
+  processPct={videoTrimPopover?.processPct}
+  errorCode={videoTrimPopover?.errorCode}
+  onStartChange={setVideoTrimStartSec}
+  onCancel={closeVideoTrimPopover}
+  onTrim={applyVideoTrimPopover}
 />
 <ReportPopover
   open={reportUI.open}
