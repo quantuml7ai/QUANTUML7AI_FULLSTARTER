@@ -1954,7 +1954,7 @@ const Styles = () => (
       color: #eaf1ff;
     }
     .forum_root{
-      --mb-video-h-mobile: 700px;
+      --mb-video-h-mobile: 650px;
       --mb-video-h-tablet: 550px;
       --mb-video-h-desktop: 550px;
   /* Video: минимальная высота */
@@ -10898,19 +10898,30 @@ const runPostButtonFx = React.useCallback((e, kindHint) => {
   // видео: blob: (локальный превью) или публичные ссылки /video-*.webm|.mp4 (и любые .mp4)
 
   // видео: blob: (локальный превью) или публичные ссылки /video-*.webm|.mp4 (и любые .mp4)
-  const POST_VIDEO_EXT_RE = /\.(?:webm|mp4|mov|m4v|mkv)(?:$|[?#])/i;
+  const POST_VIDEO_EXT_RE = /\.(?:mp4|mov|m4v|mkv)(?:$|[?#])/i;
+  const POST_VIDEO_WEBM_RE = /(?:\/video-\d+\.webm(?:$|[?#])|[?&]filename=[^&#]*video[^&#]*\.webm(?:$|[&#]))/i;
   const POST_VIDEO_FILENAME_RE = /[?&]filename=[^&#]+\.(?:webm|mp4|mov|m4v|mkv)(?:$|[&#])/i;
   const POST_VIDEO_ENDPOINT_RE = /(?:\/uploads\/video\/|\/forum\/video(?:\/|$)|\/api\/forum\/uploadVideo(?:\/|$))/i;
   const POST_VIDEO_HINT_RE = /(?:^|[\/_\-])video(?:[\/_.\-]|$)/i;
+  const POST_AUDIO_HINT_RE = /(?:\/uploads\/audio\/|\/forum\/voice(?:\/|$)|(?:^|[\/_\-])(voice|audio)(?:[\/_.\-]|$))/i;
+  const POST_AUDIO_FILENAME_HINT_RE = /[?&]filename=[^&#]*(?:voice|audio)[^&#]*\.(?:webm|ogg|mp3|m4a|wav)(?:$|[&#])/i;
 
   const isPostDirectVideoUrl = (u) => {
     const s = String(u || '').trim();
     if (!s) return false;
     if (isYouTubeUrl(s) || isTikTokUrl(s)) return false;
     if (IMG_RE.test(s) || isImageUrl(s)) return false;
+    if (POST_AUDIO_HINT_RE.test(s) || POST_AUDIO_FILENAME_HINT_RE.test(s)) return false;
 
     // blob: в тексте поста неоднозначен (audio/video local preview) -> здесь не классифицируем как video.
     if (/^blob:/i.test(s)) return false;
+
+    if (/\.webm(?:$|[?#])/i.test(s)) {
+      if (POST_VIDEO_WEBM_RE.test(s)) return true;
+      if (POST_VIDEO_ENDPOINT_RE.test(s)) return true;
+      if (/vercel[-]?storage|vercel[-]?blob/i.test(s) && POST_VIDEO_HINT_RE.test(s)) return true;
+      return false;
+    }
 
     if (POST_VIDEO_EXT_RE.test(s)) return true;
     if (POST_VIDEO_FILENAME_RE.test(s)) return true;
@@ -10922,7 +10933,8 @@ const runPostButtonFx = React.useCallback((e, kindHint) => {
     if (isAudioUrl(s)) return false;
     return false;
   };
-  const VIDEO_RE = { test: (u) => isPostDirectVideoUrl(u) };
+  const VIDEO_RE =
+    /^(?:blob:[^\s]+|https?:\/\/[^\s]+(?:\/video-\d+\.(?:webm|mp4)|\.mp4)(?:[?#].*)?)$/i;
 
   // YouTube: обычные watch + короткие youtu.be
   const YT_RE =
@@ -10933,29 +10945,7 @@ const runPostButtonFx = React.useCallback((e, kindHint) => {
     /^(?:https?:\/\/)?(?:www\.)?tiktok\.com\/(@[\w.\-]+\/video\/(\d+)|t\/[A-Za-z0-9]+)(?:[?#].*)?$/i;
 
 // аудио: поддерживаем https и blob: (blob используется только локально, но подстрахуемся)
-  const AUDIO_EXT = /\.(?:ogg|mp3|m4a|wav)(?:$|[?#])/i;
-  const AUDIO_WEBM_EXT = /\.webm(?:$|[?#])/i;
-  const AUDIO_HINT_RE = /(?:\/uploads\/audio\/|\/forum\/voice(?:\/|$)|(?:^|[\/_\-])(voice|audio)(?:[\/_.\-]|$))/i;
-  const AUDIO_FILENAME_ANY_RE = /[?&]filename=[^&#]+\.(?:webm|ogg|mp3|m4a|wav)(?:$|[&#])/i;
-  const AUDIO_FILENAME_WEBM_HINT_RE = /[?&]filename=[^&#]*(?:voice|audio)[^&#]*\.webm(?:$|[&#])/i;
-  const isPostAudioUrlLike = (u) => {
-    const t = String(u || '').trim();
-    if (!t) return false;
-    if (isYouTubeUrl(t) || isTikTokUrl(t)) return false;
-    if (IMG_RE.test(t) || isImageUrl(t)) return false;
-    if (isPostDirectVideoUrl(t)) return false;
-    if (/^blob:/i.test(t)) return false;
-    if (AUDIO_EXT.test(t)) return true;
-    if (AUDIO_WEBM_EXT.test(t)) {
-      return AUDIO_HINT_RE.test(t) || AUDIO_FILENAME_WEBM_HINT_RE.test(t);
-    }
-    if (/^\/uploads\/audio\//i.test(t) || /\/forum\/voice/i.test(t)) return true;
-    if (AUDIO_FILENAME_ANY_RE.test(t)) {
-      if (/\.webm(?:$|[&#])/i.test(t)) return AUDIO_FILENAME_WEBM_HINT_RE.test(t);
-      return true;
-    }
-    return false;
-  };
+  const AUDIO_EXT = /\.(?:webm|ogg|mp3|m4a|wav)(?:$|[?#])/i;
   const isAudioLine = (s) => {
     const t = String(s).trim();
     if (!t) return false;
@@ -10963,10 +10953,11 @@ const runPostButtonFx = React.useCallback((e, kindHint) => {
     if (!/^\S+$/.test(t)) return false;
     // blob: — тип неизвестен (может быть видео) → не относим к аудио
     if (/^blob:/.test(t)) return false;
-    if (isPostDirectVideoUrl(t)) return false;
+    if (VIDEO_RE.test(t)) return false;
     // https://… или твои относительные пути
     if (/^https?:\/\//i.test(t) || /^\/uploads\/audio\//i.test(t) || /\/forum\/voice/i.test(t)) {
-      if (isPostAudioUrlLike(t)) return true;
+      if (AUDIO_EXT.test(t) && !VIDEO_RE.test(t)) return true;
+      if (/[?&]filename=.*\.(webm|ogg|mp3|m4a|wav)(?:$|[&#])/i.test(t)) return true;
     }
     return false;
   };
@@ -10994,7 +10985,7 @@ const runPostButtonFx = React.useCallback((e, kindHint) => {
   // но и из любых строк, где они встречаются.
   const imgInline   = collectMatches(allLines, IMG_RE);
   const videoInline = collectMatches(allLines, VIDEO_RE);
-  const audioInline = collectMatches(allLines, { test: isPostAudioUrlLike }).filter((u) => !isPostDirectVideoUrl(u));
+  const audioInline = collectMatches(allLines, AUDIO_EXT).filter((u) => !VIDEO_RE.test(u));
   const ytInline    = collectMatches(allLines, YT_RE);
   const tiktokInline = collectMatches(allLines, TIKTOK_RE);
 
