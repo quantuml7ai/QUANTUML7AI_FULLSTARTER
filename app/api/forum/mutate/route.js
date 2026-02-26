@@ -19,6 +19,7 @@ import {
 import { Redis } from '@upstash/redis'
 import { bus } from '../_bus.js'
 import crypto from 'node:crypto'
+import { resolveCanonicalAccountId } from '../../profile/_identity.js'
 
 async function publishForumEvent(evt) {
   const payload = { ...evt, ts: Date.now() }
@@ -164,7 +165,14 @@ async function setPostReaction(postId, userId, state) {
   let authorId = null
   if (likeDelta) {
     const postObj = await getPostObj(pid)
-    authorId = String(postObj?.userId || postObj?.accountId || '').trim() || null
+    const rawAuthorId = String(postObj?.userId || postObj?.accountId || '').trim() || null
+    if (rawAuthorId) {
+      try {
+        authorId = String((await resolveCanonicalAccountId(rawAuthorId)) || rawAuthorId || '').trim() || null
+      } catch {
+        authorId = rawAuthorId
+      }
+    }
   }
 
   return { state: next, likes, dislikes, changed: true, likeDelta, authorId }
@@ -235,7 +243,10 @@ export async function POST(request) {
   try {
     const body = await request.json().catch(() => ({}))
     const userIdRaw = requireUserId(request, body)
-    const userId = String(userIdRaw || '').trim()
+    let userId = String(userIdRaw || '').trim()
+    try {
+      userId = String((await resolveCanonicalAccountId(userId)) || userId || '').trim()
+    } catch {}
 
     // 🚫 мгновенные баны (по userId и IP)
     const ip = getClientIp(request)

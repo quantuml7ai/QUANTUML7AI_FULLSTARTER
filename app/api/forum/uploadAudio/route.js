@@ -2,6 +2,7 @@
  import { NextResponse } from 'next/server'
  import { put } from '@vercel/blob'
  import { isMediaLocked } from '../_db.js'
+ import { resolveCanonicalAccountId } from '../../profile/_identity.js'
  export const runtime = 'nodejs'
   const ALLOWED_MIME = /^(audio\/webm|audio\/mpeg|audio\/mp4|audio\/wav)$/i
  const MAX_SIZE_BYTES = 10 * 1024 * 1024 // 10MB
@@ -11,7 +12,8 @@
      const form = await req.formData()
      const headerId = req.headers.get('x-forum-user-id')
      const formId = form.get('userId') || form.get('accountId') || form.get('asherId')
-     const userId = String(headerId || formId || '').trim()
+     const rawUserId = String(headerId || formId || '').trim()
+     const userId = String((await resolveCanonicalAccountId(rawUserId).catch(() => '')) || rawUserId || '').trim()
      if (!userId) {
        return NextResponse.json({ ok: false, error: 'missing_user_id' }, { status: 401, headers: { 'cache-control': 'no-store' } })
      }

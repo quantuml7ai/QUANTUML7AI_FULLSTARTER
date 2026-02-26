@@ -32,7 +32,8 @@ export async function GET(req) {
       )
     }
 
-    const accountId = await resolveCanonicalAccountId(userId)
+    const rawUserId = String(userId || '').trim()
+    const accountId = await resolveCanonicalAccountId(rawUserId)
     if (!accountId) {
       return NextResponse.json(
         { ok: false, error: 'missing_user_id' },
@@ -40,13 +41,36 @@ export async function GET(req) {
       )
     }
 
-    const [about, followers, posts, topics, likes] = await Promise.all([
+    const legacyId = rawUserId && rawUserId !== accountId ? rawUserId : ''
+    const [
+      aboutCanonical,
+      followersCanonical,
+      postsCanonical,
+      topicsCanonical,
+      likesCanonical,
+      aboutLegacy,
+      followersLegacy,
+      postsLegacy,
+      topicsLegacy,
+      likesLegacy,
+    ] = await Promise.all([
       getUserAbout(accountId),
       getFollowersCount(accountId),
       getUserPostsTotal(accountId),
       getUserTopicsTotal(accountId),
       getUserLikesTotal(accountId),
+      legacyId ? getUserAbout(legacyId).catch(() => '') : Promise.resolve(''),
+      legacyId ? getFollowersCount(legacyId).catch(() => 0) : Promise.resolve(0),
+      legacyId ? getUserPostsTotal(legacyId).catch(() => 0) : Promise.resolve(0),
+      legacyId ? getUserTopicsTotal(legacyId).catch(() => 0) : Promise.resolve(0),
+      legacyId ? getUserLikesTotal(legacyId).catch(() => 0) : Promise.resolve(0),
     ])
+
+    const about = String(aboutCanonical || aboutLegacy || '')
+    const followers = Math.max(Number(followersCanonical || 0), Number(followersLegacy || 0))
+    const posts = Number(postsCanonical || 0) + Number(postsLegacy || 0)
+    const topics = Number(topicsCanonical || 0) + Number(topicsLegacy || 0)
+    const likes = Number(likesCanonical || 0) + Number(likesLegacy || 0)
 
     return NextResponse.json({
       ok: true,

@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server'
 import { handleUpload } from '@vercel/blob/client'
 import { isMediaLocked } from '../_db.js'
+import { resolveCanonicalAccountId } from '../../profile/_identity.js'
 export const runtime = 'nodejs'
 
 // Разрешаем iPhone .mov и ставим лимит 300 МБ
@@ -40,7 +41,8 @@ export async function POST(req) {
       j?.payload?.clientPayload?.userId ||
       j?.payload?.clientPayload?.accountId ||
       j?.payload?.clientPayload?.asherId
-    const userId = String(headerId || bodyId || '').trim()
+    const rawUserId = String(headerId || bodyId || '').trim()
+    const userId = String((await resolveCanonicalAccountId(rawUserId).catch(() => '')) || rawUserId || '').trim()
     if (!userId) {
       return respond(401, { error: { code: 'missing_user_id', message: 'User id required' } })
     }

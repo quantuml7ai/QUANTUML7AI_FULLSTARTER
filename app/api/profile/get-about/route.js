@@ -24,7 +24,8 @@ export async function GET(req) {
       )
     }
 
-    const accountId = await resolveCanonicalAccountId(userId)
+    const rawUserId = String(userId || '').trim()
+    const accountId = await resolveCanonicalAccountId(rawUserId)
     if (!accountId) {
       return NextResponse.json(
         { ok: false, error: 'missing_user_id' },
@@ -32,7 +33,13 @@ export async function GET(req) {
       )
     }
 
-    const about = await getUserAbout(accountId)
+    let about = await getUserAbout(accountId)
+    if (!String(about || '').trim()) {
+      const legacyId = rawUserId && rawUserId !== accountId ? rawUserId : ''
+      if (legacyId) {
+        try { about = await getUserAbout(legacyId) } catch {}
+      }
+    }
 
     return NextResponse.json({
       ok: true,
