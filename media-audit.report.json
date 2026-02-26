@@ -1,18 +1,18 @@
 {
   "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-02-15T22:24:33.920Z",
+  "generatedAt": "2026-02-26T12:42:43.401Z",
   "results": [
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\Forum.jsx",
       "counts": {
         "video": 14,
-        "autoplay": 12,
+        "autoplay": 13,
         "loop": 18,
-        "preload": 18,
+        "preload": 23,
         "img": 9,
-        "lazy": 13,
-        "create": 4,
-        "revoke": 10
+        "lazy": 14,
+        "create": 6,
+        "revoke": 12
       },
       "flags": [
         "⚠ video + autoplay",
@@ -22,58 +22,58 @@
       "samples": {
         "video": [
           {
-            "line": 184,
+            "line": 398,
             "text": "// Иначе оно улетает в ветку video и рендерится нативным <video controls> (чёрный экран)."
           },
           {
-            "line": 2581,
+            "line": 2801,
             "text": "/* 2) Обычные <img>/<video>/<canvas>/<svg> внутри — растянуть и покрыть */"
           },
           {
-            "line": 7371,
+            "line": 8475,
             "text": "<video"
           }
         ],
         "autoplay": [
           {
-            "line": 7374,
+            "line": 8478,
             "text": "autoPlay"
           },
           {
-            "line": 10017,
+            "line": 11386,
             "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
           },
           {
-            "line": 10096,
+            "line": 11465,
             "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
           }
         ],
         "img": [
           {
-            "line": 730,
+            "line": 944,
             "text": "// строго детерминированный URL и только <img>"
           },
           {
-            "line": 774,
+            "line": 988,
             "text": "* — После mount, если icon — картинка, показываем <img> внутри того же <div>"
           },
           {
-            "line": 2581,
+            "line": 2801,
             "text": "/* 2) Обычные <img>/<video>/<canvas>/<svg> внутри — растянуть и покрыть */"
           }
         ],
         "create": [
           {
-            "line": 8293,
+            "line": 230,
+            "text": "const src = isStringSrc ? String(videoSource) : URL.createObjectURL(videoSource);"
+          },
+          {
+            "line": 276,
+            "text": "const src = isStringSrc ? String(audioSource) : URL.createObjectURL(audioSource);"
+          },
+          {
+            "line": 9397,
             "text": "const url = URL.createObjectURL(f);"
-          },
-          {
-            "line": 16801,
-            "text": "const url  = URL.createObjectURL(blob);"
-          },
-          {
-            "line": 17021,
-            "text": "const url = URL.createObjectURL(blob);"
           }
         ]
       }

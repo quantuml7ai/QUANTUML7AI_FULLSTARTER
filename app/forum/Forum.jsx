@@ -93,6 +93,220 @@ const cls = (...xs) => xs.filter(Boolean).join(' ')
 const shortId = id => id ? `${String(id).slice(0,6)}…${String(id).slice(-4)}` : '—'
 const human = ts => new Date(ts || Date.now()).toLocaleString()
 const now = () => Date.now()
+const FORUM_VIDEO_MAX_SECONDS = 120;
+const FORUM_AUDIO_MAX_SECONDS = 600;
+const FORUM_VIDEO_MAX_BYTES = 300 * 1024 * 1024;
+const FORUM_VIDEO_LIMIT_I18N = {
+  en: {
+    title: 'Video limit: up to 2 minutes',
+    body: 'Only videos up to 120 seconds are allowed.',
+    tipsTitle: 'How to fix:',
+    tips: [
+      'Trim to 02:00 or less in your phone gallery/editor.',
+      'If needed, crop/trim in Canvas or another editor and export again.',
+      'For fast start in feed use H.264 MP4 (720p-1080p).',
+    ],
+    badDuration: 'Cannot read video duration. Use MP4/WebM up to 2 minutes.',
+    tooLong: 'Video is longer than 2 minutes. Trim it and try again.',
+    ok: 'OK',
+  },
+  ru: {
+    title: 'Лимит видео: до 2 минут',
+    body: 'Разрешены только видео длительностью до 120 секунд.',
+    tipsTitle: 'Что сделать:',
+    tips: [
+      'Обрежьте видео до 02:00 или меньше в галерее/редакторе телефона.',
+      'При необходимости обрежьте/кадрируйте через Canvas или другой редактор и экспортируйте снова.',
+      'Для быстрого старта в ленте используйте H.264 MP4 (720p-1080p).',
+    ],
+    badDuration: 'Не удалось определить длительность. Используйте MP4/WebM до 2 минут.',
+    tooLong: 'Видео длиннее 2 минут. Обрежьте и попробуйте снова.',
+    ok: 'Понятно',
+  },
+  uk: {
+    title: 'Ліміт відео: до 2 хвилин',
+    body: 'Дозволені лише відео тривалістю до 120 секунд.',
+    tipsTitle: 'Що зробити:',
+    tips: [
+      'Обріжте відео до 02:00 або менше у галереї/редакторі телефона.',
+      'За потреби кадруйте/обріжте через Canvas або інший редактор і експортуйте знову.',
+      'Для швидкого старту у стрічці використовуйте H.264 MP4 (720p-1080p).',
+    ],
+    badDuration: 'Не вдалося визначити тривалість. Використайте MP4/WebM до 2 хвилин.',
+    tooLong: 'Відео довше за 2 хвилини. Обріжте та спробуйте ще раз.',
+    ok: 'Добре',
+  },
+  es: {
+    title: 'Límite de video: hasta 2 minutos',
+    body: 'Solo se permiten videos de hasta 120 segundos.',
+    tipsTitle: 'Cómo arreglarlo:',
+    tips: [
+      'Recorta el video a 02:00 o menos en la galería/editor del teléfono.',
+      'Si hace falta, recorta/encuadra con Canvas u otro editor y exporta de nuevo.',
+      'Para inicio rápido en el feed usa H.264 MP4 (720p-1080p).',
+    ],
+    badDuration: 'No se pudo leer la duración. Usa MP4/WebM de hasta 2 minutos.',
+    tooLong: 'El video supera 2 minutos. Recórtalo e inténtalo de nuevo.',
+    ok: 'OK',
+  },
+  zh: {
+    title: '视频限制：最多 2 分钟',
+    body: '仅允许上传时长不超过 120 秒的视频。',
+    tipsTitle: '处理方式：',
+    tips: [
+      '在手机相册/编辑器中裁剪到 02:00 以内。',
+      '需要时可通过 Canvas 或其他编辑器裁剪后重新导出。',
+      '为保证秒开，建议使用 H.264 MP4（720p-1080p）。',
+    ],
+    badDuration: '无法读取视频时长。请使用 2 分钟以内的 MP4/WebM。',
+    tooLong: '视频超过 2 分钟，请裁剪后重试。',
+    ok: '知道了',
+  },
+  ar: {
+    title: 'حد الفيديو: حتى دقيقتين',
+    body: 'يُسمح فقط بمقاطع فيديو لا تتجاوز 120 ثانية.',
+    tipsTitle: 'كيفية الإصلاح:',
+    tips: [
+      'قصّ الفيديو إلى 02:00 أو أقل من معرض الهاتف/المحرر.',
+      'عند الحاجة، قصّ/اقتطع عبر Canvas أو محرر آخر ثم صدّر مرة أخرى.',
+      'لبدء سريع في الخلاصة استخدم H.264 MP4 (720p-1080p).',
+    ],
+    badDuration: 'تعذر قراءة مدة الفيديو. استخدم MP4/WebM حتى دقيقتين.',
+    tooLong: 'الفيديو أطول من دقيقتين. قصّه ثم أعد المحاولة.',
+    ok: 'حسنًا',
+  },
+  tr: {
+    title: 'Video limiti: en fazla 2 dakika',
+    body: 'Yalnızca 120 saniyeye kadar videolara izin verilir.',
+    tipsTitle: 'Nasıl düzeltilir:',
+    tips: [
+      'Telefon galeri/düzenleyicide videoyu 02:00 veya altına kırpın.',
+      'Gerekirse Canvas veya başka bir editörde kırpıp yeniden dışa aktarın.',
+      'Akışta hızlı başlangıç için H.264 MP4 (720p-1080p) kullanın.',
+    ],
+    badDuration: 'Video süresi okunamadı. 2 dakikaya kadar MP4/WebM kullanın.',
+    tooLong: 'Video 2 dakikadan uzun. Kırpıp tekrar deneyin.',
+    ok: 'Tamam',
+  },
+};
+
+function resolveForumLang(locale) {
+  const s = String(locale || '').toLowerCase();
+  if (s.startsWith('ru')) return 'ru';
+  if (s.startsWith('uk')) return 'uk';
+  if (s.startsWith('es')) return 'es';
+  if (s.startsWith('zh')) return 'zh';
+  if (s.startsWith('ar')) return 'ar';
+  if (s.startsWith('tr')) return 'tr';
+  return 'en';
+}
+
+function getForumVideoLimitCopy(locale) {
+  const lang = resolveForumLang(locale);
+  return FORUM_VIDEO_LIMIT_I18N[lang] || FORUM_VIDEO_LIMIT_I18N.en;
+}
+
+const FORUM_VOICE_TAP_LABEL = {
+  en: 'Record voice',
+  ru: 'Запись голоса',
+  uk: 'Запис голосу',
+  es: 'Grabar voz',
+  zh: '录音',
+  ar: 'تسجيل صوت',
+  tr: 'Ses kaydı',
+};
+
+function getForumVoiceTapLabel(locale) {
+  const lang = resolveForumLang(locale);
+  return FORUM_VOICE_TAP_LABEL[lang] || FORUM_VOICE_TAP_LABEL.en;
+}
+
+function readVideoDurationSec(videoSource, timeoutMs = 8000) {
+  if (typeof document === 'undefined') return Promise.resolve(NaN);
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video');
+    let done = false;
+    const isStringSrc = typeof videoSource === 'string';
+    const src = isStringSrc ? String(videoSource) : URL.createObjectURL(videoSource);
+
+    const finish = (err, durationSec) => {
+      if (done) return;
+      done = true;
+      try { clearTimeout(timer); } catch {}
+      try { video.removeEventListener('loadedmetadata', onLoaded); } catch {}
+      try { video.removeEventListener('error', onError); } catch {}
+      try { video.pause?.(); } catch {}
+      try { video.removeAttribute('src'); } catch {}
+      try { video.load?.(); } catch {}
+      if (!isStringSrc) {
+        try { URL.revokeObjectURL(src); } catch {}
+      }
+      if (err) reject(err);
+      else resolve(durationSec);
+    };
+
+    const onLoaded = () => {
+      const d = Number(video.duration || 0);
+      if (Number.isFinite(d) && d > 0 && d < Number.POSITIVE_INFINITY) {
+        finish(null, d);
+      } else {
+        finish(new Error('video_duration_unavailable'));
+      }
+    };
+    const onError = () => finish(new Error('video_metadata_error'));
+
+    const timer = setTimeout(() => finish(new Error('video_metadata_timeout')), timeoutMs);
+    video.preload = 'metadata';
+    video.muted = true;
+    video.playsInline = true;
+    video.addEventListener('loadedmetadata', onLoaded, { once: true });
+    video.addEventListener('error', onError, { once: true });
+    video.src = src;
+    try { video.load?.(); } catch {}
+    if (video.readyState >= 1) onLoaded();
+  });
+}
+
+function readAudioDurationSec(audioSource, timeoutMs = 8000) {
+  if (typeof document === 'undefined') return Promise.resolve(NaN);
+  return new Promise((resolve, reject) => {
+    const audio = document.createElement('audio');
+    let done = false;
+    const isStringSrc = typeof audioSource === 'string';
+    const src = isStringSrc ? String(audioSource) : URL.createObjectURL(audioSource);
+
+    const finish = (err, durationSec) => {
+      if (done) return;
+      done = true;
+      try { clearTimeout(timer); } catch {}
+      try { audio.removeEventListener('loadedmetadata', onLoaded); } catch {}
+      try { audio.removeEventListener('error', onError); } catch {}
+      try { audio.pause?.(); } catch {}
+      try { audio.removeAttribute('src'); } catch {}
+      try { audio.load?.(); } catch {}
+      if (!isStringSrc) {
+        try { URL.revokeObjectURL(src); } catch {}
+      }
+      if (err) reject(err);
+      else resolve(durationSec);
+    };
+
+    const onLoaded = () => {
+      const d = Number(audio.duration || 0);
+      if (Number.isFinite(d) && d > 0 && d < Number.POSITIVE_INFINITY) finish(null, d);
+      else finish(new Error('audio_duration_unavailable'));
+    };
+    const onError = () => finish(new Error('audio_metadata_error'));
+
+    const timer = setTimeout(() => finish(new Error('audio_metadata_timeout')), timeoutMs);
+    audio.preload = 'metadata';
+    audio.addEventListener('loadedmetadata', onLoaded, { once: true });
+    audio.addEventListener('error', onError, { once: true });
+    audio.src = src;
+    try { audio.load?.(); } catch {}
+    if (audio.readyState >= 1) onLoaded();
+  });
+}
 const formatCount = (n) => {
   const x = Number(n || 0);
   if (!Number.isFinite(x)) return '0';
@@ -4426,6 +4640,53 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   pointer-events:none;
 }
 .dmConfirmPop > *{ position:relative; z-index:1; }
+.videoLimitPop{
+  position: relative;
+  width: min(520px, calc(100vw - 18px));
+  margin: max(8px, env(safe-area-inset-top, 0px)) auto;
+  padding: 14px 14px 12px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgba(12,20,34,.98), rgba(6,10,18,.98));
+  border: 1px solid rgba(140,190,255,.22);
+  box-shadow: 0 18px 36px rgba(0,0,0,.45), 0 0 26px rgba(80,160,255,.18);
+  backdrop-filter: blur(10px) saturate(140%);
+  color: #eaf4ff;
+}
+.videoLimitTitle{
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+.videoLimitBody{
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: #d9ecff;
+}
+.videoLimitMeta{
+  margin-top: 8px;
+  font-size: 12px;
+  color: #b9d4f5;
+}
+.videoLimitTipsTitle{
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #eaf4ff;
+}
+.videoLimitTips{
+  margin: 6px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 5px;
+  font-size: 12px;
+  color: #cfe4ff;
+}
+.videoLimitActions{
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
 .dmConfirmTitle{
   font-size:14px;
   font-weight:900;
@@ -4630,11 +4891,12 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 
 /* ===== PostCard emoji FX (QCast INSANE lite, pooled & fast) ===== */
 .postFxLayer{
-  position:fixed;
+  position:absolute;
   inset:0;
   pointer-events:none;
-  z-index:9999;
-  contain: layout paint;
+  z-index:8;
+  overflow:visible;
+  contain: paint;
 }
 .postFx{
   position:absolute;
@@ -4994,6 +5256,11 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   transform:scale(1);
   filter:blur(0px) saturate(175%) brightness(1.15);
 }
+/* Mobile/WebView (iOS Safari, Telegram Mini App, Android Chrome):
+   disable heavy ring compositing to prevent frame drops and tab kills. */
+@media (pointer: coarse), (max-width: 860px){
+  .qcastViz{ display:none !important; }
+}
 
 .qcastAudio{
   position:absolute;
@@ -5004,11 +5271,12 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 }
 /* ===== QCast emoji FX (INSANE, fast, spread over the whole card) ===== */
 .qcastFxLayer{
-  position:fixed;
+  position:absolute;
   inset:0;
   pointer-events:none;
-  z-index:9999;
-  contain: layout paint;
+  z-index:6;
+  overflow:hidden;
+  contain: paint;
 }
 .qcastFx{
   position:absolute;
@@ -5043,10 +5311,8 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
     -10px 10px 18px rgba(0,245,255,.10),
     12px -12px 22px rgba(178,0,255,.10);
 
-  animation:
-    qcastFxAlpha var(--dur) cubic-bezier(.16,.9,.22,1) forwards,
-    qcastFxCore  var(--dur) cubic-bezier(.12,.95,.2,1) forwards;
-  animation-delay: var(--delay), var(--delay);
+  /* IMPORTANT: do not animate on mount (prevents top-left flashes) */
+  animation:none;
 }
 .qcastFx--bad{
   filter:
@@ -5057,6 +5323,12 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
     0 0 14px rgba(255,255,255,.08),
     -10px 10px 18px rgba(255,80,120,.10),
     12px -12px 22px rgba(178,0,255,.10);
+}
+.qcastFx.isLive{
+  animation:
+    qcastFxAlpha var(--dur) cubic-bezier(.16,.9,.22,1) forwards,
+    qcastFxCore  var(--dur) cubic-bezier(.12,.95,.2,1) forwards;
+  animation-delay: var(--delay), var(--delay);
 }
 
 /* sparks/trail */
@@ -5070,6 +5342,9 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   opacity:0;
   pointer-events:none;
   filter: drop-shadow(0 0 18px rgba(255,255,255,.12)) drop-shadow(0 0 22px rgba(178,0,255,.16));
+  animation:none;
+}
+.qcastFx.isLive::after{
   animation: qcastFxTrail var(--dur) cubic-bezier(.18,.86,.22,1) forwards;
   animation-delay: var(--delay);
 }
@@ -5169,6 +5444,10 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
     0 0 calc(28px * var(--bGlow)) rgba(178,0,255,.12);
   filter: hue-rotate(var(--bHue));
   will-change: transform, opacity;
+  /* IMPORTANT: do not animate on mount */
+  animation:none;
+}
+.qcastBoom.isLive{
   animation: qcastBoom var(--bDur) cubic-bezier(.14,.9,.22,1) forwards;
 }
 .qcastBoom--bad{
@@ -5210,6 +5489,13 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   opacity:1;
   transform: translateY(0);
   pointer-events:auto;
+}
+.qcastControls[data-visible="0"] .qcastCtrlShimmer{
+  animation:none !important;
+  opacity:0 !important;
+}
+.qcastControls[data-visible="0"] .qcastCtrlBar{
+  animation:none !important;
 }
 
 /* top HUD (EQ) */
@@ -5344,6 +5630,14 @@ animation:qcastCtrlEQ 880ms ease-in-out infinite, qcastCtrlHue 2.4s linear infin
 @media (prefers-reduced-motion: reduce){
   .qcastCtrlShimmer{ animation:none; }
   .qcastCtrlBar{ animation: none; }
+}
+@media (pointer: coarse), (max-width: 860px){
+  .qcastCtrlShimmer{ animation:none; opacity:.18; }
+  .qcastCtrlBar{
+    animation:none;
+    transform:scaleY(calc(.14 + (var(--h) * .42)));
+    filter:none;
+  }
 }
 
 /* ===== New adaptive layout (mobile wrapper + desktop wrapper) ===== */
@@ -5527,19 +5821,36 @@ animation:qcastCtrlEQ 880ms ease-in-out infinite, qcastCtrlHue 2.4s linear infin
 .qcastReact{
   width:56px;
   height:56px;
-  border-radius:18px;
+  border-radius: 58% 42% 54% 46% / 44% 58% 42% 56%;
   border:1px solid rgba(210,230,255,.16);
   background: rgba(8,12,20,.22);
   color:#f3f7ff;
   display:inline-flex;
   align-items:center;
   justify-content:center;
+  position: relative;
+  isolation: isolate;
   backdrop-filter: blur(8px) saturate(140%);
   -webkit-backdrop-filter: blur(8px) saturate(140%);
   box-shadow:
     0 0 0 1px rgba(255,255,255,.03),
     0 12px 28px rgba(0,0,0,.22);
   transition: transform .14s ease, box-shadow .18s ease, border-color .18s ease, filter .18s ease;
+}
+.qcastReact::before{
+  content:'';
+  position:absolute;
+  inset:-2px;
+  border-radius: 61% 39% 58% 42% / 49% 52% 48% 51%;
+  border:1px solid rgba(255,255,255,.08);
+  opacity:.45;
+  pointer-events:none;
+}
+.qcastReact--bad{
+  border-radius: 44% 56% 39% 61% / 58% 42% 55% 45%;
+}
+.qcastReact--bad::before{
+  border-radius: 48% 52% 42% 58% / 61% 39% 57% 43%;
 }
 .qcastReactEmoji{ font-size:28px; line-height:1; }
 .qcastReact:hover{
@@ -5556,7 +5867,7 @@ animation:qcastCtrlEQ 880ms ease-in-out infinite, qcastCtrlHue 2.4s linear infin
 .qcastReact--bad:hover{ border-color: rgba(255,80,120,.28); }
 
 @media (max-width: 859px){
-  .qcastReact, .qcastBtn--rail{ width:58px; height:58px; border-radius:20px; }
+  .qcastReact, .qcastBtn--rail{ width:58px; height:58px; }
   .qcastReactEmoji{ font-size:30px; }
 }
 
@@ -9831,6 +10142,50 @@ function DmDeletePopover({
   );
 }
 
+function VideoLimitOverlay({ open, copy, maxSec = FORUM_VIDEO_MAX_SECONDS, durationSec, onClose }) {
+  React.useEffect(() => {
+    if (!open || typeof window === 'undefined') return;
+    const onKey = (e) => { if (e.key === 'Escape') onClose?.(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
+  if (!open || typeof document === 'undefined') return null;
+  const seconds = Number(durationSec || 0);
+  const hasDuration = Number.isFinite(seconds) && seconds > 0;
+
+  return createPortal(
+    <div
+      className="confirmOverlayRoot dmConfirmOverlay"
+      role="presentation"
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose?.(); }}
+      onTouchStart={(e) => { if (e.target === e.currentTarget) onClose?.(); }}
+    >
+      <div className="videoLimitPop" role="dialog" aria-modal="true" aria-live="polite">
+        <div className="videoLimitTitle">{copy?.title || 'Video limit: up to 2 minutes'}</div>
+        <div className="videoLimitBody">{copy?.body || 'Only videos up to 120 seconds are allowed.'}</div>
+        <div className="videoLimitMeta">
+          {hasDuration ? `Duration: ${seconds.toFixed(1)}s` : (copy?.badDuration || 'Cannot read video duration.')}
+          {' · '}
+          {`Max: ${maxSec}s`}
+        </div>
+        <div className="videoLimitTipsTitle">{copy?.tipsTitle || 'How to fix:'}</div>
+        <ul className="videoLimitTips">
+          {(Array.isArray(copy?.tips) ? copy.tips : []).map((tip, i) => (
+            <li key={i}>{tip}</li>
+          ))}
+        </ul>
+        <div className="videoLimitActions">
+          <button type="button" className="dmConfirmBtn primary" onClick={onClose}>
+            {copy?.ok || 'OK'}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 function TopicItem({ t, agg, onOpen, onView, isAdmin, onDelete, authId, onOwnerDelete, viewerId, starredAuthors, onToggleStar, onUserInfoToggle }) {
 const { t: tt } = useI18n();
   const avatarRef = React.useRef(null);
@@ -10382,72 +10737,52 @@ const cardRef = React.useRef(null);
   const likes    = Number(p?.likes ?? 0);
   const dislikes = Number(p?.dislikes ?? 0);
 // ===== PostCard emoji FX (QCast-like): pooled DOM, no React re-renders =====
-const FX_POOL = 56;           // fixed nodes in DOM
-const FX_BURST_BASE = 14;     // per click (base)
-const BOOM_POOL = 10;         // rings
+const FX_POOL = 18;
+const FX_BURST_BASE = 5;
+const POST_BOOM_ENABLED = false;
+const BOOM_POOL = POST_BOOM_ENABLED ? 8 : 0;
 const fxNodesRef = React.useRef([]);
 const fxCursorRef = React.useRef(0);
 const boomNodesRef = React.useRef([]);
 const boomCursorRef = React.useRef(0);
 const fxBurstRef = React.useRef(FX_BURST_BASE);
-const isScrollingRef = React.useRef(false);
 const FX_VARIANTS = React.useMemo(() => ([
   'float','spiral','rocket','zigzag','bounce','snap','wave','drift'
 ]), []);
 
 const setFxNodeRef = React.useCallback((el, idx) => {
-  if (el) fxNodesRef.current[idx] = el;
+  fxNodesRef.current[idx] = el || null;
 }, []);
 
 const setBoomNodeRef = React.useCallback((el, idx) => {
-  if (el) boomNodesRef.current[idx] = el;
+  boomNodesRef.current[idx] = el || null;
 }, []);
-// ===== PERF: disable FX while scrolling (prevents jank & random flashes) =====
-React.useEffect(() => {
-  if (typeof window === 'undefined') return;
-  let t = 0;
-  const onScroll = () => {
-    isScrollingRef.current = true;
-    if (t) clearTimeout(t);
-    t = window.setTimeout(() => { isScrollingRef.current = false; }, 160);
-  };
-  window.addEventListener('scroll', onScroll, { passive: true });
-  return () => {
-    try { window.removeEventListener('scroll', onScroll); } catch {}
-    if (t) clearTimeout(t);
-  };
-}, []);
-
-// ===== PERF: adaptive FX budget (auto lowers burst on low FPS) =====
-React.useEffect(() => {
-  if (typeof window === 'undefined') return;
-  let raf = 0;
-  let last = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
-  let emaFps = 60;
-  const tick = () => {
-    const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
-    const dt = now - last;
-    last = now;
-    if (dt > 0 && dt < 200) {
-      const fps = 1000 / dt;
-      emaFps = emaFps * 0.92 + fps * 0.08;
-      // budget tiers
-      if (emaFps < 42) fxBurstRef.current = Math.max(6, Math.floor(FX_BURST_BASE * 0.45));
-      else if (emaFps < 52) fxBurstRef.current = Math.max(8, Math.floor(FX_BURST_BASE * 0.70));
-      else fxBurstRef.current = FX_BURST_BASE;
-    }
-    raf = window.requestAnimationFrame(tick);
-  };
-  raf = window.requestAnimationFrame(tick);
-  return () => { try { window.cancelAnimationFrame(raf); } catch {} };
-}, []);
+// FX budget remains static to avoid per-card scroll listeners/RAF loops.
 
 const spawnPostBoom = React.useCallback((kind, origin) => {
-  const el = boomNodesRef.current[boomCursorRef.current++ % BOOM_POOL];
+  if (!POST_BOOM_ENABLED || BOOM_POOL <= 0) return;
+  let nodes = boomNodesRef.current.filter((n) => n && n.isConnected);
+  if (!nodes.length) {
+    try {
+      nodes = Array.from(cardRef.current?.querySelectorAll?.('.postBoom') || []);
+      if (nodes.length) boomNodesRef.current = nodes;
+    } catch {}
+  }
+  if (!nodes.length) return;
+  const el = nodes[boomCursorRef.current++ % nodes.length];
   if (!el) return;
 
-  const x = origin?.x ?? (window.innerWidth * 0.5);
-  const y = origin?.y ?? (window.innerHeight * 0.5);
+  const host = cardRef.current;
+  const r = host?.getBoundingClientRect?.();
+  const rect = r && r.width > 20 && r.height > 20 ? r : null;
+  const ox = Number(origin?.x);
+  const oy = Number(origin?.y);
+  const x = rect
+    ? (Number.isFinite(ox) ? (ox - rect.left) : (rect.width * 0.5))
+    : (Number.isFinite(ox) ? ox : 0);
+  const y = rect
+    ? (Number.isFinite(oy) ? (oy - rect.top) : (rect.height * 0.5))
+    : (Number.isFinite(oy) ? oy : 0);
 
   const hue = Math.round((Math.random() - 0.5) * 36);
   const glow = (0.90 + Math.random() * 1.10).toFixed(2);
@@ -10462,26 +10797,36 @@ const spawnPostBoom = React.useCallback((kind, origin) => {
   el.style.setProperty('--bDur', `${dur}ms`);
 
     // перезапуск без глюков: снимаем isLive -> reflow -> ставим isLive
-    el.classList.remove('isLive');
-    void el.offsetHeight;
-    el.classList.add('isLive');
-}, []);
+    __rearmPooledFxNode(el);
+}, [BOOM_POOL, POST_BOOM_ENABLED]);
 
 const spawnPostFx = React.useCallback((kind, emoji, origin) => {
-  const nodes = fxNodesRef.current;
-  if (!nodes || nodes.length === 0) return;
+  let nodes = [];
+  try {
+    nodes = Array.from(cardRef.current?.querySelectorAll?.('.postFx') || []).filter((n) => n && n.isConnected);
+    if (nodes.length) fxNodesRef.current = nodes;
+  } catch {}
+  if (!nodes.length) {
+    nodes = fxNodesRef.current.filter((n) => n && n.isConnected);
+  }
+  if (!nodes.length) return;
 
   const host = cardRef.current;
   const r = host?.getBoundingClientRect?.();
   const rect = r && r.width > 20 && r.height > 20 ? r : null;
 
   const trails = ['✦','✧','✨','⋆','⟡','•','✴','✺','✹','✵'];
-  const ox = origin?.x;
-  const oy = origin?.y;
+  const hostW = rect?.width || 260;
+  const hostH = rect?.height || 320;
+  const oxAbs = Number(origin?.x);
+  const oyAbs = Number(origin?.y);
+  const ox = rect && Number.isFinite(oxAbs) ? (oxAbs - rect.left) : null;
+  const oy = rect && Number.isFinite(oyAbs) ? (oyAbs - rect.top) : null;
 
   const burst = Math.max(0, fxBurstRef.current || FX_BURST_BASE);
-    for (let i = 0; i < burst; i++) {
-    const el = nodes[fxCursorRef.current++ % FX_POOL];
+  const poolSize = Math.max(1, nodes.length);
+  for (let i = 0; i < burst; i++) {
+    const el = nodes[fxCursorRef.current++ % poolSize];
     if (!el) continue;
 
     const variant = FX_VARIANTS[(Math.random() * FX_VARIANTS.length) | 0];
@@ -10489,10 +10834,10 @@ const spawnPostFx = React.useCallback((kind, emoji, origin) => {
 
     const left = preferOrigin
       ? (ox + (Math.random() - 0.5) * 120)
-      : (rect ? (rect.left + Math.random() * rect.width) : (window.innerWidth * (0.10 + Math.random() * 0.80)));
+      : (Math.random() * hostW);
     const top  = preferOrigin
       ? (oy + (Math.random() - 0.5) * 140)
-      : (rect ? (rect.top + Math.random() * rect.height) : (window.innerHeight * (0.12 + Math.random() * 0.76)));
+      : (Math.random() * hostH);
 
     const dx = Math.round((Math.random() - 0.5) * 300);
     const dy = -Math.round(200 + Math.random() * 420);
@@ -10523,9 +10868,7 @@ const spawnPostFx = React.useCallback((kind, emoji, origin) => {
     el.style.setProperty('--trail', `"${trail}"`);
 
       // IMPORTANT: анимация только по "isLive"
-      el.classList.remove('isLive');
-      void el.offsetHeight;
-      el.classList.add('isLive');
+      __rearmPooledFxNode(el);
   }
 }, [FX_VARIANTS]);
 
@@ -10540,8 +10883,7 @@ const extractEmojiFromEl = React.useCallback((el) => {
 }, []);
 
 const runPostButtonFx = React.useCallback((e, kindHint) => {
-    try {
-      if (isScrollingRef.current) return;
+  try {
     const btn = e?.currentTarget;
     const emoji = extractEmojiFromEl(btn);
     const r = btn?.getBoundingClientRect?.();
@@ -10556,8 +10898,31 @@ const runPostButtonFx = React.useCallback((e, kindHint) => {
   // видео: blob: (локальный превью) или публичные ссылки /video-*.webm|.mp4 (и любые .mp4)
 
   // видео: blob: (локальный превью) или публичные ссылки /video-*.webm|.mp4 (и любые .mp4)
-  const VIDEO_RE =
-    /^(?:blob:[^\s]+|https?:\/\/[^\s]+(?:\/video-\d+\.(?:webm|mp4)|\.mp4)(?:[?#].*)?)$/i;
+  const POST_VIDEO_EXT_RE = /\.(?:webm|mp4|mov|m4v|mkv)(?:$|[?#])/i;
+  const POST_VIDEO_FILENAME_RE = /[?&]filename=[^&#]+\.(?:webm|mp4|mov|m4v|mkv)(?:$|[&#])/i;
+  const POST_VIDEO_ENDPOINT_RE = /(?:\/uploads\/video\/|\/forum\/video(?:\/|$)|\/api\/forum\/uploadVideo(?:\/|$))/i;
+  const POST_VIDEO_HINT_RE = /(?:^|[\/_\-])video(?:[\/_.\-]|$)/i;
+
+  const isPostDirectVideoUrl = (u) => {
+    const s = String(u || '').trim();
+    if (!s) return false;
+    if (isYouTubeUrl(s) || isTikTokUrl(s)) return false;
+    if (IMG_RE.test(s) || isImageUrl(s)) return false;
+
+    // blob: в тексте поста неоднозначен (audio/video local preview) -> здесь не классифицируем как video.
+    if (/^blob:/i.test(s)) return false;
+
+    if (POST_VIDEO_EXT_RE.test(s)) return true;
+    if (POST_VIDEO_FILENAME_RE.test(s)) return true;
+    if (POST_VIDEO_ENDPOINT_RE.test(s)) return true;
+
+    // Vercel/Blob без расширения: считаем video только при явном hint в URL.
+    if (/vercel[-]?storage|vercel[-]?blob/i.test(s) && POST_VIDEO_HINT_RE.test(s)) return true;
+
+    if (isAudioUrl(s)) return false;
+    return false;
+  };
+  const VIDEO_RE = { test: (u) => isPostDirectVideoUrl(u) };
 
   // YouTube: обычные watch + короткие youtu.be
   const YT_RE =
@@ -10568,7 +10933,29 @@ const runPostButtonFx = React.useCallback((e, kindHint) => {
     /^(?:https?:\/\/)?(?:www\.)?tiktok\.com\/(@[\w.\-]+\/video\/(\d+)|t\/[A-Za-z0-9]+)(?:[?#].*)?$/i;
 
 // аудио: поддерживаем https и blob: (blob используется только локально, но подстрахуемся)
-  const AUDIO_EXT = /\.(?:webm|ogg|mp3|m4a|wav)(?:$|[?#])/i;
+  const AUDIO_EXT = /\.(?:ogg|mp3|m4a|wav)(?:$|[?#])/i;
+  const AUDIO_WEBM_EXT = /\.webm(?:$|[?#])/i;
+  const AUDIO_HINT_RE = /(?:\/uploads\/audio\/|\/forum\/voice(?:\/|$)|(?:^|[\/_\-])(voice|audio)(?:[\/_.\-]|$))/i;
+  const AUDIO_FILENAME_ANY_RE = /[?&]filename=[^&#]+\.(?:webm|ogg|mp3|m4a|wav)(?:$|[&#])/i;
+  const AUDIO_FILENAME_WEBM_HINT_RE = /[?&]filename=[^&#]*(?:voice|audio)[^&#]*\.webm(?:$|[&#])/i;
+  const isPostAudioUrlLike = (u) => {
+    const t = String(u || '').trim();
+    if (!t) return false;
+    if (isYouTubeUrl(t) || isTikTokUrl(t)) return false;
+    if (IMG_RE.test(t) || isImageUrl(t)) return false;
+    if (isPostDirectVideoUrl(t)) return false;
+    if (/^blob:/i.test(t)) return false;
+    if (AUDIO_EXT.test(t)) return true;
+    if (AUDIO_WEBM_EXT.test(t)) {
+      return AUDIO_HINT_RE.test(t) || AUDIO_FILENAME_WEBM_HINT_RE.test(t);
+    }
+    if (/^\/uploads\/audio\//i.test(t) || /\/forum\/voice/i.test(t)) return true;
+    if (AUDIO_FILENAME_ANY_RE.test(t)) {
+      if (/\.webm(?:$|[&#])/i.test(t)) return AUDIO_FILENAME_WEBM_HINT_RE.test(t);
+      return true;
+    }
+    return false;
+  };
   const isAudioLine = (s) => {
     const t = String(s).trim();
     if (!t) return false;
@@ -10576,10 +10963,10 @@ const runPostButtonFx = React.useCallback((e, kindHint) => {
     if (!/^\S+$/.test(t)) return false;
     // blob: — тип неизвестен (может быть видео) → не относим к аудио
     if (/^blob:/.test(t)) return false;
+    if (isPostDirectVideoUrl(t)) return false;
     // https://… или твои относительные пути
     if (/^https?:\/\//i.test(t) || /^\/uploads\/audio\//i.test(t) || /\/forum\/voice/i.test(t)) {
-      if (AUDIO_EXT.test(t)) return true;
-      if (/[?&]filename=.*\.(webm|ogg|mp3|m4a|wav)(?:$|[&#])/i.test(t)) return true;
+      if (isPostAudioUrlLike(t)) return true;
     }
     return false;
   };
@@ -10607,7 +10994,7 @@ const runPostButtonFx = React.useCallback((e, kindHint) => {
   // но и из любых строк, где они встречаются.
   const imgInline   = collectMatches(allLines, IMG_RE);
   const videoInline = collectMatches(allLines, VIDEO_RE);
-  const audioInline = collectMatches(allLines, AUDIO_EXT);
+  const audioInline = collectMatches(allLines, { test: isPostAudioUrlLike }).filter((u) => !isPostDirectVideoUrl(u));
   const ytInline    = collectMatches(allLines, YT_RE);
   const tiktokInline = collectMatches(allLines, TIKTOK_RE);
 
@@ -10619,17 +11006,21 @@ const runPostButtonFx = React.useCallback((e, kindHint) => {
     ...imgInline
   ]));
 
+  const imgSet = new Set(imgLines);
+
   const videoLines = Array.from(new Set([
     ...trimmed.filter(s => VIDEO_RE.test(s)),
     ...videoInline
-  ]));
+  ])).filter((u) => !imgSet.has(u));
+
+  const videoSet = new Set(videoLines);
 
   const audioLines = Array.from(new Set([
     // прежняя логика одиночной строки + защита от попадания видео в аудио
     ...trimmed.filter(isAudioLine).filter(s => !VIDEO_RE.test(s)),
     // а также ссылки на аудио, встречающиеся внутри текста
     ...audioInline.filter(u => !VIDEO_RE.test(u))
-  ]));
+  ])).filter((u) => !imgSet.has(u) && !videoSet.has(u));
 
   // очищаем текст: убираем из строк видео/yt/tiktok/аудио/картинки, но оставляем обычные ссылки
 const cleanedText = allLines
@@ -10778,16 +11169,17 @@ const confirmOwnerDelete = () => {
       role="article"
       aria-label={t('forum_post_aria')}
 >
-{typeof document !== 'undefined' ? createPortal(
+{FX_POOL > 0 ? (
   <div className="postFxLayer" aria-hidden="true">
     {Array.from({ length: FX_POOL }).map((_, i) => (
       <div key={i} ref={(el) => setFxNodeRef(el, i)} className="postFx" />
     ))}
-    {Array.from({ length: BOOM_POOL }).map((_, i) => (
-      <div key={`b_${i}`} ref={(el) => setBoomNodeRef(el, i)} className="postBoom" />
-    ))}
-  </div>,
-  document.body
+    {POST_BOOM_ENABLED && BOOM_POOL > 0
+      ? Array.from({ length: BOOM_POOL }).map((_, i) => (
+          <div key={`b_${i}`} ref={(el) => setBoomNodeRef(el, i)} className="postBoom" />
+        ))
+      : null}
+  </div>
 ) : null}
 
 <div className="postBodyFrame"> 
@@ -12121,11 +12513,34 @@ function readMutedPrefFromStorage() {
 //  keep alive window around viewport
 // Было 1800px — это часто держит слишком много видео "живыми" одновременно,
 // особенно при быстрой прокрутке + возврате назад (даёт скачки из-за переразметки).
-const __MEDIA_VIS_MARGIN_PX = 700;
+const __MEDIA_VIS_MARGIN_PX = (() => {
+  try {
+    const ua = String(navigator?.userAgent || '');
+    const isIOS = /iP(hone|ad|od)/i.test(ua);
+    const isAndroid = /Android/i.test(ua);
+    const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
+    if (isIOS || isAndroid || coarse) return 420;
+    return 560;
+  } catch {
+    return 380;
+  }
+})();
 
 // Hard-cap: сколько видео вообще разрешаем держать "живыми" (с src/буфером) одновременно.
 // Это именно про memory/decoder pressure. Про "играет только одно" — у тебя уже отдельно.
-const __MAX_ACTIVE_VIDEO_ELEMENTS = (typeof navigator !== 'undefined' && /iP(hone|ad|od)/.test(navigator.userAgent)) ? 1 : 2;
+const __MAX_ACTIVE_VIDEO_ELEMENTS = (() => {
+  try {
+    const ua = String(navigator?.userAgent || '');
+    const isIOS = /iP(hone|ad|od)/i.test(ua);
+    const isAndroid = /Android/i.test(ua);
+    const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
+    if (isIOS) return 2;
+    if (isAndroid || coarse) return 3;
+    return 8;
+  } catch {
+    return 6;
+  }
+})();
 
 
 // LRU-учёт активных видео-элементов:
@@ -12149,14 +12564,34 @@ function __dropActiveVideoEl(el) {
   if (idx !== -1) __activeVideoLRU.splice(idx, 1);
 }
 
+function __isVideoNearViewport(el, marginPx = 120) {
+  try {
+    if (!el?.isConnected) return false;
+    const r = el.getBoundingClientRect?.();
+    if (!r) return false;
+    const vh = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
+    if (vh <= 0) return false;
+    const topBound = 0 - marginPx;
+    const bottomBound = vh + marginPx;
+    return r.bottom > topBound && r.top < bottomBound;
+  } catch {
+    return false;
+  }
+}
+
 function __enforceActiveVideoCap(exceptEl) {
   try {
-    // чистим хвост, пока не уложимся в лимит
-    while (__activeVideoLRU.length > __MAX_ACTIVE_VIDEO_ELEMENTS) {
+    let guard = 0;
+    while (__activeVideoLRU.length > __MAX_ACTIVE_VIDEO_ELEMENTS && guard < 128) {
+      guard += 1;
       const victim = __activeVideoLRU[0];
-      // не трогаем текущий элемент (который только что активировался)
+      if (!victim) break;
       if (victim === exceptEl) {
-        // переносим его в конец и берём следующего
+        __activeVideoLRU.shift();
+        __activeVideoLRU.push(victim);
+        continue;
+      }
+      if (__isVideoNearViewport(victim, 140)) {
         __activeVideoLRU.shift();
         __activeVideoLRU.push(victim);
         continue;
@@ -12206,10 +12641,37 @@ function __restoreVideoEl(el) {
   if (!src) return;
   const cur = el.getAttribute('src') || '';
   if (cur === src) return;
-  try { el.preload = 'metadata'; } catch {}
+  try { el.preload = (el.dataset?.__prewarm === '1') ? 'auto' : 'metadata'; } catch {}
   try { el.setAttribute('src', src); } catch {}
   try { el.dataset.__active = '1'; } catch {}
   try { el.load?.(); } catch {}
+}
+
+function __hasLazyVideoSourceWithoutSrc(el) {
+  if (!(el instanceof HTMLVideoElement)) return false;
+  try {
+    const hasSrc = !!el.getAttribute('src');
+    const lazySrc = el.dataset?.__src || el.getAttribute('data-src') || '';
+    return !hasSrc && !!lazySrc;
+  } catch {
+    return false;
+  }
+}
+
+function __rearmPooledFxNode(el) {
+  if (!el?.isConnected) return false;
+  try {
+    el.classList.remove('isLive');
+    el.style.animation = 'none';
+    el.style.webkitAnimation = 'none';
+    void el.offsetHeight;
+    el.style.animation = '';
+    el.style.webkitAnimation = '';
+    el.classList.add('isLive');
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -12306,8 +12768,21 @@ function VideoMedia({
     if (!el) return;
 
     let io = null;
-    let active = true;
+    let active = false;
     let unloadTimer = null;
+    const runtimeProfile = (() => {
+      try {
+        const ua = String(navigator?.userAgent || '');
+        const isIOS = /iP(hone|ad|od)/i.test(ua);
+        const isAndroid = /Android/i.test(ua);
+        const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
+        if (isIOS) return { unloadDelayMs: 1400, hardUnloadOnInactive: true };
+        if (isAndroid || coarse) return { unloadDelayMs: 1600, hardUnloadOnInactive: true };
+        return { unloadDelayMs: 2600, hardUnloadOnInactive: false };
+      } catch {
+        return { unloadDelayMs: 2000, hardUnloadOnInactive: true };
+      }
+    })();
 
     const setActive = (v) => {
       const next = !!v;
@@ -12335,9 +12810,16 @@ function VideoMedia({
           unloadTimer = null;
           // если за время ожидания снова стало active — ничего не делаем
           if (active) return;
+          if (__isVideoNearViewport(el, Math.round(__MEDIA_VIS_MARGIN_PX * 0.9))) return;
           __dropActiveVideoEl(el);
+          if (!runtimeProfile.hardUnloadOnInactive) {
+            try { el.pause?.(); } catch {}
+            try { el.dataset.__active = '0'; } catch {}
+            try { el.preload = 'metadata'; } catch {}
+            return;
+          }
           __unloadVideoEl(el);
-        }, 350);
+        }, runtimeProfile.unloadDelayMs);
       }
     };
 
@@ -12355,6 +12837,9 @@ function VideoMedia({
         }
       );
       io.observe(el);
+      if (__isVideoNearViewport(el, Math.round(__MEDIA_VIS_MARGIN_PX * 0.8))) {
+        setActive(true);
+      }
     } catch {
       // без IO — хотя бы чистим на unmount
     }
@@ -12418,6 +12903,26 @@ function QCastPlayer({ src, onRemove, preview = false }) {
     (typeof document !== 'undefined' && (document.documentElement?.dir === 'rtl' || getComputedStyle(document.documentElement).direction === 'rtl'))
       ? 'rtl'
       : 'ltr';
+  const qcastFxProfile = React.useMemo(() => {
+    if (typeof window === 'undefined') return { viz: false, boom: false };
+    try {
+      const ua = String(navigator?.userAgent || '');
+      const isIOS = /iP(hone|ad|od)/i.test(ua);
+      const isAndroid = /Android/i.test(ua);
+      const isTelegram = /Telegram/i.test(ua) || !!window?.Telegram?.WebApp;
+      const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
+      const reduced = !!window?.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+      const lowMem = Number(navigator?.deviceMemory || 0) > 0 && Number(navigator?.deviceMemory || 0) <= 3;
+      const mobileLike = isIOS || isAndroid || coarse;
+      return {
+        viz: !(reduced || isTelegram || mobileLike || lowMem),
+        // Boom ring was causing visual flashes and extra compositor load.
+        boom: false,
+      };
+    } catch {
+      return { viz: false, boom: false };
+    }
+  }, []);
 
   const openControls = React.useCallback(() => setShowControls(true), []);
   const toggleControls = React.useCallback(() => setShowControls((v) => !v), []);
@@ -12468,71 +12973,50 @@ const BAD_SET = React.useMemo(() => ([
   const [badEmoji, setBadEmoji] = React.useState(() => pick(BAD_SET));
 // ===== QCast emoji FX (INSANE, fast): DOM pool + burst + random presets =====
 // ВАЖНО: без setState на каждую частицу => нет лагов от React-рендеров.
-const FX_POOL = 84;          // фикс. число DOM-узлов (можно 56/72/84/96)
-const FX_BURST_BASE = 18;   // INSANE v3 base burst
-const BOOM_POOL = 16;       // shockwave rings
+const FX_POOL = 24;
+const FX_BURST_BASE = 5;
+const BOOM_POOL = qcastFxProfile.boom ? 12 : 0;
 const fxNodesRef = React.useRef([]);
 const fxCursorRef = React.useRef(0);
 const boomNodesRef = React.useRef([]);
 const boomCursorRef = React.useRef(0);
 const fxBurstRef = React.useRef(FX_BURST_BASE);
-const isScrollingRef = React.useRef(false);
 const FX_VARIANTS = React.useMemo(() => ([
   'float','spiral','rocket','zigzag','bounce','snap','wave','drift'
 ]), []);
 
 const setFxNodeRef = React.useCallback((el, idx) => {
-  if (el) fxNodesRef.current[idx] = el;
+  fxNodesRef.current[idx] = el || null;
 }, []);
 const setBoomNodeRef = React.useCallback((el, idx) => {
-  if (el) boomNodesRef.current[idx] = el;
+  boomNodesRef.current[idx] = el || null;
 }, []);
-// ===== PERF: disable FX while scrolling (prevents feed jank) =====
-React.useEffect(() => {
-  if (typeof window === 'undefined') return;
-  let t = 0;
-  const onScroll = () => {
-    isScrollingRef.current = true;
-    if (t) clearTimeout(t);
-    t = window.setTimeout(() => { isScrollingRef.current = false; }, 180);
-  };
-  window.addEventListener('scroll', onScroll, { passive: true });
-  return () => {
-    try { window.removeEventListener('scroll', onScroll); } catch {}
-    if (t) clearTimeout(t);
-  };
-}, []);
-
-// ===== PERF: adaptive FX budget =====
-React.useEffect(() => {
-  if (typeof window === 'undefined') return;
-  let raf = 0;
-  let last = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
-  let emaFps = 60;
-  const tick = () => {
-    const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
-    const dt = now - last;
-    last = now;
-    if (dt > 0 && dt < 200) {
-      const fps = 1000 / dt;
-      emaFps = emaFps * 0.92 + fps * 0.08;
-      if (emaFps < 42) fxBurstRef.current = Math.max(7, Math.floor(FX_BURST_BASE * 0.45));
-      else if (emaFps < 52) fxBurstRef.current = Math.max(10, Math.floor(FX_BURST_BASE * 0.70));
-      else fxBurstRef.current = FX_BURST_BASE;
-    }
-    raf = window.requestAnimationFrame(tick);
-  };
-  raf = window.requestAnimationFrame(tick);
-  return () => { try { window.cancelAnimationFrame(raf); } catch {} };
-}, []);
+// Keep a static budget to avoid per-instance scroll/RAF overhead.
 
 const spawnBoom = React.useCallback((kind, origin) => {
-  const nodes = boomNodesRef.current;
-  const el = nodes[boomCursorRef.current++ % BOOM_POOL];
+  if (!qcastFxProfile.boom || BOOM_POOL <= 0) return;
+  let nodes = boomNodesRef.current.filter((n) => n && n.isConnected);
+  if (!nodes.length) {
+    try {
+      nodes = Array.from(hostRef.current?.querySelectorAll?.('.qcastBoom') || []);
+      if (nodes.length) boomNodesRef.current = nodes;
+    } catch {}
+  }
+  if (!nodes.length) return;
+  const el = nodes[boomCursorRef.current++ % nodes.length];
   if (!el) return;
 
-  const x = origin?.x ?? (window.innerWidth * 0.5);
-  const y = origin?.y ?? (window.innerHeight * 0.5);
+  const host = hostRef.current;
+  const r = host?.getBoundingClientRect?.();
+  const rect = r && r.width > 20 && r.height > 20 ? r : null;
+  const ox = Number(origin?.x);
+  const oy = Number(origin?.y);
+  const x = rect
+    ? (Number.isFinite(ox) ? (ox - rect.left) : (rect.width * 0.5))
+    : (Number.isFinite(ox) ? ox : 0);
+  const y = rect
+    ? (Number.isFinite(oy) ? (oy - rect.top) : (rect.height * 0.5))
+    : (Number.isFinite(oy) ? oy : 0);
 
   const hue = Math.round((Math.random() - 0.5) * 40);
   const glow = (1.0 + Math.random() * 1.2).toFixed(2);
@@ -12545,47 +13029,54 @@ const spawnBoom = React.useCallback((kind, origin) => {
   el.style.setProperty('--bGlow', glow);
   el.style.setProperty('--bDur', `${dur}ms`);
 
-  // перезапуск анимации (1 reflow)
-  el.style.animation = 'none';
-  void el.offsetHeight;
-  el.style.animation = '';
-}, []);
+  // IMPORTANT: animation only when explicitly armed.
+  __rearmPooledFxNode(el);
+}, [qcastFxProfile.boom, BOOM_POOL]);
 
 const spawnFx = React.useCallback((kind, origin) => {
-    if (isScrollingRef.current) return;
     const set = kind === 'good' ? GOOD_SET : BAD_SET;
 
-  // Разброс: по всей карточке (а не "где-то в центре")
-  // Позиционируем в px внутри viewport (fxLayer = fixed).
+  // Разброс по локальной области плеера (без fullscreen fixed-слоя).
   const host = hostRef.current;
   const r = host?.getBoundingClientRect?.();
   const rect = r && r.width > 20 && r.height > 20 ? r : null;
+  const hostW = rect?.width || 260;
+  const hostH = rect?.height || 320;
 
-  const nodes = fxNodesRef.current;
-  if (!nodes || nodes.length === 0) return;
+  let nodes = [];
+  try {
+    nodes = Array.from(hostRef.current?.querySelectorAll?.('.qcastFx') || []).filter((n) => n && n.isConnected);
+    if (nodes.length) fxNodesRef.current = nodes;
+  } catch {}
+  if (!nodes.length) {
+    nodes = fxNodesRef.current.filter((n) => n && n.isConnected);
+  }
+  if (!nodes.length) return;
 
   const trails = ['✦','✧','✨','⋆','⟡','•','✴','✺','✹','✵'];
 
   const burst = Math.max(0, fxBurstRef.current || FX_BURST_BASE);
 
     for (let i = 0; i < burst; i++) {
-    const idx = fxCursorRef.current++ % FX_POOL;
+    const idx = fxCursorRef.current++ % nodes.length;
     const el = nodes[idx];
     if (!el) continue;
 
     const emoji = set[(Math.random() * set.length) | 0];
     const variant = FX_VARIANTS[(Math.random() * FX_VARIANTS.length) | 0];
 
-    const ox = origin?.x;
-    const oy = origin?.y;
+    const oxAbs = Number(origin?.x);
+    const oyAbs = Number(origin?.y);
+    const ox = rect && Number.isFinite(oxAbs) ? (oxAbs - rect.left) : null;
+    const oy = rect && Number.isFinite(oyAbs) ? (oyAbs - rect.top) : null;
     const preferOrigin = (ox != null && oy != null && Math.random() < 0.30);
 
     const left = preferOrigin
       ? (ox + (Math.random() - 0.5) * 120)
-      : (rect ? (rect.left + Math.random() * rect.width) : (window.innerWidth * (0.10 + Math.random() * 0.80)));
+      : (Math.random() * hostW);
     const top  = preferOrigin
       ? (oy + (Math.random() - 0.5) * 140)
-      : (rect ? (rect.top  + Math.random() * rect.height) : (window.innerHeight * (0.12 + Math.random() * 0.76)));
+      : (Math.random() * hostH);
 
     // INSANE motion profile (GPU: transform/opacity)
     const dx = Math.round((Math.random() - 0.5) * 360);     // px
@@ -12618,10 +13109,8 @@ const spawnFx = React.useCallback((kind, origin) => {
     el.style.setProperty('--glow', glow);
     el.style.setProperty('--trail', `"${trail}"`);
 
-    // перезапуск анимации (1 reflow)
-    el.style.animation = 'none';
-    void el.offsetHeight;
-    el.style.animation = '';
+    // IMPORTANT: animation only when explicitly armed.
+    __rearmPooledFxNode(el);
   }
 
   // кнопки реакций тоже постоянно меняем
@@ -12773,6 +13262,29 @@ const spawnFx = React.useCallback((kind, origin) => {
       audio.removeEventListener('play', onPlay);
       audio.removeEventListener('pause', onPause);
       audio.removeEventListener('volumechange', onVolume);
+      // Hard cleanup: release WebAudio graph/GPU resources on unmount.
+      try { if (st.raf) cancelAnimationFrame(st.raf); } catch {}
+      st.raf = 0;
+      try { st.ro?.disconnect?.(); } catch {}
+      st.ro = null;
+      try { st.srcNode?.disconnect?.(); } catch {}
+      try { st.analyser?.disconnect?.(); } catch {}
+      try { st.master?.disconnect?.(); } catch {}
+      try { st.dryGain?.disconnect?.(); } catch {}
+      try { st.wetGain?.disconnect?.(); } catch {}
+      try { st.panner?.disconnect?.(); } catch {}
+      try { if (Array.isArray(st.filters)) st.filters.forEach((f) => f?.disconnect?.()); } catch {}
+      const ctx = st.ctx;
+      st.ctx = null;
+      st.analyser = null;
+      st.srcNode = null;
+      st.master = null;
+      st.dryGain = null;
+      st.wetGain = null;
+      st.filters = null;
+      st.panner = null;
+      st.data = null;
+      try { ctx?.close?.(); } catch {}
     }; 
   }, [applyPreset]);
 
@@ -12976,23 +13488,34 @@ const onPlayerPointerDown = React.useCallback((e) => {
   tapRef.current = { t: now, x, y, timer };
 }, [spawnBoom, spawnFx, toggleControls]);
 
+React.useEffect(() => {
+  return () => {
+    const tid = Number(tapRef.current?.timer || 0);
+    if (tid) {
+      try { clearTimeout(tid); } catch {}
+    }
+  };
+}, []);
+
   return (
     <div className="qcastPlayer" ref={hostRef} onPointerDown={onPlayerPointerDown}
-      data-preview={preview ? '1' : '0'} data-forum-media="qcast" data-qcast="1" dir={dir}>
+      data-preview={preview ? '1' : '0'} data-forum-media="qcast" data-qcast="1" data-viz={qcastFxProfile.viz ? '1' : '0'} dir={dir}>
       <Image className="qcastCover" src="/audio/Q-Cast.png" alt="Q-Cast" width={720} height={1280} unoptimized />
-      <canvas ref={canvasRef} className="qcastViz" data-on={isPlaying ? '1' : '0'} aria-hidden="true" />
+      {qcastFxProfile.viz ? (
+        <canvas ref={canvasRef} className="qcastViz" data-on={isPlaying ? '1' : '0'} aria-hidden="true" />
+      ) : null}
      <audio ref={audioRef} src={src} preload="metadata" playsInline crossOrigin="anonymous" data-qcast-audio="1" className="qcastAudio" />
 
-      {typeof document !== 'undefined' ? createPortal(
+      {FX_POOL > 0 ? (
         <div className="qcastFxLayer" aria-hidden="true">
 {Array.from({ length: FX_POOL }).map((_, i) => (
   <div key={i} ref={(el) => setFxNodeRef(el, i)} className="qcastFx" />
 ))}
-{Array.from({ length: BOOM_POOL }).map((_, i) => (
+{qcastFxProfile.boom && BOOM_POOL > 0 ? Array.from({ length: BOOM_POOL }).map((_, i) => (
   <div key={`b_${i}`} ref={(el) => setBoomNodeRef(el, i)} className="qcastBoom" />
-))}
+)) : null}
 
-        </div>, document.body
+        </div>
       ) : null}
 
 <div
@@ -13477,6 +14000,318 @@ function HeadChevronIcon({ dir = 'down' }) {
   );
 }
 
+function ForumActionNavIcon({ kind = 'plus', active = false, size = 22 }) {
+  const common = {
+    width: size,
+    height: size,
+  };
+  if (kind === 'inbox') {
+    return (
+      <svg className="forumNavFx forumNavFx--inbox" viewBox="0 0 24 24" aria-hidden style={common}>
+        <style>{`
+          .forumNavFx * { vector-effect: non-scaling-stroke; }
+          .forumNavFx--inbox .l1,
+          .forumNavFx--inbox .l2{
+            animation: forumNavStroke 2.4s ease-in-out infinite;
+            transform-box: fill-box;
+            transform-origin: center;
+          }
+          .forumNavFx--inbox .l2{ animation-delay:.12s; }
+          .forumNavFx--inbox .glow{
+            opacity:${active ? '0.95' : '0.65'};
+            animation: forumNavGlow 2s ease-in-out infinite;
+          }
+          @keyframes forumNavStroke {
+            0%,100% { stroke-dasharray: 36 80; stroke-dashoffset: 0; transform: translateY(0); }
+            35% { stroke-dasharray: 72 80; stroke-dashoffset: -8; transform: translateY(-0.25px); }
+            60% { stroke-dashoffset: -14; transform: translateY(0.2px); }
+          }
+          @keyframes forumNavGlow {
+            0%,100% { opacity:.4; }
+            50% { opacity:1; filter: drop-shadow(0 0 4px rgba(120,220,255,.45)); }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .forumNavFx--inbox .l1, .forumNavFx--inbox .l2, .forumNavFx--inbox .glow { animation:none !important; }
+          }
+        `}</style>
+        <path className="glow" d="M3 7h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="rgba(140,220,255,.55)" strokeWidth="2.2" fill="none" opacity="0.45" />
+        <path className="l1" d="M3 7h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.6" fill="none"/>
+        <path className="l2" d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    );
+  }
+  if (kind === 'home') {
+    return (
+      <svg className="forumNavFx forumNavFx--home" viewBox="0 0 24 24" fill="none" aria-hidden style={common}>
+        <style>{`
+          .forumNavFx--home .roof, .forumNavFx--home .base {
+            animation: forumHomePulse 2.8s ease-in-out infinite;
+            transform-box: fill-box;
+            transform-origin: center;
+          }
+          .forumNavFx--home .base { animation-delay: .16s; }
+          .forumNavFx--home .spark {
+            animation: forumHomeSpark 2.8s ease-in-out infinite;
+            transform-box: fill-box;
+            transform-origin: center;
+          }
+          @keyframes forumHomePulse {
+            0%,100% { stroke-dasharray: 24 64; stroke-dashoffset: 0; }
+            45% { stroke-dasharray: 64 64; stroke-dashoffset: -6; }
+          }
+          @keyframes forumHomeSpark {
+            0%,100% { opacity:.15; transform: scale(.85); }
+            55% { opacity:.9; transform: scale(1.06); }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .forumNavFx--home .roof, .forumNavFx--home .base, .forumNavFx--home .spark { animation:none !important; }
+          }
+        `}</style>
+        <circle className="spark" cx="12" cy="8.1" r="1.1" fill="rgba(255,255,255,.7)" opacity="0.25" />
+        <path className="roof" d="M3 10l9-7 9 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+        <path className="base" d="M5 10v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    );
+  }
+  if (kind === 'back') {
+    return (
+      <svg className="forumNavFx forumNavFx--back" viewBox="0 0 24 24" fill="none" aria-hidden style={common}>
+        <style>{`
+          .forumNavFx--back .arrow {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: forumBackSwipe 2.2s cubic-bezier(.2,.9,.22,1) infinite;
+          }
+          .forumNavFx--back .trail {
+            animation: forumBackTrail 2.2s ease-in-out infinite;
+          }
+          @keyframes forumBackSwipe {
+            0%,100% { transform: translateX(0); }
+            22% { transform: translateX(-1.2px); }
+            30% { transform: translateX(-2.1px); }
+            48% { transform: translateX(0.7px); }
+            60% { transform: translateX(0); }
+          }
+          @keyframes forumBackTrail {
+            0%,100% { opacity:.16; }
+            30% { opacity:.85; }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .forumNavFx--back .arrow, .forumNavFx--back .trail { animation:none !important; }
+          }
+        `}</style>
+        <path className="trail" d="M17.2 12H9.2" stroke="rgba(255,255,255,.35)" strokeWidth="1.6" strokeLinecap="round" opacity="0.18" />
+        <path className="arrow" d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    );
+  }
+  return (
+    <svg className="forumNavFx forumNavFx--plus" viewBox="0 0 24 24" aria-hidden style={common}>
+      <style>{`
+        .forumNavFx--plus .plusCore {
+          transform-box: fill-box;
+          transform-origin: center;
+          animation: forumPlusBounce 2.6s ease-in-out infinite;
+        }
+        .forumNavFx--plus .plusGlow {
+          transform-box: fill-box;
+          transform-origin: center;
+          animation: forumPlusGlow 2.6s ease-in-out infinite;
+        }
+        @keyframes forumPlusBounce {
+          0%,100% { transform: translateY(0) rotate(0deg); }
+          10% { transform: translateY(-0.65px) rotate(1.5deg); }
+          18% { transform: translateY(0.35px) rotate(-1.1deg); }
+          30% { transform: translateY(-1px) rotate(0.6deg); }
+          44% { transform: translateY(0) rotate(0deg); }
+        }
+        @keyframes forumPlusGlow {
+          0%,100% { opacity:.18; transform: scale(.85); }
+          28% { opacity:.85; transform: scale(1.08); }
+          45% { opacity:.2; transform: scale(.9); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .forumNavFx--plus .plusCore, .forumNavFx--plus .plusGlow { animation:none !important; }
+        }
+      `}</style>
+      <circle className="plusGlow" cx="12" cy="12" r="6.6" fill="rgba(255,255,255,.14)" opacity="0.2" />
+      <path className="plusCore" d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+function VideoFeedNavIcon({ active = false }) {
+  if (active) {
+    return (
+      <svg
+        className="vfNavIcon vfNavIcon--refresh"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.15"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{ width: 58, height: 58 }}
+      >
+        <style>{`
+          .vfNavIcon .vfFrame{opacity:.9}
+          .vfNavIcon--refresh .vfRefreshSpin{
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: vfRefreshSpin 1.35s linear infinite;
+          }
+          .vfNavIcon--refresh .vfRefreshPulse{
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: vfRefreshPulse 1.7s ease-in-out infinite;
+          }
+          .vfNavIcon--refresh .vfRefreshSpark{
+            animation: vfRefreshSpark 1.7s ease-in-out infinite;
+          }
+          @keyframes vfRefreshSpin { to { transform: rotate(360deg); } }
+          @keyframes vfRefreshPulse {
+            0%,100% { opacity:.78; transform: scale(1); }
+            50% { opacity:1; transform: scale(1.04); }
+          }
+          @keyframes vfRefreshSpark {
+            0%,100% { opacity:.22; }
+            45% { opacity:.9; }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .vfNavIcon--refresh .vfRefreshSpin,
+            .vfNavIcon--refresh .vfRefreshPulse,
+            .vfNavIcon--refresh .vfRefreshSpark { animation: none !important; }
+          }
+        `}</style>
+        <rect className="vfFrame" x="0.8" y="0.5" width="22.4" height="22.4" rx="6.0" />
+        <g className="vfRefreshPulse">
+          <circle cx="12" cy="12" r="6.2" opacity="0.10" />
+        </g>
+        <g className="vfRefreshSpin">
+          <path d="M16.9 8.4a5.6 5.6 0 10.8 5.6" opacity="0.95" />
+          <path d="M17.4 5.8v4.3h-4.3" opacity="0.95" />
+        </g>
+        <circle className="vfRefreshSpark" cx="18.2" cy="6.4" r="0.7" opacity="0.8" />
+      </svg>
+    );
+  }
+  return (
+    <svg
+      className="vfNavIcon vfNavIcon--play"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="0.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ width: 58, height: 58 }}
+    >
+      <style>{`
+        .vfNavIcon .vfFrame{opacity:.9}
+        .vfNavIcon--play .vfTriWrap,
+        .vfNavIcon--play .vfWordWrap,
+        .vfNavIcon--play .vfDust{ transform-box: fill-box; transform-origin: center; }
+        .vfNavIcon--play .vfTriWrap{ animation: vfTriPhase 2.8s ease-in-out infinite; }
+        .vfNavIcon--play .vfTriFill{
+          animation: vfTriShake 2.8s linear infinite;
+          transform-box: fill-box;
+          transform-origin: center;
+        }
+        .vfNavIcon--play .vfTriStroke{ animation: vfTriStrokePulse 2.8s ease-in-out infinite; }
+        .vfNavIcon--play .vfWordWrap{ animation: vfWordPhase 2.8s ease-in-out infinite; }
+        .vfNavIcon--play .vfDust circle{
+          animation: vfDustBurst 2.8s ease-in-out infinite;
+          transform-origin: center;
+          transform-box: fill-box;
+        }
+        .vfNavIcon--play .vfDust circle:nth-child(2){ animation-delay: .03s; }
+        .vfNavIcon--play .vfDust circle:nth-child(3){ animation-delay: .06s; }
+        .vfNavIcon--play .vfDust circle:nth-child(4){ animation-delay: .09s; }
+        @keyframes vfTriPhase {
+          0%,38% { opacity:1; transform: translateY(0) scale(1); }
+          10% { transform: translateY(-0.5px) scale(1.02); }
+          16% { transform: translateY(0.4px) translateX(-0.15px) scale(.99); }
+          22% { transform: translateY(-0.35px) translateX(0.15px) scale(1.01); }
+          40% { opacity:0; transform: scale(.72) rotate(-12deg); }
+          100% { opacity:0; transform: scale(.72) rotate(-12deg); }
+        }
+        @keyframes vfTriShake {
+          0%,6%,34%,100% { transform: translate(0,0); }
+          8% { transform: translate(-0.18px,-0.32px) rotate(-0.8deg); }
+          12% { transform: translate(0.16px,0.14px) rotate(0.8deg); }
+          18% { transform: translate(-0.14px,0.22px) rotate(-0.7deg); }
+          24% { transform: translate(0.2px,-0.22px) rotate(0.9deg); }
+        }
+        @keyframes vfTriStrokePulse {
+          0%,38% { opacity:.95; }
+          18% { opacity:1; }
+          40%,100% { opacity:0; }
+        }
+        @keyframes vfWordPhase {
+          0%,36% { opacity:0; transform: scale(.84) translateY(1px); }
+          46%,78% { opacity:1; transform: scale(1) translateY(0); }
+          88%,100% { opacity:0; transform: scale(1.06) translateY(-.4px); }
+        }
+        @keyframes vfDustBurst {
+          0%,34% { opacity:0; transform: translate(0,0) scale(.4); }
+          42% { opacity:.9; transform: translate(0,0) scale(1); }
+          54% { opacity:.65; }
+          70%,100% { opacity:0; transform: translate(var(--dx), var(--dy)) scale(.2); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .vfNavIcon--play .vfTriWrap,
+          .vfNavIcon--play .vfTriFill,
+          .vfNavIcon--play .vfTriStroke,
+          .vfNavIcon--play .vfWordWrap,
+          .vfNavIcon--play .vfDust circle { animation: none !important; }
+          .vfNavIcon--play .vfTriWrap { opacity:1; }
+          .vfNavIcon--play .vfWordWrap { opacity:0; }
+        }
+      `}</style>
+      <rect className="vfFrame" x="0.8" y="0.5" width="22.4" height="22.4" rx="6.0" />
+      <g className="vfDust" opacity="0.9">
+        <circle cx="12" cy="12" r="0.7" fill="rgba(255,255,255,.95)" style={{ '--dx': '-4px', '--dy': '-3px' }} />
+        <circle cx="12" cy="12" r="0.55" fill="rgba(255,80,80,.95)" style={{ '--dx': '4px', '--dy': '-2px' }} />
+        <circle cx="12" cy="12" r="0.5" fill="rgba(255,255,255,.8)" style={{ '--dx': '-3px', '--dy': '3px' }} />
+        <circle cx="12" cy="12" r="0.45" fill="rgba(243,28,28,.95)" style={{ '--dx': '3px', '--dy': '2px' }} />
+      </g>
+      <g className="vfTriWrap">
+        <path
+          className="vfTriStroke"
+          d="M10.7 10.2L15.2 12.0L10.7 13.8Z"
+          fill="none"
+          stroke="rgba(255,255,255,.95)"
+          strokeWidth="0.9"
+          transform="translate(12 12) scale(2) translate(-12 -12)"
+        />
+        <path
+          className="vfTriFill"
+          d="M10.7 10.2L15.2 12.0L10.7 13.8Z"
+          fill="#f31c1c"
+          opacity="0.9"
+          stroke="none"
+          transform="translate(12 12) scale(1.78) translate(-12 -12)"
+        />
+      </g>
+      <g className="vfWordWrap" aria-hidden="true">
+        <text
+          x="12"
+          y="13.4"
+          textAnchor="middle"
+          fill="rgba(255,255,255,.96)"
+          fontSize="4.25"
+          fontWeight="800"
+          letterSpacing=".8"
+        >
+          PLAY
+        </text>
+      </g>
+    </svg>
+  );
+}
+
 // =========================================================
 // Native <video> controls: ONLY after user interaction (tap/click)
 // =========================================================
@@ -13488,6 +14323,12 @@ function enableVideoControlsOnTap(e) {
     if (typeof window === 'undefined') return;
     // если это не video — выходим
     if (!(v instanceof HTMLVideoElement)) return;
+    try {
+      if (__hasLazyVideoSourceWithoutSrc(v)) __restoreVideoEl(v);
+      __touchActiveVideoEl(v);
+      __enforceActiveVideoCap(v);
+      v.preload = 'metadata';
+    } catch {}
 
     // уже включено — ничего не делаем
     if (v.controls) return;
@@ -13503,6 +14344,8 @@ function enableVideoControlsOnTap(e) {
 
     // если видео было на паузе — мягко пробуем запустить
     try {
+      if (!v.currentSrc && (v.dataset?.__src || v.getAttribute('data-src'))) __restoreVideoEl(v);
+      if (!v.currentSrc) return;
       if (v.paused) {
         const p = v.play?.();
         if (p && typeof p.catch === 'function') p.catch(() => {});
@@ -13643,23 +14486,124 @@ export default function Forum(){
   // ===== FORUM DIAG (writes to /forum-diag.jsonl via API) =====
   const diagSeqRef = useRef(0);
   const diagLastSentRef = useRef(0);
+  const diagSnapshotRef = useRef({ ts: 0, media: null });
+  const diagLastScrollYRef = useRef(0);
 
-  const emitDiag = useCallback(async (event, extra = {}) => {
+  const emitDiag = useCallback(async (event, extra = {}, opts = {}) => {
     try {
       const now = Date.now();
+      const force = !!opts?.force;
       // не спамим чаще чем раз в 1500мс (кроме ошибок)
-      if (event !== "error" && event !== "unhandledrejection") {
+      if (!force && event !== "error" && event !== "unhandledrejection") {
         if (now - diagLastSentRef.current < 1500) return;
         diagLastSentRef.current = now;
       }
 
-      const videos = Array.from(document.querySelectorAll("video"));
-      let playing = 0;
-      for (const v of videos) {
-        try {
-          if (!v.paused && !v.ended && v.readyState >= 2) playing++;
-        } catch {}
+      const needsFreshMedia =
+        force ||
+        event === "mount" ||
+        event === "unmount" ||
+        event === "error" ||
+        event === "unhandledrejection" ||
+        event === "beforeunload" ||
+        event === "pagehide" ||
+        event === "media_coordinator_init" ||
+        event === "media_coordinator_cleanup" ||
+        event === "media_focus_switch" ||
+        event === "iframe_play" ||
+        event === "iframe_hard_unload" ||
+        event === "iframe_resident_cap" ||
+        !diagSnapshotRef.current?.media ||
+        (now - Number(diagSnapshotRef.current?.ts || 0) > 5000);
+
+      let mediaSnapshot = diagSnapshotRef.current?.media || null;
+      if (needsFreshMedia) {
+        const videos = Array.from(document.querySelectorAll("video"));
+        const audios = Array.from(document.querySelectorAll("audio"));
+        const iframes = Array.from(document.querySelectorAll("iframe[data-forum-media]"));
+        const qcastAudios = Array.from(document.querySelectorAll('audio[data-qcast-audio="1"]'));
+        let playing = 0;
+        for (const v of videos) {
+          try {
+            if (!v.paused && !v.ended && v.readyState >= 2) playing++;
+          } catch {}
+        }
+        let audioPlaying = 0;
+        for (const a of audios) {
+          try {
+            if (!a.paused && !a.ended && a.readyState >= 2) audioPlaying++;
+          } catch {}
+        }
+        let qcastPlaying = 0;
+        for (const a of qcastAudios) {
+          try {
+            if (!a.paused && !a.ended && a.readyState >= 2) qcastPlaying++;
+          } catch {}
+        }
+
+        const iframesLoaded = iframes.filter((f) => {
+          try { return !!f.getAttribute("src"); } catch { return false; }
+        }).length;
+        const iframesActive = iframes.filter((f) => {
+          try { return f.getAttribute("data-forum-iframe-active") === "1"; } catch { return false; }
+        }).length;
+        const ytIframes = iframes.filter((f) => {
+          try { return f.getAttribute("data-forum-media") === "youtube"; } catch { return false; }
+        }).length;
+        const ttIframes = iframes.filter((f) => {
+          try { return f.getAttribute("data-forum-media") === "tiktok"; } catch { return false; }
+        }).length;
+        const genericIframes = iframes.filter((f) => {
+          try { return f.getAttribute("data-forum-media") === "iframe"; } catch { return false; }
+        }).length;
+        mediaSnapshot = {
+          videos: videos.length,
+          videosPlaying: playing,
+          audios: audios.length,
+          audiosPlaying: audioPlaying,
+          qcastAudios: qcastAudios.length,
+          qcastPlaying,
+          iframes: iframes.length,
+          iframesLoaded,
+          iframesActive,
+          ytIframes,
+          ttIframes,
+          genericIframes,
+        };
+        diagSnapshotRef.current = { ts: now, media: mediaSnapshot };
       }
+      if (!mediaSnapshot) {
+        mediaSnapshot = {
+          videos: 0,
+          videosPlaying: 0,
+          audios: 0,
+          audiosPlaying: 0,
+          qcastAudios: 0,
+          qcastPlaying: 0,
+          iframes: 0,
+          iframesLoaded: 0,
+          iframesActive: 0,
+          ytIframes: 0,
+          ttIframes: 0,
+          genericIframes: 0,
+        };
+      }
+      const ytPlayers = (() => {
+        try {
+          const mapRef = window?.__forumYtPlayers;
+          return (mapRef && mapRef instanceof Map) ? mapRef.size : 0;
+        } catch {
+          return 0;
+        }
+      })();
+
+      const ua = typeof navigator !== "undefined" ? String(navigator.userAgent || "") : "";
+      const isIOS = /iP(hone|ad|od)/i.test(ua);
+      const isAndroid = /Android/i.test(ua);
+      const isTelegramMiniApp = /Telegram/i.test(ua) || !!window?.Telegram?.WebApp;
+      const isChromeLike = /Chrome|Chromium|CriOS|Edg|OPR/i.test(ua);
+      const isSafariLike = /Safari/i.test(ua) && !isChromeLike && !/FxiOS/i.test(ua);
+      const coarsePointer = !!window?.matchMedia?.("(pointer: coarse)")?.matches;
 
       const mem = (performance && performance.memory) ? {
         usedJSHeapSize: performance.memory.usedJSHeapSize,
@@ -13672,22 +14616,40 @@ export default function Forum(){
         event,
         href: String(location?.href || ""),
         vis: String(document?.visibilityState || ""),
-        ua: typeof navigator !== "undefined" ? navigator.userAgent : "",
+        ua,
         deviceMemory: typeof navigator !== "undefined" ? navigator.deviceMemory : undefined,
+        env: {
+          isIOS,
+          isAndroid,
+          isSafariLike,
+          isChromeLike,
+          isTelegramMiniApp,
+          coarsePointer,
+        },
         // scroll snapshot
         scrollY: typeof window !== "undefined" ? window.scrollY : undefined,
         innerH: typeof window !== "undefined" ? window.innerHeight : undefined,
         docH: document?.documentElement?.scrollHeight,
         // media snapshot
-        videos: videos.length,
-        videosPlaying: playing,
+        videos: mediaSnapshot.videos,
+        videosPlaying: mediaSnapshot.videosPlaying,
+        audios: mediaSnapshot.audios,
+        audiosPlaying: mediaSnapshot.audiosPlaying,
+        qcastAudios: mediaSnapshot.qcastAudios,
+        qcastPlaying: mediaSnapshot.qcastPlaying,
+        iframes: mediaSnapshot.iframes,
+        iframesLoaded: mediaSnapshot.iframesLoaded,
+        iframesActive: mediaSnapshot.iframesActive,
+        ytIframes: mediaSnapshot.ytIframes,
+        ttIframes: mediaSnapshot.ttIframes,
+        genericIframes: mediaSnapshot.genericIframes,
+        ytPlayers,
         // memory snapshot (only Chrome usually)
         mem,
         extra,
       };
 
       // Пишем и в консоль тоже (чтобы сразу видеть)
-      try { console.log("[FORUM-DIAG]", payload); } catch {}
 
       // Отправка на сервер, который пишет forum-diag.jsonl в корень проекта
       await fetch("/api/debug/forum-diag", {
@@ -13701,9 +14663,10 @@ export default function Forum(){
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    let stopped = false;
 
     // стартовая отметка
-    emitDiag("mount");
+    emitDiag("mount", {}, { force: true });
 
     const onErr = (e) => {
       emitDiag("error", {
@@ -13724,9 +14687,9 @@ export default function Forum(){
       });
     };
 
-    const onVis = () => emitDiag("visibilitychange");
-    const onHide = (e) => emitDiag("pagehide", { persisted: !!e?.persisted });
-    const onBeforeUnload = () => emitDiag("beforeunload");
+    const onVis = () => { if (!stopped) emitDiag("visibilitychange"); };
+    const onHide = (e) => { if (!stopped) emitDiag("pagehide", { persisted: !!e?.persisted }, { force: true }); };
+    const onBeforeUnload = () => { if (!stopped) emitDiag("beforeunload", {}, { force: true }); };
 
     window.addEventListener("error", onErr);
     window.addEventListener("unhandledrejection", onRej);
@@ -13736,6 +14699,7 @@ export default function Forum(){
 
     // периодический снимок, чтобы поймать рост памяти ДО “выбивания”
     const id = setInterval(() => {
+      if (stopped) return;
       if (document.visibilityState !== "visible") return;
       emitDiag("tick");
     }, 5000);
@@ -13743,15 +14707,21 @@ export default function Forum(){
     // снимок после резкого скролла (throttle через raf)
     let raf = 0;
     const onScroll = () => {
+      if (stopped) return;
       if (raf) return;
       raf = requestAnimationFrame(() => {
+        if (stopped) return;
         raf = 0;
+        const y = Number(window?.scrollY || 0);
+        if (Math.abs(y - Number(diagLastScrollYRef.current || 0)) < 220) return;
+        diagLastScrollYRef.current = y;
         emitDiag("scroll");
       });
     };
     window.addEventListener("scroll", onScroll, { passive: true });
 
     return () => {
+      stopped = true;
       try { clearInterval(id); } catch {}
       try { window.removeEventListener("error", onErr); } catch {}
       try { window.removeEventListener("unhandledrejection", onRej); } catch {}
@@ -13760,7 +14730,7 @@ export default function Forum(){
       try { window.removeEventListener("beforeunload", onBeforeUnload); } catch {}
       try { window.removeEventListener("scroll", onScroll); } catch {}
       try { if (raf) cancelAnimationFrame(raf); } catch {}
-      emitDiag("unmount");
+      emitDiag("unmount", {}, { force: true });
     };
   }, [emitDiag]);
 
@@ -13771,6 +14741,39 @@ export default function Forum(){
   void profileBump
   const { t, locale } = useI18n()
   const toast = useToast()
+  const videoLimitCopy = useMemo(() => getForumVideoLimitCopy(locale), [locale]);
+  const voiceTapLabel = useMemo(() => getForumVoiceTapLabel(locale), [locale]);
+  const [videoLimitOverlay, setVideoLimitOverlay] = useState({
+    open: false,
+    durationSec: null,
+    source: '',
+    reason: '',
+  });
+  const closeVideoLimitOverlay = useCallback(() => {
+    setVideoLimitOverlay({ open: false, durationSec: null, source: '', reason: '' });
+  }, []);
+  const showVideoLimitOverlay = useCallback((payload = {}) => {
+    const durationSec = Number(payload?.durationSec);
+    const reason = String(payload?.reason || (Number.isFinite(durationSec) && durationSec > FORUM_VIDEO_MAX_SECONDS ? 'too_long' : 'bad_duration'));
+    setVideoLimitOverlay({
+      open: true,
+      durationSec: Number.isFinite(durationSec) ? durationSec : null,
+      source: String(payload?.source || ''),
+      reason,
+    });
+    const msg = reason === 'too_long'
+      ? (videoLimitCopy?.tooLong || 'Video is longer than 2 minutes. Trim it and try again.')
+      : (videoLimitCopy?.badDuration || 'Cannot read video duration. Use MP4/WebM up to 2 minutes.');
+    try { toast?.warn?.(msg); } catch {}
+    try {
+      emitDiag('video_limit_reject', {
+        source: String(payload?.source || ''),
+        reason,
+        durationSec: Number.isFinite(durationSec) ? Math.round(durationSec * 100) / 100 : null,
+        maxSec: FORUM_VIDEO_MAX_SECONDS,
+      });
+    } catch {}
+  }, [emitDiag, toast, videoLimitCopy]);
   const uiDir = (isBrowser() &&
     (document.documentElement?.dir === 'rtl' ||
       getComputedStyle(document.documentElement).direction === 'rtl'))
@@ -14042,8 +15045,15 @@ const persistTombstones = useCallback((patch) => {
             }
             return;
           }
-          const src = frame.getAttribute('data-src');
-          if (src && frame.getAttribute('src')) frame.setAttribute('src', '');
+          // IMPORTANT: no hard src reset here.
+          // Resetting iframe src on every media focus causes reload thrash,
+          // visible flashes and high memory churn on mobile.
+          try {
+            frame.contentWindow?.postMessage?.({ method: 'pause' }, '*');
+          } catch {}
+          try {
+            frame.contentWindow?.postMessage?.({ event: 'command', func: 'pauseVideo', args: '' }, '*');
+          } catch {}
         });
       } catch {}
     };
@@ -14138,17 +15148,26 @@ const persistTombstones = useCallback((patch) => {
       video.dataset.previewInit = '1';
 
       try {
-        // Мягко просим метаданные (без постоянных reset/load на скролле)
-        video.preload = 'metadata';
+        // Более ранний prewarm: к зоне фокуса хотим уже готовый первый кадр.
+        video.dataset.__prewarm = '1';
+        video.preload = 'auto';
 
-        // Если метаданные уже есть — ничего не делаем
-        if (video.readyState >= 1) return;
+        // Если первый кадр/данные уже готовы — ничего не делаем
+        if (video.readyState >= 2) return;
+        if (__hasLazyVideoSourceWithoutSrc(video)) {
+          // Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start.
+          __restoreVideoEl(video);
+          __touchActiveVideoEl(video);
+          __enforceActiveVideoCap(video);
+          return;
+        }
 
         // Тяжёлый load() — только в idle и только если видео реально "холодное"
         if (pending.has(video)) return;
         const id = idle(() => {
           pending.delete(video);
           try {
+            if (__hasLazyVideoSourceWithoutSrc(video)) return;
             const cold = (video.readyState === 0 || !video.currentSrc);
             const safe = cold && video.paused && (video.currentTime === 0);
             if (safe) video.load?.();
@@ -14180,7 +15199,8 @@ const persistTombstones = useCallback((patch) => {
       {
         // Чуть раньше подготавливаем медиа, чтобы автоплей не "спотыкался"
         // при входе в зону фокуса на мобильных.
-        threshold: 0.15, // было 0.25
+        threshold: 0.01,
+        rootMargin: `${Math.max(380, Math.round(__MEDIA_VIS_MARGIN_PX * 2.1))}px 0px ${Math.max(520, Math.round(__MEDIA_VIS_MARGIN_PX * 3.1))}px 0px`,
       }
     );
 
@@ -14192,6 +15212,83 @@ const persistTombstones = useCallback((patch) => {
         pending.forEach((id) => { try { cancelIdle(id); } catch {} });
         pending.clear?.();
       } catch {}     
+    };
+  }, []);
+  // === Ранний prewarm iframe (YouTube/TikTok/other embeds) для более быстрого старта в зоне фокуса ===
+  useEffect(() => {
+    if (!isBrowser()) return;
+    if (!('IntersectionObserver' in window)) return;
+
+    const selector = 'iframe[data-forum-media="youtube"],iframe[data-forum-media="tiktok"],iframe[data-forum-media="iframe"]';
+    const isCoarseUi = (() => {
+      try {
+        const ua = String(navigator?.userAgent || '');
+        return /iP(hone|ad|od)|Android/i.test(ua) || !!window?.matchMedia?.('(pointer: coarse)')?.matches;
+      } catch {
+        return false;
+      }
+    })();
+    const prewarmCap = isCoarseUi ? 1 : 2;
+
+    const getLoadedIframeCount = () => {
+      try {
+        return Array.from(document.querySelectorAll(selector)).filter((el) => {
+          try { return !!el.getAttribute('src'); } catch { return false; }
+        }).length;
+      } catch {
+        return 0;
+      }
+    };
+
+    const prewarm = (node) => {
+      const el = node instanceof HTMLIFrameElement ? node : null;
+      if (!el) return;
+      if (el.dataset.forumPrewarmInit === '1') return;
+      const src = String(el.getAttribute('data-src') || '').trim();
+      if (!src) return;
+      const cur = String(el.getAttribute('src') || '').trim();
+      if (cur) {
+        el.dataset.forumPrewarmInit = '1';
+        return;
+      }
+      if (getLoadedIframeCount() >= prewarmCap) return;
+      try { el.setAttribute('src', src); } catch {}
+      try { el.setAttribute('data-forum-last-active-ts', String(Date.now())); } catch {}
+      try { el.dataset.forumPrewarmInit = '1'; } catch {}
+    };
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          prewarm(entry.target);
+        }
+      },
+      {
+        threshold: 0.01,
+        rootMargin: `${Math.max(360, Math.round(__MEDIA_VIS_MARGIN_PX * 2.0))}px 0px ${Math.max(520, Math.round(__MEDIA_VIS_MARGIN_PX * 3.2))}px 0px`,
+      }
+    );
+
+    try { document.querySelectorAll(selector).forEach((el) => io.observe(el)); } catch {}
+
+    let mo = null;
+    try {
+      mo = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+          for (const n of (m.addedNodes || [])) {
+            if (!(n instanceof Element)) continue;
+            if (n.matches?.(selector)) io.observe(n);
+            try { n.querySelectorAll?.(selector)?.forEach?.((el) => io.observe(el)); } catch {}
+          }
+        }
+      });
+      mo.observe(document.body, { childList: true, subtree: true });
+    } catch {}
+
+    return () => {
+      try { mo?.disconnect?.(); } catch {}
+      try { io.disconnect(); } catch {}
     };
   }, []);
   // === Shorts-like autoplay: play when in focus, pause when out ===
@@ -14367,12 +15464,79 @@ const persistTombstones = useCallback((patch) => {
 
     const observed = new WeakSet();
     const unloadTimers = new WeakMap(); // el -> timeoutId 
+    const isCoarseUi = (() => {
+      try {
+        const uaMobile = /iP(hone|ad|od)|Android/i.test(String(navigator?.userAgent || ''));
+        const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
+        return uaMobile || coarse;
+      } catch {
+        return false;
+      }
+    })();
+    const IFRAME_HARD_UNLOAD_MS = isCoarseUi ? 4200 : 2600;
+    const IFRAME_RESIDENT_CAP = (() => {
+      if (isCoarseUi) return 1;
+      const dm = Number(navigator?.deviceMemory || 0);
+      if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 2;
+      return 3;
+    })();
+    let mediaDiagLastTs = 0;
+    const emitMediaDiag = (event, extra = {}, force = false) => {
+      try {
+        const now = Date.now();
+        if (!force && now - mediaDiagLastTs < 1100) return;
+        mediaDiagLastTs = now;
+        emitDiag(event, { scope: 'forum-media', ...extra }, { force });
+      } catch {}
+    };
+    const isIframeLike = (el) => {
+      const kind = el?.getAttribute?.('data-forum-media');
+      return kind === 'youtube' || kind === 'tiktok' || kind === 'iframe';
+    };
+    const getUnloadDelay = (el, reason = 'timeout') => {
+      if (!isIframeLike(el)) {
+        if (reason === 'cleanup') return 0;
+        return 1200;
+      }
+      if (reason === 'cleanup' || reason === 'resident_cap') return 0;
+      if (!isCoarseUi && (reason === 'focus_switch' || reason === 'below_stop_ratio' || reason === 'candidate_replace')) {
+        return 12000;
+      }
+      if (!isCoarseUi && reason === 'out_of_view') return 6000;
+      return IFRAME_HARD_UNLOAD_MS;
+    };
+    const getLoadedIframes = () => {
+      try {
+        return Array.from(document.querySelectorAll('iframe[data-forum-media]')).filter((frame) => {
+          try { return !!frame.getAttribute('src'); } catch { return false; }
+        });
+      } catch {
+        return [];
+      }
+    };
+    const getIframeSnapshot = () => {
+      try {
+        const all = Array.from(document.querySelectorAll('iframe[data-forum-media]'));
+        const loaded = all.filter((frame) => {
+          try { return !!frame.getAttribute('src'); } catch { return false; }
+        }).length;
+        return { total: all.length, loaded };
+      } catch {
+        return { total: 0, loaded: 0 };
+      }
+    };
 
     const cancelUnload = (el) => {
       const id = unloadTimers.get(el);
       if (id) clearTimeout(id);
       unloadTimers.delete(el);
     };
+    emitMediaDiag('media_coordinator_init', {
+      iframeHardUnloadMs: IFRAME_HARD_UNLOAD_MS,
+      iframeResidentCap: IFRAME_RESIDENT_CAP,
+      isCoarseUi,
+      ...getIframeSnapshot(),
+    }, true);
 
     const softPauseMedia = (el) => {
       if (!el) return;
@@ -14395,7 +15559,7 @@ const persistTombstones = useCallback((patch) => {
       // iframe/tiktok: softPause ничего не делает (иначе будет reload thrash)
     };
 
-    const hardUnloadMedia = (el) => {
+    const hardUnloadMedia = (el, reason = 'unknown') => {
       if (!el) return;
       if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
         try { if (!el.paused) el.pause(); } catch {}
@@ -14430,24 +15594,55 @@ const persistTombstones = useCallback((patch) => {
 
         try { player?.destroy?.(); } catch {}
         try { ytPlayers.delete(el); } catch {}
+        emitMediaDiag('iframe_hard_unload', { kind, reason, ...getIframeSnapshot() });
         return;
       } 
       if (kind === 'tiktok' || kind === 'iframe') { 
         const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
         if (src && !el.getAttribute('data-src')) { try { el.setAttribute('data-src', src); } catch {} }
         try { el.removeAttribute('data-forum-iframe-active'); } catch {}
+        try { el.removeAttribute('data-forum-last-active-ts'); } catch {}
         if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }
+        emitMediaDiag('iframe_hard_unload', { kind, reason, ...getIframeSnapshot() });
         return;
       }
     };
 
-    const scheduleHardUnload = (el, ms = 800) => {
+    const enforceIframeResidentCap = (keepEl = null) => {
+      if (IFRAME_RESIDENT_CAP <= 0) return;
+      const loaded = getLoadedIframes();
+      const extra = loaded.length - IFRAME_RESIDENT_CAP;
+      if (extra <= 0) return;
+
+      const sorted = loaded
+        .filter((frame) => frame !== keepEl)
+        .sort((a, b) => {
+          const ta = Number(a?.getAttribute?.('data-forum-last-active-ts') || 0);
+          const tb = Number(b?.getAttribute?.('data-forum-last-active-ts') || 0);
+          return ta - tb;
+        });
+      const victims = sorted.slice(0, extra);
+      if (!victims.length) return;
+
+      victims.forEach((frame) => {
+        cancelUnload(frame);
+        hardUnloadMedia(frame, 'resident_cap');
+      });
+      emitMediaDiag('iframe_resident_cap', {
+        cap: IFRAME_RESIDENT_CAP,
+        dropped: victims.length,
+        ...getIframeSnapshot(),
+      }, true);
+    };
+
+    const scheduleHardUnload = (el, ms = null, reason = 'timeout') => {
       if (!el) return;
       cancelUnload(el);
+      const delay = Number.isFinite(ms) ? ms : getUnloadDelay(el, reason);
       const id = setTimeout(() => {
         unloadTimers.delete(el);
-        hardUnloadMedia(el);
-      }, ms);
+        hardUnloadMedia(el, reason);
+      }, delay);
       unloadTimers.set(el, id);
     }; 
     // Best-effort loop для iframe (Vimeo/встроенные плееры/прочее):
@@ -14468,6 +15663,12 @@ const persistTombstones = useCallback((patch) => {
 
       if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
         try {
+          if (el instanceof HTMLVideoElement) {
+            const hasSrc = !!el.getAttribute('src');
+            if (!hasSrc) __restoreVideoEl(el);
+            __touchActiveVideoEl(el);
+            __enforceActiveVideoCap(el);
+          }
           applyMutedPref(el);
           el.playsInline = true;
           // LOOP: автоплей всегда зацикленный 
@@ -14505,12 +15706,15 @@ const persistTombstones = useCallback((patch) => {
           const ds = el.getAttribute('data-src') || '';
           const cur = el.getAttribute('src') || ''; 
           if (ds && !cur) el.setAttribute('src', ds);
+          el.setAttribute('data-forum-last-active-ts', String(Date.now()));
         } catch {}
         const player = await initYouTubePlayer(el);
         try {
           if (desiredMuted()) player?.mute?.();
           else player?.unMute?.();
           player?.playVideo?.();
+          enforceIframeResidentCap(el);
+          emitMediaDiag('iframe_play', { kind: 'youtube', ...getIframeSnapshot() });
           window.dispatchEvent(new CustomEvent('site-media-play', {
             detail: { source: 'youtube', element: el }
           }));
@@ -14532,6 +15736,9 @@ const persistTombstones = useCallback((patch) => {
           try { el.setAttribute('data-forum-iframe-active', '1'); } catch {}
           try { el.setAttribute('src', src); } catch {}
         }
+        try { el.setAttribute('data-forum-last-active-ts', String(Date.now())); } catch {}
+        enforceIframeResidentCap(el);
+        emitMediaDiag('iframe_play', { kind, ...getIframeSnapshot() });
         window.dispatchEvent(new CustomEvent('site-media-play', {
           detail: { source: kind, element: el }
         }));
@@ -14564,7 +15771,7 @@ const persistTombstones = useCallback((patch) => {
             if (active === el) {
               softPauseMedia(el);
               // iframe/youtube — освобождаем ресурсы с задержкой (анти-микроскролл)
-              scheduleHardUnload(el, 900);
+              scheduleHardUnload(el, null, 'out_of_view');
               active = null;
             } 
           } else {
@@ -14592,16 +15799,17 @@ const persistTombstones = useCallback((patch) => {
               // (иначе будет флаттер между двумя элементами рядом)
               if (candidate && candidate !== active && ratio >= START_RATIO && ratio > ar + 0.08) {
                 softPauseMedia(active);
-                scheduleHardUnload(active, 900);
+                scheduleHardUnload(active, null, 'focus_switch');
                 active = candidate;
                 cancelUnload(active);
+                emitMediaDiag('media_focus_switch', { ratio, prevRatio: ar });
                 playMedia(active);
               }
               return;
             }
             // Активный выпал ниже STOP_RATIO — мягко отпускаем
             softPauseMedia(active);
-            scheduleHardUnload(active, 900);
+            scheduleHardUnload(active, null, 'below_stop_ratio');
             active = null;
           } 
 
@@ -14612,11 +15820,12 @@ const persistTombstones = useCallback((patch) => {
           if (active && active !== candidate) {
             // старый — мягко стоп + hard unload с задержкой
             softPauseMedia(active);
-            scheduleHardUnload(active, 900);
+            scheduleHardUnload(active, null, 'candidate_replace');
           }
 
           active = candidate;
           cancelUnload(active);
+          emitMediaDiag('media_focus_switch', { ratio, prevRatio: 0 });
           playMedia(active);
         });
       },
@@ -14691,7 +15900,7 @@ const persistTombstones = useCallback((patch) => {
 
       if (active) {
         softPauseMedia(active);
-        scheduleHardUnload(active, 0);
+        scheduleHardUnload(active, 0, 'cleanup');
       }
       active = null;
       ratios.clear();
@@ -14719,9 +15928,12 @@ const persistTombstones = useCallback((patch) => {
       try { ytPlayers.clear(); } catch {}       
       ytMutePolls.forEach((id) => clearInterval(id));
       ytMutePolls.clear();
-      ytMuteLast.clear();        
+      ytMuteLast.clear();
+      emitMediaDiag('media_coordinator_cleanup', {
+        ...getIframeSnapshot(),
+      }, true);
     }; 
-  }, []);
+  }, [emitDiag]);
     useEffect(() => {
     let alive = true
 
@@ -18383,6 +19595,18 @@ const videoMirrorRef = useRef(null);  // вспомогательный незе
        mr.onstop = async () => {
          try {
            const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+           let audioDurationSec = NaN;
+           try { audioDurationSec = await readAudioDurationSec(blob); } catch {}
+           if (!Number.isFinite(audioDurationSec) || audioDurationSec <= 0 || audioDurationSec > FORUM_AUDIO_MAX_SECONDS) {
+             try {
+               toast?.warn?.(
+                 Number.isFinite(audioDurationSec) && audioDurationSec > FORUM_AUDIO_MAX_SECONDS
+                   ? `Audio limit: ${Math.floor(FORUM_AUDIO_MAX_SECONDS / 60)} min`
+                   : 'Audio duration read failed'
+               );
+             } catch {}
+             return;
+           }
            const url  = URL.createObjectURL(blob);
            setPendingAudio(url);
            try { restoreComposerScroll(); } catch {}
@@ -18396,7 +19620,11 @@ const videoMirrorRef = useRef(null);  // вспомогательный незе
       const started = Date.now();
       clearInterval(recTimerRef.current);
       recTimerRef.current = setInterval(() => {
-        setRecElapsed(Math.min(60, Math.floor((Date.now() - started)/1000)));
+        const sec = Math.floor((Date.now() - started)/1000);
+        setRecElapsed(Math.min(FORUM_AUDIO_MAX_SECONDS, sec));
+        if (sec >= FORUM_AUDIO_MAX_SECONDS) {
+          try { stopRecord(); } catch {}
+        }
       }, 200);
      } catch (e) {
        console.warn('mic denied', e);
@@ -18404,7 +19632,9 @@ const videoMirrorRef = useRef(null);  // вспомогательный незе
    };
 
    const stopRecord = () => {
-     if (recState !== 'rec') return;
+     const rec = mediaRef.current;
+     const isActive = !!rec && (rec.state === 'recording' || rec.state === 'paused');
+     if (!isActive) return;
      try { mediaRef.current?.stop(); } catch {}
      try { mediaRef.current?.stream?.getTracks?.().forEach(tr => tr.stop()); } catch {}
      mediaRef.current = null;
@@ -18603,6 +19833,24 @@ async function createUnmirroredFrontStream(baseStream) {
         }
 
         const blob = new Blob(videoChunksRef.current, { type: mr.mimeType || 'video/webm' });
+        let recordedDurationSec = NaN;
+        try {
+          recordedDurationSec = await readVideoDurationSec(blob);
+        } catch {}
+        if (!Number.isFinite(recordedDurationSec) || recordedDurationSec <= 0 || recordedDurationSec > FORUM_VIDEO_MAX_SECONDS) {
+          try {
+            showVideoLimitOverlay({
+              source: 'camera_record',
+              durationSec: Number.isFinite(recordedDurationSec) ? recordedDurationSec : null,
+              reason: Number.isFinite(recordedDurationSec) && recordedDurationSec > FORUM_VIDEO_MAX_SECONDS ? 'too_long' : 'bad_duration',
+            });
+          } catch {}
+          videoChunksRef.current = [];
+          setPendingVideo(null);
+          setVideoState('idle');
+          try { restoreComposerScroll(); } catch {}
+          return;
+        }
         const url = URL.createObjectURL(blob);
 
         // освободим предыдущий blob:URL
@@ -18630,8 +19878,10 @@ async function createUnmirroredFrontStream(baseStream) {
     clearInterval(videoTimerRef.current);
     videoTimerRef.current = setInterval(() => {
       const sec = Math.floor((Date.now() - started) / 1000);
-      setVideoElapsed(Math.min(600, sec)); // лимит 10:00
-      if (sec >= 600) stopVideo();         // авто-стоп
+      setVideoElapsed(Math.min(FORUM_VIDEO_MAX_SECONDS, sec));
+      if (sec >= FORUM_VIDEO_MAX_SECONDS) {
+        try { stopVideo(); } catch {}
+      }
     }, 200);
   } catch (e) {
     setVideoState('idle'); setVideoOpen(false);
@@ -18640,7 +19890,9 @@ async function createUnmirroredFrontStream(baseStream) {
 };
 
 const stopVideo = () => {
-  if (videoState !== 'recording') return;
+  const rec = videoRecRef.current;
+  const isActive = !!rec && (rec.state === 'recording' || rec.state === 'paused');
+  if (!isActive) return;
   setVideoState('processing');
   try { videoRecRef.current?.stop?.(); } catch {}
   // основной стрим и спец-потоки гасим здесь: камера реально выключается
@@ -19187,7 +20439,27 @@ const createPost = async () => {
         const fileBlob = await resp.blob(); // type: video/webm|mp4|quicktime
         const mime = String(fileBlob.type || '').split(';')[0].trim().toLowerCase();
         if (!/^video\/(mp4|webm|quicktime)$/.test(mime)) throw new Error('bad_type');
-        if (fileBlob.size > 300 * 1024 * 1024) { try { toast?.err?.(t?.('forum_video_too_big')); } catch {} ; return _fail(); }
+        if (fileBlob.size > FORUM_VIDEO_MAX_BYTES) {
+          try { toast?.err?.(t?.('forum_video_too_big')); } catch {}
+          try { endMediaPipeline?.(); } catch {}
+          return _fail();
+        }
+        let durationSec = NaN;
+        try { durationSec = await readVideoDurationSec(fileBlob); } catch {}
+        if (!Number.isFinite(durationSec) || durationSec <= 0 || durationSec > FORUM_VIDEO_MAX_SECONDS) {
+          try {
+            showVideoLimitOverlay({
+              source: 'post_blob_upload',
+              durationSec: Number.isFinite(durationSec) ? durationSec : null,
+              reason: Number.isFinite(durationSec) && durationSec > FORUM_VIDEO_MAX_SECONDS ? 'too_long' : 'bad_duration',
+            });
+          } catch {}
+          try { endMediaPipeline?.(); } catch {}
+          return _fail((Number.isFinite(durationSec) && durationSec > FORUM_VIDEO_MAX_SECONDS)
+            ? (videoLimitCopy?.tooLong || '')
+            : (videoLimitCopy?.badDuration || '')
+          );
+        }
 
         // имя с правильным расширением
         const ext = mime.includes('mp4') ? 'mp4' : (mime.includes('quicktime') ? 'mov' : 'webm');
@@ -19222,6 +20494,7 @@ const createPost = async () => {
         if (e?.name === 'AbortError' || signal?.aborted) return _fail();
         console.error('video_client_upload_failed', e);
         try { toast?.err?.(t?.('forum_video_upload_failed')); } catch {}
+        try { endMediaPipeline?.(); } catch {}
         return _fail();
       }
   }
@@ -19235,6 +20508,19 @@ const createPost = async () => {
         try { setMediaPct(p => Math.max(45, Number(p || 0))); } catch {}        
         const resp = await fetch(pendingAudio, { signal });
         const blob = await resp.blob();
+        let audioDurationSec = NaN;
+        try { audioDurationSec = await readAudioDurationSec(blob); } catch {}
+        if (!Number.isFinite(audioDurationSec) || audioDurationSec <= 0 || audioDurationSec > FORUM_AUDIO_MAX_SECONDS) {
+          try {
+            toast?.warn?.(
+              Number.isFinite(audioDurationSec) && audioDurationSec > FORUM_AUDIO_MAX_SECONDS
+                ? `Audio is longer than ${Math.floor(FORUM_AUDIO_MAX_SECONDS / 60)} minutes`
+                : 'Cannot read audio duration'
+            );
+          } catch {}
+          audioUrlToSend = '';
+          throw new Error('audio_duration_limit');
+        }
         const fd = new FormData();
         fd.append('file', blob, `voice-${Date.now()}.webm`);
         const up = await fetch('/api/forum/uploadAudio', {
@@ -19627,6 +20913,20 @@ useEffect(() => {
   };
 
   // префетчим видео на ±5 карточек вокруг текущей
+  const prefetchedPosters = new Set();
+  const prefetchedPosterQueue = [];
+  const PREFETCH_POSTER_LIMIT = 96;
+  const rememberPrefetchedPoster = (url) => {
+    if (!url || prefetchedPosters.has(url)) return false;
+    prefetchedPosters.add(url);
+    prefetchedPosterQueue.push(url);
+    if (prefetchedPosterQueue.length > PREFETCH_POSTER_LIMIT) {
+      const stale = prefetchedPosterQueue.shift();
+      if (stale) prefetchedPosters.delete(stale);
+    }
+    return true;
+  };
+
   const prefetchVideosAround = (centerEl) => {
     try {
       const cards = Array.from(document.querySelectorAll(CARD_SELECTOR));
@@ -19645,11 +20945,12 @@ useEffect(() => {
                // Prefetch только постеров: НЕ трогаем video.load()/preload=metadata,
                // иначе iOS начнёт декод/буферы заранее и снова поймаем memory pressure.
                const p = v.getAttribute('poster') || v.dataset?.poster || '';
-               if (!p) return;
-               const img = new Image();
-               img.decoding = 'async';
-               img.loading = 'eager';
-               img.src = p;
+                if (!p) return;
+                if (!rememberPrefetchedPoster(p)) return;
+                const img = new Image();
+                img.decoding = 'async';
+                img.loading = 'lazy';
+                img.src = p;
 
              } catch {}
            });
@@ -19927,12 +21228,27 @@ try { startSoftProgress?.(72, 200, 88); } catch {}  // мягко едем к ~8
       const okMime = /^video\/(mp4|webm|quicktime)$/i.test(mime) || /\.(mp4|webm|mov)$/i.test(String(vf?.name || ''));
       if (!okMime) {
         try { toast?.warn?.(t?.('forum_video_bad_type')); } catch {}
+        try { endMediaPipeline?.(); } catch {}
         return;
       }
-      if (Number(vf.size || 0) > 300 * 1024 * 1024) {
+      if (Number(vf.size || 0) > FORUM_VIDEO_MAX_BYTES) {
         try { toast?.err?.(t?.('forum_video_too_big')); } catch {}
+        try { endMediaPipeline?.(); } catch {}
         return;
-      } 
+      }
+      let pickedDurationSec = NaN;
+      try { pickedDurationSec = await readVideoDurationSec(vf); } catch {}
+      if (!Number.isFinite(pickedDurationSec) || pickedDurationSec <= 0 || pickedDurationSec > FORUM_VIDEO_MAX_SECONDS) {
+        try {
+          showVideoLimitOverlay({
+            source: 'attach_picker',
+            durationSec: Number.isFinite(pickedDurationSec) ? pickedDurationSec : null,
+            reason: Number.isFinite(pickedDurationSec) && pickedDurationSec > FORUM_VIDEO_MAX_SECONDS ? 'too_long' : 'bad_duration',
+          });
+        } catch {}
+        try { endMediaPipeline?.(); } catch {}
+        return;
+      }
 
       // UPLOAD TO VERCEL BLOB (тот же роут, что у записи с камеры)
       try {
@@ -20001,7 +21317,7 @@ try { startSoftProgress?.(72, 200, 88); } catch {}  // мягко едем к ~8
     if (e?.target) e.target.value = '';
     try { restoreComposerScroll(); } catch {}
   }
-}, [t, toast, moderateImageFiles, toastI18n, reasonKey, beginMediaPipeline, endMediaPipeline, setPendingImgs, setPendingVideo, startSoftProgress, stopMediaProg, setMediaPhase, setMediaPct, setVideoProgress, viewerId, saveComposerScroll, restoreComposerScroll]);
+}, [t, toast, moderateImageFiles, toastI18n, reasonKey, beginMediaPipeline, endMediaPipeline, setPendingImgs, setPendingVideo, startSoftProgress, stopMediaProg, setMediaPhase, setMediaPct, setVideoProgress, viewerId, showVideoLimitOverlay, saveComposerScroll, restoreComposerScroll]);
 
   /* ---- профиль (поповер у аватара) ---- */
   const idShown = resolveProfileAccountId(auth.asherId || auth.accountId || '')
@@ -20302,22 +21618,75 @@ setVideoFeed(withStars);
 }
 
 /** открыть ленту видео */
-function openVideoFeed(entryId) {
+const snapVideoFeedToFirstCardTop = React.useCallback((opts = {}) => {
+  if (!isBrowser()) return;
+  const hideHeader = opts?.hideHeader !== false;
+  if (hideHeader) {
+    try { headAutoOpenRef.current = false; } catch {}
+    try { setHeadPinned(false); } catch {}
+    try { setHeadHidden(true); } catch {}
+  }
+  const run = () => {
+    try {
+      const scrollEl = bodyRef.current || document.querySelector('[data-forum-scroll="1"]') || null;
+      const anchor = document.querySelector('[data-forum-video-start="1"]');
+      const root = anchor?.parentElement || document;
+      const card =
+        root.querySelector?.('[data-forum-video-start="1"] ~ .grid [data-feed-card="1"][data-feed-kind="post"]') ||
+        root.querySelector?.('[data-feed-card="1"][data-feed-kind="post"]') ||
+        null;
+      if (!card) {
+        try { anchor?.scrollIntoView?.({ behavior: 'auto', block: 'start' }); } catch {}
+        return;
+      }
+      const cardRect = card.getBoundingClientRect?.();
+      if (!cardRect) return;
+      const useInner = !!scrollEl && (scrollEl.scrollHeight > scrollEl.clientHeight + 1);
+      if (useInner) {
+        const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 };
+        scrollEl.scrollTop += (cardRect.top - Number(hostRect.top || 0));
+      } else {
+        const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + cardRect.top;
+        try { window.scrollTo({ top: y, behavior: 'auto' }); } catch { try { window.scrollTo(0, y); } catch {} }
+      }
+    } catch {}
+  };
+  try { requestAnimationFrame(() => requestAnimationFrame(run)); } catch { try { setTimeout(run, 0); } catch {} }
+}, [setHeadHidden, setHeadPinned]);
+
+const refreshVideoFeedWithoutReload = React.useCallback(() => {
+  try { setVideoFeedUserSortLocked(false); } catch {}
+  try { setVideoFeedEntryToken((x) => x + 1); } catch {}
+  snapVideoFeedToFirstCardTop({ hideHeader: true });
+}, [snapVideoFeedToFirstCardTop]);
+
+function openVideoFeed(entryId, opts = {}) {
   // ✅ каждый вход в видео-ленту стартует с «перетасованной» выдачи
   // (даже если в прошлый раз юзер ставил сортировку по лайкам/топу).
   setVideoFeedUserSortLocked(false);
   setVideoFeedEntryToken((x) => x + 1);
 
-  try { pushNavState(entryId || 'video_feed_btn'); } catch {}
-  try { headAutoOpenRef.current = false; } catch {}
-  try { setHeadPinned(false); } catch {}
-  try { setHeadHidden(true); } catch {}
+  if (!opts?.skipPush) {
+    try { pushNavState(entryId || 'video_feed_btn'); } catch {}
+  }
+  if (opts?.keepHeaderOpen) {
+    try { setHeadPinned(false); } catch {}
+    try { setHeadHidden(false); } catch {}
+  } else {
+    try { headAutoOpenRef.current = false; } catch {}
+    try { setHeadPinned(false); } catch {}
+    try { setHeadHidden(true); } catch {}
+  }
   try { videoFeedOpenRef.current = true; } catch {}
   setVideoFeedOpen(true);
   try { setInboxOpen?.(false); } catch {}
   try { setSel?.(null); setThreadRoot?.(null); } catch {}
   try { setTopicFilterId?.(null); } catch {}
-  try { setTimeout(() => document.querySelector('[data-forum-video-start="1"]')?.scrollIntoView({ behavior:'auto', block:'start' }), 0); } catch {}
+  if (opts?.keepHeaderOpen) {
+    try { setTimeout(() => document.querySelector('[data-forum-video-start="1"]')?.scrollIntoView({ behavior:'auto', block:'start' }), 0); } catch {}
+  } else {
+    snapVideoFeedToFirstCardTop({ hideHeader: true });
+  }
 }
 
 /** закрыть ленту видео */
@@ -20325,7 +21694,9 @@ function closeVideoFeed() {
   try { videoFeedOpenRef.current = false; } catch {}
   setVideoFeedOpen(false);
 }
+const openVideoFeedEvent = useEvent(openVideoFeed)
 const buildAndSetVideoFeedEvent = useEvent(buildAndSetVideoFeed)
+const videoFeedAutoBootRef = React.useRef(false);
 // [INBOX:OPEN_GLOBAL] — всегда открываем "полный" инбокс (как в списке тем),
 // даже если сейчас в видео-фиде или в ветке.
 // Логика: если уже на странице инбокса — закрыть, иначе: закрыть видео/ветку и открыть инбокс.
@@ -20379,7 +21750,7 @@ React.useEffect(() => {
   if (!videoFeedOpen) return;
   buildAndSetVideoFeedEvent();
   // зависимости: любые сигналы обновления снапшота/постов у тебя в состоянии
-}, [videoFeedOpen, data?.rev, data?.posts, data?.messages, data?.topics, allPosts, feedSort, activeStarredAuthors, buildAndSetVideoFeedEvent]);
+}, [videoFeedOpen, videoFeedEntryToken, data?.rev, data?.posts, data?.messages, data?.topics, allPosts, feedSort, activeStarredAuthors, buildAndSetVideoFeedEvent]);
 
 // [VIDEO_FEED:OPEN_THREAD] — открыть полноценную ветку из ленты
 function openThreadFromPost(p){
@@ -20403,6 +21774,19 @@ function openThreadFromPost(p){
 // === QUESTS: вкладка квестов (полупассивный режим) ===
 const [questOpen, setQuestOpen] = React.useState(false);
 const [questSel,  setQuestSel]  = React.useState(null);   // текущая карточка квеста
+React.useEffect(() => {
+  if (videoFeedAutoBootRef.current) return;
+  if (navRestoringRef.current) return;
+
+  // Не переоткрываем видеофид поверх явной навигации (глубокие ссылки / восстановление состояния).
+  if (videoFeedOpen || inboxOpen || questOpen || sel || threadRoot) {
+    videoFeedAutoBootRef.current = true;
+    return;
+  }
+
+  videoFeedAutoBootRef.current = true;
+  try { openVideoFeedEvent('video_feed_auto', { skipPush: true, keepHeaderOpen: true }); } catch {}
+}, [videoFeedOpen, inboxOpen, questOpen, sel, threadRoot, openVideoFeedEvent]);
 
 // [NAV_STACK:SNAPSHOT] — актуальное состояние UI для back-stack
 navStateRef.current = {
@@ -21656,6 +23040,13 @@ function pickAdUrlForSlot(slotKey, slotKind) {
   onResetConfirm={resetOrCloseOverlay}
   t={t}
 />
+<VideoLimitOverlay
+  open={!!videoLimitOverlay?.open}
+  copy={videoLimitCopy}
+  maxSec={FORUM_VIDEO_MAX_SECONDS}
+  durationSec={videoLimitOverlay?.durationSec}
+  onClose={closeVideoLimitOverlay}
+/>
 <ReportPopover
   open={reportUI.open}
   anchorRect={reportUI.anchorRect}
@@ -22286,10 +23677,7 @@ onClick={()=>{
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); openInboxGlobal('inbox_btn_main'); }}
         aria-pressed={inboxOpen}
       >
-        <svg viewBox="0 0 24 24" aria-hidden>
-          <path d="M3 7h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.6" fill="none"/>
-          <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
+        <ForumActionNavIcon kind="inbox" active={!!inboxOpen} size={24} />
         {mounted && unreadCount > 0 && (
           <span className="inboxBadgeReplies" suppressHydrationWarning>{formatCount(unreadCount)}</span>
         )}
@@ -22363,9 +23751,7 @@ onClick={()=>{
   setTimeout(() => { try { window.__forumToggleCreateTopic?.() } catch {} }, 0)
 }}
   >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-        </svg>
+        <ForumActionNavIcon kind="plus" size={24} />
   </button>
            <button
     type="button"
@@ -22374,34 +23760,14 @@ onClick={()=>{
     aria-label={t('forum_video_feed')}
     id="video_feed_btn_main"
     onClick={() => {
-      if (videoFeedOpen) { try { closeVideoFeed?.() } catch {} ; return; }
+      if (videoFeedOpen) {
+        try { refreshVideoFeedWithoutReload(); } catch {}
+        return;
+      }
       try { openVideoFeed?.('video_feed_btn_main') } catch {}
     }}
   >
-<svg
-  viewBox="0 0 24 24"
-  aria-hidden="true"
-  fill="none"
-  stroke="currentColor"
-  strokeWidth="0.8"
-  strokeLinecap="round"
-  strokeLinejoin="round"
-  style={{ width: 58, height: 58 }}
->
-  {/* внешний контур (чуть более "капсула") */}
-  <rect x="0.8" y="0.5" width="22.4" height="22.4" rx="6.0" opacity="0.90" />
-
-  {/* play — крупнее, плотнее */}
-<path
-  d="M10.7 10.2L15.2 12.0L10.7 13.8Z"
-  fill="red"
-  opacity="0.80"
-  stroke="none"
-  transform="translate(12 12) scale(2) translate(-12 -12)"
-/>
-
-
-</svg>
+    <VideoFeedNavIcon active={videoFeedOpen} />
 
   </button> 
 
@@ -22428,10 +23794,7 @@ onClick={()=>{
   }}
     title={t?.('forum_home')}
   >
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
-      <path d="M3 10l9-7 9 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M5 10v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
+    <ForumActionNavIcon kind="home" size={22} />
   </button>
   {/* Назад (иконка) */}
   <button
@@ -22443,9 +23806,7 @@ onClick={()=>{
        title={t?.('forum_back')}
    
       >
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
-      <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
+    <ForumActionNavIcon kind="back" size={22} />
   </button>
     </div>
   </div>
@@ -23818,10 +25179,7 @@ onClick={()=>{
         onClick={() => openInboxGlobal('inbox_btn_thread')}
         aria-pressed={inboxOpen}
       >
-        <svg viewBox="0 0 24 24" aria-hidden>
-          <path d="M3 7h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.6" fill="none"/>
-          <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
+        <ForumActionNavIcon kind="inbox" active={!!inboxOpen} size={24} />
         {mounted && unreadCount > 0 && (
           <span className="inboxBadgeReplies" suppressHydrationWarning>{formatCount(unreadCount)}</span>
         )}
@@ -23894,9 +25252,7 @@ onClick={()=>{
               setTimeout(() => { try { window.__forumToggleCreateTopic?.() } catch {} }, 0)
         }}
        >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-        </svg>
+        <ForumActionNavIcon kind="plus" size={24} />
   </button>
  
            <button
@@ -23906,34 +25262,14 @@ onClick={()=>{
     aria-label={t('forum_video_feed')}
     id="video_feed_btn_thread"
     onClick={() => {
-      if (videoFeedOpen) { try { closeVideoFeed?.() } catch {} ; return; }
+      if (videoFeedOpen) {
+        try { refreshVideoFeedWithoutReload(); } catch {}
+        return;
+      }
       try { openVideoFeed?.('video_feed_btn_thread') } catch {}
     }}
   >
-<svg
-  viewBox="0 0 24 24"
-  aria-hidden="true"
-  fill="none"
-  stroke="currentColor"
-  strokeWidth="0.8"
-  strokeLinecap="round"
-  strokeLinejoin="round"
-  style={{ width: 58, height: 58 }}
->
-  {/* внешний контур (чуть более "капсула") */}
-  <rect x="0.8" y="0.5" width="22.4" height="22.4" rx="6.0" opacity="0.90" />
-
-  {/* play — крупнее, плотнее */}
-<path
-  d="M10.7 10.2L15.2 12.0L10.7 13.8Z"
-  fill="red"
-  opacity="0.80"
-  stroke="none"
-  transform="translate(12 12) scale(2) translate(-12 -12)"
-/>
-
-
-</svg>
+    <VideoFeedNavIcon active={videoFeedOpen} />
   </button> 
     </div>
     <div className="slot-right">
@@ -23958,10 +25294,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
     }}
     title={t?.('forum_home')}
   >
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
-      <path d="M3 10l9-7 9 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M5 10v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
+    <ForumActionNavIcon kind="home" size={22} />
   </button> 
   {/* Назад (иконка) */}
   <button
@@ -23972,9 +25305,7 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
     onClick={handleGlobalBack}
     title={t?.('forum_back')}
   >
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden>
-      <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
+    <ForumActionNavIcon kind="back" size={22} />
   </button>
     </div>
 <CreateTopicCard t={t} onCreate={createTopic} onOpenVideoFeed={openVideoFeed} />
@@ -24262,27 +25593,28 @@ setTimeout(()=>document.querySelector('[data-forum-topics-start="1"]')?.scrollIn
   <button
     type="button"
     className={cls('iconBtn ghost micBtn lockable', recState==='rec' && 'rec', mediaLocked && 'isLocked')}
-    aria-label={t('forum_voice_hold')}
+    aria-label={recState === 'rec' ? (t('forum_stop') || 'Stop recording') : voiceTapLabel}
+    title={recState === 'rec' ? (t('forum_stop') || 'Stop recording') : voiceTapLabel}
     disabled={mediaLocked}
     aria-disabled={mediaLocked ? 'true' : 'false'}    
-    onMouseDown={(e)=>{
+    onClick={(e)=>{
       e.preventDefault();
-      if (mediaLocked) return;      
-      startRecord();
+      if (mediaLocked) return;
+      if (recState === 'rec') stopRecord();
+      else startRecord();
     }}
-    onMouseUp={()=>{ if (recState==='rec') stopRecord(); }}
-    onMouseLeave={()=>{ if (recState==='rec') stopRecord(); }}
-    onTouchStart={(e)=>{
-      e.preventDefault();
-      if (mediaLocked) return;      
-      startRecord();
-    }}
-    onTouchEnd={()=>{ if (recState==='rec') stopRecord(); }}
   >
-    <svg viewBox="0 0 24 24" aria-hidden>
-      <path d="M12 14a3 3 0 003-3V7a3 3 0 10-6 0v4a3 3 0 003 3Z" stroke="currentColor" strokeWidth="1.8" fill="none"/>
-      <path d="M5 11a7 7 0 0014 0M12 18v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
-    </svg>
+    {recState === 'rec' ? (
+      <svg viewBox="0 0 24 24" aria-hidden>
+        <circle cx="12" cy="12" r="8.2" fill="#FF4D4F" />
+        <rect x="9" y="9" width="6" height="6" rx="1.2" fill="#fff" />
+      </svg>
+    ) : (
+      <svg viewBox="0 0 24 24" aria-hidden>
+        <path d="M12 14a3 3 0 003-3V7a3 3 0 10-6 0v4a3 3 0 003 3Z" stroke="currentColor" strokeWidth="1.8" fill="none"/>
+        <path d="M5 11a7 7 0 0014 0M12 18v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+      </svg>
+    )}
           {recState === 'rec' && (
             <span className="micTimer" aria-live="polite">{fmtSec(recElapsed)}</span>
           )}  
@@ -25188,3 +26520,4 @@ function CreateTopicCard({ t, onCreate,}){
   )
 } 
  
+
