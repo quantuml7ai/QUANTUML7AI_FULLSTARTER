@@ -32,6 +32,7 @@ export default function VideoMedia({
   const recoverTimerRef = React.useRef(0)
   const mutedEvent = String(mutedEventName || 'forum:media-mute')
   const mediaVisMargin = Number.isFinite(Number(mediaVisMarginPx)) ? Number(mediaVisMarginPx) : 380
+  const preloadMode = String(preload || 'none').trim().toLowerCase() || 'none'
 
   const readMuted = React.useCallback(() => {
     try {
@@ -115,14 +116,17 @@ export default function VideoMedia({
       else el.removeAttribute('data-src')
     } catch {}
     try {
-      el.preload = 'none'
+      const wantsWarm = el.dataset?.__prewarm === '1' || el.dataset?.__active === '1'
+      const effectivePreload = wantsWarm && preloadMode === 'none' ? 'auto' : preloadMode
+      el.preload = effectivePreload
     } catch {}
     if (poster) {
       try {
+        el.dataset.__posterOriginal = String(poster)
         el.setAttribute('poster', String(poster))
       } catch {}
     }
-  }, [src, poster])
+  }, [src, poster, preloadMode])
 
   React.useEffect(() => {
     const el = ref.current
@@ -337,6 +341,24 @@ export default function VideoMedia({
       const el = ref.current
       if (!el) return
       el.dataset.__recoverTry = '0'
+      const revealPoster = () => {
+        try {
+          if (!el.isConnected) return
+          if ((el.readyState || 0) < 2) return
+          if (el.dataset?.__posterRevealed === '1') return
+          el.dataset.__posterRevealed = '1'
+          el.removeAttribute('poster')
+        } catch {}
+      }
+      try {
+        if (typeof el.requestVideoFrameCallback === 'function') {
+          el.requestVideoFrameCallback(() => revealPoster())
+        } else {
+          requestAnimationFrame(() => revealPoster())
+        }
+      } catch {
+        revealPoster()
+      }
     } catch {}
   }, [])
 

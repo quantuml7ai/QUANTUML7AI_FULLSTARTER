@@ -153,6 +153,11 @@ export function __unloadVideoEl(el) {
     try {
       el.preload = 'metadata'
     } catch {}
+    try {
+      const poster = el.dataset?.__posterOriginal || ''
+      if (poster) el.setAttribute('poster', poster)
+      el.dataset.__posterRevealed = '0'
+    } catch {}
     return
   }
   try {
@@ -170,6 +175,11 @@ export function __unloadVideoEl(el) {
     el.preload = 'none'
   } catch {}
   try {
+    const poster = el.dataset?.__posterOriginal || ''
+    if (poster) el.setAttribute('poster', poster)
+    el.dataset.__posterRevealed = '0'
+  } catch {}
+  try {
     el.load?.()
   } catch {}
 }
@@ -182,6 +192,11 @@ export function __restoreVideoEl(el) {
   if (cur === src) return
   try {
     el.preload = (el.dataset?.__prewarm === '1') ? 'auto' : 'metadata'
+  } catch {}
+  try {
+    const poster = el.dataset?.__posterOriginal || ''
+    if (poster && !el.getAttribute('poster')) el.setAttribute('poster', poster)
+    el.dataset.__posterRevealed = '0'
   } catch {}
   try {
     el.setAttribute('src', src)
@@ -257,4 +272,3 @@ export const enableVideoControlsOnTap = createEnableVideoControlsOnTap({
   touchActiveVideoEl: __touchActiveVideoEl,
   enforceActiveVideoCap: __enforceActiveVideoCap,
 })
-

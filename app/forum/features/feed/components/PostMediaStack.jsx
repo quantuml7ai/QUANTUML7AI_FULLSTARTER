@@ -58,7 +58,7 @@ export default function PostMediaStack({
                 src={src}
                 poster={i === 0 && posterUrl ? posterUrl : undefined}
                 playsInline
-                preload="none"
+                preload="metadata"
                 controls={false}
                 controlsList="nodownload noplaybackrate noremoteplayback"
                 disablePictureInPicture

@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-03-10T15:22:34.514Z",
+  "generatedAt": "2026-03-11T16:02:08.657Z",
   "results": [
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\i18n.js",
@@ -186,7 +186,7 @@
       "samples": {
         "video": [
           {
-            "line": 344,
+            "line": 366,
             "text": "<video"
           }
         ],
@@ -196,11 +196,11 @@
             "text": "autoPlay,"
           },
           {
-            "line": 132,
+            "line": 136,
             "text": "const nextMuted = typeof initial === 'boolean' ? initial : !!autoPlay"
           },
           {
-            "line": 173,
+            "line": 177,
             "text": "}, [autoPlay, mutedEvent, readMuted, writeMuted])"
           }
         ],
@@ -862,14 +862,14 @@
         "video": [
           {
             "line": 225,
-            "text": "/* 2) Обычные <img>/<video>/<canvas>/<svg> внутри — растянуть и покрыть */"
+            "text": "/* 2) РћР±С‹С‡РЅС‹Рµ <img>/<video>/<canvas>/<svg> РІРЅСѓС‚СЂРё вЂ” СЂР°СЃС‚СЏРЅСѓС‚СЊ Рё РїРѕРєСЂС‹С‚СЊ */"
           }
         ],
         "autoplay": [],
         "img": [
           {
             "line": 225,
-            "text": "/* 2) Обычные <img>/<video>/<canvas>/<svg> внутри — растянуть и покрыть */"
+            "text": "/* 2) РћР±С‹С‡РЅС‹Рµ <img>/<video>/<canvas>/<svg> РІРЅСѓС‚СЂРё вЂ” СЂР°СЃС‚СЏРЅСѓС‚СЊ Рё РїРѕРєСЂС‹С‚СЊ */"
           }
         ],
         "create": []

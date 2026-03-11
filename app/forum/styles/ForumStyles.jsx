@@ -4300,6 +4300,16 @@ animation:qcastCtrlEQ 880ms ease-in-out infinite, qcastCtrlHue 2.4s linear infin
   max-width:100%;
 }
 
+article[data-forum-post-card="1"] .forumDividerRail::after{
+  content: none;
+  display: none;
+  animation: none;
+}
+article[data-forum-post-card="1"] .forumDividerRail{
+  background: linear-gradient(90deg, rgba(255,205,100,.08), rgba(255,214,120,.48), rgba(255,205,100,.08));
+  opacity: .92;
+}
+
 /* --- РџРѕРїРѕРІРµСЂ QCoin РєРѕРЅС‚РµР№РЅРµСЂ --- */
 .qcoinPop{
   /* РµСЃР»Рё Сѓ С‚РµР±СЏ СѓР¶Рµ СЃС‚РѕРёС‚ position/left/top/width вЂ” РѕСЃС‚Р°РІСЊ РёС… */
