@@ -7,7 +7,7 @@ export default function VideoMedia({
   poster,
   className,
   style,
-  preload = 'metadata',
+  preload = 'none',
   playsInline = true,
   controlsList,
   disablePictureInPicture,
@@ -22,25 +22,16 @@ export default function VideoMedia({
   restoreVideoEl,
   touchActiveVideo,
   enforceActiveVideoCap,
-  touchResidentVideo,
-  enforceResidentVideoCap,
   isVideoNearViewport,
   mediaVisMarginPx,
   dropActiveVideo,
-  dropResidentVideo,
   unloadVideoEl,
-  primeVideoForWarmStart,
   ...rest
 }) {
   const ref = React.useRef(null)
   const recoverTimerRef = React.useRef(0)
   const mutedEvent = String(mutedEventName || 'forum:media-mute')
   const mediaVisMargin = Number.isFinite(Number(mediaVisMarginPx)) ? Number(mediaVisMarginPx) : 380
-  const normalizedPreload = React.useMemo(() => {
-    const raw = String(preload || 'metadata').toLowerCase()
-    return raw === 'none' ? 'metadata' : raw
-  }, [preload])
-  const [preloadMode, setPreloadMode] = React.useState(normalizedPreload)
 
   const readMuted = React.useCallback(() => {
     try {
@@ -86,24 +77,6 @@ export default function VideoMedia({
     [enforceActiveVideoCap],
   )
 
-  const touchResidentVideoFn = React.useCallback(
-    (el) => {
-      try {
-        if (typeof touchResidentVideo === 'function') touchResidentVideo(el)
-      } catch {}
-    },
-    [touchResidentVideo],
-  )
-
-  const enforceResidentVideoCapFn = React.useCallback(
-    (el) => {
-      try {
-        if (typeof enforceResidentVideoCap === 'function') enforceResidentVideoCap(el)
-      } catch {}
-    },
-    [enforceResidentVideoCap],
-  )
-
   const isVideoNearViewportFn = React.useCallback(
     (el, marginPx) => {
       try {
@@ -123,15 +96,6 @@ export default function VideoMedia({
     [dropActiveVideo],
   )
 
-  const dropResidentVideoFn = React.useCallback(
-    (el) => {
-      try {
-        if (typeof dropResidentVideo === 'function') dropResidentVideo(el)
-      } catch {}
-    },
-    [dropResidentVideo],
-  )
-
   const unloadVideoElFn = React.useCallback(
     (el) => {
       try {
@@ -139,15 +103,6 @@ export default function VideoMedia({
       } catch {}
     },
     [unloadVideoEl],
-  )
-
-  const primeVideoForWarmStartFn = React.useCallback(
-    (el) => {
-      try {
-        if (typeof primeVideoForWarmStart === 'function') primeVideoForWarmStart(el)
-      } catch {}
-    },
-    [primeVideoForWarmStart],
   )
 
   React.useEffect(() => {
@@ -160,25 +115,14 @@ export default function VideoMedia({
       else el.removeAttribute('data-src')
     } catch {}
     try {
-      el.preload = normalizedPreload
-      el.setAttribute('preload', normalizedPreload)
+      el.preload = 'none'
     } catch {}
     if (poster) {
       try {
         el.setAttribute('poster', String(poster))
       } catch {}
     }
-    setPreloadMode(normalizedPreload)
-  }, [src, poster, normalizedPreload])
-
-  React.useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    try {
-      el.preload = preloadMode
-      el.setAttribute('preload', preloadMode)
-    } catch {}
-  }, [preloadMode])
+  }, [src, poster])
 
   React.useEffect(() => {
     const el = ref.current
@@ -244,12 +188,12 @@ export default function VideoMedia({
         const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
         const dm = Number(navigator?.deviceMemory || 0)
         const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2
-        if (isIOS) return { unloadDelayMs: 7200, hardUnloadOnInactive: false, residentMarginPx: Math.max(880, Math.round(mediaVisMargin * 2.9)) }
-        if (lowMem) return { unloadDelayMs: 5600, hardUnloadOnInactive: true, residentMarginPx: Math.max(760, Math.round(mediaVisMargin * 2.35)) }
-        if (isAndroid || coarse) return { unloadDelayMs: 8200, hardUnloadOnInactive: false, residentMarginPx: Math.max(980, Math.round(mediaVisMargin * 3.1)) }
-        return { unloadDelayMs: 7600, hardUnloadOnInactive: false, residentMarginPx: Math.max(720, Math.round(mediaVisMargin * 2.55)) }
+        if (isIOS) return { unloadDelayMs: 2200, hardUnloadOnInactive: false }
+        if (lowMem) return { unloadDelayMs: 1800, hardUnloadOnInactive: true }
+        if (isAndroid || coarse) return { unloadDelayMs: 2400, hardUnloadOnInactive: false }
+        return { unloadDelayMs: 2600, hardUnloadOnInactive: false }
       } catch {
-        return { unloadDelayMs: 7200, hardUnloadOnInactive: false, residentMarginPx: Math.max(720, Math.round(mediaVisMargin * 2.5)) }
+        return { unloadDelayMs: 2200, hardUnloadOnInactive: false }
       }
     })()
 
@@ -265,10 +209,9 @@ export default function VideoMedia({
           unloadTimer = null
         }
 
-        touchResidentVideoFn(el)
-        enforceResidentVideoCapFn(el)
-        setPreloadMode('auto')
-        primeVideoForWarmStartFn(el)
+        restoreVideoElFn(el)
+        touchActiveVideoFn(el)
+        enforceActiveVideoCapFn(el)
       } else {
         if (unloadTimer) {
           try {
@@ -279,8 +222,7 @@ export default function VideoMedia({
         unloadTimer = setTimeout(() => {
           unloadTimer = null
           if (active) return
-          if (isVideoNearViewportFn(el, Math.round(runtimeProfile.residentMarginPx * 0.82))) return
-          dropResidentVideoFn(el)
+          if (isVideoNearViewportFn(el, Math.round(mediaVisMargin * 0.9))) return
           dropActiveVideoFn(el)
           if (!runtimeProfile.hardUnloadOnInactive) {
             try {
@@ -290,12 +232,8 @@ export default function VideoMedia({
               el.dataset.__active = '0'
             } catch {}
             try {
-              delete el.dataset.__prewarm
-              delete el.dataset.__warmLoading
               el.preload = 'metadata'
-              el.setAttribute('preload', 'metadata')
             } catch {}
-            setPreloadMode('metadata')
             return
           }
           unloadVideoElFn(el)
@@ -312,12 +250,12 @@ export default function VideoMedia({
         },
         {
           root: null,
-          rootMargin: `${runtimeProfile.residentMarginPx}px 0px ${runtimeProfile.residentMarginPx}px 0px`,
+          rootMargin: `${mediaVisMargin}px 0px ${mediaVisMargin}px 0px`,
           threshold: 0.01,
         },
       )
       io.observe(el)
-      if (isVideoNearViewportFn(el, Math.round(runtimeProfile.residentMarginPx * 0.78))) {
+      if (isVideoNearViewportFn(el, Math.round(mediaVisMargin * 0.8))) {
         setActive(true)
       }
     } catch {}
@@ -336,21 +274,16 @@ export default function VideoMedia({
         } catch {}
         unloadTimer = null
       }
-      dropResidentVideoFn(el)
       dropActiveVideoFn(el)
       unloadVideoElFn(el)
     }
   }, [
     dropActiveVideoFn,
-    dropResidentVideoFn,
     enforceActiveVideoCapFn,
-    enforceResidentVideoCapFn,
     isVideoNearViewportFn,
     mediaVisMargin,
-    primeVideoForWarmStartFn,
     restoreVideoElFn,
     touchActiveVideoFn,
-    touchResidentVideoFn,
     unloadVideoElFn,
   ])
 

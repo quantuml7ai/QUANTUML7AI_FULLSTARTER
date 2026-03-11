@@ -188,7 +188,7 @@ function categorizeFile(filePath) {
 }
 
 function writeMarkdown(filePath, lines) {
-  fs.writeFileSync(filePath, `\uFEFF${lines.join('\n')}\n`, 'utf8')
+  fs.writeFileSync(filePath, `\uFEFF${lines.join('\n')}`, 'utf8')
 }
 
 module.exports = {

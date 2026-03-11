@@ -7,10 +7,7 @@ import {
   readMutedPrefFromStorage,
   __touchActiveVideoEl,
   __enforceActiveVideoCap,
-  __touchResidentVideoEl,
-  __enforceResidentVideoCap,
   __restoreVideoEl,
-  __primeVideoForWarmStart,
   __hasLazyVideoSourceWithoutSrc,
   __MEDIA_VIS_MARGIN_PX,
 } from '../utils/mediaLifecycleRuntime'
@@ -115,62 +112,81 @@ export default function useForumMediaCoordinator({ emitDiag }) {
 
     const selector = 'video[data-forum-video="post"]';
 
+    const pending = new WeakMap();
+    const idle = (fn) => {
+      try {
+        if ('requestIdleCallback' in window) {
+          return window.requestIdleCallback(fn, { timeout: 1500 });
+        }
+      } catch {}
+      return setTimeout(fn, 120);
+    };
+    const cancelIdle = (id) => {
+      try {
+        if ('cancelIdleCallback' in window) return window.cancelIdleCallback(id);
+      } catch {}
+      clearTimeout(id);
+    };
+
     const prepare = (video) => {
       if (!(video instanceof HTMLVideoElement)) return;
+      if (video.dataset.previewInit === '1') return;
+      video.dataset.previewInit = '1';
 
       try {
-        __touchResidentVideoEl(video);
-        __enforceResidentVideoCap(video);
-        __primeVideoForWarmStart(video);
+        // Более ранний prewarm: к зоне фокуса хотим уже готовый первый кадр.
+        video.dataset.__prewarm = '1';
+        video.preload = 'auto';
+
+        // Если первый кадр/данные уже готовы — ничего не делаем
+        if (video.readyState >= 2) return;
+        if (__hasLazyVideoSourceWithoutSrc(video)) {
+          // Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start.
+          __restoreVideoEl(video);
+          __touchActiveVideoEl(video);
+          __enforceActiveVideoCap(video);
+          return;
+        }
+
+        // Тяжёлый load() — только в idle и только если видео реально "холодное"
+        if (pending.has(video)) return;
+        const id = idle(() => {
+          pending.delete(video);
+          try {
+            if (__hasLazyVideoSourceWithoutSrc(video)) return;
+            const cold = (video.readyState === 0 || !video.currentSrc);
+            const safe = cold && video.paused && (video.currentTime === 0);
+            if (safe) video.load?.();
+          } catch {}
+        });
+        pending.set(video, id);
       } catch {}
     };
 
     // если нет IntersectionObserver — готовим всё сразу
     if (!('IntersectionObserver' in window)) {
       document.querySelectorAll(selector).forEach(prepare);
-      return undefined;
+      return () => {
+        try {
+          pending.forEach((id) => { try { cancelIdle(id); } catch {} });
+          pending.clear?.();
+        } catch {}
+      };
     }
-
-    const prewarmMargins = (() => {
-      try {
-        const vh = Number(window?.innerHeight || 0) || 0;
-        const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
-        const dm = Number(window?.navigator?.deviceMemory || 0);
-        const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2;
-        if (lowMem) {
-          return {
-            top: Math.max(420, Math.round(vh * 0.72)),
-            bottom: Math.max(760, Math.round(vh * 1.15)),
-          };
-        }
-        if (coarse) {
-          return {
-            top: Math.max(560, Math.round(vh * 0.95)),
-            bottom: Math.max(1320, Math.round(vh * 1.9)),
-          };
-        }
-        return {
-          top: Math.max(460, Math.round(vh * 0.82)),
-          bottom: Math.max(980, Math.round(vh * 1.45)),
-        };
-      } catch {
-        return {
-          top: Math.max(420, Math.round(__MEDIA_VIS_MARGIN_PX * 1.6)),
-          bottom: Math.max(900, Math.round(__MEDIA_VIS_MARGIN_PX * 3.2)),
-        };
-      }
-    })();
 
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
           prepare(entry.target);
+          io.unobserve(entry.target); // один раз на видео
         });
       },
       {
+        // Чуть раньше подготавливаем медиа, чтобы автоплей не "спотыкался"
+        // при входе в зону фокуса на мобильных.
         threshold: 0.01,
-        rootMargin: `${prewarmMargins.top}px 0px ${prewarmMargins.bottom}px 0px`,
+        rootMargin: `${Math.max(220, Math.round(__MEDIA_VIS_MARGIN_PX * 1.05))}px 0px ${Math.max(300, Math.round(__MEDIA_VIS_MARGIN_PX * 1.45))}px 0px`,
       }
     );
 
@@ -178,6 +194,10 @@ export default function useForumMediaCoordinator({ emitDiag }) {
 
     return () => {
       io.disconnect();
+            try {
+        pending.forEach((id) => { try { cancelIdle(id); } catch {} });
+        pending.clear?.();
+      } catch {}     
     };
   }, []);
   // === Ранний prewarm iframe (YouTube/TikTok/other embeds) для более быстрого старта в зоне фокуса ===

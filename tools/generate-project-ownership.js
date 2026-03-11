@@ -223,7 +223,7 @@ function main() {
     ['audit', 'app', 'app/forum', 'app/api', 'components', 'lib']
   ))
 
-  fs.writeFileSync(outputPath, `\uFEFF${lines.join('\n')}\n`, 'utf8')
+  fs.writeFileSync(outputPath, `\uFEFF${lines.join('\n')}`, 'utf8')
   process.stdout.write(`Written ${path.basename(outputPath)}.\n`)
 }
 

@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 
 const fs = require('fs')
 const path = require('path')
@@ -6,10 +7,10 @@ const repoRoot = process.cwd()
 const outputPath = path.join(repoRoot, 'PROJECT_TREE.md')
 const ignoredTopDirs = ['.git', '.next', 'node_modules']
 const sourceExts = new Set(['.js', '.jsx', '.mjs', '.cjs', '.json'])
-
-function sortNatural(list) {
-  return list.sort((a, b) => a.localeCompare(b, 'ru', { sensitivity: 'base', numeric: true }))
-}
+const assetExts = new Set([
+  '.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg', '.mp3', '.wav', '.ogg', '.mp4', '.webm', '.ico', '.glb',
+  '.gltf', '.bin', '.txt', '.json', '.woff', '.woff2', '.ttf', '.otf', '.pdf',
+])
 
 function readRepoFiles() {
   const out = []
@@ -22,14 +23,17 @@ function readRepoFiles() {
       if (!rel) continue
       const topDir = rel.split('/')[0]
       if (ignoredTopDirs.includes(topDir)) continue
-      if (entry.isDirectory()) walk(abs)
-      else if (entry.isFile()) out.push(rel)
+      if (entry.isDirectory()) {
+        walk(abs)
+      } else if (entry.isFile()) {
+        out.push(rel)
+      }
     }
   }
 
   walk(repoRoot)
   if (!out.includes('PROJECT_TREE.md')) out.push('PROJECT_TREE.md')
-  return sortNatural(out)
+  return out.sort((a, b) => a.localeCompare(b, 'ru', { sensitivity: 'base', numeric: true }))
 }
 
 function buildFileSet(files) {
@@ -91,7 +95,7 @@ function extractDeps(filePath, fileSet) {
       if (resolved && resolved !== filePath) out.add(resolved)
     }
   }
-  return Array.from(out).sort((a, b) => a.localeCompare(b, 'ru', { sensitivity: 'base', numeric: true }))
+  return Array.from(out).sort()
 }
 
 function splitName(name) {
@@ -142,7 +146,7 @@ function extLabel(filePath) {
 
 function describeDir(dirPath) {
   const map = {
-    app: 'основной каталог Next.js App Router: страницы, layout и API.',
+    'app': 'основной каталог Next.js App Router: страницы, layout и API.',
     'app/about': 'страница/ресурсы раздела About.',
     'app/academy': 'страницы и блоки академии.',
     'app/ads': 'страницы и модули рекламного раздела.',
@@ -177,11 +181,11 @@ function describeDir(dirPath) {
     'app/subscribe': 'страницы подписки/лендинга.',
     'app/tma': 'Telegram Mini App связанные страницы.',
     'app/tma/auto': 'авто-страницы TMA.',
-    audit: 'JSON-артефакты аудитов и миграционных фаз.',
-    components: 'общие React-компоненты всего проекта.',
-    lib: 'общие библиотеки, кеши, middleware-хелперы и инфраструктурные утилиты.',
-    public: 'статические ассеты, доступные по публичным URL.',
-    tools: 'локальные скрипты аудита, генерации и техобслуживания.',
+    'audit': 'JSON-артефакты аудитов и миграционных фаз.',
+    'components': 'общие React-компоненты всего проекта.',
+    'lib': 'общие библиотеки, кеши, middleware-хелперы и инфраструктурные утилиты.',
+    'public': 'статические ассеты, доступные по публичным URL.',
+    'tools': 'локальные скрипты аудита, генерации и техобслуживания.',
   }
 
   if (map[dirPath]) return map[dirPath]
@@ -203,14 +207,29 @@ function describeDir(dirPath) {
       state: 'состояния',
       adapters: 'адаптеры',
     }
-    if (layerMap[base]) return `каталог слоя ${layerMap[base]} внутри feature ${feature}.`
-    if (feature && layer) return `каталог ${base} внутри feature ${feature}.`
+    if (layerMap[base]) {
+      return `каталог слоя ${layerMap[base]} внутри feature ${feature}.`
+    }
+    if (feature && layer) {
+      return `каталог ${base} внутри feature ${feature}.`
+    }
   }
 
-  if (parent === 'app/forum/shared') return `каталог shared-слоя форума: ${base}.`
-  if (dirPath.startsWith('public/')) return `подкаталог статических ассетов public/${base}.`
-  if (dirPath.startsWith('audit/')) return `группа audit-артефактов: ${base}.`
-  if (dirPath.startsWith('tools/')) return `подкаталог инструментов: ${base}.`
+  if (parent === 'app/forum/shared') {
+    return `каталог shared-слоя форума: ${base}.`
+  }
+
+  if (dirPath.startsWith('public/')) {
+    return `подкаталог статических ассетов public/${base}.`
+  }
+
+  if (dirPath.startsWith('audit/')) {
+    return `группа audit-артефактов: ${base}.`
+  }
+
+  if (dirPath.startsWith('tools/')) {
+    return `подкаталог инструментов: ${base}.`
+  }
 
   return `каталог ${base}.`
 }
@@ -239,121 +258,159 @@ function classifyForumFeature(filePath) {
     utils: 'утилита',
     constants: 'константа',
     docs: 'документ',
-    state: 'state-модуль',
+    state: 'модуль состояния',
     adapters: 'адаптер',
   }
-  const featureLabel = featureMap[feature] || feature || 'feature'
-  const layerLabel = layerMap[layer] || 'модуль'
-  return `${layerLabel} подсистемы ${featureLabel}: ${base}.`
+  if (!feature || !layer) return null
+  return `${layerMap[layer] || 'модуль'} ${base} домена ${featureMap[feature] || feature}.`
 }
 
-function describeFile(filePath) {
+function describeFile(filePath, deps, reverseDeps) {
+  const base = path.posix.basename(filePath)
+  const ext = path.posix.extname(filePath)
   const parts = filePath.split('/')
-  const base = parts[parts.length - 1]
-  const clean = splitName(base)
+  const parent = parts.slice(0, -1).join('/')
+  const stem = splitName(base)
 
-  if (/^PROJECT_(TREE|ROUTES|OWNERSHIP|DEPENDENCIES|RISKS)\.md$/i.test(base)) {
-    return `${extLabel(filePath)} реестра проекта: ${clean}.`
-  }
-  if (filePath === 'README.md') return 'Markdown-документ верхнего уровня с общим описанием проекта.'
-  if (filePath === 'package.json') return 'JSON-файл манифеста npm/pnpm: зависимости, скрипты и метаданные проекта.'
-  if (filePath === 'pnpm-lock.yaml') return 'YAML-файл lockfile pnpm, фиксирует версии зависимостей.'
-  if (filePath === 'pnpm-workspace.yaml') return 'YAML-файл конфигурации workspace pnpm.'
-  if (filePath === 'jsconfig.json') return 'JSON-файл конфигурации JS/alias для редактора и Next.js.'
-  if (filePath === 'next.config.mjs') return 'ESM-конфиг Next.js приложения.'
-  if (filePath === 'next-env.d.ts') return 'TS-служебный файл, генерируемый Next.js для типового окружения.'
-  if (filePath === '.env.local') return 'служебный-файл локальных переменных окружения разработчика.'
-  if (filePath === '.env.local.example') return 'служебный-файл примера локальных переменных окружения.'
-  if (filePath === '.eslintrc.json') return 'JSON-файл конфигурации ESLint.'
-  if (filePath === '.gitignore') return 'служебный-файл правил исключения для Git.'
-  if (filePath.startsWith('audit/')) return `${extLabel(filePath)} аудита/проверки состояния проекта.`
-  if (filePath.startsWith('tools/')) return `${extLabel(filePath)} локального инструмента генерации, аудита или техобслуживания.`
-  if (filePath.startsWith('public/')) return `${extLabel(filePath)} статического публичного ассета ${clean}.`
-  if (filePath.startsWith('components/')) return `${extLabel(filePath)} общего компонента/провайдера ${clean}.`
-  if (filePath.startsWith('lib/')) return `${extLabel(filePath)} общей библиотеки/инфраструктурного модуля ${clean}.`
-  if (filePath.startsWith('app/forum/features/')) return classifyForumFeature(filePath)
-  if (filePath.startsWith('app/forum/shared/')) return `${extLabel(filePath)} shared-слоя форума: ${clean}.`
-  if (filePath.startsWith('app/forum/styles/modules/')) return `${extLabel(filePath)} модульного фрагмента стилей форума: ${clean}.`
-  if (filePath.startsWith('app/forum/styles/')) return `${extLabel(filePath)} стилевого слоя форума: ${clean}.`
-  if (filePath.startsWith('app/api/')) {
-    if (base === 'route.js' || base === 'route.jsx') {
-      const routePath = parts.slice(2, -1).join('/') || 'root'
-      return `API-route ${routePath} для серверной логики Next.js.`
-    }
-    if (base.startsWith('_')) return `${extLabel(filePath)} внутреннего серверного хелпера API: ${clean}.`
-    return `${extLabel(filePath)} серверного модуля API-зоны ${parts[2] || 'root'}: ${clean}.`
-  }
-  if (filePath.startsWith('app/')) {
-    if (/\/(page|layout|loading|not-found|default)\.(js|jsx)$/.test(filePath)) {
-      const segment = parts.slice(1, -1).join('/') || 'root'
-      if (base.startsWith('page.')) return `Next.js страница маршрута /${segment === 'root' ? '' : segment}.`
-      if (base.startsWith('layout.')) return `Next.js layout для сегмента /${segment === 'root' ? '' : segment}.`
-      if (base.startsWith('loading.')) return `Next.js loading-состояние для сегмента /${segment === 'root' ? '' : segment}.`
-      if (base.startsWith('not-found.')) return `Next.js not-found для сегмента /${segment === 'root' ? '' : segment}.`
-      if (base.startsWith('default.')) return `Next.js default-слот для сегмента /${segment === 'root' ? '' : segment}.`
-    }
-    return `${extLabel(filePath)} сегмента ${parts[1] || 'root'}: ${clean}.`
-  }
-  return `${extLabel(filePath)} ${clean}.`
-}
-
-function dependencyNote(filePath, deps, reverseDeps) {
-  const outgoing = deps.get(filePath) || []
-  const incoming = reverseDeps.get(filePath) || []
-
-  if (!outgoing.length && !incoming.length) {
-    return 'Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.'
+  const rootMap = {
+    '.env.local': 'локальный runtime-конфиг и секреты окружения.',
+    '.env.local.example': 'пример переменных окружения для локального запуска.',
+    '.eslintrc.json': 'конфигурация ESLint для всего проекта.',
+    '.gitignore': 'правила исключения файлов из Git.',
+    'jsconfig.json': 'алиасы и baseUrl проекта для JS/JSX.',
+    'next-env.d.ts': 'служебный файл Next.js для типовой совместимости среды.',
+    'next.config.mjs': 'главная конфигурация Next.js сборки и рантайма.',
+    'package.json': 'манифест пакета, npm/pnpm-скрипты и зависимости.',
+    'pnpm-lock.yaml': 'lockfile pnpm с зафиксированными версиями зависимостей.',
+    'pnpm-workspace.yaml': 'конфиг workspace для pnpm.',
+    'README.md': 'корневая документация проекта.',
+    'account-sync-audit.report.json': 'сводный JSON-отчет аудита синхронизации аккаунта.',
+    'deep-audit.report.json': 'сводный JSON-отчет глубокого аудита проекта.',
+    'effects-leak.report.json': 'JSON-отчет аудита утечек эффектов.',
+    'forum-deps-audit.report.json': 'JSON-отчет аудита зависимостей форума.',
+    'forum-diag.jsonl': 'потоковый лог диагностики форума в формате JSONL.',
+    'heavy-audit.report.json': 'JSON-отчет тяжелого аудита hot-path зон.',
+    'media-audit.report.json': 'JSON-отчет аудита медиа-подсистемы.',
+    'runtime-hotspots.report.json': 'JSON-отчет по runtime-hotspots.',
   }
 
-  const parts = []
-  if (outgoing.length) parts.push(`импортирует ${outgoing.slice(0, 4).join(', ')}`)
-  if (incoming.length) parts.push(`используется в ${incoming.slice(0, 4).join(', ')}`)
-  return `Связи: ${parts.join('; ')}.`
-}
+  let description = rootMap[filePath] || rootMap[base] || ''
 
-function buildStats(files) {
-  const map = new Map()
-  for (const file of files) {
-    const top = file.split('/')[0]
-    map.set(top, (map.get(top) || 0) + 1)
-  }
-  return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0], 'ru', { sensitivity: 'base', numeric: true }))
-}
-
-function buildTree(files) {
-  const root = { dirs: new Map(), files: [] }
-  for (const file of files) {
-    const parts = file.split('/')
-    let node = root
-    for (let i = 0; i < parts.length; i += 1) {
-      const part = parts[i]
-      const isFile = i === parts.length - 1
-      if (isFile) node.files.push(file)
-      else {
-        if (!node.dirs.has(part)) node.dirs.set(part, { path: parts.slice(0, i + 1).join('/'), dirs: new Map(), files: [] })
-        node = node.dirs.get(part)
-      }
+  if (!description && filePath.startsWith('app/api/')) {
+    if (base === 'route.js') {
+      const endpoint = filePath.replace(/^app\/api\//, '').replace(/\/route\.js$/, '')
+      description = `API-route ${endpoint || '/'} для серверной логики Next.js.`
+    } else if (base.startsWith('_')) {
+      description = `внутренний ${stem} для API-сегмента ${parent.replace(/^app\/api\//, '') || 'root'}.`
     }
   }
-  return root
+
+  if (!description && filePath.startsWith('app/forum/features/')) {
+    description = classifyForumFeature(filePath)
+  }
+
+  if (!description && filePath.startsWith('app/forum/shared/')) {
+    const layer = parts[3]
+    const layerMap = {
+      api: 'shared API-хелпер',
+      components: 'shared UI-компонент',
+      config: 'shared конфиг',
+      constants: 'shared константа',
+      docs: 'shared документ',
+      hooks: 'shared хук',
+      storage: 'shared storage-обертка',
+      telemetry: 'shared телеметрия',
+      utils: 'shared утилита',
+    }
+    description = `${layerMap[layer] || 'shared модуль'} ${stem} форума.`
+  }
+
+  if (!description && filePath.startsWith('app/forum/styles/')) {
+    if (parts[3] === 'modules') {
+      description = `модуль стилевой сборки форума: ${stem}.`
+    } else {
+      description = `файл стилевого слоя форума: ${stem}.`
+    }
+  }
+
+  if (!description && filePath.startsWith('app/forum/')) {
+    const exact = {
+      'app/forum/Forum.jsx': 'тонкий entry-point экрана форума.',
+      'app/forum/ForumRoot.jsx': 'корневой composition-root форума и мессенджера.',
+      'app/forum/ForumHeaderPanel.jsx': 'компоновщик шапки форума с контролами, профилем, QCoin и VIP.',
+      'app/forum/ForumLayout.jsx': 'layout-обвязка форума.',
+      'app/forum/ForumProviders.jsx': 'провайдеры и контекстная сборка форума.',
+      'app/forum/ForumAds.js': 'форумная интеграция рекламных/промо-блоков.',
+    }
+    description = exact[filePath] || `${extLabel(filePath)} ${stem} домена форума.`
+  }
+
+  if (!description && filePath.startsWith('app/')) {
+    if (base === 'page.js') {
+      description = `Next.js страница маршрута /${parts.slice(1, -1).join('/')}.`
+    } else if (base === 'layout.js') {
+      description = `Next.js layout для сегмента /${parts.slice(1, -1).join('/') || ''}.`
+    } else if (base === 'loading.js') {
+      description = `loading-состояние для маршрута /${parts.slice(1, -1).join('/')}.`
+    } else if (base === 'not-found.js') {
+      description = `not-found обработчик для сегмента /${parts.slice(1, -1).join('/')}.`
+    } else {
+      description = `${extLabel(filePath)} ${stem} сегмента ${parent.replace(/^app\//, '') || 'app'}.`
+    }
+  }
+
+  if (!description && filePath.startsWith('components/')) {
+    description = `общий React-компонент ${stem}, используемый вне одного домена.`
+  }
+
+  if (!description && filePath.startsWith('lib/')) {
+    description = `общая библиотека/утилита ${stem} инфраструктурного слоя.`
+  }
+
+  if (!description && filePath.startsWith('public/')) {
+    const publicDir = parent === 'public' ? '' : parent.replace(/^public\//, '')
+    const publicScope = publicDir ? `public/${publicDir}` : 'public/'
+    description = `${extLabel(filePath)} из ${publicScope}; статический ассет проекта.`
+  }
+
+  if (!description && filePath.startsWith('tools/')) {
+    description = `локальный скрипт/инструмент ${stem} для аудита или техобслуживания.`
+  }
+
+  if (!description && filePath.startsWith('audit/')) {
+    description = `JSON-артефакт аудита ${stem}.`
+  }
+
+  if (!description) {
+    description = `${extLabel(filePath)} ${stem}.`
+  }
+
+  const imports = (deps.get(filePath) || []).slice(0, 3).map(shortPath)
+  const usedBy = (reverseDeps.get(filePath) || []).slice(0, 3).map(shortPath)
+
+  let links = ''
+  if (filePath.startsWith('public/')) {
+    links = ' Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.'
+  } else if (filePath.startsWith('audit/')) {
+    links = ' Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.'
+  } else if (imports.length || usedBy.length) {
+    const chunks = []
+    if (imports.length) chunks.push(`импортирует ${imports.join(', ')}`)
+    if (usedBy.length) chunks.push(`используется в ${usedBy.join(', ')}`)
+    links = ` Связи: ${chunks.join('; ')}.`
+  } else if (filePath.startsWith('tools/')) {
+    links = ' Связи: запускается вручную или из локального audit/workflow.'
+  } else {
+    links = ' Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.'
+  }
+
+  return `${capitalize(description)}${links}`
 }
 
-function renderTree(node, deps, reverseDeps, lines, depth = 0) {
-  const indent = '  '.repeat(depth)
-  const dirEntries = Array.from(node.dirs.entries()).sort((a, b) => a[0].localeCompare(b[0], 'ru', { sensitivity: 'base', numeric: true }))
-  const files = node.files.slice().sort((a, b) => a.localeCompare(b, 'ru', { sensitivity: 'base', numeric: true }))
-
-  for (const [name, child] of dirEntries) {
-    lines.push(`${indent}- ${name}/ — ${capitalize(describeDir(child.path))}`)
-    renderTree(child, deps, reverseDeps, lines, depth + 1)
-  }
-
-  for (const file of files) {
-    const base = path.posix.basename(file)
-    const description = describeFile(file)
-    const links = dependencyNote(file, deps, reverseDeps)
-    lines.push(`${indent}- ${base} — ${capitalize(description)} ${links}`)
-  }
+function shortPath(filePath) {
+  return filePath
+    .replace(/^app\/forum\//, 'forum/')
+    .replace(/^app\//, 'app/')
 }
 
 function capitalize(text) {
@@ -361,9 +418,70 @@ function capitalize(text) {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
+function makeTree(files) {
+  const root = { type: 'dir', name: '', path: '', children: new Map() }
+  for (const filePath of files) {
+    const parts = filePath.split('/')
+    let current = root
+    let acc = ''
+    parts.forEach((part, index) => {
+      acc = acc ? `${acc}/${part}` : part
+      const isFile = index === parts.length - 1
+      if (!current.children.has(part)) {
+        current.children.set(part, {
+          type: isFile ? 'file' : 'dir',
+          name: part,
+          path: acc,
+          children: new Map(),
+        })
+      }
+      current = current.children.get(part)
+    })
+  }
+  return root
+}
+
+function sortNodes(nodes) {
+  return nodes.sort((a, b) => {
+    if (a.type !== b.type) return a.type === 'dir' ? -1 : 1
+    return a.name.localeCompare(b.name, 'ru', { sensitivity: 'base', numeric: true })
+  })
+}
+
+function buildTopLevelCounts(files) {
+  const counts = new Map()
+  for (const file of files) {
+    const top = file.split('/')[0]
+    counts.set(top, (counts.get(top) || 0) + 1)
+  }
+  return Array.from(counts.entries())
+    .sort((a, b) => a[0].localeCompare(b[0], 'ru', { sensitivity: 'base', numeric: true }))
+}
+
+function renderTree(root, deps, reverseDeps) {
+  const lines = []
+  function walk(node, depth) {
+    const indent = '  '.repeat(depth)
+    if (node.path) {
+      if (node.type === 'dir') {
+        lines.push(`${indent}- ${node.name}/ — ${capitalize(describeDir(node.path))}`)
+      } else {
+        lines.push(`${indent}- ${node.name} — ${describeFile(node.path, deps, reverseDeps)}`)
+      }
+    }
+    if (node.type === 'dir') {
+      const children = sortNodes(Array.from(node.children.values()))
+      for (const child of children) walk(child, node.path ? depth + 1 : depth)
+    }
+  }
+  walk(root, 0)
+  return lines
+}
+
 function main() {
   const files = readRepoFiles()
   const fileSet = buildFileSet(files)
+  const topLevelCounts = buildTopLevelCounts(files)
   const deps = new Map()
   const reverseDeps = new Map()
 
@@ -377,10 +495,10 @@ function main() {
   }
 
   for (const [key, value] of reverseDeps.entries()) {
-    reverseDeps.set(key, value.sort((a, b) => a.localeCompare(b, 'ru', { sensitivity: 'base', numeric: true })))
+    reverseDeps.set(key, value.sort())
   }
 
-  const stats = buildStats(files)
+  const tree = makeTree(files)
   const lines = []
   lines.push('# PROJECT_TREE.md')
   lines.push('')
@@ -394,7 +512,6 @@ function main() {
   lines.push(`Файлов в реестре: ${files.length}`)
   lines.push('')
   lines.push('## Исключенные каталоги')
-  lines.push('')
   lines.push('- `.git/` — служебные внутренние данные Git, не часть прикладного дерева проекта.')
   lines.push('- `.next/` — генерируемые артефакты Next.js сборки.')
   lines.push('- `node_modules/` — внешние зависимости менеджера пакетов, не авторский код репозитория.')
@@ -404,18 +521,17 @@ function main() {
   lines.push('Этот файл описывает весь авторский репозиторий проекта, а не только форумный домен.')
   lines.push('Включены все прикладные страницы, layouts, API-маршруты, клиентские компоненты, серверные и инфраструктурные модули, public-ассеты, audit-артефакты и корневые конфиги.')
   lines.push('')
-  for (const [name, count] of stats) {
+  for (const [name, count] of topLevelCounts) {
     lines.push(`- \`${name}\` — ${count} файлов`)
   }
-
   lines.push('')
   lines.push('## Дерево проекта')
   lines.push('')
-  const tree = buildTree(files)
-  renderTree(tree, deps, reverseDeps, lines)
+  lines.push(...renderTree(tree, deps, reverseDeps))
+  lines.push('')
 
-  fs.writeFileSync(outputPath, `\uFEFF${lines.join('\n')}\n`, 'utf8')
-  process.stdout.write(`Written ${path.basename(outputPath)}.\n`)
+  fs.writeFileSync(outputPath, `\uFEFF${lines.join('\n')}`, 'utf8')
+  process.stdout.write(`Written ${path.basename(outputPath)} with ${files.length} files.\n`)
 }
 
 main()

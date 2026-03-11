@@ -61,26 +61,8 @@ const __MAX_ACTIVE_VIDEO_ELEMENTS = (() => {
   }
 })()
 
-const __MAX_RESIDENT_VIDEO_ELEMENTS = (() => {
-  try {
-    const ua = String((typeof navigator !== 'undefined' ? navigator.userAgent : '') || '')
-    const isIOS = /iP(hone|ad|od)/i.test(ua)
-    const coarse = !!(typeof window !== 'undefined' && window?.matchMedia?.('(pointer: coarse)')?.matches)
-    const dm = Number((typeof navigator !== 'undefined' ? navigator?.deviceMemory : 0) || 0)
-    const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2
-    if (isIOS) return 3
-    if (lowMem) return 3
-    if (coarse) return 4
-    return 6
-  } catch {
-    return 4
-  }
-})()
-
 const __activeVideoEls = new Set()
 const __activeVideoLRU = []
-const __residentVideoEls = new Set()
-const __residentVideoLRU = []
 
 export function __touchActiveVideoEl(el) {
   if (!el) return
@@ -95,21 +77,6 @@ export function __dropActiveVideoEl(el) {
   __activeVideoEls.delete(el)
   const idx = __activeVideoLRU.indexOf(el)
   if (idx !== -1) __activeVideoLRU.splice(idx, 1)
-}
-
-export function __touchResidentVideoEl(el) {
-  if (!el) return
-  if (!__residentVideoEls.has(el)) __residentVideoEls.add(el)
-  const idx = __residentVideoLRU.indexOf(el)
-  if (idx !== -1) __residentVideoLRU.splice(idx, 1)
-  __residentVideoLRU.push(el)
-}
-
-export function __dropResidentVideoEl(el) {
-  if (!el) return
-  __residentVideoEls.delete(el)
-  const idx = __residentVideoLRU.indexOf(el)
-  if (idx !== -1) __residentVideoLRU.splice(idx, 1)
 }
 
 export function __isVideoNearViewport(el, marginPx = 120) {
@@ -151,36 +118,6 @@ export function __enforceActiveVideoCap(exceptEl) {
   } catch {}
 }
 
-export function __enforceResidentVideoCap(exceptEl) {
-  try {
-    if (__residentVideoLRU.length <= __MAX_RESIDENT_VIDEO_ELEMENTS) return
-    let attempts = __residentVideoLRU.length + 4
-    while (__residentVideoLRU.length > __MAX_RESIDENT_VIDEO_ELEMENTS && attempts > 0) {
-      attempts -= 1
-      const victim = __residentVideoLRU.shift()
-      if (!victim) break
-      if (victim === exceptEl) {
-        __residentVideoLRU.push(victim)
-        continue
-      }
-      if (!victim?.isConnected) {
-        __residentVideoEls.delete(victim)
-        continue
-      }
-      if (__isVideoNearViewport(victim, Math.max(520, Math.round(__MEDIA_VIS_MARGIN_PX * 2.1)))) {
-        __residentVideoLRU.push(victim)
-        continue
-      }
-      if (!victim.paused) {
-        __residentVideoLRU.push(victim)
-        continue
-      }
-      __residentVideoEls.delete(victim)
-      __unloadVideoEl(victim)
-    }
-  } catch {}
-}
-
 export function __readMediaMutedPref() {
   const v = readMutedPrefFromStorage()
   if (typeof v === 'boolean') return v
@@ -197,18 +134,11 @@ export function __writeMediaMutedPref(nextMuted) {
 
 export function __unloadVideoEl(el) {
   if (!el) return
-  __dropResidentVideoEl(el)
-  __dropActiveVideoEl(el)
   try {
     el.pause?.()
   } catch {}
   try {
     el.dataset.__active = '0'
-  } catch {}
-  try {
-    delete el.dataset.__prewarm
-    delete el.dataset.__warmLoading
-    delete el.dataset.__warmReady
   } catch {}
   const canHardUnload = (() => {
     try {
@@ -222,7 +152,6 @@ export function __unloadVideoEl(el) {
   if (!canHardUnload) {
     try {
       el.preload = 'metadata'
-      el.setAttribute('preload', 'metadata')
     } catch {}
     return
   }
@@ -239,7 +168,6 @@ export function __unloadVideoEl(el) {
   } catch {}
   try {
     el.preload = 'none'
-    el.setAttribute('preload', 'none')
   } catch {}
   try {
     el.load?.()
@@ -254,7 +182,6 @@ export function __restoreVideoEl(el) {
   if (cur === src) return
   try {
     el.preload = (el.dataset?.__prewarm === '1') ? 'auto' : 'metadata'
-    el.setAttribute('preload', (el.dataset?.__prewarm === '1') ? 'auto' : 'metadata')
   } catch {}
   try {
     el.setAttribute('src', src)
@@ -264,59 +191,6 @@ export function __restoreVideoEl(el) {
   } catch {}
   try {
     el.load?.()
-  } catch {}
-}
-
-export function __primeVideoForWarmStart(el) {
-  if (!(el instanceof HTMLVideoElement)) return
-  __touchResidentVideoEl(el)
-  __enforceResidentVideoCap(el)
-  try {
-    el.dataset.__prewarm = '1'
-    el.preload = 'auto'
-    el.setAttribute('preload', 'auto')
-  } catch {}
-
-  if (el.readyState >= 2 && el.currentSrc) {
-    try {
-      el.dataset.__warmReady = '1'
-      delete el.dataset.__warmLoading
-    } catch {}
-    return
-  }
-
-  const finish = () => {
-    try {
-      el.dataset.__warmReady = '1'
-      delete el.dataset.__warmLoading
-    } catch {}
-    try { el.removeEventListener('loadeddata', finish) } catch {}
-    try { el.removeEventListener('canplay', finish) } catch {}
-    try { el.removeEventListener('error', fail) } catch {}
-  }
-
-  const fail = () => {
-    try { delete el.dataset.__warmLoading } catch {}
-    try { el.removeEventListener('loadeddata', finish) } catch {}
-    try { el.removeEventListener('canplay', finish) } catch {}
-    try { el.removeEventListener('error', fail) } catch {}
-  }
-
-  if (el.dataset.__warmLoading === '1') return
-  try {
-    el.dataset.__warmLoading = '1'
-    el.addEventListener('loadeddata', finish, { once: true })
-    el.addEventListener('canplay', finish, { once: true })
-    el.addEventListener('error', fail, { once: true })
-  } catch {}
-
-  if (__hasLazyVideoSourceWithoutSrc(el)) {
-    __restoreVideoEl(el)
-    return
-  }
-
-  try {
-    if (el.paused && (el.readyState < 2 || !el.currentSrc)) el.load?.()
   } catch {}
 }
 
@@ -357,14 +231,10 @@ export function VideoMedia(props) {
       restoreVideoEl={__restoreVideoEl}
       touchActiveVideo={__touchActiveVideoEl}
       enforceActiveVideoCap={__enforceActiveVideoCap}
-      touchResidentVideo={__touchResidentVideoEl}
-      enforceResidentVideoCap={__enforceResidentVideoCap}
       isVideoNearViewport={__isVideoNearViewport}
       mediaVisMarginPx={__MEDIA_VIS_MARGIN_PX}
       dropActiveVideo={__dropActiveVideoEl}
-      dropResidentVideo={__dropResidentVideoEl}
       unloadVideoEl={__unloadVideoEl}
-      primeVideoForWarmStart={__primeVideoForWarmStart}
     />
   )
 }
@@ -387,3 +257,4 @@ export const enableVideoControlsOnTap = createEnableVideoControlsOnTap({
   touchActiveVideoEl: __touchActiveVideoEl,
   enforceActiveVideoCap: __enforceActiveVideoCap,
 })
+

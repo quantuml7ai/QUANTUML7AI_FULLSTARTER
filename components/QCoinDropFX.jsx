@@ -497,8 +497,8 @@ export default function QCoinDropFX ({
       const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now()
       impulseUntilRef.current = now + IMPULSE_DURATION_MS
       impulseStrengthRef.current = Math.min(1, impulseStrengthRef.current + 0.6)
-      setTick((x) => (x + 1) & 1023)
 
+      setTick((x) => (x + 1) & 1023)
     }
 
     window.addEventListener('pointerdown', onPointerDown, { passive: true })
@@ -531,8 +531,8 @@ export default function QCoinDropFX ({
       const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now()
       impulseUntilRef.current = now + IMPULSE_DURATION_MS
       impulseStrengthRef.current = Math.min(1, impulseStrengthRef.current + 0.4)
-      setTick((x) => (x + 1) & 1023)
 
+      setTick((x) => (x + 1) & 1023)
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })

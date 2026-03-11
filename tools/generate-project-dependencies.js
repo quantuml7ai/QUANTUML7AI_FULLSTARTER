@@ -6,16 +6,39 @@ const {
   readRepoFiles,
   buildDependencyMaps,
   categorizeFile,
+  sortNatural,
   writeMarkdown,
 } = require('./project-docs-shared')
 
 const outputPath = path.join(repoRoot, 'PROJECT_DEPENDENCIES.md')
 
-function compareRu(a, b) {
-  return a.localeCompare(b, 'ru', { sensitivity: 'base', numeric: true })
+function topEdgesByZone(files, deps) {
+  const edgeMap = new Map()
+
+  for (const file of files) {
+    const fromZone = categorizeFile(file)
+    for (const dep of deps.get(file) || []) {
+      const toZone = categorizeFile(dep)
+      const key = `${fromZone} -> ${toZone}`
+      edgeMap.set(key, (edgeMap.get(key) || 0) + 1)
+    }
+  }
+
+  return Array.from(edgeMap.entries())
+    .map(([key, count]) => {
+      const [from, to] = key.split(' -> ')
+      return { from, to, count }
+    })
+    .sort((a, b) => b.count - a.count || a.from.localeCompare(b.from, 'ru', { sensitivity: 'base', numeric: true }))
 }
 
-function buildZoneStats(files) {
+function topFilesByFanIn(reverseDeps) {
+  return Array.from(reverseDeps.entries())
+    .map(([file, consumers]) => ({ file, fanIn: consumers.length, consumers: consumers.slice(0, 8) }))
+    .sort((a, b) => b.fanIn - a.fanIn || a.file.localeCompare(b.file, 'ru', { sensitivity: 'base', numeric: true }))
+}
+
+function zoneStats(files) {
   const map = new Map()
   for (const file of files) {
     const zone = categorizeFile(file)
@@ -23,40 +46,10 @@ function buildZoneStats(files) {
   }
   return Array.from(map.entries())
     .map(([zone, count]) => ({ zone, count }))
-    .sort((a, b) => compareRu(a.zone, b.zone))
+    .sort((a, b) => a.zone.localeCompare(b.zone, 'ru', { sensitivity: 'base', numeric: true }))
 }
 
-function buildZoneEdges(files, deps) {
-  const map = new Map()
-  for (const file of files) {
-    const fromZone = categorizeFile(file)
-    for (const dep of deps.get(file) || []) {
-      const toZone = categorizeFile(dep)
-      const key = `${fromZone} -> ${toZone}`
-      map.set(key, (map.get(key) || 0) + 1)
-    }
-  }
-  return Array.from(map.entries())
-    .map(([key, count]) => {
-      const [fromZone, toZone] = key.split(' -> ')
-      return { fromZone, toZone, count }
-    })
-    .sort((a, b) => b.count - a.count || compareRu(a.fromZone, b.fromZone) || compareRu(a.toZone, b.toZone))
-}
-
-function buildFanIn(reverseDeps) {
-  return Array.from(reverseDeps.entries())
-    .map(([file, consumers]) => ({ file, count: consumers.length, consumers: consumers.slice(0, 8) }))
-    .sort((a, b) => b.count - a.count || compareRu(a.file, b.file))
-}
-
-function buildFanOut(files, deps) {
-  return files
-    .map((file) => ({ file, count: (deps.get(file) || []).length, deps: (deps.get(file) || []).slice(0, 8) }))
-    .sort((a, b) => b.count - a.count || compareRu(a.file, b.file))
-}
-
-function buildOutgoingByZone(files, deps) {
+function groupOutgoingByZone(files, deps) {
   const grouped = new Map()
   for (const file of files) {
     const fromZone = categorizeFile(file)
@@ -71,21 +64,20 @@ function buildOutgoingByZone(files, deps) {
     .map(([zone, edgeMap]) => ({
       zone,
       edges: Array.from(edgeMap.entries())
-        .map(([target, count]) => ({ target, count }))
-        .sort((a, b) => b.count - a.count || compareRu(a.target, b.target)),
+        .map(([toZone, count]) => ({ toZone, count }))
+        .sort((a, b) => b.count - a.count || a.toZone.localeCompare(b.toZone, 'ru', { sensitivity: 'base', numeric: true })),
     }))
-    .sort((a, b) => compareRu(a.zone, b.zone))
+    .sort((a, b) => a.zone.localeCompare(b.zone, 'ru', { sensitivity: 'base', numeric: true }))
 }
 
 function main() {
   const files = readRepoFiles()
   const sourceFiles = files.filter((file) => /\.(js|jsx|mjs|cjs|json)$/.test(file))
   const { deps, reverseDeps } = buildDependencyMaps(sourceFiles)
-  const zoneStats = buildZoneStats(sourceFiles)
-  const zoneEdges = buildZoneEdges(sourceFiles, deps)
-  const fanIn = buildFanIn(reverseDeps)
-  const fanOut = buildFanOut(sourceFiles, deps)
-  const outgoingByZone = buildOutgoingByZone(sourceFiles, deps)
+  const edges = topEdgesByZone(sourceFiles, deps)
+  const fanIn = topFilesByFanIn(reverseDeps)
+  const zones = zoneStats(sourceFiles)
+  const groupedOutgoing = groupOutgoingByZone(sourceFiles, deps)
 
   const lines = []
   lines.push('# PROJECT_DEPENDENCIES.md')
@@ -96,29 +88,29 @@ function main() {
   lines.push('')
   lines.push(`Сгенерировано автоматически: ${new Date().toISOString()}`)
   lines.push(`Исходных файлов в анализе: ${sourceFiles.length}`)
-  lines.push(`Локальных зависимостей: ${zoneEdges.reduce((sum, item) => sum + item.count, 0)}`)
+  lines.push(`Локальных зависимостей: ${edges.reduce((sum, item) => sum + item.count, 0)}`)
   lines.push('')
   lines.push('## Охват')
   lines.push('')
   lines.push('- Локальные импорты между `app`, `components`, `lib`, `tools`, `public`.')
   lines.push('- Межзоновые зависимости по доменам и слоям.')
-  lines.push('- Файлы с высоким fan-in и fan-out, то есть с высоким радиусом поломки.')
+  lines.push('- Файлы с высоким fan-in, то есть большим радиусом поломки.')
   lines.push('')
   lines.push('## Размер Зон')
   lines.push('')
-  for (const item of zoneStats) {
+  for (const item of zones) {
     lines.push(`- \`${item.zone}\` — ${item.count} файлов`)
   }
   lines.push('')
   lines.push('## Топ Межзоновых Зависимостей')
   lines.push('')
-  for (const edge of zoneEdges.slice(0, 50)) {
-    lines.push(`- \`${edge.fromZone}\` -> \`${edge.toZone}\` — ${edge.count} локальных импортов`)
+  for (const edge of edges.slice(0, 50)) {
+    lines.push(`- \`${edge.from}\` -> \`${edge.to}\` — ${edge.count} локальных импортов`)
   }
   lines.push('')
   lines.push('## Исходящие Зависимости По Зонам')
   lines.push('')
-  for (const item of outgoingByZone) {
+  for (const item of groupedOutgoing) {
     lines.push(`### ${item.zone}`)
     lines.push('')
     if (!item.edges.length) {
@@ -127,29 +119,21 @@ function main() {
       continue
     }
     for (const edge of item.edges.slice(0, 12)) {
-      lines.push(`- \`${edge.target}\` — ${edge.count}`)
+      lines.push(`- \`${edge.toZone}\` — ${edge.count}`)
     }
     lines.push('')
   }
   lines.push('## Файлы С Высоким Fan-In')
   lines.push('')
   for (const item of fanIn.slice(0, 40)) {
-    const consumers = item.consumers.length ? item.consumers.map((value) => `\`${value}\``).join(', ') : 'нет'
-    lines.push(`- \`${item.file}\` — fan-in ${item.count}; основные потребители: ${consumers}`)
-  }
-  lines.push('')
-  lines.push('## Файлы С Высоким Fan-Out')
-  lines.push('')
-  for (const item of fanOut.slice(0, 40)) {
-    const targets = item.deps.length ? item.deps.map((value) => `\`${value}\``).join(', ') : 'нет'
-    lines.push(`- \`${item.file}\` — fan-out ${item.count}; основные зависимости: ${targets}`)
+    const consumers = item.consumers.length ? item.consumers.map((v) => `\`${v}\``).join(', ') : 'нет'
+    lines.push(`- \`${item.file}\` — fan-in ${item.fanIn}; основные потребители: ${consumers}`)
   }
   lines.push('')
   lines.push('## Вывод')
   lines.push('')
-  lines.push('- Файлы с высоким fan-in требуют особенно осторожных изменений, потому что влияют на большое число модулей.')
+  lines.push('- Файлы с высоким fan-in требуют особенно осторожных изменений.')
   lines.push('- Самые чувствительные зоны обычно находятся в `app/forum`, `app/api/*`, `components/i18n.js`, `lib/*` и корневых route/layout файлах.')
-  lines.push('- Этот документ не заменяет код-ревью, но показывает, где радиус регрессии максимальный еще до ручной проверки.')
 
   writeMarkdown(outputPath, lines)
   process.stdout.write(`Written ${path.basename(outputPath)}.\n`)

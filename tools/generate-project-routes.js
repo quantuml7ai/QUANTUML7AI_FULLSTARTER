@@ -161,7 +161,7 @@ function main() {
   lines.push(...renderSection('Пользовательские Маршруты И Route Handlers', appRoutes))
   lines.push(...renderSection('API Маршруты', apiRoutes))
 
-  fs.writeFileSync(outputPath, `\uFEFF${lines.join('\n')}\n`, 'utf8')
+  fs.writeFileSync(outputPath, `\uFEFF${lines.join('\n')}`, 'utf8')
   process.stdout.write(`Written ${path.basename(outputPath)} with ${all.length} route-aware files.\n`)
 }
 
