@@ -1,0 +1,74 @@
+{
+  "phase": "122",
+  "timestamp": "2026-03-10T17:33:21.797Z",
+  "scope": [
+    "app/api/forum/_db.js",
+    "app/api/forum/snapshot/route.js",
+    "app/api/forum/mutate/route.js",
+    "app/forum/features/feed/hooks/useForumSyncLoop.js",
+    "app/forum/features/moderation/hooks/useReportController.js",
+    "app/forum/features/ui/hooks/useForumSessionShell.js"
+  ],
+  "touched_files": [
+    "app/api/forum/_db.js",
+    "app/api/forum/snapshot/route.js",
+    "app/api/forum/mutate/route.js",
+    "app/forum/features/feed/hooks/useForumSyncLoop.js",
+    "app/forum/features/moderation/hooks/useReportController.js",
+    "app/forum/features/ui/hooks/useForumSessionShell.js"
+  ],
+  "new_files": [
+    "tools/audit-forum-view-report.js"
+  ],
+  "moved_logic_domains": [
+    "feed/views sync",
+    "snapshot incremental fallback",
+    "report/media-lock ownership",
+    "session media-lock polling"
+  ],
+  "dependency_changes": {
+    "snapshot_sync": "incremental now reads newest change window and supports full fallback on gaps",
+    "view_persistence": "view_topic(s)/view_post(s) now patch full snapshot for freshness",
+    "report_locking": "lock owner id returned and applied only for that user"
+  },
+  "detected_risks": [],
+  "detected_cycles": [],
+  "api_contract_risk": "low",
+  "storage_risk": "low",
+  "runtime_risk": "low",
+  "notes": [
+    "Static contract audit for views/report critical paths.",
+    "Use together with build + heavy/effects/deps audits."
+  ],
+  "status": "ok",
+  "checks": [
+    {
+      "check": "snapshot_incremental_reads_recent_changes",
+      "ok": true
+    },
+    {
+      "check": "snapshot_route_accepts_incremental_full_fallback",
+      "ok": true
+    },
+    {
+      "check": "sync_loop_handles_full_fallback",
+      "ok": true
+    },
+    {
+      "check": "mutate_patches_snapshot_for_all_view_ops",
+      "ok": true
+    },
+    {
+      "check": "report_db_returns_lock_owner",
+      "ok": true
+    },
+    {
+      "check": "report_controller_applies_lock_only_to_target_user",
+      "ok": true
+    },
+    {
+      "check": "media_lock_polling_enabled",
+      "ok": true
+    }
+  ]
+}

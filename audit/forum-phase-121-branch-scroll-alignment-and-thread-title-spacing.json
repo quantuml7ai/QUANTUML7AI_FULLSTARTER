@@ -1,0 +1,47 @@
+{
+  "phase": "phase-121-branch-scroll-alignment-and-thread-title-spacing",
+  "timestamp": "2026-03-10T19:01:07.3499908+02:00",
+  "scope": [
+    "forum branch transition scroll alignment",
+    "inbox header/tabs alignment fallback",
+    "video feed top snap on mode open",
+    "thread title spacing and replies centering"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/dm/utils/alignInboxStartUnderTabs.js",
+    "app/forum/features/dm/hooks/useDmOpenEvents.js",
+    "app/forum/features/feed/components/ThreadTitle.jsx",
+    "app/forum/styles/ForumStyles.jsx"
+  ],
+  "new_files": [
+    "audit/forum-phase-121-branch-scroll-alignment-and-thread-title-spacing.json"
+  ],
+  "moved_logic_domains": [
+    "cross-branch scroll positioning moved to explicit mode-align effect in ForumRoot",
+    "inbox tabs alignment now supports both inner scroll and window scroll containers"
+  ],
+  "dependency_changes": {
+    "imports_added": [
+      "snapVideoFeedToFirstCardTopUtil in ForumRoot"
+    ],
+    "prop_contract_changes": [
+      "none"
+    ]
+  },
+  "detected_risks": [
+    "Mode align effect intentionally skips deeplink-active and dm-thread modes to avoid regressions"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "notes": [
+    "pnpm eslint targeted files: pass",
+    "pnpm build: pass",
+    "node tools/audit-heavy.js: pass",
+    "node tools/audit-effects.js: pass",
+    "unrelated no-img warnings remain"
+  ],
+  "status": "passed"
+}

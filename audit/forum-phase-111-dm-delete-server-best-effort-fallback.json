@@ -1,0 +1,31 @@
+{
+  "phase": "111",
+  "timestamp": "2026-03-10T09:10:00+02:00",
+  "scope": [
+    "dm delete server parity fallback for local branch"
+  ],
+  "touched_files": [
+    "app/forum/features/dm/hooks/useDmDeleteController.js"
+  ],
+  "new_files": [
+    "audit/forum-phase-111-dm-delete-server-best-effort-fallback.json"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "dm/delete",
+      "change": "Local delete branch now also attempts backend delete to prevent peer-state divergence."
+    }
+  ],
+  "dependency_changes": [],
+  "detected_risks": [
+    "In local-only intent, peer-side delete may now still happen if server request succeeds."
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "low",
+  "storage_risk": "low",
+  "runtime_risk": "low",
+  "notes": [
+    "Validation: pnpm eslint on touched file passed."
+  ],
+  "status": "completed"
+}

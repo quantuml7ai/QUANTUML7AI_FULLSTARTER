@@ -1,0 +1,37 @@
+﻿{
+    "phase":  "10b-forum-global-css-gating",
+    "timestamp":  "2026-03-08T17:17:20.6210249+02:00",
+    "scope":  [
+                  "app/globals.css",
+                  "app/forum/ForumRoot.jsx"
+              ],
+    "touched_files":  [
+                          "app/globals.css",
+                          "app/forum/ForumRoot.jsx"
+                      ],
+    "new_files":  [
+
+                  ],
+    "moved_logic_domains":  [
+                                "none"
+                            ],
+    "dependency_changes":  {
+                               "forum_runtime":  "sets html[data-forum-active=\"1\"] via useHtmlFlag",
+                               "global_css":  "scoped broad global selectors behind html:not([data-forum-active=\"1\"])",
+                               "build":  "pnpm build passed"
+                           },
+    "detected_risks":  [
+                           "Forum flag is applied after client mount, so first paint can briefly use non-forum styles before hydration."
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "none",
+    "storage_risk":  "none",
+    "runtime_risk":  "low",
+    "notes":  [
+                  "This patch prevents generic global rules from overriding forum-local classes and semantic layout tags.",
+                  "No API/DB logic changed."
+              ],
+    "status":  "passed"
+}

@@ -1,0 +1,74 @@
+{
+  "phase": "forum-phase-118-reactions-views-premium",
+  "timestamp": "2026-03-10T00:00:00+02:00",
+  "scope": [
+    "feed reactions UX/state",
+    "reaction server invariant",
+    "focus-based post views",
+    "post action visual state"
+  ],
+  "touched_files": [
+    "app/forum/features/feed/hooks/useForumMutationQueue.js",
+    "app/forum/features/feed/hooks/useForumMutationActions.js",
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/feed/components/PostActionBar.jsx",
+    "app/forum/features/feed/components/ForumPostCard.jsx",
+    "app/forum/features/feed/hooks/useForumViewTracking.js",
+    "app/api/forum/mutate/route.js",
+    "app/forum/styles/ForumStyles.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/feed/components/PostActionBar.jsx"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "reactions",
+      "from": "toggleable like/dislike with nullable reset",
+      "to": "exclusive switch only (like <-> dislike)"
+    },
+    {
+      "domain": "views",
+      "from": "ratio-only focus mark",
+      "to": "ratio + visible-pixels focus mark for tall media cards"
+    }
+  ],
+  "dependency_changes": [
+    {
+      "module": "useForumMutationQueue",
+      "change": "pushOp now supports per-op flush delay"
+    },
+    {
+      "module": "useForumMutationActions",
+      "change": "reaction ops flush at 35ms and prevent same-state re-send"
+    },
+    {
+      "module": "api/forum/mutate",
+      "change": "setPostReaction ignores null reset and keeps previous state"
+    }
+  ],
+  "detected_risks": [
+    "Existing server snapshot still does not hydrate per-user myReaction for unseen sessions.",
+    "Queue entries created before this patch with state=null are now treated as no-op (intentional behavior change)."
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "low",
+  "storage_risk": "low",
+  "runtime_risk": "medium",
+  "notes": [
+    "Reaction button active state is visually dark + disabled.",
+    "Optimistic reaction counters are conservative when current state is unknown to avoid counter jumps.",
+    "View tracking now handles oversized post cards where intersectionRatio alone is insufficient."
+  ],
+  "audit": {
+    "eslint": "passed",
+    "effects_audit": "completed",
+    "media_audit": "completed",
+    "heavy_audit": "completed",
+    "artifacts": [
+      "effects-leak.report.json",
+      "media-audit.report.json",
+      "heavy-audit.report.json"
+    ]
+  },
+  "status": "completed"
+}

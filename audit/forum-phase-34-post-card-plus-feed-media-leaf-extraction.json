@@ -1,0 +1,103 @@
+{
+  "phase": "34-post-card-plus-feed-media-leaf-extraction",
+  "timestamp": "2026-03-05T01:03:00.1056990+02:00",
+  "scope": [
+    "forum-root-thinning",
+    "feed-post-card-composition",
+    "feed-leaf-components",
+    "media-live-preview-component"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/feed/components/ForumPostCard.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/feed/components/LoadMoreSentinel.jsx",
+    "app/forum/features/feed/components/CreateTopicCard.jsx",
+    "app/forum/features/media/components/LivePreview.jsx"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "feed.post-card",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/feed/components/ForumPostCard.jsx",
+      "status": "completed"
+    },
+    {
+      "domain": "feed.pagination-sentinel",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/feed/components/LoadMoreSentinel.jsx",
+      "status": "completed"
+    },
+    {
+      "domain": "feed.create-topic-modal",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/feed/components/CreateTopicCard.jsx",
+      "status": "completed"
+    },
+    {
+      "domain": "media.live-camera-preview",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/components/LivePreview.jsx",
+      "status": "completed"
+    }
+  ],
+  "dependency_changes": {
+    "forum_dependency_audit": {
+      "files_scanned": 165,
+      "internal_edges": 233,
+      "cycles": 0,
+      "cross_domain_edges": 79,
+      "forum_root_imports": 1
+    },
+    "forum_root_delta": {
+      "local_component_definitions_removed": [
+        "LoadMoreSentinel",
+        "LivePreview",
+        "CreateTopicCard"
+      ],
+      "local_component_wrapper_kept": [
+        "PostCard -> ForumPostCard"
+      ],
+      "new_feature_imports": [
+        "features/feed/components/LoadMoreSentinel",
+        "features/feed/components/CreateTopicCard",
+        "features/media/components/LivePreview"
+      ]
+    }
+  },
+  "detected_risks": [
+    "ForumRoot remains high-complexity file with residual raf/layout/event-heavy zones.",
+    "LivePreview keeps autoplay semantics by design; media audit will continue to flag video+autoplay pattern.",
+    "No functional migration on API/server contracts in this phase; risk mainly UI wiring/regression."
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": {
+    "level": "low",
+    "notes": [
+      "No endpoint URL, payload, or response handling changes.",
+      "Client fetch/mutation contracts unchanged."
+    ]
+  },
+  "storage_risk": {
+    "level": "low",
+    "notes": [
+      "No storage key changes.",
+      "Persist/restore semantics untouched."
+    ]
+  },
+  "runtime_risk": {
+    "level": "low",
+    "notes": [
+      "Build passed after extraction.",
+      "Eslint passed for touched files.",
+      "Known global warnings remain outside forum migration scope."
+    ]
+  },
+  "notes": [
+    "Audit scripts executed: audit-forum-deps, audit-full-forum, audit-effects, audit-media, audit-heavy.",
+    "Production build passed with existing no-img-element warnings in unrelated files.",
+    "Phase keeps behavior parity by moving code without business-rule rewrites."
+  ],
+  "status": "pass"
+}

@@ -1,0 +1,46 @@
+﻿{
+    "phase":  "10h-quest-claim-instant-overlay",
+    "timestamp":  "2026-03-08T19:26:52.2240947+02:00",
+    "scope":  [
+                  "app/forum/features/quests/hooks/useForumQuestProgress.js"
+              ],
+    "touched_files":  [
+                          "app/forum/features/quests/hooks/useForumQuestProgress.js"
+                      ],
+    "new_files":  [
+                      "audit/forum-phase-10h-quest-claim-instant-overlay.json"
+                  ],
+    "moved_logic_domains":  [
+                                "quests: claim overlay trigger now has timer-driven readiness watcher"
+                            ],
+    "dependency_changes":  {
+                               "client":  [
+                                              "useForumQuestProgress: added claimClockTick interval gated by pending claim cards",
+                                              "auto-open claim effect now checks per-task readiness (isTaskReady) + min overlay delay"
+                                          ],
+                               "server_routes":  [
+                                                     "none"
+                                                 ],
+                               "db_utils":  [
+                                                "none"
+                                            ]
+                           },
+    "detected_risks":  [
+                           "If user closes claim overlay without claim, it can reopen while card remains claimable (same as auto-claim force behavior)"
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low",
+    "runtime_risk":  "low",
+    "notes":  [
+                  "Fix addresses delayed claim popup after timer expiry without requiring page reload.",
+                  "Overlay rendering remains in ForumOverlayStack, independent of header open/closed state."
+              ],
+    "verification":  {
+                         "eslint":  "passed: app/forum/features/quests/hooks/useForumQuestProgress.js",
+                         "functional_parity":  "passed: tools/audit-forum-functional-parity.ps1"
+                     },
+    "status":  "passed"
+}

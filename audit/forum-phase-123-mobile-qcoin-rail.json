@@ -1,0 +1,28 @@
+﻿{
+  "phase": "forum-phase-123-mobile-qcoin-rail",
+  "timestamp": "2026-03-11T13:56:12",
+  "scope": [
+    "forum header mobile qcoin layout",
+    "about rail pulse clipping"
+  ],
+  "touched_files": [
+    "app/forum/styles/ForumStyles.jsx",
+    "app/forum/styles/modules/qcoinStyles.js",
+    "app/forum/styles/modules/profileStyles.js"
+  ],
+  "new_files": [],
+  "moved_logic_domains": [],
+  "dependency_changes": [],
+  "detected_risks": [
+    "mobile-only visual tuning may need one more pass on very narrow screens"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "notes": [
+    "Q COIN block enlarged on <=680px without stretching across the full row",
+    "About rail pulse is clipped inside the rail; pencil stays visible"
+  ],
+  "status": "passed"
+}

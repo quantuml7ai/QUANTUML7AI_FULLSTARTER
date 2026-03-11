@@ -497,8 +497,8 @@ export default function QCoinDropFX ({
       const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now()
       impulseUntilRef.current = now + IMPULSE_DURATION_MS
       impulseStrengthRef.current = Math.min(1, impulseStrengthRef.current + 0.6)
-
       setTick((x) => (x + 1) & 1023)
+
     }
 
     window.addEventListener('pointerdown', onPointerDown, { passive: true })
@@ -531,8 +531,8 @@ export default function QCoinDropFX ({
       const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now()
       impulseUntilRef.current = now + IMPULSE_DURATION_MS
       impulseStrengthRef.current = Math.min(1, impulseStrengthRef.current + 0.4)
-
       setTick((x) => (x + 1) & 1023)
+
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -543,6 +543,18 @@ export default function QCoinDropFX ({
     const mm = Math.max(1, Math.floor(Number(m) || 1))
     return `x${mm}`
   }
+
+  const toastErrorLabel = (() => {
+    if (!isBrowser()) return '(the credit will be verified on the server)'
+    const lang = String(document?.documentElement?.lang || '').toLowerCase()
+    if (lang.startsWith('ru')) return '(зачисление будет проверено на сервере)'
+    if (lang.startsWith('uk')) return '(зарахування буде перевірено на сервері)'
+    if (lang.startsWith('es')) return '(el abono será verificado en el servidor)'
+    if (lang.startsWith('zh')) return '（充值将由服务器进行验证）'
+    if (lang.startsWith('ar')) return '(سيتم التحقق من الإيداع على الخادم)'
+    if (lang.startsWith('tr')) return '(yatırım sunucuda doğrulanacaktır)'
+    return '(the credit will be verified on the server)'
+  })()
 
   const tierTitle = (m) => {
     const t = getTierByMult(m)
@@ -562,10 +574,10 @@ export default function QCoinDropFX ({
     }
 
     const fullTitle = tierTitle(toast.mult)
-    const fullReward = `🎉+${toast.reward.toLocaleString('en-US', {
+    const fullReward = `+${toast.reward.toLocaleString('en-US', {
       maximumFractionDigits: 8,
       minimumFractionDigits: 0,
-    })} QCoin 🎁`
+    })} QCoin`
     const fullMult = formatMult(toast.mult)
 
     setTyped({
@@ -729,7 +741,7 @@ export default function QCoinDropFX ({
 
   const toastTitle = toast ? (typed.title || tierTitle(toast.mult)) : ''
   const toastReward = toast
-    ? (typed.reward || `🎉+${toast.reward.toLocaleString('en-US', { maximumFractionDigits: 8, minimumFractionDigits: 0 })} QCoin 🎁`)
+    ? (typed.reward || `+${toast.reward.toLocaleString('en-US', { maximumFractionDigits: 8, minimumFractionDigits: 0 })} QCoin`)
     : ''
   const toastMult = toast ? (typed.mult || formatMult(toast.mult)) : ''
 
@@ -835,7 +847,7 @@ export default function QCoinDropFX ({
 
               {toast.error && (
                 <div className="qdrop-toast-error">
-                  {tr('qcoin_drop_toast_error', '(зачисление будет проверено на сервере)')}
+                  {toastErrorLabel}
                 </div>
               )}
             </div>

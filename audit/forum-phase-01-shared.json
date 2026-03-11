@@ -1,0 +1,109 @@
+﻿{
+    "phase":  "phase-01-shared",
+    "timestamp":  "2026-03-04T16:40:43.9529547Z",
+    "scope":  [
+                  "app/forum/Forum.jsx",
+                  "app/forum/shared/*",
+                  "tools/audit-forum-deps.js"
+              ],
+    "touched_files":  [
+                          "app/forum/Forum.jsx",
+                          "app/forum/shared/hooks/useEvent.js",
+                          "app/forum/shared/utils/browser.js",
+                          "app/forum/shared/utils/classnames.js",
+                          "app/forum/shared/utils/time.js",
+                          "app/forum/shared/constants/media.js",
+                          "app/forum/shared/config/runtime.js",
+                          "app/forum/shared/storage/localStorage.js",
+                          "app/forum/shared/api/http.js",
+                          "app/forum/shared/telemetry/diag.js",
+                          "app/forum/shared/docs/phase-01-shared-foundation.md",
+                          "tools/audit-forum-deps.js"
+                      ],
+    "new_files":  [
+                      "app/forum/shared/hooks/useEvent.js",
+                      "app/forum/shared/utils/browser.js",
+                      "app/forum/shared/utils/classnames.js",
+                      "app/forum/shared/utils/time.js",
+                      "app/forum/shared/constants/media.js",
+                      "app/forum/shared/config/runtime.js",
+                      "app/forum/shared/storage/localStorage.js",
+                      "app/forum/shared/api/http.js",
+                      "app/forum/shared/telemetry/diag.js",
+                      "app/forum/shared/docs/phase-01-shared-foundation.md",
+                      "tools/audit-forum-deps.js",
+                      "audit/forum-phase-01-shared.json"
+                  ],
+    "moved_logic_domains":  [
+                                "forum-shared/hooks: useEvent",
+                                "forum-shared/utils: isBrowser, cls",
+                                "forum-shared/constants: media limits",
+                                "forum-shared/config: runtime config from window.__FORUM_CONF__",
+                                "forum-shared/storage: safe localStorage wrappers",
+                                "forum-shared/api: requestJson wrapper"
+                            ],
+    "dependency_changes":  {
+                               "forum_root_imports_added":  [
+                                                                "app/forum/shared/hooks/useEvent.js",
+                                                                "app/forum/shared/utils/browser.js",
+                                                                "app/forum/shared/utils/classnames.js",
+                                                                "app/forum/shared/constants/media.js",
+                                                                "app/forum/shared/config/runtime.js",
+                                                                "app/forum/shared/storage/localStorage.js",
+                                                                "app/forum/shared/api/http.js"
+                                                            ],
+                               "forum_root_logic_replaced":  [
+                                                                 "inline useEvent hook removed",
+                                                                 "inline isBrowser/cls removed",
+                                                                 "inline media constants removed",
+                                                                 "inline runtime config parsing replaced with shared config reader",
+                                                                 "translateText fetch-\u003erequestJson",
+                                                                 "readAuth/ensureClientId localStorage-\u003esafe storage wrapper"
+                                                             ],
+                               "forum_dependency_audit":  {
+                                                              "report":  "forum-deps-audit.report.json",
+                                                              "scannedFiles":  109,
+                                                              "internalEdges":  125,
+                                                              "cycleCount":  0,
+                                                              "crossDomainEdgeCount":  49,
+                                                              "forumRootImportCount":  12
+                                                          }
+                           },
+    "detected_risks":  [
+                           "Forum.jsx remains monolithic; shared extraction only addressed foundational helpers",
+                           "Heavy side-effect clusters remain in root and are planned for later phases",
+                           "Storage/API semantics still legacy-distributed; wrappers added without semantic change"
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low_to_medium",
+    "runtime_risk":  "medium",
+    "notes":  [
+                  "Behavior-preserving extraction only; no route/API payload changes",
+                  "No TypeScript introduced; JS/JSX only",
+                  "New dependency audit script now provides import graph + cycle visibility for forum ecosystem"
+              ],
+    "status":  "completed",
+    "audits":  {
+                   "executed":  [
+                                    "node tools/audit-full-forum.js",
+                                    "node tools/audit-heavy.js",
+                                    "node tools/audit-media.js",
+                                    "node tools/audit-effects.js",
+                                    "node tools/audit-runtime-hotspots.js",
+                                    "node tools/audit-account-sync.js",
+                                    "node tools/audit-forum-deps.js"
+                                ],
+                   "outputs":  [
+                                   "deep-audit.report.json",
+                                   "heavy-audit.report.json",
+                                   "media-audit.report.json",
+                                   "effects-leak.report.json",
+                                   "runtime-hotspots.report.json",
+                                   "account-sync-audit.report.json",
+                                   "forum-deps-audit.report.json"
+                               ]
+               }
+}

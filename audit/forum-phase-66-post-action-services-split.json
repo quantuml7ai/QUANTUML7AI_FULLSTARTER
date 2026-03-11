@@ -1,0 +1,93 @@
+{
+  "phase": "phase-66-post-action-services-split",
+  "timestamp": "2026-03-06T00:53:11.8488759+02:00",
+  "scope": [
+    "feed createPost decomposition",
+    "media send path ownership split",
+    "dm send path ownership split"
+  ],
+  "touched_files": [
+    "app/forum/features/feed/hooks/useForumCreatePostAction.js"
+  ],
+  "new_files": [
+    "app/forum/features/media/services/resolveComposerMediaPayload.js",
+    "app/forum/features/dm/services/sendDmComposerMessage.js",
+    "audit/forum-phase-66-post-action-services-split.json"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "media/composer-upload-send-prepare",
+      "from": "app/forum/features/feed/hooks/useForumCreatePostAction.js",
+      "to": "app/forum/features/media/services/resolveComposerMediaPayload.js"
+    },
+    {
+      "domain": "dm/send-from-forum-composer",
+      "from": "app/forum/features/feed/hooks/useForumCreatePostAction.js",
+      "to": "app/forum/features/dm/services/sendDmComposerMessage.js"
+    }
+  ],
+  "dependency_changes": [
+    "useForumCreatePostAction now imports media service resolver",
+    "useForumCreatePostAction now imports dm send service",
+    "ForumRoot wiring unchanged, public behavior path preserved"
+  ],
+  "detected_risks": [
+    "ForumRoot still contains heavy orchestration clusters outside this split",
+    "Residual audit warnings remain in known non-phase files (autoplay/effects hotspots)",
+    "Service interfaces are still wide and will need narrowing in next pass"
+  ],
+  "detected_cycles": {
+    "value": 0,
+    "source": "forum-deps-audit.report.json"
+  },
+  "api_contract_risk": {
+    "level": "low",
+    "notes": "No route or payload changes for /api/dm/send, /api/forum/uploadAudio, /api/forum/blobUploadUrl."
+  },
+  "storage_risk": {
+    "level": "low",
+    "notes": "No storage keys or persistence semantics changed."
+  },
+  "runtime_risk": {
+    "level": "medium",
+    "notes": "Root runtime hotspots unchanged in this phase; ownership split improves maintainability but not yet root complexity."
+  },
+  "verification": {
+    "eslint": {
+      "command": "pnpm eslint app/forum/ForumRoot.jsx app/forum/features/feed/hooks/useForumCreatePostAction.js app/forum/features/media/services/resolveComposerMediaPayload.js app/forum/features/dm/services/sendDmComposerMessage.js --no-cache",
+      "status": "pass"
+    },
+    "audits": [
+      { "command": "node tools/audit-heavy.js", "status": "pass_with_warnings" },
+      { "command": "node tools/audit-media.js", "status": "pass_with_warnings" },
+      { "command": "node tools/audit-effects.js", "status": "pass_with_warnings" },
+      { "command": "node tools/audit-forum-deps.js", "status": "pass" },
+      { "command": "node tools/audit-runtime-hotspots.js", "status": "pass_with_warnings" },
+      { "command": "node tools/audit-full-forum.js", "status": "pass_with_warnings" },
+      { "command": "node tools/audit-account-sync.js", "status": "pass_with_warnings" }
+    ],
+    "build": {
+      "command": "pnpm build",
+      "status": "pass",
+      "warnings": [
+        "next/no-img-element warnings in app/ads/home.js",
+        "next/no-img-element warning in app/forum/ForumAds.js",
+        "next/no-img-element warnings in components/AuthNavClient.jsx",
+        "next/no-img-element warnings in components/NotRobot.jsx"
+      ]
+    }
+  },
+  "metrics": {
+    "forum_root_lines_after": 7847,
+    "hook_lines_after": 367,
+    "dm_service_lines": 171,
+    "media_service_lines": 261,
+    "runtime_hotspots_forum_root_score": 143,
+    "deep_audit_forum_root_score": 107
+  },
+  "notes": [
+    "Behavior parity preserved by direct logic extraction without contract changes",
+    "JS/JSX only, no TypeScript added"
+  ],
+  "status": "pass_with_residual_risks"
+}

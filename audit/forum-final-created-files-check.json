@@ -1,0 +1,49 @@
+﻿{
+    "phase":  "final-created-files-check",
+    "timestamp":  "2026-03-08T16:00:34.0224487+02:00",
+    "scope":  [
+                  "app/forum/**/*.js",
+                  "app/forum/**/*.jsx"
+              ],
+    "files_checked":  264,
+    "sample_files":  [
+                         "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\error.js",
+                         "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\Forum.jsx",
+                         "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
+                         "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\ForumHeaderPanel.jsx",
+                         "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\ForumLayout.jsx",
+                         "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\ForumProviders.jsx",
+                         "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\ForumRoot.jsx",
+                         "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\layout.js",
+                         "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\loading.js",
+                         "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\page.js",
+                         "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\SharePopover.jsx",
+                         "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\events\\bus.js",
+                         "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\diagnostics\\hooks\\useForumDiagnostics.js",
+                         "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\diagnostics\\utils\\emitPolicy.js",
+                         "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmDialogRow.jsx",
+                         "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmDialogsPane.jsx",
+                         "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmMessagesPane.jsx",
+                         "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmThreadAlerts.jsx",
+                         "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmThreadHeader.jsx",
+                         "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmThreadLoadMore.jsx"
+                     ],
+    "checks":  [
+                   {
+                       "name":  "eslint app/forum",
+                       "status":  "passed_with_known_warning",
+                       "detail":  "No errors. Single known warning in app/forum/ForumAds.js (@next/next/no-img-element)."
+                   },
+                   {
+                       "name":  "build",
+                       "status":  "passed_with_known_warnings",
+                       "detail":  "Production build succeeds."
+                   },
+                   {
+                       "name":  "typescript_artifacts_scan",
+                       "status":  "passed",
+                       "detail":  "No .ts/.tsx files added in forum domain."
+                   }
+               ],
+    "status":  "passed"
+}

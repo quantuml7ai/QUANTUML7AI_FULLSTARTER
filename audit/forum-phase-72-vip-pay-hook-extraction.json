@@ -1,0 +1,128 @@
+{
+  "phase": "72-vip-pay-hook-extraction",
+  "timestamp": "2026-03-06T01:53:15+02:00",
+  "scope": [
+    "profile/vip payment-flow ownership extraction",
+    "ForumRoot duplicate VIP onPay async removal"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/profile/hooks/useVipPayAction.js"
+  ],
+  "new_files": [
+    "app/forum/features/profile/hooks/useVipPayAction.js"
+  ],
+  "moved_logic_domains": [
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/profile/hooks/useVipPayAction.js",
+      "logic": [
+        "VIP payment trigger flow",
+        "pre-flight vip status check",
+        "payment window launch",
+        "status polling and vip activation/pending toasts",
+        "popover close in finally path"
+      ]
+    }
+  ],
+  "dependency_changes": {
+    "ForumRoot_imports_added": [
+      "./features/profile/hooks/useVipPayAction"
+    ],
+    "ForumRoot_imports_removed": [
+      "./features/qcoin/utils/paymentWindow"
+    ],
+    "ForumRoot_runtime_changes": [
+      "two duplicated VipPopover onPay async handlers replaced with one shared callback handleVipPay",
+      "VipPopover UI contract unchanged, only handler ownership changed"
+    ]
+  },
+  "detected_risks": [
+    {
+      "id": "vip-flow-callback-deps",
+      "level": "low",
+      "detail": "Hook uses auth/t/setters in useCallback dependencies to preserve current account-specific behavior."
+    },
+    {
+      "id": "vip-close-semantics",
+      "level": "low",
+      "detail": "setVipOpen(false) kept in both early-return and finally branches to preserve prior close semantics."
+    }
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": {
+    "level": "low",
+    "detail": "No API contract changes; same /api/subscription/status and /api/pay/create payload semantics."
+  },
+  "storage_risk": {
+    "level": "low",
+    "detail": "No storage key changes."
+  },
+  "runtime_risk": {
+    "level": "medium",
+    "detail": "Pre-existing media/autoplay/effect residual warnings remain; no new build/lint regressions introduced."
+  },
+  "audit_runs": [
+    {
+      "command": "pnpm eslint app/forum/ForumRoot.jsx app/forum/features/profile/hooks/useVipPayAction.js app/forum/features/ui/components/ForumActionRow.jsx app/forum/features/quests/components/QuestLaunchIcon.jsx --no-cache",
+      "status": "passed"
+    },
+    {
+      "command": "node tools/audit-heavy.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 56
+      }
+    },
+    {
+      "command": "node tools/audit-media.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "node tools/audit-effects.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "node tools/audit-forum-deps.js",
+      "status": "passed",
+      "summary": {
+        "cycles": 0,
+        "cross_domain_edges": 102
+      }
+    },
+    {
+      "command": "node tools/audit-runtime-hotspots.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 91
+      }
+    },
+    {
+      "command": "node tools/audit-full-forum.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 99
+      }
+    },
+    {
+      "command": "node tools/audit-account-sync.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 405
+      }
+    },
+    {
+      "command": "pnpm build",
+      "status": "passed_with_warnings",
+      "warnings": [
+        "existing no-img-element warnings outside vip payment scope"
+      ]
+    }
+  ],
+  "notes": [
+    "VIP payment business flow is no longer owned by ForumRoot JSX branch blocks.",
+    "Both main/thread header paths now share one tested VIP payment callback.",
+    "Runtime hotspot score for ForumRoot improved from 109 to 91 in this phase."
+  ],
+  "status": "done"
+}

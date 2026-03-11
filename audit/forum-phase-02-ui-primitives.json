@@ -1,0 +1,84 @@
+﻿{
+    "phase":  "phase-02-ui-primitives",
+    "timestamp":  "2026-03-04T16:55:55.9532993Z",
+    "scope":  [
+                  "app/forum/Forum.jsx",
+                  "app/forum/features/ui/components/*"
+              ],
+    "touched_files":  [
+                          "app/forum/Forum.jsx",
+                          "app/forum/features/ui/components/StarButton.jsx",
+                          "app/forum/features/ui/components/HeadChevronIcon.jsx",
+                          "app/forum/features/ui/components/ForumActionNavIcon.jsx",
+                          "app/forum/features/ui/components/VideoFeedNavIcon.jsx",
+                          "app/forum/features/ui/components/ConfirmDeleteOverlay.jsx",
+                          "app/forum/features/ui/components/DmDeletePopover.jsx"
+                      ],
+    "new_files":  [
+                      "app/forum/features/ui/components/StarButton.jsx",
+                      "app/forum/features/ui/components/HeadChevronIcon.jsx",
+                      "app/forum/features/ui/components/ForumActionNavIcon.jsx",
+                      "app/forum/features/ui/components/VideoFeedNavIcon.jsx",
+                      "app/forum/features/ui/components/ConfirmDeleteOverlay.jsx",
+                      "app/forum/features/ui/components/DmDeletePopover.jsx",
+                      "audit/forum-phase-02-ui-primitives.json"
+                  ],
+    "moved_logic_domains":  [
+                                "ui-components: StarButton",
+                                "ui-components: HeadChevronIcon",
+                                "ui-components: ForumActionNavIcon",
+                                "ui-components: VideoFeedNavIcon",
+                                "ui-overlays: ConfirmDeleteOverlay",
+                                "ui-overlays: DmDeletePopover"
+                            ],
+    "dependency_changes":  {
+                               "forum_root_imports_added":  [
+                                                                "./features/ui/components/StarButton",
+                                                                "./features/ui/components/HeadChevronIcon",
+                                                                "./features/ui/components/ForumActionNavIcon",
+                                                                "./features/ui/components/VideoFeedNavIcon",
+                                                                "./features/ui/components/ConfirmDeleteOverlay",
+                                                                "./features/ui/components/DmDeletePopover"
+                                                            ],
+                               "forum_dependency_audit":  {
+                                                              "report":  "forum-deps-audit.report.json",
+                                                              "scannedFiles":  115,
+                                                              "internalEdges":  133,
+                                                              "cycleCount":  0,
+                                                              "crossDomainEdgeCount":  57,
+                                                              "forumRootImportCount":  18
+                                                          }
+                           },
+    "detected_risks":  [
+                           "Forum.jsx still mixes many non-leaf domains",
+                           "UI split done, but stateful orchestration remains in root",
+                           "Media/DM/feed ownership still centralized pending next phases"
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low",
+    "runtime_risk":  "low_to_medium",
+    "notes":  [
+                  "Extraction kept props contract intact; call-sites unchanged semantically",
+                  "No API/routes/db/storage semantic changes in this phase",
+                  "Encoding incident was corrected; mojibake audit returned to zero"
+              ],
+    "status":  "completed",
+    "audits":  {
+                   "executed":  [
+                                    "pnpm eslint app/forum/Forum.jsx app/forum/features/ui/components/*.jsx --no-cache",
+                                    "node tools/audit-forum-deps.js",
+                                    "node tools/audit-media.js",
+                                    "node tools/audit-effects.js",
+                                    "node tools/audit-full-forum.js"
+                                ],
+                   "outputs":  [
+                                   "forum-deps-audit.report.json",
+                                   "media-audit.report.json",
+                                   "effects-leak.report.json",
+                                   "deep-audit.report.json"
+                               ]
+               }
+}

@@ -1,0 +1,256 @@
+﻿{
+    "phase":  "phase-00-architecture",
+    "timestamp":  "2026-03-04T10:22:16.3161932Z",
+    "scope":  [
+                  "app/forum/Forum.jsx",
+                  "app/forum/page.js",
+                  "app/forum/layout.js",
+                  "app/forum/p/[postId]/route.js",
+                  "app/forum/ForumAds.js",
+                  "app/forum/SharePopover.jsx",
+                  "app/forum/events/bus.js",
+                  "app/api/forum/*",
+                  "app/api/dm/*",
+                  "app/api/profile/*",
+                  "app/api/qcoin/*",
+                  "app/api/quest/*",
+                  "app/api/pay/*",
+                  "app/api/subscription/status/route.js",
+                  "app/api/debug/forum-diag/route.js",
+                  "tools/audit-*.js"
+              ],
+    "touched_files":  [
+                          "deep-audit.report.json",
+                          "heavy-audit.report.json",
+                          "media-audit.report.json",
+                          "effects-leak.report.json",
+                          "runtime-hotspots.report.json",
+                          "account-sync-audit.report.json"
+                      ],
+    "new_files":  [
+                      "audit/forum-phase-00-architecture.json"
+                  ],
+    "moved_logic_domains":  [
+
+                            ],
+    "dependency_changes":  {
+                               "client":  [
+                                              "Forum.jsx imports i18n, local event bus, SharePopover, ForumAds, forumVideoTrim and Next router/image/runtime APIs",
+                                              "Forum page shell keeps rules-gate and wraps Forum component",
+                                              "Forum references auth events open-auth/auth:ok/auth:success from shared components"
+                                          ],
+                               "server":  [
+                                              "Forum API surface spans forum, dm, profile, qcoin, quest, subscription, pay, debug routes",
+                                              "Forum routes rely on app/api/forum/_db.js and _utils.js semantics (snapshot/rev/changes/media lock/admin/report/subs)",
+                                              "Cross-domain identity canonicalization via app/api/profile/_identity.js is critical for forum+profile+dm consistency"
+                                          ],
+                               "infrastructure":  [
+                                                      "Existing audits focus on hotspots/media/effects/account-sync; no dedicated cycle/ownership/coupling audit yet",
+                                                      "Forum diagnostics pipeline persists JSONL through app/api/debug/forum-diag/route.js"
+                                                  ]
+                           },
+    "detected_risks":  [
+                           "Forum.jsx remains a god-file with mixed ownership across feed/media/dm/profile/subscriptions/qcoin/quests/mod/admin/diagnostics",
+                           "High side-effect density in Forum.jsx: timers, RAF, listeners, layout reads and localStorage persistence in one root",
+                           "State orchestration and API calling are coupled with render/UI branches",
+                           "Storage semantics are distributed and include dynamic keys (DM/thread/seen/quest), raising migration regression risk",
+                           "Server contracts are tightly coupled to key names and rev/snapshot semantics in forum _db routes",
+                           "No existing automatic ownership-boundary or circular-dependency guard for planned modular split"
+                       ],
+    "detected_cycles":  [
+                            "not_audited_yet: dedicated circular dependency audit script is required in phase 1"
+                        ],
+    "api_contract_risk":  "high",
+    "storage_risk":  "high",
+    "runtime_risk":  "high",
+    "notes":  [
+                  "Phase 0 contains discovery + mapping only; no behavior changes",
+                  "All findings are JS/JSX only; no TS migration introduced",
+                  "Next phases must preserve existing route contracts and storage keys until explicit migration adapters are in place"
+              ],
+    "status":  "completed_with_findings",
+    "metrics":  {
+                    "forum_file_lines":  26111,
+                    "forum_file_chars":  1066933,
+                    "hooks":  {
+                                  "useState":  174,
+                                  "useRef":  193,
+                                  "useEffect":  179,
+                                  "useLayoutEffect":  5,
+                                  "useMemo":  47,
+                                  "useCallback":  157
+                              },
+                    "side_effect_signals":  {
+                                                "fetch":  63,
+                                                "eventSource":  1,
+                                                "addEventListener":  93,
+                                                "removeEventListener":  91,
+                                                "localStorage_get":  35,
+                                                "localStorage_set":  26,
+                                                "localStorage_remove":  5
+                                            }
+                },
+    "domain_map":  {
+                       "root":  "app/forum/Forum.jsx (composition + mixed legacy ownership)",
+                       "domains":  [
+                                       "feed-thread-composer",
+                                       "media-lifecycle-upload-preview",
+                                       "dm-inbox-thread-cache",
+                                       "profile-vip-avatar-about",
+                                       "subscriptions-social-graph",
+                                       "qcoin-payments-heartbeat",
+                                       "quests-progress-timers",
+                                       "moderation-report-admin",
+                                       "diagnostics-telemetry"
+                                   ]
+                   },
+    "side_effect_clusters":  [
+                                 "bootstrap/auth sync listeners + initial snapshot/queue restore",
+                                 "polling/timers for sync, qcoin heartbeat, cooldowns, media progress, quest timers",
+                                 "sse stream (/api/forum/events/stream) + incremental snapshot sync",
+                                 "scroll/head lock/resize/observers (IntersectionObserver, MutationObserver, wheel/touch prevention)",
+                                 "media objectURL lifecycle, recorder/camera streams, playback control, mute propagation",
+                                 "localStorage persist/restore for forum queues, tombstones, DM caches and quests",
+                                 "diagnostic shipping to /api/debug/forum-diag"
+                             ],
+    "api_surface":  {
+                        "forum":  [
+                                      "/api/forum/snapshot",
+                                      "/api/forum/mutate",
+                                      "/api/forum/events/stream",
+                                      "/api/forum/own",
+                                      "/api/forum/report",
+                                      "/api/forum/moderate",
+                                      "/api/forum/mediaLock",
+                                      "/api/forum/upload",
+                                      "/api/forum/uploadAudio",
+                                      "/api/forum/blobUploadUrl",
+                                      "/api/forum/admin/*",
+                                      "/api/forum/subs/*",
+                                      "/api/forum/vip/batch"
+                                  ],
+                        "dm":  [
+                                   "/api/dm/dialogs",
+                                   "/api/dm/thread",
+                                   "/api/dm/send",
+                                   "/api/dm/seen",
+                                   "/api/dm/delete",
+                                   "/api/dm/block",
+                                   "/api/dm/unblock"
+                               ],
+                        "profile":  [
+                                        "/api/profile/batch",
+                                        "/api/profile/get-profile",
+                                        "/api/profile/get-about",
+                                        "/api/profile/set-about",
+                                        "/api/profile/save-nick",
+                                        "/api/profile/check-nick",
+                                        "/api/profile/upload-avatar",
+                                        "/api/profile/user-popover"
+                                    ],
+                        "economy":  [
+                                        "/api/qcoin/get",
+                                        "/api/qcoin/heartbeat",
+                                        "/api/pay/create",
+                                        "/api/subscription/status"
+                                    ],
+                        "quests":  [
+                                       "/api/quest/env",
+                                       "/api/quest/status",
+                                       "/api/quest/progress"
+                                   ],
+                        "diagnostics":  [
+                                            "/api/debug/forum-diag"
+                                        ],
+                        "extra":  [
+                                      "/api/deep-translate"
+                                  ]
+                    },
+    "storage_surface":  {
+                            "static_keys":  [
+                                                "forum:cid",
+                                                "forum:snap",
+                                                "forum:queue",
+                                                "forum:tombstones",
+                                                "forum:mediaMuted",
+                                                "forum:videoMuted",
+                                                "ql7_admin",
+                                                "ql7_vip",
+                                                "ai_quota_vip"
+                                            ],
+                            "auth_alias_keys":  [
+                                                    "account",
+                                                    "wallet",
+                                                    "asherId",
+                                                    "ql7_uid",
+                                                    "profile:*",
+                                                    "profile:alias:*"
+                                                ],
+                            "dynamic_keys":  [
+                                                 "forum:seenReplies:${meId}",
+                                                 "seenDM:${meId}",
+                                                 "dm:blocked:${meId}",
+                                                 "dm:deleted:${meId}",
+                                                 "dm:deleted_msg:${meId}",
+                                                 "dm:dialogs:${meId}",
+                                                 "dm:thread:thr:${meId}:${uid}",
+                                                 "quest:v1:${uidOrAnonymous}",
+                                                 "questTimers:v1:${uidOrAnonymous}",
+                                                 "post:${postId}:viewed:${uid}:${bucket}",
+                                                 "topic:${topicId}:viewed:${uid}:${bucket}"
+                                             ]
+                        },
+    "ownership_conflicts":  [
+                                "Forum root owns both UI composition and domain orchestration",
+                                "Feed and media state are interleaved inside same render/effect paths",
+                                "DM cache/storage lifecycle is coordinated from forum root instead of dedicated DM module",
+                                "Profile/VIP/subscription/QCoin hooks and API calls are mixed with feed controls",
+                                "Diagnostics logic is embedded in forum runtime instead of isolated diagnostics layer"
+                            ],
+    "dependency_impact_map":  {
+                                  "client":  [
+                                                 "app/forum/page.js -\u003e app/forum/Forum.jsx",
+                                                 "app/forum/Forum.jsx -\u003e app/forum/ForumAds.js + SharePopover.jsx + events/bus.js + lib/forumVideoTrim.js + components/i18n.js",
+                                                 "auth events bridge via components/AuthNavClient.jsx and global listeners used by Forum"
+                                             ],
+                                  "server":  [
+                                                 "app/api/forum/* routes -\u003e app/api/forum/_db.js + _utils.js + _bus.js",
+                                                 "app/api/dm/* routes -\u003e app/api/dm/_db.js + _utils.js",
+                                                 "profile routes and some forum/dm routes -\u003e app/api/profile/_identity.js canonicalization",
+                                                 "forum deep-link route app/forum/p/[postId]/route.js -\u003e app/api/forum/_db.js"
+                                             ],
+                                  "critical_contracts":  [
+                                                             "forum snapshot/rev/changes event model",
+                                                             "route payload shapes for mutate/admin/report/subs/dm/profile",
+                                                             "Redis key semantics from forum/dm/qcoin/quest routes",
+                                                             "media lock and upload token/env semantics"
+                                                         ],
+                                  "infrastructure":  [
+                                                         "tools/audit-full-forum.js",
+                                                         "tools/audit-heavy.js",
+                                                         "tools/audit-media.js",
+                                                         "tools/audit-effects.js",
+                                                         "tools/audit-runtime-hotspots.js",
+                                                         "tools/audit-account-sync.js"
+                                                     ]
+                              },
+    "planned_phases":  [
+                           "phase-01-shared-foundation",
+                           "phase-02-leaf-ui-components",
+                           "phase-03-feed-thread-composer",
+                           "phase-04-media-subsystem",
+                           "phase-05-dm-subsystem",
+                           "phase-06-profile-subscriptions-qcoin",
+                           "phase-07-quests-moderation-diagnostics",
+                           "phase-08-styles-split",
+                           "phase-09-root-cleanup-final-audit"
+                       ],
+    "audit_inputs":  [
+                         "deep-audit.report.json",
+                         "heavy-audit.report.json",
+                         "media-audit.report.json",
+                         "effects-leak.report.json",
+                         "runtime-hotspots.report.json",
+                         "account-sync-audit.report.json"
+                     ]
+}

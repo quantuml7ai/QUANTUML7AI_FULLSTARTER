@@ -1,0 +1,64 @@
+﻿{
+    "phase":  "83-six-hooks-domain-extraction",
+    "timestamp":  "2026-03-08T13:46:44.8846992+02:00",
+    "scope":  [
+                  "app/forum/ForumRoot.jsx",
+                  "app/forum/features/ui/hooks",
+                  "app/forum/features/profile/hooks",
+                  "app/forum/features/media/hooks",
+                  "app/forum/features/dm/hooks"
+              ],
+    "touched_files":  [
+                          "app/forum/ForumRoot.jsx",
+                          "app/forum/features/ui/hooks/useComposerEmojiState.js",
+                          "app/forum/features/ui/hooks/useComposerActionHandlers.js",
+                          "app/forum/features/profile/hooks/useAboutEditor.js",
+                          "app/forum/features/media/hooks/useVideoFeedState.js",
+                          "app/forum/features/ui/hooks/useForumAdsRuntime.js",
+                          "app/forum/features/dm/hooks/useDmDeleteCopy.js",
+                          "audit/forum-phase-83-final-parity.json"
+                      ],
+    "new_files":  [
+                      "app/forum/features/ui/hooks/useComposerEmojiState.js",
+                      "app/forum/features/ui/hooks/useComposerActionHandlers.js",
+                      "app/forum/features/profile/hooks/useAboutEditor.js",
+                      "app/forum/features/media/hooks/useVideoFeedState.js",
+                      "app/forum/features/ui/hooks/useForumAdsRuntime.js",
+                      "app/forum/features/dm/hooks/useDmDeleteCopy.js"
+                  ],
+    "moved_logic_domains":  [
+                                "ui: composer emoji state and composer primary actions",
+                                "profile: about editor state and persistence flow",
+                                "media: video feed state/build lifecycle",
+                                "ui: ads runtime session and slot picker ownership",
+                                "dm: delete-popover copy derivation"
+                            ],
+    "dependency_changes":  {
+                               "forum_root_lines_before":  4080,
+                               "forum_root_lines_after":  3994,
+                               "forum_deps_files_scanned":  316,
+                               "forum_deps_cycles":  0,
+                               "forum_deps_cross_domain_edges":  109,
+                               "runtime_hotspot_forumroot_before":  57,
+                               "runtime_hotspot_forumroot_after":  55,
+                               "parity_hash_total":  82,
+                               "parity_hash_changed":  1,
+                               "parity_hash_missing":  0
+                           },
+    "detected_risks":  [
+                           "Pre-existing media autoplay and img optimization warnings remain outside this extraction scope.",
+                           "ForumRoot still contains remaining orchestration and should be reduced in subsequent phases."
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low",
+    "runtime_risk":  "medium",
+    "notes":  [
+                  "Functional parity against baseline zip passed; only app/forum/Forum.jsx differs as expected thin-wrapper.",
+                  "All forum API and backend route hashes in parity scope remain unchanged.",
+                  "Build and targeted eslint pass after extraction."
+              ],
+    "status":  "passed"
+}

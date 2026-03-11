@@ -1,0 +1,35 @@
+﻿{
+  "phase": "114c",
+  "timestamp": "2026-03-10T12:51:10.9888338+02:00",
+  "scope": ["composer-progress-behavior-revert"],
+  "touched_files": [
+    "app/forum/features/ui/components/ComposerMediaProgressBar.jsx",
+    "app/forum/features/ui/components/ComposerCore.jsx",
+    "app/forum/features/ui/utils/propBundles/buildComposerCoreProps.js",
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": ["audit/forum-phase-114c-progress-revert.json"],
+  "moved_logic_domains": ["composer-ui"],
+  "dependency_changes": [
+    "Removed videoProgress prop chain from ForumRoot -> prop bundle -> ComposerCore -> ComposerMediaProgressBar",
+    "ComposerMediaProgressBar uses mediaPct directly (legacy behavior)"
+  ],
+  "detected_risks": [],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "checks": [
+    {
+      "name": "eslint-targeted",
+      "status": "passed",
+      "detail": "pnpm eslint on 4 touched files"
+    },
+    {
+      "name": "build",
+      "status": "failed_unrelated",
+      "detail": "next build failed on missing page module /api/aiquota/usage (not from this patch)"
+    }
+  ],
+  "status": "passed_with_external_build_issue"
+}

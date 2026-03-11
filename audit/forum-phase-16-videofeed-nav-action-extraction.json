@@ -1,0 +1,61 @@
+{
+  "phase": "16-videofeed-nav-action-extraction",
+  "timestamp": "2026-03-06T03:42:00+02:00",
+  "scope": [
+    "forum root",
+    "video feed action ownership",
+    "inbox global action ownership",
+    "nav snapshot ownership"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/media/hooks/useVideoFeedActions.js",
+    "app/forum/features/dm/hooks/useOpenInboxGlobalAction.js",
+    "app/forum/features/feed/hooks/useNavStateSnapshot.js",
+    "audit/forum-phase-12-final-parity.json",
+    "audit/forum-phase-16-videofeed-nav-action-extraction.json"
+  ],
+  "new_files": [
+    "app/forum/features/media/hooks/useVideoFeedActions.js",
+    "app/forum/features/dm/hooks/useOpenInboxGlobalAction.js",
+    "app/forum/features/feed/hooks/useNavStateSnapshot.js",
+    "audit/forum-phase-16-videofeed-nav-action-extraction.json"
+  ],
+  "moved_logic_domains": [
+    "video feed open/close/refresh action orchestration",
+    "global inbox open orchestration",
+    "nav snapshot state materialization"
+  ],
+  "dependency_changes": {
+    "forum_root_line_count_before": 6062,
+    "forum_root_line_count_after": 6042,
+    "deps_files_scanned": 277,
+    "cross_domain_edges": 105,
+    "cycles": 0
+  },
+  "detected_risks": [
+    "ForumRoot still keeps core business orchestration and remains large.",
+    "Runtime risk remains medium due to media-intensive paths and existing global UX complexity."
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "low",
+  "storage_risk": "low",
+  "runtime_risk": "medium",
+  "notes": [
+    "Behavior-critical line videoFeedRefreshTeleportPendingRef.current=true preserved in extracted refresh flow.",
+    "No API route shape, request parameters, server handlers, or db utility paths were changed.",
+    "Baseline parity audit remains passed after extraction."
+  ],
+  "status": "completed",
+  "validation": {
+    "lint_targeted": "passed",
+    "build": "passed",
+    "audits": [
+      "node tools/audit-effects.js",
+      "node tools/audit-forum-deps.js",
+      "powershell -ExecutionPolicy Bypass -File tools/audit-forum-functional-parity.ps1 -ZipPath \"C:\\Users\\BETEP\\Desktop\\СЕЙЧАС — копия.zip\" -OutputPath \"audit/forum-phase-12-final-parity.json\"",
+      "pnpm eslint app/forum/ForumRoot.jsx app/forum/features/media/hooks/useVideoFeedActions.js app/forum/features/dm/hooks/useOpenInboxGlobalAction.js app/forum/features/feed/hooks/useNavStateSnapshot.js --no-cache",
+      "pnpm build"
+    ]
+  }
+}

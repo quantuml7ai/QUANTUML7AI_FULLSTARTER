@@ -1,0 +1,54 @@
+﻿{
+    "phase":  "85-openonly-navbridge-propbundles-extraction",
+    "timestamp":  "2026-03-08T14:01:50.8319229+02:00",
+    "scope":  [
+                  "app/forum/ForumRoot.jsx",
+                  "app/forum/features/ui/hooks/useForumPopoverModeController.js",
+                  "app/forum/shared/hooks/useForumNavBridge.js",
+                  "app/forum/features/ui/utils/buildForumRootPropBundles.js"
+              ],
+    "touched_files":  [
+                          "app/forum/ForumRoot.jsx",
+                          "app/forum/features/ui/hooks/useForumPopoverModeController.js",
+                          "app/forum/shared/hooks/useForumNavBridge.js",
+                          "app/forum/features/ui/utils/buildForumRootPropBundles.js",
+                          "audit/forum-phase-85-final-parity.json"
+                      ],
+    "new_files":  [
+                      "app/forum/features/ui/hooks/useForumPopoverModeController.js",
+                      "app/forum/shared/hooks/useForumNavBridge.js",
+                      "app/forum/features/ui/utils/buildForumRootPropBundles.js"
+                  ],
+    "moved_logic_domains":  [
+                                "ui: exclusive popover mode orchestration (openOnly) moved into dedicated controller hook",
+                                "root/shared: nav bridge wrappers (getScrollEl/alignInboxStartUnderTabs/pushNavState) moved into shared hook",
+                                "ui/root wiring: large prop-bundle assembly moved into dedicated builder utility"
+                            ],
+    "dependency_changes":  {
+                               "forum_root_lines_before":  3940,
+                               "forum_root_lines_after":  3834,
+                               "forum_deps_files_scanned":  320,
+                               "forum_deps_cycles":  0,
+                               "forum_deps_cross_domain_edges":  110,
+                               "runtime_hotspot_forumroot_after":  55,
+                               "parity_hash_total":  82,
+                               "parity_hash_changed":  1,
+                               "parity_hash_missing":  0
+                           },
+    "detected_risks":  [
+                           "ForumRoot still remains top hotspot with residual orchestration and should be reduced in next passes.",
+                           "Pre-existing media autoplay and \u003cimg\u003e warnings remain out of this extraction scope."
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low",
+    "runtime_risk":  "medium",
+    "notes":  [
+                  "Parity against baseline zip passed; only app/forum/Forum.jsx changed as expected thin wrapper.",
+                  "All audited API/backend route hashes in parity scope remained unchanged.",
+                  "Build and full audit suite passed after migration."
+              ],
+    "status":  "passed"
+}

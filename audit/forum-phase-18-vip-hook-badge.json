@@ -1,0 +1,51 @@
+{
+  "phase": "18-vip-hook-badge-extraction",
+  "timestamp": "2026-03-04T19:27:42Z",
+  "scope": [
+    "forum/profile",
+    "forum/root"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/profile/hooks/useVipFlag.js",
+    "app/forum/features/profile/components/VipFlipBadge.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/profile/hooks/useVipFlag.js",
+    "app/forum/features/profile/components/VipFlipBadge.jsx",
+    "audit/forum-phase-18-vip-hook-badge.json"
+  ],
+  "moved_logic_domains": [
+    "VIP resolution hook ownership moved from ForumRoot to profile hook module",
+    "VIP animated badge component ownership moved from ForumRoot to profile component module"
+  ],
+  "dependency_changes": {
+    "forum_root_imports": 1,
+    "cross_domain_edges": 61,
+    "cycles": 0
+  },
+  "detected_risks": [
+    "VIP batch probe still depends on /api/forum/vip/batch runtime availability",
+    "ForumRoot remains large and still owns feed/media/DM orchestration"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "low",
+  "runtime_risk": "medium",
+  "notes": [
+    "No changes to VIP API contract or response handling semantics.",
+    "Existing call-sites keep same props and render conditions.",
+    "vip probe dedupe semantics preserved in hook-local Set."
+  ],
+  "status": "completed",
+  "validation": {
+    "lint_targeted": "passed",
+    "build": "passed",
+    "audits": [
+      "tools/audit-forum-deps.js",
+      "tools/audit-full-forum.js",
+      "tools/audit-effects.js",
+      "tools/audit-media.js"
+    ]
+  }
+}

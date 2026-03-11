@@ -814,7 +814,15 @@ export async function reportPost({ postId, reporterId, reason }) {
     const lockedUntil = now() + MEDIA_LOCK_MS
     if (authorId) {
       await setMediaLockUntil(authorId, lockedUntil)
-      return { ok: true, action: 'deleted_and_locked', count, lockedUntil, deleted, rev }
+      return {
+        ok: true,
+        action: 'deleted_and_locked',
+        count,
+        lockedUntil,
+        lockedUserId: authorId,
+        deleted,
+        rev,
+      }
     }
     return { ok: true, action: 'deleted', count, deleted, rev }
   }
@@ -845,16 +853,37 @@ export async function snapshot(sinceRev = 0, limit = 10000) {
     return { rev: snap.rev, ...snap.payload }
   }
 
-  const end = -1
-  const start = Math.max(-limit, -2000)
-  const rawList = await redis.lrange(K.changes, start, end)
-  const events = rawList
-    .map(r => { try { return JSON.parse(r) } catch { return null } })
+  const take = Math.max(1, Math.min(50000, Number(limit) || 10000))
+  const rawList = await redis.lrange(K.changes, 0, take - 1)
+  const parsed = rawList
+    .map((r) => { try { return JSON.parse(r) } catch { return null } })
     .filter(Boolean)
-    .filter(e => (e.rev || 0) > sinceRev)
+
+  const revs = parsed
+    .map((e) => Number(e?.rev || 0))
+    .filter((n) => Number.isFinite(n) && n > 0)
+
+  if (revs.length) {
+    const oldestRevInWindow = Math.min(...revs)
+    const lostWindow = Number(sinceRev) > 0 && Number(currentRev) > Number(sinceRev) && Number(sinceRev) < oldestRevInWindow
+    if (lostWindow) {
+      const raw = await redis.get(K.snapshot)
+      if (raw) {
+        const snap = safeParse(raw)
+        if (snap && typeof snap.rev === 'number' && snap.payload) {
+          return { rev: snap.rev, ...snap.payload, full: true, gap: true }
+        }
+      }
+      const snap = await rebuildSnapshot()
+      return { rev: snap.rev, ...snap.payload, full: true, gap: true }
+    }
+  }
+
+  const events = parsed
+    .filter((e) => Number(e?.rev || 0) > Number(sinceRev || 0))
     .sort((a, b) => (a.rev || 0) - (b.rev || 0))
 
-  return { rev: currentRev, events }
+  return { rev: currentRev, events, full: false }
 }
 // --- Nickname helpers (compat) ---
 export function normNick(raw) {

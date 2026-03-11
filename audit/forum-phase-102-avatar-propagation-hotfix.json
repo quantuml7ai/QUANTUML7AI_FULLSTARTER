@@ -1,0 +1,56 @@
+﻿{
+    "phase":  "102-avatar-propagation-hotfix",
+    "timestamp":  "2026-03-10T08:43:01.9247660+02:00",
+    "scope":  [
+                  "app/forum/features/profile/components/AvatarEmoji.jsx",
+                  "app/forum/features/feed/hooks/useForumSseBridge.js",
+                  "app/forum/features/feed/hooks/useForumSyncLoop.js",
+                  "app/api/profile/save-nick/route.js"
+              ],
+    "touched_files":  [
+                          "app/forum/features/profile/components/AvatarEmoji.jsx",
+                          "app/forum/features/feed/hooks/useForumSseBridge.js",
+                          "app/forum/features/feed/hooks/useForumSyncLoop.js",
+                          "app/api/profile/save-nick/route.js",
+                          "audit/forum-phase-102-avatar-propagation-hotfix.json"
+                      ],
+    "new_files":  [
+                      "audit/forum-phase-102-avatar-propagation-hotfix.json"
+                  ],
+    "moved_logic_domains":  [
+                                "profile cache invalidation/fallback handling",
+                                "profile SSE alias fan-out",
+                                "profile batch alias hydration for legacy raw ids"
+                            ],
+    "dependency_changes":  {
+                               "api":  [
+                                           "/api/profile/save-nick",
+                                           "/api/profile/batch"
+                                       ],
+                               "sse":  [
+                                           "/api/forum/events/stream"
+                                       ],
+                               "storage":  [
+                                               "profile:*",
+                                               "profile:alias:*"
+                                           ]
+                           },
+    "detected_risks":  [
+                           "save-nick event payload now contains source identifiers; clients consuming profile.updated must ignore unknown fields safely.",
+                           "Build currently fails on unrelated route /api/ads (pre-existing project state); changed files lint clean."
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "medium",
+    "storage_risk":  "low",
+    "runtime_risk":  "low",
+    "notes":  [
+                  "Fixed avatar fallback flicker loop by keeping failed src latched until resolved url changes.",
+                  "SSE profile updates now write both alias links and profile cache patches for raw and canonical IDs.",
+                  "Full snapshot profile batch path now mirrors canonical profile data into alias raw-id caches to match legacy cards.",
+                  "Validated changed files with eslint: pass.",
+                  "Forum dependency audit: cycles=0."
+              ],
+    "status":  "ok"
+}

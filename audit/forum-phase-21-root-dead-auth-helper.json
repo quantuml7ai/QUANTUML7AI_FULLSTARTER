@@ -1,0 +1,43 @@
+{
+  "phase": "21-root-dead-auth-helper-cleanup",
+  "timestamp": "2026-03-04T19:32:57Z",
+  "scope": [
+    "forum/root"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "audit/forum-phase-21-root-dead-auth-helper.json"
+  ],
+  "moved_logic_domains": [
+    "removed dead ensureClientId helper from ForumRoot residual section"
+  ],
+  "dependency_changes": {
+    "forum_root_imports": 0,
+    "cross_domain_edges": 62,
+    "cycles": 0
+  },
+  "detected_risks": [
+    "ForumRoot still contains large active orchestration areas"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "notes": [
+    "Function had no references; cleanup is behavior-neutral.",
+    "Audit and build remained green after removal."
+  ],
+  "status": "completed",
+  "validation": {
+    "lint_targeted": "passed",
+    "build": "passed",
+    "audits": [
+      "tools/audit-forum-deps.js",
+      "tools/audit-full-forum.js",
+      "tools/audit-effects.js",
+      "tools/audit-media.js"
+    ]
+  }
+}

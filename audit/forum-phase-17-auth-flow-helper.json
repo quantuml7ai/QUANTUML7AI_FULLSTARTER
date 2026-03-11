@@ -1,0 +1,50 @@
+{
+  "phase": "17-auth-flow-helper-extraction",
+  "timestamp": "2026-03-04T19:22:37Z",
+  "scope": [
+    "forum/shared",
+    "forum/root",
+    "forum/profile"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/shared/utils/openAuth.js"
+  ],
+  "new_files": [
+    "app/forum/shared/utils/openAuth.js",
+    "audit/forum-phase-17-auth-flow-helper.json"
+  ],
+  "moved_logic_domains": [
+    "auth modal open/wait flow moved to shared utility",
+    "auth event listener lifecycle for open-auth handshake"
+  ],
+  "dependency_changes": {
+    "forum_root_imports": 1,
+    "cross_domain_edges": 59,
+    "cycles": 0
+  },
+  "detected_risks": [
+    "Auth flow still depends on global events/auth provider contract in runtime",
+    "ForumRoot remains large with heavy feed/media/DM orchestration"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "medium",
+  "notes": [
+    "No route/backend changes; extraction is client-side ownership move only.",
+    "openAuth continues to resolve through same auth event names and timeout semantics.",
+    "readAuth snapshot source preserved (injected into openAuthFlow)."
+  ],
+  "status": "completed",
+  "validation": {
+    "lint_targeted": "passed",
+    "build": "passed",
+    "audits": [
+      "tools/audit-forum-deps.js",
+      "tools/audit-full-forum.js",
+      "tools/audit-effects.js",
+      "tools/audit-media.js"
+    ]
+  }
+}

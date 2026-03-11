@@ -1,0 +1,83 @@
+{
+  "phase": "phase-60-feed-sync-engine-hooks",
+  "timestamp": "2026-03-05T15:45:00.000Z",
+  "scope": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/feed/utils/snapshotTransforms.js",
+    "app/forum/features/feed/hooks/useForumSyncLoop.js",
+    "app/forum/features/feed/hooks/useForumSseBridge.js"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/feed/utils/snapshotTransforms.js",
+    "app/forum/features/feed/hooks/useForumSyncLoop.js",
+    "app/forum/features/feed/hooks/useForumSseBridge.js"
+  ],
+  "new_files": [
+    "app/forum/features/feed/utils/snapshotTransforms.js",
+    "app/forum/features/feed/hooks/useForumSyncLoop.js",
+    "app/forum/features/feed/hooks/useForumSseBridge.js",
+    "audit/forum-phase-60-feed-sync-engine-hooks.json"
+  ],
+  "moved_logic_domains": [
+    "features.feed.snapshot-dedupe-and-apply-transforms",
+    "features.feed.incremental-sync-loop-runner",
+    "features.feed.sse-rev-bridge-and-profile-live-hydration"
+  ],
+  "dependency_changes": {
+    "forumRoot_imports_added": [
+      "./features/feed/utils/snapshotTransforms",
+      "./features/feed/hooks/useForumSyncLoop",
+      "./features/feed/hooks/useForumSseBridge"
+    ],
+    "forum_deps": {
+      "cycles": 0,
+      "cross_domain_edges": 101,
+      "forum_root_imports": 1
+    }
+  },
+  "detected_risks": [
+    "ForumRoot still owns mutation-queue orchestration and deep-link/nav stack orchestration",
+    "Media/runtime hotspot warnings remain and were not changed functionally on this step",
+    "Sync behavior now delegated to hooks; adapters preserve old contracts but needs scenario regression check"
+  ],
+  "detected_cycles": {
+    "forum_deps_cycle_count": 0
+  },
+  "api_contract_risk": "none (same /api/forum/snapshot, /api/forum/events/stream, /api/forum/vip/batch, /api/profile/batch)",
+  "storage_risk": "low (same forum:snap/forum:queue/forum:tombstones semantics)",
+  "runtime_risk": {
+    "forum_root_heavy_score": 73,
+    "forum_root_runtime_score": 201,
+    "forum_root_deep_score": 128,
+    "forum_root_lines": 9051,
+    "forum_root_useEffect_count": 68,
+    "forum_root_useCallback_count": 69,
+    "trend": {
+      "heavy_score_before_phase_60": 75,
+      "heavy_score_after_phase_60": 73,
+      "runtime_score_before_phase_60": 221,
+      "runtime_score_after_phase_60": 201
+    }
+  },
+  "notes": {
+    "audits_run": [
+      "pnpm eslint app/forum/ForumRoot.jsx app/forum/features/feed/utils/snapshotTransforms.js app/forum/features/feed/hooks/useForumSyncLoop.js app/forum/features/feed/hooks/useForumSseBridge.js --no-cache",
+      "pnpm eslint app/forum --ext .js,.jsx --no-cache",
+      "node tools/audit-forum-deps.js",
+      "node tools/audit-full-forum.js",
+      "node tools/audit-effects.js",
+      "node tools/audit-media.js",
+      "node tools/audit-heavy.js",
+      "node tools/audit-account-sync.js",
+      "node tools/audit-runtime-hotspots.js",
+      "pnpm build"
+    ],
+    "status_summary": {
+      "lint": "ok (1 known warning in app/forum/ForumAds.js: @next/next/no-img-element)",
+      "build": "ok",
+      "forum_deps_cycles": 0
+    }
+  },
+  "status": "ok"
+}

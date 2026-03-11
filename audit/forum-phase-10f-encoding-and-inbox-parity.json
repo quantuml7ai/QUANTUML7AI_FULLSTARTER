@@ -1,0 +1,41 @@
+﻿{
+    "phase":  "phase-10f-encoding-and-inbox-parity",
+    "timestamp":  "2026-03-08T18:57:35.5612572+02:00",
+    "scope":  [
+                  "quests-encoding-parity",
+                  "dm-encoding-parity",
+                  "quest-branch-inbox-open-parity"
+              ],
+    "touched_files":  [
+                          "app/forum/features/quests/components/QuestHub.jsx",
+                          "app/forum/features/dm/components/DmThreadMessageRow.jsx",
+                          "app/forum/features/dm/components/DmDialogRow.jsx",
+                          "app/forum/features/dm/utils/openInboxGlobal.js",
+                          "app/forum/features/dm/hooks/useOpenInboxGlobalAction.js",
+                          "app/forum/features/ui/hooks/useForumScreenFlowsRuntime.js"
+                      ],
+    "new_files":  [
+
+                  ],
+    "moved_logic_domains":  [
+                                "dm/inbox-global-flow"
+                            ],
+    "dependency_changes":  [
+                               "No API/route/db contract changes"
+                           ],
+    "detected_risks":  [
+                           "Manual browser validation required for quest-branch envelope flow and visual glyph parity"
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "none",
+    "storage_risk":  "none",
+    "runtime_risk":  "low",
+    "notes":  [
+                  "targeted eslint ok",
+                  "Symbols restored as in source (no unicode-escape literals in JSX)",
+                  "Inbox open flow now explicitly closes quest mode before opening messenger"
+              ],
+    "status":  "passed-with-manual-ui-check-required"
+}

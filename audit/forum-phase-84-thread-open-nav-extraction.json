@@ -1,0 +1,48 @@
+﻿{
+    "phase":  "84-thread-open-navigation-extraction",
+    "timestamp":  "2026-03-08T13:52:25.5410523+02:00",
+    "scope":  [
+                  "app/forum/ForumRoot.jsx",
+                  "app/forum/features/feed/hooks/useThreadOpenNavigation.js"
+              ],
+    "touched_files":  [
+                          "app/forum/ForumRoot.jsx",
+                          "app/forum/features/feed/hooks/useThreadOpenNavigation.js",
+                          "audit/forum-phase-84-final-parity.json"
+                      ],
+    "new_files":  [
+                      "app/forum/features/feed/hooks/useThreadOpenNavigation.js"
+                  ],
+    "moved_logic_domains":  [
+                                "feed/navigation: openThreadForPost flow",
+                                "feed/navigation: pending thread-root restore on topic switch",
+                                "feed/navigation: deferred post scroll after thread activation"
+                            ],
+    "dependency_changes":  {
+                               "forum_root_lines_before":  3994,
+                               "forum_root_lines_after":  3940,
+                               "forum_deps_files_scanned":  317,
+                               "forum_deps_cycles":  0,
+                               "forum_deps_cross_domain_edges":  109,
+                               "runtime_hotspot_forumroot_after":  55,
+                               "parity_hash_total":  82,
+                               "parity_hash_changed":  1,
+                               "parity_hash_missing":  0
+                           },
+    "detected_risks":  [
+                           "ForumRoot remains large and still contains global mode orchestration.",
+                           "Pre-existing autoplay/img/perf warnings remain outside this extraction scope."
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low",
+    "runtime_risk":  "medium",
+    "notes":  [
+                  "Functional parity against baseline zip passed; only app/forum/Forum.jsx differs as expected thin-wrapper.",
+                  "No API/backend/db route hash deviations in parity scope.",
+                  "Build and full audit suite passed after extraction."
+              ],
+    "status":  "passed"
+}

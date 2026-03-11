@@ -1,0 +1,4689 @@
+{
+  "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
+  "generatedAt": "2026-03-10T09:41:12.856Z",
+  "summary": {
+    "scannedFiles": 355,
+    "internalEdges": 463,
+    "cycleCount": 0,
+    "crossDomainEdgeCount": 111,
+    "forumRootImportCount": 1,
+    "forumRootExternalCount": 1
+  },
+  "cycles": [],
+  "crossDomainEdges": [
+    {
+      "from": "app/forum/features/dm/components/DmDialogRow.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/classnames.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/dm/components/DmDialogRow.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/formatters.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/dm/components/DmDialogRow.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/components/HydrateText.jsx",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/dm/components/DmThreadHeader.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/classnames.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/dm/components/DmThreadHeader.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/formatters.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/dm/components/DmThreadMessageRow.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/classnames.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/dm/components/DmThreadMessageRow.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/richText.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/dm/components/DmThreadMessageRow.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/formatters.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/dm/components/DmThreadMessageRow.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/components/HydrateText.jsx",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/dm/components/DmThreadMessageRow.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/api/translate.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/components/ForumPostCard.jsx",
+      "fromDomain": "forum-ui",
+      "to": "components/i18n.js",
+      "toDomain": "components"
+    },
+    {
+      "from": "app/forum/features/feed/components/PostActionBar.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/components/HydrateText.jsx",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/components/PostCardBridge.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/richText.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/components/PostHeaderMeta.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/classnames.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/components/PostHeaderMeta.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/formatters.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/components/PostHeaderMeta.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/components/HydrateText.jsx",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/components/TopicItem.jsx",
+      "fromDomain": "forum-ui",
+      "to": "components/i18n.js",
+      "toDomain": "components"
+    },
+    {
+      "from": "app/forum/features/feed/components/TopicItem.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/classnames.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/components/TopicItem.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/formatters.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/components/TopicItem.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/components/HydrateText.jsx",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/hooks/useForumDeepLinkFlow.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/hooks/useEvent.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/hooks/usePostTranslation.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/api/translate.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/utils/postEvents.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/events/bus.js",
+      "toDomain": "forum-events"
+    },
+    {
+      "from": "app/forum/features/media/components/VideoLimitOverlay.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/constants/media.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/media/components/VideoOverlay.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/hooks/usePageLock.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/media/components/VideoOverlay.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/hooks/useHtmlFlag.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/media/components/VideoTrimPopover.jsx",
+      "fromDomain": "forum-ui",
+      "to": "lib/forumVideoTrim.js",
+      "toDomain": "lib"
+    },
+    {
+      "from": "app/forum/features/media/components/VideoTrimPopover.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/constants/media.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/browser.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/media/hooks/useForumVideoFeedRuntime.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/hooks/useHtmlFlag.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/media/hooks/useForumVideoFeedRuntime.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/hooks/useEvent.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/media/utils/mediaRuntime.js",
+      "fromDomain": "forum-ui",
+      "to": "lib/forumVideoTrim.js",
+      "toDomain": "lib"
+    },
+    {
+      "from": "app/forum/features/media/utils/mediaRuntime.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/constants/media.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/media/utils/videoCopy.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/forumLocale.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/moderation/hooks/useAdminFlag.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/browser.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/profile/components/AboutRail.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/classnames.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/profile/components/ForumVipControl.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/classnames.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/profile/components/ProfilePopover.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/hooks/useEvent.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/profile/components/ProfilePopover.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/classnames.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/profile/components/ProfilePopover.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/counts.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/profile/components/UserInfoPopover.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/api/translate.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/profile/components/UserInfoPopover.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/components/HydrateText.jsx",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/profile/components/UserInfoPopover.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/counts.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/profile/components/VipFlipBadge.jsx",
+      "fromDomain": "forum-ui",
+      "to": "components/i18n.js",
+      "toDomain": "components"
+    },
+    {
+      "from": "app/forum/features/profile/components/VipFlipBadge.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/classnames.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/profile/hooks/useForumProfileSync.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/hooks/useEvent.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/profile/hooks/useForumProfileSync.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/browser.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/profile/hooks/useForumProfileSync.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/storage/localStorage.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/profile/utils/profileCache.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/browser.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/qcoin/components/QCoinInline.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/classnames.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/qcoin/hooks/useQCoinLive.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/browser.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/quests/components/QuestHub.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/classnames.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/subscriptions/components/FollowersCounterInline.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/components/HydrateText.jsx",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/ui/components/ComposerCore.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/classnames.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/ui/components/ConfirmDeleteOverlay.jsx",
+      "fromDomain": "forum-ui",
+      "to": "components/i18n.js",
+      "toDomain": "components"
+    },
+    {
+      "from": "app/forum/features/ui/components/ForumSearchSortControls.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/classnames.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/ui/components/HeadChevronIcon.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/classnames.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/Forum.jsx",
+      "fromDomain": "forum-root",
+      "to": "app/forum/ForumRoot.jsx",
+      "toDomain": "forum-ui"
+    },
+    {
+      "from": "app/forum/ForumAds.js",
+      "fromDomain": "forum-ui",
+      "to": "components/i18n.js",
+      "toDomain": "components"
+    },
+    {
+      "from": "app/forum/ForumHeaderPanel.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/classnames.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "fromDomain": "forum-ui",
+      "to": "components/i18n.js",
+      "toDomain": "components"
+    },
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "fromDomain": "forum-ui",
+      "to": "lib/forumVideoTrim.js",
+      "toDomain": "lib"
+    },
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/hooks/useEvent.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/hooks/useHtmlFlag.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/hooks/useForumToast.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/browser.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/counts.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/richText.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/constants/media.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/config/runtime.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/hooks/useForumNavBridge.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/linkDetection.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/openAuth.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/formatters.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/time.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/layout.js",
+      "fromDomain": "forum-ui",
+      "to": "lib/metadataCache.js",
+      "toDomain": "lib"
+    },
+    {
+      "from": "app/forum/p/[postId]/route.js",
+      "fromDomain": "forum-ui",
+      "to": "app/api/forum/_db.js",
+      "toDomain": "api-forum"
+    },
+    {
+      "from": "app/forum/page.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/Forum.jsx",
+      "toDomain": "forum-root"
+    },
+    {
+      "from": "app/forum/page.js",
+      "fromDomain": "forum-ui",
+      "to": "components/i18n.js",
+      "toDomain": "components"
+    },
+    {
+      "from": "app/forum/SharePopover.jsx",
+      "fromDomain": "forum-ui",
+      "to": "lib/forumShareManager.js",
+      "toDomain": "lib"
+    },
+    {
+      "from": "app/api/forum/blobUploadUrl/route.js",
+      "fromDomain": "api-forum",
+      "to": "app/api/profile/_identity.js",
+      "toDomain": "api-profile"
+    },
+    {
+      "from": "app/api/forum/mutate/route.js",
+      "fromDomain": "api-forum",
+      "to": "app/api/profile/_identity.js",
+      "toDomain": "api-profile"
+    },
+    {
+      "from": "app/api/forum/subs/count/route.js",
+      "fromDomain": "api-forum",
+      "to": "app/api/profile/_identity.js",
+      "toDomain": "api-profile"
+    },
+    {
+      "from": "app/api/forum/subs/list/route.js",
+      "fromDomain": "api-forum",
+      "to": "app/api/profile/_identity.js",
+      "toDomain": "api-profile"
+    },
+    {
+      "from": "app/api/forum/subs/my-count/route.js",
+      "fromDomain": "api-forum",
+      "to": "app/api/profile/_identity.js",
+      "toDomain": "api-profile"
+    },
+    {
+      "from": "app/api/forum/subs/toggle/route.js",
+      "fromDomain": "api-forum",
+      "to": "app/api/profile/_identity.js",
+      "toDomain": "api-profile"
+    },
+    {
+      "from": "app/api/forum/uploadAudio/route.js",
+      "fromDomain": "api-forum",
+      "to": "app/api/profile/_identity.js",
+      "toDomain": "api-profile"
+    },
+    {
+      "from": "app/api/forum/vip/batch/route.js",
+      "fromDomain": "api-forum",
+      "to": "lib/subscriptions.js",
+      "toDomain": "lib"
+    },
+    {
+      "from": "app/api/dm/_utils.js",
+      "fromDomain": "api-dm",
+      "to": "app/api/profile/_identity.js",
+      "toDomain": "api-profile"
+    },
+    {
+      "from": "app/api/profile/batch/route.js",
+      "fromDomain": "api-profile",
+      "to": "app/api/forum/_db.js",
+      "toDomain": "api-forum"
+    },
+    {
+      "from": "app/api/profile/check-nick/route.js",
+      "fromDomain": "api-profile",
+      "to": "app/api/forum/_db.js",
+      "toDomain": "api-forum"
+    },
+    {
+      "from": "app/api/profile/check-nick/route.js",
+      "fromDomain": "api-profile",
+      "to": "app/api/forum/_utils.js",
+      "toDomain": "api-forum"
+    },
+    {
+      "from": "app/api/profile/get-about/route.js",
+      "fromDomain": "api-profile",
+      "to": "app/api/forum/_utils.js",
+      "toDomain": "api-forum"
+    },
+    {
+      "from": "app/api/profile/get-about/route.js",
+      "fromDomain": "api-profile",
+      "to": "app/api/forum/_db.js",
+      "toDomain": "api-forum"
+    },
+    {
+      "from": "app/api/profile/get-profile/route.js",
+      "fromDomain": "api-profile",
+      "to": "app/api/forum/_utils.js",
+      "toDomain": "api-forum"
+    },
+    {
+      "from": "app/api/profile/get-profile/route.js",
+      "fromDomain": "api-profile",
+      "to": "app/api/forum/_db.js",
+      "toDomain": "api-forum"
+    },
+    {
+      "from": "app/api/profile/save-nick/route.js",
+      "fromDomain": "api-profile",
+      "to": "app/api/forum/_utils.js",
+      "toDomain": "api-forum"
+    },
+    {
+      "from": "app/api/profile/save-nick/route.js",
+      "fromDomain": "api-profile",
+      "to": "app/api/forum/_db.js",
+      "toDomain": "api-forum"
+    },
+    {
+      "from": "app/api/profile/set-about/route.js",
+      "fromDomain": "api-profile",
+      "to": "app/api/forum/_utils.js",
+      "toDomain": "api-forum"
+    },
+    {
+      "from": "app/api/profile/set-about/route.js",
+      "fromDomain": "api-profile",
+      "to": "app/api/forum/_db.js",
+      "toDomain": "api-forum"
+    },
+    {
+      "from": "app/api/profile/user-popover/route.js",
+      "fromDomain": "api-profile",
+      "to": "app/api/forum/_utils.js",
+      "toDomain": "api-forum"
+    },
+    {
+      "from": "app/api/profile/user-popover/route.js",
+      "fromDomain": "api-profile",
+      "to": "app/api/forum/_db.js",
+      "toDomain": "api-forum"
+    },
+    {
+      "from": "app/api/qcoin/drop/route.js",
+      "fromDomain": "api-qcoin",
+      "to": "app/api/forum/_utils.js",
+      "toDomain": "api-forum"
+    },
+    {
+      "from": "app/api/qcoin/get/route.js",
+      "fromDomain": "api-qcoin",
+      "to": "app/api/forum/_utils.js",
+      "toDomain": "api-forum"
+    },
+    {
+      "from": "app/api/qcoin/heartbeat/route.js",
+      "fromDomain": "api-qcoin",
+      "to": "app/api/forum/_utils.js",
+      "toDomain": "api-forum"
+    },
+    {
+      "from": "app/api/quest/progress/route.js",
+      "fromDomain": "api-quest",
+      "to": "app/api/forum/_utils.js",
+      "toDomain": "api-forum"
+    },
+    {
+      "from": "app/api/quest/status/route.js",
+      "fromDomain": "api-quest",
+      "to": "app/api/forum/_utils.js",
+      "toDomain": "api-forum"
+    },
+    {
+      "from": "app/api/pay/create/route.js",
+      "fromDomain": "api-pay",
+      "to": "lib/adsCore.js",
+      "toDomain": "lib"
+    },
+    {
+      "from": "app/api/pay/webhook/route.js",
+      "fromDomain": "api-pay",
+      "to": "lib/subscriptions.js",
+      "toDomain": "lib"
+    },
+    {
+      "from": "app/api/pay/webhook/route.js",
+      "fromDomain": "api-pay",
+      "to": "lib/adsCore.js",
+      "toDomain": "lib"
+    },
+    {
+      "from": "app/api/subscription/status/route.js",
+      "fromDomain": "api-subscription",
+      "to": "lib/subscriptions.js",
+      "toDomain": "lib"
+    }
+  ],
+  "forumRoot": {
+    "file": "app/forum/Forum.jsx",
+    "imports": [
+      "app/forum/ForumRoot.jsx"
+    ],
+    "external": [
+      "react"
+    ],
+    "domain": "forum-root"
+  },
+  "files": [
+    {
+      "file": "app/forum/error.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/events/bus.js",
+      "domain": "forum-events",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/diagnostics/utils/emitPolicy.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/diagnostics/utils/emitPolicy.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/dm/components/DmDialogRow.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/utils/classnames.js",
+        "app/forum/features/ui/components/StarButton.jsx",
+        "app/forum/features/profile/components/AvatarEmoji.jsx",
+        "app/forum/features/profile/components/VipFlipBadge.jsx",
+        "app/forum/features/profile/hooks/useVipFlag.js",
+        "app/forum/features/profile/utils/profileCache.js",
+        "app/forum/features/dm/utils/mediaParsing.js",
+        "app/forum/shared/utils/formatters.js",
+        "app/forum/shared/components/HydrateText.jsx"
+      ],
+      "importCount": 9,
+      "external": [
+        "react",
+        "next/image"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/forum/features/dm/components/DmDialogsPane.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/dm/components/DmDialogRow.jsx"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/components/DmMessagesPane.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/dm/components/DmThreadHeader.jsx",
+        "app/forum/features/dm/components/DmThreadAlerts.jsx",
+        "app/forum/features/dm/components/DmThreadLoadMore.jsx",
+        "app/forum/features/dm/components/DmThreadMessageRow.jsx",
+        "app/forum/features/dm/components/DmDialogsPane.jsx"
+      ],
+      "importCount": 5,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/components/DmThreadAlerts.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/components/DmThreadHeader.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/utils/classnames.js",
+        "app/forum/features/ui/components/StarButton.jsx",
+        "app/forum/features/profile/components/AvatarEmoji.jsx",
+        "app/forum/features/profile/components/VipFlipBadge.jsx",
+        "app/forum/features/profile/hooks/useVipFlag.js",
+        "app/forum/features/profile/utils/profileCache.js",
+        "app/forum/shared/utils/formatters.js"
+      ],
+      "importCount": 7,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/components/DmThreadLoadMore.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/components/DmThreadMessageRow.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/utils/classnames.js",
+        "app/forum/shared/utils/richText.js",
+        "app/forum/shared/utils/formatters.js",
+        "app/forum/shared/components/HydrateText.jsx",
+        "app/forum/shared/api/translate.js",
+        "app/forum/features/profile/components/AvatarEmoji.jsx",
+        "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+        "app/forum/features/dm/components/DmVoicePlayer.jsx",
+        "app/forum/features/dm/utils/mediaParsing.js"
+      ],
+      "importCount": 9,
+      "external": [
+        "react",
+        "next/image"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/forum/features/dm/components/DmVoicePlayer.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/components/InboxPane.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/dm/components/InboxTabsHeader.jsx",
+        "app/forum/features/dm/components/InboxRepliesPane.jsx",
+        "app/forum/features/dm/components/DmMessagesPane.jsx",
+        "app/forum/features/feed/components/PublishedPostsPane.jsx"
+      ],
+      "importCount": 4,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/components/InboxRepliesPane.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/components/InboxTabsHeader.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useDmDeleteController.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useDmDeleteCopy.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useDmLoadLifecycle.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useDmLocalCache.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useDmOpenEvents.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useDmRepliesSeen.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useDmSeenObservers.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useDmStorageMaps.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/dm/utils/deletedMap.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useDmThreadAutoScroll.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useDmUnreadState.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useDmVipBatchProbe.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useForumDmRuntime.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/dm/hooks/useDmStorageMaps.js",
+        "app/forum/features/dm/hooks/useDmThreadAutoScroll.js",
+        "app/forum/features/dm/hooks/useInboxRepliesModel.js",
+        "app/forum/features/dm/hooks/useDmVipBatchProbe.js",
+        "app/forum/features/dm/hooks/useDmRepliesSeen.js",
+        "app/forum/features/dm/hooks/useDmUnreadState.js",
+        "app/forum/features/dm/hooks/useDmLocalCache.js",
+        "app/forum/features/dm/hooks/useDmLoadLifecycle.js",
+        "app/forum/features/dm/hooks/useDmSeenObservers.js",
+        "app/forum/features/dm/hooks/useDmDeleteController.js",
+        "app/forum/features/feed/hooks/usePublishedPostsModel.js",
+        "app/forum/features/dm/utils/dmLoaders.js"
+      ],
+      "importCount": 12,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useInboxRepliesModel.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useOpenInboxGlobalAction.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/dm/utils/openInboxGlobal.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/dm/services/sendDmComposerMessage.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/dm/utils/alignInboxStartUnderTabs.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/dm/utils/deletedMap.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/dm/utils/dmLoaders.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/dm/utils/mediaParsing.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/dm/utils/openInboxGlobal.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/feed/components/CreateTopicCard.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react",
+        "react-dom"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/forum/features/feed/components/ForumPostCard.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "components/i18n.js",
+        "app/forum/features/profile/hooks/useVipFlag.js",
+        "app/forum/features/profile/utils/profileCache.js",
+        "app/forum/features/feed/components/PostActionBar.jsx",
+        "app/forum/features/feed/components/PostMediaStack.jsx",
+        "app/forum/features/feed/components/PostBodyContent.jsx",
+        "app/forum/features/feed/components/PostTranslateToggle.jsx",
+        "app/forum/features/feed/components/PostOwnerMenu.jsx",
+        "app/forum/features/feed/components/PostFxLayer.jsx",
+        "app/forum/features/feed/components/PostHeaderMeta.jsx",
+        "app/forum/features/feed/hooks/usePostTranslation.js",
+        "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+        "app/forum/features/feed/hooks/usePostFx.js",
+        "app/forum/features/feed/hooks/usePostParentReplyNav.js"
+      ],
+      "importCount": 14,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/components/LoadMoreSentinel.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/components/PostActionBar.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/components/HydrateText.jsx"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/components/PostBodyContent.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react",
+        "next/image"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/forum/features/feed/components/PostCardBridge.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/feed/components/ForumPostCard.jsx",
+        "app/forum/shared/utils/richText.js",
+        "app/forum/features/media/utils/mediaLifecycleRuntime.js"
+      ],
+      "importCount": 3,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/components/PostFxLayer.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/components/PostHeaderMeta.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/utils/classnames.js",
+        "app/forum/shared/utils/formatters.js",
+        "app/forum/shared/components/HydrateText.jsx",
+        "app/forum/features/ui/components/StarButton.jsx",
+        "app/forum/features/profile/components/AvatarEmoji.jsx",
+        "app/forum/features/profile/components/VipFlipBadge.jsx",
+        "app/forum/features/profile/utils/profileCache.js"
+      ],
+      "importCount": 7,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react",
+        "next/image"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/forum/features/feed/components/PostOwnerMenu.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/ui/components/ConfirmDeleteOverlay.jsx",
+        "app/forum/features/feed/hooks/usePostOwnerActions.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/components/PostTranslateToggle.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/components/PublishedPostsPane.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/components/ThreadRepliesPane.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/components/ThreadSection.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/ForumHeaderPanel.jsx",
+        "app/forum/features/ui/components/ThreadForumActionCluster.jsx",
+        "app/forum/features/feed/components/ThreadTitle.jsx",
+        "app/forum/features/feed/components/ThreadRepliesPane.jsx"
+      ],
+      "importCount": 4,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/components/ThreadTitle.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/components/TopicItem.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "components/i18n.js",
+        "app/forum/shared/utils/classnames.js",
+        "app/forum/shared/utils/formatters.js",
+        "app/forum/shared/components/HydrateText.jsx",
+        "app/forum/features/ui/components/ConfirmDeleteOverlay.jsx",
+        "app/forum/features/ui/components/StarButton.jsx",
+        "app/forum/features/profile/components/AvatarEmoji.jsx",
+        "app/forum/features/profile/components/VipFlipBadge.jsx",
+        "app/forum/features/profile/hooks/useVipFlag.js",
+        "app/forum/features/profile/utils/profileCache.js"
+      ],
+      "importCount": 10,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/components/TopicsOrPanelsSwitch.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/media/components/VideoFeedPane.jsx",
+        "app/forum/features/quests/components/QuestPane.jsx",
+        "app/forum/features/dm/components/InboxPane.jsx",
+        "app/forum/features/feed/components/TopicsPane.jsx"
+      ],
+      "importCount": 4,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/components/TopicsPane.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/components/TopicsSection.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/ForumHeaderPanel.jsx",
+        "app/forum/features/ui/components/MainForumActionCluster.jsx",
+        "app/forum/features/feed/components/TopicsOrPanelsSwitch.jsx"
+      ],
+      "importCount": 3,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/constants/deeplink.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumCreatePostAction.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/dm/services/sendDmComposerMessage.js",
+        "app/forum/features/media/services/resolveComposerMediaPayload.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumCreateTopicAction.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumDataRuntime.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/feed/utils/snapshotTransforms.js",
+        "app/forum/features/feed/hooks/useForumMutationQueue.js",
+        "app/forum/features/feed/hooks/useForumSyncLoop.js",
+        "app/forum/features/feed/hooks/useForumSseBridge.js"
+      ],
+      "importCount": 4,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumDeepLinkFlow.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/hooks/useEvent.js",
+        "app/forum/features/feed/constants/deeplink.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumFeedRuntime.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/feed/hooks/useForumDeepLinkFlow.js",
+        "app/forum/features/feed/hooks/useThreadOpenNavigation.js",
+        "app/forum/features/feed/hooks/useThreadPostsModel.js",
+        "app/forum/features/feed/hooks/useTopicDiscoveryModel.js",
+        "app/forum/features/feed/utils/postFocus.js"
+      ],
+      "importCount": 5,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumHomeAction.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumMutationActions.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumMutationQueue.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/feed/utils/snapshotTransforms.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumNavigationActions.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/dm/utils/alignInboxStartUnderTabs.js",
+        "app/forum/features/feed/utils/navState.js",
+        "app/forum/features/feed/utils/navOrchestrator.js"
+      ],
+      "importCount": 3,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumNavigationRuntime.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/feed/hooks/useForumHomeAction.js",
+        "app/forum/features/feed/hooks/useForumNavigationActions.js",
+        "app/forum/features/feed/hooks/useNavStateSnapshot.js"
+      ],
+      "importCount": 3,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumSseBridge.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumSyncLoop.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumViewTracking.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useNavStateSnapshot.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostFx.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostOwnerActions.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostParentReplyNav.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostTranslation.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/api/translate.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePublishedPostsModel.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useThreadOpenNavigation.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useThreadPostsModel.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useTopicDiscoveryModel.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/services/rateLimiter.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/feed/utils/navOrchestrator.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/feed/utils/navScroll.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/feed/utils/navState.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/feed/utils/openThreadFromPost.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/feed/utils/postEvents.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/events/bus.js"
+      ],
+      "importCount": 1,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/feed/utils/postFocus.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/feed/utils/signatures.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/feed/utils/snapshotTransforms.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/feed/utils/signatures.js"
+      ],
+      "importCount": 1,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/media/components/ComposerAttachmentPreview.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/media/utils/mediaLifecycleRuntime.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react",
+        "next/image"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/forum/features/media/components/LivePreview.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/media/components/qcast/QCastIcons.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/media/components/QCastPlayer.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/media/utils/formatMediaTime.js",
+        "app/forum/features/media/utils/qcastBars.js",
+        "app/forum/features/media/components/qcast/QCastIcons.jsx"
+      ],
+      "importCount": 3,
+      "external": [
+        "react",
+        "next/image"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/forum/features/media/components/VideoFeedPane.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/media/components/VideoLimitOverlay.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/constants/media.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react",
+        "react-dom"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/forum/features/media/components/VideoMedia.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/media/components/VideoOverlay.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/media/components/LivePreview.jsx",
+        "app/forum/shared/hooks/usePageLock.js",
+        "app/forum/shared/hooks/useHtmlFlag.js"
+      ],
+      "importCount": 3,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/media/components/VideoTrimPopover.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "lib/forumVideoTrim.js",
+        "app/forum/shared/constants/media.js",
+        "app/forum/features/media/utils/mediaRuntime.js"
+      ],
+      "importCount": 3,
+      "external": [
+        "react",
+        "react-dom"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumComposerAttachments.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/utils/browser.js",
+        "app/forum/features/media/utils/mediaLifecycleRuntime.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumVideoFeedRuntime.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/hooks/useHtmlFlag.js",
+        "app/forum/shared/hooks/useEvent.js",
+        "app/forum/features/media/hooks/useVideoFeedActions.js",
+        "app/forum/features/media/hooks/useVideoFeedLifecycle.js",
+        "app/forum/features/media/hooks/useVideoFeedState.js",
+        "app/forum/features/media/utils/videoFeedScroll.js"
+      ],
+      "importCount": 6,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/media/hooks/useMediaPipelineController.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/media/hooks/useVideoCaptureController.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/media/hooks/useVideoFeedActions.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/media/utils/videoFeedActions.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/media/hooks/useVideoFeedLifecycle.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/media/hooks/useVideoFeedState.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/media/utils/videoFeedBuilder.js",
+        "app/forum/features/media/utils/videoFeedSalt.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/media/hooks/useVideoFeedWindowing.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/media/hooks/useVideoTrimController.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/media/utils/mediaRuntime.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/media/hooks/useVoiceRecorder.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/media/services/resolveComposerMediaPayload.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/media/utils/formatMediaTime.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/media/utils/frontCameraMirror.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/media/components/VideoMedia.jsx",
+        "app/forum/features/media/components/QCastPlayer.jsx",
+        "app/forum/features/media/utils/videoControls.js"
+      ],
+      "importCount": 3,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLinks.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaRuntime.js",
+      "domain": "forum-ui",
+      "imports": [
+        "lib/forumVideoTrim.js",
+        "app/forum/shared/constants/media.js"
+      ],
+      "importCount": 2,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaUrlPipeline.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/media/utils/mediaLinks.js"
+      ],
+      "importCount": 1,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/media/utils/moderationPrep.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/media/utils/qcastBars.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/media/utils/urlParsing.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/media/utils/videoControls.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/media/utils/videoCopy.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/utils/forumLocale.js"
+      ],
+      "importCount": 1,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/media/utils/videoFeedActions.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/media/utils/videoFeedBuilder.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/media/utils/videoFeedRandom.js",
+        "app/forum/features/media/utils/videoFeedPosts.js"
+      ],
+      "importCount": 2,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/media/utils/videoFeedPosts.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/media/utils/videoFeedRandom.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/media/utils/videoFeedSalt.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/media/utils/videoFeedScroll.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/moderation/components/AdminPopover.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/services/forumApi.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/moderation/components/ReportPopover.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/moderation/hooks/useAdminActions.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/moderation/hooks/useAdminFlag.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/utils/browser.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/moderation/hooks/useForumModerationRuntime.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/moderation/hooks/useAdminActions.js",
+        "app/forum/features/moderation/hooks/useAdminFlag.js",
+        "app/forum/features/moderation/hooks/useForumModerationUi.js",
+        "app/forum/features/moderation/hooks/useMediaModeration.js",
+        "app/forum/features/moderation/hooks/useReportController.js"
+      ],
+      "importCount": 5,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/moderation/hooks/useForumModerationUi.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/moderation/hooks/useMediaModeration.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/moderation/utils/http.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/moderation/hooks/useReportController.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/moderation/utils/http.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/profile/components/AboutRail.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/utils/classnames.js",
+        "app/forum/features/profile/utils/aboutText.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/profile/components/AvatarEmoji.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/profile/utils/profileCache.js",
+        "app/forum/features/profile/utils/avatar.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "react",
+        "next/image"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/forum/features/profile/components/ForumVipControl.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/utils/classnames.js",
+        "app/forum/features/profile/components/VipPopover.jsx"
+      ],
+      "importCount": 2,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/profile/components/ProfilePopover.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/hooks/useEvent.js",
+        "app/forum/shared/utils/classnames.js",
+        "app/forum/shared/utils/counts.js",
+        "app/forum/features/subscriptions/components/FollowersCounterInline.jsx",
+        "app/forum/features/qcoin/utils/account.js",
+        "app/forum/features/profile/utils/profileCache.js"
+      ],
+      "importCount": 6,
+      "external": [
+        "react",
+        "next/image"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/forum/features/profile/components/UserInfoPopover.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/api/translate.js",
+        "app/forum/shared/components/HydrateText.jsx",
+        "app/forum/shared/utils/counts.js",
+        "app/forum/features/profile/utils/profileCache.js"
+      ],
+      "importCount": 4,
+      "external": [
+        "react",
+        "react-dom"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/forum/features/profile/components/VipFlipBadge.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "components/i18n.js",
+        "app/forum/shared/utils/classnames.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "react",
+        "next/image"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/forum/features/profile/components/VipPopover.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/profile/constants/vipAssets.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/profile/hooks/useAboutEditor.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/profile/hooks/useForumProfileSocialRuntime.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/subscriptions/hooks/useStarredAuthorsState.js",
+        "app/forum/features/profile/hooks/useAboutEditor.js",
+        "app/forum/features/profile/hooks/useVipPayAction.js",
+        "app/forum/features/profile/hooks/useVipSubscriptionState.js"
+      ],
+      "importCount": 4,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/profile/hooks/useForumProfileSync.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/hooks/useEvent.js",
+        "app/forum/shared/utils/browser.js",
+        "app/forum/shared/storage/localStorage.js",
+        "app/forum/features/profile/utils/profileCache.js"
+      ],
+      "importCount": 4,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/profile/hooks/useVipFlag.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/profile/utils/vip.js",
+        "app/forum/features/profile/utils/profileCache.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/profile/hooks/useVipPayAction.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/qcoin/utils/paymentWindow.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/profile/hooks/useVipSubscriptionState.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/profile/utils/aboutText.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/profile/utils/avatar.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/profile/utils/profileCache.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/utils/browser.js"
+      ],
+      "importCount": 1,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/profile/utils/vip.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/qcoin/components/QCoinInline.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/qcoin/hooks/useQCoinLive.js",
+        "app/forum/shared/utils/classnames.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/qcoin/components/QCoinWithdrawPopover.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react",
+        "next/image",
+        "next/navigation"
+      ],
+      "externalCount": 3
+    },
+    {
+      "file": "app/forum/features/qcoin/hooks/useQCoinLive.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/utils/browser.js",
+        "app/forum/features/qcoin/utils/account.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/qcoin/utils/account.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/qcoin/utils/paymentWindow.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/quests/components/QuestClaimOverlay.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/quests/components/QuestHub.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/utils/classnames.js",
+        "app/forum/features/quests/utils/progress.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "react",
+        "next/image"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/forum/features/quests/components/QuestLaunchIcon.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "next/image"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/quests/components/QuestPane.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/quests/components/QuestHub.jsx"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/quests/hooks/useForumQuestConfig.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/quests/hooks/useForumQuestProgress.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/quests/utils/progress.js",
+        "app/forum/features/quests/hooks/useQuestStorageState.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/quests/hooks/useForumQuestRuntime.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/quests/hooks/useForumQuestConfig.js",
+        "app/forum/features/quests/hooks/useForumQuestProgress.js",
+        "app/forum/features/quests/hooks/useQuestClaimAction.js",
+        "app/forum/features/quests/hooks/useQuestViewActions.js"
+      ],
+      "importCount": 4,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/quests/hooks/useQuestClaimAction.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/quests/hooks/useQuestStorageState.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/quests/utils/progress.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/quests/hooks/useQuestViewActions.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/quests/utils/progress.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/subscriptions/components/FollowersCounterInline.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/components/HydrateText.jsx"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/subscriptions/hooks/useStarredAuthorsState.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/subscriptions/utils/starred.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/subscriptions/utils/starred.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/ui/components/ComposeDock.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/ui/components/ComposerStatusMeta.jsx",
+        "app/forum/features/ui/components/ComposerCore.jsx",
+        "app/forum/features/ui/components/ComposerFabButton.jsx"
+      ],
+      "importCount": 3,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/components/ComposerActionRail.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/components/ComposerCore.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/ui/components/ComposerMediaProgressBar.jsx",
+        "app/forum/features/ui/components/ComposerActionRail.jsx",
+        "app/forum/features/ui/components/ComposerTextInput.jsx",
+        "app/forum/features/ui/components/ComposerEmojiPreview.jsx",
+        "app/forum/features/ui/components/ComposerEmojiPanel.jsx",
+        "app/forum/features/ui/components/ComposerFileInput.jsx",
+        "app/forum/features/media/components/ComposerAttachmentPreview.jsx",
+        "app/forum/features/dm/components/DmVoicePlayer.jsx",
+        "app/forum/shared/utils/classnames.js"
+      ],
+      "importCount": 9,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/components/ComposerEmojiPanel.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react",
+        "next/image"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/forum/features/ui/components/ComposerEmojiPreview.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react",
+        "next/image"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/forum/features/ui/components/ComposerFabButton.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/components/ComposerFileInput.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/components/ComposerMediaProgressBar.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/components/ComposerStatusMeta.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/components/ComposerTextInput.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/components/ConfirmDeleteOverlay.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "components/i18n.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react",
+        "react-dom"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/forum/features/ui/components/DmDeletePopover.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react",
+        "react-dom"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/forum/features/ui/components/ForumActionNavIcon.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/components/ForumActionRow.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/ui/components/ForumActionNavIcon.jsx",
+        "app/forum/features/ui/components/VideoFeedNavIcon.jsx"
+      ],
+      "importCount": 2,
+      "external": [
+        "next/image"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/components/ForumAdSlot.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/ForumAds.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/components/ForumOverlayStack.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/ui/components/DmDeletePopover.jsx",
+        "app/forum/features/media/components/VideoOverlay.jsx",
+        "app/forum/features/media/components/VideoLimitOverlay.jsx",
+        "app/forum/features/media/components/VideoTrimPopover.jsx",
+        "app/forum/features/moderation/components/ReportPopover.jsx",
+        "app/forum/SharePopover.jsx",
+        "app/forum/features/profile/components/UserInfoPopover.jsx",
+        "app/forum/features/quests/components/QuestClaimOverlay.jsx"
+      ],
+      "importCount": 8,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/components/ForumSearchSortControls.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/utils/classnames.js",
+        "app/forum/features/media/utils/mediaLinks.js",
+        "app/forum/features/quests/components/QuestLaunchIcon.jsx"
+      ],
+      "importCount": 3,
+      "external": [
+        "next/image"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/components/HeadChevronIcon.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/utils/classnames.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/components/MainForumActionCluster.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/ui/components/ForumActionRow.jsx",
+        "app/forum/features/feed/components/CreateTopicCard.jsx",
+        "app/forum/features/ui/constants/inviteButton.js"
+      ],
+      "importCount": 3,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/components/StarButton.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/components/ThreadForumActionCluster.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/ui/components/ForumActionRow.jsx",
+        "app/forum/features/feed/components/CreateTopicCard.jsx",
+        "app/forum/features/ui/constants/inviteButton.js"
+      ],
+      "importCount": 3,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/components/VideoFeedNavIcon.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/constants/emojiCatalog.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/ui/constants/inviteButton.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useComposerActionHandlers.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useComposerEmojiState.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useComposerScrollMemory.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useComposerUiLifecycle.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumAdSlots.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/ui/utils/adsSlots.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumAdsRuntime.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/ForumAds.js",
+        "app/forum/features/ui/hooks/useForumAdSlots.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumComposerRuntime.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/ui/hooks/useComposerScrollMemory.js",
+        "app/forum/features/ui/hooks/useComposerUiLifecycle.js",
+        "app/forum/features/media/hooks/useVoiceRecorder.js",
+        "app/forum/features/media/hooks/useMediaPipelineController.js"
+      ],
+      "importCount": 4,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumComposerSubmitRuntime.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/feed/hooks/useForumCreateTopicAction.js",
+        "app/forum/features/feed/hooks/useForumCreatePostAction.js",
+        "app/forum/features/feed/hooks/useForumViewTracking.js",
+        "app/forum/features/ui/hooks/useComposerEmojiState.js",
+        "app/forum/features/ui/hooks/useComposerActionHandlers.js",
+        "app/forum/features/media/hooks/useForumComposerAttachments.js"
+      ],
+      "importCount": 6,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumEditMode.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumGlobalPopovers.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumPopoverModeController.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumScreenFlowsRuntime.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/media/hooks/useForumVideoFeedRuntime.js",
+        "app/forum/features/dm/hooks/useDmOpenEvents.js",
+        "app/forum/features/dm/hooks/useOpenInboxGlobalAction.js",
+        "app/forum/features/quests/hooks/useForumQuestRuntime.js",
+        "app/forum/features/feed/hooks/useForumNavigationRuntime.js",
+        "app/forum/features/ui/hooks/useForumAdsRuntime.js",
+        "app/forum/features/media/hooks/useVideoFeedWindowing.js",
+        "app/forum/features/dm/hooks/useDmDeleteCopy.js"
+      ],
+      "importCount": 8,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumSessionShell.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumViewState.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useScrollResizeCompensation.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/ui/utils/adsSlots.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/ui/utils/buildForumLayoutProps.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/ui/utils/buildForumRootPropBundles.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/ui/utils/propBundles/buildActionClusterProps.js",
+        "app/forum/features/ui/utils/propBundles/buildComposerCoreProps.js",
+        "app/forum/features/ui/utils/propBundles/buildForumHeaderPanelProps.js",
+        "app/forum/features/ui/utils/propBundles/buildInboxPaneProps.js",
+        "app/forum/features/ui/utils/propBundles/buildSearchSortControlsProps.js",
+        "app/forum/features/ui/utils/propBundles/buildThreadRepliesPaneProps.js",
+        "app/forum/features/ui/utils/propBundles/buildTopicsSwitchProps.js"
+      ],
+      "importCount": 7,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/ui/utils/propBundles/buildActionClusterProps.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/ui/utils/propBundles/buildComposerCoreProps.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/ui/utils/propBundles/buildForumHeaderPanelProps.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/ui/utils/propBundles/buildInboxPaneProps.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/ui/utils/propBundles/buildSearchSortControlsProps.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/ui/utils/propBundles/buildThreadRepliesPaneProps.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/ui/utils/propBundles/buildTopicsSwitchProps.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/Forum.jsx",
+      "domain": "forum-root",
+      "imports": [
+        "app/forum/ForumRoot.jsx"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "domain": "forum-ui",
+      "imports": [
+        "components/i18n.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react",
+        "next/image",
+        "next/navigation"
+      ],
+      "externalCount": 3
+    },
+    {
+      "file": "app/forum/ForumHeaderPanel.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/utils/classnames.js",
+        "app/forum/features/ui/components/HeadChevronIcon.jsx",
+        "app/forum/features/profile/components/AvatarEmoji.jsx",
+        "app/forum/features/profile/components/ProfilePopover.jsx",
+        "app/forum/features/profile/components/AboutRail.jsx",
+        "app/forum/features/qcoin/components/QCoinInline.jsx",
+        "app/forum/features/qcoin/components/QCoinWithdrawPopover.jsx",
+        "app/forum/features/ui/components/ForumSearchSortControls.jsx",
+        "app/forum/features/profile/components/ForumVipControl.jsx"
+      ],
+      "importCount": 9,
+      "external": [
+        "react",
+        "react-dom"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/forum/ForumLayout.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/styles/ForumStyles.jsx",
+        "app/forum/styles/ForumFxStyles.jsx",
+        "app/forum/features/feed/components/TopicsSection.jsx",
+        "app/forum/features/feed/components/ThreadSection.jsx",
+        "app/forum/features/ui/components/ComposeDock.jsx",
+        "app/forum/features/ui/components/ForumOverlayStack.jsx"
+      ],
+      "importCount": 6,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/ForumProviders.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/ForumRoot.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "components/i18n.js",
+        "app/forum/ForumLayout.jsx",
+        "app/forum/ForumProviders.jsx",
+        "lib/forumVideoTrim.js",
+        "app/forum/shared/hooks/useEvent.js",
+        "app/forum/shared/hooks/useHtmlFlag.js",
+        "app/forum/shared/hooks/useForumToast.js",
+        "app/forum/shared/utils/browser.js",
+        "app/forum/shared/utils/counts.js",
+        "app/forum/shared/utils/richText.js",
+        "app/forum/shared/constants/media.js",
+        "app/forum/shared/config/runtime.js",
+        "app/forum/shared/hooks/useForumNavBridge.js",
+        "app/forum/shared/utils/linkDetection.js",
+        "app/forum/shared/utils/openAuth.js",
+        "app/forum/shared/utils/formatters.js",
+        "app/forum/shared/utils/time.js",
+        "app/forum/features/ui/constants/emojiCatalog.js",
+        "app/forum/features/ui/components/ForumAdSlot.jsx",
+        "app/forum/features/ui/hooks/useForumGlobalPopovers.js",
+        "app/forum/features/ui/hooks/useForumEditMode.js",
+        "app/forum/features/ui/hooks/useScrollResizeCompensation.js",
+        "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+        "app/forum/features/ui/hooks/useForumPopoverModeController.js",
+        "app/forum/features/ui/hooks/useForumComposerRuntime.js",
+        "app/forum/features/ui/hooks/useForumSessionShell.js",
+        "app/forum/features/ui/hooks/useForumViewState.js",
+        "app/forum/features/ui/hooks/useForumComposerSubmitRuntime.js",
+        "app/forum/features/ui/hooks/useForumScreenFlowsRuntime.js",
+        "app/forum/features/ui/utils/buildForumRootPropBundles.js",
+        "app/forum/features/ui/utils/buildForumLayoutProps.js",
+        "app/forum/features/feed/hooks/useForumDataRuntime.js",
+        "app/forum/features/feed/hooks/useForumMutationActions.js",
+        "app/forum/features/feed/hooks/useForumFeedRuntime.js",
+        "app/forum/features/feed/utils/navScroll.js",
+        "app/forum/features/feed/services/rateLimiter.js",
+        "app/forum/features/feed/components/TopicItem.jsx",
+        "app/forum/features/feed/components/PostCardBridge.jsx",
+        "app/forum/features/feed/components/LoadMoreSentinel.jsx",
+        "app/forum/features/feed/utils/postEvents.js",
+        "app/forum/features/media/components/VideoOverlay.jsx",
+        "app/forum/features/media/utils/mediaRuntime.js",
+        "app/forum/features/media/utils/videoCopy.js",
+        "app/forum/features/media/utils/urlParsing.js",
+        "app/forum/features/media/utils/mediaLinks.js",
+        "app/forum/features/media/utils/mediaUrlPipeline.js",
+        "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+        "app/forum/features/media/hooks/useVideoTrimController.js",
+        "app/forum/features/media/hooks/useVideoCaptureController.js",
+        "app/forum/features/media/utils/frontCameraMirror.js",
+        "app/forum/features/media/utils/moderationPrep.js",
+        "app/forum/features/dm/utils/mediaParsing.js",
+        "app/forum/features/dm/hooks/useForumDmRuntime.js",
+        "app/forum/features/profile/utils/profileCache.js",
+        "app/forum/features/profile/hooks/useForumProfileSync.js",
+        "app/forum/features/profile/hooks/useForumProfileSocialRuntime.js",
+        "app/forum/features/profile/constants/vipAssets.js",
+        "app/forum/features/profile/utils/aboutText.js",
+        "app/forum/services/forumApi.js",
+        "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+        "app/forum/features/moderation/hooks/useForumModerationRuntime.js",
+        "app/forum/ForumAds.js"
+      ],
+      "importCount": 62,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/layout.js",
+      "domain": "forum-ui",
+      "imports": [
+        "lib/metadataCache.js"
+      ],
+      "importCount": 1,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/loading.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/p/[postId]/route.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/api/forum/_db.js"
+      ],
+      "importCount": 1,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/page.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/Forum.jsx",
+        "components/i18n.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "react",
+        "next/link",
+        "next/image"
+      ],
+      "externalCount": 3
+    },
+    {
+      "file": "app/forum/services/forumApi.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/shared/api/http.js",
+      "domain": "forum-shared",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/shared/api/translate.js",
+      "domain": "forum-shared",
+      "imports": [
+        "app/forum/shared/api/http.js"
+      ],
+      "importCount": 1,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/shared/components/HydrateText.jsx",
+      "domain": "forum-shared",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/shared/config/runtime.js",
+      "domain": "forum-shared",
+      "imports": [
+        "app/forum/shared/utils/browser.js"
+      ],
+      "importCount": 1,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/shared/constants/media.js",
+      "domain": "forum-shared",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/shared/hooks/useEvent.js",
+      "domain": "forum-shared",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/shared/hooks/useForumNavBridge.js",
+      "domain": "forum-shared",
+      "imports": [
+        "app/forum/shared/hooks/useEvent.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/shared/hooks/useForumToast.js",
+      "domain": "forum-shared",
+      "imports": [
+        "app/forum/shared/utils/classnames.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/shared/hooks/useHtmlFlag.js",
+      "domain": "forum-shared",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/shared/hooks/usePageLock.js",
+      "domain": "forum-shared",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/shared/storage/localStorage.js",
+      "domain": "forum-shared",
+      "imports": [
+        "app/forum/shared/utils/browser.js"
+      ],
+      "importCount": 1,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/shared/telemetry/diag.js",
+      "domain": "forum-shared",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/shared/utils/browser.js",
+      "domain": "forum-shared",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/shared/utils/classnames.js",
+      "domain": "forum-shared",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/shared/utils/counts.js",
+      "domain": "forum-shared",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/shared/utils/formatters.js",
+      "domain": "forum-shared",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/shared/utils/forumLocale.js",
+      "domain": "forum-shared",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/shared/utils/linkDetection.js",
+      "domain": "forum-shared",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/shared/utils/openAuth.js",
+      "domain": "forum-shared",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/shared/utils/richText.js",
+      "domain": "forum-shared",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/shared/utils/time.js",
+      "domain": "forum-shared",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/SharePopover.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "lib/forumShareManager.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react",
+        "react-dom",
+        "next/image"
+      ],
+      "externalCount": 3
+    },
+    {
+      "file": "app/forum/styles/ForumFxStyles.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/styles/modules/composerStyles.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/styles/modules/dmStyles.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/styles/modules/fxStyles.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/styles/modules/layoutStyles.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/styles/modules/profileStyles.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/styles/modules/qcoinStyles.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/styles/modules/questStyles.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/forum/admin/banUser/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js"
+      ],
+      "importCount": 2,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/forum/admin/deletePost/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js"
+      ],
+      "importCount": 2,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/forum/admin/deleteTopic/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js"
+      ],
+      "importCount": 2,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/forum/admin/unbanUser/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js"
+      ],
+      "importCount": 2,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/forum/admin/verify/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_utils.js"
+      ],
+      "importCount": 1,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/forum/blobUploadUrl/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_db.js",
+        "app/api/profile/_identity.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "next/server",
+        "@vercel/blob/client"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/api/forum/events/stream/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_bus.js",
+        "app/api/forum/_db.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "@upstash/redis"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/api/forum/mediaLock/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js"
+      ],
+      "importCount": 2,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/forum/moderate/route.js",
+      "domain": "api-forum",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "@tensorflow/tfjs-core",
+        "nsfwjs",
+        "pngjs",
+        "jpeg-js",
+        "@tensorflow/tfjs-backend-cpu",
+        "@tensorflow/tfjs-layers"
+      ],
+      "externalCount": 6
+    },
+    {
+      "file": "app/api/forum/mutate/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js",
+        "app/api/forum/_bus.js",
+        "app/api/profile/_identity.js"
+      ],
+      "importCount": 4,
+      "external": [
+        "@upstash/redis",
+        "node:crypto"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/api/forum/own/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "next/server"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/api/forum/post-by-id/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js"
+      ],
+      "importCount": 2,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/forum/post-chain/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js"
+      ],
+      "importCount": 2,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/forum/post-locate/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js"
+      ],
+      "importCount": 2,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/forum/post-meta/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js"
+      ],
+      "importCount": 2,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/forum/report/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js",
+        "app/api/forum/_bus.js"
+      ],
+      "importCount": 3,
+      "external": [
+        "@upstash/redis"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/api/forum/snapshot/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_db.js"
+      ],
+      "importCount": 1,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/forum/subs/count/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js",
+        "app/api/profile/_identity.js"
+      ],
+      "importCount": 3,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/forum/subs/list/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js",
+        "app/api/profile/_identity.js"
+      ],
+      "importCount": 3,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/forum/subs/my-count/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js",
+        "app/api/profile/_identity.js"
+      ],
+      "importCount": 3,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/forum/subs/toggle/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js",
+        "app/api/profile/_identity.js"
+      ],
+      "importCount": 3,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/forum/upload/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_db.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "next/server",
+        "@vercel/blob",
+        "sharp"
+      ],
+      "externalCount": 3
+    },
+    {
+      "file": "app/api/forum/uploadAudio/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_db.js",
+        "app/api/profile/_identity.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "next/server",
+        "@vercel/blob"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/api/forum/uploadVideo/route.js",
+      "domain": "api-forum",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "next/server",
+        "@vercel/blob"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/api/forum/vip/batch/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "lib/subscriptions.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "next/server"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/api/forum/wa-preview/route.js",
+      "domain": "api-forum",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "sharp"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/api/forum/_bus.js",
+      "domain": "api-forum",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/forum/_db.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_utils.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "@upstash/redis"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/api/forum/_utils.js",
+      "domain": "api-forum",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "next/headers"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/api/dm/block/route.js",
+      "domain": "api-dm",
+      "imports": [
+        "app/api/dm/_db.js",
+        "app/api/dm/_utils.js"
+      ],
+      "importCount": 2,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/dm/delete/route.js",
+      "domain": "api-dm",
+      "imports": [
+        "app/api/dm/_db.js",
+        "app/api/dm/_utils.js"
+      ],
+      "importCount": 2,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/dm/dialogs/route.js",
+      "domain": "api-dm",
+      "imports": [
+        "app/api/dm/_db.js",
+        "app/api/dm/_utils.js"
+      ],
+      "importCount": 2,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/dm/seen/route.js",
+      "domain": "api-dm",
+      "imports": [
+        "app/api/dm/_db.js",
+        "app/api/dm/_utils.js"
+      ],
+      "importCount": 2,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/dm/send/route.js",
+      "domain": "api-dm",
+      "imports": [
+        "app/api/dm/_db.js",
+        "app/api/dm/_utils.js"
+      ],
+      "importCount": 2,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/dm/thread/route.js",
+      "domain": "api-dm",
+      "imports": [
+        "app/api/dm/_db.js",
+        "app/api/dm/_utils.js"
+      ],
+      "importCount": 2,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/dm/unblock/route.js",
+      "domain": "api-dm",
+      "imports": [
+        "app/api/dm/_db.js",
+        "app/api/dm/_utils.js"
+      ],
+      "importCount": 2,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/dm/_db.js",
+      "domain": "api-dm",
+      "imports": [
+        "app/api/dm/_utils.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "@upstash/redis"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/api/dm/_utils.js",
+      "domain": "api-dm",
+      "imports": [
+        "app/api/profile/_identity.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "next/headers"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/api/profile/batch/route.js",
+      "domain": "api-profile",
+      "imports": [
+        "app/api/forum/_db.js",
+        "app/api/profile/_identity.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "next/server",
+        "@upstash/redis"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/api/profile/check-nick/route.js",
+      "domain": "api-profile",
+      "imports": [
+        "app/api/forum/_db.js",
+        "app/api/forum/_utils.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "next/server"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/api/profile/get-about/route.js",
+      "domain": "api-profile",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js",
+        "app/api/profile/_identity.js"
+      ],
+      "importCount": 3,
+      "external": [
+        "next/server"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/api/profile/get-profile/route.js",
+      "domain": "api-profile",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js",
+        "app/api/profile/_identity.js"
+      ],
+      "importCount": 3,
+      "external": [
+        "next/server"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/api/profile/save-nick/route.js",
+      "domain": "api-profile",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js",
+        "app/api/profile/_identity.js"
+      ],
+      "importCount": 3,
+      "external": [
+        "next/server",
+        "@upstash/redis"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/api/profile/set-about/route.js",
+      "domain": "api-profile",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js",
+        "app/api/profile/_identity.js"
+      ],
+      "importCount": 3,
+      "external": [
+        "next/server",
+        "@upstash/redis"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/api/profile/upload-avatar/route.js",
+      "domain": "api-profile",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "next/server",
+        "path",
+        "fs/promises",
+        "crypto"
+      ],
+      "externalCount": 4
+    },
+    {
+      "file": "app/api/profile/user-popover/route.js",
+      "domain": "api-profile",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js",
+        "app/api/profile/_identity.js"
+      ],
+      "importCount": 3,
+      "external": [
+        "next/server"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/api/profile/_identity.js",
+      "domain": "api-profile",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "@upstash/redis"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/api/qcoin/drop/route.js",
+      "domain": "api-qcoin",
+      "imports": [
+        "app/api/forum/_utils.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "@upstash/redis"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/api/qcoin/get/route.js",
+      "domain": "api-qcoin",
+      "imports": [
+        "app/api/forum/_utils.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "next/server",
+        "@upstash/redis"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/api/qcoin/heartbeat/route.js",
+      "domain": "api-qcoin",
+      "imports": [
+        "app/api/forum/_utils.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "next/server",
+        "@upstash/redis"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/api/quest/env/route.js",
+      "domain": "api-quest",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "next/server"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/api/quest/progress/route.js",
+      "domain": "api-quest",
+      "imports": [
+        "app/api/forum/_utils.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "next/server",
+        "@upstash/redis"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/api/quest/status/route.js",
+      "domain": "api-quest",
+      "imports": [
+        "app/api/forum/_utils.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "next/server",
+        "@upstash/redis"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/api/pay/create/route.js",
+      "domain": "api-pay",
+      "imports": [
+        "lib/adsCore.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "next/server",
+        "@upstash/redis"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "app/api/pay/webhook/route.js",
+      "domain": "api-pay",
+      "imports": [
+        "lib/subscriptions.js",
+        "lib/adsCore.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "next/server",
+        "crypto",
+        "@upstash/redis"
+      ],
+      "externalCount": 3
+    },
+    {
+      "file": "app/api/subscription/status/route.js",
+      "domain": "api-subscription",
+      "imports": [
+        "lib/subscriptions.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "next/server"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/api/debug/forum-diag/route.js",
+      "domain": "api-debug",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "fs",
+        "path"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "lib/adsCore.js",
+      "domain": "lib",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "@upstash/redis",
+        "@vercel/blob"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "lib/brain.js",
+      "domain": "lib",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "lib/databroker.js",
+      "domain": "lib",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "lib/forumShareManager.js",
+      "domain": "lib",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "lib/forumVideoTrim.js",
+      "domain": "lib",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "lib/geo/countries.js",
+      "domain": "lib",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "lib/geo/regions.js",
+      "domain": "lib",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "lib/indicators.js",
+      "domain": "lib",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "lib/metadataCache.js",
+      "domain": "lib",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "fs",
+        "path"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "lib/redis.js",
+      "domain": "lib",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "@upstash/redis"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "lib/safeWin.js",
+      "domain": "lib",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "lib/subscriptions.js",
+      "domain": "lib",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "@upstash/redis"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "lib/tma.js",
+      "domain": "lib",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "crypto"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "components/AuthNavClient.jsx",
+      "domain": "components",
+      "imports": [
+        "components/i18n.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react",
+        "next/image",
+        "@web3modal/wagmi/react",
+        "wagmi"
+      ],
+      "externalCount": 4
+    },
+    {
+      "file": "components/BgAudio.js",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "components/HeroAvatar.js",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "components/HeroSection.js",
+      "domain": "components",
+      "imports": [
+        "components/HeroAvatar.js"
+      ],
+      "importCount": 1,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "components/i18n.js",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "components/InviteFriendPopup.jsx",
+      "domain": "components",
+      "imports": [
+        "components/i18n.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react",
+        "next/image"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "components/InviteFriendProvider.jsx",
+      "domain": "components",
+      "imports": [
+        "components/InviteFriendPopup.jsx"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "components/LanguageSwitcher.js",
+      "domain": "components",
+      "imports": [
+        "components/i18n.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "components/NotRobot.jsx",
+      "domain": "components",
+      "imports": [
+        "components/i18n.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react",
+        "next/navigation"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "components/QCoinDropFX.jsx",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "components/QCoinDropFXGate.jsx",
+      "domain": "components",
+      "imports": [
+        "components/QCoinDropFX.jsx"
+      ],
+      "importCount": 1,
+      "external": [
+        "react",
+        "next/navigation"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "components/ScrollTopPulse.js",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "components/SnowFX.jsx",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "components/TopBar.js",
+      "domain": "components",
+      "imports": [
+        "components/i18n.js",
+        "components/LanguageSwitcher.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "next/link",
+        "next/navigation",
+        "next/dynamic",
+        "next/image"
+      ],
+      "externalCount": 4
+    },
+    {
+      "file": "components/UnlimitModal.client.jsx",
+      "domain": "components",
+      "imports": [
+        "components/i18n.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "components/WalletEVM.js",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "wagmi",
+        "wagmi/connectors"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "components/WalletsHub.js",
+      "domain": "components",
+      "imports": [
+        "components/i18n.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "components/WalletSOL.js",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "components/WalletTON.js",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "@tonconnect/ui",
+        "react"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "components/WalletTRON.js",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "components/Web3Provider.js",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "wagmi",
+        "wagmi/chains",
+        "@tanstack/react-query"
+      ],
+      "externalCount": 3
+    }
+  ]
+}

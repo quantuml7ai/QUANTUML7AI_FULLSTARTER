@@ -1,0 +1,43 @@
+﻿{
+    "phase":  "10-style-runtime-parity-fix",
+    "timestamp":  "2026-03-08T17:11:23.2537542+02:00",
+    "scope":  [
+                  "app/forum/ForumRoot.jsx",
+                  "app/forum/styles/ForumStyles.jsx",
+                  "app/forum/styles/ForumFxStyles.jsx"
+              ],
+    "touched_files":  [
+                          "app/forum/ForumRoot.jsx",
+                          "app/forum/styles/ForumStyles.jsx",
+                          "app/forum/styles/ForumFxStyles.jsx"
+                      ],
+    "new_files":  [
+                      "app/forum/styles/ForumStyles.jsx",
+                      "app/forum/styles/ForumFxStyles.jsx",
+                      "app/forum/ForumRoot.jsx"
+                  ],
+    "moved_logic_domains":  [
+                                "none (regression fix)"
+                            ],
+    "dependency_changes":  {
+                               "api_or_db_changes":  "none",
+                               "style_source":  "restored from baseline Forum.jsx style blocks",
+                               "html_flag":  "added data-forum-active marker on html"
+                           },
+    "detected_risks":  [
+                           "Cannot run interactive browser in sandbox (Next dev spawn EPERM)"
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "none",
+    "storage_risk":  "none",
+    "runtime_risk":  "low-to-medium (pending visual user verification in browser)",
+    "notes":  [
+                  "ForumStyles/ForumFxStyles are now byte-parity with baseline style blocks from source Forum.jsx.",
+                  "Removed prior over-aggressive forum isolation overrides that altered paddings/media sizing.",
+                  "ESLint passed for ForumRoot and style files.",
+                  "Audit scripts executed: audit-heavy, audit-effects, audit-media, functional parity."
+              ],
+    "status":  "passed-with-manual-ui-check"
+}

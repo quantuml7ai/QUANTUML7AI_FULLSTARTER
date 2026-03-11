@@ -1,0 +1,70 @@
+﻿{
+    "phase":  "phase-04-media",
+    "timestamp":  "2026-03-04T17:14:13.4085217Z",
+    "scope":  [
+                  "app/forum/Forum.jsx",
+                  "app/forum/features/media/utils/mediaRuntime.js"
+              ],
+    "touched_files":  [
+                          "app/forum/Forum.jsx",
+                          "app/forum/features/media/utils/mediaRuntime.js"
+                      ],
+    "new_files":  [
+                      "app/forum/features/media/utils/mediaRuntime.js",
+                      "audit/forum-phase-04-media.json"
+                  ],
+    "moved_logic_domains":  [
+                                "media-utils: readVideoDurationSec",
+                                "media-utils: readAudioDurationSec",
+                                "media-utils: fmtTrimClock",
+                                "media-utils: clampTrimNum",
+                                "media-utils: trimVideoBlobNative"
+                            ],
+    "dependency_changes":  {
+                               "forum_root_imports_added":  [
+                                                                "./features/media/utils/mediaRuntime"
+                                                            ],
+                               "forum_root_logic_replaced":  [
+                                                                 "inline media runtime helpers removed from Forum.jsx",
+                                                                 "media helpers now consumed from media subsystem module"
+                                                             ],
+                               "forum_dependency_audit":  {
+                                                              "report":  "forum-deps-audit.report.json",
+                                                              "scannedFiles":  118,
+                                                              "internalEdges":  138,
+                                                              "cycleCount":  0,
+                                                              "crossDomainEdgeCount":  62,
+                                                              "forumRootImportCount":  21
+                                                          }
+                           },
+    "detected_risks":  [
+                           "Media orchestration effects still live in Forum root; only utility layer moved",
+                           "Player lifecycle and overlay ownership require further extraction in later passes"
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low",
+    "runtime_risk":  "medium",
+    "notes":  [
+                  "No changes to media API routes or payload semantics",
+                  "ObjectURL lifecycle preserved in extracted functions"
+              ],
+    "status":  "completed",
+    "audits":  {
+                   "executed":  [
+                                    "pnpm eslint app/forum/Forum.jsx app/forum/features/media/utils/mediaRuntime.js --no-cache",
+                                    "node tools/audit-media.js",
+                                    "node tools/audit-forum-deps.js",
+                                    "node tools/audit-effects.js",
+                                    "node tools/audit-full-forum.js"
+                                ],
+                   "outputs":  [
+                                   "media-audit.report.json",
+                                   "forum-deps-audit.report.json",
+                                   "effects-leak.report.json",
+                                   "deep-audit.report.json"
+                               ]
+               }
+}

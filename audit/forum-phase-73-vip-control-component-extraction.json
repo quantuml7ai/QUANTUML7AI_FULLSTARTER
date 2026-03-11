@@ -1,0 +1,127 @@
+{
+  "phase": "73-vip-control-component-extraction",
+  "timestamp": "2026-03-06T01:56:40+02:00",
+  "scope": [
+    "profile VIP button+popover UI ownership extraction",
+    "ForumRoot duplicate vipWrap markup removal"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/profile/components/ForumVipControl.jsx",
+    "app/forum/features/profile/hooks/useVipPayAction.js"
+  ],
+  "new_files": [
+    "app/forum/features/profile/components/ForumVipControl.jsx"
+  ],
+  "moved_logic_domains": [
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/profile/components/ForumVipControl.jsx",
+      "logic": [
+        "VIP+ button render and styling",
+        "VipPopover wiring (anchor/open/close)",
+        "VIP popover UI ownership across main/thread header branches"
+      ]
+    }
+  ],
+  "dependency_changes": {
+    "ForumRoot_imports_added": [
+      "./features/profile/components/ForumVipControl"
+    ],
+    "ForumRoot_imports_removed": [
+      "./features/profile/components/VipPopover"
+    ],
+    "ForumRoot_runtime_changes": [
+      "two duplicated vipWrap fragments replaced with one reusable ForumVipControl component",
+      "business callback remains shared via useVipPayAction handleVipPay"
+    ]
+  },
+  "detected_risks": [
+    {
+      "id": "vip-anchor-ref-singleton",
+      "level": "low",
+      "detail": "Both branches still use same vipBtnRef, but only one branch mounts at a time (main vs thread), preserving previous runtime assumptions."
+    },
+    {
+      "id": "vip-open-routing",
+      "level": "low",
+      "detail": "openOnly(vipOpen ? null : 'vip') behavior preserved inside extracted component."
+    }
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": {
+    "level": "low",
+    "detail": "No API contract changes."
+  },
+  "storage_risk": {
+    "level": "low",
+    "detail": "No storage changes."
+  },
+  "runtime_risk": {
+    "level": "medium",
+    "detail": "Residual media/effects warnings remain pre-existing; no new lint/build failures."
+  },
+  "audit_runs": [
+    {
+      "command": "pnpm eslint app/forum/ForumRoot.jsx app/forum/features/profile/hooks/useVipPayAction.js app/forum/features/profile/components/ForumVipControl.jsx app/forum/features/ui/components/ForumActionRow.jsx app/forum/features/quests/components/QuestLaunchIcon.jsx --no-cache",
+      "status": "passed"
+    },
+    {
+      "command": "node tools/audit-heavy.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 56
+      }
+    },
+    {
+      "command": "node tools/audit-media.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "node tools/audit-effects.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "node tools/audit-forum-deps.js",
+      "status": "passed",
+      "summary": {
+        "cycles": 0,
+        "cross_domain_edges": 103
+      }
+    },
+    {
+      "command": "node tools/audit-runtime-hotspots.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 91
+      }
+    },
+    {
+      "command": "node tools/audit-full-forum.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 99
+      }
+    },
+    {
+      "command": "node tools/audit-account-sync.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 395
+      }
+    },
+    {
+      "command": "pnpm build",
+      "status": "passed_with_warnings",
+      "warnings": [
+        "existing no-img-element warnings outside VIP scope"
+      ]
+    }
+  ],
+  "notes": [
+    "VIP UI ownership moved to profile feature component while payment business logic remains in profile hook.",
+    "ForumRoot residual duplicated header markup reduced further.",
+    "Combined with phase-72, VIP subsystem is now separated into UI component + business hook."
+  ],
+  "status": "done"
+}

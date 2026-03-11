@@ -1,0 +1,36 @@
+{
+  "phase": "110",
+  "timestamp": "2026-03-10T09:00:00+02:00",
+  "scope": [
+    "dm message delete default-for-all behavior hardening"
+  ],
+  "touched_files": [
+    "app/forum/features/dm/hooks/useDmDeleteController.js",
+    "app/forum/features/ui/components/DmDeletePopover.jsx"
+  ],
+  "new_files": [
+    "audit/forum-phase-110-dm-delete-default-for-all-message.json"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "dm/delete",
+      "change": "Message delete popover now opens with for-all enabled by default; user can still uncheck for local delete."
+    },
+    {
+      "domain": "dm/delete-confirm",
+      "change": "Confirm receives checkbox value from popover local ref to avoid render timing races."
+    }
+  ],
+  "dependency_changes": [],
+  "detected_risks": [
+    "Behavioral change: default action for message delete is now 'for all'."
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "low",
+  "storage_risk": "low",
+  "runtime_risk": "low",
+  "notes": [
+    "Validation: pnpm eslint on touched files passed."
+  ],
+  "status": "completed"
+}

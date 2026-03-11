@@ -1,0 +1,92 @@
+{
+  "phase": "35-popover-leaf-extraction",
+  "timestamp": "2026-03-05T01:18:40.2585635+02:00",
+  "scope": [
+    "forum-root-thinning",
+    "moderation-popovers",
+    "profile-vip-popover"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/moderation/components/ReportPopover.jsx",
+    "app/forum/features/moderation/components/AdminPopover.jsx",
+    "app/forum/features/profile/components/VipPopover.jsx"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "moderation.report-popover-ui",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/moderation/components/ReportPopover.jsx",
+      "status": "completed"
+    },
+    {
+      "domain": "moderation.admin-popover-ui",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/moderation/components/AdminPopover.jsx",
+      "status": "completed"
+    },
+    {
+      "domain": "profile.vip-popover-ui",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/profile/components/VipPopover.jsx",
+      "status": "completed"
+    }
+  ],
+  "dependency_changes": {
+    "forum_dependency_audit": {
+      "files_scanned": 168,
+      "internal_edges": 237,
+      "cycles": 0,
+      "cross_domain_edges": 79,
+      "forum_root_imports": 1
+    },
+    "forum_root_delta": {
+      "local_component_definitions_removed": [
+        "ReportPopover",
+        "AdminPopover",
+        "VipPopover"
+      ],
+      "new_feature_imports": [
+        "features/moderation/components/ReportPopover",
+        "features/moderation/components/AdminPopover",
+        "features/profile/components/VipPopover"
+      ]
+    }
+  },
+  "detected_risks": [
+    "ForumRoot remains heavy with residual media/dm/quest orchestration.",
+    "AdminPopover still performs auth route calls and localStorage writes; logic was moved as-is.",
+    "No behavior rewrite done, only ownership transfer."
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": {
+    "level": "low",
+    "notes": [
+      "Admin verify route usage unchanged: POST/DELETE /api/forum/admin/verify.",
+      "No request/response schema changes."
+    ]
+  },
+  "storage_risk": {
+    "level": "low",
+    "notes": [
+      "ql7_admin localStorage semantics unchanged.",
+      "No other storage keys modified in this phase."
+    ]
+  },
+  "runtime_risk": {
+    "level": "low",
+    "notes": [
+      "Eslint passed on touched files.",
+      "Build passed.",
+      "Known global no-img-element warnings remain outside this phase scope."
+    ]
+  },
+  "notes": [
+    "Audit scripts executed: audit-forum-deps, audit-full-forum, audit-effects, audit-media, audit-heavy.",
+    "No server route/backend/db util file changed.",
+    "Cross-feature imports remain acyclic per dependency audit."
+  ],
+  "status": "pass"
+}

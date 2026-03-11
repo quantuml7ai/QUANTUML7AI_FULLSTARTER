@@ -1,0 +1,166 @@
+﻿{
+    "phase":  "final-ownership-map",
+    "timestamp":  "2026-03-08T15:58:29.4180287+02:00",
+    "scope":  [
+                  "app/forum",
+                  "app/api/forum",
+                  "app/api/dm",
+                  "app/api/profile",
+                  "app/api/qcoin",
+                  "app/api/quest"
+              ],
+    "status":  "passed",
+    "root_layer":  {
+                       "forum_js":  "app/forum/Forum.jsx",
+                       "forum_root":  "app/forum/ForumRoot.jsx",
+                       "forum_layout":  "app/forum/ForumLayout.jsx",
+                       "forum_providers":  "app/forum/ForumProviders.jsx"
+                   },
+    "domain_ownership":  [
+                             {
+                                 "domain":  "shared",
+                                 "owner":  "app/forum/shared/*",
+                                 "entrypoints":  [
+                                                     "shared/utils",
+                                                     "shared/hooks",
+                                                     "shared/storage",
+                                                     "shared/config"
+                                                 ]
+                             },
+                             {
+                                 "domain":  "feed",
+                                 "owner":  "app/forum/features/feed/*",
+                                 "entrypoints":  [
+                                                     "useForumDataRuntime",
+                                                     "useForumFeedRuntime",
+                                                     "useForumMutationActions"
+                                                 ]
+                             },
+                             {
+                                 "domain":  "media",
+                                 "owner":  "app/forum/features/media/*",
+                                 "entrypoints":  [
+                                                     "useForumComposerAttachments",
+                                                     "useVideoTrimController",
+                                                     "useVideoCaptureController",
+                                                     "useForumMediaCoordinator"
+                                                 ]
+                             },
+                             {
+                                 "domain":  "dm",
+                                 "owner":  "app/forum/features/dm/*",
+                                 "entrypoints":  [
+                                                     "useForumDmRuntime",
+                                                     "useDmOpenEvents",
+                                                     "useOpenInboxGlobalAction"
+                                                 ]
+                             },
+                             {
+                                 "domain":  "profile",
+                                 "owner":  "app/forum/features/profile/*",
+                                 "entrypoints":  [
+                                                     "useForumProfileSocialRuntime",
+                                                     "useForumProfileSync"
+                                                 ]
+                             },
+                             {
+                                 "domain":  "subscriptions",
+                                 "owner":  "app/forum/features/subscriptions/*",
+                                 "entrypoints":  [
+                                                     "useStarredAuthorsState"
+                                                 ]
+                             },
+                             {
+                                 "domain":  "qcoin",
+                                 "owner":  "app/forum/features/qcoin/*",
+                                 "entrypoints":  [
+                                                     "QCoinInline",
+                                                     "QCoinWithdrawPopover"
+                                                 ]
+                             },
+                             {
+                                 "domain":  "quests",
+                                 "owner":  "app/forum/features/quests/*",
+                                 "entrypoints":  [
+                                                     "useForumQuestRuntime",
+                                                     "QuestHub"
+                                                 ]
+                             },
+                             {
+                                 "domain":  "moderation",
+                                 "owner":  "app/forum/features/moderation/*",
+                                 "entrypoints":  [
+                                                     "useForumModerationRuntime",
+                                                     "ReportPopover",
+                                                     "AdminPopover"
+                                                 ]
+                             },
+                             {
+                                 "domain":  "diagnostics",
+                                 "owner":  "app/forum/features/diagnostics/*",
+                                 "entrypoints":  [
+                                                     "useForumDiagnostics"
+                                                 ]
+                             },
+                             {
+                                 "domain":  "ui",
+                                 "owner":  "app/forum/features/ui/*",
+                                 "entrypoints":  [
+                                                     "buildForumRootPropBundles",
+                                                     "buildForumLayoutProps",
+                                                     "useForumViewState",
+                                                     "useForumScreenFlowsRuntime",
+                                                     "useForumComposerSubmitRuntime"
+                                                 ]
+                             }
+                         ],
+    "server_surface":  {
+                           "forum_routes":  [
+                                                "/api/forum/snapshot",
+                                                "/api/forum/mutate",
+                                                "/api/forum/events/stream",
+                                                "/api/forum/report",
+                                                "/api/forum/admin/*",
+                                                "/api/forum/subs/*",
+                                                "/api/forum/upload*",
+                                                "/api/forum/moderate",
+                                                "/api/forum/vip/batch"
+                                            ],
+                           "dm_routes":  [
+                                             "/api/dm/dialogs",
+                                             "/api/dm/thread",
+                                             "/api/dm/send",
+                                             "/api/dm/delete",
+                                             "/api/dm/seen",
+                                             "/api/dm/block",
+                                             "/api/dm/unblock"
+                                         ],
+                           "profile_routes":  [
+                                                  "/api/profile/get-profile",
+                                                  "/api/profile/set-about",
+                                                  "/api/profile/user-popover",
+                                                  "/api/profile/upload-avatar",
+                                                  "/api/profile/batch"
+                                              ],
+                           "qcoin_routes":  [
+                                                "/api/qcoin/get",
+                                                "/api/qcoin/heartbeat",
+                                                "/api/qcoin/drop"
+                                            ],
+                           "quest_routes":  [
+                                                "/api/quest/env",
+                                                "/api/quest/progress",
+                                                "/api/quest/status"
+                                            ]
+                       },
+    "contract_risk":  {
+                          "api":  "low",
+                          "storage":  "low",
+                          "db_util":  "low"
+                      },
+    "notes":  [
+                  "Ownership is feature-oriented; ForumRoot acts as composition/wiring root.",
+                  "No TypeScript files or TS-only typing introduced.",
+                  "Forum/API parity against baseline archive remains stable except expected Forum.jsx thin-wrapper hash change."
+              ]
+}

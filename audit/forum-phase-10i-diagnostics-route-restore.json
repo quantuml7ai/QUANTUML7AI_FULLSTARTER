@@ -1,0 +1,42 @@
+﻿{
+    "phase":  "10i-diagnostics-route-restore",
+    "timestamp":  "2026-03-09T12:09:31.2741944+02:00",
+    "scope":  [
+                  "app/api/debug/forum-diag/route.js",
+                  "app/forum/features/diagnostics/hooks/useForumDiagnostics.js"
+              ],
+    "touched_files":  [
+                          "app/api/debug/forum-diag/route.js"
+                      ],
+    "new_files":  [
+                      "audit/forum-phase-10i-diagnostics-route-restore.json"
+                  ],
+    "moved_logic_domains":  [
+                                "none (route restore to baseline)"
+                            ],
+    "dependency_changes":  {
+                               "client":  [
+                                              "useForumDiagnostics keeps POST /api/debug/forum-diag"
+                                          ],
+                               "server":  [
+                                              "restored app/api/debug/forum-diag/route.js"
+                                          ],
+                               "db":  [
+                                          "none"
+                                      ]
+                           },
+    "detected_risks":  [
+
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low",
+    "runtime_risk":  "low",
+    "notes":  [
+                  "404 spam for /api/debug/forum-diag caused by missing API route in current tree.",
+                  "Route restored from baseline source to match original logging path."
+              ],
+    "status":  "passed"
+}

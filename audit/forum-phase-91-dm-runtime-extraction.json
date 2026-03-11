@@ -1,0 +1,42 @@
+﻿{
+    "phase":  "forum-phase-91-dm-runtime-extraction",
+    "timestamp":  "2026-03-08T14:56:16.5248895+02:00",
+    "scope":  [
+                  "app/forum/ForumRoot.jsx",
+                  "app/forum/features/dm/hooks/useForumDmRuntime.js"
+              ],
+    "touched_files":  [
+                          "app/forum/ForumRoot.jsx"
+                      ],
+    "new_files":  [
+                      "app/forum/features/dm/hooks/useForumDmRuntime.js"
+                  ],
+    "moved_logic_domains":  [
+                                "DM inbox/thread/cache/seen/delete runtime orchestration moved from ForumRoot into features/dm/hooks/useForumDmRuntime.js",
+                                "DM open events wiring now runs after closeVideoFeed initialization (removed temporal ordering hazard)"
+                            ],
+    "dependency_changes":  {
+                               "forum_root_line_count_before":  2098,
+                               "forum_root_line_count_after":  1839,
+                               "forum_root_line_delta":  -259,
+                               "forum_dependency_files_scanned":  335,
+                               "forum_dependency_cycles":  0,
+                               "forum_cross_domain_edges":  109
+                           },
+    "detected_risks":  [
+                           "Legacy image optimization warnings remain outside this refactor scope",
+                           "Known non-forum effect leak warnings remain in shared/unrelated modules"
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low",
+    "runtime_risk":  "low",
+    "notes":  [
+                  "Build passed",
+                  "Forum lint passed (single existing warning in ForumAds)",
+                  "Functional parity vs baseline zip passed (only Forum.jsx wrapper changed)"
+              ],
+    "status":  "passed"
+}

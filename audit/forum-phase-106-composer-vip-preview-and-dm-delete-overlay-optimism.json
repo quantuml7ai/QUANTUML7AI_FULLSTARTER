@@ -1,0 +1,38 @@
+{
+  "phase": "106",
+  "timestamp": "2026-03-10T08:05:00+02:00",
+  "scope": [
+    "composer vip emoji preview remove-icon parity",
+    "dm delete overlay optimistic close behavior"
+  ],
+  "touched_files": [
+    "app/forum/features/ui/components/ComposerEmojiPreview.jsx",
+    "app/forum/features/dm/hooks/useDmDeleteController.js"
+  ],
+  "new_files": [
+    "audit/forum-phase-106-composer-vip-preview-and-dm-delete-overlay-optimism.json"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "ui/composer",
+      "change": "VIP emoji preview remove control now uses stable remove icon instead of placeholder symbol."
+    },
+    {
+      "domain": "dm/ux",
+      "change": "Delete confirm overlay now closes immediately on confirm to provide optimistic UX."
+    }
+  ],
+  "dependency_changes": [],
+  "detected_risks": [
+    "Immediate overlay close can hide transient backend failures; rollback path and toast remain enabled."
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "low",
+  "storage_risk": "low",
+  "runtime_risk": "low",
+  "notes": [
+    "Validation: pnpm eslint on touched files passed.",
+    "Validation: pnpm build passed (existing non-blocking no-img warnings remain)."
+  ],
+  "status": "completed"
+}

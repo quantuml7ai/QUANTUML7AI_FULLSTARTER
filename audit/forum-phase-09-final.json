@@ -1,0 +1,101 @@
+﻿{
+    "phase":  "09-final",
+    "timestamp":  "2026-03-08T15:59:19.3138620+02:00",
+    "scope":  [
+                  "forum final architecture cleanup",
+                  "providers/layout/root alignment",
+                  "final parity and audit package"
+              ],
+    "touched_files":  [
+                          "app/forum/ForumRoot.jsx",
+                          "app/forum/ForumLayout.jsx",
+                          "app/forum/ForumProviders.jsx",
+                          "app/forum/features/ui/utils/buildForumLayoutProps.js",
+                          "audit/forum-phase-95-final-parity.json",
+                          "audit/forum-final-ownership-map.json",
+                          "audit/forum-final-residual-monolith.json",
+                          "audit/forum-phase-09-final.json"
+                      ],
+    "new_files":  [
+                      "app/forum/ForumProviders.jsx",
+                      "app/forum/features/ui/utils/buildForumLayoutProps.js",
+                      "audit/forum-final-ownership-map.json",
+                      "audit/forum-final-residual-monolith.json",
+                      "audit/forum-phase-95-final-parity.json"
+                  ],
+    "moved_logic_domains":  [
+                                "root style/toast/fx concerns -\u003e ForumProviders",
+                                "layout prop assembly -\u003e buildForumLayoutProps",
+                                "ForumRoot kept as composition/wiring root"
+                            ],
+    "dependency_changes":  {
+                               "forum_root_lines":  1410,
+                               "forum_root_imports":  63,
+                               "forum_deps_scanned_files":  355,
+                               "forum_deps_internal_edges":  471,
+                               "forum_deps_cross_domain_edges":  111,
+                               "forum_deps_cycles":  0,
+                               "parity_hash_total":  82,
+                               "parity_hash_same":  81,
+                               "parity_hash_changed":  1,
+                               "parity_hash_missing":  0
+                           },
+    "detected_risks":  [
+                           "Known pre-existing warnings: @next/next/no-img-element in non-refactor scope files.",
+                           "Known residual autoplay/effects hotspots in unchanged modules."
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low",
+    "runtime_risk":  "low_to_medium",
+    "audit_runs":  [
+                       {
+                           "name":  "pnpm eslint app/forum --ext .js,.jsx --no-cache",
+                           "status":  "passed_with_known_warning"
+                       },
+                       {
+                           "name":  "pnpm build",
+                           "status":  "passed_with_known_warnings"
+                       },
+                       {
+                           "name":  "node tools/audit-forum-deps.js",
+                           "status":  "passed"
+                       },
+                       {
+                           "name":  "node tools/audit-runtime-hotspots.js",
+                           "status":  "passed_with_residuals"
+                       },
+                       {
+                           "name":  "node tools/audit-effects.js",
+                           "status":  "passed_with_residuals"
+                       },
+                       {
+                           "name":  "node tools/audit-heavy.js",
+                           "status":  "passed_with_residuals"
+                       },
+                       {
+                           "name":  "node tools/audit-media.js",
+                           "status":  "passed_with_residuals"
+                       },
+                       {
+                           "name":  "node tools/audit-full-forum.js",
+                           "status":  "passed_with_residuals"
+                       },
+                       {
+                           "name":  "node tools/audit-account-sync.js",
+                           "status":  "passed_with_residuals"
+                       },
+                       {
+                           "name":  "tools/audit-forum-functional-parity.ps1",
+                           "status":  "passed"
+                       }
+                   ],
+    "notes":  [
+                  "Final parity with baseline archive is preserved (expected only Forum.jsx hash change due thin wrapper).",
+                  "Forum root layer now includes Forum.jsx, ForumRoot.jsx, ForumLayout.jsx, ForumProviders.jsx as requested.",
+                  "All changes remain in pure JavaScript/JSX without TypeScript artifacts."
+              ],
+    "status":  "passed"
+}

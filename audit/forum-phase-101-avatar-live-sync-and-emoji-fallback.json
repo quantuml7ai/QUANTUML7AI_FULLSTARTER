@@ -1,0 +1,63 @@
+﻿{
+    "phase":  "101-avatar-live-sync-and-emoji-fallback",
+    "timestamp":  "2026-03-09T13:59:13.7790645+02:00",
+    "scope":  [
+                  "app/forum/features/profile/components/AvatarEmoji.jsx",
+                  "app/forum/features/feed/hooks/useForumSseBridge.js",
+                  "app/forum/features/profile/utils/profileCache.js",
+                  "app/api/profile/save-nick/route.js",
+                  "app/forum/styles/ForumStyles.jsx",
+                  "app/forum/styles/modules/foundationStyles.js"
+              ],
+    "touched_files":  [
+                          "app/forum/features/profile/components/AvatarEmoji.jsx",
+                          "app/forum/features/feed/hooks/useForumSseBridge.js",
+                          "app/forum/features/profile/utils/profileCache.js",
+                          "app/api/profile/save-nick/route.js",
+                          "app/forum/styles/ForumStyles.jsx",
+                          "app/forum/styles/modules/foundationStyles.js",
+                          "audit/forum-phase-101-avatar-live-sync-and-emoji-fallback.json"
+                      ],
+    "new_files":  [
+                      "audit/forum-phase-101-avatar-live-sync-and-emoji-fallback.json"
+                  ],
+    "moved_logic_domains":  [
+                                "profile/avatar render refresh",
+                                "profile event alias propagation",
+                                "composer emoji font fallback"
+                            ],
+    "dependency_changes":  {
+                               "api":  [
+                                           "/api/profile/save-nick"
+                                       ],
+                               "sse":  [
+                                           "/api/forum/events/stream"
+                                       ],
+                               "storage":  [
+                                               "profile:*",
+                                               "profile:alias:*"
+                                           ],
+                               "styles":  [
+                                              "forum-main-styles"
+                                          ]
+                           },
+    "detected_risks":  [
+                           "Avatar live update depends on ForumRoot re-render via setProfileBump.",
+                           "save-nick event payload changed (added source ids) and must remain backward compatible."
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "medium",
+    "storage_risk":  "low",
+    "runtime_risk":  "low",
+    "notes":  [
+                  "AvatarEmoji now resolves profile icon from local cache on each render, fixing stale remote avatars after SSE cache merge.",
+                  "SSE bridge now writes aliases from sourceUserId/sourceAccountId/sourceAsherId fields.",
+                  "save-nick now publishes source ids in profile.updated event and returns no-store headers.",
+                  "Emoji rendering fallback fonts added for composer/panel lock badges to prevent glyph replacement as ?? on non-emoji primary fonts.",
+                  "Build passed: pnpm build (2026-03-09).",
+                  "Audit scripts executed: audit-heavy, audit-media, audit-effects, audit-forum-deps, functional-parity script."
+              ],
+    "status":  "ok"
+}

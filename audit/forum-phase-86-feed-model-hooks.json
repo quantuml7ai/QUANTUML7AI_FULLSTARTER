@@ -1,0 +1,53 @@
+{
+  "phase": "phase-86-feed-model-hooks",
+  "timestamp": "2026-03-08T12:14:28.150Z",
+  "scope": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/feed/hooks/usePublishedPostsModel.js",
+    "app/forum/features/feed/hooks/useThreadPostsModel.js",
+    "app/forum/features/feed/hooks/useTopicDiscoveryModel.js"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/feed/hooks/usePublishedPostsModel.js",
+    "app/forum/features/feed/hooks/useThreadPostsModel.js",
+    "app/forum/features/feed/hooks/useTopicDiscoveryModel.js",
+    "audit/forum-phase-86-final-parity.json"
+  ],
+  "new_files": [
+    "app/forum/features/feed/hooks/usePublishedPostsModel.js",
+    "app/forum/features/feed/hooks/useThreadPostsModel.js",
+    "app/forum/features/feed/hooks/useTopicDiscoveryModel.js",
+    "audit/forum-phase-86-final-parity.json",
+    "audit/forum-phase-86-feed-model-hooks.json"
+  ],
+  "moved_logic_domains": [
+    "feed/published-posts-model",
+    "feed/thread-posts-model",
+    "feed/topic-discovery-and-sort-model"
+  ],
+  "dependency_changes": {
+    "forum_root_lines_before": 3834,
+    "forum_root_lines_after": 3632,
+    "forum_root_lines_delta": -202,
+    "forum_dep_cycles": 0,
+    "forum_cross_domain_edges": 110,
+    "parity_hash_total": 82,
+    "parity_hash_same": 81,
+    "parity_hash_changed": 1,
+    "parity_hash_missing": 0
+  },
+  "detected_risks": [
+    "No functional parity drift detected versus baseline zip (except expected Forum.jsx wrapper hash).",
+    "Static audits still show existing non-forum warnings in unrelated files (img/autoplay/effect leaks)."
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "low",
+  "storage_risk": "low",
+  "runtime_risk": "low",
+  "notes": [
+    "Moved heavy derived feed/search/sort computations out of ForumRoot into dedicated feed hooks without changing contracts.",
+    "Build and all audit scripts passed."
+  ],
+  "status": "passed"
+}

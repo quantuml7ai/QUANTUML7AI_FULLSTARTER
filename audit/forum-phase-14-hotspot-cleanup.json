@@ -1,0 +1,60 @@
+{
+  "phase": "14-hotspot-cleanup",
+  "timestamp": "2026-03-06T03:23:00+02:00",
+  "scope": [
+    "forum/ui head collapse",
+    "forum/media windowing",
+    "forum/shared page lock",
+    "forum root residual cleanup"
+  ],
+  "touched_files": [
+    "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+    "app/forum/features/media/hooks/useVideoFeedWindowing.js",
+    "app/forum/shared/hooks/usePageLock.js",
+    "app/forum/ForumRoot.jsx",
+    "audit/forum-phase-12-final-parity.json",
+    "audit/forum-phase-14-hotspot-cleanup.json"
+  ],
+  "new_files": [
+    "audit/forum-phase-14-hotspot-cleanup.json"
+  ],
+  "moved_logic_domains": [
+    "none (stability pass and residual cleanup)"
+  ],
+  "dependency_changes": {
+    "forum_root_imports": 1,
+    "cross_domain_edges": 105,
+    "cycles": 0,
+    "effects_leak_forum_head_collapse": "resolved",
+    "effects_leak_video_feed_windowing": "resolved",
+    "effects_leak_page_lock": "resolved"
+  },
+  "detected_risks": [
+    "ForumRoot.jsx is still a large orchestrator and keeps medium runtime risk by design.",
+    "Autoplay/media-heavy UX paths remain and are intentional."
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "low",
+  "storage_risk": "low",
+  "runtime_risk": "medium",
+  "notes": [
+    "Added explicit cleanup for nested requestAnimationFrame/setTimeout scheduling in forum hooks.",
+    "Removed dead qcoin activity tracking block from ForumRoot (unused refs and listeners).",
+    "Parity with baseline zip remains passed; server hash map unchanged except expected Forum.jsx wrapper delta."
+  ],
+  "status": "completed",
+  "validation": {
+    "lint_targeted": "passed",
+    "build": "passed",
+    "audits": [
+      "node tools/audit-effects.js",
+      "node tools/audit-heavy.js",
+      "node tools/audit-runtime-hotspots.js",
+      "node tools/audit-forum-deps.js",
+      "node tools/audit-full-forum.js",
+      "powershell -ExecutionPolicy Bypass -File tools/audit-forum-functional-parity.ps1 -ZipPath \"C:\\Users\\BETEP\\Desktop\\СЕЙЧАС — копия.zip\" -OutputPath \"audit/forum-phase-12-final-parity.json\"",
+      "pnpm eslint app/forum/features/ui/hooks/useForumHeadCollapse.js app/forum/features/media/hooks/useVideoFeedWindowing.js app/forum/shared/hooks/usePageLock.js app/forum/ForumRoot.jsx --no-cache",
+      "pnpm build"
+    ]
+  }
+}

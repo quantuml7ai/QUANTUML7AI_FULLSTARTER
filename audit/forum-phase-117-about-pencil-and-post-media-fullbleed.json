@@ -1,0 +1,55 @@
+﻿{
+    "phase":  "117-about-pencil-and-post-media-fullbleed",
+    "timestamp":  "2026-03-10T14:41:32.9320629+02:00",
+    "scope":  [
+                  "app/forum/styles/ForumStyles.jsx"
+              ],
+    "touched_files":  [
+                          "app/forum/styles/ForumStyles.jsx"
+                      ],
+    "new_files":  [
+
+                  ],
+    "moved_logic_domains":  [
+                                "style-only: about rail pencil visibility",
+                                "style-only: post media full-bleed horizontal layout"
+                            ],
+    "dependency_changes":  {
+                               "imports_added":  [
+
+                                                 ],
+                               "contracts_changed":  [
+
+                                                     ],
+                               "css_contracts_updated":  [
+                                                             ".aboutRailPencil",
+                                                             ".aboutRailLine",
+                                                             ".postBodyFrame .postImages/.postVideo/.postAudio"
+                                                         ]
+                           },
+    "detected_risks":  [
+                           "Full build currently fails on unrelated /academy page-not-found during page data collection."
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "none",
+    "storage_risk":  "none",
+    "runtime_risk":  "low",
+    "notes":  [
+                  "Returned white pencil visual priority above animated rail pulse.",
+                  "Media blocks inside post body now have no side inset (full bleed to frame edges)."
+              ],
+    "audits":  {
+                   "eslint":  {
+                                  "command":  "pnpm eslint app/forum/styles/ForumStyles.jsx app/forum/features/feed/components/ForumPostCard.jsx app/forum/features/profile/components/AboutRail.jsx --no-cache",
+                                  "status":  "pass"
+                              },
+                   "build":  {
+                                 "command":  "pnpm build",
+                                 "status":  "blocked-unrelated",
+                                 "issue":  "PageNotFoundError: /academy during collect page data"
+                             }
+               },
+    "status":  "done"
+}

@@ -1,0 +1,53 @@
+{
+  "phase": "28-feed-post-body-translate-components",
+  "timestamp": "2026-03-04T20:22:57Z",
+  "scope": [
+    "forum/features/feed",
+    "forum/root",
+    "forum/post-rendering"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/feed/components/PostBodyContent.jsx",
+    "app/forum/features/feed/components/PostTranslateToggle.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/feed/components/PostBodyContent.jsx",
+    "app/forum/features/feed/components/PostTranslateToggle.jsx",
+    "audit/forum-phase-28-post-body-translate-components.json"
+  ],
+  "moved_logic_domains": [
+    "Post sticker/text body rendering moved from PostCard in ForumRoot to features/feed/components/PostBodyContent",
+    "Post translate toggle button rendering moved from PostCard in ForumRoot to features/feed/components/PostTranslateToggle"
+  ],
+  "dependency_changes": {
+    "forum_root_imports": 1,
+    "cross_domain_edges": 74,
+    "cycles": 0
+  },
+  "detected_risks": [
+    "Translation state/effect ownership still remains inside PostCard and should be extracted into feed hook/controller in later phase",
+    "PostCard continues to own parsing/orchestration glue and remains a high-complexity node"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "notes": [
+    "No API route, backend handler, or db util contract changes.",
+    "Sticker and text rendering semantics preserved (same regex and render pipeline).",
+    "Translate button behavior preserved with the same state flags and handler."
+  ],
+  "status": "completed",
+  "validation": {
+    "lint_targeted": "passed",
+    "build": "passed",
+    "audits": [
+      "tools/audit-forum-deps.js",
+      "tools/audit-full-forum.js",
+      "tools/audit-effects.js",
+      "tools/audit-media.js",
+      "tools/audit-heavy.js"
+    ]
+  }
+}

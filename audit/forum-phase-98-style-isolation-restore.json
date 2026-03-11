@@ -1,0 +1,40 @@
+﻿{
+    "phase":  "phase-98-style-isolation-restore",
+    "timestamp":  "2026-03-08T16:33:40.4054411+02:00",
+    "scope":  [
+                  "forum style runtime semantics",
+                  "global style isolation parity"
+              ],
+    "touched_files":  [
+                          "app/forum/styles/ForumStyles.jsx",
+                          "app/forum/styles/ForumFxStyles.jsx"
+                      ],
+    "new_files":  [
+
+                  ],
+    "moved_logic_domains":  [
+                                "none"
+                            ],
+    "dependency_changes":  [
+                               "Changed style template evaluation from String.raw tagged literals to plain template literals (same as original monolith)."
+                           ],
+    "detected_risks":  [
+
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "none",
+    "storage_risk":  "none",
+    "runtime_risk":  "low",
+    "notes":  [
+                  "Potential CSS break came from String.raw changing escape processing vs original monolith style literals",
+                  "Styles are now evaluated identically to original Forum.jsx style blocks"
+              ],
+    "verification":  {
+                         "build_failure":  "PageNotFoundError for /api/aiquota/usage (not touched by style fix)",
+                         "build":  "failed_unrelated",
+                         "eslint":  "pass"
+                     },
+    "status":  "ok_with_external_build_issue"
+}

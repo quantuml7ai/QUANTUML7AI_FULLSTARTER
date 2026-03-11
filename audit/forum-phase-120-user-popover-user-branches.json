@@ -1,0 +1,63 @@
+{
+  "phase": "phase-120-user-popover-user-branches",
+  "timestamp": "2026-03-10T17:21:29.2646600+02:00",
+  "scope": [
+    "forum profile popover",
+    "feed user branches",
+    "global sorting integration",
+    "navigation snapshot/back-home compatibility"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/profile/components/UserInfoPopover.jsx",
+    "app/forum/features/ui/components/ForumOverlayStack.jsx",
+    "app/forum/features/ui/utils/buildForumLayoutProps.js",
+    "app/forum/features/feed/hooks/useForumFeedRuntime.js",
+    "app/forum/features/feed/hooks/useTopicDiscoveryModel.js",
+    "app/forum/features/feed/components/TopicsOrPanelsSwitch.jsx",
+    "app/forum/features/ui/components/ForumSearchSortControls.jsx",
+    "app/forum/features/ui/utils/propBundles/buildSearchSortControlsProps.js",
+    "app/forum/features/ui/utils/propBundles/buildTopicsSwitchProps.js",
+    "app/forum/features/feed/hooks/useNavStateSnapshot.js",
+    "app/forum/features/feed/hooks/useForumNavigationActions.js",
+    "app/forum/features/feed/hooks/useForumHomeAction.js",
+    "app/forum/features/feed/utils/navOrchestrator.js",
+    "app/forum/styles/ForumStyles.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/feed/hooks/useUserPostsBranchModel.js",
+    "app/forum/features/feed/components/UserPostsPane.jsx",
+    "audit/forum-phase-120-user-popover-user-branches.json"
+  ],
+  "moved_logic_domains": [
+    "profile-popover -> feed/user-branch actions",
+    "topics panel -> dedicated user-posts pane",
+    "navigation snapshot/back/home -> profile branch state"
+  ],
+  "dependency_changes": {
+    "imports_added": [
+      "useUserPostsBranchModel",
+      "UserPostsPane"
+    ],
+    "prop_contract_changes": [
+      "UserInfoPopover now accepts onOpenUserPosts/onOpenUserTopics",
+      "ForumOverlayStack/buildForumLayoutProps pass profile branch callbacks",
+      "ForumSearchSortControls accepts forcePostSort",
+      "TopicsOrPanelsSwitch/buildTopicsSwitchProps include profile branch payload"
+    ]
+  },
+  "detected_risks": [
+    "Profile user branch is client-state driven and depends on profile id resolution consistency",
+    "Topic branch filter uses author id filter and relies on topic user/account fields parity"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "notes": [
+    "pnpm eslint targeted files: pass",
+    "pnpm build: pass",
+    "Existing no-img warnings remain in unrelated files"
+  ],
+  "status": "passed"
+}

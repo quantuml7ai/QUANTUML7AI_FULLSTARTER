@@ -1,0 +1,64 @@
+﻿{
+    "phase":  "96-ideal-closeout",
+    "timestamp":  "2026-03-08T16:00:53.4232971+02:00",
+    "scope":  [
+                  "forum root-layer finalization",
+                  "providers/layout ownership cleanup",
+                  "final parity + full audit suite"
+              ],
+    "touched_files":  [
+                          "app/forum/ForumRoot.jsx",
+                          "app/forum/ForumLayout.jsx",
+                          "app/forum/ForumProviders.jsx",
+                          "app/forum/features/ui/utils/buildForumLayoutProps.js",
+                          "audit/forum-final-created-files-check.json",
+                          "audit/forum-final-ownership-map.json",
+                          "audit/forum-final-residual-monolith.json",
+                          "audit/forum-phase-95-final-parity.json",
+                          "audit/forum-phase-09-final.json",
+                          "audit/forum-phase-96-ideal-closeout.json"
+                      ],
+    "new_files":  [
+                      "app/forum/ForumProviders.jsx",
+                      "app/forum/features/ui/utils/buildForumLayoutProps.js",
+                      "audit/forum-final-created-files-check.json",
+                      "audit/forum-final-ownership-map.json",
+                      "audit/forum-final-residual-monolith.json",
+                      "audit/forum-phase-95-final-parity.json"
+                  ],
+    "moved_logic_domains":  [
+                                "root visual providers (styles/fx/toast) -\u003e ForumProviders",
+                                "layout object assembly -\u003e buildForumLayoutProps",
+                                "ForumRoot remains composition root for domain runtimes"
+                            ],
+    "dependency_changes":  {
+                               "forum_root_lines":  1410,
+                               "forum_root_imports":  63,
+                               "forum_feature_dirs":  10,
+                               "forum_feature_files":  220,
+                               "deps_scanned_files":  355,
+                               "deps_internal_edges":  471,
+                               "deps_cross_domain_edges":  111,
+                               "deps_cycles":  0,
+                               "parity_hash_total":  82,
+                               "parity_hash_same":  81,
+                               "parity_hash_changed":  1,
+                               "parity_hash_missing":  0
+                           },
+    "detected_risks":  [
+                           "Pre-existing non-blocking image warnings (\u003cimg\u003e) remain outside this closeout scope.",
+                           "Pre-existing media/effects hotspot warnings remain in unchanged modules."
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low",
+    "runtime_risk":  "low_to_medium",
+    "notes":  [
+                  "Functional parity with baseline archive preserved: only expected app/forum/Forum.jsx hash change.",
+                  "Client/server/db route contracts remained unchanged in this pass.",
+                  "Forum root-layer target files are now present: Forum.jsx, ForumRoot.jsx, ForumLayout.jsx, ForumProviders.jsx."
+              ],
+    "status":  "passed"
+}

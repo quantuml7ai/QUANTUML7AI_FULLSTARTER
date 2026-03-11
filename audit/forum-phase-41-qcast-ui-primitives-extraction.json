@@ -1,0 +1,61 @@
+{
+  "phase": "41-qcast-ui-primitives-extraction",
+  "timestamp": "2026-03-05T01:54:57.8994062+02:00",
+  "scope": {
+    "domain": "forum.features.media.qcast",
+    "goal": "extract qcast icon primitives and deterministic control-bar generator from ForumRoot"
+  },
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/media/components/qcast/QCastIcons.jsx",
+    "app/forum/features/media/utils/qcastBars.js"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "media.qcast.ui.icons",
+      "from": "app/forum/ForumRoot.jsx::QCastPlayer",
+      "to": "app/forum/features/media/components/qcast/QCastIcons.jsx"
+    },
+    {
+      "domain": "media.qcast.ui.eq-bars",
+      "from": "app/forum/ForumRoot.jsx::QCastPlayer",
+      "to": "app/forum/features/media/utils/qcastBars.js::buildQCastControlBars"
+    }
+  ],
+  "dependency_changes": [
+    {
+      "type": "import_added",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/components/qcast/QCastIcons.jsx"
+    },
+    {
+      "type": "import_added",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/utils/qcastBars.js"
+    }
+  ],
+  "detected_risks": [
+    "QCastPlayer ownership is still in ForumRoot; this phase only extracts leaf/UI primitives",
+    "ForumRoot remains a heavy runtime hotspot with known RAF/timer warnings"
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "audit": {
+    "eslint": "pass",
+    "audit_forum_deps": "pass",
+    "audit_full_forum": "pass_with_known_hotspots",
+    "audit_effects": "pass_with_known_residual_warnings",
+    "audit_media": "pass_with_expected_media_flags",
+    "audit_heavy": "pass_with_known_hotspots",
+    "build": "pass"
+  },
+  "notes": [
+    "Pure decomposition: no business logic or API semantics changed.",
+    "QCast icon rendering and bar generation are now owned by media feature modules."
+  ],
+  "status": "completed"
+}

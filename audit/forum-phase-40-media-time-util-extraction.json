@@ -1,0 +1,54 @@
+{
+  "phase": "40-media-time-util-extraction",
+  "timestamp": "2026-03-05T01:50:23.6374615+02:00",
+  "scope": {
+    "domain": "forum.features.media",
+    "goal": "move media time formatter from ForumRoot into media utils module"
+  },
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/media/utils/formatMediaTime.js"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "media.presentation.time-formatting",
+      "from": "app/forum/ForumRoot.jsx::formatMediaTime",
+      "to": "app/forum/features/media/utils/formatMediaTime.js::formatMediaTime"
+    }
+  ],
+  "dependency_changes": [
+    {
+      "type": "import_added",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/utils/formatMediaTime.js"
+    },
+    {
+      "type": "local_helper_removed",
+      "file": "app/forum/ForumRoot.jsx",
+      "symbol": "formatMediaTime"
+    }
+  ],
+  "detected_risks": [
+    "Residual QCastPlayer and other media logic still remain inside ForumRoot"
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "low",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "audit": {
+    "eslint": "pass",
+    "audit_forum_deps": "pass",
+    "audit_full_forum": "pass_with_known_hotspots",
+    "audit_effects": "pass_with_known_residual_warnings",
+    "audit_media": "pass_with_expected_video_autoplay_flags",
+    "audit_heavy": "pass_with_known_hotspots",
+    "build": "pass"
+  },
+  "notes": [
+    "Pure refactor, no behavior change intended.",
+    "No client/server API contracts were modified."
+  ],
+  "status": "completed"
+}

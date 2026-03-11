@@ -1,0 +1,87 @@
+{
+  "phase": "37-qcoin-withdraw-userinfo-extraction",
+  "timestamp": "2026-03-05T01:31:57.6614475+02:00",
+  "scope": [
+    "forum-root-thinning",
+    "qcoin-withdraw-popover",
+    "profile-userinfo-popover"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/qcoin/components/QCoinWithdrawPopover.jsx",
+    "app/forum/features/profile/components/UserInfoPopover.jsx"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "qcoin.withdraw-popover-ui",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/qcoin/components/QCoinWithdrawPopover.jsx",
+      "status": "completed"
+    },
+    {
+      "domain": "profile.user-info-popover-ui",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/profile/components/UserInfoPopover.jsx",
+      "status": "completed"
+    }
+  ],
+  "dependency_changes": {
+    "forum_dependency_audit": {
+      "files_scanned": 172,
+      "internal_edges": 246,
+      "cycles": 0,
+      "cross_domain_edges": 83,
+      "forum_root_imports": 1
+    },
+    "forum_root_delta": {
+      "local_component_definitions_removed": [
+        "QCoinWithdrawPopover",
+        "UserInfoPopover"
+      ],
+      "new_feature_imports": [
+        "features/qcoin/components/QCoinWithdrawPopover",
+        "features/profile/components/UserInfoPopover"
+      ],
+      "adapter_props_used": [
+        "QCoinWithdrawPopover.requireAuth=openAuth",
+        "UserInfoPopover.renderRich=rich",
+        "UserInfoPopover.formatCountFn=formatCount"
+      ]
+    }
+  },
+  "detected_risks": [
+    "ForumRoot still contains heavy media/dm/quest controllers and effects.",
+    "UserInfoPopover retains live fetch/translate behavior and portal-driven positioning with RAF.",
+    "QCoinWithdrawPopover keeps autoplay video semantics by design."
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": {
+    "level": "low",
+    "notes": [
+      "UserInfoPopover keeps GET /api/profile/user-popover contract unchanged.",
+      "No route payload/shape changes were introduced."
+    ]
+  },
+  "storage_risk": {
+    "level": "low",
+    "notes": [
+      "No storage key changes in this phase."
+    ]
+  },
+  "runtime_risk": {
+    "level": "low",
+    "notes": [
+      "Eslint passed on touched files.",
+      "All required audit scripts passed.",
+      "Production build passed with existing global image warnings outside this scope."
+    ]
+  },
+  "notes": [
+    "Audit scripts executed: audit-forum-deps, audit-full-forum, audit-effects, audit-media, audit-heavy.",
+    "No backend handler/db util changes.",
+    "Circular dependency audit remains clean."
+  ],
+  "status": "pass"
+}

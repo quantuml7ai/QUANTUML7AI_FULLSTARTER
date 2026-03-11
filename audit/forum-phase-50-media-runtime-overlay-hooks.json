@@ -1,0 +1,117 @@
+{
+  "phase": "50",
+  "timestamp": "2026-03-05T12:38:53+02:00",
+  "scope": [
+    "forum root thinning",
+    "media runtime ownership",
+    "overlay component extraction",
+    "shared hook extraction",
+    "dm inbox align helper extraction"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/media/components/VideoOverlay.jsx",
+    "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+    "app/forum/shared/hooks/useHtmlFlag.js",
+    "app/forum/shared/hooks/usePageLock.js",
+    "app/forum/features/dm/utils/alignInboxStartUnderTabs.js"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "media",
+      "moved": [
+        "video overlay UI/controller",
+        "media muted/storage keys",
+        "video LRU lifecycle helpers",
+        "video controls-on-tap wiring",
+        "VideoMedia/QCastPlayer runtime adapters"
+      ],
+      "from": "app/forum/ForumRoot.jsx",
+      "to": [
+        "app/forum/features/media/components/VideoOverlay.jsx",
+        "app/forum/features/media/utils/mediaLifecycleRuntime.js"
+      ]
+    },
+    {
+      "domain": "shared",
+      "moved": [
+        "html data-flag hook",
+        "overlay page-lock hook"
+      ],
+      "from": "app/forum/ForumRoot.jsx",
+      "to": [
+        "app/forum/shared/hooks/useHtmlFlag.js",
+        "app/forum/shared/hooks/usePageLock.js"
+      ]
+    },
+    {
+      "domain": "dm",
+      "moved": [
+        "inbox header/body first-message align helper"
+      ],
+      "from": "app/forum/ForumRoot.jsx",
+      "to": [
+        "app/forum/features/dm/utils/alignInboxStartUnderTabs.js"
+      ]
+    }
+  ],
+  "dependency_changes": {
+    "ForumRoot_removed_local_owners": [
+      "VideoOverlay",
+      "usePageLock",
+      "useHtmlFlag",
+      "readMutedPrefFromStorage",
+      "__touchActiveVideoEl",
+      "__enforceActiveVideoCap",
+      "__restoreVideoEl",
+      "__hasLazyVideoSourceWithoutSrc",
+      "__rearmPooledFxNode",
+      "enableVideoControlsOnTap",
+      "VideoMedia",
+      "QCastPlayer",
+      "alignInboxStartUnderTabs"
+    ],
+    "ForumRoot_new_imports": [
+      "app/forum/features/media/components/VideoOverlay.jsx",
+      "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "app/forum/shared/hooks/useHtmlFlag.js",
+      "app/forum/features/dm/utils/alignInboxStartUnderTabs.js"
+    ]
+  },
+  "detected_risks": [
+    "effects-leak audit still flags historical RAF/interval imbalances in ForumRoot",
+    "usePageLock hook adds RAF restore calls (known acceptable pattern, tracked by audit)",
+    "ForumRoot remains high-complexity orchestrator despite score reduction"
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "low",
+  "storage_risk": {
+    "status": "low",
+    "notes": [
+      "media mute keys preserved: forum:mediaMuted / forum:videoMuted",
+      "event name preserved: forum:media-mute"
+    ]
+  },
+  "runtime_risk": {
+    "status": "low-medium",
+    "notes": [
+      "behavior preserved through pass-through adapters",
+      "build passed after encoding fix",
+      "manual smoke checks still required for camera overlay and media autoplay flows"
+    ]
+  },
+  "notes": {
+    "lint": "passed for all changed files",
+    "build": "passed (initial UTF-8 encoding issue fixed)",
+    "audits": {
+      "tools/audit-forum-deps.js": "passed, cycles=0",
+      "tools/audit-full-forum.js": "passed",
+      "tools/audit-effects.js": "passed with known warnings",
+      "tools/audit-media.js": "passed",
+      "tools/audit-heavy.js": "passed, ForumRoot score down to 137"
+    }
+  },
+  "status": "done"
+}

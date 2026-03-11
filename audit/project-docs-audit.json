@@ -1,0 +1,78 @@
+{
+  "phase": "project-docs-audit",
+  "timestamp": "2026-03-11T14:16:42.707Z",
+  "scope": "whole repository docs package",
+  "touched_files": [
+    "PROJECT_TREE.md",
+    "PROJECT_ROUTES.md",
+    "PROJECT_OWNERSHIP.md",
+    "PROJECT_DEPENDENCIES.md",
+    "PROJECT_RISKS.md"
+  ],
+  "new_files": [
+    "PROJECT_TREE.md",
+    "PROJECT_ROUTES.md",
+    "PROJECT_OWNERSHIP.md",
+    "PROJECT_DEPENDENCIES.md",
+    "PROJECT_RISKS.md"
+  ],
+  "moved_logic_domains": [],
+  "dependency_changes": [],
+  "detected_risks": [],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "notes": [],
+  "status": "ok",
+  "generators": [
+    "tools/generate-project-tree.js",
+    "tools/generate-project-routes.js",
+    "tools/generate-project-ownership.js",
+    "tools/generate-project-dependencies.js",
+    "tools/generate-project-risks.js",
+    "tools/generate-project-docs.js",
+    "tools/audit-project-docs.js"
+  ],
+  "documents": [
+    {
+      "file": "PROJECT_TREE.md",
+      "exists": true,
+      "lines": 1809,
+      "headings": 4,
+      "has_rule_header": true
+    },
+    {
+      "file": "PROJECT_ROUTES.md",
+      "exists": true,
+      "lines": 222,
+      "headings": 39,
+      "has_rule_header": true
+    },
+    {
+      "file": "PROJECT_OWNERSHIP.md",
+      "exists": true,
+      "lines": 538,
+      "headings": 80,
+      "has_rule_header": true
+    },
+    {
+      "file": "PROJECT_DEPENDENCIES.md",
+      "exists": true,
+      "lines": 599,
+      "headings": 80,
+      "has_rule_header": true
+    },
+    {
+      "file": "PROJECT_RISKS.md",
+      "exists": true,
+      "lines": 307,
+      "headings": 9,
+      "has_rule_header": true
+    }
+  ],
+  "route_file_count": 95,
+  "source_file_count": 608,
+  "dependency_edge_count": 534,
+  "reverse_dependency_nodes": 288
+}

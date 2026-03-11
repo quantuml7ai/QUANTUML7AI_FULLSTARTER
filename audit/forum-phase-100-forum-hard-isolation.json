@@ -1,0 +1,37 @@
+﻿{
+    "phase":  "phase-100-forum-hard-isolation",
+    "timestamp":  "2026-03-08T16:53:55.0063775+02:00",
+    "scope":  [
+                  "forum style shield against app/globals.css"
+              ],
+    "touched_files":  [
+                          "app/forum/styles/ForumStyles.jsx"
+                      ],
+    "new_files":  [
+
+                  ],
+    "moved_logic_domains":  [
+                                "none"
+                            ],
+    "dependency_changes":  [
+                               "Added strict .forum_root overrides for global container and media rules; neutralized global audio/fab fixed-button rule leakage"
+                           ],
+    "detected_risks":  [
+                           "Some forum controls using intentionally fixed inline styles may require class-level tuning after visual check"
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "none",
+    "storage_risk":  "none",
+    "runtime_risk":  "low",
+    "notes":  [
+                  "User-reported symptom indicated forum UI looked like global css was dominating",
+                  "This pass enforces forum-root style authority with !important scoped overrides only"
+              ],
+    "verification":  {
+                         "eslint":  "pass",
+                         "build":  "not_rerun_external_api_fail_pattern"
+                     },
+    "status":  "ok_pending_visual_verification"
+}

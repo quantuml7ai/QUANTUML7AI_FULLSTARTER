@@ -1,0 +1,82 @@
+{
+  "phase": "44-media-links-cluster-extraction",
+  "timestamp": "2026-03-05T02:47:55.8766431+02:00",
+  "scope": {
+    "domain": "forum.features.media",
+    "goal": "extract media links/parsing cluster from ForumRoot into feature utils and keep root wiring-only"
+  },
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/media/utils/mediaLinks.js"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "media.url.detectors",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/utils/mediaLinks.js",
+      "symbols": [
+        "isYouTubeUrl",
+        "isTikTokUrl"
+      ]
+    },
+    {
+      "domain": "media.video.meta",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/utils/mediaLinks.js",
+      "symbols": [
+        "getYouTubeId",
+        "shortVideoMeta",
+        "buildSearchVideoMedia"
+      ]
+    },
+    {
+      "domain": "media.url.classification",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/utils/mediaLinks.js",
+      "symbols": [
+        "createIsMediaUrl",
+        "createStripMediaUrlsFromText",
+        "isVercelStorageUrl"
+      ]
+    }
+  ],
+  "dependency_changes": [
+    {
+      "type": "import_added",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/utils/mediaLinks.js"
+    },
+    {
+      "type": "root_wiring_added",
+      "file": "app/forum/ForumRoot.jsx",
+      "symbols": [
+        "const isMediaUrl = createIsMediaUrl(...)",
+        "const stripMediaUrlsFromText = createStripMediaUrlsFromText(...)"
+      ]
+    }
+  ],
+  "detected_risks": [
+    "ForumRoot remains very large and still contains many cross-domain side effects",
+    "Media/feed orchestration in root still has high runtime hotspot score"
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "audit": {
+    "eslint": "pass",
+    "audit_forum_deps": "pass",
+    "audit_full_forum": "pass_with_known_hotspots",
+    "audit_effects": "pass_with_known_residual_warnings",
+    "audit_media": "pass_with_expected_media_flags",
+    "audit_heavy": "pass_with_known_hotspots",
+    "build": "pass"
+  },
+  "notes": [
+    "No route/API/db/storage contract changed.",
+    "Behavior preserved by keeping same predicates and same text-strip semantics."
+  ],
+  "status": "completed"
+}

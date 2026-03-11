@@ -1,0 +1,108 @@
+{
+  "phase": "47-feed-media-hooks-utils-extraction",
+  "timestamp": "2026-03-05T03:18:52.8076195+02:00",
+  "scope": {
+    "domain": "forum.root-decomposition",
+    "goal": "extract five additional safe helper clusters from ForumRoot to feature/shared ownership modules"
+  },
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/shared/utils/time.js"
+  ],
+  "new_files": [
+    "app/forum/features/ui/hooks/useForumEditMode.js",
+    "app/forum/features/ui/components/ForumAdSlot.jsx",
+    "app/forum/features/media/utils/videoFeedRandom.js",
+    "app/forum/features/media/utils/videoFeedPosts.js"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "ui.edit-mode.listener",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/ui/hooks/useForumEditMode.js",
+      "symbols": [
+        "forum:edit useEffect listener"
+      ]
+    },
+    {
+      "domain": "ui.ad-slot.resize-observer",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/ui/components/ForumAdSlot.jsx",
+      "symbols": [
+        "ForumAdSlot"
+      ]
+    },
+    {
+      "domain": "media.video-feed.randomization",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/utils/videoFeedRandom.js",
+      "symbols": [
+        "__vfHash32",
+        "__vfMulberry32",
+        "__vfShuffleStable"
+      ]
+    },
+    {
+      "domain": "media.video-feed.post-selection",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/utils/videoFeedPosts.js",
+      "symbols": [
+        "isMediaPost",
+        "gatherAllPosts"
+      ]
+    },
+    {
+      "domain": "shared.time.bucket",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/shared/utils/time.js",
+      "symbols": [
+        "getBucket"
+      ]
+    }
+  ],
+  "dependency_changes": [
+    {
+      "type": "imports_added",
+      "file": "app/forum/ForumRoot.jsx",
+      "details": [
+        "shared/utils/time::getTimeBucket",
+        "features/ui/components/ForumAdSlot",
+        "features/ui/hooks/useForumEditMode",
+        "features/media/utils/videoFeedRandom",
+        "features/media/utils/videoFeedPosts"
+      ]
+    },
+    {
+      "type": "legacy_local_functions_removed_from_root",
+      "file": "app/forum/ForumRoot.jsx",
+      "count": 6
+    }
+  ],
+  "detected_risks": [
+    "VideoTrimPopover and several heavy media/navigation clusters still remain inside ForumRoot",
+    "Known historical effect/hotspot warnings in ForumRoot are still present and were not behavior-changed in this step"
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "audit": {
+    "eslint": "pass",
+    "audit_forum_deps": "pass",
+    "audit_full_forum": "pass_with_known_hotspots",
+    "audit_effects": "pass_with_known_residual_warnings",
+    "audit_media": "pass_with_expected_media_flags",
+    "audit_heavy": "pass_with_known_hotspots",
+    "build": "pass"
+  },
+  "metrics": {
+    "forum_root_lines": 14138,
+    "forum_root_function_count": 38,
+    "forum_root_use_effect_count": 125
+  },
+  "notes": [
+    "No server routes, backend handlers, db utils, or API payload contracts were changed.",
+    "Video feed randomization and media-post classification behavior preserved via pure util extraction and dependency injection."
+  ],
+  "status": "completed"
+}

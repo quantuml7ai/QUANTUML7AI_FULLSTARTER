@@ -10,7 +10,15 @@
     "dev:clean": "pnpm -s clean && next dev",
     "clean": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\"",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "project:tree": "node tools/generate-project-tree.js",
+    "project:routes": "node tools/generate-project-routes.js",
+    "project:ownership": "node tools/generate-project-ownership.js",
+    "project:dependencies": "node tools/generate-project-dependencies.js",
+    "project:risks": "node tools/generate-project-risks.js",
+    "project:docs": "node tools/generate-project-docs.js",
+    "project:docs:audit": "node tools/audit-project-docs.js",
+    "project:docs:full": "node tools/generate-project-docs.js"
   },
   "dependencies": {
     "@react-three/drei": "^9.114.0",

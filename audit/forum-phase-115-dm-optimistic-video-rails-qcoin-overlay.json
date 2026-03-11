@@ -1,0 +1,99 @@
+﻿{
+  "phase": "forum-phase-115-dm-optimistic-video-rails-qcoin-overlay",
+  "timestamp": "2026-03-10T13:31:45.4332729+02:00",
+  "scope": [
+    "dm optimistic send path with pre-upload local video preview",
+    "header peek button visibility during video recording/preview",
+    "dm dialogs visual rails + date badge",
+    "qcoin claim overlay text/button hardening"
+  ],
+  "touched_files": [
+    "app/forum/features/feed/hooks/useForumCreatePostAction.js",
+    "app/forum/features/dm/services/sendDmComposerMessage.js",
+    "app/forum/features/dm/components/DmDialogRow.jsx",
+    "app/forum/styles/modules/dmStyles.js",
+    "app/forum/styles/ForumStyles.jsx",
+    "app/forum/features/quests/components/QuestClaimOverlay.jsx",
+    "app/forum/styles/ForumFxStyles.jsx",
+    "app/forum/styles/modules/fxStyles.js"
+  ],
+  "new_files": [],
+  "moved_logic_domains": [
+    {
+      "domain": "dm",
+      "move": "media resolve deferred into dm send flow via resolveMediaPayloadFn callback",
+      "owner": "features/dm/services/sendDmComposerMessage"
+    },
+    {
+      "domain": "ui/header",
+      "move": "peek button suppression includes videoOpen + recording/preview states",
+      "owner": "ForumHeaderPanel"
+    }
+  ],
+  "dependency_changes": [
+    {
+      "type": "call-flow",
+      "from": "features/feed/hooks/useForumCreatePostAction",
+      "to": "features/dm/services/sendDmComposerMessage",
+      "detail": "DM path now optimistic-first; resolver callback passed for blob upload"
+    },
+    {
+      "type": "style-contract",
+      "from": "features/dm/components/DmDialogRow",
+      "to": "styles/ForumStyles + styles/modules/dmStyles",
+      "detail": "added dmRowRail/dmRowTimeBadge/dmPreviewIcon svg sizing classes"
+    }
+  ],
+  "detected_risks": [
+    "DM optimistic item rollback path depends on resolver callback success/fail semantics",
+    "Dialog-row visual updates require quick UI smoke-check on mobile and desktop",
+    "QCoin overlay fallback labels may differ from locale text if translation resolves to malformed 1-char value"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": {
+    "level": "low",
+    "notes": [
+      "No API route shape changed",
+      "DM send payload remains {to,text,attachments}; only timing/order of media resolve changed"
+    ]
+  },
+  "storage_risk": {
+    "level": "none",
+    "notes": [
+      "No storage key/schema changes in this pass"
+    ]
+  },
+  "runtime_risk": {
+    "level": "medium",
+    "notes": [
+      "Optimistic DM item now appears before upload completes; requires manual verification for blob video playback and rollback"
+    ]
+  },
+  "audit_runs": [
+    {
+      "name": "pnpm build",
+      "status": "pass",
+      "notes": "one transient .next manifest failure occurred once; second run passed"
+    },
+    {
+      "name": "node tools/audit-heavy.js",
+      "status": "pass",
+      "artifact": "heavy-audit.report.json"
+    },
+    {
+      "name": "node tools/audit-media.js",
+      "status": "pass",
+      "artifact": "media-audit.report.json"
+    },
+    {
+      "name": "node tools/audit-effects.js",
+      "status": "pass",
+      "artifact": "effects-leak.report.json"
+    }
+  ],
+  "notes": [
+    "Build warnings are unchanged no-img-element warnings outside touched forum flow",
+    "No server route or DB util files were modified in this pass"
+  ],
+  "status": "completed"
+}

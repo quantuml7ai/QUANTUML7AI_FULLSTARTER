@@ -1,0 +1,39 @@
+{
+  "phase": "forum-phase-126-video-warm-lifecycle",
+  "timestamp": "2026-03-11T14:16:12.453Z",
+  "scope": "forum media warmup, resident lifecycle, instant focus playback",
+  "touched_files": [
+    "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+    "app/forum/features/media/components/VideoMedia.jsx",
+    "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+    "app/forum/features/feed/components/PostMediaStack.jsx",
+    "app/forum/features/media/utils/videoControls.js"
+  ],
+  "new_files": [],
+  "moved_logic_domains": [
+    "video resident ownership separated from active playback ownership",
+    "video prewarm made repeatable instead of one-shot"
+  ],
+  "dependency_changes": [
+    "VideoMedia now receives resident lifecycle helpers from mediaLifecycleRuntime",
+    "forum media coordinator uses resident warm-start helpers instead of active-cap helpers for prewarm"
+  ],
+  "detected_risks": [
+    "HAR showed repeated 206 requests for the same MP4 URLs, consistent with unload/reload thrash",
+    "Previous preload=none path could override warmup and leave videos cold until focus",
+    "Previous prewarm path was one-shot and did not re-prime videos after later unload"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "medium reduced to low-medium after resident/warm separation",
+  "notes": [
+    "pnpm build passed",
+    "eslint passed for touched media files",
+    "audit-media executed",
+    "audit-runtime-hotspots executed",
+    "audit-effects executed",
+    "local HAR sample: 364 video requests, 25 duplicate video URLs with repeated 206 range fetches"
+  ],
+  "status": "ok"
+}

@@ -1,0 +1,50 @@
+{
+  "phase": "30-feed-post-media-text-model-hook",
+  "timestamp": "2026-03-04T20:46:05Z",
+  "scope": [
+    "forum/features/feed",
+    "forum/root",
+    "forum/post-media-text-model"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/feed/hooks/usePostMediaTextModel.js"
+  ],
+  "new_files": [
+    "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+    "audit/forum-phase-30-post-media-text-model-hook.json"
+  ],
+  "moved_logic_domains": [
+    "Post text/media parsing model (img/video/yt/tiktok/audio + cleaned text + yt params) moved from PostCard in ForumRoot to features/feed/hooks/usePostMediaTextModel"
+  ],
+  "dependency_changes": {
+    "forum_root_imports": 1,
+    "cross_domain_edges": 75,
+    "cycles": 0
+  },
+  "detected_risks": [
+    "Regex-heavy parsing is now isolated but still coupled to legacy inline URL semantics; future step should add dedicated test vectors",
+    "DM text/media parsing remains separate and should be normalized later under DM ownership"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "notes": [
+    "No server/API route, handler, or db util changes.",
+    "PostMediaStack and translation hook continue consuming the same derived model values.",
+    "ForumRoot heavy/deep metrics remained stable after pure ownership move."
+  ],
+  "status": "completed",
+  "validation": {
+    "lint_targeted": "passed",
+    "build": "passed",
+    "audits": [
+      "tools/audit-forum-deps.js",
+      "tools/audit-full-forum.js",
+      "tools/audit-effects.js",
+      "tools/audit-media.js",
+      "tools/audit-heavy.js"
+    ]
+  }
+}

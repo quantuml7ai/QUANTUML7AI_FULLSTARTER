@@ -1,0 +1,96 @@
+{
+  "phase": "phase-65-create-post-hook",
+  "timestamp": "2026-03-05T20:53:27.1778943+02:00",
+  "scope": [
+    "forum root decomposition",
+    "feed composer post-send orchestration extraction",
+    "dm send path ownership extraction"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/feed/hooks/useForumCreatePostAction.js",
+    "audit/forum-phase-65-create-post-hook.json"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "feed/post-create-submit-pipeline",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/feed/hooks/useForumCreatePostAction.js"
+    },
+    {
+      "domain": "dm/send-from-composer-path",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/feed/hooks/useForumCreatePostAction.js"
+    },
+    {
+      "domain": "composer-media-upload-and-send-bridge",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/feed/hooks/useForumCreatePostAction.js"
+    }
+  ],
+  "dependency_changes": [
+    "ForumRoot now imports and wires useForumCreatePostAction",
+    "ForumRoot no longer owns createPost/postingRef internals directly",
+    "getForumUserId is now injected into hook via getForumUserIdFn"
+  ],
+  "detected_risks": [
+    "Hook receives a wide dependency surface; next step is split into feed-only and dm-only action hooks",
+    "ForumRoot still contains residual navigation/video-feed orchestration",
+    "Existing effects/runtime warnings remain outside this phase scope"
+  ],
+  "detected_cycles": {
+    "value": 0,
+    "source": "forum-deps-audit.report.json"
+  },
+  "api_contract_risk": {
+    "level": "low",
+    "notes": "No contract shape changes for /api/dm/send, /api/forum/uploadAudio, /api/forum/blobUploadUrl, queue mutate ops."
+  },
+  "storage_risk": {
+    "level": "low",
+    "notes": "No storage keys or restore/persist semantics changed."
+  },
+  "runtime_risk": {
+    "level": "medium",
+    "notes": "Residual runtime complexity remains in ForumRoot despite measurable reduction."
+  },
+  "verification": {
+    "eslint": {
+      "command": "pnpm eslint app/forum/ForumRoot.jsx app/forum/features/feed/hooks/useForumCreatePostAction.js --no-cache",
+      "status": "pass"
+    },
+    "audits": [
+      { "command": "node tools/audit-heavy.js", "status": "pass_with_warnings" },
+      { "command": "node tools/audit-media.js", "status": "pass_with_warnings" },
+      { "command": "node tools/audit-effects.js", "status": "pass_with_warnings" },
+      { "command": "node tools/audit-forum-deps.js", "status": "pass" },
+      { "command": "node tools/audit-runtime-hotspots.js", "status": "pass_with_warnings" },
+      { "command": "node tools/audit-full-forum.js", "status": "pass_with_warnings" },
+      { "command": "node tools/audit-account-sync.js", "status": "pass_with_warnings" }
+    ],
+    "build": {
+      "command": "pnpm build",
+      "status": "pass",
+      "warnings": [
+        "next/no-img-element warnings in app/ads/home.js",
+        "next/no-img-element warning in app/forum/ForumAds.js",
+        "next/no-img-element warnings in components/AuthNavClient.jsx",
+        "next/no-img-element warnings in components/NotRobot.jsx"
+      ]
+    }
+  },
+  "metrics": {
+    "forum_root_lines_after": 7847,
+    "new_hook_lines": 615,
+    "runtime_hotspots_forum_root_score": 143,
+    "deep_audit_forum_root_score": 107
+  },
+  "notes": [
+    "createPost behavior preserved: edit mode, media upload gates, DM send semantics, optimistic post and queue push",
+    "No TypeScript introduced; JS/JSX only",
+    "No cyclic dependencies introduced in forum graph"
+  ],
+  "status": "pass_with_residual_risks"
+}

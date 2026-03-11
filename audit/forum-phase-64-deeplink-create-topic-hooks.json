@@ -1,0 +1,88 @@
+{
+  "phase": "phase-64-deeplink-create-topic-hooks",
+  "timestamp": "2026-03-05T20:00:08.0536669+02:00",
+  "scope": [
+    "forum root decomposition",
+    "feed deeplink orchestration ownership",
+    "feed create-topic action ownership"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/feed/hooks/useForumDeepLinkFlow.js",
+    "app/forum/features/feed/hooks/useForumCreateTopicAction.js",
+    "audit/forum-phase-64-deeplink-create-topic-hooks.json"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "feed/deeplink-thread-open",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/feed/hooks/useForumDeepLinkFlow.js"
+    },
+    {
+      "domain": "feed/topic-create-composer-action",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/feed/hooks/useForumCreateTopicAction.js"
+    }
+  ],
+  "dependency_changes": [
+    "ForumRoot now depends on useForumDeepLinkFlow hook",
+    "ForumRoot now depends on useForumCreateTopicAction hook",
+    "Deep link constants consumed inside feed hook instead of ForumRoot"
+  ],
+  "detected_risks": [
+    "ForumRoot still has high residual complexity in createPost/DM/media-submit path",
+    "Audit scripts still report autoplay/effects hotspots outside this phase scope",
+    "Effects leak report still shows pre-existing warnings in useForumHeadCollapse and other modules"
+  ],
+  "detected_cycles": {
+    "value": 0,
+    "source": "forum-deps-audit.report.json"
+  },
+  "api_contract_risk": {
+    "level": "low",
+    "notes": "No API route payload/shape changes. Deep link still calls /api/forum/post-chain with same query semantics."
+  },
+  "storage_risk": {
+    "level": "low",
+    "notes": "No storage key schema changes. Existing localStorage semantics preserved."
+  },
+  "runtime_risk": {
+    "level": "medium",
+    "notes": "Residual runtime hotspots remain in ForumRoot despite reduced orchestration ownership."
+  },
+  "verification": {
+    "eslint": {
+      "command": "pnpm eslint app/forum/ForumRoot.jsx app/forum/features/feed/hooks/useForumDeepLinkFlow.js app/forum/features/feed/hooks/useForumCreateTopicAction.js --no-cache",
+      "status": "pass"
+    },
+    "audits": [
+      { "command": "node tools/audit-heavy.js", "status": "pass" },
+      { "command": "node tools/audit-media.js", "status": "pass" },
+      { "command": "node tools/audit-effects.js", "status": "pass_with_warnings" },
+      { "command": "node tools/audit-forum-deps.js", "status": "pass" },
+      { "command": "node tools/audit-runtime-hotspots.js", "status": "pass_with_warnings" },
+      { "command": "node tools/audit-full-forum.js", "status": "pass_with_warnings" },
+      { "command": "node tools/audit-account-sync.js", "status": "pass_with_warnings" }
+    ],
+    "build": {
+      "command": "pnpm build",
+      "status": "pass",
+      "warnings": [
+        "next/no-img-element warnings in app/ads/home.js",
+        "next/no-img-element warning in app/forum/ForumAds.js",
+        "next/no-img-element warnings in components/AuthNavClient.jsx",
+        "next/no-img-element warnings in components/NotRobot.jsx"
+      ]
+    }
+  },
+  "notes": [
+    "ForumRoot line count after phase: 8309",
+    "runtime-hotspots ForumRoot score: 151",
+    "deep-audit ForumRoot score: 113",
+    "heavy-audit ForumRoot score: 64",
+    "Behavior preserved: deeplink banner, chain expansion, topic create optimistic flow and queue push"
+  ],
+  "status": "pass_with_residual_risks"
+}

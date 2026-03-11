@@ -1,0 +1,86 @@
+{
+  "phase": "36-qcoin-subscriptions-inline-extraction",
+  "timestamp": "2026-03-05T01:22:49.5424170+02:00",
+  "scope": [
+    "forum-root-thinning",
+    "qcoin-inline-widget",
+    "subscriptions-followers-inline"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/qcoin/components/QCoinInline.jsx",
+    "app/forum/features/subscriptions/components/FollowersCounterInline.jsx"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "qcoin.balance-inline-ui",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/qcoin/components/QCoinInline.jsx",
+      "status": "completed"
+    },
+    {
+      "domain": "subscriptions.followers-inline-ui",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/subscriptions/components/FollowersCounterInline.jsx",
+      "status": "completed"
+    }
+  ],
+  "dependency_changes": {
+    "forum_dependency_audit": {
+      "files_scanned": 170,
+      "internal_edges": 241,
+      "cycles": 0,
+      "cross_domain_edges": 81,
+      "forum_root_imports": 1
+    },
+    "forum_root_delta": {
+      "local_component_definitions_removed": [
+        "QCoinInline",
+        "FollowersCounterInline"
+      ],
+      "new_feature_imports": [
+        "features/qcoin/components/QCoinInline",
+        "features/subscriptions/components/FollowersCounterInline"
+      ],
+      "adapter_props_used": [
+        "formatCountFn passed from ForumRoot to FollowersCounterInline for exact formatting parity"
+      ]
+    }
+  },
+  "detected_risks": [
+    "ForumRoot still owns QCoinWithdrawPopover and heavy orchestration zones.",
+    "QCoin inline widget still dispatches window events by design (vip:open, qcoin:open).",
+    "No server contract changes in this phase; risk concentrated in UI wiring."
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": {
+    "level": "low",
+    "notes": [
+      "No API endpoint or payload changes.",
+      "QCoin live polling hook usage remains unchanged."
+    ]
+  },
+  "storage_risk": {
+    "level": "low",
+    "notes": [
+      "No storage key changes.",
+      "Persist/restore behavior unchanged."
+    ]
+  },
+  "runtime_risk": {
+    "level": "low",
+    "notes": [
+      "Eslint passed on touched files.",
+      "Build passed.",
+      "Known global no-img-element warnings remain outside migration scope."
+    ]
+  },
+  "notes": [
+    "Audit scripts executed: audit-forum-deps, audit-full-forum, audit-effects, audit-media, audit-heavy.",
+    "No backend/db/util files changed.",
+    "Circular dependency audit remains clean (0 cycles)."
+  ],
+  "status": "pass"
+}

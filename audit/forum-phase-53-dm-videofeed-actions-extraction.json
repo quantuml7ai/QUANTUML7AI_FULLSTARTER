@@ -1,0 +1,100 @@
+{
+  "phase": "53",
+  "timestamp": "2026-03-05T13:48:42+02:00",
+  "scope": [
+    "dm global inbox flow extraction",
+    "video feed open/close action extraction",
+    "global back capability helper extraction"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/feed/utils/navOrchestrator.js"
+  ],
+  "new_files": [
+    "app/forum/features/dm/utils/openInboxGlobal.js",
+    "app/forum/features/media/utils/videoFeedActions.js"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "dm",
+      "moved": [
+        "open inbox global flow with dialog reset/path switching"
+      ],
+      "from": "app/forum/ForumRoot.jsx",
+      "to": [
+        "app/forum/features/dm/utils/openInboxGlobal.js"
+      ]
+    },
+    {
+      "domain": "media",
+      "moved": [
+        "open video feed action flow",
+        "close video feed action flow"
+      ],
+      "from": "app/forum/ForumRoot.jsx",
+      "to": [
+        "app/forum/features/media/utils/videoFeedActions.js"
+      ]
+    },
+    {
+      "domain": "feed",
+      "moved": [
+        "canGlobalBack boolean evaluation helper"
+      ],
+      "from": "app/forum/ForumRoot.jsx",
+      "to": [
+        "app/forum/features/feed/utils/navOrchestrator.js"
+      ]
+    }
+  ],
+  "dependency_changes": {
+    "ForumRoot_new_imports": [
+      "app/forum/features/dm/utils/openInboxGlobal.js",
+      "app/forum/features/media/utils/videoFeedActions.js"
+    ],
+    "ForumRoot_thin_wrappers": [
+      "openVideoFeed",
+      "closeVideoFeed",
+      "openInboxGlobal",
+      "canGlobalBack"
+    ]
+  },
+  "detected_risks": [
+    "ForumRoot still contains major state/effect orchestration blocks",
+    "effects audit still reports historical RAF/interval imbalance regions"
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "low",
+  "storage_risk": {
+    "status": "low",
+    "notes": [
+      "no storage keys changed",
+      "dm/video-feed runtime flow semantics preserved"
+    ]
+  },
+  "runtime_risk": {
+    "status": "low-medium",
+    "notes": [
+      "all extracted logic is connected via wrappers with same call sites",
+      "lint/build/audits green"
+    ]
+  },
+  "notes": {
+    "lint": "passed for touched/new files",
+    "build": "passed",
+    "audits": {
+      "tools/audit-forum-deps.js": "passed, cycles=0",
+      "tools/audit-full-forum.js": "passed",
+      "tools/audit-effects.js": "passed with known warnings",
+      "tools/audit-media.js": "passed",
+      "tools/audit-heavy.js": "passed, ForumRoot score=109"
+    },
+    "root_metrics": {
+      "ForumRoot_lines": 10631,
+      "ForumRoot_top_level_function_count": 13,
+      "ForumRoot_useEffect_count": 99
+    }
+  },
+  "status": "done"
+}
+

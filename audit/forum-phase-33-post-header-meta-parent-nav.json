@@ -1,0 +1,53 @@
+{
+  "phase": "33-feed-post-header-meta-parent-nav",
+  "timestamp": "2026-03-04T22:03:55Z",
+  "scope": [
+    "forum/features/feed",
+    "forum/root",
+    "forum/post-header-meta"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/feed/components/PostHeaderMeta.jsx",
+    "app/forum/features/feed/hooks/usePostParentReplyNav.js"
+  ],
+  "new_files": [
+    "app/forum/features/feed/components/PostHeaderMeta.jsx",
+    "app/forum/features/feed/hooks/usePostParentReplyNav.js",
+    "audit/forum-phase-33-post-header-meta-parent-nav.json"
+  ],
+  "moved_logic_domains": [
+    "Post header/meta rendering (avatar/nick/vip/star/time/reply tag) moved from PostCard in ForumRoot to features/feed/components/PostHeaderMeta",
+    "Parent reply navigation behavior (snippet + jump/flash/open-thread fallback) moved from PostCard in ForumRoot to features/feed/hooks/usePostParentReplyNav"
+  ],
+  "dependency_changes": {
+    "forum_root_imports": 1,
+    "cross_domain_edges": 78,
+    "cycles": 0
+  },
+  "detected_risks": [
+    "Header component still consumes profile helpers directly; optional follow-up is profile display adapter for stricter boundaries",
+    "Reply-to navigation still depends on DOM id conventions and two-raf retry semantics"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "notes": [
+    "No server/API/db changes.",
+    "ForumRoot deep risk score reduced from 448 to 444 after extraction.",
+    "ForumRoot heavy score reduced from 351 to 347 after extraction."
+  ],
+  "status": "completed",
+  "validation": {
+    "lint_targeted": "passed",
+    "build": "passed",
+    "audits": [
+      "tools/audit-forum-deps.js",
+      "tools/audit-full-forum.js",
+      "tools/audit-effects.js",
+      "tools/audit-media.js",
+      "tools/audit-heavy.js"
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+﻿{
+  "phase": "113",
+  "timestamp": "2026-03-10T00:00:00+02:00",
+  "scope": "dm dialog delete for-all + composer progress smoothing",
+  "touched_files": [
+    "app/api/dm/delete/route.js",
+    "app/forum/features/media/hooks/useMediaPipelineController.js",
+    "app/forum/features/media/services/resolveComposerMediaPayload.js",
+    "app/forum/features/media/hooks/useForumComposerAttachments.js"
+  ],
+  "new_files": [],
+  "moved_logic_domains": [
+    "server.dm.dialog_delete",
+    "client.media_progress"
+  ],
+  "dependency_changes": [
+    "none"
+  ],
+  "detected_risks": [
+    "mailbox-intersection fallback in dm dialog delete is now broader by design"
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "low",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "notes": [
+    "Dialog delete fallback now removes ids present in both participants mailboxes",
+    "Soft media progress made deterministic and starts above 1%",
+    "Upload progress normalization supports 0..1, 0..100 and percent-string formats"
+  ],
+  "status": "ok"
+}

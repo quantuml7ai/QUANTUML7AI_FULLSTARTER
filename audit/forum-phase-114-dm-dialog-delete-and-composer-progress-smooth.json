@@ -1,0 +1,59 @@
+﻿{
+  "phase": "114",
+  "timestamp": "2026-03-10T12:29:27.9855043+02:00",
+  "scope": [
+    "dm-dialog-delete-server-parity",
+    "composer-media-progress-smoothing"
+  ],
+  "touched_files": [
+    "app/api/dm/delete/route.js",
+    "app/forum/features/dm/hooks/useDmDeleteController.js",
+    "app/forum/features/ui/components/ComposerMediaProgressBar.jsx",
+    "app/forum/features/ui/components/ComposerCore.jsx",
+    "app/forum/features/ui/utils/propBundles/buildComposerCoreProps.js",
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "audit/forum-phase-114-dm-dialog-delete-and-composer-progress-smooth.json"
+  ],
+  "moved_logic_domains": [
+    "dm.delete.controller",
+    "dm.delete.api",
+    "composer.progress.ui"
+  ],
+  "dependency_changes": [
+    "ComposerMediaProgressBar now consumes videoProgress alongside mediaPct",
+    "ForumRoot prop bundle now forwards videoProgress into ComposerCore",
+    "DM dialog delete confirm path forces server-authoritative for-all mode"
+  ],
+  "detected_risks": [
+    "Dialog local-only delete option is effectively disabled by controller for consistency across devices",
+    "Server-side dialog delete may touch a wider candidate set due message-payload fallback (intended for index drift recovery)"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "low",
+  "storage_risk": "low",
+  "runtime_risk": "low",
+  "checks": [
+    {
+      "name": "eslint-targeted",
+      "status": "passed",
+      "detail": "pnpm eslint on modified DM/composer/root files"
+    },
+    {
+      "name": "build",
+      "status": "passed_with_known_warnings",
+      "detail": "pnpm build successful; only existing no-img warnings outside this scope"
+    },
+    {
+      "name": "effects-audit",
+      "status": "passed_for_scope",
+      "detail": "node tools/audit-effects.js; no new leaks introduced in modified files"
+    }
+  ],
+  "notes": [
+    "Dialog delete fallback now validates candidate message payload (from/to) against participants to avoid orphaned remote thread items",
+    "Composer progress display now smooths to the max(mediaPct, videoProgress) and keeps gentle motion during active phases"
+  ],
+  "status": "passed"
+}

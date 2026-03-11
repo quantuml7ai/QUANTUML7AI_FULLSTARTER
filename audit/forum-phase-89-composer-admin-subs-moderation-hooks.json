@@ -1,0 +1,50 @@
+﻿{
+    "phase":  "forum-phase-89-composer-admin-subs-moderation-hooks",
+    "timestamp":  "2026-03-08T14:35:35.5471671+02:00",
+    "scope":  [
+                  "app/forum/ForumRoot.jsx",
+                  "app/forum/features/ui/hooks/useForumComposerRuntime.js",
+                  "app/forum/features/moderation/hooks/useForumModerationUi.js",
+                  "app/forum/features/moderation/hooks/useAdminActions.js",
+                  "app/forum/features/subscriptions/hooks/useStarredAuthorsState.js"
+              ],
+    "touched_files":  [
+                          "app/forum/ForumRoot.jsx"
+                      ],
+    "new_files":  [
+                      "app/forum/features/ui/hooks/useForumComposerRuntime.js",
+                      "app/forum/features/moderation/hooks/useForumModerationUi.js",
+                      "app/forum/features/moderation/hooks/useAdminActions.js",
+                      "app/forum/features/subscriptions/hooks/useStarredAuthorsState.js"
+                  ],
+    "moved_logic_domains":  [
+                                "composer runtime state + media pipeline ownership -\u003e features/ui/hooks/useForumComposerRuntime.js",
+                                "moderation UI helpers (reason mapping + i18n toast + mode) -\u003e features/moderation/hooks/useForumModerationUi.js",
+                                "admin moderation actions -\u003e features/moderation/hooks/useAdminActions.js",
+                                "subscriptions/social graph state (starred + followers count + toggle flow) -\u003e features/subscriptions/hooks/useStarredAuthorsState.js"
+                            ],
+    "dependency_changes":  {
+                               "forum_root_line_count_before":  2424,
+                               "forum_root_line_count_after":  2237,
+                               "forum_root_line_delta":  -187,
+                               "forum_dependency_cycles":  0,
+                               "forum_cross_domain_edges":  111,
+                               "forum_files_scanned":  333
+                           },
+    "detected_risks":  [
+                           "Known legacy warnings outside forum root remain: no-img-element in ads/home and ForumAds",
+                           "Effects audit still reports legacy listener/RAF imbalance in unrelated/shared files"
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low",
+    "runtime_risk":  "low",
+    "notes":  [
+                  "Build passed",
+                  "Parity vs baseline zip passed (hash_changed=1 expected thin Forum.jsx wrapper)",
+                  "No server route/db contract changes in this phase"
+              ],
+    "status":  "passed"
+}

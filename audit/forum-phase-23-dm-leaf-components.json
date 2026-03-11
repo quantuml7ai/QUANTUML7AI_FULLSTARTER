@@ -1,0 +1,50 @@
+{
+  "phase": "23-dm-leaf-components-extraction",
+  "timestamp": "2026-03-04T19:48:10Z",
+  "scope": [
+    "forum/dm",
+    "forum/root"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/dm/components/DmThreadHeader.jsx",
+    "app/forum/features/dm/components/DmDialogRow.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/dm/components/DmThreadHeader.jsx",
+    "app/forum/features/dm/components/DmDialogRow.jsx",
+    "audit/forum-phase-23-dm-leaf-components.json"
+  ],
+  "moved_logic_domains": [
+    "DM thread header UI with VIP/star/profile-anchor behavior",
+    "DM dialogs list row UI with media preview parsing and unread/deleted semantics"
+  ],
+  "dependency_changes": {
+    "forum_root_imports": 1,
+    "cross_domain_edges": 64,
+    "cycles": 0
+  },
+  "detected_risks": [
+    "DmDialogRow currently receives root helper dependencies (shortId/human/HydrateText/stripMediaUrlsFromText) and should be normalized in later passes",
+    "ForumRoot still owns heavy DM thread body orchestration"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "notes": [
+    "No server route changes; /api/dm/* and /api/forum/vip/batch contracts untouched.",
+    "Dialog deletion/unread/star/VIP/preview logic preserved by direct code move."
+  ],
+  "status": "completed",
+  "validation": {
+    "lint_targeted": "passed",
+    "build": "passed",
+    "audits": [
+      "tools/audit-forum-deps.js",
+      "tools/audit-full-forum.js",
+      "tools/audit-effects.js",
+      "tools/audit-media.js"
+    ]
+  }
+}

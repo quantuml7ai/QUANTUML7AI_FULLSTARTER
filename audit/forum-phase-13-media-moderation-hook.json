@@ -1,0 +1,51 @@
+{
+  "phase": "13-media-moderation-hook-extraction",
+  "timestamp": "2026-03-04T18:50:22Z",
+  "scope": [
+    "forum/moderation",
+    "forum/media",
+    "forum/root"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/moderation/hooks/useMediaModeration.js"
+  ],
+  "new_files": [
+    "app/forum/features/moderation/hooks/useMediaModeration.js",
+    "audit/forum-phase-13-media-moderation-hook.json"
+  ],
+  "moved_logic_domains": [
+    "moderation API call wrapper for media payloads",
+    "image moderation normalization and strict-mode decision mapping",
+    "video moderation fallback and frame-pack review decision mapping"
+  ],
+  "dependency_changes": {
+    "forum_root_imports": 1,
+    "cross_domain_edges": 54,
+    "cycles": 0
+  },
+  "detected_risks": [
+    "ForumRoot remains large and still owns media extraction/runtime orchestration",
+    "useMediaModeration relies on injected deps (toastI18n/fileToJpegBlob/extractVideoFrames) and must stay integration-tested"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "low",
+  "storage_risk": "none",
+  "runtime_risk": "medium",
+  "notes": [
+    "Route /api/forum/moderate and FormData payload semantics preserved.",
+    "STRICT/BALANCED moderation behavior preserved for both image and video paths.",
+    "ForumRoot now consumes moderation entrypoints via hook without changing downstream call-sites."
+  ],
+  "status": "completed",
+  "validation": {
+    "lint_targeted": "passed",
+    "build": "passed",
+    "audits": [
+      "tools/audit-forum-deps.js",
+      "tools/audit-full-forum.js",
+      "tools/audit-effects.js",
+      "tools/audit-media.js"
+    ]
+  }
+}
