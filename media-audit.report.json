@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-03-11T16:02:08.657Z",
+  "generatedAt": "2026-03-11T17:01:34.947Z",
   "results": [
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\i18n.js",
@@ -148,17 +148,17 @@
       "samples": {
         "video": [
           {
-            "line": 17,
+            "line": 18,
             "text": "// В любой момент времени играет только один <video>/<audio> controls."
           }
         ],
         "autoplay": [
           {
-            "line": 144,
+            "line": 150,
             "text": "// Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start."
           },
           {
-            "line": 280,
+            "line": 287,
             "text": "// === Shorts-like autoplay: play when in focus, pause when out ==="
           }
         ],
@@ -186,7 +186,7 @@
       "samples": {
         "video": [
           {
-            "line": 366,
+            "line": 372,
             "text": "<video"
           }
         ],
@@ -200,7 +200,7 @@
             "text": "const nextMuted = typeof initial === 'boolean' ? initial : !!autoPlay"
           },
           {
-            "line": 177,
+            "line": 183,
             "text": "}, [autoPlay, mutedEvent, readMuted, writeMuted])"
           }
         ],
@@ -315,53 +315,6 @@
       }
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
-      "counts": {
-        "video": 1,
-        "autoplay": 4,
-        "loop": 2,
-        "preload": 1,
-        "img": 1,
-        "lazy": 1,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [
-        "⚠ video + autoplay",
-        "⚠ video + loop",
-        "⚠ video + preload"
-      ],
-      "samples": {
-        "video": [
-          {
-            "line": 1582,
-            "text": "<video"
-          }
-        ],
-        "autoplay": [
-          {
-            "line": 1237,
-            "text": "autoplay: 0,"
-          },
-          {
-            "line": 1301,
-            "text": "emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback');"
-          },
-          {
-            "line": 1606,
-            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
-          }
-        ],
-        "img": [
-          {
-            "line": 1654,
-            "text": "<img"
-          }
-        ],
-        "create": []
-      }
-    },
-    {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\components\\QuestHub.jsx",
       "counts": {
         "video": 2,
@@ -400,6 +353,53 @@
           }
         ],
         "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
+      "counts": {
+        "video": 1,
+        "autoplay": 3,
+        "loop": 2,
+        "preload": 1,
+        "img": 1,
+        "lazy": 1,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + loop",
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 1580,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 1237,
+            "text": "autoplay: 0,"
+          },
+          {
+            "line": 1604,
+            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
+          },
+          {
+            "line": 1628,
+            "text": "allow=\"autoplay; encrypted-media; fullscreen; picture-in-picture\""
+          }
+        ],
+        "img": [
+          {
+            "line": 1652,
+            "text": "<img"
+          }
+        ],
         "create": []
       }
     },
@@ -831,14 +831,14 @@
       "samples": {
         "video": [
           {
-            "line": 909,
+            "line": 921,
             "text": "/* 2) РћР±С‹С‡РЅС‹Рµ <img>/<video>/<canvas>/<svg> РІРЅСѓС‚СЂРё вЂ” СЂР°СЃС‚СЏРЅСѓС‚СЊ Рё РїРѕРєСЂС‹С‚СЊ */"
           }
         ],
         "autoplay": [],
         "img": [
           {
-            "line": 909,
+            "line": 921,
             "text": "/* 2) РћР±С‹С‡РЅС‹Рµ <img>/<video>/<canvas>/<svg> РІРЅСѓС‚СЂРё вЂ” СЂР°СЃС‚СЏРЅСѓС‚СЊ Рё РїРѕРєСЂС‹С‚СЊ */"
           }
         ],

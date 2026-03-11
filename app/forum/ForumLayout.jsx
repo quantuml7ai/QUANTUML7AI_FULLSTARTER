@@ -55,7 +55,7 @@ export default function ForumLayout({
         <div className="deeplinkBanner">
           {deeplinkUI.status === 'not_found'
             ? (t?.('forum_post_not_found') || 'Post not found')
-            : (t?.('forum_search_post') || 'Finding post...')}
+            : (t?.('forum_search_post') || 'Finding post…')}
         </div>
       )}
       <ForumOverlayStack {...overlayStackProps} />

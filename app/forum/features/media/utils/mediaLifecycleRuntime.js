@@ -26,11 +26,11 @@ export const __MEDIA_VIS_MARGIN_PX = (() => {
     const isIOS = /iP(hone|ad|od)/i.test(ua)
     const isAndroid = /Android/i.test(ua)
     const coarse = !!(typeof window !== 'undefined' && window?.matchMedia?.('(pointer: coarse)')?.matches)
-    if (isIOS) return 320
-    if (isAndroid || coarse) return 360
-    return 280
+    if (isIOS) return 360
+    if (isAndroid || coarse) return 420
+    return 320
   } catch {
-    return 280
+    return 320
   }
 })()
 

@@ -3,6 +3,7 @@
 import { isBrowser } from '../../../shared/utils/browser'
 import {
   MEDIA_MUTED_KEY,
+  MEDIA_VIDEO_MUTED_KEY,
   MEDIA_MUTED_EVENT,
   readMutedPrefFromStorage,
   __touchActiveVideoEl,
@@ -113,19 +114,24 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     const selector = 'video[data-forum-video="post"]';
 
     const pending = new WeakMap();
-    const idle = (fn) => {
-      try {
-        if ('requestIdleCallback' in window) {
-          return window.requestIdleCallback(fn, { timeout: 1500 });
-        }
-      } catch {}
-      return setTimeout(fn, 120);
+    const schedulePrepare = (fn) => {
+      let done = false;
+      const run = () => {
+        if (done) return;
+        done = true;
+        try { fn(); } catch {}
+      };
+      const rafId = typeof requestAnimationFrame === 'function' ? requestAnimationFrame(run) : 0;
+      const timeoutId = setTimeout(run, 32);
+      return { rafId, timeoutId };
     };
-    const cancelIdle = (id) => {
+    const cancelPrepare = (job) => {
       try {
-        if ('cancelIdleCallback' in window) return window.cancelIdleCallback(id);
+        if (job?.rafId) cancelAnimationFrame(job.rafId);
       } catch {}
-      clearTimeout(id);
+      try {
+        if (job?.timeoutId) clearTimeout(job.timeoutId);
+      } catch {}
     };
 
     const prepare = (video) => {
@@ -148,18 +154,19 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           return;
         }
 
-        // Тяжёлый load() — только в idle и только если видео реально "холодное"
+        // Подготовка должна происходить заранее, а не ждать idle во время скролла.
         if (pending.has(video)) return;
-        const id = idle(() => {
+        const job = schedulePrepare(() => {
           pending.delete(video);
           try {
+            if (!video.isConnected) return;
             if (__hasLazyVideoSourceWithoutSrc(video)) return;
             const cold = (video.readyState === 0 || !video.currentSrc);
             const safe = cold && video.paused && (video.currentTime === 0);
             if (safe) video.load?.();
           } catch {}
         });
-        pending.set(video, id);
+        pending.set(video, job);
       } catch {}
     };
 
@@ -168,7 +175,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       document.querySelectorAll(selector).forEach(prepare);
       return () => {
         try {
-          pending.forEach((id) => { try { cancelIdle(id); } catch {} });
+          pending.forEach((job) => { try { cancelPrepare(job); } catch {} });
           pending.clear?.();
         } catch {}
       };
@@ -186,7 +193,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         // Чуть раньше подготавливаем медиа, чтобы автоплей не "спотыкался"
         // при входе в зону фокуса на мобильных.
         threshold: 0.01,
-        rootMargin: `${Math.max(220, Math.round(__MEDIA_VIS_MARGIN_PX * 1.05))}px 0px ${Math.max(300, Math.round(__MEDIA_VIS_MARGIN_PX * 1.45))}px 0px`,
+        rootMargin: `${Math.max(320, Math.round(__MEDIA_VIS_MARGIN_PX * 1.35))}px 0px ${Math.max(520, Math.round(__MEDIA_VIS_MARGIN_PX * 1.95))}px 0px`,
       }
     );
 
@@ -194,10 +201,10 @@ export default function useForumMediaCoordinator({ emitDiag }) {
 
     return () => {
       io.disconnect();
-            try {
-        pending.forEach((id) => { try { cancelIdle(id); } catch {} });
+      try {
+        pending.forEach((job) => { try { cancelPrepare(job); } catch {} });
         pending.clear?.();
-      } catch {}     
+      } catch {}
     };
   }, []);
   // === Ранний prewarm iframe (YouTube/TikTok/other embeds) для более быстрого старта в зоне фокуса ===
@@ -285,7 +292,11 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     const selector = '[data-forum-media]';
 
     const writeMutedPref = (val) => {
-      try { localStorage.setItem(MEDIA_MUTED_KEY, val ? '1' : '0'); } catch {}
+      try {
+        const next = val ? '1' : '0';
+        localStorage.setItem(MEDIA_MUTED_KEY, next);
+        localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, next);
+      } catch {}
     };
     let mutedPref = readMutedPrefFromStorage();
 

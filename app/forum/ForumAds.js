@@ -1297,8 +1297,6 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
         v.play?.().catch(() => {
           // если пробовали со звуком и браузер запретил — откатим в mute глобально
           if (!muted) {
-            writeMutedPrefToStorage(true);
-            emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback');
             setMuted(true);
             try { v.muted = true; } catch {}
           }

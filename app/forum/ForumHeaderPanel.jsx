@@ -92,7 +92,7 @@ export default function ForumHeaderPanel({
             </button>
           )}
 
-          <div className="headAvatarCol" style={{ position: 'relative' }}>
+          <div style={{ position: 'relative' }}>
             <button
               ref={avatarRef}
               className={cls('avaBig neon', (!nickShown || iconShown === '👤') && 'pulse')}
@@ -158,7 +158,7 @@ export default function ForumHeaderPanel({
             />
           )}
 
-          <div className="headQcoinSlot min-w-0">
+          <div className="min-w-0">
             <div
               className="qRowRight"
               style={{ '--qcoin-offset': '6px', '--qcoin-y': '10px', '--qcoin-scale': '1.15' }}

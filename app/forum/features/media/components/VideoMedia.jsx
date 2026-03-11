@@ -136,6 +136,9 @@ export default function VideoMedia({
     const nextMuted = typeof initial === 'boolean' ? initial : !!autoPlay
     try {
       el.muted = !!nextMuted
+      el.defaultMuted = !!nextMuted
+      if (nextMuted) el.setAttribute('muted', '')
+      else el.removeAttribute('muted')
     } catch {}
 
     const onVol = () => {
@@ -156,6 +159,9 @@ export default function VideoMedia({
         const m = e?.detail?.muted
         if (typeof m !== 'boolean') return
         if (ref.current.muted !== m) ref.current.muted = m
+        ref.current.defaultMuted = m
+        if (m) ref.current.setAttribute('muted', '')
+        else ref.current.removeAttribute('muted')
       } catch {}
     }
 
