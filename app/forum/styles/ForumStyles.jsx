@@ -389,6 +389,18 @@ font-size: 12px;
   flex-wrap:wrap;
   width:100%;
 }
+.headAvatarCol{
+  position: relative;
+  flex: 0 0 auto;
+  width: 120px;
+  min-width: 120px;
+}
+.headQcoinSlot{
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
 .head.head--collapsed{
   transform: translateY(-100%);
   opacity: 0;
@@ -1316,7 +1328,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 
 @media (max-width:520px){
   .subsCounter{ margin-left:0; margin-top:8px; }
-  .qRowRight{ flex-wrap:wrap; }
+  .qRowRight{ flex-wrap:nowrap; }
 }
 .subsCounter.noAuth{
   border-color:rgba(255,70,70,.55);
@@ -2310,6 +2322,18 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 @keyframes blinkPause{ 50%{ opacity:.45 } }
 
 @media (max-width: 680px){
+  .headInner .headAvatarCol{
+    width: 120px;
+    min-width: 120px;
+  }
+  .headInner .headQcoinSlot{
+    flex: 1 1 calc(100% - 132px);
+    min-width: 0;
+    align-self: center;
+  }
+  .headInner .headQcoinSlot .qRowRight{
+    flex-wrap: nowrap;
+  }
   .headInner .qRowRight{
     flex-wrap: nowrap;
     justify-content: center;
