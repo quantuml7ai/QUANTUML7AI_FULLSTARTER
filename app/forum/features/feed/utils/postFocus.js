@@ -50,7 +50,7 @@ export function centerNodeInScroll(node, options = {}) {
       const visibleH = Math.max(1, contRect.height - occ)
       const desired = visibleH / 2
       const delta = elCenterInView - desired
-      if (!Number.isFinite(delta)) return
+      if (!Number.isFinite(delta) || Math.abs(delta) < 8) return
       const nextTop = Math.max(
         0,
         Math.min((scrollEl.scrollTop || 0) + delta, (scrollEl.scrollHeight || 0) - (scrollEl.clientHeight || 0)),
@@ -69,7 +69,7 @@ export function centerNodeInScroll(node, options = {}) {
       const visibleH = Math.max(1, vh - occ)
       const desired = visibleH / 2
       const delta = elCenter - desired
-      if (Number.isFinite(delta) && Math.abs(delta) > 0.5) {
+      if (Number.isFinite(delta) && Math.abs(delta) > 8) {
         const curY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0
         const nextY = Math.max(0, curY + delta)
         try {
@@ -100,7 +100,7 @@ export function centerPostAfterDom(postId, options = {}) {
   const pid = String(postId || '').trim()
   if (!pid || !isBrowserFn?.()) return
   let tries = 0
-  const maxTries = 28
+  const maxTries = 18
   const tick = () => {
     tries += 1
     const node = document.getElementById(`post_${pid}`)
@@ -150,7 +150,7 @@ export function centerAndFlashPostAfterDom(postId, options = {}) {
   } catch {}
 
   let tries = 0
-  const maxTries = 220
+  const maxTries = 72
   const tick = () => {
     tries += 1
     const node = document.getElementById(`post_${pid}`)
@@ -189,7 +189,7 @@ export function centerAndFlashPostAfterDom(postId, options = {}) {
 
         const maybeRecenter = () => {
           const d = computeDelta()
-          if (Number.isFinite(d) && Math.abs(d) > 2) {
+          if (Number.isFinite(d) && Math.abs(d) > 14) {
             try {
               centerNodeInScrollFn(node, 'auto')
             } catch {}
@@ -200,10 +200,10 @@ export function centerAndFlashPostAfterDom(postId, options = {}) {
           requestAnimationFrame(maybeRecenter)
         } catch {}
         try {
-          setTimeout(maybeRecenter, 280)
+          setTimeout(maybeRecenter, 140)
         } catch {}
         try {
-          setTimeout(maybeRecenter, 900)
+          setTimeout(maybeRecenter, 420)
         } catch {}
 
         try {
@@ -241,7 +241,7 @@ export function centerAndFlashPostAfterDom(postId, options = {}) {
                   cancelAnimationFrame(rafId)
                 } catch {}
               }
-            }, 1600)
+            }, 800)
           }
         } catch {}
       } catch {}

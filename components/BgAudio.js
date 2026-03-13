@@ -64,6 +64,7 @@ export default function BgAudio({
 
     return () => {
       cancelled = true
+      try { a.pause() } catch {}
     }
   }, [src])
 
@@ -199,7 +200,7 @@ export default function BgAudio({
       <audio
         ref={audioRef}
         src={src}
-        preload="auto"
+        preload="metadata"
         playsInline
         aria-hidden="true"
       />

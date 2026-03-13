@@ -88,6 +88,8 @@ export default function SnowFX({
   const lastTimeRef = useRef(0)
   const worldRef = useRef({ w: 0, h: 0 })
   const lastScrollYRef = useRef(0)
+  const lastPaintRef = useRef(0)
+  const visibilityPausedRef = useRef(false)
 
   // до какого времени импульс ещё считается живым
   const impulseUntilRef = useRef(0)
@@ -203,6 +205,20 @@ export default function SnowFX({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [count, minSize, maxSize])
 
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    const syncVisibility = () => {
+      try {
+        visibilityPausedRef.current = document.visibilityState !== 'visible'
+      } catch {
+        visibilityPausedRef.current = false
+      }
+    }
+    syncVisibility()
+    document.addEventListener('visibilitychange', syncVisibility)
+    return () => document.removeEventListener('visibilitychange', syncVisibility)
+  }, [])
+
   /* ===== ГЛАВНЫЙ АНИМАЦИОННЫЙ ЛУП ===== */
 
   useEffect(() => {
@@ -227,6 +243,11 @@ export default function SnowFX({
       const dtMs = ts - lastTimeRef.current
       lastTimeRef.current = ts
       const dt = Math.min(0.05, Math.max(0.012, dtMs / 1000))
+
+      if (visibilityPausedRef.current) {
+        if (!stopped) animFrameRef.current = requestAnimationFrame(loop)
+        return
+      }
 
       const flakes = flakesRef.current
       if (!flakes.length) {
@@ -295,7 +316,10 @@ export default function SnowFX({
         }
       }
 
-      setTick((x0) => x0 + 1)
+      if ((ts - lastPaintRef.current) >= 34) {
+        lastPaintRef.current = ts
+        setTick((x0) => x0 + 1)
+      }
 
       // если компонент уже размонтирован (cleanup выставил stopped),
       // не планируем следующий кадр
@@ -358,6 +382,7 @@ export default function SnowFX({
       // сразу даём пику импульса
       impulseStrengthRef.current = Math.min(1, impulseStrengthRef.current + 0.6)
 
+      lastPaintRef.current = 0
       setTick((x0) => x0 + 1)
     }
 
@@ -417,6 +442,7 @@ export default function SnowFX({
       // добавляем силу импульса поверх существующей
       impulseStrengthRef.current = Math.min(1, impulseStrengthRef.current + 0.4)
 
+      lastPaintRef.current = 0
       setTick((x0) => x0 + 1)
     }
 

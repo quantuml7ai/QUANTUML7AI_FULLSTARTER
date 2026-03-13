@@ -110,6 +110,7 @@ export default function VideoMedia({
     const el = ref.current
     if (!el) return
     const s = String(src || '')
+    const mediaKey = s || String(poster || '')
     el.dataset.__src = s
     try {
       if (s) el.setAttribute('data-src', s)
@@ -122,8 +123,18 @@ export default function VideoMedia({
     } catch {}
     if (poster) {
       try {
-        el.dataset.__posterOriginal = String(poster)
-        el.setAttribute('poster', String(poster))
+        const nextPoster = String(poster)
+        const prevMediaKey = String(el.dataset.__posterMediaKey || '')
+        const isNewMedia = prevMediaKey !== mediaKey
+        el.dataset.__posterOriginal = nextPoster
+        if (isNewMedia) {
+          el.dataset.__posterMediaKey = mediaKey
+          el.dataset.__posterRevealed = '0'
+          el.dataset.__needsPosterRestore = '1'
+          el.setAttribute('poster', nextPoster)
+        } else if (el.dataset?.__posterRevealed !== '1' && !el.getAttribute('poster')) {
+          el.setAttribute('poster', nextPoster)
+        }
       } catch {}
     }
   }, [src, poster, preloadMode])
@@ -190,7 +201,7 @@ export default function VideoMedia({
     let io = null
     let active = false
     let unloadTimer = null
-    const warmKeepMargin = Math.max(560, Math.round(mediaVisMargin * 1.9))
+    const warmKeepMargin = Math.max(760, Math.round(mediaVisMargin * 2.45))
     const runtimeProfile = (() => {
       try {
         const ua = String(navigator?.userAgent || '')
@@ -199,12 +210,12 @@ export default function VideoMedia({
         const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
         const dm = Number(navigator?.deviceMemory || 0)
         const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2
-        if (isIOS) return { unloadDelayMs: 3200, hardUnloadOnInactive: false }
-        if (lowMem) return { unloadDelayMs: 2400, hardUnloadOnInactive: true }
-        if (isAndroid || coarse) return { unloadDelayMs: 3600, hardUnloadOnInactive: false }
-        return { unloadDelayMs: 4200, hardUnloadOnInactive: false }
+        if (isIOS) return { unloadDelayMs: 3800, hardUnloadOnInactive: false }
+        if (lowMem) return { unloadDelayMs: 2800, hardUnloadOnInactive: true }
+        if (isAndroid || coarse) return { unloadDelayMs: 4400, hardUnloadOnInactive: false }
+        return { unloadDelayMs: 5200, hardUnloadOnInactive: false }
       } catch {
-        return { unloadDelayMs: 3200, hardUnloadOnInactive: false }
+        return { unloadDelayMs: 3800, hardUnloadOnInactive: false }
       }
     })()
 
@@ -380,6 +391,7 @@ export default function VideoMedia({
           if ((el.readyState || 0) < 2) return
           if (el.dataset?.__posterRevealed === '1') return
           el.dataset.__posterRevealed = '1'
+          el.dataset.__needsPosterRestore = '0'
           el.removeAttribute('poster')
         } catch {}
       }

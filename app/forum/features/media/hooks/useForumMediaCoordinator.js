@@ -122,7 +122,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         try { fn(); } catch {}
       };
       const rafId = typeof requestAnimationFrame === 'function' ? requestAnimationFrame(run) : 0;
-      const timeoutId = setTimeout(run, 32);
+      const timeoutId = setTimeout(run, 12);
       return { rafId, timeoutId };
     };
     const cancelPrepare = (job) => {
@@ -134,8 +134,8 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       } catch {}
     };
 
-    const warmMarginTop = Math.max(320, Math.round(__MEDIA_VIS_MARGIN_PX * 1.35));
-    const warmMarginBottom = Math.max(520, Math.round(__MEDIA_VIS_MARGIN_PX * 1.95));
+    const warmMarginTop = Math.max(420, Math.round(__MEDIA_VIS_MARGIN_PX * 1.6));
+    const warmMarginBottom = Math.max(760, Math.round(__MEDIA_VIS_MARGIN_PX * 2.35));
 
     const warm = (video) => {
       if (!(video instanceof HTMLVideoElement)) return;
@@ -150,8 +150,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         if (__hasLazyVideoSourceWithoutSrc(video)) {
           // Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start.
           __restoreVideoEl(video);
-          __touchActiveVideoEl(video);
-          __enforceActiveVideoCap(video);
           return;
         }
 

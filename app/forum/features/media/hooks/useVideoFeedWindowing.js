@@ -237,15 +237,22 @@ export default function useVideoFeedWindowing({
     }
 
     const el = vfGetScrollEl()
+    const useInnerScroll = !!el && (Number(el.scrollHeight || 0) > (Number(el.clientHeight || 0) + 1))
     const opts = { passive: true }
-    try { el?.addEventListener?.('scroll', onScroll, opts) } catch {}
-    window.addEventListener('scroll', onScroll, opts)
+    if (useInnerScroll) {
+      try { el?.addEventListener?.('scroll', onScroll, opts) } catch {}
+    } else {
+      window.addEventListener('scroll', onScroll, opts)
+    }
     window.addEventListener('resize', onScroll, opts)
     onScroll()
 
     return () => {
-      try { el?.removeEventListener?.('scroll', onScroll) } catch {}
-      window.removeEventListener('scroll', onScroll)
+      if (useInnerScroll) {
+        try { el?.removeEventListener?.('scroll', onScroll) } catch {}
+      } else {
+        window.removeEventListener('scroll', onScroll)
+      }
       window.removeEventListener('resize', onScroll)
       if (vfRafRef.current) {
         try { cancelAnimationFrame(vfRafRef.current) } catch {}

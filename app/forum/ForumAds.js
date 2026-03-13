@@ -822,6 +822,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   const [isPageActive, setIsPageActive] = useState(true);
 
   const shouldPlay = isFocused && isPageActive;
+  const shouldResolveMedia = isNear || shouldPlay;
   const shouldPlayRef = useRef(false);
   const slotCssVars = {
     '--ad-slot-h-m': `${AD_SLOT_HEIGHT_PX.mobile}px`,
@@ -990,6 +991,10 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   useEffect(() => {
     if (!safeClick || !mediaHref) {
       setMedia({ kind: 'skeleton', src: null });
+      return;
+    }
+    if (!shouldResolveMedia) {
+      setMedia((prev) => (prev?.kind === 'skeleton' ? prev : { kind: 'skeleton', src: null }));
       return;
     }
     let cancelled = false;
@@ -1217,7 +1222,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     return () => {
       cancelled = true;
     };
-  }, [safeClick, conf, slotKind, nearId, mediaHref]);
+  }, [safeClick, conf, slotKind, nearId, mediaHref, shouldResolveMedia]);
 
   // YouTube Iframe API для управления звуком
   useEffect(() => {
@@ -1575,7 +1580,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
               <div className="animate-pulse w-full h-full bg-[color:var(--skeleton,#111827)]" />
             )}
 
-{media.kind === 'video' && media.src && (
+{media.kind === 'video' && media.src && (isNear || shouldPlay) && (
   <div className="forum-ad-media-fill">
     <video
       ref={videoRef}
@@ -1584,14 +1589,14 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
       muted={muted}
       loop
       playsInline
-      preload={isNear ? 'metadata' : 'none'}
+      preload={shouldPlay ? 'auto' : 'metadata'}
     />
   </div>
 )}
 
 
 
-            {media.kind === 'youtube' && media.src && (
+            {media.kind === 'youtube' && media.src && (isNear || shouldPlay) && (
 <div
   className="relative overflow-hidden rounded-lg"
   style={isFluid ? { width: '100%', aspectRatio: '16 / 9' } : { width: '100%', height: '100%' }}
@@ -1616,7 +1621,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
 
             )}
 
-            {media.kind === 'tiktok' && media.src && shouldPlay && (
+            {media.kind === 'tiktok' && media.src && (isNear || shouldPlay) && (
 <div
   className="relative overflow-hidden rounded-lg"
   style={isFluid ? { width: '100%', aspectRatio: '9 / 16' } : { width: '100%', height: '100%' }}

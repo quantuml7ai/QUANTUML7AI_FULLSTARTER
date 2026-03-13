@@ -153,11 +153,6 @@ export function __unloadVideoEl(el) {
     try {
       el.preload = 'metadata'
     } catch {}
-    try {
-      const poster = el.dataset?.__posterOriginal || ''
-      if (poster) el.setAttribute('poster', poster)
-      el.dataset.__posterRevealed = '0'
-    } catch {}
     return
   }
   try {
@@ -178,6 +173,7 @@ export function __unloadVideoEl(el) {
     const poster = el.dataset?.__posterOriginal || ''
     if (poster) el.setAttribute('poster', poster)
     el.dataset.__posterRevealed = '0'
+    el.dataset.__needsPosterRestore = '1'
   } catch {}
   try {
     el.load?.()
@@ -194,15 +190,16 @@ export function __restoreVideoEl(el) {
     el.preload = (el.dataset?.__prewarm === '1') ? 'auto' : 'metadata'
   } catch {}
   try {
-    const poster = el.dataset?.__posterOriginal || ''
-    if (poster && !el.getAttribute('poster')) el.setAttribute('poster', poster)
-    el.dataset.__posterRevealed = '0'
+    const shouldRestorePoster = String(el.dataset?.__needsPosterRestore || '') === '1'
+    if (shouldRestorePoster) {
+      const poster = el.dataset?.__posterOriginal || ''
+      if (poster && !el.getAttribute('poster')) el.setAttribute('poster', poster)
+      el.dataset.__posterRevealed = '0'
+      el.dataset.__needsPosterRestore = '0'
+    }
   } catch {}
   try {
     el.setAttribute('src', src)
-  } catch {}
-  try {
-    el.dataset.__active = '1'
   } catch {}
   try {
     el.load?.()
