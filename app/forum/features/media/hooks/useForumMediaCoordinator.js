@@ -134,10 +134,11 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       } catch {}
     };
 
-    const prepare = (video) => {
+    const warmMarginTop = Math.max(320, Math.round(__MEDIA_VIS_MARGIN_PX * 1.35));
+    const warmMarginBottom = Math.max(520, Math.round(__MEDIA_VIS_MARGIN_PX * 1.95));
+
+    const warm = (video) => {
       if (!(video instanceof HTMLVideoElement)) return;
-      if (video.dataset.previewInit === '1') return;
-      video.dataset.previewInit = '1';
 
       try {
         // Более ранний prewarm: к зоне фокуса хотим уже готовый первый кадр.
@@ -170,9 +171,21 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       } catch {}
     };
 
+    const cool = (video) => {
+      if (!(video instanceof HTMLVideoElement)) return;
+      try {
+        video.dataset.__prewarm = '0';
+      } catch {}
+      try {
+        if (video.dataset?.__active === '1') return;
+        if ((video.readyState || 0) >= 2) return;
+        video.preload = 'metadata';
+      } catch {}
+    };
+
     // если нет IntersectionObserver — готовим всё сразу
     if (!('IntersectionObserver' in window)) {
-      document.querySelectorAll(selector).forEach(prepare);
+      document.querySelectorAll(selector).forEach(warm);
       return () => {
         try {
           pending.forEach((job) => { try { cancelPrepare(job); } catch {} });
@@ -184,20 +197,27 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          prepare(entry.target);
-          io.unobserve(entry.target); // один раз на видео
+          if (entry.isIntersecting) {
+            warm(entry.target);
+            return;
+          }
+          cool(entry.target);
         });
       },
       {
         // Чуть раньше подготавливаем медиа, чтобы автоплей не "спотыкался"
         // при входе в зону фокуса на мобильных.
         threshold: 0.01,
-        rootMargin: `${Math.max(320, Math.round(__MEDIA_VIS_MARGIN_PX * 1.35))}px 0px ${Math.max(520, Math.round(__MEDIA_VIS_MARGIN_PX * 1.95))}px 0px`,
+        rootMargin: `${warmMarginTop}px 0px ${warmMarginBottom}px 0px`,
       }
     );
 
-    document.querySelectorAll(selector).forEach((v) => io.observe(v));
+    document.querySelectorAll(selector).forEach((v) => {
+      io.observe(v);
+      try {
+        if (__isVideoNearViewport(v, Math.max(warmMarginTop, warmMarginBottom))) warm(v);
+      } catch {}
+    });
 
     return () => {
       io.disconnect();
@@ -667,6 +687,14 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           if (el instanceof HTMLVideoElement) {
             const hasSrc = !!el.getAttribute('src');
             if (!hasSrc) __restoreVideoEl(el);
+            try { el.dataset.__prewarm = '1'; } catch {}
+            try { el.dataset.__active = '1'; } catch {}
+            try { el.preload = 'auto'; } catch {}
+            try {
+              const cold = (el.readyState === 0 || !el.currentSrc);
+              const safe = cold && el.paused && (el.currentTime === 0);
+              if (safe) el.load?.();
+            } catch {}
             __touchActiveVideoEl(el);
             __enforceActiveVideoCap(el);
           }

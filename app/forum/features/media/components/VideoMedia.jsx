@@ -190,6 +190,7 @@ export default function VideoMedia({
     let io = null
     let active = false
     let unloadTimer = null
+    const warmKeepMargin = Math.max(560, Math.round(mediaVisMargin * 1.9))
     const runtimeProfile = (() => {
       try {
         const ua = String(navigator?.userAgent || '')
@@ -198,14 +199,25 @@ export default function VideoMedia({
         const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
         const dm = Number(navigator?.deviceMemory || 0)
         const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2
-        if (isIOS) return { unloadDelayMs: 2200, hardUnloadOnInactive: false }
-        if (lowMem) return { unloadDelayMs: 1800, hardUnloadOnInactive: true }
-        if (isAndroid || coarse) return { unloadDelayMs: 2400, hardUnloadOnInactive: false }
-        return { unloadDelayMs: 2600, hardUnloadOnInactive: false }
+        if (isIOS) return { unloadDelayMs: 3200, hardUnloadOnInactive: false }
+        if (lowMem) return { unloadDelayMs: 2400, hardUnloadOnInactive: true }
+        if (isAndroid || coarse) return { unloadDelayMs: 3600, hardUnloadOnInactive: false }
+        return { unloadDelayMs: 4200, hardUnloadOnInactive: false }
       } catch {
-        return { unloadDelayMs: 2200, hardUnloadOnInactive: false }
+        return { unloadDelayMs: 3200, hardUnloadOnInactive: false }
       }
     })()
+
+    const shouldKeepWarmResident = () => {
+      try {
+        if (!el?.isConnected) return false
+        const warmFlag = el.dataset?.__prewarm === '1'
+        if (warmFlag) return true
+        return isVideoNearViewportFn(el, warmKeepMargin)
+      } catch {
+        return false
+      }
+    }
 
     const setActive = (v) => {
       const next = !!v
@@ -222,6 +234,14 @@ export default function VideoMedia({
         restoreVideoElFn(el)
         touchActiveVideoFn(el)
         enforceActiveVideoCapFn(el)
+        try {
+          el.dataset.__active = '1'
+          el.dataset.__prewarm = '1'
+          el.preload = 'auto'
+          if ((el.readyState === 0 || !el.currentSrc) && el.paused && (el.currentTime === 0)) {
+            el.load?.()
+          }
+        } catch {}
       } else {
         if (unloadTimer) {
           try {
@@ -232,7 +252,13 @@ export default function VideoMedia({
         unloadTimer = setTimeout(() => {
           unloadTimer = null
           if (active) return
-          if (isVideoNearViewportFn(el, Math.round(mediaVisMargin * 0.9))) return
+          if (shouldKeepWarmResident()) {
+            try {
+              el.dataset.__active = '0'
+              el.preload = el.dataset?.__prewarm === '1' ? 'auto' : 'metadata'
+            } catch {}
+            return
+          }
           dropActiveVideoFn(el)
           if (!runtimeProfile.hardUnloadOnInactive) {
             try {
@@ -240,6 +266,7 @@ export default function VideoMedia({
             } catch {}
             try {
               el.dataset.__active = '0'
+              el.dataset.__prewarm = '0'
             } catch {}
             try {
               el.preload = 'metadata'

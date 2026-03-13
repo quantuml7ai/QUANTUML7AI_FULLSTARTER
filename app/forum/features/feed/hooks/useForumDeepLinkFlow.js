@@ -7,6 +7,29 @@ import {
   DEEPLINK_POLL_MS,
 } from '../constants/deeplink'
 
+async function fetchJsonWithTimeout(url, timeoutMs) {
+  const ms = Math.max(1, Number(timeoutMs || 0) || DEEPLINK_TIMEOUT_MS)
+  const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null
+  let timer = null
+  try {
+    if (ctrl) {
+      timer = setTimeout(() => {
+        try { ctrl.abort() } catch {}
+      }, ms)
+    }
+    const res = await fetch(url, {
+      cache: 'no-store',
+      signal: ctrl?.signal,
+    })
+    const json = await res.json().catch(() => null)
+    return { res, json }
+  } finally {
+    if (timer) {
+      try { clearTimeout(timer) } catch {}
+    }
+  }
+}
+
 export default function useForumDeepLinkFlow({
   isBrowserFn,
   data,
@@ -145,6 +168,7 @@ export default function useForumDeepLinkFlow({
         try {
           setDeeplinkUI({ active: false, status: 'idle', postId: null, topicId: null })
         } catch {}
+        clearDeepLinkQuery()
       }, 3200)
     }
 
@@ -161,10 +185,10 @@ export default function useForumDeepLinkFlow({
     ;(async () => {
       let chainResp = null
       try {
-        const r = await fetch(`/api/forum/post-chain?postId=${encodeURIComponent(postId)}`, {
-          cache: 'no-store',
-        })
-        const j = await r.json().catch(() => null)
+        const { res: r, json: j } = await fetchJsonWithTimeout(
+          `/api/forum/post-chain?postId=${encodeURIComponent(postId)}`,
+          Math.min(4000, remainingMs() || DEEPLINK_TIMEOUT_MS),
+        )
         if (cancelled || deeplinkRef.current.runId !== runId) return
         if (!r.ok || !j?.ok) return fail()
         chainResp = j

@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-03-11T17:01:34.947Z",
+  "generatedAt": "2026-03-13T11:23:18.372Z",
   "results": [
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\i18n.js",
@@ -134,7 +134,7 @@
         "video": 1,
         "autoplay": 2,
         "loop": 9,
-        "preload": 1,
+        "preload": 3,
         "img": 0,
         "lazy": 0,
         "create": 0,
@@ -154,11 +154,11 @@
         ],
         "autoplay": [
           {
-            "line": 150,
+            "line": 151,
             "text": "// Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start."
           },
           {
-            "line": 287,
+            "line": 307,
             "text": "// === Shorts-like autoplay: play when in focus, pause when out ==="
           }
         ],
@@ -172,7 +172,7 @@
         "video": 1,
         "autoplay": 4,
         "loop": 2,
-        "preload": 5,
+        "preload": 7,
         "img": 0,
         "lazy": 0,
         "create": 0,
@@ -186,7 +186,7 @@
       "samples": {
         "video": [
           {
-            "line": 372,
+            "line": 399,
             "text": "<video"
           }
         ],
@@ -831,14 +831,14 @@
       "samples": {
         "video": [
           {
-            "line": 921,
+            "line": 909,
             "text": "/* 2) РћР±С‹С‡РЅС‹Рµ <img>/<video>/<canvas>/<svg> РІРЅСѓС‚СЂРё вЂ” СЂР°СЃС‚СЏРЅСѓС‚СЊ Рё РїРѕРєСЂС‹С‚СЊ */"
           }
         ],
         "autoplay": [],
         "img": [
           {
-            "line": 921,
+            "line": 909,
             "text": "/* 2) РћР±С‹С‡РЅС‹Рµ <img>/<video>/<canvas>/<svg> РІРЅСѓС‚СЂРё вЂ” СЂР°СЃС‚СЏРЅСѓС‚СЊ Рё РїРѕРєСЂС‹С‚СЊ */"
           }
         ],
