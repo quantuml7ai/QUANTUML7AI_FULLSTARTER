@@ -5,14 +5,28 @@ import {
   emptyDiagMediaSnapshot,
 } from '../utils/emitPolicy'
 
+function isDiagEnabled() {
+  try {
+    if (String(process.env.NEXT_PUBLIC_FORUM_DIAG || '') === '1') return true
+  } catch {}
+  try {
+    const qs = new URLSearchParams(window.location.search || '')
+    const fromQuery = String(qs.get('forumDiag') || '').trim()
+    if (fromQuery === '1' || fromQuery.toLowerCase() === 'true') return true
+  } catch {}
+  return false
+}
+
 export default function useForumDiagnostics() {
   const diagSeqRef = useRef(0)
   const diagLastSentRef = useRef(0)
   const diagSnapshotRef = useRef({ ts: 0, media: null })
   const diagLastScrollYRef = useRef(0)
+  const enabledRef = useRef(false)
 
   const emitDiag = useCallback(async (event, extra = {}, opts = {}) => {
     try {
+      if (!enabledRef.current) return
       const now = Date.now()
       const force = !!opts?.force
       const throttleState = shouldThrottleDiagEvent(
@@ -181,6 +195,8 @@ export default function useForumDiagnostics() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
+    enabledRef.current = isDiagEnabled()
+    if (!enabledRef.current) return
     let stopped = false
 
     emitDiag('mount', {}, { force: true })

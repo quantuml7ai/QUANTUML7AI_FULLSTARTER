@@ -7,9 +7,12 @@ import {
   MEDIA_MUTED_EVENT,
   readMutedPrefFromStorage,
   __touchActiveVideoEl,
+  __dropActiveVideoEl,
   __enforceActiveVideoCap,
   __restoreVideoEl,
+  __unloadVideoEl,
   __hasLazyVideoSourceWithoutSrc,
+  __isVideoNearViewport,
   __MEDIA_VIS_MARGIN_PX,
 } from '../utils/mediaLifecycleRuntime'
 
@@ -49,16 +52,26 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       if (e?.detail?.source === 'bg-audio') return;
       const activeEl = e?.detail?.element || null;
       const source = e?.detail?.source || '';
-      if (!['youtube', 'tiktok', 'iframe'].includes(source)) return;
+      if (!['youtube', 'tiktok', 'iframe', 'qcast'].includes(source)) return;
+      const containsActive = (node) => {
+        try {
+          if (!activeEl || !(activeEl instanceof Element)) return false;
+          return !!activeEl.contains?.(node);
+        } catch {
+          return false;
+        }
+      };
       try {
         document.querySelectorAll('video').forEach((v) => {
           if (v === activeEl) return;
+          if (containsActive(v)) return;
           if (!(v instanceof HTMLVideoElement)) return;
           if (!v.controls) return;
           v.pause();
         });
         document.querySelectorAll('audio').forEach((a) => {
           if (a === activeEl) return;
+          if (containsActive(a)) return;
           if (!(a instanceof HTMLAudioElement)) return;
           a.pause();
         });
@@ -113,7 +126,63 @@ export default function useForumMediaCoordinator({ emitDiag }) {
 
     const selector = 'video[data-forum-video="post"]';
 
-    const pending = new WeakMap();
+    const pending = new Map();
+    let warmSweepRaf = 0;
+    let warmSweepTimeout = 0;
+    let lastWarmSweepTs = 0;
+    let lastWarmSweepTop = -1;
+    const warmLeaseUntil = new WeakMap();
+    const traceEnabled = (() => {
+      try {
+        if (String(process.env.NEXT_PUBLIC_FORUM_VIDEO_TRACE || '') === '1') return true;
+      } catch {}
+      try {
+        const qs = new URLSearchParams(window.location.search || '');
+        const fromQuery = String(qs.get('videoTrace') || '').trim();
+        if (fromQuery === '1' || fromQuery.toLowerCase() === 'true') return true;
+      } catch {}
+      return false;
+    })();
+    const trace = (event, video, extra = {}) => {
+      if (!traceEnabled) return;
+      try {
+        const bucket = Array.isArray(window.__forumVideoTrace) ? window.__forumVideoTrace : [];
+        const src = String(
+          video?.dataset?.__src ||
+          video?.getAttribute?.('data-src') ||
+          video?.currentSrc ||
+          video?.getAttribute?.('src') ||
+          ''
+        );
+        bucket.push({
+          ts: Date.now(),
+          event,
+          id: String(video?.dataset?.__mid || ''),
+          src,
+          readyState: Number(video?.readyState || 0),
+          networkState: Number(video?.networkState || 0),
+          loadPending: String(video?.dataset?.__loadPending || ''),
+          warmReady: String(video?.dataset?.__warmReady || ''),
+          active: String(video?.dataset?.__active || ''),
+          prewarm: String(video?.dataset?.__prewarm || ''),
+          resident: String(video?.dataset?.__resident || ''),
+          ...extra,
+        });
+        while (bucket.length > 500) bucket.shift();
+        window.__forumVideoTrace = bucket;
+      } catch {}
+    };
+    try {
+      if (traceEnabled && typeof window.dumpForumVideoTrace !== 'function') {
+        window.dumpForumVideoTrace = () => {
+          try {
+            return Array.isArray(window.__forumVideoTrace) ? [...window.__forumVideoTrace] : [];
+          } catch {
+            return [];
+          }
+        };
+      }
+    } catch {}
     const schedulePrepare = (fn) => {
       let done = false;
       const run = () => {
@@ -136,19 +205,43 @@ export default function useForumMediaCoordinator({ emitDiag }) {
 
     const warmMarginTop = Math.max(420, Math.round(__MEDIA_VIS_MARGIN_PX * 1.6));
     const warmMarginBottom = Math.max(760, Math.round(__MEDIA_VIS_MARGIN_PX * 2.35));
+    const poolMargin = Math.max(warmMarginTop, warmMarginBottom);
+    const isCoarseWarm = (() => {
+      try {
+        return !!window?.matchMedia?.('(pointer: coarse)')?.matches;
+      } catch {
+        return false;
+      }
+    })();
+    const warmResidentCap = isCoarseWarm ? 2 : 3;
+    const eagerWarmCount = 1;
+    const warmLeaseMs = isCoarseWarm ? 1300 : 900;
+    const residentLeaseMs = isCoarseWarm ? 950 : 650;
+    const farUnloadMargin = Math.max(Math.round(poolMargin * 1.85), 1400);
+
+    const extendWarmLease = (video, ms) => {
+      try {
+        warmLeaseUntil.set(video, Date.now() + Math.max(120, Number(ms || 0)));
+      } catch {}
+    };
 
     const warm = (video) => {
       if (!(video instanceof HTMLVideoElement)) return;
 
       try {
         // Более ранний prewarm: к зоне фокуса хотим уже готовый первый кадр.
+        video.dataset.__resident = '1';
         video.dataset.__prewarm = '1';
         video.preload = 'auto';
+        extendWarmLease(video, warmLeaseMs);
+        trace('warm', video);
 
         // Если первый кадр/данные уже готовы — ничего не делаем
         if (video.readyState >= 2) return;
+        if (video.dataset?.__loadPending === '1') return;
         if (__hasLazyVideoSourceWithoutSrc(video)) {
           // Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start.
+          trace('warm_restore', video);
           __restoreVideoEl(video);
           return;
         }
@@ -162,23 +255,139 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             if (__hasLazyVideoSourceWithoutSrc(video)) return;
             const cold = (video.readyState === 0 || !video.currentSrc);
             const safe = cold && video.paused && (video.currentTime === 0);
-            if (safe) video.load?.();
+            if (safe && video.dataset?.__loadPending !== '1') {
+              try { video.dataset.__loadPending = '1'; } catch {}
+              trace('warm_load', video);
+              video.load?.();
+            }
           } catch {}
         });
         pending.set(video, job);
       } catch {}
     };
 
-    const cool = (video) => {
+    const keepResident = (video) => {
       if (!(video instanceof HTMLVideoElement)) return;
       try {
+        video.dataset.__resident = '1';
+        if (video.dataset?.__active !== '1') video.dataset.__prewarm = '0';
+        extendWarmLease(video, residentLeaseMs);
+        if (__hasLazyVideoSourceWithoutSrc(video)) {
+          __restoreVideoEl(video);
+        }
+        if (video.dataset?.__active !== '1') {
+          video.preload = 'metadata';
+        }
+        trace('resident', video);
+      } catch {}
+    };
+
+    const cool = (video) => {
+      if (!(video instanceof HTMLVideoElement)) return;
+      const now = Date.now();
+      try {
         video.dataset.__prewarm = '0';
+        video.dataset.__resident = '0';
+        trace('cool', video);
       } catch {}
       try {
         if (video.dataset?.__active === '1') return;
-        if ((video.readyState || 0) >= 2) return;
+        const hasLease = Number(warmLeaseUntil.get(video) || 0) > now;
+        const nearViewport = __isVideoNearViewport(video, poolMargin);
+        const farViewport = !__isVideoNearViewport(video, farUnloadMargin);
+        const loadPending = video.dataset?.__loadPending === '1';
+        if (loadPending && (nearViewport || hasLease)) {
+          video.dataset.__resident = '1';
+          video.preload = 'auto';
+          return;
+        }
         video.preload = 'metadata';
+        if (!farViewport) return;
+        if (hasLease && loadPending) return;
+        __dropActiveVideoEl(video);
+        __unloadVideoEl(video);
       } catch {}
+    };
+
+    const runWarmSweep = () => {
+      try {
+        const vh = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
+        const centerY = vh / 2;
+        const keepCount = Math.max(eagerWarmCount, warmResidentCap);
+        const ranked = Array.from(document.querySelectorAll(selector))
+          .filter((video) => video instanceof HTMLVideoElement && video.isConnected)
+          .map((video) => {
+            try {
+              const rect = video.getBoundingClientRect?.();
+              const center = rect ? ((rect.top + rect.bottom) / 2) : 0;
+              const dist = Math.abs(center - centerY);
+              const near = __isVideoNearViewport(video, poolMargin);
+              return { video, dist, near };
+            } catch {
+              return { video, dist: Number.MAX_SAFE_INTEGER, near: false };
+            }
+          })
+          .filter((item) => item.near)
+          .sort((a, b) => a.dist - b.dist);
+
+        const keep = ranked.slice(0, keepCount);
+        const keepSet = new Set(keep.map((item) => item.video));
+
+        keep.forEach(({ video }, index) => {
+          if (index < eagerWarmCount) warm(video);
+          else keepResident(video);
+        });
+
+        Array.from(document.querySelectorAll(selector)).forEach((video) => {
+          if (!(video instanceof HTMLVideoElement)) return;
+          if (keepSet.has(video)) return;
+          cool(video);
+        });
+      } catch {}
+    };
+
+    const cancelWarmSweepSchedule = () => {
+      if (warmSweepRaf) {
+        try { cancelAnimationFrame(warmSweepRaf); } catch {}
+        warmSweepRaf = 0;
+      }
+      if (warmSweepTimeout) {
+        try { clearTimeout(warmSweepTimeout); } catch {}
+        warmSweepTimeout = 0;
+      }
+    };
+
+    const readWarmSweepScrollTop = () => {
+      try {
+        const scrollEl = document.querySelector?.('[data-forum-scroll="1"]') || null;
+        if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {
+          return Number(scrollEl.scrollTop || 0);
+        }
+      } catch {}
+      try {
+        return Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0);
+      } catch {}
+      return 0;
+    };
+
+    const scheduleWarmSweep = () => {
+      if (warmSweepRaf || warmSweepTimeout) return;
+      const runner = () => {
+        warmSweepRaf = 0;
+        warmSweepTimeout = 0;
+        const now = Date.now();
+        const top = readWarmSweepScrollTop();
+        const topDelta = Math.abs(top - lastWarmSweepTop);
+        if ((now - lastWarmSweepTs) < 120 && topDelta < 180) return;
+        lastWarmSweepTs = now;
+        lastWarmSweepTop = top;
+        runWarmSweep();
+      };
+      try {
+        warmSweepRaf = requestAnimationFrame(runner);
+      } catch {
+        warmSweepTimeout = setTimeout(runner, 32);
+      }
     };
 
     // если нет IntersectionObserver — готовим всё сразу
@@ -187,7 +396,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       return () => {
         try {
           pending.forEach((job) => { try { cancelPrepare(job); } catch {} });
-          pending.clear?.();
+          pending.clear();
         } catch {}
       };
     }
@@ -196,7 +405,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            warm(entry.target);
+            runWarmSweep();
             return;
           }
           cool(entry.target);
@@ -212,16 +421,44 @@ export default function useForumMediaCoordinator({ emitDiag }) {
 
     document.querySelectorAll(selector).forEach((v) => {
       io.observe(v);
-      try {
-        if (__isVideoNearViewport(v, Math.max(warmMarginTop, warmMarginBottom))) warm(v);
-      } catch {}
     });
+    runWarmSweep();
+
+    const onWarmSweepResize = () => runWarmSweep();
+    const onWarmSweepScroll = () => scheduleWarmSweep();
+    const onWarmSweepVisibility = () => {
+      try {
+        if (document.visibilityState === 'visible') runWarmSweep();
+      } catch {}
+    };
+    const scrollEl = (() => {
+      try {
+        const el = document.querySelector?.('[data-forum-scroll="1"]') || null;
+        if (el && el.scrollHeight > el.clientHeight + 1) return el;
+      } catch {}
+      return null;
+    })();
+    try { window.addEventListener('resize', onWarmSweepResize, { passive: true }); } catch {}
+    if (scrollEl) {
+      try { scrollEl.addEventListener('scroll', onWarmSweepScroll, { passive: true }); } catch {}
+    } else {
+      try { window.addEventListener('scroll', onWarmSweepScroll, { passive: true }); } catch {}
+    }
+    try { document.addEventListener('visibilitychange', onWarmSweepVisibility); } catch {}
 
     return () => {
       io.disconnect();
+      try { window.removeEventListener('resize', onWarmSweepResize); } catch {}
+      if (scrollEl) {
+        try { scrollEl.removeEventListener('scroll', onWarmSweepScroll); } catch {}
+      } else {
+        try { window.removeEventListener('scroll', onWarmSweepScroll); } catch {}
+      }
+      try { document.removeEventListener('visibilitychange', onWarmSweepVisibility); } catch {}
+      cancelWarmSweepSchedule();
       try {
         pending.forEach((job) => { try { cancelPrepare(job); } catch {} });
-        pending.clear?.();
+        pending.clear();
       } catch {}
     };
   }, []);
@@ -308,6 +545,64 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     if (!isBrowser()) return;
 
     const selector = '[data-forum-media]';
+    const readyReplay = new Map();
+    const traceEnabled = (() => {
+      try {
+        if (String(process.env.NEXT_PUBLIC_FORUM_VIDEO_TRACE || '') === '1') return true;
+      } catch {}
+      try {
+        const qs = new URLSearchParams(window.location.search || '');
+        const fromQuery = String(qs.get('videoTrace') || '').trim();
+        if (fromQuery === '1' || fromQuery.toLowerCase() === 'true') return true;
+      } catch {}
+      return false;
+    })();
+    const trace = (event, el, extra = {}) => {
+      if (!traceEnabled) return;
+      try {
+        const bucket = Array.isArray(window.__forumVideoTrace) ? window.__forumVideoTrace : [];
+        const src = String(
+          el?.dataset?.__src ||
+          el?.getAttribute?.('data-src') ||
+          el?.currentSrc ||
+          el?.getAttribute?.('src') ||
+          ''
+        );
+        bucket.push({
+          ts: Date.now(),
+          event,
+          kind: String(el?.getAttribute?.('data-forum-media') || ''),
+          id: String(el?.dataset?.__mid || ''),
+          src,
+          readyState: Number(el?.readyState || 0),
+          networkState: Number(el?.networkState || 0),
+          loadPending: String(el?.dataset?.__loadPending || ''),
+          warmReady: String(el?.dataset?.__warmReady || ''),
+          active: String(el?.dataset?.__active || ''),
+          ...extra,
+        });
+        while (bucket.length > 500) bucket.shift();
+        window.__forumVideoTrace = bucket;
+      } catch {}
+    };
+    const candidateTraceState = { key: '', ts: 0 };
+    const traceCandidate = (event, el, extra = {}) => {
+      if (!traceEnabled) return;
+      try {
+        const key = [
+          event,
+          String(el?.dataset?.__mid || el?.getAttribute?.('data-src') || ''),
+          Math.round(Number(extra?.ratio || 0) * 100),
+          Math.round(Number(extra?.activeRatio || 0) * 100),
+          String(extra?.reason || ''),
+        ].join('|');
+        const now = Date.now();
+        if (candidateTraceState.key === key && (now - candidateTraceState.ts) < 140) return;
+        candidateTraceState.key = key;
+        candidateTraceState.ts = now;
+      } catch {}
+      trace(event, el, extra);
+    };
 
     const writeMutedPref = (val) => {
       try {
@@ -357,6 +652,39 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           }));
         } catch {}
       }
+    };
+    const clearReadyReplay = (el) => {
+      const cleanup = readyReplay.get(el);
+      if (cleanup) {
+        try { cleanup(); } catch {}
+      }
+      readyReplay.delete(el);
+    };
+    const armReadyReplay = (el) => {
+      if (!(el instanceof HTMLVideoElement || el instanceof HTMLAudioElement)) return;
+      clearReadyReplay(el);
+      const replay = () => {
+        clearReadyReplay(el);
+        trace('ready_replay', el);
+        try {
+          applyMutedPref(el);
+          el.playsInline = true;
+          if (el instanceof HTMLVideoElement) {
+            try { el.loop = true; } catch {}
+          }
+          if (el.paused) {
+            const p = el.play?.();
+            if (p && typeof p.catch === 'function') p.catch(() => {});
+          }
+        } catch {}
+      };
+      const onReady = () => replay();
+      try { el.addEventListener('loadeddata', onReady, { once: true }); } catch {}
+      try { el.addEventListener('canplay', onReady, { once: true }); } catch {}
+      readyReplay.set(el, () => {
+        try { el.removeEventListener('loadeddata', onReady); } catch {}
+        try { el.removeEventListener('canplay', onReady); } catch {}
+      });
     };
     const volHandlers = new WeakMap();
     const bindVolumeListener = (el) => { 
@@ -474,6 +802,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
 
     const ratios = new Map();
     let active = null;
+    let activeSinceTs = 0;
     let rafId = 0;
     let io = null;
 
@@ -559,14 +888,23 @@ export default function useForumMediaCoordinator({ emitDiag }) {
 
     const softPauseMedia = (el) => {
       if (!el) return;
+      clearReadyReplay(el);
+      trace('soft_pause', el);
       if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
         try { if (!el.paused) el.pause(); } catch {}
+        try { el.dataset.__active = '0'; } catch {}
+        if (el instanceof HTMLVideoElement) {
+          try { __dropActiveVideoEl(el); } catch {}
+        }
         return;
       }
       const kind = el.getAttribute('data-forum-media');
       if (kind === 'qcast') {
         const a = el.querySelector?.('audio');
-        if (a instanceof HTMLAudioElement) { try { if (!a.paused) a.pause(); } catch {} }
+        if (a instanceof HTMLAudioElement) {
+          clearReadyReplay(a);
+          try { if (!a.paused) a.pause(); } catch {}
+        }
         return;
       }
       if (kind === 'youtube') {
@@ -580,14 +918,25 @@ export default function useForumMediaCoordinator({ emitDiag }) {
 
     const hardUnloadMedia = (el, reason = 'unknown') => {
       if (!el) return;
+      clearReadyReplay(el);
+      trace('hard_unload', el, { reason });
       if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
-        try { if (!el.paused) el.pause(); } catch {}
+        try { __dropActiveVideoEl(el); } catch {}
+        if (el instanceof HTMLVideoElement) {
+          try { __unloadVideoEl(el); } catch {}
+        } else {
+          try { if (!el.paused) el.pause(); } catch {}
+          try { el.dataset.__active = '0'; } catch {}
+        }
         return;
       }
       const kind = el.getAttribute('data-forum-media');
       if (kind === 'qcast') {
         const a = el.querySelector?.('audio');
-        if (a instanceof HTMLAudioElement) { try { if (!a.paused) a.pause(); } catch {} }
+        if (a instanceof HTMLAudioElement) {
+          clearReadyReplay(a);
+          try { if (!a.paused) a.pause(); } catch {}
+        }
         return;
       }
       if (kind === 'youtube') { 
@@ -679,19 +1028,26 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     const playMedia = async (el) => {
       if (!el) return;
       cancelUnload(el);
+      trace('play_request', el);
 
       if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
         try {
           if (el instanceof HTMLVideoElement) {
             const hasSrc = !!el.getAttribute('src');
-            if (!hasSrc) __restoreVideoEl(el);
+            if (!hasSrc) {
+              trace('play_restore', el);
+              __restoreVideoEl(el);
+            }
             try { el.dataset.__prewarm = '1'; } catch {}
             try { el.dataset.__active = '1'; } catch {}
             try { el.preload = 'auto'; } catch {}
             try {
-              const cold = (el.readyState === 0 || !el.currentSrc);
-              const safe = cold && el.paused && (el.currentTime === 0);
-              if (safe) el.load?.();
+              const empty = (el.networkState === HTMLMediaElement.NETWORK_EMPTY) || !el.currentSrc;
+              if (empty && el.dataset?.__loadPending !== '1' && el.paused && (el.currentTime === 0)) {
+                try { el.dataset.__loadPending = '1'; } catch {}
+                trace('play_load', el);
+                el.load?.();
+              }
             } catch {}
             __touchActiveVideoEl(el);
             __enforceActiveVideoCap(el);
@@ -700,7 +1056,11 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           el.playsInline = true;
           // LOOP: автоплей всегда зацикленный 
           el.loop = true;
-          if (el.paused) {
+          if ((el.readyState || 0) < 2) {
+            trace('play_wait_ready', el);
+            armReadyReplay(el);
+          } else if (el.paused) {
+            trace('play_now', el);
             const p = el.play?.();
             if (p && typeof p.catch === 'function') p.catch(() => {});
           }
@@ -715,8 +1075,14 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           try {
             applyMutedPref(a);
             // LOOP: qcast-аудио тоже зацикливаем
-            a.loop = true;            
-            if (a.paused) {
+            a.loop = true;
+            if ((a.readyState || 0) < 2) {
+              try {
+                const empty = (a.networkState === HTMLMediaElement.NETWORK_EMPTY) || !a.currentSrc;
+                if (empty && a.paused) a.load?.();
+              } catch {}
+              armReadyReplay(a);
+            } else if (a.paused) {
               const p = a.play?.();
               if (p && typeof p.catch === 'function') p.catch(() => {});
             }
@@ -772,16 +1138,62 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       }
     };
 
+    const getCandidateMetrics = (el, ratioOverride = null) => {
+      if (!(el instanceof Element)) return null;
+      const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
+      const viewportCenter = viewportH / 2;
+      try {
+        const rect = el.getBoundingClientRect?.();
+        if (!rect) return null;
+        const ratio = Number(ratioOverride == null ? (ratios.get(el) || 0) : ratioOverride);
+        const visiblePx = Math.max(0, Math.min(rect.bottom, viewportH) - Math.max(rect.top, 0));
+        const center = (rect.top + rect.bottom) / 2;
+        const centerDist = Math.abs(center - viewportCenter);
+        const score = (visiblePx * 1.15) + (ratio * 420) - (centerDist * 0.45);
+        return { el, ratio, score, visiblePx, centerDist };
+      } catch {}
+      return null;
+    };
+
     const pickMostVisible = () => {
       let best = null;
+      let bestScore = -Infinity;
       let bestRatio = 0;
-      for (const [el, r] of ratios.entries()) { 
-        if (r > bestRatio) {
-          bestRatio = r;
+      let bestVisiblePx = 0;
+      let bestCenterDist = 0;
+      for (const [el, r] of ratios.entries()) {
+        const metrics = getCandidateMetrics(el, r);
+        if (!metrics) continue;
+        if (metrics.score > bestScore) {
+          bestScore = metrics.score;
+          bestRatio = metrics.ratio;
+          bestVisiblePx = metrics.visiblePx;
+          bestCenterDist = metrics.centerDist;
           best = el;
         }
       }
-      return { el: best, ratio: bestRatio };
+      if (!best) {
+        for (const [el, r] of ratios.entries()) {
+          if (r > bestRatio) {
+            bestRatio = r;
+            best = el;
+          }
+        }
+      }
+      return { el: best, ratio: bestRatio, score: bestScore, visiblePx: bestVisiblePx, centerDist: bestCenterDist };
+    };
+
+    const ACTIVE_SWITCH_HOLD_MS = 420;
+    const SWITCH_RATIO_DELTA = 0.12;
+    const SWITCH_SCORE_DELTA = 180;
+
+    const isReadyCandidate = (el) => {
+      if (!(el instanceof HTMLVideoElement || el instanceof HTMLAudioElement)) return true;
+      try {
+        if ((el.readyState || 0) >= 2) return true;
+        if (String(el.dataset?.__warmReady || '') === '1') return true;
+      } catch {}
+      return false;
     };
 
     if (!('IntersectionObserver' in window)) return;
@@ -809,7 +1221,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         if (rafId) return;
         rafId = requestAnimationFrame(() => {
           rafId = 0;
-          const { el: candidate, ratio } = pickMostVisible();
+          const { el: candidate, ratio, score, visiblePx, centerDist } = pickMostVisible();
           // Расширяем "зону удержания" автоплея примерно на 30–40%:
           //  - раньше было 0.5 (нужно было видеть ?50% элемента)
           //  - теперь стартуем при ~35% и выключаемся только при падении ниже ~22%
@@ -821,27 +1233,97 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           // Это убирает "стоп/плей" при лёгком смещении вверх/вниз.
           if (active) {
             const ar = ratios.get(active) || 0;
+            const activeMetrics = getCandidateMetrics(active, ar);
+            const activeScore = Number(activeMetrics?.score ?? -Infinity);
             if (ar >= STOP_RATIO) {
               // Если кандидат другой — переключаемся только когда он уверенно лучше.
               // (иначе будет флаттер между двумя элементами рядом)
-              if (candidate && candidate !== active && ratio >= START_RATIO && ratio > ar + 0.08) {
+              if (
+                candidate &&
+                candidate !== active &&
+                ratio >= START_RATIO &&
+                (ratio > ar + SWITCH_RATIO_DELTA || score > activeScore + SWITCH_SCORE_DELTA)
+              ) {
+                const now = Date.now();
+                if (!isReadyCandidate(candidate) && ar >= STOP_RATIO) {
+                  traceCandidate('candidate_reject_not_ready', candidate, {
+                    ratio,
+                    score,
+                    visiblePx,
+                    centerDist,
+                    activeRatio: ar,
+                    activeScore,
+                    reason: 'not_ready',
+                  });
+                  return;
+                }
+                if ((now - activeSinceTs) < ACTIVE_SWITCH_HOLD_MS && ar >= STOP_RATIO) {
+                  traceCandidate('candidate_hold_active', candidate, {
+                    ratio,
+                    score,
+                    visiblePx,
+                    centerDist,
+                    activeRatio: ar,
+                    activeScore,
+                    reason: 'switch_hold',
+                  });
+                  return;
+                }
+                traceCandidate('candidate_switch', candidate, {
+                  ratio,
+                  score,
+                  visiblePx,
+                  centerDist,
+                  activeRatio: ar,
+                  activeScore,
+                });
                 softPauseMedia(active);
                 scheduleHardUnload(active, null, 'focus_switch');
                 active = candidate;
+                activeSinceTs = now;
                 cancelUnload(active);
-                emitMediaDiag('media_focus_switch', { ratio, prevRatio: ar });
+                emitMediaDiag('media_focus_switch', { ratio, prevRatio: ar, score, prevScore: activeScore });
                 playMedia(active);
+              }
+              if (candidate && candidate !== active) {
+                traceCandidate('candidate_keep_active', active, {
+                  ratio: ar,
+                  score: activeScore,
+                  visiblePx: Number(activeMetrics?.visiblePx || 0),
+                  centerDist: Number(activeMetrics?.centerDist || 0),
+                  activeRatio: ar,
+                  activeScore,
+                  reason: 'active_still_valid',
+                });
               }
               return;
             }
             // Активный выпал ниже STOP_RATIO — мягко отпускаем
+            traceCandidate('candidate_release_active', active, {
+              ratio: ar,
+              score: activeScore,
+              visiblePx: Number(activeMetrics?.visiblePx || 0),
+              centerDist: Number(activeMetrics?.centerDist || 0),
+              reason: 'below_stop_ratio',
+            });
             softPauseMedia(active);
             scheduleHardUnload(active, null, 'below_stop_ratio');
             active = null;
           } 
 
           // Нет активного — берём кандидата, только если он попал в расширенную зону
-          if (!candidate || ratio < START_RATIO) return;
+          if (!candidate || ratio < START_RATIO) {
+            if (candidate) {
+              traceCandidate('candidate_below_start', candidate, {
+                ratio,
+                score,
+                visiblePx,
+                centerDist,
+                reason: 'below_start_ratio',
+              });
+            }
+            return;
+          }
  
 
           if (active && active !== candidate) {
@@ -850,9 +1332,17 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             scheduleHardUnload(active, null, 'candidate_replace');
           }
 
+          traceCandidate(isReadyCandidate(candidate) ? 'candidate_activate' : 'candidate_activate_pending', candidate, {
+            ratio,
+            score,
+            visiblePx,
+            centerDist,
+            reason: isReadyCandidate(candidate) ? 'ready' : 'pending_ready',
+          });
           active = candidate;
+          activeSinceTs = Date.now();
           cancelUnload(active);
-          emitMediaDiag('media_focus_switch', { ratio, prevRatio: 0 });
+          emitMediaDiag('media_focus_switch', { ratio, prevRatio: 0, score });
           playMedia(active);
         });
       },
@@ -924,12 +1414,16 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       try {
         unloadTimers.forEach?.((id) => clearTimeout(id));
       } catch {}
+      try {
+        readyReplay.forEach?.((cleanup) => { try { cleanup(); } catch {} });
+      } catch {}
 
       if (active) {
         softPauseMedia(active);
         scheduleHardUnload(active, 0, 'cleanup');
       }
       active = null;
+      activeSinceTs = 0;
       ratios.clear();
  
       try {

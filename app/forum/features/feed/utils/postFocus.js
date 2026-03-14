@@ -1,5 +1,12 @@
 'use client'
 
+function normalizeFocusOptions(options) {
+  if (typeof options === 'string') {
+    return { behavior: options }
+  }
+  return options && typeof options === 'object' ? options : {}
+}
+
 function readBottomOcclusionPx(top, bottom) {
   try {
     const t = Number(top || 0) || 0
@@ -34,10 +41,13 @@ function readMarginY(node) {
 }
 
 export function centerNodeInScroll(node, options = {}) {
-  const behavior = options?.behavior || 'smooth'
-  const isBrowserFn = typeof options?.isBrowserFn === 'function' ? options.isBrowserFn : () => false
-  const getScrollEl = typeof options?.getScrollEl === 'function' ? options.getScrollEl : () => null
+  const normalized = normalizeFocusOptions(options)
+  const behavior = normalized?.behavior || 'auto'
+  const isBrowserFn = typeof normalized?.isBrowserFn === 'function' ? normalized.isBrowserFn : () => false
+  const getScrollEl = typeof normalized?.getScrollEl === 'function' ? normalized.getScrollEl : () => null
   if (!isBrowserFn?.() || !node) return
+
+  const minDelta = behavior === 'smooth' ? 18 : 10
 
   try {
     const scrollEl = getScrollEl?.()
@@ -50,7 +60,7 @@ export function centerNodeInScroll(node, options = {}) {
       const visibleH = Math.max(1, contRect.height - occ)
       const desired = visibleH / 2
       const delta = elCenterInView - desired
-      if (!Number.isFinite(delta) || Math.abs(delta) < 8) return
+      if (!Number.isFinite(delta) || Math.abs(delta) < minDelta) return
       const nextTop = Math.max(
         0,
         Math.min((scrollEl.scrollTop || 0) + delta, (scrollEl.scrollHeight || 0) - (scrollEl.clientHeight || 0)),
@@ -69,7 +79,7 @@ export function centerNodeInScroll(node, options = {}) {
       const visibleH = Math.max(1, vh - occ)
       const desired = visibleH / 2
       const delta = elCenter - desired
-      if (Number.isFinite(delta) && Math.abs(delta) > 8) {
+      if (Number.isFinite(delta) && Math.abs(delta) > minDelta) {
         const curY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0
         const nextY = Math.max(0, curY + delta)
         try {
@@ -93,14 +103,15 @@ export function centerNodeInScroll(node, options = {}) {
 }
 
 export function centerPostAfterDom(postId, options = {}) {
-  const behavior = options?.behavior || 'smooth'
-  const isBrowserFn = typeof options?.isBrowserFn === 'function' ? options.isBrowserFn : () => false
+  const normalized = normalizeFocusOptions(options)
+  const behavior = normalized?.behavior || 'auto'
+  const isBrowserFn = typeof normalized?.isBrowserFn === 'function' ? normalized.isBrowserFn : () => false
   const centerNodeInScrollFn =
-    typeof options?.centerNodeInScrollFn === 'function' ? options.centerNodeInScrollFn : centerNodeInScroll
+    typeof normalized?.centerNodeInScrollFn === 'function' ? normalized.centerNodeInScrollFn : centerNodeInScroll
   const pid = String(postId || '').trim()
   if (!pid || !isBrowserFn?.()) return
   let tries = 0
-  const maxTries = 18
+  const maxTries = 10
   const tick = () => {
     tries += 1
     const node = document.getElementById(`post_${pid}`)
@@ -128,15 +139,16 @@ export function centerPostAfterDom(postId, options = {}) {
 }
 
 export function centerAndFlashPostAfterDom(postId, options = {}) {
-  const behavior = options?.behavior || 'smooth'
-  const isBrowserFn = typeof options?.isBrowserFn === 'function' ? options.isBrowserFn : () => false
+  const normalized = normalizeFocusOptions(options)
+  const behavior = normalized?.behavior || 'auto'
+  const isBrowserFn = typeof normalized?.isBrowserFn === 'function' ? normalized.isBrowserFn : () => false
   const centerNodeInScrollFn =
-    typeof options?.centerNodeInScrollFn === 'function' ? options.centerNodeInScrollFn : centerNodeInScroll
-  const getScrollEl = typeof options?.getScrollEl === 'function' ? options.getScrollEl : () => null
-  const postsLen = Number(options?.postsLen || 0)
-  const visibleThreadPostsCount = Number(options?.visibleThreadPostsCount || 0)
+    typeof normalized?.centerNodeInScrollFn === 'function' ? normalized.centerNodeInScrollFn : centerNodeInScroll
+  const getScrollEl = typeof normalized?.getScrollEl === 'function' ? normalized.getScrollEl : () => null
+  const postsLen = Number(normalized?.postsLen || 0)
+  const visibleThreadPostsCount = Number(normalized?.visibleThreadPostsCount || 0)
   const setVisibleThreadPostsCount =
-    typeof options?.setVisibleThreadPostsCount === 'function' ? options.setVisibleThreadPostsCount : null
+    typeof normalized?.setVisibleThreadPostsCount === 'function' ? normalized.setVisibleThreadPostsCount : null
 
   const pid = String(postId || '').trim()
   if (!pid || !isBrowserFn?.()) return
@@ -150,7 +162,7 @@ export function centerAndFlashPostAfterDom(postId, options = {}) {
   } catch {}
 
   let tries = 0
-  const maxTries = 72
+  const maxTries = 18
   const tick = () => {
     tries += 1
     const node = document.getElementById(`post_${pid}`)
@@ -189,7 +201,7 @@ export function centerAndFlashPostAfterDom(postId, options = {}) {
 
         const maybeRecenter = () => {
           const d = computeDelta()
-          if (Number.isFinite(d) && Math.abs(d) > 14) {
+          if (Number.isFinite(d) && Math.abs(d) > 24) {
             try {
               centerNodeInScrollFn(node, 'auto')
             } catch {}
@@ -197,13 +209,7 @@ export function centerAndFlashPostAfterDom(postId, options = {}) {
         }
 
         try {
-          requestAnimationFrame(maybeRecenter)
-        } catch {}
-        try {
-          setTimeout(maybeRecenter, 140)
-        } catch {}
-        try {
-          setTimeout(maybeRecenter, 420)
+          setTimeout(maybeRecenter, 90)
         } catch {}
 
         try {
@@ -241,7 +247,7 @@ export function centerAndFlashPostAfterDom(postId, options = {}) {
                   cancelAnimationFrame(rafId)
                 } catch {}
               }
-            }, 800)
+            }, 180)
           }
         } catch {}
       } catch {}

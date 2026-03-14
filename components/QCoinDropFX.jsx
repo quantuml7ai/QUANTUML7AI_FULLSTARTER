@@ -313,6 +313,14 @@ export default function QCoinDropFX ({
     }
   }, [])
 
+  const queueLoopFrame = useCallback((fn) => {
+    try {
+      animFrameRef.current = requestAnimationFrame(fn)
+    } catch {
+      animFrameRef.current = null
+    }
+  }, [])
+
   useEffect(() => {
     if (!isBrowser()) return
     try {
@@ -388,7 +396,7 @@ export default function QCoinDropFX ({
       sleepTimerRef.current = setTimeout(() => {
         sleepTimerRef.current = null
         if (!stopped) {
-          animFrameRef.current = requestAnimationFrame((nextTs) => loop(nextTs))
+          queueLoopFrame((nextTs) => loop(nextTs))
         }
       }, nextDelay)
     }
@@ -493,10 +501,10 @@ export default function QCoinDropFX ({
         lastPaintRef.current = ts
         setTick((x) => (x + 1) & 1023)
       }
-      if (!stopped) animFrameRef.current = requestAnimationFrame(loop)
+      if (!stopped) queueLoopFrame(loop)
     }
 
-    animFrameRef.current = requestAnimationFrame(loop)
+    queueLoopFrame(loop)
 
     return () => {
       stopped = true
@@ -508,7 +516,7 @@ export default function QCoinDropFX ({
       animFrameRef.current = null
       if (rafId) cancelAnimationFrame(rafId)
     }
-  }, [uid, intervalMs, minSize, maxSize, initWorld])
+  }, [uid, intervalMs, minSize, maxSize, initWorld, queueLoopFrame])
 
   useEffect(() => {
     if (!isBrowser()) return
@@ -545,7 +553,6 @@ export default function QCoinDropFX ({
       impulseStrengthRef.current = Math.min(1, impulseStrengthRef.current + 0.6)
 
       lastPaintRef.current = 0
-      setTick((x) => (x + 1) & 1023)
     }
 
     window.addEventListener('pointerdown', onPointerDown, { passive: true })
@@ -580,7 +587,6 @@ export default function QCoinDropFX ({
       impulseStrengthRef.current = Math.min(1, impulseStrengthRef.current + 0.4)
 
       lastPaintRef.current = 0
-      setTick((x) => (x + 1) & 1023)
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -778,7 +784,6 @@ export default function QCoinDropFX ({
     setTimeout(() => {
       coinRef.current = null
       lastPaintRef.current = 0
-      setTick((x) => (x + 1) & 1023)
     }, 600)
 
     setTimeout(() => {

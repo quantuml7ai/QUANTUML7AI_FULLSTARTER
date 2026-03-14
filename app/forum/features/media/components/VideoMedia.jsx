@@ -16,6 +16,7 @@ export default function VideoMedia({
   loop,
   onError: onErrorProp,
   'data-forum-media': dataForumMedia,
+  'data-forum-video': dataForumVideo,
   readMutedPref,
   writeMutedPref,
   mutedEventName,
@@ -33,6 +34,8 @@ export default function VideoMedia({
   const mutedEvent = String(mutedEventName || 'forum:media-mute')
   const mediaVisMargin = Number.isFinite(Number(mediaVisMarginPx)) ? Number(mediaVisMarginPx) : 380
   const preloadMode = String(preload || 'none').trim().toLowerCase() || 'none'
+  const renderPreload = dataForumVideo === 'post' ? undefined : preload
+  const renderPoster = dataForumVideo === 'post' ? undefined : poster
 
   const readMuted = React.useCallback(() => {
     try {
@@ -106,7 +109,7 @@ export default function VideoMedia({
     [unloadVideoEl],
   )
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     const el = ref.current
     if (!el) return
     const s = String(src || '')
@@ -194,11 +197,64 @@ export default function VideoMedia({
   }, [autoPlay, mutedEvent, readMuted, writeMuted])
 
   React.useEffect(() => {
+    const el = ref.current
+    if (!el) return
+
+    const markPending = () => {
+      try {
+        el.dataset.__loadPending = '1'
+        el.dataset.__warmReady = '0'
+      } catch {}
+    }
+    const markReady = () => {
+      try {
+        el.dataset.__loadPending = '0'
+        el.dataset.__warmReady = '1'
+      } catch {}
+    }
+    const markCold = () => {
+      try {
+        el.dataset.__loadPending = '0'
+        el.dataset.__warmReady = '0'
+      } catch {}
+    }
+
+    try { el.addEventListener('loadstart', markPending) } catch {}
+    try { el.addEventListener('loadeddata', markReady) } catch {}
+    try { el.addEventListener('canplay', markReady) } catch {}
+    try { el.addEventListener('playing', markReady) } catch {}
+    try { el.addEventListener('abort', markCold) } catch {}
+    try { el.addEventListener('emptied', markCold) } catch {}
+    try { el.addEventListener('error', markCold) } catch {}
+
+    return () => {
+      try { el.removeEventListener('loadstart', markPending) } catch {}
+      try { el.removeEventListener('loadeddata', markReady) } catch {}
+      try { el.removeEventListener('canplay', markReady) } catch {}
+      try { el.removeEventListener('playing', markReady) } catch {}
+      try { el.removeEventListener('abort', markCold) } catch {}
+      try { el.removeEventListener('emptied', markCold) } catch {}
+      try { el.removeEventListener('error', markCold) } catch {}
+    }
+  }, [])
+
+  React.useEffect(() => {
     if (typeof window === 'undefined') return
     const el = ref.current
     if (!el) return
 
     let io = null
+    if (dataForumVideo === 'post') {
+      return () => {
+        try {
+          if (recoverTimerRef.current) clearTimeout(recoverTimerRef.current)
+        } catch {}
+        recoverTimerRef.current = 0
+        try { dropActiveVideoFn(el) } catch {}
+        try { unloadVideoElFn(el) } catch {}
+      }
+    }
+
     let active = false
     let unloadTimer = null
     const warmKeepMargin = Math.max(760, Math.round(mediaVisMargin * 2.45))
@@ -224,6 +280,7 @@ export default function VideoMedia({
         if (!el?.isConnected) return false
         const warmFlag = el.dataset?.__prewarm === '1'
         if (warmFlag) return true
+        if (el.dataset?.__loadPending === '1') return true
         return isVideoNearViewportFn(el, warmKeepMargin)
       } catch {
         return false
@@ -249,7 +306,12 @@ export default function VideoMedia({
           el.dataset.__active = '1'
           el.dataset.__prewarm = '1'
           el.preload = 'auto'
-          if ((el.readyState === 0 || !el.currentSrc) && el.paused && (el.currentTime === 0)) {
+          if (
+            (el.readyState === 0 || !el.currentSrc) &&
+            el.dataset?.__loadPending !== '1' &&
+            el.paused &&
+            (el.currentTime === 0)
+          ) {
             el.load?.()
           }
         } catch {}
@@ -326,6 +388,7 @@ export default function VideoMedia({
       unloadVideoElFn(el)
     }
   }, [
+    dataForumVideo,
     dropActiveVideoFn,
     enforceActiveVideoCapFn,
     isVideoNearViewportFn,
@@ -411,9 +474,10 @@ export default function VideoMedia({
     <video
       ref={ref}
       data-forum-media={dataForumMedia}
+      data-forum-video={dataForumVideo}
       playsInline={playsInline}
-      poster={poster}
-      preload={preload}
+      poster={renderPoster}
+      preload={renderPreload}
       controls={controls}
       autoPlay={autoPlay}
       loop={loop}

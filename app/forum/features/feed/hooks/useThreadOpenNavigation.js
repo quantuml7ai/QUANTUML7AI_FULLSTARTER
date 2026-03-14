@@ -95,7 +95,7 @@ export default function useThreadOpenNavigation({
     const timer = setTimeout(() => {
       try {
         document.getElementById('post_' + pendingId)?.scrollIntoView({
-          behavior: 'smooth',
+          behavior: 'auto',
           block: 'center',
         })
       } catch {}

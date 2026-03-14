@@ -104,6 +104,14 @@ export default function SnowFX({
     }
   }
 
+  const queueLoopFrame = (fn) => {
+    try {
+      animFrameRef.current = requestAnimationFrame(fn)
+    } catch {
+      animFrameRef.current = null
+    }
+  }
+
   const scheduleNextRespawn = (flake) => {
     const { h } = worldRef.current
 
@@ -245,7 +253,7 @@ export default function SnowFX({
       const dt = Math.min(0.05, Math.max(0.012, dtMs / 1000))
 
       if (visibilityPausedRef.current) {
-        if (!stopped) animFrameRef.current = requestAnimationFrame(loop)
+        if (!stopped) queueLoopFrame(loop)
         return
       }
 
@@ -253,7 +261,7 @@ export default function SnowFX({
       if (!flakes.length) {
         // если компонент уже размонтирован (cleanup выставил stopped),
         // не планируем следующий кадр — иначе можно оставить "висящий" RAF
-        if (!stopped) animFrameRef.current = requestAnimationFrame(loop)
+        if (!stopped) queueLoopFrame(loop)
         return
       }
 
@@ -323,10 +331,10 @@ export default function SnowFX({
 
       // если компонент уже размонтирован (cleanup выставил stopped),
       // не планируем следующий кадр
-      if (!stopped) animFrameRef.current = requestAnimationFrame(loop)
+      if (!stopped) queueLoopFrame(loop)
     }
 
-    animFrameRef.current = requestAnimationFrame(loop)
+    queueLoopFrame(loop)
 
     return () => {
       stopped = true
@@ -383,7 +391,6 @@ export default function SnowFX({
       impulseStrengthRef.current = Math.min(1, impulseStrengthRef.current + 0.6)
 
       lastPaintRef.current = 0
-      setTick((x0) => x0 + 1)
     }
 
     window.addEventListener('pointerdown', onPointerDown, { passive: true })
@@ -443,7 +450,6 @@ export default function SnowFX({
       impulseStrengthRef.current = Math.min(1, impulseStrengthRef.current + 0.4)
 
       lastPaintRef.current = 0
-      setTick((x0) => x0 + 1)
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })

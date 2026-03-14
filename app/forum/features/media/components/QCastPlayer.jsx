@@ -21,6 +21,9 @@ export default function QCastPlayer({
   mutedEventName = 'forum:media-mute',
   rearmPooledFxNode,
 }) {
+  const desiredMuted = React.useCallback((pref) => (
+    pref == null ? true : !!pref
+  ), [])
   const readMutedPref = React.useCallback(() => {
     try {
       return typeof readMutedPrefFromStorage === 'function' ? readMutedPrefFromStorage() : null;
@@ -298,9 +301,8 @@ const spawnFx = React.useCallback((kind, origin) => {
     if (!audio) return undefined;
     const st = waRef.current;
 
-    // FIX: по умолчанию НЕ muted
     const initialMuted = readMutedPref();
-    audio.muted = (initialMuted == null) ? false : initialMuted;
+    audio.muted = desiredMuted(initialMuted);
     setMuted(!!audio.muted);
 
     try {
@@ -430,7 +432,7 @@ const spawnFx = React.useCallback((kind, origin) => {
       st.data = null;
       try { ctx?.close?.(); } catch {}
     }; 
-  }, [applyPreset, mutedEventName, readMutedPref, writeMuted]);
+  }, [applyPreset, desiredMuted, mutedEventName, readMutedPref, writeMuted]);
 
   React.useEffect(() => {
     const audio = audioRef.current;

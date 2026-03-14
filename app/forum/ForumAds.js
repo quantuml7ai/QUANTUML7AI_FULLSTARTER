@@ -820,6 +820,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   const [isNear, setIsNear] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isPageActive, setIsPageActive] = useState(true);
+  const [mediaResident, setMediaResident] = useState(false);
 
   const shouldPlay = isFocused && isPageActive;
   const shouldResolveMedia = isNear || shouldPlay;
@@ -833,6 +834,20 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   useEffect(() => {
     shouldPlayRef.current = shouldPlay;
   }, [shouldPlay]);
+
+  useEffect(() => {
+    let timer = null;
+    if (isNear || shouldPlay) {
+      setMediaResident(true);
+      return undefined;
+    }
+    timer = setTimeout(() => {
+      setMediaResident(false);
+    }, 2200);
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [isNear, shouldPlay]);
 
   // Page visibility + focus/blur
   useEffect(() => {
@@ -864,7 +879,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     // near: заранее «подойти» к блоку (без игры)
     const nearObs = new IntersectionObserver(
       ([e]) => setIsNear(!!e?.isIntersecting),
-      { rootMargin: '800px 0px', threshold: 0 }
+      { rootMargin: '420px 0px', threshold: 0 }
     );
 
     // focused: реально видно (>= 60% площади)
@@ -1448,7 +1463,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   };
 
   const showSoundButton =
-    media.kind === 'video' || media.kind === 'youtube';
+    shouldPlay && (media.kind === 'video' || media.kind === 'youtube');
 
   return (
 <div
@@ -1580,7 +1595,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
               <div className="animate-pulse w-full h-full bg-[color:var(--skeleton,#111827)]" />
             )}
 
-{media.kind === 'video' && media.src && (isNear || shouldPlay) && (
+{media.kind === 'video' && media.src && mediaResident && (
   <div className="forum-ad-media-fill">
     <video
       ref={videoRef}
@@ -1594,9 +1609,13 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
   </div>
 )}
 
+            {media.kind === 'video' && media.src && !mediaResident && (
+              <div className="w-full h-full flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)]">
+                {host}
+              </div>
+            )}
 
-
-            {media.kind === 'youtube' && media.src && (isNear || shouldPlay) && (
+            {media.kind === 'youtube' && media.src && mediaResident && (
 <div
   className="relative overflow-hidden rounded-lg"
   style={isFluid ? { width: '100%', aspectRatio: '16 / 9' } : { width: '100%', height: '100%' }}
@@ -1621,7 +1640,13 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
 
             )}
 
-            {media.kind === 'tiktok' && media.src && (isNear || shouldPlay) && (
+            {media.kind === 'youtube' && media.src && !mediaResident && (
+              <div className="w-full h-full flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)]">
+                {host}
+              </div>
+            )}
+
+            {media.kind === 'tiktok' && media.src && mediaResident && (
 <div
   className="relative overflow-hidden rounded-lg"
   style={isFluid ? { width: '100%', aspectRatio: '9 / 16' } : { width: '100%', height: '100%' }}
@@ -1644,7 +1669,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
 
             )}
 
-            {media.kind === 'tiktok' && media.src && !shouldPlay && (
+            {media.kind === 'tiktok' && media.src && !mediaResident && (
               <div className="w-full h-full flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)]">
                 {host}
               </div>

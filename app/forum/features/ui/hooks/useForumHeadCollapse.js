@@ -187,6 +187,7 @@ export default function useForumHeadCollapse({
     let compRafB = 0
     let compTimeout = 0
     let lastTop = getScrollTop()
+    const SCROLL_EPS = 2
 
     const cancelCompensationSchedule = () => {
       if (compRafA) {
@@ -210,13 +211,20 @@ export default function useForumHeadCollapse({
         raf = 0
         const st = getScrollTop()
         const delta = st - lastTop
-        const scrollingDown = delta > 0
+        const scrollingDown = delta > SCROLL_EPS
+        const scrollingUp = delta < -SCROLL_EPS
         const openAt = getHeadOpenAt()
         const closeAt = getHeadCloseAt(openAt)
         const atTopForOpen = st <= openAt
+        const nearAbsoluteTop = st <= 20
 
         if (headPinnedRef.current) {
           headAutoOpenRef.current = false
+          lastTop = st
+          return
+        }
+
+        if (!scrollingDown && !scrollingUp) {
           lastTop = st
           return
         }
@@ -233,7 +241,7 @@ export default function useForumHeadCollapse({
           return
         }
 
-        if (!videoFeedOpenRef.current && atTopForOpen) {
+        if (!videoFeedOpenRef.current && atTopForOpen && (scrollingUp || nearAbsoluteTop)) {
           if (headHiddenRef.current) {
             setHeadPinned(false)
             setHeadHidden(false)
@@ -283,18 +291,27 @@ export default function useForumHeadCollapse({
     }
 
     const el = bodyRef.current
+    const useInnerScroll = !!el && (Number(el.scrollHeight || 0) > (Number(el.clientHeight || 0) + 1))
     const opts = { passive: true }
-    try {
-      el?.addEventListener?.('scroll', onScroll, opts)
-    } catch {}
-    window.addEventListener('scroll', onScroll, opts)
+    if (useInnerScroll) {
+      try {
+        el?.addEventListener?.('scroll', onScroll, opts)
+      } catch {}
+    } else {
+      window.addEventListener('scroll', onScroll, opts)
+    }
+    window.addEventListener('resize', onScroll, opts)
     onScroll()
 
     return () => {
-      try {
-        el?.removeEventListener?.('scroll', onScroll)
-      } catch {}
-      window.removeEventListener('scroll', onScroll)
+      if (useInnerScroll) {
+        try {
+          el?.removeEventListener?.('scroll', onScroll)
+        } catch {}
+      } else {
+        window.removeEventListener('scroll', onScroll)
+      }
+      window.removeEventListener('resize', onScroll)
       if (raf) {
         try {
           window.cancelAnimationFrame(raf)

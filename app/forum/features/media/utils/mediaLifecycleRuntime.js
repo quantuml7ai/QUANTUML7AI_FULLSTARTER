@@ -139,6 +139,10 @@ export function __unloadVideoEl(el) {
   } catch {}
   try {
     el.dataset.__active = '0'
+    el.dataset.__loadPending = '0'
+    el.dataset.__warmReady = '0'
+    el.dataset.__resident = '0'
+    el.dataset.__prewarm = '0'
   } catch {}
   const canHardUnload = (() => {
     try {
@@ -199,6 +203,8 @@ export function __restoreVideoEl(el) {
     }
   } catch {}
   try {
+    el.dataset.__loadPending = '1'
+    el.dataset.__warmReady = '0'
     el.setAttribute('src', src)
   } catch {}
   try {
