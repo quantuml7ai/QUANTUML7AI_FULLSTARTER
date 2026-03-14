@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-03-14T15:11:15.458Z",
+  "generatedAt": "2026-03-14T20:45:22.989Z",
   "report": [
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
@@ -9,7 +9,7 @@
         "while-loop": 2,
         "map-chain": 0,
         "filter-map": 0,
-        "layout-read": 6,
+        "layout-read": 7,
         "sync-json": 0,
         "local-storage": 2,
         "session-storage": 0,
@@ -18,7 +18,7 @@
         "interval": 2
       },
       "longLines": [],
-      "score": 50
+      "score": 53
     },
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\lib\\adsCore.js",
@@ -39,6 +39,24 @@
       "score": 50
     },
     {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\utils\\postFocus.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 12,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 5,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 46
+    },
+    {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\api\\dm\\delete\\route.js",
       "counts": {
         "for-loop": 22,
@@ -55,24 +73,6 @@
       },
       "longLines": [],
       "score": 44
-    },
-    {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\utils\\postFocus.js",
-      "counts": {
-        "for-loop": 0,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 11,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 5,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 43
     },
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\services\\forumApi.js",
@@ -688,6 +688,24 @@
         "session-storage": 0,
         "network-call": 0,
         "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 14
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useScrollResizeCompensation.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 1,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 3,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 1,
         "interval": 0
       },
       "longLines": [],
@@ -1661,24 +1679,6 @@
         "session-storage": 0,
         "network-call": 0,
         "raf": 0,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 5
-    },
-    {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useScrollResizeCompensation.js",
-      "counts": {
-        "for-loop": 0,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 1,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 1,
         "interval": 0
       },
       "longLines": [],

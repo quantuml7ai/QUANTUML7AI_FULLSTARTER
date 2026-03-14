@@ -40,6 +40,31 @@ function readMarginY(node) {
   }
 }
 
+function readScrollState(getScrollEl) {
+  try {
+    const scrollEl = typeof getScrollEl === 'function' ? getScrollEl() : null
+    if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {
+      return { mode: 'inner', top: Number(scrollEl.scrollTop || 0) || 0 }
+    }
+  } catch {}
+  try {
+    return {
+      mode: 'window',
+      top: Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0) || 0,
+    }
+  } catch {}
+  return { mode: 'window', top: 0 }
+}
+
+function isScrollStable(snapshot, getScrollEl, maxDelta = 10) {
+  try {
+    const next = readScrollState(getScrollEl)
+    if (String(next.mode || '') !== String(snapshot?.mode || '')) return false
+    return Math.abs(Number(next.top || 0) - Number(snapshot?.top || 0)) <= Math.max(0, Number(maxDelta || 0))
+  } catch {}
+  return false
+}
+
 export function centerNodeInScroll(node, options = {}) {
   const normalized = normalizeFocusOptions(options)
   const behavior = normalized?.behavior || 'auto'
@@ -47,7 +72,7 @@ export function centerNodeInScroll(node, options = {}) {
   const getScrollEl = typeof normalized?.getScrollEl === 'function' ? normalized.getScrollEl : () => null
   if (!isBrowserFn?.() || !node) return
 
-  const minDelta = behavior === 'smooth' ? 18 : 10
+  const minDelta = behavior === 'smooth' ? 24 : 14
 
   try {
     const scrollEl = getScrollEl?.()
@@ -94,7 +119,7 @@ export function centerNodeInScroll(node, options = {}) {
     }
   } catch {}
   try {
-    node.scrollIntoView?.({ behavior, block: 'center' })
+    node.scrollIntoView?.({ behavior, block: 'nearest' })
   } catch {
     try {
       node.scrollIntoView?.()
@@ -111,7 +136,7 @@ export function centerPostAfterDom(postId, options = {}) {
   const pid = String(postId || '').trim()
   if (!pid || !isBrowserFn?.()) return
   let tries = 0
-  const maxTries = 10
+  const maxTries = 5
   const tick = () => {
     tries += 1
     const node = document.getElementById(`post_${pid}`)
@@ -162,16 +187,18 @@ export function centerAndFlashPostAfterDom(postId, options = {}) {
   } catch {}
 
   let tries = 0
-  const maxTries = 18
+  const maxTries = 8
   const tick = () => {
     tries += 1
     const node = document.getElementById(`post_${pid}`)
     if (node) {
+      const baseScroll = readScrollState(getScrollEl)
       try {
         centerNodeInScrollFn(node, behavior)
       } catch {}
 
       try {
+        let recenterCount = 0
         const computeDelta = () => {
           try {
             const r = node.getBoundingClientRect?.()
@@ -200,8 +227,11 @@ export function centerAndFlashPostAfterDom(postId, options = {}) {
         }
 
         const maybeRecenter = () => {
+          if (recenterCount >= 1) return
+          if (!isScrollStable(baseScroll, getScrollEl, 10)) return
           const d = computeDelta()
-          if (Number.isFinite(d) && Math.abs(d) > 24) {
+          if (Number.isFinite(d) && Math.abs(d) > 44) {
+            recenterCount += 1
             try {
               centerNodeInScrollFn(node, 'auto')
             } catch {}
@@ -209,12 +239,11 @@ export function centerAndFlashPostAfterDom(postId, options = {}) {
         }
 
         try {
-          setTimeout(maybeRecenter, 90)
+          setTimeout(maybeRecenter, 96)
         } catch {}
 
         try {
           if (typeof ResizeObserver !== 'undefined') {
-            const scrollEl = getScrollEl?.()
             let stopped = false
             let rafId = 0
             const schedule = () => {
@@ -231,11 +260,6 @@ export function centerAndFlashPostAfterDom(postId, options = {}) {
             try {
               ro.observe(node)
             } catch {}
-            if (scrollEl) {
-              try {
-                ro.observe(scrollEl)
-              } catch {}
-            }
 
             setTimeout(() => {
               stopped = true
@@ -247,7 +271,7 @@ export function centerAndFlashPostAfterDom(postId, options = {}) {
                   cancelAnimationFrame(rafId)
                 } catch {}
               }
-            }, 180)
+            }, 90)
           }
         } catch {}
       } catch {}

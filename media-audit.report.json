@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-03-14T15:11:14.969Z",
+  "generatedAt": "2026-03-14T20:28:57.655Z",
   "results": [
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\i18n.js",
@@ -134,7 +134,7 @@
         "video": 1,
         "autoplay": 2,
         "loop": 10,
-        "preload": 5,
+        "preload": 8,
         "img": 0,
         "lazy": 0,
         "create": 0,
@@ -154,11 +154,11 @@
         ],
         "autoplay": [
           {
-            "line": 243,
+            "line": 263,
             "text": "// Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start."
           },
           {
-            "line": 542,
+            "line": 587,
             "text": "// === Shorts-like autoplay: play when in focus, pause when out ==="
           }
         ],
@@ -186,7 +186,7 @@
       "samples": {
         "video": [
           {
-            "line": 474,
+            "line": 490,
             "text": "<video"
           }
         ],
@@ -196,11 +196,11 @@
             "text": "autoPlay,"
           },
           {
-            "line": 150,
+            "line": 163,
             "text": "const nextMuted = typeof initial === 'boolean' ? initial : !!autoPlay"
           },
           {
-            "line": 197,
+            "line": 213,
             "text": "}, [autoPlay, mutedEvent, readMuted, writeMuted])"
           }
         ],
@@ -375,27 +375,27 @@
       "samples": {
         "video": [
           {
-            "line": 1600,
+            "line": 1705,
             "text": "<video"
           }
         ],
         "autoplay": [
           {
-            "line": 1257,
+            "line": 1357,
             "text": "autoplay: 0,"
           },
           {
-            "line": 1628,
+            "line": 1733,
             "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
           },
           {
-            "line": 1658,
+            "line": 1763,
             "text": "allow=\"autoplay; encrypted-media; fullscreen; picture-in-picture\""
           }
         ],
         "img": [
           {
-            "line": 1682,
+            "line": 1787,
             "text": "<img"
           }
         ],
@@ -878,6 +878,26 @@
       }
     },
     {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\QCastPlayer.jsx",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 2,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaRuntime.js",
       "counts": {
         "video": 0,
@@ -904,26 +924,6 @@
             "text": "const src = isStringSrc ? String(audioSource) : URL.createObjectURL(audioSource)"
           }
         ]
-      }
-    },
-    {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\qcoin\\hooks\\useQCoinLive.js",
-      "counts": {
-        "video": 0,
-        "autoplay": 0,
-        "loop": 0,
-        "preload": 2,
-        "img": 0,
-        "lazy": 0,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [],
-      "samples": {
-        "video": [],
-        "autoplay": [],
-        "img": [],
-        "create": []
       }
     },
     {
@@ -968,26 +968,6 @@
     },
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmVoicePlayer.jsx",
-      "counts": {
-        "video": 0,
-        "autoplay": 0,
-        "loop": 0,
-        "preload": 1,
-        "img": 0,
-        "lazy": 0,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [],
-      "samples": {
-        "video": [],
-        "autoplay": [],
-        "img": [],
-        "create": []
-      }
-    },
-    {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\QCastPlayer.jsx",
       "counts": {
         "video": 0,
         "autoplay": 0,

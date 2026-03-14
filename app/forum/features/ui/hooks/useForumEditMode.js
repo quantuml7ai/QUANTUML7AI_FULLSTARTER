@@ -33,10 +33,18 @@ export default function useForumEditMode({
             focusRaf = 0
             const root = (composerRef && composerRef.current) || document.getElementById('forum-composer')
             if (root && root.scrollIntoView) {
-              root.scrollIntoView({ behavior: 'smooth', block: 'center' })
+              root.scrollIntoView({ behavior: 'auto', block: 'nearest' })
             }
             const ta = root?.querySelector?.('.taInput') || root?.querySelector?.('textarea')
-            if (ta && typeof ta.focus === 'function') ta.focus()
+            const active = document.activeElement
+            const activeInsideComposer = !!(active && root?.contains?.(active))
+            if (ta && typeof ta.focus === 'function' && !activeInsideComposer) {
+              try {
+                ta.focus({ preventScroll: true })
+              } catch {
+                ta.focus()
+              }
+            }
           })
         } catch {}
 

@@ -320,7 +320,20 @@ const spawnFx = React.useCallback((kind, origin) => {
         setMuted(!!audio.muted);
         const v = Number(audio.volume);
         if (Number.isFinite(v)) setVolume(Math.min(1, Math.max(0, v)));
-        writeMuted(!!audio.muted);
+        const skipPersistUntil = Math.max(
+          Number(audio?.dataset?.__skipMutePersistUntil || 0),
+          Number(hostRef.current?.dataset?.__skipMutePersistUntil || 0),
+        );
+        if (skipPersistUntil <= Date.now()) {
+          writeMuted(!!audio.muted);
+        }
+      } catch {}
+      try {
+        const skipPersistUntil = Math.max(
+          Number(audio?.dataset?.__skipMutePersistUntil || 0),
+          Number(hostRef.current?.dataset?.__skipMutePersistUntil || 0),
+        );
+        if (skipPersistUntil > Date.now()) return;
       } catch {}
       try {
         window.dispatchEvent(new CustomEvent(mutedEventName, {
@@ -457,12 +470,86 @@ const spawnFx = React.useCallback((kind, origin) => {
 
   const togglePlay = async (e) => {
     e?.preventDefault?.(); e?.stopPropagation?.();
-    openControls(); await unlockAudio();
+    openControls();
     const audio = audioRef.current;
+    const host = hostRef.current;
     if (!audio) return;
+    const unlockPromise = unlockAudio();
     if (audio.muted && readMutedPref() == null) { try { audio.muted = false; } catch {} }
-    if (audio.paused) { try { const p = audio.play(); if (p?.catch) p.catch(()=>{}); } catch {} }
-    else { try { audio.pause(); } catch {} }
+    if (audio.paused) {
+      const gestureUntil = String(Date.now() + 1800);
+      const leaseUntil = String(Date.now() + 5200);
+      try {
+        delete audio.dataset.__autoplayFallbackMuted;
+        delete audio.dataset.__skipMutePersistUntil;
+        delete audio.dataset.__userPaused;
+        delete audio.dataset.__userPausedAt;
+        audio.dataset.__userGestureUntil = gestureUntil;
+        audio.dataset.__manualLeaseUntil = leaseUntil;
+        try { audio.preload = 'auto'; } catch {}
+        if ((audio.networkState === HTMLMediaElement.NETWORK_EMPTY) || !audio.currentSrc) {
+          try { audio.load?.(); } catch {}
+        }
+        if (host?.dataset) {
+          delete host.dataset.__autoplayFallbackMuted;
+          delete host.dataset.__skipMutePersistUntil;
+          host.dataset.__userGestureUntil = gestureUntil;
+        }
+        delete host?.dataset?.__userPaused;
+        delete host?.dataset?.__userPausedAt;
+        if (host?.dataset) host.dataset.__manualLeaseUntil = leaseUntil;
+      } catch {}
+      try {
+        const p = audio.play();
+        if (p && typeof p.then === 'function') {
+          p.then(() => {
+            void unlockPromise;
+            try {
+              window.dispatchEvent(new CustomEvent('site-media-play', {
+                detail: { source: 'qcast', element: host || null, manual: true, id: playerIdRef.current }
+              }));
+            } catch {}
+          }).catch(() => {
+            Promise.resolve(unlockPromise).then(() => {
+              try {
+                if (audio.paused) {
+                  const retry = audio.play?.();
+                  if (retry && typeof retry.then === 'function') {
+                    retry.then(() => {
+                      try {
+                        window.dispatchEvent(new CustomEvent('site-media-play', {
+                          detail: { source: 'qcast', element: host || null, manual: true, id: playerIdRef.current }
+                        }));
+                      } catch {}
+                    }).catch(() => {});
+                  }
+                }
+              } catch {}
+            }).catch(() => {});
+          });
+        }
+      } catch {}
+    }
+    else {
+      try {
+        audio.dataset.__userPaused = '1';
+        audio.dataset.__userPausedAt = String(Date.now());
+        delete audio.dataset.__autoplayFallbackMuted;
+        delete audio.dataset.__skipMutePersistUntil;
+        delete audio.dataset.__userGestureUntil;
+        delete audio.dataset.__manualLeaseUntil;
+        if (host?.dataset) {
+          host.dataset.__userPaused = '1';
+          host.dataset.__userPausedAt = String(Date.now());
+          delete host.dataset.__autoplayFallbackMuted;
+          delete host.dataset.__skipMutePersistUntil;
+          delete host.dataset.__userGestureUntil;
+          delete host.dataset.__manualLeaseUntil;
+        }
+      } catch {}
+      try { audio.pause(); } catch {}
+      try { await unlockPromise; } catch {}
+    }
   };
 
   const toggleMute = async (e) => {

@@ -30,7 +30,7 @@ export default function ForumAdSlot({ url, slotKind, nearId, slotKey, onResizeDe
       }
       const prev = lastHRef.current || 0
       const delta = h - prev
-      if (delta) {
+      if (Math.abs(delta) >= 16) {
         lastHRef.current = h
         try {
           onResizeDelta?.(node, delta, { slotKind, slotKey })

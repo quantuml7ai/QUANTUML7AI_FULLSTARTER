@@ -21,6 +21,13 @@ export default function useForumHeadCollapse({
   }, [selId, headAutoOpenRef, navRestoringRef])
 
   const prevSelIdRef = useRef(null)
+  const suppressScrollSyncUntilRef = useRef(0)
+
+  const suppressScrollSync = (ms = 180) => {
+    try {
+      suppressScrollSyncUntilRef.current = Date.now() + Math.max(80, Number(ms || 0))
+    } catch {}
+  }
   useEffect(() => {
     if (!isBrowserFn?.()) return
 
@@ -37,6 +44,7 @@ export default function useForumHeadCollapse({
     try {
       headAutoOpenRef.current = false
     } catch {}
+    suppressScrollSync(240)
     try {
       setHeadPinned(false)
     } catch {}
@@ -53,16 +61,14 @@ export default function useForumHeadCollapse({
           bodyRef.current ||
           document.querySelector('[data-forum-scroll="1"]') ||
           null
+        suppressScrollSync(260)
 
         if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {
-          scrollEl.scrollTop = 0
+          if (Number(scrollEl.scrollTop || 0) > 4) scrollEl.scrollTop = 0
         } else {
-          window.scrollTo(0, 0)
+          const top = Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0)
+          if (top > 4) window.scrollTo(0, 0)
         }
-
-        document
-          .querySelector('[data-forum-thread-start="1"]')
-          ?.scrollIntoView({ behavior: 'auto', block: 'start' })
       } catch {}
     }
 
@@ -187,7 +193,7 @@ export default function useForumHeadCollapse({
     let compRafB = 0
     let compTimeout = 0
     let lastTop = getScrollTop()
-    const SCROLL_EPS = 2
+    const SCROLL_EPS = 6
 
     const cancelCompensationSchedule = () => {
       if (compRafA) {
@@ -210,6 +216,10 @@ export default function useForumHeadCollapse({
       raf = window.requestAnimationFrame(() => {
         raf = 0
         const st = getScrollTop()
+        if (Date.now() < Number(suppressScrollSyncUntilRef.current || 0)) {
+          lastTop = st
+          return
+        }
         const delta = st - lastTop
         const scrollingDown = delta > SCROLL_EPS
         const scrollingUp = delta < -SCROLL_EPS
@@ -243,6 +253,7 @@ export default function useForumHeadCollapse({
 
         if (!videoFeedOpenRef.current && atTopForOpen && (scrollingUp || nearAbsoluteTop)) {
           if (headHiddenRef.current) {
+            suppressScrollSync(220)
             setHeadPinned(false)
             setHeadHidden(false)
           }
@@ -250,11 +261,12 @@ export default function useForumHeadCollapse({
         } else if (!headHiddenRef.current && scrollingDown && st > closeAt) {
           const prevSt = st
           const headH = getHeadHeight()
-          const compensate = readCssFlag01('--head-collapse-scroll-compensate', 1)
+          const compensate = readCssFlag01('--head-collapse-scroll-compensate', 0)
+          suppressScrollSync(220)
           setHeadPinned(false)
           setHeadHidden(true)
 
-          if (compensate && headH > 1) {
+          if (compensate && headH > 1 && prevSt > 32) {
             const applyComp = () => {
               try {
                 const el = bodyRef.current

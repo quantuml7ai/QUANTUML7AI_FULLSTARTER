@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-03-14T14:36:15.689Z",
+  "generatedAt": "2026-03-14T20:45:22.633Z",
   "report": [
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\tools\\audit-heavy.js",
@@ -375,133 +375,133 @@
       "hits": [
         {
           "key": "setTimeout",
-          "line": 325,
+          "line": 341,
           "text": "unloadTimer = setTimeout(() => {",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
           "key": "setTimeout",
-          "line": 428,
+          "line": 444,
           "text": "recoverTimerRef.current = setTimeout(() => {",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
           "key": "requestAnimationFrame",
-          "line": 465,
+          "line": 481,
           "text": "requestAnimationFrame(() => revealPoster())",
           "why": "RAF-циклы часто грузят main-thread"
         },
         {
           "key": "addEventListener",
-          "line": 187,
+          "line": 203,
           "text": "el.addEventListener('volumechange', onVol)",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 189,
+          "line": 205,
           "text": "window.addEventListener(mutedEvent, onMutedEvent)",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 222,
+          "line": 238,
           "text": "try { el.addEventListener('loadstart', markPending) } catch {}",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 223,
+          "line": 239,
           "text": "try { el.addEventListener('loadeddata', markReady) } catch {}",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 224,
+          "line": 240,
           "text": "try { el.addEventListener('canplay', markReady) } catch {}",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 225,
+          "line": 241,
           "text": "try { el.addEventListener('playing', markReady) } catch {}",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 226,
+          "line": 242,
           "text": "try { el.addEventListener('abort', markCold) } catch {}",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 227,
+          "line": 243,
           "text": "try { el.addEventListener('emptied', markCold) } catch {}",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 228,
+          "line": 244,
           "text": "try { el.addEventListener('error', markCold) } catch {}",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "removeEventListener",
-          "line": 193,
+          "line": 209,
           "text": "el.removeEventListener('volumechange', onVol)",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 195,
+          "line": 211,
           "text": "window.removeEventListener(mutedEvent, onMutedEvent)",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 231,
+          "line": 247,
           "text": "try { el.removeEventListener('loadstart', markPending) } catch {}",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 232,
+          "line": 248,
           "text": "try { el.removeEventListener('loadeddata', markReady) } catch {}",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 233,
+          "line": 249,
           "text": "try { el.removeEventListener('canplay', markReady) } catch {}",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 234,
+          "line": 250,
           "text": "try { el.removeEventListener('playing', markReady) } catch {}",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 235,
+          "line": 251,
           "text": "try { el.removeEventListener('abort', markCold) } catch {}",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 236,
+          "line": 252,
           "text": "try { el.removeEventListener('emptied', markCold) } catch {}",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 237,
+          "line": 253,
           "text": "try { el.removeEventListener('error', markCold) } catch {}",
           "why": "Проверяем парность с add"
         },
         {
           "key": "<video",
-          "line": 474,
+          "line": 490,
           "text": "<video",
           "why": "Видео = память+декодер+GPU"
         },
@@ -513,19 +513,19 @@
         },
         {
           "key": "autoplay",
-          "line": 150,
+          "line": 163,
           "text": "const nextMuted = typeof initial === 'boolean' ? initial : !!autoPlay",
           "why": "Autoplay/loop → постоянная нагрузка"
         },
         {
           "key": "autoplay",
-          "line": 197,
+          "line": 213,
           "text": "}, [autoPlay, mutedEvent, readMuted, writeMuted])",
           "why": "Autoplay/loop → постоянная нагрузка"
         },
         {
           "key": "autoplay",
-          "line": 482,
+          "line": 498,
           "text": "autoPlay={autoPlay}",
           "why": "Autoplay/loop → постоянная нагрузка"
         },
@@ -537,7 +537,7 @@
         },
         {
           "key": "loop",
-          "line": 483,
+          "line": 499,
           "text": "loop={loop}",
           "why": "Loop особенно опасен на множестве карточек"
         },
@@ -549,37 +549,37 @@
         },
         {
           "key": "preload",
-          "line": 125,
+          "line": 129,
           "text": "el.preload = effectivePreload",
           "why": "preload=auto/metadata может забивать сеть/память"
         },
         {
           "key": "preload",
-          "line": 308,
+          "line": 324,
           "text": "el.preload = 'auto'",
           "why": "preload=auto/metadata может забивать сеть/память"
         },
         {
           "key": "preload",
-          "line": 331,
+          "line": 347,
           "text": "el.preload = el.dataset?.__prewarm === '1' ? 'auto' : 'metadata'",
           "why": "preload=auto/metadata может забивать сеть/память"
         },
         {
           "key": "preload",
-          "line": 345,
+          "line": 361,
           "text": "el.preload = 'metadata'",
           "why": "preload=auto/metadata может забивать сеть/память"
         },
         {
           "key": "preload",
-          "line": 423,
+          "line": 439,
           "text": "el.preload = 'metadata'",
           "why": "preload=auto/metadata может забивать сеть/память"
         },
         {
           "key": "preload",
-          "line": 480,
+          "line": 496,
           "text": "preload={renderPreload}",
           "why": "preload=auto/metadata может забивать сеть/память"
         }
@@ -590,17 +590,17 @@
       "counts": {
         "setInterval": 2,
         "clearInterval": 2,
-        "setTimeout": 4,
+        "setTimeout": 6,
         "requestAnimationFrame": 3,
         "cancelAnimationFrame": 3,
-        "querySelectorAll": 16,
-        "addEventListener": 10,
-        "removeEventListener": 10,
+        "querySelectorAll": 18,
+        "addEventListener": 14,
+        "removeEventListener": 14,
         "<video": 1,
         "<audio": 2,
         "autoplay": 2,
         "loop": 10,
-        "preload": 5
+        "preload": 8
       },
       "flags": [
         "⚠ autoplay видео (может грузить/GPU/память)"
@@ -608,301 +608,373 @@
       "hits": [
         {
           "key": "setInterval",
-          "line": 718,
+          "line": 1223,
           "text": "const id = setInterval(() => {",
           "why": "Может плодиться/не чиститься → утечки/нагрузка"
         },
         {
           "key": "setInterval",
-          "line": 1276,
+          "line": 2058,
           "text": "// Вместо setInterval(querySelectorAll...) — MutationObserver на новые медиа-узлы",
           "why": "Может плодиться/не чиститься → утечки/нагрузка"
         },
         {
           "key": "clearInterval",
-          "line": 713,
+          "line": 1218,
           "text": "if (id) clearInterval(id);",
           "why": "Проверяем парность с setInterval"
         },
         {
           "key": "clearInterval",
-          "line": 1333,
+          "line": 2123,
           "text": "ytMutePolls.forEach((id) => clearInterval(id));",
           "why": "Проверяем парность с setInterval"
         },
         {
           "key": "setTimeout",
-          "line": 184,
+          "line": 214,
           "text": "const timeoutId = setTimeout(run, 12);",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
           "key": "setTimeout",
-          "line": 379,
+          "line": 403,
+          "text": "warmSweepSettleTimer = setTimeout(() => {",
+          "why": "Может заспамить ререндер/таймеры"
+        },
+        {
+          "key": "setTimeout",
+          "line": 424,
           "text": "warmSweepTimeout = setTimeout(runner, 32);",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
           "key": "setTimeout",
-          "line": 689,
+          "line": 951,
+          "text": "setTimeout(() => {",
+          "why": "Может заспамить ререндер/таймеры"
+        },
+        {
+          "key": "setTimeout",
+          "line": 1187,
           "text": "else setTimeout(check, 60);",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
           "key": "setTimeout",
-          "line": 973,
+          "line": 1569,
           "text": "const id = setTimeout(() => {",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
           "key": "requestAnimationFrame",
-          "line": 183,
+          "line": 213,
           "text": "const rafId = typeof requestAnimationFrame === 'function' ? requestAnimationFrame(run) : 0;",
           "why": "RAF-циклы часто грузят main-thread"
         },
         {
           "key": "requestAnimationFrame",
-          "line": 377,
+          "line": 422,
           "text": "warmSweepRaf = requestAnimationFrame(runner);",
           "why": "RAF-циклы часто грузят main-thread"
         },
         {
           "key": "requestAnimationFrame",
-          "line": 1162,
+          "line": 1828,
           "text": "rafId = requestAnimationFrame(() => {",
           "why": "RAF-циклы часто грузят main-thread"
         },
         {
           "key": "cancelAnimationFrame",
-          "line": 189,
+          "line": 219,
           "text": "if (job?.rafId) cancelAnimationFrame(job.rafId);",
           "why": "Проверяем парность с RAF"
         },
         {
           "key": "cancelAnimationFrame",
-          "line": 341,
+          "line": 371,
           "text": "try { cancelAnimationFrame(warmSweepRaf); } catch {}",
           "why": "Проверяем парность с RAF"
         },
         {
           "key": "cancelAnimationFrame",
-          "line": 1294,
+          "line": 2084,
           "text": "try { if (rafId) cancelAnimationFrame(rafId); } catch {}",
           "why": "Проверяем парность с RAF"
         },
         {
           "key": "querySelectorAll",
-          "line": 27,
+          "line": 44,
           "text": "document.querySelectorAll('iframe[data-forum-media]').forEach((frame) => {",
           "why": "Может быть дорого/часто вызываться"
         },
         {
           "key": "querySelectorAll",
-          "line": 57,
+          "line": 82,
           "text": "document.querySelectorAll('video').forEach((v) => {",
           "why": "Может быть дорого/часто вызываться"
         },
         {
           "key": "querySelectorAll",
-          "line": 63,
+          "line": 89,
           "text": "document.querySelectorAll('audio').forEach((a) => {",
           "why": "Может быть дорого/часто вызываться"
         },
         {
           "key": "querySelectorAll",
-          "line": 80,
+          "line": 109,
           "text": "document.querySelectorAll('video').forEach((v) => {",
           "why": "Может быть дорого/часто вызываться"
         },
         {
           "key": "querySelectorAll",
-          "line": 86,
+          "line": 115,
           "text": "document.querySelectorAll('audio').forEach((a) => {",
           "why": "Может быть дорого/часто вызываться"
         },
         {
           "key": "querySelectorAll",
-          "line": 307,
+          "line": 337,
           "text": "const ranked = Array.from(document.querySelectorAll(selector))",
           "why": "Может быть дорого/часто вызываться"
         },
         {
           "key": "querySelectorAll",
-          "line": 331,
+          "line": 361,
           "text": "Array.from(document.querySelectorAll(selector)).forEach((video) => {",
           "why": "Может быть дорого/часто вызываться"
         },
         {
           "key": "querySelectorAll",
-          "line": 385,
+          "line": 430,
           "text": "document.querySelectorAll(selector).forEach(warm);",
           "why": "Может быть дорого/часто вызываться"
         },
         {
           "key": "querySelectorAll",
-          "line": 412,
+          "line": 457,
           "text": "document.querySelectorAll(selector).forEach((v) => {",
           "why": "Может быть дорого/часто вызываться"
         },
         {
           "key": "querySelectorAll",
-          "line": 473,
+          "line": 528,
           "text": "return Array.from(document.querySelectorAll(selector)).filter((el) => {",
           "why": "Может быть дорого/часто вызываться"
         },
         {
           "key": "querySelectorAll",
-          "line": 511,
+          "line": 566,
           "text": "try { document.querySelectorAll(selector).forEach((el) => io.observe(el)); } catch {}",
           "why": "Может быть дорого/часто вызываться"
         },
         {
           "key": "querySelectorAll",
-          "line": 599,
+          "line": 655,
+          "text": "return Array.from(document.querySelectorAll(selector)).map((el) => {",
+          "why": "Может быть дорого/часто вызываться"
+        },
+        {
+          "key": "querySelectorAll",
+          "line": 750,
           "text": "document.querySelectorAll('[data-forum-media]').forEach((el) => {",
           "why": "Может быть дорого/часто вызываться"
         },
         {
           "key": "querySelectorAll",
-          "line": 830,
+          "line": 1361,
           "text": "return Array.from(document.querySelectorAll('iframe[data-forum-media]')).filter((frame) => {",
           "why": "Может быть дорого/часто вызываться"
         },
         {
           "key": "querySelectorAll",
-          "line": 839,
+          "line": 1370,
           "text": "const all = Array.from(document.querySelectorAll('iframe[data-forum-media]'));",
           "why": "Может быть дорого/часто вызываться"
         },
         {
           "key": "querySelectorAll",
-          "line": 1271,
+          "line": 1439,
+          "text": "document.querySelectorAll(selector).forEach((node) => {",
+          "why": "Может быть дорого/часто вызываться"
+        },
+        {
+          "key": "querySelectorAll",
+          "line": 2024,
           "text": "try { document.querySelectorAll(selector).forEach(observeOne); } catch {}",
           "why": "Может быть дорого/часто вызываться"
         },
         {
           "key": "querySelectorAll",
-          "line": 1313,
+          "line": 2103,
           "text": "document.querySelectorAll(selector).forEach((el) => {",
           "why": "Может быть дорого/часто вызываться"
         },
         {
           "key": "addEventListener",
-          "line": 106,
+          "line": 135,
           "text": "document.addEventListener('play', handlePlay, true);",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 107,
+          "line": 136,
           "text": "window.addEventListener('site-media-play', onSiteMediaPlay);",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 431,
+          "line": 486,
           "text": "try { window.addEventListener('resize', onWarmSweepResize, { passive: true }); } catch {}",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 433,
+          "line": 488,
           "text": "try { scrollEl.addEventListener('scroll', onWarmSweepScroll, { passive: true }); } catch {}",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 435,
+          "line": 490,
           "text": "try { window.addEventListener('scroll', onWarmSweepScroll, { passive: true }); } catch {}",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 437,
+          "line": 492,
           "text": "try { document.addEventListener('visibilitychange', onWarmSweepVisibility); } catch {}",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 654,
+          "line": 988,
           "text": "try { el.addEventListener('loadeddata', onReady, { once: true }); } catch {}",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 655,
+          "line": 989,
           "text": "try { el.addEventListener('canplay', onReady, { once: true }); } catch {}",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 673,
+          "line": 1045,
           "text": "el.addEventListener('volumechange', h, { passive: true });",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 1290,
+          "line": 2072,
           "text": "window.addEventListener(MEDIA_MUTED_EVENT, onMutedEvent);",
           "why": "Если без remove → утечки и лаги"
         },
         {
+          "key": "addEventListener",
+          "line": 2073,
+          "text": "window.addEventListener('site-media-play', onExternalMediaPlay);",
+          "why": "Если без remove → утечки и лаги"
+        },
+        {
+          "key": "addEventListener",
+          "line": 2074,
+          "text": "document.addEventListener('pointerdown', onMediaPointerCaptured, true);",
+          "why": "Если без remove → утечки и лаги"
+        },
+        {
+          "key": "addEventListener",
+          "line": 2075,
+          "text": "document.addEventListener('pause', onMediaPauseCaptured, true);",
+          "why": "Если без remove → утечки и лаги"
+        },
+        {
+          "key": "addEventListener",
+          "line": 2076,
+          "text": "document.addEventListener('play', onMediaPlayCaptured, true);",
+          "why": "Если без remove → утечки и лаги"
+        },
+        {
           "key": "removeEventListener",
-          "line": 109,
+          "line": 138,
           "text": "document.removeEventListener('play', handlePlay, true);",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 110,
+          "line": 139,
           "text": "window.removeEventListener('site-media-play', onSiteMediaPlay);",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 441,
+          "line": 496,
           "text": "try { window.removeEventListener('resize', onWarmSweepResize); } catch {}",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 443,
+          "line": 498,
           "text": "try { scrollEl.removeEventListener('scroll', onWarmSweepScroll); } catch {}",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 445,
+          "line": 500,
           "text": "try { window.removeEventListener('scroll', onWarmSweepScroll); } catch {}",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 447,
+          "line": 502,
           "text": "try { document.removeEventListener('visibilitychange', onWarmSweepVisibility); } catch {}",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 657,
+          "line": 991,
           "text": "try { el.removeEventListener('loadeddata', onReady); } catch {}",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 658,
+          "line": 992,
           "text": "try { el.removeEventListener('canplay', onReady); } catch {}",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 1293,
+          "line": 2079,
           "text": "window.removeEventListener(MEDIA_MUTED_EVENT, onMutedEvent);",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 1316,
+          "line": 2080,
+          "text": "window.removeEventListener('site-media-play', onExternalMediaPlay);",
+          "why": "Проверяем парность с add"
+        },
+        {
+          "key": "removeEventListener",
+          "line": 2081,
+          "text": "document.removeEventListener('pointerdown', onMediaPointerCaptured, true);",
+          "why": "Проверяем парность с add"
+        },
+        {
+          "key": "removeEventListener",
+          "line": 2082,
+          "text": "document.removeEventListener('pause', onMediaPauseCaptured, true);",
+          "why": "Проверяем парность с add"
+        },
+        {
+          "key": "removeEventListener",
+          "line": 2083,
+          "text": "document.removeEventListener('play', onMediaPlayCaptured, true);",
+          "why": "Проверяем парность с add"
+        },
+        {
+          "key": "removeEventListener",
+          "line": 2106,
           "text": "if (h) el.removeEventListener('volumechange', h);",
           "why": "Проверяем парность с add"
         },
@@ -920,103 +992,103 @@
         },
         {
           "key": "<audio",
-          "line": 1251,
+          "line": 2004,
           "text": "// Q-Cast: mute/unmute берём с вложенного <audio>",
           "why": "Аудио = доп ресурсы"
         },
         {
           "key": "autoplay",
-          "line": 233,
+          "line": 263,
           "text": "// Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start.",
           "why": "Autoplay/loop → постоянная нагрузка"
         },
         {
           "key": "autoplay",
-          "line": 532,
+          "line": 587,
           "text": "// === Shorts-like autoplay: play when in focus, pause when out ===",
           "why": "Autoplay/loop → постоянная нагрузка"
         },
         {
           "key": "loop",
-          "line": 645,
+          "line": 982,
           "text": "try { el.loop = true; } catch {}",
           "why": "Loop особенно опасен на множестве карточек"
         },
         {
           "key": "loop",
-          "line": 755,
+          "line": 1286,
           "text": "// LOOP: когда ролик закончился — стартуем заново без reload iframe",
           "why": "Loop особенно опасен на множестве карточек"
         },
         {
           "key": "loop",
-          "line": 979,
+          "line": 1575,
           "text": "// Best-effort loop для iframe (Vimeo/встроенные плееры/прочее):",
           "why": "Loop особенно опасен на множестве карточек"
         },
         {
           "key": "loop",
-          "line": 980,
+          "line": 1576,
           "text": "// добавляем loop=1 ОДИН РАЗ (не на каждом фокусе), чтобы не было дергания.",
           "why": "Loop особенно опасен на множестве карточек"
         },
         {
           "key": "loop",
-          "line": 984,
+          "line": 1580,
           "text": "if (!u.searchParams.has('loop')) u.searchParams.set('loop', '1');",
           "why": "Loop особенно опасен на множестве карточек"
         },
         {
           "key": "loop",
-          "line": 1020,
+          "line": 1621,
           "text": "// LOOP: автоплей всегда зацикленный",
           "why": "Loop особенно опасен на множестве карточек"
         },
         {
           "key": "loop",
-          "line": 1021,
+          "line": 1622,
           "text": "el.loop = true;",
           "why": "Loop особенно опасен на множестве карточек"
         },
         {
           "key": "loop",
-          "line": 1040,
+          "line": 1645,
           "text": "// LOOP: qcast-аудио тоже зацикливаем",
           "why": "Loop особенно опасен на множестве карточек"
         },
         {
           "key": "loop",
-          "line": 1041,
+          "line": 1646,
           "text": "a.loop = true;",
           "why": "Loop особенно опасен на множестве карточек"
         },
         {
           "key": "loop",
-          "line": 1080,
+          "line": 1686,
           "text": "// сохраняем уже \"loop-версию\" в data-src, чтобы дальше не мутить url повторно",
           "why": "Loop особенно опасен на множестве карточек"
         },
         {
           "key": "preload",
-          "line": 225,
+          "line": 255,
           "text": "video.preload = 'auto';",
           "why": "preload=auto/metadata может забивать сеть/память"
         },
         {
           "key": "preload",
-          "line": 269,
+          "line": 299,
           "text": "video.preload = 'metadata';",
           "why": "preload=auto/metadata может забивать сеть/память"
         },
         {
           "key": "preload",
-          "line": 291,
+          "line": 321,
           "text": "video.preload = 'auto';",
           "why": "preload=auto/metadata может забивать сеть/память"
         },
         {
           "key": "preload",
-          "line": 294,
+          "line": 324,
           "text": "video.preload = 'metadata';",
           "why": "preload=auto/metadata может забивать сеть/память"
         },
@@ -1024,6 +1096,24 @@
           "key": "preload",
           "line": 1006,
           "text": "try { el.preload = 'auto'; } catch {}",
+          "why": "preload=auto/metadata может забивать сеть/память"
+        },
+        {
+          "key": "preload",
+          "line": 1012,
+          "text": "try { el.preload = 'auto'; } catch {}",
+          "why": "preload=auto/metadata может забивать сеть/память"
+        },
+        {
+          "key": "preload",
+          "line": 1607,
+          "text": "try { el.preload = 'auto'; } catch {}",
+          "why": "preload=auto/metadata может забивать сеть/память"
+        },
+        {
+          "key": "preload",
+          "line": 1647,
+          "text": "try { a.preload = 'auto'; } catch {}",
           "why": "preload=auto/metadata может забивать сеть/память"
         }
       ]
@@ -1135,7 +1225,7 @@
       "counts": {
         "setInterval": 1,
         "clearInterval": 1,
-        "setTimeout": 3,
+        "setTimeout": 4,
         "addEventListener": 4,
         "removeEventListener": 4,
         "<video": 1,
@@ -1152,139 +1242,145 @@
       "hits": [
         {
           "key": "setInterval",
-          "line": 983,
+          "line": 1058,
           "text": "const timer = setInterval(pickNext, rotateMs);",
           "why": "Может плодиться/не чиститься → утечки/нагрузка"
         },
         {
           "key": "clearInterval",
-          "line": 986,
+          "line": 1061,
           "text": "clearInterval(timer);",
           "why": "Проверяем парность с setInterval"
         },
         {
           "key": "setTimeout",
-          "line": 713,
+          "line": 716,
           "text": "const timer = setTimeout(() => finish(false), timeoutMs);",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
           "key": "setTimeout",
-          "line": 723,
+          "line": 750,
           "text": "const timer = setTimeout(() => controller.abort(), timeoutMs);",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
           "key": "setTimeout",
-          "line": 1350,
+          "line": 904,
+          "text": "timer = setTimeout(() => {",
+          "why": "Может заспамить ререндер/таймеры"
+        },
+        {
+          "key": "setTimeout",
+          "line": 1470,
           "text": "timer = setTimeout(() => {",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
           "key": "addEventListener",
-          "line": 847,
+          "line": 922,
           "text": "document.addEventListener('visibilitychange', sync);",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 848,
+          "line": 923,
           "text": "window.addEventListener('focus', sync);",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 849,
+          "line": 924,
           "text": "window.addEventListener('blur', sync);",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 913,
+          "line": 988,
           "text": "window.addEventListener(MEDIA_MUTED_EVENT, onMuted);",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "removeEventListener",
-          "line": 852,
+          "line": 927,
           "text": "document.removeEventListener('visibilitychange', sync);",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 853,
+          "line": 928,
           "text": "window.removeEventListener('focus', sync);",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 854,
+          "line": 929,
           "text": "window.removeEventListener('blur', sync);",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 914,
+          "line": 989,
           "text": "return () => window.removeEventListener(MEDIA_MUTED_EVENT, onMuted);",
           "why": "Проверяем парность с add"
         },
         {
           "key": "<video",
-          "line": 1585,
+          "line": 1705,
           "text": "<video",
           "why": "Видео = память+декодер+GPU"
         },
         {
           "key": "<img",
-          "line": 1657,
+          "line": 1787,
           "text": "<img",
           "why": "Картинки без lazy часто убивают память"
         },
         {
           "key": "autoplay",
-          "line": 1242,
+          "line": 1357,
           "text": "autoplay: 0,",
           "why": "Autoplay/loop → постоянная нагрузка"
         },
         {
           "key": "autoplay",
-          "line": 1609,
+          "line": 1733,
           "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\"",
           "why": "Autoplay/loop → постоянная нагрузка"
         },
         {
           "key": "autoplay",
-          "line": 1633,
+          "line": 1763,
           "text": "allow=\"autoplay; encrypted-media; fullscreen; picture-in-picture\"",
           "why": "Autoplay/loop → постоянная нагрузка"
         },
         {
           "key": "loop",
-          "line": 1249,
+          "line": 1364,
           "text": "loop: 1,",
           "why": "Loop особенно опасен на множестве карточек"
         },
         {
           "key": "loop",
-          "line": 1590,
+          "line": 1710,
           "text": "loop",
           "why": "Loop особенно опасен на множестве карточек"
         },
         {
           "key": "preload",
-          "line": 1592,
+          "line": 1712,
           "text": "preload={shouldPlay ? 'auto' : 'metadata'}",
           "why": "preload=auto/metadata может забивать сеть/память"
         },
         {
           "key": "loading=lazy",
-          "line": 1661,
+          "line": 1791,
           "text": "loading=\"lazy\"",
           "why": "Ищем где НЕ lazy"
         },
         {
           "key": "decoding=async",
-          "line": 1662,
+          "line": 1792,
           "text": "decoding=\"async\"",
           "why": "Полезно для img"
         }
@@ -1422,7 +1518,7 @@
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\utils\\postFocus.js",
       "counts": {
         "setTimeout": 7,
-        "requestAnimationFrame": 6,
+        "requestAnimationFrame": 5,
         "cancelAnimationFrame": 1,
         "getBoundingClientRect": 2
       },
@@ -1430,97 +1526,91 @@
       "hits": [
         {
           "key": "setTimeout",
-          "line": 127,
+          "line": 152,
           "text": "setTimeout(tick, 16)",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
           "key": "setTimeout",
-          "line": 136,
+          "line": 161,
           "text": "setTimeout(tick, 0)",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
           "key": "setTimeout",
-          "line": 215,
-          "text": "setTimeout(maybeRecenter, 110)",
+          "line": 242,
+          "text": "setTimeout(maybeRecenter, 96)",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
           "key": "setTimeout",
-          "line": 243,
+          "line": 264,
           "text": "setTimeout(() => {",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
           "key": "setTimeout",
-          "line": 259,
+          "line": 280,
           "text": "window.setTimeout(() => node.classList.remove('replyTargetFlash'), 1100)",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
           "key": "setTimeout",
-          "line": 268,
+          "line": 289,
           "text": "setTimeout(tick, 16)",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
           "key": "setTimeout",
-          "line": 277,
+          "line": 298,
           "text": "setTimeout(tick, 0)",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
           "key": "requestAnimationFrame",
-          "line": 124,
+          "line": 149,
           "text": "requestAnimationFrame(tick)",
           "why": "RAF-циклы часто грузят main-thread"
         },
         {
           "key": "requestAnimationFrame",
-          "line": 133,
+          "line": 158,
           "text": "requestAnimationFrame(tick)",
           "why": "RAF-циклы часто грузят main-thread"
         },
         {
           "key": "requestAnimationFrame",
-          "line": 212,
-          "text": "requestAnimationFrame(maybeRecenter)",
-          "why": "RAF-циклы часто грузят main-thread"
-        },
-        {
-          "key": "requestAnimationFrame",
-          "line": 226,
+          "line": 252,
           "text": "rafId = requestAnimationFrame(() => {",
           "why": "RAF-циклы часто грузят main-thread"
         },
         {
           "key": "requestAnimationFrame",
-          "line": 265,
+          "line": 286,
           "text": "requestAnimationFrame(tick)",
           "why": "RAF-циклы часто грузят main-thread"
         },
         {
           "key": "requestAnimationFrame",
-          "line": 274,
+          "line": 295,
           "text": "requestAnimationFrame(tick)",
           "why": "RAF-циклы часто грузят main-thread"
         },
         {
           "key": "cancelAnimationFrame",
-          "line": 250,
+          "line": 271,
           "text": "cancelAnimationFrame(rafId)",
           "why": "Проверяем парность с RAF"
         },
         {
           "key": "getBoundingClientRect",
-          "line": 55,
+          "line": 80,
           "text": "const contRect = scrollEl.getBoundingClientRect()",
           "why": "Очень дорого в скролле/таче/raf"
         },
         {
           "key": "getBoundingClientRect",
-          "line": 56,
+          "line": 81,
           "text": "const r = node.getBoundingClientRect()",
           "why": "Очень дорого в скролле/таче/raf"
         }
@@ -1626,19 +1716,19 @@
         },
         {
           "key": "getBoundingClientRect",
-          "line": 87,
+          "line": 88,
           "text": "const rect = el.getBoundingClientRect()",
           "why": "Очень дорого в скролле/таче/raf"
         },
         {
           "key": "getBoundingClientRect",
-          "line": 88,
+          "line": 89,
           "text": "const contRect = scrollEl.getBoundingClientRect()",
           "why": "Очень дорого в скролле/таче/raf"
         },
         {
           "key": "getBoundingClientRect",
-          "line": 97,
+          "line": 100,
           "text": "const rect = el.getBoundingClientRect()",
           "why": "Очень дорого в скролле/таче/raf"
         }
@@ -2093,103 +2183,103 @@
       "hits": [
         {
           "key": "setTimeout",
-          "line": 82,
+          "line": 88,
           "text": "timeoutId = window.setTimeout(() => {",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
           "key": "setTimeout",
-          "line": 283,
+          "line": 295,
           "text": "compTimeout = window.setTimeout(applyComp, 0)",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
           "key": "requestAnimationFrame",
-          "line": 75,
+          "line": 81,
           "text": "rafA = requestAnimationFrame(() => {",
           "why": "RAF-циклы часто грузят main-thread"
         },
         {
           "key": "requestAnimationFrame",
-          "line": 76,
+          "line": 82,
           "text": "rafB = requestAnimationFrame(() => {",
           "why": "RAF-циклы часто грузят main-thread"
         },
         {
           "key": "requestAnimationFrame",
-          "line": 210,
+          "line": 216,
           "text": "raf = window.requestAnimationFrame(() => {",
           "why": "RAF-циклы часто грузят main-thread"
         },
         {
           "key": "requestAnimationFrame",
-          "line": 277,
+          "line": 289,
           "text": "compRafA = requestAnimationFrame(() => {",
           "why": "RAF-циклы часто грузят main-thread"
         },
         {
           "key": "requestAnimationFrame",
-          "line": 278,
+          "line": 290,
           "text": "compRafB = requestAnimationFrame(applyComp)",
           "why": "RAF-циклы часто грузят main-thread"
         },
         {
           "key": "cancelAnimationFrame",
-          "line": 91,
+          "line": 97,
           "text": "try { cancelAnimationFrame(rafA) } catch {}",
           "why": "Проверяем парность с RAF"
         },
         {
           "key": "cancelAnimationFrame",
-          "line": 95,
+          "line": 101,
           "text": "try { cancelAnimationFrame(rafB) } catch {}",
           "why": "Проверяем парность с RAF"
         },
         {
           "key": "cancelAnimationFrame",
-          "line": 194,
+          "line": 200,
           "text": "try { window.cancelAnimationFrame(compRafA) } catch {}",
           "why": "Проверяем парность с RAF"
         },
         {
           "key": "cancelAnimationFrame",
-          "line": 198,
+          "line": 204,
           "text": "try { window.cancelAnimationFrame(compRafB) } catch {}",
           "why": "Проверяем парность с RAF"
         },
         {
           "key": "cancelAnimationFrame",
-          "line": 317,
+          "line": 329,
           "text": "window.cancelAnimationFrame(raf)",
           "why": "Проверяем парность с RAF"
         },
         {
           "key": "addEventListener",
-          "line": 301,
+          "line": 313,
           "text": "window.addEventListener('scroll', onScroll, opts)",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 303,
+          "line": 315,
           "text": "window.addEventListener('resize', onScroll, opts)",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "removeEventListener",
-          "line": 312,
+          "line": 324,
           "text": "window.removeEventListener('scroll', onScroll)",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 314,
+          "line": 326,
           "text": "window.removeEventListener('resize', onScroll)",
           "why": "Проверяем парность с add"
         },
         {
           "key": "onScroll",
-          "line": 207,
+          "line": 213,
           "text": "const onScroll = () => {",
           "why": "Проверь, нет ли setState/измерений внутри"
         }
@@ -2707,6 +2797,74 @@
           "key": "onScroll",
           "line": 269,
           "text": "const onScroll = () => schedulePositionUpdate()",
+          "why": "Проверь, нет ли setState/измерений внутри"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useScrollResizeCompensation.js",
+      "counts": {
+        "requestAnimationFrame": 1,
+        "cancelAnimationFrame": 1,
+        "getBoundingClientRect": 2,
+        "addEventListener": 2,
+        "removeEventListener": 2,
+        "onScroll": 1
+      },
+      "flags": [],
+      "hits": [
+        {
+          "key": "requestAnimationFrame",
+          "line": 52,
+          "text": "rafGuardRef.current = window.requestAnimationFrame(() => {",
+          "why": "RAF-циклы часто грузят main-thread"
+        },
+        {
+          "key": "cancelAnimationFrame",
+          "line": 33,
+          "text": "try { window.cancelAnimationFrame(rafGuardRef.current) } catch {}",
+          "why": "Проверяем парность с RAF"
+        },
+        {
+          "key": "getBoundingClientRect",
+          "line": 62,
+          "text": "const rect = targetEl.getBoundingClientRect()",
+          "why": "Очень дорого в скролле/таче/raf"
+        },
+        {
+          "key": "getBoundingClientRect",
+          "line": 64,
+          "text": "const hostRect = scrollHost.getBoundingClientRect()",
+          "why": "Очень дорого в скролле/таче/raf"
+        },
+        {
+          "key": "addEventListener",
+          "line": 27,
+          "text": "try { window.addEventListener('scroll', onScroll, { passive: true, capture: true }) } catch {}",
+          "why": "Если без remove → утечки и лаги"
+        },
+        {
+          "key": "addEventListener",
+          "line": 28,
+          "text": "try { document.addEventListener('scroll', onScroll, { passive: true, capture: true }) } catch {}",
+          "why": "Если без remove → утечки и лаги"
+        },
+        {
+          "key": "removeEventListener",
+          "line": 30,
+          "text": "try { window.removeEventListener('scroll', onScroll, true) } catch {}",
+          "why": "Проверяем парность с add"
+        },
+        {
+          "key": "removeEventListener",
+          "line": 31,
+          "text": "try { document.removeEventListener('scroll', onScroll, true) } catch {}",
+          "why": "Проверяем парность с add"
+        },
+        {
+          "key": "onScroll",
+          "line": 26,
+          "text": "const onScroll = () => { lastUserScrollTsRef.current = Date.now() }",
           "why": "Проверь, нет ли setState/измерений внутри"
         }
       ]
@@ -3339,7 +3497,7 @@
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVideoFeedWindowing.js",
       "counts": {
-        "setTimeout": 1,
+        "setTimeout": 2,
         "requestAnimationFrame": 3,
         "cancelAnimationFrame": 3,
         "addEventListener": 3,
@@ -3350,85 +3508,91 @@
       "hits": [
         {
           "key": "setTimeout",
-          "line": 226,
+          "line": 278,
           "text": "vfHardResetScheduleRef.current.timeoutId = setTimeout(() => {",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
+          "key": "setTimeout",
+          "line": 314,
+          "text": "scrollActivity.settleTimer = setTimeout(() => {",
+          "why": "Может заспамить ререндер/таймеры"
+        },
+        {
           "key": "requestAnimationFrame",
-          "line": 172,
+          "line": 223,
           "text": "vfRafRef.current = requestAnimationFrame(() => {",
           "why": "RAF-циклы часто грузят main-thread"
         },
         {
           "key": "requestAnimationFrame",
-          "line": 218,
+          "line": 270,
           "text": "vfHardResetScheduleRef.current.rafA = requestAnimationFrame(() => {",
           "why": "RAF-циклы часто грузят main-thread"
         },
         {
           "key": "requestAnimationFrame",
-          "line": 219,
+          "line": 271,
           "text": "vfHardResetScheduleRef.current.rafB = requestAnimationFrame(() => {",
           "why": "RAF-циклы часто грузят main-thread"
         },
         {
           "key": "cancelAnimationFrame",
-          "line": 182,
+          "line": 233,
           "text": "try { cancelAnimationFrame(scheduled.rafA) } catch {}",
           "why": "Проверяем парность с RAF"
         },
         {
           "key": "cancelAnimationFrame",
-          "line": 186,
+          "line": 237,
           "text": "try { cancelAnimationFrame(scheduled.rafB) } catch {}",
           "why": "Проверяем парность с RAF"
         },
         {
           "key": "cancelAnimationFrame",
-          "line": 277,
+          "line": 341,
           "text": "try { cancelAnimationFrame(vfRafRef.current) } catch {}",
           "why": "Проверяем парность с RAF"
         },
         {
           "key": "addEventListener",
-          "line": 264,
+          "line": 328,
           "text": "window.addEventListener('scroll', onScroll, opts)",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 266,
+          "line": 330,
           "text": "window.addEventListener('resize', onScroll, opts)",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 322,
+          "line": 394,
           "text": "window.addEventListener('resize', onResize, { passive: true })",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "removeEventListener",
-          "line": 273,
+          "line": 337,
           "text": "window.removeEventListener('scroll', onScroll)",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 275,
+          "line": 339,
           "text": "window.removeEventListener('resize', onScroll)",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 323,
+          "line": 395,
           "text": "return () => window.removeEventListener('resize', onResize)",
           "why": "Проверяем парность с add"
         },
         {
           "key": "onScroll",
-          "line": 242,
+          "line": 295,
           "text": "const onScroll = () => {",
           "why": "Проверь, нет ли setState/измерений внутри"
         }
@@ -3687,56 +3851,6 @@
           "line": 84,
           "text": "window.addEventListener('wheel', cancelScroll, { passive: true, capture: true })",
           "why": "Wheel обработчики могут грузить"
-        }
-      ]
-    },
-    {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useScrollResizeCompensation.js",
-      "counts": {
-        "requestAnimationFrame": 1,
-        "cancelAnimationFrame": 1,
-        "getBoundingClientRect": 1,
-        "addEventListener": 1,
-        "removeEventListener": 1,
-        "onScroll": 1
-      },
-      "flags": [],
-      "hits": [
-        {
-          "key": "requestAnimationFrame",
-          "line": 29,
-          "text": "rafGuardRef.current = window.requestAnimationFrame(() => {",
-          "why": "RAF-циклы часто грузят main-thread"
-        },
-        {
-          "key": "cancelAnimationFrame",
-          "line": 14,
-          "text": "try { window.cancelAnimationFrame(rafGuardRef.current) } catch {}",
-          "why": "Проверяем парность с RAF"
-        },
-        {
-          "key": "getBoundingClientRect",
-          "line": 32,
-          "text": "const rect = el.getBoundingClientRect()",
-          "why": "Очень дорого в скролле/таче/raf"
-        },
-        {
-          "key": "addEventListener",
-          "line": 10,
-          "text": "window.addEventListener('scroll', onScroll, { passive: true })",
-          "why": "Если без remove → утечки и лаги"
-        },
-        {
-          "key": "removeEventListener",
-          "line": 12,
-          "text": "window.removeEventListener('scroll', onScroll)",
-          "why": "Проверяем парность с add"
-        },
-        {
-          "key": "onScroll",
-          "line": 9,
-          "text": "const onScroll = () => { lastUserScrollTsRef.current = Date.now() }",
-          "why": "Проверь, нет ли setState/измерений внутри"
         }
       ]
     },
@@ -4802,133 +4916,71 @@
       "counts": {
         "setInterval": 1,
         "clearInterval": 1,
-        "setTimeout": 3,
-        "querySelectorAll": 1,
-        "addEventListener": 6,
-        "removeEventListener": 6,
-        "preload": 2
+        "setTimeout": 2,
+        "addEventListener": 3,
+        "removeEventListener": 3
       },
       "flags": [],
       "hits": [
         {
           "key": "setInterval",
-          "line": 283,
+          "line": 181,
           "text": "const id = setInterval(async function(){",
           "why": "Может плодиться/не чиститься → утечки/нагрузка"
         },
         {
           "key": "clearInterval",
-          "line": 369,
+          "line": 267,
           "text": "return function(){ clearInterval(id); };",
           "why": "Проверяем парность с setInterval"
         },
         {
           "key": "setTimeout",
-          "line": 74,
-          "text": "return setTimeout(fn, 120);",
-          "why": "Может заспамить ререндер/таймеры"
-        },
-        {
-          "key": "setTimeout",
-          "line": 193,
+          "line": 91,
           "text": "const timeoutId  = setTimeout(() => controller.abort(), 8000);",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
           "key": "setTimeout",
-          "line": 315,
+          "line": 213,
           "text": "const timeoutId  = setTimeout(() => controller.abort(), 8000);",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
-          "key": "querySelectorAll",
-          "line": 120,
-          "text": "const list = Array.from(document.querySelectorAll(selector));",
-          "why": "Может быть дорого/часто вызываться"
-        },
-        {
           "key": "addEventListener",
-          "line": 149,
-          "text": "document.addEventListener('play', onPlay, true);",
-          "why": "Если без remove → утечки и лаги"
-        },
-        {
-          "key": "addEventListener",
-          "line": 150,
-          "text": "document.addEventListener('pause', onStop, true);",
-          "why": "Если без remove → утечки и лаги"
-        },
-        {
-          "key": "addEventListener",
-          "line": 151,
-          "text": "document.addEventListener('ended', onStop, true);",
-          "why": "Если без remove → утечки и лаги"
-        },
-        {
-          "key": "addEventListener",
-          "line": 258,
+          "line": 156,
           "text": "root.addEventListener(e, onAny, {passive:true});",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 260,
+          "line": 158,
           "text": "document.addEventListener('visibilitychange', onVis);",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 261,
+          "line": 159,
           "text": "window.addEventListener('focus', onAny);",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "removeEventListener",
-          "line": 154,
-          "text": "document.removeEventListener('play', onPlay, true);",
-          "why": "Проверяем парность с add"
-        },
-        {
-          "key": "removeEventListener",
-          "line": 155,
-          "text": "document.removeEventListener('pause', onStop, true);",
-          "why": "Проверяем парность с add"
-        },
-        {
-          "key": "removeEventListener",
-          "line": 156,
-          "text": "document.removeEventListener('ended', onStop, true);",
-          "why": "Проверяем парность с add"
-        },
-        {
-          "key": "removeEventListener",
-          "line": 265,
+          "line": 163,
           "text": "root.removeEventListener(e, onAny);",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 267,
+          "line": 165,
           "text": "document.removeEventListener('visibilitychange', onVis);",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 268,
+          "line": 166,
           "text": "window.removeEventListener('focus', onAny);",
           "why": "Проверяем парность с add"
-        },
-        {
-          "key": "preload",
-          "line": 99,
-          "text": "warmed.preload = slow ? 'metadata' : 'auto';",
-          "why": "preload=auto/metadata может забивать сеть/память"
-        },
-        {
-          "key": "preload",
-          "line": 129,
-          "text": "warmed.preload = slow ? 'metadata' : 'auto';",
-          "why": "preload=auto/metadata может забивать сеть/память"
         }
       ]
     },
@@ -5041,19 +5093,19 @@
         },
         {
           "key": "cancelAnimationFrame",
-          "line": 54,
+          "line": 62,
           "text": "try { cancelAnimationFrame(focusRaf) } catch {}",
           "why": "Проверяем парность с RAF"
         },
         {
           "key": "addEventListener",
-          "line": 50,
+          "line": 58,
           "text": "window.addEventListener('forum:edit', onEdit)",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "removeEventListener",
-          "line": 52,
+          "line": 60,
           "text": "window.removeEventListener('forum:edit', onEdit)",
           "why": "Проверяем парность с add"
         }
@@ -6033,115 +6085,121 @@
         "addEventListener": 7,
         "removeEventListener": 7,
         "<audio": 1,
-        "preload": 1
+        "preload": 2
       },
       "flags": [],
       "hits": [
         {
           "key": "setTimeout",
-          "line": 581,
+          "line": 670,
           "text": "const timer = setTimeout(() => {",
           "why": "Может заспамить ререндер/таймеры"
         },
         {
           "key": "cancelAnimationFrame",
-          "line": 410,
+          "line": 425,
           "text": "try { if (st.raf) cancelAnimationFrame(st.raf); } catch {}",
           "why": "Проверяем парность с RAF"
         },
         {
           "key": "addEventListener",
-          "line": 396,
+          "line": 411,
           "text": "audio.addEventListener('loadedmetadata', onMeta);",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 397,
+          "line": 412,
           "text": "audio.addEventListener('durationchange', onMeta);",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 398,
+          "line": 413,
           "text": "audio.addEventListener('timeupdate', onTime);",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 399,
+          "line": 414,
           "text": "audio.addEventListener('play', onPlay);",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 400,
+          "line": 415,
           "text": "audio.addEventListener('pause', onPause);",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 401,
+          "line": 416,
           "text": "audio.addEventListener('volumechange', onVolume);",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "addEventListener",
-          "line": 450,
+          "line": 465,
           "text": "document.addEventListener('pointerdown', onDoc, { passive: true });",
           "why": "Если без remove → утечки и лаги"
         },
         {
           "key": "removeEventListener",
-          "line": 403,
+          "line": 418,
           "text": "audio.removeEventListener('loadedmetadata', onMeta);",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 404,
+          "line": 419,
           "text": "audio.removeEventListener('durationchange', onMeta);",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 405,
+          "line": 420,
           "text": "audio.removeEventListener('timeupdate', onTime);",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 406,
+          "line": 421,
           "text": "audio.removeEventListener('play', onPlay);",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 407,
+          "line": 422,
           "text": "audio.removeEventListener('pause', onPause);",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 408,
+          "line": 423,
           "text": "audio.removeEventListener('volumechange', onVolume);",
           "why": "Проверяем парность с add"
         },
         {
           "key": "removeEventListener",
-          "line": 451,
+          "line": 466,
           "text": "return () => document.removeEventListener('pointerdown', onDoc);",
           "why": "Проверяем парность с add"
         },
         {
           "key": "<audio",
-          "line": 605,
+          "line": 694,
           "text": "<audio ref={audioRef} src={src} preload=\"metadata\" playsInline crossOrigin=\"anonymous\" data-qcast-audio=\"1\" className=\"qcastAudio\" />",
           "why": "Аудио = доп ресурсы"
         },
         {
           "key": "preload",
-          "line": 605,
+          "line": 489,
+          "text": "try { audio.preload = 'auto'; } catch {}",
+          "why": "preload=auto/metadata может забивать сеть/память"
+        },
+        {
+          "key": "preload",
+          "line": 694,
           "text": "<audio ref={audioRef} src={src} preload=\"metadata\" playsInline crossOrigin=\"anonymous\" data-qcast-audio=\"1\" className=\"qcastAudio\" />",
           "why": "preload=auto/metadata может забивать сеть/память"
         }
@@ -6194,25 +6252,40 @@
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaLifecycleRuntime.js",
       "counts": {
+        "addEventListener": 2,
         "preload": 3
       },
-      "flags": [],
+      "flags": [
+        "⚠ addEventListener > removeEventListener (возможная утечка)"
+      ],
       "hits": [
         {
+          "key": "addEventListener",
+          "line": 232,
+          "text": "try { el.addEventListener('loadedmetadata', seekToResume, { once: true }) } catch {}",
+          "why": "Если без remove → утечки и лаги"
+        },
+        {
+          "key": "addEventListener",
+          "line": 233,
+          "text": "try { el.addEventListener('canplay', seekToResume, { once: true }) } catch {}",
+          "why": "Если без remove → утечки и лаги"
+        },
+        {
           "key": "preload",
-          "line": 158,
+          "line": 166,
           "text": "el.preload = 'metadata'",
           "why": "preload=auto/metadata может забивать сеть/память"
         },
         {
           "key": "preload",
-          "line": 174,
+          "line": 182,
           "text": "el.preload = 'none'",
           "why": "preload=auto/metadata может забивать сеть/память"
         },
         {
           "key": "preload",
-          "line": 194,
+          "line": 202,
           "text": "el.preload = (el.dataset?.__prewarm === '1') ? 'auto' : 'metadata'",
           "why": "preload=auto/metadata может забивать сеть/память"
         }

@@ -9,6 +9,8 @@ const VF_AD_CARD_H_TABLET = 260
 const VF_AD_CARD_H_DESKTOP = 320
 const VF_ITEM_CHROME_EST = 240
 const VF_WINDOW_STICKY_MS = 220
+const VF_LAYOUT_JITTER_PX = 28
+const VF_SCROLL_SETTLE_MS = 180
 
 function defaultIsBrowser() {
   return typeof window !== 'undefined'
@@ -30,6 +32,7 @@ export default function useVideoFeedWindowing({
   const vfRafRef = useRef(0)
   const vfHardResetScheduleRef = useRef({ rafA: 0, rafB: 0, timeoutId: 0 })
   const vfScrollStateRef = useRef({ top: 0, ts: 0, velocity: 0, direction: 0 })
+  const vfScrollActivityRef = useRef({ activeUntil: 0, settleTimer: 0 })
   const vfWinMetaRef = useRef({ ts: 0, start: 0, end: 0 })
   const [vfWin, setVfWin] = useState(() => ({ start: 0, end: 0, top: 0, bottom: 0 }))
 
@@ -202,7 +205,12 @@ export default function useVideoFeedWindowing({
       }
 
       const next = vfBuildWindow(nextStart, nextEnd, total)
+      const topDelta = Math.abs(Number(prev.top || 0) - Number(next.top || 0))
+      const bottomDelta = Math.abs(Number(prev.bottom || 0) - Number(next.bottom || 0))
       if (prev.start === next.start && prev.end === next.end && prev.top === next.top && prev.bottom === next.bottom) {
+        return prev
+      }
+      if (prev.start === next.start && prev.end === next.end && topDelta < VF_LAYOUT_JITTER_PX && bottomDelta < VF_LAYOUT_JITTER_PX) {
         return prev
       }
       vfWinMetaRef.current = { ts: Date.now(), start: next.start, end: next.end }
@@ -282,6 +290,7 @@ export default function useVideoFeedWindowing({
   useEffect(() => {
     if (!isBrowserFn()) return undefined
     if (!videoFeedOpen) return undefined
+    const scrollActivity = vfScrollActivityRef.current
 
     const onScroll = () => {
       try {
@@ -297,6 +306,15 @@ export default function useVideoFeedWindowing({
         const velocity = dt > 220 ? 0 : (dy / dt)
         const direction = dy < 2 ? Number(prev?.direction || 0) : (signedDy > 0 ? 1 : -1)
         vfScrollStateRef.current = { top, ts: now, velocity, direction }
+        scrollActivity.activeUntil = Date.now() + VF_SCROLL_SETTLE_MS
+        if (scrollActivity.settleTimer) {
+          try { clearTimeout(scrollActivity.settleTimer) } catch {}
+          scrollActivity.settleTimer = 0
+        }
+        scrollActivity.settleTimer = setTimeout(() => {
+          scrollActivity.settleTimer = 0
+          vfScheduleRecalc()
+        }, VF_SCROLL_SETTLE_MS)
       } catch {}
       vfScheduleRecalc()
     }
@@ -323,6 +341,11 @@ export default function useVideoFeedWindowing({
         try { cancelAnimationFrame(vfRafRef.current) } catch {}
         vfRafRef.current = 0
       }
+      if (scrollActivity.settleTimer) {
+        try { clearTimeout(scrollActivity.settleTimer) } catch {}
+        scrollActivity.settleTimer = 0
+      }
+      scrollActivity.activeUntil = 0
       vfScrollStateRef.current = { top: 0, ts: 0, velocity: 0, direction: 0 }
     }
   }, [videoFeedOpen, vfScheduleRecalc, vfGetScrollEl, vfReadViewportState, isBrowserFn])
@@ -346,6 +369,8 @@ export default function useVideoFeedWindowing({
           const nextH = Math.round(h)
           if (Number.isFinite(prev) && Math.abs(prev - nextH) < 2) return
           vfHeightsRef.current.set(idx, nextH)
+          const now = Date.now()
+          if (Number(vfScrollActivityRef.current.activeUntil || 0) > now) return
           vfScheduleRecalc()
         } catch {}
       }

@@ -31,6 +31,7 @@ export default function VideoMedia({
 }) {
   const ref = React.useRef(null)
   const recoverTimerRef = React.useRef(0)
+  const mediaKeyRef = React.useRef('')
   const mutedEvent = String(mutedEventName || 'forum:media-mute')
   const mediaVisMargin = Number.isFinite(Number(mediaVisMarginPx)) ? Number(mediaVisMarginPx) : 380
   const preloadMode = String(preload || 'none').trim().toLowerCase() || 'none'
@@ -114,6 +115,9 @@ export default function VideoMedia({
     if (!el) return
     const s = String(src || '')
     const mediaKey = s || String(poster || '')
+    const prevMediaKey = String(mediaKeyRef.current || '')
+    const isNewMediaNode = prevMediaKey !== mediaKey
+    mediaKeyRef.current = mediaKey
     el.dataset.__src = s
     try {
       if (s) el.setAttribute('data-src', s)
@@ -124,16 +128,25 @@ export default function VideoMedia({
       const effectivePreload = wantsWarm && preloadMode === 'none' ? 'auto' : preloadMode
       el.preload = effectivePreload
     } catch {}
+    if (isNewMediaNode) {
+      try {
+        delete el.dataset.__resumeTime
+        delete el.dataset.__candidateBoostTs
+        delete el.dataset.__recoverTry
+      } catch {}
+    }
     if (poster) {
       try {
         const nextPoster = String(poster)
-        const prevMediaKey = String(el.dataset.__posterMediaKey || '')
-        const isNewMedia = prevMediaKey !== mediaKey
+        const prevPosterMediaKey = String(el.dataset.__posterMediaKey || '')
+        const isNewMedia = prevPosterMediaKey !== mediaKey
         el.dataset.__posterOriginal = nextPoster
         if (isNewMedia) {
           el.dataset.__posterMediaKey = mediaKey
           el.dataset.__posterRevealed = '0'
           el.dataset.__needsPosterRestore = '1'
+          delete el.dataset.__resumeTime
+          delete el.dataset.__candidateBoostTs
           el.setAttribute('poster', nextPoster)
         } else if (el.dataset?.__posterRevealed !== '1' && !el.getAttribute('poster')) {
           el.setAttribute('poster', nextPoster)
@@ -158,12 +171,15 @@ export default function VideoMedia({
     const onVol = () => {
       try {
         const m = !!el.muted
-        writeMuted(m)
-        window.dispatchEvent(
-          new CustomEvent(mutedEvent, {
-            detail: { muted: m, source: 'video', id: el.dataset.__mid || null },
-          }),
-        )
+        const skipPersistUntil = Number(el?.dataset?.__skipMutePersistUntil || 0)
+        if (skipPersistUntil <= Date.now()) {
+          writeMuted(m)
+          window.dispatchEvent(
+            new CustomEvent(mutedEvent, {
+              detail: { muted: m, source: 'video', id: el.dataset.__mid || null },
+            }),
+          )
+        }
       } catch {}
     }
 

@@ -78,6 +78,7 @@ export function restoreEntryPosition(options = {}) {
 
   const useInner = !!state?.scroll?.useInner
   const offset = Number(state?.entryOffset)
+  const minDelta = 14
   const apply = () => {
     try {
       if (useInner) {
@@ -87,21 +88,25 @@ export function restoreEntryPosition(options = {}) {
             const rect = el.getBoundingClientRect()
             const contRect = scrollEl.getBoundingClientRect()
             const delta = rect.top - contRect.top - offset
-            scrollEl.scrollTop += delta
+            if (Math.abs(delta) >= minDelta) {
+              scrollEl.scrollTop += delta
+            }
           } else {
-            el.scrollIntoView({ behavior: 'auto', block: 'center' })
+            el.scrollIntoView({ behavior: 'auto', block: 'nearest' })
           }
           return true
         }
       } else if (Number.isFinite(offset)) {
         const rect = el.getBoundingClientRect()
         const delta = rect.top - offset
-        try {
-          window.scrollTo({ top: (window.pageYOffset || 0) + delta, behavior: 'auto' })
-        } catch {}
+        if (Math.abs(delta) >= minDelta) {
+          try {
+            window.scrollTo({ top: (window.pageYOffset || 0) + delta, behavior: 'auto' })
+          } catch {}
+        }
         return true
       } else {
-        el.scrollIntoView({ behavior: 'auto', block: 'center' })
+        el.scrollIntoView({ behavior: 'auto', block: 'nearest' })
         return true
       }
     } catch {}

@@ -96,7 +96,7 @@ export default function useThreadOpenNavigation({
       try {
         document.getElementById('post_' + pendingId)?.scrollIntoView({
           behavior: 'auto',
-          block: 'center',
+          block: 'nearest',
         })
       } catch {}
     }, 120)

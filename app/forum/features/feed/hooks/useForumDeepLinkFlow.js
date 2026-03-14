@@ -96,7 +96,7 @@ export default function useForumDeepLinkFlow({
     } catch {}
   })
 
-  const centerAndFlashPostAfterDomEvent = useEvent((postId, behavior = 'smooth') => {
+  const centerAndFlashPostAfterDomEvent = useEvent((postId, behavior = 'auto') => {
     centerAndFlashPostAfterDom?.(postId, behavior)
   })
 
@@ -300,7 +300,7 @@ export default function useForumDeepLinkFlow({
       )
       if (!targetOk) return fail()
 
-      centerAndFlashPostAfterDomEvent(postId, 'smooth')
+      centerAndFlashPostAfterDomEvent(postId, 'auto')
       st.done = true
       setDeeplinkUI({ active: false, status: 'done', postId: null, topicId: null })
       clearDeepLinkQuery()

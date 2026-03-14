@@ -135,6 +135,14 @@ export function __writeMediaMutedPref(nextMuted) {
 export function __unloadVideoEl(el) {
   if (!el) return
   try {
+    const cur = Number(el.currentTime || 0)
+    const dur = Number(el.duration || 0)
+    const hasMeaningfulTime = Number.isFinite(cur) && cur > 0.18
+    const nearEnd = Number.isFinite(dur) && dur > 0 && cur >= Math.max(0, dur - 0.18)
+    if (hasMeaningfulTime && !nearEnd) el.dataset.__resumeTime = String(cur)
+    else delete el.dataset.__resumeTime
+  } catch {}
+  try {
     el.pause?.()
   } catch {}
   try {
@@ -206,6 +214,24 @@ export function __restoreVideoEl(el) {
     el.dataset.__loadPending = '1'
     el.dataset.__warmReady = '0'
     el.setAttribute('src', src)
+  } catch {}
+  try {
+    const resumeTo = Number(el.dataset?.__resumeTime || 0)
+    if (Number.isFinite(resumeTo) && resumeTo > 0.18) {
+      const seekToResume = () => {
+        try {
+          const duration = Number(el.duration || 0)
+          const safeTarget = Number.isFinite(duration) && duration > 0
+            ? Math.max(0, Math.min(resumeTo, duration - 0.12))
+            : resumeTo
+          if (Number.isFinite(safeTarget) && safeTarget > 0.05 && Math.abs(Number(el.currentTime || 0) - safeTarget) > 0.05) {
+            el.currentTime = safeTarget
+          }
+        } catch {}
+      }
+      try { el.addEventListener('loadedmetadata', seekToResume, { once: true }) } catch {}
+      try { el.addEventListener('canplay', seekToResume, { once: true }) } catch {}
+    }
   } catch {}
   try {
     el.load?.()

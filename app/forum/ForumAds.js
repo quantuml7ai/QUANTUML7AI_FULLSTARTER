@@ -1,7 +1,7 @@
 // app/forum/ForumAds.js
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import NextImage from 'next/image';
 import { useI18n } from '../../components/i18n';
 import { useRouter } from 'next/navigation';
@@ -695,6 +695,9 @@ function emitAdEvent(type, payload, conf) {
 }
 
 function tryLoadImage(src, timeoutMs = 3000) {
+  if (adImageProbeCache.has(src)) {
+    return Promise.resolve(!!adImageProbeCache.get(src));
+  }
   return new Promise((resolve) => {
     if (!src || !isBrowser() || !('Image' in window)) {
       resolve(false);
@@ -712,12 +715,36 @@ function tryLoadImage(src, timeoutMs = 3000) {
     img.onerror = () => finish(false);
     const timer = setTimeout(() => finish(false), timeoutMs);
     img.src = src;
+  }).then((ok) => {
+    try { adImageProbeCache.set(src, !!ok); } catch {}
+    return !!ok;
   });
+}
+
+function canProbeMediaKind(raw) {
+  if (!raw || !isBrowser()) return false;
+  const s = String(raw).trim();
+  if (!s || /^blob:/i.test(s) || /^data:/i.test(s)) return false;
+  if (/\.(webm|mp4|mov|m4v|mkv|jpe?g|png|webp|gif|avif|svg)(?:$|[?#])/i.test(s)) return true;
+  if (/[?&](?:filename|file|src|url)=.*\.(webm|mp4|mov|m4v|mkv|jpe?g|png|webp|gif|avif|svg)(?:$|[&#])/i.test(s)) return true;
+  try {
+    const u = new URL(s, window.location.href);
+    if (u.origin === window.location.origin) return true;
+    if (/vercel-storage|public\.blob\.vercel-storage|storage\.googleapis|cloudfront|cloudinary|imgix|cdn/i.test(String(u.hostname || ''))) {
+      return true;
+    }
+  } catch {}
+  return false;
 }
 
 // Определяем тип медиа по Content-Type через HEAD
 async function detectMediaKind(url, timeoutMs = 3000) {
   if (!url || !isBrowser() || typeof fetch === 'undefined') return null;
+  if (adMediaKindCache.has(url)) return adMediaKindCache.get(url);
+  if (!canProbeMediaKind(url)) {
+    adMediaKindCache.set(url, null);
+    return null;
+  }
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -732,9 +759,16 @@ async function detectMediaKind(url, timeoutMs = 3000) {
 
     const ct = (resp.headers.get('content-type') || '').toLowerCase();
 
-    if (ct.startsWith('video/')) return 'video';
-    if (ct.startsWith('image/')) return 'image';
+    if (ct.startsWith('video/')) {
+      adMediaKindCache.set(url, 'video');
+      return 'video';
+    }
+    if (ct.startsWith('image/')) {
+      adMediaKindCache.set(url, 'image');
+      return 'image';
+    }
 
+    adMediaKindCache.set(url, null);
     return null;
   } catch {
     return null;
@@ -768,6 +802,15 @@ function isLikelyVideoUrl(raw) {
   return false;
 }
 
+function isLikelyImageUrl(raw) {
+  if (!raw) return false;
+  const s = String(raw).trim();
+  if (!s) return false;
+  if (/\.(jpe?g|png|webp|gif|avif|svg)(?:$|[?#])/i.test(s)) return true;
+  if (/[?&](?:filename|file|src|url)=.*\.(jpe?g|png|webp|gif|avif|svg)(?:$|[&#])/i.test(s)) return true;
+  return false;
+}
+
 const YT_RE =
   /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{6,})/i;
 
@@ -777,6 +820,10 @@ const TIKTOK_RE =
 /* ====== вспомогательное хранилище для анти-повтора медиы по слоту ====== */
 
 const lastMediaIndexByKey = new Map();
+const adMediaKindCache = new Map();
+const adMediaResolveCache = new Map();
+const adMediaResolvePending = new Map();
+const adImageProbeCache = new Map();
 
 /* ======================= AdCard ======================= */
 /**
@@ -813,6 +860,14 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   const videoRef = useRef(null);
   const ytIframeRef = useRef(null);
   const ytPlayerRef = useRef(null);
+  const isAttachedYtPlayer = useCallback((player = ytPlayerRef.current) => {
+    try {
+      const iframe = player?.getIframe?.() || ytIframeRef.current;
+      return !!(iframe && iframe.isConnected);
+    } catch {
+      return !!ytIframeRef.current?.isConnected;
+    }
+  }, []);
   // ===== Focus / attention gating =====
   // isNear: блок рядом (можно подгружать, но не играть)
   // isFocused: блок реально в зоне внимания (играем)
@@ -825,6 +880,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   const shouldPlay = isFocused && isPageActive;
   const shouldResolveMedia = isNear || shouldPlay;
   const shouldPlayRef = useRef(false);
+  const mutedRef = useRef(muted);
   const slotCssVars = {
     '--ad-slot-h-m': `${AD_SLOT_HEIGHT_PX.mobile}px`,
     '--ad-slot-h-t': `${AD_SLOT_HEIGHT_PX.tablet}px`,
@@ -834,6 +890,10 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   useEffect(() => {
     shouldPlayRef.current = shouldPlay;
   }, [shouldPlay]);
+
+  useEffect(() => {
+    mutedRef.current = muted;
+  }, [muted]);
 
   useEffect(() => {
     let timer = null;
@@ -879,7 +939,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     // near: заранее «подойти» к блоку (без игры)
     const nearObs = new IntersectionObserver(
       ([e]) => setIsNear(!!e?.isIntersecting),
-      { rootMargin: '420px 0px', threshold: 0 }
+      { rootMargin: '560px 0px', threshold: 0 }
     );
 
     // focused: реально видно (>= 60% площади)
@@ -1008,8 +1068,12 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       setMedia({ kind: 'skeleton', src: null });
       return;
     }
+    const cacheKey = `${mediaHref}::${slotKind || ''}`;
+    const cachedResolved = adMediaResolveCache.get(cacheKey);
+    if (cachedResolved) {
+      setMedia(cachedResolved);
+    }
     if (!shouldResolveMedia) {
-      setMedia((prev) => (prev?.kind === 'skeleton' ? prev : { kind: 'skeleton', src: null }));
       return;
     }
     let cancelled = false;
@@ -1022,43 +1086,41 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
         ? conf.THUMBS
         : DEFAULT_THUMB_SERVICES;
 
-    const isDirectImg = /\.(jpe?g|png|webp|gif|avif)(?:$|[?#])/i.test(
-      mediaHref
-    );
+    const isDirectImg = isLikelyImageUrl(mediaHref);
 
-    async function run() {
-      // 0) сначала пробуем определить тип по Content-Type (HEAD)
-      if (!cancelled) {
-        const detected = await detectMediaKind(mediaHref).catch(() => null);
-        if (cancelled) return;
+    const setResolved = (next) => {
+      if (!next) return next;
+      try { adMediaResolveCache.set(cacheKey, next); } catch {}
+      if (!cancelled) setMedia(next);
+      return next;
+    };
 
-        if (detected === 'video') {
-          setMedia({ kind: 'video', src: mediaHref, step: 'head_video' });
-          emitAdEvent(
-            'ad_fallback',
-            { url: clickHref, cascade_step: 'head_video', slot_kind: slotKind },
-            conf
-          );
-          return;
-        }
-
-        if (detected === 'image') {
-          setMedia({ kind: 'image', src: mediaHref, step: 'head_image' });
-          emitAdEvent(
-            'ad_fallback',
-            { url: clickHref, cascade_step: 'head_image', slot_kind: slotKind },
-            conf
-          );
-          return;
-        }
+        async function run() {
+      if (cachedResolved) return;
+      if (adMediaResolvePending.has(cacheKey)) {
+        try {
+          const resolved = await adMediaResolvePending.get(cacheKey);
+          if (!cancelled && resolved) setMedia(resolved);
+        } catch {}
+        return;
       }
-
-      // 1) прямое видео (blob, mp4 и т.п.) по URL-эвристике
+      // 0) direct video by URL heuristics
       if (!cancelled && isLikelyVideoUrl(mediaHref)) {
-        setMedia({ kind: 'video', src: mediaHref, step: 'env_video' });
+        setResolved({ kind: 'video', src: mediaHref, step: 'env_video' });
         emitAdEvent(
           'ad_fallback',
           { url: clickHref, cascade_step: 'env_video', slot_kind: slotKind },
+          conf
+        );
+        return;
+      }
+
+      // 1) direct image by URL heuristics
+      if (!cancelled && isDirectImg) {
+        setResolved({ kind: 'image', src: mediaHref, step: 'env_image' });
+        emitAdEvent(
+          'ad_fallback',
+          { url: clickHref, cascade_step: 'env_image', slot_kind: slotKind },
           conf
         );
         return;
@@ -1069,7 +1131,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       if (!cancelled && ytMatch) {
         const videoId = ytMatch[1];
         if (videoId) {
-          setMedia({ kind: 'youtube', src: videoId, step: 'env_youtube' });
+          setResolved({ kind: 'youtube', src: videoId, step: 'env_youtube' });
           emitAdEvent(
             'ad_fallback',
             {
@@ -1093,7 +1155,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
           if (m) videoId = m[1];
         } catch {}
         if (videoId) {
-          setMedia({ kind: 'tiktok', src: videoId, step: 'env_tiktok' });
+          setResolved({ kind: 'tiktok', src: videoId, step: 'env_tiktok' });
           emitAdEvent(
             'ad_fallback',
             {
@@ -1107,7 +1169,33 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
         }
       }
 
-      // 4) Microlink (OG screenshot / image)
+      // 4) HEAD probe only for likely direct-media URLs to avoid CORS noise on landing pages
+      if (!cancelled) {
+        const detected = await detectMediaKind(mediaHref).catch(() => null);
+        if (cancelled) return;
+
+        if (detected === 'video') {
+          setResolved({ kind: 'video', src: mediaHref, step: 'head_video' });
+          emitAdEvent(
+            'ad_fallback',
+            { url: clickHref, cascade_step: 'head_video', slot_kind: slotKind },
+            conf
+          );
+          return;
+        }
+
+        if (detected === 'image') {
+          setResolved({ kind: 'image', src: mediaHref, step: 'head_image' });
+          emitAdEvent(
+            'ad_fallback',
+            { url: clickHref, cascade_step: 'head_image', slot_kind: slotKind },
+            conf
+          );
+          return;
+        }
+      }
+
+      // 5) Microlink (OG screenshot / image)
       if (!cancelled && conf.PREVIEW !== 'favicon') {
         try {
           const q =
@@ -1136,7 +1224,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
 
               const ok = await tryLoadImage(cu.toString());
               if (ok && !cancelled) {
-                setMedia({ kind: 'image', src: cu.toString(), step: c.step });
+                setResolved({ kind: 'image', src: cu.toString(), step: c.step });
                 emitAdEvent(
                   'ad_fallback',
                   {
@@ -1157,7 +1245,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       if (!cancelled && conf.PREVIEW !== 'favicon' && isDirectImg) {
         const ok = await tryLoadImage(mediaHref);
         if (ok && !cancelled) {
-          setMedia({ kind: 'image', src: mediaHref, step: 'direct_image' });
+          setResolved({ kind: 'image', src: mediaHref, step: 'direct_image' });
           emitAdEvent(
             'ad_fallback',
             {
@@ -1181,7 +1269,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
             if (uShot.protocol !== 'https:') continue;
             const ok = await tryLoadImage(uShot.toString());
             if (ok && !cancelled) {
-              setMedia({ kind: 'image', src: uShot.toString(), step: 'shot' });
+              setResolved({ kind: 'image', src: uShot.toString(), step: 'shot' });
               emitAdEvent(
                 'ad_fallback',
                 { url: clickHref, cascade_step: 'shot', slot_kind: slotKind },
@@ -1203,7 +1291,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
             'https://icons.duckduckgo.com/ip3/' + landingHost + '.ico';
           const ok = await tryLoadImage(ico);
           if (ok && !cancelled) {
-            setMedia({ kind: 'favicon', src: ico, step: 'favicon' });
+            setResolved({ kind: 'favicon', src: ico, step: 'favicon' });
             emitAdEvent(
               'ad_fallback',
               {
@@ -1220,7 +1308,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
 
       // 8) Placeholder
       if (!cancelled) {
-        setMedia({ kind: 'placeholder', src: null, step: 'placeholder' });
+        setResolved({ kind: 'placeholder', src: null, step: 'placeholder' });
         emitAdEvent(
           'ad_fallback',
           {
@@ -1233,7 +1321,10 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       }
     }
 
-    run();
+    const pendingRun = run().finally(() => {
+      try { adMediaResolvePending.delete(cacheKey); } catch {}
+    });
+    try { adMediaResolvePending.set(cacheKey, pendingRun); } catch {}
     return () => {
       cancelled = true;
     };
@@ -1245,6 +1336,15 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     if (media.kind !== 'youtube' || !media.src) return;
 
     let cancelled = false;
+    if (ytPlayerRef.current && isAttachedYtPlayer(ytPlayerRef.current)) {
+      try {
+        if (mutedRef.current) ytPlayerRef.current.mute?.();
+        else ytPlayerRef.current.unMute?.();
+        if (shouldPlayRef.current) ytPlayerRef.current.playVideo?.();
+        else ytPlayerRef.current.pauseVideo?.();
+      } catch {}
+      return;
+    }
 
     function createPlayer() {
       if (cancelled) return;
@@ -1256,7 +1356,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
           playerVars: {
             autoplay: 0,
             controls: 0,
-            mute: muted ? 1 : 0,
+            mute: mutedRef.current ? 1 : 0,
             rel: 0,
             fs: 0,
             modestbranding: 1,
@@ -1266,10 +1366,13 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
           },
           events: {
             onReady: (ev) => {
-              if (cancelled) return;
+              if (cancelled || !isAttachedYtPlayer(ev?.target)) {
+                try { ev?.target?.destroy?.(); } catch {}
+                return;
+              }
               ytPlayerRef.current = ev.target;
               try {
-                if (muted) ev.target.mute?.();
+                if (mutedRef.current) ev.target.mute?.();
                 else ev.target.unMute?.();
                 // Играем только если реально в фокусе внимания
                 if (shouldPlayRef.current) ev.target.playVideo?.();
@@ -1301,8 +1404,10 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
 
     return () => {
       cancelled = true;
+      try { ytPlayerRef.current?.destroy?.(); } catch {}
+      ytPlayerRef.current = null;
     };
-  }, [media, muted]);
+  }, [media.kind, media.src, isAttachedYtPlayer]);
   // ===== Hard stop / resume playback depending on attention =====
   useEffect(() => {
     // HTML5 video
@@ -1327,7 +1432,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     }
 
     // YouTube player (Iframe API)
-    if (media.kind === 'youtube' && ytPlayerRef.current) {
+    if (media.kind === 'youtube' && ytPlayerRef.current && isAttachedYtPlayer(ytPlayerRef.current)) {
       const p = ytPlayerRef.current;
       try {
         if (shouldPlay) {
@@ -1338,7 +1443,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
         }
       } catch {}
     }
-  }, [shouldPlay, media.kind, muted]);
+  }, [shouldPlay, media.kind, muted, isAttachedYtPlayer]);
 
   // Impression tracking
   useEffect(() => {
@@ -1450,7 +1555,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     }
 
     // YouTube
-    if (media.kind === 'youtube' && ytPlayerRef.current) {
+    if (media.kind === 'youtube' && ytPlayerRef.current && isAttachedYtPlayer(ytPlayerRef.current)) {
       const p = ytPlayerRef.current;
       try { 
         if (next) p.mute?.();
@@ -1737,3 +1842,4 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
     </div>
   );
 }
+
