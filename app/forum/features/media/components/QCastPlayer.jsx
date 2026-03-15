@@ -64,20 +64,24 @@ export default function QCastPlayer({
       ? 'rtl'
       : 'ltr';
   const qcastFxProfile = React.useMemo(() => {
-    if (typeof window === 'undefined') return { viz: false, boom: false, burst: 4 };
+    if (typeof window === 'undefined') return { viz: false, boom: false, burst: 2, pool: 0 };
     try {
+      const ua = String(navigator?.userAgent || '');
+      const isIOS = /iP(hone|ad|od)/i.test(ua);
       const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
       const reduced = !!window?.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
       const lowMem = Number(navigator?.deviceMemory || 0) > 0 && Number(navigator?.deviceMemory || 0) <= 3;
-      const burst = lowMem ? 3 : (coarse ? 4 : 5);
+      const mobileLean = !!isIOS || !!coarse || !!lowMem;
+      const burst = mobileLean ? 2 : 5;
       return {
-        viz: !reduced,
+        viz: !reduced && !mobileLean,
         // Boom ring was causing visual flashes and extra compositor load.
         boom: false,
         burst,
+        pool: mobileLean ? 0 : 24,
       };
     } catch {
-      return { viz: false, boom: false, burst: 4 };
+      return { viz: false, boom: false, burst: 2, pool: 0 };
     }
   }, []);
 
@@ -130,7 +134,7 @@ const BAD_SET = React.useMemo(() => ([
   const [badEmoji, setBadEmoji] = React.useState(() => pick(BAD_SET));
 // ===== QCast emoji FX (INSANE, fast): DOM pool + burst + random presets =====
 // ВАЖНО: без setState на каждую частицу => нет лагов от React-рендеров.
-const FX_POOL = 24;
+const FX_POOL = Math.max(0, Number(qcastFxProfile?.pool || 0));
 const FX_BURST_BASE = Number(qcastFxProfile?.burst || 4);
 const BOOM_POOL = qcastFxProfile.boom ? 12 : 0;
 const fxNodesRef = React.useRef([]);
@@ -478,12 +482,13 @@ const spawnFx = React.useCallback((kind, origin) => {
     if (audio.muted && readMutedPref() == null) { try { audio.muted = false; } catch {} }
     if (audio.paused) {
       const gestureUntil = String(Date.now() + 1800);
-      const leaseUntil = String(Date.now() + 5200);
+      const leaseUntil = String(Date.now() + 7200);
       try {
         delete audio.dataset.__autoplayFallbackMuted;
         delete audio.dataset.__skipMutePersistUntil;
         delete audio.dataset.__userPaused;
         delete audio.dataset.__userPausedAt;
+        delete audio.dataset.__suppressedPlayUntil;
         audio.dataset.__userGestureUntil = gestureUntil;
         audio.dataset.__manualLeaseUntil = leaseUntil;
         try { audio.preload = 'auto'; } catch {}
@@ -493,6 +498,7 @@ const spawnFx = React.useCallback((kind, origin) => {
         if (host?.dataset) {
           delete host.dataset.__autoplayFallbackMuted;
           delete host.dataset.__skipMutePersistUntil;
+          delete host.dataset.__suppressedPlayUntil;
           host.dataset.__userGestureUntil = gestureUntil;
         }
         delete host?.dataset?.__userPaused;
@@ -534,6 +540,7 @@ const spawnFx = React.useCallback((kind, origin) => {
       try {
         audio.dataset.__userPaused = '1';
         audio.dataset.__userPausedAt = String(Date.now());
+        audio.dataset.__suppressedPlayUntil = String(Date.now() + 4200);
         delete audio.dataset.__autoplayFallbackMuted;
         delete audio.dataset.__skipMutePersistUntil;
         delete audio.dataset.__userGestureUntil;
@@ -541,6 +548,7 @@ const spawnFx = React.useCallback((kind, origin) => {
         if (host?.dataset) {
           host.dataset.__userPaused = '1';
           host.dataset.__userPausedAt = String(Date.now());
+          host.dataset.__suppressedPlayUntil = String(Date.now() + 4200);
           delete host.dataset.__autoplayFallbackMuted;
           delete host.dataset.__skipMutePersistUntil;
           delete host.dataset.__userGestureUntil;

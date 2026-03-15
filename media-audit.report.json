@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-03-14T20:28:57.655Z",
+  "generatedAt": "2026-03-15T11:37:05.611Z",
   "results": [
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\i18n.js",
@@ -154,11 +154,11 @@
         ],
         "autoplay": [
           {
-            "line": 263,
+            "line": 274,
             "text": "// Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start."
           },
           {
-            "line": 587,
+            "line": 598,
             "text": "// === Shorts-like autoplay: play when in focus, pause when out ==="
           }
         ],
@@ -205,6 +205,57 @@
           }
         ],
         "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
+      "counts": {
+        "video": 1,
+        "autoplay": 5,
+        "loop": 2,
+        "preload": 1,
+        "img": 2,
+        "lazy": 4,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + loop",
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 1850,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 49,
+            "text": "// Default to muted when there is no stored pref; autoplay is more reliable this way."
+          },
+          {
+            "line": 1513,
+            "text": "autoplay: 0,"
+          },
+          {
+            "line": 1568,
+            "text": "// If autoplay with sound is blocked, retry muted without changing the global pref."
+          }
+        ],
+        "img": [
+          {
+            "line": 1897,
+            "text": "<img"
+          },
+          {
+            "line": 1946,
+            "text": "<img"
+          }
+        ],
         "create": []
       }
     },
@@ -353,53 +404,6 @@
             "text": "url = URL.createObjectURL(file)"
           }
         ]
-      }
-    },
-    {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
-      "counts": {
-        "video": 1,
-        "autoplay": 3,
-        "loop": 2,
-        "preload": 1,
-        "img": 1,
-        "lazy": 1,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [
-        "⚠ video + autoplay",
-        "⚠ video + loop",
-        "⚠ video + preload"
-      ],
-      "samples": {
-        "video": [
-          {
-            "line": 1705,
-            "text": "<video"
-          }
-        ],
-        "autoplay": [
-          {
-            "line": 1357,
-            "text": "autoplay: 0,"
-          },
-          {
-            "line": 1733,
-            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
-          },
-          {
-            "line": 1763,
-            "text": "allow=\"autoplay; encrypted-media; fullscreen; picture-in-picture\""
-          }
-        ],
-        "img": [
-          {
-            "line": 1787,
-            "text": "<img"
-          }
-        ],
-        "create": []
       }
     },
     {

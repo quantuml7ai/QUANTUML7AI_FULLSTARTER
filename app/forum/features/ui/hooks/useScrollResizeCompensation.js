@@ -4,6 +4,14 @@ export default function useScrollResizeCompensation() {
   const lastUserScrollTsRef = useRef(0)
   const rafGuardRef = useRef(0)
   const pendingRef = useRef({ el: null, delta: 0 })
+  const isCoarseUi = useCallback(() => {
+    try {
+      const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
+      const narrow = Number(window?.innerWidth || 0) <= 720
+      return coarse || narrow
+    } catch {}
+    return false
+  }, [])
 
   const resolveScrollHost = useCallback((node) => {
     try {
@@ -40,13 +48,26 @@ export default function useScrollResizeCompensation() {
     if (!el || !deltaH) return
     if (typeof window === 'undefined') return
     if (document?.hidden) return
-    if (Math.abs(Number(deltaH || 0)) < 18) return
+    const coarse = isCoarseUi()
+    if (coarse) return
+    const minDelta = coarse ? 40 : 18
+    if (Math.abs(Number(deltaH || 0)) < minDelta) return
 
     const nowTs = Date.now()
-    if (nowTs - (lastUserScrollTsRef.current || 0) < 220) return
+    const idleMs = coarse ? 420 : 220
+    if (nowTs - (lastUserScrollTsRef.current || 0) < idleMs) return
 
     pendingRef.current.el = el
-    pendingRef.current.delta += Number(deltaH || 0)
+    const nextDelta = Number(deltaH || 0)
+    if (
+      coarse &&
+      pendingRef.current.delta &&
+      Math.sign(pendingRef.current.delta) !== Math.sign(nextDelta)
+    ) {
+      pendingRef.current.delta = nextDelta
+    } else {
+      pendingRef.current.delta += nextDelta
+    }
     if (rafGuardRef.current) return
 
     rafGuardRef.current = window.requestAnimationFrame(() => {
@@ -66,7 +87,7 @@ export default function useScrollResizeCompensation() {
           const lockEdge = topEdge + 12
           const aboveViewport = rect.bottom <= lockEdge
           const clippedAtTop = rect.top < lockEdge && rect.bottom > lockEdge
-          if (!(aboveViewport || clippedAtTop)) return
+          if (coarse ? !aboveViewport : !(aboveViewport || clippedAtTop)) return
           scrollHost.scrollTop = Math.max(0, Number(scrollHost.scrollTop || 0) + totalDelta)
           return
         }
@@ -75,10 +96,10 @@ export default function useScrollResizeCompensation() {
         const lockEdge = topEdge + 12
         const aboveViewport = rect.bottom <= lockEdge
         const clippedAtTop = rect.top < lockEdge && rect.bottom > lockEdge
-        if (aboveViewport || clippedAtTop) {
+        if (coarse ? aboveViewport : (aboveViewport || clippedAtTop)) {
           window.scrollBy(0, totalDelta)
         }
       } catch {}
     })
-  }, [resolveScrollHost])
+  }, [isCoarseUi, resolveScrollHost])
 }

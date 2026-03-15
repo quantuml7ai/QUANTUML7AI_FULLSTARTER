@@ -36,12 +36,15 @@ export const __MEDIA_VIS_MARGIN_PX = (() => {
 
 const __VIDEO_HARD_CAP_ENABLED = (() => {
   try {
+    const ua = String((typeof navigator !== 'undefined' ? navigator.userAgent : '') || '')
+    const isIOS = /iP(hone|ad|od)/i.test(ua)
     const dm = Number((typeof navigator !== 'undefined' ? navigator?.deviceMemory : 0) || 0)
     const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2
-    const coarse = !!(typeof window !== 'undefined' && window?.matchMedia?.('(pointer: coarse)')?.matches)
-    return !!lowMem || !!coarse
+    if (isIOS) return false
+    if (lowMem) return true
+    return false
   } catch {
-    return true
+    return false
   }
 })()
 

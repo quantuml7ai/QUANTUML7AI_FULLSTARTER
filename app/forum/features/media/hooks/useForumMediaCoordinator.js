@@ -226,6 +226,13 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     const warmMarginTop = Math.max(420, Math.round(__MEDIA_VIS_MARGIN_PX * 1.6));
     const warmMarginBottom = Math.max(760, Math.round(__MEDIA_VIS_MARGIN_PX * 2.35));
     const poolMargin = Math.max(warmMarginTop, warmMarginBottom);
+    const isIOSWarm = (() => {
+      try {
+        return /iP(hone|ad|od)/i.test(String(navigator?.userAgent || ''));
+      } catch {
+        return false;
+      }
+    })();
     const isCoarseWarm = (() => {
       try {
         return !!window?.matchMedia?.('(pointer: coarse)')?.matches;
@@ -233,11 +240,15 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         return false;
       }
     })();
-    const warmResidentCap = isCoarseWarm ? 2 : 3;
+    const warmResidentCap = isIOSWarm ? 2 : (isCoarseWarm ? 1 : 3);
     const eagerWarmCount = 1;
-    const warmLeaseMs = isCoarseWarm ? 1300 : 900;
-    const residentLeaseMs = isCoarseWarm ? 950 : 650;
-    const farUnloadMargin = Math.max(Math.round(poolMargin * 1.85), 1400);
+    const warmLeaseMs = isIOSWarm ? 1120 : (isCoarseWarm ? 820 : 900);
+    const residentLeaseMs = isIOSWarm ? 760 : (isCoarseWarm ? 480 : 650);
+    const farUnloadMargin = isIOSWarm
+      ? Math.max(Math.round(poolMargin * 1.5), 1240)
+      : isCoarseWarm
+        ? Math.max(Math.round(poolMargin * 1.25), 980)
+        : Math.max(Math.round(poolMargin * 1.85), 1400);
 
     const extendWarmLease = (video, ms) => {
       try {
@@ -403,7 +414,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         warmSweepSettleTimer = setTimeout(() => {
           warmSweepSettleTimer = 0;
           scheduleWarmSweep('immediate');
-        }, 128);
+        }, isCoarseWarm ? 220 : 128);
         return;
       }
       if (warmSweepRaf || warmSweepTimeout) return;
@@ -413,7 +424,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         const now = Date.now();
         const top = readWarmSweepScrollTop();
         const topDelta = Math.abs(top - lastWarmSweepTop);
-        if ((now - lastWarmSweepTs) < 180 && topDelta < 220) return;
+        if ((now - lastWarmSweepTs) < (isCoarseWarm ? 280 : 180) && topDelta < (isCoarseWarm ? 420 : 220)) return;
         lastWarmSweepTs = now;
         lastWarmSweepTop = top;
         runWarmSweep();
@@ -464,8 +475,8 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       const now = Date.now();
       const top = readWarmSweepScrollTop();
       const topDelta = Math.abs(top - lastWarmSweepTop);
-      if (lastWarmSweepTop >= 0 && topDelta < 24) return;
-      if (topDelta > 1400 && (now - lastWarmSweepTs) > 320) {
+      if (lastWarmSweepTop >= 0 && topDelta < (isCoarseWarm ? 72 : 24)) return;
+      if (topDelta > (isCoarseWarm ? 900 : 1400) && (now - lastWarmSweepTs) > (isCoarseWarm ? 260 : 320)) {
         scheduleWarmSweep('immediate');
         return;
       }
@@ -839,6 +850,36 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         if (owner instanceof Element && owner.dataset) delete owner.dataset.__manualLeaseUntil;
       } catch {}
     };
+    const bumpPlayRequestToken = (el) => {
+      let next = 1;
+      try {
+        const media = getMediaStateNode(el);
+        const owner = getOwnerNode(el);
+        const mediaToken = Number(media?.dataset?.__playReqToken || 0);
+        const ownerToken = Number(owner?.dataset?.__playReqToken || 0);
+        next = Math.max(0, mediaToken, ownerToken) + 1;
+        const token = String(next);
+        if (media?.dataset) media.dataset.__playReqToken = token;
+        if (owner instanceof Element && owner.dataset) owner.dataset.__playReqToken = token;
+      } catch {}
+      return String(next);
+    };
+    const invalidatePlayRequest = (el) => {
+      try {
+        bumpPlayRequestToken(el);
+      } catch {}
+    };
+    const isPlayRequestCurrent = (el, token) => {
+      try {
+        const media = getMediaStateNode(el);
+        const owner = getOwnerNode(el);
+        const mediaToken = String(media?.dataset?.__playReqToken || '');
+        const ownerToken = String(owner?.dataset?.__playReqToken || '');
+        const current = mediaToken || ownerToken;
+        return !!String(token || '') && current === String(token);
+      } catch {}
+      return false;
+    };
     const markSuppressedPlayback = (el, ms = 1200) => {
       const until = String(Date.now() + Math.max(200, Number(ms || 0)));
       try {
@@ -1059,6 +1100,9 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       markUserPaused(target);
       clearUserGestureIntent(target);
       clearManualLease(target);
+      invalidatePlayRequest(target);
+      markSuppressedPlayback(target, 4200);
+      markSuppressedPlayback(owner, 4200);
       pendingReadyGrace.delete(owner);
       cancelUnload(owner);
       try {
@@ -1067,6 +1111,8 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           markUserPaused(qcastHost);
           clearUserGestureIntent(qcastHost);
           clearManualLease(qcastHost);
+          invalidatePlayRequest(qcastHost);
+          markSuppressedPlayback(qcastHost, 4200);
         }
       } catch {}
       try {
@@ -1098,6 +1144,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         if (!manualLease && !hasGesture) {
           trace('user_play_blocked_paused_lock', target);
           clearReadyReplay(target);
+          invalidatePlayRequest(target);
           withSystemPause(target, () => {
             try { if (!target.paused) target.pause(); } catch {}
           });
@@ -1107,6 +1154,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       if (isSuppressed && !manualLease && !hasGesture) {
         trace('user_play_blocked_suppressed', target);
         clearReadyReplay(target);
+        invalidatePlayRequest(target);
         withSystemPause(target, () => {
           try { if (!target.paused) target.pause(); } catch {}
         });
@@ -1137,12 +1185,30 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     };
     const startHtmlMedia = (el, reason = 'play') => {
       if (!(el instanceof HTMLMediaElement)) return;
+      const playToken = bumpPlayRequestToken(el);
+      const canContinue = () => {
+        try {
+          return isPlayRequestCurrent(el, playToken) && !isUserPaused(el) && !hasSuppressedPlayback(el);
+        } catch {}
+        return false;
+      };
       try {
         const p = el.play?.();
         if (p && typeof p.then === 'function') {
           p.then(() => {
+            if (!canContinue()) {
+              trace('play_started_stale', el, { reason, muted: !!el.muted });
+              withSystemPause(el, () => {
+                try { if (!el.paused) el.pause(); } catch {}
+              });
+              return;
+            }
             trace('play_started', el, { reason, muted: !!el.muted });
           }).catch((err) => {
+            if (!canContinue()) {
+              trace('play_reject_stale', el, { reason });
+              return;
+            }
             trace('play_reject', el, {
               reason,
               name: String(err?.name || ''),
@@ -1161,6 +1227,13 @@ export default function useForumMediaCoordinator({ emitDiag }) {
               const retry = el.play?.();
               if (retry && typeof retry.then === 'function') {
                 retry.then(() => {
+                  if (!canContinue()) {
+                    trace('play_retry_stale', el, { reason });
+                    withSystemPause(el, () => {
+                      try { if (!el.paused) el.pause(); } catch {}
+                    });
+                    return;
+                  }
                   trace('play_retry_muted_ok', el, { reason });
                 }).catch((retryErr) => {
                   trace('play_retry_muted_fail', el, {
@@ -1311,6 +1384,13 @@ export default function useForumMediaCoordinator({ emitDiag }) {
 
     const observed = new WeakSet();
     const unloadTimers = new WeakMap(); // el -> timeoutId 
+    const isIOSUi = (() => {
+      try {
+        return /iP(hone|ad|od)/i.test(String(navigator?.userAgent || ''));
+      } catch {
+        return false;
+      }
+    })();
     const isCoarseUi = (() => {
       try {
         const uaMobile = /iP(hone|ad|od)|Android/i.test(String(navigator?.userAgent || ''));
@@ -1320,9 +1400,9 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         return false;
       }
     })();
-    const IFRAME_HARD_UNLOAD_MS = isCoarseUi ? 9000 : 3000;
+    const IFRAME_HARD_UNLOAD_MS = isIOSUi ? 7600 : (isCoarseUi ? 5200 : 3000);
     const IFRAME_RESIDENT_CAP = (() => {
-      if (isCoarseUi) return 2;
+      if (isCoarseUi) return 1;
       const dm = Number(navigator?.deviceMemory || 0);
       if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 2;
       return 3;
@@ -1350,10 +1430,10 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         return 12000;
       }
       if (isCoarseUi && (reason === 'focus_switch' || reason === 'below_stop_ratio' || reason === 'candidate_replace')) {
-        return 9500;
+        return 5200;
       }
       if (!isCoarseUi && reason === 'out_of_view') return 6000;
-      if (isCoarseUi && reason === 'out_of_view') return 9000;
+      if (isCoarseUi && reason === 'out_of_view') return 6200;
       return IFRAME_HARD_UNLOAD_MS;
     };
     const getLoadedIframes = () => {
@@ -1394,6 +1474,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       clearReadyReplay(el);
       trace('soft_pause', el);
       if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
+        invalidatePlayRequest(el);
         markSuppressedPlayback(el, 1400);
         withSystemPause(el, () => {
           try { if (!el.paused) el.pause(); } catch {}
@@ -1408,6 +1489,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       if (kind === 'qcast') {
         const a = el.querySelector?.('audio');
         if (a instanceof HTMLAudioElement) {
+          invalidatePlayRequest(a);
           markSuppressedPlayback(a, 1800);
           markSuppressedPlayback(el, 1800);
           clearReadyReplay(a);
@@ -1442,6 +1524,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           if (keepEl instanceof Element && keepEl.contains?.(node)) return;
           if (node.contains?.(keepEl)) return;
           if (node instanceof HTMLVideoElement || node instanceof HTMLAudioElement) {
+            invalidatePlayRequest(node);
             withSystemPause(node, () => {
               try { if (!node.paused) node.pause(); } catch {}
             });
@@ -1451,6 +1534,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           if (kind === 'qcast') {
             const a = node.querySelector?.('audio[data-qcast-audio="1"]');
             if (a instanceof HTMLAudioElement) {
+              invalidatePlayRequest(a);
               withSystemPause(a, () => {
                 try { if (!a.paused) a.pause(); } catch {}
               });
@@ -1476,6 +1560,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       clearReadyReplay(el);
       trace('hard_unload', el, { reason });
       if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
+        invalidatePlayRequest(el);
         try { __dropActiveVideoEl(el); } catch {}
         if (el instanceof HTMLVideoElement) {
           try { __unloadVideoEl(el); } catch {}
@@ -1491,6 +1576,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       if (kind === 'qcast') {
         const a = el.querySelector?.('audio');
         if (a instanceof HTMLAudioElement) {
+          invalidatePlayRequest(a);
           clearReadyReplay(a);
           withSystemPause(a, () => {
             try { if (!a.paused) a.pause(); } catch {}
@@ -1596,6 +1682,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
 
       if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
         try {
+          clearSuppressedPlayback(el);
           if (el instanceof HTMLVideoElement) {
             const hasSrc = !!el.getAttribute('src');
             if (!hasSrc) {
@@ -1641,6 +1728,8 @@ export default function useForumMediaCoordinator({ emitDiag }) {
               trace('play_skip_user_paused', a, { reason: 'qcast_user_paused' });
               return;
             }
+            clearSuppressedPlayback(a);
+            clearSuppressedPlayback(el);
             applyMutedPref(a);
             // LOOP: qcast-аудио тоже зацикливаем
             a.loop = true;
@@ -1747,28 +1836,28 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       return { el: best, ratio: bestRatio, score: bestScore, visiblePx: bestVisiblePx, centerDist: bestCenterDist };
     };
 
-    const ACTIVE_SWITCH_HOLD_MS = 420;
+    const ACTIVE_SWITCH_HOLD_MS = isIOSUi ? 620 : (isCoarseUi ? 520 : 420);
     const SWITCH_RATIO_DELTA = 0.12;
     const SWITCH_SCORE_DELTA = 180;
-    const PENDING_READY_GRACE_MS = 260;
+    const PENDING_READY_GRACE_MS = isIOSUi ? 720 : (isCoarseUi ? 420 : 260);
     const PENDING_READY_GRACE_RATIO = 0.12;
     const getMediaKind = (el) => String(el?.getAttribute?.('data-forum-media') || '');
     const getStartRatio = (el) => {
       const kind = getMediaKind(el);
-      if (kind === 'qcast') return 0.18;
-      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return 0.3;
-      return 0.35;
+      if (kind === 'qcast') return isIOSUi ? 0.12 : (isCoarseUi ? 0.14 : 0.18);
+      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 0.2 : (isCoarseUi ? 0.22 : 0.3);
+      return isIOSUi ? 0.2 : (isCoarseUi ? 0.24 : 0.35);
     };
     const getStopRatio = (el) => {
       const kind = getMediaKind(el);
-      if (kind === 'qcast') return 0.03;
-      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return 0.12;
-      return 0.22;
+      if (kind === 'qcast') return isIOSUi ? 0.01 : (isCoarseUi ? 0.02 : 0.03);
+      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 0.06 : (isCoarseUi ? 0.08 : 0.12);
+      return isIOSUi ? 0.1 : (isCoarseUi ? 0.14 : 0.22);
     };
     const getSwitchHoldMs = (el) => {
       const kind = getMediaKind(el);
-      if (kind === 'qcast') return 1800;
-      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return 880;
+      if (kind === 'qcast') return isCoarseUi ? 2200 : 1800;
+      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isCoarseUi ? 1200 : 880;
       return ACTIVE_SWITCH_HOLD_MS;
     };
     const getSwitchRatioDelta = (el) => {
