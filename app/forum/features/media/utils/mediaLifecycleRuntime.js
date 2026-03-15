@@ -67,6 +67,28 @@ const __MAX_ACTIVE_VIDEO_ELEMENTS = (() => {
 const __activeVideoEls = new Set()
 const __activeVideoLRU = []
 
+export function __requestVideoLoad(el, reason = 'runtime') {
+  if (!(el instanceof HTMLMediaElement)) return false
+  const now = Date.now()
+  const lastTs = Number(el?.dataset?.__lastLoadTs || 0)
+  const pending = String(el?.dataset?.__loadPending || '') === '1'
+
+  if (pending && (now - lastTs) < 1200) return false
+  if ((now - lastTs) < 250) return false
+
+  try {
+    el.dataset.__lastLoadTs = String(now)
+    el.dataset.__lastLoadReason = String(reason || 'runtime')
+    el.dataset.__loadPending = '1'
+    el.dataset.__loadPendingSince = String(now)
+  } catch {}
+
+  try {
+    el.load?.()
+  } catch {}
+
+  return true
+}
 export function __touchActiveVideoEl(el) {
   if (!el) return
   if (!__activeVideoEls.has(el)) __activeVideoEls.add(el)
@@ -158,6 +180,11 @@ export function __unloadVideoEl(el) {
   const canHardUnload = (() => {
     try {
       if (__VIDEO_HARD_CAP_ENABLED) return true
+      const isPostVideo =
+        String(el?.dataset?.forumVideo || el?.getAttribute?.('data-forum-video') || '') === 'post'
+      const pageHidden = String(document?.visibilityState || '') === 'hidden'
+      const farAway = !__isVideoNearViewport(el, Math.max(__MEDIA_VIS_MARGIN_PX, 280))
+      if (isPostVideo && (pageHidden || farAway)) return true      
       if (document?.documentElement?.getAttribute?.('data-video-feed') === '1') return true
       return String(el?.dataset?.__forceHardUnload || '') === '1'
     } catch {
@@ -216,6 +243,7 @@ export function __restoreVideoEl(el) {
   try {
     el.dataset.__loadPending = '1'
     el.dataset.__warmReady = '0'
+    el.setAttribute('data-src', src)
     el.setAttribute('src', src)
   } catch {}
   try {
@@ -236,9 +264,7 @@ export function __restoreVideoEl(el) {
       try { el.addEventListener('canplay', seekToResume, { once: true }) } catch {}
     }
   } catch {}
-  try {
-    el.load?.()
-  } catch {}
+   __requestVideoLoad(el, 'restore')
 }
 
 export function __hasLazyVideoSourceWithoutSrc(el) {
@@ -282,6 +308,7 @@ export function VideoMedia(props) {
       mediaVisMarginPx={__MEDIA_VIS_MARGIN_PX}
       dropActiveVideo={__dropActiveVideoEl}
       unloadVideoEl={__unloadVideoEl}
+      requestVideoLoad={__requestVideoLoad}
     />
   )
 }

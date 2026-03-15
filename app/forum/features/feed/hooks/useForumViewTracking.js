@@ -92,6 +92,18 @@ export default function useForumViewTracking({
     const prefetchedPosters = new Set()
     const prefetchedPosterQueue = []
     const PREFETCH_POSTER_LIMIT = 96
+    const posterPrefetchRadius = (() => {
+      try {
+        const ua = String(navigator?.userAgent || '')
+        const coarse = /iP(hone|ad|od)|Android/i.test(ua) || !!window?.matchMedia?.('(pointer: coarse)')?.matches
+        const saveData = !!navigator?.connection?.saveData
+        if (saveData) return 0
+        return coarse ? 1 : 2
+      } catch {
+        return 2
+      }
+    })()
+    const posterPrefetchBudget = posterPrefetchRadius <= 1 ? 2 : 4    
     const rememberPrefetchedPoster = (url) => {
       if (!url || prefetchedPosters.has(url)) return false
       prefetchedPosters.add(url)
@@ -105,19 +117,24 @@ export default function useForumViewTracking({
 
     const prefetchVideosAround = (centerEl) => {
       try {
+        if (posterPrefetchRadius <= 0) return
+        if (document.visibilityState !== 'visible') return        
         const cards = Array.from(document.querySelectorAll(CARD_SELECTOR))
         const idx = cards.indexOf(centerEl)
         if (idx < 0) return
 
-        const from = Math.max(0, idx - 2)
-        const to = Math.min(cards.length - 1, idx + 2)
+        const from = Math.max(0, idx - posterPrefetchRadius)
+        const to = Math.min(cards.length - 1, idx + posterPrefetchRadius)
+        let warmed = 0
 
         for (let i = from; i <= to; i++) {
+          if (warmed >= posterPrefetchBudget) break
           const card = cards[i]
           card
             .querySelectorAll('video[data-forum-video="post"]')
             .forEach((v) => {
               try {
+                if (warmed >= posterPrefetchBudget) return
                 const p = v.getAttribute('poster') || v.dataset?.poster || ''
                 if (!p) return
                 if (!rememberPrefetchedPoster(p)) return
@@ -125,6 +142,7 @@ export default function useForumViewTracking({
                 img.decoding = 'async'
                 img.loading = 'lazy'
                 img.src = p
+                warmed += 1
               } catch {}
             })
         }

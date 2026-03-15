@@ -30,7 +30,9 @@ function readMutedPrefFromStorage() {
 function writeMutedPrefToStorage(val) {
   if (!isBrowser()) return;
   try {
-    window.localStorage?.setItem(MEDIA_MUTED_KEY, val ? '1' : '0');
+    const next = val ? '1' : '0';
+    window.localStorage?.setItem(MEDIA_MUTED_KEY, next);
+    window.localStorage?.setItem(MEDIA_VIDEO_MUTED_KEY, next)
   } catch {}
 }
 
@@ -1075,8 +1077,8 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     if (!el || !isBrowser() || typeof IntersectionObserver === 'undefined')
       return;
 
-    const prepareMargin = coarseUi ? '1320px 0px' : '920px 0px';
-    const nearMargin = coarseUi ? '860px 0px' : '560px 0px';
+    const prepareMargin = coarseUi ? '980px 0px' : '720px 0px';
+    const nearMargin = coarseUi ? '560px 0px' : '360px 0px';
 
     const prepareObs = new IntersectionObserver(
       ([e]) => setIsPrepareNear(!!e?.isIntersecting),
@@ -1134,7 +1136,8 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       }
     };
 
-  // Build the list of media choices for the current click URL.
+    window.addEventListener(MEDIA_MUTED_EVENT, onMuted);
+
     return () => window.removeEventListener(MEDIA_MUTED_EVENT, onMuted);
   }, []);
   const safeClick = useMemo(() => {
@@ -1589,6 +1592,17 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     };
   }, [shouldMountYouTube, mediaSrc, isAttachedYtPlayer]);
 
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!(el instanceof HTMLVideoElement)) return undefined;
+
+    return () => {
+      try { el.pause?.(); } catch {}
+      try { el.removeAttribute('src'); } catch {}
+      try { el.load?.(); } catch {}
+    };
+  }, [mediaKind, mediaSrc]);
+
   // ===== Hard stop / resume playback depending on attention =====
   useEffect(() => {
     // HTML5 video
@@ -1674,7 +1688,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     observer.observe(el);
     return () => {
       if (timer) clearTimeout(timer);
-
+      try { observer.disconnect(); } catch {}
     };
   }, [safeClick, slotKind, nearId, conf]);
 
@@ -1888,9 +1902,12 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
       src={media.src}
       className="forum-ad-fit"
       muted={muted}
+      defaultMuted={muted}
       loop
       playsInline
-      preload={shouldPlay ? 'auto' : 'metadata'}
+      preload={shouldPlay ? 'metadata' : 'none'}
+      controls={false}
+      disablePictureInPicture
     />
   </div>
 )}

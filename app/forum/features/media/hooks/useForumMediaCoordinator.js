@@ -11,6 +11,7 @@ import {
   __enforceActiveVideoCap,
   __restoreVideoEl,
   __unloadVideoEl,
+  __requestVideoLoad,
   __hasLazyVideoSourceWithoutSrc,
   __isVideoNearViewport,
   __MEDIA_VIS_MARGIN_PX,
@@ -115,15 +116,15 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         return false;
       }
     })();
-    const warmMarginTop = Math.max(isIOSWarm ? 560 : 420, Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSWarm ? 1.9 : 1.6)));
-    const warmMarginBottom = Math.max(isIOSWarm ? 1120 : 760, Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSWarm ? 2.85 : 2.35)));
+    const warmMarginTop = Math.max(isIOSWarm ? 320 : 420, Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSWarm ? 1.35 : 1.6)));
+    const warmMarginBottom = Math.max(isIOSWarm ? 640 : 760, Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSWarm ? 1.9 : 2.35)));
     const poolMargin = Math.max(warmMarginTop, warmMarginBottom);
-    const warmResidentCap = isIOSWarm ? 3 : (isCoarseWarm ? 1 : 3);
-    const eagerWarmCount = isIOSWarm ? 2 : 1;
-    const warmLeaseMs = isIOSWarm ? 1480 : (isCoarseWarm ? 820 : 900);
-    const residentLeaseMs = isIOSWarm ? 980 : (isCoarseWarm ? 480 : 650);
+    const warmResidentCap = isIOSWarm ? 1 : (isCoarseWarm ? 1 : 3);
+    const eagerWarmCount = 1;
+    const warmLeaseMs = isIOSWarm ? 900 : (isCoarseWarm ? 820 : 900);
+    const residentLeaseMs = isIOSWarm ? 420 : (isCoarseWarm ? 480 : 650);
     const farUnloadMargin = isIOSWarm
-      ? Math.max(Math.round(poolMargin * 1.7), 1680)
+      ? Math.max(Math.round(poolMargin * 1.25), 980)
       : isCoarseWarm
         ? Math.max(Math.round(poolMargin * 1.25), 980)
         : Math.max(Math.round(poolMargin * 1.85), 1400);
@@ -164,10 +165,9 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             if (__hasLazyVideoSourceWithoutSrc(video)) return;
             const cold = (video.readyState === 0 || !video.currentSrc);
             const safe = cold && video.paused && (video.currentTime === 0);
-            if (safe && video.dataset?.__loadPending !== '1') {
-              try { video.dataset.__loadPending = '1'; } catch {}
+            if (safe && video.dataset?.__loadPending !== '1') { 
               trace('warm_load', video);
-              video.load?.();
+              __requestVideoLoad(video, 'warm');
             }
           } catch {}
         });
@@ -253,8 +253,21 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           cool(video);
         });
       } catch {}
-    };
+   };
 
+    const coolAllPostVideos = (reason = 'hidden') => {
+      try {
+        document.querySelectorAll(selector).forEach((video) => {
+          if (!(video instanceof HTMLVideoElement)) return;
+          const job = pending.get(video);
+          if (job) cancelPrepare(job);
+          pending.delete(video);
+          try { __dropActiveVideoEl(video); } catch {}
+          try { __unloadVideoEl(video); } catch {}
+          trace('cool_all', video, { reason });
+        });
+      } catch {}
+    };
     const cancelWarmSweepSchedule = () => {
       if (warmSweepRaf) {
         try { cancelAnimationFrame(warmSweepRaf); } catch {}
@@ -362,9 +375,16 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     };
     const onWarmSweepVisibility = () => {
       try {
-        if (document.visibilityState === 'visible') runWarmSweep();
+        if (document.visibilityState === 'hidden') {
+          coolAllPostVideos('visibility_hidden');
+          return;
+        }
+        runWarmSweep();
       } catch {}
     };
+    const onWarmSweepPageHide = () => {
+      coolAllPostVideos('pagehide');
+    };    
     const scrollEl = (() => {
       try {
         const el = document.querySelector?.('[data-forum-scroll="1"]') || null;
@@ -378,7 +398,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     } else {
       try { window.addEventListener('scroll', onWarmSweepScroll, { passive: true }); } catch {}
     }
-    try { document.addEventListener('visibilitychange', onWarmSweepVisibility); } catch {}
+    try { window.addEventListener('pagehide', onWarmSweepPageHide, { passive: true }); } catch {}
 
     return () => {
       io.disconnect();
@@ -389,11 +409,13 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         try { window.removeEventListener('scroll', onWarmSweepScroll); } catch {}
       }
       try { document.removeEventListener('visibilitychange', onWarmSweepVisibility); } catch {}
+      try { window.removeEventListener('pagehide', onWarmSweepPageHide); } catch {}
       cancelWarmSweepSchedule();
       try {
         pending.forEach((job) => { try { cancelPrepare(job); } catch {} });
         pending.clear();
       } catch {}
+      coolAllPostVideos('cleanup');
     };
   }, []);
   // === Ранний prewarm iframe (YouTube/TikTok/other embeds) для более быстрого старта в зоне фокуса ===
@@ -1028,10 +1050,9 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         const networkState = Number(el.networkState || 0);
         const cold = networkState === HTMLMediaElement.NETWORK_EMPTY || !el.currentSrc;
         if (cold && (now - lastBoostTs) > 1500 && el.dataset?.__loadPending !== '1') {
-          try { el.dataset.__candidateBoostTs = String(now); } catch {}
-          try { el.dataset.__loadPending = '1'; } catch {}
+          try { el.dataset.__candidateBoostTs = String(now); } catch {} 
           trace('candidate_force_load', el, { reason: `${reason}:cold` });
-          try { el.load?.(); } catch {}
+          __requestVideoLoad(el, `${reason}:cold`);
         }
         const stalledPending =
           String(el.dataset?.__loadPending || '') === '1' &&
@@ -1049,7 +1070,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           try {
             if (!el.getAttribute('src')) __restoreVideoEl(el);
           } catch {}
-          try { el.load?.(); } catch {}
+          __requestVideoLoad(el, `${reason}:stall_retry`);
         }
         armReadyReplay(el);
       } catch {}
@@ -1814,10 +1835,9 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             try { el.preload = 'auto'; } catch {}
             try {
               const empty = (el.networkState === HTMLMediaElement.NETWORK_EMPTY) || !el.currentSrc;
-              if (empty && el.dataset?.__loadPending !== '1' && el.paused && (el.currentTime === 0)) {
-                try { el.dataset.__loadPending = '1'; } catch {}
+              if (empty && el.dataset?.__loadPending !== '1' && el.paused && (el.currentTime === 0)) { 
                 trace('play_load', el);
-                el.load?.();
+                __requestVideoLoad(el, 'play_activate');
               }
             } catch {}
             __touchActiveVideoEl(el);
@@ -2264,6 +2284,44 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       promoteExternalActive(candidate, `${source}_external_play`);
     };
 
+    const coolAllCoordinatorMedia = (reason = 'visibility_hidden') => {
+      try {
+        document.querySelectorAll(selector).forEach((node) => {
+          if (!(node instanceof Element)) return;
+          cancelUnload(node);
+          pendingReadyGrace.delete(node);
+          const kind = String(node.getAttribute?.('data-forum-media') || '');
+          if (
+            node instanceof HTMLVideoElement ||
+            node instanceof HTMLAudioElement ||
+            kind === 'qcast' ||
+            kind === 'youtube' ||
+            kind === 'tiktok' ||
+            kind === 'iframe'
+          ) {
+            softPauseMedia(node);
+            hardUnloadMedia(node, reason);
+          }
+        });
+      } catch {}
+      active = null;
+      activeSinceTs = 0;
+    };
+
+    const onCoordinatorVisibility = () => {
+      try {
+        if (document.visibilityState === 'hidden') {
+          coolAllCoordinatorMedia('visibility_hidden');
+          return;
+        }
+        observeAll();
+      } catch {}
+    };
+
+    const onCoordinatorPageHide = () => {
+      coolAllCoordinatorMedia('pagehide');
+    };
+
     observeAll();
 
     // Вместо setInterval(querySelectorAll...) — MutationObserver на новые медиа-узлы
@@ -2287,6 +2345,8 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     } catch { mo = null; }
     window.addEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
     window.addEventListener('site-media-play', onExternalMediaPlay);
+    document.addEventListener('visibilitychange', onCoordinatorVisibility);
+    window.addEventListener('pagehide', onCoordinatorPageHide, { passive: true });    
     document.addEventListener('pointerdown', onMediaPointerCaptured, true);
     document.addEventListener('pause', onMediaPauseCaptured, true);
     document.addEventListener('play', onMediaPlayCaptured, true);
@@ -2294,6 +2354,8 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       try { mo?.disconnect?.(); } catch {}
       window.removeEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
       window.removeEventListener('site-media-play', onExternalMediaPlay);
+      document.removeEventListener('visibilitychange', onCoordinatorVisibility);
+      window.removeEventListener('pagehide', onCoordinatorPageHide);      
       document.removeEventListener('pointerdown', onMediaPointerCaptured, true);
       document.removeEventListener('pause', onMediaPauseCaptured, true);
       document.removeEventListener('play', onMediaPlayCaptured, true);
