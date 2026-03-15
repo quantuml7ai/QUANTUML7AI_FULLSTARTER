@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-03-15T12:08:03.718Z",
+  "generatedAt": "2026-03-15T13:38:00.184Z",
   "results": [
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\i18n.js",
@@ -161,7 +161,7 @@
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoMedia.jsx",
       "counts": {
         "video": 1,
-        "autoplay": 4,
+        "autoplay": 6,
         "loop": 2,
         "preload": 7,
         "img": 0,
@@ -177,7 +177,7 @@
       "samples": {
         "video": [
           {
-            "line": 490,
+            "line": 510,
             "text": "<video"
           }
         ],
@@ -187,12 +187,12 @@
             "text": "autoPlay,"
           },
           {
-            "line": 163,
-            "text": "const nextMuted = typeof initial === 'boolean' ? initial : !!autoPlay"
+            "line": 139,
+            "text": "const nextMuted = typeof initialMuted === 'boolean' ? initialMuted : !!autoPlay"
           },
           {
-            "line": 213,
-            "text": "}, [autoPlay, mutedEvent, readMuted, writeMuted])"
+            "line": 172,
+            "text": "}, [autoPlay, playsInline, poster, preloadMode, readMuted, src])"
           }
         ],
         "img": [],
@@ -219,7 +219,7 @@
       "samples": {
         "video": [
           {
-            "line": 1850,
+            "line": 1886,
             "text": "<video"
           }
         ],
@@ -229,21 +229,21 @@
             "text": "// Default to muted when there is no stored pref; autoplay is more reliable this way."
           },
           {
-            "line": 1513,
+            "line": 1549,
             "text": "autoplay: 0,"
           },
           {
-            "line": 1568,
+            "line": 1604,
             "text": "// If autoplay with sound is blocked, retry muted without changing the global pref."
           }
         ],
         "img": [
           {
-            "line": 1897,
+            "line": 1933,
             "text": "<img"
           },
           {
-            "line": 1946,
+            "line": 1982,
             "text": "<img"
           }
         ],
@@ -580,11 +580,11 @@
         "video": [],
         "autoplay": [
           {
-            "line": 103,
+            "line": 106,
             "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
           },
           {
-            "line": 180,
+            "line": 183,
             "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
           }
         ],

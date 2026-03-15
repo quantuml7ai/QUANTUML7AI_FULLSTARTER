@@ -1,11 +1,11 @@
 {
   "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-03-15T12:08:04.061Z",
+  "generatedAt": "2026-03-15T13:38:00.406Z",
   "report": [
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
       "counts": {
-        "for-loop": 8,
+        "for-loop": 13,
         "while-loop": 2,
         "map-chain": 0,
         "filter-map": 0,
@@ -18,7 +18,7 @@
         "interval": 2
       },
       "longLines": [],
-      "score": 59
+      "score": 69
     },
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\lib\\adsCore.js",
@@ -39,28 +39,10 @@
       "score": 50
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\utils\\postFocus.js",
-      "counts": {
-        "for-loop": 0,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 12,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 5,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 46
-    },
-    {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
       "counts": {
         "for-loop": 11,
-        "while-loop": 1,
+        "while-loop": 2,
         "map-chain": 0,
         "filter-map": 0,
         "layout-read": 0,
@@ -83,57 +65,75 @@
           "text": "// Р РЋРІР‚С™Р В РЎвЂўР В Р’В»Р РЋР Р‰Р В РЎвЂќР В РЎвЂў Р РЋР РЏР В Р вЂ Р В Р вЂ¦Р РЋРІР‚в„–Р В Р’Вµ video-Р РЋР РЉР В Р вЂ¦Р В РўвЂР В РЎвЂ”Р В РЎвЂўР В РЎвЂР В Р вЂ¦Р РЋРІР‚С™Р РЋРІР‚в„–"
         },
         {
-          "i": 979,
+          "i": 996,
           "len": 381,
           "text": "// Р РЋРІР‚С™Р В Р’ВµР В РЎвЂќР РЋРЎвЂњР РЋРІР‚В°Р В РЎвЂР В РІвЂћвЂ“ Р В Р вЂ Р РЋРІР‚в„–Р В Р’В±Р РЋР вЂљР В Р’В°Р В Р вЂ¦Р В Р вЂ¦Р РЋРІР‚в„–Р В РІвЂћвЂ“ mediaHref (Р В РЎвЂќР В РЎвЂўР В Р вЂ¦Р В РЎвЂќР РЋР вЂљР В Р’ВµР РЋРІР‚С™Р В Р вЂ¦Р РЋРІР‚в„–Р В РІвЂћвЂ“ youtube / Р В РЎвЂќР В Р’В°Р РЋР вЂљР РЋРІР‚С™Р В РЎвЂР В Р вЂ¦Р В РЎвЂќР В Р’В° Р В РЎвЂ Р РЋРІР‚С™.Р В РЎвЂ”.)"
         },
         {
-          "i": 995,
+          "i": 1020,
           "len": 318,
           "text": "// isNear: Р В Р’В±Р В Р’В»Р В РЎвЂўР В РЎвЂќ Р РЋР вЂљР РЋР РЏР В РўвЂР В РЎвЂўР В РЎВ (Р В РЎВР В РЎвЂўР В Р’В¶Р В Р вЂ¦Р В РЎвЂў Р В РЎвЂ”Р В РЎвЂўР В РўвЂР В РЎвЂ“Р РЋР вЂљР РЋРЎвЂњР В Р’В¶Р В Р’В°Р РЋРІР‚С™Р РЋР Р‰, Р В Р вЂ¦Р В РЎвЂў Р В Р вЂ¦Р В Р’Вµ Р В РЎвЂР В РЎвЂ“Р РЋР вЂљР В Р’В°Р РЋРІР‚С™Р РЋР Р‰)"
         },
         {
-          "i": 996,
+          "i": 1021,
           "len": 279,
           "text": "// isFocused: Р В Р’В±Р В Р’В»Р В РЎвЂўР В РЎвЂќ Р РЋР вЂљР В Р’ВµР В Р’В°Р В Р’В»Р РЋР Р‰Р В Р вЂ¦Р В РЎвЂў Р В Р вЂ  Р В Р’В·Р В РЎвЂўР В Р вЂ¦Р В Р’Вµ Р В Р вЂ Р В Р вЂ¦Р В РЎвЂР В РЎВР В Р’В°Р В Р вЂ¦Р В РЎвЂР РЋР РЏ (Р В РЎвЂР В РЎвЂ“Р РЋР вЂљР В Р’В°Р В Р’ВµР В РЎВ)"
         },
         {
-          "i": 997,
+          "i": 1022,
           "len": 322,
           "text": "// isPageActive: Р В Р вЂ Р В РЎвЂќР В Р’В»Р В Р’В°Р В РўвЂР В РЎвЂќР В Р’В°/Р В РЎвЂўР В РЎвЂќР В Р вЂ¦Р В РЎвЂў Р В Р’В°Р В РЎвЂќР РЋРІР‚С™Р В РЎвЂР В Р вЂ Р В Р вЂ¦Р В РЎвЂў (Р В РЎвЂР В Р вЂ¦Р В Р’В°Р РЋРІР‚РЋР В Р’Вµ Р В Р вЂ Р РЋР С“Р В Р’ВµР В РЎвЂ“Р В РўвЂР В Р’В° Р В РЎвЂ”Р В Р’В°Р РЋРЎвЂњР В Р’В·Р В Р’В°)"
         },
         {
-          "i": 1052,
+          "i": 1086,
           "len": 277,
           "text": "// near: Р В Р’В·Р В Р’В°Р РЋР вЂљР В Р’В°Р В Р вЂ¦Р В Р’ВµР В Р’Вµ Р вЂ™Р’В«Р В РЎвЂ”Р В РЎвЂўР В РўвЂР В РЎвЂўР В РІвЂћвЂ“Р РЋРІР‚С™Р В РЎвЂР вЂ™Р’В» Р В РЎвЂќ Р В Р’В±Р В Р’В»Р В РЎвЂўР В РЎвЂќР РЋРЎвЂњ (Р В Р’В±Р В Р’ВµР В Р’В· Р В РЎвЂР В РЎвЂ“Р РЋР вЂљР РЋРІР‚в„–)"
         },
         {
-          "i": 1058,
+          "i": 1092,
           "len": 193,
           "text": "// focused: Р РЋР вЂљР В Р’ВµР В Р’В°Р В Р’В»Р РЋР Р‰Р В Р вЂ¦Р В РЎвЂў Р В Р вЂ Р В РЎвЂР В РўвЂР В Р вЂ¦Р В РЎвЂў (>= 60% Р В РЎвЂ”Р В Р’В»Р В РЎвЂўР РЋРІР‚В°Р В Р’В°Р В РўвЂР В РЎвЂ)"
         },
         {
-          "i": 1114,
+          "i": 1150,
           "len": 443,
           "text": "// Р В РЎвЂќР В Р’В»Р РЋР вЂ№Р РЋРІР‚РЋ Р В РўвЂР В Р’В»Р РЋР РЏ Р РЋР С“Р В Р’В»Р В РЎвЂўР РЋРІР‚С™Р В Р’В°, Р РЋРІР‚РЋР РЋРІР‚С™Р В РЎвЂўР В Р’В±Р РЋРІР‚в„– Р В Р вЂ¦Р В Р’Вµ Р В РЎвЂ”Р В РЎвЂўР В Р вЂ Р РЋРІР‚С™Р В РЎвЂўР РЋР вЂљР РЋР РЏР РЋРІР‚С™Р РЋР Р‰ Р В РЎвЂўР В РўвЂР В Р вЂ¦Р РЋРЎвЂњ Р В РЎвЂ Р РЋРІР‚С™Р РЋРЎвЂњ Р В Р’В¶Р В Р’Вµ Р В РЎВР В Р’ВµР В РўвЂР В РЎвЂР РЋРЎвЂњ Р В РЎвЂ”Р В РЎвЂўР В РўвЂР РЋР вЂљР РЋР РЏР В РўвЂ"
         },
         {
-          "i": 1209,
+          "i": 1245,
           "len": 343,
           "text": "// 2) Р В РЎв„ўР В Р’В°Р РЋР С“Р В РЎвЂќР В Р’В°Р В РўвЂ Р В РЎвЂўР В РЎвЂ”Р РЋР вЂљР В Р’ВµР В РўвЂР В Р’ВµР В Р’В»Р В Р’ВµР В Р вЂ¦Р В РЎвЂР РЋР РЏ Р РЋРІР‚С™Р В РЎвЂР В РЎвЂ”Р В Р’В° Р В РЎВР В Р’ВµР В РўвЂР В РЎвЂР В Р’В° Р В РўвЂР В Р’В»Р РЋР РЏ Р РЋРІР‚С™Р В Р’ВµР В РЎвЂќР РЋРЎвЂњР РЋРІР‚В°Р В Р’ВµР В РЎвЂ“Р В РЎвЂў mediaHref"
         },
         {
-          "i": 1685,
+          "i": 1721,
           "len": 295,
           "text": "// 1) Р РЋР С“Р В РЎвЂўР РЋРІР‚В¦Р РЋР вЂљР В Р’В°Р В Р вЂ¦Р В РЎвЂР РЋРІР‚С™Р РЋР Р‰ Р В РЎвЂ“Р В Р’В»Р В РЎвЂўР В Р’В±Р В Р’В°Р В Р’В»Р РЋР Р‰Р В Р вЂ¦Р В РЎвЂў + Р В РЎвЂўР В РЎвЂ”Р В РЎвЂўР В Р вЂ Р В Р’ВµР РЋР С“Р РЋРІР‚С™Р В РЎвЂР РЋРІР‚С™Р РЋР Р‰ Р В Р вЂ Р РЋР С“Р В Р’ВµР РЋРІР‚В¦"
         },
         {
-          "i": 1729,
+          "i": 1765,
           "len": 197,
           "text": "position: relative;         /* Р В РЎвЂќР В Р’В»Р РЋР вЂ№Р РЋРІР‚РЋ: Р РЋР РЏР В РЎвЂќР В РЎвЂўР РЋР вЂљР РЋР Р‰ Р В РўвЂР В Р’В»Р РЋР РЏ absolute Р В РЎВР В Р’ВµР В РўвЂР В РЎвЂР В Р’В° */"
         }
       ],
-      "score": 45
+      "score": 48
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\utils\\postFocus.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 12,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 5,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 46
     },
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\api\\dm\\delete\\route.js",
@@ -283,6 +283,24 @@
           "text": "script.innerHTML=JSON.stringify({ symbols:[{proName:MAP_TV(symbol),title:symbol}], isTransparent:true, showSymbolLogo:true, colorTheme:'dark', locale:'en', displayMode:'regular', width:'100%', height:52 })"
         }
       ],
+      "score": 31
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\diagnostics\\hooks\\useForumDiagnostics.js",
+      "counts": {
+        "for-loop": 6,
+        "while-loop": 2,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 1,
+        "sync-json": 1,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 1,
+        "raf": 2,
+        "interval": 2
+      },
+      "longLines": [],
       "score": 31
     },
     {
@@ -858,24 +876,6 @@
         "network-call": 0,
         "raf": 0,
         "interval": 0
-      },
-      "longLines": [],
-      "score": 12
-    },
-    {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\diagnostics\\hooks\\useForumDiagnostics.js",
-      "counts": {
-        "for-loop": 3,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 0,
-        "sync-json": 1,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 1,
-        "raf": 1,
-        "interval": 1
       },
       "longLines": [],
       "score": 12

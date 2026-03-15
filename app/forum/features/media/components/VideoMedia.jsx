@@ -128,11 +128,27 @@ export default function VideoMedia({
       const effectivePreload = wantsWarm && preloadMode === 'none' ? 'auto' : preloadMode
       el.preload = effectivePreload
     } catch {}
+    try {
+      if (playsInline) {
+        el.setAttribute('playsinline', '')
+        el.setAttribute('webkit-playsinline', '')
+      }
+    } catch {}
+    try {
+      const initialMuted = readMuted()
+      const nextMuted = typeof initialMuted === 'boolean' ? initialMuted : !!autoPlay
+      el.muted = !!nextMuted
+      el.defaultMuted = !!nextMuted
+      if (nextMuted) el.setAttribute('muted', '')
+      else el.removeAttribute('muted')
+    } catch {}
     if (isNewMediaNode) {
       try {
         delete el.dataset.__resumeTime
         delete el.dataset.__candidateBoostTs
         delete el.dataset.__recoverTry
+        delete el.dataset.__readyRetryCount
+        delete el.dataset.__loadPendingSince
       } catch {}
     }
     if (poster) {
@@ -153,7 +169,7 @@ export default function VideoMedia({
         }
       } catch {}
     }
-  }, [src, poster, preloadMode])
+  }, [autoPlay, playsInline, poster, preloadMode, readMuted, src])
 
   React.useEffect(() => {
     const el = ref.current
@@ -220,18 +236,22 @@ export default function VideoMedia({
       try {
         el.dataset.__loadPending = '1'
         el.dataset.__warmReady = '0'
+        el.dataset.__loadPendingSince = String(Date.now())
       } catch {}
     }
     const markReady = () => {
       try {
         el.dataset.__loadPending = '0'
         el.dataset.__warmReady = '1'
+        delete el.dataset.__loadPendingSince
+        delete el.dataset.__readyRetryCount
       } catch {}
     }
     const markCold = () => {
       try {
         el.dataset.__loadPending = '0'
         el.dataset.__warmReady = '0'
+        delete el.dataset.__loadPendingSince
       } catch {}
     }
 

@@ -18,13 +18,15 @@ export default function PostMediaStack({
   posterUrl,
   YT_RE,
 }) {
+  const mediaKeyBase = String(postId || 'post')
+
   return (
     <>
       {imgLines.length > 0 && (
         <div className="postImages" style={{ display: 'grid', gap: 8, marginTop: 8 }}>
           {imgLines.map((src, i) => (
             <figure
-              key={i}
+              key={`img:${mediaKeyBase}:${src}:${i}`}
               className="imgWrap mediaBox"
               data-kind="image"
               style={{ margin: 0 }}
@@ -51,8 +53,9 @@ export default function PostMediaStack({
       {videoLines.length > 0 && (
         <div className="postVideo" style={{ display: 'grid', gap: 8, marginTop: 8 }}>
           {videoLines.map((src, i) => (
-            <div key={`v${i}`} className="videoCard mediaBox" data-kind="video" style={{ margin: 0 }}>
+            <div key={`video:${mediaKeyBase}:${src}:${i}`} className="videoCard mediaBox" data-kind="video" style={{ margin: 0 }}>
               <VideoMediaComponent
+                key={`video-media:${mediaKeyBase}:${src}:${i}`}
                 data-forum-video="post"
                 data-forum-media="video"
                 src={src}
@@ -85,7 +88,7 @@ export default function PostMediaStack({
             const videoId = m[1]
             return (
               <div
-                key={`yt${i}`}
+                key={`yt:${mediaKeyBase}:${videoId}:${i}`}
                 className="videoCard mediaBox"
                 data-kind="iframe"
                 data-subkind="youtube"
@@ -123,7 +126,7 @@ export default function PostMediaStack({
             if (!videoId) {
               return (
                 <div
-                  key={`tt_link_${i}`}
+                  key={`tt-link:${mediaKeyBase}:${src}:${i}`}
                   className="videoCard"
                   style={{
                     margin: 0,
@@ -169,7 +172,7 @@ export default function PostMediaStack({
             }
 
             return (
-              <div key={`tt${i}`} className="videoCard mediaBox" data-kind="iframe" style={{ margin: 0 }}>
+              <div key={`tt:${mediaKeyBase}:${videoId}:${i}`} className="videoCard mediaBox" data-kind="iframe" style={{ margin: 0 }}>
                 <iframe
                   src=""
                   title="TikTok video"
@@ -190,7 +193,7 @@ export default function PostMediaStack({
       {audioLines.length > 0 && (
         <div className="postAudio" style={{ display: 'grid', gap: 8, marginTop: 8 }}>
           {audioLines.map((src, i) => (
-            <div key={i} className="audioCard mediaBox" data-kind="qcast">
+            <div key={`audio:${mediaKeyBase}:${src}:${i}`} className="audioCard mediaBox" data-kind="qcast">
               <QCastPlayerComponent src={src} />
             </div>
           ))}

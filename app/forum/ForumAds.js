@@ -823,7 +823,7 @@ function tryLoadImage(src, timeoutMs = 3000) {
     const timer = setTimeout(() => finish(false), timeoutMs);
     img.src = src;
   }).then((ok) => {
-    try { adImageProbeCache.set(src, !!ok); } catch {}
+    try { setBoundedMap(adImageProbeCache, src, !!ok, 320); } catch {}
     return !!ok;
   });
 }
@@ -856,7 +856,7 @@ async function detectMediaKind(url, timeoutMs = 3000) {
     }
   }
   if (!canProbeMediaKind(url)) {
-    adMediaKindCache.set(url, null);
+    setBoundedMap(adMediaKindCache, url, null, 320);
     return null;
   }
 
@@ -875,15 +875,15 @@ async function detectMediaKind(url, timeoutMs = 3000) {
       const ct = (resp.headers.get('content-type') || '').toLowerCase();
 
       if (ct.startsWith('video/')) {
-        adMediaKindCache.set(url, 'video');
+        setBoundedMap(adMediaKindCache, url, 'video', 320);
         return 'video';
       }
       if (ct.startsWith('image/')) {
-        adMediaKindCache.set(url, 'image');
+        setBoundedMap(adMediaKindCache, url, 'image', 320);
         return 'image';
       }
 
-      adMediaKindCache.set(url, null);
+      setBoundedMap(adMediaKindCache, url, null, 320);
       return null;
     } catch {
       return null;
@@ -945,6 +945,23 @@ const adMediaKindPending = new Map();
 const adMediaResolveCache = new Map();
 const adMediaResolvePending = new Map();
 const adImageProbeCache = new Map();
+const pruneBoundedMap = (map, cap = 240) => {
+  try {
+    while (map.size > cap) {
+      const oldest = map.keys().next()?.value;
+      if (typeof oldest === 'undefined') break;
+      map.delete(oldest);
+    }
+  } catch {}
+};
+const setBoundedMap = (map, key, value, cap = 240) => {
+  try {
+    if (map.has(key)) map.delete(key);
+    map.set(key, value);
+    pruneBoundedMap(map, cap);
+  } catch {}
+  return value;
+};
 
 /* ======================= AdCard ======================= */
 /**
@@ -983,6 +1000,14 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   const videoRef = useRef(null);
   const ytIframeRef = useRef(null);
   const ytPlayerRef = useRef(null);
+  const coarseUi = useMemo(() => {
+    try {
+      const ua = String(navigator?.userAgent || '');
+      return /iP(hone|ad|od)|Android/i.test(ua) || !!window?.matchMedia?.('(pointer: coarse)')?.matches;
+    } catch {
+      return false;
+    }
+  }, []);
   const isAttachedYtPlayer = useCallback((player = ytPlayerRef.current) => {
     try {
       const iframe = player?.getIframe?.() || ytIframeRef.current;
@@ -996,12 +1021,13 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   // isFocused: Р В Р’В±Р В Р’В»Р В РЎвЂўР В РЎвЂќ Р РЋР вЂљР В Р’ВµР В Р’В°Р В Р’В»Р РЋР Р‰Р В Р вЂ¦Р В РЎвЂў Р В Р вЂ  Р В Р’В·Р В РЎвЂўР В Р вЂ¦Р В Р’Вµ Р В Р вЂ Р В Р вЂ¦Р В РЎвЂР В РЎВР В Р’В°Р В Р вЂ¦Р В РЎвЂР РЋР РЏ (Р В РЎвЂР В РЎвЂ“Р РЋР вЂљР В Р’В°Р В Р’ВµР В РЎВ)
   // isPageActive: Р В Р вЂ Р В РЎвЂќР В Р’В»Р В Р’В°Р В РўвЂР В РЎвЂќР В Р’В°/Р В РЎвЂўР В РЎвЂќР В Р вЂ¦Р В РЎвЂў Р В Р’В°Р В РЎвЂќР РЋРІР‚С™Р В РЎвЂР В Р вЂ Р В Р вЂ¦Р В РЎвЂў (Р В РЎвЂР В Р вЂ¦Р В Р’В°Р РЋРІР‚РЋР В Р’Вµ Р В Р вЂ Р РЋР С“Р В Р’ВµР В РЎвЂ“Р В РўвЂР В Р’В° Р В РЎвЂ”Р В Р’В°Р РЋРЎвЂњР В Р’В·Р В Р’В°)
   const [isNear, setIsNear] = useState(false);
+  const [isPrepareNear, setIsPrepareNear] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const isPageActive = usePageActiveState();
   const [mediaResident, setMediaResident] = useState(false);
 
   const shouldPlay = isFocused && isPageActive;
-  const shouldResolveMedia = isNear || shouldPlay;
+  const shouldResolveMedia = isPrepareNear || isNear || shouldPlay;
   const shouldPlayRef = useRef(false);
   const mutedRef = useRef(muted);
   const mediaHrefRef = useRef(null);
@@ -1049,10 +1075,18 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     if (!el || !isBrowser() || typeof IntersectionObserver === 'undefined')
       return;
 
+    const prepareMargin = coarseUi ? '1320px 0px' : '920px 0px';
+    const nearMargin = coarseUi ? '860px 0px' : '560px 0px';
+
+    const prepareObs = new IntersectionObserver(
+      ([e]) => setIsPrepareNear(!!e?.isIntersecting),
+      { rootMargin: prepareMargin, threshold: 0 }
+    );
+
     // near: Р В Р’В·Р В Р’В°Р РЋР вЂљР В Р’В°Р В Р вЂ¦Р В Р’ВµР В Р’Вµ Р вЂ™Р’В«Р В РЎвЂ”Р В РЎвЂўР В РўвЂР В РЎвЂўР В РІвЂћвЂ“Р РЋРІР‚С™Р В РЎвЂР вЂ™Р’В» Р В РЎвЂќ Р В Р’В±Р В Р’В»Р В РЎвЂўР В РЎвЂќР РЋРЎвЂњ (Р В Р’В±Р В Р’ВµР В Р’В· Р В РЎвЂР В РЎвЂ“Р РЋР вЂљР РЋРІР‚в„–)
     const nearObs = new IntersectionObserver(
       ([e]) => setIsNear(!!e?.isIntersecting),
-      { rootMargin: '560px 0px', threshold: 0 }
+      { rootMargin: nearMargin, threshold: 0 }
     );
 
     // focused: Р РЋР вЂљР В Р’ВµР В Р’В°Р В Р’В»Р РЋР Р‰Р В Р вЂ¦Р В РЎвЂў Р В Р вЂ Р В РЎвЂР В РўвЂР В Р вЂ¦Р В РЎвЂў (>= 60% Р В РЎвЂ”Р В Р’В»Р В РЎвЂўР РЋРІР‚В°Р В Р’В°Р В РўвЂР В РЎвЂ)
@@ -1061,14 +1095,16 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       { threshold: [0, 0.25, 0.6, 0.75, 1] }
     );
 
+    prepareObs.observe(el);
     nearObs.observe(el);
     focusObs.observe(el);
 
     return () => {
+      prepareObs.disconnect();
       nearObs.disconnect();
       focusObs.disconnect();
     };
-  }, []);
+  }, [coarseUi]);
 
   // ===== Global mute sync from forum =====
   useEffect(() => {
@@ -1150,7 +1186,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       idx = next;
     }
 
-    lastMediaIndexByKey.set(mediaKey, idx);
+    setBoundedMap(lastMediaIndexByKey, mediaKey, idx, 240);
     const nextHref = mediaChoices[idx] || null;
     setMediaHref(nextHref);
     return nextHref;
@@ -1166,7 +1202,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     if (currentHref && mediaChoices.includes(currentHref)) {
       const currentIdx = mediaChoices.indexOf(currentHref);
       if (currentIdx >= 0) {
-        lastMediaIndexByKey.set(mediaKey, currentIdx);
+        setBoundedMap(lastMediaIndexByKey, mediaKey, currentIdx, 240);
         return;
       }
     }
@@ -1234,7 +1270,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
 
     const setResolved = (next) => {
       if (!next) return next;
-      try { adMediaResolveCache.set(cacheKey, next); } catch {}
+      try { setBoundedMap(adMediaResolveCache, cacheKey, next, 320); } catch {}
       if (!cancelled) setMedia(next);
       return next;
     };
