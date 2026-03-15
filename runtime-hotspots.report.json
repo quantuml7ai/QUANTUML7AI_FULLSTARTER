@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-03-15T11:37:06.121Z",
+  "generatedAt": "2026-03-15T12:08:04.061Z",
   "report": [
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
@@ -9,7 +9,7 @@
         "while-loop": 2,
         "map-chain": 0,
         "filter-map": 0,
-        "layout-read": 7,
+        "layout-read": 9,
         "sync-json": 0,
         "local-storage": 2,
         "session-storage": 0,
@@ -18,7 +18,7 @@
         "interval": 2
       },
       "longLines": [],
-      "score": 53
+      "score": 59
     },
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\lib\\adsCore.js",
@@ -208,6 +208,24 @@
       "score": 35
     },
     {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumHeadCollapse.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 8,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 5,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 34
+    },
+    {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\academy\\AcademyExamBlock.js",
       "counts": {
         "for-loop": 8,
@@ -320,24 +338,6 @@
       },
       "longLines": [],
       "score": 28
-    },
-    {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumHeadCollapse.js",
-      "counts": {
-        "for-loop": 0,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 5,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 5,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 25
     },
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\components\\CryptoNewsLens.jsx",
@@ -1126,6 +1126,24 @@
         "local-storage": 1,
         "session-storage": 0,
         "network-call": 3,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 9
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useThreadOpenNavigation.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 3,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
         "raf": 0,
         "interval": 0
       },
@@ -5159,24 +5177,6 @@
     },
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\usePublishedPostsModel.js",
-      "counts": {
-        "for-loop": 0,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 0,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 0,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 0
-    },
-    {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useThreadOpenNavigation.js",
       "counts": {
         "for-loop": 0,
         "while-loop": 0,

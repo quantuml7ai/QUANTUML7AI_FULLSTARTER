@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-03-15T11:37:05.611Z",
+  "generatedAt": "2026-03-15T12:08:03.718Z",
   "results": [
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\i18n.js",
@@ -131,7 +131,7 @@
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
       "counts": {
-        "video": 1,
+        "video": 0,
         "autoplay": 2,
         "loop": 10,
         "preload": 8,
@@ -140,25 +140,16 @@
         "create": 0,
         "revoke": 0
       },
-      "flags": [
-        "⚠ video + autoplay",
-        "⚠ video + loop",
-        "⚠ video + preload"
-      ],
+      "flags": [],
       "samples": {
-        "video": [
-          {
-            "line": 21,
-            "text": "// В любой момент времени играет только один <video>/<audio> controls."
-          }
-        ],
+        "video": [],
         "autoplay": [
           {
-            "line": 274,
+            "line": 152,
             "text": "// Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start."
           },
           {
-            "line": 598,
+            "line": 476,
             "text": "// === Shorts-like autoplay: play when in focus, pause when out ==="
           }
         ],
