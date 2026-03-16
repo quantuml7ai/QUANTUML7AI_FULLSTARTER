@@ -21,6 +21,13 @@ export default function useForumHeadCollapse({
   }, [selId, headAutoOpenRef, navRestoringRef])
 
   const prevSelIdRef = useRef(null)
+  const suppressScrollSyncUntilRef = useRef(0)
+
+  const suppressScrollSync = (ms = 180) => {
+    try {
+      suppressScrollSyncUntilRef.current = Date.now() + Math.max(80, Number(ms || 0))
+    } catch {}
+  }
   useEffect(() => {
     if (!isBrowserFn?.()) return
 
@@ -37,6 +44,7 @@ export default function useForumHeadCollapse({
     try {
       headAutoOpenRef.current = false
     } catch {}
+    suppressScrollSync(240)
     try {
       setHeadPinned(false)
     } catch {}
@@ -47,41 +55,92 @@ export default function useForumHeadCollapse({
     if (!entered) return
     if (hasPendingTarget) return
 
+    const alignNodeToTop = (node) => {
+      try {
+        if (!node) return false
+        const scrollEl =
+          bodyRef.current ||
+          document.querySelector('[data-forum-scroll="1"]') ||
+          null
+        const rect = node.getBoundingClientRect?.()
+        if (!rect) return false
+        if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {
+          const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }
+          const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))
+          if (Math.abs(Number(scrollEl.scrollTop || 0) - targetTop) > 2) {
+            scrollEl.scrollTop = Math.max(0, targetTop)
+          }
+          return true
+        }
+        const top = (window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0) + rect.top
+        try {
+          window.scrollTo({ top: Math.max(0, top), behavior: 'auto' })
+        } catch {
+          try { window.scrollTo(0, Math.max(0, top)) } catch {}
+        }
+        return true
+      } catch {}
+      return false
+    }
+
     const scrollToThreadStart = () => {
       try {
         const scrollEl =
           bodyRef.current ||
           document.querySelector('[data-forum-scroll="1"]') ||
           null
-
+        const root = scrollEl || document
+        const branchStart =
+          root.querySelector?.('[data-forum-thread-start="1"]') ||
+          document.querySelector?.('[data-forum-thread-start="1"]') ||
+          root.querySelector?.('[data-forum-topics-start="1"]') ||
+          document.querySelector?.('[data-forum-topics-start="1"]') ||
+          null
+        suppressScrollSync(260)
+        if (branchStart && alignNodeToTop(branchStart)) return true
         if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {
-          scrollEl.scrollTop = 0
-        } else {
-          window.scrollTo(0, 0)
+          if (Number(scrollEl.scrollTop || 0) > 4) scrollEl.scrollTop = 0
+          return true
         }
-
-        document
-          .querySelector('[data-forum-thread-start="1"]')
-          ?.scrollIntoView({ behavior: 'auto', block: 'start' })
+        const top = Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0)
+        if (top > 4) {
+          window.scrollTo(0, 0)
+          return true
+        }
       } catch {}
+      return false
     }
 
     let rafA = 0
     let rafB = 0
     let timeoutId = 0
+    let retryTimer = 0
     let cancelled = false
+    let attempts = 0
+
+    const tryScrollToThreadStart = () => {
+      if (cancelled) return
+      attempts += 1
+      let ok = false
+      try { ok = !!scrollToThreadStart() } catch {}
+      if (ok) return
+      if (attempts >= 6) return
+      retryTimer = window.setTimeout(() => {
+        tryScrollToThreadStart()
+      }, 48)
+    }
 
     try {
       rafA = requestAnimationFrame(() => {
         rafB = requestAnimationFrame(() => {
           if (cancelled) return
-          scrollToThreadStart()
+          tryScrollToThreadStart()
         })
       })
     } catch {
       timeoutId = window.setTimeout(() => {
         if (cancelled) return
-        scrollToThreadStart()
+        tryScrollToThreadStart()
       }, 0)
     }
 
@@ -98,6 +157,10 @@ export default function useForumHeadCollapse({
       if (timeoutId) {
         try { clearTimeout(timeoutId) } catch {}
         timeoutId = 0
+      }
+      if (retryTimer) {
+        try { clearTimeout(retryTimer) } catch {}
+        retryTimer = 0
       }
     }
   }, [
@@ -187,6 +250,7 @@ export default function useForumHeadCollapse({
     let compRafB = 0
     let compTimeout = 0
     let lastTop = getScrollTop()
+    const SCROLL_EPS = isMobileUi() ? 14 : 6
 
     const cancelCompensationSchedule = () => {
       if (compRafA) {
@@ -209,14 +273,25 @@ export default function useForumHeadCollapse({
       raf = window.requestAnimationFrame(() => {
         raf = 0
         const st = getScrollTop()
+        if (Date.now() < Number(suppressScrollSyncUntilRef.current || 0)) {
+          lastTop = st
+          return
+        }
         const delta = st - lastTop
-        const scrollingDown = delta > 0
+        const scrollingDown = delta > SCROLL_EPS
+        const scrollingUp = delta < -SCROLL_EPS
         const openAt = getHeadOpenAt()
         const closeAt = getHeadCloseAt(openAt)
         const atTopForOpen = st <= openAt
+        const nearAbsoluteTop = st <= 20
 
         if (headPinnedRef.current) {
           headAutoOpenRef.current = false
+          lastTop = st
+          return
+        }
+
+        if (!scrollingDown && !scrollingUp) {
           lastTop = st
           return
         }
@@ -233,8 +308,9 @@ export default function useForumHeadCollapse({
           return
         }
 
-        if (!videoFeedOpenRef.current && atTopForOpen) {
+        if (!videoFeedOpenRef.current && atTopForOpen && (scrollingUp || nearAbsoluteTop)) {
           if (headHiddenRef.current) {
+            suppressScrollSync(220)
             setHeadPinned(false)
             setHeadHidden(false)
           }
@@ -242,11 +318,12 @@ export default function useForumHeadCollapse({
         } else if (!headHiddenRef.current && scrollingDown && st > closeAt) {
           const prevSt = st
           const headH = getHeadHeight()
-          const compensate = readCssFlag01('--head-collapse-scroll-compensate', 1)
+          const compensate = !isMobileUi() && readCssFlag01('--head-collapse-scroll-compensate', 0)
+          suppressScrollSync(220)
           setHeadPinned(false)
           setHeadHidden(true)
 
-          if (compensate && headH > 1) {
+          if (compensate && headH > 1 && prevSt > 32) {
             const applyComp = () => {
               try {
                 const el = bodyRef.current
@@ -283,18 +360,27 @@ export default function useForumHeadCollapse({
     }
 
     const el = bodyRef.current
+    const useInnerScroll = !!el && (Number(el.scrollHeight || 0) > (Number(el.clientHeight || 0) + 1))
     const opts = { passive: true }
-    try {
-      el?.addEventListener?.('scroll', onScroll, opts)
-    } catch {}
-    window.addEventListener('scroll', onScroll, opts)
+    if (useInnerScroll) {
+      try {
+        el?.addEventListener?.('scroll', onScroll, opts)
+      } catch {}
+    } else {
+      window.addEventListener('scroll', onScroll, opts)
+    }
+    window.addEventListener('resize', onScroll, opts)
     onScroll()
 
     return () => {
-      try {
-        el?.removeEventListener?.('scroll', onScroll)
-      } catch {}
-      window.removeEventListener('scroll', onScroll)
+      if (useInnerScroll) {
+        try {
+          el?.removeEventListener?.('scroll', onScroll)
+        } catch {}
+      } else {
+        window.removeEventListener('scroll', onScroll)
+      }
+      window.removeEventListener('resize', onScroll)
       if (raf) {
         try {
           window.cancelAnimationFrame(raf)

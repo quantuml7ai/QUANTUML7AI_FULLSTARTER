@@ -294,19 +294,30 @@ export default function QCoinDropFX ({
 
   const coinRef = useRef(null)
   const animFrameRef = useRef(null)
+  const sleepTimerRef = useRef(null)
   const lastTimeRef = useRef(0)
+  const lastPaintRef = useRef(0)
   const worldRef = useRef({ w: 0, h: 0 })
   const spawnAtRef = useRef(0)
 
   const impulseUntilRef = useRef(0)
   const impulseStrengthRef = useRef(0)
   const motionReducedRef = useRef(false)
+  const visibilityPausedRef = useRef(false)
 
   const initWorld = useCallback(() => {
     if (!isBrowser()) return
     worldRef.current = {
       w: window.innerWidth || 1024,
       h: window.innerHeight || 768,
+    }
+  }, [])
+
+  const queueLoopFrame = useCallback((fn) => {
+    try {
+      animFrameRef.current = requestAnimationFrame(fn)
+    } catch {
+      animFrameRef.current = null
     }
   }, [])
 
@@ -318,6 +329,20 @@ export default function QCoinDropFX ({
     } catch {
       motionReducedRef.current = false
     }
+  }, [])
+
+  useEffect(() => {
+    if (!isBrowser()) return
+    const syncVisibility = () => {
+      try {
+        visibilityPausedRef.current = document.visibilityState !== 'visible'
+      } catch {
+        visibilityPausedRef.current = false
+      }
+    }
+    syncVisibility()
+    document.addEventListener('visibilitychange', syncVisibility)
+    return () => document.removeEventListener('visibilitychange', syncVisibility)
   }, [])
 
   useEffect(() => {
@@ -359,9 +384,22 @@ export default function QCoinDropFX ({
   useEffect(() => {
     if (!isBrowser()) return
     if (motionReducedRef.current) return
+    if (!uid) return
 
     lastTimeRef.current = 0
     let stopped = false
+    const scheduleSleep = (delayMs) => {
+      const nextDelay = Math.max(24, Number(delayMs || 0))
+      if (sleepTimerRef.current) {
+        clearTimeout(sleepTimerRef.current)
+      }
+      sleepTimerRef.current = setTimeout(() => {
+        sleepTimerRef.current = null
+        if (!stopped) {
+          queueLoopFrame((nextTs) => loop(nextTs))
+        }
+      }, nextDelay)
+    }
 
     const loop = (ts) => {
       if (stopped) return
@@ -374,6 +412,11 @@ export default function QCoinDropFX ({
       const dtMs = ts - lastTimeRef.current
       lastTimeRef.current = ts
       const dt = Math.min(0.05, Math.max(0.012, dtMs / 1000))
+
+      if (visibilityPausedRef.current) {
+        scheduleSleep(180)
+        return
+      }
 
       const now = ts
       const impulseLeft = Math.max(0, impulseUntilRef.current - now)
@@ -388,6 +431,10 @@ export default function QCoinDropFX ({
 
       if (uid && !coin) {
         const nextAt = spawnAtRef.current || 0
+        if (nextAt && ts < nextAt) {
+          scheduleSleep(Math.min(220, Math.max(40, nextAt - ts)))
+          return
+        }
         if (!nextAt || ts >= nextAt) {
           const depth = 0.4 + rng() * 0.6
           const size = minSize + depth * (maxSize - minSize)
@@ -450,19 +497,26 @@ export default function QCoinDropFX ({
         }
       }
 
-      setTick((x) => (x + 1) & 1023)
-      if (!stopped) animFrameRef.current = requestAnimationFrame(loop)
+      if (coin && (ts - lastPaintRef.current) >= 34) {
+        lastPaintRef.current = ts
+        setTick((x) => (x + 1) & 1023)
+      }
+      if (!stopped) queueLoopFrame(loop)
     }
 
-    animFrameRef.current = requestAnimationFrame(loop)
+    queueLoopFrame(loop)
 
     return () => {
       stopped = true
+      if (sleepTimerRef.current) {
+        clearTimeout(sleepTimerRef.current)
+        sleepTimerRef.current = null
+      }
       const rafId = animFrameRef.current
       animFrameRef.current = null
       if (rafId) cancelAnimationFrame(rafId)
     }
-  }, [uid, intervalMs, minSize, maxSize, initWorld])
+  }, [uid, intervalMs, minSize, maxSize, initWorld, queueLoopFrame])
 
   useEffect(() => {
     if (!isBrowser()) return
@@ -498,7 +552,7 @@ export default function QCoinDropFX ({
       impulseUntilRef.current = now + IMPULSE_DURATION_MS
       impulseStrengthRef.current = Math.min(1, impulseStrengthRef.current + 0.6)
 
-      setTick((x) => (x + 1) & 1023)
+      lastPaintRef.current = 0
     }
 
     window.addEventListener('pointerdown', onPointerDown, { passive: true })
@@ -532,7 +586,7 @@ export default function QCoinDropFX ({
       impulseUntilRef.current = now + IMPULSE_DURATION_MS
       impulseStrengthRef.current = Math.min(1, impulseStrengthRef.current + 0.4)
 
-      setTick((x) => (x + 1) & 1023)
+      lastPaintRef.current = 0
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -648,6 +702,7 @@ export default function QCoinDropFX ({
     if (!coin || !uid) return
 
     coin.exploding = true
+    lastPaintRef.current = 0
     setTick((x) => (x + 1) & 1023)
 
     const coinMult = Number.isFinite(coin.mult) ? Math.max(1, Math.floor(coin.mult)) : 1
@@ -728,7 +783,7 @@ export default function QCoinDropFX ({
 
     setTimeout(() => {
       coinRef.current = null
-      setTick((x) => (x + 1) & 1023)
+      lastPaintRef.current = 0
     }, 600)
 
     setTimeout(() => {

@@ -23,7 +23,7 @@ export function createEnableVideoControlsOnTap({
         }
         if (typeof touchActiveVideoEl === 'function') touchActiveVideoEl(v)
         if (typeof enforceActiveVideoCap === 'function') enforceActiveVideoCap(v)
-        v.preload = 'metadata'
+        v.preload = 'auto'
       } catch {}
 
       if (v.controls) return

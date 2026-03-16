@@ -5,14 +5,40 @@ import {
   emptyDiagMediaSnapshot,
 } from '../utils/emitPolicy'
 
+function isDiagEnabled() {
+  try {
+    if (String(process.env.NEXT_PUBLIC_FORUM_DIAG || '') === '1') return true
+  } catch {}
+  try {
+    const qs = new URLSearchParams(window.location.search || '')
+    const fromQuery = String(qs.get('forumDiag') || '').trim()
+    if (fromQuery === '1' || fromQuery.toLowerCase() === 'true') return true
+  } catch {}
+  return false
+}
+
+function isPerfTraceEnabled() {
+  try {
+    if (String(process.env.NEXT_PUBLIC_FORUM_PERF_TRACE || '') === '1') return true
+  } catch {}
+  try {
+    const qs = new URLSearchParams(window.location.search || '')
+    const fromQuery = String(qs.get('forumPerf') || '').trim()
+    if (fromQuery === '1' || fromQuery.toLowerCase() === 'true') return true
+  } catch {}
+  return false
+}
+
 export default function useForumDiagnostics() {
   const diagSeqRef = useRef(0)
   const diagLastSentRef = useRef(0)
   const diagSnapshotRef = useRef({ ts: 0, media: null })
   const diagLastScrollYRef = useRef(0)
+  const enabledRef = useRef(false)
 
   const emitDiag = useCallback(async (event, extra = {}, opts = {}) => {
     try {
+      if (!enabledRef.current) return
       const now = Date.now()
       const force = !!opts?.force
       const throttleState = shouldThrottleDiagEvent(
@@ -181,6 +207,8 @@ export default function useForumDiagnostics() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
+    enabledRef.current = isDiagEnabled()
+    if (!enabledRef.current) return
     let stopped = false
 
     emitDiag('mount', {}, { force: true })
@@ -269,6 +297,347 @@ export default function useForumDiagnostics() {
       emitDiag('unmount', {}, { force: true })
     }
   }, [emitDiag])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const readPerfSample = (event = 'sample', extra = {}) => {
+      try {
+        const scrollEl =
+          document.querySelector('[data-forum-scroll="1"]') ||
+          null
+        const nav = (() => {
+          try {
+            const row = performance.getEntriesByType('navigation')?.[0]
+            return row
+              ? {
+                  type: String(row.type || ''),
+                  domComplete: Number(row.domComplete || 0),
+                  loadEventEnd: Number(row.loadEventEnd || 0),
+                }
+              : null
+          } catch {
+            return null
+          }
+        })()
+        const mem = performance?.memory
+          ? {
+              usedJSHeapSize: Number(performance.memory.usedJSHeapSize || 0),
+              totalJSHeapSize: Number(performance.memory.totalJSHeapSize || 0),
+              jsHeapSizeLimit: Number(performance.memory.jsHeapSizeLimit || 0),
+            }
+          : null
+        const media =
+          typeof window.dumpForumMediaSummary === 'function'
+            ? window.dumpForumMediaSummary()
+            : null
+        const resources = (() => {
+          try {
+            const rows = performance.getEntriesByType('resource') || []
+            const tail = rows.slice(Math.max(0, rows.length - 160))
+            let media = 0
+            let forumMedia = 0
+            let transfer = 0
+            let decoded = 0
+            for (const row of tail) {
+              const name = String(row?.name || '')
+              const initiator = String(row?.initiatorType || '')
+              if (initiator === 'media' || /\.mp4(?:$|[?#])|\.webm(?:$|[?#])/i.test(name)) {
+                media += 1
+                if (/\/forum\/|forum\/video-|blob\.vercel-storage\.com\/forum\//i.test(name)) {
+                  forumMedia += 1
+                }
+              }
+              transfer += Number(row?.transferSize || 0)
+              decoded += Number(row?.decodedBodySize || 0)
+            }
+            return {
+              total: rows.length,
+              tail: tail.length,
+              media,
+              forumMedia,
+              transfer,
+              decoded,
+            }
+          } catch {
+            return null
+          }
+        })()
+
+        return {
+          ts: Date.now(),
+          event,
+          vis: String(document.visibilityState || ''),
+          href: String(location?.href || ''),
+          wasDiscarded: !!document?.wasDiscarded,
+          nav,
+          scrollY: Number(window.scrollY || 0),
+          innerScrollTop: Number(scrollEl?.scrollTop || 0),
+          innerScrollHeight: Number(scrollEl?.scrollHeight || 0),
+          innerClientHeight: Number(scrollEl?.clientHeight || 0),
+          media,
+          mem,
+          resources,
+          extra,
+        }
+      } catch {
+        return { ts: Date.now(), event, extra: { failed: true, ...extra } }
+      }
+    }
+
+    const ensurePerfHelpers = () => {
+      if (typeof window.dumpForumDiagConfig !== 'function') {
+        window.dumpForumDiagConfig = () => ({
+          clientDiagEnabled: !!enabledRef.current,
+          perfTraceAutoEnabled: isPerfTraceEnabled(),
+          perfTraceRunning: !!window.__forumPerfTraceCtl,
+          videoTraceEnabled: (() => {
+            try {
+              if (String(process.env.NEXT_PUBLIC_FORUM_VIDEO_TRACE || '') === '1') return true
+            } catch {}
+            try {
+              const qs = new URLSearchParams(window.location.search || '')
+              const fromQuery = String(qs.get('videoTrace') || '').trim()
+              return fromQuery === '1' || fromQuery.toLowerCase() === 'true'
+            } catch {}
+            return false
+          })(),
+        })
+      }
+
+      if (typeof window.snapshotForumPerf !== 'function') {
+        window.snapshotForumPerf = (event = 'snapshot', extra = {}) => readPerfSample(event, extra)
+      }
+      if (typeof window.dumpForumPerfTrace !== 'function') {
+        window.dumpForumPerfTrace = () => {
+          try {
+            return Array.isArray(window.__forumPerfTrace) ? [...window.__forumPerfTrace] : []
+          } catch {
+            return []
+          }
+        }
+      }
+      if (typeof window.dumpForumPerfDigest !== 'function') {
+        window.dumpForumPerfDigest = () => {
+          try {
+            const rows = typeof window.dumpForumPerfTrace === 'function' ? window.dumpForumPerfTrace() : []
+            return rows.reduce((acc, row) => {
+              const usedHeap = Number(row?.mem?.usedJSHeapSize || 0)
+              const transfer = Number(row?.resources?.transfer || 0)
+              const decoded = Number(row?.resources?.decoded || 0)
+              const mediaTotal = Number(row?.resources?.media || 0)
+              const forumMedia = Number(row?.resources?.forumMedia || 0)
+              const longTaskDuration = row?.event === 'longtask' ? Number(row?.extra?.duration || 0) : 0
+              const layoutShiftValue = row?.event === 'layout_shift' ? Number(row?.extra?.value || 0) : 0
+              const active = Number(row?.media?.active || 0)
+              const prewarm = Number(row?.media?.prewarm || 0)
+              const resident = Number(row?.media?.resident || 0)
+              const loadPending = Number(row?.media?.loadPending || 0)
+              acc.samples += 1
+              acc.events[String(row?.event || 'unknown')] = (acc.events[String(row?.event || 'unknown')] || 0) + 1
+              acc.peakHeapMB = Math.max(acc.peakHeapMB, Math.round((usedHeap / 1024 / 1024) * 10) / 10)
+              acc.peakTransferMB = Math.max(acc.peakTransferMB, Math.round((transfer / 1024 / 1024) * 10) / 10)
+              acc.peakDecodedMB = Math.max(acc.peakDecodedMB, Math.round((decoded / 1024 / 1024) * 10) / 10)
+              acc.peakMediaTail = Math.max(acc.peakMediaTail, mediaTotal)
+              acc.peakForumMediaTail = Math.max(acc.peakForumMediaTail, forumMedia)
+              acc.peakActive = Math.max(acc.peakActive, active)
+              acc.peakPrewarm = Math.max(acc.peakPrewarm, prewarm)
+              acc.peakResident = Math.max(acc.peakResident, resident)
+              acc.peakLoadPending = Math.max(acc.peakLoadPending, loadPending)
+              acc.longTaskCount += row?.event === 'longtask' ? 1 : 0
+              acc.maxLongTaskMs = Math.max(acc.maxLongTaskMs, longTaskDuration)
+              acc.layoutShiftCount += row?.event === 'layout_shift' ? 1 : 0
+              acc.maxLayoutShift = Math.max(acc.maxLayoutShift, layoutShiftValue)
+              if (!acc.firstTs) acc.firstTs = Number(row?.ts || 0)
+              acc.lastTs = Number(row?.ts || 0)
+              return acc
+            }, {
+              samples: 0,
+              firstTs: 0,
+              lastTs: 0,
+              peakHeapMB: 0,
+              peakTransferMB: 0,
+              peakDecodedMB: 0,
+              peakMediaTail: 0,
+              peakForumMediaTail: 0,
+              peakActive: 0,
+              peakPrewarm: 0,
+              peakResident: 0,
+              peakLoadPending: 0,
+              longTaskCount: 0,
+              maxLongTaskMs: 0,
+              layoutShiftCount: 0,
+              maxLayoutShift: 0,
+              events: {},
+            })
+          } catch {
+            return {}
+          }
+        }
+      }
+      if (typeof window.clearForumPerfTrace !== 'function') {
+        window.clearForumPerfTrace = () => {
+          try { window.__forumPerfTrace = [] } catch {}
+          return []
+        }
+      }
+      if (typeof window.stopForumPerfTrace !== 'function') {
+        window.stopForumPerfTrace = () => {
+          try {
+            const ctl = window.__forumPerfTraceCtl
+            ctl?.stop?.()
+            delete window.__forumPerfTraceCtl
+          } catch {}
+          return typeof window.dumpForumPerfTrace === 'function' ? window.dumpForumPerfTrace() : []
+        }
+      }
+      if (typeof window.startForumPerfTrace !== 'function') {
+        window.startForumPerfTrace = (opts = {}) => {
+          try {
+            window.stopForumPerfTrace?.()
+          } catch {}
+          try {
+            performance?.setResourceTimingBufferSize?.(4000)
+          } catch {}
+          if (opts?.clearResources !== false) {
+            try { performance?.clearResourceTimings?.() } catch {}
+          }
+
+          const bucket = []
+          const push = (event, extra = {}) => {
+            try {
+              bucket.push(readPerfSample(event, extra))
+              while (bucket.length > 600) bucket.shift()
+              window.__forumPerfTrace = bucket
+            } catch {}
+          }
+
+          const sampleMs = Math.max(300, Number(opts?.sampleMs || 1200))
+          const scrollDelta = Math.max(60, Number(opts?.scrollDelta || 240))
+          let lastScrollTop = Number(window.scrollY || 0)
+          let scrollRaf = 0
+
+          const onScroll = () => {
+            if (scrollRaf) return
+            scrollRaf = requestAnimationFrame(() => {
+              scrollRaf = 0
+              const scrollEl = document.querySelector('[data-forum-scroll="1"]') || null
+              const top = Number(scrollEl?.scrollTop || window.scrollY || 0)
+              if (Math.abs(top - lastScrollTop) < scrollDelta) return
+              lastScrollTop = top
+              push('scroll', { top })
+            })
+          }
+          const onVisibility = () => push('visibilitychange')
+          const onPageHide = (e) => push('pagehide', { persisted: !!e?.persisted })
+          const onPageShow = (e) => push('pageshow', { persisted: !!e?.persisted })
+          const onFreeze = () => push('freeze')
+          const onResume = () => push('resume')
+          const onResize = () => push('resize', { w: Number(window.innerWidth || 0), h: Number(window.innerHeight || 0) })
+
+          const perfObservers = []
+          const observeEntryType = (type, handler) => {
+            try {
+              if (typeof PerformanceObserver === 'undefined') return
+              const po = new PerformanceObserver((list) => {
+                try {
+                  handler(list.getEntries() || [])
+                } catch {}
+              })
+              po.observe({ type, buffered: true })
+              perfObservers.push(po)
+            } catch {}
+          }
+
+          observeEntryType('longtask', (entries) => {
+            for (const entry of entries.slice(-6)) {
+              push('longtask', {
+                duration: Number(entry?.duration || 0),
+                name: String(entry?.name || ''),
+              })
+            }
+          })
+          observeEntryType('layout-shift', (entries) => {
+            for (const entry of entries.slice(-6)) {
+              if (entry?.hadRecentInput) continue
+              const sources = (() => {
+                try {
+                  return Array.from(entry?.sources || []).slice(0, 3).map((src) => {
+                    const node = src?.node
+                    if (!(node instanceof Element)) return null
+                    return {
+                      tag: String(node.tagName || '').toLowerCase(),
+                      cls: String(node.className || '').slice(0, 120),
+                      forumMedia: String(node.getAttribute?.('data-forum-media') || ''),
+                      forumVideo: String(node.getAttribute?.('data-forum-video') || ''),
+                      adSlot: String(node.getAttribute?.('data-ad-slot') || ''),
+                    }
+                  }).filter(Boolean)
+                } catch {
+                  return []
+                }
+              })()
+              push('layout_shift', {
+                value: Number(entry?.value || 0),
+                sources,
+              })
+            }
+          })
+
+          const timer = setInterval(() => {
+            push('tick')
+          }, sampleMs)
+
+          try { window.addEventListener('scroll', onScroll, { passive: true, capture: true }) } catch {}
+          try { document.addEventListener('visibilitychange', onVisibility) } catch {}
+          try { window.addEventListener('pagehide', onPageHide) } catch {}
+          try { window.addEventListener('pageshow', onPageShow) } catch {}
+          try { document.addEventListener('freeze', onFreeze) } catch {}
+          try { document.addEventListener('resume', onResume) } catch {}
+          try { window.addEventListener('resize', onResize, { passive: true }) } catch {}
+
+          push('trace_start', { sampleMs, scrollDelta })
+
+          window.__forumPerfTraceCtl = {
+            stop() {
+              try { clearInterval(timer) } catch {}
+              try { window.removeEventListener('scroll', onScroll, { capture: true }) } catch {}
+              try { document.removeEventListener('visibilitychange', onVisibility) } catch {}
+              try { window.removeEventListener('pagehide', onPageHide) } catch {}
+              try { window.removeEventListener('pageshow', onPageShow) } catch {}
+              try { document.removeEventListener('freeze', onFreeze) } catch {}
+              try { document.removeEventListener('resume', onResume) } catch {}
+              try { window.removeEventListener('resize', onResize) } catch {}
+              try { if (scrollRaf) cancelAnimationFrame(scrollRaf) } catch {}
+              try { perfObservers.forEach((po) => po?.disconnect?.()) } catch {}
+              push('trace_stop')
+            },
+          }
+
+          return bucket
+        }
+      }
+      if (typeof window.markForumPerf !== 'function') {
+        window.markForumPerf = (label = 'mark', extra = {}) => {
+          try {
+            const bucket = Array.isArray(window.__forumPerfTrace) ? window.__forumPerfTrace : []
+            bucket.push(readPerfSample('mark', { label: String(label || 'mark'), ...extra }))
+            while (bucket.length > 600) bucket.shift()
+            window.__forumPerfTrace = bucket
+            return bucket
+          } catch {
+            return []
+          }
+        }
+      }
+    }
+
+    ensurePerfHelpers()
+    if (isPerfTraceEnabled() && !window.__forumPerfTraceCtl) {
+      try { window.startForumPerfTrace() } catch {}
+    }
+    return () => {}
+  }, [])
 
   return emitDiag
 }

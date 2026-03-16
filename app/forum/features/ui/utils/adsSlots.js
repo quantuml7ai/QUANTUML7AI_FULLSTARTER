@@ -56,9 +56,5 @@ export function pickAdUrlForSlot({
   sess.used.add(url)
   if (!sess.bySlot) sess.bySlot = new Map()
   sess.bySlot.set(slotKey, url)
-  try {
-    console.log('[ADS] slot_pick', { slotKey, slotKind, url })
-  } catch {}
   return url
 }
-

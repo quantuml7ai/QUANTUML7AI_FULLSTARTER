@@ -4,15 +4,15 @@
 > Если появляются новые крупные зависимости между доменами, меняются import-графы или переносится ownership между зонами, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-dependencies.js`.
 
-Сгенерировано автоматически: 2026-03-11T14:16:41.725Z
-Исходных файлов в анализе: 608
+Сгенерировано автоматически: 2026-03-14T14:01:26.584Z
+Исходных файлов в анализе: 610
 Локальных зависимостей: 534
 
 ## Охват
 
 - Локальные импорты между `app`, `components`, `lib`, `tools`, `public`.
 - Межзоновые зависимости по доменам и слоям.
-- Файлы с высоким fan-in и fan-out, то есть с высоким радиусом поломки.
+- Файлы с высоким fan-in, то есть большим радиусом поломки.
 
 ## Размер Зон
 
@@ -87,7 +87,7 @@
 - `public/tonconnect-manifest.json` — 1 файлов
 - `public/workers` — 1 файлов
 - `root` — 11 файлов
-- `tools` — 16 файлов
+- `tools` — 18 файлов
 
 ## Топ Межзоновых Зависимостей
 
@@ -125,21 +125,21 @@
 - `forum/ui` -> `forum/dm` — 4 локальных импортов
 - `api/qcoin` -> `api/forum` — 3 локальных импортов
 - `app/ads` -> `components` — 3 локальных импортов
-- `forum/feed` -> `forum/dm` — 3 локальных импортов
 - `forum/feed` -> `forum/media` — 3 локальных импортов
 - `forum/feed` -> `forum/root` — 3 локальных импортов
+- `forum/feed` -> `forum/dm` — 3 локальных импортов
 - `forum/root` -> `components` — 3 локальных импортов
-- `forum/ui` -> `forum/quests` — 3 локальных импортов
-- `forum/ui` -> `forum/root` — 3 локальных импортов
 - `forum/ui` -> `forum/shared` — 3 локальных импортов
+- `forum/ui` -> `forum/root` — 3 локальных импортов
+- `forum/ui` -> `forum/quests` — 3 локальных импортов
 - `tools` -> `tools` — 3 локальных импортов
 - `api/battlecoin` -> `api/forum` — 2 локальных импортов
 - `api/pay` -> `lib/adsCore.js` — 2 локальных импортов
 - `api/quest` -> `api/forum` — 2 локальных импортов
 - `api/referral` -> `api/forum` — 2 локальных импортов
 - `app/academy` -> `components` — 2 локальных импортов
-- `app/ads` -> `app/ads` — 2 локальных импортов
 - `app/ads` -> `lib/geo` — 2 локальных импортов
+- `app/ads` -> `app/ads` — 2 локальных импортов
 - `app/exchange` -> `components` — 2 локальных импортов
 
 ## Исходящие Зависимости По Зонам
@@ -548,51 +548,7 @@
 - `app/forum/features/feed/utils/snapshotTransforms.js` — fan-in 2; основные потребители: `app/forum/features/feed/hooks/useForumDataRuntime.js`, `app/forum/features/feed/hooks/useForumMutationQueue.js`
 - `app/forum/features/media/components/VideoOverlay.jsx` — fan-in 2; основные потребители: `app/forum/features/ui/components/ForumOverlayStack.jsx`, `app/forum/ForumRoot.jsx`
 
-## Файлы С Высоким Fan-Out
-
-- `app/forum/ForumRoot.jsx` — fan-out 64; основные зависимости: `app/forum/features/diagnostics/hooks/useForumDiagnostics.js`, `app/forum/features/dm/hooks/useForumDmRuntime.js`, `app/forum/features/dm/utils/mediaParsing.js`, `app/forum/features/feed/components/LoadMoreSentinel.jsx`, `app/forum/features/feed/components/PostCardBridge.jsx`, `app/forum/features/feed/components/TopicItem.jsx`, `app/forum/features/feed/hooks/useForumDataRuntime.js`, `app/forum/features/feed/hooks/useForumFeedRuntime.js`
-- `app/forum/features/feed/components/ForumPostCard.jsx` — fan-out 14; основные зависимости: `app/forum/features/feed/components/PostActionBar.jsx`, `app/forum/features/feed/components/PostBodyContent.jsx`, `app/forum/features/feed/components/PostFxLayer.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/PostMediaStack.jsx`, `app/forum/features/feed/components/PostOwnerMenu.jsx`, `app/forum/features/feed/components/PostTranslateToggle.jsx`, `app/forum/features/feed/hooks/usePostFx.js`
-- `app/forum/features/dm/hooks/useForumDmRuntime.js` — fan-out 12; основные зависимости: `app/forum/features/dm/hooks/useDmDeleteController.js`, `app/forum/features/dm/hooks/useDmLoadLifecycle.js`, `app/forum/features/dm/hooks/useDmLocalCache.js`, `app/forum/features/dm/hooks/useDmRepliesSeen.js`, `app/forum/features/dm/hooks/useDmSeenObservers.js`, `app/forum/features/dm/hooks/useDmStorageMaps.js`, `app/forum/features/dm/hooks/useDmThreadAutoScroll.js`, `app/forum/features/dm/hooks/useDmUnreadState.js`
-- `app/layout.js` — fan-out 11; основные зависимости: `app/providers.jsx`, `components/BgAudio.js`, `components/HeroAvatar.js`, `components/i18n.js`, `components/InviteFriendProvider.jsx`, `components/NotRobot.jsx`, `components/QCoinDropFX.jsx`, `components/ScrollTopPulse.js`
-- `app/forum/features/feed/components/TopicItem.jsx` — fan-out 10; основные зависимости: `app/forum/features/profile/components/AvatarEmoji.jsx`, `app/forum/features/profile/components/VipFlipBadge.jsx`, `app/forum/features/profile/hooks/useVipFlag.js`, `app/forum/features/profile/utils/profileCache.js`, `app/forum/features/ui/components/ConfirmDeleteOverlay.jsx`, `app/forum/features/ui/components/StarButton.jsx`, `app/forum/shared/components/HydrateText.jsx`, `app/forum/shared/utils/classnames.js`
-- `app/forum/features/dm/components/DmDialogRow.jsx` — fan-out 9; основные зависимости: `app/forum/features/dm/utils/mediaParsing.js`, `app/forum/features/profile/components/AvatarEmoji.jsx`, `app/forum/features/profile/components/VipFlipBadge.jsx`, `app/forum/features/profile/hooks/useVipFlag.js`, `app/forum/features/profile/utils/profileCache.js`, `app/forum/features/ui/components/StarButton.jsx`, `app/forum/shared/components/HydrateText.jsx`, `app/forum/shared/utils/classnames.js`
-- `app/forum/features/dm/components/DmThreadMessageRow.jsx` — fan-out 9; основные зависимости: `app/forum/features/dm/components/DmVoicePlayer.jsx`, `app/forum/features/dm/utils/mediaParsing.js`, `app/forum/features/media/utils/mediaLifecycleRuntime.js`, `app/forum/features/profile/components/AvatarEmoji.jsx`, `app/forum/shared/api/translate.js`, `app/forum/shared/components/HydrateText.jsx`, `app/forum/shared/utils/classnames.js`, `app/forum/shared/utils/formatters.js`
-- `app/forum/features/ui/components/ComposerCore.jsx` — fan-out 9; основные зависимости: `app/forum/features/dm/components/DmVoicePlayer.jsx`, `app/forum/features/media/components/ComposerAttachmentPreview.jsx`, `app/forum/features/ui/components/ComposerActionRail.jsx`, `app/forum/features/ui/components/ComposerEmojiPanel.jsx`, `app/forum/features/ui/components/ComposerEmojiPreview.jsx`, `app/forum/features/ui/components/ComposerFileInput.jsx`, `app/forum/features/ui/components/ComposerMediaProgressBar.jsx`, `app/forum/features/ui/components/ComposerTextInput.jsx`
-- `app/forum/ForumHeaderPanel.jsx` — fan-out 9; основные зависимости: `app/forum/features/profile/components/AboutRail.jsx`, `app/forum/features/profile/components/AvatarEmoji.jsx`, `app/forum/features/profile/components/ForumVipControl.jsx`, `app/forum/features/profile/components/ProfilePopover.jsx`, `app/forum/features/qcoin/components/QCoinInline.jsx`, `app/forum/features/qcoin/components/QCoinWithdrawPopover.jsx`, `app/forum/features/ui/components/ForumSearchSortControls.jsx`, `app/forum/features/ui/components/HeadChevronIcon.jsx`
-- `app/forum/features/ui/components/ForumOverlayStack.jsx` — fan-out 8; основные зависимости: `app/forum/features/media/components/VideoLimitOverlay.jsx`, `app/forum/features/media/components/VideoOverlay.jsx`, `app/forum/features/media/components/VideoTrimPopover.jsx`, `app/forum/features/moderation/components/ReportPopover.jsx`, `app/forum/features/profile/components/UserInfoPopover.jsx`, `app/forum/features/quests/components/QuestClaimOverlay.jsx`, `app/forum/features/ui/components/DmDeletePopover.jsx`, `app/forum/SharePopover.jsx`
-- `app/forum/features/ui/hooks/useForumScreenFlowsRuntime.js` — fan-out 8; основные зависимости: `app/forum/features/dm/hooks/useDmDeleteCopy.js`, `app/forum/features/dm/hooks/useDmOpenEvents.js`, `app/forum/features/dm/hooks/useOpenInboxGlobalAction.js`, `app/forum/features/feed/hooks/useForumNavigationRuntime.js`, `app/forum/features/media/hooks/useForumVideoFeedRuntime.js`, `app/forum/features/media/hooks/useVideoFeedWindowing.js`, `app/forum/features/quests/hooks/useForumQuestRuntime.js`, `app/forum/features/ui/hooks/useForumAdsRuntime.js`
-- `app/forum/features/dm/components/DmThreadHeader.jsx` — fan-out 7; основные зависимости: `app/forum/features/profile/components/AvatarEmoji.jsx`, `app/forum/features/profile/components/VipFlipBadge.jsx`, `app/forum/features/profile/hooks/useVipFlag.js`, `app/forum/features/profile/utils/profileCache.js`, `app/forum/features/ui/components/StarButton.jsx`, `app/forum/shared/utils/classnames.js`, `app/forum/shared/utils/formatters.js`
-- `app/forum/features/feed/components/PostHeaderMeta.jsx` — fan-out 7; основные зависимости: `app/forum/features/profile/components/AvatarEmoji.jsx`, `app/forum/features/profile/components/VipFlipBadge.jsx`, `app/forum/features/profile/utils/profileCache.js`, `app/forum/features/ui/components/StarButton.jsx`, `app/forum/shared/components/HydrateText.jsx`, `app/forum/shared/utils/classnames.js`, `app/forum/shared/utils/formatters.js`
-- `app/forum/features/ui/utils/buildForumRootPropBundles.js` — fan-out 7; основные зависимости: `app/forum/features/ui/utils/propBundles/buildActionClusterProps.js`, `app/forum/features/ui/utils/propBundles/buildComposerCoreProps.js`, `app/forum/features/ui/utils/propBundles/buildForumHeaderPanelProps.js`, `app/forum/features/ui/utils/propBundles/buildInboxPaneProps.js`, `app/forum/features/ui/utils/propBundles/buildSearchSortControlsProps.js`, `app/forum/features/ui/utils/propBundles/buildThreadRepliesPaneProps.js`, `app/forum/features/ui/utils/propBundles/buildTopicsSwitchProps.js`
-- `app/forum/features/media/hooks/useForumVideoFeedRuntime.js` — fan-out 6; основные зависимости: `app/forum/features/media/hooks/useVideoFeedActions.js`, `app/forum/features/media/hooks/useVideoFeedLifecycle.js`, `app/forum/features/media/hooks/useVideoFeedState.js`, `app/forum/features/media/utils/videoFeedScroll.js`, `app/forum/shared/hooks/useEvent.js`, `app/forum/shared/hooks/useHtmlFlag.js`
-- `app/forum/features/profile/components/ProfilePopover.jsx` — fan-out 6; основные зависимости: `app/forum/features/profile/utils/profileCache.js`, `app/forum/features/qcoin/utils/account.js`, `app/forum/features/subscriptions/components/FollowersCounterInline.jsx`, `app/forum/shared/hooks/useEvent.js`, `app/forum/shared/utils/classnames.js`, `app/forum/shared/utils/counts.js`
-- `app/forum/features/ui/hooks/useForumComposerSubmitRuntime.js` — fan-out 6; основные зависимости: `app/forum/features/feed/hooks/useForumCreatePostAction.js`, `app/forum/features/feed/hooks/useForumCreateTopicAction.js`, `app/forum/features/feed/hooks/useForumViewTracking.js`, `app/forum/features/media/hooks/useForumComposerAttachments.js`, `app/forum/features/ui/hooks/useComposerActionHandlers.js`, `app/forum/features/ui/hooks/useComposerEmojiState.js`
-- `app/forum/ForumLayout.jsx` — fan-out 6; основные зависимости: `app/forum/features/feed/components/ThreadSection.jsx`, `app/forum/features/feed/components/TopicsSection.jsx`, `app/forum/features/ui/components/ComposeDock.jsx`, `app/forum/features/ui/components/ForumOverlayStack.jsx`, `app/forum/styles/ForumFxStyles.jsx`, `app/forum/styles/ForumStyles.jsx`
-- `app/forum/features/dm/components/DmMessagesPane.jsx` — fan-out 5; основные зависимости: `app/forum/features/dm/components/DmDialogsPane.jsx`, `app/forum/features/dm/components/DmThreadAlerts.jsx`, `app/forum/features/dm/components/DmThreadHeader.jsx`, `app/forum/features/dm/components/DmThreadLoadMore.jsx`, `app/forum/features/dm/components/DmThreadMessageRow.jsx`
-- `app/forum/features/feed/components/TopicsOrPanelsSwitch.jsx` — fan-out 5; основные зависимости: `app/forum/features/dm/components/InboxPane.jsx`, `app/forum/features/feed/components/TopicsPane.jsx`, `app/forum/features/feed/components/UserPostsPane.jsx`, `app/forum/features/media/components/VideoFeedPane.jsx`, `app/forum/features/quests/components/QuestPane.jsx`
-- `app/forum/features/feed/hooks/useForumFeedRuntime.js` — fan-out 5; основные зависимости: `app/forum/features/feed/hooks/useForumDeepLinkFlow.js`, `app/forum/features/feed/hooks/useThreadOpenNavigation.js`, `app/forum/features/feed/hooks/useThreadPostsModel.js`, `app/forum/features/feed/hooks/useTopicDiscoveryModel.js`, `app/forum/features/feed/utils/postFocus.js`
-- `app/forum/features/moderation/hooks/useForumModerationRuntime.js` — fan-out 5; основные зависимости: `app/forum/features/moderation/hooks/useAdminActions.js`, `app/forum/features/moderation/hooks/useAdminFlag.js`, `app/forum/features/moderation/hooks/useForumModerationUi.js`, `app/forum/features/moderation/hooks/useMediaModeration.js`, `app/forum/features/moderation/hooks/useReportController.js`
-- `app/api/forum/mutate/route.js` — fan-out 4; основные зависимости: `app/api/forum/_bus.js`, `app/api/forum/_db.js`, `app/api/forum/_utils.js`, `app/api/profile/_identity.js`
-- `app/exchange/page.js` — fan-out 4; основные зависимости: `app/ads.js`, `app/exchange/BattleCoin.jsx`, `components/i18n.js`, `lib/brain.js`
-- `app/forum/features/dm/components/InboxPane.jsx` — fan-out 4; основные зависимости: `app/forum/features/dm/components/DmMessagesPane.jsx`, `app/forum/features/dm/components/InboxRepliesPane.jsx`, `app/forum/features/dm/components/InboxTabsHeader.jsx`, `app/forum/features/feed/components/PublishedPostsPane.jsx`
-- `app/forum/features/feed/components/ThreadSection.jsx` — fan-out 4; основные зависимости: `app/forum/features/feed/components/ThreadRepliesPane.jsx`, `app/forum/features/feed/components/ThreadTitle.jsx`, `app/forum/features/ui/components/ThreadForumActionCluster.jsx`, `app/forum/ForumHeaderPanel.jsx`
-- `app/forum/features/feed/hooks/useForumDataRuntime.js` — fan-out 4; основные зависимости: `app/forum/features/feed/hooks/useForumMutationQueue.js`, `app/forum/features/feed/hooks/useForumSseBridge.js`, `app/forum/features/feed/hooks/useForumSyncLoop.js`, `app/forum/features/feed/utils/snapshotTransforms.js`
-- `app/forum/features/profile/components/UserInfoPopover.jsx` — fan-out 4; основные зависимости: `app/forum/features/profile/utils/profileCache.js`, `app/forum/shared/api/translate.js`, `app/forum/shared/components/HydrateText.jsx`, `app/forum/shared/utils/counts.js`
-- `app/forum/features/profile/hooks/useForumProfileSocialRuntime.js` — fan-out 4; основные зависимости: `app/forum/features/profile/hooks/useAboutEditor.js`, `app/forum/features/profile/hooks/useVipPayAction.js`, `app/forum/features/profile/hooks/useVipSubscriptionState.js`, `app/forum/features/subscriptions/hooks/useStarredAuthorsState.js`
-- `app/forum/features/profile/hooks/useForumProfileSync.js` — fan-out 4; основные зависимости: `app/forum/features/profile/utils/profileCache.js`, `app/forum/shared/hooks/useEvent.js`, `app/forum/shared/storage/localStorage.js`, `app/forum/shared/utils/browser.js`
-- `app/forum/features/quests/hooks/useForumQuestRuntime.js` — fan-out 4; основные зависимости: `app/forum/features/quests/hooks/useForumQuestConfig.js`, `app/forum/features/quests/hooks/useForumQuestProgress.js`, `app/forum/features/quests/hooks/useQuestClaimAction.js`, `app/forum/features/quests/hooks/useQuestViewActions.js`
-- `app/forum/features/ui/components/ForumSearchSortControls.jsx` — fan-out 4; основные зависимости: `app/forum/features/media/utils/mediaLinks.js`, `app/forum/features/quests/components/QuestLaunchIcon.jsx`, `app/forum/features/ui/components/ForumControlNavIcon.jsx`, `app/forum/shared/utils/classnames.js`
-- `app/forum/features/ui/hooks/useForumComposerRuntime.js` — fan-out 4; основные зависимости: `app/forum/features/media/hooks/useMediaPipelineController.js`, `app/forum/features/media/hooks/useVoiceRecorder.js`, `app/forum/features/ui/hooks/useComposerScrollMemory.js`, `app/forum/features/ui/hooks/useComposerUiLifecycle.js`
-- `app/academy/page.js` — fan-out 3; основные зависимости: `app/academy/AcademyExamBlock.js`, `app/ads.js`, `components/i18n.js`
-- `app/ads/GeoTargetingPicker.jsx` — fan-out 3; основные зависимости: `components/i18n.js`, `lib/geo/countries.js`, `lib/geo/regions.js`
-- `app/api/forum/report/route.js` — fan-out 3; основные зависимости: `app/api/forum/_bus.js`, `app/api/forum/_db.js`, `app/api/forum/_utils.js`
-- `app/api/forum/subs/count/route.js` — fan-out 3; основные зависимости: `app/api/forum/_db.js`, `app/api/forum/_utils.js`, `app/api/profile/_identity.js`
-- `app/api/forum/subs/list/route.js` — fan-out 3; основные зависимости: `app/api/forum/_db.js`, `app/api/forum/_utils.js`, `app/api/profile/_identity.js`
-- `app/api/forum/subs/my-count/route.js` — fan-out 3; основные зависимости: `app/api/forum/_db.js`, `app/api/forum/_utils.js`, `app/api/profile/_identity.js`
-- `app/api/forum/subs/toggle/route.js` — fan-out 3; основные зависимости: `app/api/forum/_db.js`, `app/api/forum/_utils.js`, `app/api/profile/_identity.js`
-
 ## Вывод
 
-- Файлы с высоким fan-in требуют особенно осторожных изменений, потому что влияют на большое число модулей.
+- Файлы с высоким fan-in требуют особенно осторожных изменений.
 - Самые чувствительные зоны обычно находятся в `app/forum`, `app/api/*`, `components/i18n.js`, `lib/*` и корневых route/layout файлах.
-- Этот документ не заменяет код-ревью, но показывает, где радиус регрессии максимальный еще до ручной проверки.

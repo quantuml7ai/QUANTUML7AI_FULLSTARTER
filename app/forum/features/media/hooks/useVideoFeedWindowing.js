@@ -8,6 +8,9 @@ const VF_AD_CARD_H_MOBILE = 200
 const VF_AD_CARD_H_TABLET = 260
 const VF_AD_CARD_H_DESKTOP = 320
 const VF_ITEM_CHROME_EST = 240
+const VF_WINDOW_STICKY_MS = 220
+const VF_LAYOUT_JITTER_PX = 28
+const VF_SCROLL_SETTLE_MS = 180
 
 function defaultIsBrowser() {
   return typeof window !== 'undefined'
@@ -28,18 +31,21 @@ export default function useVideoFeedWindowing({
   const vfRosRef = useRef(new Map())
   const vfRafRef = useRef(0)
   const vfHardResetScheduleRef = useRef({ rafA: 0, rafB: 0, timeoutId: 0 })
+  const vfScrollStateRef = useRef({ top: 0, ts: 0, velocity: 0, direction: 0 })
+  const vfScrollActivityRef = useRef({ activeUntil: 0, settleTimer: 0 })
+  const vfWinMetaRef = useRef({ ts: 0, start: 0, end: 0 })
   const [vfWin, setVfWin] = useState(() => ({ start: 0, end: 0, top: 0, bottom: 0 }))
 
   const vfGetMaxRender = useCallback(() => {
     try {
-      if (!isBrowserFn()) return 10
+      if (!isBrowserFn()) return 12
       const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
       const dm = Number(window?.navigator?.deviceMemory || 0)
-      if (coarse) return 8
-      if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 9
-      return 11
+      if (coarse) return 10
+      if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 12
+      return 14
     } catch {
-      return 10
+      return 12
     }
   }, [isBrowserFn])
 
@@ -91,12 +97,11 @@ export default function useVideoFeedWindowing({
       const el = vfGetScrollEl()
       const innerScrollable = !!el && (el.scrollHeight > (el.clientHeight + 1))
       if (!innerScrollable) return { st: winTop, vh: winH, mode: 'window' }
-
-      const innerTop = Number(el.scrollTop || 0)
-      const innerH = Number(el.clientHeight || 0) || winH
-      const useWindow = winTop > (innerTop + 2) && winTop > 0
-      if (useWindow) return { st: winTop, vh: winH, mode: 'window' }
-      return { st: innerTop, vh: innerH, mode: 'inner' }
+      return {
+        st: Number(el.scrollTop || 0),
+        vh: Number(el.clientHeight || 0) || winH,
+        mode: 'inner',
+      }
     } catch {}
     return { st: winTop, vh: winH, mode: 'window' }
   }, [vfGetScrollEl])
@@ -113,6 +118,14 @@ export default function useVideoFeedWindowing({
     return vfEstimateH(i)
   }, [vfEstimateH])
 
+  const vfBuildWindow = useCallback((start, end, total) => {
+    let top = 0
+    for (let i = 0; i < start; i++) top += vfGetH(i)
+    let bottom = 0
+    for (let i = end; i < total; i++) bottom += vfGetH(i)
+    return { start, end, top, bottom }
+  }, [vfGetH])
+
   const vfRecalcWindow = useCallback(() => {
     if (!isBrowserFn()) return
     if (!videoFeedOpen) return
@@ -126,8 +139,12 @@ export default function useVideoFeedWindowing({
     const vp = vfReadViewportState()
     const st = Number(vp?.st || 0)
     const vh = Number(vp?.vh || 0)
-    const fromY = Math.max(0, st - VF_OVERSCAN_PX)
-    const toY = st + vh + VF_OVERSCAN_PX
+    const velocity = Math.abs(Number(vfScrollStateRef.current?.velocity || 0))
+    const direction = Number(vfScrollStateRef.current?.direction || 0)
+    const velocityBoost = Math.min(1100, Math.round(velocity * 520))
+    const overscanPx = VF_OVERSCAN_PX + velocityBoost
+    const fromY = Math.max(0, st - overscanPx)
+    const toY = st + vh + overscanPx
 
     let acc = 0
     let start = 0
@@ -143,7 +160,7 @@ export default function useVideoFeedWindowing({
       end++
     }
 
-    const vfMaxRender = vfGetMaxRender()
+    const vfMaxRender = vfGetMaxRender() + (velocity > 0.6 ? 2 : 0) + (velocity > 1.2 ? 2 : 0)
     if ((end - start) > vfMaxRender) {
       const mid = Math.floor((start + end) / 2)
       const half = Math.floor(vfMaxRender / 2)
@@ -151,18 +168,63 @@ export default function useVideoFeedWindowing({
       end = Math.min(total, start + vfMaxRender)
     }
 
-    let top = 0
-    for (let i = 0; i < start; i++) top += vfGetH(i)
-    let bottom = 0
-    for (let i = end; i < total; i++) bottom += vfGetH(i)
-
     setVfWin((prev) => {
-      if (prev.start === start && prev.end === end && prev.top === top && prev.bottom === bottom) {
+      let nextStart = start
+      let nextEnd = end
+
+      const shrinkOnly =
+        nextStart >= prev.start &&
+        nextEnd <= prev.end &&
+        (nextStart > prev.start || nextEnd < prev.end)
+
+      if (shrinkOnly) {
+        const now = Date.now()
+        const recentWindowChange = (now - Number(vfWinMetaRef.current?.ts || 0)) < VF_WINDOW_STICKY_MS
+        const stickyItems = velocity > 1.2 ? 4 : velocity > 0.55 ? 3 : 2
+        const stickyMaxRender = vfMaxRender + stickyItems
+        const leadingTrim = Math.max(0, nextStart - prev.start)
+        const trailingTrim = Math.max(0, prev.end - nextEnd)
+        const smallShrink = leadingTrim <= stickyItems && trailingTrim <= stickyItems
+
+        if (recentWindowChange || smallShrink) {
+          nextStart = prev.start
+          nextEnd = prev.end
+        } else if (direction > 0 && trailingTrim > 0 && leadingTrim <= (stickyItems * 2)) {
+          nextEnd = prev.end
+        } else if (direction < 0 && leadingTrim > 0 && trailingTrim <= (stickyItems * 2)) {
+          nextStart = prev.start
+        }
+
+        if ((nextEnd - nextStart) > stickyMaxRender) {
+          if (direction >= 0 && nextEnd === prev.end) {
+            nextStart = Math.max(prev.start, nextEnd - stickyMaxRender)
+          } else if (direction <= 0 && nextStart === prev.start) {
+            nextEnd = Math.min(prev.end, nextStart + stickyMaxRender)
+          }
+        }
+      }
+
+      const next = vfBuildWindow(nextStart, nextEnd, total)
+      const topDelta = Math.abs(Number(prev.top || 0) - Number(next.top || 0))
+      const bottomDelta = Math.abs(Number(prev.bottom || 0) - Number(next.bottom || 0))
+      if (prev.start === next.start && prev.end === next.end && prev.top === next.top && prev.bottom === next.bottom) {
         return prev
       }
-      return { start, end, top, bottom }
+      if (prev.start === next.start && prev.end === next.end && topDelta < VF_LAYOUT_JITTER_PX && bottomDelta < VF_LAYOUT_JITTER_PX) {
+        return prev
+      }
+      vfWinMetaRef.current = { ts: Date.now(), start: next.start, end: next.end }
+      return next
     })
-  }, [videoFeedOpen, vfSlots.length, vfReadViewportState, vfGetH, vfGetMaxRender, isBrowserFn])
+  }, [videoFeedOpen, vfSlots.length, vfReadViewportState, vfGetH, vfGetMaxRender, vfBuildWindow, isBrowserFn])
+
+  const vfScheduleRecalc = useCallback(() => {
+    if (vfRafRef.current) return
+    vfRafRef.current = requestAnimationFrame(() => {
+      vfRafRef.current = 0
+      try { vfRecalcWindow() } catch {}
+    })
+  }, [vfRecalcWindow])
 
   useEffect(() => {
     const cancelHardResetSchedule = () => {
@@ -190,6 +252,7 @@ export default function useVideoFeedWindowing({
       } catch {}
       try { vfHeightsRef.current.clear() } catch {}
       try {
+        vfWinMetaRef.current = { ts: Date.now(), start: 0, end: Math.min(vfGetMaxRender(), Math.max(0, vfSlots.length || 0)) }
         setVfWin({
           start: 0,
           end: Math.min(vfGetMaxRender(), Math.max(0, vfSlots.length || 0)),
@@ -206,14 +269,14 @@ export default function useVideoFeedWindowing({
         cancelHardResetSchedule()
         vfHardResetScheduleRef.current.rafA = requestAnimationFrame(() => {
           vfHardResetScheduleRef.current.rafB = requestAnimationFrame(() => {
-            try { vfRecalcWindow() } catch {}
+            try { vfScheduleRecalc() } catch {}
           })
         })
       } catch {
         try {
           cancelHardResetSchedule()
           vfHardResetScheduleRef.current.timeoutId = setTimeout(() => {
-            try { vfRecalcWindow() } catch {}
+            try { vfScheduleRecalc() } catch {}
           }, 0)
         } catch {}
       }
@@ -222,37 +285,70 @@ export default function useVideoFeedWindowing({
       cancelHardResetSchedule()
       try { videoFeedHardResetRef.current = null } catch {}
     }
-  }, [vfSlots.length, vfGetScrollEl, vfRecalcWindow, emitDiag, videoFeedHardResetRef, vfGetMaxRender])
+  }, [vfSlots.length, vfGetScrollEl, vfScheduleRecalc, emitDiag, videoFeedHardResetRef, vfGetMaxRender])
 
   useEffect(() => {
     if (!isBrowserFn()) return undefined
     if (!videoFeedOpen) return undefined
+    const scrollActivity = vfScrollActivityRef.current
 
     const onScroll = () => {
-      if (vfRafRef.current) return
-      vfRafRef.current = requestAnimationFrame(() => {
-        vfRafRef.current = 0
-        vfRecalcWindow()
-      })
+      try {
+        const vp = vfReadViewportState()
+        const now = (typeof performance !== 'undefined' && typeof performance.now === 'function')
+          ? performance.now()
+          : Date.now()
+        const top = Number(vp?.st || 0)
+        const prev = vfScrollStateRef.current
+        const dt = Math.max(1, now - Number(prev?.ts || 0))
+        const signedDy = top - Number(prev?.top || 0)
+        const dy = Math.abs(signedDy)
+        const velocity = dt > 220 ? 0 : (dy / dt)
+        const direction = dy < 2 ? Number(prev?.direction || 0) : (signedDy > 0 ? 1 : -1)
+        vfScrollStateRef.current = { top, ts: now, velocity, direction }
+        scrollActivity.activeUntil = Date.now() + VF_SCROLL_SETTLE_MS
+        if (scrollActivity.settleTimer) {
+          try { clearTimeout(scrollActivity.settleTimer) } catch {}
+          scrollActivity.settleTimer = 0
+        }
+        scrollActivity.settleTimer = setTimeout(() => {
+          scrollActivity.settleTimer = 0
+          vfScheduleRecalc()
+        }, VF_SCROLL_SETTLE_MS)
+      } catch {}
+      vfScheduleRecalc()
     }
 
     const el = vfGetScrollEl()
+    const useInnerScroll = !!el && (Number(el.scrollHeight || 0) > (Number(el.clientHeight || 0) + 1))
     const opts = { passive: true }
-    try { el?.addEventListener?.('scroll', onScroll, opts) } catch {}
-    window.addEventListener('scroll', onScroll, opts)
+    if (useInnerScroll) {
+      try { el?.addEventListener?.('scroll', onScroll, opts) } catch {}
+    } else {
+      window.addEventListener('scroll', onScroll, opts)
+    }
     window.addEventListener('resize', onScroll, opts)
     onScroll()
 
     return () => {
-      try { el?.removeEventListener?.('scroll', onScroll) } catch {}
-      window.removeEventListener('scroll', onScroll)
+      if (useInnerScroll) {
+        try { el?.removeEventListener?.('scroll', onScroll) } catch {}
+      } else {
+        window.removeEventListener('scroll', onScroll)
+      }
       window.removeEventListener('resize', onScroll)
       if (vfRafRef.current) {
         try { cancelAnimationFrame(vfRafRef.current) } catch {}
         vfRafRef.current = 0
       }
+      if (scrollActivity.settleTimer) {
+        try { clearTimeout(scrollActivity.settleTimer) } catch {}
+        scrollActivity.settleTimer = 0
+      }
+      scrollActivity.activeUntil = 0
+      vfScrollStateRef.current = { top: 0, ts: 0, velocity: 0, direction: 0 }
     }
-  }, [videoFeedOpen, vfRecalcWindow, vfGetScrollEl, isBrowserFn])
+  }, [videoFeedOpen, vfScheduleRecalc, vfGetScrollEl, vfReadViewportState, isBrowserFn])
 
   const vfMeasureRef = useCallback((idx) => (node) => {
     try {
@@ -270,9 +366,12 @@ export default function useVideoFeedWindowing({
           const h = node.getBoundingClientRect?.()?.height
           if (!Number.isFinite(h) || h <= 1) return
           const prev = vfHeightsRef.current.get(idx)
-          if (prev === h) return
-          vfHeightsRef.current.set(idx, h)
-          vfRecalcWindow()
+          const nextH = Math.round(h)
+          if (Number.isFinite(prev) && Math.abs(prev - nextH) < 2) return
+          vfHeightsRef.current.set(idx, nextH)
+          const now = Date.now()
+          if (Number(vfScrollActivityRef.current.activeUntil || 0) > now) return
+          vfScheduleRecalc()
         } catch {}
       }
 
@@ -283,18 +382,18 @@ export default function useVideoFeedWindowing({
         vfRosRef.current.set(idx, ro)
       }
     } catch {}
-  }, [vfRecalcWindow])
+  }, [vfScheduleRecalc])
 
   useEffect(() => {
     if (!isBrowserFn()) return undefined
     if (!videoFeedOpen) return undefined
     const onResize = () => {
       try { vfHeightsRef.current.clear() } catch {}
-      vfRecalcWindow()
+      vfScheduleRecalc()
     }
     window.addEventListener('resize', onResize, { passive: true })
     return () => window.removeEventListener('resize', onResize)
-  }, [videoFeedOpen, vfRecalcWindow, isBrowserFn])
+  }, [videoFeedOpen, vfScheduleRecalc, isBrowserFn])
 
   return {
     vfSlots,

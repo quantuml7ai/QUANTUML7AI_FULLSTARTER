@@ -1,5 +1,4 @@
 ﻿import React, { useEffect } from 'react'
-import { isBrowser } from '../../../shared/utils/browser'
 import { resolveForumUserId } from '../utils/account'
 
 const INC_PER_SEC = 1 / (365 * 24 * 60 * 60)
@@ -55,107 +54,6 @@ export default function useQCoinLive(userKey, isVip){
   const markUi = React.useCallback(function(){
     lastUiRef.current = Date.now();
     becameActiveRef.current = true;
-  }, []);
-  // === Next-up video warmup (preload the next video while current plays) ===
-  useEffect(() => { 
-    if (!isBrowser()) return;
-
-    const selector = 'video[data-forum-video="post"]';
-    let warmed = null;
-    const warmedOnce = new WeakSet();
-    let warmIdleId = null;
-
-    const idle = (fn) => {
-      try {
-        if ('requestIdleCallback' in window) {
-          return window.requestIdleCallback(fn, { timeout: 1200 });
-        }
-      } catch {}
-      return setTimeout(fn, 120);
-    };
-    const cancelIdle = (id) => {
-      try {
-        if ('cancelIdleCallback' in window) return window.cancelIdleCallback(id);
-      } catch {}
-      clearTimeout(id);
-    };
-
-    const isSlowNetwork = () => {
-      try {
-        const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-        const type = String(conn?.effectiveType || '');
-        return !!conn?.saveData || /(^|-)2g/.test(type);
-      } catch {
-        return false;
-      }
-    };
-
-    const clearWarm = () => {
-      if (!(warmed instanceof HTMLVideoElement)) { warmed = null; return; }
-      try {
-        if (warmIdleId != null) { try { cancelIdle(warmIdleId); } catch {} warmIdleId = null; }
-       
-        const slow = isSlowNetwork();
-        warmed.preload = slow ? 'metadata' : 'auto'; 
-
-        // НЕ дергаем load() на каждом play (это и даёт дерганье/CPU).
-        // Подогреваем мягко и ОДИН раз на видео, в idle, только если совсем "холодное".
-        if (!warmedOnce.has(warmed)) {
-          warmedOnce.add(warmed);
-          warmIdleId = idle(() => {
-            warmIdleId = null;
-            try {
-              const cold = (warmed.readyState === 0 || !warmed.currentSrc);
-              const safe = cold && warmed.paused && (warmed.currentTime === 0);
-              if (safe) warmed.load?.();
-            } catch {}
-          });
-        }
-      } catch {}
-      warmed = null;
-    };
-
-    const warmNext = (current) => {
-      if (!(current instanceof HTMLVideoElement)) return;
-      const list = Array.from(document.querySelectorAll(selector));
-      const idx = list.indexOf(current);
-      if (idx < 0) return;
-      const next = list[idx + 1];
-      if (!next || next === warmed) return;
-      clearWarm();
-      warmed = next;
-      const slow = isSlowNetwork();
-      try {
-        warmed.preload = slow ? 'metadata' : 'auto';
-        warmed.setAttribute('data-forum-warm', '1');
-        warmed.load();
-      } catch {}
-    };
-
-    const onPlay = (e) => {
-      const target = e.target;
-      if (!(target instanceof HTMLVideoElement)) return;
-      if (target.getAttribute('data-forum-video') !== 'post') return;
-      warmNext(target);
-    };
-
-    const onStop = (e) => {
-      const target = e.target;
-      if (!(target instanceof HTMLVideoElement)) return;
-      if (target.getAttribute('data-forum-video') !== 'post') return;
-      clearWarm();
-    };
-
-    document.addEventListener('play', onPlay, true);
-    document.addEventListener('pause', onStop, true);
-    document.addEventListener('ended', onStop, true);
-
-    return () => {
-      document.removeEventListener('play', onPlay, true);
-      document.removeEventListener('pause', onStop, true);
-      document.removeEventListener('ended', onStop, true);
-      clearWarm();
-    };
   }, []);
   // Считаем открытие страницы «активностью», чтобы тикер сразу начал тикать
   React.useEffect(function(){

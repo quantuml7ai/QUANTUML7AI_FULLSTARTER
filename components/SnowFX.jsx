@@ -88,6 +88,8 @@ export default function SnowFX({
   const lastTimeRef = useRef(0)
   const worldRef = useRef({ w: 0, h: 0 })
   const lastScrollYRef = useRef(0)
+  const lastPaintRef = useRef(0)
+  const visibilityPausedRef = useRef(false)
 
   // до какого времени импульс ещё считается живым
   const impulseUntilRef = useRef(0)
@@ -99,6 +101,14 @@ export default function SnowFX({
     worldRef.current = {
       w: window.innerWidth || 1024,
       h: window.innerHeight || 768,
+    }
+  }
+
+  const queueLoopFrame = (fn) => {
+    try {
+      animFrameRef.current = requestAnimationFrame(fn)
+    } catch {
+      animFrameRef.current = null
     }
   }
 
@@ -203,6 +213,20 @@ export default function SnowFX({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [count, minSize, maxSize])
 
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    const syncVisibility = () => {
+      try {
+        visibilityPausedRef.current = document.visibilityState !== 'visible'
+      } catch {
+        visibilityPausedRef.current = false
+      }
+    }
+    syncVisibility()
+    document.addEventListener('visibilitychange', syncVisibility)
+    return () => document.removeEventListener('visibilitychange', syncVisibility)
+  }, [])
+
   /* ===== ГЛАВНЫЙ АНИМАЦИОННЫЙ ЛУП ===== */
 
   useEffect(() => {
@@ -228,11 +252,16 @@ export default function SnowFX({
       lastTimeRef.current = ts
       const dt = Math.min(0.05, Math.max(0.012, dtMs / 1000))
 
+      if (visibilityPausedRef.current) {
+        if (!stopped) queueLoopFrame(loop)
+        return
+      }
+
       const flakes = flakesRef.current
       if (!flakes.length) {
         // если компонент уже размонтирован (cleanup выставил stopped),
         // не планируем следующий кадр — иначе можно оставить "висящий" RAF
-        if (!stopped) animFrameRef.current = requestAnimationFrame(loop)
+        if (!stopped) queueLoopFrame(loop)
         return
       }
 
@@ -295,14 +324,17 @@ export default function SnowFX({
         }
       }
 
-      setTick((x0) => x0 + 1)
+      if ((ts - lastPaintRef.current) >= 34) {
+        lastPaintRef.current = ts
+        setTick((x0) => x0 + 1)
+      }
 
       // если компонент уже размонтирован (cleanup выставил stopped),
       // не планируем следующий кадр
-      if (!stopped) animFrameRef.current = requestAnimationFrame(loop)
+      if (!stopped) queueLoopFrame(loop)
     }
 
-    animFrameRef.current = requestAnimationFrame(loop)
+    queueLoopFrame(loop)
 
     return () => {
       stopped = true
@@ -358,7 +390,7 @@ export default function SnowFX({
       // сразу даём пику импульса
       impulseStrengthRef.current = Math.min(1, impulseStrengthRef.current + 0.6)
 
-      setTick((x0) => x0 + 1)
+      lastPaintRef.current = 0
     }
 
     window.addEventListener('pointerdown', onPointerDown, { passive: true })
@@ -417,7 +449,7 @@ export default function SnowFX({
       // добавляем силу импульса поверх существующей
       impulseStrengthRef.current = Math.min(1, impulseStrengthRef.current + 0.4)
 
-      setTick((x0) => x0 + 1)
+      lastPaintRef.current = 0
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })

@@ -28,10 +28,9 @@ export function openThreadFromVideoFeedPost({
 
   setTimeout(() => {
     try {
-      document.getElementById(`post_${post.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      document.getElementById(`post_${post.id}`)?.scrollIntoView({ behavior: 'auto', block: 'nearest' })
     } catch {}
   }, 120)
 
   return true
 }
-

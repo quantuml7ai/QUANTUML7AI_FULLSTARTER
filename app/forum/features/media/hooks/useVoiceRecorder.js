@@ -15,6 +15,7 @@ export default function useVoiceRecorder({
   const chunksRef = useRef([])
   const recTimerRef = useRef(null)
   const stopRecordRef = useRef(() => {})
+  const audioBlobUrlRef = useRef(null)
 
   const stopRecord = useCallback(() => {
     const rec = mediaRef.current
@@ -59,7 +60,12 @@ export default function useVoiceRecorder({
             } catch {}
             return
           }
+          try {
+            const prevUrl = String(audioBlobUrlRef.current || '')
+            if (prevUrl && /^blob:/i.test(prevUrl)) URL.revokeObjectURL(prevUrl)
+          } catch {}
           const url = URL.createObjectURL(blob)
+          audioBlobUrlRef.current = url
           setPendingAudio(url)
           try { restoreComposerScroll() } catch {}
         } catch {}
@@ -88,6 +94,11 @@ export default function useVoiceRecorder({
       recTimerRef.current = null
       try { mediaRef.current?.stream?.getTracks?.().forEach((tr) => tr.stop()) } catch {}
       mediaRef.current = null
+      try {
+        const prevUrl = String(audioBlobUrlRef.current || '')
+        if (prevUrl && /^blob:/i.test(prevUrl)) URL.revokeObjectURL(prevUrl)
+      } catch {}
+      audioBlobUrlRef.current = null
     }
   }, [])
 

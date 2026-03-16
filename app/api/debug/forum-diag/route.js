@@ -32,6 +32,12 @@ function safeJsonlRow(obj, maxChars = 200_000) {
 
 export async function POST(req) {
   try {
+    if (String(process.env.FORUM_DIAG_SERVER || "") !== "1") {
+      return new Response(JSON.stringify({ ok: true, disabled: true }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }
     const body = await req.json().catch(() => ({}));
     const root = process.cwd();
     const file = path.join(root, "forum-diag.jsonl");

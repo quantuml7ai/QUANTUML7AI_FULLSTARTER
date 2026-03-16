@@ -11,6 +11,7 @@ export default function useForumEditMode({
   setComposerActive,
 }) {
   useEffect(() => {
+    let focusRaf = 0
     const onEdit = (e) => {
       try {
         const d = e?.detail || {}
@@ -24,13 +25,26 @@ export default function useForumEditMode({
         } catch {}
 
         try {
-          requestAnimationFrame(() => {
+          if (focusRaf) {
+            cancelAnimationFrame(focusRaf)
+            focusRaf = 0
+          }
+          focusRaf = requestAnimationFrame(() => {
+            focusRaf = 0
             const root = (composerRef && composerRef.current) || document.getElementById('forum-composer')
             if (root && root.scrollIntoView) {
-              root.scrollIntoView({ behavior: 'smooth', block: 'center' })
+              root.scrollIntoView({ behavior: 'auto', block: 'nearest' })
             }
             const ta = root?.querySelector?.('.taInput') || root?.querySelector?.('textarea')
-            if (ta && typeof ta.focus === 'function') ta.focus()
+            const active = document.activeElement
+            const activeInsideComposer = !!(active && root?.contains?.(active))
+            if (ta && typeof ta.focus === 'function' && !activeInsideComposer) {
+              try {
+                ta.focus({ preventScroll: true })
+              } catch {
+                ta.focus()
+              }
+            }
           })
         } catch {}
 
@@ -42,7 +56,13 @@ export default function useForumEditMode({
 
     if (typeof window !== 'undefined') {
       window.addEventListener('forum:edit', onEdit)
-      return () => window.removeEventListener('forum:edit', onEdit)
+      return () => {
+        window.removeEventListener('forum:edit', onEdit)
+        if (focusRaf) {
+          try { cancelAnimationFrame(focusRaf) } catch {}
+          focusRaf = 0
+        }
+      }
     }
     return undefined
   }, [t, toast, composerRef, setEditPostId, setText, setComposerActive])

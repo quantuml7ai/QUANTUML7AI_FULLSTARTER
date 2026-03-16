@@ -21,7 +21,7 @@ export default function usePostParentReplyNav({ post, parentText, parentPost, on
       const scrollAndFlash = (node) => {
         if (!node) return
         try {
-          node.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          node.scrollIntoView({ behavior: 'auto', block: 'nearest' })
         } catch {
           try {
             node.scrollIntoView()
