@@ -13,15 +13,6 @@ export default function ForumAdSlot({ url, slotKind, nearId, slotKey, onResizeDe
     if (!el) return
     if (typeof window === 'undefined') return
     if (typeof ResizeObserver === 'undefined') return
-    const isCoarseUi = (() => {
-      try {
-        const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
-        const narrow = Number(window?.innerWidth || 0) <= 720
-        return coarse || narrow
-      } catch {}
-      return false
-    })()
-    const minDelta = isCoarseUi ? 36 : 16
 
     try {
       lastHRef.current = el.getBoundingClientRect().height || 0
@@ -39,7 +30,7 @@ export default function ForumAdSlot({ url, slotKind, nearId, slotKey, onResizeDe
       }
       const prev = lastHRef.current || 0
       const delta = h - prev
-      if (Math.abs(delta) >= minDelta) {
+      if (delta) {
         lastHRef.current = h
         try {
           onResizeDelta?.(node, delta, { slotKind, slotKey })

@@ -1,12 +1,5 @@
 'use client'
 
-function normalizeFocusOptions(options) {
-  if (typeof options === 'string') {
-    return { behavior: options }
-  }
-  return options && typeof options === 'object' ? options : {}
-}
-
 function readBottomOcclusionPx(top, bottom) {
   try {
     const t = Number(top || 0) || 0
@@ -40,39 +33,11 @@ function readMarginY(node) {
   }
 }
 
-function readScrollState(getScrollEl) {
-  try {
-    const scrollEl = typeof getScrollEl === 'function' ? getScrollEl() : null
-    if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {
-      return { mode: 'inner', top: Number(scrollEl.scrollTop || 0) || 0 }
-    }
-  } catch {}
-  try {
-    return {
-      mode: 'window',
-      top: Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0) || 0,
-    }
-  } catch {}
-  return { mode: 'window', top: 0 }
-}
-
-function isScrollStable(snapshot, getScrollEl, maxDelta = 10) {
-  try {
-    const next = readScrollState(getScrollEl)
-    if (String(next.mode || '') !== String(snapshot?.mode || '')) return false
-    return Math.abs(Number(next.top || 0) - Number(snapshot?.top || 0)) <= Math.max(0, Number(maxDelta || 0))
-  } catch {}
-  return false
-}
-
 export function centerNodeInScroll(node, options = {}) {
-  const normalized = normalizeFocusOptions(options)
-  const behavior = normalized?.behavior || 'auto'
-  const isBrowserFn = typeof normalized?.isBrowserFn === 'function' ? normalized.isBrowserFn : () => false
-  const getScrollEl = typeof normalized?.getScrollEl === 'function' ? normalized.getScrollEl : () => null
+  const behavior = options?.behavior || 'smooth'
+  const isBrowserFn = typeof options?.isBrowserFn === 'function' ? options.isBrowserFn : () => false
+  const getScrollEl = typeof options?.getScrollEl === 'function' ? options.getScrollEl : () => null
   if (!isBrowserFn?.() || !node) return
-
-  const minDelta = behavior === 'smooth' ? 24 : 14
 
   try {
     const scrollEl = getScrollEl?.()
@@ -85,7 +50,7 @@ export function centerNodeInScroll(node, options = {}) {
       const visibleH = Math.max(1, contRect.height - occ)
       const desired = visibleH / 2
       const delta = elCenterInView - desired
-      if (!Number.isFinite(delta) || Math.abs(delta) < minDelta) return
+      if (!Number.isFinite(delta)) return
       const nextTop = Math.max(
         0,
         Math.min((scrollEl.scrollTop || 0) + delta, (scrollEl.scrollHeight || 0) - (scrollEl.clientHeight || 0)),
@@ -104,7 +69,7 @@ export function centerNodeInScroll(node, options = {}) {
       const visibleH = Math.max(1, vh - occ)
       const desired = visibleH / 2
       const delta = elCenter - desired
-      if (Number.isFinite(delta) && Math.abs(delta) > minDelta) {
+      if (Number.isFinite(delta) && Math.abs(delta) > 0.5) {
         const curY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0
         const nextY = Math.max(0, curY + delta)
         try {
@@ -119,7 +84,7 @@ export function centerNodeInScroll(node, options = {}) {
     }
   } catch {}
   try {
-    node.scrollIntoView?.({ behavior, block: 'nearest' })
+    node.scrollIntoView?.({ behavior, block: 'center' })
   } catch {
     try {
       node.scrollIntoView?.()
@@ -128,15 +93,14 @@ export function centerNodeInScroll(node, options = {}) {
 }
 
 export function centerPostAfterDom(postId, options = {}) {
-  const normalized = normalizeFocusOptions(options)
-  const behavior = normalized?.behavior || 'auto'
-  const isBrowserFn = typeof normalized?.isBrowserFn === 'function' ? normalized.isBrowserFn : () => false
+  const behavior = options?.behavior || 'smooth'
+  const isBrowserFn = typeof options?.isBrowserFn === 'function' ? options.isBrowserFn : () => false
   const centerNodeInScrollFn =
-    typeof normalized?.centerNodeInScrollFn === 'function' ? normalized.centerNodeInScrollFn : centerNodeInScroll
+    typeof options?.centerNodeInScrollFn === 'function' ? options.centerNodeInScrollFn : centerNodeInScroll
   const pid = String(postId || '').trim()
   if (!pid || !isBrowserFn?.()) return
   let tries = 0
-  const maxTries = 5
+  const maxTries = 28
   const tick = () => {
     tries += 1
     const node = document.getElementById(`post_${pid}`)
@@ -164,16 +128,15 @@ export function centerPostAfterDom(postId, options = {}) {
 }
 
 export function centerAndFlashPostAfterDom(postId, options = {}) {
-  const normalized = normalizeFocusOptions(options)
-  const behavior = normalized?.behavior || 'auto'
-  const isBrowserFn = typeof normalized?.isBrowserFn === 'function' ? normalized.isBrowserFn : () => false
+  const behavior = options?.behavior || 'smooth'
+  const isBrowserFn = typeof options?.isBrowserFn === 'function' ? options.isBrowserFn : () => false
   const centerNodeInScrollFn =
-    typeof normalized?.centerNodeInScrollFn === 'function' ? normalized.centerNodeInScrollFn : centerNodeInScroll
-  const getScrollEl = typeof normalized?.getScrollEl === 'function' ? normalized.getScrollEl : () => null
-  const postsLen = Number(normalized?.postsLen || 0)
-  const visibleThreadPostsCount = Number(normalized?.visibleThreadPostsCount || 0)
+    typeof options?.centerNodeInScrollFn === 'function' ? options.centerNodeInScrollFn : centerNodeInScroll
+  const getScrollEl = typeof options?.getScrollEl === 'function' ? options.getScrollEl : () => null
+  const postsLen = Number(options?.postsLen || 0)
+  const visibleThreadPostsCount = Number(options?.visibleThreadPostsCount || 0)
   const setVisibleThreadPostsCount =
-    typeof normalized?.setVisibleThreadPostsCount === 'function' ? normalized.setVisibleThreadPostsCount : null
+    typeof options?.setVisibleThreadPostsCount === 'function' ? options.setVisibleThreadPostsCount : null
 
   const pid = String(postId || '').trim()
   if (!pid || !isBrowserFn?.()) return
@@ -187,18 +150,16 @@ export function centerAndFlashPostAfterDom(postId, options = {}) {
   } catch {}
 
   let tries = 0
-  const maxTries = 8
+  const maxTries = 220
   const tick = () => {
     tries += 1
     const node = document.getElementById(`post_${pid}`)
     if (node) {
-      const baseScroll = readScrollState(getScrollEl)
       try {
         centerNodeInScrollFn(node, behavior)
       } catch {}
 
       try {
-        let recenterCount = 0
         const computeDelta = () => {
           try {
             const r = node.getBoundingClientRect?.()
@@ -227,11 +188,8 @@ export function centerAndFlashPostAfterDom(postId, options = {}) {
         }
 
         const maybeRecenter = () => {
-          if (recenterCount >= 1) return
-          if (!isScrollStable(baseScroll, getScrollEl, 10)) return
           const d = computeDelta()
-          if (Number.isFinite(d) && Math.abs(d) > 44) {
-            recenterCount += 1
+          if (Number.isFinite(d) && Math.abs(d) > 2) {
             try {
               centerNodeInScrollFn(node, 'auto')
             } catch {}
@@ -239,11 +197,18 @@ export function centerAndFlashPostAfterDom(postId, options = {}) {
         }
 
         try {
-          setTimeout(maybeRecenter, 96)
+          requestAnimationFrame(maybeRecenter)
+        } catch {}
+        try {
+          setTimeout(maybeRecenter, 280)
+        } catch {}
+        try {
+          setTimeout(maybeRecenter, 900)
         } catch {}
 
         try {
           if (typeof ResizeObserver !== 'undefined') {
+            const scrollEl = getScrollEl?.()
             let stopped = false
             let rafId = 0
             const schedule = () => {
@@ -260,6 +225,11 @@ export function centerAndFlashPostAfterDom(postId, options = {}) {
             try {
               ro.observe(node)
             } catch {}
+            if (scrollEl) {
+              try {
+                ro.observe(scrollEl)
+              } catch {}
+            }
 
             setTimeout(() => {
               stopped = true
@@ -271,7 +241,7 @@ export function centerAndFlashPostAfterDom(postId, options = {}) {
                   cancelAnimationFrame(rafId)
                 } catch {}
               }
-            }, 90)
+            }, 1600)
           }
         } catch {}
       } catch {}

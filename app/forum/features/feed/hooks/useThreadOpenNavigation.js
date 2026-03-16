@@ -17,33 +17,6 @@ export default function useThreadOpenNavigation({
 }) {
   const pendingThreadRootIdRef = useRef(null)
   const pendingScrollToPostIdRef = useRef(null)
-  const alignNodeToThreadTop = useCallback((node) => {
-    if (!(node instanceof Element)) return false
-    try {
-      const scrollEl =
-        document.querySelector('[data-forum-scroll="1"]') ||
-        null
-      const rect = node.getBoundingClientRect?.()
-      if (!rect) return false
-      const useInner = !!scrollEl && (scrollEl.scrollHeight > scrollEl.clientHeight + 1)
-      if (useInner) {
-        const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }
-        const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))
-        if (Math.abs(Number(scrollEl.scrollTop || 0) - targetTop) > 2) {
-          scrollEl.scrollTop = Math.max(0, targetTop)
-        }
-        return true
-      }
-      const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top
-      try {
-        window.scrollTo({ top: Math.max(0, y), behavior: 'auto' })
-      } catch {
-        try { window.scrollTo(0, Math.max(0, y)) } catch {}
-      }
-      return true
-    } catch {}
-    return false
-  }, [])
 
   const openThreadForPost = useCallback((post, opts = {}) => {
     if (!post || !post.id) return
@@ -121,23 +94,15 @@ export default function useThreadOpenNavigation({
 
     const timer = setTimeout(() => {
       try {
-        const threadStart = document.querySelector('[data-forum-thread-start="1"]')
-        const threadRootId = String(threadRoot?.id || '')
-        if (threadStart && threadRootId && threadRootId === String(pendingId)) {
-          alignNodeToThreadTop(threadStart)
-          return
-        }
-        const targetPost = document.getElementById('post_' + pendingId)
-        if (targetPost) {
-          alignNodeToThreadTop(targetPost)
-          return
-        }
-        if (threadStart) alignNodeToThreadTop(threadStart)
+        document.getElementById('post_' + pendingId)?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        })
       } catch {}
     }, 120)
 
     return () => clearTimeout(timer)
-  }, [alignNodeToThreadTop, isBrowserFn, selId, threadRoot])
+  }, [selId, threadRoot, isBrowserFn])
 
   return {
     openThreadForPost,

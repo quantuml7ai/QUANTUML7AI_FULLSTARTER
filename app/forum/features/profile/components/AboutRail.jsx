@@ -24,17 +24,9 @@ export default function AboutRail({
     const el = taRef.current
     if (!el) return
     try {
-      const active = document.activeElement
-      const activeInside = !!(active && el.contains?.(active))
-      if (active !== el && !activeInside) {
-        try {
-          el.focus({ preventScroll: true })
-        } catch {
-          el.focus()
-        }
-        const len = el.value.length
-        el.setSelectionRange(len, len)
-      }
+      el.focus()
+      const len = el.value.length
+      el.setSelectionRange(len, len)
     } catch {}
   }, [editing])
 

@@ -1,25 +1,7 @@
 {
   "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-03-15T13:38:00.406Z",
+  "generatedAt": "2026-03-13T11:07:12.466Z",
   "report": [
-    {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
-      "counts": {
-        "for-loop": 13,
-        "while-loop": 2,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 9,
-        "sync-json": 0,
-        "local-storage": 2,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 3,
-        "interval": 2
-      },
-      "longLines": [],
-      "score": 69
-    },
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\lib\\adsCore.js",
       "counts": {
@@ -39,101 +21,22 @@
       "score": 50
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
-      "counts": {
-        "for-loop": 11,
-        "while-loop": 2,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 0,
-        "sync-json": 1,
-        "local-storage": 1,
-        "session-storage": 0,
-        "network-call": 4,
-        "raf": 0,
-        "interval": 0
-      },
-      "longLines": [
-        {
-          "i": 907,
-          "len": 246,
-          "text": "// Р В Р вЂ¦Р В РЎвЂўР РЋР вЂљР В РЎВР В Р’В°Р В Р’В»Р РЋР Р‰Р В Р вЂ¦Р РЋРІР‚в„–Р В Р’Вµ Р В Р вЂ Р В РЎвЂР В РўвЂР В Р’ВµР В РЎвЂў Р В РЎвЂ”Р В РЎвЂў Р РЋР вЂљР В Р’В°Р РЋР С“Р РЋРІвЂљВ¬Р В РЎвЂР РЋР вЂљР В Р’ВµР В Р вЂ¦Р В РЎвЂР РЋР вЂ№"
-        },
-        {
-          "i": 913,
-          "len": 194,
-          "text": "// Р РЋРІР‚С™Р В РЎвЂўР В Р’В»Р РЋР Р‰Р В РЎвЂќР В РЎвЂў Р РЋР РЏР В Р вЂ Р В Р вЂ¦Р РЋРІР‚в„–Р В Р’Вµ video-Р РЋР РЉР В Р вЂ¦Р В РўвЂР В РЎвЂ”Р В РЎвЂўР В РЎвЂР В Р вЂ¦Р РЋРІР‚С™Р РЋРІР‚в„–"
-        },
-        {
-          "i": 996,
-          "len": 381,
-          "text": "// Р РЋРІР‚С™Р В Р’ВµР В РЎвЂќР РЋРЎвЂњР РЋРІР‚В°Р В РЎвЂР В РІвЂћвЂ“ Р В Р вЂ Р РЋРІР‚в„–Р В Р’В±Р РЋР вЂљР В Р’В°Р В Р вЂ¦Р В Р вЂ¦Р РЋРІР‚в„–Р В РІвЂћвЂ“ mediaHref (Р В РЎвЂќР В РЎвЂўР В Р вЂ¦Р В РЎвЂќР РЋР вЂљР В Р’ВµР РЋРІР‚С™Р В Р вЂ¦Р РЋРІР‚в„–Р В РІвЂћвЂ“ youtube / Р В РЎвЂќР В Р’В°Р РЋР вЂљР РЋРІР‚С™Р В РЎвЂР В Р вЂ¦Р В РЎвЂќР В Р’В° Р В РЎвЂ Р РЋРІР‚С™.Р В РЎвЂ”.)"
-        },
-        {
-          "i": 1020,
-          "len": 318,
-          "text": "// isNear: Р В Р’В±Р В Р’В»Р В РЎвЂўР В РЎвЂќ Р РЋР вЂљР РЋР РЏР В РўвЂР В РЎвЂўР В РЎВ (Р В РЎВР В РЎвЂўР В Р’В¶Р В Р вЂ¦Р В РЎвЂў Р В РЎвЂ”Р В РЎвЂўР В РўвЂР В РЎвЂ“Р РЋР вЂљР РЋРЎвЂњР В Р’В¶Р В Р’В°Р РЋРІР‚С™Р РЋР Р‰, Р В Р вЂ¦Р В РЎвЂў Р В Р вЂ¦Р В Р’Вµ Р В РЎвЂР В РЎвЂ“Р РЋР вЂљР В Р’В°Р РЋРІР‚С™Р РЋР Р‰)"
-        },
-        {
-          "i": 1021,
-          "len": 279,
-          "text": "// isFocused: Р В Р’В±Р В Р’В»Р В РЎвЂўР В РЎвЂќ Р РЋР вЂљР В Р’ВµР В Р’В°Р В Р’В»Р РЋР Р‰Р В Р вЂ¦Р В РЎвЂў Р В Р вЂ  Р В Р’В·Р В РЎвЂўР В Р вЂ¦Р В Р’Вµ Р В Р вЂ Р В Р вЂ¦Р В РЎвЂР В РЎВР В Р’В°Р В Р вЂ¦Р В РЎвЂР РЋР РЏ (Р В РЎвЂР В РЎвЂ“Р РЋР вЂљР В Р’В°Р В Р’ВµР В РЎВ)"
-        },
-        {
-          "i": 1022,
-          "len": 322,
-          "text": "// isPageActive: Р В Р вЂ Р В РЎвЂќР В Р’В»Р В Р’В°Р В РўвЂР В РЎвЂќР В Р’В°/Р В РЎвЂўР В РЎвЂќР В Р вЂ¦Р В РЎвЂў Р В Р’В°Р В РЎвЂќР РЋРІР‚С™Р В РЎвЂР В Р вЂ Р В Р вЂ¦Р В РЎвЂў (Р В РЎвЂР В Р вЂ¦Р В Р’В°Р РЋРІР‚РЋР В Р’Вµ Р В Р вЂ Р РЋР С“Р В Р’ВµР В РЎвЂ“Р В РўвЂР В Р’В° Р В РЎвЂ”Р В Р’В°Р РЋРЎвЂњР В Р’В·Р В Р’В°)"
-        },
-        {
-          "i": 1086,
-          "len": 277,
-          "text": "// near: Р В Р’В·Р В Р’В°Р РЋР вЂљР В Р’В°Р В Р вЂ¦Р В Р’ВµР В Р’Вµ Р вЂ™Р’В«Р В РЎвЂ”Р В РЎвЂўР В РўвЂР В РЎвЂўР В РІвЂћвЂ“Р РЋРІР‚С™Р В РЎвЂР вЂ™Р’В» Р В РЎвЂќ Р В Р’В±Р В Р’В»Р В РЎвЂўР В РЎвЂќР РЋРЎвЂњ (Р В Р’В±Р В Р’ВµР В Р’В· Р В РЎвЂР В РЎвЂ“Р РЋР вЂљР РЋРІР‚в„–)"
-        },
-        {
-          "i": 1092,
-          "len": 193,
-          "text": "// focused: Р РЋР вЂљР В Р’ВµР В Р’В°Р В Р’В»Р РЋР Р‰Р В Р вЂ¦Р В РЎвЂў Р В Р вЂ Р В РЎвЂР В РўвЂР В Р вЂ¦Р В РЎвЂў (>= 60% Р В РЎвЂ”Р В Р’В»Р В РЎвЂўР РЋРІР‚В°Р В Р’В°Р В РўвЂР В РЎвЂ)"
-        },
-        {
-          "i": 1150,
-          "len": 443,
-          "text": "// Р В РЎвЂќР В Р’В»Р РЋР вЂ№Р РЋРІР‚РЋ Р В РўвЂР В Р’В»Р РЋР РЏ Р РЋР С“Р В Р’В»Р В РЎвЂўР РЋРІР‚С™Р В Р’В°, Р РЋРІР‚РЋР РЋРІР‚С™Р В РЎвЂўР В Р’В±Р РЋРІР‚в„– Р В Р вЂ¦Р В Р’Вµ Р В РЎвЂ”Р В РЎвЂўР В Р вЂ Р РЋРІР‚С™Р В РЎвЂўР РЋР вЂљР РЋР РЏР РЋРІР‚С™Р РЋР Р‰ Р В РЎвЂўР В РўвЂР В Р вЂ¦Р РЋРЎвЂњ Р В РЎвЂ Р РЋРІР‚С™Р РЋРЎвЂњ Р В Р’В¶Р В Р’Вµ Р В РЎВР В Р’ВµР В РўвЂР В РЎвЂР РЋРЎвЂњ Р В РЎвЂ”Р В РЎвЂўР В РўвЂР РЋР вЂљР РЋР РЏР В РўвЂ"
-        },
-        {
-          "i": 1245,
-          "len": 343,
-          "text": "// 2) Р В РЎв„ўР В Р’В°Р РЋР С“Р В РЎвЂќР В Р’В°Р В РўвЂ Р В РЎвЂўР В РЎвЂ”Р РЋР вЂљР В Р’ВµР В РўвЂР В Р’ВµР В Р’В»Р В Р’ВµР В Р вЂ¦Р В РЎвЂР РЋР РЏ Р РЋРІР‚С™Р В РЎвЂР В РЎвЂ”Р В Р’В° Р В РЎВР В Р’ВµР В РўвЂР В РЎвЂР В Р’В° Р В РўвЂР В Р’В»Р РЋР РЏ Р РЋРІР‚С™Р В Р’ВµР В РЎвЂќР РЋРЎвЂњР РЋРІР‚В°Р В Р’ВµР В РЎвЂ“Р В РЎвЂў mediaHref"
-        },
-        {
-          "i": 1721,
-          "len": 295,
-          "text": "// 1) Р РЋР С“Р В РЎвЂўР РЋРІР‚В¦Р РЋР вЂљР В Р’В°Р В Р вЂ¦Р В РЎвЂР РЋРІР‚С™Р РЋР Р‰ Р В РЎвЂ“Р В Р’В»Р В РЎвЂўР В Р’В±Р В Р’В°Р В Р’В»Р РЋР Р‰Р В Р вЂ¦Р В РЎвЂў + Р В РЎвЂўР В РЎвЂ”Р В РЎвЂўР В Р вЂ Р В Р’ВµР РЋР С“Р РЋРІР‚С™Р В РЎвЂР РЋРІР‚С™Р РЋР Р‰ Р В Р вЂ Р РЋР С“Р В Р’ВµР РЋРІР‚В¦"
-        },
-        {
-          "i": 1765,
-          "len": 197,
-          "text": "position: relative;         /* Р В РЎвЂќР В Р’В»Р РЋР вЂ№Р РЋРІР‚РЋ: Р РЋР РЏР В РЎвЂќР В РЎвЂўР РЋР вЂљР РЋР Р‰ Р В РўвЂР В Р’В»Р РЋР РЏ absolute Р В РЎВР В Р’ВµР В РўвЂР В РЎвЂР В Р’В° */"
-        }
-      ],
-      "score": 48
-    },
-    {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\utils\\postFocus.js",
       "counts": {
         "for-loop": 0,
         "while-loop": 0,
         "map-chain": 0,
         "filter-map": 0,
-        "layout-read": 12,
+        "layout-read": 11,
         "sync-json": 0,
         "local-storage": 0,
         "session-storage": 0,
         "network-call": 0,
-        "raf": 5,
+        "raf": 6,
         "interval": 0
       },
       "longLines": [],
-      "score": 46
+      "score": 45
     },
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\api\\dm\\delete\\route.js",
@@ -208,22 +111,22 @@
       "score": 35
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumHeadCollapse.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
       "counts": {
-        "for-loop": 0,
-        "while-loop": 0,
+        "for-loop": 11,
+        "while-loop": 1,
         "map-chain": 0,
         "filter-map": 0,
-        "layout-read": 8,
-        "sync-json": 0,
-        "local-storage": 0,
+        "layout-read": 0,
+        "sync-json": 1,
+        "local-storage": 1,
         "session-storage": 0,
-        "network-call": 0,
-        "raf": 5,
-        "interval": 0
+        "network-call": 4,
+        "raf": 0,
+        "interval": 1
       },
       "longLines": [],
-      "score": 34
+      "score": 35
     },
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\academy\\AcademyExamBlock.js",
@@ -286,42 +189,6 @@
       "score": 31
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\diagnostics\\hooks\\useForumDiagnostics.js",
-      "counts": {
-        "for-loop": 6,
-        "while-loop": 2,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 1,
-        "sync-json": 1,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 1,
-        "raf": 2,
-        "interval": 2
-      },
-      "longLines": [],
-      "score": 31
-    },
-    {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVideoFeedWindowing.js",
-      "counts": {
-        "for-loop": 2,
-        "while-loop": 2,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 5,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 3,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 31
-    },
-    {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\lib\\brain.js",
       "counts": {
         "for-loop": 15,
@@ -352,6 +219,24 @@
         "session-storage": 0,
         "network-call": 6,
         "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 28
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVideoFeedWindowing.js",
+      "counts": {
+        "for-loop": 2,
+        "while-loop": 2,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 4,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 3,
         "interval": 0
       },
       "longLines": [],
@@ -458,6 +343,42 @@
       "score": 22
     },
     {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
+      "counts": {
+        "for-loop": 7,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 2,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 2,
+        "interval": 2
+      },
+      "longLines": [],
+      "score": 22
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumHeadCollapse.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 4,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 5,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 22
+    },
+    {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\videoFeedScroll.js",
       "counts": {
         "for-loop": 0,
@@ -494,6 +415,80 @@
       "score": 19
     },
     {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\QCoinDropFX.jsx",
+      "counts": {
+        "for-loop": 1,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 3,
+        "local-storage": 2,
+        "session-storage": 0,
+        "network-call": 1,
+        "raf": 2,
+        "interval": 0
+      },
+      "longLines": [
+        {
+          "i": 1023,
+          "len": 211,
+          "text": ".qdrop-fx-flash { position: absolute; inset: -20%; background: radial-gradient(circle at 50% 50%, rgba(255, 220, 120, 0.22), rgba(0,0,0,0) 62%); opacity: 0; animation: qfxFlash 0.55s ease-out forwards; }"
+        },
+        {
+          "i": 1024,
+          "len": 313,
+          "text": ".qdrop-fx-shockwave { position: absolute; left: 50%; top: 50%; width: 20px; height: 20px; border-radius: 999px; transform: translate(-50%, -50%) scale(1); opacity: 0; border: 2px solid rgba(255, 220, 140, 0.45); box-shadow: 0 0 40px rgba(255, 210, 120, 0.18); animation: qfxWave 0.85s ease-out forwards; }"
+        },
+        {
+          "i": 1025,
+          "len": 324,
+          "text": ".qdrop-fx-coreglow { position: absolute; left: 50%; top: 50%; width: 26px; height: 26px; border-radius: 999px; transform: translate(-50%, -50%); background: radial-gradient(circle, rgba(255, 240, 190, 0.55), rgba(255, 210, 120, 0.0) 70%); filter: blur(0.2px); opacity: 0; animation: qfxCore 0.9s ease-out forwards; }"
+        },
+        {
+          "i": 1029,
+          "len": 218,
+          "text": ".qdrop-fx-badge { position: absolute; left: 50%; top: calc(50% + 92px); transform: translateX(-50%); opacity: 0; animation: qfxBadge 1.05s ease-out forwards; filter: drop-shadow(0 16px 30px rgba(0,0,0,0.35)); }"
+        },
+        {
+          "i": 1030,
+          "len": 385,
+          "text": ".qdrop-fx-badge-inner { display: inline-block; padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(255, 220, 140, 0.42); background: radial-gradient(circle at 20% 0%, rgba(255,255,255,0.18), transparent 45%), rgba(10, 14, 24, 0.72); color: rgba(255, 245, 225, 0.98); font-weight: 950; letter-spacing: 0.08em; text-transform: uppercase; backdrop-filter: blur(8px); }"
+        },
+        {
+          "i": 1031,
+          "len": 262,
+          "text": "@keyframes qfxBadge { 0% { opacity: 0; transform: translateX(-50%) translateY(16px) scale(0.92); } 22% { opacity: 1; transform: translateX(-50%) translateY(0px) scale(1); } 100% { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(1.02); } }"
+        },
+        {
+          "i": 1033,
+          "len": 414,
+          "text": ".qdrop-fx-spark { position: absolute; left: 0; top: 0; width: var(--sz); height: var(--sz); border-radius: 999px; background: radial-gradient(circle at 30% 30%, #fff, rgba(255, 232, 160, 0.92), rgba(255, 170, 80, 0.1)); transform: translate(-50%, -50%) translate3d(0,0,0) scale(0.6); opacity: 0; animation: qfxSpark var(--d) ease-out var(--dl) forwards; filter: drop-shadow(0 10px 18px rgba(0,0,0,0.22)); }"
+        },
+        {
+          "i": 1034,
+          "len": 238,
+          "text": "@keyframes qfxSpark { 0% { opacity: 0; transform: translate(-50%, -50%) translate3d(0,0,0) scale(0.6); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -50%) translate3d(var(--dx), var(--dy), 0) scale(1.15); } }"
+        },
+        {
+          "i": 1036,
+          "len": 434,
+          "text": ".qdrop-fx-coin { position: absolute; left: 0; top: 0; width: 24px; height: 24px; border-radius: 999px; background-image: url('/qcoin-32.png'); background-size: cover; background-repeat: no-repeat; transform: translate(-50%, -50%) translate3d(0,0,0) rotate(0deg) scale(var(--sc)); opacity: 0; animation: qfxCoin var(--d) cubic-bezier(0.18, 0.72, 0.24, 1) var(--dl) forwards; filter: drop-shadow(0 10px 18px rgba(0,0,0,0.32)); }"
+        },
+        {
+          "i": 1043,
+          "len": 443,
+          "text": ".qdrop-fx-conf { position: absolute; left: var(--x); top: -12vh; width: calc(var(--sz) * 0.48); height: calc(var(--sz) * 1.35); border-radius: 4px; background: linear-gradient(135deg, rgba(255,255,255,0.85), rgba(255, 230, 150, 0.85), rgba(255, 170, 80, 0.55)); opacity: 0; transform: translate3d(0, 0, 0) rotate(var(--rot)); animation: qfxConf var(--d) ease-out var(--dl) forwards; filter: drop-shadow(0 10px 18px rgba(0,0,0,0.22)); }"
+        },
+        {
+          "i": 1044,
+          "len": 222,
+          "text": ".qdrop-fx-conf.is-dot { width: calc(var(--sz) * 0.9); height: calc(var(--sz) * 0.9); border-radius: 999px; background: radial-gradient(circle at 30% 30%, #fff, rgba(255, 230, 150, 0.92), rgba(255, 170, 80, 0.1)); }"
+        }
+      ],
+      "score": 19
+    },
+    {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\api\\dm\\thread\\route.js",
       "counts": {
         "for-loop": 9,
@@ -527,80 +522,6 @@
         "interval": 0
       },
       "longLines": [],
-      "score": 17
-    },
-    {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\QCoinDropFX.jsx",
-      "counts": {
-        "for-loop": 1,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 0,
-        "sync-json": 3,
-        "local-storage": 2,
-        "session-storage": 0,
-        "network-call": 1,
-        "raf": 1,
-        "interval": 0
-      },
-      "longLines": [
-        {
-          "i": 1078,
-          "len": 211,
-          "text": ".qdrop-fx-flash { position: absolute; inset: -20%; background: radial-gradient(circle at 50% 50%, rgba(255, 220, 120, 0.22), rgba(0,0,0,0) 62%); opacity: 0; animation: qfxFlash 0.55s ease-out forwards; }"
-        },
-        {
-          "i": 1079,
-          "len": 313,
-          "text": ".qdrop-fx-shockwave { position: absolute; left: 50%; top: 50%; width: 20px; height: 20px; border-radius: 999px; transform: translate(-50%, -50%) scale(1); opacity: 0; border: 2px solid rgba(255, 220, 140, 0.45); box-shadow: 0 0 40px rgba(255, 210, 120, 0.18); animation: qfxWave 0.85s ease-out forwards; }"
-        },
-        {
-          "i": 1080,
-          "len": 324,
-          "text": ".qdrop-fx-coreglow { position: absolute; left: 50%; top: 50%; width: 26px; height: 26px; border-radius: 999px; transform: translate(-50%, -50%); background: radial-gradient(circle, rgba(255, 240, 190, 0.55), rgba(255, 210, 120, 0.0) 70%); filter: blur(0.2px); opacity: 0; animation: qfxCore 0.9s ease-out forwards; }"
-        },
-        {
-          "i": 1084,
-          "len": 218,
-          "text": ".qdrop-fx-badge { position: absolute; left: 50%; top: calc(50% + 92px); transform: translateX(-50%); opacity: 0; animation: qfxBadge 1.05s ease-out forwards; filter: drop-shadow(0 16px 30px rgba(0,0,0,0.35)); }"
-        },
-        {
-          "i": 1085,
-          "len": 385,
-          "text": ".qdrop-fx-badge-inner { display: inline-block; padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(255, 220, 140, 0.42); background: radial-gradient(circle at 20% 0%, rgba(255,255,255,0.18), transparent 45%), rgba(10, 14, 24, 0.72); color: rgba(255, 245, 225, 0.98); font-weight: 950; letter-spacing: 0.08em; text-transform: uppercase; backdrop-filter: blur(8px); }"
-        },
-        {
-          "i": 1086,
-          "len": 262,
-          "text": "@keyframes qfxBadge { 0% { opacity: 0; transform: translateX(-50%) translateY(16px) scale(0.92); } 22% { opacity: 1; transform: translateX(-50%) translateY(0px) scale(1); } 100% { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(1.02); } }"
-        },
-        {
-          "i": 1088,
-          "len": 414,
-          "text": ".qdrop-fx-spark { position: absolute; left: 0; top: 0; width: var(--sz); height: var(--sz); border-radius: 999px; background: radial-gradient(circle at 30% 30%, #fff, rgba(255, 232, 160, 0.92), rgba(255, 170, 80, 0.1)); transform: translate(-50%, -50%) translate3d(0,0,0) scale(0.6); opacity: 0; animation: qfxSpark var(--d) ease-out var(--dl) forwards; filter: drop-shadow(0 10px 18px rgba(0,0,0,0.22)); }"
-        },
-        {
-          "i": 1089,
-          "len": 238,
-          "text": "@keyframes qfxSpark { 0% { opacity: 0; transform: translate(-50%, -50%) translate3d(0,0,0) scale(0.6); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -50%) translate3d(var(--dx), var(--dy), 0) scale(1.15); } }"
-        },
-        {
-          "i": 1091,
-          "len": 434,
-          "text": ".qdrop-fx-coin { position: absolute; left: 0; top: 0; width: 24px; height: 24px; border-radius: 999px; background-image: url('/qcoin-32.png'); background-size: cover; background-repeat: no-repeat; transform: translate(-50%, -50%) translate3d(0,0,0) rotate(0deg) scale(var(--sc)); opacity: 0; animation: qfxCoin var(--d) cubic-bezier(0.18, 0.72, 0.24, 1) var(--dl) forwards; filter: drop-shadow(0 10px 18px rgba(0,0,0,0.32)); }"
-        },
-        {
-          "i": 1098,
-          "len": 443,
-          "text": ".qdrop-fx-conf { position: absolute; left: var(--x); top: -12vh; width: calc(var(--sz) * 0.48); height: calc(var(--sz) * 1.35); border-radius: 4px; background: linear-gradient(135deg, rgba(255,255,255,0.85), rgba(255, 230, 150, 0.85), rgba(255, 170, 80, 0.55)); opacity: 0; transform: translate3d(0, 0, 0) rotate(var(--rot)); animation: qfxConf var(--d) ease-out var(--dl) forwards; filter: drop-shadow(0 10px 18px rgba(0,0,0,0.22)); }"
-        },
-        {
-          "i": 1099,
-          "len": 222,
-          "text": ".qdrop-fx-conf.is-dot { width: calc(var(--sz) * 0.9); height: calc(var(--sz) * 0.9); border-radius: 999px; background: radial-gradient(circle at 30% 30%, #fff, rgba(255, 230, 150, 0.92), rgba(255, 170, 80, 0.1)); }"
-        }
-      ],
       "score": 17
     },
     {
@@ -701,6 +622,24 @@
       "score": 16
     },
     {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\SnowFX.jsx",
+      "counts": {
+        "for-loop": 5,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 3,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 16
+    },
+    {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\api\\profile\\_identity.js",
       "counts": {
         "for-loop": 7,
@@ -767,24 +706,6 @@
         "session-storage": 0,
         "network-call": 0,
         "raf": 0,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 14
-    },
-    {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useScrollResizeCompensation.js",
-      "counts": {
-        "for-loop": 0,
-        "while-loop": 1,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 3,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 1,
         "interval": 0
       },
       "longLines": [],
@@ -881,6 +802,24 @@
       "score": 12
     },
     {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\diagnostics\\hooks\\useForumDiagnostics.js",
+      "counts": {
+        "for-loop": 3,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 1,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 1,
+        "raf": 1,
+        "interval": 1
+      },
+      "longLines": [],
+      "score": 12
+    },
+    {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaLifecycleRuntime.js",
       "counts": {
         "for-loop": 0,
@@ -912,24 +851,6 @@
         "network-call": 0,
         "raf": 0,
         "interval": 1
-      },
-      "longLines": [],
-      "score": 12
-    },
-    {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\SnowFX.jsx",
-      "counts": {
-        "for-loop": 5,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 0,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 1,
-        "interval": 0
       },
       "longLines": [],
       "score": 12
@@ -1126,24 +1047,6 @@
         "local-storage": 1,
         "session-storage": 0,
         "network-call": 3,
-        "raf": 0,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 9
-    },
-    {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useThreadOpenNavigation.js",
-      "counts": {
-        "for-loop": 0,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 3,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
         "raf": 0,
         "interval": 0
       },
@@ -1758,6 +1661,24 @@
         "session-storage": 0,
         "network-call": 0,
         "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 5
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useScrollResizeCompensation.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 1,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 1,
         "interval": 0
       },
       "longLines": [],
@@ -3635,7 +3556,7 @@
         "map-chain": 0,
         "filter-map": 0,
         "layout-read": 0,
-        "sync-json": 7,
+        "sync-json": 6,
         "local-storage": 0,
         "session-storage": 0,
         "network-call": 0,
@@ -5177,6 +5098,24 @@
     },
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\usePublishedPostsModel.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 0
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useThreadOpenNavigation.js",
       "counts": {
         "for-loop": 0,
         "while-loop": 0,

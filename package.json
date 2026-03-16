@@ -10,12 +10,7 @@
     "dev:clean": "pnpm -s clean && next dev",
     "clean": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\"",
     "build": "next build",
-    "start": "next start",
-    "project:docs": "node tools/generate-project-docs.js",
-    "project:docs:audit": "node tools/audit-project-docs.js",
-    "project:docs:full": "pnpm project:docs && pnpm project:docs:audit",
-    "audit:forum:diag": "node tools/analyze-forum-diag.js",
-    "audit:forum:har": "node tools/analyze-forum-media-har.js"
+    "start": "next start"
   },
   "dependencies": {
     "@react-three/drei": "^9.114.0",

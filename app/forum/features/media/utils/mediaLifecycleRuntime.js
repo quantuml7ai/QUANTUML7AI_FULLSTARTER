@@ -36,15 +36,12 @@ export const __MEDIA_VIS_MARGIN_PX = (() => {
 
 const __VIDEO_HARD_CAP_ENABLED = (() => {
   try {
-    const ua = String((typeof navigator !== 'undefined' ? navigator.userAgent : '') || '')
-    const isIOS = /iP(hone|ad|od)/i.test(ua)
     const dm = Number((typeof navigator !== 'undefined' ? navigator?.deviceMemory : 0) || 0)
     const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2
-    if (isIOS) return false
-    if (lowMem) return true
-    return false
+    const coarse = !!(typeof window !== 'undefined' && window?.matchMedia?.('(pointer: coarse)')?.matches)
+    return !!lowMem || !!coarse
   } catch {
-    return false
+    return true
   }
 })()
 
@@ -67,28 +64,6 @@ const __MAX_ACTIVE_VIDEO_ELEMENTS = (() => {
 const __activeVideoEls = new Set()
 const __activeVideoLRU = []
 
-export function __requestVideoLoad(el, reason = 'runtime') {
-  if (!(el instanceof HTMLMediaElement)) return false
-  const now = Date.now()
-  const lastTs = Number(el?.dataset?.__lastLoadTs || 0)
-  const pending = String(el?.dataset?.__loadPending || '') === '1'
-
-  if (pending && (now - lastTs) < 1200) return false
-  if ((now - lastTs) < 250) return false
-
-  try {
-    el.dataset.__lastLoadTs = String(now)
-    el.dataset.__lastLoadReason = String(reason || 'runtime')
-    el.dataset.__loadPending = '1'
-    el.dataset.__loadPendingSince = String(now)
-  } catch {}
-
-  try {
-    el.load?.()
-  } catch {}
-
-  return true
-}
 export function __touchActiveVideoEl(el) {
   if (!el) return
   if (!__activeVideoEls.has(el)) __activeVideoEls.add(el)
@@ -160,31 +135,14 @@ export function __writeMediaMutedPref(nextMuted) {
 export function __unloadVideoEl(el) {
   if (!el) return
   try {
-    const cur = Number(el.currentTime || 0)
-    const dur = Number(el.duration || 0)
-    const hasMeaningfulTime = Number.isFinite(cur) && cur > 0.18
-    const nearEnd = Number.isFinite(dur) && dur > 0 && cur >= Math.max(0, dur - 0.18)
-    if (hasMeaningfulTime && !nearEnd) el.dataset.__resumeTime = String(cur)
-    else delete el.dataset.__resumeTime
-  } catch {}
-  try {
     el.pause?.()
   } catch {}
   try {
     el.dataset.__active = '0'
-    el.dataset.__loadPending = '0'
-    el.dataset.__warmReady = '0'
-    el.dataset.__resident = '0'
-    el.dataset.__prewarm = '0'
   } catch {}
   const canHardUnload = (() => {
     try {
       if (__VIDEO_HARD_CAP_ENABLED) return true
-      const isPostVideo =
-        String(el?.dataset?.forumVideo || el?.getAttribute?.('data-forum-video') || '') === 'post'
-      const pageHidden = String(document?.visibilityState || '') === 'hidden'
-      const farAway = !__isVideoNearViewport(el, Math.max(__MEDIA_VIS_MARGIN_PX, 280))
-      if (isPostVideo && (pageHidden || farAway)) return true      
       if (document?.documentElement?.getAttribute?.('data-video-feed') === '1') return true
       return String(el?.dataset?.__forceHardUnload || '') === '1'
     } catch {
@@ -194,6 +152,11 @@ export function __unloadVideoEl(el) {
   if (!canHardUnload) {
     try {
       el.preload = 'metadata'
+    } catch {}
+    try {
+      const poster = el.dataset?.__posterOriginal || ''
+      if (poster) el.setAttribute('poster', poster)
+      el.dataset.__posterRevealed = '0'
     } catch {}
     return
   }
@@ -215,7 +178,6 @@ export function __unloadVideoEl(el) {
     const poster = el.dataset?.__posterOriginal || ''
     if (poster) el.setAttribute('poster', poster)
     el.dataset.__posterRevealed = '0'
-    el.dataset.__needsPosterRestore = '1'
   } catch {}
   try {
     el.load?.()
@@ -232,39 +194,19 @@ export function __restoreVideoEl(el) {
     el.preload = (el.dataset?.__prewarm === '1') ? 'auto' : 'metadata'
   } catch {}
   try {
-    const shouldRestorePoster = String(el.dataset?.__needsPosterRestore || '') === '1'
-    if (shouldRestorePoster) {
-      const poster = el.dataset?.__posterOriginal || ''
-      if (poster && !el.getAttribute('poster')) el.setAttribute('poster', poster)
-      el.dataset.__posterRevealed = '0'
-      el.dataset.__needsPosterRestore = '0'
-    }
+    const poster = el.dataset?.__posterOriginal || ''
+    if (poster && !el.getAttribute('poster')) el.setAttribute('poster', poster)
+    el.dataset.__posterRevealed = '0'
   } catch {}
   try {
-    el.dataset.__loadPending = '1'
-    el.dataset.__warmReady = '0'
-    el.setAttribute('data-src', src)
     el.setAttribute('src', src)
   } catch {}
   try {
-    const resumeTo = Number(el.dataset?.__resumeTime || 0)
-    if (Number.isFinite(resumeTo) && resumeTo > 0.18) {
-      const seekToResume = () => {
-        try {
-          const duration = Number(el.duration || 0)
-          const safeTarget = Number.isFinite(duration) && duration > 0
-            ? Math.max(0, Math.min(resumeTo, duration - 0.12))
-            : resumeTo
-          if (Number.isFinite(safeTarget) && safeTarget > 0.05 && Math.abs(Number(el.currentTime || 0) - safeTarget) > 0.05) {
-            el.currentTime = safeTarget
-          }
-        } catch {}
-      }
-      try { el.addEventListener('loadedmetadata', seekToResume, { once: true }) } catch {}
-      try { el.addEventListener('canplay', seekToResume, { once: true }) } catch {}
-    }
+    el.dataset.__active = '1'
   } catch {}
-   __requestVideoLoad(el, 'restore')
+  try {
+    el.load?.()
+  } catch {}
 }
 
 export function __hasLazyVideoSourceWithoutSrc(el) {
@@ -308,7 +250,6 @@ export function VideoMedia(props) {
       mediaVisMarginPx={__MEDIA_VIS_MARGIN_PX}
       dropActiveVideo={__dropActiveVideoEl}
       unloadVideoEl={__unloadVideoEl}
-      requestVideoLoad={__requestVideoLoad}
     />
   )
 }

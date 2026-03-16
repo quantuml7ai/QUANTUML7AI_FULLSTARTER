@@ -1014,29 +1014,13 @@ async function ensureAuthorized() {
 
   // ждём событие об успешной авторизации
   acc = await new Promise((resolve) => {
-    let settled = false
-    let tid = null
-    const cleanup = () => {
-      try { window.removeEventListener('auth:ok', done) } catch {}
-      try { window.removeEventListener('auth:success', done) } catch {}
-      if (tid) {
-        clearTimeout(tid)
-        tid = null
-      }
-    }
-    const finish = (value) => {
-      if (settled) return
-      settled = true
-      cleanup()
-      resolve(value)
-    }
     const done = (e)=> {
       const id = e?.detail?.accountId || getAcc()
-      if (id) finish(id)
+      if (id) resolve(id)
     }
     window.addEventListener('auth:ok', done, { once:true })
     window.addEventListener('auth:success', done, { once:true })
-    tid = setTimeout(() => finish(getAcc()), 120000)
+    setTimeout(()=> resolve(getAcc()), 120000)
   })
 
   return acc || null
@@ -1591,16 +1575,14 @@ function AIQuotaGate({ children, onOpenUnlimit }) {
     }, STATUS_REFRESH_MS)
 
     const onHide = () => { flushQuota() }
-    const onVisibilityHide = () => {
-      if (document.visibilityState === 'hidden') onHide()
-    }
     window.addEventListener('pagehide', onHide)
-    document.addEventListener('visibilitychange', onVisibilityHide)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') onHide()
+    })
 
     return () => {
       clearInterval(id)
       window.removeEventListener('pagehide', onHide)
-      document.removeEventListener('visibilitychange', onVisibilityHide)
     }
   }, [limit, flushQuota])
   // строгий refresh 1 раз в минуту (subscription + quota)

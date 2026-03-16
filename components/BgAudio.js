@@ -64,9 +64,6 @@ export default function BgAudio({
 
     return () => {
       cancelled = true
-      try { a.pause() } catch {}
-      try { a.removeAttribute('src') } catch {}
-      try { a.load?.() } catch {}
     }
   }, [src])
 
@@ -75,29 +72,15 @@ export default function BgAudio({
   ========================= */
   useEffect(() => {
     const a = audioRef.current
-    if (!a || !locked) return () => {}
+    if (!a || !locked) return
 
-    let detached = false
-    const captureOptions = true
-    const passiveCaptureOptions = { passive: true, capture: true }
-
-    const detach = () => {
-      if (detached) return
-      detached = true
-      window.removeEventListener('pointerdown', onGesture, captureOptions)
-      window.removeEventListener('click', onGesture, captureOptions)
-      window.removeEventListener('keydown', onGesture, captureOptions)
-      window.removeEventListener('wheel', onGesture, passiveCaptureOptions)
-      window.removeEventListener('touchstart', onGesture, passiveCaptureOptions)
-      window.removeEventListener('touchmove', onGesture, passiveCaptureOptions)
-    }
+    let removed = false
 
     const enableSound = async () => {
-      const el = audioRef.current
-      if (!el) return
+      if (!audioRef.current) return
       try {
-        el.muted = false
-        await el.play()
+        audioRef.current.muted = false
+        await audioRef.current.play()
         setPlaying(true)
         setLocked(false)
 
@@ -111,20 +94,31 @@ export default function BgAudio({
       } catch {}
     }
 
-    const onGesture = () => {
-      void enableSound()
+    const onGesture = () => enableSound()
+
+    function attach() {
+      if (removed) return
+      window.addEventListener('pointerdown', onGesture, true)
+      window.addEventListener('click', onGesture, true)
+      window.addEventListener('keydown', onGesture, true)
+      window.addEventListener('wheel', onGesture, { passive: true, capture: true })
+      window.addEventListener('touchstart', onGesture, { passive: true, capture: true })
+      window.addEventListener('touchmove', onGesture, { passive: true, capture: true })
     }
 
-    window.addEventListener('pointerdown', onGesture, captureOptions)
-    window.addEventListener('click', onGesture, captureOptions)
-    window.addEventListener('keydown', onGesture, captureOptions)
-    window.addEventListener('wheel', onGesture, passiveCaptureOptions)
-    window.addEventListener('touchstart', onGesture, passiveCaptureOptions)
-    window.addEventListener('touchmove', onGesture, passiveCaptureOptions)
-
-    return () => {
-      detach()
+    function detach() {
+      if (removed) return
+      removed = true
+      window.removeEventListener('pointerdown', onGesture, true)
+      window.removeEventListener('click', onGesture, true)
+      window.removeEventListener('keydown', onGesture, true)
+      window.removeEventListener('wheel', onGesture, true)
+      window.removeEventListener('touchstart', onGesture, true)
+      window.removeEventListener('touchmove', onGesture, true)
     }
+
+    attach()
+    return detach
   }, [locked])
 
   /* =========================
@@ -205,7 +199,7 @@ export default function BgAudio({
       <audio
         ref={audioRef}
         src={src}
-        preload="metadata"
+        preload="auto"
         playsInline
         aria-hidden="true"
       />

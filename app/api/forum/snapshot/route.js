@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const fetchCache = 'force-no-store'
 
-// lightweight in-process cache for identical snapshot requests
+// Лёгкий процессный микрокэш (на инстанс)
 const cache = new Map()
 const TTL_MS = 15000
 
@@ -13,15 +13,16 @@ export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url)
     const sinceParam = searchParams.get('since') || ''
-    const revParam = searchParams.get('rev') || ''
-    const bust = searchParams.get('b') || ''
+    const revParam   = searchParams.get('rev')   || ''   // барьер по ревизии
+    const bust       = searchParams.get('b')     || ''   // клиентский «бастер» (любой)
 
     const since = Number.isFinite(+sinceParam) ? +sinceParam : 0
     const revTarget = Number.isFinite(+revParam) ? +revParam : 0
 
-    const key = since > 0
-      ? `since:${since}:${revTarget}:${bust}`
-      : `full:${revTarget}:${bust}`
+    // Ключ кэша различает режимы и параметры
+const key = (since > 0)
+  ? `since:${since}:${revTarget}:${bust}`
+  : `full:${revTarget}:${bust}`
     const canUseCache = !bust
 
     const now = Date.now()
@@ -33,29 +34,26 @@ export async function GET(req) {
     let data
 
     if (since > 0) {
-      // incremental mode may fallback to full snapshot when changes gap is detected
+      // === ИНКРЕМЕНТАЛЬНЫЙ РЕЖИМ ===
       data = await snapshot(since)
-      const hasEventsShape = !!(data && typeof data === 'object' && 'events' in data)
-      const hasFullShape = !!(
-        data &&
-        typeof data === 'object' &&
-        Array.isArray(data.topics) &&
-        Array.isArray(data.posts)
-      )
-      if (!data || typeof data !== 'object' || typeof data.rev !== 'number' || (!hasEventsShape && !hasFullShape)) {
+      // ожидание: { rev, events }
+      if (!data || typeof data !== 'object' || typeof data.rev !== 'number' || !('events' in data)) {
         data = { rev: since, events: [] }
       }
     } else {
-      // full snapshot mode
+      // === ПОЛНЫЙ СНЭП ===
       data = await snapshot(0)
+      // ожидание: { rev, topics, posts, banned, errors }
       if (!data || typeof data !== 'object' || typeof data.rev !== 'number' || (!('topics' in data) && !('events' in data))) {
         data = { rev: 0, topics: [], posts: [], banned: [] }
       }
 
+      // Барьер по ревизии: если клиент знает, что есть новее — отдаём как есть, без rebuild
       if (revTarget > 0 && Number.isFinite(data.rev) && data.rev < revTarget) {
         data = { ...data }
       }
     }
+ 
 
     const body = JSON.stringify({ ok: true, ...data })
     const headers = new Headers({
@@ -66,7 +64,6 @@ export async function GET(req) {
     if (canUseCache) {
       cache.set(key, { body, headers, exp: now + TTL_MS })
     }
-
     return new Response(body, { status: 200, headers })
   } catch (e) {
     return new Response(

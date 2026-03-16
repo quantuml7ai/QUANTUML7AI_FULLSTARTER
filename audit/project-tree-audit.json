@@ -1,57 +1,117 @@
-{
-  "phase": "project-tree-audit",
-  "timestamp": "2026-03-14T14:01:27.875Z",
-  "scope": "whole repository tree registry",
-  "touched_files": [
-    "PROJECT_TREE.md"
-  ],
-  "new_files": [],
-  "moved_logic_domains": [],
-  "dependency_changes": [],
-  "detected_risks": [],
-  "detected_cycles": [],
-  "api_contract_risk": "none",
-  "storage_risk": "none",
-  "runtime_risk": "low",
-  "notes": [
-    "repo_files=1543",
-    "source_files=610",
-    "route_files=95"
-  ],
-  "status": "ok",
-  "total_repo_files": 1543,
-  "total_source_files": 610,
-  "top_level_breakdown": {
-    ".env.local": 1,
-    ".env.local.example": 1,
-    ".eslintrc.json": 1,
-    ".gitignore": 1,
-    "account-sync-audit.report.json": 1,
-    "AGENTS.md": 1,
-    "app": 376,
-    "audit": 170,
-    "components": 21,
-    "deep-audit.report.json": 1,
-    "effects-leak.report.json": 1,
-    "forum-deps-audit.report.json": 1,
-    "forum-diag.jsonl": 1,
-    "heavy-audit.report.json": 1,
-    "jsconfig.json": 1,
-    "lib": 13,
-    "media-audit.report.json": 1,
-    "next-env.d.ts": 1,
-    "next.config.mjs": 1,
-    "package.json": 1,
-    "pnpm-lock.yaml": 1,
-    "pnpm-workspace.yaml": 1,
-    "PROJECT_DEPENDENCIES.md": 1,
-    "PROJECT_OWNERSHIP.md": 1,
-    "PROJECT_RISKS.md": 1,
-    "PROJECT_ROUTES.md": 1,
-    "PROJECT_TREE.md": 1,
-    "public": 919,
-    "README.md": 1,
-    "runtime-hotspots.report.json": 1,
-    "tools": 19
-  }
+﻿{
+    "phase":  "project-tree-audit",
+    "timestamp":  "2026-03-11T14:53:32",
+    "total_files":  1527,
+    "excluded_dirs":  [
+                          ".git",
+                          ".next",
+                          "node_modules"
+                      ],
+    "output_file":  "PROJECT_TREE.md",
+    "top_level_breakdown":  [
+                                {
+                                    "name":  ".env.local",
+                                    "count":  1
+                                },
+                                {
+                                    "name":  ".env.local.example",
+                                    "count":  1
+                                },
+                                {
+                                    "name":  ".eslintrc.json",
+                                    "count":  1
+                                },
+                                {
+                                    "name":  ".gitignore",
+                                    "count":  1
+                                },
+                                {
+                                    "name":  "account-sync-audit.report.json",
+                                    "count":  1
+                                },
+                                {
+                                    "name":  "app",
+                                    "count":  376
+                                },
+                                {
+                                    "name":  "audit",
+                                    "count":  168
+                                },
+                                {
+                                    "name":  "components",
+                                    "count":  21
+                                },
+                                {
+                                    "name":  "deep-audit.report.json",
+                                    "count":  1
+                                },
+                                {
+                                    "name":  "effects-leak.report.json",
+                                    "count":  1
+                                },
+                                {
+                                    "name":  "forum-deps-audit.report.json",
+                                    "count":  1
+                                },
+                                {
+                                    "name":  "forum-diag.jsonl",
+                                    "count":  1
+                                },
+                                {
+                                    "name":  "heavy-audit.report.json",
+                                    "count":  1
+                                },
+                                {
+                                    "name":  "jsconfig.json",
+                                    "count":  1
+                                },
+                                {
+                                    "name":  "lib",
+                                    "count":  13
+                                },
+                                {
+                                    "name":  "media-audit.report.json",
+                                    "count":  1
+                                },
+                                {
+                                    "name":  "next.config.mjs",
+                                    "count":  1
+                                },
+                                {
+                                    "name":  "next-env.d.ts",
+                                    "count":  1
+                                },
+                                {
+                                    "name":  "package.json",
+                                    "count":  1
+                                },
+                                {
+                                    "name":  "pnpm-lock.yaml",
+                                    "count":  1
+                                },
+                                {
+                                    "name":  "pnpm-workspace.yaml",
+                                    "count":  1
+                                },
+                                {
+                                    "name":  "PROJECT_TREE.md",
+                                    "count":  1
+                                },
+                                {
+                                    "name":  "public",
+                                    "count":  919
+                                },
+                                {
+                                    "name":  "README.md",
+                                    "count":  1
+                                },
+                                {
+                                    "name":  "runtime-hotspots.report.json",
+                                    "count":  1
+                                },
+                                {
+                                    "name":  "tools",
+                                    "count":  10
+                                }
+                            ]
 }

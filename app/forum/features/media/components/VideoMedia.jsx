@@ -16,7 +16,6 @@ export default function VideoMedia({
   loop,
   onError: onErrorProp,
   'data-forum-media': dataForumMedia,
-  'data-forum-video': dataForumVideo,
   readMutedPref,
   writeMutedPref,
   mutedEventName,
@@ -27,21 +26,13 @@ export default function VideoMedia({
   mediaVisMarginPx,
   dropActiveVideo,
   unloadVideoEl,
-  requestVideoLoad,
   ...rest
 }) {
   const ref = React.useRef(null)
   const recoverTimerRef = React.useRef(0)
-  const mediaKeyRef = React.useRef('')
   const mutedEvent = String(mutedEventName || 'forum:media-mute')
   const mediaVisMargin = Number.isFinite(Number(mediaVisMarginPx)) ? Number(mediaVisMarginPx) : 380
   const preloadMode = String(preload || 'none').trim().toLowerCase() || 'none'
-  const isPostVideo = dataForumVideo === 'post'
-  const renderSrc = src || undefined
-  const renderPreload = preload
-  const renderPoster = poster
-  const initialMutedFallback = isPostVideo ? true : !!autoPlay
-  const renderMuted = isPostVideo ? true : undefined
 
   const readMuted = React.useCallback(() => {
     try {
@@ -115,26 +106,10 @@ export default function VideoMedia({
     [unloadVideoEl],
   )
 
-  const requestVideoLoadFn = React.useCallback(
-    (el, reason = 'video_media') => {
-      try {
-        if (typeof requestVideoLoad === 'function') return !!requestVideoLoad(el, reason)
-      } catch {}
-      try {
-        el?.load?.()
-      } catch {}
-      return true
-    },
-    [requestVideoLoad],
-  )
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     const el = ref.current
     if (!el) return
     const s = String(src || '')
-    const mediaKey = s || String(poster || '')
-    const prevMediaKey = String(mediaKeyRef.current || '')
-    const isNewMediaNode = prevMediaKey !== mediaKey
-    mediaKeyRef.current = mediaKey
     el.dataset.__src = s
     try {
       if (s) el.setAttribute('data-src', s)
@@ -145,55 +120,20 @@ export default function VideoMedia({
       const effectivePreload = wantsWarm && preloadMode === 'none' ? 'auto' : preloadMode
       el.preload = effectivePreload
     } catch {}
-    try {
-      if (playsInline) {
-        el.setAttribute('playsinline', '')
-        el.setAttribute('webkit-playsinline', '')
-      }
-    } catch {}
-    try {
-      const initialMuted = readMuted()
-      const nextMuted = typeof initialMuted === 'boolean' ? initialMuted : initialMutedFallback
-       el.muted = !!nextMuted
-      el.defaultMuted = !!nextMuted
-      if (nextMuted) el.setAttribute('muted', '')
-      else el.removeAttribute('muted')
-    } catch {}
-    if (isNewMediaNode) {
-      try {
-        delete el.dataset.__resumeTime
-        delete el.dataset.__candidateBoostTs
-        delete el.dataset.__recoverTry
-        delete el.dataset.__readyRetryCount
-        delete el.dataset.__loadPendingSince
-      } catch {}
-    }
     if (poster) {
       try {
-        const nextPoster = String(poster)
-        const prevPosterMediaKey = String(el.dataset.__posterMediaKey || '')
-        const isNewMedia = prevPosterMediaKey !== mediaKey
-        el.dataset.__posterOriginal = nextPoster
-        if (isNewMedia) {
-          el.dataset.__posterMediaKey = mediaKey
-          el.dataset.__posterRevealed = '0'
-          el.dataset.__needsPosterRestore = '1'
-          delete el.dataset.__resumeTime
-          delete el.dataset.__candidateBoostTs
-          el.setAttribute('poster', nextPoster)
-        } else if (el.dataset?.__posterRevealed !== '1' && !el.getAttribute('poster')) {
-          el.setAttribute('poster', nextPoster)
-        }
+        el.dataset.__posterOriginal = String(poster)
+        el.setAttribute('poster', String(poster))
       } catch {}
     }
-  }, [initialMutedFallback, playsInline, poster, preloadMode, readMuted, src])
+  }, [src, poster, preloadMode])
 
   React.useEffect(() => {
     const el = ref.current
     if (!el || typeof window === 'undefined') return
 
     const initial = readMuted()
-    const nextMuted = typeof initial === 'boolean' ? initial : initialMutedFallback
+    const nextMuted = typeof initial === 'boolean' ? initial : !!autoPlay
     try {
       el.muted = !!nextMuted
       el.defaultMuted = !!nextMuted
@@ -204,15 +144,12 @@ export default function VideoMedia({
     const onVol = () => {
       try {
         const m = !!el.muted
-        const skipPersistUntil = Number(el?.dataset?.__skipMutePersistUntil || 0)
-        if (skipPersistUntil <= Date.now()) {
-          writeMuted(m)
-          window.dispatchEvent(
-            new CustomEvent(mutedEvent, {
-              detail: { muted: m, source: 'video', id: el.dataset.__mid || null },
-            }),
-          )
-        }
+        writeMuted(m)
+        window.dispatchEvent(
+          new CustomEvent(mutedEvent, {
+            detail: { muted: m, source: 'video', id: el.dataset.__mid || null },
+          }),
+        )
       } catch {}
     }
 
@@ -243,53 +180,7 @@ export default function VideoMedia({
       } catch {}
       window.removeEventListener(mutedEvent, onMutedEvent)
     }
-  }, [initialMutedFallback, mutedEvent, readMuted, writeMuted])
-
-  React.useEffect(() => {
-    const el = ref.current
-    if (!el) return
-
-    const markPending = () => {
-      try {
-        el.dataset.__loadPending = '1'
-        el.dataset.__warmReady = '0'
-        el.dataset.__loadPendingSince = String(Date.now())
-      } catch {}
-    }
-    const markReady = () => {
-      try {
-        el.dataset.__loadPending = '0'
-        el.dataset.__warmReady = '1'
-        delete el.dataset.__loadPendingSince
-        delete el.dataset.__readyRetryCount
-      } catch {}
-    }
-    const markCold = () => {
-      try {
-        el.dataset.__loadPending = '0'
-        el.dataset.__warmReady = '0'
-        delete el.dataset.__loadPendingSince
-      } catch {}
-    }
-
-    try { el.addEventListener('loadstart', markPending) } catch {}
-    try { el.addEventListener('loadeddata', markReady) } catch {}
-    try { el.addEventListener('canplay', markReady) } catch {}
-    try { el.addEventListener('playing', markReady) } catch {}
-    try { el.addEventListener('abort', markCold) } catch {}
-    try { el.addEventListener('emptied', markCold) } catch {}
-    try { el.addEventListener('error', markCold) } catch {}
-
-    return () => {
-      try { el.removeEventListener('loadstart', markPending) } catch {}
-      try { el.removeEventListener('loadeddata', markReady) } catch {}
-      try { el.removeEventListener('canplay', markReady) } catch {}
-      try { el.removeEventListener('playing', markReady) } catch {}
-      try { el.removeEventListener('abort', markCold) } catch {}
-      try { el.removeEventListener('emptied', markCold) } catch {}
-      try { el.removeEventListener('error', markCold) } catch {}
-    }
-  }, [])
+  }, [autoPlay, mutedEvent, readMuted, writeMuted])
 
   React.useEffect(() => {
     if (typeof window === 'undefined') return
@@ -297,20 +188,9 @@ export default function VideoMedia({
     if (!el) return
 
     let io = null
-    if (dataForumVideo === 'post') {
-      return () => {
-        try {
-          if (recoverTimerRef.current) clearTimeout(recoverTimerRef.current)
-        } catch {}
-        recoverTimerRef.current = 0
-        try { dropActiveVideoFn(el) } catch {}
-        try { unloadVideoElFn(el) } catch {}
-      }
-    }
-
     let active = false
     let unloadTimer = null
-    const warmKeepMargin = Math.max(760, Math.round(mediaVisMargin * 2.45))
+    const warmKeepMargin = Math.max(560, Math.round(mediaVisMargin * 1.9))
     const runtimeProfile = (() => {
       try {
         const ua = String(navigator?.userAgent || '')
@@ -319,12 +199,12 @@ export default function VideoMedia({
         const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
         const dm = Number(navigator?.deviceMemory || 0)
         const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2
-        if (isIOS) return { unloadDelayMs: 3800, hardUnloadOnInactive: false }
-        if (lowMem) return { unloadDelayMs: 2800, hardUnloadOnInactive: true }
-        if (isAndroid || coarse) return { unloadDelayMs: 4400, hardUnloadOnInactive: false }
-        return { unloadDelayMs: 5200, hardUnloadOnInactive: false }
+        if (isIOS) return { unloadDelayMs: 3200, hardUnloadOnInactive: false }
+        if (lowMem) return { unloadDelayMs: 2400, hardUnloadOnInactive: true }
+        if (isAndroid || coarse) return { unloadDelayMs: 3600, hardUnloadOnInactive: false }
+        return { unloadDelayMs: 4200, hardUnloadOnInactive: false }
       } catch {
-        return { unloadDelayMs: 3800, hardUnloadOnInactive: false }
+        return { unloadDelayMs: 3200, hardUnloadOnInactive: false }
       }
     })()
 
@@ -333,7 +213,6 @@ export default function VideoMedia({
         if (!el?.isConnected) return false
         const warmFlag = el.dataset?.__prewarm === '1'
         if (warmFlag) return true
-        if (el.dataset?.__loadPending === '1') return true
         return isVideoNearViewportFn(el, warmKeepMargin)
       } catch {
         return false
@@ -359,12 +238,7 @@ export default function VideoMedia({
           el.dataset.__active = '1'
           el.dataset.__prewarm = '1'
           el.preload = 'auto'
-          if (
-            (el.readyState === 0 || !el.currentSrc) &&
-            el.dataset?.__loadPending !== '1' &&
-            el.paused &&
-            (el.currentTime === 0)
-          ) {
+          if ((el.readyState === 0 || !el.currentSrc) && el.paused && (el.currentTime === 0)) {
             el.load?.()
           }
         } catch {}
@@ -441,7 +315,6 @@ export default function VideoMedia({
       unloadVideoElFn(el)
     }
   }, [
-    dataForumVideo,
     dropActiveVideoFn,
     enforceActiveVideoCapFn,
     isVideoNearViewportFn,
@@ -465,41 +338,27 @@ export default function VideoMedia({
         if (tried < 1) {
           const srcSafe = String(el.dataset.__src || el.getAttribute('data-src') || '')
           if (srcSafe) {
-            el.dataset.__recoverTry = String(tried + 1) 
+            el.dataset.__recoverTry = String(tried + 1)
             try {
-             if (recoverTimerRef.current) clearTimeout(recoverTimerRef.current)
-           } catch {}
-            if (isPostVideo) {
+              el.pause?.()
+            } catch {}
+            try {
+              el.removeAttribute('src')
+            } catch {}
+            try {
+              el.preload = 'metadata'
+            } catch {}
+            try {
+              if (recoverTimerRef.current) clearTimeout(recoverTimerRef.current)
+            } catch {}
+            recoverTimerRef.current = setTimeout(() => {
+              recoverTimerRef.current = 0
               try {
-                unloadVideoElFn(el)
+                if (!el.isConnected) return
+                if (!el.getAttribute('src')) el.setAttribute('src', srcSafe)
+                el.load?.()
               } catch {}
-              recoverTimerRef.current = setTimeout(() => {
-                recoverTimerRef.current = 0
-                try {
-                  if (!el.isConnected) return
-                  restoreVideoElFn(el)
-                  requestVideoLoadFn(el, 'video_error_recover')
-                } catch {}
-              }, 220)
-            } else {
-              try {
-                el.pause?.()
-              } catch {}
-              try {
-                el.removeAttribute('src')
-              } catch {}
-              try {
-                el.preload = 'metadata'
-              } catch {}
-              recoverTimerRef.current = setTimeout(() => {
-                recoverTimerRef.current = 0
-                try {
-                  if (!el.isConnected) return
-                  if (!el.getAttribute('src')) el.setAttribute('src', srcSafe)
-                  requestVideoLoadFn(el, 'video_error_recover')
-                } catch {}
-              }, 220)
-            }
+            }, 180)
           }
         }
       } catch {}
@@ -507,8 +366,8 @@ export default function VideoMedia({
         onErrorProp?.(e)
       } catch {}
     },
-    [isPostVideo, onErrorProp, requestVideoLoadFn, restoreVideoElFn, unloadVideoElFn],
-   )
+    [onErrorProp],
+  )
 
   const onVideoLoaded = React.useCallback(() => {
     try {
@@ -521,7 +380,6 @@ export default function VideoMedia({
           if ((el.readyState || 0) < 2) return
           if (el.dataset?.__posterRevealed === '1') return
           el.dataset.__posterRevealed = '1'
-          el.dataset.__needsPosterRestore = '0'
           el.removeAttribute('poster')
         } catch {}
       }
@@ -540,15 +398,10 @@ export default function VideoMedia({
   return (
     <video
       ref={ref}
-      src={renderSrc}
-      data-src={renderSrc}      
       data-forum-media={dataForumMedia}
-      data-forum-video={dataForumVideo}
       playsInline={playsInline}
-      poster={renderPoster}
-      preload={renderPreload}
-      muted={renderMuted}
-      defaultMuted={renderMuted}      
+      poster={poster}
+      preload={preload}
       controls={controls}
       autoPlay={autoPlay}
       loop={loop}

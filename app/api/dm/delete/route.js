@@ -54,8 +54,7 @@ export async function POST(req) {
       if (!withId) return bad('missing_with', 400)
       await addAliasesFor(withId, [rawWithInput, rawWith])
 
-      const deleteDialogForAll = body?.deleteForAll !== false
-      if (!deleteDialogForAll) return ok({ localOnly: true })
+      if (!deleteForAll) return ok({ localOnly: true })
 
       const meIds = new Set(await expandAliasIds([me, rawMeHeader, rawMe]))
       const withIds = new Set(await expandAliasIds([withId, rawWithInput, rawWith]))
@@ -103,28 +102,26 @@ export async function POST(req) {
       // fallback: если thread-index рассинхронизирован, чистим и по inbox/outbox пересечению участников
       const meMailboxIds = await collectMailboxIds(meIdSet)
       const withMailboxIds = await collectMailboxIds(withIdSet)
-      // Fallback must be mailbox-authoritative:
-      // if message id is present in both participants mailboxes,
-      // it belongs to this dialog even when thread index/aliases drift.
+      const candidateMsgIds = new Set(msgIdSet)
       for (const id of meMailboxIds) {
-        if (withMailboxIds.has(id)) msgIdSet.add(String(id))
+        if (withMailboxIds.has(id)) candidateMsgIds.add(id)
       }
-      // Strong fallback for drifted inbox/outbox indexes:
-      // if message payload itself is between participants, include it.
-      const candidateIds = new Set([...meMailboxIds, ...withMailboxIds])
-      if (candidateIds.size) {
-        const ids = Array.from(candidateIds).map((id) => String(id || '').trim()).filter(Boolean)
-        const msgRows = await Promise.all(ids.map((id) => getMessage(id).catch(() => null)))
-        for (let i = 0; i < ids.length; i += 1) {
-          const id = ids[i]
-          const msg = msgRows[i] || null
-          const from = toStr(msg?.from)
-          const to = toStr(msg?.to)
+
+      if (candidateMsgIds.size) {
+        const checks = await Promise.all(
+          Array.from(candidateMsgIds).map(async (id) => {
+            const msg = await getMessage(id).catch(() => null)
+            return { id, msg }
+          })
+        )
+        for (const it of checks) {
+          const from = String(it?.msg?.from || '').trim()
+          const to = String(it?.msg?.to || '').trim()
           if (!from || !to) continue
-          const isDialogMsg =
+          const between =
             (meIdSet.has(from) && withIdSet.has(to)) ||
             (meIdSet.has(to) && withIdSet.has(from))
-          if (isDialogMsg) msgIdSet.add(id)
+          if (between) msgIdSet.add(String(it.id))
         }
       }
 

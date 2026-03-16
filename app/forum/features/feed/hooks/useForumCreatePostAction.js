@@ -340,7 +340,7 @@ export default function useForumCreatePostAction({
       },
     }))
 
-    try { centerPostAfterDom(tmpId, 'auto') } catch {}
+    try { centerPostAfterDom(tmpId, 'smooth') } catch {}
 
     if (isReply) {
       const parentPost = (data?.posts || []).find((x) => String(x.id) === String(parentId))

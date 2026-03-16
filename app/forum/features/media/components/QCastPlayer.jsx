@@ -21,9 +21,6 @@ export default function QCastPlayer({
   mutedEventName = 'forum:media-mute',
   rearmPooledFxNode,
 }) {
-  const desiredMuted = React.useCallback((pref) => (
-    pref == null ? true : !!pref
-  ), [])
   const readMutedPref = React.useCallback(() => {
     try {
       return typeof readMutedPrefFromStorage === 'function' ? readMutedPrefFromStorage() : null;
@@ -64,24 +61,20 @@ export default function QCastPlayer({
       ? 'rtl'
       : 'ltr';
   const qcastFxProfile = React.useMemo(() => {
-    if (typeof window === 'undefined') return { viz: false, boom: false, burst: 2, pool: 0 };
+    if (typeof window === 'undefined') return { viz: false, boom: false, burst: 4 };
     try {
-      const ua = String(navigator?.userAgent || '');
-      const isIOS = /iP(hone|ad|od)/i.test(ua);
       const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
       const reduced = !!window?.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
       const lowMem = Number(navigator?.deviceMemory || 0) > 0 && Number(navigator?.deviceMemory || 0) <= 3;
-      const mobileLean = !!isIOS || !!coarse || !!lowMem;
-      const burst = mobileLean ? 2 : 5;
+      const burst = lowMem ? 3 : (coarse ? 4 : 5);
       return {
-        viz: !reduced && !mobileLean,
+        viz: !reduced,
         // Boom ring was causing visual flashes and extra compositor load.
         boom: false,
         burst,
-        pool: mobileLean ? 0 : 24,
       };
     } catch {
-      return { viz: false, boom: false, burst: 2, pool: 0 };
+      return { viz: false, boom: false, burst: 4 };
     }
   }, []);
 
@@ -134,7 +127,7 @@ const BAD_SET = React.useMemo(() => ([
   const [badEmoji, setBadEmoji] = React.useState(() => pick(BAD_SET));
 // ===== QCast emoji FX (INSANE, fast): DOM pool + burst + random presets =====
 // ВАЖНО: без setState на каждую частицу => нет лагов от React-рендеров.
-const FX_POOL = Math.max(0, Number(qcastFxProfile?.pool || 0));
+const FX_POOL = 24;
 const FX_BURST_BASE = Number(qcastFxProfile?.burst || 4);
 const BOOM_POOL = qcastFxProfile.boom ? 12 : 0;
 const fxNodesRef = React.useRef([]);
@@ -305,8 +298,9 @@ const spawnFx = React.useCallback((kind, origin) => {
     if (!audio) return undefined;
     const st = waRef.current;
 
+    // FIX: по умолчанию НЕ muted
     const initialMuted = readMutedPref();
-    audio.muted = desiredMuted(initialMuted);
+    audio.muted = (initialMuted == null) ? false : initialMuted;
     setMuted(!!audio.muted);
 
     try {
@@ -324,20 +318,7 @@ const spawnFx = React.useCallback((kind, origin) => {
         setMuted(!!audio.muted);
         const v = Number(audio.volume);
         if (Number.isFinite(v)) setVolume(Math.min(1, Math.max(0, v)));
-        const skipPersistUntil = Math.max(
-          Number(audio?.dataset?.__skipMutePersistUntil || 0),
-          Number(hostRef.current?.dataset?.__skipMutePersistUntil || 0),
-        );
-        if (skipPersistUntil <= Date.now()) {
-          writeMuted(!!audio.muted);
-        }
-      } catch {}
-      try {
-        const skipPersistUntil = Math.max(
-          Number(audio?.dataset?.__skipMutePersistUntil || 0),
-          Number(hostRef.current?.dataset?.__skipMutePersistUntil || 0),
-        );
-        if (skipPersistUntil > Date.now()) return;
+        writeMuted(!!audio.muted);
       } catch {}
       try {
         window.dispatchEvent(new CustomEvent(mutedEventName, {
@@ -449,7 +430,7 @@ const spawnFx = React.useCallback((kind, origin) => {
       st.data = null;
       try { ctx?.close?.(); } catch {}
     }; 
-  }, [applyPreset, desiredMuted, mutedEventName, readMutedPref, writeMuted]);
+  }, [applyPreset, mutedEventName, readMutedPref, writeMuted]);
 
   React.useEffect(() => {
     const audio = audioRef.current;
@@ -474,90 +455,12 @@ const spawnFx = React.useCallback((kind, origin) => {
 
   const togglePlay = async (e) => {
     e?.preventDefault?.(); e?.stopPropagation?.();
-    openControls();
+    openControls(); await unlockAudio();
     const audio = audioRef.current;
-    const host = hostRef.current;
     if (!audio) return;
-    const unlockPromise = unlockAudio();
     if (audio.muted && readMutedPref() == null) { try { audio.muted = false; } catch {} }
-    if (audio.paused) {
-      const gestureUntil = String(Date.now() + 1800);
-      const leaseUntil = String(Date.now() + 7200);
-      try {
-        delete audio.dataset.__autoplayFallbackMuted;
-        delete audio.dataset.__skipMutePersistUntil;
-        delete audio.dataset.__userPaused;
-        delete audio.dataset.__userPausedAt;
-        delete audio.dataset.__suppressedPlayUntil;
-        audio.dataset.__userGestureUntil = gestureUntil;
-        audio.dataset.__manualLeaseUntil = leaseUntil;
-        try { audio.preload = 'auto'; } catch {}
-        if ((audio.networkState === HTMLMediaElement.NETWORK_EMPTY) || !audio.currentSrc) {
-          try { audio.load?.(); } catch {}
-        }
-        if (host?.dataset) {
-          delete host.dataset.__autoplayFallbackMuted;
-          delete host.dataset.__skipMutePersistUntil;
-          delete host.dataset.__suppressedPlayUntil;
-          host.dataset.__userGestureUntil = gestureUntil;
-        }
-        delete host?.dataset?.__userPaused;
-        delete host?.dataset?.__userPausedAt;
-        if (host?.dataset) host.dataset.__manualLeaseUntil = leaseUntil;
-      } catch {}
-      try {
-        const p = audio.play();
-        if (p && typeof p.then === 'function') {
-          p.then(() => {
-            void unlockPromise;
-            try {
-              window.dispatchEvent(new CustomEvent('site-media-play', {
-                detail: { source: 'qcast', element: host || null, manual: true, id: playerIdRef.current }
-              }));
-            } catch {}
-          }).catch(() => {
-            Promise.resolve(unlockPromise).then(() => {
-              try {
-                if (audio.paused) {
-                  const retry = audio.play?.();
-                  if (retry && typeof retry.then === 'function') {
-                    retry.then(() => {
-                      try {
-                        window.dispatchEvent(new CustomEvent('site-media-play', {
-                          detail: { source: 'qcast', element: host || null, manual: true, id: playerIdRef.current }
-                        }));
-                      } catch {}
-                    }).catch(() => {});
-                  }
-                }
-              } catch {}
-            }).catch(() => {});
-          });
-        }
-      } catch {}
-    }
-    else {
-      try {
-        audio.dataset.__userPaused = '1';
-        audio.dataset.__userPausedAt = String(Date.now());
-        audio.dataset.__suppressedPlayUntil = String(Date.now() + 4200);
-        delete audio.dataset.__autoplayFallbackMuted;
-        delete audio.dataset.__skipMutePersistUntil;
-        delete audio.dataset.__userGestureUntil;
-        delete audio.dataset.__manualLeaseUntil;
-        if (host?.dataset) {
-          host.dataset.__userPaused = '1';
-          host.dataset.__userPausedAt = String(Date.now());
-          host.dataset.__suppressedPlayUntil = String(Date.now() + 4200);
-          delete host.dataset.__autoplayFallbackMuted;
-          delete host.dataset.__skipMutePersistUntil;
-          delete host.dataset.__userGestureUntil;
-          delete host.dataset.__manualLeaseUntil;
-        }
-      } catch {}
-      try { audio.pause(); } catch {}
-      try { await unlockPromise; } catch {}
-    }
+    if (audio.paused) { try { const p = audio.play(); if (p?.catch) p.catch(()=>{}); } catch {} }
+    else { try { audio.pause(); } catch {} }
   };
 
   const toggleMute = async (e) => {

@@ -1,7 +1,7 @@
-﻿// app/forum/ForumAds.js
+// app/forum/ForumAds.js
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import NextImage from 'next/image';
 import { useI18n } from '../../components/i18n';
 import { useRouter } from 'next/navigation';
@@ -9,10 +9,10 @@ import { useRouter } from 'next/navigation';
 /* ======================= CAMPAIGN META ======================= */
 const AD_LABEL_FONT_SIZE_PX = 20;
 
-/* ======================= GLOBAL SOUND MEMORY (Forum-compatible) ======================= */
-// Shared mute memory for forum media and ad media.
+/* ======================= GLOBAL SOUND MEMORY (Forum.jsx-compatible) ======================= */
+// ДОЛЖНО совпадать со схемой форума:
 const MEDIA_MUTED_KEY = 'forum:mediaMuted';
-const MEDIA_VIDEO_MUTED_KEY = 'forum:videoMuted'; // legacy fallback
+const MEDIA_VIDEO_MUTED_KEY = 'forum:videoMuted'; // fallback совместимости
 const MEDIA_MUTED_EVENT = 'forum:media-mute';
 
 function readMutedPrefFromStorage() {
@@ -30,9 +30,7 @@ function readMutedPrefFromStorage() {
 function writeMutedPrefToStorage(val) {
   if (!isBrowser()) return;
   try {
-    const next = val ? '1' : '0';
-    window.localStorage?.setItem(MEDIA_MUTED_KEY, next);
-    window.localStorage?.setItem(MEDIA_VIDEO_MUTED_KEY, next)
+    window.localStorage?.setItem(MEDIA_MUTED_KEY, val ? '1' : '0');
   } catch {}
 }
 
@@ -48,11 +46,11 @@ function emitMutedPref(val, id, source = 'forum-ads') {
 }
 
 function desiredMutedFromPref(pref) {
-  // Default to muted when there is no stored pref; autoplay is more reliable this way.
+  // Если префа нет — стартуем muted=true (иначе автоплей часто будет блокироваться браузером).
   return pref == null ? true : !!pref;
 }
 // ===== FIXED AD SLOT HEIGHT (px) =====
-// Keep the slot height fixed; media should fit inside instead of resizing the card.
+// Контент внутри вписывается, но высота/ширина слота не растут.
 const AD_SLOT_HEIGHT_PX = {
   mobile: 520,   // < 640px
   tablet: 620,   // 640..1023px
@@ -70,7 +68,7 @@ const DEFAULT_THUMB_SERVICES = [
 ];
  
 /**
- * Read the forum ad config from NEXT_PUBLIC_* env vars.
+ * ВАЖНО: только статические обращения к NEXT_PUBLIC_*
  */
 /* eslint-disable no-undef */
 const ENV_AD = {
@@ -95,7 +93,7 @@ async function mergeLinksFromRedisOnce() {
   adsLinksMerged = true;
 
   try {
-    // Browser-side fetch of extra ad links via /api/ads?action=links.
+    // берём ссылки через универсальный /api/ads?action=links
     const res = await fetch('/api/ads?action=links', {
       method: 'GET',
       cache: 'no-store',
@@ -107,16 +105,16 @@ async function mergeLinksFromRedisOnce() {
     const extraParsed = parseLinks(j.linksString);
     if (!extraParsed.links || !extraParsed.links.length) return;
 
-    const base = getForumAdConf(); // current cached config
+    const base = getForumAdConf(); // берём текущий кэш
     const baseLinks = Array.isArray(base.LINKS) ? base.LINKS : [];
 
-    // If ENV links are empty, use only the DB-sourced set.
-    // If ENV links exist, merge ENV links with DB links without dedupe.
+    // Если ENV пустые — baseLinks = [], значит используем только базу.
+    // Если ENV есть — объединяем ENV + база.
     const mergedLinks = baseLinks.length
       ? [...baseLinks, ...extraParsed.links]
       : extraParsed.links;
 
-    // MEDIA_BY_CLICK stores clickUrl -> media array.
+    // MEDIA_BY_CLICK теперь: clickUrl -> массив медиа
     const mergedMedia = { ...(base.MEDIA_BY_CLICK || {}) };
     const extraMedia = extraParsed.mediaByClick || {};
 
@@ -132,7 +130,7 @@ async function mergeLinksFromRedisOnce() {
       }
     }
 
-    // Keep all ad-link entries; do not dedupe repeated campaign links.
+    // БОЛЬШЕ НЕ ДЕДУПИМ ссылки — оставляем все вхождения
     const cleanedLinks = mergedLinks.filter(Boolean);
 
     base.LINKS = cleanedLinks;
@@ -189,7 +187,7 @@ function stableShuffle(arr, seed) {
 
 /* ======================= CONFIG ======================= */
 /**
- * Р В РЎСџР РЋР вЂљР В РЎвЂР В РЎвЂўР РЋР вЂљР В РЎвЂР РЋРІР‚С™Р В Р’ВµР РЋРІР‚С™:
+ * Приоритет:
  * 1) ?FORUM_AD_*
  * 2) localStorage.FORUM_AD_*
  * 3) window.FORUM_CONF.FORUM_AD_*
@@ -270,7 +268,7 @@ function normalizeUrl(raw) {
     u.pathname = u.pathname.slice(0, -1);
   }
 
-  // Normalize query params in a stable order before hashing.
+  // сортированный query для стабильного hash
   if (u.search) {
     const entries = Array.from(u.searchParams.entries()).sort((a, b) =>
       a[0] > b[0] ? 1 : a[0] < b[0] ? -1 : 0
@@ -283,19 +281,19 @@ function normalizeUrl(raw) {
 }
 
 /**
- * LINKS accepts CSV, semicolon, newline, or whitespace-separated entries.
+ * LINKS: CSV / ; / пробел / \n, поддержка # комментариев
  *
- * Supported forms:
+ * Формат одной записи:
  *   https://site.com
  *   https://click.url|https://media.url
  *
- * Format:
- *   https://site.com
- *   https://click.url|https://media.url
- * Keep duplicates; each entry stays in the rotation pool.
- * MEDIA_BY_CLICK stores clickUrl -> media array.
+ * ▸ если одна часть → и кликаем, и показываем её
+ * ▸ если через | → слева clickUrl, справа mediaUrl
+ *
+ * ВАЖНО: больше НЕТ дедупа — каждое вхождение остаётся.
+ * Дополнительно:
+ *   MEDIA_BY_CLICK[clickUrl] = [media1, media2, ...]
  */
-
 function parseLinks(raw) {
   if (!raw) return { links: [], mediaByClick: {} };
 
@@ -317,10 +315,10 @@ function parseLinks(raw) {
 
     const mediaNorm = normalizeUrl(mediaRaw || clickNorm) || clickNorm;
 
-    // Keep a deterministic list of click URLs in insertion order.
+    // добавляем каждое вхождение в общий список
     links.push(clickNorm);
 
-    // Seed the media list for this click URL with its primary resolved media.
+    // собираем массив медиа для каждого клик-URL
     if (!mediaByClick[clickNorm]) {
       mediaByClick[clickNorm] = [mediaNorm];
     } else if (Array.isArray(mediaByClick[clickNorm])) {
@@ -343,9 +341,9 @@ function parseThumbs(raw) {
 
 export function getForumAdConf() {
   if (isBrowser() && cachedClientConf) return cachedClientConf;
-  // In the browser, try to merge extra campaigns from Redis into the cached client config.
+  // Параллельно пробуем подтянуть рекламные кампании из Redis
   if (isBrowser()) {
-    // Fire-and-forget; cachedClientConf is updated in place when the merge completes.
+    // fire-and-forget, результат мутирует cachedClientConf, когда готово
     mergeLinksFromRedisOnce().catch(() => {});
   }
   const EVERY = parseNumber(readRaw('EVERY'), 0);
@@ -442,7 +440,7 @@ export function interleaveAds(items, EVERY, opts = {}) {
 class AdsCoordinatorImpl {
   constructor() {
     this.frames = new Map(); // frameId -> Set(url)
-    this.history = []; // recent global picks
+    this.history = []; // последние показы (глобально)
     this.lastBySeedKey = new Map(); // slotKey -> url
     this.lastFrameId = 0;
     this.lastFrameTs = 0;
@@ -480,7 +478,7 @@ class AdsCoordinatorImpl {
   reserve(url, frameId) {
     if (!url || frameId == null) return true;
     const bucket = this._ensureFrame(frameId);
-    if (bucket.has(url)) return false; // avoid duplicate URL inside the same pick frame
+    if (bucket.has(url)) return false; // не рисуем один и тот же урл в нескольких слотах одного кадра
     bucket.add(url);
     return true;
   }
@@ -502,7 +500,7 @@ class AdsCoordinatorImpl {
     if (!url) return false;
     const last = this.getLastGlobal();
     if (last && last === url && linksLen > 1) {
-      // avoid repeating the same global URL when alternatives exist
+      // не даём тот же урл подряд глобально, если есть альтернатива
       return false;
     }
     return true;
@@ -522,14 +520,14 @@ class AdsCoordinatorImpl {
 export const AdsCoordinator = new AdsCoordinatorImpl();
 
 /* ======================= URL PICKER ======================= */
-
 /**
- * Deterministic ad URL picker.
- * - Rotates on ROTATE_MIN buckets
- * - Seeded by campaign, client, slot, and time bucket
- * - Avoids duplicate picks in the same frame
- * - Avoids repeating the same global URL when alternatives exist
+ * Детально:
+ * - ротация по ROTATE_MIN минут
+ * - сид завязан на (campaign, seed, clientId, slotKey, timeBucket)
+ * - каждый слот — своя перестановка ссылок
+ * - не даём подряд одинаковый урл глобально и для данного slotKey, если есть выбор
  */
+
 export function resolveCurrentAdUrl(
   rawConf,
   clientId,
@@ -555,10 +553,10 @@ export function resolveCurrentAdUrl(
   const periodMs = Math.max(1, rotateMin) * 60_000;
   const timeBucket = Math.floor(now / periodMs);
 
+  // фиксированный сид для конкретного слота и тайм-слота
   const seed = hash32(
     [CAMPAIGN_ID, conf.seed || 1, cid, key, timeBucket, links.length].join('|')
   );
-
 
   const perm = stableShuffle(links, seed);
   if (!perm.length) {
@@ -576,10 +574,10 @@ export function resolveCurrentAdUrl(
     const thisUrl = perm[i];
     if (!thisUrl) continue;
 
-    // Avoid repeating the same URL for the same seeded slot when alternatives exist.
+    // не повторяем подряд для этого слота
     if (lastForSeed && thisUrl === lastForSeed && perm.length > 1) continue;
 
-    // Also avoid immediately repeating the most recent globally shown URL.
+    // не повторяем подряд глобально, если есть выбор
     if (lastGlobal && thisUrl === lastGlobal && perm.length > 1) continue;
 
     if (coordinator && !coordinator.allowed(thisUrl, perm.length)) continue;
@@ -611,113 +609,6 @@ export function resolveCurrentAdUrl(
 /* ======================= PRECONNECT ======================= */
 
 let preconnectDone = false;
-let pageActivityCleanup = null;
-let pageActivityBound = false;
-let pageActivityValue = true;
-const pageActivitySubscribers = new Set();
-let ytIframeApiPromise = null;
-
-function readPageActivityValue() {
-  if (!isBrowser()) return true;
-  try {
-    return document.visibilityState === 'visible' && document.hasFocus();
-  } catch {
-    return true;
-  }
-}
-
-function notifyPageActivity(next) {
-  pageActivityValue = !!next;
-  pageActivitySubscribers.forEach((fn) => {
-    try {
-      fn(pageActivityValue);
-    } catch {}
-  });
-}
-
-function bindPageActivity() {
-  if (!isBrowser() || pageActivityBound) return;
-  const sync = () => {
-    const next = readPageActivityValue();
-    if (next === pageActivityValue) return;
-    notifyPageActivity(next);
-  };
-  pageActivityBound = true;
-  pageActivityValue = readPageActivityValue();
-  try { document.addEventListener('visibilitychange', sync, { passive: true }); } catch {}
-  try { window.addEventListener('focus', sync, { passive: true }); } catch {}
-  try { window.addEventListener('blur', sync, { passive: true }); } catch {}
-  pageActivityCleanup = () => {
-    try { document.removeEventListener('visibilitychange', sync); } catch {}
-    try { window.removeEventListener('focus', sync); } catch {}
-    try { window.removeEventListener('blur', sync); } catch {}
-    pageActivityBound = false;
-    pageActivityCleanup = null;
-  };
-}
-
-function subscribePageActivity(fn) {
-  if (!isBrowser() || typeof fn !== 'function') return () => {};
-  bindPageActivity();
-  pageActivitySubscribers.add(fn);
-  try { fn(pageActivityValue); } catch {}
-  return () => {
-    pageActivitySubscribers.delete(fn);
-    if (!pageActivitySubscribers.size && typeof pageActivityCleanup === 'function') {
-      pageActivityCleanup();
-    }
-  };
-}
-
-function usePageActiveState() {
-  const [active, setActive] = useState(() => readPageActivityValue());
-
-  useEffect(() => subscribePageActivity(setActive), []);
-
-  return active;
-}
-
-function ensureYouTubeIframeApi() {
-  if (!isBrowser()) return Promise.resolve(null);
-  if (window.YT?.Player) return Promise.resolve(window.YT);
-  if (ytIframeApiPromise) return ytIframeApiPromise;
-
-  ytIframeApiPromise = new Promise((resolve) => {
-    const done = () => resolve(window.YT || null);
-    const prev = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = function onYouTubeIframeAPIReadyPatched() {
-      try {
-        if (typeof prev === 'function') prev();
-      } catch {}
-      done();
-    };
-
-    const existing = document.getElementById('yt-iframe-api');
-    if (!existing) {
-      const tag = document.createElement('script');
-      tag.id = 'yt-iframe-api';
-      tag.src = 'https://www.youtube.com/iframe_api';
-      tag.async = true;
-      tag.onerror = () => {
-        ytIframeApiPromise = null;
-        resolve(null);
-      };
-      document.head.appendChild(tag);
-      return;
-    }
-
-    const checkReady = () => {
-      if (window.YT?.Player) {
-        done();
-        return;
-      }
-      window.setTimeout(checkReady, 100);
-    };
-    checkReady();
-  });
-
-  return ytIframeApiPromise;
-}
 
 export function useAdPreconnect(conf) {
   conf = conf || getForumAdConf();
@@ -781,11 +672,11 @@ function emitAdEvent(type, payload, conf) {
     } catch {}
   }
 
-  // Fire analytics through the shared /api/ads endpoint.
+  // Серверная аналитика для пользовательских кампаний
   if (type === 'ad_impression' || type === 'ad_click') {
     try {
       const body = {
-        action: 'event', // shared ads analytics endpoint
+        action: 'event', // работаем через единый /api/ads
         type, // 'ad_impression' | 'ad_click'
         url_hash: detail.url_hash,
         slot_kind: detail.slot_kind,
@@ -804,9 +695,6 @@ function emitAdEvent(type, payload, conf) {
 }
 
 function tryLoadImage(src, timeoutMs = 3000) {
-  if (adImageProbeCache.has(src)) {
-    return Promise.resolve(!!adImageProbeCache.get(src));
-  }
   return new Promise((resolve) => {
     if (!src || !isBrowser() || !('Image' in window)) {
       resolve(false);
@@ -824,79 +712,35 @@ function tryLoadImage(src, timeoutMs = 3000) {
     img.onerror = () => finish(false);
     const timer = setTimeout(() => finish(false), timeoutMs);
     img.src = src;
-  }).then((ok) => {
-    try { setBoundedMap(adImageProbeCache, src, !!ok, 320); } catch {}
-    return !!ok;
   });
 }
 
-function canProbeMediaKind(raw) {
-  if (!raw || !isBrowser()) return false;
-  const s = String(raw).trim();
-  if (!s || /^blob:/i.test(s) || /^data:/i.test(s)) return false;
-  if (/\.(webm|mp4|mov|m4v|mkv|jpe?g|png|webp|gif|avif|svg)(?:$|[?#])/i.test(s)) return true;
-  if (/[?&](?:filename|file|src|url)=.*\.(webm|mp4|mov|m4v|mkv|jpe?g|png|webp|gif|avif|svg)(?:$|[&#])/i.test(s)) return true;
-  try {
-    const u = new URL(s, window.location.href);
-    if (u.origin === window.location.origin) return true;
-    if (/vercel-storage|public\.blob\.vercel-storage|storage\.googleapis|cloudfront|cloudinary|imgix|cdn/i.test(String(u.hostname || ''))) {
-      return true;
-    }
-  } catch {}
-  return false;
-}
-
-// Detect media type via Content-Type from a HEAD request.
+// Определяем тип медиа по Content-Type через HEAD
 async function detectMediaKind(url, timeoutMs = 3000) {
   if (!url || !isBrowser() || typeof fetch === 'undefined') return null;
-  if (adMediaKindCache.has(url)) return adMediaKindCache.get(url);
-  if (adMediaKindPending.has(url)) {
-    try {
-      return await adMediaKindPending.get(url);
-    } catch {
-      return null;
-    }
-  }
-  if (!canProbeMediaKind(url)) {
-    setBoundedMap(adMediaKindCache, url, null, 320);
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const resp = await fetch(url, {
+      method: 'HEAD',
+      signal: controller.signal,
+    }).catch(() => null);
+
+    if (!resp) return null;
+
+    const ct = (resp.headers.get('content-type') || '').toLowerCase();
+
+    if (ct.startsWith('video/')) return 'video';
+    if (ct.startsWith('image/')) return 'image';
+
     return null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
   }
-
-  const probe = (async () => {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
-
-    try {
-      const resp = await fetch(url, {
-        method: 'HEAD',
-        signal: controller.signal,
-      }).catch(() => null);
-
-      if (!resp) return null;
-
-      const ct = (resp.headers.get('content-type') || '').toLowerCase();
-
-      if (ct.startsWith('video/')) {
-        setBoundedMap(adMediaKindCache, url, 'video', 320);
-        return 'video';
-      }
-      if (ct.startsWith('image/')) {
-        setBoundedMap(adMediaKindCache, url, 'image', 320);
-        return 'image';
-      }
-
-      setBoundedMap(adMediaKindCache, url, null, 320);
-      return null;
-    } catch {
-      return null;
-    } finally {
-      clearTimeout(timer);
-      adMediaKindPending.delete(url);
-    }
-  })();
-
-  adMediaKindPending.set(url, probe);
-  return probe;
 }
 
 function isLikelyVideoUrl(raw) {
@@ -906,13 +750,13 @@ function isLikelyVideoUrl(raw) {
 
   if (/^blob:/i.test(s)) return true;
 
-  // Р В Р вЂ¦Р В РЎвЂўР РЋР вЂљР В РЎВР В Р’В°Р В Р’В»Р РЋР Р‰Р В Р вЂ¦Р РЋРІР‚в„–Р В Р’Вµ Р В Р вЂ Р В РЎвЂР В РўвЂР В Р’ВµР В РЎвЂў Р В РЎвЂ”Р В РЎвЂў Р РЋР вЂљР В Р’В°Р РЋР С“Р РЋРІвЂљВ¬Р В РЎвЂР РЋР вЂљР В Р’ВµР В Р вЂ¦Р В РЎвЂР РЋР вЂ№
+  // нормальные видео по расширению
   if (/\.(webm|mp4|mov|m4v|mkv)(?:$|[?#])/i.test(s)) return true;
 
-  // filename=...mp4 Р В Р вЂ  query
+  // filename=...mp4 в query
   if (/[?&]filename=.*\.(webm|mp4|mov|m4v|mkv)(?:$|[?#])/i.test(s)) return true;
 
-  // Р РЋРІР‚С™Р В РЎвЂўР В Р’В»Р РЋР Р‰Р В РЎвЂќР В РЎвЂў Р РЋР РЏР В Р вЂ Р В Р вЂ¦Р РЋРІР‚в„–Р В Р’Вµ video-Р РЋР РЉР В Р вЂ¦Р В РўвЂР В РЎвЂ”Р В РЎвЂўР В РЎвЂР В Р вЂ¦Р РЋРІР‚С™Р РЋРІР‚в„–
+  // только явные video-эндпоинты
   if (
     /vercel[-]?storage|vercel[-]?blob|\/uploads\/video|\/forum\/video|\/api\/forum\/uploadVideo/i.test(
       s
@@ -924,52 +768,21 @@ function isLikelyVideoUrl(raw) {
   return false;
 }
 
-function isLikelyImageUrl(raw) {
-  if (!raw) return false;
-  const s = String(raw).trim();
-  if (!s) return false;
-  if (/\.(jpe?g|png|webp|gif|avif|svg)(?:$|[?#])/i.test(s)) return true;
-  if (/[?&](?:filename|file|src|url)=.*\.(jpe?g|png|webp|gif|avif|svg)(?:$|[&#])/i.test(s)) return true;
-  return false;
-}
-
 const YT_RE =
   /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{6,})/i;
 
 const TIKTOK_RE =
   /^(?:https?:\/\/)?(?:www\.)?tiktok\.com\/(?:@[\w.\-]+\/video\/(\d+)|t\/[A-Za-z0-9]+)(?:[?#].*)?$/i;
 
-/* ====== Shared resolve caches for anti-reroll media lookup ====== */
+/* ====== вспомогательное хранилище для анти-повтора медиы по слоту ====== */
 
 const lastMediaIndexByKey = new Map();
-const adMediaKindCache = new Map();
-const adMediaKindPending = new Map();
-const adMediaResolveCache = new Map();
-const adMediaResolvePending = new Map();
-const adImageProbeCache = new Map();
-const pruneBoundedMap = (map, cap = 240) => {
-  try {
-    while (map.size > cap) {
-      const oldest = map.keys().next()?.value;
-      if (typeof oldest === 'undefined') break;
-      map.delete(oldest);
-    }
-  } catch {}
-};
-const setBoundedMap = (map, key, value, cap = 240) => {
-  try {
-    if (map.has(key)) map.delete(key);
-    map.set(key, value);
-    pruneBoundedMap(map, cap);
-  } catch {}
-  return value;
-};
 
 /* ======================= AdCard ======================= */
 /**
- * OG video/screenshot/image -> direct file -> YouTube/TikTok -> screenshot CDNs -> favicon -> placeholder
- * Ad label text is taken from forum_ad_label.
- * Keep the card stable even when no external preview is available.
+ * OG video/screenshot/image → direct file → YouTube/TikTok → screenshot CDNs → favicon → placeholder
+ * Бейдж "Реклама" из словаря: ключ forum_ad_label.
+ * Превью тянет карточку на всю доступную высоту.
  */
 
 export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
@@ -978,13 +791,11 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   const i18n = useI18n();
   const t = i18n?.t;
   const router = useRouter();
-  const isFluid = layout === 'fluid';
+ const isFluid = layout === 'fluid';
   const [media, setMedia] = useState({ kind: 'skeleton', src: null });
   const [muted, setMuted] = useState(true);
-  const mediaKind = media.kind;
-  const mediaSrc = media.src;
 
-  // Unique instance id so global mute sync ignores self-emitted events.
+  // уникальный id инстанса, чтобы не ловить свой же event
   const playerIdRef = useRef(
     `ad_${Math.random().toString(36).slice(2)}_${Date.now()}`
   );
@@ -995,44 +806,23 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     const want = desiredMutedFromPref(pref);
     setMuted(want);
   }, []);
-  // Р РЋРІР‚С™Р В Р’ВµР В РЎвЂќР РЋРЎвЂњР РЋРІР‚В°Р В РЎвЂР В РІвЂћвЂ“ Р В Р вЂ Р РЋРІР‚в„–Р В Р’В±Р РЋР вЂљР В Р’В°Р В Р вЂ¦Р В Р вЂ¦Р РЋРІР‚в„–Р В РІвЂћвЂ“ mediaHref (Р В РЎвЂќР В РЎвЂўР В Р вЂ¦Р В РЎвЂќР РЋР вЂљР В Р’ВµР РЋРІР‚С™Р В Р вЂ¦Р РЋРІР‚в„–Р В РІвЂћвЂ“ youtube / Р В РЎвЂќР В Р’В°Р РЋР вЂљР РЋРІР‚С™Р В РЎвЂР В Р вЂ¦Р В РЎвЂќР В Р’В° Р В РЎвЂ Р РЋРІР‚С™.Р В РЎвЂ”.)
+  // текущий выбранный mediaHref (конкретный youtube / картинка и т.п.)
   const [mediaHref, setMediaHref] = useState(null);
 
   const rootRef = useRef(null);
   const videoRef = useRef(null);
   const ytIframeRef = useRef(null);
   const ytPlayerRef = useRef(null);
-  const coarseUi = useMemo(() => {
-    try {
-      const ua = String(navigator?.userAgent || '');
-      return /iP(hone|ad|od)|Android/i.test(ua) || !!window?.matchMedia?.('(pointer: coarse)')?.matches;
-    } catch {
-      return false;
-    }
-  }, []);
-  const isAttachedYtPlayer = useCallback((player = ytPlayerRef.current) => {
-    try {
-      const iframe = player?.getIframe?.() || ytIframeRef.current;
-      return !!(iframe && iframe.isConnected);
-    } catch {
-      return !!ytIframeRef.current?.isConnected;
-    }
-  }, []);
   // ===== Focus / attention gating =====
-  // isNear: Р В Р’В±Р В Р’В»Р В РЎвЂўР В РЎвЂќ Р РЋР вЂљР РЋР РЏР В РўвЂР В РЎвЂўР В РЎВ (Р В РЎВР В РЎвЂўР В Р’В¶Р В Р вЂ¦Р В РЎвЂў Р В РЎвЂ”Р В РЎвЂўР В РўвЂР В РЎвЂ“Р РЋР вЂљР РЋРЎвЂњР В Р’В¶Р В Р’В°Р РЋРІР‚С™Р РЋР Р‰, Р В Р вЂ¦Р В РЎвЂў Р В Р вЂ¦Р В Р’Вµ Р В РЎвЂР В РЎвЂ“Р РЋР вЂљР В Р’В°Р РЋРІР‚С™Р РЋР Р‰)
-  // isFocused: Р В Р’В±Р В Р’В»Р В РЎвЂўР В РЎвЂќ Р РЋР вЂљР В Р’ВµР В Р’В°Р В Р’В»Р РЋР Р‰Р В Р вЂ¦Р В РЎвЂў Р В Р вЂ  Р В Р’В·Р В РЎвЂўР В Р вЂ¦Р В Р’Вµ Р В Р вЂ Р В Р вЂ¦Р В РЎвЂР В РЎВР В Р’В°Р В Р вЂ¦Р В РЎвЂР РЋР РЏ (Р В РЎвЂР В РЎвЂ“Р РЋР вЂљР В Р’В°Р В Р’ВµР В РЎВ)
-  // isPageActive: Р В Р вЂ Р В РЎвЂќР В Р’В»Р В Р’В°Р В РўвЂР В РЎвЂќР В Р’В°/Р В РЎвЂўР В РЎвЂќР В Р вЂ¦Р В РЎвЂў Р В Р’В°Р В РЎвЂќР РЋРІР‚С™Р В РЎвЂР В Р вЂ Р В Р вЂ¦Р В РЎвЂў (Р В РЎвЂР В Р вЂ¦Р В Р’В°Р РЋРІР‚РЋР В Р’Вµ Р В Р вЂ Р РЋР С“Р В Р’ВµР В РЎвЂ“Р В РўвЂР В Р’В° Р В РЎвЂ”Р В Р’В°Р РЋРЎвЂњР В Р’В·Р В Р’В°)
+  // isNear: блок рядом (можно подгружать, но не играть)
+  // isFocused: блок реально в зоне внимания (играем)
+  // isPageActive: вкладка/окно активно (иначе всегда пауза)
   const [isNear, setIsNear] = useState(false);
-  const [isPrepareNear, setIsPrepareNear] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const isPageActive = usePageActiveState();
-  const [mediaResident, setMediaResident] = useState(false);
+  const [isPageActive, setIsPageActive] = useState(true);
 
   const shouldPlay = isFocused && isPageActive;
-  const shouldResolveMedia = isPrepareNear || isNear || shouldPlay;
   const shouldPlayRef = useRef(false);
-  const mutedRef = useRef(muted);
-  const mediaHrefRef = useRef(null);
   const slotCssVars = {
     '--ad-slot-h-m': `${AD_SLOT_HEIGHT_PX.mobile}px`,
     '--ad-slot-h-t': `${AD_SLOT_HEIGHT_PX.tablet}px`,
@@ -1043,33 +833,26 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     shouldPlayRef.current = shouldPlay;
   }, [shouldPlay]);
 
+  // Page visibility + focus/blur
   useEffect(() => {
-    mutedRef.current = muted;
-  }, [muted]);
+    if (!isBrowser()) return;
 
-  useEffect(() => {
-    mediaHrefRef.current = mediaHref;
-  }, [mediaHref]);
-
-  useEffect(() => {
-    let timer = null;
-    if (isNear || shouldPlay) {
-      setMediaResident(true);
-      return undefined;
-    }
-    const holdMs =
-      mediaKind === 'youtube' || mediaKind === 'tiktok'
-        ? 650
-        : mediaKind === 'video'
-          ? 1800
-          : 1200;
-    timer = setTimeout(() => {
-      setMediaResident(false);
-    }, holdMs);
-    return () => {
-      if (timer) clearTimeout(timer);
+    const sync = () => {
+      const visible = document.visibilityState === 'visible';
+      setIsPageActive(visible);
     };
-  }, [isNear, shouldPlay, mediaKind]);
+
+    sync();
+    document.addEventListener('visibilitychange', sync);
+    window.addEventListener('focus', sync);
+    window.addEventListener('blur', sync);
+
+    return () => {
+      document.removeEventListener('visibilitychange', sync);
+      window.removeEventListener('focus', sync);
+      window.removeEventListener('blur', sync);
+    };
+  }, []);
 
   // Intersection: near + focused
   useEffect(() => {
@@ -1077,36 +860,26 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     if (!el || !isBrowser() || typeof IntersectionObserver === 'undefined')
       return;
 
-    const prepareMargin = coarseUi ? '980px 0px' : '720px 0px';
-    const nearMargin = coarseUi ? '560px 0px' : '360px 0px';
-
-    const prepareObs = new IntersectionObserver(
-      ([e]) => setIsPrepareNear(!!e?.isIntersecting),
-      { rootMargin: prepareMargin, threshold: 0 }
-    );
-
-    // near: Р В Р’В·Р В Р’В°Р РЋР вЂљР В Р’В°Р В Р вЂ¦Р В Р’ВµР В Р’Вµ Р вЂ™Р’В«Р В РЎвЂ”Р В РЎвЂўР В РўвЂР В РЎвЂўР В РІвЂћвЂ“Р РЋРІР‚С™Р В РЎвЂР вЂ™Р’В» Р В РЎвЂќ Р В Р’В±Р В Р’В»Р В РЎвЂўР В РЎвЂќР РЋРЎвЂњ (Р В Р’В±Р В Р’ВµР В Р’В· Р В РЎвЂР В РЎвЂ“Р РЋР вЂљР РЋРІР‚в„–)
+    // near: заранее «подойти» к блоку (без игры)
     const nearObs = new IntersectionObserver(
       ([e]) => setIsNear(!!e?.isIntersecting),
-      { rootMargin: nearMargin, threshold: 0 }
+      { rootMargin: '800px 0px', threshold: 0 }
     );
 
-    // focused: Р РЋР вЂљР В Р’ВµР В Р’В°Р В Р’В»Р РЋР Р‰Р В Р вЂ¦Р В РЎвЂў Р В Р вЂ Р В РЎвЂР В РўвЂР В Р вЂ¦Р В РЎвЂў (>= 60% Р В РЎвЂ”Р В Р’В»Р В РЎвЂўР РЋРІР‚В°Р В Р’В°Р В РўвЂР В РЎвЂ)
+    // focused: реально видно (>= 60% площади)
     const focusObs = new IntersectionObserver(
       ([e]) => setIsFocused((e?.intersectionRatio || 0) >= 0.6),
       { threshold: [0, 0.25, 0.6, 0.75, 1] }
     );
 
-    prepareObs.observe(el);
     nearObs.observe(el);
     focusObs.observe(el);
 
     return () => {
-      prepareObs.disconnect();
       nearObs.disconnect();
       focusObs.disconnect();
     };
-  }, [coarseUi]);
+  }, []);
 
   // ===== Global mute sync from forum =====
   useEffect(() => {
@@ -1137,7 +910,6 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     };
 
     window.addEventListener(MEDIA_MUTED_EVENT, onMuted);
-
     return () => window.removeEventListener(MEDIA_MUTED_EVENT, onMuted);
   }, []);
   const safeClick = useMemo(() => {
@@ -1150,113 +922,74 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     }
   }, [url]);
 
-  // Р В РЎвЂќР В Р’В»Р РЋР вЂ№Р РЋРІР‚РЋ Р В РўвЂР В Р’В»Р РЋР РЏ Р РЋР С“Р В Р’В»Р В РЎвЂўР РЋРІР‚С™Р В Р’В°, Р РЋРІР‚РЋР РЋРІР‚С™Р В РЎвЂўР В Р’В±Р РЋРІР‚в„– Р В Р вЂ¦Р В Р’Вµ Р В РЎвЂ”Р В РЎвЂўР В Р вЂ Р РЋРІР‚С™Р В РЎвЂўР РЋР вЂљР РЋР РЏР РЋРІР‚С™Р РЋР Р‰ Р В РЎвЂўР В РўвЂР В Р вЂ¦Р РЋРЎвЂњ Р В РЎвЂ Р РЋРІР‚С™Р РЋРЎвЂњ Р В Р’В¶Р В Р’Вµ Р В РЎВР В Р’ВµР В РўвЂР В РЎвЂР РЋРЎвЂњ Р В РЎвЂ”Р В РЎвЂўР В РўвЂР РЋР вЂљР РЋР РЏР В РўвЂ
+  // ключ для слота, чтобы не повторять одну и ту же медиу подряд
   const mediaKey = useMemo(
     () => `${url}::${slotKind || ''}::${nearId || ''}`,
     [url, slotKind, nearId]
   );
 
-  const mediaChoices = useMemo(() => {
-    if (!safeClick) return [];
+  // 1) Выбор конкретного mediaHref из MEDIA_BY_CLICK[clickHref] по таймеру
+  useEffect(() => {
+    if (!safeClick) return;
 
     const clickHref = safeClick.toString();
     const entry = conf.MEDIA_BY_CLICK?.[clickHref] ?? null;
-    if (Array.isArray(entry) && entry.length) return entry.filter(Boolean);
-    if (typeof entry === 'string' && entry.trim()) return [entry.trim()];
-    return [clickHref];
-  }, [safeClick, conf]);
 
-  const pickNextMediaHref = useCallback(() => {
-    if (!mediaChoices.length) {
-      setMediaHref(null);
-      return null;
-    }
-
-    let idx = lastMediaIndexByKey.has(mediaKey)
-      ? Number(lastMediaIndexByKey.get(mediaKey) || 0)
-      : -1;
-
-    if (mediaChoices.length === 1) {
-      idx = 0;
+    let list = [];
+    if (Array.isArray(entry) && entry.length) {
+      list = entry.filter(Boolean);
+    } else if (typeof entry === 'string' && entry.trim()) {
+      list = [entry.trim()];
     } else {
-      let tries = 0;
-      let next = idx;
-      while (tries < 5 && next === idx) {
-        next = Math.floor(Math.random() * mediaChoices.length);
-        tries += 1;
-      }
-      if (next < 0) next = 0;
-      idx = next;
+      // если нет отдельной медиы — крутим сам clickHref
+      list = [clickHref];
     }
 
-    setBoundedMap(lastMediaIndexByKey, mediaKey, idx, 240);
-    const nextHref = mediaChoices[idx] || null;
-    setMediaHref(nextHref);
-    return nextHref;
-  }, [mediaChoices, mediaKey]);
-
-  useEffect(() => {
-    if (!safeClick || !mediaChoices.length) {
+    if (!list.length) {
       setMediaHref(null);
       return;
     }
 
-    const currentHref = mediaHrefRef.current;
-    if (currentHref && mediaChoices.includes(currentHref)) {
-      const currentIdx = mediaChoices.indexOf(currentHref);
-      if (currentIdx >= 0) {
-        setBoundedMap(lastMediaIndexByKey, mediaKey, currentIdx, 240);
-        return;
+    let idx = lastMediaIndexByKey.has(mediaKey)
+      ? lastMediaIndexByKey.get(mediaKey)
+      : -1;
+
+    const pickNext = () => {
+      if (list.length === 1) {
+        idx = 0;
+      } else {
+        let tries = 0;
+        let next = idx;
+        while (tries < 5 && next === idx) {
+          next = Math.floor(Math.random() * list.length);
+          tries += 1;
+        }
+        idx = next;
       }
-    }
+      lastMediaIndexByKey.set(mediaKey, idx);
+      setMediaHref(list[idx]);
+    };
 
-    pickNextMediaHref();
-  }, [safeClick, mediaChoices, mediaKey, pickNextMediaHref]);
+    // сразу выбираем первую медиу
+    pickNext();
 
-  useEffect(() => {
-    if (!safeClick || mediaChoices.length <= 1) return undefined;
-    if (!(isNear || shouldPlay || mediaResident) || !isPageActive) return undefined;
-
+    // период ротации медиы — завязан на ROTATE_MIN,
+    // но не меньше 10 секунд, чтобы был заметен эффект
     const rotateMs = Math.max(
       10_000,
       Number(conf.ROTATE_MIN || 1) * 60_000
     );
-
-    let timer = null;
-    const schedule = () => {
-      timer = setTimeout(() => {
-        pickNextMediaHref();
-        schedule();
-      }, rotateMs);
-    };
-    schedule();
+    const timer = setInterval(pickNext, rotateMs);
 
     return () => {
-      if (timer) clearTimeout(timer);
+      clearInterval(timer);
     };
-  }, [
-    safeClick,
-    mediaChoices,
-    mediaResident,
-    isNear,
-    shouldPlay,
-    isPageActive,
-    conf,
-    pickNextMediaHref,
-  ]);
+  }, [safeClick, conf, mediaKey]);
 
-  // 2) Р В РЎв„ўР В Р’В°Р РЋР С“Р В РЎвЂќР В Р’В°Р В РўвЂ Р В РЎвЂўР В РЎвЂ”Р РЋР вЂљР В Р’ВµР В РўвЂР В Р’ВµР В Р’В»Р В Р’ВµР В Р вЂ¦Р В РЎвЂР РЋР РЏ Р РЋРІР‚С™Р В РЎвЂР В РЎвЂ”Р В Р’В° Р В РЎВР В Р’ВµР В РўвЂР В РЎвЂР В Р’В° Р В РўвЂР В Р’В»Р РЋР РЏ Р РЋРІР‚С™Р В Р’ВµР В РЎвЂќР РЋРЎвЂњР РЋРІР‚В°Р В Р’ВµР В РЎвЂ“Р В РЎвЂў mediaHref
+  // 2) Каскад определения типа медиа для текущего mediaHref
   useEffect(() => {
     if (!safeClick || !mediaHref) {
       setMedia({ kind: 'skeleton', src: null });
-      return;
-    }
-    const cacheKey = `${mediaHref}::${slotKind || ''}`;
-    const cachedResolved = adMediaResolveCache.get(cacheKey);
-    if (cachedResolved) {
-      setMedia(cachedResolved);
-    }
-    if (!shouldResolveMedia) {
       return;
     }
     let cancelled = false;
@@ -1269,41 +1002,43 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
         ? conf.THUMBS
         : DEFAULT_THUMB_SERVICES;
 
-    const isDirectImg = isLikelyImageUrl(mediaHref);
+    const isDirectImg = /\.(jpe?g|png|webp|gif|avif)(?:$|[?#])/i.test(
+      mediaHref
+    );
 
-    const setResolved = (next) => {
-      if (!next) return next;
-      try { setBoundedMap(adMediaResolveCache, cacheKey, next, 320); } catch {}
-      if (!cancelled) setMedia(next);
-      return next;
-    };
+    async function run() {
+      // 0) сначала пробуем определить тип по Content-Type (HEAD)
+      if (!cancelled) {
+        const detected = await detectMediaKind(mediaHref).catch(() => null);
+        if (cancelled) return;
 
-        async function run() {
-      if (cachedResolved) return;
-      if (adMediaResolvePending.has(cacheKey)) {
-        try {
-          const resolved = await adMediaResolvePending.get(cacheKey);
-          if (!cancelled && resolved) setMedia(resolved);
-        } catch {}
-        return;
+        if (detected === 'video') {
+          setMedia({ kind: 'video', src: mediaHref, step: 'head_video' });
+          emitAdEvent(
+            'ad_fallback',
+            { url: clickHref, cascade_step: 'head_video', slot_kind: slotKind },
+            conf
+          );
+          return;
+        }
+
+        if (detected === 'image') {
+          setMedia({ kind: 'image', src: mediaHref, step: 'head_image' });
+          emitAdEvent(
+            'ad_fallback',
+            { url: clickHref, cascade_step: 'head_image', slot_kind: slotKind },
+            conf
+          );
+          return;
+        }
       }
-      // 0) direct video by URL heuristics
+
+      // 1) прямое видео (blob, mp4 и т.п.) по URL-эвристике
       if (!cancelled && isLikelyVideoUrl(mediaHref)) {
-        setResolved({ kind: 'video', src: mediaHref, step: 'env_video' });
+        setMedia({ kind: 'video', src: mediaHref, step: 'env_video' });
         emitAdEvent(
           'ad_fallback',
           { url: clickHref, cascade_step: 'env_video', slot_kind: slotKind },
-          conf
-        );
-        return;
-      }
-
-      // 1) direct image by URL heuristics
-      if (!cancelled && isDirectImg) {
-        setResolved({ kind: 'image', src: mediaHref, step: 'env_image' });
-        emitAdEvent(
-          'ad_fallback',
-          { url: clickHref, cascade_step: 'env_image', slot_kind: slotKind },
           conf
         );
         return;
@@ -1314,7 +1049,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       if (!cancelled && ytMatch) {
         const videoId = ytMatch[1];
         if (videoId) {
-          setResolved({ kind: 'youtube', src: videoId, step: 'env_youtube' });
+          setMedia({ kind: 'youtube', src: videoId, step: 'env_youtube' });
           emitAdEvent(
             'ad_fallback',
             {
@@ -1338,7 +1073,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
           if (m) videoId = m[1];
         } catch {}
         if (videoId) {
-          setResolved({ kind: 'tiktok', src: videoId, step: 'env_tiktok' });
+          setMedia({ kind: 'tiktok', src: videoId, step: 'env_tiktok' });
           emitAdEvent(
             'ad_fallback',
             {
@@ -1352,33 +1087,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
         }
       }
 
-      // 4) HEAD probe only for likely direct-media URLs to avoid CORS noise on landing pages
-      if (!cancelled) {
-        const detected = await detectMediaKind(mediaHref).catch(() => null);
-        if (cancelled) return;
-
-        if (detected === 'video') {
-          setResolved({ kind: 'video', src: mediaHref, step: 'head_video' });
-          emitAdEvent(
-            'ad_fallback',
-            { url: clickHref, cascade_step: 'head_video', slot_kind: slotKind },
-            conf
-          );
-          return;
-        }
-
-        if (detected === 'image') {
-          setResolved({ kind: 'image', src: mediaHref, step: 'head_image' });
-          emitAdEvent(
-            'ad_fallback',
-            { url: clickHref, cascade_step: 'head_image', slot_kind: slotKind },
-            conf
-          );
-          return;
-        }
-      }
-
-      // 5) Microlink (OG screenshot / image)
+      // 4) Microlink (OG screenshot / image)
       if (!cancelled && conf.PREVIEW !== 'favicon') {
         try {
           const q =
@@ -1407,7 +1116,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
 
               const ok = await tryLoadImage(cu.toString());
               if (ok && !cancelled) {
-                setResolved({ kind: 'image', src: cu.toString(), step: c.step });
+                setMedia({ kind: 'image', src: cu.toString(), step: c.step });
                 emitAdEvent(
                   'ad_fallback',
                   {
@@ -1424,11 +1133,11 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
         } catch {}
       }
 
-      // 5) Р В РЎвЂ”Р РЋР вЂљР РЋР РЏР В РЎВР В РЎвЂўР В РІвЂћвЂ“ Р РЋРІР‚С›Р В Р’В°Р В РІвЂћвЂ“Р В Р’В»-Р В РЎвЂќР В Р’В°Р РЋР вЂљР РЋРІР‚С™Р В РЎвЂР В Р вЂ¦Р В РЎвЂќР В Р’В°
+      // 5) прямой файл-картинка
       if (!cancelled && conf.PREVIEW !== 'favicon' && isDirectImg) {
         const ok = await tryLoadImage(mediaHref);
         if (ok && !cancelled) {
-          setResolved({ kind: 'image', src: mediaHref, step: 'direct_image' });
+          setMedia({ kind: 'image', src: mediaHref, step: 'direct_image' });
           emitAdEvent(
             'ad_fallback',
             {
@@ -1452,7 +1161,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
             if (uShot.protocol !== 'https:') continue;
             const ok = await tryLoadImage(uShot.toString());
             if (ok && !cancelled) {
-              setResolved({ kind: 'image', src: uShot.toString(), step: 'shot' });
+              setMedia({ kind: 'image', src: uShot.toString(), step: 'shot' });
               emitAdEvent(
                 'ad_fallback',
                 { url: clickHref, cascade_step: 'shot', slot_kind: slotKind },
@@ -1474,7 +1183,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
             'https://icons.duckduckgo.com/ip3/' + landingHost + '.ico';
           const ok = await tryLoadImage(ico);
           if (ok && !cancelled) {
-            setResolved({ kind: 'favicon', src: ico, step: 'favicon' });
+            setMedia({ kind: 'favicon', src: ico, step: 'favicon' });
             emitAdEvent(
               'ad_fallback',
               {
@@ -1491,7 +1200,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
 
       // 8) Placeholder
       if (!cancelled) {
-        setResolved({ kind: 'placeholder', src: null, step: 'placeholder' });
+        setMedia({ kind: 'placeholder', src: null, step: 'placeholder' });
         emitAdEvent(
           'ad_fallback',
           {
@@ -1504,42 +1213,18 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       }
     }
 
-    const pendingRun = run().finally(() => {
-      try { adMediaResolvePending.delete(cacheKey); } catch {}
-    });
-    try { adMediaResolvePending.set(cacheKey, pendingRun); } catch {}
+    run();
     return () => {
       cancelled = true;
     };
-  }, [safeClick, conf, slotKind, nearId, mediaHref, shouldResolveMedia]);
+  }, [safeClick, conf, slotKind, nearId, mediaHref]);
 
-  const shouldMountYouTube = mediaKind === 'youtube' && !!mediaSrc && shouldPlay;
-  const shouldMountTikTok = mediaKind === 'tiktok' && !!mediaSrc && shouldPlay;
-  const youtubeThumbSrc =
-    mediaKind === 'youtube' && mediaSrc
-      ? `https://i.ytimg.com/vi/${mediaSrc}/hqdefault.jpg`
-      : null;
-
-
-  // YouTube Iframe API Р Т‘Р В»РЎРЏ РЎС“Р С—РЎР‚Р В°Р Р†Р В»Р ВµР Р…Р С‘РЎРЏ Р В·Р Р†РЎС“Р С”Р С•Р С
+  // YouTube Iframe API для управления звуком
   useEffect(() => {
     if (!isBrowser()) return;
-    if (!shouldMountYouTube) {
-      try { ytPlayerRef.current?.destroy?.(); } catch {}
-      ytPlayerRef.current = null;
-      return;
-    }
+    if (media.kind !== 'youtube' || !media.src) return;
 
     let cancelled = false;
-    if (ytPlayerRef.current && isAttachedYtPlayer(ytPlayerRef.current)) {
-      try {
-        if (mutedRef.current) ytPlayerRef.current.mute?.();
-        else ytPlayerRef.current.unMute?.();
-        if (shouldPlayRef.current) ytPlayerRef.current.playVideo?.();
-        else ytPlayerRef.current.pauseVideo?.();
-      } catch {}
-      return;
-    }
 
     function createPlayer() {
       if (cancelled) return;
@@ -1547,28 +1232,26 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
 
       try {
         const player = new window.YT.Player(ytIframeRef.current, {
-          videoId: mediaSrc,
+          videoId: media.src,
           playerVars: {
             autoplay: 0,
             controls: 0,
-            mute: mutedRef.current ? 1 : 0,
+            mute: muted ? 1 : 0,
             rel: 0,
             fs: 0,
             modestbranding: 1,
             playsinline: 1,
             loop: 1,
-            playlist: mediaSrc,
+            playlist: media.src,
           },
           events: {
             onReady: (ev) => {
-              if (cancelled || !isAttachedYtPlayer(ev?.target)) {
-                try { ev?.target?.destroy?.(); } catch {}
-                return;
-              }
+              if (cancelled) return;
               ytPlayerRef.current = ev.target;
               try {
-                if (mutedRef.current) ev.target.mute?.();
+                if (muted) ev.target.mute?.();
                 else ev.target.unMute?.();
+                // Играем только если реально в фокусе внимания
                 if (shouldPlayRef.current) ev.target.playVideo?.();
                 else ev.target.pauseVideo?.();
               } catch {}
@@ -1580,43 +1263,42 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       } catch {}
     }
 
-    ensureYouTubeIframeApi().then(() => {
-      if (cancelled) return;
+    if (window.YT && window.YT.Player) {
       createPlayer();
-    }).catch(() => {});
+    } else {
+      const prev = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = function () {
+        if (typeof prev === 'function') prev();
+        createPlayer();
+      };
+      if (!document.getElementById('yt-iframe-api')) {
+        const tag = document.createElement('script');
+        tag.id = 'yt-iframe-api';
+        tag.src = 'https://www.youtube.com/iframe_api';
+        document.head.appendChild(tag);
+      }
+    }
 
     return () => {
       cancelled = true;
-      try { ytPlayerRef.current?.destroy?.(); } catch {}
-      ytPlayerRef.current = null;
     };
-  }, [shouldMountYouTube, mediaSrc, isAttachedYtPlayer]);
-
-  useEffect(() => {
-    const el = videoRef.current;
-    if (!(el instanceof HTMLVideoElement)) return undefined;
-
-    return () => {
-      try { el.pause?.(); } catch {}
-      try { el.removeAttribute('src'); } catch {}
-      try { el.load?.(); } catch {}
-    };
-  }, [mediaKind, mediaSrc]);
-
+  }, [media, muted]);
   // ===== Hard stop / resume playback depending on attention =====
   useEffect(() => {
     // HTML5 video
-    if (mediaKind === 'video' && videoRef.current) {
+    if (media.kind === 'video' && videoRef.current) {
       const v = videoRef.current;
       if (shouldPlay) {
-        // Keep the HTML video muted state aligned before play.
+        // синхроним mute ДО play
         try {
           v.muted = !!muted;
         } catch {}
 
         v.play?.().catch(() => {
-          // If autoplay with sound is blocked, retry muted without changing the global pref.
+          // если пробовали со звуком и браузер запретил — откатим в mute глобально
           if (!muted) {
+            writeMutedPrefToStorage(true);
+            emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback');
             setMuted(true);
             try { v.muted = true; } catch {}
           }
@@ -1627,7 +1309,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     }
 
     // YouTube player (Iframe API)
-    if (shouldMountYouTube && ytPlayerRef.current && isAttachedYtPlayer(ytPlayerRef.current)) {
+    if (media.kind === 'youtube' && ytPlayerRef.current) {
       const p = ytPlayerRef.current;
       try {
         if (shouldPlay) {
@@ -1638,7 +1320,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
         }
       } catch {}
     }
-  }, [shouldPlay, mediaKind, muted, isAttachedYtPlayer, shouldMountYouTube]);
+  }, [shouldPlay, media.kind, muted]);
 
   // Impression tracking
   useEffect(() => {
@@ -1688,7 +1370,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     observer.observe(el);
     return () => {
       if (timer) clearTimeout(timer);
-      try { observer.disconnect(); } catch {}
+      observer.disconnect();
     };
   }, [safeClick, slotKind, nearId, conf]);
 
@@ -1698,10 +1380,10 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   const host = safeClick.hostname.replace(/^www\./i, '');
   const label =
     typeof t === 'function'
-      ? t('forum_ad_label', 'Advertisement')
-      : 'Advertisement';
+      ? t('forum_ad_label', 'Реклама')
+      : 'Реклама';
 
-  // Open the /ads page directly without following the outbound ad link.
+  // Кнопка «Разместить» — переходим на страницу /ads, не кликая по рекламной ссылке
   const handleOpenAdsPage = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -1732,11 +1414,11 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     e.stopPropagation();
     const next = !muted;
 
-    // 1) Р РЋР С“Р В РЎвЂўР РЋРІР‚В¦Р РЋР вЂљР В Р’В°Р В Р вЂ¦Р В РЎвЂР РЋРІР‚С™Р РЋР Р‰ Р В РЎвЂ“Р В Р’В»Р В РЎвЂўР В Р’В±Р В Р’В°Р В Р’В»Р РЋР Р‰Р В Р вЂ¦Р В РЎвЂў + Р В РЎвЂўР В РЎвЂ”Р В РЎвЂўР В Р вЂ Р В Р’ВµР РЋР С“Р РЋРІР‚С™Р В РЎвЂР РЋРІР‚С™Р РЋР Р‰ Р В Р вЂ Р РЋР С“Р В Р’ВµР РЋРІР‚В¦
+    // 1) сохранить глобально + оповестить всех
     writeMutedPrefToStorage(next);
     emitMutedPref(next, playerIdRef.current, 'forum-ads-toggle');
 
-    // 2) Р В Р’В»Р В РЎвЂўР В РЎвЂќР В Р’В°Р В Р’В»Р РЋР Р‰Р В Р вЂ¦Р В РЎвЂў
+    // 2) локально
     setMuted(next);
 
     // HTML5
@@ -1750,7 +1432,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     }
 
     // YouTube
-    if (shouldMountYouTube && ytPlayerRef.current && isAttachedYtPlayer(ytPlayerRef.current)) {
+    if (media.kind === 'youtube' && ytPlayerRef.current) {
       const p = ytPlayerRef.current;
       try { 
         if (next) p.mute?.();
@@ -1763,7 +1445,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   };
 
   const showSoundButton =
-    shouldPlay && (media.kind === 'video' || (media.kind === 'youtube' && shouldMountYouTube));
+    media.kind === 'video' || media.kind === 'youtube';
 
   return (
 <div
@@ -1776,12 +1458,12 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
 <style jsx>{`
   .forum-ad-media-slot {
     width: 100%; 
-    position: relative;         /* Р В РЎвЂќР В Р’В»Р РЋР вЂ№Р РЋРІР‚РЋ: Р РЋР РЏР В РЎвЂќР В РЎвЂўР РЋР вЂљР РЋР Р‰ Р В РўвЂР В Р’В»Р РЋР РЏ absolute Р В РЎВР В Р’ВµР В РўвЂР В РЎвЂР В Р’В° */
+    position: relative;         /* ключ: якорь для absolute медиа */
     overflow: hidden;
     border-radius: 0.5rem;
     background: var(--bg-soft, #020817);
   }
-  /* ===== FIXED (Р В РЎвЂќР В Р’В°Р В РЎвЂќ Р В Р вЂ  Р РЋРІР‚С›Р В РЎвЂўР РЋР вЂљР РЋРЎвЂњР В РЎВР В Р’Вµ Р РЋР С“Р В Р’ВµР В РІвЂћвЂ“Р РЋРІР‚РЋР В Р’В°Р РЋР С“) ===== */
+  /* ===== FIXED (как в форуме сейчас) ===== */
   .forum-ad-media-slot[data-layout="fixed"] {
     height: var(--ad-slot-h-m);
   }
@@ -1797,13 +1479,13 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     }
   }
 
-  /* ===== FLUID (Р В РўвЂР В Р’В»Р РЋР РЏ Р РЋР вЂљР В Р’ВµР В Р вЂ¦Р В РўвЂР В Р’ВµР РЋР вЂљР В Р’В° Р В РЎвЂ”Р В РЎвЂў Р В Р вЂ Р РЋР С“Р В Р’ВµР В РЎВР РЋРЎвЂњ Р РЋР С“Р В Р’В°Р В РІвЂћвЂ“Р РЋРІР‚С™Р РЋРЎвЂњ) ===== */
+  /* ===== FLUID (для рендера по всему сайту) ===== */
   .forum-ad-media-slot[data-layout="fluid"] {
     height: auto;
     overflow: visible;
   }
 
-  /* fixed: Р РЋР С“Р В Р’В»Р В РЎвЂўР В РІвЂћвЂ“ Р В РЎВР В Р’ВµР В РўвЂР В РЎвЂР В Р’В° Р РЋР вЂљР В Р’В°Р РЋР С“Р РЋРІР‚С™Р РЋР РЏР В РЎвЂ“Р В РЎвЂР В Р вЂ Р В Р’В°Р В Р’ВµР В РЎВ Р В Р вЂ¦Р В Р’В° Р В Р вЂ Р В Р’ВµР РЋР С“Р РЋР Р‰ Р РЋР С“Р В Р’В»Р В РЎвЂўР РЋРІР‚С™ */
+  /* fixed: слой медиа растягиваем на весь слот */
   .forum-ad-media-slot[data-layout="fixed"] .forum-ad-media-fill {
     position: absolute;
     inset: 0;
@@ -1819,7 +1501,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     display: block;
   }
 
-  /* fluid: Р РЋР С“Р В Р’В»Р В РЎвЂўР В РІвЂћвЂ“ Р В РЎВР В Р’ВµР В РўвЂР В РЎвЂР В Р’В° Р В Р вЂ¦Р В Р’Вµ absolute Р Р†Р вЂљРІР‚Сњ Р В РЎвЂР В Р вЂ¦Р В Р’В°Р РЋРІР‚РЋР В Р’Вµ Р В Р вЂ Р РЋРІР‚в„–Р РЋР С“Р В РЎвЂўР РЋРІР‚С™Р В Р’В° Р В Р вЂ¦Р В Р’Вµ Р РЋР С“Р РЋРІР‚РЋР В РЎвЂР РЋРІР‚С™Р В Р’В°Р В Р’ВµР РЋРІР‚С™Р РЋР С“Р РЋР РЏ */
+  /* fluid: слой медиа не absolute — иначе высота не считается */
   .forum-ad-media-slot[data-layout="fluid"] .forum-ad-media-fill {
     position: static;
     width: 100%;
@@ -1840,11 +1522,11 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
         target="_blank"
         rel="noopener noreferrer nofollow ugc"
         onClick={handleClick}
-        aria-label={`${label} Р Р†Р вЂљРЎС› ${host}`}
+        aria-label={`${label} • ${host}`}
         className="block no-underline focus:outline-none focus-visible:ring focus-visible:ring-offset-2 focus-visible:ring-indigo-500"
       >
         <div className="flex flex-col gap-1 h-full">
-          {/* header: Р РЋРІР‚С™Р В РЎвЂўР В Р’В»Р РЋР Р‰Р В РЎвЂќР В РЎвЂў Р В Р’В±Р В Р’ВµР В РІвЂћвЂ“Р В РўвЂР В Р’В¶ + Р В РўвЂР В РЎвЂўР В РЎВР В Р’ВµР В Р вЂ¦, Р В Р’В±Р В Р’ВµР В Р’В· url-Р РЋР С“Р РЋРІР‚С™Р РЋР вЂљР В РЎвЂўР В РЎвЂќР В РЎвЂ */}
+          {/* header: только бейдж + домен, без url-строки */}
           <div
             className="flex items-center gap-2 text-[9px] uppercase tracking-wide text-[color:var(--muted-fore,#9ca3af)]"
             style={{
@@ -1863,7 +1545,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
                 {label}
               </span>
               <span className="truncate max-w-[140px] font-medium">
-                {/* Р В РўвЂР В РЎвЂўР В РЎВР В Р’ВµР В Р вЂ¦ Р В РЎВР В РЎвЂўР В Р’В¶Р В Р вЂ¦Р В РЎвЂў Р В Р вЂ Р В Р’ВµР РЋР вЂљР В Р вЂ¦Р РЋРЎвЂњР РЋРІР‚С™Р РЋР Р‰ Р РЋР С“Р РЋР вЂ№Р В РўвЂР В Р’В°, Р В Р’ВµР РЋР С“Р В Р’В»Р В РЎвЂ Р В Р’В·Р В Р’В°Р РЋРІР‚В¦Р В РЎвЂўР РЋРІР‚РЋР В Р’ВµР РЋРІвЂљВ¬Р РЋР Р‰ */}
+                {/* домен можно вернуть сюда, если захочешь */}
               </span>
             </div>
             <button
@@ -1880,12 +1562,12 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
               }}
             >
               {typeof t === 'function'
-                ? t('forum_ad_place', 'Place Ad')
-                : 'Place Ad'}
+                ? t('forum_ad_place', 'Разместить')
+                : 'Разместить'}
             </button>
           </div>
 
-          {/* media: Р В Р’В·Р В Р’В°Р В РЎвЂ”Р В РЎвЂўР В Р’В»Р В Р вЂ¦Р РЋР РЏР В Р’ВµР РЋРІР‚С™ Р В РЎвЂќР В Р’В°Р РЋР вЂљР РЋРІР‚С™Р В РЎвЂўР РЋРІР‚РЋР В РЎвЂќР РЋРЎвЂњ */}
+          {/* media: заполняет карточку */}
 <div
   className="relative mt-0.5 border border-[color:var(--border,#27272a)] forum-ad-media-slot"
 data-layout={isFluid ? 'fluid' : 'fixed'}
@@ -1895,30 +1577,23 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
               <div className="animate-pulse w-full h-full bg-[color:var(--skeleton,#111827)]" />
             )}
 
-{media.kind === 'video' && media.src && mediaResident && (
+{media.kind === 'video' && media.src && (
   <div className="forum-ad-media-fill">
     <video
       ref={videoRef}
       src={media.src}
       className="forum-ad-fit"
       muted={muted}
-      defaultMuted={muted}
       loop
       playsInline
-      preload={shouldPlay ? 'metadata' : 'none'}
-      controls={false}
-      disablePictureInPicture
+      preload={isNear ? 'metadata' : 'none'}
     />
   </div>
 )}
 
-            {media.kind === 'video' && media.src && !mediaResident && (
-              <div className="w-full h-full flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)]">
-                {host}
-              </div>
-            )}
 
-            {media.kind === 'youtube' && media.src && shouldMountYouTube && (
+
+            {media.kind === 'youtube' && media.src && (
 <div
   className="relative overflow-hidden rounded-lg"
   style={isFluid ? { width: '100%', aspectRatio: '16 / 9' } : { width: '100%', height: '100%' }}
@@ -1928,7 +1603,6 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
     src={`https://www.youtube.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}
     title="YouTube video"
     frameBorder="0"
-    loading="lazy"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
     allowFullScreen
     style={{
@@ -1944,25 +1618,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
 
             )}
 
-            {media.kind === 'youtube' && media.src && !shouldMountYouTube && (
-              youtubeThumbSrc ? (
-                <div className="forum-ad-media-fill">
-                  <img
-                    src={youtubeThumbSrc}
-                    alt={host}
-                    className="forum-ad-fit"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)]">
-                  {host}
-                </div>
-              )
-            )}
-
-            {media.kind === 'tiktok' && media.src && shouldMountTikTok && (
+            {media.kind === 'tiktok' && media.src && shouldPlay && (
 <div
   className="relative overflow-hidden rounded-lg"
   style={isFluid ? { width: '100%', aspectRatio: '9 / 16' } : { width: '100%', height: '100%' }}
@@ -1971,7 +1627,6 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
     src={`https://www.tiktok.com/embed/v2/${media.src}`}
     title="TikTok video"
     frameBorder="0"
-    loading="lazy"
     allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
     style={{
       position: 'absolute',
@@ -1986,7 +1641,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
 
             )}
 
-            {media.kind === 'tiktok' && media.src && !shouldMountTikTok && (
+            {media.kind === 'tiktok' && media.src && !shouldPlay && (
               <div className="w-full h-full flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)]">
                 {host}
               </div>
@@ -2041,16 +1696,13 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
                 type="button"
                 onClick={handleToggleSound}
                 className="audio-toggle"
-                aria-label={muted ? 'Enable sound' : 'Mute sound'}
-                title={muted ? 'Enable sound' : 'Mute sound'}
+                aria-label={muted ? 'Включить звук' : 'Выключить звук'}
               >
-                <span className="ico" aria-hidden="true">
-                  {muted ? '🔇' : '🔊'}
-                </span>
+                {muted ? '🔇' : '🔊'}
               </button>
             )}
 
-            <div className="pointer-events-none Р В Р’В°Р В Р’В±Р РЋР С“Р В РЎвЂўР В Р’В»Р РЋР вЂ№Р РЋРІР‚С™ inset-0 rounded-lg border border-transparent qshine" />
+            <div className="pointer-events-none абсолют inset-0 rounded-lg border border-transparent qshine" />
           </div>
         </div> 
       </a>

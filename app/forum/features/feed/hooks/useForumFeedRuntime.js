@@ -88,7 +88,7 @@ export default function useForumFeedRuntime({
     threadRoot,
   })
 
-  const centerNodeInScroll = useCallback((node, behavior = 'auto') => {
+  const centerNodeInScroll = useCallback((node, behavior = 'smooth') => {
     centerNodeInScrollUtil(node, {
       behavior,
       isBrowserFn,
@@ -100,7 +100,7 @@ export default function useForumFeedRuntime({
     })
   }, [bodyRef, isBrowserFn])
 
-  const centerPostAfterDom = useCallback((postId, behavior = 'auto') => {
+  const centerPostAfterDom = useCallback((postId, behavior = 'smooth') => {
     centerPostAfterDomUtil(postId, {
       behavior,
       isBrowserFn,
@@ -108,7 +108,7 @@ export default function useForumFeedRuntime({
     })
   }, [centerNodeInScroll, isBrowserFn])
 
-  const centerAndFlashPostAfterDom = useCallback((postId, behavior = 'auto') => {
+  const centerAndFlashPostAfterDom = useCallback((postId, behavior = 'smooth') => {
     centerAndFlashPostAfterDomUtil(postId, {
       behavior,
       isBrowserFn,

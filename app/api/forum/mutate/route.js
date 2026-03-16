@@ -130,8 +130,7 @@ async function setPostReaction(postId, userId, state) {
     redisDirect.sismember(disSet,  uid),
   ])
   const prev = hasLike ? 'like' : (hasDis ? 'dislike' : null)
-  // Premium rule: reaction can only switch to opposite, not reset to null by repeat click.
-  const next = (state === 'like' || state === 'dislike') ? state : prev
+  const next = (state === 'like' || state === 'dislike') ? state : null
   const likeDelta = (next === 'like' ? 1 : 0) - (prev === 'like' ? 1 : 0)
   if (prev === next) {
     const [likes, dislikes] = await Promise.all([ getInt(likeKey, 0), getInt(disKey, 0) ])
@@ -365,9 +364,6 @@ export async function POST(request) {
           if (inc) {
             const rev = await nextRev()
             await pushChange({ rev, kind: 'views', topics: { [String(topicId)]: views }, ts: Date.now() })
-            try {
-              await patchSnapshotPartial({ rev, patch: { topics: { [String(topicId)]: { views } } } })
-            } catch {}
             results.push({ op: 'view_topic', topicId, views, delta: 1, rev, opId: op.opId })
             await publishForumEvent({ type: 'view_topic', topicId, views, rev })
           } else {
@@ -395,24 +391,15 @@ try {
         } else if (op.type === 'view_topics') {
           const ids = Array.from(new Set((Array.isArray(p.ids) ? p.ids : []).map(String).filter(Boolean)))
           const viewsMap = {}
-          const snapshotTopicPatch = {}
           let changed = false
           for (const id of ids) {
             const { inc, views } = await incrementTopicViewsUnique(id, userId)
             viewsMap[id] = views
-            if (Number.isFinite(Number(views))) {
-              snapshotTopicPatch[id] = { views: Number(views) }
-            }
             if (inc) changed = true
           }
           if (changed) {
             const rev = await nextRev()
             await pushChange({ rev, kind: 'views', topics: viewsMap, ts: Date.now() })
-            try {
-              if (Object.keys(snapshotTopicPatch).length) {
-                await patchSnapshotPartial({ rev, patch: { topics: snapshotTopicPatch } })
-              }
-            } catch {}
             results.push({ op: 'view_topics', ids, views: viewsMap, rev, opId: op.opId })
             await publishForumEvent({ type: 'view_topics', ids, views: viewsMap, rev })
           } else {
@@ -422,24 +409,15 @@ try {
         } else if (op.type === 'view_posts') {
           const ids = Array.from(new Set((Array.isArray(p.ids) ? p.ids : []).map(String).filter(Boolean)))
           const viewsMap = {}
-          const snapshotPostPatch = {}
           let changed = false
           for (const id of ids) {
             const { inc, views } = await incrementPostViewsUnique(id, userId)
             viewsMap[id] = views
-            if (Number.isFinite(Number(views))) {
-              snapshotPostPatch[id] = { views: Number(views) }
-            }
             if (inc) changed = true
           }
           if (changed) {
             const rev = await nextRev()
             await pushChange({ rev, kind: 'views', posts: viewsMap, ts: Date.now() })
-            try {
-              if (Object.keys(snapshotPostPatch).length) {
-                await patchSnapshotPartial({ rev, patch: { posts: snapshotPostPatch } })
-              }
-            } catch {}
             results.push({ op: 'view_posts', ids, views: viewsMap, rev, opId: op.opId })
             await publishForumEvent({ type: 'view_posts', ids, views: viewsMap, rev })
           } else {
