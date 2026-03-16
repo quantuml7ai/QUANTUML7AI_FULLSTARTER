@@ -1,21 +1,5 @@
 import { useCallback } from 'react'
 
-function clearForumDeepLinkQuery() {
-  if (typeof window === 'undefined') return
-  try {
-    const u = new URL(window.location.href)
-    const hasDeepLink =
-      u.searchParams.has('post') ||
-      u.searchParams.has('topic') ||
-      u.searchParams.has('root')
-    if (!hasDeepLink) return
-    u.searchParams.delete('post')
-    u.searchParams.delete('topic')
-    u.searchParams.delete('root')
-    window.history.replaceState({}, '', u.pathname + u.search + u.hash)
-  } catch {}
-}
-
 export default function useForumHomeAction({
   headAutoOpenRef,
   setHeadPinned,
@@ -41,7 +25,6 @@ export default function useForumHomeAction({
     try { setReplyTo(null) } catch {}
     try { setThreadRoot(null) } catch {}
     try { setSel(null) } catch {}
-    clearForumDeepLinkQuery()
     setTimeout(() => {
       try {
         document

@@ -26,11 +26,11 @@ export const __MEDIA_VIS_MARGIN_PX = (() => {
     const isIOS = /iP(hone|ad|od)/i.test(ua)
     const isAndroid = /Android/i.test(ua)
     const coarse = !!(typeof window !== 'undefined' && window?.matchMedia?.('(pointer: coarse)')?.matches)
-    if (isIOS) return 360
-    if (isAndroid || coarse) return 420
-    return 320
+    if (isIOS) return 320
+    if (isAndroid || coarse) return 360
+    return 280
   } catch {
-    return 320
+    return 280
   }
 })()
 
@@ -153,11 +153,6 @@ export function __unloadVideoEl(el) {
     try {
       el.preload = 'metadata'
     } catch {}
-    try {
-      const poster = el.dataset?.__posterOriginal || ''
-      if (poster) el.setAttribute('poster', poster)
-      el.dataset.__posterRevealed = '0'
-    } catch {}
     return
   }
   try {
@@ -175,11 +170,6 @@ export function __unloadVideoEl(el) {
     el.preload = 'none'
   } catch {}
   try {
-    const poster = el.dataset?.__posterOriginal || ''
-    if (poster) el.setAttribute('poster', poster)
-    el.dataset.__posterRevealed = '0'
-  } catch {}
-  try {
     el.load?.()
   } catch {}
 }
@@ -192,11 +182,6 @@ export function __restoreVideoEl(el) {
   if (cur === src) return
   try {
     el.preload = (el.dataset?.__prewarm === '1') ? 'auto' : 'metadata'
-  } catch {}
-  try {
-    const poster = el.dataset?.__posterOriginal || ''
-    if (poster && !el.getAttribute('poster')) el.setAttribute('poster', poster)
-    el.dataset.__posterRevealed = '0'
   } catch {}
   try {
     el.setAttribute('src', src)
@@ -272,3 +257,4 @@ export const enableVideoControlsOnTap = createEnableVideoControlsOnTap({
   touchActiveVideoEl: __touchActiveVideoEl,
   enforceActiveVideoCap: __enforceActiveVideoCap,
 })
+

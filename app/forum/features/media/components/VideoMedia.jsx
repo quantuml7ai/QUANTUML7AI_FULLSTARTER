@@ -32,7 +32,6 @@ export default function VideoMedia({
   const recoverTimerRef = React.useRef(0)
   const mutedEvent = String(mutedEventName || 'forum:media-mute')
   const mediaVisMargin = Number.isFinite(Number(mediaVisMarginPx)) ? Number(mediaVisMarginPx) : 380
-  const preloadMode = String(preload || 'none').trim().toLowerCase() || 'none'
 
   const readMuted = React.useCallback(() => {
     try {
@@ -116,17 +115,14 @@ export default function VideoMedia({
       else el.removeAttribute('data-src')
     } catch {}
     try {
-      const wantsWarm = el.dataset?.__prewarm === '1' || el.dataset?.__active === '1'
-      const effectivePreload = wantsWarm && preloadMode === 'none' ? 'auto' : preloadMode
-      el.preload = effectivePreload
+      el.preload = 'none'
     } catch {}
     if (poster) {
       try {
-        el.dataset.__posterOriginal = String(poster)
         el.setAttribute('poster', String(poster))
       } catch {}
     }
-  }, [src, poster, preloadMode])
+  }, [src, poster])
 
   React.useEffect(() => {
     const el = ref.current
@@ -136,9 +132,6 @@ export default function VideoMedia({
     const nextMuted = typeof initial === 'boolean' ? initial : !!autoPlay
     try {
       el.muted = !!nextMuted
-      el.defaultMuted = !!nextMuted
-      if (nextMuted) el.setAttribute('muted', '')
-      else el.removeAttribute('muted')
     } catch {}
 
     const onVol = () => {
@@ -159,9 +152,6 @@ export default function VideoMedia({
         const m = e?.detail?.muted
         if (typeof m !== 'boolean') return
         if (ref.current.muted !== m) ref.current.muted = m
-        ref.current.defaultMuted = m
-        if (m) ref.current.setAttribute('muted', '')
-        else ref.current.removeAttribute('muted')
       } catch {}
     }
 
@@ -190,7 +180,6 @@ export default function VideoMedia({
     let io = null
     let active = false
     let unloadTimer = null
-    const warmKeepMargin = Math.max(560, Math.round(mediaVisMargin * 1.9))
     const runtimeProfile = (() => {
       try {
         const ua = String(navigator?.userAgent || '')
@@ -199,25 +188,14 @@ export default function VideoMedia({
         const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
         const dm = Number(navigator?.deviceMemory || 0)
         const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2
-        if (isIOS) return { unloadDelayMs: 3200, hardUnloadOnInactive: false }
-        if (lowMem) return { unloadDelayMs: 2400, hardUnloadOnInactive: true }
-        if (isAndroid || coarse) return { unloadDelayMs: 3600, hardUnloadOnInactive: false }
-        return { unloadDelayMs: 4200, hardUnloadOnInactive: false }
+        if (isIOS) return { unloadDelayMs: 2200, hardUnloadOnInactive: false }
+        if (lowMem) return { unloadDelayMs: 1800, hardUnloadOnInactive: true }
+        if (isAndroid || coarse) return { unloadDelayMs: 2400, hardUnloadOnInactive: false }
+        return { unloadDelayMs: 2600, hardUnloadOnInactive: false }
       } catch {
-        return { unloadDelayMs: 3200, hardUnloadOnInactive: false }
+        return { unloadDelayMs: 2200, hardUnloadOnInactive: false }
       }
     })()
-
-    const shouldKeepWarmResident = () => {
-      try {
-        if (!el?.isConnected) return false
-        const warmFlag = el.dataset?.__prewarm === '1'
-        if (warmFlag) return true
-        return isVideoNearViewportFn(el, warmKeepMargin)
-      } catch {
-        return false
-      }
-    }
 
     const setActive = (v) => {
       const next = !!v
@@ -234,14 +212,6 @@ export default function VideoMedia({
         restoreVideoElFn(el)
         touchActiveVideoFn(el)
         enforceActiveVideoCapFn(el)
-        try {
-          el.dataset.__active = '1'
-          el.dataset.__prewarm = '1'
-          el.preload = 'auto'
-          if ((el.readyState === 0 || !el.currentSrc) && el.paused && (el.currentTime === 0)) {
-            el.load?.()
-          }
-        } catch {}
       } else {
         if (unloadTimer) {
           try {
@@ -252,13 +222,7 @@ export default function VideoMedia({
         unloadTimer = setTimeout(() => {
           unloadTimer = null
           if (active) return
-          if (shouldKeepWarmResident()) {
-            try {
-              el.dataset.__active = '0'
-              el.preload = el.dataset?.__prewarm === '1' ? 'auto' : 'metadata'
-            } catch {}
-            return
-          }
+          if (isVideoNearViewportFn(el, Math.round(mediaVisMargin * 0.9))) return
           dropActiveVideoFn(el)
           if (!runtimeProfile.hardUnloadOnInactive) {
             try {
@@ -266,7 +230,6 @@ export default function VideoMedia({
             } catch {}
             try {
               el.dataset.__active = '0'
-              el.dataset.__prewarm = '0'
             } catch {}
             try {
               el.preload = 'metadata'
@@ -374,24 +337,6 @@ export default function VideoMedia({
       const el = ref.current
       if (!el) return
       el.dataset.__recoverTry = '0'
-      const revealPoster = () => {
-        try {
-          if (!el.isConnected) return
-          if ((el.readyState || 0) < 2) return
-          if (el.dataset?.__posterRevealed === '1') return
-          el.dataset.__posterRevealed = '1'
-          el.removeAttribute('poster')
-        } catch {}
-      }
-      try {
-        if (typeof el.requestVideoFrameCallback === 'function') {
-          el.requestVideoFrameCallback(() => revealPoster())
-        } else {
-          requestAnimationFrame(() => revealPoster())
-        }
-      } catch {
-        revealPoster()
-      }
     } catch {}
   }, [])
 

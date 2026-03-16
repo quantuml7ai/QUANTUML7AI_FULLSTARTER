@@ -2309,6 +2309,55 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 .qcoinValue.paused{ color:#ff8c8c; animation:blinkPause .9s steps(1) infinite }
 @keyframes blinkPause{ 50%{ opacity:.45 } }
 
+@media (max-width: 680px){
+  .headInner .qRowRight{
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    padding-right: 2px;
+  }
+  .headInner .qRowRight > *{
+    width: auto;
+    max-width: 100%;
+    flex: 0 1 auto;
+    justify-content: center;
+    text-align: center;
+    overflow: visible;
+    font-size: inherit;
+  }
+  .headInner .qRowRight > .qcoinRow.qcoinCol{
+    margin-left: 0;
+    gap: 10px;
+    align-items: center;
+  }
+  .headInner .qRowRight .qcoinTop{
+    justify-content: center;
+    gap: 12px;
+  }
+  .headInner .qRowRight .qcoinLabel{
+    font-size: clamp(2.72em, 8vw, 3.18em);
+    line-height: .92;
+    letter-spacing: .5px;
+  }
+  .headInner .qRowRight .qcoinX2{
+    min-width: 56px;
+    height: 31px;
+    padding: 0 9px;
+    font-size: 15px;
+  }
+  .headInner .qRowRight .qcoinValue{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    font-size: clamp(1.72em, 5.2vw, 2.02em);
+    padding: .26em .80em;
+    line-height: 1.02;
+  }
+}
+
 /* РјРѕРґР°Р»РєР° вЂ” СЃРєСЂРѕР»Р»РёРј РїРѕРґР»РѕР¶РєСѓ, РєР°СЂС‚РѕС‡РєР° СЂР°СЃС‚СЏРіРёРІР°РµС‚СЃСЏ РїРѕ РєРѕРЅС‚РµРЅС‚Сѓ */
 .qcoinModal{
   position:fixed; inset:0; z-index:3200;
@@ -4249,16 +4298,6 @@ animation:qcastCtrlEQ 880ms ease-in-out infinite, qcastCtrlHue 2.4s linear infin
   text-align:right;
   font-size:clamp(12px, 2.8vw, 24px);     /* Р°РґР°РїС‚РёРІРЅС‹Р№ СЂР°Р·РјРµСЂ С€СЂРёС„С‚Р° */
   max-width:100%;
-}
-
-article[data-forum-post-card="1"] .forumDividerRail::after{
-  content: none;
-  display: none;
-  animation: none;
-}
-article[data-forum-post-card="1"] .forumDividerRail{
-  background: linear-gradient(90deg, rgba(255,205,100,.08), rgba(255,214,120,.48), rgba(255,205,100,.08));
-  opacity: .92;
 }
 
 /* --- РџРѕРїРѕРІРµСЂ QCoin РєРѕРЅС‚РµР№РЅРµСЂ --- */

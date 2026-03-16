@@ -3,7 +3,6 @@
 import { isBrowser } from '../../../shared/utils/browser'
 import {
   MEDIA_MUTED_KEY,
-  MEDIA_VIDEO_MUTED_KEY,
   MEDIA_MUTED_EVENT,
   readMutedPrefFromStorage,
   __touchActiveVideoEl,
@@ -114,31 +113,25 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     const selector = 'video[data-forum-video="post"]';
 
     const pending = new WeakMap();
-    const schedulePrepare = (fn) => {
-      let done = false;
-      const run = () => {
-        if (done) return;
-        done = true;
-        try { fn(); } catch {}
-      };
-      const rafId = typeof requestAnimationFrame === 'function' ? requestAnimationFrame(run) : 0;
-      const timeoutId = setTimeout(run, 32);
-      return { rafId, timeoutId };
+    const idle = (fn) => {
+      try {
+        if ('requestIdleCallback' in window) {
+          return window.requestIdleCallback(fn, { timeout: 1500 });
+        }
+      } catch {}
+      return setTimeout(fn, 120);
     };
-    const cancelPrepare = (job) => {
+    const cancelIdle = (id) => {
       try {
-        if (job?.rafId) cancelAnimationFrame(job.rafId);
+        if ('cancelIdleCallback' in window) return window.cancelIdleCallback(id);
       } catch {}
-      try {
-        if (job?.timeoutId) clearTimeout(job.timeoutId);
-      } catch {}
+      clearTimeout(id);
     };
 
-    const warmMarginTop = Math.max(320, Math.round(__MEDIA_VIS_MARGIN_PX * 1.35));
-    const warmMarginBottom = Math.max(520, Math.round(__MEDIA_VIS_MARGIN_PX * 1.95));
-
-    const warm = (video) => {
+    const prepare = (video) => {
       if (!(video instanceof HTMLVideoElement)) return;
+      if (video.dataset.previewInit === '1') return;
+      video.dataset.previewInit = '1';
 
       try {
         // Более ранний prewarm: к зоне фокуса хотим уже готовый первый кадр.
@@ -155,40 +148,27 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           return;
         }
 
-        // Подготовка должна происходить заранее, а не ждать idle во время скролла.
+        // Тяжёлый load() — только в idle и только если видео реально "холодное"
         if (pending.has(video)) return;
-        const job = schedulePrepare(() => {
+        const id = idle(() => {
           pending.delete(video);
           try {
-            if (!video.isConnected) return;
             if (__hasLazyVideoSourceWithoutSrc(video)) return;
             const cold = (video.readyState === 0 || !video.currentSrc);
             const safe = cold && video.paused && (video.currentTime === 0);
             if (safe) video.load?.();
           } catch {}
         });
-        pending.set(video, job);
-      } catch {}
-    };
-
-    const cool = (video) => {
-      if (!(video instanceof HTMLVideoElement)) return;
-      try {
-        video.dataset.__prewarm = '0';
-      } catch {}
-      try {
-        if (video.dataset?.__active === '1') return;
-        if ((video.readyState || 0) >= 2) return;
-        video.preload = 'metadata';
+        pending.set(video, id);
       } catch {}
     };
 
     // если нет IntersectionObserver — готовим всё сразу
     if (!('IntersectionObserver' in window)) {
-      document.querySelectorAll(selector).forEach(warm);
+      document.querySelectorAll(selector).forEach(prepare);
       return () => {
         try {
-          pending.forEach((job) => { try { cancelPrepare(job); } catch {} });
+          pending.forEach((id) => { try { cancelIdle(id); } catch {} });
           pending.clear?.();
         } catch {}
       };
@@ -197,34 +177,27 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            warm(entry.target);
-            return;
-          }
-          cool(entry.target);
+          if (!entry.isIntersecting) return;
+          prepare(entry.target);
+          io.unobserve(entry.target); // один раз на видео
         });
       },
       {
         // Чуть раньше подготавливаем медиа, чтобы автоплей не "спотыкался"
         // при входе в зону фокуса на мобильных.
         threshold: 0.01,
-        rootMargin: `${warmMarginTop}px 0px ${warmMarginBottom}px 0px`,
+        rootMargin: `${Math.max(220, Math.round(__MEDIA_VIS_MARGIN_PX * 1.05))}px 0px ${Math.max(300, Math.round(__MEDIA_VIS_MARGIN_PX * 1.45))}px 0px`,
       }
     );
 
-    document.querySelectorAll(selector).forEach((v) => {
-      io.observe(v);
-      try {
-        if (__isVideoNearViewport(v, Math.max(warmMarginTop, warmMarginBottom))) warm(v);
-      } catch {}
-    });
+    document.querySelectorAll(selector).forEach((v) => io.observe(v));
 
     return () => {
       io.disconnect();
-      try {
-        pending.forEach((job) => { try { cancelPrepare(job); } catch {} });
+            try {
+        pending.forEach((id) => { try { cancelIdle(id); } catch {} });
         pending.clear?.();
-      } catch {}
+      } catch {}     
     };
   }, []);
   // === Ранний prewarm iframe (YouTube/TikTok/other embeds) для более быстрого старта в зоне фокуса ===
@@ -312,11 +285,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     const selector = '[data-forum-media]';
 
     const writeMutedPref = (val) => {
-      try {
-        const next = val ? '1' : '0';
-        localStorage.setItem(MEDIA_MUTED_KEY, next);
-        localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, next);
-      } catch {}
+      try { localStorage.setItem(MEDIA_MUTED_KEY, val ? '1' : '0'); } catch {}
     };
     let mutedPref = readMutedPrefFromStorage();
 
@@ -687,14 +656,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           if (el instanceof HTMLVideoElement) {
             const hasSrc = !!el.getAttribute('src');
             if (!hasSrc) __restoreVideoEl(el);
-            try { el.dataset.__prewarm = '1'; } catch {}
-            try { el.dataset.__active = '1'; } catch {}
-            try { el.preload = 'auto'; } catch {}
-            try {
-              const cold = (el.readyState === 0 || !el.currentSrc);
-              const safe = cold && el.paused && (el.currentTime === 0);
-              if (safe) el.load?.();
-            } catch {}
             __touchActiveVideoEl(el);
             __enforceActiveVideoCap(el);
           }

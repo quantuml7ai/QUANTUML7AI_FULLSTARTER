@@ -1,83 +1,7 @@
 {
   "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-03-04T10:15:31.260Z",
+  "generatedAt": "2026-03-10T15:22:34.514Z",
   "results": [
-    {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\Forum.jsx",
-      "counts": {
-        "video": 15,
-        "autoplay": 13,
-        "loop": 18,
-        "preload": 26,
-        "img": 9,
-        "lazy": 14,
-        "create": 10,
-        "revoke": 20
-      },
-      "flags": [
-        "⚠ video + autoplay",
-        "⚠ video + loop",
-        "⚠ video + preload"
-      ],
-      "samples": {
-        "video": [
-          {
-            "line": 403,
-            "text": "// Иначе оно улетает в ветку video и рендерится нативным <video controls> (чёрный экран)."
-          },
-          {
-            "line": 2849,
-            "text": "/* 2) Обычные <img>/<video>/<canvas>/<svg> внутри — растянуть и покрыть */"
-          },
-          {
-            "line": 8524,
-            "text": "<video"
-          }
-        ],
-        "autoplay": [
-          {
-            "line": 8527,
-            "text": "autoPlay"
-          },
-          {
-            "line": 12425,
-            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
-          },
-          {
-            "line": 12504,
-            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
-          }
-        ],
-        "img": [
-          {
-            "line": 992,
-            "text": "// строго детерминированный URL и только <img>"
-          },
-          {
-            "line": 1036,
-            "text": "* — После mount, если icon — картинка, показываем <img> внутри того же <div>"
-          },
-          {
-            "line": 2849,
-            "text": "/* 2) Обычные <img>/<video>/<canvas>/<svg> внутри — растянуть и покрыть */"
-          }
-        ],
-        "create": [
-          {
-            "line": 179,
-            "text": "const src = isStringSrc ? String(videoSource) : URL.createObjectURL(videoSource);"
-          },
-          {
-            "line": 281,
-            "text": "const src = isStringSrc ? String(audioSource) : URL.createObjectURL(audioSource);"
-          },
-          {
-            "line": 9446,
-            "text": "const url = URL.createObjectURL(f);"
-          }
-        ]
-      }
-    },
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\i18n.js",
       "counts": {
@@ -201,6 +125,86 @@
             "text": "if ((counts[\"<img\"] || 0) >= 5 && (counts[\"loading=lazy\"] || 0) === 0) flags.push(\"⚠ много img без loading=lazy\");"
           }
         ],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
+      "counts": {
+        "video": 1,
+        "autoplay": 2,
+        "loop": 9,
+        "preload": 1,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + loop",
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 17,
+            "text": "// В любой момент времени играет только один <video>/<audio> controls."
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 144,
+            "text": "// Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start."
+          },
+          {
+            "line": 280,
+            "text": "// === Shorts-like autoplay: play when in focus, pause when out ==="
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoMedia.jsx",
+      "counts": {
+        "video": 1,
+        "autoplay": 4,
+        "loop": 2,
+        "preload": 5,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + loop",
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 344,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 15,
+            "text": "autoPlay,"
+          },
+          {
+            "line": 132,
+            "text": "const nextMuted = typeof initial === 'boolean' ? initial : !!autoPlay"
+          },
+          {
+            "line": 173,
+            "text": "}, [autoPlay, mutedEvent, readMuted, writeMuted])"
+          }
+        ],
+        "img": [],
         "create": []
       }
     },
@@ -358,6 +362,48 @@
       }
     },
     {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\components\\QuestHub.jsx",
+      "counts": {
+        "video": 2,
+        "autoplay": 2,
+        "loop": 2,
+        "preload": 2,
+        "img": 0,
+        "lazy": 2,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + loop",
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 205,
+            "text": "? <video className=\"questThumb\" src={q.cover} playsInline autoPlay muted loop preload=\"metadata\" />"
+          },
+          {
+            "line": 296,
+            "text": "? <video className=\"questThumb\" src={q.cover} playsInline autoPlay muted loop preload=\"metadata\" />"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 205,
+            "text": "? <video className=\"questThumb\" src={q.cover} playsInline autoPlay muted loop preload=\"metadata\" />"
+          },
+          {
+            "line": 296,
+            "text": "? <video className=\"questThumb\" src={q.cover} playsInline autoPlay muted loop preload=\"metadata\" />"
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\about\\page.js",
       "counts": {
         "video": 1,
@@ -425,6 +471,65 @@
       }
     },
     {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\qcoin\\components\\QCoinWithdrawPopover.jsx",
+      "counts": {
+        "video": 1,
+        "autoplay": 1,
+        "loop": 1,
+        "preload": 1,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + loop",
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 106,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 109,
+            "text": "autoPlay"
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\frontCameraMirror.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 1,
+        "loop": 3,
+        "preload": 0,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [
+          {
+            "line": 19,
+            "text": "video.autoplay = true"
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\SnowFX.jsx",
       "counts": {
         "video": 0,
@@ -440,6 +545,35 @@
       "samples": {
         "video": [],
         "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostMediaStack.jsx",
+      "counts": {
+        "video": 0,
+        "autoplay": 2,
+        "loop": 0,
+        "preload": 1,
+        "img": 0,
+        "lazy": 3,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [
+          {
+            "line": 103,
+            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
+          },
+          {
+            "line": 180,
+            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
+          }
+        ],
         "img": [],
         "create": []
       }
@@ -474,12 +608,150 @@
       }
     },
     {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\LivePreview.jsx",
+      "counts": {
+        "video": 1,
+        "autoplay": 1,
+        "loop": 0,
+        "preload": 0,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 53,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 55,
+            "text": "autoPlay"
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\QCoinDropFX.jsx",
       "counts": {
         "video": 0,
         "autoplay": 0,
         "loop": 3,
         "preload": 0,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVoiceRecorder.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 0,
+        "lazy": 0,
+        "create": 1,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ createObjectURL > revokeObjectURL"
+      ],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": [
+          {
+            "line": 62,
+            "text": "const url = URL.createObjectURL(blob)"
+          }
+        ]
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\ComposerAttachmentPreview.jsx",
+      "counts": {
+        "video": 1,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 1,
+        "img": 0,
+        "lazy": 1,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 64,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoTrimPopover.jsx",
+      "counts": {
+        "video": 1,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 1,
+        "img": 0,
+        "lazy": 0,
+        "create": 1,
+        "revoke": 1
+      },
+      "flags": [
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 292,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [],
+        "img": [],
+        "create": [
+          {
+            "line": 120,
+            "text": "url = URL.createObjectURL(sourceBlob);"
+          }
+        ]
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaLifecycleRuntime.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 3,
         "img": 0,
         "lazy": 0,
         "create": 0,
@@ -514,6 +786,96 @@
       }
     },
     {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoOverlay.jsx",
+      "counts": {
+        "video": 1,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 1,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [
+          {
+            "line": 355,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [],
+        "img": [
+          {
+            "line": 340,
+            "text": "<img"
+          }
+        ],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\styles\\ForumStyles.jsx",
+      "counts": {
+        "video": 1,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 1,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [
+          {
+            "line": 909,
+            "text": "/* 2) РћР±С‹С‡РЅС‹Рµ <img>/<video>/<canvas>/<svg> РІРЅСѓС‚СЂРё вЂ” СЂР°СЃС‚СЏРЅСѓС‚СЊ Рё РїРѕРєСЂС‹С‚СЊ */"
+          }
+        ],
+        "autoplay": [],
+        "img": [
+          {
+            "line": 909,
+            "text": "/* 2) РћР±С‹С‡РЅС‹Рµ <img>/<video>/<canvas>/<svg> РІРЅСѓС‚СЂРё вЂ” СЂР°СЃС‚СЏРЅСѓС‚СЊ Рё РїРѕРєСЂС‹С‚СЊ */"
+          }
+        ],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\styles\\modules\\profileStyles.js",
+      "counts": {
+        "video": 1,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 1,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [
+          {
+            "line": 225,
+            "text": "/* 2) Обычные <img>/<video>/<canvas>/<svg> внутри — растянуть и покрыть */"
+          }
+        ],
+        "autoplay": [],
+        "img": [
+          {
+            "line": 225,
+            "text": "/* 2) Обычные <img>/<video>/<canvas>/<svg> внутри — растянуть и покрыть */"
+          }
+        ],
+        "create": []
+      }
+    },
+    {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\page.js",
       "counts": {
         "video": 0,
@@ -544,12 +906,141 @@
       }
     },
     {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaRuntime.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 2,
+        "img": 0,
+        "lazy": 0,
+        "create": 2,
+        "revoke": 2
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": [
+          {
+            "line": 11,
+            "text": "const src = isStringSrc ? String(videoSource) : URL.createObjectURL(videoSource)"
+          },
+          {
+            "line": 137,
+            "text": "const src = isStringSrc ? String(audioSource) : URL.createObjectURL(audioSource)"
+          }
+        ]
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\qcoin\\hooks\\useQCoinLive.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 2,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\ScrollTopPulse.js",
       "counts": {
         "video": 0,
         "autoplay": 0,
         "loop": 1,
         "preload": 0,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmThreadMessageRow.jsx",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 1,
+        "img": 0,
+        "lazy": 2,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmVoicePlayer.jsx",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 1,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\QCastPlayer.jsx",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 1,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\videoControls.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 1,
         "img": 0,
         "lazy": 0,
         "create": 0,
@@ -622,6 +1113,31 @@
       }
     },
     {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ForumSearchSortControls.jsx",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 1,
+        "lazy": 2,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [
+          {
+            "line": 134,
+            "text": "<img"
+          }
+        ],
+        "create": []
+      }
+    },
+    {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\AuthNavClient.jsx",
       "counts": {
         "video": 0,
@@ -644,6 +1160,102 @@
           }
         ],
         "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVideoTrimController.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 0,
+        "lazy": 0,
+        "create": 1,
+        "revoke": 1
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": [
+          {
+            "line": 178,
+            "text": "const outUrl = URL.createObjectURL(finalBlob)"
+          }
+        ]
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\moderationPrep.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 1,
+        "img": 0,
+        "lazy": 0,
+        "create": 2,
+        "revoke": 3
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": [
+          {
+            "line": 18,
+            "text": "const localUrl = URL.createObjectURL(file)"
+          },
+          {
+            "line": 81,
+            "text": "const url = isStringSource ? videoSource : URL.createObjectURL(videoSource)"
+          }
+        ]
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\components\\ProfilePopover.jsx",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 3,
+        "lazy": 0,
+        "create": 2,
+        "revoke": 3
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [
+          {
+            "line": 87,
+            "text": "// WHY: <img> + object-fit:cover обрезает картинку в квадрат сразу после выбора."
+          },
+          {
+            "line": 788,
+            "text": "<img"
+          },
+          {
+            "line": 797,
+            "text": "<img"
+          }
+        ],
+        "create": [
+          {
+            "line": 338,
+            "text": "const url = URL.createObjectURL(f);"
+          },
+          {
+            "line": 358,
+            "text": "const localUrl = URL.createObjectURL(f);"
+          }
+        ]
       }
     },
     {
@@ -675,6 +1287,31 @@
           {
             "line": 487,
             "text": "const srcUrl = URL.createObjectURL(inputBlob);"
+          }
+        ]
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVideoCaptureController.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 0,
+        "lazy": 0,
+        "create": 1,
+        "revoke": 6
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": [
+          {
+            "line": 236,
+            "text": "const url = URL.createObjectURL(blob)"
           }
         ]
       }
