@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import Forum from './Forum'
 import { useI18n } from '../../components/i18n'   // тот же хук, что на главной
+import ForumBootSplash from '../../components/ForumBootSplash'
 
 export const dynamic = 'force-static'          // страница статическая
 
@@ -77,6 +78,8 @@ export default function ForumPage() {
 
   return (
     <div className="iso-forum-page">
+      <ForumBootSplash />
+
       <div className="iso-forum-shell">
         {/* Верхний бренд-блок */}
         <div className="forum-brand">

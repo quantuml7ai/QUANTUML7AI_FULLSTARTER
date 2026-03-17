@@ -33,7 +33,7 @@ const LS_LAST_POPUP = 'invite:lastPopupAt'
 const LS_LAST_ACTIVITY = 'invite:lastActivityAt'
 
 const INVITE_TEST_MODE =
-  process.env.NEXT_PUBLIC_INVITE_TEST_MODE === '1'
+  process.env.NEXT_PUBLIC_INVITE_TEST_MODE === '0'
 
 export default function InviteFriendProvider() {
   const [uid, setUid] = useState(null)
