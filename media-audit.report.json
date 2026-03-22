@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-03-15T13:38:00.184Z",
+  "generatedAt": "2026-03-22T22:31:46.406Z",
   "results": [
     {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\i18n.js",
@@ -134,7 +134,7 @@
         "video": 0,
         "autoplay": 2,
         "loop": 10,
-        "preload": 8,
+        "preload": 9,
         "img": 0,
         "lazy": 0,
         "create": 0,
@@ -145,11 +145,11 @@
         "video": [],
         "autoplay": [
           {
-            "line": 152,
+            "line": 236,
             "text": "// Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start."
           },
           {
-            "line": 476,
+            "line": 573,
             "text": "// === Shorts-like autoplay: play when in focus, pause when out ==="
           }
         ],
@@ -161,7 +161,7 @@
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoMedia.jsx",
       "counts": {
         "video": 1,
-        "autoplay": 6,
+        "autoplay": 4,
         "loop": 2,
         "preload": 7,
         "img": 0,
@@ -177,7 +177,7 @@
       "samples": {
         "video": [
           {
-            "line": 510,
+            "line": 550,
             "text": "<video"
           }
         ],
@@ -187,12 +187,12 @@
             "text": "autoPlay,"
           },
           {
-            "line": 139,
-            "text": "const nextMuted = typeof initialMuted === 'boolean' ? initialMuted : !!autoPlay"
-          },
-          {
             "line": 172,
             "text": "}, [autoPlay, playsInline, poster, preloadMode, readMuted, src])"
+          },
+          {
+            "line": 229,
+            "text": "}, [autoPlay, mutedEvent, readMuted, writeMuted])"
           }
         ],
         "img": [],
@@ -203,7 +203,7 @@
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
       "counts": {
         "video": 1,
-        "autoplay": 5,
+        "autoplay": 6,
         "loop": 2,
         "preload": 1,
         "img": 2,
@@ -219,7 +219,7 @@
       "samples": {
         "video": [
           {
-            "line": 1886,
+            "line": 1986,
             "text": "<video"
           }
         ],
@@ -229,21 +229,21 @@
             "text": "// Default to muted when there is no stored pref; autoplay is more reliable this way."
           },
           {
-            "line": 1549,
+            "line": 1637,
             "text": "autoplay: 0,"
           },
           {
-            "line": 1604,
+            "line": 1695,
             "text": "// If autoplay with sound is blocked, retry muted without changing the global pref."
           }
         ],
         "img": [
           {
-            "line": 1933,
+            "line": 2039,
             "text": "<img"
           },
           {
-            "line": 1982,
+            "line": 2089,
             "text": "<img"
           }
         ],
@@ -285,6 +285,47 @@
           {
             "line": 106,
             "text": "autoplay: count(text, R.autoplay),"
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\ForumBootSplash.jsx",
+      "counts": {
+        "video": 1,
+        "autoplay": 6,
+        "loop": 0,
+        "preload": 1,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 258,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 31,
+            "text": "const FORUM_SPLASH_TRY_SOUND_AUTOPLAY = 1"
+          },
+          {
+            "line": 33,
+            "text": "// If sound autoplay is blocked by browser:"
+          },
+          {
+            "line": 34,
+            "text": "// 1 = fallback to muted autoplay"
           }
         ],
         "img": [],
@@ -564,35 +605,6 @@
       }
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostMediaStack.jsx",
-      "counts": {
-        "video": 0,
-        "autoplay": 2,
-        "loop": 0,
-        "preload": 1,
-        "img": 0,
-        "lazy": 3,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [],
-      "samples": {
-        "video": [],
-        "autoplay": [
-          {
-            "line": 106,
-            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
-          },
-          {
-            "line": 183,
-            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
-          }
-        ],
-        "img": [],
-        "create": []
-      }
-    },
-    {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\BgAudio.js",
       "counts": {
         "video": 0,
@@ -615,6 +627,35 @@
           {
             "line": 53,
             "text": "// autoplay со звуком запрещён → играем тихо"
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostMediaStack.jsx",
+      "counts": {
+        "video": 0,
+        "autoplay": 2,
+        "loop": 0,
+        "preload": 0,
+        "img": 0,
+        "lazy": 3,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [
+          {
+            "line": 105,
+            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
+          },
+          {
+            "line": 182,
+            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
           }
         ],
         "img": [],
@@ -727,6 +768,33 @@
       "flags": [],
       "samples": {
         "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\tools\\audit-media-budget.js",
+      "counts": {
+        "video": 1,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 1,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 19,
+            "text": "{ key: 'videoTag', rx: /<video\\b/gi },"
+          }
+        ],
         "autoplay": [],
         "img": [],
         "create": []
@@ -922,6 +990,31 @@
       }
     },
     {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\tools\\audit-ad-runtime.js",
+      "counts": {
+        "video": 1,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [
+          {
+            "line": 16,
+            "text": "{ key: 'videoTag', rx: /<video\\b/gi },"
+          }
+        ],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
       "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\ScrollTopPulse.js",
       "counts": {
         "video": 0,
@@ -1102,7 +1195,7 @@
         "autoplay": [],
         "img": [
           {
-            "line": 388,
+            "line": 369,
             "text": "<img"
           }
         ],

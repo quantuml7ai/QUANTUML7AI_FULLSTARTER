@@ -1,0 +1,251 @@
+{
+  "file": "c:\\Users\\BETEP\\Downloads\\Heap-20260323T000929.heapsnapshot",
+  "fileSizeMB": 177.54,
+  "snapshot": {
+    "nodeCount": 1819717,
+    "edgeCount": 8951089,
+    "extraNativeBytesMB": 5.72
+  },
+  "nodes": {
+    "totalNodes": 1819717,
+    "totalSelfSize": 233138225,
+    "totalSelfSizeMB": 222.34,
+    "detachedNodes": 1220,
+    "detachedSelfSize": 184872,
+    "detachedSelfSizeMB": 0.18,
+    "topTypesBySelfSize": [
+      {
+        "type": "native",
+        "count": 47313,
+        "selfSize": 139974345,
+        "detachedCount": 1220,
+        "detachedSelfSize": 184872,
+        "maxSelfSize": 33513772,
+        "selfSizeMB": 133.49,
+        "detachedSelfSizeMB": 0.18,
+        "maxSelfSizeKB": 32728.29
+      },
+      {
+        "type": "code",
+        "count": 346952,
+        "selfSize": 22089200,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "maxSelfSize": 154496,
+        "selfSizeMB": 21.07,
+        "detachedSelfSizeMB": 0,
+        "maxSelfSizeKB": 150.88
+      },
+      {
+        "type": "string",
+        "count": 176877,
+        "selfSize": 21782648,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "maxSelfSize": 5384036,
+        "selfSizeMB": 20.77,
+        "detachedSelfSizeMB": 0,
+        "maxSelfSizeKB": 5257.85
+      },
+      {
+        "type": "closure",
+        "count": 657403,
+        "selfSize": 17247328,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "maxSelfSize": 36,
+        "selfSizeMB": 16.45,
+        "detachedSelfSizeMB": 0,
+        "maxSelfSizeKB": 0.04
+      },
+      {
+        "type": "array",
+        "count": 45217,
+        "selfSize": 14945684,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "maxSelfSize": 2621460,
+        "selfSizeMB": 14.25,
+        "detachedSelfSizeMB": 0,
+        "maxSelfSizeKB": 2560.02
+      },
+      {
+        "type": "object",
+        "count": 235439,
+        "selfSize": 7480132,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "maxSelfSize": 19780,
+        "selfSizeMB": 7.13,
+        "detachedSelfSizeMB": 0,
+        "maxSelfSizeKB": 19.32
+      },
+      {
+        "type": "object shape",
+        "count": 93127,
+        "selfSize": 4980280,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "maxSelfSize": 10712,
+        "selfSizeMB": 4.75,
+        "detachedSelfSizeMB": 0,
+        "maxSelfSizeKB": 10.46
+      },
+      {
+        "type": "hidden",
+        "count": 130824,
+        "selfSize": 3026676,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "maxSelfSize": 49160,
+        "selfSizeMB": 2.89,
+        "detachedSelfSizeMB": 0,
+        "maxSelfSizeKB": 48.01
+      },
+      {
+        "type": "concatenated string",
+        "count": 69782,
+        "selfSize": 1395640,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "maxSelfSize": 20,
+        "selfSizeMB": 1.33,
+        "detachedSelfSizeMB": 0,
+        "maxSelfSizeKB": 0.02
+      },
+      {
+        "type": "number",
+        "count": 12792,
+        "selfSize": 115428,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "maxSelfSize": 12,
+        "selfSizeMB": 0.11,
+        "detachedSelfSizeMB": 0,
+        "maxSelfSizeKB": 0.01
+      },
+      {
+        "type": "regexp",
+        "count": 2574,
+        "selfSize": 72072,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "maxSelfSize": 28,
+        "selfSizeMB": 0.07,
+        "detachedSelfSizeMB": 0,
+        "maxSelfSizeKB": 0.03
+      },
+      {
+        "type": "bigint",
+        "count": 1174,
+        "selfSize": 25208,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "maxSelfSize": 48,
+        "selfSizeMB": 0.02,
+        "detachedSelfSizeMB": 0,
+        "maxSelfSizeKB": 0.05
+      },
+      {
+        "type": "sliced string",
+        "count": 116,
+        "selfSize": 2320,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "maxSelfSize": 20,
+        "selfSizeMB": 0,
+        "detachedSelfSizeMB": 0,
+        "maxSelfSizeKB": 0.02
+      },
+      {
+        "type": "symbol",
+        "count": 95,
+        "selfSize": 1264,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "maxSelfSize": 16,
+        "selfSizeMB": 0,
+        "detachedSelfSizeMB": 0,
+        "maxSelfSizeKB": 0.02
+      },
+      {
+        "type": "synthetic",
+        "count": 32,
+        "selfSize": 0,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "maxSelfSize": 0,
+        "selfSizeMB": 0,
+        "detachedSelfSizeMB": 0,
+        "maxSelfSizeKB": 0
+      }
+    ],
+    "topTypesByDetachedSize": [
+      {
+        "type": "native",
+        "count": 47313,
+        "selfSize": 139974345,
+        "detachedCount": 1220,
+        "detachedSelfSize": 184872,
+        "maxSelfSize": 33513772,
+        "selfSizeMB": 133.49,
+        "detachedSelfSizeMB": 0.18,
+        "maxSelfSizeKB": 32728.29
+      }
+    ]
+  },
+  "keywordHits": [
+    {
+      "keyword": "htmlvideoelement",
+      "count": 92
+    },
+    {
+      "keyword": "youtube",
+      "count": 82
+    },
+    {
+      "keyword": "forumads",
+      "count": 67
+    },
+    {
+      "keyword": "tiktok",
+      "count": 46
+    },
+    {
+      "keyword": "intersectionobserver",
+      "count": 27
+    },
+    {
+      "keyword": "__forum",
+      "count": 23
+    },
+    {
+      "keyword": "detached",
+      "count": 21
+    },
+    {
+      "keyword": "htmliframeelement",
+      "count": 21
+    },
+    {
+      "keyword": "htmlaudioelement",
+      "count": 19
+    },
+    {
+      "keyword": "resizeobserver",
+      "count": 17
+    },
+    {
+      "keyword": "useforummediacoordinator",
+      "count": 13
+    },
+    {
+      "keyword": "wagmi",
+      "count": 9
+    },
+    {
+      "keyword": "web3modal",
+      "count": 0
+    }
+  ]
+}

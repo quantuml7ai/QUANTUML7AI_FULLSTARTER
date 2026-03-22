@@ -1,0 +1,102 @@
+{
+  "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
+  "generatedAt": "2026-03-22T15:49:01.951Z",
+  "report": [
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
+      "runtime": {
+        "videoTag": 1,
+        "iframeTag": 2,
+        "intersectionObserver": 6,
+        "mapUsage": 8,
+        "fetchCalls": 4,
+        "imageProbe": 1,
+        "ytPlayer": 4,
+        "intervals": 0,
+        "raf": 0,
+        "preloadAttr": 1
+      },
+      "business": {
+        "purchase": 0,
+        "activation": 0,
+        "placement": 0,
+        "rotation": 1,
+        "package": 0
+      },
+      "runtimeScore": 27,
+      "businessScore": 1
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumAdsRuntime.js",
+      "runtime": {
+        "videoTag": 0,
+        "iframeTag": 0,
+        "intersectionObserver": 0,
+        "mapUsage": 1,
+        "fetchCalls": 0,
+        "imageProbe": 0,
+        "ytPlayer": 0,
+        "intervals": 0,
+        "raf": 0,
+        "preloadAttr": 0
+      },
+      "business": {
+        "purchase": 0,
+        "activation": 0,
+        "placement": 0,
+        "rotation": 0,
+        "package": 0
+      },
+      "runtimeScore": 1,
+      "businessScore": 0
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\lib\\adsCore.js",
+      "runtime": {
+        "videoTag": 0,
+        "iframeTag": 0,
+        "intersectionObserver": 0,
+        "mapUsage": 0,
+        "fetchCalls": 1,
+        "imageProbe": 0,
+        "ytPlayer": 0,
+        "intervals": 0,
+        "raf": 0,
+        "preloadAttr": 0
+      },
+      "business": {
+        "purchase": 0,
+        "activation": 0,
+        "placement": 0,
+        "rotation": 0,
+        "package": 16
+      },
+      "runtimeScore": 1,
+      "businessScore": 16
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ForumAdSlot.jsx",
+      "runtime": {
+        "videoTag": 0,
+        "iframeTag": 0,
+        "intersectionObserver": 0,
+        "mapUsage": 0,
+        "fetchCalls": 0,
+        "imageProbe": 0,
+        "ytPlayer": 0,
+        "intervals": 0,
+        "raf": 0,
+        "preloadAttr": 0
+      },
+      "business": {
+        "purchase": 0,
+        "activation": 0,
+        "placement": 0,
+        "rotation": 0,
+        "package": 0
+      },
+      "runtimeScore": 0,
+      "businessScore": 0
+    }
+  ]
+}

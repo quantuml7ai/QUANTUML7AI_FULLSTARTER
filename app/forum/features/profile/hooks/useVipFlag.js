@@ -14,8 +14,7 @@ export default function useVipFlag(userId, hint) {
   const [vip, setVip] = React.useState(() => {
     const fromHint = vipFromHint(hint)
     if (fromHint !== null) return fromHint
-    const fromProf = vipFromProfile(safeReadProfile(uid))
-    return fromProf
+    return false
   })
 
   React.useEffect(() => {

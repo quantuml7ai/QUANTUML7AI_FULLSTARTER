@@ -4,9 +4,7 @@ import { isBrowser } from '../../../shared/utils/browser'
 const ADMIN_KEY = 'ql7_admin'
 
 export default function useAdminFlag() {
-  const [isAdmin, setIsAdmin] = useState(
-    () => isBrowser() && localStorage.getItem(ADMIN_KEY) === '1'
-  )
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     if (!isBrowser()) return

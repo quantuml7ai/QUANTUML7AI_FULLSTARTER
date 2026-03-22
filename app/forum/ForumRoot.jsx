@@ -9,7 +9,6 @@ import ForumProviders from './ForumProviders'
 import {
   optimizeForumVideoFastStart,
 } from '../../lib/forumVideoTrim'
-import { useEvent } from './shared/hooks/useEvent'
 import useHtmlFlag from './shared/hooks/useHtmlFlag'
 import useForumToast from './shared/hooks/useForumToast'
 import { isBrowser } from './shared/utils/browser'
@@ -44,15 +43,20 @@ import buildForumRootPropBundles from './features/ui/utils/buildForumRootPropBun
 import buildForumLayoutProps from './features/ui/utils/buildForumLayoutProps'
 import useForumDataRuntime from './features/feed/hooks/useForumDataRuntime'
 import useForumMutationActions from './features/feed/hooks/useForumMutationActions'
-import useForumFeedRuntime from './features/feed/hooks/useForumFeedRuntime'
-import useUserPostsBranchModel from './features/feed/hooks/useUserPostsBranchModel'
+import useForumFeedRuntime, {
+  useForumModeSync,
+  useForumScrollAlignmentRuntime,
+} from './features/feed/hooks/useForumFeedRuntime'
+import {
+  useForumProfileBranchRuntime,
+  useForumProfileBranchActions,
+} from './features/feed/hooks/useUserPostsBranchModel'
 import {
   getScrollSnapshot as getNavScrollSnapshot,
   getEntryOffset as getNavEntryOffset,
   restoreScrollSnapshot as restoreNavScrollSnapshot,
   restoreEntryPosition as restoreNavEntryPosition,
 } from './features/feed/utils/navScroll'
-import { snapVideoFeedToFirstCardTop as snapVideoFeedToFirstCardTopUtil } from './features/media/utils/videoFeedScroll'
 import { createFeedRateLimiter } from './features/feed/services/rateLimiter'
 import TopicItem from './features/feed/components/TopicItem'
 import PostCard from './features/feed/components/PostCardBridge'
@@ -94,8 +98,7 @@ import {
 } from './features/profile/utils/profileCache'
 import {
   readForumAuth as readAuth,
-  useSyncForumProfileOnMount,
-  useSyncForumAboutOnMount,
+  useSyncForumPostAuthProfileOnMount,
 } from './features/profile/hooks/useForumProfileSync'
 import useForumProfileSocialRuntime from './features/profile/hooks/useForumProfileSocialRuntime'
 import { VIP_EMOJI, VIP_AVATARS } from './features/profile/constants/vipAssets'
@@ -151,8 +154,7 @@ export default function Forum(){
 
 
   const [profileBump, setProfileBump] = useState(0)
-  useSyncForumProfileOnMount(() => setProfileBump((x) => x + 1))
-    useSyncForumAboutOnMount(() => setProfileBump((x) => x + 1))
+  useSyncForumPostAuthProfileOnMount(() => setProfileBump((x) => x + 1))
   void profileBump
   const { t, locale } = useI18n()
   const toast = useForumToast()
@@ -236,17 +238,6 @@ const {
   PUBLISHED_PAGE_SIZE,
 } = useForumViewState()
 
-const [profileBranchMode, setProfileBranchMode] = useState(null)
-const [profileBranchUserId, setProfileBranchUserId] = useState(null)
-const [profileBranchUserNick, setProfileBranchUserNick] = useState('')
-const [visibleProfilePostsCount, setVisibleProfilePostsCount] = useState(THREAD_PAGE_SIZE)
-
-const clearProfileBranch = useCallback(() => {
-  setProfileBranchMode(null)
-  setProfileBranchUserId(null)
-  setProfileBranchUserNick('')
-}, [])
-
 useForumMediaCoordinator({ emitDiag })
 const openOnlyRef = useRef(null)
 const popoverControlsRef = useRef({})
@@ -319,6 +310,26 @@ const {
   setProfileBump,
   tombstoneTtlMs: TOMBSTONE_TTL_MS,
 })
+const {
+  profileBranchMode,
+  setProfileBranchMode,
+  profileBranchUserId,
+  setProfileBranchUserId,
+  profileBranchUserNick,
+  setProfileBranchUserNick,
+  visibleProfilePostsCount,
+  setVisibleProfilePostsCount,
+  normalizedProfileBranchUserId,
+  clearProfileBranch,
+  profileBranchAllPosts,
+  visibleProfilePosts,
+  profilePostsHasMore,
+} = useForumProfileBranchRuntime({
+  posts: data?.posts,
+  postSort,
+  resolveProfileAccountIdFn: resolveProfileAccountId,
+  threadPageSize: THREAD_PAGE_SIZE,
+})
 
 const {
   bindNavActions,
@@ -335,36 +346,6 @@ const openOnly = useForumPopoverModeController({
 useEffect(() => {
   openOnlyRef.current = openOnly
 }, [openOnly])
-const alignInboxStartUnderTabsEvent = useEvent((attempt = 0) => alignInboxStartUnderTabs(attempt))
-const requestAlignInboxStartUnderTabs = React.useCallback(() => {
-  ;[0, 60, 140, 260].forEach((delay, idx) => {
-    setTimeout(() => {
-      try { alignInboxStartUnderTabsEvent(idx) } catch {}
-    }, delay)
-  })
-}, [alignInboxStartUnderTabsEvent])
-
-const alignNodeToTop = useEvent((node) => {
-  if (!node || !isBrowser()) return
-  try {
-    const scrollEl =
-      getScrollEl?.() ||
-      bodyRef.current ||
-      document.querySelector('[data-forum-scroll="1"]') ||
-      null
-    const rect = node.getBoundingClientRect?.()
-    if (!rect) return
-    const useInner = !!scrollEl && (scrollEl.scrollHeight > scrollEl.clientHeight + 1)
-    if (useInner) {
-      const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }
-      const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))
-      scrollEl.scrollTop = Math.max(0, targetTop)
-      return
-    }
-    const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top
-    try { window.scrollTo({ top: y, behavior: 'auto' }) } catch { try { window.scrollTo(0, y) } catch {} }
-  } catch {}
-})
 
 const {
   reportUI,
@@ -432,6 +413,17 @@ useEffect(() => { headHiddenRef.current = headHidden }, [headHidden]);
 useEffect(() => { headPinnedRef.current = headPinned }, [headPinned]);
 useHtmlFlag('data-forum-active', '1');
 useHtmlFlag('data-head-hidden', headHidden && !headPinned ? '1' : null);
+
+const {
+  requestAlignInboxStartUnderTabs,
+  alignNodeToTop,
+  canAutoAlignNow,
+} = useForumScrollAlignmentRuntime({
+  alignInboxStartUnderTabs,
+  getScrollEl,
+  bodyRef,
+  isBrowserFn: isBrowser,
+})
   
 const questBtnClass = ''
 const setVideoFeedOpenRef = useRef(() => {})
@@ -517,11 +509,6 @@ const {
 })
 inboxMessagesModeRef.current = !!inboxOpen && inboxTab === 'messages'
 useHtmlFlag('data-inbox-open', inboxOpen ? '1' : null)
-const normalizedProfileBranchUserId = useMemo(() => {
-  const raw = String(profileBranchUserId || '').trim()
-  if (!raw) return ''
-  return String(resolveProfileAccountId(raw) || raw).trim()
-}, [profileBranchUserId])
 const {
   threadRoot,
   setThreadRoot,
@@ -582,118 +569,19 @@ const {
   starredFirstFn: starredFirst,
 })
 
-const {
-  filteredPosts: profileBranchAllPosts,
-  visiblePosts: visibleProfilePosts,
-  hasMore: profilePostsHasMore,
-} = useUserPostsBranchModel({
-  posts: data?.posts,
-  postSort,
-  authorFilterUserId: profileBranchMode === 'posts' ? normalizedProfileBranchUserId : '',
-  visiblePostsCount: visibleProfilePostsCount,
-  resolveProfileAccountIdFn: resolveProfileAccountId,
-})
-
-const forumModeKey = useMemo(() => {
-  if (videoFeedOpenRef.current === true) return 'video_feed'
-  if (questOpen) return `quest:${String(questSel?.id || '')}`
-  if (inboxOpen) {
-    if (inboxTab === 'messages' && dmWithUserId) return `inbox:dm:${String(dmWithUserId)}`
-    return `inbox:list:${String(inboxTab || 'messages')}`
-  }
-  if (sel?.id) {
-    if (threadRoot?.id) return `thread:replies:${String(threadRoot.id)}`
-    return `thread:topic:${String(sel.id)}`
-  }
-  if (profileBranchMode) {
-    return `profile_branch:${profileBranchMode}:${String(normalizedProfileBranchUserId || '')}`
-  }
-  return 'topics'
-}, [
+useForumModeSync({
+  videoFeedOpenRef,
   questOpen,
-  questSel?.id,
+  questId: questSel?.id,
   inboxOpen,
   inboxTab,
   dmWithUserId,
-  sel?.id,
-  threadRoot?.id,
+  selectedTopicId: sel?.id,
+  threadRootId: threadRoot?.id,
   profileBranchMode,
   normalizedProfileBranchUserId,
-])
-
-const prevForumModeKeyRef = useRef(forumModeKey)
-useEffect(() => {
-  const prevMode = String(prevForumModeKeyRef.current || '')
-  const nextMode = String(forumModeKey || '')
-  if (prevMode === nextMode) return
-  prevForumModeKeyRef.current = nextMode
-
-  if (navRestoringRef.current) return
-  if (deeplinkUI?.active) return
-
-  const isDmThreadMode = nextMode.startsWith('inbox:dm:')
-  if (isDmThreadMode) return
-
-  const runAlign = () => {
-    try {
-      if (nextMode === 'video_feed') {
-        snapVideoFeedToFirstCardTopUtil({
-          opts: { hideHeader: true, anchorOnly: true },
-          isBrowserFn: isBrowser,
-          bodyRef,
-          headAutoOpenRef,
-          setHeadPinned,
-          setHeadHidden,
-        })
-        return
-      }
-      if (nextMode.startsWith('inbox:list:')) {
-        requestAlignInboxStartUnderTabs()
-        return
-      }
-      const scrollEl =
-        getScrollEl?.() ||
-        bodyRef.current ||
-        document.querySelector('[data-forum-scroll="1"]') ||
-        null
-      const root = scrollEl || document
-      let branchStart =
-        root.querySelector?.('[data-forum-thread-start="1"]') ||
-        root.querySelector?.('[data-forum-topics-start="1"]') ||
-        root.querySelector?.('.inboxBody [data-feed-card="1"]') ||
-        root.querySelector?.('[data-feed-card="1"]') ||
-        null
-      if (!branchStart && root !== document) {
-        branchStart =
-          document.querySelector?.('[data-forum-thread-start="1"]') ||
-          document.querySelector?.('[data-forum-topics-start="1"]') ||
-          document.querySelector?.('.inboxBody [data-feed-card="1"]') ||
-          document.querySelector?.('[data-feed-card="1"]') ||
-          null
-      }
-      if (branchStart) {
-        alignNodeToTop(branchStart)
-      }
-    } catch {}
-  }
-
-  let rafA = 0
-  let rafB = 0
-  try {
-    rafA = requestAnimationFrame(() => {
-      rafB = requestAnimationFrame(runAlign)
-    })
-  } catch {
-    try { setTimeout(runAlign, 0) } catch {}
-  }
-  return () => {
-    try { if (rafA) cancelAnimationFrame(rafA) } catch {}
-    try { if (rafB) cancelAnimationFrame(rafB) } catch {}
-  }
-}, [
-  forumModeKey,
   navRestoringRef,
-  deeplinkUI?.active,
+  deeplinkActive: deeplinkUI?.active,
   requestAlignInboxStartUnderTabs,
   bodyRef,
   getScrollEl,
@@ -701,7 +589,10 @@ useEffect(() => {
   headAutoOpenRef,
   setHeadPinned,
   setHeadHidden,
-])
+  isBrowserFn: isBrowser,
+  topicsCardsCount: visibleTopics?.length || 0,
+  canAutoAlignNow,
+})
 
 useForumHeadCollapse({
   isBrowserFn: isBrowser,
@@ -1065,67 +956,31 @@ const {
   pendingVideo,
 })
 
-const openProfileBranch = useCallback((mode, payload = {}) => {
-  const rawUserId = String(payload?.userId || '').trim()
-  if (!rawUserId) return
-  const resolvedUserId = String(resolveProfileAccountId(rawUserId) || rawUserId).trim()
-  const branchMode = mode === 'posts' ? 'posts' : 'topics'
-
-  try { pushNavStateStable(`profile_${branchMode}_${resolvedUserId}`) } catch {}
-
-  setProfileBranchMode(branchMode)
-  setProfileBranchUserId(resolvedUserId)
-
-  const displayNick = String(
-    payload?.nickname || resolveNickForDisplay(resolvedUserId, '') || rawUserId,
-  ).trim()
-  setProfileBranchUserNick(displayNick)
-
-  setSel(null)
-  setThreadRoot(null)
-  setReplyTo(null)
-  setInboxOpen(false)
-  setQuestOpen(false)
-  setVideoFeedOpenBridge(false)
-  setTopicFilterId(null)
-  setQ('')
-  setDrop(false)
-  setSortOpen(false)
-
-  if (branchMode === 'posts') {
-    setVisibleProfilePostsCount(THREAD_PAGE_SIZE)
-  } else {
-    setVisibleTopicsCount(TOPIC_PAGE_SIZE)
-  }
-}, [
+const {
+  openProfilePostsBranch,
+  openProfileTopicsBranch,
+} = useForumProfileBranchActions({
+  resolveProfileAccountIdFn: resolveProfileAccountId,
+  resolveNickForDisplayFn: resolveNickForDisplay,
   pushNavStateStable,
-  setSel,
+  setProfileBranchMode,
+  setProfileBranchUserId,
+  setProfileBranchUserNick,
+  setSelectedTopic: setSel,
   setThreadRoot,
   setReplyTo,
   setInboxOpen,
   setQuestOpen,
-  setVideoFeedOpenBridge,
+  setVideoFeedOpen: setVideoFeedOpenBridge,
   setTopicFilterId,
-  setQ,
+  setQuery: setQ,
   setDrop,
   setSortOpen,
+  setVisibleProfilePostsCount,
   setVisibleTopicsCount,
-  THREAD_PAGE_SIZE,
-  TOPIC_PAGE_SIZE,
-])
-
-const openProfilePostsBranch = useCallback((payload) => {
-  openProfileBranch('posts', payload)
-}, [openProfileBranch])
-
-const openProfileTopicsBranch = useCallback((payload) => {
-  openProfileBranch('topics', payload)
-}, [openProfileBranch])
-
-useEffect(() => {
-  if (profileBranchMode !== 'posts') return
-  setVisibleProfilePostsCount(THREAD_PAGE_SIZE)
-}, [profileBranchMode, profileBranchUserId, postSort, THREAD_PAGE_SIZE])
+  threadPageSize: THREAD_PAGE_SIZE,
+  topicPageSize: TOPIC_PAGE_SIZE,
+})
 
 popoverControlsRef.current = {
   setProfileOpen,

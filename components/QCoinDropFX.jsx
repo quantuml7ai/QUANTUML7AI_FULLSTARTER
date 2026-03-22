@@ -39,6 +39,7 @@ const CLICK_IMPULSE_BASE = 90
 const DEFAULT_INTERVAL_MS = 120_000
 const DEFAULT_MIN_SIZE = 25
 const DEFAULT_MAX_SIZE = 50
+const POST_AUTH_DEDUP_WINDOW_MS = 1800
 
 /* ===== УМНЫЕ МНОЖИТЕЛИ (ТОЛЬКО В ПЛЮС, ДО x100) ===== */
 const ENV_BASE_MULT = (() => {
@@ -304,6 +305,7 @@ export default function QCoinDropFX ({
   const impulseStrengthRef = useRef(0)
   const motionReducedRef = useRef(false)
   const visibilityPausedRef = useRef(false)
+  const lastPostAuthSignalRef = useRef({ accountId: '', ts: 0 })
 
   const initWorld = useCallback(() => {
     if (!isBrowser()) return
@@ -348,28 +350,87 @@ export default function QCoinDropFX ({
   useEffect(() => {
     if (!isBrowser()) return
 
-    const onAuth = () => {
-      const acc = readUnifiedAccountId()
-      if (acc) {
-        setUid(acc)
-        const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now()
+    const applyUid = (accountId, source = 'unknown') => {
+      const acc = String(accountId || readUnifiedAccountId() || '').trim()
+      if (!acc) return false
+
+      const nowTs = Date.now()
+      const prev = lastPostAuthSignalRef.current || { accountId: '', ts: 0 }
+      const sameSignalBurst =
+        prev.accountId === acc &&
+        nowTs - Number(prev.ts || 0) < POST_AUTH_DEDUP_WINDOW_MS
+      if (sameSignalBurst) return true
+
+      lastPostAuthSignalRef.current = { accountId: acc, ts: nowTs, source }
+      setUid(acc)
+      const now =
+        (typeof performance !== 'undefined' && performance.now)
+          ? performance.now()
+          : nowTs
+      if (!spawnAtRef.current || spawnAtRef.current < now) {
         spawnAtRef.current = now + intervalMs
       }
+      return true
     }
 
-    window.addEventListener('auth:ok', onAuth)
-    window.addEventListener('auth:success', onAuth)
+    const applyPostAuthSignal = (accountId, source = 'unknown') => {
+      void applyUid(accountId, source)
+    }
+
+    const onPostAuthReady = (event) => {
+      const accountId = String(event?.detail?.accountId || '').trim()
+      const reason = String(event?.detail?.reason || '').trim()
+      applyPostAuthSignal(accountId, reason ? `forum:${reason}` : 'forum')
+    }
+
+    const onAuthFallback = (event) => {
+      const accountId = String(event?.detail?.accountId || '').trim()
+      // Фолбэк без дополнительного post-auth эффекта, только синхронизация uid.
+      applyPostAuthSignal(accountId, 'auth_fallback')
+    }
+
+    const onAuthLogout = () => {
+      const strictAccount = String(window.__AUTH_ACCOUNT__ || window.__ASHER_ID__ || '').trim()
+      if (strictAccount) {
+        void applyUid(strictAccount, 'auth_logout_strict_recover')
+        return
+      }
+      setUid(null)
+      coinRef.current = null
+      spawnAtRef.current = 0
+    }
+
+    const recoverUid = () => {
+      void applyUid(readUnifiedAccountId(), 'lifecycle_recover')
+    }
+
+    const onVisible = () => {
+      try {
+        if (document.visibilityState === 'visible') recoverUid()
+      } catch {}
+    }
+
+    window.addEventListener('forum:post-auth-ready', onPostAuthReady)
+    window.addEventListener('auth:ok', onAuthFallback)
+    window.addEventListener('auth:logout', onAuthLogout)
+    window.addEventListener('focus', recoverUid)
+    window.addEventListener('pageshow', recoverUid)
+    window.addEventListener('storage', recoverUid)
+    document.addEventListener('visibilitychange', onVisible)
 
     const initial = readUnifiedAccountId()
     if (initial) {
-      setUid(initial)
-      const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now()
-      spawnAtRef.current = now + intervalMs
+      void applyUid(initial, 'initial_mount')
     }
 
     return () => {
-      window.removeEventListener('auth:ok', onAuth)
-      window.removeEventListener('auth:success', onAuth)
+      window.removeEventListener('forum:post-auth-ready', onPostAuthReady)
+      window.removeEventListener('auth:ok', onAuthFallback)
+      window.removeEventListener('auth:logout', onAuthLogout)
+      window.removeEventListener('focus', recoverUid)
+      window.removeEventListener('pageshow', recoverUid)
+      window.removeEventListener('storage', recoverUid)
+      document.removeEventListener('visibilitychange', onVisible)
     }
   }, [intervalMs])
 
@@ -693,9 +754,9 @@ export default function QCoinDropFX ({
   }, [toast])
 
   /**
-   * ✅ БОЕВОЙ ФИКС НАГРАДЫ И МНОЖИТЕЛЯ:
-   * - UI множитель: всегда монетный, если сервер вернул 1
-   * - UI награда: если сервер вернул "базу" (multiplierApplied=1), а монета >1 — умножаем для отображения
+   * Показываем только серверные значения:
+   * - rewardQcoin: фактически начисленная награда
+   * - multiplierApplied: фактически применённый множитель
    */
   const handleCollect = async (e) => {
     const coin = coinRef.current
@@ -710,7 +771,6 @@ export default function QCoinDropFX ({
     let rewardFromServer = 0
     let multApplied = 1
     let isError = false
-    let baseRewardMaybe = null
 
     try {
       const res = await fetch('/api/qcoin/drop', {
@@ -722,16 +782,6 @@ export default function QCoinDropFX ({
 
       // награда от сервера (как есть)
       rewardFromServer = Number(data?.rewardQcoin ?? data?.reward ?? 0) || 0
-
-      // если сервер иногда отдаёт "базу" отдельным полем — поддержим сразу
-      baseRewardMaybe = Number(
-        data?.rewardBase ??
-        data?.rewardUnmultiplied ??
-        data?.rewardBeforeMultiplier ??
-        data?.baseReward ??
-        NaN
-      )
-      if (!Number.isFinite(baseRewardMaybe)) baseRewardMaybe = null
 
       multApplied = Number(data?.multiplierApplied ?? 1)
       if (!Number.isFinite(multApplied)) multApplied = 1
@@ -747,21 +797,8 @@ export default function QCoinDropFX ({
       isError = true
     }
 
-    // UI множитель: если сервер не применил — показываем монетный
-    const uiMult = (multApplied === 1 && coinMult > 1) ? coinMult : multApplied
-
-    // UI награда:
-    // 1) если сервер дал baseReward отдельным полем — умножаем
-    // 2) иначе: если server multApplied=1, но монета >1 — считаем что rewardFromServer = база, умножаем
-    // 3) иначе — доверяем серверу (скорее всего уже умножено)
+    const uiMult = multApplied
     let uiReward = rewardFromServer
-
-    if (baseRewardMaybe != null && uiMult > 1) {
-      uiReward = baseRewardMaybe * uiMult
-    } else if (multApplied === 1 && coinMult > 1 && rewardFromServer > 0) {
-      uiReward = rewardFromServer * coinMult
-    }
-
     if (!Number.isFinite(uiReward) || uiReward < 0) uiReward = 0
 
     setToast({

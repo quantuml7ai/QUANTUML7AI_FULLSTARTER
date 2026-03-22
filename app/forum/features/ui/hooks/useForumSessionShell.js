@@ -9,7 +9,10 @@ export default function useForumSessionShell({
   t,
   toast,
 }) {
-  const [auth, setAuth] = useState(() => readAuthFn())
+  const [auth, setAuth] = useState(() => ({
+    accountId: null,
+    asherId: null,
+  }))
   const viewerId = useMemo(() => {
     return String(resolveProfileAccountIdFn(auth?.asherId || auth?.accountId) || '').trim()
   }, [auth, resolveProfileAccountIdFn])
@@ -29,6 +32,20 @@ export default function useForumSessionShell({
   const userInfoUidRef = useRef(null)
 
   useEffect(() => {
+    if (!isBrowserFn()) return undefined
+    const next = readAuthFn()
+    setAuth((prev) => {
+      const prevAccount = String(prev?.accountId || '')
+      const prevAsher = String(prev?.asherId || '')
+      const nextAccount = String(next?.accountId || '')
+      const nextAsher = String(next?.asherId || '')
+      if (prevAccount === nextAccount && prevAsher === nextAsher) return prev
+      return next
+    })
+    return undefined
+  }, [readAuthFn, isBrowserFn])
+
+  useEffect(() => {
     const upd = () => {
       const next = readAuthFn()
       setAuth((prev) => {
@@ -41,13 +58,25 @@ export default function useForumSessionShell({
       })
     }
     if (!isBrowserFn()) return undefined
+    const onVisible = () => {
+      try {
+        if (document.visibilityState === 'visible') upd()
+      } catch {}
+    }
+    upd()
     window.addEventListener('auth:ok', upd)
-    window.addEventListener('auth:success', upd)
-    const id = setInterval(upd, 3000)
+    window.addEventListener('auth:logout', upd)
+    window.addEventListener('focus', upd)
+    window.addEventListener('pageshow', upd)
+    window.addEventListener('storage', upd)
+    document.addEventListener('visibilitychange', onVisible)
     return () => {
       window.removeEventListener('auth:ok', upd)
-      window.removeEventListener('auth:success', upd)
-      clearInterval(id)
+      window.removeEventListener('auth:logout', upd)
+      window.removeEventListener('focus', upd)
+      window.removeEventListener('pageshow', upd)
+      window.removeEventListener('storage', upd)
+      document.removeEventListener('visibilitychange', onVisible)
     }
   }, [readAuthFn, isBrowserFn])
 

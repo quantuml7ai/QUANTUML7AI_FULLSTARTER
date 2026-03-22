@@ -22,9 +22,28 @@ const DROP_REWARD_QCOIN = readNumberEnv(
   0.01, // дефолт, если env не заданы
 )
 
-// Разрешённые множители награды (должны совпадать с клиентом)
-// Любые другие значения будут проигнорированы и заменены на 1
-const ALLOWED_MULTIPLIERS = [0, 0.2, 1 / 3, 0.5, 1, 2, 3, 5]
+function readIntegerEnv (names, fallback) {
+  const raw = readNumberEnv(names, fallback)
+  const n = Number(raw)
+  if (!Number.isFinite(n)) return fallback
+  return Math.floor(n)
+}
+
+const MIN_MULTIPLIER = 1
+const MAX_MULTIPLIER = Math.max(
+  MIN_MULTIPLIER,
+  readIntegerEnv(
+    ['QCOIN_DROP_MAX_MULT', 'NEXT_PUBLIC_QCOIN_DROP_MAX_MULT'],
+    100,
+  ),
+)
+
+function normalizeMultiplier (raw) {
+  const n = Number(raw)
+  if (!Number.isFinite(n)) return 1
+  const int = Math.floor(n)
+  return Math.max(MIN_MULTIPLIER, Math.min(MAX_MULTIPLIER, int))
+}
 
 const qcoinKey = (uid) => `qcoin:${uid}`
 
@@ -56,16 +75,10 @@ export async function POST (req) {
     return bad('invalid_qcoin_reward', 500)
   }
 
-  // multiplier может прислать клиент, но мы применяем ТОЛЬКО из whitelist
-  // если не прислал или прислал мусор — считаем x1
-  let multRaw = body && typeof body === 'object' ? body.multiplier : undefined
-  let mult = Number(multRaw)
-  if (!Number.isFinite(mult)) mult = 1
-
-  // допускаем небольшую погрешность (на случай 0.3333333)
-  const EPS = 1e-6
-  const allowed = ALLOWED_MULTIPLIERS.find((m) => Math.abs(m - mult) <= EPS)
-  const multiplierApplied = Number.isFinite(allowed) ? allowed : 1
+  // multiplier может прислать клиент, но сервер применяет только безопасный целый диапазон
+  // всё, что невалидно, приводим к x1
+  const multRaw = body && typeof body === 'object' ? body.multiplier : undefined
+  const multiplierApplied = normalizeMultiplier(multRaw)
 
   // итоговая награда, которая реально начисляется
   const reward = baseReward * multiplierApplied

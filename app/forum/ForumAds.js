@@ -823,7 +823,7 @@ function tryLoadImage(src, timeoutMs = 3000) {
     const timer = setTimeout(() => finish(false), timeoutMs);
     img.src = src;
   }).then((ok) => {
-    try { setBoundedMap(adImageProbeCache, src, !!ok, 320); } catch {}
+    try { setBoundedMap(adImageProbeCache, src, !!ok, AD_IMAGE_PROBE_CACHE_CAP); } catch {}
     return !!ok;
   });
 }
@@ -856,7 +856,7 @@ async function detectMediaKind(url, timeoutMs = 3000) {
     }
   }
   if (!canProbeMediaKind(url)) {
-    setBoundedMap(adMediaKindCache, url, null, 320);
+    setBoundedMap(adMediaKindCache, url, null, AD_MEDIA_KIND_CACHE_CAP);
     return null;
   }
 
@@ -875,15 +875,15 @@ async function detectMediaKind(url, timeoutMs = 3000) {
       const ct = (resp.headers.get('content-type') || '').toLowerCase();
 
       if (ct.startsWith('video/')) {
-        setBoundedMap(adMediaKindCache, url, 'video', 320);
+        setBoundedMap(adMediaKindCache, url, 'video', AD_MEDIA_KIND_CACHE_CAP);
         return 'video';
       }
       if (ct.startsWith('image/')) {
-        setBoundedMap(adMediaKindCache, url, 'image', 320);
+        setBoundedMap(adMediaKindCache, url, 'image', AD_MEDIA_KIND_CACHE_CAP);
         return 'image';
       }
 
-      setBoundedMap(adMediaKindCache, url, null, 320);
+      setBoundedMap(adMediaKindCache, url, null, AD_MEDIA_KIND_CACHE_CAP);
       return null;
     } catch {
       return null;
@@ -893,7 +893,7 @@ async function detectMediaKind(url, timeoutMs = 3000) {
     }
   })();
 
-  adMediaKindPending.set(url, probe);
+  setBoundedMap(adMediaKindPending, url, probe, AD_PENDING_RESOLVE_CAP);
   return probe;
 }
 
@@ -945,6 +945,11 @@ const adMediaKindPending = new Map();
 const adMediaResolveCache = new Map();
 const adMediaResolvePending = new Map();
 const adImageProbeCache = new Map();
+const AD_LAST_MEDIA_INDEX_CAP = 240;
+const AD_MEDIA_KIND_CACHE_CAP = 320;
+const AD_MEDIA_RESOLVE_CACHE_CAP = 320;
+const AD_IMAGE_PROBE_CACHE_CAP = 320;
+const AD_PENDING_RESOLVE_CAP = 96;
 const pruneBoundedMap = (map, cap = 240) => {
   try {
     while (map.size > cap) {
@@ -962,6 +967,81 @@ const setBoundedMap = (map, key, value, cap = 240) => {
   } catch {}
   return value;
 };
+
+function hasForumContentActiveCandidate() {
+  if (!isBrowser()) return false;
+  try {
+    if (
+      document.querySelector(
+        [
+          '[data-forum-media][data-__active="1"]',
+          'iframe[data-forum-media][data-forum-iframe-active="1"]',
+          '[data-forum-media][data-__loadPending="1"][data-__prewarm="1"]',
+        ].join(',')
+      )
+    ) {
+      return true;
+    }
+  } catch {}
+  return false;
+}
+
+function readForumAdRuntimeSnapshot() {
+  if (!isBrowser()) return {};
+  try {
+    const cards = Array.from(document.querySelectorAll('[data-forum-ad-card="1"]'));
+    const summary = cards.reduce((acc, card) => {
+      const kind = String(card?.getAttribute?.('data-forum-ad-kind') || 'unknown');
+      acc.cards += 1;
+      acc.byKind[kind] = Number(acc.byKind[kind] || 0) + 1;
+      if (card?.getAttribute?.('data-forum-ad-prepare-near') === '1') acc.prepareNear += 1;
+      if (card?.getAttribute?.('data-forum-ad-near') === '1') acc.near += 1;
+      if (card?.getAttribute?.('data-forum-ad-focused') === '1') acc.focused += 1;
+      if (card?.getAttribute?.('data-forum-ad-resident') === '1') acc.resident += 1;
+      if (card?.getAttribute?.('data-forum-ad-playable') === '1') acc.playable += 1;
+      if (card?.getAttribute?.('data-forum-ad-budget-blocked') === '1') acc.budgetBlocked += 1;
+      return acc;
+    }, {
+      cards: 0,
+      prepareNear: 0,
+      near: 0,
+      focused: 0,
+      resident: 0,
+      playable: 0,
+      budgetBlocked: 0,
+      byKind: {},
+    });
+    return {
+      ...summary,
+      mountedVideos: document.querySelectorAll('[data-forum-ad-media="video"]').length,
+      mountedYouTube: document.querySelectorAll('[data-forum-ad-media="youtube"]').length,
+      mountedTikTok: document.querySelectorAll('[data-forum-ad-media="tiktok"]').length,
+      mountedIframes: document.querySelectorAll('[data-forum-ad-media="iframe"]').length,
+      cacheSizes: {
+        lastMediaIndexByKey: lastMediaIndexByKey.size,
+        adMediaKindCache: adMediaKindCache.size,
+        adMediaKindPending: adMediaKindPending.size,
+        adMediaResolveCache: adMediaResolveCache.size,
+        adMediaResolvePending: adMediaResolvePending.size,
+        adImageProbeCache: adImageProbeCache.size,
+      },
+      pendingKindResolves: adMediaKindPending.size,
+      pendingMediaResolves: adMediaResolvePending.size,
+      forumContentActive: hasForumContentActiveCandidate(),
+    };
+  } catch {
+    return {};
+  }
+}
+
+function ensureForumAdRuntimeHelper() {
+  if (!isBrowser()) return;
+  try {
+    if (typeof window.dumpForumAdRuntimeState !== 'function') {
+      window.dumpForumAdRuntimeState = () => readForumAdRuntimeSnapshot();
+    }
+  } catch {}
+}
 
 /* ======================= AdCard ======================= */
 /**
@@ -992,6 +1072,9 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     const pref = readMutedPrefFromStorage();
     const want = desiredMutedFromPref(pref);
     setMuted(want);
+  }, []);
+  useEffect(() => {
+    ensureForumAdRuntimeHelper();
   }, []);
   // Р РЋРІР‚С™Р В Р’ВµР В РЎвЂќР РЋРЎвЂњР РЋРІР‚В°Р В РЎвЂР В РІвЂћвЂ“ Р В Р вЂ Р РЋРІР‚в„–Р В Р’В±Р РЋР вЂљР В Р’В°Р В Р вЂ¦Р В Р вЂ¦Р РЋРІР‚в„–Р В РІвЂћвЂ“ mediaHref (Р В РЎвЂќР В РЎвЂўР В Р вЂ¦Р В РЎвЂќР РЋР вЂљР В Р’ВµР РЋРІР‚С™Р В Р вЂ¦Р РЋРІР‚в„–Р В РІвЂћвЂ“ youtube / Р В РЎвЂќР В Р’В°Р РЋР вЂљР РЋРІР‚С™Р В РЎвЂР В Р вЂ¦Р В РЎвЂќР В Р’В° Р В РЎвЂ Р РЋРІР‚С™.Р В РЎвЂ”.)
   const [mediaHref, setMediaHref] = useState(null);
@@ -1025,7 +1108,6 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   const [isFocused, setIsFocused] = useState(false);
   const isPageActive = usePageActiveState();
   const [mediaResident, setMediaResident] = useState(false);
-
   const shouldPlay = isFocused && isPageActive;
   const shouldResolveMedia = isPrepareNear || isNear || shouldPlay;
   const shouldPlayRef = useRef(false);
@@ -1090,9 +1172,10 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     );
 
     // focused: Р РЋР вЂљР В Р’ВµР В Р’В°Р В Р’В»Р РЋР Р‰Р В Р вЂ¦Р В РЎвЂў Р В Р вЂ Р В РЎвЂР В РўвЂР В Р вЂ¦Р В РЎвЂў (>= 60% Р В РЎвЂ”Р В Р’В»Р В РЎвЂўР РЋРІР‚В°Р В Р’В°Р В РўвЂР В РЎвЂ)
+    const focusRatio = coarseUi ? 0.25 : 0.3;
     const focusObs = new IntersectionObserver(
-      ([e]) => setIsFocused((e?.intersectionRatio || 0) >= 0.6),
-      { threshold: [0, 0.25, 0.6, 0.75, 1] }
+      ([e]) => setIsFocused((e?.intersectionRatio || 0) >= focusRatio),
+      { threshold: [0, 0.2, 0.4, 0.6, 0.8, 1] }
     );
 
     prepareObs.observe(el);
@@ -1135,6 +1218,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     };
 
   // Build the list of media choices for the current click URL.
+    window.addEventListener(MEDIA_MUTED_EVENT, onMuted);
     return () => window.removeEventListener(MEDIA_MUTED_EVENT, onMuted);
   }, []);
   const safeClick = useMemo(() => {
@@ -1186,7 +1270,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       idx = next;
     }
 
-    setBoundedMap(lastMediaIndexByKey, mediaKey, idx, 240);
+    setBoundedMap(lastMediaIndexByKey, mediaKey, idx, AD_LAST_MEDIA_INDEX_CAP);
     const nextHref = mediaChoices[idx] || null;
     setMediaHref(nextHref);
     return nextHref;
@@ -1202,7 +1286,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     if (currentHref && mediaChoices.includes(currentHref)) {
       const currentIdx = mediaChoices.indexOf(currentHref);
       if (currentIdx >= 0) {
-        setBoundedMap(lastMediaIndexByKey, mediaKey, currentIdx, 240);
+        setBoundedMap(lastMediaIndexByKey, mediaKey, currentIdx, AD_LAST_MEDIA_INDEX_CAP);
         return;
       }
     }
@@ -1270,7 +1354,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
 
     const setResolved = (next) => {
       if (!next) return next;
-      try { setBoundedMap(adMediaResolveCache, cacheKey, next, 320); } catch {}
+      try { setBoundedMap(adMediaResolveCache, cacheKey, next, AD_MEDIA_RESOLVE_CACHE_CAP); } catch {}
       if (!cancelled) setMedia(next);
       return next;
     };
@@ -1504,7 +1588,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     const pendingRun = run().finally(() => {
       try { adMediaResolvePending.delete(cacheKey); } catch {}
     });
-    try { adMediaResolvePending.set(cacheKey, pendingRun); } catch {}
+    try { setBoundedMap(adMediaResolvePending, cacheKey, pendingRun, AD_PENDING_RESOLVE_CAP); } catch {}
     return () => {
       cancelled = true;
     };
@@ -1512,6 +1596,10 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
 
   const shouldMountYouTube = mediaKind === 'youtube' && !!mediaSrc && shouldPlay;
   const shouldMountTikTok = mediaKind === 'tiktok' && !!mediaSrc && shouldPlay;
+  const shouldMountVideoResident =
+    mediaKind === 'video' &&
+    !!mediaSrc &&
+    (mediaResident || isNear || shouldPlay);
   const youtubeThumbSrc =
     mediaKind === 'youtube' && mediaSrc
       ? `https://i.ytimg.com/vi/${mediaSrc}/hqdefault.jpg`
@@ -1594,12 +1682,15 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     // HTML5 video
     if (mediaKind === 'video' && videoRef.current) {
       const v = videoRef.current;
+      const coordinatorManaged = String(v?.dataset?.forumAdManaged || '') === '1';
+      try {
+        v.muted = !!muted;
+        v.defaultMuted = !!muted;
+      } catch {}
+      if (coordinatorManaged) {
+        return;
+      }
       if (shouldPlay) {
-        // Keep the HTML video muted state aligned before play.
-        try {
-          v.muted = !!muted;
-        } catch {}
-
         v.play?.().catch(() => {
           // If autoplay with sound is blocked, retry muted without changing the global pref.
           if (!muted) {
@@ -1674,7 +1765,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     observer.observe(el);
     return () => {
       if (timer) clearTimeout(timer);
-
+      try { observer.disconnect(); } catch {}
     };
   }, [safeClick, slotKind, nearId, conf]);
 
@@ -1731,7 +1822,8 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       try {
         v.muted = next;
       } catch {}
-      if (v.paused && !next && shouldPlayRef.current) v.play?.().catch(() => {});
+      const coordinatorManaged = String(v?.dataset?.forumAdManaged || '') === '1';
+      if (!coordinatorManaged && v.paused && !next && shouldPlayRef.current) v.play?.().catch(() => {});
       return;
     }
 
@@ -1755,8 +1847,16 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
 <div
   ref={rootRef}
   className="item forum-ad-card"
+  data-forum-ad-id={playerIdRef.current}
   data-slot-kind={slotKind}
   data-ads="1"
+  data-forum-ad-card="1"
+  data-forum-ad-kind={mediaKind || 'unknown'}
+  data-forum-ad-prepare-near={isPrepareNear ? '1' : '0'}
+  data-forum-ad-near={isNear ? '1' : '0'}
+  data-forum-ad-focused={isFocused ? '1' : '0'}
+  data-forum-ad-resident={mediaResident ? '1' : '0'}
+  data-forum-ad-playable={shouldPlay ? '1' : '0'}
   style={slotCssVars}
 >
 <style jsx>{`
@@ -1881,13 +1981,18 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
               <div className="animate-pulse w-full h-full bg-[color:var(--skeleton,#111827)]" />
             )}
 
-{media.kind === 'video' && media.src && mediaResident && (
+{media.kind === 'video' && media.src && shouldMountVideoResident && (
   <div className="forum-ad-media-fill">
     <video
       ref={videoRef}
       src={media.src}
       className="forum-ad-fit"
+      data-forum-media="video"
+      data-forum-video="ad"
+      data-forum-ad-managed="1"
+      data-forum-ad-media="video"
       muted={muted}
+      autoPlay={shouldPlay}
       loop
       playsInline
       preload={shouldPlay ? 'auto' : 'metadata'}
@@ -1895,7 +2000,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
   </div>
 )}
 
-            {media.kind === 'video' && media.src && !mediaResident && (
+            {media.kind === 'video' && media.src && !shouldMountVideoResident && (
               <div className="w-full h-full flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)]">
                 {host}
               </div>
@@ -1910,6 +2015,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
     ref={ytIframeRef}
     src={`https://www.youtube.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}
     title="YouTube video"
+    data-forum-ad-media="youtube"
     frameBorder="0"
     loading="lazy"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -1953,6 +2059,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
   <iframe
     src={`https://www.tiktok.com/embed/v2/${media.src}`}
     title="TikTok video"
+    data-forum-ad-media="tiktok"
     frameBorder="0"
     loading="lazy"
     allow="autoplay; encrypted-media; fullscreen; picture-in-picture"

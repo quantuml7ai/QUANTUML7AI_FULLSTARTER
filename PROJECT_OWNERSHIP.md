@@ -4,7 +4,7 @@
 > Если меняется граница ответственности каталогов, появляются новые домены, переносятся модули между зонами или меняются entry points, этот файл обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-ownership.js`.
 
-Сгенерировано автоматически: 2026-03-14T14:01:26.237Z
+Сгенерировано автоматически: 2026-03-21T17:24:42.407Z
 
 ## Общий Принцип
 
@@ -351,7 +351,7 @@
 
 - Зона: `components`
 - Назначение: Переиспользуемые UI-компоненты и провайдеры верхнего уровня вне одного домена.
-- Точки входа: `components/AuthNavClient.jsx`, `components/BgAudio.js`, `components/HeroAvatar.js`, `components/HeroSection.js`, `components/i18n.js`, `components/InviteFriendPopup.jsx`, `components/InviteFriendProvider.jsx`, `components/LanguageSwitcher.js`, `components/NotRobot.jsx`, `components/QCoinDropFX.jsx`, `components/QCoinDropFXGate.jsx`, `components/ScrollTopPulse.js`
+- Точки входа: `components/AuthNavClient.jsx`, `components/BgAudio.js`, `components/ForumBootSplash.jsx`, `components/ForumShellGate.jsx`, `components/HeroAvatar.js`, `components/HeroSection.js`, `components/i18n.js`, `components/InviteFriendPopup.jsx`, `components/InviteFriendProvider.jsx`, `components/LanguageSwitcher.js`, `components/NotRobot.jsx`, `components/QCoinDropFX.jsx`
 - Связанные зоны: `app`, `app/forum`, `lib`, `public`
 - Примечания: Сюда входят i18n, wallet-хабы, top bar, визуальные FX и общие клиентские виджеты.
 
@@ -456,6 +456,13 @@
 - Точки входа: `public/leng/ar.png`, `public/leng/en.png`, `public/leng/es.png`, `public/leng/ru.png`, `public/leng/tr.png`, `public/leng/uk.png`
 - Связанные зоны: `app`, `components`, `app/forum`, `styles/public URLs`
 
+### public/load
+
+- Зона: `public/load`
+- Назначение: Статические ассеты namespace load.
+- Точки входа: `public/load/load.mp4`
+- Связанные зоны: `app`, `components`, `app/forum`, `styles/public URLs`
+
 ### public/metab
 
 - Зона: `public/metab`
@@ -532,5 +539,5 @@
 
 - Зона: `tools`
 - Назначение: Локальные генераторы и аудит-скрипты проекта.
-- Точки входа: `tools/analyze-forum-diag.js`, `tools/analyze-forum-media-har.js`, `tools/audit-account-sync.js`, `tools/audit-effects.js`, `tools/audit-forum-deps.js`, `tools/audit-forum-functional-parity.ps1`, `tools/audit-forum-view-report.js`, `tools/audit-full-forum.js`, `tools/audit-heavy.js`, `tools/audit-media.js`, `tools/audit-project-docs.js`, `tools/audit-runtime-hotspots.js`, `tools/generate-project-dependencies.js`, `tools/generate-project-docs.js`, `tools/generate-project-ownership.js`, `tools/generate-project-risks.js`, `tools/generate-project-routes.js`, `tools/generate-project-tree.js`, `tools/project-docs-shared.js`
+- Точки входа: `tools/analyze-forum-diag.js`, `tools/analyze-forum-media-har.js`, `tools/analyze-heapsnapshot.js`, `tools/audit-account-sync.js`, `tools/audit-ad-runtime.js`, `tools/audit-auth-bus.js`, `tools/audit-effects.js`, `tools/audit-forum-deps.js`, `tools/audit-forum-functional-parity.ps1`, `tools/audit-forum-startup.js`, `tools/audit-forum-view-report.js`, `tools/audit-full-forum.js`, `tools/audit-heavy.js`, `tools/audit-media-budget.js`, `tools/audit-media.js`, `tools/audit-project-docs.js`, `tools/audit-runtime-hotspots.js`, `tools/generate-project-dependencies.js`, `tools/generate-project-docs.js`, `tools/generate-project-ownership.js`, `tools/generate-project-risks.js`, `tools/generate-project-routes.js`, `tools/generate-project-tree.js`, `tools/project-docs-shared.js`
 - Связанные зоны: `audit`, `app`, `app/forum`, `app/api`, `components`, `lib`

@@ -100,8 +100,16 @@ function getFrameWidth() {
   return `${FORUM_SPLASH_WIDTH_VW}vw`
 }
 
+function shouldShowSplashNow() {
+  if (FORUM_SPLASH_ENABLED !== 1) return false
+  if (typeof window === 'undefined') return true
+  if (window.__QL7_FORUM_SPLASH_SHOWN__) return false
+  window.__QL7_FORUM_SPLASH_SHOWN__ = true
+  return true
+}
+
 export default function ForumBootSplash({ onDone }) {
-  const [visible, setVisible] = useState(FORUM_SPLASH_ENABLED === 1)
+  const [visible, setVisible] = useState(() => shouldShowSplashNow())
   const [closing, setClosing] = useState(false)
   const [playbackReady, setPlaybackReady] = useState(false)
   const [soundAutoplayBlocked, setSoundAutoplayBlocked] = useState(false)
@@ -193,6 +201,13 @@ export default function ForumBootSplash({ onDone }) {
       return
     }
 
+    if (!visible) {
+      try {
+        onDone?.()
+      } catch {}
+      return
+    }
+
     if (FORUM_SPLASH_DEBUG) {
       try {
         console.log('[ForumBootSplash] mounted')
@@ -217,7 +232,7 @@ export default function ForumBootSplash({ onDone }) {
         if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current)
       } catch {}
     }
-  }, [finish, onDone, startPlayback])
+  }, [finish, onDone, startPlayback, visible])
 
   useEffect(() => {
     if (!visible) return

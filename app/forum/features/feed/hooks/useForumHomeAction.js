@@ -30,6 +30,43 @@ export default function useForumHomeAction({
   setThreadRoot,
   setSel,
 }) {
+  const alignFirstTopicsCardToTop = useCallback(() => {
+    try {
+      const scrollEl = document.querySelector('[data-forum-scroll="1"]') || null
+      const root = scrollEl || document
+      let target =
+        root.querySelector?.('[data-feed-card="1"]') ||
+        document.querySelector?.('[data-forum-scroll="1"] [data-feed-card="1"]') ||
+        null
+      if (!target && root !== document) {
+        target =
+          document.querySelector?.('[data-feed-card="1"]') ||
+          document.querySelector?.('[data-forum-scroll="1"] [data-feed-card="1"]') ||
+          null
+      }
+      if (!target) {
+        if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {
+          scrollEl.scrollTop = 0
+          return true
+        }
+        try { window.scrollTo({ top: 0, behavior: 'auto' }) } catch { try { window.scrollTo(0, 0) } catch {} }
+        return true
+      }
+      const rect = target.getBoundingClientRect?.()
+      if (!rect) return false
+      if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {
+        const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }
+        const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))
+        scrollEl.scrollTop = Math.max(0, targetTop)
+        return true
+      }
+      const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top
+      try { window.scrollTo({ top: Math.max(0, y), behavior: 'auto' }) } catch { try { window.scrollTo(0, Math.max(0, y)) } catch {} }
+      return true
+    } catch {}
+    return false
+  }, [])
+
   return useCallback(() => {
     try { headAutoOpenRef.current = false } catch {}
     try { setHeadPinned(false) } catch {}
@@ -42,14 +79,14 @@ export default function useForumHomeAction({
     try { setThreadRoot(null) } catch {}
     try { setSel(null) } catch {}
     clearForumDeepLinkQuery()
-    setTimeout(() => {
-      try {
-        document
-          .querySelector('[data-forum-topics-start="1"]')
-          ?.scrollIntoView({ block: 'start' })
-      } catch {}
-    }, 0)
+    const delays = [0, 60, 140, 260]
+    delays.forEach((delay) => {
+      setTimeout(() => {
+        try { alignFirstTopicsCardToTop() } catch {}
+      }, delay)
+    })
   }, [
+    alignFirstTopicsCardToTop,
     closeQuests,
     closeVideoFeed,
     clearProfileBranch,

@@ -1,0 +1,517 @@
+{
+  "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
+  "generatedAt": "2026-03-22T15:49:03.738Z",
+  "summary": [
+    {
+      "event": "auth:ok",
+      "add": 14,
+      "remove": 12,
+      "dispatch": 2,
+      "fileCount": 11
+    },
+    {
+      "event": "auth:success",
+      "add": 5,
+      "remove": 3,
+      "dispatch": 0,
+      "fileCount": 4
+    },
+    {
+      "event": "auth:logout",
+      "add": 7,
+      "remove": 7,
+      "dispatch": 1,
+      "fileCount": 7
+    },
+    {
+      "event": "open-auth",
+      "add": 1,
+      "remove": 1,
+      "dispatch": 7,
+      "fileCount": 7
+    },
+    {
+      "event": "tg:link-status",
+      "add": 2,
+      "remove": 2,
+      "dispatch": 1,
+      "fileCount": 3
+    }
+  ],
+  "byFile": [
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\exchange\\BattleCoin.jsx",
+      "totalHits": 9,
+      "hits": [
+        {
+          "event": "auth:ok",
+          "kind": "remove",
+          "line": 93,
+          "text": "window.removeEventListener('auth:ok', onAuthOk)"
+        },
+        {
+          "event": "auth:logout",
+          "kind": "remove",
+          "line": 96,
+          "text": "window.removeEventListener('auth:logout', onLogout)"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "add",
+          "line": 100,
+          "text": "window.addEventListener('auth:ok', onAuthOk)"
+        },
+        {
+          "event": "auth:logout",
+          "kind": "add",
+          "line": 101,
+          "text": "window.addEventListener('auth:logout', onLogout)"
+        },
+        {
+          "event": "open-auth",
+          "kind": "dispatch",
+          "line": 104,
+          "text": "window.dispatchEvent(new Event('open-auth'))"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "add",
+          "line": 317,
+          "text": "window.addEventListener('auth:ok', onAuthOk)"
+        },
+        {
+          "event": "auth:logout",
+          "kind": "add",
+          "line": 318,
+          "text": "window.addEventListener('auth:logout', onLogout)"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "remove",
+          "line": 322,
+          "text": "try { window.removeEventListener('auth:ok', onAuthOk) } catch {}"
+        },
+        {
+          "event": "auth:logout",
+          "kind": "remove",
+          "line": 323,
+          "text": "try { window.removeEventListener('auth:logout', onLogout) } catch {}"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\academy\\AcademyExamBlock.js",
+      "totalHits": 7,
+      "hits": [
+        {
+          "event": "open-auth",
+          "kind": "dispatch",
+          "line": 69,
+          "text": "window.dispatchEvent(new CustomEvent('open-auth'))"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "add",
+          "line": 96,
+          "text": "window.addEventListener('auth:ok', done, { once: true })"
+        },
+        {
+          "event": "auth:success",
+          "kind": "add",
+          "line": 97,
+          "text": "window.addEventListener('auth:success', done, { once: true })"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "add",
+          "line": 607,
+          "text": "window.addEventListener('auth:ok', handleAuthEvent)"
+        },
+        {
+          "event": "auth:success",
+          "kind": "add",
+          "line": 608,
+          "text": "window.addEventListener('auth:success', handleAuthEvent)"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "remove",
+          "line": 611,
+          "text": "window.removeEventListener('auth:ok', handleAuthEvent)"
+        },
+        {
+          "event": "auth:success",
+          "kind": "remove",
+          "line": 612,
+          "text": "window.removeEventListener('auth:success', handleAuthEvent)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\exchange\\page.js",
+      "totalHits": 7,
+      "hits": [
+        {
+          "event": "open-auth",
+          "kind": "dispatch",
+          "line": 1004,
+          "text": "try { window.dispatchEvent(new CustomEvent('open-auth')) } catch {}"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "remove",
+          "line": 1020,
+          "text": "try { window.removeEventListener('auth:ok', done) } catch {}"
+        },
+        {
+          "event": "auth:success",
+          "kind": "remove",
+          "line": 1021,
+          "text": "try { window.removeEventListener('auth:success', done) } catch {}"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "add",
+          "line": 1037,
+          "text": "window.addEventListener('auth:ok', done, { once:true })"
+        },
+        {
+          "event": "auth:success",
+          "kind": "add",
+          "line": 1038,
+          "text": "window.addEventListener('auth:success', done, { once:true })"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "add",
+          "line": 1632,
+          "text": "window.addEventListener('auth:ok', onRefresh)"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "remove",
+          "line": 1637,
+          "text": "window.removeEventListener('auth:ok', onRefresh)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\AuthNavClient.jsx",
+      "totalHits": 7,
+      "hits": [
+        {
+          "event": "auth:ok",
+          "kind": "dispatch",
+          "line": 183,
+          "text": "window.dispatchEvent(new CustomEvent('auth:ok', { detail: { accountId: acc, provider: 'tma' } }))"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "add",
+          "line": 231,
+          "text": "window.addEventListener('auth:ok', onAuthOk)"
+        },
+        {
+          "event": "auth:logout",
+          "kind": "add",
+          "line": 232,
+          "text": "window.addEventListener('auth:logout', onAuthLogout)"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "remove",
+          "line": 237,
+          "text": "window.removeEventListener('auth:ok', onAuthOk)"
+        },
+        {
+          "event": "auth:logout",
+          "kind": "remove",
+          "line": 238,
+          "text": "window.removeEventListener('auth:logout', onAuthLogout)"
+        },
+        {
+          "event": "open-auth",
+          "kind": "dispatch",
+          "line": 246,
+          "text": "window.dispatchEvent(new CustomEvent('open-auth', { detail: { source, view } }))"
+        },
+        {
+          "event": "tg:link-status",
+          "kind": "dispatch",
+          "line": 321,
+          "text": "window.dispatchEvent(new CustomEvent('tg:link-status', { detail: { linked: !!tgLinked } }))"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\subscribe\\subscribe.client.jsx",
+      "totalHits": 6,
+      "hits": [
+        {
+          "event": "open-auth",
+          "kind": "dispatch",
+          "line": 19,
+          "text": "try { window.dispatchEvent(new CustomEvent('open-auth')) } catch {}"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "add",
+          "line": 34,
+          "text": "window.addEventListener('auth:ok', done, { once:true })"
+        },
+        {
+          "event": "auth:success",
+          "kind": "add",
+          "line": 35,
+          "text": "window.addEventListener('auth:success', done, { once:true })"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "add",
+          "line": 211,
+          "text": "window.addEventListener('auth:ok', onAuth)"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "remove",
+          "line": 215,
+          "text": "window.removeEventListener('auth:ok', onAuth)"
+        },
+        {
+          "event": "open-auth",
+          "kind": "dispatch",
+          "line": 234,
+          "text": "try { window.dispatchEvent(new CustomEvent('open-auth')) } catch {}"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\shared\\utils\\openAuth.js",
+      "totalHits": 5,
+      "hits": [
+        {
+          "event": "open-auth",
+          "kind": "dispatch",
+          "line": 3,
+          "text": "window.dispatchEvent(new CustomEvent('open-auth'))"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "remove",
+          "line": 19,
+          "text": "window.removeEventListener('auth:ok', ok)"
+        },
+        {
+          "event": "auth:success",
+          "kind": "remove",
+          "line": 20,
+          "text": "window.removeEventListener('auth:success', ok)"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "add",
+          "line": 26,
+          "text": "window.addEventListener('auth:ok', ok, { once: true })"
+        },
+        {
+          "event": "auth:success",
+          "kind": "add",
+          "line": 27,
+          "text": "window.addEventListener('auth:success', ok, { once: true })"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\hooks\\useForumProfileSync.js",
+      "totalHits": 4,
+      "hits": [
+        {
+          "event": "auth:ok",
+          "kind": "add",
+          "line": 188,
+          "text": "window.addEventListener('auth:ok', onAuthChanged)"
+        },
+        {
+          "event": "tg:link-status",
+          "kind": "add",
+          "line": 191,
+          "text": "window.addEventListener('tg:link-status', onTgLinkStatus)"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "remove",
+          "line": 209,
+          "text": "window.removeEventListener('auth:ok', onAuthChanged)"
+        },
+        {
+          "event": "tg:link-status",
+          "kind": "remove",
+          "line": 212,
+          "text": "window.removeEventListener('tg:link-status', onTgLinkStatus)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumSessionShell.js",
+      "totalHits": 4,
+      "hits": [
+        {
+          "event": "auth:ok",
+          "kind": "add",
+          "line": 67,
+          "text": "window.addEventListener('auth:ok', upd)"
+        },
+        {
+          "event": "auth:logout",
+          "kind": "add",
+          "line": 68,
+          "text": "window.addEventListener('auth:logout', upd)"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "remove",
+          "line": 74,
+          "text": "window.removeEventListener('auth:ok', upd)"
+        },
+        {
+          "event": "auth:logout",
+          "kind": "remove",
+          "line": 75,
+          "text": "window.removeEventListener('auth:logout', upd)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\InviteFriendProvider.jsx",
+      "totalHits": 4,
+      "hits": [
+        {
+          "event": "auth:ok",
+          "kind": "add",
+          "line": 220,
+          "text": "window.addEventListener('auth:ok', handleAuthOk)"
+        },
+        {
+          "event": "auth:logout",
+          "kind": "add",
+          "line": 221,
+          "text": "window.addEventListener('auth:logout', handleAuthLogout)"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "remove",
+          "line": 225,
+          "text": "window.removeEventListener('auth:ok', handleAuthOk)"
+        },
+        {
+          "event": "auth:logout",
+          "kind": "remove",
+          "line": 226,
+          "text": "window.removeEventListener('auth:logout', handleAuthLogout)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\QCoinDropFX.jsx",
+      "totalHits": 4,
+      "hits": [
+        {
+          "event": "auth:ok",
+          "kind": "add",
+          "line": 414,
+          "text": "window.addEventListener('auth:ok', onAuthFallback)"
+        },
+        {
+          "event": "auth:logout",
+          "kind": "add",
+          "line": 415,
+          "text": "window.addEventListener('auth:logout', onAuthLogout)"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "remove",
+          "line": 428,
+          "text": "window.removeEventListener('auth:ok', onAuthFallback)"
+        },
+        {
+          "event": "auth:logout",
+          "kind": "remove",
+          "line": 429,
+          "text": "window.removeEventListener('auth:logout', onAuthLogout)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\providers.jsx",
+      "totalHits": 3,
+      "hits": [
+        {
+          "event": "auth:logout",
+          "kind": "dispatch",
+          "line": 129,
+          "text": "window.dispatchEvent(new CustomEvent('auth:logout'));"
+        },
+        {
+          "event": "open-auth",
+          "kind": "add",
+          "line": 445,
+          "text": "window.addEventListener('open-auth', onOpenAuth);"
+        },
+        {
+          "event": "open-auth",
+          "kind": "remove",
+          "line": 448,
+          "text": "window.removeEventListener('open-auth', onOpenAuth);"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\page.js",
+      "totalHits": 2,
+      "hits": [
+        {
+          "event": "tg:link-status",
+          "kind": "add",
+          "line": 147,
+          "text": "window.addEventListener('tg:link-status', onStatus)"
+        },
+        {
+          "event": "tg:link-status",
+          "kind": "remove",
+          "line": 168,
+          "text": "window.removeEventListener('tg:link-status', onStatus)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\TopBar.js",
+      "totalHits": 2,
+      "hits": [
+        {
+          "event": "auth:logout",
+          "kind": "add",
+          "line": 36,
+          "text": "window.addEventListener('auth:logout', onLogout)"
+        },
+        {
+          "event": "auth:logout",
+          "kind": "remove",
+          "line": 38,
+          "text": "window.removeEventListener('auth:logout', onLogout)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\tma\\auto\\page.jsx",
+      "totalHits": 1,
+      "hits": [
+        {
+          "event": "auth:ok",
+          "kind": "dispatch",
+          "line": 54,
+          "text": "window.dispatchEvent(new CustomEvent('auth:ok', {"
+        }
+      ]
+    }
+  ]
+}

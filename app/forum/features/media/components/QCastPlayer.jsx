@@ -479,7 +479,6 @@ const spawnFx = React.useCallback((kind, origin) => {
     const host = hostRef.current;
     if (!audio) return;
     const unlockPromise = unlockAudio();
-    if (audio.muted && readMutedPref() == null) { try { audio.muted = false; } catch {} }
     if (audio.paused) {
       const gestureUntil = String(Date.now() + 1800);
       const leaseUntil = String(Date.now() + 7200);

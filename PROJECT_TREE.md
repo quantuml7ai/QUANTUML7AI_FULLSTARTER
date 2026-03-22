@@ -6,8 +6,8 @@
 > Если меняются связи файла с другими файлами настолько, что комментарий устаревает, комментарий тоже обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-tree.js`.
 
-Сгенерировано автоматически: 2026-03-14T14:01:26.994Z
-Файлов в реестре: 1543
+Сгенерировано автоматически: 2026-03-21T17:24:43.187Z
+Файлов в реестре: 1556
 
 ## Исключенные каталоги
 - `.git/` — служебные внутренние данные Git, не часть прикладного дерева проекта.
@@ -24,18 +24,23 @@
 - `.eslintrc.json` — 1 файлов
 - `.gitignore` — 1 файлов
 - `account-sync-audit.report.json` — 1 файлов
+- `ad-runtime.audit.report.json` — 1 файлов
 - `AGENTS.md` — 1 файлов
 - `app` — 376 файлов
 - `audit` — 170 файлов
-- `components` — 21 файлов
+- `auth-bus.audit.report.json` — 1 файлов
+- `components` — 23 файлов
 - `deep-audit.report.json` — 1 файлов
 - `effects-leak.report.json` — 1 файлов
 - `forum-deps-audit.report.json` — 1 файлов
 - `forum-diag.jsonl` — 1 файлов
+- `forum-startup.audit.report.json` — 1 файлов
+- `heapsnapshot-analysis.report.json` — 1 файлов
 - `heavy-audit.report.json` — 1 файлов
 - `jsconfig.json` — 1 файлов
 - `lib` — 13 файлов
 - `media-audit.report.json` — 1 файлов
+- `media-budget.audit.report.json` — 1 файлов
 - `next-env.d.ts` — 1 файлов
 - `next.config.mjs` — 1 файлов
 - `package.json` — 1 файлов
@@ -46,10 +51,10 @@
 - `PROJECT_RISKS.md` — 1 файлов
 - `PROJECT_ROUTES.md` — 1 файлов
 - `PROJECT_TREE.md` — 1 файлов
-- `public` — 919 файлов
+- `public` — 920 файлов
 - `README.md` — 1 файлов
 - `runtime-hotspots.report.json` — 1 файлов
-- `tools` — 19 файлов
+- `tools` — 24 файлов
 
 ## Дерево проекта
 
@@ -445,7 +450,7 @@
           - QCoinInline.jsx — UI-компонент QCoin Inline домена QCoin. Связи: импортирует forum/features/qcoin/hooks/useQCoinLive.js, forum/shared/utils/classnames.js; используется в forum/ForumHeaderPanel.jsx.
           - QCoinWithdrawPopover.jsx — UI-компонент QCoin Withdraw Popover домена QCoin. Связи: используется в forum/ForumHeaderPanel.jsx.
         - hooks/ — Каталог слоя хуки внутри feature qcoin.
-          - useQCoinLive.js — Хук use QCoin Live домена QCoin. Связи: импортирует forum/features/qcoin/utils/account.js, forum/shared/utils/browser.js; используется в forum/features/qcoin/components/QCoinInline.jsx.
+          - useQCoinLive.js — Хук use QCoin Live домена QCoin. Связи: импортирует forum/features/qcoin/utils/account.js; используется в forum/features/qcoin/components/QCoinInline.jsx.
         - utils/ — Каталог слоя утилиты внутри feature qcoin.
           - account.js — Утилита account домена QCoin. Связи: используется в forum/features/profile/components/ProfilePopover.jsx, forum/features/qcoin/hooks/useQCoinLive.js.
           - paymentWindow.js — Утилита payment Window домена QCoin. Связи: используется в forum/features/profile/hooks/useVipPayAction.js.
@@ -586,7 +591,7 @@
     - ForumRoot.jsx — Корневой composition-root форума и мессенджера. Связи: импортирует forum/ForumAds.js, forum/ForumLayout.jsx, forum/ForumProviders.jsx; используется в forum/Forum.jsx.
     - layout.js — JS-файл layout домена форума. Связи: импортирует lib/metadataCache.js.
     - loading.js — JS-файл loading домена форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-    - page.js — JS-файл page домена форума. Связи: импортирует forum/Forum.jsx, components/i18n.js.
+    - page.js — JS-файл page домена форума. Связи: импортирует forum/Forum.jsx, components/ForumBootSplash.jsx, components/i18n.js.
     - SharePopover.jsx — JSX-файл Share Popover домена форума. Связи: импортирует lib/forumShareManager.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
   - game/ — Страницы/компоненты игрового раздела.
     - layout.js — Next.js layout для сегмента /game. Связи: импортирует lib/metadataCache.js.
@@ -603,7 +608,7 @@
   - ads.js — JS-файл ads сегмента app. Связи: импортирует forum/ForumAds.js; используется в app/about/page.js, app/academy/page.js, app/exchange/page.js.
   - globals.css — CSS-файл globals сегмента app. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - jsconfig.json — Алиасы и baseUrl проекта для JS/JSX. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-  - layout.js — Next.js layout для сегмента /. Связи: импортирует app/providers.jsx, components/BgAudio.js, components/HeroAvatar.js.
+  - layout.js — Next.js layout для сегмента /. Связи: импортирует app/providers.jsx, components/BgAudio.js, components/ForumShellGate.jsx.
   - page.js — Next.js страница маршрута /. Связи: импортирует app/ads.js, app/components/CryptoNewsLens.jsx, components/i18n.js.
   - providers.jsx — JSX-файл providers сегмента app. Связи: используется в app/layout.js.
 - audit/ — JSON-артефакты аудитов и миграционных фаз.
@@ -780,6 +785,8 @@
 - components/ — Общие React-компоненты всего проекта.
   - AuthNavClient.jsx — Общий React-компонент Auth Nav Client, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в components/TopBar.js.
   - BgAudio.js — Общий React-компонент Bg Audio, используемый вне одного домена. Связи: используется в app/layout.js.
+  - ForumBootSplash.jsx — Общий React-компонент Forum Boot Splash, используемый вне одного домена. Связи: используется в forum/page.js.
+  - ForumShellGate.jsx — Общий React-компонент Forum Shell Gate, используемый вне одного домена. Связи: используется в app/layout.js.
   - HeroAvatar.js — Общий React-компонент Hero Avatar, используемый вне одного домена. Связи: используется в app/layout.js, components/HeroSection.js.
   - HeroSection.js — Общий React-компонент Hero Section, используемый вне одного домена. Связи: импортирует components/HeroAvatar.js.
   - i18n.js — Общий React-компонент i18n, используемый вне одного домена. Связи: используется в app/about/page.js, app/academy/AcademyExamBlock.js, app/academy/page.js.
@@ -790,7 +797,7 @@
   - QCoinDropFX.jsx — Общий React-компонент QCoin Drop FX, используемый вне одного домена. Связи: используется в app/layout.js, components/QCoinDropFXGate.jsx.
   - QCoinDropFXGate.jsx — Общий React-компонент QCoin Drop FXGate, используемый вне одного домена. Связи: импортирует components/QCoinDropFX.jsx.
   - ScrollTopPulse.js — Общий React-компонент Scroll Top Pulse, используемый вне одного домена. Связи: используется в app/layout.js.
-  - SnowFX.jsx — Общий React-компонент Snow FX, используемый вне одного домена. Связи: используется в app/layout.js.
+  - SnowFX.jsx — Общий React-компонент Snow FX, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - TopBar.js — Общий React-компонент Top Bar, используемый вне одного домена. Связи: импортирует components/AuthNavClient.jsx, components/LanguageSwitcher.js, components/i18n.js; используется в app/layout.js.
   - UnlimitModal.client.jsx — Общий React-компонент Unlimit Modal.client, используемый вне одного домена. Связи: импортирует components/i18n.js.
   - WalletEVM.js — Общий React-компонент Wallet EVM, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
@@ -1373,6 +1380,8 @@
     - tr.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
     - uk.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
     - zh.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - load/ — Подкаталог статических ассетов public/load.
+    - load.mp4 — MP4-ассет из public/load; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
   - metab/ — Подкаталог статических ассетов public/metab.
     - about1.jpg — JPG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
     - academy1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
@@ -1765,13 +1774,18 @@
 - tools/ — Локальные скрипты аудита, генерации и техобслуживания.
   - analyze-forum-diag.js — Локальный скрипт/инструмент analyze forum diag для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - analyze-forum-media-har.js — Локальный скрипт/инструмент analyze forum media har для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - analyze-heapsnapshot.js — Локальный скрипт/инструмент analyze heapsnapshot для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-account-sync.js — Локальный скрипт/инструмент audit account sync для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-ad-runtime.js — Локальный скрипт/инструмент audit ad runtime для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-auth-bus.js — Локальный скрипт/инструмент audit auth bus для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-effects.js — Локальный скрипт/инструмент audit effects для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-forum-deps.js — Локальный скрипт/инструмент audit forum deps для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-forum-functional-parity.ps1 — Локальный скрипт/инструмент audit forum functional parity для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-startup.js — Локальный скрипт/инструмент audit forum startup для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-forum-view-report.js — Локальный скрипт/инструмент audit forum view report для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-full-forum.js — Локальный скрипт/инструмент audit full forum для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-heavy.js — Локальный скрипт/инструмент audit heavy для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-media-budget.js — Локальный скрипт/инструмент audit media budget для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-media.js — Локальный скрипт/инструмент audit media для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-project-docs.js — Локальный скрипт/инструмент audit project docs для аудита или техобслуживания. Связи: импортирует tools/project-docs-shared.js.
   - audit-runtime-hotspots.js — Локальный скрипт/инструмент audit runtime hotspots для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
@@ -1787,14 +1801,19 @@
 - .eslintrc.json — Конфигурация ESLint для всего проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - .gitignore — Правила исключения файлов из Git. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - account-sync-audit.report.json — Сводный JSON-отчет аудита синхронизации аккаунта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- ad-runtime.audit.report.json — JSON-файл ad runtime.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - AGENTS.md — Markdown-документ AGENTS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- auth-bus.audit.report.json — JSON-файл auth bus.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - deep-audit.report.json — Сводный JSON-отчет глубокого аудита проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - effects-leak.report.json — JSON-отчет аудита утечек эффектов. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-deps-audit.report.json — JSON-отчет аудита зависимостей форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-diag.jsonl — Потоковый лог диагностики форума в формате JSONL. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- forum-startup.audit.report.json — JSON-файл forum startup.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- heapsnapshot-analysis.report.json — JSON-файл heapsnapshot analysis.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - heavy-audit.report.json — JSON-отчет тяжелого аудита hot-path зон. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - jsconfig.json — Алиасы и baseUrl проекта для JS/JSX. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - media-audit.report.json — JSON-отчет аудита медиа-подсистемы. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- media-budget.audit.report.json — JSON-файл media budget.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - next-env.d.ts — Служебный файл Next.js для типовой совместимости среды. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - next.config.mjs — Главная конфигурация Next.js сборки и рантайма. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - package.json — Манифест пакета, npm/pnpm-скрипты и зависимости. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.

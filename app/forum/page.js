@@ -15,6 +15,12 @@ const LS_KEY = 'ql7_forum_rules_accepted_v1'
 export default function ForumPage() {
   const { t } = useI18n()
 
+  useEffect(() => {
+    try {
+      window?.markForumStartup?.('forum_page_mount')
+    } catch {}
+  }, [])
+
   // Бегущая строка
   const marqueeRef = useRef(null)
   useEffect(() => {

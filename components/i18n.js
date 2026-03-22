@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 const TG_NAME = (process.env.NEXT_PUBLIC_TG_BOT || '').replace(/^@/, '')
 const BOT_LINK = process.env.NEXT_PUBLIC_BOT_LINK || (TG_NAME ? `https://t.me/${TG_NAME}` : 'https://t.me/YourBot')
@@ -49182,11 +49182,12 @@ try {
   ensureDict('ar', MISSING_AR)
   ensureDict('tr', MISSING_TR)
 } catch (e) {}
-export function I18nProvider({ children }) {
 const SUPPORTED_LANGS = ['ru', 'en', 'zh', 'uk', 'ar', 'tr', 'es']
 const DEFAULT_LANG = 'en'
 
-const normalizeLang = (raw) => {
+export function I18nProvider({ children }) {
+
+const normalizeLang = useCallback((raw) => {
   if (!raw) return null
   const s = String(raw).trim().toLowerCase()
   if (!s) return null
@@ -49195,18 +49196,18 @@ const normalizeLang = (raw) => {
   // иногда встречается "ua" вместо "uk"
   if (base === 'ua') return 'uk'
   return base || null
-}
+}, [])
 
-const readStoredLang = () => {
+const readStoredLang = useCallback(() => {
   try {
     const s = localStorage.getItem('ql7_lang')
     return SUPPORTED_LANGS.includes(s) ? s : null
   } catch {
     return null
   }
-}
+}, [])
 
-const detectSystemLang = () => {
+const detectSystemLang = useCallback(() => {
   if (typeof navigator === 'undefined') return null
   const prefs = []
   try {
@@ -49220,17 +49221,24 @@ const detectSystemLang = () => {
     if (n && SUPPORTED_LANGS.includes(n)) return n
   }
   return null
-}
+}, [normalizeLang])
 
-const getInitialLang = () => {
+const getInitialLang = useCallback(() => {
   // SSR-safe: на сервере navigator/localStorage недоступны
-  if (typeof window === 'undefined') return DEFAULT_LANG
-  return readStoredLang() || detectSystemLang() || DEFAULT_LANG
-}
+  return DEFAULT_LANG
+}, [])
 
 const [lang, setLang] = useState(getInitialLang)
+const [langReady, setLangReady] = useState(false)
 
   useEffect(() => {
+    const nextLang = readStoredLang() || detectSystemLang() || DEFAULT_LANG
+    setLang((prev) => (prev === nextLang ? prev : nextLang))
+    setLangReady(true)
+  }, [detectSystemLang, readStoredLang])
+
+  useEffect(() => {
+    if (!langReady) return
     try { localStorage.setItem('ql7_lang', lang) } catch {}
 if (typeof document !== 'undefined') {
   document.documentElement.setAttribute('lang', lang)
@@ -49238,7 +49246,7 @@ if (typeof document !== 'undefined') {
   document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr')
 }
 
-    }, [lang])
+    }, [lang, langReady])
 
   const t = (k) => dict?.[lang]?.[k] ?? dict?.[DEFAULT_LANG]?.[k] ?? k
   return <I18nContext.Provider value={{ t, lang, setLang }}>{children}</I18nContext.Provider>

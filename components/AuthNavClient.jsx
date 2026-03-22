@@ -1,30 +1,38 @@
 'use client'
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import Image from 'next/image'
-import { useWeb3Modal } from '@web3modal/wagmi/react'
-import { useAccount } from 'wagmi'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useI18n } from './i18n'
 
-const shortAddr = (a) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '')
-
-// Единая выборка корректного EVM-провайдера (EIP-1193 / EIP-6963)
-function pickEthereum() {
+function readStoredAuthMethod() {
   try {
     if (typeof window === 'undefined') return null
-    const eth = window.ethereum
-    if (!eth) return null
-    if (Array.isArray(eth.providers) && eth.providers.length) {
-      const mm = eth.providers.find(p => p && p.isMetaMask)
-      const brave = eth.providers.find(p => p && p.isBraveWallet)
-      const okx = eth.providers.find(p => p && p.isOkxWallet)
-      return (mm || brave || okx || eth)
-    }
-    return eth
-  } catch { return null }
+    return (
+      localStorage.getItem('w3m-auth-provider') ||
+      localStorage.getItem('W3M_CONNECTED_CONNECTOR') ||
+      null
+    )
+  } catch {
+    return null
+  }
 }
 
-// ---------- helpers ----------
+function readWalletBridgeState() {
+  try {
+    if (typeof window === 'undefined') return null
+    return window.__QL7_WALLET_RUNTIME_STATE__?.() || null
+  } catch {
+    return null
+  }
+}
+
+function markStartup(label, extra = {}) {
+  try {
+    window?.markForumStartup?.(label, extra)
+  } catch {}
+}
+
+const shortAddr = (a) => (a ? `${a.slice(0, 6)}...${a.slice(-4)}` : '')
+
 function readCookie(name) {
   try {
     const m = document.cookie.match(
@@ -35,6 +43,7 @@ function readCookie(name) {
     return null
   }
 }
+
 function isTelegramLink(url) {
   if (!url) return false
   const s = String(url)
@@ -67,31 +76,24 @@ function safeOpenExternal(url) {
 
     const tgLink = isTelegramLink(url)
 
-    // 1) Внутри Telegram Mini App
     if (isTG && tg) {
-      // 1a) Если это ссылка на бота / чат t.me → используем openTelegramLink
       if (tgLink && typeof tg.openTelegramLink === 'function') {
         tg.openTelegramLink(url)
         return
       }
 
-      // 1b) Любой внешний http(s) → обычный openLink
       if (typeof tg.openLink === 'function') {
         tg.openLink(url)
         return
       }
     }
 
-    // 2) iOS (особенно PWA/иконка на домашнем экране) → лучше прямой переход
     if (isIOS || isStandalone) {
       window.location.href = url
       return
     }
 
-    // 3) Обычный браузер
     const w = window.open(url, '_blank', 'noopener,noreferrer')
-
-    // если попап заблокировали — фоллбек
     if (!w) {
       window.location.href = url
     }
@@ -107,14 +109,13 @@ function readAccountId() {
     const a1 = localStorage.getItem('asherId')
     const a2 = localStorage.getItem('ql7_uid')
     const a3 = localStorage.getItem('ql7_account') || localStorage.getItem('account') || localStorage.getItem('wallet')
-    const c1 = readCookie('asherId') // fallback — ставится /api/tma/auto
+    const c1 = readCookie('asherId')
     return (a1 || a2 || a3 || c1) ? String(a1 || a2 || a3 || c1) : null
   } catch {
     return null
   }
 }
 
-// Строгое определение настоящего Mini App
 function detectTMAHard() {
   try {
     if (typeof window === 'undefined') return false
@@ -127,141 +128,130 @@ function detectTMAHard() {
   } catch { return false }
 }
 
-// ================= component =================
 export default function AuthNavClient() {
-  const { open } = useWeb3Modal()
-  const { isConnected, address } = useAccount()
   const { t } = useI18n()
 
   const [authMethod, setAuthMethod] = useState(null)
   const [mounted, setMounted] = useState(false)
-  const announcedRef = useRef(false)
-  const prevConnectedRef = useRef(isConnected)
+  const [walletConnected, setWalletConnected] = useState(false)
+  const [walletAddress, setWalletAddress] = useState(null)
 
-  // --- режим "мы внутри TMA" + статус автологина через /api/tma/auto
   const [isTMA, setIsTMA] = useState(false)
   const [tmaAuthed, setTmaAuthed] = useState(false)
 
-  // TG link status
   const [tgLinked, setTgLinked] = useState(false)
   const checkingRef = useRef(false)
 
-  // ===== BRIDGE refs (чтобы главная могла дергать без красноты/зависимостей) =====
   const tgLinkedRef = useRef(false)
   const linkFnRef = useRef(null)
   const refreshFnRef = useRef(null)
 
-  useEffect(() => { setMounted(true) }, [])
+  const syncWalletSnapshot = useCallback((fallbackProvider = null) => {
+    const bridgeState = readWalletBridgeState()
+    const nextProvider = fallbackProvider || readStoredAuthMethod()
+
+    if (bridgeState?.isConnected && bridgeState?.address) {
+      setWalletConnected(true)
+      setWalletAddress(String(bridgeState.address))
+      setAuthMethod(nextProvider || bridgeState.provider || null)
+      return
+    }
+
+    setWalletConnected(false)
+    setWalletAddress(null)
+    setAuthMethod(nextProvider || null)
+  }, [])
+
+  useEffect(() => {
+    markStartup('auth_nav_mount')
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (!mounted) return
-    setIsTMA(detectTMAHard())
+
+    const tma = detectTMAHard()
+    setIsTMA(tma)
 
     const acc = readAccountId()
     setTmaAuthed(!!acc)
 
-    // если перезаход: синхронизируем глобалку и кидаем событие
     try {
       if (acc && !window.__AUTH_ACCOUNT__) {
         window.__AUTH_ACCOUNT__ = acc
+        markStartup('auth_ok_dispatch', { provider: 'tma_bootstrap' })
         window.dispatchEvent(new CustomEvent('auth:ok', { detail: { accountId: acc, provider: 'tma' } }))
       }
     } catch {}
 
-    try {
-      const m1 = localStorage.getItem('w3m-auth-provider')
-      const m2 = localStorage.getItem('W3M_CONNECTED_CONNECTOR')
-      setAuthMethod(m1 || m2 || null)
-    } catch {}
-  }, [mounted])
+    syncWalletSnapshot(readStoredAuthMethod())
+  }, [mounted, syncWalletSnapshot])
 
-  // слушаем событие, которое кидает /api/tma/auto (auth:ok)
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined') return undefined
+
     const onAuthOk = (ev) => {
       try {
         const acc = (ev && ev.detail && ev.detail.accountId) || readAccountId()
+        const provider = String(ev?.detail?.provider || '') || readStoredAuthMethod() || null
         if (acc) setTmaAuthed(true)
+        syncWalletSnapshot(provider)
       } catch {}
     }
-    window.addEventListener('auth:ok', onAuthOk)
-    return () => window.removeEventListener('auth:ok', onAuthOk)
-  }, [])
 
-  // глобальный вызов web3modal (как было)
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const handler = () => {
-      try {
-        const res = open?.()
-        if (res && typeof res.catch === 'function') res.catch(() => {})
-      } catch {}
+    const onAuthLogout = () => {
+      setWalletConnected(false)
+      setWalletAddress(null)
+      syncWalletSnapshot(readStoredAuthMethod())
     }
-    window.addEventListener('open-auth', handler)
-    return () => window.removeEventListener('open-auth', handler)
-  }, [open])
 
-  // после успешной wallet-авторизации
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    if (!isConnected || !address) { announcedRef.current = false; return }
-    if (announcedRef.current) return
-    try {
-      window.__AUTH_ACCOUNT__ = address
-      window.dispatchEvent(new CustomEvent('auth:ok', {
-        detail: { accountId: address, provider: authMethod || 'wallet' }
-      }))
-      announcedRef.current = true
-    } catch {}
-  }, [isConnected, address, authMethod])
+    const onWalletState = (ev) => {
+      const detail = ev?.detail || {}
+      const nextProvider =
+        (detail.provider ? String(detail.provider) : null) ||
+        readStoredAuthMethod() ||
+        null
 
-  // разлогин кошелька → reload
-  useEffect(() => {
-    if (prevConnectedRef.current === true && isConnected === false) {
-      try {
-        window.dispatchEvent(new Event('aiquota:flush'))
-        window.dispatchEvent(new CustomEvent('auth:logout'))
-      } catch {}
-      if (typeof window !== 'undefined') window.location.reload()
-    }
-    prevConnectedRef.current = isConnected
-  }, [isConnected])
-
-  // эвенты провайдера
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const eth = pickEthereum()
-    if (!eth || typeof eth.on !== 'function') return
-    const onAccountsChanged = (accs = []) => {
-      if (!accs || accs.length === 0) {
-        try {
-          window.dispatchEvent(new Event('aiquota:flush'))
-          window.dispatchEvent(new CustomEvent('auth:logout'))
-        } catch {}
-        window.location.reload()
+      if (detail.isConnected && detail.address) {
+        setWalletConnected(true)
+        setWalletAddress(String(detail.address))
+        setAuthMethod(nextProvider)
+        return
       }
+
+      setWalletConnected(false)
+      setWalletAddress(null)
+      setAuthMethod(nextProvider)
     }
-    const onDisconnect = () => {
-      try {
-        window.dispatchEvent(new Event('aiquota:flush'))
-        window.dispatchEvent(new CustomEvent('auth:logout'))
-      } catch {}
-      window.location.reload()
+
+    const onRuntimeReady = () => {
+      syncWalletSnapshot(readStoredAuthMethod())
     }
-    eth.on('accountsChanged', onAccountsChanged)
-    eth.on('disconnect', onDisconnect)
+
+    window.addEventListener('auth:ok', onAuthOk)
+    window.addEventListener('auth:logout', onAuthLogout)
+    window.addEventListener('ql7:wallet-state', onWalletState)
+    window.addEventListener('ql7:wallet-runtime-ready', onRuntimeReady)
+
     return () => {
-      try { eth.removeListener && eth.removeListener('accountsChanged', onAccountsChanged) } catch {}
-      try { eth.removeListener && eth.removeListener('disconnect', onDisconnect) } catch {}
+      window.removeEventListener('auth:ok', onAuthOk)
+      window.removeEventListener('auth:logout', onAuthLogout)
+      window.removeEventListener('ql7:wallet-state', onWalletState)
+      window.removeEventListener('ql7:wallet-runtime-ready', onRuntimeReady)
     }
+  }, [syncWalletSnapshot])
+
+  const requestOpenAuth = useCallback((source = 'topbar_button', view = '') => {
+    try {
+      window.dispatchEvent(new CustomEvent('open-auth', { detail: { source, view } }))
+    } catch {}
   }, [])
 
-  // ===== Проверка статуса привязки TG (как было) =====
   const refreshTgLinkStatus = useCallback(async () => {
     if (checkingRef.current) return false
     checkingRef.current = true
     try {
-      const accountId = readAccountId() || address || null
+      const accountId = readAccountId() || walletAddress || null
       if (!accountId) { setTgLinked(false); return false }
       const r = await fetch('/api/telegram/link/status', {
         method: 'POST',
@@ -274,31 +264,29 @@ export default function AuthNavClient() {
       return linked
     } catch { return false }
     finally { checkingRef.current = false }
-  }, [address])
+  }, [walletAddress])
 
-  useEffect(() => { refreshTgLinkStatus() }, [mounted, isConnected, address, refreshTgLinkStatus])
+  useEffect(() => { refreshTgLinkStatus() }, [mounted, walletConnected, walletAddress, refreshTgLinkStatus])
 
-  // ===== Состояние для цвета/лейбла =====
-  const isAuthedWallet = !!(isConnected && address)
+  const isAuthedWallet = !!(walletConnected && walletAddress)
 
   const authLabel = useMemo(() => {
-    if (isAuthedWallet) return shortAddr(address)
+    if (isAuthedWallet) return shortAddr(walletAddress)
     if (authMethod) {
+      const methodKey = String(authMethod).trim().toLowerCase()
       const map = { google: t('auth_google') || 'Google', email: t('auth_email') || 'Email' }
-      return map[authMethod] || t('auth_connected') || 'Connected'
+      if (map[methodKey]) return map[methodKey]
     }
     const v = t('auth_signin')
     return v && v !== 'auth_signin' ? v : 'Sign in'
-  }, [isAuthedWallet, address, authMethod, t])
+  }, [isAuthedWallet, walletAddress, authMethod, t])
 
-  // ===== Связка Telegram (как было) =====
   async function onLinkTelegram() {
     try {
-      const accountId = readAccountId() || address || null
+      const accountId = readAccountId() || walletAddress || null
 
-      // если не авторизован — просим открыть auth-модалку
       if (!accountId) {
-        window.dispatchEvent(new Event('open-auth'))
+        requestOpenAuth('telegram_link')
         return
       }
 
@@ -314,7 +302,6 @@ export default function AuthNavClient() {
       const deepLink = j.deepLink || `https://t.me/${botName.replace('@', '')}?start=ql7link_${j.token}`
       safeOpenExternal(deepLink)
 
-      // лёгкий поллинг статуса
       const deadline = Date.now() + 15000
       const delay = (ms) => new Promise(r => setTimeout(r, ms))
       while (Date.now() < deadline) {
@@ -327,8 +314,6 @@ export default function AuthNavClient() {
     }
   }
 
-  // ===== BRIDGE: публикуем состояние + функции в window =====
-  // 1) синхронизируем ref + шлём событие для главной
   useEffect(() => {
     tgLinkedRef.current = !!tgLinked
     try {
@@ -338,15 +323,13 @@ export default function AuthNavClient() {
     } catch {}
   }, [tgLinked])
 
-  // 2) держим актуальные функции в ref
   useEffect(() => {
     linkFnRef.current = onLinkTelegram
     refreshFnRef.current = refreshTgLinkStatus
   })
 
-  // 3) публикуем глобальные хелперы один раз
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined') return undefined
 
     window.__QL7_TG_LINK_START__ = () => {
       try { linkFnRef.current && linkFnRef.current() } catch {}
@@ -365,15 +348,13 @@ export default function AuthNavClient() {
     }
   }, [])
 
-  // ===== Мини-апп: прячем auth-UI ТОЛЬКО когда есть авторизация
   if (isTMA && tmaAuthed) return null
 
-  // ===== Веб-режим
   return (
     <>
       <button
         type="button"
-        onClick={() => open()}
+        onClick={() => requestOpenAuth('topbar_button', isAuthedWallet ? 'account' : 'connect')}
         className={`nav-auth-btn ${isAuthedWallet ? 'is-auth' : 'is-guest'}`}
         aria-label="Open connect modal"
         data-auth-open

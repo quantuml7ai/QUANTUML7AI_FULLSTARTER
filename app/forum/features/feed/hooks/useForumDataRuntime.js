@@ -8,6 +8,9 @@ import useForumMutationQueue from './useForumMutationQueue'
 import useForumSyncLoop from './useForumSyncLoop'
 import useForumSseBridge from './useForumSseBridge'
 
+const EMPTY_TOMBSTONES = { topics: {}, posts: {} }
+const EMPTY_SNAP = { topics: [], posts: [], bans: [], admins: [], rev: null }
+
 export default function useForumDataRuntime({
   isBrowserFn,
   auth,
@@ -18,17 +21,7 @@ export default function useForumDataRuntime({
   setProfileBump,
   tombstoneTtlMs,
 }) {
-  const [tombstones, setTombstones] = React.useState(() => {
-    if (!isBrowserFn()) return { topics: {}, posts: {} }
-    try {
-      const raw = JSON.parse(localStorage.getItem('forum:tombstones') || 'null')
-      return raw && typeof raw === 'object'
-        ? { topics: raw.topics || {}, posts: raw.posts || {} }
-        : { topics: {}, posts: {} }
-    } catch {
-      return { topics: {}, posts: {} }
-    }
-  })
+  const [tombstones, setTombstones] = React.useState(EMPTY_TOMBSTONES)
 
   const persistTombstones = React.useCallback((patch) => {
     setTombstones((prev) => {
@@ -38,14 +31,36 @@ export default function useForumDataRuntime({
     })
   }, [])
 
-  const [snap, setSnap] = React.useState(() => {
-    if (!isBrowserFn()) return { topics: [], posts: [], bans: [], admins: [], rev: null }
+  const [snap, setSnap] = React.useState(EMPTY_SNAP)
+
+  React.useEffect(() => {
+    if (!isBrowserFn()) return undefined
     try {
-      return JSON.parse(localStorage.getItem('forum:snap') || 'null') || { topics: [], posts: [], bans: [], admins: [], rev: null }
-    } catch {
-      return { topics: [], posts: [], bans: [], admins: [], rev: null }
-    }
-  })
+      const rawTombstones = JSON.parse(localStorage.getItem('forum:tombstones') || 'null')
+      if (rawTombstones && typeof rawTombstones === 'object') {
+        setTombstones({
+          topics: rawTombstones.topics || {},
+          posts: rawTombstones.posts || {},
+        })
+      }
+    } catch {}
+
+    try {
+      const rawSnap = JSON.parse(localStorage.getItem('forum:snap') || 'null')
+      if (rawSnap && typeof rawSnap === 'object') {
+        setSnap({
+          topics: Array.isArray(rawSnap.topics) ? rawSnap.topics : [],
+          posts: Array.isArray(rawSnap.posts) ? rawSnap.posts : [],
+          bans: Array.isArray(rawSnap.bans) ? rawSnap.bans : [],
+          admins: Array.isArray(rawSnap.admins) ? rawSnap.admins : [],
+          rev: rawSnap.rev ?? null,
+          cursor: rawSnap.cursor ?? null,
+        })
+      }
+    } catch {}
+
+    return undefined
+  }, [isBrowserFn])
 
   const persistSnap = React.useCallback((patch) => {
     setSnap((prev) => {

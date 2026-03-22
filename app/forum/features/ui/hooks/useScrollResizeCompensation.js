@@ -31,7 +31,11 @@ export default function useScrollResizeCompensation() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined
-    const onScroll = () => { lastUserScrollTsRef.current = Date.now() }
+    const onScroll = () => {
+      const now = Date.now()
+      lastUserScrollTsRef.current = now
+      try { window.__forumUserScrollTs = now } catch {}
+    }
     try { window.addEventListener('scroll', onScroll, { passive: true, capture: true }) } catch {}
     try { document.addEventListener('scroll', onScroll, { passive: true, capture: true }) } catch {}
     return () => {
@@ -54,8 +58,10 @@ export default function useScrollResizeCompensation() {
     if (Math.abs(Number(deltaH || 0)) < minDelta) return
 
     const nowTs = Date.now()
+    const lastGlobalTs = Number(window.__forumUserScrollTs || 0)
+    const lastScrollTs = Math.max(Number(lastUserScrollTsRef.current || 0), lastGlobalTs)
     const idleMs = coarse ? 420 : 220
-    if (nowTs - (lastUserScrollTsRef.current || 0) < idleMs) return
+    if (nowTs - lastScrollTs < idleMs) return
 
     pendingRef.current.el = el
     const nextDelta = Number(deltaH || 0)
