@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
+import React, { useEffect, useMemo, useState, useRef } from 'react'
 import { useI18n } from '../../components/i18n'
 import { upload as blobUpload } from '@vercel/blob/client'
 import GeoTargetingPicker from './GeoTargetingPicker'
@@ -1292,12 +1292,6 @@ export default function AdsHome() {
 
 // Метрики по каждой кампании для списка
 const [campaignMetrics, setCampaignMetrics] = useState({})
-  const revokeBlobUrl = useCallback((url) => {
-    try {
-      const safe = String(url || '')
-      if (safe && /^blob:/i.test(safe)) URL.revokeObjectURL(safe)
-    } catch {}
-  }, [])
 
   // Действия с кампанией
   const [campaignActionError, setCampaignActionError] = useState(null)
@@ -1310,25 +1304,9 @@ const [campaignMetrics, setCampaignMetrics] = useState({})
   const accountId = useMemo(() => getAccountIdSafe(), [])
   const primaryCreative = creative
 
-  const updateCreative = useCallback((patch) => {
-    setCreative((prev) => {
-      const next = { ...prev, ...patch }
-      if (prev?.videoPreviewUrl && prev.videoPreviewUrl !== next.videoPreviewUrl) {
-        revokeBlobUrl(prev.videoPreviewUrl)
-      }
-      if (prev?.imagePreviewUrl && prev.imagePreviewUrl !== next.imagePreviewUrl) {
-        revokeBlobUrl(prev.imagePreviewUrl)
-      }
-      return next
-    })
-  }, [revokeBlobUrl])
-
-  useEffect(() => {
-    return () => {
-      try { revokeBlobUrl(creative?.videoPreviewUrl) } catch {}
-      try { revokeBlobUrl(creative?.imagePreviewUrl) } catch {}
-    }
-  }, [creative?.videoPreviewUrl, creative?.imagePreviewUrl, revokeBlobUrl])
+  const updateCreative = (patch) => {
+    setCreative((prev) => ({ ...prev, ...patch }))
+  }
 
   // Проверка скролла в правилах
   useEffect(() => {

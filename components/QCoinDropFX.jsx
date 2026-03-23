@@ -39,7 +39,6 @@ const CLICK_IMPULSE_BASE = 90
 const DEFAULT_INTERVAL_MS = 120_000
 const DEFAULT_MIN_SIZE = 25
 const DEFAULT_MAX_SIZE = 50
-const POST_AUTH_DEDUP_WINDOW_MS = 1800
 
 /* ===== УМНЫЕ МНОЖИТЕЛИ (ТОЛЬКО В ПЛЮС, ДО x100) ===== */
 const ENV_BASE_MULT = (() => {
@@ -295,31 +294,19 @@ export default function QCoinDropFX ({
 
   const coinRef = useRef(null)
   const animFrameRef = useRef(null)
-  const sleepTimerRef = useRef(null)
   const lastTimeRef = useRef(0)
-  const lastPaintRef = useRef(0)
   const worldRef = useRef({ w: 0, h: 0 })
   const spawnAtRef = useRef(0)
 
   const impulseUntilRef = useRef(0)
   const impulseStrengthRef = useRef(0)
   const motionReducedRef = useRef(false)
-  const visibilityPausedRef = useRef(false)
-  const lastPostAuthSignalRef = useRef({ accountId: '', ts: 0 })
 
   const initWorld = useCallback(() => {
     if (!isBrowser()) return
     worldRef.current = {
       w: window.innerWidth || 1024,
       h: window.innerHeight || 768,
-    }
-  }, [])
-
-  const queueLoopFrame = useCallback((fn) => {
-    try {
-      animFrameRef.current = requestAnimationFrame(fn)
-    } catch {
-      animFrameRef.current = null
     }
   }, [])
 
@@ -335,102 +322,29 @@ export default function QCoinDropFX ({
 
   useEffect(() => {
     if (!isBrowser()) return
-    const syncVisibility = () => {
-      try {
-        visibilityPausedRef.current = document.visibilityState !== 'visible'
-      } catch {
-        visibilityPausedRef.current = false
-      }
-    }
-    syncVisibility()
-    document.addEventListener('visibilitychange', syncVisibility)
-    return () => document.removeEventListener('visibilitychange', syncVisibility)
-  }, [])
 
-  useEffect(() => {
-    if (!isBrowser()) return
-
-    const applyUid = (accountId, source = 'unknown') => {
-      const acc = String(accountId || readUnifiedAccountId() || '').trim()
-      if (!acc) return false
-
-      const nowTs = Date.now()
-      const prev = lastPostAuthSignalRef.current || { accountId: '', ts: 0 }
-      const sameSignalBurst =
-        prev.accountId === acc &&
-        nowTs - Number(prev.ts || 0) < POST_AUTH_DEDUP_WINDOW_MS
-      if (sameSignalBurst) return true
-
-      lastPostAuthSignalRef.current = { accountId: acc, ts: nowTs, source }
-      setUid(acc)
-      const now =
-        (typeof performance !== 'undefined' && performance.now)
-          ? performance.now()
-          : nowTs
-      if (!spawnAtRef.current || spawnAtRef.current < now) {
+    const onAuth = () => {
+      const acc = readUnifiedAccountId()
+      if (acc) {
+        setUid(acc)
+        const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now()
         spawnAtRef.current = now + intervalMs
       }
-      return true
     }
 
-    const applyPostAuthSignal = (accountId, source = 'unknown') => {
-      void applyUid(accountId, source)
-    }
-
-    const onPostAuthReady = (event) => {
-      const accountId = String(event?.detail?.accountId || '').trim()
-      const reason = String(event?.detail?.reason || '').trim()
-      applyPostAuthSignal(accountId, reason ? `forum:${reason}` : 'forum')
-    }
-
-    const onAuthFallback = (event) => {
-      const accountId = String(event?.detail?.accountId || '').trim()
-      // Фолбэк без дополнительного post-auth эффекта, только синхронизация uid.
-      applyPostAuthSignal(accountId, 'auth_fallback')
-    }
-
-    const onAuthLogout = () => {
-      const strictAccount = String(window.__AUTH_ACCOUNT__ || window.__ASHER_ID__ || '').trim()
-      if (strictAccount) {
-        void applyUid(strictAccount, 'auth_logout_strict_recover')
-        return
-      }
-      setUid(null)
-      coinRef.current = null
-      spawnAtRef.current = 0
-    }
-
-    const recoverUid = () => {
-      void applyUid(readUnifiedAccountId(), 'lifecycle_recover')
-    }
-
-    const onVisible = () => {
-      try {
-        if (document.visibilityState === 'visible') recoverUid()
-      } catch {}
-    }
-
-    window.addEventListener('forum:post-auth-ready', onPostAuthReady)
-    window.addEventListener('auth:ok', onAuthFallback)
-    window.addEventListener('auth:logout', onAuthLogout)
-    window.addEventListener('focus', recoverUid)
-    window.addEventListener('pageshow', recoverUid)
-    window.addEventListener('storage', recoverUid)
-    document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('auth:ok', onAuth)
+    window.addEventListener('auth:success', onAuth)
 
     const initial = readUnifiedAccountId()
     if (initial) {
-      void applyUid(initial, 'initial_mount')
+      setUid(initial)
+      const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now()
+      spawnAtRef.current = now + intervalMs
     }
 
     return () => {
-      window.removeEventListener('forum:post-auth-ready', onPostAuthReady)
-      window.removeEventListener('auth:ok', onAuthFallback)
-      window.removeEventListener('auth:logout', onAuthLogout)
-      window.removeEventListener('focus', recoverUid)
-      window.removeEventListener('pageshow', recoverUid)
-      window.removeEventListener('storage', recoverUid)
-      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('auth:ok', onAuth)
+      window.removeEventListener('auth:success', onAuth)
     }
   }, [intervalMs])
 
@@ -445,22 +359,9 @@ export default function QCoinDropFX ({
   useEffect(() => {
     if (!isBrowser()) return
     if (motionReducedRef.current) return
-    if (!uid) return
 
     lastTimeRef.current = 0
     let stopped = false
-    const scheduleSleep = (delayMs) => {
-      const nextDelay = Math.max(24, Number(delayMs || 0))
-      if (sleepTimerRef.current) {
-        clearTimeout(sleepTimerRef.current)
-      }
-      sleepTimerRef.current = setTimeout(() => {
-        sleepTimerRef.current = null
-        if (!stopped) {
-          queueLoopFrame((nextTs) => loop(nextTs))
-        }
-      }, nextDelay)
-    }
 
     const loop = (ts) => {
       if (stopped) return
@@ -473,11 +374,6 @@ export default function QCoinDropFX ({
       const dtMs = ts - lastTimeRef.current
       lastTimeRef.current = ts
       const dt = Math.min(0.05, Math.max(0.012, dtMs / 1000))
-
-      if (visibilityPausedRef.current) {
-        scheduleSleep(180)
-        return
-      }
 
       const now = ts
       const impulseLeft = Math.max(0, impulseUntilRef.current - now)
@@ -492,10 +388,6 @@ export default function QCoinDropFX ({
 
       if (uid && !coin) {
         const nextAt = spawnAtRef.current || 0
-        if (nextAt && ts < nextAt) {
-          scheduleSleep(Math.min(220, Math.max(40, nextAt - ts)))
-          return
-        }
         if (!nextAt || ts >= nextAt) {
           const depth = 0.4 + rng() * 0.6
           const size = minSize + depth * (maxSize - minSize)
@@ -558,26 +450,19 @@ export default function QCoinDropFX ({
         }
       }
 
-      if (coin && (ts - lastPaintRef.current) >= 34) {
-        lastPaintRef.current = ts
-        setTick((x) => (x + 1) & 1023)
-      }
-      if (!stopped) queueLoopFrame(loop)
+      setTick((x) => (x + 1) & 1023)
+      if (!stopped) animFrameRef.current = requestAnimationFrame(loop)
     }
 
-    queueLoopFrame(loop)
+    animFrameRef.current = requestAnimationFrame(loop)
 
     return () => {
       stopped = true
-      if (sleepTimerRef.current) {
-        clearTimeout(sleepTimerRef.current)
-        sleepTimerRef.current = null
-      }
       const rafId = animFrameRef.current
       animFrameRef.current = null
       if (rafId) cancelAnimationFrame(rafId)
     }
-  }, [uid, intervalMs, minSize, maxSize, initWorld, queueLoopFrame])
+  }, [uid, intervalMs, minSize, maxSize, initWorld])
 
   useEffect(() => {
     if (!isBrowser()) return
@@ -613,7 +498,7 @@ export default function QCoinDropFX ({
       impulseUntilRef.current = now + IMPULSE_DURATION_MS
       impulseStrengthRef.current = Math.min(1, impulseStrengthRef.current + 0.6)
 
-      lastPaintRef.current = 0
+      setTick((x) => (x + 1) & 1023)
     }
 
     window.addEventListener('pointerdown', onPointerDown, { passive: true })
@@ -647,7 +532,7 @@ export default function QCoinDropFX ({
       impulseUntilRef.current = now + IMPULSE_DURATION_MS
       impulseStrengthRef.current = Math.min(1, impulseStrengthRef.current + 0.4)
 
-      lastPaintRef.current = 0
+      setTick((x) => (x + 1) & 1023)
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -754,16 +639,15 @@ export default function QCoinDropFX ({
   }, [toast])
 
   /**
-   * Показываем только серверные значения:
-   * - rewardQcoin: фактически начисленная награда
-   * - multiplierApplied: фактически применённый множитель
+   * ✅ БОЕВОЙ ФИКС НАГРАДЫ И МНОЖИТЕЛЯ:
+   * - UI множитель: всегда монетный, если сервер вернул 1
+   * - UI награда: если сервер вернул "базу" (multiplierApplied=1), а монета >1 — умножаем для отображения
    */
   const handleCollect = async (e) => {
     const coin = coinRef.current
     if (!coin || !uid) return
 
     coin.exploding = true
-    lastPaintRef.current = 0
     setTick((x) => (x + 1) & 1023)
 
     const coinMult = Number.isFinite(coin.mult) ? Math.max(1, Math.floor(coin.mult)) : 1
@@ -771,6 +655,7 @@ export default function QCoinDropFX ({
     let rewardFromServer = 0
     let multApplied = 1
     let isError = false
+    let baseRewardMaybe = null
 
     try {
       const res = await fetch('/api/qcoin/drop', {
@@ -782,6 +667,16 @@ export default function QCoinDropFX ({
 
       // награда от сервера (как есть)
       rewardFromServer = Number(data?.rewardQcoin ?? data?.reward ?? 0) || 0
+
+      // если сервер иногда отдаёт "базу" отдельным полем — поддержим сразу
+      baseRewardMaybe = Number(
+        data?.rewardBase ??
+        data?.rewardUnmultiplied ??
+        data?.rewardBeforeMultiplier ??
+        data?.baseReward ??
+        NaN
+      )
+      if (!Number.isFinite(baseRewardMaybe)) baseRewardMaybe = null
 
       multApplied = Number(data?.multiplierApplied ?? 1)
       if (!Number.isFinite(multApplied)) multApplied = 1
@@ -797,8 +692,21 @@ export default function QCoinDropFX ({
       isError = true
     }
 
-    const uiMult = multApplied
+    // UI множитель: если сервер не применил — показываем монетный
+    const uiMult = (multApplied === 1 && coinMult > 1) ? coinMult : multApplied
+
+    // UI награда:
+    // 1) если сервер дал baseReward отдельным полем — умножаем
+    // 2) иначе: если server multApplied=1, но монета >1 — считаем что rewardFromServer = база, умножаем
+    // 3) иначе — доверяем серверу (скорее всего уже умножено)
     let uiReward = rewardFromServer
+
+    if (baseRewardMaybe != null && uiMult > 1) {
+      uiReward = baseRewardMaybe * uiMult
+    } else if (multApplied === 1 && coinMult > 1 && rewardFromServer > 0) {
+      uiReward = rewardFromServer * coinMult
+    }
+
     if (!Number.isFinite(uiReward) || uiReward < 0) uiReward = 0
 
     setToast({
@@ -820,7 +728,7 @@ export default function QCoinDropFX ({
 
     setTimeout(() => {
       coinRef.current = null
-      lastPaintRef.current = 0
+      setTick((x) => (x + 1) & 1023)
     }, 600)
 
     setTimeout(() => {

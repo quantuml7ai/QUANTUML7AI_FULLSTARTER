@@ -1,5 +1,26 @@
 {
   "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-03-22T22:31:46.337Z",
-  "all": []
+  "generatedAt": "2026-03-22T23:55:28.842Z",
+  "all": [
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\QCoinDropFX.jsx",
+      "issues": [
+        {
+          "startLine": 359,
+          "endLine": 465,
+          "block": "  useEffect(() => {\n    if (!isBrowser()) return\n    if (motionReducedRef.current) return\n\n    lastTimeRef.current = 0\n    let stopped = false\n\n    const loop = (ts) => {\n      if (stopped) return\n\n      const { w, h } = worldRef.current\n      if (!w || !h) initWorld()\n\n      if (!lastTimeRef.current) lastTimeRef.current = ts\n\n      const dtMs = ts - lastTimeRef.current\n      lastTimeRef.current = ts\n      const dt = Math.min(0.05, Math.max(0.012, dtMs / 1000))\n\n      const now = ts\n      const impulseLeft = Math.max(0, impulseUntilRef.current - now)\n      const impulsePhase = Math.min(1, impulseLeft / IMPULSE_DURATION_MS)\n      const targetStrength = impulsePhase\n      const currentStrength = impulseStrengthRef.current\n      impulseStrengthRef.current =\n        currentStrength + (targetStrength - currentStrength) * 0.18\n      const impulseK = impulseStrengthRef.current\n\n      let coin = coinRef.current\n\n      if (uid && !coin) {\n        const nextAt = spawnAtRef.current || 0\n        if (!nextAt || ts >= nextAt) {\n          const depth = 0.4 + rng() * 0.6\n          const size = minSize + depth * (maxSize - minSize)\n          const baseVy = 60 + 50 * depth\n\n          const { base, max } = getEffectiveMultRange()\n          const mult = pickSmartMultiplier(base, max)\n\n          coin = {\n            id: ts,\n            depth,\n            size,\n            x: rng() * w,\n            y: -size,\n            vx: (rng() * 2 - 1) * (10 + 20 * depth),\n            vy: baseVy,\n            baseVy,\n            swayPhase: rng() * Math.PI * 2,\n            swaySpeed: 0.4 + rng() * 1.2,\n            swayAmp: 8 + 18 * depth,\n            angle: rng() * 360,\n            spinDir: rng() < 0.5 ? -1 : 1,\n            spinSpeed: 30 + rng() * 50,\n            opacity: 0.98,\n            exploding: false,\n            mult,\n          }\n\n          coinRef.current = coin\n          spawnAtRef.current = ts + intervalMs\n        }\n      }\n\n      if (coin) {\n        const f = coin\n        const depthFactor = 0.5 + f.depth * 0.7\n\n        f.vy += GRAVITY * depthFactor * dt\n        f.vx += (rng() * 2 - 1) * WIND_NOISE * dt * depthFactor\n\n        f.vx *= FRICTION_VX\n        f.vy *= FRICTION_VY\n\n        const relax = impulseK > 0.01 ? IMPULSE_DAMPING : 0.9\n        f.vy = f.vy * relax + f.baseVy * (1 - relax)\n\n        f.x += f.vx * dt\n        f.y += f.vy * dt\n\n        f.swayPhase += f.swaySpeed * dt\n        f.angle += f.spinDir * f.spinSpeed * dt\n        if (f.angle > 360) f.angle -= 360\n        if (f.angle < 0) f.angle += 360\n\n        const bottom = h + 80\n        const left = -80\n        const right = w + 80\n        if (f.y > bottom || f.x < left || f.x > right) {\n          coinRef.current = null\n        }\n      }\n\n      setTick((x) => (x + 1) & 1023)\n      if (!stopped) animFrameRef.current = requestAnimationFrame(loop)\n    }\n\n    animFrameRef.current = requestAnimationFrame(loop)\n\n    return () => {\n      stopped = true\n      const rafId = animFrameRef.current\n      animFrameRef.current = null\n      if (rafId) cancelAnimationFrame(rafId)\n    }\n  }, [uid, intervalMs, minSize, maxSize, initWorld])",
+          "add": 0,
+          "rem": 0,
+          "si": 0,
+          "ci": 0,
+          "raf": 2,
+          "caf": 1,
+          "rect": 0,
+          "flags": [
+            "⚠ requestAnimationFrame(2) > cancelAnimationFrame(1)"
+          ]
+        }
+      ]
+    }
+  ]
 }

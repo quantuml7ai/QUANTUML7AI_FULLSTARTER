@@ -9,6 +9,27 @@ import {
   defaultAvatarUrl,
 } from '../utils/avatar'
 
+const AVATAR_FAIL_TTL_MS = 10 * 60 * 1000
+const avatarFailUntilByUrl = new Map()
+
+function isAvatarTemporarilyBlocked(url) {
+  const key = String(url || '')
+  if (!key) return false
+  const until = Number(avatarFailUntilByUrl.get(key) || 0)
+  if (!until) return false
+  if (until <= Date.now()) {
+    avatarFailUntilByUrl.delete(key)
+    return false
+  }
+  return true
+}
+
+function markAvatarFailed(url) {
+  const key = String(url || '')
+  if (!key) return
+  avatarFailUntilByUrl.set(key, Date.now() + AVATAR_FAIL_TTL_MS)
+}
+
 export default function AvatarEmoji({ userId, pIcon, className }) {
   const fallbackUrl = React.useMemo(() => defaultAvatarUrl(userId), [userId])
   const [src, setSrc] = React.useState(fallbackUrl)
@@ -33,35 +54,32 @@ export default function AvatarEmoji({ userId, pIcon, className }) {
       setSrc(fallbackUrl)
       return
     }
+    if (isAvatarTemporarilyBlocked(targetUrl)) {
+      setSrc(fallbackUrl)
+      return
+    }
     if (typeof window === 'undefined') {
       setSrc(targetUrl)
       return
     }
 
     let cancelled = false
-    let retryTimer = null
-
-    const tryLoad = () => {
+    const probe = new window.Image()
+    probe.onload = () => {
       if (cancelled) return
-      const probe = new window.Image()
-      probe.onload = () => {
-        if (cancelled) return
-        setSrc(targetUrl)
-      }
-      probe.onerror = () => {
-        if (cancelled) return
-        setSrc(fallbackUrl)
-        retryTimer = window.setTimeout(tryLoad, 4000)
-      }
-      probe.src = targetUrl
+      setSrc(targetUrl)
     }
+    probe.onerror = () => {
+      if (cancelled) return
+      markAvatarFailed(targetUrl)
+      setSrc(fallbackUrl)
+    }
+    probe.src = targetUrl
 
-    tryLoad()
     return () => {
       cancelled = true
-      if (retryTimer) {
-        clearTimeout(retryTimer)
-      }
+      probe.onload = null
+      probe.onerror = null
     }
   }, [targetUrl, fallbackUrl])
 
@@ -74,7 +92,10 @@ export default function AvatarEmoji({ userId, pIcon, className }) {
         height={64}
         unoptimized
         onError={() => {
-          if (src !== fallbackUrl) setSrc(fallbackUrl)
+          if (src !== fallbackUrl) {
+            markAvatarFailed(src)
+            setSrc(fallbackUrl)
+          }
         }}
         style={{
           width: '100%',

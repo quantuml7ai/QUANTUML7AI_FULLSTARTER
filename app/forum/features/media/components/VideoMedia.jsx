@@ -443,6 +443,14 @@ export default function VideoMedia({
         } catch {}
         return
       }
+      // Для пост-видео восстановление делает единый coordinator.
+      // Локальный remove(src)+load() здесь создаёт лишние 206/cancel-циклы.
+      if (String(dataForumVideo || '') === 'post') {
+        try {
+          onErrorProp?.(e)
+        } catch {}
+        return
+      }
       try {
         const tried = Number(el.dataset.__recoverTry || 0)
         if (tried < 1) {
@@ -476,7 +484,7 @@ export default function VideoMedia({
         onErrorProp?.(e)
       } catch {}
     },
-    [onErrorProp],
+    [dataForumVideo, onErrorProp],
   )
 
   const onVideoLoaded = React.useCallback(() => {
@@ -516,6 +524,7 @@ export default function VideoMedia({
       preload={renderPreload}
       controls={controls}
       autoPlay={autoPlay}
+      defaultMuted
       loop={loop}
       controlsList={controlsList}
       disablePictureInPicture={disablePictureInPicture}

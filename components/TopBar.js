@@ -3,7 +3,6 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect } from 'react'
 import { useI18n } from './i18n'
 import LanguageSwitcher from './LanguageSwitcher'
 import dynamic from 'next/dynamic'
@@ -25,19 +24,17 @@ export default function TopBar () {
   const pathname = usePathname()
   const router = useRouter()
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return undefined
-
-    const onLogout = () => {
-      try { window.dispatchEvent(new Event('aiquota:flush')) } catch {}
-      try { window.location.reload() } catch {}
-    }
-
-    window.addEventListener('auth:logout', onLogout)
-    return () => {
-      window.removeEventListener('auth:logout', onLogout)
-    }
-  }, [])
+  // слушатель логаута
+  if (typeof window !== 'undefined') {
+    window.__QL7_TOPBAR_LOGOUT_ONCE__ ||= (() => {
+      const onLogout = () => {
+        try { window.dispatchEvent(new Event('aiquota:flush')) } catch {}
+        try { window.location.reload() } catch {}
+      }
+      window.addEventListener('auth:logout', onLogout)
+      return true
+    })()
+  }
 
   const items = [
     { href: '/exchange',  label: t('nav_exchange') },

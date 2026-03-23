@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import InviteFriendPopup from './InviteFriendPopup'
 
 // Простейшая проверка браузера
@@ -24,32 +24,18 @@ function readUnifiedAccountId() {
   return null
 }
 
-const FIRST_DELAY_MS = 15 * 60 * 1000     // первый показ через 15 минут после auth-граничного события
+const FIRST_DELAY_MS = 7 * 60 * 1000      // 5 минут после авторизации
 const INTERVAL_MS = 60 * 60 * 1000        // каждый час
 const ACTIVE_WINDOW_MS = 10 * 60 * 1000   // пользователь активен в последние 10 минут
-const AUTH_TIMER_REFRESH_DEDUP_MS = 30 * 1000
 
 const LS_LAST_AUTH = 'invite:lastAuthAt'
 const LS_LAST_POPUP = 'invite:lastPopupAt'
 const LS_LAST_ACTIVITY = 'invite:lastActivityAt'
-const POST_AUTH_DEDUP_WINDOW_MS = 1800
 
-function readInviteTestMode() {
-  if (String(process.env.NEXT_PUBLIC_INVITE_TEST_MODE || '') !== '1') return false
-  if (!isBrowser()) return false
-  try {
-    const qs = new URLSearchParams(window.location.search || '')
-    const fromQuery = String(qs.get('inviteTest') || '').trim().toLowerCase()
-    if (fromQuery === '1' || fromQuery === 'true') return true
-    const fromStorage = String(window.localStorage.getItem('invite:test-mode') || '').trim().toLowerCase()
-    return fromStorage === '1' || fromStorage === 'true'
-  } catch {
-    return false
-  }
-}
+const INVITE_TEST_MODE =
+  process.env.NEXT_PUBLIC_INVITE_TEST_MODE === '1'
 
 export default function InviteFriendProvider() {
-  const inviteTestMode = readInviteTestMode()
   const [uid, setUid] = useState(null)
   const [open, setOpen] = useState(false)
   const [referralUrl, setReferralUrl] = useState('')
@@ -75,10 +61,6 @@ export default function InviteFriendProvider() {
     if (!isBrowser()) return 0
     const raw = window.localStorage.getItem(LS_LAST_ACTIVITY)
     return raw ? Number(raw) || 0 : 0
-  })
-  const lastPostAuthSignalRef = useRef({
-    accountId: String(readUnifiedAccountId() || '').trim(),
-    ts: 0,
   })
 
   // --- Функции открытия / закрытия поповера ---
@@ -145,87 +127,39 @@ export default function InviteFriendProvider() {
       setUid(initial)
 
       // В тестовом режиме можно сразу открыть поповер при наличии uid
-      if (inviteTestMode) {
+      if (INVITE_TEST_MODE) {
         openPopup(initial)
       }
     }
-  }, [openPopup, inviteTestMode])
+  }, [openPopup])
 
   // --- Слушаем события авторизации ---
 
   useEffect(() => {
     if (!isBrowser()) return
 
-    const applyPostAuthSignal = (accountId, source = 'unknown') => {
-      const acc = String(accountId || readUnifiedAccountId() || '').trim()
+    const handleAuth = () => {
+      const acc = readUnifiedAccountId()
       if (!acc) return
-
       const now = Date.now()
-      const prev = lastPostAuthSignalRef.current || { accountId: '', ts: 0 }
-      const sameSignalBurst =
-        prev.accountId === acc &&
-        now - Number(prev.ts || 0) < POST_AUTH_DEDUP_WINDOW_MS
-      if (sameSignalBurst) return
-
-      lastPostAuthSignalRef.current = { accountId: acc, ts: now, source }
       setUid(acc)
-      const sourceKey = String(source || '').trim().toLowerCase()
-      const isAuthBoundarySignal =
-        sourceKey.includes('auth_ok') || sourceKey.includes('auth_success')
-      const accountChanged = String(prev.accountId || '') !== acc
-      let storedAuthAt = 0
-      try {
-        storedAuthAt = Number(window.localStorage.getItem(LS_LAST_AUTH) || 0) || 0
-      } catch {
-        storedAuthAt = 0
-      }
-      const authBoundaryRecentlyHandled =
-        storedAuthAt > 0 &&
-        now - storedAuthAt < AUTH_TIMER_REFRESH_DEDUP_MS
-      const shouldRefreshAuthTimer =
-        accountChanged ||
-        storedAuthAt <= 0 ||
-        (isAuthBoundarySignal && !authBoundaryRecentlyHandled)
+      setLastAuthAt(now)
+      window.localStorage.setItem(LS_LAST_AUTH, String(now))
 
-      if (shouldRefreshAuthTimer) {
-        setLastAuthAt(now)
-        try {
-          window.localStorage.setItem(LS_LAST_AUTH, String(now))
-        } catch {}
-      }
-
-      if (inviteTestMode && shouldRefreshAuthTimer) {
-        // В тестовом режиме сразу открываем попап только на auth-граничном сигнале.
+      if (INVITE_TEST_MODE) {
+        // В тестовом режиме сразу открываем поповер, не ждём 5 минут
         openPopup(acc)
       }
     }
 
-    const handlePostAuthReady = (event) => {
-      const accountId = String(event?.detail?.accountId || '').trim()
-      const reason = String(event?.detail?.reason || '').trim()
-      applyPostAuthSignal(accountId, reason ? `forum:${reason}` : 'forum')
-    }
-
-    const handleAuthOk = (event) => {
-      const accountId = String(event?.detail?.accountId || '').trim()
-      // Фолбэк: обновляем uid, но не считаем это "новой auth-границей".
-      applyPostAuthSignal(accountId, 'auth_fallback')
-    }
-
-    const handleAuthLogout = () => {
-      setUid(null)
-    }
-
-    window.addEventListener('forum:post-auth-ready', handlePostAuthReady)
-    window.addEventListener('auth:ok', handleAuthOk)
-    window.addEventListener('auth:logout', handleAuthLogout)
+    window.addEventListener('auth:ok', handleAuth)
+    window.addEventListener('auth:success', handleAuth)
 
     return () => {
-      window.removeEventListener('forum:post-auth-ready', handlePostAuthReady)
-      window.removeEventListener('auth:ok', handleAuthOk)
-      window.removeEventListener('auth:logout', handleAuthLogout)
+      window.removeEventListener('auth:ok', handleAuth)
+      window.removeEventListener('auth:success', handleAuth)
     }
-  }, [openPopup, inviteTestMode])
+  }, [openPopup])
   // --- Принудительное открытие попапа по глобальному событию --- 
   useEffect(() => {
     if (!isBrowser()) return
@@ -268,7 +202,7 @@ export default function InviteFriendProvider() {
 
   useEffect(() => {
     if (!isBrowser()) return
-    if (inviteTestMode) return
+    if (INVITE_TEST_MODE) return
 
     const id = window.setInterval(() => {
       if (!uid) return
@@ -290,7 +224,7 @@ export default function InviteFriendProvider() {
     return () => {
       window.clearInterval(id)
     }
-  }, [uid, lastAuthAt, lastPopupAt, lastActivityAt, openPopup, inviteTestMode])
+  }, [uid, lastAuthAt, lastPopupAt, lastActivityAt, openPopup])
 
   return (
     <InviteFriendPopup

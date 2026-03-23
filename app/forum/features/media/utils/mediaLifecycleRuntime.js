@@ -138,12 +138,19 @@ export function __writeMediaMutedPref(nextMuted) {
 export function __unloadVideoEl(el) {
   if (!el) return
   try {
-    const cur = Number(el.currentTime || 0)
-    const dur = Number(el.duration || 0)
-    const hasMeaningfulTime = Number.isFinite(cur) && cur > 0.18
-    const nearEnd = Number.isFinite(dur) && dur > 0 && cur >= Math.max(0, dur - 0.18)
-    if (hasMeaningfulTime && !nearEnd) el.dataset.__resumeTime = String(cur)
-    else delete el.dataset.__resumeTime
+    const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
+    if (isPostFeedVideo) {
+      // Для feed-видео не переносим seek-позицию между unload/restore:
+      // это снижает range-шторм и нестабильные "серые" перезапуски.
+      delete el.dataset.__resumeTime
+    } else {
+      const cur = Number(el.currentTime || 0)
+      const dur = Number(el.duration || 0)
+      const hasMeaningfulTime = Number.isFinite(cur) && cur > 0.18
+      const nearEnd = Number.isFinite(dur) && dur > 0 && cur >= Math.max(0, dur - 0.18)
+      if (hasMeaningfulTime && !nearEnd) el.dataset.__resumeTime = String(cur)
+      else delete el.dataset.__resumeTime
+    }
   } catch {}
   try {
     el.pause?.()
@@ -158,7 +165,6 @@ export function __unloadVideoEl(el) {
   const canHardUnload = (() => {
     try {
       if (__VIDEO_HARD_CAP_ENABLED) return true
-      if (document?.documentElement?.getAttribute?.('data-video-feed') === '1') return true
       return String(el?.dataset?.__forceHardUnload || '') === '1'
     } catch {
       return __VIDEO_HARD_CAP_ENABLED
@@ -179,7 +185,9 @@ export function __unloadVideoEl(el) {
     el.removeAttribute('src')
   } catch {}
   try {
-    el.removeAttribute('data-src')
+    if (el.dataset?.__src) {
+      el.setAttribute('data-src', String(el.dataset.__src))
+    }
   } catch {}
   try {
     el.preload = 'none'
@@ -199,8 +207,25 @@ export function __restoreVideoEl(el) {
   if (!el) return
   const src = el.dataset.__src || el.getAttribute('data-src') || ''
   if (!src) return
+  try {
+    if (!el.getAttribute('data-src')) el.setAttribute('data-src', String(src))
+  } catch {}
   const cur = el.getAttribute('src') || ''
-  if (cur === src) return
+  if (cur === src) {
+    try {
+      const readyStateNow = Number(el.readyState || 0)
+      const networkStateNow = Number(el.networkState || 0)
+      const isNetworkEmpty =
+        typeof HTMLMediaElement !== 'undefined' &&
+        networkStateNow === HTMLMediaElement.NETWORK_EMPTY
+      if (readyStateNow === 0 || isNetworkEmpty) {
+        el.dataset.__loadPending = '1'
+        el.dataset.__warmReady = '0'
+        el.load?.()
+      }
+    } catch {}
+    return
+  }
   try {
     el.preload = (el.dataset?.__prewarm === '1') ? 'auto' : 'metadata'
   } catch {}
@@ -219,25 +244,32 @@ export function __restoreVideoEl(el) {
     el.setAttribute('src', src)
   } catch {}
   try {
-    const resumeTo = Number(el.dataset?.__resumeTime || 0)
-    if (Number.isFinite(resumeTo) && resumeTo > 0.18) {
-      const seekToResume = () => {
-        try {
-          const duration = Number(el.duration || 0)
-          const safeTarget = Number.isFinite(duration) && duration > 0
-            ? Math.max(0, Math.min(resumeTo, duration - 0.12))
-            : resumeTo
-          if (Number.isFinite(safeTarget) && safeTarget > 0.05 && Math.abs(Number(el.currentTime || 0) - safeTarget) > 0.05) {
-            el.currentTime = safeTarget
-          }
-        } catch {}
+    const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
+    if (!isPostFeedVideo) {
+      const resumeTo = Number(el.dataset?.__resumeTime || 0)
+      if (Number.isFinite(resumeTo) && resumeTo > 0.18) {
+        const seekToResume = () => {
+          try {
+            const duration = Number(el.duration || 0)
+            const safeTarget = Number.isFinite(duration) && duration > 0
+              ? Math.max(0, Math.min(resumeTo, duration - 0.12))
+              : resumeTo
+            if (Number.isFinite(safeTarget) && safeTarget > 0.05 && Math.abs(Number(el.currentTime || 0) - safeTarget) > 0.05) {
+              el.currentTime = safeTarget
+            }
+          } catch {}
+        }
+        try { el.addEventListener('loadedmetadata', seekToResume, { once: true }) } catch {}
+        try { el.addEventListener('canplay', seekToResume, { once: true }) } catch {}
       }
-      try { el.addEventListener('loadedmetadata', seekToResume, { once: true }) } catch {}
-      try { el.addEventListener('canplay', seekToResume, { once: true }) } catch {}
     }
   } catch {}
   try {
-    el.load?.()
+    const networkState = Number(el.networkState || 0)
+    const isLoading =
+      typeof HTMLMediaElement !== 'undefined' &&
+      networkState === HTMLMediaElement.NETWORK_LOADING
+    if (!isLoading) el.load?.()
   } catch {}
 }
 
