@@ -54,6 +54,7 @@ const writeQcastMutedPref = React.useCallback((nextMuted) => {
   const hostRef = React.useRef(null);
   const canvasRef = React.useRef(null);
   const playerIdRef = React.useRef(`qcast_${Math.random().toString(36).slice(2)}`);
+  const muteSyncGuardRef = React.useRef(false);
  
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [duration, setDuration] = React.useState(0);
@@ -318,19 +319,95 @@ const spawnFx = React.useCallback((kind, origin) => {
   const ctrlBars = React.useMemo(() => buildQCastControlBars(src), [src]);
 
   const waRef = React.useRef({
-    ctx: null, analyser: null, srcNode: null, gain: null, filters: null, panner: null,
+    ctx: null, analyser: null, srcNode: null, gain: null, master: null, outputGate: null, dryGain: null, wetGain: null, filters: null, panner: null,
     data: null, raf: 0, ro: null, ctx2d: null, w: 0, h: 0, dpr: 1,
     particles: [], t: 0, active: false, lastTs: 0, lastPaint: 0,
   });
-  const syncMasterGain = React.useCallback(() => {
+  const applyGainValue = React.useCallback((node, nextValue) => {
+    try {
+      const gain = node?.gain;
+      if (!gain) return;
+      const value = Math.min(1, Math.max(0, Number(nextValue ?? 0)));
+      const ctx = waRef.current?.ctx;
+      if (ctx && typeof gain.cancelScheduledValues === 'function' && typeof gain.setValueAtTime === 'function') {
+        gain.cancelScheduledValues(ctx.currentTime);
+        gain.setValueAtTime(value, ctx.currentTime);
+        return;
+      }
+      gain.value = value;
+    } catch {}
+  }, []);
+  const syncMasterGain = React.useCallback((forcedMuted = null) => {
     try {
       const audio = audioRef.current;
       const st = waRef.current;
-      if (!audio || !st?.master) return;
-      const nextGain = !!audio.muted ? 0 : Math.min(1, Math.max(0, Number(audio.volume ?? 1)));
-      st.master.gain.value = nextGain;
+      if (!audio) return;
+      const effectiveMuted = typeof forcedMuted === 'boolean' ? !!forcedMuted : !!audio.muted;
+      const nextVolume = Math.min(1, Math.max(0, Number(audio.volume ?? 1)));
+      try {
+        audio.defaultMuted = effectiveMuted;
+        if (effectiveMuted) audio.setAttribute?.('muted', '');
+        else audio.removeAttribute?.('muted');
+      } catch {}
+      applyGainValue(st?.master, nextVolume);
+      applyGainValue(st?.outputGate, effectiveMuted ? 0 : 1);
     } catch {}
-  }, []);
+  }, [applyGainValue]);
+
+  const applyQcastMutedState = React.useCallback((nextMuted, {
+    persist = false,
+    emit = false,
+    source = 'qcast',
+  } = {}) => {
+    const audio = audioRef.current;
+    const host = hostRef.current;
+    if (!audio) return;
+
+    const next = !!nextMuted;
+    muteSyncGuardRef.current = true;
+
+    try {
+      audio.muted = next;
+      audio.defaultMuted = next;
+      if (next) audio.setAttribute?.('muted', '');
+      else audio.removeAttribute?.('muted');
+    } catch {}
+
+    try {
+      if (host?.dataset) {
+        delete host.dataset.__userUnmuteHoldUntil;
+        delete host.dataset.__qcastManualUnmute;
+      }
+      delete audio.dataset.__userUnmuteHoldUntil;
+      delete audio.dataset.__qcastManualUnmute;
+    } catch {}
+
+    setMuted(next);
+    try {
+      const v = Number(audio.volume);
+      if (Number.isFinite(v)) setVolume(Math.min(1, Math.max(0, v)));
+    } catch {}
+    syncMasterGain(next);
+
+    if (persist) {
+      try { writeQcastMutedPref(next); } catch {}
+      try { writeMuted(next); } catch {}
+    }
+
+    if (emit) {
+      try {
+        window.dispatchEvent(new CustomEvent(mutedEventName, {
+          detail: { muted: next, source, id: playerIdRef.current }
+        }));
+      } catch {}
+    }
+
+    try {
+      audio.dispatchEvent?.(new Event('volumechange'));
+    } catch {
+      muteSyncGuardRef.current = false;
+    }
+  }, [mutedEventName, syncMasterGain, writeMuted, writeQcastMutedPref]);
 
   const applyPreset = React.useCallback((st, nextPreset) => {
     const filters = st?.filters;
@@ -351,23 +428,7 @@ const spawnFx = React.useCallback((kind, origin) => {
     const st = waRef.current;
 
     const initialMuted = readQcastMutedPref();
-    audio.muted = desiredMuted(initialMuted);
-    try {
-      const globalHoldUntil = Number(window?.__forumQcastUnmuteHoldUntil || 0);
-      if (globalHoldUntil > Date.now()) {
-        audio.muted = false;
-        audio.defaultMuted = false;
-        audio.removeAttribute?.('muted');
-        audio.dataset.__userUnmuteHoldUntil = String(globalHoldUntil);
-        audio.dataset.__qcastManualUnmute = '1';
-        if (hostRef.current?.dataset) hostRef.current.dataset.__userUnmuteHoldUntil = String(globalHoldUntil);
-        if (hostRef.current?.dataset) hostRef.current.dataset.__qcastManualUnmute = '1';
-      }
-    } catch {}
-    audio.defaultMuted = !!audio.muted;
-    if (audio.muted) audio.setAttribute?.('muted', '');
-    else audio.removeAttribute?.('muted');
-    setMuted(!!audio.muted);
+    applyQcastMutedState(desiredMuted(initialMuted), { source: 'qcast-init' });
 
     try {
       const v = Number(audio.volume);
@@ -411,11 +472,14 @@ const spawnFx = React.useCallback((kind, origin) => {
     };
 
     const onVolume = () => {
+      const guarded = muteSyncGuardRef.current;
+      muteSyncGuardRef.current = false;
       try {
         setMuted(!!audio.muted);
         const v = Number(audio.volume);
         if (Number.isFinite(v)) setVolume(Math.min(1, Math.max(0, v)));
         syncMasterGain();
+        if (guarded) return;
         const skipPersistUntil = Math.max(
           Number(audio?.dataset?.__skipMutePersistUntil || 0),
           Number(hostRef.current?.dataset?.__skipMutePersistUntil || 0),
@@ -425,6 +489,7 @@ const spawnFx = React.useCallback((kind, origin) => {
         }
       } catch {}
       try {
+        if (guarded) return;
         const skipPersistUntil = Math.max(
           Number(audio?.dataset?.__skipMutePersistUntil || 0),
           Number(hostRef.current?.dataset?.__skipMutePersistUntil || 0),
@@ -461,7 +526,9 @@ const spawnFx = React.useCallback((kind, origin) => {
           st.data = new Uint8Array(st.analyser.frequencyBinCount);
           // master output
           st.master = st.ctx.createGain();
-          st.master.gain.value = Math.min(1, Math.max(0, Number(audioRef.current.volume ?? 1)));
+          st.outputGate = st.ctx.createGain();
+          applyGainValue(st.master, Math.min(1, Math.max(0, Number(audioRef.current.volume ?? 1))));
+          applyGainValue(st.outputGate, !!audioRef.current?.muted ? 0 : 1);
 
           // dry/wet mix: DRY всегда даёт звук (страховка от “тишины”)
           st.dryGain = st.ctx.createGain();
@@ -485,14 +552,19 @@ const spawnFx = React.useCallback((kind, origin) => {
           st.analyser.connect(st.wetGain);
           st.wetGain.connect(st.master);
 
-          // master -> (optional panner) -> destination
-          if (st.panner) { st.master.connect(st.panner); st.panner.connect(st.ctx.destination); }
-          else { st.master.connect(st.ctx.destination); }
+          // final output gate keeps QCast audible state aligned with mute toggle/global mute memory
+          st.master.connect(st.outputGate);
+
+          // outputGate -> (optional panner) -> destination
+          if (st.panner) { st.outputGate.connect(st.panner); st.panner.connect(st.ctx.destination); }
+          else { st.outputGate.connect(st.ctx.destination); }
+
+          syncMasterGain();
 
         } catch {
           try { st.ctx?.close?.(); } catch {}
          st.ctx = null; st.analyser = null; st.srcNode = null;
-          st.master = null; st.dryGain = null; st.wetGain = null;
+          st.master = null; st.outputGate = null; st.dryGain = null; st.wetGain = null;
           st.filters = null; st.panner = null; st.data = null;
           return;
         }
@@ -528,6 +600,7 @@ const spawnFx = React.useCallback((kind, origin) => {
       try { st.srcNode?.disconnect?.(); } catch {}
       try { st.analyser?.disconnect?.(); } catch {}
       try { st.master?.disconnect?.(); } catch {}
+      try { st.outputGate?.disconnect?.(); } catch {}
       try { st.dryGain?.disconnect?.(); } catch {}
       try { st.wetGain?.disconnect?.(); } catch {}
       try { st.panner?.disconnect?.(); } catch {}
@@ -537,6 +610,7 @@ const spawnFx = React.useCallback((kind, origin) => {
       st.analyser = null;
       st.srcNode = null;
       st.master = null;
+      st.outputGate = null;
       st.dryGain = null;
       st.wetGain = null;
       st.filters = null;
@@ -544,7 +618,7 @@ const spawnFx = React.useCallback((kind, origin) => {
       st.data = null;
       try { ctx?.close?.(); } catch {}
     }; 
-  }, [applyPreset, desiredMuted, mutedEventName, readQcastMutedPref, syncMasterGain, writeQcastMutedPref]);
+  }, [applyGainValue, applyPreset, applyQcastMutedState, desiredMuted, mutedEventName, readQcastMutedPref, syncMasterGain, writeQcastMutedPref]);
 
   React.useEffect(() => {
     const audio = audioRef.current;
@@ -556,43 +630,7 @@ const spawnFx = React.useCallback((kind, origin) => {
         if (d?.id && d.id === playerIdRef.current) return;
         if (typeof d?.muted !== 'boolean') return;
         const next = !!d.muted;
-        const source = String(d?.source || '');
-        const persistedPref = readQcastMutedPref();
-        const userUnmuteHoldUntil = Math.max(
-          Number(audio?.dataset?.__userUnmuteHoldUntil || 0),
-          Number(hostRef.current?.dataset?.__userUnmuteHoldUntil || 0),
-        );
-        const hasManualUnmute =
-          String(audio?.dataset?.__qcastManualUnmute || '') === '1' ||
-          String(hostRef.current?.dataset?.__qcastManualUnmute || '') === '1';
-        if (source !== 'qcast' && next && hasManualUnmute) {
-          return;
-        }
-        if (source !== 'qcast' && next && userUnmuteHoldUntil > Date.now()) {
-          return;
-        }
-        if (source !== 'qcast' && next && persistedPref === false) {
-          return;
-        }
-        const manualLeaseUntil = Math.max(
-          Number(audio?.dataset?.__manualLeaseUntil || 0),
-          Number(hostRef.current?.dataset?.__manualLeaseUntil || 0),
-        );
-        if (
-          source !== 'qcast' &&
-          next &&
-          !audio.paused &&
-          !audio.muted &&
-          manualLeaseUntil > Date.now()
-        ) {
-          return;
-        }
-        if (audio.muted !== next) audio.muted = next;
-        audio.defaultMuted = next;
-        if (next) audio.setAttribute?.('muted', '');
-        else audio.removeAttribute?.('muted');
-        setMuted(next);
-        syncMasterGain();
+        applyQcastMutedState(next, { source: String(d?.source || 'external') });
       } catch {}
     };
 
@@ -620,7 +658,7 @@ const spawnFx = React.useCallback((kind, origin) => {
       window.removeEventListener('pageshow', onVisibilityRecover);
       window.removeEventListener('focus', onVisibilityRecover, true);
     };
-  }, [mutedEventName, readQcastMutedPref, syncMasterGain]);
+  }, [applyQcastMutedState, mutedEventName, syncMasterGain]);
 
   React.useEffect(() => {
     const audio = audioRef.current;
@@ -734,57 +772,21 @@ const spawnFx = React.useCallback((kind, origin) => {
     e?.preventDefault?.(); e?.stopPropagation?.();
     openControls(); await unlockAudio();
     const audio = audioRef.current;
-    const host = hostRef.current;
     if (!audio) return;
-    audio.muted = !audio.muted;
-    audio.defaultMuted = !!audio.muted;
-    if (audio.muted) audio.setAttribute?.('muted', '');
-    else audio.removeAttribute?.('muted');
-    writeQcastMutedPref(!!audio.muted);
-    try {
-      if (!audio.muted) {
-        const gestureUntil = String(Date.now() + 1800);
-        const leaseUntil = String(Date.now() + 90_000);
-        const unmuteHoldUntil = String(Date.now() + (8 * 60 * 60 * 1000));
-        if (Number(audio.volume || 0) <= 0.01) {
-          try { audio.volume = 1; } catch {}
-        }
-        try { window.__forumQcastUnmuteHoldUntil = Number(unmuteHoldUntil); } catch {}
-        audio.dataset.__userGestureUntil = gestureUntil;
-        audio.dataset.__manualLeaseUntil = leaseUntil;
-        audio.dataset.__userUnmuteHoldUntil = unmuteHoldUntil;
-        audio.dataset.__qcastManualUnmute = '1';
-        delete audio.dataset.__userPaused;
-        delete audio.dataset.__userPausedAt;
-        if (host?.dataset) {
-          host.dataset.__userGestureUntil = gestureUntil;
-          host.dataset.__manualLeaseUntil = leaseUntil;
-          host.dataset.__userUnmuteHoldUntil = unmuteHoldUntil;
-          host.dataset.__qcastManualUnmute = '1';
-          delete host.dataset.__userPaused;
-          delete host.dataset.__userPausedAt;
-        }
-      } else {
-        try { delete window.__forumQcastUnmuteHoldUntil; } catch {}
-        delete audio.dataset.__userUnmuteHoldUntil;
-        delete audio.dataset.__qcastManualUnmute;
-        if (host?.dataset) delete host.dataset.__userUnmuteHoldUntil;
-        if (host?.dataset) delete host.dataset.__qcastManualUnmute;
-      }
-    } catch {}
-    setMuted(!!audio.muted);
-    try {
-      const v = Number(audio.volume);
-      if (Number.isFinite(v)) setVolume(Math.min(1, Math.max(0, v)));
-    } catch {}
-    syncMasterGain();
+    const nextMuted = !audio.muted;
+    if (!nextMuted && Number(audio.volume || 0) <= 0.01) {
+      try { audio.volume = 1; } catch {}
+    }
+    applyQcastMutedState(nextMuted, {
+      persist: true,
+      emit: true,
+      source: 'qcast',
+    });
     try {
       requestAnimationFrame(() => {
         try { syncMasterGain(); } catch {}
       });
     } catch {}
-    try { writeMuted(!!audio.muted); } catch {}
-    try { window.dispatchEvent(new CustomEvent(mutedEventName,{ detail:{ muted: audio.muted, source:'qcast', id: playerIdRef.current } })); } catch {}
   };
 
   const setVol = async (v) => {

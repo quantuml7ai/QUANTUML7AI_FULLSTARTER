@@ -1,11 +1,11 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-03T07:18:51.974Z",
+  "generatedAt": "2026-04-03T08:36:01.418Z",
   "report": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
       "counts": {
-        "for-loop": 18,
+        "for-loop": 19,
         "while-loop": 2,
         "map-chain": 0,
         "filter-map": 0,
@@ -24,7 +24,7 @@
           "text": "rootMargin: `${Math.max(isCoarseUi ? 420 : 340, Math.round(__MEDIA_VIS_MARGIN_PX * 1.35))}px 0px ${Math.max(isCoarseUi ? 980 : 760, Math.round(__MEDIA_VIS_MARGIN_PX * 2.35))}px 0px`,"
         }
       ],
-      "score": 97
+      "score": 99
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\lib\\adsCore.js",
@@ -1006,24 +1006,6 @@
       "score": 11
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumViewTracking.js",
-      "counts": {
-        "for-loop": 4,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 1,
-        "sync-json": 0,
-        "local-storage": 4,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 0,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 11
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\usePostFx.js",
       "counts": {
         "for-loop": 1,
@@ -1143,6 +1125,24 @@
         "local-storage": 1,
         "session-storage": 0,
         "network-call": 3,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 9
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumViewTracking.js",
+      "counts": {
+        "for-loop": 3,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 1,
+        "sync-json": 0,
+        "local-storage": 4,
+        "session-storage": 0,
+        "network-call": 0,
         "raf": 0,
         "interval": 0
       },

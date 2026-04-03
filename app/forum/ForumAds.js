@@ -1090,6 +1090,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   const adPlayEventTsRef = useRef(0);
   const autoplayRetryTimerRef = useRef(0);
   const autoplayRetryStageRef = useRef(0);
+  const autoplayRetryTotalRef = useRef(0);
   const tryStartAdVideoRef = useRef(() => false);
   const tryStartAdYoutubeRef = useRef(() => false);
 
@@ -1128,6 +1129,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
 
   const resetAdAutoplayRetry = React.useCallback(() => {
     autoplayRetryStageRef.current = 0;
+    autoplayRetryTotalRef.current = 0;
     clearAdAutoplayRetry();
   }, [clearAdAutoplayRetry]);
 
@@ -1138,11 +1140,13 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       return false;
     }
     if (rearm) autoplayRetryStageRef.current = 0;
+    if (autoplayRetryTotalRef.current >= 12) return false;
     if (autoplayRetryStageRef.current >= 6) return false;
 
     const delays = [120, 220, 360, 560, 840, 1280];
     const delay = delays[Math.min(autoplayRetryStageRef.current, delays.length - 1)];
     autoplayRetryStageRef.current += 1;
+    autoplayRetryTotalRef.current += 1;
     clearAdAutoplayRetry();
     autoplayRetryTimerRef.current = window.setTimeout(() => {
       autoplayRetryTimerRef.current = 0;
@@ -1287,6 +1291,7 @@ tryStartAdVideoRef.current = tryStartAdVideo;
     if (!shouldPlay) {
       clearAdAutoplayRetry();
       autoplayRetryStageRef.current = 0;
+      autoplayRetryTotalRef.current = 0;
     }
   }, [clearAdAutoplayRetry, shouldPlay]);
 
@@ -1308,6 +1313,11 @@ tryStartAdVideoRef.current = tryStartAdVideo;
     }
   }, [emitAdPlayToCoordinator, muted, scheduleAdAutoplayRetry]);
   tryStartAdYoutubeRef.current = tryStartAdYoutube;
+
+  useEffect(() => {
+    if (media.kind === 'video' || media.kind === 'youtube' || media.kind === 'tiktok') return;
+    resetAdAutoplayRetry();
+  }, [media.kind, resetAdAutoplayRetry]);
 
   // Page visibility + focus/blur
   useEffect(() => {
@@ -1385,9 +1395,7 @@ tryStartAdVideoRef.current = tryStartAdVideo;
 
       // HTML5
       if (videoRef.current) {
-        try {
-          videoRef.current.muted = next;
-        } catch {}
+        applyHtmlMediaMutedState(videoRef.current, next);
       }
 
       // YouTube
@@ -1397,11 +1405,15 @@ tryStartAdVideoRef.current = tryStartAdVideo;
           else ytPlayerRef.current.unMute?.();
         } catch {}
       }
+
+      if (shouldPlayRef.current) {
+        scheduleAdAutoplayRetry('global_mute_change', { rearm: true });
+      }
     };
 
     window.addEventListener(MEDIA_MUTED_EVENT, onMuted);
     return () => window.removeEventListener(MEDIA_MUTED_EVENT, onMuted);
-  }, []);
+  }, [scheduleAdAutoplayRetry]);
   const safeClick = useMemo(() => {
     try {
       const u = new URL(url);
@@ -1743,6 +1755,7 @@ tryStartAdVideoRef.current = tryStartAdVideo;
     if (!isBrowser()) return;
 
     if (media.kind !== 'youtube' || !media.src || !shouldPrimeAdMedia) {
+      clearAdAutoplayRetry();
       destroyLocalYtPlayer(!shouldPrimeAdMedia);
       return;
     }
@@ -1757,9 +1770,9 @@ tryStartAdVideoRef.current = tryStartAdVideo;
         else player.unMute?.();
 
         if (shouldPlayRef.current) {
-          emitAdPlayToCoordinator('ad_youtube');
-          player.playVideo?.();
+          tryStartAdYoutube('yt_apply_state');
         } else {
+          resetAdAutoplayRetry();
           player.pauseVideo?.();
         }
       } catch {}
@@ -1799,15 +1812,29 @@ tryStartAdVideoRef.current = tryStartAdVideo;
               const st = ev?.data;
 
               if (st === window.YT?.PlayerState?.PLAYING) {
+                resetAdAutoplayRetry();
                 emitAdPlayToCoordinator('ad_youtube');
+                return;
+              }
+
+              if (
+                shouldPlayRef.current &&
+                (
+                  st === window.YT?.PlayerState?.BUFFERING ||
+                  st === window.YT?.PlayerState?.UNSTARTED ||
+                  st === window.YT?.PlayerState?.CUED
+                )
+              ) {
+                scheduleAdAutoplayRetry(`yt_state_${String(st || 'pending')}`, { rearm: true });
               }
 
               if (st === window.YT?.PlayerState?.ENDED) {
                 try { ev.target?.seekTo?.(0, true); } catch {}
-                try { ev.target?.playVideo?.(); } catch {}
+                tryStartAdYoutube('yt_ended');
               }
             },
             onError: () => {
+              clearAdAutoplayRetry();
               destroyLocalYtPlayer(true);
             },
           },
@@ -1848,15 +1875,20 @@ tryStartAdVideoRef.current = tryStartAdVideo;
     media.src,
     muted,
     shouldPrimeAdMedia,
+    clearAdAutoplayRetry,
     destroyLocalYtPlayer,
     emitAdPlayToCoordinator,
+    resetAdAutoplayRetry,
+    scheduleAdAutoplayRetry,
+    tryStartAdYoutube,
   ]);
 
   useEffect(() => {
     return () => {
+      clearAdAutoplayRetry();
       destroyLocalYtPlayer(true);
     };
-  }, [destroyLocalYtPlayer]);
+  }, [clearAdAutoplayRetry, destroyLocalYtPlayer]);
   // ===== Hard stop / resume playback depending on attention =====
 useEffect(() => {
   // HTML5 video
@@ -1870,8 +1902,9 @@ useEffect(() => {
     }
 
     if (shouldPlay) {
-      tryStartAdVideo();
+      tryStartAdVideo('attention_resume');
     } else {
+      resetAdAutoplayRetry();
       try { v.pause?.(); } catch {}
     }
   }
@@ -1881,11 +1914,9 @@ useEffect(() => {
     const p = ytPlayerRef.current;
     try {
       if (shouldPlay) {
-        emitAdPlayToCoordinator('ad_youtube');
-        if (muted) p.mute?.();
-        else p.unMute?.();
-        p.playVideo?.();
+        tryStartAdYoutube('attention_resume');
       } else {
+        resetAdAutoplayRetry();
         p.pauseVideo?.();
       }
     } catch {}
@@ -1900,7 +1931,9 @@ useEffect(() => {
   media.kind,
   media.src,
   muted,
+  resetAdAutoplayRetry,
   tryStartAdVideo,
+  tryStartAdYoutube,
 ]);
 
   // Impression tracking
@@ -2005,10 +2038,10 @@ useEffect(() => {
     // HTML5
     if (media.kind === 'video' && videoRef.current) {
       const v = videoRef.current;
-      try {
-        v.muted = next;
-      } catch {}
-      if (v.paused && !next && shouldPlayRef.current) v.play?.().catch(() => {});
+      applyHtmlMediaMutedState(v, next);
+      if (shouldPlayRef.current) {
+        scheduleAdAutoplayRetry('manual_toggle', { rearm: true });
+      }
       return;
     }
 
@@ -2019,7 +2052,7 @@ useEffect(() => {
         if (next) p.mute?.();
         else {
           p.unMute?.();
-          if (shouldPlayRef.current) p.playVideo?.();
+          if (shouldPlayRef.current) tryStartAdYoutube('manual_toggle');
         }
       } catch {} 
     } 
@@ -2177,35 +2210,37 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
       preload={shouldPlay ? 'auto' : shouldPrimeAdMedia ? 'metadata' : 'none'}
       onLoadedMetadata={() => {
         try { clearVideoSrcBlock(media?.src); } catch {}
-        tryStartAdVideo('loadedmetadata');
+        scheduleAdAutoplayRetry('loadedmetadata', { rearm: true });
       }}
       onLoadedData={() => {
         try { clearVideoSrcBlock(media?.src); } catch {}
-        tryStartAdVideo('loadeddata');
+        scheduleAdAutoplayRetry('loadeddata', { rearm: true });
       }}
       onCanPlay={() => {
         try { clearVideoSrcBlock(media?.src); } catch {}
-        tryStartAdVideo('canplay');
+        scheduleAdAutoplayRetry('canplay', { rearm: true });
       }}
       onPlaying={() => {
         try { clearVideoSrcBlock(media?.src); } catch {}
+        resetAdAutoplayRetry();
       }}
       onPause={() => {
         const v = videoRef.current;
         if (!v) return;
         if (!shouldPlayRef.current) return;
         if (v.ended) return;
-        tryStartAdVideo('pause');
+        scheduleAdAutoplayRetry('pause', { rearm: true });
       }}
       onWaiting={() => {
         if (!shouldPlayRef.current) return;
-        tryStartAdVideo('waiting');
+        scheduleAdAutoplayRetry('waiting', { rearm: true });
       }}
       onStalled={() => {
         if (!shouldPlayRef.current) return;
-        tryStartAdVideo('stalled');
+        scheduleAdAutoplayRetry('stalled', { rearm: true });
       }}
       onError={() => {
+        clearAdAutoplayRetry();
         try {
           markVideoSrcTemporarilyBlocked(media?.src, isNear ? 12000 : 20000);
         } catch {}
@@ -2285,12 +2320,13 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
 {media.kind === 'image' && media.src && (
   <div className="forum-ad-media-fill">
     {isFluid ? (
-      <img
+      <NextImage
         src={media.src}
         alt={host}
+        fill
         className="forum-ad-fit"
-        loading="lazy"
-        decoding="async"
+        style={{ objectFit: 'contain', objectPosition: 'center' }}
+        unoptimized
         referrerPolicy="no-referrer"
       />
     ) : (

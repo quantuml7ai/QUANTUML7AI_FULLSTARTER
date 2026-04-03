@@ -535,7 +535,9 @@ export default function useForumMediaCoordinator({ emitDiag }) {
 
     const selector = '[data-forum-media]';
     const readyReplay = new Map();
+    const htmlRetryTimers = new Map();
     const pendingReadyGrace = new WeakMap();
+    const HTML_RETRY_DELAYS = [120, 220, 360, 560, 840, 1280];
     let lastDetachedSweepTs = 0;
     const traceEnabled = (() => {
       try {
@@ -788,9 +790,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, next);
       } catch {}
     };
-    // Единый источник mute-предпочтения для video/iframe/youtube — storage.
-    // Для QCast используем отдельный ключ, чтобы звук QCast не "сбивался"
-    // от глобального muted-состояния видеоленты.
+    // Единый источник mute-предпочтения для video/iframe/youtube/qcast — storage.
     // В mediaLifecycleRuntime уже есть одноразовый session boot mute,
     // поэтому здесь нельзя каждый init насильно перетирать настройку.
     let mutedPref = null;
@@ -801,10 +801,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     }
     if (typeof mutedPref !== 'boolean') mutedPref = true;
 
-const desiredMuted = () => (mutedPref == null ? true : !!mutedPref);
-
-// ЕДИНЫЙ sound-state для всей ленты:
-// video / audio / youtube / iframe-носители / qcast должны жить в одном mute-контуре.
 const isSplashActive = () => {
   try {
     return !!window.__forumBootSplashActive;
@@ -812,6 +808,20 @@ const isSplashActive = () => {
     return false;
   }
 };
+
+const isSplashMediaTarget = (node) => {
+  try {
+    if (!(node instanceof Element)) return false;
+    return (
+      String(node.getAttribute?.('data-forum-splash') || '') === '1' ||
+      !!node.closest?.('[data-forum-splash="1"]')
+    );
+  } catch {
+    return false;
+  }
+};
+
+const desiredMuted = () => (isSplashActive() ? true : (mutedPref == null ? true : !!mutedPref));
 
 const readQcastMutedPref = () => {
   try {
@@ -927,6 +937,107 @@ const setMutedPref = (val, source = 'forum-coordinator', emit = true) => {
         return media;
       }
       return getQCastAudio(el);
+    };
+    const cancelHtmlRetry = (el) => {
+      const mediaEl = getMediaStateNode(el);
+      if (!(mediaEl instanceof HTMLVideoElement || mediaEl instanceof HTMLAudioElement)) return;
+      const tid = htmlRetryTimers.get(mediaEl);
+      if (tid) {
+        try { clearTimeout(tid); } catch {}
+      }
+      htmlRetryTimers.delete(mediaEl);
+    };
+    const resetHtmlRetryState = (el) => {
+      const mediaEl = getMediaStateNode(el);
+      if (!(mediaEl instanceof HTMLVideoElement || mediaEl instanceof HTMLAudioElement)) return;
+      cancelHtmlRetry(mediaEl);
+      try {
+        delete mediaEl.dataset.__autoplayRetryCount;
+        delete mediaEl.dataset.__autoplayRetryReason;
+        delete mediaEl.dataset.__autoplayRetryTotalCount;
+      } catch {}
+    };
+    const scheduleHtmlRetry = (el, reason = 'html_retry', { rearm = false } = {}) => {
+      const mediaEl = getMediaStateNode(el);
+      if (!(mediaEl instanceof HTMLVideoElement || mediaEl instanceof HTMLAudioElement)) return false;
+
+      const owner = getOwnerNode(mediaEl) || (mediaEl instanceof Element ? mediaEl : null);
+      if (isSplashActive()) {
+        resetHtmlRetryState(mediaEl);
+        return false;
+      }
+      if (
+        isUserPaused(owner || mediaEl) ||
+        isUserPaused(mediaEl) ||
+        hasSuppressedPlayback(owner || mediaEl) ||
+        hasSuppressedPlayback(mediaEl)
+      ) {
+        resetHtmlRetryState(mediaEl);
+        return false;
+      }
+
+      const activeOwner = active instanceof Element ? active : null;
+      const ownerMatchesActive =
+        !!(owner instanceof Element && activeOwner && (
+          activeOwner === owner ||
+          activeOwner.contains?.(owner) ||
+          owner.contains?.(activeOwner)
+        ));
+      const manualLease = hasManualLease(owner || mediaEl) || hasManualLease(mediaEl);
+      const hasGesture = hasUserGestureIntent(owner || mediaEl) || hasUserGestureIntent(mediaEl);
+      const visiblePxNow = getOwnerVisiblePx(owner || mediaEl);
+      const minVisiblePx = getAutoplayMinVisiblePx(owner || mediaEl);
+      const centerDistNow = getOwnerCenterDist(owner || mediaEl);
+      const maxCenterDist = getPriorityCenterMaxDist(owner || mediaEl);
+
+      if (
+        !ownerMatchesActive &&
+        !manualLease &&
+        !hasGesture &&
+        (visiblePxNow < minVisiblePx || centerDistNow > maxCenterDist)
+      ) {
+        resetHtmlRetryState(mediaEl);
+        return false;
+      }
+
+      let attempt = Number(mediaEl.dataset?.__autoplayRetryCount || 0);
+      const totalAttempt = Number(mediaEl.dataset?.__autoplayRetryTotalCount || 0);
+      if (rearm) attempt = 0;
+      if (totalAttempt >= 12) return false;
+      if (attempt >= HTML_RETRY_DELAYS.length) {
+        armReadyReplay(mediaEl);
+        return false;
+      }
+
+      cancelHtmlRetry(mediaEl);
+      try {
+        mediaEl.dataset.__autoplayRetryCount = String(attempt + 1);
+        mediaEl.dataset.__autoplayRetryReason = String(reason || 'html_retry');
+        mediaEl.dataset.__autoplayRetryTotalCount = String(totalAttempt + 1);
+      } catch {}
+
+      const delay = HTML_RETRY_DELAYS[Math.min(attempt, HTML_RETRY_DELAYS.length - 1)];
+      const tid = setTimeout(() => {
+        htmlRetryTimers.delete(mediaEl);
+        if (
+          isUserPaused(owner || mediaEl) ||
+          isUserPaused(mediaEl) ||
+          hasSuppressedPlayback(owner || mediaEl) ||
+          hasSuppressedPlayback(mediaEl)
+        ) {
+          resetHtmlRetryState(mediaEl);
+          return;
+        }
+        const ready = ensurePendingHtmlMediaReady(mediaEl, reason);
+        if (ready) {
+          if (mediaEl.paused) startHtmlMedia(mediaEl, reason);
+          return;
+        }
+        armReadyReplay(mediaEl);
+        scheduleHtmlRetry(mediaEl, `${reason}:pending`);
+      }, delay);
+      htmlRetryTimers.set(mediaEl, tid);
+      return true;
     };
     const srcKickState = new Map();
 const MAX_CONCURRENT_LOAD_PENDING = (() => {
@@ -1550,57 +1661,30 @@ const withSystemPause = (el, fn, { clearUser = false } = {}) => {
       }
       el = mediaEl;
       if (readyReplay.has(el)) return;
-      const replay = () => {
+      const READY_REPLAY_EVENTS = ['loadedmetadata', 'loadeddata', 'canplay', 'playing', 'waiting', 'stalled', 'pause'];
+      const onReady = (evt) => {
+        const trigger = String(evt?.type || 'ready_replay');
+        if (trigger === 'playing') {
+          trace('ready_replay_playing', el);
+          resetHtmlRetryState(el);
+          clearReadyReplay(el);
+          return;
+        }
         clearReadyReplay(el);
         if (isUserPaused(el)) {
           trace('ready_replay_skip_user_paused', el);
           return;
         }
-        const owner = getOwnerNode(el) || (el instanceof Element ? el : null);
-        const activeOwner = active instanceof Element ? active : null;
-        const ownerMatchesActive =
-          !!(owner instanceof Element && activeOwner &&
-            (activeOwner === owner || activeOwner.contains?.(owner) || owner.contains?.(activeOwner)));
-        const manualLease = hasManualLease(owner || el) || hasManualLease(el);
-        const hasGesture = hasUserGestureIntent(owner || el) || hasUserGestureIntent(el);
-        const visiblePxNow = getOwnerVisiblePx(owner || el);
-        const minVisiblePx = getAutoplayMinVisiblePx(owner || el);
-        const centerDistNow = getOwnerCenterDist(owner || el);
-        const maxCenterDist = getPriorityCenterMaxDist(owner || el);
-        if (!ownerMatchesActive && !manualLease && !hasGesture) {
-          trace('ready_replay_skip_not_active', el, {
-            visiblePx: visiblePxNow,
-            minVisiblePx,
-            centerDist: centerDistNow,
-            maxCenterDist,
-          });
-          return;
-        }
-        if (!manualLease && !hasGesture && (visiblePxNow < minVisiblePx || centerDistNow > maxCenterDist)) {
-          trace('ready_replay_skip_out_of_focus', el, {
-            visiblePx: visiblePxNow,
-            minVisiblePx,
-            centerDist: centerDistNow,
-            maxCenterDist,
-          });
-          return;
-        }
-        trace('ready_replay', el);
-        try {
-          applyMutedPref(el);
-          el.playsInline = true;
-          if (el instanceof HTMLVideoElement) {
-            try { el.loop = true; } catch {}
-          }
-          if (el.paused) startHtmlMedia(el, 'ready_replay');
-        } catch {}
+        trace('ready_replay', el, { trigger });
+        scheduleHtmlRetry(el, `ready_replay:${trigger}`, { rearm: true });
       };
-      const onReady = () => replay();
-      try { el.addEventListener('loadeddata', onReady, { once: true }); } catch {}
-      try { el.addEventListener('canplay', onReady, { once: true }); } catch {}
+      READY_REPLAY_EVENTS.forEach((type) => {
+        try { el.addEventListener(type, onReady, { passive: true }); } catch {}
+      });
       readyReplay.set(el, () => {
-        try { el.removeEventListener('loadeddata', onReady); } catch {}
-        try { el.removeEventListener('canplay', onReady); } catch {}
+        READY_REPLAY_EVENTS.forEach((type) => {
+          try { el.removeEventListener(type, onReady); } catch {}
+        });
       });
     };
 const ensurePendingHtmlMediaReady = (el, reason = 'candidate_pending') => {
@@ -1787,6 +1871,7 @@ const onMutedEvent = (e) => {
     const onMediaPauseCaptured = (e) => {
       const target = e?.target;
       if (!(target instanceof HTMLVideoElement || target instanceof HTMLAudioElement)) return;
+      if (isSplashMediaTarget(target)) return;
       const owner = getOwnerNode(target);
       if (!(owner instanceof Element)) return;
       const systemPauseUntil = Number(target?.dataset?.__systemPauseUntil || 0);
@@ -1812,7 +1897,17 @@ const onMutedEvent = (e) => {
         clearCoordinatorPlayIntent(owner);
         return;
       }
-      if (!manualLease && !hasGesture && (coordinatorPlay || !ownerMatchesActive)) {
+      if (!manualLease && !hasGesture && coordinatorPlay) {
+        trace('pause_rearm_non_user', target, {
+          coordinatorPlay,
+          ownerMatchesActive,
+        });
+        scheduleHtmlRetry(target, 'pause_non_user', { rearm: true });
+        clearCoordinatorPlayIntent(target);
+        clearCoordinatorPlayIntent(owner);
+        return;
+      }
+      if (!manualLease && !hasGesture && !ownerMatchesActive) {
         trace('pause_ignore_non_user', target, {
           coordinatorPlay,
           ownerMatchesActive,
@@ -1853,6 +1948,7 @@ const onMutedEvent = (e) => {
     const onMediaPointerCaptured = (e) => {
       const target = e?.target;
       if (!(target instanceof Element)) return;
+      if (isSplashMediaTarget(target)) return;
       const owner = getOwnerNode(target);
       if (!(owner instanceof Element)) return;
       markUserGestureIntent(owner);
@@ -1861,6 +1957,7 @@ const onMutedEvent = (e) => {
     const onMediaPlayCaptured = (e) => {
       const target = e?.target;
       if (!(target instanceof HTMLVideoElement || target instanceof HTMLAudioElement)) return;
+      if (isSplashMediaTarget(target)) return;
       const owner = getOwnerNode(target);
       if (!(owner instanceof Element)) return;
       const coordinatorPlay = hasCoordinatorPlayIntent(target) || hasCoordinatorPlayIntent(owner);
@@ -1914,6 +2011,8 @@ const onMutedEvent = (e) => {
       }
       clearSuppressedPlayback(target);
       clearSuppressedPlayback(owner);
+      resetHtmlRetryState(target);
+      clearReadyReplay(target);
       clearUserGestureIntent(target);
       clearUserGestureIntent(owner);
       clearCoordinatorPlayIntent(target);
@@ -1947,6 +2046,7 @@ const onMutedEvent = (e) => {
     const onMediaErrorCaptured = (e) => {
       const target = e?.target;
       if (!(target instanceof HTMLVideoElement || target instanceof HTMLAudioElement)) return;
+      if (isSplashMediaTarget(target)) return;
       const owner = getOwnerNode(target);
       const errCode = Number(target?.error?.code || 0);
       // MEDIA_ERR_ABORTED(1) и пустой код часто прилетают как служебный след
@@ -2022,15 +2122,21 @@ const onMutedEvent = (e) => {
         blockedForMs: Math.max(0, Number(blocked?.until || 0) - Date.now()),
       });
     };
-const onMediaLoadedCaptured = (e) => {
+const onMediaLifecycleCaptured = (e) => {
   const target = e?.target;
   if (!(target instanceof HTMLVideoElement || target instanceof HTMLAudioElement)) return;
+  if (isSplashMediaTarget(target)) return;
+  const eventType = String(e?.type || 'loadeddata');
 
-  clearMediaSrcBlocked(target, e?.type === 'canplay' ? 'canplay' : 'loadeddata');
+  if (eventType === 'loadedmetadata' || eventType === 'loadeddata' || eventType === 'canplay' || eventType === 'playing') {
+    clearMediaSrcBlocked(target, eventType);
+  }
 
   try {
-    target.dataset.__loadPending = '0';
-    if (target.readyState >= 2) target.dataset.__warmReady = '1';
+    if (eventType === 'loadedmetadata' || eventType === 'loadeddata' || eventType === 'canplay' || eventType === 'playing') {
+      target.dataset.__loadPending = '0';
+      if (target.readyState >= 1) target.dataset.__warmReady = target.readyState >= 2 ? '1' : target.dataset.__warmReady;
+    }
   } catch {}
 
   try {
@@ -2053,8 +2159,15 @@ const onMediaLoadedCaptured = (e) => {
       visiblePxNow >= minVisiblePx &&
       centerDistNow <= maxCenterDist;
 
+    if (eventType === 'playing') {
+      resetHtmlRetryState(target);
+      clearReadyReplay(target);
+      return;
+    }
+
     if (isCurrentActive || nearEnough) {
       trace('loaded_replay_try', target, {
+        eventType,
         isCurrentActive,
         visiblePx: visiblePxNow,
         minVisiblePx,
@@ -2063,7 +2176,7 @@ const onMediaLoadedCaptured = (e) => {
       });
 
       cancelUnload(owner);
-      playMedia(owner);
+      scheduleHtmlRetry(target, `${eventType}_event`, { rearm: true });
     }
   } catch {}
 };
@@ -2099,11 +2212,13 @@ const onMediaLoadedCaptured = (e) => {
           const audio = getQCastAudio(owner);
           if (audio instanceof HTMLAudioElement) {
             try { clearReadyReplay(audio); } catch {}
+            try { resetHtmlRetryState(audio); } catch {}
             try { invalidatePlayRequest(audio); } catch {}
           }
         }
         if (owner instanceof HTMLVideoElement || owner instanceof HTMLAudioElement) {
           try { clearReadyReplay(owner); } catch {}
+          try { resetHtmlRetryState(owner); } catch {}
           try { invalidatePlayRequest(owner); } catch {}
           if (owner instanceof HTMLVideoElement) {
             try { __dropActiveVideoEl(owner); } catch {}
@@ -2136,6 +2251,14 @@ const sweepDetachedMediaState = (reason = 'detached_sweep', force = false) => {
       if (!(el instanceof Element) || !el.isConnected) {
         try { cleanup?.(); } catch {}
         readyReplay.delete(el);
+      }
+    }
+  } catch {}
+
+  try {
+    for (const [el] of htmlRetryTimers.entries()) {
+      if (!(el instanceof Element) || !el.isConnected) {
+        resetHtmlRetryState(el);
       }
     }
   } catch {}
@@ -2200,6 +2323,8 @@ const sweepDetachedMediaState = (reason = 'detached_sweep', force = false) => {
               return;
             }
             trace('play_started', el, { reason, muted: !!el.muted });
+            resetHtmlRetryState(el);
+            clearReadyReplay(el);
             try { pauseForeignMedia(el); } catch {}
           }).catch((err) => {
             if (!canContinue()) {
@@ -2212,19 +2337,8 @@ const sweepDetachedMediaState = (reason = 'detached_sweep', force = false) => {
               message: String(err?.message || ''),
               muted: !!el.muted,
             });
-            if (el.muted) return;
-            const qcastHost = (() => {
-              try { return el.closest?.('[data-forum-media="qcast"]') || null; } catch { return null; }
-            })();
-            const qcastUserUnmuteHoldUntil = Math.max(
-              Number(el?.dataset?.__userUnmuteHoldUntil || 0),
-              Number(qcastHost?.dataset?.__userUnmuteHoldUntil || 0),
-              Number(window?.__forumQcastUnmuteHoldUntil || 0),
-            );
-            if (qcastHost && qcastUserUnmuteHoldUntil > Date.now()) {
-              // Пользователь явно держит qcast в unmute:
-              // не переводим в muted-fallback, иначе визуально "звук включён", а по факту тишина.
-              trace('play_reject_qcast_hold', el, { reason });
+            if (el.muted) {
+              scheduleHtmlRetry(el, `${reason}:play_reject_muted`);
               return;
             }
             try {
@@ -2249,18 +2363,27 @@ const sweepDetachedMediaState = (reason = 'detached_sweep', force = false) => {
                     return;
                   }
                   trace('play_retry_muted_ok', el, { reason });
+                  resetHtmlRetryState(el);
+                  clearReadyReplay(el);
                 }).catch((retryErr) => {
                   trace('play_retry_muted_fail', el, {
                     reason,
                     name: String(retryErr?.name || ''),
                     message: String(retryErr?.message || ''),
                   });
+                  scheduleHtmlRetry(el, `${reason}:play_retry_muted_fail`);
                 });
+                return;
               }
             } catch {}
+            scheduleHtmlRetry(el, `${reason}:play_retry_muted_pending`);
           });
+        } else if (el.paused) {
+          scheduleHtmlRetry(el, `${reason}:play_pending`);
         }
-      } catch {}
+      } catch {
+        scheduleHtmlRetry(el, `${reason}:play_throw`);
+      }
     };
     let ytApiPromise = null;
     const ensureYouTubeAPI = () => {
@@ -3089,6 +3212,7 @@ const playMedia = async (el) => {
         ensurePendingHtmlMediaReady(el, 'play_wait_ready');
         trace('play_wait_ready', el);
         armReadyReplay(el);
+        scheduleHtmlRetry(el, 'play_wait_ready', { rearm: true });
       } else {
         trace('play_now', el);
         startHtmlMedia(el, 'play_now');
@@ -3143,6 +3267,7 @@ const playMedia = async (el) => {
           } catch {}
 
           armReadyReplay(a);
+          scheduleHtmlRetry(a, 'qcast_play_wait_ready', { rearm: true });
         } else {
           startHtmlMedia(a, 'qcast_play_now');
         }
@@ -3917,8 +4042,12 @@ const onExternalMediaPlay = (e) => {
     document.addEventListener('pause', onMediaPauseCaptured, true);
     document.addEventListener('play', onMediaPlayCaptured, true);
     document.addEventListener('error', onMediaErrorCaptured, true);
-    document.addEventListener('loadeddata', onMediaLoadedCaptured, true);
-    document.addEventListener('canplay', onMediaLoadedCaptured, true);
+    document.addEventListener('loadedmetadata', onMediaLifecycleCaptured, true);
+    document.addEventListener('loadeddata', onMediaLifecycleCaptured, true);
+    document.addEventListener('canplay', onMediaLifecycleCaptured, true);
+    document.addEventListener('playing', onMediaLifecycleCaptured, true);
+    document.addEventListener('waiting', onMediaLifecycleCaptured, true);
+    document.addEventListener('stalled', onMediaLifecycleCaptured, true);
     return () => { 
       try { mo?.disconnect?.(); } catch {}
       if (mutationSweepRaf) {
@@ -3938,8 +4067,12 @@ const onExternalMediaPlay = (e) => {
       document.removeEventListener('pause', onMediaPauseCaptured, true);
       document.removeEventListener('play', onMediaPlayCaptured, true);
       document.removeEventListener('error', onMediaErrorCaptured, true);
-      document.removeEventListener('loadeddata', onMediaLoadedCaptured, true);
-      document.removeEventListener('canplay', onMediaLoadedCaptured, true);
+      document.removeEventListener('loadedmetadata', onMediaLifecycleCaptured, true);
+      document.removeEventListener('loadeddata', onMediaLifecycleCaptured, true);
+      document.removeEventListener('canplay', onMediaLifecycleCaptured, true);
+      document.removeEventListener('playing', onMediaLifecycleCaptured, true);
+      document.removeEventListener('waiting', onMediaLifecycleCaptured, true);
+      document.removeEventListener('stalled', onMediaLifecycleCaptured, true);
       try { if (rafId) cancelAnimationFrame(rafId); } catch {}
       io?.disconnect?.();
       nearIo?.disconnect?.();
@@ -3948,6 +4081,10 @@ const onExternalMediaPlay = (e) => {
       try {
         unloadTimers.forEach((id) => clearTimeout(id));
         unloadTimers.clear();
+      } catch {}
+      try {
+        htmlRetryTimers.forEach((id) => clearTimeout(id));
+        htmlRetryTimers.clear();
       } catch {}
       try {
         readyReplay.forEach?.((cleanup) => { try { cleanup(); } catch {} });
@@ -3967,6 +4104,7 @@ const onExternalMediaPlay = (e) => {
           if (!(el instanceof HTMLVideoElement || el instanceof HTMLAudioElement)) return;
           const h = volHandlers.get(el);
           if (h) el.removeEventListener('volumechange', h);
+          resetHtmlRetryState(el);
         });
       } catch {}
       try { 
@@ -3996,4 +4134,3 @@ const onExternalMediaPlay = (e) => {
     }; 
   }, [emitDiag]);
 }
-
