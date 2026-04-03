@@ -15,9 +15,19 @@ const MEDIA_MUTED_KEY = 'forum:mediaMuted';
 const MEDIA_VIDEO_MUTED_KEY = 'forum:videoMuted'; // fallback совместимости
 const MEDIA_MUTED_EVENT = 'forum:media-mute';
 
+function isSplashMutedHoldActive() {
+  if (!isBrowser()) return false;
+  try {
+    return !!window.__forumBootSplashActive;
+  } catch {
+    return false;
+  }
+}
+
 function readMutedPrefFromStorage() {
   if (!isBrowser()) return null;
   try {
+    if (isSplashMutedHoldActive()) return true;
     let v = window.localStorage?.getItem(MEDIA_MUTED_KEY);
     if (v == null) v = window.localStorage?.getItem(MEDIA_VIDEO_MUTED_KEY);
     if (v == null) return null;
@@ -30,7 +40,9 @@ function readMutedPrefFromStorage() {
 function writeMutedPrefToStorage(val) {
   if (!isBrowser()) return;
   try {
-    window.localStorage?.setItem(MEDIA_MUTED_KEY, val ? '1' : '0');
+    const next = val ? '1' : '0';
+    window.localStorage?.setItem(MEDIA_MUTED_KEY, next);
+    window.localStorage?.setItem(MEDIA_VIDEO_MUTED_KEY, next);
   } catch {}
 }
 
@@ -48,6 +60,16 @@ function emitMutedPref(val, id, source = 'forum-ads') {
 function desiredMutedFromPref(pref) {
   // Если префа нет — стартуем muted=true (иначе автоплей часто будет блокироваться браузером).
   return pref == null ? true : !!pref;
+}
+
+function applyHtmlMediaMutedState(videoEl, nextMuted) {
+  if (!(videoEl instanceof HTMLMediaElement)) return;
+  try {
+    videoEl.muted = !!nextMuted;
+    videoEl.defaultMuted = !!nextMuted;
+    if (nextMuted) videoEl.setAttribute('muted', '');
+    else videoEl.removeAttribute('muted');
+  } catch {}
 }
 
 const AD_NEAR_ROOT_MARGIN = '560px 0px 760px 0px';
@@ -1066,6 +1088,10 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
 
   const shouldPlayRef = useRef(false);
   const adPlayEventTsRef = useRef(0);
+  const autoplayRetryTimerRef = useRef(0);
+  const autoplayRetryStageRef = useRef(0);
+  const tryStartAdVideoRef = useRef(() => false);
+  const tryStartAdYoutubeRef = useRef(() => false);
 
   const emitAdPlayToCoordinator = React.useCallback((source = 'ad') => {
     if (!isBrowser()) return;
@@ -1093,6 +1119,49 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     } catch {}
   }, []);
 
+  const clearAdAutoplayRetry = React.useCallback(() => {
+    const tid = Number(autoplayRetryTimerRef.current || 0);
+    if (!tid) return;
+    try { clearTimeout(tid); } catch {}
+    autoplayRetryTimerRef.current = 0;
+  }, []);
+
+  const resetAdAutoplayRetry = React.useCallback(() => {
+    autoplayRetryStageRef.current = 0;
+    clearAdAutoplayRetry();
+  }, [clearAdAutoplayRetry]);
+
+  const scheduleAdAutoplayRetry = React.useCallback((reason = 'retry', { rearm = false } = {}) => {
+    if (!isBrowser()) return false;
+    if (!shouldPlayRef.current) {
+      clearAdAutoplayRetry();
+      return false;
+    }
+    if (rearm) autoplayRetryStageRef.current = 0;
+    if (autoplayRetryStageRef.current >= 6) return false;
+
+    const delays = [120, 220, 360, 560, 840, 1280];
+    const delay = delays[Math.min(autoplayRetryStageRef.current, delays.length - 1)];
+    autoplayRetryStageRef.current += 1;
+    clearAdAutoplayRetry();
+    autoplayRetryTimerRef.current = window.setTimeout(() => {
+      autoplayRetryTimerRef.current = 0;
+      if (!shouldPlayRef.current) return;
+      if (media.kind === 'video') {
+        tryStartAdVideoRef.current?.(`${reason}:retry`);
+        return;
+      }
+      if (media.kind === 'youtube') {
+        tryStartAdYoutubeRef.current?.(`${reason}:retry`);
+        return;
+      }
+      if (media.kind === 'tiktok') {
+        emitAdPlayToCoordinator('ad_tiktok');
+      }
+    }, delay);
+    return true;
+  }, [clearAdAutoplayRetry, emitAdPlayToCoordinator, media.kind]);
+
   const destroyLocalYtPlayer = React.useCallback((blankIframe = false) => {
     const player = ytPlayerRef.current;
     ytPlayerRef.current = null;
@@ -1113,8 +1182,8 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   }, []);
 const tryStartAdVideo = React.useCallback((reason = 'play') => {
   const v = videoRef.current;
-  if (!v) return;
-  if (!shouldPlayRef.current) return;
+  if (!v) return false;
+  if (!shouldPlayRef.current) return false;
 
   try {
     v.playsInline = true;
@@ -1122,12 +1191,7 @@ const tryStartAdVideo = React.useCallback((reason = 'play') => {
     v.preload = shouldPlayRef.current ? 'auto' : 'metadata';
   } catch {}
 
-  try {
-    v.muted = !!muted;
-    v.defaultMuted = !!muted;
-    if (muted) v.setAttribute('muted', '');
-    else v.removeAttribute('muted');
-  } catch {}
+  applyHtmlMediaMutedState(v, muted);
 
   try {
     const isCold =
@@ -1141,50 +1205,77 @@ const tryStartAdVideo = React.useCallback((reason = 'play') => {
         try { v.setAttribute('src', lazySrc); } catch {}
       }
       try { v.load?.(); } catch {}
-      return;
+      scheduleAdAutoplayRetry(`${reason}:cold`);
+      return false;
     }
   } catch {}
+
+  const retryMutedFallback = () => {
+    if (!shouldPlayRef.current) return false;
+    if (v.muted) {
+      scheduleAdAutoplayRetry(`${reason}:muted_blocked`);
+      return false;
+    }
+
+    applyHtmlMediaMutedState(v, true);
+    try { writeMutedPrefToStorage(true); } catch {}
+    try { emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback'); } catch {}
+    setMuted(true);
+
+    try {
+      const retry = v.play?.();
+      if (retry && typeof retry.then === 'function') {
+        retry
+          .then(() => {
+            resetAdAutoplayRetry();
+          })
+          .catch(() => {
+            scheduleAdAutoplayRetry(`${reason}:muted_retry_fail`);
+          });
+        return true;
+      }
+    } catch {}
+
+    if (!v.paused) {
+      resetAdAutoplayRetry();
+      return true;
+    }
+
+    scheduleAdAutoplayRetry(`${reason}:muted_pending`);
+    return false;
+  };
 
   try {
     emitAdPlayToCoordinator('ad_video');
     const p = v.play?.();
 
     if (p && typeof p.then === 'function') {
-      p.catch(() => {
-        if (v.muted) {
-          try {
-            if (v.readyState >= 2 && shouldPlayRef.current) {
-              v.play?.().catch(() => {});
-            }
-          } catch {}
-          return;
-        }
-
-        try {
-          v.muted = true;
-          v.defaultMuted = true;
-          v.setAttribute('muted', '');
-        } catch {}
-
-        try {
-          writeMutedPrefToStorage(true);
-        } catch {}
-
-        try {
-          emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback');
-        } catch {}
-
-        setMuted(true);
-
-        try {
-          if (shouldPlayRef.current) {
-            v.play?.().catch(() => {});
-          }
-        } catch {}
+      p.then(() => {
+        resetAdAutoplayRetry();
+      }).catch(() => {
+        retryMutedFallback();
       });
+      return true;
     }
-  } catch {}
-}, [emitAdPlayToCoordinator, muted]);
+  } catch {
+    retryMutedFallback();
+    return false;
+  }
+
+  if (!v.paused) {
+    resetAdAutoplayRetry();
+    return true;
+  }
+
+  scheduleAdAutoplayRetry(`${reason}:pending`);
+  return false;
+}, [
+  emitAdPlayToCoordinator,
+  muted,
+  resetAdAutoplayRetry,
+  scheduleAdAutoplayRetry,
+]);
+tryStartAdVideoRef.current = tryStartAdVideo;
   const slotCssVars = {
     '--ad-slot-h-m': `${AD_SLOT_HEIGHT_PX.mobile}px`,
     '--ad-slot-h-t': `${AD_SLOT_HEIGHT_PX.tablet}px`,
@@ -1193,7 +1284,30 @@ const tryStartAdVideo = React.useCallback((reason = 'play') => {
 
   useEffect(() => {
     shouldPlayRef.current = shouldPlay;
-  }, [shouldPlay]);
+    if (!shouldPlay) {
+      clearAdAutoplayRetry();
+      autoplayRetryStageRef.current = 0;
+    }
+  }, [clearAdAutoplayRetry, shouldPlay]);
+
+  const tryStartAdYoutube = React.useCallback((reason = 'ad_youtube') => {
+    const player = ytPlayerRef.current;
+    if (!player) return false;
+    if (!shouldPlayRef.current) return false;
+
+    try {
+      if (muted) player.mute?.();
+      else player.unMute?.();
+      emitAdPlayToCoordinator('ad_youtube');
+      player.playVideo?.();
+      scheduleAdAutoplayRetry(`${reason}:watchdog`);
+      return true;
+    } catch {
+      scheduleAdAutoplayRetry(`${reason}:throw`);
+      return false;
+    }
+  }, [emitAdPlayToCoordinator, muted, scheduleAdAutoplayRetry]);
+  tryStartAdYoutubeRef.current = tryStartAdYoutube;
 
   // Page visibility + focus/blur
   useEffect(() => {
