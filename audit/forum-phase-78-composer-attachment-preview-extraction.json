@@ -1,0 +1,148 @@
+{
+  "phase": "78-composer-attachment-preview-extraction",
+  "timestamp": "2026-03-06T04:12:00+02:00",
+  "scope": [
+    "composer attachment preview JSX extraction",
+    "pending video fullscreen/remove action extraction",
+    "ForumRoot render-block reduction"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/media/hooks/useVideoCaptureController.js",
+    "app/forum/features/media/components/ComposerAttachmentPreview.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/media/components/ComposerAttachmentPreview.jsx"
+  ],
+  "moved_logic_domains": [
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/components/ComposerAttachmentPreview.jsx",
+      "logic": [
+        "pending image preview row rendering",
+        "pending video preview card rendering",
+        "pending audio preview row rendering",
+        "inline attachment remove/open fullscreen button markup"
+      ]
+    },
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/hooks/useVideoCaptureController.js",
+      "logic": [
+        "open pending video fullscreen action",
+        "remove pending video attachment action"
+      ]
+    }
+  ],
+  "dependency_changes": {
+    "ForumRoot_imports_added": [
+      "./features/media/components/ComposerAttachmentPreview"
+    ],
+    "ForumRoot_imports_removed": [
+      "enableVideoControlsOnTap (moved to media component)"
+    ],
+    "ForumRoot_runtime_changes": [
+      "attachment preview render block replaced by ComposerAttachmentPreview",
+      "video fullscreen/remove action callbacks now provided by useVideoCaptureController"
+    ]
+  },
+  "detected_risks": [
+    {
+      "id": "preview-render-extraction",
+      "level": "medium",
+      "detail": "Large JSX block moved from root into media component; mitigated by unchanged callback contracts and full build/parity validation."
+    },
+    {
+      "id": "pending-video-action-move",
+      "level": "medium",
+      "detail": "open/remove pending video actions were moved to hook; verified by lint + media/full audits + parity pass."
+    }
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": {
+    "level": "low",
+    "detail": "No API route or payload changes."
+  },
+  "storage_risk": {
+    "level": "low",
+    "detail": "No storage key changes."
+  },
+  "runtime_risk": {
+    "level": "medium",
+    "detail": "Residual baseline autoplay/effect hotspots remain; no new dependency cycles or contract regressions introduced."
+  },
+  "audit_runs": [
+    {
+      "command": "pnpm eslint app/forum/ForumRoot.jsx app/forum/features/media/hooks/useVideoCaptureController.js app/forum/features/media/components/ComposerAttachmentPreview.jsx --no-cache",
+      "status": "passed"
+    },
+    {
+      "command": "node tools/audit-effects.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "node tools/audit-forum-deps.js",
+      "status": "passed",
+      "summary": {
+        "files_scanned": 280,
+        "cycles": 0,
+        "cross_domain_edges": 105
+      }
+    },
+    {
+      "command": "node tools/audit-heavy.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 32
+      }
+    },
+    {
+      "command": "node tools/audit-media.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "node tools/audit-runtime-hotspots.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 65
+      }
+    },
+    {
+      "command": "node tools/audit-full-forum.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 76
+      }
+    },
+    {
+      "command": "node tools/audit-account-sync.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 385
+      }
+    },
+    {
+      "command": "pnpm build",
+      "status": "passed_with_warnings",
+      "warnings": [
+        "existing no-img-element warnings outside this extraction scope"
+      ]
+    },
+    {
+      "command": "powershell -ExecutionPolicy Bypass -File tools/audit-forum-functional-parity.ps1 -ZipPath \"C:\\\\Users\\\\BETEP\\\\Desktop\\\\СЕЙЧАС — копия.zip\" -OutputPath \"audit/forum-phase-78-final-parity.json\"",
+      "status": "passed",
+      "summary": {
+        "hash_total": 82,
+        "hash_same": 81,
+        "hash_changed": 1,
+        "unexpected_changed": []
+      }
+    }
+  ],
+  "notes": [
+    "ForumRoot reduced to 5414 lines in this pass.",
+    "Attachment preview UI ownership moved into media components layer.",
+    "Server/API/DB integration surface remains unchanged."
+  ],
+  "status": "done"
+}

@@ -1,0 +1,72 @@
+﻿{
+    "phase":  "phase-05-dm",
+    "timestamp":  "2026-03-04T17:17:05.3750216Z",
+    "scope":  [
+                  "app/forum/Forum.jsx",
+                  "app/forum/features/dm/utils/mediaParsing.js"
+              ],
+    "touched_files":  [
+                          "app/forum/Forum.jsx",
+                          "app/forum/features/dm/utils/mediaParsing.js"
+                      ],
+    "new_files":  [
+                      "app/forum/features/dm/utils/mediaParsing.js",
+                      "audit/forum-phase-05-dm.json"
+                  ],
+    "moved_logic_domains":  [
+                                "dm-media-utils: normalizeDmUrl",
+                                "dm-media-utils: inferDmStickerKind",
+                                "dm-media-utils: isDmStickerUrl",
+                                "dm-media-utils: isDmVideoUrl/isDmAudioUrl/isDmImageUrl",
+                                "dm-media-utils: getDmMediaKind",
+                                "dm-media-utils: stripDmPlayableUrlsFromText",
+                                "dm-media-utils: extractDmStickersFromText"
+                            ],
+    "dependency_changes":  {
+                               "forum_root_imports_added":  [
+                                                                "./features/dm/utils/mediaParsing"
+                                                            ],
+                               "forum_root_logic_replaced":  [
+                                                                 "inline DM media parsing constants/functions removed from Forum.jsx",
+                                                                 "DM message parsing now resolved through dm subsystem utility module"
+                                                             ],
+                               "forum_dependency_audit":  {
+                                                              "report":  "forum-deps-audit.report.json",
+                                                              "scannedFiles":  119,
+                                                              "internalEdges":  139,
+                                                              "cycleCount":  0,
+                                                              "crossDomainEdgeCount":  63,
+                                                              "forumRootImportCount":  22
+                                                          }
+                           },
+    "detected_risks":  [
+                           "DM UI/state controllers still in Forum root; only parser layer moved",
+                           "Some generic URL helper overlap remains and should be normalized later"
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low_to_medium",
+    "runtime_risk":  "medium",
+    "notes":  [
+                  "No DM route contract changes",
+                  "DM sticker/media parse semantics preserved by function parity"
+              ],
+    "status":  "completed",
+    "audits":  {
+                   "executed":  [
+                                    "pnpm eslint app/forum/Forum.jsx app/forum/features/dm/utils/mediaParsing.js --no-cache",
+                                    "node tools/audit-forum-deps.js",
+                                    "node tools/audit-full-forum.js",
+                                    "node tools/audit-effects.js",
+                                    "node tools/audit-account-sync.js"
+                                ],
+                   "outputs":  [
+                                   "forum-deps-audit.report.json",
+                                   "deep-audit.report.json",
+                                   "effects-leak.report.json",
+                                   "account-sync-audit.report.json"
+                               ]
+               }
+}

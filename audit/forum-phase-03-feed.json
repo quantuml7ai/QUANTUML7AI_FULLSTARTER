@@ -1,0 +1,75 @@
+﻿{
+    "phase":  "phase-03-feed",
+    "timestamp":  "2026-03-04T16:59:45.2454381Z",
+    "scope":  [
+                  "app/forum/Forum.jsx",
+                  "app/forum/features/feed/*"
+              ],
+    "touched_files":  [
+                          "app/forum/Forum.jsx",
+                          "app/forum/features/feed/utils/signatures.js",
+                          "app/forum/features/feed/services/rateLimiter.js",
+                          "app/forum/features/feed/docs/phase-03-feed.md"
+                      ],
+    "new_files":  [
+                      "app/forum/features/feed/utils/signatures.js",
+                      "app/forum/features/feed/services/rateLimiter.js",
+                      "app/forum/features/feed/docs/phase-03-feed.md",
+                      "audit/forum-phase-03-feed.json"
+                  ],
+    "moved_logic_domains":  [
+                                "feed-utils: sigTopic/signature dedupe",
+                                "feed-utils: sigPost/signature dedupe",
+                                "feed-services: createFeedRateLimiter"
+                            ],
+    "dependency_changes":  {
+                               "forum_root_imports_added":  [
+                                                                "./features/feed/utils/signatures",
+                                                                "./features/feed/services/rateLimiter"
+                                                            ],
+                               "forum_root_logic_replaced":  [
+                                                                 "inline sigTopic removed",
+                                                                 "inline sigPost removed",
+                                                                 "inline rateLimiter removed",
+                                                                 "useMemo(rateLimiter) -\u003e useMemo(createFeedRateLimiter)"
+                                                             ],
+                               "forum_dependency_audit":  {
+                                                              "report":  "forum-deps-audit.report.json",
+                                                              "scannedFiles":  117,
+                                                              "internalEdges":  135,
+                                                              "cycleCount":  0,
+                                                              "crossDomainEdgeCount":  59,
+                                                              "forumRootImportCount":  20
+                                                          }
+                           },
+    "detected_risks":  [
+                           "Forum root still owns feed orchestration/state transitions",
+                           "Feed controller/service boundaries are not yet complete (next slices needed)",
+                           "Render + side-effect coupling in root remains high"
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low",
+    "runtime_risk":  "medium",
+    "notes":  [
+                  "No server/API payload changes",
+                  "Rate limiter semantics preserved",
+                  "Dedupe signatures unchanged by value/format"
+              ],
+    "status":  "completed",
+    "audits":  {
+                   "executed":  [
+                                    "pnpm eslint app/forum/Forum.jsx app/forum/features/feed/utils/signatures.js app/forum/features/feed/services/rateLimiter.js --no-cache",
+                                    "node tools/audit-forum-deps.js",
+                                    "node tools/audit-full-forum.js",
+                                    "node tools/audit-effects.js"
+                                ],
+                   "outputs":  [
+                                   "forum-deps-audit.report.json",
+                                   "deep-audit.report.json",
+                                   "effects-leak.report.json"
+                               ]
+               }
+}

@@ -1,0 +1,61 @@
+﻿{
+    "phase":  "10g-quests-dm-encoding-inbox-recheck",
+    "timestamp":  "2026-03-08T19:06:23.3691381+02:00",
+    "scope":  [
+                  "app/forum/features/quests/components/QuestHub.jsx",
+                  "app/forum/features/dm/components/DmThreadMessageRow.jsx",
+                  "app/forum/features/dm/components/DmDialogRow.jsx",
+                  "app/forum/features/dm/utils/openInboxGlobal.js",
+                  "app/forum/features/dm/hooks/useOpenInboxGlobalAction.js",
+                  "app/forum/features/ui/hooks/useForumScreenFlowsRuntime.js"
+              ],
+    "touched_files":  [
+                          "app/forum/features/quests/components/QuestHub.jsx",
+                          "app/forum/features/dm/components/DmThreadMessageRow.jsx",
+                          "app/forum/features/dm/components/DmDialogRow.jsx",
+                          "app/forum/features/dm/utils/openInboxGlobal.js",
+                          "app/forum/features/dm/hooks/useOpenInboxGlobalAction.js",
+                          "app/forum/features/ui/hooks/useForumScreenFlowsRuntime.js"
+                      ],
+    "new_files":  [
+                      "audit/forum-phase-10g-quests-dm-encoding-inbox-recheck.json"
+                  ],
+    "moved_logic_domains":  [
+                                "dm:open-inbox-global flow now owns quest-\u003einbox transition close logic"
+                            ],
+    "dependency_changes":  {
+                               "client":  [
+                                              "useOpenInboxGlobalAction -\u003e openInboxGlobalFlow (closeQuests)",
+                                              "useForumScreenFlowsRuntime -\u003e useForumQuestRuntime(closeQuests) -\u003e useOpenInboxGlobalAction"
+                                          ],
+                               "server":  [
+                                              "none"
+                                          ],
+                               "db":  [
+                                          "none"
+                                      ]
+                           },
+    "detected_risks":  [
+                           "next build fails in unrelated API route collection: /api/academy/exam, /api/deep-translate"
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low",
+    "runtime_risk":  "low",
+    "notes":  [
+                  "Quest/DM glyph literals verified against baseline source (no unicode escape literals in target files).",
+                  "Inbox open from quest branch fixed by explicit closeQuests call before opening inbox.",
+                  "Functional parity script passed for forum/api surface."
+              ],
+    "verification":  {
+                         "lint":  "passed (target files)",
+                         "build":  "failed (unrelated pre-existing PageNotFoundError during collect page data)",
+                         "heavy_audit":  "ran",
+                         "media_audit":  "ran",
+                         "effects_audit":  "ran",
+                         "functional_parity":  "passed (tools/audit-forum-functional-parity.ps1)"
+                     },
+    "status":  "completed-with-unrelated-build-blocker"
+}

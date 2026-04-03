@@ -1,0 +1,53 @@
+{
+  "phase": "105",
+  "timestamp": "2026-03-10T08:00:00+02:00",
+  "scope": [
+    "composer media preview encoding parity",
+    "dm optimistic actions (send/block/unblock/delete)",
+    "dm loading label duplication guard"
+  ],
+  "touched_files": [
+    "app/forum/features/media/components/ComposerAttachmentPreview.jsx",
+    "app/forum/features/dm/hooks/useDmDeleteController.js",
+    "app/forum/features/dm/hooks/useForumDmRuntime.js",
+    "app/forum/features/dm/services/sendDmComposerMessage.js",
+    "app/forum/features/dm/components/DmDialogsPane.jsx"
+  ],
+  "new_files": [
+    "audit/forum-phase-105-composer-preview-and-dm-optimism.json"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "media/composer",
+      "change": "Removed broken placeholder symbols and switched preview controls to stable icon rendering."
+    },
+    {
+      "domain": "dm/state-orchestration",
+      "change": "Added optimistic local state updates and rollback for block/unblock and delete-for-all flows."
+    },
+    {
+      "domain": "dm/send",
+      "change": "Hardened optimistic send rollback path for non-block and network failures."
+    }
+  ],
+  "dependency_changes": [
+    {
+      "module": "useDmDeleteController",
+      "change": "Now receives dmDialogs + dmThreadItems snapshots from useForumDmRuntime for rollback safety."
+    }
+  ],
+  "detected_risks": [
+    "Rollback of optimistic dialog/message state can conflict with concurrent background refresh if multiple actions happen in parallel.",
+    "Dialog removal fallback relies on cached previous lastMessage for optimistic send rollback."
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "low",
+  "storage_risk": "low",
+  "runtime_risk": "low",
+  "notes": [
+    "Validation: pnpm eslint (touched files) passed.",
+    "Validation: node tools/audit-forum-deps.js passed (cycles: 0).",
+    "Validation: pnpm build passed; only existing non-blocking no-img warnings remained."
+  ],
+  "status": "completed"
+}

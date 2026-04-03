@@ -1,0 +1,57 @@
+﻿{
+    "status":  "passed",
+    "touched_files":  [
+                          "app/forum/ForumRoot.jsx",
+                          "app/forum/features/feed/hooks/useForumFeedRuntime.js",
+                          "app/forum/features/media/hooks/useForumVideoFeedRuntime.js",
+                          "app/forum/features/quests/hooks/useForumQuestRuntime.js"
+                      ],
+    "detected_cycles":  [
+
+                        ],
+    "timestamp":  "2026-03-08T15:12:44.2585588+02:00",
+    "new_files":  [
+                      "app/forum/features/feed/hooks/useForumFeedRuntime.js",
+                      "app/forum/features/media/hooks/useForumVideoFeedRuntime.js",
+                      "app/forum/features/quests/hooks/useForumQuestRuntime.js",
+                      "audit/forum-phase-92-runtime-feed-media-quests.json",
+                      "audit/forum-phase-92-final-parity.json"
+                  ],
+    "storage_risk":  "low",
+    "api_contract_risk":  "low",
+    "notes":  [
+                  "No API route/backend handler/db util contracts changed in this phase.",
+                  "Setter bridge introduced for video feed closing path inside feed runtime to keep hook order safe.",
+                  "Build, eslint, forum dependency audit, full/forum/media/heavy/effects/account-sync audits, and baseline parity all passed."
+              ],
+    "runtime_risk":  "low",
+    "moved_logic_domains":  [
+                                "feed/thread/nav/deeplink runtime -\u003e useForumFeedRuntime",
+                                "video feed state/actions/lifecycle runtime -\u003e useForumVideoFeedRuntime",
+                                "quests config/progress/claim/view runtime -\u003e useForumQuestRuntime"
+                            ],
+    "scope":  [
+                  "app/forum/ForumRoot.jsx",
+                  "app/forum/features/feed/hooks/useForumFeedRuntime.js",
+                  "app/forum/features/media/hooks/useForumVideoFeedRuntime.js",
+                  "app/forum/features/quests/hooks/useForumQuestRuntime.js"
+              ],
+    "phase":  "forum-phase-92-runtime-feed-media-quests",
+    "dependency_changes":  {
+                               "import_graph_cross_domain_edges":  111,
+                               "parity_hash_changed":  1,
+                               "import_graph_internal_edges":  454,
+                               "import_graph_cycles":  0,
+                               "import_graph_files_scanned":  338,
+                               "parity_hash_missing":  0,
+                               "forum_root_lines_before":  1782,
+                               "parity_hash_same":  81,
+                               "forum_root_lines_after":  1633,
+                               "parity_hash_total":  82,
+                               "forum_root_delta":  -149
+                           },
+    "detected_risks":  [
+                           "Known legacy \u003cimg\u003e lint warnings in app/ads/home.js, app/forum/ForumAds.js, components/AuthNavClient.jsx, components/NotRobot.jsx.",
+                           "Existing heavy/effects hotspots outside current extraction scope remain and are tracked in heavy/effects/runtime reports."
+                       ]
+}

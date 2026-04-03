@@ -1,0 +1,1411 @@
+{
+  "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
+  "generatedAt": "2026-04-03T07:18:52.044Z",
+  "results": [
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 45,
+        "preload": 0,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\tools\\audit-media.js",
+      "counts": {
+        "video": 1,
+        "autoplay": 8,
+        "loop": 7,
+        "preload": 2,
+        "img": 1,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + loop",
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 43,
+            "text": "const video = findLines(t, /<video\\b/i);"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 44,
+            "text": "const autoplay = findLines(t, /\\bautoPlay\\b|autoplay\\s*=/i);"
+          },
+          {
+            "line": 54,
+            "text": "if (video.length || autoplay.length || loop.length || preload.length || img.length || create.length) {"
+          },
+          {
+            "line": 56,
+            "text": "if (video.length && autoplay.length) flags.push(\"⚠ video + autoplay\");"
+          }
+        ],
+        "img": [
+          {
+            "line": 48,
+            "text": "const img = findLines(t, /<img\\b/i);"
+          }
+        ],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\tools\\audit-heavy.js",
+      "counts": {
+        "video": 6,
+        "autoplay": 6,
+        "loop": 2,
+        "preload": 1,
+        "img": 2,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + loop",
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 35,
+            "text": "{ key: \"<video\", rx: /<video\\b/gi, why: \"Видео = память+декодер+GPU\" },"
+          },
+          {
+            "line": 95,
+            "text": "if ((counts.autoplay || 0) >= 1 && (counts[\"<video\"] || 0) >= 1) flags.push(\"⚠ autoplay видео (может грузить/GPU/память)\");"
+          },
+          {
+            "line": 108,
+            "text": "+ (a.counts[\"<video\"] || 0) * 6"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 38,
+            "text": "{ key: \"autoplay\", rx: /\\bautoPlay\\b|autoplay\\s*=/gi, why: \"Autoplay/loop → постоянная нагрузка\" },"
+          },
+          {
+            "line": 95,
+            "text": "if ((counts.autoplay || 0) >= 1 && (counts[\"<video\"] || 0) >= 1) flags.push(\"⚠ autoplay видео (может грузить/GPU/память)\");"
+          },
+          {
+            "line": 109,
+            "text": "+ (a.counts.autoplay || 0) * 6"
+          }
+        ],
+        "img": [
+          {
+            "line": 37,
+            "text": "{ key: \"<img\", rx: /<img\\b/gi, why: \"Картинки без lazy часто убивают память\" },"
+          },
+          {
+            "line": 96,
+            "text": "if ((counts[\"<img\"] || 0) >= 5 && (counts[\"loading=lazy\"] || 0) === 0) flags.push(\"⚠ много img без loading=lazy\");"
+          }
+        ],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 3,
+        "loop": 7,
+        "preload": 9,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [
+          {
+            "line": 170,
+            "text": "// Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start."
+          },
+          {
+            "line": 531,
+            "text": "// === Shorts-like autoplay: play when in focus, pause when out ==="
+          },
+          {
+            "line": 1936,
+            "text": "// иначе при гонках промисов возможен двойной autoplay."
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoMedia.jsx",
+      "counts": {
+        "video": 1,
+        "autoplay": 6,
+        "loop": 2,
+        "preload": 7,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + loop",
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 1051,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 296,
+            "text": "autoPlay,"
+          },
+          {
+            "line": 542,
+            "text": "const fallbackMuted = typeof defaultMutedProp === 'boolean' ? defaultMutedProp : !!autoPlay"
+          },
+          {
+            "line": 575,
+            "text": "}, [autoPlay, clearNativeControlsForPost, defaultMutedProp, playsInline, poster, preloadMode, readMuted, src])"
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
+      "counts": {
+        "video": 1,
+        "autoplay": 5,
+        "loop": 3,
+        "preload": 2,
+        "img": 1,
+        "lazy": 2,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + loop",
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 2049,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 1174,
+            "text": "emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback');"
+          },
+          {
+            "line": 1664,
+            "text": "autoplay: 0,"
+          },
+          {
+            "line": 2058,
+            "text": "autoPlay"
+          }
+        ],
+        "img": [
+          {
+            "line": 2174,
+            "text": "<img"
+          }
+        ],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\tools\\audit-full-forum.js",
+      "counts": {
+        "video": 1,
+        "autoplay": 5,
+        "loop": 3,
+        "preload": 0,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + loop"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 28,
+            "text": "video: /<video\\b/gi,"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 29,
+            "text": "autoplay: /\\bautoPlay\\b|autoplay\\s*=/gi,"
+          },
+          {
+            "line": 65,
+            "text": "(c.autoplay || 0) * 6 +"
+          },
+          {
+            "line": 106,
+            "text": "autoplay: count(text, R.autoplay),"
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\ads\\home.js",
+      "counts": {
+        "video": 2,
+        "autoplay": 2,
+        "loop": 2,
+        "preload": 1,
+        "img": 2,
+        "lazy": 0,
+        "create": 3,
+        "revoke": 2
+      },
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + loop",
+        "⚠ video + preload",
+        "⚠ createObjectURL > revokeObjectURL"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 2565,
+            "text": "<video"
+          },
+          {
+            "line": 3037,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 2568,
+            "text": "autoPlay"
+          },
+          {
+            "line": 3039,
+            "text": "autoPlay"
+          }
+        ],
+        "img": [
+          {
+            "line": 2574,
+            "text": "<img"
+          },
+          {
+            "line": 3052,
+            "text": "<img"
+          }
+        ],
+        "create": [
+          {
+            "line": 114,
+            "text": "const url = URL.createObjectURL(file)"
+          },
+          {
+            "line": 2131,
+            "text": "url = URL.createObjectURL(file)"
+          },
+          {
+            "line": 2153,
+            "text": "url = URL.createObjectURL(file)"
+          }
+        ]
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\components\\QuestHub.jsx",
+      "counts": {
+        "video": 2,
+        "autoplay": 2,
+        "loop": 2,
+        "preload": 2,
+        "img": 0,
+        "lazy": 2,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + loop",
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 205,
+            "text": "? <video className=\"questThumb\" src={q.cover} playsInline autoPlay muted loop preload=\"metadata\" />"
+          },
+          {
+            "line": 296,
+            "text": "? <video className=\"questThumb\" src={q.cover} playsInline autoPlay muted loop preload=\"metadata\" />"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 205,
+            "text": "? <video className=\"questThumb\" src={q.cover} playsInline autoPlay muted loop preload=\"metadata\" />"
+          },
+          {
+            "line": 296,
+            "text": "? <video className=\"questThumb\" src={q.cover} playsInline autoPlay muted loop preload=\"metadata\" />"
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\ForumBootSplash.jsx",
+      "counts": {
+        "video": 1,
+        "autoplay": 4,
+        "loop": 0,
+        "preload": 2,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 414,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 37,
+            "text": "const FORUM_SPLASH_TRY_SOUND_AUTOPLAY = 1"
+          },
+          {
+            "line": 298,
+            "text": "if (FORUM_SPLASH_TRY_SOUND_AUTOPLAY === 1 && soundAttemptsRef.current < 3) {"
+          },
+          {
+            "line": 418,
+            "text": "autoPlay"
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\about\\page.js",
+      "counts": {
+        "video": 1,
+        "autoplay": 1,
+        "loop": 3,
+        "preload": 1,
+        "img": 3,
+        "lazy": 1,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + loop",
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 182,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 185,
+            "text": "autoPlay"
+          }
+        ],
+        "img": [
+          {
+            "line": 208,
+            "text": "<img src={img.src} alt={img.alt} loading=\"lazy\" />"
+          },
+          {
+            "line": 298,
+            "text": "<img"
+          },
+          {
+            "line": 312,
+            "text": "<img"
+          }
+        ],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\SnowFX.jsx",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 5,
+        "preload": 0,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\tools\\audit-runtime-hotspots.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 5,
+        "preload": 0,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\qcoin\\components\\QCoinWithdrawPopover.jsx",
+      "counts": {
+        "video": 1,
+        "autoplay": 1,
+        "loop": 1,
+        "preload": 1,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + loop",
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 106,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 109,
+            "text": "autoPlay"
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\frontCameraMirror.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 1,
+        "loop": 3,
+        "preload": 0,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [
+          {
+            "line": 19,
+            "text": "video.autoplay = true"
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\BgAudio.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 2,
+        "loop": 0,
+        "preload": 1,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [
+          {
+            "line": 14,
+            "text": "const [locked, setLocked] = useState(true) // браузер запретил autoplay со звуком"
+          },
+          {
+            "line": 53,
+            "text": "// autoplay со звуком запрещён → играем тихо"
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostMediaStack.jsx",
+      "counts": {
+        "video": 0,
+        "autoplay": 2,
+        "loop": 0,
+        "preload": 0,
+        "img": 0,
+        "lazy": 1,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [
+          {
+            "line": 150,
+            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
+          },
+          {
+            "line": 226,
+            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\LivePreview.jsx",
+      "counts": {
+        "video": 1,
+        "autoplay": 1,
+        "loop": 0,
+        "preload": 0,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 53,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 55,
+            "text": "autoPlay"
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\QCoinDropFX.jsx",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 3,
+        "preload": 0,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\ComposerAttachmentPreview.jsx",
+      "counts": {
+        "video": 1,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 1,
+        "img": 0,
+        "lazy": 1,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 64,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoTrimPopover.jsx",
+      "counts": {
+        "video": 1,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 1,
+        "img": 0,
+        "lazy": 0,
+        "create": 1,
+        "revoke": 1
+      },
+      "flags": [
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 292,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [],
+        "img": [],
+        "create": [
+          {
+            "line": 120,
+            "text": "url = URL.createObjectURL(sourceBlob);"
+          }
+        ]
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaLifecycleRuntime.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 3,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\tools\\audit-media-budget.js",
+      "counts": {
+        "video": 1,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 1,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 19,
+            "text": "{ key: 'videoTag', rx: /<video\\b/gi },"
+          }
+        ],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\api\\forum\\events\\stream\\route.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 2,
+        "preload": 0,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoOverlay.jsx",
+      "counts": {
+        "video": 1,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 1,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [
+          {
+            "line": 355,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [],
+        "img": [
+          {
+            "line": 340,
+            "text": "<img"
+          }
+        ],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\styles\\ForumStyles.jsx",
+      "counts": {
+        "video": 1,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 1,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [
+          {
+            "line": 1237,
+            "text": "/* 2) РћР±С‹С‡РЅС‹Рµ <img>/<video>/<canvas>/<svg> РІРЅСѓС‚СЂРё вЂ” СЂР°СЃС‚СЏРЅСѓС‚СЊ Рё РїРѕРєСЂС‹С‚СЊ */"
+          }
+        ],
+        "autoplay": [],
+        "img": [
+          {
+            "line": 1237,
+            "text": "/* 2) РћР±С‹С‡РЅС‹Рµ <img>/<video>/<canvas>/<svg> РІРЅСѓС‚СЂРё вЂ” СЂР°СЃС‚СЏРЅСѓС‚СЊ Рё РїРѕРєСЂС‹С‚СЊ */"
+          }
+        ],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\styles\\modules\\profileStyles.js",
+      "counts": {
+        "video": 1,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 1,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [
+          {
+            "line": 225,
+            "text": "/* 2) РћР±С‹С‡РЅС‹Рµ <img>/<video>/<canvas>/<svg> РІРЅСѓС‚СЂРё вЂ” СЂР°СЃС‚СЏРЅСѓС‚СЊ Рё РїРѕРєСЂС‹С‚СЊ */"
+          }
+        ],
+        "autoplay": [],
+        "img": [
+          {
+            "line": 225,
+            "text": "/* 2) РћР±С‹С‡РЅС‹Рµ <img>/<video>/<canvas>/<svg> РІРЅСѓС‚СЂРё вЂ” СЂР°СЃС‚СЏРЅСѓС‚СЊ Рё РїРѕРєСЂС‹С‚СЊ */"
+          }
+        ],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\page.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 1,
+        "loop": 0,
+        "preload": 0,
+        "img": 1,
+        "lazy": 2,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [
+          {
+            "line": 101,
+            "text": "allow=\"autoplay; encrypted-media; picture-in-picture\""
+          }
+        ],
+        "img": [
+          {
+            "line": 266,
+            "text": "{/* ← заменено <img> на <Image/> в двух иконках */}"
+          }
+        ],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\QCastPlayer.jsx",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 2,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaRuntime.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 2,
+        "img": 0,
+        "lazy": 0,
+        "create": 2,
+        "revoke": 2
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": [
+          {
+            "line": 11,
+            "text": "const src = isStringSrc ? String(videoSource) : URL.createObjectURL(videoSource)"
+          },
+          {
+            "line": 137,
+            "text": "const src = isStringSrc ? String(audioSource) : URL.createObjectURL(audioSource)"
+          }
+        ]
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\tools\\audit-ad-runtime.js",
+      "counts": {
+        "video": 1,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [
+          {
+            "line": 16,
+            "text": "{ key: 'videoTag', rx: /<video\\b/gi },"
+          }
+        ],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\ScrollTopPulse.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 1,
+        "preload": 0,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmThreadMessageRow.jsx",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 1,
+        "img": 0,
+        "lazy": 2,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmVoicePlayer.jsx",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 1,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\videoControls.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 1,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\HeroAvatar.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 2,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [
+          {
+            "line": 138,
+            "text": "{/* ПОСТЕР: всегда обычный <img>, без next/image оптимизации */}"
+          },
+          {
+            "line": 142,
+            "text": "<img"
+          }
+        ],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\NotRobot.jsx",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 2,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [
+          {
+            "line": 493,
+            "text": "<img"
+          },
+          {
+            "line": 521,
+            "text": "<img"
+          }
+        ],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\components\\AvatarEmoji.jsx",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 1,
+        "lazy": 1,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [
+          {
+            "line": 33,
+            "text": "<img"
+          }
+        ],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ForumSearchSortControls.jsx",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 1,
+        "lazy": 2,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [
+          {
+            "line": 151,
+            "text": "<img"
+          }
+        ],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\AuthNavClient.jsx",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 1,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [
+          {
+            "line": 388,
+            "text": "<img"
+          }
+        ],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVideoTrimController.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 0,
+        "lazy": 0,
+        "create": 1,
+        "revoke": 1
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": [
+          {
+            "line": 178,
+            "text": "const outUrl = URL.createObjectURL(finalBlob)"
+          }
+        ]
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\moderationPrep.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 1,
+        "img": 0,
+        "lazy": 0,
+        "create": 2,
+        "revoke": 3
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": [
+          {
+            "line": 18,
+            "text": "const localUrl = URL.createObjectURL(file)"
+          },
+          {
+            "line": 81,
+            "text": "const url = isStringSource ? videoSource : URL.createObjectURL(videoSource)"
+          }
+        ]
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\components\\ProfilePopover.jsx",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 3,
+        "lazy": 0,
+        "create": 2,
+        "revoke": 3
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [
+          {
+            "line": 87,
+            "text": "// WHY: <img> + object-fit:cover обрезает картинку в квадрат сразу после выбора."
+          },
+          {
+            "line": 788,
+            "text": "<img"
+          },
+          {
+            "line": 797,
+            "text": "<img"
+          }
+        ],
+        "create": [
+          {
+            "line": 338,
+            "text": "const url = URL.createObjectURL(f);"
+          },
+          {
+            "line": 358,
+            "text": "const localUrl = URL.createObjectURL(f);"
+          }
+        ]
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVoiceRecorder.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 0,
+        "lazy": 0,
+        "create": 1,
+        "revoke": 2
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": [
+          {
+            "line": 67,
+            "text": "const url = URL.createObjectURL(blob)"
+          }
+        ]
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\lib\\forumVideoTrim.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 3,
+        "img": 0,
+        "lazy": 0,
+        "create": 3,
+        "revoke": 5
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": [
+          {
+            "line": 40,
+            "text": "const src = URL.createObjectURL(blob);"
+          },
+          {
+            "line": 163,
+            "text": "const url = URL.createObjectURL(inputBlob);"
+          },
+          {
+            "line": 491,
+            "text": "const srcUrl = URL.createObjectURL(inputBlob);"
+          }
+        ]
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVideoCaptureController.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "img": 0,
+        "lazy": 0,
+        "create": 1,
+        "revoke": 6
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": [
+          {
+            "line": 236,
+            "text": "const url = URL.createObjectURL(blob)"
+          }
+        ]
+      }
+    }
+  ]
+}

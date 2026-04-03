@@ -1,0 +1,440 @@
+import { useEffect, useRef } from 'react'
+
+export default function useForumHeadCollapse({
+  isBrowserFn,
+  selId,
+  bodyRef,
+  navRestoringRef,
+  pendingScrollToPostIdRef,
+  pendingThreadRootIdRef,
+  headAutoOpenRef,
+  headHiddenRef,
+  headPinnedRef,
+  setHeadHidden,
+  setHeadPinned,
+  videoFeedOpenRef,
+  inboxMessagesModeRef,
+}) {
+  useEffect(() => {
+    if (navRestoringRef.current) return
+    headAutoOpenRef.current = false
+  }, [selId, headAutoOpenRef, navRestoringRef])
+
+  const prevSelIdRef = useRef(null)
+  const suppressScrollSyncUntilRef = useRef(0)
+  const isProgrammaticCooldown = (windowMs = 260) => {
+    try {
+      const now = Date.now()
+      const last = Number(window.__forumProgrammaticScrollTs || 0)
+      return (now - last) < Math.max(80, Number(windowMs || 0))
+    } catch {
+      return false
+    }
+  }
+  const markProgrammaticScroll = (reason = 'head_collapse') => {
+    try {
+      window.__forumProgrammaticScrollTs = Date.now()
+      window.__forumProgrammaticScrollReason = String(reason || 'head_collapse')
+    } catch {}
+  }
+
+  const suppressScrollSync = (ms = 180) => {
+    try {
+      suppressScrollSyncUntilRef.current = Date.now() + Math.max(80, Number(ms || 0))
+    } catch {}
+  }
+  useEffect(() => {
+    if (!isBrowserFn?.()) return
+
+    const cur = selId ? String(selId) : null
+    const prev = prevSelIdRef.current
+    prevSelIdRef.current = cur
+    if (!cur) return
+
+    const entered = cur !== prev
+    const hasPendingTarget =
+      !!pendingScrollToPostIdRef?.current ||
+      !!pendingThreadRootIdRef?.current
+
+    try {
+      headAutoOpenRef.current = false
+    } catch {}
+    suppressScrollSync(240)
+    try {
+      setHeadPinned(false)
+    } catch {}
+    try {
+      setHeadHidden(true)
+    } catch {}
+
+    if (!entered) return
+    if (hasPendingTarget) return
+
+    const alignNodeToTop = (node) => {
+      try {
+        if (!node) return false
+        const scrollEl =
+          bodyRef.current ||
+          document.querySelector('[data-forum-scroll="1"]') ||
+          null
+        const rect = node.getBoundingClientRect?.()
+        if (!rect) return false
+        if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {
+          const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }
+          const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))
+          if (Math.abs(Number(scrollEl.scrollTop || 0) - targetTop) > 2) {
+            markProgrammaticScroll('head_align_inner')
+            scrollEl.scrollTop = Math.max(0, targetTop)
+          }
+          return true
+        }
+        const top = (window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0) + rect.top
+        markProgrammaticScroll('head_align_window')
+        try {
+          window.scrollTo({ top: Math.max(0, top), behavior: 'auto' })
+        } catch {
+          try { window.scrollTo(0, Math.max(0, top)) } catch {}
+        }
+        return true
+      } catch {}
+      return false
+    }
+
+    const scrollToThreadStart = () => {
+      try {
+        const scrollEl =
+          bodyRef.current ||
+          document.querySelector('[data-forum-scroll="1"]') ||
+          null
+        const root = scrollEl || document
+        const branchStart =
+          root.querySelector?.('[data-forum-thread-start="1"]') ||
+          document.querySelector?.('[data-forum-thread-start="1"]') ||
+          root.querySelector?.('[data-forum-topics-start="1"]') ||
+          document.querySelector?.('[data-forum-topics-start="1"]') ||
+          null
+        suppressScrollSync(260)
+        if (branchStart && alignNodeToTop(branchStart)) return true
+        if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {
+          if (Number(scrollEl.scrollTop || 0) > 4) {
+            markProgrammaticScroll('head_thread_start_reset_inner')
+            scrollEl.scrollTop = 0
+          }
+          return true
+        }
+        const top = Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0)
+        if (top > 4) {
+          markProgrammaticScroll('head_thread_start_reset_window')
+          window.scrollTo(0, 0)
+          return true
+        }
+      } catch {}
+      return false
+    }
+
+    let rafA = 0
+    let rafB = 0
+    let timeoutId = 0
+    let retryTimer = 0
+    let cancelled = false
+    let attempts = 0
+
+    const tryScrollToThreadStart = () => {
+      if (cancelled) return
+      attempts += 1
+      let ok = false
+      try { ok = !!scrollToThreadStart() } catch {}
+      if (ok) return
+      if (attempts >= 6) return
+      retryTimer = window.setTimeout(() => {
+        tryScrollToThreadStart()
+      }, 48)
+    }
+
+    try {
+      rafA = requestAnimationFrame(() => {
+        rafB = requestAnimationFrame(() => {
+          if (cancelled) return
+          tryScrollToThreadStart()
+        })
+      })
+    } catch {
+      timeoutId = window.setTimeout(() => {
+        if (cancelled) return
+        tryScrollToThreadStart()
+      }, 0)
+    }
+
+    return () => {
+      cancelled = true
+      if (rafA) {
+        try { cancelAnimationFrame(rafA) } catch {}
+        rafA = 0
+      }
+      if (rafB) {
+        try { cancelAnimationFrame(rafB) } catch {}
+        rafB = 0
+      }
+      if (timeoutId) {
+        try { clearTimeout(timeoutId) } catch {}
+        timeoutId = 0
+      }
+      if (retryTimer) {
+        try { clearTimeout(retryTimer) } catch {}
+        retryTimer = 0
+      }
+    }
+  }, [
+    bodyRef,
+    headAutoOpenRef,
+    isBrowserFn,
+    pendingScrollToPostIdRef,
+    pendingThreadRootIdRef,
+    selId,
+    setHeadHidden,
+    setHeadPinned,
+  ])
+
+  useEffect(() => {
+    if (!isBrowserFn?.()) return
+
+    const DEFAULT_HEAD_OPEN_DESKTOP = 870
+    const DEFAULT_HEAD_CLOSE_DESKTOP = 920
+    const DEFAULT_HEAD_OPEN_MOBILE = 550
+    const DEFAULT_HEAD_CLOSE_MOBILE = 610
+
+    const isMobileUi = () => {
+      try {
+        const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
+        const narrow = (Number(window?.innerWidth || 0) || 0) <= 720
+        return coarse || narrow
+      } catch {}
+      return false
+    }
+
+    const readCssPx = (varName, fallback) => {
+      try {
+        const raw = window.getComputedStyle(document.documentElement).getPropertyValue(varName)
+        const v = String(raw || '').trim()
+        const n = parseFloat(v)
+        return Number.isFinite(n) ? n : fallback
+      } catch {}
+      return fallback
+    }
+
+    const readCssFlag01 = (varName, fallback01) => {
+      try {
+        const raw = window.getComputedStyle(document.documentElement).getPropertyValue(varName)
+        const v = String(raw || '').trim()
+        if (v === '0') return 0
+        if (v === '1') return 1
+        const n = parseFloat(v)
+        return Number.isFinite(n) ? (n ? 1 : 0) : fallback01
+      } catch {}
+      return fallback01
+    }
+
+    const readThresholds = () => {
+      const mobile = isMobileUi()
+      const openAt = readCssPx(
+        mobile ? '--head-open-threshold-mobile' : '--head-open-threshold-desktop',
+        mobile ? DEFAULT_HEAD_OPEN_MOBILE : DEFAULT_HEAD_OPEN_DESKTOP,
+      )
+      const closeRaw = readCssPx(
+        mobile ? '--head-close-threshold-mobile' : '--head-close-threshold-desktop',
+        mobile ? DEFAULT_HEAD_CLOSE_MOBILE : DEFAULT_HEAD_CLOSE_DESKTOP,
+      )
+      const closeAt = Math.max((Number(openAt) || 0) + 1, Number(closeRaw) || 0)
+      const compensate = !mobile && readCssFlag01('--head-collapse-scroll-compensate', 0) === 1
+      const scrollEps = mobile ? 14 : 6
+      return { openAt, closeAt, compensate, scrollEps }
+    }
+
+    const getHeadHeight = () => {
+      try {
+        const el = document.querySelector('.headInner') || document.querySelector('.head')
+        const h = el?.getBoundingClientRect?.()?.height
+        return Number.isFinite(h) ? h : 0
+      } catch {}
+      return 0
+    }
+
+    const getScrollTop = () => {
+      const el = bodyRef.current
+      if (el && el.scrollHeight > el.clientHeight + 1) return el.scrollTop || 0
+      return (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0)
+    }
+
+    let raf = 0
+    let compRafA = 0
+    let compRafB = 0
+    let compTimeout = 0
+    let thresholds = readThresholds()
+    let lastTop = getScrollTop()
+
+    const cancelCompensationSchedule = () => {
+      if (compRafA) {
+        try { window.cancelAnimationFrame(compRafA) } catch {}
+        compRafA = 0
+      }
+      if (compRafB) {
+        try { window.cancelAnimationFrame(compRafB) } catch {}
+        compRafB = 0
+      }
+      if (compTimeout) {
+        try { window.clearTimeout(compTimeout) } catch {}
+        compTimeout = 0
+      }
+    }
+
+    const onScroll = () => {
+      if (navRestoringRef.current) return
+      if (raf) return
+      raf = window.requestAnimationFrame(() => {
+        raf = 0
+        const st = getScrollTop()
+        if (isProgrammaticCooldown(260)) {
+          lastTop = st
+          return
+        }
+        if (Date.now() < Number(suppressScrollSyncUntilRef.current || 0)) {
+          lastTop = st
+          return
+        }
+        const delta = st - lastTop
+        const scrollingDown = delta > Number(thresholds.scrollEps || 0)
+        const scrollingUp = delta < -Number(thresholds.scrollEps || 0)
+        const openAt = Number(thresholds.openAt || 0)
+        const closeAt = Number(thresholds.closeAt || 0)
+        const atTopForOpen = st <= openAt
+        const nearAbsoluteTop = st <= 20
+
+        if (headPinnedRef.current) {
+          headAutoOpenRef.current = false
+          lastTop = st
+          return
+        }
+
+        if (!scrollingDown && !scrollingUp) {
+          lastTop = st
+          return
+        }
+
+        // In Quantum Messenger mode, do not auto-open the header.
+        // Manual open (pinned) is still respected.
+        if (inboxMessagesModeRef?.current) {
+          if (!headHiddenRef.current) {
+            setHeadPinned(false)
+            setHeadHidden(true)
+          }
+          headAutoOpenRef.current = false
+          lastTop = st
+          return
+        }
+
+        if (!videoFeedOpenRef.current && atTopForOpen && (scrollingUp || nearAbsoluteTop)) {
+          if (headHiddenRef.current) {
+            suppressScrollSync(220)
+            setHeadPinned(false)
+            setHeadHidden(false)
+          }
+          headAutoOpenRef.current = false
+        } else if (!headHiddenRef.current && scrollingDown && st > closeAt) {
+          const prevSt = st
+          const headH = getHeadHeight()
+          const compensate = !!thresholds.compensate
+          suppressScrollSync(220)
+          setHeadPinned(false)
+          setHeadHidden(true)
+
+          if (compensate && headH > 1 && prevSt > 32) {
+            const applyComp = () => {
+              try {
+                const el = bodyRef.current
+                const useInner = !!el && (el.scrollHeight > el.clientHeight + 1)
+                const target = prevSt + headH
+                if (useInner && el) {
+                  if ((el.scrollTop || 0) < 2) {
+                    markProgrammaticScroll('head_compensate_inner')
+                    el.scrollTop = target
+                  }
+                } else {
+                  const y = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0
+                  if (y < 2) {
+                    try {
+                      markProgrammaticScroll('head_compensate_window')
+                      window.scrollTo(0, target)
+                    } catch {}
+                  }
+                }
+              } catch {}
+            }
+            try {
+              cancelCompensationSchedule()
+              compRafA = requestAnimationFrame(() => {
+                compRafB = requestAnimationFrame(applyComp)
+              })
+            } catch {
+              try {
+                cancelCompensationSchedule()
+                compTimeout = window.setTimeout(applyComp, 0)
+              } catch {}
+            }
+          }
+        }
+
+        lastTop = st
+      })
+    }
+
+    const onResize = () => {
+      try {
+        thresholds = readThresholds()
+      } catch {}
+      onScroll()
+    }
+
+    const el = bodyRef.current
+    const useInnerScroll = !!el && (Number(el.scrollHeight || 0) > (Number(el.clientHeight || 0) + 1))
+    const opts = { passive: true }
+    if (useInnerScroll) {
+      try {
+        el?.addEventListener?.('scroll', onScroll, opts)
+      } catch {}
+    } else {
+      window.addEventListener('scroll', onScroll, opts)
+    }
+    window.addEventListener('resize', onResize, opts)
+    onScroll()
+
+    return () => {
+      if (useInnerScroll) {
+        try {
+          el?.removeEventListener?.('scroll', onScroll)
+        } catch {}
+      } else {
+        window.removeEventListener('scroll', onScroll)
+      }
+      window.removeEventListener('resize', onResize)
+      if (raf) {
+        try {
+          window.cancelAnimationFrame(raf)
+        } catch {}
+        raf = 0
+      }
+      cancelCompensationSchedule()
+    }
+  }, [
+    bodyRef,
+    headAutoOpenRef,
+    headHiddenRef,
+    headPinnedRef,
+    isBrowserFn,
+    navRestoringRef,
+    selId,
+    setHeadHidden,
+    setHeadPinned,
+    videoFeedOpenRef,
+    inboxMessagesModeRef,
+  ])
+}

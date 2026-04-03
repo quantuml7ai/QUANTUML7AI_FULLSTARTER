@@ -1,0 +1,134 @@
+{
+  "phase": "61",
+  "timestamp": "2026-03-05T18:38:48.0700804+02:00",
+  "scope": "Feed mutation queue extraction: move queue/flush/ack reconciliation from ForumRoot into feature hook while preserving forum API/storage behavior.",
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/feed/hooks/useForumMutationQueue.js",
+    "heavy-audit.report.json",
+    "media-audit.report.json",
+    "effects-leak.report.json",
+    "forum-deps-audit.report.json",
+    "runtime-hotspots.report.json",
+    "deep-audit.report.json",
+    "account-sync-audit.report.json"
+  ],
+  "new_files": [
+    "app/forum/features/feed/hooks/useForumMutationQueue.js",
+    "audit/forum-phase-61-feed-mutation-queue-hook.json"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "feed.mutation-queue",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/feed/hooks/useForumMutationQueue.js",
+      "moved": [
+        "queue storage lifecycle (forum:queue)",
+        "op id generation and op compaction",
+        "flush scheduler (requestFlushSoon)",
+        "flushMutations mutate-call + retry/requeue",
+        "view-post/view-topic pending sets",
+        "overlay reconciliation after server ack",
+        "tombstone cleanup after delete ack"
+      ]
+    }
+  ],
+  "dependency_changes": [
+    {
+      "type": "import-added",
+      "file": "app/forum/ForumRoot.jsx",
+      "value": "./features/feed/hooks/useForumMutationQueue"
+    },
+    {
+      "type": "import-removed",
+      "file": "app/forum/ForumRoot.jsx",
+      "value": "dedupeForumSnapshot from ./features/feed/utils/snapshotTransforms"
+    },
+    {
+      "type": "wiring-updated",
+      "file": "app/forum/ForumRoot.jsx",
+      "value": "markViewPost/markViewTopic now call enqueuePendingPostView/enqueuePendingTopicView from hook"
+    }
+  ],
+  "detected_risks": [
+    "ForumRoot remains heavy (runtime-hotspots score 195), so regression risk in untouched clusters is still present.",
+    "Residual effect hygiene warnings remain in ForumRoot and other modules (from effects-leak audit); this phase did not modify those paths.",
+    "Heavy audit still reports addEventListener/removeEventListener imbalance in ForumRoot; existing pre-phase issue."
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": {
+    "status": "low",
+    "details": [
+      "Client mutation transport still uses api.mutate({ ops }, userId).",
+      "No route/path/HTTP method changes.",
+      "No response-shape changes in ack handling."
+    ]
+  },
+  "storage_risk": {
+    "status": "low",
+    "details": [
+      "Queue key remains forum:queue.",
+      "View dedupe keys remain post:<id>:viewed:<uid>:<bucket> and topic:<id>:viewed:<uid>:<bucket>.",
+      "No storage key migrations introduced."
+    ]
+  },
+  "runtime_risk": {
+    "status": "medium",
+    "details": [
+      "Root complexity reduced but still high.",
+      "Mutation queue behavior moved with same semantics; runtime risk mainly from untouched large root sections."
+    ]
+  },
+  "audit_runs": [
+    {
+      "script": "node tools/audit-heavy.js",
+      "result": "pass",
+      "notes": "ForumRoot heavy score remains 73."
+    },
+    {
+      "script": "node tools/audit-media.js",
+      "result": "pass",
+      "notes": "No new media risks introduced by this phase."
+    },
+    {
+      "script": "node tools/audit-effects.js",
+      "result": "pass",
+      "notes": "Residual warnings are pre-existing and outside mutation-queue extraction scope."
+    },
+    {
+      "script": "node tools/audit-forum-deps.js",
+      "result": "pass",
+      "notes": "cycleCount=0; crossDomainEdgeCount=101."
+    },
+    {
+      "script": "node tools/audit-runtime-hotspots.js",
+      "result": "pass",
+      "notes": "ForumRoot runtime-hotspots score=195 (improved from previous 201)."
+    },
+    {
+      "script": "node tools/audit-full-forum.js",
+      "result": "pass",
+      "notes": "ForumRoot deep audit score=128; no new critical flags from this extraction."
+    },
+    {
+      "script": "node tools/audit-account-sync.js",
+      "result": "pass",
+      "notes": "Account/id surface unchanged by this phase."
+    },
+    {
+      "script": "pnpm eslint app/forum/ForumRoot.jsx app/forum/features/feed/hooks/useForumMutationQueue.js --no-cache",
+      "result": "pass"
+    },
+    {
+      "script": "pnpm build",
+      "result": "pass",
+      "notes": "Compiled successfully; only pre-existing next/no-img-element warnings outside forum mutation queue scope."
+    }
+  ],
+  "notes": [
+    "ForumRoot line count after phase: 8752.",
+    "New hook line count: 376.",
+    "No TypeScript files introduced; JS/JSX only."
+  ],
+  "status": "pass_with_residual_risks"
+}

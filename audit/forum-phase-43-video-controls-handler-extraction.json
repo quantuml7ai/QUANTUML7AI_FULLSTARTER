@@ -1,0 +1,60 @@
+{
+  "phase": "43-video-controls-handler-extraction",
+  "timestamp": "2026-03-05T02:38:23.2560525+02:00",
+  "scope": {
+    "domain": "forum.features.media",
+    "goal": "extract native video controls unlock handler from ForumRoot to media utils with adapter wiring"
+  },
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/media/utils/videoControls.js"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "media.video.native-controls",
+      "from": "app/forum/ForumRoot.jsx::enableVideoControlsOnTap",
+      "to": "app/forum/features/media/utils/videoControls.js::createEnableVideoControlsOnTap"
+    }
+  ],
+  "dependency_changes": [
+    {
+      "type": "import_added",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/utils/videoControls.js"
+    },
+    {
+      "type": "adapter_contract",
+      "owner": "ForumRoot",
+      "details": [
+        "hasLazyVideoSourceWithoutSrc",
+        "restoreVideoEl",
+        "touchActiveVideoEl",
+        "enforceActiveVideoCap"
+      ]
+    }
+  ],
+  "detected_risks": [
+    "ForumRoot still contains large cross-domain orchestration and runtime hotspots",
+    "Video controls behavior depends on root helper contracts, which are preserved via adapters in this phase"
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "audit": {
+    "eslint": "pass",
+    "audit_forum_deps": "pass",
+    "audit_full_forum": "pass_with_known_hotspots",
+    "audit_effects": "pass_with_known_residual_warnings",
+    "audit_media": "pass_with_expected_media_flags",
+    "audit_heavy": "pass_with_known_hotspots",
+    "build": "pass"
+  },
+  "notes": [
+    "No server routes, backend handlers, db utils, or API payloads changed.",
+    "Handler semantics are preserved by passing the original root helper functions."
+  ],
+  "status": "completed"
+}

@@ -1,0 +1,66 @@
+﻿{
+    "phase":  "forum-phase-80-five-extractions",
+    "timestamp":  "2026-03-06T04:26:15.5752583+02:00",
+    "scope":  [
+                  "app/forum/ForumRoot.jsx",
+                  "app/forum/features/media/components/VideoFeedPane.jsx",
+                  "app/forum/features/dm/components/InboxTabsHeader.jsx",
+                  "app/forum/features/dm/components/InboxRepliesPane.jsx",
+                  "app/forum/features/feed/components/TopicsPane.jsx",
+                  "app/forum/features/feed/components/ThreadRepliesPane.jsx"
+              ],
+    "touched_files":  [
+                          "app/forum/ForumRoot.jsx",
+                          "app/forum/features/media/components/VideoFeedPane.jsx",
+                          "app/forum/features/dm/components/InboxTabsHeader.jsx",
+                          "app/forum/features/dm/components/InboxRepliesPane.jsx",
+                          "app/forum/features/feed/components/TopicsPane.jsx",
+                          "app/forum/features/feed/components/ThreadRepliesPane.jsx"
+                      ],
+    "new_files":  [
+                      "app/forum/features/media/components/VideoFeedPane.jsx",
+                      "app/forum/features/dm/components/InboxTabsHeader.jsx",
+                      "app/forum/features/dm/components/InboxRepliesPane.jsx",
+                      "app/forum/features/feed/components/TopicsPane.jsx",
+                      "app/forum/features/feed/components/ThreadRepliesPane.jsx"
+                  ],
+    "moved_logic_domains":  [
+                                "media: video feed render/windowed cards",
+                                "dm: inbox tabs header",
+                                "dm: replies tab rendering with ads/load-more",
+                                "feed: topics list rendering and pagination sentinel",
+                                "feed: thread replies rendering with ads/load-more"
+                            ],
+    "dependency_changes":  {
+                               "forum_deps_files_scanned":  290,
+                               "forum_deps_cycles":  0,
+                               "forum_deps_cross_domain_edges":  105,
+                               "forum_root_thinner_render_sections":  5
+                           },
+    "detected_risks":  [
+                           "Residual complexity remains in DM messages tab map and composer orchestration in ForumRoot.",
+                           "Runtime hotspot score remains elevated until next extractions."
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low",
+    "runtime_risk":  "medium",
+    "notes":  [
+                  "No API routes, backend handlers, or db utils changed in this phase.",
+                  "Parity audit against baseline zip passed with expected Forum.jsx wrapper delta only.",
+                  "Build passed; warnings are existing next/image advisory warnings outside this phase scope."
+              ],
+    "audit_outputs":  [
+                          "effects-leak.report.json",
+                          "forum-deps-audit.report.json",
+                          "heavy-audit.report.json",
+                          "media-audit.report.json",
+                          "runtime-hotspots.report.json",
+                          "deep-audit.report.json",
+                          "account-sync-audit.report.json",
+                          "audit/forum-phase-80-final-parity.json"
+                      ],
+    "status":  "passed"
+}

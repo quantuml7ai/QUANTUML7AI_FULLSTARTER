@@ -1,0 +1,93 @@
+{
+  "phase": "52",
+  "timestamp": "2026-03-05T13:09:44+02:00",
+  "scope": [
+    "feed navigation orchestration extraction",
+    "quests component extraction",
+    "ForumRoot thinning"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/feed/utils/navOrchestrator.js",
+    "app/forum/features/quests/components/QuestHub.jsx"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "feed",
+      "moved": [
+        "apply nav snapshot state logic",
+        "global back flow decision tree"
+      ],
+      "from": "app/forum/ForumRoot.jsx",
+      "to": [
+        "app/forum/features/feed/utils/navOrchestrator.js"
+      ]
+    },
+    {
+      "domain": "quests",
+      "moved": [
+        "QuestHub list/details UI",
+        "quest claimability and timer rendering",
+        "quest card/task local styling and rendering logic"
+      ],
+      "from": "app/forum/ForumRoot.jsx",
+      "to": [
+        "app/forum/features/quests/components/QuestHub.jsx"
+      ]
+    }
+  ],
+  "dependency_changes": {
+    "ForumRoot_new_imports": [
+      "app/forum/features/feed/utils/navOrchestrator.js",
+      "app/forum/features/quests/components/QuestHub.jsx"
+    ],
+    "ForumRoot_removed_local_owners": [
+      "QuestHub"
+    ],
+    "ForumRoot_thin_wrappers": [
+      "applyNavState",
+      "handleGlobalBack"
+    ]
+  },
+  "detected_risks": [
+    "ForumRoot still contains significant orchestration and effects",
+    "effects audit still reports historical RAF/interval imbalance blocks",
+    "QuestHub uses autoplay video previews (existing behavior, now explicitly owned by quests module)"
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "low",
+  "storage_risk": {
+    "status": "low",
+    "notes": [
+      "quest storage keys and semantics unchanged",
+      "nav state shape unchanged"
+    ]
+  },
+  "runtime_risk": {
+    "status": "low-medium",
+    "notes": [
+      "logic moved via adapter-style wrappers with same call signatures",
+      "full lint + build + audits passed"
+    ]
+  },
+  "notes": {
+    "lint": "passed for ForumRoot + extracted modules",
+    "build": "passed",
+    "audits": {
+      "tools/audit-forum-deps.js": "passed, cycles=0",
+      "tools/audit-full-forum.js": "passed",
+      "tools/audit-effects.js": "passed with known warnings",
+      "tools/audit-media.js": "passed",
+      "tools/audit-heavy.js": "passed, ForumRoot score=109"
+    },
+    "root_metrics": {
+      "ForumRoot_lines": 10652,
+      "ForumRoot_top_level_function_count": 13,
+      "ForumRoot_useEffect_count": 99
+    }
+  },
+  "status": "done"
+}
+

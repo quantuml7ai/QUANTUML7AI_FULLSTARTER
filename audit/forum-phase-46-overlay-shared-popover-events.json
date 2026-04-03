@@ -1,0 +1,116 @@
+{
+  "phase": "46-overlay-shared-popover-events",
+  "timestamp": "2026-03-05T03:12:24.4548227+02:00",
+  "scope": {
+    "domain": "forum.root-helper-decomposition",
+    "goal": "extract five safe ownership blocks from ForumRoot without changing behavior"
+  },
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/feed/utils/postEvents.js",
+    "app/forum/features/profile/components/UserInfoPopover.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/media/components/VideoLimitOverlay.jsx",
+    "app/forum/features/ui/hooks/useForumGlobalPopovers.js",
+    "app/forum/shared/utils/richText.js",
+    "app/forum/shared/utils/counts.js"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "media.overlay.video-limit",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/components/VideoLimitOverlay.jsx",
+      "symbols": [
+        "VideoLimitOverlay"
+      ]
+    },
+    {
+      "domain": "shared.text.rich-rendering",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/shared/utils/richText.js",
+      "symbols": [
+        "safeHtml",
+        "rich"
+      ]
+    },
+    {
+      "domain": "shared.counter.formatting",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/shared/utils/counts.js",
+      "symbols": [
+        "formatCount"
+      ]
+    },
+    {
+      "domain": "ui.global-popover-events",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/ui/hooks/useForumGlobalPopovers.js",
+      "symbols": [
+        "qcoin:open listener",
+        "vip:open listener"
+      ]
+    },
+    {
+      "domain": "feed.event.broadcasting",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/feed/utils/postEvents.js",
+      "symbols": [
+        "post_deleted broadcast without ids"
+      ]
+    }
+  ],
+  "dependency_changes": [
+    {
+      "type": "imports_added",
+      "file": "app/forum/ForumRoot.jsx",
+      "details": [
+        "features/media/components/VideoLimitOverlay",
+        "features/ui/hooks/useForumGlobalPopovers",
+        "shared/utils/richText",
+        "shared/utils/counts"
+      ]
+    },
+    {
+      "type": "imports_removed",
+      "file": "app/forum/ForumRoot.jsx",
+      "details": [
+        "events/bus broadcast alias"
+      ]
+    },
+    {
+      "type": "shared_util_adopted",
+      "file": "app/forum/features/profile/components/UserInfoPopover.jsx",
+      "details": [
+        "shared/utils/counts::formatCount"
+      ]
+    }
+  ],
+  "detected_risks": [
+    "VideoTrimPopover and other heavy media/UI blocks are still inside ForumRoot and remain high-risk hotspots",
+    "Known historical effects/heavy warnings remain in ForumRoot and are unchanged by this step"
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "audit": {
+    "eslint": "pass",
+    "audit_forum_deps": "pass",
+    "audit_full_forum": "pass_with_known_hotspots",
+    "audit_effects": "pass_with_known_residual_warnings",
+    "audit_media": "pass_with_expected_media_flags",
+    "audit_heavy": "pass_with_known_hotspots",
+    "build": "pass"
+  },
+  "metrics": {
+    "forum_root_lines": 14296,
+    "forum_root_function_count": 44,
+    "forum_root_use_effect_count": 126
+  },
+  "notes": [
+    "No API route signatures, backend handlers, db utils, or payload schemas changed.",
+    "postEvents helpers now safely support optional post/topic IDs to preserve admin-delete-topic semantics."
+  ],
+  "status": "completed"
+}

@@ -1,0 +1,50 @@
+{
+  "phase": "29-feed-post-translation-hook",
+  "timestamp": "2026-03-04T20:39:36Z",
+  "scope": [
+    "forum/features/feed",
+    "forum/root",
+    "forum/translation"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/feed/hooks/usePostTranslation.js"
+  ],
+  "new_files": [
+    "app/forum/features/feed/hooks/usePostTranslation.js",
+    "audit/forum-phase-29-post-translation-hook.json"
+  ],
+  "moved_logic_domains": [
+    "Post translation state/effects/handler moved from PostCard in ForumRoot to features/feed/hooks/usePostTranslation"
+  ],
+  "dependency_changes": {
+    "forum_root_imports": 1,
+    "cross_domain_edges": 75,
+    "cycles": 0
+  },
+  "detected_risks": [
+    "Hook currently depends on shared translate API directly; future split may route this through feed service adapter",
+    "DM translation path still remains in ForumRoot and should be decomposed in DM phases"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "notes": [
+    "No route, backend handler, or db util changes.",
+    "Post translation UX and labels preserved via same locale+t mappings.",
+    "ForumRoot deep risk score improved from 502 to 496 after extraction."
+  ],
+  "status": "completed",
+  "validation": {
+    "lint_targeted": "passed",
+    "build": "passed",
+    "audits": [
+      "tools/audit-forum-deps.js",
+      "tools/audit-full-forum.js",
+      "tools/audit-effects.js",
+      "tools/audit-media.js",
+      "tools/audit-heavy.js"
+    ]
+  }
+}

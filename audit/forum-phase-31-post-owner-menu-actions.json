@@ -1,0 +1,53 @@
+{
+  "phase": "31-feed-post-owner-menu-actions",
+  "timestamp": "2026-03-04T20:56:42Z",
+  "scope": [
+    "forum/features/feed",
+    "forum/root",
+    "forum/post-owner-actions"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/feed/components/PostOwnerMenu.jsx",
+    "app/forum/features/feed/hooks/usePostOwnerActions.js"
+  ],
+  "new_files": [
+    "app/forum/features/feed/components/PostOwnerMenu.jsx",
+    "app/forum/features/feed/hooks/usePostOwnerActions.js",
+    "audit/forum-phase-31-post-owner-menu-actions.json"
+  ],
+  "moved_logic_domains": [
+    "Post owner menu rendering moved from PostCard in ForumRoot to features/feed/components/PostOwnerMenu",
+    "Post owner edit/delete-confirm state and handlers moved from PostCard in ForumRoot to features/feed/hooks/usePostOwnerActions"
+  ],
+  "dependency_changes": {
+    "forum_root_imports": 1,
+    "cross_domain_edges": 75,
+    "cycles": 0
+  },
+  "detected_risks": [
+    "Edit dispatch still relies on global forum:edit event; migration to explicit controller bus remains pending",
+    "Topic owner-menu flow remains separate in TopicItem and can be unified later"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "notes": [
+    "No server/API/db changes.",
+    "Owner delete confirmation overlay and owner menu stop-propagation semantics preserved.",
+    "ForumRoot import of ConfirmDeleteOverlay removed; ownership now local to PostOwnerMenu."
+  ],
+  "status": "completed",
+  "validation": {
+    "lint_targeted": "passed",
+    "build": "passed",
+    "audits": [
+      "tools/audit-forum-deps.js",
+      "tools/audit-full-forum.js",
+      "tools/audit-effects.js",
+      "tools/audit-media.js",
+      "tools/audit-heavy.js"
+    ]
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "phase": "07-quests-moderation-diagnostics",
+  "timestamp": "2026-03-04T00:00:00Z",
+  "scope": [
+    "forum/quests",
+    "forum/moderation",
+    "forum/diagnostics"
+  ],
+  "touched_files": [
+    "app/forum/Forum.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/quests/utils/progress.js",
+    "app/forum/features/moderation/utils/http.js",
+    "app/forum/features/diagnostics/utils/emitPolicy.js"
+  ],
+  "moved_logic_domains": [
+    "quest storage key derivation and card id normalization",
+    "quest reward decimal doubling and total-task resolver",
+    "moderation form-data build and response/error normalization",
+    "diagnostics emit throttling/media-refresh policy"
+  ],
+  "dependency_changes": {
+    "forum_root_imports_delta": 4,
+    "cross_domain_edges": 73,
+    "cycles": 0
+  },
+  "detected_risks": [
+    "Forum.jsx remains dominant owner of side-effects and orchestration",
+    "diagnostics payload construction still resides in root component"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "low",
+  "storage_risk": "low",
+  "runtime_risk": "medium",
+  "notes": [
+    "No server route contract changes were introduced.",
+    "Quest key semantics remain identical through helper mapping.",
+    "Moderation endpoint and payload shape are unchanged."
+  ],
+  "status": "completed"
+}

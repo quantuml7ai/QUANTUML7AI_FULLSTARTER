@@ -1,0 +1,95 @@
+{
+  "phase": "38-about-dmvoice-extraction",
+  "timestamp": "2026-03-05T01:37:56.9126356+02:00",
+  "scope": [
+    "forum-root-thinning",
+    "profile-about-rail",
+    "dm-voice-player",
+    "profile-about-text-utils"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/profile/components/AboutRail.jsx",
+    "app/forum/features/profile/utils/aboutText.js",
+    "app/forum/features/dm/components/DmVoicePlayer.jsx"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "profile.about-rail-ui",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/profile/components/AboutRail.jsx",
+      "status": "completed"
+    },
+    {
+      "domain": "profile.about-normalization",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/profile/utils/aboutText.js",
+      "status": "completed"
+    },
+    {
+      "domain": "dm.voice-player-ui",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/dm/components/DmVoicePlayer.jsx",
+      "status": "completed"
+    }
+  ],
+  "dependency_changes": {
+    "forum_dependency_audit": {
+      "files_scanned": 175,
+      "internal_edges": 251,
+      "cycles": 0,
+      "cross_domain_edges": 84,
+      "forum_root_imports": 1
+    },
+    "forum_root_delta": {
+      "local_component_definitions_removed": [
+        "AboutRail",
+        "DmVoicePlayer",
+        "normalizeAboutDraft",
+        "normalizeAboutForSave",
+        "ABOUT_LIMIT"
+      ],
+      "new_feature_imports": [
+        "features/profile/components/AboutRail",
+        "features/profile/utils/aboutText",
+        "features/dm/components/DmVoicePlayer"
+      ]
+    }
+  },
+  "detected_risks": [
+    "ForumRoot still contains high-complexity media/feed orchestration.",
+    "DmVoicePlayer retains RAF-driven progress behavior; audit flags expected raf imbalance pattern.",
+    "No backend/API/db changes in this phase."
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": {
+    "level": "low",
+    "notes": [
+      "No route payload or endpoint usage changed.",
+      "About save logic uses same API flow with moved local normalization utility."
+    ]
+  },
+  "storage_risk": {
+    "level": "low",
+    "notes": [
+      "No storage key changes.",
+      "Persist/restore semantics unchanged."
+    ]
+  },
+  "runtime_risk": {
+    "level": "low",
+    "notes": [
+      "Eslint passed for touched files.",
+      "Audit scripts passed.",
+      "Production build passed with existing unrelated no-img-element warnings."
+    ]
+  },
+  "notes": [
+    "Audit scripts executed: audit-forum-deps, audit-full-forum, audit-effects, audit-media, audit-heavy.",
+    "No server route/backend/db util modifications.",
+    "Circular dependency audit remains clean."
+  ],
+  "status": "pass"
+}

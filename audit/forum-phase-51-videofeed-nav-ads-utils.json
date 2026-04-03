@@ -1,0 +1,115 @@
+{
+  "phase": "51",
+  "timestamp": "2026-03-05T12:47:58+02:00",
+  "scope": [
+    "video feed controller decomposition",
+    "nav snapshot helper extraction",
+    "ads slot picker ownership extraction",
+    "feed thread-open helper extraction"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/media/utils/videoFeedBuilder.js",
+    "app/forum/features/media/utils/videoFeedScroll.js",
+    "app/forum/features/feed/utils/openThreadFromPost.js",
+    "app/forum/features/feed/utils/navState.js",
+    "app/forum/features/ui/utils/adsSlots.js"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "media",
+      "moved": [
+        "video feed list builder (dedupe/filter/sort/random/replyCount/star-prioritization)",
+        "video feed snap-to-anchor/first-card scroll util"
+      ],
+      "from": "app/forum/ForumRoot.jsx",
+      "to": [
+        "app/forum/features/media/utils/videoFeedBuilder.js",
+        "app/forum/features/media/utils/videoFeedScroll.js"
+      ]
+    },
+    {
+      "domain": "feed",
+      "moved": [
+        "open thread from video-feed post helper",
+        "nav capture/push snapshot helpers"
+      ],
+      "from": "app/forum/ForumRoot.jsx",
+      "to": [
+        "app/forum/features/feed/utils/openThreadFromPost.js",
+        "app/forum/features/feed/utils/navState.js"
+      ]
+    },
+    {
+      "domain": "ui",
+      "moved": [
+        "ad slot debug passthrough",
+        "ad slot URL picker with bucket/session anti-duplication semantics"
+      ],
+      "from": "app/forum/ForumRoot.jsx",
+      "to": [
+        "app/forum/features/ui/utils/adsSlots.js"
+      ]
+    }
+  ],
+  "dependency_changes": {
+    "ForumRoot_new_imports": [
+      "app/forum/features/media/utils/videoFeedBuilder.js",
+      "app/forum/features/media/utils/videoFeedScroll.js",
+      "app/forum/features/feed/utils/openThreadFromPost.js",
+      "app/forum/features/feed/utils/navState.js",
+      "app/forum/features/ui/utils/adsSlots.js"
+    ],
+    "ForumRoot_thin_wrappers": [
+      "buildAndSetVideoFeed",
+      "snapVideoFeedToFirstCardTop",
+      "openThreadFromPost",
+      "captureNavState",
+      "pushNavState",
+      "debugAdsSlots",
+      "pickAdUrlForSlot"
+    ]
+  },
+  "detected_risks": [
+    "ForumRoot still owns applyNavState/handleGlobalBack orchestration",
+    "effects audit continues to flag historical RAF/interval regions",
+    "quest subsystem still co-located in root"
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "low",
+  "storage_risk": {
+    "status": "low",
+    "notes": [
+      "no storage keys changed in this phase",
+      "video feed behavior remains state-compatible"
+    ]
+  },
+  "runtime_risk": {
+    "status": "low-medium",
+    "notes": [
+      "all moved logic was preserved via thin wrappers",
+      "full build and targeted lint passed",
+      "manual smoke checks still required for video feed open/refresh and ad slot rotation"
+    ]
+  },
+  "notes": {
+    "lint": "passed for touched/new files",
+    "build": "passed",
+    "audits": {
+      "tools/audit-forum-deps.js": "passed, cycles=0",
+      "tools/audit-full-forum.js": "passed",
+      "tools/audit-effects.js": "passed with known warnings",
+      "tools/audit-media.js": "passed",
+      "tools/audit-heavy.js": "passed, ForumRoot score=135"
+    },
+    "root_metrics": {
+      "ForumRoot_lines": 11085,
+      "ForumRoot_top_level_function_count": 14,
+      "ForumRoot_useEffect_count": 100
+    }
+  },
+  "status": "done"
+}
+

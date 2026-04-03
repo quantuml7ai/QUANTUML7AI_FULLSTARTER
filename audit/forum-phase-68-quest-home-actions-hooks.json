@@ -1,0 +1,129 @@
+{
+  "phase": "68-quest-home-actions-hooks",
+  "timestamp": "2026-03-06T01:14:57.3931931+02:00",
+  "scope": [
+    "quests view open/close orchestration extraction",
+    "home navigation action deduplication",
+    "forum root residual orchestration cleanup"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/quests/hooks/useQuestViewActions.js",
+    "app/forum/features/feed/hooks/useForumHomeAction.js"
+  ],
+  "new_files": [
+    "app/forum/features/quests/hooks/useQuestViewActions.js",
+    "app/forum/features/feed/hooks/useForumHomeAction.js"
+  ],
+  "moved_logic_domains": [
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/quests/hooks/useQuestViewActions.js",
+      "logic": [
+        "openQuests",
+        "closeQuests",
+        "quest-start anchor scroll fallback"
+      ]
+    },
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/feed/hooks/useForumHomeAction.js",
+      "logic": [
+        "home button reset flow",
+        "topic-start anchor restore"
+      ]
+    }
+  ],
+  "dependency_changes": {
+    "ForumRoot_imports_added": [
+      "./features/quests/hooks/useQuestViewActions",
+      "./features/feed/hooks/useForumHomeAction"
+    ],
+    "ForumRoot_runtime_changes": [
+      "both Home buttons now use shared goHome action",
+      "quest open/close flow now owned by quest hook"
+    ]
+  },
+  "detected_risks": [
+    {
+      "id": "quest-scroll-anchor-preservation",
+      "level": "low",
+      "detail": "Quest-start scroll behavior preserved with same two-RAF timing and fallback chain."
+    },
+    {
+      "id": "home-action-centralization",
+      "level": "low",
+      "detail": "Centralizing duplicated home handler lowers drift risk between desktop/mobile headers."
+    }
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": {
+    "level": "low",
+    "detail": "No API endpoint, payload, or route-handler changes."
+  },
+  "storage_risk": {
+    "level": "low",
+    "detail": "No storage keys or persistence semantics changed."
+  },
+  "runtime_risk": {
+    "level": "medium",
+    "detail": "Residual baseline warnings remain (autoplay/RAF/event cleanup hotspots), but no new failures."
+  },
+  "audit_runs": [
+    {
+      "command": "pnpm eslint app/forum/ForumRoot.jsx app/forum/features/quests/hooks/useQuestViewActions.js app/forum/features/feed/hooks/useForumHomeAction.js --no-cache",
+      "status": "passed"
+    },
+    {
+      "command": "node tools/audit-heavy.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "node tools/audit-media.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "node tools/audit-effects.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "node tools/audit-forum-deps.js",
+      "status": "passed",
+      "summary": {
+        "cycles": 0,
+        "cross_domain_edges": 102
+      }
+    },
+    {
+      "command": "node tools/audit-runtime-hotspots.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 135
+      }
+    },
+    {
+      "command": "node tools/audit-full-forum.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 99
+      }
+    },
+    {
+      "command": "node tools/audit-account-sync.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "pnpm build",
+      "status": "passed_with_warnings",
+      "warnings": [
+        "existing no-img-element warnings outside modified scope"
+      ]
+    }
+  ],
+  "notes": [
+    "Quest and home actions now have explicit feature ownership instead of root-level duplicated handlers.",
+    "ForumRoot remained behavior-compatible: quest tab opens/closes and home reset flow are unchanged functionally.",
+    "Next pass should target large residual quest-env/config and diagnostics/report orchestration clusters in ForumRoot."
+  ],
+  "status": "done"
+}

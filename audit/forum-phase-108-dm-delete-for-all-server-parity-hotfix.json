@@ -1,0 +1,49 @@
+{
+  "phase": "108",
+  "timestamp": "2026-03-10T08:35:00+02:00",
+  "scope": [
+    "dm delete-for-all server parity hotfix",
+    "dm dialogs last-message optimistic consistency"
+  ],
+  "touched_files": [
+    "app/forum/features/dm/hooks/useDmDeleteController.js",
+    "app/forum/features/ui/components/DmDeletePopover.jsx",
+    "app/forum/features/dm/components/DmDialogsPane.jsx",
+    "app/forum/features/dm/components/DmThreadLoadMore.jsx",
+    "app/forum/styles/modules/dmStyles.js",
+    "app/forum/styles/modules/qcoinStyles.js",
+    "app/forum/styles/ForumStyles.jsx"
+  ],
+  "new_files": [
+    "audit/forum-phase-108-dm-delete-for-all-server-parity-hotfix.json"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "dm/delete",
+      "change": "Confirm now accepts explicit checkbox value from popover, removing stale-state risk."
+    },
+    {
+      "domain": "dm/delete-server-contract",
+      "change": "Message delete payload expanded with messageId+id+with/userId for backend compatibility."
+    },
+    {
+      "domain": "dm/dialogs-view",
+      "change": "On local message delete, dialogs lastMessage is updated immediately if deleted message was previewed."
+    }
+  ],
+  "dependency_changes": [],
+  "detected_risks": [
+    "Fallback payload broadening may hide backend schema drift; API route still validates and rejects invalid deletes.",
+    "Local lastMessage replacement uses current thread snapshot and may differ from server order until refresh."
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "low",
+  "storage_risk": "low",
+  "runtime_risk": "low",
+  "notes": [
+    "Validation: pnpm eslint on touched dm files passed.",
+    "Validation: dependency audit passed (cycles: 0).",
+    "Note: full pnpm build currently fails in workspace due unrelated missing page modules (/ads, /academy)."
+  ],
+  "status": "completed"
+}

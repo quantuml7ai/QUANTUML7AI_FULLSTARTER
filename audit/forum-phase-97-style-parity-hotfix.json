@@ -1,0 +1,51 @@
+﻿{
+    "phase":  "phase-97-style-parity-hotfix",
+    "timestamp":  "2026-03-08T16:25:22.5267018+02:00",
+    "scope":  [
+                  "forum styles wiring",
+                  "layout provider wiring",
+                  "source parity with original zip"
+              ],
+    "touched_files":  [
+                          "app/forum/ForumRoot.jsx",
+                          "app/forum/ForumLayout.jsx",
+                          "app/forum/ForumProviders.jsx",
+                          "app/forum/styles/ForumStyles.jsx",
+                          "app/forum/styles/ForumFxStyles.jsx"
+                      ],
+    "new_files":  [
+
+                  ],
+    "moved_logic_domains":  [
+                                "style injection ownership -\u003e ForumLayout"
+                            ],
+    "dependency_changes":  [
+                               "ForumProviders no longer injects global styles/toast",
+                               "ForumLayout now owns Style+FX+toast render order"
+                           ],
+    "detected_risks":  [
+
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "none",
+    "storage_risk":  "none",
+    "runtime_risk":  "low",
+    "notes":  [
+                  "Restored both \u003cstyle jsx global\u003e blocks from original archive Forum.jsx with exact content match",
+                  "Removed duplicate style injection path"
+              ],
+    "verification":  {
+                         "build_warnings":  [
+                                                "@next/next/no-img-element existing warnings in non-forum files and ForumAds.js"
+                                            ],
+                         "build":  "pass",
+                         "style_parity":  {
+                                              "main_match":  true,
+                                              "fx_match":  true
+                                          },
+                         "lint":  "pass"
+                     },
+    "status":  "ok"
+}

@@ -1,0 +1,109 @@
+﻿{
+    "phase":  "94-five-clusters-runtime-layout",
+    "timestamp":  "2026-03-08T15:48:23.8769418+02:00",
+    "scope":  [
+                  "app/forum/ForumRoot.jsx",
+                  "app/forum/ForumLayout.jsx",
+                  "app/forum/features/feed/hooks/useForumDataRuntime.js",
+                  "app/forum/features/ui/hooks/useForumViewState.js",
+                  "app/forum/features/ui/hooks/useForumComposerSubmitRuntime.js",
+                  "app/forum/features/ui/hooks/useForumScreenFlowsRuntime.js"
+              ],
+    "touched_files":  [
+                          "app/forum/ForumRoot.jsx",
+                          "app/forum/ForumLayout.jsx",
+                          "app/forum/features/feed/hooks/useForumDataRuntime.js",
+                          "app/forum/features/ui/hooks/useForumViewState.js",
+                          "app/forum/features/ui/hooks/useForumComposerSubmitRuntime.js",
+                          "app/forum/features/ui/hooks/useForumScreenFlowsRuntime.js",
+                          "audit/forum-phase-94-big-five-pass-parity.json"
+                      ],
+    "new_files":  [
+                      "app/forum/ForumLayout.jsx",
+                      "app/forum/features/feed/hooks/useForumDataRuntime.js",
+                      "app/forum/features/ui/hooks/useForumViewState.js",
+                      "app/forum/features/ui/hooks/useForumComposerSubmitRuntime.js",
+                      "app/forum/features/ui/hooks/useForumScreenFlowsRuntime.js"
+                  ],
+    "moved_logic_domains":  [
+                                "forum data/snapshot/tombstones/sync orchestration -\u003e features/feed/hooks/useForumDataRuntime",
+                                "forum view state/pagination/sort/filter state -\u003e features/ui/hooks/useForumViewState",
+                                "composer submit + view tracking + emoji + attachment wiring -\u003e features/ui/hooks/useForumComposerSubmitRuntime",
+                                "video feed + inbox global + quest/nav/ads/windowing + dm delete copy wiring -\u003e features/ui/hooks/useForumScreenFlowsRuntime",
+                                "ForumRoot JSX render tree -\u003e app/forum/ForumLayout.jsx"
+                            ],
+    "dependency_changes":  {
+                               "forum_root_lines_before":  1599,
+                               "forum_root_lines_after":  1407,
+                               "forum_root_imports_before":  80,
+                               "forum_root_imports_after":  61,
+                               "deps_audit_files_scanned":  353,
+                               "deps_audit_internal_edges":  469,
+                               "deps_audit_cycles":  0,
+                               "deps_audit_cross_domain_edges":  111,
+                               "parity_hash_total":  82,
+                               "parity_hash_same":  81,
+                               "parity_hash_changed":  1,
+                               "parity_hash_missing":  0
+                           },
+    "detected_risks":  [
+                           "Residual non-blocking media/effects warnings remain in pre-existing non-forum hotspots and unchanged media modules.",
+                           "ForumRoot still orchestrates many runtime inputs although significantly reduced; further split into Providers/Controllers can continue in next passes."
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low",
+    "runtime_risk":  "low_to_medium",
+    "notes":  [
+                  "No API route/db util contract was changed in this pass; only client-side ownership move and wiring split.",
+                  "Parity audit against C:\\\\Users\\\\BETEP\\\\Desktop\\\\СЕЙЧАС — копия.zip passed (only expected Forum.jsx hash change).",
+                  "Lint/build/audit suite passed with only known pre-existing \u003cimg\u003e warnings."
+              ],
+    "status":  "passed",
+    "audit_runs":  [
+                       {
+                           "name":  "pnpm eslint app/forum --ext .js,.jsx --no-cache",
+                           "status":  "passed_with_known_warning",
+                           "detail":  "Known @next/next/no-img-element warning in ForumAds.js only."
+                       },
+                       {
+                           "name":  "pnpm build",
+                           "status":  "passed_with_known_warnings",
+                           "detail":  "Build succeeded; known pre-existing \u003cimg\u003e warnings outside refactor scope."
+                       },
+                       {
+                           "name":  "node tools/audit-forum-deps.js",
+                           "status":  "passed"
+                       },
+                       {
+                           "name":  "node tools/audit-runtime-hotspots.js",
+                           "status":  "passed_with_residuals"
+                       },
+                       {
+                           "name":  "node tools/audit-effects.js",
+                           "status":  "passed_with_residuals"
+                       },
+                       {
+                           "name":  "node tools/audit-heavy.js",
+                           "status":  "passed_with_residuals"
+                       },
+                       {
+                           "name":  "node tools/audit-media.js",
+                           "status":  "passed_with_residuals"
+                       },
+                       {
+                           "name":  "node tools/audit-full-forum.js",
+                           "status":  "passed_with_residuals"
+                       },
+                       {
+                           "name":  "node tools/audit-account-sync.js",
+                           "status":  "passed_with_residuals"
+                       },
+                       {
+                           "name":  "tools/audit-forum-functional-parity.ps1",
+                           "status":  "passed"
+                       }
+                   ]
+}

@@ -1,0 +1,50 @@
+{
+  "phase": "10-root-pass-02",
+  "timestamp": "2026-03-04T00:00:00Z",
+  "scope": [
+    "forum/root",
+    "forum/api-facade",
+    "forum/qcoin-hook"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "app/forum/services/forumApi.js",
+    "app/forum/features/qcoin/hooks/useQCoinLive.js",
+    "audit/forum-phase-10-root-pass-02.json"
+  ],
+  "moved_logic_domains": [
+    "forum client API facade moved out of ForumRoot into services/forumApi.js",
+    "qcoin live ticker hook moved out of ForumRoot into features/qcoin/hooks/useQCoinLive.js"
+  ],
+  "dependency_changes": {
+    "forum_root_imports": 1,
+    "cross_domain_edges": 54,
+    "cycles": 0
+  },
+  "detected_risks": [
+    "ForumRoot remains large and still contains media/feed/quest orchestration",
+    "QCoin hook still includes video-warmup side-effect and should be separated in next pass"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "low",
+  "storage_risk": "low",
+  "runtime_risk": "medium",
+  "notes": [
+    "No endpoint paths, headers, payload shapes, or response handling changed.",
+    "Build and targeted lint passed after extraction.",
+    "Forum import graph still has zero cycles."
+  ],
+  "status": "completed",
+  "validation": {
+    "lint_targeted": "passed",
+    "build": "passed",
+    "audits": [
+      "tools/audit-forum-deps.js",
+      "tools/audit-full-forum.js",
+      "tools/audit-effects.js",
+      "tools/audit-account-sync.js"
+    ]
+  }
+}

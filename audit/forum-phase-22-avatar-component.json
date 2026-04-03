@@ -1,0 +1,47 @@
+{
+  "phase": "22-avatar-component-extraction",
+  "timestamp": "2026-03-04T19:36:19Z",
+  "scope": [
+    "forum/profile",
+    "forum/root"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/profile/components/AvatarEmoji.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/profile/components/AvatarEmoji.jsx",
+    "audit/forum-phase-22-avatar-component.json"
+  ],
+  "moved_logic_domains": [
+    "profile avatar resolution/rendering ownership moved from ForumRoot to profile component module"
+  ],
+  "dependency_changes": {
+    "forum_root_imports": 1,
+    "cross_domain_edges": 62,
+    "cycles": 0
+  },
+  "detected_risks": [
+    "Avatar fallback semantics rely on shared profile cache shape remaining stable",
+    "ForumRoot still contains major orchestration logic"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "notes": [
+    "Call-sites preserved; only component ownership changed.",
+    "No route/backend changes in this phase."
+  ],
+  "status": "completed",
+  "validation": {
+    "lint_targeted": "passed",
+    "build": "passed",
+    "audits": [
+      "tools/audit-forum-deps.js",
+      "tools/audit-full-forum.js",
+      "tools/audit-effects.js",
+      "tools/audit-media.js"
+    ]
+  }
+}

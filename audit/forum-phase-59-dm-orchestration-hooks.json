@@ -1,0 +1,98 @@
+{
+  "phase": "phase-59-dm-orchestration-hooks",
+  "timestamp": "2026-03-05T15:31:00.000Z",
+  "scope": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/dm/hooks/useDmRepliesSeen.js",
+    "app/forum/features/dm/hooks/useDmUnreadState.js",
+    "app/forum/features/dm/hooks/useDmLoadLifecycle.js",
+    "app/forum/features/dm/hooks/useDmSeenObservers.js",
+    "app/forum/features/dm/hooks/useDmOpenEvents.js",
+    "app/forum/features/dm/hooks/useDmDeleteController.js"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/dm/hooks/useDmRepliesSeen.js",
+    "app/forum/features/dm/hooks/useDmUnreadState.js",
+    "app/forum/features/dm/hooks/useDmLoadLifecycle.js",
+    "app/forum/features/dm/hooks/useDmSeenObservers.js",
+    "app/forum/features/dm/hooks/useDmOpenEvents.js",
+    "app/forum/features/dm/hooks/useDmDeleteController.js"
+  ],
+  "new_files": [
+    "app/forum/features/dm/hooks/useDmRepliesSeen.js",
+    "app/forum/features/dm/hooks/useDmUnreadState.js",
+    "app/forum/features/dm/hooks/useDmLoadLifecycle.js",
+    "app/forum/features/dm/hooks/useDmSeenObservers.js",
+    "app/forum/features/dm/hooks/useDmOpenEvents.js",
+    "app/forum/features/dm/hooks/useDmDeleteController.js",
+    "audit/forum-phase-59-dm-orchestration-hooks.json"
+  ],
+  "moved_logic_domains": [
+    "features.dm.replies-seen-state-and-observer",
+    "features.dm.unread-count-and-deleted-map-reconcile",
+    "features.dm.dialog-thread-load-lifecycle-and-polling",
+    "features.dm.seen-observer-and-seen-api-reporting",
+    "features.dm.inbox-open-global-events",
+    "features.dm.delete-block-controller"
+  ],
+  "dependency_changes": {
+    "forumRoot_imports_added": [
+      "./features/dm/hooks/useDmRepliesSeen",
+      "./features/dm/hooks/useDmUnreadState",
+      "./features/dm/hooks/useDmLoadLifecycle",
+      "./features/dm/hooks/useDmSeenObservers",
+      "./features/dm/hooks/useDmOpenEvents",
+      "./features/dm/hooks/useDmDeleteController"
+    ],
+    "forum_deps": {
+      "cycles": 0,
+      "cross_domain_edges": 101,
+      "forum_root_imports": 1
+    }
+  },
+  "detected_risks": [
+    "ForumRoot remains high complexity due feed/media/sync orchestration still inside root",
+    "Known effects/media hotspots still exist and were not behavior-changed in this step",
+    "DM hooks rely on DOM selectors and observer semantics preserved from legacy root"
+  ],
+  "detected_cycles": {
+    "forum_deps_cycle_count": 0
+  },
+  "api_contract_risk": "none (same /api/dm/* request shapes and semantics)",
+  "storage_risk": "low (same DM keys and replies seen key semantics preserved)",
+  "runtime_risk": {
+    "forum_root_heavy_score": 75,
+    "forum_root_runtime_score": 221,
+    "forum_root_deep_score": 130,
+    "forum_root_lines": 9349,
+    "forum_root_useEffect_count": 70,
+    "forum_root_useCallback_count": 66,
+    "trend": {
+      "heavy_score_before_phase_59": 81,
+      "heavy_score_after_phase_59": 75,
+      "runtime_score_before_phase_59": 250,
+      "runtime_score_after_phase_59": 221
+    }
+  },
+  "notes": {
+    "audits_run": [
+      "pnpm eslint app/forum/ForumRoot.jsx app/forum/features/dm/hooks/useDmRepliesSeen.js app/forum/features/dm/hooks/useDmUnreadState.js app/forum/features/dm/hooks/useDmLoadLifecycle.js app/forum/features/dm/hooks/useDmSeenObservers.js app/forum/features/dm/hooks/useDmOpenEvents.js app/forum/features/dm/hooks/useDmDeleteController.js --no-cache",
+      "pnpm eslint app/forum --ext .js,.jsx --no-cache",
+      "node tools/audit-forum-deps.js",
+      "node tools/audit-full-forum.js",
+      "node tools/audit-effects.js",
+      "node tools/audit-media.js",
+      "node tools/audit-heavy.js",
+      "node tools/audit-account-sync.js",
+      "node tools/audit-runtime-hotspots.js",
+      "pnpm build"
+    ],
+    "status_summary": {
+      "lint": "ok (1 known warning in app/forum/ForumAds.js: @next/next/no-img-element)",
+      "build": "ok",
+      "forum_deps_cycles": 0
+    }
+  },
+  "status": "ok"
+}

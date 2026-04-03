@@ -1,0 +1,77 @@
+{
+  "phase": "phase-57-windowing-dm-media-hooks",
+  "timestamp": "2026-03-05T13:53:28.450Z",
+  "scope": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/dm/utils/dmLoaders.js",
+    "app/forum/features/media/hooks/useMediaPipelineController.js",
+    "app/forum/features/media/hooks/useVideoFeedWindowing.js"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/dm/utils/dmLoaders.js",
+    "app/forum/features/media/hooks/useMediaPipelineController.js",
+    "app/forum/features/media/hooks/useVideoFeedWindowing.js"
+  ],
+  "new_files": [
+    "app/forum/features/dm/utils/dmLoaders.js",
+    "app/forum/features/media/hooks/useMediaPipelineController.js",
+    "app/forum/features/media/hooks/useVideoFeedWindowing.js"
+  ],
+  "moved_logic_domains": [
+    "features.dm.loaders-caching-throttle",
+    "features.media.pipeline-progress-controller",
+    "features.media.video-feed-windowing-virtualization"
+  ],
+  "dependency_changes": {
+    "forumRoot_imports": {
+      "added": [
+        "./features/dm/utils/dmLoaders",
+        "./features/media/hooks/useMediaPipelineController",
+        "./features/media/hooks/useVideoFeedWindowing"
+      ]
+    }
+  },
+  "detected_risks": [
+    "DM dialogs/thread merge logic migrated into util flow; wrappers preserve existing callsites",
+    "Composer media progress/abort moved into hook; root still controls same UI and side effects",
+    "Video feed virtualization moved into dedicated hook; hard reset ref contract preserved"
+  ],
+  "detected_cycles": {
+    "forum_deps_cycle_count": 0
+  },
+  "api_contract_risk": "none (same /api/dm/dialogs and /api/dm/thread call semantics)",
+  "storage_risk": "none (storage keys untouched)",
+  "runtime_risk": {
+    "forum_root_heavy_score": 94,
+    "forum_root_runtime_score": 258,
+    "forum_root_lines": 10685,
+    "forum_root_useEffect_count": 106,
+    "forum_root_useCallback_count": 129,
+    "trend": {
+      "heavy_score_before_phase_57": 103,
+      "heavy_score_after_phase_57": 94,
+      "runtime_score_before_phase_57": 298,
+      "runtime_score_after_phase_57": 258
+    }
+  },
+  "notes": {
+    "audits_run": [
+      "pnpm eslint app/forum --ext .js,.jsx --no-cache",
+      "node tools/audit-forum-deps.js",
+      "node tools/audit-full-forum.js",
+      "node tools/audit-effects.js",
+      "node tools/audit-media.js",
+      "node tools/audit-heavy.js",
+      "node tools/audit-account-sync.js",
+      "node tools/audit-runtime-hotspots.js",
+      "pnpm build"
+    ],
+    "status_summary": {
+      "lint": "ok (1 warning: app/forum/ForumAds.js no-img)",
+      "build": "ok",
+      "forum_deps_cycles": 0
+    }
+  },
+  "status": "ok"
+}

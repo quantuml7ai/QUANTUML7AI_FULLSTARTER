@@ -1,0 +1,51 @@
+{
+  "phase": "27-feed-post-media-stack-component",
+  "timestamp": "2026-03-04T20:10:30Z",
+  "scope": [
+    "forum/features/feed",
+    "forum/root",
+    "forum/media-rendering"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/feed/components/PostMediaStack.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/feed/components/PostMediaStack.jsx",
+    "audit/forum-phase-27-post-media-stack-component.json"
+  ],
+  "moved_logic_domains": [
+    "Post media rendering stack (images/video/youtube/tiktok/audio) moved from PostCard in ForumRoot to features/feed/components/PostMediaStack"
+  ],
+  "dependency_changes": {
+    "forum_root_imports": 1,
+    "cross_domain_edges": 74,
+    "cycles": 0
+  },
+  "detected_risks": [
+    "PostMediaStack receives VideoMedia and QCastPlayer via props as temporary adapter; dedicated feed/media ownership boundary should be finalized in later phases",
+    "PostCard still owns media/text parsing and translation toggling orchestration"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "notes": [
+    "No route, backend handler, or db util contracts changed.",
+    "ForumRoot heavy score reduced from 369 to 351 in heavy audit after extraction.",
+    "ForumRoot deep risk score reduced from 523 to 502 after extraction.",
+    "UI behavior preserved through adapter props and same data attributes."
+  ],
+  "status": "completed",
+  "validation": {
+    "lint_targeted": "passed",
+    "build": "passed",
+    "audits": [
+      "tools/audit-forum-deps.js",
+      "tools/audit-full-forum.js",
+      "tools/audit-effects.js",
+      "tools/audit-media.js",
+      "tools/audit-heavy.js"
+    ]
+  }
+}

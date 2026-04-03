@@ -1,0 +1,100 @@
+﻿{
+    "phase":  "116-rails-controls-qcoin-progress",
+    "timestamp":  "2026-03-10T14:26:17.7168108+02:00",
+    "scope":  [
+                  "app/forum/features/media/hooks/useMediaPipelineController.js",
+                  "app/forum/features/ui/components/ForumSearchSortControls.jsx",
+                  "app/forum/features/ui/components/ForumControlNavIcon.jsx",
+                  "app/forum/features/profile/components/ForumVipControl.jsx",
+                  "app/forum/features/feed/components/ForumPostCard.jsx",
+                  "app/forum/features/feed/components/PostHeaderMeta.jsx",
+                  "app/forum/features/dm/components/DmThreadMessageRow.jsx",
+                  "app/forum/features/profile/components/ProfilePopover.jsx",
+                  "app/forum/ForumHeaderPanel.jsx",
+                  "app/forum/styles/ForumStyles.jsx",
+                  "components/QCoinDropFX.jsx"
+              ],
+    "touched_files":  [
+                          "app/forum/features/media/hooks/useMediaPipelineController.js",
+                          "app/forum/features/ui/components/ForumSearchSortControls.jsx",
+                          "app/forum/features/profile/components/ForumVipControl.jsx",
+                          "app/forum/features/feed/components/ForumPostCard.jsx",
+                          "app/forum/features/feed/components/PostHeaderMeta.jsx",
+                          "app/forum/features/dm/components/DmThreadMessageRow.jsx",
+                          "app/forum/features/profile/components/ProfilePopover.jsx",
+                          "app/forum/ForumHeaderPanel.jsx",
+                          "app/forum/styles/ForumStyles.jsx",
+                          "components/QCoinDropFX.jsx"
+                      ],
+    "new_files":  [
+                      "app/forum/features/ui/components/ForumControlNavIcon.jsx"
+                  ],
+    "moved_logic_domains":  [
+                                "ui-controls: search/sort icon rendering -\u003e ForumControlNavIcon",
+                                "styles: inline divider rails -\u003e shared pulsing rail classes",
+                                "qcoin-overlay: toast text fallback handling moved to local deterministic label resolver"
+                            ],
+    "dependency_changes":  {
+                               "imports_added":  [
+                                                     "app/forum/features/ui/components/ForumSearchSortControls.jsx -\u003e ./ForumControlNavIcon"
+                                                 ],
+                               "contracts_changed":  [
+
+                                                     ],
+                               "css_contracts_added":  [
+                                                           ".forumDividerRail",
+                                                           ".forumDividerRail--gold",
+                                                           ".forumDividerRail--cyan",
+                                                           ".forumControlBtn",
+                                                           ".forumControlBtn--active",
+                                                           ".forumVipControlBtn",
+                                                           ".forumVipControlText"
+                                                       ]
+                           },
+    "detected_risks":  [
+                           "ForumStyles has a large legacy surface; pulsing rail overrides may need visual fine-tune on some old blocks.",
+                           "Functional parity script still reports pre-existing API file hash drift in server files outside this pass scope."
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low",
+    "runtime_risk":  "low",
+    "notes":  [
+                  "Fixed media progress baseline lock at 2% by removing forced floor and separating idle-ready(100) vs active-pipeline(1).",
+                  "Removed emoji-dependent QCoin reward string wrappers to avoid cross-tab glyph/encoding inconsistency.",
+                  "Added animated search/sort controls and VIP phase text (Go-\u003eVIP+ / I-\u003eVIP+).",
+                  "Converted key forum separators to shared pulsing rails with gold accent and kept DM rails animated."
+              ],
+    "audits":  {
+                   "build":  {
+                                 "command":  "pnpm build",
+                                 "status":  "pass-with-warnings",
+                                 "warnings":  [
+                                                  "next/no-img-element warnings outside current scope"
+                                              ]
+                             },
+                   "heavy":  {
+                                 "command":  "node tools/audit-heavy.js",
+                                 "status":  "pass",
+                                 "report":  "heavy-audit.report.json"
+                             },
+                   "media":  {
+                                 "command":  "node tools/audit-media.js",
+                                 "status":  "pass",
+                                 "report":  "media-audit.report.json"
+                             },
+                   "effects":  {
+                                   "command":  "node tools/audit-effects.js",
+                                   "status":  "pass",
+                                   "report":  "effects-leak.report.json"
+                               },
+                   "parity":  {
+                                  "command":  "powershell -ExecutionPolicy Bypass -File tools/audit-forum-functional-parity.ps1",
+                                  "status":  "warning",
+                                  "report":  "audit/forum-functional-parity.report.json"
+                              }
+               },
+    "status":  "done-with-followup-checks"
+}

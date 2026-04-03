@@ -1,0 +1,1825 @@
+﻿# PROJECT_TREE.md
+
+> Обязательное правило сопровождения:
+> Любое изменение структуры проекта обязательно должно сопровождаться обновлением этого файла.
+> Это включает: добавление файлов, удаление файлов, переименование, перенос между папками и изменение назначения файла.
+> Если меняются связи файла с другими файлами настолько, что комментарий устаревает, комментарий тоже обязан быть обновлен.
+> Рекомендуемый способ обновления: `node tools/generate-project-tree.js`.
+
+Сгенерировано автоматически: 2026-04-03T07:18:25.540Z
+Файлов в реестре: 1555
+
+## Исключенные каталоги
+- `.git/` — служебные внутренние данные Git, не часть прикладного дерева проекта.
+- `.next/` — генерируемые артефакты Next.js сборки.
+- `node_modules/` — внешние зависимости менеджера пакетов, не авторский код репозитория.
+
+## Охват
+
+Этот файл описывает весь авторский репозиторий проекта, а не только форумный домен.
+Включены все прикладные страницы, layouts, API-маршруты, клиентские компоненты, серверные и инфраструктурные модули, public-ассеты, audit-артефакты и корневые конфиги.
+
+- `.env.local` — 1 файлов
+- `.env.local.example` — 1 файлов
+- `.eslintrc.json` — 1 файлов
+- `.gitignore` — 1 файлов
+- `account-sync-audit.report.json` — 1 файлов
+- `ad-runtime.audit.report.json` — 1 файлов
+- `AGENTS.md` — 1 файлов
+- `app` — 375 файлов
+- `audit` — 170 файлов
+- `auth-bus.audit.report.json` — 1 файлов
+- `components` — 23 файлов
+- `deep-audit.report.json` — 1 файлов
+- `effects-leak.report.json` — 1 файлов
+- `forum-deps-audit.report.json` — 1 файлов
+- `forum-diag.jsonl` — 1 файлов
+- `forum-startup.audit.report.json` — 1 файлов
+- `heapsnapshot-analysis.report.json` — 1 файлов
+- `heavy-audit.report.json` — 1 файлов
+- `jsconfig.json` — 1 файлов
+- `lib` — 13 файлов
+- `media-audit.report.json` — 1 файлов
+- `media-budget.audit.report.json` — 1 файлов
+- `next-env.d.ts` — 1 файлов
+- `next.config.mjs` — 1 файлов
+- `package.json` — 1 файлов
+- `pnpm-lock.yaml` — 1 файлов
+- `pnpm-workspace.yaml` — 1 файлов
+- `PROJECT_DEPENDENCIES.md` — 1 файлов
+- `PROJECT_OWNERSHIP.md` — 1 файлов
+- `PROJECT_RISKS.md` — 1 файлов
+- `PROJECT_ROUTES.md` — 1 файлов
+- `PROJECT_TREE.md` — 1 файлов
+- `public` — 920 файлов
+- `README.md` — 1 файлов
+- `runtime-hotspots.report.json` — 1 файлов
+- `tools` — 24 файлов
+
+## Дерево проекта
+
+- app/ — Основной каталог Next.js App Router: страницы, layout и API.
+  - about/ — Страница/ресурсы раздела About.
+    - layout.js — Next.js layout для сегмента /about. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /about. Связи: импортирует app/ads.js, components/i18n.js.
+  - academy/ — Страницы и блоки академии.
+    - AcademyExamBlock.js — JS-файл Academy Exam Block сегмента academy. Связи: импортирует components/i18n.js; используется в app/academy/page.js.
+    - layout.js — Next.js layout для сегмента /academy. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /academy. Связи: импортирует app/academy/AcademyExamBlock.js, app/ads.js, components/i18n.js.
+  - ads/ — Страницы и модули рекламного раздела.
+    - GeoTargetingPicker.jsx — JSX-файл Geo Targeting Picker сегмента ads. Связи: импортирует components/i18n.js, lib/geo/countries.js, lib/geo/regions.js; используется в app/ads/home.js.
+    - home.js — JS-файл home сегмента ads. Связи: импортирует app/ads/GeoTargetingPicker.jsx, components/i18n.js; используется в app/ads/page.jsx.
+    - layout.js — Next.js layout для сегмента /ads. Связи: импортирует lib/metadataCache.js.
+    - page.jsx — JSX-файл page сегмента ads. Связи: импортирует app/ads/home.js, components/i18n.js.
+  - api/ — Серверные API-маршруты и их внутренние хелперы.
+    - _diag/ — Служебная диагностика API.
+      - route.js — API-route _diag для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - academy/ — Каталог academy.
+      - exam/ — Каталог exam.
+        - route.js — API-route academy/exam для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js.
+    - ads/ — Каталог ads.
+      - route.js — API-route ads для серверной логики Next.js. Связи: импортирует lib/adsCore.js.
+    - aiquota/ — Каталог aiquota.
+      - usage/ — Каталог usage.
+        - route.js — API-route aiquota/usage для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - battlecoin/ — Каталог battlecoin.
+      - order/ — Каталог order.
+        - route.js — API-route battlecoin/order для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js.
+      - state/ — Каталог state.
+        - route.js — API-route battlecoin/state для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js.
+    - brain/ — Каталог brain.
+      - analyze/ — Каталог analyze.
+        - route.js — API-route brain/analyze для серверной логики Next.js. Связи: импортирует lib/brain.js, lib/databroker.js.
+    - coins/ — Каталог coins.
+      - route.js — API-route coins для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - contact/ — Каталог contact.
+      - route.js — API-route contact для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - crypto-news/ — Каталог crypto-news.
+      - route.js — API-route crypto-news для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - deep-translate/ — Каталог deep-translate.
+      - route.js — API-route deep-translate для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - dm/ — Серверный контур личных сообщений.
+      - block/ — Каталог block.
+        - route.js — API-route dm/block для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js.
+      - delete/ — Каталог delete.
+        - route.js — API-route dm/delete для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js.
+      - dialogs/ — Каталог dialogs.
+        - route.js — API-route dm/dialogs для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js.
+      - seen/ — Каталог seen.
+        - route.js — API-route dm/seen для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js.
+      - send/ — Каталог send.
+        - route.js — API-route dm/send для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js.
+      - thread/ — Каталог thread.
+        - route.js — API-route dm/thread для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js.
+      - unblock/ — Каталог unblock.
+        - route.js — API-route dm/unblock для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js.
+      - _db.js — Внутренний db для API-сегмента dm. Связи: импортирует app/api/dm/_utils.js; используется в app/api/dm/block/route.js, app/api/dm/delete/route.js, app/api/dm/dialogs/route.js.
+      - _utils.js — Внутренний utils для API-сегмента dm. Связи: импортирует app/api/profile/_identity.js; используется в app/api/dm/_db.js, app/api/dm/block/route.js, app/api/dm/delete/route.js.
+    - forum/ — Серверный контур форума: снапшоты, мутации, модерация, upload.
+      - admin/ — Каталог admin.
+        - banUser/ — Каталог banUser.
+          - route.js — API-route forum/admin/banUser для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+        - deletePost/ — Каталог deletePost.
+          - route.js — API-route forum/admin/deletePost для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+        - deleteTopic/ — Каталог deleteTopic.
+          - route.js — API-route forum/admin/deleteTopic для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+        - unbanUser/ — Каталог unbanUser.
+          - route.js — API-route forum/admin/unbanUser для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+        - verify/ — Каталог verify.
+          - route.js — API-route forum/admin/verify для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js.
+      - blobUploadUrl/ — Каталог blobUploadUrl.
+        - route.js — API-route forum/blobUploadUrl для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/profile/_identity.js.
+      - events/ — Каталог events.
+        - stream/ — Каталог stream.
+          - route.js — API-route forum/events/stream для серверной логики Next.js. Связи: импортирует app/api/forum/_bus.js, app/api/forum/_db.js.
+      - mediaLock/ — Каталог mediaLock.
+        - route.js — API-route forum/mediaLock для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+      - moderate/ — Каталог moderate.
+        - route.js — API-route forum/moderate для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - mutate/ — Каталог mutate.
+        - route.js — API-route forum/mutate для серверной логики Next.js. Связи: импортирует app/api/forum/_bus.js, app/api/forum/_db.js, app/api/forum/_utils.js.
+      - own/ — Каталог own.
+        - route.js — API-route forum/own для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+      - post-by-id/ — Каталог post-by-id.
+        - route.js — API-route forum/post-by-id для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+      - post-chain/ — Каталог post-chain.
+        - route.js — API-route forum/post-chain для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+      - post-locate/ — Каталог post-locate.
+        - route.js — API-route forum/post-locate для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+      - post-meta/ — Каталог post-meta.
+        - route.js — API-route forum/post-meta для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+      - report/ — Каталог report.
+        - route.js — API-route forum/report для серверной логики Next.js. Связи: импортирует app/api/forum/_bus.js, app/api/forum/_db.js, app/api/forum/_utils.js.
+      - snapshot/ — Каталог snapshot.
+        - route.js — API-route forum/snapshot для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js.
+      - subs/ — Каталог subs.
+        - count/ — Каталог count.
+          - route.js — API-route forum/subs/count для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+        - list/ — Каталог list.
+          - route.js — API-route forum/subs/list для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+        - my-count/ — Каталог my-count.
+          - route.js — API-route forum/subs/my-count для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+        - toggle/ — Каталог toggle.
+          - route.js — API-route forum/subs/toggle для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+      - upload/ — Каталог upload.
+        - route.js — API-route forum/upload для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js.
+      - uploadAudio/ — Каталог uploadAudio.
+        - route.js — API-route forum/uploadAudio для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/profile/_identity.js.
+      - uploadVideo/ — Каталог uploadVideo.
+        - route.js — API-route forum/uploadVideo для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - vip/ — Каталог vip.
+        - batch/ — Каталог batch.
+          - route.js — API-route forum/vip/batch для серверной логики Next.js. Связи: импортирует lib/subscriptions.js.
+      - wa-preview/ — Каталог wa-preview.
+        - route.js — API-route forum/wa-preview для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - _bus.js — Внутренний bus для API-сегмента forum. Связи: используется в app/api/forum/events/stream/route.js, app/api/forum/mutate/route.js, app/api/forum/report/route.js.
+      - _db.js — Внутренний db для API-сегмента forum. Связи: импортирует app/api/forum/_utils.js; используется в app/api/battlecoin/order/route.js, app/api/battlecoin/state/route.js, app/api/forum/admin/banUser/route.js.
+      - _utils.js — Внутренний utils для API-сегмента forum. Связи: используется в app/api/academy/exam/route.js, app/api/forum/_db.js, app/api/forum/admin/banUser/route.js.
+    - market/ — Каталог market.
+      - summary/ — Каталог summary.
+        - route.js — API-route market/summary для серверной логики Next.js. Связи: импортирует lib/brain.js, lib/databroker.js.
+    - pay/ — Каталог pay.
+      - create/ — Каталог create.
+        - route.js — API-route pay/create для серверной логики Next.js. Связи: импортирует lib/adsCore.js.
+      - webhook/ — Каталог webhook.
+        - route.js — API-route pay/webhook для серверной логики Next.js. Связи: импортирует lib/adsCore.js, lib/subscriptions.js.
+    - payments/ — Каталог payments.
+      - demo/ — Каталог demo.
+        - complete/ — Каталог complete.
+          - route.js — API-route payments/demo/complete для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - now/ — Каталог now.
+        - create/ — Каталог create.
+          - route.js — API-route payments/now/create для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - webhook/ — Каталог webhook.
+          - route.js — API-route payments/now/webhook для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - profile/ — Серверные маршруты профиля, ника и аватара.
+      - batch/ — Каталог batch.
+        - route.js — API-route profile/batch для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/profile/_identity.js.
+      - check-nick/ — Каталог check-nick.
+        - route.js — API-route profile/check-nick для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+      - get-about/ — Каталог get-about.
+        - route.js — API-route profile/get-about для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+      - get-profile/ — Каталог get-profile.
+        - route.js — API-route profile/get-profile для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+      - save-nick/ — Каталог save-nick.
+        - route.js — API-route profile/save-nick для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+      - set-about/ — Каталог set-about.
+        - route.js — API-route profile/set-about для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+      - upload-avatar/ — Каталог upload-avatar.
+        - route.js — API-route profile/upload-avatar для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - user-popover/ — Каталог user-popover.
+        - route.js — API-route profile/user-popover для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+      - _identity.js — Внутренний identity для API-сегмента profile. Связи: используется в app/api/dm/_utils.js, app/api/forum/blobUploadUrl/route.js, app/api/forum/mutate/route.js.
+    - qcoin/ — Серверные маршруты QCoin.
+      - drop/ — Каталог drop.
+        - route.js — API-route qcoin/drop для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js.
+      - get/ — Каталог get.
+        - route.js — API-route qcoin/get для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js.
+      - heartbeat/ — Каталог heartbeat.
+        - route.js — API-route qcoin/heartbeat для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js.
+    - quest/ — Серверные маршруты квестов.
+      - env/ — Каталог env.
+        - route.js — API-route quest/env для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - progress/ — Каталог progress.
+        - route.js — API-route quest/progress для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js.
+      - status/ — Каталог status.
+        - route.js — API-route quest/status для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js.
+    - quotes/ — Каталог quotes.
+      - route.js — API-route quotes для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - referral/ — Каталог referral.
+      - hit/ — Каталог hit.
+        - route.js — API-route referral/hit для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/subscriptions.js.
+      - link/ — Каталог link.
+        - route.js — API-route referral/link для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js.
+    - subscription/ — Каталог subscription.
+      - status/ — Каталог status.
+        - route.js — API-route subscription/status для серверной логики Next.js. Связи: импортирует lib/subscriptions.js.
+    - telegram/ — Каталог telegram.
+      - link/ — Каталог link.
+        - confirm/ — Каталог confirm.
+          - route.js — API-route telegram/link/confirm для серверной логики Next.js. Связи: импортирует lib/redis.js.
+        - resolve/ — Каталог resolve.
+          - route.js — API-route telegram/link/resolve для серверной логики Next.js. Связи: импортирует lib/redis.js.
+        - start/ — Каталог start.
+          - route.js — API-route telegram/link/start для серверной логики Next.js. Связи: импортирует lib/redis.js.
+        - status/ — Каталог status.
+          - route.js — API-route telegram/link/status для серверной логики Next.js. Связи: импортирует lib/redis.js.
+    - tma/ — Каталог tma.
+      - auto/ — Каталог auto.
+        - route.js — API-route tma/auto для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - components/ — Локальные компоненты верхнего уровня внутри app.
+    - CryptoNewsLens.jsx — JSX-файл Crypto News Lens сегмента components. Связи: импортирует components/i18n.js; используется в app/page.js.
+  - contact/ — Страница контактов.
+    - page.js — Next.js страница маршрута /contact. Связи: импортирует components/i18n.js.
+  - exchange/ — Страницы/виджеты exchange-раздела.
+    - BattleCoin.jsx — JSX-файл Battle Coin сегмента exchange. Связи: импортирует components/i18n.js; используется в app/exchange/page.js.
+    - layout.js — Next.js layout для сегмента /exchange. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /exchange. Связи: импортирует app/ads.js, app/exchange/BattleCoin.jsx, components/i18n.js.
+  - forum/ — Домен форума и мессенджера.
+    - events/ — Клиентские event-хелперы форума.
+      - bus.js — JS-файл bus домена форума. Связи: используется в forum/features/feed/utils/postEvents.js.
+    - features/ — Feature-oriented слой форума.
+      - diagnostics/ — Подсистема диагностики и perf-наблюдения.
+        - hooks/ — Каталог слоя хуки внутри feature diagnostics.
+          - useForumDiagnostics.js — Хук use Forum Diagnostics домена диагностики. Связи: импортирует forum/features/diagnostics/utils/emitPolicy.js; используется в forum/ForumRoot.jsx.
+        - utils/ — Каталог слоя утилиты внутри feature diagnostics.
+          - emitPolicy.js — Утилита emit Policy домена диагностики. Связи: используется в forum/features/diagnostics/hooks/useForumDiagnostics.js.
+      - dm/ — Подсистема Quantum Messenger / DM.
+        - components/ — Каталог слоя компоненты внутри feature dm.
+          - DmDialogRow.jsx — UI-компонент Dm Dialog Row домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/mediaParsing.js, forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx; используется в forum/features/dm/components/DmDialogsPane.jsx.
+          - DmDialogsPane.jsx — UI-компонент Dm Dialogs Pane домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmDialogRow.jsx; используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmMessagesPane.jsx — UI-компонент Dm Messages Pane домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmDialogsPane.jsx, forum/features/dm/components/DmThreadAlerts.jsx, forum/features/dm/components/DmThreadHeader.jsx; используется в forum/features/dm/components/InboxPane.jsx.
+          - DmThreadAlerts.jsx — UI-компонент Dm Thread Alerts домена DM/мессенджера. Связи: используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmThreadHeader.jsx — UI-компонент Dm Thread Header домена DM/мессенджера. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, forum/features/profile/hooks/useVipFlag.js; используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmThreadLoadMore.jsx — UI-компонент Dm Thread Load More домена DM/мессенджера. Связи: используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmThreadMessageRow.jsx — UI-компонент Dm Thread Message Row домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmVoicePlayer.jsx, forum/features/dm/utils/mediaParsing.js, forum/features/media/utils/mediaLifecycleRuntime.js; используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmVoicePlayer.jsx — UI-компонент Dm Voice Player домена DM/мессенджера. Связи: используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/ui/components/ComposerCore.jsx.
+          - InboxPane.jsx — UI-компонент Inbox Pane домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmMessagesPane.jsx, forum/features/dm/components/InboxRepliesPane.jsx, forum/features/dm/components/InboxTabsHeader.jsx; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+          - InboxRepliesPane.jsx — UI-компонент Inbox Replies Pane домена DM/мессенджера. Связи: используется в forum/features/dm/components/InboxPane.jsx.
+          - InboxTabsHeader.jsx — UI-компонент Inbox Tabs Header домена DM/мессенджера. Связи: используется в forum/features/dm/components/InboxPane.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature dm.
+          - useDmDeleteController.js — Хук use Dm Delete Controller домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmDeleteCopy.js — Хук use Dm Delete Copy домена DM/мессенджера. Связи: используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useDmLoadLifecycle.js — Хук use Dm Load Lifecycle домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmLocalCache.js — Хук use Dm Local Cache домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmOpenEvents.js — Хук use Dm Open Events домена DM/мессенджера. Связи: используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useDmRepliesSeen.js — Хук use Dm Replies Seen домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmSeenObservers.js — Хук use Dm Seen Observers домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmStorageMaps.js — Хук use Dm Storage Maps домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/deletedMap.js; используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmThreadAutoScroll.js — Хук use Dm Thread Auto Scroll домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmUnreadState.js — Хук use Dm Unread State домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmVipBatchProbe.js — Хук use Dm Vip Batch Probe домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useForumDmRuntime.js — Хук use Forum Dm Runtime домена DM/мессенджера. Связи: импортирует forum/features/dm/hooks/useDmDeleteController.js, forum/features/dm/hooks/useDmLoadLifecycle.js, forum/features/dm/hooks/useDmLocalCache.js; используется в forum/ForumRoot.jsx.
+          - useInboxRepliesModel.js — Хук use Inbox Replies Model домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useOpenInboxGlobalAction.js — Хук use Open Inbox Global Action домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/openInboxGlobal.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+        - services/ — Каталог слоя сервисы внутри feature dm.
+          - sendDmComposerMessage.js — Сервис send Dm Composer Message домена DM/мессенджера. Связи: используется в forum/features/feed/hooks/useForumCreatePostAction.js.
+        - utils/ — Каталог слоя утилиты внутри feature dm.
+          - alignInboxStartUnderTabs.js — Утилита align Inbox Start Under Tabs домена DM/мессенджера. Связи: используется в forum/features/feed/hooks/useForumNavigationActions.js.
+          - deletedMap.js — Утилита deleted Map домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useDmStorageMaps.js.
+          - dmLoaders.js — Утилита dm Loaders домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - mediaParsing.js — Утилита media Parsing домена DM/мессенджера. Связи: используется в forum/ForumRoot.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadMessageRow.jsx.
+          - openInboxGlobal.js — Утилита open Inbox Global домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useOpenInboxGlobalAction.js.
+      - feed/ — Подсистема ленты, тем, постов и композера.
+        - components/ — Каталог слоя компоненты внутри feature feed.
+          - CreateTopicCard.jsx — UI-компонент Create Topic Card домена ленты/тем/постов. Связи: используется в forum/features/ui/components/MainForumActionCluster.jsx, forum/features/ui/components/ThreadForumActionCluster.jsx.
+          - ForumPostCard.jsx — UI-компонент Forum Post Card домена ленты/тем/постов. Связи: импортирует forum/features/feed/components/PostActionBar.jsx, forum/features/feed/components/PostBodyContent.jsx, forum/features/feed/components/PostFxLayer.jsx; используется в forum/features/feed/components/PostCardBridge.jsx.
+          - LoadMoreSentinel.jsx — UI-компонент Load More Sentinel домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx.
+          - PostActionBar.jsx — UI-компонент Post Action Bar домена ленты/тем/постов. Связи: импортирует forum/shared/components/HydrateText.jsx; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostBodyContent.jsx — UI-компонент Post Body Content домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostCardBridge.jsx — UI-компонент Post Card Bridge домена ленты/тем/постов. Связи: импортирует forum/features/feed/components/ForumPostCard.jsx, forum/features/media/utils/mediaLifecycleRuntime.js, forum/shared/utils/richText.js; используется в forum/ForumRoot.jsx.
+          - PostFxLayer.jsx — UI-компонент Post Fx Layer домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostHeaderMeta.jsx — UI-компонент Post Header Meta домена ленты/тем/постов. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, forum/features/profile/utils/profileCache.js; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostMediaStack.jsx — UI-компонент Post Media Stack домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostOwnerMenu.jsx — UI-компонент Post Owner Menu домена ленты/тем/постов. Связи: импортирует forum/features/feed/hooks/usePostOwnerActions.js, forum/features/ui/components/ConfirmDeleteOverlay.jsx; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostTranslateToggle.jsx — UI-компонент Post Translate Toggle домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PublishedPostsPane.jsx — UI-компонент Published Posts Pane домена ленты/тем/постов. Связи: используется в forum/features/dm/components/InboxPane.jsx.
+          - ThreadRepliesPane.jsx — UI-компонент Thread Replies Pane домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ThreadSection.jsx.
+          - ThreadSection.jsx — UI-компонент Thread Section домена ленты/тем/постов. Связи: импортирует forum/ForumHeaderPanel.jsx, forum/features/feed/components/ThreadRepliesPane.jsx, forum/features/feed/components/ThreadTitle.jsx; используется в forum/ForumLayout.jsx.
+          - ThreadTitle.jsx — UI-компонент Thread Title домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ThreadSection.jsx.
+          - TopicItem.jsx — UI-компонент Topic Item домена ленты/тем/постов. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, forum/features/profile/hooks/useVipFlag.js; используется в forum/ForumRoot.jsx.
+          - TopicsOrPanelsSwitch.jsx — UI-компонент Topics Or Panels Switch домена ленты/тем/постов. Связи: импортирует forum/features/dm/components/InboxPane.jsx, forum/features/feed/components/TopicsPane.jsx, forum/features/feed/components/UserPostsPane.jsx; используется в forum/features/feed/components/TopicsSection.jsx.
+          - TopicsPane.jsx — UI-компонент Topics Pane домена ленты/тем/постов. Связи: используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+          - TopicsSection.jsx — UI-компонент Topics Section домена ленты/тем/постов. Связи: импортирует forum/ForumHeaderPanel.jsx, forum/features/feed/components/TopicsOrPanelsSwitch.jsx, forum/features/ui/components/MainForumActionCluster.jsx; используется в forum/ForumLayout.jsx.
+          - UserPostsPane.jsx — UI-компонент User Posts Pane домена ленты/тем/постов. Связи: используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+        - constants/ — Каталог слоя константы внутри feature feed.
+          - deeplink.js — Константа deeplink домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumDeepLinkFlow.js.
+        - docs/ — Каталог слоя документация внутри feature feed.
+          - phase-03-feed.md — Документ phase 03 feed домена ленты/тем/постов. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - hooks/ — Каталог слоя хуки внутри feature feed.
+          - useForumCreatePostAction.js — Хук use Forum Create Post Action домена ленты/тем/постов. Связи: импортирует forum/features/dm/services/sendDmComposerMessage.js, forum/features/media/services/resolveComposerMediaPayload.js; используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
+          - useForumCreateTopicAction.js — Хук use Forum Create Topic Action домена ленты/тем/постов. Связи: используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
+          - useForumDataRuntime.js — Хук use Forum Data Runtime домена ленты/тем/постов. Связи: импортирует forum/features/feed/hooks/useForumMutationQueue.js, forum/features/feed/hooks/useForumSseBridge.js, forum/features/feed/hooks/useForumSyncLoop.js; используется в forum/ForumRoot.jsx.
+          - useForumDeepLinkFlow.js — Хук use Forum Deep Link Flow домена ленты/тем/постов. Связи: импортирует forum/features/feed/constants/deeplink.js, forum/shared/hooks/useEvent.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js.
+          - useForumFeedRuntime.js — Хук use Forum Feed Runtime домена ленты/тем/постов. Связи: импортирует forum/features/feed/hooks/useForumDeepLinkFlow.js, forum/features/feed/hooks/useThreadOpenNavigation.js, forum/features/feed/hooks/useThreadPostsModel.js; используется в forum/ForumRoot.jsx.
+          - useForumHomeAction.js — Хук use Forum Home Action домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumNavigationRuntime.js.
+          - useForumMutationActions.js — Хук use Forum Mutation Actions домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx.
+          - useForumMutationQueue.js — Хук use Forum Mutation Queue домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/snapshotTransforms.js; используется в forum/features/feed/hooks/useForumDataRuntime.js.
+          - useForumNavigationActions.js — Хук use Forum Navigation Actions домена ленты/тем/постов. Связи: импортирует forum/features/dm/utils/alignInboxStartUnderTabs.js, forum/features/feed/utils/navOrchestrator.js, forum/features/feed/utils/navState.js; используется в forum/features/feed/hooks/useForumNavigationRuntime.js.
+          - useForumNavigationRuntime.js — Хук use Forum Navigation Runtime домена ленты/тем/постов. Связи: импортирует forum/features/feed/hooks/useForumHomeAction.js, forum/features/feed/hooks/useForumNavigationActions.js, forum/features/feed/hooks/useNavStateSnapshot.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useForumSseBridge.js — Хук use Forum Sse Bridge домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumDataRuntime.js.
+          - useForumSyncLoop.js — Хук use Forum Sync Loop домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumDataRuntime.js.
+          - useForumViewTracking.js — Хук use Forum View Tracking домена ленты/тем/постов. Связи: используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
+          - useNavStateSnapshot.js — Хук use Nav State Snapshot домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumNavigationRuntime.js.
+          - usePostFx.js — Хук use Post Fx домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
+          - usePostMediaTextModel.js — Хук use Post Media Text Model домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
+          - usePostOwnerActions.js — Хук use Post Owner Actions домена ленты/тем/постов. Связи: используется в forum/features/feed/components/PostOwnerMenu.jsx.
+          - usePostParentReplyNav.js — Хук use Post Parent Reply Nav домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
+          - usePostTranslation.js — Хук use Post Translation домена ленты/тем/постов. Связи: импортирует forum/shared/api/translate.js; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - usePublishedPostsModel.js — Хук use Published Posts Model домена ленты/тем/постов. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useThreadOpenNavigation.js — Хук use Thread Open Navigation домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumFeedRuntime.js.
+          - useThreadPostsModel.js — Хук use Thread Posts Model домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumFeedRuntime.js.
+          - useTopicDiscoveryModel.js — Хук use Topic Discovery Model домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumFeedRuntime.js.
+          - useUserPostsBranchModel.js — Хук use User Posts Branch Model домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx.
+        - services/ — Каталог слоя сервисы внутри feature feed.
+          - rateLimiter.js — Сервис rate Limiter домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx.
+        - utils/ — Каталог слоя утилиты внутри feature feed.
+          - navOrchestrator.js — Утилита nav Orchestrator домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumNavigationActions.js.
+          - navScroll.js — Утилита nav Scroll домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx.
+          - navState.js — Утилита nav State домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumNavigationActions.js.
+          - openThreadFromPost.js — Утилита open Thread From Post домена ленты/тем/постов. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - postEvents.js — Утилита post Events домена ленты/тем/постов. Связи: импортирует forum/events/bus.js; используется в forum/ForumRoot.jsx.
+          - postFocus.js — Утилита post Focus домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumFeedRuntime.js.
+          - signatures.js — Утилита signatures домена ленты/тем/постов. Связи: используется в forum/features/feed/utils/snapshotTransforms.js.
+          - snapshotTransforms.js — Утилита snapshot Transforms домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/signatures.js; используется в forum/features/feed/hooks/useForumDataRuntime.js, forum/features/feed/hooks/useForumMutationQueue.js.
+      - media/ — Подсистема медиа, плееров и preview.
+        - components/ — Каталог слоя компоненты внутри feature media.
+          - qcast/ — Каталог qcast внутри feature media.
+            - QCastIcons.jsx — UI-компонент QCast Icons домена медиа. Связи: используется в forum/features/media/components/QCastPlayer.jsx.
+          - ComposerAttachmentPreview.jsx — UI-компонент Composer Attachment Preview домена медиа. Связи: импортирует forum/features/media/utils/mediaLifecycleRuntime.js; используется в forum/features/ui/components/ComposerCore.jsx.
+          - LivePreview.jsx — UI-компонент Live Preview домена медиа. Связи: используется в forum/features/media/components/VideoOverlay.jsx.
+          - QCastPlayer.jsx — UI-компонент QCast Player домена медиа. Связи: импортирует forum/features/media/components/qcast/QCastIcons.jsx, forum/features/media/utils/formatMediaTime.js, forum/features/media/utils/qcastBars.js; используется в forum/features/media/utils/mediaLifecycleRuntime.js.
+          - VideoFeedPane.jsx — UI-компонент Video Feed Pane домена медиа. Связи: используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+          - VideoLimitOverlay.jsx — UI-компонент Video Limit Overlay домена медиа. Связи: импортирует forum/shared/constants/media.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
+          - VideoMedia.jsx — UI-компонент Video Media домена медиа. Связи: используется в forum/features/media/utils/mediaLifecycleRuntime.js.
+          - VideoOverlay.jsx — UI-компонент Video Overlay домена медиа. Связи: импортирует forum/features/media/components/LivePreview.jsx, forum/shared/hooks/useHtmlFlag.js, forum/shared/hooks/usePageLock.js; используется в forum/ForumRoot.jsx, forum/features/ui/components/ForumOverlayStack.jsx.
+          - VideoTrimPopover.jsx — UI-компонент Video Trim Popover домена медиа. Связи: импортирует forum/features/media/utils/mediaRuntime.js, forum/shared/constants/media.js, lib/forumVideoTrim.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature media.
+          - useForumComposerAttachments.js — Хук use Forum Composer Attachments домена медиа. Связи: используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
+          - useForumMediaCoordinator.js — Хук use Forum Media Coordinator домена медиа. Связи: импортирует forum/features/media/utils/mediaLifecycleRuntime.js, forum/shared/utils/browser.js; используется в forum/ForumRoot.jsx.
+          - useForumVideoFeedRuntime.js — Хук use Forum Video Feed Runtime домена медиа. Связи: импортирует forum/features/media/hooks/useVideoFeedActions.js, forum/features/media/hooks/useVideoFeedLifecycle.js, forum/features/media/hooks/useVideoFeedState.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useMediaPipelineController.js — Хук use Media Pipeline Controller домена медиа. Связи: используется в forum/features/ui/hooks/useForumComposerRuntime.js.
+          - useVideoCaptureController.js — Хук use Video Capture Controller домена медиа. Связи: используется в forum/ForumRoot.jsx.
+          - useVideoFeedActions.js — Хук use Video Feed Actions домена медиа. Связи: импортирует forum/features/media/utils/videoFeedActions.js; используется в forum/features/media/hooks/useForumVideoFeedRuntime.js.
+          - useVideoFeedLifecycle.js — Хук use Video Feed Lifecycle домена медиа. Связи: используется в forum/features/media/hooks/useForumVideoFeedRuntime.js.
+          - useVideoFeedState.js — Хук use Video Feed State домена медиа. Связи: импортирует forum/features/media/utils/videoFeedBuilder.js, forum/features/media/utils/videoFeedSalt.js; используется в forum/features/media/hooks/useForumVideoFeedRuntime.js.
+          - useVideoFeedWindowing.js — Хук use Video Feed Windowing домена медиа. Связи: используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useVideoTrimController.js — Хук use Video Trim Controller домена медиа. Связи: импортирует forum/features/media/utils/mediaRuntime.js; используется в forum/ForumRoot.jsx.
+          - useVoiceRecorder.js — Хук use Voice Recorder домена медиа. Связи: используется в forum/features/ui/hooks/useForumComposerRuntime.js.
+        - services/ — Каталог слоя сервисы внутри feature media.
+          - resolveComposerMediaPayload.js — Сервис resolve Composer Media Payload домена медиа. Связи: используется в forum/features/feed/hooks/useForumCreatePostAction.js.
+        - utils/ — Каталог слоя утилиты внутри feature media.
+          - formatMediaTime.js — Утилита format Media Time домена медиа. Связи: используется в forum/features/media/components/QCastPlayer.jsx.
+          - frontCameraMirror.js — Утилита front Camera Mirror домена медиа. Связи: используется в forum/ForumRoot.jsx.
+          - mediaLifecycleRuntime.js — Утилита media Lifecycle Runtime домена медиа. Связи: импортирует forum/features/media/components/QCastPlayer.jsx, forum/features/media/components/VideoMedia.jsx, forum/features/media/utils/videoControls.js; используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/components/PostCardBridge.jsx, forum/features/media/components/ComposerAttachmentPreview.jsx.
+          - mediaLinks.js — Утилита media Links домена медиа. Связи: используется в forum/ForumRoot.jsx, forum/features/media/utils/mediaUrlPipeline.js, forum/features/ui/components/ForumSearchSortControls.jsx.
+          - mediaRuntime.js — Утилита media Runtime домена медиа. Связи: импортирует forum/shared/constants/media.js, lib/forumVideoTrim.js; используется в forum/ForumRoot.jsx, forum/features/media/components/VideoTrimPopover.jsx, forum/features/media/hooks/useVideoTrimController.js.
+          - mediaUrlPipeline.js — Утилита media Url Pipeline домена медиа. Связи: импортирует forum/features/media/utils/mediaLinks.js; используется в forum/ForumRoot.jsx.
+          - moderationPrep.js — Утилита moderation Prep домена медиа. Связи: используется в forum/ForumRoot.jsx.
+          - qcastBars.js — Утилита qcast Bars домена медиа. Связи: используется в forum/features/media/components/QCastPlayer.jsx.
+          - urlParsing.js — Утилита url Parsing домена медиа. Связи: используется в forum/ForumRoot.jsx.
+          - videoControls.js — Утилита video Controls домена медиа. Связи: используется в forum/features/media/utils/mediaLifecycleRuntime.js.
+          - videoCopy.js — Утилита video Copy домена медиа. Связи: импортирует forum/shared/utils/forumLocale.js; используется в forum/ForumRoot.jsx.
+          - videoFeedActions.js — Утилита video Feed Actions домена медиа. Связи: используется в forum/features/media/hooks/useVideoFeedActions.js.
+          - videoFeedBuilder.js — Утилита video Feed Builder домена медиа. Связи: импортирует forum/features/media/utils/videoFeedPosts.js, forum/features/media/utils/videoFeedRandom.js; используется в forum/features/media/hooks/useVideoFeedState.js.
+          - videoFeedPosts.js — Утилита video Feed Posts домена медиа. Связи: используется в forum/features/media/utils/videoFeedBuilder.js.
+          - videoFeedRandom.js — Утилита video Feed Random домена медиа. Связи: используется в forum/features/media/utils/videoFeedBuilder.js.
+          - videoFeedSalt.js — Утилита video Feed Salt домена медиа. Связи: используется в forum/features/media/hooks/useVideoFeedState.js.
+          - videoFeedScroll.js — Утилита video Feed Scroll домена медиа. Связи: используется в forum/features/feed/hooks/useForumFeedRuntime.js, forum/features/media/hooks/useForumVideoFeedRuntime.js.
+      - moderation/ — Подсистема жалоб, модерации и admin UI.
+        - components/ — Каталог слоя компоненты внутри feature moderation.
+          - AdminPopover.jsx — UI-компонент Admin Popover домена модерации. Связи: импортирует forum/services/forumApi.js.
+          - ReportPopover.jsx — UI-компонент Report Popover домена модерации. Связи: используется в forum/features/ui/components/ForumOverlayStack.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature moderation.
+          - useAdminActions.js — Хук use Admin Actions домена модерации. Связи: используется в forum/features/moderation/hooks/useForumModerationRuntime.js.
+          - useAdminFlag.js — Хук use Admin Flag домена модерации. Связи: импортирует forum/shared/utils/browser.js; используется в forum/features/moderation/hooks/useForumModerationRuntime.js.
+          - useForumModerationRuntime.js — Хук use Forum Moderation Runtime домена модерации. Связи: импортирует forum/features/moderation/hooks/useAdminActions.js, forum/features/moderation/hooks/useAdminFlag.js, forum/features/moderation/hooks/useForumModerationUi.js; используется в forum/ForumRoot.jsx.
+          - useForumModerationUi.js — Хук use Forum Moderation Ui домена модерации. Связи: используется в forum/features/moderation/hooks/useForumModerationRuntime.js.
+          - useMediaModeration.js — Хук use Media Moderation домена модерации. Связи: импортирует forum/features/moderation/utils/http.js; используется в forum/features/moderation/hooks/useForumModerationRuntime.js.
+          - useReportController.js — Хук use Report Controller домена модерации. Связи: используется в forum/features/moderation/hooks/useForumModerationRuntime.js.
+        - utils/ — Каталог слоя утилиты внутри feature moderation.
+          - http.js — Утилита http домена модерации. Связи: используется в forum/features/moderation/hooks/useMediaModeration.js.
+      - profile/ — Подсистема профиля, about, VIP и popover.
+        - components/ — Каталог слоя компоненты внутри feature profile.
+          - AboutRail.jsx — UI-компонент About Rail домена профиля/VIP. Связи: импортирует forum/features/profile/utils/aboutText.js, forum/shared/utils/classnames.js; используется в forum/ForumHeaderPanel.jsx.
+          - AvatarEmoji.jsx — UI-компонент Avatar Emoji домена профиля/VIP. Связи: импортирует forum/features/profile/utils/avatar.js, forum/features/profile/utils/profileCache.js; используется в forum/ForumHeaderPanel.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
+          - ForumVipControl.jsx — UI-компонент Forum Vip Control домена профиля/VIP. Связи: импортирует forum/features/profile/components/VipPopover.jsx, forum/shared/utils/classnames.js; используется в forum/ForumHeaderPanel.jsx.
+          - ProfilePopover.jsx — UI-компонент Profile Popover домена профиля/VIP. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/features/qcoin/utils/account.js, forum/features/subscriptions/components/FollowersCounterInline.jsx; используется в forum/ForumHeaderPanel.jsx.
+          - UserInfoPopover.jsx — UI-компонент User Info Popover домена профиля/VIP. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/api/translate.js, forum/shared/components/HydrateText.jsx; используется в forum/features/ui/components/ForumOverlayStack.jsx.
+          - VipFlipBadge.jsx — UI-компонент Vip Flip Badge домена профиля/VIP. Связи: импортирует forum/shared/utils/classnames.js, components/i18n.js; используется в forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx, forum/features/feed/components/PostHeaderMeta.jsx.
+          - VipPopover.jsx — UI-компонент Vip Popover домена профиля/VIP. Связи: используется в forum/features/profile/components/ForumVipControl.jsx.
+        - constants/ — Каталог слоя константы внутри feature profile.
+          - vipAssets.js — Константа vip Assets домена профиля/VIP. Связи: используется в forum/ForumRoot.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature profile.
+          - useAboutEditor.js — Хук use About Editor домена профиля/VIP. Связи: используется в forum/features/profile/hooks/useForumProfileSocialRuntime.js.
+          - useForumProfileSocialRuntime.js — Хук use Forum Profile Social Runtime домена профиля/VIP. Связи: импортирует forum/features/profile/hooks/useAboutEditor.js, forum/features/profile/hooks/useVipPayAction.js, forum/features/profile/hooks/useVipSubscriptionState.js; используется в forum/ForumRoot.jsx.
+          - useForumProfileSync.js — Хук use Forum Profile Sync домена профиля/VIP. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useEvent.js, forum/shared/storage/localStorage.js; используется в forum/ForumRoot.jsx.
+          - useVipFlag.js — Хук use Vip Flag домена профиля/VIP. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/features/profile/utils/vip.js; используется в forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx, forum/features/feed/components/ForumPostCard.jsx.
+          - useVipPayAction.js — Хук use Vip Pay Action домена профиля/VIP. Связи: импортирует forum/features/qcoin/utils/paymentWindow.js; используется в forum/features/profile/hooks/useForumProfileSocialRuntime.js.
+          - useVipSubscriptionState.js — Хук use Vip Subscription State домена профиля/VIP. Связи: используется в forum/features/profile/hooks/useForumProfileSocialRuntime.js.
+        - utils/ — Каталог слоя утилиты внутри feature profile.
+          - aboutText.js — Утилита about Text домена профиля/VIP. Связи: используется в forum/ForumRoot.jsx, forum/features/profile/components/AboutRail.jsx.
+          - avatar.js — Утилита avatar домена профиля/VIP. Связи: используется в forum/features/profile/components/AvatarEmoji.jsx.
+          - profileCache.js — Утилита profile Cache домена профиля/VIP. Связи: импортирует forum/shared/utils/browser.js; используется в forum/ForumRoot.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
+          - vip.js — Утилита vip домена профиля/VIP. Связи: используется в forum/features/profile/hooks/useVipFlag.js.
+      - qcoin/ — Подсистема QCoin в форуме.
+        - components/ — Каталог слоя компоненты внутри feature qcoin.
+          - QCoinInline.jsx — UI-компонент QCoin Inline домена QCoin. Связи: импортирует forum/features/qcoin/hooks/useQCoinLive.js, forum/shared/utils/classnames.js; используется в forum/ForumHeaderPanel.jsx.
+          - QCoinWithdrawPopover.jsx — UI-компонент QCoin Withdraw Popover домена QCoin. Связи: используется в forum/ForumHeaderPanel.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature qcoin.
+          - useQCoinLive.js — Хук use QCoin Live домена QCoin. Связи: импортирует forum/features/qcoin/utils/account.js; используется в forum/features/qcoin/components/QCoinInline.jsx.
+        - utils/ — Каталог слоя утилиты внутри feature qcoin.
+          - account.js — Утилита account домена QCoin. Связи: используется в forum/features/profile/components/ProfilePopover.jsx, forum/features/qcoin/hooks/useQCoinLive.js.
+          - paymentWindow.js — Утилита payment Window домена QCoin. Связи: используется в forum/features/profile/hooks/useVipPayAction.js.
+      - quests/ — Подсистема квестов форума.
+        - components/ — Каталог слоя компоненты внутри feature quests.
+          - QuestClaimOverlay.jsx — UI-компонент Quest Claim Overlay домена квестов. Связи: используется в forum/features/ui/components/ForumOverlayStack.jsx.
+          - QuestHub.jsx — UI-компонент Quest Hub домена квестов. Связи: импортирует forum/features/quests/utils/progress.js, forum/shared/utils/classnames.js; используется в forum/features/quests/components/QuestPane.jsx.
+          - QuestLaunchIcon.jsx — UI-компонент Quest Launch Icon домена квестов. Связи: используется в forum/features/ui/components/ForumSearchSortControls.jsx.
+          - QuestPane.jsx — UI-компонент Quest Pane домена квестов. Связи: импортирует forum/features/quests/components/QuestHub.jsx; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature quests.
+          - useForumQuestConfig.js — Хук use Forum Quest Config домена квестов. Связи: используется в forum/features/quests/hooks/useForumQuestRuntime.js.
+          - useForumQuestProgress.js — Хук use Forum Quest Progress домена квестов. Связи: импортирует forum/features/quests/hooks/useQuestStorageState.js, forum/features/quests/utils/progress.js; используется в forum/features/quests/hooks/useForumQuestRuntime.js.
+          - useForumQuestRuntime.js — Хук use Forum Quest Runtime домена квестов. Связи: импортирует forum/features/quests/hooks/useForumQuestConfig.js, forum/features/quests/hooks/useForumQuestProgress.js, forum/features/quests/hooks/useQuestClaimAction.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useQuestClaimAction.js — Хук use Quest Claim Action домена квестов. Связи: используется в forum/features/quests/hooks/useForumQuestRuntime.js.
+          - useQuestStorageState.js — Хук use Quest Storage State домена квестов. Связи: импортирует forum/features/quests/utils/progress.js; используется в forum/features/quests/hooks/useForumQuestProgress.js.
+          - useQuestViewActions.js — Хук use Quest View Actions домена квестов. Связи: используется в forum/features/quests/hooks/useForumQuestRuntime.js.
+        - utils/ — Каталог слоя утилиты внутри feature quests.
+          - progress.js — Утилита progress домена квестов. Связи: используется в forum/features/quests/components/QuestHub.jsx, forum/features/quests/hooks/useForumQuestProgress.js, forum/features/quests/hooks/useQuestStorageState.js.
+      - subscriptions/ — Подсистема подписок/соцграфа.
+        - components/ — Каталог слоя компоненты внутри feature subscriptions.
+          - FollowersCounterInline.jsx — UI-компонент Followers Counter Inline домена подписок. Связи: импортирует forum/shared/components/HydrateText.jsx; используется в forum/features/profile/components/ProfilePopover.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature subscriptions.
+          - useStarredAuthorsState.js — Хук use Starred Authors State домена подписок. Связи: импортирует forum/features/subscriptions/utils/starred.js; используется в forum/features/profile/hooks/useForumProfileSocialRuntime.js.
+        - utils/ — Каталог слоя утилиты внутри feature subscriptions.
+          - starred.js — Утилита starred домена подписок. Связи: используется в forum/features/subscriptions/hooks/useStarredAuthorsState.js.
+      - ui/ — Общие UI-узлы и проп-бандлы форума.
+        - components/ — Каталог слоя компоненты внутри feature ui.
+          - ComposeDock.jsx — UI-компонент Compose Dock домена форумного UI. Связи: импортирует forum/features/ui/components/ComposerCore.jsx, forum/features/ui/components/ComposerFabButton.jsx, forum/features/ui/components/ComposerStatusMeta.jsx; используется в forum/ForumLayout.jsx.
+          - ComposerActionRail.jsx — UI-компонент Composer Action Rail домена форумного UI. Связи: используется в forum/features/ui/components/ComposerCore.jsx.
+          - ComposerCore.jsx — UI-компонент Composer Core домена форумного UI. Связи: импортирует forum/features/dm/components/DmVoicePlayer.jsx, forum/features/media/components/ComposerAttachmentPreview.jsx, forum/features/ui/components/ComposerActionRail.jsx; используется в forum/features/ui/components/ComposeDock.jsx.
+          - ComposerEmojiPanel.jsx — UI-компонент Composer Emoji Panel домена форумного UI. Связи: используется в forum/features/ui/components/ComposerCore.jsx.
+          - ComposerEmojiPreview.jsx — UI-компонент Composer Emoji Preview домена форумного UI. Связи: используется в forum/features/ui/components/ComposerCore.jsx.
+          - ComposerFabButton.jsx — UI-компонент Composer Fab Button домена форумного UI. Связи: используется в forum/features/ui/components/ComposeDock.jsx.
+          - ComposerFileInput.jsx — UI-компонент Composer File Input домена форумного UI. Связи: используется в forum/features/ui/components/ComposerCore.jsx.
+          - ComposerMediaProgressBar.jsx — UI-компонент Composer Media Progress Bar домена форумного UI. Связи: используется в forum/features/ui/components/ComposerCore.jsx.
+          - ComposerStatusMeta.jsx — UI-компонент Composer Status Meta домена форумного UI. Связи: используется в forum/features/ui/components/ComposeDock.jsx.
+          - ComposerTextInput.jsx — UI-компонент Composer Text Input домена форумного UI. Связи: используется в forum/features/ui/components/ComposerCore.jsx.
+          - ConfirmDeleteOverlay.jsx — UI-компонент Confirm Delete Overlay домена форумного UI. Связи: импортирует components/i18n.js; используется в forum/features/feed/components/PostOwnerMenu.jsx, forum/features/feed/components/TopicItem.jsx.
+          - DmDeletePopover.jsx — UI-компонент Dm Delete Popover домена форумного UI. Связи: используется в forum/features/ui/components/ForumOverlayStack.jsx.
+          - ForumActionNavIcon.jsx — UI-компонент Forum Action Nav Icon домена форумного UI. Связи: используется в forum/features/ui/components/ForumActionRow.jsx.
+          - ForumActionRow.jsx — UI-компонент Forum Action Row домена форумного UI. Связи: импортирует forum/features/ui/components/ForumActionNavIcon.jsx, forum/features/ui/components/VideoFeedNavIcon.jsx; используется в forum/features/ui/components/MainForumActionCluster.jsx, forum/features/ui/components/ThreadForumActionCluster.jsx.
+          - ForumAdSlot.jsx — UI-компонент Forum Ad Slot домена форумного UI. Связи: импортирует forum/ForumAds.js; используется в forum/ForumRoot.jsx.
+          - ForumControlNavIcon.jsx — UI-компонент Forum Control Nav Icon домена форумного UI. Связи: используется в forum/features/ui/components/ForumSearchSortControls.jsx.
+          - ForumOverlayStack.jsx — UI-компонент Forum Overlay Stack домена форумного UI. Связи: импортирует forum/SharePopover.jsx, forum/features/media/components/VideoLimitOverlay.jsx, forum/features/media/components/VideoOverlay.jsx; используется в forum/ForumLayout.jsx.
+          - ForumSearchSortControls.jsx — UI-компонент Forum Search Sort Controls домена форумного UI. Связи: импортирует forum/features/media/utils/mediaLinks.js, forum/features/profile/components/AvatarEmoji.jsx, forum/features/quests/components/QuestLaunchIcon.jsx; используется в forum/ForumHeaderPanel.jsx.
+          - HeadChevronIcon.jsx — UI-компонент Head Chevron Icon домена форумного UI. Связи: импортирует forum/shared/utils/classnames.js; используется в forum/ForumHeaderPanel.jsx.
+          - MainForumActionCluster.jsx — UI-компонент Main Forum Action Cluster домена форумного UI. Связи: импортирует forum/features/feed/components/CreateTopicCard.jsx, forum/features/ui/components/ForumActionRow.jsx, forum/features/ui/constants/inviteButton.js; используется в forum/features/feed/components/TopicsSection.jsx.
+          - StarButton.jsx — UI-компонент Star Button домена форумного UI. Связи: используется в forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx, forum/features/feed/components/PostHeaderMeta.jsx.
+          - ThreadForumActionCluster.jsx — UI-компонент Thread Forum Action Cluster домена форумного UI. Связи: импортирует forum/features/feed/components/CreateTopicCard.jsx, forum/features/ui/components/ForumActionRow.jsx, forum/features/ui/constants/inviteButton.js; используется в forum/features/feed/components/ThreadSection.jsx.
+          - VideoFeedNavIcon.jsx — UI-компонент Video Feed Nav Icon домена форумного UI. Связи: используется в forum/features/ui/components/ForumActionRow.jsx.
+        - constants/ — Каталог слоя константы внутри feature ui.
+          - emojiCatalog.js — Константа emoji Catalog домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - inviteButton.js — Константа invite Button домена форумного UI. Связи: используется в forum/features/ui/components/MainForumActionCluster.jsx, forum/features/ui/components/ThreadForumActionCluster.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature ui.
+          - useComposerActionHandlers.js — Хук use Composer Action Handlers домена форумного UI. Связи: используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
+          - useComposerEmojiState.js — Хук use Composer Emoji State домена форумного UI. Связи: используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
+          - useComposerScrollMemory.js — Хук use Composer Scroll Memory домена форумного UI. Связи: используется в forum/features/ui/hooks/useForumComposerRuntime.js.
+          - useComposerUiLifecycle.js — Хук use Composer Ui Lifecycle домена форумного UI. Связи: используется в forum/features/ui/hooks/useForumComposerRuntime.js.
+          - useForumAdSlots.js — Хук use Forum Ad Slots домена форумного UI. Связи: импортирует forum/features/ui/utils/adsSlots.js; используется в forum/features/ui/hooks/useForumAdsRuntime.js.
+          - useForumAdsRuntime.js — Хук use Forum Ads Runtime домена форумного UI. Связи: импортирует forum/ForumAds.js, forum/features/ui/hooks/useForumAdSlots.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useForumComposerRuntime.js — Хук use Forum Composer Runtime домена форумного UI. Связи: импортирует forum/features/media/hooks/useMediaPipelineController.js, forum/features/media/hooks/useVoiceRecorder.js, forum/features/ui/hooks/useComposerScrollMemory.js; используется в forum/ForumRoot.jsx.
+          - useForumComposerSubmitRuntime.js — Хук use Forum Composer Submit Runtime домена форумного UI. Связи: импортирует forum/features/feed/hooks/useForumCreatePostAction.js, forum/features/feed/hooks/useForumCreateTopicAction.js, forum/features/feed/hooks/useForumViewTracking.js; используется в forum/ForumRoot.jsx.
+          - useForumEditMode.js — Хук use Forum Edit Mode домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useForumGlobalPopovers.js — Хук use Forum Global Popovers домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useForumHeadCollapse.js — Хук use Forum Head Collapse домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useForumPopoverModeController.js — Хук use Forum Popover Mode Controller домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useForumScreenFlowsRuntime.js — Хук use Forum Screen Flows Runtime домена форумного UI. Связи: импортирует forum/features/dm/hooks/useDmDeleteCopy.js, forum/features/dm/hooks/useDmOpenEvents.js, forum/features/dm/hooks/useOpenInboxGlobalAction.js; используется в forum/ForumRoot.jsx.
+          - useForumSessionShell.js — Хук use Forum Session Shell домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useForumViewState.js — Хук use Forum View State домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useScrollResizeCompensation.js — Хук use Scroll Resize Compensation домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+        - utils/ — Каталог слоя утилиты внутри feature ui.
+          - propBundles/ — Каталог propBundles внутри feature ui.
+            - buildActionClusterProps.js — Утилита build Action Cluster Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildComposerCoreProps.js — Утилита build Composer Core Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildForumHeaderPanelProps.js — Утилита build Forum Header Panel Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildInboxPaneProps.js — Утилита build Inbox Pane Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildSearchSortControlsProps.js — Утилита build Search Sort Controls Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildThreadRepliesPaneProps.js — Утилита build Thread Replies Pane Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildTopicsSwitchProps.js — Утилита build Topics Switch Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+          - adsSlots.js — Утилита ads Slots домена форумного UI. Связи: используется в forum/features/ui/hooks/useForumAdSlots.js.
+          - buildForumLayoutProps.js — Утилита build Forum Layout Props домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - buildForumRootPropBundles.js — Утилита build Forum Root Prop Bundles домена форумного UI. Связи: импортирует forum/features/ui/utils/propBundles/buildActionClusterProps.js, forum/features/ui/utils/propBundles/buildComposerCoreProps.js, forum/features/ui/utils/propBundles/buildForumHeaderPanelProps.js; используется в forum/ForumRoot.jsx.
+    - p/ — Каталог p.
+      - [postId]/ — Каталог [postId].
+        - route.js — JS-файл route домена форума. Связи: импортирует app/api/forum/_db.js.
+    - services/ — Каталог services.
+      - forumApi.js — JS-файл forum Api домена форума. Связи: используется в forum/ForumRoot.jsx, forum/features/moderation/components/AdminPopover.jsx.
+    - shared/ — Shared-слой форума: общие хуки, utils, storage, config.
+      - api/ — Каталог shared-слоя форума: api.
+        - http.js — Shared API-хелпер http форума. Связи: используется в forum/shared/api/translate.js.
+        - translate.js — Shared API-хелпер translate форума. Связи: импортирует forum/shared/api/http.js; используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/hooks/usePostTranslation.js, forum/features/profile/components/UserInfoPopover.jsx.
+      - components/ — Каталог shared-слоя форума: components.
+        - HydrateText.jsx — Shared UI-компонент Hydrate Text форума. Связи: используется в forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/components/PostActionBar.jsx.
+      - config/ — Каталог shared-слоя форума: config.
+        - runtime.js — Shared конфиг runtime форума. Связи: импортирует forum/shared/utils/browser.js; используется в forum/ForumRoot.jsx.
+      - constants/ — Каталог shared-слоя форума: constants.
+        - media.js — Shared константа media форума. Связи: используется в forum/ForumRoot.jsx, forum/features/media/components/VideoLimitOverlay.jsx, forum/features/media/components/VideoTrimPopover.jsx.
+      - docs/ — Каталог shared-слоя форума: docs.
+        - phase-01-shared-foundation.md — Shared документ phase 01 shared foundation форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - hooks/ — Каталог shared-слоя форума: hooks.
+        - useEvent.js — Shared хук use Event форума. Связи: используется в forum/features/feed/hooks/useForumDeepLinkFlow.js, forum/features/feed/hooks/useForumFeedRuntime.js, forum/features/media/hooks/useForumVideoFeedRuntime.js.
+        - useForumNavBridge.js — Shared хук use Forum Nav Bridge форума. Связи: импортирует forum/shared/hooks/useEvent.js; используется в forum/ForumRoot.jsx.
+        - useForumToast.js — Shared хук use Forum Toast форума. Связи: импортирует forum/shared/utils/classnames.js; используется в forum/ForumRoot.jsx.
+        - useHtmlFlag.js — Shared хук use Html Flag форума. Связи: используется в forum/ForumRoot.jsx, forum/features/media/components/VideoOverlay.jsx, forum/features/media/hooks/useForumVideoFeedRuntime.js.
+        - usePageLock.js — Shared хук use Page Lock форума. Связи: используется в forum/features/media/components/VideoOverlay.jsx.
+      - storage/ — Каталог shared-слоя форума: storage.
+        - localStorage.js — Shared storage-обертка local Storage форума. Связи: импортирует forum/shared/utils/browser.js; используется в forum/features/profile/hooks/useForumProfileSync.js.
+      - telemetry/ — Каталог shared-слоя форума: telemetry.
+        - diag.js — Shared телеметрия diag форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - utils/ — Каталог shared-слоя форума: utils.
+        - browser.js — Shared утилита browser форума. Связи: используется в forum/ForumRoot.jsx, forum/features/media/hooks/useForumMediaCoordinator.js, forum/features/moderation/hooks/useAdminFlag.js.
+        - classnames.js — Shared утилита classnames форума. Связи: используется в forum/ForumHeaderPanel.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
+        - counts.js — Shared утилита counts форума. Связи: используется в forum/ForumRoot.jsx, forum/features/profile/components/ProfilePopover.jsx, forum/features/profile/components/UserInfoPopover.jsx.
+        - formatters.js — Shared утилита formatters форума. Связи: используется в forum/ForumRoot.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
+        - forumLocale.js — Shared утилита forum Locale форума. Связи: используется в forum/features/media/utils/videoCopy.js.
+        - linkDetection.js — Shared утилита link Detection форума. Связи: используется в forum/ForumRoot.jsx.
+        - openAuth.js — Shared утилита open Auth форума. Связи: используется в forum/ForumRoot.jsx.
+        - richText.js — Shared утилита rich Text форума. Связи: используется в forum/ForumRoot.jsx, forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/components/PostCardBridge.jsx.
+        - time.js — Shared утилита time форума. Связи: используется в forum/ForumRoot.jsx.
+    - styles/ — Стили форума и их сборка.
+      - modules/ — Модульные фрагменты стилевого слоя форума.
+        - composerStyles.js — Модуль стилевой сборки форума: composer Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - dmStyles.js — Модуль стилевой сборки форума: dm Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - foundationStyles.js — Модуль стилевой сборки форума: foundation Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - fxStyles.js — Модуль стилевой сборки форума: fx Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - layoutStyles.js — Модуль стилевой сборки форума: layout Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - profileStyles.js — Модуль стилевой сборки форума: profile Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - qcoinStyles.js — Модуль стилевой сборки форума: qcoin Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - questStyles.js — Модуль стилевой сборки форума: quest Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ForumFxStyles.jsx — Файл стилевого слоя форума: Forum Fx Styles. Связи: используется в forum/ForumLayout.jsx.
+      - ForumStyles.jsx — Файл стилевого слоя форума: Forum Styles. Связи: используется в forum/ForumLayout.jsx.
+    - error.js — JS-файл error домена форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - Forum.jsx — Тонкий entry-point экрана форума. Связи: импортирует forum/ForumRoot.jsx; используется в forum/page.js.
+    - ForumAds.js — Форумная интеграция рекламных/промо-блоков. Связи: импортирует components/i18n.js; используется в app/ads.js, forum/ForumRoot.jsx, forum/features/ui/components/ForumAdSlot.jsx.
+    - ForumHeaderPanel.jsx — Компоновщик шапки форума с контролами, профилем, QCoin и VIP. Связи: импортирует forum/features/profile/components/AboutRail.jsx, forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/ForumVipControl.jsx; используется в forum/features/feed/components/ThreadSection.jsx, forum/features/feed/components/TopicsSection.jsx.
+    - ForumLayout.jsx — Layout-обвязка форума. Связи: импортирует forum/features/feed/components/ThreadSection.jsx, forum/features/feed/components/TopicsSection.jsx, forum/features/ui/components/ComposeDock.jsx; используется в forum/ForumRoot.jsx.
+    - ForumProviders.jsx — Провайдеры и контекстная сборка форума. Связи: используется в forum/ForumRoot.jsx.
+    - ForumRoot.jsx — Корневой composition-root форума и мессенджера. Связи: импортирует forum/ForumAds.js, forum/ForumLayout.jsx, forum/ForumProviders.jsx; используется в forum/Forum.jsx.
+    - layout.js — JS-файл layout домена форума. Связи: импортирует lib/metadataCache.js.
+    - loading.js — JS-файл loading домена форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - page.js — JS-файл page домена форума. Связи: импортирует forum/Forum.jsx, components/ForumBootSplash.jsx, components/i18n.js.
+    - SharePopover.jsx — JSX-файл Share Popover домена форума. Связи: импортирует lib/forumShareManager.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
+  - game/ — Страницы/компоненты игрового раздела.
+    - layout.js — Next.js layout для сегмента /game. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /game. Связи: импортирует app/ads.js, components/i18n.js.
+  - privacy/ — Страница privacy/policy.
+    - page.js — Next.js страница маршрута /privacy. Связи: импортирует components/i18n.js.
+  - subscribe/ — Страницы подписки/лендинга.
+    - layout.js — Next.js layout для сегмента /subscribe. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /subscribe. Связи: импортирует app/subscribe/subscribe.client.jsx.
+    - subscribe.client.jsx — JSX-файл subscribe.client сегмента subscribe. Связи: импортирует app/ads.js, components/i18n.js; используется в app/subscribe/page.js.
+  - tma/ — Telegram Mini App связанные страницы.
+    - auto/ — Авто-страницы TMA.
+      - page.jsx — JSX-файл page сегмента tma/auto. Связи: импортирует components/i18n.js.
+  - ads.js — JS-файл ads сегмента app. Связи: импортирует forum/ForumAds.js; используется в app/about/page.js, app/academy/page.js, app/exchange/page.js.
+  - globals.css — CSS-файл globals сегмента app. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - jsconfig.json — Алиасы и baseUrl проекта для JS/JSX. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - layout.js — Next.js layout для сегмента /. Связи: импортирует app/providers.jsx, components/BgAudio.js, components/ForumShellGate.jsx.
+  - page.js — Next.js страница маршрута /. Связи: импортирует app/ads.js, app/components/CryptoNewsLens.jsx, components/i18n.js.
+  - providers.jsx — JSX-файл providers сегмента app. Связи: используется в app/layout.js.
+- audit/ — JSON-артефакты аудитов и миграционных фаз.
+  - forum-final-created-files-check.json — JSON-артефакт аудита forum final created files check. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-final-ownership-map.json — JSON-артефакт аудита forum final ownership map. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-final-residual-monolith.json — JSON-артефакт аудита forum final residual monolith. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-functional-parity.report.json — JSON-артефакт аудита forum functional parity.report. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-00-architecture.json — JSON-артефакт аудита forum phase 00 architecture. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-01-shared.json — JSON-артефакт аудита forum phase 01 shared. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-02-ui-primitives.json — JSON-артефакт аудита forum phase 02 ui primitives. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-03-feed.json — JSON-артефакт аудита forum phase 03 feed. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-04-media.json — JSON-артефакт аудита forum phase 04 media. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-05-dm.json — JSON-артефакт аудита forum phase 05 dm. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-06-profile-social-qcoin.json — JSON-артефакт аудита forum phase 06 profile social qcoin. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-07-quests-moderation-diagnostics.json — JSON-артефакт аудита forum phase 07 quests moderation diagnostics. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-08-styles.json — JSON-артефакт аудита forum phase 08 styles. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-09-final.json — JSON-артефакт аудита forum phase 09 final. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10-root-pass-02.json — JSON-артефакт аудита forum phase 10 root pass 02. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10-style-runtime-parity-fix.json — JSON-артефакт аудита forum phase 10 style runtime parity fix. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10b-global-css-gating.json — JSON-артефакт аудита forum phase 10b global css gating. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10c-head-style-injection.json — JSON-артефакт аудита forum phase 10c head style injection. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10d-header-controls-parity.json — JSON-артефакт аудита forum phase 10d header controls parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10d-style-parity-integration.json — JSON-артефакт аудита forum phase 10d style parity integration. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10e-header-single-block-parity.json — JSON-артефакт аудита forum phase 10e header single block parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10f-encoding-and-inbox-parity.json — JSON-артефакт аудита forum phase 10f encoding and inbox parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10g-quests-dm-encoding-inbox-recheck.json — JSON-артефакт аудита forum phase 10g quests dm encoding inbox recheck. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10h-quest-claim-instant-overlay.json — JSON-артефакт аудита forum phase 10h quest claim instant overlay. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10i-diagnostics-route-restore.json — JSON-артефакт аудита forum phase 10i diagnostics route restore. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10j-composer-emoji-encoding-restore.json — JSON-артефакт аудита forum phase 10j composer emoji encoding restore. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10k-composer-emoji-parity-complete.json — JSON-артефакт аудита forum phase 10k composer emoji parity complete. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-11-report-controller.json — JSON-артефакт аудита forum phase 11 report controller. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-12-diagnostics-hook.json — JSON-артефакт аудита forum phase 12 diagnostics hook. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-12-final-parity.json — JSON-артефакт аудита forum phase 12 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-13-final-closeout.json — JSON-артефакт аудита forum phase 13 final closeout. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-13-media-moderation-hook.json — JSON-артефакт аудита forum phase 13 media moderation hook. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-14-hotspot-cleanup.json — JSON-артефакт аудита forum phase 14 hotspot cleanup. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-14-media-preprocess-utils.json — JSON-артефакт аудита forum phase 14 media preprocess utils. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-15-profile-sync-hooks.json — JSON-артефакт аудита forum phase 15 profile sync hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-15-root-lifecycle-extraction.json — JSON-артефакт аудита forum phase 15 root lifecycle extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-16-shared-helpers.json — JSON-артефакт аудита forum phase 16 shared helpers. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-16-videofeed-nav-action-extraction.json — JSON-артефакт аудита forum phase 16 videofeed nav action extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-17-auth-flow-helper.json — JSON-артефакт аудита forum phase 17 auth flow helper. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-18-vip-hook-badge.json — JSON-артефакт аудита forum phase 18 vip hook badge. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-19-shared-toast-hook.json — JSON-артефакт аудита forum phase 19 shared toast hook. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-20-root-residual-cleanup.json — JSON-артефакт аудита forum phase 20 root residual cleanup. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-21-root-dead-auth-helper.json — JSON-артефакт аудита forum phase 21 root dead auth helper. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-22-avatar-component.json — JSON-артефакт аудита forum phase 22 avatar component. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-23-dm-leaf-components.json — JSON-артефакт аудита forum phase 23 dm leaf components. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-24-shared-formatters-hydrate.json — JSON-артефакт аудита forum phase 24 shared formatters hydrate. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-25-feed-topic-item-component.json — JSON-артефакт аудита forum phase 25 feed topic item component. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-26-post-action-bar-component.json — JSON-артефакт аудита forum phase 26 post action bar component. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-27-post-media-stack-component.json — JSON-артефакт аудита forum phase 27 post media stack component. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-28-post-body-translate-components.json — JSON-артефакт аудита forum phase 28 post body translate components. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-29-post-translation-hook.json — JSON-артефакт аудита forum phase 29 post translation hook. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-30-post-media-text-model-hook.json — JSON-артефакт аудита forum phase 30 post media text model hook. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-31-post-owner-menu-actions.json — JSON-артефакт аудита forum phase 31 post owner menu actions. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-32-post-fx-hook-layer.json — JSON-артефакт аудита forum phase 32 post fx hook layer. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-33-post-header-meta-parent-nav.json — JSON-артефакт аудита forum phase 33 post header meta parent nav. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-34-post-card-plus-feed-media-leaf-extraction.json — JSON-артефакт аудита forum phase 34 post card plus feed media leaf extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-35-popover-leaf-extraction.json — JSON-артефакт аудита forum phase 35 popover leaf extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-36-qcoin-subscriptions-inline-extraction.json — JSON-артефакт аудита forum phase 36 qcoin subscriptions inline extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-37-qcoin-withdraw-userinfo-extraction.json — JSON-артефакт аудита forum phase 37 qcoin withdraw userinfo extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-38-about-dmvoice-extraction.json — JSON-артефакт аудита forum phase 38 about dmvoice extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-39-video-media-adapter-extraction.json — JSON-артефакт аудита forum phase 39 video media adapter extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-40-media-time-util-extraction.json — JSON-артефакт аудита forum phase 40 media time util extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-41-qcast-ui-primitives-extraction.json — JSON-артефакт аудита forum phase 41 qcast ui primitives extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-42-qcast-component-extraction.json — JSON-артефакт аудита forum phase 42 qcast component extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-43-video-controls-handler-extraction.json — JSON-артефакт аудита forum phase 43 video controls handler extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-44-media-links-cluster-extraction.json — JSON-артефакт аудита forum phase 44 media links cluster extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-45-core-helper-clusters-extraction.json — JSON-артефакт аудита forum phase 45 core helper clusters extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-46-overlay-shared-popover-events.json — JSON-артефакт аудита forum phase 46 overlay shared popover events. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-47-feed-media-hooks-utils-extraction.json — JSON-артефакт аудита forum phase 47 feed media hooks utils extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-48-post-focus-deeplink-media-pipeline.json — JSON-артефакт аудита forum phase 48 post focus deeplink media pipeline. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-49-video-trim-and-nav-scroll-extraction.json — JSON-артефакт аудита forum phase 49 video trim and nav scroll extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-50-media-runtime-overlay-hooks.json — JSON-артефакт аудита forum phase 50 media runtime overlay hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-51-videofeed-nav-ads-utils.json — JSON-артефакт аудита forum phase 51 videofeed nav ads utils. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-52-nav-quest-extraction.json — JSON-артефакт аудита forum phase 52 nav quest extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-53-dm-videofeed-actions-extraction.json — JSON-артефакт аудита forum phase 53 dm videofeed actions extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-54-validation-and-postcard-bridge.json — JSON-артефакт аудита forum phase 54 validation and postcard bridge. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-55-style-split.json — JSON-артефакт аудита forum phase 55 style split. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-56-root-cleanup-style-hooks.json — JSON-артефакт аудита forum phase 56 root cleanup style hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-57-windowing-dm-media-hooks.json — JSON-артефакт аудита forum phase 57 windowing dm media hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-58-profile-admin-dm-quest-storage-hooks.json — JSON-артефакт аудита forum phase 58 profile admin dm quest storage hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-59-dm-orchestration-hooks.json — JSON-артефакт аудита forum phase 59 dm orchestration hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-60-feed-sync-engine-hooks.json — JSON-артефакт аудита forum phase 60 feed sync engine hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-61-feed-mutation-queue-hook.json — JSON-артефакт аудита forum phase 61 feed mutation queue hook. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-62-feed-view-and-actions-hooks.json — JSON-артефакт аудита forum phase 62 feed view and actions hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-63-composer-and-head-collapse-hooks.json — JSON-артефакт аудита forum phase 63 composer and head collapse hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-64-deeplink-create-topic-hooks.json — JSON-артефакт аудита forum phase 64 deeplink create topic hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-65-create-post-hook.json — JSON-артефакт аудита forum phase 65 create post hook. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-66-post-action-services-split.json — JSON-артефакт аудита forum phase 66 post action services split. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-67-navigation-actions-hook.json — JSON-артефакт аудита forum phase 67 navigation actions hook. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-68-quest-home-actions-hooks.json — JSON-артефакт аудита forum phase 68 quest home actions hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-69-quest-domain-hooks.json — JSON-артефакт аудита forum phase 69 quest domain hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-70-quest-claim-overlay-modularization.json — JSON-артефакт аудита forum phase 70 quest claim overlay modularization. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-71-action-row-quest-launch-extraction.json — JSON-артефакт аудита forum phase 71 action row quest launch extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-72-vip-pay-hook-extraction.json — JSON-артефакт аудита forum phase 72 vip pay hook extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-73-vip-control-component-extraction.json — JSON-артефакт аудита forum phase 73 vip control component extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-74-search-sort-controls-extraction.json — JSON-артефакт аудита forum phase 74 search sort controls extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-75-header-panel-composition-extraction.json — JSON-артефакт аудита forum phase 75 header panel composition extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-76-final-parity.json — JSON-артефакт аудита forum phase 76 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-76-video-trim-controller-extraction.json — JSON-артефакт аудита forum phase 76 video trim controller extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-77-final-parity.json — JSON-артефакт аудита forum phase 77 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-77-video-capture-controller-extraction.json — JSON-артефакт аудита forum phase 77 video capture controller extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-78-composer-attachment-preview-extraction.json — JSON-артефакт аудита forum phase 78 composer attachment preview extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-78-final-parity.json — JSON-артефакт аудита forum phase 78 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-80-final-parity.json — JSON-артефакт аудита forum phase 80 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-80-five-extractions.json — JSON-артефакт аудита forum phase 80 five extractions. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-81-final-parity.json — JSON-артефакт аудита forum phase 81 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-81-ten-extractions.json — JSON-артефакт аудита forum phase 81 ten extractions. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-82-final-parity.json — JSON-артефакт аудита forum phase 82 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-83-final-parity.json — JSON-артефакт аудита forum phase 83 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-83-six-hooks-extraction.json — JSON-артефакт аудита forum phase 83 six hooks extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-84-final-parity.json — JSON-артефакт аудита forum phase 84 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-84-thread-open-nav-extraction.json — JSON-артефакт аудита forum phase 84 thread open nav extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-85-final-parity.json — JSON-артефакт аудита forum phase 85 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-85-three-blocks-extraction.json — JSON-артефакт аудита forum phase 85 three blocks extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-86-feed-model-hooks.json — JSON-артефакт аудита forum phase 86 feed model hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-86-final-parity.json — JSON-артефакт аудита forum phase 86 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-87-feed-dm-model-extraction.json — JSON-артефакт аудита forum phase 87 feed dm model extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-87-final-parity.json — JSON-артефакт аудита forum phase 87 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-88-final-parity.json — JSON-артефакт аудита forum phase 88 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-88-media-coordinator-and-asset-catalog.json — JSON-артефакт аудита forum phase 88 media coordinator and asset catalog. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-89-composer-admin-subs-moderation-hooks.json — JSON-артефакт аудита forum phase 89 composer admin subs moderation hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-89-final-parity.json — JSON-артефакт аудита forum phase 89 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-90-final-parity.json — JSON-артефакт аудита forum phase 90 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-90-shell-cleanup-and-noise-reduction.json — JSON-артефакт аудита forum phase 90 shell cleanup and noise reduction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-91-dm-runtime-extraction.json — JSON-артефакт аудита forum phase 91 dm runtime extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-91-final-parity.json — JSON-артефакт аудита forum phase 91 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-92-final-parity.json — JSON-артефакт аудита forum phase 92 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-92-runtime-feed-media-quests.json — JSON-артефакт аудита forum phase 92 runtime feed media quests. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-93-all-five-finalization.json — JSON-артефакт аудита forum phase 93 all five finalization. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-93-final-parity.json — JSON-артефакт аудита forum phase 93 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-94-big-five-pass-parity.json — JSON-артефакт аудита forum phase 94 big five pass parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-94-five-clusters-runtime-layout.json — JSON-артефакт аудита forum phase 94 five clusters runtime layout. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-95-final-parity.json — JSON-артефакт аудита forum phase 95 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-96-hotfix-parity.json — JSON-артефакт аудита forum phase 96 hotfix parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-96-ideal-closeout.json — JSON-артефакт аудита forum phase 96 ideal closeout. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-97-style-parity-hotfix.json — JSON-артефакт аудита forum phase 97 style parity hotfix. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-98-style-isolation-restore.json — JSON-артефакт аудита forum phase 98 style isolation restore. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-99-forum-global-css-isolation.json — JSON-артефакт аудита forum phase 99 forum global css isolation. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-100-forum-hard-isolation.json — JSON-артефакт аудита forum phase 100 forum hard isolation. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-101-avatar-live-sync-and-emoji-fallback.json — JSON-артефакт аудита forum phase 101 avatar live sync and emoji fallback. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-102-avatar-propagation-hotfix.json — JSON-артефакт аудита forum phase 102 avatar propagation hotfix. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-103-avatar-propagation-flicker-fix.json — JSON-артефакт аудита forum phase 103 avatar propagation flicker fix. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-104-dm-loading-and-profile-alias-hardening.json — JSON-артефакт аудита forum phase 104 dm loading and profile alias hardening. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-105-composer-preview-and-dm-optimism.json — JSON-артефакт аудита forum phase 105 composer preview and dm optimism. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-106-composer-vip-preview-and-dm-delete-overlay-optimism.json — JSON-артефакт аудита forum phase 106 composer vip preview and dm delete overlay optimism. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-107-dm-delete-for-all-fix-and-loading-center.json — JSON-артефакт аудита forum phase 107 dm delete for all fix and loading center. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-108-dm-delete-for-all-server-parity-hotfix.json — JSON-артефакт аудита forum phase 108 dm delete for all server parity hotfix. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-109-dm-delete-for-all-race-fix.json — JSON-артефакт аудита forum phase 109 dm delete for all race fix. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-110-dm-delete-default-for-all-message.json — JSON-артефакт аудита forum phase 110 dm delete default for all message. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-111-dm-delete-server-best-effort-fallback.json — JSON-артефакт аудита forum phase 111 dm delete server best effort fallback. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-112-dm-delete-server-parity-and-thread-refresh.json — JSON-артефакт аудита forum phase 112 dm delete server parity and thread refresh. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-113-dm-dialog-delete-and-composer-progress.json — JSON-артефакт аудита forum phase 113 dm dialog delete and composer progress. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-114-dm-dialog-delete-and-composer-progress-smooth.json — JSON-артефакт аудита forum phase 114 dm dialog delete and composer progress smooth. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-114b-video-progress-reference-fix.json — JSON-артефакт аудита forum phase 114b video progress reference fix. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-114c-progress-revert.json — JSON-артефакт аудита forum phase 114c progress revert. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-115-dm-optimistic-video-rails-qcoin-overlay.json — JSON-артефакт аудита forum phase 115 dm optimistic video rails qcoin overlay. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-116-rails-controls-qcoin-progress.json — JSON-артефакт аудита forum phase 116 rails controls qcoin progress. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-117-about-pencil-and-post-media-fullbleed.json — JSON-артефакт аудита forum phase 117 about pencil and post media fullbleed. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-118-reactions-views-premium.json — JSON-артефакт аудита forum phase 118 reactions views premium. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-119-share-parity-check.json — JSON-артефакт аудита forum phase 119 share parity check. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-120-user-popover-user-branches.json — JSON-артефакт аудита forum phase 120 user popover user branches. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-121-branch-scroll-alignment-and-thread-title-spacing.json — JSON-артефакт аудита forum phase 121 branch scroll alignment and thread title spacing. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-122-functional-parity.report.json — JSON-артефакт аудита forum phase 122 functional parity.report. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-122-view-sync-report-flow.json — JSON-артефакт аудита forum phase 122 view sync report flow. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-123-mobile-qcoin-rail.json — JSON-артефакт аудита forum phase 123 mobile qcoin rail. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-124-mobile-qcoin-center-pencil.json — JSON-артефакт аудита forum phase 124 mobile qcoin center pencil. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-125-vip-button-animation.json — JSON-артефакт аудита forum phase 125 vip button animation. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-126-video-warm-lifecycle.json — JSON-артефакт аудита forum phase 126 video warm lifecycle. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - project-docs-audit.json — JSON-артефакт аудита project docs audit. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - project-tree-audit.json — JSON-артефакт аудита project tree audit. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+- components/ — Общие React-компоненты всего проекта.
+  - AuthNavClient.jsx — Общий React-компонент Auth Nav Client, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в components/TopBar.js.
+  - BgAudio.js — Общий React-компонент Bg Audio, используемый вне одного домена. Связи: используется в app/layout.js.
+  - ForumBootSplash.jsx — Общий React-компонент Forum Boot Splash, используемый вне одного домена. Связи: используется в forum/page.js.
+  - ForumShellGate.jsx — Общий React-компонент Forum Shell Gate, используемый вне одного домена. Связи: используется в app/layout.js.
+  - HeroAvatar.js — Общий React-компонент Hero Avatar, используемый вне одного домена. Связи: используется в app/layout.js, components/HeroSection.js.
+  - HeroSection.js — Общий React-компонент Hero Section, используемый вне одного домена. Связи: импортирует components/HeroAvatar.js.
+  - i18n.js — Общий React-компонент i18n, используемый вне одного домена. Связи: используется в app/about/page.js, app/academy/AcademyExamBlock.js, app/academy/page.js.
+  - InviteFriendPopup.jsx — Общий React-компонент Invite Friend Popup, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в components/InviteFriendProvider.jsx.
+  - InviteFriendProvider.jsx — Общий React-компонент Invite Friend Provider, используемый вне одного домена. Связи: импортирует components/InviteFriendPopup.jsx; используется в app/layout.js.
+  - LanguageSwitcher.js — Общий React-компонент Language Switcher, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в components/TopBar.js.
+  - NotRobot.jsx — Общий React-компонент Not Robot, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в app/layout.js.
+  - QCoinDropFX.jsx — Общий React-компонент QCoin Drop FX, используемый вне одного домена. Связи: используется в app/layout.js, components/QCoinDropFXGate.jsx.
+  - QCoinDropFXGate.jsx — Общий React-компонент QCoin Drop FXGate, используемый вне одного домена. Связи: импортирует components/QCoinDropFX.jsx.
+  - ScrollTopPulse.js — Общий React-компонент Scroll Top Pulse, используемый вне одного домена. Связи: используется в app/layout.js.
+  - SnowFX.jsx — Общий React-компонент Snow FX, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - TopBar.js — Общий React-компонент Top Bar, используемый вне одного домена. Связи: импортирует components/AuthNavClient.jsx, components/LanguageSwitcher.js, components/i18n.js; используется в app/layout.js.
+  - UnlimitModal.client.jsx — Общий React-компонент Unlimit Modal.client, используемый вне одного домена. Связи: импортирует components/i18n.js.
+  - WalletEVM.js — Общий React-компонент Wallet EVM, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - WalletsHub.js — Общий React-компонент Wallets Hub, используемый вне одного домена. Связи: импортирует components/i18n.js.
+  - WalletSOL.js — Общий React-компонент Wallet SOL, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - WalletTON.js — Общий React-компонент Wallet TON, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - WalletTRON.js — Общий React-компонент Wallet TRON, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - Web3Provider.js — Общий React-компонент Web3 Provider, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- lib/ — Общие библиотеки, кеши, middleware-хелперы и инфраструктурные утилиты.
+  - geo/ — Каталог geo.
+    - countries.js — Общая библиотека/утилита countries инфраструктурного слоя. Связи: используется в app/ads/GeoTargetingPicker.jsx.
+    - regions.js — Общая библиотека/утилита regions инфраструктурного слоя. Связи: используется в app/ads/GeoTargetingPicker.jsx.
+  - adsCore.js — Общая библиотека/утилита ads Core инфраструктурного слоя. Связи: используется в app/api/ads/route.js, app/api/pay/create/route.js, app/api/pay/webhook/route.js.
+  - brain.js — Общая библиотека/утилита brain инфраструктурного слоя. Связи: используется в app/api/brain/analyze/route.js, app/api/market/summary/route.js, app/exchange/page.js.
+  - databroker.js — Общая библиотека/утилита databroker инфраструктурного слоя. Связи: используется в app/api/brain/analyze/route.js, app/api/market/summary/route.js.
+  - forumShareManager.js — Общая библиотека/утилита forum Share Manager инфраструктурного слоя. Связи: используется в forum/SharePopover.jsx.
+  - forumVideoTrim.js — Общая библиотека/утилита forum Video Trim инфраструктурного слоя. Связи: используется в forum/ForumRoot.jsx, forum/features/media/components/VideoTrimPopover.jsx, forum/features/media/utils/mediaRuntime.js.
+  - indicators.js — Общая библиотека/утилита indicators инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - metadataCache.js — Общая библиотека/утилита metadata Cache инфраструктурного слоя. Связи: используется в app/about/layout.js, app/academy/layout.js, app/ads/layout.js.
+  - redis.js — Общая библиотека/утилита redis инфраструктурного слоя. Связи: используется в app/api/telegram/link/confirm/route.js, app/api/telegram/link/resolve/route.js, app/api/telegram/link/start/route.js.
+  - safeWin.js — Общая библиотека/утилита safe Win инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - subscriptions.js — Общая библиотека/утилита subscriptions инфраструктурного слоя. Связи: используется в app/api/forum/vip/batch/route.js, app/api/pay/webhook/route.js, app/api/referral/hit/route.js.
+  - tma.js — Общая библиотека/утилита tma инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- public/ — Статические ассеты, доступные по публичным URL.
+  - academy/ — Подкаталог статических ассетов public/academy.
+    - ai_block_15.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ai_block_16.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ai_meta_block_17.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - chain_block_03.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - dao_meta_block_08.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - data_ai_block_14.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - defi_block_01 1.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - defi_block_01.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - defi_block_02.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - dev_data_block_13.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - gamefi_socialfi_block_11.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_ai_reg_block_19.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_09.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_21.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_22.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_23.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_24.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_25.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_26.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_27.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_28.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_29.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_gamefi_block_10.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_mix_block_18.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - nft_reg_ai_block_07.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - rwa_gamefi_mix_block_20.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - sec_trade_block_05.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - socialfi_dev_block_12.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - trade_nft_block_06.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - web3_sec_block_04.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - ads/ — Подкаталог статических ассетов public/ads.
+    - hero-preview.png — PNG-ассет из public/ads; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ql7-forum-global.png — PNG-ассет из public/ads; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - ai/ — Подкаталог статических ассетов public/ai.
+    - ai.gif — GIF-ассет из public/ai; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - audio/ — Подкаталог статических ассетов public/audio.
+    - cosmic.mp3 — MP3-ассет из public/audio; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - Q-Cast.png — PNG-ассет из public/audio; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - branding/ — Подкаталог статических ассетов public/branding.
+    - about-analytics.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - about-architecture.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - about-feed.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - about-loop 1.mp4 — MP4-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - about-poster.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - exchange_promo.png — PNG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - explain_promo.png — PNG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - forum_logo.png — PNG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - qc_room.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ql7-logo-512 1.png — PNG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ql7-logo-512.png — PNG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - quantum_l7_logo 1.png — PNG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - quantum_l7_logo 2.png — PNG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - quantum_l7_logo 3.png — PNG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - quantum_l7_logo 5.png — PNG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - quantum_l7_logo.png — PNG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - sub-hero.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - sub-start.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - telegram_card_tape_fixed_poster.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - telegram_card_tape_fixed.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - click/ — Подкаталог статических ассетов public/click.
+    - authorization 1.gif — GIF-ассет из public/click; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - authorization.gif — GIF-ассет из public/click; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - policy 1.png — PNG-ассет из public/click; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - policy.png — PNG-ассет из public/click; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - quest.gif — GIF-ассет из public/click; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - support 1.png — PNG-ассет из public/click; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - support.png — PNG-ассет из public/click; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - telegram.gif — GIF-ассет из public/click; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - coins/ — Подкаталог статических ассетов public/coins.
+    - battlecoin/ — Подкаталог статических ассетов public/battlecoin.
+      - logo.png — PNG-ассет из public/coins/battlecoin; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 0GUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 1INCHUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 1MBABYDOGEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 2ZUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 1000CATUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 1000CHEEMSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 1000SATSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - A2ZUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AAVEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ACAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ACEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ACHUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ACMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ACTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ACXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ADAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ADXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AEURUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AEVOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AGLDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AIXBTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ALCXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ALGOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ALICEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ALLOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ALPINEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ALTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AMPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ANIMEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ANKRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - APEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - API3USDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - APTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ARBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ARDRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ARKMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ARKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ARPAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ARUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ASRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ASTERUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ASTRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ATAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ATMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ATOMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ATUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AUCTIONUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AUDIOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AVAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AVAXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AVNTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AWEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AXLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AXSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BABYUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BANANAS31USDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BANANAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BANDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BANKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BARDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BARUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BATUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BCHUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BEAMXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BELUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BERAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BFUSDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BICOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BIFIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BIGTIMEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BIOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BLURUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BMTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BNBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BNSOLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BNTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BOMEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BONKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BREVUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BROCCOLI714USDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BTCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BTTCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - C98USDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CAKEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CATIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CELOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CELRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CETUSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CFXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CGPTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CHESSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CHRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CHZUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CITYUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CKBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - COMPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - COOKIEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - COSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - COTIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - COWUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CRVUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CTKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CTSIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CVCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CVXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CYBERUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DASHUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DATAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DCRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DEGOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DENTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DEXEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DFUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DGBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DIAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DODOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DOGEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DOGSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DOLOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DOTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DUSKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DYDXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DYMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - EDENUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - EDUUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - EGLDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - EIGENUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ENAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ENJUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ENSOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ENSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - EPICUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ERAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ETCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ETHFIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ETHUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - EULUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - EURIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - EURUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FARMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FDUSDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FETUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FFUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FIDAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FILUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FIOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FISUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FLOKIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FLOWUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FLUXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FORMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FORTHUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FTTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FUNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FXSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GALAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GASUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GHSTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GIGGLEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GLMRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GLMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GMTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GMXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GNOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GNSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GPSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GRTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GTCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GUNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HAEDALUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HBARUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HEIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HEMIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HFTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HIGHUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HIVEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HMSTRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HOLOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HOMEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HOOKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HOTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HUMAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HYPERUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ICPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ICXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - IDEXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - IDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ILVUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - IMXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - INITUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - INJUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - IOSTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - IOTAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - IOTXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - IOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - IQUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - JASMYUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - JOEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - JSTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - JTOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - JUPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - JUVUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - KAIAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - KAITOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - KAVAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - KERNELUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - KITEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - KMNOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - KNCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - KSMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LAYERUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LAZIOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LDOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LINEAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LINKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LISTAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LPTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LQTYUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LRCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LSKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LTCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LUMIAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LUNAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LUNCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MAGICUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MANAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MANTAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MASKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MAVUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MBLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MBOXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MDTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MEMEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - METISUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - METUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MINAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MIRAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MITOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MLNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MMTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MORPHOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MOVEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MOVRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MTLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MUBARAKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NEARUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NEIROUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NEOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NEWTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NEXOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NFPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NILUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NKNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NMRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NOMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NOTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NTRNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NXPCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - OGNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - OGUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - OMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ONDOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ONEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ONGUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ONTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - OPENUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - OPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ORCAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ORDIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - OSMOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - OXTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PARTIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PAXGUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PENDLEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PENGUUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PEOPLEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PEPEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PHAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PHBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PIVXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PIXELUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PLUMEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PNUTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - POLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - POLYXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PONDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PORTALUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PORTOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - POWRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PROMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PROVEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PSGUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PUMPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PUNDIXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PYRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PYTHUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - QIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - QKCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - QNTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - QTUMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - QUICKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RADUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RAREUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RAYUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RDNTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - REDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - REIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RENDERUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - REQUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RESOLVUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - REZUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RIFUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RLCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RONINUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ROSEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RPLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RSRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RUNEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RVNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SAGAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SAHARAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SANDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SANTOSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SAPIENUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SCRTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SCRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SEIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SFPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SHELLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SHIBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SIGNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SKLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SKYUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SLPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SNXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SOLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SOLVUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SOMIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SOPHUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SPELLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SPKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SSVUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - STEEMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - STGUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - STORJUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - STOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - STRAXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - STRKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - STXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SUIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SUNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SUPERUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SUSHIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SXPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SXTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SYNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SYRUPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SYSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TAOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TFUELUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - THETAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - THEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TIAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TKOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TLMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TNSRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TONUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TOWNSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TRBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TREEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TRUMPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TRUUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TRXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TSTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TURBOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TURTLEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TUSDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TUTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TWTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - UMAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - UNIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - USD1USDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - USDCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - USDEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - USDPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - USTCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - USUALUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - UTKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - VANAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - VANRYUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - VELODROMEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - VETUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - VICUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - VIRTUALUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - VOXELUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - VTHOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WALUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WANUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WAXPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WBETHUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WBTCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WCTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WIFUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WINUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WLDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WLFIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WOOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - XAIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - XECUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - XLMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - XNOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - XPLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - XRPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - XTZUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - XUSDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - XVGUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - XVSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - YBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - YFIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - YGGUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ZBTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ZECUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ZENUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ZILUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ZKCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ZKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ZROUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ZRXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 币安人生USDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - friends/ — Подкаталог статических ассетов public/friends.
+    - fb.png — PNG-ассет из public/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ig.png — PNG-ассет из public/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - invitation.gif — GIF-ассет из public/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - tg.png — PNG-ассет из public/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - viber.png — PNG-ассет из public/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - wa.png — PNG-ассет из public/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - x.png — PNG-ассет из public/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - fucher/ — Подкаталог статических ассетов public/fucher.
+    - fucher.png — PNG-ассет из public/fucher; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - game/ — Подкаталог статических ассетов public/game.
+    - 1.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - apk.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - game.gif — GIF-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif1.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif2.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif3.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif4.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif5.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif6.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif7.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif8.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif9.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif10.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ios.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - web.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - windows.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - icons/ — Подкаталог статических ассетов public/icons.
+    - instagram.png — PNG-ассет из public/icons; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - telegram.png — PNG-ассет из public/icons; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - tiktok.png — PNG-ассет из public/icons; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - twitter.png — PNG-ассет из public/icons; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - youtube.png — PNG-ассет из public/icons; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - isvip/ — Подкаталог статических ассетов public/isvip.
+    - 1.png — PNG-ассет из public/isvip; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 2.png — PNG-ассет из public/isvip; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - leng/ — Подкаталог статических ассетов public/leng.
+    - ar.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - en.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - es.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ru.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - tr.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - uk.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - zh.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - load/ — Подкаталог статических ассетов public/load.
+    - load.mp4 — MP4-ассет из public/load; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - metab/ — Подкаталог статических ассетов public/metab.
+    - about1.jpg — JPG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - academy1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ads1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - exchange1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - forum1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - game1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - home1.jpg — JPG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - subscription1.jpg — JPG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - models/ — Подкаталог статических ассетов public/models.
+    - nsfwjs/ — Подкаталог статических ассетов public/nsfwjs.
+      - group1-shard1of1 — Служебный-файл из public/models/nsfwjs; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - model.json — JSON-файл из public/models/nsfwjs; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - qcoind/ — Подкаталог статических ассетов public/qcoind.
+    - mini.mp4 — MP4-ассет из public/qcoind; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - Quest/ — Подкаталог статических ассетов public/Quest.
+    - q1/ — Подкаталог статических ассетов public/q1.
+      - 1.png — PNG-ассет из public/Quest/q1; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - 2.png — PNG-ассет из public/Quest/q1; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - 3.png — PNG-ассет из public/Quest/q1; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - 4.png — PNG-ассет из public/Quest/q1; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - 5.png — PNG-ассет из public/Quest/q1; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q1.mp4 — MP4-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q1.png — PNG-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q2.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q3.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q4.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q5.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q6.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q7.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q8.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q9.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q10.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - robot/ — Подкаталог статических ассетов public/robot.
+    - 1.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 2.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 3.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 4.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 5.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 6.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 7.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 8.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 9.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 10.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 11.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 12.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 13.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 14.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 15.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 16.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 17.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 18.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 19.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 20.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 21.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 22.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 23.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - robot.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - snow/ — Подкаталог статических ассетов public/snow.
+    - fx. 1png — . 1png-файл из public/snow; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - fx.png — PNG-ассет из public/snow; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - uploads/ — Подкаталог статических ассетов public/uploads.
+    - avatars/ — Подкаталог статических ассетов public/avatars.
+      - ava_0x8F49b54543_2b1a5851f8d04c349227.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_3ac73e94e23e43ce9d4a.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_3e772da4fa014c89ba1b.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_5f42899137284397a273.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_7e472c3b350f4899a482.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_48cb9ee3b4734e8f8df6.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_216f5cd128a64d0c9a46.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_421e9e5bfd0147369293.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_79140efcff7342219e38.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_2831984313e34dc3b970.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_b01aa1c556fa404aa600.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_d4d3abb7e9124da7abb9.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_d27f9cfff21441779b10.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_d384cdd74a6749ce9902.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_e59cee92e73e4e069e65.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_e72e70e7d5134bc79d86.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_f6fb87c689a44a4d8281.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_f08a385401e048f79b52.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - vip/ — Подкаталог статических ассетов public/vip.
+    - avatars/ — Подкаталог статических ассетов public/avatars.
+      - a1.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a2.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a3.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a4.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a5.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a6.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a7.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a8.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a9.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a10.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a11.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a12.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a13.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a14.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a15.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a16.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a17.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a18.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a19.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a20.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a21.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a22.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a23.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a24.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a25.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a26.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a27.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a28.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a29.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a30.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a31.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a32.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a33.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a34.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a35.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a36.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a37.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a38.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a39.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a40.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a41.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a42.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a43.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a44.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a45.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a46.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a47.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a48.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a49.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a50.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a51.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a52.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a53.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a54.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a55.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a56.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a57.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a58.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a59.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a60.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a61.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a62.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a63.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a64.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a65.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a66.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a67.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a68.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a69.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a70.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a71.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a72.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a73.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a74.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a75.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a76.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a77.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a78.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a79.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a80.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a81.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a82.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a83.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a84.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a85.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a86.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a87.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a88.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a89.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a90.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a91.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a92.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a93.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a94.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a95.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a96.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a97.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a98.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a99.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a100.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a101.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a102.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a103.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a104.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a105.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a106.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a107.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a108.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a109.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a110.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a111.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a112.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a113.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a114.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a115.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a116.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a117.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a118.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a119.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a120.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a121.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a122.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a123.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a124.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a125.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a126.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a127.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a128.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a129.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a130.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - emoji/ — Подкаталог статических ассетов public/emoji.
+      - e1.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e2.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e3.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e4.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e5.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e6.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e7.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e8.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e9.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e10.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e11.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e12.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e13.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e14.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e15.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e16.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e17.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e18.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e19.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e20.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e21.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e22.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e23.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e24.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e25.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e26.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e27.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e28.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e29.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e30.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e31.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e32.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e33.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e34.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e35.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e36.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e37.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e38.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e39.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e40.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e41.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e42.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e43.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e44.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e45.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e46.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e47.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e48.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e49.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e50.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e51.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e53.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e54.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e55.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e56.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e57.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e58.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e59.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e60.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e61.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e62.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e63.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e64.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e65.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e66.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e67.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e68.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e69.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e70.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e71.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e72.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e73.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e74.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e75.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e76.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e77.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e78.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e79.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e80.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e81.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e82.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e83.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e84.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e85.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e86.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e87.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e88.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e89.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e90.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e91.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e92.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e93.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e94.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e95.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e96.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e97.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e98.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e99.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e100.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e101.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e102.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e103.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e104.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e105.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e106.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e107.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e108.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e109.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e110.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e111.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e112.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e113.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e114.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e115.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e116.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e117.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e118.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e119.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e120.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e121.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e122.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e123.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e124.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e125.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e126.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e127.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e128.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e129.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e130.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e131.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e132.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e133.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e134.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e135.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e136.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e137.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e138.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e139.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e140.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e141.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e142.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e143.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e144.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e145.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e146.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e147.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e148.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e149.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e150.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - workers/ — Подкаталог статических ассетов public/workers.
+    - forum-trim-worker.js — JS-файл из public/workers; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - apple-touch-icon 1.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - apple-touch-icon-new.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - avatar.jpg — JPG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - compat.js — JS-файл из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - Exchange 1.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - Exchange 2.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - Exchange.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - favicon 111.ico — ICO-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - favicon-16 1.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - favicon-32 1.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - favicon-48 1.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - favicon-64 1.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - favicon-new-16.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - favicon-new-32.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - favicon-new-48.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - favicon-new-64.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - favicon-new.ico — ICO-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - icon 1.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - icon-192  1.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - icon-192.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - icon-new.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - qcoin-32.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - tonconnect-manifest.json — JSON-файл из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - upload.jpg — JPG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+- tools/ — Локальные скрипты аудита, генерации и техобслуживания.
+  - analyze-forum-diag.js — Локальный скрипт/инструмент analyze forum diag для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - analyze-forum-media-har.js — Локальный скрипт/инструмент analyze forum media har для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - analyze-heapsnapshot.js — Локальный скрипт/инструмент analyze heapsnapshot для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-account-sync.js — Локальный скрипт/инструмент audit account sync для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-ad-runtime.js — Локальный скрипт/инструмент audit ad runtime для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-auth-bus.js — Локальный скрипт/инструмент audit auth bus для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-effects.js — Локальный скрипт/инструмент audit effects для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-deps.js — Локальный скрипт/инструмент audit forum deps для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-functional-parity.ps1 — Локальный скрипт/инструмент audit forum functional parity для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-startup.js — Локальный скрипт/инструмент audit forum startup для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-view-report.js — Локальный скрипт/инструмент audit forum view report для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-full-forum.js — Локальный скрипт/инструмент audit full forum для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-heavy.js — Локальный скрипт/инструмент audit heavy для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-media-budget.js — Локальный скрипт/инструмент audit media budget для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-media.js — Локальный скрипт/инструмент audit media для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-project-docs.js — Локальный скрипт/инструмент audit project docs для аудита или техобслуживания. Связи: импортирует tools/project-docs-shared.js.
+  - audit-runtime-hotspots.js — Локальный скрипт/инструмент audit runtime hotspots для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - generate-project-dependencies.js — Локальный скрипт/инструмент generate project dependencies для аудита или техобслуживания. Связи: импортирует tools/project-docs-shared.js.
+  - generate-project-docs.js — Локальный скрипт/инструмент generate project docs для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - generate-project-ownership.js — Локальный скрипт/инструмент generate project ownership для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - generate-project-risks.js — Локальный скрипт/инструмент generate project risks для аудита или техобслуживания. Связи: импортирует tools/project-docs-shared.js.
+  - generate-project-routes.js — Локальный скрипт/инструмент generate project routes для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - generate-project-tree.js — Локальный скрипт/инструмент generate project tree для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - project-docs-shared.js — Локальный скрипт/инструмент project docs shared для аудита или техобслуживания. Связи: используется в tools/audit-project-docs.js, tools/generate-project-dependencies.js, tools/generate-project-risks.js.
+- .env.local — Локальный runtime-конфиг и секреты окружения. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- .env.local.example — Пример переменных окружения для локального запуска. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- .eslintrc.json — Конфигурация ESLint для всего проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- .gitignore — Правила исключения файлов из Git. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- account-sync-audit.report.json — Сводный JSON-отчет аудита синхронизации аккаунта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- ad-runtime.audit.report.json — JSON-файл ad runtime.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- AGENTS.md — Markdown-документ AGENTS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- auth-bus.audit.report.json — JSON-файл auth bus.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- deep-audit.report.json — Сводный JSON-отчет глубокого аудита проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- effects-leak.report.json — JSON-отчет аудита утечек эффектов. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- forum-deps-audit.report.json — JSON-отчет аудита зависимостей форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- forum-diag.jsonl — Потоковый лог диагностики форума в формате JSONL. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- forum-startup.audit.report.json — JSON-файл forum startup.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- heapsnapshot-analysis.report.json — JSON-файл heapsnapshot analysis.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- heavy-audit.report.json — JSON-отчет тяжелого аудита hot-path зон. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- jsconfig.json — Алиасы и baseUrl проекта для JS/JSX. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- media-audit.report.json — JSON-отчет аудита медиа-подсистемы. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- media-budget.audit.report.json — JSON-файл media budget.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- next-env.d.ts — Служебный файл Next.js для типовой совместимости среды. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- next.config.mjs — Главная конфигурация Next.js сборки и рантайма. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- package.json — Манифест пакета, npm/pnpm-скрипты и зависимости. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- pnpm-lock.yaml — Lockfile pnpm с зафиксированными версиями зависимостей. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- pnpm-workspace.yaml — Конфиг workspace для pnpm. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- PROJECT_DEPENDENCIES.md — Markdown-документ PROJECT DEPENDENCIES. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- PROJECT_OWNERSHIP.md — Markdown-документ PROJECT OWNERSHIP. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- PROJECT_RISKS.md — Markdown-документ PROJECT RISKS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- PROJECT_ROUTES.md — Markdown-документ PROJECT ROUTES. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- PROJECT_TREE.md — Markdown-документ PROJECT TREE. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- README.md — Корневая документация проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- runtime-hotspots.report.json — JSON-отчет по runtime-hotspots. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.

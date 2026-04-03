@@ -1,0 +1,43 @@
+﻿{
+    "phase":  "phase-10e-header-single-block-parity",
+    "timestamp":  "2026-03-08T18:20:55.8194695+02:00",
+    "scope":  [
+                  "forum-header-single-block",
+                  "collapse-behavior-parity",
+                  "tma-offset-parity"
+              ],
+    "touched_files":  [
+                          "app/forum/ForumHeaderPanel.jsx",
+                          "app/forum/features/feed/components/TopicsSection.jsx",
+                          "app/forum/features/feed/components/ThreadSection.jsx",
+                          "app/forum/features/ui/components/MainForumActionCluster.jsx",
+                          "app/forum/features/ui/components/ThreadForumActionCluster.jsx",
+                          "app/forum/styles/ForumStyles.jsx"
+                      ],
+    "new_files":  [
+
+                  ],
+    "moved_logic_domains":  [
+                                "ui/header-ownership",
+                                "ui/action-row-placement"
+                            ],
+    "dependency_changes":  [
+                               "No API/route/db contract changes"
+                           ],
+    "detected_risks":  [
+                           "Manual visual validation still required in /forum for exact spacing parity"
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "none",
+    "storage_risk":  "none",
+    "runtime_risk":  "low",
+    "notes":  [
+                  "targeted eslint ok",
+                  "forum-deps audit: cycles=0",
+                  "next build blocked by existing missing route /api/battlecoin/order (unrelated to forum patch)",
+                  "TMA head offsets kept from baseline: 45/90/120 px rules"
+              ],
+    "status":  "passed-with-unrelated-build-blocker"
+}

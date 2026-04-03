@@ -1,0 +1,18 @@
+﻿{
+  "phase": "114b",
+  "timestamp": "2026-03-10T12:43:34.8329769+02:00",
+  "scope": ["runtime-hotfix", "composer-progress-props-chain"],
+  "touched_files": ["app/forum/ForumRoot.jsx"],
+  "new_files": ["audit/forum-phase-114b-video-progress-reference-fix.json"],
+  "moved_logic_domains": ["forum-root-prop-wiring"],
+  "dependency_changes": ["videoProgress is now destructured from useForumComposerRuntime and passed downstream as intended"],
+  "detected_risks": [],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "checks": [
+    {"name":"eslint-targeted","status":"passed","detail":"pnpm eslint app/forum/ForumRoot.jsx --no-cache"}
+  ],
+  "status": "passed"
+}

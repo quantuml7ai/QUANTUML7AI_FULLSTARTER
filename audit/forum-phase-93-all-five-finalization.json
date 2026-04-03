@@ -1,0 +1,71 @@
+﻿{
+    "status":  "passed",
+    "touched_files":  [
+                          "app/forum/ForumRoot.jsx",
+                          "app/forum/features/ui/utils/buildForumRootPropBundles.js"
+                      ],
+    "detected_cycles":  [
+
+                        ],
+    "timestamp":  "2026-03-08T15:27:40.9464609+02:00",
+    "new_files":  [
+                      "app/forum/features/profile/hooks/useForumProfileSocialRuntime.js",
+                      "app/forum/features/moderation/hooks/useForumModerationRuntime.js",
+                      "app/forum/features/feed/hooks/useForumNavigationRuntime.js",
+                      "app/forum/features/ui/utils/propBundles/buildSearchSortControlsProps.js",
+                      "app/forum/features/ui/utils/propBundles/buildForumHeaderPanelProps.js",
+                      "app/forum/features/ui/utils/propBundles/buildActionClusterProps.js",
+                      "app/forum/features/ui/utils/propBundles/buildInboxPaneProps.js",
+                      "app/forum/features/ui/utils/propBundles/buildTopicsSwitchProps.js",
+                      "app/forum/features/ui/utils/propBundles/buildThreadRepliesPaneProps.js",
+                      "app/forum/features/ui/utils/propBundles/buildComposerCoreProps.js",
+                      "audit/forum-phase-93-all-five-finalization.json",
+                      "audit/forum-phase-93-final-parity.json",
+                      "audit/forum-final-ownership-map.json",
+                      "audit/forum-final-residual-monolith.json",
+                      "audit/forum-phase-09-final.json"
+                  ],
+    "storage_risk":  "low",
+    "api_contract_risk":  "low",
+    "notes":  [
+                  "Removed residual undefined identifiers in ForumRoot (setAdminOpen, questBtnClass handling).",
+                  "No server routes/handlers/db-utils were modified in this pass.",
+                  "Build + eslint + all audit scripts + baseline parity passed."
+              ],
+    "runtime_risk":  "low",
+    "moved_logic_domains":  [
+                                "profile/vip/subscriptions/qcoin orchestration -\u003e useForumProfileSocialRuntime",
+                                "report/admin/media moderation orchestration -\u003e useForumModerationRuntime",
+                                "navigation snapshot/back/go-home orchestration -\u003e useForumNavigationRuntime",
+                                "UI prop bundle assembly split into dedicated domain builders"
+                            ],
+    "scope":  [
+                  "app/forum/ForumRoot.jsx",
+                  "app/forum/features/profile/hooks/useForumProfileSocialRuntime.js",
+                  "app/forum/features/moderation/hooks/useForumModerationRuntime.js",
+                  "app/forum/features/feed/hooks/useForumNavigationRuntime.js",
+                  "app/forum/features/ui/utils/buildForumRootPropBundles.js",
+                  "app/forum/features/ui/utils/propBundles/*"
+              ],
+    "phase":  "forum-phase-93-all-five-finalization",
+    "dependency_changes":  {
+                               "forum_root_lines_after":  1599,
+                               "parity_hash_missing":  0,
+                               "forum_root_imports_after":  80,
+                               "parity_hash_total":  82,
+                               "forum_deps_cross_domain_edges":  111,
+                               "forum_deps_cycles":  0,
+                               "forum_root_lines_before":  1782,
+                               "parity_hash_same":  81,
+                               "forum_deps_scanned_files":  348,
+                               "build_prop_bundle_lines_after":  32,
+                               "forum_deps_internal_edges":  464,
+                               "build_prop_bundle_lines_before":  557,
+                               "forum_root_delta":  -183,
+                               "parity_hash_changed":  1
+                           },
+    "detected_risks":  [
+                           "Known baseline no-img warnings remain in app/ads/home.js, app/forum/ForumAds.js, components/AuthNavClient.jsx, components/NotRobot.jsx.",
+                           "Pre-existing heavy/effects hotspots remain in non-forum and media-performance paths (tracked by heavy/effects/runtime audits)."
+                       ]
+}

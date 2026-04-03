@@ -1,0 +1,51 @@
+{
+  "phase": "16-shared-helpers-extraction",
+  "timestamp": "2026-03-04T19:20:29Z",
+  "scope": [
+    "forum/shared",
+    "forum/root"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/shared/api/translate.js",
+    "app/forum/shared/utils/linkDetection.js"
+  ],
+  "new_files": [
+    "app/forum/shared/api/translate.js",
+    "app/forum/shared/utils/linkDetection.js",
+    "audit/forum-phase-16-shared-helpers.json"
+  ],
+  "moved_logic_domains": [
+    "deep-translate client wrapper moved to shared API layer",
+    "generic link detection moved to shared utility layer"
+  ],
+  "dependency_changes": {
+    "forum_root_imports": 1,
+    "cross_domain_edges": 58,
+    "cycles": 0
+  },
+  "detected_risks": [
+    "ForumRoot still contains high side-effect density (feed/media/DM orchestration)",
+    "Link detection remains regex-based and should stay covered by manual scenario checks"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "medium",
+  "notes": [
+    "No route changes: /api/deep-translate contract unchanged.",
+    "Call-sites for translate and link checks are preserved in place.",
+    "Extraction only changed ownership and import paths."
+  ],
+  "status": "completed",
+  "validation": {
+    "lint_targeted": "passed",
+    "build": "passed",
+    "audits": [
+      "tools/audit-forum-deps.js",
+      "tools/audit-full-forum.js",
+      "tools/audit-effects.js",
+      "tools/audit-media.js"
+    ]
+  }
+}

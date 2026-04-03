@@ -1,0 +1,18 @@
+﻿packages:
+  - '.'
+
+ignoredBuiltDependencies:
+  - core-js
+  - ffmpeg-static
+  - unrs-resolver
+
+onlyBuiltDependencies:
+  - '@vercel/speed-insights'
+  - blake-hash
+  - bufferutil
+  - keccak
+  - protobufjs
+  - sharp
+  - tiny-secp256k1
+  - usb
+  - utf-8-validate

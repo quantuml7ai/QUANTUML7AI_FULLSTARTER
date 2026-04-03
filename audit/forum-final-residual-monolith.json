@@ -1,0 +1,50 @@
+﻿{
+    "phase":  "final-residual-monolith",
+    "timestamp":  "2026-03-08T15:58:52.1980058+02:00",
+    "scope":  [
+                  "app/forum/ForumRoot.jsx"
+              ],
+    "status":  "passed_with_residuals",
+    "metrics":  {
+                    "forum_root_lines":  1410,
+                    "forum_root_imports":  63,
+                    "hooks_call_sites":  22,
+                    "feature_dirs":  10,
+                    "feature_files":  220
+                },
+    "residual_clusters":  [
+                              {
+                                  "id":  "prop_bundle_call_surface",
+                                  "severity":  "medium",
+                                  "detail":  "ForumRoot still passes a very large wiring object into buildForumRootPropBundles() for screen assembly."
+                              },
+                              {
+                                  "id":  "overlay_wiring_surface",
+                                  "severity":  "low",
+                                  "detail":  "Overlay/video/report/share/user-info props remain assembled in root runtime path (now centralized via buildForumLayoutProps)."
+                              },
+                              {
+                                  "id":  "legacy_warning_surface",
+                                  "severity":  "low",
+                                  "detail":  "Known pre-existing media/effects warnings remain outside this pass (autoplay/effect hotspots)."
+                              }
+                          ],
+    "detected_cycles":  [
+
+                        ],
+    "dependency_changes":  {
+                               "deps_audit_files_scanned":  355,
+                               "internal_edges":  471,
+                               "cross_domain_edges":  111,
+                               "cycles":  0
+                           },
+    "risks":  {
+                  "api_contract_risk":  "low",
+                  "runtime_risk":  "low_to_medium",
+                  "storage_risk":  "low"
+              },
+    "notes":  [
+                  "Residuals are architectural and non-breaking; functional parity remains verified.",
+                  "Next non-breaking step would be splitting ForumRoot wiring into ForumProviders + per-domain context adapters."
+              ]
+}

@@ -1,0 +1,140 @@
+{
+  "phase": "76-video-trim-controller-extraction",
+  "timestamp": "2026-03-06T03:52:00+02:00",
+  "scope": [
+    "forum media trim popover ownership extraction",
+    "forum video limit overlay ownership extraction",
+    "ForumRoot residual media effect reduction"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/media/hooks/useVideoTrimController.js"
+  ],
+  "new_files": [
+    "app/forum/features/media/hooks/useVideoTrimController.js"
+  ],
+  "moved_logic_domains": [
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/hooks/useVideoTrimController.js",
+      "logic": [
+        "video trim popover state and ref ownership",
+        "video trim open/close/start/apply actions",
+        "video duration limit overlay open/close actions",
+        "trim diagnostics events and composer scroll protection"
+      ]
+    }
+  ],
+  "dependency_changes": {
+    "ForumRoot_imports_added": [
+      "./features/media/hooks/useVideoTrimController"
+    ],
+    "ForumRoot_imports_removed": [
+      "clampTrimNum",
+      "trimVideoBlobNative"
+    ],
+    "ForumRoot_runtime_changes": [
+      "trim/limit callbacks are now wired from media hook return values",
+      "all callers keep same callback names: showVideoLimitOverlay/openVideoTrimPopover/applyVideoTrimPopover"
+    ]
+  },
+  "detected_risks": [
+    {
+      "id": "trim-callback-contract",
+      "level": "medium",
+      "detail": "open/show/apply trim callbacks are consumed by camera flow, attach flow, and create-post flow; mitigated by parity + build + deps/effects audits."
+    },
+    {
+      "id": "blob-url-lifecycle",
+      "level": "low",
+      "detail": "Blob URL revoke/set semantics were moved to hook; verified via lint/build and unchanged functional parity result."
+    }
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": {
+    "level": "low",
+    "detail": "No API route or payload contract changes in client/server boundaries."
+  },
+  "storage_risk": {
+    "level": "low",
+    "detail": "No storage key changes."
+  },
+  "runtime_risk": {
+    "level": "medium",
+    "detail": "Project-wide residual autoplay/effect hotspots remain from prior baseline; no new cycle or contract regression introduced."
+  },
+  "audit_runs": [
+    {
+      "command": "pnpm eslint app/forum/ForumRoot.jsx app/forum/features/media/hooks/useVideoTrimController.js app/forum/features/media/hooks/useForumComposerAttachments.js app/forum/features/feed/hooks/useForumCreatePostAction.js --no-cache",
+      "status": "passed"
+    },
+    {
+      "command": "node tools/audit-effects.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "node tools/audit-forum-deps.js",
+      "status": "passed",
+      "summary": {
+        "files_scanned": 278,
+        "cycles": 0,
+        "cross_domain_edges": 105
+      }
+    },
+    {
+      "command": "node tools/audit-heavy.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 40
+      }
+    },
+    {
+      "command": "node tools/audit-media.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "node tools/audit-runtime-hotspots.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 68
+      }
+    },
+    {
+      "command": "node tools/audit-full-forum.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 87
+      }
+    },
+    {
+      "command": "node tools/audit-account-sync.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 385
+      }
+    },
+    {
+      "command": "pnpm build",
+      "status": "passed_with_warnings",
+      "warnings": [
+        "existing no-img-element warnings in ads/forum/auth/notrobot components outside this extraction scope"
+      ]
+    },
+    {
+      "command": "powershell -ExecutionPolicy Bypass -File tools/audit-forum-functional-parity.ps1 -ZipPath \"C:\\\\Users\\\\BETEP\\\\Desktop\\\\СЕЙЧАС — копия.zip\" -OutputPath \"audit/forum-phase-76-final-parity.json\"",
+      "status": "passed",
+      "summary": {
+        "hash_total": 82,
+        "hash_same": 81,
+        "hash_changed": 1,
+        "unexpected_changed": []
+      }
+    }
+  ],
+  "notes": [
+    "ForumRoot no longer owns trim/limit overlay mutation internals.",
+    "Callback names used by existing subsystems remained stable to keep behavior parity.",
+    "Parity report confirms no unexpected server/API scope drift versus baseline zip."
+  ],
+  "status": "done"
+}

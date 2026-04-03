@@ -1,0 +1,47 @@
+{
+  "phase": "12-diagnostics-hook-extraction",
+  "timestamp": "2026-03-04T00:00:00Z",
+  "scope": [
+    "forum/diagnostics",
+    "forum/root"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+    "audit/forum-phase-12-diagnostics-hook.json"
+  ],
+  "moved_logic_domains": [
+    "diag emit throttling and media snapshot collection",
+    "global diagnostic lifecycle listeners (error/rejection/visibility/pagehide/beforeunload/scroll/tick)"
+  ],
+  "dependency_changes": {
+    "forum_root_imports": 1,
+    "cross_domain_edges": 54,
+    "cycles": 0
+  },
+  "detected_risks": [
+    "ForumRoot remains large and still owns media/feed orchestration",
+    "Diagnostics remains runtime-heavy by design due to global observers and periodic snapshots"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "low",
+  "storage_risk": "none",
+  "runtime_risk": "medium",
+  "notes": [
+    "Endpoint /api/debug/forum-diag and payload schema preserved.",
+    "All existing emitDiag call-sites in ForumRoot kept unchanged and now consume hook output."
+  ],
+  "status": "completed",
+  "validation": {
+    "lint_targeted": "passed",
+    "build": "passed",
+    "audits": [
+      "tools/audit-forum-deps.js",
+      "tools/audit-full-forum.js",
+      "tools/audit-effects.js",
+      "tools/audit-media.js"
+    ]
+  }
+}

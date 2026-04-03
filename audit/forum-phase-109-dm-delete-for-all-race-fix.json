@@ -1,0 +1,31 @@
+{
+  "phase": "109",
+  "timestamp": "2026-03-10T08:50:00+02:00",
+  "scope": [
+    "dm delete-for-all checkbox/confirm race condition fix"
+  ],
+  "touched_files": [
+    "app/forum/features/dm/hooks/useDmDeleteController.js"
+  ],
+  "new_files": [
+    "audit/forum-phase-109-dm-delete-for-all-race-fix.json"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "dm/delete",
+      "change": "forAll decision now prioritizes tracked ref truthy state to prevent stale false override."
+    }
+  ],
+  "dependency_changes": [],
+  "detected_risks": [
+    "None identified beyond existing server-side permissions and message existence checks."
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "low",
+  "storage_risk": "low",
+  "runtime_risk": "low",
+  "notes": [
+    "Validation: pnpm eslint on dm delete files passed."
+  ],
+  "status": "completed"
+}

@@ -1,0 +1,64 @@
+{
+  "phase": "39-video-media-adapter-extraction",
+  "timestamp": "2026-03-05T01:47:55.1841992+02:00",
+  "scope": {
+    "domain": "forum.features.media",
+    "goal": "replace local VideoMedia implementation in ForumRoot with adapter wrapper to feature module"
+  },
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [],
+  "moved_logic_domains": [
+    {
+      "domain": "media.video.lifecycle",
+      "from": "app/forum/ForumRoot.jsx::VideoMedia",
+      "to": "app/forum/features/media/components/VideoMedia.jsx"
+    }
+  ],
+  "dependency_changes": [
+    {
+      "type": "import_added",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/components/VideoMedia.jsx"
+    },
+    {
+      "type": "adapter_contract",
+      "owner": "ForumRoot",
+      "details": [
+        "readMutedPref",
+        "writeMutedPref",
+        "mutedEventName",
+        "restoreVideoEl",
+        "touchActiveVideo",
+        "enforceActiveVideoCap",
+        "isVideoNearViewport",
+        "mediaVisMarginPx",
+        "dropActiveVideo",
+        "unloadVideoEl"
+      ]
+    }
+  ],
+  "detected_risks": [
+    "ForumRoot remains heavy and still has residual RAF/timer complexity outside VideoMedia adapter",
+    "QCastPlayer is still local and not yet extracted"
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "low",
+  "storage_risk": "low",
+  "runtime_risk": "low_to_medium",
+  "audit": {
+    "eslint": "pass",
+    "audit_forum_deps": "pass",
+    "audit_full_forum": "pass_with_known_hotspots",
+    "audit_effects": "pass_with_known_residual_warnings",
+    "audit_media": "pass_with_expected_video_autoplay_flags",
+    "audit_heavy": "pass_with_known_hotspots",
+    "build": "pass"
+  },
+  "notes": [
+    "Behavior preserved by keeping all root-owned helper functions and passing them as adapter props.",
+    "No API routes, handlers, db utils, or storage keys were changed in this phase."
+  ],
+  "status": "completed"
+}

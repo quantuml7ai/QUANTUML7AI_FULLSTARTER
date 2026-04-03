@@ -1,0 +1,74 @@
+{
+  "phase": "42-qcast-component-extraction",
+  "timestamp": "2026-03-05T02:11:37.5340463+02:00",
+  "scope": {
+    "domain": "forum.features.media.qcast",
+    "goal": "move QCastPlayer ownership from ForumRoot to media feature component with adapter wiring"
+  },
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/media/components/QCastPlayer.jsx"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "media.qcast.player.lifecycle",
+      "from": "app/forum/ForumRoot.jsx::QCastPlayer",
+      "to": "app/forum/features/media/components/QCastPlayer.jsx"
+    }
+  ],
+  "dependency_changes": [
+    {
+      "type": "import_added",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/components/QCastPlayer.jsx"
+    },
+    {
+      "type": "adapter_contract",
+      "owner": "ForumRoot",
+      "details": [
+        "readMutedPrefFromStorage",
+        "writeMutedPref",
+        "mutedEventName",
+        "rearmPooledFxNode"
+      ]
+    },
+    {
+      "type": "import_removed",
+      "from": "app/forum/ForumRoot.jsx",
+      "details": [
+        "formatMediaTime",
+        "buildQCastControlBars",
+        "QCastIconPlay",
+        "QCastIconPause",
+        "QCastIconBack10",
+        "QCastIconFwd10",
+        "QCastIconVolume",
+        "QCastIconGear"
+      ]
+    }
+  ],
+  "detected_risks": [
+    "ForumRoot still contains other heavy media/feed runtime orchestration not yet extracted",
+    "QCast internals still have known legacy structure and should be further split into hooks/services/components in later phases"
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "none",
+  "storage_risk": "low",
+  "runtime_risk": "low_to_medium",
+  "audit": {
+    "eslint": "pass",
+    "audit_forum_deps": "pass",
+    "audit_full_forum": "pass_with_known_hotspots",
+    "audit_effects": "pass_with_known_residual_warnings",
+    "audit_media": "pass_with_expected_media_flags",
+    "audit_heavy": "pass_with_known_hotspots",
+    "build": "pass"
+  },
+  "notes": [
+    "Behavior was preserved via adapter props from ForumRoot to QCastPlayer feature module.",
+    "No server routes, handlers, DB utils, or storage key schemas were changed."
+  ],
+  "status": "completed"
+}

@@ -1,0 +1,143 @@
+{
+  "phase": "63",
+  "timestamp": "2026-03-05T19:38:18.5791461+02:00",
+  "scope": "Large extraction of composer attachment pipeline and head collapse scroll orchestration from ForumRoot into dedicated hooks.",
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/media/hooks/useForumComposerAttachments.js",
+    "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+    "heavy-audit.report.json",
+    "media-audit.report.json",
+    "effects-leak.report.json",
+    "forum-deps-audit.report.json",
+    "runtime-hotspots.report.json",
+    "deep-audit.report.json",
+    "account-sync-audit.report.json"
+  ],
+  "new_files": [
+    "app/forum/features/media/hooks/useForumComposerAttachments.js",
+    "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+    "audit/forum-phase-63-composer-and-head-collapse-hooks.json"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "media.composer.attachments",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/hooks/useForumComposerAttachments.js",
+      "moved": [
+        "file input ownership",
+        "attach button flow (handleAttachClick)",
+        "image moderation/upload pipeline",
+        "video validation + trim/limit gates",
+        "video faststart optimization step",
+        "blob upload progress mapping",
+        "overlay/media ready transitions",
+        "upload success/error toasts + scroll restore"
+      ]
+    },
+    {
+      "domain": "ui.head-collapse",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+      "moved": [
+        "thread-enter header collapse + scroll-to-start",
+        "header auto open/close by scroll thresholds",
+        "header hide compensation logic for scroll clamping"
+      ]
+    }
+  ],
+  "dependency_changes": [
+    {
+      "type": "import-added",
+      "file": "app/forum/ForumRoot.jsx",
+      "value": "./features/media/hooks/useForumComposerAttachments"
+    },
+    {
+      "type": "import-added",
+      "file": "app/forum/ForumRoot.jsx",
+      "value": "./features/ui/hooks/useForumHeadCollapse"
+    },
+    {
+      "type": "legacy-removed",
+      "file": "app/forum/ForumRoot.jsx",
+      "value": "inline attachment upload pipeline block and inline head-collapse effects"
+    }
+  ],
+  "detected_risks": [
+    "Root still contains large navigation/video feed and composer-submit clusters; residual monolith risk remains.",
+    "Effects leak warnings moved from root to dedicated head-collapse hook; semantics preserved but audit still flags RAF imbalance heuristics.",
+    "No route contract changes were made; remaining risk is mostly from untouched large orchestration blocks."
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": {
+    "status": "low",
+    "details": [
+      "Upload and blob endpoints unchanged (`/api/forum/upload`, `/api/forum/blobUploadUrl`).",
+      "Mutate/report/admin/payment route usage untouched.",
+      "Payload and response handling for extracted paths preserved."
+    ]
+  },
+  "storage_risk": {
+    "status": "low",
+    "details": [
+      "No storage key migration in this phase.",
+      "Composer pending media semantics preserved."
+    ]
+  },
+  "runtime_risk": {
+    "status": "medium",
+    "details": [
+      "Runtime hotspot score of ForumRoot improved significantly but file remains large.",
+      "Head-collapse runtime moved into dedicated hook with same thresholds/RAF behavior."
+    ]
+  },
+  "audit_runs": [
+    {
+      "script": "pnpm eslint app/forum/ForumRoot.jsx app/forum/features/ui/hooks/useForumHeadCollapse.js app/forum/features/media/hooks/useForumComposerAttachments.js app/forum/features/feed/hooks/useForumViewTracking.js app/forum/features/feed/hooks/useForumMutationActions.js app/forum/features/feed/hooks/useForumMutationQueue.js --no-cache",
+      "result": "pass"
+    },
+    {
+      "script": "node tools/audit-heavy.js",
+      "result": "pass",
+      "notes": "ForumRoot heavy score=64."
+    },
+    {
+      "script": "node tools/audit-media.js",
+      "result": "pass"
+    },
+    {
+      "script": "node tools/audit-effects.js",
+      "result": "pass"
+    },
+    {
+      "script": "node tools/audit-forum-deps.js",
+      "result": "pass",
+      "notes": "cycles=0; crossDomainEdgeCount=101."
+    },
+    {
+      "script": "node tools/audit-runtime-hotspots.js",
+      "result": "pass",
+      "notes": "ForumRoot runtime-hotspots score=158."
+    },
+    {
+      "script": "node tools/audit-full-forum.js",
+      "result": "pass",
+      "notes": "ForumRoot deep score=113."
+    },
+    {
+      "script": "node tools/audit-account-sync.js",
+      "result": "pass"
+    },
+    {
+      "script": "pnpm build",
+      "result": "pass",
+      "notes": "Compiled successfully; only pre-existing next/no-img warnings in non-target files."
+    }
+  ],
+  "notes": [
+    "ForumRoot lines: 8079 (was 8466 before phase).",
+    "New hooks: useForumComposerAttachments.js (398 lines), useForumHeadCollapse.js (226 lines).",
+    "JS/JSX only; no TypeScript introduced."
+  ],
+  "status": "pass_with_residual_risks"
+}

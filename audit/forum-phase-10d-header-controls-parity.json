@@ -1,0 +1,46 @@
+﻿{
+    "phase":  "phase-10d-header-controls-parity",
+    "timestamp":  "2026-03-08T18:11:19.1167021+02:00",
+    "scope":  [
+                  "forum-header-controls",
+                  "vip-inline-with-search-sort",
+                  "header-collapse-sync-with-global-action-row"
+              ],
+    "touched_files":  [
+                          "app/forum/ForumHeaderPanel.jsx",
+                          "app/forum/features/ui/components/ForumSearchSortControls.jsx",
+                          "app/forum/features/ui/components/MainForumActionCluster.jsx",
+                          "app/forum/features/ui/components/ThreadForumActionCluster.jsx",
+                          "app/forum/features/ui/components/ForumActionRow.jsx",
+                          "app/forum/features/feed/components/TopicsSection.jsx",
+                          "app/forum/features/feed/components/ThreadSection.jsx",
+                          "app/forum/styles/ForumStyles.jsx"
+                      ],
+    "new_files":  [
+
+                  ],
+    "moved_logic_domains":  [
+                                "ui/header-controls-ownership",
+                                "ui/action-cluster-visibility"
+                            ],
+    "dependency_changes":  [
+                               "No API/route/db contract changes",
+                               "No new cross-feature ownership violations in dependency audit"
+                           ],
+    "detected_risks":  [
+                           "Header-collapse hide now controls entire forumActionCluster; verify expected UX for create-topic card visibility in collapsed state"
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "none",
+    "storage_risk":  "none",
+    "runtime_risk":  "low",
+    "notes":  [
+                  "build ok",
+                  "targeted eslint ok",
+                  "forum-deps audit: cycles=0",
+                  "effects audit warnings are pre-existing and outside this patch scope"
+              ],
+    "status":  "passed-with-manual-ui-check-required"
+}

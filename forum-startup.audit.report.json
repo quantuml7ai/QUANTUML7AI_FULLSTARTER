@@ -1,0 +1,248 @@
+{
+  "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
+  "generatedAt": "2026-04-03T07:19:08.983Z",
+  "report": [
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\AuthNavClient.jsx",
+      "counts": {
+        "dynamicImport": 0,
+        "ssrFalseDynamic": 0,
+        "providerGateNull": 7,
+        "web3Modal": 2,
+        "wagmi": 2,
+        "analytics": 0,
+        "beforeInteractiveScript": 0,
+        "topBarMount": 0,
+        "forumBootSplash": 0
+      },
+      "startupMarks": [],
+      "riskFlags": [
+        "provider returns null during startup path"
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\layout.js",
+      "counts": {
+        "dynamicImport": 5,
+        "ssrFalseDynamic": 5,
+        "providerGateNull": 1,
+        "web3Modal": 0,
+        "wagmi": 0,
+        "analytics": 8,
+        "beforeInteractiveScript": 4,
+        "topBarMount": 1,
+        "forumBootSplash": 0
+      },
+      "startupMarks": [
+        {
+          "line": 64,
+          "text": "if (typeof window.markForumStartup !== 'function') {"
+        },
+        {
+          "line": 65,
+          "text": "window.markForumStartup = function (label, extra) {"
+        }
+      ],
+      "riskFlags": [
+        "provider returns null during startup path",
+        "global analytics mounts in root layout"
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\providers.jsx",
+      "counts": {
+        "dynamicImport": 0,
+        "ssrFalseDynamic": 0,
+        "providerGateNull": 2,
+        "web3Modal": 2,
+        "wagmi": 9,
+        "analytics": 0,
+        "beforeInteractiveScript": 0,
+        "topBarMount": 0,
+        "forumBootSplash": 0
+      },
+      "startupMarks": [],
+      "riskFlags": [
+        "provider returns null during startup path",
+        "wallet runtime participates in root providers"
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\QCoinDropFX.jsx",
+      "counts": {
+        "dynamicImport": 0,
+        "ssrFalseDynamic": 0,
+        "providerGateNull": 3,
+        "web3Modal": 0,
+        "wagmi": 0,
+        "analytics": 0,
+        "beforeInteractiveScript": 0,
+        "topBarMount": 0,
+        "forumBootSplash": 0
+      },
+      "startupMarks": [],
+      "riskFlags": [
+        "provider returns null during startup path"
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\InviteFriendProvider.jsx",
+      "counts": {
+        "dynamicImport": 0,
+        "ssrFalseDynamic": 0,
+        "providerGateNull": 2,
+        "web3Modal": 0,
+        "wagmi": 0,
+        "analytics": 0,
+        "beforeInteractiveScript": 0,
+        "topBarMount": 0,
+        "forumBootSplash": 0
+      },
+      "startupMarks": [],
+      "riskFlags": [
+        "provider returns null during startup path"
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\ScrollTopPulse.js",
+      "counts": {
+        "dynamicImport": 0,
+        "ssrFalseDynamic": 0,
+        "providerGateNull": 1,
+        "web3Modal": 0,
+        "wagmi": 0,
+        "analytics": 0,
+        "beforeInteractiveScript": 0,
+        "topBarMount": 0,
+        "forumBootSplash": 0
+      },
+      "startupMarks": [],
+      "riskFlags": [
+        "provider returns null during startup path"
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\NotRobot.jsx",
+      "counts": {
+        "dynamicImport": 0,
+        "ssrFalseDynamic": 0,
+        "providerGateNull": 1,
+        "web3Modal": 0,
+        "wagmi": 0,
+        "analytics": 0,
+        "beforeInteractiveScript": 0,
+        "topBarMount": 0,
+        "forumBootSplash": 0
+      },
+      "startupMarks": [],
+      "riskFlags": [
+        "provider returns null during startup path"
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\ForumBootSplash.jsx",
+      "counts": {
+        "dynamicImport": 0,
+        "ssrFalseDynamic": 0,
+        "providerGateNull": 1,
+        "web3Modal": 0,
+        "wagmi": 0,
+        "analytics": 0,
+        "beforeInteractiveScript": 0,
+        "topBarMount": 0,
+        "forumBootSplash": 0
+      },
+      "startupMarks": [],
+      "riskFlags": [
+        "provider returns null during startup path"
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\page.js",
+      "counts": {
+        "dynamicImport": 0,
+        "ssrFalseDynamic": 0,
+        "providerGateNull": 0,
+        "web3Modal": 0,
+        "wagmi": 0,
+        "analytics": 0,
+        "beforeInteractiveScript": 0,
+        "topBarMount": 0,
+        "forumBootSplash": 1
+      },
+      "startupMarks": [
+        {
+          "line": 20,
+          "text": "window?.markForumStartup?.('forum_page_mount')"
+        }
+      ],
+      "riskFlags": [
+        "forum route mounts splash before feed"
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\TopBar.js",
+      "counts": {
+        "dynamicImport": 1,
+        "ssrFalseDynamic": 1,
+        "providerGateNull": 0,
+        "web3Modal": 0,
+        "wagmi": 0,
+        "analytics": 0,
+        "beforeInteractiveScript": 0,
+        "topBarMount": 0,
+        "forumBootSplash": 0
+      },
+      "startupMarks": [],
+      "riskFlags": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\layout.js",
+      "counts": {
+        "dynamicImport": 0,
+        "ssrFalseDynamic": 0,
+        "providerGateNull": 0,
+        "web3Modal": 0,
+        "wagmi": 0,
+        "analytics": 1,
+        "beforeInteractiveScript": 0,
+        "topBarMount": 0,
+        "forumBootSplash": 0
+      },
+      "startupMarks": [],
+      "riskFlags": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\BgAudio.js",
+      "counts": {
+        "dynamicImport": 0,
+        "ssrFalseDynamic": 0,
+        "providerGateNull": 0,
+        "web3Modal": 0,
+        "wagmi": 0,
+        "analytics": 0,
+        "beforeInteractiveScript": 0,
+        "topBarMount": 0,
+        "forumBootSplash": 0
+      },
+      "startupMarks": [],
+      "riskFlags": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumRoot.jsx",
+      "counts": {
+        "dynamicImport": 0,
+        "ssrFalseDynamic": 0,
+        "providerGateNull": 0,
+        "web3Modal": 0,
+        "wagmi": 0,
+        "analytics": 0,
+        "beforeInteractiveScript": 0,
+        "topBarMount": 0,
+        "forumBootSplash": 0
+      },
+      "startupMarks": [],
+      "riskFlags": []
+    }
+  ]
+}

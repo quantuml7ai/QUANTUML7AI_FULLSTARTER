@@ -1,0 +1,38 @@
+﻿{
+    "phase":  "phase-99-forum-global-css-isolation",
+    "timestamp":  "2026-03-08T16:49:27.3934071+02:00",
+    "scope":  [
+                  "forum style isolation against app/globals.css"
+              ],
+    "touched_files":  [
+                          "app/forum/styles/ForumStyles.jsx"
+                      ],
+    "new_files":  [
+
+                  ],
+    "moved_logic_domains":  [
+                                "none"
+                            ],
+    "dependency_changes":  [
+                               "Added high-specificity .forum_root overrides for generic selectors affected by app/globals.css (.btn/.tag/.item/.glass/.neon and semantic containers)."
+                           ],
+    "detected_risks":  [
+                           "Potential minor visual deltas in non-forum overlays that rely on global .btn look"
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "none",
+    "storage_risk":  "none",
+    "runtime_risk":  "low",
+    "notes":  [
+                  "Validated conflict source in app/globals.css generic .btn and global section/header/article selectors with !important",
+                  "Forum style content still sourced from baseline Forum.jsx and kept intact; isolation overrides appended as a boundary layer"
+              ],
+    "verification":  {
+                         "build_failure":  "PageNotFoundError for /api/academy/exam (outside forum styles)",
+                         "build":  "failed_unrelated",
+                         "eslint":  "pass"
+                     },
+    "status":  "ok_with_external_build_issue"
+}

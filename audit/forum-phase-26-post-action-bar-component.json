@@ -1,0 +1,49 @@
+{
+  "phase": "26-feed-post-action-bar-component",
+  "timestamp": "2026-03-04T20:05:09Z",
+  "scope": [
+    "forum/features/feed",
+    "forum/root"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/feed/components/PostActionBar.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/feed/components/PostActionBar.jsx",
+    "audit/forum-phase-26-post-action-bar-component.json"
+  ],
+  "moved_logic_domains": [
+    "Post action bar rendering and action-button wiring moved from PostCard in ForumRoot to features/feed/components/PostActionBar"
+  ],
+  "dependency_changes": {
+    "forum_root_imports": 1,
+    "cross_domain_edges": 74,
+    "cycles": 0
+  },
+  "detected_risks": [
+    "PostCard remains a large owner of media/text parsing and should be decomposed in further feed/media phases",
+    "Action bar still receives many callbacks from root; next step should move orchestration into feed controller/hooks"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "notes": [
+    "No server routes, backend handlers, or db utils were changed.",
+    "Button click semantics (fx/reactions/share/report/admin actions) preserved via direct prop wiring.",
+    "Hydration-sensitive counters keep HydrateText and suppressHydrationWarning in extracted component."
+  ],
+  "status": "completed",
+  "validation": {
+    "lint_targeted": "passed",
+    "build": "passed",
+    "audits": [
+      "tools/audit-forum-deps.js",
+      "tools/audit-full-forum.js",
+      "tools/audit-effects.js",
+      "tools/audit-media.js",
+      "tools/audit-heavy.js"
+    ]
+  }
+}

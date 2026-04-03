@@ -1,0 +1,127 @@
+{
+  "phase": "74-search-sort-controls-extraction",
+  "timestamp": "2026-03-06T02:44:30+02:00",
+  "scope": [
+    "header search/sort/quest/star controls extraction",
+    "ForumRoot duplicate controls block removal in main/thread branches"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/ui/components/ForumSearchSortControls.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/ui/components/ForumSearchSortControls.jsx"
+  ],
+  "moved_logic_domains": [
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/ui/components/ForumSearchSortControls.jsx",
+      "logic": [
+        "search input + search dropdown rendering",
+        "search result navigation handling",
+        "sort dropdown and star mode toggle",
+        "quest launch icon in controls rail"
+      ]
+    }
+  ],
+  "dependency_changes": {
+    "ForumRoot_imports_added": [
+      "./features/ui/components/ForumSearchSortControls"
+    ],
+    "ForumRoot_imports_removed": [
+      "./features/quests/components/QuestLaunchIcon"
+    ],
+    "ForumRoot_runtime_changes": [
+      "both duplicated controls fragments replaced by one reusable component",
+      "search/sort click semantics preserved through prop-wired callbacks"
+    ]
+  },
+  "detected_risks": [
+    {
+      "id": "search-dropdown-callback-wiring",
+      "level": "low",
+      "detail": "Component now receives many callbacks/refs; verified that openOnly/search-open and post/topic thread-open flows are preserved."
+    },
+    {
+      "id": "jsx-nesting-regression",
+      "level": "low",
+      "detail": "During extraction two JSX close tags drifted; corrected and revalidated with lint/build."
+    }
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": {
+    "level": "low",
+    "detail": "No API contract changes; only client UI ownership moved."
+  },
+  "storage_risk": {
+    "level": "low",
+    "detail": "No storage key changes."
+  },
+  "runtime_risk": {
+    "level": "medium",
+    "detail": "Pre-existing media/effects residual warnings remain. No new build/lint failures."
+  },
+  "audit_runs": [
+    {
+      "command": "pnpm eslint app/forum/ForumRoot.jsx app/forum/features/ui/components/ForumSearchSortControls.jsx app/forum/features/ui/components/ForumActionRow.jsx app/forum/features/quests/components/QuestLaunchIcon.jsx app/forum/features/profile/components/ForumVipControl.jsx app/forum/features/profile/hooks/useVipPayAction.js --no-cache",
+      "status": "passed"
+    },
+    {
+      "command": "node tools/audit-heavy.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 56
+      }
+    },
+    {
+      "command": "node tools/audit-media.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "node tools/audit-effects.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "node tools/audit-forum-deps.js",
+      "status": "passed",
+      "summary": {
+        "cycles": 0,
+        "cross_domain_edges": 104
+      }
+    },
+    {
+      "command": "node tools/audit-runtime-hotspots.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 85
+      }
+    },
+    {
+      "command": "node tools/audit-full-forum.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 99
+      }
+    },
+    {
+      "command": "node tools/audit-account-sync.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 395
+      }
+    },
+    {
+      "command": "pnpm build",
+      "status": "passed_with_warnings",
+      "warnings": [
+        "existing no-img-element warnings outside ForumRoot controls scope"
+      ]
+    }
+  ],
+  "notes": [
+    "ForumRoot duplicate search/sort/quest/star UI removed from two branches.",
+    "Residual runtime hotspot score improved from 91 to 85.",
+    "Feature ownership now cleaner: controls UI in features/ui, quest icon in features/quests, vip in features/profile."
+  ],
+  "status": "done"
+}

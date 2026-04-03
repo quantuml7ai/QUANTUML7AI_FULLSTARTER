@@ -1,0 +1,47 @@
+﻿{
+    "phase":  "phase-10d-style-parity-integration",
+    "timestamp":  "2026-03-08T17:37:53.1136971+02:00",
+    "scope":  [
+                  "app/forum/ForumLayout.jsx",
+                  "app/forum/ForumRoot.jsx",
+                  "forum style runtime parity with baseline source"
+              ],
+    "touched_files":  [
+                          "app/forum/ForumLayout.jsx",
+                          "app/forum/ForumRoot.jsx"
+                      ],
+    "new_files":  [
+                      "audit/forum-phase-10d-style-parity-integration.json"
+                  ],
+    "moved_logic_domains":  [
+                                "none (style integration rollback only)"
+                            ],
+    "dependency_changes":  [
+                               "ForumLayout now uses style components (ForumFxStyles + Styles) instead of runtime head style injection",
+                               "ForumRoot no longer sets html[data-forum-active] runtime marker"
+                           ],
+    "detected_risks":  [
+                           "Residual visual deltas may still exist if non-style markup diverged from baseline in feature components",
+                           "Build pipeline has unrelated Next trace ENOENT in .next after static generation"
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "none (no API path changed)",
+    "storage_risk":  "none (no storage keys/restore paths changed)",
+    "runtime_risk":  "low: style order restored to baseline pattern; no business logic changes in this pass",
+    "notes":  [
+                  "Verified baseline style payloads already matched source file C:/Users/BETEP/OneDrive/Рабочий стол/Тесты Мув атом/СЕЙЧАС/app/forum/Forum.jsx",
+                  "Removed temporary style isolation marker usage (data-forum-active)",
+                  "Ran eslint for changed files",
+                  "Ran audit-heavy/media/effects scripts"
+              ],
+    "checks":  {
+                   "eslint_for_changed_files":  "pass",
+                   "build":  "compile/static generation pass, final trace step failed with ENOENT (unrelated infra issue)",
+                   "audit_heavy":  "pass (report generated)",
+                   "audit_media":  "pass (report generated)",
+                   "audit_effects":  "pass (report generated)"
+               },
+    "status":  "completed_with_infra_warning"
+}

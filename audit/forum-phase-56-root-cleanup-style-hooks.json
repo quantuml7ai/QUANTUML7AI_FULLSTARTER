@@ -1,0 +1,79 @@
+{
+  "phase": "phase-56-root-cleanup-style-hooks",
+  "timestamp": "2026-03-05T12:51:46.162Z",
+  "scope": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/ui/hooks/useForumAdSlots.js",
+    "app/forum/features/ui/hooks/useScrollResizeCompensation.js",
+    "app/forum/styles/ForumFxStyles.jsx",
+    "app/forum/styles/modules/fxStyles.js"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/ui/hooks/useForumAdSlots.js",
+    "app/forum/features/ui/hooks/useScrollResizeCompensation.js",
+    "app/forum/styles/ForumFxStyles.jsx",
+    "app/forum/styles/modules/fxStyles.js"
+  ],
+  "new_files": [
+    "app/forum/features/ui/hooks/useForumAdSlots.js",
+    "app/forum/features/ui/hooks/useScrollResizeCompensation.js",
+    "app/forum/styles/ForumFxStyles.jsx",
+    "app/forum/styles/modules/fxStyles.js"
+  ],
+  "moved_logic_domains": [
+    "features.ui.ad-slot-orchestration",
+    "features.ui.scroll-resize-compensation",
+    "styles.fx-header-coin-burst"
+  ],
+  "dependency_changes": {
+    "forumRoot_imports": {
+      "added": [
+        "./features/ui/hooks/useForumAdSlots",
+        "./features/ui/hooks/useScrollResizeCompensation",
+        "./styles/ForumFxStyles"
+      ],
+      "removed": [
+        "./features/ui/utils/adsSlots (direct util usage in root)"
+      ]
+    }
+  },
+  "detected_risks": [
+    "Ad slot selection now routed through hook wrapper; behavior preserved by delegating to existing util",
+    "Scroll compensation moved to dedicated hook; callback semantics preserved",
+    "FX style block moved from ForumRoot render into ForumFxStyles module"
+  ],
+  "detected_cycles": {
+    "forum_deps_cycle_count": 0,
+    "forum_deps_cycles": 0
+  },
+  "api_contract_risk": "none (client API call signatures unchanged)",
+  "storage_risk": "none",
+  "runtime_risk": {
+    "forum_root_heavy_score": 103,
+    "forum_root_runtime_score": 298,
+    "forum_root_lines": 11245,
+    "forum_root_useEffect_count": 114,
+    "forum_root_useCallback_count": 150,
+    "note": "Build passed; remaining warnings are existing no-img warnings outside this phase scope"
+  },
+  "notes": {
+    "audits_run": [
+      "pnpm eslint app/forum --ext .js,.jsx --no-cache",
+      "node tools/audit-forum-deps.js",
+      "node tools/audit-full-forum.js",
+      "node tools/audit-effects.js",
+      "node tools/audit-media.js",
+      "node tools/audit-heavy.js",
+      "node tools/audit-account-sync.js",
+      "node tools/audit-runtime-hotspots.js",
+      "pnpm build"
+    ],
+    "status_summary": {
+      "lint": "ok (1 warning: app/forum/ForumAds.js no-img)",
+      "build": "ok",
+      "forum_deps_cycles": 0
+    }
+  },
+  "status": "ok"
+}

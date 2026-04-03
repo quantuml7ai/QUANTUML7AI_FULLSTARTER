@@ -1,0 +1,42 @@
+{
+  "phase": "107",
+  "timestamp": "2026-03-10T08:20:00+02:00",
+  "scope": [
+    "dm delete-for-all correctness after optimistic overlay close",
+    "dm loading badge centering"
+  ],
+  "touched_files": [
+    "app/forum/features/dm/hooks/useDmDeleteController.js",
+    "app/forum/features/dm/components/DmDialogsPane.jsx",
+    "app/forum/features/dm/components/DmThreadLoadMore.jsx",
+    "app/forum/styles/modules/dmStyles.js",
+    "app/forum/styles/modules/qcoinStyles.js",
+    "app/forum/styles/ForumStyles.jsx"
+  ],
+  "new_files": [
+    "audit/forum-phase-107-dm-delete-for-all-fix-and-loading-center.json"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "dm/delete",
+      "change": "Delete-for-all checkbox state is now read from a live ref to prevent stale state and accidental local-only delete."
+    },
+    {
+      "domain": "dm/ui-loading",
+      "change": "Load-more sentinel moved out of the badge row so loading badge stays centered in DM list/thread."
+    }
+  ],
+  "dependency_changes": [],
+  "detected_risks": [
+    "If users rely on function-form setter for delete-for-all state, tracked setter still supports it but coerces to boolean."
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "low",
+  "storage_risk": "low",
+  "runtime_risk": "low",
+  "notes": [
+    "Validation: pnpm eslint on touched files passed.",
+    "Validation: pnpm build passed (existing non-blocking no-img warnings remain)."
+  ],
+  "status": "completed"
+}

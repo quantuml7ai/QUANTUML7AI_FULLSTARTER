@@ -1,0 +1,28 @@
+﻿{
+  "phase": "forum-phase-124-mobile-qcoin-center-pencil",
+  "timestamp": "2026-03-11T14:18:13",
+  "scope": [
+    "forum header mobile qcoin centering",
+    "about rail pencil visibility"
+  ],
+  "touched_files": [
+    "app/forum/styles/ForumStyles.jsx",
+    "app/forum/styles/modules/qcoinStyles.js",
+    "app/forum/styles/modules/profileStyles.js"
+  ],
+  "new_files": [],
+  "moved_logic_domains": [],
+  "dependency_changes": [],
+  "detected_risks": [
+    "build currently blocked by unrelated route issue /api/brain/analyze"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "notes": [
+    "mobile qcoin block centered within right header zone",
+    "about rail pencil forced back to white and made visible while rail pulse remains clipped horizontally"
+  ],
+  "status": "passed_with_external_build_blocker"
+}

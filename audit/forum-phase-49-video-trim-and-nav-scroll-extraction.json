@@ -1,0 +1,85 @@
+{
+  "phase": "49-video-trim-and-nav-scroll-extraction",
+  "timestamp": "2026-03-05T12:16:53.5590242+02:00",
+  "scope": {
+    "domain": "forum.root-decomposition",
+    "goal": "extract heavy VideoTrimPopover and nav scroll helper cluster from ForumRoot while preserving behavior"
+  },
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/media/components/VideoTrimPopover.jsx",
+    "app/forum/features/feed/utils/navScroll.js"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "media.video-trim-overlay",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/components/VideoTrimPopover.jsx",
+      "symbols": [
+        "VideoTrimPopover"
+      ]
+    },
+    {
+      "domain": "feed.navigation.scroll-restore",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/feed/utils/navScroll.js",
+      "symbols": [
+        "getScrollSnapshot",
+        "getEntryOffset",
+        "restoreScrollSnapshot",
+        "restoreEntryPosition"
+      ]
+    }
+  ],
+  "dependency_changes": [
+    {
+      "type": "imports_added",
+      "file": "app/forum/ForumRoot.jsx",
+      "details": [
+        "features/media/components/VideoTrimPopover",
+        "features/feed/utils/navScroll"
+      ]
+    },
+    {
+      "type": "imports_removed",
+      "file": "app/forum/ForumRoot.jsx",
+      "details": [
+        "lib/forumVideoTrim::buildForumVideoFilmstrip"
+      ]
+    },
+    {
+      "type": "legacy_root_functions_removed",
+      "file": "app/forum/ForumRoot.jsx",
+      "count": 5
+    }
+  ],
+  "detected_risks": [
+    "ProfilePopover and nav state orchestration are still large inside ForumRoot",
+    "Known historical effect warnings remain and are not behavior changes from this phase"
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "audit": {
+    "eslint": "pass",
+    "audit_forum_deps": "pass",
+    "audit_full_forum": "pass_with_known_hotspots",
+    "audit_effects": "pass_with_known_residual_warnings",
+    "audit_media": "pass_with_expected_media_flags",
+    "audit_heavy": "pass_with_known_hotspots",
+    "build": "pass"
+  },
+  "metrics": {
+    "forum_root_lines": 12956,
+    "forum_root_function_count": 30,
+    "forum_root_use_effect_count": 119
+  },
+  "notes": [
+    "No server routes, backend handlers, db utils, or storage keys were changed.",
+    "Video trim UX and media pipeline were preserved by moving code as-is into feature component."
+  ],
+  "status": "completed"
+}

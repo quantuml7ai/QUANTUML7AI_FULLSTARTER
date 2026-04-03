@@ -1,0 +1,48 @@
+﻿{
+    "phase":  "forum-phase-103-avatar-propagation-flicker-fix",
+    "timestamp":  "2026-03-10T08:56:30.4726849+02:00",
+    "scope":  [
+                  "app/forum/features/profile",
+                  "app/forum/features/feed/hooks/useForumSseBridge.js",
+                  "app/api/profile/save-nick/route.js"
+              ],
+    "touched_files":  [
+                          "app/forum/features/profile/components/AvatarEmoji.jsx",
+                          "app/forum/features/profile/components/ProfilePopover.jsx",
+                          "app/api/profile/save-nick/route.js"
+                      ],
+    "new_files":  [
+
+                  ],
+    "moved_logic_domains":  [
+                                "profile/avatar render stability",
+                                "profile update alias propagation"
+                            ],
+    "dependency_changes":  {
+                               "avatar_loader":  "AvatarEmoji preloads target avatar and retries in background",
+                               "sse_payload":  "profile.updated now carries raw/source ids",
+                               "client_request":  "save-nick request now sends raw/source ids"
+                           },
+    "detected_risks":  [
+                           "profile.updated payload expanded; legacy consumers should ignore extra fields",
+                           "background retry timer per broken avatar URL"
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low",
+    "runtime_risk":  "low",
+    "notes":  [
+                  "No behavior change for successful avatar loads",
+                  "Fallback image remains stable until target avatar is successfully reachable",
+                  "Cross-client alias hydration improved for mixed raw/canonical ids"
+              ],
+    "status":  "passed",
+    "verification":  {
+                         "functional_parity":  "failed_expected_changed_files_only",
+                         "deps_audit":  "passed",
+                         "build":  "passed_with_warnings",
+                         "eslint":  "passed"
+                     }
+}

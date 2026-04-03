@@ -1,0 +1,45 @@
+﻿{
+    "phase":  "forum-phase-90-shell-cleanup-and-noise-reduction",
+    "timestamp":  "2026-03-08T14:47:45.2642325+02:00",
+    "scope":  [
+                  "app/forum/ForumRoot.jsx",
+                  "app/forum/features/ui/hooks/useForumSessionShell.js",
+                  "app/forum/features/media/utils/videoFeedScroll.js"
+              ],
+    "touched_files":  [
+                          "app/forum/ForumRoot.jsx",
+                          "app/forum/features/media/utils/videoFeedScroll.js"
+                      ],
+    "new_files":  [
+                      "app/forum/features/ui/hooks/useForumSessionShell.js"
+                  ],
+    "moved_logic_domains":  [
+                                "auth sync + media lock + share/user-info popover state moved from ForumRoot to features/ui/hooks/useForumSessionShell.js",
+                                "ForumRoot import surface cleaned from dead direct UI/component imports",
+                                "media scroll util got JSDoc shape contracts to remove low-quality any hints in editor"
+                            ],
+    "dependency_changes":  {
+                               "forum_root_line_count_before":  2237,
+                               "forum_root_line_count_after":  2098,
+                               "forum_root_line_delta":  -139,
+                               "forum_dependency_files_scanned":  334,
+                               "forum_dependency_cycles":  0,
+                               "forum_cross_domain_edges":  109
+                           },
+    "detected_risks":  [
+                           "Legacy no-img warnings remain outside current refactor scope (ads/home, ForumAds, shared components).",
+                           "Known non-forum effects audit warnings remain in unrelated modules."
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low",
+    "runtime_risk":  "low",
+    "notes":  [
+                  "ForumRoot passes no-unused-vars:error after cleanup",
+                  "Build passed",
+                  "Parity check against baseline zip passed with expected single changed file (app/forum/Forum.jsx thin wrapper)"
+              ],
+    "status":  "passed"
+}

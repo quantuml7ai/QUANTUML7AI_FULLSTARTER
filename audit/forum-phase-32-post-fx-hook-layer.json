@@ -1,0 +1,53 @@
+{
+  "phase": "32-feed-post-fx-hook-layer",
+  "timestamp": "2026-03-04T21:37:25Z",
+  "scope": [
+    "forum/features/feed",
+    "forum/root",
+    "forum/post-fx"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/feed/hooks/usePostFx.js",
+    "app/forum/features/feed/components/PostFxLayer.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/feed/hooks/usePostFx.js",
+    "app/forum/features/feed/components/PostFxLayer.jsx",
+    "audit/forum-phase-32-post-fx-hook-layer.json"
+  ],
+  "moved_logic_domains": [
+    "Post emoji FX pooled behavior moved from PostCard in ForumRoot to features/feed/hooks/usePostFx",
+    "Post FX layer DOM rendering moved from PostCard in ForumRoot to features/feed/components/PostFxLayer"
+  ],
+  "dependency_changes": {
+    "forum_root_imports": 1,
+    "cross_domain_edges": 75,
+    "cycles": 0
+  },
+  "detected_risks": [
+    "Post FX still depends on root-level helper __rearmPooledFxNode via adapter prop and should be normalized to shared primitive later",
+    "QCast has a separate FX path with duplicated ideas; unification is still pending"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "notes": [
+    "No server/API/db contract changes.",
+    "PostActionBar integration preserved by passing runPostButtonFx from usePostFx.",
+    "ForumRoot deep risk score reduced from 496 to 448 after extraction."
+  ],
+  "status": "completed",
+  "validation": {
+    "lint_targeted": "passed",
+    "build": "passed",
+    "audits": [
+      "tools/audit-forum-deps.js",
+      "tools/audit-full-forum.js",
+      "tools/audit-effects.js",
+      "tools/audit-media.js",
+      "tools/audit-heavy.js"
+    ]
+  }
+}

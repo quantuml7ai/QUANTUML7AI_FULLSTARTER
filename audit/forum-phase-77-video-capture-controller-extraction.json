@@ -1,0 +1,139 @@
+{
+  "phase": "77-video-capture-controller-extraction",
+  "timestamp": "2026-03-06T04:02:00+02:00",
+  "scope": [
+    "camera recording state-machine extraction from ForumRoot",
+    "overlay accept/reset flow extraction",
+    "media pipeline cancel flow extraction"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/media/hooks/useVideoCaptureController.js"
+  ],
+  "new_files": [
+    "app/forum/features/media/hooks/useVideoCaptureController.js"
+  ],
+  "moved_logic_domains": [
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/hooks/useVideoCaptureController.js",
+      "logic": [
+        "camera start/stop/processing/preview lifecycle",
+        "front-camera unmirror capture path",
+        "recorded-duration fallback/guard logic",
+        "blob URL lifecycle for camera output",
+        "media cancel pipeline action",
+        "overlay close/accept/reset branching"
+      ]
+    }
+  ],
+  "dependency_changes": {
+    "ForumRoot_imports_added": [
+      "./features/media/hooks/useVideoCaptureController"
+    ],
+    "ForumRoot_runtime_changes": [
+      "ForumRoot now consumes startVideo/stopVideo/resetVideo/cancelMediaOperation/resetOrCloseOverlay from media hook",
+      "existing callback names and call sites are preserved",
+      "camera long-video path still delegates to openVideoTrimPopover"
+    ]
+  },
+  "detected_risks": [
+    {
+      "id": "camera-state-machine-extraction",
+      "level": "medium",
+      "detail": "High-churn camera lifecycle moved from root to hook; mitigated by keeping identical callback contracts and full parity/build/audit pass."
+    },
+    {
+      "id": "overlay-reset-flow",
+      "level": "medium",
+      "detail": "Global back and overlay reset rely on resetOrCloseOverlay semantics; preserved and validated through navigation/media audits."
+    }
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": {
+    "level": "low",
+    "detail": "No route/payload/db-util contract changes."
+  },
+  "storage_risk": {
+    "level": "low",
+    "detail": "No storage key changes."
+  },
+  "runtime_risk": {
+    "level": "medium",
+    "detail": "Residual project-wide autoplay/effect hotspots remain from baseline; forum root risk score improved after extraction."
+  },
+  "audit_runs": [
+    {
+      "command": "pnpm eslint app/forum/ForumRoot.jsx app/forum/features/media/hooks/useVideoCaptureController.js --no-cache",
+      "status": "passed"
+    },
+    {
+      "command": "node tools/audit-effects.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "node tools/audit-forum-deps.js",
+      "status": "passed",
+      "summary": {
+        "files_scanned": 279,
+        "cycles": 0,
+        "cross_domain_edges": 105
+      }
+    },
+    {
+      "command": "node tools/audit-heavy.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 38
+      }
+    },
+    {
+      "command": "node tools/audit-media.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "node tools/audit-runtime-hotspots.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 65
+      }
+    },
+    {
+      "command": "node tools/audit-full-forum.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 85
+      }
+    },
+    {
+      "command": "node tools/audit-account-sync.js",
+      "status": "passed_with_residuals",
+      "summary": {
+        "forum_root_score": 385
+      }
+    },
+    {
+      "command": "pnpm build",
+      "status": "passed_with_warnings",
+      "warnings": [
+        "existing no-img-element warnings outside this extraction scope"
+      ]
+    },
+    {
+      "command": "powershell -ExecutionPolicy Bypass -File tools/audit-forum-functional-parity.ps1 -ZipPath \"C:\\\\Users\\\\BETEP\\\\Desktop\\\\СЕЙЧАС — копия.zip\" -OutputPath \"audit/forum-phase-77-final-parity.json\"",
+      "status": "passed",
+      "summary": {
+        "hash_total": 82,
+        "hash_same": 81,
+        "hash_changed": 1,
+        "unexpected_changed": []
+      }
+    }
+  ],
+  "notes": [
+    "ForumRoot reduced to 5549 lines from previous 5830 lines in this pass.",
+    "Camera + overlay lifecycle ownership is now in media hook layer.",
+    "All server/API/DB contracts remained unchanged."
+  ],
+  "status": "done"
+}

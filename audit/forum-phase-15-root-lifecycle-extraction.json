@@ -1,0 +1,62 @@
+{
+  "phase": "15-root-lifecycle-extraction",
+  "timestamp": "2026-03-06T03:36:00+02:00",
+  "scope": [
+    "forum root",
+    "ui composer lifecycle",
+    "media video-feed lifecycle"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/ui/hooks/useComposerScrollMemory.js",
+    "app/forum/features/ui/hooks/useComposerUiLifecycle.js",
+    "app/forum/features/media/hooks/useVideoFeedLifecycle.js",
+    "audit/forum-phase-12-final-parity.json",
+    "audit/forum-phase-15-root-lifecycle-extraction.json"
+  ],
+  "new_files": [
+    "app/forum/features/ui/hooks/useComposerScrollMemory.js",
+    "app/forum/features/ui/hooks/useComposerUiLifecycle.js",
+    "app/forum/features/media/hooks/useVideoFeedLifecycle.js",
+    "audit/forum-phase-15-root-lifecycle-extraction.json"
+  ],
+  "moved_logic_domains": [
+    "composer scroll save/restore lifecycle",
+    "composer cooldown and close behavior",
+    "video feed refresh/teleport lifecycle",
+    "video feed auto-boot lifecycle"
+  ],
+  "dependency_changes": {
+    "forum_root_line_count_before": 6193,
+    "forum_root_line_count_after": 6062,
+    "forum_root_imports": 1,
+    "files_scanned_by_deps_audit": 274,
+    "cross_domain_edges": 105,
+    "detected_cycles": 0
+  },
+  "detected_risks": [
+    "ForumRoot remains a large orchestrator despite extraction.",
+    "Cooldown state is still effectively passive unless explicitly activated by future logic."
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "low",
+  "storage_risk": "low",
+  "runtime_risk": "medium",
+  "notes": [
+    "Removed dead video-thread bridge function from root and moved feed lifecycle effects to dedicated hook.",
+    "No API routes, handlers, db utils, or storage keys were changed in this phase.",
+    "Baseline functional parity against zip source remains passed."
+  ],
+  "status": "completed",
+  "validation": {
+    "lint_targeted": "passed",
+    "build": "passed",
+    "audits": [
+      "node tools/audit-effects.js",
+      "node tools/audit-forum-deps.js",
+      "powershell -ExecutionPolicy Bypass -File tools/audit-forum-functional-parity.ps1 -ZipPath \"C:\\Users\\BETEP\\Desktop\\СЕЙЧАС — копия.zip\" -OutputPath \"audit/forum-phase-12-final-parity.json\"",
+      "pnpm eslint app/forum/ForumRoot.jsx app/forum/features/ui/hooks/useComposerScrollMemory.js app/forum/features/ui/hooks/useComposerUiLifecycle.js app/forum/features/media/hooks/useVideoFeedLifecycle.js --no-cache",
+      "pnpm build"
+    ]
+  }
+}

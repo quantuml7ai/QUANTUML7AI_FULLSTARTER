@@ -1,0 +1,605 @@
+﻿{
+    "phase":  "12-final-functional-parity",
+    "timestamp":  "2026-03-06T03:58:48.8782312+02:00",
+    "scope":  [
+                  "app/forum",
+                  "app/api"
+              ],
+    "baseline_zip":  "C:\\Users\\BETEP\\Desktop\\СЕЙЧАС — копия.zip",
+    "project_root":  "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
+    "touched_files":  [
+                          "tools/audit-forum-functional-parity.ps1",
+                          "audit/forum-phase-77-final-parity.json"
+                      ],
+    "new_files":  [
+
+                  ],
+    "moved_logic_domains":  [
+                                "n/a (verification-only)"
+                            ],
+    "dependency_changes":  {
+                               "hash_total":  82,
+                               "hash_same":  81,
+                               "hash_changed":  1,
+                               "hash_missing":  0,
+                               "unexpected_changed":  [
+
+                                                      ]
+                           },
+    "detected_risks":  [
+
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low",
+    "runtime_risk":  "medium",
+    "notes":  [
+                  "Static parity audit compares baseline monolith surface with current modular forum scope.",
+                  "Changed file app/forum/Forum.jsx is expected because it became a thin composition wrapper.",
+                  "Use this report together with build/audit scripts for release confidence."
+              ],
+    "status":  "passed",
+    "hash_rows":  [
+                      {
+                          "file":  "app/api/_diag/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "28bb9de9c9abe368379d0155c0c40317492c6e5aea0bde329da8aeb9b29678cc",
+                          "current_sha256":  "28bb9de9c9abe368379d0155c0c40317492c6e5aea0bde329da8aeb9b29678cc"
+                      },
+                      {
+                          "file":  "app/api/academy/exam/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "4c2a0cad3bfd0fa85b8da6de084cd895b01cf2bf5515eb83030203717ba51b78",
+                          "current_sha256":  "4c2a0cad3bfd0fa85b8da6de084cd895b01cf2bf5515eb83030203717ba51b78"
+                      },
+                      {
+                          "file":  "app/api/ads/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "67888a530bb6738eeaa1eff2d4ef27c3ad17057883a680b96aea0274b5a06a9e",
+                          "current_sha256":  "67888a530bb6738eeaa1eff2d4ef27c3ad17057883a680b96aea0274b5a06a9e"
+                      },
+                      {
+                          "file":  "app/api/aiquota/usage/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "7b6a6154cb68f79baf443d26a9ca2569c45bb7812da15ac0a09a5532d5fbec28",
+                          "current_sha256":  "7b6a6154cb68f79baf443d26a9ca2569c45bb7812da15ac0a09a5532d5fbec28"
+                      },
+                      {
+                          "file":  "app/api/battlecoin/order/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "ab3a80be7ce90cb3f1da679ee0cf44ded83b505112d42431eec8c4c4b355cc3a",
+                          "current_sha256":  "ab3a80be7ce90cb3f1da679ee0cf44ded83b505112d42431eec8c4c4b355cc3a"
+                      },
+                      {
+                          "file":  "app/api/battlecoin/state/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "f3d0f81bf19fa912aa601cbf363fa0f08e58689c9b39ea335944bfcd3902062b",
+                          "current_sha256":  "f3d0f81bf19fa912aa601cbf363fa0f08e58689c9b39ea335944bfcd3902062b"
+                      },
+                      {
+                          "file":  "app/api/brain/analyze/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "8e67dd9a487f15253ad9522a64113a583fa1249f517f00a2a02c2fb08e7266cf",
+                          "current_sha256":  "8e67dd9a487f15253ad9522a64113a583fa1249f517f00a2a02c2fb08e7266cf"
+                      },
+                      {
+                          "file":  "app/api/coins/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "463f8f1da3c5de4abb717e26cb64436dc690458c0c943fbc2c71b9c2c482ecae",
+                          "current_sha256":  "463f8f1da3c5de4abb717e26cb64436dc690458c0c943fbc2c71b9c2c482ecae"
+                      },
+                      {
+                          "file":  "app/api/contact/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "b3dc06158846ef9d3e26445bc7b9c0c94151ea2a83354c165ae1bb1026b6237c",
+                          "current_sha256":  "b3dc06158846ef9d3e26445bc7b9c0c94151ea2a83354c165ae1bb1026b6237c"
+                      },
+                      {
+                          "file":  "app/api/crypto-news/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "2bdb5e556247b0bbe8623593d2ee2c9d2063b763ff266aa5a1856f0204425af7",
+                          "current_sha256":  "2bdb5e556247b0bbe8623593d2ee2c9d2063b763ff266aa5a1856f0204425af7"
+                      },
+                      {
+                          "file":  "app/api/debug/forum-diag/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "c01113cf93dc9a4d300cac0737f13a694b008c8f26a90ab5ae51766592cbf3b6",
+                          "current_sha256":  "c01113cf93dc9a4d300cac0737f13a694b008c8f26a90ab5ae51766592cbf3b6"
+                      },
+                      {
+                          "file":  "app/api/deep-translate/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "eb332f0baa993a46587e2a795f4d9b684b70a2bce358c2b856fe263beb58f979",
+                          "current_sha256":  "eb332f0baa993a46587e2a795f4d9b684b70a2bce358c2b856fe263beb58f979"
+                      },
+                      {
+                          "file":  "app/api/dm/_db.js",
+                          "status":  "same",
+                          "baseline_sha256":  "84fa9d1d575803812c21c6842d80e3b97c9668b3cb8c9c2907a0aa8d85028ac6",
+                          "current_sha256":  "84fa9d1d575803812c21c6842d80e3b97c9668b3cb8c9c2907a0aa8d85028ac6"
+                      },
+                      {
+                          "file":  "app/api/dm/_utils.js",
+                          "status":  "same",
+                          "baseline_sha256":  "7a0774c49cf15dcc13e96ef31d4e7e681fcc59d783a4758368c1faed1938985b",
+                          "current_sha256":  "7a0774c49cf15dcc13e96ef31d4e7e681fcc59d783a4758368c1faed1938985b"
+                      },
+                      {
+                          "file":  "app/api/dm/block/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "c643a933671f35216699aefbf4f4f04c5fe8bd3b10d68f31d9e035bb3bf936c7",
+                          "current_sha256":  "c643a933671f35216699aefbf4f4f04c5fe8bd3b10d68f31d9e035bb3bf936c7"
+                      },
+                      {
+                          "file":  "app/api/dm/delete/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "c8c6aea0d34c86c776c25a3e52a78699c0956aa12de5f344f3e45c0eddce6478",
+                          "current_sha256":  "c8c6aea0d34c86c776c25a3e52a78699c0956aa12de5f344f3e45c0eddce6478"
+                      },
+                      {
+                          "file":  "app/api/dm/dialogs/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "183c54b3ba3857a7d3f5c603dd034ac77386f5adc5c363694b0b5ee95bdbc7a3",
+                          "current_sha256":  "183c54b3ba3857a7d3f5c603dd034ac77386f5adc5c363694b0b5ee95bdbc7a3"
+                      },
+                      {
+                          "file":  "app/api/dm/seen/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "8b6bd898c04c20ddc7a0cf689eea340376199a609e7b0b469101c63c7c1d42b3",
+                          "current_sha256":  "8b6bd898c04c20ddc7a0cf689eea340376199a609e7b0b469101c63c7c1d42b3"
+                      },
+                      {
+                          "file":  "app/api/dm/send/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "7098a10f964515b65527448666ea53ba74d0cf58b596bc38362b67f749ec5b2f",
+                          "current_sha256":  "7098a10f964515b65527448666ea53ba74d0cf58b596bc38362b67f749ec5b2f"
+                      },
+                      {
+                          "file":  "app/api/dm/thread/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "fc65f2c751776e616b89e8e4c55e9e04e381969bb4b2918648a3f8c06f619411",
+                          "current_sha256":  "fc65f2c751776e616b89e8e4c55e9e04e381969bb4b2918648a3f8c06f619411"
+                      },
+                      {
+                          "file":  "app/api/dm/unblock/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "501fcde0a9e26f9f141f2aeb9e6c2c20fa1324e311746afdf4bb6841e7ee2f5d",
+                          "current_sha256":  "501fcde0a9e26f9f141f2aeb9e6c2c20fa1324e311746afdf4bb6841e7ee2f5d"
+                      },
+                      {
+                          "file":  "app/api/forum/_bus.js",
+                          "status":  "same",
+                          "baseline_sha256":  "2d6a500b736b9c867b44bcabd96bdc48879ec103d4b000842d1018fa1a76a476",
+                          "current_sha256":  "2d6a500b736b9c867b44bcabd96bdc48879ec103d4b000842d1018fa1a76a476"
+                      },
+                      {
+                          "file":  "app/api/forum/_db.js",
+                          "status":  "same",
+                          "baseline_sha256":  "b2812b0e52c316881a0985e4c331dcaa5f186400196b6058ae455c7ab17142ce",
+                          "current_sha256":  "b2812b0e52c316881a0985e4c331dcaa5f186400196b6058ae455c7ab17142ce"
+                      },
+                      {
+                          "file":  "app/api/forum/_utils.js",
+                          "status":  "same",
+                          "baseline_sha256":  "bb4ff394fb22eb513754557ef167c9a9eaaa97cc49466c9d23bc6e404c116e28",
+                          "current_sha256":  "bb4ff394fb22eb513754557ef167c9a9eaaa97cc49466c9d23bc6e404c116e28"
+                      },
+                      {
+                          "file":  "app/api/forum/admin/banUser/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "2ee7b527006a7fb9b8c5b9d343750aa8a9d7081dc3dc9237c6ef6cee7650253a",
+                          "current_sha256":  "2ee7b527006a7fb9b8c5b9d343750aa8a9d7081dc3dc9237c6ef6cee7650253a"
+                      },
+                      {
+                          "file":  "app/api/forum/admin/deletePost/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "96df51dcd2025478bee687e8abdb7f6ab8b18e87b400c78be5b6bc0003e941b9",
+                          "current_sha256":  "96df51dcd2025478bee687e8abdb7f6ab8b18e87b400c78be5b6bc0003e941b9"
+                      },
+                      {
+                          "file":  "app/api/forum/admin/deleteTopic/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "72ccc67c7f5bcd64d00a1d7f9b2a6a9bf5e7a381924f9369a0bcb6afd5fec635",
+                          "current_sha256":  "72ccc67c7f5bcd64d00a1d7f9b2a6a9bf5e7a381924f9369a0bcb6afd5fec635"
+                      },
+                      {
+                          "file":  "app/api/forum/admin/unbanUser/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "b8e5b3458942bc52e1cae0e06e0f26916ff838295fbbac9d882db9c194ffe187",
+                          "current_sha256":  "b8e5b3458942bc52e1cae0e06e0f26916ff838295fbbac9d882db9c194ffe187"
+                      },
+                      {
+                          "file":  "app/api/forum/admin/verify/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "c3365bbc85a603e61e4b4f4321bb1957ef5b3d615e9e5d0bc9a4de81361d28be",
+                          "current_sha256":  "c3365bbc85a603e61e4b4f4321bb1957ef5b3d615e9e5d0bc9a4de81361d28be"
+                      },
+                      {
+                          "file":  "app/api/forum/blobUploadUrl/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "9c7ec2eaa7747599b5b091a0a8c3d7159133fdf0b51cf080c0c06bebfc823d05",
+                          "current_sha256":  "9c7ec2eaa7747599b5b091a0a8c3d7159133fdf0b51cf080c0c06bebfc823d05"
+                      },
+                      {
+                          "file":  "app/api/forum/events/stream/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "3343d65bc0fb18c86440820cd696243073a7c34552237c5df76aadf0b0c7d6c7",
+                          "current_sha256":  "3343d65bc0fb18c86440820cd696243073a7c34552237c5df76aadf0b0c7d6c7"
+                      },
+                      {
+                          "file":  "app/api/forum/mediaLock/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "d4d7b78f3810c7099f7b363a5273f75a1e382fac054d252d0b18aa75db09792f",
+                          "current_sha256":  "d4d7b78f3810c7099f7b363a5273f75a1e382fac054d252d0b18aa75db09792f"
+                      },
+                      {
+                          "file":  "app/api/forum/moderate/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "e60c2e371682bdb8db33a22ddec995ce2eddcb68601afa664f35df2900af0946",
+                          "current_sha256":  "e60c2e371682bdb8db33a22ddec995ce2eddcb68601afa664f35df2900af0946"
+                      },
+                      {
+                          "file":  "app/api/forum/mutate/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "2d8e4fb5d1aa83aed5701da9361dc2d970dcdb068bbc1f2c3f5b121e884ac4f0",
+                          "current_sha256":  "2d8e4fb5d1aa83aed5701da9361dc2d970dcdb068bbc1f2c3f5b121e884ac4f0"
+                      },
+                      {
+                          "file":  "app/api/forum/own/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "27d988f5f13a515fdc55ad9ea41162feef331ac85653fd2cc1fa0613852b8cef",
+                          "current_sha256":  "27d988f5f13a515fdc55ad9ea41162feef331ac85653fd2cc1fa0613852b8cef"
+                      },
+                      {
+                          "file":  "app/api/forum/post-by-id/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "58a3308795d888d44045cca9185a699145b0ad5713a14aa07099a9494ddbfef9",
+                          "current_sha256":  "58a3308795d888d44045cca9185a699145b0ad5713a14aa07099a9494ddbfef9"
+                      },
+                      {
+                          "file":  "app/api/forum/post-chain/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "3318c7a65840b413c015a4a6554bdd462c9da55a4ecadb919f5818e50e1128a7",
+                          "current_sha256":  "3318c7a65840b413c015a4a6554bdd462c9da55a4ecadb919f5818e50e1128a7"
+                      },
+                      {
+                          "file":  "app/api/forum/post-locate/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "08fc3349d31ae87b8001dbc54f789e0e1d1cf6c35356a6a97068b233de77e897",
+                          "current_sha256":  "08fc3349d31ae87b8001dbc54f789e0e1d1cf6c35356a6a97068b233de77e897"
+                      },
+                      {
+                          "file":  "app/api/forum/post-meta/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "514baa123d432765cf0fd8ae91977b8a5f8bcb14e8fc21b4ce86db8b04840ad5",
+                          "current_sha256":  "514baa123d432765cf0fd8ae91977b8a5f8bcb14e8fc21b4ce86db8b04840ad5"
+                      },
+                      {
+                          "file":  "app/api/forum/report/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "dfbb7eae6c2d6c0a5e90bab569e3130987f52ade22d0c94980c17c168b967509",
+                          "current_sha256":  "dfbb7eae6c2d6c0a5e90bab569e3130987f52ade22d0c94980c17c168b967509"
+                      },
+                      {
+                          "file":  "app/api/forum/snapshot/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "e849a2b7c795b3d0c82b8dd60e9a7e37b27896d1ec87ba51d293ed63b2b9ef79",
+                          "current_sha256":  "e849a2b7c795b3d0c82b8dd60e9a7e37b27896d1ec87ba51d293ed63b2b9ef79"
+                      },
+                      {
+                          "file":  "app/api/forum/subs/count/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "73d72b0c7f456a32c989f546a80221ad1e3a79c9c9210775b04a5a44b6c4decb",
+                          "current_sha256":  "73d72b0c7f456a32c989f546a80221ad1e3a79c9c9210775b04a5a44b6c4decb"
+                      },
+                      {
+                          "file":  "app/api/forum/subs/list/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "0b91d7eb555a8d572f8509a94f0452040f24a979c721c914ac62621057b0c945",
+                          "current_sha256":  "0b91d7eb555a8d572f8509a94f0452040f24a979c721c914ac62621057b0c945"
+                      },
+                      {
+                          "file":  "app/api/forum/subs/my-count/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "92873ba08a7da66603ab546ed3c095e902b227f119d5ea7cf5048881ef0b9bb8",
+                          "current_sha256":  "92873ba08a7da66603ab546ed3c095e902b227f119d5ea7cf5048881ef0b9bb8"
+                      },
+                      {
+                          "file":  "app/api/forum/subs/toggle/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "587e5756bb2a3458d697f986631e9aadd256cd9dbf001e4259a5e7b904e32ed4",
+                          "current_sha256":  "587e5756bb2a3458d697f986631e9aadd256cd9dbf001e4259a5e7b904e32ed4"
+                      },
+                      {
+                          "file":  "app/api/forum/upload/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "515165149e4f7153b1af81091da068b8241884eacebeeab1e7f86e1614a61341",
+                          "current_sha256":  "515165149e4f7153b1af81091da068b8241884eacebeeab1e7f86e1614a61341"
+                      },
+                      {
+                          "file":  "app/api/forum/uploadAudio/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "357421001145684d774331fbb96be8b568fa1139f99a498dd9bad9b254b86574",
+                          "current_sha256":  "357421001145684d774331fbb96be8b568fa1139f99a498dd9bad9b254b86574"
+                      },
+                      {
+                          "file":  "app/api/forum/uploadVideo/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "42658b60b18ece0ea133f7dea0927162edf7b154678bdf40f88435db33be0053",
+                          "current_sha256":  "42658b60b18ece0ea133f7dea0927162edf7b154678bdf40f88435db33be0053"
+                      },
+                      {
+                          "file":  "app/api/forum/vip/batch/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "7ce7187f103992e2db9d6464471bb64915b7c0451d40d8e1e77a0d1443d3a726",
+                          "current_sha256":  "7ce7187f103992e2db9d6464471bb64915b7c0451d40d8e1e77a0d1443d3a726"
+                      },
+                      {
+                          "file":  "app/api/forum/wa-preview/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "dfc3283461108cffd6f19cb55d2616d35d9a7a8a7883c61d309da8322febfd42",
+                          "current_sha256":  "dfc3283461108cffd6f19cb55d2616d35d9a7a8a7883c61d309da8322febfd42"
+                      },
+                      {
+                          "file":  "app/api/market/summary/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "3b0cffa9da20a1c81a0887d00896e720b2d9d5ba7f83d7427dcb831f1417550f",
+                          "current_sha256":  "3b0cffa9da20a1c81a0887d00896e720b2d9d5ba7f83d7427dcb831f1417550f"
+                      },
+                      {
+                          "file":  "app/api/pay/create/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "75cd762fbaca63adf9f4c9988265975507d63a3acb62c835dc059ba4c58986f4",
+                          "current_sha256":  "75cd762fbaca63adf9f4c9988265975507d63a3acb62c835dc059ba4c58986f4"
+                      },
+                      {
+                          "file":  "app/api/pay/webhook/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "af2c7d40ea53cdf2cbc4d68e699e0b56ad04c2603d0b338a37bd5c466e54e162",
+                          "current_sha256":  "af2c7d40ea53cdf2cbc4d68e699e0b56ad04c2603d0b338a37bd5c466e54e162"
+                      },
+                      {
+                          "file":  "app/api/payments/demo/complete/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "1caf682c01a99f55f3d861bf8e73e509455dcc9fba82fb5393566e8ce413e09b",
+                          "current_sha256":  "1caf682c01a99f55f3d861bf8e73e509455dcc9fba82fb5393566e8ce413e09b"
+                      },
+                      {
+                          "file":  "app/api/payments/now/create/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "64e7eea51e4f85b4d8ee747610634ca00d4ee5c5640da6bdc530b1469117dc1c",
+                          "current_sha256":  "64e7eea51e4f85b4d8ee747610634ca00d4ee5c5640da6bdc530b1469117dc1c"
+                      },
+                      {
+                          "file":  "app/api/payments/now/webhook/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "0d0dcc04986a99f681dfcb474c8ce56e780e76dedcc913244a7d9725265f0c61",
+                          "current_sha256":  "0d0dcc04986a99f681dfcb474c8ce56e780e76dedcc913244a7d9725265f0c61"
+                      },
+                      {
+                          "file":  "app/api/profile/_identity.js",
+                          "status":  "same",
+                          "baseline_sha256":  "965a120ede2ed7e8cc7dd9496666fdf155ea4d367f93273b9b3e895f20f2ca09",
+                          "current_sha256":  "965a120ede2ed7e8cc7dd9496666fdf155ea4d367f93273b9b3e895f20f2ca09"
+                      },
+                      {
+                          "file":  "app/api/profile/batch/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "88c9de0d569361f48ddbda53bd34fde76c7a9888b9a53a415b51dfb4a1cd3767",
+                          "current_sha256":  "88c9de0d569361f48ddbda53bd34fde76c7a9888b9a53a415b51dfb4a1cd3767"
+                      },
+                      {
+                          "file":  "app/api/profile/check-nick/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "4aff33a175f393cdb3da49fd6bd61fc521d4020b84f514e04011b509074c7606",
+                          "current_sha256":  "4aff33a175f393cdb3da49fd6bd61fc521d4020b84f514e04011b509074c7606"
+                      },
+                      {
+                          "file":  "app/api/profile/get-about/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "81650f25205ec36228dcd5e6da9b0731a1664aeb69295a68b693f590e0ebf868",
+                          "current_sha256":  "81650f25205ec36228dcd5e6da9b0731a1664aeb69295a68b693f590e0ebf868"
+                      },
+                      {
+                          "file":  "app/api/profile/get-profile/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "2f4a3e62eb89868eb3644f4398fa9a005aec19e4ddac97adf67138494a635399",
+                          "current_sha256":  "2f4a3e62eb89868eb3644f4398fa9a005aec19e4ddac97adf67138494a635399"
+                      },
+                      {
+                          "file":  "app/api/profile/save-nick/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "cbf0456f7e8378e4f97f8e25e192056d4331e1b3ed29798e1db70fc6902edf66",
+                          "current_sha256":  "cbf0456f7e8378e4f97f8e25e192056d4331e1b3ed29798e1db70fc6902edf66"
+                      },
+                      {
+                          "file":  "app/api/profile/set-about/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "3325e4e93565e2614cbadbd551fab75a899acfc140edfec00926123f3a5a2d8b",
+                          "current_sha256":  "3325e4e93565e2614cbadbd551fab75a899acfc140edfec00926123f3a5a2d8b"
+                      },
+                      {
+                          "file":  "app/api/profile/upload-avatar/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "dcff4721f8e303372f9b47f33e2cecdf1817b2b709c9a3a33151ea1c65b2b0ce",
+                          "current_sha256":  "dcff4721f8e303372f9b47f33e2cecdf1817b2b709c9a3a33151ea1c65b2b0ce"
+                      },
+                      {
+                          "file":  "app/api/profile/user-popover/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "3a4d7429b432a777eaca8ab5fb3797a6042c333b67a76beea4f291f8362d7e68",
+                          "current_sha256":  "3a4d7429b432a777eaca8ab5fb3797a6042c333b67a76beea4f291f8362d7e68"
+                      },
+                      {
+                          "file":  "app/api/qcoin/drop/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "a132609705232bd8dff012e56c6489b71cb47a7b61a8f96acea8f1799f4bf401",
+                          "current_sha256":  "a132609705232bd8dff012e56c6489b71cb47a7b61a8f96acea8f1799f4bf401"
+                      },
+                      {
+                          "file":  "app/api/qcoin/get/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "8f50d4d454b19b2c8044a27e94544ea05d1d0c90eb367b4348e82ec12221015d",
+                          "current_sha256":  "8f50d4d454b19b2c8044a27e94544ea05d1d0c90eb367b4348e82ec12221015d"
+                      },
+                      {
+                          "file":  "app/api/qcoin/heartbeat/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "61c3f3a1a17b5cdbd3140f372396df667adb9e195d04a0d1940529b17d3730bb",
+                          "current_sha256":  "61c3f3a1a17b5cdbd3140f372396df667adb9e195d04a0d1940529b17d3730bb"
+                      },
+                      {
+                          "file":  "app/api/quest/env/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "bcbd32f06b1b45817e9cb27fa22699c1971eddcbdd65d6f83e001818947d7896",
+                          "current_sha256":  "bcbd32f06b1b45817e9cb27fa22699c1971eddcbdd65d6f83e001818947d7896"
+                      },
+                      {
+                          "file":  "app/api/quest/progress/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "fa343c8aec7baaac1ae13c60d24ca6969799133bc8ed7455da04d771d811ddf2",
+                          "current_sha256":  "fa343c8aec7baaac1ae13c60d24ca6969799133bc8ed7455da04d771d811ddf2"
+                      },
+                      {
+                          "file":  "app/api/quest/status/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "bfbc73d8ac64efcdda9002b7e9301acf24bc3b6411d7602ffdf1ecb936b2512f",
+                          "current_sha256":  "bfbc73d8ac64efcdda9002b7e9301acf24bc3b6411d7602ffdf1ecb936b2512f"
+                      },
+                      {
+                          "file":  "app/api/quotes/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "723fe62584582214eaf310eec4eca955c0e69faf522621694d729a016ceeb8d8",
+                          "current_sha256":  "723fe62584582214eaf310eec4eca955c0e69faf522621694d729a016ceeb8d8"
+                      },
+                      {
+                          "file":  "app/api/referral/hit/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "3419ff6683cc8ffd23dd2ca1c939ce2b90a1bedbfbcfd915f8b9711b34fc6551",
+                          "current_sha256":  "3419ff6683cc8ffd23dd2ca1c939ce2b90a1bedbfbcfd915f8b9711b34fc6551"
+                      },
+                      {
+                          "file":  "app/api/referral/link/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "fbe6a776a76534061a056ab0cc007f2679feeea32e71292d82fe65061f250b90",
+                          "current_sha256":  "fbe6a776a76534061a056ab0cc007f2679feeea32e71292d82fe65061f250b90"
+                      },
+                      {
+                          "file":  "app/api/subscription/status/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "42bce248462e114cd7c172fd6e995364911d4b4cb9a1336d6205b9a1d96127da",
+                          "current_sha256":  "42bce248462e114cd7c172fd6e995364911d4b4cb9a1336d6205b9a1d96127da"
+                      },
+                      {
+                          "file":  "app/api/telegram/link/confirm/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "68d7e49b9c9bb295d0d846bbad0119940bf436e7f2c62e29aa5157c4b42a3a8f",
+                          "current_sha256":  "68d7e49b9c9bb295d0d846bbad0119940bf436e7f2c62e29aa5157c4b42a3a8f"
+                      },
+                      {
+                          "file":  "app/api/telegram/link/resolve/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "e8ff60305c2ae5d1b9a4672584629183b55d72864a6991ba7cd9bb8a3e1cfba4",
+                          "current_sha256":  "e8ff60305c2ae5d1b9a4672584629183b55d72864a6991ba7cd9bb8a3e1cfba4"
+                      },
+                      {
+                          "file":  "app/api/telegram/link/start/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "4de50bdd381768d07a5a9e69c3d9edeb5d759738cc5f262c1535ecb5066a3c04",
+                          "current_sha256":  "4de50bdd381768d07a5a9e69c3d9edeb5d759738cc5f262c1535ecb5066a3c04"
+                      },
+                      {
+                          "file":  "app/api/telegram/link/status/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "45fa5e3be4c1fc666ca2ceeb32d57c59a0ae0f0dd043e5ad37c97e0046fd5619",
+                          "current_sha256":  "45fa5e3be4c1fc666ca2ceeb32d57c59a0ae0f0dd043e5ad37c97e0046fd5619"
+                      },
+                      {
+                          "file":  "app/api/tma/auto/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "5d1ac0eaa9ac522e4a879ff8135d8dce0b4a14a6c0e95d3026baf80cfc8a2e71",
+                          "current_sha256":  "5d1ac0eaa9ac522e4a879ff8135d8dce0b4a14a6c0e95d3026baf80cfc8a2e71"
+                      },
+                      {
+                          "file":  "app/forum/Forum.jsx",
+                          "status":  "changed",
+                          "baseline_sha256":  "8e4482defa676bde7fc75c0b66b4139e36d354853da67b44623f777bd248a7fa",
+                          "current_sha256":  "9bd1ca1838c0fa0f1760fe0efb19ed590c1728c4675f1ff1bf8042a2374eec0e"
+                      },
+                      {
+                          "file":  "app/forum/p/[postId]/route.js",
+                          "status":  "same",
+                          "baseline_sha256":  "14af227a972c0123ee6e62dd588c2e7731aa331cdb295489fb9419b8450d3fe8",
+                          "current_sha256":  "14af227a972c0123ee6e62dd588c2e7731aa331cdb295489fb9419b8450d3fe8"
+                      }
+                  ],
+    "forum_surface":  {
+                          "fetch_literals":  {
+                                                 "baseline_count":  31,
+                                                 "current_count":  32,
+                                                 "diff":  {
+                                                              "baseline_only":  [
+                                                                                    "/api/deep-translate"
+                                                                                ],
+                                                              "current_only":  [
+                                                                                   "/api/ads",
+                                                                                   "/api/ads?action=links"
+                                                                               ]
+                                                          }
+                                             },
+                          "api_literals":  {
+                                               "baseline_count":  47,
+                                               "current_count":  51,
+                                               "diff":  {
+                                                            "baseline_only":  [
+                                                                                  "/api/profile/get-profile"
+                                                                              ],
+                                                            "current_only":  [
+                                                                                 "/api/ads",
+                                                                                 "/api/ads?action=links",
+                                                                                 "/api/forum/_db.js",
+                                                                                 "/api/forum/wa-preview",
+                                                                                 "/api/translate"
+                                                                             ]
+                                                        },
+                                               "baseline_only_missing_routes":  [
+
+                                                                                ]
+                                           },
+                          "storage_keys":  {
+                                               "baseline_count":  12,
+                                               "current_count":  8,
+                                               "diff":  {
+                                                            "baseline_only":  [
+                                                                                  "ai_quota_vip",
+                                                                                  "forum:cid",
+                                                                                  "forum:queue",
+                                                                                  "ql7_vip"
+                                                                              ],
+                                                            "current_only":  [
+
+                                                                             ]
+                                                        }
+                                           },
+                          "event_names":  {
+                                              "baseline_count":  8,
+                                              "current_count":  10,
+                                              "diff":  {
+                                                           "baseline_only":  [
+
+                                                                             ],
+                                                           "current_only":  [
+                                                                                "ads:event",
+                                                                                "forum-broadcast"
+                                                                            ]
+                                                       }
+                                          }
+                      },
+    "thin_wrapper_check":  {
+                               "forum_js_lines":  9,
+                               "has_forumroot_import":  true,
+                               "renders_forumroot":  true
+                           }
+}

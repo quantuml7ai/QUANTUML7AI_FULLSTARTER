@@ -1,0 +1,113 @@
+{
+  "phase": "48-post-focus-deeplink-media-pipeline",
+  "timestamp": "2026-03-05T03:29:16.3702090+02:00",
+  "scope": {
+    "domain": "forum.root-decomposition",
+    "goal": "extract five additional root helper clusters into feature/shared modules with no behavior changes"
+  },
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/feed/utils/postFocus.js",
+    "app/forum/features/feed/constants/deeplink.js",
+    "app/forum/features/ui/constants/inviteButton.js",
+    "app/forum/features/media/utils/videoFeedSalt.js",
+    "app/forum/features/media/utils/mediaUrlPipeline.js"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "feed.post-focus-scroll",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/feed/utils/postFocus.js",
+      "symbols": [
+        "centerNodeInScroll",
+        "centerPostAfterDom",
+        "centerAndFlashPostAfterDom"
+      ]
+    },
+    {
+      "domain": "feed.deeplink.constants",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/feed/constants/deeplink.js",
+      "symbols": [
+        "DEEPLINK_MAX_DEPTH",
+        "DEEPLINK_TIMEOUT_MS",
+        "DEEPLINK_POLL_MS"
+      ]
+    },
+    {
+      "domain": "ui.invite-button.constants",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/ui/constants/inviteButton.js",
+      "symbols": [
+        "INVITE_BTN_SIZE",
+        "INVITE_GIF_SIZE",
+        "INVITE_BTN_OFFSET_X",
+        "INVITE_BTN_OFFSET_Y"
+      ]
+    },
+    {
+      "domain": "media.video-feed.page-salt",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/utils/videoFeedSalt.js",
+      "symbols": [
+        "videoFeedPageSalt initializer"
+      ]
+    },
+    {
+      "domain": "media.url.pipeline.builder",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/utils/mediaUrlPipeline.js",
+      "symbols": [
+        "isMediaUrl pipeline wiring",
+        "stripMediaUrlsFromText pipeline wiring"
+      ]
+    }
+  ],
+  "dependency_changes": [
+    {
+      "type": "imports_added",
+      "file": "app/forum/ForumRoot.jsx",
+      "details": [
+        "features/feed/utils/postFocus",
+        "features/feed/constants/deeplink",
+        "features/ui/constants/inviteButton",
+        "features/media/utils/videoFeedSalt",
+        "features/media/utils/mediaUrlPipeline"
+      ]
+    },
+    {
+      "type": "legacy_root_locals_removed",
+      "file": "app/forum/ForumRoot.jsx",
+      "count": 10
+    }
+  ],
+  "detected_risks": [
+    "VideoTrimPopover and other heavy media/navigation orchestration still remain inside ForumRoot",
+    "Known historical effects warnings remain in ForumRoot and are unchanged behavior-wise"
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "audit": {
+    "eslint": "pass",
+    "audit_forum_deps": "pass",
+    "audit_full_forum": "pass_with_known_hotspots",
+    "audit_effects": "pass_with_known_residual_warnings",
+    "audit_media": "pass_with_expected_media_flags",
+    "audit_heavy": "pass_with_known_hotspots",
+    "build": "pass"
+  },
+  "metrics": {
+    "forum_root_lines": 13955,
+    "forum_root_function_count": 35,
+    "forum_root_use_effect_count": 125
+  },
+  "notes": [
+    "No API routes, backend handlers, db utils, or storage key semantics were changed.",
+    "Post focus behavior remains equivalent through adapter callbacks into the extracted feed utility."
+  ],
+  "status": "completed"
+}

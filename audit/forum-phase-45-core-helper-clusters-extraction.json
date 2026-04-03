@@ -1,0 +1,111 @@
+{
+  "phase": "45-core-helper-clusters-extraction",
+  "timestamp": "2026-03-05T02:59:34.4898831+02:00",
+  "scope": {
+    "domain": "forum.root-helper-decomposition",
+    "goal": "extract five helper clusters from ForumRoot into feature/shared modules while preserving behavior"
+  },
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/feed/utils/postEvents.js",
+    "app/forum/shared/utils/forumLocale.js",
+    "app/forum/features/media/utils/videoCopy.js",
+    "app/forum/features/media/utils/urlParsing.js"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "feed.events.broadcast",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/feed/utils/postEvents.js",
+      "symbols": [
+        "emitCreated",
+        "emitDeleted"
+      ]
+    },
+    {
+      "domain": "shared.locale.resolution",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/shared/utils/forumLocale.js",
+      "symbols": [
+        "resolveForumLang"
+      ]
+    },
+    {
+      "domain": "media.ui.copy",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/utils/videoCopy.js",
+      "symbols": [
+        "getForumVideoLimitCopy",
+        "getForumVideoTrimCopy",
+        "getForumVoiceTapLabel"
+      ]
+    },
+    {
+      "domain": "media.url.parsing",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/utils/urlParsing.js",
+      "symbols": [
+        "FEED_URL_RE",
+        "IMG_LINE_RE",
+        "extractUrlsFromText",
+        "isVideoUrl",
+        "isImageUrl",
+        "isAudioUrl"
+      ]
+    },
+    {
+      "domain": "media.url.classification.wiring",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/media/utils/mediaLinks.js",
+      "symbols": [
+        "createIsMediaUrl",
+        "createStripMediaUrlsFromText"
+      ]
+    }
+  ],
+  "dependency_changes": [
+    {
+      "type": "imports_added",
+      "file": "app/forum/ForumRoot.jsx",
+      "details": [
+        "features/feed/utils/postEvents",
+        "features/media/utils/videoCopy",
+        "features/media/utils/urlParsing"
+      ]
+    },
+    {
+      "type": "legacy_functions_removed_from_root",
+      "file": "app/forum/ForumRoot.jsx",
+      "count": 13
+    }
+  ],
+  "detected_risks": [
+    "ForumRoot remains a large orchestration file with many side effects and runtime hotspots",
+    "Direct forumBroadcast usage still exists in one path and should be normalized in a later step"
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "none",
+  "storage_risk": "none",
+  "runtime_risk": "low",
+  "audit": {
+    "eslint": "pass",
+    "audit_forum_deps": "pass",
+    "audit_full_forum": "pass_with_known_hotspots",
+    "audit_effects": "pass_with_known_residual_warnings",
+    "audit_media": "pass_with_expected_media_flags",
+    "audit_heavy": "pass_with_known_hotspots",
+    "build": "pass"
+  },
+  "metrics": {
+    "forum_root_lines": 14369,
+    "forum_root_function_count": 45,
+    "forum_root_use_effect_count": 129
+  },
+  "notes": [
+    "No server routes, backend handlers, db utils, or API payload contracts were changed.",
+    "All extracted helpers are pure or adapter-safe and keep existing call semantics."
+  ],
+  "status": "completed"
+}

@@ -1,0 +1,80 @@
+﻿{
+    "phase":  "forum-phase-81-ten-extractions",
+    "timestamp":  "2026-03-06T13:53:04.4201569+02:00",
+    "scope":  [
+                  "app/forum/ForumRoot.jsx",
+                  "app/forum/features/dm/components/*",
+                  "app/forum/features/feed/components/*",
+                  "app/forum/features/ui/components/*"
+              ],
+    "touched_files":  [
+                          "app/forum/ForumRoot.jsx",
+                          "app/forum/features/dm/components/DmThreadAlerts.jsx",
+                          "app/forum/features/dm/components/DmThreadLoadMore.jsx",
+                          "app/forum/features/dm/components/DmDialogsPane.jsx",
+                          "app/forum/features/dm/components/DmThreadMessageRow.jsx",
+                          "app/forum/features/dm/components/DmMessagesPane.jsx",
+                          "app/forum/features/feed/components/PublishedPostsPane.jsx",
+                          "app/forum/features/feed/components/ThreadTitle.jsx",
+                          "app/forum/features/ui/components/ComposerStatusMeta.jsx",
+                          "app/forum/features/ui/components/ComposerFileInput.jsx",
+                          "app/forum/features/ui/components/ComposerFabButton.jsx"
+                      ],
+    "new_files":  [
+                      "app/forum/features/dm/components/DmThreadAlerts.jsx",
+                      "app/forum/features/dm/components/DmThreadLoadMore.jsx",
+                      "app/forum/features/dm/components/DmDialogsPane.jsx",
+                      "app/forum/features/dm/components/DmThreadMessageRow.jsx",
+                      "app/forum/features/dm/components/DmMessagesPane.jsx",
+                      "app/forum/features/feed/components/PublishedPostsPane.jsx",
+                      "app/forum/features/feed/components/ThreadTitle.jsx",
+                      "app/forum/features/ui/components/ComposerStatusMeta.jsx",
+                      "app/forum/features/ui/components/ComposerFileInput.jsx",
+                      "app/forum/features/ui/components/ComposerFabButton.jsx"
+                  ],
+    "moved_logic_domains":  [
+                                "dm: message-tab orchestration from ForumRoot into DmMessagesPane",
+                                "dm: thread blocked alerts to DmThreadAlerts",
+                                "dm: thread load-more footer to DmThreadLoadMore",
+                                "dm: dialog list/messages fallback to DmDialogsPane",
+                                "dm: single thread message render+translate/media to DmThreadMessageRow",
+                                "feed: published-tab rendering to PublishedPostsPane",
+                                "feed: selected thread title block to ThreadTitle",
+                                "ui composer: reply/replying meta row to ComposerStatusMeta",
+                                "ui composer: hidden file input to ComposerFileInput",
+                                "ui composer: floating compose FAB to ComposerFabButton"
+                            ],
+    "dependency_changes":  {
+                               "forum_deps_files_scanned":  300,
+                               "forum_deps_cycles":  0,
+                               "forum_deps_cross_domain_edges":  108,
+                               "forum_root_line_count":  4560,
+                               "runtime_hotspot_score_forum_root":  57
+                           },
+    "detected_risks":  [
+                           "DM row logic remains heavy but is now isolated in a dedicated component.",
+                           "ForumRoot still owns cross-domain orchestration and should be reduced further in next phases."
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low",
+    "runtime_risk":  "medium",
+    "notes":  [
+                  "No client API contract changes and no server route/backend/db util edits in this phase.",
+                  "Parity audit with baseline zip passed; only expected Forum.jsx wrapper delta remains.",
+                  "Build passed; warnings are pre-existing next/image advisories outside touched scope."
+              ],
+    "audit_outputs":  [
+                          "effects-leak.report.json",
+                          "forum-deps-audit.report.json",
+                          "heavy-audit.report.json",
+                          "media-audit.report.json",
+                          "runtime-hotspots.report.json",
+                          "deep-audit.report.json",
+                          "account-sync-audit.report.json",
+                          "audit/forum-phase-81-final-parity.json"
+                      ],
+    "status":  "passed"
+}

@@ -1,0 +1,140 @@
+{
+  "phase": "62",
+  "timestamp": "2026-03-05T19:27:38.8738661+02:00",
+  "scope": "Feed ownership cleanup: extract view-tracking observer cluster and feed mutation actions from ForumRoot into dedicated hooks.",
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/feed/hooks/useForumViewTracking.js",
+    "app/forum/features/feed/hooks/useForumMutationActions.js",
+    "heavy-audit.report.json",
+    "media-audit.report.json",
+    "effects-leak.report.json",
+    "forum-deps-audit.report.json",
+    "runtime-hotspots.report.json",
+    "deep-audit.report.json",
+    "account-sync-audit.report.json"
+  ],
+  "new_files": [
+    "app/forum/features/feed/hooks/useForumViewTracking.js",
+    "app/forum/features/feed/hooks/useForumMutationActions.js",
+    "audit/forum-phase-62-feed-view-and-actions-hooks.json"
+  ],
+  "moved_logic_domains": [
+    {
+      "domain": "feed.views",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/feed/hooks/useForumViewTracking.js",
+      "moved": [
+        "markViewPost + TTL localStorage dedupe",
+        "markViewTopic + TTL localStorage dedupe",
+        "post card IntersectionObserver focus tracking",
+        "focus bucket re-fire scheduling",
+        "poster prefetch around focused post",
+        "auto-mark selected topic view"
+      ]
+    },
+    {
+      "domain": "feed.actions",
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/feed/hooks/useForumMutationActions.js",
+      "moved": [
+        "reactMut optimistic like/dislike toggle",
+        "owner topic delete optimistic+tombstone+rollback",
+        "owner post delete optimistic+tombstone+rollback"
+      ]
+    }
+  ],
+  "dependency_changes": [
+    {
+      "type": "import-added",
+      "file": "app/forum/ForumRoot.jsx",
+      "value": "./features/feed/hooks/useForumViewTracking"
+    },
+    {
+      "type": "import-added",
+      "file": "app/forum/ForumRoot.jsx",
+      "value": "./features/feed/hooks/useForumMutationActions"
+    },
+    {
+      "type": "legacy-removed",
+      "file": "app/forum/ForumRoot.jsx",
+      "value": "inline markViewPost/markViewTopic/observer block + inline reactMut/delTopicOwn/delPostOwn"
+    }
+  ],
+  "detected_risks": [
+    "ForumRoot still contains large media/composer/navigation orchestration blocks; residual monolith risk remains.",
+    "Effects leak warnings in ForumRoot and non-forum files are pre-existing and not addressed in this phase.",
+    "No server or route contract changes were made, but high root complexity still implies integration risk in untouched paths."
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": {
+    "status": "low",
+    "details": [
+      "Mutation actions still call the same client API methods (`api.ownerDeleteTopic`, `api.ownerDeletePost`, `pushOp set_reaction`).",
+      "No route path, method, or response shape changes."
+    ]
+  },
+  "storage_risk": {
+    "status": "low",
+    "details": [
+      "View dedupe keys preserved (`post:<id>:viewed:<uid>:<bucket>`, `topic:<id>:viewed:<uid>:<bucket>`).",
+      "Queue/tombstone semantics preserved."
+    ]
+  },
+  "runtime_risk": {
+    "status": "medium",
+    "details": [
+      "Root runtime-hotspots improved but remains high due to untouched clusters.",
+      "Observer logic moved as-is; runtime behavior should match previous path."
+    ]
+  },
+  "audit_runs": [
+    {
+      "script": "pnpm eslint app/forum/ForumRoot.jsx app/forum/features/feed/hooks/useForumViewTracking.js app/forum/features/feed/hooks/useForumMutationQueue.js app/forum/features/feed/hooks/useForumMutationActions.js --no-cache",
+      "result": "pass"
+    },
+    {
+      "script": "node tools/audit-heavy.js",
+      "result": "pass",
+      "notes": "ForumRoot heavy score 71."
+    },
+    {
+      "script": "node tools/audit-media.js",
+      "result": "pass"
+    },
+    {
+      "script": "node tools/audit-effects.js",
+      "result": "pass"
+    },
+    {
+      "script": "node tools/audit-forum-deps.js",
+      "result": "pass",
+      "notes": "cycles=0; crossDomainEdgeCount=101."
+    },
+    {
+      "script": "node tools/audit-runtime-hotspots.js",
+      "result": "pass",
+      "notes": "ForumRoot runtime-hotspots score 185."
+    },
+    {
+      "script": "node tools/audit-full-forum.js",
+      "result": "pass",
+      "notes": "ForumRoot deep score 123."
+    },
+    {
+      "script": "node tools/audit-account-sync.js",
+      "result": "pass"
+    },
+    {
+      "script": "pnpm build",
+      "result": "pass",
+      "notes": "Compiled successfully; only existing next/no-img warnings in non-forum files."
+    }
+  ],
+  "notes": [
+    "ForumRoot lines: 8466 (was 8752 before this phase).",
+    "New hooks: useForumViewTracking.js (250 lines), useForumMutationActions.js (147 lines).",
+    "JS/JSX only; no TypeScript introduced."
+  ],
+  "status": "pass_with_residual_risks"
+}

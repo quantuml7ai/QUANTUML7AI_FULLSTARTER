@@ -1,0 +1,48 @@
+{
+  "phase": "11-report-controller-extraction",
+  "timestamp": "2026-03-04T00:00:00Z",
+  "scope": [
+    "forum/moderation",
+    "forum/root"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx"
+  ],
+  "new_files": [
+    "app/forum/features/moderation/hooks/useReportController.js",
+    "audit/forum-phase-11-report-controller.json"
+  ],
+  "moved_logic_domains": [
+    "report popover state and anchor sync",
+    "report submit flow with auth gate",
+    "report side effects to tombstones/media lock"
+  ],
+  "dependency_changes": {
+    "forum_root_imports": 1,
+    "cross_domain_edges": 54,
+    "cycles": 0
+  },
+  "detected_risks": [
+    "ForumRoot still owns major media/feed orchestration",
+    "Report hook relies on injected runtime callbacks and should remain integration-tested"
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "low",
+  "storage_risk": "low",
+  "runtime_risk": "medium",
+  "notes": [
+    "No server route contracts were changed.",
+    "Tombstone semantics preserved via persistTombstones injection.",
+    "Build and lint passed after extraction."
+  ],
+  "status": "completed",
+  "validation": {
+    "lint_targeted": "passed",
+    "build": "passed",
+    "audits": [
+      "tools/audit-forum-deps.js",
+      "tools/audit-full-forum.js",
+      "tools/audit-effects.js"
+    ]
+  }
+}

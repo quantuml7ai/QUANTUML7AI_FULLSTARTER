@@ -1,0 +1,63 @@
+{
+  "phase": "13-final-closeout",
+  "timestamp": "2026-03-06T03:15:00+02:00",
+  "scope": [
+    "forum root",
+    "forum features",
+    "forum shared",
+    "forum api/server parity"
+  ],
+  "touched_files": [
+    "tools/audit-forum-functional-parity.ps1",
+    "audit/forum-phase-12-final-parity.json",
+    "audit/forum-phase-13-final-closeout.json"
+  ],
+  "new_files": [
+    "audit/forum-phase-12-final-parity.json",
+    "audit/forum-phase-13-final-closeout.json"
+  ],
+  "moved_logic_domains": [
+    "n/a (verification and closeout pass)"
+  ],
+  "dependency_changes": {
+    "forum_root_imports": 1,
+    "cross_domain_edges": 105,
+    "cycles": 0,
+    "baseline_hash_total": 82,
+    "baseline_hash_same": 81,
+    "baseline_hash_changed": 1,
+    "baseline_hash_missing": 0
+  },
+  "detected_risks": [
+    "ForumRoot.jsx remains large and still centralizes part of orchestration side effects.",
+    "Effects/media audits still report RAF/listener cleanup hotspots in selected modules."
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "low",
+  "storage_risk": "low",
+  "runtime_risk": "medium",
+  "notes": [
+    "Server route and handler hashes in scope app/api + forum deep-link route are parity-stable against baseline zip.",
+    "Functional parity audit status: passed (no missing files, no unexpected hash deltas, no missing baseline routes).",
+    "Forum.jsx is a thin wrapper over ForumRoot and this is the only expected hash delta in baseline compare.",
+    "No TypeScript files were introduced in this pass.",
+    "Build is green; only non-blocking Next no-img warnings are present outside forum core and in ForumAds."
+  ],
+  "status": "completed",
+  "validation": {
+    "build": "passed",
+    "lint_targeted": "passed",
+    "audits": [
+      "node tools/audit-heavy.js",
+      "node tools/audit-media.js",
+      "node tools/audit-effects.js",
+      "node tools/audit-forum-deps.js",
+      "node tools/audit-full-forum.js",
+      "node tools/audit-account-sync.js",
+      "node tools/audit-runtime-hotspots.js",
+      "powershell -ExecutionPolicy Bypass -File tools/audit-forum-functional-parity.ps1 -ZipPath \"C:\\Users\\BETEP\\Desktop\\СЕЙЧАС — копия.zip\" -OutputPath \"audit/forum-phase-12-final-parity.json\"",
+      "pnpm eslint app/forum/ForumRoot.jsx app/forum/Forum.jsx --no-cache",
+      "pnpm build"
+    ]
+  }
+}

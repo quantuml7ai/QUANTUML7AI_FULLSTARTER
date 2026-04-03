@@ -1,0 +1,119 @@
+{
+  "phase": "67-navigation-actions-hook",
+  "timestamp": "2026-03-06T01:05:32.6154400+02:00",
+  "scope": [
+    "forum root nav orchestration ownership",
+    "feed/dm back-stack adapters",
+    "global back / nav state capture-restore bridge"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/feed/hooks/useForumNavigationActions.js"
+  ],
+  "new_files": [],
+  "moved_logic_domains": [
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "to": "app/forum/features/feed/hooks/useForumNavigationActions.js",
+      "logic": [
+        "getScrollEl",
+        "alignInboxStartUnderTabs",
+        "captureNavState",
+        "pushNavState",
+        "applyNavState",
+        "handleGlobalBack",
+        "canGlobalBack"
+      ]
+    }
+  ],
+  "dependency_changes": {
+    "ForumRoot_imports_added": [
+      "./features/feed/hooks/useForumNavigationActions"
+    ],
+    "ForumRoot_imports_removed": [
+      "./features/feed/utils/navState",
+      "./features/feed/utils/navOrchestrator",
+      "./features/dm/utils/alignInboxStartUnderTabs"
+    ],
+    "notes": [
+      "ForumRoot now uses navActionsRef bridge to keep early callbacks stable before nav owner hook wiring."
+    ]
+  },
+  "detected_risks": [
+    {
+      "id": "nav-ref-proxy-init-order",
+      "level": "low",
+      "detail": "Early callbacks now call navActionsRef; before first render wiring these paths are no-op, but runtime calls happen post-render."
+    },
+    {
+      "id": "existing-runtime-hotspot-forumroot",
+      "level": "medium",
+      "detail": "ForumRoot remains heavy by runtime-hotspots audit; this pass isolates navigation ownership but does not yet reduce all hotspot clusters."
+    }
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": {
+    "level": "low",
+    "detail": "No route or payload changes; API calls untouched."
+  },
+  "storage_risk": {
+    "level": "low",
+    "detail": "Storage keys and persist/restore semantics unchanged."
+  },
+  "runtime_risk": {
+    "level": "medium",
+    "detail": "Residual RAF/event warnings unchanged from baseline; no new lint/build failures."
+  },
+  "audit_runs": [
+    {
+      "command": "pnpm eslint app/forum/ForumRoot.jsx app/forum/features/feed/hooks/useForumNavigationActions.js --no-cache",
+      "status": "passed"
+    },
+    {
+      "command": "node tools/audit-heavy.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "node tools/audit-media.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "node tools/audit-effects.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "node tools/audit-forum-deps.js",
+      "status": "passed",
+      "summary": {
+        "cycles": 0,
+        "cross_domain_edges": 102,
+        "forum_root_imports": 1
+      }
+    },
+    {
+      "command": "node tools/audit-runtime-hotspots.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "node tools/audit-full-forum.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "node tools/audit-account-sync.js",
+      "status": "passed_with_residuals"
+    },
+    {
+      "command": "pnpm build",
+      "status": "passed_with_warnings",
+      "warnings": [
+        "existing next/image no-img-element warnings outside this scope"
+      ]
+    }
+  ],
+  "notes": [
+    "Navigation ownership is now feature-level, while ForumRoot keeps thin proxy wrappers for compatibility.",
+    "No behavior changes intended for global back, search-open, topic open, DM open, or video-feed entry navigation.",
+    "Next pass should continue reducing ForumRoot residual orchestration clusters (quests/report/diagnostics wiring)."
+  ],
+  "status": "done"
+}

@@ -1,0 +1,65 @@
+{
+  "phase": "phase-87-feed-dm-model-extraction",
+  "timestamp": "2026-03-08T12:18:19.478Z",
+  "scope": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/feed/hooks/usePublishedPostsModel.js",
+    "app/forum/features/feed/hooks/useThreadPostsModel.js",
+    "app/forum/features/feed/hooks/useTopicDiscoveryModel.js",
+    "app/forum/features/dm/hooks/useInboxRepliesModel.js",
+    "app/forum/features/dm/hooks/useDmThreadAutoScroll.js",
+    "app/forum/features/dm/hooks/useDmVipBatchProbe.js"
+  ],
+  "touched_files": [
+    "app/forum/ForumRoot.jsx",
+    "app/forum/features/feed/hooks/usePublishedPostsModel.js",
+    "app/forum/features/feed/hooks/useThreadPostsModel.js",
+    "app/forum/features/feed/hooks/useTopicDiscoveryModel.js",
+    "app/forum/features/dm/hooks/useInboxRepliesModel.js",
+    "app/forum/features/dm/hooks/useDmThreadAutoScroll.js",
+    "app/forum/features/dm/hooks/useDmVipBatchProbe.js",
+    "audit/forum-phase-87-final-parity.json"
+  ],
+  "new_files": [
+    "app/forum/features/feed/hooks/usePublishedPostsModel.js",
+    "app/forum/features/feed/hooks/useThreadPostsModel.js",
+    "app/forum/features/feed/hooks/useTopicDiscoveryModel.js",
+    "app/forum/features/dm/hooks/useInboxRepliesModel.js",
+    "app/forum/features/dm/hooks/useDmThreadAutoScroll.js",
+    "app/forum/features/dm/hooks/useDmVipBatchProbe.js",
+    "audit/forum-phase-87-final-parity.json",
+    "audit/forum-phase-87-feed-dm-model-extraction.json"
+  ],
+  "moved_logic_domains": [
+    "feed/published-posts-model",
+    "feed/thread-tree-and-sort-model",
+    "feed/topic-aggregates-search-sort-model",
+    "dm/inbox-replies-model",
+    "dm/thread-auto-scroll-lifecycle",
+    "dm/vip-batch-probe-lifecycle"
+  ],
+  "dependency_changes": {
+    "forum_root_lines_before": 3834,
+    "forum_root_lines_after": 3572,
+    "forum_root_lines_delta": -262,
+    "forum_dep_cycles": 0,
+    "forum_cross_domain_edges": 110,
+    "parity_hash_total": 82,
+    "parity_hash_same": 81,
+    "parity_hash_changed": 1,
+    "parity_hash_missing": 0
+  },
+  "detected_risks": [
+    "No parity regression against baseline zip (only expected Forum.jsx thin-wrapper hash differs).",
+    "Existing non-forum warnings remain in unrelated legacy files and are unchanged by this phase."
+  ],
+  "detected_cycles": [],
+  "api_contract_risk": "low",
+  "storage_risk": "low",
+  "runtime_risk": "low",
+  "notes": [
+    "ForumRoot delegates additional derived/stateful domains to feature hooks; UI contracts preserved.",
+    "Build, eslint, and full audit suite executed after extraction."
+  ],
+  "status": "passed"
+}

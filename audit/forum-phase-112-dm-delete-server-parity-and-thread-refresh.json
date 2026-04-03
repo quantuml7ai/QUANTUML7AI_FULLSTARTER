@@ -1,0 +1,30 @@
+﻿{
+  "phase": "112",
+  "timestamp": "2026-03-10T00:00:00+02:00",
+  "scope": "dm delete parity + thread refresh merge",
+  "touched_files": [
+    "app/forum/features/dm/hooks/useDmDeleteController.js",
+    "app/forum/features/dm/utils/dmLoaders.js"
+  ],
+  "new_files": [],
+  "moved_logic_domains": [
+    "dm.delete_controller",
+    "dm.thread_refresh_merge"
+  ],
+  "dependency_changes": [
+    "none"
+  ],
+  "detected_risks": [
+    "delete_for_all default now true in popover; user can uncheck for local-only"
+  ],
+  "detected_cycles": 0,
+  "api_contract_risk": "low",
+  "storage_risk": "low",
+  "runtime_risk": "low",
+  "notes": [
+    "Fixed stale thread retention when server refresh returns empty thread",
+    "Delete-for-all path is server-first to prevent local-only ghost success",
+    "Dialog/message delete request now sends with/userId/peer for robust backend matching"
+  ],
+  "status": "ok"
+}

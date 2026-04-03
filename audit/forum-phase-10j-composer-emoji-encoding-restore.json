@@ -1,0 +1,46 @@
+﻿{
+    "phase":  "10j-composer-emoji-encoding-restore",
+    "timestamp":  "2026-03-09T12:28:25.3104715+02:00",
+    "scope":  [
+                  "app/forum/features/ui/constants/emojiCatalog.js"
+              ],
+    "touched_files":  [
+                          "app/forum/features/ui/constants/emojiCatalog.js"
+                      ],
+    "new_files":  [
+                      "audit/forum-phase-10j-composer-emoji-encoding-restore.json"
+                  ],
+    "moved_logic_domains":  [
+                                "none (data parity restore)"
+                            ],
+    "dependency_changes":  {
+                               "client":  [
+                                              "ForumRoot -\u003e EMOJI/ICONS uses restored unicode catalog"
+                                          ],
+                               "server":  [
+                                              "none"
+                                          ],
+                               "db":  [
+                                          "none"
+                                      ]
+                           },
+    "detected_risks":  [
+
+                       ],
+    "detected_cycles":  [
+
+                        ],
+    "api_contract_risk":  "low",
+    "storage_risk":  "low",
+    "runtime_risk":  "low",
+    "notes":  [
+                  "Composer emoji catalog had mojibake placeholders (??) causing broken emoji UI.",
+                  "Replaced catalog content with baseline unicode constants from original Forum.jsx."
+              ],
+    "verification":  {
+                         "eslint":  "passed",
+                         "no_placeholder_tokens":  "passed (no ?? in emojiCatalog.js)",
+                         "functional_parity":  "passed"
+                     },
+    "status":  "passed"
+}
