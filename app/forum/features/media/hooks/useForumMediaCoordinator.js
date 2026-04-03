@@ -983,7 +983,9 @@ const setMutedPref = (val, source = 'forum-coordinator', emit = true) => {
 
       clearHtmlStartWatch(mediaEl);
 
-      const confirmWindowMs = isIOSUi ? 920 : (isCoarseUi ? 800 : 700);
+      const confirmWindowMs = mediaEl instanceof HTMLAudioElement
+        ? (isIOSUi ? 1400 : (isCoarseUi ? 1180 : 920))
+        : (isIOSUi ? 920 : (isCoarseUi ? 800 : 700));
       const startTime = Number(mediaEl.currentTime || 0);
       let settled = false;
       let timerId = 0;
@@ -1457,7 +1459,7 @@ const isDocumentPlaybackActive = () => {
 const pickManagedPreload = (el, mode = 'warm') => {
   if (!(el instanceof HTMLMediaElement)) return 'metadata';
   if (mode === 'active') return 'auto';
-  if (el instanceof HTMLVideoElement) return 'auto';
+  if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) return 'auto';
   return 'metadata';
 };
 
@@ -3043,9 +3045,9 @@ const IFRAME_RESIDENT_CAP = (() => {
     };
     const getAutoplayMinVisiblePx = (el) => {
       const kind = String(getOwnerNode(el)?.getAttribute?.('data-forum-media') || el?.getAttribute?.('data-forum-media') || '');
-      if (kind === 'qcast') return isIOSUi ? 64 : (isCoarseUi ? 98 : 80);
-      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 96 : (isCoarseUi ? 150 : 140);
-      return isIOSUi ? 72 : (isCoarseUi ? 128 : 120);
+      if (kind === 'qcast') return isIOSUi ? 52 : (isCoarseUi ? 84 : 80);
+      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 84 : (isCoarseUi ? 140 : 140);
+      return isIOSUi ? 64 : (isCoarseUi ? 108 : 120);
     };
     const getOwnerCenterDist = (el) => {
       try {
@@ -3393,40 +3395,49 @@ const playMedia = async (el) => {
 
   pauseForeignMedia(el);
 
-  if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
-    const blocked = readMediaSrcBlocked(el);
+  const htmlMediaEl =
+    getOwnerPlayableStateNode(el) ||
+    (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement ? el : null);
+
+  if (htmlMediaEl instanceof HTMLVideoElement || htmlMediaEl instanceof HTMLAudioElement) {
+    const owner = getOwnerNode(htmlMediaEl) || (htmlMediaEl instanceof Element ? htmlMediaEl : null);
+    const blocked = readMediaSrcBlocked(htmlMediaEl);
     if (blocked) {
-      trace('play_skip_blocked_src', el, {
+      trace('play_skip_blocked_src', htmlMediaEl, {
         blockedForMs: Math.max(0, Number(blocked.until || 0) - Date.now()),
         hits: Number(blocked.hits || 0),
       });
-      markSuppressedPlayback(el, 2200);
+      markSuppressedPlayback(htmlMediaEl, 2200);
+      if (owner instanceof Element) markSuppressedPlayback(owner, 2200);
       return;
     }
 
     try {
-      clearSuppressedPlayback(el);
+      clearSuppressedPlayback(htmlMediaEl);
+      if (owner instanceof Element) clearSuppressedPlayback(owner);
 
-      if (el instanceof HTMLVideoElement) {
-        const hasSrc = !!el.getAttribute('src');
+      if (htmlMediaEl instanceof HTMLVideoElement) {
+        const hasSrc = !!htmlMediaEl.getAttribute('src');
         let restoredNow = false;
 
         if (!hasSrc) {
-          trace('play_restore', el);
-          __restoreVideoEl(el);
+          trace('play_restore', htmlMediaEl);
+          __restoreVideoEl(htmlMediaEl);
           restoredNow = true;
         }
 
-        try { el.dataset.__prewarm = '1'; } catch {}
-        try { el.dataset.__resident = '1'; } catch {}
-        try { el.dataset.__active = '1'; } catch {}
-        try { el.preload = 'auto'; } catch {}
+        try { htmlMediaEl.dataset.__prewarm = '1'; } catch {}
+        try { htmlMediaEl.dataset.__resident = '1'; } catch {}
+        try { htmlMediaEl.dataset.__active = '1'; } catch {}
+        try { htmlMediaEl.preload = 'auto'; } catch {}
 
         try {
-          const empty = (el.networkState === HTMLMediaElement.NETWORK_EMPTY) || !el.currentSrc;
-          if (!restoredNow && empty && el.dataset?.__loadPending !== '1' && el.paused) {
-            const userIntentKick = hasUserGestureIntent(el) || hasManualLease(el);
-            if (!canKickLoad(el, {
+          const empty =
+            (htmlMediaEl.networkState === HTMLMediaElement.NETWORK_EMPTY) || !htmlMediaEl.currentSrc;
+          if (!restoredNow && empty && htmlMediaEl.dataset?.__loadPending !== '1' && htmlMediaEl.paused) {
+            const userIntentKick =
+              hasUserGestureIntent(owner || htmlMediaEl) || hasManualLease(owner || htmlMediaEl);
+            if (!canKickLoad(htmlMediaEl, {
               channel: 'play_cold',
               minGapMs: isIOSUi ? 1700 : (isCoarseUi ? 1500 : 1300),
               burstWindowMs: isIOSUi ? 22000 : 15000,
@@ -3436,31 +3447,31 @@ const playMedia = async (el) => {
               bypassPendingBudget: true,
             })) return;
 
-            try { el.dataset.__loadPending = '1'; } catch {}
-            try { el.dataset.__loadPendingSince = String(Date.now()); } catch {}
-            trace('play_load', el);
-            try { el.load?.(); } catch {}
+            try { htmlMediaEl.dataset.__loadPending = '1'; } catch {}
+            try { htmlMediaEl.dataset.__loadPendingSince = String(Date.now()); } catch {}
+            trace('play_load', htmlMediaEl);
+            try { htmlMediaEl.load?.(); } catch {}
           }
         } catch {}
 
-        __touchActiveVideoEl(el);
-        __enforceActiveVideoCap(el);
+        __touchActiveVideoEl(htmlMediaEl);
+        __enforceActiveVideoCap(htmlMediaEl);
       } else {
-        try { el.preload = 'auto'; } catch {}
+        try { htmlMediaEl.preload = pickManagedPreload(htmlMediaEl, 'active'); } catch {}
       }
 
-      applyMutedPref(el);
-      el.playsInline = true;
-      el.loop = true;
+      applyMutedPref(htmlMediaEl);
+      htmlMediaEl.playsInline = true;
+      htmlMediaEl.loop = true;
 
-      if ((el.readyState || 0) < 2) {
-        ensurePendingHtmlMediaReady(el, 'play_wait_ready');
-        trace('play_wait_ready', el);
-        armReadyReplay(el);
-        scheduleHtmlRetry(el, 'play_wait_ready', { rearm: true });
+      if ((htmlMediaEl.readyState || 0) < 2) {
+        ensurePendingHtmlMediaReady(htmlMediaEl, 'play_wait_ready');
+        trace('play_wait_ready', htmlMediaEl);
+        armReadyReplay(htmlMediaEl);
+        scheduleHtmlRetry(htmlMediaEl, 'play_wait_ready', { rearm: true });
       } else {
-        trace('play_now', el);
-        startHtmlMedia(el, 'play_now');
+        trace('play_now', htmlMediaEl);
+        startHtmlMedia(htmlMediaEl, 'play_now');
       }
     } catch {}
 
@@ -3468,56 +3479,6 @@ const playMedia = async (el) => {
   }
 
   const kind = el.getAttribute('data-forum-media');
-
-  if (kind === 'qcast') {
-    const a = el.querySelector?.('audio');
-    if (a instanceof HTMLAudioElement) {
-      try {
-        if (isUserPaused(el) || isUserPaused(a)) {
-          trace('play_skip_user_paused', a, { reason: 'qcast_user_paused' });
-          return;
-        }
-
-        clearSuppressedPlayback(a);
-        clearSuppressedPlayback(el);
-
-        const wantMuted = desiredMuted();
-        try {
-          a.muted = wantMuted;
-          a.defaultMuted = wantMuted;
-          if (wantMuted) a.setAttribute('muted', '');
-          else a.removeAttribute('muted');
-        } catch {}
-
-        a.loop = true;
-        try { a.preload = 'auto'; } catch {}
-
-        if ((a.readyState || 0) < 2) {
-          try {
-            const empty = (a.networkState === HTMLMediaElement.NETWORK_EMPTY) || !a.currentSrc;
-            const userIntentKick = hasUserGestureIntent(a) || hasManualLease(el) || hasManualLease(a);
-            if (empty && a.paused && canKickLoad(a, {
-              channel: 'qcast_cold',
-              minGapMs: isIOSUi ? 1800 : 1500,
-              burstWindowMs: isIOSUi ? 20000 : 15000,
-              burstLimit: isIOSUi ? 3 : 4,
-              blockMs: isIOSUi ? 12000 : 9000,
-              bypassSrcLimiter: userIntentKick || isIOSUi,
-              bypassPendingBudget: true,
-            })) {
-              a.load?.();
-            }
-          } catch {}
-
-          armReadyReplay(a);
-          scheduleHtmlRetry(a, 'qcast_play_wait_ready', { rearm: true });
-        } else {
-          startHtmlMedia(a, 'qcast_play_now');
-        }
-      } catch {}
-    }
-    return;
-  }
 
   if (kind === 'youtube') {
     try {
@@ -3631,15 +3592,15 @@ const playMedia = async (el) => {
     const getMediaKind = (el) => String(el?.getAttribute?.('data-forum-media') || '');
     const getStartRatio = (el) => {
       const kind = getMediaKind(el);
-      if (kind === 'qcast') return isIOSUi ? 0.08 : (isCoarseUi ? 0.14 : 0.18);
-      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 0.12 : (isCoarseUi ? 0.22 : 0.3);
-      return isIOSUi ? 0.11 : (isCoarseUi ? 0.24 : 0.35);
+      if (kind === 'qcast') return isIOSUi ? 0.05 : (isCoarseUi ? 0.1 : 0.18);
+      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 0.08 : (isCoarseUi ? 0.18 : 0.3);
+      return isIOSUi ? 0.08 : (isCoarseUi ? 0.18 : 0.35);
     };
     const getStartVisiblePx = (el) => {
       const kind = getMediaKind(el);
-      if (kind === 'qcast') return isIOSUi ? 64 : (isCoarseUi ? 110 : 80);
-      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 96 : (isCoarseUi ? 180 : 140);
-      return isIOSUi ? 72 : (isCoarseUi ? 150 : 120);
+      if (kind === 'qcast') return isIOSUi ? 52 : (isCoarseUi ? 84 : 80);
+      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 84 : (isCoarseUi ? 140 : 140);
+      return isIOSUi ? 64 : (isCoarseUi ? 108 : 120);
     };
     const getStopCenterMaxDist = (el) => {
       const startDist = getPriorityCenterMaxDist(el);
@@ -3658,9 +3619,9 @@ const playMedia = async (el) => {
     };
     const getStopRatio = (el) => {
       const kind = getMediaKind(el);
-      if (kind === 'qcast') return isIOSUi ? 0.01 : (isCoarseUi ? 0.02 : 0.03);
-      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 0.06 : (isCoarseUi ? 0.08 : 0.12);
-      return isIOSUi ? 0.1 : (isCoarseUi ? 0.14 : 0.22);
+      if (kind === 'qcast') return isIOSUi ? 0.008 : (isCoarseUi ? 0.012 : 0.03);
+      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 0.045 : (isCoarseUi ? 0.06 : 0.12);
+      return isIOSUi ? 0.08 : (isCoarseUi ? 0.1 : 0.22);
     };
     const getSwitchHoldMs = (el) => {
       const kind = getMediaKind(el);
@@ -3882,11 +3843,12 @@ const playMedia = async (el) => {
             active = null;
           } 
 
-          const relaxedStartForIOS = (() => {
-            if (!isIOSUi) return false;
+          const relaxedStartForMobile = (() => {
+            if (!(isIOSUi || isCoarseUi)) return false;
             if (!(candidate instanceof Element)) return false;
-            const ratioGate = Math.max(0.08, Number(getStartRatio(candidate) || 0) * 0.82);
-            const pxGate = Math.max(58, Math.round(Number(getStartVisiblePx(candidate) || 0) * 0.78));
+            if (!isReadyCandidate(candidate)) return false;
+            const ratioGate = Math.max(0.05, Number(getStartRatio(candidate) || 0) * 0.72);
+            const pxGate = Math.max(48, Math.round(Number(getStartVisiblePx(candidate) || 0) * 0.72));
             const centerGate = Math.max(140, Number(getPriorityCenterMaxDist(candidate) || 0) + 40);
             return (
               Number(ratio || 0) >= ratioGate &&
@@ -3895,8 +3857,8 @@ const playMedia = async (el) => {
             );
           })();
           // Нет активного — берём кандидата, только если он попал в расширенную зону.
-          // На iPhone добавляем мягкий relaxed-start, чтобы не требовался ручной старт при уже прогретом кадре.
-          if (!candidate || (!isStartableCandidate(candidate, ratio, visiblePx, centerDist) && !relaxedStartForIOS)) {
+          // На мобильных добавляем мягкий relaxed-start для уже прогретого media.
+          if (!candidate || (!isStartableCandidate(candidate, ratio, visiblePx, centerDist) && !relaxedStartForMobile)) {
             if (candidate) {
               pendingReadyGrace.delete(candidate);
               traceCandidate('candidate_below_start', candidate, {
@@ -3904,7 +3866,7 @@ const playMedia = async (el) => {
                 score,
                 visiblePx,
                 centerDist,
-                reason: relaxedStartForIOS ? 'ios_relaxed_gate_hold' : 'below_start_gate',
+                reason: relaxedStartForMobile ? 'mobile_relaxed_gate_hold' : 'below_start_gate',
               });
             }
             return;

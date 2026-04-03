@@ -1032,12 +1032,16 @@ export default function VideoMedia({
     spawnEmojiBurst('bad')
   }, [armUserIntentLease, revealHud, spawnEmojiBurst])
 
+  const renderMuted = !!mutedState
+
   const videoNode = (
     <video
       ref={ref}
       data-forum-media={dataForumMedia}
       data-forum-video={dataForumVideo}
       playsInline={playsInline}
+      muted={renderMuted}
+      defaultMuted={renderMuted}
       preload={renderPreload}
       controls={isPostVideo ? undefined : renderControls}
       autoPlay={autoPlay}

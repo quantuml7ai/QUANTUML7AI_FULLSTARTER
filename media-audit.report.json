@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-03T18:45:58.618Z",
+  "generatedAt": "2026-04-03T19:59:08.846Z",
   "results": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n.js",
@@ -129,39 +129,6 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
-      "counts": {
-        "video": 0,
-        "autoplay": 3,
-        "loop": 6,
-        "preload": 11,
-        "img": 0,
-        "lazy": 0,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [],
-      "samples": {
-        "video": [],
-        "autoplay": [
-          {
-            "line": 170,
-            "text": "// Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start."
-          },
-          {
-            "line": 531,
-            "text": "// === Shorts-like autoplay: play when in focus, pause when out ==="
-          },
-          {
-            "line": 2225,
-            "text": "// иначе при гонках промисов возможен двойной autoplay."
-          }
-        ],
-        "img": [],
-        "create": []
-      }
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoMedia.jsx",
       "counts": {
         "video": 1,
@@ -181,7 +148,7 @@
       "samples": {
         "video": [
           {
-            "line": 1036,
+            "line": 1038,
             "text": "<video"
           }
         ],
@@ -197,6 +164,39 @@
           {
             "line": 565,
             "text": "}, [autoPlay, clearNativeControlsForPost, defaultMutedProp, playsInline, preloadMode, readMuted, src])"
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 3,
+        "loop": 5,
+        "preload": 10,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [
+          {
+            "line": 170,
+            "text": "// Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start."
+          },
+          {
+            "line": 531,
+            "text": "// === Shorts-like autoplay: play when in focus, pause when out ==="
+          },
+          {
+            "line": 2227,
+            "text": "// иначе при гонках промисов возможен двойной autoplay."
           }
         ],
         "img": [],
@@ -237,7 +237,7 @@
             "text": "autoplay: 0,"
           },
           {
-            "line": 2534,
+            "line": 2535,
             "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
           }
         ],
@@ -671,6 +671,26 @@
       }
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\QCastPlayer.jsx",
+      "counts": {
+        "video": 0,
+        "autoplay": 0,
+        "loop": 1,
+        "preload": 2,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [],
+        "img": [],
+        "create": []
+      }
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\ComposerAttachmentPreview.jsx",
       "counts": {
         "video": 1,
@@ -933,26 +953,6 @@
             "text": "{/* ← заменено <img> на <Image/> в двух иконках */}"
           }
         ],
-        "create": []
-      }
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\QCastPlayer.jsx",
-      "counts": {
-        "video": 0,
-        "autoplay": 0,
-        "loop": 0,
-        "preload": 2,
-        "img": 0,
-        "lazy": 0,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [],
-      "samples": {
-        "video": [],
-        "autoplay": [],
-        "img": [],
         "create": []
       }
     },

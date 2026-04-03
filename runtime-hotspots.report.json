@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-03T18:45:59.212Z",
+  "generatedAt": "2026-04-03T19:59:08.677Z",
   "report": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
@@ -43,6 +43,24 @@
       },
       "longLines": [],
       "score": 50
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\utils\\postFocus.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 12,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 5,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 46
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
@@ -265,24 +283,6 @@
       },
       "longLines": [],
       "score": 30
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\utils\\postFocus.js",
-      "counts": {
-        "for-loop": 0,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 7,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 4,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 29
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\ads\\home.js",

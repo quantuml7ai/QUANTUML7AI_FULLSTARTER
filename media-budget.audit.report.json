@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-03T18:45:58.079Z",
+  "generatedAt": "2026-04-03T20:01:09.348Z",
   "report": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
@@ -11,7 +11,7 @@
         "playCall": 0,
         "pauseCall": 14,
         "loadCall": 0,
-        "preloadAttr": 11,
+        "preloadAttr": 10,
         "prewarmFlag": 10,
         "residentFlag": 11,
         "loadPendingFlag": 33,
@@ -28,7 +28,7 @@
         "pause-semantics",
         "viewport-orchestration"
       ],
-      "score": 105
+      "score": 103
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoMedia.jsx",
@@ -84,6 +84,31 @@
       "score": 22
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaLifecycleRuntime.js",
+      "counts": {
+        "videoTag": 0,
+        "iframeTag": 0,
+        "audioTag": 0,
+        "playCall": 0,
+        "pauseCall": 0,
+        "loadCall": 0,
+        "preloadAttr": 3,
+        "prewarmFlag": 3,
+        "residentFlag": 2,
+        "loadPendingFlag": 7,
+        "userPauseFlag": 0,
+        "systemPauseFlag": 0,
+        "manualLeaseFlag": 0,
+        "rectReads": 0,
+        "intersectionObserver": 0
+      },
+      "responsibilities": [
+        "load-policy",
+        "budget-state"
+      ],
+      "score": 19
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
       "counts": {
         "videoTag": 1,
@@ -107,31 +132,6 @@
         "viewport-orchestration"
       ],
       "score": 18
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaLifecycleRuntime.js",
-      "counts": {
-        "videoTag": 0,
-        "iframeTag": 0,
-        "audioTag": 0,
-        "playCall": 0,
-        "pauseCall": 0,
-        "loadCall": 0,
-        "preloadAttr": 3,
-        "prewarmFlag": 2,
-        "residentFlag": 1,
-        "loadPendingFlag": 6,
-        "userPauseFlag": 0,
-        "systemPauseFlag": 0,
-        "manualLeaseFlag": 0,
-        "rectReads": 0,
-        "intersectionObserver": 0
-      },
-      "responsibilities": [
-        "load-policy",
-        "budget-state"
-      ],
-      "score": 17
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostMediaStack.jsx",

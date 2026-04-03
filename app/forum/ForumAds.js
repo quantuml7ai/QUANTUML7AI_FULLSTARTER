@@ -2459,6 +2459,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
       data-src={media.src}
       className="forum-ad-fit"
       muted={muted}
+      defaultMuted={muted}
       loop
       playsInline
       referrerPolicy="no-referrer"

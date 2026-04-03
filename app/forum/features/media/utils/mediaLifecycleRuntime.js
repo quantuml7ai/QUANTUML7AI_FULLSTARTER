@@ -109,6 +109,10 @@ export function __touchActiveVideoEl(el) {
 
   if (!__activeVideoEls.has(el)) __activeVideoEls.add(el)
 
+  try {
+    el.dataset.__lastManagedActiveTs = String(Date.now())
+  } catch {}
+
   const idx = __activeVideoLRU.indexOf(el)
   if (idx !== -1) __activeVideoLRU.splice(idx, 1)
 
@@ -148,6 +152,19 @@ export function __enforceActiveVideoCap(exceptEl) {
   try {
     if (__activeVideoLRU.length <= __MAX_ACTIVE_VIDEO_ELEMENTS) return
 
+    const keepMargin = Math.max(280, Math.round(Number(__MEDIA_VIS_MARGIN_PX || 320) * 1.4))
+    const recentKeepMs = (() => {
+      try {
+        const coarse = !!(
+          typeof window !== 'undefined' &&
+          window?.matchMedia?.('(pointer: coarse)')?.matches
+        )
+        return coarse ? 3600 : 2800
+      } catch {
+        return 2800
+      }
+    })()
+
     let guard = 0
 
     while (
@@ -162,7 +179,12 @@ export function __enforceActiveVideoCap(exceptEl) {
         const candidate = __activeVideoLRU[i]
         if (!candidate) continue
         if (candidate === exceptEl) continue
-        if (__isVideoNearViewport(candidate, 140)) continue
+        if (String(candidate?.dataset?.__loadPending || '') === '1') continue
+        if (String(candidate?.dataset?.__prewarm || '') === '1') continue
+        if (String(candidate?.dataset?.__resident || '') === '1') continue
+        const lastManagedActiveTs = Number(candidate?.dataset?.__lastManagedActiveTs || 0)
+        if (lastManagedActiveTs > 0 && (Date.now() - lastManagedActiveTs) < recentKeepMs) continue
+        if (__isVideoNearViewport(candidate, keepMargin)) continue
 
         victimIndex = i
         break
