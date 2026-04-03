@@ -536,8 +536,9 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     const selector = '[data-forum-media]';
     const readyReplay = new Map();
     const htmlRetryTimers = new Map();
+    const htmlStartWatches = new Map();
     const pendingReadyGrace = new WeakMap();
-    const HTML_RETRY_DELAYS = [120, 220, 360, 560, 840, 1280];
+    const HTML_RETRY_DELAYS = [100, 180, 320, 520, 820, 1240, 1860];
     let lastDetachedSweepTs = 0;
     const traceEnabled = (() => {
       try {
@@ -947,9 +948,156 @@ const setMutedPref = (val, source = 'forum-coordinator', emit = true) => {
       }
       htmlRetryTimers.delete(mediaEl);
     };
+    const clearHtmlStartWatch = (el) => {
+      const mediaEl = getMediaStateNode(el);
+      if (!(mediaEl instanceof HTMLVideoElement || mediaEl instanceof HTMLAudioElement)) return;
+      const cleanup = htmlStartWatches.get(mediaEl);
+      if (cleanup) {
+        try { cleanup(); } catch {}
+      }
+      htmlStartWatches.delete(mediaEl);
+      try {
+        delete mediaEl.dataset.__playStartWatchUntil;
+      } catch {}
+    };
+    const confirmHtmlPlaybackStart = (el, reason = 'play', { onStarted, onPending } = {}) => {
+      const mediaEl = getMediaStateNode(el);
+      if (!(mediaEl instanceof HTMLVideoElement || mediaEl instanceof HTMLAudioElement)) return false;
+
+      clearHtmlStartWatch(mediaEl);
+
+      const confirmWindowMs = isIOSUi ? 920 : (isCoarseUi ? 800 : 700);
+      const startTime = Number(mediaEl.currentTime || 0);
+      let settled = false;
+      let timerId = 0;
+      let frameId = 0;
+
+      const cleanup = () => {
+        try { mediaEl.removeEventListener('playing', onPlaying); } catch {}
+        try { mediaEl.removeEventListener('timeupdate', onTimeUpdate); } catch {}
+        try { mediaEl.removeEventListener('ended', onEnded); } catch {}
+        try { mediaEl.removeEventListener('emptied', onAbortLike); } catch {}
+        try { mediaEl.removeEventListener('error', onAbortLike); } catch {}
+        try { mediaEl.removeEventListener('abort', onAbortLike); } catch {}
+        try {
+          if (timerId) clearTimeout(timerId);
+        } catch {}
+        timerId = 0;
+        try {
+          if (
+            frameId &&
+            mediaEl instanceof HTMLVideoElement &&
+            typeof mediaEl.cancelVideoFrameCallback === 'function'
+          ) {
+            mediaEl.cancelVideoFrameCallback(frameId);
+          }
+        } catch {}
+        frameId = 0;
+      };
+
+      const settleStarted = (trigger = 'playing') => {
+        if (settled) return true;
+        settled = true;
+        cleanup();
+        htmlStartWatches.delete(mediaEl);
+        try {
+          delete mediaEl.dataset.__playStartWatchUntil;
+        } catch {}
+        trace('play_confirmed', mediaEl, {
+          reason,
+          trigger,
+          muted: !!mediaEl.muted,
+          currentTime: Number(mediaEl.currentTime || 0),
+        });
+        try { onStarted?.(trigger); } catch {}
+        return true;
+      };
+
+      const settlePending = (trigger = 'timeout') => {
+        if (settled) return false;
+        settled = true;
+        cleanup();
+        htmlStartWatches.delete(mediaEl);
+        try {
+          delete mediaEl.dataset.__playStartWatchUntil;
+        } catch {}
+        trace('play_confirm_pending', mediaEl, {
+          reason,
+          trigger,
+          muted: !!mediaEl.muted,
+          currentTime: Number(mediaEl.currentTime || 0),
+        });
+        try { onPending?.(trigger); } catch {}
+        return false;
+      };
+
+      const maybeStarted = (trigger = 'probe') => {
+        try {
+          const currentTime = Number(mediaEl.currentTime || 0);
+          const progressed = currentTime > (startTime + 0.033);
+          const readyEnough = Number(mediaEl.readyState || 0) >= 2;
+          if ((!mediaEl.paused && readyEnough && currentTime > 0.033) || progressed) {
+            return settleStarted(trigger);
+          }
+        } catch {}
+        return false;
+      };
+
+      const onPlaying = () => {
+        settleStarted('playing_event');
+      };
+      const onTimeUpdate = () => {
+        maybeStarted('timeupdate');
+      };
+      const onEnded = () => {
+        if (!settled) settlePending('ended_before_confirm');
+      };
+      const onAbortLike = () => {
+        if (!settled) settlePending('abort_like');
+      };
+
+      if (maybeStarted('sync')) return true;
+
+      try { mediaEl.addEventListener('playing', onPlaying, { passive: true }); } catch {}
+      try { mediaEl.addEventListener('timeupdate', onTimeUpdate, { passive: true }); } catch {}
+      try { mediaEl.addEventListener('ended', onEnded, { passive: true }); } catch {}
+      try { mediaEl.addEventListener('emptied', onAbortLike, { passive: true }); } catch {}
+      try { mediaEl.addEventListener('error', onAbortLike, { passive: true }); } catch {}
+      try { mediaEl.addEventListener('abort', onAbortLike, { passive: true }); } catch {}
+
+      try {
+        if (
+          mediaEl instanceof HTMLVideoElement &&
+          typeof mediaEl.requestVideoFrameCallback === 'function'
+        ) {
+          const watchFrame = () => {
+            try {
+              frameId = mediaEl.requestVideoFrameCallback((_now, meta) => {
+                if (settled) return;
+                const mediaTime = Number(meta?.mediaTime || 0);
+                if (mediaTime > (startTime + 0.02) || maybeStarted('video_frame')) return;
+                watchFrame();
+              });
+            } catch {}
+          };
+          watchFrame();
+        }
+      } catch {}
+
+      timerId = setTimeout(() => {
+        settlePending('timeout');
+      }, confirmWindowMs);
+
+      try {
+        mediaEl.dataset.__playStartWatchUntil = String(Date.now() + confirmWindowMs);
+      } catch {}
+      htmlStartWatches.set(mediaEl, cleanup);
+      return false;
+    };
     const resetHtmlRetryState = (el) => {
       const mediaEl = getMediaStateNode(el);
       if (!(mediaEl instanceof HTMLVideoElement || mediaEl instanceof HTMLAudioElement)) return;
+      clearHtmlStartWatch(mediaEl);
       cancelHtmlRetry(mediaEl);
       try {
         delete mediaEl.dataset.__autoplayRetryCount;
@@ -1003,7 +1151,7 @@ const setMutedPref = (val, source = 'forum-coordinator', emit = true) => {
       let attempt = Number(mediaEl.dataset?.__autoplayRetryCount || 0);
       const totalAttempt = Number(mediaEl.dataset?.__autoplayRetryTotalCount || 0);
       if (rearm) attempt = 0;
-      if (totalAttempt >= 12) return false;
+      if (totalAttempt >= 14) return false;
       if (attempt >= HTML_RETRY_DELAYS.length) {
         armReadyReplay(mediaEl);
         return false;
@@ -1291,6 +1439,7 @@ const isDocumentPlaybackActive = () => {
 const pickManagedPreload = (el, mode = 'warm') => {
   if (!(el instanceof HTMLMediaElement)) return 'metadata';
   if (mode === 'active') return 'auto';
+  if (el instanceof HTMLVideoElement) return 'auto';
   return 'metadata';
 };
 
@@ -1731,20 +1880,27 @@ const ensurePendingHtmlMediaReady = (el, reason = 'candidate_pending') => {
 
     const now = Date.now();
     const reasonTag = String(reason || '').trim();
-    const highPriorityReason =
-      reasonTag === 'activate_pending' ||
-      reasonTag === 'play_wait_ready' ||
-      reasonTag === 'visibility_recover' ||
-      reasonTag === 'pending_grace' ||
-      reasonTag === 'early_prewarm' ||
-      reasonTag === 'io_near_prewarm' ||
-      reasonTag === 'candidate_near_prewarm';
+    const highPriorityReason = [
+      'activate_pending',
+      'play_wait_ready',
+      'visibility_recover',
+      'pending_grace',
+      'early_prewarm',
+      'io_near_prewarm',
+      'candidate_near_prewarm',
+      'ready_replay',
+    ].some((token) => (
+      reasonTag === token ||
+      reasonTag.startsWith(`${token}:`) ||
+      reasonTag.includes(`:${token}`) ||
+      reasonTag.includes(token)
+    )) || reasonTag.includes('retry') || reasonTag.includes('pending') || reasonTag.startsWith('play_');
 
     const lastBoostTs = Number(el.dataset?.__candidateBoostTs || 0);
     const pendingSince = Number(el.dataset?.__loadPendingSince || 0);
     const readyRetryCount = Number(el.dataset?.__readyRetryCount || 0);
     const networkState = Number(el.networkState || 0);
-    const stalePendingMs = isIOSUi ? 2400 : (isCoarseUi ? 3200 : 4200);
+    const stalePendingMs = isIOSUi ? 2200 : (isCoarseUi ? 2600 : 3000);
 
     if (
       String(el.dataset?.__loadPending || '') === '1' &&
@@ -1762,7 +1918,13 @@ const ensurePendingHtmlMediaReady = (el, reason = 'candidate_pending') => {
       });
     }
 
-    const cold = networkState === HTMLMediaElement.NETWORK_EMPTY || !el.currentSrc;
+    const cold =
+      (
+        networkState === HTMLMediaElement.NETWORK_EMPTY ||
+        networkState === HTMLMediaElement.NETWORK_IDLE ||
+        !el.currentSrc
+      ) &&
+      readyState < 2;
     if (cold && (now - lastBoostTs) > 1500 && el.dataset?.__loadPending !== '1') {
       const minGapMs = highPriorityReason
         ? (isIOSUi ? 1300 : (isCoarseUi ? 1000 : 900))
@@ -1783,6 +1945,8 @@ const ensurePendingHtmlMediaReady = (el, reason = 'candidate_pending') => {
 
       try { el.dataset.__candidateBoostTs = String(now); } catch {}
       try { el.dataset.__loadPending = '1'; } catch {}
+      try { el.dataset.__loadPendingSince = String(now); } catch {}
+      try { el.preload = 'auto'; } catch {}
       trace('candidate_force_load', el, { reason: `${reason}:cold` });
       try { el.load?.(); } catch {}
     }
@@ -1792,9 +1956,9 @@ const ensurePendingHtmlMediaReady = (el, reason = 'candidate_pending') => {
       readyState === 0 &&
       networkState === HTMLMediaElement.NETWORK_LOADING &&
       pendingSince > 0 &&
-      (now - pendingSince) > (isIOSUi ? 1100 : 1450);
+      (now - pendingSince) > (isIOSUi ? 900 : (isCoarseUi ? 1050 : 1180));
 
-    const maxReadyRetryCount = isIOSUi ? 2 : 1;
+    const maxReadyRetryCount = isIOSUi ? 3 : 2;
     if (stalledPending && readyRetryCount < maxReadyRetryCount && (now - lastBoostTs) > 900) {
       if (!canKickLoad(el, {
         channel: 'candidate_retry',
@@ -1811,6 +1975,8 @@ const ensurePendingHtmlMediaReady = (el, reason = 'candidate_pending') => {
 
       try { el.dataset.__candidateBoostTs = String(now); } catch {}
       try { el.dataset.__readyRetryCount = String(readyRetryCount + 1); } catch {}
+      try { el.dataset.__loadPendingSince = String(now); } catch {}
+      try { el.preload = 'auto'; } catch {}
       trace('candidate_pending_stall_retry', el, {
         reason,
         stalledMs: now - pendingSince,
@@ -2264,6 +2430,15 @@ const sweepDetachedMediaState = (reason = 'detached_sweep', force = false) => {
   } catch {}
 
   try {
+    for (const [el, cleanup] of htmlStartWatches.entries()) {
+      if (!(el instanceof Element) || !el.isConnected) {
+        try { cleanup?.(); } catch {}
+        htmlStartWatches.delete(el);
+      }
+    }
+  } catch {}
+
+  try {
     for (const [iframe] of ytPlayers.entries()) {
       if (!(iframe instanceof HTMLIFrameElement) || !iframe.isConnected) {
         detachYouTubePlayer(iframe, reason);
@@ -2312,6 +2487,25 @@ const sweepDetachedMediaState = (reason = 'detached_sweep', force = false) => {
       };
       try {
         markCoordinatorPlayIntent(el, 1500);
+        clearHtmlStartWatch(el);
+        const onConfirmedStart = (trigger = 'confirm') => {
+          if (!canContinue()) {
+            trace('play_started_stale', el, { reason, trigger, muted: !!el.muted });
+            withSystemPause(el, () => {
+              try { if (!el.paused) el.pause(); } catch {}
+            });
+            return;
+          }
+          trace('play_started', el, { reason, trigger, muted: !!el.muted });
+          resetHtmlRetryState(el);
+          clearReadyReplay(el);
+          try { pauseForeignMedia(el); } catch {}
+        };
+        const onPendingStart = (trigger = 'timeout') => {
+          if (!canContinue()) return;
+          armReadyReplay(el);
+          scheduleHtmlRetry(el, `${reason}:play_confirm_${trigger}`, { rearm: true });
+        };
         const p = el.play?.();
         if (p && typeof p.then === 'function') {
           p.then(() => {
@@ -2322,10 +2516,9 @@ const sweepDetachedMediaState = (reason = 'detached_sweep', force = false) => {
               });
               return;
             }
-            trace('play_started', el, { reason, muted: !!el.muted });
-            resetHtmlRetryState(el);
-            clearReadyReplay(el);
-            try { pauseForeignMedia(el); } catch {}
+            if (confirmHtmlPlaybackStart(el, reason, { onStarted: onConfirmedStart, onPending: onPendingStart })) {
+              onConfirmedStart('sync_after_promise');
+            }
           }).catch((err) => {
             if (!canContinue()) {
               trace('play_reject_stale', el, { reason });
@@ -2362,9 +2555,9 @@ const sweepDetachedMediaState = (reason = 'detached_sweep', force = false) => {
                     });
                     return;
                   }
-                  trace('play_retry_muted_ok', el, { reason });
-                  resetHtmlRetryState(el);
-                  clearReadyReplay(el);
+                  if (confirmHtmlPlaybackStart(el, `${reason}:muted_retry`, { onStarted: onConfirmedStart, onPending: onPendingStart })) {
+                    onConfirmedStart('sync_after_muted_retry');
+                  }
                 }).catch((retryErr) => {
                   trace('play_retry_muted_fail', el, {
                     reason,
@@ -2380,6 +2573,8 @@ const sweepDetachedMediaState = (reason = 'detached_sweep', force = false) => {
           });
         } else if (el.paused) {
           scheduleHtmlRetry(el, `${reason}:play_pending`);
+        } else if (confirmHtmlPlaybackStart(el, reason, { onStarted: onConfirmedStart, onPending: onPendingStart })) {
+          onConfirmedStart('sync_no_promise');
         }
       } catch {
         scheduleHtmlRetry(el, `${reason}:play_throw`);
@@ -2915,6 +3110,7 @@ const pauseForeignMedia = (keepEl = null) => {
       const el = args?.[0];
       const unloadReason = String(args?.[1] || 'unknown');
       if (!el) return;
+      clearHtmlStartWatch(el);
       clearReadyReplay(el);
       trace('hard_unload', el, { reason: unloadReason });
       if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
@@ -3045,6 +3241,13 @@ const pauseForeignMedia = (keepEl = null) => {
       }, delay);
       unloadTimers.set(el, id);
     }; 
+    const isExternalAdPlaybackHoldActive = () => {
+      try {
+        return Number(window.__forumAdPlaybackHoldUntil || 0) > Date.now();
+      } catch {
+        return false;
+      }
+    };
     // Best-effort loop для iframe (Vimeo/встроенные плееры/прочее):
     // добавляем loop=1 ОДИН РАЗ (не на каждом фокусе), чтобы не было дергания.
     const ensureIframeLoopParam = (src) => {
@@ -3193,6 +3396,7 @@ const playMedia = async (el) => {
             })) return;
 
             try { el.dataset.__loadPending = '1'; } catch {}
+            try { el.dataset.__loadPendingSince = String(Date.now()); } catch {}
             trace('play_load', el);
             try { el.load?.(); } catch {}
           }
@@ -3383,7 +3587,7 @@ const playMedia = async (el) => {
     const ACTIVE_SWITCH_HOLD_MS = isIOSUi ? 900 : (isCoarseUi ? 760 : 620);
     const SWITCH_RATIO_DELTA = 0.16;
     const SWITCH_SCORE_DELTA = 240;
-    const PENDING_READY_GRACE_MS = isIOSUi ? 980 : (isCoarseUi ? 620 : 420);
+    const PENDING_READY_GRACE_MS = isIOSUi ? 1180 : (isCoarseUi ? 920 : 760);
     const PENDING_READY_GRACE_RATIO = 0.12;
     const getMediaKind = (el) => String(el?.getAttribute?.('data-forum-media') || '');
     const getStartRatio = (el) => {
@@ -3675,6 +3879,18 @@ const playMedia = async (el) => {
           }
 
           pendingReadyGrace.delete(candidate);
+          if (isExternalAdPlaybackHoldActive()) {
+            pendingReadyGrace.delete(candidate);
+            traceCandidate('candidate_hold_external_ad', candidate, {
+              ratio,
+              score,
+              visiblePx,
+              centerDist,
+              reason: 'ad_launch_hold',
+            });
+            return;
+          }
+
           if (!isReadyCandidate(candidate)) {
             const candidateKind = getMediaKind(candidate);
             const isExternalCandidate =
@@ -3744,7 +3960,7 @@ const playMedia = async (el) => {
           });
         if (!intersecting.length) return;
 
-        const maxBatch = isIOSUi ? 3 : (isCoarseUi ? 2 : 3);
+        const maxBatch = isIOSUi ? 3 : (isCoarseUi ? 3 : 4);
         let preparedCount = 0;
         for (const item of intersecting) {
           if (preparedCount >= maxBatch) break;
@@ -3773,9 +3989,9 @@ const playMedia = async (el) => {
       {
         threshold: 0.001,
         rootMargin: `${
-          Math.max(isIOSUi ? 1120 : (isCoarseUi ? 560 : 420), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 2.9 : 1.6)))
+          Math.max(isIOSUi ? 1120 : (isCoarseUi ? 720 : 560), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 2.9 : 1.95)))
         }px 0px ${
-          Math.max(isIOSUi ? 2240 : (isCoarseUi ? 1180 : 920), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 4.8 : 2.6)))
+          Math.max(isIOSUi ? 2240 : (isCoarseUi ? 1480 : 1280), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 4.8 : 3.05)))
         }px 0px`,
       },
     );
@@ -3951,6 +4167,7 @@ const onExternalMediaPlay = (e) => {
               blockMs: isIOSUi ? 15000 : 11000,
             })) return;
             try { mediaEl.dataset.__loadPending = '1'; } catch {}
+            try { mediaEl.dataset.__loadPendingSince = String(Date.now()); } catch {}
             trace('visibility_restore', mediaEl, { reason, mode: 'kick_stalled' });
             try { mediaEl.load?.(); } catch {}
           }
@@ -4085,6 +4302,10 @@ const onExternalMediaPlay = (e) => {
       try {
         htmlRetryTimers.forEach((id) => clearTimeout(id));
         htmlRetryTimers.clear();
+      } catch {}
+      try {
+        htmlStartWatches.forEach?.((cleanup) => { try { cleanup?.(); } catch {} });
+        htmlStartWatches.clear?.();
       } catch {}
       try {
         readyReplay.forEach?.((cleanup) => { try { cleanup(); } catch {} });

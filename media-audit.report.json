@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-03T08:36:01.465Z",
+  "generatedAt": "2026-04-03T10:58:19.548Z",
   "results": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n.js",
@@ -129,6 +129,39 @@
       }
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 3,
+        "loop": 6,
+        "preload": 11,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [
+          {
+            "line": 170,
+            "text": "// Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start."
+          },
+          {
+            "line": 531,
+            "text": "// === Shorts-like autoplay: play when in focus, pause when out ==="
+          },
+          {
+            "line": 2201,
+            "text": "// иначе при гонках промисов возможен двойной autoplay."
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoMedia.jsx",
       "counts": {
         "video": 1,
@@ -171,45 +204,12 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
-      "counts": {
-        "video": 0,
-        "autoplay": 3,
-        "loop": 6,
-        "preload": 9,
-        "img": 0,
-        "lazy": 0,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [],
-      "samples": {
-        "video": [],
-        "autoplay": [
-          {
-            "line": 170,
-            "text": "// Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start."
-          },
-          {
-            "line": 531,
-            "text": "// === Shorts-like autoplay: play when in focus, pause when out ==="
-          },
-          {
-            "line": 2035,
-            "text": "// иначе при гонках промисов возможен двойной autoplay."
-          }
-        ],
-        "img": [],
-        "create": []
-      }
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
       "counts": {
         "video": 1,
-        "autoplay": 5,
-        "loop": 3,
-        "preload": 2,
+        "autoplay": 4,
+        "loop": 4,
+        "preload": 3,
         "img": 0,
         "lazy": 1,
         "create": 0,
@@ -223,22 +223,22 @@
       "samples": {
         "video": [
           {
-            "line": 2196,
+            "line": 2424,
             "text": "<video"
           }
         ],
         "autoplay": [
           {
-            "line": 1226,
+            "line": 1419,
             "text": "try { emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback'); } catch {}"
           },
           {
-            "line": 1791,
+            "line": 2002,
             "text": "autoplay: 0,"
           },
           {
-            "line": 2205,
-            "text": "autoPlay"
+            "line": 2506,
+            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
           }
         ],
         "img": [],
@@ -249,7 +249,7 @@
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\ForumBootSplash.jsx",
       "counts": {
         "video": 1,
-        "autoplay": 7,
+        "autoplay": 6,
         "loop": 0,
         "preload": 2,
         "img": 0,
@@ -264,21 +264,21 @@
       "samples": {
         "video": [
           {
-            "line": 732,
+            "line": 966,
             "text": "<video"
           }
         ],
         "autoplay": [
           {
-            "line": 44,
+            "line": 46,
             "text": "const FORUM_SPLASH_TRY_SOUND_AUTOPLAY = 1"
           },
           {
-            "line": 155,
+            "line": 157,
             "text": "FORUM_SPLASH_TRY_SOUND_AUTOPLAY === 1 ? 'sound' : 'muted'"
           },
           {
-            "line": 357,
+            "line": 362,
             "text": "message.includes('autoplay')"
           }
         ],

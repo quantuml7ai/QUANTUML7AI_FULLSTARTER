@@ -1,11 +1,11 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-03T08:36:01.418Z",
+  "generatedAt": "2026-04-03T10:58:19.860Z",
   "report": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
       "counts": {
-        "for-loop": 19,
+        "for-loop": 20,
         "while-loop": 2,
         "map-chain": 0,
         "filter-map": 0,
@@ -24,7 +24,7 @@
           "text": "rootMargin: `${Math.max(isCoarseUi ? 420 : 340, Math.round(__MEDIA_VIS_MARGIN_PX * 1.35))}px 0px ${Math.max(isCoarseUi ? 980 : 760, Math.round(__MEDIA_VIS_MARGIN_PX * 2.35))}px 0px`,"
         }
       ],
-      "score": 99
+      "score": 101
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\lib\\adsCore.js",
@@ -1418,6 +1418,24 @@
         "session-storage": 0,
         "network-call": 0,
         "raf": 1,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 8
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\ForumBootSplash.jsx",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 4,
         "interval": 0
       },
       "longLines": [],
@@ -7264,24 +7282,6 @@
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\BgAudio.js",
-      "counts": {
-        "for-loop": 0,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 0,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 0,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 0
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\ForumBootSplash.jsx",
       "counts": {
         "for-loop": 0,
         "while-loop": 0,

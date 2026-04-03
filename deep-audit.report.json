@@ -1,23 +1,23 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-03T07:59:22.465Z",
+  "generatedAt": "2026-04-03T10:58:19.163Z",
   "summary": {
     "projectFilesScanned": 434,
     "forumFilesScanned": 299,
     "projectTotals": {
-      "addEvt": 235,
-      "remEvt": 217,
+      "addEvt": 250,
+      "remEvt": 232,
       "setInt": 33,
       "clrInt": 44,
-      "setTo": 131,
-      "raf": 60,
-      "caf": 44,
+      "setTo": 135,
+      "raf": 64,
+      "caf": 46,
       "rect": 22,
       "qsa": 33,
       "video": 26,
       "autoplay": 65,
-      "loop": 103,
-      "preload": 46,
+      "loop": 104,
+      "preload": 49,
       "createUrl": 16,
       "revokeUrl": 29,
       "fetch": 134,
@@ -27,19 +27,19 @@
       "mojibake": 1429
     },
     "forumTotals": {
-      "addEvt": 157,
-      "remEvt": 152,
+      "addEvt": 169,
+      "remEvt": 164,
       "setInt": 19,
       "clrInt": 24,
-      "setTo": 91,
+      "setTo": 93,
       "raf": 53,
       "caf": 39,
       "rect": 21,
       "qsa": 31,
       "video": 11,
-      "autoplay": 22,
-      "loop": 66,
-      "preload": 37,
+      "autoplay": 21,
+      "loop": 67,
+      "preload": 40,
       "createUrl": 13,
       "revokeUrl": 27,
       "fetch": 63,
@@ -236,11 +236,11 @@
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
       "forumScope": true,
       "counts": {
-        "addEvt": 21,
-        "remEvt": 21,
+        "addEvt": 27,
+        "remEvt": 27,
         "setInt": 2,
         "clrInt": 3,
-        "setTo": 8,
+        "setTo": 9,
         "raf": 4,
         "caf": 4,
         "rect": 0,
@@ -248,7 +248,7 @@
         "video": 0,
         "autoplay": 3,
         "loop": 7,
-        "preload": 9,
+        "preload": 11,
         "createUrl": 0,
         "revokeUrl": 0,
         "fetch": 0,
@@ -258,7 +258,7 @@
         "mojibake": 0
       },
       "flags": [],
-      "score": 85
+      "score": 91
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoMedia.jsx",
@@ -324,19 +324,19 @@
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
       "forumScope": true,
       "counts": {
-        "addEvt": 5,
-        "remEvt": 5,
+        "addEvt": 11,
+        "remEvt": 11,
         "setInt": 1,
         "clrInt": 1,
-        "setTo": 4,
+        "setTo": 5,
         "raf": 0,
         "caf": 0,
         "rect": 0,
         "qsa": 0,
         "video": 1,
-        "autoplay": 5,
-        "loop": 3,
-        "preload": 2,
+        "autoplay": 4,
+        "loop": 4,
+        "preload": 3,
         "createUrl": 0,
         "revokeUrl": 0,
         "fetch": 5,
@@ -346,6 +346,37 @@
         "mojibake": 0
       },
       "flags": [
+        "video + autoplay"
+      ],
+      "score": 57
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\ForumBootSplash.jsx",
+      "forumScope": false,
+      "counts": {
+        "addEvt": 6,
+        "remEvt": 6,
+        "setInt": 0,
+        "clrInt": 0,
+        "setTo": 6,
+        "raf": 4,
+        "caf": 2,
+        "rect": 0,
+        "qsa": 0,
+        "video": 1,
+        "autoplay": 6,
+        "loop": 0,
+        "preload": 2,
+        "createUrl": 0,
+        "revokeUrl": 0,
+        "fetch": 0,
+        "redis": 0,
+        "accountKeys": 0,
+        "unicodeEscape": 0,
+        "mojibake": 0
+      },
+      "flags": [
+        "raf imbalance (4/2)",
         "video + autoplay"
       ],
       "score": 56
@@ -410,36 +441,6 @@
         "video + autoplay"
       ],
       "score": 43
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\ForumBootSplash.jsx",
-      "forumScope": false,
-      "counts": {
-        "addEvt": 3,
-        "remEvt": 3,
-        "setInt": 0,
-        "clrInt": 0,
-        "setTo": 4,
-        "raf": 0,
-        "caf": 0,
-        "rect": 0,
-        "qsa": 0,
-        "video": 1,
-        "autoplay": 5,
-        "loop": 0,
-        "preload": 2,
-        "createUrl": 0,
-        "revokeUrl": 0,
-        "fetch": 0,
-        "redis": 0,
-        "accountKeys": 0,
-        "unicodeEscape": 0,
-        "mojibake": 0
-      },
-      "flags": [
-        "video + autoplay"
-      ],
-      "score": 42
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\styles\\ForumFxStyles.jsx",
@@ -1356,11 +1357,11 @@
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
       "forumScope": true,
       "counts": {
-        "addEvt": 21,
-        "remEvt": 21,
+        "addEvt": 27,
+        "remEvt": 27,
         "setInt": 2,
         "clrInt": 3,
-        "setTo": 8,
+        "setTo": 9,
         "raf": 4,
         "caf": 4,
         "rect": 0,
@@ -1368,7 +1369,7 @@
         "video": 0,
         "autoplay": 3,
         "loop": 7,
-        "preload": 9,
+        "preload": 11,
         "createUrl": 0,
         "revokeUrl": 0,
         "fetch": 0,
@@ -1378,7 +1379,7 @@
         "mojibake": 0
       },
       "flags": [],
-      "score": 85
+      "score": 91
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoMedia.jsx",
@@ -1414,19 +1415,19 @@
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
       "forumScope": true,
       "counts": {
-        "addEvt": 5,
-        "remEvt": 5,
+        "addEvt": 11,
+        "remEvt": 11,
         "setInt": 1,
         "clrInt": 1,
-        "setTo": 4,
+        "setTo": 5,
         "raf": 0,
         "caf": 0,
         "rect": 0,
         "qsa": 0,
         "video": 1,
-        "autoplay": 5,
-        "loop": 3,
-        "preload": 2,
+        "autoplay": 4,
+        "loop": 4,
+        "preload": 3,
         "createUrl": 0,
         "revokeUrl": 0,
         "fetch": 5,
@@ -1438,7 +1439,7 @@
       "flags": [
         "video + autoplay"
       ],
-      "score": 56
+      "score": 57
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\usePostFx.js",

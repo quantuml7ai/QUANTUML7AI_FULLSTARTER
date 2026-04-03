@@ -72,6 +72,15 @@ function applyHtmlMediaMutedState(videoEl, nextMuted) {
   } catch {}
 }
 
+function bumpGlobalAdPlaybackHold(ms = 1400) {
+  if (!isBrowser()) return;
+  try {
+    const until = Date.now() + Math.max(240, Number(ms || 0));
+    const prev = Number(window.__forumAdPlaybackHoldUntil || 0);
+    window.__forumAdPlaybackHoldUntil = Math.max(prev, until);
+  } catch {}
+}
+
 const AD_NEAR_ROOT_MARGIN = '560px 0px 760px 0px';
 const AD_FOCUS_START_RATIO = 0.56;
 const AD_FOCUS_STOP_RATIO = 0.18;
@@ -1046,7 +1055,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   const ytIframeRef = useRef(null);
   const ytPlayerRef = useRef(null);
   const videoErrorUntilRef = useRef(new Map());
-  const isVideoSrcTemporarilyBlocked = (src) => {
+  const isVideoSrcTemporarilyBlocked = React.useCallback((src) => {
     const key = String(src || '').trim();
     if (!key) return false;
     const until = Number(videoErrorUntilRef.current.get(key) || 0);
@@ -1056,8 +1065,8 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       return false;
     }
     return true;
-  };
-  const markVideoSrcTemporarilyBlocked = (src, ms = 20000) => {
+  }, []);
+  const markVideoSrcTemporarilyBlocked = React.useCallback((src, ms = 20000) => {
     const key = String(src || '').trim();
     if (!key) return;
     videoErrorUntilRef.current.set(key, Date.now() + Math.max(2500, Number(ms || 0)));
@@ -1069,12 +1078,12 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
         if (drop <= 0) break;
       }
     }
-  };
-  const clearVideoSrcBlock = (src) => {
+  }, []);
+  const clearVideoSrcBlock = React.useCallback((src) => {
     const key = String(src || '').trim();
     if (!key) return;
     videoErrorUntilRef.current.delete(key);
-  };
+  }, []);
   // ===== Focus / attention gating =====
   // isNear: блок рядом (можно подгружать, но не играть)
   // isFocused: блок реально в зоне внимания (играем)
@@ -1087,12 +1096,23 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   const shouldPrimeAdMedia = (isNear && isPageActive) || shouldPlay;
 
   const shouldPlayRef = useRef(false);
+  const shouldPrimeAdMediaRef = useRef(false);
+  const mutedRef = useRef(true);
   const adPlayEventTsRef = useRef(0);
   const autoplayRetryTimerRef = useRef(0);
   const autoplayRetryStageRef = useRef(0);
   const autoplayRetryTotalRef = useRef(0);
+  const adPlaybackConfirmRef = useRef(null);
+  const adLastPrimeLoadTsRef = useRef(0);
   const tryStartAdVideoRef = useRef(() => false);
   const tryStartAdYoutubeRef = useRef(() => false);
+
+  const setAdPlaybackState = React.useCallback((state = 'idle') => {
+    const root = rootRef.current;
+    if (!root) return;
+    try { root.dataset.adPlayState = String(state || 'idle'); } catch {}
+    try { root.dataset.adShouldPlay = shouldPlayRef.current ? '1' : '0'; } catch {}
+  }, []);
 
   const emitAdPlayToCoordinator = React.useCallback((source = 'ad') => {
     if (!isBrowser()) return;
@@ -1127,26 +1147,45 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     autoplayRetryTimerRef.current = 0;
   }, []);
 
+  const clearAdPlaybackConfirm = React.useCallback(() => {
+    const cleanup = adPlaybackConfirmRef.current;
+    if (typeof cleanup === 'function') {
+      try { cleanup(); } catch {}
+    }
+    adPlaybackConfirmRef.current = null;
+  }, []);
+
   const resetAdAutoplayRetry = React.useCallback(() => {
     autoplayRetryStageRef.current = 0;
     autoplayRetryTotalRef.current = 0;
     clearAdAutoplayRetry();
-  }, [clearAdAutoplayRetry]);
+    clearAdPlaybackConfirm();
+  }, [clearAdAutoplayRetry, clearAdPlaybackConfirm]);
+
+  const markAdPlaybackStarted = React.useCallback(() => {
+    clearAdPlaybackConfirm();
+    setAdPlaybackState('playing');
+    bumpGlobalAdPlaybackHold(1800);
+    emitAdPlayToCoordinator('ad_video');
+    resetAdAutoplayRetry();
+  }, [clearAdPlaybackConfirm, emitAdPlayToCoordinator, resetAdAutoplayRetry, setAdPlaybackState]);
 
   const scheduleAdAutoplayRetry = React.useCallback((reason = 'retry', { rearm = false } = {}) => {
     if (!isBrowser()) return false;
     if (!shouldPlayRef.current) {
+      clearAdPlaybackConfirm();
       clearAdAutoplayRetry();
       return false;
     }
-    if (rearm) autoplayRetryStageRef.current = 0;
-    if (autoplayRetryTotalRef.current >= 12) return false;
-    if (autoplayRetryStageRef.current >= 6) return false;
+    if (rearm) autoplayRetryStageRef.current = Math.min(autoplayRetryStageRef.current, 1);
+    if (autoplayRetryTotalRef.current >= 14) return false;
+    if (autoplayRetryStageRef.current >= 7) return false;
 
-    const delays = [120, 220, 360, 560, 840, 1280];
+    const delays = [120, 220, 360, 560, 840, 1280, 1860];
     const delay = delays[Math.min(autoplayRetryStageRef.current, delays.length - 1)];
     autoplayRetryStageRef.current += 1;
     autoplayRetryTotalRef.current += 1;
+    setAdPlaybackState('retrying');
     clearAdAutoplayRetry();
     autoplayRetryTimerRef.current = window.setTimeout(() => {
       autoplayRetryTimerRef.current = 0;
@@ -1164,7 +1203,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       }
     }, delay);
     return true;
-  }, [clearAdAutoplayRetry, emitAdPlayToCoordinator, media.kind]);
+  }, [clearAdAutoplayRetry, clearAdPlaybackConfirm, emitAdPlayToCoordinator, media.kind, setAdPlaybackState]);
 
   const destroyLocalYtPlayer = React.useCallback((blankIframe = false) => {
     const player = ytPlayerRef.current;
@@ -1184,31 +1223,185 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       } catch {}
     }
   }, []);
+  const primeAdVideo = React.useCallback(() => {
+    const v = videoRef.current;
+    if (!v || media.kind !== 'video' || !media.src) return false;
+    if (!shouldPrimeAdMediaRef.current && !shouldPlayRef.current) return false;
+    if (isVideoSrcTemporarilyBlocked(media.src)) return false;
+
+    const desiredSrc = String(v.getAttribute('data-src') || media.src || '').trim();
+
+    try {
+      v.playsInline = true;
+      v.loop = true;
+      v.preload = 'auto';
+    } catch {}
+
+    applyHtmlMediaMutedState(v, mutedRef.current);
+
+    try {
+      if (desiredSrc && String(v.getAttribute('src') || '').trim() !== desiredSrc) {
+        v.setAttribute('src', desiredSrc);
+      }
+    } catch {}
+
+    try {
+      if (Number(v.readyState || 0) >= 2) return true;
+      const isCold =
+        (typeof HTMLMediaElement !== 'undefined' &&
+          (
+            v.networkState === HTMLMediaElement.NETWORK_EMPTY ||
+            v.networkState === HTMLMediaElement.NETWORK_IDLE
+          )) ||
+        !v.currentSrc;
+      if (!isCold && Number(v.readyState || 0) > 0) return false;
+      const now = Date.now();
+      if ((now - Number(adLastPrimeLoadTsRef.current || 0)) < 1200) return false;
+      adLastPrimeLoadTsRef.current = now;
+      setAdPlaybackState(shouldPlayRef.current ? 'priming' : 'warming');
+      try { v.load?.(); } catch {}
+    } catch {}
+
+    return Number(v.readyState || 0) >= 2;
+  }, [isVideoSrcTemporarilyBlocked, media.kind, media.src, setAdPlaybackState]);
+
+  const confirmAdPlaybackStart = React.useCallback((reason = 'play') => {
+    const v = videoRef.current;
+    if (!v) return false;
+
+    clearAdPlaybackConfirm();
+
+    const confirmWindowMs = 760;
+    const startTime = Number(v.currentTime || 0);
+    let settled = false;
+    let timerId = 0;
+    let frameId = 0;
+
+    const cleanup = () => {
+      try { v.removeEventListener('playing', onPlaying); } catch {}
+      try { v.removeEventListener('timeupdate', onTimeUpdate); } catch {}
+      try { v.removeEventListener('ended', onEnded); } catch {}
+      try { v.removeEventListener('emptied', onAbortLike); } catch {}
+      try { v.removeEventListener('error', onAbortLike); } catch {}
+      try { v.removeEventListener('abort', onAbortLike); } catch {}
+      try {
+        if (timerId) clearTimeout(timerId);
+      } catch {}
+      timerId = 0;
+      try {
+        if (frameId && typeof v.cancelVideoFrameCallback === 'function') {
+          v.cancelVideoFrameCallback(frameId);
+        }
+      } catch {}
+      frameId = 0;
+    };
+
+    const settleStarted = (trigger = 'playing') => {
+      if (settled) return true;
+      settled = true;
+      cleanup();
+      adPlaybackConfirmRef.current = null;
+      markAdPlaybackStarted(trigger);
+      return true;
+    };
+
+    const settlePending = (trigger = 'timeout') => {
+      if (settled) return false;
+      settled = true;
+      cleanup();
+      adPlaybackConfirmRef.current = null;
+      if (!shouldPlayRef.current) return false;
+      setAdPlaybackState('retrying');
+      scheduleAdAutoplayRetry(`${reason}:${trigger}`);
+      return false;
+    };
+
+    const maybeStarted = (trigger = 'probe') => {
+      try {
+        const currentTime = Number(v.currentTime || 0);
+        const progressed = currentTime > (startTime + 0.033);
+        const readyEnough = Number(v.readyState || 0) >= 2;
+        if ((!v.paused && readyEnough && currentTime > 0.033) || progressed) {
+          return settleStarted(trigger);
+        }
+      } catch {}
+      return false;
+    };
+
+    const onPlaying = () => {
+      settleStarted('playing_event');
+    };
+    const onTimeUpdate = () => {
+      maybeStarted('timeupdate');
+    };
+    const onEnded = () => {
+      if (!settled) settlePending('ended_before_confirm');
+    };
+    const onAbortLike = () => {
+      if (!settled) settlePending('abort_like');
+    };
+
+    if (maybeStarted('sync')) return true;
+
+    try { v.addEventListener('playing', onPlaying, { passive: true }); } catch {}
+    try { v.addEventListener('timeupdate', onTimeUpdate, { passive: true }); } catch {}
+    try { v.addEventListener('ended', onEnded, { passive: true }); } catch {}
+    try { v.addEventListener('emptied', onAbortLike, { passive: true }); } catch {}
+    try { v.addEventListener('error', onAbortLike, { passive: true }); } catch {}
+    try { v.addEventListener('abort', onAbortLike, { passive: true }); } catch {}
+
+    try {
+      if (typeof v.requestVideoFrameCallback === 'function') {
+        const watchFrame = () => {
+          try {
+            frameId = v.requestVideoFrameCallback((_now, meta) => {
+              if (settled) return;
+              const mediaTime = Number(meta?.mediaTime || 0);
+              if (mediaTime > (startTime + 0.02) || maybeStarted('video_frame')) return;
+              watchFrame();
+            });
+          } catch {}
+        };
+        watchFrame();
+      }
+    } catch {}
+
+    timerId = window.setTimeout(() => {
+      settlePending('timeout');
+    }, confirmWindowMs);
+
+    adPlaybackConfirmRef.current = cleanup;
+    setAdPlaybackState('attempting');
+    return false;
+  }, [clearAdPlaybackConfirm, markAdPlaybackStarted, scheduleAdAutoplayRetry, setAdPlaybackState]);
+
 const tryStartAdVideo = React.useCallback((reason = 'play') => {
   const v = videoRef.current;
   if (!v) return false;
   if (!shouldPlayRef.current) return false;
+  if (isVideoSrcTemporarilyBlocked(media.src)) return false;
+
+  bumpGlobalAdPlaybackHold(960);
+  primeAdVideo(reason);
 
   try {
     v.playsInline = true;
     v.loop = true;
-    v.preload = shouldPlayRef.current ? 'auto' : 'metadata';
+    v.preload = 'auto';
   } catch {}
 
-  applyHtmlMediaMutedState(v, muted);
+  applyHtmlMediaMutedState(v, mutedRef.current);
 
   try {
     const isCold =
       (typeof HTMLMediaElement !== 'undefined' &&
-        v.networkState === HTMLMediaElement.NETWORK_EMPTY) ||
+        (
+          v.networkState === HTMLMediaElement.NETWORK_EMPTY ||
+          v.networkState === HTMLMediaElement.NETWORK_IDLE
+        )) ||
       !v.currentSrc;
 
-    if (isCold) {
-      const lazySrc = String(v.getAttribute('data-src') || '').trim();
-      if (lazySrc && !v.getAttribute('src')) {
-        try { v.setAttribute('src', lazySrc); } catch {}
-      }
-      try { v.load?.(); } catch {}
+    if (isCold && Number(v.readyState || 0) < 2) {
       scheduleAdAutoplayRetry(`${reason}:cold`);
       return false;
     }
@@ -1224,6 +1417,7 @@ const tryStartAdVideo = React.useCallback((reason = 'play') => {
     applyHtmlMediaMutedState(v, true);
     try { writeMutedPrefToStorage(true); } catch {}
     try { emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback'); } catch {}
+    mutedRef.current = true;
     setMuted(true);
 
     try {
@@ -1231,7 +1425,7 @@ const tryStartAdVideo = React.useCallback((reason = 'play') => {
       if (retry && typeof retry.then === 'function') {
         retry
           .then(() => {
-            resetAdAutoplayRetry();
+            confirmAdPlaybackStart(`${reason}:muted_retry`);
           })
           .catch(() => {
             scheduleAdAutoplayRetry(`${reason}:muted_retry_fail`);
@@ -1241,7 +1435,7 @@ const tryStartAdVideo = React.useCallback((reason = 'play') => {
     } catch {}
 
     if (!v.paused) {
-      resetAdAutoplayRetry();
+      confirmAdPlaybackStart(`${reason}:muted_retry_sync`);
       return true;
     }
 
@@ -1250,12 +1444,11 @@ const tryStartAdVideo = React.useCallback((reason = 'play') => {
   };
 
   try {
-    emitAdPlayToCoordinator('ad_video');
     const p = v.play?.();
 
     if (p && typeof p.then === 'function') {
       p.then(() => {
-        resetAdAutoplayRetry();
+        confirmAdPlaybackStart(reason);
       }).catch(() => {
         retryMutedFallback();
       });
@@ -1267,16 +1460,17 @@ const tryStartAdVideo = React.useCallback((reason = 'play') => {
   }
 
   if (!v.paused) {
-    resetAdAutoplayRetry();
+    confirmAdPlaybackStart(`${reason}:sync`);
     return true;
   }
 
   scheduleAdAutoplayRetry(`${reason}:pending`);
   return false;
 }, [
-  emitAdPlayToCoordinator,
-  muted,
-  resetAdAutoplayRetry,
+  confirmAdPlaybackStart,
+  isVideoSrcTemporarilyBlocked,
+  media.src,
+  primeAdVideo,
   scheduleAdAutoplayRetry,
 ]);
 tryStartAdVideoRef.current = tryStartAdVideo;
@@ -1287,13 +1481,20 @@ tryStartAdVideoRef.current = tryStartAdVideo;
   };
 
   useEffect(() => {
+    mutedRef.current = muted;
+  }, [muted]);
+
+  useEffect(() => {
     shouldPlayRef.current = shouldPlay;
+    shouldPrimeAdMediaRef.current = shouldPrimeAdMedia;
+    setAdPlaybackState(shouldPlay ? 'armed' : 'idle');
     if (!shouldPlay) {
+      clearAdPlaybackConfirm();
       clearAdAutoplayRetry();
       autoplayRetryStageRef.current = 0;
       autoplayRetryTotalRef.current = 0;
     }
-  }, [clearAdAutoplayRetry, shouldPlay]);
+  }, [clearAdAutoplayRetry, clearAdPlaybackConfirm, setAdPlaybackState, shouldPlay, shouldPrimeAdMedia]);
 
   const tryStartAdYoutube = React.useCallback((reason = 'ad_youtube') => {
     const player = ytPlayerRef.current;
@@ -1301,9 +1502,10 @@ tryStartAdVideoRef.current = tryStartAdVideo;
     if (!shouldPlayRef.current) return false;
 
     try {
-      if (muted) player.mute?.();
+      bumpGlobalAdPlaybackHold(960);
+      if (mutedRef.current) player.mute?.();
       else player.unMute?.();
-      emitAdPlayToCoordinator('ad_youtube');
+      setAdPlaybackState('attempting');
       player.playVideo?.();
       scheduleAdAutoplayRetry(`${reason}:watchdog`);
       return true;
@@ -1311,13 +1513,20 @@ tryStartAdVideoRef.current = tryStartAdVideo;
       scheduleAdAutoplayRetry(`${reason}:throw`);
       return false;
     }
-  }, [emitAdPlayToCoordinator, muted, scheduleAdAutoplayRetry]);
+  }, [scheduleAdAutoplayRetry, setAdPlaybackState]);
   tryStartAdYoutubeRef.current = tryStartAdYoutube;
 
   useEffect(() => {
     if (media.kind === 'video' || media.kind === 'youtube' || media.kind === 'tiktok') return;
     resetAdAutoplayRetry();
-  }, [media.kind, resetAdAutoplayRetry]);
+    setAdPlaybackState('idle');
+  }, [media.kind, resetAdAutoplayRetry, setAdPlaybackState]);
+
+  useEffect(() => {
+    if (media.kind !== 'video' || !media.src) return;
+    if (!shouldPrimeAdMedia) return;
+    primeAdVideo('near_prime');
+  }, [media.kind, media.src, primeAdVideo, shouldPrimeAdMedia]);
 
   // Page visibility + focus/blur
   useEffect(() => {
@@ -1391,6 +1600,8 @@ tryStartAdVideoRef.current = tryStartAdVideo;
       if (typeof d?.muted !== 'boolean') return;
 
       const next = !!d.muted;
+      const changed = mutedRef.current !== next;
+      mutedRef.current = next;
       setMuted(next);
 
       // HTML5
@@ -1406,7 +1617,7 @@ tryStartAdVideoRef.current = tryStartAdVideo;
         } catch {}
       }
 
-      if (shouldPlayRef.current) {
+      if (shouldPlayRef.current && changed) {
         scheduleAdAutoplayRetry('global_mute_change', { rearm: true });
       }
     };
@@ -1766,7 +1977,7 @@ tryStartAdVideoRef.current = tryStartAdVideo;
     const applyPlayerState = (player) => {
       if (!player || cancelled) return;
       try {
-        if (muted) player.mute?.();
+        if (mutedRef.current) player.mute?.();
         else player.unMute?.();
 
         if (shouldPlayRef.current) {
@@ -1790,7 +2001,7 @@ tryStartAdVideoRef.current = tryStartAdVideo;
           playerVars: {
             autoplay: 0,
             controls: 0,
-            mute: muted ? 1 : 0,
+            mute: mutedRef.current ? 1 : 0,
             rel: 0,
             fs: 0,
             modestbranding: 1,
@@ -1812,6 +2023,8 @@ tryStartAdVideoRef.current = tryStartAdVideo;
               const st = ev?.data;
 
               if (st === window.YT?.PlayerState?.PLAYING) {
+                setAdPlaybackState('playing');
+                bumpGlobalAdPlaybackHold(1800);
                 resetAdAutoplayRetry();
                 emitAdPlayToCoordinator('ad_youtube');
                 return;
@@ -1825,6 +2038,7 @@ tryStartAdVideoRef.current = tryStartAdVideo;
                   st === window.YT?.PlayerState?.CUED
                 )
               ) {
+                setAdPlaybackState('attempting');
                 scheduleAdAutoplayRetry(`yt_state_${String(st || 'pending')}`, { rearm: true });
               }
 
@@ -1834,7 +2048,9 @@ tryStartAdVideoRef.current = tryStartAdVideo;
               }
             },
             onError: () => {
+              clearAdPlaybackConfirm();
               clearAdAutoplayRetry();
+              setAdPlaybackState('error');
               destroyLocalYtPlayer(true);
             },
           },
@@ -1873,22 +2089,25 @@ tryStartAdVideoRef.current = tryStartAdVideo;
   }, [
     media.kind,
     media.src,
-    muted,
     shouldPrimeAdMedia,
     clearAdAutoplayRetry,
+    clearAdPlaybackConfirm,
     destroyLocalYtPlayer,
     emitAdPlayToCoordinator,
     resetAdAutoplayRetry,
     scheduleAdAutoplayRetry,
+    setAdPlaybackState,
     tryStartAdYoutube,
   ]);
 
   useEffect(() => {
     return () => {
+      clearAdPlaybackConfirm();
       clearAdAutoplayRetry();
+      setAdPlaybackState('idle');
       destroyLocalYtPlayer(true);
     };
-  }, [clearAdAutoplayRetry, destroyLocalYtPlayer]);
+  }, [clearAdAutoplayRetry, clearAdPlaybackConfirm, destroyLocalYtPlayer, setAdPlaybackState]);
   // ===== Hard stop / resume playback depending on attention =====
 useEffect(() => {
   // HTML5 video
@@ -1898,6 +2117,7 @@ useEffect(() => {
 
     if (isVideoSrcTemporarilyBlocked(srcKey)) {
       try { v.pause?.(); } catch {}
+      setAdPlaybackState('blocked');
       return;
     }
 
@@ -1905,6 +2125,8 @@ useEffect(() => {
       tryStartAdVideo('attention_resume');
     } else {
       resetAdAutoplayRetry();
+      clearAdPlaybackConfirm();
+      setAdPlaybackState('idle');
       try { v.pause?.(); } catch {}
     }
   }
@@ -1917,6 +2139,8 @@ useEffect(() => {
         tryStartAdYoutube('attention_resume');
       } else {
         resetAdAutoplayRetry();
+        clearAdPlaybackConfirm();
+        setAdPlaybackState('idle');
         p.pauseVideo?.();
       }
     } catch {}
@@ -1927,11 +2151,13 @@ useEffect(() => {
   }
 }, [
   emitAdPlayToCoordinator,
+  isVideoSrcTemporarilyBlocked,
   shouldPlay,
   media.kind,
   media.src,
-  muted,
+  clearAdPlaybackConfirm,
   resetAdAutoplayRetry,
+  setAdPlaybackState,
   tryStartAdVideo,
   tryStartAdYoutube,
 ]);
@@ -2033,6 +2259,7 @@ useEffect(() => {
     emitMutedPref(next, playerIdRef.current, 'forum-ads-toggle');
 
     // 2) локально
+    mutedRef.current = next;
     setMuted(next);
 
     // HTML5
@@ -2040,7 +2267,8 @@ useEffect(() => {
       const v = videoRef.current;
       applyHtmlMediaMutedState(v, next);
       if (shouldPlayRef.current) {
-        scheduleAdAutoplayRetry('manual_toggle', { rearm: true });
+        if (next) scheduleAdAutoplayRetry('manual_toggle', { rearm: true });
+        else tryStartAdVideoRef.current?.('manual_toggle');
       }
       return;
     }
@@ -2202,45 +2430,52 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
       }
       data-src={media.src}
       className="forum-ad-fit"
-      autoPlay
       muted={muted}
       loop
       playsInline
       referrerPolicy="no-referrer"
-      preload={shouldPlay ? 'auto' : shouldPrimeAdMedia ? 'metadata' : 'none'}
+      preload={shouldPrimeAdMedia ? 'auto' : 'none'}
       onLoadedMetadata={() => {
         try { clearVideoSrcBlock(media?.src); } catch {}
+        primeAdVideo('loadedmetadata');
         scheduleAdAutoplayRetry('loadedmetadata', { rearm: true });
       }}
       onLoadedData={() => {
         try { clearVideoSrcBlock(media?.src); } catch {}
+        primeAdVideo('loadeddata');
         scheduleAdAutoplayRetry('loadeddata', { rearm: true });
       }}
       onCanPlay={() => {
         try { clearVideoSrcBlock(media?.src); } catch {}
+        primeAdVideo('canplay');
         scheduleAdAutoplayRetry('canplay', { rearm: true });
       }}
       onPlaying={() => {
         try { clearVideoSrcBlock(media?.src); } catch {}
-        resetAdAutoplayRetry();
+        markAdPlaybackStarted('dom_playing');
       }}
       onPause={() => {
         const v = videoRef.current;
         if (!v) return;
         if (!shouldPlayRef.current) return;
         if (v.ended) return;
+        setAdPlaybackState('paused');
         scheduleAdAutoplayRetry('pause', { rearm: true });
       }}
       onWaiting={() => {
         if (!shouldPlayRef.current) return;
+        setAdPlaybackState('waiting');
         scheduleAdAutoplayRetry('waiting', { rearm: true });
       }}
       onStalled={() => {
         if (!shouldPlayRef.current) return;
+        setAdPlaybackState('stalled');
         scheduleAdAutoplayRetry('stalled', { rearm: true });
       }}
       onError={() => {
+        clearAdPlaybackConfirm();
         clearAdAutoplayRetry();
+        setAdPlaybackState('error');
         try {
           markVideoSrcTemporarilyBlocked(media?.src, isNear ? 12000 : 20000);
         } catch {}
