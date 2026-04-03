@@ -16,7 +16,6 @@ export default function useVideoFeedActions({
   setSel,
   setThreadRoot,
   setTopicFilterId,
-  snapVideoFeedToFirstCardTop,
   emitDiag,
   visibleVideoCount,
   videoFeed,
@@ -85,7 +84,6 @@ export default function useVideoFeedActions({
       setSel,
       setThreadRoot,
       setTopicFilterId,
-      snapVideoFeedToFirstCardTop,
     })
   }, [
     setVideoFeedUserSortLocked,
@@ -100,7 +98,6 @@ export default function useVideoFeedActions({
     setSel,
     setThreadRoot,
     setTopicFilterId,
-    snapVideoFeedToFirstCardTop,
   ])
 
   const closeVideoFeed = useCallback(() => {

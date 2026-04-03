@@ -17,6 +17,13 @@ function scrollToY(y) {
   }
 }
 
+function markProgrammaticScroll(reason = 'video_feed_align_start') {
+  try {
+    window.__forumProgrammaticScrollTs = Date.now()
+    window.__forumProgrammaticScrollReason = String(reason || 'video_feed_align_start')
+  } catch {}
+}
+
 /**
  * @typedef {Object} SnapVideoFeedOptions
  * @property {boolean=} hideHeader Hide sticky header before snapping.
@@ -68,9 +75,11 @@ export function snapVideoFeedToFirstCardTop({
           if (useInner) {
             const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }
             const targetTop = (scrollEl.scrollTop || 0) + (anchorRect.top - Number(hostRect.top || 0))
+            markProgrammaticScroll('video_feed_anchor_align')
             scrollEl.scrollTop = Math.max(0, targetTop)
           } else {
             const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + anchorRect.top
+            markProgrammaticScroll('video_feed_anchor_align')
             scrollToY(y)
           }
           return
@@ -95,9 +104,11 @@ export function snapVideoFeedToFirstCardTop({
       if (useInner) {
         const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }
         const targetTop = (scrollEl.scrollTop || 0) + (cardRect.top - Number(hostRect.top || 0))
+        markProgrammaticScroll('video_feed_card_align')
         scrollEl.scrollTop = Math.max(0, targetTop)
       } else {
         const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + cardRect.top
+        markProgrammaticScroll('video_feed_card_align')
         scrollToY(y)
       }
     } catch {}

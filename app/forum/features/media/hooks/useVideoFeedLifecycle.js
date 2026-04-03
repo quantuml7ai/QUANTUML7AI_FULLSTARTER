@@ -58,12 +58,26 @@ export default function useVideoFeedLifecycle({
   const autoBootRef = useRef(false)
   const buildTimerRef = useRef(0)
   const lastBuildEntryTokenRef = useRef(Number(videoFeedEntryToken || 0))
+  const lifecycleTimersRef = useRef([])
+  const lifecycleRafRef = useRef({ a: 0, b: 0 })
+
+  const clearLifecycleQueues = () => {
+    const timers = lifecycleTimersRef.current
+    while (timers.length) {
+      clearSafeTimeout(timers.pop())
+    }
+    const rafs = lifecycleRafRef.current
+    clearSafeAnimationFrame(rafs.a)
+    clearSafeAnimationFrame(rafs.b)
+    rafs.a = 0
+    rafs.b = 0
+  }
 
   useEffect(() => {
     let disposed = false
-    let rafA = 0
-    let rafB = 0
-    const timers = []
+    clearLifecycleQueues()
+    const rafs = lifecycleRafRef.current
+    const timers = lifecycleTimersRef.current
 
     const cancelScheduledBuild = () => {
       if (buildTimerRef.current) {
@@ -88,10 +102,14 @@ export default function useVideoFeedLifecycle({
       disposed = true
       cancelScheduledBuild()
       clearTimers()
-      clearSafeAnimationFrame(rafA)
-      clearSafeAnimationFrame(rafB)
-      rafA = 0
-      rafB = 0
+      try {
+        if (rafs.a) cancelAnimationFrame(rafs.a)
+      } catch {}
+      try {
+        if (rafs.b) cancelAnimationFrame(rafs.b)
+      } catch {}
+      rafs.a = 0
+      rafs.b = 0
     }
 
     if (!videoFeedOpen) return cleanup
@@ -228,8 +246,8 @@ export default function useVideoFeedLifecycle({
 
     if (videoFeedRefreshTeleportPendingRef.current) {
       try {
-        rafA = requestAnimationFrame(() => {
-          rafB = requestAnimationFrame(() => {
+        rafs.a = requestAnimationFrame(() => {
+          rafs.b = requestAnimationFrame(() => {
             applySoftRefreshWhenIdle(0)
           })
         })
@@ -238,7 +256,9 @@ export default function useVideoFeedLifecycle({
       }
     }
 
-    return cleanup
+    return () => {
+      cleanup()
+    }
   }, [
     videoFeedOpen,
     videoFeedEntryToken,
@@ -260,6 +280,16 @@ export default function useVideoFeedLifecycle({
     videoFeedRefreshTeleportPendingRef,
     headAutoOpenRef,
   ])
+
+  useEffect(() => {
+    return () => {
+      clearLifecycleQueues()
+      if (buildTimerRef.current) {
+        clearSafeTimeout(buildTimerRef.current)
+        buildTimerRef.current = 0
+      }
+    }
+  }, [])
 
   useBrowserLayoutEffect(() => {
     if (autoBootRef.current) return

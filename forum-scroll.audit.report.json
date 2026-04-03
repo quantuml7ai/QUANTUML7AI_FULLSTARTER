@@ -1,0 +1,5974 @@
+{
+  "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
+  "generatedAt": "2026-04-03T19:15:47.819Z",
+  "scannedFiles": 268,
+  "report": [
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumFeedRuntime.js",
+      "score": 330,
+      "counts": {
+        "scrollWrite": 2,
+        "scrollRead": 11,
+        "alignOps": 24,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 2,
+        "resizeObserver": 0,
+        "raf": 4,
+        "timers": 5
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 325,
+          "text": "try { window.scrollTo({ top: nextY, behavior: 'auto' }) } catch { try { window.scrollTo(0, nextY) } catch {} }"
+        },
+        {
+          "key": "scrollRead",
+          "line": 312,
+          "text": "const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))"
+        },
+        {
+          "key": "scrollRead",
+          "line": 314,
+          "text": "if (Math.abs(Number(scrollEl.scrollTop || 0) - nextTop) >= 1) {"
+        },
+        {
+          "key": "scrollRead",
+          "line": 316,
+          "text": "scrollEl.scrollTop = nextTop"
+        },
+        {
+          "key": "scrollRead",
+          "line": 320,
+          "text": "const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top"
+        },
+        {
+          "key": "scrollRead",
+          "line": 322,
+          "text": "const curY = Number(window.pageYOffset || document.documentElement.scrollTop || 0)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 621,
+          "text": "return Number(scrollEl.scrollTop || 0)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 624,
+          "text": "window.pageYOffset ||"
+        },
+        {
+          "key": "scrollRead",
+          "line": 625,
+          "text": "document.documentElement?.scrollTop ||"
+        },
+        {
+          "key": "alignOps",
+          "line": 10,
+          "text": "import { snapVideoFeedToFirstCardTop as snapVideoFeedToFirstCardTopUtil } from '../../media/utils/videoFeedScroll'"
+        },
+        {
+          "key": "alignOps",
+          "line": 12,
+          "text": "centerNodeInScroll as centerNodeInScrollUtil,"
+        },
+        {
+          "key": "alignOps",
+          "line": 14,
+          "text": "centerAndFlashPostAfterDom as centerAndFlashPostAfterDomUtil,"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\utils\\postFocus.js",
+      "score": 156,
+      "counts": {
+        "scrollWrite": 5,
+        "scrollRead": 8,
+        "alignOps": 5,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 6,
+        "resizeObserver": 2,
+        "raf": 5,
+        "timers": 7
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 93,
+          "text": "scrollEl.scrollTo?.({ top: nextTop, behavior })"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 111,
+          "text": "window.scrollTo({ top: nextY, behavior })"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 114,
+          "text": "window.scrollTo(0, nextY)"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 122,
+          "text": "node.scrollIntoView?.({ behavior, block: 'nearest' })"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 125,
+          "text": "node.scrollIntoView?.()"
+        },
+        {
+          "key": "scrollRead",
+          "line": 47,
+          "text": "return { mode: 'inner', top: Number(scrollEl.scrollTop || 0) || 0 }"
+        },
+        {
+          "key": "scrollRead",
+          "line": 53,
+          "text": "top: Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0) || 0,"
+        },
+        {
+          "key": "scrollRead",
+          "line": 91,
+          "text": "Math.min((scrollEl.scrollTop || 0) + delta, (scrollEl.scrollHeight || 0) - (scrollEl.clientHeight || 0)),"
+        },
+        {
+          "key": "scrollRead",
+          "line": 108,
+          "text": "const curY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0"
+        },
+        {
+          "key": "alignOps",
+          "line": 68,
+          "text": "export function centerNodeInScroll(node, options = {}) {"
+        },
+        {
+          "key": "alignOps",
+          "line": 130,
+          "text": "export function centerPostAfterDom(postId, options = {}) {"
+        },
+        {
+          "key": "alignOps",
+          "line": 135,
+          "text": "typeof normalized?.centerNodeInScrollFn === 'function' ? normalized.centerNodeInScrollFn : centerNodeInScroll"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumHeadCollapse.js",
+      "score": 133,
+      "counts": {
+        "scrollWrite": 4,
+        "scrollRead": 20,
+        "alignOps": 2,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 3,
+        "resizeObserver": 0,
+        "raf": 5,
+        "timers": 3
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 94,
+          "text": "window.scrollTo({ top: Math.max(0, top), behavior: 'auto' })"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 96,
+          "text": "try { window.scrollTo(0, Math.max(0, top)) } catch {}"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 128,
+          "text": "window.scrollTo(0, 0)"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 366,
+          "text": "window.scrollTo(0, target)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 84,
+          "text": "const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))"
+        },
+        {
+          "key": "scrollRead",
+          "line": 87,
+          "text": "scrollEl.scrollTop = Math.max(0, targetTop)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 91,
+          "text": "const top = (window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0) + rect.top"
+        },
+        {
+          "key": "scrollRead",
+          "line": 119,
+          "text": "if (Number(scrollEl.scrollTop || 0) > 4) {"
+        },
+        {
+          "key": "scrollRead",
+          "line": 121,
+          "text": "scrollEl.scrollTop = 0"
+        },
+        {
+          "key": "scrollRead",
+          "line": 125,
+          "text": "const top = Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 264,
+          "text": "if (el && el.scrollHeight > el.clientHeight + 1) return el.scrollTop || 0"
+        },
+        {
+          "key": "scrollRead",
+          "line": 265,
+          "text": "return (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\utils\\navScroll.js",
+      "score": 104,
+      "counts": {
+        "scrollWrite": 5,
+        "scrollRead": 7,
+        "alignOps": 0,
+        "restoreOps": 4,
+        "teleportOps": 0,
+        "rectReads": 5,
+        "resizeObserver": 0,
+        "raf": 2,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 52,
+          "text": "window.scrollTo({ top: y, behavior: 'auto' })"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 55,
+          "text": "window.scrollTo(0, y)"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 95,
+          "text": "el.scrollIntoView({ behavior: 'auto', block: 'nearest' })"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 104,
+          "text": "window.scrollTo({ top: (window.pageYOffset || 0) + delta, behavior: 'auto' })"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 109,
+          "text": "el.scrollIntoView({ behavior: 'auto', block: 'nearest' })"
+        },
+        {
+          "key": "scrollRead",
+          "line": 10,
+          "text": "if (useInner) return { useInner: true, y: scrollEl.scrollTop || 0 }"
+        },
+        {
+          "key": "scrollRead",
+          "line": 12,
+          "text": "const winY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0"
+        },
+        {
+          "key": "scrollRead",
+          "line": 48,
+          "text": "scrollEl.scrollTop = y"
+        },
+        {
+          "key": "scrollRead",
+          "line": 92,
+          "text": "scrollEl.scrollTop += delta"
+        },
+        {
+          "key": "scrollRead",
+          "line": 104,
+          "text": "window.scrollTo({ top: (window.pageYOffset || 0) + delta, behavior: 'auto' })"
+        },
+        {
+          "key": "restoreOps",
+          "line": 3,
+          "text": "export function getScrollSnapshot(options = {}) {"
+        },
+        {
+          "key": "restoreOps",
+          "line": 16,
+          "text": "export function getEntryOffset(options = {}) {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumRoot.jsx",
+      "score": 94,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 6,
+        "restoreOps": 4,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "alignOps",
+          "line": 338,
+          "text": "alignInboxStartUnderTabs,"
+        },
+        {
+          "key": "alignOps",
+          "line": 420,
+          "text": "alignNodeToTop,"
+        },
+        {
+          "key": "alignOps",
+          "line": 423,
+          "text": "alignInboxStartUnderTabs,"
+        },
+        {
+          "key": "alignOps",
+          "line": 532,
+          "text": "centerPostAfterDom,"
+        },
+        {
+          "key": "alignOps",
+          "line": 591,
+          "text": "alignNodeToTop,"
+        },
+        {
+          "key": "alignOps",
+          "line": 891,
+          "text": "centerPostAfterDom,"
+        },
+        {
+          "key": "restoreOps",
+          "line": 55,
+          "text": "getScrollSnapshot as getNavScrollSnapshot,"
+        },
+        {
+          "key": "restoreOps",
+          "line": 57,
+          "text": "restoreScrollSnapshot as restoreNavScrollSnapshot,"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\ScrollTopPulse.js",
+      "score": 83,
+      "counts": {
+        "scrollWrite": 5,
+        "scrollRead": 11,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 3,
+        "timers": 4
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 298,
+          "text": "// и дожимаем window.scrollTo на всякий (не меняет логику, но страхует крайние случаи)"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 347,
+          "text": "window.scrollTo(0, getTarget())"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 372,
+          "text": "window.scrollTo(0, 0)"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 419,
+          "text": "window.scrollTo(0, maxY)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 95,
+          "text": "lastYRef.current = window.scrollY || 0"
+        },
+        {
+          "key": "scrollRead",
+          "line": 137,
+          "text": "const y = window.scrollY || 0"
+        },
+        {
+          "key": "scrollRead",
+          "line": 266,
+          "text": "// Не \"подпрыгиваем\" от чтения window.scrollY каждый кадр (feedback loop),"
+        },
+        {
+          "key": "scrollRead",
+          "line": 272,
+          "text": "let virtualY = (typeof window.scrollY === 'number' ? window.scrollY : scroller.scrollTop) || 0"
+        },
+        {
+          "key": "scrollRead",
+          "line": 297,
+          "text": "scroller.scrollTop = Math.round(finalY)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 317,
+          "text": "scroller.scrollTop = Math.round(virtualY)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 320,
+          "text": "const actualY = (typeof window.scrollY === 'number' ? window.scrollY : scroller.scrollTop) || 0"
+        },
+        {
+          "key": "raf",
+          "line": 279,
+          "text": "rafRef.current = requestAnimationFrame(step)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVideoFeedWindowing.js",
+      "score": 76,
+      "counts": {
+        "scrollWrite": 3,
+        "scrollRead": 10,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 3,
+        "resizeObserver": 2,
+        "raf": 3,
+        "timers": 2
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 165,
+          "text": "window.scrollTo({ top: nextY, behavior: 'auto' })"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 167,
+          "text": "try { window.scrollTo(0, nextY) } catch {}"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 329,
+          "text": "else window.scrollTo(0, 0)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 104,
+          "text": "const winTop = Number(window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 111,
+          "text": "st: Number(el.scrollTop || 0),"
+        },
+        {
+          "key": "scrollRead",
+          "line": 144,
+          "text": "const prevTop = Number(scrollEl.scrollTop || 0)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 149,
+          "text": "scrollEl.scrollTop = nextTop"
+        },
+        {
+          "key": "scrollRead",
+          "line": 156,
+          "text": "window.pageYOffset ||"
+        },
+        {
+          "key": "scrollRead",
+          "line": 157,
+          "text": "document.documentElement?.scrollTop ||"
+        },
+        {
+          "key": "scrollRead",
+          "line": 328,
+          "text": "if (el && el.scrollHeight > el.clientHeight + 1) el.scrollTop = 0"
+        },
+        {
+          "key": "rectReads",
+          "line": 128,
+          "text": "const rect = node.getBoundingClientRect?.()"
+        },
+        {
+          "key": "rectReads",
+          "line": 141,
+          "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\videoFeedScroll.js",
+      "score": 73,
+      "counts": {
+        "scrollWrite": 3,
+        "scrollRead": 8,
+        "alignOps": 1,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 4,
+        "resizeObserver": 0,
+        "raf": 2,
+        "timers": 2
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 12,
+          "text": "window.scrollTo({ top: y, behavior: 'auto' })"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 15,
+          "text": "window.scrollTo(0, y)"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 96,
+          "text": "anchor?.scrollIntoView?.({ behavior: 'auto', block: 'start' })"
+        },
+        {
+          "key": "scrollRead",
+          "line": 77,
+          "text": "const targetTop = (scrollEl.scrollTop || 0) + (anchorRect.top - Number(hostRect.top || 0))"
+        },
+        {
+          "key": "scrollRead",
+          "line": 79,
+          "text": "scrollEl.scrollTop = Math.max(0, targetTop)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 81,
+          "text": "const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + anchorRect.top"
+        },
+        {
+          "key": "scrollRead",
+          "line": 106,
+          "text": "const targetTop = (scrollEl.scrollTop || 0) + (cardRect.top - Number(hostRect.top || 0))"
+        },
+        {
+          "key": "scrollRead",
+          "line": 108,
+          "text": "scrollEl.scrollTop = Math.max(0, targetTop)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 110,
+          "text": "const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + cardRect.top"
+        },
+        {
+          "key": "alignOps",
+          "line": 49,
+          "text": "export function snapVideoFeedToFirstCardTop({"
+        },
+        {
+          "key": "rectReads",
+          "line": 72,
+          "text": "const anchorRect = anchor.getBoundingClientRect?.()"
+        },
+        {
+          "key": "rectReads",
+          "line": 76,
+          "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\utils\\alignInboxStartUnderTabs.js",
+      "score": 64,
+      "counts": {
+        "scrollWrite": 2,
+        "scrollRead": 2,
+        "alignOps": 3,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 2,
+        "resizeObserver": 0,
+        "raf": 2,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 85,
+          "text": "window.scrollBy({ top: delta, behavior: 'auto' })"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 87,
+          "text": "try { window.scrollTo(0, (window.pageYOffset || 0) + delta) } catch {}"
+        },
+        {
+          "key": "scrollRead",
+          "line": 80,
+          "text": "scrollEl.scrollTop += delta"
+        },
+        {
+          "key": "scrollRead",
+          "line": 87,
+          "text": "try { window.scrollTo(0, (window.pageYOffset || 0) + delta) } catch {}"
+        },
+        {
+          "key": "alignOps",
+          "line": 12,
+          "text": "export function alignInboxStartUnderTabs({"
+        },
+        {
+          "key": "alignOps",
+          "line": 36,
+          "text": "alignInboxStartUnderTabs({"
+        },
+        {
+          "key": "alignOps",
+          "line": 58,
+          "text": "alignInboxStartUnderTabs({"
+        },
+        {
+          "key": "rectReads",
+          "line": 69,
+          "text": "const tabsRect = tabs.getBoundingClientRect()"
+        },
+        {
+          "key": "raf",
+          "line": 5,
+          "text": "if (typeof requestAnimationFrame === 'function') {"
+        },
+        {
+          "key": "timers",
+          "line": 9,
+          "text": "return setTimeout(cb, 16)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumHomeAction.js",
+      "score": 52,
+      "counts": {
+        "scrollWrite": 4,
+        "scrollRead": 5,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 2,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 52,
+          "text": "try { window.scrollTo({ top: 0, behavior: 'auto' }) } catch { try { window.scrollTo(0, 0) } catch {} }"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 64,
+          "text": "try { window.scrollTo({ top: Math.max(0, y), behavior: 'auto' }) } catch { try { window.scrollTo(0, Math.max(0, y)) } catch {} }"
+        },
+        {
+          "key": "scrollRead",
+          "line": 49,
+          "text": "scrollEl.scrollTop = 0"
+        },
+        {
+          "key": "scrollRead",
+          "line": 59,
+          "text": "const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))"
+        },
+        {
+          "key": "scrollRead",
+          "line": 63,
+          "text": "const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top"
+        },
+        {
+          "key": "rectReads",
+          "line": 55,
+          "text": "const rect = target.getBoundingClientRect?.()"
+        },
+        {
+          "key": "rectReads",
+          "line": 58,
+          "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }"
+        },
+        {
+          "key": "timers",
+          "line": 84,
+          "text": "setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\UserPostsPane.jsx",
+      "score": 48,
+      "counts": {
+        "scrollWrite": 2,
+        "scrollRead": 8,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 2,
+        "resizeObserver": 0,
+        "raf": 1,
+        "timers": 2
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 91,
+          "text": "try { window.scrollTo({ top: Math.max(0, y), behavior: 'auto' }) } catch { try { window.scrollTo(0, Math.max(0, y)) } catch {} }"
+        },
+        {
+          "key": "scrollRead",
+          "line": 59,
+          "text": "return Number(scrollEl.scrollTop || 0)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 62,
+          "text": "window.pageYOffset ||"
+        },
+        {
+          "key": "scrollRead",
+          "line": 63,
+          "text": "document.documentElement?.scrollTop ||"
+        },
+        {
+          "key": "scrollRead",
+          "line": 87,
+          "text": "const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))"
+        },
+        {
+          "key": "scrollRead",
+          "line": 90,
+          "text": "const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top"
+        },
+        {
+          "key": "rectReads",
+          "line": 81,
+          "text": "const rect = marker.getBoundingClientRect?.()"
+        },
+        {
+          "key": "rectReads",
+          "line": 86,
+          "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }"
+        },
+        {
+          "key": "raf",
+          "line": 128,
+          "text": "rafA = requestAnimationFrame(() => scheduleAlign(0, baselineTop))"
+        },
+        {
+          "key": "timers",
+          "line": 110,
+          "text": "retryTimer = setTimeout(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 119,
+          "text": "retryTimer = setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
+      "score": 45,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 4,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 6,
+        "resizeObserver": 0,
+        "raf": 5,
+        "timers": 11
+      },
+      "hits": [
+        {
+          "key": "scrollRead",
+          "line": 309,
+          "text": "return Number(scrollEl.scrollTop || 0);"
+        },
+        {
+          "key": "scrollRead",
+          "line": 313,
+          "text": "return Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0);"
+        },
+        {
+          "key": "rectReads",
+          "line": 262,
+          "text": "const rect = video.getBoundingClientRect?.();"
+        },
+        {
+          "key": "rectReads",
+          "line": 609,
+          "text": "const rect = el.getBoundingClientRect?.();"
+        },
+        {
+          "key": "rectReads",
+          "line": 2801,
+          "text": "const rect = node.getBoundingClientRect?.();"
+        },
+        {
+          "key": "rectReads",
+          "line": 3037,
+          "text": "const rect = owner.getBoundingClientRect?.();"
+        },
+        {
+          "key": "rectReads",
+          "line": 3054,
+          "text": "const rect = owner.getBoundingClientRect?.();"
+        },
+        {
+          "key": "rectReads",
+          "line": 3582,
+          "text": "const rect = el.getBoundingClientRect?.();"
+        },
+        {
+          "key": "raf",
+          "line": 109,
+          "text": "const rafId = typeof requestAnimationFrame === 'function' ? requestAnimationFrame(run) : 0;"
+        },
+        {
+          "key": "raf",
+          "line": 343,
+          "text": "warmSweepRaf = requestAnimationFrame(runner);"
+        },
+        {
+          "key": "raf",
+          "line": 3735,
+          "text": "rafId = requestAnimationFrame(() => {"
+        },
+        {
+          "key": "raf",
+          "line": 4242,
+          "text": "mutationSweepRaf = requestAnimationFrame(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumNavigationActions.js",
+      "score": 44,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 4,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "alignOps",
+          "line": 3,
+          "text": "import { alignInboxStartUnderTabs as alignInboxStartUnderTabsUtil } from '../../dm/utils/alignInboxStartUnderTabs'"
+        },
+        {
+          "key": "alignOps",
+          "line": 74,
+          "text": "const alignInboxStartUnderTabs = useCallback((attempt = 0) => {"
+        },
+        {
+          "key": "alignOps",
+          "line": 273,
+          "text": "alignInboxStartUnderTabs,"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\hooks\\useForumNavBridge.js",
+      "score": 44,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 4,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "alignOps",
+          "line": 7,
+          "text": "alignInboxStartUnderTabs: () => {},"
+        },
+        {
+          "key": "alignOps",
+          "line": 26,
+          "text": "const alignInboxStartUnderTabs = useCallback((attempt = 0) => {"
+        },
+        {
+          "key": "alignOps",
+          "line": 28,
+          "text": "navActionsRef.current.alignInboxStartUnderTabs?.(attempt)"
+        },
+        {
+          "key": "alignOps",
+          "line": 43,
+          "text": "alignInboxStartUnderTabs,"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useUserPostsBranchModel.js",
+      "score": 41,
+      "counts": {
+        "scrollWrite": 2,
+        "scrollRead": 5,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 2,
+        "resizeObserver": 0,
+        "raf": 2,
+        "timers": 2
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 258,
+          "text": "window.scrollTo?.({ top: 0, behavior: 'auto' })"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 290,
+          "text": "try { window.scrollTo?.({ top: Math.max(0, y), behavior: 'auto' }) } catch {}"
+        },
+        {
+          "key": "scrollRead",
+          "line": 256,
+          "text": "scrollEl.scrollTop = 0"
+        },
+        {
+          "key": "scrollRead",
+          "line": 286,
+          "text": "const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))"
+        },
+        {
+          "key": "scrollRead",
+          "line": 289,
+          "text": "const y = (window.pageYOffset || document.documentElement?.scrollTop || 0) + rect.top"
+        },
+        {
+          "key": "rectReads",
+          "line": 282,
+          "text": "const rect = marker.getBoundingClientRect?.()"
+        },
+        {
+          "key": "rectReads",
+          "line": 285,
+          "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }"
+        },
+        {
+          "key": "raf",
+          "line": 311,
+          "text": "rafA = window.requestAnimationFrame(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 307,
+          "text": "timerId = window.setTimeout(() => scheduleAlign(attempt + 1), delay)"
+        },
+        {
+          "key": "timers",
+          "line": 314,
+          "text": "window.setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVideoFeedLifecycle.js",
+      "score": 39,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 3,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 2,
+        "timers": 2
+      },
+      "hits": [
+        {
+          "key": "alignOps",
+          "line": 50,
+          "text": "snapVideoFeedToFirstCardTop,"
+        },
+        {
+          "key": "alignOps",
+          "line": 234,
+          "text": "snapVideoFeedToFirstCardTop({"
+        },
+        {
+          "key": "alignOps",
+          "line": 273,
+          "text": "snapVideoFeedToFirstCardTop,"
+        },
+        {
+          "key": "raf",
+          "line": 249,
+          "text": "rafs.a = requestAnimationFrame(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 96,
+          "text": "const id = setTimeout(fn, ms)"
+        },
+        {
+          "key": "timers",
+          "line": 147,
+          "text": "buildTimerRef.current = setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useScrollResizeCompensation.js",
+      "score": 37,
+      "counts": {
+        "scrollWrite": 2,
+        "scrollRead": 5,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 2,
+        "resizeObserver": 0,
+        "raf": 1,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 148,
+          "text": "window.scrollTo({ top: nextY, behavior: 'auto' })"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 150,
+          "text": "try { window.scrollTo(0, nextY) } catch {}"
+        },
+        {
+          "key": "scrollRead",
+          "line": 129,
+          "text": "const prevTop = Number(host.el.scrollTop || 0)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 134,
+          "text": "host.el.scrollTop = nextTop"
+        },
+        {
+          "key": "scrollRead",
+          "line": 143,
+          "text": "const curY = Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0)"
+        },
+        {
+          "key": "rectReads",
+          "line": 123,
+          "text": "const rect = node.getBoundingClientRect()"
+        },
+        {
+          "key": "rectReads",
+          "line": 126,
+          "text": "const hostRect = host.el.getBoundingClientRect?.() || { top: 0 }"
+        },
+        {
+          "key": "raf",
+          "line": 106,
+          "text": "rafGuardRef.current = window.requestAnimationFrame(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useThreadOpenNavigation.js",
+      "score": 36,
+      "counts": {
+        "scrollWrite": 2,
+        "scrollRead": 5,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 2,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 39,
+          "text": "window.scrollTo({ top: Math.max(0, y), behavior: 'auto' })"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 41,
+          "text": "try { window.scrollTo(0, Math.max(0, y)) } catch {}"
+        },
+        {
+          "key": "scrollRead",
+          "line": 31,
+          "text": "const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))"
+        },
+        {
+          "key": "scrollRead",
+          "line": 33,
+          "text": "scrollEl.scrollTop = Math.max(0, targetTop)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 37,
+          "text": "const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top"
+        },
+        {
+          "key": "rectReads",
+          "line": 26,
+          "text": "const rect = node.getBoundingClientRect?.()"
+        },
+        {
+          "key": "rectReads",
+          "line": 30,
+          "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }"
+        },
+        {
+          "key": "timers",
+          "line": 122,
+          "text": "const timer = setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmThreadAutoScroll.js",
+      "score": 35,
+      "counts": {
+        "scrollWrite": 4,
+        "scrollRead": 1,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 31,
+          "text": "if (node?.scrollIntoView) {"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 33,
+          "text": "node.scrollIntoView({ block: 'end', behavior: 'auto' })"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 35,
+          "text": "try { node.scrollIntoView() } catch {}"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 47,
+          "text": "window.scrollTo(0, document.body.scrollHeight || 0)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 45,
+          "text": "scrollEl.scrollTop = scrollEl.scrollHeight"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\diagnostics\\hooks\\useForumDiagnostics.js",
+      "score": 33,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 9,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 2,
+        "timers": 2
+      },
+      "hits": [
+        {
+          "key": "scrollRead",
+          "line": 179,
+          "text": "scrollY: typeof window !== 'undefined' ? window.scrollY : undefined,"
+        },
+        {
+          "key": "scrollRead",
+          "line": 263,
+          "text": "const y = Number(window?.scrollY || 0)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 374,
+          "text": "scrollY: Number(window.scrollY || 0),"
+        },
+        {
+          "key": "scrollRead",
+          "line": 375,
+          "text": "innerScrollTop: Number(scrollEl?.scrollTop || 0),"
+        },
+        {
+          "key": "scrollRead",
+          "line": 578,
+          "text": "let lastScrollTop = Number(window.scrollY || 0)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 586,
+          "text": "const top = Number(scrollEl?.scrollTop || window.scrollY || 0)"
+        },
+        {
+          "key": "raf",
+          "line": 260,
+          "text": "raf = requestAnimationFrame(() => {"
+        },
+        {
+          "key": "raf",
+          "line": 583,
+          "text": "scrollRaf = requestAnimationFrame(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 250,
+          "text": "const id = setInterval(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 648,
+          "text": "const timer = setInterval(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumVideoFeedRuntime.js",
+      "score": 33,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 3,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "alignOps",
+          "line": 10,
+          "text": "import { snapVideoFeedToFirstCardTop as snapVideoFeedToFirstCardTopUtil } from '../utils/videoFeedScroll'"
+        },
+        {
+          "key": "alignOps",
+          "line": 71,
+          "text": "const snapVideoFeedToFirstCardTop = useCallback("
+        },
+        {
+          "key": "alignOps",
+          "line": 137,
+          "text": "snapVideoFeedToFirstCardTop,"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useComposerScrollMemory.js",
+      "score": 32,
+      "counts": {
+        "scrollWrite": 2,
+        "scrollRead": 4,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 2,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 31,
+          "text": "try { window.scrollTo({ top: y, behavior: 'auto' }) } catch { try { window.scrollTo(0, y) } catch {} }"
+        },
+        {
+          "key": "scrollRead",
+          "line": 13,
+          "text": "? (scrollEl.scrollTop || 0)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 14,
+          "text": ": (window.scrollY || window.pageYOffset || 0)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 29,
+          "text": "try { scrollEl.scrollTop = y } catch {}"
+        },
+        {
+          "key": "raf",
+          "line": 35,
+          "text": "requestAnimationFrame(() => requestAnimationFrame(apply))"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\hooks\\useQuestViewActions.js",
+      "score": 31,
+      "counts": {
+        "scrollWrite": 3,
+        "scrollRead": 1,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 2,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 24,
+          "text": "if (marker?.scrollIntoView) {"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 39,
+          "text": "try { window.scrollTo({ top: 0, behavior: 'auto' }) } catch {}"
+        },
+        {
+          "key": "scrollRead",
+          "line": 35,
+          "text": "scrollEl.scrollTop = 0"
+        },
+        {
+          "key": "raf",
+          "line": 20,
+          "text": "requestAnimationFrame(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumDeepLinkFlow.js",
+      "score": 25,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 2,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 3
+      },
+      "hits": [
+        {
+          "key": "alignOps",
+          "line": 43,
+          "text": "centerAndFlashPostAfterDom,"
+        },
+        {
+          "key": "alignOps",
+          "line": 100,
+          "text": "centerAndFlashPostAfterDom?.(postId, behavior)"
+        },
+        {
+          "key": "timers",
+          "line": 16,
+          "text": "timer = setTimeout(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 131,
+          "text": "const sleep = (ms) => new Promise((r) => setTimeout(r, ms))"
+        },
+        {
+          "key": "timers",
+          "line": 167,
+          "text": "setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumSyncLoop.js",
+      "score": 25,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 8,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "scrollRead",
+          "line": 50,
+          "text": "const innerTop = Number(scrollEl?.scrollTop || 0)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 52,
+          "text": "Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 70,
+          "text": "const innerTop = Number(scrollEl?.scrollTop || 0)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 72,
+          "text": "Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0)"
+        },
+        {
+          "key": "timers",
+          "line": 238,
+          "text": "const id = setInterval(runTick, TICK_MS)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumCreatePostAction.js",
+      "score": 22,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 2,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "alignOps",
+          "line": 80,
+          "text": "centerPostAfterDom,"
+        },
+        {
+          "key": "alignOps",
+          "line": 343,
+          "text": "try { centerPostAfterDom(tmpId, 'auto') } catch {}"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\usePostParentReplyNav.js",
+      "score": 21,
+      "counts": {
+        "scrollWrite": 2,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 2,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 24,
+          "text": "node.scrollIntoView({ behavior: 'auto', block: 'nearest' })"
+        },
+        {
+          "key": "scrollWrite",
+          "line": 27,
+          "text": "node.scrollIntoView()"
+        },
+        {
+          "key": "raf",
+          "line": 45,
+          "text": "requestAnimationFrame(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 32,
+          "text": "window.setTimeout(() => node.classList.remove('replyTargetFlash'), 1100)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\hooks\\usePageLock.js",
+      "score": 20,
+      "counts": {
+        "scrollWrite": 1,
+        "scrollRead": 4,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 72,
+          "text": "window.scrollTo(0, winY)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 19,
+          "text": "const winY = window.scrollY || window.pageYOffset || 0"
+        },
+        {
+          "key": "scrollRead",
+          "line": 20,
+          "text": "const innerY = scrollEl ? (scrollEl.scrollTop || 0) : 0"
+        },
+        {
+          "key": "scrollRead",
+          "line": 68,
+          "text": "scrollEl.scrollTop = innerY"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumEditMode.js",
+      "score": 18,
+      "counts": {
+        "scrollWrite": 2,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 1,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 35,
+          "text": "if (root && root.scrollIntoView) {"
+        },
+        {
+          "key": "raf",
+          "line": 32,
+          "text": "focusRaf = requestAnimationFrame(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ForumAdSlot.jsx",
+      "score": 14,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 2,
+        "resizeObserver": 2,
+        "raf": 1,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "rectReads",
+          "line": 20,
+          "text": "lastHRef.current = el.getBoundingClientRect().height || 0"
+        },
+        {
+          "key": "rectReads",
+          "line": 53,
+          "text": "h = node.getBoundingClientRect().height || 0"
+        },
+        {
+          "key": "resizeObserver",
+          "line": 17,
+          "text": "if (typeof ResizeObserver === 'undefined') return"
+        },
+        {
+          "key": "resizeObserver",
+          "line": 48,
+          "text": "const ro = new ResizeObserver(() => {"
+        },
+        {
+          "key": "raf",
+          "line": 63,
+          "text": "rafRef.current = requestAnimationFrame(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\components\\ProfilePopover.jsx",
+      "score": 13,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 3,
+        "resizeObserver": 1,
+        "raf": 1,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "rectReads",
+          "line": 266,
+          "text": "const r = el.getBoundingClientRect();"
+        },
+        {
+          "key": "rectReads",
+          "line": 576,
+          "text": "const parentRect = parent?.getBoundingClientRect?.() || { top: 0, left: 0, right: 0 };"
+        },
+        {
+          "key": "resizeObserver",
+          "line": 287,
+          "text": "const ro = new ResizeObserver(() => applySize());"
+        },
+        {
+          "key": "raf",
+          "line": 174,
+          "text": "rafRef.current = requestAnimationFrame(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 535,
+          "text": "const h = setTimeout(async () => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ForumSearchSortControls.jsx",
+      "score": 12,
+      "counts": {
+        "scrollWrite": 1,
+        "scrollRead": 1,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 111,
+          "text": "else window.scrollTo({ top: 0, behavior: 'auto' })"
+        },
+        {
+          "key": "scrollRead",
+          "line": 110,
+          "text": "if (sc && sc.scrollHeight > sc.clientHeight + 1) sc.scrollTop = 0"
+        },
+        {
+          "key": "timers",
+          "line": 107,
+          "text": "setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useTopicDiscoveryModel.js",
+      "score": 9,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 3,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "scrollRead",
+          "line": 234,
+          "text": "return Number(scrollEl.scrollTop || 0) > 140"
+        },
+        {
+          "key": "scrollRead",
+          "line": 236,
+          "text": "return Number(window.pageYOffset || document.documentElement?.scrollTop || 0) > 140"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\utils\\openThreadFromPost.js",
+      "score": 9,
+      "counts": {
+        "scrollWrite": 1,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 31,
+          "text": "document.getElementById(`post_${post.id}`)?.scrollIntoView({ behavior: 'auto', block: 'nearest' })"
+        },
+        {
+          "key": "timers",
+          "line": 29,
+          "text": "setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\QCastPlayer.jsx",
+      "score": 8,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 2,
+        "resizeObserver": 0,
+        "raf": 1,
+        "timers": 2
+      },
+      "hits": [
+        {
+          "key": "rectReads",
+          "line": 182,
+          "text": "const r = host?.getBoundingClientRect?.();"
+        },
+        {
+          "key": "rectReads",
+          "line": 224,
+          "text": "const r = host?.getBoundingClientRect?.();"
+        },
+        {
+          "key": "raf",
+          "line": 745,
+          "text": "requestAnimationFrame(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 389,
+          "text": "muteSyncGuardTimerRef.current = window.setTimeout(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 866,
+          "text": "const timer = setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\components\\UserInfoPopover.jsx",
+      "score": 7,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 2,
+        "resizeObserver": 0,
+        "raf": 1,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "rectReads",
+          "line": 214,
+          "text": "const rect = anchorEl.getBoundingClientRect()"
+        },
+        {
+          "key": "raf",
+          "line": 256,
+          "text": "rafRef.current = window.requestAnimationFrame(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 49,
+          "text": "timerRef.current = setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmVoicePlayer.jsx",
+      "score": 6,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 1,
+        "resizeObserver": 0,
+        "raf": 2,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "rectReads",
+          "line": 154,
+          "text": "const rect = el.getBoundingClientRect()"
+        },
+        {
+          "key": "raf",
+          "line": 70,
+          "text": "rafRef.current = requestAnimationFrame(tick)"
+        },
+        {
+          "key": "raf",
+          "line": 72,
+          "text": "rafRef.current = requestAnimationFrame(tick)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\usePostFx.js",
+      "score": 6,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 3,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "rectReads",
+          "line": 45,
+          "text": "const r = host?.getBoundingClientRect?.()"
+        },
+        {
+          "key": "rectReads",
+          "line": 83,
+          "text": "const r = host?.getBoundingClientRect?.()"
+        },
+        {
+          "key": "rectReads",
+          "line": 157,
+          "text": "const r = btn?.getBoundingClientRect?.()"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoTrimPopover.jsx",
+      "score": 6,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 1,
+        "resizeObserver": 0,
+        "raf": 2,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "rectReads",
+          "line": 62,
+          "text": "const rect = track.getBoundingClientRect?.();"
+        },
+        {
+          "key": "raf",
+          "line": 213,
+          "text": "previewRafRef.current = requestAnimationFrame(tick);"
+        },
+        {
+          "key": "raf",
+          "line": 220,
+          "text": "previewRafRef.current = requestAnimationFrame(tick);"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\moderation\\components\\AdminPopover.jsx",
+      "score": 6,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 3,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "rectReads",
+          "line": 26,
+          "text": "const pRect = parent?.getBoundingClientRect?.() || { left: 0, right: window.innerWidth }"
+        },
+        {
+          "key": "rectReads",
+          "line": 30,
+          "text": "const top = Math.round(r.bottom - (parent?.getBoundingClientRect?.()?.top || 0) + GAP)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\components\\VipPopover.jsx",
+      "score": 6,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 3,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "rectReads",
+          "line": 19,
+          "text": "const pRect = parent?.getBoundingClientRect?.() || { left: 0, right: window.innerWidth }"
+        },
+        {
+          "key": "rectReads",
+          "line": 23,
+          "text": "const top = Math.round(r.bottom - (parent?.getBoundingClientRect?.()?.top || 0) + GAP)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
+      "score": 6,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 6
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 796,
+          "text": "const timer = setTimeout(() => finish(false), timeoutMs);"
+        },
+        {
+          "key": "timers",
+          "line": 875,
+          "text": "const timer = setTimeout(() => controller.abort(), timeoutMs);"
+        },
+        {
+          "key": "timers",
+          "line": 1202,
+          "text": "autoplayRetryTimerRef.current = window.setTimeout(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 1381,
+          "text": "timerId = window.setTimeout(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 1723,
+          "text": "const timer = setInterval(pickNext, rotateMs);"
+        },
+        {
+          "key": "timers",
+          "line": 2215,
+          "text": "timer = setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoMedia.jsx",
+      "score": 5,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 5
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 447,
+          "text": "controlsTimerRef.current = window.setTimeout(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 460,
+          "text": "centerIconTimerRef.current = window.setTimeout(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 505,
+          "text": "const tid = window.setTimeout(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 800,
+          "text": "unloadTimer = setTimeout(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 938,
+          "text": "recoverTimerRef.current = setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\moderation\\hooks\\useReportController.js",
+      "score": 4,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 2,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "rectReads",
+          "line": 28,
+          "text": "if (!anchorEl || typeof anchorEl.getBoundingClientRect !== 'function') {"
+        },
+        {
+          "key": "rectReads",
+          "line": 32,
+          "text": "const rect = anchorEl.getBoundingClientRect()"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\qcoin\\components\\QCoinWithdrawPopover.jsx",
+      "score": 4,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 2,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "rectReads",
+          "line": 40,
+          "text": "popParent?.getBoundingClientRect?.() || {"
+        },
+        {
+          "key": "rectReads",
+          "line": 46,
+          "text": "const r = btn.getBoundingClientRect()"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoOverlay.jsx",
+      "score": 3,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 3
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 202,
+          "text": "await new Promise((r) => setTimeout(r, 30))"
+        },
+        {
+          "key": "timers",
+          "line": 218,
+          "text": "setTimeout(calcAspectFromTrack, 0)"
+        },
+        {
+          "key": "timers",
+          "line": 263,
+          "text": "setTimeout(calcAspectFromTrack, 0)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\frontCameraMirror.js",
+      "score": 3,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 1,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "raf",
+          "line": 68,
+          "text": "rafId = requestAnimationFrame(loop)"
+        },
+        {
+          "key": "timers",
+          "line": 37,
+          "text": "setTimeout(resolve, 400)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\qcoin\\hooks\\useQCoinLive.js",
+      "score": 3,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 3
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 91,
+          "text": "const timeoutId  = setTimeout(() => controller.abort(), 8000);"
+        },
+        {
+          "key": "timers",
+          "line": 181,
+          "text": "const id = setInterval(async function(){"
+        },
+        {
+          "key": "timers",
+          "line": 213,
+          "text": "const timeoutId  = setTimeout(() => controller.abort(), 8000);"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\components\\QuestHub.jsx",
+      "score": 3,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 3
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 57,
+          "text": "const id = setInterval(() => __setQuestTick((x) => (x + 1) & 1023), 1000)"
+        },
+        {
+          "key": "timers",
+          "line": 376,
+          "text": "onClick={() => { setTimeout(() => onMarkDone?.(q.id, tid), 0) }}"
+        },
+        {
+          "key": "timers",
+          "line": 384,
+          "text": "onClick={() => { setTimeout(() => onMarkDone?.(q.id, tid), 0) }}"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\page.js",
+      "score": 3,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 1,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "scrollRead",
+          "line": 71,
+          "text": "const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 4"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmDeleteController.js",
+      "score": 2,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 1,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "rectReads",
+          "line": 173,
+          "text": "const b = e?.currentTarget?.getBoundingClientRect?.()"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmLoadLifecycle.js",
+      "score": 2,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 2
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 45,
+          "text": "const timer = setInterval(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 61,
+          "text": "const timer = setInterval(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmLocalCache.js",
+      "score": 2,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 2
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 116,
+          "text": "dmDialogsPersistTimerRef.current = setTimeout(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 138,
+          "text": "dmThreadPersistTimerRef.current = setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostActionBar.jsx",
+      "score": 2,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 1,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "rectReads",
+          "line": 140,
+          "text": "const rect = e.currentTarget?.getBoundingClientRect?.()"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\TopicItem.jsx",
+      "score": 2,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 1,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "rectReads",
+          "line": 51,
+          "text": "const b = e?.currentTarget?.getBoundingClientRect?.()"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\usePostOwnerActions.js",
+      "score": 2,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 1,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "rectReads",
+          "line": 32,
+          "text": "const b = e?.currentTarget?.getBoundingClientRect?.()"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\utils\\navOrchestrator.js",
+      "score": 2,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 2
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 124,
+          "text": "setTimeout(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 144,
+          "text": "setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\LivePreview.jsx",
+      "score": 2,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 1,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "raf",
+          "line": 33,
+          "text": "rafId = requestAnimationFrame(bindStream)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaLifecycleRuntime.js",
+      "score": 2,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 1,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "rectReads",
+          "line": 131,
+          "text": "const r = el.getBoundingClientRect?.()"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaRuntime.js",
+      "score": 2,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 2
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 87,
+          "text": "const timer = setTimeout(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 176,
+          "text": "const timer = setTimeout(() => finish(new Error('audio_metadata_timeout')), timeoutMs)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\moderationPrep.js",
+      "score": 2,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 2
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 93,
+          "text": "setTimeout(done, 1200)"
+        },
+        {
+          "key": "timers",
+          "line": 139,
+          "text": "setTimeout(() => resolve(false), 900)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\moderation\\components\\ReportPopover.jsx",
+      "score": 2,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 1,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "rectReads",
+          "line": 24,
+          "text": "const rect = el.getBoundingClientRect()"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\CreateTopicCard.jsx",
+      "score": 1,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 41,
+          "text": "const id = setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumMutationQueue.js",
+      "score": 1,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 43,
+          "text": "flushSoonTimerRef.current = setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumSseBridge.js",
+      "score": 1,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 106,
+          "text": "sseSyncTimerRef.current = setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumViewTracking.js",
+      "score": 1,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 84,
+          "text": "rec.t = setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useMediaPipelineController.js",
+      "score": 1,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 63,
+          "text": "mediaProgRef.current.timer = setInterval(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVideoCaptureController.js",
+      "score": 1,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 277,
+          "text": "videoTimerRef.current = setInterval(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVoiceRecorder.js",
+      "score": 1,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 79,
+          "text": "recTimerRef.current = setInterval(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\hooks\\useForumProfileSync.js",
+      "score": 1,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 94,
+          "text": "timerId = window.setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\hooks\\useVipPayAction.js",
+      "score": 1,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 44,
+          "text": "await new Promise((resolve) => setTimeout(resolve, 2000))"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\hooks\\useForumQuestProgress.js",
+      "score": 1,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 264,
+          "text": "const id = setInterval(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\MainForumActionCluster.jsx",
+      "score": 1,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 57,
+          "text": "setTimeout(() => { try { window.__forumToggleCreateTopic?.() } catch {} }, 0)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ThreadForumActionCluster.jsx",
+      "score": 1,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 55,
+          "text": "setTimeout(() => { try { window.__forumToggleCreateTopic?.() } catch {} }, 0)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useComposerUiLifecycle.js",
+      "score": 1,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 20,
+          "text": "const id = setInterval(() => setCooldownLeft((s) => Math.max(0, s - 1)), 1000)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumSessionShell.js",
+      "score": 1,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 104,
+          "text": "const id = setInterval(refreshMediaLock, 15000)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\hooks\\useForumToast.js",
+      "score": 1,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 9,
+          "text": "const id = setTimeout(() => set(null), 6500)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\utils\\openAuth.js",
+      "score": 1,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 31,
+          "text": "const timer = setTimeout(() => cancel(), timeoutMs)"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\SharePopover.jsx",
+      "score": 1,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 33,
+          "text": "const id = window.setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\error.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\events\\bus.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\diagnostics\\utils\\emitPolicy.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmDialogRow.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmDialogsPane.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmMessagesPane.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmThreadAlerts.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmThreadHeader.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmThreadLoadMore.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmThreadMessageRow.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\InboxPane.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\InboxRepliesPane.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\InboxTabsHeader.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmDeleteCopy.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmOpenEvents.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmRepliesSeen.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmSeenObservers.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmStorageMaps.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmUnreadState.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmVipBatchProbe.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useForumDmRuntime.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useInboxRepliesModel.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useOpenInboxGlobalAction.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\services\\sendDmComposerMessage.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\utils\\deletedMap.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\utils\\dmLoaders.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\utils\\mediaParsing.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\utils\\openInboxGlobal.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\ForumPostCard.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\LoadMoreSentinel.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostBodyContent.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostCardBridge.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostFxLayer.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostHeaderMeta.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostMediaStack.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostOwnerMenu.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostTranslateToggle.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PublishedPostsPane.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\ThreadRepliesPane.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\ThreadSection.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\ThreadTitle.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\TopicsOrPanelsSwitch.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\TopicsPane.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\TopicsSection.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\constants\\deeplink.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumCreateTopicAction.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumDataRuntime.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumMutationActions.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumNavigationRuntime.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useNavStateSnapshot.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\usePostMediaTextModel.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\usePostTranslation.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\usePublishedPostsModel.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useThreadPostsModel.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\services\\rateLimiter.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\utils\\navState.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\utils\\postEvents.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\utils\\signatures.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\utils\\snapshotTransforms.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\ComposerAttachmentPreview.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\qcast\\QCastIcons.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoFeedPane.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoLimitOverlay.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumComposerAttachments.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVideoFeedActions.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVideoFeedState.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVideoTrimController.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\services\\resolveComposerMediaPayload.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\formatMediaTime.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaLinks.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaUrlPipeline.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\qcastBars.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\urlParsing.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\videoControls.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\videoCopy.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\videoFeedActions.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\videoFeedBuilder.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\videoFeedPosts.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\videoFeedRandom.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\videoFeedSalt.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\moderation\\hooks\\useAdminActions.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\moderation\\hooks\\useAdminFlag.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\moderation\\hooks\\useForumModerationRuntime.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\moderation\\hooks\\useForumModerationUi.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\moderation\\hooks\\useMediaModeration.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\moderation\\utils\\http.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\components\\AboutRail.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\components\\AvatarEmoji.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\components\\ForumVipControl.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\components\\VipFlipBadge.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\constants\\vipAssets.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\hooks\\useAboutEditor.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\hooks\\useForumProfileSocialRuntime.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\hooks\\useVipFlag.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\hooks\\useVipSubscriptionState.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\utils\\aboutText.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\utils\\avatar.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\utils\\profileCache.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\utils\\vip.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\qcoin\\components\\QCoinInline.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\qcoin\\utils\\account.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\qcoin\\utils\\paymentWindow.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\components\\QuestClaimOverlay.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\components\\QuestLaunchIcon.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\components\\QuestPane.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\hooks\\useForumQuestConfig.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\hooks\\useForumQuestRuntime.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\hooks\\useQuestClaimAction.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\hooks\\useQuestStorageState.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\utils\\progress.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\subscriptions\\components\\FollowersCounterInline.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\subscriptions\\hooks\\useStarredAuthorsState.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\subscriptions\\utils\\starred.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ComposeDock.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ComposerActionRail.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ComposerCore.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ComposerEmojiPanel.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ComposerEmojiPreview.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ComposerFabButton.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ComposerFileInput.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ComposerMediaProgressBar.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ComposerStatusMeta.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ComposerTextInput.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ConfirmDeleteOverlay.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\DmDeletePopover.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ForumActionNavIcon.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ForumActionRow.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ForumControlNavIcon.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ForumOverlayStack.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\HeadChevronIcon.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\StarButton.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\VideoFeedNavIcon.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\constants\\emojiCatalog.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\constants\\inviteButton.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useComposerActionHandlers.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useComposerEmojiState.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumAdSlots.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumAdsRuntime.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumComposerRuntime.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumComposerSubmitRuntime.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumGlobalPopovers.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumPopoverModeController.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumScreenFlowsRuntime.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumViewState.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\utils\\adsSlots.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\utils\\buildForumLayoutProps.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\utils\\buildForumRootPropBundles.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\utils\\propBundles\\buildActionClusterProps.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\utils\\propBundles\\buildComposerCoreProps.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\utils\\propBundles\\buildForumHeaderPanelProps.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\utils\\propBundles\\buildInboxPaneProps.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\utils\\propBundles\\buildSearchSortControlsProps.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\utils\\propBundles\\buildThreadRepliesPaneProps.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\utils\\propBundles\\buildTopicsSwitchProps.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\Forum.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumHeaderPanel.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumLayout.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumProviders.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\layout.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\loading.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\p\\[postId]\\route.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\services\\forumApi.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\api\\http.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\api\\translate.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\components\\HydrateText.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\config\\runtime.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\constants\\media.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\hooks\\useEvent.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\hooks\\useHtmlFlag.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\storage\\localStorage.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\telemetry\\diag.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\utils\\browser.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\utils\\classnames.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\utils\\counts.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\utils\\formatters.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\utils\\forumLocale.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\utils\\linkDetection.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\utils\\richText.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\utils\\time.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\styles\\ForumFxStyles.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\styles\\ForumStyles.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\styles\\modules\\composerStyles.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\styles\\modules\\dmStyles.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\styles\\modules\\foundationStyles.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\styles\\modules\\fxStyles.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\styles\\modules\\layoutStyles.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\styles\\modules\\profileStyles.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\styles\\modules\\qcoinStyles.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\styles\\modules\\questStyles.js",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    }
+  ]
+}

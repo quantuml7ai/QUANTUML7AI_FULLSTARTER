@@ -81,9 +81,9 @@ function bumpGlobalAdPlaybackHold(ms = 1400) {
   } catch {}
 }
 
-const AD_NEAR_ROOT_MARGIN = '560px 0px 760px 0px';
-const AD_FOCUS_START_RATIO = 0.56;
-const AD_FOCUS_STOP_RATIO = 0.18;
+const AD_NEAR_ROOT_MARGIN = '760px 0px 1040px 0px';
+const AD_FOCUS_START_RATIO = 0.52;
+const AD_FOCUS_STOP_RATIO = 0.16;
 
 function isPageActuallyActive() {
   if (!isBrowser()) return true;
@@ -1103,7 +1103,9 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   const autoplayRetryStageRef = useRef(0);
   const autoplayRetryTotalRef = useRef(0);
   const adPlaybackConfirmRef = useRef(null);
+  const adPlaybackConfirmUntilRef = useRef(0);
   const adLastPrimeLoadTsRef = useRef(0);
+  const adLastStartAttemptTsRef = useRef(0);
   const tryStartAdVideoRef = useRef(() => false);
   const tryStartAdYoutubeRef = useRef(() => false);
 
@@ -1153,11 +1155,18 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       try { cleanup(); } catch {}
     }
     adPlaybackConfirmRef.current = null;
+    adPlaybackConfirmUntilRef.current = 0;
+  }, []);
+
+  const isAdPlaybackConfirmPending = React.useCallback(() => {
+    if (typeof adPlaybackConfirmRef.current !== 'function') return false;
+    return Number(adPlaybackConfirmUntilRef.current || 0) > Date.now();
   }, []);
 
   const resetAdAutoplayRetry = React.useCallback(() => {
     autoplayRetryStageRef.current = 0;
     autoplayRetryTotalRef.current = 0;
+    adLastStartAttemptTsRef.current = 0;
     clearAdAutoplayRetry();
     clearAdPlaybackConfirm();
   }, [clearAdAutoplayRetry, clearAdPlaybackConfirm]);
@@ -1176,6 +1185,9 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       clearAdPlaybackConfirm();
       clearAdAutoplayRetry();
       return false;
+    }
+    if (rearm && isAdPlaybackConfirmPending()) {
+      return true;
     }
     if (rearm) autoplayRetryStageRef.current = Math.min(autoplayRetryStageRef.current, 1);
     if (autoplayRetryTotalRef.current >= 14) return false;
@@ -1203,7 +1215,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       }
     }, delay);
     return true;
-  }, [clearAdAutoplayRetry, clearAdPlaybackConfirm, emitAdPlayToCoordinator, media.kind, setAdPlaybackState]);
+  }, [clearAdAutoplayRetry, clearAdPlaybackConfirm, emitAdPlayToCoordinator, isAdPlaybackConfirmPending, media.kind, setAdPlaybackState]);
 
   const destroyLocalYtPlayer = React.useCallback((blankIframe = false) => {
     const player = ytPlayerRef.current;
@@ -1371,6 +1383,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     }, confirmWindowMs);
 
     adPlaybackConfirmRef.current = cleanup;
+    adPlaybackConfirmUntilRef.current = Date.now() + confirmWindowMs;
     setAdPlaybackState('attempting');
     return false;
   }, [clearAdPlaybackConfirm, markAdPlaybackStarted, scheduleAdAutoplayRetry, setAdPlaybackState]);
@@ -1380,6 +1393,13 @@ const tryStartAdVideo = React.useCallback((reason = 'play') => {
   if (!v) return false;
   if (!shouldPlayRef.current) return false;
   if (isVideoSrcTemporarilyBlocked(media.src)) return false;
+  {
+    const now = Date.now();
+    if (isAdPlaybackConfirmPending() && (now - Number(adLastStartAttemptTsRef.current || 0)) < 140) {
+      return true;
+    }
+    adLastStartAttemptTsRef.current = now;
+  }
 
   bumpGlobalAdPlaybackHold(960);
   primeAdVideo(reason);
@@ -1468,6 +1488,7 @@ const tryStartAdVideo = React.useCallback((reason = 'play') => {
   return false;
 }, [
   confirmAdPlaybackStart,
+  isAdPlaybackConfirmPending,
   isVideoSrcTemporarilyBlocked,
   media.src,
   primeAdVideo,
@@ -1500,6 +1521,13 @@ tryStartAdVideoRef.current = tryStartAdVideo;
     const player = ytPlayerRef.current;
     if (!player) return false;
     if (!shouldPlayRef.current) return false;
+    {
+      const now = Date.now();
+      if (isAdPlaybackConfirmPending() && (now - Number(adLastStartAttemptTsRef.current || 0)) < 140) {
+        return true;
+      }
+      adLastStartAttemptTsRef.current = now;
+    }
 
     try {
       bumpGlobalAdPlaybackHold(960);
@@ -1513,7 +1541,7 @@ tryStartAdVideoRef.current = tryStartAdVideo;
       scheduleAdAutoplayRetry(`${reason}:throw`);
       return false;
     }
-  }, [scheduleAdAutoplayRetry, setAdPlaybackState]);
+  }, [isAdPlaybackConfirmPending, scheduleAdAutoplayRetry, setAdPlaybackState]);
   tryStartAdYoutubeRef.current = tryStartAdYoutube;
 
   useEffect(() => {

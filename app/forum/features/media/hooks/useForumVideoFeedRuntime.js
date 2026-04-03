@@ -104,7 +104,6 @@ export default function useForumVideoFeedRuntime({
     setSel: setSelectedTopic,
     setThreadRoot,
     setTopicFilterId,
-    snapVideoFeedToFirstCardTop,
     emitDiag,
     visibleVideoCount,
     videoFeed,

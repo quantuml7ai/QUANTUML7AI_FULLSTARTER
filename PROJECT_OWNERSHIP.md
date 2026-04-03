@@ -4,7 +4,7 @@
 > Если меняется граница ответственности каталогов, появляются новые домены, переносятся модули между зонами или меняются entry points, этот файл обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-ownership.js`.
 
-Сгенерировано автоматически: 2026-04-03T10:58:00.038Z
+Сгенерировано автоматически: 2026-04-03T18:44:27.865Z
 
 ## Общий Принцип
 
@@ -532,5 +532,5 @@
 
 - Зона: `tools`
 - Назначение: Локальные генераторы и аудит-скрипты проекта.
-- Точки входа: `tools/analyze-forum-diag.js`, `tools/analyze-forum-media-har.js`, `tools/analyze-heapsnapshot.js`, `tools/audit-account-sync.js`, `tools/audit-ad-runtime.js`, `tools/audit-auth-bus.js`, `tools/audit-effects.js`, `tools/audit-forum-deps.js`, `tools/audit-forum-functional-parity.ps1`, `tools/audit-forum-startup.js`, `tools/audit-forum-view-report.js`, `tools/audit-full-forum.js`, `tools/audit-heavy.js`, `tools/audit-media-budget.js`, `tools/audit-media.js`, `tools/audit-project-docs.js`, `tools/audit-runtime-hotspots.js`, `tools/generate-project-dependencies.js`, `tools/generate-project-docs.js`, `tools/generate-project-ownership.js`, `tools/generate-project-risks.js`, `tools/generate-project-routes.js`, `tools/generate-project-tree.js`, `tools/project-docs-shared.js`
+- Точки входа: `tools/analyze-forum-diag.js`, `tools/analyze-forum-media-har.js`, `tools/analyze-heapsnapshot.js`, `tools/audit-account-sync.js`, `tools/audit-ad-runtime.js`, `tools/audit-auth-bus.js`, `tools/audit-effects.js`, `tools/audit-forum-deps.js`, `tools/audit-forum-functional-parity.ps1`, `tools/audit-forum-scroll-runtime.js`, `tools/audit-forum-startup.js`, `tools/audit-forum-view-report.js`, `tools/audit-full-forum.js`, `tools/audit-heavy.js`, `tools/audit-media-budget.js`, `tools/audit-media.js`, `tools/audit-project-docs.js`, `tools/audit-runtime-hotspots.js`, `tools/generate-project-dependencies.js`, `tools/generate-project-docs.js`, `tools/generate-project-ownership.js`, `tools/generate-project-risks.js`, `tools/generate-project-routes.js`, `tools/generate-project-tree.js`, `tools/project-docs-shared.js`
 - Связанные зоны: `audit`, `app`, `app/forum`, `app/api`, `components`, `lib`

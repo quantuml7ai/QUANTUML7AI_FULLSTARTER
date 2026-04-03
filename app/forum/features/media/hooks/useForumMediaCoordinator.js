@@ -537,6 +537,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     const readyReplay = new Map();
     const htmlRetryTimers = new Map();
     const htmlStartWatches = new Map();
+    const htmlStartAttemptTs = new Map();
     const pendingReadyGrace = new WeakMap();
     const HTML_RETRY_DELAYS = [100, 180, 320, 520, 820, 1240, 1860];
     let lastDetachedSweepTs = 0;
@@ -906,7 +907,13 @@ const applyMutedPrefToAll = () => {
 
 const setMutedPref = (val, source = 'forum-coordinator', emit = true) => {
   const next = !!val;
-  if (mutedPref === next && source === 'forum-coordinator') return;
+  if (mutedPref === next) {
+    try {
+      if (source === 'qcast') writeQcastMutedPref(next);
+      else if (source !== 'forum-coordinator') writeMutedPref(next);
+    } catch {}
+    return;
+  }
 
   mutedPref = next;
 
@@ -959,6 +966,16 @@ const setMutedPref = (val, source = 'forum-coordinator', emit = true) => {
       try {
         delete mediaEl.dataset.__playStartWatchUntil;
       } catch {}
+    };
+    const hasActiveHtmlStartWatch = (el) => {
+      const mediaEl = getMediaStateNode(el);
+      if (!(mediaEl instanceof HTMLVideoElement || mediaEl instanceof HTMLAudioElement)) return false;
+      if (!htmlStartWatches.has(mediaEl)) return false;
+      try {
+        const watchUntil = Number(mediaEl.dataset?.__playStartWatchUntil || 0);
+        if (watchUntil > Date.now()) return true;
+      } catch {}
+      return htmlStartWatches.has(mediaEl);
     };
     const confirmHtmlPlaybackStart = (el, reason = 'play', { onStarted, onPending } = {}) => {
       const mediaEl = getMediaStateNode(el);
@@ -1099,6 +1116,7 @@ const setMutedPref = (val, source = 'forum-coordinator', emit = true) => {
       if (!(mediaEl instanceof HTMLVideoElement || mediaEl instanceof HTMLAudioElement)) return;
       clearHtmlStartWatch(mediaEl);
       cancelHtmlRetry(mediaEl);
+      htmlStartAttemptTs.delete(mediaEl);
       try {
         delete mediaEl.dataset.__autoplayRetryCount;
         delete mediaEl.dataset.__autoplayRetryReason;
@@ -2017,7 +2035,6 @@ const bindVolumeListener = (el) => {
 
       // И QCast, и обычные видео/аудио пишут в один и тот же глобальный канал
       if (isQcastAudio) {
-        try { writeQcastMutedPref(nextMuted); } catch {}
         setMutedPref(nextMuted, 'qcast', true);
         return;
       }
@@ -2064,6 +2081,13 @@ const onMutedEvent = (e) => {
         return;
       }
       if (!manualLease && !hasGesture && coordinatorPlay) {
+        if (hasActiveHtmlStartWatch(target)) {
+          trace('pause_rearm_skipped_pending_start', target, {
+            coordinatorPlay,
+            ownerMatchesActive,
+          });
+          return;
+        }
         trace('pause_rearm_non_user', target, {
           coordinatorPlay,
           ownerMatchesActive,
@@ -2332,6 +2356,15 @@ const onMediaLifecycleCaptured = (e) => {
     }
 
     if (isCurrentActive || nearEnough) {
+      if (hasActiveHtmlStartWatch(target) && eventType !== 'playing') {
+        trace('loaded_replay_skip_pending_start', target, {
+          eventType,
+          isCurrentActive,
+          visiblePx: visiblePxNow,
+          centerDist: centerDistNow,
+        });
+        return;
+      }
       trace('loaded_replay_try', target, {
         eventType,
         isCurrentActive,
@@ -2479,6 +2512,13 @@ const sweepDetachedMediaState = (reason = 'detached_sweep', force = false) => {
     const startHtmlMedia = (el, reason = 'play') => {
       if (!(el instanceof HTMLMediaElement)) return;
       const playToken = bumpPlayRequestToken(el);
+      const lastAttemptTs = Number(htmlStartAttemptTs.get(el) || 0);
+      const nowTs = Date.now();
+      if (hasActiveHtmlStartWatch(el) && lastAttemptTs > 0 && (nowTs - lastAttemptTs) < 120) {
+        trace('play_attempt_deduped', el, { reason, sinceMs: nowTs - lastAttemptTs });
+        return;
+      }
+      htmlStartAttemptTs.set(el, nowTs);
       const canContinue = () => {
         try {
           return isPlayRequestCurrent(el, playToken) && !isUserPaused(el) && !hasSuppressedPlayback(el);
@@ -3111,6 +3151,7 @@ const pauseForeignMedia = (keepEl = null) => {
       const unloadReason = String(args?.[1] || 'unknown');
       if (!el) return;
       clearHtmlStartWatch(el);
+      try { htmlStartAttemptTs.delete(getMediaStateNode(el) || el); } catch {}
       clearReadyReplay(el);
       trace('hard_unload', el, { reason: unloadReason });
       if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
@@ -3447,8 +3488,6 @@ const playMedia = async (el) => {
           if (wantMuted) a.setAttribute('muted', '');
           else a.removeAttribute('muted');
         } catch {}
-
-        try { writeQcastMutedPref(wantMuted); } catch {}
 
         a.loop = true;
         try { a.preload = 'auto'; } catch {}
@@ -3960,12 +3999,12 @@ const playMedia = async (el) => {
           });
         if (!intersecting.length) return;
 
-        const maxBatch = isIOSUi ? 3 : (isCoarseUi ? 3 : 4);
+        const maxBatch = isIOSUi ? 3 : (isCoarseUi ? 4 : 5);
         let preparedCount = 0;
+        let pendingLoads = readPendingLoads();
         for (const item of intersecting) {
           if (preparedCount >= maxBatch) break;
           const el = item.entry.target;
-          const pendingLoads = readPendingLoads();
           if (
             pendingLoads >= Math.max(1, Number(MAX_CONCURRENT_LOAD_PENDING || 0)) &&
             item.centerDist > Math.max(getPriorityCenterMaxDist(el) * 1.2, 220)
@@ -3975,6 +4014,9 @@ const playMedia = async (el) => {
           const prepared = prewarmAhead(el, 'io_near_prewarm');
           if (!prepared) continue;
           preparedCount += 1;
+          try {
+            if (String(el?.dataset?.__loadPending || '') === '1') pendingLoads += 1;
+          } catch {}
           try {
             traceCandidate('candidate_near_prewarm', el, {
               ratio: Number(item.entry.intersectionRatio || 0),
@@ -3989,9 +4031,9 @@ const playMedia = async (el) => {
       {
         threshold: 0.001,
         rootMargin: `${
-          Math.max(isIOSUi ? 1120 : (isCoarseUi ? 720 : 560), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 2.9 : 1.95)))
+          Math.max(isIOSUi ? 1280 : (isCoarseUi ? 880 : 680), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 3.2 : 2.15)))
         }px 0px ${
-          Math.max(isIOSUi ? 2240 : (isCoarseUi ? 1480 : 1280), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 4.8 : 3.05)))
+          Math.max(isIOSUi ? 2360 : (isCoarseUi ? 1760 : 1520), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 5.1 : 3.35)))
         }px 0px`,
       },
     );
@@ -4307,6 +4349,7 @@ const onExternalMediaPlay = (e) => {
         htmlStartWatches.forEach?.((cleanup) => { try { cleanup?.(); } catch {} });
         htmlStartWatches.clear?.();
       } catch {}
+      try { htmlStartAttemptTs.clear?.(); } catch {}
       try {
         readyReplay.forEach?.((cleanup) => { try { cleanup(); } catch {} });
       } catch {}
