@@ -1,0 +1,7856 @@
+[
+  {
+    "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+    "score": 829,
+    "counts": {
+      "playCalls": 2,
+      "pauseCalls": 14,
+      "loadCalls": 5,
+      "srcSets": 7,
+      "srcRemoves": 0,
+      "currentSrcReads": 14,
+      "pendingFlags": 66,
+      "hardUnload": 21,
+      "iframeOps": 153,
+      "io": 8,
+      "ro": 0,
+      "raf": 10,
+      "scrollWrites": 0,
+      "layoutReads": 22
+    },
+    "flags": [
+      "reload-thrash risk",
+      "pending-state churn",
+      "iframe remount risk"
+    ],
+    "samples": {
+      "playCalls": [
+        {
+          "line": 2580,
+          "text": "const p = el.play?.();"
+        },
+        {
+          "line": 2619,
+          "text": "const retry = el.play?.();"
+        }
+      ],
+      "pauseCalls": [
+        {
+          "line": 2201,
+          "text": "try { if (!target.paused) target.pause(); } catch {}"
+        },
+        {
+          "line": 2211,
+          "text": "try { if (!target.paused) target.pause(); } catch {}"
+        },
+        {
+          "line": 2221,
+          "text": "try { if (!target.paused) target.pause(); } catch {}"
+        },
+        {
+          "line": 2317,
+          "text": "try { if (!target.paused) target.pause(); } catch {}"
+        }
+      ],
+      "loadCalls": [
+        {
+          "line": 193,
+          "text": "video.load?.();"
+        },
+        {
+          "line": 1992,
+          "text": "try { el.load?.(); } catch {}"
+        },
+        {
+          "line": 2030,
+          "text": "try { el.load?.(); } catch {}"
+        },
+        {
+          "line": 3497,
+          "text": "try { htmlMediaEl.load?.(); } catch {}"
+        }
+      ],
+      "srcSets": [
+        {
+          "line": 491,
+          "text": "try { el.setAttribute('src', src); } catch {}"
+        },
+        {
+          "line": 3252,
+          "text": "if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }"
+        },
+        {
+          "line": 3269,
+          "text": "if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }"
+        },
+        {
+          "line": 3374,
+          "text": "try { el.setAttribute('src', nextSrc); } catch {}"
+        }
+      ],
+      "currentSrcReads": [
+        {
+          "line": 69,
+          "text": "video?.currentSrc ||"
+        },
+        {
+          "line": 183,
+          "text": "const cold = (video.readyState === 0 || !video.currentSrc);"
+        },
+        {
+          "line": 562,
+          "text": "el?.currentSrc ||"
+        },
+        {
+          "line": 618,
+          "text": "mediaEl?.currentSrc ||"
+        }
+      ],
+      "pendingFlags": [
+        {
+          "line": 80,
+          "text": "loadPending: String(video?.dataset?.__loadPending || ''),"
+        },
+        {
+          "line": 83,
+          "text": "prewarm: String(video?.dataset?.__prewarm || ''),"
+        },
+        {
+          "line": 160,
+          "text": "video.dataset.__resident = '1';"
+        },
+        {
+          "line": 168,
+          "text": "if (video.dataset?.__loadPending === '1') return;"
+        }
+      ],
+      "hardUnload": [
+        {
+          "line": 12,
+          "text": "__restoreVideoEl,"
+        },
+        {
+          "line": 172,
+          "text": "__restoreVideoEl(video);"
+        },
+        {
+          "line": 208,
+          "text": "__restoreVideoEl(video);"
+        },
+        {
+          "line": 1911,
+          "text": "__restoreVideoEl(el);"
+        }
+      ],
+      "iframeOps": [
+        {
+          "line": 431,
+          "text": "// === Ранний prewarm iframe (YouTube/TikTok/other embeds) для более быстрого старта в зоне фокуса ==="
+        },
+        {
+          "line": 448,
+          "text": "// По умолчанию legacy iframe-прогрев выключен:"
+        },
+        {
+          "line": 455,
+          "text": "const selector = 'iframe[data-forum-media=\"youtube\"],iframe[data-forum-media=\"tiktok\"],iframe[data-forum-media=\"iframe\"]';"
+        },
+        {
+          "line": 532,
+          "text": "// Расширено для video + audio + iframe (YouTube/TikTok best-effort)."
+        }
+      ],
+      "io": [
+        {
+          "line": 349,
+          "text": "// если нет IntersectionObserver — готовим всё сразу"
+        },
+        {
+          "line": 360,
+          "text": "const io = new IntersectionObserver("
+        },
+        {
+          "line": 434,
+          "text": "if (!('IntersectionObserver' in window)) return;"
+        },
+        {
+          "line": 497,
+          "text": "const io = new IntersectionObserver("
+        }
+      ],
+      "raf": [
+        {
+          "line": 109,
+          "text": "const rafId = typeof requestAnimationFrame === 'function' ? requestAnimationFrame(run) : 0;"
+        },
+        {
+          "line": 115,
+          "text": "if (job?.rafId) cancelAnimationFrame(job.rafId);"
+        },
+        {
+          "line": 292,
+          "text": "try { cancelAnimationFrame(warmSweepRaf); } catch {}"
+        },
+        {
+          "line": 343,
+          "text": "warmSweepRaf = requestAnimationFrame(runner);"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 255,
+          "text": "const vh = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;"
+        },
+        {
+          "line": 262,
+          "text": "const rect = video.getBoundingClientRect?.();"
+        },
+        {
+          "line": 308,
+          "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {"
+        },
+        {
+          "line": 403,
+          "text": "if (el && el.scrollHeight > el.clientHeight + 1) return el;"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/ForumAds.js",
+    "score": 146,
+    "counts": {
+      "playCalls": 2,
+      "pauseCalls": 3,
+      "loadCalls": 1,
+      "srcSets": 1,
+      "srcRemoves": 1,
+      "currentSrcReads": 3,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 40,
+      "io": 5,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [
+      "iframe remount risk"
+    ],
+    "samples": {
+      "playCalls": [
+        {
+          "line": 1451,
+          "text": "const retry = v.play?.();"
+        },
+        {
+          "line": 1474,
+          "text": "const p = v.play?.();"
+        }
+      ],
+      "pauseCalls": [
+        {
+          "line": 2154,
+          "text": "try { v.pause?.(); } catch {}"
+        },
+        {
+          "line": 2165,
+          "text": "try { v.pause?.(); } catch {}"
+        },
+        {
+          "line": 2519,
+          "text": "videoRef.current?.pause?.();"
+        }
+      ],
+      "loadCalls": [
+        {
+          "line": 1281,
+          "text": "try { v.load?.(); } catch {}"
+        }
+      ],
+      "srcSets": [
+        {
+          "line": 1256,
+          "text": "v.setAttribute('src', desiredSrc);"
+        }
+      ],
+      "srcRemoves": [
+        {
+          "line": 1232,
+          "text": "iframe.removeAttribute('src');"
+        }
+      ],
+      "currentSrcReads": [
+        {
+          "line": 1268,
+          "text": "!v.currentSrc;"
+        },
+        {
+          "line": 1272,
+          "text": "!!v.currentSrc &&"
+        },
+        {
+          "line": 1429,
+          "text": "!v.currentSrc;"
+        }
+      ],
+      "iframeOps": [
+        {
+          "line": 961,
+          "text": "'&screenshot=true&meta=true&video=false&audio=false&iframe=false&waitFor=2000';"
+        },
+        {
+          "line": 1013,
+          "text": "/^(?:https?:\\/\\/)?(?:www\\.)?(?:youtube\\.com\\/watch\\?v=|youtu\\.be\\/)([A-Za-z0-9_-]{6,})/i;"
+        },
+        {
+          "line": 1016,
+          "text": "/^(?:https?:\\/\\/)?(?:www\\.)?tiktok\\.com\\/(?:@[\\w.\\-]+\\/video\\/(\\d+)|t\\/[A-Za-z0-9]+)(?:[?#].*)?$/i;"
+        },
+        {
+          "line": 1050,
+          "text": "// текущий выбранный mediaHref (конкретный youtube / картинка и т.п.)"
+        }
+      ],
+      "io": [
+        {
+          "line": 1592,
+          "text": "if (!el || !isBrowser() || typeof IntersectionObserver === 'undefined') {"
+        },
+        {
+          "line": 1596,
+          "text": "const nearObs = new IntersectionObserver("
+        },
+        {
+          "line": 1606,
+          "text": "const focusObs = new IntersectionObserver("
+        },
+        {
+          "line": 2206,
+          "text": "typeof IntersectionObserver === 'undefined' ||"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+    "score": 112,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 1,
+      "loadCalls": 3,
+      "srcSets": 1,
+      "srcRemoves": 1,
+      "currentSrcReads": 2,
+      "pendingFlags": 15,
+      "hardUnload": 6,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 3
+    },
+    "flags": [
+      "reload-thrash risk",
+      "pending-state churn"
+    ],
+    "samples": {
+      "pauseCalls": [
+        {
+          "line": 250,
+          "text": "el.pause?.()"
+        }
+      ],
+      "loadCalls": [
+        {
+          "line": 309,
+          "text": "el.load?.()"
+        },
+        {
+          "line": 397,
+          "text": "el.load?.()"
+        },
+        {
+          "line": 458,
+          "text": "if (!isLoading && canRestoreLoad()) el.load?.()"
+        }
+      ],
+      "srcSets": [
+        {
+          "line": 412,
+          "text": "el.setAttribute('src', src)"
+        }
+      ],
+      "srcRemoves": [
+        {
+          "line": 291,
+          "text": "el.removeAttribute('src')"
+        }
+      ],
+      "currentSrcReads": [
+        {
+          "line": 281,
+          "text": "if (!el.dataset.__src && el.currentSrc) el.dataset.__src = el.currentSrc"
+        }
+      ],
+      "pendingFlags": [
+        {
+          "line": 182,
+          "text": "if (String(candidate?.dataset?.__loadPending || '') === '1') continue"
+        },
+        {
+          "line": 184,
+          "text": "if (String(candidate?.dataset?.__resident || '') === '1') continue"
+        },
+        {
+          "line": 255,
+          "text": "el.dataset.__loadPending = '0'"
+        },
+        {
+          "line": 257,
+          "text": "el.dataset.__resident = '0'"
+        }
+      ],
+      "hardUnload": [
+        {
+          "line": 200,
+          "text": "__unloadVideoEl(victim)"
+        },
+        {
+          "line": 220,
+          "text": "export function __unloadVideoEl(el) {"
+        },
+        {
+          "line": 313,
+          "text": "export function __restoreVideoEl(el) {"
+        },
+        {
+          "line": 498,
+          "text": "restoreVideoEl={__restoreVideoEl}"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 135,
+          "text": "const r = el.getBoundingClientRect?.()"
+        },
+        {
+          "line": 139,
+          "text": "Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/media/hooks/useVideoFeedWindowing.js",
+    "score": 96,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 2,
+      "raf": 9,
+      "scrollWrites": 5,
+      "layoutReads": 18
+    },
+    "flags": [
+      "resize/layout churn"
+    ],
+    "samples": {
+      "ro": [
+        {
+          "line": 447,
+          "text": "if (!vfRosRef.current.get(idx) && typeof ResizeObserver !== 'undefined') {"
+        }
+      ],
+      "raf": [
+        {
+          "line": 290,
+          "text": "vfRafRef.current = requestAnimationFrame(() => {"
+        },
+        {
+          "line": 300,
+          "text": "try { cancelAnimationFrame(scheduled.rafA) } catch {}"
+        },
+        {
+          "line": 304,
+          "text": "try { cancelAnimationFrame(scheduled.rafB) } catch {}"
+        },
+        {
+          "line": 337,
+          "text": "vfHardResetScheduleRef.current.rafA = requestAnimationFrame(() => {"
+        }
+      ],
+      "scrollWrites": [
+        {
+          "line": 153,
+          "text": "scrollEl.scrollTop = nextTop"
+        },
+        {
+          "line": 169,
+          "text": "window.scrollTo({ top: nextY, behavior: 'auto' })"
+        },
+        {
+          "line": 171,
+          "text": "try { window.scrollTo(0, nextY) } catch {}"
+        },
+        {
+          "line": 332,
+          "text": "if (el && el.scrollHeight > el.clientHeight + 1) el.scrollTop = 0"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 106,
+          "text": "const winH = Number(window.innerHeight || 0) || 0"
+        },
+        {
+          "line": 109,
+          "text": "const innerScrollable = !!el && (el.scrollHeight > (el.clientHeight + 1))"
+        },
+        {
+          "line": 113,
+          "text": "vh: Number(el.clientHeight || 0) || winH,"
+        },
+        {
+          "line": 129,
+          "text": "Math.round(Number(vp?.vh || window?.innerHeight || 0) * 0.82),"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+    "score": 91,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 10,
+      "scrollWrites": 7,
+      "layoutReads": 13
+    },
+    "flags": [],
+    "samples": {
+      "raf": [
+        {
+          "line": 155,
+          "text": "rafA = requestAnimationFrame(() => {"
+        },
+        {
+          "line": 171,
+          "text": "try { cancelAnimationFrame(rafA) } catch {}"
+        },
+        {
+          "line": 175,
+          "text": "try { cancelAnimationFrame(rafB) } catch {}"
+        },
+        {
+          "line": 277,
+          "text": "try { window.cancelAnimationFrame(compRafA) } catch {}"
+        }
+      ],
+      "scrollWrites": [
+        {
+          "line": 87,
+          "text": "scrollEl.scrollTop = Math.max(0, targetTop)"
+        },
+        {
+          "line": 94,
+          "text": "window.scrollTo({ top: Math.max(0, top), behavior: 'auto' })"
+        },
+        {
+          "line": 96,
+          "text": "try { window.scrollTo(0, Math.max(0, top)) } catch {}"
+        },
+        {
+          "line": 121,
+          "text": "scrollEl.scrollTop = 0"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 80,
+          "text": "const rect = node.getBoundingClientRect?.()"
+        },
+        {
+          "line": 82,
+          "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {"
+        },
+        {
+          "line": 118,
+          "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {"
+        },
+        {
+          "line": 256,
+          "text": "const h = el?.getBoundingClientRect?.()?.height"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+    "score": 84,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 1,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 30,
+      "io": 0,
+      "ro": 0,
+      "raf": 4,
+      "scrollWrites": 0,
+      "layoutReads": 5
+    },
+    "flags": [],
+    "samples": {
+      "currentSrcReads": [
+        {
+          "line": 488,
+          "text": "return !!String(v.getAttribute('src') || v.currentSrc || '').trim()"
+        }
+      ],
+      "iframeOps": [
+        {
+          "line": 64,
+          "text": "const iframes = Array.from(document.querySelectorAll('iframe[data-forum-media]'))"
+        },
+        {
+          "line": 85,
+          "text": "const iframesLoaded = iframes.filter((f) => {"
+        },
+        {
+          "line": 92,
+          "text": "const iframesActive = iframes.filter((f) => {"
+        },
+        {
+          "line": 94,
+          "text": "return f.getAttribute('data-forum-iframe-active') === '1'"
+        }
+      ],
+      "raf": [
+        {
+          "line": 260,
+          "text": "raf = requestAnimationFrame(() => {"
+        },
+        {
+          "line": 295,
+          "text": "if (raf) cancelAnimationFrame(raf)"
+        },
+        {
+          "line": 583,
+          "text": "scrollRaf = requestAnimationFrame(() => {"
+        },
+        {
+          "line": 672,
+          "text": "try { if (scrollRaf) cancelAnimationFrame(scrollRaf) } catch {}"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 180,
+          "text": "innerH: typeof window !== 'undefined' ? window.innerHeight : undefined,"
+        },
+        {
+          "line": 376,
+          "text": "innerScrollHeight: Number(scrollEl?.scrollHeight || 0),"
+        },
+        {
+          "line": 597,
+          "text": "const onResize = () => push('resize', { w: Number(window.innerWidth || 0), h: Number(window.innerHeight || 0) })"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/media/components/VideoMedia.jsx",
+    "score": 83,
+    "counts": {
+      "playCalls": 1,
+      "pauseCalls": 3,
+      "loadCalls": 2,
+      "srcSets": 1,
+      "srcRemoves": 1,
+      "currentSrcReads": 1,
+      "pendingFlags": 17,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 1,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 1
+    },
+    "flags": [
+      "reload-thrash risk",
+      "pending-state churn"
+    ],
+    "samples": {
+      "playCalls": [
+        {
+          "line": 1010,
+          "text": "const p = el.play?.()"
+        }
+      ],
+      "pauseCalls": [
+        {
+          "line": 813,
+          "text": "el.pause?.()"
+        },
+        {
+          "line": 927,
+          "text": "el.pause?.()"
+        },
+        {
+          "line": 1018,
+          "text": "try { el.pause?.() } catch {}"
+        }
+      ],
+      "loadCalls": [
+        {
+          "line": 790,
+          "text": "el.load?.()"
+        },
+        {
+          "line": 943,
+          "text": "el.load?.()"
+        }
+      ],
+      "srcSets": [
+        {
+          "line": 942,
+          "text": "if (!el.getAttribute('src')) el.setAttribute('src', srcSafe)"
+        }
+      ],
+      "srcRemoves": [
+        {
+          "line": 930,
+          "text": "el.removeAttribute('src')"
+        }
+      ],
+      "currentSrcReads": [
+        {
+          "line": 785,
+          "text": "(el.readyState === 0 || !el.currentSrc) &&"
+        }
+      ],
+      "pendingFlags": [
+        {
+          "line": 526,
+          "text": "const wantsWarm = el.dataset?.__prewarm === '1' || el.dataset?.__active === '1'"
+        },
+        {
+          "line": 553,
+          "text": "delete el.dataset.__loadPendingSince"
+        },
+        {
+          "line": 678,
+          "text": "el.dataset.__loadPending = '1'"
+        },
+        {
+          "line": 680,
+          "text": "el.dataset.__loadPendingSince = String(Date.now())"
+        }
+      ],
+      "io": [
+        {
+          "line": 830,
+          "text": "io = new IntersectionObserver("
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 475,
+          "text": "const vh = Number(window?.innerHeight || 0)"
+        }
+      ]
+    }
+  },
+  {
+    "file": "components/ForumBootSplash.jsx",
+    "score": 74,
+    "counts": {
+      "playCalls": 3,
+      "pauseCalls": 2,
+      "loadCalls": 3,
+      "srcSets": 1,
+      "srcRemoves": 1,
+      "currentSrcReads": 1,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 6,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [
+      "reload-thrash risk"
+    ],
+    "samples": {
+      "playCalls": [
+        {
+          "line": 594,
+          "text": "const p = el.play?.()"
+        },
+        {
+          "line": 620,
+          "text": "const retry = el.play?.()"
+        },
+        {
+          "line": 680,
+          "text": "const p = el.play?.()"
+        }
+      ],
+      "pauseCalls": [
+        {
+          "line": 259,
+          "text": "el.pause?.()"
+        },
+        {
+          "line": 373,
+          "text": "el.pause?.()"
+        }
+      ],
+      "loadCalls": [
+        {
+          "line": 267,
+          "text": "el.load?.()"
+        },
+        {
+          "line": 338,
+          "text": "if (isCold) el.load?.()"
+        },
+        {
+          "line": 389,
+          "text": "el.load?.()"
+        }
+      ],
+      "srcSets": [
+        {
+          "line": 384,
+          "text": "el.setAttribute('src', FORUM_SPLASH_VIDEO_SRC)"
+        }
+      ],
+      "srcRemoves": [
+        {
+          "line": 263,
+          "text": "el.removeAttribute('src')"
+        }
+      ],
+      "currentSrcReads": [
+        {
+          "line": 337,
+          "text": "!el.currentSrc"
+        }
+      ],
+      "raf": [
+        {
+          "line": 441,
+          "text": "if (rafId) cancelAnimationFrame(rafId)"
+        },
+        {
+          "line": 470,
+          "text": "rafId = requestAnimationFrame(check)"
+        },
+        {
+          "line": 500,
+          "text": "rafId = requestAnimationFrame(check)"
+        },
+        {
+          "line": 540,
+          "text": "if (rafId) cancelAnimationFrame(rafId)"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/feed/utils/postFocus.js",
+    "score": 72,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 2,
+      "raf": 6,
+      "scrollWrites": 2,
+      "layoutReads": 18
+    },
+    "flags": [
+      "resize/layout churn"
+    ],
+    "samples": {
+      "ro": [
+        {
+          "line": 246,
+          "text": "if (typeof ResizeObserver !== 'undefined') {"
+        },
+        {
+          "line": 259,
+          "text": "const ro = new ResizeObserver(schedule)"
+        }
+      ],
+      "raf": [
+        {
+          "line": 149,
+          "text": "requestAnimationFrame(tick)"
+        },
+        {
+          "line": 158,
+          "text": "requestAnimationFrame(tick)"
+        },
+        {
+          "line": 252,
+          "text": "rafId = requestAnimationFrame(() => {"
+        },
+        {
+          "line": 271,
+          "text": "cancelAnimationFrame(rafId)"
+        }
+      ],
+      "scrollWrites": [
+        {
+          "line": 111,
+          "text": "window.scrollTo({ top: nextY, behavior })"
+        },
+        {
+          "line": 114,
+          "text": "window.scrollTo(0, nextY)"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 17,
+          "text": "const dr = dock.getBoundingClientRect?.()"
+        },
+        {
+          "line": 46,
+          "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {"
+        },
+        {
+          "line": 79,
+          "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {"
+        },
+        {
+          "line": 81,
+          "text": "const r = node.getBoundingClientRect()"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/styles/ForumStyles.jsx",
+    "score": 68,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 34,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "iframeOps": [
+        {
+          "line": 85,
+          "text": "--mb-iframe-h-mobile: 700px;"
+        },
+        {
+          "line": 87,
+          "text": "--mb-iframe-h-desktop: 550px;"
+        },
+        {
+          "line": 89,
+          "text": "- max-height СѓР¶Рµ СѓРїСЂР°РІР»СЏРµС‚СЃСЏ С‡РµСЂРµР· --mb-iframe-h-*"
+        },
+        {
+          "line": 92,
+          "text": "--mb-yt-iframe-min-h-mobile: 420px;"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/styles/modules/foundationStyles.js",
+    "score": 68,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 34,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "iframeOps": [
+        {
+          "line": 82,
+          "text": "--mb-iframe-h-mobile: 700px;"
+        },
+        {
+          "line": 84,
+          "text": "--mb-iframe-h-desktop: 550px;"
+        },
+        {
+          "line": 86,
+          "text": "- max-height уже управляется через --mb-iframe-h-*"
+        },
+        {
+          "line": 89,
+          "text": "--mb-yt-iframe-min-h-mobile: 420px;"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/feed/hooks/useForumFeedRuntime.js",
+    "score": 51,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 8,
+      "scrollWrites": 3,
+      "layoutReads": 6
+    },
+    "flags": [],
+    "samples": {
+      "raf": [
+        {
+          "line": 565,
+          "text": "rafA = requestAnimationFrame(() => {"
+        },
+        {
+          "line": 574,
+          "text": "try { if (rafA) cancelAnimationFrame(rafA) } catch {}"
+        },
+        {
+          "line": 696,
+          "text": "rafA = requestAnimationFrame(() => {"
+        },
+        {
+          "line": 706,
+          "text": "try { if (rafA) cancelAnimationFrame(rafA) } catch {}"
+        }
+      ],
+      "scrollWrites": [
+        {
+          "line": 316,
+          "text": "scrollEl.scrollTop = nextTop"
+        },
+        {
+          "line": 325,
+          "text": "try { window.scrollTo({ top: nextY, behavior: 'auto' }) } catch { try { window.scrollTo(0, nextY) } catch {} }"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 307,
+          "text": "const rect = node.getBoundingClientRect?.()"
+        },
+        {
+          "line": 309,
+          "text": "const useInner = !!scrollEl && (scrollEl.scrollHeight > scrollEl.clientHeight + 1)"
+        },
+        {
+          "line": 311,
+          "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }"
+        },
+        {
+          "line": 620,
+          "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/feed/utils/navScroll.js",
+    "score": 50,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 2,
+      "scrollWrites": 6,
+      "layoutReads": 7
+    },
+    "flags": [],
+    "samples": {
+      "raf": [
+        {
+          "line": 61,
+          "text": "requestAnimationFrame(() => requestAnimationFrame(apply))"
+        }
+      ],
+      "scrollWrites": [
+        {
+          "line": 48,
+          "text": "scrollEl.scrollTop = y"
+        },
+        {
+          "line": 52,
+          "text": "window.scrollTo({ top: y, behavior: 'auto' })"
+        },
+        {
+          "line": 55,
+          "text": "window.scrollTo(0, y)"
+        },
+        {
+          "line": 95,
+          "text": "el.scrollIntoView({ behavior: 'auto', block: 'nearest' })"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 9,
+          "text": "const useInner = !!scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1"
+        },
+        {
+          "line": 25,
+          "text": "const rect = el.getBoundingClientRect()"
+        },
+        {
+          "line": 28,
+          "text": "const contRect = scrollEl?.getBoundingClientRect?.() || { top: 0 }"
+        },
+        {
+          "line": 88,
+          "text": "const rect = el.getBoundingClientRect()"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+    "score": 48,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 24,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "iframeOps": [
+        {
+          "line": 27,
+          "text": "tiktokLines,"
+        },
+        {
+          "line": 41,
+          "text": "const nextTiktok = uniqList(tiktokLines).length ? uniqList(tiktokLines) : uniqList(cached.tiktok || [])"
+        },
+        {
+          "line": 48,
+          "text": "const directTiktok = uniqList(tiktokLines)"
+        },
+        {
+          "line": 50,
+          "text": "const nextTiktok = directTiktok.length ? directTiktok : uniqList(cached.tiktok || [])"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+    "score": 46,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 23,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "iframeOps": [
+        {
+          "line": 7,
+          "text": "const YT_RE = /^(?:https?:\\/\\/)?(?:www\\.)?(?:youtube\\.com\\/(?:watch\\?(?:.*&)?v=|shorts\\/|embed\\/)|youtu\\.be\\/)([A-Za-z0-9_-]{6,})/i"
+        },
+        {
+          "line": 11,
+          "text": "const TIKTOK_PLAYABLE_RE = /^(?:https?:\\/\\/)?(?:(?:www|m)\\.)?tiktok\\.com\\/@[\\w.\\-]+\\/video\\/\\d+(?:[?#].*)?$/i"
+        },
+        {
+          "line": 65,
+          "text": "const tiktokInline = React.useMemo(() => collectMatches(allLines, TIKTOK_RE), [allLines])"
+        },
+        {
+          "line": 68,
+          "text": "const tiktokLines = React.useMemo(() => Array.from(new Set(tiktokInline)), [tiktokInline])"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/media/utils/mediaRuntime.js",
+    "score": 46,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 2,
+      "loadCalls": 4,
+      "srcSets": 0,
+      "srcRemoves": 2,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [
+      "reload-thrash risk"
+    ],
+    "samples": {
+      "pauseCalls": [
+        {
+          "line": 48,
+          "text": "video.pause?.()"
+        },
+        {
+          "line": 152,
+          "text": "audio.pause?.()"
+        }
+      ],
+      "loadCalls": [
+        {
+          "line": 54,
+          "text": "video.load?.()"
+        },
+        {
+          "line": 100,
+          "text": "video.load?.()"
+        },
+        {
+          "line": 158,
+          "text": "audio.load?.()"
+        },
+        {
+          "line": 182,
+          "text": "audio.load?.()"
+        }
+      ],
+      "srcRemoves": [
+        {
+          "line": 51,
+          "text": "video.removeAttribute('src')"
+        },
+        {
+          "line": 155,
+          "text": "audio.removeAttribute('src')"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/feed/hooks/useForumHomeAction.js",
+    "score": 42,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 6,
+      "layoutReads": 6
+    },
+    "flags": [],
+    "samples": {
+      "scrollWrites": [
+        {
+          "line": 49,
+          "text": "scrollEl.scrollTop = 0"
+        },
+        {
+          "line": 52,
+          "text": "try { window.scrollTo({ top: 0, behavior: 'auto' }) } catch { try { window.scrollTo(0, 0) } catch {} }"
+        },
+        {
+          "line": 60,
+          "text": "scrollEl.scrollTop = Math.max(0, targetTop)"
+        },
+        {
+          "line": 64,
+          "text": "try { window.scrollTo({ top: Math.max(0, y), behavior: 'auto' }) } catch { try { window.scrollTo(0, Math.max(0, y)) } catch {} }"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 48,
+          "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {"
+        },
+        {
+          "line": 55,
+          "text": "const rect = target.getBoundingClientRect?.()"
+        },
+        {
+          "line": 57,
+          "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/media/utils/videoFeedScroll.js",
+    "score": 42,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 2,
+      "scrollWrites": 4,
+      "layoutReads": 8
+    },
+    "flags": [],
+    "samples": {
+      "raf": [
+        {
+          "line": 5,
+          "text": "if (typeof requestAnimationFrame === 'function') return requestAnimationFrame(fn)"
+        }
+      ],
+      "scrollWrites": [
+        {
+          "line": 12,
+          "text": "window.scrollTo({ top: y, behavior: 'auto' })"
+        },
+        {
+          "line": 15,
+          "text": "window.scrollTo(0, y)"
+        },
+        {
+          "line": 79,
+          "text": "scrollEl.scrollTop = Math.max(0, targetTop)"
+        },
+        {
+          "line": 108,
+          "text": "scrollEl.scrollTop = Math.max(0, targetTop)"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 72,
+          "text": "const anchorRect = anchor.getBoundingClientRect?.()"
+        },
+        {
+          "line": 74,
+          "text": "const useInner = !!scrollEl && (scrollEl.scrollHeight > scrollEl.clientHeight + 1)"
+        },
+        {
+          "line": 76,
+          "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }"
+        },
+        {
+          "line": 100,
+          "text": "const cardRect = card.getBoundingClientRect?.()"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/media/components/QCastPlayer.jsx",
+    "score": 35,
+    "counts": {
+      "playCalls": 2,
+      "pauseCalls": 1,
+      "loadCalls": 1,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 1,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 2,
+      "scrollWrites": 0,
+      "layoutReads": 4
+    },
+    "flags": [],
+    "samples": {
+      "playCalls": [
+        {
+          "line": 689,
+          "text": "const p = audio.play();"
+        },
+        {
+          "line": 697,
+          "text": "const retry = audio.play?.();"
+        }
+      ],
+      "pauseCalls": [
+        {
+          "line": 728,
+          "text": "try { audio.pause(); } catch {}"
+        }
+      ],
+      "loadCalls": [
+        {
+          "line": 676,
+          "text": "try { audio.load?.(); } catch {}"
+        }
+      ],
+      "currentSrcReads": [
+        {
+          "line": 675,
+          "text": "if ((audio.networkState === HTMLMediaElement.NETWORK_EMPTY) || !audio.currentSrc) {"
+        }
+      ],
+      "raf": [
+        {
+          "line": 562,
+          "text": "try { if (st.raf) cancelAnimationFrame(st.raf); } catch {}"
+        },
+        {
+          "line": 745,
+          "text": "requestAnimationFrame(() => {"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 182,
+          "text": "const r = host?.getBoundingClientRect?.();"
+        },
+        {
+          "line": 186,
+          "text": "const viewportH = Number(window?.innerHeight || 0) || 0;"
+        },
+        {
+          "line": 224,
+          "text": "const r = host?.getBoundingClientRect?.();"
+        },
+        {
+          "line": 228,
+          "text": "const viewportH = Number(window?.innerHeight || 0) || 0;"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/feed/hooks/useUserPostsBranchModel.js",
+    "score": 34,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 4,
+      "scrollWrites": 2,
+      "layoutReads": 6
+    },
+    "flags": [],
+    "samples": {
+      "raf": [
+        {
+          "line": 311,
+          "text": "rafA = window.requestAnimationFrame(() => {"
+        },
+        {
+          "line": 315,
+          "text": "try { if (rafA) window.cancelAnimationFrame(rafA) } catch {}"
+        }
+      ],
+      "scrollWrites": [
+        {
+          "line": 256,
+          "text": "scrollEl.scrollTop = 0"
+        },
+        {
+          "line": 287,
+          "text": "scrollEl.scrollTop = Math.max(0, targetTop)"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 255,
+          "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {"
+        },
+        {
+          "line": 282,
+          "text": "const rect = marker.getBoundingClientRect?.()"
+        },
+        {
+          "line": 284,
+          "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/feed/components/UserPostsPane.jsx",
+    "score": 33,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 2,
+      "scrollWrites": 3,
+      "layoutReads": 6
+    },
+    "flags": [],
+    "samples": {
+      "raf": [
+        {
+          "line": 128,
+          "text": "rafA = requestAnimationFrame(() => scheduleAlign(0, baselineTop))"
+        },
+        {
+          "line": 142,
+          "text": "try { if (rafA) cancelAnimationFrame(rafA) } catch {}"
+        }
+      ],
+      "scrollWrites": [
+        {
+          "line": 88,
+          "text": "scrollEl.scrollTop = Math.max(0, targetTop)"
+        },
+        {
+          "line": 91,
+          "text": "try { window.scrollTo({ top: Math.max(0, y), behavior: 'auto' }) } catch { try { window.scrollTo(0, Math.max(0, y)) } catch {} }"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 58,
+          "text": "if (scrollEl && (scrollEl.scrollHeight > scrollEl.clientHeight + 1)) {"
+        },
+        {
+          "line": 81,
+          "text": "const rect = marker.getBoundingClientRect?.()"
+        },
+        {
+          "line": 83,
+          "text": "const useInner = !!scrollEl && (scrollEl.scrollHeight > scrollEl.clientHeight + 1)"
+        },
+        {
+          "line": 86,
+          "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/ui/hooks/useScrollResizeCompensation.js",
+    "score": 33,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 2,
+      "scrollWrites": 3,
+      "layoutReads": 6
+    },
+    "flags": [],
+    "samples": {
+      "raf": [
+        {
+          "line": 64,
+          "text": "try { window.cancelAnimationFrame(rafGuardRef.current) } catch {}"
+        },
+        {
+          "line": 106,
+          "text": "rafGuardRef.current = window.requestAnimationFrame(() => {"
+        }
+      ],
+      "scrollWrites": [
+        {
+          "line": 134,
+          "text": "host.el.scrollTop = nextTop"
+        },
+        {
+          "line": 148,
+          "text": "window.scrollTo({ top: nextY, behavior: 'auto' })"
+        },
+        {
+          "line": 150,
+          "text": "try { window.scrollTo(0, nextY) } catch {}"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 36,
+          "text": "if (el && el.scrollHeight > el.clientHeight + 1) {"
+        },
+        {
+          "line": 123,
+          "text": "const rect = node.getBoundingClientRect()"
+        },
+        {
+          "line": 126,
+          "text": "const hostRect = host.el.getBoundingClientRect?.() || { top: 0 }"
+        },
+        {
+          "line": 130,
+          "text": "const maxTop = Math.max(0, Number(host.el.scrollHeight || 0) - Number(host.el.clientHeight || 0))"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/media/components/VideoTrimPopover.jsx",
+    "score": 31,
+    "counts": {
+      "playCalls": 1,
+      "pauseCalls": 2,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 6,
+      "scrollWrites": 0,
+      "layoutReads": 1
+    },
+    "flags": [],
+    "samples": {
+      "playCalls": [
+        {
+          "line": 343,
+          "text": "try { v.play?.(); } catch {}"
+        }
+      ],
+      "pauseCalls": [
+        {
+          "line": 320,
+          "text": "if (!previewPlayingRef.current) v.pause?.();"
+        },
+        {
+          "line": 345,
+          "text": "try { v.pause?.(); } catch {}"
+        }
+      ],
+      "raf": [
+        {
+          "line": 53,
+          "text": "try { if (previewRafRef.current) cancelAnimationFrame(previewRafRef.current); } catch {}"
+        },
+        {
+          "line": 213,
+          "text": "previewRafRef.current = requestAnimationFrame(tick);"
+        },
+        {
+          "line": 219,
+          "text": "try { if (previewRafRef.current) cancelAnimationFrame(previewRafRef.current); } catch {}"
+        },
+        {
+          "line": 222,
+          "text": "try { if (previewRafRef.current) cancelAnimationFrame(previewRafRef.current); } catch {}"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 62,
+          "text": "const rect = track.getBoundingClientRect?.();"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/dm/hooks/useDmThreadAutoScroll.js",
+    "score": 28,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 4,
+      "layoutReads": 4
+    },
+    "flags": [],
+    "samples": {
+      "scrollWrites": [
+        {
+          "line": 33,
+          "text": "node.scrollIntoView({ block: 'end', behavior: 'auto' })"
+        },
+        {
+          "line": 35,
+          "text": "try { node.scrollIntoView() } catch {}"
+        },
+        {
+          "line": 45,
+          "text": "scrollEl.scrollTop = scrollEl.scrollHeight"
+        },
+        {
+          "line": 47,
+          "text": "window.scrollTo(0, document.body.scrollHeight || 0)"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 44,
+          "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {"
+        },
+        {
+          "line": 47,
+          "text": "window.scrollTo(0, document.body.scrollHeight || 0)"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/ui/hooks/useComposerScrollMemory.js",
+    "score": 25,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 2,
+      "scrollWrites": 3,
+      "layoutReads": 2
+    },
+    "flags": [],
+    "samples": {
+      "raf": [
+        {
+          "line": 35,
+          "text": "requestAnimationFrame(() => requestAnimationFrame(apply))"
+        }
+      ],
+      "scrollWrites": [
+        {
+          "line": 29,
+          "text": "try { scrollEl.scrollTop = y } catch {}"
+        },
+        {
+          "line": 31,
+          "text": "try { window.scrollTo({ top: y, behavior: 'auto' }) } catch { try { window.scrollTo(0, y) } catch {} }"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 11,
+          "text": "const useInner = !!scrollEl && (scrollEl.scrollHeight > scrollEl.clientHeight + 1)"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/feed/hooks/useThreadOpenNavigation.js",
+    "score": 23,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 3,
+      "layoutReads": 4
+    },
+    "flags": [],
+    "samples": {
+      "scrollWrites": [
+        {
+          "line": 33,
+          "text": "scrollEl.scrollTop = Math.max(0, targetTop)"
+        },
+        {
+          "line": 39,
+          "text": "window.scrollTo({ top: Math.max(0, y), behavior: 'auto' })"
+        },
+        {
+          "line": 41,
+          "text": "try { window.scrollTo(0, Math.max(0, y)) } catch {}"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 26,
+          "text": "const rect = node.getBoundingClientRect?.()"
+        },
+        {
+          "line": 28,
+          "text": "const useInner = !!scrollEl && (scrollEl.scrollHeight > scrollEl.clientHeight + 1)"
+        },
+        {
+          "line": 30,
+          "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/dm/components/DmVoicePlayer.jsx",
+    "score": 22,
+    "counts": {
+      "playCalls": 1,
+      "pauseCalls": 2,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 3,
+      "scrollWrites": 0,
+      "layoutReads": 1
+    },
+    "flags": [],
+    "samples": {
+      "playCalls": [
+        {
+          "line": 134,
+          "text": "if (a.paused) a.play?.()"
+        }
+      ],
+      "pauseCalls": [
+        {
+          "line": 86,
+          "text": "a.pause?.()"
+        },
+        {
+          "line": 135,
+          "text": "else a.pause?.()"
+        }
+      ],
+      "raf": [
+        {
+          "line": 58,
+          "text": "if (rafRef.current) cancelAnimationFrame(rafRef.current)"
+        },
+        {
+          "line": 70,
+          "text": "rafRef.current = requestAnimationFrame(tick)"
+        },
+        {
+          "line": 72,
+          "text": "rafRef.current = requestAnimationFrame(tick)"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 154,
+          "text": "const rect = el.getBoundingClientRect()"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/media/utils/moderationPrep.js",
+    "score": 22,
+    "counts": {
+      "playCalls": 1,
+      "pauseCalls": 1,
+      "loadCalls": 1,
+      "srcSets": 0,
+      "srcRemoves": 1,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "playCalls": [
+        {
+          "line": 143,
+          "text": "await video.play().catch(() => null)"
+        }
+      ],
+      "pauseCalls": [
+        {
+          "line": 171,
+          "text": "video.pause()"
+        }
+      ],
+      "loadCalls": [
+        {
+          "line": 175,
+          "text": "video.load()"
+        }
+      ],
+      "srcRemoves": [
+        {
+          "line": 174,
+          "text": "video.removeAttribute('src')"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/quests/hooks/useQuestViewActions.js",
+    "score": 21,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 2,
+      "scrollWrites": 3,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "raf": [
+        {
+          "line": 20,
+          "text": "requestAnimationFrame(() => {"
+        }
+      ],
+      "scrollWrites": [
+        {
+          "line": 25,
+          "text": "marker.scrollIntoView({ behavior: 'auto', block: 'start' })"
+        },
+        {
+          "line": 35,
+          "text": "scrollEl.scrollTop = 0"
+        },
+        {
+          "line": 39,
+          "text": "try { window.scrollTo({ top: 0, behavior: 'auto' }) } catch {}"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/dm/utils/alignInboxStartUnderTabs.js",
+    "score": 19,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 2,
+      "scrollWrites": 1,
+      "layoutReads": 4
+    },
+    "flags": [],
+    "samples": {
+      "raf": [
+        {
+          "line": 5,
+          "text": "if (typeof requestAnimationFrame === 'function') {"
+        }
+      ],
+      "scrollWrites": [
+        {
+          "line": 87,
+          "text": "try { window.scrollTo(0, (window.pageYOffset || 0) + delta) } catch {}"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 69,
+          "text": "const tabsRect = tabs.getBoundingClientRect()"
+        },
+        {
+          "line": 77,
+          "text": "scrollEl.scrollHeight > scrollEl.clientHeight + 1"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/ui/components/ForumAdSlot.jsx",
+    "score": 18,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 2,
+      "raf": 2,
+      "scrollWrites": 0,
+      "layoutReads": 2
+    },
+    "flags": [],
+    "samples": {
+      "ro": [
+        {
+          "line": 17,
+          "text": "if (typeof ResizeObserver === 'undefined') return"
+        },
+        {
+          "line": 48,
+          "text": "const ro = new ResizeObserver(() => {"
+        }
+      ],
+      "raf": [
+        {
+          "line": 63,
+          "text": "rafRef.current = requestAnimationFrame(() => {"
+        },
+        {
+          "line": 76,
+          "text": "try { cancelAnimationFrame(rafRef.current) } catch {}"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 20,
+          "text": "lastHRef.current = el.getBoundingClientRect().height || 0"
+        },
+        {
+          "line": 53,
+          "text": "h = node.getBoundingClientRect().height || 0"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/dm/hooks/useDmSeenObservers.js",
+    "score": 16,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 4,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "io": [
+        {
+          "line": 22,
+          "text": "if (typeof IntersectionObserver === 'undefined') return"
+        },
+        {
+          "line": 26,
+          "text": "const io = new IntersectionObserver((entries) => {"
+        },
+        {
+          "line": 73,
+          "text": "if (typeof IntersectionObserver === 'undefined') return"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/feed/hooks/usePostParentReplyNav.js",
+    "score": 16,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 2,
+      "scrollWrites": 2,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "raf": [
+        {
+          "line": 45,
+          "text": "requestAnimationFrame(() => {"
+        }
+      ],
+      "scrollWrites": [
+        {
+          "line": 24,
+          "text": "node.scrollIntoView({ behavior: 'auto', block: 'nearest' })"
+        },
+        {
+          "line": 27,
+          "text": "node.scrollIntoView()"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/profile/components/ProfilePopover.jsx",
+    "score": 16,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 1,
+      "raf": 2,
+      "scrollWrites": 0,
+      "layoutReads": 3
+    },
+    "flags": [],
+    "samples": {
+      "ro": [
+        {
+          "line": 287,
+          "text": "const ro = new ResizeObserver(() => applySize());"
+        }
+      ],
+      "raf": [
+        {
+          "line": 172,
+          "text": "if (rafRef.current) cancelAnimationFrame(rafRef.current);"
+        },
+        {
+          "line": 174,
+          "text": "rafRef.current = requestAnimationFrame(() => {"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 266,
+          "text": "const r = el.getBoundingClientRect();"
+        },
+        {
+          "line": 576,
+          "text": "const parentRect = parent?.getBoundingClientRect?.() || { top: 0, left: 0, right: 0 };"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/media/hooks/useVideoFeedLifecycle.js",
+    "score": 15,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 5,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "raf": [
+        {
+          "line": 30,
+          "text": "if (id) cancelAnimationFrame(id)"
+        },
+        {
+          "line": 106,
+          "text": "if (rafs.a) cancelAnimationFrame(rafs.a)"
+        },
+        {
+          "line": 109,
+          "text": "if (rafs.b) cancelAnimationFrame(rafs.b)"
+        },
+        {
+          "line": 249,
+          "text": "rafs.a = requestAnimationFrame(() => {"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/media/components/LivePreview.jsx",
+    "score": 14,
+    "counts": {
+      "playCalls": 1,
+      "pauseCalls": 1,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 2,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "playCalls": [
+        {
+          "line": 28,
+          "text": "const p = el.play?.()"
+        }
+      ],
+      "pauseCalls": [
+        {
+          "line": 43,
+          "text": "el.pause?.()"
+        }
+      ],
+      "raf": [
+        {
+          "line": 33,
+          "text": "rafId = requestAnimationFrame(bindStream)"
+        },
+        {
+          "line": 39,
+          "text": "if (rafId) cancelAnimationFrame(rafId)"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/media/utils/frontCameraMirror.js",
+    "score": 14,
+    "counts": {
+      "playCalls": 1,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 3,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "playCalls": [
+        {
+          "line": 40,
+          "text": "try { await video.play() } catch {}"
+        }
+      ],
+      "raf": [
+        {
+          "line": 68,
+          "text": "rafId = requestAnimationFrame(loop)"
+        },
+        {
+          "line": 75,
+          "text": "try { if (rafId) cancelAnimationFrame(rafId) } catch {}"
+        },
+        {
+          "line": 83,
+          "text": "try { if (rafId) cancelAnimationFrame(rafId) } catch {}"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/ui/components/ForumSearchSortControls.jsx",
+    "score": 14,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 2,
+      "layoutReads": 2
+    },
+    "flags": [],
+    "samples": {
+      "scrollWrites": [
+        {
+          "line": 110,
+          "text": "if (sc && sc.scrollHeight > sc.clientHeight + 1) sc.scrollTop = 0"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 110,
+          "text": "if (sc && sc.scrollHeight > sc.clientHeight + 1) sc.scrollTop = 0"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/ui/hooks/useForumEditMode.js",
+    "score": 14,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 3,
+      "scrollWrites": 1,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "raf": [
+        {
+          "line": 29,
+          "text": "cancelAnimationFrame(focusRaf)"
+        },
+        {
+          "line": 32,
+          "text": "focusRaf = requestAnimationFrame(() => {"
+        },
+        {
+          "line": 62,
+          "text": "try { cancelAnimationFrame(focusRaf) } catch {}"
+        }
+      ],
+      "scrollWrites": [
+        {
+          "line": 36,
+          "text": "root.scrollIntoView({ behavior: 'auto', block: 'nearest' })"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/shared/hooks/usePageLock.js",
+    "score": 14,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 2,
+      "layoutReads": 2
+    },
+    "flags": [],
+    "samples": {
+      "scrollWrites": [
+        {
+          "line": 68,
+          "text": "scrollEl.scrollTop = innerY"
+        },
+        {
+          "line": 72,
+          "text": "window.scrollTo(0, winY)"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 25,
+          "text": "(scrollEl.scrollHeight - scrollEl.clientHeight) > 2"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/diagnostics/utils/emitPolicy.js",
+    "score": 12,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 6,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "iframeOps": [
+        {
+          "line": 13,
+          "text": "'iframe_play',"
+        },
+        {
+          "line": 15,
+          "text": "'iframe_resident_cap',"
+        },
+        {
+          "line": 50,
+          "text": "iframes: 0,"
+        },
+        {
+          "line": 52,
+          "text": "iframesActive: 0,"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/feed/hooks/useForumViewTracking.js",
+    "score": 12,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 2,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 2
+    },
+    "flags": [],
+    "samples": {
+      "io": [
+        {
+          "line": 60,
+          "text": "if (!('IntersectionObserver' in window)) return"
+        },
+        {
+          "line": 106,
+          "text": "const io = new IntersectionObserver("
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 99,
+          "text": "const viewportPx = Number(window.innerHeight || document.documentElement?.clientHeight || 0)"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/profile/components/UserInfoPopover.jsx",
+    "score": 12,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 2,
+      "scrollWrites": 0,
+      "layoutReads": 3
+    },
+    "flags": [],
+    "samples": {
+      "raf": [
+        {
+          "line": 256,
+          "text": "rafRef.current = window.requestAnimationFrame(() => {"
+        },
+        {
+          "line": 276,
+          "text": "cancelAnimationFrame(rafRef.current)"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 214,
+          "text": "const rect = anchorEl.getBoundingClientRect()"
+        },
+        {
+          "line": 218,
+          "text": "const viewportH = window.innerHeight"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/qcoin/components/QCoinWithdrawPopover.jsx",
+    "score": 10,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 5
+    },
+    "flags": [],
+    "samples": {
+      "layoutReads": [
+        {
+          "line": 40,
+          "text": "popParent?.getBoundingClientRect?.() || {"
+        },
+        {
+          "line": 44,
+          "text": "bottom: window.innerHeight,"
+        },
+        {
+          "line": 46,
+          "text": "const r = btn.getBoundingClientRect()"
+        },
+        {
+          "line": 55,
+          "text": "const viewportH = window.innerHeight || document.documentElement.clientHeight || 800"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/media/utils/videoControls.js",
+    "score": 9,
+    "counts": {
+      "playCalls": 1,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 2,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "playCalls": [
+        {
+          "line": 57,
+          "text": "const p = v.play?.()"
+        }
+      ],
+      "currentSrcReads": [
+        {
+          "line": 52,
+          "text": "if (!v.currentSrc && hasLazy) {"
+        },
+        {
+          "line": 55,
+          "text": "if (!v.currentSrc) return"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/dm/hooks/useDmRepliesSeen.js",
+    "score": 8,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 2,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "io": [
+        {
+          "line": 62,
+          "text": "if (typeof IntersectionObserver === 'undefined') return"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/feed/components/LoadMoreSentinel.jsx",
+    "score": 8,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 2,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "io": [
+        {
+          "line": 19,
+          "text": "if (!('IntersectionObserver' in window)) {"
+        },
+        {
+          "line": 24,
+          "text": "const io = new IntersectionObserver("
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/p/[postId]/route.js",
+    "score": 8,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 4,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "iframeOps": [
+        {
+          "line": 113,
+          "text": "/(?:youtube(?:-nocookie)?\\.com\\/(?:watch\\?v=|embed\\/|shorts\\/)|youtu\\.be\\/)([A-Za-z0-9_-]{6,})/i,"
+        },
+        {
+          "line": 236,
+          "text": "const ytEmbedUrl = ytId ? `https://www.youtube.com/embed/${encodeURIComponent(ytId)}` : ''"
+        },
+        {
+          "line": 256,
+          "text": "kind: 'youtube',"
+        },
+        {
+          "line": 286,
+          "text": "const waVideoPost = waCrawler && (chosen.kind === 'video' || chosen.kind === 'youtube')"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/feed/components/ForumPostCard.jsx",
+    "score": 6,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 3,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "iframeOps": [
+        {
+          "line": 95,
+          "text": "tiktokLines,"
+        },
+        {
+          "line": 169,
+          "text": "tiktokLines={tiktokLines}"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/feed/components/TopicItem.jsx",
+    "score": 6,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 1,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 1
+    },
+    "flags": [],
+    "samples": {
+      "io": [
+        {
+          "line": 69,
+          "text": "const io = new IntersectionObserver("
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 51,
+          "text": "const b = e?.currentTarget?.getBoundingClientRect?.()"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/feed/hooks/usePostFx.js",
+    "score": 6,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 3
+    },
+    "flags": [],
+    "samples": {
+      "layoutReads": [
+        {
+          "line": 45,
+          "text": "const r = host?.getBoundingClientRect?.()"
+        },
+        {
+          "line": 83,
+          "text": "const r = host?.getBoundingClientRect?.()"
+        },
+        {
+          "line": 157,
+          "text": "const r = btn?.getBoundingClientRect?.()"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/media/utils/mediaLinks.js",
+    "score": 6,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 3,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "iframeOps": [
+        {
+          "line": 7,
+          "text": "return /^(?:https?:\\/\\/)?(?:www\\.)?(?:youtube\\.com\\/(?:watch\\?v=|shorts\\/|embed\\/)|youtu\\.be\\/)[A-Za-z0-9_-]{6,}/i.test(s)"
+        },
+        {
+          "line": 14,
+          "text": "return /^(?:https?:\\/\\/)?(?:(?:www|m)\\.)?tiktok\\.com\\/@[\\w.\\-]+\\/video\\/\\d+(?:[?#].*)?$/i.test(s)"
+        },
+        {
+          "line": 31,
+          "text": "const m = s.match(/tiktok\\.com\\/(@[\\w.\\-]+\\/video\\/\\d+)/i)"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/moderation/components/AdminPopover.jsx",
+    "score": 6,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 3
+    },
+    "flags": [],
+    "samples": {
+      "layoutReads": [
+        {
+          "line": 26,
+          "text": "const pRect = parent?.getBoundingClientRect?.() || { left: 0, right: window.innerWidth }"
+        },
+        {
+          "line": 30,
+          "text": "const top = Math.round(r.bottom - (parent?.getBoundingClientRect?.()?.top || 0) + GAP)"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/profile/components/VipPopover.jsx",
+    "score": 6,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 3
+    },
+    "flags": [],
+    "samples": {
+      "layoutReads": [
+        {
+          "line": 19,
+          "text": "const pRect = parent?.getBoundingClientRect?.() || { left: 0, right: window.innerWidth }"
+        },
+        {
+          "line": 23,
+          "text": "const top = Math.round(r.bottom - (parent?.getBoundingClientRect?.()?.top || 0) + GAP)"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/feed/utils/openThreadFromPost.js",
+    "score": 5,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 1,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "scrollWrites": [
+        {
+          "line": 31,
+          "text": "document.getElementById(`post_${post.id}`)?.scrollIntoView({ behavior: 'auto', block: 'nearest' })"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/feed/hooks/useTopicDiscoveryModel.js",
+    "score": 4,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 2
+    },
+    "flags": [],
+    "samples": {
+      "layoutReads": [
+        {
+          "line": 233,
+          "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/media/utils/videoFeedPosts.js",
+    "score": 4,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 2,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "iframeOps": [
+        {
+          "line": 66,
+          "text": "/(?:youtube\\.com|youtu\\.be)/i.test(post.html) ||"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/moderation/components/ReportPopover.jsx",
+    "score": 4,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 2
+    },
+    "flags": [],
+    "samples": {
+      "layoutReads": [
+        {
+          "line": 24,
+          "text": "const rect = el.getBoundingClientRect()"
+        },
+        {
+          "line": 37,
+          "text": "const winH = window.innerHeight || 0"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/moderation/hooks/useReportController.js",
+    "score": 4,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 2
+    },
+    "flags": [],
+    "samples": {
+      "layoutReads": [
+        {
+          "line": 28,
+          "text": "if (!anchorEl || typeof anchorEl.getBoundingClientRect !== 'function') {"
+        },
+        {
+          "line": 32,
+          "text": "const rect = anchorEl.getBoundingClientRect()"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/page.js",
+    "score": 4,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 2
+    },
+    "flags": [],
+    "samples": {
+      "layoutReads": [
+        {
+          "line": 71,
+          "text": "const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 4"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/dm/hooks/useDmDeleteController.js",
+    "score": 2,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 1
+    },
+    "flags": [],
+    "samples": {
+      "layoutReads": [
+        {
+          "line": 173,
+          "text": "const b = e?.currentTarget?.getBoundingClientRect?.()"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/feed/components/PostActionBar.jsx",
+    "score": 2,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 1
+    },
+    "flags": [],
+    "samples": {
+      "layoutReads": [
+        {
+          "line": 140,
+          "text": "const rect = e.currentTarget?.getBoundingClientRect?.()"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/feed/hooks/usePostOwnerActions.js",
+    "score": 2,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 1
+    },
+    "flags": [],
+    "samples": {
+      "layoutReads": [
+        {
+          "line": 32,
+          "text": "const b = e?.currentTarget?.getBoundingClientRect?.()"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/profile/components/AboutRail.jsx",
+    "score": 2,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 1
+    },
+    "flags": [],
+    "samples": {
+      "layoutReads": [
+        {
+          "line": 47,
+          "text": "el.style.height = `${el.scrollHeight}px`"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/ui/components/ConfirmDeleteOverlay.jsx",
+    "score": 2,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 1
+    },
+    "flags": [],
+    "samples": {
+      "layoutReads": [
+        {
+          "line": 25,
+          "text": "const vh = window.innerHeight || 0"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/ui/components/DmDeletePopover.jsx",
+    "score": 2,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 1
+    },
+    "flags": [],
+    "samples": {
+      "layoutReads": [
+        {
+          "line": 33,
+          "text": "const vh = window.innerHeight || 0"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/error.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/events/bus.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/components/DmDialogRow.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/components/DmDialogsPane.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/components/DmMessagesPane.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/components/DmThreadAlerts.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/components/DmThreadHeader.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/components/DmThreadLoadMore.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/components/DmThreadMessageRow.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/components/InboxPane.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/components/InboxRepliesPane.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/components/InboxTabsHeader.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/hooks/useDmDeleteCopy.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/hooks/useDmLoadLifecycle.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/hooks/useDmLocalCache.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/hooks/useDmOpenEvents.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/hooks/useDmStorageMaps.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/hooks/useDmUnreadState.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/hooks/useDmVipBatchProbe.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/hooks/useForumDmRuntime.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/hooks/useInboxRepliesModel.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/hooks/useOpenInboxGlobalAction.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/services/sendDmComposerMessage.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/utils/deletedMap.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/utils/dmLoaders.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/utils/mediaParsing.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/dm/utils/openInboxGlobal.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/components/CreateTopicCard.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/components/PostBodyContent.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/components/PostCardBridge.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/components/PostFxLayer.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/components/PostHeaderMeta.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/components/PostOwnerMenu.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/components/PostTranslateToggle.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/components/PublishedPostsPane.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/components/ThreadRepliesPane.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/components/ThreadSection.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/components/ThreadTitle.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/components/TopicsOrPanelsSwitch.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/components/TopicsPane.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/components/TopicsSection.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/constants/deeplink.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/hooks/useForumCreatePostAction.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/hooks/useForumCreateTopicAction.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/hooks/useForumDataRuntime.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/hooks/useForumDeepLinkFlow.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/hooks/useForumMutationActions.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/hooks/useForumMutationQueue.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/hooks/useForumNavigationActions.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/hooks/useForumNavigationRuntime.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/hooks/useForumSseBridge.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/hooks/useForumSyncLoop.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/hooks/useNavStateSnapshot.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/hooks/usePostTranslation.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/hooks/usePublishedPostsModel.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/hooks/useThreadPostsModel.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/services/rateLimiter.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/utils/navOrchestrator.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/utils/navState.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/utils/postEvents.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/utils/signatures.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/feed/utils/snapshotTransforms.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/components/ComposerAttachmentPreview.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/components/qcast/QCastIcons.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/components/VideoFeedPane.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/components/VideoLimitOverlay.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/components/VideoOverlay.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/hooks/useForumComposerAttachments.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/hooks/useForumVideoFeedRuntime.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/hooks/useMediaPipelineController.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/hooks/useVideoCaptureController.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/hooks/useVideoFeedActions.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/hooks/useVideoFeedState.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/hooks/useVideoTrimController.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/hooks/useVoiceRecorder.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/services/resolveComposerMediaPayload.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/utils/formatMediaTime.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/utils/mediaUrlPipeline.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/utils/qcastBars.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/utils/urlParsing.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/utils/videoCopy.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/utils/videoFeedActions.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/utils/videoFeedBuilder.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/utils/videoFeedRandom.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/utils/videoFeedSalt.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/moderation/hooks/useAdminActions.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/moderation/hooks/useAdminFlag.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/moderation/hooks/useForumModerationRuntime.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/moderation/hooks/useForumModerationUi.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/moderation/hooks/useMediaModeration.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/moderation/utils/http.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/profile/components/AvatarEmoji.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/profile/components/ForumVipControl.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/profile/components/VipFlipBadge.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/profile/constants/vipAssets.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/profile/hooks/useAboutEditor.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/profile/hooks/useForumProfileSocialRuntime.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/profile/hooks/useForumProfileSync.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/profile/hooks/useVipFlag.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/profile/hooks/useVipPayAction.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/profile/hooks/useVipSubscriptionState.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/profile/utils/aboutText.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/profile/utils/avatar.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/profile/utils/profileCache.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/profile/utils/vip.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/qcoin/components/QCoinInline.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/qcoin/hooks/useQCoinLive.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/qcoin/utils/account.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/qcoin/utils/paymentWindow.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/quests/components/QuestClaimOverlay.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/quests/components/QuestHub.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/quests/components/QuestLaunchIcon.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/quests/components/QuestPane.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/quests/hooks/useForumQuestConfig.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/quests/hooks/useForumQuestProgress.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/quests/hooks/useForumQuestRuntime.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/quests/hooks/useQuestClaimAction.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/quests/hooks/useQuestStorageState.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/quests/utils/progress.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/subscriptions/components/FollowersCounterInline.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/subscriptions/hooks/useStarredAuthorsState.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/subscriptions/utils/starred.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/components/ComposeDock.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/components/ComposerActionRail.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/components/ComposerCore.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/components/ComposerEmojiPanel.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/components/ComposerEmojiPreview.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/components/ComposerFabButton.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/components/ComposerFileInput.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/components/ComposerMediaProgressBar.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/components/ComposerStatusMeta.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/components/ComposerTextInput.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/components/ForumActionNavIcon.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/components/ForumActionRow.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/components/ForumControlNavIcon.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/components/ForumOverlayStack.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/components/HeadChevronIcon.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/components/MainForumActionCluster.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/components/StarButton.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/components/ThreadForumActionCluster.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/components/VideoFeedNavIcon.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/constants/emojiCatalog.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/constants/inviteButton.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/hooks/useComposerActionHandlers.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/hooks/useComposerEmojiState.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/hooks/useComposerUiLifecycle.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/hooks/useForumAdSlots.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/hooks/useForumAdsRuntime.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/hooks/useForumComposerRuntime.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/hooks/useForumComposerSubmitRuntime.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/hooks/useForumGlobalPopovers.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/hooks/useForumPopoverModeController.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/hooks/useForumScreenFlowsRuntime.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/hooks/useForumSessionShell.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/hooks/useForumViewState.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/utils/adsSlots.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/utils/buildForumLayoutProps.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/utils/buildForumRootPropBundles.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/utils/propBundles/buildActionClusterProps.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/utils/propBundles/buildComposerCoreProps.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/utils/propBundles/buildForumHeaderPanelProps.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/utils/propBundles/buildInboxPaneProps.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/utils/propBundles/buildSearchSortControlsProps.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/utils/propBundles/buildThreadRepliesPaneProps.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/ui/utils/propBundles/buildTopicsSwitchProps.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/Forum.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/ForumHeaderPanel.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/ForumLayout.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/ForumProviders.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/ForumRoot.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/layout.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/loading.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/services/forumApi.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/api/http.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/api/translate.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/components/HydrateText.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/config/runtime.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/constants/media.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/hooks/useEvent.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/hooks/useForumNavBridge.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/hooks/useForumToast.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/hooks/useHtmlFlag.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/storage/localStorage.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/telemetry/diag.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/utils/browser.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/utils/classnames.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/utils/counts.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/utils/formatters.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/utils/forumLocale.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/utils/linkDetection.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/utils/openAuth.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/utils/richText.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/utils/time.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/SharePopover.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/styles/ForumFxStyles.jsx",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/styles/modules/composerStyles.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/styles/modules/dmStyles.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/styles/modules/fxStyles.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/styles/modules/layoutStyles.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/styles/modules/profileStyles.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/styles/modules/qcoinStyles.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/styles/modules/questStyles.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  }
+]

@@ -280,49 +280,6 @@ function buildFxPack (tier) {
 
 const cn = (...parts) => parts.filter(Boolean).join(' ')
 
-function cancelCoinAnimFrame (animFrameRef) {
-  const rafId = Number(animFrameRef?.current || 0)
-  animFrameRef.current = 0
-  if (!rafId) return
-  try { cancelAnimationFrame(rafId) } catch {}
-}
-
-function clearCoinWakeTimer (wakeTimerRef) {
-  const tid = Number(wakeTimerRef?.current || 0)
-  wakeTimerRef.current = 0
-  if (!tid) return
-  try { clearTimeout(tid) } catch {}
-}
-
-function scheduleCoinFrame (animFrameRef, cb) {
-  cancelCoinAnimFrame(animFrameRef)
-  try {
-    animFrameRef.current = requestAnimationFrame(cb)
-    return animFrameRef.current
-  } catch {
-    animFrameRef.current = 0
-    return 0
-  }
-}
-
-function scheduleCoinWake (animFrameRef, wakeTimerRef, cb, delayMs = 0) {
-  clearCoinWakeTimer(wakeTimerRef)
-  const delay = Math.max(0, Number(delayMs || 0))
-  if (delay <= 18) {
-    return scheduleCoinFrame(animFrameRef, cb)
-  }
-  wakeTimerRef.current = setTimeout(() => {
-    wakeTimerRef.current = 0
-    scheduleCoinFrame(animFrameRef, cb)
-  }, delay)
-  return 0
-}
-
-function clearCoinAnimLoop (animFrameRef, wakeTimerRef) {
-  clearCoinWakeTimer(wakeTimerRef)
-  cancelCoinAnimFrame(animFrameRef)
-}
-
 export default function QCoinDropFX ({
   intervalMs = DEFAULT_INTERVAL_MS,
   minSize = DEFAULT_MIN_SIZE,
@@ -337,7 +294,6 @@ export default function QCoinDropFX ({
 
   const coinRef = useRef(null)
   const animFrameRef = useRef(null)
-  const wakeTimerRef = useRef(null)
   const lastTimeRef = useRef(0)
   const worldRef = useRef({ w: 0, h: 0 })
   const spawnAtRef = useRef(0)
@@ -406,10 +362,6 @@ export default function QCoinDropFX ({
 
     lastTimeRef.current = 0
     let stopped = false
-    const scheduleNext = (delayMs = 0) => {
-      if (stopped) return
-      scheduleCoinWake(animFrameRef, wakeTimerRef, loop, delayMs)
-    }
 
     const loop = (ts) => {
       if (stopped) return
@@ -498,30 +450,17 @@ export default function QCoinDropFX ({
         }
       }
 
-      if (coinRef.current) {
-        setTick((x) => (x + 1) & 1023)
-        scheduleNext(0)
-        return
-      }
-
-      if (uid) {
-        const nextAt = Number(spawnAtRef.current || 0)
-        const waitMs = nextAt > ts
-          ? Math.max(48, Math.min(2200, nextAt - ts))
-          : 48
-        scheduleNext(waitMs)
-        return
-      }
-
-      scheduleNext(1400)
+      setTick((x) => (x + 1) & 1023)
+      if (!stopped) animFrameRef.current = requestAnimationFrame(loop)
     }
 
-    scheduleNext(0)
+    animFrameRef.current = requestAnimationFrame(loop)
 
     return () => {
       stopped = true
-      clearCoinAnimLoop(animFrameRef, wakeTimerRef)
-      lastTimeRef.current = 0
+      const rafId = animFrameRef.current
+      animFrameRef.current = null
+      if (rafId) cancelAnimationFrame(rafId)
     }
   }, [uid, intervalMs, minSize, maxSize, initWorld])
 

@@ -1,6 +1,6 @@
 {
   "phase": "project-tree-audit",
-  "timestamp": "2026-04-03T18:44:29.549Z",
+  "timestamp": "2026-04-03T10:58:01.623Z",
   "scope": "whole repository tree registry",
   "touched_files": [
     "PROJECT_TREE.md"
@@ -14,13 +14,13 @@
   "storage_risk": "none",
   "runtime_risk": "low",
   "notes": [
-    "repo_files=1557",
-    "source_files=623",
+    "repo_files=1555",
+    "source_files=621",
     "route_files=94"
   ],
   "status": "ok",
-  "total_repo_files": 1557,
-  "total_source_files": 623,
+  "total_repo_files": 1555,
+  "total_source_files": 621,
   "top_level_breakdown": {
     ".env.local": 1,
     ".env.local.example": 1,
@@ -37,7 +37,6 @@
     "effects-leak.report.json": 1,
     "forum-deps-audit.report.json": 1,
     "forum-diag.jsonl": 1,
-    "forum-scroll.audit.report.json": 1,
     "forum-startup.audit.report.json": 1,
     "heapsnapshot-analysis.report.json": 1,
     "heavy-audit.report.json": 1,
@@ -58,6 +57,6 @@
     "public": 920,
     "README.md": 1,
     "runtime-hotspots.report.json": 1,
-    "tools": 25
+    "tools": 24
   }
 }

@@ -90,16 +90,6 @@ export default function useVideoFeedWindowing({
     return null
   }, [bodyRef])
 
-  const vfClearMeasureState = useCallback(() => {
-    try {
-      vfRosRef.current.forEach((ro) => {
-        try { ro?.disconnect?.() } catch {}
-      })
-      vfRosRef.current.clear()
-    } catch {}
-    try { vfHeightsRef.current.clear() } catch {}
-  }, [])
-
   const vfReadViewportState = useCallback(() => {
     const winTop = Number(window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0)
     const winH = Number(window.innerHeight || 0) || 0
@@ -115,59 +105,6 @@ export default function useVideoFeedWindowing({
     } catch {}
     return { st: winTop, vh: winH, mode: 'window' }
   }, [vfGetScrollEl])
-
-  const vfCompensateOffscreenDelta = useCallback((node, deltaH) => {
-    try {
-      const rawDelta = Number(deltaH || 0)
-      if (!videoFeedOpen) return
-      if (!(node instanceof Element) || !node.isConnected) return
-      if (!Number.isFinite(rawDelta) || Math.abs(rawDelta) < 10) return
-
-      const delta = Math.max(-260, Math.min(260, rawDelta))
-      const vp = vfReadViewportState()
-      const rect = node.getBoundingClientRect?.()
-      if (!rect) return
-
-      const markProgrammaticScroll = () => {
-        try {
-          window.__forumProgrammaticScrollTs = Date.now()
-          window.__forumProgrammaticScrollReason = 'video_feed_resize_compensation'
-        } catch {}
-      }
-
-      if (String(vp?.mode || '') === 'inner') {
-        const scrollEl = vfGetScrollEl()
-        if (!scrollEl || !(scrollEl.scrollHeight > scrollEl.clientHeight + 1)) return
-        const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }
-        const bottomInHost = Number(rect.bottom || 0) - Number(hostRect.top || 0)
-        if (bottomInHost > 0) return
-        const prevTop = Number(scrollEl.scrollTop || 0)
-        const maxTop = Math.max(0, Number(scrollEl.scrollHeight || 0) - Number(scrollEl.clientHeight || 0))
-        const nextTop = Math.max(0, Math.min(maxTop, prevTop + delta))
-        if (Math.abs(nextTop - prevTop) < 1) return
-        markProgrammaticScroll()
-        scrollEl.scrollTop = nextTop
-        return
-      }
-
-      if (Number(rect.bottom || 0) > 0) return
-
-      const curY = Number(
-        window.pageYOffset ||
-        document.documentElement?.scrollTop ||
-        document.body?.scrollTop ||
-        0,
-      )
-      const nextY = Math.max(0, curY + delta)
-      if (Math.abs(nextY - curY) < 1) return
-      markProgrammaticScroll()
-      try {
-        window.scrollTo({ top: nextY, behavior: 'auto' })
-      } catch {
-        try { window.scrollTo(0, nextY) } catch {}
-      }
-    } catch {}
-  }, [videoFeedOpen, vfGetScrollEl, vfReadViewportState])
 
   const vfEstimateH = useCallback((i) => {
     const slot = vfSlots?.[i]
@@ -390,6 +327,7 @@ export default function useVideoFeedWindowing({
     } else {
       window.addEventListener('scroll', onScroll, opts)
     }
+    window.addEventListener('resize', onScroll, opts)
     onScroll()
 
     return () => {
@@ -398,6 +336,7 @@ export default function useVideoFeedWindowing({
       } else {
         window.removeEventListener('scroll', onScroll)
       }
+      window.removeEventListener('resize', onScroll)
       if (vfRafRef.current) {
         try { cancelAnimationFrame(vfRafRef.current) } catch {}
         vfRafRef.current = 0
@@ -430,9 +369,6 @@ export default function useVideoFeedWindowing({
           const nextH = Math.round(h)
           if (Number.isFinite(prev) && Math.abs(prev - nextH) < 2) return
           vfHeightsRef.current.set(idx, nextH)
-          if (Number.isFinite(prev)) {
-            vfCompensateOffscreenDelta(node, nextH - prev)
-          }
           const now = Date.now()
           if (Number(vfScrollActivityRef.current.activeUntil || 0) > now) return
           vfScheduleRecalc()
@@ -446,7 +382,7 @@ export default function useVideoFeedWindowing({
         vfRosRef.current.set(idx, ro)
       }
     } catch {}
-  }, [vfCompensateOffscreenDelta, vfScheduleRecalc])
+  }, [vfScheduleRecalc])
 
   useEffect(() => {
     if (!isBrowserFn()) return undefined
@@ -458,47 +394,6 @@ export default function useVideoFeedWindowing({
     window.addEventListener('resize', onResize, { passive: true })
     return () => window.removeEventListener('resize', onResize)
   }, [videoFeedOpen, vfScheduleRecalc, isBrowserFn])
-
-  useEffect(() => {
-    if (videoFeedOpen) return undefined
-    vfClearMeasureState()
-    vfWinMetaRef.current = { ts: 0, start: 0, end: 0 }
-    vfScrollStateRef.current = { top: 0, ts: 0, velocity: 0, direction: 0 }
-    setVfWin({ start: 0, end: 0, top: 0, bottom: 0 })
-    return undefined
-  }, [videoFeedOpen, vfClearMeasureState])
-
-  useEffect(() => {
-    const hardResetScheduleRef = vfHardResetScheduleRef
-    const rafRef = vfRafRef
-    const scrollActivityRef = vfScrollActivityRef
-    return () => {
-      const scheduled = hardResetScheduleRef.current
-      if (scheduled.rafA) {
-        try { cancelAnimationFrame(scheduled.rafA) } catch {}
-        scheduled.rafA = 0
-      }
-      if (scheduled.rafB) {
-        try { cancelAnimationFrame(scheduled.rafB) } catch {}
-        scheduled.rafB = 0
-      }
-      if (scheduled.timeoutId) {
-        try { clearTimeout(scheduled.timeoutId) } catch {}
-        scheduled.timeoutId = 0
-      }
-      if (rafRef.current) {
-        try { cancelAnimationFrame(rafRef.current) } catch {}
-        rafRef.current = 0
-      }
-      const scrollActivity = scrollActivityRef.current
-      if (scrollActivity?.settleTimer) {
-        try { clearTimeout(scrollActivity.settleTimer) } catch {}
-        scrollActivity.settleTimer = 0
-      }
-      try { scrollActivity.activeUntil = 0 } catch {}
-      vfClearMeasureState()
-    }
-  }, [vfClearMeasureState])
 
   return {
     vfSlots,

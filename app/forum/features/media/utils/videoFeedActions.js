@@ -13,6 +13,7 @@ export function openVideoFeedFlow(entryId, opts = {}, ctx) {
     setSel,
     setThreadRoot,
     setTopicFilterId,
+    snapVideoFeedToFirstCardTop,
   } = ctx
 
   setVideoFeedUserSortLocked(false)
@@ -33,6 +34,9 @@ export function openVideoFeedFlow(entryId, opts = {}, ctx) {
   try { setInboxOpen?.(false) } catch {}
   try { setSel?.(null); setThreadRoot?.(null) } catch {}
   try { setTopicFilterId?.(null) } catch {}
+  if (!opts?.keepHeaderOpen) {
+    snapVideoFeedToFirstCardTop({ hideHeader: true })
+  }
 }
 
 export function closeVideoFeedFlow(ctx) {

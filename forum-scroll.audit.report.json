@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-03T19:15:47.819Z",
+  "generatedAt": "2026-04-03T21:08:25.581Z",
   "scannedFiles": 268,
   "report": [
     {
@@ -462,62 +462,62 @@
       "hits": [
         {
           "key": "scrollWrite",
-          "line": 165,
+          "line": 169,
           "text": "window.scrollTo({ top: nextY, behavior: 'auto' })"
         },
         {
           "key": "scrollWrite",
-          "line": 167,
+          "line": 171,
           "text": "try { window.scrollTo(0, nextY) } catch {}"
         },
         {
           "key": "scrollWrite",
-          "line": 329,
+          "line": 333,
           "text": "else window.scrollTo(0, 0)"
         },
         {
           "key": "scrollRead",
-          "line": 104,
+          "line": 105,
           "text": "const winTop = Number(window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0)"
         },
         {
           "key": "scrollRead",
-          "line": 111,
+          "line": 112,
           "text": "st: Number(el.scrollTop || 0),"
         },
         {
           "key": "scrollRead",
-          "line": 144,
+          "line": 148,
           "text": "const prevTop = Number(scrollEl.scrollTop || 0)"
         },
         {
           "key": "scrollRead",
-          "line": 149,
+          "line": 153,
           "text": "scrollEl.scrollTop = nextTop"
         },
         {
           "key": "scrollRead",
-          "line": 156,
+          "line": 160,
           "text": "window.pageYOffset ||"
         },
         {
           "key": "scrollRead",
-          "line": 157,
+          "line": 161,
           "text": "document.documentElement?.scrollTop ||"
         },
         {
           "key": "scrollRead",
-          "line": 328,
+          "line": 332,
           "text": "if (el && el.scrollHeight > el.clientHeight + 1) el.scrollTop = 0"
         },
         {
           "key": "rectReads",
-          "line": 128,
+          "line": 132,
           "text": "const rect = node.getBoundingClientRect?.()"
         },
         {
           "key": "rectReads",
-          "line": 141,
+          "line": 145,
           "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }"
         }
       ]
@@ -832,22 +832,22 @@
         },
         {
           "key": "rectReads",
-          "line": 2801,
+          "line": 2832,
           "text": "const rect = node.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 3037,
+          "line": 3068,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 3054,
+          "line": 3085,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 3582,
+          "line": 3587,
           "text": "const rect = el.getBoundingClientRect?.();"
         },
         {
@@ -862,12 +862,12 @@
         },
         {
           "key": "raf",
-          "line": 3735,
+          "line": 3740,
           "text": "rafId = requestAnimationFrame(() => {"
         },
         {
           "key": "raf",
-          "line": 4242,
+          "line": 4248,
           "text": "mutationSweepRaf = requestAnimationFrame(() => {"
         }
       ]
@@ -2027,17 +2027,17 @@
         },
         {
           "key": "timers",
-          "line": 1381,
+          "line": 1388,
           "text": "timerId = window.setTimeout(() => {"
         },
         {
           "key": "timers",
-          "line": 1723,
+          "line": 1730,
           "text": "const timer = setInterval(pickNext, rotateMs);"
         },
         {
           "key": "timers",
-          "line": 2215,
+          "line": 2222,
           "text": "timer = setTimeout(() => {"
         }
       ]
@@ -2491,7 +2491,7 @@
       "hits": [
         {
           "key": "rectReads",
-          "line": 131,
+          "line": 135,
           "text": "const r = el.getBoundingClientRect?.()"
         }
       ]
