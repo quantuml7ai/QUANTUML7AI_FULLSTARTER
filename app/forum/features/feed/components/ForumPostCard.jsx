@@ -136,7 +136,7 @@ export default function ForumPostCard({
       aria-label={t('forum_post_aria')}
       onPointerEnter={markFocusedView}
       onFocusCapture={markFocusedView}
-      onTouchStart={markFocusedView}
+      onPointerDown={markFocusedView}
     >
       <PostFxLayer
         FX_POOL={FX_POOL}

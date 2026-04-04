@@ -74,10 +74,12 @@ export const api = {
   async snapshot(q = {}) {
     try {
       const params = new URLSearchParams();
-      if (q.b)     params.set('b',     String(q.b));
+      const fullMode = !!q.full;
+      const cacheBust = q.b || (fullMode ? `full:${Date.now()}` : '');
+      if (cacheBust) params.set('b', String(cacheBust));
       if (q.rev)   params.set('rev',   String(q.rev));
       if (q.since) params.set('since', String(q.since));
-      if (q.full)  params.set('full',  '1');
+      if (fullMode)  params.set('full',  '1');
       const url = '/api/forum/snapshot' + (params.toString() ? `?${params}` : '');
       const r   = await fetch(url, { cache: 'no-store' });
 

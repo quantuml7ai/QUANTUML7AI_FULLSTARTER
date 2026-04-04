@@ -1,5 +1,30 @@
 import { useMemo } from 'react'
 
+function readReplyCountFromPost(post) {
+  const candidates = [
+    post?.replyCount,
+    post?.repliesCount,
+    post?.answersCount,
+    post?.commentsCount,
+    post?.__repliesCount,
+  ]
+  for (const value of candidates) {
+    const parsed = Number(value)
+    if (Number.isFinite(parsed) && parsed >= 0) return parsed
+  }
+  return NaN
+}
+
+function resolveReplyCount(post, repliesById) {
+  const postId = String(post?.id || '')
+  const derived = Number(repliesById?.get?.(postId) || 0)
+  const direct = readReplyCountFromPost(post)
+  if (Number.isFinite(direct) && direct >= 0) {
+    return Math.max(direct, derived)
+  }
+  return Math.max(0, derived)
+}
+
 export default function usePublishedPostsModel({
   meId,
   posts,
@@ -24,7 +49,7 @@ export default function usePublishedPostsModel({
       const ts = Number(post?.ts || 0)
       const likes = Number(post?.likes || 0)
       const views = Number(post?.views || 0)
-      const replies = Number(repliesById.get(String(post?.id || '')) || 0)
+      const replies = resolveReplyCount(post, repliesById)
       switch (String(postSort || 'new')) {
         case 'likes':
           return likes
@@ -58,6 +83,20 @@ export default function usePublishedPostsModel({
         const aScore = score(a)
         if (bScore !== aScore) return bScore - aScore
         return Number(b?.ts || 0) - Number(a?.ts || 0)
+      })
+      .map((post) => {
+        const nextReplyCount = resolveReplyCount(post, repliesById)
+        const currentReplyCount = readReplyCountFromPost(post)
+        const currentShadowReplyCount = Number(post?.__repliesCount)
+        const shouldPatchReplyCount =
+          !Number.isFinite(currentReplyCount) || currentReplyCount < nextReplyCount
+        const shouldPatchShadowReplyCount =
+          !Number.isFinite(currentShadowReplyCount) || currentShadowReplyCount !== nextReplyCount
+        if (!shouldPatchReplyCount && !shouldPatchShadowReplyCount) return post
+        const patchedPost = { ...post }
+        if (shouldPatchReplyCount) patchedPost.replyCount = nextReplyCount
+        if (shouldPatchShadowReplyCount) patchedPost.__repliesCount = nextReplyCount
+        return patchedPost
       })
   }, [activeStarredAuthors, meId, posts, postSort, repliesById, resolveProfileAccountIdFn])
 

@@ -132,9 +132,28 @@ export default function DmDialogRow({
     onUserInfoToggle?.(uid, anchor)
   }
 
+  const openDialog = () => {
+    onOpen?.(uid, entryId)
+  }
+
+  const handleRowKeyDown = (e) => {
+    if (e?.target !== e?.currentTarget) return
+    if (e?.key === 'Enter' || e?.key === ' ') {
+      e.preventDefault()
+      openDialog()
+    }
+  }
+
+  const handleDeleteClick = (e) => {
+    e?.preventDefault?.()
+    e?.stopPropagation?.()
+    onDelete?.(uid, nick || shortId(uid), e)
+  }
+
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       id={entryId}
       className={cls('item dmRow hoverPop text-left', unread && 'dmRowUnread')}
       data-feed-card="1"
@@ -142,7 +161,8 @@ export default function DmDialogRow({
       data-dm-uid={uid}
       data-dm-lastts={lastTs}
       data-dm-lastfrom={lastFromRaw || lastFrom}
-      onClick={() => onOpen?.(uid, entryId)}
+      onClick={openDialog}
+      onKeyDown={handleRowKeyDown}
     >
       <div className="dmRowMain">
         <div className="dmRowTop">
@@ -218,13 +238,13 @@ export default function DmDialogRow({
         className="iconBtn ghost"
         aria-label={t('dm_delete_dialog')}
         title={t('dm_delete_dialog')}
-        onClick={(e) => onDelete?.(uid, nick || shortId(uid), e)}
+        onClick={handleDeleteClick}
       >
         <svg viewBox="0 0 24 24" aria-hidden>
           <path d="M6 7h12M9 7V5h6v2M8 7l1 12h6l1-12" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" />
         </svg>
       </button>
       {unread && <span className="dmUnreadDot" aria-hidden="true" />}
-    </button>
+    </div>
   )
 }

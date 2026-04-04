@@ -42,10 +42,7 @@ export default function VideoLimitOverlay({
     <div
       className="confirmOverlayRoot dmConfirmOverlay videoLimitOverlayRoot"
       role="presentation"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose?.()
-      }}
-      onTouchStart={(e) => {
+      onPointerDown={(e) => {
         if (e.target === e.currentTarget) onClose?.()
       }}
     >

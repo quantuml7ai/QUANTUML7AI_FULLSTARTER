@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-03T10:58:19.207Z",
+  "generatedAt": "2026-04-04T23:16:10.918Z",
   "report": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\AuthNavClient.jsx",
@@ -35,11 +35,11 @@
       },
       "startupMarks": [
         {
-          "line": 64,
+          "line": 69,
           "text": "if (typeof window.markForumStartup !== 'function') {"
         },
         {
-          "line": 65,
+          "line": 70,
           "text": "window.markForumStartup = function (label, extra) {"
         }
       ],

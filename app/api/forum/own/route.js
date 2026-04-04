@@ -89,7 +89,7 @@ export async function POST(req) {
       const topicId = String(body?.topicId || '').trim()
       let topic = topics.find(t => String(t?.id) === topicId)
       if (!topic) topic = await getById('topic', topicId)
-      if (!topic) return fail('forum_err_not_found', 404)
+      if (!topic) return ok({ notFound: true })
       if (!isOwner(userId, topic)) return fail('forum_err_forbidden', 403)
 
       const r = await callMutate([{ type: 'delete_topic', payload: { id: topicId } }])
@@ -104,7 +104,7 @@ export async function POST(req) {
       const postId = String(body?.postId || '').trim()
       let post = posts.find(p => String(p?.id) === postId)
       if (!post) post = await getById('post', postId)
-      if (!post) return fail('forum_err_not_found', 404)
+      if (!post) return ok({ notFound: true })
       if (!isOwner(userId, post)) return fail('forum_err_forbidden', 403)
 
       const r = await callMutate([{ type: 'delete_post', payload: { id: postId } }])
