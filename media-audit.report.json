@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-03T10:58:19.548Z",
+  "generatedAt": "2026-04-03T23:58:12.325Z",
   "results": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n.js",
@@ -149,11 +149,11 @@
             "text": "// Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start."
           },
           {
-            "line": 531,
+            "line": 532,
             "text": "// === Shorts-like autoplay: play when in focus, pause when out ==="
           },
           {
-            "line": 2201,
+            "line": 2206,
             "text": "// иначе при гонках промисов возможен двойной autoplay."
           }
         ],
@@ -223,21 +223,21 @@
       "samples": {
         "video": [
           {
-            "line": 2424,
+            "line": 2502,
             "text": "<video"
           }
         ],
         "autoplay": [
           {
-            "line": 1419,
+            "line": 1493,
             "text": "try { emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback'); } catch {}"
           },
           {
-            "line": 2002,
+            "line": 2076,
             "text": "autoplay: 0,"
           },
           {
-            "line": 2506,
+            "line": 2584,
             "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
           }
         ],

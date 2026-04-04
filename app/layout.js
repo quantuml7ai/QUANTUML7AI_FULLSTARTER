@@ -529,7 +529,7 @@ export default function RootLayout({ children }) {
             {/* фон. аудио (кнопка снизу — «Выключить аудио») */}
             </ForumShellGate>
             <ForumShellGate label="bg_audio" delayMs={3200} idleTimeoutMs={2600}>
-              <BgAudio src="/audio/cosmic.mp3" defaultVolume={1.35} />
+              {/* <BgAudio src="/audio/cosmic.mp3" defaultVolume={1.35} /> */}
             </ForumShellGate>
 
             {/* 🔹 Глобальный поп-ап «Пригласи друга» */}

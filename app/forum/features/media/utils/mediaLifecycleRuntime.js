@@ -71,7 +71,7 @@ const __VIDEO_HARD_CAP_ENABLED = (() => {
     const dm = Number((typeof navigator !== 'undefined' ? navigator?.deviceMemory : 0) || 0)
     const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2
 
-    if (isIOS) return false
+    if (isIOS) return true
     if (lowMem) return true
     return false
   } catch {
@@ -92,7 +92,7 @@ const __MAX_ACTIVE_VIDEO_ELEMENTS = (() => {
     const dm = Number((typeof navigator !== 'undefined' ? navigator?.deviceMemory : 0) || 0)
     const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2
 
-    if (isIOS) return 2
+    if (isIOS) return 1
     if (lowMem) return 2
     if (coarse) return 3
     return 4
@@ -162,7 +162,7 @@ export function __enforceActiveVideoCap(exceptEl) {
         const candidate = __activeVideoLRU[i]
         if (!candidate) continue
         if (candidate === exceptEl) continue
-        if (__isVideoNearViewport(candidate, 140)) continue
+        if (__isVideoNearViewport(candidate, Math.max(220, Math.round(__MEDIA_VIS_MARGIN_PX * 0.6)))) continue
 
         victimIndex = i
         break

@@ -505,6 +505,7 @@ class AdsCoordinatorImpl {
     this.frames = new Map(); // frameId -> Set(url)
     this.history = []; // последние показы (глобально)
     this.lastBySeedKey = new Map(); // slotKey -> url
+    this.bucketSessions = new Map(); // bucketKey -> { bySlot, counts, createdAt }
     this.lastFrameId = 0;
     this.lastFrameTs = 0;
   }
@@ -578,6 +579,54 @@ class AdsCoordinatorImpl {
     if (!seedKey) return null;
     return this.lastBySeedKey.get(String(seedKey)) || null;
   }
+
+  _ensureBucketSession(bucketKey) {
+    const key = String(bucketKey || '');
+    let session = this.bucketSessions.get(key);
+    if (!session) {
+      session = {
+        bySlot: new Map(),
+        counts: new Map(),
+        createdAt: Date.now(),
+      };
+      this.bucketSessions.set(key, session);
+    }
+    if (this.bucketSessions.size > 12) {
+      const staleKeys = Array.from(this.bucketSessions.entries())
+        .sort((a, b) => Number(a?.[1]?.createdAt || 0) - Number(b?.[1]?.createdAt || 0))
+        .slice(0, Math.max(0, this.bucketSessions.size - 8))
+        .map(([staleKey]) => staleKey);
+      staleKeys.forEach((staleKey) => {
+        if (staleKey !== key) this.bucketSessions.delete(staleKey);
+      });
+    }
+    return session;
+  }
+
+  getAssigned(bucketKey, slotKey) {
+    const session = this._ensureBucketSession(bucketKey);
+    return session?.bySlot?.get?.(String(slotKey || '')) || null;
+  }
+
+  getBucketUsage(bucketKey, url) {
+    const session = this._ensureBucketSession(bucketKey);
+    return Number(session?.counts?.get?.(String(url || '')) || 0);
+  }
+
+  assign(bucketKey, slotKey, url) {
+    if (!url) return;
+    const session = this._ensureBucketSession(bucketKey);
+    const slot = String(slotKey || '');
+    const prev = session.bySlot.get(slot);
+    if (prev === url) return;
+    if (prev) {
+      const prevCount = Number(session.counts.get(prev) || 0);
+      if (prevCount > 1) session.counts.set(prev, prevCount - 1);
+      else session.counts.delete(prev);
+    }
+    session.bySlot.set(slot, url);
+    session.counts.set(String(url), Number(session.counts.get(String(url)) || 0) + 1);
+  }
 }
 
 export const AdsCoordinator = new AdsCoordinatorImpl();
@@ -615,6 +664,13 @@ export function resolveCurrentAdUrl(
   const rotateMin = Number(conf.ROTATE_MIN || 1);
   const periodMs = Math.max(1, rotateMin) * 60_000;
   const timeBucket = Math.floor(now / periodMs);
+  const bucketKey = [CAMPAIGN_ID, conf.seed || 1, cid, timeBucket].join('|');
+
+  const assigned = coordinator?.getAssigned?.(bucketKey, key);
+  if (assigned && links.includes(assigned)) {
+    debugLog(conf, 'slot_pick_assigned', { slotKey: key, url: assigned });
+    return assigned;
+  }
 
   // фиксированный сид для конкретного слота и тайм-слота
   const seed = hash32(
@@ -622,39 +678,56 @@ export function resolveCurrentAdUrl(
   );
 
   const perm = stableShuffle(links, seed);
-  if (!perm.length) {
+  const ordered = [];
+  const seen = new Set();
+  for (let i = 0; i < perm.length; i += 1) {
+    const candidate = perm[i];
+    if (!candidate || seen.has(candidate)) continue;
+    seen.add(candidate);
+    ordered.push(candidate);
+  }
+  if (!ordered.length) {
     debugLog(conf, 'slot_no_perm', { slotKey });
     return null;
   }
 
-  const frameId = coordinator?.getFrameId(now);
   const lastForSeed = coordinator?.getLastForSeed(key);
   const lastGlobal = coordinator?.getLastGlobal();
 
   let chosen = null;
+  let bestScore = Number.POSITIVE_INFINITY;
 
-  for (let i = 0; i < perm.length; i++) {
-    const thisUrl = perm[i];
+  for (let i = 0; i < ordered.length; i++) {
+    const thisUrl = ordered[i];
     if (!thisUrl) continue;
 
     // не повторяем подряд для этого слота
-    if (lastForSeed && thisUrl === lastForSeed && perm.length > 1) continue;
+    const usageCount = Number(coordinator?.getBucketUsage?.(bucketKey, thisUrl) || 0);
 
     // не повторяем подряд глобально, если есть выбор
-    if (lastGlobal && thisUrl === lastGlobal && perm.length > 1) continue;
+    const sameSeedPenalty =
+      lastForSeed && thisUrl === lastForSeed && ordered.length > 1 ? 3 : 0;
 
-    if (coordinator && !coordinator.allowed(thisUrl, perm.length)) continue;
-    if (coordinator && frameId != null && !coordinator.reserve(thisUrl, frameId))
-      continue;
+    const sameGlobalPenalty =
+      lastGlobal && thisUrl === lastGlobal && ordered.length > 1 ? 2 : 0;
+    const tieBreak = (hash32(`${key}|${thisUrl}|${timeBucket}`) % 17) / 1000;
 
-    chosen = thisUrl;
-    break;
+    const score =
+      (usageCount * 100) +
+      (sameSeedPenalty * 10) +
+      (sameGlobalPenalty * 5) +
+      i +
+      tieBreak;
+    if (score < bestScore) {
+      bestScore = score;
+      chosen = thisUrl;
+    }
   }
 
   if (!chosen) {
-    chosen = perm[0];
+    chosen = ordered[0];
     if (!chosen) {
-      debugLog(conf, 'slot_no_pick', { slotKey, linksLen: perm.length });
+      debugLog(conf, 'slot_no_pick', { slotKey, linksLen: ordered.length });
       return null;
     }
   }
@@ -662,6 +735,7 @@ export function resolveCurrentAdUrl(
   if (coordinator) {
     coordinator.bump(chosen);
     coordinator.setLastForSeed(key, chosen);
+    coordinator.assign(bucketKey, key, chosen);
   }
 
   debugLog(conf, 'slot_pick', { slotKey: key, url: chosen });
@@ -2324,6 +2398,7 @@ useEffect(() => {
   /* ===== FLUID (для рендера по всему сайту) ===== */
   .forum-ad-media-slot[data-layout="fluid"] {
     height: auto;
+    min-height: 220px;
     overflow: visible;
   }
 
@@ -2415,8 +2490,11 @@ useEffect(() => {
 data-layout={isFluid ? 'fluid' : 'fixed'}
 >
           
- {media.kind === 'skeleton' && (
-              <div className="animate-pulse w-full h-full bg-[color:var(--skeleton,#111827)]" />
+            {media.kind === 'skeleton' && (
+              <div
+                className="animate-pulse w-full h-full bg-[color:var(--skeleton,#111827)]"
+                style={isFluid ? { minHeight: 220 } : undefined}
+              />
             )}
 
 {media.kind === 'video' && media.src && (
@@ -2558,7 +2636,8 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
       <NextImage
         src={media.src}
         alt={host}
-        fill
+        width={1600}
+        height={900}
         className="forum-ad-fit"
         style={{ objectFit: 'contain', objectPosition: 'center' }}
         unoptimized
@@ -2594,7 +2673,10 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
             )}
 
             {media.kind === 'placeholder' && (
-              <div className="w-full h-full flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)]">
+              <div
+                className="w-full h-full flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)]"
+                style={isFluid ? { minHeight: 220 } : undefined}
+              >
                 {host}
               </div>
             )}

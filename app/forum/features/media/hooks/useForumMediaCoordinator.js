@@ -189,6 +189,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
               if (lastWarmKickTs > 0 && (now - lastWarmKickTs) < minWarmGap) return;
               try { video.dataset.__lastWarmLoadKickTs = String(now); } catch {}
               try { video.dataset.__loadPending = '1'; } catch {}
+              try { video.dataset.__loadPendingSince = String(now); } catch {}
               trace('warm_load', video);
               video.load?.();
             }
@@ -1193,9 +1194,9 @@ const MAX_CONCURRENT_LOAD_PENDING = (() => {
     const ua = String(navigator?.userAgent || '');
     const ios = /iP(hone|ad|od)/i.test(ua);
     const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
-    if (ios) return 2;
-    if (coarse) return 2;
-    return 3;
+    if (ios) return 3;
+    if (coarse) return 3;
+    return 4;
   } catch {
     return 3;
   }
@@ -1229,9 +1230,10 @@ const MAX_CONCURRENT_LOAD_PENDING = (() => {
             const pendingForMs = since > 0 ? (now - since) : 0;
             const mayBeStuck =
               pendingForMs > stalePendingMs &&
-              readyState === 0 &&
+              readyState < 2 &&
               (
                 networkState === HTMLMediaElement.NETWORK_LOADING ||
+                networkState === HTMLMediaElement.NETWORK_IDLE ||
                 networkState === HTMLMediaElement.NETWORK_EMPTY ||
                 networkState === HTMLMediaElement.NETWORK_NO_SOURCE
               );
@@ -1900,12 +1902,12 @@ const ensurePendingHtmlMediaReady = (el, reason = 'candidate_pending') => {
     const pendingSince = Number(el.dataset?.__loadPendingSince || 0);
     const readyRetryCount = Number(el.dataset?.__readyRetryCount || 0);
     const networkState = Number(el.networkState || 0);
-    const stalePendingMs = isIOSUi ? 2200 : (isCoarseUi ? 2600 : 3000);
+    const stalePendingMs = isIOSUi ? 3800 : (isCoarseUi ? 4200 : 3600);
 
     if (
       String(el.dataset?.__loadPending || '') === '1' &&
       pendingSince > 0 &&
-      readyState === 0 &&
+      readyState < 2 &&
       (now - pendingSince) > stalePendingMs
     ) {
       try {
@@ -1953,10 +1955,13 @@ const ensurePendingHtmlMediaReady = (el, reason = 'candidate_pending') => {
 
     const stalledPending =
       String(el.dataset?.__loadPending || '') === '1' &&
-      readyState === 0 &&
-      networkState === HTMLMediaElement.NETWORK_LOADING &&
+      readyState < 2 &&
+      (
+        networkState === HTMLMediaElement.NETWORK_LOADING ||
+        networkState === HTMLMediaElement.NETWORK_IDLE
+      ) &&
       pendingSince > 0 &&
-      (now - pendingSince) > (isIOSUi ? 900 : (isCoarseUi ? 1050 : 1180));
+      (now - pendingSince) > (isIOSUi ? 1600 : (isCoarseUi ? 1850 : 2100));
 
     const maxReadyRetryCount = isIOSUi ? 3 : 2;
     if (stalledPending && readyRetryCount < maxReadyRetryCount && (now - lastBoostTs) > 900) {
@@ -2299,9 +2304,12 @@ const onMediaLifecycleCaptured = (e) => {
   }
 
   try {
-    if (eventType === 'loadedmetadata' || eventType === 'loadeddata' || eventType === 'canplay' || eventType === 'playing') {
+    if (eventType === 'loadeddata' || eventType === 'canplay' || eventType === 'playing') {
       target.dataset.__loadPending = '0';
-      if (target.readyState >= 1) target.dataset.__warmReady = target.readyState >= 2 ? '1' : target.dataset.__warmReady;
+      delete target.dataset.__loadPendingSince;
+    }
+    if (eventType === 'loadeddata' || eventType === 'canplay' || eventType === 'playing') {
+      if (target.readyState >= 2) target.dataset.__warmReady = '1';
     }
   } catch {}
 
@@ -3003,9 +3011,9 @@ const IFRAME_RESIDENT_CAP = (() => {
     };
     const getAutoplayMinVisiblePx = (el) => {
       const kind = String(getOwnerNode(el)?.getAttribute?.('data-forum-media') || el?.getAttribute?.('data-forum-media') || '');
-      if (kind === 'qcast') return isIOSUi ? 64 : (isCoarseUi ? 98 : 80);
-      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 96 : (isCoarseUi ? 150 : 140);
-      return isIOSUi ? 72 : (isCoarseUi ? 128 : 120);
+      if (kind === 'qcast') return isIOSUi ? 48 : (isCoarseUi ? 80 : 80);
+      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 72 : (isCoarseUi ? 118 : 140);
+      return isIOSUi ? 56 : (isCoarseUi ? 96 : 120);
     };
     const getOwnerCenterDist = (el) => {
       try {
@@ -3023,11 +3031,11 @@ const IFRAME_RESIDENT_CAP = (() => {
     const getPriorityCenterMaxDist = (el) => {
       const kind = String(getOwnerNode(el)?.getAttribute?.('data-forum-media') || el?.getAttribute?.('data-forum-media') || '');
       const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-      if (kind === 'qcast') return Math.max(150, Math.round(viewportH * (isIOSUi ? 0.62 : (isCoarseUi ? 0.44 : 0.36))));
+      if (kind === 'qcast') return Math.max(150, Math.round(viewportH * (isIOSUi ? 0.72 : (isCoarseUi ? 0.52 : 0.36))));
       if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') {
-        return Math.max(170, Math.round(viewportH * (isIOSUi ? 0.6 : (isCoarseUi ? 0.42 : 0.34))));
+        return Math.max(170, Math.round(viewportH * (isIOSUi ? 0.68 : (isCoarseUi ? 0.50 : 0.34))));
       }
-      return Math.max(140, Math.round(viewportH * (isIOSUi ? 0.56 : (isCoarseUi ? 0.40 : 0.30))));
+      return Math.max(140, Math.round(viewportH * (isIOSUi ? 0.64 : (isCoarseUi ? 0.48 : 0.30))));
     };
 const pauseForeignMedia = (keepEl = null) => {
   const keepOwner = getOwnerNode(keepEl) || keepEl || null;
@@ -3587,20 +3595,20 @@ const playMedia = async (el) => {
     const ACTIVE_SWITCH_HOLD_MS = isIOSUi ? 900 : (isCoarseUi ? 760 : 620);
     const SWITCH_RATIO_DELTA = 0.16;
     const SWITCH_SCORE_DELTA = 240;
-    const PENDING_READY_GRACE_MS = isIOSUi ? 1180 : (isCoarseUi ? 920 : 760);
+    const PENDING_READY_GRACE_MS = isIOSUi ? 1450 : (isCoarseUi ? 1180 : 900);
     const PENDING_READY_GRACE_RATIO = 0.12;
     const getMediaKind = (el) => String(el?.getAttribute?.('data-forum-media') || '');
     const getStartRatio = (el) => {
       const kind = getMediaKind(el);
-      if (kind === 'qcast') return isIOSUi ? 0.08 : (isCoarseUi ? 0.14 : 0.18);
-      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 0.12 : (isCoarseUi ? 0.22 : 0.3);
-      return isIOSUi ? 0.11 : (isCoarseUi ? 0.24 : 0.35);
+      if (kind === 'qcast') return isIOSUi ? 0.05 : (isCoarseUi ? 0.10 : 0.18);
+      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 0.08 : (isCoarseUi ? 0.16 : 0.3);
+      return isIOSUi ? 0.07 : (isCoarseUi ? 0.18 : 0.35);
     };
     const getStartVisiblePx = (el) => {
       const kind = getMediaKind(el);
-      if (kind === 'qcast') return isIOSUi ? 64 : (isCoarseUi ? 110 : 80);
-      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 96 : (isCoarseUi ? 180 : 140);
-      return isIOSUi ? 72 : (isCoarseUi ? 150 : 120);
+      if (kind === 'qcast') return isIOSUi ? 48 : (isCoarseUi ? 84 : 80);
+      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 72 : (isCoarseUi ? 130 : 140);
+      return isIOSUi ? 56 : (isCoarseUi ? 110 : 120);
     };
     const getStopCenterMaxDist = (el) => {
       const startDist = getPriorityCenterMaxDist(el);
@@ -3924,7 +3932,7 @@ const playMedia = async (el) => {
         });
       },
       {
-        threshold: [0, 0.15, 0.35, 0.6, 0.85, 1],
+        threshold: [0, 0.04, 0.08, 0.15, 0.3, 0.55, 0.85, 1],
         // Было: '0px 0px -20% 0px' > фокусная зона смещалась вверх (особенно на мобилках).
         // Делаем симметрично, ближе к настоящему центру, и шире по ощущению.
         rootMargin: '-10% 0px -10% 0px',
@@ -3960,7 +3968,7 @@ const playMedia = async (el) => {
           });
         if (!intersecting.length) return;
 
-        const maxBatch = isIOSUi ? 3 : (isCoarseUi ? 3 : 4);
+        const maxBatch = isIOSUi ? 4 : (isCoarseUi ? 4 : 5);
         let preparedCount = 0;
         for (const item of intersecting) {
           if (preparedCount >= maxBatch) break;

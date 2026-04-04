@@ -741,7 +741,7 @@ export default function VideoMedia({
         const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
         const dm = Number(navigator?.deviceMemory || 0)
         const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2
-        if (isIOS) return { unloadDelayMs: 3800, hardUnloadOnInactive: false }
+        if (isIOS) return { unloadDelayMs: 3200, hardUnloadOnInactive: true }
         if (lowMem) return { unloadDelayMs: 2800, hardUnloadOnInactive: true }
         if (isAndroid || coarse) return { unloadDelayMs: 4400, hardUnloadOnInactive: false }
         return { unloadDelayMs: 5200, hardUnloadOnInactive: false }

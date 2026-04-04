@@ -23,7 +23,6 @@ export function pickAdUrlForSlot({
   const sess = adSessionRef.current
   if (sess.bucket !== bucket) {
     sess.bucket = bucket
-    sess.used = new Set()
     sess.bySlot = new Map()
   }
 
@@ -32,7 +31,7 @@ export function pickAdUrlForSlot({
     if (stable) return stable
   }
 
-  let url = resolveCurrentAdUrl(
+  const url = resolveCurrentAdUrl(
     adConf,
     clientId,
     now,
@@ -40,20 +39,8 @@ export function pickAdUrlForSlot({
     AdsCoordinator,
   )
 
-  const links = (
-    Array.isArray(adConf.LINKS) && adConf.LINKS.length
-      ? adConf.LINKS
-      : []
-  ).filter(Boolean)
-
-  if (url && sess.used.has(url) && links.length > 1) {
-    const alt = links.find((candidate) => !sess.used.has(candidate))
-    if (alt) url = alt
-  }
-
   if (!url) return null
 
-  sess.used.add(url)
   if (!sess.bySlot) sess.bySlot = new Map()
   sess.bySlot.set(slotKey, url)
   return url
