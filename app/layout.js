@@ -491,9 +491,8 @@ export default function RootLayout({ children }) {
     strategy="beforeInteractive"
     id="tg-webapp-sdk"
   />
-        {/* ✅ Dev: глушим метрику Coinbase, чтобы не было 401 в консоли */}
-        {process.env.NODE_ENV !== 'production' && (
-          <Script id="cb-metrics-mute" strategy="beforeInteractive">{`
+        {/* ✅ Best-effort: глушим analytics-шум Coinbase AMP/metrics, не трогая сам wallet flow */}
+        <Script id="cb-metrics-mute" strategy="beforeInteractive">{`
             (function(){
               var shouldBlock = function(url){
                 try {
@@ -544,7 +543,6 @@ export default function RootLayout({ children }) {
               } catch(e){}
             })();
           `}</Script>
-        )}
       </head>
 
       <body>

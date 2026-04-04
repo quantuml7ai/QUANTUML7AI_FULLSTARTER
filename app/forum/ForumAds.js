@@ -903,6 +903,20 @@ function shouldProbeMediaKind(rawUrl) {
   return false;
 }
 
+function computeAdViewportAttention(rect, viewportHeight) {
+  const vh = Math.max(0, Number(viewportHeight || 0));
+  const h = Math.max(0, Number(rect?.height || 0));
+  if (!vh || !h) return { near: false, ratio: 0 };
+
+  const top = Number(rect?.top || 0);
+  const bottom = Number(rect?.bottom || 0);
+  const near = bottom >= -560 && top <= (vh + 760);
+  const visiblePx = Math.max(0, Math.min(bottom, vh) - Math.max(top, 0));
+  const denom = Math.max(1, Math.min(h, vh));
+  const ratio = Math.max(0, Math.min(1, visiblePx / denom));
+  return { near, ratio };
+}
+
 // Определяем тип медиа по Content-Type через HEAD
 async function detectMediaKind(url, timeoutMs = 3000) {
   if (!url || !isBrowser() || typeof fetch === 'undefined') return null;
@@ -1632,6 +1646,30 @@ tryStartAdVideoRef.current = tryStartAdVideo;
       return;
     }
 
+    const syncFromRect = () => {
+      try {
+        const rect = el.getBoundingClientRect();
+        const vh =
+          Number(window.innerHeight || 0) ||
+          Number(document.documentElement?.clientHeight || 0) ||
+          0;
+        const attention = computeAdViewportAttention(rect, vh);
+        setIsNear(attention.near);
+        setIsFocused((prev) =>
+          prev ? attention.ratio >= AD_FOCUS_STOP_RATIO : attention.ratio >= AD_FOCUS_START_RATIO
+        );
+      } catch {}
+    };
+
+    syncFromRect();
+    let bootRaf = 0;
+    try {
+      bootRaf = requestAnimationFrame(() => {
+        bootRaf = 0;
+        syncFromRect();
+      });
+    } catch {}
+
     const nearObs = new IntersectionObserver( 
       ([entry]) => {
         setIsNear(!!entry?.isIntersecting);
@@ -1644,9 +1682,23 @@ tryStartAdVideoRef.current = tryStartAdVideo;
 
     const focusObs = new IntersectionObserver( 
       ([entry]) => {
-        const ratio = Number(entry?.intersectionRatio || 0);
+        const vh =
+          Number(window.innerHeight || 0) ||
+          Number(document.documentElement?.clientHeight || 0) ||
+          0;
+        const attention = computeAdViewportAttention(entry?.boundingClientRect, vh);
+        if (entry?.intersectionRect) {
+          const visiblePx = Math.max(0, Number(entry.intersectionRect.height || 0));
+          const denom = Math.max(
+            1,
+            Math.min(Number(entry?.boundingClientRect?.height || 0), Math.max(1, vh))
+          );
+          attention.ratio = Math.max(attention.ratio, Math.max(0, Math.min(1, visiblePx / denom)));
+        }
         setIsFocused((prev) =>
-          prev ? ratio >= AD_FOCUS_STOP_RATIO : ratio >= AD_FOCUS_START_RATIO
+          prev
+            ? attention.ratio >= AD_FOCUS_STOP_RATIO
+            : attention.ratio >= AD_FOCUS_START_RATIO
         );
       },
       {
@@ -1659,6 +1711,9 @@ tryStartAdVideoRef.current = tryStartAdVideo;
     focusObs.observe(el);
 
     return () => {
+      if (bootRaf) {
+        try { cancelAnimationFrame(bootRaf); } catch {}
+      }
       nearObs.disconnect();
       focusObs.disconnect();
     };
@@ -1779,12 +1834,26 @@ tryStartAdVideoRef.current = tryStartAdVideo;
       setMedia({ kind: 'skeleton', src: null });
       return;
     }
-    const canResolveNow = !!isNear || !!isFocused;
+    const isDirectImg = /\.(jpe?g|png|webp|gif|avif)(?:$|[?#])/i.test(
+      mediaHref
+    );
+    const canResolveNow =
+      !!isNear ||
+      !!isFocused ||
+      isLikelyVideoUrl(mediaHref) ||
+      YT_RE.test(mediaHref) ||
+      TIKTOK_RE.test(mediaHref) ||
+      isDirectImg;
     if (!canResolveNow) {
       const cachedOnly = readCachedAdResolvedMedia(String(mediaHref || '').trim());
-      if (cachedOnly) setMedia(cachedOnly);
-      else setMedia({ kind: 'skeleton', src: null });
-      return;
+      if (cachedOnly) {
+        setMedia(cachedOnly);
+        return;
+      }
+      setMedia((prev) => {
+        if (prev?.kind && prev.kind !== 'skeleton') return prev;
+        return { kind: 'placeholder', src: null, step: 'deferred_placeholder' };
+      });
     }
     let cancelled = false;
 
@@ -1817,9 +1886,6 @@ tryStartAdVideoRef.current = tryStartAdVideo;
         ? conf.THUMBS
         : DEFAULT_THUMB_SERVICES;
 
-    const isDirectImg = /\.(jpe?g|png|webp|gif|avif)(?:$|[?#])/i.test(
-      mediaHref
-    );
     const publishResolved = (next, okCache = true) => {
       if (!next) return;
       cacheAdResolvedMedia(mediaResolveKey, next, okCache);
@@ -2292,6 +2358,10 @@ useEffect(() => {
 
   const clickHref = safeClick.toString();
   const host = safeClick.hostname.replace(/^www\./i, '');
+  const placeholderPath =
+    safeClick.pathname && safeClick.pathname !== '/'
+      ? String(safeClick.pathname).replace(/\/+/g, ' ').trim().slice(0, 80)
+      : clickHref.replace(/^https?:\/\//i, '').slice(0, 80);
   const label =
     typeof t === 'function'
       ? t('forum_ad_label', 'Реклама')
@@ -2502,7 +2572,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
     <video
       ref={videoRef}
       src={
-        shouldPrimeAdMedia && !isVideoSrcTemporarilyBlocked(media.src)
+        !isVideoSrcTemporarilyBlocked(media.src)
           ? media.src
           : undefined
       }
@@ -2512,7 +2582,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
       loop
       playsInline
       referrerPolicy="no-referrer"
-      preload={shouldPrimeAdMedia ? 'auto' : 'none'}
+      preload={shouldPrimeAdMedia ? 'auto' : 'metadata'}
       onLoadedMetadata={() => {
         try { clearVideoSrcBlock(media?.src); } catch {}
         primeAdVideo('loadedmetadata');
@@ -2539,6 +2609,14 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
         if (v.ended) return;
         setAdPlaybackState('paused');
         scheduleAdAutoplayRetry('pause', { rearm: true });
+      }}
+      onEnded={() => {
+        const v = videoRef.current;
+        if (!v) return;
+        try { v.currentTime = 0; } catch {}
+        if (shouldPlayRef.current) {
+          tryStartAdVideoRef.current?.('ended_restart');
+        }
       }}
       onWaiting={() => {
         if (!shouldPlayRef.current) return;
@@ -2674,10 +2752,20 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
 
             {media.kind === 'placeholder' && (
               <div
-                className="w-full h-full flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)]"
+                className="w-full h-full flex items-center justify-center bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.12),transparent_58%),linear-gradient(180deg,rgba(2,6,23,0.96),rgba(2,6,23,0.9))] text-[11px] text-[color:var(--muted-fore,#9ca3af)]"
                 style={isFluid ? { minHeight: 220 } : undefined}
               >
-                {host}
+                <div className="px-5 text-center">
+                  <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] text-[12px] font-semibold tracking-[0.24em] text-[color:var(--fore,#e5e7eb)]">
+                    AD
+                  </div>
+                  <div className="text-[13px] font-semibold text-[color:var(--fore,#e5e7eb)] break-all">
+                    {host}
+                  </div>
+                  <div className="mt-2 text-[11px] leading-5 text-[color:var(--muted-fore,#9ca3af)]">
+                    {placeholderPath}
+                  </div>
+                </div>
               </div>
             )}
 

@@ -50,6 +50,9 @@ const RB_COINS = [
 ];
 
 const RB_VISIBLE_COINS_PER_ROUND = 5;
+const RB_GLOBAL_PRELOAD_FLAG = "__notRobotPreloadedOnce";
+const RB_GLOBAL_FIRST_SHOW_DUE_AT = "__notRobotFirstShowDueAt";
+const RB_DEBUG_FLAG = "__notRobotDebug";
 
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
@@ -62,6 +65,26 @@ function shuffleArray(arr) {
     [copy[i], copy[j]] = [copy[j], copy[i]];
   }
   return copy;
+}
+
+function getNotRobotWindow() {
+  return typeof window !== "undefined" ? window : null;
+}
+
+function isNotRobotDebugEnabled() {
+  const win = getNotRobotWindow();
+  try {
+    return !!win?.[RB_DEBUG_FLAG];
+  } catch {
+    return false;
+  }
+}
+
+function logNotRobotLifecycle(label) {
+  if (!isNotRobotDebugEnabled()) return;
+  try {
+    console.log(`[NotRobot] ${String(label || "")}`);
+  } catch {}
 }
 
 export default function NotRobot() {
@@ -160,6 +183,9 @@ export default function NotRobot() {
   const rbPreloadImages = useCallback(() => {
     if (rbPreloadedRef.current) return;
     rbPreloadedRef.current = true;
+    const win = getNotRobotWindow();
+    if (win?.[RB_GLOBAL_PRELOAD_FLAG]) return;
+    if (win) win[RB_GLOBAL_PRELOAD_FLAG] = true;
 
     const paths = ["/robot/robot.png", ...RB_COINS.map((c) => c.imagePath)];
     for (const src of paths) {
@@ -348,7 +374,7 @@ export default function NotRobot() {
   // ====== INITIAL MOUNT / UNMOUNT ======
 
   useEffect(() => {
-    console.log("[NotRobot] mount");
+    logNotRobotLifecycle("mount");
 
     // читаем ключ (не меняем), но по твоему ТЗ: перезагрузка = новый вход
     // => первый показ ВСЕГДА планируем через 60 секунд на каждый mount.
@@ -378,10 +404,25 @@ export default function NotRobot() {
 
     // ✅ ПЕРВЫЙ ПОКАЗ: строго через 60 сек на каждый mount/перезагрузку
     rbClearFirstShowTimeout();
+    const now = Date.now();
+    let dueAt = now + RB_FIRST_SHOW_DELAY_MS;
+    try {
+      const win = getNotRobotWindow();
+      const storedDueAt = Number(win?.[RB_GLOBAL_FIRST_SHOW_DUE_AT] || 0);
+      if (storedDueAt > now) {
+        dueAt = storedDueAt;
+      } else if (win) {
+        win[RB_GLOBAL_FIRST_SHOW_DUE_AT] = dueAt;
+      }
+    } catch {}
     rbFirstShowTimeoutRef.current = setTimeout(() => {
+      try {
+        const win = getNotRobotWindow();
+        if (win) win[RB_GLOBAL_FIRST_SHOW_DUE_AT] = 0;
+      } catch {}
       if (rbOverlayOpenRef.current) return;
       rbOpenOverlay();
-    }, RB_FIRST_SHOW_DELAY_MS);
+    }, Math.max(0, dueAt - now));
 
     // ✅ Idle-повтор (15 минут) включаем ТОЛЬКО если пользователь уже проходил проверку
     // (и дальше он будет работать после успеха в текущей сессии тоже).
@@ -408,7 +449,7 @@ export default function NotRobot() {
     }
 
     return () => {
-      console.log("[NotRobot] unmount");
+      logNotRobotLifecycle("unmount");
 
       if (typeof window !== "undefined") {
         activityEvents.forEach((evt) =>
