@@ -14,9 +14,21 @@ const FORUM_VOICE_TAP_LABEL = {
 
 export function getForumVideoLimitCopy(tt) {
   if (typeof tt !== 'function') {
-    return { title: '', body: '', tipsTitle: '', tips: [], badDuration: '', tooLong: '', ok: '' }
+    return {
+      badge: '',
+      title: '',
+      body: '',
+      tipsTitle: '',
+      tips: [],
+      badDuration: '',
+      tooLong: '',
+      ok: '',
+      detectedLabel: '',
+      limitLabel: '',
+    }
   }
   return {
+    badge: String(tt('forum_video_limit_badge') || ''),
     title: String(tt('forum_video_limit_title') || ''),
     body: String(tt('forum_video_limit_body') || ''),
     tipsTitle: String(tt('forum_video_limit_tips_title') || ''),
@@ -28,6 +40,8 @@ export function getForumVideoLimitCopy(tt) {
     badDuration: String(tt('forum_video_limit_bad_duration') || ''),
     tooLong: String(tt('forum_video_limit_too_long') || ''),
     ok: String(tt('forum_video_limit_ok') || ''),
+    detectedLabel: String(tt('forum_video_limit_detected') || ''),
+    limitLabel: String(tt('forum_video_limit_limit_label') || ''),
   }
 }
 

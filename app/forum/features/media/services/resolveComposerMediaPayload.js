@@ -13,7 +13,6 @@ export async function resolveComposerMediaPayload({
   forumVideoCameraRecordEpsilonSec,
   showVideoLimitOverlay,
   endMediaPipeline,
-  openVideoTrimPopover,
   forumVideoMaxBytes,
   viewerId,
   stopMediaProg,
@@ -160,12 +159,10 @@ export async function resolveComposerMediaPayload({
         }
         if (durationSec > (forumVideoMaxSeconds + forumVideoCameraRecordEpsilonSec) && !trustedLocalClip) {
           try {
-            openVideoTrimPopover?.({
+            showVideoLimitOverlay?.({
               source: 'post_blob_upload',
-              blob: uploadBlob,
-              mime: uploadMime,
               durationSec,
-              name: `composer-${Date.now()}.${uploadMime.includes('mp4') ? 'mp4' : (uploadMime.includes('quicktime') ? 'mov' : 'webm')}`,
+              reason: 'too_long',
             })
           } catch {}
           try { endMediaPipeline?.() } catch {}
