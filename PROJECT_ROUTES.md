@@ -4,10 +4,10 @@
 > Любое изменение маршрутов, страниц, layout-файлов, loading/not-found/default файлов и API-route файлов обязано сопровождаться обновлением этого файла.
 > Рекомендуемый способ обновления: `node tools/generate-project-routes.js`.
 
-Сгенерировано автоматически: 2026-04-03T10:57:59.979Z
-Всего route-aware файлов: 94
+Сгенерировано автоматически: 2026-04-04T01:13:54.141Z
+Всего route-aware файлов: 95
 Пользовательских route-сущностей: 21
-API-route сущностей: 73
+API-route сущностей: 74
 
 ## Охват
 
@@ -109,6 +109,10 @@ API-route сущностей: 73
 ### api/crypto-news
 
 - `/api/crypto-news` — API-эндпоинт `/api/crypto-news`; файл: `app/api/crypto-news/route.js`; тип: `api-route`.
+
+### api/debug
+
+- `/api/debug/forum-diag` — API-эндпоинт `/api/debug/forum-diag`; файл: `app/api/debug/forum-diag/route.js`; тип: `api-route`.
 
 ### api/deep-translate
 

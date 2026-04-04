@@ -4,9 +4,9 @@
 > Если меняются критические точки входа, серверные контракты, import-граф или ownership модулей, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-risks.js`.
 
-Сгенерировано автоматически: 2026-04-03T10:58:00.554Z
-Исходных файлов в анализе: 621
-Route-aware файлов: 94
+Сгенерировано автоматически: 2026-04-04T01:13:55.143Z
+Исходных файлов в анализе: 626
+Route-aware файлов: 95
 
 ## Что Считается Риском
 
@@ -33,6 +33,7 @@ Route-aware файлов: 94
 - `app/api/coins/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
 - `app/api/contact/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
 - `app/api/crypto-news/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
+- `app/api/debug/forum-diag/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
 - `app/api/deep-translate/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
 - `app/api/dm/block/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
 - `app/api/dm/delete/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
@@ -213,6 +214,7 @@ Route-aware файлов: 94
 - `app/api/coins/route.js`
 - `app/api/contact/route.js`
 - `app/api/crypto-news/route.js`
+- `app/api/debug/forum-diag/route.js`
 - `app/api/deep-translate/route.js`
 - `app/api/dm/_db.js`
 - `app/api/dm/_utils.js`

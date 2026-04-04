@@ -949,13 +949,6 @@ export default function ForumBootSplash({ onDone }) {
 
   return (
     <>
-      <link
-        rel="preload"
-        href={FORUM_SPLASH_VIDEO_SRC}
-        as="video"
-        fetchPriority="high"
-      />
-
       <div
         className={`forum-boot-splash ${closing ? 'is-closing' : ''}`}
         onPointerDown={() => {

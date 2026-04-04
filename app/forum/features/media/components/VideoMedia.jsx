@@ -311,6 +311,13 @@ export default function VideoMedia({
   unloadVideoEl,
   ...rest
 }) {
+  const resolveInitialMuted = () => {
+    try {
+      const pref = typeof readMutedPref === 'function' ? readMutedPref() : null
+      if (typeof pref === 'boolean') return pref
+    } catch {}
+    return typeof defaultMutedProp === 'boolean' ? defaultMutedProp : !!autoPlay
+  }
   const ref = React.useRef(null)
   const recoverTimerRef = React.useRef(0)
   const mediaKeyRef = React.useRef('')
@@ -320,7 +327,7 @@ export default function VideoMedia({
   const fxIdRef = React.useRef(0)
   const [hudVisible, setHudVisible] = React.useState(false)
   const [pausedState, setPausedState] = React.useState(true)
-  const [mutedState, setMutedState] = React.useState(true)
+  const [mutedState, setMutedState] = React.useState(() => !!resolveInitialMuted())
   const [centerGlyph, setCenterGlyph] = React.useState('')
   const [fxBursts, setFxBursts] = React.useState([])
   const mutedEvent = String(mutedEventName || 'forum:media-mute')
@@ -330,6 +337,7 @@ export default function VideoMedia({
   const coordinatorOwnsLifecycle = !!String(dataForumMedia || '').trim()
   const renderControls = isPostVideo ? false : controls
   const renderPreload = dataForumVideo === 'post' ? undefined : preload
+  const renderLoop = isPostVideo ? true : loop
   const readMuted = React.useCallback(() => {
     try {
       return typeof readMutedPref === 'function' ? readMutedPref() : null
@@ -337,6 +345,7 @@ export default function VideoMedia({
       return null
     }
   }, [readMutedPref])
+  const renderMuted = !!mutedState
 
   const writeMuted = React.useCallback(
     (nextMuted) => {
@@ -1005,6 +1014,11 @@ export default function VideoMedia({
     clearNativeControlsForPost()
     revealHud(2200)
     if (el.paused) {
+      try {
+        if (Number(el.ended ? 1 : 0) === 1 || Number(el.currentTime || 0) >= Math.max(0, Number(el.duration || 0) - 0.05)) {
+          el.currentTime = 0
+        }
+      } catch {}
       showCenterGlyph('play', 760)
       try {
         const p = el.play?.()
@@ -1040,8 +1054,9 @@ export default function VideoMedia({
       playsInline={playsInline}
       preload={renderPreload}
       controls={isPostVideo ? undefined : renderControls}
+      muted={renderMuted}
       autoPlay={autoPlay}
-      loop={loop}
+      loop={renderLoop}
       controlsList={controlsList}
       disablePictureInPicture={disablePictureInPicture}
       referrerPolicy="no-referrer"

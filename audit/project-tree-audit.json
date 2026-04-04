@@ -1,6 +1,6 @@
 {
   "phase": "project-tree-audit",
-  "timestamp": "2026-04-03T10:58:01.623Z",
+  "timestamp": "2026-04-04T01:13:56.963Z",
   "scope": "whole repository tree registry",
   "touched_files": [
     "PROJECT_TREE.md"
@@ -14,13 +14,13 @@
   "storage_risk": "none",
   "runtime_risk": "low",
   "notes": [
-    "repo_files=1555",
-    "source_files=621",
-    "route_files=94"
+    "repo_files=1560",
+    "source_files=626",
+    "route_files=95"
   ],
   "status": "ok",
-  "total_repo_files": 1555,
-  "total_source_files": 621,
+  "total_repo_files": 1560,
+  "total_source_files": 626,
   "top_level_breakdown": {
     ".env.local": 1,
     ".env.local.example": 1,
@@ -29,7 +29,7 @@
     "account-sync-audit.report.json": 1,
     "ad-runtime.audit.report.json": 1,
     "AGENTS.md": 1,
-    "app": 375,
+    "app": 376,
     "audit": 170,
     "auth-bus.audit.report.json": 1,
     "components": 23,
@@ -37,6 +37,8 @@
     "effects-leak.report.json": 1,
     "forum-deps-audit.report.json": 1,
     "forum-diag.jsonl": 1,
+    "forum-media-churn.audit.report.json": 1,
+    "forum-scroll.audit.report.json": 1,
     "forum-startup.audit.report.json": 1,
     "heapsnapshot-analysis.report.json": 1,
     "heavy-audit.report.json": 1,
@@ -57,6 +59,6 @@
     "public": 920,
     "README.md": 1,
     "runtime-hotspots.report.json": 1,
-    "tools": 24
+    "tools": 26
   }
 }

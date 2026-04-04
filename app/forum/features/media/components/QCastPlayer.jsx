@@ -55,6 +55,7 @@ const writeQcastMutedPref = React.useCallback((nextMuted) => {
   const canvasRef = React.useRef(null);
   const playerIdRef = React.useRef(`qcast_${Math.random().toString(36).slice(2)}`);
   const muteSyncGuardRef = React.useRef(false);
+  const muteGuardResetTimerRef = React.useRef(0);
  
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [duration, setDuration] = React.useState(0);
@@ -403,10 +404,12 @@ const spawnFx = React.useCallback((kind, origin) => {
     }
 
     try {
-      audio.dispatchEvent?.(new Event('volumechange'));
-    } catch {
+      if (muteGuardResetTimerRef.current) clearTimeout(muteGuardResetTimerRef.current);
+    } catch {}
+    muteGuardResetTimerRef.current = setTimeout(() => {
+      muteGuardResetTimerRef.current = 0;
       muteSyncGuardRef.current = false;
-    }
+    }, 0);
   }, [mutedEventName, syncMasterGain, writeMuted, writeQcastMutedPref]);
 
   const applyPreset = React.useCallback((st, nextPreset) => {
@@ -592,6 +595,11 @@ const spawnFx = React.useCallback((kind, origin) => {
       audio.removeEventListener('canplay', onCanPlay);
       audio.removeEventListener('volumechange', onVolume);
       stopGainWatch();
+      try {
+        if (muteGuardResetTimerRef.current) clearTimeout(muteGuardResetTimerRef.current);
+      } catch {}
+      muteGuardResetTimerRef.current = 0;
+      muteSyncGuardRef.current = false;
       // Hard cleanup: release WebAudio graph/GPU resources on unmount.
       try { if (st.raf) cancelAnimationFrame(st.raf); } catch {}
       st.raf = 0;
@@ -630,6 +638,11 @@ const spawnFx = React.useCallback((kind, origin) => {
         if (d?.id && d.id === playerIdRef.current) return;
         if (typeof d?.muted !== 'boolean') return;
         const next = !!d.muted;
+        if (!!audio.muted === next) {
+          setMuted(next);
+          syncMasterGain(next);
+          return;
+        }
         applyQcastMutedState(next, { source: String(d?.source || 'external') });
       } catch {}
     };
@@ -924,7 +937,16 @@ React.useEffect(() => {
       {qcastFxProfile.viz ? (
         <canvas ref={canvasRef} className="qcastViz" data-on={isPlaying ? '1' : '0'} aria-hidden="true" />
       ) : null}
-     <audio ref={audioRef} src={src} preload="auto" playsInline referrerPolicy="no-referrer" data-qcast-audio="1" className="qcastAudio" />
+     <audio
+       ref={audioRef}
+       src={src}
+       preload="auto"
+       playsInline
+       muted={muted}
+       referrerPolicy="no-referrer"
+       data-qcast-audio="1"
+       className="qcastAudio"
+     />
 
       {FX_POOL > 0 ? (
         <div className="qcastFxLayer" data-scope={qcastFxProfile.fullscreen ? 'viewport' : 'card'} aria-hidden="true">

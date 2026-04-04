@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-03T23:58:12.325Z",
+  "generatedAt": "2026-04-04T01:02:03.902Z",
   "results": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n.js",
@@ -129,6 +129,48 @@
       }
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoMedia.jsx",
+      "counts": {
+        "video": 1,
+        "autoplay": 7,
+        "loop": 2,
+        "preload": 7,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + loop",
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 1044,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 295,
+            "text": "autoPlay,"
+          },
+          {
+            "line": 319,
+            "text": "return typeof defaultMutedProp === 'boolean' ? defaultMutedProp : !!autoPlay"
+          },
+          {
+            "line": 547,
+            "text": "const fallbackMuted = typeof defaultMutedProp === 'boolean' ? defaultMutedProp : !!autoPlay"
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
       "counts": {
         "video": 0,
@@ -155,48 +197,6 @@
           {
             "line": 2206,
             "text": "// иначе при гонках промисов возможен двойной autoplay."
-          }
-        ],
-        "img": [],
-        "create": []
-      }
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoMedia.jsx",
-      "counts": {
-        "video": 1,
-        "autoplay": 6,
-        "loop": 2,
-        "preload": 7,
-        "img": 0,
-        "lazy": 0,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [
-        "⚠ video + autoplay",
-        "⚠ video + loop",
-        "⚠ video + preload"
-      ],
-      "samples": {
-        "video": [
-          {
-            "line": 1036,
-            "text": "<video"
-          }
-        ],
-        "autoplay": [
-          {
-            "line": 295,
-            "text": "autoPlay,"
-          },
-          {
-            "line": 539,
-            "text": "const fallbackMuted = typeof defaultMutedProp === 'boolean' ? defaultMutedProp : !!autoPlay"
-          },
-          {
-            "line": 565,
-            "text": "}, [autoPlay, clearNativeControlsForPost, defaultMutedProp, playsInline, preloadMode, readMuted, src])"
           }
         ],
         "img": [],

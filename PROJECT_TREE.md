@@ -6,8 +6,8 @@
 > Если меняются связи файла с другими файлами настолько, что комментарий устаревает, комментарий тоже обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-tree.js`.
 
-Сгенерировано автоматически: 2026-04-03T10:58:00.754Z
-Файлов в реестре: 1555
+Сгенерировано автоматически: 2026-04-04T01:13:55.496Z
+Файлов в реестре: 1560
 
 ## Исключенные каталоги
 - `.git/` — служебные внутренние данные Git, не часть прикладного дерева проекта.
@@ -26,7 +26,7 @@
 - `account-sync-audit.report.json` — 1 файлов
 - `ad-runtime.audit.report.json` — 1 файлов
 - `AGENTS.md` — 1 файлов
-- `app` — 375 файлов
+- `app` — 376 файлов
 - `audit` — 170 файлов
 - `auth-bus.audit.report.json` — 1 файлов
 - `components` — 23 файлов
@@ -34,6 +34,8 @@
 - `effects-leak.report.json` — 1 файлов
 - `forum-deps-audit.report.json` — 1 файлов
 - `forum-diag.jsonl` — 1 файлов
+- `forum-media-churn.audit.report.json` — 1 файлов
+- `forum-scroll.audit.report.json` — 1 файлов
 - `forum-startup.audit.report.json` — 1 файлов
 - `heapsnapshot-analysis.report.json` — 1 файлов
 - `heavy-audit.report.json` — 1 файлов
@@ -54,7 +56,7 @@
 - `public` — 920 файлов
 - `README.md` — 1 файлов
 - `runtime-hotspots.report.json` — 1 файлов
-- `tools` — 24 файлов
+- `tools` — 26 файлов
 
 ## Дерево проекта
 
@@ -96,6 +98,9 @@
       - route.js — API-route contact для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
     - crypto-news/ — Каталог crypto-news.
       - route.js — API-route crypto-news для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - debug/ — Каталог debug.
+      - forum-diag/ — Каталог forum-diag.
+        - route.js — API-route debug/forum-diag для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
     - deep-translate/ — Каталог deep-translate.
       - route.js — API-route deep-translate для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
     - dm/ — Серверный контур личных сообщений.
@@ -1778,6 +1783,8 @@
   - audit-effects.js — Локальный скрипт/инструмент audit effects для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-forum-deps.js — Локальный скрипт/инструмент audit forum deps для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-forum-functional-parity.ps1 — Локальный скрипт/инструмент audit forum functional parity для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-media-churn.js — Локальный скрипт/инструмент audit forum media churn для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-scroll-runtime.js — Локальный скрипт/инструмент audit forum scroll runtime для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-forum-startup.js — Локальный скрипт/инструмент audit forum startup для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-forum-view-report.js — Локальный скрипт/инструмент audit forum view report для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-full-forum.js — Локальный скрипт/инструмент audit full forum для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
@@ -1805,6 +1812,8 @@
 - effects-leak.report.json — JSON-отчет аудита утечек эффектов. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-deps-audit.report.json — JSON-отчет аудита зависимостей форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-diag.jsonl — Потоковый лог диагностики форума в формате JSONL. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- forum-media-churn.audit.report.json — JSON-файл forum media churn.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- forum-scroll.audit.report.json — JSON-файл forum scroll.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-startup.audit.report.json — JSON-файл forum startup.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - heapsnapshot-analysis.report.json — JSON-файл heapsnapshot analysis.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - heavy-audit.report.json — JSON-отчет тяжелого аудита hot-path зон. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.

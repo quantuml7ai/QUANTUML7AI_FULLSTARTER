@@ -3333,6 +3333,14 @@ const playMedia = async (el) => {
 
   const manualLease = hasManualLease(el);
   const hasGesture = hasUserGestureIntent(el);
+  const owner = getOwnerNode(el) || (el instanceof Element ? el : null);
+  const activeOwner = active instanceof Element ? active : null;
+  const ownerMatchesActive =
+    !!(owner instanceof Element && activeOwner && (
+      activeOwner === owner ||
+      activeOwner.contains?.(owner) ||
+      owner.contains?.(activeOwner)
+    ));
   const visiblePxNow = getOwnerVisiblePx(el);
   const minVisiblePx = getAutoplayMinVisiblePx(el);
   const centerDistNow = getOwnerCenterDist(el);
@@ -3347,13 +3355,14 @@ const playMedia = async (el) => {
     ? Math.max(180, Math.round(maxCenterDist * 0.82))
     : (manualLease ? (maxCenterDist + Math.max(80, Math.round(maxCenterDist * 0.25))) : maxCenterDist);
 
-  if (!hasGesture && (visiblePxNow < minVisibleWithLease || centerDistNow > maxCenterWithLease)) {
+  if (!hasGesture && !ownerMatchesActive && (visiblePxNow < minVisibleWithLease || centerDistNow > maxCenterWithLease)) {
     trace('play_skip_not_visible', el, {
       visiblePx: visiblePxNow,
       minVisiblePx: minVisibleWithLease,
       centerDist: centerDistNow,
       maxCenterDist: maxCenterWithLease,
       manualLease,
+      ownerMatchesActive,
     });
     return;
   }
