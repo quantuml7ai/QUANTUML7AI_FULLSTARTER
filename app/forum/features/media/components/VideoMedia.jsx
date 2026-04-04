@@ -335,9 +335,20 @@ export default function VideoMedia({
   const preloadMode = String(preload || 'none').trim().toLowerCase() || 'none'
   const isPostVideo = String(dataForumVideo || '') === 'post'
   const coordinatorOwnsLifecycle = !!String(dataForumMedia || '').trim()
+  const selfieMirror = /(?:[#?&])ql7selfie=1(?:$|[&#])/i.test(String(src || ''))
   const renderControls = isPostVideo ? false : controls
   const renderPreload = dataForumVideo === 'post' ? undefined : preload
   const renderLoop = isPostVideo ? true : loop
+  const renderStyle = React.useMemo(() => {
+    if (!selfieMirror) return style
+    const baseStyle = style && typeof style === 'object' ? style : {}
+    const baseTransform = typeof baseStyle.transform === 'string' ? baseStyle.transform.trim() : ''
+    return {
+      ...baseStyle,
+      transform: `${baseTransform ? `${baseTransform} ` : ''}scaleX(-1)`,
+      transformOrigin: baseStyle.transformOrigin || 'center center',
+    }
+  }, [selfieMirror, style])
   const readMuted = React.useCallback(() => {
     try {
       return typeof readMutedPref === 'function' ? readMutedPref() : null
@@ -1061,7 +1072,7 @@ export default function VideoMedia({
       disablePictureInPicture={disablePictureInPicture}
       referrerPolicy="no-referrer"
       className={className}
-      style={style}
+      style={renderStyle}
       onPointerDown={handleRootPointerDown}
       onClick={isPostVideo ? handleSurfaceClick : undefined}
       onLoadedData={onVideoLoaded}

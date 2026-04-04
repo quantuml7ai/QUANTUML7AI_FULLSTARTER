@@ -24,6 +24,7 @@ export default function ForumOverlayStack({
   videoStreamRef,
   overlayMediaUrl,
   pendingVideo,
+  pendingVideoMirrorPreview,
   overlayMediaKind,
   acceptMediaFromOverlay,
   startVideo,
@@ -83,6 +84,7 @@ export default function ForumOverlayStack({
         elapsed={videoElapsed}
         streamRef={videoStreamRef}
         previewUrl={overlayMediaUrl || pendingVideo}
+        mirrorPreview={pendingVideoMirrorPreview}
         mediaKind={overlayMediaKind}
         onAccept={acceptMediaFromOverlay}
         onStart={startVideo}

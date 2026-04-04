@@ -41,6 +41,7 @@ export default function ComposerCore({
   pendingImgs,
   setPendingImgs,
   pendingVideo,
+  pendingVideoMirrorPreview,
   pendingAudio,
   openPendingVideoFullscreen,
   removePendingVideoAttachment,
@@ -107,6 +108,7 @@ export default function ComposerCore({
           pendingImgs={pendingImgs}
           setPendingImgs={setPendingImgs}
           pendingVideo={pendingVideo}
+          mirrorPreview={pendingVideoMirrorPreview}
           pendingAudio={pendingAudio}
           t={t}
           onOpenVideoFullscreen={openPendingVideoFullscreen}

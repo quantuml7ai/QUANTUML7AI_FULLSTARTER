@@ -15,6 +15,7 @@ export default function VideoOverlay({
   onResetConfirm,        // закрыть/сбросить
   streamRef,
   previewUrl,
+  mirrorPreview = false,
   mediaKind = 'video',   // 'video' | 'image' (для fullscreen-превью загруженного медиа)
   onAccept,              // зелёная галочка: принять (перенести в маленькое превью под композером)
   t,
@@ -77,13 +78,31 @@ export default function VideoOverlay({
 
   const previewVidRef = React.useRef(null)
   const [isPlaying, setIsPlaying] = React.useState(false)
+  const [previewCurrentTime, setPreviewCurrentTime] = React.useState(0)
+  const [previewDuration, setPreviewDuration] = React.useState(0)
+
+  const syncPreviewTime = React.useCallback((videoEl) => {
+    if (!videoEl) return
+    setPreviewCurrentTime(videoEl.currentTime || 0)
+    setPreviewDuration(Number.isFinite(videoEl.duration) ? videoEl.duration : 0)
+  }, [])
+
+  React.useEffect(() => {
+    setPreviewCurrentTime(0)
+    setPreviewDuration(0)
+  }, [previewUrl, open, st])
 
   React.useEffect(() => {
     const v = previewVidRef.current
     if (!v) return undefined
     const onPlay = () => setIsPlaying(true)
     const onPause = () => setIsPlaying(false)
-    const onEnd = () => setIsPlaying(false)
+    const onEnd = () => {
+      setIsPlaying(false)
+      try { v.pause?.() } catch {}
+      try { v.currentTime = 0 } catch {}
+      syncPreviewTime(v)
+    }
     v.addEventListener('play', onPlay)
     v.addEventListener('pause', onPause)
     v.addEventListener('ended', onEnd)
@@ -92,7 +111,7 @@ export default function VideoOverlay({
       v.removeEventListener('pause', onPause)
       v.removeEventListener('ended', onEnd)
     }
-  }, [open, state])
+  }, [open, state, syncPreviewTime])
 
   React.useEffect(() => {
     if (!open) return undefined
@@ -288,9 +307,9 @@ export default function VideoOverlay({
       onKeyDown={(e) => {
         if (e.key === 'Escape') onResetConfirm?.()
       }}
-      onWheel={stopAll}
-      onTouchMove={stopAll}
-      onPointerDown={stopAll}
+      onWheel={st === 'preview' ? undefined : stopAll}
+      onTouchMove={st === 'preview' ? undefined : stopAll}
+      onPointerDown={st === 'preview' ? undefined : stopAll}
       style={{
         position: 'fixed',
         inset: 0,
@@ -304,14 +323,18 @@ export default function VideoOverlay({
         style={{
           position: 'absolute',
           inset: 0,
-          pointerEvents: 'auto',
+          pointerEvents: st === 'preview' ? 'none' : 'auto',
         }}
       />
 
       <div className="voTop" style={{ pointerEvents: 'none' }}>
         <div className={`voTimer ${st === 'recording' ? 'isRec' : 'isIdle'}`} aria-live="polite">
           {st === 'recording' && (<><span className="dot" /><span className="rec">REC</span></>)}
-          <span className="time">{fmtTime(elapsed)}</span>
+          <span className="time">
+            {st === 'preview' && mediaKind !== 'image'
+              ? `${fmtTime(previewCurrentTime)} / ${fmtTime(previewDuration || elapsed)}`
+              : fmtTime(elapsed)}
+          </span>
         </div>
       </div>
 
@@ -353,16 +376,28 @@ export default function VideoOverlay({
                 />
               ) : (
                 <video
+                  className={mirrorPreview ? 'voPreviewVideo isMirrored' : 'voPreviewVideo'}
                   ref={previewVidRef}
                   src={previewUrl || ''}
                   controls
                   playsInline
-                  onLoadedMetadata={onMeta}
+                  onLoadedMetadata={(e) => {
+                    onMeta(e)
+                    syncPreviewTime(e?.currentTarget)
+                  }}
+                  onTimeUpdate={(e) => {
+                    syncPreviewTime(e?.currentTarget)
+                  }}
+                  onSeeked={(e) => {
+                    syncPreviewTime(e?.currentTarget)
+                  }}
                   style={{
                     width: '100%',
                     height: '100%',
                     objectFit: 'contain',
                     background: '#000',
+                    transform: mirrorPreview ? 'scaleX(-1)' : undefined,
+                    transformOrigin: mirrorPreview ? 'center center' : undefined,
                   }}
                 />
               )}
@@ -610,6 +645,22 @@ export default function VideoOverlay({
           color:#46ffb0;
           box-shadow: 0 0 0 rgba(56,255,172,0);
           animation: acceptPulse 1.8s ease-in-out infinite;
+        }
+        .voPreviewVideo.isMirrored::-webkit-media-controls,
+        .voPreviewVideo.isMirrored::-webkit-media-controls-enclosure,
+        .voPreviewVideo.isMirrored::-webkit-media-controls-panel,
+        .voPreviewVideo.isMirrored::-webkit-media-controls-start-playback-button,
+        .voPreviewVideo.isMirrored::-webkit-media-controls-overlay-play-button,
+        .voPreviewVideo.isMirrored::-webkit-media-controls-timeline,
+        .voPreviewVideo.isMirrored::-webkit-media-controls-mute-button,
+        .voPreviewVideo.isMirrored::-webkit-media-controls-volume-slider,
+        .voPreviewVideo.isMirrored::-webkit-media-controls-fullscreen-button{
+          transform: scaleX(-1);
+          transform-origin: center center;
+        }
+        .voPreviewVideo.isMirrored::-webkit-media-controls-current-time-display,
+        .voPreviewVideo.isMirrored::-webkit-media-controls-time-remaining-display{
+          display:none !important;
         }
         @keyframes acceptPulse{
           0%{ box-shadow: 0 0 0 0 rgba(56,255,172,.35) }

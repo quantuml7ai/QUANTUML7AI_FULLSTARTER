@@ -1201,6 +1201,18 @@ const {
   setVideoFeedOpenRef,
 })
 
+const pendingVideoMirrorPreview = !!(
+  pendingVideo &&
+  (
+    pendingVideoBlobMetaRef.current?.get?.(String(pendingVideo || ''))?.source === 'camera_record' ||
+    pendingVideoInfoRef.current?.source === 'camera_record'
+  ) &&
+  (
+    pendingVideoBlobMetaRef.current?.get?.(String(pendingVideo || ''))?.mirrorPlayback ||
+    pendingVideoInfoRef.current?.mirrorPlayback
+  )
+)
+
 // Scroll Focus Lock (компенсация scroll при росте/сжатии блоков)
 const compensateScrollOnResize = useScrollResizeCompensation()
   const {
@@ -1432,6 +1444,7 @@ const compensateScrollOnResize = useScrollResizeCompensation()
     pendingImgs,
     setPendingImgs,
     pendingVideo,
+    pendingVideoMirrorPreview,
     pendingAudio,
     openPendingVideoFullscreen,
     removePendingVideoAttachment,
@@ -1460,6 +1473,7 @@ const compensateScrollOnResize = useScrollResizeCompensation()
     videoStreamRef,
     overlayMediaUrl,
     pendingVideo,
+    pendingVideoMirrorPreview,
     overlayMediaKind,
     acceptMediaFromOverlay,
     startVideo,

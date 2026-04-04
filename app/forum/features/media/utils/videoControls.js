@@ -30,7 +30,21 @@ export function createEnableVideoControlsOnTap({
         v.preload = 'auto'
       } catch {}
 
-      if (v.controls) return
+      if (v.controls) {
+        try {
+          const dur = Number(v.duration || 0)
+          const cur = Number(v.currentTime || 0)
+          const endedLike =
+            Number(v.ended ? 1 : 0) === 1 ||
+            (Number.isFinite(dur) && dur > 0 && cur >= Math.max(0, dur - 0.05))
+          if (endedLike && v.paused) {
+            v.currentTime = 0
+            const p = v.play?.()
+            if (p && typeof p.catch === 'function') p.catch(() => {})
+          }
+        } catch {}
+        return
+      }
 
       v.controls = true
       try {

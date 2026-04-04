@@ -1522,6 +1522,18 @@ const isAdOwnedNode = (el) => {
   }
 };
 
+const isManagedCoordinatorOwner = (owner) => {
+  try {
+    if (!(owner instanceof Element)) return false;
+    return !!(
+      owner.matches?.(selector) ||
+      owner.matches?.(adOwnerSelector)
+    );
+  } catch {
+    return false;
+  }
+};
+
 const inferMediaKind = (el) => {
   try {
     const owner = getOwnerNode(el) || (el instanceof Element ? el : null);
@@ -2045,6 +2057,7 @@ const onMutedEvent = (e) => {
       if (isSplashMediaTarget(target)) return;
       const owner = getOwnerNode(target);
       if (!(owner instanceof Element)) return;
+      if (!isManagedCoordinatorOwner(owner)) return;
       const systemPauseUntil = Number(target?.dataset?.__systemPauseUntil || 0);
       if (String(target.dataset?.__systemPause || '') === '1' || systemPauseUntil > Date.now()) return;
       const manualLease = hasManualLease(owner) || hasManualLease(target);
@@ -2122,6 +2135,7 @@ const onMutedEvent = (e) => {
       if (isSplashMediaTarget(target)) return;
       const owner = getOwnerNode(target);
       if (!(owner instanceof Element)) return;
+      if (!isManagedCoordinatorOwner(owner)) return;
       markUserGestureIntent(owner);
       trace('user_pointer', owner);
     };
@@ -2131,6 +2145,7 @@ const onMutedEvent = (e) => {
       if (isSplashMediaTarget(target)) return;
       const owner = getOwnerNode(target);
       if (!(owner instanceof Element)) return;
+      if (!isManagedCoordinatorOwner(owner)) return;
       const coordinatorPlay = hasCoordinatorPlayIntent(target) || hasCoordinatorPlayIntent(owner);
       const manualLease = hasManualLease(owner) || hasManualLease(target);
       const hasGesture = hasUserGestureIntent(owner) || hasUserGestureIntent(target);
@@ -2219,6 +2234,7 @@ const onMutedEvent = (e) => {
       if (!(target instanceof HTMLVideoElement || target instanceof HTMLAudioElement)) return;
       if (isSplashMediaTarget(target)) return;
       const owner = getOwnerNode(target);
+      if (!isManagedCoordinatorOwner(owner)) return;
       const errCode = Number(target?.error?.code || 0);
       // MEDIA_ERR_ABORTED(1) и пустой код часто прилетают как служебный след
       // при штатных pause/unload/reload сценариях; не считаем это "битым" src.
@@ -2298,6 +2314,9 @@ const onMediaLifecycleCaptured = (e) => {
   if (!(target instanceof HTMLVideoElement || target instanceof HTMLAudioElement)) return;
   if (isSplashMediaTarget(target)) return;
   const eventType = String(e?.type || 'loadeddata');
+  const owner = getOwnerNode(target) || target;
+  if (!(owner instanceof Element)) return;
+  if (!isManagedCoordinatorOwner(owner)) return;
 
   if (eventType === 'loadedmetadata' || eventType === 'loadeddata' || eventType === 'canplay' || eventType === 'playing') {
     clearMediaSrcBlocked(target, eventType);
@@ -2315,9 +2334,6 @@ const onMediaLifecycleCaptured = (e) => {
 
   try {
     if (isSplashActive()) return;
-
-    const owner = getOwnerNode(target) || target;
-    if (!(owner instanceof Element)) return;
     if (isUserPaused(owner) || isUserPaused(target)) return;
     if (hasSuppressedPlayback(owner) || hasSuppressedPlayback(target)) return;
 

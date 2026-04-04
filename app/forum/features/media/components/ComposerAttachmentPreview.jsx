@@ -10,6 +10,7 @@ export default function ComposerAttachmentPreview({
   pendingImgs = [],
   setPendingImgs,
   pendingVideo,
+  mirrorPreview = false,
   pendingAudio,
   t,
   onOpenVideoFullscreen,
@@ -17,6 +18,39 @@ export default function ComposerAttachmentPreview({
   onRemoveAudio,
   AudioPreviewPlayer,
 }) {
+  const previewVideoRef = React.useRef(null)
+  const [previewCurrentTime, setPreviewCurrentTime] = React.useState(0)
+  const [previewDuration, setPreviewDuration] = React.useState(0)
+
+  const fmtTime = React.useCallback((sec) => {
+    const whole = Number.isFinite(sec) && sec > 0 ? sec : 0
+    const m = Math.floor(whole / 60)
+    const s = String(Math.floor(whole % 60)).padStart(2, '0')
+    return `${m}:${s}`
+  }, [])
+
+  React.useEffect(() => {
+    setPreviewCurrentTime(0)
+    setPreviewDuration(0)
+  }, [pendingVideo])
+
+  const syncPreviewTime = React.useCallback((videoEl) => {
+    if (!videoEl) return
+    setPreviewCurrentTime(videoEl.currentTime || 0)
+    setPreviewDuration(Number.isFinite(videoEl.duration) ? videoEl.duration : 0)
+  }, [])
+
+  const videoPreviewStyle = {
+    width: '100%',
+    height: 'auto',
+    maxHeight: 620,
+    display: 'block',
+    objectFit: 'contain',
+    background: '#000',
+    transform: mirrorPreview ? 'scaleX(-1)' : undefined,
+    transformOrigin: mirrorPreview ? 'center center' : undefined,
+  }
+
   return (
     <>
       {pendingImgs.length > 0 && (
@@ -62,27 +96,63 @@ export default function ComposerAttachmentPreview({
             }}
           >
             <video
+              className={mirrorPreview ? 'composerPreviewVideo isMirrored' : 'composerPreviewVideo'}
+              ref={previewVideoRef}
               src={pendingVideo}
               playsInline
               preload="metadata"
               controlsList="nodownload noplaybackrate noremoteplayback"
               disablePictureInPicture
-              style={{
-                width: '100%',
-                height: 'auto',
-                maxHeight: 620,
-                display: 'block',
-                objectFit: 'contain',
-                background: '#000',
-              }}
+              style={videoPreviewStyle}
               onPointerDown={(e) => {
                 enableVideoControlsOnTap(e)
                 e.stopPropagation()
               }}
+              onLoadedMetadata={(e) => {
+                syncPreviewTime(e?.currentTarget)
+              }}
+              onTimeUpdate={(e) => {
+                syncPreviewTime(e?.currentTarget)
+              }}
+              onSeeked={(e) => {
+                syncPreviewTime(e?.currentTarget)
+              }}
               onClick={(e) => {
                 e.stopPropagation()
               }}
+              onEnded={(e) => {
+                const v = e?.currentTarget
+                try { v?.pause?.() } catch {}
+                try {
+                  if (v) v.currentTime = 0
+                } catch {}
+                syncPreviewTime(v)
+              }}
             />
+
+            {mirrorPreview && (
+              <div
+                aria-hidden="true"
+                style={{
+                  position: 'absolute',
+                  top: 10,
+                  left: 56,
+                  zIndex: 2,
+                  padding: '6px 10px',
+                  borderRadius: 999,
+                  border: '1px solid rgba(255,255,255,.14)',
+                  background: 'rgba(5,10,20,.72)',
+                  color: '#f5fbff',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  letterSpacing: '.02em',
+                  boxShadow: '0 10px 24px rgba(0,0,0,.28)',
+                  backdropFilter: 'blur(10px)',
+                }}
+              >
+                {fmtTime(previewCurrentTime)} / {fmtTime(previewDuration)}
+              </div>
+            )}
 
             <button
               type="button"
@@ -138,6 +208,26 @@ export default function ComposerAttachmentPreview({
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        .composerPreviewVideo.isMirrored::-webkit-media-controls,
+        .composerPreviewVideo.isMirrored::-webkit-media-controls-enclosure,
+        .composerPreviewVideo.isMirrored::-webkit-media-controls-panel,
+        .composerPreviewVideo.isMirrored::-webkit-media-controls-start-playback-button,
+        .composerPreviewVideo.isMirrored::-webkit-media-controls-overlay-play-button,
+        .composerPreviewVideo.isMirrored::-webkit-media-controls-timeline,
+        .composerPreviewVideo.isMirrored::-webkit-media-controls-mute-button,
+        .composerPreviewVideo.isMirrored::-webkit-media-controls-volume-slider,
+        .composerPreviewVideo.isMirrored::-webkit-media-controls-fullscreen-button{
+          transform: scaleX(-1);
+          transform-origin: center center;
+        }
+
+        .composerPreviewVideo.isMirrored::-webkit-media-controls-current-time-display,
+        .composerPreviewVideo.isMirrored::-webkit-media-controls-time-remaining-display{
+          display:none !important;
+        }
+      `}</style>
 
       {pendingAudio && (
         <div className="attachPreviewRow mt-2">
