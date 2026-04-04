@@ -495,18 +495,52 @@ export default function RootLayout({ children }) {
         {process.env.NODE_ENV !== 'production' && (
           <Script id="cb-metrics-mute" strategy="beforeInteractive">{`
             (function(){
+              var shouldBlock = function(url){
+                try {
+                  var s = String(url || '');
+                  return s.includes('cca-lite.coinbase.com/metrics') || s.includes('cca-lite.coinbase.com/amp');
+                } catch(e) {
+                  return false;
+                }
+              };
               try { localStorage.setItem('walletlink_analytics_enabled', 'false'); } catch(e){}
               try {
                 const _fetch = window.fetch;
                 window.fetch = function(input, init){
                   try {
                     const url = typeof input === 'string' ? input : (input && input.url) || '';
-                    if (url.includes('cca-lite.coinbase.com/metrics')) {
+                    if (shouldBlock(url)) {
                       return Promise.resolve(new Response(null, { status: 204 }));
                     }
                   } catch(e){}
                   return _fetch.apply(this, arguments);
                 };
+              } catch(e){}
+              try {
+                var _sendBeacon = navigator.sendBeacon && navigator.sendBeacon.bind(navigator);
+                if (_sendBeacon) {
+                  navigator.sendBeacon = function(url, data){
+                    if (shouldBlock(url)) return true;
+                    return _sendBeacon(url, data);
+                  };
+                }
+              } catch(e){}
+              try {
+                var xhrOpen = XMLHttpRequest && XMLHttpRequest.prototype && XMLHttpRequest.prototype.open;
+                var xhrSend = XMLHttpRequest && XMLHttpRequest.prototype && XMLHttpRequest.prototype.send;
+                if (xhrOpen && xhrSend) {
+                  XMLHttpRequest.prototype.open = function(method, url){
+                    try { this.__cbBlocked = shouldBlock(url); } catch(e) { this.__cbBlocked = false; }
+                    return xhrOpen.apply(this, arguments);
+                  };
+                  XMLHttpRequest.prototype.send = function(body){
+                    if (this.__cbBlocked) {
+                      try { this.abort(); } catch(e){}
+                      return;
+                    }
+                    return xhrSend.apply(this, arguments);
+                  };
+                }
               } catch(e){}
             })();
           `}</Script>

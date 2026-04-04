@@ -84,6 +84,8 @@ export default function ForumSearchSortControls({
     <div className="search">
         <div className="searchInputWrap">
           <input
+            id="forum-search-input"
+            name="forumSearch"
             className="searchInput"
             value={q}
             onChange={(e) => { setQ(e.target.value); openOnly('search') }}
