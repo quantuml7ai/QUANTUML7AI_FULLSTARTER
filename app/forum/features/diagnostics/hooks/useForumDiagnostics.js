@@ -5,10 +5,13 @@ import {
   emptyDiagMediaSnapshot,
 } from '../utils/emitPolicy'
 
+const FORUM_DIAG_ENV_ENABLED = String(process.env.NEXT_PUBLIC_FORUM_DIAG || '') === '1'
+const FORUM_PERF_TRACE_ENV_ENABLED = String(process.env.NEXT_PUBLIC_FORUM_PERF_TRACE || '') === '1'
+const FORUM_DIAG_QUERY_ALLOWED = process.env.NODE_ENV !== 'production'
+
 function isDiagEnabled() {
-  try {
-    if (String(process.env.NEXT_PUBLIC_FORUM_DIAG || '') === '1') return true
-  } catch {}
+  if (FORUM_DIAG_ENV_ENABLED) return true
+  if (!FORUM_DIAG_QUERY_ALLOWED) return false
   try {
     const qs = new URLSearchParams(window.location.search || '')
     const fromQuery = String(qs.get('forumDiag') || '').trim()
@@ -18,9 +21,8 @@ function isDiagEnabled() {
 }
 
 function isPerfTraceEnabled() {
-  try {
-    if (String(process.env.NEXT_PUBLIC_FORUM_PERF_TRACE || '') === '1') return true
-  } catch {}
+  if (FORUM_PERF_TRACE_ENV_ENABLED) return true
+  if (!FORUM_DIAG_QUERY_ALLOWED) return false
   try {
     const qs = new URLSearchParams(window.location.search || '')
     const fromQuery = String(qs.get('forumPerf') || '').trim()
