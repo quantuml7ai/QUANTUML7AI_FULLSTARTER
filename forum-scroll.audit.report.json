@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-04T23:16:10.418Z",
+  "generatedAt": "2026-04-05T00:44:14.816Z",
   "scannedFiles": 268,
   "report": [
     {
@@ -985,52 +985,52 @@
       "hits": [
         {
           "key": "scrollWrite",
-          "line": 266,
+          "line": 324,
           "text": "else window.scrollTo(0, 0)"
         },
         {
           "key": "scrollRead",
-          "line": 94,
+          "line": 125,
           "text": "const winTop = Number(window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0)"
         },
         {
           "key": "scrollRead",
-          "line": 101,
+          "line": 132,
           "text": "st: Number(el.scrollTop || 0),"
         },
         {
           "key": "scrollRead",
-          "line": 265,
+          "line": 323,
           "text": "if (el && el.scrollHeight > el.clientHeight + 1) el.scrollTop = 0"
         },
         {
           "key": "rectReads",
-          "line": 366,
+          "line": 428,
           "text": "const h = node.getBoundingClientRect?.()?.height"
         },
         {
           "key": "resizeObserver",
-          "line": 379,
+          "line": 441,
           "text": "if (!vfRosRef.current.get(idx) && typeof ResizeObserver !== 'undefined') {"
         },
         {
           "key": "raf",
-          "line": 223,
+          "line": 255,
           "text": "vfRafRef.current = requestAnimationFrame(() => {"
         },
         {
           "key": "raf",
-          "line": 270,
+          "line": 329,
           "text": "vfHardResetScheduleRef.current.rafA = requestAnimationFrame(() => {"
         },
         {
           "key": "timers",
-          "line": 278,
+          "line": 337,
           "text": "vfHardResetScheduleRef.current.timeoutId = setTimeout(() => {"
         },
         {
           "key": "timers",
-          "line": 314,
+          "line": 375,
           "text": "scrollActivity.settleTimer = setTimeout(() => {"
         }
       ]

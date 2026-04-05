@@ -16,6 +16,28 @@ function defaultIsBrowser() {
   return typeof window !== 'undefined'
 }
 
+function shouldUseLinearVideoFeedMode(isBrowserFn = defaultIsBrowser) {
+  try {
+    if (!isBrowserFn()) return false
+    if (window?.Telegram?.WebApp) return false
+
+    const ua = String(window?.navigator?.userAgent || '')
+    const maxTouchPoints = Number(window?.navigator?.maxTouchPoints || 0)
+    const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
+    const isiOS =
+      /iP(hone|ad|od)/i.test(ua) ||
+      (/Macintosh/i.test(ua) && maxTouchPoints > 1)
+
+    // In regular iOS browsers the viewport height frequently changes while
+    // scrolling because of browser chrome. Video-feed windowing reacts to those
+    // resizes with spacer recalculation/remounts; the linear list mode keeps the
+    // same soft scroll profile as the user-posts branch.
+    return coarse && isiOS
+  } catch {
+    return false
+  }
+}
+
 export default function useVideoFeedWindowing({
   videoFeedOpen,
   visibleVideoFeed,
@@ -35,6 +57,7 @@ export default function useVideoFeedWindowing({
   const vfScrollActivityRef = useRef({ activeUntil: 0, settleTimer: 0 })
   const vfWinMetaRef = useRef({ ts: 0, start: 0, end: 0 })
   const [vfWin, setVfWin] = useState(() => ({ start: 0, end: 0, top: 0, bottom: 0 }))
+  const vfLinearMode = useMemo(() => shouldUseLinearVideoFeedMode(isBrowserFn), [isBrowserFn])
 
   const vfGetMaxRender = useCallback(() => {
     try {
@@ -82,6 +105,14 @@ export default function useVideoFeedWindowing({
       })
     )
   }, [visibleVideoFeed, adEvery, debugAdsSlots, interleaveAdsFn])
+  const vfSlotsLength = Math.max(0, Number(vfSlots?.length || 0))
+
+  const vfLinearWin = useMemo(() => ({
+    start: 0,
+    end: vfSlotsLength,
+    top: 0,
+    bottom: 0,
+  }), [vfSlotsLength])
 
   const vfGetScrollEl = useCallback(() => {
     try {
@@ -129,6 +160,7 @@ export default function useVideoFeedWindowing({
   const vfRecalcWindow = useCallback(() => {
     if (!isBrowserFn()) return
     if (!videoFeedOpen) return
+    if (vfLinearMode) return
 
     const total = vfSlots.length || 0
     if (!total) {
@@ -216,7 +248,7 @@ export default function useVideoFeedWindowing({
       vfWinMetaRef.current = { ts: Date.now(), start: next.start, end: next.end }
       return next
     })
-  }, [videoFeedOpen, vfSlots.length, vfReadViewportState, vfGetH, vfGetMaxRender, vfBuildWindow, isBrowserFn])
+  }, [videoFeedOpen, vfSlots.length, vfReadViewportState, vfGetH, vfGetMaxRender, vfBuildWindow, isBrowserFn, vfLinearMode])
 
   const vfScheduleRecalc = useCallback(() => {
     if (vfRafRef.current) return
@@ -225,6 +257,30 @@ export default function useVideoFeedWindowing({
       try { vfRecalcWindow() } catch {}
     })
   }, [vfRecalcWindow])
+
+  useEffect(() => {
+    if (!videoFeedOpen) return undefined
+    if (!vfLinearMode) return undefined
+    try {
+      emitDiag?.('video_feed_window_mode', {
+        mode: 'linear_ios_browser',
+        slots: vfSlotsLength,
+      }, { force: true })
+    } catch {}
+    return undefined
+  }, [emitDiag, vfLinearMode, vfSlotsLength, videoFeedOpen])
+
+  useEffect(() => {
+    if (!vfLinearMode) return undefined
+    try { vfHeightsRef.current.clear() } catch {}
+    try {
+      vfRosRef.current.forEach((ro) => {
+        try { ro?.disconnect?.() } catch {}
+      })
+      vfRosRef.current.clear()
+    } catch {}
+    return undefined
+  }, [vfLinearMode])
 
   useEffect(() => {
     const cancelHardResetSchedule = () => {
@@ -247,49 +303,54 @@ export default function useVideoFeedWindowing({
       try {
         emitDiag?.('video_feed_hard_reset', {
           source: 'videoFeedHardResetRef',
-          slots: Number(vfSlots?.length || 0),
+          slots: vfSlotsLength,
         }, { force: true })
       } catch {}
       try { vfHeightsRef.current.clear() } catch {}
       try {
-        vfWinMetaRef.current = { ts: Date.now(), start: 0, end: Math.min(vfGetMaxRender(), Math.max(0, vfSlots.length || 0)) }
-        setVfWin({
-          start: 0,
-          end: Math.min(vfGetMaxRender(), Math.max(0, vfSlots.length || 0)),
-          top: 0,
-          bottom: 0,
-        })
+        if (!vfLinearMode) {
+          vfWinMetaRef.current = { ts: Date.now(), start: 0, end: Math.min(vfGetMaxRender(), vfSlotsLength) }
+          setVfWin({
+            start: 0,
+            end: Math.min(vfGetMaxRender(), vfSlotsLength),
+            top: 0,
+            bottom: 0,
+          })
+        }
       } catch {}
       try {
         const el = vfGetScrollEl()
         if (el && el.scrollHeight > el.clientHeight + 1) el.scrollTop = 0
         else window.scrollTo(0, 0)
       } catch {}
-      try {
-        cancelHardResetSchedule()
-        vfHardResetScheduleRef.current.rafA = requestAnimationFrame(() => {
-          vfHardResetScheduleRef.current.rafB = requestAnimationFrame(() => {
-            try { vfScheduleRecalc() } catch {}
-          })
-        })
-      } catch {
+      if (!vfLinearMode) {
         try {
           cancelHardResetSchedule()
-          vfHardResetScheduleRef.current.timeoutId = setTimeout(() => {
-            try { vfScheduleRecalc() } catch {}
-          }, 0)
-        } catch {}
+          vfHardResetScheduleRef.current.rafA = requestAnimationFrame(() => {
+            vfHardResetScheduleRef.current.rafB = requestAnimationFrame(() => {
+              try { vfScheduleRecalc() } catch {}
+            })
+          })
+        } catch {
+          try {
+            cancelHardResetSchedule()
+            vfHardResetScheduleRef.current.timeoutId = setTimeout(() => {
+              try { vfScheduleRecalc() } catch {}
+            }, 0)
+          } catch {}
+        }
       }
     }
     return () => {
       cancelHardResetSchedule()
       try { videoFeedHardResetRef.current = null } catch {}
     }
-  }, [vfSlots.length, vfGetScrollEl, vfScheduleRecalc, emitDiag, videoFeedHardResetRef, vfGetMaxRender])
+  }, [vfSlotsLength, vfGetScrollEl, vfScheduleRecalc, emitDiag, videoFeedHardResetRef, vfGetMaxRender, vfLinearMode])
 
   useEffect(() => {
     if (!isBrowserFn()) return undefined
     if (!videoFeedOpen) return undefined
+    if (vfLinearMode) return undefined
     const scrollActivity = vfScrollActivityRef.current
 
     const onScroll = () => {
@@ -348,9 +409,10 @@ export default function useVideoFeedWindowing({
       scrollActivity.activeUntil = 0
       vfScrollStateRef.current = { top: 0, ts: 0, velocity: 0, direction: 0 }
     }
-  }, [videoFeedOpen, vfScheduleRecalc, vfGetScrollEl, vfReadViewportState, isBrowserFn])
+  }, [videoFeedOpen, vfScheduleRecalc, vfGetScrollEl, vfReadViewportState, isBrowserFn, vfLinearMode])
 
   const vfMeasureRef = useCallback((idx) => (node) => {
+    if (vfLinearMode) return
     try {
       if (!node) {
         const ro = vfRosRef.current.get(idx)
@@ -382,22 +444,23 @@ export default function useVideoFeedWindowing({
         vfRosRef.current.set(idx, ro)
       }
     } catch {}
-  }, [vfScheduleRecalc])
+  }, [vfScheduleRecalc, vfLinearMode])
 
   useEffect(() => {
     if (!isBrowserFn()) return undefined
     if (!videoFeedOpen) return undefined
+    if (vfLinearMode) return undefined
     const onResize = () => {
       try { vfHeightsRef.current.clear() } catch {}
       vfScheduleRecalc()
     }
     window.addEventListener('resize', onResize, { passive: true })
     return () => window.removeEventListener('resize', onResize)
-  }, [videoFeedOpen, vfScheduleRecalc, isBrowserFn])
+  }, [videoFeedOpen, vfScheduleRecalc, isBrowserFn, vfLinearMode])
 
   return {
     vfSlots,
-    vfWin,
+    vfWin: vfLinearMode ? vfLinearWin : vfWin,
     vfMeasureRef,
   }
 }

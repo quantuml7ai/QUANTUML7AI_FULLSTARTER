@@ -1014,49 +1014,49 @@
     "samples": {
       "ro": [
         {
-          "line": 379,
+          "line": 441,
           "text": "if (!vfRosRef.current.get(idx) && typeof ResizeObserver !== 'undefined') {"
         }
       ],
       "raf": [
         {
-          "line": 223,
+          "line": 255,
           "text": "vfRafRef.current = requestAnimationFrame(() => {"
         },
         {
-          "line": 233,
+          "line": 289,
           "text": "try { cancelAnimationFrame(scheduled.rafA) } catch {}"
         },
         {
-          "line": 237,
+          "line": 293,
           "text": "try { cancelAnimationFrame(scheduled.rafB) } catch {}"
         },
         {
-          "line": 270,
+          "line": 329,
           "text": "vfHardResetScheduleRef.current.rafA = requestAnimationFrame(() => {"
         }
       ],
       "scrollWrites": [
         {
-          "line": 265,
+          "line": 323,
           "text": "if (el && el.scrollHeight > el.clientHeight + 1) el.scrollTop = 0"
         }
       ],
       "layoutReads": [
         {
-          "line": 95,
+          "line": 126,
           "text": "const winH = Number(window.innerHeight || 0) || 0"
         },
         {
-          "line": 98,
+          "line": 129,
           "text": "const innerScrollable = !!el && (el.scrollHeight > (el.clientHeight + 1))"
         },
         {
-          "line": 102,
+          "line": 133,
           "text": "vh: Number(el.clientHeight || 0) || winH,"
         },
         {
-          "line": 265,
+          "line": 323,
           "text": "if (el && el.scrollHeight > el.clientHeight + 1) el.scrollTop = 0"
         }
       ]
