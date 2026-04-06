@@ -38,13 +38,24 @@ export default function QCastPlayer({
       if (typeof writeMutedPref === 'function') writeMutedPref(!!nextMuted);
     } catch {}
   }, [writeMutedPref]);
-const readQcastMutedPref = React.useCallback(() => {
-  return readMutedPref();
-}, [readMutedPref]);
-
-const writeQcastMutedPref = React.useCallback((nextMuted) => {
-  writeMuted(!!nextMuted);
-}, [writeMuted]);
+  const readQcastMutedPref = React.useCallback(() => {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const raw = localStorage.getItem(QCAST_MUTED_KEY);
+        if (raw === '1' || raw === 'true') return true;
+        if (raw === '0' || raw === 'false') return false;
+      }
+    } catch {}
+    return readMutedPref();
+  }, [readMutedPref]);
+  const writeQcastMutedPref = React.useCallback((nextMuted) => {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(QCAST_MUTED_KEY, nextMuted ? '1' : '0');
+      }
+    } catch {}
+    writeMuted(nextMuted);
+  }, [writeMuted]);
   const rearmPooledFx = React.useCallback((el) => {
     try {
       return typeof rearmPooledFxNode === 'function' ? !!rearmPooledFxNode(el) : false;

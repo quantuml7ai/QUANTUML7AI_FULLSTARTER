@@ -12,7 +12,7 @@ const TOP_HIDE_Y      = 40
 const DIR_SWITCH_PX   = 500
 
 // === НАСТРОЙКА СКОРОСТИ СКРОЛЛА (ПОСТОЯННАЯ СКОРОСТЬ!) ===
-const SCROLL_PX_PER_SEC = 150
+const SCROLL_PX_PER_SEC = 200
 
 export default function ScrollTopPulse() {
   const [visible, setVisible] = useState(false)

@@ -68,19 +68,16 @@ export default function useForumVideoFeedRuntime({
 
   useHtmlFlag('data-video-feed', videoFeedOpen ? '1' : null)
 
-  const snapVideoFeedToFirstCardTop = useCallback(
-    (opts = {}) => {
-      snapVideoFeedToFirstCardTopUtil({
-        opts,
-        isBrowserFn,
-        bodyRef,
-        headAutoOpenRef,
-        setHeadPinned,
-        setHeadHidden,
-      })
-    },
-    [bodyRef, headAutoOpenRef, isBrowserFn, setHeadHidden, setHeadPinned]
-  )
+  const snapVideoFeedToFirstCardTop = useCallback((opts = {}) => {
+    snapVideoFeedToFirstCardTopUtil({
+      opts,
+      isBrowserFn,
+      bodyRef,
+      headAutoOpenRef,
+      setHeadPinned,
+      setHeadHidden,
+    })
+  }, [bodyRef, headAutoOpenRef, isBrowserFn, setHeadHidden, setHeadPinned])
 
   const videoFeedRefreshTeleportPendingRef = useRef(false)
   const videoFeedHardResetRef = useRef(null)
@@ -115,8 +112,6 @@ export default function useForumVideoFeedRuntime({
   })
 
   const openVideoFeedEvent = useEvent(openVideoFeed)
-  const closeVideoFeedEvent = useEvent(closeVideoFeed)
-  const refreshVideoFeedWithoutReloadEvent = useEvent(refreshVideoFeedWithoutReload)
   const buildAndSetVideoFeedEvent = useEvent(buildAndSetVideoFeed)
 
   useVideoFeedLifecycle({
@@ -153,9 +148,9 @@ export default function useForumVideoFeedRuntime({
     setVideoFeedUserSortLocked,
     visibleVideoFeed,
     videoHasMore,
-    refreshVideoFeedWithoutReload: refreshVideoFeedWithoutReloadEvent,
-    openVideoFeed: openVideoFeedEvent,
-    closeVideoFeed: closeVideoFeedEvent,
+    refreshVideoFeedWithoutReload,
+    openVideoFeed,
+    closeVideoFeed,
     videoFeedHardResetRef,
   }
-} 
+}

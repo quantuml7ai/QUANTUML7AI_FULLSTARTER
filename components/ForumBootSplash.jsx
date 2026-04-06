@@ -1,42 +1,43 @@
 'use client'
 
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
-
-const useBrowserLayoutEffect =
-  typeof window !== 'undefined' ? useLayoutEffect : useEffect
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 /* =========================================================
    FORUM BOOT SPLASH — MASTER SETTINGS
-========================================================= */ 
+   1 = enabled
+   0 = disabled
+========================================================= */
 const FORUM_SPLASH_ENABLED = 1
 
 /* =========================================================
    TIMING
 ========================================================= */
-const FORUM_SPLASH_CLOSE_ON_VIDEO_END = 1
-const FORUM_SPLASH_FAILSAFE_MS = 45000
-const FORUM_SPLASH_FADE_OUT_MS = 320
-const FORUM_SPLASH_FALLBACK_DELAY_MS = 700
-const FORUM_SPLASH_RETRY_MS = 220
+const FORUM_SPLASH_SHOW_MS = 10000           // legacy fallback mode only
+const FORUM_SPLASH_CLOSE_ON_VIDEO_END = 1    // 1 = close when video ends, 0 = ignore video end
+const FORUM_SPLASH_FAILSAFE_MS = 45000       // emergency close only if video never ends/errors
+const FORUM_SPLASH_FADE_OUT_MS = 320         // fade-out duration
 
 /* =========================================================
    VIDEO SOURCE
-========================================================= */ 
+   File must exist in: public/load/load.mp4
+   URL for Next/public usage: /load/load.mp4
+========================================================= */
 const FORUM_SPLASH_VIDEO_SRC = '/load/load.mp4'
 
 /* =========================================================
    SOUND SETTINGS
 ========================================================= */
-const FORUM_SPLASH_TRY_SOUND_AUTOPLAY = 1 
+// 1 = try to start with sound immediately
+// 0 = always start muted
+const FORUM_SPLASH_TRY_SOUND_AUTOPLAY = 1
+
+// If sound autoplay is blocked by browser:
+// 1 = fallback to muted autoplay
+// 0 = do not fallback
 const FORUM_SPLASH_ALLOW_MUTED_FALLBACK = 1
-const FORUM_SPLASH_VOLUME = 1 
+
+// Initial volume if sound autoplay succeeds
+const FORUM_SPLASH_VOLUME = 1
 
 /* =========================================================
    LAYER / Z-INDEX
@@ -47,8 +48,8 @@ const FORUM_SPLASH_Z_INDEX = 2147483647
    OVERLAY POSITIONING
 ========================================================= */
 const FORUM_SPLASH_OVERLAY_INSET = '0px'
-const FORUM_SPLASH_ALIGN_X = 'center'
-const FORUM_SPLASH_ALIGN_Y = 'center'
+const FORUM_SPLASH_ALIGN_X = 'center'     // center | flex-start | flex-end
+const FORUM_SPLASH_ALIGN_Y = 'center'     // center | flex-start | flex-end
 const FORUM_SPLASH_PADDING = '0px'
 
 /* =========================================================
@@ -58,9 +59,11 @@ const FORUM_SPLASH_BACKDROP = 'rgba(0,0,0,0.94)'
 const FORUM_SPLASH_BACKDROP_BLUR = '0px'
 
 /* =========================================================
-   VIDEO FRAME GEOMETRY
+   VIDEO FRAME GEOMETRY (9:16 PRESERVED)
 ========================================================= */
-const FORUM_SPLASH_ASPECT_RATIO = '9 / 16' 
+const FORUM_SPLASH_ASPECT_RATIO = '9 / 16'
+
+// 'vw' | 'vh' | 'px'
 const FORUM_SPLASH_SIZE_MODE = 'vh'
 
 const FORUM_SPLASH_WIDTH_VW = 56
@@ -82,7 +85,7 @@ const FORUM_SPLASH_OVERFLOW = 'hidden'
 /* =========================================================
    VIDEO FIT / LOOK
 ========================================================= */
-const FORUM_SPLASH_OBJECT_FIT = 'contain'
+const FORUM_SPLASH_OBJECT_FIT = 'contain' // contain | cover | fill
 const FORUM_SPLASH_OBJECT_POSITION = 'center center'
 const FORUM_SPLASH_VIDEO_BACKGROUND = '#00000000'
 const FORUM_SPLASH_VIDEO_OPACITY = 1
@@ -99,235 +102,104 @@ function getFrameWidth() {
 }
 
 function shouldShowSplashNow() {
-  return FORUM_SPLASH_ENABLED === 1
+  if (FORUM_SPLASH_ENABLED !== 1) return false
+  if (typeof window === 'undefined') return true
+  if (window.__QL7_FORUM_SPLASH_SHOWN__) return false
+  window.__QL7_FORUM_SPLASH_SHOWN__ = true
+  return true
 }
 
 export default function ForumBootSplash({ onDone }) {
   const [visible, setVisible] = useState(() => shouldShowSplashNow())
   const [closing, setClosing] = useState(false)
   const [playbackReady, setPlaybackReady] = useState(false)
-  const [showFallback, setShowFallback] = useState(false)
   const [soundAutoplayBlocked, setSoundAutoplayBlocked] = useState(false)
 
-  const videoRef = useRef(null)
+  const closeTimerRef = useRef(0)
   const fadeTimerRef = useRef(0)
-  const failsafeTimerRef = useRef(0)
-  const retryTimerRef = useRef(0)
-  const fallbackTimerRef = useRef(0)
-
-  const doneRef = useRef(false)
-  const closingRef = useRef(false)
-  const playbackReadyRef = useRef(false)
-  const soundAttemptsRef = useRef(0)
-  const mutedAttemptsRef = useRef(0)
-  const ensurePlaybackRef = useRef(() => {})
+  const videoRef = useRef(null)
 
   const frameWidth = useMemo(() => getFrameWidth(), [])
 
-  const clearTimer = (ref) => {
-    try {
-      if (ref.current) clearTimeout(ref.current)
-    } catch {}
-    ref.current = 0
-  }
-
-  const debugLog = (...args) => {
-    if (!FORUM_SPLASH_DEBUG) return
-    try {
-      console.log('[ForumBootSplash]', ...args)
-    } catch {}
-  }
-
-  const setSplashActiveFlag = useCallback((next) => {
-    try {
-      if (typeof window === 'undefined') return
-      window.__forumBootSplashActive = !!next
-    } catch {}
-  }, [])
-
-  const markReady = useCallback(() => {
-    playbackReadyRef.current = true
-    setPlaybackReady(true)
-    setShowFallback(false)
-  }, [])
-
-  const releaseVideo = useCallback(() => {
-    const el = videoRef.current
-    if (!el) return
-
-    try {
-      el.pause?.()
-    } catch {}
-
-    try {
-      el.removeAttribute('src')
-    } catch {}
-
-    try {
-      el.load?.()
-    } catch {}
-  }, [])
-
   const finish = useCallback(() => {
-    if (doneRef.current) return
-    doneRef.current = true
-    closingRef.current = true
+    if (FORUM_SPLASH_ENABLED !== 1) {
+      try {
+        onDone?.()
+      } catch {}
+      return
+    }
 
-    clearTimer(retryTimerRef)
-    clearTimer(fallbackTimerRef)
-    clearTimer(failsafeTimerRef)
-
-    setSplashActiveFlag(false)
-    setShowFallback(false)
     setClosing(true)
 
+    try {
+      if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current)
+    } catch {}
+
     fadeTimerRef.current = window.setTimeout(() => {
-      releaseVideo()
       setVisible(false)
       try {
         onDone?.()
       } catch {}
     }, Math.max(0, Number(FORUM_SPLASH_FADE_OUT_MS || 0)))
-  }, [onDone, releaseVideo, setSplashActiveFlag])
+  }, [onDone])
 
-  const primeVideo = useCallback(() => {
+  const startPlayback = useCallback(async () => {
     const el = videoRef.current
     if (!el) return
 
     try {
       el.preload = 'auto'
-      el.playsInline = true
-      el.setAttribute('playsinline', '')
-      el.setAttribute('webkit-playsinline', 'true')
-      el.setAttribute('preload', 'auto')
-    } catch {}
-
-    try {
-      if (Number(el.volume || 1) !== Number(FORUM_SPLASH_VOLUME || 1)) {
-        el.volume = Math.max(0, Math.min(1, Number(FORUM_SPLASH_VOLUME || 1)))
-      }
-    } catch {}
-
-    try {
       const isCold =
-        (typeof HTMLMediaElement !== 'undefined' &&
-          el.networkState === HTMLMediaElement.NETWORK_EMPTY) ||
+        (el.networkState === HTMLMediaElement.NETWORK_EMPTY) ||
         !el.currentSrc
       if (isCold) el.load?.()
     } catch {}
-  }, [])
-
-  const applyMuteState = useCallback((wantMuted) => {
-    const el = videoRef.current
-    if (!el) return
 
     try {
-      el.muted = !!wantMuted
-      el.defaultMuted = !!wantMuted
-      if (wantMuted) el.setAttribute('muted', '')
-      else el.removeAttribute('muted')
+      el.currentTime = 0
     } catch {}
-  }, [])
 
-  const tryPlay = useCallback(
-    async (wantMuted, reason) => {
-      const el = videoRef.current
-      if (!el) return false
-      if (!visible || closingRef.current) return false
+    try {
+      el.volume = Math.max(0, Math.min(1, Number(FORUM_SPLASH_VOLUME || 1)))
+    } catch {}
 
-      primeVideo()
-      applyMuteState(wantMuted)
-
+    if (FORUM_SPLASH_TRY_SOUND_AUTOPLAY === 1) {
       try {
-        if (el.ended) {
-          try {
-            el.currentTime = 0
-          } catch {}
-        }
-      } catch {}
+        el.muted = false
+        el.defaultMuted = false
+        el.removeAttribute('muted')
 
-      try { 
         const p = el.play?.()
         if (p && typeof p.then === 'function') {
           await p
         }
-        if (!el.paused) {
-          debugLog('play_ok', { reason, muted: !!wantMuted })
-          markReady()
-          return true
-        }
-      } catch (err) {
-        debugLog('play_reject', {
-          reason,
-          muted: !!wantMuted,
-          name: String(err?.name || ''),
-          message: String(err?.message || ''),
-        })
-      }
 
-      return false
-    },
-    [applyMuteState, markReady, primeVideo, visible]
-  )
-
-  const scheduleRetry = useCallback((reason = 'retry') => {
-    if (!visible || closingRef.current) return
-    clearTimer(retryTimerRef)
-    retryTimerRef.current = window.setTimeout(() => {
-      try {
-        ensurePlaybackRef.current?.(reason)
-      } catch {}
-    }, FORUM_SPLASH_RETRY_MS)
-  }, [visible])
-
-  const ensurePlayback = useCallback(
-    async (reason = 'manual') => {
-      const el = videoRef.current
-      if (!el) return
-      if (!visible || closingRef.current) return
-
-      primeVideo()
-
-      try {
-        if (!el.paused && !el.ended) {
-          markReady()
-          return
-        }
-      } catch {}
-
-      if (FORUM_SPLASH_TRY_SOUND_AUTOPLAY === 1 && soundAttemptsRef.current < 3) {
-        soundAttemptsRef.current += 1
-        const soundOk = await tryPlay(false, `${reason}:sound`)
-        if (soundOk) {
-          setSoundAutoplayBlocked(false)
-          return
-        }
+        setSoundAutoplayBlocked(false)
+        setPlaybackReady(true)
+        return
+      } catch {
         setSoundAutoplayBlocked(true)
       }
+    }
 
-      if (
-        FORUM_SPLASH_ALLOW_MUTED_FALLBACK === 1 &&
-        mutedAttemptsRef.current < 8
-      ) {
-        mutedAttemptsRef.current += 1
-        const mutedOk = await tryPlay(true, `${reason}:muted`)
-        if (mutedOk) return
-      }
+    if (FORUM_SPLASH_ALLOW_MUTED_FALLBACK === 1) {
+      try {
+        el.muted = true
+        el.defaultMuted = true
+        el.setAttribute('muted', '')
 
-      scheduleRetry(reason)
-    },
-    [markReady, primeVideo, scheduleRetry, tryPlay, visible]
-  )
+        const p = el.play?.()
+        if (p && typeof p.then === 'function') {
+          await p
+        }
 
-  ensurePlaybackRef.current = ensurePlayback
+        setPlaybackReady(true)
+        return
+      } catch {}
+    }
 
-  useBrowserLayoutEffect(() => {
-    if (!visible) return undefined
-    setSplashActiveFlag(true)
-    primeVideo()
-    ensurePlayback('layout_mount')
-    return undefined
-  }, [ensurePlayback, primeVideo, setSplashActiveFlag, visible])
+    setPlaybackReady(false)
+  }, [])
 
   useEffect(() => {
     if (FORUM_SPLASH_ENABLED !== 1) {
@@ -338,54 +210,62 @@ export default function ForumBootSplash({ onDone }) {
       return
     }
 
-    if (!visible) return
-
-    debugLog('mounted')
-    setSplashActiveFlag(true)
-
-    clearTimer(fallbackTimerRef)
-    fallbackTimerRef.current = window.setTimeout(() => {
-      if (!playbackReadyRef.current && !closingRef.current) {
-        setShowFallback(true)
-      }
-    }, Math.max(0, Number(FORUM_SPLASH_FALLBACK_DELAY_MS || 0)))
-
-    clearTimer(failsafeTimerRef)
-    failsafeTimerRef.current = window.setTimeout(() => {
-      finish()
-    }, Math.max(0, Number(FORUM_SPLASH_FAILSAFE_MS || 0)))
-
-    const onVisibilityRecover = () => {
+    if (!visible) {
       try {
-        if (document.visibilityState !== 'visible') return
+        onDone?.()
       } catch {}
-      scheduleRetry('visibility')
+      return
     }
 
-    const onPageShow = () => scheduleRetry('pageshow')
-    const onFocus = () => scheduleRetry('focus')
+    if (FORUM_SPLASH_DEBUG) {
+      try {
+        console.log('[ForumBootSplash] mounted')
+      } catch {}
+    }
 
-    document.addEventListener('visibilitychange', onVisibilityRecover)
-    window.addEventListener('pageshow', onPageShow)
-    window.addEventListener('focus', onFocus, true)
+    try {
+      const el = videoRef.current
+      if (el) {
+        el.preload = 'auto'
+        const isCold =
+          (el.networkState === HTMLMediaElement.NETWORK_EMPTY) ||
+          !el.currentSrc
+        if (isCold) el.load?.()
+      }
+    } catch {}
+
+    void startPlayback()
+
+    try {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
+    } catch {}
+
+    if (FORUM_SPLASH_CLOSE_ON_VIDEO_END === 1) {
+      const failsafeMs = Math.max(0, Number(FORUM_SPLASH_FAILSAFE_MS || 0))
+      if (failsafeMs > 0) {
+        closeTimerRef.current = window.setTimeout(() => {
+          finish()
+        }, failsafeMs)
+      }
+    } else {
+      closeTimerRef.current = window.setTimeout(() => {
+        finish()
+      }, Math.max(0, Number(FORUM_SPLASH_SHOW_MS || 0)))
+    }
 
     return () => {
-      document.removeEventListener('visibilitychange', onVisibilityRecover)
-      window.removeEventListener('pageshow', onPageShow)
-      window.removeEventListener('focus', onFocus, true)
-
-      clearTimer(fadeTimerRef)
-      clearTimer(retryTimerRef)
-      clearTimer(fallbackTimerRef)
-      clearTimer(failsafeTimerRef)
-
-      setSplashActiveFlag(false)
+      try {
+        if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
+      } catch {}
+      try {
+        if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current)
+      } catch {}
     }
-  }, [finish, onDone, scheduleRetry, setSplashActiveFlag, visible])
+  }, [finish, onDone, startPlayback, visible])
 
   useEffect(() => {
     if (!visible) return
-    if (typeof document === 'undefined') return undefined
+    if (typeof document === 'undefined') return
 
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -399,13 +279,6 @@ export default function ForumBootSplash({ onDone }) {
 
   return (
     <>
-      <link
-        rel="preload"
-        href={FORUM_SPLASH_VIDEO_SRC}
-        as="video"
-        fetchPriority="high"
-      />
-
       <div
         className={`forum-boot-splash ${closing ? 'is-closing' : ''}`}
         aria-hidden="true"
@@ -420,53 +293,18 @@ export default function ForumBootSplash({ onDone }) {
             preload="auto"
             controls={false}
             disablePictureInPicture
-            onLoadedMetadata={() => {
-              ensurePlaybackRef.current?.('loadedmetadata')
-            }}
             onLoadedData={() => {
-              markReady()
-              ensurePlaybackRef.current?.('loadeddata')
-            }}
-            onCanPlay={() => {
-              markReady()
-              ensurePlaybackRef.current?.('canplay')
-            }}
-            onCanPlayThrough={() => {
-              markReady()
-              ensurePlaybackRef.current?.('canplaythrough')
-            }}
-            onPlaying={() => {
-              markReady()
-            }}
-            onPause={() => {
-              const el = videoRef.current
-              if (!el) return
-              if (closingRef.current) return
-              if (el.ended) return
-              scheduleRetry('pause')
-            }}
-            onWaiting={() => {
-              scheduleRetry('waiting')
-            }}
-            onStalled={() => {
-              scheduleRetry('stalled')
-            }}
-            onSuspend={() => {
-              if (!playbackReadyRef.current) {
-                scheduleRetry('suspend')
-              }
+              setPlaybackReady(true)
             }}
             onEnded={() => {
-              if (FORUM_SPLASH_CLOSE_ON_VIDEO_END === 1) {
-                finish()
-              }
+              finish()
             }}
             onError={() => {
-              scheduleRetry('error')
+              finish()
             }}
           />
 
-          {showFallback && !playbackReady && (
+          {!playbackReady && (
             <div className="forum-boot-splash__fallback">
               <div className="forum-boot-splash__fallback-label">
                 Loading...
@@ -516,7 +354,6 @@ export default function ForumBootSplash({ onDone }) {
           box-shadow: ${FORUM_SPLASH_BOX_SHADOW};
           overflow: ${FORUM_SPLASH_OVERFLOW};
           background: ${FORUM_SPLASH_VIDEO_BACKGROUND};
-          contain: layout paint style;
         }
 
         .forum-boot-splash__video {
@@ -528,8 +365,6 @@ export default function ForumBootSplash({ onDone }) {
           background: ${FORUM_SPLASH_VIDEO_BACKGROUND};
           opacity: ${FORUM_SPLASH_VIDEO_OPACITY};
           pointer-events: none;
-          transform: translateZ(0);
-          backface-visibility: hidden;
         }
 
         .forum-boot-splash__fallback {
@@ -538,7 +373,7 @@ export default function ForumBootSplash({ onDone }) {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(0, 0, 0, 0.18);
+          background: rgba(0, 0, 0, 0.28);
         }
 
         .forum-boot-splash__fallback-label {
@@ -565,4 +400,4 @@ export default function ForumBootSplash({ onDone }) {
       `}</style>
     </>
   )
-} 
+}

@@ -1,35 +1,6 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 
-const useBrowserLayoutEffect =
-  typeof window !== 'undefined' ? useLayoutEffect : useEffect
-
-function readGlobalTs(key) {
-  try {
-    if (typeof window === 'undefined') return 0
-    return Number(window[key] || 0)
-  } catch {
-    return 0
-  }
-}
-
-function markProgrammaticScrollTs() {
-  try {
-    if (typeof window === 'undefined') return
-    window.__forumProgrammaticScrollTs = Date.now()
-  } catch {}
-}
-
-function clearSafeTimeout(id) {
-  try {
-    if (id) clearTimeout(id)
-  } catch {}
-}
-
-function clearSafeAnimationFrame(id) {
-  try {
-    if (id) cancelAnimationFrame(id)
-  } catch {}
-}
+const useBrowserLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 export default function useVideoFeedLifecycle({
   videoFeedOpen,
@@ -60,70 +31,34 @@ export default function useVideoFeedLifecycle({
   const lastBuildEntryTokenRef = useRef(Number(videoFeedEntryToken || 0))
 
   useEffect(() => {
-    let disposed = false
     let rafA = 0
     let rafB = 0
     const timers = []
-
     const cancelScheduledBuild = () => {
       if (buildTimerRef.current) {
-        clearSafeTimeout(buildTimerRef.current)
+        try { clearTimeout(buildTimerRef.current) } catch {}
         buildTimerRef.current = 0
       }
     }
-
     const clearTimers = () => {
-      while (timers.length) {
-        clearSafeTimeout(timers.pop())
-      }
+      timers.forEach((id) => {
+        try { clearTimeout(id) } catch {}
+      })
+      timers.length = 0
     }
+    if (!videoFeedOpen) return undefined
 
-    const scheduleTimer = (fn, ms) => {
-      const id = setTimeout(fn, ms)
-      timers.push(id)
-      return id
-    }
-
-    const cleanup = () => {
-      disposed = true
-      cancelScheduledBuild()
-      clearTimers()
-      clearSafeAnimationFrame(rafA)
-      clearSafeAnimationFrame(rafB)
-      rafA = 0
-      rafB = 0
-    }
-
-    if (!videoFeedOpen) return cleanup
-
-    const runBuild = (source = 'scheduled') => {
-      if (disposed) return
-      cancelScheduledBuild()
-
-      try {
-        emitDiag?.(
-          'video_feed_build_run',
-          {
-            source,
-            token: Number(videoFeedEntryToken || 0),
-          },
-          { force: source === 'entry_token' }
-        )
-      } catch {}
-
-      try {
-        buildAndSetVideoFeed()
-      } catch {}
+    const runBuild = () => {
+      buildAndSetVideoFeed()
     }
 
     const scheduleBuildWhenIdle = (attempt = 0) => {
-      if (disposed || !videoFeedOpen) return
-
       const now = Date.now()
-      const lastUserScrollTs = readGlobalTs('__forumUserScrollTs')
+      const lastUserScrollTs = (() => {
+        try { return Number(window.__forumUserScrollTs || 0) } catch { return 0 }
+      })()
       const idleFor = now - lastUserScrollTs
       const idleNeed = 320
-
       if (attempt < 10 && idleFor < idleNeed) {
         cancelScheduledBuild()
         buildTimerRef.current = setTimeout(() => {
@@ -132,113 +67,75 @@ export default function useVideoFeedLifecycle({
         }, Math.max(90, idleNeed - idleFor))
         return
       }
-
-      runBuild(attempt > 0 ? 'idle_retry' : 'idle')
+      runBuild()
     }
 
     const tokenNow = Number(videoFeedEntryToken || 0)
-    const tokenChanged =
-      tokenNow !== Number(lastBuildEntryTokenRef.current || 0)
-
+    const tokenChanged = tokenNow !== Number(lastBuildEntryTokenRef.current || 0)
     lastBuildEntryTokenRef.current = tokenNow
 
     if (tokenChanged && tokenNow > 0) {
       try {
-        emitDiag?.(
-          'video_feed_refresh_build_immediate',
-          {
-            source: 'entry_token',
-            token: tokenNow,
-          },
-          { force: true }
-        )
+        emitDiag?.('video_feed_refresh_build_immediate', {
+          source: 'entry_token',
+          token: tokenNow,
+        }, { force: true })
       } catch {}
-
-      runBuild('entry_token')
+      runBuild()
     } else {
       scheduleBuildWhenIdle(0)
     }
 
     const applySoftRefreshWhenIdle = (attempt = 0) => {
-      if (disposed || !videoFeedOpen) return
       if (!videoFeedRefreshTeleportPendingRef.current) return
-
       const now = Date.now()
-      const lastUserScrollTs = readGlobalTs('__forumUserScrollTs')
-      const lastProgrammaticScrollTs = readGlobalTs(
-        '__forumProgrammaticScrollTs'
-      )
+      const lastUserScrollTs = (() => {
+        try { return Number(window.__forumUserScrollTs || 0) } catch { return 0 }
+      })()
+      const lastProgrammaticScrollTs = (() => {
+        try { return Number(window.__forumProgrammaticScrollTs || 0) } catch { return 0 }
+      })()
       const idleFor = now - Math.max(lastUserScrollTs, lastProgrammaticScrollTs)
       const idleNeed = attempt <= 2 ? 340 : 460
-
       if (attempt < 12 && idleFor < idleNeed) {
-        scheduleTimer(() => applySoftRefreshWhenIdle(attempt + 1), Math.max(90, idleNeed - idleFor))
+        const wait = Math.max(90, idleNeed - idleFor)
+        const id = setTimeout(() => applySoftRefreshWhenIdle(attempt + 1), wait)
+        timers.push(id)
         return
       }
-
       try {
-        emitDiag?.(
-          'video_feed_soft_refresh_apply',
-          {
-            stage: 'pre_teleport',
-            attempt,
-            idleFor,
-          },
-          { force: true }
-        )
+        emitDiag?.('video_feed_soft_refresh_apply', {
+          stage: 'pre_teleport',
+          attempt,
+          idleFor,
+        }, { force: true })
       } catch {}
-
-      try {
-        headAutoOpenRef.current = false
-      } catch {}
-
-      try {
-        setHeadPinned(false)
-      } catch {}
-
-      try {
-        setHeadHidden(true)
-      } catch {}
-
-      try {
-        setVisibleVideoCount(videoPageSize)
-      } catch {}
-
-      try {
-        videoFeedHardResetRef.current?.()
-      } catch {}
-
-      try {
-        markProgrammaticScrollTs()
-      } catch {}
-
-      try {
-        snapVideoFeedToFirstCardTop({
-          hideHeader: true,
-          anchorOnly: true,
-        })
-      } catch {}
-
-      try {
-        markProgrammaticScrollTs()
-      } catch {}
-
+      try { headAutoOpenRef.current = false } catch {}
+      try { setHeadPinned(false) } catch {}
+      try { setHeadHidden(true) } catch {}
+      try { setVisibleVideoCount(videoPageSize) } catch {}
+      try { videoFeedHardResetRef.current?.() } catch {}
+      try { snapVideoFeedToFirstCardTop({ hideHeader: true, anchorOnly: true }) } catch {}
       videoFeedRefreshTeleportPendingRef.current = false
     }
 
     if (videoFeedRefreshTeleportPendingRef.current) {
       try {
         rafA = requestAnimationFrame(() => {
-          rafB = requestAnimationFrame(() => {
-            applySoftRefreshWhenIdle(0)
-          })
+          rafB = requestAnimationFrame(() => applySoftRefreshWhenIdle(0))
         })
       } catch {
-        scheduleTimer(() => applySoftRefreshWhenIdle(0), 0)
+        const id = setTimeout(() => applySoftRefreshWhenIdle(0), 0)
+        timers.push(id)
       }
     }
 
-    return cleanup
+    return () => {
+      cancelScheduledBuild()
+      clearTimers()
+      try { if (rafA) cancelAnimationFrame(rafA) } catch {}
+      try { if (rafB) cancelAnimationFrame(rafB) } catch {}
+    }
   }, [
     videoFeedOpen,
     videoFeedEntryToken,
@@ -265,31 +162,12 @@ export default function useVideoFeedLifecycle({
     if (autoBootRef.current) return
     if (navRestoringRef.current) return
 
-    if (videoFeedOpen) {
+    if (videoFeedOpen || inboxOpen || questOpen || sel || threadRoot) {
       autoBootRef.current = true
       return
     }
 
-    if (inboxOpen || questOpen || sel || threadRoot) {
-      return
-    }
-
-    try {
-      autoBootRef.current = true
-      openVideoFeed('video_feed_auto', {
-        skipPush: true,
-        keepHeaderOpen: true,
-      })
-    } catch {
-      autoBootRef.current = false
-    }
-  }, [
-    videoFeedOpen,
-    inboxOpen,
-    questOpen,
-    sel,
-    threadRoot,
-    openVideoFeed,
-    navRestoringRef,
-  ])
-} 
+    autoBootRef.current = true
+    try { openVideoFeed('video_feed_auto', { skipPush: true, keepHeaderOpen: true }) } catch {}
+  }, [videoFeedOpen, inboxOpen, questOpen, sel, threadRoot, openVideoFeed, navRestoringRef])
+}

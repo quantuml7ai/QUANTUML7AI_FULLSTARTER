@@ -7,22 +7,18 @@ import { createEnableVideoControlsOnTap } from './videoControls'
 
 export const MEDIA_MUTED_KEY = 'forum:mediaMuted'
 export const MEDIA_VIDEO_MUTED_KEY = 'forum:videoMuted'
-export const MEDIA_MUTED_EVENT = 'forum:media-mute' 
-
+export const MEDIA_MUTED_EVENT = 'forum:media-mute'
 ;(() => {
-  // На новый реальный заход страницы форума стартуем в muted,
-  // но не перетираем preference повторными eval этого модуля в рамках той же вкладки.
+  // На каждый новый перезапуск страницы стартуем в muted,
+  // чтобы iPhone/Safari не блокировал autoplay из-за старого unmuted-состояния.
   try {
     if (typeof window === 'undefined') return
-    if (window.__forumBootMutedApplied === 1) return
-    window.__forumBootMutedApplied = 1
-
     localStorage.setItem(MEDIA_MUTED_KEY, '1')
     localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, '1')
   } catch {}
 })()
 
-export function readMutedPrefFromStorage() { 
+export function readMutedPrefFromStorage() {
   try {
     let v = localStorage.getItem(MEDIA_MUTED_KEY)
     if (v == null) v = localStorage.getItem(MEDIA_VIDEO_MUTED_KEY)
@@ -52,7 +48,7 @@ const __VIDEO_HARD_CAP_ENABLED = (() => {
     const ua = String((typeof navigator !== 'undefined' ? navigator.userAgent : '') || '')
     const isIOS = /iP(hone|ad|od)/i.test(ua)
     const dm = Number((typeof navigator !== 'undefined' ? navigator?.deviceMemory : 0) || 0)
-    const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2 
+    const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2
     if (isIOS) return false
     if (lowMem) return true
     return false
@@ -67,7 +63,7 @@ const __MAX_ACTIVE_VIDEO_ELEMENTS = (() => {
     const isIOS = /iP(hone|ad|od)/i.test(ua)
     const coarse = !!(typeof window !== 'undefined' && window?.matchMedia?.('(pointer: coarse)')?.matches)
     const dm = Number((typeof navigator !== 'undefined' ? navigator?.deviceMemory : 0) || 0)
-    const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2 
+    const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2
     if (isIOS) return 2
     if (lowMem) return 2
     if (coarse) return 3
@@ -112,31 +108,24 @@ export function __isVideoNearViewport(el, marginPx = 120) {
 
 export function __enforceActiveVideoCap(exceptEl) {
   try {
-    if (__activeVideoLRU.length <= __MAX_ACTIVE_VIDEO_ELEMENTS) return
-
     let guard = 0
-    while (__activeVideoLRU.length > __MAX_ACTIVE_VIDEO_ELEMENTS && guard < 64) {
+    while (__activeVideoLRU.length > __MAX_ACTIVE_VIDEO_ELEMENTS && guard < 128) {
       guard += 1
-      let victimIndex = -1
-
-      for (let i = 0; i < __activeVideoLRU.length; i += 1) {
-        const candidate = __activeVideoLRU[i]
-        if (!candidate) continue
-        if (candidate === exceptEl) continue
-        if (__isVideoNearViewport(candidate, 140)) continue
-        victimIndex = i
-        break
+      const victim = __activeVideoLRU[0]
+      if (!victim) break
+      if (victim === exceptEl) {
+        __activeVideoLRU.shift()
+        __activeVideoLRU.push(victim)
+        continue
       }
-
-      if (victimIndex < 0) break
-
-      const victim = __activeVideoLRU[victimIndex]
-      __activeVideoLRU.splice(victimIndex, 1)
+      if (__isVideoNearViewport(victim, 140)) {
+        __activeVideoLRU.shift()
+        __activeVideoLRU.push(victim)
+        continue
+      }
+      __activeVideoLRU.shift()
       __activeVideoEls.delete(victim)
-
-      try {
-        __unloadVideoEl(victim)
-      } catch {}
+      __unloadVideoEl(victim)
     }
   } catch {}
 }
@@ -147,7 +136,7 @@ export function __readMediaMutedPref() {
   return null
 }
 
-export function __writeMediaMutedPref(nextMuted) { 
+export function __writeMediaMutedPref(nextMuted) {
   try {
     const v = nextMuted ? '1' : '0'
     localStorage.setItem(MEDIA_MUTED_KEY, v)
@@ -158,40 +147,32 @@ export function __writeMediaMutedPref(nextMuted) {
 export function __unloadVideoEl(el) {
   if (!el) return
   const nowTs = Date.now()
-
   try {
     const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
     if (isPostFeedVideo) {
+      // Для feed-видео не переносим seek-позицию между unload/restore:
+      // это снижает range-шторм и нестабильные "серые" перезапуски.
       delete el.dataset.__resumeTime
     } else {
       const cur = Number(el.currentTime || 0)
       const dur = Number(el.duration || 0)
       const hasMeaningfulTime = Number.isFinite(cur) && cur > 0.18
-      const nearEnd =
-        Number.isFinite(dur) && dur > 0 && cur >= Math.max(0, dur - 0.18)
-
-      if (hasMeaningfulTime && !nearEnd) {
-        el.dataset.__resumeTime = String(cur)
-      } else {
-        delete el.dataset.__resumeTime
-      }
+      const nearEnd = Number.isFinite(dur) && dur > 0 && cur >= Math.max(0, dur - 0.18)
+      if (hasMeaningfulTime && !nearEnd) el.dataset.__resumeTime = String(cur)
+      else delete el.dataset.__resumeTime
     }
   } catch {}
-
   try {
     el.pause?.()
   } catch {}
-
   try {
     el.dataset.__active = '0'
     el.dataset.__loadPending = '0'
     el.dataset.__warmReady = '0'
     el.dataset.__resident = '0'
     el.dataset.__prewarm = '0'
-    delete el.dataset.__loadPendingSince
     el.dataset.__lastUnloadTs = String(nowTs)
   } catch {}
-
   const canHardUnload = (() => {
     try {
       if (__VIDEO_HARD_CAP_ENABLED) return true
@@ -200,34 +181,28 @@ export function __unloadVideoEl(el) {
       return __VIDEO_HARD_CAP_ENABLED
     }
   })()
-
   if (!canHardUnload) {
     try {
       el.preload = 'metadata'
     } catch {}
     return
   }
-
   try {
     if (!el.dataset.__src && el.currentSrc) el.dataset.__src = el.currentSrc
     if (!el.dataset.__src && el.getAttribute('src')) el.dataset.__src = el.getAttribute('src')
     if (!el.dataset.__src && el.getAttribute('data-src')) el.dataset.__src = el.getAttribute('data-src')
   } catch {}
-
   try {
     el.removeAttribute('src')
   } catch {}
-
   try {
     if (el.dataset?.__src) {
       el.setAttribute('data-src', String(el.dataset.__src))
     }
   } catch {}
-
   try {
     el.preload = 'none'
   } catch {}
-
   try {
     const poster = el.dataset?.__posterOriginal || ''
     if (poster) el.setAttribute('poster', poster)
@@ -235,7 +210,6 @@ export function __unloadVideoEl(el) {
     el.dataset.__needsPosterRestore = '1'
     el.dataset.__lastHardUnloadTs = String(nowTs)
   } catch {}
-
   try {
     el.load?.()
   } catch {}
@@ -246,67 +220,44 @@ export function __restoreVideoEl(el) {
   const nowTs = Date.now()
   const src = el.dataset.__src || el.getAttribute('data-src') || ''
   if (!src) return
-
   try {
     delete el.dataset.__forceHardUnload
   } catch {}
-
   const canRestoreLoad = () => {
     try {
       const now = Date.now()
       const blockedUntil = Number(el.dataset?.__restoreLoadBlockedUntil || 0)
       if (blockedUntil > now) return false
-
       const minGap = 1500
       const lastTs = Number(el.dataset?.__lastRestoreLoadTs || 0)
       if (lastTs > 0 && (now - lastTs) < minGap) return false
-
       const winMs = 16000
       const burstLimit = 5
       const winStart = Number(el.dataset?.__restoreLoadWindowStart || 0)
       const inWindow = winStart > 0 && (now - winStart) < winMs
       let count = Number(el.dataset?.__restoreLoadCount || 0)
-
       if (!inWindow) {
         el.dataset.__restoreLoadWindowStart = String(now)
         count = 0
       }
-
       count += 1
       el.dataset.__restoreLoadCount = String(count)
-
       if (count > burstLimit) {
         el.dataset.__restoreLoadBlockedUntil = String(now + 10000)
         return false
       }
-
       el.dataset.__lastRestoreLoadTs = String(now)
       return true
     } catch {
       return true
     }
   }
-
   try {
     el.dataset.__lastRestoreTs = String(nowTs)
   } catch {}
-
   try {
-    if (!el.getAttribute('data-src')) {
-      el.setAttribute('data-src', String(src))
-    }
+    if (!el.getAttribute('data-src')) el.setAttribute('data-src', String(src))
   } catch {}
-
-  try {
-    const mutedPref = __readMediaMutedPref()
-    if (typeof mutedPref === 'boolean') {
-      el.muted = mutedPref
-      el.defaultMuted = mutedPref
-      if (mutedPref) el.setAttribute('muted', '')
-      else el.removeAttribute('muted')
-    }
-  } catch {}
-
   const cur = el.getAttribute('src') || ''
   if (cur === src) {
     try {
@@ -315,7 +266,6 @@ export function __restoreVideoEl(el) {
       const isNetworkEmpty =
         typeof HTMLMediaElement !== 'undefined' &&
         networkStateNow === HTMLMediaElement.NETWORK_EMPTY
-
       if (readyStateNow === 0 || isNetworkEmpty) {
         if (!canRestoreLoad()) return
         el.dataset.__loadPending = '1'
@@ -325,11 +275,9 @@ export function __restoreVideoEl(el) {
     } catch {}
     return
   }
-
   try {
-    el.preload = el.dataset?.__prewarm === '1' ? 'auto' : 'metadata'
+    el.preload = (el.dataset?.__prewarm === '1') ? 'auto' : 'metadata'
   } catch {}
-
   try {
     const shouldRestorePoster = String(el.dataset?.__needsPosterRestore || '') === '1'
     if (shouldRestorePoster) {
@@ -339,13 +287,11 @@ export function __restoreVideoEl(el) {
       el.dataset.__needsPosterRestore = '0'
     }
   } catch {}
-
   try {
     el.dataset.__loadPending = '1'
     el.dataset.__warmReady = '0'
     el.setAttribute('src', src)
   } catch {}
-
   try {
     const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
     if (!isPostFeedVideo) {
@@ -354,27 +300,19 @@ export function __restoreVideoEl(el) {
         const seekToResume = () => {
           try {
             const duration = Number(el.duration || 0)
-            const safeTarget =
-              Number.isFinite(duration) && duration > 0
-                ? Math.max(0, Math.min(resumeTo, duration - 0.12))
-                : resumeTo
-
-            if (
-              Number.isFinite(safeTarget) &&
-              safeTarget > 0.05 &&
-              Math.abs(Number(el.currentTime || 0) - safeTarget) > 0.05
-            ) {
+            const safeTarget = Number.isFinite(duration) && duration > 0
+              ? Math.max(0, Math.min(resumeTo, duration - 0.12))
+              : resumeTo
+            if (Number.isFinite(safeTarget) && safeTarget > 0.05 && Math.abs(Number(el.currentTime || 0) - safeTarget) > 0.05) {
               el.currentTime = safeTarget
             }
           } catch {}
         }
-
         try { el.addEventListener('loadedmetadata', seekToResume, { once: true }) } catch {}
         try { el.addEventListener('canplay', seekToResume, { once: true }) } catch {}
       }
     }
   } catch {}
-
   try {
     const networkState = Number(el.networkState || 0)
     const isLoading =

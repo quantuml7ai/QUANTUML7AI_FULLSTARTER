@@ -82,15 +82,9 @@ export default function ForumPage() {
     setShowRules(false)
   }
 
-return (
-  <div className="iso-forum-page">
-    <link
-      rel="preload"
-      href="/load/load.mp4"
-      as="video"
-      fetchPriority="high"
-    />
-    <ForumBootSplash />
+  return (
+    <div className="iso-forum-page">
+      <ForumBootSplash />
 
       <div className="iso-forum-shell">
         {/* Верхний бренд-блок */}

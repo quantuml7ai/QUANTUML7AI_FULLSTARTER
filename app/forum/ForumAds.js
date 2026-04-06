@@ -49,22 +49,6 @@ function desiredMutedFromPref(pref) {
   // Если префа нет — стартуем muted=true (иначе автоплей часто будет блокироваться браузером).
   return pref == null ? true : !!pref;
 }
-
-const AD_NEAR_ROOT_MARGIN = '560px 0px 760px 0px';
-const AD_FOCUS_START_RATIO = 0.56;
-const AD_FOCUS_STOP_RATIO = 0.18;
-
-function isPageActuallyActive() {
-  if (!isBrowser()) return true;
-  try {
-    const visible = document.visibilityState === 'visible';
-    const focused =
-      typeof document.hasFocus === 'function' ? document.hasFocus() : true;
-    return visible && focused;
-  } catch {
-    return true;
-  }
-}
 // ===== FIXED AD SLOT HEIGHT (px) =====
 // Контент внутри вписывается, но высота/ширина слота не растут.
 const AD_SLOT_HEIGHT_PX = {
@@ -1059,132 +1043,23 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   // isPageActive: вкладка/окно активно (иначе всегда пауза)
   const [isNear, setIsNear] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const [isPageActive, setIsPageActive] = useState(() => isPageActuallyActive());
+  const [isPageActive, setIsPageActive] = useState(true);
 
   const shouldPlay = isFocused && isPageActive;
-  const shouldPrimeAdMedia = (isNear && isPageActive) || shouldPlay;
-
   const shouldPlayRef = useRef(false);
   const adPlayEventTsRef = useRef(0);
-
   const emitAdPlayToCoordinator = React.useCallback((source = 'ad') => {
     if (!isBrowser()) return;
     try {
       const now = Date.now();
       if ((now - Number(adPlayEventTsRef.current || 0)) < 320) return;
       adPlayEventTsRef.current = now;
-
-      const el =
-        videoRef.current ||
-        ytIframeRef.current ||
-        rootRef.current ||
-        null;
-
-      window.dispatchEvent(
-        new CustomEvent('site-media-play', {
-          detail: {
-            source,
-            element: el,
-            manual: false,
-            id: playerIdRef.current,
-          },
-        })
-      );
+      const el = rootRef.current || videoRef.current || ytIframeRef.current || null;
+      window.dispatchEvent(new CustomEvent('site-media-play', {
+        detail: { source, element: el, manual: false, id: playerIdRef.current }
+      }));
     } catch {}
   }, []);
-
-  const destroyLocalYtPlayer = React.useCallback((blankIframe = false) => {
-    const player = ytPlayerRef.current;
-    ytPlayerRef.current = null;
-
-    try { player?.pauseVideo?.(); } catch {}
-    try { player?.stopVideo?.(); } catch {}
-    try { player?.destroy?.(); } catch {}
-
-    if (blankIframe) {
-      try {
-        const iframe = ytIframeRef.current;
-        if (iframe) {
-          iframe.removeAttribute('src');
-          iframe.src = 'about:blank';
-        }
-      } catch {}
-    }
-  }, []);
-const tryStartAdVideo = React.useCallback((reason = 'play') => {
-  const v = videoRef.current;
-  if (!v) return;
-  if (!shouldPlayRef.current) return;
-
-  try {
-    v.playsInline = true;
-    v.loop = true;
-    v.preload = shouldPlayRef.current ? 'auto' : 'metadata';
-  } catch {}
-
-  try {
-    v.muted = !!muted;
-    v.defaultMuted = !!muted;
-    if (muted) v.setAttribute('muted', '');
-    else v.removeAttribute('muted');
-  } catch {}
-
-  try {
-    const isCold =
-      (typeof HTMLMediaElement !== 'undefined' &&
-        v.networkState === HTMLMediaElement.NETWORK_EMPTY) ||
-      !v.currentSrc;
-
-    if (isCold) {
-      const lazySrc = String(v.getAttribute('data-src') || '').trim();
-      if (lazySrc && !v.getAttribute('src')) {
-        try { v.setAttribute('src', lazySrc); } catch {}
-      }
-      try { v.load?.(); } catch {}
-      return;
-    }
-  } catch {}
-
-  try {
-    emitAdPlayToCoordinator('ad_video');
-    const p = v.play?.();
-
-    if (p && typeof p.then === 'function') {
-      p.catch(() => {
-        if (v.muted) {
-          try {
-            if (v.readyState >= 2 && shouldPlayRef.current) {
-              v.play?.().catch(() => {});
-            }
-          } catch {}
-          return;
-        }
-
-        try {
-          v.muted = true;
-          v.defaultMuted = true;
-          v.setAttribute('muted', '');
-        } catch {}
-
-        try {
-          writeMutedPrefToStorage(true);
-        } catch {}
-
-        try {
-          emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback');
-        } catch {}
-
-        setMuted(true);
-
-        try {
-          if (shouldPlayRef.current) {
-            v.play?.().catch(() => {});
-          }
-        } catch {}
-      });
-    }
-  } catch {}
-}, [emitAdPlayToCoordinator, muted]);
   const slotCssVars = {
     '--ad-slot-h-m': `${AD_SLOT_HEIGHT_PX.mobile}px`,
     '--ad-slot-h-t': `${AD_SLOT_HEIGHT_PX.tablet}px`,
@@ -1200,52 +1075,38 @@ const tryStartAdVideo = React.useCallback((reason = 'play') => {
     if (!isBrowser()) return;
 
     const sync = () => {
-      setIsPageActive(isPageActuallyActive());
+      const visible = document.visibilityState === 'visible';
+      setIsPageActive(visible);
     };
 
     sync();
-
-    document.addEventListener('visibilitychange', sync, true);
-    window.addEventListener('focus', sync, true);
-    window.addEventListener('blur', sync, true);
-    window.addEventListener('pageshow', sync, true);
+    document.addEventListener('visibilitychange', sync);
+    window.addEventListener('focus', sync);
+    window.addEventListener('blur', sync);
 
     return () => {
-      document.removeEventListener('visibilitychange', sync, true);
-      window.removeEventListener('focus', sync, true);
-      window.removeEventListener('blur', sync, true);
-      window.removeEventListener('pageshow', sync, true);
+      document.removeEventListener('visibilitychange', sync);
+      window.removeEventListener('focus', sync);
+      window.removeEventListener('blur', sync);
     };
   }, []);
 
   // Intersection: near + focused
   useEffect(() => {
     const el = rootRef.current;
-    if (!el || !isBrowser() || typeof IntersectionObserver === 'undefined') {
+    if (!el || !isBrowser() || typeof IntersectionObserver === 'undefined')
       return;
-    }
 
-    const nearObs = new IntersectionObserver( 
-      ([entry]) => {
-        setIsNear(!!entry?.isIntersecting);
-      },
-      {
-        rootMargin: AD_NEAR_ROOT_MARGIN,
-        threshold: 0.001,
-      }
+    // near: заранее «подойти» к блоку (без игры)
+    const nearObs = new IntersectionObserver(
+      ([e]) => setIsNear(!!e?.isIntersecting),
+      { rootMargin: '800px 0px', threshold: 0 }
     );
 
-    const focusObs = new IntersectionObserver( 
-      ([entry]) => {
-        const ratio = Number(entry?.intersectionRatio || 0);
-        setIsFocused((prev) =>
-          prev ? ratio >= AD_FOCUS_STOP_RATIO : ratio >= AD_FOCUS_START_RATIO
-        );
-      },
-      {
-        threshold: [0, 0.15, 0.35, 0.6, 0.85, 1],
-        rootMargin: '-10% 0px -10% 0px',
-      }
+    // focused: реально видно (>= 60% площади)
+    const focusObs = new IntersectionObserver(
+      ([e]) => setIsFocused((e?.intersectionRatio || 0) >= 0.6),
+      { threshold: [0, 0.25, 0.6, 0.75, 1] }
     );
 
     nearObs.observe(el);
@@ -1627,38 +1488,16 @@ const tryStartAdVideo = React.useCallback((reason = 'play') => {
   // YouTube Iframe API для управления звуком
   useEffect(() => {
     if (!isBrowser()) return;
-
-    if (media.kind !== 'youtube' || !media.src || !shouldPrimeAdMedia) {
-      destroyLocalYtPlayer(!shouldPrimeAdMedia);
-      return;
-    }
+    if (media.kind !== 'youtube' || !media.src) return;
 
     let cancelled = false;
-    let localPlayer = null;
 
-    const applyPlayerState = (player) => {
-      if (!player || cancelled) return;
-      try {
-        if (muted) player.mute?.();
-        else player.unMute?.();
-
-        if (shouldPlayRef.current) {
-          emitAdPlayToCoordinator('ad_youtube');
-          player.playVideo?.();
-        } else {
-          player.pauseVideo?.();
-        }
-      } catch {}
-    };
-
-    const mountPlayer = () => {
+    function createPlayer() {
       if (cancelled) return;
       if (!window.YT || !window.YT.Player || !ytIframeRef.current) return;
 
-      destroyLocalYtPlayer(false);
-
       try {
-        localPlayer = new window.YT.Player(ytIframeRef.current, {
+        const player = new window.YT.Player(ytIframeRef.current, {
           videoId: media.src,
           playerVars: {
             autoplay: 0,
@@ -1673,121 +1512,91 @@ const tryStartAdVideo = React.useCallback((reason = 'play') => {
           },
           events: {
             onReady: (ev) => {
-              if (cancelled) {
-                try { ev.target?.destroy?.(); } catch {}
-                return;
-              }
-              ytPlayerRef.current = ev.target;
-              applyPlayerState(ev.target);
-            },
-            onStateChange: (ev) => {
               if (cancelled) return;
-              const st = ev?.data;
-
-              if (st === window.YT?.PlayerState?.PLAYING) {
-                emitAdPlayToCoordinator('ad_youtube');
-              }
-
-              if (st === window.YT?.PlayerState?.ENDED) {
-                try { ev.target?.seekTo?.(0, true); } catch {}
-                try { ev.target?.playVideo?.(); } catch {}
-              }
-            },
-            onError: () => {
-              destroyLocalYtPlayer(true);
+              ytPlayerRef.current = ev.target;
+              try {
+                if (muted) ev.target.mute?.();
+                else ev.target.unMute?.();
+                // Играем только если реально в фокусе внимания
+                if (shouldPlayRef.current) ev.target.playVideo?.();
+                else ev.target.pauseVideo?.();
+              } catch {}
             },
           },
-        }); 
-      } catch {}
-    };
+        });
 
-    if (window.YT?.Player) {
-      mountPlayer();
+        ytPlayerRef.current = player;
+      } catch {}
+    }
+
+    if (window.YT && window.YT.Player) {
+      createPlayer();
     } else {
       const prev = window.onYouTubeIframeAPIReady;
       window.onYouTubeIframeAPIReady = function () {
-        try {
-          if (typeof prev === 'function') prev();
-        } catch {}
-        mountPlayer();
+        if (typeof prev === 'function') prev();
+        createPlayer();
       };
-
       if (!document.getElementById('yt-iframe-api')) {
         const tag = document.createElement('script');
         tag.id = 'yt-iframe-api';
         tag.src = 'https://www.youtube.com/iframe_api';
-        tag.async = true;
         document.head.appendChild(tag);
       }
     }
 
     return () => {
       cancelled = true;
-      if (localPlayer) {
-        try { localPlayer.pauseVideo?.(); } catch {}
-        try { localPlayer.destroy?.(); } catch {}
-        if (ytPlayerRef.current === localPlayer) ytPlayerRef.current = null;
-      }
     };
-  }, [
-    media.kind,
-    media.src,
-    muted,
-    shouldPrimeAdMedia,
-    destroyLocalYtPlayer,
-    emitAdPlayToCoordinator,
-  ]);
-
-  useEffect(() => {
-    return () => {
-      destroyLocalYtPlayer(true);
-    };
-  }, [destroyLocalYtPlayer]);
+  }, [media, muted]);
   // ===== Hard stop / resume playback depending on attention =====
-useEffect(() => {
-  // HTML5 video
-  if (media.kind === 'video' && videoRef.current) {
-    const v = videoRef.current;
-    const srcKey = String(media.src || '');
-
-    if (isVideoSrcTemporarilyBlocked(srcKey)) {
-      try { v.pause?.(); } catch {}
-      return;
-    }
-
-    if (shouldPlay) {
-      tryStartAdVideo();
-    } else {
-      try { v.pause?.(); } catch {}
-    }
-  }
-
-  // YouTube player (Iframe API)
-  if (media.kind === 'youtube' && ytPlayerRef.current) {
-    const p = ytPlayerRef.current;
-    try {
-      if (shouldPlay) {
-        emitAdPlayToCoordinator('ad_youtube');
-        if (muted) p.mute?.();
-        else p.unMute?.();
-        p.playVideo?.();
-      } else {
-        p.pauseVideo?.();
+  useEffect(() => {
+    // HTML5 video
+    if (media.kind === 'video' && videoRef.current) {
+      const v = videoRef.current;
+      const srcKey = String(media.src || '');
+      if (isVideoSrcTemporarilyBlocked(srcKey)) {
+        try { v.pause?.(); } catch {}
+        return;
       }
-    } catch {}
-  }
+      if (shouldPlay) {
+        // синхроним mute ДО play
+        try {
+          emitAdPlayToCoordinator('ad_video');
+          v.muted = !!muted;
+        } catch {}
 
-  if (media.kind === 'tiktok' && shouldPlay) {
-    emitAdPlayToCoordinator('ad_tiktok');
-  }
-}, [
-  emitAdPlayToCoordinator,
-  shouldPlay,
-  media.kind,
-  media.src,
-  muted,
-  tryStartAdVideo,
-]);
+        v.play?.().catch(() => {
+          // если пробовали со звуком и браузер запретил — откатим в mute глобально
+          if (!muted) {
+            writeMutedPrefToStorage(true);
+            emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback');
+            setMuted(true);
+            try { v.muted = true; } catch {}
+          }
+        });
+      } else {
+        v.pause?.();
+      }
+    }
+
+    // YouTube player (Iframe API)
+    if (media.kind === 'youtube' && ytPlayerRef.current) {
+      const p = ytPlayerRef.current;
+      try {
+        if (shouldPlay) {
+          emitAdPlayToCoordinator('ad_youtube');
+          if (muted) p.mute?.();
+          p.playVideo?.();
+        } else {
+          p.pauseVideo?.();
+        }
+      } catch {}
+    }
+    if (media.kind === 'tiktok' && shouldPlay) {
+      emitAdPlayToCoordinator('ad_tiktok');
+    }
+  }, [emitAdPlayToCoordinator, shouldPlay, media.kind, media.src, muted]);
 
   // Impression tracking
   useEffect(() => {
@@ -2020,7 +1829,7 @@ useEffect(() => {
               onClick={handleOpenAdsPage}
               className="btn"
               style={{
-                fontSize: '12px',
+                fontSize: '12x',
                 padding: '6px 12px',
                 borderRadius: 999,
                 marginLeft: 'auto',
@@ -2048,96 +1857,55 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
   <div className="forum-ad-media-fill">
     <video
       ref={videoRef}
-      src={
-        shouldPrimeAdMedia && !isVideoSrcTemporarilyBlocked(media.src)
-          ? media.src
-          : undefined
-      }
-      data-src={media.src}
+      src={media.src}
       className="forum-ad-fit"
-      autoPlay
       muted={muted}
       loop
       playsInline
       referrerPolicy="no-referrer"
-      preload={shouldPlay ? 'auto' : shouldPrimeAdMedia ? 'metadata' : 'none'}
-      onLoadedMetadata={() => {
-        try { clearVideoSrcBlock(media?.src); } catch {}
-        tryStartAdVideo('loadedmetadata');
-      }}
+      preload={isNear ? 'metadata' : 'none'}
       onLoadedData={() => {
         try { clearVideoSrcBlock(media?.src); } catch {}
-        tryStartAdVideo('loadeddata');
       }}
       onCanPlay={() => {
         try { clearVideoSrcBlock(media?.src); } catch {}
-        tryStartAdVideo('canplay');
-      }}
-      onPlaying={() => {
-        try { clearVideoSrcBlock(media?.src); } catch {}
-      }}
-      onPause={() => {
-        const v = videoRef.current;
-        if (!v) return;
-        if (!shouldPlayRef.current) return;
-        if (v.ended) return;
-        tryStartAdVideo('pause');
-      }}
-      onWaiting={() => {
-        if (!shouldPlayRef.current) return;
-        tryStartAdVideo('waiting');
-      }}
-      onStalled={() => {
-        if (!shouldPlayRef.current) return;
-        tryStartAdVideo('stalled');
       }}
       onError={() => {
         try {
           markVideoSrcTemporarilyBlocked(media?.src, isNear ? 12000 : 20000);
         } catch {}
-        try {
-          videoRef.current?.pause?.();
-        } catch {}
       }}
     />
   </div>
 )}
- 
-            {media.kind === 'youtube' && media.src && shouldPrimeAdMedia && (
-              <div
-                className="relative overflow-hidden rounded-lg"
-                style={
-                  isFluid
-                    ? { width: '100%', aspectRatio: '16 / 9' }
-                    : { width: '100%', height: '100%' }
-                }
-              >
-                <iframe
-                  ref={ytIframeRef}
-                  src={`https://www.youtube.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}
-                  data-src={`https://www.youtube.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}
-                  loading="lazy"
-                  title="YouTube video"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: 10,
-                    pointerEvents: 'none',
-                  }}
-                />
-              </div>
+
+
+
+            {media.kind === 'youtube' && media.src && (
+<div
+  className="relative overflow-hidden rounded-lg"
+  style={isFluid ? { width: '100%', aspectRatio: '16 / 9' } : { width: '100%', height: '100%' }}
+>
+  <iframe
+    ref={ytIframeRef}
+    src={`https://www.youtube.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}
+    title="YouTube video"
+    frameBorder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    allowFullScreen
+    style={{
+      position: 'absolute',
+      inset: 0,
+      width: '100%',
+      height: '100%',
+      borderRadius: 10,
+      pointerEvents: 'none',
+    }}
+  />
+</div>
+
             )}
 
-            {media.kind === 'youtube' && media.src && !shouldPrimeAdMedia && (
-              <div className="w-full h-full flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)]">
-                {host}
-              </div>
-            )}
             {media.kind === 'tiktok' && media.src && shouldPlay && (
 <div
   className="relative overflow-hidden rounded-lg"
@@ -2225,7 +1993,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
               </button>
             )}
 
-            <div className="pointer-events-none absolute inset-0 rounded-lg border border-transparent qshine" />
+            <div className="pointer-events-none абсолют inset-0 rounded-lg border border-transparent qshine" />
           </div>
         </div> 
       </a>
