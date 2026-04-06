@@ -24,8 +24,9 @@ export default function useVideoCaptureController({
   saveComposerScroll,
   restoreComposerScroll,
   readVideoDurationSecFn,
+  createUnmirroredFrontStreamFn,
   emitDiag,
-  showVideoLimitOverlay,
+  openVideoTrimPopover,
   toast,
   t,
   setVideoProgress,
@@ -105,9 +106,14 @@ export default function useVideoCaptureController({
       } catch {}
       videoMirrorRef.current = null
 
+      const mime = MediaRecorder.isTypeSupported?.('video/webm;codecs=vp9')
+        ? 'video/webm;codecs=vp9'
+        : 'video/webm'
+
       const vTrack = baseStream.getVideoTracks?.()[0] || null
+      const aTracks = (baseStream.getAudioTracks?.() || []).filter((track) => track.readyState === 'live')
+
       let recStream = baseStream
-      let mirrorPlayback = false
       if (vTrack) {
         const settings = vTrack.getSettings?.() || {}
         const facing = String(settings.facingMode || '').toLowerCase()
@@ -117,14 +123,17 @@ export default function useVideoCaptureController({
           facing.includes('face')
 
         if (isFront) {
-          mirrorPlayback = true
-          try { emitDiag?.('camera_record_front_path', { path: 'base_stream' }) } catch {}
+          const mirrorStream = await createUnmirroredFrontStreamFn(baseStream)
+          const fixedTrack = mirrorStream?.getVideoTracks?.()[0] || null
+          if (mirrorStream && fixedTrack) {
+            recStream = new MediaStream([
+              ...aTracks,
+              fixedTrack,
+            ])
+            videoMirrorRef.current = mirrorStream
+          }
         }
       }
-
-      const mime = MediaRecorder.isTypeSupported?.('video/webm;codecs=vp9')
-        ? 'video/webm;codecs=vp9'
-        : 'video/webm'
 
       const mediaRecorder = new MediaRecorder(recStream, { mimeType: mime })
       videoChunksRef.current = []
@@ -160,7 +169,7 @@ export default function useVideoCaptureController({
               }
             } catch {}
             setPendingVideo(null)
-            try { pendingVideoInfoRef.current = { source: '', durationSec: NaN, mirrorPlayback: false } } catch {}
+            try { pendingVideoInfoRef.current = { source: '', durationSec: NaN } } catch {}
             setVideoState('idle')
             videoCancelRef.current = false
             return
@@ -168,38 +177,47 @@ export default function useVideoCaptureController({
 
           const blob = new Blob(videoChunksRef.current, { type: mediaRecorder.mimeType || 'video/webm' })
           videoChunksRef.current = []
-          const elapsedByStart = recordStartedAt
-            ? Math.max(0.1, Math.min(
-                forumVideoMaxSeconds,
-                (Date.now() - recordStartedAt) / 1000
-              ))
-            : NaN
-          const elapsedByState = Math.max(0, Number(videoElapsedRef.current || 0))
-          const derived =
-            (autoStoppedAtLimit ? forumVideoMaxSeconds : NaN)
-            || (Number.isFinite(elapsedByStart) && elapsedByStart > 0 ? elapsedByStart : NaN)
-            || (Number.isFinite(elapsedByState) && elapsedByState > 0 ? elapsedByState : NaN)
-
-          let recordedDurationSec =
-            (Number.isFinite(derived) && derived > 0)
-              ? Math.max(0.1, Math.min(forumVideoMaxSeconds, derived))
-              : forumVideoMaxSeconds
-
+          let recordedDurationSec = NaN
           try {
-            emitDiag?.('camera_record_duration_derived', {
-              source: autoStoppedAtLimit ? 'auto_limit' : 'timer',
-              durationSec: Math.round(recordedDurationSec * 100) / 100,
-            })
+            recordedDurationSec = await readVideoDurationSecFn(blob)
           } catch {}
+
+          if (!Number.isFinite(recordedDurationSec) || recordedDurationSec <= 0) {
+            const elapsedByStart = recordStartedAt
+              ? Math.max(0.1, Math.min(
+                  forumVideoMaxSeconds,
+                  (Date.now() - recordStartedAt) / 1000
+                ))
+              : NaN
+            const elapsedByState = Math.max(0, Number(videoElapsedRef.current || 0))
+            const derived =
+              (autoStoppedAtLimit ? forumVideoMaxSeconds : NaN)
+              || (Number.isFinite(elapsedByStart) && elapsedByStart > 0 ? elapsedByStart : NaN)
+              || (Number.isFinite(elapsedByState) && elapsedByState > 0 ? elapsedByState : NaN)
+
+            if (Number.isFinite(derived) && derived > 0) {
+              recordedDurationSec = Math.max(0.1, Math.min(forumVideoMaxSeconds, derived))
+            } else {
+              recordedDurationSec = forumVideoMaxSeconds
+            }
+            try {
+              emitDiag?.('camera_record_duration_fallback', {
+                source: autoStoppedAtLimit ? 'auto_limit' : 'timer',
+                durationSec: Math.round(recordedDurationSec * 100) / 100,
+              })
+            } catch {}
+          }
 
           if (recordedDurationSec > (forumVideoMaxSeconds + forumVideoCameraRecordEpsilonSec)) {
             try {
               setVideoOpen(false)
               setVideoState('idle')
-              showVideoLimitOverlay?.({
+              openVideoTrimPopover({
                 source: 'camera_record',
+                blob,
+                mime: String(blob?.type || ''),
                 durationSec: recordedDurationSec,
-                reason: 'too_long',
+                name: `camera-${Date.now()}.webm`,
               })
             } catch {}
             videoChunksRef.current = []
@@ -210,7 +228,7 @@ export default function useVideoCaptureController({
               }
             } catch {}
             setPendingVideo(null)
-            try { pendingVideoInfoRef.current = { source: '', durationSec: NaN, mirrorPlayback: false } } catch {}
+            try { pendingVideoInfoRef.current = { source: '', durationSec: NaN } } catch {}
             try { restoreComposerScroll() } catch {}
             return
           }
@@ -231,7 +249,6 @@ export default function useVideoCaptureController({
               map.set(String(url), {
                 source: 'camera_record',
                 durationSec: Math.min(forumVideoMaxSeconds, Math.max(0.1, Number(recordedDurationSec || 0))),
-                mirrorPlayback,
               })
               if (map.size > 32) {
                 const first = map.keys().next()?.value
@@ -239,45 +256,9 @@ export default function useVideoCaptureController({
               }
             }
           } catch {}
-          try {
-            pendingVideoInfoRef.current = {
-              source: 'camera_record',
-              durationSec: recordedDurationSec,
-              mirrorPlayback,
-            }
-          } catch {}
+          try { pendingVideoInfoRef.current = { source: 'camera_record', durationSec: recordedDurationSec } } catch {}
           setVideoState('preview')
           try { restoreComposerScroll() } catch {}
-          try {
-            Promise.resolve(readVideoDurationSecFn?.(blob, 4000))
-              .then((actualDurationSec) => {
-                const nextDuration = Number(actualDurationSec || 0)
-                if (!Number.isFinite(nextDuration) || nextDuration <= 0) return
-                const safeDuration = Math.max(0.1, Math.min(forumVideoMaxSeconds, nextDuration))
-                try {
-                  if (pendingVideoInfoRef.current?.source === 'camera_record') {
-                    pendingVideoInfoRef.current = {
-                      source: 'camera_record',
-                      durationSec: safeDuration,
-                      mirrorPlayback,
-                    }
-                  }
-                } catch {}
-                try {
-                  const map = pendingVideoBlobMetaRef.current
-                  if (map && typeof map.set === 'function' && /^blob:/.test(String(url || ''))) {
-                    const prevMeta = map.get(String(url)) || {}
-                    map.set(String(url), {
-                      ...prevMeta,
-                      source: 'camera_record',
-                      durationSec: safeDuration,
-                      mirrorPlayback: typeof prevMeta?.mirrorPlayback === 'boolean' ? prevMeta.mirrorPlayback : mirrorPlayback,
-                    })
-                  }
-                } catch {}
-              })
-              .catch(() => {})
-          } catch {}
         } catch {
           try { videoChunksRef.current = [] } catch {}
           setVideoState('idle')
@@ -308,10 +289,11 @@ export default function useVideoCaptureController({
       try { toast?.warn?.(t?.('forum_camera_denied')) } catch {}
     }
   }, [
+    createUnmirroredFrontStreamFn,
     emitDiag,
     forumVideoCameraRecordEpsilonSec,
     forumVideoMaxSeconds,
-    showVideoLimitOverlay,
+    openVideoTrimPopover,
     pendingVideo,
     pendingVideoBlobMetaRef,
     pendingVideoInfoRef,
@@ -366,7 +348,7 @@ export default function useVideoCaptureController({
     }
 
     setPendingVideo(null)
-    try { pendingVideoInfoRef.current = { source: '', durationSec: NaN, mirrorPlayback: false } } catch {}
+    try { pendingVideoInfoRef.current = { source: '', durationSec: NaN } } catch {}
     setVideoOpen(false)
     setVideoState('idle')
     setVideoElapsed(0)

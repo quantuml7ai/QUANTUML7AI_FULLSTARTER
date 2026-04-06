@@ -1135,8 +1135,6 @@ const activePreview = useNewsPreview(activeItem)
             {/* выбор интервала */}
             <div className="selectShell smallSelectShell">
               <select
-                id="crypto-news-autoplay-interval"
-                name="cryptoNewsAutoplayInterval"
                 className="select smallSelect"
                 value={String(autoPlayIntervalMs)}
                 onChange={(e) =>
@@ -1329,8 +1327,6 @@ const activePreview = useNewsPreview(activeItem)
                 </button>
                 <div className="selectShell smallSelectShell">
                   <select
-                    id="crypto-news-autoplay-interval-mobile"
-                    name="cryptoNewsAutoplayIntervalMobile"
                     className="select smallSelect"
                     value={String(autoPlayIntervalMs)}
                     onChange={(e) =>

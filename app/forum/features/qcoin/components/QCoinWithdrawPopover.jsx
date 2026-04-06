@@ -110,7 +110,7 @@ export default function QCoinWithdrawPopover({
               muted
               loop
               playsInline
-                preload="metadata"
+              preload="metadata"
             />
           </div>
 

@@ -89,6 +89,48 @@ export default function useForumViewTracking({
       }, delay)
     }
 
+    const prefetchedPosters = new Set()
+    const prefetchedPosterQueue = []
+    const PREFETCH_POSTER_LIMIT = 96
+    const rememberPrefetchedPoster = (url) => {
+      if (!url || prefetchedPosters.has(url)) return false
+      prefetchedPosters.add(url)
+      prefetchedPosterQueue.push(url)
+      if (prefetchedPosterQueue.length > PREFETCH_POSTER_LIMIT) {
+        const stale = prefetchedPosterQueue.shift()
+        if (stale) prefetchedPosters.delete(stale)
+      }
+      return true
+    }
+
+    const prefetchVideosAround = (centerEl) => {
+      try {
+        const cards = Array.from(document.querySelectorAll(CARD_SELECTOR))
+        const idx = cards.indexOf(centerEl)
+        if (idx < 0) return
+
+        const from = Math.max(0, idx - 2)
+        const to = Math.min(cards.length - 1, idx + 2)
+
+        for (let i = from; i <= to; i++) {
+          const card = cards[i]
+          card
+            .querySelectorAll('video[data-forum-video="post"]')
+            .forEach((v) => {
+              try {
+                const p = v.getAttribute('poster') || v.dataset?.poster || ''
+                if (!p) return
+                if (!rememberPrefetchedPoster(p)) return
+                const img = new Image()
+                img.decoding = 'async'
+                img.loading = 'lazy'
+                img.src = p
+              } catch {}
+            })
+        }
+      } catch {}
+    }
+
     const isEntryFocused = (entry) => {
       if (!entry?.isIntersecting) return false
       const ratio = Number(entry.intersectionRatio || 0)
@@ -117,6 +159,7 @@ export default function useForumViewTracking({
             else focused.get(postId).el = el
 
             markViewPostRef.current?.(postId)
+            prefetchVideosAround(el)
             scheduleNextBucketTick(postId)
           } else {
             clearFocusedTimer(postId)

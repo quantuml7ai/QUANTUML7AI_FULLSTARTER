@@ -68,7 +68,7 @@ export default function Providers({ children }) {
             projectId,
             chains: chainsArr,
             themeMode: 'dark',
-            enableAnalytics: false,
+            enableAnalytics: true,
             enableExplorer: true,
             explorerRecommendedWalletIds: 'NONE',
             featuredWalletIds: [

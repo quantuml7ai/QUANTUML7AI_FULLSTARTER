@@ -37,14 +37,6 @@ images: {
     // Keep the existing asset name (`Q-Cast.png`) and provide a stable alias path.
     return [
       {
-        source: '/favicon.ico',
-        destination: '/favicon-new.ico',
-      },
-      {
-        source: '/apple-touch-icon.png',
-        destination: '/apple-touch-icon-new.png',
-      },
-      {
         source: '/audio/Qcast.png',
         destination: '/audio/Q-Cast.png',
       },
@@ -85,7 +77,7 @@ images: {
     return [
       // 🔹 1) Фавиконки — без кеша
       {
-        source: '/:file(favicon.ico|favicon-new.ico|apple-touch-icon.png|apple-touch-icon-new.png)',
+        source: '/:file(favicon-new.ico|apple-touch-icon-new.png)',
         headers: [
           {
             key: 'Cache-Control',

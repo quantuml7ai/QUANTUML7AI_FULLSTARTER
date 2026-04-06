@@ -136,7 +136,7 @@ export default function ForumPostCard({
       aria-label={t('forum_post_aria')}
       onPointerEnter={markFocusedView}
       onFocusCapture={markFocusedView}
-      onPointerDown={markFocusedView}
+      onTouchStart={markFocusedView}
     >
       <PostFxLayer
         FX_POOL={FX_POOL}
@@ -174,6 +174,7 @@ export default function ForumPostCard({
           QCastPlayerComponent={QCastPlayerComponent}
           ytEmbedParams={ytEmbedParams}
           postId={p?.id}
+          posterUrl={p?.posterUrl}
           YT_RE={YT_RE}
         />
 

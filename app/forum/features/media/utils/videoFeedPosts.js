@@ -6,7 +6,7 @@ export function isMediaPostCandidate(post, deps = {}) {
   const extractUrlsFromText = typeof deps.extractUrlsFromText === 'function' ? deps.extractUrlsFromText : () => []
 
   if (post.type === 'video' || post.type === 'audio' || post.type === 'image') return true
-  if (post.videoUrl || post.audioUrl || post.imageUrl) return true
+  if (post.videoUrl || post.posterUrl || post.audioUrl || post.imageUrl) return true
   if (post.mime && /^(video|audio|image)\//i.test(String(post.mime))) return true
   if (
     post.media &&

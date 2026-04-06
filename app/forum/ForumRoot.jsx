@@ -67,7 +67,7 @@ import {
   readVideoDurationSec,
   readAudioDurationSec,
 } from './features/media/utils/mediaRuntime'
-import { getForumVideoLimitCopy, getForumVoiceTapLabel } from './features/media/utils/videoCopy'
+import { getForumVideoLimitCopy, getForumVideoTrimCopy, getForumVoiceTapLabel } from './features/media/utils/videoCopy'
 import { FEED_URL_RE, extractUrlsFromText, isVideoUrl, isImageUrl, isAudioUrl } from './features/media/utils/urlParsing'
 import {
   isYouTubeUrl,
@@ -159,6 +159,7 @@ export default function Forum(){
   const { t, locale } = useI18n()
   const toast = useForumToast()
   const videoLimitCopy = useMemo(() => getForumVideoLimitCopy(t), [t]);
+  const videoTrimCopy = useMemo(() => getForumVideoTrimCopy(t), [t]);
   const voiceTapLabel = useMemo(() => getForumVoiceTapLabel(locale), [locale]);
   const uiDir = (isBrowser() &&
     (document.documentElement?.dir === 'rtl' ||
@@ -698,9 +699,25 @@ const {
   videoLimitOverlay,
   closeVideoLimitOverlay,
   showVideoLimitOverlay,
+  videoTrimPopover,
+  closeVideoTrimPopover,
+  openVideoTrimPopover,
+  setVideoTrimStartSec,
+  applyVideoTrimPopover,
 } = useVideoTrimController({
   emitDiag,
   forumVideoMaxSeconds: FORUM_VIDEO_MAX_SECONDS,
+  pendingVideo,
+  setPendingVideo,
+  pendingVideoRef,
+  pendingVideoBlobMetaRef,
+  pendingVideoInfoRef,
+  setOverlayMediaKind,
+  setOverlayMediaUrl,
+  setVideoOpen,
+  setVideoState,
+  saveComposerScroll,
+  restoreComposerScroll,
 });
  
 const {
@@ -738,7 +755,7 @@ const {
   readVideoDurationSecFn: readVideoDurationSec,
   createUnmirroredFrontStreamFn: createUnmirroredFrontStream,
   emitDiag,
-  showVideoLimitOverlay,
+  openVideoTrimPopover,
   toast,
   t,
   setVideoProgress,
@@ -826,6 +843,7 @@ const {
     forumVideoCameraRecordEpsilonSec: FORUM_VIDEO_CAMERA_RECORD_EPSILON_SEC,
     showVideoLimitOverlay,
     endMediaPipeline,
+    openVideoTrimPopover,
     forumVideoMaxBytes: FORUM_VIDEO_MAX_BYTES,
     viewerId,
     stopMediaProg,
@@ -924,6 +942,7 @@ const {
     setVideoOpen,
     viewerId,
     showVideoLimitOverlay,
+    openVideoTrimPopover,
     readVideoDurationSecFn: readVideoDurationSec,
     forumVideoMaxSeconds: FORUM_VIDEO_MAX_SECONDS,
     forumVideoMaxBytes: FORUM_VIDEO_MAX_BYTES,
@@ -1201,18 +1220,6 @@ const {
   setVideoFeedOpenRef,
 })
 
-const pendingVideoMirrorPreview = !!(
-  pendingVideo &&
-  (
-    pendingVideoBlobMetaRef.current?.get?.(String(pendingVideo || ''))?.source === 'camera_record' ||
-    pendingVideoInfoRef.current?.source === 'camera_record'
-  ) &&
-  (
-    pendingVideoBlobMetaRef.current?.get?.(String(pendingVideo || ''))?.mirrorPlayback ||
-    pendingVideoInfoRef.current?.mirrorPlayback
-  )
-)
-
 // Scroll Focus Lock (компенсация scroll при росте/сжатии блоков)
 const compensateScrollOnResize = useScrollResizeCompensation()
   const {
@@ -1444,7 +1451,6 @@ const compensateScrollOnResize = useScrollResizeCompensation()
     pendingImgs,
     setPendingImgs,
     pendingVideo,
-    pendingVideoMirrorPreview,
     pendingAudio,
     openPendingVideoFullscreen,
     removePendingVideoAttachment,
@@ -1473,7 +1479,6 @@ const compensateScrollOnResize = useScrollResizeCompensation()
     videoStreamRef,
     overlayMediaUrl,
     pendingVideo,
-    pendingVideoMirrorPreview,
     overlayMediaKind,
     acceptMediaFromOverlay,
     startVideo,
@@ -1483,6 +1488,11 @@ const compensateScrollOnResize = useScrollResizeCompensation()
     videoLimitCopy,
     forumVideoMaxSeconds: FORUM_VIDEO_MAX_SECONDS,
     closeVideoLimitOverlay,
+    videoTrimPopover,
+    videoTrimCopy,
+    setVideoTrimStartSec,
+    closeVideoTrimPopover,
+    applyVideoTrimPopover,
     reportUI,
     closeReportPopover,
     handleReportSelect,

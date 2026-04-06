@@ -31,6 +31,7 @@ export default function PostMediaStack({
   QCastPlayerComponent,
   ytEmbedParams,
   postId,
+  posterUrl,
   YT_RE,
 }) {
   const mediaKeyBase = String(postId || 'post')
@@ -105,6 +106,7 @@ export default function PostMediaStack({
                 data-forum-video="post"
                 data-forum-media="video"
                 src={src}
+                poster={i === 0 && posterUrl ? posterUrl : undefined}
                 playsInline
                 controls={false}
                 controlsList="nodownload noplaybackrate noremoteplayback"

@@ -7,15 +7,7 @@ import { createEnableVideoControlsOnTap } from './videoControls'
 
 export const MEDIA_MUTED_KEY = 'forum:mediaMuted'
 export const MEDIA_VIDEO_MUTED_KEY = 'forum:videoMuted'
-export const MEDIA_MUTED_EVENT = 'forum:media-mute'
-
-function isForumBootSplashActive() {
-  try {
-    return !!window.__forumBootSplashActive
-  } catch {
-    return false
-  }
-}
+export const MEDIA_MUTED_EVENT = 'forum:media-mute' 
 
 ;(() => {
   // На новый реальный заход страницы форума стартуем в muted,
@@ -23,16 +15,15 @@ function isForumBootSplashActive() {
   try {
     if (typeof window === 'undefined') return
     if (window.__forumBootMutedApplied === 1) return
+    window.__forumBootMutedApplied = 1
 
-    window.__forumBootMutedApplied = 1 
     localStorage.setItem(MEDIA_MUTED_KEY, '1')
     localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, '1')
   } catch {}
 })()
 
-export function readMutedPrefFromStorage() {
+export function readMutedPrefFromStorage() { 
   try {
-    if (isForumBootSplashActive()) return true
     let v = localStorage.getItem(MEDIA_MUTED_KEY)
     if (v == null) v = localStorage.getItem(MEDIA_VIDEO_MUTED_KEY)
     if (v == null) return null
@@ -44,16 +35,10 @@ export function readMutedPrefFromStorage() {
 
 export const __MEDIA_VIS_MARGIN_PX = (() => {
   try {
-    const ua = String(
-      (typeof navigator !== 'undefined' ? navigator.userAgent : '') || ''
-    )
+    const ua = String((typeof navigator !== 'undefined' ? navigator.userAgent : '') || '')
     const isIOS = /iP(hone|ad|od)/i.test(ua)
     const isAndroid = /Android/i.test(ua)
-    const coarse = !!(
-      typeof window !== 'undefined' &&
-      window?.matchMedia?.('(pointer: coarse)')?.matches
-    )
-
+    const coarse = !!(typeof window !== 'undefined' && window?.matchMedia?.('(pointer: coarse)')?.matches)
     if (isIOS) return 360
     if (isAndroid || coarse) return 420
     return 320
@@ -64,14 +49,11 @@ export const __MEDIA_VIS_MARGIN_PX = (() => {
 
 const __VIDEO_HARD_CAP_ENABLED = (() => {
   try {
-    const ua = String(
-      (typeof navigator !== 'undefined' ? navigator.userAgent : '') || ''
-    )
+    const ua = String((typeof navigator !== 'undefined' ? navigator.userAgent : '') || '')
     const isIOS = /iP(hone|ad|od)/i.test(ua)
     const dm = Number((typeof navigator !== 'undefined' ? navigator?.deviceMemory : 0) || 0)
-    const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2
-
-    if (isIOS) return true
+    const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2 
+    if (isIOS) return false
     if (lowMem) return true
     return false
   } catch {
@@ -81,18 +63,12 @@ const __VIDEO_HARD_CAP_ENABLED = (() => {
 
 const __MAX_ACTIVE_VIDEO_ELEMENTS = (() => {
   try {
-    const ua = String(
-      (typeof navigator !== 'undefined' ? navigator.userAgent : '') || ''
-    )
+    const ua = String((typeof navigator !== 'undefined' ? navigator.userAgent : '') || '')
     const isIOS = /iP(hone|ad|od)/i.test(ua)
-    const coarse = !!(
-      typeof window !== 'undefined' &&
-      window?.matchMedia?.('(pointer: coarse)')?.matches
-    )
+    const coarse = !!(typeof window !== 'undefined' && window?.matchMedia?.('(pointer: coarse)')?.matches)
     const dm = Number((typeof navigator !== 'undefined' ? navigator?.deviceMemory : 0) || 0)
-    const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2
-
-    if (isIOS) return 1
+    const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2 
+    if (isIOS) return 2
     if (lowMem) return 2
     if (coarse) return 3
     return 4
@@ -106,20 +82,15 @@ const __activeVideoLRU = []
 
 export function __touchActiveVideoEl(el) {
   if (!el) return
-
   if (!__activeVideoEls.has(el)) __activeVideoEls.add(el)
-
   const idx = __activeVideoLRU.indexOf(el)
   if (idx !== -1) __activeVideoLRU.splice(idx, 1)
-
   __activeVideoLRU.push(el)
 }
 
 export function __dropActiveVideoEl(el) {
   if (!el) return
-
   __activeVideoEls.delete(el)
-
   const idx = __activeVideoLRU.indexOf(el)
   if (idx !== -1) __activeVideoLRU.splice(idx, 1)
 }
@@ -127,17 +98,12 @@ export function __dropActiveVideoEl(el) {
 export function __isVideoNearViewport(el, marginPx = 120) {
   try {
     if (!el?.isConnected) return false
-
     const r = el.getBoundingClientRect?.()
     if (!r) return false
-
-    const vh =
-      Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0
+    const vh = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0
     if (vh <= 0) return false
-
     const topBound = 0 - marginPx
     const bottomBound = vh + marginPx
-
     return r.bottom > topBound && r.top < bottomBound
   } catch {
     return false
@@ -149,21 +115,15 @@ export function __enforceActiveVideoCap(exceptEl) {
     if (__activeVideoLRU.length <= __MAX_ACTIVE_VIDEO_ELEMENTS) return
 
     let guard = 0
-
-    while (
-      __activeVideoLRU.length > __MAX_ACTIVE_VIDEO_ELEMENTS &&
-      guard < 64
-    ) {
+    while (__activeVideoLRU.length > __MAX_ACTIVE_VIDEO_ELEMENTS && guard < 64) {
       guard += 1
-
       let victimIndex = -1
 
       for (let i = 0; i < __activeVideoLRU.length; i += 1) {
         const candidate = __activeVideoLRU[i]
         if (!candidate) continue
         if (candidate === exceptEl) continue
-        if (__isVideoNearViewport(candidate, Math.max(220, Math.round(__MEDIA_VIS_MARGIN_PX * 0.6)))) continue
-
+        if (__isVideoNearViewport(candidate, 140)) continue
         victimIndex = i
         break
       }
@@ -187,7 +147,7 @@ export function __readMediaMutedPref() {
   return null
 }
 
-export function __writeMediaMutedPref(nextMuted) {
+export function __writeMediaMutedPref(nextMuted) { 
   try {
     const v = nextMuted ? '1' : '0'
     localStorage.setItem(MEDIA_MUTED_KEY, v)
@@ -197,24 +157,18 @@ export function __writeMediaMutedPref(nextMuted) {
 
 export function __unloadVideoEl(el) {
   if (!el) return
-
   const nowTs = Date.now()
 
   try {
-    const isPostFeedVideo =
-      String(el?.getAttribute?.('data-forum-video') || '') === 'post'
-
+    const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
     if (isPostFeedVideo) {
-      // Для feed-видео не переносим seek-позицию между unload/restore.
       delete el.dataset.__resumeTime
     } else {
       const cur = Number(el.currentTime || 0)
       const dur = Number(el.duration || 0)
       const hasMeaningfulTime = Number.isFinite(cur) && cur > 0.18
       const nearEnd =
-        Number.isFinite(dur) &&
-        dur > 0 &&
-        cur >= Math.max(0, dur - 0.18)
+        Number.isFinite(dur) && dur > 0 && cur >= Math.max(0, dur - 0.18)
 
       if (hasMeaningfulTime && !nearEnd) {
         el.dataset.__resumeTime = String(cur)
@@ -235,7 +189,6 @@ export function __unloadVideoEl(el) {
     el.dataset.__resident = '0'
     el.dataset.__prewarm = '0'
     delete el.dataset.__loadPendingSince
-    delete el.dataset.__readyRetryCount
     el.dataset.__lastUnloadTs = String(nowTs)
   } catch {}
 
@@ -257,12 +210,8 @@ export function __unloadVideoEl(el) {
 
   try {
     if (!el.dataset.__src && el.currentSrc) el.dataset.__src = el.currentSrc
-    if (!el.dataset.__src && el.getAttribute('src')) {
-      el.dataset.__src = el.getAttribute('src')
-    }
-    if (!el.dataset.__src && el.getAttribute('data-src')) {
-      el.dataset.__src = el.getAttribute('data-src')
-    }
+    if (!el.dataset.__src && el.getAttribute('src')) el.dataset.__src = el.getAttribute('src')
+    if (!el.dataset.__src && el.getAttribute('data-src')) el.dataset.__src = el.getAttribute('data-src')
   } catch {}
 
   try {
@@ -279,7 +228,11 @@ export function __unloadVideoEl(el) {
     el.preload = 'none'
   } catch {}
 
-  try { 
+  try {
+    const poster = el.dataset?.__posterOriginal || ''
+    if (poster) el.setAttribute('poster', poster)
+    el.dataset.__posterRevealed = '0'
+    el.dataset.__needsPosterRestore = '1'
     el.dataset.__lastHardUnloadTs = String(nowTs)
   } catch {}
 
@@ -290,7 +243,6 @@ export function __unloadVideoEl(el) {
 
 export function __restoreVideoEl(el) {
   if (!el) return
-
   const nowTs = Date.now()
   const src = el.dataset.__src || el.getAttribute('data-src') || ''
   if (!src) return
@@ -307,13 +259,12 @@ export function __restoreVideoEl(el) {
 
       const minGap = 1500
       const lastTs = Number(el.dataset?.__lastRestoreLoadTs || 0)
-      if (lastTs > 0 && now - lastTs < minGap) return false
+      if (lastTs > 0 && (now - lastTs) < minGap) return false
 
       const winMs = 16000
       const burstLimit = 5
       const winStart = Number(el.dataset?.__restoreLoadWindowStart || 0)
-      const inWindow = winStart > 0 && now - winStart < winMs
-
+      const inWindow = winStart > 0 && (now - winStart) < winMs
       let count = Number(el.dataset?.__restoreLoadCount || 0)
 
       if (!inWindow) {
@@ -351,7 +302,6 @@ export function __restoreVideoEl(el) {
     if (typeof mutedPref === 'boolean') {
       el.muted = mutedPref
       el.defaultMuted = mutedPref
-
       if (mutedPref) el.setAttribute('muted', '')
       else el.removeAttribute('muted')
     }
@@ -368,35 +318,38 @@ export function __restoreVideoEl(el) {
 
       if (readyStateNow === 0 || isNetworkEmpty) {
         if (!canRestoreLoad()) return
-
         el.dataset.__loadPending = '1'
-        el.dataset.__loadPendingSince = String(Date.now())
         el.dataset.__warmReady = '0'
         el.load?.()
       }
     } catch {}
-
     return
   }
 
   try {
     el.preload = el.dataset?.__prewarm === '1' ? 'auto' : 'metadata'
-  } catch {} 
+  } catch {}
+
+  try {
+    const shouldRestorePoster = String(el.dataset?.__needsPosterRestore || '') === '1'
+    if (shouldRestorePoster) {
+      const poster = el.dataset?.__posterOriginal || ''
+      if (poster && !el.getAttribute('poster')) el.setAttribute('poster', poster)
+      el.dataset.__posterRevealed = '0'
+      el.dataset.__needsPosterRestore = '0'
+    }
+  } catch {}
 
   try {
     el.dataset.__loadPending = '1'
-    el.dataset.__loadPendingSince = String(Date.now())
     el.dataset.__warmReady = '0'
     el.setAttribute('src', src)
   } catch {}
 
   try {
-    const isPostFeedVideo =
-      String(el?.getAttribute?.('data-forum-video') || '') === 'post'
-
+    const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
     if (!isPostFeedVideo) {
       const resumeTo = Number(el.dataset?.__resumeTime || 0)
-
       if (Number.isFinite(resumeTo) && resumeTo > 0.18) {
         const seekToResume = () => {
           try {
@@ -416,13 +369,8 @@ export function __restoreVideoEl(el) {
           } catch {}
         }
 
-        try {
-          el.addEventListener('loadedmetadata', seekToResume, { once: true })
-        } catch {}
-
-        try {
-          el.addEventListener('canplay', seekToResume, { once: true })
-        } catch {}
+        try { el.addEventListener('loadedmetadata', seekToResume, { once: true }) } catch {}
+        try { el.addEventListener('canplay', seekToResume, { once: true }) } catch {}
       }
     }
   } catch {}
@@ -432,14 +380,12 @@ export function __restoreVideoEl(el) {
     const isLoading =
       typeof HTMLMediaElement !== 'undefined' &&
       networkState === HTMLMediaElement.NETWORK_LOADING
-
     if (!isLoading && canRestoreLoad()) el.load?.()
   } catch {}
 }
 
 export function __hasLazyVideoSourceWithoutSrc(el) {
   if (!(el instanceof HTMLVideoElement)) return false
-
   try {
     const hasSrc = !!el.getAttribute('src')
     const lazySrc = el.dataset?.__src || el.getAttribute('data-src') || ''
@@ -451,7 +397,6 @@ export function __hasLazyVideoSourceWithoutSrc(el) {
 
 export function __rearmPooledFxNode(el) {
   if (!el?.isConnected) return false
-
   try {
     el.classList.remove('isLive')
     el.style.animation = 'none'

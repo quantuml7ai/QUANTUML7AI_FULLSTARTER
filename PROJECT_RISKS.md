@@ -4,8 +4,8 @@
 > Если меняются критические точки входа, серверные контракты, import-граф или ownership модулей, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-risks.js`.
 
-Сгенерировано автоматически: 2026-04-04T01:13:55.143Z
-Исходных файлов в анализе: 626
+Сгенерировано автоматически: 2026-03-21T17:24:42.991Z
+Исходных файлов в анализе: 622
 Route-aware файлов: 95
 
 ## Что Считается Риском
@@ -124,10 +124,10 @@ Route-aware файлов: 95
 - `app/api/dm/_utils.js` — используют 8 локальных модулей
 - `lib/metadataCache.js` — используют 8 локальных модулей
 - `app/api/dm/_db.js` — используют 7 локальных модулей
-- `app/forum/features/profile/components/AvatarEmoji.jsx` — используют 7 локальных модулей
 - `app/forum/shared/components/HydrateText.jsx` — используют 7 локальных модулей
 - `app/forum/shared/utils/browser.js` — используют 7 локальных модулей
 - `app/ads.js` — используют 6 локальных модулей
+- `app/forum/features/profile/components/AvatarEmoji.jsx` — используют 6 локальных модулей
 - `app/forum/shared/hooks/useEvent.js` — используют 6 локальных модулей
 - `app/forum/shared/utils/formatters.js` — используют 6 локальных модулей
 - `app/forum/features/media/utils/mediaLifecycleRuntime.js` — используют 4 локальных модулей
@@ -143,7 +143,7 @@ Route-aware файлов: 95
 
 ## Файлы С Самым Высоким Fan-Out
 
-- `app/forum/ForumRoot.jsx` — импортирует 62 локальных модулей
+- `app/forum/ForumRoot.jsx` — импортирует 64 локальных модулей
 - `app/forum/features/feed/components/ForumPostCard.jsx` — импортирует 14 локальных модулей
 - `app/forum/features/dm/hooks/useForumDmRuntime.js` — импортирует 12 локальных модулей
 - `app/layout.js` — импортирует 11 локальных модулей
@@ -156,7 +156,6 @@ Route-aware файлов: 95
 - `app/forum/features/ui/hooks/useForumScreenFlowsRuntime.js` — импортирует 8 локальных модулей
 - `app/forum/features/dm/components/DmThreadHeader.jsx` — импортирует 7 локальных модулей
 - `app/forum/features/feed/components/PostHeaderMeta.jsx` — импортирует 7 локальных модулей
-- `app/forum/features/feed/hooks/useForumFeedRuntime.js` — импортирует 7 локальных модулей
 - `app/forum/features/ui/utils/buildForumRootPropBundles.js` — импортирует 7 локальных модулей
 - `app/forum/features/media/hooks/useForumVideoFeedRuntime.js` — импортирует 6 локальных модулей
 - `app/forum/features/profile/components/ProfilePopover.jsx` — импортирует 6 локальных модулей
@@ -164,15 +163,16 @@ Route-aware файлов: 95
 - `app/forum/ForumLayout.jsx` — импортирует 6 локальных модулей
 - `app/forum/features/dm/components/DmMessagesPane.jsx` — импортирует 5 локальных модулей
 - `app/forum/features/feed/components/TopicsOrPanelsSwitch.jsx` — импортирует 5 локальных модулей
+- `app/forum/features/feed/hooks/useForumFeedRuntime.js` — импортирует 5 локальных модулей
 - `app/forum/features/moderation/hooks/useForumModerationRuntime.js` — импортирует 5 локальных модулей
-- `app/forum/features/ui/components/ForumSearchSortControls.jsx` — импортирует 5 локальных модулей
 - `app/api/forum/mutate/route.js` — импортирует 4 локальных модулей
 - `app/exchange/page.js` — импортирует 4 локальных модулей
+- `app/forum/features/dm/components/InboxPane.jsx` — импортирует 4 локальных модулей
 
 ## Зоны С Повышенной Плотностью Связей
 
 - `app/layout.js` — файлов: 1; исходящих связей: 11; плотность: 11
-- `forum/root` — файлов: 14; исходящих связей: 85; плотность: 6.07
+- `forum/root` — файлов: 14; исходящих связей: 87; плотность: 6.21
 - `app/page.js` — файлов: 1; исходящих связей: 3; плотность: 3
 - `api/profile` — файлов: 9; исходящих связей: 19; плотность: 2.11
 - `app/ads` — файлов: 4; исходящих связей: 8; плотность: 2
@@ -188,9 +188,9 @@ Route-aware файлов: 95
 - `api/referral` — файлов: 2; исходящих связей: 3; плотность: 1.5
 - `app/about` — файлов: 2; исходящих связей: 3; плотность: 1.5
 - `app/game` — файлов: 2; исходящих связей: 3; плотность: 1.5
-- `forum/feed` — файлов: 54; исходящих связей: 74; плотность: 1.37
+- `forum/feed` — файлов: 54; исходящих связей: 72; плотность: 1.33
 - `app/subscribe` — файлов: 3; исходящих связей: 4; плотность: 1.33
-- `forum/ui` — файлов: 51; исходящих связей: 64; плотность: 1.25
+- `forum/ui` — файлов: 51; исходящих связей: 63; плотность: 1.24
 - `api/telegram` — файлов: 4; исходящих связей: 4; плотность: 1
 - `api/qcoin` — файлов: 3; исходящих связей: 3; плотность: 1
 - `api/battlecoin` — файлов: 2; исходящих связей: 2; плотность: 1

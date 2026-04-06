@@ -4,6 +4,7 @@ import React from 'react'
 import DmDeletePopover from './DmDeletePopover'
 import VideoOverlay from '../../media/components/VideoOverlay'
 import VideoLimitOverlay from '../../media/components/VideoLimitOverlay'
+import VideoTrimPopover from '../../media/components/VideoTrimPopover'
 import ReportPopover from '../../moderation/components/ReportPopover'
 import SharePopover from '../../../SharePopover'
 import UserInfoPopover from '../../profile/components/UserInfoPopover'
@@ -24,7 +25,6 @@ export default function ForumOverlayStack({
   videoStreamRef,
   overlayMediaUrl,
   pendingVideo,
-  pendingVideoMirrorPreview,
   overlayMediaKind,
   acceptMediaFromOverlay,
   startVideo,
@@ -34,6 +34,11 @@ export default function ForumOverlayStack({
   videoLimitCopy,
   forumVideoMaxSeconds,
   closeVideoLimitOverlay,
+  videoTrimPopover,
+  videoTrimCopy,
+  setVideoTrimStartSec,
+  closeVideoTrimPopover,
+  applyVideoTrimPopover,
   reportUI,
   closeReportPopover,
   handleReportSelect,
@@ -84,7 +89,6 @@ export default function ForumOverlayStack({
         elapsed={videoElapsed}
         streamRef={videoStreamRef}
         previewUrl={overlayMediaUrl || pendingVideo}
-        mirrorPreview={pendingVideoMirrorPreview}
         mediaKind={overlayMediaKind}
         onAccept={acceptMediaFromOverlay}
         onStart={startVideo}
@@ -97,8 +101,22 @@ export default function ForumOverlayStack({
         copy={videoLimitCopy}
         maxSec={forumVideoMaxSeconds}
         durationSec={videoLimitOverlay?.durationSec}
-        reason={videoLimitOverlay?.reason}
         onClose={closeVideoLimitOverlay}
+      />
+      <VideoTrimPopover
+        open={!!videoTrimPopover?.open}
+        copy={videoTrimCopy}
+        t={t}
+        sourceBlob={videoTrimPopover?.blob}
+        durationSec={videoTrimPopover?.durationSec}
+        maxSec={forumVideoMaxSeconds}
+        startSec={videoTrimPopover?.startSec}
+        processing={!!videoTrimPopover?.processing}
+        processPct={videoTrimPopover?.processPct}
+        errorCode={videoTrimPopover?.errorCode}
+        onStartChange={setVideoTrimStartSec}
+        onCancel={closeVideoTrimPopover}
+        onTrim={applyVideoTrimPopover}
       />
       <ReportPopover
         open={reportUI.open}

@@ -84,6 +84,12 @@ export default function ForumPage() {
 
 return (
   <div className="iso-forum-page">
+    <link
+      rel="preload"
+      href="/load/load.mp4"
+      as="video"
+      fetchPriority="high"
+    />
     <ForumBootSplash />
 
       <div className="iso-forum-shell">
@@ -93,7 +99,7 @@ return (
             className="forum-brand-img"
             src="/branding/forum_logo.png"
             alt="QL7 Forum — Global Network"
-            priority
+            loading="lazy"
             decoding="async"
             width={1600}
             height={400}

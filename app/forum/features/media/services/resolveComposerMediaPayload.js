@@ -13,6 +13,7 @@ export async function resolveComposerMediaPayload({
   forumVideoCameraRecordEpsilonSec,
   showVideoLimitOverlay,
   endMediaPipeline,
+  openVideoTrimPopover,
   forumVideoMaxBytes,
   viewerId,
   stopMediaProg,
@@ -25,13 +26,6 @@ export async function resolveComposerMediaPayload({
   t,
   onFail,
 }) {
-  const appendSelfieMirrorMarker = (url) => {
-    const raw = String(url || '')
-    if (!raw) return raw
-    if (/(?:[#?&])ql7selfie=1(?:$|[&#])/i.test(raw)) return raw
-    return `${raw}#ql7selfie=1`
-  }
-
   const fail = (msg) => {
     try { onFail?.(msg) } catch {}
     return { failed: true, videoUrlToSend: '', audioUrlToSend: '' }
@@ -71,13 +65,11 @@ export async function resolveComposerMediaPayload({
         let durationSec = NaN
         let dMeta = NaN
         let srcMeta = ''
-        let mirrorPlayback = false
         let trustedBlobMeta = null
         try {
           const meta = pendingVideoInfoRef.current || {}
           dMeta = Number(meta?.durationSec || 0)
           srcMeta = String(meta?.source || '')
-          mirrorPlayback = !!meta?.mirrorPlayback
         } catch {}
         try {
           const localMeta = pendingVideoBlobMetaRef.current?.get?.(String(pendingVideoCurrent || '')) || null
@@ -85,11 +77,9 @@ export async function resolveComposerMediaPayload({
             trustedBlobMeta = {
               source: String(localMeta?.source || 'trimmed_local'),
               durationSec: Number(localMeta.durationSec),
-              mirrorPlayback: !!localMeta?.mirrorPlayback,
             }
             if (!srcMeta) srcMeta = trustedBlobMeta.source
             if (!Number.isFinite(dMeta) || dMeta <= 0) dMeta = trustedBlobMeta.durationSec
-            if (!mirrorPlayback) mirrorPlayback = !!trustedBlobMeta.mirrorPlayback
           }
         } catch {}
         const trustedLocalClip =
@@ -170,10 +160,12 @@ export async function resolveComposerMediaPayload({
         }
         if (durationSec > (forumVideoMaxSeconds + forumVideoCameraRecordEpsilonSec) && !trustedLocalClip) {
           try {
-            showVideoLimitOverlay?.({
+            openVideoTrimPopover?.({
               source: 'post_blob_upload',
+              blob: uploadBlob,
+              mime: uploadMime,
               durationSec,
-              reason: 'too_long',
+              name: `composer-${Date.now()}.${uploadMime.includes('mp4') ? 'mp4' : (uploadMime.includes('quicktime') ? 'mov' : 'webm')}`,
             })
           } catch {}
           try { endMediaPipeline?.() } catch {}
@@ -213,9 +205,6 @@ export async function resolveComposerMediaPayload({
           },
         })
         videoUrlToSend = result?.url || ''
-        if (videoUrlToSend && srcMeta === 'camera_record' && mirrorPlayback) {
-          videoUrlToSend = appendSelfieMirrorMarker(videoUrlToSend)
-        }
         if (!videoUrlToSend) throw new Error('no_url')
       } else {
         videoUrlToSend = pendingVideoCurrent

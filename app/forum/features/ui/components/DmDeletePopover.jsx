@@ -62,7 +62,10 @@ export default function DmDeletePopover({
     <div
       className="confirmOverlayRoot dmConfirmOverlay"
       role="presentation"
-      onPointerDown={(e) => {
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onCancel?.()
+      }}
+      onTouchStart={(e) => {
         if (e.target === e.currentTarget) onCancel?.()
       }}
     >

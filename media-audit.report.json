@@ -1,9 +1,9 @@
 {
-  "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-04T01:02:03.902Z",
+  "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
+  "generatedAt": "2026-03-28T16:50:17.130Z",
   "results": [
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\i18n.js",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -23,7 +23,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\tools\\audit-media.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\tools\\audit-media.js",
       "counts": {
         "video": 1,
         "autoplay": 8,
@@ -70,7 +70,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\tools\\audit-heavy.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\tools\\audit-heavy.js",
       "counts": {
         "video": 6,
         "autoplay": 6,
@@ -129,10 +129,43 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoMedia.jsx",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 3,
+        "loop": 10,
+        "preload": 8,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [
+          {
+            "line": 170,
+            "text": "// Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start."
+          },
+          {
+            "line": 531,
+            "text": "// === Shorts-like autoplay: play when in focus, pause when out ==="
+          },
+          {
+            "line": 1721,
+            "text": "// иначе при гонках промисов возможен двойной autoplay."
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoMedia.jsx",
       "counts": {
         "video": 1,
-        "autoplay": 7,
+        "autoplay": 6,
         "loop": 2,
         "preload": 7,
         "img": 0,
@@ -148,22 +181,22 @@
       "samples": {
         "video": [
           {
-            "line": 1044,
+            "line": 1076,
             "text": "<video"
           }
         ],
         "autoplay": [
           {
-            "line": 295,
+            "line": 296,
             "text": "autoPlay,"
           },
           {
-            "line": 319,
-            "text": "return typeof defaultMutedProp === 'boolean' ? defaultMutedProp : !!autoPlay"
-          },
-          {
-            "line": 547,
+            "line": 542,
             "text": "const fallbackMuted = typeof defaultMutedProp === 'boolean' ? defaultMutedProp : !!autoPlay"
+          },
+          {
+            "line": 586,
+            "text": "}, [autoPlay, clearNativeControlsForPost, defaultMutedProp, playsInline, poster, preloadMode, readMuted, src])"
           }
         ],
         "img": [],
@@ -171,88 +204,13 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
-      "counts": {
-        "video": 0,
-        "autoplay": 3,
-        "loop": 6,
-        "preload": 11,
-        "img": 0,
-        "lazy": 0,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [],
-      "samples": {
-        "video": [],
-        "autoplay": [
-          {
-            "line": 170,
-            "text": "// Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start."
-          },
-          {
-            "line": 532,
-            "text": "// === Shorts-like autoplay: play when in focus, pause when out ==="
-          },
-          {
-            "line": 2206,
-            "text": "// иначе при гонках промисов возможен двойной autoplay."
-          }
-        ],
-        "img": [],
-        "create": []
-      }
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\ForumBootSplash.jsx",
       "counts": {
         "video": 1,
-        "autoplay": 4,
-        "loop": 4,
+        "autoplay": 7,
+        "loop": 0,
         "preload": 3,
         "img": 0,
-        "lazy": 1,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [
-        "⚠ video + autoplay",
-        "⚠ video + loop",
-        "⚠ video + preload"
-      ],
-      "samples": {
-        "video": [
-          {
-            "line": 2502,
-            "text": "<video"
-          }
-        ],
-        "autoplay": [
-          {
-            "line": 1493,
-            "text": "try { emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback'); } catch {}"
-          },
-          {
-            "line": 2076,
-            "text": "autoplay: 0,"
-          },
-          {
-            "line": 2584,
-            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
-          }
-        ],
-        "img": [],
-        "create": []
-      }
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\ForumBootSplash.jsx",
-      "counts": {
-        "video": 1,
-        "autoplay": 6,
-        "loop": 0,
-        "preload": 2,
-        "img": 0,
         "lazy": 0,
         "create": 0,
         "revoke": 0
@@ -264,22 +222,22 @@
       "samples": {
         "video": [
           {
-            "line": 966,
+            "line": 287,
             "text": "<video"
           }
         ],
         "autoplay": [
           {
-            "line": 46,
+            "line": 32,
             "text": "const FORUM_SPLASH_TRY_SOUND_AUTOPLAY = 1"
           },
           {
-            "line": 157,
-            "text": "FORUM_SPLASH_TRY_SOUND_AUTOPLAY === 1 ? 'sound' : 'muted'"
+            "line": 34,
+            "text": "// If sound autoplay is blocked by browser:"
           },
           {
-            "line": 362,
-            "text": "message.includes('autoplay')"
+            "line": 35,
+            "text": "// 1 = fallback to muted autoplay"
           }
         ],
         "img": [],
@@ -287,7 +245,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\tools\\audit-full-forum.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\tools\\audit-full-forum.js",
       "counts": {
         "video": 1,
         "autoplay": 5,
@@ -328,7 +286,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\ads\\home.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\ads\\home.js",
       "counts": {
         "video": 2,
         "autoplay": 2,
@@ -393,7 +351,54 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\components\\QuestHub.jsx",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
+      "counts": {
+        "video": 1,
+        "autoplay": 4,
+        "loop": 2,
+        "preload": 1,
+        "img": 1,
+        "lazy": 1,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + loop",
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 1858,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 1503,
+            "text": "autoplay: 0,"
+          },
+          {
+            "line": 1573,
+            "text": "emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback');"
+          },
+          {
+            "line": 1894,
+            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
+          }
+        ],
+        "img": [
+          {
+            "line": 1942,
+            "text": "<img"
+          }
+        ],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\components\\QuestHub.jsx",
       "counts": {
         "video": 2,
         "autoplay": 2,
@@ -435,7 +440,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\about\\page.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\about\\page.js",
       "counts": {
         "video": 1,
         "autoplay": 1,
@@ -482,7 +487,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\SnowFX.jsx",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\SnowFX.jsx",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -502,7 +507,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\tools\\audit-runtime-hotspots.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\tools\\audit-runtime-hotspots.js",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -522,7 +527,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\qcoin\\components\\QCoinWithdrawPopover.jsx",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\qcoin\\components\\QCoinWithdrawPopover.jsx",
       "counts": {
         "video": 1,
         "autoplay": 1,
@@ -556,7 +561,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\frontCameraMirror.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\frontCameraMirror.js",
       "counts": {
         "video": 0,
         "autoplay": 1,
@@ -581,7 +586,32 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\BgAudio.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaLifecycleRuntime.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 1,
+        "loop": 0,
+        "preload": 3,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [
+          {
+            "line": 13,
+            "text": "// чтобы iPhone/Safari не блокировал autoplay из-за старого unmuted-состояния."
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\BgAudio.js",
       "counts": {
         "video": 0,
         "autoplay": 2,
@@ -610,7 +640,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostMediaStack.jsx",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostMediaStack.jsx",
       "counts": {
         "video": 0,
         "autoplay": 2,
@@ -626,11 +656,11 @@
         "video": [],
         "autoplay": [
           {
-            "line": 148,
+            "line": 150,
             "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
           },
           {
-            "line": 224,
+            "line": 226,
             "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
           }
         ],
@@ -639,7 +669,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\LivePreview.jsx",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\LivePreview.jsx",
       "counts": {
         "video": 1,
         "autoplay": 1,
@@ -671,7 +701,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\QCoinDropFX.jsx",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\QCoinDropFX.jsx",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -691,7 +721,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\ComposerAttachmentPreview.jsx",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\ComposerAttachmentPreview.jsx",
       "counts": {
         "video": 1,
         "autoplay": 0,
@@ -718,7 +748,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoTrimPopover.jsx",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoTrimPopover.jsx",
       "counts": {
         "video": 1,
         "autoplay": 0,
@@ -750,27 +780,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaLifecycleRuntime.js",
-      "counts": {
-        "video": 0,
-        "autoplay": 0,
-        "loop": 0,
-        "preload": 3,
-        "img": 0,
-        "lazy": 0,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [],
-      "samples": {
-        "video": [],
-        "autoplay": [],
-        "img": [],
-        "create": []
-      }
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\tools\\audit-media-budget.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\tools\\audit-media-budget.js",
       "counts": {
         "video": 1,
         "autoplay": 0,
@@ -797,7 +807,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\api\\forum\\events\\stream\\route.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\api\\forum\\events\\stream\\route.js",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -817,7 +827,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoOverlay.jsx",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoOverlay.jsx",
       "counts": {
         "video": 1,
         "autoplay": 0,
@@ -847,7 +857,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\styles\\ForumStyles.jsx",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\styles\\ForumStyles.jsx",
       "counts": {
         "video": 1,
         "autoplay": 0,
@@ -877,7 +887,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\styles\\modules\\profileStyles.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\styles\\modules\\profileStyles.js",
       "counts": {
         "video": 1,
         "autoplay": 0,
@@ -907,7 +917,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\page.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\page.js",
       "counts": {
         "video": 0,
         "autoplay": 1,
@@ -937,7 +947,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\QCastPlayer.jsx",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\QCastPlayer.jsx",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -957,7 +967,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaRuntime.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaRuntime.js",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -986,7 +996,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\tools\\audit-ad-runtime.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\tools\\audit-ad-runtime.js",
       "counts": {
         "video": 1,
         "autoplay": 0,
@@ -1011,7 +1021,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\ScrollTopPulse.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\ScrollTopPulse.js",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -1031,7 +1041,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmThreadMessageRow.jsx",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmThreadMessageRow.jsx",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -1051,7 +1061,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmVoicePlayer.jsx",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmVoicePlayer.jsx",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -1071,7 +1081,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\videoControls.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\videoControls.js",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -1091,7 +1101,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\HeroAvatar.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\HeroAvatar.js",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -1120,7 +1130,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\NotRobot.jsx",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\NotRobot.jsx",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -1149,7 +1159,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\components\\AvatarEmoji.jsx",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\components\\AvatarEmoji.jsx",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -1174,7 +1184,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ForumSearchSortControls.jsx",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ForumSearchSortControls.jsx",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -1199,7 +1209,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\AuthNavClient.jsx",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\AuthNavClient.jsx",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -1224,7 +1234,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVideoTrimController.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVideoTrimController.js",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -1249,7 +1259,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\moderationPrep.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\moderationPrep.js",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -1278,7 +1288,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\components\\ProfilePopover.jsx",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\components\\ProfilePopover.jsx",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -1320,7 +1330,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVoiceRecorder.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVoiceRecorder.js",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -1345,7 +1355,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\lib\\forumVideoTrim.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\lib\\forumVideoTrim.js",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -1378,7 +1388,7 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVideoCaptureController.js",
+      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVideoCaptureController.js",
       "counts": {
         "video": 0,
         "autoplay": 0,

@@ -51,7 +51,10 @@ export default function ConfirmDeleteOverlay({
     <div
       className="confirmOverlayRoot"
       role="presentation"
-      onPointerDown={(e) => {
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onCancel?.()
+      }}
+      onTouchStart={(e) => {
         if (e.target === e.currentTarget) onCancel?.()
       }}
     >

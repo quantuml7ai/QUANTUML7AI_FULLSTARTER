@@ -15,19 +15,9 @@ const MEDIA_MUTED_KEY = 'forum:mediaMuted';
 const MEDIA_VIDEO_MUTED_KEY = 'forum:videoMuted'; // fallback совместимости
 const MEDIA_MUTED_EVENT = 'forum:media-mute';
 
-function isSplashMutedHoldActive() {
-  if (!isBrowser()) return false;
-  try {
-    return !!window.__forumBootSplashActive;
-  } catch {
-    return false;
-  }
-}
-
 function readMutedPrefFromStorage() {
   if (!isBrowser()) return null;
   try {
-    if (isSplashMutedHoldActive()) return true;
     let v = window.localStorage?.getItem(MEDIA_MUTED_KEY);
     if (v == null) v = window.localStorage?.getItem(MEDIA_VIDEO_MUTED_KEY);
     if (v == null) return null;
@@ -40,9 +30,7 @@ function readMutedPrefFromStorage() {
 function writeMutedPrefToStorage(val) {
   if (!isBrowser()) return;
   try {
-    const next = val ? '1' : '0';
-    window.localStorage?.setItem(MEDIA_MUTED_KEY, next);
-    window.localStorage?.setItem(MEDIA_VIDEO_MUTED_KEY, next);
+    window.localStorage?.setItem(MEDIA_MUTED_KEY, val ? '1' : '0');
   } catch {}
 }
 
@@ -60,25 +48,6 @@ function emitMutedPref(val, id, source = 'forum-ads') {
 function desiredMutedFromPref(pref) {
   // Если префа нет — стартуем muted=true (иначе автоплей часто будет блокироваться браузером).
   return pref == null ? true : !!pref;
-}
-
-function applyHtmlMediaMutedState(videoEl, nextMuted) {
-  if (!(videoEl instanceof HTMLMediaElement)) return;
-  try {
-    videoEl.muted = !!nextMuted;
-    videoEl.defaultMuted = !!nextMuted;
-    if (nextMuted) videoEl.setAttribute('muted', '');
-    else videoEl.removeAttribute('muted');
-  } catch {}
-}
-
-function bumpGlobalAdPlaybackHold(ms = 1400) {
-  if (!isBrowser()) return;
-  try {
-    const until = Date.now() + Math.max(240, Number(ms || 0));
-    const prev = Number(window.__forumAdPlaybackHoldUntil || 0);
-    window.__forumAdPlaybackHoldUntil = Math.max(prev, until);
-  } catch {}
 }
 
 const AD_NEAR_ROOT_MARGIN = '560px 0px 760px 0px';
@@ -505,7 +474,6 @@ class AdsCoordinatorImpl {
     this.frames = new Map(); // frameId -> Set(url)
     this.history = []; // последние показы (глобально)
     this.lastBySeedKey = new Map(); // slotKey -> url
-    this.bucketSessions = new Map(); // bucketKey -> { bySlot, counts, createdAt }
     this.lastFrameId = 0;
     this.lastFrameTs = 0;
   }
@@ -579,54 +547,6 @@ class AdsCoordinatorImpl {
     if (!seedKey) return null;
     return this.lastBySeedKey.get(String(seedKey)) || null;
   }
-
-  _ensureBucketSession(bucketKey) {
-    const key = String(bucketKey || '');
-    let session = this.bucketSessions.get(key);
-    if (!session) {
-      session = {
-        bySlot: new Map(),
-        counts: new Map(),
-        createdAt: Date.now(),
-      };
-      this.bucketSessions.set(key, session);
-    }
-    if (this.bucketSessions.size > 12) {
-      const staleKeys = Array.from(this.bucketSessions.entries())
-        .sort((a, b) => Number(a?.[1]?.createdAt || 0) - Number(b?.[1]?.createdAt || 0))
-        .slice(0, Math.max(0, this.bucketSessions.size - 8))
-        .map(([staleKey]) => staleKey);
-      staleKeys.forEach((staleKey) => {
-        if (staleKey !== key) this.bucketSessions.delete(staleKey);
-      });
-    }
-    return session;
-  }
-
-  getAssigned(bucketKey, slotKey) {
-    const session = this._ensureBucketSession(bucketKey);
-    return session?.bySlot?.get?.(String(slotKey || '')) || null;
-  }
-
-  getBucketUsage(bucketKey, url) {
-    const session = this._ensureBucketSession(bucketKey);
-    return Number(session?.counts?.get?.(String(url || '')) || 0);
-  }
-
-  assign(bucketKey, slotKey, url) {
-    if (!url) return;
-    const session = this._ensureBucketSession(bucketKey);
-    const slot = String(slotKey || '');
-    const prev = session.bySlot.get(slot);
-    if (prev === url) return;
-    if (prev) {
-      const prevCount = Number(session.counts.get(prev) || 0);
-      if (prevCount > 1) session.counts.set(prev, prevCount - 1);
-      else session.counts.delete(prev);
-    }
-    session.bySlot.set(slot, url);
-    session.counts.set(String(url), Number(session.counts.get(String(url)) || 0) + 1);
-  }
 }
 
 export const AdsCoordinator = new AdsCoordinatorImpl();
@@ -664,13 +584,6 @@ export function resolveCurrentAdUrl(
   const rotateMin = Number(conf.ROTATE_MIN || 1);
   const periodMs = Math.max(1, rotateMin) * 60_000;
   const timeBucket = Math.floor(now / periodMs);
-  const bucketKey = [CAMPAIGN_ID, conf.seed || 1, cid, timeBucket].join('|');
-
-  const assigned = coordinator?.getAssigned?.(bucketKey, key);
-  if (assigned && links.includes(assigned)) {
-    debugLog(conf, 'slot_pick_assigned', { slotKey: key, url: assigned });
-    return assigned;
-  }
 
   // фиксированный сид для конкретного слота и тайм-слота
   const seed = hash32(
@@ -678,56 +591,39 @@ export function resolveCurrentAdUrl(
   );
 
   const perm = stableShuffle(links, seed);
-  const ordered = [];
-  const seen = new Set();
-  for (let i = 0; i < perm.length; i += 1) {
-    const candidate = perm[i];
-    if (!candidate || seen.has(candidate)) continue;
-    seen.add(candidate);
-    ordered.push(candidate);
-  }
-  if (!ordered.length) {
+  if (!perm.length) {
     debugLog(conf, 'slot_no_perm', { slotKey });
     return null;
   }
 
+  const frameId = coordinator?.getFrameId(now);
   const lastForSeed = coordinator?.getLastForSeed(key);
   const lastGlobal = coordinator?.getLastGlobal();
 
   let chosen = null;
-  let bestScore = Number.POSITIVE_INFINITY;
 
-  for (let i = 0; i < ordered.length; i++) {
-    const thisUrl = ordered[i];
+  for (let i = 0; i < perm.length; i++) {
+    const thisUrl = perm[i];
     if (!thisUrl) continue;
 
     // не повторяем подряд для этого слота
-    const usageCount = Number(coordinator?.getBucketUsage?.(bucketKey, thisUrl) || 0);
+    if (lastForSeed && thisUrl === lastForSeed && perm.length > 1) continue;
 
     // не повторяем подряд глобально, если есть выбор
-    const sameSeedPenalty =
-      lastForSeed && thisUrl === lastForSeed && ordered.length > 1 ? 3 : 0;
+    if (lastGlobal && thisUrl === lastGlobal && perm.length > 1) continue;
 
-    const sameGlobalPenalty =
-      lastGlobal && thisUrl === lastGlobal && ordered.length > 1 ? 2 : 0;
-    const tieBreak = (hash32(`${key}|${thisUrl}|${timeBucket}`) % 17) / 1000;
+    if (coordinator && !coordinator.allowed(thisUrl, perm.length)) continue;
+    if (coordinator && frameId != null && !coordinator.reserve(thisUrl, frameId))
+      continue;
 
-    const score =
-      (usageCount * 100) +
-      (sameSeedPenalty * 10) +
-      (sameGlobalPenalty * 5) +
-      i +
-      tieBreak;
-    if (score < bestScore) {
-      bestScore = score;
-      chosen = thisUrl;
-    }
+    chosen = thisUrl;
+    break;
   }
 
   if (!chosen) {
-    chosen = ordered[0];
+    chosen = perm[0];
     if (!chosen) {
-      debugLog(conf, 'slot_no_pick', { slotKey, linksLen: ordered.length });
+      debugLog(conf, 'slot_no_pick', { slotKey, linksLen: perm.length });
       return null;
     }
   }
@@ -735,7 +631,6 @@ export function resolveCurrentAdUrl(
   if (coordinator) {
     coordinator.bump(chosen);
     coordinator.setLastForSeed(key, chosen);
-    coordinator.assign(bucketKey, key, chosen);
   }
 
   debugLog(conf, 'slot_pick', { slotKey: key, url: chosen });
@@ -901,20 +796,6 @@ function shouldProbeMediaKind(rawUrl) {
     }
   } catch {}
   return false;
-}
-
-function computeAdViewportAttention(rect, viewportHeight) {
-  const vh = Math.max(0, Number(viewportHeight || 0));
-  const h = Math.max(0, Number(rect?.height || 0));
-  if (!vh || !h) return { near: false, ratio: 0 };
-
-  const top = Number(rect?.top || 0);
-  const bottom = Number(rect?.bottom || 0);
-  const near = bottom >= -560 && top <= (vh + 760);
-  const visiblePx = Math.max(0, Math.min(bottom, vh) - Math.max(top, 0));
-  const denom = Math.max(1, Math.min(h, vh));
-  const ratio = Math.max(0, Math.min(1, visiblePx / denom));
-  return { near, ratio };
 }
 
 // Определяем тип медиа по Content-Type через HEAD
@@ -1143,7 +1024,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   const ytIframeRef = useRef(null);
   const ytPlayerRef = useRef(null);
   const videoErrorUntilRef = useRef(new Map());
-  const isVideoSrcTemporarilyBlocked = React.useCallback((src) => {
+  const isVideoSrcTemporarilyBlocked = (src) => {
     const key = String(src || '').trim();
     if (!key) return false;
     const until = Number(videoErrorUntilRef.current.get(key) || 0);
@@ -1153,8 +1034,8 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       return false;
     }
     return true;
-  }, []);
-  const markVideoSrcTemporarilyBlocked = React.useCallback((src, ms = 20000) => {
+  };
+  const markVideoSrcTemporarilyBlocked = (src, ms = 20000) => {
     const key = String(src || '').trim();
     if (!key) return;
     videoErrorUntilRef.current.set(key, Date.now() + Math.max(2500, Number(ms || 0)));
@@ -1166,12 +1047,12 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
         if (drop <= 0) break;
       }
     }
-  }, []);
-  const clearVideoSrcBlock = React.useCallback((src) => {
+  };
+  const clearVideoSrcBlock = (src) => {
     const key = String(src || '').trim();
     if (!key) return;
     videoErrorUntilRef.current.delete(key);
-  }, []);
+  };
   // ===== Focus / attention gating =====
   // isNear: блок рядом (можно подгружать, но не играть)
   // isFocused: блок реально в зоне внимания (играем)
@@ -1184,23 +1065,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   const shouldPrimeAdMedia = (isNear && isPageActive) || shouldPlay;
 
   const shouldPlayRef = useRef(false);
-  const shouldPrimeAdMediaRef = useRef(false);
-  const mutedRef = useRef(true);
   const adPlayEventTsRef = useRef(0);
-  const autoplayRetryTimerRef = useRef(0);
-  const autoplayRetryStageRef = useRef(0);
-  const autoplayRetryTotalRef = useRef(0);
-  const adPlaybackConfirmRef = useRef(null);
-  const adLastPrimeLoadTsRef = useRef(0);
-  const tryStartAdVideoRef = useRef(() => false);
-  const tryStartAdYoutubeRef = useRef(() => false);
-
-  const setAdPlaybackState = React.useCallback((state = 'idle') => {
-    const root = rootRef.current;
-    if (!root) return;
-    try { root.dataset.adPlayState = String(state || 'idle'); } catch {}
-    try { root.dataset.adShouldPlay = shouldPlayRef.current ? '1' : '0'; } catch {}
-  }, []);
 
   const emitAdPlayToCoordinator = React.useCallback((source = 'ad') => {
     if (!isBrowser()) return;
@@ -1228,71 +1093,6 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     } catch {}
   }, []);
 
-  const clearAdAutoplayRetry = React.useCallback(() => {
-    const tid = Number(autoplayRetryTimerRef.current || 0);
-    if (!tid) return;
-    try { clearTimeout(tid); } catch {}
-    autoplayRetryTimerRef.current = 0;
-  }, []);
-
-  const clearAdPlaybackConfirm = React.useCallback(() => {
-    const cleanup = adPlaybackConfirmRef.current;
-    if (typeof cleanup === 'function') {
-      try { cleanup(); } catch {}
-    }
-    adPlaybackConfirmRef.current = null;
-  }, []);
-
-  const resetAdAutoplayRetry = React.useCallback(() => {
-    autoplayRetryStageRef.current = 0;
-    autoplayRetryTotalRef.current = 0;
-    clearAdAutoplayRetry();
-    clearAdPlaybackConfirm();
-  }, [clearAdAutoplayRetry, clearAdPlaybackConfirm]);
-
-  const markAdPlaybackStarted = React.useCallback(() => {
-    clearAdPlaybackConfirm();
-    setAdPlaybackState('playing');
-    bumpGlobalAdPlaybackHold(1800);
-    emitAdPlayToCoordinator('ad_video');
-    resetAdAutoplayRetry();
-  }, [clearAdPlaybackConfirm, emitAdPlayToCoordinator, resetAdAutoplayRetry, setAdPlaybackState]);
-
-  const scheduleAdAutoplayRetry = React.useCallback((reason = 'retry', { rearm = false } = {}) => {
-    if (!isBrowser()) return false;
-    if (!shouldPlayRef.current) {
-      clearAdPlaybackConfirm();
-      clearAdAutoplayRetry();
-      return false;
-    }
-    if (rearm) autoplayRetryStageRef.current = Math.min(autoplayRetryStageRef.current, 1);
-    if (autoplayRetryTotalRef.current >= 14) return false;
-    if (autoplayRetryStageRef.current >= 7) return false;
-
-    const delays = [120, 220, 360, 560, 840, 1280, 1860];
-    const delay = delays[Math.min(autoplayRetryStageRef.current, delays.length - 1)];
-    autoplayRetryStageRef.current += 1;
-    autoplayRetryTotalRef.current += 1;
-    setAdPlaybackState('retrying');
-    clearAdAutoplayRetry();
-    autoplayRetryTimerRef.current = window.setTimeout(() => {
-      autoplayRetryTimerRef.current = 0;
-      if (!shouldPlayRef.current) return;
-      if (media.kind === 'video') {
-        tryStartAdVideoRef.current?.(`${reason}:retry`);
-        return;
-      }
-      if (media.kind === 'youtube') {
-        tryStartAdYoutubeRef.current?.(`${reason}:retry`);
-        return;
-      }
-      if (media.kind === 'tiktok') {
-        emitAdPlayToCoordinator('ad_tiktok');
-      }
-    }, delay);
-    return true;
-  }, [clearAdAutoplayRetry, clearAdPlaybackConfirm, emitAdPlayToCoordinator, media.kind, setAdPlaybackState]);
-
   const destroyLocalYtPlayer = React.useCallback((blankIframe = false) => {
     const player = ytPlayerRef.current;
     ytPlayerRef.current = null;
@@ -1311,257 +1111,80 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       } catch {}
     }
   }, []);
-  const primeAdVideo = React.useCallback(() => {
-    const v = videoRef.current;
-    if (!v || media.kind !== 'video' || !media.src) return false;
-    if (!shouldPrimeAdMediaRef.current && !shouldPlayRef.current) return false;
-    if (isVideoSrcTemporarilyBlocked(media.src)) return false;
-
-    const desiredSrc = String(v.getAttribute('data-src') || media.src || '').trim();
-
-    try {
-      v.playsInline = true;
-      v.loop = true;
-      v.preload = 'auto';
-    } catch {}
-
-    applyHtmlMediaMutedState(v, mutedRef.current);
-
-    try {
-      if (desiredSrc && String(v.getAttribute('src') || '').trim() !== desiredSrc) {
-        v.setAttribute('src', desiredSrc);
-      }
-    } catch {}
-
-    try {
-      if (Number(v.readyState || 0) >= 2) return true;
-      const isCold =
-        (typeof HTMLMediaElement !== 'undefined' &&
-          (
-            v.networkState === HTMLMediaElement.NETWORK_EMPTY ||
-            v.networkState === HTMLMediaElement.NETWORK_IDLE
-          )) ||
-        !v.currentSrc;
-      if (!isCold && Number(v.readyState || 0) > 0) return false;
-      const now = Date.now();
-      if ((now - Number(adLastPrimeLoadTsRef.current || 0)) < 1200) return false;
-      adLastPrimeLoadTsRef.current = now;
-      setAdPlaybackState(shouldPlayRef.current ? 'priming' : 'warming');
-      try { v.load?.(); } catch {}
-    } catch {}
-
-    return Number(v.readyState || 0) >= 2;
-  }, [isVideoSrcTemporarilyBlocked, media.kind, media.src, setAdPlaybackState]);
-
-  const confirmAdPlaybackStart = React.useCallback((reason = 'play') => {
-    const v = videoRef.current;
-    if (!v) return false;
-
-    clearAdPlaybackConfirm();
-
-    const confirmWindowMs = 760;
-    const startTime = Number(v.currentTime || 0);
-    let settled = false;
-    let timerId = 0;
-    let frameId = 0;
-
-    const cleanup = () => {
-      try { v.removeEventListener('playing', onPlaying); } catch {}
-      try { v.removeEventListener('timeupdate', onTimeUpdate); } catch {}
-      try { v.removeEventListener('ended', onEnded); } catch {}
-      try { v.removeEventListener('emptied', onAbortLike); } catch {}
-      try { v.removeEventListener('error', onAbortLike); } catch {}
-      try { v.removeEventListener('abort', onAbortLike); } catch {}
-      try {
-        if (timerId) clearTimeout(timerId);
-      } catch {}
-      timerId = 0;
-      try {
-        if (frameId && typeof v.cancelVideoFrameCallback === 'function') {
-          v.cancelVideoFrameCallback(frameId);
-        }
-      } catch {}
-      frameId = 0;
-    };
-
-    const settleStarted = (trigger = 'playing') => {
-      if (settled) return true;
-      settled = true;
-      cleanup();
-      adPlaybackConfirmRef.current = null;
-      markAdPlaybackStarted(trigger);
-      return true;
-    };
-
-    const settlePending = (trigger = 'timeout') => {
-      if (settled) return false;
-      settled = true;
-      cleanup();
-      adPlaybackConfirmRef.current = null;
-      if (!shouldPlayRef.current) return false;
-      setAdPlaybackState('retrying');
-      scheduleAdAutoplayRetry(`${reason}:${trigger}`);
-      return false;
-    };
-
-    const maybeStarted = (trigger = 'probe') => {
-      try {
-        const currentTime = Number(v.currentTime || 0);
-        const progressed = currentTime > (startTime + 0.033);
-        const readyEnough = Number(v.readyState || 0) >= 2;
-        if ((!v.paused && readyEnough && currentTime > 0.033) || progressed) {
-          return settleStarted(trigger);
-        }
-      } catch {}
-      return false;
-    };
-
-    const onPlaying = () => {
-      settleStarted('playing_event');
-    };
-    const onTimeUpdate = () => {
-      maybeStarted('timeupdate');
-    };
-    const onEnded = () => {
-      if (!settled) settlePending('ended_before_confirm');
-    };
-    const onAbortLike = () => {
-      if (!settled) settlePending('abort_like');
-    };
-
-    if (maybeStarted('sync')) return true;
-
-    try { v.addEventListener('playing', onPlaying, { passive: true }); } catch {}
-    try { v.addEventListener('timeupdate', onTimeUpdate, { passive: true }); } catch {}
-    try { v.addEventListener('ended', onEnded, { passive: true }); } catch {}
-    try { v.addEventListener('emptied', onAbortLike, { passive: true }); } catch {}
-    try { v.addEventListener('error', onAbortLike, { passive: true }); } catch {}
-    try { v.addEventListener('abort', onAbortLike, { passive: true }); } catch {}
-
-    try {
-      if (typeof v.requestVideoFrameCallback === 'function') {
-        const watchFrame = () => {
-          try {
-            frameId = v.requestVideoFrameCallback((_now, meta) => {
-              if (settled) return;
-              const mediaTime = Number(meta?.mediaTime || 0);
-              if (mediaTime > (startTime + 0.02) || maybeStarted('video_frame')) return;
-              watchFrame();
-            });
-          } catch {}
-        };
-        watchFrame();
-      }
-    } catch {}
-
-    timerId = window.setTimeout(() => {
-      settlePending('timeout');
-    }, confirmWindowMs);
-
-    adPlaybackConfirmRef.current = cleanup;
-    setAdPlaybackState('attempting');
-    return false;
-  }, [clearAdPlaybackConfirm, markAdPlaybackStarted, scheduleAdAutoplayRetry, setAdPlaybackState]);
-
 const tryStartAdVideo = React.useCallback((reason = 'play') => {
   const v = videoRef.current;
-  if (!v) return false;
-  if (!shouldPlayRef.current) return false;
-  if (isVideoSrcTemporarilyBlocked(media.src)) return false;
-
-  bumpGlobalAdPlaybackHold(960);
-  primeAdVideo(reason);
+  if (!v) return;
+  if (!shouldPlayRef.current) return;
 
   try {
     v.playsInline = true;
     v.loop = true;
-    v.preload = 'auto';
+    v.preload = shouldPlayRef.current ? 'auto' : 'metadata';
   } catch {}
 
-  applyHtmlMediaMutedState(v, mutedRef.current);
+  try {
+    v.muted = !!muted;
+    v.defaultMuted = !!muted;
+    if (muted) v.setAttribute('muted', '');
+    else v.removeAttribute('muted');
+  } catch {}
 
   try {
     const isCold =
       (typeof HTMLMediaElement !== 'undefined' &&
-        (
-          v.networkState === HTMLMediaElement.NETWORK_EMPTY ||
-          v.networkState === HTMLMediaElement.NETWORK_IDLE
-        )) ||
+        v.networkState === HTMLMediaElement.NETWORK_EMPTY) ||
       !v.currentSrc;
 
-    if (isCold && Number(v.readyState || 0) < 2) {
-      scheduleAdAutoplayRetry(`${reason}:cold`);
-      return false;
+    if (isCold) {
+      const lazySrc = String(v.getAttribute('data-src') || '').trim();
+      if (lazySrc && !v.getAttribute('src')) {
+        try { v.setAttribute('src', lazySrc); } catch {}
+      }
+      try { v.load?.(); } catch {}
+      return;
     }
   } catch {}
 
-  const retryMutedFallback = () => {
-    if (!shouldPlayRef.current) return false;
-    if (v.muted) {
-      scheduleAdAutoplayRetry(`${reason}:muted_blocked`);
-      return false;
-    }
-
-    applyHtmlMediaMutedState(v, true);
-    try { writeMutedPrefToStorage(true); } catch {}
-    try { emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback'); } catch {}
-    mutedRef.current = true;
-    setMuted(true);
-
-    try {
-      const retry = v.play?.();
-      if (retry && typeof retry.then === 'function') {
-        retry
-          .then(() => {
-            confirmAdPlaybackStart(`${reason}:muted_retry`);
-          })
-          .catch(() => {
-            scheduleAdAutoplayRetry(`${reason}:muted_retry_fail`);
-          });
-        return true;
-      }
-    } catch {}
-
-    if (!v.paused) {
-      confirmAdPlaybackStart(`${reason}:muted_retry_sync`);
-      return true;
-    }
-
-    scheduleAdAutoplayRetry(`${reason}:muted_pending`);
-    return false;
-  };
-
   try {
+    emitAdPlayToCoordinator('ad_video');
     const p = v.play?.();
 
     if (p && typeof p.then === 'function') {
-      p.then(() => {
-        confirmAdPlaybackStart(reason);
-      }).catch(() => {
-        retryMutedFallback();
+      p.catch(() => {
+        if (v.muted) {
+          try {
+            if (v.readyState >= 2 && shouldPlayRef.current) {
+              v.play?.().catch(() => {});
+            }
+          } catch {}
+          return;
+        }
+
+        try {
+          v.muted = true;
+          v.defaultMuted = true;
+          v.setAttribute('muted', '');
+        } catch {}
+
+        try {
+          writeMutedPrefToStorage(true);
+        } catch {}
+
+        try {
+          emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback');
+        } catch {}
+
+        setMuted(true);
+
+        try {
+          if (shouldPlayRef.current) {
+            v.play?.().catch(() => {});
+          }
+        } catch {}
       });
-      return true;
     }
-  } catch {
-    retryMutedFallback();
-    return false;
-  }
-
-  if (!v.paused) {
-    confirmAdPlaybackStart(`${reason}:sync`);
-    return true;
-  }
-
-  scheduleAdAutoplayRetry(`${reason}:pending`);
-  return false;
-}, [
-  confirmAdPlaybackStart,
-  isVideoSrcTemporarilyBlocked,
-  media.src,
-  primeAdVideo,
-  scheduleAdAutoplayRetry,
-]);
-tryStartAdVideoRef.current = tryStartAdVideo;
+  } catch {}
+}, [emitAdPlayToCoordinator, muted]);
   const slotCssVars = {
     '--ad-slot-h-m': `${AD_SLOT_HEIGHT_PX.mobile}px`,
     '--ad-slot-h-t': `${AD_SLOT_HEIGHT_PX.tablet}px`,
@@ -1569,52 +1192,8 @@ tryStartAdVideoRef.current = tryStartAdVideo;
   };
 
   useEffect(() => {
-    mutedRef.current = muted;
-  }, [muted]);
-
-  useEffect(() => {
     shouldPlayRef.current = shouldPlay;
-    shouldPrimeAdMediaRef.current = shouldPrimeAdMedia;
-    setAdPlaybackState(shouldPlay ? 'armed' : 'idle');
-    if (!shouldPlay) {
-      clearAdPlaybackConfirm();
-      clearAdAutoplayRetry();
-      autoplayRetryStageRef.current = 0;
-      autoplayRetryTotalRef.current = 0;
-    }
-  }, [clearAdAutoplayRetry, clearAdPlaybackConfirm, setAdPlaybackState, shouldPlay, shouldPrimeAdMedia]);
-
-  const tryStartAdYoutube = React.useCallback((reason = 'ad_youtube') => {
-    const player = ytPlayerRef.current;
-    if (!player) return false;
-    if (!shouldPlayRef.current) return false;
-
-    try {
-      bumpGlobalAdPlaybackHold(960);
-      if (mutedRef.current) player.mute?.();
-      else player.unMute?.();
-      setAdPlaybackState('attempting');
-      player.playVideo?.();
-      scheduleAdAutoplayRetry(`${reason}:watchdog`);
-      return true;
-    } catch {
-      scheduleAdAutoplayRetry(`${reason}:throw`);
-      return false;
-    }
-  }, [scheduleAdAutoplayRetry, setAdPlaybackState]);
-  tryStartAdYoutubeRef.current = tryStartAdYoutube;
-
-  useEffect(() => {
-    if (media.kind === 'video' || media.kind === 'youtube' || media.kind === 'tiktok') return;
-    resetAdAutoplayRetry();
-    setAdPlaybackState('idle');
-  }, [media.kind, resetAdAutoplayRetry, setAdPlaybackState]);
-
-  useEffect(() => {
-    if (media.kind !== 'video' || !media.src) return;
-    if (!shouldPrimeAdMedia) return;
-    primeAdVideo('near_prime');
-  }, [media.kind, media.src, primeAdVideo, shouldPrimeAdMedia]);
+  }, [shouldPlay]);
 
   // Page visibility + focus/blur
   useEffect(() => {
@@ -1646,30 +1225,6 @@ tryStartAdVideoRef.current = tryStartAdVideo;
       return;
     }
 
-    const syncFromRect = () => {
-      try {
-        const rect = el.getBoundingClientRect();
-        const vh =
-          Number(window.innerHeight || 0) ||
-          Number(document.documentElement?.clientHeight || 0) ||
-          0;
-        const attention = computeAdViewportAttention(rect, vh);
-        setIsNear(attention.near);
-        setIsFocused((prev) =>
-          prev ? attention.ratio >= AD_FOCUS_STOP_RATIO : attention.ratio >= AD_FOCUS_START_RATIO
-        );
-      } catch {}
-    };
-
-    syncFromRect();
-    let bootRaf = 0;
-    try {
-      bootRaf = requestAnimationFrame(() => {
-        bootRaf = 0;
-        syncFromRect();
-      });
-    } catch {}
-
     const nearObs = new IntersectionObserver( 
       ([entry]) => {
         setIsNear(!!entry?.isIntersecting);
@@ -1682,23 +1237,9 @@ tryStartAdVideoRef.current = tryStartAdVideo;
 
     const focusObs = new IntersectionObserver( 
       ([entry]) => {
-        const vh =
-          Number(window.innerHeight || 0) ||
-          Number(document.documentElement?.clientHeight || 0) ||
-          0;
-        const attention = computeAdViewportAttention(entry?.boundingClientRect, vh);
-        if (entry?.intersectionRect) {
-          const visiblePx = Math.max(0, Number(entry.intersectionRect.height || 0));
-          const denom = Math.max(
-            1,
-            Math.min(Number(entry?.boundingClientRect?.height || 0), Math.max(1, vh))
-          );
-          attention.ratio = Math.max(attention.ratio, Math.max(0, Math.min(1, visiblePx / denom)));
-        }
+        const ratio = Number(entry?.intersectionRatio || 0);
         setIsFocused((prev) =>
-          prev
-            ? attention.ratio >= AD_FOCUS_STOP_RATIO
-            : attention.ratio >= AD_FOCUS_START_RATIO
+          prev ? ratio >= AD_FOCUS_STOP_RATIO : ratio >= AD_FOCUS_START_RATIO
         );
       },
       {
@@ -1711,9 +1252,6 @@ tryStartAdVideoRef.current = tryStartAdVideo;
     focusObs.observe(el);
 
     return () => {
-      if (bootRaf) {
-        try { cancelAnimationFrame(bootRaf); } catch {}
-      }
       nearObs.disconnect();
       focusObs.disconnect();
     };
@@ -1729,13 +1267,13 @@ tryStartAdVideoRef.current = tryStartAdVideo;
       if (typeof d?.muted !== 'boolean') return;
 
       const next = !!d.muted;
-      const changed = mutedRef.current !== next;
-      mutedRef.current = next;
       setMuted(next);
 
       // HTML5
       if (videoRef.current) {
-        applyHtmlMediaMutedState(videoRef.current, next);
+        try {
+          videoRef.current.muted = next;
+        } catch {}
       }
 
       // YouTube
@@ -1745,15 +1283,11 @@ tryStartAdVideoRef.current = tryStartAdVideo;
           else ytPlayerRef.current.unMute?.();
         } catch {}
       }
-
-      if (shouldPlayRef.current && changed) {
-        scheduleAdAutoplayRetry('global_mute_change', { rearm: true });
-      }
     };
 
     window.addEventListener(MEDIA_MUTED_EVENT, onMuted);
     return () => window.removeEventListener(MEDIA_MUTED_EVENT, onMuted);
-  }, [scheduleAdAutoplayRetry]);
+  }, []);
   const safeClick = useMemo(() => {
     try {
       const u = new URL(url);
@@ -1834,26 +1368,12 @@ tryStartAdVideoRef.current = tryStartAdVideo;
       setMedia({ kind: 'skeleton', src: null });
       return;
     }
-    const isDirectImg = /\.(jpe?g|png|webp|gif|avif)(?:$|[?#])/i.test(
-      mediaHref
-    );
-    const canResolveNow =
-      !!isNear ||
-      !!isFocused ||
-      isLikelyVideoUrl(mediaHref) ||
-      YT_RE.test(mediaHref) ||
-      TIKTOK_RE.test(mediaHref) ||
-      isDirectImg;
+    const canResolveNow = !!isNear || !!isFocused;
     if (!canResolveNow) {
       const cachedOnly = readCachedAdResolvedMedia(String(mediaHref || '').trim());
-      if (cachedOnly) {
-        setMedia(cachedOnly);
-        return;
-      }
-      setMedia((prev) => {
-        if (prev?.kind && prev.kind !== 'skeleton') return prev;
-        return { kind: 'placeholder', src: null, step: 'deferred_placeholder' };
-      });
+      if (cachedOnly) setMedia(cachedOnly);
+      else setMedia({ kind: 'skeleton', src: null });
+      return;
     }
     let cancelled = false;
 
@@ -1886,6 +1406,9 @@ tryStartAdVideoRef.current = tryStartAdVideo;
         ? conf.THUMBS
         : DEFAULT_THUMB_SERVICES;
 
+    const isDirectImg = /\.(jpe?g|png|webp|gif|avif)(?:$|[?#])/i.test(
+      mediaHref
+    );
     const publishResolved = (next, okCache = true) => {
       if (!next) return;
       cacheAdResolvedMedia(mediaResolveKey, next, okCache);
@@ -2106,7 +1629,6 @@ tryStartAdVideoRef.current = tryStartAdVideo;
     if (!isBrowser()) return;
 
     if (media.kind !== 'youtube' || !media.src || !shouldPrimeAdMedia) {
-      clearAdAutoplayRetry();
       destroyLocalYtPlayer(!shouldPrimeAdMedia);
       return;
     }
@@ -2117,13 +1639,13 @@ tryStartAdVideoRef.current = tryStartAdVideo;
     const applyPlayerState = (player) => {
       if (!player || cancelled) return;
       try {
-        if (mutedRef.current) player.mute?.();
+        if (muted) player.mute?.();
         else player.unMute?.();
 
         if (shouldPlayRef.current) {
-          tryStartAdYoutube('yt_apply_state');
+          emitAdPlayToCoordinator('ad_youtube');
+          player.playVideo?.();
         } else {
-          resetAdAutoplayRetry();
           player.pauseVideo?.();
         }
       } catch {}
@@ -2141,7 +1663,7 @@ tryStartAdVideoRef.current = tryStartAdVideo;
           playerVars: {
             autoplay: 0,
             controls: 0,
-            mute: mutedRef.current ? 1 : 0,
+            mute: muted ? 1 : 0,
             rel: 0,
             fs: 0,
             modestbranding: 1,
@@ -2163,34 +1685,15 @@ tryStartAdVideoRef.current = tryStartAdVideo;
               const st = ev?.data;
 
               if (st === window.YT?.PlayerState?.PLAYING) {
-                setAdPlaybackState('playing');
-                bumpGlobalAdPlaybackHold(1800);
-                resetAdAutoplayRetry();
                 emitAdPlayToCoordinator('ad_youtube');
-                return;
-              }
-
-              if (
-                shouldPlayRef.current &&
-                (
-                  st === window.YT?.PlayerState?.BUFFERING ||
-                  st === window.YT?.PlayerState?.UNSTARTED ||
-                  st === window.YT?.PlayerState?.CUED
-                )
-              ) {
-                setAdPlaybackState('attempting');
-                scheduleAdAutoplayRetry(`yt_state_${String(st || 'pending')}`, { rearm: true });
               }
 
               if (st === window.YT?.PlayerState?.ENDED) {
                 try { ev.target?.seekTo?.(0, true); } catch {}
-                tryStartAdYoutube('yt_ended');
+                try { ev.target?.playVideo?.(); } catch {}
               }
             },
             onError: () => {
-              clearAdPlaybackConfirm();
-              clearAdAutoplayRetry();
-              setAdPlaybackState('error');
               destroyLocalYtPlayer(true);
             },
           },
@@ -2229,25 +1732,17 @@ tryStartAdVideoRef.current = tryStartAdVideo;
   }, [
     media.kind,
     media.src,
+    muted,
     shouldPrimeAdMedia,
-    clearAdAutoplayRetry,
-    clearAdPlaybackConfirm,
     destroyLocalYtPlayer,
     emitAdPlayToCoordinator,
-    resetAdAutoplayRetry,
-    scheduleAdAutoplayRetry,
-    setAdPlaybackState,
-    tryStartAdYoutube,
   ]);
 
   useEffect(() => {
     return () => {
-      clearAdPlaybackConfirm();
-      clearAdAutoplayRetry();
-      setAdPlaybackState('idle');
       destroyLocalYtPlayer(true);
     };
-  }, [clearAdAutoplayRetry, clearAdPlaybackConfirm, destroyLocalYtPlayer, setAdPlaybackState]);
+  }, [destroyLocalYtPlayer]);
   // ===== Hard stop / resume playback depending on attention =====
 useEffect(() => {
   // HTML5 video
@@ -2257,16 +1752,12 @@ useEffect(() => {
 
     if (isVideoSrcTemporarilyBlocked(srcKey)) {
       try { v.pause?.(); } catch {}
-      setAdPlaybackState('blocked');
       return;
     }
 
     if (shouldPlay) {
-      tryStartAdVideo('attention_resume');
+      tryStartAdVideo();
     } else {
-      resetAdAutoplayRetry();
-      clearAdPlaybackConfirm();
-      setAdPlaybackState('idle');
       try { v.pause?.(); } catch {}
     }
   }
@@ -2276,11 +1767,11 @@ useEffect(() => {
     const p = ytPlayerRef.current;
     try {
       if (shouldPlay) {
-        tryStartAdYoutube('attention_resume');
+        emitAdPlayToCoordinator('ad_youtube');
+        if (muted) p.mute?.();
+        else p.unMute?.();
+        p.playVideo?.();
       } else {
-        resetAdAutoplayRetry();
-        clearAdPlaybackConfirm();
-        setAdPlaybackState('idle');
         p.pauseVideo?.();
       }
     } catch {}
@@ -2291,15 +1782,11 @@ useEffect(() => {
   }
 }, [
   emitAdPlayToCoordinator,
-  isVideoSrcTemporarilyBlocked,
   shouldPlay,
   media.kind,
   media.src,
-  clearAdPlaybackConfirm,
-  resetAdAutoplayRetry,
-  setAdPlaybackState,
+  muted,
   tryStartAdVideo,
-  tryStartAdYoutube,
 ]);
 
   // Impression tracking
@@ -2358,10 +1845,6 @@ useEffect(() => {
 
   const clickHref = safeClick.toString();
   const host = safeClick.hostname.replace(/^www\./i, '');
-  const placeholderPath =
-    safeClick.pathname && safeClick.pathname !== '/'
-      ? String(safeClick.pathname).replace(/\/+/g, ' ').trim().slice(0, 80)
-      : clickHref.replace(/^https?:\/\//i, '').slice(0, 80);
   const label =
     typeof t === 'function'
       ? t('forum_ad_label', 'Реклама')
@@ -2403,17 +1886,15 @@ useEffect(() => {
     emitMutedPref(next, playerIdRef.current, 'forum-ads-toggle');
 
     // 2) локально
-    mutedRef.current = next;
     setMuted(next);
 
     // HTML5
     if (media.kind === 'video' && videoRef.current) {
       const v = videoRef.current;
-      applyHtmlMediaMutedState(v, next);
-      if (shouldPlayRef.current) {
-        if (next) scheduleAdAutoplayRetry('manual_toggle', { rearm: true });
-        else tryStartAdVideoRef.current?.('manual_toggle');
-      }
+      try {
+        v.muted = next;
+      } catch {}
+      if (v.paused && !next && shouldPlayRef.current) v.play?.().catch(() => {});
       return;
     }
 
@@ -2424,7 +1905,7 @@ useEffect(() => {
         if (next) p.mute?.();
         else {
           p.unMute?.();
-          if (shouldPlayRef.current) tryStartAdYoutube('manual_toggle');
+          if (shouldPlayRef.current) p.playVideo?.();
         }
       } catch {} 
     } 
@@ -2468,7 +1949,6 @@ useEffect(() => {
   /* ===== FLUID (для рендера по всему сайту) ===== */
   .forum-ad-media-slot[data-layout="fluid"] {
     height: auto;
-    min-height: 220px;
     overflow: visible;
   }
 
@@ -2560,11 +2040,8 @@ useEffect(() => {
 data-layout={isFluid ? 'fluid' : 'fixed'}
 >
           
-            {media.kind === 'skeleton' && (
-              <div
-                className="animate-pulse w-full h-full bg-[color:var(--skeleton,#111827)]"
-                style={isFluid ? { minHeight: 220 } : undefined}
-              />
+ {media.kind === 'skeleton' && (
+              <div className="animate-pulse w-full h-full bg-[color:var(--skeleton,#111827)]" />
             )}
 
 {media.kind === 'video' && media.src && (
@@ -2572,66 +2049,49 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
     <video
       ref={videoRef}
       src={
-        !isVideoSrcTemporarilyBlocked(media.src)
+        shouldPrimeAdMedia && !isVideoSrcTemporarilyBlocked(media.src)
           ? media.src
           : undefined
       }
       data-src={media.src}
       className="forum-ad-fit"
+      autoPlay
       muted={muted}
       loop
       playsInline
       referrerPolicy="no-referrer"
-      preload={shouldPrimeAdMedia ? 'auto' : 'metadata'}
+      preload={shouldPlay ? 'auto' : shouldPrimeAdMedia ? 'metadata' : 'none'}
       onLoadedMetadata={() => {
         try { clearVideoSrcBlock(media?.src); } catch {}
-        primeAdVideo('loadedmetadata');
-        scheduleAdAutoplayRetry('loadedmetadata', { rearm: true });
+        tryStartAdVideo('loadedmetadata');
       }}
       onLoadedData={() => {
         try { clearVideoSrcBlock(media?.src); } catch {}
-        primeAdVideo('loadeddata');
-        scheduleAdAutoplayRetry('loadeddata', { rearm: true });
+        tryStartAdVideo('loadeddata');
       }}
       onCanPlay={() => {
         try { clearVideoSrcBlock(media?.src); } catch {}
-        primeAdVideo('canplay');
-        scheduleAdAutoplayRetry('canplay', { rearm: true });
+        tryStartAdVideo('canplay');
       }}
       onPlaying={() => {
         try { clearVideoSrcBlock(media?.src); } catch {}
-        markAdPlaybackStarted('dom_playing');
       }}
       onPause={() => {
         const v = videoRef.current;
         if (!v) return;
         if (!shouldPlayRef.current) return;
         if (v.ended) return;
-        setAdPlaybackState('paused');
-        scheduleAdAutoplayRetry('pause', { rearm: true });
-      }}
-      onEnded={() => {
-        const v = videoRef.current;
-        if (!v) return;
-        try { v.currentTime = 0; } catch {}
-        if (shouldPlayRef.current) {
-          tryStartAdVideoRef.current?.('ended_restart');
-        }
+        tryStartAdVideo('pause');
       }}
       onWaiting={() => {
         if (!shouldPlayRef.current) return;
-        setAdPlaybackState('waiting');
-        scheduleAdAutoplayRetry('waiting', { rearm: true });
+        tryStartAdVideo('waiting');
       }}
       onStalled={() => {
         if (!shouldPlayRef.current) return;
-        setAdPlaybackState('stalled');
-        scheduleAdAutoplayRetry('stalled', { rearm: true });
+        tryStartAdVideo('stalled');
       }}
       onError={() => {
-        clearAdPlaybackConfirm();
-        clearAdAutoplayRetry();
-        setAdPlaybackState('error');
         try {
           markVideoSrcTemporarilyBlocked(media?.src, isNear ? 12000 : 20000);
         } catch {}
@@ -2711,14 +2171,12 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
 {media.kind === 'image' && media.src && (
   <div className="forum-ad-media-fill">
     {isFluid ? (
-      <NextImage
+      <img
         src={media.src}
         alt={host}
-        width={1600}
-        height={900}
         className="forum-ad-fit"
-        style={{ objectFit: 'contain', objectPosition: 'center' }}
-        unoptimized
+        loading="lazy"
+        decoding="async"
         referrerPolicy="no-referrer"
       />
     ) : (
@@ -2751,21 +2209,8 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
             )}
 
             {media.kind === 'placeholder' && (
-              <div
-                className="w-full h-full flex items-center justify-center bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.12),transparent_58%),linear-gradient(180deg,rgba(2,6,23,0.96),rgba(2,6,23,0.9))] text-[11px] text-[color:var(--muted-fore,#9ca3af)]"
-                style={isFluid ? { minHeight: 220 } : undefined}
-              >
-                <div className="px-5 text-center">
-                  <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] text-[12px] font-semibold tracking-[0.24em] text-[color:var(--fore,#e5e7eb)]">
-                    AD
-                  </div>
-                  <div className="text-[13px] font-semibold text-[color:var(--fore,#e5e7eb)] break-all">
-                    {host}
-                  </div>
-                  <div className="mt-2 text-[11px] leading-5 text-[color:var(--muted-fore,#9ca3af)]">
-                    {placeholderPath}
-                  </div>
-                </div>
+              <div className="w-full h-full flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)]">
+                {host}
               </div>
             )}
 

@@ -300,6 +300,7 @@ export const FORUM_STYLES = `
     .ql7VideoSurface > video::-webkit-media-controls-toggle-closed-captions-button{ display:none !important; }
     .ql7VideoSurface > video::-webkit-media-controls-fullscreen-button{ display:none !important; }
     .ql7VideoSurface > video::-moz-media-controls{ display:none !important; }
+    .ql7VideoSurface > video::-internal-media-controls-overlay-cast-button{ display:none !important; }
     .ql7VideoSurface > video::-webkit-media-controls-overlay-play-button{ display:none !important; }
     .ql7VideoHud{
       position:absolute;

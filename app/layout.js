@@ -20,26 +20,21 @@ const forumTitleFont = Montserrat({
   display: 'swap',
   variable: '--font-forum-title',
 })
-const forumDiagEnabledByEnv = String(process.env.NEXT_PUBLIC_FORUM_DIAG || '') === '1'
-const forumPerfEnabledByEnv = String(process.env.NEXT_PUBLIC_FORUM_PERF_TRACE || '') === '1'
-const forumDiagQueryAllowed = process.env.NODE_ENV !== 'production'
-const forumEarlyDiagScriptEnabled =
-  forumDiagQueryAllowed || forumDiagEnabledByEnv || forumPerfEnabledByEnv
 const forumEarlyDiagFlags = JSON.stringify({
-  diag: forumDiagEnabledByEnv,
-  perf: forumPerfEnabledByEnv,
-  allowQuery: forumDiagQueryAllowed,
+  diag: String(process.env.NEXT_PUBLIC_FORUM_DIAG || '') === '1',
+  perf: String(process.env.NEXT_PUBLIC_FORUM_PERF_TRACE || '') === '1',
 })
 const forumEarlyDiagBootstrap = `(function () {
   try {
     var flags = ${forumEarlyDiagFlags};
+    var path = String((window.location && window.location.pathname) || '');
     var qs = new URLSearchParams((window.location && window.location.search) || '');
-    var queryEnabled = !!flags.allowQuery && ['forumDiag', 'forumPerf', 'forumAudit'].some(function (key) {
+    var queryEnabled = ['forumDiag', 'forumPerf', 'forumAudit'].some(function (key) {
       var value = String(qs.get(key) || '').trim().toLowerCase();
       return value === '1' || value === 'true';
     });
-    var path = String((window.location && window.location.pathname) || '');
-    var traceEnabled = !!(queryEnabled || flags.diag || flags.perf);
+    var forumPath = /^\\/forum(?:\\/|$)/i.test(path);
+    var traceEnabled = !!(forumPath || queryEnabled || flags.diag || flags.perf);
     var startup = window.__forumStartupTrace = window.__forumStartupTrace || {
       installedAt: Date.now(),
       firstInputTs: 0,
@@ -482,67 +477,33 @@ export default function RootLayout({ children }) {
       <head>
         {/* ✅ compat.js – максимально рано */}
         <Script src="/compat.js" strategy="beforeInteractive" id="compat-bootstrap" />
-        {forumEarlyDiagScriptEnabled && (
-          <Script id="forum-early-diag" strategy="beforeInteractive">{forumEarlyDiagBootstrap}</Script>
-        )}
+        <Script id="forum-early-diag" strategy="beforeInteractive">{forumEarlyDiagBootstrap}</Script>
   {/* ✅ Telegram WebApp SDK — ДОЛЖЕН грузиться до рендера страниц */}
   <Script
     src="https://telegram.org/js/telegram-web-app.js"
     strategy="beforeInteractive"
     id="tg-webapp-sdk"
   />
-        {/* ✅ Best-effort: глушим analytics-шум Coinbase AMP/metrics, не трогая сам wallet flow */}
-        <Script id="cb-metrics-mute" strategy="beforeInteractive">{`
+        {/* ✅ Dev: глушим метрику Coinbase, чтобы не было 401 в консоли */}
+        {process.env.NODE_ENV !== 'production' && (
+          <Script id="cb-metrics-mute" strategy="beforeInteractive">{`
             (function(){
-              var shouldBlock = function(url){
-                try {
-                  var s = String(url || '');
-                  return s.includes('cca-lite.coinbase.com/metrics') || s.includes('cca-lite.coinbase.com/amp');
-                } catch(e) {
-                  return false;
-                }
-              };
               try { localStorage.setItem('walletlink_analytics_enabled', 'false'); } catch(e){}
               try {
                 const _fetch = window.fetch;
                 window.fetch = function(input, init){
                   try {
                     const url = typeof input === 'string' ? input : (input && input.url) || '';
-                    if (shouldBlock(url)) {
+                    if (url.includes('cca-lite.coinbase.com/metrics')) {
                       return Promise.resolve(new Response(null, { status: 204 }));
                     }
                   } catch(e){}
                   return _fetch.apply(this, arguments);
                 };
               } catch(e){}
-              try {
-                var _sendBeacon = navigator.sendBeacon && navigator.sendBeacon.bind(navigator);
-                if (_sendBeacon) {
-                  navigator.sendBeacon = function(url, data){
-                    if (shouldBlock(url)) return true;
-                    return _sendBeacon(url, data);
-                  };
-                }
-              } catch(e){}
-              try {
-                var xhrOpen = XMLHttpRequest && XMLHttpRequest.prototype && XMLHttpRequest.prototype.open;
-                var xhrSend = XMLHttpRequest && XMLHttpRequest.prototype && XMLHttpRequest.prototype.send;
-                if (xhrOpen && xhrSend) {
-                  XMLHttpRequest.prototype.open = function(method, url){
-                    try { this.__cbBlocked = shouldBlock(url); } catch(e) { this.__cbBlocked = false; }
-                    return xhrOpen.apply(this, arguments);
-                  };
-                  XMLHttpRequest.prototype.send = function(body){
-                    if (this.__cbBlocked) {
-                      try { this.abort(); } catch(e){}
-                      return;
-                    }
-                    return xhrSend.apply(this, arguments);
-                  };
-                }
-              } catch(e){}
             })();
           `}</Script>
+        )}
       </head>
 
       <body>
@@ -568,7 +529,7 @@ export default function RootLayout({ children }) {
             {/* фон. аудио (кнопка снизу — «Выключить аудио») */}
             </ForumShellGate>
             <ForumShellGate label="bg_audio" delayMs={3200} idleTimeoutMs={2600}>
-              {/* <BgAudio src="/audio/cosmic.mp3" defaultVolume={1.35} /> */}
+              <BgAudio src="/audio/cosmic.mp3" defaultVolume={1.35} />
             </ForumShellGate>
 
             {/* 🔹 Глобальный поп-ап «Пригласи друга» */}

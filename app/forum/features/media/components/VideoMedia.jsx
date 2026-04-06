@@ -285,6 +285,7 @@ function Ql7IconBad(props) {
 
 export default function VideoMedia({
   src,
+  poster,
   className,
   style,
   preload = 'none',
@@ -311,13 +312,6 @@ export default function VideoMedia({
   unloadVideoEl,
   ...rest
 }) {
-  const resolveInitialMuted = () => {
-    try {
-      const pref = typeof readMutedPref === 'function' ? readMutedPref() : null
-      if (typeof pref === 'boolean') return pref
-    } catch {}
-    return typeof defaultMutedProp === 'boolean' ? defaultMutedProp : !!autoPlay
-  }
   const ref = React.useRef(null)
   const recoverTimerRef = React.useRef(0)
   const mediaKeyRef = React.useRef('')
@@ -327,7 +321,7 @@ export default function VideoMedia({
   const fxIdRef = React.useRef(0)
   const [hudVisible, setHudVisible] = React.useState(false)
   const [pausedState, setPausedState] = React.useState(true)
-  const [mutedState, setMutedState] = React.useState(() => !!resolveInitialMuted())
+  const [mutedState, setMutedState] = React.useState(true)
   const [centerGlyph, setCenterGlyph] = React.useState('')
   const [fxBursts, setFxBursts] = React.useState([])
   const mutedEvent = String(mutedEventName || 'forum:media-mute')
@@ -335,20 +329,10 @@ export default function VideoMedia({
   const preloadMode = String(preload || 'none').trim().toLowerCase() || 'none'
   const isPostVideo = String(dataForumVideo || '') === 'post'
   const coordinatorOwnsLifecycle = !!String(dataForumMedia || '').trim()
-  const selfieMirror = /(?:[#?&])ql7selfie=1(?:$|[&#])/i.test(String(src || ''))
   const renderControls = isPostVideo ? false : controls
   const renderPreload = dataForumVideo === 'post' ? undefined : preload
-  const renderLoop = isPostVideo ? true : loop
-  const renderStyle = React.useMemo(() => {
-    if (!selfieMirror) return style
-    const baseStyle = style && typeof style === 'object' ? style : {}
-    const baseTransform = typeof baseStyle.transform === 'string' ? baseStyle.transform.trim() : ''
-    return {
-      ...baseStyle,
-      transform: `${baseTransform ? `${baseTransform} ` : ''}scaleX(-1)`,
-      transformOrigin: baseStyle.transformOrigin || 'center center',
-    }
-  }, [selfieMirror, style])
+  const renderPoster = dataForumVideo === 'post' ? undefined : poster
+
   const readMuted = React.useCallback(() => {
     try {
       return typeof readMutedPref === 'function' ? readMutedPref() : null
@@ -356,7 +340,6 @@ export default function VideoMedia({
       return null
     }
   }, [readMutedPref])
-  const renderMuted = !!mutedState
 
   const writeMuted = React.useCallback(
     (nextMuted) => {
@@ -533,7 +516,7 @@ export default function VideoMedia({
     const el = ref.current
     if (!el) return
     const s = String(src || '')
-    const mediaKey = s
+    const mediaKey = s || String(poster || '')
     const prevMediaKey = String(mediaKeyRef.current || '')
     const isNewMediaNode = prevMediaKey !== mediaKey
     mediaKeyRef.current = mediaKey
@@ -582,7 +565,25 @@ export default function VideoMedia({
         delete el.dataset.__lastManualMuteTs
       } catch {}
     }
-  }, [autoPlay, clearNativeControlsForPost, defaultMutedProp, playsInline, preloadMode, readMuted, src])
+    if (poster) {
+      try {
+        const nextPoster = String(poster)
+        const prevPosterMediaKey = String(el.dataset.__posterMediaKey || '')
+        const isNewMedia = prevPosterMediaKey !== mediaKey
+        el.dataset.__posterOriginal = nextPoster
+        if (isNewMedia) {
+          el.dataset.__posterMediaKey = mediaKey
+          el.dataset.__posterRevealed = '0'
+          el.dataset.__needsPosterRestore = '1'
+          delete el.dataset.__resumeTime
+          delete el.dataset.__candidateBoostTs
+          el.setAttribute('poster', nextPoster)
+        } else if (el.dataset?.__posterRevealed !== '1' && !el.getAttribute('poster')) {
+          el.setAttribute('poster', nextPoster)
+        }
+      } catch {}
+    }
+  }, [autoPlay, clearNativeControlsForPost, defaultMutedProp, playsInline, poster, preloadMode, readMuted, src])
 
   React.useEffect(() => {
     const el = ref.current
@@ -761,7 +762,7 @@ export default function VideoMedia({
         const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
         const dm = Number(navigator?.deviceMemory || 0)
         const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2
-        if (isIOS) return { unloadDelayMs: 3200, hardUnloadOnInactive: true }
+        if (isIOS) return { unloadDelayMs: 3800, hardUnloadOnInactive: false }
         if (lowMem) return { unloadDelayMs: 2800, hardUnloadOnInactive: true }
         if (isAndroid || coarse) return { unloadDelayMs: 4400, hardUnloadOnInactive: false }
         return { unloadDelayMs: 5200, hardUnloadOnInactive: false }
@@ -979,6 +980,25 @@ export default function VideoMedia({
       if (!el) return
       clearNativeControlsForPost()
       el.dataset.__recoverTry = '0'
+      const revealPoster = () => {
+        try {
+          if (!el.isConnected) return
+          if ((el.readyState || 0) < 2) return
+          if (el.dataset?.__posterRevealed === '1') return
+          el.dataset.__posterRevealed = '1'
+          el.dataset.__needsPosterRestore = '0'
+          el.removeAttribute('poster')
+        } catch {}
+      }
+      try {
+        if (typeof el.requestVideoFrameCallback === 'function') {
+          el.requestVideoFrameCallback(() => revealPoster())
+        } else {
+          requestAnimationFrame(() => revealPoster())
+        }
+      } catch {
+        revealPoster()
+      }
     } catch {}
   }, [clearNativeControlsForPost])
 
@@ -1025,11 +1045,6 @@ export default function VideoMedia({
     clearNativeControlsForPost()
     revealHud(2200)
     if (el.paused) {
-      try {
-        if (Number(el.ended ? 1 : 0) === 1 || Number(el.currentTime || 0) >= Math.max(0, Number(el.duration || 0) - 0.05)) {
-          el.currentTime = 0
-        }
-      } catch {}
       showCenterGlyph('play', 760)
       try {
         const p = el.play?.()
@@ -1063,16 +1078,16 @@ export default function VideoMedia({
       data-forum-media={dataForumMedia}
       data-forum-video={dataForumVideo}
       playsInline={playsInline}
+      poster={renderPoster}
       preload={renderPreload}
       controls={isPostVideo ? undefined : renderControls}
-      muted={renderMuted}
       autoPlay={autoPlay}
-      loop={renderLoop}
+      loop={loop}
       controlsList={controlsList}
       disablePictureInPicture={disablePictureInPicture}
       referrerPolicy="no-referrer"
       className={className}
-      style={renderStyle}
+      style={style}
       onPointerDown={handleRootPointerDown}
       onClick={isPostVideo ? handleSurfaceClick : undefined}
       onLoadedData={onVideoLoaded}

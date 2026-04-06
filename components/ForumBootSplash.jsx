@@ -25,15 +25,6 @@ const FORUM_SPLASH_FAILSAFE_MS = 45000
 const FORUM_SPLASH_FADE_OUT_MS = 320
 const FORUM_SPLASH_FALLBACK_DELAY_MS = 700
 const FORUM_SPLASH_RETRY_MS = 220
-const FORUM_SPLASH_SOUND_START_BUDGET_MS = 900
-const FORUM_SPLASH_SOUND_MAX_ATTEMPTS = 3
-const FORUM_SPLASH_MUTED_MAX_ATTEMPTS = 10
-const FORUM_SPLASH_FAILSAFE_MIN_MS = 12000
-const FORUM_SPLASH_FAILSAFE_CAP_MS = 20000
-const FORUM_SPLASH_DURATION_GRACE_MS = 5000
-const FORUM_SPLASH_PLAY_CONFIRM_MS = 420
-const FORUM_SPLASH_AUDIBLE_UPGRADE_CONFIRM_MS = 900
-const FORUM_SPLASH_AUDIBLE_UPGRADE_MAX_ATTEMPTS = 1
 
 /* =========================================================
    VIDEO SOURCE
@@ -46,10 +37,6 @@ const FORUM_SPLASH_VIDEO_SRC = '/load/load.mp4'
 const FORUM_SPLASH_TRY_SOUND_AUTOPLAY = 1 
 const FORUM_SPLASH_ALLOW_MUTED_FALLBACK = 1
 const FORUM_SPLASH_VOLUME = 1 
-
-const MEDIA_MUTED_KEY = 'forum:mediaMuted'
-const MEDIA_VIDEO_MUTED_KEY = 'forum:videoMuted'
-const MEDIA_MUTED_EVENT = 'forum:media-mute'
 
 /* =========================================================
    LAYER / Z-INDEX
@@ -112,24 +99,7 @@ function getFrameWidth() {
 }
 
 function shouldShowSplashNow() {
-  if (FORUM_SPLASH_ENABLED !== 1) return false
-  try {
-    if (typeof window === 'undefined') return true
-    return window.__forumBootSplashShown !== 1
-  } catch {
-    return true
-  }
-}
-
-function readStoredForumMutedPref() {
-  try {
-    let v = window.localStorage?.getItem(MEDIA_MUTED_KEY)
-    if (v == null) v = window.localStorage?.getItem(MEDIA_VIDEO_MUTED_KEY)
-    if (v == null) return true
-    return v === '1' || v === 'true'
-  } catch {
-    return true
-  }
+  return FORUM_SPLASH_ENABLED === 1
 }
 
 export default function ForumBootSplash({ onDone }) {
@@ -148,20 +118,9 @@ export default function ForumBootSplash({ onDone }) {
   const doneRef = useRef(false)
   const closingRef = useRef(false)
   const playbackReadyRef = useRef(false)
-  const soundAutoplayBlockedRef = useRef(false)
   const soundAttemptsRef = useRef(0)
   const mutedAttemptsRef = useRef(0)
-  const retryStageRef = useRef(0)
-  const retryTotalRef = useRef(0)
-  const playbackPhaseRef = useRef(
-    FORUM_SPLASH_TRY_SOUND_AUTOPLAY === 1 ? 'sound' : 'muted'
-  )
-  const phaseStartedAtRef = useRef(0)
-  const muteHoldReleasedRef = useRef(false)
   const ensurePlaybackRef = useRef(() => {})
-  const audibleUpgradeAttemptsRef = useRef(0)
-  const audibleUpgradeInFlightRef = useRef(false)
-  const gestureCapturedRef = useRef(false)
 
   const frameWidth = useMemo(() => getFrameWidth(), [])
 
@@ -172,24 +131,12 @@ export default function ForumBootSplash({ onDone }) {
     ref.current = 0
   }
 
-  const debugLog = useCallback((...args) => {
+  const debugLog = (...args) => {
     if (!FORUM_SPLASH_DEBUG) return
     try {
       console.log('[ForumBootSplash]', ...args)
     } catch {}
-  }, [])
-
-  const nowMs = useCallback(() => {
-    try {
-      if (
-        typeof performance !== 'undefined' &&
-        typeof performance.now === 'function'
-      ) {
-        return performance.now()
-      }
-    } catch {}
-    return Date.now()
-  }, [])
+  }
 
   const setSplashActiveFlag = useCallback((next) => {
     try {
@@ -198,57 +145,10 @@ export default function ForumBootSplash({ onDone }) {
     } catch {}
   }, [])
 
-  const syncForumMutedState = useCallback((forceMuted, source) => {
-    try {
-      if (typeof window === 'undefined') return
-      window.dispatchEvent(
-        new CustomEvent(MEDIA_MUTED_EVENT, {
-          detail: {
-            muted: !!forceMuted,
-            id: 'forum_boot_splash',
-            source,
-          },
-        }),
-      )
-    } catch {}
-  }, [])
-
-  const setSoundBlocked = useCallback((nextBlocked) => {
-    soundAutoplayBlockedRef.current = !!nextBlocked
-    setSoundAutoplayBlocked(!!nextBlocked)
-  }, [])
-
-  const hasPlaybackStarted = useCallback(() => {
-    const el = videoRef.current
-    if (!el) return false
-    if (playbackReadyRef.current) return true
-
-    try {
-      if (el.ended) return false
-      if (el.paused) return false
-      return Number(el.currentTime || 0) > 0.05
-    } catch {}
-
-    return false
-  }, [])
-
-  const releaseMuteHold = useCallback(
-    (source) => {
-      if (muteHoldReleasedRef.current) return
-      muteHoldReleasedRef.current = true
-      setSplashActiveFlag(false)
-      syncForumMutedState(readStoredForumMutedPref(), source)
-    },
-    [setSplashActiveFlag, syncForumMutedState]
-  )
-
   const markReady = useCallback(() => {
-    clearTimer(retryTimerRef)
     playbackReadyRef.current = true
     setPlaybackReady(true)
     setShowFallback(false)
-    retryStageRef.current = 0
-    retryTotalRef.current = 0
   }, [])
 
   const releaseVideo = useCallback(() => {
@@ -277,40 +177,18 @@ export default function ForumBootSplash({ onDone }) {
     clearTimer(fallbackTimerRef)
     clearTimer(failsafeTimerRef)
 
+    setSplashActiveFlag(false)
     setShowFallback(false)
     setClosing(true)
 
     fadeTimerRef.current = window.setTimeout(() => {
       releaseVideo()
-      releaseMuteHold('forum-splash-release')
       setVisible(false)
       try {
         onDone?.()
       } catch {}
     }, Math.max(0, Number(FORUM_SPLASH_FADE_OUT_MS || 0)))
-  }, [onDone, releaseMuteHold, releaseVideo])
-
-  const armFailsafe = useCallback((ms) => {
-    clearTimer(failsafeTimerRef)
-    failsafeTimerRef.current = window.setTimeout(() => {
-      finish()
-    }, Math.max(0, Number(ms || 0)))
-  }, [finish])
-
-  const computeFailsafeMs = useCallback((durationMs) => {
-    const safeDuration = Number(durationMs || 0)
-    if (!Number.isFinite(safeDuration) || safeDuration <= 0) {
-      return FORUM_SPLASH_FAILSAFE_MS
-    }
-
-    return Math.min(
-      FORUM_SPLASH_FAILSAFE_CAP_MS,
-      Math.max(
-        FORUM_SPLASH_FAILSAFE_MIN_MS,
-        safeDuration + FORUM_SPLASH_DURATION_GRACE_MS,
-      ),
-    )
-  }, [])
+  }, [onDone, releaseVideo, setSplashActiveFlag])
 
   const primeVideo = useCallback(() => {
     const el = videoRef.current
@@ -351,314 +229,11 @@ export default function ForumBootSplash({ onDone }) {
     } catch {}
   }, [])
 
-  const isAutoplayBlockError = useCallback((err) => {
-    const name = String(err?.name || '')
-    const message = String(err?.message || '').toLowerCase()
-    return (
-      /notallowed|securityerror/i.test(name) ||
-      message.includes('notallowed') ||
-      message.includes('gesture') ||
-      message.includes('interact') ||
-      message.includes('autoplay')
-    )
-  }, [])
-
-  const restartPlaybackTransport = useCallback((reason) => {
-    const el = videoRef.current
-    if (!el) return
-
-    debugLog('restart_transport', { reason })
-
-    try {
-      el.pause?.()
-    } catch {}
-
-    try {
-      if (Number(el.currentTime || 0) > 0) {
-        el.currentTime = 0
-      }
-    } catch {}
-
-    try {
-      if (!el.getAttribute('src')) {
-        el.setAttribute('src', FORUM_SPLASH_VIDEO_SRC)
-      }
-    } catch {}
-
-    try {
-      el.load?.()
-    } catch {}
-  }, [debugLog])
-
-  const createPlaybackEvidenceWaiter = useCallback(
-    (
-      timeoutMs = FORUM_SPLASH_PLAY_CONFIRM_MS,
-      baselineTime = Number(videoRef.current?.currentTime || 0),
-    ) => {
-      const el = videoRef.current
-      if (!el || !visible || closingRef.current) {
-        return {
-          cancel: () => {},
-          promise: Promise.resolve(false),
-        }
-      }
-
-      const startTime = Number.isFinite(Number(baselineTime))
-        ? Number(baselineTime)
-        : Number(el.currentTime || 0)
-
-      const hasTimeAdvanced = () => {
-        try {
-          return Number(el.currentTime || 0) > startTime + 0.001
-        } catch {
-          return false
-        }
-      }
-
-      if (hasPlaybackStarted() || hasTimeAdvanced()) {
-        return {
-          cancel: () => {},
-          promise: Promise.resolve(true),
-        }
-      }
-
-      let settled = false
-      let confirmTimer = 0
-      let rafId = 0
-      let frameHandle = 0
-      let settleResolve = () => {}
-
-      const cleanup = () => {
-        try {
-          el.removeEventListener('playing', onPlaying)
-          el.removeEventListener('timeupdate', onTimeUpdate)
-        } catch {}
-        try {
-          if (confirmTimer) clearTimeout(confirmTimer)
-        } catch {}
-        confirmTimer = 0
-        try {
-          if (rafId) cancelAnimationFrame(rafId)
-        } catch {}
-        rafId = 0
-        try {
-          if (frameHandle && typeof el.cancelVideoFrameCallback === 'function') {
-            el.cancelVideoFrameCallback(frameHandle)
-          }
-        } catch {}
-        frameHandle = 0
-      }
-
-      const settle = (next) => {
-        if (settled) return
-        settled = true
-        cleanup()
-        settleResolve(!!next)
-      }
-
-      const check = () => {
-        if (!visible || closingRef.current) {
-          settle(false)
-          return
-        }
-        if (hasPlaybackStarted() || hasTimeAdvanced()) {
-          settle(true)
-          return
-        }
-        try {
-          if (!el.paused) {
-            rafId = requestAnimationFrame(check)
-          }
-        } catch {}
-      }
-
-      const onPlaying = () => {
-        settle(true)
-      }
-
-      const onTimeUpdate = () => {
-        if (hasPlaybackStarted() || hasTimeAdvanced()) settle(true)
-      }
-
-      try {
-        el.addEventListener('playing', onPlaying, { passive: true })
-        el.addEventListener('timeupdate', onTimeUpdate, { passive: true })
-      } catch {}
-
-      try {
-        if (typeof el.requestVideoFrameCallback === 'function') {
-          frameHandle = el.requestVideoFrameCallback(() => {
-            settle(true)
-          })
-        }
-      } catch {}
-
-      confirmTimer = window.setTimeout(() => {
-        settle(hasPlaybackStarted() || hasTimeAdvanced())
-      }, Math.max(120, Number(timeoutMs || 0)))
-
-      rafId = requestAnimationFrame(check)
-
-      return {
-        cancel: () => settle(false),
-        promise: new Promise((resolve) => {
-          settleResolve = resolve
-        }),
-      }
-    },
-    [hasPlaybackStarted, visible]
-  )
-
-  const attemptAudibleUpgrade = useCallback(
-    async (reason = 'muted_upgrade') => {
-      const el = videoRef.current
-      if (!el) return false
-      if (!visible || closingRef.current || doneRef.current) return false
-      if (FORUM_SPLASH_TRY_SOUND_AUTOPLAY !== 1) return false
-      if (playbackPhaseRef.current !== 'muted') return false
-      if (audibleUpgradeInFlightRef.current) return false
-      if (
-        audibleUpgradeAttemptsRef.current >= FORUM_SPLASH_AUDIBLE_UPGRADE_MAX_ATTEMPTS
-      ) {
-        return false
-      }
-
-      audibleUpgradeInFlightRef.current = true
-      audibleUpgradeAttemptsRef.current += 1
-
-      const startedAt = Number(el.currentTime || 0)
-      let pauseSeen = false
-      let settled = false
-      let rafId = 0
-      let timerId = 0
-
-      const cleanup = () => {
-        try {
-          el.removeEventListener('pause', onPause)
-        } catch {}
-        try {
-          if (rafId) cancelAnimationFrame(rafId)
-        } catch {}
-        rafId = 0
-        try {
-          if (timerId) clearTimeout(timerId)
-        } catch {}
-        timerId = 0
-      }
-
-      const onPause = () => {
-        pauseSeen = true
-      }
-
-      const confirmUpgrade = () =>
-        new Promise((resolve) => {
-          const settle = (next) => {
-            if (settled) return
-            settled = true
-            cleanup()
-            resolve(!!next)
-          }
-
-          const check = () => {
-            if (!visible || closingRef.current || doneRef.current) {
-              settle(false)
-              return
-            }
-
-            const advanced = Number(el.currentTime || 0) > startedAt + 0.02
-            if (!pauseSeen && !el.paused && !el.muted && advanced) {
-              settle(true)
-              return
-            }
-
-            rafId = requestAnimationFrame(check)
-          }
-
-          try {
-            el.addEventListener('pause', onPause, { passive: true })
-          } catch {}
-
-          timerId = window.setTimeout(() => {
-            const advanced = Number(el.currentTime || 0) > startedAt + 0.02
-            settle(!pauseSeen && !el.paused && !el.muted && advanced)
-          }, Math.max(240, Number(FORUM_SPLASH_AUDIBLE_UPGRADE_CONFIRM_MS || 0)))
-
-          rafId = requestAnimationFrame(check)
-        })
-
-      try {
-        applyMuteState(false)
-        try {
-          el.volume = Math.max(0, Math.min(1, Number(FORUM_SPLASH_VOLUME || 1)))
-        } catch {}
-        const p = el.play?.()
-        if (p && typeof p.then === 'function') {
-          await p
-        }
-
-        const ok = await confirmUpgrade()
-        if (ok) {
-          playbackPhaseRef.current = 'sound'
-          setSoundBlocked(false)
-          debugLog('audible_upgrade_ok', { reason })
-          return true
-        }
-      } catch (err) {
-        debugLog('audible_upgrade_reject', {
-          reason,
-          name: String(err?.name || ''),
-          message: String(err?.message || ''),
-        })
-      } finally {
-        cleanup()
-        settled = true
-        audibleUpgradeInFlightRef.current = false
-      }
-
-      try {
-        applyMuteState(true)
-        const retry = el.play?.()
-        if (retry && typeof retry.then === 'function') {
-          retry.catch(() => {})
-        }
-      } catch {}
-      setSoundBlocked(true)
-      debugLog('audible_upgrade_fallback_muted', { reason })
-      return false
-    },
-    [applyMuteState, debugLog, setSoundBlocked, visible]
-  )
-
-  const captureStartGesture = useCallback((source = 'gesture') => {
-    if (!visible || closingRef.current || doneRef.current) return
-    const isFirstGesture = !gestureCapturedRef.current
-    gestureCapturedRef.current = true
-    setShowFallback(false)
-
-    debugLog('user_gesture', {
-      source,
-      firstGesture: isFirstGesture,
-      phase: playbackPhaseRef.current,
-      ready: playbackReadyRef.current,
-      blocked: soundAutoplayBlockedRef.current,
-    })
-
-    if (playbackPhaseRef.current === 'muted' || soundAutoplayBlockedRef.current) {
-      void attemptAudibleUpgrade(`${source}:muted_upgrade`)
-    }
-
-    try {
-      if (!playbackReadyRef.current || !hasPlaybackStarted()) {
-        ensurePlaybackRef.current?.(`${source}:play`)
-      }
-    } catch {}
-  }, [attemptAudibleUpgrade, debugLog, hasPlaybackStarted, visible])
-
   const tryPlay = useCallback(
     async (wantMuted, reason) => {
       const el = videoRef.current
-      if (!el) return { ok: false, blocked: false }
-      if (!visible || closingRef.current) return { ok: false, blocked: false }
+      if (!el) return false
+      if (!visible || closingRef.current) return false
 
       primeVideo()
       applyMuteState(wantMuted)
@@ -671,94 +246,39 @@ export default function ForumBootSplash({ onDone }) {
         }
       } catch {}
 
-      const playbackEvidence = createPlaybackEvidenceWaiter(
-        FORUM_SPLASH_PLAY_CONFIRM_MS,
-        Number(el.currentTime || 0),
-      )
-
       try { 
         const p = el.play?.()
         if (p && typeof p.then === 'function') {
           await p
         }
-        if (hasPlaybackStarted()) {
-          playbackEvidence.cancel()
-          debugLog('play_ok_immediate', { reason, muted: !!wantMuted })
-          markReady()
-          return { ok: true, blocked: false }
-        }
-        if (await playbackEvidence.promise) {
+        if (!el.paused) {
           debugLog('play_ok', { reason, muted: !!wantMuted })
           markReady()
-          if (wantMuted) {
-            void attemptAudibleUpgrade(`${reason}:post_start`)
-          }
-          return { ok: true, blocked: false }
+          return true
         }
       } catch (err) {
-        playbackEvidence.cancel()
         debugLog('play_reject', {
           reason,
           muted: !!wantMuted,
           name: String(err?.name || ''),
           message: String(err?.message || ''),
         })
-        return { ok: false, blocked: isAutoplayBlockError(err) }
       }
 
-      return { ok: false, blocked: false }
+      return false
     },
-    [
-      applyMuteState,
-      createPlaybackEvidenceWaiter,
-      isAutoplayBlockError,
-      hasPlaybackStarted,
-      markReady,
-      primeVideo,
-      attemptAudibleUpgrade,
-      debugLog,
-      visible,
-    ]
+    [applyMuteState, markReady, primeVideo, visible]
   )
 
-  const enterMutedFallback = useCallback(
-    (reason) => {
-      if (playbackPhaseRef.current === 'muted') return
-      playbackPhaseRef.current = 'muted'
-      phaseStartedAtRef.current = nowMs()
-      retryStageRef.current = 0
-      restartPlaybackTransport(reason)
-      setSoundBlocked(true)
-      debugLog('enter_muted_fallback', {
-        reason,
-        soundAttempts: soundAttemptsRef.current,
-      })
-    },
-    [debugLog, nowMs, restartPlaybackTransport, setSoundBlocked]
-  )
-
-  const scheduleRetry = useCallback((reason = 'retry', { rearm = false, force = false } = {}) => {
+  const scheduleRetry = useCallback((reason = 'retry') => {
     if (!visible || closingRef.current) return
-    if (playbackReadyRef.current && !force) return
-    if (rearm) retryStageRef.current = 0
-    if (retryTotalRef.current >= 16) {
-      debugLog('retry_budget_exhausted', { reason })
-      return
-    }
-    const delays =
-      playbackPhaseRef.current === 'sound'
-        ? [60, 120, 180]
-        : [90, 180, 280, 420, 640, 920, 1280, 1800]
-    const delay = delays[Math.min(retryStageRef.current, delays.length - 1)]
-    retryStageRef.current += 1
-    retryTotalRef.current += 1
     clearTimer(retryTimerRef)
     retryTimerRef.current = window.setTimeout(() => {
       try {
         ensurePlaybackRef.current?.(reason)
       } catch {}
-    }, playbackPhaseRef.current === 'sound' ? delay : Math.max(FORUM_SPLASH_RETRY_MS, delay))
-  }, [debugLog, visible])
+    }, FORUM_SPLASH_RETRY_MS)
+  }, [visible])
 
   const ensurePlayback = useCallback(
     async (reason = 'manual') => {
@@ -768,100 +288,46 @@ export default function ForumBootSplash({ onDone }) {
 
       primeVideo()
 
-      if (
-        playbackPhaseRef.current === 'sound' &&
-        FORUM_SPLASH_TRY_SOUND_AUTOPLAY === 1
-      ) {
+      try {
+        if (!el.paused && !el.ended) {
+          markReady()
+          return
+        }
+      } catch {}
+
+      if (FORUM_SPLASH_TRY_SOUND_AUTOPLAY === 1 && soundAttemptsRef.current < 3) {
         soundAttemptsRef.current += 1
-        const soundResult = await tryPlay(false, `${reason}:sound`)
-        if (soundResult.ok) {
-          setSoundBlocked(false)
+        const soundOk = await tryPlay(false, `${reason}:sound`)
+        if (soundOk) {
+          setSoundAutoplayBlocked(false)
           return
         }
-
-        const soundPhaseElapsed = Math.max(0, nowMs() - phaseStartedAtRef.current)
-        const shouldUseMutedFallback =
-          FORUM_SPLASH_ALLOW_MUTED_FALLBACK === 1 &&
-          (
-            soundResult.blocked ||
-            soundAttemptsRef.current >= FORUM_SPLASH_SOUND_MAX_ATTEMPTS ||
-            soundPhaseElapsed >= FORUM_SPLASH_SOUND_START_BUDGET_MS
-          )
-
-        if (!shouldUseMutedFallback) {
-          scheduleRetry(reason)
-          return
-        }
-
-        enterMutedFallback(
-          soundResult.blocked
-            ? `${reason}:sound_blocked`
-            : `${reason}:sound_budget`
-        )
+        setSoundAutoplayBlocked(true)
       }
 
       if (
-        (playbackPhaseRef.current === 'muted' ||
-          FORUM_SPLASH_TRY_SOUND_AUTOPLAY !== 1) &&
-        (FORUM_SPLASH_ALLOW_MUTED_FALLBACK === 1 ||
-          FORUM_SPLASH_TRY_SOUND_AUTOPLAY !== 1)
+        FORUM_SPLASH_ALLOW_MUTED_FALLBACK === 1 &&
+        mutedAttemptsRef.current < 8
       ) {
-        if (mutedAttemptsRef.current >= FORUM_SPLASH_MUTED_MAX_ATTEMPTS) {
-          debugLog('muted_retry_budget_exhausted', { reason })
-          return
-        }
         mutedAttemptsRef.current += 1
-        const mutedResult = await tryPlay(true, `${reason}:muted`)
-        if (mutedResult.ok) return
+        const mutedOk = await tryPlay(true, `${reason}:muted`)
+        if (mutedOk) return
       }
 
       scheduleRetry(reason)
     },
-    [
-      enterMutedFallback,
-      nowMs,
-      primeVideo,
-      scheduleRetry,
-      setSoundBlocked,
-      tryPlay,
-      debugLog,
-      visible,
-    ]
+    [markReady, primeVideo, scheduleRetry, tryPlay, visible]
   )
 
   ensurePlaybackRef.current = ensurePlayback
 
   useBrowserLayoutEffect(() => {
     if (!visible) return undefined
-    try {
-      if (typeof window !== 'undefined') window.__forumBootSplashShown = 1
-    } catch {}
-    playbackPhaseRef.current =
-      FORUM_SPLASH_TRY_SOUND_AUTOPLAY === 1 ? 'sound' : 'muted'
-    phaseStartedAtRef.current = nowMs()
-    soundAttemptsRef.current = 0
-    mutedAttemptsRef.current = 0
-    audibleUpgradeAttemptsRef.current = 0
-    audibleUpgradeInFlightRef.current = false
-    retryStageRef.current = 0
-    retryTotalRef.current = 0
-    muteHoldReleasedRef.current = false
-    setSoundBlocked(FORUM_SPLASH_TRY_SOUND_AUTOPLAY !== 1)
     setSplashActiveFlag(true)
-    syncForumMutedState(true, 'forum-splash')
     primeVideo()
     ensurePlayback('layout_mount')
     return undefined
-  }, [
-    ensurePlayback,
-    nowMs,
-    primeVideo,
-    setSoundBlocked,
-    setSplashActiveFlag,
-    syncForumMutedState,
-    debugLog,
-    visible,
-  ])
+  }, [ensurePlayback, primeVideo, setSplashActiveFlag, visible])
 
   useEffect(() => {
     if (FORUM_SPLASH_ENABLED !== 1) {
@@ -876,7 +342,6 @@ export default function ForumBootSplash({ onDone }) {
 
     debugLog('mounted')
     setSplashActiveFlag(true)
-    syncForumMutedState(true, 'forum-splash')
 
     clearTimer(fallbackTimerRef)
     fallbackTimerRef.current = window.setTimeout(() => {
@@ -885,7 +350,10 @@ export default function ForumBootSplash({ onDone }) {
       }
     }, Math.max(0, Number(FORUM_SPLASH_FALLBACK_DELAY_MS || 0)))
 
-    armFailsafe(FORUM_SPLASH_FAILSAFE_MS)
+    clearTimer(failsafeTimerRef)
+    failsafeTimerRef.current = window.setTimeout(() => {
+      finish()
+    }, Math.max(0, Number(FORUM_SPLASH_FAILSAFE_MS || 0)))
 
     const onVisibilityRecover = () => {
       try {
@@ -911,27 +379,9 @@ export default function ForumBootSplash({ onDone }) {
       clearTimer(fallbackTimerRef)
       clearTimer(failsafeTimerRef)
 
-      releaseMuteHold('forum-splash-cleanup')
+      setSplashActiveFlag(false)
     }
-  }, [
-    armFailsafe,
-    finish,
-    onDone,
-    releaseMuteHold,
-    scheduleRetry,
-    setSplashActiveFlag,
-    syncForumMutedState,
-    debugLog,
-    visible,
-  ])
-
-  useEffect(() => {
-    if (visible) return
-    if (doneRef.current) return
-    try {
-      onDone?.()
-    } catch {}
-  }, [onDone, visible])
+  }, [finish, onDone, scheduleRetry, setSplashActiveFlag, visible])
 
   useEffect(() => {
     if (!visible) return
@@ -949,37 +399,41 @@ export default function ForumBootSplash({ onDone }) {
 
   return (
     <>
+      <link
+        rel="preload"
+        href={FORUM_SPLASH_VIDEO_SRC}
+        as="video"
+        fetchPriority="high"
+      />
+
       <div
         className={`forum-boot-splash ${closing ? 'is-closing' : ''}`}
-        onPointerDown={() => {
-          captureStartGesture('overlay-pointer')
-        }}
+        aria-hidden="true"
       >
         <div className="forum-boot-splash__frame">
           <video
             ref={videoRef}
             className="forum-boot-splash__video"
             src={FORUM_SPLASH_VIDEO_SRC}
+            autoPlay
             playsInline
             preload="auto"
             controls={false}
             disablePictureInPicture
             onLoadedMetadata={() => {
-              const el = videoRef.current
-              const durationMs = Number(el?.duration || 0) * 1000
-              if (Number.isFinite(durationMs) && durationMs > 0) {
-                armFailsafe(computeFailsafeMs(durationMs))
-              }
-              scheduleRetry('loadedmetadata', { rearm: true })
+              ensurePlaybackRef.current?.('loadedmetadata')
             }}
             onLoadedData={() => {
-              scheduleRetry('loadeddata', { rearm: true })
+              markReady()
+              ensurePlaybackRef.current?.('loadeddata')
             }}
             onCanPlay={() => {
-              scheduleRetry('canplay', { rearm: true })
+              markReady()
+              ensurePlaybackRef.current?.('canplay')
             }}
             onCanPlayThrough={() => {
-              scheduleRetry('canplaythrough', { rearm: true })
+              markReady()
+              ensurePlaybackRef.current?.('canplaythrough')
             }}
             onPlaying={() => {
               markReady()
@@ -989,20 +443,18 @@ export default function ForumBootSplash({ onDone }) {
               if (!el) return
               if (closingRef.current) return
               if (el.ended) return
-              playbackReadyRef.current = false
-              scheduleRetry('pause', { rearm: true, force: true })
+              scheduleRetry('pause')
             }}
             onWaiting={() => {
-              playbackReadyRef.current = false
-              scheduleRetry('waiting', { rearm: true, force: true })
+              scheduleRetry('waiting')
             }}
             onStalled={() => {
-              playbackReadyRef.current = false
-              scheduleRetry('stalled', { rearm: true, force: true })
+              scheduleRetry('stalled')
             }}
             onSuspend={() => {
-              playbackReadyRef.current = false
-              scheduleRetry('suspend', { rearm: true, force: true })
+              if (!playbackReadyRef.current) {
+                scheduleRetry('suspend')
+              }
             }}
             onEnded={() => {
               if (FORUM_SPLASH_CLOSE_ON_VIDEO_END === 1) {
@@ -1010,10 +462,8 @@ export default function ForumBootSplash({ onDone }) {
               }
             }}
             onError={() => {
-              playbackReadyRef.current = false
-              scheduleRetry('error', { rearm: true, force: true })
+              scheduleRetry('error')
             }}
-            data-forum-splash="1"
           />
 
           {showFallback && !playbackReady && (
