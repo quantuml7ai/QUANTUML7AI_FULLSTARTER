@@ -101,6 +101,7 @@ export default function ForumOverlayStack({
         copy={videoLimitCopy}
         maxSec={forumVideoMaxSeconds}
         durationSec={videoLimitOverlay?.durationSec}
+        reason={videoLimitOverlay?.reason}
         onClose={closeVideoLimitOverlay}
       />
       <VideoTrimPopover

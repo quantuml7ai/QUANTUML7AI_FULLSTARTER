@@ -26,7 +26,7 @@ export default function useVideoCaptureController({
   readVideoDurationSecFn,
   createUnmirroredFrontStreamFn,
   emitDiag,
-  openVideoTrimPopover,
+  showVideoLimitOverlay,
   toast,
   t,
   setVideoProgress,
@@ -212,12 +212,10 @@ export default function useVideoCaptureController({
             try {
               setVideoOpen(false)
               setVideoState('idle')
-              openVideoTrimPopover({
+              showVideoLimitOverlay?.({
                 source: 'camera_record',
-                blob,
-                mime: String(blob?.type || ''),
                 durationSec: recordedDurationSec,
-                name: `camera-${Date.now()}.webm`,
+                reason: 'too_long',
               })
             } catch {}
             videoChunksRef.current = []
@@ -293,7 +291,6 @@ export default function useVideoCaptureController({
     emitDiag,
     forumVideoCameraRecordEpsilonSec,
     forumVideoMaxSeconds,
-    openVideoTrimPopover,
     pendingVideo,
     pendingVideoBlobMetaRef,
     pendingVideoInfoRef,
@@ -304,6 +301,7 @@ export default function useVideoCaptureController({
     setVideoElapsed,
     setVideoOpen,
     setVideoState,
+    showVideoLimitOverlay,
     t,
     toast,
     videoAutoStopAtLimitRef,

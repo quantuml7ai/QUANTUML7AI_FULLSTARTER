@@ -22,7 +22,6 @@ export default function useForumComposerAttachments({
   setVideoOpen,
   viewerId,
   showVideoLimitOverlay,
-  openVideoTrimPopover,
   readVideoDurationSecFn,
   forumVideoMaxSeconds,
   forumVideoMaxBytes,
@@ -213,12 +212,10 @@ export default function useForumComposerAttachments({
         }
         if (pickedDurationSec > forumVideoMaxSeconds) {
           try {
-            openVideoTrimPopover?.({
+            showVideoLimitOverlay?.({
               source: 'attach_picker',
-              blob: vf,
-              mime,
               durationSec: pickedDurationSec,
-              name: String(vf?.name || ''),
+              reason: 'too_long',
             })
           } catch {}
           try {
@@ -390,7 +387,6 @@ export default function useForumComposerAttachments({
     forumVideoMaxBytes,
     forumVideoMaxSeconds,
     moderateImageFiles,
-    openVideoTrimPopover,
     optimizeForumVideoFastStartFn,
     pendingVideoInfoRef,
     readVideoDurationSecFn,
