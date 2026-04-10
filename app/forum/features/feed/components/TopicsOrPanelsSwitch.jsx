@@ -78,10 +78,15 @@ export default function TopicsOrPanelsSwitch({
   topicPageSize,
   sortedTopicsLength,
   TopicItem,
+  contentRefreshToken,
+  userRecommendationsRail,
+  userRecommendationsRuntime,
+  onOpenUserPosts,
 }) {
   if (videoFeedOpen) {
     return (
       <VideoFeedPane
+        key={`video-feed:${contentRefreshToken || 0}`}
         t={t}
         vfWin={vfWin}
         vfSlots={vfSlots}
@@ -112,6 +117,9 @@ export default function TopicsOrPanelsSwitch({
         PostCard={PostCard}
         ForumAdSlot={ForumAdSlot}
         LoadMoreSentinel={LoadMoreSentinel}
+        userRecommendationsRail={userRecommendationsRail}
+        userRecommendationsRuntime={userRecommendationsRuntime}
+        onOpenUserPosts={onOpenUserPosts}
       />
     )
   }
@@ -119,6 +127,7 @@ export default function TopicsOrPanelsSwitch({
   if (questOpen && questEnabled) {
     return (
       <QuestPane
+        key={`quest-pane:${contentRefreshToken || 0}`}
         t={t}
         quests={quests}
         questProg={questProg}
@@ -137,12 +146,13 @@ export default function TopicsOrPanelsSwitch({
   }
 
   if (inboxOpen) {
-    return <InboxPane {...inboxPaneProps} />
+    return <InboxPane key={`inbox-pane:${contentRefreshToken || 0}`} {...inboxPaneProps} />
   }
 
   if (profileBranchMode === 'posts') {
     return (
       <UserPostsPane
+        key={`user-posts:${contentRefreshToken || 0}`}
         t={t}
         branchUserNick={profileBranchUserNick}
         branchUserId={profileBranchUserId}
@@ -177,6 +187,7 @@ export default function TopicsOrPanelsSwitch({
 
   return (
     <TopicsPane
+      key={`topics-pane:${contentRefreshToken || 0}`}
       visibleTopics={visibleTopics}
       aggregates={aggregates}
       pushNavState={pushNavState}

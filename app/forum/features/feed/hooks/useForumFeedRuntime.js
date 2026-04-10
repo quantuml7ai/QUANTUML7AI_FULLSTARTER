@@ -47,6 +47,7 @@ export default function useForumFeedRuntime({
   isTikTokUrlFn,
   buildSearchVideoMediaFn,
   starredFirstFn,
+  resolveProfileAccountIdFn,
 }) {
   const [threadRoot, setThreadRoot] = useState(null)
   const navStackRef = useRef([])
@@ -68,6 +69,7 @@ export default function useForumFeedRuntime({
     postSort,
     activeStarredAuthors,
     visibleThreadPostsCount,
+    resolveProfileAccountIdFn,
   })
 
   const {
@@ -178,8 +180,10 @@ export default function useForumFeedRuntime({
     topicSort,
     topicFilterId,
     starredFirstFn,
+    activeStarredAuthors,
     visibleTopicsCount,
     setTopicFilterId,
+    resolveProfileAccountIdFn,
   })
 
   return {

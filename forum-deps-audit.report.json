@@ -1,11 +1,11 @@
 {
-  "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-03-10T09:41:12.856Z",
+  "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
+  "generatedAt": "2026-04-10T22:40:14.486Z",
   "summary": {
-    "scannedFiles": 355,
-    "internalEdges": 463,
+    "scannedFiles": 365,
+    "internalEdges": 486,
     "cycleCount": 0,
-    "crossDomainEdgeCount": 111,
+    "crossDomainEdgeCount": 117,
     "forumRootImportCount": 1,
     "forumRootExternalCount": 1
   },
@@ -132,7 +132,31 @@
       "toDomain": "forum-shared"
     },
     {
+      "from": "app/forum/features/feed/components/UserRecommendationCard.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/components/HydrateText.jsx",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/components/UserRecommendationCard.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/counts.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/components/UserRecommendationsRail.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/classnames.js",
+      "toDomain": "forum-shared"
+    },
+    {
       "from": "app/forum/features/feed/hooks/useForumDeepLinkFlow.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/hooks/useEvent.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/hooks/useForumFeedRuntime.js",
       "fromDomain": "forum-ui",
       "to": "app/forum/shared/hooks/useEvent.js",
       "toDomain": "forum-shared"
@@ -195,6 +219,12 @@
       "from": "app/forum/features/media/hooks/useForumVideoFeedRuntime.js",
       "fromDomain": "forum-ui",
       "to": "app/forum/shared/hooks/useEvent.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/media/hooks/useVideoFeedWindowing.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/config/runtime.js",
       "toDomain": "forum-shared"
     },
     {
@@ -312,12 +342,6 @@
       "toDomain": "forum-shared"
     },
     {
-      "from": "app/forum/features/qcoin/hooks/useQCoinLive.js",
-      "fromDomain": "forum-ui",
-      "to": "app/forum/shared/utils/browser.js",
-      "toDomain": "forum-shared"
-    },
-    {
       "from": "app/forum/features/quests/components/QuestHub.jsx",
       "fromDomain": "forum-ui",
       "to": "app/forum/shared/utils/classnames.js",
@@ -382,12 +406,6 @@
       "fromDomain": "forum-ui",
       "to": "lib/forumVideoTrim.js",
       "toDomain": "lib"
-    },
-    {
-      "from": "app/forum/ForumRoot.jsx",
-      "fromDomain": "forum-ui",
-      "to": "app/forum/shared/hooks/useEvent.js",
-      "toDomain": "forum-shared"
     },
     {
       "from": "app/forum/ForumRoot.jsx",
@@ -486,6 +504,12 @@
       "toDomain": "components"
     },
     {
+      "from": "app/forum/page.js",
+      "fromDomain": "forum-ui",
+      "to": "components/ForumBootSplash.jsx",
+      "toDomain": "components"
+    },
+    {
       "from": "app/forum/SharePopover.jsx",
       "fromDomain": "forum-ui",
       "to": "lib/forumShareManager.js",
@@ -502,6 +526,18 @@
       "fromDomain": "api-forum",
       "to": "app/api/profile/_identity.js",
       "toDomain": "api-profile"
+    },
+    {
+      "from": "app/api/forum/recommendations/users/route.js",
+      "fromDomain": "api-forum",
+      "to": "app/api/profile/_identity.js",
+      "toDomain": "api-profile"
+    },
+    {
+      "from": "app/api/forum/recommendations/users/route.js",
+      "fromDomain": "api-forum",
+      "to": "lib/subscriptions.js",
+      "toDomain": "lib"
     },
     {
       "from": "app/api/forum/subs/count/route.js",
@@ -1301,9 +1337,10 @@
         "app/forum/features/media/components/VideoFeedPane.jsx",
         "app/forum/features/quests/components/QuestPane.jsx",
         "app/forum/features/dm/components/InboxPane.jsx",
-        "app/forum/features/feed/components/TopicsPane.jsx"
+        "app/forum/features/feed/components/TopicsPane.jsx",
+        "app/forum/features/feed/components/UserPostsPane.jsx"
       ],
-      "importCount": 4,
+      "importCount": 5,
       "external": [
         "react"
       ],
@@ -1328,6 +1365,44 @@
         "app/forum/features/feed/components/TopicsOrPanelsSwitch.jsx"
       ],
       "importCount": 3,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/components/UserPostsPane.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/components/UserRecommendationCard.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/components/HydrateText.jsx",
+        "app/forum/shared/utils/counts.js",
+        "app/forum/features/profile/components/AvatarEmoji.jsx",
+        "app/forum/features/profile/components/VipFlipBadge.jsx"
+      ],
+      "importCount": 4,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/components/UserRecommendationsRail.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/utils/classnames.js",
+        "app/forum/features/feed/components/UserRecommendationCard.jsx"
+      ],
+      "importCount": 2,
       "external": [
         "react"
       ],
@@ -1400,9 +1475,11 @@
         "app/forum/features/feed/hooks/useThreadOpenNavigation.js",
         "app/forum/features/feed/hooks/useThreadPostsModel.js",
         "app/forum/features/feed/hooks/useTopicDiscoveryModel.js",
+        "app/forum/shared/hooks/useEvent.js",
+        "app/forum/features/media/utils/videoFeedScroll.js",
         "app/forum/features/feed/utils/postFocus.js"
       ],
-      "importCount": 5,
+      "importCount": 7,
       "external": [
         "react"
       ],
@@ -1581,8 +1658,10 @@
     {
       "file": "app/forum/features/feed/hooks/useThreadPostsModel.js",
       "domain": "forum-ui",
-      "imports": [],
-      "importCount": 0,
+      "imports": [
+        "app/forum/features/subscriptions/utils/starred.js"
+      ],
+      "importCount": 1,
       "external": [
         "react"
       ],
@@ -1590,6 +1669,18 @@
     },
     {
       "file": "app/forum/features/feed/hooks/useTopicDiscoveryModel.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/subscriptions/utils/starred.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useUserPostsBranchModel.js",
       "domain": "forum-ui",
       "imports": [],
       "importCount": 0,
@@ -1599,7 +1690,27 @@
       "externalCount": 1
     },
     {
+      "file": "app/forum/features/feed/hooks/useUserRecommendationsRail.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/profile/utils/profileCache.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
       "file": "app/forum/features/feed/services/rateLimiter.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/feed/utils/interleaveRecommendationRails.js",
       "domain": "forum-ui",
       "imports": [],
       "importCount": 0,
@@ -1725,8 +1836,10 @@
     {
       "file": "app/forum/features/media/components/VideoFeedPane.jsx",
       "domain": "forum-ui",
-      "imports": [],
-      "importCount": 0,
+      "imports": [
+        "app/forum/features/feed/components/UserRecommendationsRail.jsx"
+      ],
+      "importCount": 1,
       "external": [
         "react"
       ],
@@ -1882,8 +1995,11 @@
     {
       "file": "app/forum/features/media/hooks/useVideoFeedWindowing.js",
       "domain": "forum-ui",
-      "imports": [],
-      "importCount": 0,
+      "imports": [
+        "app/forum/shared/config/runtime.js",
+        "app/forum/features/feed/utils/interleaveRecommendationRails.js"
+      ],
+      "importCount": 2,
       "external": [
         "react"
       ],
@@ -2193,10 +2309,9 @@
       ],
       "importCount": 2,
       "external": [
-        "react",
-        "next/image"
+        "react"
       ],
-      "externalCount": 2
+      "externalCount": 1
     },
     {
       "file": "app/forum/features/profile/components/ForumVipControl.jsx",
@@ -2206,8 +2321,10 @@
         "app/forum/features/profile/components/VipPopover.jsx"
       ],
       "importCount": 2,
-      "external": [],
-      "externalCount": 0
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
     },
     {
       "file": "app/forum/features/profile/components/ProfilePopover.jsx",
@@ -2413,10 +2530,9 @@
       "file": "app/forum/features/qcoin/hooks/useQCoinLive.js",
       "domain": "forum-ui",
       "imports": [
-        "app/forum/shared/utils/browser.js",
         "app/forum/features/qcoin/utils/account.js"
       ],
-      "importCount": 2,
+      "importCount": 1,
       "external": [
         "react"
       ],
@@ -2770,6 +2886,16 @@
       "externalCount": 1
     },
     {
+      "file": "app/forum/features/ui/components/ForumControlNavIcon.jsx",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
       "file": "app/forum/features/ui/components/ForumOverlayStack.jsx",
       "domain": "forum-ui",
       "imports": [
@@ -2794,9 +2920,11 @@
       "imports": [
         "app/forum/shared/utils/classnames.js",
         "app/forum/features/media/utils/mediaLinks.js",
-        "app/forum/features/quests/components/QuestLaunchIcon.jsx"
+        "app/forum/features/profile/components/AvatarEmoji.jsx",
+        "app/forum/features/quests/components/QuestLaunchIcon.jsx",
+        "app/forum/features/ui/components/ForumControlNavIcon.jsx"
       ],
-      "importCount": 3,
+      "importCount": 5,
       "external": [
         "next/image"
       ],
@@ -3232,7 +3360,6 @@
         "app/forum/ForumLayout.jsx",
         "app/forum/ForumProviders.jsx",
         "lib/forumVideoTrim.js",
-        "app/forum/shared/hooks/useEvent.js",
         "app/forum/shared/hooks/useHtmlFlag.js",
         "app/forum/shared/hooks/useForumToast.js",
         "app/forum/shared/utils/browser.js",
@@ -3261,7 +3388,10 @@
         "app/forum/features/ui/utils/buildForumLayoutProps.js",
         "app/forum/features/feed/hooks/useForumDataRuntime.js",
         "app/forum/features/feed/hooks/useForumMutationActions.js",
+        "app/forum/features/feed/hooks/useUserRecommendationsRail.js",
         "app/forum/features/feed/hooks/useForumFeedRuntime.js",
+        "app/forum/features/media/utils/videoFeedScroll.js",
+        "app/forum/features/feed/hooks/useUserPostsBranchModel.js",
         "app/forum/features/feed/utils/navScroll.js",
         "app/forum/features/feed/services/rateLimiter.js",
         "app/forum/features/feed/components/TopicItem.jsx",
@@ -3291,7 +3421,7 @@
         "app/forum/features/moderation/hooks/useForumModerationRuntime.js",
         "app/forum/ForumAds.js"
       ],
-      "importCount": 62,
+      "importCount": 64,
       "external": [
         "react"
       ],
@@ -3330,9 +3460,10 @@
       "domain": "forum-ui",
       "imports": [
         "app/forum/Forum.jsx",
-        "components/i18n.js"
+        "components/i18n.js",
+        "components/ForumBootSplash.jsx"
       ],
-      "importCount": 2,
+      "importCount": 3,
       "external": [
         "react",
         "next/link",
@@ -3815,6 +3946,21 @@
       "importCount": 2,
       "external": [],
       "externalCount": 0
+    },
+    {
+      "file": "app/api/forum/recommendations/users/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_db.js",
+        "app/api/forum/_utils.js",
+        "app/api/profile/_identity.js",
+        "lib/subscriptions.js"
+      ],
+      "importCount": 4,
+      "external": [
+        "next/server"
+      ],
+      "externalCount": 1
     },
     {
       "file": "app/api/forum/report/route.js",
@@ -4322,8 +4468,8 @@
       "imports": [],
       "importCount": 0,
       "external": [
-        "fs",
-        "path"
+        "node:fs/promises",
+        "node:path"
       ],
       "externalCount": 2
     },
@@ -4467,6 +4613,27 @@
         "react"
       ],
       "externalCount": 1
+    },
+    {
+      "file": "components/ForumBootSplash.jsx",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "components/ForumShellGate.jsx",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react",
+        "next/navigation"
+      ],
+      "externalCount": 2
     },
     {
       "file": "components/HeroAvatar.js",

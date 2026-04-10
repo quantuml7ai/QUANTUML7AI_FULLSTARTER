@@ -22,6 +22,8 @@ export default function buildSearchSortControlsProps({
   setVideoFeedUserSortLocked,
   setFeedSort,
   sel,
+  inboxOpen,
+  inboxTab,
   profileBranchMode,
   setPostSort,
   setTopicSort,
@@ -30,6 +32,7 @@ export default function buildSearchSortControlsProps({
   questEnabled,
   questBtnClass,
   openQuests,
+  onCommitSortChange,
 }) {
   return {
     t,
@@ -55,7 +58,9 @@ export default function buildSearchSortControlsProps({
     setVideoFeedUserSortLocked,
     setFeedSort,
     sel,
-    forcePostSort: profileBranchMode === 'posts',
+    forcePostSort:
+      profileBranchMode === 'posts' ||
+      (inboxOpen && String(inboxTab || 'messages') !== 'messages'),
     setPostSort,
     setTopicSort,
     starMode,
@@ -63,5 +68,6 @@ export default function buildSearchSortControlsProps({
     questEnabled,
     questBtnClass,
     openQuests,
+    onCommitSortChange,
   }
 }

@@ -21,6 +21,9 @@ export default function buildForumRootPropBundles(args) {
   const topicsSwitchProps = buildTopicsSwitchProps({
     ...args,
     inboxPaneProps,
+    userRecommendationsRail: args.userRecommendationsRail,
+    userRecommendationsRuntime: args.userRecommendationsRuntime,
+    onOpenUserPosts: args.onOpenUserPosts,
   })
 
   const threadRepliesPaneProps = buildThreadRepliesPaneProps(args)

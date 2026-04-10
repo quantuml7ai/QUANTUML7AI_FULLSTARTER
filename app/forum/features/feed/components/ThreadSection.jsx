@@ -37,7 +37,10 @@ export default function ThreadSection({
         style={{ flex: '1 1 auto', minHeight: 0, height: '100%', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}
       >
         <div data-forum-thread-start="1" />
-        <ThreadRepliesPane {...threadRepliesPaneProps} />
+        <ThreadRepliesPane
+          key={`thread-replies:${threadRepliesPaneProps?.contentRefreshToken || 0}`}
+          {...threadRepliesPaneProps}
+        />
       </div>
     </section>
   )

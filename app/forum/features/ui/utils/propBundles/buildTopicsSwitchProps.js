@@ -69,6 +69,10 @@ export default function buildTopicsSwitchProps({
   topicPageSize,
   sortedTopicsLength,
   TopicItem,
+  contentRefreshToken,
+  userRecommendationsRail,
+  userRecommendationsRuntime,
+  onOpenUserPosts,
 }) {
   return {
     videoFeedOpen,
@@ -141,5 +145,9 @@ export default function buildTopicsSwitchProps({
     topicPageSize,
     sortedTopicsLength,
     TopicItem,
+    contentRefreshToken,
+    userRecommendationsRail,
+    userRecommendationsRuntime,
+    onOpenUserPosts,
   }
 }

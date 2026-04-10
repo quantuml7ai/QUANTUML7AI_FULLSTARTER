@@ -31,6 +31,12 @@ export default function useForumViewState() {
     setVisibleTopicsCount(TOPIC_PAGE_SIZE)
   }, [topicSort, topicFilterId, starMode])
 
+  React.useEffect(() => {
+    setVisibleThreadPostsCount(THREAD_PAGE_SIZE)
+    setVisibleRepliesCount(REPLIES_PAGE_SIZE)
+    setVisiblePublishedCount(PUBLISHED_PAGE_SIZE)
+  }, [postSort, starMode])
+
   return {
     starMode,
     setStarMode,

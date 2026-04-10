@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { readForumRuntimeConfig } from '../../../shared/config/runtime'
+import interleaveRecommendationRails from '../../feed/utils/interleaveRecommendationRails'
 
 const VF_OVERSCAN_PX = 1900
 const VF_VIDEO_CARD_H_MOBILE = 650
@@ -7,6 +9,9 @@ const VF_VIDEO_CARD_H_DESKTOP = 550
 const VF_AD_CARD_H_MOBILE = 200
 const VF_AD_CARD_H_TABLET = 260
 const VF_AD_CARD_H_DESKTOP = 320
+const VF_RECOMMENDATION_RAIL_H_MOBILE = 278
+const VF_RECOMMENDATION_RAIL_H_TABLET = 304
+const VF_RECOMMENDATION_RAIL_H_DESKTOP = 328
 const VF_ITEM_CHROME_EST = 240
 const VF_WINDOW_STICKY_MS = 320
 const VF_LAYOUT_JITTER_PX = 28
@@ -35,6 +40,9 @@ export default function useVideoFeedWindowing({
   const vfScrollActivityRef = useRef({ activeUntil: 0, settleTimer: 0 })
   const vfWinMetaRef = useRef({ ts: 0, start: 0, end: 0 })
   const [vfWin, setVfWin] = useState(() => ({ start: 0, end: 0, top: 0, bottom: 0 }))
+  const runtimeCfg = readForumRuntimeConfig()
+  const recommendationsEnabled = !!runtimeCfg?.userRecommendations?.enabled
+  const recommendationsEvery = Math.max(0, Number(runtimeCfg?.userRecommendations?.every || 0) || 0)
 
   const vfGetMaxRender = useCallback(() => {
     try {
@@ -73,15 +81,38 @@ export default function useVideoFeedWindowing({
     }
   }, [isBrowserFn])
 
+  const vfGetFixedRecommendationH = useCallback(() => {
+    try {
+      if (!isBrowserFn()) return VF_RECOMMENDATION_RAIL_H_TABLET
+      const w = window?.innerWidth || 0
+      if (w >= 1024) return VF_RECOMMENDATION_RAIL_H_DESKTOP
+      if (w >= 640) return VF_RECOMMENDATION_RAIL_H_TABLET
+      return VF_RECOMMENDATION_RAIL_H_MOBILE
+    } catch {
+      return VF_RECOMMENDATION_RAIL_H_TABLET
+    }
+  }, [isBrowserFn])
+
   const vfSlots = useMemo(() => {
-    return debugAdsSlots(
+    const adSlots = debugAdsSlots(
       'video',
       interleaveAdsFn(visibleVideoFeed || [], adEvery, {
         isSkippable: (p) => !p || !p.id,
         getId: (p) => p?.id || `${p?.topicId || 'vf'}:${p?.ts || 0}`,
       })
     )
-  }, [visibleVideoFeed, adEvery, debugAdsSlots, interleaveAdsFn])
+    if (!recommendationsEnabled || !recommendationsEvery) return adSlots
+    return interleaveRecommendationRails(adSlots, recommendationsEvery, {
+      isSkippable: (slot) => String(slot?.type || '') !== 'item' || !slot?.item?.id,
+    })
+  }, [
+    visibleVideoFeed,
+    adEvery,
+    debugAdsSlots,
+    interleaveAdsFn,
+    recommendationsEnabled,
+    recommendationsEvery,
+  ])
 
   const vfGetScrollEl = useCallback(() => {
     try {
@@ -108,9 +139,11 @@ export default function useVideoFeedWindowing({
 
   const vfEstimateH = useCallback((i) => {
     const slot = vfSlots?.[i]
-    if (slot && slot.type !== 'item') return vfGetFixedAdH()
+    if (!slot || slot.type === 'item') return vfGetFixedItemH() + VF_ITEM_CHROME_EST
+    if (slot.type === 'recommendation_rail') return vfGetFixedRecommendationH()
+    if (slot.type === 'ad') return vfGetFixedAdH()
     return vfGetFixedItemH() + VF_ITEM_CHROME_EST
-  }, [vfSlots, vfGetFixedAdH, vfGetFixedItemH])
+  }, [vfSlots, vfGetFixedAdH, vfGetFixedItemH, vfGetFixedRecommendationH])
 
   const vfGetH = useCallback((i) => {
     const h = vfHeightsRef.current.get(i)

@@ -31,6 +31,21 @@ function keyOfVideoFeedItem(item) {
   return ''
 }
 
+function buildVideoFeedContextSignature(list) {
+  const keys = (Array.isArray(list) ? list : [])
+    .map((item) => keyOfVideoFeedItem(item))
+    .filter((key) => !!String(key || '').trim())
+
+  const head = keys.slice(0, 5).join(',')
+  const tail = keys.slice(-5).join(',')
+  return `${keys.length}|${head}|${tail}`
+}
+
+function buildStarredSignature(starredAuthors) {
+  if (!starredAuthors?.size) return 'off'
+  return Array.from(starredAuthors).map(String).sort().join(',')
+}
+
 export default function useVideoFeedState({
   data,
   allPosts,
@@ -38,6 +53,7 @@ export default function useVideoFeedState({
   extractUrlsFromText,
   viewerId,
   starredFirst,
+  activeStarredAuthors,
   videoFeedOpenRef,
   navRestoringRef,
   emitDiag,
@@ -53,6 +69,10 @@ export default function useVideoFeedState({
   const [videoFeedPageSalt, setVideoFeedPageSalt] = useState(() => createVideoFeedPageSalt())
   const lastBuildEntryTokenRef = useRef(0)
   const lastBuildOrderKeyRef = useRef('')
+  const starredSignature = useMemo(
+    () => buildStarredSignature(activeStarredAuthors),
+    [activeStarredAuthors],
+  )
 
   useEffect(() => {
     videoFeedOpenRef.current = videoFeedOpen
@@ -106,6 +126,7 @@ export default function useVideoFeedState({
       String(videoFeedPageSalt || ''),
       String(videoFeedUserSortLocked ? '1' : '0'),
       String(feedSort || 'random'),
+      starredSignature,
     ].join('|')
     const buildOrderChanged = buildOrderKeyNow !== String(lastBuildOrderKeyRef.current || '')
     lastBuildOrderKeyRef.current = buildOrderKeyNow
@@ -158,6 +179,7 @@ export default function useVideoFeedState({
     videoFeedPageSalt,
     videoFeedUserSortLocked,
     viewerId,
+    starredSignature,
   ])
 
   const visibleVideoFeed = useMemo(
@@ -165,6 +187,23 @@ export default function useVideoFeedState({
     [videoFeed, visibleVideoCount],
   )
   const videoHasMore = visibleVideoFeed.length < (videoFeed || []).length
+  const videoFeedContextKey = useMemo(() => {
+    return [
+      String(feedSort || 'random'),
+      String(videoFeedEntryToken || 0),
+      String(videoFeedPageSalt || ''),
+      String(videoFeedUserSortLocked ? '1' : '0'),
+      starredSignature,
+      buildVideoFeedContextSignature(videoFeed),
+    ].join('|')
+  }, [
+    feedSort,
+    videoFeed,
+    videoFeedEntryToken,
+    videoFeedPageSalt,
+    videoFeedUserSortLocked,
+    starredSignature,
+  ])
 
   return {
     videoFeedOpen,
@@ -182,5 +221,6 @@ export default function useVideoFeedState({
     buildAndSetVideoFeed,
     visibleVideoFeed,
     videoHasMore,
+    videoFeedContextKey,
   }
 }

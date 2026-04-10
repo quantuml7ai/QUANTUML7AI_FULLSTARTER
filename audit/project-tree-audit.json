@@ -1,6 +1,6 @@
 {
   "phase": "project-tree-audit",
-  "timestamp": "2026-03-21T17:24:44.045Z",
+  "timestamp": "2026-04-10T16:59:44.950Z",
   "scope": "whole repository tree registry",
   "touched_files": [
     "PROJECT_TREE.md"
@@ -14,29 +14,33 @@
   "storage_risk": "none",
   "runtime_risk": "low",
   "notes": [
-    "repo_files=1556",
-    "source_files=622",
-    "route_files=95"
+    "repo_files=1588",
+    "source_files=651",
+    "route_files=96"
   ],
   "status": "ok",
-  "total_repo_files": 1556,
-  "total_source_files": 622,
+  "total_repo_files": 1588,
+  "total_source_files": 651,
   "top_level_breakdown": {
     ".env.local": 1,
     ".env.local.example": 1,
     ".eslintrc.json": 1,
     ".gitignore": 1,
+    ".npmrc": 1,
     "account-sync-audit.report.json": 1,
     "ad-runtime.audit.report.json": 1,
     "AGENTS.md": 1,
-    "app": 376,
+    "app": 381,
     "audit": 170,
     "auth-bus.audit.report.json": 1,
     "components": 23,
     "deep-audit.report.json": 1,
+    "docs": 1,
     "effects-leak.report.json": 1,
     "forum-deps-audit.report.json": 1,
     "forum-diag.jsonl": 1,
+    "forum-media-churn.audit.report.json": 1,
+    "forum-scroll.audit.report.json": 1,
     "forum-startup.audit.report.json": 1,
     "heapsnapshot-analysis.report.json": 1,
     "heavy-audit.report.json": 1,
@@ -57,6 +61,9 @@
     "public": 920,
     "README.md": 1,
     "runtime-hotspots.report.json": 1,
-    "tools": 24
+    "tests": 15,
+    "tools": 30,
+    "tsconfig.json": 1,
+    "vitest.config.mjs": 1
   }
 }

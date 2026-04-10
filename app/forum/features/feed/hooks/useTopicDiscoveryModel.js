@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react'
+import { resolveStarredEntityAuthorId } from '../../subscriptions/utils/starred'
 
 export default function useTopicDiscoveryModel({
   query,
@@ -18,10 +19,16 @@ export default function useTopicDiscoveryModel({
   topicSort,
   topicFilterId,
   starredFirstFn,
+  activeStarredAuthors,
   visibleTopicsCount,
   setTopicFilterId,
+  resolveProfileAccountIdFn,
 }) {
   const stableOrderRef = useRef({ key: '', ids: [] })
+  const starredSignature = useMemo(() => {
+    if (!activeStarredAuthors?.size) return 'off'
+    return Array.from(activeStarredAuthors).map(String).sort().join(',')
+  }, [activeStarredAuthors])
 
   const aggregates = useMemo(() => {
     const byTopic = new Map()
@@ -180,9 +187,10 @@ export default function useTopicDiscoveryModel({
   const sortedTopics = useMemo(() => {
     let nextTopics = [...(topics || [])]
     const authorFilter = String(authorFilterUserId || '').trim()
+    const readTopicAuthorId = (topic) => resolveStarredEntityAuthorId(topic, resolveProfileAccountIdFn)
     if (authorFilter) {
       nextTopics = nextTopics.filter((topic) => {
-        const authorId = String(topic?.userId || topic?.accountId || '').trim()
+        const authorId = readTopicAuthorId(topic)
         return authorId === authorFilter
       })
     }
@@ -213,13 +221,14 @@ export default function useTopicDiscoveryModel({
       String(topicFilterId || ''),
       authorFilter,
       String(query || '').trim().toLowerCase(),
+      starredSignature,
     ].join('|')
 
     if (stableOrderRef.current.key !== orderKey) {
       stableOrderRef.current = { key: orderKey, ids: [] }
     }
 
-    let ordered = starredFirstFn(base, (topic) => topic?.userId || topic?.accountId)
+    let ordered = starredFirstFn(base, readTopicAuthorId)
 
     const shouldStabilizeByScroll = (() => {
       try {
@@ -255,7 +264,17 @@ export default function useTopicDiscoveryModel({
 
     stableOrderRef.current.ids = ordered.map((topic) => String(topic?.id || ''))
     return ordered
-  }, [topics, aggregates, topicSort, topicFilterId, starredFirstFn, authorFilterUserId, query])
+  }, [
+    topics,
+    aggregates,
+    topicSort,
+    topicFilterId,
+    starredFirstFn,
+    authorFilterUserId,
+    query,
+    resolveProfileAccountIdFn,
+    starredSignature,
+  ])
 
   const visibleTopics = useMemo(
     () => (sortedTopics || []).slice(0, visibleTopicsCount),

@@ -36,6 +36,7 @@ export default function useForumProfileSocialRuntime({
     api,
     requireAuthStrict,
     starMode,
+    resolveProfileAccountIdFn,
   })
 
   const [vipOpen, setVipOpen] = useState(false)

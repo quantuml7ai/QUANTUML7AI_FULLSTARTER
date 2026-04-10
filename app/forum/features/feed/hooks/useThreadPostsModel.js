@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { getStarredEntityRank } from '../../subscriptions/utils/starred'
 
 export default function useThreadPostsModel({
   selectedTopicId,
@@ -7,6 +8,7 @@ export default function useThreadPostsModel({
   postSort,
   activeStarredAuthors,
   visibleThreadPostsCount,
+  resolveProfileAccountIdFn,
 }) {
   const allPosts = useMemo(
     () => (
@@ -58,9 +60,7 @@ export default function useThreadPostsModel({
     }
 
     const starRank = (post) => {
-      if (!activeStarredAuthors?.size) return 0
-      const authorId = String(post?.userId || post?.accountId || '').trim()
-      return authorId && activeStarredAuthors.has(authorId) ? 1 : 0
+      return getStarredEntityRank(post, activeStarredAuthors, resolveProfileAccountIdFn)
     }
 
     if (!threadRoot) {
@@ -124,7 +124,15 @@ export default function useThreadPostsModel({
     }))
 
     return [rootRow, ...childRows]
-  }, [selectedTopicId, threadRoot, rootPosts, idMap, postSort, activeStarredAuthors])
+  }, [
+    selectedTopicId,
+    threadRoot,
+    rootPosts,
+    idMap,
+    postSort,
+    activeStarredAuthors,
+    resolveProfileAccountIdFn,
+  ])
 
   const visibleFlat = useMemo(
     () => (flat || []).slice(0, visibleThreadPostsCount),

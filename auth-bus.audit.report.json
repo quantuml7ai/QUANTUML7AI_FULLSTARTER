@@ -1,6 +1,6 @@
 {
-  "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-03-24T02:19:53.911Z",
+  "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
+  "generatedAt": "2026-04-10T22:40:14.328Z",
   "summary": [
     {
       "event": "auth:ok",
@@ -40,7 +40,7 @@
   ],
   "byFile": [
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\AuthNavClient.jsx",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\AuthNavClient.jsx",
       "totalHits": 11,
       "hits": [
         {
@@ -112,7 +112,7 @@
       ]
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\exchange\\BattleCoin.jsx",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\exchange\\BattleCoin.jsx",
       "totalHits": 9,
       "hits": [
         {
@@ -172,7 +172,7 @@
       ]
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\academy\\AcademyExamBlock.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\academy\\AcademyExamBlock.js",
       "totalHits": 7,
       "hits": [
         {
@@ -220,7 +220,7 @@
       ]
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\exchange\\page.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\exchange\\page.js",
       "totalHits": 7,
       "hits": [
         {
@@ -268,7 +268,7 @@
       ]
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\subscribe\\subscribe.client.jsx",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\subscribe\\subscribe.client.jsx",
       "totalHits": 6,
       "hits": [
         {
@@ -310,7 +310,7 @@
       ]
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\shared\\utils\\openAuth.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\utils\\openAuth.js",
       "totalHits": 5,
       "hits": [
         {
@@ -346,7 +346,7 @@
       ]
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\hooks\\useForumProfileSync.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\hooks\\useForumProfileSync.js",
       "totalHits": 4,
       "hits": [
         {
@@ -376,7 +376,7 @@
       ]
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumSessionShell.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumSessionShell.js",
       "totalHits": 4,
       "hits": [
         {
@@ -406,7 +406,7 @@
       ]
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\InviteFriendProvider.jsx",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\InviteFriendProvider.jsx",
       "totalHits": 4,
       "hits": [
         {
@@ -436,7 +436,7 @@
       ]
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\QCoinDropFX.jsx",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\QCoinDropFX.jsx",
       "totalHits": 4,
       "hits": [
         {
@@ -466,7 +466,7 @@
       ]
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\page.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\page.js",
       "totalHits": 2,
       "hits": [
         {
@@ -484,7 +484,7 @@
       ]
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\tma\\auto\\page.jsx",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\tma\\auto\\page.jsx",
       "totalHits": 1,
       "hits": [
         {
@@ -496,7 +496,7 @@
       ]
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\TopBar.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\TopBar.js",
       "totalHits": 1,
       "hits": [
         {

@@ -43,10 +43,12 @@ import buildForumRootPropBundles from './features/ui/utils/buildForumRootPropBun
 import buildForumLayoutProps from './features/ui/utils/buildForumLayoutProps'
 import useForumDataRuntime from './features/feed/hooks/useForumDataRuntime'
 import useForumMutationActions from './features/feed/hooks/useForumMutationActions'
+import useUserRecommendationsRail from './features/feed/hooks/useUserRecommendationsRail'
 import useForumFeedRuntime, {
   useForumModeSync,
   useForumScrollAlignmentRuntime,
 } from './features/feed/hooks/useForumFeedRuntime'
+import { snapVideoFeedToFirstCardTop as snapVideoFeedToFirstCardTopUtil } from './features/media/utils/videoFeedScroll'
 import {
   useForumProfileBranchRuntime,
   useForumProfileBranchActions,
@@ -133,6 +135,7 @@ const MIN_INTERVAL_MS = RUNTIME_CFG.minIntervalMs;
 const REACTS_PER_MINUTE = RUNTIME_CFG.reactsPerMinute;
 const VIEW_TTL_SEC = RUNTIME_CFG.viewTtlSec;
 const FORUM_VIEW_TTL_SEC = VIEW_TTL_SEC
+const USER_RECOMMENDATIONS_RUNTIME = RUNTIME_CFG.userRecommendations || {}
 const TOMBSTONE_TTL_MS = 10 * 60 * 1000;
 
 /* =========================================================
@@ -410,6 +413,9 @@ const headPinnedRef = useRef(false);
 const headAutoOpenRef = useRef(false);
 const videoFeedOpenRef = useRef(false); 
 const inboxMessagesModeRef = useRef(false);
+const sortRefreshAlignTimersRef = useRef([]);
+const sortRefreshAlignRafsRef = useRef([]);
+const sortRefreshAlignPendingRef = useRef(false);
 useEffect(() => { headHiddenRef.current = headHidden }, [headHidden]);
 useEffect(() => { headPinnedRef.current = headPinned }, [headPinned]);
 useHtmlFlag('data-forum-active', '1');
@@ -425,6 +431,18 @@ const {
   bodyRef,
   isBrowserFn: isBrowser,
 })
+const [contentRefreshToken, setContentRefreshToken] = useState(0)
+
+const clearSortRefreshAlignHandles = useCallback(() => {
+  try {
+    sortRefreshAlignTimersRef.current.forEach((timerId) => clearTimeout(timerId))
+    sortRefreshAlignTimersRef.current = []
+  } catch {}
+  try {
+    sortRefreshAlignRafsRef.current.forEach((rafId) => cancelAnimationFrame(rafId))
+    sortRefreshAlignRafsRef.current = []
+  } catch {}
+}, [])
   
 const questBtnClass = ''
 const setVideoFeedOpenRef = useRef(() => {})
@@ -570,6 +588,7 @@ const {
   isTikTokUrlFn: isTikTokUrl,
   buildSearchVideoMediaFn: buildSearchVideoMedia,
   starredFirstFn: starredFirst,
+  resolveProfileAccountIdFn: resolveProfileAccountId,
 })
 
 useForumModeSync({
@@ -596,6 +615,202 @@ useForumModeSync({
   topicsCardsCount: visibleTopics?.length || 0,
   canAutoAlignNow,
 })
+
+const findSortRefreshBranchStartCard = useCallback(() => {
+  try {
+    const scrollEl =
+      getScrollEl?.() ||
+      bodyRef.current ||
+      document.querySelector('[data-forum-scroll="1"]') ||
+      null
+    const root = scrollEl || document
+
+    if (profileBranchMode) {
+      const profileRoot =
+        root.querySelector?.('[data-profile-branch-root="1"]') ||
+        document.querySelector?.('[data-profile-branch-root="1"]') ||
+        null
+      return (
+        profileRoot?.querySelector?.('[data-profile-branch-start="1"]') ||
+        root.querySelector?.('[data-profile-branch-start="1"]') ||
+        profileRoot?.querySelector?.('[data-feed-card="1"]') ||
+        root.querySelector?.('[data-feed-card="1"]') ||
+        (root !== document
+          ? (
+              document.querySelector?.('[data-profile-branch-root="1"] [data-profile-branch-start="1"]') ||
+              document.querySelector?.('[data-profile-branch-root="1"] [data-feed-card="1"]') ||
+              document.querySelector?.('[data-feed-card="1"]') ||
+              null
+            )
+          : null)
+      )
+    }
+
+    if (inboxOpen) {
+      return (
+        root.querySelector?.('.inboxBody [data-feed-card="1"]') ||
+        root.querySelector?.('[data-feed-card="1"]') ||
+        (root !== document
+          ? (
+              document.querySelector?.('.inboxBody [data-feed-card="1"]') ||
+              document.querySelector?.('[data-feed-card="1"]') ||
+              null
+            )
+          : null)
+      )
+    }
+
+    if (sel?.id) {
+      return (
+        root.querySelector?.('[data-thread-branch-root="1"]') ||
+        root.querySelector?.('[data-forum-thread-start="1"] ~ [data-feed-card="1"]') ||
+        root.querySelector?.('[data-feed-card="1"]') ||
+        (root !== document
+          ? (
+              document.querySelector?.('[data-thread-branch-root="1"]') ||
+              document.querySelector?.('[data-forum-thread-start="1"] ~ [data-feed-card="1"]') ||
+              document.querySelector?.('[data-feed-card="1"]') ||
+              null
+            )
+          : null)
+      )
+    }
+
+    return (
+      root.querySelector?.('[data-feed-card="1"]') ||
+      (root !== document
+        ? (
+            document.querySelector?.('[data-forum-scroll="1"] [data-feed-card="1"]') ||
+            document.querySelector?.('[data-feed-card="1"]') ||
+            null
+          )
+        : null)
+    )
+  } catch {}
+  return null
+}, [bodyRef, getScrollEl, inboxOpen, profileBranchMode, sel?.id])
+
+const runSortRefreshAlignment = useCallback(() => {
+  if (!canAutoAlignNow?.()) return false
+  try { headAutoOpenRef.current = false } catch {}
+  try { setHeadPinned(false) } catch {}
+  try { setHeadHidden(true) } catch {}
+
+  try {
+    if (videoFeedOpenRef.current) {
+      snapVideoFeedToFirstCardTopUtil({
+        opts: { hideHeader: true, anchorOnly: true },
+        isBrowserFn: isBrowser,
+        bodyRef,
+        headAutoOpenRef,
+        setHeadPinned,
+        setHeadHidden,
+      })
+      return true
+    }
+    if (inboxOpen) {
+      requestAlignInboxStartUnderTabs?.()
+      return true
+    }
+    const target = findSortRefreshBranchStartCard()
+    if (!(target instanceof Element)) return false
+    alignNodeToTop(target)
+    return true
+  } catch {}
+  return false
+}, [
+  alignNodeToTop,
+  bodyRef,
+  canAutoAlignNow,
+  findSortRefreshBranchStartCard,
+  inboxOpen,
+  requestAlignInboxStartUnderTabs,
+  setHeadHidden,
+  setHeadPinned,
+])
+
+const commitSortChangeRefresh = useCallback(() => {
+  try { headAutoOpenRef.current = false } catch {}
+  try { setHeadPinned(false) } catch {}
+  try { setHeadHidden(true) } catch {}
+  clearSortRefreshAlignHandles()
+
+  if (videoFeedOpenRef.current) {
+    try { setVisibleVideoCount(VIDEO_PAGE_SIZE) } catch {}
+  } else if (inboxOpen) {
+    try { setVisibleRepliesCount(REPLIES_PAGE_SIZE) } catch {}
+    try { setVisiblePublishedCount(PUBLISHED_PAGE_SIZE) } catch {}
+  } else if (profileBranchMode === 'posts') {
+    try { setVisibleProfilePostsCount(THREAD_PAGE_SIZE) } catch {}
+  } else if (sel?.id) {
+    try { setVisibleThreadPostsCount(THREAD_PAGE_SIZE) } catch {}
+  } else {
+    try { setVisibleTopicsCount(TOPIC_PAGE_SIZE) } catch {}
+  }
+
+  sortRefreshAlignPendingRef.current = true
+  setContentRefreshToken((prev) => prev + 1)
+}, [
+  VIDEO_PAGE_SIZE,
+  TOPIC_PAGE_SIZE,
+  REPLIES_PAGE_SIZE,
+  THREAD_PAGE_SIZE,
+  PUBLISHED_PAGE_SIZE,
+  clearSortRefreshAlignHandles,
+  inboxOpen,
+  setHeadHidden,
+  setHeadPinned,
+  setVisibleProfilePostsCount,
+  setVisiblePublishedCount,
+  setVisibleRepliesCount,
+  setVisibleThreadPostsCount,
+  setVisibleTopicsCount,
+  setVisibleVideoCount,
+  profileBranchMode,
+  sel?.id,
+])
+
+useEffect(() => {
+  if (!sortRefreshAlignPendingRef.current) return undefined
+
+  sortRefreshAlignPendingRef.current = false
+  clearSortRefreshAlignHandles()
+
+  const startUserScrollTs = (() => {
+    try { return Number(window.__forumUserScrollTs || 0) } catch { return 0 }
+  })()
+
+  let cancelled = false
+  const scheduleAlign = (attempt = 0) => {
+    if (cancelled) return
+    const currentUserScrollTs = (() => {
+      try { return Number(window.__forumUserScrollTs || 0) } catch { return 0 }
+    })()
+    if (attempt > 0 && currentUserScrollTs > startUserScrollTs) return
+    const aligned = !!runSortRefreshAlignment()
+    if (aligned) return
+    if (attempt >= 12) return
+    const delay = attempt <= 1 ? 72 : (attempt <= 6 ? 130 : 200)
+    const timerId = setTimeout(() => scheduleAlign(attempt + 1), delay)
+    sortRefreshAlignTimersRef.current.push(timerId)
+  }
+
+  try {
+    const rafA = requestAnimationFrame(() => {
+      const rafB = requestAnimationFrame(() => scheduleAlign(0))
+      sortRefreshAlignRafsRef.current.push(rafB)
+    })
+    sortRefreshAlignRafsRef.current.push(rafA)
+  } catch {
+    const timerId = setTimeout(() => scheduleAlign(0), 0)
+    sortRefreshAlignTimersRef.current.push(timerId)
+  }
+
+  return () => {
+    cancelled = true
+    clearSortRefreshAlignHandles()
+  }
+}, [clearSortRefreshAlignHandles, contentRefreshToken, runSortRefreshAlignment])
 
 useForumHeadCollapse({
   isBrowserFn: isBrowser,
@@ -992,6 +1207,7 @@ popoverControlsRef.current = {
 const {
   videoFeedOpen,
   videoFeed,
+  feedSort,
   setFeedSort,
   setVideoFeedUserSortLocked,
   videoHasMore,
@@ -1023,6 +1239,7 @@ const {
   vfSlots,
   vfWin,
   vfMeasureRef,
+  videoFeedContextKey,
   dmDeleteText,
   dmDeleteCheckboxLabel,
 } = useForumScreenFlowsRuntime({
@@ -1217,6 +1434,18 @@ const {
   setVideoFeedOpenRef,
 })
 
+const userRecommendationsRail = useUserRecommendationsRail({
+  enabled: !!USER_RECOMMENDATIONS_RUNTIME?.enabled,
+  videoFeedOpen,
+  viewerId,
+  feedSort,
+  feedContextKey: videoFeedContextKey,
+  vfSlots,
+  vfWin,
+  runtimeConfig: USER_RECOMMENDATIONS_RUNTIME,
+  emitDiag,
+})
+
 // Scroll Focus Lock (компенсация scroll при росте/сжатии блоков)
 const compensateScrollOnResize = useScrollResizeCompensation()
   const {
@@ -1250,11 +1479,13 @@ const compensateScrollOnResize = useScrollResizeCompensation()
     setVideoFeedUserSortLocked,
     setFeedSort,
     sel,
+    inboxTab,
     setPostSort,
     setTopicSort,
     profileBranchMode,
     starMode,
     setStarMode,
+    onCommitSortChange: commitSortChangeRefresh,
     questEnabled: QUEST_ENABLED,
     questBtnClass,
     openQuests,
@@ -1380,6 +1611,9 @@ const compensateScrollOnResize = useScrollResizeCompensation()
     vfWin,
     vfSlots,
     vfMeasureRef,
+    userRecommendationsRail,
+    userRecommendationsRuntime: USER_RECOMMENDATIONS_RUNTIME,
+    onOpenUserPosts: openProfilePostsBranch,
     videoHasMore,
     setVisibleVideoCount,
     videoPageSize: VIDEO_PAGE_SIZE,
@@ -1414,6 +1648,7 @@ const compensateScrollOnResize = useScrollResizeCompensation()
     topicPageSize: TOPIC_PAGE_SIZE,
     sortedTopicsLength: (sortedTopics || []).length,
     TopicItem,
+    contentRefreshToken,
     visibleFlat,
     allPosts,
     threadHasMore,

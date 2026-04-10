@@ -4,9 +4,9 @@
 > Если появляются новые крупные зависимости между доменами, меняются import-графы или переносится ownership между зонами, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-dependencies.js`.
 
-Сгенерировано автоматически: 2026-03-21T17:24:42.760Z
-Исходных файлов в анализе: 622
-Локальных зависимостей: 534
+Сгенерировано автоматически: 2026-04-10T16:59:43.494Z
+Исходных файлов в анализе: 651
+Локальных зависимостей: 565
 
 ## Охват
 
@@ -28,7 +28,7 @@
 - `api/debug` — 1 файлов
 - `api/deep-translate` — 1 файлов
 - `api/dm` — 9 файлов
-- `api/forum` — 29 файлов
+- `api/forum` — 30 файлов
 - `api/market` — 1 файлов
 - `api/pay` — 2 файлов
 - `api/payments` — 3 файлов
@@ -59,7 +59,7 @@
 - `components` — 23 файлов
 - `forum/diagnostics` — 2 файлов
 - `forum/dm` — 31 файлов
-- `forum/feed` — 54 файлов
+- `forum/feed` — 58 файлов
 - `forum/media` — 38 файлов
 - `forum/moderation` — 9 файлов
 - `forum/profile` — 18 файлов
@@ -86,35 +86,36 @@
 - `public/models` — 1 файлов
 - `public/tonconnect-manifest.json` — 1 файлов
 - `public/workers` — 1 файлов
-- `root` — 16 файлов
-- `tools` — 23 файлов
+- `root` — 34 файлов
+- `tools` — 29 файлов
 
 ## Топ Межзоновых Зависимостей
 
-- `api/forum` -> `api/forum` — 42 локальных импортов
-- `forum/feed` -> `forum/feed` — 35 локальных импортов
+- `api/forum` -> `api/forum` — 44 локальных импортов
+- `forum/feed` -> `forum/feed` — 36 локальных импортов
 - `forum/ui` -> `forum/ui` — 31 локальных импортов
 - `forum/dm` -> `forum/dm` — 25 локальных импортов
 - `forum/media` -> `forum/media` — 21 локальных импортов
 - `forum/root` -> `forum/ui` — 18 локальных импортов
 - `api/dm` -> `api/dm` — 15 локальных импортов
-- `forum/root` -> `forum/shared` — 14 локальных импортов
+- `forum/feed` -> `forum/shared` — 14 локальных импортов
 - `api/profile` -> `api/forum` — 13 локальных импортов
 - `forum/profile` -> `forum/shared` — 13 локальных импортов
+- `forum/root` -> `forum/shared` — 13 локальных импортов
+- `forum/root` -> `forum/feed` — 13 локальных импортов
 - `components` -> `components` — 12 локальных импортов
+- `forum/feed` -> `forum/profile` — 12 локальных импортов
 - `forum/profile` -> `forum/profile` — 12 локальных импортов
-- `forum/root` -> `forum/feed` — 12 локальных импортов
-- `forum/root` -> `forum/media` — 12 локальных импортов
+- `forum/root` -> `forum/media` — 11 локальных импортов
 - `forum/dm` -> `forum/shared` — 10 локальных импортов
-- `forum/feed` -> `forum/shared` — 10 локальных импортов
+- `forum/media` -> `forum/shared` — 10 локальных импортов
 - `forum/ui` -> `forum/media` — 10 локальных импортов
 - `app/layout.js` -> `components` — 9 локальных импортов
 - `forum/dm` -> `forum/profile` — 9 локальных импортов
-- `forum/feed` -> `forum/profile` — 9 локальных импортов
-- `forum/media` -> `forum/shared` — 9 локальных импортов
 - `forum/quests` -> `forum/quests` — 9 локальных импортов
 - `forum/root` -> `forum/profile` — 9 локальных импортов
-- `api/forum` -> `api/profile` — 7 локальных импортов
+- `api/forum` -> `api/profile` — 8 локальных импортов
+- `root` -> `root` — 7 локальных импортов
 - `api/profile` -> `api/profile` — 6 локальных импортов
 - `forum/feed` -> `forum/ui` — 6 локальных импортов
 - `forum/moderation` -> `forum/moderation` — 6 локальных импортов
@@ -122,11 +123,12 @@
 - `forum/ui` -> `forum/feed` — 6 локальных импортов
 - `forum/shared` -> `forum/shared` — 5 локальных импортов
 - `api/telegram` -> `lib/redis.js` — 4 локальных импортов
+- `forum/feed` -> `forum/media` — 4 локальных импортов
 - `forum/root` -> `components` — 4 локальных импортов
 - `forum/ui` -> `forum/dm` — 4 локальных импортов
+- `root` -> `forum/feed` — 4 локальных импортов
 - `api/qcoin` -> `api/forum` — 3 локальных импортов
 - `app/ads` -> `components` — 3 локальных импортов
-- `forum/feed` -> `forum/media` — 3 локальных импортов
 - `forum/feed` -> `forum/root` — 3 локальных импортов
 - `forum/feed` -> `forum/dm` — 3 локальных импортов
 - `forum/ui` -> `forum/shared` — 3 локальных импортов
@@ -134,13 +136,11 @@
 - `forum/ui` -> `forum/quests` — 3 локальных импортов
 - `tools` -> `tools` — 3 локальных импортов
 - `api/battlecoin` -> `api/forum` — 2 локальных импортов
+- `api/forum` -> `lib/subscriptions.js` — 2 локальных импортов
 - `api/pay` -> `lib/adsCore.js` — 2 локальных импортов
 - `api/quest` -> `api/forum` — 2 локальных импортов
 - `api/referral` -> `api/forum` — 2 локальных импортов
 - `app/academy` -> `components` — 2 локальных импортов
-- `app/ads` -> `lib/geo` — 2 локальных импортов
-- `app/ads` -> `app/ads` — 2 локальных импортов
-- `app/exchange` -> `components` — 2 локальных импортов
 
 ## Исходящие Зависимости По Зонам
 
@@ -196,9 +196,9 @@
 
 ### api/forum
 
-- `api/forum` — 42
-- `api/profile` — 7
-- `lib/subscriptions.js` — 1
+- `api/forum` — 44
+- `api/profile` — 8
+- `lib/subscriptions.js` — 2
 
 ### api/market
 
@@ -352,12 +352,12 @@
 
 ### forum/feed
 
-- `forum/feed` — 35
-- `forum/shared` — 10
-- `forum/profile` — 9
+- `forum/feed` — 36
+- `forum/shared` — 14
+- `forum/profile` — 12
 - `forum/ui` — 6
+- `forum/media` — 4
 - `forum/dm` — 3
-- `forum/media` — 3
 - `forum/root` — 3
 - `components` — 2
 - `forum/quests` — 1
@@ -365,7 +365,8 @@
 ### forum/media
 
 - `forum/media` — 21
-- `forum/shared` — 9
+- `forum/shared` — 10
+- `forum/feed` — 2
 - `lib/forumVideoTrim.js` — 2
 
 ### forum/moderation
@@ -395,9 +396,9 @@
 ### forum/root
 
 - `forum/ui` — 18
-- `forum/shared` — 14
-- `forum/feed` — 12
-- `forum/media` — 12
+- `forum/feed` — 13
+- `forum/shared` — 13
+- `forum/media` — 11
 - `forum/profile` — 9
 - `forum/root` — 6
 - `components` — 4
@@ -429,9 +430,9 @@
 - `forum/quests` — 3
 - `forum/root` — 3
 - `forum/shared` — 3
+- `forum/profile` — 2
 - `components` — 1
 - `forum/moderation` — 1
-- `forum/profile` — 1
 
 ### lib/adsCore.js
 
@@ -499,7 +500,11 @@
 
 ### root
 
-- Нет локальных исходящих импортов.
+- `root` — 7
+- `forum/feed` — 4
+- `forum/shared` — 2
+- `api/forum` — 1
+- `forum/media` — 1
 
 ### tools
 
@@ -507,46 +512,46 @@
 
 ## Файлы С Высоким Fan-In
 
-- `app/api/forum/_utils.js` — fan-in 32; основные потребители: `app/api/academy/exam/route.js`, `app/api/forum/_db.js`, `app/api/forum/admin/banUser/route.js`, `app/api/forum/admin/deletePost/route.js`, `app/api/forum/admin/deleteTopic/route.js`, `app/api/forum/admin/unbanUser/route.js`, `app/api/forum/admin/verify/route.js`, `app/api/forum/mediaLock/route.js`
-- `app/api/forum/_db.js` — fan-in 31; основные потребители: `app/api/battlecoin/order/route.js`, `app/api/battlecoin/state/route.js`, `app/api/forum/admin/banUser/route.js`, `app/api/forum/admin/deletePost/route.js`, `app/api/forum/admin/deleteTopic/route.js`, `app/api/forum/admin/unbanUser/route.js`, `app/api/forum/blobUploadUrl/route.js`, `app/api/forum/events/stream/route.js`
+- `app/api/forum/_utils.js` — fan-in 33; основные потребители: `app/api/academy/exam/route.js`, `app/api/forum/_db.js`, `app/api/forum/admin/banUser/route.js`, `app/api/forum/admin/deletePost/route.js`, `app/api/forum/admin/deleteTopic/route.js`, `app/api/forum/admin/unbanUser/route.js`, `app/api/forum/admin/verify/route.js`, `app/api/forum/mediaLock/route.js`
+- `app/api/forum/_db.js` — fan-in 32; основные потребители: `app/api/battlecoin/order/route.js`, `app/api/battlecoin/state/route.js`, `app/api/forum/admin/banUser/route.js`, `app/api/forum/admin/deletePost/route.js`, `app/api/forum/admin/deleteTopic/route.js`, `app/api/forum/admin/unbanUser/route.js`, `app/api/forum/blobUploadUrl/route.js`, `app/api/forum/events/stream/route.js`
 - `components/i18n.js` — fan-in 30; основные потребители: `app/about/page.js`, `app/academy/AcademyExamBlock.js`, `app/academy/page.js`, `app/ads/GeoTargetingPicker.jsx`, `app/ads/home.js`, `app/ads/page.jsx`, `app/components/CryptoNewsLens.jsx`, `app/contact/page.js`
-- `app/forum/shared/utils/classnames.js` — fan-in 16; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadHeader.jsx`, `app/forum/features/dm/components/DmThreadMessageRow.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/TopicItem.jsx`, `app/forum/features/profile/components/AboutRail.jsx`, `app/forum/features/profile/components/ForumVipControl.jsx`, `app/forum/features/profile/components/ProfilePopover.jsx`
-- `app/api/profile/_identity.js` — fan-in 14; основные потребители: `app/api/dm/_utils.js`, `app/api/forum/blobUploadUrl/route.js`, `app/api/forum/mutate/route.js`, `app/api/forum/subs/count/route.js`, `app/api/forum/subs/list/route.js`, `app/api/forum/subs/my-count/route.js`, `app/api/forum/subs/toggle/route.js`, `app/api/forum/uploadAudio/route.js`
-- `app/forum/features/profile/utils/profileCache.js` — fan-in 11; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadHeader.jsx`, `app/forum/features/feed/components/ForumPostCard.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/TopicItem.jsx`, `app/forum/features/profile/components/AvatarEmoji.jsx`, `app/forum/features/profile/components/ProfilePopover.jsx`, `app/forum/features/profile/components/UserInfoPopover.jsx`
+- `app/forum/shared/utils/classnames.js` — fan-in 17; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadHeader.jsx`, `app/forum/features/dm/components/DmThreadMessageRow.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/TopicItem.jsx`, `app/forum/features/feed/components/UserRecommendationsRail.jsx`, `app/forum/features/profile/components/AboutRail.jsx`, `app/forum/features/profile/components/ForumVipControl.jsx`
+- `app/api/profile/_identity.js` — fan-in 15; основные потребители: `app/api/dm/_utils.js`, `app/api/forum/blobUploadUrl/route.js`, `app/api/forum/mutate/route.js`, `app/api/forum/recommendations/users/route.js`, `app/api/forum/subs/count/route.js`, `app/api/forum/subs/list/route.js`, `app/api/forum/subs/my-count/route.js`, `app/api/forum/subs/toggle/route.js`
+- `app/forum/features/profile/utils/profileCache.js` — fan-in 12; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadHeader.jsx`, `app/forum/features/feed/components/ForumPostCard.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/TopicItem.jsx`, `app/forum/features/feed/hooks/useUserRecommendationsRail.js`, `app/forum/features/profile/components/AvatarEmoji.jsx`, `app/forum/features/profile/components/ProfilePopover.jsx`
 - `app/api/dm/_utils.js` — fan-in 8; основные потребители: `app/api/dm/_db.js`, `app/api/dm/block/route.js`, `app/api/dm/delete/route.js`, `app/api/dm/dialogs/route.js`, `app/api/dm/seen/route.js`, `app/api/dm/send/route.js`, `app/api/dm/thread/route.js`, `app/api/dm/unblock/route.js`
+- `app/forum/features/profile/components/AvatarEmoji.jsx` — fan-in 8; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadHeader.jsx`, `app/forum/features/dm/components/DmThreadMessageRow.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/TopicItem.jsx`, `app/forum/features/feed/components/UserRecommendationCard.jsx`, `app/forum/features/ui/components/ForumSearchSortControls.jsx`, `app/forum/ForumHeaderPanel.jsx`
+- `app/forum/shared/components/HydrateText.jsx` — fan-in 8; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadMessageRow.jsx`, `app/forum/features/feed/components/PostActionBar.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/TopicItem.jsx`, `app/forum/features/feed/components/UserRecommendationCard.jsx`, `app/forum/features/profile/components/UserInfoPopover.jsx`, `app/forum/features/subscriptions/components/FollowersCounterInline.jsx`
 - `lib/metadataCache.js` — fan-in 8; основные потребители: `app/about/layout.js`, `app/academy/layout.js`, `app/ads/layout.js`, `app/exchange/layout.js`, `app/forum/layout.js`, `app/game/layout.js`, `app/layout.js`, `app/subscribe/layout.js`
 - `app/api/dm/_db.js` — fan-in 7; основные потребители: `app/api/dm/block/route.js`, `app/api/dm/delete/route.js`, `app/api/dm/dialogs/route.js`, `app/api/dm/seen/route.js`, `app/api/dm/send/route.js`, `app/api/dm/thread/route.js`, `app/api/dm/unblock/route.js`
-- `app/forum/shared/components/HydrateText.jsx` — fan-in 7; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadMessageRow.jsx`, `app/forum/features/feed/components/PostActionBar.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/TopicItem.jsx`, `app/forum/features/profile/components/UserInfoPopover.jsx`, `app/forum/features/subscriptions/components/FollowersCounterInline.jsx`
 - `app/forum/shared/utils/browser.js` — fan-in 7; основные потребители: `app/forum/features/media/hooks/useForumMediaCoordinator.js`, `app/forum/features/moderation/hooks/useAdminFlag.js`, `app/forum/features/profile/hooks/useForumProfileSync.js`, `app/forum/features/profile/utils/profileCache.js`, `app/forum/ForumRoot.jsx`, `app/forum/shared/config/runtime.js`, `app/forum/shared/storage/localStorage.js`
 - `app/ads.js` — fan-in 6; основные потребители: `app/about/page.js`, `app/academy/page.js`, `app/exchange/page.js`, `app/game/page.js`, `app/page.js`, `app/subscribe/subscribe.client.jsx`
-- `app/forum/features/profile/components/AvatarEmoji.jsx` — fan-in 6; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadHeader.jsx`, `app/forum/features/dm/components/DmThreadMessageRow.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/TopicItem.jsx`, `app/forum/ForumHeaderPanel.jsx`
-- `app/forum/shared/hooks/useEvent.js` — fan-in 6; основные потребители: `app/forum/features/feed/hooks/useForumDeepLinkFlow.js`, `app/forum/features/media/hooks/useForumVideoFeedRuntime.js`, `app/forum/features/profile/components/ProfilePopover.jsx`, `app/forum/features/profile/hooks/useForumProfileSync.js`, `app/forum/ForumRoot.jsx`, `app/forum/shared/hooks/useForumNavBridge.js`
+- `app/forum/shared/hooks/useEvent.js` — fan-in 6; основные потребители: `app/forum/features/feed/hooks/useForumDeepLinkFlow.js`, `app/forum/features/feed/hooks/useForumFeedRuntime.js`, `app/forum/features/media/hooks/useForumVideoFeedRuntime.js`, `app/forum/features/profile/components/ProfilePopover.jsx`, `app/forum/features/profile/hooks/useForumProfileSync.js`, `app/forum/shared/hooks/useForumNavBridge.js`
 - `app/forum/shared/utils/formatters.js` — fan-in 6; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadHeader.jsx`, `app/forum/features/dm/components/DmThreadMessageRow.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/TopicItem.jsx`, `app/forum/ForumRoot.jsx`
+- `app/forum/features/profile/components/VipFlipBadge.jsx` — fan-in 5; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadHeader.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/TopicItem.jsx`, `app/forum/features/feed/components/UserRecommendationCard.jsx`
+- `app/forum/shared/utils/counts.js` — fan-in 5; основные потребители: `app/forum/features/feed/components/UserRecommendationCard.jsx`, `app/forum/features/profile/components/ProfilePopover.jsx`, `app/forum/features/profile/components/UserInfoPopover.jsx`, `app/forum/ForumRoot.jsx`, `tests/unit/forum/shared/utils/counts.test.js`
+- `lib/subscriptions.js` — fan-in 5; основные потребители: `app/api/forum/recommendations/users/route.js`, `app/api/forum/vip/batch/route.js`, `app/api/pay/webhook/route.js`, `app/api/referral/hit/route.js`, `app/api/subscription/status/route.js`
 - `app/forum/features/media/utils/mediaLifecycleRuntime.js` — fan-in 4; основные потребители: `app/forum/features/dm/components/DmThreadMessageRow.jsx`, `app/forum/features/feed/components/PostCardBridge.jsx`, `app/forum/features/media/components/ComposerAttachmentPreview.jsx`, `app/forum/features/media/hooks/useForumMediaCoordinator.js`
-- `app/forum/features/profile/components/VipFlipBadge.jsx` — fan-in 4; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadHeader.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/TopicItem.jsx`
 - `app/forum/features/profile/hooks/useVipFlag.js` — fan-in 4; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadHeader.jsx`, `app/forum/features/feed/components/ForumPostCard.jsx`, `app/forum/features/feed/components/TopicItem.jsx`
 - `app/forum/features/ui/components/StarButton.jsx` — fan-in 4; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadHeader.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/TopicItem.jsx`
 - `app/forum/ForumAds.js` — fan-in 4; основные потребители: `app/ads.js`, `app/forum/features/ui/components/ForumAdSlot.jsx`, `app/forum/features/ui/hooks/useForumAdsRuntime.js`, `app/forum/ForumRoot.jsx`
 - `app/forum/shared/constants/media.js` — fan-in 4; основные потребители: `app/forum/features/media/components/VideoLimitOverlay.jsx`, `app/forum/features/media/components/VideoTrimPopover.jsx`, `app/forum/features/media/utils/mediaRuntime.js`, `app/forum/ForumRoot.jsx`
 - `lib/redis.js` — fan-in 4; основные потребители: `app/api/telegram/link/confirm/route.js`, `app/api/telegram/link/resolve/route.js`, `app/api/telegram/link/start/route.js`, `app/api/telegram/link/status/route.js`
-- `lib/subscriptions.js` — fan-in 4; основные потребители: `app/api/forum/vip/batch/route.js`, `app/api/pay/webhook/route.js`, `app/api/referral/hit/route.js`, `app/api/subscription/status/route.js`
+- `tests/fixtures/forum/recommendations.js` — fan-in 4; основные потребители: `tests/component/forum/features/feed/components/UserRecommendationCard.test.jsx`, `tests/component/forum/features/feed/components/UserRecommendationsRail.test.jsx`, `tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx`, `tests/smoke/forum/features/media/components/VideoFeedPane.test.jsx`
 - `app/api/forum/_bus.js` — fan-in 3; основные потребители: `app/api/forum/events/stream/route.js`, `app/api/forum/mutate/route.js`, `app/api/forum/report/route.js`
 - `app/forum/features/dm/utils/mediaParsing.js` — fan-in 3; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadMessageRow.jsx`, `app/forum/ForumRoot.jsx`
 - `app/forum/features/media/utils/mediaLinks.js` — fan-in 3; основные потребители: `app/forum/features/media/utils/mediaUrlPipeline.js`, `app/forum/features/ui/components/ForumSearchSortControls.jsx`, `app/forum/ForumRoot.jsx`
 - `app/forum/features/media/utils/mediaRuntime.js` — fan-in 3; основные потребители: `app/forum/features/media/components/VideoTrimPopover.jsx`, `app/forum/features/media/hooks/useVideoTrimController.js`, `app/forum/ForumRoot.jsx`
 - `app/forum/features/quests/utils/progress.js` — fan-in 3; основные потребители: `app/forum/features/quests/components/QuestHub.jsx`, `app/forum/features/quests/hooks/useForumQuestProgress.js`, `app/forum/features/quests/hooks/useQuestStorageState.js`
 - `app/forum/shared/api/translate.js` — fan-in 3; основные потребители: `app/forum/features/dm/components/DmThreadMessageRow.jsx`, `app/forum/features/feed/hooks/usePostTranslation.js`, `app/forum/features/profile/components/UserInfoPopover.jsx`
+- `app/forum/shared/config/runtime.js` — fan-in 3; основные потребители: `app/forum/features/media/hooks/useVideoFeedWindowing.js`, `app/forum/ForumRoot.jsx`, `tests/unit/forum/shared/config/runtime.test.js`
 - `app/forum/shared/hooks/useHtmlFlag.js` — fan-in 3; основные потребители: `app/forum/features/media/components/VideoOverlay.jsx`, `app/forum/features/media/hooks/useForumVideoFeedRuntime.js`, `app/forum/ForumRoot.jsx`
-- `app/forum/shared/utils/counts.js` — fan-in 3; основные потребители: `app/forum/features/profile/components/ProfilePopover.jsx`, `app/forum/features/profile/components/UserInfoPopover.jsx`, `app/forum/ForumRoot.jsx`
 - `app/forum/shared/utils/richText.js` — fan-in 3; основные потребители: `app/forum/features/dm/components/DmThreadMessageRow.jsx`, `app/forum/features/feed/components/PostCardBridge.jsx`, `app/forum/ForumRoot.jsx`
 - `lib/adsCore.js` — fan-in 3; основные потребители: `app/api/ads/route.js`, `app/api/pay/create/route.js`, `app/api/pay/webhook/route.js`
 - `lib/brain.js` — fan-in 3; основные потребители: `app/api/brain/analyze/route.js`, `app/api/market/summary/route.js`, `app/exchange/page.js`
 - `lib/forumVideoTrim.js` — fan-in 3; основные потребители: `app/forum/features/media/components/VideoTrimPopover.jsx`, `app/forum/features/media/utils/mediaRuntime.js`, `app/forum/ForumRoot.jsx`
+- `tests/support/projectSurface.js` — fan-in 3; основные потребители: `tests/contracts/project/api-route-contracts.test.js`, `tests/contracts/project/app-entry-contracts.test.js`, `tests/contracts/project/forum-hook-contracts.test.js`
 - `tools/project-docs-shared.js` — fan-in 3; основные потребители: `tools/audit-project-docs.js`, `tools/generate-project-dependencies.js`, `tools/generate-project-risks.js`
 - `app/forum/features/dm/components/DmVoicePlayer.jsx` — fan-in 2; основные потребители: `app/forum/features/dm/components/DmThreadMessageRow.jsx`, `app/forum/features/ui/components/ComposerCore.jsx`
-- `app/forum/features/feed/components/CreateTopicCard.jsx` — fan-in 2; основные потребители: `app/forum/features/ui/components/MainForumActionCluster.jsx`, `app/forum/features/ui/components/ThreadForumActionCluster.jsx`
-- `app/forum/features/feed/utils/snapshotTransforms.js` — fan-in 2; основные потребители: `app/forum/features/feed/hooks/useForumDataRuntime.js`, `app/forum/features/feed/hooks/useForumMutationQueue.js`
-- `app/forum/features/media/components/VideoOverlay.jsx` — fan-in 2; основные потребители: `app/forum/features/ui/components/ForumOverlayStack.jsx`, `app/forum/ForumRoot.jsx`
 
 ## Вывод
 

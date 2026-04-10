@@ -51,6 +51,7 @@ export default function useForumVideoFeedRuntime({
     buildAndSetVideoFeed,
     visibleVideoFeed,
     videoHasMore,
+    videoFeedContextKey,
   } = useVideoFeedState({
     data,
     allPosts,
@@ -58,6 +59,7 @@ export default function useForumVideoFeedRuntime({
     extractUrlsFromText: extractUrlsFromTextFn,
     viewerId,
     starredFirst: starredFirstFn,
+    activeStarredAuthors,
     videoFeedOpenRef,
     navRestoringRef,
     emitDiag,
@@ -148,6 +150,7 @@ export default function useForumVideoFeedRuntime({
     setVideoFeedUserSortLocked,
     visibleVideoFeed,
     videoHasMore,
+    videoFeedContextKey,
     refreshVideoFeedWithoutReload,
     openVideoFeed,
     closeVideoFeed,

@@ -79,7 +79,35 @@ export default function ForumSearchSortControls({
   questEnabled,
   questBtnClass,
   openQuests,
+  onCommitSortChange,
 }) {
+  const commitSelectedSort = (sortKey) => {
+    if (videoFeedOpen) {
+      setVideoFeedUserSortLocked(true)
+      setFeedSort(sortKey)
+    } else if (sel || forcePostSort) {
+      setPostSort(sortKey)
+    } else {
+      setTopicSort(sortKey)
+    }
+    setSortOpen(false)
+    onCommitSortChange?.({
+      kind: 'sort',
+      sortKey,
+      target: videoFeedOpen ? 'video' : (sel || forcePostSort ? 'post' : 'topic'),
+    })
+  }
+
+  const toggleStarMode = (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+    setStarMode((prev) => !prev)
+    onCommitSortChange?.({
+      kind: 'star_mode',
+      target: videoFeedOpen ? 'video' : (sel || forcePostSort ? 'post' : 'topic'),
+    })
+  }
+
   return (
     <div className="search">
         <div className="searchInputWrap">
@@ -237,14 +265,7 @@ export default function ForumSearchSortControls({
               <button
                 key={k}
                 className="item w-full text-left mb-1"
-                onClick={() => {
-                  if (videoFeedOpen) {
-                    setVideoFeedUserSortLocked(true)
-                    setFeedSort(k)
-                  } else if (sel || forcePostSort) setPostSort(k)
-                  else setTopicSort(k)
-                  setSortOpen(false)
-                }}
+                onClick={() => commitSelectedSort(k)}
               >
                 {txt}
               </button>
@@ -252,7 +273,7 @@ export default function ForumSearchSortControls({
             <button
               type="button"
               className={`starModeBtn ${starMode ? 'on' : ''}`}
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setStarMode((v) => !v) }}
+              onClick={toggleStarMode}
               title={t('forum_star_mode_title')}
               aria-pressed={starMode}
               aria-label={t('forum_star_mode')}

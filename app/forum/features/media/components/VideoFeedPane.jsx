@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import UserRecommendationsRail from '../../feed/components/UserRecommendationsRail'
 
 export default function VideoFeedPane({
   t,
@@ -33,6 +34,9 @@ export default function VideoFeedPane({
   PostCard,
   ForumAdSlot,
   LoadMoreSentinel,
+  userRecommendationsRail,
+  userRecommendationsRuntime,
+  onOpenUserPosts,
 }) {
   return (
     <>
@@ -43,6 +47,26 @@ export default function VideoFeedPane({
 
         {vfSlots.slice(vfWin.start, vfWin.end).map((slot, indexInWindow) => {
           const index = vfWin.start + indexInWindow
+          if (slot.type === 'recommendation_rail') {
+            const railState = userRecommendationsRail?.getSlotState?.(slot.key) || null
+            return (
+              <div
+                key={slot.key}
+                ref={vfMeasureRef(index)}
+                data-feed-card="1"
+                data-feed-kind="recommendation_rail"
+              >
+                <UserRecommendationsRail
+                  t={t}
+                  railState={railState}
+                  onOpenUserPosts={onOpenUserPosts}
+                  hideScrollbar={!!userRecommendationsRuntime?.hideScrollbar}
+                  desktopArrows={!!userRecommendationsRuntime?.desktopArrows}
+                />
+              </div>
+            )
+          }
+
           if (slot.type === 'item') {
             const p = slot.item
             const parent = p?.parentId
