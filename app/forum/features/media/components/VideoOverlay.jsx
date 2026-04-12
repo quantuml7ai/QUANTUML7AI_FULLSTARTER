@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { createPortal } from 'react-dom'
 import LivePreview from './LivePreview'
 import usePageLock from '../../../shared/hooks/usePageLock'
 import useHtmlFlag from '../../../shared/hooks/useHtmlFlag'
@@ -270,7 +271,7 @@ export default function VideoOverlay({
     return `${m}:${s}`
   }
 
-  if (!open) return null
+  if (!open || typeof document === 'undefined') return null
 
   const stopAll = (e) => {
     e.preventDefault()
@@ -278,7 +279,7 @@ export default function VideoOverlay({
   }
   const fixMirrorClass = 'voVideoFix'
 
-  return (
+  return createPortal(
     <div
       ref={rootRef}
       className="forum_video_overlay"
@@ -295,8 +296,12 @@ export default function VideoOverlay({
         position: 'fixed',
         inset: 0,
         zIndex: 2147483000,
-        background: 'transparent',
-        backdropFilter: 'none',
+        background: 'radial-gradient(circle at top, rgba(20,34,58,.42), rgba(5,7,14,.96) 58%), rgba(5,7,14,.96)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+        isolation: 'isolate',
+        transform: 'translateZ(0)',
+        willChange: 'opacity, transform',
       }}
     >
       <div
@@ -322,6 +327,7 @@ export default function VideoOverlay({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          zIndex: 2,
           pointerEvents: st === 'preview' ? 'auto' : 'none',
         }}
       >
@@ -617,7 +623,7 @@ export default function VideoOverlay({
           100%{ box-shadow: 0 0 0 0 rgba(56,255,172,0) }
         }
       `}</style>
-    </div>
+    </div>,
+    document.body,
   )
 }
-

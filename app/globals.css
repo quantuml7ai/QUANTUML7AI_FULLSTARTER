@@ -1208,6 +1208,12 @@ html[data-vo-open="1"] .audio-toggle {
   opacity: 0 !important;
 }
 
+/* 1.1) Hero-фон полностью убираем, чтобы мобильный compositor не пробивался через video overlay */
+html[data-vo-open="1"] .scene {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
 /* 2) Заблокировать скролл и клики по странице под оверлеем */
 html[data-vo-open="1"],
 html[data-vo-open="1"] body {

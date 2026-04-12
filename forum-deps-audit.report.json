@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-12T19:57:59.609Z",
+  "generatedAt": "2026-04-12T20:15:16.434Z",
   "summary": {
     "scannedFiles": 365,
     "internalEdges": 487,
@@ -1880,9 +1880,10 @@
       ],
       "importCount": 3,
       "external": [
-        "react"
+        "react",
+        "react-dom"
       ],
-      "externalCount": 1
+      "externalCount": 2
     },
     {
       "file": "app/forum/features/media/components/VideoTrimPopover.jsx",
