@@ -155,8 +155,10 @@ export const K = {
   userNick:  (userId)    => `forum:user:${userId}:nick`,
 
   userAvatar: (userId)   => `forum:user:${userId}:avatar`,
+  userGender: (userId)   => `forum:user:${userId}:gender`,
+  userBirthYear: (userId) => `forum:user:${userId}:birth_year`,
 
-    userAbout:  (userId)   => `forum:user:${userId}:about`,
+  userAbout:  (userId)   => `forum:user:${userId}:about`,
   userPostsTotal: (userId) => `forum:user:${userId}:posts_total`,
   userTopicsTotal: (userId) => `forum:user:${userId}:topics_total`,
   userLikesTotal: (userId) => `forum:user:${userId}:likes_total`,
@@ -978,6 +980,71 @@ export async function setUserAvatar(userId, icon) {
     return v
   }
 }
+export function normUserGender(raw) {
+  const value = str(raw).toLowerCase()
+  if (value === 'male' || value === 'female') return value
+  return ''
+}
+
+export async function getUserGender(userId) {
+  try {
+    const value = await redis.get(K.userGender(userId))
+    return normUserGender(value)
+  } catch {
+    return ''
+  }
+}
+
+export async function setUserGender(userId, gender) {
+  const value = normUserGender(gender)
+  try {
+    if (!value) {
+      await redis.del(K.userGender(userId))
+      return ''
+    }
+    await redis.set(K.userGender(userId), value)
+    return value
+  } catch {
+    return value
+  }
+}
+
+export function getBirthYearBounds(nowYear = new Date().getFullYear()) {
+  const max = Math.max(1900, Number(nowYear || 0) - 14)
+  const min = max - 99
+  return { min, max }
+}
+
+export function normUserBirthYear(raw, nowYear = new Date().getFullYear()) {
+  const parsed = parseIntSafe(raw, 0)
+  if (!parsed) return 0
+  const { min, max } = getBirthYearBounds(nowYear)
+  if (parsed < min || parsed > max) return 0
+  return parsed
+}
+
+export async function getUserBirthYear(userId) {
+  try {
+    return normUserBirthYear(await redis.get(K.userBirthYear(userId)))
+  } catch {
+    return 0
+  }
+}
+
+export async function setUserBirthYear(userId, birthYear) {
+  const value = normUserBirthYear(birthYear)
+  try {
+    if (!value) {
+      await redis.del(K.userBirthYear(userId))
+      return 0
+    }
+    await redis.set(K.userBirthYear(userId), String(value))
+    return value
+  } catch {
+    return value
+  }
+}
+
 export function normAbout(raw) {
   const s = String(raw ?? '').replace(/\r\n/g, '\n')
   const trimmed = s.replace(/^[ \t]+|[ \t]+$/g, '')
@@ -1008,17 +1075,21 @@ export async function setUserAbout(userId, about) {
 }
 
 export async function getUserProfile(userId) {
-  const [nick, avatar] = await Promise.all([
+  const [nick, avatar, gender, birthYear] = await Promise.all([
     getUserNick(userId),
     getUserAvatar(userId),
+    getUserGender(userId),
+    getUserBirthYear(userId),
   ])
   return {
     nickname: str(nick || ''),
     icon: str(avatar || ''),
+    gender: normUserGender(gender),
+    birthYear: normUserBirthYear(birthYear),
   }
 }
 
-export async function setUserProfile(userId, { nickname, icon } = {}) {
+export async function setUserProfile(userId, { nickname, icon, gender, birthYear } = {}) {
   const out = {}
 
   if (nickname != null && nickname !== '') {
@@ -1027,6 +1098,14 @@ export async function setUserProfile(userId, { nickname, icon } = {}) {
 
   if (icon != null) {
     out.icon = await setUserAvatar(userId, icon)
+  }
+
+  if (gender != null) {
+    out.gender = await setUserGender(userId, gender)
+  }
+
+  if (birthYear != null) {
+    out.birthYear = await setUserBirthYear(userId, birthYear)
   }
 
   return out

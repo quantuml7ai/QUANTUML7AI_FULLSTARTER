@@ -1,9 +1,9 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-10T22:40:14.486Z",
+  "generatedAt": "2026-04-12T19:07:58.970Z",
   "summary": {
     "scannedFiles": 365,
-    "internalEdges": 486,
+    "internalEdges": 487,
     "cycleCount": 0,
     "crossDomainEdgeCount": 117,
     "forumRootImportCount": 1,
@@ -1596,8 +1596,10 @@
     {
       "file": "app/forum/features/feed/hooks/usePostMediaTextModel.js",
       "domain": "forum-ui",
-      "imports": [],
-      "importCount": 0,
+      "imports": [
+        "app/forum/features/dm/utils/mediaParsing.js"
+      ],
+      "importCount": 1,
       "external": [
         "react"
       ],

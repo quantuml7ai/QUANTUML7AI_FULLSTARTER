@@ -47,9 +47,23 @@ export default function ProfilePopover({
     if (!uid || typeof window === 'undefined') return null;
     return safeReadProfile(uid) || null;
   }, [uid]);
+  const nowYear = new Date().getFullYear();
+  const maxBirthYear = nowYear - 14;
+  const minBirthYear = maxBirthYear - 99;
+  const birthYearOptions = React.useMemo(() =>
+    Array.from({ length: 100 }, (_, index) => maxBirthYear - index),
+  [maxBirthYear]);
 
   const initialLocal = readLocal() || {};
+  const savedGenderRef = useRef(String(initialLocal.gender || ''));
+  const savedBirthYearRef = useRef(Number(initialLocal.birthYear || 0) || 0);
   const [nick, setNick] = useState(initialLocal.nickname || '');
+  const [gender, setGender] = useState(String(initialLocal.gender || ''));
+  const [birthYear, setBirthYear] = useState(Number(initialLocal.birthYear || 0) || 0);
+  const [yearMenuOpen, setYearMenuOpen] = useState(false);
+  const yearMenuRef = useRef(null);
+  const genderLocked = !!String(savedGenderRef.current || '');
+  const birthYearLocked = Number(savedBirthYearRef.current || 0) > 0;
   const [icon, setIcon] = useState(initialLocal.icon || icons[0] || '👦');
  
   // ===== Upload Avatar (custom photo) =====
@@ -513,8 +527,28 @@ const makeCroppedPngBlob = React.useCallback(async ({ size = 512 } = {}) => {
   if (!open || !uid) return;
   const l = readLocal() || {};
   setNick(l.nickname || '');
+  setGender(String(l.gender || ''));
+  setBirthYear(Number(l.birthYear || 0) || 0);
+  savedGenderRef.current = String(l.gender || '');
+  savedBirthYearRef.current = Number(l.birthYear || 0) || 0;
+  setYearMenuOpen(false);
   setIcon(l.icon || icons[0] || '👦');
 }, [open, uid, readLocal, icons]);
+
+useEffect(() => {
+  if (!open || !yearMenuOpen) return undefined;
+
+  const handlePointerDown = (event) => {
+    const root = yearMenuRef.current;
+    if (!root || root.contains(event.target)) return;
+    setYearMenuOpen(false);
+  };
+
+  document.addEventListener('pointerdown', handlePointerDown);
+  return () => {
+    document.removeEventListener('pointerdown', handlePointerDown);
+  };
+}, [open, yearMenuOpen]);
 
 // дебаунс-проверка ника в базе
 useEffect(() => {
@@ -584,21 +618,48 @@ const left = isRtl ? undefined : Math.round(rect.left - parentRect.left);
 
 // RTL — прижимаем по правому краю parent
 const right = isRtl ? Math.round(parentRect.right - rect.right) : undefined;
+const genderOptions = [
+  { value: 'male', label: t('forum_profile_gender_male') },
+  { value: 'female', label: t('forum_profile_gender_female') },
+];
+const selectedBirthYearLabel = birthYear
+  ? String(birthYear)
+  : t('forum_profile_birth_year_placeholder');
 
   const save = async () => {
   const n = String(nick || '').trim();
   if (!n || nickFree === false || busy || !uid) return;
+  const nextGender = genderLocked
+    ? String(savedGenderRef.current || '')
+    : (gender === 'male' || gender === 'female' ? gender : '');
+  const nextBirthYear = birthYearLocked
+    ? (Number(savedBirthYearRef.current || 0) || 0)
+    : (
+        Number(birthYear || 0) >= minBirthYear &&
+        Number(birthYear || 0) <= maxBirthYear
+          ? Number(birthYear || 0)
+          : 0
+      );
+  setYearMenuOpen(false);
 
   // ===== OPTIMISTIC UI (сразу обновляем всё в интерфейсе пользователя) =====
   const prevLocal = readLocal() || {};
   const prevNick = prevLocal.nickname || '';
+  const prevGender = String(prevLocal.gender || '');
+  const prevBirthYear = Number(prevLocal.birthYear || 0) || 0;
   const prevIcon = prevLocal.icon || icons[0] || '👦';
 
   // если выбран файл — показываем везде то, что уже есть в превью
   const optimisticIcon = uploadFile ? (finalAvatarUrl || rawAvatarUrl || icon) : icon;
 
-  mergeProfileCache(uid, { nickname: n, icon: optimisticIcon, updatedAt: Date.now() });
-  onSaved?.({ nickname: n, icon: optimisticIcon });
+  mergeProfileCache(uid, {
+    nickname: n,
+    icon: optimisticIcon,
+    gender: nextGender,
+    birthYear: nextBirthYear,
+    updatedAt: Date.now(),
+  });
+  onSaved?.({ nickname: n, icon: optimisticIcon, gender: nextGender, birthYear: nextBirthYear });
 
   // закрываем поповер мгновенно (дальше всё догружается в фоне)
   onClose?.();
@@ -635,8 +696,14 @@ const right = isRtl ? Math.round(parentRect.right - rect.right) : undefined;
             toastI18n('warn', 'forum_image_blocked');
             toastI18n('info', reasonKey(mod?.reason));
             // rollback optimistic
-            mergeProfileCache(uid, { nickname: prevNick, icon: prevIcon, updatedAt: Date.now() });
-            onSaved?.({ nickname: prevNick, icon: prevIcon });
+            mergeProfileCache(uid, {
+              nickname: prevNick,
+              icon: prevIcon,
+              gender: prevGender,
+              birthYear: prevBirthYear,
+              updatedAt: Date.now(),
+            });
+            onSaved?.({ nickname: prevNick, icon: prevIcon, gender: prevGender, birthYear: prevBirthYear });
             cleanupObjectUrlsIfStale();      
             return;
           }
@@ -648,8 +715,14 @@ const right = isRtl ? Math.round(parentRect.right - rect.right) : undefined;
           toastI18n('err', 'forum_moderation_error');
           toastI18n('info', 'forum_moderation_try_again');
           // rollback optimistic
-          mergeProfileCache(uid, { nickname: prevNick, icon: prevIcon, updatedAt: Date.now() });
-          onSaved?.({ nickname: prevNick, icon: prevIcon });
+          mergeProfileCache(uid, {
+            nickname: prevNick,
+            icon: prevIcon,
+            gender: prevGender,
+            birthYear: prevBirthYear,
+            updatedAt: Date.now(),
+          });
+          onSaved?.({ nickname: prevNick, icon: prevIcon, gender: prevGender, birthYear: prevBirthYear });
            cleanupObjectUrlsIfStale();     
           return;
         }
@@ -672,8 +745,14 @@ const right = isRtl ? Math.round(parentRect.right - rect.right) : undefined;
         if (!up.ok || !uj?.urls?.[0]) {
           console.warn('avatar upload failed', uj);
           // rollback optimistic
-          mergeProfileCache(uid, { nickname: prevNick, icon: prevIcon, updatedAt: Date.now() });
-          onSaved?.({ nickname: prevNick, icon: prevIcon });
+          mergeProfileCache(uid, {
+            nickname: prevNick,
+            icon: prevIcon,
+            gender: prevGender,
+            birthYear: prevBirthYear,
+            updatedAt: Date.now(),
+          });
+          onSaved?.({ nickname: prevNick, icon: prevIcon, gender: prevGender, birthYear: prevBirthYear });
           cleanupObjectUrlsIfStale();     
           return;
         }
@@ -681,8 +760,13 @@ const right = isRtl ? Math.round(parentRect.right - rect.right) : undefined;
         iconToSend = uj.urls[0];
 
         // ✅ reconcile: подменяем blob-превью на реальный URL (чтобы пережило перезагрузку)
-        mergeProfileCache(uid, { icon: iconToSend, updatedAt: Date.now() });
-        onSaved?.({ nickname: n, icon: iconToSend });
+        mergeProfileCache(uid, {
+          icon: iconToSend,
+          gender: nextGender,
+          birthYear: nextBirthYear,
+          updatedAt: Date.now(),
+        });
+        onSaved?.({ nickname: n, icon: iconToSend, gender: nextGender, birthYear: nextBirthYear });
         cleanupObjectUrlsIfStale();     
       } finally {
         if (mountedRef.current) setUploadBusy(false);
@@ -701,6 +785,8 @@ const right = isRtl ? Math.round(parentRect.right - rect.right) : undefined;
       body: JSON.stringify({
         nick: n,
         icon: iconToSend,
+        gender: nextGender,
+        birthYear: nextBirthYear,
         // canonical ids
         accountId: uid,
         asherId: uid,
@@ -719,20 +805,38 @@ const right = isRtl ? Math.round(parentRect.right - rect.right) : undefined;
     if (!r.ok || !j?.ok) {
       if (j?.error === 'nick_taken' && mountedRef.current) setNickFree(false);
       // rollback optimistic
-      mergeProfileCache(uid, { nickname: prevNick, icon: prevIcon, updatedAt: Date.now() });
-      onSaved?.({ nickname: prevNick, icon: prevIcon });
+      mergeProfileCache(uid, {
+        nickname: prevNick,
+        icon: prevIcon,
+        gender: prevGender,
+        birthYear: prevBirthYear,
+        updatedAt: Date.now(),
+      });
+      onSaved?.({ nickname: prevNick, icon: prevIcon, gender: prevGender, birthYear: prevBirthYear });
       cleanupObjectUrlsIfStale();    
       return;
     }
 
     const savedNick = j.nick || n;
     const savedIcon = j.icon || iconToSend || optimisticIcon;
+    const savedGender = String(j.gender || nextGender || '');
+    const savedBirthYear = Number(j.birthYear || nextBirthYear || 0) || 0;
     const savedAccountId = String(j.accountId || uid || '').trim();
+    savedGenderRef.current = savedGender;
+    savedBirthYearRef.current = savedBirthYear;
+    setGender(savedGender);
+    setBirthYear(savedBirthYear);
 
     writeProfileAlias(uid, savedAccountId);
-    mergeProfileCache(savedAccountId, { nickname: savedNick, icon: savedIcon, updatedAt: Date.now() });
+    mergeProfileCache(savedAccountId, {
+      nickname: savedNick,
+      icon: savedIcon,
+      gender: savedGender,
+      birthYear: savedBirthYear,
+      updatedAt: Date.now(),
+    });
   // финальный reconcile на ответ бэка
-    onSaved?.({ nickname: savedNick, icon: savedIcon });
+    onSaved?.({ nickname: savedNick, icon: savedIcon, gender: savedGender, birthYear: savedBirthYear });
     cleanupObjectUrlsIfStale();
   } finally {
 if (mountedRef.current) setBusy(false);
@@ -875,6 +979,70 @@ if (mountedRef.current) setBusy(false);
             {!nickBusy && nickFree===false && t('nick_taken')}
           </div>
         </label>
+        <div className="profileIdentityRow">
+          <div className={cls('profileIdentityField', genderLocked && 'isLocked')}>
+            <div className="profileIdentityLabel">{t('forum_profile_gender')}</div>
+            <div className="profileGenderOptions" role="group" aria-label={t('forum_profile_gender')}>
+              {genderOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={cls(
+                    'profileSelectChip',
+                    gender === option.value && 'isSelected',
+                    genderLocked && 'isLocked',
+                  )}
+                  disabled={genderLocked || busy}
+                  onClick={() => setGender(option.value)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className={cls('profileIdentityField', birthYearLocked && 'isLocked')} ref={yearMenuRef}>
+            <div className="profileIdentityLabel">{t('forum_profile_birth_year')}</div>
+            <button
+              type="button"
+              className={cls(
+                'profileSelectTrigger',
+                birthYear && 'isSelected',
+                birthYearLocked && 'isLocked',
+              )}
+              disabled={birthYearLocked || busy}
+              onClick={() => setYearMenuOpen((value) => !value)}
+            >
+              <span>{selectedBirthYearLabel}</span>
+              <svg viewBox="0 0 20 20" focusable="false" aria-hidden="true">
+                <path
+                  d="m5 7 5 6 5-6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            {!birthYearLocked && yearMenuOpen && (
+              <div className="profileYearMenu" role="listbox" aria-label={t('forum_profile_birth_year')}>
+                {birthYearOptions.map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    className={cls('profileYearOption', birthYear === option && 'isSelected')}
+                    onClick={() => {
+                      setBirthYear(option);
+                      setYearMenuOpen(false);
+                    }}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
         <div>
       <div className="forumDividerRail forumDividerRail--gold" style={{ margin: '20px 4px' }} aria-hidden="true" />
            

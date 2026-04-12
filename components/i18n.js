@@ -49259,6 +49259,64 @@ try {
   ensureDict('ar', MISSING_AR)
   ensureDict('tr', MISSING_TR)
 } catch (e) {}
+try {
+  ensureDict('en', {
+    forum_image_limit_notice: 'You can attach up to {limit} images. We kept the first {kept}.',
+    forum_profile_gender: 'Gender',
+    forum_profile_gender_male: 'Male',
+    forum_profile_gender_female: 'Female',
+    forum_profile_birth_year: 'Birth year',
+    forum_profile_birth_year_placeholder: 'Select year',
+  })
+  ensureDict('ru', {
+    forum_image_limit_notice: 'Можно прикрепить до {limit} изображений. Мы оставили только первые {kept}.',
+    forum_profile_gender: 'Пол',
+    forum_profile_gender_male: 'Мужской',
+    forum_profile_gender_female: 'Женский',
+    forum_profile_birth_year: 'Год рождения',
+    forum_profile_birth_year_placeholder: 'Выбрать год',
+  })
+  ensureDict('uk', {
+    forum_image_limit_notice: 'Можна прикріпити до {limit} зображень. Ми залишили лише перші {kept}.',
+    forum_profile_gender: 'Стать',
+    forum_profile_gender_male: 'Чоловіча',
+    forum_profile_gender_female: 'Жіноча',
+    forum_profile_birth_year: 'Рік народження',
+    forum_profile_birth_year_placeholder: 'Оберіть рік',
+  })
+  ensureDict('es', {
+    forum_image_limit_notice: 'Puedes adjuntar hasta {limit} imágenes. Conservamos solo las primeras {kept}.',
+    forum_profile_gender: 'Género',
+    forum_profile_gender_male: 'Masculino',
+    forum_profile_gender_female: 'Femenino',
+    forum_profile_birth_year: 'Año de nacimiento',
+    forum_profile_birth_year_placeholder: 'Seleccionar año',
+  })
+  ensureDict('zh', {
+    forum_image_limit_notice: '最多可附加 {limit} 张图片。我们只保留前 {kept} 张。',
+    forum_profile_gender: '性别',
+    forum_profile_gender_male: '男',
+    forum_profile_gender_female: '女',
+    forum_profile_birth_year: '出生年份',
+    forum_profile_birth_year_placeholder: '选择年份',
+  })
+  ensureDict('ar', {
+    forum_image_limit_notice: 'يمكن إرفاق ما يصل إلى {limit} صور. احتفظنا فقط بأول {kept}.',
+    forum_profile_gender: 'الجنس',
+    forum_profile_gender_male: 'ذكر',
+    forum_profile_gender_female: 'أنثى',
+    forum_profile_birth_year: 'سنة الميلاد',
+    forum_profile_birth_year_placeholder: 'اختر السنة',
+  })
+  ensureDict('tr', {
+    forum_image_limit_notice: 'En fazla {limit} görsel ekleyebilirsiniz. Yalnızca ilk {kept} görseli tuttuk.',
+    forum_profile_gender: 'Cinsiyet',
+    forum_profile_gender_male: 'Erkek',
+    forum_profile_gender_female: 'Kadın',
+    forum_profile_birth_year: 'Doğum yılı',
+    forum_profile_birth_year_placeholder: 'Yıl seç',
+  })
+} catch (e) {}
 const SUPPORTED_LANGS = ['ru', 'en', 'zh', 'uk', 'ar', 'tr', 'es']
 const DEFAULT_LANG = 'en'
 

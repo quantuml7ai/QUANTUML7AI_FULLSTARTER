@@ -2,9 +2,14 @@
 import { NextResponse } from 'next/server'
 import { requireUserId } from '../../forum/_utils.js'
 import {
+  getUserProfile,
   setUserNick,
   normNick,
   setUserAvatar,
+  normUserGender,
+  normUserBirthYear,
+  setUserGender,
+  setUserBirthYear,
 } from '../../forum/_db.js'
 import { resolveCanonicalAccountId, writeCanonicalAliases } from '../_identity.js'
 import { Redis } from '@upstash/redis'
@@ -48,9 +53,28 @@ export async function POST(req) {
       return NextResponse.json({ ok: false, error: 'empty_nick' }, { status: 400 })
     }
 
+    const hasGenderInput = body?.gender != null && String(body?.gender || '').trim() !== ''
+    const nextGender = normUserGender(body?.gender)
+    if (hasGenderInput && !nextGender) {
+      return NextResponse.json({ ok: false, error: 'invalid_gender' }, { status: 400 })
+    }
+
+    const hasBirthYearInput = body?.birthYear != null && String(body?.birthYear || '').trim() !== ''
+    const nextBirthYear = normUserBirthYear(body?.birthYear)
+    if (hasBirthYearInput && !nextBirthYear) {
+      return NextResponse.json({ ok: false, error: 'invalid_birth_year' }, { status: 400 })
+    }
+
     const iconRaw = body?.icon || body?.avatar || ''
+    const currentProfile = await getUserProfile(accountId)
     const saved = await setUserNick(accountId, nick)
     const savedIcon = await setUserAvatar(accountId, iconRaw)
+    const savedGender = currentProfile?.gender
+      ? String(currentProfile.gender)
+      : (nextGender ? await setUserGender(accountId, nextGender) : '')
+    const savedBirthYear = Number(currentProfile?.birthYear || 0) || (
+      nextBirthYear ? await setUserBirthYear(accountId, nextBirthYear) : 0
+    )
 
     try {
       const redis = Redis.fromEnv()
@@ -89,7 +113,14 @@ export async function POST(req) {
     } catch {}
 
     return NextResponse.json(
-      { ok: true, nick: saved, icon: savedIcon, accountId },
+      {
+        ok: true,
+        nick: saved,
+        icon: savedIcon,
+        accountId,
+        gender: savedGender || '',
+        birthYear: Number(savedBirthYear || 0) || 0,
+      },
       { headers: NO_STORE_HEADERS },
     )
   } catch (e) {

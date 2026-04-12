@@ -2,6 +2,7 @@ export async function sendDmComposerMessage({
   uid,
   dmTarget,
   text,
+  pendingSticker,
   dmWithUserId,
   pendingImgs,
   audioUrlToSend,
@@ -21,6 +22,7 @@ export async function sendDmComposerMessage({
   setComposerActive,
   setText,
   setPendingImgs,
+  setPendingSticker,
   pendingAudio,
   setPendingAudio,
   stopMediaProg,
@@ -49,7 +51,12 @@ export async function sendDmComposerMessage({
   if (String(uid) === String(dmTarget)) return fail(t('dm_blocked'))
   if (dmBlockedMap?.[dmTarget]) return fail(t('dm_you_blocked'))
 
-  const dmText = String(text || '').trim()
+  const dmText = [
+    String(text || '').trim(),
+    pendingSticker?.src
+      ? `[${String(pendingSticker?.kind || '') === 'mozi' ? 'MOZI' : 'VIP_EMOJI'}:${String(pendingSticker.src)}]`
+      : '',
+  ].filter(Boolean).join('\n')
   const rawToId = String(dmWithUserId || '').trim()
   const pendingAudioUrl = String(pendingAudio || '').trim()
   const pendingVideoUrl = String(pendingVideo || '').trim()
@@ -228,6 +235,7 @@ export async function sendDmComposerMessage({
   setComposerActive(false)
   try { setText('') } catch {}
   try { setPendingImgs([]) } catch {}
+  try { setPendingSticker?.(null) } catch {}
   try { if (pendingAudio && /^blob:/.test(pendingAudio)) URL.revokeObjectURL(pendingAudio) } catch {}
   try { setPendingAudio(null) } catch {}
   try { stopMediaProg() } catch {}

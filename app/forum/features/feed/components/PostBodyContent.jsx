@@ -3,33 +3,47 @@
 import React from 'react'
 import Image from 'next/image'
 
-const STICKER_RE = /^\[(VIP_EMOJI|MOZI):\/[^\]]+\]$/
+export default function PostBodyContent({
+  displayText,
+  renderRich,
+  stickerEntries = [],
+}) {
+  const stickers = Array.isArray(stickerEntries) ? stickerEntries.filter((entry) => entry?.url) : []
+  const hasText = String(displayText || '').trim().length > 0
 
-export default function PostBodyContent({ pText, displayText, renderRich }) {
-  const rawText = String(pText || '')
+  if (!stickers.length && !hasText) return null
 
-  return STICKER_RE.test(rawText) ? (
-    <div className="postBody emojiPostWrap">
-      <div className="vipMediaBox" data-kind="sticker">
-        <Image
-          src={rawText.replace(/^\[(VIP_EMOJI|MOZI):(.*?)\]$/, '$2')}
-          alt=""
-          width={512}
-          height={512}
-          unoptimized
-          className={rawText.startsWith('[MOZI:') ? 'moziEmojiBig emojiPostBig' : 'vipEmojiBig emojiPostBig'}
-          style={{ width: '100%', height: 'auto' }}
-        />
-      </div>
-    </div>
-  ) : (
-    displayText.trim() && (
-      <div className="postBodyFrame">
-        <div
-          className="postBodyContent text-[15px] leading-relaxed postBody whitespace-pre-wrap break-words"
-          dangerouslySetInnerHTML={{ __html: renderRich(displayText) }}
-        />
-      </div>
-    )
+  return (
+    <>
+      {stickers.length > 0 && (
+        <div className="postBody emojiPostWrap">
+          {stickers.map((sticker, index) => {
+            const isMozi = String(sticker?.kind || '') === 'mozi'
+            return (
+              <div key={`sticker:${sticker?.url || index}:${index}`} className="vipMediaBox" data-kind="sticker">
+                <Image
+                  src={sticker.url}
+                  alt=""
+                  width={512}
+                  height={512}
+                  unoptimized
+                  className={isMozi ? 'moziEmojiBig emojiPostBig' : 'vipEmojiBig emojiPostBig'}
+                  style={{ width: '100%', height: 'auto' }}
+                />
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {hasText && (
+        <div className="postBodyFrame">
+          <div
+            className="postBodyContent text-[15px] leading-relaxed postBody whitespace-pre-wrap break-words"
+            dangerouslySetInnerHTML={{ __html: renderRich(displayText) }}
+          />
+        </div>
+      )}
+    </>
   )
 }

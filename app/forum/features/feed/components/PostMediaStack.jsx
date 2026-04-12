@@ -20,6 +20,230 @@ function sameList(a, b) {
   return true
 }
 
+function clampIndex(index, total) {
+  if (!total) return 0
+  return Math.max(0, Math.min(total - 1, Number(index || 0)))
+}
+
+function ImageCarousel({
+  images,
+  mediaKeyBase,
+  onOpenLightbox,
+}) {
+  const [activeIndex, setActiveIndex] = React.useState(0)
+  const swipeStartRef = React.useRef(null)
+  const swipeDeltaRef = React.useRef(0)
+  const hasMany = images.length > 1
+
+  React.useEffect(() => {
+    setActiveIndex((prev) => clampIndex(prev, images.length))
+  }, [images.length])
+
+  const goTo = React.useCallback((nextIndex) => {
+    setActiveIndex((prev) => {
+      const safePrev = clampIndex(prev, images.length)
+      const resolved = typeof nextIndex === 'function' ? nextIndex(safePrev) : nextIndex
+      return clampIndex(resolved, images.length)
+    })
+  }, [images.length])
+
+  const handleTouchStart = React.useCallback((event) => {
+    const touch = event.touches?.[0]
+    if (!touch) return
+    swipeStartRef.current = Number(touch.clientX || 0)
+    swipeDeltaRef.current = 0
+  }, [])
+
+  const handleTouchMove = React.useCallback((event) => {
+    const touch = event.touches?.[0]
+    if (!touch || swipeStartRef.current == null) return
+    swipeDeltaRef.current = Number(touch.clientX || 0) - Number(swipeStartRef.current || 0)
+  }, [])
+
+  const handleTouchEnd = React.useCallback(() => {
+    if (swipeStartRef.current == null) return
+    const deltaX = Number(swipeDeltaRef.current || 0)
+    swipeStartRef.current = null
+    swipeDeltaRef.current = 0
+    if (Math.abs(deltaX) < 42) return
+    if (deltaX < 0) goTo((prev) => prev + 1)
+    else goTo((prev) => prev - 1)
+  }, [goTo])
+
+  return (
+    <div className="postImagesCarousel" style={{ marginTop: 8 }}>
+      <div
+        className="postImagesCarouselViewport mediaBox"
+        data-kind="image"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ margin: 0, touchAction: 'pan-y' }}
+      >
+        <div
+          className="postImagesCarouselTrack"
+          style={{
+            display: 'flex',
+            width: '100%',
+            height: '100%',
+            transform: `translate3d(-${activeIndex * 100}%, 0, 0)`,
+            transition: 'transform 260ms ease',
+          }}
+        >
+          {images.map((src, index) => {
+            return (
+              <figure
+                key={`img:${mediaKeyBase}:${src}:${index}`}
+                className="postImagesCarouselSlide"
+                style={{
+                  flex: '0 0 100%',
+                  width: '100%',
+                  height: '100%',
+                  margin: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  if (!hasMany) onOpenLightbox?.(src, index, images)
+                }}
+              >
+                <Image
+                  src={src}
+                  alt=""
+                  width={1200}
+                  height={800}
+                  unoptimized
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                  className="mediaBoxItem"
+                  style={{ objectFit: 'contain' }}
+                />
+              </figure>
+            )
+          })}
+        </div>
+
+        {hasMany && (
+          <>
+            <button
+              type="button"
+              className="postGalleryNav postGalleryNav--prev"
+              aria-label="Previous image"
+              onClick={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                goTo((prev) => prev - 1)
+              }}
+            >
+              <span className="postGalleryNavGlyph" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path
+                    d="M14.5 6.5 9 12l5.5 5.5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+            </button>
+            <button
+              type="button"
+              className="postGalleryNav postGalleryNav--next"
+              aria-label="Next image"
+              onClick={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                goTo((prev) => prev + 1)
+              }}
+            >
+              <span className="postGalleryNavGlyph" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path
+                    d="M9.5 6.5 15 12l-5.5 5.5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+            </button>
+          </>
+        )}
+      </div>
+
+      {hasMany && (
+        <div className="postGalleryDots" aria-hidden="true">
+          {images.map((src, index) => {
+            return (
+              <button
+                key={`dot:${mediaKeyBase}:${src}:${index}`}
+                type="button"
+                className={`postGalleryDot ${index === activeIndex ? 'isActive' : ''}`}
+                onClick={(event) => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  goTo(index)
+                }}
+              />
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function IframeTouchShield({ href }) {
+  return (
+    <div className="iframeTouchShield" aria-hidden={!href}>
+      {href ? (
+        <a
+          className="iframeTouchShieldAction"
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(event) => event.stopPropagation()}
+          aria-label="Open media source"
+          title="Open media source"
+        >
+          <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+            <path
+              d="M14 5h5v5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M10 14 19 5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M19 13v4a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </a>
+      ) : null}
+    </div>
+  )
+}
+
 export default function PostMediaStack({
   imgLines,
   videoLines,
@@ -69,32 +293,11 @@ export default function PostMediaStack({
   return (
     <>
       {imgLines.length > 0 && (
-        <div className="postImages" style={{ display: 'grid', gap: 8, marginTop: 8 }}>
-          {imgLines.map((src, i) => (
-            <figure
-              key={`img:${mediaKeyBase}:${src}:${i}`}
-              className="imgWrap mediaBox"
-              data-kind="image"
-              style={{ margin: 0 }}
-              onClick={(e) => {
-                e.stopPropagation()
-                onOpenLightbox?.(src, i, imgLines)
-              }}
-            >
-              <Image
-                src={src}
-                alt=""
-                width={1200}
-                height={800}
-                unoptimized
-                loading="lazy"
-                referrerPolicy="no-referrer"
-                className="mediaBoxItem"
-                style={{ objectFit: 'contain' }}
-              />
-            </figure>
-          ))}
-        </div>
+        <ImageCarousel
+          images={imgLines}
+          mediaKeyBase={mediaKeyBase}
+          onOpenLightbox={onOpenLightbox}
+        />
       )}
 
       {videoLines.length > 0 && (
@@ -116,8 +319,8 @@ export default function PostMediaStack({
                   objectFit: 'contain',
                   background: '#000',
                 }}
-                onPointerDown={(e) => {
-                  e.stopPropagation()
+                onPointerDown={(event) => {
+                  event.stopPropagation()
                 }}
               />
             </div>
@@ -128,9 +331,9 @@ export default function PostMediaStack({
       {ytLinesStable.length > 0 && (
         <div className="postVideo" style={{ display: 'grid', gap: 8, marginTop: 8 }}>
           {ytLinesStable.map((src, i) => {
-            const m = src.match(YT_RE)
-            if (!m) return null
-            const videoId = m[1]
+            const match = src.match(YT_RE)
+            if (!match) return null
+            const videoId = match[1]
             return (
               <div
                 key={`yt:${mediaKeyBase}:${videoId}:${i}`}
@@ -151,6 +354,7 @@ export default function PostMediaStack({
                   allowFullScreen
                   className="mediaBoxItem"
                 />
+                <IframeTouchShield href={src} />
               </div>
             )
           })}
@@ -162,9 +366,9 @@ export default function PostMediaStack({
           {tiktokLinesStable.map((src, i) => {
             let videoId = null
             try {
-              const u = new URL(src)
-              const m = u.pathname.match(/\/video\/(\d+)/)
-              if (m) videoId = m[1]
+              const url = new URL(src)
+              const match = url.pathname.match(/\/video\/(\d+)/)
+              if (match) videoId = match[1]
             } catch {}
 
             if (!videoId) {
@@ -205,7 +409,7 @@ export default function PostMediaStack({
                     href={src}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(event) => event.stopPropagation()}
                     style={{ flex: '0 0 auto' }}
                     title="Open"
                   >
@@ -227,6 +431,7 @@ export default function PostMediaStack({
                   allowFullScreen
                   className="mediaBoxItem"
                 />
+                <IframeTouchShield href={src} />
               </div>
             )
           })}

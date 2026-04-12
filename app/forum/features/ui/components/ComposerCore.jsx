@@ -22,6 +22,7 @@ export default function ComposerCore({
   text,
   textLimit,
   mediaLocked,
+  composerMediaKind,
   handleAttachClick,
   setEmojiOpen,
   videoState,
@@ -40,6 +41,8 @@ export default function ComposerCore({
   setComposerActive,
   pendingImgs,
   setPendingImgs,
+  pendingSticker,
+  setPendingSticker,
   pendingVideo,
   pendingAudio,
   openPendingVideoFullscreen,
@@ -53,6 +56,7 @@ export default function ComposerCore({
   EMOJI,
   fileInputRef,
   onFilesChosen,
+  fileInputAccept,
 }) {
   return (
     <>
@@ -70,6 +74,7 @@ export default function ComposerCore({
             text={text}
             textLimit={textLimit}
             mediaLocked={mediaLocked}
+            composerMediaKind={composerMediaKind}
             handleAttachClick={handleAttachClick}
             t={t}
             setEmojiOpen={setEmojiOpen}
@@ -97,8 +102,8 @@ export default function ComposerCore({
           />
 
           <ComposerEmojiPreview
-            text={text}
-            setText={setText}
+            pendingSticker={pendingSticker}
+            setPendingSticker={setPendingSticker}
             t={t}
           />
         </div>
@@ -124,6 +129,7 @@ export default function ComposerCore({
           VIP_EMOJI={VIP_EMOJI}
           EMOJI={EMOJI}
           t={t}
+          stickersDisabled={!!composerMediaKind && composerMediaKind !== 'sticker'}
         />
       </div>
 
@@ -131,6 +137,7 @@ export default function ComposerCore({
         fileInputRef={fileInputRef}
         onFilesChosen={onFilesChosen}
         mediaLocked={mediaLocked}
+        accept={fileInputAccept}
       />
     </>
   )

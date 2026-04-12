@@ -9,6 +9,7 @@ export default function buildComposerCoreProps({
   text,
   textLimit,
   mediaLocked,
+  composerMediaKind,
   handleAttachClick,
   setEmojiOpen,
   videoState,
@@ -27,6 +28,8 @@ export default function buildComposerCoreProps({
   setComposerActive,
   pendingImgs,
   setPendingImgs,
+  pendingSticker,
+  setPendingSticker,
   pendingVideo,
   pendingAudio,
   openPendingVideoFullscreen,
@@ -40,6 +43,7 @@ export default function buildComposerCoreProps({
   emoji,
   fileInputRef,
   onFilesChosen,
+  fileInputAccept,
 }) {
   return {
     composerActive,
@@ -52,6 +56,7 @@ export default function buildComposerCoreProps({
     text,
     textLimit,
     mediaLocked,
+    composerMediaKind,
     handleAttachClick,
     setEmojiOpen,
     videoState,
@@ -70,6 +75,8 @@ export default function buildComposerCoreProps({
     setComposerActive,
     pendingImgs,
     setPendingImgs,
+    pendingSticker,
+    setPendingSticker,
     pendingVideo,
     pendingAudio,
     openPendingVideoFullscreen,
@@ -83,5 +90,6 @@ export default function buildComposerCoreProps({
     EMOJI: emoji,
     fileInputRef,
     onFilesChosen,
+    fileInputAccept,
   }
 }

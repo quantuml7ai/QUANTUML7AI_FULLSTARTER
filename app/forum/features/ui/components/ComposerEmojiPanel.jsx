@@ -12,6 +12,7 @@ export default function ComposerEmojiPanel({
   VIP_EMOJI,
   EMOJI,
   t,
+  stickersDisabled = false,
 }) {
   if (!emojiOpen) return null
 
@@ -57,7 +58,10 @@ export default function ComposerEmojiPanel({
                   key={emojiItem}
                   type="button"
                   className="emojiBtn hoverPop"
+                  disabled={stickersDisabled}
+                  aria-disabled={stickersDisabled ? 'true' : 'false'}
                   onClick={() => {
+                    if (stickersDisabled) return
                     addEmoji(emojiItem)
                     setEmojiOpen(false)
                   }}

@@ -4,7 +4,9 @@ import useUserRecommendationsRail from '../../../../../../app/forum/features/fee
 import usePublishedPostsModel from '../../../../../../app/forum/features/feed/hooks/usePublishedPostsModel.js'
 import useThreadPostsModel from '../../../../../../app/forum/features/feed/hooks/useThreadPostsModel.js'
 import useTopicDiscoveryModel from '../../../../../../app/forum/features/feed/hooks/useTopicDiscoveryModel.js'
+import usePostMediaTextModel from '../../../../../../app/forum/features/feed/hooks/usePostMediaTextModel.js'
 import useVideoFeedState from '../../../../../../app/forum/features/media/hooks/useVideoFeedState.js'
+import useForumComposerAttachments from '../../../../../../app/forum/features/media/hooks/useForumComposerAttachments.js'
 import { prioritizeStarredItems } from '../../../../../../app/forum/features/subscriptions/utils/starred.js'
 import { createRecommendationUser } from '../../../../../fixtures/forum/recommendations.js'
 
@@ -445,5 +447,194 @@ describe('starred sorting models', () => {
         id: promotedItem.id,
       }),
     )
+  })
+})
+
+describe('usePostMediaTextModel', () => {
+  it('extracts sticker tags into sticker entries and preserves description text', () => {
+    const { result } = renderHook(() =>
+      usePostMediaTextModel({
+        text: 'Sticker caption\n[MOZI:/mozi/cat.webp]',
+        postId: 'post-sticker',
+      }),
+    )
+
+    expect(result.current.stickerEntries).toEqual([
+      expect.objectContaining({
+        url: '/mozi/cat.webp',
+        kind: 'mozi',
+      }),
+    ])
+    expect(result.current.cleanedText).toBe('Sticker caption')
+  })
+})
+
+describe('useForumComposerAttachments', () => {
+  it('narrows file input accept to images and blocks opening picker for other media kinds', () => {
+    const clickSpy = vi.fn()
+
+    const { result } = renderHook(() =>
+      useForumComposerAttachments({
+        mediaLocked: false,
+        composerMediaKind: 'sticker',
+        pendingImgs: [],
+        saveComposerScroll: vi.fn(),
+        restoreComposerScroll: vi.fn(),
+        beginMediaPipeline: vi.fn(),
+        endMediaPipeline: vi.fn(),
+        toast: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), success: vi.fn() },
+        t: (key) => key,
+        moderateImageFiles: vi.fn(),
+        toastI18n: vi.fn(),
+        reasonKey: vi.fn(),
+        stopMediaProg: vi.fn(),
+        setMediaPhase: vi.fn(),
+        setMediaPct: vi.fn(),
+        startSoftProgress: vi.fn(),
+        setPendingImgs: vi.fn(),
+        setOverlayMediaKind: vi.fn(),
+        setOverlayMediaUrl: vi.fn(),
+        setVideoState: vi.fn(),
+        setVideoOpen: vi.fn(),
+        viewerId: 'viewer-1',
+        showVideoLimitOverlay: vi.fn(),
+        readVideoDurationSecFn: vi.fn(),
+        forumVideoMaxSeconds: 30,
+        forumVideoMaxBytes: 1024,
+        forumVideoFaststartTranscodeMaxBytes: 1024,
+        optimizeForumVideoFastStartFn: vi.fn(),
+        emitDiag: vi.fn(),
+        setPendingVideo: vi.fn(),
+        pendingVideoInfoRef: { current: { source: '', durationSec: Number.NaN } },
+        setVideoProgress: vi.fn(),
+      }),
+    )
+
+    result.current.fileInputRef.current = { click: clickSpy }
+
+    act(() => {
+      result.current.handleAttachClick({
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
+      })
+    })
+
+    expect(result.current.fileInputAccept).toContain('video/mp4')
+    expect(clickSpy).not.toHaveBeenCalled()
+  })
+
+  it('limits accepted files to images when the composer already holds images', () => {
+    const { result } = renderHook(() =>
+      useForumComposerAttachments({
+        mediaLocked: false,
+        composerMediaKind: 'image',
+        pendingImgs: [],
+        saveComposerScroll: vi.fn(),
+        restoreComposerScroll: vi.fn(),
+        beginMediaPipeline: vi.fn(),
+        endMediaPipeline: vi.fn(),
+        toast: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), success: vi.fn() },
+        t: (key) => key,
+        moderateImageFiles: vi.fn(),
+        toastI18n: vi.fn(),
+        reasonKey: vi.fn(),
+        stopMediaProg: vi.fn(),
+        setMediaPhase: vi.fn(),
+        setMediaPct: vi.fn(),
+        startSoftProgress: vi.fn(),
+        setPendingImgs: vi.fn(),
+        setOverlayMediaKind: vi.fn(),
+        setOverlayMediaUrl: vi.fn(),
+        setVideoState: vi.fn(),
+        setVideoOpen: vi.fn(),
+        viewerId: 'viewer-1',
+        showVideoLimitOverlay: vi.fn(),
+        readVideoDurationSecFn: vi.fn(),
+        forumVideoMaxSeconds: 30,
+        forumVideoMaxBytes: 1024,
+        forumVideoFaststartTranscodeMaxBytes: 1024,
+        optimizeForumVideoFastStartFn: vi.fn(),
+        emitDiag: vi.fn(),
+        setPendingVideo: vi.fn(),
+        pendingVideoInfoRef: { current: { source: '', durationSec: Number.NaN } },
+        setVideoProgress: vi.fn(),
+      }),
+    )
+
+    expect(result.current.fileInputAccept).toContain('image/*')
+    expect(result.current.fileInputAccept).not.toContain('video/mp4')
+  })
+
+  it('caps image attachments at ten and warns when the picked batch exceeds the remaining slots', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ urls: Array.from({ length: 2 }, (_, index) => `/uploads/${index + 1}.webp`) }),
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const warn = vi.fn()
+    const success = vi.fn()
+    const setPendingImgs = vi.fn()
+    const moderateImageFiles = vi.fn(async (files) => ({
+      decision: 'allow',
+      files,
+    }))
+
+    const { result } = renderHook(() =>
+      useForumComposerAttachments({
+        mediaLocked: false,
+        composerMediaKind: 'image',
+        pendingImgs: Array.from({ length: 8 }, (_, index) => `/existing/${index + 1}.webp`),
+        saveComposerScroll: vi.fn(),
+        restoreComposerScroll: vi.fn(),
+        beginMediaPipeline: vi.fn(() => ({ signal: undefined })),
+        endMediaPipeline: vi.fn(),
+        toast: { info: vi.fn(), error: vi.fn(), warn, success },
+        t: (key) => key === 'forum_image_limit_notice'
+          ? 'limit:{limit};kept:{kept}'
+          : key,
+        moderateImageFiles,
+        toastI18n: vi.fn(),
+        reasonKey: vi.fn(),
+        stopMediaProg: vi.fn(),
+        setMediaPhase: vi.fn(),
+        setMediaPct: vi.fn(),
+        startSoftProgress: vi.fn(),
+        setPendingImgs,
+        setOverlayMediaKind: vi.fn(),
+        setOverlayMediaUrl: vi.fn(),
+        setVideoState: vi.fn(),
+        setVideoOpen: vi.fn(),
+        viewerId: 'viewer-1',
+        showVideoLimitOverlay: vi.fn(),
+        readVideoDurationSecFn: vi.fn(),
+        forumVideoMaxSeconds: 30,
+        forumVideoMaxBytes: 1024,
+        forumVideoFaststartTranscodeMaxBytes: 1024,
+        optimizeForumVideoFastStartFn: vi.fn(),
+        emitDiag: vi.fn(),
+        setPendingVideo: vi.fn(),
+        pendingVideoInfoRef: { current: { source: '', durationSec: Number.NaN } },
+        setVideoProgress: vi.fn(),
+      }),
+    )
+
+    const files = Array.from({ length: 4 }, (_, index) => new File(['x'], `image-${index + 1}.png`, { type: 'image/png' }))
+
+    await act(async () => {
+      await result.current.onFilesChosen({
+        target: {
+          files,
+          value: 'picked',
+        },
+      })
+    })
+
+    expect(warn).toHaveBeenCalledWith('limit:10;kept:10')
+    expect(moderateImageFiles).toHaveBeenCalledWith(files.slice(0, 2), { signal: undefined })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock.mock.calls[0][1].body.getAll('files')).toHaveLength(2)
+    expect(setPendingImgs).toHaveBeenCalled()
+    expect(success).toHaveBeenCalled()
   })
 })

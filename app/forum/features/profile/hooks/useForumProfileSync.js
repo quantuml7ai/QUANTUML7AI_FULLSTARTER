@@ -23,6 +23,7 @@ async function syncForumProfile(uid) {
   const r = await fetch(`/api/profile/get-profile?uid=${encodeURIComponent(uid)}`, {
     method: 'GET',
     cache: 'no-store',
+    headers: { 'x-forum-user-id': String(uid || '') },
   })
   const j = await r.json().catch(() => null)
   if (!j?.ok) return { ok: false, accountId: uid }
@@ -47,6 +48,8 @@ async function syncForumProfile(uid) {
     ...cur,
     nickname: j.nickname || j.nick || cur.nickname || '',
     icon: j.icon || cur.icon || '',
+    gender: j.gender || cur.gender || '',
+    birthYear: Number(j.birthYear || 0) || Number(cur.birthYear || 0) || 0,
     vipActive,
     vipUntil,
   })

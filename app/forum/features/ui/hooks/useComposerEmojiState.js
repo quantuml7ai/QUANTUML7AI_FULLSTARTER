@@ -1,20 +1,19 @@
 import { useCallback, useState } from 'react'
 
-export default function useComposerEmojiState({ setText }) {
+export default function useComposerEmojiState({ setText, setPendingSticker }) {
   const [emojiOpen, setEmojiOpen] = useState(false)
   const [emojiTab, setEmojiTab] = useState('emoji')
 
   const addEmoji = useCallback((entry) => {
     if (typeof entry === 'string' && entry.startsWith('/')) {
-      if (entry.startsWith('/mozi/')) {
-        setText('[MOZI:' + entry + ']')
-      } else {
-        setText('[VIP_EMOJI:' + entry + ']')
-      }
+      setPendingSticker?.({
+        src: entry,
+        kind: entry.startsWith('/mozi/') ? 'mozi' : 'vip',
+      })
       return
     }
     setText((value) => (value || '') + entry)
-  }, [setText])
+  }, [setPendingSticker, setText])
 
   return {
     emojiOpen,

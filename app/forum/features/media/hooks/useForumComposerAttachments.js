@@ -1,7 +1,11 @@
 import { useCallback, useRef } from 'react'
 
+const MAX_COMPOSER_IMAGE_ATTACHMENTS = 10
+
 export default function useForumComposerAttachments({
   mediaLocked,
+  composerMediaKind,
+  pendingImgs,
   saveComposerScroll,
   restoreComposerScroll,
   beginMediaPipeline,
@@ -33,16 +37,26 @@ export default function useForumComposerAttachments({
   setVideoProgress,
 }) {
   const fileInputRef = useRef(null)
+  const formatI18nMessage = useCallback((key, values = {}) => {
+    let message = String(t?.(key) || key)
+    Object.entries(values || {}).forEach(([name, value]) => {
+      message = message.replaceAll(`{${name}}`, String(value ?? ''))
+    })
+    return message
+  }, [t])
+  const fileInputAccept = composerMediaKind === 'image'
+    ? 'image/*,image/jpeg,image/png,image/webp,image/gif'
+    : 'image/*,image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov'
 
   const handleAttachClick = useCallback((e) => {
     e?.preventDefault?.()
     e?.stopPropagation?.()
-    if (mediaLocked) return
+    if (mediaLocked || (composerMediaKind && composerMediaKind !== 'image')) return
     try {
       saveComposerScroll?.()
     } catch {}
     fileInputRef.current?.click?.()
-  }, [mediaLocked, saveComposerScroll])
+  }, [composerMediaKind, mediaLocked, saveComposerScroll])
 
   const onFilesChosen = useCallback(async (e) => {
     try {
@@ -52,7 +66,7 @@ export default function useForumComposerAttachments({
       const picked = Array.from(e?.target?.files || [])
       if (!picked.length) return
 
-      const imgFiles = picked.filter((f) =>
+      const rawImgFiles = picked.filter((f) =>
         /^image\//i.test(String(f?.type || '')) ||
         /\.(png|jpe?g|webp|gif)$/i.test(String(f?.name || ''))
       )
@@ -60,6 +74,37 @@ export default function useForumComposerAttachments({
         /^video\//i.test(String(f?.type || '')) ||
         /\.(mp4|webm|mov|m4v|mkv)$/i.test(String(f?.name || ''))
       )
+
+      if (composerMediaKind === 'image' && !rawImgFiles.length) return
+      if (composerMediaKind === 'image' && vidFiles.length) return
+      if (rawImgFiles.length && vidFiles.length) {
+        try {
+          toast?.info?.(t?.('forum_attach_info', { types: 'PNG, JPG, JPEG, WEBP, GIF or MP4/WEBM/MOV' }))
+        } catch {}
+        return
+      }
+
+      const currentPendingImageCount = Array.isArray(pendingImgs) ? pendingImgs.length : 0
+      const remainingImageSlots = Math.max(
+        0,
+        MAX_COMPOSER_IMAGE_ATTACHMENTS - currentPendingImageCount,
+      )
+      const imgFiles = rawImgFiles.slice(0, remainingImageSlots)
+
+      if (rawImgFiles.length > imgFiles.length) {
+        try {
+          toast?.warn?.(
+            formatI18nMessage('forum_image_limit_notice', {
+              limit: MAX_COMPOSER_IMAGE_ATTACHMENTS,
+              kept: currentPendingImageCount + imgFiles.length,
+            }),
+          )
+        } catch {}
+      }
+
+      if (rawImgFiles.length > 0 && imgFiles.length === 0 && vidFiles.length === 0) {
+        return
+      }
 
       let signal
       if ((imgFiles?.length || 0) > 0 || (vidFiles?.length || 0) > 0) {
@@ -134,7 +179,7 @@ export default function useForumComposerAttachments({
           startSoftProgress?.(72, 200, 88)
         } catch {}
         const fd = new FormData()
-        for (const f of imgFiles.slice(0, 20)) fd.append('files', f, f.name)
+        for (const f of imgFiles) fd.append('files', f, f.name)
 
         const res = await fetch('/api/forum/upload', {
           method: 'POST',
@@ -386,8 +431,10 @@ export default function useForumComposerAttachments({
     forumVideoFaststartTranscodeMaxBytes,
     forumVideoMaxBytes,
     forumVideoMaxSeconds,
+    formatI18nMessage,
     moderateImageFiles,
     optimizeForumVideoFastStartFn,
+    pendingImgs,
     pendingVideoInfoRef,
     readVideoDurationSecFn,
     reasonKey,
@@ -409,10 +456,12 @@ export default function useForumComposerAttachments({
     toast,
     toastI18n,
     viewerId,
+    composerMediaKind,
   ])
 
   return {
     fileInputRef,
+    fileInputAccept,
     handleAttachClick,
     onFilesChosen,
   }

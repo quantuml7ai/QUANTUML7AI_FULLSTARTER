@@ -14,11 +14,13 @@ export default function useForumComposerSubmitRuntime({
   attachmentsArgs,
   text,
   pendingImgs,
+  pendingSticker,
   pendingAudio,
   pendingVideo,
 }) {
   const canSend = (String(text || '').trim().length > 0)
     || (pendingImgs.length > 0)
+    || !!pendingSticker?.src
     || !!pendingAudio
     || !!pendingVideo
 
@@ -48,6 +50,7 @@ export default function useForumComposerSubmitRuntime({
 
   const {
     fileInputRef,
+    fileInputAccept,
     handleAttachClick,
     onFilesChosen,
   } = useForumComposerAttachments(attachmentsArgs)
@@ -66,6 +69,7 @@ export default function useForumComposerSubmitRuntime({
     handleComposerVideoButtonClick,
     handleComposerSendButtonClick,
     fileInputRef,
+    fileInputAccept,
     handleAttachClick,
     onFilesChosen,
   }

@@ -8,10 +8,38 @@ function formatSeconds(sec) {
   return `${m}:${String(s).padStart(2, '0')}`
 }
 
+function LockBadge() {
+  return (
+    <span className="lockBadge" aria-hidden="true">
+      <svg viewBox="0 0 24 24" focusable="false">
+        <path
+          d="M8 10V7.75A4 4 0 0 1 12 3.75a4 4 0 0 1 4 4V10"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <rect
+          x="6.5"
+          y="10"
+          width="11"
+          height="9"
+          rx="2.2"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        />
+      </svg>
+    </span>
+  )
+}
+
 export default function ComposerActionRail({
   text,
   textLimit,
   mediaLocked,
+  composerMediaKind,
   handleAttachClick,
   t,
   setEmojiOpen,
@@ -36,6 +64,11 @@ export default function ComposerActionRail({
     !canSend ||
     textLen > textLimit
 
+  const attachDisabled = !!mediaLocked || !!(composerMediaKind && composerMediaKind !== 'image')
+  const emojiDisabled = !!mediaLocked || !!(composerMediaKind && composerMediaKind !== 'sticker')
+  const videoDisabled = !!mediaLocked || !!composerMediaKind || videoState === 'uploading'
+  const voiceDisabled = !!mediaLocked || !!composerMediaKind
+
   return (
     <div className="topRail" role="toolbar" aria-label={t('forum_composer_actions')}>
       <div className="railInner">
@@ -50,12 +83,12 @@ export default function ComposerActionRail({
         <div className="railItem">
           <button
             type="button"
-            className={cls('iconBtn ghost lockable', mediaLocked && 'isLocked')}
+            className={cls('iconBtn ghost lockable', attachDisabled && 'isLocked')}
             aria-label={t('forum_attach')}
             title={t('forum_attach')}
             onClick={handleAttachClick}
-            disabled={mediaLocked}
-            aria-disabled={mediaLocked ? 'true' : 'false'}
+            disabled={attachDisabled}
+            aria-disabled={attachDisabled ? 'true' : 'false'}
           >
             <svg viewBox="0 0 24 24" aria-hidden>
               <path
@@ -67,17 +100,22 @@ export default function ComposerActionRail({
                 fill="none"
               />
             </svg>
-            {mediaLocked && <span className="lockBadge" aria-hidden="true">🔒</span>}
+            {attachDisabled && <LockBadge />}
           </button>
         </div>
 
         <div className="railItem">
           <button
             type="button"
-            className="iconBtn ghost"
+            className={cls('iconBtn ghost lockable', emojiDisabled && 'isLocked')}
             title={t('forum_more_emoji')}
             aria-label={t('forum_more_emoji')}
-            onClick={() => setEmojiOpen((v) => !v)}
+            disabled={emojiDisabled}
+            aria-disabled={emojiDisabled ? 'true' : 'false'}
+            onClick={() => {
+              if (emojiDisabled) return
+              setEmojiOpen((value) => !value)
+            }}
           >
             <svg viewBox="0 0 24 24" aria-hidden>
               <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.7" fill="none" />
@@ -85,6 +123,7 @@ export default function ComposerActionRail({
               <circle cx="15" cy="10" r="1.2" fill="currentColor" />
               <path d="M8 14.5c1.2 1.2 2.8 1.8 4 1.8s2.8-.6 4-1.8" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
             </svg>
+            {emojiDisabled && <LockBadge />}
           </button>
         </div>
 
@@ -94,14 +133,14 @@ export default function ComposerActionRail({
             className={cls(
               'iconBtn camBtn lockable',
               videoState === 'recording' && 'rec',
-              (videoState === 'uploading') && 'disabled',
-              mediaLocked && 'isLocked'
+              videoState === 'uploading' && 'disabled',
+              videoDisabled && 'isLocked',
             )}
             aria-label={videoState === 'recording' ? t('forum_stop') : (videoState === 'preview' ? t('forum_video_retake') : t('forum_video_shoot'))}
             title={videoState === 'recording' ? t('forum_stop') : (videoState === 'preview' ? t('forum_video_retake') : t('forum_video_shoot'))}
             onClick={onVideoButtonClick}
-            disabled={mediaLocked || videoState === 'uploading'}
-            aria-disabled={mediaLocked || videoState === 'uploading' ? 'true' : 'false'}
+            disabled={videoDisabled}
+            aria-disabled={videoDisabled ? 'true' : 'false'}
           >
             {videoState === 'recording'
               ? (
@@ -109,28 +148,28 @@ export default function ComposerActionRail({
                   <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#FF4D4F', display: 'inline-block' }} />
                   <b>{t('forum_rec_short')}</b>
                 </span>
-              )
+                )
               : (
                 <svg viewBox="0 0 24 24" aria-hidden>
                   <path d="M7 7h10a2 2 0 012 2v6a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2z" stroke="currentColor" strokeWidth="1.8" fill="none" />
                   <circle cx="12" cy="12" r="3" fill={videoState === 'preview' ? '#3A7BFF' : 'currentColor'} />
                 </svg>
-              )}
-            {mediaLocked && <span className="lockBadge" aria-hidden="true">🔒</span>}
+                )}
+            {videoDisabled && <LockBadge />}
           </button>
         </div>
 
         <div className="railItem">
           <button
             type="button"
-            className={cls('iconBtn ghost micBtn lockable', recState === 'rec' && 'rec', mediaLocked && 'isLocked')}
+            className={cls('iconBtn ghost micBtn lockable', recState === 'rec' && 'rec', voiceDisabled && 'isLocked')}
             aria-label={recState === 'rec' ? (t('forum_stop') || 'Stop recording') : voiceTapLabel}
             title={recState === 'rec' ? (t('forum_stop') || 'Stop recording') : voiceTapLabel}
-            disabled={mediaLocked}
-            aria-disabled={mediaLocked ? 'true' : 'false'}
-            onClick={(e) => {
-              e.preventDefault()
-              if (mediaLocked) return
+            disabled={voiceDisabled}
+            aria-disabled={voiceDisabled ? 'true' : 'false'}
+            onClick={(event) => {
+              event.preventDefault()
+              if (voiceDisabled) return
               if (recState === 'rec') stopRecord()
               else startRecord()
             }}
@@ -149,7 +188,7 @@ export default function ComposerActionRail({
             {recState === 'rec' && (
               <span className="micTimer" aria-live="polite">{formatSeconds(recElapsed)}</span>
             )}
-            {mediaLocked && <span className="lockBadge" aria-hidden="true">🔒</span>}
+            {voiceDisabled && <LockBadge />}
           </button>
         </div>
 

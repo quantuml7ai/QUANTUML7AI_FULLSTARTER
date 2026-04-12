@@ -89,6 +89,7 @@ export default function ForumPostCard({
 
   const {
     cleanedText,
+    stickerEntries,
     imgLines,
     videoLines,
     ytLines,
@@ -178,7 +179,11 @@ export default function ForumPostCard({
           YT_RE={YT_RE}
         />
 
-        <PostBodyContent pText={p.text} displayText={displayText} renderRich={richRenderer} />
+        <PostBodyContent
+          displayText={displayText}
+          renderRich={richRenderer}
+          stickerEntries={stickerEntries}
+        />
         <div className="forumDividerRail forumDividerRail--gold" aria-hidden="true" />
 
         <PostActionBar

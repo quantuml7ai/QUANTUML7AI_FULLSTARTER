@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { extractDmStickersFromText } from '../../dm/utils/mediaParsing'
 
 const IMG_RE = /^(?:\/uploads\/[A-Za-z0-9._\-\/]+?\.(?:webp|png|jpe?g|gif)|https?:\/\/[^\s]+?\.(?:webp|png|jpe?g|gif))(?:[?#].*)?$/i
 const VIDEO_RE = /^(?:blob:[^\s]+|https?:\/\/[^\s]+(?:\/video-\d+\.(?:webm|mp4)|\.mp4)(?:[?#].*)?)$/i
@@ -52,7 +53,15 @@ function buildMediaTextCacheKey(input) {
 }
 
 export default function usePostMediaTextModel({ text, postId = null, isVideoFeed = false }) {
-  const allLines = React.useMemo(() => String(text || '').split(/\r?\n/), [text])
+  const { textWithoutStickerTags, stickerEntries } = React.useMemo(() => {
+    const parsed = extractDmStickersFromText(text)
+    return {
+      textWithoutStickerTags: String(parsed?.text || ''),
+      stickerEntries: Array.isArray(parsed?.stickers) ? parsed.stickers : [],
+    }
+  }, [text])
+
+  const allLines = React.useMemo(() => String(textWithoutStickerTags || '').split(/\r?\n/), [textWithoutStickerTags])
   const trimmed = React.useMemo(() => allLines.map((s) => s.trim()), [allLines])
 
   const imgInline = React.useMemo(() => collectMatches(allLines, IMG_RE), [allLines])
@@ -232,6 +241,7 @@ export default function usePostMediaTextModel({ text, postId = null, isVideoFeed
 
   return {
     cleanedText,
+    stickerEntries,
     imgLines,
     videoLines,
     ytLines: ytLinesStable,

@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 
 export default function useComposerActionHandlers({
   mediaLocked,
+  composerMediaKind,
   videoState,
   saveComposerScroll,
   setComposerActive,
@@ -20,7 +21,7 @@ export default function useComposerActionHandlers({
 }) {
   const handleComposerVideoButtonClick = useCallback((event) => {
     try { event?.preventDefault?.() } catch {}
-    if (mediaLocked || videoState === 'uploading') return
+    if (mediaLocked || composerMediaKind || videoState === 'uploading') return
     try { saveComposerScroll() } catch {}
     try { setComposerActive(true) } catch {}
     try { setOverlayMediaKind('video') } catch {}
@@ -30,6 +31,7 @@ export default function useComposerActionHandlers({
     try { document.activeElement?.blur?.() } catch {}
   }, [
     mediaLocked,
+    composerMediaKind,
     saveComposerScroll,
     setComposerActive,
     setOverlayMediaKind,

@@ -20,6 +20,7 @@ export default function useForumCreatePostAction({
   pendingVideo,
   pendingAudio,
   pendingImgs,
+  pendingSticker,
   beginMediaPipeline,
   pendingVideoRef,
   pendingVideoInfoRef,
@@ -41,6 +42,7 @@ export default function useForumCreatePostAction({
   readAudioDurationSecFn,
   forumAudioMaxSeconds,
   setPendingImgs,
+  setPendingSticker,
   setPendingAudio,
   setPendingVideo,
   textLimit,
@@ -134,6 +136,7 @@ export default function useForumCreatePostAction({
         uid,
         dmTarget,
         text,
+        pendingSticker,
         dmWithUserId,
         pendingImgs,
         audioUrlToSend: '',
@@ -179,6 +182,7 @@ export default function useForumCreatePostAction({
         setComposerActive,
         setText,
         setPendingImgs,
+        setPendingSticker,
         pendingAudio,
         setPendingAudio,
         stopMediaProg,
@@ -234,12 +238,14 @@ export default function useForumCreatePostAction({
     const { videoUrlToSend, audioUrlToSend } = media
 
     // 1) собираем текст
-    const plain = (String(text || '').trim()
-      || ((pendingImgs.length > 0 || audioUrlToSend || videoUrlToSend) ? '\u200B' : '')
-    ).slice(0, textLimit)
+    const plain = String(text || '').trim().slice(0, textLimit)
+    const stickerTagLine = pendingSticker?.src
+      ? `[${String(pendingSticker?.kind || '') === 'mozi' ? 'MOZI' : 'VIP_EMOJI'}:${String(pendingSticker.src)}]`
+      : ''
 
     const body = [
       plain,
+      stickerTagLine,
       ...pendingImgs,
       ...(audioUrlToSend ? [audioUrlToSend] : []),
       ...(videoUrlToSend ? [videoUrlToSend] : []),
@@ -258,7 +264,7 @@ export default function useForumCreatePostAction({
     if (!isAdm && !isVip && hasAnyLink(body)) {
       const sameHost = (typeof location !== 'undefined' ? location.host : '') || ''
       const URL_RE = /https?:\/\/[^\s<>"')]+/gi
-      const ST_PREFIX = ['/vip-emoji/', '/emoji/', '/stickers/', '/assets/emoji/', '/Quest/']
+      const ST_PREFIX = ['/vip-emoji/', '/emoji/', '/stickers/', '/assets/emoji/', '/mozi/', '/Quest/']
       const ST_EXT = /\.(gif|png|webp|jpg|jpeg)$/i
       const AUD_EXT = /\.(mp3|webm|ogg|wav|m4a)$/i
       const VID_EXT = /\.(webm|mp4|mov|m4v|mkv)$/i
@@ -293,7 +299,7 @@ export default function useForumCreatePostAction({
         }
       }
 
-      const justSticker = /^\[(VIP_EMOJI|STICKER):\/[^\]]+\]$/.test(String(body).trim())
+      const justSticker = /^\[(VIP_EMOJI|MOZI|STICKER):\/[^\]]+\]$/.test(String(body).trim())
       const urls = extractUrls(body)
       const forbidden = justSticker ? false : urls.some((u) => !isAllowed(u))
       if (forbidden) {
@@ -364,6 +370,7 @@ export default function useForumCreatePostAction({
     // сброс UI
     setText('')
     setPendingImgs([])
+    setPendingSticker(null)
     try { if (pendingAudio && /^blob:/.test(pendingAudio)) URL.revokeObjectURL(pendingAudio) } catch {}
     setPendingAudio(null)
 

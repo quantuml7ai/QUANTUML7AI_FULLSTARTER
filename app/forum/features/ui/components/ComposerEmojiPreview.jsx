@@ -3,18 +3,16 @@
 import React from 'react'
 import Image from 'next/image'
 
-const EMOJI_TAG_RE = /^\[(VIP_EMOJI|MOZI):\/[^\]]+\]$/
 const ICON_REMOVE = '\u2716'
 
 export default function ComposerEmojiPreview({
-  text,
-  setText,
+  pendingSticker,
+  setPendingSticker,
   t,
 }) {
-  if (!EMOJI_TAG_RE.test(text || '')) return null
-
-  const emojiSrc = String(text || '').replace(/^\[(VIP_EMOJI|MOZI):(.*?)\]$/, '$2')
-  const isMozi = String(text || '').startsWith('[MOZI:')
+  const emojiSrc = String(pendingSticker?.src || '').trim()
+  if (!emojiSrc) return null
+  const isMozi = String(pendingSticker?.kind || '') === 'mozi'
 
   return (
     <div className="vipComposerPreview">
@@ -33,7 +31,7 @@ export default function ComposerEmojiPreview({
         onClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
-          setText('')
+          setPendingSticker?.(null)
         }}
       >
         {ICON_REMOVE}

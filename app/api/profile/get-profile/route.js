@@ -3,17 +3,21 @@ import { NextResponse } from 'next/server'
 import { requireUserId } from '../../forum/_utils.js'
 import { getUserProfile } from '../../forum/_db.js'
 import { resolveCanonicalAccountId } from '../_identity.js'
+
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const fetchCache = 'force-no-store'
 
 export async function GET(req) {
   try {
+    let requesterId = ''
     let userId = ''
-    // 1) пробуем из заголовка x-forum-user-id (как в мутаторе форума)
-    try { userId = requireUserId(req, {}) } catch {}
 
-    // 2) fallback — из query ?uid=...
+    try {
+      requesterId = requireUserId(req, {})
+      userId = requesterId
+    } catch {}
+
     if (!userId) {
       const { searchParams } = new URL(req.url)
       userId = searchParams.get('uid') || ''
@@ -34,9 +38,12 @@ export async function GET(req) {
       )
     }
 
-    // WHY: always read profile by canonical accountId to avoid split identities.
     const profile = await getUserProfile(accountId)
-
+    const requesterAccountId = requesterId
+      ? await resolveCanonicalAccountId(requesterId)
+      : ''
+    const includePrivateIdentity =
+      !!requesterAccountId && String(requesterAccountId).trim() === String(accountId).trim()
 
     return NextResponse.json({
       ok: true,
@@ -44,6 +51,8 @@ export async function GET(req) {
       accountId,
       nickname: profile.nickname || '',
       icon: profile.icon || '',
+      gender: includePrivateIdentity ? (profile.gender || '') : '',
+      birthYear: includePrivateIdentity ? (Number(profile.birthYear || 0) || 0) : 0,
     })
   } catch (e) {
     return NextResponse.json(

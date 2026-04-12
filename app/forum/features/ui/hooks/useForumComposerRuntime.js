@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import useComposerScrollMemory from './useComposerScrollMemory'
 import useComposerUiLifecycle from './useComposerUiLifecycle'
 import useVoiceRecorder from '../../media/hooks/useVoiceRecorder'
@@ -15,6 +15,7 @@ export default function useForumComposerRuntime({
   const [text, setText] = useState('')
   const [replyTo, setReplyTo] = useState(null)
   const [pendingImgs, setPendingImgs] = useState([])
+  const [pendingSticker, setPendingSticker] = useState(null)
 
   const [composerActive, setComposerActive] = useState(false)
   const composerRef = useRef(null)
@@ -100,6 +101,13 @@ export default function useForumComposerRuntime({
 
   const videoCancelRef = useRef(false)
   const videoMirrorRef = useRef(null)
+  const composerMediaKind = useMemo(() => {
+    if ((pendingImgs?.length || 0) > 0) return 'image'
+    if (pendingVideo) return 'video'
+    if (pendingAudio) return 'audio'
+    if (pendingSticker?.src) return 'sticker'
+    return null
+  }, [pendingAudio, pendingImgs, pendingSticker, pendingVideo])
 
   return {
     text,
@@ -108,6 +116,9 @@ export default function useForumComposerRuntime({
     setReplyTo,
     pendingImgs,
     setPendingImgs,
+    pendingSticker,
+    setPendingSticker,
+    composerMediaKind,
     composerActive,
     setComposerActive,
     composerRef,

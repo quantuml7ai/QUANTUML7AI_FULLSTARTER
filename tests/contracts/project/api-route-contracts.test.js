@@ -18,4 +18,21 @@ describe('API route contracts', () => {
     const source = readRepoFile(routeFile)
     expect(source).toMatch(handlerExportRx)
   })
+
+  it('keeps profile save route wired for one-time gender and birth-year persistence', () => {
+    const source = readRepoFile('app/api/profile/save-nick/route.js')
+
+    expect(source).toContain('gender')
+    expect(source).toContain('birthYear')
+    expect(source).toContain('invalid_gender')
+    expect(source).toContain('invalid_birth_year')
+  })
+
+  it('keeps profile get route returning private identity fields only for the same account', () => {
+    const source = readRepoFile('app/api/profile/get-profile/route.js')
+
+    expect(source).toContain('includePrivateIdentity')
+    expect(source).toContain('gender:')
+    expect(source).toContain('birthYear:')
+  })
 })
