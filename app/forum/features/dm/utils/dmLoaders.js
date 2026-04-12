@@ -1,10 +1,73 @@
-function mergeDmDialogs(existing, incoming) {
-  if (!Array.isArray(existing) || !existing.length) return incoming
-  const byUid = new Map(incoming.map((d) => [String(d?.userId || ''), d]))
+export function normalizeDmDialogId(value) {
+  return String(value || '').trim()
+}
+
+export function resolveDmDialogPeerId(dialog, meId = '') {
+  const directId = normalizeDmDialogId(dialog?.userId)
+  const last = dialog?.lastMessage || null
+  const me = normalizeDmDialogId(meId)
+  const fromCanonical = normalizeDmDialogId(last?.fromCanonical)
+  const toCanonical = normalizeDmDialogId(last?.toCanonical)
+  const fromRaw = normalizeDmDialogId(last?.from)
+  const toRaw = normalizeDmDialogId(last?.to)
+
+  if (me) {
+    if (fromCanonical && fromCanonical === me) return toCanonical || toRaw || directId
+    if (toCanonical && toCanonical === me) return fromCanonical || fromRaw || directId
+    if (fromRaw && fromRaw === me) return toCanonical || toRaw || directId
+    if (toRaw && toRaw === me) return fromCanonical || fromRaw || directId
+  }
+
+  return directId || fromCanonical || toCanonical || fromRaw || toRaw || ''
+}
+
+export function dialogMatchesUser(dialog, uid, meId = '') {
+  const target = normalizeDmDialogId(uid)
+  if (!target) return false
+  const last = dialog?.lastMessage || null
+  const candidates = new Set([
+    normalizeDmDialogId(dialog?.userId),
+    resolveDmDialogPeerId(dialog, meId),
+    normalizeDmDialogId(last?.fromCanonical),
+    normalizeDmDialogId(last?.toCanonical),
+    normalizeDmDialogId(last?.from),
+    normalizeDmDialogId(last?.to),
+  ].filter(Boolean))
+  return candidates.has(target)
+}
+
+export function dedupeDmDialogs(dialogs, meId = '') {
+  const list = Array.isArray(dialogs) ? dialogs : []
+  if (!list.length) return []
+  const byUid = new Map()
+  for (const dialog of list) {
+    const uid = resolveDmDialogPeerId(dialog, meId)
+    if (!uid) continue
+    const prev = byUid.get(uid)
+    const prevTs = Number(prev?.lastMessage?.ts || 0)
+    const nextTs = Number(dialog?.lastMessage?.ts || 0)
+    if (!prev || nextTs >= prevTs) {
+      byUid.set(uid, {
+        ...(prev || {}),
+        ...(dialog || {}),
+        userId: uid,
+        lastMessage: dialog?.lastMessage || prev?.lastMessage || null,
+      })
+    }
+  }
+  return Array.from(byUid.values())
+    .sort((a, b) => Number(b?.lastMessage?.ts || 0) - Number(a?.lastMessage?.ts || 0))
+}
+
+function mergeDmDialogs(existing, incoming, meId = '') {
+  const existingList = dedupeDmDialogs(existing, meId)
+  const incomingList = dedupeDmDialogs(incoming, meId)
+  if (!existingList.length) return incomingList
+  const byUid = new Map(incomingList.map((d) => [resolveDmDialogPeerId(d, meId), d]))
   const merged = []
   const used = new Set()
-  for (const d of existing) {
-    const uid = String(d?.userId || '')
+  for (const d of existingList) {
+    const uid = resolveDmDialogPeerId(d, meId)
     if (!uid) {
       merged.push(d)
       continue
@@ -36,14 +99,13 @@ function mergeDmDialogs(existing, incoming) {
       }
     }
   }
-  for (const d of incoming) {
-    const uid = String(d?.userId || '')
+  for (const d of incomingList) {
+    const uid = resolveDmDialogPeerId(d, meId)
     if (!uid || used.has(uid)) continue
-    merged.push(d)
+    merged.push({ ...d, userId: uid })
     used.add(uid)
   }
-  merged.sort((a, b) => Number(b?.lastMessage?.ts || 0) - Number(a?.lastMessage?.ts || 0))
-  return merged
+  return dedupeDmDialogs(merged, meId)
 }
 
 function mergeDmThreadRefresh(existing, itemsAsc, deletedMap) {
@@ -213,11 +275,10 @@ export async function loadDmDialogs(cursor = null, opts = {}, ctx = {}) {
       opts
     )
     if (j?.ok) {
-      const incoming = Array.isArray(j.items) ? j.items : []
+      const incoming = dedupeDmDialogs(Array.isArray(j.items) ? j.items : [], meId)
       setDmDialogs((prev) => {
         const existing = Array.isArray(prev) ? prev : []
-        if (cursor) return [...existing, ...incoming]
-        return mergeDmDialogs(existing, incoming)
+        return mergeDmDialogs(existing, incoming, meId)
       })
       setDmDialogsCursor(j.nextCursor || null)
       setDmDialogsHasMore(!!j.hasMore)

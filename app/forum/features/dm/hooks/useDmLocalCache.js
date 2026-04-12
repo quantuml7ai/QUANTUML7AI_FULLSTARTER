@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
+import { dedupeDmDialogs } from '../utils/dmLoaders'
 
 const DM_LS_DIALOGS_MAX = 150
 const DM_LS_THREAD_MAX = 150
@@ -35,7 +36,7 @@ export default function useDmLocalCache({
       const key = `dm:dialogs:${meId}`
       const raw = localStorage.getItem(key)
       const parsed = raw ? JSON.parse(raw) : null
-      const items = Array.isArray(parsed?.items) ? parsed.items : []
+      const items = dedupeDmDialogs(Array.isArray(parsed?.items) ? parsed.items : [], meId)
       if (!items.length) return
       setDmDialogs((prev) => ((Array.isArray(prev) && prev.length) ? prev : items))
       setDmDialogsCursor((prev) => (prev != null ? prev : (parsed?.cursor || null)))
@@ -48,6 +49,8 @@ export default function useDmLocalCache({
     if (!isBrowserFn() || !meId) return
     const uid = String(dmWithUserId || '').trim()
     if (!uid) {
+      const prevUid = String(dmActiveThreadUidRef.current || '').trim()
+      if (!prevUid) return
       dmActiveThreadUidRef.current = ''
       setDmThreadItems([])
       setDmThreadCursor(null)
@@ -116,7 +119,10 @@ export default function useDmLocalCache({
     dmDialogsPersistTimerRef.current = setTimeout(() => {
       try {
         const key = `dm:dialogs:${meId}`
-        const items = Array.isArray(dmDialogs) ? dmDialogs.slice(0, DM_LS_DIALOGS_MAX) : []
+        const items = dedupeDmDialogs(
+          Array.isArray(dmDialogs) ? dmDialogs.slice(0, DM_LS_DIALOGS_MAX) : [],
+          meId,
+        )
         localStorage.setItem(key, JSON.stringify({
           ts: Date.now(),
           cursor: dmDialogsCursor || null,

@@ -16,6 +16,7 @@ export default function useVoiceRecorder({
   const recTimerRef = useRef(null)
   const stopRecordRef = useRef(() => {})
   const audioBlobUrlRef = useRef(null)
+  const recordStartedAtRef = useRef(0)
 
   const stopRecord = useCallback(() => {
     const rec = mediaRef.current
@@ -50,7 +51,20 @@ export default function useVoiceRecorder({
           const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
           let audioDurationSec = NaN
           try { audioDurationSec = await readAudioDurationSec(blob) } catch {}
+          const recordedDurationSec = Math.max(
+            0,
+            Number(((Date.now() - Number(recordStartedAtRef.current || 0)) / 1000).toFixed(2)) || 0,
+          )
+          if (
+            (!Number.isFinite(audioDurationSec) || audioDurationSec <= 0) &&
+            Number.isFinite(recordedDurationSec) &&
+            recordedDurationSec > 0 &&
+            recordedDurationSec <= maxAudioSeconds
+          ) {
+            audioDurationSec = recordedDurationSec
+          }
           if (!Number.isFinite(audioDurationSec) || audioDurationSec <= 0 || audioDurationSec > maxAudioSeconds) {
+            recordStartedAtRef.current = 0
             try {
               toast?.warn?.(
                 Number.isFinite(audioDurationSec) && audioDurationSec > maxAudioSeconds
@@ -67,11 +81,15 @@ export default function useVoiceRecorder({
           const url = URL.createObjectURL(blob)
           audioBlobUrlRef.current = url
           setPendingAudio(url)
+          recordStartedAtRef.current = 0
           try { restoreComposerScroll() } catch {}
-        } catch {}
+        } catch {
+          recordStartedAtRef.current = 0
+        }
       }
       mr.start()
       mediaRef.current = mr
+      recordStartedAtRef.current = Date.now()
       setRecState('rec')
       setRecElapsed(0)
       const started = Date.now()
@@ -94,6 +112,7 @@ export default function useVoiceRecorder({
       recTimerRef.current = null
       try { mediaRef.current?.stream?.getTracks?.().forEach((tr) => tr.stop()) } catch {}
       mediaRef.current = null
+      recordStartedAtRef.current = 0
       try {
         const prevUrl = String(audioBlobUrlRef.current || '')
         if (prevUrl && /^blob:/i.test(prevUrl)) URL.revokeObjectURL(prevUrl)

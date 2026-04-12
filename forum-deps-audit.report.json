@@ -1,9 +1,9 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-12T20:15:16.434Z",
+  "generatedAt": "2026-04-12T21:29:21.160Z",
   "summary": {
     "scannedFiles": 365,
-    "internalEdges": 487,
+    "internalEdges": 490,
     "cycleCount": 0,
     "crossDomainEdgeCount": 117,
     "forumRootImportCount": 1,
@@ -917,8 +917,10 @@
     {
       "file": "app/forum/features/dm/hooks/useDmDeleteController.js",
       "domain": "forum-ui",
-      "imports": [],
-      "importCount": 0,
+      "imports": [
+        "app/forum/features/dm/utils/dmLoaders.js"
+      ],
+      "importCount": 1,
       "external": [
         "react"
       ],
@@ -947,8 +949,10 @@
     {
       "file": "app/forum/features/dm/hooks/useDmLocalCache.js",
       "domain": "forum-ui",
-      "imports": [],
-      "importCount": 0,
+      "imports": [
+        "app/forum/features/dm/utils/dmLoaders.js"
+      ],
+      "importCount": 1,
       "external": [
         "react"
       ],
@@ -1074,8 +1078,10 @@
     {
       "file": "app/forum/features/dm/services/sendDmComposerMessage.js",
       "domain": "forum-ui",
-      "imports": [],
-      "importCount": 0,
+      "imports": [
+        "app/forum/features/dm/utils/dmLoaders.js"
+      ],
+      "importCount": 1,
       "external": [],
       "externalCount": 0
     },

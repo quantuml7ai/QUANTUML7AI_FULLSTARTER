@@ -8,6 +8,7 @@ export default function DmVoicePlayer({ src }) {
 
   const rafRef = React.useRef(0)
   const draggingRef = React.useRef(false)
+  const durationPollRef = React.useRef(0)
 
   const [playing, setPlaying] = React.useState(false)
   const [dur, setDur] = React.useState(0)
@@ -59,18 +60,49 @@ export default function DmVoicePlayer({ src }) {
     rafRef.current = 0
   }, [])
 
+  const stopDurationPoll = React.useCallback(() => {
+    if (durationPollRef.current) clearInterval(durationPollRef.current)
+    durationPollRef.current = 0
+  }, [])
+
+  const readDuration = React.useCallback((audio) => {
+    const a = audio || audioRef.current
+    if (!a) return 0
+    let next = Number(a.duration || 0)
+    if ((!Number.isFinite(next) || next <= 0 || next === Number.POSITIVE_INFINITY) && a.seekable?.length > 0) {
+      try {
+        const tail = Number(a.seekable.end(a.seekable.length - 1) || 0)
+        if (Number.isFinite(tail) && tail > 0) next = tail
+      } catch {}
+    }
+    return Number.isFinite(next) && next > 0 && next < Number.POSITIVE_INFINITY ? next : 0
+  }, [])
+
+  const syncAudioMetrics = React.useCallback((audio) => {
+    const a = audio || audioRef.current
+    if (!a) return
+    const nextDur = readDuration(a)
+    if (nextDur > 0) {
+      setDur((prev) => (Math.abs(Number(prev || 0) - nextDur) > 0.05 ? nextDur : prev))
+      stopDurationPoll()
+    }
+    if (!draggingRef.current) {
+      const t = Number(a.currentTime || 0) || 0
+      setPos(t)
+    }
+  }, [readDuration, stopDurationPoll])
+
   const startRaf = React.useCallback(() => {
     stopRaf()
     const tick = () => {
       const a = audioRef.current
       if (a && !draggingRef.current) {
-        const t = Number(a.currentTime || 0) || 0
-        setPos(t)
+        syncAudioMetrics(a)
       }
       rafRef.current = requestAnimationFrame(tick)
     }
     rafRef.current = requestAnimationFrame(tick)
-  }, [stopRaf])
+  }, [stopRaf, syncAudioMetrics])
 
   React.useEffect(() => {
     const a = audioRef.current
@@ -81,6 +113,7 @@ export default function DmVoicePlayer({ src }) {
     setPos(0)
     draggingRef.current = false
     stopRaf()
+    stopDurationPoll()
 
     try {
       a.pause?.()
@@ -92,9 +125,10 @@ export default function DmVoicePlayer({ src }) {
       a.playbackRate = rateRef.current
     } catch {}
 
-    const onLoaded = () => setDur(Number(a.duration || 0) || 0)
+    const onLoaded = () => syncAudioMetrics(a)
     const onPlay = () => {
       setPlaying(true)
+      syncAudioMetrics(a)
       startRaf()
     }
     const onPause = () => {
@@ -106,20 +140,34 @@ export default function DmVoicePlayer({ src }) {
       stopRaf()
       setPos(0)
     }
+    const onTimeUpdate = () => syncAudioMetrics(a)
 
     a.addEventListener('loadedmetadata', onLoaded)
+    a.addEventListener('loadeddata', onLoaded)
+    a.addEventListener('canplay', onLoaded)
+    a.addEventListener('durationchange', onLoaded)
+    a.addEventListener('progress', onLoaded)
+    a.addEventListener('timeupdate', onTimeUpdate)
     a.addEventListener('play', onPlay)
     a.addEventListener('pause', onPause)
     a.addEventListener('ended', onEnded)
+    durationPollRef.current = window.setInterval(() => syncAudioMetrics(a), 350)
+    syncAudioMetrics(a)
 
     return () => {
       a.removeEventListener('loadedmetadata', onLoaded)
+      a.removeEventListener('loadeddata', onLoaded)
+      a.removeEventListener('canplay', onLoaded)
+      a.removeEventListener('durationchange', onLoaded)
+      a.removeEventListener('progress', onLoaded)
+      a.removeEventListener('timeupdate', onTimeUpdate)
       a.removeEventListener('play', onPlay)
       a.removeEventListener('pause', onPause)
       a.removeEventListener('ended', onEnded)
       stopRaf()
+      stopDurationPoll()
     }
-  }, [src, startRaf, stopRaf])
+  }, [src, startRaf, stopDurationPoll, stopRaf, syncAudioMetrics])
 
   React.useEffect(() => {
     const a = audioRef.current
@@ -279,7 +327,7 @@ export default function DmVoicePlayer({ src }) {
         </div>
       </div>
 
-      <audio ref={audioRef} src={src} preload="metadata" />
+      <audio ref={audioRef} src={src} preload="auto" />
     </div>
   )
 }

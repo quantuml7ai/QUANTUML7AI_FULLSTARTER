@@ -1,3 +1,5 @@
+import { dedupeDmDialogs, dialogMatchesUser } from '../utils/dmLoaders'
+
 export async function sendDmComposerMessage({
   uid,
   dmTarget,
@@ -93,18 +95,19 @@ export async function sendDmComposerMessage({
     ts: Date.now(),
     status: 'sending',
   }
+  const matchesTargetDialog = (dialog) => dialogMatchesUser(dialog, dmTarget, uid)
   setDmThreadItems((prev) => [...(prev || []), optimistic])
   setDmDialogs((prev) => {
-    const list = Array.isArray(prev) ? prev.slice() : []
-    const idx = list.findIndex((x) => String(x?.userId || '') === String(dmTarget))
+    const list = dedupeDmDialogs(Array.isArray(prev) ? prev.slice() : [], uid)
+    const idx = list.findIndex(matchesTargetDialog)
     const prevLastMessage = idx >= 0 ? (list[idx]?.lastMessage || null) : null
     const lastMessage = { ...optimistic, __optimisticPrevLastMessage: prevLastMessage }
     if (idx >= 0) {
-      const next = { ...list[idx], lastMessage }
+      const next = { ...list[idx], userId: dmTarget, lastMessage }
       list.splice(idx, 1)
-      return [next, ...list]
+      return dedupeDmDialogs([next, ...list], uid)
     }
-    return [{ userId: dmTarget, lastMessage }, ...list]
+    return dedupeDmDialogs([{ userId: dmTarget, lastMessage }, ...list], uid)
   })
   dmDialogsCacheRef.current.clear()
   dmThreadCacheRef.current.clear()
@@ -112,10 +115,10 @@ export async function sendDmComposerMessage({
   const removeOptimisticMessage = () => {
     setDmThreadItems((prev) => (prev || []).filter((m) => String(m?.id || '') !== String(tmpId)))
     setDmDialogs((prev) => {
-      const list = Array.isArray(prev) ? prev : []
+      const list = dedupeDmDialogs(Array.isArray(prev) ? prev : [], uid)
       const out = []
       for (const d of list) {
-        if (String(d?.userId || '') !== String(dmTarget)) {
+        if (!matchesTargetDialog(d)) {
           out.push(d)
           continue
         }
@@ -125,9 +128,9 @@ export async function sendDmComposerMessage({
           continue
         }
         const prevLast = last?.__optimisticPrevLastMessage || null
-        if (prevLast) out.push({ ...d, lastMessage: prevLast })
+        if (prevLast) out.push({ ...d, userId: dmTarget, lastMessage: prevLast })
       }
-      return out
+      return dedupeDmDialogs(out, uid)
     })
   }
 
@@ -138,12 +141,17 @@ export async function sendDmComposerMessage({
         ? { ...m, attachments: list }
         : m
     ))
-    setDmDialogs((prev) => (prev || []).map((d) => {
-      if (String(d?.userId || '') !== String(dmTarget)) return d
-      const last = d?.lastMessage || null
-      if (!last || String(last?.id || '') !== String(tmpId)) return d
-      return { ...d, lastMessage: { ...last, attachments: list } }
-    }))
+    setDmDialogs((prev) =>
+      dedupeDmDialogs(
+        (prev || []).map((d) => {
+          if (!matchesTargetDialog(d)) return d
+          const last = d?.lastMessage || null
+          if (!last || String(last?.id || '') !== String(tmpId)) return d
+          return { ...d, userId: dmTarget, lastMessage: { ...last, attachments: list } }
+        }),
+        uid,
+      )
+    )
   }
 
   let dmSendOk = false
@@ -218,13 +226,22 @@ export async function sendDmComposerMessage({
           ? { ...m, id: realId, ts: realTs, status: 'sent' }
           : m
       ))
-      setDmDialogs((prev) => (prev || []).map((d) => {
-        if (String(d?.userId || '') !== String(dmTarget)) return d
-        const last = d?.lastMessage || null
-        if (!last || String(last.id) !== String(tmpId)) return d
-        const { __optimisticPrevLastMessage, ...safeLast } = (last || {})
-        return { ...d, lastMessage: { ...safeLast, id: realId, ts: realTs, status: 'sent' } }
-      }))
+      setDmDialogs((prev) =>
+        dedupeDmDialogs(
+          (prev || []).map((d) => {
+            if (!matchesTargetDialog(d)) return d
+            const last = d?.lastMessage || null
+            if (!last || String(last.id) !== String(tmpId)) return d
+            const { __optimisticPrevLastMessage, ...safeLast } = (last || {})
+            return {
+              ...d,
+              userId: dmTarget,
+              lastMessage: { ...safeLast, id: realId, ts: realTs, status: 'sent' },
+            }
+          }),
+          uid,
+        )
+      )
     }
   } catch {
     removeOptimisticMessage()

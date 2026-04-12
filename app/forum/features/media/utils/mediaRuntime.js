@@ -134,7 +134,24 @@ export function readAudioDurationSec(audioSource, timeoutMs = 8000) {
     const audio = document.createElement('audio')
     let done = false
     const isStringSrc = typeof audioSource === 'string'
+    const isBlobLike = !isStringSrc && typeof audioSource?.size === 'number'
     const src = isStringSrc ? String(audioSource) : URL.createObjectURL(audioSource)
+    const effectiveTimeoutMs = (() => {
+      const n = Number(timeoutMs || 0)
+      if (Number.isFinite(n) && n > 0) return isBlobLike ? Math.max(n, 14000) : n
+      return isBlobLike ? 14000 : 8000
+    })()
+
+    const readDuration = () => {
+      let d = Number(audio.duration || 0)
+      if ((!Number.isFinite(d) || d <= 0 || d === Number.POSITIVE_INFINITY) && audio.seekable?.length > 0) {
+        try {
+          const tail = Number(audio.seekable.end(audio.seekable.length - 1) || 0)
+          if (Number.isFinite(tail) && tail > 0) d = tail
+        } catch {}
+      }
+      return d
+    }
 
     const finish = (err, durationSec) => {
       if (done) return
@@ -144,6 +161,18 @@ export function readAudioDurationSec(audioSource, timeoutMs = 8000) {
       } catch {}
       try {
         audio.removeEventListener('loadedmetadata', onLoaded)
+      } catch {}
+      try {
+        audio.removeEventListener('loadeddata', onLoaded)
+      } catch {}
+      try {
+        audio.removeEventListener('canplay', onLoaded)
+      } catch {}
+      try {
+        audio.removeEventListener('durationchange', onDurationChange)
+      } catch {}
+      try {
+        audio.removeEventListener('timeupdate', onDurationChange)
       } catch {}
       try {
         audio.removeEventListener('error', onError)
@@ -167,15 +196,32 @@ export function readAudioDurationSec(audioSource, timeoutMs = 8000) {
     }
 
     const onLoaded = () => {
-      const d = Number(audio.duration || 0)
+      const d = readDuration()
+      if (Number.isFinite(d) && d > 0 && d < Number.POSITIVE_INFINITY) {
+        finish(null, d)
+        return
+      }
+      try {
+        audio.currentTime = Math.max(0, Number(audio.currentTime || 0))
+      } catch {}
+    }
+    const onDurationChange = () => {
+      const d = readDuration()
       if (Number.isFinite(d) && d > 0 && d < Number.POSITIVE_INFINITY) finish(null, d)
-      else finish(new Error('audio_duration_unavailable'))
     }
     const onError = () => finish(new Error('audio_metadata_error'))
 
-    const timer = setTimeout(() => finish(new Error('audio_metadata_timeout')), timeoutMs)
-    audio.preload = 'metadata'
+    const timer = setTimeout(() => {
+      const d = readDuration()
+      if (Number.isFinite(d) && d > 0 && d < Number.POSITIVE_INFINITY) finish(null, d)
+      else finish(new Error('audio_metadata_timeout'))
+    }, effectiveTimeoutMs)
+    audio.preload = 'auto'
     audio.addEventListener('loadedmetadata', onLoaded, { once: true })
+    audio.addEventListener('loadeddata', onLoaded, { once: true })
+    audio.addEventListener('canplay', onLoaded, { once: true })
+    audio.addEventListener('durationchange', onDurationChange)
+    audio.addEventListener('timeupdate', onDurationChange)
     audio.addEventListener('error', onError, { once: true })
     audio.src = src
     try {

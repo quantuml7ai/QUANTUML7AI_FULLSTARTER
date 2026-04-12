@@ -24,6 +24,19 @@ export default function useDmStorageMaps({ meId, resolveProfileAccountIdFn }) {
   const [dmDeletedMap, setDmDeletedMap] = useState({})
   const [dmDeletedMsgMap, setDmDeletedMsgMap] = useState({})
 
+  const normalizeDeletedDialogKeys = useCallback((raw) => {
+    const next = normalizeDmDeletedMap(raw)
+    const out = {}
+    for (const [key, value] of Object.entries(next)) {
+      const rawId = String(key || '').trim()
+      if (!rawId) continue
+      const canonicalId = String(resolveProfileAccountIdFn?.(rawId) || rawId || '').trim()
+      if (!canonicalId) continue
+      out[canonicalId] = Math.max(Number(out[canonicalId] || 0), Number(value || 0))
+    }
+    return out
+  }, [resolveProfileAccountIdFn])
+
   useEffect(() => {
     if (!seenDmKey) {
       setDmSeenMap({})
@@ -74,7 +87,7 @@ export default function useDmStorageMaps({ meId, resolveProfileAccountIdFn }) {
     }
     try {
       const raw = JSON.parse(localStorage.getItem(dmDeletedKey) || '{}') || {}
-      const next = normalizeDmDeletedMap(raw)
+      const next = normalizeDeletedDialogKeys(raw)
       setDmDeletedMap(next)
       try {
         localStorage.setItem(dmDeletedKey, JSON.stringify(next))
@@ -82,7 +95,7 @@ export default function useDmStorageMaps({ meId, resolveProfileAccountIdFn }) {
     } catch {
       setDmDeletedMap({})
     }
-  }, [dmDeletedKey])
+  }, [dmDeletedKey, normalizeDeletedDialogKeys])
 
   useEffect(() => {
     if (!dmDeletedMsgKey) {

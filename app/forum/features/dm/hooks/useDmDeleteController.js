@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
+import { dedupeDmDialogs, dialogMatchesUser } from '../utils/dmLoaders'
 
 export default function useDmDeleteController({
   meId,
@@ -50,6 +51,15 @@ export default function useDmDeleteController({
     persistMap(dmDeletedMsgKey, value)
   }, [dmDeletedMsgKey, persistMap])
 
+  const clearDmLocalCaches = useCallback((uid = '') => {
+    const id = String(uid || '').trim()
+    try {
+      if (!meId || typeof localStorage === 'undefined') return
+      localStorage.removeItem(`dm:dialogs:${meId}`)
+      if (id) localStorage.removeItem(`dm:thread:thr:${meId}:${id}`)
+    } catch {}
+  }, [meId])
+
   const toggleDmBlock = useCallback(async (uid, nextBlock) => {
     const id = String(uid || '').trim()
     if (!id || !meId) return
@@ -80,9 +90,14 @@ export default function useDmDeleteController({
   const removeDmDialogFromState = useCallback((uid) => {
     const id = String(uid || '').trim()
     if (!id) return
-    setDmDialogs((prev) => (prev || []).filter((dialog) => String(dialog?.userId || '') !== id))
+    setDmDialogs((prev) =>
+      dedupeDmDialogs(
+        (prev || []).filter((dialog) => !dialogMatchesUser(dialog, id, meId)),
+        meId,
+      )
+    )
     if (String(dmWithUserId || '') === id) setDmWithUserId('')
-  }, [dmWithUserId, setDmDialogs, setDmWithUserId])
+  }, [dmWithUserId, meId, setDmDialogs, setDmWithUserId])
 
   const deleteDmDialogLocal = useCallback((uid, ts = Date.now()) => {
     const id = String(uid || '').trim()
@@ -92,7 +107,8 @@ export default function useDmDeleteController({
     persistDeletedDialogsMap(next)
     setDmDeletedMap(next)
     removeDmDialogFromState(id)
-  }, [dmDeletedMap, persistDeletedDialogsMap, removeDmDialogFromState, setDmDeletedMap])
+    clearDmLocalCaches(id)
+  }, [clearDmLocalCaches, dmDeletedMap, persistDeletedDialogsMap, removeDmDialogFromState, setDmDeletedMap])
 
   const deleteDmMessageLocal = useCallback((msgId, uid = '') => {
     const id = String(msgId || '').trim()
@@ -108,15 +124,23 @@ export default function useDmDeleteController({
         .filter((msg) => !next[String(msg?.id || '')])
         .slice()
         .sort((a, b) => Number(b?.ts || 0) - Number(a?.ts || 0))[0] || null
-      setDmDialogs((prev) => (prev || []).map((dialog) => {
-        if (String(dialog?.userId || '') !== peerId) return dialog
-        const last = dialog?.lastMessage || null
-        if (!last || String(last?.id || '') !== id) return dialog
-        return { ...dialog, lastMessage: replacement ? { ...replacement } : null }
-      }))
+      setDmDialogs((prev) =>
+        dedupeDmDialogs(
+          (prev || [])
+            .flatMap((dialog) => {
+              if (!dialogMatchesUser(dialog, peerId, meId)) return [dialog]
+              const last = dialog?.lastMessage || null
+              if (!last || String(last?.id || '') !== id) return [dialog]
+              if (!replacement) return []
+              return [{ ...dialog, userId: peerId, lastMessage: { ...replacement } }]
+            }),
+          meId,
+        )
+      )
     }
     setDmThreadItems((prev) => (prev || []).filter((msg) => String(msg?.id || '') !== id))
-  }, [dmDeletedMsgMap, dmThreadItems, dmWithUserId, persistDeletedMessagesMap, setDmDeletedMsgMap, setDmDialogs, setDmThreadItems])
+    clearDmLocalCaches(peerId)
+  }, [clearDmLocalCaches, dmDeletedMsgMap, dmThreadItems, dmWithUserId, meId, persistDeletedMessagesMap, setDmDeletedMsgMap, setDmDialogs, setDmThreadItems])
 
   const deleteDmDialogServer = useCallback(async (uid) => {
     const id = String(uid || '').trim()

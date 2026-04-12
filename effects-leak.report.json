@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-12T20:15:15.015Z",
+  "generatedAt": "2026-04-12T21:29:19.648Z",
   "all": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumRoot.jsx",
@@ -18,6 +18,26 @@
           "rect": 0,
           "flags": [
             "⚠ requestAnimationFrame(2) > cancelAnimationFrame(0)"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmVoicePlayer.jsx",
+      "issues": [
+        {
+          "startLine": 107,
+          "endLine": 170,
+          "block": "  React.useEffect(() => {\n    const a = audioRef.current\n    if (!a) return\n\n    setPlaying(false)\n    setDur(0)\n    setPos(0)\n    draggingRef.current = false\n    stopRaf()\n    stopDurationPoll()\n\n    try {\n      a.pause?.()\n    } catch {}\n    try {\n      a.currentTime = 0\n    } catch {}\n    try {\n      a.playbackRate = rateRef.current\n    } catch {}\n\n    const onLoaded = () => syncAudioMetrics(a)\n    const onPlay = () => {\n      setPlaying(true)\n      syncAudioMetrics(a)\n      startRaf()\n    }\n    const onPause = () => {\n      setPlaying(false)\n      stopRaf()\n    }\n    const onEnded = () => {\n      setPlaying(false)\n      stopRaf()\n      setPos(0)\n    }\n    const onTimeUpdate = () => syncAudioMetrics(a)\n\n    a.addEventListener('loadedmetadata', onLoaded)\n    a.addEventListener('loadeddata', onLoaded)\n    a.addEventListener('canplay', onLoaded)\n    a.addEventListener('durationchange', onLoaded)\n    a.addEventListener('progress', onLoaded)\n    a.addEventListener('timeupdate', onTimeUpdate)\n    a.addEventListener('play', onPlay)\n    a.addEventListener('pause', onPause)\n    a.addEventListener('ended', onEnded)\n    durationPollRef.current = window.setInterval(() => syncAudioMetrics(a), 350)\n    syncAudioMetrics(a)\n\n    return () => {\n      a.removeEventListener('loadedmetadata', onLoaded)\n      a.removeEventListener('loadeddata', onLoaded)\n      a.removeEventListener('canplay', onLoaded)\n      a.removeEventListener('durationchange', onLoaded)\n      a.removeEventListener('progress', onLoaded)\n      a.removeEventListener('timeupdate', onTimeUpdate)\n      a.removeEventListener('play', onPlay)\n      a.removeEventListener('pause', onPause)\n      a.removeEventListener('ended', onEnded)\n      stopRaf()\n      stopDurationPoll()\n    }\n  }, [src, startRaf, stopDurationPoll, stopRaf, syncAudioMetrics])",
+          "add": 9,
+          "rem": 9,
+          "si": 1,
+          "ci": 0,
+          "raf": 0,
+          "caf": 0,
+          "rect": 0,
+          "flags": [
+            "⚠ setInterval(1) > clearInterval(0)"
           ]
         }
       ]
