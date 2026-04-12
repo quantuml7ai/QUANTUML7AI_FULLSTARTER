@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-12T19:07:58.970Z",
+  "generatedAt": "2026-04-12T19:57:59.609Z",
   "summary": {
     "scannedFiles": 365,
     "internalEdges": 487,
@@ -2342,9 +2342,10 @@
       "importCount": 6,
       "external": [
         "react",
+        "react-dom",
         "next/image"
       ],
-      "externalCount": 2
+      "externalCount": 3
     },
     {
       "file": "app/forum/features/profile/components/UserInfoPopover.jsx",

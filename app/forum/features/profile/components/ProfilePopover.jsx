@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import { useEvent } from '../../../shared/hooks/useEvent'
 import { cls } from '../../../shared/utils/classnames'
@@ -88,9 +89,15 @@ export default function ProfilePopover({
 
   // ✅ защита от setState после unmount (save может продолжаться после onClose)
   const mountedRef = useRef(false);
+  const lastFocusRef = useRef(null);
+  const [portalReady, setPortalReady] = useState(false);
   useEffect(() => {
     mountedRef.current = true;
-    return () => { mountedRef.current = false; };
+    setPortalReady(true);
+    return () => {
+      mountedRef.current = false;
+      setPortalReady(false);
+    };
   }, []);
   const dragRef = useRef({ on: false, moved: false, canDrag: false, x: 0, y: 0, sx: 0, sy: 0, sz: 1 });
  
@@ -269,6 +276,34 @@ export default function ProfilePopover({
     try { bmpRef.current?.close?.(); } catch {}
     bmpRef.current = null;
   }, [open, revokeObjectUrlIfSafeEvent]);
+
+  useEffect(() => {
+    if (!open || typeof document === 'undefined') return;
+    lastFocusRef.current = document.activeElement;
+    return undefined;
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || typeof document === 'undefined') return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        onClose?.();
+      }
+    };
+    document.addEventListener('keydown', onKey, true);
+    return () => document.removeEventListener('keydown', onKey, true);
+  }, [open, onClose]);
+
+  useEffect(() => {
+    if (open) return;
+    const prev = lastFocusRef.current || anchorRef?.current || null;
+    lastFocusRef.current = null;
+    if (prev && typeof prev.focus === 'function') {
+      try { prev.focus(); } catch {}
+    }
+  }, [open, anchorRef]);
 
   // resize: держим превью-канвас = размеру квадрата (адаптив)
   useEffect(() => {
@@ -590,7 +625,7 @@ useEffect(() => {
 }, [open, nick, uid]);
 
 
-if (!open || !anchorRef?.current || !uid) return null;
+if (!open || !uid || !portalReady || typeof document === 'undefined') return null;
 
 // ===== позиционирование попапа (LTR/RTL) =====
 const isRtl =
@@ -598,17 +633,17 @@ const isRtl =
   (document.documentElement?.dir === 'rtl' ||
     getComputedStyle(document.documentElement).direction === 'rtl');
 
-const el = anchorRef.current;
+const el = anchorRef?.current || null;
 
 // ищем ближайшего “контейнерного” родителя, относительно которого будет absolute-позиционирование
 const parent =
-  el.offsetParent ||
-  el.parentElement ||
-  el.closest('section') ||
+  el?.offsetParent ||
+  el?.parentElement ||
+  el?.closest?.('section') ||
   document.body;
 
 const parentRect = parent?.getBoundingClientRect?.() || { top: 0, left: 0, right: 0 };
-const rect = el.getBoundingClientRect();
+const rect = el?.getBoundingClientRect?.() || parentRect;
 
 // top/left/right — теперь ВНУТРИ parent (а не в координатах окна)
 const top = Math.round((rect.bottom - parentRect.top) + 8);
@@ -618,6 +653,14 @@ const left = isRtl ? undefined : Math.round(rect.left - parentRect.left);
 
 // RTL — прижимаем по правому краю parent
 const right = isRtl ? Math.round(parentRect.right - rect.right) : undefined;
+void isRtl;
+void el;
+void parent;
+void parentRect;
+void rect;
+void top;
+void left;
+void right;
 const genderOptions = [
   { value: 'male', label: t('forum_profile_gender_male') },
   { value: 'female', label: t('forum_profile_gender_female') },
@@ -843,12 +886,23 @@ if (mountedRef.current) setBusy(false);
   }
 };
 
-
-  return (
-
-    <div className="profilePop" 
-    style={{ top, left, right }}
-    translate="no"
+  return createPortal(
+    <div
+      className="profileOverlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('forum_account_settings')}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose?.();
+      }}
+    >
+    <div
+      className="profilePop"
+      translate="no"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
     >
   
       <div className="text-lg font-bold mb-2">{t('forum_account_settings')}</div>
@@ -1114,7 +1168,8 @@ if (mountedRef.current) setBusy(false);
         </div>
       </div>
     </div>
-    
+    </div>,
+    document.body,
   )
 }
 

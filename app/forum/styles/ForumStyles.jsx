@@ -2085,11 +2085,47 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
       border-color:rgba(255,255,255,.12);
       box-shadow:none;
     }
+    .profileOverlay{
+      position:fixed;
+      inset:0;
+      z-index:2147482500;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      background:rgba(0,0,0,.45);
+      backdrop-filter: blur(6px);
+    }
     .profilePop{
-
-      position:absolute; width: min(75vw, 500px);
-      border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98);
-      border-radius:12px; padding:10px; z-index:3200; box-shadow:0 10px 30px rgba(0,0,0,.45)
+      position:relative;
+      width:min(500px, 92vw);
+      max-height:min(82vh, 760px);
+      overflow:auto;
+      -webkit-overflow-scrolling:touch;
+      overscroll-behavior:contain;
+      border:1px solid rgba(255,255,255,.14);
+      background:
+        radial-gradient(120% 140% at 12% 0%, rgba(120,200,255,.14), rgba(10,14,20,.96) 54%),
+        linear-gradient(140deg, rgba(10,14,20,.97), rgba(12,20,32,.98));
+      border-radius:16px;
+      padding:12px;
+      z-index:3200;
+      box-shadow:
+        0 18px 54px rgba(0,0,0,.58),
+        0 0 34px rgba(80,167,255,.16),
+        inset 0 0 0 1px rgba(255,255,255,.04);
+      backdrop-filter: blur(16px) saturate(135%);
+    }
+    @media (max-width: 640px){
+      .profileOverlay{
+        align-items:center;
+        padding:12px;
+      }
+      .profilePop{
+        width:min(500px, 96vw);
+        max-height:min(84vh, 760px);
+        padding:10px;
+      }
     }
     .userInfoPopover{
       position:fixed;
