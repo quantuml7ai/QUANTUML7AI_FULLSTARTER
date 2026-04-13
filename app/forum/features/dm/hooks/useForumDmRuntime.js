@@ -275,6 +275,7 @@ export default function useForumDmRuntime({
     isBrowserFn,
     meId,
     dmWithUserId,
+    dmDeletedMap,
     dmDialogs,
     dmDialogsCursor,
     dmDialogsHasMore,

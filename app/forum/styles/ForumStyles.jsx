@@ -198,7 +198,7 @@ export const FORUM_STYLES = `
     }
     .mediaBox[data-kind="video"]{ --mb-h: var(--mb-video-h); height: var(--mb-video-h); max-height: var(--mb-video-h); background:#000; }
     .mediaBox[data-kind="image"]{ --mb-h: var(--mb-image-h); }
-    .mediaBox[data-kind="iframe"]{
+.mediaBox[data-kind="iframe"]{
       --mb-h: var(--mb-iframe-h);
       min-height: var(--mb-iframe-h);
       height: var(--mb-iframe-h);
@@ -206,6 +206,8 @@ export const FORUM_STYLES = `
       background:#000;
       position:relative;
       overflow:hidden;
+      touch-action: pan-y pinch-zoom;
+      overscroll-behavior: contain;
     }
     .mediaBox[data-kind="audio"]{ --mb-h: var(--mb-audio-h); background:#000; }
     /* QCast: РѕС‚РґРµР»СЊРЅР°СЏ РјР°РєСЃРёРјР°Р»СЊРЅР°СЏ РІС‹СЃРѕС‚Р° */
@@ -558,6 +560,7 @@ export const FORUM_STYLES = `
       aspect-ratio:16/9;
       display:block;
       background:#000;
+      touch-action: pan-y pinch-zoom;
     }
 .iframeTouchShield{
   position:absolute;
@@ -595,11 +598,8 @@ export const FORUM_STYLES = `
   }
 }
 @media (pointer:coarse){
-  .iframeTouchShield{
-    pointer-events:auto;
-  }
   .mediaBox[data-kind="iframe"] > iframe{
-    pointer-events:none;
+    pointer-events:auto;
   }
 }
 /* YouTube iframe: РјРёРЅРёРјР°Р»СЊРЅР°СЏ РІС‹СЃРѕС‚Р° РѕС‚РґРµР»СЊРЅРѕ (РїРµСЂРµРјРµРЅРЅР°СЏ РїРѕРґ РјРѕР±/РґРµСЃРєС‚РѕРї) */

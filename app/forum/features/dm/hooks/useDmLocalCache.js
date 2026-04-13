@@ -8,6 +8,7 @@ export default function useDmLocalCache({
   isBrowserFn,
   meId,
   dmWithUserId,
+  dmDeletedMap,
   dmDialogs,
   dmDialogsCursor,
   dmDialogsHasMore,
@@ -97,6 +98,20 @@ export default function useDmLocalCache({
     setDmThreadSeenTs,
     setDmThreadLoading,
   ])
+
+  useEffect(() => {
+    if (!isBrowserFn() || !meId) return
+    const deletedIds = Object.keys(dmDeletedMap || {})
+    if (!deletedIds.length) return
+    try { dmThreadMemRef.current = new Map() } catch {}
+    try {
+      const prefix = `dm:thread:thr:${meId}:`
+      for (let i = localStorage.length - 1; i >= 0; i -= 1) {
+        const key = String(localStorage.key(i) || '')
+        if (key.startsWith(prefix)) localStorage.removeItem(key)
+      }
+    } catch {}
+  }, [isBrowserFn, meId, dmDeletedMap])
 
   useEffect(() => {
     if (!isBrowserFn() || !meId) return
