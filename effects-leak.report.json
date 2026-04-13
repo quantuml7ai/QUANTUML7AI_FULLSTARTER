@@ -1,13 +1,13 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-13T16:47:29.512Z",
+  "generatedAt": "2026-04-13T17:53:00.696Z",
   "all": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumRoot.jsx",
       "issues": [
         {
-          "startLine": 773,
-          "endLine": 813,
+          "startLine": 809,
+          "endLine": 849,
           "block": "useEffect(() => {\n  if (!sortRefreshAlignPendingRef.current) return undefined\n\n  sortRefreshAlignPendingRef.current = false\n  clearSortRefreshAlignHandles()\n\n  const startUserScrollTs = (() => {\n    try { return Number(window.__forumUserScrollTs || 0) } catch { return 0 }\n  })()\n\n  let cancelled = false\n  const scheduleAlign = (attempt = 0) => {\n    if (cancelled) return\n    const currentUserScrollTs = (() => {\n      try { return Number(window.__forumUserScrollTs || 0) } catch { return 0 }\n    })()\n    if (attempt > 0 && currentUserScrollTs > startUserScrollTs) return\n    const aligned = !!runSortRefreshAlignment()\n    if (aligned) return\n    if (attempt >= 12) return\n    const delay = attempt <= 1 ? 72 : (attempt <= 6 ? 130 : 200)\n    const timerId = setTimeout(() => scheduleAlign(attempt + 1), delay)\n    sortRefreshAlignTimersRef.current.push(timerId)\n  }\n\n  try {\n    const rafA = requestAnimationFrame(() => {\n      const rafB = requestAnimationFrame(() => scheduleAlign(0))\n      sortRefreshAlignRafsRef.current.push(rafB)\n    })\n    sortRefreshAlignRafsRef.current.push(rafA)\n  } catch {\n    const timerId = setTimeout(() => scheduleAlign(0), 0)\n    sortRefreshAlignTimersRef.current.push(timerId)\n  }\n\n  return () => {\n    cancelled = true\n    clearSortRefreshAlignHandles()\n  }\n}, [clearSortRefreshAlignHandles, contentRefreshToken, runSortRefreshAlignment])",
           "add": 0,
           "rem": 0,

@@ -6969,6 +6969,9 @@ forum_qcoin_x2_hint: 'VIP+: accrual ×2',
   dm_send_failed: 'Failed to send',
   dm_delivered: 'Delivered',
   dm_seen: 'Seen',
+  forum_notifications_title: 'Quantum Messenger',
+  forum_notifications_new_messages: 'new messages',
+  forum_notifications_new_replies: 'new replies',
 
 }
 
@@ -7181,6 +7184,9 @@ dm_sent: 'Отправлено',
 dm_send_failed: 'Не удалось отправить',
 dm_delivered: 'Доставлено',
 dm_seen: 'Прочитано',
+forum_notifications_title: 'Quantum Messenger',
+forum_notifications_new_messages: 'новых сообщений',
+forum_notifications_new_replies: 'новых ответов',
 
 }
 
@@ -7388,6 +7394,9 @@ dm_sent: 'Надіслано',
 dm_send_failed: 'Не вдалося надіслати',
 dm_delivered: 'Доставлено',
 dm_seen: 'Прочитано',
+forum_notifications_title: 'Quantum Messenger',
+forum_notifications_new_messages: 'нових повідомлень',
+forum_notifications_new_replies: 'нових відповідей',
 
 }
 
@@ -7597,6 +7606,9 @@ dm_sent: 'Enviado',
 dm_send_failed: 'No se pudo enviar',
 dm_delivered: 'Entregado',
 dm_seen: 'Visto',
+forum_notifications_title: 'Quantum Messenger',
+forum_notifications_new_messages: 'mensajes nuevos',
+forum_notifications_new_replies: 'respuestas nuevas',
 
 }
 
@@ -7805,6 +7817,9 @@ dm_sent: '已发送',
 dm_send_failed: '发送失败',
 dm_delivered: '已送达',
 dm_seen: '已读',
+forum_notifications_title: 'Quantum Messenger',
+forum_notifications_new_messages: '条新消息',
+forum_notifications_new_replies: '条新回复',
 
 
   // Inbox
@@ -8035,6 +8050,9 @@ dm_sent: 'تم الإرسال',
 dm_send_failed: 'تعذر الإرسال',
 dm_delivered: 'تم التسليم',
 dm_seen: 'تمت القراءة',
+forum_notifications_title: 'Quantum Messenger',
+forum_notifications_new_messages: 'رسائل جديدة',
+forum_notifications_new_replies: 'ردود جديدة',
 
 }
 
@@ -8244,6 +8262,9 @@ dm_sent: 'Gönderildi',
 dm_send_failed: 'Gönderilemedi',
 dm_delivered: 'Teslim edildi',
 dm_seen: 'Görüldü',
+forum_notifications_title: 'Quantum Messenger',
+forum_notifications_new_messages: 'yeni mesaj',
+forum_notifications_new_replies: 'yeni yanıt',
 
 }
 
