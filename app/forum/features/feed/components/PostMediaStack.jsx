@@ -200,8 +200,95 @@ function ImageCarousel({
 }
 
 function IframeTouchShield({ href }) {
+  const [interactive, setInteractive] = React.useState(false)
+  const unlockTimerRef = React.useRef(null)
+  const pointerStateRef = React.useRef({
+    id: null,
+    startX: 0,
+    startY: 0,
+    moved: false,
+    startedAt: 0,
+  })
+
+  const clearUnlockTimer = React.useCallback(() => {
+    try {
+      if (unlockTimerRef.current) clearTimeout(unlockTimerRef.current)
+    } catch {}
+    unlockTimerRef.current = null
+  }, [])
+
+  const unlockInteract = React.useCallback((ttlMs = 2600) => {
+    clearUnlockTimer()
+    setInteractive(true)
+    unlockTimerRef.current = setTimeout(() => {
+      setInteractive(false)
+      unlockTimerRef.current = null
+    }, Math.max(800, Number(ttlMs || 0)))
+  }, [clearUnlockTimer])
+
+  const resetPointerState = React.useCallback(() => {
+    pointerStateRef.current = {
+      id: null,
+      startX: 0,
+      startY: 0,
+      moved: false,
+      startedAt: 0,
+    }
+  }, [])
+
+  React.useEffect(() => {
+    return () => clearUnlockTimer()
+  }, [clearUnlockTimer])
+
+  const handlePointerDown = React.useCallback((event) => {
+    const pointerType = String(event?.pointerType || '')
+    if (pointerType && pointerType !== 'touch' && pointerType !== 'pen') return
+    pointerStateRef.current = {
+      id: event?.pointerId ?? null,
+      startX: Number(event?.clientX || 0),
+      startY: Number(event?.clientY || 0),
+      moved: false,
+      startedAt: Date.now(),
+    }
+  }, [])
+
+  const handlePointerMove = React.useCallback((event) => {
+    const state = pointerStateRef.current
+    if (state.id == null) return
+    if (event?.pointerId != null && state.id !== event.pointerId) return
+    const dx = Math.abs(Number(event?.clientX || 0) - Number(state.startX || 0))
+    const dy = Math.abs(Number(event?.clientY || 0) - Number(state.startY || 0))
+    if (dx > 10 || dy > 10) {
+      pointerStateRef.current = { ...state, moved: true }
+    }
+  }, [])
+
+  const handlePointerUp = React.useCallback((event) => {
+    const state = pointerStateRef.current
+    if (state.id == null) return
+    if (event?.pointerId != null && state.id !== event.pointerId) return
+    const dx = Math.abs(Number(event?.clientX || 0) - Number(state.startX || 0))
+    const dy = Math.abs(Number(event?.clientY || 0) - Number(state.startY || 0))
+    const elapsed = Date.now() - Number(state.startedAt || 0)
+    const isTap = !state.moved && dx < 12 && dy < 12 && elapsed < 420
+    resetPointerState()
+    if (isTap) unlockInteract()
+  }, [resetPointerState, unlockInteract])
+
+  const handlePointerCancel = React.useCallback(() => {
+    resetPointerState()
+  }, [resetPointerState])
+
   return (
-    <div className="iframeTouchShield" aria-hidden={!href}>
+    <div className={`iframeTouchShield${interactive ? ' isInteractive' : ''}`}>
+      <div
+        className={`iframeTouchShieldGesture${interactive ? ' isInteractive' : ''}`}
+        aria-hidden="true"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
+      />
       {href ? (
         <a
           className="iframeTouchShieldAction"

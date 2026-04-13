@@ -1,5 +1,13 @@
 import { useEffect } from 'react'
 
+function isOverlayMediaBusy() {
+  if (typeof document === 'undefined') return false
+  try {
+    return document.documentElement?.getAttribute?.('data-vo-open') === '1'
+  } catch {}
+  return false
+}
+
 export default function useDmLoadLifecycle({
   mounted,
   meId,
@@ -35,6 +43,7 @@ export default function useDmLoadLifecycle({
   useEffect(() => {
     const uid = String(dmWithUserId || '').trim()
     if (!uid) return
+    if (isOverlayMediaBusy()) return
     loadDmThread(uid, null, { force: true, refresh: true })
   }, [dmWithUserId, loadDmThread])
 
@@ -43,7 +52,7 @@ export default function useDmLoadLifecycle({
     if (inboxOpen && inboxTab === 'messages') return
     if (typeof document === 'undefined') return
     const timer = setInterval(() => {
-      if (document.hidden) return
+      if (document.hidden || isOverlayMediaBusy()) return
       try {
         loadDmDialogs(null, { force: true, refresh: true, background: true })
       } catch {}
@@ -59,7 +68,7 @@ export default function useDmLoadLifecycle({
     if (!inboxOpen || inboxTab !== 'messages') return
     if (typeof document === 'undefined') return
     const timer = setInterval(() => {
-      if (document.hidden) return
+      if (document.hidden || isOverlayMediaBusy()) return
       try {
         loadDmDialogs(null, { force: true, refresh: true })
       } catch {}

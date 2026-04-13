@@ -573,7 +573,19 @@ export const FORUM_STYLES = `
   background:linear-gradient(180deg, rgba(4,8,16,0), rgba(4,8,16,.08));
   pointer-events:none;
 }
+.iframeTouchShieldGesture{
+  position:absolute;
+  inset:0;
+  pointer-events:auto;
+  touch-action:pan-y pinch-zoom;
+}
+.iframeTouchShield.isInteractive .iframeTouchShieldGesture,
+.iframeTouchShieldGesture.isInteractive{
+  pointer-events:none;
+}
 .iframeTouchShieldAction{
+  position:relative;
+  z-index:2;
   width:38px;
   height:38px;
   border-radius:12px;
@@ -600,6 +612,9 @@ export const FORUM_STYLES = `
 @media (pointer:coarse){
   .mediaBox[data-kind="iframe"] > iframe{
     pointer-events:auto;
+  }
+  .iframeTouchShield{
+    display:flex;
   }
 }
 /* YouTube iframe: РјРёРЅРёРјР°Р»СЊРЅР°СЏ РІС‹СЃРѕС‚Р° РѕС‚РґРµР»СЊРЅРѕ (РїРµСЂРµРјРµРЅРЅР°СЏ РїРѕРґ РјРѕР±/РґРµСЃРєС‚РѕРї) */
