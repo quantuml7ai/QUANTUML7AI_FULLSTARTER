@@ -9,7 +9,7 @@
 
 .profileTopRow .profileBadgeLeft{ min-width:0; }
 
-/* РєРІР°РґСЂР°С‚РЅР°СЏ РєРЅРѕРїРєР° СЃРїСЂР°РІР°: РїРѕ РєР»РёРєСѓ вЂ” РІС‹Р±РѕСЂ С„Р°Р№Р»Р°; РїРѕСЃР»Рµ РІС‹Р±РѕСЂР° вЂ” РїСЂРµРІСЊСЋ РІРЅСѓС‚СЂРё */
+/* квадратная кнопка справа: по клику — выбор файла; после выбора — превью внутри */
 .avaUploadSquare{
   --s: clamp(74px, 14vw, 96px);
   width: var(--s);
@@ -71,7 +71,7 @@
   height:100%;
   display:block;
   pointer-events:none;
-  /* canvas: РІРЅСѓС‚СЂРё СЂРёСЃСѓРµРј СЃР°РјРё, РїРѕСЌС‚РѕРјСѓ object-fit РќР• РЅСѓР¶РµРЅ */
+  /* canvas: внутри рисуем сами, поэтому object-fit НЕ нужен */
   will-change: contents;
 }
 
@@ -101,7 +101,7 @@
   backdrop-filter: blur(3px);
 }
 
-/* Р—СѓРј-СЃС‚СЂРѕРєР°: РІСЃРµРіРґР° СЃР»РµРґСѓСЋС‰РµР№ СЃС‚СЂРѕРєРѕР№ Рё РЅР° РІСЃСЋ С€РёСЂРёРЅСѓ РїРѕРїРѕРІРµСЂР° */
+/* Зум-строка: всегда следующей строкой и на всю ширину поповера */
 .avaZoomWideRow{
   display:flex;
   align-items:center;
@@ -201,11 +201,11 @@
 }
 /* NOTE: duplicate legacy rule removed (was breaking layout with display:absolute) */
 
-/* 1) РљРѕРЅС‚РµР№РЅРµСЂ: РЅРёС‡РµРіРѕ РЅРµ РјРµРЅСЏРµРј РєСЂРѕРјРµ РѕР±СЂРµР·РєРё Рё РєРѕРЅС‚РµРєСЃС‚Р° РїРѕР·РёС†РёРѕРЅРёСЂРѕРІР°РЅРёСЏ */
+/* 1) Контейнер: ничего не меняем кроме обрезки и контекста позиционирования */
 .avaBig,
 .avaMini{
-  overflow: hidden;         /* С‡С‚РѕР±С‹ Р»РёС€РЅРµРµ РѕР±СЂРµР·Р°Р»РѕСЃСЊ РїРѕ СЂР°РјРєРµ */
-  position: relative;       /* РЅСѓР¶РЅРѕ, С‡С‚РѕР±С‹ next/image РЅРµ В«СѓР±РµР¶Р°Р»В» */
+  overflow: hidden;         /* чтобы лишнее обрезалось по рамке */
+  position: relative;       /* нужно, чтобы next/image не «убежал» */
 }
 /* pencil overlay on avabig */
 .avaEditPencil{
@@ -222,31 +222,31 @@
   filter: drop-shadow(0 1px 2px rgba(0,0,0,.65));
 }
 .avaEditPencil svg{ display:block; }
-/* 2) РћР±С‹С‡РЅС‹Рµ <img>/<video>/<canvas>/<svg> РІРЅСѓС‚СЂРё вЂ” СЂР°СЃС‚СЏРЅСѓС‚СЊ Рё РїРѕРєСЂС‹С‚СЊ */
+/* 2) Обычные <img>/<video>/<canvas>/<svg> внутри — растянуть и покрыть */
 .avaBig :is(img, video, canvas, svg),
 .avaMini :is(img, video, canvas, svg){
   width: 100%;
   height: 100%;
-  object-fit: cover;        /* Р·Р°РїРѕР»РЅСЏРµРј Р±РµР· В«РїРёСЃРµРјВ» */
+  object-fit: cover;        /* заполняем без «писем» */
   object-position: center;
   display: block;
-  border-radius: inherit;   /* СЃРєСЂСѓРіР»РµРЅРёРµ РєР°Рє Сѓ РєРѕРЅС‚РµР№РЅРµСЂР° */
+  border-radius: inherit;   /* скругление как у контейнера */
 }
 
-/* 3) Р•СЃР»Рё РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ next/image (img РїРѕР·РёС†РёРѕРЅРёСЂСѓРµС‚СЃСЏ Р°Р±СЃРѕР»СЋС‚РЅРѕ РІРЅСѓС‚СЂРё span) */
+/* 3) Если используется next/image (img позиционируется абсолютно внутри span) */
 .avaBig :is(span, div) > img,
 .avaMini :is(span, div) > img{
-  inset: 0 !important;      /* СЂР°СЃС‚СЏРіРёРІР°РµРј РІРѕ РІРµСЃСЊ РєРѕРЅС‚РµР№РЅРµСЂ */
+  inset: 0 !important;      /* растягиваем во весь контейнер */
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
   object-position: center !important;
 }
 
-/* 4) РќР° РІСЃСЏРєРёР№ СЃР»СѓС‡Р°Р№ СЂР°СЃС‚СЏРЅРµРј СЃР°Рј РѕР±С‘СЂС‚РѕС‡РЅС‹Р№ span next/image */
+/* 4) На всякий случай растянем сам обёрточный span next/image */
 .avaBig :is(span, div):has(> img),
 .avaMini :is(span, div):has(> img){
-  position: absolute;       /* Р·Р°РїРѕР»РЅСЏРµС‚ РІСЃСЋ РєРЅРѕРїРєСѓ */
+  position: absolute;       /* заполняет всю кнопку */
   inset: 0;
 }
 .avaCropStage{
@@ -263,13 +263,13 @@
   display:block;
 }
 
-/* ====== РќРћР’РћР•: РїСЂР°РІС‹Р№ Р±Р»РѕРє СѓРїСЂР°РІР»РµРЅРёСЏ РІ С…РµРґРµСЂРµ ====== */
+/* ====== НОВОЕ: правый блок управления в хедере ====== */
 .controls{
   margin-left:auto;
   display:flex; align-items:center; gap:6px;
   flex-wrap: nowrap;            /* в†ђ РљРќРћРџРљР РќР• РџР•Р Р•РќРћРЎРЇРўРЎРЇ */
   flex: 1 1 auto;
-  min-width: 0;                 /* в†ђ РјРѕР¶РЅРѕ СѓР¶РёРјР°С‚СЊСЃСЏ */
+  min-width: 0;                 /* ← можно ужиматься */
   max-width: 100%;
   order: 3;
 }
@@ -404,13 +404,13 @@
   .aboutLimit{ order: 2; }
 }
 
-/* РџРѕРёСЃРє РІСЃС‚СЂРѕРµРЅ РІ .controls Рё СЃР¶РёРјР°РµС‚СЃСЏ РїРѕ С€РёСЂРёРЅРµ РЅР° СѓР·РєРёС… СЌРєСЂР°РЅР°С… */
+/* Поиск встроен в .controls и сжимается по ширине на узких экранах */
 .search{
   position:relative;
   display:flex; align-items:center; gap:8px;
   z-index:60; overflow:visible;
-  flex: 1 1 auto;               /* в†ђ РїРѕР»Рµ РїРѕРёСЃРєР° СЂРµР·РёРЅРѕРІРѕРµ */
-  min-width: 80px;              /* РЅРёР¶РЅСЏСЏ РіСЂР°РЅРёС†Р° РЅР° РѕС‡РµРЅСЊ СѓР·РєРёС… СЌРєСЂР°РЅР°С… */
+  flex: 1 1 auto;               /* ← поле поиска резиновое */
+  min-width: 80px;              /* нижняя граница на очень узких экранах */
 }
 .searchInputWrap{
   position:relative;
@@ -418,7 +418,7 @@
   min-width:0;
 }
 
-/* РёРЅРїСѓС‚ Р·Р°РЅРёРјР°РµС‚ РІСЃС‘ РѕСЃС‚Р°РІС€РµРµСЃСЏ РјРµСЃС‚Рѕ Рё СѓР¶РёРјР°РµС‚СЃСЏ РїРµСЂРІС‹Рј */
+/* инпут занимает всё оставшееся место и ужимается первым */
 .searchInput{
   width:100%;
   flex: 1 1 auto; min-width: 60px; max-width:100%;
@@ -427,7 +427,7 @@
 }
 
 
-/* РєРЅРѕРїРєРё/С‡РёРїС‹ вЂ” С„РёРєСЃ. С€РёСЂРёРЅР°, РЅРµ СЃР¶РёРјР°СЋС‚СЃСЏ Рё РЅРµ РїРµСЂРµРЅРѕСЃСЏС‚СЃСЏ */
+/* кнопки/чипы — фикс. ширина, не сжимаются и не переносятся */
 .iconBtn,
 .sortWrap,
 .adminWrap,
@@ -441,9 +441,9 @@
   top:calc(100% + 6px);
    left:0;
    right:auto;
-   /* РќР• РїСЂРёРІСЏР·С‹РІР°РµРј Рє С€РёСЂРёРЅРµ РёРЅРїСѓС‚Р°: РґРµР»Р°РµРј Р°РґР°РїС‚РёРІРЅРѕ */
+   /* НЕ привязываем к ширине инпута: делаем адаптивно */
    inline-size:clamp(250px, 92vw, 560px);
-   /* Рё РЅРµ РґР°С‘Рј РІС‹Р»РµР·С‚Рё Р·Р° СЌРєСЂР°РЅ */
+   /* и не даём вылезти за экран */
    max-inline-size:calc(100vw - 24px);
    box-sizing:border-box;
 
@@ -456,7 +456,7 @@
   z-index:3000;
 }
 
- /* RTL: РґСЂРѕРїРґР°СѓРЅ РґРѕР»Р¶РµРЅ РѕС‚РєСЂС‹РІР°С‚СЊСЃСЏ РѕС‚ РїСЂР°РІРѕРіРѕ РєСЂР°СЏ РїРѕРёСЃРєР° */
+ /* RTL: дропдаун должен открываться от правого края поиска */
  [dir="rtl"] .searchDrop{
    left:auto;
    right:0;
@@ -673,7 +673,7 @@
 .starModeBtn.on{ border-color:rgba(255,215,90,.55); box-shadow:0 0 0 3px rgba(255,215,90,.08); }
 
 .starModeBtn.on .starPath{ fill:rgba(255,215,90,.95); stroke:rgba(255,215,90,.95); }
-    .adminWrap{ position:relative; flex:0 0 auto } /* СЃРїСЂР°РІР° РѕС‚ РїРѕРёСЃРєР°, РІ СЂР°РјРєР°С… .controls */
+    .adminWrap{ position:relative; flex:0 0 auto } /* справа от поиска, в рамках .controls */
     .adminBtn{ border:1px solid rgba(255,255,255,.16); border-radius:12px; padding:.55rem .8rem; font-weight:700; letter-spacing:.4px }
     .adminOff{ background:rgba(255,90,90,.10); border-color:rgba(255,120,120,.45); color:#ffb1a1 }
     .adminOn{ background:rgba(70,210,120,.12); border-color:rgba(110,240,170,.45); color:#baf7d6 }
@@ -682,7 +682,7 @@
     .qft_toast{ max-width:min(420px,90vw); padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(10,14,22,.94); color:#eaf4ff; box-shadow:0 10px 28px rgba(0,0,0,.45) }
     .qft_toast.ok{ border-color:rgba(70,220,130,.5) } .qft_toast.warn{ border-color:rgba(255,200,80,.5) } .qft_toast.err{ border-color:rgba(255,90,90,.5) }
 
-    /* РјРёРЅРё-РїРѕРїРѕРІРµСЂС‹ */
+    /* мини-поповеры */
     .adminPop{
       position:absolute; width: min(62vw, 360px);
       border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98);
@@ -1262,7 +1262,7 @@
 
     .avaCropBtns{ display:flex; gap:8px; justify-content:flex-end; }
 
-    /* РќР° РјРѕР±РёР»Рµ РґРµР»Р°РµРј РїСЂРµРІСЊСЋ вЂњРІС‹С€Рµ/РЅРёР¶РµвЂќ, РєР°Рє С‚С‹ РїСЂРѕСЃРёР» */
+    /* На мобиле делаем превью “выше/ниже”, как ты просил */
     @media (max-width:520px){
       .avaUploadBtn{ width:86px; height:32px; border-radius:12px; }
       .avaCropPanel{
@@ -1270,10 +1270,10 @@
       }
       .avaCropBox{
         width:100%;
-        height:140px;   /* С‡СѓС‚СЊ РІС‹С€Рµ РЅР° РјРѕР±РёР»Рµ */
+        height:140px;   /* чуть выше на мобиле */
       }
     }
-/* Р’СЊСЋРїРѕСЂС‚С‹: РїРµСЂРµРЅРѕСЃРёРј Р’Р•РЎР¬ СЂСЏРґ РїРѕРґ Р°РІР°С‚Р°СЂ, РЅРѕ РІРЅСѓС‚СЂРё вЂ” РѕРґРЅР° СЃС‚СЂРѕРєР° */
+/* Вьюпорты: переносим ВЕСЬ ряд под аватар, но внутри — одна строка */
 @media (max-width:860px){
   .controls{
     order:3;
@@ -1284,27 +1284,27 @@
     gap:6px;
     flex-wrap:nowrap;         /* в†ђ РќР• РџР•Р Р•РќРћРЎРРўРЎРЇ Р’РќРЈРўР Р */
   }
-  .search{ flex:1 1 0; min-width:120px } /* СЃР¶РёРјР°РµС‚СЃСЏ РїРµСЂРІРѕР№ */
+  .search{ flex:1 1 0; min-width:120px } /* сжимается первой */
 }
 
-/* РЈР¶Рµ СѓР¶Рµ: РµС‰С‘ СЃРёР»СЊРЅРµРµ СѓР¶РёРјР°РµРј РїРѕРёСЃРє, РєРЅРѕРїРєРё РѕСЃС‚Р°СЋС‚СЃСЏ */
+/* Уже уже: ещё сильнее ужимаем поиск, кнопки остаются */
 @media (max-width:560px){
   .head{ padding:10px }
   .controls{
     order:3;
     flex:0 0 100%;
     min-width:100%;
-    flex-wrap:nowrap;         /* в†ђ РІСЃС‘ РµС‰С‘ РѕРґРЅР° Р»РёРЅРёСЏ */
+    flex-wrap:nowrap;         /* ← всё ещё одна линия */
   }
   .search{ flex:1 1 0; min-width:90px }
   .iconBtn{ width:36px; height:36px }
 }
 
-/* РЎРѕРІСЃРµРј СѓР·РєРѕ: РјРёРЅРёРјР°Р»СЊРЅС‹Р№ РґРѕРїСѓСЃРє РґР»СЏ РїРѕРёСЃРєР° */
+/* Совсем узко: минимальный допуск для поиска */
 @media (max-width:420px){
   .search{ flex:1 1 0; min-width:70px }
 }
-/* === VIP styles (РєРЅРѕРїРєР° + РїРѕРїРѕРІРµСЂ) === */
+/* === VIP styles (кнопка + поповер) === */
 .iconBtn.vip { border-color: rgba(255,215,0,.55); color:#ffd700; box-shadow:0 0 14px rgba(255,215,0,.25) }
 .iconBtn.vipGray { opacity:.85 }
 .vipWrap { position:relative }
@@ -1440,17 +1440,17 @@
   50%{ transform: scale(1.03); filter: brightness(1.16); text-shadow: 0 0 16px rgba(255,232,160,.52); }
 }
 
-/* РІРЅРµ РјРµРґРёР°: С„РёРєСЃРёСЂСѓРµРј, С‡С‚Рѕ РєРЅРѕРїРєРё/С‡РёРїС‹ РЅРµ СЃР¶РёРјР°СЋС‚СЃСЏ */
+/* вне медиа: фиксируем, что кнопки/чипы не сжимаются */
 .iconBtn,
 .sortWrap,
 .adminWrap,
 .adminBtn{ flex:0 0 auto; }
-/* РІ С‚РІРѕРё РіР»РѕР±Р°Р»С‹/РјРѕРґСѓР»СЊ */
+/* в твои глобалы/модуль */
 .emojiGrid.vip { outline: 1px dashed rgba(255,215,0,.25); border-radius: 10px; padding: 6px; }
 .emojiBtn.vipAnim { will-change: transform; }
 .emojiBtn.vipAnim:hover { transform: translateY(-1px) scale(1.02); }
 
-/* Р»С‘РіРєРѕРµ РїРѕРґРїСЂС‹РіРёРІР°РЅРёРµ РЅР° hover */
+/* лёгкое подпрыгивание на hover */
 .hoverPop {
   transition: filter .12s ease, color .12s ease, background-color .12s ease, border-color .12s ease;
   will-change: auto;
@@ -1480,7 +1480,7 @@
 @media (max-width:480px){
   .vipEmojiBig{ width:var(--vip-emoji-size-sm); height:var(--vip-emoji-size-sm); }
 }
-/* РљСЂСѓРїРЅС‹Р№ Р°РєРєСѓСЂР°С‚РЅС‹Р№ Р±РµР№РґР¶ РЅРёРєР° (РµРґРёРЅС‹Р№ РґР»СЏ РІСЃРµС…) */
+/* Крупный аккуратный бейдж ника (единый для всех) */
 .nick-badge{
   display:inline-flex;
   align-items:center;
@@ -1507,11 +1507,11 @@
 @media (max-width:640px){
   .nick-text{ max-width:16ch; }
 }
-/* --- VIP badge РЅР°Рґ РЅРёРєРѕРј (20s / 5s) ---
-   РќР°СЃС‚СЂРѕР№РєР° РїРѕР·РёС†РёРѕРЅРёСЂРѕРІР°РЅРёСЏ/СЂР°Р·РјРµСЂР°:
-   --vip-badge-w, --vip-badge-h  (СЂР°Р·РјРµСЂ)
-   --vip-badge-gap              (СЂР°СЃСЃС‚РѕСЏРЅРёРµ РјРµР¶РґСѓ Р±РµР№РґР¶РµРј Рё РЅРёРєРѕРј)
-   --vip-badge-shift-x/y        (СЃРґРІРёРі Р±РµР№РґР¶Р°)
+/* --- VIP badge над ником (20s / 5s) ---
+   Настройка позиционирования/размера:
+   --vip-badge-w, --vip-badge-h  (размер)
+   --vip-badge-gap              (расстояние между бейджем и ником)
+   --vip-badge-shift-x/y        (сдвиг бейджа)
 */
 :root{
   --vip-badge-w: clamp(42px, 9vw, 54px);
@@ -1548,7 +1548,7 @@
   will-change: opacity;
 }
 
-/* РѕР±С‰РёР№ С†РёРєР» 25s: 1.png РІРёРґРЅРѕ 0..20s (80%), 2.png РІРёРґРЅРѕ 20..25s (20%) */
+/* общий цикл 25s: 1.png видно 0..20s (80%), 2.png видно 20..25s (20%) */
 @keyframes vipFlipA{
   0%, 79.99% { opacity: 1; }
   80%, 100%  { opacity: 0; }
@@ -1569,7 +1569,7 @@
 /* ====== РђРќРРњРђР¦РРЇ РќРРљРђ ====== */
 .nick-animate{
   position: relative;
-  /* Р±РµРіСѓС‰РёР№ РіСЂР°РґРёРµРЅС‚ РїРѕ СЂР°РјРєРµ */
+  /* бегущий градиент по рамке */
   background:
     linear-gradient(#0b1220,#0b1220) padding-box,
     linear-gradient(135deg,#5b9dff,#9b5bff,#ff5bb2,#5b9dff) border-box;
@@ -1577,19 +1577,19 @@
   animation: nickGradient 6s linear infinite, nickGlow 2.2s ease-in-out infinite;
 }
 
-/* РјСЏРіРєРѕРµ СЃРІРµС‡РµРЅРёРµ */
+/* мягкое свечение */
 @keyframes nickGlow{
   0%,100%{ box-shadow: 0 0 .5rem rgba(91,157,255,.28), inset 0 0 .35rem rgba(155,91,255,.16) }
   50%   { box-shadow: 0 0 1.15rem rgba(91,157,255,.55), inset 0 0 .55rem rgba(155,91,255,.28) }
 }
 
-/* РґРІРёР¶РµРЅРёРµ РіСЂР°РґРёРµРЅС‚Р° СЂР°РјРєРё */
+/* движение градиента рамки */
 @keyframes nickGradient{
   0%   { background-position: 0% 0%, 0% 50% }
   100%{ background-position: 200% 200%, 300% 50% }
 }
 
-/* СѓРІР°Р¶РµРЅРёРµ Рє reduced motion */
+/* уважение к reduced motion */
 @media (prefers-reduced-motion: reduce){
   .nick-animate{ animation: none }
 }
@@ -1613,12 +1613,12 @@
   border-radius:8px; padding:2px 4px;
   box-shadow:0 0 10px rgba(90, 120, 255, 0);
 }
-/* РіР°Р»РµСЂРµСЏ РёР·РѕР±СЂР°Р¶РµРЅРёР№ РІ РїРѕСЃС‚Рµ */
+/* галерея изображений в посте */
 .postGallery{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin-top:8px }
 .postGallery .thumb{ position:relative; padding:0; border:0; background:transparent; border-radius:8px; overflow:hidden; outline:1px solid rgba(140,170,255,.25) }
 .postGallery img{ width:100%; height:100%; object-fit:cover; display:block; aspect-ratio:1 / 1; }
 
-/* Р»Р°Р№С‚Р±РѕРєСЃ */
+/* лайтбокс */
 .lightbox{
   position:fixed; inset:0; background:rgba(8,12,22,.9);
   display:flex; align-items:center; justify-content:center; z-index:1000;
@@ -1631,7 +1631,7 @@
 }
 .lightbox .prev{ left:16px }
 .lightbox .next{ right:16px }
-/* Р»РѕРєР°Р»РёР·Р°С†РёСЏ С‚РѕР»СЊРєРѕ РІРЅСѓС‚СЂРё СЃС‚СЂРѕРєРё РєРѕРјРїРѕР·РµСЂР° */
+/* локализация только внутри строки композера */
 .forumComposer .attachPreviewRow{
   background: transparent !important;
   border: 0 !important;
@@ -1650,7 +1650,7 @@
   display: block;
 }
 
-/* cРµСЂРѕСЃС‚СЊ РјРѕРіР»Р° РїСЂРёС…РѕРґРёС‚СЊ РѕС‚ РіР»РѕР±Р°Р»СЊРЅС‹С… СЃС‚РёР»РµР№ button */
+/* cерость могла приходить от глобальных стилей button */
 .forumComposer .attachPreviewRow button{
   background: transparent !important;
   border: 0 !important;
@@ -1658,7 +1658,7 @@
   padding: 0;
 }
 
-/* Р° РґР»СЏ РєСЂРµСЃС‚РёРєР° Р·Р°РґР°С‘Рј СЃРІРѕР№ С‚С‘РјРЅС‹Р№ РєСЂСѓР¶РѕРє РѕС‚РґРµР»СЊРЅРѕ */
+/* а для крестика задаём свой тёмный кружок отдельно */
 .forumComposer .attachPreviewRemove{
   position: absolute;
   top: -6px; right: -6px;

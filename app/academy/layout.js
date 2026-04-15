@@ -1,5 +1,5 @@
 // app/academy/layout.js
-import { toAbsoluteSiteUrl, withAssetVersion } from '../../lib/metadataCache'
+import { withAssetVersion } from '../../lib/metadataCache'
 
 const GLOBAL_DESCRIPTION =
   'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Q-Line Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©'
@@ -8,17 +8,17 @@ export const metadata = {
   title: 'Academy',
   description: GLOBAL_DESCRIPTION,
   alternates: {
-    canonical: toAbsoluteSiteUrl('/academy'),
+    canonical: '/academy',
   },
   openGraph: {
     type: 'website',
-    url: toAbsoluteSiteUrl('/academy'),
+    url: '/academy',
     siteName: 'Quantum L7 AI',
     title: 'Academy',
     description: GLOBAL_DESCRIPTION,
     images: [
       {
-        url: toAbsoluteSiteUrl(withAssetVersion('/metab/academy1.png')),
+        url: withAssetVersion('/metab/academy1.png'),
         width: 1200,
         height: 630,
         alt: 'Academy',
@@ -31,7 +31,7 @@ export const metadata = {
     creator: '@quantuml7ai',
     title: 'Academy',
     description: GLOBAL_DESCRIPTION,
-    images: [toAbsoluteSiteUrl(withAssetVersion('/metab/academy1.png'))],
+    images: [withAssetVersion('/metab/academy1.png')],
   },
 }
 

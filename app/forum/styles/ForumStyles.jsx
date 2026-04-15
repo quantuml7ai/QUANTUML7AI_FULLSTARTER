@@ -5,7 +5,7 @@ export const FORUM_STYLES = `
     :root{
       --ink:#eaf4ff;
       --b:rgba(80,167,255,.32);
-      /* Telegram Mini App: РїРѕРґРЅРёРјРё/РѕРїСѓСЃС‚Рё Р»РёРїРєСѓСЋ РїР°РЅРµР»СЊ Quantum Messenger */
+      /* Telegram Mini App: подними/опусти липкую панель Quantum Messenger */
       --tma-inbox-sticky-top: 45px;
     }
     .forum_root{ color:var(--ink) }
@@ -67,7 +67,7 @@ export const FORUM_STYLES = `
       }
     }
     .postBodyContent{
-      position: relative; /* РїРѕРІРµСЂС… ::before */
+      position: relative; /* поверх ::before */
       min-height: 22px;
       color: #eaf1ff;
     }
@@ -75,7 +75,7 @@ export const FORUM_STYLES = `
       --mb-video-h-mobile: 650px;
       --mb-video-h-tablet: 550px;
       --mb-video-h-desktop: 550px;
-  /* Video: РјРёРЅРёРјР°Р»СЊРЅР°СЏ РІС‹СЃРѕС‚Р° */
+  /* Video: минимальная высота */
   --mb-video-min-h-mobile: 420px;
   --mb-video-min-h-tablet: 550px;
   --mb-video-min-h-desktop: 550px;      
@@ -85,9 +85,9 @@ export const FORUM_STYLES = `
       --mb-iframe-h-mobile: 700px;
       --mb-iframe-h-tablet: 550px;
       --mb-iframe-h-desktop: 550px;
-  /* YouTube iframe: РјРёРЅРёРјР°Р»СЊРЅР°СЏ РІС‹СЃРѕС‚Р° (РјРѕР±/РїР»Р°РЅС€/РґРµСЃРєС‚РѕРї)
-     - max-height СѓР¶Рµ СѓРїСЂР°РІР»СЏРµС‚СЃСЏ С‡РµСЂРµР· --mb-iframe-h-*
-     - СЌС‚Рѕ РёРјРµРЅРЅРѕ РЅРёР¶РЅСЏСЏ РіСЂР°РЅРёС†Р°, С‡С‚РѕР±С‹ РєР°СЂС‚РѕС‡РєР° YouTube РЅРµ Р±С‹Р»Р° В«СЃР»РёС€РєРѕРј РЅРёР·РєРѕР№В»
+  /* YouTube iframe: минимальная высота (моб/планш/десктоп)
+     - max-height уже управляется через --mb-iframe-h-*
+     - это именно нижняя граница, чтобы карточка YouTube не была «слишком низкой»
   */
   --mb-yt-iframe-min-h-mobile: 420px;
   --mb-yt-iframe-min-h-tablet: 550px;
@@ -102,7 +102,7 @@ export const FORUM_STYLES = `
       --mb-ad-h-tablet: 260px;
       --mb-ad-h-desktop: 320px;
 
-  /* VIP emoji / MOZI sticker cards fixed height (РєР°Рє mediaBox) */
+  /* VIP emoji / MOZI sticker cards fixed height (как mediaBox) */
   --mb-vip-emoji-h-mobile: 260px;
   --mb-vip-emoji-h-tablet: 320px;
   --mb-vip-emoji-h-desktop: 380px;
@@ -152,7 +152,7 @@ export const FORUM_STYLES = `
       }
     }
     /* =========================================================
-       VIP emoji / MOZI sticker fixed card (Р°РЅР°Р»РѕРі mediaBox)
+       VIP emoji / MOZI sticker fixed card (аналог mediaBox)
     ========================================================= */
     .vipMediaBox{
       position: relative;
@@ -184,7 +184,7 @@ export const FORUM_STYLES = `
     .mediaBox{
       position:relative;
       width:100%;
-      /* Р РµР·РёРЅРѕРІР°СЏ РєР°СЂС‚РѕС‡РєР°: СЂР°СЃС‚С‘С‚ РїРѕ РєРѕРЅС‚РµРЅС‚Сѓ, РЅРѕ РЅРµ РІС‹С€Рµ max-height (РїРµСЂРµРјРµРЅРЅРѕР№) */
+      /* Резиновая карточка: растёт по контенту, но не выше max-height (переменной) */
       max-height:var(--mb-h, 240px);
       height:auto;
       overflow:hidden;
@@ -210,7 +210,7 @@ export const FORUM_STYLES = `
       overscroll-behavior: contain;
     }
     .mediaBox[data-kind="audio"]{ --mb-h: var(--mb-audio-h); background:#000; }
-    /* QCast: РѕС‚РґРµР»СЊРЅР°СЏ РјР°РєСЃРёРјР°Р»СЊРЅР°СЏ РІС‹СЃРѕС‚Р° */
+    /* QCast: отдельная максимальная высота */
     .mediaBox[data-kind="qcast"]{ --mb-h: var(--mb-qcast-h); background:#000; }
     .mediaBox[data-kind="ad"]{ --mb-h: var(--mb-ad-h); background:#000; }
     .forumAdSlotPlaceholder{
@@ -242,7 +242,7 @@ export const FORUM_STYLES = `
       100%{ transform: translateX(120%); opacity: .18; }
     }
 
-    /* РЈРЅРёРІРµСЂСЃР°Р»СЊРЅС‹Р№ СЌР»РµРјРµРЅС‚ РјРµРґРёР°: Р±РµР· absolute вЂ” С‡С‚РѕР±С‹ РєРѕРЅС‚РµР№РЅРµСЂ РјРѕРі СѓР¶РёРјР°С‚СЊСЃСЏ */
+    /* Универсальный элемент медиа: без absolute — чтобы контейнер мог ужиматься */
     .mediaBoxItem{
       position:relative;
       display:block;
@@ -264,7 +264,7 @@ export const FORUM_STYLES = `
       background:#000;
     }
 
-    /* Video/iframe cards: С„РёРєСЃРёСЂСѓРµРј РІРЅСѓС‚СЂРµРЅРЅРёР№ РїР»РµРµСЂ РїРѕ РІС‹СЃРѕС‚Рµ РєРѕРЅС‚РµР№РЅРµСЂР° */
+    /* Video/iframe cards: фиксируем внутренний плеер по высоте контейнера */
     .mediaBox[data-kind="video"] > video{
       height:100%;
       min-height:100%;
@@ -550,7 +550,7 @@ export const FORUM_STYLES = `
       }
     }
 
-    /* iframe: РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ 16:9, РґР»СЏ TikTok вЂ” 9:16 */
+    /* iframe: по умолчанию 16:9, для TikTok — 9:16 */
 .mediaBox > iframe{
       width:100%;
       height:100%;
@@ -617,7 +617,7 @@ export const FORUM_STYLES = `
     display:flex;
   }
 }
-/* YouTube iframe: РјРёРЅРёРјР°Р»СЊРЅР°СЏ РІС‹СЃРѕС‚Р° РѕС‚РґРµР»СЊРЅРѕ (РїРµСЂРµРјРµРЅРЅР°СЏ РїРѕРґ РјРѕР±/РґРµСЃРєС‚РѕРї) */
+/* YouTube iframe: минимальная высота отдельно (переменная под моб/десктоп) */
 .mediaBox > iframe[data-forum-media="youtube"]{
   min-height: var(--mb-yt-iframe-min-h, 0px);
 }      
@@ -641,8 +641,8 @@ export const FORUM_STYLES = `
       color-scheme:dark;
     }
     :root{
-  --vip-emoji-size: 48px;      /* РјРѕР¶РЅРѕ Р±С‹СЃС‚СЂРѕ РЅР°СЃС‚СЂРѕРёС‚СЊ РїРѕРґ СЃРµР±СЏ */
-  --vip-emoji-size-sm: 48px;   /* РЅР° РјРѕР±РёР»СЊРЅС‹С… */
+  --vip-emoji-size: 48px;      /* можно быстро настроить под себя */
+  --vip-emoji-size-sm: 48px;   /* на мобильных */
 }
 .vipEmojiBig{
   width: var(--vip-emoji-size);
@@ -655,14 +655,14 @@ export const FORUM_STYLES = `
 } 
 
 
-/* РїСЂРµРІСЊСЋ-РєРѕРЅС‚РµР№РЅРµСЂ Рё РєСЂРµСЃС‚РёРє СѓРґР°Р»РµРЅРёСЏ */
+/* превью-контейнер и крестик удаления */
 .vipComposerPreview{ position:relative; display:inline-block; margin-top:6px }
 .vipComposerPreview .vipRemove{
   position:absolute; top:-6px; right:-6px;
   border:0; border-radius:8px; padding:2px 5px; line-height:1;
   background:rgba(0,0,0,.7); color:#fff; cursor:pointer;
 }
-/* РїРѕРґРґРµСЂР¶РєР° MOZI-СЌРјРѕРґР·Рё (СЂР°Р·РјРµСЂ вЂ” С‚РµРјРё Р¶Рµ РїРµСЂРµРјРµРЅРЅС‹РјРё, РјРѕР¶РЅРѕ СЂР°Р·РґРµР»РёС‚СЊ РїСЂРё Р¶РµР»Р°РЅРёРё) */
+/* поддержка MOZI-эмодзи (размер — теми же переменными, можно разделить при желании) */
 .moziEmojiBig{ width: var(--mozi-emoji-size, var(--vip-emoji-size)); height: var(--mozi-emoji-size, var(--vip-emoji-size)); display:inline-block; vertical-align:middle; }
     .btn, .tag, .iconBtn, .adminBtn, .emojiBtn { cursor:pointer }
     /* === clicky effects for small chips/buttons === */
@@ -688,34 +688,34 @@ export const FORUM_STYLES = `
       transform: translateY(0) scale(.97);
     }
 
-    /* РєРѕРјРїР°РєС‚РЅС‹Р№ РІР°СЂРёР°РЅС‚ РґР»СЏ action-РєРЅРѕРїРѕРє РЅР° РєР°СЂС‚РѕС‡РєРµ */
+    /* компактный вариант для action-кнопок на карточке */
     .btnSm { padding: 6px 8px; font-size: 12px; line-height: 1; }
-/* ----- Reply-chip РѕРєРѕР»Рѕ РЅРёРєР° ----- */
+/* ----- Reply-chip около ника ----- */
 
 @media (max-width: 680px) {
-  /* СЃС‚СЂРѕРєР° СЃ Р°РІР°С‚Р°СЂРѕРј Рё РЅРёРєРѕРј + С‡РёРїРѕРј РѕС‚РІРµС‚Р° */
+  /* строка с аватаром и ником + чипом ответа */
   .postUserRow {
     display: flex;
     align-items: center;
-    flex-wrap: wrap; /* СЂР°Р·СЂРµС€Р°РµРј РїРµСЂРµРЅРѕСЃ РЅР° РЅРѕРІСѓСЋ СЃС‚СЂРѕРєСѓ */
+    flex-wrap: wrap; /* разрешаем перенос на новую строку */
   }
 
-  /* РЅРёРє РЅРµ РґР°С‘Рј СЃР¶РёРјР°С‚СЊ РІРѕРѕР±С‰Рµ */
+  /* ник не даём сжимать вообще */
   .postUserRow .nick-badge {
     flex-shrink: 0;
   }
 
-  /* СЃР°Рј С‡РёРї "РћС‚РІРµС‚ РґР»СЏ ..." */
+  /* сам чип "Ответ для ..." */
   .postUserRow .replyTag {
-    font-size: 7px;          /* РїРѕРјРµРЅСЊС€Рµ С€СЂРёС„С‚ РЅР° РјРѕР±РёР»Рµ */
+    font-size: 7px;          /* поменьше шрифт на мобиле */
     line-height: 1.1;
-    white-space: normal;      /* СЂР°Р·СЂРµС€Р°РµРј РїРµСЂРµРЅРѕСЃ РїРѕ СЃР»РѕРІР°Рј */
+    white-space: normal;      /* разрешаем перенос по словам */
     word-break: normal;
-    overflow-wrap: break-word;/* РµСЃР»Рё РѕС‡РµРЅСЊ РґР»РёРЅРЅС‹Р№ РЅРёРє/С‚РµРєСЃС‚ вЂ“ РїРµСЂРµРЅРѕСЃРёРј, РЅРѕ РЅРµ РїРѕ Р±СѓРєРІР°Рј */
+    overflow-wrap: break-word;/* если очень длинный ник/текст – переносим, но не по буквам */
 
     max-width: 100%;
-    flex-basis: 100%;         /* РїСЂРё РЅРµС…РІР°С‚РєРµ РјРµСЃС‚Р° СѓС…РѕРґРёС‚ РќРђ РЎР›Р•Р”РЈР®Р©РЈР® РЎРўР РћРљРЈ РїРѕРґ РЅРёРєРѕРј */
-    margin-left: 0;           /* РїРѕРґ РЅРёРєРѕРј, Р° РЅРµ СЃР±РѕРєСѓ */
+    flex-basis: 100%;         /* при нехватке места уходит НА СЛЕДУЮЩУЮ СТРОКУ под ником */
+    margin-left: 0;           /* под ником, а не сбоку */
     margin-top: 2px;
   }
   .postUserRow .replyTagSnippet{
@@ -726,7 +726,7 @@ export const FORUM_STYLES = `
     overflow: hidden;
   }
   }
-/* reply badge (РєР»РёРєР°Р±РµР»СЊРЅС‹Р№) */
+/* reply badge (кликабельный) */
 .replyTagBtn{
 font-size: 12px;
   cursor: pointer;
@@ -752,7 +752,7 @@ font-size: 12px;
   text-overflow: ellipsis;
 }
 
-/* РїРѕРґСЃРІРµС‚РєР° СЃРѕРѕР±С‰РµРЅРёСЏ-С†РµР»Рё РїСЂРё РїРµСЂРµС…РѕРґРµ */
+/* подсветка сообщения-цели при переходе */
 .replyTargetFlash{
   animation: replyTargetFlash 1.1s ease-out;
 }
@@ -823,7 +823,7 @@ html[data-video-feed="1"] .head.head--collapsed{
 html[data-inbox-open="1"] .headPeekBtn{
   top: calc(90px + env(safe-area-inset-top, 0px));
 }
-/* вњ… Telegram Mini App: РѕРїСѓСЃРєР°РµРј СЃС‚СЂРµР»РєСѓ С‡СѓС‚СЊ РЅРёР¶Рµ, С‡С‚РѕР±С‹ РЅРµ РЅР°Р»РµР·Р°Р»Р° РЅР° С‚Р°Р±С‹ */
+/* ✅ Telegram Mini App: опускаем стрелку чуть ниже, чтобы не налезала на табы */
 html[data-tma="1"][data-inbox-open="1"] .headPeekBtn{
   top: calc(120px + env(safe-area-inset-top, 0px)); /* +8px */
 }  
@@ -867,12 +867,12 @@ html[data-tma="1"][data-inbox-open="1"] .headPeekBtn{
   .head{ transition: none; }
   .headArrowSvg .chev{ opacity: .85; }
 }
-/* [STYLES:BODY-SCOPE] вЂ” РѕРіСЂР°РЅРёС‡РёРІР°РµРј РѕР±Р»Р°СЃС‚СЊ РґРµР№СЃС‚РІРёСЏ .body С‚РѕР»СЊРєРѕ С„РѕСЂСѓРјРѕРј */
+/* [STYLES:BODY-SCOPE] — ограничиваем область действия .body только форумом */
 .forum_root .body{ padding:12px; overflow:visible }
 html[data-head-hidden="1"] .forum_root .body{ padding-top:0; margin-top:0; }
 html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 
-/* [STYLES:LAYOUT-FLEX] вЂ” РґРµР»Р°РµРј В«РєРѕСЂРёРґРѕСЂВ» РІС‹СЃРѕС‚С‹ Рё СЃРєСЂРѕР»Р»СЏС‰РёРµСЃСЏ С‚РµР»Р° СЃРµРєС†РёР№ */
+/* [STYLES:LAYOUT-FLEX] — делаем «коридор» высоты и скроллящиеся тела секций */
 .forum_root{
   min-height: 100dvh;
   display: flex;
@@ -880,37 +880,37 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 }
 
 .forum_root .grid2{
-  /* РІ СЂРµРЅРґРµСЂРµ С‚С‹ СѓР¶Рµ РґРѕР±Р°РІРёР» inline flex, РґСѓР±Р»РёСЂСѓРµРј РЅР° РІСЃСЏРєРёР№ РІ CSS, С‡С‚РѕР±С‹ РЅРµ Р·Р°РІРёСЃРµС‚СЊ РѕС‚ inline */
+  /* в рендере ты уже добавил inline flex, дублируем на всякий в CSS, чтобы не зависеть от inline */
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
-  min-height: 0;         /* в†ђ РґР°С‘Рј РґРµС‚СЏРј РїСЂР°РІРѕ СЃР¶РёРјР°С‚СЊСЃСЏ РїРѕ РІС‹СЃРѕС‚Рµ */
+  min-height: 0;         /* ← даём детям право сжиматься по высоте */
 }
 
-/* РєР°Р¶РґР°СЏ СЃРµРєС†РёСЏ (СЃРїРёСЃРѕРє С‚РµРј / РІС‹Р±СЂР°РЅРЅР°СЏ С‚РµРјР°) вЂ” РєРѕР»РѕРЅРєР°, Р·Р°РЅРёРјР°СЋС‰Р°СЏ РѕСЃС‚Р°С‚РѕРє */
+/* каждая секция (список тем / выбранная тема) — колонка, занимающая остаток */
 .forum_root .grid2 > section{
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
-  min-height: 0;         /* в†ђ РєСЂРёС‚РёС‡РЅРѕ РґР»СЏ РїРѕСЏРІР»РµРЅРёСЏ РІРЅСѓС‚СЂРµРЅРЅРµРіРѕ СЃРєСЂРѕР»Р»Р° */
+  min-height: 0;         /* ← критично для появления внутреннего скролла */
 }
 
-/* СЃРѕР±СЃС‚РІРµРЅРЅРѕ СЃРєСЂРѕР»Р» РІРєР»СЋС‡Р°РµРј РўРћР›Р¬РљРћ РЅР° В«С‚РµР»Р°С…В» СЃРµРєС†РёР№ */
+/* собственно скролл включаем ТОЛЬКО на «телах» секций */
 .forum_root .grid2 > section > .body{
   flex: 1 1 auto;
   min-height: 0;
-  height: 100%;                 /* СЃС‚Р°Р±РёР»РёР·РёСЂСѓРµС‚ РІС‹СЃРѕС‚Сѓ РѕР±Р»Р°СЃС‚Рё СЃРєСЂРѕР»Р»Р° */
+  height: 100%;                 /* стабилизирует высоту области скролла */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
-/* [STYLES:OVERFLOW-PROBE] вЂ” РЅР° РІСЃСЏРєРёР№, РЅРµ РґР°С‘Рј РєР°СЂС‚РѕС‡РєРµ-РѕР±С‘СЂС‚РєРµ СЂРµР·Р°С‚СЊ СЃРѕРґРµСЂР¶РёРјРѕРµ */
+/* [STYLES:OVERFLOW-PROBE] — на всякий, не даём карточке-обёртке резать содержимое */
 .forum_root .glass.neon{ overflow: visible !important; }
 
-    /* Р”РћР‘РђР’Р¬ РІ Styles() (Р»СЋР±РѕР№ Р±Р»РѕРє <style jsx global>) */
+    /* ДОБАВЬ в Styles() (любой блок <style jsx global>) */
     .tagOk{ border-color: rgba(110,240,170,.45)!important; color:#baf7d6!important; background: rgba(70,210,120,.12)!important }
     .tagDanger{ border-color: rgba(255,120,120,.45)!important; color:#ffb1a1!important; background: rgba(255,90,90,.10)!important }
 
-    /* СЌС„С„РµРєС‚С‹ РєР»РёРєР° СѓР¶Рµ РµСЃС‚СЊ: РґР»СЏ .btn, .tag, .reactionBtn вЂ” hover/active РґРѕР±Р°РІР»РµРЅС‹ */
+    /* эффекты клика уже есть: для .btn, .tag, .reactionBtn — hover/active добавлены */
 
     .btn{ border:1px solid var(--b); background:linear-gradient(180deg, rgba(25,129,255,.28),rgba(25,129,255,.15));
       padding:.62rem .95rem; border-radius:12px; color:var(--ink); display:inline-flex; align-items:center; gap:.6rem;
@@ -931,20 +931,20 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 
     .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px }
     @media (max-width:1024px){ .grid2{ grid-template-columns:1fr } }
-/* [SCROLL_FIX] вЂ” РІРЅСѓС‚СЂРё С„РѕСЂСѓРјР° .grid2 Р”РћР›Р–РќРђ Р±С‹С‚СЊ flex-РєРѕР»РѕРЅРєРѕР№ */
+/* [SCROLL_FIX] — внутри форума .grid2 ДОЛЖНА быть flex-колонкой */
 .forum_root .grid2{
   display:flex !important;
   flex-direction:column;
   flex:1 1 auto;
-  min-height:0;           /* РєСЂРёС‚РёС‡РЅРѕ РґР»СЏ РїРѕСЏРІР»РµРЅРёСЏ РІРЅСѓС‚СЂРµРЅРЅРµРіРѕ СЃРєСЂРѕР»Р»Р° */
+  min-height:0;           /* критично для появления внутреннего скролла */
 }
 
-/* РєР°Р¶РґР°СЏ СЃРµРєС†РёСЏ РІРЅСѓС‚СЂРё grid2 вЂ” С‚РѕР¶Рµ РєРѕР»РѕРЅРєР°, РєРѕС‚РѕСЂР°СЏ Р·Р°РЅРёРјР°РµС‚ РѕСЃС‚Р°С‚РѕРє */
+/* каждая секция внутри grid2 — тоже колонка, которая занимает остаток */
 .forum_root .grid2 > section{
   display:flex;
   flex-direction:column;
   flex:1 1 auto;
-  min-height:0;           /* РЅРµ РґР°С‘Рј СЃРµРєС†РёРё В«СЂР°СЃРїРµСЂРµС‚СЊВ» СЂРѕРґРёС‚РµР»СЏ РїРѕ РІС‹СЃРѕС‚Рµ */
+  min-height:0;           /* не даём секции «распереть» родителя по высоте */
 }
 
 /* СЃРєСЂРѕР»Р»РёРј РРњР•РќРќРћ С‚РµР»Рѕ СЃРµРєС†РёРё */
@@ -954,7 +954,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
 }
-/* [TOPICS_BODY_OVERRIDE] вЂ” Р¶С‘СЃС‚РєРѕ РІРєР»СЋС‡Р°РµРј СЃРєСЂРѕР»Р» С‚РµР»Р° РІ СЂРµР¶РёРјРµ СЃРїРёСЃРєР° С‚РµРј */
+/* [TOPICS_BODY_OVERRIDE] — жёстко включаем скролл тела в режиме списка тем */
 .forum_root[data-view="topics"] .grid2{ min-height:0 !important; }
 .forum_root[data-view="topics"] .grid2 > section{
   display:flex !important;
@@ -988,8 +988,8 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 
 /* Big VIP emoji in posts */
 :root{
-  --vip-emoji-size: 48px;      /* Р±Р°Р·РѕРІС‹Р№ СЂР°Р·РјРµСЂ */
-  --vip-emoji-size-sm: 40px;   /* РЅР° СѓР·РєРёС… СЌРєСЂР°РЅР°С… */
+  --vip-emoji-size: 48px;      /* базовый размер */
+  --vip-emoji-size-sm: 40px;   /* на узких экранах */
 }
  /* --- Emoji panel tabs --------------------------------------------------- */
 .emojiTabs{
@@ -1013,7 +1013,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   transition: background .12s ease, border-color .12s ease, transform .06s ease;
 }
 
-/* hover / focus (РѕР±Р° С‚Р°Р±Р°) */
+/* hover / focus (оба таба) */
 .emojiTabBtn:hover{
   background: rgba(255,255,255,.12);
   transform: translateY(-1px);
@@ -1024,8 +1024,8 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   border-color: rgba(80,167,255,.55);
 }
 
-/* Р°РєС‚РёРІРЅР°СЏ РІРєР»Р°РґРєР°: С‡РёС‚Р°РµРјРѕ Рё В«РіРѕСЂРёС‚В» */
-/* Р±РѕР»РµРµ СЏСЂРєРёР№ Р°РєС‚РёРІ */
+/* активная вкладка: читаемо и «горит» */
+/* более яркий актив */
 .emojiTabBtn[aria-pressed="true"]{
   background: linear-gradient(0deg, rgba(80,167,255,.22), rgba(80,167,255,.22));
   border-color: rgba(80,167,255,.65);
@@ -1033,7 +1033,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 }
 
 
-/* РјРѕР±РёР»СЊРЅС‹Р№ РєРѕРјРїР°РєС‚ */
+/* мобильный компакт */
 @media (max-width: 420px){
   .emojiTabBtn{
     --btn-h: 26px;
@@ -1057,13 +1057,13 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
     .iconWrap{ display:flex; flex-wrap:wrap; gap:10px }
     .avaBig{ width:112px; height:112px; border-radius:16px; border:1px solid rgba(1, 204, 255, 0.31); display:grid; place-items:center; font-size:48px; background:rgba(119, 0, 255, 0.09) }
     .avaMini{ width:60px; height:60px; border-radius:10px; font-size:18px }
-/* === AVATAR FILL (РґРѕР±Р°РІРєР°) ============================= */
-    /* РїР»Р°РІРЅРѕСЃС‚СЊ РґР»СЏ РјРµР»РєРёС… Р°РІР°С‚Р°СЂРѕРє */
+/* === AVATAR FILL (добавка) ============================= */
+    /* плавность для мелких аватарок */
     .profileList .avaMini{
       transition: transform .12s ease-out, box-shadow .12s ease-out, outline-color .12s ease-out;
     }
 
-    /* РІС‹Р±СЂР°РЅРЅС‹Р№ Р°РІР°С‚Р°СЂ вЂ” С‡СѓС‚СЊ РєСЂСѓРїРЅРµРµ Рё СЃ СЏСЂРєРёРј РєРѕРЅС‚СѓСЂРѕРј */
+    /* выбранный аватар — чуть крупнее и с ярким контуром */
     .profileList .avaMini.tag{
       transform: translateY(-2px) scale(1.06);
       box-shadow: 0 0 0 2px rgba(56, 189, 248, .9), 0 0 16px rgba(56, 189, 248, .5);
@@ -1081,7 +1081,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 
 .profileTopRow .profileBadgeLeft{ min-width:0; }
 
-/* РєРІР°РґСЂР°С‚РЅР°СЏ РєРЅРѕРїРєР° СЃРїСЂР°РІР°: РїРѕ РєР»РёРєСѓ вЂ” РІС‹Р±РѕСЂ С„Р°Р№Р»Р°; РїРѕСЃР»Рµ РІС‹Р±РѕСЂР° вЂ” РїСЂРµРІСЊСЋ РІРЅСѓС‚СЂРё */
+/* квадратная кнопка справа: по клику — выбор файла; после выбора — превью внутри */
 .avaUploadSquare{
   --s: clamp(74px, 14vw, 96px);
   width: var(--s);
@@ -1143,7 +1143,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   height:100%;
   display:block;
   pointer-events:none;
-  /* canvas: РІРЅСѓС‚СЂРё СЂРёСЃСѓРµРј СЃР°РјРё, РїРѕСЌС‚РѕРјСѓ object-fit РќР• РЅСѓР¶РµРЅ */
+  /* canvas: внутри рисуем сами, поэтому object-fit НЕ нужен */
   will-change: contents;
 }
 
@@ -1173,7 +1173,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   backdrop-filter: blur(3px);
 }
 
-/* Р—СѓРј-СЃС‚СЂРѕРєР°: РІСЃРµРіРґР° СЃР»РµРґСѓСЋС‰РµР№ СЃС‚СЂРѕРєРѕР№ Рё РЅР° РІСЃСЋ С€РёСЂРёРЅСѓ РїРѕРїРѕРІРµСЂР° */
+/* Зум-строка: всегда следующей строкой и на всю ширину поповера */
 .avaZoomWideRow{
   display:flex;
   align-items:center;
@@ -1273,11 +1273,11 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 }
 /* NOTE: duplicate legacy rule removed (was breaking layout with display:absolute) */
 
-/* 1) РљРѕРЅС‚РµР№РЅРµСЂ: РЅРёС‡РµРіРѕ РЅРµ РјРµРЅСЏРµРј РєСЂРѕРјРµ РѕР±СЂРµР·РєРё Рё РєРѕРЅС‚РµРєСЃС‚Р° РїРѕР·РёС†РёРѕРЅРёСЂРѕРІР°РЅРёСЏ */
+/* 1) Контейнер: ничего не меняем кроме обрезки и контекста позиционирования */
 .avaBig,
 .avaMini{
-  overflow: hidden;         /* С‡С‚РѕР±С‹ Р»РёС€РЅРµРµ РѕР±СЂРµР·Р°Р»РѕСЃСЊ РїРѕ СЂР°РјРєРµ */
-  position: relative;       /* РЅСѓР¶РЅРѕ, С‡С‚РѕР±С‹ next/image РЅРµ В«СѓР±РµР¶Р°Р»В» */
+  overflow: hidden;         /* чтобы лишнее обрезалось по рамке */
+  position: relative;       /* нужно, чтобы next/image не «убежал» */
 }
 /* pencil overlay on avabig */
 .avaEditPencil{
@@ -1294,31 +1294,31 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   filter: drop-shadow(0 1px 2px rgba(0,0,0,.65));
 }
 .avaEditPencil svg{ display:block; }
-/* 2) РћР±С‹С‡РЅС‹Рµ <img>/<video>/<canvas>/<svg> РІРЅСѓС‚СЂРё вЂ” СЂР°СЃС‚СЏРЅСѓС‚СЊ Рё РїРѕРєСЂС‹С‚СЊ */
+/* 2) Обычные <img>/<video>/<canvas>/<svg> внутри — растянуть и покрыть */
 .avaBig :is(img, video, canvas, svg),
 .avaMini :is(img, video, canvas, svg){
   width: 100%;
   height: 100%;
-  object-fit: cover;        /* Р·Р°РїРѕР»РЅСЏРµРј Р±РµР· В«РїРёСЃРµРјВ» */
+  object-fit: cover;        /* заполняем без «писем» */
   object-position: center;
   display: block;
-  border-radius: inherit;   /* СЃРєСЂСѓРіР»РµРЅРёРµ РєР°Рє Сѓ РєРѕРЅС‚РµР№РЅРµСЂР° */
+  border-radius: inherit;   /* скругление как у контейнера */
 }
 
-/* 3) Р•СЃР»Рё РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ next/image (img РїРѕР·РёС†РёРѕРЅРёСЂСѓРµС‚СЃСЏ Р°Р±СЃРѕР»СЋС‚РЅРѕ РІРЅСѓС‚СЂРё span) */
+/* 3) Если используется next/image (img позиционируется абсолютно внутри span) */
 .avaBig :is(span, div) > img,
 .avaMini :is(span, div) > img{
-  inset: 0 !important;      /* СЂР°СЃС‚СЏРіРёРІР°РµРј РІРѕ РІРµСЃСЊ РєРѕРЅС‚РµР№РЅРµСЂ */
+  inset: 0 !important;      /* растягиваем во весь контейнер */
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
   object-position: center !important;
 }
 
-/* 4) РќР° РІСЃСЏРєРёР№ СЃР»СѓС‡Р°Р№ СЂР°СЃС‚СЏРЅРµРј СЃР°Рј РѕР±С‘СЂС‚РѕС‡РЅС‹Р№ span next/image */
+/* 4) На всякий случай растянем сам обёрточный span next/image */
 .avaBig :is(span, div):has(> img),
 .avaMini :is(span, div):has(> img){
-  position: absolute;       /* Р·Р°РїРѕР»РЅСЏРµС‚ РІСЃСЋ РєРЅРѕРїРєСѓ */
+  position: absolute;       /* заполняет всю кнопку */
   inset: 0;
 }
 .avaCropStage{
@@ -1335,13 +1335,13 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   display:block;
 }
 
-/* ====== РќРћР’РћР•: РїСЂР°РІС‹Р№ Р±Р»РѕРє СѓРїСЂР°РІР»РµРЅРёСЏ РІ С…РµРґРµСЂРµ ====== */
+/* ====== НОВОЕ: правый блок управления в хедере ====== */
 .controls{
   margin-left:auto;
   display:flex; align-items:center; gap:6px;
   flex-wrap: nowrap;            /* в†ђ РљРќРћРџРљР РќР• РџР•Р Р•РќРћРЎРЇРўРЎРЇ */
   flex: 1 1 auto;
-  min-width: 0;                 /* в†ђ РјРѕР¶РЅРѕ СѓР¶РёРјР°С‚СЊСЃСЏ */
+  min-width: 0;                 /* ← можно ужиматься */
   max-width: 100%;
   order: 3;
 }
@@ -1467,13 +1467,13 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   .aboutLimit{ order: 2; }
 }
 
-/* РџРѕРёСЃРє РІСЃС‚СЂРѕРµРЅ РІ .controls Рё СЃР¶РёРјР°РµС‚СЃСЏ РїРѕ С€РёСЂРёРЅРµ РЅР° СѓР·РєРёС… СЌРєСЂР°РЅР°С… */
+/* Поиск встроен в .controls и сжимается по ширине на узких экранах */
 .search{
   position:relative;
   display:flex; align-items:center; gap:8px;
   z-index:60; overflow:visible;
-  flex: 1 1 auto;               /* в†ђ РїРѕР»Рµ РїРѕРёСЃРєР° СЂРµР·РёРЅРѕРІРѕРµ */
-  min-width: 80px;              /* РЅРёР¶РЅСЏСЏ РіСЂР°РЅРёС†Р° РЅР° РѕС‡РµРЅСЊ СѓР·РєРёС… СЌРєСЂР°РЅР°С… */
+  flex: 1 1 auto;               /* ← поле поиска резиновое */
+  min-width: 80px;              /* нижняя граница на очень узких экранах */
 }
 .searchInputWrap{
   position:relative;
@@ -1481,7 +1481,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   min-width:0;
 }
 
-/* РёРЅРїСѓС‚ Р·Р°РЅРёРјР°РµС‚ РІСЃС‘ РѕСЃС‚Р°РІС€РµРµСЃСЏ РјРµСЃС‚Рѕ Рё СѓР¶РёРјР°РµС‚СЃСЏ РїРµСЂРІС‹Рј */
+/* инпут занимает всё оставшееся место и ужимается первым */
 .searchInput{
   width:100%;
   flex: 1 1 auto; min-width: 60px; max-width:100%;
@@ -1490,7 +1490,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 }
 
 
-/* РєРЅРѕРїРєРё/С‡РёРїС‹ вЂ” С„РёРєСЃ. С€РёСЂРёРЅР°, РЅРµ СЃР¶РёРјР°СЋС‚СЃСЏ Рё РЅРµ РїРµСЂРµРЅРѕСЃСЏС‚СЃСЏ */
+/* кнопки/чипы — фикс. ширина, не сжимаются и не переносятся */
 .iconBtn,
 .sortWrap,
 .adminWrap,
@@ -1504,9 +1504,9 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   top:calc(100% + 6px);
    left:0;
    right:auto;
-   /* РќР• РїСЂРёРІСЏР·С‹РІР°РµРј Рє С€РёСЂРёРЅРµ РёРЅРїСѓС‚Р°: РґРµР»Р°РµРј Р°РґР°РїС‚РёРІРЅРѕ */
+   /* НЕ привязываем к ширине инпута: делаем адаптивно */
    inline-size:clamp(250px, 92vw, 560px);
-   /* Рё РЅРµ РґР°С‘Рј РІС‹Р»РµР·С‚Рё Р·Р° СЌРєСЂР°РЅ */
+   /* и не даём вылезти за экран */
    max-inline-size:calc(100vw - 24px);
    box-sizing:border-box;
 
@@ -1519,7 +1519,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   z-index:3000;
 }
 
- /* RTL: РґСЂРѕРїРґР°СѓРЅ РґРѕР»Р¶РµРЅ РѕС‚РєСЂС‹РІР°С‚СЊСЃСЏ РѕС‚ РїСЂР°РІРѕРіРѕ РєСЂР°СЏ РїРѕРёСЃРєР° */
+ /* RTL: дропдаун должен открываться от правого края поиска */
  [dir="rtl"] .searchDrop{
    left:auto;
    right:0;
@@ -1784,7 +1784,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 .starModeBtn.on{ border-color:rgba(255,215,90,.55); box-shadow:0 0 0 3px rgba(255,215,90,.08); }
 
 .starModeBtn.on .starPath{ fill:rgba(255,215,90,.95); stroke:rgba(255,215,90,.95); }
-    .adminWrap{ position:relative; flex:0 0 auto } /* СЃРїСЂР°РІР° РѕС‚ РїРѕРёСЃРєР°, РІ СЂР°РјРєР°С… .controls */
+    .adminWrap{ position:relative; flex:0 0 auto } /* справа от поиска, в рамках .controls */
     .adminBtn{ border:1px solid rgba(255,255,255,.16); border-radius:12px; padding:.55rem .8rem; font-weight:700; letter-spacing:.4px }
     .adminOff{ background:rgba(255,90,90,.10); border-color:rgba(255,120,120,.45); color:#ffb1a1 }
     .adminOn{ background:rgba(70,210,120,.12); border-color:rgba(110,240,170,.45); color:#baf7d6 }
@@ -1793,7 +1793,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
     .qft_toast{ max-width:min(420px,90vw); padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(10,14,22,.94); color:#eaf4ff; box-shadow:0 10px 28px rgba(0,0,0,.45) }
     .qft_toast.ok{ border-color:rgba(70,220,130,.5) } .qft_toast.warn{ border-color:rgba(255,200,80,.5) } .qft_toast.err{ border-color:rgba(255,90,90,.5) }
 
-    /* РјРёРЅРё-РїРѕРїРѕРІРµСЂС‹ */
+    /* мини-поповеры */
     .adminPop{
       position:absolute; width: min(62vw, 360px);
       border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98);
@@ -2586,7 +2586,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 
     .avaCropBtns{ display:flex; gap:8px; justify-content:flex-end; }
 
-    /* РќР° РјРѕР±РёР»Рµ РґРµР»Р°РµРј РїСЂРµРІСЊСЋ вЂњРІС‹С€Рµ/РЅРёР¶РµвЂќ, РєР°Рє С‚С‹ РїСЂРѕСЃРёР» */
+    /* На мобиле делаем превью “выше/ниже”, как ты просил */
     @media (max-width:520px){
       .avaUploadBtn{ width:86px; height:32px; border-radius:12px; }
       .avaCropPanel{
@@ -2594,10 +2594,10 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
       }
       .avaCropBox{
         width:100%;
-        height:140px;   /* С‡СѓС‚СЊ РІС‹С€Рµ РЅР° РјРѕР±РёР»Рµ */
+        height:140px;   /* чуть выше на мобиле */
       }
     }
-/* Р’СЊСЋРїРѕСЂС‚С‹: РїРµСЂРµРЅРѕСЃРёРј Р’Р•РЎР¬ СЂСЏРґ РїРѕРґ Р°РІР°С‚Р°СЂ, РЅРѕ РІРЅСѓС‚СЂРё вЂ” РѕРґРЅР° СЃС‚СЂРѕРєР° */
+/* Вьюпорты: переносим ВЕСЬ ряд под аватар, но внутри — одна строка */
 @media (max-width:860px){
   .controls{
     order:3;
@@ -2608,42 +2608,42 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
     gap:6px;
     flex-wrap:nowrap;         /* в†ђ РќР• РџР•Р Р•РќРћРЎРРўРЎРЇ Р’РќРЈРўР Р */
   }
-  .search{ flex:1 1 0; min-width:120px } /* СЃР¶РёРјР°РµС‚СЃСЏ РїРµСЂРІРѕР№ */
+  .search{ flex:1 1 0; min-width:120px } /* сжимается первой */
 }
 
-/* РЈР¶Рµ СѓР¶Рµ: РµС‰С‘ СЃРёР»СЊРЅРµРµ СѓР¶РёРјР°РµРј РїРѕРёСЃРє, РєРЅРѕРїРєРё РѕСЃС‚Р°СЋС‚СЃСЏ */
+/* Уже уже: ещё сильнее ужимаем поиск, кнопки остаются */
 @media (max-width:560px){
   .head{ padding:10px }
   .controls{
     order:3;
     flex:0 0 100%;
     min-width:100%;
-    flex-wrap:nowrap;         /* в†ђ РІСЃС‘ РµС‰С‘ РѕРґРЅР° Р»РёРЅРёСЏ */
+    flex-wrap:nowrap;         /* ← всё ещё одна линия */
   }
   .search{ flex:1 1 0; min-width:90px }
   .iconBtn{ width:36px; height:36px }
 }
 
-/* РЎРѕРІСЃРµРј СѓР·РєРѕ: РјРёРЅРёРјР°Р»СЊРЅС‹Р№ РґРѕРїСѓСЃРє РґР»СЏ РїРѕРёСЃРєР° */
+/* Совсем узко: минимальный допуск для поиска */
 @media (max-width:420px){
   .search{ flex:1 1 0; min-width:70px }
 }
-/* === VIP styles (РєРЅРѕРїРєР° + РїРѕРїРѕРІРµСЂ) === */
+/* === VIP styles (кнопка + поповер) === */
 .iconBtn.vip { border-color: rgba(255,215,0,.55); color:#ffd700; box-shadow:0 0 14px rgba(255,215,0,.25) }
 .iconBtn.vipGray { opacity:.85 }
 .vipWrap { position:relative }
 
-/* РІРЅРµ РјРµРґРёР°: С„РёРєСЃРёСЂСѓРµРј, С‡С‚Рѕ РєРЅРѕРїРєРё/С‡РёРїС‹ РЅРµ СЃР¶РёРјР°СЋС‚СЃСЏ */
+/* вне медиа: фиксируем, что кнопки/чипы не сжимаются */
 .iconBtn,
 .sortWrap,
 .adminWrap,
 .adminBtn{ flex:0 0 auto; }
-/* РІ С‚РІРѕРё РіР»РѕР±Р°Р»С‹/РјРѕРґСѓР»СЊ */
+/* в твои глобалы/модуль */
 .emojiGrid.vip { outline: 1px dashed rgba(255,215,0,.25); border-radius: 10px; padding: 6px; }
 .emojiBtn.vipAnim { will-change: transform; }
 .emojiBtn.vipAnim:hover { transform: translateY(-1px) scale(1.02); }
 
-/* Р»С‘РіРєРѕРµ РїРѕРґРїСЂС‹РіРёРІР°РЅРёРµ РЅР° hover */
+/* лёгкое подпрыгивание на hover */
 .hoverPop {
   transition: filter .12s ease, color .12s ease, background-color .12s ease, border-color .12s ease;
   will-change: auto;
@@ -2673,7 +2673,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 @media (max-width:480px){
   .vipEmojiBig{ width:var(--vip-emoji-size-sm); height:var(--vip-emoji-size-sm); }
 }
-/* РљСЂСѓРїРЅС‹Р№ Р°РєРєСѓСЂР°С‚РЅС‹Р№ Р±РµР№РґР¶ РЅРёРєР° (РµРґРёРЅС‹Р№ РґР»СЏ РІСЃРµС…) */
+/* Крупный аккуратный бейдж ника (единый для всех) */
 .nick-badge{
   display:inline-flex;
   align-items:center;
@@ -2700,11 +2700,11 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 @media (max-width:640px){
   .nick-text{ max-width:16ch; }
 }
-/* --- VIP badge РЅР°Рґ РЅРёРєРѕРј (20s / 5s) ---
-   РќР°СЃС‚СЂРѕР№РєР° РїРѕР·РёС†РёРѕРЅРёСЂРѕРІР°РЅРёСЏ/СЂР°Р·РјРµСЂР°:
-   --vip-badge-w, --vip-badge-h  (СЂР°Р·РјРµСЂ)
-   --vip-badge-gap              (СЂР°СЃСЃС‚РѕСЏРЅРёРµ РјРµР¶РґСѓ Р±РµР№РґР¶РµРј Рё РЅРёРєРѕРј)
-   --vip-badge-shift-x/y        (СЃРґРІРёРі Р±РµР№РґР¶Р°)
+/* --- VIP badge над ником (20s / 5s) ---
+   Настройка позиционирования/размера:
+   --vip-badge-w, --vip-badge-h  (размер)
+   --vip-badge-gap              (расстояние между бейджем и ником)
+   --vip-badge-shift-x/y        (сдвиг бейджа)
 */
 :root{
   --vip-badge-w: clamp(42px, 9vw, 54px);
@@ -2741,7 +2741,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   will-change: opacity;
 }
 
-/* РѕР±С‰РёР№ С†РёРєР» 25s: 1.png РІРёРґРЅРѕ 0..20s (80%), 2.png РІРёРґРЅРѕ 20..25s (20%) */
+/* общий цикл 25s: 1.png видно 0..20s (80%), 2.png видно 20..25s (20%) */
 @keyframes vipFlipA{
   0%, 79.99% { opacity: 1; }
   80%, 100%  { opacity: 0; }
@@ -2762,7 +2762,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 /* ====== РђРќРРњРђР¦РРЇ РќРРљРђ ====== */
 .nick-animate{
   position: relative;
-  /* Р±РµРіСѓС‰РёР№ РіСЂР°РґРёРµРЅС‚ РїРѕ СЂР°РјРєРµ */
+  /* бегущий градиент по рамке */
   background:
     linear-gradient(#0b1220,#0b1220) padding-box,
     linear-gradient(135deg,#5b9dff,#9b5bff,#ff5bb2,#5b9dff) border-box;
@@ -2770,19 +2770,19 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   animation: nickGradient 6s linear infinite, nickGlow 2.2s ease-in-out infinite;
 }
 
-/* РјСЏРіРєРѕРµ СЃРІРµС‡РµРЅРёРµ */
+/* мягкое свечение */
 @keyframes nickGlow{
   0%,100%{ box-shadow: 0 0 .5rem rgba(91,157,255,.28), inset 0 0 .35rem rgba(155,91,255,.16) }
   50%   { box-shadow: 0 0 1.15rem rgba(91,157,255,.55), inset 0 0 .55rem rgba(155,91,255,.28) }
 }
 
-/* РґРІРёР¶РµРЅРёРµ РіСЂР°РґРёРµРЅС‚Р° СЂР°РјРєРё */
+/* движение градиента рамки */
 @keyframes nickGradient{
   0%   { background-position: 0% 0%, 0% 50% }
   100%{ background-position: 200% 200%, 300% 50% }
 }
 
-/* СѓРІР°Р¶РµРЅРёРµ Рє reduced motion */
+/* уважение к reduced motion */
 @media (prefers-reduced-motion: reduce){
   .nick-animate{ animation: none }
 }
@@ -2941,7 +2941,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   }
 }
 
-/* Р»Р°Р№С‚Р±РѕРєСЃ */
+/* лайтбокс */
 .lightbox{
   position:fixed; inset:0; background:rgba(8,12,22,.9);
   display:flex; align-items:center; justify-content:center; z-index:1000;
@@ -2954,7 +2954,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 }
 .lightbox .prev{ left:16px }
 .lightbox .next{ right:16px }
-/* Р»РѕРєР°Р»РёР·Р°С†РёСЏ С‚РѕР»СЊРєРѕ РІРЅСѓС‚СЂРё СЃС‚СЂРѕРєРё РєРѕРјРїРѕР·РµСЂР° */
+/* локализация только внутри строки композера */
 .forumComposer .attachPreviewRow{
   background: transparent !important;
   border: 0 !important;
@@ -2973,7 +2973,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   display: block;
 }
 
-/* cРµСЂРѕСЃС‚СЊ РјРѕРіР»Р° РїСЂРёС…РѕРґРёС‚СЊ РѕС‚ РіР»РѕР±Р°Р»СЊРЅС‹С… СЃС‚РёР»РµР№ button */
+/* cерость могла приходить от глобальных стилей button */
 .forumComposer .attachPreviewRow button{
   background: transparent !important;
   border: 0 !important;
@@ -2981,7 +2981,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   padding: 0;
 }
 
-/* Р° РґР»СЏ РєСЂРµСЃС‚РёРєР° Р·Р°РґР°С‘Рј СЃРІРѕР№ С‚С‘РјРЅС‹Р№ РєСЂСѓР¶РѕРє РѕС‚РґРµР»СЊРЅРѕ */
+/* а для крестика задаём свой тёмный кружок отдельно */
 .forumComposer .attachPreviewRemove{
   position: absolute;
   top: -6px; right: -6px;
@@ -2994,12 +2994,12 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   cursor: pointer;
 }
 
-/* === Q COIN (РёРЅР»Р°Р№РЅ + РјРѕРґР°Р»РєР°) === */
+/* === Q COIN (инлайн + модалка) === */
 .qcoinRow{
   display:inline-flex; align-items:center; gap:10px; margin-left:10px;
 }
 
-/* Р—РѕР»РѕС‚Р°СЏ РЅР°РґРїРёСЃСЊ СЃ РїРµСЂРµР»РёРІРѕРј Рё СЃРІРµС‡РµРЅРёРµРј */
+/* Золотая надпись с переливом и свечением */
 .qcoinLabel{
   font-size:2.4em; font-weight:900; letter-spacing:.4px;
   background:
@@ -3024,7 +3024,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   100%{ text-shadow:0 0 .3rem rgba(255,215,0,.35), 0 0 .1rem rgba(255,255,180,.35) }
 }
 
-/* РЎР°РјРѕ С‡РёСЃР»Рѕ вЂ” РєСЂСѓРїРЅРµРµ, СЃ В«СЃС‚РµРєР»СЏРЅРЅРѕР№В» РїРѕРґР»РѕР¶РєРѕР№ */
+/* Само число — крупнее, с «стеклянной» подложкой */
 .qcoinValue{
   font-size:1.6em;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -3037,26 +3037,26 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 .qcoinValue.paused{ color:#ff8c8c; animation:blinkPause .9s steps(1) infinite }
 @keyframes blinkPause{ 50%{ opacity:.45 } }
 
-/* РјРѕРґР°Р»РєР° вЂ” СЃРєСЂРѕР»Р»РёРј РїРѕРґР»РѕР¶РєСѓ, РєР°СЂС‚РѕС‡РєР° СЂР°СЃС‚СЏРіРёРІР°РµС‚СЃСЏ РїРѕ РєРѕРЅС‚РµРЅС‚Сѓ */
+/* модалка — скроллим подложку, карточка растягивается по контенту */
 .qcoinModal{
   position:fixed; inset:0; z-index:3200;
-  display:grid; align-items:start; justify-items:center; /* РІРјРµСЃС‚Рѕ place-items:center */
-  overflow:auto;                     /* СЃРєСЂРѕР»Р» Сѓ РїРѕРґР»РѕР¶РєРё */
-  padding:16px 10px;                 /* Р·Р°РїР°СЃ РѕС‚ РєСЂР°С‘РІ СЌРєСЂР°РЅР° */
+  display:grid; align-items:start; justify-items:center; /* вместо place-items:center */
+  overflow:auto;                     /* скролл у подложки */
+  padding:16px 10px;                 /* запас от краёв экрана */
   background:rgba(8,12,22,.8);
 }
 .qcoinCard{
-  width:min(520px, 88vw);            /* С€РёСЂРёРЅСѓ РќР• С‚СЂРѕРіР°РµРј */
+  width:min(520px, 88vw);            /* ширину НЕ трогаем */
   height:auto !important;
-  max-height:none !important;        /* СѓР±РёСЂР°РµРј РѕРіСЂР°РЅРёС‡РµРЅРёРµ РїРѕ РІС‹СЃРѕС‚Рµ */
-  overflow:visible !important;       /* Р±РµР· РІРЅСѓС‚СЂРµРЅРЅРµРіРѕ СЃРєСЂРѕР»Р»Р° */
+  max-height:none !important;        /* убираем ограничение по высоте */
+  overflow:visible !important;       /* без внутреннего скролла */
   border:1px solid rgba(255,255,255,.14); border-radius:14px;
   background:rgba(10,14,20,.96); padding:14px;
   box-shadow:0 10px 30px rgba(0,0,0,.45);
 }
 .qcoinCardHdr{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px }
 
-/* РіРёС„/Р°РІР°С‚Р°СЂ вЂ” РѕРґРЅР° РІРµСЂСЃРёСЏ (СѓР±СЂР°РЅС‹ РґСѓР±Р»Рё) */
+/* гиф/аватар — одна версия (убраны дубли) */
 .qcoinMini{
   width:  clamp(108px, 12.6vw, 144px);
   height: clamp(108px, 12.6vw, 144px);
@@ -3064,17 +3064,17 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   object-fit:cover;
   border:1px solid rgba(255,215,0,.4);
   flex:0 0 auto;
-  background:#000;                   /* РЅР° СЃР»СѓС‡Р°Р№ Р·Р°РіСЂСѓР·РєРё РјРµС‚Р°РґР°РЅРЅС‹С… */
+  background:#000;                   /* на случай загрузки метаданных */
   box-shadow:0 4px 12px rgba(50,80,160,.25);
 }
 
 .qcoinPopBody{
-  max-height:none !important;        /* СЃРЅРёРјР°РµРј РІС‚РѕСЂРѕР№ Р»РёРјРёС‚ */
-  overflow:visible !important;       /* СЃРєСЂРѕР»Р» РЅРµ Р·РґРµСЃСЊ */
+  max-height:none !important;        /* снимаем второй лимит */
+  overflow:visible !important;       /* скролл не здесь */
 }
 .qcoinCardHdr img, .qcoinPopBody img{ max-width:100%; height:auto }
 
-/* РєРЅРѕРїРєРё (СЃС‚Р°СЂС‹Рµ) */
+/* кнопки (старые) */
 .qcoinBtn{
   border:1px solid rgba(255,255,255,.16);
   background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
@@ -3087,7 +3087,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   box-shadow:0 0 22px rgba(255,215,0,.35);
 }
 
-/* РќР•РћРќРћР’РђРЇ В«Р‘РёСЂР¶Р°В» РІ РјРѕРґР°Р»РєРµ */
+/* НЕОНОВАЯ «Биржа» в модалке */
 .qcoinExchangeBtn{
   position:relative;
   padding:.55rem 1rem; border-radius:.8rem; font-weight:800; letter-spacing:.4px;
@@ -3122,7 +3122,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   0%{ left:-40% } 100%{ left:140% }
 }
 
-/* Р°РЅРёРјР°С†РёРё off РїСЂРё reduced motion */
+/* анимации off при reduced motion */
 @media (prefers-reduced-motion: reduce){
   .qcoinLabel{ animation:none }
   .qcoinValue.paused{ animation:none }
@@ -3141,53 +3141,53 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 .forumTopbar .left{ display:flex; gap:6px; align-items:center; }
 .forumTopbar .right{ display:flex; gap:6px; align-items:center; }
 
-/* РєР°СЂС‚РѕС‡РєРё РјРѕР¶РЅРѕ РїРµСЂРµРёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РёР· Р»РµРІРѕР№/РїСЂР°РІРѕР№ РєРѕР»РѕРЅРѕРє Р±РµР· РёР·РјРµРЅРµРЅРёР№ */
+/* карточки можно переиспользовать из левой/правой колонок без изменений */
 
-/* === Thread view: С„РёРєСЃ РѕР±СЂРµР·Р°РЅРёР№ СЃРїСЂР°РІР° Рё СЃС‚РѕРїСЂРѕС†РµРЅС‚РЅР°СЏ Р°РґР°РїС‚РёРІРЅРѕСЃС‚СЊ === */
+/* === Thread view: фикс обрезаний справа и стопроцентная адаптивность === */
 .forum_root, .forum_root * { box-sizing: border-box; }
 
-/* РљР»СЋС‡РµРІРѕРµ: РїРѕР·РІРѕР»СЏРµРј РґРµС‚СЏРј РІ grid/flex СЃР¶РёРјР°С‚СЊСЃСЏ, СѓР±РёСЂР°РµРј В«РЅРµРІРёРґРёРјСѓСЋВ» РїРѕР»РѕРІРёРЅСѓ */
+/* Ключевое: позволяем детям в grid/flex сжиматься, убираем «невидимую» половину */
 .forum_root .body,
 .forum_root .head,
 .forum_root .title,
 .forum_root .composer { max-width: 100%; min-width: 0; }
 
-/* РЎРїРёСЃРѕРє РїРѕСЃС‚РѕРІ РІРЅСѓС‚СЂРё .body РјРѕР¶РµС‚ Р±С‹С‚СЊ grid/flex вЂ” С‚РѕР¶Рµ РґР°С‘Рј СЃР¶РёРјР°С‚СЊСЃСЏ */
+/* Список постов внутри .body может быть grid/flex — тоже даём сжиматься */
 .forum_root .body > .grid,
 .forum_root .body > .flex { min-width: 0; }
 
-/* РќР° РІСЃСЏРєРёР№ вЂ” РµСЃР»Рё РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґРІСѓС…РєРѕР»РѕРЅРѕС‡РЅР°СЏ СЃРµС‚РєР° .grid2 */
+/* На всякий — если используется двухколоночная сетка .grid2 */
 .grid2 > * { min-width: 0; }
 
-/* Р’РµСЂС‚РёРєР°Р»СЊРЅС‹Р№ СЃРєСЂРѕР»Р», Р° РїРѕ X вЂ” РЅРµ СЂРµР¶РµРј (РєРѕРЅС‚РµРЅС‚ СЃР°Рј СЃРѕР¶РјС‘С‚СЃСЏ) */
+/* Вертикальный скролл, а по X — не режем (контент сам сожмётся) */
 .forum_root .body { overflow-y: auto; overflow-x: visible; }
 
-/* Р›РёРїРєРёР№ РєРѕРјРїРѕР·РµСЂ СЂР°СЃС‚СЏРіРёРІР°РµРј РїРѕ С€РёСЂРёРЅРµ РєРѕРЅС‚РµР№РЅРµСЂР°-СЃРєСЂРѕР»Р»Р° */
+/* Липкий композер растягиваем по ширине контейнера-скролла */
 .forum_root .composer { left: 0; right: 0; width: auto; }
 
-/* === FIX: РєРЅРѕРїРєРё РґРµР№СЃС‚РІРёР№ РІ РєР°СЂС‚РѕС‡РєР°С… РїРѕСЃС‚РѕРІ РІСЃРµРіРґР° РІ РѕРґРёРЅ СЂСЏРґ Рё СЃР¶РёРјР°СЋС‚СЃСЏ === */
+/* === FIX: кнопки действий в карточках постов всегда в один ряд и сжимаются === */
 
-/* 1) РЎС‚СЂР°С…СѓРµРј РєРѕРЅС‚РµР№РЅРµСЂС‹ РєР°СЂС‚РѕС‡РµРє РѕС‚ РѕР±СЂРµР·Р°РЅРёСЏ РєРѕРЅС‚РµРЅС‚Р° */
+/* 1) Страхуем контейнеры карточек от обрезания контента */
 [id^="post_"],
 [id^="post_"] > div,
 .postCard {
-  min-width: 0;         /* РїРѕР·РІРѕР»СЏРµС‚ flex-РґРµС‚СЏРј СЃР¶РёРјР°С‚СЊСЃСЏ */
-  overflow: visible;    /* РёСЃРєР»СЋС‡Р°РµС‚ РІРЅСѓС‚СЂРµРЅРЅРµРµ В«РїРѕРґСЂРµР·Р°РЅРёРµВ» */
+  min-width: 0;         /* позволяет flex-детям сжиматься */
+  overflow: visible;    /* исключает внутреннее «подрезание» */
 }
 
-/* 2) Р СЏРґ СЃ РєРЅРѕРїРєР°РјРё РґРµР№СЃС‚РІРёР№ РїРѕСЃС‚Р°: Р·Р°РїСЂРµС‰Р°РµРј РїРµСЂРµРЅРѕСЃ, РґР°С‘Рј СЃР¶Р°С‚РёРµ */
+/* 2) Ряд с кнопками действий поста: запрещаем перенос, даём сжатие */
 [id^="post_"] .actions,
 .postCard .actions,
 .post .actions {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: nowrap;    /* РЅРёРєРѕРіРґР° РЅРµ РїРµСЂРµРЅРѕСЃРёС‚СЊ РЅР° РІС‚РѕСЂСѓСЋ СЃС‚СЂРѕРєСѓ */
+  flex-wrap: nowrap;    /* никогда не переносить на вторую строку */
   min-width: 0;
   overflow: visible;
-  white-space: nowrap;  /* С‚РµРєСЃС‚С‹ РЅР° РєРЅРѕРїРєР°С… РІ РѕРґРЅСѓ СЃС‚СЂРѕРєСѓ */
+  white-space: nowrap;  /* тексты на кнопках в одну строку */
 }
-/* [ACTIONS-SHRINK-EXTRA] РµС‰С‘ СЃРёР»СЊРЅРµРµ СЂР°Р·СЂРµС€Р°РµРј СЃР¶Р°С‚РёРµ РЅР° СЃРІРµСЂС…СѓР·РєРёС… */
+/* [ACTIONS-SHRINK-EXTRA] ещё сильнее разрешаем сжатие на сверхузких */
 .post .actions .btn,
 .post .actions .iconBtn {
   flex: 0 1 auto;
@@ -3203,23 +3203,23 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   white-space: nowrap;
 }
 
-/* 3) РЎР°РјРё РєРЅРѕРїРєРё: СЂР°Р·СЂРµС€Р°РµРј СЃР¶РёРјР°С‚СЊСЃСЏ, СѓРјРµРЅСЊС€Р°РµРј РїР°РґРґРёРЅРіРё Рё С€СЂРёС„С‚ РїРѕ РјРµСЂРµ СЃСѓР¶РµРЅРёСЏ */
+/* 3) Сами кнопки: разрешаем сжиматься, уменьшаем паддинги и шрифт по мере сужения */
 [id^="post_"] .actions .btn,
 [id^="post_"] .actions .iconBtn,
 .postCard .actions .btn,
 .postCard .actions .iconBtn,
 .post .actions .btn,
 .post .actions .iconBtn {
-  flex: 0 1 auto;                    /* РјРѕР¶РЅРѕ СЃР¶РёРјР°С‚СЊСЃСЏ */
-  min-width: 0;                      /* С‡С‚РѕР±С‹ РЅРµ РґРµСЂР¶Р°Р»Рё С€РёСЂРёРЅСѓ */
-  height: clamp(26px, 4.2vw, 32px);  /* РЅРёР¶Рµ вЂ” СѓР¶Рµ РЅРµСѓРґРѕР±РЅРѕ РЅР°Р¶РёРјР°С‚СЊ */
+  flex: 0 1 auto;                    /* можно сжиматься */
+  min-width: 0;                      /* чтобы не держали ширину */
+  height: clamp(26px, 4.2vw, 32px);  /* ниже — уже неудобно нажимать */
   padding-inline: clamp(6px, 1.4vw, 12px);
   padding-block: 4px;
   font-size: clamp(11px, 1.6vw, 14px);
-  line-height: 1;                    /* РєРѕРјРїР°РєС‚РЅРµРµ СЃС‚СЂРѕРєР° */
+  line-height: 1;                    /* компактнее строка */
 }
 
-/* 4) Р•СЃР»Рё РІ РєРЅРѕРїРєРµ РµСЃС‚СЊ С‚РµРєСЃС‚РѕРІС‹Р№ СЃС‹РЅ вЂ” РїСѓСЃС‚СЊ РѕРЅ СѓР¶РёРјР°РµС‚СЃСЏ СЃ С‚СЂРѕРµС‚РѕС‡РёРµРј */
+/* 4) Если в кнопке есть текстовый сын — пусть он ужимается с троеточием */
 [id^="post_"] .actions .btn > span,
 .postCard .actions .btn > span,
 .post .actions .btn > span {
@@ -3229,7 +3229,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   text-overflow: ellipsis;
 }
 
-/* 5) РќР° СЃРІРµСЂС…СѓР·РєРёС… вЂ” С‡СѓС‚СЊ СѓРјРµРЅСЊС€Р°РµРј Р·Р°Р·РѕСЂС‹, РЅРѕ РІСЃС‘ РµС‰С‘ РІ РѕРґРёРЅ СЂСЏРґ */
+/* 5) На сверхузких — чуть уменьшаем зазоры, но всё ещё в один ряд */
 @media (max-width: 360px) {
   [id^="post_"] .actions,
   .postCard .actions,
@@ -3247,32 +3247,32 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
     height: clamp(24px, 3.8vw, 30px);
   }
 }
-/* === FIX: РїРµСЂРµРЅРѕСЃ РґР»РёРЅРЅС‹С… title/description РІ РєР°СЂС‚РѕС‡РєР°С… С‚РµРј === */
+/* === FIX: перенос длинных title/description в карточках тем === */
 
-/* СЃС‚СЂР°С…СѓРµРј РєРѕРЅС‚РµР№РЅРµСЂС‹ РєР°СЂС‚РѕС‡РµРє С‚РµРј РѕС‚ В«СЂР°СЃС‚Р°Р»РєРёРІР°РЅРёСЏВ» СЃРѕСЃРµРґРµР№ */
+/* страхуем контейнеры карточек тем от «расталкивания» соседей */
 [id^="topic_"],
 .topicCard {
   min-width: 0;
   max-width: 100%;
-  overflow-x: hidden; /* РЅРµ РґР°С‘Рј РіРѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅС‹Р№ СЃРєСЂРѕР»Р» РёР·-Р·Р° РґР»РёРЅРЅС‹С… СЃР»РѕРІ */
+  overflow-x: hidden; /* не даём горизонтальный скролл из-за длинных слов */
 }
 
-/* Р·Р°РіРѕР»РѕРІРѕРє С‚РµРјС‹ */
+/* заголовок темы */
 [id^="topic_"] .title,
 .topicCard .title,
 [id^="topic_"] h2,
 .topicCard h2,
 [id^="topic_"] h3,
 .topicCard h3 {
-  white-space: normal !important;   /* СЂР°Р·СЂРµС€Р°РµРј РїРµСЂРµРЅРѕСЃ СЃС‚СЂРѕРє */
-  overflow-wrap: anywhere;          /* РїРµСЂРµРЅРѕСЃРёРј РґР°Р¶Рµ В«СЃР»РёС‚РєРёВ» СЃРёРјРІРѕР»РѕРІ */
-  word-break: break-word;           /* РєР»Р°СЃСЃРёС‡РµСЃРєРёР№ РїРµСЂРµРЅРѕСЃ РґР»РёРЅРЅС‹С… СЃР»РѕРІ */
-  hyphens: auto;                    /* СЂР°СЃСЃС‚Р°РІР»СЏРµРј РјСЏРіРєРёРµ РїРµСЂРµРЅРѕСЃС‹ С‚Р°Рј, РіРґРµ РјРѕР¶РЅРѕ */
+  white-space: normal !important;   /* разрешаем перенос строк */
+  overflow-wrap: anywhere;          /* переносим даже «слитки» символов */
+  word-break: break-word;           /* классический перенос длинных слов */
+  hyphens: auto;                    /* расставляем мягкие переносы там, где можно */
   min-width: 0;
   max-width: 100%;
 }
 
-/* РѕРїРёСЃР°РЅРёРµ С‚РµРјС‹ (РїРѕРґР·Р°РіРѕР»РѕРІРѕРє/РїСЂРµРІСЊСЋ) */
+/* описание темы (подзаголовок/превью) */
 [id^="topic_"] .desc,
 .topicCard .desc,
 [id^="topic_"] .subtitle,
@@ -3287,26 +3287,26 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   max-width: 100%;
 }
 
-/* РµСЃР»Рё РІРЅСѓС‚СЂРё РїРѕРїР°РґР°СЋС‚СЃСЏ РґР»РёРЅРЅС‹Рµ URL вЂ” РЅРµ Р»РѕРјР°РµРј СЂР°СЃРєР»Р°РґРєСѓ, РЅРѕ РїРµСЂРµРЅРѕСЃРёРј */
+/* если внутри попадаются длинные URL — не ломаем раскладку, но переносим */
 [id^="topic_"] .title a,
 [id^="topic_"] .desc  a,
 .topicCard .title a,
 .topicCard .desc  a {
-  word-break: break-all;    /* Р°РґСЂРµСЃ РјРѕР¶РЅРѕ СЂСѓР±РёС‚СЊ РІ Р»СЋР±РѕРј РјРµСЃС‚Рµ */
+  word-break: break-all;    /* адрес можно рубить в любом месте */
   overflow-wrap: anywhere;
   text-decoration: inherit;
 }
 
-/* РЅР° СЃРІРµСЂС…СѓР·РєРёС… вЂ” СЃР»РµРіРєР° СѓРјРµРЅСЊС€Р°РµРј РјРµР¶СЃС‚СЂРѕС‡РЅС‹Рµ/РѕС‚СЃС‚СѓРїС‹, С‡С‚РѕР±С‹ С‚РµРєСЃС‚ В«СѓРјРµС‰Р°Р»СЃСЏ РєСЂР°СЃРёРІРѕВ» */
+/* на сверхузких — слегка уменьшаем межстрочные/отступы, чтобы текст «умещался красиво» */
 @media (max-width: 360px) {
   [id^="topic_"] .title,
   .topicCard .title { line-height: 1.15; }
   [id^="topic_"] .desc,
   .topicCard .desc  { line-height: 1.2; }
 }
-/* === HARD FIX: С‚РµРјС‹ РЅРµ РІС‹Р»РµР·Р°СЋС‚, Р»СЋР±С‹Рµ РґР»РёРЅРЅС‹Рµ СЃС‚СЂРѕРєРё РїРµСЂРµРЅРѕСЃСЏС‚СЃСЏ === */
+/* === HARD FIX: темы не вылезают, любые длинные строки переносятся === */
 
-/* 0) РЎС‚СЂР°С…СѓРµРј РєР°СЂС‚РѕС‡РєСѓ С‚РµРјС‹ Рё РІСЃРµС… РµС‘ РґРµС‚РµР№: РјРѕР¶РЅРѕ СЃР¶РёРјР°С‚СЊСЃСЏ, РЅРµР»СЊР·СЏ СЂР°СЃРїРёС…РёРІР°С‚СЊ */
+/* 0) Страхуем карточку темы и всех её детей: можно сжиматься, нельзя распихивать */
 [id^="topic_"],
 .topicCard {
   max-width: 100% !important;
@@ -3315,18 +3315,18 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 }
 [id^="topic_"] * ,
 .topicCard * {
-  min-width: 0 !important;            /* РєР»СЋС‡ Рє РЅРѕСЂРјР°Р»СЊРЅРѕРјСѓ СЃР¶Р°С‚РёСЋ РІРѕ flex/grid */
+  min-width: 0 !important;            /* ключ к нормальному сжатию во flex/grid */
 }
 
-/* 1) РЎР°Рј Р·Р°РіРѕР»РѕРІРѕРє С‚РµРјС‹ вЂ” Р»РѕРјР°РµРј РґР°Р¶Рµ В«РѕРѕРѕРѕРѕРѕРѕРѕВ» Рё РґР»РёРЅРЅС‹Рµ URL/СЃР»РёС‚РєРё */
+/* 1) Сам заголовок темы — ломаем даже «оооооооо» и длинные URL/слитки */
 [id^="topic_"] .title,
 .topicCard .title,
 [id^="topic_"] h1, [id^="topic_"] h2, [id^="topic_"] h3,
 .topicCard h1, .topicCard h2, .topicCard h3 {
   display: block;
   white-space: normal !important;
-  overflow-wrap: anywhere !important;  /* РіР»Р°РІРЅС‹Р№ РіРµСЂРѕР№ */
-  word-break: break-word !important;   /* РєР»Р°СЃСЃРёРєР° */
+  overflow-wrap: anywhere !important;  /* главный герой */
+  word-break: break-word !important;   /* классика */
 
   hyphens: auto;
   max-width: 100%;
@@ -3334,7 +3334,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 } 
 
 
-/* РўРµРєСЃС‚РѕРІС‹Рµ СѓР·Р»С‹ РІРЅСѓС‚СЂРё Р·Р°РіРѕР»РѕРІРєР° (span/a/strong Рё С‚.Рї.) вЂ” С‚РѕР¶Рµ Р»РѕРјР°РµРј */
+/* Текстовые узлы внутри заголовка (span/a/strong и т.п.) — тоже ломаем */
 [id^="topic_"] .title *, .topicCard .title * {
   white-space: normal !important;
   overflow-wrap: anywhere !important;
@@ -3342,7 +3342,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   line-break: anywhere !important;
 }
 
-/* 2) РћРїРёСЃР°РЅРёРµ С‚РµРјС‹ вЂ” С‚Рµ Р¶Рµ РїСЂР°РІРёР»Р° */
+/* 2) Описание темы — те же правила */
 [id^="topic_"] .desc,
 .topicCard .desc,
 [id^="topic_"] .subtitle,
@@ -3358,7 +3358,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   max-width: 100%;
 }
 
-/* Р›СЋР±С‹Рµ СЃСЃС‹Р»РєРё РІРЅСѓС‚СЂРё title/desc вЂ” РїРѕР·РІРѕР»СЏРµРј СЂСѓР±РёС‚СЊ РІ Р»СЋР±РѕРј РјРµСЃС‚Рµ */
+/* Любые ссылки внутри title/desc — позволяем рубить в любом месте */
 [id^="topic_"] .title a,
 [id^="topic_"] .desc a,
 .topicCard .title a,
@@ -3367,17 +3367,17 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   overflow-wrap: anywhere !important;
 }
 
-/* 3) Р•СЃР»Рё С€Р°РїРєР° РєР°СЂС‚РѕС‡РєРё вЂ” flex/grid: РєРѕРЅС‚РµРЅС‚РЅР°СЏ РєРѕР»РѕРЅРєР° РґРѕР»Р¶РЅР° РёРјРµС‚СЊ min-width:0 */
+/* 3) Если шапка карточки — flex/grid: контентная колонка должна иметь min-width:0 */
 [id^="topic_"] .header,
 .topicCard .header,
 [id^="topic_"] .content,
 .topicCard .content {
   min-width: 0 !important;
   max-width: 100% !important;
-  overflow: hidden;                   /* РЅР° РІСЃСЏРєРёР№, С‡С‚РѕР±С‹ РЅРµ РїРѕСЏРІР»СЏР»СЃСЏ РіРѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅС‹Р№ СЃРєСЂРѕР»Р» */
+  overflow: hidden;                   /* на всякий, чтобы не появлялся горизонтальный скролл */
 }
 
-/* 4) Р‘РµР№РґР¶Рё/Р°РІР°С‚Р°СЂ РЅРµ С‚СЏРЅСѓС‚ С€РёСЂРёРЅСѓ: РЅРµ СЂР°СЃС‚СЏРіРёРІР°СЋС‚СЃСЏ Рё РЅРµ Р»РѕРјР°СЋС‚ СЃС‚СЂРѕРєСѓ */
+/* 4) Бейджи/аватар не тянут ширину: не растягиваются и не ломают строку */
 [id^="topic_"] .avatar,
 .topicCard .avatar,
 [id^="topic_"] .badge,
@@ -3385,14 +3385,14 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   flex: 0 0 auto;
 }
 
-/* 5) РќР° СЃРІРµСЂС…СѓР·РєРёС… вЂ” СѓРјРµРЅСЊС€Р°РµРј РјРµР¶СЃС‚СЂРѕС‡РЅС‹Рµ, С‡С‚РѕР±С‹ РІРёР·СѓР°Р»СЊРЅРѕ Р°РєРєСѓСЂР°С‚РЅРѕ СѓРјРµС‰Р°Р»РѕСЃСЊ */
+/* 5) На сверхузких — уменьшаем межстрочные, чтобы визуально аккуратно умещалось */
 @media (max-width: 360px) {
   [id^="topic_"] .title,
   .topicCard .title { line-height: 1.15; }
   [id^="topic_"] .desc,
   .topicCard .desc  { line-height: 1.2; }
 }
-/* === FORCE WRAP for topic title/desc (РїРµСЂРµРєСЂС‹РІР°РµРј СЃС‚Р°СЂС‹Рµ РїСЂР°РІРёР»Р°) === */
+/* === FORCE WRAP for topic title/desc (перекрываем старые правила) === */
 .topicTitle, .topicTitle * {
   white-space: normal !important;
   overflow-wrap: break-word !important;
@@ -3408,19 +3408,19 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   max-width: 100% !important;
 }
 
-/* OWNER kebab/menu вЂ” РѕР±С‰РёР№ РґР»СЏ С‚РµРј Рё РїРѕСЃС‚РѕРІ */
+/* OWNER kebab/menu — общий для тем и постов */
  .ownerKebab { 
    position: absolute; 
    right: 8px; 
    top: 8px; 
-   z-index: 80;              /* РІС‹С€Рµ РєР»РёРєР°Р±РµР»СЊРЅС‹С… РѕРІРµСЂР»РµРµРІ РєР°СЂС‚РѕС‡РєРё */
-   pointer-events: auto;     /* РЅР° СЃР»СѓС‡Р°Р№ РµСЃР»Рё СЂРѕРґРёС‚РµР»СЊ/РѕРІРµСЂР»РµР№ РІРјРµС€РёРІР°РµС‚СЃСЏ */
+   z-index: 80;              /* выше кликабельных оверлеев карточки */
+   pointer-events: auto;     /* на случай если родитель/оверлей вмешивается */
  }
 .kebabBtn{
   width:28px; height:28px; border:0; border-radius:6px;
   background:rgba(255,255,255,.06); color:#eaf4ff; cursor:pointer;
    pointer-events: auto;
-   touch-action: manipulation; /* Р±С‹СЃС‚СЂРµРµ/С‡РёС‰Рµ РєР»РёРє РЅР° РјРѕР±РёР»Рµ */  
+   touch-action: manipulation; /* быстрее/чище клик на мобиле */  
 }
 .kebabBtn:hover{ filter:brightness(1.1); }
 .ownerMenu{
@@ -3429,14 +3429,14 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.35); z-index:20; visibility:hidden;
  pointer-events: auto;
   }
- /* RTL: Р·РµСЂРєР°Р»РёРј РїРѕР·РёС†РёРѕРЅРёСЂРѕРІР°РЅРёРµ в‹® Рё РІС‹РїР°РґР°СЋС‰РµРіРѕ РјРµРЅСЋ */
+ /* RTL: зеркалим позиционирование ⋮ и выпадающего меню */
  [dir="rtl"] .ownerKebab{ right:auto; left:8px; }
  [dir="rtl"] .ownerMenu{ right:auto; left:30px; }
 
 .ownerKebab:focus-within .ownerMenu,
 .ownerKebab:hover .ownerMenu{ visibility:visible; }
 
- /* owner menu: РѕР±С‹С‡РЅС‹Рµ РєРЅРѕРїРєРё (РЅР°РїСЂРёРјРµСЂ вњЏпёЏ) вЂ” Р±РµР· СЃРµСЂРѕРіРѕ С„РѕРЅР° */
+ /* owner menu: обычные кнопки (например ✏️) — без серого фона */
  .ownerMenu button:not(.danger){
    background: transparent !important;
    box-shadow: none !important;
@@ -3453,7 +3453,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   position: fixed;
   inset: 0;
   z-index: 1200;
-  background: rgba(0,0,0,0); /* РїСЂРѕР·СЂР°С‡РЅР°СЏ Р»РѕРІСѓС€РєР° РєР»РёРєРѕРІ */
+  background: rgba(0,0,0,0); /* прозрачная ловушка кликов */
 }
 .confirmPop{
   position: absolute;
@@ -3629,7 +3629,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   0%{ opacity:0; transform: translateY(6px) scale(.98); }
   100%{ opacity:1; transform: translateY(0) scale(1); }
 }
-/* [FOCUS_TOOLS_STYLES:BEGIN] вЂ” РїР°РЅРµР»СЊ РёРЅСЃС‚СЂСѓРјРµРЅС‚РѕРІ РєРѕРјРїРѕР·РµСЂР° РїРѕ С„РѕРєСѓСЃСѓ */
+/* [FOCUS_TOOLS_STYLES:BEGIN] — панель инструментов композера по фокусу */
 .composer .tools{
   max-height: 0;
   opacity: 0;
@@ -3638,14 +3638,14 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   transition: max-height .2s ease, opacity .2s ease;
 }
 .composer[data-active="true"] .tools{
-  max-height: 480px; /* РґРѕСЃС‚Р°С‚РѕС‡РЅРѕ РґР»СЏ 2-3 СЂСЏРґРѕРІ */
+  max-height: 480px; /* достаточно для 2-3 рядов */
   opacity: 1;
   pointer-events: auto;
 }
 /* [FOCUS_TOOLS_STYLES:END] */
 /* === sticky bottom fix === */
 .forum_root[data-view="topics"] .body { padding-bottom: 0 !important; margin-bottom: 0 !important; }
-.forum_root[data-view="thread"] .body { padding-bottom: 96px !important; } /* РІС‹СЃРѕС‚Р° РєРѕРјРїРѕР·РµСЂР° + С‡СѓС‚СЊ РІРѕР·РґСѓС…Р° */
+.forum_root[data-view="thread"] .body { padding-bottom: 96px !important; } /* высота композера + чуть воздуха */
 .forum_root .body > :last-child { margin-bottom: 0 !important; }
 
 /* title wrap in thread header */
@@ -3657,7 +3657,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   line-break: anywhere !important;
   min-width: 0;
 }
-/* [STICKY-HEADER] РІРµСЂС…РЅРёР№ Р±Р»РѕРє РІСЃРµРіРґР° РїСЂРёР»РёРїР°РµС‚ Рє РІРµСЂС…Сѓ РѕРєРЅР° РїСЂРѕРєСЂСѓС‚РєРё С„РѕСЂСѓРјР° */
+/* [STICKY-HEADER] верхний блок всегда прилипает к верху окна прокрутки форума */
 .forum_root .head {
   position: sticky;
   top: 0;
@@ -3667,7 +3667,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   -webkit-backdrop-filter: saturate(140%) blur(8px);
   border-bottom: 1px solid rgba(255,255,255,.06);
 }
-/* [BACK-TO-TOP] РїР»Р°РІР°СЋС‰Р°СЏ РєРЅРѕРїРєР° РЅР°РІРµСЂС… (РЅР°Рґ РєРѕРјРїРѕР·РµСЂРѕРј) */
+/* [BACK-TO-TOP] плавающая кнопка наверх (над композером) */
 .backToTop{
   position: fixed;
   right: clamp(12px, 3vw, 20px);
@@ -3686,19 +3686,19 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 @media (max-width: 480px){
   .backToTop{ bottom: clamp(84px, 16dvh, 120px); }
 }
-/* === PostCard: РїРµСЂРµРІРѕРґ С‚РµРєСЃС‚Р° === */
+/* === PostCard: перевод текста === */
 .translateToggleBtn {
   position: relative;
-  display: flex;                 /* СЂР°СЃС‚СЏРіРёРІР°РµРј РєРѕРЅС‚РµРЅС‚ РїРѕ С€РёСЂРёРЅРµ */
+  display: flex;                 /* растягиваем контент по ширине */
   align-items: center;
-  justify-content: center;       /* С‚РµРєСЃС‚ Рё РёРєРѕРЅРєРё РїРѕ С†РµРЅС‚СЂСѓ */
+  justify-content: center;       /* текст и иконки по центру */
 
-  width: 100%;                   /* Р’РЎРЇ С€РёСЂРёРЅР° РєР°СЂС‚РѕС‡РєРё */
+  width: 100%;                   /* ВСЯ ширина карточки */
   box-sizing: border-box;
-  margin-top: 8px;               /* РѕС‚СЃС‚СѓРї РѕС‚ РґР°С‚С‹ */
-  margin-left: 0;                /* Р±РѕР»СЊС€Рµ РЅРµ РЅСѓР¶РµРЅ СЃРјРµС‰Р°СЋС‰РёР№ left */
+  margin-top: 8px;               /* отступ от даты */
+  margin-left: 0;                /* больше не нужен смещающий left */
 
-  gap: 8px;                      /* Сѓ С‚РµР±СЏ Р±С‹Р»Рѕ 70x вЂ” РѕРїРµС‡Р°С‚РєР° */
+  gap: 8px;                      /* у тебя было 70x — опечатка */
   padding: 10px 14px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.18);
@@ -3744,7 +3744,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   font-size: 13px;
 }
 
-/* С‚РµРєСЃС‚ РІРЅСѓС‚СЂРё вЂ” РїРѕРґ РѕР±СЂРµР·, С‡С‚РѕР±С‹ РЅР° РјР°Р»РµРЅСЊРєРёС… СЌРєСЂР°РЅР°С… РЅРµ Р»РѕРјР°Р»Рѕ СЂР°Р·РјРµС‚РєСѓ */
+/* текст внутри — под обрез, чтобы на маленьких экранах не ломало разметку */
 .translateToggleText {
   max-width: 100%;
   white-space: nowrap;
@@ -3752,7 +3752,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   text-overflow: ellipsis;
 }
 
-/* Р°РґР°РїС‚РёРІ: С‡СѓС‚СЊ РјРµРЅСЊС€Рµ С€СЂРёС„С‚ Рё РїР°РґРґРёРЅРіРё РЅР° СѓР·РєРёС… СЌРєСЂР°РЅР°С… */
+/* адаптив: чуть меньше шрифт и паддинги на узких экранах */
 @media (max-width: 640px) {
   .translateToggleBtn {
     padding: 8px 10px;
@@ -3760,21 +3760,21 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   }
 }
 
-/* РєРѕРјРїР°РєС‚РЅРµРµ, С‡РµРј .btnSm вЂ” РїРѕРґ РёРєРѕРЅРєРё/СЃС‡С‘С‚С‡РёРєРё */
+/* компактнее, чем .btnSm — под иконки/счётчики */
 .btnXs{
   padding: 3px 6px;
   font-size: 11px;
   line-height: 1;
-  height: 26px;            /* СѓРґРѕР±РЅС‹Р№ РјРёРЅРёРјСѓРј */
+  height: 26px;            /* удобный минимум */
   border-radius: 10px;
 }
 @media (max-width:360px){
   .btnXs{ padding: 2px 5px; font-size: 10px; height: 24px; }
 }
-  /* РџРѕР»РѕСЃР° РґРµР№СЃС‚РІРёР№ РїРѕСЃС‚Р°: РєРЅРѕРїРєРё Р·Р°РЅРёРјР°СЋС‚ РґРѕСЃС‚СѓРїРЅСѓСЋ С€РёСЂРёРЅСѓ Рё СЃР¶РёРјР°СЋС‚СЃСЏ Р±РµР· СЃРєСЂРѕР»Р»Р° */
-  .actionBar > * { min-width: 0; }                /* РґРµС‚СЏРј СЂР°Р·СЂРµС€Р°РµРј СЃР¶РёРјР°С‚СЊСЃСЏ */
-  .actionBar .btnXs { flex: 1 1 0; min-width: 0; }/* СЃР°РјРё РјР°Р»РµРЅСЊРєРёРµ РєРЅРѕРїРєРё вЂ” РіРёР±РєРёРµ */
-.actionBar .tag  { min-width: 0; }              /* СЃС‡С‘С‚С‡РёРєРё С‚РѕР¶Рµ РЅРµ С„РёРєСЃРёСЂСѓРµРј */
+  /* Полоса действий поста: кнопки занимают доступную ширину и сжимаются без скролла */
+  .actionBar > * { min-width: 0; }                /* детям разрешаем сжиматься */
+  .actionBar .btnXs { flex: 1 1 0; min-width: 0; }/* сами маленькие кнопки — гибкие */
+.actionBar .tag  { min-width: 0; }              /* счётчики тоже не фиксируем */
 .actionBar .reactionBtnLike,
 .actionBar .reactionBtnDislike{
   transition: background .2s ease, border-color .2s ease, color .2s ease, box-shadow .2s ease, opacity .2s ease, transform .12s ease;
@@ -3834,7 +3834,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   will-change: transform, opacity;
   backface-visibility:hidden;
 
-  /* IMPORTANT: РЅРµ Р°РЅРёРјРёСЂСѓРµРјСЃСЏ РЅР° РјР°СѓРЅС‚Рµ (РёРЅР°С‡Рµ РІСЃРїС‹С€РєРё РІ (0,0) РїСЂРё СЃРєСЂРѕР»Р»Рµ) */
+  /* IMPORTANT: не анимируемся на маунте (иначе вспышки в (0,0) при скролле) */
   animation:none;
   /* premium glow without blur */
   filter:
@@ -3848,7 +3848,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
     10px -10px 18px rgba(178,0,255,.08);
   }
 
-/* РђРЅРёРјР°С†РёСЏ РІРєР»СЋС‡Р°РµС‚СЃСЏ РўРћР›Р¬РљРћ РєРѕРіРґР° РјС‹ СЏРІРЅРѕ Р·Р°Р¶РёРіР°РµРј РЅРѕРґСѓ */
+/* Анимация включается ТОЛЬКО когда мы явно зажигаем ноду */
 .postFx.isLive{
   animation:
     postFxAlpha var(--dur) cubic-bezier(.16,.9,.22,1) forwards,
@@ -3875,7 +3875,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   opacity:0;
   pointer-events:none;
   filter: drop-shadow(0 0 16px rgba(255,255,255,.10)) drop-shadow(0 0 18px rgba(178,0,255,.12));
-  /* IMPORTANT: trail С‚РѕР¶Рµ РЅРµ РґРѕР»Р¶РµРЅ Р¶РёС‚СЊ РЅР° РјР°СѓРЅС‚Рµ */
+  /* IMPORTANT: trail тоже не должен жить на маунте */
   animation:none;
 }
 .postFx.isLive::after{
@@ -3974,7 +3974,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
     0 0 calc(24px * var(--bGlow)) rgba(178,0,255,.10);
   filter: hue-rotate(var(--bHue));
   will-change: transform, opacity;
-  /* IMPORTANT: РЅРµ Р°РЅРёРјРёСЂРѕРІР°С‚СЊ РЅР° РјР°СѓРЅС‚Рµ */
+  /* IMPORTANT: не анимировать на маунте */
   animation:none;
 }
 .postBoom.isLive{
@@ -4005,10 +4005,10 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   display:inline-flex; align-items:center; gap:8px;
   pointer-events:auto;
   height: var(--voice-size);
-  z-index: 1; /* РЅРёР¶Рµ РїРѕРїРѕРІРµСЂРѕРІ/С‚РѕСЃС‚РѕРІ */
+  z-index: 1; /* ниже поповеров/тостов */
 }
 
-/* РїСЂСЏС‡РµРј РґРѕРє, РєРѕРіРґР° РєРѕРјРїРѕР·РµСЂ РЅРµ Р°РєС‚РёРІРµРЅ */
+/* прячем док, когда композер не активен */
 .composer:not([data-active="true"]) .voiceDock{
   opacity: 0; pointer-events: none;
   transform: translateY(4px) scale(.98);
@@ -4019,7 +4019,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   transition: opacity .12s ease, transform .12s ease;
 }
 
-/* РєРЅРѕРїРєР° РјРёРєСЂРѕС„РѕРЅР° */
+/* кнопка микрофона */
 .voiceBtn{
   position:relative; display:inline-flex; align-items:center; justify-content:center;
   width:var(--voice-size); height:var(--voice-size);
@@ -4030,7 +4030,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 .voiceBtn:hover{ filter:brightness(1.08) saturate(1.1); }
 .voiceBtn:active{ transform:translateY(1px) scale(.98); }
 
-/* Р·Р°РїРёСЃСЊ */
+/* запись */
 .voiceBtn.rec{
 
   box-shadow:0 0 0 2px rgba(255,90,90,.9), 0 0 14px 2px rgba(255,90,90,.25);
@@ -4041,7 +4041,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   background:#ff5959; box-shadow:0 0 6px rgba(255,0,0,.75);
 }
 
-/* Р°РІС‚Рѕ-РјР°СЃС€С‚Р°Р± РёРєРѕРЅРєРё РїРѕРґ СЂР°Р·РјРµСЂ РєРЅРѕРїРєРё */
+/* авто-масштаб иконки под размер кнопки */
 .voiceBtn svg{
   width:calc(var(--voice-size)*.46);
   height:calc(var(--voice-size)*.46);
@@ -4052,7 +4052,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
       font-size:11px; line-height:1; padding:5px 10px; border-radius:4px;
       background:rgba(252, 0, 0, 0.34); color:#fff; pointer-events:none;
     }
-/* Р±РµР№РґР¶-Р·Р°РјРѕРє: РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ СЃРєСЂС‹С‚ */
+/* бейдж-замок: по умолчанию скрыт */
 .voiceBtn .lockBadge{
   position:absolute; top:-4px; right:-4px;
   display:none; align-items:center; justify-content:center;
@@ -4060,13 +4060,13 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   font-size:11px; line-height:1;
   background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.18);
   filter: drop-shadow(0 1px 2px rgba(0,0,0,.6));
-  pointer-events:none; z-index:2; /* РїРѕРІРµСЂС… svg */
+  pointer-events:none; z-index:2; /* поверх svg */
 }
-/* РїРѕРєР°Р·Р°С‚СЊ Р·Р°РјРѕРє, РєРѕРіРґР° РЅРµС‚ VIP вЂ” СЂРѕРІРЅРѕ РєР°Рє Сѓ СЃРєСЂРµРїРєРё */
+/* показать замок, когда нет VIP — ровно как у скрепки */
 .voiceBtn[data-locked="true"] .lockBadge{
   display:inline-flex;
 }
-/* С‚Р°Р№РјРµСЂ-РїРёР»СЋР»СЏ РЅР°Рґ РєРЅРѕРїРєРѕР№ */
+/* таймер-пилюля над кнопкой */
 .voiceTimerPill{
   position:absolute; right:0; bottom:calc(var(--voice-size) + 8px);
   padding:4px 10px; border-radius:999px;
@@ -4078,7 +4078,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   backdrop-filter: blur(6px) saturate(120%);
 }
 
-/* ---- AUDIO card (РїСЂРµРІСЊСЋ + РїРѕСЃС‚) ---- */
+/* ---- AUDIO card (превью + пост) ---- */
 .audioCard{
   position:relative;
   display:flex; align-items:center; gap:10px;
@@ -4109,7 +4109,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   padding:4px;
 }
 .audioCard audio{ display:block; width:100%; color-scheme:dark; }
-/* СѓР±РёСЂР°РµРј СЃРµСЂСѓСЋ РїР»Р°С€РєСѓ Сѓ Chromium */
+/* убираем серую плашку у Chromium */
 .audioCard audio::-webkit-media-controls-panel{ background:transparent !important; }
 .audioCard audio::-webkit-media-controls-enclosure{ background:transparent !important; }
 .audioCard audio::-webkit-media-controls{ background:transparent !important; }
@@ -4123,7 +4123,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 }
 
 .qcastPlayer{
-  /* Р±РѕР»СЊС€Рµ РќР• absolute: РєРѕРЅС‚РµР№РЅРµСЂ СЃР°Рј Р·Р°РґР°С‘С‚ РІС‹СЃРѕС‚Сѓ РїРѕ РєРѕРЅС‚РµРЅС‚Сѓ (РґРѕ max-height) */
+  /* больше НЕ absolute: контейнер сам задаёт высоту по контенту (до max-height) */
   position:relative;
   width:100%;
   max-height:100%;
@@ -4147,7 +4147,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
 .qcastCover{
   width:100%;
   height:100%;
-  /* РїРѕРґР»РѕР¶РєР° QCast РІСЃРµРіРґР° С†РµР»РёРєРѕРј, Р±РµР· РєСЂРѕРїР° */
+  /* подложка QCast всегда целиком, без кропа */
   object-fit:contain;
   display:block;
 }
@@ -4474,7 +4474,7 @@ padding:8px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.1
   .qcastBottomCenter{ max-width: min(520px, 52vw); }
 }
 
- /* ===== EQ РЅР°Рґ РєРѕРЅС‚СЂРѕР»Р°РјРё: rail + bars (Р±РµСЂС‘С‚ СЌРЅРµСЂРіРёСЋ РёР· CSS vars --q-all/--q-high) ===== */
+ /* ===== EQ над контролами: rail + bars (берёт энергию из CSS vars --q-all/--q-high) ===== */
 .qcastCtrlEQ{
   position:relative;
   padding:10px 10px 4px;
@@ -4948,41 +4948,41 @@ animation:qcastCtrlEQ 880ms ease-in-out infinite, qcastCtrlHue 2.4s linear infin
   100%{ transform: translateX(60%); }
 }
 .loadMoreSentinel{ width:100%; height:1px; }
-/* --- avatar + nick (РЅРёРє РІСЃРµРіРґР° РїРѕРґ Р°РІР°С‚Р°СЂРѕРј) --- */
+/* --- avatar + nick (ник всегда под аватаром) --- */
 .avaNick{
   display:inline-flex;
   align-items:center; justify-content:center;
   margin-top:14px;
   width:84px; 
-   width:120px;                  /* = С€РёСЂРёРЅР° С‚РІРѕРµРіРѕ .avaBig; РµСЃР»Рё РґСЂСѓРіР°СЏ вЂ” РїРѕРґСЃС‚Р°РІСЊ РµС‘ */
+   width:120px;                  /* = ширина твоего .avaBig; если другая — подставь её */
   text-align:center;
   max-width:clamp;
   padding:2 88px;
-  white-space:nowrap;          /* РЅРµ РїРµСЂРµРЅРѕСЃРёРј РЅРёРє */
+  white-space:nowrap;          /* не переносим ник */
   overflow:hidden; text-overflow:ellipsis;
 }
 
-/* --- РїСЂР°РІР°СЏ РїРѕР»РѕСЃР° СЃ Q COIN --- */
+/* --- правая полоса с Q COIN --- */
 .qRowRight{
-  /* РєРѕРЅС‚РµР№РЅРµСЂ QCoin Р·Р°РЅРёРјР°РµС‚ РІСЃСЋ РїСЂР°РІСѓСЋ С‡Р°СЃС‚СЊ Рё РїРѕ РІС‹СЃРѕС‚Рµ СЂРѕРІРЅРѕ Р°РІР°С‚Р°СЂ */
+  /* контейнер QCoin занимает всю правую часть и по высоте ровно аватар */
   flex:1 1 auto; min-width:0; width:100%;
-  align-self:center;                      /* С†РµРЅС‚СЂ РїРѕ РєРѕР»РѕРЅРєРµ Р°РІР°С‚Р°СЂР° */
+  align-self:center;                      /* центр по колонке аватара */
   height:var(--ava-size);
-  display:flex; align-items:center; justify-content:flex-end; /* РїСЂРёР¶РёРјР°РµРј РєРѕРЅС‚РµРЅС‚ РІРїСЂР°РІРѕ */
-  /* С‚РѕРЅРєР°СЏ РІРµСЂС‚РёРєР°Р»СЊРЅР°СЏ РїРѕРґСЃС‚СЂРѕР№РєР° РѕС‚ СЃРµСЂРµРґРёРЅС‹ Р°РІР°С‚Р°СЂР° (РјРѕР¶РЅРѕ РєСЂСѓС‚РёС‚СЊ РёРЅР»Р°Р№РЅРѕРј) */
+  display:flex; align-items:center; justify-content:flex-end; /* прижимаем контент вправо */
+  /* тонкая вертикальная подстройка от середины аватара (можно крутить инлайном) */
   --qcoin-y: 0px;
   transform: translateY(var(--qcoin-y));
   transform-origin:left center;
 }
 
-/* СЃР°Рј Р±Р»РѕРє QCoin СЂР°СЃС‚СЏРіРёРІР°РµС‚СЃСЏ РЅР° РІСЃСЋ РґРѕСЃС‚СѓРїРЅСѓСЋ С€РёСЂРёРЅСѓ,
-   РЅРѕ РЅРµ РїРµСЂРµРЅРѕСЃРёС‚СЃСЏ Рё РЅРµ РІС‹Р»Р°Р·РёС‚ */
+/* сам блок QCoin растягивается на всю доступную ширину,
+   но не переносится и не вылазит */
 .qRowRight > *{
   flex:1 1 auto; min-width:0; width:100%;
   display:inline-flex; align-items:center; justify-content:flex-end;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   text-align:right;
-  font-size:clamp(12px, 2.8vw, 24px);     /* Р°РґР°РїС‚РёРІРЅС‹Р№ СЂР°Р·РјРµСЂ С€СЂРёС„С‚Р° */
+  font-size:clamp(12px, 2.8vw, 24px);     /* адаптивный размер шрифта */
   max-width:100%;
 }
 
@@ -5001,35 +5001,35 @@ article[data-forum-post-card="1"] .forumDividerRail{
   opacity: .85;
 }
 
-/* --- РџРѕРїРѕРІРµСЂ QCoin РєРѕРЅС‚РµР№РЅРµСЂ --- */
+/* --- Поповер QCoin контейнер --- */
 .qcoinPop{
-  /* РµСЃР»Рё Сѓ С‚РµР±СЏ СѓР¶Рµ СЃС‚РѕРёС‚ position/left/top/width вЂ” РѕСЃС‚Р°РІСЊ РёС… */
+  /* если у тебя уже стоит position/left/top/width — оставь их */
   max-width: 520px;
   z-index: 3200;
 }
 
-/* РљР°СЂС‚РѕС‡РєР°: РґРµР»Р°РµРј РєРѕР»РѕРЅРѕС‡РЅС‹Р№ Р»СЌР№Р°СѓС‚ СЃ РїСЂРѕРєСЂСѓС‡РёРІР°РµРјС‹Рј body */
+/* Карточка: делаем колоночный лэйаут с прокручиваемым body */
 .qcoinCard{
   display:flex; flex-direction:column;
-  max-height: min(72vh, 1060px);   /* РѕРіСЂР°РЅРёС‡РёРј РІС‹СЃРѕС‚Сѓ РїРѕРїРѕРІРµСЂР° */
-  overflow:hidden;                /* СЃРєСЂРѕР»Р» С‚РѕР»СЊРєРѕ РІ body */
+  max-height: min(72vh, 1060px);   /* ограничим высоту поповера */
+  overflow:hidden;                /* скролл только в body */
 }
 
-/* РЁР°РїРєР° С„РёРєСЃ СЃРІРµСЂС…Сѓ */
+/* Шапка фикс сверху */
 .qcoinCardHdr{
   display:flex; align-items:center; justify-content:space-between;
   gap:12px; padding:10px 12px;
   border-bottom:1px solid rgba(160,180,255,.15);
 }
 
-/* РўРµР»Рѕ: РёРјРµРЅРЅРѕ РѕРЅРѕ СЃРєСЂРѕР»Р»РёС‚СЃСЏ */
+/* Тело: именно оно скроллится */
 .qcoinPopBody{
   padding:12px; overflow:auto;
   overscroll-behavior: contain;
   max-height: 100%;
 }
 
-/* --- РџРѕР»РѕСЃР° РґРµР№СЃС‚РІРёР№: РІСЃРµРіРґР° РѕРґРёРЅ СЂСЏРґ, Р°РґР°РїС‚РёРІРЅРѕ СЃР¶РёРјР°РµС‚СЃСЏ --- */
+/* --- Полоса действий: всегда один ряд, адаптивно сжимается --- */
 .qcActions{
   display:flex; flex-wrap:nowrap; gap:10px;
   align-items:center; justify-content:space-between;
@@ -5037,8 +5037,8 @@ article[data-forum-post-card="1"] .forumDividerRail{
 }
 
 .qcBtn{
-  flex:1 1 0;                    /* СЂР°РІРЅС‹Рµ РґРѕР»Рё, СЃР¶РёРјР°С‚СЊСЃСЏ РјРѕР¶РЅРѕ */
-  min-width:0;                   /* РїРѕР·РІРѕР»СЏРµРј СѓР¶РёРјР°С‚СЊСЃСЏ СЂРµР°Р»СЊРЅРѕ */
+  flex:1 1 0;                    /* равные доли, сжиматься можно */
+  min-width:0;                   /* позволяем ужиматься реально */
   white-space:nowrap;
   overflow:hidden; text-overflow:ellipsis;
   font-size: clamp(12px, 2.6vw, 14px);
@@ -5046,7 +5046,7 @@ article[data-forum-post-card="1"] .forumDividerRail{
   padding: 10px 12px;
 }
 
-/* РЎРїРµС†СЌС„С„РµРєС‚ РЅР° "Р‘РёСЂР¶Р°" вЂ” Р»С‘РіРєРёР№ С€РёРјРµСЂ + РЅРµРѕРЅРѕРІС‹Р№ С…РѕРІРµСЂ */
+/* Спецэффект на "Биржа" — лёгкий шимер + неоновый ховер */
 .qcBtn.qcExchange{
   position:relative;
   border:1px solid rgba(160,180,255,.28);
@@ -5066,7 +5066,7 @@ article[data-forum-post-card="1"] .forumDividerRail{
   border-color: rgba(180,200,255,.45);
 }
 
-/* "Р’С‹РІРѕРґ" вЂ” Р·РѕР»РѕС‚Р°СЏ, РєРѕРіРґР° РґРѕСЃС‚СѓРїРЅРѕ; СЃРµСЂР°СЏ, РєРѕРіРґР° disabled */
+/* "Вывод" — золотая, когда доступно; серая, когда disabled */
 .qcBtn.qcWithdraw[disabled]{
   opacity:.7;
   border:1px solid rgba(160,180,255,.22);
@@ -5086,7 +5086,7 @@ article[data-forum-post-card="1"] .forumDividerRail{
   filter: saturate(1.1) brightness(1.03);
 }
 
-/* РќР° РѕС‡РµРЅСЊ СѓР·РєРёС… СЌРєСЂР°РЅР°С… вЂ” Р¶РјС‘Рј РїР»РѕС‚РЅРµРµ */
+/* На очень узких экранах — жмём плотнее */
 @media (max-width: 360px){
   .qcBtn{ font-size: clamp(11px, 3.2vw, 13px); padding:8px 10px; }
 }
@@ -5108,24 +5108,24 @@ article[data-forum-post-card="1"] .forumDividerRail{
 }
 .topicDesc { line-height: 1.35; }
 
-/* --- TopicItem: Р°РІР°С‚Р°СЂ СЃР»РµРІР°, РЅРёРє СЃРїСЂР°РІР° Р’ РћР”РќРЈ РЎРўР РћРљРЈ --- */
+/* --- TopicItem: аватар слева, ник справа В ОДНУ СТРОКУ --- */
 .item .topicUserRow{
   display:flex;
   align-items:center;
   gap:8px;
-  flex-wrap:nowrap;   /* Р·Р°РїСЂРµС‰Р°РµРј РїРµСЂРµРЅРѕСЃ РЅРёРєР° РІРЅРёР· */
-  min-width:0;        /* СЂР°Р·СЂРµС€Р°РµРј СЂРµР°Р»СЊРЅРѕРµ СЃР¶Р°С‚РёРµ СЃС‚СЂРѕРєРё */
+  flex-wrap:nowrap;   /* запрещаем перенос ника вниз */
+  min-width:0;        /* разрешаем реальное сжатие строки */
 }
 .item .topicUserRow .avaMini{
-  flex:0 0 auto;      /* Р°РІР°С‚Р°СЂ С„РёРєСЃРёСЂРѕРІР°РЅРЅС‹Р№ */
+  flex:0 0 auto;      /* аватар фиксированный */
 }
  .item .topicUserRow .nick-badge{
    display:inline-flex;
    align-items:center;
-   flex:0 1 auto;        /* в†ђ Р±РѕР»СЊС€Рµ РќР• СЂР°СЃС‚СЏРіРёРІР°РµРјСЃСЏ */
+   flex:0 1 auto;        /* ← больше НЕ растягиваемся */
    min-width:0;
    width:auto;
-   max-width:clamp(96px, 40vw, 240px);  /* Р°РєРєСѓСЂР°С‚РЅС‹Р№ РїСЂРµРґРµР» РґР»СЏ РѕР±СЂРµР·РєРё */
+   max-width:clamp(96px, 40vw, 240px);  /* аккуратный предел для обрезки */
  }
  .item .topicUserRow .nick-badge .nick-text{
    display:block;
@@ -5134,7 +5134,7 @@ article[data-forum-post-card="1"] .forumDividerRail{
    text-overflow:ellipsis;
    max-width:100%;
  }
- /* PostCard: Р°РІР°С‚Р°СЂ СЃР»РµРІР°, РЅРёРє СЃРїСЂР°РІР° вЂ” РѕРґРЅР° СЃС‚СЂРѕРєР°, Р±РµР· СЂР°СЃС‚СЏР¶РµРЅРёСЏ */
+ /* PostCard: аватар слева, ник справа — одна строка, без растяжения */
 .item .postUserRow{
   display:flex;
   align-items:center;
@@ -5146,10 +5146,10 @@ article[data-forum-post-card="1"] .forumDividerRail{
 .item .postUserRow .nick-badge{
   display:inline-flex;
   align-items:center;
-  flex:0 1 auto;      /* РЅРµ СЂР°СЃС‚СЏРіРёРІР°РµРјСЃСЏ РЅР° РІСЃСЋ С€РёСЂРёРЅСѓ */
+  flex:0 1 auto;      /* не растягиваемся на всю ширину */
   min-width:0;
   width:auto;
-  max-width:clamp(96px, 40vw, 260px);  /* Р°РєРєСѓСЂР°С‚РЅС‹Р№ РїСЂРµРґРµР» РїРѕРґ ellipsis */
+  max-width:clamp(96px, 40vw, 260px);  /* аккуратный предел под ellipsis */
 }
 .item .postUserRow .nick-badge .nick-text{
   display:block;
@@ -5158,8 +5158,8 @@ article[data-forum-post-card="1"] .forumDividerRail{
   text-overflow:ellipsis;
   max-width:100%;
 }
-/* ---- INBOX (РєРѕРЅРІРµСЂС‚ СЃРїСЂР°РІР° РІ С€Р°РїРєРµ СЃРїРёСЃРєР°) ---- */
-.head .flex.items-center.justify-between{ flex-wrap:nowrap; } /* РЅРµ РїРµСЂРµРЅРѕСЃРёРј СЂСЏРґ */
+/* ---- INBOX (конверт справа в шапке списка) ---- */
+.head .flex.items-center.justify-between{ flex-wrap:nowrap; } /* не переносим ряд */
 
 .iconBtn.inboxBtn{
   position:relative;
@@ -5171,7 +5171,7 @@ article[data-forum-post-card="1"] .forumDividerRail{
 .iconBtn.inboxBtn:hover{ filter:brightness(1.08) saturate(1.08); }
 .iconBtn.inboxBtn:active{ transform:translateY(1px) scale(.98); }
 
-/* РєСЂР°СЃРЅС‹Р№ Р±РµР№РґР¶ РЅРµРїСЂРѕС‡РёС‚Р°РЅРЅРѕРіРѕ (Replies) */
+/* красный бейдж непрочитанного (Replies) */
 .inboxBadgeReplies{
   position:absolute; right:-6px; top:-6px;
   min-width:18px; height:18px; padding:0 5px;
@@ -5183,7 +5183,7 @@ article[data-forum-post-card="1"] .forumDividerRail{
   box-shadow:0 0 10px rgba(255,60,60,.5);
   z-index:3;
 }
-/* Р·РµР»С‘РЅС‹Р№/РѕСЂР°РЅР¶РµРІС‹Р№ Р±РµР№РґР¶ РЅРµРїСЂРѕС‡РёС‚Р°РЅРЅРѕРіРѕ (DM) */
+/* зелёный/оранжевый бейдж непрочитанного (DM) */
 .inboxBadgeDM{
   position:absolute; left:-6px; top:-6px;
   min-width:18px; height:18px; padding:0 5px;
@@ -5196,14 +5196,14 @@ article[data-forum-post-card="1"] .forumDividerRail{
   z-index:2;
 }
 
-/* С‚РµР»Рѕ В«InboxВ» вЂ” РєР°СЂС‚РѕС‡РєРё СЂРѕРІРЅРѕ РєР°Рє РїРѕСЃС‚С‹ */
+/* тело «Inbox» — карточки ровно как посты */
 .inboxList{ display:grid; gap:10px; }
 .inboxEmpty{ opacity:.75; padding:8px 2px; }
 
 /* ---- INBOX button ---- */
 .iconBtn.inboxBtn{
   position:relative;
-  /* РґРµР»Р°РµРј РєСЂСѓРїРЅРѕР№ Рё Р±РµР· С„РѕРЅР° */
+  /* делаем крупной и без фона */
   width: 64px !important;
   height: 64px !important;
   padding: 0 !important;
@@ -5222,7 +5222,7 @@ article[data-forum-post-card="1"] .forumDividerRail{
 .iconBtn.inboxBtn:hover{ filter:brightness(1.08) saturate(1.08); }
 .iconBtn.inboxBtn:active{ transform: translateY(1px) scale(.98); }
 
-/* РєСЂР°СЃРЅС‹Р№ Р±РµР№РґР¶ (Replies) */
+/* красный бейдж (Replies) */
 .inboxBadgeReplies{
   position:absolute; right:-6px; top:-6px;
   min-width:18px; height:18px; padding:0 5px;
@@ -5234,7 +5234,7 @@ article[data-forum-post-card="1"] .forumDividerRail{
   box-shadow:0 0 10px rgba(255,60,60,.5);
   z-index:3;
 }
-/* Р·РµР»С‘РЅС‹Р№/РѕСЂР°РЅР¶РµРІС‹Р№ Р±РµР№РґР¶ (DM) */
+/* зелёный/оранжевый бейдж (DM) */
 .inboxBadgeDM{
   position:absolute; left:-6px; top:-6px;
   min-width:18px; height:18px; padding:0 5px;
@@ -5280,12 +5280,12 @@ article[data-forum-post-card="1"] .forumDividerRail{
   white-space:nowrap; flex-wrap:nowrap;
   padding:6px 0 4px;
 }
-/* РћС‚СЃС‚СѓРї РєРѕРЅС‚РµРЅС‚Р° Inbox РѕС‚ РєРѕРЅС‚СЂРѕР»РѕРІ (Р·Р°РіРѕР»РѕРІРѕРє/С‚Р°Р±С‹).
-   РќР°СЃС‚СЂР°РёРІР°РµС‚СЃСЏ С‡РµСЂРµР· CSS-РїРµСЂРµРјРµРЅРЅСѓСЋ:
-   --inbox-content-top-offset: 8px; (РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РєР°Рє Р±С‹Р»Рѕ mt-2)
+/* Отступ контента Inbox от контролов (заголовок/табы).
+   Настраивается через CSS-переменную:
+   --inbox-content-top-offset: 8px; (по умолчанию как было mt-2)
 */
 :root{
-  --inbox-content-top-offset: 100px; /* СЃРєРѕР»СЊРєРѕ РЅСѓР¶РЅРѕ */
+  --inbox-content-top-offset: 100px; /* сколько нужно */
 }
 :root{ --inbox-dm-list-start-desktop: 980px; }
 @media (max-width: 640px){
@@ -5293,7 +5293,7 @@ article[data-forum-post-card="1"] .forumDividerRail{
 }
 
 .inboxBody{ padding:0 6px 6px; }
-/* TMA: РѕС‚РґРµР»СЊРЅР°СЏ СЂСѓС‡РЅР°СЏ РґРѕРєСЂСѓС‚РєР° Р»РёРїРєРѕР№ РїР°РЅРµР»Рё */
+/* TMA: отдельная ручная докрутка липкой панели */
 html[data-tma="1"] .inboxHeader,
 html[data-tma="1"] .inboxTabs{
   top: var(--tma-inbox-sticky-top, 0px);
@@ -5701,7 +5701,7 @@ html[data-tma="1"] .inboxTabs{
   width:100%;
 }
 
-/* вЂњРґРѕСЂРѕР¶РєР°вЂќ РїСЂРѕРіСЂРµСЃСЃР° РїРѕРґ РІРѕР»РЅРѕР№ (РЅРµРѕРЅ, РґРµС€РµРІРѕ РїРѕ CPU) */
+/* “дорожка” прогресса под волной (неон, дешево по CPU) */
 .dmVoiceTrack{
   position:absolute;
   left:0; right:0;
@@ -5733,7 +5733,7 @@ html[data-tma="1"] .inboxTabs{
   opacity:.9;
 }
 
-/* SVG РІРѕР»РЅР° */
+/* SVG волна */
 .dmVoiceWave{
   position:relative;
   z-index:1;
@@ -5746,10 +5746,10 @@ html[data-tma="1"] .inboxTabs{
   background: rgba(0,0,0,.10);
   border:1px solid rgba(140,190,255,.14);
   box-shadow: inset 0 0 14px rgba(0,0,0,.22);
-  touch-action: none; /* вњ… РІР°Р¶РЅРѕ РґР»СЏ pointer drag РЅР° РјРѕР±РёР»Рµ */
+  touch-action: none; /* ✅ важно для pointer drag на мобиле */
 }
 
-/* Р‘Р°СЂ РІРѕР»РЅС‹: Р±Р°Р·РѕРІС‹Р№ */
+/* Бар волны: базовый */
 .dmWaveBar{
   fill: rgba(150,200,255,.28);
   transition: fill .18s ease, filter .18s ease;
@@ -5757,19 +5757,19 @@ html[data-tma="1"] .inboxTabs{
   transform-origin: center;
 }
 
-/* РђРєС‚РёРІРЅС‹Рµ Р±Р°СЂС‹ (РґРѕ РїСЂРѕРіСЂРµСЃСЃР°) */
+/* Активные бары (до прогресса) */
 .dmWaveBar.isActive{
   fill: rgba(140,220,255,.92);
   filter: drop-shadow(0 0 8px rgba(120,220,255,.18));
 }
 
-/* вЂњРїРѕРґ Р±РёС‚вЂќ вЂ” С‚РѕР»СЊРєРѕ РєРѕРіРґР° РёРіСЂР°РµС‚ (CSS-only, Р»С‘РіРєР°СЏ Р°РЅРёРјР°С†РёСЏ) */
+/* “под бит” — только когда играет (CSS-only, лёгкая анимация) */
 .dmVoicePlaying .dmWaveBar{
   animation: dmWaveBounce 1.15s ease-in-out infinite;
   animation-delay: var(--d);
 }
 
-/* Р‘Р°СЂС‹, РєРѕС‚РѕСЂС‹Рµ СѓР¶Рµ вЂњРїСЂРѕР№РґРµРЅРЅС‹РµвЂќ, РїСЂС‹РіР°СЋС‚ С‡СѓС‚СЊ СЏСЂС‡Рµ */
+/* Бары, которые уже “пройденные”, прыгают чуть ярче */
 .dmVoicePlaying .dmWaveBar.isActive{
   animation: dmWaveBounceHot 1.05s ease-in-out infinite;
   animation-delay: var(--d);
@@ -5786,7 +5786,7 @@ html[data-tma="1"] .inboxTabs{
   50%     { transform: scaleY(calc(1.00 + (var(--a) * 0.30))); }
 }
 
-/* РњРµС‚Р°РґР°РЅРЅС‹Рµ */
+/* Метаданные */
 .dmVoiceMeta{
   display:flex;
   align-items:center;
@@ -5866,10 +5866,10 @@ html[data-tma="1"] .inboxTabs{
   .dmConfirmPop{ animation: none !important; }
   .dmRow::after, .dmUnreadDot, .dmRowRail::after{ animation: none !important; }
 }
-/* ---- ATTACH (СЃРєСЂРµРїРєР°) вЂ” СЃС‚РёР»СЊ РєР°Рє Сѓ voiceBtn ---- */
+/* ---- ATTACH (скрепка) — стиль как у voiceBtn ---- */
 .attachBtn{
   position:relative; display:inline-flex; align-items:center; justify-content:center;
-  /* РµРґРёРЅС‹Р№ СЂР°Р·РјРµСЂ; РјРѕР¶РЅРѕ РїРµСЂРµРѕРїСЂРµРґРµР»РёС‚СЊ С‡РµСЂРµР· inline style: '--attach-size':'56px' */
+  /* единый размер; можно переопределить через inline style: '--attach-size':'56px' */
   --attach-size: 48px;
   width: var(--attach-size); height: var(--attach-size);
   border:0; background:transparent; color:#cfe0ff;
@@ -5878,13 +5878,13 @@ html[data-tma="1"] .inboxTabs{
 .attachBtn:hover{ filter:brightness(1.08) saturate(1.1); }
 .attachBtn:active{ transform:translateY(1px) scale(.98); }
 
-/* СЃРѕСЃС‚РѕСЏРЅРёРµ В«Р·Р°РјРѕРєВ» */
+/* состояние «замок» */
 .attachBtn[data-locked="true"]{ opacity:.55; cursor:not-allowed; filter:saturate(.6); }
 
-/* Р°РІС‚Рѕ-РјР°СЃС€С‚Р°Р± РёРєРѕРЅРєРё РїРѕРґ СЂР°Р·РјРµСЂ РєРЅРѕРїРєРё */
+/* авто-масштаб иконки под размер кнопки */
 .attachBtn svg{ width:calc(var(--attach-size)*.46); height:calc(var(--attach-size)*.46); }
 
-/* Р±РµР№РґР¶-Р·Р°РјРѕРє, РєР°Рє Сѓ РјРёРєСЂРѕС„РѕРЅР° */
+/* бейдж-замок, как у микрофона */
 .attachBtn .lockBadge{
   position:absolute; top:-4px; right:-4px;
   display:none; align-items:center; justify-content:center;
@@ -5898,7 +5898,7 @@ html[data-tma="1"] .inboxTabs{
 .input.ok  { outline:2px solid rgba(80,220,140,.9); box-shadow:0 0 12px rgba(80,220,140,.25); }
 .input.bad { outline:2px solid rgba(255,110,110,.95); box-shadow:0 0 12px rgba(255,110,110,.25); }
 
-/* Q COIN: Р·РѕР»РѕС‚РѕР№ РјРёРіР°СЋС‰РёР№ Р±РµР№РґР¶ Г—2 СЃРїСЂР°РІР° РѕС‚ Р»РµР№Р±Р»Р° */
+/* Q COIN: золотой мигающий бейдж ×2 справа от лейбла */
 .qcoinLabel{
   display:inline-flex; align-items:center; gap:8px;
 }
@@ -5908,7 +5908,7 @@ html[data-tma="1"] .inboxTabs{
   border-radius: 999px;
   font: 700 16px/1.1 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto;
   letter-spacing: .5px;
-  color:#211;             /* С‚С‘РјРЅС‹Р№ С‚РµРєСЃС‚ РЅРµ РЅСѓР¶РµРЅ вЂ” РґРµР»Р°РµРј В«СЃРІРµС‡РµРЅРёРµВ» С‚РµРєСЃС‚Р° */
+  color:#211;             /* тёмный текст не нужен — делаем «свечение» текста */
   background: linear-gradient(180deg,#ffde6a,#ffbc3d);
   box-shadow:
      0 0 12px rgba(255,210,90,.45),
@@ -5920,9 +5920,9 @@ html[data-tma="1"] .inboxTabs{
   overflow: hidden;
   animation: qcoinX2Pulse 1.6s ease-in-out infinite;
 }
-  /* Р‘Р°Р·РѕРІС‹Р№ РІРёРґ .qcoinX2 СѓР¶Рµ РµСЃС‚СЊ */
+  /* Базовый вид .qcoinX2 уже есть */
 
-/* РђРєС‚РёРІРЅС‹Р№ VIP вЂ” Р·РѕР»РѕС‚РѕР№ СЃ РїРµСЂРµР»РёРІРѕРј (РїРѕРІС‚РѕСЂСЏРµРј СЌС„С„РµРєС‚С‹ Р·Р°РіРѕР»РѕРІРєР°) */
+/* Активный VIP — золотой с переливом (повторяем эффекты заголовка) */
 .qcoinX2.vip{
   background:
     linear-gradient(135deg,
@@ -5936,7 +5936,7 @@ html[data-tma="1"] .inboxTabs{
   cursor:default;
 }
 
-/* РќРµ VIP вЂ” Р·Р°РјРµС‚РЅРѕ РјРёРіР°РµС‚ РєСЂР°СЃРЅС‹Рј Рё РєР»РёРєР°Р±РµР»СЊРЅРѕ */
+/* Не VIP — заметно мигает красным и кликабельно */
 .qcoinX2.needVip{
   background:rgba(255,70,70,.18);
   color:#fff;
@@ -5957,17 +5957,17 @@ html[data-tma="1"] .inboxTabs{
      0 1px 0 0 rgba(0,0,0,.35); }
 }
  .qcoinCol{
-  flex-direction: column;       /* С‚РµРїРµСЂСЊ РєРѕР»РѕРЅРєРѕР№ */
-  align-items: flex-end;        /* РІС‹СЂР°РІРЅРёРІР°РЅРёРµ РІРїСЂР°РІРѕ, РєР°Рє Рё СЂР°РЅСЊС€Рµ */
-  gap: 18px;                     /* РІРµСЂС‚РёРєР°Р»СЊРЅС‹Р№ Р·Р°Р·РѕСЂ РјРµР¶РґСѓ СЃС‚СЂРѕРєР°РјРё */
+  flex-direction: column;       /* теперь колонкой */
+  align-items: flex-end;        /* выравнивание вправо, как и раньше */
+  gap: 18px;                     /* вертикальный зазор между строками */
 }
 .qcoinTop{
   display: inline-flex;
   align-items: center;
-  gap: 20px;                     /* СЂР°СЃСЃС‚РѕСЏРЅРёРµ РјРµР¶РґСѓ Q COIN Рё Г—2 */
+  gap: 20px;                     /* расстояние между Q COIN и ×2 */
 }
     
-/* Р‘Р°Р·РѕРІР°СЏ РёРєРѕРЅ-РєРЅРѕРїРєР° Р±РµР· С„РѕРЅР° */
+/* Базовая икон-кнопка без фона */
 .iconBtn{
   display:inline-flex; align-items:center; justify-content:center;
   width:46px; height:46px;
@@ -5997,22 +5997,22 @@ html[data-tma="1"] .inboxTabs{
   filter:saturate(.6);
 }
 
-/* SVG Р°РІС‚РѕРїРѕРґРіРѕРЅ */
+/* SVG автоподгон */
 .iconBtn svg{ display:block; width:30px; height:30px; }
-/* РІСЃС‚СЂРѕРµРЅРЅС‹Р№ РєРѕРјРїРѕР·РµСЂ */
+/* встроенный композер */
 .forumComposer { position: relative; }
-  /* phase accents (РєРёР±РµСЂ-РїРѕРґСЃРІРµС‚РєР° РїРѕ СЌС‚Р°РїР°Рј) */
+  /* phase accents (кибер-подсветка по этапам) */
   .composerMediaBar[data-phase="moderating"]{ ... }
   .composerMediaBar[data-phase="uploading"]{ ... }
   .composerMediaBar[data-phase="sending"]{ ... }
 
-  /* Р»С‘РіРєРёР№ "СЃРєР°РЅР»Р°Р№РЅ" РїРѕРІРµСЂС… СЂРµР»СЊСЃС‹ */
+  /* лёгкий "сканлайн" поверх рельсы */
   .cmbTrack::after{ ... animation: cmbScan ... }
 
   /* =========================================================
-     Composer media progress bar (РЅР°Рґ РєРѕРЅС‚СЂРѕР»Р°РјРё)
-     - РІРёРґРЅР° РѕС‚ РјРѕРјРµРЅС‚Р° РІС‹Р±РѕСЂР°/Р·Р°РїРёСЃРё РґРѕ РѕС‚РїСЂР°РІРєРё РёР»Рё СЃР±СЂРѕСЃР° РјРµРґРёР°
-     - СЃР»РµРІР° РјРёРіР°РµС‚ "Loading" (EN)
+     Composer media progress bar (над контролами)
+     - видна от момента выбора/записи до отправки или сброса медиа
+     - слева мигает "Loading" (EN)
   ========================================================= */
   .composerMediaBar{
     display:flex;
@@ -6036,7 +6036,7 @@ html[data-tma="1"] .inboxTabs{
     border: 1px solid rgba(255,255,255,.08);
     background: rgba(0,0,0,.18);
   }
-  /* РІРјРµСЃС‚Рѕ РјРёРіР°СЋС‰РµРіРѕ С‚РµРєСЃС‚Р° вЂ” В«С‚РѕС‡РµС‡РЅРѕРµ РєРѕР»РµС‡РєРѕВ» Р·Р°РіСЂСѓР·РєРё */
+  /* вместо мигающего текста — «точечное колечко» загрузки */
   .cmbSpinner{
     position: relative;
     width: 22px;
@@ -6133,7 +6133,7 @@ html[data-tma="1"] .inboxTabs{
     mix-blend-mode: overlay;
     opacity: .35;
   }
-  /* РєРѕРјРїР°РєС‚РЅРµРµ РЅР° РјРѕР±РёР»РєРµ */
+  /* компактнее на мобилке */
   @media (max-width: 520px){
     .cmbLeft{ width: 72px; }
     .composerMediaBar{ gap:8px; padding:9px 9px; }
@@ -6146,7 +6146,7 @@ html[data-tma="1"] .inboxTabs{
   background: rgba(10,16,24,.55);
   backdrop-filter: blur(8px) saturate(120%);
   border: 1px solid rgba(255,255,255,.08);
-  padding: 12px 64px;      /* РјРµСЃС‚Рѕ РїРѕРґ СЂРµР»СЊСЃС‹ */
+  padding: 12px 64px;      /* место под рельсы */
   padding-left: 10px;
   padding-right: 10px;
   min-height: 50px;
@@ -6173,7 +6173,7 @@ html[data-tma="1"] .inboxTabs{
 
 
 
-/* РєРЅРѕРїРєРё-РёРєРѕРЅРєРё */
+/* кнопки-иконки */
 .iconBtn{
   position:relative;
   display:inline-flex; align-items:center; justify-content:center;
@@ -6198,11 +6198,11 @@ html[data-tma="1"] .inboxTabs{
   pointer-events:none;
 }
 
-/* СЃР°РјРѕР»С‘С‚РёРє */
+/* самолётик */
 .planeBtn .plane{ fill:#2b8cff; width:22px; height:22px; }
 .planeBtn.disabled .plane{ fill:none; stroke:#6f88b3; stroke-width:1.8; opacity:.7; }
 
-/* РјРёРєСЂРѕС„РѕРЅ РїСЂРё Р·Р°РїРёСЃРё */
+/* микрофон при записи */
 .micBtn.rec{
   box-shadow:0 0 0 2px rgba(255,90,90,.9), 0 0 14px 2px rgba(255,90,90,.25);
   color:#ffd1d1;
@@ -6216,7 +6216,7 @@ html[data-tma="1"] .inboxTabs{
    box-shadow:0 0 0 1px rgba(22,163,74,.35) inset, 0 6px 18px -8px rgba(22,163,74,.45);
  }
 
- /* Quest vibro button (РІ РїРѕРїРѕРІРµСЂРµ QCoin) */
+ /* Quest vibro button (в поповере QCoin) */
  .questBtn{
    display:inline-flex; align-items:center; gap:8px;
    background:#ff2340; color:#fff; border:0;
@@ -6246,14 +6246,14 @@ html[data-tma="1"] .inboxTabs{
  }
 /* === QUEST: full-width cards, like TopicItem/PostCard === */
 .questList { display: grid; gap: .5rem; }
-.questItem {                       /* Р±Р°Р·РѕРІС‹Р№ РєРѕРЅС‚РµР№РЅРµСЂ РєРІРµСЃС‚Р° */
-  width: 100%;                     /* РІРѕ РІСЃСЋ С€РёСЂРёРЅСѓ РєРѕР»РѕРЅРєРё */
+.questItem {                       /* базовый контейнер квеста */
+  width: 100%;                     /* во всю ширину колонки */
 }
-.questItem.item {                  /* РЅР°СЃР»РµРґСѓРµРј РІРёР·СѓР°Р» РѕС‚ .item */
+.questItem.item {                  /* наследуем визуал от .item */
   padding: 10px 12px;
-  min-height: auto;                /* РїРѕ РєРѕРЅС‚РµРЅС‚Сѓ */
+  min-height: auto;                /* по контенту */
 }
-/* РїСЂРµРІСЊСЋ Рё Р·Р°РіРѕР»РѕРІРєРё */
+/* превью и заголовки */
 .questHead{ display:flex; align-items:center; gap:.6rem; }
 .questThumb{
   width: 98px; height: 98px; border-radius: .6rem;
@@ -6262,17 +6262,17 @@ html[data-tma="1"] .inboxTabs{
 .questTitle{ font-weight:700; line-height:1.15; }
 .questMeta{ font-size:.82rem; opacity:.8; }
 
-/* Р·Р°РґР°С‡Рё РІРЅСѓС‚СЂРё РєРІРµСЃС‚Р° вЂ” С‚Рµ Р¶Рµ РїРѕР»РЅРѕС€РёСЂРёРЅРЅС‹Рµ РєР°СЂС‚РѕС‡РєРё */
+/* задачи внутри квеста — те же полноширинные карточки */
 .questTaskList{ display:grid; gap:.5rem; }
 .questTask.item{ padding:10px 12px; }
 .questTask .right{ margin-left:auto; display:flex; align-items:center; gap:.5rem; }
 
-/* СЃРѕСЃС‚РѕСЏРЅРёСЏ РєРЅРѕРїРѕРє РІС‹РїРѕР»РЅРµРЅРёСЏ */
+/* состояния кнопок выполнения */
 .btnQuest.do     { background:#1e66ff; }
 .btnQuest.done   { background:#16a34a; }
 .btnQuest.locked { background:#7a7a7a; cursor:not-allowed; opacity:.7; }
 
-/* РјРёРЅРё-СЃС‡С‘С‚С‡РёРє */
+/* мини-счётчик */
 .miniCounter{
   position:absolute; left:10px; inset-inline-start:10px; bottom:6px;
   font-size:12px; opacity:.75; user-select:none;
@@ -6284,9 +6284,9 @@ html[data-tma="1"] .inboxTabs{
 .miniCounter .max{ opacity:.75; }
 .miniCounter .over{ color:#ff7f7f; opacity:1; }
 
-/* СЃС‚Р°СЂС‹Рµ СЌР»РµРјРµРЅС‚С‹ РєРѕРјРїРѕР·РµСЂР° РїСЂСЏС‡РµРј (РµСЃР»Рё РѕСЃС‚Р°Р»РёСЃСЊ РІ DOM) */
+/* старые элементы композера прячем (если остались в DOM) */
 .tools{ display:none !important; }
-/* Р‘Р°Р·РѕРІР°СЏ РёРєРѕРЅ-РєРЅРѕРїРєР° */
+/* Базовая икон-кнопка */
 .iconBtn{
   -webkit-tap-highlight-color: transparent;
   position: relative;
@@ -6309,7 +6309,7 @@ html[data-tma="1"] .inboxTabs{
   filter: saturate(.7);
 }
 
-/* Р‘РѕР»СЊС€РѕР№ РєРѕРЅС‚СѓСЂРЅС‹Р№ РїР»СЋСЃ */
+/* Большой контурный плюс */
 .bigPlus{
   width: 48px;
   height: 48px;
@@ -6329,30 +6329,30 @@ html[data-tma="1"] .inboxTabs{
 @media (prefers-color-scheme: dark){
   .iconBtn{ border-color: rgba(255,255,255,.16); }
 }
-/* РџРѕР»РѕСЃР° РЅР°Рґ СЃРїРёСЃРєРѕРј С‚РµРј СЃ РєРЅРѕРїРєРѕР№-РїР»СЋСЃРѕРј */
+/* Полоса над списком тем с кнопкой-плюсом */
 .createTopicRow{
-  /* РѕС‚СЃС‚СѓРї СЃРІРµСЂС…Сѓ РѕС‚ С€Р°РїРєРё Р±Р»РѕРєР° С‚РµРј */
-  margin-block-start: 8px;        /* = margin-top, Р»РѕРіРёС‡РЅРѕ РґР»СЏ RTL */
-  /* РІРЅСѓС‚СЂРµРЅРЅРёР№ РїР°РґРґРёРЅРі, С‡С‚РѕР±С‹ РїР»СЋСЃ РЅРµ РїСЂРёР»РёРїР°Р» Рє Р»РµРІРѕРјСѓ Р±РѕСЂРґСЋСЂСѓ РєР°СЂС‚РѕС‡РєРё */
-  padding-inline-start: 10px;     /* = padding-left РІ LTR, padding-right РІ RTL */
+  /* отступ сверху от шапки блока тем */
+  margin-block-start: 8px;        /* = margin-top, логично для RTL */
+  /* внутренний паддинг, чтобы плюс не прилипал к левому бордюру карточки */
+  padding-inline-start: 10px;     /* = padding-left в LTR, padding-right в RTL */
   padding-inline-end: 10px;
   padding-block-start: 6px;
   padding-block-end: 0;
 }
 
-/* СЃР°Рј РїР»СЋСЃ вЂ” РЅРµР±РѕР»СЊС€РѕР№ Р·Р°Р·РѕСЂ РѕС‚ РІРµСЂС…РЅРµР№ РєСЂРѕРјРєРё Рё Р»РµРІРѕРіРѕ Р±РѕСЂС‚Р° */
+/* сам плюс — небольшой зазор от верхней кромки и левого борта */
 .createTopicRow .bigPlus{
-  margin-block-start: 2px;        /* в†“ РѕС‚СЃС‚СѓРї РѕС‚ РІРµСЂС…РЅРµР№ РєСЂРѕРјРєРё */
-  margin-inline-start: 6px;       /* в†ђ РѕС‚СЃС‚СѓРї РѕС‚ Р»РµРІРѕРіРѕ (РёР»Рё РїСЂР°РІРѕРіРѕ РІ RTL) */
+  margin-block-start: 2px;        /* ↓ отступ от верхней кромки */
+  margin-inline-start: 6px;       /* ← отступ от левого (или правого в RTL) */
 }
 
-/* РµСЃР»Рё С…РѕС‡РµС‚СЃСЏ С‡СѓС‚СЊ Р±РѕР»СЊС€Рµ РІРѕР·РґСѓС…Р° РЅР°Рґ РїРµСЂРІРѕР№ РєР°СЂС‚РѕС‡РєРѕР№ С‚РµРјС‹ */
+/* если хочется чуть больше воздуха над первой карточкой темы */
 .createTopicRow + .item,
 .createTopicRow + div .item{
-  margin-block-start: 14px;        /* РїРµСЂРІР°СЏ РєР°СЂС‚РѕС‡РєР° С‚РµРј РѕС‚СЉРµРґРµС‚ РІРЅРёР· */
+  margin-block-start: 14px;        /* первая карточка тем отъедет вниз */
 }
 
-/* РЅР° РѕС‡РµРЅСЊ СѓР·РєРёС… СЌРєСЂР°РЅР°С… РјРѕР¶РЅРѕ СЃР»РµРіРєР° СѓРІРµР»РёС‡РёС‚СЊ РІРЅСѓС‚СЂРµРЅРЅРёРµ РїРѕР»СЏ */
+/* на очень узких экранах можно слегка увеличить внутренние поля */
 @media (max-width: 420px){
   .createTopicRow{
     padding-inline-start: 12px;
@@ -6361,16 +6361,16 @@ html[data-tma="1"] .inboxTabs{
   }
 }
 /* =========================================================
-   Create Topic вЂ” РІСЃРїР»С‹РІР°СЋС‰Р°СЏ С„РѕСЂРјР° РїРѕ С†РµРЅС‚СЂСѓ СЌРєСЂР°РЅР° (Р±РµР· РѕРІРµСЂР»РµСЏ)
-   - РќР• Р·Р°РЅРёРјР°РµС‚ РјРµСЃС‚Рѕ РїРѕРґ РєРѕРЅС‚СЂРѕР»Р»Р°РјРё
-   - РїРѕРІРµСЂС… РІСЃРµРіРѕ (РІ С‚.С‡. С€Р°РїРєРё), С‚.Рє. СЂРµРЅРґРµСЂРёС‚СЃСЏ РїРѕСЂС‚Р°Р»РѕРј РІ body
+   Create Topic — всплывающая форма по центру экрана (без оверлея)
+   - НЕ занимает место под контроллами
+   - поверх всего (в т.ч. шапки), т.к. рендерится порталом в body
 ========================================================= */
 .createTopicModal{
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 2147483000; /* РјР°РєСЃРёРјР°Р»СЊРЅРѕ РІС‹С€Рµ С€Р°РїРѕРє/Р»РёРїРєРёС… РїР°РЅРµР»РµР№ */
+  z-index: 2147483000; /* максимально выше шапок/липких панелей */
   width: min(92vw, 720px);
   pointer-events: auto;
 }
@@ -6380,26 +6380,26 @@ html[data-tma="1"] .inboxTabs{
   overflow: auto;
   border-radius: 14px;
   box-shadow: 0 18px 55px rgba(0,0,0,.35);
-  /* вњ… С‡С‚РѕР±С‹ РЅРµ Р±С‹Р»Р° РїСЂРѕР·СЂР°С‡РЅРѕР№ РєР°Рє .item */
+  /* ✅ чтобы не была прозрачной как .item */
   background: rgba(10,14,22,.96);
   border: 1px solid rgba(255,255,255,.12);
- /* вњ… С‡С‚РѕР±С‹ РІРёР·СѓР°Р»СЊРЅРѕ Р±С‹Р»Рѕ РєР°Рє Сѓ .item (РµСЃР»Рё СЂР°РЅСЊС€Рµ РѕРЅР° РґР°РІР°Р»Р° РѕС‚СЃС‚СѓРїС‹) */
+ /* ✅ чтобы визуально было как у .item (если раньше она давала отступы) */
   padding: 12px;
 }
 
-/* Р•РґРёРЅР°СЏ РіРѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅР°СЏ СЂРµР»СЊСЃР° вЂ” РІРёР·СѓР°Р»СЊРЅРѕ РєР°Рє СЃР°Рј РєРѕРјРїРѕР·РµСЂ */
+/* Единая горизонтальная рельса — визуально как сам композер */
 .topRail{
   width:100%;
   margin-bottom:8px;
 }
 .topRail .railInner{
   display:grid;
-  grid-template-columns: repeat(6, 1fr); /* 6 СЂР°РІРЅС‹С… Р·РѕРЅ */
+  grid-template-columns: repeat(6, 1fr); /* 6 равных зон */
   align-items:center;
   gap: clamp(8px, 2vw, 16px);
   padding: 8px 10px;
 
-  /* РїРѕРґРіРѕРЅ РїРѕРґ СЃС‚РёР»СЊ РєРѕРјРїРѕР·РµСЂР° */
+  /* подгон под стиль композера */
   border:1px solid rgba(255, 255, 255, 0);
   border-radius:14px;
   background: rgba(10, 14, 22, 0);
@@ -6417,7 +6417,7 @@ html[data-tma="1"] .inboxTabs{
 .topRail .iconBtn{
   width:36px; height:36px;
   display:inline-flex; align-items:center; justify-content:center;
-  padding:0; /* РЅРµ РјРµРЅСЏРµРј С‚РІРѕРё РєР»Р°СЃСЃС‹, С‚РѕР»СЊРєРѕ РіР°Р±Р°СЂРёС‚С‹ */
+  padding:0; /* не меняем твои классы, только габариты */
 }
 
 .topRail .miniCounter{
@@ -6428,19 +6428,19 @@ html[data-tma="1"] .inboxTabs{
 }
 
 
-/* Р§С‚РѕР± РјРµР¶РґСѓ СЂРµР»СЊСЃРѕР№ Рё РїРѕР»РµРј РІРІРѕРґР° Р±С‹Р»Рѕ СЂРѕРІРЅРѕ РєР°Рє РїРѕ Р±РѕРєР°Рј СЂР°РЅСЊС€Рµ */
+/* Чтоб между рельсой и полем ввода было ровно как по бокам раньше */
 .taWrap { gap: 8px; display:flex; flex-direction:column; }
 
 /* ===========================================
-   Q-shine: РјСЏРіРєРёР№ Р·РѕР»РѕС‚РѕР№ РїРµСЂРµР»РёРІ РґР»СЏ РєР°СЂС‚РѕС‡РµРє
+   Q-shine: мягкий золотой перелив для карточек
    =========================================== */
- /* Р—РѕР»РѕС‚РѕР№ VIP-РїРµСЂРµР»РёРІ РґР»СЏ СЃСѓРјРјС‹ РЅР°РіСЂР°РґС‹ вЂ” РєР°Рє Сѓ .qcoinX2.vip */
+ /* Золотой VIP-перелив для суммы награды — как у .qcoinX2.vip */
 .goldReward{
   display:inline-block;
   font-weight:800;
   font-size:1.15rem;
   letter-spacing:.02em;
-  /* С‚РѕС‚ Р¶Рµ РіСЂР°РґРёРµРЅС‚ Рё СЃРєРѕСЂРѕСЃС‚СЊ В«shineВ», С‡С‚Рѕ Сѓ qcoinX2.vip */
+  /* тот же градиент и скорость «shine», что у qcoinX2.vip */
   background:
     linear-gradient(135deg,
       #7a5c00 0%, #ffd700 18%, #fff4b3 32%, #ffd700 46%,
@@ -6448,8 +6448,8 @@ html[data-tma="1"] .inboxTabs{
   background-size:200% 100%;
   -webkit-background-clip:text;
   background-clip:text;
-  color:transparent; /* СЃР°Рј С‚РµРєСЃС‚ В«Р·РѕР»РѕС‚РёС‚СЃСЏВ» РіСЂР°РґРёРµРЅС‚РѕРј */
-  /* СЃРІРµС‡РµРЅРёРµ РєР°Рє Сѓ Р±РµР№РґР¶Р° X2 */
+  color:transparent; /* сам текст «золотится» градиентом */
+  /* свечение как у бейджа X2 */
   text-shadow:
      0 0 8px  rgba(255,220,120,.65),
      0 0 18px rgba(255,215,0,.35);
@@ -6460,7 +6460,7 @@ html[data-tma="1"] .inboxTabs{
 .goldReward.big{
   font-size:1.35rem;
 }
-/* РљР°РґСЂС‹ Р°РЅРёРјР°С†РёР№ вЂ” РІ С‚РѕС‡РЅРѕСЃС‚Рё РїРѕРІС‚РѕСЂСЏРµРј РёРґРµСЋ Р±РµР№РґР¶Р° X2 */
+/* Кадры анимаций — в точности повторяем идею бейджа X2 */
 @keyframes qcoinShine {
   0%   { background-position:   0% 50% }
   100% { background-position: 200% 50% }
@@ -6493,9 +6493,9 @@ html[data-tma="1"] .inboxTabs{
 }
  .tag.ok{ background:#16a34a; color:#fff; border-color:#15803d }
 .tag.info{ background:#6366f1; color:#fff; border-color:#4f46e5 }
-.tag.warn { background:#ef4444; color:#fff; border:1px solid #dc2626 } /* РєР°Рє Р±С‹Р»Рѕ */
+.tag.warn { background:#ef4444; color:#fff; border:1px solid #dc2626 } /* как было */
 
-/* СѓРІРµР»РёС‡РµРЅРЅС‹Р№ РєСЂРµСЃС‚РёРє РІ РїСЂРµРІСЊСЋ VIP/MOZI */
+/* увеличенный крестик в превью VIP/MOZI */
 .emojiRemoveBtn {
   position: absolute;
   top: -12px;
@@ -6517,7 +6517,7 @@ html[data-tma="1"] .inboxTabs{
   transform: scale(1.2);
 }
 
-/* СЂР°Р·РјРµСЂ РїСЂРµРІСЊСЋ VIP/MOZI РІ composer */
+/* размер превью VIP/MOZI в composer */
 .emojiPreviewBig {
   width: 80px;
   height: 80px;
@@ -6525,14 +6525,14 @@ html[data-tma="1"] .inboxTabs{
   vertical-align: middle;
 }
 
-/* СЂР°Р·РјРµСЂ VIP/MOZI РІ РїРѕСЃС‚Р°С… */
+/* размер VIP/MOZI в постах */
 .emojiPostBig {
   width: 64px;
   height: 64px;
   display: inline-block;
   vertical-align: middle;
 }
-/* РѕР±С‘СЂС‚РєР° РїРѕРґ РєСЂСѓРїРЅС‹Рµ СЌРјРѕРґР·Рё РІ РєР°СЂС‚РѕС‡РєРµ */
+/* обёртка под крупные эмодзи в карточке */
 .emojiPostWrap {
   display: flex;
   justify-content: center;
@@ -6540,7 +6540,7 @@ html[data-tma="1"] .inboxTabs{
   margin: 8px 0;
 }
 
-/* СЂР°Р·РјРµСЂ VIP/MOZI СЌРјРѕРґР·Рё РІ РєР°СЂС‚РѕС‡РєР°С… */
+/* размер VIP/MOZI эмодзи в карточках */
 .emojiPostBig {
   width: 250px;
   height: 250px;
@@ -6552,12 +6552,12 @@ html[data-tma="1"] .inboxTabs{
   transform: scale(1.08);
 }
 
-/* РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё РґР»СЏ MOZI РјРѕР¶РЅРѕ Р·Р°РґР°С‚СЊ СЃРІРѕР№ СЂР°Р·РјРµСЂ */
+/* при необходимости для MOZI можно задать свой размер */
 .moziEmojiBig.emojiPostBig {
   width: 84px;
   height: 84px;
 }
-/* РђР±СЃРѕР»СЋС‚РЅРѕ В«С‡РёСЃС‚Р°СЏВ» РєР°СЂС‚РёРЅРєР°: РЅРё С„РѕРЅР°, РЅРё СЂР°РјРѕРє, РЅРё РїРѕРґСЃРІРµС‚РєРё С„РѕРєСѓСЃР° */
+/* Абсолютно «чистая» картинка: ни фона, ни рамок, ни подсветки фокуса */
 .questIconPure {
   width: var(--quest-w, 64px);
   height: var(--quest-h, auto);
@@ -6571,7 +6571,7 @@ html[data-tma="1"] .inboxTabs{
   cursor: var(--quest-cursor, pointer);
   image-rendering: auto;
   transform: translateY(var(--quest-y, 0));
-/* СѓР±РёСЂР°РµРј РјРѕР±РёР»СЊРЅС‹Р№ tap-highlight, РІС‹РґРµР»РµРЅРёРµ Рё РєРѕР»СЊС†Р° С„РѕРєСѓСЃР° */
+/* убираем мобильный tap-highlight, выделение и кольца фокуса */
   -webkit-tap-highlight-color: transparent;
   -webkit-focus-ring-color: rgba(0,0,0,0);
   -webkit-user-select: none;
@@ -6579,13 +6579,13 @@ html[data-tma="1"] .inboxTabs{
   -webkit-user-drag: none;
 }
 
-/* Р’С‹РєР»СЋС‡РµРЅРЅРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ */
+/* Выключенное состояние */
 .questIconPure[aria-disabled="true"] {
   opacity: 0.5;
   pointer-events: none;
 }
 
-/* РіР°СЃРёРј РІРёР·СѓР°Р»СЊРЅС‹Р№ В«РєР»РёРєВ»/focus */
+/* гасим визуальный «клик»/focus */
 .questIconPure:active,
 .questIconPure:focus,
 .questIconPure:focus-visible {
@@ -6594,7 +6594,7 @@ html[data-tma="1"] .inboxTabs{
   background: transparent !important;
 }
 
-/* РЅР° РІСЃСЏРєРёР№ СЃР»СѓС‡Р°Р№ вЂ” СѓР±РёСЂР°РµРј РїРѕРґСЃРІРµС‚РєСѓ РІС‹РґРµР»РµРЅРёСЏ РїРёРєС‡Рё РїСЂРё С‚Р°РїРµ/РґР°Р±Р»-С‚Р°РїРµ */
+/* на всякий случай — убираем подсветку выделения пикчи при тапе/дабл-тапе */
 .questIconPure::selection {
   background: transparent;
 } 
@@ -6605,7 +6605,7 @@ html[data-tma="1"] .inboxTabs{
   --forum-topic-title-color: #fec301ff;
 }
 
-/* Р•РґРёРЅС‹Р№ СЃС‚РёР»СЊ Р·Р°РіРѕР»РѕРІРєРѕРІ С‚РµРј РІ С„РѕСЂСѓРјРµ */
+/* Единый стиль заголовков тем в форуме */
 .forum_root [id^="topic_"] .title,
 .forum_root .topicCard .title,
 .forum_root .topicTitle,
@@ -6623,22 +6623,22 @@ html[data-tma="1"] .inboxTabs{
   letter-spacing: .06em;
   text-transform: none;
 
-  /* Р»С‘РіРєРёР№ В«РєСЂРёРїС‚Рѕ-РЅРµРѕРЅВ» СЃРїРµС†СЌС„С„РµРєС‚ */
+  /* лёгкий «крипто-неон» спецэффект */
   text-shadow:
     0 0 6px rgba(0, 200, 255, 0.55),
     0 0 14px rgba(0, 0, 0, 0.85);
 }
-/* РѕР±С‰РёР№ Р»РёРїРєРёР№ РґРѕРє РІРЅРёР·Сѓ РѕРєРЅР° вЂ” РґРµСЂР¶РёС‚ РєРѕРјРїРѕР·РµСЂ Рё FAB РЅР° РјРµСЃС‚Рµ */
+/* общий липкий док внизу окна — держит композер и FAB на месте */
 .composeDock{
   position: sticky;
   bottom: 0;
-  z-index: 40;          /* РїРѕРІРµСЂС… РєРѕРЅС‚РµРЅС‚Р° СЃРѕ СЃРєСЂРѕР»Р»РѕРј */
-  pointer-events: none; /* СЃР°Рј РґРѕРє РєР»РёРєРё РЅРµ РїРµСЂРµС…РІР°С‚С‹РІР°РµС‚ */
+  z-index: 40;          /* поверх контента со скроллом */
+  pointer-events: none; /* сам док клики не перехватывает */
 }
-/* РµРіРѕ РґРµС‚Рё РєР»РёРєР°Р±РµР»СЊРЅС‹ */
+/* его дети кликабельны */
 .composeDock > *{ pointer-events: auto; }
 
-/* РїСЂСЏС‡РµРј РєРѕРјРїРѕР·РµСЂ, РєРѕРіРґР° РѕРЅ РІС‹РєР»СЋС‡РµРЅ вЂ” РµСЃР»Рё Сѓ С‚РµР±СЏ СЌС‚Рѕ СѓР¶Рµ РµСЃС‚СЊ, РѕСЃС‚Р°РІСЊ СЃРІРѕС‘ */
+/* прячем композер, когда он выключен — если у тебя это уже есть, оставь своё */
 .composer:not([data-active="true"]){
   transform: translateY(100%);
   opacity: 0;
@@ -6646,11 +6646,11 @@ html[data-tma="1"] .inboxTabs{
   transition: transform .18s ease, opacity .12s ease;
 }
 
-/* FAB РІРЅСѓС‚СЂРё РґРѕРєР°: РїРѕР·РёС†РёРѕРЅРёСЂСѓРµРј Рє РїСЂР°РІРѕРјСѓ РЅРёР¶РЅРµРјСѓ СѓРіР»Сѓ РґРѕРєР° */
+/* FAB внутри дока: позиционируем к правому нижнему углу дока */
 .fabCompose{
   --fab-size: 50px;
-  --fab-right: 16px;   /* РјРѕР¶РЅРѕ РјРµРЅСЏС‚СЊ РїРѕР·РёС†РёСЋ */
-  --fab-bottom: 36px;  /* РјРѕР¶РЅРѕ РјРµРЅСЏС‚СЊ РїРѕР·РёС†РёСЋ */
+  --fab-right: 16px;   /* можно менять позицию */
+  --fab-bottom: 36px;  /* можно менять позицию */
 
   position: absolute;
   right: max(var(--fab-right), env(safe-area-inset-right));
@@ -6670,7 +6670,7 @@ html[data-tma="1"] .inboxTabs{
 }
 .fabCompose svg{ width: 28px; height: 28px; display:block; fill: currentColor; }
 
-/* РїСЂСЏС‡РµРј FAB, РєРѕРіРґР° РєРѕРјРїРѕР·РµСЂ Р°РєС‚РёРІРµРЅ */
+/* прячем FAB, когда композер активен */
 .composer[data-active="true"] ~ .fabCompose{
   opacity: 0; transform: translateY(4px) scale(.98); pointer-events: none;
 }

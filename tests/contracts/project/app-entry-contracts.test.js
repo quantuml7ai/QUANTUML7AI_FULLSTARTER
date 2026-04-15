@@ -27,21 +27,17 @@ describe('App entry contracts', () => {
     expect(source).not.toContain('forumPath ||')
   })
 
-  it('keeps marketing page metadata wired to absolute OG/Twitter image urls', () => {
+  it('keeps absolute preview metadata for home/about/subscribe/game', () => {
     const rootLayout = readRepoFile('app/layout.js')
     const aboutLayout = readRepoFile('app/about/layout.js')
     const subscribeLayout = readRepoFile('app/subscribe/layout.js')
     const gameLayout = readRepoFile('app/game/layout.js')
-    const forumLayout = readRepoFile('app/forum/layout.js')
-    const academyLayout = readRepoFile('app/academy/layout.js')
 
     ;[
       rootLayout,
       aboutLayout,
       subscribeLayout,
       gameLayout,
-      forumLayout,
-      academyLayout,
     ].forEach((source) => {
       expect(source).toContain('toAbsoluteSiteUrl(')
       expect(source).toContain("withAssetVersion('/metab/")

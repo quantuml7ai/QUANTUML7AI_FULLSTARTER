@@ -25,8 +25,8 @@ export const FORUM_FX_STYLES = `
  .forumRowBar .inboxBtn .inboxBadgeDM{
    position:absolute; top:-6px; left:-6px; z-index:2;
  }
- /* RTL: Р·РµСЂРєР°Р»РёРј С‚РѕР»СЊРєРѕ РїРѕСЂСЏРґРѕРє СЃР»РѕС‚РѕРІ, С†РµРЅС‚СЂ РѕСЃС‚Р°С‘С‚СЃСЏ С†РµРЅС‚СЂРѕРј */
- [dir="rtl"] .forumRowBar{ direction:ltr; } /* С‡С‚РѕР±С‹ РёРєРѕРЅРєРё РЅРµ РїРµСЂРµРІРѕСЂР°С‡РёРІР°Р»РёСЃСЊ */
+ /* RTL: зеркалим только порядок слотов, центр остаётся центром */
+ [dir="rtl"] .forumRowBar{ direction:ltr; } /* чтобы иконки не переворачивались */
  [dir="rtl"] .forumRowBar .slot-left{ order:3; }
  [dir="rtl"] .forumRowBar .slot-center{ order:2; }
  [dir="rtl"] .forumRowBar .slot-right{ order:1; }

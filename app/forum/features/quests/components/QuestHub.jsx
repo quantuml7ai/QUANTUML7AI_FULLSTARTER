@@ -18,7 +18,7 @@ export default function QuestHub({
   getTaskRemainMs,             // (qid, tidString) -> ms
   taskDelayMs = 15000,
 }) {
-  /* === scoped СЃС‚РёР»Рё В«Р·РµР»С‘РЅРѕР№ РіР°Р»РєРёВ» === */
+  /* === scoped стили «зелёной галки» === */
   const tickStyles = (
     <style jsx>{`
       .qTickDraw{ display:inline-block; width:22px; height:22px; position:relative; }
@@ -29,7 +29,7 @@ export default function QuestHub({
         background:#2ecc71; filter: drop-shadow(0 0 6px rgba(46,204,113,.55));
         animation: qTickStroke .7s ease-out forwards;
       }
-    /* Р¤РѕР»Р±СЌРє РґР»СЏ Р±СЂР°СѓР·РµСЂРѕРІ Р±РµР· CSS mask */
+    /* Фолбэк для браузеров без CSS mask */
     @supports not ((-webkit-mask: url("")) or (mask: url(""))) {
       .qTickDraw{ width:auto; height:auto; }
       .qTickDraw::before{
@@ -50,7 +50,7 @@ export default function QuestHub({
     `}</style>
   )
 
-  /* === РѕР±С‰РёР№ С‚РёРє СЂР°Р· РІ СЃРµРєСѓРЅРґСѓ, С…СѓРє вЂ” РІСЃРµРіРґР°, СЂР°Р±РѕС‚Р° С‚РѕР»СЊРєРѕ РїСЂРё РѕС‚РєСЂС‹С‚РѕР№ РєР°СЂС‚РѕС‡РєРµ === */
+  /* === общий тик раз в секунду, хук — всегда, работа только при открытой карточке === */
   const [__questTick, __setQuestTick] = React.useState(0)
   React.useEffect(() => {
     if (!selected) return undefined
@@ -58,12 +58,12 @@ export default function QuestHub({
     return () => clearInterval(id)
   }, [selected])
 
-  /* === СѓС‚РёР»РёС‚С‹ === */
+  /* === утилиты === */
   const doubleDecimal = React.useCallback((s) => {
     return doubleQuestDecimal(s)
   }, [])
 
-  // СЃРєРѕР»СЊРєРѕ Р·Р°РґР°С‡ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ Сѓ РєР°СЂС‚РѕС‡РєРё (ENV СЃ РїРѕРєР°СЂС‚РѕС‡РЅС‹Рј РѕРІРµСЂСЂР°Р№РґРѕРј)
+  // сколько задач должно быть у карточки (ENV с покарточным оверрайдом)
   const getTotalTasks = React.useCallback((card) => {
     return resolveQuestTotalTasks(card, readEnv)
   }, [readEnv])
@@ -78,7 +78,7 @@ export default function QuestHub({
     return Math.max(0, Number(taskDelayMs) || 15000)
   }, [getTaskRemainMs, taskDelayMs])
 
-  // Р»РѕРєР°Р»СЊРЅР°СЏ В«РјРѕР¶РЅРѕ РєР»РµР№РјРёС‚СЊ?В», РµСЃР»Рё СЃРІРµСЂС…Сѓ РЅРµ РґР°Р»Рё РїСЂРѕРї
+  // локальная «можно клеймить?», если сверху не дали проп
   const claimDelayMsLocal = Math.max(0, Number(readEnv?.('NEXT_PUBLIC_QUEST_CLAIM_DELAY_MS', '0')) || 0)
   const isCardClaimableLocal = React.useCallback((qid) => {
     const card = questProg?.[qid]
@@ -109,14 +109,14 @@ export default function QuestHub({
           .cmrk svg { width:42px; height:42px; overflow:visible; }
           .cmrk .tick {
             fill:none; stroke:#2ecc71; stroke-width:3; stroke-linecap:round; stroke-linejoin:round;
-            /* Р°РЅРёРјР°С†РёСЏ РїСЂРѕСЂРёСЃРѕРІРєРё */
+            /* анимация прорисовки */
             stroke-dasharray: 28;
             stroke-dashoffset: 28;
             animation: cmrk-draw .40s ease-out forwards;
             filter: drop-shadow(0 0 6px rgba(46,204,113,.55));
           }
           @keyframes cmrk-draw { to { stroke-dashoffset: 0; } }
-          /* СѓРІР°Р¶РµРЅРёРµ reduce-motion */
+          /* уважение reduce-motion */
           @media (prefers-reduced-motion: reduce) {
             .cmrk .tick { animation: none; stroke-dashoffset: 0; }
           }
@@ -130,26 +130,26 @@ export default function QuestHub({
     )
   }
 
-  /* ===== РЎРїРёСЃРѕРє РєР°СЂС‚РѕС‡РµРє ===== */
+  /* ===== Список карточек ===== */
   if (!selected) {
     return (
       <div className="questList mt-2" suppressHydrationWarning>
         {tickStyles}
 
-        {/* СЃС‚РёР»Рё РґР»СЏ РїСЂР°РІРѕРіРѕ Р±РµР№РґР¶Р° Р±РµР· absolute */}
+        {/* стили для правого бейджа без absolute */}
         <style jsx>{`
           .qHeadRow{
             display:flex; align-items:center; gap:12px;
           }
           .qMid{
-            flex: 1 1 auto; min-width:0;   /* РґР°С‘Рј СЃРµСЂРµРґРёРЅРµ СЃР¶РёРјР°С‚СЊСЃСЏ Рё РїРµСЂРµРЅРѕСЃРёС‚СЊ СЃС‚СЂРѕРєРё */
+            flex: 1 1 auto; min-width:0;   /* даём середине сжиматься и переносить строки */
           }
           .qRight{
             flex: 0 0 auto; margin-left:auto;
             display:inline-flex; align-items:center; justify-content:center;
           }
 
-          /* Р°РЅРёРјР°С†РёРё/СЃС‚РёР»Рё Р±РµР№РґР¶РµР№ */
+          /* анимации/стили бейджей */
           .tag.warn{
             color:#ff4d4f; background:rgba(255,77,79,.12);
             border:1px solid rgba(255,77,79,.45);
@@ -175,7 +175,7 @@ export default function QuestHub({
             100%{ box-shadow:0 0 16px rgba(23, 214, 115, 0.22), 0 0 22px rgba(23,214,115,.15) }
           }
 
-          /* РЅР° СѓР·РєРёС… вЂ” РјРµС‚Сѓ РїРѕР·РІРѕР»СЏРµРј РїРµСЂРµРЅРѕСЃРёС‚СЊ СЃС‚СЂРѕРєРё, РїСЂР°РІС‹Р№ Р±РµР№РґР¶ РѕСЃС‚Р°С‘С‚СЃСЏ РЅР° РјРµСЃС‚Рµ */
+          /* на узких — мету позволяем переносить строки, правый бейдж остаётся на месте */
           @media (max-width: 520px){
             .questMeta{ white-space:normal }
           }
@@ -199,14 +199,14 @@ export default function QuestHub({
               title={t(q.i18nKey) || q.id}
             >
               <div className="questHead qHeadRow">
-                {/* СЃР»РµРІР° вЂ” РѕР±Р»РѕР¶РєР° */}
+                {/* слева — обложка */}
                 {q.cover ? (
                   q.coverType === 'mp4'
                     ? <video className="questThumb" src={q.cover} playsInline autoPlay muted loop preload="metadata" />
                     : <Image className="questThumb" src={q.cover} alt="" loading="lazy" unoptimized width={60} height={60} />
                 ) : (<div className="avaMini">🗂️</div>)}
 
-                {/* СЃРµСЂРµРґРёРЅР° вЂ” С‚СЏРЅРµС‚СЃСЏ/РїРµСЂРµРЅРѕСЃРёС‚СЃСЏ */}
+                {/* середина — тянется/переносится */}
                 <div className="qMid min-w-0">
                   <div className="questTitle whitespace-normal break-words">
                     {t(q.i18nKey) || q.id}
@@ -234,11 +234,11 @@ export default function QuestHub({
                   </div>
                 </div>
 
-                {/* СЃРїСЂР°РІР° вЂ” Р±РµР№РґР¶/РіР°Р»РѕС‡РєР°, РЅРёРєРѕРіРґР° РЅРµ РїРµСЂРµРєСЂС‹РІР°РµС‚ РєРѕРЅС‚РµРЅС‚ */}
+                {/* справа — бейдж/галочка, никогда не перекрывает контент */}
                 <div className="qRight">
                   {questProg?.[q.id]?.claimed || canClaim(q.id) ? (
                     <span className="tag ok" title={t('quest_done')}>✓</span>
-                    // РµСЃР»Рё С…РѕС‡РµС€СЊ вЂ” РјРѕР¶РЅРѕ Р·Р°РјРµРЅРёС‚СЊ РЅР° <AnimatedCheckmark />
+                    // если хочешь — можно заменить на <AnimatedCheckmark />
                   ) : (
                     <span
                       className={cls('tag', 'warn')}
@@ -257,7 +257,7 @@ export default function QuestHub({
     )
   }
 
-  /* ===== Р”РµС‚Р°Р»Рё РІС‹Р±СЂР°РЅРЅРѕР№ РєР°СЂС‚РѕС‡РєРё ===== */
+  /* ===== Детали выбранной карточки ===== */
   const q = selected
   const doneSet = new Set((questProg?.[q.id]?.done || []).map(String))
   const reward = readEnv?.(q.rewardKey, '') || ''
@@ -269,15 +269,15 @@ export default function QuestHub({
     <div className="item qshine">
       {tickStyles}
 
-      {/* СЃС‚РёР»Рё РёРјРµРЅРЅРѕ РґР»СЏ СЃРїРёСЃРєР° Р·Р°РґР°С‡ РІС‹Р±СЂР°РЅРЅРѕРіРѕ РєРІРµСЃС‚Р° */}
+      {/* стили именно для списка задач выбранного квеста */}
       <style jsx>{`
         .questTaskHead{
           display:flex;
           align-items:flex-start;
           gap:.6rem;
         }
-        /* Р»РµРІР°СЏ РєРѕР»РѕРЅРєР°: С„РёРєСЃРёСЂСѓРµРј С€РёСЂРёРЅСѓ = С€РёСЂРёРЅРµ РёРєРѕРЅРєРё,
-           С‡С‚РѕР±С‹ РјР°Р»РµРЅСЊРєРёР№ СЃС‡С‘С‚С‡РёРє РЅРµ РјРѕРі РµС‘ СѓР¶Р°С‚СЊ */
+        /* левая колонка: фиксируем ширину = ширине иконки,
+           чтобы маленький счётчик не мог её ужать */
         .questTaskIconCol{
           display:flex;
           flex-direction:column;
@@ -326,14 +326,14 @@ export default function QuestHub({
 
       <div className="questTaskList">
         {taskList.map((task, idx) => {
-          const tid = String(idx + 1) // СѓРЅРёС„РёС†РёСЂРѕРІР°РЅРЅС‹Р№ id Р·Р°РґР°С‡Рё: "1..N"
+          const tid = String(idx + 1) // унифицированный id задачи: "1..N"
           const url = readEnv?.(task.urlKey, '') || ''
           const isDone = doneSet.has(tid)
 
           return (
             <div key={task.id ?? `t:${idx}`} className="item qshine questTask" data-intensity="soft">
               <div className="questHead questTaskHead">
-                {/* Р›Р•Р’РђРЇ РљРћР›РћРќРљРђ: РёРєРѕРЅРєР° + Start/С‚Р°Р№РјРµСЂ/РіР°Р»РєР° РџРћР” РЅРµР№, С„РёРєСЃРёСЂРѕРІР°РЅРЅРѕР№ С€РёСЂРёРЅС‹ */}
+                {/* ЛЕВАЯ КОЛОНКА: иконка + Start/таймер/галка ПОД ней, фиксированной ширины */}
                 <div className="questTaskIconCol">
                   {task.cover ? (
                     <Image
@@ -351,7 +351,7 @@ export default function QuestHub({
                   <div>
                     {isDone ? (
                       (() => {
-                        const remain = Math.max(0, __questGetRemainMs(q.id, tid)) // СЃС‚СЂР°С…РѕРІРєР°
+                        const remain = Math.max(0, __questGetRemainMs(q.id, tid)) // страховка
                         if (remain > 0) {
                           const sec = Math.ceil(remain / 1000)
                           return (
@@ -390,7 +390,7 @@ export default function QuestHub({
                   </div>
                 </div>
 
-                {/* РџР РђР’РђРЇ Р§РђРЎРўР¬: С‚РµРєСЃС‚ Р·Р°РґР°С‡Рё */}
+                {/* ПРАВАЯ ЧАСТЬ: текст задачи */}
                 <div className="min-w-0">
                   <div className="title whitespace-normal break-words">
                     {t(task.i18nKey) || `${q.id} • ${idx + 1}`}
