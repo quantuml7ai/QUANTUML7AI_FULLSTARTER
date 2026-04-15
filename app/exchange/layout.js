@@ -1,5 +1,5 @@
 // app/exchange/layout.js
-import { withAssetVersion } from '../../lib/metadataCache'
+import { toAbsoluteSiteUrl, withAssetVersion } from '../../lib/metadataCache'
 
 const GLOBAL_DESCRIPTION =
   'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Q-Line Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©'
@@ -8,17 +8,17 @@ export const metadata = {
   title: 'Exchange',
   description: GLOBAL_DESCRIPTION,
   alternates: {
-    canonical: '/exchange',
+    canonical: toAbsoluteSiteUrl('/exchange'),
   },
   openGraph: {
     type: 'website',
-    url: '/exchange',
+    url: toAbsoluteSiteUrl('/exchange'),
     siteName: 'Quantum L7 AI',
     title: 'Exchange',
     description: GLOBAL_DESCRIPTION,
     images: [
       {
-        url: withAssetVersion('/metab/exchange1.png'),
+        url: toAbsoluteSiteUrl(withAssetVersion('/metab/exchange1.png')),
         width: 1200,
         height: 630,
         alt: 'Exchange',
@@ -31,7 +31,7 @@ export const metadata = {
     creator: '@quantuml7ai',
     title: 'Exchange',
     description: GLOBAL_DESCRIPTION,
-    images: [withAssetVersion('/metab/exchange1.png')],
+    images: [toAbsoluteSiteUrl(withAssetVersion('/metab/exchange1.png'))],
   },
 }
 

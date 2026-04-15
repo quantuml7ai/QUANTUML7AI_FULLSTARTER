@@ -26,4 +26,31 @@ describe('App entry contracts', () => {
     expect(source).toContain('if (!flags || !flags.master) return;')
     expect(source).not.toContain('forumPath ||')
   })
+
+  it('keeps marketing page metadata wired to absolute OG/Twitter image urls', () => {
+    const rootLayout = readRepoFile('app/layout.js')
+    const aboutLayout = readRepoFile('app/about/layout.js')
+    const subscribeLayout = readRepoFile('app/subscribe/layout.js')
+    const gameLayout = readRepoFile('app/game/layout.js')
+    const forumLayout = readRepoFile('app/forum/layout.js')
+    const academyLayout = readRepoFile('app/academy/layout.js')
+
+    ;[
+      rootLayout,
+      aboutLayout,
+      subscribeLayout,
+      gameLayout,
+      forumLayout,
+      academyLayout,
+    ].forEach((source) => {
+      expect(source).toContain('toAbsoluteSiteUrl(')
+      expect(source).toContain("withAssetVersion('/metab/")
+    })
+
+    expect(rootLayout).toContain('metadataBase: new URL(SITE_ORIGIN)')
+    expect(rootLayout).toContain("canonical: toAbsoluteSiteUrl('/')")
+    expect(aboutLayout).toContain("canonical: toAbsoluteSiteUrl('/about')")
+    expect(subscribeLayout).toContain("canonical: toAbsoluteSiteUrl('/subscribe')")
+    expect(gameLayout).toContain("canonical: toAbsoluteSiteUrl('/game')")
+  })
 })
