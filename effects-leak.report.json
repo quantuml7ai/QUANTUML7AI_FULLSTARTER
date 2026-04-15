@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-15T17:42:59.788Z",
+  "generatedAt": "2026-04-15T22:56:52.952Z",
   "all": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumRoot.jsx",
@@ -38,6 +38,26 @@
           "rect": 0,
           "flags": [
             "⚠ setInterval(1) > clearInterval(0)"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\QCastPlayer.jsx",
+      "issues": [
+        {
+          "startLine": 359,
+          "endLine": 462,
+          "block": "  React.useEffect(() => {\n    if (!qcastFxProfile.viz) return undefined\n\n    const audio = audioRef.current\n    const canvas = canvasRef.current\n    if (!audio || !canvas) return undefined\n\n    const st = waRef.current\n    const ctx2d = canvas.getContext('2d', { alpha: true })\n    if (!ctx2d) return undefined\n    st.ctx2d = ctx2d\n\n    const resize = () => {\n      try {\n        const host = hostRef.current\n        const rect = host?.getBoundingClientRect?.()\n        const w = Math.max(32, Math.round(rect?.width || 0))\n        const h = Math.max(32, Math.round(rect?.height || 0))\n        const dpr = Math.min(2, Math.max(1, Number(window.devicePixelRatio || 1)))\n        st.dpr = dpr\n        st.w = w\n        st.h = h\n        canvas.width = Math.round(w * dpr)\n        canvas.height = Math.round(h * dpr)\n        canvas.style.width = `${w}px`\n        canvas.style.height = `${h}px`\n        ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0)\n      } catch {}\n    }\n\n    resize()\n\n    try {\n      st.ro?.disconnect?.()\n    } catch {}\n    try {\n      if (typeof ResizeObserver !== 'undefined') {\n        st.ro = new ResizeObserver(() => resize())\n        if (hostRef.current) st.ro.observe(hostRef.current)\n      }\n    } catch {}\n\n    const paint = () => {\n      st.raf = 0\n      try {\n        if (!hostRef.current || !ctx2d) return\n        const w = st.w || 1\n        const h = st.h || 1\n        ctx2d.clearRect(0, 0, w, h)\n\n        if (!isPlaying || !st.analyser || !st.data) return\n\n        st.analyser.getByteFrequencyData(st.data)\n\n        const bars = 32\n        const gap = 4\n        const barW = Math.max(3, Math.floor((w - gap * (bars - 1)) / bars))\n        const step = Math.max(1, Math.floor(st.data.length / bars))\n        const baseY = h - 14\n\n        for (let i = 0; i < bars; i++) {\n          const sample = st.data[Math.min(st.data.length - 1, i * step)] || 0\n          const amp = sample / 255\n          const bh = Math.max(6, Math.round(amp * (h * 0.34)))\n          const x = i * (barW + gap)\n          const y = baseY - bh\n\n          ctx2d.fillStyle = i % 2 === 0 ? 'rgba(97, 214, 255, 0.18)' : 'rgba(255, 110, 214, 0.14)'\n          ctx2d.fillRect(x, y, barW, bh)\n\n          ctx2d.fillStyle = i % 2 === 0 ? 'rgba(125, 228, 255, 0.82)' : 'rgba(255, 156, 224, 0.72)'\n          ctx2d.fillRect(x, y + Math.max(0, bh - 10), barW, Math.min(10, bh))\n        }\n\n        const glow = ctx2d.createLinearGradient(0, 0, 0, h)\n        glow.addColorStop(0, 'rgba(84, 202, 255, 0.10)')\n        glow.addColorStop(0.55, 'rgba(32, 110, 168, 0.04)')\n        glow.addColorStop(1, 'rgba(0, 0, 0, 0)')\n        ctx2d.fillStyle = glow\n        ctx2d.fillRect(0, 0, w, h)\n      } catch {}\n    }\n\n    const tick = () => {\n      paint()\n      st.raf = requestAnimationFrame(tick)\n    }\n\n    st.raf = requestAnimationFrame(tick)\n\n    return () => {\n      try {\n        if (st.raf) cancelAnimationFrame(st.raf)\n      } catch {}\n      st.raf = 0\n      try {\n        st.ro?.disconnect?.()\n      } catch {}\n      st.ro = null\n      try {\n        ctx2d.clearRect(0, 0, st.w || 0, st.h || 0)\n      } catch {}\n    }\n  }, [isPlaying, qcastFxProfile.viz])",
+          "add": 0,
+          "rem": 0,
+          "si": 0,
+          "ci": 0,
+          "raf": 2,
+          "caf": 1,
+          "rect": 0,
+          "flags": [
+            "⚠ requestAnimationFrame(2) > cancelAnimationFrame(1)"
           ]
         }
       ]

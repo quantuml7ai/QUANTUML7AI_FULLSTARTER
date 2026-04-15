@@ -3,7 +3,7 @@ import {
   shouldPersistGlobalMute,
   shouldKeepResidentPostVideo,
   computeSettlingUntil,
-} from '@/app/forum/features/media/utils/mediaStatePolicy'
+} from '../../../../app/forum/features/media/utils/mediaStatePolicy.js'
 
 describe('mediaStatePolicy', () => {
   test('persists global mute only for approved sources', () => {

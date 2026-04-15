@@ -1,0 +1,269 @@
+{
+  "generatedAt": "2026-04-15T22:56:52.769Z",
+  "cwd": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
+  "files": [
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "exists": true,
+      "matches": [
+        {
+          "kind": "play_call",
+          "count": 0
+        },
+        {
+          "kind": "pause_call",
+          "count": 0
+        },
+        {
+          "kind": "load_call",
+          "count": 0
+        },
+        {
+          "kind": "remove_src",
+          "count": 1
+        },
+        {
+          "kind": "set_src",
+          "count": 1
+        },
+        {
+          "kind": "persist_mute",
+          "count": 0
+        },
+        {
+          "kind": "muted_event",
+          "count": 0
+        },
+        {
+          "kind": "site_media_play",
+          "count": 0
+        },
+        {
+          "kind": "observer",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "file": "app/forum/features/media/components/VideoMedia.jsx",
+      "exists": true,
+      "matches": [
+        {
+          "kind": "play_call",
+          "count": 0
+        },
+        {
+          "kind": "pause_call",
+          "count": 0
+        },
+        {
+          "kind": "load_call",
+          "count": 0
+        },
+        {
+          "kind": "remove_src",
+          "count": 0
+        },
+        {
+          "kind": "set_src",
+          "count": 0
+        },
+        {
+          "kind": "persist_mute",
+          "count": 0
+        },
+        {
+          "kind": "muted_event",
+          "count": 0
+        },
+        {
+          "kind": "site_media_play",
+          "count": 0
+        },
+        {
+          "kind": "observer",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "exists": true,
+      "matches": [
+        {
+          "kind": "play_call",
+          "count": 0
+        },
+        {
+          "kind": "pause_call",
+          "count": 15
+        },
+        {
+          "kind": "load_call",
+          "count": 0
+        },
+        {
+          "kind": "remove_src",
+          "count": 0
+        },
+        {
+          "kind": "set_src",
+          "count": 7
+        },
+        {
+          "kind": "persist_mute",
+          "count": 0
+        },
+        {
+          "kind": "muted_event",
+          "count": 0
+        },
+        {
+          "kind": "site_media_play",
+          "count": 3
+        },
+        {
+          "kind": "observer",
+          "count": 4
+        }
+      ]
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "exists": true,
+      "matches": [
+        {
+          "kind": "play_call",
+          "count": 0
+        },
+        {
+          "kind": "pause_call",
+          "count": 0
+        },
+        {
+          "kind": "load_call",
+          "count": 0
+        },
+        {
+          "kind": "remove_src",
+          "count": 0
+        },
+        {
+          "kind": "set_src",
+          "count": 0
+        },
+        {
+          "kind": "persist_mute",
+          "count": 0
+        },
+        {
+          "kind": "muted_event",
+          "count": 0
+        },
+        {
+          "kind": "site_media_play",
+          "count": 1
+        },
+        {
+          "kind": "observer",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "file": "app/forum/features/media/components/QCastPlayer.jsx",
+      "exists": true,
+      "matches": [
+        {
+          "kind": "play_call",
+          "count": 0
+        },
+        {
+          "kind": "pause_call",
+          "count": 1
+        },
+        {
+          "kind": "load_call",
+          "count": 0
+        },
+        {
+          "kind": "remove_src",
+          "count": 0
+        },
+        {
+          "kind": "set_src",
+          "count": 0
+        },
+        {
+          "kind": "persist_mute",
+          "count": 0
+        },
+        {
+          "kind": "muted_event",
+          "count": 0
+        },
+        {
+          "kind": "site_media_play",
+          "count": 2
+        },
+        {
+          "kind": "observer",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "file": "components/BgAudio.js",
+      "exists": true,
+      "matches": [
+        {
+          "kind": "play_call",
+          "count": 4
+        },
+        {
+          "kind": "pause_call",
+          "count": 4
+        },
+        {
+          "kind": "load_call",
+          "count": 0
+        },
+        {
+          "kind": "remove_src",
+          "count": 0
+        },
+        {
+          "kind": "set_src",
+          "count": 0
+        },
+        {
+          "kind": "persist_mute",
+          "count": 0
+        },
+        {
+          "kind": "muted_event",
+          "count": 0
+        },
+        {
+          "kind": "site_media_play",
+          "count": 3
+        },
+        {
+          "kind": "observer",
+          "count": 0
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "play_call": 4,
+    "pause_call": 20,
+    "load_call": 0,
+    "remove_src": 1,
+    "set_src": 8,
+    "persist_mute": 0,
+    "muted_event": 0,
+    "site_media_play": 9,
+    "observer": 8
+  }
+}
