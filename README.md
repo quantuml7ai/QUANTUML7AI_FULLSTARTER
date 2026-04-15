@@ -8,6 +8,53 @@ Next.js forum application with media feed, profile flows, forum runtime orchestr
 2. Install dependencies with `pnpm install`.
 3. Start the app with `pnpm dev`.
 
+## Forum Diagnostics
+
+Early forum diagnostics are now controlled by one master public flag:
+
+```bash
+NEXT_PUBLIC_FORUM_EARLY_DIAG_ENABLED=0
+```
+
+When the master flag is `0`:
+
+- the `forum-early-diag` bootstrap script is not rendered into `/forum` HTML;
+- `/forum` path alone cannot auto-enable diagnostics;
+- query flags cannot turn diagnostics back on;
+- client hook diagnostics stay inert;
+- the debug route stays in skipped/disabled mode.
+
+Secondary flags only work when the master flag is enabled:
+
+```bash
+NEXT_PUBLIC_FORUM_DIAG=0
+NEXT_PUBLIC_FORUM_PERF_TRACE=0
+```
+
+Production-safe values:
+
+```bash
+NEXT_PUBLIC_FORUM_EARLY_DIAG_ENABLED=0
+NEXT_PUBLIC_FORUM_DIAG=0
+NEXT_PUBLIC_FORUM_PERF_TRACE=0
+```
+
+Intentional local diagnostics examples:
+
+```bash
+NEXT_PUBLIC_FORUM_EARLY_DIAG_ENABLED=1
+NEXT_PUBLIC_FORUM_DIAG=1
+NEXT_PUBLIC_FORUM_PERF_TRACE=0
+```
+
+or
+
+```bash
+NEXT_PUBLIC_FORUM_EARLY_DIAG_ENABLED=1
+NEXT_PUBLIC_FORUM_DIAG=0
+NEXT_PUBLIC_FORUM_PERF_TRACE=1
+```
+
 ## Official Verification Standard
 
 The canonical verification command for every project change is:

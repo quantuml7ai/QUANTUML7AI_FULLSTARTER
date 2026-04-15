@@ -6,8 +6,8 @@
 > Если меняются связи файла с другими файлами настолько, что комментарий устаревает, комментарий тоже обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-tree.js`.
 
-Сгенерировано автоматически: 2026-04-12T21:07:11.927Z
-Файлов в реестре: 1590
+Сгенерировано автоматически: 2026-04-13T20:35:47.525Z
+Файлов в реестре: 1592
 
 ## Исключенные каталоги
 - `.git/` — служебные внутренние данные Git, не часть прикладного дерева проекта.
@@ -27,7 +27,7 @@
 - `account-sync-audit.report.json` — 1 файлов
 - `ad-runtime.audit.report.json` — 1 файлов
 - `AGENTS.md` — 1 файлов
-- `app` — 381 файлов
+- `app` — 382 файлов
 - `audit` — 170 файлов
 - `auth-bus.audit.report.json` — 1 файлов
 - `components` — 23 файлов
@@ -58,7 +58,7 @@
 - `public` — 920 файлов
 - `README.md` — 1 файлов
 - `runtime-hotspots.report.json` — 1 файлов
-- `tests` — 17 файлов
+- `tests` — 18 файлов
 - `tools` — 30 файлов
 - `tsconfig.json` — 1 файлов
 - `vitest.config.mjs` — 1 файлов
@@ -288,7 +288,7 @@
           - DmThreadMessageRow.jsx — UI-компонент Dm Thread Message Row домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmVoicePlayer.jsx, forum/features/dm/utils/mediaParsing.js, forum/features/media/utils/mediaLifecycleRuntime.js; используется в forum/features/dm/components/DmMessagesPane.jsx.
           - DmVoicePlayer.jsx — UI-компонент Dm Voice Player домена DM/мессенджера. Связи: используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/ui/components/ComposerCore.jsx.
           - InboxPane.jsx — UI-компонент Inbox Pane домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmMessagesPane.jsx, forum/features/dm/components/InboxRepliesPane.jsx, forum/features/dm/components/InboxTabsHeader.jsx; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
-          - InboxRepliesPane.jsx — UI-компонент Inbox Replies Pane домена DM/мессенджера. Связи: используется в forum/features/dm/components/InboxPane.jsx.
+          - InboxRepliesPane.jsx — UI-компонент Inbox Replies Pane домена DM/мессенджера. Связи: импортирует forum/features/profile/utils/profileCache.js; используется в forum/features/dm/components/InboxPane.jsx.
           - InboxTabsHeader.jsx — UI-компонент Inbox Tabs Header домена DM/мессенджера. Связи: используется в forum/features/dm/components/InboxPane.jsx.
         - hooks/ — Каталог слоя хуки внутри feature dm.
           - useDmDeleteController.js — Хук use Dm Delete Controller домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/dmLoaders.js; используется в forum/features/dm/hooks/useForumDmRuntime.js.
@@ -320,21 +320,21 @@
           - LoadMoreSentinel.jsx — UI-компонент Load More Sentinel домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx.
           - PostActionBar.jsx — UI-компонент Post Action Bar домена ленты/тем/постов. Связи: импортирует forum/shared/components/HydrateText.jsx; используется в forum/features/feed/components/ForumPostCard.jsx.
           - PostBodyContent.jsx — UI-компонент Post Body Content домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
-          - PostCardBridge.jsx — UI-компонент Post Card Bridge домена ленты/тем/постов. Связи: импортирует forum/features/feed/components/ForumPostCard.jsx, forum/features/media/utils/mediaLifecycleRuntime.js, forum/shared/utils/richText.js; используется в forum/ForumRoot.jsx.
+          - PostCardBridge.jsx — UI-компонент Post Card Bridge домена ленты/тем/постов. Связи: импортирует forum/features/feed/components/ForumPostCard.jsx, forum/features/feed/utils/cardMemo.js, forum/features/media/utils/mediaLifecycleRuntime.js; используется в forum/ForumRoot.jsx.
           - PostFxLayer.jsx — UI-компонент Post Fx Layer домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
           - PostHeaderMeta.jsx — UI-компонент Post Header Meta домена ленты/тем/постов. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, forum/features/profile/utils/profileCache.js; используется в forum/features/feed/components/ForumPostCard.jsx.
           - PostMediaStack.jsx — UI-компонент Post Media Stack домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
           - PostOwnerMenu.jsx — UI-компонент Post Owner Menu домена ленты/тем/постов. Связи: импортирует forum/features/feed/hooks/usePostOwnerActions.js, forum/features/ui/components/ConfirmDeleteOverlay.jsx; используется в forum/features/feed/components/ForumPostCard.jsx.
           - PostTranslateToggle.jsx — UI-компонент Post Translate Toggle домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
-          - PublishedPostsPane.jsx — UI-компонент Published Posts Pane домена ленты/тем/постов. Связи: используется в forum/features/dm/components/InboxPane.jsx.
-          - ThreadRepliesPane.jsx — UI-компонент Thread Replies Pane домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ThreadSection.jsx.
+          - PublishedPostsPane.jsx — UI-компонент Published Posts Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js; используется в forum/features/dm/components/InboxPane.jsx.
+          - ThreadRepliesPane.jsx — UI-компонент Thread Replies Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js; используется в forum/features/feed/components/ThreadSection.jsx.
           - ThreadSection.jsx — UI-компонент Thread Section домена ленты/тем/постов. Связи: импортирует forum/ForumHeaderPanel.jsx, forum/features/feed/components/ThreadRepliesPane.jsx, forum/features/feed/components/ThreadTitle.jsx; используется в forum/ForumLayout.jsx.
           - ThreadTitle.jsx — UI-компонент Thread Title домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ThreadSection.jsx.
-          - TopicItem.jsx — UI-компонент Topic Item домена ленты/тем/постов. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, forum/features/profile/hooks/useVipFlag.js; используется в forum/ForumRoot.jsx.
+          - TopicItem.jsx — UI-компонент Topic Item домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/cardMemo.js, forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx; используется в forum/ForumRoot.jsx.
           - TopicsOrPanelsSwitch.jsx — UI-компонент Topics Or Panels Switch домена ленты/тем/постов. Связи: импортирует forum/features/dm/components/InboxPane.jsx, forum/features/feed/components/TopicsPane.jsx, forum/features/feed/components/UserPostsPane.jsx; используется в forum/features/feed/components/TopicsSection.jsx.
-          - TopicsPane.jsx — UI-компонент Topics Pane домена ленты/тем/постов. Связи: используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+          - TopicsPane.jsx — UI-компонент Topics Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
           - TopicsSection.jsx — UI-компонент Topics Section домена ленты/тем/постов. Связи: импортирует forum/ForumHeaderPanel.jsx, forum/features/feed/components/TopicsOrPanelsSwitch.jsx, forum/features/ui/components/MainForumActionCluster.jsx; используется в forum/ForumLayout.jsx.
-          - UserPostsPane.jsx — UI-компонент User Posts Pane домена ленты/тем/постов. Связи: используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+          - UserPostsPane.jsx — UI-компонент User Posts Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
           - UserRecommendationCard.jsx — UI-компонент User Recommendation Card домена ленты/тем/постов. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, forum/shared/components/HydrateText.jsx; используется в forum/features/feed/components/UserRecommendationsRail.jsx, tests/component/forum/features/feed/components/UserRecommendationCard.test.jsx.
           - UserRecommendationsRail.jsx — UI-компонент User Recommendations Rail домена ленты/тем/постов. Связи: импортирует forum/features/feed/components/UserRecommendationCard.jsx, forum/shared/utils/classnames.js; используется в forum/features/media/components/VideoFeedPane.jsx, tests/component/forum/features/feed/components/UserRecommendationsRail.test.jsx, tests/smoke/forum/features/media/components/VideoFeedPane.test.jsx.
         - constants/ — Каталог слоя константы внутри feature feed.
@@ -370,6 +370,7 @@
         - services/ — Каталог слоя сервисы внутри feature feed.
           - rateLimiter.js — Сервис rate Limiter домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx.
         - utils/ — Каталог слоя утилиты внутри feature feed.
+          - cardMemo.js — Утилита card Memo домена ленты/тем/постов. Связи: используется в forum/features/feed/components/PostCardBridge.jsx, forum/features/feed/components/TopicItem.jsx, tests/unit/forum/features/feed/utils/cardMemo.test.js.
           - interleaveRecommendationRails.js — Утилита interleave Recommendation Rails домена ленты/тем/постов. Связи: используется в forum/features/media/hooks/useVideoFeedWindowing.js, tests/unit/forum/features/feed/utils/interleaveRecommendationRails.test.js.
           - navOrchestrator.js — Утилита nav Orchestrator домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumNavigationActions.js.
           - navScroll.js — Утилита nav Scroll домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx.
@@ -386,7 +387,7 @@
           - ComposerAttachmentPreview.jsx — UI-компонент Composer Attachment Preview домена медиа. Связи: импортирует forum/features/media/utils/mediaLifecycleRuntime.js; используется в forum/features/ui/components/ComposerCore.jsx.
           - LivePreview.jsx — UI-компонент Live Preview домена медиа. Связи: используется в forum/features/media/components/VideoOverlay.jsx.
           - QCastPlayer.jsx — UI-компонент QCast Player домена медиа. Связи: импортирует forum/features/media/components/qcast/QCastIcons.jsx, forum/features/media/utils/formatMediaTime.js, forum/features/media/utils/qcastBars.js; используется в forum/features/media/utils/mediaLifecycleRuntime.js.
-          - VideoFeedPane.jsx — UI-компонент Video Feed Pane домена медиа. Связи: импортирует forum/features/feed/components/UserRecommendationsRail.jsx; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+          - VideoFeedPane.jsx — UI-компонент Video Feed Pane домена медиа. Связи: импортирует forum/features/feed/components/UserRecommendationsRail.jsx, forum/features/profile/utils/profileCache.js; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
           - VideoLimitOverlay.jsx — UI-компонент Video Limit Overlay домена медиа. Связи: импортирует forum/shared/constants/media.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
           - VideoMedia.jsx — UI-компонент Video Media домена медиа. Связи: используется в forum/features/media/utils/mediaLifecycleRuntime.js.
           - VideoOverlay.jsx — UI-компонент Video Overlay домена медиа. Связи: импортирует forum/features/media/components/LivePreview.jsx, forum/shared/hooks/useHtmlFlag.js, forum/shared/hooks/usePageLock.js; используется в forum/ForumRoot.jsx, forum/features/ui/components/ForumOverlayStack.jsx.
@@ -1399,14 +1400,14 @@
   - load/ — Подкаталог статических ассетов public/load.
     - load.mp4 — MP4-ассет из public/load; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
   - metab/ — Подкаталог статических ассетов public/metab.
-    - about1.jpg — JPG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - about1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
     - academy1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
     - ads1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
     - exchange1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
     - forum1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
     - game1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
-    - home1.jpg — JPG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
-    - subscription1.jpg — JPG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - home1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - subscription1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
   - models/ — Подкаталог статических ассетов public/models.
     - nsfwjs/ — Подкаталог статических ассетов public/nsfwjs.
       - group1-shard1of1 — Служебный-файл из public/models/nsfwjs; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
@@ -1831,6 +1832,7 @@
             - dmLoaders.test.js — JS-файл dm Loaders.test. Связи: импортирует forum/features/dm/utils/dmLoaders.js.
         - feed/ — Каталог feed.
           - utils/ — Каталог utils.
+            - cardMemo.test.js — JS-файл card Memo.test. Связи: импортирует forum/features/feed/utils/cardMemo.js.
             - interleaveRecommendationRails.test.js — JS-файл interleave Recommendation Rails.test. Связи: импортирует forum/features/feed/utils/interleaveRecommendationRails.js.
         - media/ — Каталог media.
           - utils/ — Каталог utils.

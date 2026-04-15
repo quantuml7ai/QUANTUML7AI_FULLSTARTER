@@ -35,8 +35,8 @@ export default function ForumPostCard({
   markView,
   t,
   isVideoFeed = false,
-  viewerId,
-  starredAuthors,
+  isSelfAuthor = false,
+  isStarredAuthor = false,
   onToggleStar,
   onUserInfoToggle,
   richRenderer,
@@ -60,8 +60,8 @@ export default function ForumPostCard({
   const views = Number(p?.views ?? 0)
   const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()
   const rawUserId = String(p?.userId || p?.accountId || '').trim()
-  const isSelf = !!viewerId && authorId && String(viewerId) === authorId
-  const isStarred = !!authorId && !!starredAuthors?.has?.(authorId)
+  const isSelf = !!isSelfAuthor
+  const isStarred = !!isStarredAuthor
   const isVipAuthor = useVipFlag(authorId, p?.vipActive ?? p?.isVip ?? p?.vip ?? p?.vipUntil ?? null)
 
   const replies = Number(

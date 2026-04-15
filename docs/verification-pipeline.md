@@ -100,6 +100,28 @@ The initial verification foundation covers:
 - recommendation rail rendering states
 - video feed slot smoke rendering with item/ad/recommendation coexistence
 
+## Forum Diagnostics Flags
+
+Forum diagnostics are controlled by a master public flag:
+
+```bash
+NEXT_PUBLIC_FORUM_EARLY_DIAG_ENABLED=0
+```
+
+When this master flag is `0`, production-safe behavior is enforced:
+
+- `forum-early-diag` is not rendered into forum HTML;
+- `/forum` does not auto-enable diagnostics;
+- query params cannot force diagnostics on;
+- diagnostics hooks and the debug route stay inert.
+
+Secondary flags only matter when the master switch is enabled:
+
+```bash
+NEXT_PUBLIC_FORUM_DIAG=0
+NEXT_PUBLIC_FORUM_PERF_TRACE=0
+```
+
 ## Mandatory Usage Rule
 
 After any repository change:

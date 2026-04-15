@@ -1,6 +1,11 @@
 'use client'
 
 import React from 'react'
+import { resolveProfileAccountId } from '../../profile/utils/profileCache'
+
+const CLOSE_INBOX_THREAD_OPTIONS = Object.freeze({
+  closeInbox: true,
+})
 
 export default function InboxRepliesPane({
   visibleRepliesToMe,
@@ -35,22 +40,40 @@ export default function InboxRepliesPane({
   ForumAdSlot,
   LoadMoreSentinel,
 }) {
+  const postsById = React.useMemo(() => {
+    const map = new Map()
+    for (const post of dataPosts || []) {
+      const id = String(post?.id || '').trim()
+      if (!id) continue
+      map.set(id, post)
+    }
+    return map
+  }, [dataPosts])
+
+  const replySlots = React.useMemo(
+    () => debugAdsSlots(
+      'inbox',
+      interleaveAds(
+        visibleRepliesToMe || [],
+        adEvery,
+        {
+          isSkippable: (p) => !p || !p.id,
+          getId: (p) => p?.id || `${p?.topicId || 'ib'}:${p?.ts || 0}`,
+        },
+      ),
+    ),
+    [adEvery, debugAdsSlots, interleaveAds, visibleRepliesToMe],
+  )
+
   return (
     <>
-      {debugAdsSlots(
-        'inbox',
-        interleaveAds(
-          visibleRepliesToMe || [],
-          adEvery,
-          {
-            isSkippable: (p) => !p || !p.id,
-            getId: (p) => p?.id || `${p?.topicId || 'ib'}:${p?.ts || 0}`,
-          },
-        ),
-      ).map((slot) => {
+      {replySlots.map((slot) => {
         if (slot.type === 'item') {
           const p = slot.item
-          const parent = (dataPosts || []).find((x) => String(x.id) === String(p.parentId))
+          const parent = postsById.get(String(p.parentId)) || null
+          const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()
+          const isSelfAuthor = !!viewerId && !!authorId && String(viewerId) === authorId
+          const isStarredAuthor = !!authorId && !!starredAuthors?.has?.(authorId)
           return (
             <div
               key={slot.key}
@@ -65,11 +88,10 @@ export default function InboxRepliesPane({
                 parentPost={parent || null}
                 parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''}
                 parentText={parent ? (parent.text || parent.message || parent.body || '') : ''}
-                onReport={(post, rect, anchorEl) => openReportPopover(post, rect, anchorEl)}
-                onShare={(post) => openSharePopover(post)}
-                onOpenThread={(clickP) => {
-                  openThreadForPost(clickP || p, { closeInbox: true })
-                }}
+                onReport={openReportPopover}
+                onShare={openSharePopover}
+                onOpenThread={openThreadForPost}
+                threadOpenOptions={CLOSE_INBOX_THREAD_OPTIONS}
                 onReact={reactMut}
                 isAdmin={isAdmin}
                 onDeletePost={delPost}
@@ -80,8 +102,8 @@ export default function InboxRepliesPane({
                 authId={viewerId}
                 markView={markViewPost}
                 t={t}
-                viewerId={viewerId}
-                starredAuthors={starredAuthors}
+                isSelfAuthor={isSelfAuthor}
+                isStarredAuthor={isStarredAuthor}
                 onToggleStar={toggleAuthorStar}
                 onUserInfoToggle={handleUserInfoToggle}
               />

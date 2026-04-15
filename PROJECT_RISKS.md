@@ -4,8 +4,8 @@
 > Если меняются критические точки входа, серверные контракты, import-граф или ownership модулей, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-risks.js`.
 
-Сгенерировано автоматически: 2026-04-12T21:07:11.687Z
-Исходных файлов в анализе: 653
+Сгенерировано автоматически: 2026-04-13T20:35:47.266Z
+Исходных файлов в анализе: 655
 Route-aware файлов: 96
 
 ## Что Считается Риском
@@ -119,9 +119,9 @@ Route-aware файлов: 96
 - `app/api/forum/_utils.js` — используют 33 локальных модулей
 - `app/api/forum/_db.js` — используют 32 локальных модулей
 - `components/i18n.js` — используют 30 локальных модулей
+- `app/forum/features/profile/utils/profileCache.js` — используют 18 локальных модулей
 - `app/forum/shared/utils/classnames.js` — используют 17 локальных модулей
 - `app/api/profile/_identity.js` — используют 15 локальных модулей
-- `app/forum/features/profile/utils/profileCache.js` — используют 12 локальных модулей
 - `app/api/dm/_utils.js` — используют 8 локальных модулей
 - `app/forum/features/profile/components/AvatarEmoji.jsx` — используют 8 локальных модулей
 - `app/forum/shared/components/HydrateText.jsx` — используют 8 локальных модулей
@@ -147,8 +147,8 @@ Route-aware файлов: 96
 - `app/forum/ForumRoot.jsx` — импортирует 64 локальных модулей
 - `app/forum/features/feed/components/ForumPostCard.jsx` — импортирует 14 локальных модулей
 - `app/forum/features/dm/hooks/useForumDmRuntime.js` — импортирует 12 локальных модулей
+- `app/forum/features/feed/components/TopicItem.jsx` — импортирует 11 локальных модулей
 - `app/layout.js` — импортирует 11 локальных модулей
-- `app/forum/features/feed/components/TopicItem.jsx` — импортирует 10 локальных модулей
 - `app/forum/features/dm/components/DmDialogRow.jsx` — импортирует 9 локальных модулей
 - `app/forum/features/dm/components/DmThreadMessageRow.jsx` — импортирует 9 локальных модулей
 - `app/forum/features/ui/components/ComposerCore.jsx` — импортирует 9 локальных модулей
@@ -182,14 +182,14 @@ Route-aware файлов: 96
 - `api/market` — файлов: 1; исходящих связей: 2; плотность: 2
 - `api/forum` — файлов: 30; исходящих связей: 54; плотность: 1.8
 - `api/dm` — файлов: 9; исходящих связей: 16; плотность: 1.78
-- `forum/dm` — файлов: 31; исходящих связей: 52; плотность: 1.68
+- `forum/dm` — файлов: 31; исходящих связей: 53; плотность: 1.71
 - `forum/profile` — файлов: 18; исходящих связей: 30; плотность: 1.67
 - `app/academy` — файлов: 3; исходящих связей: 5; плотность: 1.67
+- `forum/feed` — файлов: 59; исходящих связей: 90; плотность: 1.53
 - `api/pay` — файлов: 2; исходящих связей: 3; плотность: 1.5
 - `api/referral` — файлов: 2; исходящих связей: 3; плотность: 1.5
 - `app/about` — файлов: 2; исходящих связей: 3; плотность: 1.5
 - `app/game` — файлов: 2; исходящих связей: 3; плотность: 1.5
-- `forum/feed` — файлов: 58; исходящих связей: 84; плотность: 1.45
 - `app/subscribe` — файлов: 3; исходящих связей: 4; плотность: 1.33
 - `forum/ui` — файлов: 51; исходящих связей: 64; плотность: 1.25
 - `api/telegram` — файлов: 4; исходящих связей: 4; плотность: 1

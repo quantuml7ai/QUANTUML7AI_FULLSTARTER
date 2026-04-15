@@ -2,6 +2,12 @@
 
 import React from 'react'
 import UserRecommendationsRail from '../../feed/components/UserRecommendationsRail'
+import { resolveProfileAccountId } from '../../profile/utils/profileCache'
+
+const VIDEO_THREAD_OPEN_OPTIONS = Object.freeze({
+  closeInbox: true,
+  closeVideoFeed: true,
+})
 
 export default function VideoFeedPane({
   t,
@@ -38,6 +44,20 @@ export default function VideoFeedPane({
   userRecommendationsRuntime,
   onOpenUserPosts,
 }) {
+  const postsById = React.useMemo(() => {
+    const map = new Map()
+    for (const post of dataPosts || []) {
+      const id = String(post?.id || '').trim()
+      if (!id) continue
+      map.set(id, post)
+    }
+    return map
+  }, [dataPosts])
+
+  const handleOpenThread = React.useCallback((post, options) => {
+    openThreadForPost(post, options)
+  }, [openThreadForPost])
+
   return (
     <>
       <div data-forum-video-start="1" />
@@ -69,12 +89,10 @@ export default function VideoFeedPane({
 
           if (slot.type === 'item') {
             const p = slot.item
-            const parent = p?.parentId
-              ? (dataPosts || []).find((x) => String(x.id) === String(p.parentId))
-              : null
-            const openThreadHere = (clickP) => {
-              openThreadForPost(clickP || p, { closeInbox: true, closeVideoFeed: true })
-            }
+            const parent = p?.parentId ? (postsById.get(String(p.parentId)) || null) : null
+            const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()
+            const isSelfAuthor = !!viewerId && !!authorId && String(viewerId) === authorId
+            const isStarredAuthor = !!authorId && !!starredAuthors?.has?.(authorId)
             return (
               <div
                 key={slot.key}
@@ -88,9 +106,10 @@ export default function VideoFeedPane({
                   parentPost={parent}
                   parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}
                   parentText={parent ? (parent.text || parent.message || parent.body || '') : ''}
-                  onReport={(post, rect, anchorEl) => openReportPopover(post, rect, anchorEl)}
-                  onShare={(post) => openSharePopover(post)}
-                  onOpenThread={openThreadHere}
+                  onReport={openReportPopover}
+                  onShare={openSharePopover}
+                  onOpenThread={handleOpenThread}
+                  threadOpenOptions={VIDEO_THREAD_OPEN_OPTIONS}
                   onReact={reactMut}
                   isAdmin={isAdmin}
                   onDeletePost={delPost}
@@ -102,8 +121,8 @@ export default function VideoFeedPane({
                   markView={markViewPost}
                   t={t}
                   isVideoFeed={true}
-                  viewerId={viewerId}
-                  starredAuthors={starredAuthors}
+                  isSelfAuthor={isSelfAuthor}
+                  isStarredAuthor={isStarredAuthor}
                   onToggleStar={toggleAuthorStar}
                   onUserInfoToggle={handleUserInfoToggle}
                 />

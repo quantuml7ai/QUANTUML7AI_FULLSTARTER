@@ -5,28 +5,39 @@ import {
   emptyDiagMediaSnapshot,
 } from '../utils/emitPolicy'
 
-function isDiagEnabled() {
+function isDiagMasterEnabled() {
   try {
-    if (String(process.env.NEXT_PUBLIC_FORUM_DIAG || '') === '1') return true
-  } catch {}
-  try {
-    const qs = new URLSearchParams(window.location.search || '')
-    const fromQuery = String(qs.get('forumDiag') || '').trim()
-    if (fromQuery === '1' || fromQuery.toLowerCase() === 'true') return true
+    return String(process.env.NEXT_PUBLIC_FORUM_EARLY_DIAG_ENABLED || '') === '1'
   } catch {}
   return false
 }
 
+function isQueryFlagEnabled(keys) {
+  if (!isDiagMasterEnabled()) return false
+  try {
+    const qs = new URLSearchParams(window.location.search || '')
+    return (Array.isArray(keys) ? keys : []).some((key) => {
+      const fromQuery = String(qs.get(key) || '').trim().toLowerCase()
+      return fromQuery === '1' || fromQuery === 'true'
+    })
+  } catch {}
+  return false
+}
+
+function isDiagEnabled() {
+  if (!isDiagMasterEnabled()) return false
+  try {
+    if (String(process.env.NEXT_PUBLIC_FORUM_DIAG || '') === '1') return true
+  } catch {}
+  return isQueryFlagEnabled(['forumDiag', 'forumAudit'])
+}
+
 function isPerfTraceEnabled() {
+  if (!isDiagMasterEnabled()) return false
   try {
     if (String(process.env.NEXT_PUBLIC_FORUM_PERF_TRACE || '') === '1') return true
   } catch {}
-  try {
-    const qs = new URLSearchParams(window.location.search || '')
-    const fromQuery = String(qs.get('forumPerf') || '').trim()
-    if (fromQuery === '1' || fromQuery.toLowerCase() === 'true') return true
-  } catch {}
-  return false
+  return isQueryFlagEnabled(['forumPerf', 'forumAudit'])
 }
 
 export default function useForumDiagnostics() {
@@ -207,7 +218,8 @@ export default function useForumDiagnostics() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    enabledRef.current = isDiagEnabled()
+    const diagEnabled = isDiagEnabled()
+    enabledRef.current = diagEnabled
     if (!enabledRef.current) return
     let stopped = false
 
@@ -300,6 +312,10 @@ export default function useForumDiagnostics() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
+    const masterEnabled = isDiagMasterEnabled()
+    const diagEnabled = masterEnabled && isDiagEnabled()
+    const perfEnabled = masterEnabled && isPerfTraceEnabled()
+    if (!diagEnabled && !perfEnabled) return
 
     const readPerfSample = (event = 'sample', extra = {}) => {
       try {
@@ -388,8 +404,9 @@ export default function useForumDiagnostics() {
     const ensurePerfHelpers = () => {
       if (typeof window.dumpForumDiagConfig !== 'function') {
         window.dumpForumDiagConfig = () => ({
-          clientDiagEnabled: !!enabledRef.current,
-          perfTraceAutoEnabled: isPerfTraceEnabled(),
+          masterEnabled,
+          clientDiagEnabled: diagEnabled,
+          perfTraceAutoEnabled: perfEnabled,
           perfTraceRunning: !!window.__forumPerfTraceCtl,
           videoTraceEnabled: (() => {
             try {
@@ -694,7 +711,7 @@ export default function useForumDiagnostics() {
     }
 
     ensurePerfHelpers()
-    if (isPerfTraceEnabled() && !window.__forumPerfTraceCtl) {
+    if (perfEnabled && !window.__forumPerfTraceCtl) {
       try { window.startForumPerfTrace() } catch {}
     }
     return () => {}

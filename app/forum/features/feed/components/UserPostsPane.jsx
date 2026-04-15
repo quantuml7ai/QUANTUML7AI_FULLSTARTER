@@ -1,6 +1,11 @@
 'use client'
 
 import React from 'react'
+import { resolveProfileAccountId } from '../../profile/utils/profileCache'
+
+const CLOSE_INBOX_THREAD_OPTIONS = Object.freeze({
+  closeInbox: true,
+})
 
 export default function UserPostsPane({
   t,
@@ -34,6 +39,15 @@ export default function UserPostsPane({
 }) {
   const userLabel = String(branchUserNick || resolveNickForDisplay?.(branchUserId, '') || branchUserId || '').trim()
   const firstPostId = String(visibleUserPosts?.[0]?.id || '').trim()
+  const postsById = React.useMemo(() => {
+    const map = new Map()
+    for (const post of dataPosts || []) {
+      const id = String(post?.id || '').trim()
+      if (!id) continue
+      map.set(id, post)
+    }
+    return map
+  }, [dataPosts])
 
   React.useLayoutEffect(() => {
     if (typeof window === 'undefined') return undefined
@@ -164,7 +178,10 @@ export default function UserPostsPane({
       </div>
 
       {(visibleUserPosts || []).map((p, idx) => {
-        const parent = p?.parentId ? (dataPosts || []).find((x) => String(x.id) === String(p.parentId)) : null
+        const parent = p?.parentId ? (postsById.get(String(p.parentId)) || null) : null
+        const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()
+        const isSelfAuthor = !!viewerId && !!authorId && String(viewerId) === authorId
+        const isStarredAuthor = !!authorId && !!starredAuthors?.has?.(authorId)
         return (
           <div
             key={`uprofile:${p?.id || ''}`}
@@ -178,9 +195,10 @@ export default function UserPostsPane({
               parentPost={parent || null}
               parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''}
               parentText={parent ? (parent.text || parent.message || parent.body || '') : ''}
-              onReport={(post, rect, anchorEl) => openReportPopover(post, rect, anchorEl)}
-              onShare={(post) => openSharePopover(post)}
-              onOpenThread={(clickP) => { openThreadForPost(clickP || p, { closeInbox: true }) }}
+              onReport={openReportPopover}
+              onShare={openSharePopover}
+              onOpenThread={openThreadForPost}
+              threadOpenOptions={CLOSE_INBOX_THREAD_OPTIONS}
               onReact={reactMut}
               isAdmin={isAdmin}
               onDeletePost={delPost}
@@ -191,8 +209,8 @@ export default function UserPostsPane({
               authId={viewerId}
               markView={markViewPost}
               t={t}
-              viewerId={viewerId}
-              starredAuthors={starredAuthors}
+              isSelfAuthor={isSelfAuthor}
+              isStarredAuthor={isStarredAuthor}
               onToggleStar={toggleAuthorStar}
               onUserInfoToggle={handleUserInfoToggle}
             />

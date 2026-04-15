@@ -20,21 +20,30 @@ const forumTitleFont = Montserrat({
   display: 'swap',
   variable: '--font-forum-title',
 })
+const forumEarlyDiagMasterEnabled = String(process.env.NEXT_PUBLIC_FORUM_EARLY_DIAG_ENABLED || '') === '1'
 const forumEarlyDiagFlags = JSON.stringify({
+  master: forumEarlyDiagMasterEnabled,
   diag: String(process.env.NEXT_PUBLIC_FORUM_DIAG || '') === '1',
   perf: String(process.env.NEXT_PUBLIC_FORUM_PERF_TRACE || '') === '1',
 })
 const forumEarlyDiagBootstrap = `(function () {
   try {
     var flags = ${forumEarlyDiagFlags};
+    if (!flags || !flags.master) return;
     var path = String((window.location && window.location.pathname) || '');
     var qs = new URLSearchParams((window.location && window.location.search) || '');
-    var queryEnabled = ['forumDiag', 'forumPerf', 'forumAudit'].some(function (key) {
+    var queryDiagEnabled = ['forumDiag', 'forumAudit'].some(function (key) {
       var value = String(qs.get(key) || '').trim().toLowerCase();
       return value === '1' || value === 'true';
     });
-    var forumPath = /^\\/forum(?:\\/|$)/i.test(path);
-    var traceEnabled = !!(forumPath || queryEnabled || flags.diag || flags.perf);
+    var queryPerfEnabled = ['forumPerf', 'forumAudit'].some(function (key) {
+      var value = String(qs.get(key) || '').trim().toLowerCase();
+      return value === '1' || value === 'true';
+    });
+    var diagEnabled = !!(flags.diag || queryDiagEnabled);
+    var perfEnabled = !!(flags.perf || queryPerfEnabled);
+    var traceEnabled = !!(diagEnabled || perfEnabled);
+    if (!traceEnabled) return;
     var startup = window.__forumStartupTrace = window.__forumStartupTrace || {
       installedAt: Date.now(),
       firstInputTs: 0,
@@ -202,7 +211,7 @@ const forumEarlyDiagBootstrap = `(function () {
       });
     }
 
-    if (!traceEnabled) return;
+    if (!diagEnabled) return;
     var authState = window.__forumAuthBusTrace = window.__forumAuthBusTrace || {
       installedAt: Date.now(),
       events: {},
@@ -477,7 +486,9 @@ export default function RootLayout({ children }) {
       <head>
         {/* ✅ compat.js – максимально рано */}
         <Script src="/compat.js" strategy="beforeInteractive" id="compat-bootstrap" />
-        <Script id="forum-early-diag" strategy="beforeInteractive">{forumEarlyDiagBootstrap}</Script>
+        {forumEarlyDiagMasterEnabled ? (
+          <Script id="forum-early-diag" strategy="beforeInteractive">{forumEarlyDiagBootstrap}</Script>
+        ) : null}
   {/* ✅ Telegram WebApp SDK — ДОЛЖЕН грузиться до рендера страниц */}
   <Script
     src="https://telegram.org/js/telegram-web-app.js"

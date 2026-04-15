@@ -15,8 +15,9 @@ import {
   resolveNickForDisplay,
   resolveIconForDisplay,
 } from '../../profile/utils/profileCache'
+import { areTopicItemPropsEqual } from '../utils/cardMemo'
 
-export default function TopicItem({
+const TopicItem = React.memo(function TopicItem({
   t,
   agg,
   onOpen,
@@ -25,8 +26,8 @@ export default function TopicItem({
   onDelete,
   authId,
   onOwnerDelete,
-  viewerId,
-  starredAuthors,
+  isSelfAuthor = false,
+  isStarredAuthor = false,
   onToggleStar,
   onUserInfoToggle,
   formatCount,
@@ -38,8 +39,8 @@ export default function TopicItem({
   const entryId = t?.id != null ? `topic_${t.id}` : ''
   const authorId = String(resolveProfileAccountId(t?.userId || t?.accountId) || '').trim()
   const rawUserId = String(t?.userId || t?.accountId || '').trim()
-  const isSelf = !!viewerId && authorId && String(viewerId) === authorId
-  const isStarred = !!authorId && !!starredAuthors?.has?.(authorId)
+  const isSelf = !!isSelfAuthor
+  const isStarred = !!isStarredAuthor
   const isVipAuthor = useVipFlag(authorId, t?.vipActive ?? t?.isVip ?? t?.vip ?? t?.vipUntil ?? null)
 
   const [ownDelConfirm, setOwnDelConfirm] = React.useState(null)
@@ -245,4 +246,8 @@ export default function TopicItem({
       </div>
     </div>
   )
-}
+}, areTopicItemPropsEqual)
+
+TopicItem.displayName = 'TopicItem'
+
+export default TopicItem

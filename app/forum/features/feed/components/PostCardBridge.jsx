@@ -3,6 +3,7 @@
 import React from 'react'
 import ForumPostCard from './ForumPostCard'
 import { rich } from '../../../shared/utils/richText'
+import { arePostCardBridgePropsEqual } from '../utils/cardMemo'
 import {
   __rearmPooledFxNode,
   VideoMedia,
@@ -10,7 +11,7 @@ import {
   enableVideoControlsOnTap,
 } from '../../media/utils/mediaLifecycleRuntime'
 
-export default function PostCardBridge({
+const PostCardBridge = React.memo(function PostCardBridge({
   p,
   parentAuthor,
   parentText,
@@ -18,6 +19,7 @@ export default function PostCardBridge({
   onReport,
   onShare,
   onOpenThread,
+  threadOpenOptions = null,
   onReact,
   isAdmin,
   onDeletePost,
@@ -29,11 +31,18 @@ export default function PostCardBridge({
   markView,
   t,
   isVideoFeed = false,
-  viewerId,
-  starredAuthors,
+  isSelfAuthor = false,
+  isStarredAuthor = false,
   onToggleStar,
   onUserInfoToggle,
 }) {
+  const handleOpenThread = React.useCallback(
+    (clickPost) => {
+      onOpenThread?.(clickPost || p, threadOpenOptions || undefined)
+    },
+    [onOpenThread, p, threadOpenOptions],
+  )
+
   return (
     <ForumPostCard
       p={p}
@@ -42,7 +51,7 @@ export default function PostCardBridge({
       parentPost={parentPost}
       onReport={onReport}
       onShare={onShare}
-      onOpenThread={onOpenThread}
+      onOpenThread={handleOpenThread}
       onReact={onReact}
       isAdmin={isAdmin}
       onDeletePost={onDeletePost}
@@ -54,8 +63,8 @@ export default function PostCardBridge({
       markView={markView}
       t={t}
       isVideoFeed={isVideoFeed}
-      viewerId={viewerId}
-      starredAuthors={starredAuthors}
+      isSelfAuthor={isSelfAuthor}
+      isStarredAuthor={isStarredAuthor}
       onToggleStar={onToggleStar}
       onUserInfoToggle={onUserInfoToggle}
       richRenderer={rich}
@@ -65,5 +74,8 @@ export default function PostCardBridge({
       QCastPlayerComponent={QCastPlayer}
     />
   )
-}
+}, arePostCardBridgePropsEqual)
 
+PostCardBridge.displayName = 'PostCardBridge'
+
+export default PostCardBridge

@@ -4,7 +4,7 @@
 > Если меняется граница ответственности каталогов, появляются новые домены, переносятся модули между зонами или меняются entry points, этот файл обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-ownership.js`.
 
-Сгенерировано автоматически: 2026-04-12T21:07:11.084Z
+Сгенерировано автоматически: 2026-04-13T20:35:46.552Z
 
 ## Общий Принцип
 
@@ -467,7 +467,7 @@
 
 - Зона: `public/metab`
 - Назначение: Статические ассеты namespace metab.
-- Точки входа: `public/metab/about1.jpg`, `public/metab/academy1.png`, `public/metab/ads1.png`, `public/metab/exchange1.png`, `public/metab/forum1.png`, `public/metab/game1.png`
+- Точки входа: `public/metab/about1.png`, `public/metab/academy1.png`, `public/metab/ads1.png`, `public/metab/exchange1.png`, `public/metab/forum1.png`, `public/metab/game1.png`
 - Связанные зоны: `app`, `components`, `app/forum`, `styles/public URLs`
 
 ### public/models

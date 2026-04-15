@@ -17,4 +17,13 @@ describe('App entry contracts', () => {
     const source = readRepoFile(entryFile)
     expect(source).toMatch(defaultExportRx)
   })
+
+  it('keeps forum early diagnostics gated by the master env flag in layout', () => {
+    const source = readRepoFile('app/layout.js')
+
+    expect(source).toContain('NEXT_PUBLIC_FORUM_EARLY_DIAG_ENABLED')
+    expect(source).toContain('forumEarlyDiagMasterEnabled ? (')
+    expect(source).toContain('if (!flags || !flags.master) return;')
+    expect(source).not.toContain('forumPath ||')
+  })
 })

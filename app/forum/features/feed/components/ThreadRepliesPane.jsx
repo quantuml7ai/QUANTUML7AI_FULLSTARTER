@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { resolveProfileAccountId } from '../../profile/utils/profileCache'
 
 export default function ThreadRepliesPane({
   visibleFlat,
@@ -11,7 +12,6 @@ export default function ThreadRepliesPane({
   resolveNickForDisplay,
   openReportPopover,
   openSharePopover,
-  setReplyTo,
   openThreadForPost,
   reactMut,
   isAdmin,
@@ -37,19 +37,34 @@ export default function ThreadRepliesPane({
   ForumAdSlot,
   LoadMoreSentinel,
 }) {
+  const postsById = React.useMemo(() => {
+    const map = new Map()
+    for (const post of allPosts || []) {
+      const id = String(post?.id || '').trim()
+      if (!id) continue
+      map.set(id, post)
+    }
+    return map
+  }, [allPosts])
+
+  const threadSlots = React.useMemo(
+    () => debugAdsSlots(
+      'replies',
+      interleaveAds(
+        visibleFlat || [],
+        adEvery,
+        {
+          isSkippable: (p) => !p || !p.id,
+          getId: (p) => p?.id,
+        },
+      ),
+    ),
+    [adEvery, debugAdsSlots, interleaveAds, visibleFlat],
+  )
+
   return (
     <div className="grid gap-2 threadRepliesPane">
-      {debugAdsSlots(
-        'replies',
-        interleaveAds(
-          visibleFlat || [],
-          adEvery,
-          {
-            isSkippable: (p) => !p || !p.id,
-            getId: (p) => p?.id,
-          },
-        ),
-      ).map((slot) => {
+      {threadSlots.map((slot) => {
         if (slot.type === 'item') {
           const p = slot.item
           const isThreadBranchRoot =
@@ -62,9 +77,12 @@ export default function ThreadRepliesPane({
             ? (
               isThreadBranchRoot
                 ? null
-                : allPosts.find((x) => String(x.id) === String(p.parentId))
+                : (postsById.get(String(p.parentId)) || null)
             )
             : null
+          const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()
+          const isSelfAuthor = !!viewerId && !!authorId && String(viewerId) === authorId
+          const isStarredAuthor = !!authorId && !!starredAuthors?.has?.(authorId)
 
           return (
             <div
@@ -88,10 +106,9 @@ export default function ThreadRepliesPane({
                 parentPost={parent}
                 parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}
                 parentText={parent ? (parent.text || parent.message || parent.body || '') : ''}
-                onReport={(post, rect, anchorEl) => openReportPopover(post, rect, anchorEl)}
-                onShare={(post) => openSharePopover(post)}
-                onReply={() => setReplyTo(p)}
-                onOpenThread={(clickP) => { openThreadForPost(clickP || p) }}
+                onReport={openReportPopover}
+                onShare={openSharePopover}
+                onOpenThread={openThreadForPost}
                 onReact={reactMut}
                 isAdmin={isAdmin}
                 onDeletePost={delPost}
@@ -102,8 +119,8 @@ export default function ThreadRepliesPane({
                 authId={viewerId}
                 markView={markViewPost}
                 t={t}
-                viewerId={viewerId}
-                starredAuthors={starredAuthors}
+                isSelfAuthor={isSelfAuthor}
+                isStarredAuthor={isStarredAuthor}
                 onToggleStar={toggleAuthorStar}
                 onUserInfoToggle={handleUserInfoToggle}
               />

@@ -1,6 +1,14 @@
 'use client'
 
 import React from 'react'
+import { resolveProfileAccountId } from '../../profile/utils/profileCache'
+
+const EMPTY_TOPIC_AGG = Object.freeze({
+  posts: 0,
+  likes: 0,
+  dislikes: 0,
+  views: 0,
+})
 
 export default function TopicsPane({
   visibleTopics,
@@ -27,6 +35,11 @@ export default function TopicsPane({
   LoadMoreSentinel,
 }) {
   const isProfileTopicsBranch = profileBranchMode === 'topics'
+  const handleOpenTopic = React.useCallback((topic, entryId) => {
+    pushNavState(entryId || `topic_${topic?.id}`)
+    setSel(topic)
+    setThreadRoot(null)
+  }, [pushNavState, setSel, setThreadRoot])
 
   return (
     <>
@@ -36,25 +49,24 @@ export default function TopicsPane({
         data-profile-branch-root={isProfileTopicsBranch ? '1' : undefined}
       >
         {(visibleTopics || []).map((topic, idx) => {
-          const agg = aggregates.get(topic.id) || { posts: 0, likes: 0, dislikes: 0, views: 0 }
+          const agg = aggregates.get(topic.id) || EMPTY_TOPIC_AGG
+          const authorId = String(resolveProfileAccountId(topic?.userId || topic?.accountId) || '').trim()
+          const isSelfAuthor = !!viewerId && !!authorId && String(viewerId) === authorId
+          const isStarredAuthor = !!authorId && !!starredAuthors?.has?.(authorId)
           return (
             <TopicItem
               key={`t:${topic.id}`}
               t={topic}
               dataProfileBranchStart={isProfileTopicsBranch && idx === 0 ? '1' : undefined}
               agg={agg}
-              onOpen={(tt, entryId) => {
-                pushNavState(entryId || `topic_${tt?.id}`)
-                setSel(tt)
-                setThreadRoot(null)
-              }}
+              onOpen={handleOpenTopic}
               onView={markViewTopic}
               isAdmin={isAdmin}
               onDelete={delTopic}
               authId={viewerId}
               onOwnerDelete={delTopicOwn}
-              viewerId={viewerId}
-              starredAuthors={starredAuthors}
+              isSelfAuthor={isSelfAuthor}
+              isStarredAuthor={isStarredAuthor}
               onToggleStar={toggleAuthorStar}
               onUserInfoToggle={handleUserInfoToggle}
               formatCount={formatCount}
