@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-15T19:51:46.602Z",
+  "generatedAt": "2026-04-15T20:33:03.057Z",
   "filesScanned": [
     "app/forum/Forum.jsx",
     "app/forum/ForumAds.js",
@@ -1864,7 +1864,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 1968,
+      "line": 1994,
       "text": "const p = el.play?.();",
       "operation": "play",
       "ownershipGroup": "playback_control",
@@ -1872,7 +1872,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2017,
+      "line": 2043,
       "text": "const retry = el.play?.();",
       "operation": "play",
       "ownershipGroup": "playback_control",
@@ -1880,7 +1880,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 1717,
+      "line": 1728,
       "text": "try { if (!target.paused) target.pause(); } catch {}",
       "operation": "pause",
       "ownershipGroup": "playback_control",
@@ -1888,7 +1888,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 1727,
+      "line": 1738,
       "text": "try { if (!target.paused) target.pause(); } catch {}",
       "operation": "pause",
       "ownershipGroup": "playback_control",
@@ -1896,7 +1896,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 1737,
+      "line": 1748,
       "text": "try { if (!target.paused) target.pause(); } catch {}",
       "operation": "pause",
       "ownershipGroup": "playback_control",
@@ -1904,7 +1904,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 1830,
+      "line": 1840,
       "text": "try { if (!target.paused) target.pause(); } catch {}",
       "operation": "pause",
       "ownershipGroup": "playback_control",
@@ -1912,7 +1912,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 1974,
+      "line": 2000,
       "text": "try { if (!el.paused) el.pause(); } catch {}",
       "operation": "pause",
       "ownershipGroup": "playback_control",
@@ -1920,7 +1920,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2023,
+      "line": 2049,
       "text": "try { if (!el.paused) el.pause(); } catch {}",
       "operation": "pause",
       "ownershipGroup": "playback_control",
@@ -1928,7 +1928,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2429,
+      "line": 2480,
       "text": "try { if (!el.paused) el.pause(); } catch {}",
       "operation": "pause",
       "ownershipGroup": "playback_control",
@@ -1936,7 +1936,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2446,
+      "line": 2497,
       "text": "try { if (!a.paused) a.pause(); } catch {}",
       "operation": "pause",
       "ownershipGroup": "playback_control",
@@ -1944,7 +1944,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2522,
+      "line": 2573,
       "text": "try { if (!node.paused) node.pause(); } catch {}",
       "operation": "pause",
       "ownershipGroup": "playback_control",
@@ -1952,7 +1952,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2534,
+      "line": 2585,
       "text": "try { if (!a.paused) a.pause(); } catch {}",
       "operation": "pause",
       "ownershipGroup": "playback_control",
@@ -1960,7 +1960,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2561,
+      "line": 2612,
       "text": "try { if (!node.paused) node.pause(); } catch {}",
       "operation": "pause",
       "ownershipGroup": "playback_control",
@@ -1968,7 +1968,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2605,
+      "line": 2656,
       "text": "try { if (!el.paused) el.pause(); } catch {}",
       "operation": "pause",
       "ownershipGroup": "playback_control",
@@ -1976,7 +1976,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2623,
+      "line": 2674,
       "text": "try { if (!a.paused) a.pause(); } catch {}",
       "operation": "pause",
       "ownershipGroup": "playback_control",
@@ -1984,7 +1984,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3586,
+      "line": 3638,
       "text": "try { if (!externalEl.paused) externalEl.pause(); } catch {}",
       "operation": "pause",
       "ownershipGroup": "playback_control",
@@ -1992,7 +1992,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3595,
+      "line": 3647,
       "text": "try { if (!adVideo.paused) adVideo.pause(); } catch {}",
       "operation": "pause",
       "ownershipGroup": "playback_control",
@@ -2008,7 +2008,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 1537,
+      "line": 1548,
       "text": "try { el.load?.(); } catch {}",
       "operation": "load",
       "ownershipGroup": "source_lifecycle",
@@ -2016,7 +2016,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 1568,
+      "line": 1579,
       "text": "try { el.load?.(); } catch {}",
       "operation": "load",
       "ownershipGroup": "source_lifecycle",
@@ -2024,7 +2024,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2889,
+      "line": 2940,
       "text": "el.load?.();",
       "operation": "load",
       "ownershipGroup": "source_lifecycle",
@@ -2032,7 +2032,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2979,
+      "line": 3030,
       "text": "})) a.load?.();",
       "operation": "load",
       "ownershipGroup": "source_lifecycle",
@@ -2040,7 +2040,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3665,
+      "line": 3717,
       "text": "try { mediaEl.load?.(); } catch {}",
       "operation": "load",
       "ownershipGroup": "source_lifecycle",
@@ -2056,7 +2056,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2649,
+      "line": 2700,
       "text": "if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }",
       "operation": "src_attach",
       "ownershipGroup": "source_lifecycle",
@@ -2064,7 +2064,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2666,
+      "line": 2717,
       "text": "if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }",
       "operation": "src_attach",
       "ownershipGroup": "source_lifecycle",
@@ -2072,7 +2072,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2807,
+      "line": 2858,
       "text": "try { el.setAttribute('src', nextSrc); } catch {}",
       "operation": "src_attach",
       "ownershipGroup": "source_lifecycle",
@@ -2080,7 +2080,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2998,
+      "line": 3049,
       "text": "if (ds && (!cur || cur !== ds)) el.setAttribute('src', ds);",
       "operation": "src_attach",
       "ownershipGroup": "source_lifecycle",
@@ -2088,7 +2088,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3025,
+      "line": 3076,
       "text": "try { el.setAttribute('src', src); } catch {}",
       "operation": "src_attach",
       "ownershipGroup": "source_lifecycle",
@@ -2096,7 +2096,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3831,
+      "line": 3908,
       "text": "try { if (iframe?.getAttribute?.('src')) iframe.setAttribute('src', ''); } catch {}",
       "operation": "src_attach",
       "ownershipGroup": "source_lifecycle",
@@ -2128,7 +2128,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 1482,
+      "line": 1496,
       "text": "__restoreVideoEl(el);",
       "operation": "restore_helper",
       "ownershipGroup": "source_lifecycle",
@@ -2136,7 +2136,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 1566,
+      "line": 1577,
       "text": "if (!el.getAttribute('src')) __restoreVideoEl(el);",
       "operation": "restore_helper",
       "ownershipGroup": "source_lifecycle",
@@ -2144,7 +2144,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2868,
+      "line": 2919,
       "text": "__restoreVideoEl(el);",
       "operation": "restore_helper",
       "ownershipGroup": "source_lifecycle",
@@ -2152,7 +2152,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3648,
+      "line": 3700,
       "text": "__restoreVideoEl(mediaEl);",
       "operation": "restore_helper",
       "ownershipGroup": "source_lifecycle",
@@ -2168,7 +2168,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 1837,
+      "line": 1846,
       "text": "scheduleHardUnload(owner, 0, 'error_blocked');",
       "operation": "unload_helper",
       "ownershipGroup": "source_lifecycle",
@@ -2176,7 +2176,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2573,
+      "line": 2624,
       "text": "const hardUnloadMedia = (...args) => {",
       "operation": "unload_helper",
       "ownershipGroup": "source_lifecycle",
@@ -2184,7 +2184,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2601,
+      "line": 2652,
       "text": "try { __unloadVideoEl(el); } catch {}",
       "operation": "unload_helper",
       "ownershipGroup": "source_lifecycle",
@@ -2192,7 +2192,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2690,
+      "line": 2741,
       "text": "hardUnloadMedia(frame, 'resident_cap');",
       "operation": "unload_helper",
       "ownershipGroup": "source_lifecycle",
@@ -2200,7 +2200,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2699,
+      "line": 2750,
       "text": "const scheduleHardUnload = (el, ms = null, reason = 'timeout') => {",
       "operation": "unload_helper",
       "ownershipGroup": "source_lifecycle",
@@ -2208,7 +2208,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2746,
+      "line": 2797,
       "text": "scheduleHardUnload(el, deferMs, reason);",
       "operation": "unload_helper",
       "ownershipGroup": "source_lifecycle",
@@ -2216,7 +2216,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2753,
+      "line": 2804,
       "text": "hardUnloadMedia(el, reason);",
       "operation": "unload_helper",
       "ownershipGroup": "source_lifecycle",
@@ -2224,7 +2224,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3185,
+      "line": 3236,
       "text": "scheduleHardUnload(el, null, 'out_of_view');",
       "operation": "unload_helper",
       "ownershipGroup": "source_lifecycle",
@@ -2232,7 +2232,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3287,
+      "line": 3338,
       "text": "scheduleHardUnload(active, null, 'focus_switch');",
       "operation": "unload_helper",
       "ownershipGroup": "source_lifecycle",
@@ -2240,7 +2240,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3340,
+      "line": 3391,
       "text": "scheduleHardUnload(active, null, 'below_stop_ratio');",
       "operation": "unload_helper",
       "ownershipGroup": "source_lifecycle",
@@ -2248,7 +2248,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3376,
+      "line": 3427,
       "text": "scheduleHardUnload(active, null, 'candidate_replace');",
       "operation": "unload_helper",
       "ownershipGroup": "source_lifecycle",
@@ -2256,7 +2256,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3545,
+      "line": 3597,
       "text": "scheduleHardUnload(active, null, reason);",
       "operation": "unload_helper",
       "ownershipGroup": "source_lifecycle",
@@ -2264,7 +2264,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3610,
+      "line": 3662,
       "text": "scheduleHardUnload(active, null, 'ad_focus_switch');",
       "operation": "unload_helper",
       "ownershipGroup": "source_lifecycle",
@@ -2272,7 +2272,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3808,
+      "line": 3885,
       "text": "scheduleHardUnload(active, 0, 'cleanup');",
       "operation": "unload_helper",
       "ownershipGroup": "source_lifecycle",
@@ -2312,7 +2312,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3755,
+      "line": 3822,
       "text": "window.addEventListener(MEDIA_MUTED_EVENT, onMutedEvent);",
       "operation": "mute_event",
       "ownershipGroup": "mute_persistence",
@@ -2320,7 +2320,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3777,
+      "line": 3847,
       "text": "window.removeEventListener(MEDIA_MUTED_EVENT, onMutedEvent);",
       "operation": "mute_event",
       "ownershipGroup": "mute_persistence",
@@ -2360,7 +2360,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 1590,
+      "line": 1601,
       "text": "writeQcastMutedPref(!!el.muted, {",
       "operation": "qcast_storage_write",
       "ownershipGroup": "mute_persistence",
@@ -2368,7 +2368,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2961,
+      "line": 3012,
       "text": "try { writeQcastMutedPref(!!a.muted); } catch {}",
       "operation": "qcast_storage_write",
       "ownershipGroup": "mute_persistence",
@@ -2464,7 +2464,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 1860,
+      "line": 1868,
       "text": "const detachYouTubePlayer = (iframe, reason = 'detached') => {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2472,7 +2472,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 1862,
+      "line": 1870,
       "text": "if (!(iframe instanceof HTMLIFrameElement)) return;",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2480,7 +2480,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 1863,
+      "line": 1871,
       "text": "const player = ytPlayers.get(iframe);",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2488,7 +2488,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 1869,
+      "line": 1877,
       "text": "ytPlayers.delete(iframe);",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2496,7 +2496,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 1870,
+      "line": 1878,
       "text": "traceCandidate('candidate_external_ignored', iframe, { reason });",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2504,7 +2504,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 1885,
+      "line": 1894,
       "text": "if (kind === 'youtube') {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2512,7 +2512,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 1930,
+      "line": 1949,
       "text": "for (const [iframe] of ytPlayers.entries()) {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2520,7 +2520,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 1931,
+      "line": 1950,
       "text": "if (!(iframe instanceof HTMLIFrameElement) || !iframe.isConnected) {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2528,15 +2528,31 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 1932,
-      "text": "detachYouTubePlayer(iframe, reason);",
+      "line": 1951,
+      "text": "if (iframe instanceof HTMLIFrameElement && isOwnerDetachGraceActive(iframe, now)) continue;",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
       "mediaDomain": "iframe"
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2056,
+      "line": 1952,
+      "text": "if (iframe instanceof HTMLIFrameElement) detachedCleanup.add(iframe);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1953,
+      "text": "else detachYouTubePlayer(iframe, reason);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2082,
       "text": "tag.src = 'https://www.youtube.com/iframe_api';",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2544,7 +2560,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2072,
+      "line": 2098,
       "text": "const isAttachedYtPlayer = (player, iframeRef = null) => {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2552,7 +2568,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2074,
+      "line": 2100,
       "text": "const iframe = iframeRef instanceof HTMLIFrameElement ? iframeRef : (player?.getIframe?.() || null);",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2560,7 +2576,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2075,
+      "line": 2101,
       "text": "return !!(iframe && iframe.isConnected);",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2568,7 +2584,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2097,
+      "line": 2123,
       "text": "setMutedPref(muted, 'youtube');",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2576,7 +2592,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2103,
+      "line": 2129,
       "text": "const initYouTubePlayer = async (iframe) => {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2584,7 +2600,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2104,
+      "line": 2130,
       "text": "if (!iframe || !(iframe instanceof HTMLIFrameElement)) return null;",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2592,7 +2608,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2105,
+      "line": 2131,
       "text": "if (ytPlayers.has(iframe)) {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2600,7 +2616,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2106,
+      "line": 2132,
       "text": "const existing = ytPlayers.get(iframe);",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2608,7 +2624,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2107,
+      "line": 2133,
       "text": "if (isAttachedYtPlayer(existing, iframe)) return existing;",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2616,7 +2632,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2110,
+      "line": 2136,
       "text": "ytPlayers.delete(iframe);",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2624,7 +2640,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2117,
+      "line": 2143,
       "text": "const player = new YT.Player(iframe, {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2632,40 +2648,8 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2120,
-      "text": "if (!isAttachedYtPlayer(player, iframe)) {",
-      "operation": "iframe_src",
-      "ownershipGroup": "source_lifecycle",
-      "mediaDomain": "iframe"
-    },
-    {
-      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2123,
-      "text": "ytPlayers.delete(iframe);",
-      "operation": "iframe_src",
-      "ownershipGroup": "source_lifecycle",
-      "mediaDomain": "iframe"
-    },
-    {
-      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2136,
-      "text": "if (!isAttachedYtPlayer(player, iframe)) {",
-      "operation": "iframe_src",
-      "ownershipGroup": "source_lifecycle",
-      "mediaDomain": "iframe"
-    },
-    {
-      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2138,
-      "text": "ytPlayers.delete(iframe);",
-      "operation": "iframe_src",
-      "ownershipGroup": "source_lifecycle",
-      "mediaDomain": "iframe"
-    },
-    {
-      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
       "line": 2146,
-      "text": "detail: { source: 'youtube', element: iframe }",
+      "text": "if (!isAttachedYtPlayer(player, iframe)) {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
       "mediaDomain": "iframe"
@@ -2673,7 +2657,7 @@
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
       "line": 2149,
-      "text": "// LOOP: когда ролик закончился — стартуем заново без reload iframe",
+      "text": "ytPlayers.delete(iframe);",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
       "mediaDomain": "iframe"
@@ -2681,6 +2665,38 @@
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
       "line": 2162,
+      "text": "if (!isAttachedYtPlayer(player, iframe)) {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2164,
+      "text": "ytPlayers.delete(iframe);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2172,
+      "text": "detail: { source: 'youtube', element: iframe }",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2175,
+      "text": "// LOOP: когда ролик закончился — стартуем заново без reload iframe",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2188,
       "text": "ytPlayers.set(iframe, player);",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2688,7 +2704,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2212,
+      "line": 2240,
       "text": "return kind === 'youtube' || kind === 'tiktok' || kind === 'iframe';",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2696,7 +2712,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2389,
+      "line": 2440,
       "text": "return Array.from(document.querySelectorAll('iframe[data-forum-media]')).filter((frame) => {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2704,7 +2720,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2398,
+      "line": 2449,
       "text": "const all = Array.from(document.querySelectorAll('iframe[data-forum-media]'));",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2712,7 +2728,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2414,
+      "line": 2465,
       "text": "iframeHardUnloadMs: IFRAME_HARD_UNLOAD_MS,",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2720,7 +2736,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2415,
+      "line": 2466,
       "text": "iframeResidentCap: IFRAME_RESIDENT_CAP,",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2728,7 +2744,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2451,
+      "line": 2502,
       "text": "if (kind === 'youtube') {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2736,7 +2752,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2458,
+      "line": 2509,
       "text": "if (kind === 'tiktok' || kind === 'iframe') {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2744,7 +2760,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2482,
+      "line": 2533,
       "text": "if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 96 : (isCoarseUi ? 150 : 140);",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2752,7 +2768,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2502,
+      "line": 2553,
       "text": "if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2760,7 +2776,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2539,
+      "line": 2590,
       "text": "if (kind === 'youtube') {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2768,7 +2784,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2545,
+      "line": 2596,
       "text": "if (kind === 'tiktok' || kind === 'iframe') {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2776,7 +2792,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2549,
+      "line": 2600,
       "text": "// это давало визуальное исчезновение iframe и дергания ленты.",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2784,7 +2800,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2554,
+      "line": 2605,
       "text": "document.querySelectorAll('.forum-ad-media-slot video, .forum-ad-media-slot iframe').forEach((node) => {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2792,7 +2808,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2628,
+      "line": 2679,
       "text": "if (kind === 'youtube') {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2800,7 +2816,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2633,
+      "line": 2684,
       "text": "try { el.removeAttribute('data-forum-iframe-active'); } catch {}",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2808,7 +2824,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2634,
+      "line": 2685,
       "text": "emitMediaDiag('iframe_soft_cooldown', { kind, reason: unloadReason, ...getIframeSnapshot() });",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2816,7 +2832,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2647,
+      "line": 2698,
       "text": "try { el.removeAttribute('data-forum-iframe-active'); } catch {}",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2824,7 +2840,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2651,
+      "line": 2702,
       "text": "emitMediaDiag('iframe_hard_unload', { kind, reason: unloadReason, ...getIframeSnapshot() });",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2832,7 +2848,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2654,
+      "line": 2705,
       "text": "if (kind === 'tiktok' || kind === 'iframe') {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2840,7 +2856,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2658,
+      "line": 2709,
       "text": "try { el.removeAttribute('data-forum-iframe-active'); } catch {}",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2848,7 +2864,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2659,
+      "line": 2710,
       "text": "emitMediaDiag('iframe_soft_cooldown', { kind, reason: unloadReason, ...getIframeSnapshot() });",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2856,7 +2872,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2664,
+      "line": 2715,
       "text": "try { el.removeAttribute('data-forum-iframe-active'); } catch {}",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2864,7 +2880,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2667,
+      "line": 2718,
       "text": "emitMediaDiag('iframe_hard_unload', { kind, reason: unloadReason, ...getIframeSnapshot() });",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2872,7 +2888,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2692,
+      "line": 2743,
       "text": "emitMediaDiag('iframe_resident_cap', {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2880,7 +2896,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2757,
+      "line": 2808,
       "text": "// Best-effort loop для iframe (Vimeo/встроенные плееры/прочее):",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2888,7 +2904,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2774,
+      "line": 2825,
       "text": "if (!host.includes('youtube.com') && !host.includes('youtu.be')) return next;",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2896,7 +2912,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2786,
+      "line": 2837,
       "text": "if (kind !== 'youtube' && kind !== 'tiktok' && kind !== 'iframe') return false;",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2904,7 +2920,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2795,
+      "line": 2846,
       "text": "kind === 'youtube'",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2912,7 +2928,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2812,
+      "line": 2863,
       "text": "trace('iframe_prewarm', el, { kind, reason, hadSrc });",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2920,7 +2936,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2813,
+      "line": 2864,
       "text": "emitMediaDiag('iframe_prewarm', { kind, reason, hadSrc, ...getIframeSnapshot() });",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2928,7 +2944,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2990,
+      "line": 3041,
       "text": "if (kind === 'youtube') {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2936,7 +2952,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3008,
+      "line": 3059,
       "text": "emitMediaDiag('iframe_play', { kind: 'youtube', ...getIframeSnapshot() });",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2944,7 +2960,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3013,
+      "line": 3064,
       "text": "if (kind === 'tiktok' || kind === 'iframe') {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2952,7 +2968,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3021,
+      "line": 3072,
       "text": "const alreadyActive = el.getAttribute('data-forum-iframe-active') === '1';",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2960,7 +2976,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3024,
+      "line": 3075,
       "text": "try { el.setAttribute('data-forum-iframe-active', '1'); } catch {}",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2968,7 +2984,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3029,
+      "line": 3080,
       "text": "emitMediaDiag('iframe_play', { kind, ...getIframeSnapshot() });",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2976,7 +2992,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3094,
+      "line": 3145,
       "text": "if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 0.12 : (isCoarseUi ? 0.22 : 0.3);",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2984,7 +3000,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3100,
+      "line": 3151,
       "text": "if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 96 : (isCoarseUi ? 180 : 140);",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -2992,7 +3008,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3121,
+      "line": 3172,
       "text": "if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 0.06 : (isCoarseUi ? 0.08 : 0.12);",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -3000,7 +3016,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3127,
+      "line": 3178,
       "text": "if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isCoarseUi ? 1700 : 1300;",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -3008,7 +3024,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3133,
+      "line": 3184,
       "text": "if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return 0.24;",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -3016,7 +3032,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3139,
+      "line": 3190,
       "text": "if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return 260;",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -3024,7 +3040,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3145,
+      "line": 3196,
       "text": "if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -3032,7 +3048,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3184,
+      "line": 3235,
       "text": "// iframe/youtube — освобождаем ресурсы с задержкой (анти-микроскролл)",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -3040,7 +3056,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3203,
+      "line": 3254,
       "text": "candidateKind === 'youtube' || candidateKind === 'tiktok' || candidateKind === 'iframe'",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -3048,7 +3064,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3231,
+      "line": 3282,
       "text": "((activeKind === 'youtube' || activeKind === 'tiktok' || activeKind === 'iframe') && activeVisiblePx >= 220);",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -3056,7 +3072,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3252,
+      "line": 3303,
       "text": "candidateKind === 'youtube' || candidateKind === 'tiktok' || candidateKind === 'iframe'",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -3064,7 +3080,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3383,
+      "line": 3434,
       "text": "candidateKind === 'youtube' || candidateKind === 'tiktok' || candidateKind === 'iframe';",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -3072,7 +3088,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3424,
+      "line": 3475,
       "text": "if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -3080,7 +3096,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3503,
+      "line": 3555,
       "text": "// iframe/tiktok: гарантируем data-src",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -3088,7 +3104,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3504,
+      "line": 3556,
       "text": "if ((kind === 'tiktok' || kind === 'iframe') && el?.getAttribute) {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -3096,7 +3112,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3598,
+      "line": 3650,
       "text": "const adIframe = externalEl.querySelector?.('iframe');",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -3104,7 +3120,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3621,
+      "line": 3673,
       "text": "if (!['qcast', 'youtube', 'tiktok', 'iframe'].includes(source)) return;",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -3112,7 +3128,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3828,
+      "line": 3905,
       "text": "ytPlayers.forEach((player, iframe) => {",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -3120,7 +3136,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3831,
+      "line": 3908,
       "text": "try { if (iframe?.getAttribute?.('src')) iframe.setAttribute('src', ''); } catch {}",
       "operation": "iframe_src",
       "ownershipGroup": "source_lifecycle",
@@ -3208,7 +3224,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2218,
+      "line": 2246,
       "text": "const rect = node.getBoundingClientRect?.();",
       "operation": "viewport_read",
       "ownershipGroup": "viewport_logic",
@@ -3216,7 +3232,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2220,
+      "line": 2248,
       "text": "const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;",
       "operation": "viewport_read",
       "ownershipGroup": "viewport_logic",
@@ -3224,7 +3240,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2472,
+      "line": 2523,
       "text": "const rect = owner.getBoundingClientRect?.();",
       "operation": "viewport_read",
       "ownershipGroup": "viewport_logic",
@@ -3232,7 +3248,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2474,
+      "line": 2525,
       "text": "const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;",
       "operation": "viewport_read",
       "ownershipGroup": "viewport_logic",
@@ -3240,7 +3256,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2489,
+      "line": 2540,
       "text": "const rect = owner.getBoundingClientRect?.();",
       "operation": "viewport_read",
       "ownershipGroup": "viewport_logic",
@@ -3248,7 +3264,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2491,
+      "line": 2542,
       "text": "const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;",
       "operation": "viewport_read",
       "ownershipGroup": "viewport_logic",
@@ -3256,7 +3272,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 2500,
+      "line": 2551,
       "text": "const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;",
       "operation": "viewport_read",
       "ownershipGroup": "viewport_logic",
@@ -3264,7 +3280,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3038,
+      "line": 3089,
       "text": "const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;",
       "operation": "viewport_read",
       "ownershipGroup": "viewport_logic",
@@ -3272,7 +3288,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3041,
+      "line": 3092,
       "text": "const rect = el.getBoundingClientRect?.();",
       "operation": "viewport_read",
       "ownershipGroup": "viewport_logic",
@@ -3280,7 +3296,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3171,
+      "line": 3222,
       "text": "if (!('IntersectionObserver' in window)) return;",
       "operation": "viewport_read",
       "ownershipGroup": "viewport_logic",
@@ -3288,7 +3304,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3173,
+      "line": 3224,
       "text": "io = new IntersectionObserver(",
       "operation": "viewport_read",
       "ownershipGroup": "viewport_logic",
@@ -3296,7 +3312,7 @@
     },
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-      "line": 3430,
+      "line": 3481,
       "text": "nearIo = new IntersectionObserver(",
       "operation": "viewport_read",
       "ownershipGroup": "viewport_logic",
@@ -3368,7 +3384,7 @@
     },
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-      "line": 161,
+      "line": 197,
       "text": "el.pause?.()",
       "operation": "pause",
       "ownershipGroup": "playback_control",
@@ -3376,7 +3392,7 @@
     },
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-      "line": 217,
+      "line": 253,
       "text": "el.load?.()",
       "operation": "load",
       "ownershipGroup": "source_lifecycle",
@@ -3384,7 +3400,7 @@
     },
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-      "line": 280,
+      "line": 315,
       "text": "el.load?.()",
       "operation": "load",
       "ownershipGroup": "source_lifecycle",
@@ -3392,7 +3408,15 @@
     },
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-      "line": 300,
+      "line": 368,
+      "text": "el.load?.()",
+      "operation": "load",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 334,
       "text": "el.setAttribute('src', src)",
       "operation": "src_attach",
       "ownershipGroup": "source_lifecycle",
@@ -3400,7 +3424,7 @@
     },
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-      "line": 323,
+      "line": 394,
       "text": "// setAttribute('src') уже запускает стандартный resource selection path браузера.",
       "operation": "src_attach",
       "ownershipGroup": "source_lifecycle",
@@ -3408,7 +3432,7 @@
     },
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-      "line": 199,
+      "line": 235,
       "text": "el.removeAttribute('src')",
       "operation": "src_detach",
       "ownershipGroup": "source_lifecycle",
@@ -3416,7 +3440,7 @@
     },
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-      "line": 221,
+      "line": 257,
       "text": "export function __restoreVideoEl(el) {",
       "operation": "restore_helper",
       "ownershipGroup": "source_lifecycle",
@@ -3424,7 +3448,7 @@
     },
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-      "line": 361,
+      "line": 432,
       "text": "restoreVideoEl={__restoreVideoEl}",
       "operation": "restore_helper",
       "ownershipGroup": "source_lifecycle",
@@ -3432,7 +3456,7 @@
     },
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-      "line": 386,
+      "line": 457,
       "text": "restoreVideoEl: __restoreVideoEl,",
       "operation": "restore_helper",
       "ownershipGroup": "source_lifecycle",
@@ -3440,7 +3464,7 @@
     },
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-      "line": 120,
+      "line": 151,
       "text": "__unloadVideoEl(victim)",
       "operation": "unload_helper",
       "ownershipGroup": "source_lifecycle",
@@ -3448,7 +3472,7 @@
     },
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-      "line": 131,
+      "line": 162,
       "text": "export function __unloadVideoEl(el) {",
       "operation": "unload_helper",
       "ownershipGroup": "source_lifecycle",
@@ -3456,7 +3480,7 @@
     },
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-      "line": 367,
+      "line": 438,
       "text": "unloadVideoEl={__unloadVideoEl}",
       "operation": "unload_helper",
       "ownershipGroup": "source_lifecycle",
@@ -3480,7 +3504,7 @@
     },
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-      "line": 359,
+      "line": 430,
       "text": "writeMutedPref={__writeMediaMutedPref}",
       "operation": "mute_storage_write",
       "ownershipGroup": "mute_persistence",
@@ -3488,7 +3512,7 @@
     },
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-      "line": 377,
+      "line": 448,
       "text": "writeMutedPref={__writeMediaMutedPref}",
       "operation": "mute_storage_write",
       "ownershipGroup": "mute_persistence",
@@ -3512,7 +3536,7 @@
     },
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-      "line": 360,
+      "line": 431,
       "text": "mutedEventName={MEDIA_MUTED_EVENT}",
       "operation": "mute_event",
       "ownershipGroup": "mute_persistence",
@@ -3520,7 +3544,7 @@
     },
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-      "line": 378,
+      "line": 449,
       "text": "mutedEventName={MEDIA_MUTED_EVENT}",
       "operation": "mute_event",
       "ownershipGroup": "mute_persistence",
@@ -3528,7 +3552,7 @@
     },
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-      "line": 89,
+      "line": 120,
       "text": "const r = el.getBoundingClientRect?.()",
       "operation": "viewport_read",
       "ownershipGroup": "viewport_logic",
@@ -3536,7 +3560,7 @@
     },
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-      "line": 91,
+      "line": 122,
       "text": "const vh = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0",
       "operation": "viewport_read",
       "ownershipGroup": "viewport_logic",

@@ -18,6 +18,8 @@ describe('Forum media contracts', () => {
 
     expect(source).toContain('restoredRecently || kickedRecently')
     expect(source).not.toContain("if (!isLoading && canRestoreLoad()) el.load?.()")
+    expect(source).toContain('el.dataset.__loadPendingSince')
+    expect(source).toContain('html_media_restore_load_kick')
   })
 
   it('keeps forum ads autoplay fallback local-only and reserves global mute persistence for explicit toggles', () => {
@@ -40,5 +42,18 @@ describe('Forum media contracts', () => {
 
     expect(source).toContain('flags.auditEnabled')
     expect(source).not.toContain("qs.get('legacyWarmSweep')")
+  })
+
+  it('defers detached media cleanup and coordinates scroll settling before recovery work', () => {
+    const source = readRepoFile('app/forum/features/media/hooks/useForumMediaCoordinator.js')
+
+    expect(source).toContain('DETACHED_CLEANUP_GRACE_MS')
+    expect(source).toContain('markOwnerDetached(owner)')
+    expect(source).not.toContain("cleanupObservedMediaNode(n, 'mutation_removed')")
+    expect(source).toContain("enterSettling('scroll_activity'")
+    expect(source).toContain("recoverVisibleHtmlMedia('scroll_settle')")
+    expect(source).toContain('markMediaLoadPending')
+    expect(source).toContain('clearMediaLoadPending')
+    expect(source).toContain('media.dataset.__loadPendingSince')
   })
 })

@@ -67,6 +67,37 @@ const __MAX_ACTIVE_VIDEO_ELEMENTS = (() => {
 
 const __activeVideoEls = new Set()
 const __activeVideoLRU = []
+const __restoreKickTimers = new WeakMap()
+
+function __markMediaLoadPending(el) {
+  if (!el) return
+  try {
+    el.dataset.__loadPending = '1'
+    el.dataset.__warmReady = '0'
+    el.dataset.__loadPendingSince = String(Date.now())
+  } catch {}
+}
+
+function __clearMediaLoadPending(el, { warmReady = false } = {}) {
+  if (!el) return
+  try {
+    el.dataset.__loadPending = '0'
+    if (warmReady) el.dataset.__warmReady = '1'
+    delete el.dataset.__loadPendingSince
+  } catch {}
+}
+
+function __isMobileRestoreKickClient() {
+  try {
+    const ua = String((typeof navigator !== 'undefined' ? navigator.userAgent : '') || '')
+    const isIOS = /iP(hone|ad|od)/i.test(ua)
+    const isAndroid = /Android/i.test(ua)
+    const coarse = !!(typeof window !== 'undefined' && window?.matchMedia?.('(pointer: coarse)')?.matches)
+    return isIOS || isAndroid || coarse
+  } catch {
+    return false
+  }
+}
 
 export function __touchActiveVideoEl(el) {
   if (!el) return
@@ -131,6 +162,11 @@ export function __readMediaMutedPref() {
 export function __unloadVideoEl(el) {
   if (!el) return
   const nowTs = Date.now()
+  try {
+    const restoreTimer = __restoreKickTimers.get(el)
+    if (restoreTimer) clearTimeout(restoreTimer)
+    __restoreKickTimers.delete(el)
+  } catch {}
   __appendForumMediaTrace('html_media_unload', {
     id: String(el?.dataset?.__mid || ''),
     src: String(
@@ -162,7 +198,7 @@ export function __unloadVideoEl(el) {
   } catch {}
   try {
     el.dataset.__active = '0'
-    el.dataset.__loadPending = '0'
+    __clearMediaLoadPending(el, { warmReady: false })
     el.dataset.__warmReady = '0'
     el.dataset.__resident = '0'
     el.dataset.__prewarm = '0'
@@ -275,8 +311,7 @@ export function __restoreVideoEl(el) {
         networkStateNow === HTMLMediaElement.NETWORK_EMPTY
       if (readyStateNow === 0 || isNetworkEmpty) {
         if (!canRestoreLoad()) return
-        el.dataset.__loadPending = '1'
-        el.dataset.__warmReady = '0'
+        __markMediaLoadPending(el)
         el.load?.()
       }
     } catch {}
@@ -295,10 +330,46 @@ export function __restoreVideoEl(el) {
     }
   } catch {}
   try {
-    el.dataset.__loadPending = '1'
-    el.dataset.__warmReady = '0'
+    __markMediaLoadPending(el)
     el.setAttribute('src', src)
   } catch {}
+  try {
+    const prevTimer = __restoreKickTimers.get(el)
+    if (prevTimer) clearTimeout(prevTimer)
+  } catch {}
+  if (__isMobileRestoreKickClient()) {
+    const kickDelayMs = 180
+    const timer = setTimeout(() => {
+      try {
+        __restoreKickTimers.delete(el)
+        if (!el?.isConnected) return
+        const readyStateNow = Number(el.readyState || 0)
+        const networkStateNow = Number(el.networkState || 0)
+        const currentSrcNow = String(el.currentSrc || el.getAttribute('src') || '').trim()
+        const stillCold =
+          readyStateNow < 2 &&
+          (
+            !currentSrcNow ||
+            (
+              typeof HTMLMediaElement !== 'undefined' &&
+              (
+                networkStateNow === HTMLMediaElement.NETWORK_EMPTY ||
+                networkStateNow === HTMLMediaElement.NETWORK_NO_SOURCE
+              )
+            )
+          )
+        if (!stillCold) return
+        if (!canRestoreLoad()) return
+        __markMediaLoadPending(el)
+        __appendForumMediaTrace('html_media_restore_load_kick', {
+          id: String(el?.dataset?.__mid || ''),
+          src: String(src || ''),
+        })
+        el.load?.()
+      } catch {}
+    }, kickDelayMs)
+    try { __restoreKickTimers.set(el, timer) } catch {}
+  }
   try {
     const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
     if (!isPostFeedVideo) {
