@@ -25,11 +25,6 @@ const audits = [
     script: 'tools/audit-forum-deps.js',
     outputs: ['forum-deps-audit.report.json'],
   },
-  {
-    label: 'Forum media ownership map',
-    script: 'tools/audit-media-ownership.js',
-    outputs: ['forum-media-ownership.audit.report.json'],
-  },
 ]
 
 for (const audit of audits) {

@@ -33,9 +33,9 @@ export default function QCastPlayer({
       return null;
     }
   }, [readMutedPrefFromStorage]);
-  const writeMuted = React.useCallback((nextMuted, meta = {}) => {
+  const writeMuted = React.useCallback((nextMuted) => {
     try {
-      if (typeof writeMutedPref === 'function') writeMutedPref(!!nextMuted, meta);
+      if (typeof writeMutedPref === 'function') writeMutedPref(!!nextMuted);
     } catch {}
   }, [writeMutedPref]);
   const readQcastMutedPref = React.useCallback(() => {
@@ -48,16 +48,13 @@ export default function QCastPlayer({
     } catch {}
     return readMutedPref();
   }, [readMutedPref]);
-  const writeQcastMutedPref = React.useCallback((nextMuted, meta = {}) => {
+  const writeQcastMutedPref = React.useCallback((nextMuted) => {
     try {
       if (typeof localStorage !== 'undefined') {
         localStorage.setItem(QCAST_MUTED_KEY, nextMuted ? '1' : '0');
       }
     } catch {}
-    writeMuted(nextMuted, {
-      source: String(meta?.source || 'qcast'),
-      userAction: !!meta?.userAction,
-    });
+    writeMuted(nextMuted);
   }, [writeMuted]);
   const rearmPooledFx = React.useCallback((el) => {
     try {
@@ -426,10 +423,7 @@ const spawnFx = React.useCallback((kind, origin) => {
           Number(hostRef.current?.dataset?.__skipMutePersistUntil || 0),
         );
         if (skipPersistUntil <= Date.now()) {
-          writeQcastMutedPref(!!audio.muted, {
-            source: 'qcast_volumechange',
-            userAction: true,
-          });
+          writeQcastMutedPref(!!audio.muted);
         }
       } catch {}
       try {
@@ -441,7 +435,7 @@ const spawnFx = React.useCallback((kind, origin) => {
       } catch {}
       try {
         window.dispatchEvent(new CustomEvent(mutedEventName, {
-          detail: { muted: !!audio.muted, source: 'qcast', id: playerIdRef.current, userAction: true }
+          detail: { muted: !!audio.muted, source: 'qcast', id: playerIdRef.current }
         }));
       } catch {}
     };
@@ -742,10 +736,7 @@ const spawnFx = React.useCallback((kind, origin) => {
     const host = hostRef.current;
     if (!audio) return;
     audio.muted = !audio.muted;
-    writeQcastMutedPref(!!audio.muted, {
-      source: 'qcast_toggle',
-      userAction: true,
-    });
+    writeQcastMutedPref(!!audio.muted);
     try {
       if (!audio.muted) {
         const gestureUntil = String(Date.now() + 1800);
@@ -788,7 +779,8 @@ const spawnFx = React.useCallback((kind, origin) => {
         try { syncMasterGain(); } catch {}
       });
     } catch {}
-    try { window.dispatchEvent(new CustomEvent(mutedEventName,{ detail:{ muted: audio.muted, source:'qcast', id: playerIdRef.current, userAction: true } })); } catch {}
+    try { writeMuted(!!audio.muted); } catch {}
+    try { window.dispatchEvent(new CustomEvent(mutedEventName,{ detail:{ muted: audio.muted, source:'qcast', id: playerIdRef.current } })); } catch {}
   };
 
   const setVol = async (v) => {

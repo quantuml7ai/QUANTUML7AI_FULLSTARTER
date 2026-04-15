@@ -2,9 +2,10 @@
 
 import { isBrowser } from '../../../shared/utils/browser'
 import {
+  MEDIA_MUTED_KEY,
+  MEDIA_VIDEO_MUTED_KEY,
   MEDIA_MUTED_EVENT,
   readMutedPrefFromStorage,
-  __writeMediaMutedPref,
   __touchActiveVideoEl,
   __dropActiveVideoEl,
   __enforceActiveVideoCap,
@@ -14,30 +15,27 @@ import {
   __isVideoNearViewport,
   __MEDIA_VIS_MARGIN_PX,
 } from '../utils/mediaLifecycleRuntime'
-import {
-  __getForumMediaDebugFlags,
-  __appendForumMediaTrace,
-} from '../utils/mediaDebugRuntime'
-import {
-  resolveMediaLifecycleState,
-  shouldDeferHardUnload,
-} from '../utils/mediaLifecycleStateMachine'
 
 export default function useForumMediaCoordinator({ emitDiag }) {
   // === Ленивая подгрузка превью видео в постах ===
   useEffect(() => { 
     if (!isBrowser()) return;
     const warmSweepMode = (() => {
-      const flags = __getForumMediaDebugFlags();
-      if (!flags.auditEnabled) return 'off';
+      let explicit = '';
       try {
         const env = String(process.env.NEXT_PUBLIC_FORUM_LEGACY_WARM_SWEEP || '').trim().toLowerCase();
-        if (env === '1' || env === 'true' || env === 'on') return 'on';
-        if (env === '0' || env === 'false' || env === 'off') return 'off';
+        if (env === '1' || env === 'true' || env === 'on') explicit = 'on';
+        if (env === '0' || env === 'false' || env === 'off') explicit = 'off';
       } catch {}
-      // Legacy warm sweep допускаем только как dev/test audit-переключатель.
-      // В рабочем рантайме единственным владельцем prewarm/autoplay остаётся coordinator.
-      return 'off';
+      try {
+        const qs = new URLSearchParams(window.location.search || '');
+        const fromQuery = String(qs.get('legacyWarmSweep') || '').trim().toLowerCase();
+        if (fromQuery === '1' || fromQuery === 'true' || fromQuery === 'on') explicit = 'on';
+        if (fromQuery === '0' || fromQuery === 'false' || fromQuery === 'off') explicit = 'off';
+      } catch {}
+      // По умолчанию legacy-контур выключен:
+      // единым владельцем прогрева/старта является боевой координатор ниже.
+      return explicit || 'off';
     })();
     if (warmSweepMode !== 'on') return;
 
@@ -50,7 +48,17 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     let lastWarmSweepTs = 0;
     let lastWarmSweepTop = -1;
     const warmLeaseUntil = new WeakMap();
-    const traceEnabled = !!__getForumMediaDebugFlags().traceEnabled;
+    const traceEnabled = (() => {
+      try {
+        if (String(process.env.NEXT_PUBLIC_FORUM_VIDEO_TRACE || '') === '1') return true;
+      } catch {}
+      try {
+        const qs = new URLSearchParams(window.location.search || '');
+        const fromQuery = String(qs.get('videoTrace') || '').trim();
+        if (fromQuery === '1' || fromQuery.toLowerCase() === 'true') return true;
+      } catch {}
+      return false;
+    })();
     const trace = (event, video, extra = {}) => {
       if (!traceEnabled) return;
       try {
@@ -78,19 +86,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         });
         while (bucket.length > 320) bucket.shift();
         window.__forumVideoTrace = bucket;
-        __appendForumMediaTrace(event, {
-          scope: 'legacy_warm_sweep',
-          id: String(video?.dataset?.__mid || ''),
-          src,
-          readyState: Number(video?.readyState || 0),
-          networkState: Number(video?.networkState || 0),
-          loadPending: String(video?.dataset?.__loadPending || ''),
-          warmReady: String(video?.dataset?.__warmReady || ''),
-          active: String(video?.dataset?.__active || ''),
-          prewarm: String(video?.dataset?.__prewarm || ''),
-          resident: String(video?.dataset?.__resident || ''),
-          ...extra,
-        });
       } catch {}
     };
     try {
@@ -193,7 +188,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
               const lastWarmKickTs = Number(video.dataset?.__lastWarmLoadKickTs || 0);
               if (lastWarmKickTs > 0 && (now - lastWarmKickTs) < minWarmGap) return;
               try { video.dataset.__lastWarmLoadKickTs = String(now); } catch {}
-              markMediaLoadPending(video);
+              try { video.dataset.__loadPending = '1'; } catch {}
               trace('warm_load', video);
               video.load?.();
             }
@@ -542,26 +537,17 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     const readyReplay = new Map();
     const pendingReadyGrace = new WeakMap();
     let lastDetachedSweepTs = 0;
-    let settleUntilTs = Date.now() + 900;
-    let settleTimer = 0;
-    const traceEnabled = !!__getForumMediaDebugFlags().traceEnabled;
-    const getSettleRemainingMs = () => Math.max(0, settleUntilTs - Date.now());
-    const isCoordinatorSettling = () => getSettleRemainingMs() > 0;
-    const enterSettling = (reason = 'runtime_settle', ms = null) => {
-      const nextMs = Math.max(240, Number.isFinite(ms) ? Number(ms) : (isCoarseUi ? 900 : 720));
-      settleUntilTs = Date.now() + nextMs;
-      if (settleTimer) {
-        try { clearTimeout(settleTimer); } catch {}
-      }
-      settleTimer = setTimeout(() => {
-        settleTimer = 0;
-      }, nextMs);
-      __appendForumMediaTrace('media_settling', {
-        scope: 'media_coordinator',
-        reason,
-        durationMs: nextMs,
-      });
-    };
+    const traceEnabled = (() => {
+      try {
+        if (String(process.env.NEXT_PUBLIC_FORUM_VIDEO_TRACE || '') === '1') return true;
+      } catch {}
+      try {
+        const qs = new URLSearchParams(window.location.search || '');
+        const fromQuery = String(qs.get('videoTrace') || '').trim();
+        if (fromQuery === '1' || fromQuery.toLowerCase() === 'true') return true;
+      } catch {}
+      return false;
+    })();
     const trace = (event, el, extra = {}) => {
       if (!traceEnabled) return;
       try {
@@ -588,18 +574,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         });
         while (bucket.length > 320) bucket.shift();
         window.__forumVideoTrace = bucket;
-        __appendForumMediaTrace(event, {
-          scope: 'media_coordinator',
-          kind: String(el?.getAttribute?.('data-forum-media') || ''),
-          id: String(el?.dataset?.__mid || ''),
-          src,
-          readyState: Number(el?.readyState || 0),
-          networkState: Number(el?.networkState || 0),
-          loadPending: String(el?.dataset?.__loadPending || ''),
-          warmReady: String(el?.dataset?.__warmReady || ''),
-          active: String(el?.dataset?.__active || ''),
-          ...extra,
-        });
       } catch {}
     };
     const candidateTraceState = { key: '', ts: 0 };
@@ -807,8 +781,12 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       };
     } catch {}
 
-    const writeMutedPref = (val, meta = {}) => {
-      __writeMediaMutedPref(!!val, meta);
+    const writeMutedPref = (val) => {
+      try {
+        const next = val ? '1' : '0';
+        localStorage.setItem(MEDIA_MUTED_KEY, next);
+        localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, next);
+      } catch {}
     };
     // Единый источник mute-предпочтения для video/iframe/youtube — storage.
     // Для QCast используем отдельный ключ, чтобы звук QCast не "сбивался"
@@ -834,14 +812,10 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         return null;
       }
     };
-    const writeQcastMutedPref = (next, meta = {}) => {
+    const writeQcastMutedPref = (next) => {
       try {
         localStorage.setItem(QCAST_MUTED_KEY, next ? '1' : '0');
       } catch {}
-      writeMutedPref(next, {
-        source: String(meta?.source || 'qcast'),
-        userAction: !!meta?.userAction,
-      });
     };
  
 
@@ -868,23 +842,16 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       } catch {}
     };
 
-    const setMutedPref = (val, source = 'forum-coordinator', opts = {}) => {
+    const setMutedPref = (val, source = 'forum-coordinator', emit = true) => {
       const next = !!val;
       if (mutedPref === next && source === 'forum-coordinator') return;
-      const emit = opts?.emit !== false;
-      const persist = opts?.persist !== false;
       mutedPref = next;
-      if (persist) {
-        writeMutedPref(next, {
-          source,
-          userAction: !!opts?.userAction,
-        });
-      }
+      writeMutedPref(next);
       applyMutedPrefToAll();
       if (emit) {
         try {
           window.dispatchEvent(new CustomEvent(MEDIA_MUTED_EVENT, {
-            detail: { muted: next, source, userAction: !!opts?.userAction }
+            detail: { muted: next, source }
           }));
         } catch {}
       }
@@ -901,23 +868,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     const getMediaStateNode = (el) => {
       if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) return el;
       return getQCastAudio(el);
-    };
-    const markMediaLoadPending = (media) => {
-      if (!(media instanceof HTMLMediaElement)) return;
-      try {
-        media.dataset.__loadPending = '1';
-        media.dataset.__warmReady = '0';
-        media.dataset.__loadPendingSince = String(Date.now());
-      } catch {}
-    };
-    const clearMediaLoadPending = (media, { warmReady = null } = {}) => {
-      if (!(media instanceof HTMLMediaElement)) return;
-      try {
-        media.dataset.__loadPending = '0';
-        delete media.dataset.__loadPendingSince;
-        if (warmReady === true) media.dataset.__warmReady = '1';
-        if (warmReady === false) media.dataset.__warmReady = '0';
-      } catch {}
     };
     const srcKickState = new Map();
     const MAX_CONCURRENT_LOAD_PENDING = (() => {
@@ -972,7 +922,10 @@ export default function useForumMediaCoordinator({ emitDiag }) {
                 networkState === HTMLMediaElement.NETWORK_NO_SOURCE
               );
             if (mayBeStuck) {
-              clearMediaLoadPending(node);
+              try {
+                node.dataset.__loadPending = '0';
+                delete node.dataset.__loadPendingSince;
+              } catch {}
               trace('load_pending_stale_reset', node, { pendingForMs, stalePendingMs });
               return acc;
             }
@@ -1522,7 +1475,10 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           readyState === 0 &&
           (now - pendingSince) > stalePendingMs
         ) {
-          clearMediaLoadPending(el);
+          try {
+            el.dataset.__loadPending = '0';
+            delete el.dataset.__loadPendingSince;
+          } catch {}
           trace('candidate_clear_stale_pending', el, { reason, pendingForMs: now - pendingSince });
         }
         const cold = networkState === HTMLMediaElement.NETWORK_EMPTY || !el.currentSrc;
@@ -1543,7 +1499,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             return false;
           }
           try { el.dataset.__candidateBoostTs = String(now); } catch {}
-          markMediaLoadPending(el);
+          try { el.dataset.__loadPending = '1'; } catch {}
           trace('candidate_force_load', el, { reason: `${reason}:cold` });
           try { el.load?.(); } catch {}
         }
@@ -1598,28 +1554,20 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             owner?.getAttribute?.('data-forum-media') === 'qcast' ||
             String(el?.dataset?.qcastAudio || '') === '1';
           if (isQcastAudio) {
-            writeQcastMutedPref(!!el.muted, {
-              source: 'qcast_volumechange',
-              userAction: true,
-            });
+            writeQcastMutedPref(!!el.muted);
             return;
           }
         } catch {}
-        setMutedPref(!!el.muted, 'html_volumechange', {
-          userAction: true,
-        });
+        setMutedPref(!!el.muted);
       };
       volHandlers.set(el, h);
       el.addEventListener('volumechange', h, { passive: true });
     };
     const onMutedEvent = (e) => {
       if (e?.detail?.source === 'forum-coordinator') return;
+      if (e?.detail?.source === 'qcast') return;
       if (typeof e?.detail?.muted !== 'boolean') return;
-      setMutedPref(e.detail.muted, e.detail.source || 'external', {
-        emit: false,
-        persist: !!e?.detail?.userAction,
-        userAction: !!e?.detail?.userAction,
-      });
+      setMutedPref(e.detail.muted, e.detail.source || 'external', false);
     };
     const onMediaPauseCaptured = (e) => {
       const target = e?.target;
@@ -1790,7 +1738,8 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       // при штатных pause/unload/reload сценариях; не считаем это "битым" src.
       if (errCode <= 1) {
         try {
-          clearMediaLoadPending(target, { warmReady: false });
+          target.dataset.__loadPending = '0';
+          if ((target.readyState || 0) < 2) target.dataset.__warmReady = '0';
         } catch {}
         trace('media_error_ignore', target, { code: errCode, reason: 'benign_abort' });
         return;
@@ -1840,7 +1789,8 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         try { if (!target.paused) target.pause(); } catch {}
       });
       try {
-        clearMediaLoadPending(target, { warmReady: false });
+        target.dataset.__loadPending = '0';
+        target.dataset.__warmReady = '0';
       } catch {}
       if (owner instanceof Element) {
         scheduleHardUnload(owner, 0, 'error_blocked');
@@ -1862,7 +1812,8 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       if (!(target instanceof HTMLVideoElement || target instanceof HTMLAudioElement)) return;
       clearMediaSrcBlocked(target, e?.type === 'canplay' ? 'canplay' : 'loadeddata');
       try {
-        clearMediaLoadPending(target, { warmReady: target.readyState >= 2 });
+        target.dataset.__loadPending = '0';
+        if (target.readyState >= 2) target.dataset.__warmReady = '1';
       } catch {}
     };
     const detachYouTubePlayer = (iframe, reason = 'detached') => {
@@ -1881,7 +1832,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     const cleanupObservedMediaNode = (node, reason = 'removed') => {
       if (!(node instanceof Element)) return;
       forEachMediaOwner(node, (owner) => {
-        clearOwnerDetached(owner);
         try { cancelUnload(owner); } catch {}
         try { clearReadyReplay(owner); } catch {}
         try { pendingReadyGrace.delete(owner); } catch {}
@@ -1914,43 +1864,31 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       const now = Date.now();
       if (!force && (now - lastDetachedSweepTs) < 900) return;
       lastDetachedSweepTs = now;
-      const detachedCleanup = new Set();
       try {
         if (active instanceof Element && !active.isConnected) {
-          if (!isOwnerDetachGraceActive(active, now)) {
-            detachedCleanup.add(active);
-            active = null;
-            activeSinceTs = 0;
-          }
+          active = null;
+          activeSinceTs = 0;
         }
       } catch {}
       try {
         for (const [el] of ratios.entries()) {
           if (!(el instanceof Element) || !el.isConnected) {
-            if (el instanceof Element && isOwnerDetachGraceActive(el, now)) continue;
-            if (el instanceof Element) detachedCleanup.add(el);
-            else ratios.delete(el);
+            ratios.delete(el);
           }
         }
       } catch {}
       try {
         for (const [el, cleanup] of readyReplay.entries()) {
           if (!(el instanceof Element) || !el.isConnected) {
-            if (el instanceof Element && isOwnerDetachGraceActive(el, now)) continue;
-            if (el instanceof Element) detachedCleanup.add(el);
-            else {
-              try { cleanup?.(); } catch {}
-              readyReplay.delete(el);
-            }
+            try { cleanup?.(); } catch {}
+            readyReplay.delete(el);
           }
         }
       } catch {}
       try {
         for (const [iframe] of ytPlayers.entries()) {
           if (!(iframe instanceof HTMLIFrameElement) || !iframe.isConnected) {
-            if (iframe instanceof HTMLIFrameElement && isOwnerDetachGraceActive(iframe, now)) continue;
-            if (iframe instanceof HTMLIFrameElement) detachedCleanup.add(iframe);
-            else detachYouTubePlayer(iframe, reason);
+            detachYouTubePlayer(iframe, reason);
           }
         }
       } catch {}
@@ -1964,11 +1902,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             ytMuteLast.delete(player);
           }
         }
-      } catch {}
-      try {
-        detachedCleanup.forEach((node) => {
-          try { cleanupObservedMediaNode(node, reason); } catch {}
-        });
       } catch {}
       try { pruneMediaSrcBlockMap(force); } catch {}
     };
@@ -2200,7 +2133,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     let nearIo = null;
 
     const observed = new WeakSet();
-    const detachedOwnerSince = new WeakMap();
     const unloadTimers = new Map(); // el -> timeoutId 
     const isIOSUi = (() => {
       try {
@@ -2219,7 +2151,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       }
     })();
     const IFRAME_HARD_UNLOAD_MS = isIOSUi ? 9800 : (isCoarseUi ? 7600 : 5200);
-    const DETACHED_CLEANUP_GRACE_MS = isIOSUi ? 2600 : (isCoarseUi ? 1900 : 1300);
     const IFRAME_RESIDENT_CAP = (() => {
       if (isCoarseUi) return 4;
       const dm = Number(navigator?.deviceMemory || 0);
@@ -2254,7 +2185,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       const mediaEl = getMediaStateNode(el);
       if (!(mediaEl instanceof HTMLMediaElement)) return false;
       try {
-        const now = Date.now();
         const owner = getOwnerNode(el);
         const ownerDataset = owner instanceof Element ? owner.dataset : null;
         const mediaDataset = mediaEl.dataset || null;
@@ -2262,47 +2192,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         if (String(mediaDataset?.__prewarm || ownerDataset?.__prewarm || '') === '1') return true;
         if (String(mediaDataset?.__resident || ownerDataset?.__resident || '') === '1') return true;
         if (String(mediaDataset?.__loadPending || ownerDataset?.__loadPending || '') === '1') return true;
-        const lastRestoreTs = Math.max(
-          Number(mediaDataset?.__lastRestoreTs || 0),
-          Number(ownerDataset?.__lastRestoreTs || 0),
-        );
-        const lastLoadKickTs = Math.max(
-          Number(mediaDataset?.__lastLoadKickTs || 0),
-          Number(ownerDataset?.__lastLoadKickTs || 0),
-        );
-        const lastManualLeaseTs = Math.max(
-          Number(mediaDataset?.__manualLeaseUntil || 0),
-          Number(ownerDataset?.__manualLeaseUntil || 0),
-        );
-        const restoreRetainMs = isIOSUi ? 22000 : (isCoarseUi ? 18000 : 15000);
-        const loadRetainMs = isIOSUi ? 18000 : (isCoarseUi ? 15000 : 12000);
-        if (lastRestoreTs > 0 && (now - lastRestoreTs) < restoreRetainMs) return true;
-        if (lastLoadKickTs > 0 && (now - lastLoadKickTs) < loadRetainMs) return true;
-        if (lastManualLeaseTs > now) return true;
         if (isNearViewportElement(owner || mediaEl)) return true;
-      } catch {}
-      return false;
-    };
-    const markOwnerDetached = (el) => {
-      try {
-        if (el instanceof Element) detachedOwnerSince.set(el, Date.now());
-      } catch {}
-    };
-    const clearOwnerDetached = (el) => {
-      try {
-        if (el instanceof Element) detachedOwnerSince.delete(el);
-      } catch {}
-    };
-    const isOwnerDetachGraceActive = (el, nowTs = Date.now()) => {
-      try {
-        if (!(el instanceof Element)) return false;
-        const detachedAt = Number(detachedOwnerSince.get(el) || 0);
-        if (!detachedAt) {
-          detachedOwnerSince.set(el, nowTs);
-          return true;
-        }
-        if ((nowTs - detachedAt) < DETACHED_CLEANUP_GRACE_MS) return true;
-        detachedOwnerSince.delete(el);
       } catch {}
       return false;
     };
@@ -2631,18 +2521,12 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         invalidatePlayRequest(el);
         try { el.dataset.__coordinatorUnloadUntil = String(Date.now() + 2500); } catch {}
         try {
-          const farOutOfView = unloadReason === 'out_of_view' && !isNearViewportElement(el, isIOSUi ? 4200 : (isCoarseUi ? 3200 : 2600));
-          const lastRestoreTs = Number(el?.dataset?.__lastRestoreTs || 0);
-          const lastLoadKickTs = Number(el?.dataset?.__lastLoadKickTs || 0);
-          const restoreCooldownMs = isIOSUi ? 24000 : (isCoarseUi ? 20000 : 17000);
-          const loadKickCooldownMs = isIOSUi ? 18000 : (isCoarseUi ? 15000 : 12000);
-          const restoredRecently = lastRestoreTs > 0 && (Date.now() - lastRestoreTs) < restoreCooldownMs;
-          const kickedRecently = lastLoadKickTs > 0 && (Date.now() - lastLoadKickTs) < loadKickCooldownMs;
+          const farOutOfView = unloadReason === 'out_of_view' && !isNearViewportElement(el, isIOSUi ? 2200 : (isCoarseUi ? 1500 : 1200));
           const forceHard =
             unloadReason === 'cleanup' ||
             unloadReason === 'resident_cap' ||
             unloadReason === 'error_blocked' ||
-            (farOutOfView && !restoredRecently && !kickedRecently);
+            (farOutOfView && (isIOSUi || isCoarseUi));
           if (forceHard) el.dataset.__forceHardUnload = '1';
           else delete el.dataset.__forceHardUnload;
         } catch {}
@@ -2753,54 +2637,10 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       const delay = Number.isFinite(ms) ? ms : getUnloadDelay(el, reason);
       const id = setTimeout(() => {
         unloadTimers.delete(el);
-        const mediaEl = getMediaStateNode(el);
-        const owner = getOwnerNode(el) || el;
         if (!isIframeLike(el) && shouldRetainHtmlMedia(el)) {
           trace('hard_unload_skip_retained', el, { reason });
           return;
         }
-        const now = Date.now();
-        const lifecycleState = resolveMediaLifecycleState({
-          active: String(mediaEl?.dataset?.__active || owner?.dataset?.__active || '') === '1',
-          playing: !!(mediaEl instanceof HTMLMediaElement && !mediaEl.paused && !mediaEl.ended),
-          restoring: String(mediaEl?.dataset?.__loadPending || owner?.dataset?.__loadPending || '') === '1',
-          loadPending: String(mediaEl?.dataset?.__loadPending || owner?.dataset?.__loadPending || '') === '1',
-          prewarm: String(mediaEl?.dataset?.__prewarm || owner?.dataset?.__prewarm || '') === '1',
-          resident: String(mediaEl?.dataset?.__resident || owner?.dataset?.__resident || '') === '1',
-          inViewport: isNearViewportElement(owner, 0),
-          nearViewport: isNearViewportElement(owner),
-          farAway: !isNearViewportElement(owner, isIOSUi ? 4200 : (isCoarseUi ? 3200 : 2600)),
-          hasAttachedSource: !!(
-            mediaEl?.getAttribute?.('src') ||
-            mediaEl?.currentSrc ||
-            mediaEl?.dataset?.__src ||
-            mediaEl?.getAttribute?.('data-src')
-          ),
-        });
-        if (
-          shouldDeferHardUnload({
-            state: lifecycleState,
-            isSettling: isCoordinatorSettling(),
-            hasManualLease: hasManualLease(owner) || hasManualLease(mediaEl),
-            now,
-          })
-          && reason !== 'cleanup'
-          && reason !== 'resident_cap'
-          && reason !== 'error_blocked'
-        ) {
-          const deferMs = Math.max(280, getSettleRemainingMs() + 220);
-          trace('hard_unload_defer', mediaEl || el, {
-            reason,
-            deferMs,
-            state: lifecycleState,
-          });
-          scheduleHardUnload(el, deferMs, reason);
-          return;
-        }
-        try {
-          if (mediaEl?.dataset) mediaEl.dataset.__coordinatorUnloadReason = String(reason || '');
-          if (owner instanceof Element && owner.dataset) owner.dataset.__coordinatorUnloadReason = String(reason || '');
-        } catch {}
         hardUnloadMedia(el, reason);
       }, delay);
       unloadTimers.set(el, id);
@@ -2935,7 +2775,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
                   bypassSrcLimiter: userIntentKick || isIOSUi,
                   bypassPendingBudget: true,
                 })) return;
-                markMediaLoadPending(el);
+                try { el.dataset.__loadPending = '1'; } catch {}
                 trace('play_load', el);
                 el.load?.();
               }
@@ -3538,7 +3378,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         if (!(el instanceof Element)) return;
         if (observed.has(el)) return;
         observed.add(el);
-        clearOwnerDetached(el);
 
         // аудио/видео: следим за mute, чтобы запоминать выбор
         if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
@@ -3712,7 +3551,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
               burstLimit: isIOSUi ? 3 : 4,
               blockMs: isIOSUi ? 15000 : 11000,
             })) return;
-            markMediaLoadPending(mediaEl);
+            try { mediaEl.dataset.__loadPending = '1'; } catch {}
             trace('visibility_restore', mediaEl, { reason, mode: 'kick_stalled' });
             try { mediaEl.load?.(); } catch {}
           }
@@ -3725,36 +3564,15 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       } catch {
         return;
       }
-      enterSettling('visibility_visible', isCoarseUi ? 1100 : 900);
       try { observeAll(); } catch {}
       recoverVisibleHtmlMedia('visibility_visible');
     };
     const onPageShowRecover = () => {
-      enterSettling('pageshow', isCoarseUi ? 1200 : 960);
       try { observeAll(); } catch {}
       recoverVisibleHtmlMedia('pageshow');
     };
     const onWindowFocusRecover = () => {
-      enterSettling('window_focus', isCoarseUi ? 900 : 720);
       recoverVisibleHtmlMedia('window_focus');
-    };
-    const onWindowResizeRecover = () => {
-      enterSettling('window_resize', isCoarseUi ? 980 : 760);
-      try { observeAll(); } catch {}
-      recoverVisibleHtmlMedia('window_resize');
-    };
-    let scrollRecoverTimer = 0;
-    const onScrollActivity = () => {
-      const settleMs = isCoarseUi ? 560 : 380;
-      enterSettling('scroll_activity', settleMs);
-      if (scrollRecoverTimer) {
-        try { clearTimeout(scrollRecoverTimer); } catch {}
-      }
-      scrollRecoverTimer = setTimeout(() => {
-        scrollRecoverTimer = 0;
-        try { observeAll(); } catch {}
-        recoverVisibleHtmlMedia('scroll_settle');
-      }, settleMs + 60);
     };
 
     // Вместо setInterval(querySelectorAll...) — MutationObserver на новые медиа-узлы
@@ -3807,9 +3625,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             } catch {}
             if (!hasMedia) continue;
             touchedMedia = true;
-            forEachMediaOwner(n, (owner) => {
-              markOwnerDetached(owner);
-            });
+            cleanupObservedMediaNode(n, 'mutation_removed');
           }
         }
         if (!touchedMedia) return;
@@ -3818,16 +3634,11 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       });
       mo.observe(document.body, { childList: true, subtree: true });
     } catch { mo = null; }
-    enterSettling('media_coordinator_init', isCoarseUi ? 1100 : 900);
     window.addEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
     window.addEventListener('site-media-play', onExternalMediaPlay);
     document.addEventListener('visibilitychange', onVisibilityRecover, true);
     window.addEventListener('pageshow', onPageShowRecover);
     window.addEventListener('focus', onWindowFocusRecover, true);
-    window.addEventListener('resize', onWindowResizeRecover, { passive: true });
-    document.addEventListener('scroll', onScrollActivity, { passive: true, capture: true });
-    window.addEventListener('wheel', onScrollActivity, { passive: true });
-    window.addEventListener('touchmove', onScrollActivity, { passive: true });
     document.addEventListener('pointerdown', onMediaPointerCaptured, true);
     document.addEventListener('pause', onMediaPauseCaptured, true);
     document.addEventListener('play', onMediaPlayCaptured, true);
@@ -3849,10 +3660,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       document.removeEventListener('visibilitychange', onVisibilityRecover, true);
       window.removeEventListener('pageshow', onPageShowRecover);
       window.removeEventListener('focus', onWindowFocusRecover, true);
-      window.removeEventListener('resize', onWindowResizeRecover);
-      document.removeEventListener('scroll', onScrollActivity, true);
-      window.removeEventListener('wheel', onScrollActivity);
-      window.removeEventListener('touchmove', onScrollActivity);
       document.removeEventListener('pointerdown', onMediaPointerCaptured, true);
       document.removeEventListener('pause', onMediaPauseCaptured, true);
       document.removeEventListener('play', onMediaPlayCaptured, true);
@@ -3868,14 +3675,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         unloadTimers.forEach((id) => clearTimeout(id));
         unloadTimers.clear();
       } catch {}
-      if (settleTimer) {
-        try { clearTimeout(settleTimer); } catch {}
-        settleTimer = 0;
-      }
-      if (scrollRecoverTimer) {
-        try { clearTimeout(scrollRecoverTimer); } catch {}
-        scrollRecoverTimer = 0;
-      }
       try {
         readyReplay.forEach?.((cleanup) => { try { cleanup(); } catch {} });
       } catch {}

@@ -4,8 +4,8 @@
 > Если меняются критические точки входа, серверные контракты, import-граф или ownership модулей, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-risks.js`.
 
-Сгенерировано автоматически: 2026-04-15T19:04:09.882Z
-Исходных файлов в анализе: 665
+Сгенерировано автоматически: 2026-04-13T20:35:47.266Z
+Исходных файлов в анализе: 655
 Route-aware файлов: 96
 
 ## Что Считается Риском
@@ -132,15 +132,15 @@ Route-aware файлов: 96
 - `app/forum/shared/hooks/useEvent.js` — используют 6 локальных модулей
 - `app/forum/shared/utils/formatters.js` — используют 6 локальных модулей
 - `app/forum/features/dm/utils/dmLoaders.js` — используют 5 локальных модулей
-- `app/forum/features/media/utils/mediaLifecycleRuntime.js` — используют 5 локальных модулей
 - `app/forum/features/profile/components/VipFlipBadge.jsx` — используют 5 локальных модулей
 - `app/forum/shared/utils/counts.js` — используют 5 локальных модулей
 - `lib/subscriptions.js` — используют 5 локальных модулей
-- `tests/support/projectSurface.js` — используют 5 локальных модулей
 - `app/forum/features/dm/utils/mediaParsing.js` — используют 4 локальных модулей
+- `app/forum/features/media/utils/mediaLifecycleRuntime.js` — используют 4 локальных модулей
 - `app/forum/features/media/utils/mediaRuntime.js` — используют 4 локальных модулей
 - `app/forum/features/profile/hooks/useVipFlag.js` — используют 4 локальных модулей
 - `app/forum/features/subscriptions/utils/starred.js` — используют 4 локальных модулей
+- `app/forum/features/ui/components/StarButton.jsx` — используют 4 локальных модулей
 
 ## Файлы С Самым Высоким Fan-Out
 
@@ -166,14 +166,14 @@ Route-aware файлов: 96
 - `app/forum/ForumLayout.jsx` — импортирует 6 локальных модулей
 - `app/forum/features/dm/components/DmMessagesPane.jsx` — импортирует 5 локальных модулей
 - `app/forum/features/feed/components/TopicsOrPanelsSwitch.jsx` — импортирует 5 локальных модулей
-- `app/forum/features/media/utils/mediaLifecycleRuntime.js` — импортирует 5 локальных модулей
 - `app/forum/features/moderation/hooks/useForumModerationRuntime.js` — импортирует 5 локальных модулей
 - `app/forum/features/ui/components/ForumSearchSortControls.jsx` — импортирует 5 локальных модулей
+- `app/api/forum/mutate/route.js` — импортирует 4 локальных модулей
 
 ## Зоны С Повышенной Плотностью Связей
 
 - `app/layout.js` — файлов: 1; исходящих связей: 11; плотность: 11
-- `forum/root` — файлов: 14; исходящих связей: 88; плотность: 6.29
+- `forum/root` — файлов: 14; исходящих связей: 87; плотность: 6.21
 - `app/page.js` — файлов: 1; исходящих связей: 3; плотность: 3
 - `api/profile` — файлов: 9; исходящих связей: 19; плотность: 2.11
 - `app/ads` — файлов: 4; исходящих связей: 8; плотность: 2
@@ -192,7 +192,6 @@ Route-aware файлов: 96
 - `app/game` — файлов: 2; исходящих связей: 3; плотность: 1.5
 - `app/subscribe` — файлов: 3; исходящих связей: 4; плотность: 1.33
 - `forum/ui` — файлов: 51; исходящих связей: 64; плотность: 1.25
-- `forum/media` — файлов: 41; исходящих связей: 41; плотность: 1
 - `api/telegram` — файлов: 4; исходящих связей: 4; плотность: 1
 - `api/qcoin` — файлов: 3; исходящих связей: 3; плотность: 1
 - `api/battlecoin` — файлов: 2; исходящих связей: 2; плотность: 1
@@ -202,6 +201,7 @@ Route-aware файлов: 96
 - `app/ads.js` — файлов: 1; исходящих связей: 1; плотность: 1
 - `app/components` — файлов: 1; исходящих связей: 1; плотность: 1
 - `app/contact` — файлов: 1; исходящих связей: 1; плотность: 1
+- `app/privacy` — файлов: 1; исходящих связей: 1; плотность: 1
 
 ## Серверные И Инфраструктурные Хотспоты
 

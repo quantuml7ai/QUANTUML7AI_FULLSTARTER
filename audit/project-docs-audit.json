@@ -1,6 +1,6 @@
 {
   "phase": "project-docs-audit",
-  "timestamp": "2026-04-15T19:04:11.643Z",
+  "timestamp": "2026-04-13T20:35:48.465Z",
   "scope": "whole repository docs package",
   "touched_files": [
     "PROJECT_TREE.md",
@@ -38,7 +38,7 @@
     {
       "file": "PROJECT_TREE.md",
       "exists": true,
-      "lines": 1924,
+      "lines": 1911,
       "headings": 4,
       "has_rule_header": true
     },
@@ -72,7 +72,7 @@
     }
   ],
   "route_file_count": 96,
-  "source_file_count": 665,
-  "dependency_edge_count": 599,
-  "reverse_dependency_nodes": 300
+  "source_file_count": 655,
+  "dependency_edge_count": 590,
+  "reverse_dependency_nodes": 297
 }

@@ -55,24 +55,6 @@ NEXT_PUBLIC_FORUM_DIAG=0
 NEXT_PUBLIC_FORUM_PERF_TRACE=1
 ```
 
-## Forum Media Debug Flags
-
-Media tracing and audit helpers are dev/test only and should stay disabled in production:
-
-```bash
-NEXT_PUBLIC_FORUM_MEDIA_TRACE_ENABLED=0
-NEXT_PUBLIC_FORUM_MEDIA_AUDIT_ENABLED=0
-NEXT_PUBLIC_FORUM_MEDIA_DEBUG_OVERLAY=0
-```
-
-Recommended local debug values:
-
-```bash
-NEXT_PUBLIC_FORUM_MEDIA_TRACE_ENABLED=1
-NEXT_PUBLIC_FORUM_MEDIA_AUDIT_ENABLED=1
-NEXT_PUBLIC_FORUM_MEDIA_DEBUG_OVERLAY=0
-```
-
 ## Official Verification Standard
 
 The canonical verification command for every project change is:

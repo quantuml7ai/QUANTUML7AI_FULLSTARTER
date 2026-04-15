@@ -29,7 +29,6 @@
     "project:docs": "node tools/generate-project-docs.js",
     "project:docs:audit": "node tools/audit-project-docs.js",
     "project:docs:full": "pnpm project:docs && pnpm project:docs:audit",
-    "audit:forum:media-ownership": "node tools/audit-media-ownership.js",
     "audit:forum:diag": "node tools/analyze-forum-diag.js",
     "audit:forum:har": "node tools/analyze-forum-media-har.js"
   },

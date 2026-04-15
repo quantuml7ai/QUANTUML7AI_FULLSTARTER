@@ -4,21 +4,29 @@ import React from 'react'
 import VideoMediaLeaf from '../components/VideoMedia'
 import QCastPlayerLeaf from '../components/QCastPlayer'
 import { createEnableVideoControlsOnTap } from './videoControls'
-import { __appendForumMediaTrace } from './mediaDebugRuntime'
-import {
-  MEDIA_MUTED_KEY,
-  MEDIA_VIDEO_MUTED_KEY,
-  MEDIA_MUTED_EVENT,
-  readMutedPrefFromStorage,
-  __writeMediaMutedPref,
-} from './mediaMutePrefs'
 
-export {
-  MEDIA_MUTED_KEY,
-  MEDIA_VIDEO_MUTED_KEY,
-  MEDIA_MUTED_EVENT,
-  readMutedPrefFromStorage,
-  __writeMediaMutedPref,
+export const MEDIA_MUTED_KEY = 'forum:mediaMuted'
+export const MEDIA_VIDEO_MUTED_KEY = 'forum:videoMuted'
+export const MEDIA_MUTED_EVENT = 'forum:media-mute'
+;(() => {
+  // На каждый новый перезапуск страницы стартуем в muted,
+  // чтобы iPhone/Safari не блокировал autoplay из-за старого unmuted-состояния.
+  try {
+    if (typeof window === 'undefined') return
+    localStorage.setItem(MEDIA_MUTED_KEY, '1')
+    localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, '1')
+  } catch {}
+})()
+
+export function readMutedPrefFromStorage() {
+  try {
+    let v = localStorage.getItem(MEDIA_MUTED_KEY)
+    if (v == null) v = localStorage.getItem(MEDIA_VIDEO_MUTED_KEY)
+    if (v == null) return null
+    return v === '1' || v === 'true'
+  } catch {
+    return null
+  }
 }
 
 export const __MEDIA_VIS_MARGIN_PX = (() => {
@@ -67,37 +75,6 @@ const __MAX_ACTIVE_VIDEO_ELEMENTS = (() => {
 
 const __activeVideoEls = new Set()
 const __activeVideoLRU = []
-const __restoreKickTimers = new WeakMap()
-
-function __markMediaLoadPending(el) {
-  if (!el) return
-  try {
-    el.dataset.__loadPending = '1'
-    el.dataset.__warmReady = '0'
-    el.dataset.__loadPendingSince = String(Date.now())
-  } catch {}
-}
-
-function __clearMediaLoadPending(el, { warmReady = false } = {}) {
-  if (!el) return
-  try {
-    el.dataset.__loadPending = '0'
-    if (warmReady) el.dataset.__warmReady = '1'
-    delete el.dataset.__loadPendingSince
-  } catch {}
-}
-
-function __isMobileRestoreKickClient() {
-  try {
-    const ua = String((typeof navigator !== 'undefined' ? navigator.userAgent : '') || '')
-    const isIOS = /iP(hone|ad|od)/i.test(ua)
-    const isAndroid = /Android/i.test(ua)
-    const coarse = !!(typeof window !== 'undefined' && window?.matchMedia?.('(pointer: coarse)')?.matches)
-    return isIOS || isAndroid || coarse
-  } catch {
-    return false
-  }
-}
 
 export function __touchActiveVideoEl(el) {
   if (!el) return
@@ -159,25 +136,17 @@ export function __readMediaMutedPref() {
   return null
 }
 
+export function __writeMediaMutedPref(nextMuted) {
+  try {
+    const v = nextMuted ? '1' : '0'
+    localStorage.setItem(MEDIA_MUTED_KEY, v)
+    localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, v)
+  } catch {}
+}
+
 export function __unloadVideoEl(el) {
   if (!el) return
   const nowTs = Date.now()
-  try {
-    const restoreTimer = __restoreKickTimers.get(el)
-    if (restoreTimer) clearTimeout(restoreTimer)
-    __restoreKickTimers.delete(el)
-  } catch {}
-  __appendForumMediaTrace('html_media_unload', {
-    id: String(el?.dataset?.__mid || ''),
-    src: String(
-      el?.dataset?.__src ||
-      el?.getAttribute?.('data-src') ||
-      el?.currentSrc ||
-      el?.getAttribute?.('src') ||
-      ''
-    ),
-    reason: String(el?.dataset?.__coordinatorUnloadReason || ''),
-  })
   try {
     const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
     if (isPostFeedVideo) {
@@ -198,7 +167,7 @@ export function __unloadVideoEl(el) {
   } catch {}
   try {
     el.dataset.__active = '0'
-    __clearMediaLoadPending(el, { warmReady: false })
+    el.dataset.__loadPending = '0'
     el.dataset.__warmReady = '0'
     el.dataset.__resident = '0'
     el.dataset.__prewarm = '0'
@@ -206,15 +175,7 @@ export function __unloadVideoEl(el) {
   } catch {}
   const canHardUnload = (() => {
     try {
-      const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
-      const lastRestoreTs = Number(el?.dataset?.__lastRestoreTs || 0)
-      const lastLoadKickTs = Number(el?.dataset?.__lastLoadKickTs || 0)
-      const restoreCooldownMs = isPostFeedVideo ? 18000 : 0
-      const loadKickCooldownMs = isPostFeedVideo ? 12000 : 0
-      const restoredRecently = lastRestoreTs > 0 && (nowTs - lastRestoreTs) < restoreCooldownMs
-      const kickedRecently = lastLoadKickTs > 0 && (nowTs - lastLoadKickTs) < loadKickCooldownMs
       if (__VIDEO_HARD_CAP_ENABLED) return true
-      if (isPostFeedVideo && (restoredRecently || kickedRecently)) return false
       return String(el?.dataset?.__forceHardUnload || '') === '1'
     } catch {
       return __VIDEO_HARD_CAP_ENABLED
@@ -259,10 +220,6 @@ export function __restoreVideoEl(el) {
   const nowTs = Date.now()
   const src = el.dataset.__src || el.getAttribute('data-src') || ''
   if (!src) return
-  __appendForumMediaTrace('html_media_restore', {
-    id: String(el?.dataset?.__mid || ''),
-    src: String(src || ''),
-  })
   try {
     delete el.dataset.__forceHardUnload
   } catch {}
@@ -311,7 +268,8 @@ export function __restoreVideoEl(el) {
         networkStateNow === HTMLMediaElement.NETWORK_EMPTY
       if (readyStateNow === 0 || isNetworkEmpty) {
         if (!canRestoreLoad()) return
-        __markMediaLoadPending(el)
+        el.dataset.__loadPending = '1'
+        el.dataset.__warmReady = '0'
         el.load?.()
       }
     } catch {}
@@ -330,46 +288,10 @@ export function __restoreVideoEl(el) {
     }
   } catch {}
   try {
-    __markMediaLoadPending(el)
+    el.dataset.__loadPending = '1'
+    el.dataset.__warmReady = '0'
     el.setAttribute('src', src)
   } catch {}
-  try {
-    const prevTimer = __restoreKickTimers.get(el)
-    if (prevTimer) clearTimeout(prevTimer)
-  } catch {}
-  if (__isMobileRestoreKickClient()) {
-    const kickDelayMs = 180
-    const timer = setTimeout(() => {
-      try {
-        __restoreKickTimers.delete(el)
-        if (!el?.isConnected) return
-        const readyStateNow = Number(el.readyState || 0)
-        const networkStateNow = Number(el.networkState || 0)
-        const currentSrcNow = String(el.currentSrc || el.getAttribute('src') || '').trim()
-        const stillCold =
-          readyStateNow < 2 &&
-          (
-            !currentSrcNow ||
-            (
-              typeof HTMLMediaElement !== 'undefined' &&
-              (
-                networkStateNow === HTMLMediaElement.NETWORK_EMPTY ||
-                networkStateNow === HTMLMediaElement.NETWORK_NO_SOURCE
-              )
-            )
-          )
-        if (!stillCold) return
-        if (!canRestoreLoad()) return
-        __markMediaLoadPending(el)
-        __appendForumMediaTrace('html_media_restore_load_kick', {
-          id: String(el?.dataset?.__mid || ''),
-          src: String(src || ''),
-        })
-        el.load?.()
-      } catch {}
-    }, kickDelayMs)
-    try { __restoreKickTimers.set(el, timer) } catch {}
-  }
   try {
     const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
     if (!isPostFeedVideo) {
@@ -391,8 +313,13 @@ export function __restoreVideoEl(el) {
       }
     }
   } catch {}
-  // setAttribute('src') уже запускает стандартный resource selection path браузера.
-  // Дополнительный immediate load() здесь провоцировал лишние 206/cancel циклы.
+  try {
+    const networkState = Number(el.networkState || 0)
+    const isLoading =
+      typeof HTMLMediaElement !== 'undefined' &&
+      networkState === HTMLMediaElement.NETWORK_LOADING
+    if (!isLoading && canRestoreLoad()) el.load?.()
+  } catch {}
 }
 
 export function __hasLazyVideoSourceWithoutSrc(el) {

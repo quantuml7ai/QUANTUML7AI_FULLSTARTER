@@ -5,31 +5,41 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import NextImage from 'next/image';
 import { useI18n } from '../../components/i18n';
 import { useRouter } from 'next/navigation';
-import {
-  MEDIA_MUTED_EVENT,
-  readMutedPrefFromStorage,
-  __writeMediaMutedPref,
-} from './features/media/utils/mediaLifecycleRuntime';
 
 /* ======================= CAMPAIGN META ======================= */
 const AD_LABEL_FONT_SIZE_PX = 20;
 
 /* ======================= GLOBAL SOUND MEMORY (Forum.jsx-compatible) ======================= */
-// ДОЛЖНО совпадать со схемой форума: 
+// ДОЛЖНО совпадать со схемой форума:
+const MEDIA_MUTED_KEY = 'forum:mediaMuted';
+const MEDIA_VIDEO_MUTED_KEY = 'forum:videoMuted'; // fallback совместимости
+const MEDIA_MUTED_EVENT = 'forum:media-mute';
 
-function writeMutedPrefToStorage(val) {
-  __writeMediaMutedPref(!!val, {
-    source: 'forum-ads-toggle',
-    userAction: true,
-  });
+function readMutedPrefFromStorage() {
+  if (!isBrowser()) return null;
+  try {
+    let v = window.localStorage?.getItem(MEDIA_MUTED_KEY);
+    if (v == null) v = window.localStorage?.getItem(MEDIA_VIDEO_MUTED_KEY);
+    if (v == null) return null;
+    return v === '1' || v === 'true';
+  } catch {
+    return null;
+  }
 }
 
-function emitMutedPref(val, id, source = 'forum-ads', userAction = false) {
+function writeMutedPrefToStorage(val) {
+  if (!isBrowser()) return;
+  try {
+    window.localStorage?.setItem(MEDIA_MUTED_KEY, val ? '1' : '0');
+  } catch {}
+}
+
+function emitMutedPref(val, id, source = 'forum-ads') {
   if (!isBrowser()) return;
   try {
     window.dispatchEvent(
       new CustomEvent(MEDIA_MUTED_EVENT, {
-        detail: { muted: !!val, id, source, userAction: !!userAction },
+        detail: { muted: !!val, id, source },
       })
     );
   } catch {}
@@ -1557,9 +1567,11 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
         } catch {}
 
         v.play?.().catch(() => {
-          // Автоплей-фоллбек не имеет права переписывать глобальный persisted mute.
+          // если пробовали со звуком и браузер запретил — откатим в mute глобально
           if (!muted) {
-            setMuted(true); 
+            writeMutedPrefToStorage(true);
+            emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback');
+            setMuted(true);
             try { v.muted = true; } catch {}
           }
         });
@@ -1680,7 +1692,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
 
     // 1) сохранить глобально + оповестить всех
     writeMutedPrefToStorage(next);
-    emitMutedPref(next, playerIdRef.current, 'forum-ads-toggle', true);
+    emitMutedPref(next, playerIdRef.current, 'forum-ads-toggle');
 
     // 2) локально
     setMuted(next);
