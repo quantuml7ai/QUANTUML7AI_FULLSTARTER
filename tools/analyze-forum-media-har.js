@@ -7,6 +7,12 @@ const path = require('path');
 const MEDIA_EXT_RE = /\.(mp4|webm|mov|m4v|m3u8|mp3|aac|wav)(\?|$)/i;
 const FORUM_MEDIA_RE = /\/forum\/|blob\.vercel-storage\.com\/forum\//i;
 const AD_MEDIA_RE = /(?:^|\/)(ads?|ad-media|campaign|sponsor)(?:\/|[-_])|ADS\.mp4|forum[_-]?ad/i;
+const HAR_THRESHOLDS = Object.freeze({
+  forumRepeatWarn: 4,
+  forum206Warn: 3,
+  cancelWarn: 2,
+  churnScoreWarn: 10,
+});
 
 function readJson(file) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -123,6 +129,15 @@ function buildRows(entries) {
   return [...rows.values()]
     .map((row) => ({
       ...row,
+      churnScore: (row.total * 2) + (row.partial206 * 2) + (row.cancelled * 3),
+      thresholdViolations: [
+        ...(row.total >= HAR_THRESHOLDS.forumRepeatWarn ? [`repeat>=${HAR_THRESHOLDS.forumRepeatWarn}`] : []),
+        ...(row.partial206 >= HAR_THRESHOLDS.forum206Warn ? [`206>=${HAR_THRESHOLDS.forum206Warn}`] : []),
+        ...(row.cancelled >= HAR_THRESHOLDS.cancelWarn ? [`cancel>=${HAR_THRESHOLDS.cancelWarn}`] : []),
+        ...((((row.total * 2) + (row.partial206 * 2) + (row.cancelled * 3)) >= HAR_THRESHOLDS.churnScoreWarn)
+          ? [`churn>=${HAR_THRESHOLDS.churnScoreWarn}`]
+          : []),
+      ],
       transferredMB: Math.round((row.transferred / 1024 / 1024) * 10) / 10,
       statuses: [...row.statuses],
       types: [...row.types],
@@ -130,6 +145,7 @@ function buildRows(entries) {
     }))
     .sort((a, b) => {
       return (
+        b.churnScore - a.churnScore ||
         b.total - a.total ||
         b.partial206 - a.partial206 ||
         b.cancelled - a.cancelled ||
@@ -205,6 +221,8 @@ function main() {
     topRepeatedExternalMedia: repeatedExternalMedia.slice(0, 20),
     topCancelled: rows.filter((row) => row.cancelled > 0).slice(0, 20),
     topChurn: rows.filter((row) => row.total >= 4).slice(0, 20),
+    thresholdViolations: rows.filter((row) => row.thresholdViolations.length > 0).slice(0, 30),
+    thresholds: HAR_THRESHOLDS,
     initiatorCounts: toSortedCounts(initiators, 20),
     hostCounts: toSortedCounts(hosts, 20),
     statusCounts: toSortedCounts(statuses, 20),

@@ -4,29 +4,21 @@ import React from 'react'
 import VideoMediaLeaf from '../components/VideoMedia'
 import QCastPlayerLeaf from '../components/QCastPlayer'
 import { createEnableVideoControlsOnTap } from './videoControls'
+import { __appendForumMediaTrace } from './mediaDebugRuntime'
+import {
+  MEDIA_MUTED_KEY,
+  MEDIA_VIDEO_MUTED_KEY,
+  MEDIA_MUTED_EVENT,
+  readMutedPrefFromStorage,
+  __writeMediaMutedPref,
+} from './mediaMutePrefs'
 
-export const MEDIA_MUTED_KEY = 'forum:mediaMuted'
-export const MEDIA_VIDEO_MUTED_KEY = 'forum:videoMuted'
-export const MEDIA_MUTED_EVENT = 'forum:media-mute'
-;(() => {
-  // На каждый новый перезапуск страницы стартуем в muted,
-  // чтобы iPhone/Safari не блокировал autoplay из-за старого unmuted-состояния.
-  try {
-    if (typeof window === 'undefined') return
-    localStorage.setItem(MEDIA_MUTED_KEY, '1')
-    localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, '1')
-  } catch {}
-})()
-
-export function readMutedPrefFromStorage() {
-  try {
-    let v = localStorage.getItem(MEDIA_MUTED_KEY)
-    if (v == null) v = localStorage.getItem(MEDIA_VIDEO_MUTED_KEY)
-    if (v == null) return null
-    return v === '1' || v === 'true'
-  } catch {
-    return null
-  }
+export {
+  MEDIA_MUTED_KEY,
+  MEDIA_VIDEO_MUTED_KEY,
+  MEDIA_MUTED_EVENT,
+  readMutedPrefFromStorage,
+  __writeMediaMutedPref,
 }
 
 export const __MEDIA_VIS_MARGIN_PX = (() => {
@@ -136,17 +128,20 @@ export function __readMediaMutedPref() {
   return null
 }
 
-export function __writeMediaMutedPref(nextMuted) {
-  try {
-    const v = nextMuted ? '1' : '0'
-    localStorage.setItem(MEDIA_MUTED_KEY, v)
-    localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, v)
-  } catch {}
-}
-
 export function __unloadVideoEl(el) {
   if (!el) return
   const nowTs = Date.now()
+  __appendForumMediaTrace('html_media_unload', {
+    id: String(el?.dataset?.__mid || ''),
+    src: String(
+      el?.dataset?.__src ||
+      el?.getAttribute?.('data-src') ||
+      el?.currentSrc ||
+      el?.getAttribute?.('src') ||
+      ''
+    ),
+    reason: String(el?.dataset?.__coordinatorUnloadReason || ''),
+  })
   try {
     const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
     if (isPostFeedVideo) {
@@ -175,7 +170,15 @@ export function __unloadVideoEl(el) {
   } catch {}
   const canHardUnload = (() => {
     try {
+      const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
+      const lastRestoreTs = Number(el?.dataset?.__lastRestoreTs || 0)
+      const lastLoadKickTs = Number(el?.dataset?.__lastLoadKickTs || 0)
+      const restoreCooldownMs = isPostFeedVideo ? 18000 : 0
+      const loadKickCooldownMs = isPostFeedVideo ? 12000 : 0
+      const restoredRecently = lastRestoreTs > 0 && (nowTs - lastRestoreTs) < restoreCooldownMs
+      const kickedRecently = lastLoadKickTs > 0 && (nowTs - lastLoadKickTs) < loadKickCooldownMs
       if (__VIDEO_HARD_CAP_ENABLED) return true
+      if (isPostFeedVideo && (restoredRecently || kickedRecently)) return false
       return String(el?.dataset?.__forceHardUnload || '') === '1'
     } catch {
       return __VIDEO_HARD_CAP_ENABLED
@@ -220,6 +223,10 @@ export function __restoreVideoEl(el) {
   const nowTs = Date.now()
   const src = el.dataset.__src || el.getAttribute('data-src') || ''
   if (!src) return
+  __appendForumMediaTrace('html_media_restore', {
+    id: String(el?.dataset?.__mid || ''),
+    src: String(src || ''),
+  })
   try {
     delete el.dataset.__forceHardUnload
   } catch {}
@@ -313,13 +320,8 @@ export function __restoreVideoEl(el) {
       }
     }
   } catch {}
-  try {
-    const networkState = Number(el.networkState || 0)
-    const isLoading =
-      typeof HTMLMediaElement !== 'undefined' &&
-      networkState === HTMLMediaElement.NETWORK_LOADING
-    if (!isLoading && canRestoreLoad()) el.load?.()
-  } catch {}
+  // setAttribute('src') уже запускает стандартный resource selection path браузера.
+  // Дополнительный immediate load() здесь провоцировал лишние 206/cancel циклы.
 }
 
 export function __hasLazyVideoSourceWithoutSrc(el) {

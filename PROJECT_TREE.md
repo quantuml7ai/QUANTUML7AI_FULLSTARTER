@@ -6,8 +6,8 @@
 > Если меняются связи файла с другими файлами настолько, что комментарий устаревает, комментарий тоже обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-tree.js`.
 
-Сгенерировано автоматически: 2026-04-13T20:35:47.525Z
-Файлов в реестре: 1592
+Сгенерировано автоматически: 2026-04-15T19:04:10.280Z
+Файлов в реестре: 1602
 
 ## Исключенные каталоги
 - `.git/` — служебные внутренние данные Git, не часть прикладного дерева проекта.
@@ -27,7 +27,7 @@
 - `account-sync-audit.report.json` — 1 файлов
 - `ad-runtime.audit.report.json` — 1 файлов
 - `AGENTS.md` — 1 файлов
-- `app` — 382 файлов
+- `app` — 385 файлов
 - `audit` — 170 файлов
 - `auth-bus.audit.report.json` — 1 файлов
 - `components` — 23 файлов
@@ -37,6 +37,7 @@
 - `forum-deps-audit.report.json` — 1 файлов
 - `forum-diag.jsonl` — 1 файлов
 - `forum-media-churn.audit.report.json` — 1 файлов
+- `forum-media-ownership.audit.report.json` — 1 файлов
 - `forum-scroll.audit.report.json` — 1 файлов
 - `forum-startup.audit.report.json` — 1 файлов
 - `heapsnapshot-analysis.report.json` — 1 файлов
@@ -58,8 +59,8 @@
 - `public` — 920 файлов
 - `README.md` — 1 файлов
 - `runtime-hotspots.report.json` — 1 файлов
-- `tests` — 18 файлов
-- `tools` — 30 файлов
+- `tests` — 23 файлов
+- `tools` — 31 файлов
 - `tsconfig.json` — 1 файлов
 - `vitest.config.mjs` — 1 файлов
 
@@ -394,7 +395,7 @@
           - VideoTrimPopover.jsx — UI-компонент Video Trim Popover домена медиа. Связи: импортирует forum/features/media/utils/mediaRuntime.js, forum/shared/constants/media.js, lib/forumVideoTrim.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
         - hooks/ — Каталог слоя хуки внутри feature media.
           - useForumComposerAttachments.js — Хук use Forum Composer Attachments домена медиа. Связи: используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
-          - useForumMediaCoordinator.js — Хук use Forum Media Coordinator домена медиа. Связи: импортирует forum/features/media/utils/mediaLifecycleRuntime.js, forum/shared/utils/browser.js; используется в forum/ForumRoot.jsx.
+          - useForumMediaCoordinator.js — Хук use Forum Media Coordinator домена медиа. Связи: импортирует forum/features/media/utils/mediaDebugRuntime.js, forum/features/media/utils/mediaLifecycleRuntime.js, forum/features/media/utils/mediaLifecycleStateMachine.js; используется в forum/ForumRoot.jsx.
           - useForumVideoFeedRuntime.js — Хук use Forum Video Feed Runtime домена медиа. Связи: импортирует forum/features/media/hooks/useVideoFeedActions.js, forum/features/media/hooks/useVideoFeedLifecycle.js, forum/features/media/hooks/useVideoFeedState.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
           - useMediaPipelineController.js — Хук use Media Pipeline Controller домена медиа. Связи: используется в forum/features/ui/hooks/useForumComposerRuntime.js.
           - useVideoCaptureController.js — Хук use Video Capture Controller домена медиа. Связи: используется в forum/ForumRoot.jsx.
@@ -409,8 +410,11 @@
         - utils/ — Каталог слоя утилиты внутри feature media.
           - formatMediaTime.js — Утилита format Media Time домена медиа. Связи: используется в forum/features/media/components/QCastPlayer.jsx.
           - frontCameraMirror.js — Утилита front Camera Mirror домена медиа. Связи: используется в forum/ForumRoot.jsx.
-          - mediaLifecycleRuntime.js — Утилита media Lifecycle Runtime домена медиа. Связи: импортирует forum/features/media/components/QCastPlayer.jsx, forum/features/media/components/VideoMedia.jsx, forum/features/media/utils/videoControls.js; используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/components/PostCardBridge.jsx, forum/features/media/components/ComposerAttachmentPreview.jsx.
+          - mediaDebugRuntime.js — Утилита media Debug Runtime домена медиа. Связи: используется в forum/features/media/hooks/useForumMediaCoordinator.js, forum/features/media/utils/mediaLifecycleRuntime.js, forum/features/media/utils/mediaMutePrefs.js.
+          - mediaLifecycleRuntime.js — Утилита media Lifecycle Runtime домена медиа. Связи: импортирует forum/features/media/components/QCastPlayer.jsx, forum/features/media/components/VideoMedia.jsx, forum/features/media/utils/mediaDebugRuntime.js; используется в forum/ForumAds.js, forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/components/PostCardBridge.jsx.
+          - mediaLifecycleStateMachine.js — Утилита media Lifecycle State Machine домена медиа. Связи: используется в forum/features/media/hooks/useForumMediaCoordinator.js, tests/unit/forum/features/media/utils/mediaLifecycleStateMachine.test.js.
           - mediaLinks.js — Утилита media Links домена медиа. Связи: используется в forum/ForumRoot.jsx, forum/features/media/utils/mediaUrlPipeline.js, forum/features/ui/components/ForumSearchSortControls.jsx.
+          - mediaMutePrefs.js — Утилита media Mute Prefs домена медиа. Связи: импортирует forum/features/media/utils/mediaDebugRuntime.js; используется в forum/features/media/utils/mediaLifecycleRuntime.js.
           - mediaRuntime.js — Утилита media Runtime домена медиа. Связи: импортирует forum/shared/constants/media.js, lib/forumVideoTrim.js; используется в forum/ForumRoot.jsx, forum/features/media/components/VideoTrimPopover.jsx, forum/features/media/hooks/useVideoTrimController.js.
           - mediaUrlPipeline.js — Утилита media Url Pipeline домена медиа. Связи: импортирует forum/features/media/utils/mediaLinks.js; используется в forum/ForumRoot.jsx.
           - moderationPrep.js — Утилита moderation Prep домена медиа. Связи: используется в forum/ForumRoot.jsx.
@@ -599,7 +603,7 @@
       - ForumStyles.jsx — Файл стилевого слоя форума: Forum Styles. Связи: используется в forum/ForumLayout.jsx.
     - error.js — JS-файл error домена форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
     - Forum.jsx — Тонкий entry-point экрана форума. Связи: импортирует forum/ForumRoot.jsx; используется в forum/page.js.
-    - ForumAds.js — Форумная интеграция рекламных/промо-блоков. Связи: импортирует components/i18n.js; используется в app/ads.js, forum/ForumRoot.jsx, forum/features/ui/components/ForumAdSlot.jsx.
+    - ForumAds.js — Форумная интеграция рекламных/промо-блоков. Связи: импортирует forum/features/media/utils/mediaLifecycleRuntime.js, components/i18n.js; используется в app/ads.js, forum/ForumRoot.jsx, forum/features/ui/components/ForumAdSlot.jsx.
     - ForumHeaderPanel.jsx — Компоновщик шапки форума с контролами, профилем, QCoin и VIP. Связи: импортирует forum/features/profile/components/AboutRail.jsx, forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/ForumVipControl.jsx; используется в forum/features/feed/components/ThreadSection.jsx, forum/features/feed/components/TopicsSection.jsx.
     - ForumLayout.jsx — Layout-обвязка форума. Связи: импортирует forum/features/feed/components/ThreadSection.jsx, forum/features/feed/components/TopicsSection.jsx, forum/features/ui/components/ComposeDock.jsx; используется в forum/ForumRoot.jsx.
     - ForumProviders.jsx — Провайдеры и контекстная сборка форума. Связи: используется в forum/ForumRoot.jsx.
@@ -1800,7 +1804,9 @@
     - project/ — Каталог project.
       - api-route-contracts.test.js — JS-файл api route contracts.test. Связи: импортирует tests/support/projectSurface.js.
       - app-entry-contracts.test.js — JS-файл app entry contracts.test. Связи: импортирует tests/support/projectSurface.js.
+      - env-contracts.test.js — JS-файл env contracts.test. Связи: импортирует tests/support/projectSurface.js.
       - forum-hook-contracts.test.js — JS-файл forum hook contracts.test. Связи: импортирует tests/support/projectSurface.js.
+      - forum-media-contracts.test.js — JS-файл forum media contracts.test. Связи: импортирует tests/support/projectSurface.js.
   - fixtures/ — Каталог fixtures.
     - forum/ — Каталог forum.
       - recommendations.js — JS-файл recommendations. Связи: используется в tests/component/forum/features/feed/components/UserRecommendationCard.test.jsx, tests/component/forum/features/feed/components/UserRecommendationsRail.test.jsx, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
@@ -1813,6 +1819,9 @@
         - feed/ — Каталог feed.
           - hooks/ — Каталог hooks.
             - useUserRecommendationsRail.test.jsx — JSX-файл use User Recommendations Rail.test. Связи: импортирует forum/features/feed/hooks/usePostMediaTextModel.js, forum/features/feed/hooks/usePublishedPostsModel.js, forum/features/feed/hooks/useThreadPostsModel.js.
+        - media/ — Каталог media.
+          - utils/ — Каталог utils.
+            - mediaLifecycleRuntime.test.jsx — JSX-файл media Lifecycle Runtime.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - mocks/ — Каталог mocks.
     - .gitkeep — Служебный-файл . Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - smoke/ — Каталог smoke.
@@ -1821,8 +1830,9 @@
         - media/ — Каталог media.
           - components/ — Каталог components.
             - VideoFeedPane.test.jsx — JSX-файл Video Feed Pane.test. Связи: импортирует forum/features/feed/components/UserRecommendationsRail.jsx, tests/fixtures/forum/recommendations.js.
+            - VideoMedia.test.jsx — JSX-файл Video Media.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - support/ — Каталог support.
-    - projectSurface.js — JS-файл project Surface. Связи: используется в tests/contracts/project/api-route-contracts.test.js, tests/contracts/project/app-entry-contracts.test.js, tests/contracts/project/forum-hook-contracts.test.js.
+    - projectSurface.js — JS-файл project Surface. Связи: используется в tests/contracts/project/api-route-contracts.test.js, tests/contracts/project/app-entry-contracts.test.js, tests/contracts/project/env-contracts.test.js.
     - setup-dom.js — JS-файл setup dom. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - unit/ — Каталог unit.
     - forum/ — Каталог forum.
@@ -1836,6 +1846,7 @@
             - interleaveRecommendationRails.test.js — JS-файл interleave Recommendation Rails.test. Связи: импортирует forum/features/feed/utils/interleaveRecommendationRails.js.
         - media/ — Каталог media.
           - utils/ — Каталог utils.
+            - mediaLifecycleStateMachine.test.js — JS-файл media Lifecycle State Machine.test. Связи: импортирует forum/features/media/utils/mediaLifecycleStateMachine.js.
             - mediaRuntime.test.js — JS-файл media Runtime.test. Связи: импортирует forum/features/media/utils/mediaRuntime.js.
       - shared/ — Каталог shared.
         - config/ — Каталог config.
@@ -1859,6 +1870,7 @@
   - audit-full-forum.js — Локальный скрипт/инструмент audit full forum для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-heavy.js — Локальный скрипт/инструмент audit heavy для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-media-budget.js — Локальный скрипт/инструмент audit media budget для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-media-ownership.js — Локальный скрипт/инструмент audit media ownership для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-media.js — Локальный скрипт/инструмент audit media для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-project-docs.js — Локальный скрипт/инструмент audit project docs для аудита или техобслуживания. Связи: импортирует tools/project-docs-shared.js.
   - audit-runtime-hotspots.js — Локальный скрипт/инструмент audit runtime hotspots для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
@@ -1887,6 +1899,7 @@
 - forum-deps-audit.report.json — JSON-отчет аудита зависимостей форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-diag.jsonl — Потоковый лог диагностики форума в формате JSONL. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-media-churn.audit.report.json — JSON-файл forum media churn.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- forum-media-ownership.audit.report.json — JSON-файл forum media ownership.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-scroll.audit.report.json — JSON-файл forum scroll.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-startup.audit.report.json — JSON-файл forum startup.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - heapsnapshot-analysis.report.json — JSON-файл heapsnapshot analysis.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.

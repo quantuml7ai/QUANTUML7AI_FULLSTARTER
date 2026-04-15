@@ -1,0 +1,5220 @@
+{
+  "generatedAt": "2026-04-15T19:51:46.602Z",
+  "filesScanned": [
+    "app/forum/Forum.jsx",
+    "app/forum/ForumAds.js",
+    "app/forum/ForumHeaderPanel.jsx",
+    "app/forum/ForumLayout.jsx",
+    "app/forum/ForumProviders.jsx",
+    "app/forum/ForumRoot.jsx",
+    "app/forum/SharePopover.jsx",
+    "app/forum/error.js",
+    "app/forum/events/bus.js",
+    "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+    "app/forum/features/diagnostics/utils/emitPolicy.js",
+    "app/forum/features/dm/components/DmDialogRow.jsx",
+    "app/forum/features/dm/components/DmDialogsPane.jsx",
+    "app/forum/features/dm/components/DmMessagesPane.jsx",
+    "app/forum/features/dm/components/DmThreadAlerts.jsx",
+    "app/forum/features/dm/components/DmThreadHeader.jsx",
+    "app/forum/features/dm/components/DmThreadLoadMore.jsx",
+    "app/forum/features/dm/components/DmThreadMessageRow.jsx",
+    "app/forum/features/dm/components/DmVoicePlayer.jsx",
+    "app/forum/features/dm/components/InboxPane.jsx",
+    "app/forum/features/dm/components/InboxRepliesPane.jsx",
+    "app/forum/features/dm/components/InboxTabsHeader.jsx",
+    "app/forum/features/dm/hooks/useDmDeleteController.js",
+    "app/forum/features/dm/hooks/useDmDeleteCopy.js",
+    "app/forum/features/dm/hooks/useDmLoadLifecycle.js",
+    "app/forum/features/dm/hooks/useDmLocalCache.js",
+    "app/forum/features/dm/hooks/useDmOpenEvents.js",
+    "app/forum/features/dm/hooks/useDmRepliesSeen.js",
+    "app/forum/features/dm/hooks/useDmSeenObservers.js",
+    "app/forum/features/dm/hooks/useDmStorageMaps.js",
+    "app/forum/features/dm/hooks/useDmThreadAutoScroll.js",
+    "app/forum/features/dm/hooks/useDmUnreadState.js",
+    "app/forum/features/dm/hooks/useDmVipBatchProbe.js",
+    "app/forum/features/dm/hooks/useForumDmRuntime.js",
+    "app/forum/features/dm/hooks/useInboxRepliesModel.js",
+    "app/forum/features/dm/hooks/useOpenInboxGlobalAction.js",
+    "app/forum/features/dm/services/sendDmComposerMessage.js",
+    "app/forum/features/dm/utils/alignInboxStartUnderTabs.js",
+    "app/forum/features/dm/utils/deletedMap.js",
+    "app/forum/features/dm/utils/dmLoaders.js",
+    "app/forum/features/dm/utils/mediaParsing.js",
+    "app/forum/features/dm/utils/openInboxGlobal.js",
+    "app/forum/features/feed/components/CreateTopicCard.jsx",
+    "app/forum/features/feed/components/ForumPostCard.jsx",
+    "app/forum/features/feed/components/LoadMoreSentinel.jsx",
+    "app/forum/features/feed/components/PostActionBar.jsx",
+    "app/forum/features/feed/components/PostBodyContent.jsx",
+    "app/forum/features/feed/components/PostCardBridge.jsx",
+    "app/forum/features/feed/components/PostFxLayer.jsx",
+    "app/forum/features/feed/components/PostHeaderMeta.jsx",
+    "app/forum/features/feed/components/PostMediaStack.jsx",
+    "app/forum/features/feed/components/PostOwnerMenu.jsx",
+    "app/forum/features/feed/components/PostTranslateToggle.jsx",
+    "app/forum/features/feed/components/PublishedPostsPane.jsx",
+    "app/forum/features/feed/components/ThreadRepliesPane.jsx",
+    "app/forum/features/feed/components/ThreadSection.jsx",
+    "app/forum/features/feed/components/ThreadTitle.jsx",
+    "app/forum/features/feed/components/TopicItem.jsx",
+    "app/forum/features/feed/components/TopicsOrPanelsSwitch.jsx",
+    "app/forum/features/feed/components/TopicsPane.jsx",
+    "app/forum/features/feed/components/TopicsSection.jsx",
+    "app/forum/features/feed/components/UserPostsPane.jsx",
+    "app/forum/features/feed/components/UserRecommendationCard.jsx",
+    "app/forum/features/feed/components/UserRecommendationsRail.jsx",
+    "app/forum/features/feed/constants/deeplink.js",
+    "app/forum/features/feed/hooks/useForumCreatePostAction.js",
+    "app/forum/features/feed/hooks/useForumCreateTopicAction.js",
+    "app/forum/features/feed/hooks/useForumDataRuntime.js",
+    "app/forum/features/feed/hooks/useForumDeepLinkFlow.js",
+    "app/forum/features/feed/hooks/useForumFeedRuntime.js",
+    "app/forum/features/feed/hooks/useForumHomeAction.js",
+    "app/forum/features/feed/hooks/useForumMutationActions.js",
+    "app/forum/features/feed/hooks/useForumMutationQueue.js",
+    "app/forum/features/feed/hooks/useForumNavigationActions.js",
+    "app/forum/features/feed/hooks/useForumNavigationRuntime.js",
+    "app/forum/features/feed/hooks/useForumSseBridge.js",
+    "app/forum/features/feed/hooks/useForumSyncLoop.js",
+    "app/forum/features/feed/hooks/useForumViewTracking.js",
+    "app/forum/features/feed/hooks/useNavStateSnapshot.js",
+    "app/forum/features/feed/hooks/usePostFx.js",
+    "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+    "app/forum/features/feed/hooks/usePostOwnerActions.js",
+    "app/forum/features/feed/hooks/usePostParentReplyNav.js",
+    "app/forum/features/feed/hooks/usePostTranslation.js",
+    "app/forum/features/feed/hooks/usePublishedPostsModel.js",
+    "app/forum/features/feed/hooks/useThreadOpenNavigation.js",
+    "app/forum/features/feed/hooks/useThreadPostsModel.js",
+    "app/forum/features/feed/hooks/useTopicDiscoveryModel.js",
+    "app/forum/features/feed/hooks/useUserPostsBranchModel.js",
+    "app/forum/features/feed/hooks/useUserRecommendationsRail.js",
+    "app/forum/features/feed/services/rateLimiter.js",
+    "app/forum/features/feed/utils/cardMemo.js",
+    "app/forum/features/feed/utils/interleaveRecommendationRails.js",
+    "app/forum/features/feed/utils/navOrchestrator.js",
+    "app/forum/features/feed/utils/navScroll.js",
+    "app/forum/features/feed/utils/navState.js",
+    "app/forum/features/feed/utils/openThreadFromPost.js",
+    "app/forum/features/feed/utils/postEvents.js",
+    "app/forum/features/feed/utils/postFocus.js",
+    "app/forum/features/feed/utils/signatures.js",
+    "app/forum/features/feed/utils/snapshotTransforms.js",
+    "app/forum/features/media/components/ComposerAttachmentPreview.jsx",
+    "app/forum/features/media/components/LivePreview.jsx",
+    "app/forum/features/media/components/QCastPlayer.jsx",
+    "app/forum/features/media/components/VideoFeedPane.jsx",
+    "app/forum/features/media/components/VideoLimitOverlay.jsx",
+    "app/forum/features/media/components/VideoMedia.jsx",
+    "app/forum/features/media/components/VideoOverlay.jsx",
+    "app/forum/features/media/components/VideoTrimPopover.jsx",
+    "app/forum/features/media/components/qcast/QCastIcons.jsx",
+    "app/forum/features/media/hooks/useForumComposerAttachments.js",
+    "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+    "app/forum/features/media/hooks/useForumVideoFeedRuntime.js",
+    "app/forum/features/media/hooks/useMediaPipelineController.js",
+    "app/forum/features/media/hooks/useVideoCaptureController.js",
+    "app/forum/features/media/hooks/useVideoFeedActions.js",
+    "app/forum/features/media/hooks/useVideoFeedLifecycle.js",
+    "app/forum/features/media/hooks/useVideoFeedState.js",
+    "app/forum/features/media/hooks/useVideoFeedWindowing.js",
+    "app/forum/features/media/hooks/useVideoTrimController.js",
+    "app/forum/features/media/hooks/useVoiceRecorder.js",
+    "app/forum/features/media/services/resolveComposerMediaPayload.js",
+    "app/forum/features/media/utils/formatMediaTime.js",
+    "app/forum/features/media/utils/frontCameraMirror.js",
+    "app/forum/features/media/utils/mediaDebugRuntime.js",
+    "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+    "app/forum/features/media/utils/mediaLifecycleStateMachine.js",
+    "app/forum/features/media/utils/mediaLinks.js",
+    "app/forum/features/media/utils/mediaMutePrefs.js",
+    "app/forum/features/media/utils/mediaRuntime.js",
+    "app/forum/features/media/utils/mediaUrlPipeline.js",
+    "app/forum/features/media/utils/moderationPrep.js",
+    "app/forum/features/media/utils/qcastBars.js",
+    "app/forum/features/media/utils/urlParsing.js",
+    "app/forum/features/media/utils/videoControls.js",
+    "app/forum/features/media/utils/videoCopy.js",
+    "app/forum/features/media/utils/videoFeedActions.js",
+    "app/forum/features/media/utils/videoFeedBuilder.js",
+    "app/forum/features/media/utils/videoFeedPosts.js",
+    "app/forum/features/media/utils/videoFeedRandom.js",
+    "app/forum/features/media/utils/videoFeedSalt.js",
+    "app/forum/features/media/utils/videoFeedScroll.js",
+    "app/forum/features/moderation/components/AdminPopover.jsx",
+    "app/forum/features/moderation/components/ReportPopover.jsx",
+    "app/forum/features/moderation/hooks/useAdminActions.js",
+    "app/forum/features/moderation/hooks/useAdminFlag.js",
+    "app/forum/features/moderation/hooks/useForumModerationRuntime.js",
+    "app/forum/features/moderation/hooks/useForumModerationUi.js",
+    "app/forum/features/moderation/hooks/useMediaModeration.js",
+    "app/forum/features/moderation/hooks/useReportController.js",
+    "app/forum/features/moderation/utils/http.js",
+    "app/forum/features/profile/components/AboutRail.jsx",
+    "app/forum/features/profile/components/AvatarEmoji.jsx",
+    "app/forum/features/profile/components/ForumVipControl.jsx",
+    "app/forum/features/profile/components/ProfilePopover.jsx",
+    "app/forum/features/profile/components/UserInfoPopover.jsx",
+    "app/forum/features/profile/components/VipFlipBadge.jsx",
+    "app/forum/features/profile/components/VipPopover.jsx",
+    "app/forum/features/profile/constants/vipAssets.js",
+    "app/forum/features/profile/hooks/useAboutEditor.js",
+    "app/forum/features/profile/hooks/useForumProfileSocialRuntime.js",
+    "app/forum/features/profile/hooks/useForumProfileSync.js",
+    "app/forum/features/profile/hooks/useVipFlag.js",
+    "app/forum/features/profile/hooks/useVipPayAction.js",
+    "app/forum/features/profile/hooks/useVipSubscriptionState.js",
+    "app/forum/features/profile/utils/aboutText.js",
+    "app/forum/features/profile/utils/avatar.js",
+    "app/forum/features/profile/utils/profileCache.js",
+    "app/forum/features/profile/utils/vip.js",
+    "app/forum/features/qcoin/components/QCoinInline.jsx",
+    "app/forum/features/qcoin/components/QCoinWithdrawPopover.jsx",
+    "app/forum/features/qcoin/hooks/useQCoinLive.js",
+    "app/forum/features/qcoin/utils/account.js",
+    "app/forum/features/qcoin/utils/paymentWindow.js",
+    "app/forum/features/quests/components/QuestClaimOverlay.jsx",
+    "app/forum/features/quests/components/QuestHub.jsx",
+    "app/forum/features/quests/components/QuestLaunchIcon.jsx",
+    "app/forum/features/quests/components/QuestPane.jsx",
+    "app/forum/features/quests/hooks/useForumQuestConfig.js",
+    "app/forum/features/quests/hooks/useForumQuestProgress.js",
+    "app/forum/features/quests/hooks/useForumQuestRuntime.js",
+    "app/forum/features/quests/hooks/useQuestClaimAction.js",
+    "app/forum/features/quests/hooks/useQuestStorageState.js",
+    "app/forum/features/quests/hooks/useQuestViewActions.js",
+    "app/forum/features/quests/utils/progress.js",
+    "app/forum/features/subscriptions/components/FollowersCounterInline.jsx",
+    "app/forum/features/subscriptions/hooks/useStarredAuthorsState.js",
+    "app/forum/features/subscriptions/utils/starred.js",
+    "app/forum/features/ui/components/ComposeDock.jsx",
+    "app/forum/features/ui/components/ComposerActionRail.jsx",
+    "app/forum/features/ui/components/ComposerCore.jsx",
+    "app/forum/features/ui/components/ComposerEmojiPanel.jsx",
+    "app/forum/features/ui/components/ComposerEmojiPreview.jsx",
+    "app/forum/features/ui/components/ComposerFabButton.jsx",
+    "app/forum/features/ui/components/ComposerFileInput.jsx",
+    "app/forum/features/ui/components/ComposerMediaProgressBar.jsx",
+    "app/forum/features/ui/components/ComposerStatusMeta.jsx",
+    "app/forum/features/ui/components/ComposerTextInput.jsx",
+    "app/forum/features/ui/components/ConfirmDeleteOverlay.jsx",
+    "app/forum/features/ui/components/DmDeletePopover.jsx",
+    "app/forum/features/ui/components/ForumActionNavIcon.jsx",
+    "app/forum/features/ui/components/ForumActionRow.jsx",
+    "app/forum/features/ui/components/ForumAdSlot.jsx",
+    "app/forum/features/ui/components/ForumControlNavIcon.jsx",
+    "app/forum/features/ui/components/ForumOverlayStack.jsx",
+    "app/forum/features/ui/components/ForumSearchSortControls.jsx",
+    "app/forum/features/ui/components/HeadChevronIcon.jsx",
+    "app/forum/features/ui/components/MainForumActionCluster.jsx",
+    "app/forum/features/ui/components/StarButton.jsx",
+    "app/forum/features/ui/components/ThreadForumActionCluster.jsx",
+    "app/forum/features/ui/components/VideoFeedNavIcon.jsx",
+    "app/forum/features/ui/constants/emojiCatalog.js",
+    "app/forum/features/ui/constants/inviteButton.js",
+    "app/forum/features/ui/hooks/useComposerActionHandlers.js",
+    "app/forum/features/ui/hooks/useComposerEmojiState.js",
+    "app/forum/features/ui/hooks/useComposerScrollMemory.js",
+    "app/forum/features/ui/hooks/useComposerUiLifecycle.js",
+    "app/forum/features/ui/hooks/useForumAdSlots.js",
+    "app/forum/features/ui/hooks/useForumAdsRuntime.js",
+    "app/forum/features/ui/hooks/useForumComposerRuntime.js",
+    "app/forum/features/ui/hooks/useForumComposerSubmitRuntime.js",
+    "app/forum/features/ui/hooks/useForumEditMode.js",
+    "app/forum/features/ui/hooks/useForumGlobalPopovers.js",
+    "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+    "app/forum/features/ui/hooks/useForumPopoverModeController.js",
+    "app/forum/features/ui/hooks/useForumScreenFlowsRuntime.js",
+    "app/forum/features/ui/hooks/useForumSessionShell.js",
+    "app/forum/features/ui/hooks/useForumViewState.js",
+    "app/forum/features/ui/hooks/useScrollResizeCompensation.js",
+    "app/forum/features/ui/utils/adsSlots.js",
+    "app/forum/features/ui/utils/buildForumLayoutProps.js",
+    "app/forum/features/ui/utils/buildForumRootPropBundles.js",
+    "app/forum/features/ui/utils/propBundles/buildActionClusterProps.js",
+    "app/forum/features/ui/utils/propBundles/buildComposerCoreProps.js",
+    "app/forum/features/ui/utils/propBundles/buildForumHeaderPanelProps.js",
+    "app/forum/features/ui/utils/propBundles/buildInboxPaneProps.js",
+    "app/forum/features/ui/utils/propBundles/buildSearchSortControlsProps.js",
+    "app/forum/features/ui/utils/propBundles/buildThreadRepliesPaneProps.js",
+    "app/forum/features/ui/utils/propBundles/buildTopicsSwitchProps.js",
+    "app/forum/layout.js",
+    "app/forum/loading.js",
+    "app/forum/p/[postId]/route.js",
+    "app/forum/page.js",
+    "app/forum/services/forumApi.js",
+    "app/forum/shared/api/http.js",
+    "app/forum/shared/api/translate.js",
+    "app/forum/shared/components/HydrateText.jsx",
+    "app/forum/shared/config/runtime.js",
+    "app/forum/shared/constants/media.js",
+    "app/forum/shared/hooks/useEvent.js",
+    "app/forum/shared/hooks/useForumNavBridge.js",
+    "app/forum/shared/hooks/useForumToast.js",
+    "app/forum/shared/hooks/useHtmlFlag.js",
+    "app/forum/shared/hooks/usePageLock.js",
+    "app/forum/shared/storage/localStorage.js",
+    "app/forum/shared/telemetry/diag.js",
+    "app/forum/shared/utils/browser.js",
+    "app/forum/shared/utils/classnames.js",
+    "app/forum/shared/utils/counts.js",
+    "app/forum/shared/utils/formatters.js",
+    "app/forum/shared/utils/forumLocale.js",
+    "app/forum/shared/utils/linkDetection.js",
+    "app/forum/shared/utils/openAuth.js",
+    "app/forum/shared/utils/richText.js",
+    "app/forum/shared/utils/time.js",
+    "app/forum/styles/ForumFxStyles.jsx",
+    "app/forum/styles/ForumStyles.jsx",
+    "app/forum/styles/modules/composerStyles.js",
+    "app/forum/styles/modules/dmStyles.js",
+    "app/forum/styles/modules/foundationStyles.js",
+    "app/forum/styles/modules/fxStyles.js",
+    "app/forum/styles/modules/layoutStyles.js",
+    "app/forum/styles/modules/profileStyles.js",
+    "app/forum/styles/modules/qcoinStyles.js",
+    "app/forum/styles/modules/questStyles.js"
+  ],
+  "ownership": [
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 75,
+      "text": "const iframes = Array.from(document.querySelectorAll('iframe[data-forum-media]'))",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 96,
+      "text": "const iframesLoaded = iframes.filter((f) => {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 103,
+      "text": "const iframesActive = iframes.filter((f) => {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 105,
+      "text": "return f.getAttribute('data-forum-iframe-active') === '1'",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 110,
+      "text": "const ytIframes = iframes.filter((f) => {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 112,
+      "text": "return f.getAttribute('data-forum-media') === 'youtube'",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 117,
+      "text": "const ttIframes = iframes.filter((f) => {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 119,
+      "text": "return f.getAttribute('data-forum-media') === 'tiktok'",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 124,
+      "text": "const genericIframes = iframes.filter((f) => {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 126,
+      "text": "return f.getAttribute('data-forum-media') === 'iframe'",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 138,
+      "text": "iframes: iframes.length,",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 139,
+      "text": "iframesLoaded,",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 140,
+      "text": "iframesActive,",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 199,
+      "text": "iframes: mediaSnapshot.iframes,",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 200,
+      "text": "iframesLoaded: mediaSnapshot.iframesLoaded,",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 201,
+      "text": "iframesActive: mediaSnapshot.iframesActive,",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 501,
+      "text": "const iframes = Array.from(document.querySelectorAll('iframe[data-forum-media]'))",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 510,
+      "text": "const iframesLoaded = iframes.filter((f) => {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 542,
+      "text": "iframes: iframes.length,",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 543,
+      "text": "iframesLoaded,",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 191,
+      "text": "innerH: typeof window !== 'undefined' ? window.innerHeight : undefined,",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 391,
+      "text": "innerScrollTop: Number(scrollEl?.scrollTop || 0),",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 603,
+      "text": "const top = Number(scrollEl?.scrollTop || window.scrollY || 0)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "line": 614,
+      "text": "const onResize = () => push('resize', { w: Number(window.innerWidth || 0), h: Number(window.innerHeight || 0) })",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/diagnostics/utils/emitPolicy.js",
+      "line": 13,
+      "text": "'iframe_play',",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/utils/emitPolicy.js",
+      "line": 14,
+      "text": "'iframe_hard_unload',",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/utils/emitPolicy.js",
+      "line": 15,
+      "text": "'iframe_resident_cap',",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/utils/emitPolicy.js",
+      "line": 50,
+      "text": "iframes: 0,",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/utils/emitPolicy.js",
+      "line": 51,
+      "text": "iframesLoaded: 0,",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/diagnostics/utils/emitPolicy.js",
+      "line": 52,
+      "text": "iframesActive: 0,",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/dm/components/DmVoicePlayer.jsx",
+      "line": 182,
+      "text": "if (a.paused) a.play?.()",
+      "operation": "play",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/dm/components/DmVoicePlayer.jsx",
+      "line": 119,
+      "text": "a.pause?.()",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/dm/components/DmVoicePlayer.jsx",
+      "line": 183,
+      "text": "else a.pause?.()",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/dm/components/DmVoicePlayer.jsx",
+      "line": 202,
+      "text": "const rect = el.getBoundingClientRect()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useDmDeleteController.js",
+      "line": 197,
+      "text": "const b = e?.currentTarget?.getBoundingClientRect?.()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useDmRepliesSeen.js",
+      "line": 62,
+      "text": "if (typeof IntersectionObserver === 'undefined') return",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useDmRepliesSeen.js",
+      "line": 63,
+      "text": "const io = new IntersectionObserver((entries) => {",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useDmSeenObservers.js",
+      "line": 22,
+      "text": "if (typeof IntersectionObserver === 'undefined') return",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useDmSeenObservers.js",
+      "line": 26,
+      "text": "const io = new IntersectionObserver((entries) => {",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useDmSeenObservers.js",
+      "line": 73,
+      "text": "if (typeof IntersectionObserver === 'undefined') return",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useDmSeenObservers.js",
+      "line": 74,
+      "text": "const io = new IntersectionObserver((entries) => {",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/dm/hooks/useDmThreadAutoScroll.js",
+      "line": 45,
+      "text": "scrollEl.scrollTop = scrollEl.scrollHeight",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/dm/utils/alignInboxStartUnderTabs.js",
+      "line": 69,
+      "text": "const tabsRect = tabs.getBoundingClientRect()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/dm/utils/alignInboxStartUnderTabs.js",
+      "line": 70,
+      "text": "const firstRect = first.getBoundingClientRect()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/dm/utils/alignInboxStartUnderTabs.js",
+      "line": 80,
+      "text": "scrollEl.scrollTop += delta",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/components/ForumPostCard.jsx",
+      "line": 96,
+      "text": "tiktokLines,",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/ForumPostCard.jsx",
+      "line": 170,
+      "text": "tiktokLines={tiktokLines}",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/LoadMoreSentinel.jsx",
+      "line": 19,
+      "text": "if (!('IntersectionObserver' in window)) {",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/components/LoadMoreSentinel.jsx",
+      "line": 24,
+      "text": "const io = new IntersectionObserver(",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostActionBar.jsx",
+      "line": 140,
+      "text": "const rect = e.currentTarget?.getBoundingClientRect?.()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 283,
+      "text": "<div className={`iframeTouchShield${interactive ? ' isInteractive' : ''}`}>",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 285,
+      "text": "className={`iframeTouchShieldGesture${interactive ? ' isInteractive' : ''}`}",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 294,
+      "text": "className=\"iframeTouchShieldAction\"",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 338,
+      "text": "tiktokLines,",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 353,
+      "text": "const nextTiktok = uniqList(tiktokLines).length ? uniqList(tiktokLines) : uniqList(cached.tiktok || [])",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 354,
+      "text": "return { yt: nextYt, tiktok: nextTiktok }",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 360,
+      "text": "const directTiktok = uniqList(tiktokLines)",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 362,
+      "text": "const nextTiktok = directTiktok.length ? directTiktok : uniqList(cached.tiktok || [])",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 363,
+      "text": "const next = { yt: nextYt, tiktok: nextTiktok }",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 372,
+      "text": "if (sameList(prev?.yt, next.yt) && sameList(prev?.tiktok, next.tiktok)) return prev",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 375,
+      "text": "}, [stableEmbedKey, ytLines, tiktokLines])",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 378,
+      "text": "const tiktokLinesStable = stableEmbeds?.tiktok || []",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 428,
+      "text": "data-kind=\"iframe\"",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 429,
+      "text": "data-subkind=\"youtube\"",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 432,
+      "text": "<iframe",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 433,
+      "text": "data-src={`https://www.youtube.com/embed/${videoId}?${ytEmbedParams}`}",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 437,
+      "text": "data-forum-media=\"youtube\"",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 451,
+      "text": "{tiktokLinesStable.length > 0 && (",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 453,
+      "text": "{tiktokLinesStable.map((src, i) => {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 510,
+      "text": "<div key={`tt:${mediaKeyBase}:${videoId}:${i}`} className=\"videoCard mediaBox\" data-kind=\"iframe\" style={{ margin: 0 }}>",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 511,
+      "text": "<iframe",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 513,
+      "text": "data-forum-media=\"tiktok\"",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+      "line": 514,
+      "text": "data-src={`https://www.tiktok.com/embed/v2/${videoId}`}",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/components/TopicItem.jsx",
+      "line": 52,
+      "text": "const b = e?.currentTarget?.getBoundingClientRect?.()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/components/TopicItem.jsx",
+      "line": 70,
+      "text": "const io = new IntersectionObserver(",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/components/UserPostsPane.jsx",
+      "line": 73,
+      "text": "return Number(scrollEl.scrollTop || 0)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/components/UserPostsPane.jsx",
+      "line": 77,
+      "text": "document.documentElement?.scrollTop ||",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/components/UserPostsPane.jsx",
+      "line": 78,
+      "text": "document.body?.scrollTop ||",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/components/UserPostsPane.jsx",
+      "line": 95,
+      "text": "const rect = marker.getBoundingClientRect?.()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/components/UserPostsPane.jsx",
+      "line": 100,
+      "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/components/UserPostsPane.jsx",
+      "line": 101,
+      "text": "const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/components/UserPostsPane.jsx",
+      "line": 102,
+      "text": "scrollEl.scrollTop = Math.max(0, targetTop)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/components/UserPostsPane.jsx",
+      "line": 104,
+      "text": "const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/components/UserRecommendationCard.jsx",
+      "line": 424,
+      "text": "if (typeof ResizeObserver !== 'undefined') {",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/components/UserRecommendationCard.jsx",
+      "line": 425,
+      "text": "resizeObserver = new ResizeObserver(scheduleMeasure)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumFeedRuntime.js",
+      "line": 311,
+      "text": "const rect = node.getBoundingClientRect?.()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumFeedRuntime.js",
+      "line": 315,
+      "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumFeedRuntime.js",
+      "line": 316,
+      "text": "const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumFeedRuntime.js",
+      "line": 318,
+      "text": "if (Math.abs(Number(scrollEl.scrollTop || 0) - nextTop) >= 1) {",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumFeedRuntime.js",
+      "line": 320,
+      "text": "scrollEl.scrollTop = nextTop",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumFeedRuntime.js",
+      "line": 324,
+      "text": "const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumFeedRuntime.js",
+      "line": 326,
+      "text": "const curY = Number(window.pageYOffset || document.documentElement.scrollTop || 0)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumFeedRuntime.js",
+      "line": 625,
+      "text": "return Number(scrollEl.scrollTop || 0)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumFeedRuntime.js",
+      "line": 629,
+      "text": "document.documentElement?.scrollTop ||",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumFeedRuntime.js",
+      "line": 630,
+      "text": "document.body?.scrollTop ||",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumHomeAction.js",
+      "line": 49,
+      "text": "scrollEl.scrollTop = 0",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumHomeAction.js",
+      "line": 55,
+      "text": "const rect = target.getBoundingClientRect?.()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumHomeAction.js",
+      "line": 58,
+      "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumHomeAction.js",
+      "line": 59,
+      "text": "const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumHomeAction.js",
+      "line": 60,
+      "text": "scrollEl.scrollTop = Math.max(0, targetTop)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumHomeAction.js",
+      "line": 63,
+      "text": "const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumSyncLoop.js",
+      "line": 50,
+      "text": "const innerTop = Number(scrollEl?.scrollTop || 0)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumSyncLoop.js",
+      "line": 52,
+      "text": "Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumSyncLoop.js",
+      "line": 70,
+      "text": "const innerTop = Number(scrollEl?.scrollTop || 0)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumSyncLoop.js",
+      "line": 72,
+      "text": "Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumViewTracking.js",
+      "line": 60,
+      "text": "if (!('IntersectionObserver' in window)) return",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumViewTracking.js",
+      "line": 141,
+      "text": "const viewportPx = Number(window.innerHeight || document.documentElement?.clientHeight || 0)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useForumViewTracking.js",
+      "line": 148,
+      "text": "const io = new IntersectionObserver(",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostFx.js",
+      "line": 45,
+      "text": "const r = host?.getBoundingClientRect?.()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostFx.js",
+      "line": 83,
+      "text": "const r = host?.getBoundingClientRect?.()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostFx.js",
+      "line": 157,
+      "text": "const r = btn?.getBoundingClientRect?.()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+      "line": 8,
+      "text": "const YT_RE = /^(?:https?:\\/\\/)?(?:www\\.)?(?:youtube\\.com\\/(?:watch\\?(?:.*&)?v=|shorts\\/|embed\\/)|youtu\\.be\\/)([A-Za-z0-9_-]{6,})/i",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+      "line": 9,
+      "text": "const TIKTOK_RE = /^(?:https?:\\/\\/)?(?:www\\.)?tiktok\\.com\\/(@[\\w.\\-]+\\/video\\/(\\d+)|t\\/[A-Za-z0-9]+)(?:[?#].*)?$/i",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+      "line": 12,
+      "text": "const TIKTOK_PLAYABLE_RE = /^(?:https?:\\/\\/)?(?:(?:www|m)\\.)?tiktok\\.com\\/@[\\w.\\-]+\\/video\\/\\d+(?:[?#].*)?$/i",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+      "line": 74,
+      "text": "const tiktokInline = React.useMemo(() => collectMatches(allLines, TIKTOK_RE), [allLines])",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+      "line": 77,
+      "text": "const tiktokLines = React.useMemo(() => Array.from(new Set(tiktokInline)), [tiktokInline])",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+      "line": 99,
+      "text": "const tiktokLinesStable = React.useMemo(() => {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+      "line": 100,
+      "text": "if (tiktokLines.length > 0) return tiktokLines",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+      "line": 103,
+      "text": "if (cached?.tiktok?.length) return cached.tiktok",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+      "line": 105,
+      "text": "return tiktokLines",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+      "line": 106,
+      "text": "}, [tiktokLines, cacheKeys])",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+      "line": 111,
+      "text": "const hasTiktok = tiktokLines.length > 0",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+      "line": 118,
+      "text": "tiktok: hasTiktok ? tiktokLines : (prev.tiktok || []),",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+      "line": 129,
+      "text": "}, [cacheKeys, ytLines, tiktokLines])",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+      "line": 200,
+      "text": "tiktokLinesStable.some((x) => x === uTrim)",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+      "line": 223,
+      "text": "[allLines, isVideoFeed, ytLinesStable, tiktokLinesStable],",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+      "line": 248,
+      "text": "tiktokLines: tiktokLinesStable,",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/usePostOwnerActions.js",
+      "line": 32,
+      "text": "const b = e?.currentTarget?.getBoundingClientRect?.()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useThreadOpenNavigation.js",
+      "line": 26,
+      "text": "const rect = node.getBoundingClientRect?.()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useThreadOpenNavigation.js",
+      "line": 30,
+      "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useThreadOpenNavigation.js",
+      "line": 31,
+      "text": "const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useThreadOpenNavigation.js",
+      "line": 32,
+      "text": "if (Math.abs(Number(scrollEl.scrollTop || 0) - targetTop) > 2) {",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useThreadOpenNavigation.js",
+      "line": 33,
+      "text": "scrollEl.scrollTop = Math.max(0, targetTop)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useThreadOpenNavigation.js",
+      "line": 37,
+      "text": "const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useTopicDiscoveryModel.js",
+      "line": 243,
+      "text": "return Number(scrollEl.scrollTop || 0) > 140",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useTopicDiscoveryModel.js",
+      "line": 245,
+      "text": "return Number(window.pageYOffset || document.documentElement?.scrollTop || 0) > 140",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useUserPostsBranchModel.js",
+      "line": 256,
+      "text": "scrollEl.scrollTop = 0",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useUserPostsBranchModel.js",
+      "line": 282,
+      "text": "const rect = marker.getBoundingClientRect?.()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useUserPostsBranchModel.js",
+      "line": 285,
+      "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useUserPostsBranchModel.js",
+      "line": 286,
+      "text": "const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useUserPostsBranchModel.js",
+      "line": 287,
+      "text": "scrollEl.scrollTop = Math.max(0, targetTop)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/hooks/useUserPostsBranchModel.js",
+      "line": 289,
+      "text": "const y = (window.pageYOffset || document.documentElement?.scrollTop || 0) + rect.top",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/navScroll.js",
+      "line": 10,
+      "text": "if (useInner) return { useInner: true, y: scrollEl.scrollTop || 0 }",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/navScroll.js",
+      "line": 12,
+      "text": "const winY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/navScroll.js",
+      "line": 25,
+      "text": "const rect = el.getBoundingClientRect()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/navScroll.js",
+      "line": 28,
+      "text": "const contRect = scrollEl?.getBoundingClientRect?.() || { top: 0 }",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/navScroll.js",
+      "line": 48,
+      "text": "scrollEl.scrollTop = y",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/navScroll.js",
+      "line": 88,
+      "text": "const rect = el.getBoundingClientRect()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/navScroll.js",
+      "line": 89,
+      "text": "const contRect = scrollEl.getBoundingClientRect()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/navScroll.js",
+      "line": 92,
+      "text": "scrollEl.scrollTop += delta",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/navScroll.js",
+      "line": 100,
+      "text": "const rect = el.getBoundingClientRect()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/postFocus.js",
+      "line": 17,
+      "text": "const dr = dock.getBoundingClientRect?.()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/postFocus.js",
+      "line": 47,
+      "text": "return { mode: 'inner', top: Number(scrollEl.scrollTop || 0) || 0 }",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/postFocus.js",
+      "line": 53,
+      "text": "top: Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0) || 0,",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/postFocus.js",
+      "line": 80,
+      "text": "const contRect = scrollEl.getBoundingClientRect()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/postFocus.js",
+      "line": 81,
+      "text": "const r = node.getBoundingClientRect()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/postFocus.js",
+      "line": 91,
+      "text": "Math.min((scrollEl.scrollTop || 0) + delta, (scrollEl.scrollHeight || 0) - (scrollEl.clientHeight || 0)),",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/postFocus.js",
+      "line": 98,
+      "text": "const r = node.getBoundingClientRect?.()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/postFocus.js",
+      "line": 102,
+      "text": "const vh = window.innerHeight || document.documentElement?.clientHeight || 0",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/postFocus.js",
+      "line": 108,
+      "text": "const curY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/postFocus.js",
+      "line": 204,
+      "text": "const r = node.getBoundingClientRect?.()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/postFocus.js",
+      "line": 209,
+      "text": "const contRect = scrollEl.getBoundingClientRect?.()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/postFocus.js",
+      "line": 219,
+      "text": "const vh = window.innerHeight || document.documentElement?.clientHeight || 0",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/postFocus.js",
+      "line": 246,
+      "text": "if (typeof ResizeObserver !== 'undefined') {",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/feed/utils/postFocus.js",
+      "line": 259,
+      "text": "const ro = new ResizeObserver(schedule)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/components/LivePreview.jsx",
+      "line": 28,
+      "text": "const p = el.play?.()",
+      "operation": "play",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/components/LivePreview.jsx",
+      "line": 43,
+      "text": "el.pause?.()",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/components/QCastPlayer.jsx",
+      "line": 684,
+      "text": "const p = audio.play();",
+      "operation": "play",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/components/QCastPlayer.jsx",
+      "line": 697,
+      "text": "const retry = audio.play?.();",
+      "operation": "play",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/components/QCastPlayer.jsx",
+      "line": 733,
+      "text": "try { audio.pause(); } catch {}",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/components/QCastPlayer.jsx",
+      "line": 671,
+      "text": "try { audio.load?.(); } catch {}",
+      "operation": "load",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/components/QCastPlayer.jsx",
+      "line": 23,
+      "text": "mutedEventName = 'forum:media-mute',",
+      "operation": "mute_event",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/features/media/components/QCastPlayer.jsx",
+      "line": 15,
+      "text": "const QCAST_MUTED_KEY = 'forum:qcastMuted'",
+      "operation": "qcast_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "qcast"
+    },
+    {
+      "file": "app/forum/features/media/components/QCastPlayer.jsx",
+      "line": 44,
+      "text": "const raw = localStorage.getItem(QCAST_MUTED_KEY);",
+      "operation": "qcast_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "qcast"
+    },
+    {
+      "file": "app/forum/features/media/components/QCastPlayer.jsx",
+      "line": 51,
+      "text": "const writeQcastMutedPref = React.useCallback((nextMuted, meta = {}) => {",
+      "operation": "qcast_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "qcast"
+    },
+    {
+      "file": "app/forum/features/media/components/QCastPlayer.jsx",
+      "line": 54,
+      "text": "localStorage.setItem(QCAST_MUTED_KEY, nextMuted ? '1' : '0');",
+      "operation": "qcast_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "qcast"
+    },
+    {
+      "file": "app/forum/features/media/components/QCastPlayer.jsx",
+      "line": 429,
+      "text": "writeQcastMutedPref(!!audio.muted, {",
+      "operation": "qcast_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "qcast"
+    },
+    {
+      "file": "app/forum/features/media/components/QCastPlayer.jsx",
+      "line": 555,
+      "text": "}, [applyPreset, desiredMuted, mutedEventName, readQcastMutedPref, syncMasterGain, writeQcastMutedPref]);",
+      "operation": "qcast_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "qcast"
+    },
+    {
+      "file": "app/forum/features/media/components/QCastPlayer.jsx",
+      "line": 745,
+      "text": "writeQcastMutedPref(!!audio.muted, {",
+      "operation": "qcast_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "qcast"
+    },
+    {
+      "file": "app/forum/features/media/components/QCastPlayer.jsx",
+      "line": 197,
+      "text": "const r = host?.getBoundingClientRect?.();",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/components/QCastPlayer.jsx",
+      "line": 201,
+      "text": "const viewportH = Number(window?.innerHeight || 0) || 0;",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/components/QCastPlayer.jsx",
+      "line": 239,
+      "text": "const r = host?.getBoundingClientRect?.();",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/components/QCastPlayer.jsx",
+      "line": 243,
+      "text": "const viewportH = Number(window?.innerHeight || 0) || 0;",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/components/VideoMedia.jsx",
+      "line": 1058,
+      "text": "const p = el.play?.()",
+      "operation": "play",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/components/VideoMedia.jsx",
+      "line": 842,
+      "text": "el.pause?.()",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/components/VideoMedia.jsx",
+      "line": 956,
+      "text": "el.pause?.()",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/components/VideoMedia.jsx",
+      "line": 1066,
+      "text": "try { el.pause?.() } catch {}",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/components/VideoMedia.jsx",
+      "line": 819,
+      "text": "el.load?.()",
+      "operation": "load",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/components/VideoMedia.jsx",
+      "line": 972,
+      "text": "el.load?.()",
+      "operation": "load",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/components/VideoMedia.jsx",
+      "line": 971,
+      "text": "if (!el.getAttribute('src')) el.setAttribute('src', srcSafe)",
+      "operation": "src_attach",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/components/VideoMedia.jsx",
+      "line": 959,
+      "text": "el.removeAttribute('src')",
+      "operation": "src_detach",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/components/VideoMedia.jsx",
+      "line": 327,
+      "text": "const mutedEvent = String(mutedEventName || 'forum:media-mute')",
+      "operation": "mute_event",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/features/media/components/VideoMedia.jsx",
+      "line": 478,
+      "text": "const vh = Number(window?.innerHeight || 0)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/components/VideoMedia.jsx",
+      "line": 859,
+      "text": "io = new IntersectionObserver(",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/components/VideoTrimPopover.jsx",
+      "line": 343,
+      "text": "try { v.play?.(); } catch {}",
+      "operation": "play",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/components/VideoTrimPopover.jsx",
+      "line": 320,
+      "text": "if (!previewPlayingRef.current) v.pause?.();",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/components/VideoTrimPopover.jsx",
+      "line": 345,
+      "text": "try { v.pause?.(); } catch {}",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/components/VideoTrimPopover.jsx",
+      "line": 62,
+      "text": "const rect = track.getBoundingClientRect?.();",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1968,
+      "text": "const p = el.play?.();",
+      "operation": "play",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2017,
+      "text": "const retry = el.play?.();",
+      "operation": "play",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1717,
+      "text": "try { if (!target.paused) target.pause(); } catch {}",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1727,
+      "text": "try { if (!target.paused) target.pause(); } catch {}",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1737,
+      "text": "try { if (!target.paused) target.pause(); } catch {}",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1830,
+      "text": "try { if (!target.paused) target.pause(); } catch {}",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1974,
+      "text": "try { if (!el.paused) el.pause(); } catch {}",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2023,
+      "text": "try { if (!el.paused) el.pause(); } catch {}",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2429,
+      "text": "try { if (!el.paused) el.pause(); } catch {}",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2446,
+      "text": "try { if (!a.paused) a.pause(); } catch {}",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2522,
+      "text": "try { if (!node.paused) node.pause(); } catch {}",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2534,
+      "text": "try { if (!a.paused) a.pause(); } catch {}",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2561,
+      "text": "try { if (!node.paused) node.pause(); } catch {}",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2605,
+      "text": "try { if (!el.paused) el.pause(); } catch {}",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2623,
+      "text": "try { if (!a.paused) a.pause(); } catch {}",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3586,
+      "text": "try { if (!externalEl.paused) externalEl.pause(); } catch {}",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3595,
+      "text": "try { if (!adVideo.paused) adVideo.pause(); } catch {}",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 198,
+      "text": "video.load?.();",
+      "operation": "load",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1537,
+      "text": "try { el.load?.(); } catch {}",
+      "operation": "load",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1568,
+      "text": "try { el.load?.(); } catch {}",
+      "operation": "load",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2889,
+      "text": "el.load?.();",
+      "operation": "load",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2979,
+      "text": "})) a.load?.();",
+      "operation": "load",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3665,
+      "text": "try { mediaEl.load?.(); } catch {}",
+      "operation": "load",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 496,
+      "text": "try { el.setAttribute('src', src); } catch {}",
+      "operation": "src_attach",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2649,
+      "text": "if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }",
+      "operation": "src_attach",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2666,
+      "text": "if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }",
+      "operation": "src_attach",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2807,
+      "text": "try { el.setAttribute('src', nextSrc); } catch {}",
+      "operation": "src_attach",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2998,
+      "text": "if (ds && (!cur || cur !== ds)) el.setAttribute('src', ds);",
+      "operation": "src_attach",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3025,
+      "text": "try { el.setAttribute('src', src); } catch {}",
+      "operation": "src_attach",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3831,
+      "text": "try { if (iframe?.getAttribute?.('src')) iframe.setAttribute('src', ''); } catch {}",
+      "operation": "src_attach",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 11,
+      "text": "__restoreVideoEl,",
+      "operation": "restore_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 177,
+      "text": "__restoreVideoEl(video);",
+      "operation": "restore_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 213,
+      "text": "__restoreVideoEl(video);",
+      "operation": "restore_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1482,
+      "text": "__restoreVideoEl(el);",
+      "operation": "restore_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1566,
+      "text": "if (!el.getAttribute('src')) __restoreVideoEl(el);",
+      "operation": "restore_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2868,
+      "text": "__restoreVideoEl(el);",
+      "operation": "restore_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3648,
+      "text": "__restoreVideoEl(mediaEl);",
+      "operation": "restore_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 12,
+      "text": "__unloadVideoEl,",
+      "operation": "unload_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1837,
+      "text": "scheduleHardUnload(owner, 0, 'error_blocked');",
+      "operation": "unload_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2573,
+      "text": "const hardUnloadMedia = (...args) => {",
+      "operation": "unload_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2601,
+      "text": "try { __unloadVideoEl(el); } catch {}",
+      "operation": "unload_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2690,
+      "text": "hardUnloadMedia(frame, 'resident_cap');",
+      "operation": "unload_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2699,
+      "text": "const scheduleHardUnload = (el, ms = null, reason = 'timeout') => {",
+      "operation": "unload_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2746,
+      "text": "scheduleHardUnload(el, deferMs, reason);",
+      "operation": "unload_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2753,
+      "text": "hardUnloadMedia(el, reason);",
+      "operation": "unload_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3185,
+      "text": "scheduleHardUnload(el, null, 'out_of_view');",
+      "operation": "unload_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3287,
+      "text": "scheduleHardUnload(active, null, 'focus_switch');",
+      "operation": "unload_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3340,
+      "text": "scheduleHardUnload(active, null, 'below_stop_ratio');",
+      "operation": "unload_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3376,
+      "text": "scheduleHardUnload(active, null, 'candidate_replace');",
+      "operation": "unload_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3545,
+      "text": "scheduleHardUnload(active, null, reason);",
+      "operation": "unload_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3610,
+      "text": "scheduleHardUnload(active, null, 'ad_focus_switch');",
+      "operation": "unload_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3808,
+      "text": "scheduleHardUnload(active, 0, 'cleanup');",
+      "operation": "unload_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 7,
+      "text": "__writeMediaMutedPref,",
+      "operation": "mute_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 811,
+      "text": "__writeMediaMutedPref(!!val, meta);",
+      "operation": "mute_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 5,
+      "text": "MEDIA_MUTED_EVENT,",
+      "operation": "mute_event",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 886,
+      "text": "window.dispatchEvent(new CustomEvent(MEDIA_MUTED_EVENT, {",
+      "operation": "mute_event",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3755,
+      "text": "window.addEventListener(MEDIA_MUTED_EVENT, onMutedEvent);",
+      "operation": "mute_event",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3777,
+      "text": "window.removeEventListener(MEDIA_MUTED_EVENT, onMutedEvent);",
+      "operation": "mute_event",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 827,
+      "text": "const QCAST_MUTED_KEY = 'forum:qcastMuted';",
+      "operation": "qcast_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "qcast"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 830,
+      "text": "const raw = localStorage.getItem(QCAST_MUTED_KEY);",
+      "operation": "qcast_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "qcast"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 837,
+      "text": "const writeQcastMutedPref = (next, meta = {}) => {",
+      "operation": "qcast_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "qcast"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 839,
+      "text": "localStorage.setItem(QCAST_MUTED_KEY, next ? '1' : '0');",
+      "operation": "qcast_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "qcast"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1590,
+      "text": "writeQcastMutedPref(!!el.muted, {",
+      "operation": "qcast_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "qcast"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2961,
+      "text": "try { writeQcastMutedPref(!!a.muted); } catch {}",
+      "operation": "qcast_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "qcast"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 436,
+      "text": "// === Ранний prewarm iframe (YouTube/TikTok/other embeds) для более быстрого старта в зоне фокуса ===",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 453,
+      "text": "// По умолчанию legacy iframe-прогрев выключен:",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 460,
+      "text": "const selector = 'iframe[data-forum-media=\"youtube\"],iframe[data-forum-media=\"tiktok\"],iframe[data-forum-media=\"iframe\"]';",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 537,
+      "text": "// Расширено для video + audio + iframe (YouTube/TikTok best-effort).",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 720,
+      "text": "ytPlayers.forEach((player, iframe) => {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 721,
+      "text": "if (!(iframe instanceof HTMLIFrameElement) || !iframe.isConnected) detachedYtPlayers += 1;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 748,
+      "text": "const iframes = owners.filter((el) => el instanceof HTMLIFrameElement);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 757,
+      "text": "const iframesLoaded = iframes.filter((el) => {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 792,
+      "text": "iframes: iframes.length,",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 793,
+      "text": "iframesLoaded,",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 813,
+      "text": "// Единый источник mute-предпочтения для video/iframe/youtube — storage.",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1860,
+      "text": "const detachYouTubePlayer = (iframe, reason = 'detached') => {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1862,
+      "text": "if (!(iframe instanceof HTMLIFrameElement)) return;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1863,
+      "text": "const player = ytPlayers.get(iframe);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1869,
+      "text": "ytPlayers.delete(iframe);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1870,
+      "text": "traceCandidate('candidate_external_ignored', iframe, { reason });",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1885,
+      "text": "if (kind === 'youtube') {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1930,
+      "text": "for (const [iframe] of ytPlayers.entries()) {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1931,
+      "text": "if (!(iframe instanceof HTMLIFrameElement) || !iframe.isConnected) {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 1932,
+      "text": "detachYouTubePlayer(iframe, reason);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2056,
+      "text": "tag.src = 'https://www.youtube.com/iframe_api';",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2072,
+      "text": "const isAttachedYtPlayer = (player, iframeRef = null) => {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2074,
+      "text": "const iframe = iframeRef instanceof HTMLIFrameElement ? iframeRef : (player?.getIframe?.() || null);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2075,
+      "text": "return !!(iframe && iframe.isConnected);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2097,
+      "text": "setMutedPref(muted, 'youtube');",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2103,
+      "text": "const initYouTubePlayer = async (iframe) => {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2104,
+      "text": "if (!iframe || !(iframe instanceof HTMLIFrameElement)) return null;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2105,
+      "text": "if (ytPlayers.has(iframe)) {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2106,
+      "text": "const existing = ytPlayers.get(iframe);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2107,
+      "text": "if (isAttachedYtPlayer(existing, iframe)) return existing;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2110,
+      "text": "ytPlayers.delete(iframe);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2117,
+      "text": "const player = new YT.Player(iframe, {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2120,
+      "text": "if (!isAttachedYtPlayer(player, iframe)) {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2123,
+      "text": "ytPlayers.delete(iframe);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2136,
+      "text": "if (!isAttachedYtPlayer(player, iframe)) {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2138,
+      "text": "ytPlayers.delete(iframe);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2146,
+      "text": "detail: { source: 'youtube', element: iframe }",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2149,
+      "text": "// LOOP: когда ролик закончился — стартуем заново без reload iframe",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2162,
+      "text": "ytPlayers.set(iframe, player);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2212,
+      "text": "return kind === 'youtube' || kind === 'tiktok' || kind === 'iframe';",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2389,
+      "text": "return Array.from(document.querySelectorAll('iframe[data-forum-media]')).filter((frame) => {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2398,
+      "text": "const all = Array.from(document.querySelectorAll('iframe[data-forum-media]'));",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2414,
+      "text": "iframeHardUnloadMs: IFRAME_HARD_UNLOAD_MS,",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2415,
+      "text": "iframeResidentCap: IFRAME_RESIDENT_CAP,",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2451,
+      "text": "if (kind === 'youtube') {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2458,
+      "text": "if (kind === 'tiktok' || kind === 'iframe') {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2482,
+      "text": "if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 96 : (isCoarseUi ? 150 : 140);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2502,
+      "text": "if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2539,
+      "text": "if (kind === 'youtube') {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2545,
+      "text": "if (kind === 'tiktok' || kind === 'iframe') {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2549,
+      "text": "// это давало визуальное исчезновение iframe и дергания ленты.",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2554,
+      "text": "document.querySelectorAll('.forum-ad-media-slot video, .forum-ad-media-slot iframe').forEach((node) => {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2628,
+      "text": "if (kind === 'youtube') {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2633,
+      "text": "try { el.removeAttribute('data-forum-iframe-active'); } catch {}",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2634,
+      "text": "emitMediaDiag('iframe_soft_cooldown', { kind, reason: unloadReason, ...getIframeSnapshot() });",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2647,
+      "text": "try { el.removeAttribute('data-forum-iframe-active'); } catch {}",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2651,
+      "text": "emitMediaDiag('iframe_hard_unload', { kind, reason: unloadReason, ...getIframeSnapshot() });",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2654,
+      "text": "if (kind === 'tiktok' || kind === 'iframe') {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2658,
+      "text": "try { el.removeAttribute('data-forum-iframe-active'); } catch {}",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2659,
+      "text": "emitMediaDiag('iframe_soft_cooldown', { kind, reason: unloadReason, ...getIframeSnapshot() });",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2664,
+      "text": "try { el.removeAttribute('data-forum-iframe-active'); } catch {}",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2667,
+      "text": "emitMediaDiag('iframe_hard_unload', { kind, reason: unloadReason, ...getIframeSnapshot() });",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2692,
+      "text": "emitMediaDiag('iframe_resident_cap', {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2757,
+      "text": "// Best-effort loop для iframe (Vimeo/встроенные плееры/прочее):",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2774,
+      "text": "if (!host.includes('youtube.com') && !host.includes('youtu.be')) return next;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2786,
+      "text": "if (kind !== 'youtube' && kind !== 'tiktok' && kind !== 'iframe') return false;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2795,
+      "text": "kind === 'youtube'",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2812,
+      "text": "trace('iframe_prewarm', el, { kind, reason, hadSrc });",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2813,
+      "text": "emitMediaDiag('iframe_prewarm', { kind, reason, hadSrc, ...getIframeSnapshot() });",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2990,
+      "text": "if (kind === 'youtube') {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3008,
+      "text": "emitMediaDiag('iframe_play', { kind: 'youtube', ...getIframeSnapshot() });",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3013,
+      "text": "if (kind === 'tiktok' || kind === 'iframe') {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3021,
+      "text": "const alreadyActive = el.getAttribute('data-forum-iframe-active') === '1';",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3024,
+      "text": "try { el.setAttribute('data-forum-iframe-active', '1'); } catch {}",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3029,
+      "text": "emitMediaDiag('iframe_play', { kind, ...getIframeSnapshot() });",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3094,
+      "text": "if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 0.12 : (isCoarseUi ? 0.22 : 0.3);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3100,
+      "text": "if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 96 : (isCoarseUi ? 180 : 140);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3121,
+      "text": "if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 0.06 : (isCoarseUi ? 0.08 : 0.12);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3127,
+      "text": "if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isCoarseUi ? 1700 : 1300;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3133,
+      "text": "if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return 0.24;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3139,
+      "text": "if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return 260;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3145,
+      "text": "if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3184,
+      "text": "// iframe/youtube — освобождаем ресурсы с задержкой (анти-микроскролл)",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3203,
+      "text": "candidateKind === 'youtube' || candidateKind === 'tiktok' || candidateKind === 'iframe'",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3231,
+      "text": "((activeKind === 'youtube' || activeKind === 'tiktok' || activeKind === 'iframe') && activeVisiblePx >= 220);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3252,
+      "text": "candidateKind === 'youtube' || candidateKind === 'tiktok' || candidateKind === 'iframe'",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3383,
+      "text": "candidateKind === 'youtube' || candidateKind === 'tiktok' || candidateKind === 'iframe';",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3424,
+      "text": "if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3503,
+      "text": "// iframe/tiktok: гарантируем data-src",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3504,
+      "text": "if ((kind === 'tiktok' || kind === 'iframe') && el?.getAttribute) {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3598,
+      "text": "const adIframe = externalEl.querySelector?.('iframe');",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3621,
+      "text": "if (!['qcast', 'youtube', 'tiktok', 'iframe'].includes(source)) return;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3828,
+      "text": "ytPlayers.forEach((player, iframe) => {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3831,
+      "text": "try { if (iframe?.getAttribute?.('src')) iframe.setAttribute('src', ''); } catch {}",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 260,
+      "text": "const vh = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 267,
+      "text": "const rect = video.getBoundingClientRect?.();",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 314,
+      "text": "return Number(scrollEl.scrollTop || 0);",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 318,
+      "text": "return Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0);",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 354,
+      "text": "// если нет IntersectionObserver — готовим всё сразу",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 355,
+      "text": "if (!('IntersectionObserver' in window)) {",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 365,
+      "text": "const io = new IntersectionObserver(",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 439,
+      "text": "if (!('IntersectionObserver' in window)) return;",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 502,
+      "text": "const io = new IntersectionObserver(",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 631,
+      "text": "const rect = el.getBoundingClientRect?.();",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2218,
+      "text": "const rect = node.getBoundingClientRect?.();",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2220,
+      "text": "const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2472,
+      "text": "const rect = owner.getBoundingClientRect?.();",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2474,
+      "text": "const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2489,
+      "text": "const rect = owner.getBoundingClientRect?.();",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2491,
+      "text": "const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 2500,
+      "text": "const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3038,
+      "text": "const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3041,
+      "text": "const rect = el.getBoundingClientRect?.();",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3171,
+      "text": "if (!('IntersectionObserver' in window)) return;",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3173,
+      "text": "io = new IntersectionObserver(",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+      "line": 3430,
+      "text": "nearIo = new IntersectionObserver(",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useVideoFeedWindowing.js",
+      "line": 125,
+      "text": "const winTop = Number(window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useVideoFeedWindowing.js",
+      "line": 126,
+      "text": "const winH = Number(window.innerHeight || 0) || 0",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useVideoFeedWindowing.js",
+      "line": 132,
+      "text": "st: Number(el.scrollTop || 0),",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useVideoFeedWindowing.js",
+      "line": 298,
+      "text": "if (el && el.scrollHeight > el.clientHeight + 1) el.scrollTop = 0",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useVideoFeedWindowing.js",
+      "line": 399,
+      "text": "const h = node.getBoundingClientRect?.()?.height",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useVideoFeedWindowing.js",
+      "line": 412,
+      "text": "if (!vfRosRef.current.get(idx) && typeof ResizeObserver !== 'undefined') {",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/hooks/useVideoFeedWindowing.js",
+      "line": 413,
+      "text": "const ro = new ResizeObserver(() => update())",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/utils/frontCameraMirror.js",
+      "line": 40,
+      "text": "try { await video.play() } catch {}",
+      "operation": "play",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 161,
+      "text": "el.pause?.()",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 217,
+      "text": "el.load?.()",
+      "operation": "load",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 280,
+      "text": "el.load?.()",
+      "operation": "load",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 300,
+      "text": "el.setAttribute('src', src)",
+      "operation": "src_attach",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 323,
+      "text": "// setAttribute('src') уже запускает стандартный resource selection path браузера.",
+      "operation": "src_attach",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 199,
+      "text": "el.removeAttribute('src')",
+      "operation": "src_detach",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 221,
+      "text": "export function __restoreVideoEl(el) {",
+      "operation": "restore_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 361,
+      "text": "restoreVideoEl={__restoreVideoEl}",
+      "operation": "restore_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 386,
+      "text": "restoreVideoEl: __restoreVideoEl,",
+      "operation": "restore_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 120,
+      "text": "__unloadVideoEl(victim)",
+      "operation": "unload_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 131,
+      "text": "export function __unloadVideoEl(el) {",
+      "operation": "unload_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 367,
+      "text": "unloadVideoEl={__unloadVideoEl}",
+      "operation": "unload_helper",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 13,
+      "text": "__writeMediaMutedPref,",
+      "operation": "mute_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 21,
+      "text": "__writeMediaMutedPref,",
+      "operation": "mute_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 359,
+      "text": "writeMutedPref={__writeMediaMutedPref}",
+      "operation": "mute_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 377,
+      "text": "writeMutedPref={__writeMediaMutedPref}",
+      "operation": "mute_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 11,
+      "text": "MEDIA_MUTED_EVENT,",
+      "operation": "mute_event",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 19,
+      "text": "MEDIA_MUTED_EVENT,",
+      "operation": "mute_event",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 360,
+      "text": "mutedEventName={MEDIA_MUTED_EVENT}",
+      "operation": "mute_event",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 378,
+      "text": "mutedEventName={MEDIA_MUTED_EVENT}",
+      "operation": "mute_event",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 89,
+      "text": "const r = el.getBoundingClientRect?.()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+      "line": 91,
+      "text": "const vh = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLinks.js",
+      "line": 7,
+      "text": "return /^(?:https?:\\/\\/)?(?:www\\.)?(?:youtube\\.com\\/(?:watch\\?v=|shorts\\/|embed\\/)|youtu\\.be\\/)[A-Za-z0-9_-]{6,}/i.test(s)",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLinks.js",
+      "line": 14,
+      "text": "return /^(?:https?:\\/\\/)?(?:(?:www|m)\\.)?tiktok\\.com\\/@[\\w.\\-]+\\/video\\/\\d+(?:[?#].*)?$/i.test(s)",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaLinks.js",
+      "line": 31,
+      "text": "const m = s.match(/tiktok\\.com\\/(@[\\w.\\-]+\\/video\\/\\d+)/i)",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaMutePrefs.js",
+      "line": 20,
+      "text": "export function __writeMediaMutedPref(nextMuted, meta = {}) {",
+      "operation": "mute_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaMutePrefs.js",
+      "line": 23,
+      "text": "localStorage.setItem(MEDIA_MUTED_KEY, v)",
+      "operation": "mute_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaMutePrefs.js",
+      "line": 24,
+      "text": "localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, v)",
+      "operation": "mute_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaMutePrefs.js",
+      "line": 7,
+      "text": "export const MEDIA_MUTED_EVENT = 'forum:media-mute'",
+      "operation": "mute_event",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaRuntime.js",
+      "line": 48,
+      "text": "video.pause?.()",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaRuntime.js",
+      "line": 181,
+      "text": "audio.pause?.()",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaRuntime.js",
+      "line": 54,
+      "text": "video.load?.()",
+      "operation": "load",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaRuntime.js",
+      "line": 100,
+      "text": "video.load?.()",
+      "operation": "load",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaRuntime.js",
+      "line": 187,
+      "text": "audio.load?.()",
+      "operation": "load",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaRuntime.js",
+      "line": 228,
+      "text": "audio.load?.()",
+      "operation": "load",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaRuntime.js",
+      "line": 51,
+      "text": "video.removeAttribute('src')",
+      "operation": "src_detach",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaRuntime.js",
+      "line": 184,
+      "text": "audio.removeAttribute('src')",
+      "operation": "src_detach",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/moderationPrep.js",
+      "line": 143,
+      "text": "await video.play().catch(() => null)",
+      "operation": "play",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/moderationPrep.js",
+      "line": 171,
+      "text": "video.pause()",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/moderationPrep.js",
+      "line": 175,
+      "text": "video.load()",
+      "operation": "load",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/moderationPrep.js",
+      "line": 174,
+      "text": "video.removeAttribute('src')",
+      "operation": "src_detach",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/videoControls.js",
+      "line": 57,
+      "text": "const p = v.play?.()",
+      "operation": "play",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/features/media/utils/videoFeedPosts.js",
+      "line": 66,
+      "text": "/(?:youtube\\.com|youtu\\.be)/i.test(post.html) ||",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/utils/videoFeedPosts.js",
+      "line": 67,
+      "text": "/tiktok\\.com\\/@[\\w.\\-]+\\/video\\/\\d+/i.test(post.html))",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/features/media/utils/videoFeedScroll.js",
+      "line": 65,
+      "text": "const anchorRect = anchor.getBoundingClientRect?.()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/utils/videoFeedScroll.js",
+      "line": 69,
+      "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/utils/videoFeedScroll.js",
+      "line": 70,
+      "text": "const targetTop = (scrollEl.scrollTop || 0) + (anchorRect.top - Number(hostRect.top || 0))",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/utils/videoFeedScroll.js",
+      "line": 71,
+      "text": "scrollEl.scrollTop = Math.max(0, targetTop)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/utils/videoFeedScroll.js",
+      "line": 73,
+      "text": "const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + anchorRect.top",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/utils/videoFeedScroll.js",
+      "line": 91,
+      "text": "const cardRect = card.getBoundingClientRect?.()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/utils/videoFeedScroll.js",
+      "line": 96,
+      "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/utils/videoFeedScroll.js",
+      "line": 97,
+      "text": "const targetTop = (scrollEl.scrollTop || 0) + (cardRect.top - Number(hostRect.top || 0))",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/utils/videoFeedScroll.js",
+      "line": 98,
+      "text": "scrollEl.scrollTop = Math.max(0, targetTop)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/media/utils/videoFeedScroll.js",
+      "line": 100,
+      "text": "const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + cardRect.top",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/moderation/components/AdminPopover.jsx",
+      "line": 26,
+      "text": "const pRect = parent?.getBoundingClientRect?.() || { left: 0, right: window.innerWidth }",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/moderation/components/AdminPopover.jsx",
+      "line": 27,
+      "text": "const r = btn.getBoundingClientRect()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/moderation/components/AdminPopover.jsx",
+      "line": 30,
+      "text": "const top = Math.round(r.bottom - (parent?.getBoundingClientRect?.()?.top || 0) + GAP)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/moderation/components/ReportPopover.jsx",
+      "line": 24,
+      "text": "const rect = el.getBoundingClientRect()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/moderation/components/ReportPopover.jsx",
+      "line": 37,
+      "text": "const winH = window.innerHeight || 0",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/moderation/hooks/useReportController.js",
+      "line": 28,
+      "text": "if (!anchorEl || typeof anchorEl.getBoundingClientRect !== 'function') {",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/moderation/hooks/useReportController.js",
+      "line": 32,
+      "text": "const rect = anchorEl.getBoundingClientRect()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/profile/components/ProfilePopover.jsx",
+      "line": 315,
+      "text": "const r = el.getBoundingClientRect();",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/profile/components/ProfilePopover.jsx",
+      "line": 336,
+      "text": "const ro = new ResizeObserver(() => applySize());",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/profile/components/ProfilePopover.jsx",
+      "line": 645,
+      "text": "const parentRect = parent?.getBoundingClientRect?.() || { top: 0, left: 0, right: 0 };",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/profile/components/ProfilePopover.jsx",
+      "line": 646,
+      "text": "const rect = el?.getBoundingClientRect?.() || parentRect;",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/profile/components/UserInfoPopover.jsx",
+      "line": 214,
+      "text": "const rect = anchorEl.getBoundingClientRect()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/profile/components/UserInfoPopover.jsx",
+      "line": 215,
+      "text": "const popRect = popEl.getBoundingClientRect()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/profile/components/UserInfoPopover.jsx",
+      "line": 218,
+      "text": "const viewportH = window.innerHeight",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/profile/components/VipPopover.jsx",
+      "line": 19,
+      "text": "const pRect = parent?.getBoundingClientRect?.() || { left: 0, right: window.innerWidth }",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/profile/components/VipPopover.jsx",
+      "line": 20,
+      "text": "const r = btn.getBoundingClientRect()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/profile/components/VipPopover.jsx",
+      "line": 23,
+      "text": "const top = Math.round(r.bottom - (parent?.getBoundingClientRect?.()?.top || 0) + GAP)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/qcoin/components/QCoinWithdrawPopover.jsx",
+      "line": 40,
+      "text": "popParent?.getBoundingClientRect?.() || {",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/qcoin/components/QCoinWithdrawPopover.jsx",
+      "line": 44,
+      "text": "bottom: window.innerHeight,",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/qcoin/components/QCoinWithdrawPopover.jsx",
+      "line": 46,
+      "text": "const r = btn.getBoundingClientRect()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/qcoin/components/QCoinWithdrawPopover.jsx",
+      "line": 55,
+      "text": "const viewportH = window.innerHeight || document.documentElement.clientHeight || 800",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/quests/hooks/useQuestViewActions.js",
+      "line": 35,
+      "text": "scrollEl.scrollTop = 0",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/components/ConfirmDeleteOverlay.jsx",
+      "line": 25,
+      "text": "const vh = window.innerHeight || 0",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/components/DmDeletePopover.jsx",
+      "line": 33,
+      "text": "const vh = window.innerHeight || 0",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/components/ForumAdSlot.jsx",
+      "line": 17,
+      "text": "if (typeof ResizeObserver === 'undefined') return",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/components/ForumAdSlot.jsx",
+      "line": 20,
+      "text": "lastHRef.current = el.getBoundingClientRect().height || 0",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/components/ForumAdSlot.jsx",
+      "line": 48,
+      "text": "const ro = new ResizeObserver(() => {",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/components/ForumAdSlot.jsx",
+      "line": 53,
+      "text": "h = node.getBoundingClientRect().height || 0",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/components/ForumSearchSortControls.jsx",
+      "line": 138,
+      "text": "if (sc && sc.scrollHeight > sc.clientHeight + 1) sc.scrollTop = 0",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useComposerScrollMemory.js",
+      "line": 13,
+      "text": "? (scrollEl.scrollTop || 0)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useComposerScrollMemory.js",
+      "line": 29,
+      "text": "try { scrollEl.scrollTop = y } catch {}",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+      "line": 80,
+      "text": "const rect = node.getBoundingClientRect?.()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+      "line": 83,
+      "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+      "line": 84,
+      "text": "const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+      "line": 85,
+      "text": "if (Math.abs(Number(scrollEl.scrollTop || 0) - targetTop) > 2) {",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+      "line": 87,
+      "text": "scrollEl.scrollTop = Math.max(0, targetTop)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+      "line": 91,
+      "text": "const top = (window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0) + rect.top",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+      "line": 119,
+      "text": "if (Number(scrollEl.scrollTop || 0) > 4) {",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+      "line": 121,
+      "text": "scrollEl.scrollTop = 0",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+      "line": 125,
+      "text": "const top = Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+      "line": 256,
+      "text": "const h = el?.getBoundingClientRect?.()?.height",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+      "line": 264,
+      "text": "if (el && el.scrollHeight > el.clientHeight + 1) return el.scrollTop || 0",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+      "line": 265,
+      "text": "return (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+      "line": 357,
+      "text": "if ((el.scrollTop || 0) < 2) {",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+      "line": 359,
+      "text": "el.scrollTop = target",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+      "line": 362,
+      "text": "const y = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useScrollResizeCompensation.js",
+      "line": 123,
+      "text": "const rect = node.getBoundingClientRect()",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useScrollResizeCompensation.js",
+      "line": 126,
+      "text": "const hostRect = host.el.getBoundingClientRect?.() || { top: 0 }",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useScrollResizeCompensation.js",
+      "line": 129,
+      "text": "const prevTop = Number(host.el.scrollTop || 0)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useScrollResizeCompensation.js",
+      "line": 134,
+      "text": "host.el.scrollTop = nextTop",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useScrollResizeCompensation.js",
+      "line": 143,
+      "text": "const curY = Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0)",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1559,
+      "text": "v.play?.().catch(() => {",
+      "operation": "play",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1694,
+      "text": "if (v.paused && !next && shouldPlayRef.current) v.play?.().catch(() => {});",
+      "operation": "play",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1549,
+      "text": "try { v.pause?.(); } catch {}",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1567,
+      "text": "v.pause?.();",
+      "operation": "pause",
+      "ownershipGroup": "playback_control",
+      "mediaDomain": "html_media"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 11,
+      "text": "__writeMediaMutedPref,",
+      "operation": "mute_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 20,
+      "text": "function writeMutedPrefToStorage(val) {",
+      "operation": "mute_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 21,
+      "text": "__writeMediaMutedPref(!!val, {",
+      "operation": "mute_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1682,
+      "text": "writeMutedPrefToStorage(next);",
+      "operation": "mute_storage_write",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 9,
+      "text": "MEDIA_MUTED_EVENT,",
+      "operation": "mute_event",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 31,
+      "text": "new CustomEvent(MEDIA_MUTED_EVENT, {",
+      "operation": "mute_event",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1139,
+      "text": "window.addEventListener(MEDIA_MUTED_EVENT, onMuted);",
+      "operation": "mute_event",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1140,
+      "text": "return () => window.removeEventListener(MEDIA_MUTED_EVENT, onMuted);",
+      "operation": "mute_event",
+      "ownershipGroup": "mute_persistence",
+      "mediaDomain": "global_mute"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 904,
+      "text": "'&screenshot=true&meta=true&video=false&audio=false&iframe=false&waitFor=2000';",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 956,
+      "text": "/^(?:https?:\\/\\/)?(?:www\\.)?(?:youtube\\.com\\/watch\\?v=|youtu\\.be\\/)([A-Za-z0-9_-]{6,})/i;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 959,
+      "text": "/^(?:https?:\\/\\/)?(?:www\\.)?tiktok\\.com\\/(?:@[\\w.\\-]+\\/video\\/(\\d+)|t\\/[A-Za-z0-9]+)(?:[?#].*)?$/i;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 993,
+      "text": "// текущий выбранный mediaHref (конкретный youtube / картинка и т.п.)",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1312,
+      "text": "publishResolved({ kind: 'youtube', src: videoId, step: 'env_youtube' }, true);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1317,
+      "text": "cascade_step: 'env_youtube',",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1336,
+      "text": "publishResolved({ kind: 'tiktok', src: videoId, step: 'env_tiktok' }, true);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1341,
+      "text": "cascade_step: 'env_tiktok',",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1481,
+      "text": "if (media.kind !== 'youtube' || !media.src) return;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1530,
+      "text": "if (!document.getElementById('yt-iframe-api')) {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1532,
+      "text": "tag.id = 'yt-iframe-api';",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1533,
+      "text": "tag.src = 'https://www.youtube.com/iframe_api';",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1572,
+      "text": "if (media.kind === 'youtube' && ytPlayerRef.current) {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1576,
+      "text": "emitAdPlayToCoordinator('ad_youtube');",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1584,
+      "text": "if (media.kind === 'tiktok' && shouldPlay) {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1585,
+      "text": "emitAdPlayToCoordinator('ad_tiktok');",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1699,
+      "text": "if (media.kind === 'youtube' && ytPlayerRef.current) {",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1712,
+      "text": "media.kind === 'video' || media.kind === 'youtube';",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1872,
+      "text": "{media.kind === 'youtube' && media.src && (",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1877,
+      "text": "<iframe",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1879,
+      "text": "src={`https://www.youtube.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1897,
+      "text": "{media.kind === 'tiktok' && media.src && shouldPlay && (",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1902,
+      "text": "<iframe",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1903,
+      "text": "src={`https://www.tiktok.com/embed/v2/${media.src}`}",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1920,
+      "text": "{media.kind === 'tiktok' && media.src && !shouldPlay && (",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1087,
+      "text": "if (!el || !isBrowser() || typeof IntersectionObserver === 'undefined')",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1091,
+      "text": "const nearObs = new IntersectionObserver(",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1097,
+      "text": "const focusObs = new IntersectionObserver(",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1595,
+      "text": "typeof IntersectionObserver === 'undefined' ||",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/ForumAds.js",
+      "line": 1604,
+      "text": "const observer = new IntersectionObserver(",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/p/[postId]/route.js",
+      "line": 113,
+      "text": "/(?:youtube(?:-nocookie)?\\.com\\/(?:watch\\?v=|embed\\/|shorts\\/)|youtu\\.be\\/)([A-Za-z0-9_-]{6,})/i,",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/p/[postId]/route.js",
+      "line": 236,
+      "text": "const ytEmbedUrl = ytId ? `https://www.youtube.com/embed/${encodeURIComponent(ytId)}` : ''",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/p/[postId]/route.js",
+      "line": 256,
+      "text": "kind: 'youtube',",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/p/[postId]/route.js",
+      "line": 286,
+      "text": "const waVideoPost = waCrawler && (chosen.kind === 'video' || chosen.kind === 'youtube')",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/page.js",
+      "line": 71,
+      "text": "const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 4",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/shared/hooks/usePageLock.js",
+      "line": 20,
+      "text": "const innerY = scrollEl ? (scrollEl.scrollTop || 0) : 0",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/shared/hooks/usePageLock.js",
+      "line": 68,
+      "text": "scrollEl.scrollTop = innerY",
+      "operation": "viewport_read",
+      "ownershipGroup": "viewport_logic",
+      "mediaDomain": "viewport"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 85,
+      "text": "--mb-iframe-h-mobile: 700px;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 86,
+      "text": "--mb-iframe-h-tablet: 550px;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 87,
+      "text": "--mb-iframe-h-desktop: 550px;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 88,
+      "text": "/* YouTube iframe: минимальная высота (моб/планш/десктоп)",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 89,
+      "text": "- max-height уже управляется через --mb-iframe-h-*",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 92,
+      "text": "--mb-yt-iframe-min-h-mobile: 420px;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 93,
+      "text": "--mb-yt-iframe-min-h-tablet: 550px;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 94,
+      "text": "--mb-yt-iframe-min-h-desktop: 550px;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 116,
+      "text": "--mb-iframe-h: var(--mb-iframe-h-mobile);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 117,
+      "text": "--mb-yt-iframe-min-h: var(--mb-yt-iframe-min-h-mobile);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 129,
+      "text": "--mb-iframe-h: var(--mb-iframe-h-tablet);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 130,
+      "text": "--mb-yt-iframe-min-h: var(--mb-yt-iframe-min-h-tablet);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 144,
+      "text": "--mb-iframe-h: var(--mb-iframe-h-desktop);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 145,
+      "text": "--mb-yt-iframe-min-h: var(--mb-yt-iframe-min-h-desktop);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 201,
+      "text": ".mediaBox[data-kind=\"iframe\"]{",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 202,
+      "text": "--mb-h: var(--mb-iframe-h);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 203,
+      "text": "min-height: var(--mb-iframe-h);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 204,
+      "text": "height: var(--mb-iframe-h);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 205,
+      "text": "max-height: var(--mb-iframe-h);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 267,
+      "text": "/* Video/iframe cards: фиксируем внутренний плеер по высоте контейнера */",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 553,
+      "text": "/* iframe: по умолчанию 16:9, для TikTok — 9:16 */",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 554,
+      "text": ".mediaBox > iframe{",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 565,
+      "text": ".iframeTouchShield{",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 576,
+      "text": ".iframeTouchShieldGesture{",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 582,
+      "text": ".iframeTouchShield.isInteractive .iframeTouchShieldGesture,",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 583,
+      "text": ".iframeTouchShieldGesture.isInteractive{",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 586,
+      "text": ".iframeTouchShieldAction{",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 602,
+      "text": ".iframeTouchShieldAction svg{",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 608,
+      "text": ".iframeTouchShield{",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 613,
+      "text": ".mediaBox[data-kind=\"iframe\"] > iframe{",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 616,
+      "text": ".iframeTouchShield{",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 620,
+      "text": "/* YouTube iframe: минимальная высота отдельно (переменная под моб/десктоп) */",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 621,
+      "text": ".mediaBox > iframe[data-forum-media=\"youtube\"]{",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 622,
+      "text": "min-height: var(--mb-yt-iframe-min-h, 0px);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/ForumStyles.jsx",
+      "line": 624,
+      "text": ".mediaBox > iframe[data-forum-media=\"tiktok\"]{",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 82,
+      "text": "--mb-iframe-h-mobile: 700px;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 83,
+      "text": "--mb-iframe-h-tablet: 550px;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 84,
+      "text": "--mb-iframe-h-desktop: 550px;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 85,
+      "text": "/* YouTube iframe: минимальная высота (моб/планш/десктоп)",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 86,
+      "text": "- max-height уже управляется через --mb-iframe-h-*",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 89,
+      "text": "--mb-yt-iframe-min-h-mobile: 420px;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 90,
+      "text": "--mb-yt-iframe-min-h-tablet: 550px;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 91,
+      "text": "--mb-yt-iframe-min-h-desktop: 550px;",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 113,
+      "text": "--mb-iframe-h: var(--mb-iframe-h-mobile);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 114,
+      "text": "--mb-yt-iframe-min-h: var(--mb-yt-iframe-min-h-mobile);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 126,
+      "text": "--mb-iframe-h: var(--mb-iframe-h-tablet);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 127,
+      "text": "--mb-yt-iframe-min-h: var(--mb-yt-iframe-min-h-tablet);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 141,
+      "text": "--mb-iframe-h: var(--mb-iframe-h-desktop);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 142,
+      "text": "--mb-yt-iframe-min-h: var(--mb-yt-iframe-min-h-desktop);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 198,
+      "text": ".mediaBox[data-kind=\"iframe\"]{",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 199,
+      "text": "--mb-h: var(--mb-iframe-h);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 200,
+      "text": "min-height: var(--mb-iframe-h);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 201,
+      "text": "height: var(--mb-iframe-h);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 202,
+      "text": "max-height: var(--mb-iframe-h);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 232,
+      "text": "/* Video/iframe cards: фиксируем внутренний плеер по высоте контейнера */",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 238,
+      "text": "/* iframe: по умолчанию 16:9, для TikTok — 9:16 */",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 239,
+      "text": ".mediaBox > iframe{",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 249,
+      "text": "/* YouTube iframe: минимальная высота отдельно (переменная под моб/десктоп) */",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 250,
+      "text": ".mediaBox > iframe[data-forum-media=\"youtube\"]{",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 251,
+      "text": "min-height: var(--mb-yt-iframe-min-h, 0px);",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    },
+    {
+      "file": "app/forum/styles/modules/foundationStyles.js",
+      "line": 253,
+      "text": ".mediaBox > iframe[data-forum-media=\"tiktok\"]{",
+      "operation": "iframe_src",
+      "ownershipGroup": "source_lifecycle",
+      "mediaDomain": "iframe"
+    }
+  ],
+  "conflicts": [
+    {
+      "mediaDomain": "viewport",
+      "ownershipGroup": "viewport_logic",
+      "fileCount": 48,
+      "files": [
+        "app/forum/ForumAds.js",
+        "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+        "app/forum/features/dm/components/DmVoicePlayer.jsx",
+        "app/forum/features/dm/hooks/useDmDeleteController.js",
+        "app/forum/features/dm/hooks/useDmRepliesSeen.js",
+        "app/forum/features/dm/hooks/useDmSeenObservers.js",
+        "app/forum/features/dm/hooks/useDmThreadAutoScroll.js",
+        "app/forum/features/dm/utils/alignInboxStartUnderTabs.js",
+        "app/forum/features/feed/components/LoadMoreSentinel.jsx",
+        "app/forum/features/feed/components/PostActionBar.jsx",
+        "app/forum/features/feed/components/TopicItem.jsx",
+        "app/forum/features/feed/components/UserPostsPane.jsx",
+        "app/forum/features/feed/components/UserRecommendationCard.jsx",
+        "app/forum/features/feed/hooks/useForumFeedRuntime.js",
+        "app/forum/features/feed/hooks/useForumHomeAction.js",
+        "app/forum/features/feed/hooks/useForumSyncLoop.js",
+        "app/forum/features/feed/hooks/useForumViewTracking.js",
+        "app/forum/features/feed/hooks/usePostFx.js",
+        "app/forum/features/feed/hooks/usePostOwnerActions.js",
+        "app/forum/features/feed/hooks/useThreadOpenNavigation.js",
+        "app/forum/features/feed/hooks/useTopicDiscoveryModel.js",
+        "app/forum/features/feed/hooks/useUserPostsBranchModel.js",
+        "app/forum/features/feed/utils/navScroll.js",
+        "app/forum/features/feed/utils/postFocus.js",
+        "app/forum/features/media/components/QCastPlayer.jsx",
+        "app/forum/features/media/components/VideoMedia.jsx",
+        "app/forum/features/media/components/VideoTrimPopover.jsx",
+        "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+        "app/forum/features/media/hooks/useVideoFeedWindowing.js",
+        "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+        "app/forum/features/media/utils/videoFeedScroll.js",
+        "app/forum/features/moderation/components/AdminPopover.jsx",
+        "app/forum/features/moderation/components/ReportPopover.jsx",
+        "app/forum/features/moderation/hooks/useReportController.js",
+        "app/forum/features/profile/components/ProfilePopover.jsx",
+        "app/forum/features/profile/components/UserInfoPopover.jsx",
+        "app/forum/features/profile/components/VipPopover.jsx",
+        "app/forum/features/qcoin/components/QCoinWithdrawPopover.jsx",
+        "app/forum/features/quests/hooks/useQuestViewActions.js",
+        "app/forum/features/ui/components/ConfirmDeleteOverlay.jsx",
+        "app/forum/features/ui/components/DmDeletePopover.jsx",
+        "app/forum/features/ui/components/ForumAdSlot.jsx",
+        "app/forum/features/ui/components/ForumSearchSortControls.jsx",
+        "app/forum/features/ui/hooks/useComposerScrollMemory.js",
+        "app/forum/features/ui/hooks/useForumHeadCollapse.js",
+        "app/forum/features/ui/hooks/useScrollResizeCompensation.js",
+        "app/forum/page.js",
+        "app/forum/shared/hooks/usePageLock.js"
+      ]
+    },
+    {
+      "mediaDomain": "html_media",
+      "ownershipGroup": "playback_control",
+      "fileCount": 12,
+      "files": [
+        "app/forum/ForumAds.js",
+        "app/forum/features/dm/components/DmVoicePlayer.jsx",
+        "app/forum/features/media/components/LivePreview.jsx",
+        "app/forum/features/media/components/QCastPlayer.jsx",
+        "app/forum/features/media/components/VideoMedia.jsx",
+        "app/forum/features/media/components/VideoTrimPopover.jsx",
+        "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+        "app/forum/features/media/utils/frontCameraMirror.js",
+        "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+        "app/forum/features/media/utils/mediaRuntime.js",
+        "app/forum/features/media/utils/moderationPrep.js",
+        "app/forum/features/media/utils/videoControls.js"
+      ]
+    },
+    {
+      "mediaDomain": "iframe",
+      "ownershipGroup": "source_lifecycle",
+      "fileCount": 12,
+      "files": [
+        "app/forum/ForumAds.js",
+        "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+        "app/forum/features/diagnostics/utils/emitPolicy.js",
+        "app/forum/features/feed/components/ForumPostCard.jsx",
+        "app/forum/features/feed/components/PostMediaStack.jsx",
+        "app/forum/features/feed/hooks/usePostMediaTextModel.js",
+        "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+        "app/forum/features/media/utils/mediaLinks.js",
+        "app/forum/features/media/utils/videoFeedPosts.js",
+        "app/forum/p/[postId]/route.js",
+        "app/forum/styles/ForumStyles.jsx",
+        "app/forum/styles/modules/foundationStyles.js"
+      ]
+    },
+    {
+      "mediaDomain": "global_mute",
+      "ownershipGroup": "mute_persistence",
+      "fileCount": 6,
+      "files": [
+        "app/forum/ForumAds.js",
+        "app/forum/features/media/components/QCastPlayer.jsx",
+        "app/forum/features/media/components/VideoMedia.jsx",
+        "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+        "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+        "app/forum/features/media/utils/mediaMutePrefs.js"
+      ]
+    },
+    {
+      "mediaDomain": "html_media",
+      "ownershipGroup": "source_lifecycle",
+      "fileCount": 6,
+      "files": [
+        "app/forum/features/media/components/QCastPlayer.jsx",
+        "app/forum/features/media/components/VideoMedia.jsx",
+        "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+        "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+        "app/forum/features/media/utils/mediaRuntime.js",
+        "app/forum/features/media/utils/moderationPrep.js"
+      ]
+    },
+    {
+      "mediaDomain": "qcast",
+      "ownershipGroup": "mute_persistence",
+      "fileCount": 2,
+      "files": [
+        "app/forum/features/media/components/QCastPlayer.jsx",
+        "app/forum/features/media/hooks/useForumMediaCoordinator.js"
+      ]
+    }
+  ]
+}

@@ -649,10 +649,18 @@ export default function VideoMedia({
         const persistUntil = Number(el?.dataset?.__persistMuteUntil || 0)
         const now = Date.now()
         if (skipPersistUntil <= now && persistUntil > now) {
-          writeMuted(m)
+          writeMuted(m, {
+            source: 'video_volumechange',
+            userAction: true,
+          })
           window.dispatchEvent(
             new CustomEvent(mutedEvent, {
-              detail: { muted: m, source: 'video', id: el.dataset.__mid || null },
+              detail: {
+                muted: m,
+                source: 'video',
+                id: el.dataset.__mid || null,
+                userAction: true,
+              },
             }),
           )
         }

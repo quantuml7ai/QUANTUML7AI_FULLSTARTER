@@ -1,9 +1,9 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-15T17:43:01.077Z",
+  "generatedAt": "2026-04-15T19:51:46.413Z",
   "summary": {
-    "scannedFiles": 366,
-    "internalEdges": 498,
+    "scannedFiles": 369,
+    "internalEdges": 504,
     "cycleCount": 0,
     "crossDomainEdgeCount": 117,
     "forumRootImportCount": 1,
@@ -1942,9 +1942,11 @@
       "domain": "forum-ui",
       "imports": [
         "app/forum/shared/utils/browser.js",
-        "app/forum/features/media/utils/mediaLifecycleRuntime.js"
+        "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+        "app/forum/features/media/utils/mediaDebugRuntime.js",
+        "app/forum/features/media/utils/mediaLifecycleStateMachine.js"
       ],
-      "importCount": 2,
+      "importCount": 4,
       "external": [
         "react"
       ],
@@ -2082,24 +2084,52 @@
       "externalCount": 0
     },
     {
+      "file": "app/forum/features/media/utils/mediaDebugRuntime.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
       "domain": "forum-ui",
       "imports": [
         "app/forum/features/media/components/VideoMedia.jsx",
         "app/forum/features/media/components/QCastPlayer.jsx",
-        "app/forum/features/media/utils/videoControls.js"
+        "app/forum/features/media/utils/videoControls.js",
+        "app/forum/features/media/utils/mediaDebugRuntime.js",
+        "app/forum/features/media/utils/mediaMutePrefs.js"
       ],
-      "importCount": 3,
+      "importCount": 5,
       "external": [
         "react"
       ],
       "externalCount": 1
     },
     {
+      "file": "app/forum/features/media/utils/mediaLifecycleStateMachine.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
       "file": "app/forum/features/media/utils/mediaLinks.js",
       "domain": "forum-ui",
       "imports": [],
       "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/media/utils/mediaMutePrefs.js",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/media/utils/mediaDebugRuntime.js"
+      ],
+      "importCount": 1,
       "external": [],
       "externalCount": 0
     },
@@ -3325,9 +3355,10 @@
       "file": "app/forum/ForumAds.js",
       "domain": "forum-ui",
       "imports": [
-        "components/i18n.js"
+        "components/i18n.js",
+        "app/forum/features/media/utils/mediaLifecycleRuntime.js"
       ],
-      "importCount": 1,
+      "importCount": 2,
       "external": [
         "react",
         "next/image",

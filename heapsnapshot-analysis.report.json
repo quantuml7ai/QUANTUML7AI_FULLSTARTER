@@ -1,155 +1,155 @@
 {
-  "file": "c:\\Users\\BETEP\\Downloads\\Heap-20260328T084559.heapsnapshot",
-  "fileSizeMB": 245.89,
+  "file": "C:\\Users\\staro\\Downloads\\Heap-20260415T224038.heapsnapshot",
+  "fileSizeMB": 246.42,
   "snapshot": {
-    "nodeCount": 2423558,
-    "edgeCount": 11970621,
-    "extraNativeBytesMB": 8
+    "nodeCount": 2361942,
+    "edgeCount": 12442564,
+    "extraNativeBytesMB": 7.32
   },
   "nodes": {
-    "totalNodes": 2423558,
-    "totalSelfSize": 373899545,
-    "totalSelfSizeMB": 356.58,
-    "detachedNodes": 929,
-    "detachedSelfSize": 157432,
-    "detachedSelfSizeMB": 0.15,
+    "totalNodes": 2361942,
+    "totalSelfSize": 349074275,
+    "totalSelfSizeMB": 332.9,
+    "detachedNodes": 1823,
+    "detachedSelfSize": 387064,
+    "detachedSelfSizeMB": 0.37,
     "topTypesBySelfSize": [
       {
         "type": "native",
-        "count": 69460,
-        "selfSize": 245873117,
-        "detachedCount": 929,
-        "detachedSelfSize": 157432,
-        "maxSelfSize": 34167914,
-        "selfSizeMB": 234.48,
-        "detachedSelfSizeMB": 0.15,
-        "maxSelfSizeKB": 33367.1
+        "count": 67527,
+        "selfSize": 224556379,
+        "detachedCount": 1823,
+        "detachedSelfSize": 387064,
+        "maxSelfSize": 35361302,
+        "selfSizeMB": 214.15,
+        "detachedSelfSizeMB": 0.37,
+        "maxSelfSizeKB": 34532.52
       },
       {
         "type": "string",
-        "count": 218708,
-        "selfSize": 35390996,
+        "count": 176399,
+        "selfSize": 35483436,
         "detachedCount": 0,
         "detachedSelfSize": 0,
-        "maxSelfSize": 5384036,
-        "selfSizeMB": 33.75,
+        "maxSelfSize": 5402772,
+        "selfSizeMB": 33.84,
         "detachedSelfSizeMB": 0,
-        "maxSelfSizeKB": 5257.85
+        "maxSelfSizeKB": 5276.14
       },
       {
         "type": "code",
-        "count": 444444,
-        "selfSize": 29295944,
+        "count": 302055,
+        "selfSize": 23139156,
         "detachedCount": 0,
         "detachedSelfSize": 0,
-        "maxSelfSize": 154408,
-        "selfSizeMB": 27.94,
+        "maxSelfSize": 154496,
+        "selfSizeMB": 22.07,
         "detachedSelfSizeMB": 0,
-        "maxSelfSizeKB": 150.79
+        "maxSelfSizeKB": 150.88
       },
       {
         "type": "closure",
-        "count": 838996,
-        "selfSize": 22874932,
+        "count": 818920,
+        "selfSize": 22235008,
         "detachedCount": 0,
         "detachedSelfSize": 0,
-        "maxSelfSize": 36,
-        "selfSizeMB": 21.82,
+        "maxSelfSize": 32,
+        "selfSizeMB": 21.2,
         "detachedSelfSizeMB": 0,
-        "maxSelfSizeKB": 0.04
+        "maxSelfSizeKB": 0.03
       },
       {
         "type": "array",
-        "count": 61540,
-        "selfSize": 17626600,
+        "count": 44560,
+        "selfSize": 15151976,
         "detachedCount": 0,
         "detachedSelfSize": 0,
-        "maxSelfSize": 2621460,
-        "selfSizeMB": 16.81,
+        "maxSelfSize": 131092,
+        "selfSizeMB": 14.45,
         "detachedSelfSizeMB": 0,
-        "maxSelfSizeKB": 2560.02
-      },
-      {
-        "type": "object",
-        "count": 360921,
-        "selfSize": 10557104,
-        "detachedCount": 0,
-        "detachedSelfSize": 0,
-        "maxSelfSize": 19780,
-        "selfSizeMB": 10.07,
-        "detachedSelfSizeMB": 0,
-        "maxSelfSizeKB": 19.32
+        "maxSelfSizeKB": 128.02
       },
       {
         "type": "object shape",
-        "count": 110261,
-        "selfSize": 5861076,
+        "count": 151283,
+        "selfSize": 9354288,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "maxSelfSize": 12316,
-        "selfSizeMB": 5.59,
+        "selfSizeMB": 8.92,
         "detachedSelfSizeMB": 0,
         "maxSelfSizeKB": 12.03
       },
       {
+        "type": "object",
+        "count": 314364,
+        "selfSize": 9294108,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "maxSelfSize": 10056,
+        "selfSizeMB": 8.86,
+        "detachedSelfSizeMB": 0,
+        "maxSelfSizeKB": 9.82
+      },
+      {
         "type": "hidden",
-        "count": 205393,
-        "selfSize": 4313760,
+        "count": 416700,
+        "selfSize": 8732216,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "maxSelfSize": 49160,
-        "selfSizeMB": 4.11,
+        "selfSizeMB": 8.33,
         "detachedSelfSizeMB": 0,
         "maxSelfSizeKB": 48.01
       },
       {
         "type": "concatenated string",
-        "count": 89370,
-        "selfSize": 1787400,
+        "count": 46547,
+        "selfSize": 930940,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "maxSelfSize": 20,
-        "selfSizeMB": 1.7,
+        "selfSizeMB": 0.89,
         "detachedSelfSizeMB": 0,
         "maxSelfSizeKB": 0.02
       },
       {
         "type": "number",
-        "count": 18891,
-        "selfSize": 178680,
+        "count": 20917,
+        "selfSize": 133584,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "maxSelfSize": 12,
-        "selfSizeMB": 0.17,
+        "selfSizeMB": 0.13,
         "detachedSelfSizeMB": 0,
         "maxSelfSizeKB": 0.01
       },
       {
-        "type": "regexp",
-        "count": 3089,
-        "selfSize": 86492,
-        "detachedCount": 0,
-        "detachedSelfSize": 0,
-        "maxSelfSize": 28,
-        "selfSizeMB": 0.08,
-        "detachedSelfSizeMB": 0,
-        "maxSelfSizeKB": 0.03
-      },
-      {
         "type": "bigint",
-        "count": 1852,
-        "selfSize": 43160,
+        "count": 1181,
+        "selfSize": 28312,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "maxSelfSize": 80,
-        "selfSizeMB": 0.04,
+        "selfSizeMB": 0.03,
         "detachedSelfSizeMB": 0,
         "maxSelfSizeKB": 0.08
       },
       {
+        "type": "regexp",
+        "count": 926,
+        "selfSize": 25928,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "maxSelfSize": 28,
+        "selfSizeMB": 0.02,
+        "detachedSelfSizeMB": 0,
+        "maxSelfSizeKB": 0.03
+      },
+      {
         "type": "symbol",
-        "count": 370,
-        "selfSize": 5664,
+        "count": 355,
+        "selfSize": 5424,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "maxSelfSize": 16,
@@ -159,8 +159,8 @@
       },
       {
         "type": "sliced string",
-        "count": 231,
-        "selfSize": 4620,
+        "count": 176,
+        "selfSize": 3520,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "maxSelfSize": 20,
@@ -183,65 +183,65 @@
     "topTypesByDetachedSize": [
       {
         "type": "native",
-        "count": 69460,
-        "selfSize": 245873117,
-        "detachedCount": 929,
-        "detachedSelfSize": 157432,
-        "maxSelfSize": 34167914,
-        "selfSizeMB": 234.48,
-        "detachedSelfSizeMB": 0.15,
-        "maxSelfSizeKB": 33367.1
+        "count": 67527,
+        "selfSize": 224556379,
+        "detachedCount": 1823,
+        "detachedSelfSize": 387064,
+        "maxSelfSize": 35361302,
+        "selfSizeMB": 214.15,
+        "detachedSelfSizeMB": 0.37,
+        "maxSelfSizeKB": 34532.52
       }
     ]
   },
   "keywordHits": [
     {
       "keyword": "web3modal",
-      "count": 2926
+      "count": 2914
     },
     {
       "keyword": "wagmi",
-      "count": 1895
-    },
-    {
-      "keyword": "youtube",
-      "count": 103
-    },
-    {
-      "keyword": "forumads",
-      "count": 68
+      "count": 1789
     },
     {
       "keyword": "htmliframeelement",
-      "count": 53
+      "count": 283
     },
     {
-      "keyword": "tiktok",
-      "count": 46
+      "keyword": "youtube",
+      "count": 213
     },
     {
-      "keyword": "htmlvideoelement",
-      "count": 42
+      "keyword": "forumads",
+      "count": 66
     },
     {
       "keyword": "detached",
-      "count": 31
+      "count": 59
+    },
+    {
+      "keyword": "tiktok",
+      "count": 45
     },
     {
       "keyword": "intersectionobserver",
       "count": 27
     },
     {
-      "keyword": "__forum",
-      "count": 25
+      "keyword": "htmlvideoelement",
+      "count": 24
     },
     {
       "keyword": "htmlaudioelement",
-      "count": 19
+      "count": 23
+    },
+    {
+      "keyword": "__forum",
+      "count": 22
     },
     {
       "keyword": "resizeobserver",
-      "count": 17
+      "count": 18
     },
     {
       "keyword": "useforummediacoordinator",

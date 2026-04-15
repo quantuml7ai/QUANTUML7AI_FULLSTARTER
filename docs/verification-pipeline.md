@@ -91,6 +91,7 @@ The initial verification foundation covers:
 - every app page/layout/loading/error/not-found entry contract
 - the forum hook surface under `app/forum/**/hooks/use*.js(x)`
 - repo-wide static audits for runtime hotspots, effect cleanup risks, auth bus usage, and forum dependency topology
+- forum media ownership mapping and churn-oriented media audit artifacts
 - runtime config parsing
 - compact count formatting
 - recommendation rail interleave logic
@@ -120,6 +121,24 @@ Secondary flags only matter when the master switch is enabled:
 ```bash
 NEXT_PUBLIC_FORUM_DIAG=0
 NEXT_PUBLIC_FORUM_PERF_TRACE=0
+```
+
+## Forum Media Debug Flags
+
+Media trace and audit helpers are dev/test only and should stay off in production:
+
+```bash
+NEXT_PUBLIC_FORUM_MEDIA_TRACE_ENABLED=0
+NEXT_PUBLIC_FORUM_MEDIA_AUDIT_ENABLED=0
+NEXT_PUBLIC_FORUM_MEDIA_DEBUG_OVERLAY=0
+```
+
+Recommended local debug values:
+
+```bash
+NEXT_PUBLIC_FORUM_MEDIA_TRACE_ENABLED=1
+NEXT_PUBLIC_FORUM_MEDIA_AUDIT_ENABLED=1
+NEXT_PUBLIC_FORUM_MEDIA_DEBUG_OVERLAY=0
 ```
 
 ## Mandatory Usage Rule

@@ -55,6 +55,15 @@ describe('Forum hook contracts', () => {
     expect(source).toContain('if (!isDiagMasterEnabled()) return false')
   })
 
+  it('keeps media coordinator gated by shared media trace flags and settling-aware unload policy', () => {
+    const source = readRepoFile('app/forum/features/media/hooks/useForumMediaCoordinator.js')
+
+    expect(source).toContain('__getForumMediaDebugFlags')
+    expect(source).toContain('resolveMediaLifecycleState(')
+    expect(source).toContain('shouldDeferHardUnload(')
+    expect(source).toContain('enterSettling(')
+  })
+
   it('keeps PostCardBridge and TopicItem memoized at the list entrypoints', () => {
     const postCardSource = readRepoFile('app/forum/features/feed/components/PostCardBridge.jsx')
     const topicItemSource = readRepoFile('app/forum/features/feed/components/TopicItem.jsx')
@@ -107,5 +116,13 @@ describe('Forum hook contracts', () => {
     expect(topicItemSource).toContain('const isSelf = !!isSelfAuthor')
     expect(topicItemSource).toContain('const isStarred = !!isStarredAuthor')
     expect(topicItemSource).not.toContain('starredAuthors')
+  })
+
+  it('keeps media lifecycle runtime free from forced startup mute writes', () => {
+    const source = readRepoFile('app/forum/features/media/utils/mediaLifecycleRuntime.js')
+
+    expect(source).toContain('__appendForumMediaTrace')
+    expect(source).not.toContain("localStorage.setItem(MEDIA_MUTED_KEY, '1')")
+    expect(source).not.toContain("localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, '1')")
   })
 })
