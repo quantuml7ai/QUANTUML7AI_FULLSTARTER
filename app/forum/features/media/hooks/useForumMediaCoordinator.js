@@ -6,6 +6,7 @@ import {
   MEDIA_VIDEO_MUTED_KEY,
   MEDIA_MUTED_EVENT,
   readMutedPrefFromStorage,
+  __writeMediaMutedPref,
   __touchActiveVideoEl,
   __dropActiveVideoEl,
   __enforceActiveVideoCap,
@@ -15,6 +16,10 @@ import {
   __isVideoNearViewport,
   __MEDIA_VIS_MARGIN_PX,
 } from '../utils/mediaLifecycleRuntime'
+import {
+  shouldPersistGlobalMute,
+  computeSettlingUntil,
+} from '../utils/mediaStatePolicy'
 
 export default function useForumMediaCoordinator({ emitDiag }) {
   // === Ленивая подгрузка превью видео в постах ===
@@ -781,11 +786,9 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       };
     } catch {}
 
-    const writeMutedPref = (val) => {
+    const writeMutedPref = (val, options = {}) => {
       try {
-        const next = val ? '1' : '0';
-        localStorage.setItem(MEDIA_MUTED_KEY, next);
-        localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, next);
+        __writeMediaMutedPref(!!val, options);
       } catch {}
     };
     // Единый источник mute-предпочтения для video/iframe/youtube — storage.
@@ -842,11 +845,17 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       } catch {}
     };
 
-    const setMutedPref = (val, source = 'forum-coordinator', emit = true) => {
+    const setMutedPref = (val, source = 'forum-coordinator', emit = true, persistOverride = null) => {
       const next = !!val;
       if (mutedPref === next && source === 'forum-coordinator') return;
       mutedPref = next;
-      writeMutedPref(next);
+      const persist =
+        typeof persistOverride === 'boolean'
+          ? persistOverride
+          : shouldPersistGlobalMute(source);
+      if (persist) {
+        writeMutedPref(next, { persist: true, source });
+      }
       applyMutedPrefToAll();
       if (emit) {
         try {
@@ -1567,7 +1576,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       if (e?.detail?.source === 'forum-coordinator') return;
       if (e?.detail?.source === 'qcast') return;
       if (typeof e?.detail?.muted !== 'boolean') return;
-      setMutedPref(e.detail.muted, e.detail.source || 'external', false);
+      setMutedPref(e.detail.muted, e.detail.source || 'external', false, false);
     };
     const onMediaPauseCaptured = (e) => {
       const target = e?.target;
@@ -2053,7 +2062,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           const last = ytMuteLast.get(player);
           if (last !== muted) {
             ytMuteLast.set(player, muted);
-            setMutedPref(muted, 'youtube');
+            setMutedPref(muted, 'youtube', true, false);
           }
         } catch {}
       }, 650);
@@ -2351,12 +2360,19 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       if (id) clearTimeout(id);
       unloadTimers.delete(el);
     };
+    let settlingUntilTs = 0;
+    const markSettling = (ms = 900, reason = 'settle') => {
+      settlingUntilTs = computeSettlingUntil(settlingUntilTs, ms, Date.now());
+      emitMediaDiag('media_settling', { reason, settlingUntilTs }, false);
+    };
+    const isSettling = () => settlingUntilTs > Date.now();    
     emitMediaDiag('media_coordinator_init', {
       iframeHardUnloadMs: IFRAME_HARD_UNLOAD_MS,
       iframeResidentCap: IFRAME_RESIDENT_CAP,
       isCoarseUi,
       ...getIframeSnapshot(),
     }, true);
+    markSettling(1400, 'media_coordinator_init');
     try { window.__forumMediaCoordinatorActive = '1'; } catch {}
 
     const softPauseMedia = (el, reason = 'soft_pause') => {
@@ -2637,6 +2653,11 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       const delay = Number.isFinite(ms) ? ms : getUnloadDelay(el, reason);
       const id = setTimeout(() => {
         unloadTimers.delete(el);
+        if (isSettling()) {
+          trace('hard_unload_deferred_settling', el, { reason });
+          scheduleHardUnload(el, Math.max(900, delay), `${reason}:settle_retry`);
+          return;
+        }        
         if (!isIframeLike(el) && shouldRetainHtmlMedia(el)) {
           trace('hard_unload_skip_retained', el, { reason });
           return;
@@ -3564,14 +3585,17 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       } catch {
         return;
       }
+      markSettling(1200, 'visibility_visible');
       try { observeAll(); } catch {}
       recoverVisibleHtmlMedia('visibility_visible');
     };
     const onPageShowRecover = () => {
+      markSettling(1400, 'pageshow');
       try { observeAll(); } catch {}
       recoverVisibleHtmlMedia('pageshow');
     };
     const onWindowFocusRecover = () => {
+      markSettling(1000, 'window_focus');
       recoverVisibleHtmlMedia('window_focus');
     };
 

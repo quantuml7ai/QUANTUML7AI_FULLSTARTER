@@ -27,8 +27,9 @@ function readMutedPrefFromStorage() {
   }
 }
 
-function writeMutedPrefToStorage(val) {
+function writeMutedPrefToStorage(val, options = {}) {
   if (!isBrowser()) return;
+  if (options?.persist !== true) return;
   try {
     window.localStorage?.setItem(MEDIA_MUTED_KEY, val ? '1' : '0');
   } catch {}
@@ -1569,7 +1570,8 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
         v.play?.().catch(() => {
           // если пробовали со звуком и браузер запретил — откатим в mute глобально
           if (!muted) {
-            writeMutedPrefToStorage(true);
+            // ВАЖНО:
+            // autoplay fallback не имеет права переписывать persisted global mute preference.
             emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback');
             setMuted(true);
             try { v.muted = true; } catch {}
@@ -1691,7 +1693,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     const next = !muted;
 
     // 1) сохранить глобально + оповестить всех
-    writeMutedPrefToStorage(next);
+    writeMutedPrefToStorage(next, { persist: true });
     emitMutedPref(next, playerIdRef.current, 'forum-ads-toggle');
 
     // 2) локально

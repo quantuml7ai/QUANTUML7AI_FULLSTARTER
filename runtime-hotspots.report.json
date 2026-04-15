@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-15T17:42:59.602Z",
+  "generatedAt": "2026-04-15T22:44:31.253Z",
   "report": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
@@ -11,7 +11,7 @@
         "filter-map": 0,
         "layout-read": 14,
         "sync-json": 0,
-        "local-storage": 4,
+        "local-storage": 2,
         "session-storage": 0,
         "network-call": 0,
         "raf": 4,
@@ -19,7 +19,7 @@
       },
       "longLines": [
         {
-          "i": 506,
+          "i": 511,
           "len": 190,
           "text": "rootMargin: `${Math.max(isCoarseUi ? 420 : 340, Math.round(__MEDIA_VIS_MARGIN_PX * 1.35))}px 0px ${Math.max(isCoarseUi ? 980 : 760, Math.round(__MEDIA_VIS_MARGIN_PX * 2.35))}px 0px`,"
         }
@@ -319,6 +319,24 @@
       },
       "longLines": [],
       "score": 24
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\QCastPlayer.jsx",
+      "counts": {
+        "for-loop": 3,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 3,
+        "sync-json": 0,
+        "local-storage": 2,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 3,
+        "interval": 1
+      },
+      "longLines": [],
+      "score": 23
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\lib\\indicators.js",
@@ -790,24 +808,6 @@
       "score": 14
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\QCastPlayer.jsx",
-      "counts": {
-        "for-loop": 2,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 2,
-        "sync-json": 0,
-        "local-storage": 2,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 1,
-        "interval": 1
-      },
-      "longLines": [],
-      "score": 14
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useScrollResizeCompensation.js",
       "counts": {
         "for-loop": 0,
@@ -960,7 +960,7 @@
         "filter-map": 0,
         "layout-read": 3,
         "sync-json": 0,
-        "local-storage": 6,
+        "local-storage": 4,
         "session-storage": 0,
         "network-call": 0,
         "raf": 0,
@@ -5518,6 +5518,24 @@
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaRuntime.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 0
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaStatePolicy.js",
       "counts": {
         "for-loop": 0,
         "while-loop": 0,

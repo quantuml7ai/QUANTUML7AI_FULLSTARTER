@@ -11,6 +11,11 @@ const audits = [
     outputs: ['runtime-hotspots.report.json'],
   },
   {
+    label: 'Forum media ownership',
+    script: 'tools/audit-media-ownership.js',
+    outputs: ['forum-media-ownership.report.json'],
+  },  
+  {
     label: 'Effects leak',
     script: 'tools/audit-effects.js',
     outputs: ['effects-leak.report.json'],
