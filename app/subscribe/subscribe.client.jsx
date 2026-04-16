@@ -79,13 +79,18 @@ function openPaymentWindow(url) {
 
 
 /* ===== Badge кнопка: только визуальные эффекты X2 (VIP — золото, не VIP — мигает красным) ===== */
-function TierBadge({ label, isVip, onClick }) {
+function TierBadge({ label, isVip, onClick, ariaLabel }) {
+  const isClickable = !isVip && typeof onClick === 'function'
+
   return (
     <button
       type="button"
       className={`badge badge-cta ${isVip ? 'vip' : 'needVip'}`}
-      onClick={onClick}
-      aria-label={`Start payment for ${label} plan`}
+      onClick={isClickable ? onClick : undefined}
+      aria-label={ariaLabel || label}
+      aria-disabled={isVip ? 'true' : 'false'}
+      disabled={isVip}
+      title={label}
     >
       {label}
       <style jsx>{`
@@ -188,7 +193,13 @@ export default function SubscribePage() {
 
   const [isVip, setIsVip] = useState(false)
   const [vipUntil, setVipUntil] = useState(null)
+  const vipBadgeLabel = isVip
+    ? (t('sub_vip_badge_active') || 'VIP+ активно')
+    : (t('sub_vip_badge_idle') || 'Активировать VIP+')
 
+  const vipBadgeAriaLabel = isVip
+    ? (t('sub_vip_badge_active_aria') || 'VIP+ активно')
+    : (t('sub_vip_badge_idle_aria') || 'Активировать VIP+')
   const refreshVip = async () => {
     try {
       const accountId =
@@ -281,7 +292,12 @@ export default function SubscribePage() {
 
           {/* VIP */}
           <div style={{ marginTop: 18 }}>
-            <TierBadge label="VIP+" isVip={isVip} onClick={handleVipClick} />
+            <TierBadge
+              label={vipBadgeLabel}
+              ariaLabel={vipBadgeAriaLabel}
+              isVip={isVip}
+              onClick={handleVipClick}
+            />
             <h3 style={{ marginTop: 8 }}>{t('sub_vip_title')}</h3>
             <p><b>{t('sub_vip_price')}</b></p>
             <p dangerouslySetInnerHTML={{ __html: t('sub_vip_desc') }} />

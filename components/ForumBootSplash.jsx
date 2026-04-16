@@ -29,7 +29,7 @@ const FORUM_SPLASH_VIDEO_SRC = '/load/load.mp4'
 ========================================================= */
 // 1 = try to start with sound immediately
 // 0 = always start muted
-const FORUM_SPLASH_TRY_SOUND_AUTOPLAY = 1
+const FORUM_SPLASH_TRY_SOUND_AUTOPLAY = 0
 
 // If sound autoplay is blocked by browser:
 // 1 = fallback to muted autoplay

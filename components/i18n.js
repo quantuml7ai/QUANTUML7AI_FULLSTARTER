@@ -5411,7 +5411,10 @@ const SUBSCRIBE_EN = {
   sub_wallet_cta: 'Connect wallet',
   sub_wallet_cta_note: 'Connect your wallet — the plan will activate and sync with MiniApp/Telegram/forum.',
   sub_plans_title: 'Plans',
-
+  sub_vip_badge_idle: 'Activate VIP+',
+  sub_vip_badge_active: 'VIP+ Active',
+  sub_vip_badge_idle_aria: 'Activate VIP+ plan',
+  sub_vip_badge_active_aria: 'VIP+ plan is active',
   sub_vip_title: 'VIP+ — X2 QCoin, premium AI channel, media posting, L7 network priority',
   sub_vip_price: 'Price: 59.99 USD / month',
   sub_vip_desc: `
@@ -5510,7 +5513,10 @@ const SUBSCRIBE_RU = {
   sub_wallet_cta: 'Подключить кошелёк',
   sub_wallet_cta_note: 'Подключите кошелёк — план активируется и синхронизируется с MiniApp/Telegram/форумом.',
   sub_plans_title: 'Тарифы',
-
+  sub_vip_badge_idle: 'Активировать VIP+',
+  sub_vip_badge_active: 'VIP+ активно',
+  sub_vip_badge_idle_aria: 'Активировать VIP+',
+  sub_vip_badge_active_aria: 'VIP+ активно',
   sub_vip_title: 'VIP+ — X2 QCoin, премиальный AI-канал, медиапостинг, приоритет L7-сети',
   sub_vip_price: 'Цена: 59.99 USD / месяц',
   sub_vip_desc: `
@@ -5609,7 +5615,10 @@ const SUBSCRIBE_UK = {
   sub_wallet_cta: 'Підключити гаманець',
   sub_wallet_cta_note: 'Підключи гаманець — план активується та синхронізується з MiniApp/Telegram/форумом.',
   sub_plans_title: 'Тарифи',
-
+  sub_vip_badge_idle: 'Активувати VIP+',
+  sub_vip_badge_active: 'VIP+ активний',
+  sub_vip_badge_idle_aria: 'Активувати VIP+',
+  sub_vip_badge_active_aria: 'VIP+ активний',
   sub_vip_title: 'VIP+ — X2 QCoin, преміальний AI-канал, медіапостинг, пріоритет L7-мережі',
   sub_vip_price: 'Ціна: 59.99 USD / місяць',
   sub_vip_desc: `
@@ -5709,7 +5718,10 @@ const SUBSCRIBE_TR = {
   sub_wallet_cta: 'Cüzdanı bağla',
   sub_wallet_cta_note: 'Cüzdanı bağlayın — plan etkinleşir ve MiniApp/Telegram/forum ile senkronize edilir.',
   sub_plans_title: 'Tarifeler',
-
+  sub_vip_badge_idle: 'VIP+ Etkinleştir',
+  sub_vip_badge_active: 'VIP+ Aktif',
+  sub_vip_badge_idle_aria: 'VIP+ planını etkinleştir',
+  sub_vip_badge_active_aria: 'VIP+ planı aktif',
   sub_vip_title: 'VIP+ — X2 QCoin, premium AI kanal, medya gönderimi, L7 ağı önceliği',
   sub_vip_price: 'Fiyat: 59.99 USD / ay',
   sub_vip_desc: `
@@ -5809,7 +5821,10 @@ const SUBSCRIBE_ES = {
   sub_wallet_cta: 'Conectar billetera',
   sub_wallet_cta_note: 'Conecta tu billetera — el plan se activará y se sincronizará con MiniApp/Telegram/foro.',
   sub_plans_title: 'Planes',
-
+  sub_vip_badge_idle: 'Activar VIP+',
+  sub_vip_badge_active: 'VIP+ activo',
+  sub_vip_badge_idle_aria: 'Activar plan VIP+',
+  sub_vip_badge_active_aria: 'El plan VIP+ está activo',
   sub_vip_title: 'VIP+ — X2 QCoin, canal premium de IA, publicación multimedia, prioridad de la red L7',
   sub_vip_price: 'Precio: 59.99 USD / mes',
   sub_vip_desc: `
@@ -5909,7 +5924,10 @@ const SUBSCRIBE_AR = {
   sub_wallet_cta: 'ربط المحفظة',
   sub_wallet_cta_note: 'قم بربط محفظتك — سيتم تفعيل الخطة ومزامنتها مع MiniApp/تيليجرام/المنتدى.',
   sub_plans_title: 'الخطط',
-
+  sub_vip_badge_idle: 'تفعيل VIP+',
+  sub_vip_badge_active: 'VIP+ مفعل',
+  sub_vip_badge_idle_aria: 'تفعيل باقة VIP+',
+  sub_vip_badge_active_aria: 'باقة VIP+ مفعلة',
   sub_vip_title: 'VIP+ — X2 QCoin، قناة ذكاء اصطناعي مميزة، نشر وسائط، أولوية شبكة L7',
   sub_vip_price: 'السعر: 59.99 USD / شهرياً',
   sub_vip_desc: `
@@ -6009,7 +6027,10 @@ const SUBSCRIBE_ZH = {
   sub_wallet_cta: '连接钱包',
   sub_wallet_cta_note: '连接钱包——计划将被激活并与 MiniApp/Telegram/论坛同步。',
   sub_plans_title: '套餐',
-
+  sub_vip_badge_idle: '激活 VIP+',
+  sub_vip_badge_active: 'VIP+ 已激活',
+  sub_vip_badge_idle_aria: '激活 VIP+ 方案',
+  sub_vip_badge_active_aria: 'VIP+ 方案已激活',
   sub_vip_title: 'VIP+ — X2 QCoin，高级 AI 频道，媒体发布，L7 网络优先级',
   sub_vip_price: '价格: 59.99 USD / 月',
   sub_vip_desc: `
