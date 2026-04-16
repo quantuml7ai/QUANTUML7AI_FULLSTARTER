@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-16T21:56:39.359Z",
+  "generatedAt": "2026-04-15T17:43:00.926Z",
   "summary": [
     {
       "event": "auth:ok",
@@ -292,19 +292,19 @@
         {
           "event": "auth:ok",
           "kind": "add",
-          "line": 222,
+          "line": 211,
           "text": "window.addEventListener('auth:ok', onAuth)"
         },
         {
           "event": "auth:ok",
           "kind": "remove",
-          "line": 226,
+          "line": 215,
           "text": "window.removeEventListener('auth:ok', onAuth)"
         },
         {
           "event": "open-auth",
           "kind": "dispatch",
-          "line": 245,
+          "line": 234,
           "text": "try { window.dispatchEvent(new CustomEvent('open-auth')) } catch {}"
         }
       ]

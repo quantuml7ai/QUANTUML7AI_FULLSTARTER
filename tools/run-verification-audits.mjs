@@ -6,11 +6,6 @@ const repoRoot = process.cwd()
 
 const audits = [
   {
-    label: 'Forum media ownership',
-    script: 'tools/audit-media-ownership.js',
-    outputs: ['media-ownership.audit.report.json'],
-  },
-  {
     label: 'Runtime hotspots',
     script: 'tools/audit-runtime-hotspots.js',
     outputs: ['runtime-hotspots.report.json'],

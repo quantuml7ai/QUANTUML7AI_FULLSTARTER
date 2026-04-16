@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { readForumRuntimeConfig } from '../../../shared/config/runtime'
 import interleaveRecommendationRails from '../../feed/utils/interleaveRecommendationRails'
 
-const VF_OVERSCAN_PX = 2400
+const VF_OVERSCAN_PX = 1900
 const VF_VIDEO_CARD_H_MOBILE = 650
 const VF_VIDEO_CARD_H_TABLET = 550
 const VF_VIDEO_CARD_H_DESKTOP = 550
@@ -13,9 +13,9 @@ const VF_RECOMMENDATION_RAIL_H_MOBILE = 278
 const VF_RECOMMENDATION_RAIL_H_TABLET = 304
 const VF_RECOMMENDATION_RAIL_H_DESKTOP = 328
 const VF_ITEM_CHROME_EST = 240
-const VF_WINDOW_STICKY_MS = 760
-const VF_LAYOUT_JITTER_PX = 40
-const VF_SCROLL_SETTLE_MS = 280
+const VF_WINDOW_STICKY_MS = 320
+const VF_LAYOUT_JITTER_PX = 28
+const VF_SCROLL_SETTLE_MS = 180
 
 function defaultIsBrowser() {
   return typeof window !== 'undefined'
@@ -36,7 +36,7 @@ export default function useVideoFeedWindowing({
   const vfRosRef = useRef(new Map())
   const vfRafRef = useRef(0)
   const vfHardResetScheduleRef = useRef({ rafA: 0, rafB: 0, timeoutId: 0 })
-  const vfScrollStateRef = useRef({ top: 0, ts: 0, velocity: 0, direction: 0, flipHoldUntil: 0 })
+  const vfScrollStateRef = useRef({ top: 0, ts: 0, velocity: 0, direction: 0 })
   const vfScrollActivityRef = useRef({ activeUntil: 0, settleTimer: 0 })
   const vfWinMetaRef = useRef({ ts: 0, start: 0, end: 0 })
   const [vfWin, setVfWin] = useState(() => ({ start: 0, end: 0, top: 0, bottom: 0 }))
@@ -46,20 +46,16 @@ export default function useVideoFeedWindowing({
 
   const vfGetMaxRender = useCallback(() => {
     try {
-      if (!isBrowserFn()) return 18
+      if (!isBrowserFn()) return 13
       const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
       const dm = Number(window?.navigator?.deviceMemory || 0)
-      if (coarse) return 18
-      if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 20
-      return 22
+      if (coarse) return 12
+      if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 13
+      return 16
     } catch {
-      return 18
+      return 13
     }
   }, [isBrowserFn])
-
-  const vfIsScrollHot = useCallback(() => {
-    return Number(vfScrollActivityRef.current.activeUntil || 0) > Date.now()
-  }, [])
 
   const vfGetFixedItemH = useCallback(() => {
     try {
@@ -178,10 +174,8 @@ export default function useVideoFeedWindowing({
     const vh = Number(vp?.vh || 0)
     const velocity = Math.abs(Number(vfScrollStateRef.current?.velocity || 0))
     const direction = Number(vfScrollStateRef.current?.direction || 0)
-    const directionFlip = Number(vfScrollStateRef.current?.flipHoldUntil || 0) > Date.now()
-    const overscanBase = VF_OVERSCAN_PX + (directionFlip ? 420 : 0)
-    const velocityBoost = Math.min(1300, Math.round(velocity * 560))
-    const overscanPx = overscanBase + velocityBoost
+    const velocityBoost = Math.min(1100, Math.round(velocity * 520))
+    const overscanPx = VF_OVERSCAN_PX + velocityBoost
     const fromY = Math.max(0, st - overscanPx)
     const toY = st + vh + overscanPx
 
@@ -210,17 +204,13 @@ export default function useVideoFeedWindowing({
     setVfWin((prev) => {
       let nextStart = start
       let nextEnd = end
-      const scrollHot = vfIsScrollHot()
 
       const shrinkOnly =
         nextStart >= prev.start &&
         nextEnd <= prev.end &&
         (nextStart > prev.start || nextEnd < prev.end)
 
-      if (scrollHot) {
-        nextStart = Math.min(prev.start, nextStart)
-        nextEnd = Math.max(prev.end, nextEnd)
-      } else if (shrinkOnly) {
+      if (shrinkOnly) {
         const now = Date.now()
         const recentWindowChange = (now - Number(vfWinMetaRef.current?.ts || 0)) < VF_WINDOW_STICKY_MS
         const stickyItems = velocity > 1.2 ? 4 : velocity > 0.55 ? 3 : 2
@@ -259,7 +249,7 @@ export default function useVideoFeedWindowing({
       vfWinMetaRef.current = { ts: Date.now(), start: next.start, end: next.end }
       return next
     })
-  }, [videoFeedOpen, vfSlots.length, vfReadViewportState, vfGetH, vfGetMaxRender, vfBuildWindow, isBrowserFn, vfIsScrollHot])
+  }, [videoFeedOpen, vfSlots.length, vfReadViewportState, vfGetH, vfGetMaxRender, vfBuildWindow, isBrowserFn])
 
   const vfScheduleRecalc = useCallback(() => {
     if (vfRafRef.current) return
@@ -348,15 +338,7 @@ export default function useVideoFeedWindowing({
         const dy = Math.abs(signedDy)
         const velocity = dt > 220 ? 0 : (dy / dt)
         const direction = dy < 2 ? Number(prev?.direction || 0) : (signedDy > 0 ? 1 : -1)
-        const directionFlip =
-          dy > 18 &&
-          Number(prev?.direction || 0) !== 0 &&
-          direction !== 0 &&
-          direction !== Number(prev?.direction || 0)
-        const flipHoldUntil = directionFlip
-          ? Date.now() + VF_WINDOW_STICKY_MS
-          : Number(prev?.flipHoldUntil || 0)
-        vfScrollStateRef.current = { top, ts: now, velocity, direction, flipHoldUntil }
+        vfScrollStateRef.current = { top, ts: now, velocity, direction }
         scrollActivity.activeUntil = Date.now() + VF_SCROLL_SETTLE_MS
         if (scrollActivity.settleTimer) {
           try { clearTimeout(scrollActivity.settleTimer) } catch {}
@@ -397,7 +379,7 @@ export default function useVideoFeedWindowing({
         scrollActivity.settleTimer = 0
       }
       scrollActivity.activeUntil = 0
-      vfScrollStateRef.current = { top: 0, ts: 0, velocity: 0, direction: 0, flipHoldUntil: 0 }
+      vfScrollStateRef.current = { top: 0, ts: 0, velocity: 0, direction: 0 }
     }
   }, [videoFeedOpen, vfScheduleRecalc, vfGetScrollEl, vfReadViewportState, isBrowserFn])
 
@@ -414,16 +396,12 @@ export default function useVideoFeedWindowing({
 
       const update = () => {
         try {
-          const feedKind = String(node.getAttribute?.('data-feed-kind') || '')
-          const isPostCard = feedKind === 'post'
           const h = node.getBoundingClientRect?.()?.height
           if (!Number.isFinite(h) || h <= 1) return
           const prev = vfHeightsRef.current.get(idx)
           const nextH = Math.round(h)
-          const jitterThreshold = isPostCard ? 24 : 2
-          if (Number.isFinite(prev) && Math.abs(prev - nextH) < jitterThreshold) return
+          if (Number.isFinite(prev) && Math.abs(prev - nextH) < 2) return
           vfHeightsRef.current.set(idx, nextH)
-          if (isPostCard && vfIsScrollHot()) return
           const now = Date.now()
           if (Number(vfScrollActivityRef.current.activeUntil || 0) > now) return
           vfScheduleRecalc()
@@ -431,14 +409,13 @@ export default function useVideoFeedWindowing({
       }
 
       update()
-      const feedKind = String(node.getAttribute?.('data-feed-kind') || '')
-      if (feedKind !== 'post' && !vfRosRef.current.get(idx) && typeof ResizeObserver !== 'undefined') {
+      if (!vfRosRef.current.get(idx) && typeof ResizeObserver !== 'undefined') {
         const ro = new ResizeObserver(() => update())
         ro.observe(node)
         vfRosRef.current.set(idx, ro)
       }
     } catch {}
-  }, [vfIsScrollHot, vfScheduleRecalc])
+  }, [vfScheduleRecalc])
 
   useEffect(() => {
     if (!isBrowserFn()) return undefined

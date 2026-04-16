@@ -1075,7 +1075,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       const now = Date.now();
       if ((now - Number(adPlayEventTsRef.current || 0)) < 320) return;
       adPlayEventTsRef.current = now;
-      const el = videoRef.current || ytIframeRef.current || rootRef.current || null;
+      const el = rootRef.current || videoRef.current || ytIframeRef.current || null;
       window.dispatchEvent(new CustomEvent('site-media-play', {
         detail: { source, element: el, manual: false, id: playerIdRef.current }
       }));
@@ -1611,7 +1611,8 @@ const slotCssVars = {
         v.play?.().catch(() => {
           // если пробовали со звуком и браузер запретил — откатим в mute глобально
           if (!muted) {
-            emitMutedPref(true, playerIdRef.current, 'external');
+            writeMutedPrefToStorage(true);
+            emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback');
             setMuted(true);
             try { v.muted = true; } catch {}
           }
@@ -1733,7 +1734,7 @@ const slotCssVars = {
 
     // 1) сохранить глобально + оповестить всех
     writeMutedPrefToStorage(next);
-    emitMutedPref(next, playerIdRef.current, 'external');
+    emitMutedPref(next, playerIdRef.current, 'forum-ads-toggle');
 
     // 2) локально
     setMuted(next);
@@ -2136,17 +2137,13 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
   <div className="forum-ad-media-fill">
     <video
       ref={videoRef}
-      data-owner-id={`ad-video:${slotKind || 'slot'}:${nearId || url}`}
-      data-forum-media="video"
-      data-forum-embed-kind="ad-video"
-      data-lifecycle-state={shouldPlay ? 'active' : (isNear ? 'prepared' : 'detached')}
       src={media.src}
       className="forum-ad-fit"
       muted={muted}
       loop
       playsInline
       referrerPolicy="no-referrer"
-      preload="none"
+      preload={isNear ? 'metadata' : 'none'}
       onLoadedData={() => {
         try { clearVideoSrcBlock(media?.src); } catch {}
       }}
@@ -2171,13 +2168,8 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
 >
   <iframe
     ref={ytIframeRef}
-    data-owner-id={`ad-youtube:${slotKind || 'slot'}:${nearId || url}`}
-    data-forum-media="youtube"
-    data-forum-embed-kind="ad-youtube"
-    data-lifecycle-state={shouldPlay ? 'active' : (isNear ? 'prepared' : 'detached')}
     src={`https://www.youtube.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}
     title="YouTube video"
-    loading="lazy"
     frameBorder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
     allowFullScreen
@@ -2200,13 +2192,8 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
   style={isFluid ? { width: '100%', aspectRatio: '9 / 16' } : { width: '100%', height: '100%' }}
 >
   <iframe
-    data-owner-id={`ad-tiktok:${slotKind || 'slot'}:${nearId || url}`}
-    data-forum-media="tiktok"
-    data-forum-embed-kind="ad-tiktok"
-    data-lifecycle-state={shouldPlay ? 'active' : (isNear ? 'prepared' : 'detached')}
     src={`https://www.tiktok.com/embed/v2/${media.src}`}
     title="TikTok video"
-    loading="lazy"
     frameBorder="0"
     allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
     style={{

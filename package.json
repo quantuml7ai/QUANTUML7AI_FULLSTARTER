@@ -15,7 +15,6 @@
     "verify:env": "node tools/verify-environment.mjs",
     "verify:docs": "node tools/verify-docs-workflow.mjs",
     "verify:audits": "node tools/run-verification-audits.mjs",
-    "audit:forum:ownership": "node tools/audit-media-ownership.js",
     "test:contracts": "vitest run --configLoader native --project contracts",
     "test:unit": "vitest run --configLoader native --project unit",
     "test:component": "vitest run --configLoader native --project component",

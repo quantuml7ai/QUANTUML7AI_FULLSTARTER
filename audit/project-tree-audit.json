@@ -1,6 +1,6 @@
 {
   "phase": "project-tree-audit",
-  "timestamp": "2026-04-16T21:56:32.721Z",
+  "timestamp": "2026-04-13T20:35:48.464Z",
   "scope": "whole repository tree registry",
   "touched_files": [
     "PROJECT_TREE.md"
@@ -14,13 +14,13 @@
   "storage_risk": "none",
   "runtime_risk": "low",
   "notes": [
-    "repo_files=1599",
-    "source_files=661",
+    "repo_files=1592",
+    "source_files=655",
     "route_files=96"
   ],
   "status": "ok",
-  "total_repo_files": 1599,
-  "total_source_files": 661,
+  "total_repo_files": 1592,
+  "total_source_files": 655,
   "top_level_breakdown": {
     ".env.local": 1,
     ".env.local.example": 1,
@@ -30,7 +30,7 @@
     "account-sync-audit.report.json": 1,
     "ad-runtime.audit.report.json": 1,
     "AGENTS.md": 1,
-    "app": 383,
+    "app": 382,
     "audit": 170,
     "auth-bus.audit.report.json": 1,
     "components": 23,
@@ -48,7 +48,6 @@
     "lib": 13,
     "media-audit.report.json": 1,
     "media-budget.audit.report.json": 1,
-    "media-ownership.audit.report.json": 1,
     "next-env.d.ts": 1,
     "next.config.mjs": 1,
     "package.json": 1,
@@ -62,10 +61,9 @@
     "public": 920,
     "README.md": 1,
     "runtime-hotspots.report.json": 1,
-    "tests": 21,
-    "tools": 31,
+    "tests": 18,
+    "tools": 30,
     "tsconfig.json": 1,
-    "tsconfig.tsbuildinfo": 1,
     "vitest.config.mjs": 1
   }
 }

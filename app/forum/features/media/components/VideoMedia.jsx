@@ -285,6 +285,7 @@ function Ql7IconBad(props) {
 
 export default function VideoMedia({
   src,
+  poster,
   className,
   style,
   preload = 'none',
@@ -329,7 +330,7 @@ export default function VideoMedia({
   const isPostVideo = String(dataForumVideo || '') === 'post'
   const coordinatorOwnsLifecycle = !!String(dataForumMedia || '').trim()
   const renderControls = isPostVideo ? false : controls
-  const renderPreload = coordinatorOwnsLifecycle ? 'none' : preload
+  const renderPreload = dataForumVideo === 'post' ? undefined : preload 
 
   const readMuted = React.useCallback(() => {
     try {
@@ -529,16 +530,14 @@ React.useLayoutEffect(() => {
 
   try {
     const wantsWarm =
-      !coordinatorOwnsLifecycle &&
-      (
-        el.dataset?.__prewarm === '1' ||
-        el.dataset?.__active === '1' ||
-        el.dataset?.__resident === '1'
-      )
+      el.dataset?.__prewarm === '1' ||
+      el.dataset?.__active === '1' ||
+      el.dataset?.__resident === '1'
 
-    const effectivePreload = coordinatorOwnsLifecycle
-      ? 'none'
-      : (wantsWarm && preloadMode === 'none' ? 'auto' : preloadMode)
+    const effectivePreload =
+      isPostVideo
+        ? 'auto'
+        : (wantsWarm && preloadMode === 'none' ? 'auto' : preloadMode)
 
     el.preload = effectivePreload
   } catch {}
@@ -571,7 +570,10 @@ React.useLayoutEffect(() => {
   if (isNewMediaNode) {
     try {
       delete el.dataset.__resumeTime
+      delete el.dataset.__candidateBoostTs
       delete el.dataset.__recoverTry
+      delete el.dataset.__readyRetryCount
+      delete el.dataset.__loadPendingSince
       delete el.dataset.__userPaused
       delete el.dataset.__userPausedAt
       delete el.dataset.__suppressedPlayUntil
@@ -583,18 +585,35 @@ React.useLayoutEffect(() => {
       delete el.dataset.__lastManualMuteTs
       delete el.dataset.__bootAttachedSrc
       delete el.dataset.__bootMetadataPrimed
-      if (!coordinatorOwnsLifecycle) {
-        delete el.dataset.__candidateBoostTs
-        delete el.dataset.__readyRetryCount
-        delete el.dataset.__loadPendingSince
-      }
     } catch {}
   }
 
+  try {
+    const shouldBootstrapAttach = isPostVideo && !!s
+    const currentSrcAttr = String(el.getAttribute('src') || '')
+
+    if (shouldBootstrapAttach && currentSrcAttr !== s) {
+      el.setAttribute('src', s)
+      el.dataset.__bootAttachedSrc = s
+      el.dataset.__prewarm = '1'
+      el.dataset.__resident = '1'
+      el.preload = 'auto'
+
+      if (
+        Number(el.readyState || 0) === 0 &&
+        String(el.dataset?.__loadPending || '') !== '1'
+      ) {
+        el.dataset.__bootMetadataPrimed = '1'
+        el.dataset.__loadPending = '1'
+        el.dataset.__warmReady = '0'
+        el.dataset.__loadPendingSince = String(Date.now())
+        el.load?.()
+      }
+    }
+  } catch {}
 }, [
   autoPlay,
   clearNativeControlsForPost,
-  coordinatorOwnsLifecycle,
   defaultMutedProp,
   isPostVideo,
   playsInline,
@@ -618,19 +637,17 @@ React.useLayoutEffect(() => {
 const onPlay = () => {
   clearNativeControlsForPost()
 
-  if (!coordinatorOwnsLifecycle) {
-    try {
-      touchActiveVideoFn(el)
-      enforceActiveVideoCapFn(el)
-      el.dataset.__active = '1'
-      el.dataset.__prewarm = '1'
-      el.dataset.__resident = '1'
-      el.dataset.__loadPending = '0'
-      el.dataset.__warmReady = '1'
-      delete el.dataset.__loadPendingSince
-      el.preload = 'auto'
-    } catch {}
-  }
+  try {
+    touchActiveVideoFn(el)
+    enforceActiveVideoCapFn(el)
+    el.dataset.__active = '1'
+    el.dataset.__prewarm = '1'
+    el.dataset.__resident = '1'
+    el.dataset.__loadPending = '0'
+    el.dataset.__warmReady = '1'
+    delete el.dataset.__loadPendingSince
+    el.preload = 'auto'
+  } catch {}
 
   setPausedState(false)
   showCenterGlyph('pause', 620)
@@ -658,7 +675,6 @@ const onPlay = () => {
     }
   }, [
   clearNativeControlsForPost,
-  coordinatorOwnsLifecycle,
   enforceActiveVideoCapFn,
   hudVisible,
   revealHud,
@@ -736,7 +752,6 @@ const nextMuted = typeof initial === 'boolean' ? initial : fallbackMuted
   React.useEffect(() => {
     const el = ref.current
     if (!el) return
-    if (coordinatorOwnsLifecycle) return undefined
 
     const markPending = () => {
       try {
@@ -778,7 +793,7 @@ const nextMuted = typeof initial === 'boolean' ? initial : fallbackMuted
       try { el.removeEventListener('emptied', markCold) } catch {}
       try { el.removeEventListener('error', markCold) } catch {}
     }
-  }, [coordinatorOwnsLifecycle])
+  }, [])
 
   React.useEffect(() => {
     if (typeof window === 'undefined') return
@@ -976,7 +991,7 @@ const nextMuted = typeof initial === 'boolean' ? initial : fallbackMuted
       }
       // Для пост-видео восстановление делает единый coordinator.
       // Локальный remove(src)+load() здесь создаёт лишние 206/cancel-циклы.
-      if (String(dataForumVideo || '') === 'post' || coordinatorOwnsLifecycle) {
+      if (String(dataForumVideo || '') === 'post') {
         try {
           onErrorProp?.(e)
         } catch {}
@@ -1015,7 +1030,7 @@ const nextMuted = typeof initial === 'boolean' ? initial : fallbackMuted
         onErrorProp?.(e)
       } catch {}
     },
-    [coordinatorOwnsLifecycle, dataForumVideo, onErrorProp],
+    [dataForumVideo, onErrorProp],
   )
 
 const onVideoLoaded = React.useCallback(() => {
@@ -1025,28 +1040,26 @@ const onVideoLoaded = React.useCallback(() => {
 
     clearNativeControlsForPost()
 
-    if (!coordinatorOwnsLifecycle) {
-      try {
-        touchActiveVideoFn(el)
-        enforceActiveVideoCapFn(el)
-      } catch {}
+    try {
+      touchActiveVideoFn(el)
+      enforceActiveVideoCapFn(el)
+    } catch {}
 
-      try {
-        el.dataset.__recoverTry = '0'
-        el.dataset.__active = '1'
-        el.dataset.__prewarm = '1'
-        el.dataset.__resident = '1'
-        el.dataset.__loadPending = '0'
-        el.dataset.__warmReady = '1'
-        delete el.dataset.__loadPendingSince
-      } catch {}
+    try {
+      el.dataset.__recoverTry = '0'
+      el.dataset.__active = '1'
+      el.dataset.__prewarm = '1'
+      el.dataset.__resident = '1'
+      el.dataset.__loadPending = '0'
+      el.dataset.__warmReady = '1'
+      delete el.dataset.__loadPendingSince
+    } catch {}
 
-      try {
-        el.preload = 'auto'
-      } catch {}
-    }
+    try {
+      el.preload = 'auto'
+    } catch {}
   } catch {}
-}, [clearNativeControlsForPost, coordinatorOwnsLifecycle, enforceActiveVideoCapFn, touchActiveVideoFn])
+}, [clearNativeControlsForPost, enforceActiveVideoCapFn, touchActiveVideoFn])
 
   const handleRootPointerDown = React.useCallback((e) => {
     try { onPointerDownProp?.(e) } catch {}

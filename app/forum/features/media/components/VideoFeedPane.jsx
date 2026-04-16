@@ -133,12 +133,7 @@ export default function VideoFeedPane({
           const url = pickAdUrlForSlot(slot.key, 'video')
           if (!url) {
             return (
-              <div
-                key={slot.key}
-                ref={vfMeasureRef(index)}
-                data-feed-card="1"
-                data-feed-kind="ad"
-              >
+              <div key={slot.key} ref={vfMeasureRef(index)}>
                 <div
                   className="forumAdSlotPlaceholder mediaBox"
                   data-kind="ad"
@@ -151,12 +146,7 @@ export default function VideoFeedPane({
           }
 
           return (
-            <div
-              key={slot.key}
-              ref={vfMeasureRef(index)}
-              data-feed-card="1"
-              data-feed-kind="ad"
-            >
+            <div key={slot.key} ref={vfMeasureRef(index)}>
               <ForumAdSlot
                 slotKey={slot.key}
                 url={url}
