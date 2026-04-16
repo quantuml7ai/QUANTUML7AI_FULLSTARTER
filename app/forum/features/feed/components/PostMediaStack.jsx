@@ -210,7 +210,6 @@ export default function PostMediaStack({
   QCastPlayerComponent,
   ytEmbedParams,
   postId,
-  posterUrl,
   YT_RE,
 }) {
   const mediaKeyBase = String(postId || 'post')
@@ -230,9 +229,9 @@ export default function PostMediaStack({
     const nextTiktok = directTiktok.length ? directTiktok : uniqList(cached.tiktok || [])
     const next = { yt: nextYt, tiktok: nextTiktok }
     POST_MEDIA_EMBED_CACHE.set(stableEmbedKey, { ...next, ts: Date.now() })
-    if (POST_MEDIA_EMBED_CACHE.size > 2200) {
+    if (POST_MEDIA_EMBED_CACHE.size > 512) {
       const keys = Array.from(POST_MEDIA_EMBED_CACHE.keys())
-      for (let i = 0; i < keys.length - 1600; i += 1) {
+      for (let i = 0; i < keys.length - 320; i += 1) {
         POST_MEDIA_EMBED_CACHE.delete(keys[i])
       }
     }
@@ -261,11 +260,13 @@ export default function PostMediaStack({
             <div key={`video:${mediaKeyBase}:${src}:${i}`} className="videoCard mediaBox" data-kind="video" style={{ margin: 0 }}>
               <VideoMediaComponent
                 key={`video-media:${mediaKeyBase}:${src}:${i}`}
+                data-owner-id={`post-video:${mediaKeyBase}:${i}`}
+                data-forum-embed-kind="video"
+                data-lifecycle-state="detached"
+                data-stable-shell="1"
                 data-forum-video="post"
                 data-forum-media="video"
                 src={src}
-
-                loading="eager"
                 playsInline
                 controls={false}
                 controlsList="nodownload noplaybackrate noremoteplayback"
@@ -299,12 +300,16 @@ export default function PostMediaStack({
                 style={{ margin: 0 }}
               >
                 <iframe
+                  data-owner-id={`post-youtube:${mediaKeyBase}:${i}`}
+                  data-forum-embed-kind="youtube"
+                  data-lifecycle-state="detached"
+                  data-stable-shell="1"
                   data-src={`https://www.youtube.com/embed/${videoId}?${ytEmbedParams}`}
                   title="YouTube video"
                   id={`yt_${postId || 'post'}_${i}`}
                   data-yt-id={videoId}
                   data-forum-media="youtube"
-                  loading="eager"
+                  loading="lazy"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
@@ -379,9 +384,13 @@ export default function PostMediaStack({
               <div key={`tt:${mediaKeyBase}:${videoId}:${i}`} className="videoCard mediaBox" data-kind="iframe" style={{ margin: 0 }}>
                 <iframe
                   title="TikTok video"
+                  data-owner-id={`post-tiktok:${mediaKeyBase}:${i}`}
+                  data-forum-embed-kind="tiktok"
+                  data-lifecycle-state="detached"
+                  data-stable-shell="1"
                   data-forum-media="tiktok"
                   data-src={`https://www.tiktok.com/embed/v2/${videoId}`}
-                  loading="eager"
+                  loading="lazy"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
@@ -397,7 +406,15 @@ export default function PostMediaStack({
       {audioLines.length > 0 && (
         <div className="postAudio" style={{ display: 'grid', gap: 8, marginTop: 8 }}>
           {audioLines.map((src, i) => (
-            <div key={`audio:${mediaKeyBase}:${src}:${i}`} className="audioCard mediaBox" data-kind="qcast">
+            <div
+              key={`audio:${mediaKeyBase}:${src}:${i}`}
+              className="audioCard mediaBox"
+              data-kind="qcast"
+              data-owner-id={`post-qcast:${mediaKeyBase}:${i}`}
+              data-forum-embed-kind="qcast"
+              data-lifecycle-state="detached"
+              data-stable-shell="1"
+            >
               <QCastPlayerComponent src={src} />
             </div>
           ))}

@@ -275,6 +275,19 @@ export default function ForumBootSplash({ onDone }) {
     }
   }, [visible])
 
+  useEffect(() => {
+    if (!visible) return undefined
+    if (typeof window === 'undefined') return undefined
+    try {
+      window.__forumBootSplashActive = '1'
+    } catch {}
+    return () => {
+      try {
+        delete window.__forumBootSplashActive
+      } catch {}
+    }
+  }, [visible])
+
   if (!visible || FORUM_SPLASH_ENABLED !== 1) return null
 
   return (

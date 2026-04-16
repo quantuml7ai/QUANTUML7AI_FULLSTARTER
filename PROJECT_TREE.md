@@ -6,8 +6,8 @@
 > Если меняются связи файла с другими файлами настолько, что комментарий устаревает, комментарий тоже обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-tree.js`.
 
-Сгенерировано автоматически: 2026-04-13T20:35:47.525Z
-Файлов в реестре: 1592
+Сгенерировано автоматически: 2026-04-16T21:56:31.790Z
+Файлов в реестре: 1599
 
 ## Исключенные каталоги
 - `.git/` — служебные внутренние данные Git, не часть прикладного дерева проекта.
@@ -27,7 +27,7 @@
 - `account-sync-audit.report.json` — 1 файлов
 - `ad-runtime.audit.report.json` — 1 файлов
 - `AGENTS.md` — 1 файлов
-- `app` — 382 файлов
+- `app` — 383 файлов
 - `audit` — 170 файлов
 - `auth-bus.audit.report.json` — 1 файлов
 - `components` — 23 файлов
@@ -45,6 +45,7 @@
 - `lib` — 13 файлов
 - `media-audit.report.json` — 1 файлов
 - `media-budget.audit.report.json` — 1 файлов
+- `media-ownership.audit.report.json` — 1 файлов
 - `next-env.d.ts` — 1 файлов
 - `next.config.mjs` — 1 файлов
 - `package.json` — 1 файлов
@@ -58,9 +59,10 @@
 - `public` — 920 файлов
 - `README.md` — 1 файлов
 - `runtime-hotspots.report.json` — 1 файлов
-- `tests` — 18 файлов
-- `tools` — 30 файлов
+- `tests` — 21 файлов
+- `tools` — 31 файлов
 - `tsconfig.json` — 1 файлов
+- `tsconfig.tsbuildinfo` — 1 файлов
 - `vitest.config.mjs` — 1 файлов
 
 ## Дерево проекта
@@ -412,6 +414,7 @@
           - mediaLifecycleRuntime.js — Утилита media Lifecycle Runtime домена медиа. Связи: импортирует forum/features/media/components/QCastPlayer.jsx, forum/features/media/components/VideoMedia.jsx, forum/features/media/utils/videoControls.js; используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/components/PostCardBridge.jsx, forum/features/media/components/ComposerAttachmentPreview.jsx.
           - mediaLinks.js — Утилита media Links домена медиа. Связи: используется в forum/ForumRoot.jsx, forum/features/media/utils/mediaUrlPipeline.js, forum/features/ui/components/ForumSearchSortControls.jsx.
           - mediaRuntime.js — Утилита media Runtime домена медиа. Связи: импортирует forum/shared/constants/media.js, lib/forumVideoTrim.js; используется в forum/ForumRoot.jsx, forum/features/media/components/VideoTrimPopover.jsx, forum/features/media/hooks/useVideoTrimController.js.
+          - mediaStatePolicy.js — Утилита media State Policy домена медиа. Связи: используется в tests/unit/forum/media/mediaStatePolicy.test.js.
           - mediaUrlPipeline.js — Утилита media Url Pipeline домена медиа. Связи: импортирует forum/features/media/utils/mediaLinks.js; используется в forum/ForumRoot.jsx.
           - moderationPrep.js — Утилита moderation Prep домена медиа. Связи: используется в forum/ForumRoot.jsx.
           - qcastBars.js — Утилита qcast Bars домена медиа. Связи: используется в forum/features/media/components/QCastPlayer.jsx.
@@ -1801,6 +1804,7 @@
       - api-route-contracts.test.js — JS-файл api route contracts.test. Связи: импортирует tests/support/projectSurface.js.
       - app-entry-contracts.test.js — JS-файл app entry contracts.test. Связи: импортирует tests/support/projectSurface.js.
       - forum-hook-contracts.test.js — JS-файл forum hook contracts.test. Связи: импортирует tests/support/projectSurface.js.
+      - forum-media-contracts.test.js — JS-файл forum media contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - fixtures/ — Каталог fixtures.
     - forum/ — Каталог forum.
       - recommendations.js — JS-файл recommendations. Связи: используется в tests/component/forum/features/feed/components/UserRecommendationCard.test.jsx, tests/component/forum/features/feed/components/UserRecommendationsRail.test.jsx, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
@@ -1813,6 +1817,8 @@
         - feed/ — Каталог feed.
           - hooks/ — Каталог hooks.
             - useUserRecommendationsRail.test.jsx — JSX-файл use User Recommendations Rail.test. Связи: импортирует forum/features/feed/hooks/usePostMediaTextModel.js, forum/features/feed/hooks/usePublishedPostsModel.js, forum/features/feed/hooks/useThreadPostsModel.js.
+      - media/ — Каталог media.
+        - coordinator-runtime-contract.test.js — JS-файл coordinator runtime contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - mocks/ — Каталог mocks.
     - .gitkeep — Служебный-файл . Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - smoke/ — Каталог smoke.
@@ -1837,6 +1843,8 @@
         - media/ — Каталог media.
           - utils/ — Каталог utils.
             - mediaRuntime.test.js — JS-файл media Runtime.test. Связи: импортирует forum/features/media/utils/mediaRuntime.js.
+      - media/ — Каталог media.
+        - mediaStatePolicy.test.js — JS-файл media State Policy.test. Связи: импортирует forum/features/media/utils/mediaStatePolicy.js.
       - shared/ — Каталог shared.
         - config/ — Каталог config.
           - runtime.test.js — JS-файл runtime.test. Связи: импортирует forum/shared/config/runtime.js.
@@ -1859,6 +1867,7 @@
   - audit-full-forum.js — Локальный скрипт/инструмент audit full forum для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-heavy.js — Локальный скрипт/инструмент audit heavy для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-media-budget.js — Локальный скрипт/инструмент audit media budget для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-media-ownership.js — Локальный скрипт/инструмент audit media ownership для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-media.js — Локальный скрипт/инструмент audit media для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-project-docs.js — Локальный скрипт/инструмент audit project docs для аудита или техобслуживания. Связи: импортирует tools/project-docs-shared.js.
   - audit-runtime-hotspots.js — Локальный скрипт/инструмент audit runtime hotspots для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
@@ -1894,6 +1903,7 @@
 - jsconfig.json — Алиасы и baseUrl проекта для JS/JSX. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - media-audit.report.json — JSON-отчет аудита медиа-подсистемы. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - media-budget.audit.report.json — JSON-файл media budget.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- media-ownership.audit.report.json — JSON-файл media ownership.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - next-env.d.ts — Служебный файл Next.js для типовой совместимости среды. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - next.config.mjs — Главная конфигурация Next.js сборки и рантайма. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - package.json — Манифест пакета, npm/pnpm-скрипты и зависимости. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
@@ -1907,4 +1917,5 @@
 - README.md — Корневая документация проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - runtime-hotspots.report.json — JSON-отчет по runtime-hotspots. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - tsconfig.json — JSON-файл tsconfig. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- tsconfig.tsbuildinfo — .tsbuildinfo-файл tsconfig. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - vitest.config.mjs — ESM-конфиг/модуль vitest.config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.

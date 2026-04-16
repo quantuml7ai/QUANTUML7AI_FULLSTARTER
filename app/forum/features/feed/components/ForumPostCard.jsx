@@ -175,7 +175,6 @@ export default function ForumPostCard({
           QCastPlayerComponent={QCastPlayerComponent}
           ytEmbedParams={ytEmbedParams}
           postId={p?.id}
-          posterUrl={p?.posterUrl}
           YT_RE={YT_RE}
         />
 

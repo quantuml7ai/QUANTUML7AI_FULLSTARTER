@@ -4,9 +4,9 @@
 > Если появляются новые крупные зависимости между доменами, меняются import-графы или переносится ownership между зонами, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-dependencies.js`.
 
-Сгенерировано автоматически: 2026-04-13T20:35:46.975Z
-Исходных файлов в анализе: 655
-Локальных зависимостей: 590
+Сгенерировано автоматически: 2026-04-16T21:56:31.245Z
+Исходных файлов в анализе: 661
+Локальных зависимостей: 591
 
 ## Охват
 
@@ -60,7 +60,7 @@
 - `forum/diagnostics` — 2 файлов
 - `forum/dm` — 31 файлов
 - `forum/feed` — 59 файлов
-- `forum/media` — 38 файлов
+- `forum/media` — 39 файлов
 - `forum/moderation` — 9 файлов
 - `forum/profile` — 18 файлов
 - `forum/qcoin` — 5 файлов
@@ -86,8 +86,8 @@
 - `public/models` — 1 файлов
 - `public/tonconnect-manifest.json` — 1 файлов
 - `public/workers` — 1 файлов
-- `root` — 37 файлов
-- `tools` — 29 файлов
+- `root` — 41 файлов
+- `tools` — 30 файлов
 
 ## Топ Межзоновых Зависимостей
 
@@ -128,13 +128,13 @@
 - `forum/feed` -> `forum/dm` — 4 локальных импортов
 - `forum/root` -> `components` — 4 локальных импортов
 - `forum/ui` -> `forum/dm` — 4 локальных импортов
+- `root` -> `forum/media` — 4 локальных импортов
 - `api/qcoin` -> `api/forum` — 3 локальных импортов
 - `app/ads` -> `components` — 3 локальных импортов
 - `forum/feed` -> `forum/root` — 3 локальных импортов
 - `forum/ui` -> `forum/shared` — 3 локальных импортов
 - `forum/ui` -> `forum/root` — 3 локальных импортов
 - `forum/ui` -> `forum/quests` — 3 локальных импортов
-- `root` -> `forum/media` — 3 локальных импортов
 - `tools` -> `tools` — 3 локальных импортов
 - `api/battlecoin` -> `api/forum` — 2 локальных импортов
 - `api/forum` -> `lib/subscriptions.js` — 2 локальных импортов
@@ -504,7 +504,7 @@
 
 - `forum/feed` — 10
 - `root` — 7
-- `forum/media` — 3
+- `forum/media` — 4
 - `forum/shared` — 2
 - `api/forum` — 1
 - `forum/dm` — 1
