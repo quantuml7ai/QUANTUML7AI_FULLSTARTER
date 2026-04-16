@@ -1495,6 +1495,15 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         const pendingSince = Number(el.dataset?.__loadPendingSince || 0);
         const readyRetryCount = Number(el.dataset?.__readyRetryCount || 0);
         const networkState = Number(el.networkState || 0);
+        const hasKnownSrc = !!(
+          el.getAttribute?.('src') ||
+          el.dataset?.__src ||
+          el.currentSrc
+        );
+        const dormantReady0 =
+          readyState === 0 &&
+          hasKnownSrc &&
+          networkState !== HTMLMediaElement.NETWORK_LOADING;
         const stalePendingMs = isIOSUi ? 2400 : (isCoarseUi ? 3200 : 4200);
         if (
           String(el.dataset?.__loadPending || '') === '1' &&
@@ -1506,25 +1515,27 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           trace('candidate_clear_stale_pending', el, { reason, pendingForMs: now - pendingSince });
         }
         const cold = networkState === HTMLMediaElement.NETWORK_EMPTY || !el.currentSrc;
-        if (cold && (now - lastBoostTs) > 1500 && el.dataset?.__loadPending !== '1') {
+        if ((cold || dormantReady0) && (now - lastBoostTs) > 1500 && el.dataset?.__loadPending !== '1') {
           const minGapMs = highPriorityReason
             ? (isIOSUi ? 1300 : (isCoarseUi ? 1000 : 900))
             : (isIOSUi ? 1900 : (isCoarseUi ? 1600 : 1400));
           if (!canKickLoad(el, {
-            channel: 'candidate_cold',
+            channel: dormantReady0 ? 'candidate_dormant' : 'candidate_cold',
             minGapMs,
             burstWindowMs: isIOSUi ? 22000 : 16000,
             burstLimit: isIOSUi ? 4 : 5,
             blockMs: isIOSUi ? 14000 : 10000,
-            bypassPendingBudget: highPriorityReason,
-            bypassSrcLimiter: highPriorityReason && isIOSUi,
+            bypassPendingBudget: highPriorityReason || dormantReady0,
+            bypassSrcLimiter: highPriorityReason && (isIOSUi || isCoarseUi),
           })) {
             armReadyReplay(el);
             return false;
           }
           try { el.dataset.__candidateBoostTs = String(now); } catch {}
           markMediaLoadPending(el);
-          trace('candidate_force_load', el, { reason: `${reason}:cold` });
+          trace('candidate_force_load', el, {
+            reason: `${reason}:${dormantReady0 ? 'dormant' : 'cold'}`,
+          });
           try { el.load?.(); } catch {}
         }
         const stalledPending =
@@ -2909,12 +2920,23 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             try { el.dataset.__active = '1'; } catch {}
             try { el.preload = 'auto'; } catch {}
             try {
+              const readyStateNow = Number(el.readyState || 0);
               const empty = (el.networkState === HTMLMediaElement.NETWORK_EMPTY) || !el.currentSrc;
-              if (!restoredNow && empty && el.dataset?.__loadPending !== '1' && el.paused && (el.currentTime === 0)) {
+              const dormantReady0 =
+                readyStateNow === 0 &&
+                !!(el.getAttribute('src') || el.dataset?.__src || el.currentSrc) &&
+                el.networkState !== HTMLMediaElement.NETWORK_LOADING;
+              if (
+                !restoredNow &&
+                (empty || dormantReady0) &&
+                el.dataset?.__loadPending !== '1' &&
+                el.paused &&
+                (el.currentTime === 0)
+              ) {
                 const userIntentKick = hasUserGestureIntent(el) || hasManualLease(el);
                 if (!canKickLoad(el, {
-                  channel: 'play_cold',
-                  minGapMs: isIOSUi ? 1700 : (isCoarseUi ? 1500 : 1300),
+                  channel: dormantReady0 ? 'play_dormant' : 'play_cold',
+                  minGapMs: isIOSUi ? 1500 : (isCoarseUi ? 1300 : 1300),
                   burstWindowMs: isIOSUi ? 22000 : 15000,
                   burstLimit: isIOSUi ? 4 : 5,
                   blockMs: isIOSUi ? 12000 : 9000,
@@ -2922,7 +2944,9 @@ export default function useForumMediaCoordinator({ emitDiag }) {
                   bypassPendingBudget: true,
                 })) return;
                 markMediaLoadPending(el);
-                trace('play_load', el);
+                trace('play_load', el, {
+                  reason: dormantReady0 ? 'dormant' : 'cold',
+                });
                 el.load?.();
               }
             } catch {}
@@ -2936,6 +2960,15 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           if ((el.readyState || 0) < 2) {
             ensurePendingHtmlMediaReady(el, 'play_wait_ready');
             trace('play_wait_ready', el);
+            if (el instanceof HTMLVideoElement && (isIOSUi || isCoarseUi)) {
+              const now = Date.now();
+              const lastForcePrimeTs = Number(el.dataset?.__lastForcePrimeTs || 0);
+              if ((now - lastForcePrimeTs) > (isIOSUi ? 1400 : 1100)) {
+                try { el.dataset.__lastForcePrimeTs = String(now); } catch {}
+                trace('play_force_prime', el, { reason });
+                startHtmlMedia(el, 'play_force_prime');
+              }
+            }
             armReadyReplay(el);
           } else if (el.paused) {
             trace('play_now', el);
@@ -3802,6 +3835,10 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         if (player) ytMuteLast.set(player, !!payload.info.muted);
         if (!shouldSyncYouTubeMute(iframe)) return;
         setMutedPref(!!payload.info.muted, 'youtube', true, false);
+        try {
+          if (payload.info.muted) player?.mute?.();
+          else player?.unMute?.();
+        } catch {}
       } catch {}
     };
     let mo = null;

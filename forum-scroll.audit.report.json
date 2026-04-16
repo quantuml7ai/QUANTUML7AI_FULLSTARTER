@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-16T02:19:23.721Z",
+  "generatedAt": "2026-04-16T02:50:22.498Z",
   "scannedFiles": 274,
   "report": [
     {
@@ -807,22 +807,22 @@
         },
         {
           "key": "rectReads",
-          "line": 2278,
+          "line": 2289,
           "text": "const rect = node.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 2521,
+          "line": 2532,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 2538,
+          "line": 2549,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 3072,
+          "line": 3105,
           "text": "const rect = el.getBoundingClientRect?.();"
         },
         {
@@ -837,12 +837,12 @@
         },
         {
           "key": "raf",
-          "line": 3225,
+          "line": 3258,
           "text": "rafId = requestAnimationFrame(() => {"
         },
         {
           "key": "raf",
-          "line": 3775,
+          "line": 3808,
           "text": "mutationSweepRaf = requestAnimationFrame(() => {"
         }
       ]

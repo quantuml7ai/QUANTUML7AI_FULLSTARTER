@@ -566,6 +566,7 @@ export const FORUM_STYLES = `
   position:absolute;
   inset:0;
   display:none;
+  z-index:3;
   align-items:flex-end;
   justify-content:flex-end;
   padding:12px;
@@ -583,6 +584,7 @@ export const FORUM_STYLES = `
 .iframeTouchShieldGesture{
   position:absolute;
   inset:0;
+  z-index:1;
   pointer-events:auto;
   touch-action:pan-y pinch-zoom;
 }
@@ -595,7 +597,7 @@ export const FORUM_STYLES = `
 }
 .iframeTouchShieldAction{
   position:relative;
-  z-index:2;
+  z-index:4;
   width:38px;
   height:38px;
   border-radius:12px;
@@ -7076,4 +7078,3 @@ const Styles = () => (
 )
 
 export default Styles
-

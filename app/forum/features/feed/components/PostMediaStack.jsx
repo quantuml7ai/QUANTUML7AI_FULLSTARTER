@@ -64,7 +64,7 @@ function markIframeInteractionWindow(node, ttlMs = 5200) {
       null
     const iframe = host?.querySelector?.('iframe[data-forum-media]') || null
     if (!(iframe instanceof HTMLIFrameElement)) return
-    const persistUntil = String(Date.now() + Math.max(1800, Number(ttlMs || 0)))
+    const persistUntil = String(Date.now() + Math.max(12000, Number(ttlMs || 0)))
     const gestureUntil = String(Date.now() + 1800)
     try { iframe.dataset.__persistMuteUntil = persistUntil } catch {}
     try { iframe.dataset.__userGestureUntil = gestureUntil } catch {}
@@ -318,6 +318,25 @@ function IframeTouchShield({ href }) {
   React.useEffect(() => {
     return () => clearUnlockTimer()
   }, [clearUnlockTimer])
+
+  React.useEffect(() => {
+    const iframe = (() => {
+      try {
+        return shieldRef.current?.closest?.('.mediaBox[data-kind="iframe"]')?.querySelector?.('iframe[data-forum-media]') || null
+      } catch {
+        return null
+      }
+    })()
+    if (!(iframe instanceof HTMLIFrameElement)) return undefined
+    if (desktopWheelProxyMode && !interactive) {
+      try { iframe.style.pointerEvents = 'none' } catch {}
+    } else {
+      try { iframe.style.pointerEvents = '' } catch {}
+    }
+    return () => {
+      try { iframe.style.pointerEvents = '' } catch {}
+    }
+  }, [desktopWheelProxyMode, interactive])
 
   React.useEffect(() => {
     if (typeof window === 'undefined') return undefined
