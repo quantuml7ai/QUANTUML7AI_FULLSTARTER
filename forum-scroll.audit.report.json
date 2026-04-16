@@ -1,7 +1,7 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-16T03:07:25.189Z",
-  "scannedFiles": 274,
+  "generatedAt": "2026-04-05T05:40:48.309Z",
+  "scannedFiles": 268,
   "report": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumFeedRuntime.js",
@@ -20,47 +20,47 @@
       "hits": [
         {
           "key": "scrollWrite",
-          "line": 329,
+          "line": 325,
           "text": "try { window.scrollTo({ top: nextY, behavior: 'auto' }) } catch { try { window.scrollTo(0, nextY) } catch {} }"
         },
         {
           "key": "scrollRead",
-          "line": 316,
+          "line": 312,
           "text": "const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))"
         },
         {
           "key": "scrollRead",
-          "line": 318,
+          "line": 314,
           "text": "if (Math.abs(Number(scrollEl.scrollTop || 0) - nextTop) >= 1) {"
         },
         {
           "key": "scrollRead",
-          "line": 320,
+          "line": 316,
           "text": "scrollEl.scrollTop = nextTop"
         },
         {
           "key": "scrollRead",
-          "line": 324,
+          "line": 320,
           "text": "const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top"
         },
         {
           "key": "scrollRead",
-          "line": 326,
+          "line": 322,
           "text": "const curY = Number(window.pageYOffset || document.documentElement.scrollTop || 0)"
         },
         {
           "key": "scrollRead",
-          "line": 625,
+          "line": 621,
           "text": "return Number(scrollEl.scrollTop || 0)"
         },
         {
           "key": "scrollRead",
-          "line": 628,
+          "line": 624,
           "text": "window.pageYOffset ||"
         },
         {
           "key": "scrollRead",
-          "line": 629,
+          "line": 625,
           "text": "document.documentElement?.scrollTop ||"
         },
         {
@@ -235,83 +235,6 @@
       ]
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumRoot.jsx",
-      "score": 133,
-      "counts": {
-        "scrollWrite": 0,
-        "scrollRead": 0,
-        "alignOps": 9,
-        "restoreOps": 4,
-        "teleportOps": 0,
-        "rectReads": 0,
-        "resizeObserver": 0,
-        "raf": 2,
-        "timers": 2
-      },
-      "hits": [
-        {
-          "key": "alignOps",
-          "line": 51,
-          "text": "import { snapVideoFeedToFirstCardTop as snapVideoFeedToFirstCardTopUtil } from './features/media/utils/videoFeedScroll'"
-        },
-        {
-          "key": "alignOps",
-          "line": 341,
-          "text": "alignInboxStartUnderTabs,"
-        },
-        {
-          "key": "alignOps",
-          "line": 426,
-          "text": "alignNodeToTop,"
-        },
-        {
-          "key": "alignOps",
-          "line": 429,
-          "text": "alignInboxStartUnderTabs,"
-        },
-        {
-          "key": "alignOps",
-          "line": 550,
-          "text": "centerPostAfterDom,"
-        },
-        {
-          "key": "alignOps",
-          "line": 610,
-          "text": "alignNodeToTop,"
-        },
-        {
-          "key": "alignOps",
-          "line": 717,
-          "text": "alignNodeToTop(target)"
-        },
-        {
-          "key": "alignOps",
-          "line": 722,
-          "text": "alignNodeToTop,"
-        },
-        {
-          "key": "restoreOps",
-          "line": 57,
-          "text": "getScrollSnapshot as getNavScrollSnapshot,"
-        },
-        {
-          "key": "restoreOps",
-          "line": 59,
-          "text": "restoreScrollSnapshot as restoreNavScrollSnapshot,"
-        },
-        {
-          "key": "raf",
-          "line": 802,
-          "text": "rafA = requestAnimationFrame(() => {"
-        },
-        {
-          "key": "timers",
-          "line": 797,
-          "text": "const timerId = setTimeout(() => scheduleAlign(attempt + 1), delay)"
-        }
-      ]
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\utils\\navScroll.js",
       "score": 104,
       "counts": {
@@ -385,6 +308,63 @@
           "key": "restoreOps",
           "line": 16,
           "text": "export function getEntryOffset(options = {}) {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumRoot.jsx",
+      "score": 94,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 6,
+        "restoreOps": 4,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "alignOps",
+          "line": 337,
+          "text": "alignInboxStartUnderTabs,"
+        },
+        {
+          "key": "alignOps",
+          "line": 419,
+          "text": "alignNodeToTop,"
+        },
+        {
+          "key": "alignOps",
+          "line": 422,
+          "text": "alignInboxStartUnderTabs,"
+        },
+        {
+          "key": "alignOps",
+          "line": 531,
+          "text": "centerPostAfterDom,"
+        },
+        {
+          "key": "alignOps",
+          "line": 590,
+          "text": "alignNodeToTop,"
+        },
+        {
+          "key": "alignOps",
+          "line": 873,
+          "text": "centerPostAfterDom,"
+        },
+        {
+          "key": "restoreOps",
+          "line": 55,
+          "text": "getScrollSnapshot as getNavScrollSnapshot,"
+        },
+        {
+          "key": "restoreOps",
+          "line": 57,
+          "text": "restoreScrollSnapshot as restoreNavScrollSnapshot,"
         }
       ]
     },
@@ -683,58 +663,135 @@
       "hits": [
         {
           "key": "scrollWrite",
-          "line": 105,
+          "line": 91,
           "text": "try { window.scrollTo({ top: Math.max(0, y), behavior: 'auto' }) } catch { try { window.scrollTo(0, Math.max(0, y)) } catch {} }"
         },
         {
           "key": "scrollRead",
-          "line": 73,
+          "line": 59,
           "text": "return Number(scrollEl.scrollTop || 0)"
         },
         {
           "key": "scrollRead",
-          "line": 76,
+          "line": 62,
           "text": "window.pageYOffset ||"
         },
         {
           "key": "scrollRead",
-          "line": 77,
+          "line": 63,
           "text": "document.documentElement?.scrollTop ||"
         },
         {
           "key": "scrollRead",
-          "line": 101,
+          "line": 87,
           "text": "const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))"
         },
         {
           "key": "scrollRead",
-          "line": 104,
+          "line": 90,
           "text": "const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top"
         },
         {
           "key": "rectReads",
-          "line": 95,
+          "line": 81,
           "text": "const rect = marker.getBoundingClientRect?.()"
         },
         {
           "key": "rectReads",
-          "line": 100,
+          "line": 86,
           "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }"
         },
         {
           "key": "raf",
-          "line": 142,
+          "line": 128,
           "text": "rafA = requestAnimationFrame(() => scheduleAlign(0, baselineTop))"
         },
         {
           "key": "timers",
-          "line": 124,
+          "line": 110,
           "text": "retryTimer = setTimeout(() => {"
         },
         {
           "key": "timers",
-          "line": 133,
+          "line": 119,
           "text": "retryTimer = setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
+      "score": 45,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 4,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 6,
+        "resizeObserver": 0,
+        "raf": 5,
+        "timers": 11
+      },
+      "hits": [
+        {
+          "key": "scrollRead",
+          "line": 310,
+          "text": "return Number(scrollEl.scrollTop || 0);"
+        },
+        {
+          "key": "scrollRead",
+          "line": 314,
+          "text": "return Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0);"
+        },
+        {
+          "key": "rectReads",
+          "line": 263,
+          "text": "const rect = video.getBoundingClientRect?.();"
+        },
+        {
+          "key": "rectReads",
+          "line": 609,
+          "text": "const rect = el.getBoundingClientRect?.();"
+        },
+        {
+          "key": "rectReads",
+          "line": 2785,
+          "text": "const rect = node.getBoundingClientRect?.();"
+        },
+        {
+          "key": "rectReads",
+          "line": 3021,
+          "text": "const rect = owner.getBoundingClientRect?.();"
+        },
+        {
+          "key": "rectReads",
+          "line": 3038,
+          "text": "const rect = owner.getBoundingClientRect?.();"
+        },
+        {
+          "key": "rectReads",
+          "line": 3576,
+          "text": "const rect = el.getBoundingClientRect?.();"
+        },
+        {
+          "key": "raf",
+          "line": 109,
+          "text": "const rafId = typeof requestAnimationFrame === 'function' ? requestAnimationFrame(run) : 0;"
+        },
+        {
+          "key": "raf",
+          "line": 344,
+          "text": "warmSweepRaf = requestAnimationFrame(runner);"
+        },
+        {
+          "key": "raf",
+          "line": 3729,
+          "text": "rafId = requestAnimationFrame(() => {"
+        },
+        {
+          "key": "raf",
+          "line": 4233,
+          "text": "mutationSweepRaf = requestAnimationFrame(() => {"
         }
       ]
     },
@@ -771,83 +828,6 @@
       ]
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
-      "score": 44,
-      "counts": {
-        "scrollWrite": 0,
-        "scrollRead": 4,
-        "alignOps": 0,
-        "restoreOps": 0,
-        "teleportOps": 0,
-        "rectReads": 6,
-        "resizeObserver": 0,
-        "raf": 5,
-        "timers": 10
-      },
-      "hits": [
-        {
-          "key": "scrollRead",
-          "line": 312,
-          "text": "return Number(scrollEl.scrollTop || 0);"
-        },
-        {
-          "key": "scrollRead",
-          "line": 316,
-          "text": "return Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0);"
-        },
-        {
-          "key": "rectReads",
-          "line": 265,
-          "text": "const rect = video.getBoundingClientRect?.();"
-        },
-        {
-          "key": "rectReads",
-          "line": 602,
-          "text": "const rect = el.getBoundingClientRect?.();"
-        },
-        {
-          "key": "rectReads",
-          "line": 2289,
-          "text": "const rect = node.getBoundingClientRect?.();"
-        },
-        {
-          "key": "rectReads",
-          "line": 2532,
-          "text": "const rect = owner.getBoundingClientRect?.();"
-        },
-        {
-          "key": "rectReads",
-          "line": 2549,
-          "text": "const rect = owner.getBoundingClientRect?.();"
-        },
-        {
-          "key": "rectReads",
-          "line": 3105,
-          "text": "const rect = el.getBoundingClientRect?.();"
-        },
-        {
-          "key": "raf",
-          "line": 108,
-          "text": "const rafId = typeof requestAnimationFrame === 'function' ? requestAnimationFrame(run) : 0;"
-        },
-        {
-          "key": "raf",
-          "line": 346,
-          "text": "warmSweepRaf = requestAnimationFrame(runner);"
-        },
-        {
-          "key": "raf",
-          "line": 3258,
-          "text": "rafId = requestAnimationFrame(() => {"
-        },
-        {
-          "key": "raf",
-          "line": 3808,
-          "text": "mutationSweepRaf = requestAnimationFrame(() => {"
-        }
-      ]
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumVideoFeedRuntime.js",
       "score": 44,
       "counts": {
@@ -869,17 +849,17 @@
         },
         {
           "key": "alignOps",
-          "line": 73,
-          "text": "const snapVideoFeedToFirstCardTop = useCallback((opts = {}) => {"
+          "line": 71,
+          "text": "const snapVideoFeedToFirstCardTop = useCallback("
         },
         {
           "key": "alignOps",
-          "line": 106,
+          "line": 107,
           "text": "snapVideoFeedToFirstCardTop,"
         },
         {
           "key": "alignOps",
-          "line": 135,
+          "line": 138,
           "text": "snapVideoFeedToFirstCardTop,"
         }
       ]
@@ -1010,12 +990,12 @@
         },
         {
           "key": "scrollRead",
-          "line": 138,
+          "line": 125,
           "text": "const winTop = Number(window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0)"
         },
         {
           "key": "scrollRead",
-          "line": 145,
+          "line": 132,
           "text": "st: Number(el.scrollTop || 0),"
         },
         {
@@ -1025,39 +1005,39 @@
         },
         {
           "key": "rectReads",
-          "line": 435,
+          "line": 428,
           "text": "const h = node.getBoundingClientRect?.()?.height"
         },
         {
           "key": "resizeObserver",
-          "line": 448,
+          "line": 441,
           "text": "if (!vfRosRef.current.get(idx) && typeof ResizeObserver !== 'undefined') {"
         },
         {
           "key": "raf",
-          "line": 281,
+          "line": 255,
           "text": "vfRafRef.current = requestAnimationFrame(() => {"
         },
         {
           "key": "raf",
-          "line": 328,
+          "line": 329,
           "text": "vfHardResetScheduleRef.current.rafA = requestAnimationFrame(() => {"
         },
         {
           "key": "timers",
-          "line": 336,
+          "line": 337,
           "text": "vfHardResetScheduleRef.current.timeoutId = setTimeout(() => {"
         },
         {
           "key": "timers",
-          "line": 382,
+          "line": 375,
           "text": "scrollActivity.settleTimer = setTimeout(() => {"
         }
       ]
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVideoFeedLifecycle.js",
-      "score": 40,
+      "score": 39,
       "counts": {
         "scrollWrite": 0,
         "scrollRead": 0,
@@ -1067,43 +1047,38 @@
         "rectReads": 0,
         "resizeObserver": 0,
         "raf": 2,
-        "timers": 3
+        "timers": 2
       },
       "hits": [
         {
           "key": "alignOps",
-          "line": 21,
+          "line": 50,
           "text": "snapVideoFeedToFirstCardTop,"
         },
         {
           "key": "alignOps",
-          "line": 118,
-          "text": "try { snapVideoFeedToFirstCardTop({ hideHeader: true, anchorOnly: true }) } catch {}"
+          "line": 216,
+          "text": "snapVideoFeedToFirstCardTop({"
         },
         {
           "key": "alignOps",
-          "line": 150,
+          "line": 253,
           "text": "snapVideoFeedToFirstCardTop,"
         },
         {
           "key": "raf",
-          "line": 124,
+          "line": 231,
           "text": "rafA = requestAnimationFrame(() => {"
         },
         {
           "key": "timers",
-          "line": 64,
+          "line": 82,
+          "text": "const id = setTimeout(fn, ms)"
+        },
+        {
+          "key": "timers",
+          "line": 129,
           "text": "buildTimerRef.current = setTimeout(() => {"
-        },
-        {
-          "key": "timers",
-          "line": 102,
-          "text": "const id = setTimeout(() => applySoftRefreshWhenIdle(attempt + 1), wait)"
-        },
-        {
-          "key": "timers",
-          "line": 128,
-          "text": "const id = setTimeout(() => applySoftRefreshWhenIdle(0), 0)"
         }
       ]
     },
@@ -1280,52 +1255,52 @@
       "hits": [
         {
           "key": "scrollRead",
-          "line": 190,
+          "line": 181,
           "text": "scrollY: typeof window !== 'undefined' ? window.scrollY : undefined,"
         },
         {
           "key": "scrollRead",
-          "line": 275,
+          "line": 265,
           "text": "const y = Number(window?.scrollY || 0)"
         },
         {
           "key": "scrollRead",
-          "line": 390,
+          "line": 376,
           "text": "scrollY: Number(window.scrollY || 0),"
         },
         {
           "key": "scrollRead",
-          "line": 391,
+          "line": 377,
           "text": "innerScrollTop: Number(scrollEl?.scrollTop || 0),"
         },
         {
           "key": "scrollRead",
-          "line": 595,
+          "line": 580,
           "text": "let lastScrollTop = Number(window.scrollY || 0)"
         },
         {
           "key": "scrollRead",
-          "line": 603,
+          "line": 588,
           "text": "const top = Number(scrollEl?.scrollTop || window.scrollY || 0)"
         },
         {
           "key": "raf",
-          "line": 272,
+          "line": 262,
           "text": "raf = requestAnimationFrame(() => {"
         },
         {
           "key": "raf",
-          "line": 600,
+          "line": 585,
           "text": "scrollRaf = requestAnimationFrame(() => {"
         },
         {
           "key": "timers",
-          "line": 262,
+          "line": 252,
           "text": "const id = setInterval(() => {"
         },
         {
           "key": "timers",
-          "line": 665,
+          "line": 650,
           "text": "const timer = setInterval(() => {"
         }
       ]
@@ -1542,12 +1517,12 @@
       "hits": [
         {
           "key": "alignOps",
-          "line": 81,
+          "line": 79,
           "text": "centerPostAfterDom,"
         },
         {
           "key": "alignOps",
-          "line": 346,
+          "line": 340,
           "text": "try { centerPostAfterDom(tmpId, 'auto') } catch {}"
         }
       ]
@@ -1739,27 +1714,27 @@
       "hits": [
         {
           "key": "rectReads",
-          "line": 315,
+          "line": 266,
           "text": "const r = el.getBoundingClientRect();"
         },
         {
           "key": "rectReads",
-          "line": 645,
+          "line": 576,
           "text": "const parentRect = parent?.getBoundingClientRect?.() || { top: 0, left: 0, right: 0 };"
         },
         {
           "key": "resizeObserver",
-          "line": 336,
+          "line": 287,
           "text": "const ro = new ResizeObserver(() => applySize());"
         },
         {
           "key": "raf",
-          "line": 195,
+          "line": 174,
           "text": "rafRef.current = requestAnimationFrame(() => {"
         },
         {
           "key": "timers",
-          "line": 604,
+          "line": 535,
           "text": "const h = setTimeout(async () => {"
         }
       ]
@@ -1781,45 +1756,75 @@
       "hits": [
         {
           "key": "scrollWrite",
-          "line": 139,
+          "line": 113,
           "text": "else window.scrollTo({ top: 0, behavior: 'auto' })"
         },
         {
           "key": "scrollRead",
-          "line": 138,
+          "line": 112,
           "text": "if (sc && sc.scrollHeight > sc.clientHeight + 1) sc.scrollTop = 0"
         },
         {
           "key": "timers",
-          "line": 135,
+          "line": 109,
           "text": "setTimeout(() => {"
         }
       ]
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\UserRecommendationCard.jsx",
-      "score": 9,
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
+      "score": 10,
       "counts": {
         "scrollWrite": 0,
         "scrollRead": 0,
         "alignOps": 0,
         "restoreOps": 0,
         "teleportOps": 0,
-        "rectReads": 0,
-        "resizeObserver": 2,
-        "raf": 0,
-        "timers": 1
+        "rectReads": 1,
+        "resizeObserver": 0,
+        "raf": 1,
+        "timers": 6
       },
       "hits": [
         {
-          "key": "resizeObserver",
-          "line": 424,
-          "text": "if (typeof ResizeObserver !== 'undefined') {"
+          "key": "rectReads",
+          "line": 1651,
+          "text": "const rect = el.getBoundingClientRect();"
+        },
+        {
+          "key": "raf",
+          "line": 1667,
+          "text": "bootRaf = requestAnimationFrame(() => {"
         },
         {
           "key": "timers",
-          "line": 419,
-          "text": "timeoutId = window.setTimeout(measure, 0)"
+          "line": 870,
+          "text": "const timer = setTimeout(() => finish(false), timeoutMs);"
+        },
+        {
+          "key": "timers",
+          "line": 963,
+          "text": "const timer = setTimeout(() => controller.abort(), timeoutMs);"
+        },
+        {
+          "key": "timers",
+          "line": 1278,
+          "text": "autoplayRetryTimerRef.current = window.setTimeout(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 1457,
+          "text": "timerId = window.setTimeout(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 1824,
+          "text": "const timer = setInterval(pickNext, rotateMs);"
+        },
+        {
+          "key": "timers",
+          "line": 2327,
+          "text": "timer = setTimeout(() => {"
         }
       ]
     },
@@ -1840,12 +1845,12 @@
       "hits": [
         {
           "key": "scrollRead",
-          "line": 243,
+          "line": 234,
           "text": "return Number(scrollEl.scrollTop || 0) > 140"
         },
         {
           "key": "scrollRead",
-          "line": 245,
+          "line": 236,
           "text": "return Number(window.pageYOffset || document.documentElement?.scrollTop || 0) > 140"
         }
       ]
@@ -1878,30 +1883,8 @@
       ]
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\UserRecommendationsRail.jsx",
-      "score": 8,
-      "counts": {
-        "scrollWrite": 1,
-        "scrollRead": 0,
-        "alignOps": 0,
-        "restoreOps": 0,
-        "teleportOps": 0,
-        "rectReads": 0,
-        "resizeObserver": 0,
-        "raf": 0,
-        "timers": 0
-      },
-      "hits": [
-        {
-          "key": "scrollWrite",
-          "line": 444,
-          "text": "node.scrollBy({"
-        }
-      ]
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\QCastPlayer.jsx",
-      "score": 8,
+      "score": 9,
       "counts": {
         "scrollWrite": 0,
         "scrollRead": 0,
@@ -1911,117 +1894,38 @@
         "rectReads": 2,
         "resizeObserver": 0,
         "raf": 1,
-        "timers": 2
+        "timers": 3
       },
       "hits": [
         {
           "key": "rectReads",
-          "line": 178,
+          "line": 191,
           "text": "const r = host?.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 220,
+          "line": 233,
           "text": "const r = host?.getBoundingClientRect?.();"
         },
         {
           "key": "raf",
-          "line": 788,
+          "line": 799,
           "text": "requestAnimationFrame(() => {"
         },
         {
           "key": "timers",
-          "line": 377,
+          "line": 409,
+          "text": "muteGuardResetTimerRef.current = setTimeout(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 455,
           "text": "gainWatchId = window.setInterval(() => {"
         },
         {
           "key": "timers",
-          "line": 914,
+          "line": 916,
           "text": "const timer = setTimeout(() => {"
-        }
-      ]
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmVoicePlayer.jsx",
-      "score": 7,
-      "counts": {
-        "scrollWrite": 0,
-        "scrollRead": 0,
-        "alignOps": 0,
-        "restoreOps": 0,
-        "teleportOps": 0,
-        "rectReads": 1,
-        "resizeObserver": 0,
-        "raf": 2,
-        "timers": 1
-      },
-      "hits": [
-        {
-          "key": "rectReads",
-          "line": 216,
-          "text": "const rect = el.getBoundingClientRect()"
-        },
-        {
-          "key": "raf",
-          "line": 102,
-          "text": "rafRef.current = requestAnimationFrame(tick)"
-        },
-        {
-          "key": "raf",
-          "line": 104,
-          "text": "rafRef.current = requestAnimationFrame(tick)"
-        },
-        {
-          "key": "timers",
-          "line": 163,
-          "text": "durationPollRef.current = window.setInterval(() => syncAudioMetrics(a), 350)"
-        }
-      ]
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoMedia.jsx",
-      "score": 7,
-      "counts": {
-        "scrollWrite": 0,
-        "scrollRead": 0,
-        "alignOps": 0,
-        "restoreOps": 0,
-        "teleportOps": 0,
-        "rectReads": 0,
-        "resizeObserver": 0,
-        "raf": 1,
-        "timers": 5
-      },
-      "hits": [
-        {
-          "key": "raf",
-          "line": 1013,
-          "text": "requestAnimationFrame(() => revealPoster())"
-        },
-        {
-          "key": "timers",
-          "line": 464,
-          "text": "controlsTimerRef.current = window.setTimeout(() => {"
-        },
-        {
-          "key": "timers",
-          "line": 477,
-          "text": "centerIconTimerRef.current = window.setTimeout(() => {"
-        },
-        {
-          "key": "timers",
-          "line": 522,
-          "text": "const tid = window.setTimeout(() => {"
-        },
-        {
-          "key": "timers",
-          "line": 840,
-          "text": "unloadTimer = setTimeout(() => {"
-        },
-        {
-          "key": "timers",
-          "line": 974,
-          "text": "recoverTimerRef.current = setTimeout(() => {"
         }
       ]
     },
@@ -2054,6 +1958,38 @@
           "key": "timers",
           "line": 49,
           "text": "timerRef.current = setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmVoicePlayer.jsx",
+      "score": 6,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 1,
+        "resizeObserver": 0,
+        "raf": 2,
+        "timers": 0
+      },
+      "hits": [
+        {
+          "key": "rectReads",
+          "line": 154,
+          "text": "const rect = el.getBoundingClientRect()"
+        },
+        {
+          "key": "raf",
+          "line": 70,
+          "text": "rafRef.current = requestAnimationFrame(tick)"
+        },
+        {
+          "key": "raf",
+          "line": 72,
+          "text": "rafRef.current = requestAnimationFrame(tick)"
         }
       ]
     },
@@ -2176,6 +2112,48 @@
       ]
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoMedia.jsx",
+      "score": 5,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 5
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 467,
+          "text": "controlsTimerRef.current = window.setTimeout(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 480,
+          "text": "centerIconTimerRef.current = window.setTimeout(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 525,
+          "text": "const tid = window.setTimeout(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 820,
+          "text": "unloadTimer = setTimeout(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 958,
+          "text": "recoverTimerRef.current = setTimeout(() => {"
+        }
+      ]
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\moderation\\hooks\\useReportController.js",
       "score": 4,
       "counts": {
@@ -2230,43 +2208,6 @@
       ]
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
-      "score": 4,
-      "counts": {
-        "scrollWrite": 0,
-        "scrollRead": 0,
-        "alignOps": 0,
-        "restoreOps": 0,
-        "teleportOps": 0,
-        "rectReads": 0,
-        "resizeObserver": 0,
-        "raf": 0,
-        "timers": 4
-      },
-      "hits": [
-        {
-          "key": "timers",
-          "line": 762,
-          "text": "const timer = setTimeout(() => finish(false), timeoutMs);"
-        },
-        {
-          "key": "timers",
-          "line": 841,
-          "text": "const timer = setTimeout(() => controller.abort(), timeoutMs);"
-        },
-        {
-          "key": "timers",
-          "line": 1249,
-          "text": "const timer = setInterval(pickNext, rotateMs);"
-        },
-        {
-          "key": "timers",
-          "line": 1653,
-          "text": "timer = setTimeout(() => {"
-        }
-      ]
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoOverlay.jsx",
       "score": 3,
       "counts": {
@@ -2283,17 +2224,17 @@
       "hits": [
         {
           "key": "timers",
-          "line": 203,
+          "line": 221,
           "text": "await new Promise((r) => setTimeout(r, 30))"
         },
         {
           "key": "timers",
-          "line": 219,
+          "line": 237,
           "text": "setTimeout(calcAspectFromTrack, 0)"
         },
         {
           "key": "timers",
-          "line": 264,
+          "line": 282,
           "text": "setTimeout(calcAspectFromTrack, 0)"
         }
       ]
@@ -2428,7 +2369,7 @@
       "hits": [
         {
           "key": "rectReads",
-          "line": 197,
+          "line": 173,
           "text": "const b = e?.currentTarget?.getBoundingClientRect?.()"
         }
       ]
@@ -2450,12 +2391,12 @@
       "hits": [
         {
           "key": "timers",
-          "line": 54,
+          "line": 45,
           "text": "const timer = setInterval(() => {"
         },
         {
           "key": "timers",
-          "line": 70,
+          "line": 61,
           "text": "const timer = setInterval(() => {"
         }
       ]
@@ -2477,12 +2418,12 @@
       "hits": [
         {
           "key": "timers",
-          "line": 134,
+          "line": 116,
           "text": "dmDialogsPersistTimerRef.current = setTimeout(() => {"
         },
         {
           "key": "timers",
-          "line": 159,
+          "line": 138,
           "text": "dmThreadPersistTimerRef.current = setTimeout(() => {"
         }
       ]
@@ -2526,7 +2467,7 @@
       "hits": [
         {
           "key": "rectReads",
-          "line": 52,
+          "line": 51,
           "text": "const b = e?.currentTarget?.getBoundingClientRect?.()"
         }
       ]
@@ -2619,7 +2560,7 @@
       "hits": [
         {
           "key": "rectReads",
-          "line": 94,
+          "line": 131,
           "text": "const r = el.getBoundingClientRect?.()"
         }
       ]
@@ -2646,8 +2587,8 @@
         },
         {
           "key": "timers",
-          "line": 214,
-          "text": "const timer = setTimeout(() => {"
+          "line": 176,
+          "text": "const timer = setTimeout(() => finish(new Error('audio_metadata_timeout')), timeoutMs)"
         }
       ]
     },
@@ -2719,28 +2660,6 @@
           "key": "timers",
           "line": 41,
           "text": "const id = setTimeout(() => {"
-        }
-      ]
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostMediaStack.jsx",
-      "score": 1,
-      "counts": {
-        "scrollWrite": 0,
-        "scrollRead": 0,
-        "alignOps": 0,
-        "restoreOps": 0,
-        "teleportOps": 0,
-        "rectReads": 0,
-        "resizeObserver": 0,
-        "raf": 0,
-        "timers": 1
-      },
-      "hits": [
-        {
-          "key": "timers",
-          "line": 260,
-          "text": "unlockTimerRef.current = setTimeout(() => {"
         }
       ]
     },
@@ -2849,7 +2768,7 @@
       "hits": [
         {
           "key": "timers",
-          "line": 275,
+          "line": 296,
           "text": "videoTimerRef.current = setInterval(() => {"
         }
       ]
@@ -2871,7 +2790,7 @@
       "hits": [
         {
           "key": "timers",
-          "line": 97,
+          "line": 79,
           "text": "recTimerRef.current = setInterval(() => {"
         }
       ]
@@ -2893,7 +2812,7 @@
       "hits": [
         {
           "key": "timers",
-          "line": 97,
+          "line": 94,
           "text": "timerId = window.setTimeout(() => {"
         }
       ]
@@ -3641,6 +3560,22 @@
       "hits": []
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostMediaStack.jsx",
+      "score": 0,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 0
+      },
+      "hits": []
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostOwnerMenu.jsx",
       "score": 0,
       "counts": {
@@ -3945,55 +3880,7 @@
       "hits": []
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useUserRecommendationsRail.js",
-      "score": 0,
-      "counts": {
-        "scrollWrite": 0,
-        "scrollRead": 0,
-        "alignOps": 0,
-        "restoreOps": 0,
-        "teleportOps": 0,
-        "rectReads": 0,
-        "resizeObserver": 0,
-        "raf": 0,
-        "timers": 0
-      },
-      "hits": []
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\services\\rateLimiter.js",
-      "score": 0,
-      "counts": {
-        "scrollWrite": 0,
-        "scrollRead": 0,
-        "alignOps": 0,
-        "restoreOps": 0,
-        "teleportOps": 0,
-        "rectReads": 0,
-        "resizeObserver": 0,
-        "raf": 0,
-        "timers": 0
-      },
-      "hits": []
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\utils\\cardMemo.js",
-      "score": 0,
-      "counts": {
-        "scrollWrite": 0,
-        "scrollRead": 0,
-        "alignOps": 0,
-        "restoreOps": 0,
-        "teleportOps": 0,
-        "rectReads": 0,
-        "resizeObserver": 0,
-        "raf": 0,
-        "timers": 0
-      },
-      "hits": []
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\utils\\interleaveRecommendationRails.js",
       "score": 0,
       "counts": {
         "scrollWrite": 0,
@@ -4218,22 +4105,6 @@
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaLinks.js",
-      "score": 0,
-      "counts": {
-        "scrollWrite": 0,
-        "scrollRead": 0,
-        "alignOps": 0,
-        "restoreOps": 0,
-        "teleportOps": 0,
-        "rectReads": 0,
-        "resizeObserver": 0,
-        "raf": 0,
-        "timers": 0
-      },
-      "hits": []
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaStatePolicy.js",
       "score": 0,
       "counts": {
         "scrollWrite": 0,

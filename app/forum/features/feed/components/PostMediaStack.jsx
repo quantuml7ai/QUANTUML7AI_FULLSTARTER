@@ -5,40 +5,6 @@ import Image from 'next/image'
 
 const POST_MEDIA_EMBED_CACHE = new Map()
 
-function detectTMAHard() {
-  try {
-    if (typeof window === 'undefined') return false
-    const tg = window.Telegram && window.Telegram.WebApp
-    if (!tg) return false
-    if (tg.initData && typeof tg.initData === 'string' && tg.initData.includes('hash=')) return true
-    const hash = String(window.location.hash || '')
-    return hash.includes('tgWebAppData=') || hash.includes('tgwebappdata=')
-  } catch {
-    return false
-  }
-}
-
-function markIframeInteractionWindow(node, ttlMs = 5200) {
-  try {
-    const host =
-      node?.closest?.('.mediaBox[data-kind="iframe"]') ||
-      node?.closest?.('[data-kind="iframe"]') ||
-      null
-    const iframe = host?.querySelector?.('iframe[data-forum-media]') || null
-    if (!(iframe instanceof HTMLIFrameElement)) return
-    const persistUntil = String(Date.now() + Math.max(12000, Number(ttlMs || 0)))
-    const gestureUntil = String(Date.now() + 1800)
-    try { iframe.dataset.__persistMuteUntil = persistUntil } catch {}
-    try { iframe.dataset.__userGestureUntil = gestureUntil } catch {}
-    try {
-      if (host?.dataset) {
-        host.dataset.__persistMuteUntil = persistUntil
-        host.dataset.__userGestureUntil = gestureUntil
-      }
-    } catch {}
-  } catch {}
-}
-
 function uniqList(list) {
   return Array.from(new Set(Array.isArray(list) ? list.filter(Boolean) : []))
 }
@@ -235,8 +201,6 @@ function ImageCarousel({
 
 function IframeTouchShield({ href }) {
   const [interactive, setInteractive] = React.useState(false)
-  const [shieldEnabled, setShieldEnabled] = React.useState(false)
-  const shieldRef = React.useRef(null)
   const unlockTimerRef = React.useRef(null)
   const pointerStateRef = React.useRef({
     id: null,
@@ -255,7 +219,6 @@ function IframeTouchShield({ href }) {
 
   const unlockInteract = React.useCallback((ttlMs = 2600) => {
     clearUnlockTimer()
-    markIframeInteractionWindow(shieldRef.current, ttlMs + 4200)
     setInteractive(true)
     unlockTimerRef.current = setTimeout(() => {
       setInteractive(false)
@@ -277,21 +240,7 @@ function IframeTouchShield({ href }) {
     return () => clearUnlockTimer()
   }, [clearUnlockTimer])
 
-  React.useEffect(() => {
-    if (typeof window === 'undefined') return undefined
-    const coarseMq = window.matchMedia?.('(pointer: coarse)') || null
-    const updateShieldMode = () => {
-      setShieldEnabled(!!coarseMq?.matches || detectTMAHard())
-    }
-    updateShieldMode()
-    try { coarseMq?.addEventListener?.('change', updateShieldMode) } catch {}
-    return () => {
-      try { coarseMq?.removeEventListener?.('change', updateShieldMode) } catch {}
-    }
-  }, [])
-
   const handlePointerDown = React.useCallback((event) => {
-    if (!shieldEnabled) return
     const pointerType = String(event?.pointerType || '')
     if (pointerType && pointerType !== 'touch' && pointerType !== 'pen') return
     pointerStateRef.current = {
@@ -301,7 +250,7 @@ function IframeTouchShield({ href }) {
       moved: false,
       startedAt: Date.now(),
     }
-  }, [shieldEnabled])
+  }, [])
 
   const handlePointerMove = React.useCallback((event) => {
     const state = pointerStateRef.current
@@ -323,28 +272,15 @@ function IframeTouchShield({ href }) {
     const elapsed = Date.now() - Number(state.startedAt || 0)
     const isTap = !state.moved && dx < 12 && dy < 12 && elapsed < 420
     resetPointerState()
-    if (!isTap) return
-    try {
-      event?.preventDefault?.()
-      event?.stopPropagation?.()
-    } catch {}
-    unlockInteract()
+    if (isTap) unlockInteract()
   }, [resetPointerState, unlockInteract])
 
   const handlePointerCancel = React.useCallback(() => {
     resetPointerState()
   }, [resetPointerState])
 
-  if (!shieldEnabled) return null
-
   return (
-    <div
-      ref={shieldRef}
-      className={[
-        'iframeTouchShield',
-        interactive ? 'isInteractive' : '',
-      ].filter(Boolean).join(' ')}
-    >
+    <div className={`iframeTouchShield${interactive ? ' isInteractive' : ''}`}>
       <div
         className={`iframeTouchShieldGesture${interactive ? ' isInteractive' : ''}`}
         aria-hidden="true"
@@ -491,7 +427,6 @@ export default function PostMediaStack({
                 className="videoCard mediaBox"
                 data-kind="iframe"
                 data-subkind="youtube"
-                data-stable-shell="1"
                 style={{ margin: 0 }}
               >
                 <iframe
@@ -500,9 +435,6 @@ export default function PostMediaStack({
                   id={`yt_${postId || 'post'}_${i}`}
                   data-yt-id={videoId}
                   data-forum-media="youtube"
-                  data-forum-embed-kind="youtube"
-                  data-owner-id={`post-embed:${mediaKeyBase}:youtube:${videoId}:${i}`}
-                  data-lifecycle-state="cold"
                   loading="eager"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -575,20 +507,11 @@ export default function PostMediaStack({
             }
 
             return (
-              <div
-                key={`tt:${mediaKeyBase}:${videoId}:${i}`}
-                className="videoCard mediaBox"
-                data-kind="iframe"
-                data-stable-shell="1"
-                style={{ margin: 0 }}
-              >
+              <div key={`tt:${mediaKeyBase}:${videoId}:${i}`} className="videoCard mediaBox" data-kind="iframe" style={{ margin: 0 }}>
                 <iframe
                   title="TikTok video"
                   data-forum-media="tiktok"
                   data-src={`https://www.tiktok.com/embed/v2/${videoId}`}
-                  data-forum-embed-kind="tiktok"
-                  data-owner-id={`post-embed:${mediaKeyBase}:tiktok:${videoId}:${i}`}
-                  data-lifecycle-state="cold"
                   loading="eager"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

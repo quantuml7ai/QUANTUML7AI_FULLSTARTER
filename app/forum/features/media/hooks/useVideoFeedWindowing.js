@@ -37,38 +37,25 @@ export default function useVideoFeedWindowing({
   const vfRafRef = useRef(0)
   const vfHardResetScheduleRef = useRef({ rafA: 0, rafB: 0, timeoutId: 0 })
   const vfScrollStateRef = useRef({ top: 0, ts: 0, velocity: 0, direction: 0 })
-  const vfScrollActivityRef = useRef({ activeUntil: 0, settleTimer: 0, flipHoldUntil: 0 })
+  const vfScrollActivityRef = useRef({ activeUntil: 0, settleTimer: 0 })
   const vfWinMetaRef = useRef({ ts: 0, start: 0, end: 0 })
   const [vfWin, setVfWin] = useState(() => ({ start: 0, end: 0, top: 0, bottom: 0 }))
   const runtimeCfg = readForumRuntimeConfig()
   const recommendationsEnabled = !!runtimeCfg?.userRecommendations?.enabled
   const recommendationsEvery = Math.max(0, Number(runtimeCfg?.userRecommendations?.every || 0) || 0)
 
-  const vfGetUiFlags = useCallback(() => {
-    try {
-      if (!isBrowserFn()) return { coarse: false, ios: false }
-      const ua = String(window?.navigator?.userAgent || '')
-      const ios = /iP(hone|ad|od)/i.test(ua)
-      const coarse = ios || !!window?.matchMedia?.('(pointer: coarse)')?.matches
-      return { coarse, ios }
-    } catch {
-      return { coarse: false, ios: false }
-    }
-  }, [isBrowserFn])
-
   const vfGetMaxRender = useCallback(() => {
     try {
       if (!isBrowserFn()) return 13
-      const { coarse, ios } = vfGetUiFlags()
+      const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
       const dm = Number(window?.navigator?.deviceMemory || 0)
-      if (ios) return 18
-      if (coarse) return 16
-      if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 14
+      if (coarse) return 12
+      if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 13
       return 16
     } catch {
       return 13
     }
-  }, [isBrowserFn, vfGetUiFlags])
+  }, [isBrowserFn])
 
   const vfGetFixedItemH = useCallback(() => {
     try {
@@ -187,11 +174,8 @@ export default function useVideoFeedWindowing({
     const vh = Number(vp?.vh || 0)
     const velocity = Math.abs(Number(vfScrollStateRef.current?.velocity || 0))
     const direction = Number(vfScrollStateRef.current?.direction || 0)
-    const { coarse, ios } = vfGetUiFlags()
-    const flipHoldUntil = Number(vfScrollActivityRef.current?.flipHoldUntil || 0)
     const velocityBoost = Math.min(1100, Math.round(velocity * 520))
-    const overscanBase = VF_OVERSCAN_PX + (ios ? 980 : (coarse ? 720 : 0))
-    const overscanPx = overscanBase + velocityBoost
+    const overscanPx = VF_OVERSCAN_PX + velocityBoost
     const fromY = Math.max(0, st - overscanPx)
     const toY = st + vh + overscanPx
 
@@ -209,11 +193,7 @@ export default function useVideoFeedWindowing({
       end++
     }
 
-    const vfMaxRender =
-      vfGetMaxRender() +
-      (velocity > 0.6 ? 2 : 0) +
-      (velocity > 1.2 ? 2 : 0) +
-      ((flipHoldUntil > Date.now() && (coarse || ios)) ? 3 : 0)
+    const vfMaxRender = vfGetMaxRender() + (velocity > 0.6 ? 2 : 0) + (velocity > 1.2 ? 2 : 0)
     if ((end - start) > vfMaxRender) {
       const mid = Math.floor((start + end) / 2)
       const half = Math.floor(vfMaxRender / 2)
@@ -232,18 +212,14 @@ export default function useVideoFeedWindowing({
 
       if (shrinkOnly) {
         const now = Date.now()
-        const stickyWindowMs = VF_WINDOW_STICKY_MS + (ios ? 260 : (coarse ? 180 : 0))
-        const recentWindowChange = (now - Number(vfWinMetaRef.current?.ts || 0)) < stickyWindowMs
+        const recentWindowChange = (now - Number(vfWinMetaRef.current?.ts || 0)) < VF_WINDOW_STICKY_MS
         const stickyItems = velocity > 1.2 ? 4 : velocity > 0.55 ? 3 : 2
         const stickyMaxRender = vfMaxRender + stickyItems
         const leadingTrim = Math.max(0, nextStart - prev.start)
         const trailingTrim = Math.max(0, prev.end - nextEnd)
         const smallShrink = leadingTrim <= stickyItems && trailingTrim <= stickyItems
 
-        if (flipHoldUntil > now) {
-          nextStart = prev.start
-          nextEnd = prev.end
-        } else if (recentWindowChange || smallShrink) {
+        if (recentWindowChange || smallShrink) {
           nextStart = prev.start
           nextEnd = prev.end
         } else if (direction > 0 && trailingTrim > 0 && leadingTrim <= (stickyItems * 2)) {
@@ -267,14 +243,13 @@ export default function useVideoFeedWindowing({
       if (prev.start === next.start && prev.end === next.end && prev.top === next.top && prev.bottom === next.bottom) {
         return prev
       }
-      const layoutJitterPx = VF_LAYOUT_JITTER_PX + (ios ? 22 : (coarse ? 14 : 0))
-      if (prev.start === next.start && prev.end === next.end && topDelta < layoutJitterPx && bottomDelta < layoutJitterPx) {
+      if (prev.start === next.start && prev.end === next.end && topDelta < VF_LAYOUT_JITTER_PX && bottomDelta < VF_LAYOUT_JITTER_PX) {
         return prev
       }
       vfWinMetaRef.current = { ts: Date.now(), start: next.start, end: next.end }
       return next
     })
-  }, [videoFeedOpen, vfSlots.length, vfReadViewportState, vfGetH, vfGetMaxRender, vfBuildWindow, isBrowserFn, vfGetUiFlags])
+  }, [videoFeedOpen, vfSlots.length, vfReadViewportState, vfGetH, vfGetMaxRender, vfBuildWindow, isBrowserFn])
 
   const vfScheduleRecalc = useCallback(() => {
     if (vfRafRef.current) return
@@ -363,18 +338,8 @@ export default function useVideoFeedWindowing({
         const dy = Math.abs(signedDy)
         const velocity = dt > 220 ? 0 : (dy / dt)
         const direction = dy < 2 ? Number(prev?.direction || 0) : (signedDy > 0 ? 1 : -1)
-        const { coarse, ios } = vfGetUiFlags()
-        const directionFlip =
-          Number(prev?.direction || 0) !== 0 &&
-          direction !== 0 &&
-          Number(prev?.direction || 0) !== direction &&
-          dy >= (ios ? 12 : (coarse ? 10 : 8))
         vfScrollStateRef.current = { top, ts: now, velocity, direction }
-        const settleMs = VF_SCROLL_SETTLE_MS + (directionFlip ? (ios ? 320 : (coarse ? 240 : 120)) : 0)
-        scrollActivity.activeUntil = Date.now() + settleMs
-        if (directionFlip) {
-          scrollActivity.flipHoldUntil = Date.now() + (ios ? 560 : (coarse ? 460 : 240))
-        }
+        scrollActivity.activeUntil = Date.now() + VF_SCROLL_SETTLE_MS
         if (scrollActivity.settleTimer) {
           try { clearTimeout(scrollActivity.settleTimer) } catch {}
           scrollActivity.settleTimer = 0
@@ -382,7 +347,7 @@ export default function useVideoFeedWindowing({
         scrollActivity.settleTimer = setTimeout(() => {
           scrollActivity.settleTimer = 0
           vfScheduleRecalc()
-        }, settleMs)
+        }, VF_SCROLL_SETTLE_MS)
       } catch {}
       vfScheduleRecalc()
     }
@@ -415,9 +380,8 @@ export default function useVideoFeedWindowing({
       }
       scrollActivity.activeUntil = 0
       vfScrollStateRef.current = { top: 0, ts: 0, velocity: 0, direction: 0 }
-      scrollActivity.flipHoldUntil = 0
     }
-  }, [videoFeedOpen, vfScheduleRecalc, vfGetScrollEl, vfReadViewportState, isBrowserFn, vfGetUiFlags])
+  }, [videoFeedOpen, vfScheduleRecalc, vfGetScrollEl, vfReadViewportState, isBrowserFn])
 
   const vfMeasureRef = useCallback((idx) => (node) => {
     try {

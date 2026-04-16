@@ -27,9 +27,8 @@ function readMutedPrefFromStorage() {
   }
 }
 
-function writeMutedPrefToStorage(val, options = {}) {
+function writeMutedPrefToStorage(val) {
   if (!isBrowser()) return;
-  if (options?.persist !== true) return;
   try {
     window.localStorage?.setItem(MEDIA_MUTED_KEY, val ? '1' : '0');
   } catch {}
@@ -44,18 +43,6 @@ function emitMutedPref(val, id, source = 'forum-ads') {
       })
     );
   } catch {}
-}
-
-function isForumBootSplashActive() {
-  if (!isBrowser()) return false;
-  try {
-    return (
-      window.__forumBootSplashActive === '1' ||
-      document.documentElement?.dataset?.forumBootSplashActive === '1'
-    );
-  } catch {
-    return false;
-  }
 }
 
 function desiredMutedFromPref(pref) {
@@ -1057,9 +1044,8 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   const [isNear, setIsNear] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isPageActive, setIsPageActive] = useState(true);
-  const [isSplashActive, setIsSplashActive] = useState(() => isForumBootSplashActive());
 
-  const shouldPlay = isFocused && isPageActive && !isSplashActive;
+  const shouldPlay = isFocused && isPageActive;
   const shouldPlayRef = useRef(false);
   const adPlayEventTsRef = useRef(0);
   const emitAdPlayToCoordinator = React.useCallback((source = 'ad') => {
@@ -1083,22 +1069,6 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   useEffect(() => {
     shouldPlayRef.current = shouldPlay;
   }, [shouldPlay]);
-
-  useEffect(() => {
-    if (!isBrowser()) return undefined;
-    const syncSplash = (event) => {
-      const next =
-        typeof event?.detail?.active === 'boolean'
-          ? event.detail.active
-          : isForumBootSplashActive();
-      setIsSplashActive(!!next);
-    };
-    syncSplash();
-    window.addEventListener('forum-boot-splash', syncSplash);
-    return () => {
-      window.removeEventListener('forum-boot-splash', syncSplash);
-    };
-  }, []);
 
   // Page visibility + focus/blur
   useEffect(() => {
@@ -1599,8 +1569,8 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
         v.play?.().catch(() => {
           // если пробовали со звуком и браузер запретил — откатим в mute глобально
           if (!muted) {
-            // ВАЖНО:
-            // autoplay fallback не имеет права переписывать persisted global mute preference.
+            writeMutedPrefToStorage(true);
+            emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback');
             setMuted(true);
             try { v.muted = true; } catch {}
           }
@@ -1721,7 +1691,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
     const next = !muted;
 
     // 1) сохранить глобально + оповестить всех
-    writeMutedPrefToStorage(next, { persist: true });
+    writeMutedPrefToStorage(next);
     emitMutedPref(next, playerIdRef.current, 'forum-ads-toggle');
 
     // 2) локально
