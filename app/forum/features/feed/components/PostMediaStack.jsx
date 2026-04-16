@@ -197,7 +197,7 @@ function ImageCarousel({
       )}
     </div>
   )
-} 
+}
 
 export default function PostMediaStack({
   imgLines,
@@ -264,7 +264,8 @@ export default function PostMediaStack({
                 data-forum-video="post"
                 data-forum-media="video"
                 src={src}
-                poster={i === 0 && posterUrl ? posterUrl : undefined}
+
+                loading="eager"
                 playsInline
                 controls={false}
                 controlsList="nodownload noplaybackrate noremoteplayback"
@@ -294,7 +295,7 @@ export default function PostMediaStack({
                 key={`yt:${mediaKeyBase}:${videoId}:${i}`}
                 className="videoCard mediaBox"
                 data-kind="iframe"
-                data-subkind="youtube" 
+                data-subkind="youtube"
                 style={{ margin: 0 }}
               >
                 <iframe
@@ -302,13 +303,14 @@ export default function PostMediaStack({
                   title="YouTube video"
                   id={`yt_${postId || 'post'}_${i}`}
                   data-yt-id={videoId}
-                  data-forum-media="youtube" 
+                  data-forum-media="youtube"
                   loading="eager"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                   className="mediaBoxItem"
-                /> 
+                />
+
               </div>
             )
           })}
@@ -379,13 +381,14 @@ export default function PostMediaStack({
                   title="TikTok video"
                   data-forum-media="tiktok"
                   data-src={`https://www.tiktok.com/embed/v2/${videoId}`}
-                  loading="eager" 
+                  loading="eager"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                   className="mediaBoxItem"
                 />
-              </div> 
+
+              </div>
             )
           })}
         </div>

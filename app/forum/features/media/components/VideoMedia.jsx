@@ -310,7 +310,6 @@ export default function VideoMedia({
   mediaVisMarginPx,
   dropActiveVideo,
   unloadVideoEl,
-  markMediaLifecycleTouch,
   ...rest
 }) {
   const ref = React.useRef(null)
@@ -404,19 +403,6 @@ export default function VideoMedia({
       } catch {}
     },
     [unloadVideoEl],
-  )
-
-  const markLifecycleTouchFn = React.useCallback(
-    (reason) => {
-      try {
-        const el = ref.current
-        if (!el) return
-        if (typeof markMediaLifecycleTouch === 'function') {
-          markMediaLifecycleTouch(el, reason)
-        }
-      } catch {}
-    },
-    [markMediaLifecycleTouch],
   )
 
   const clearUiTimers = React.useCallback(() => {
@@ -577,9 +563,6 @@ export default function VideoMedia({
         delete el.dataset.__skipMutePersistUntil
         delete el.dataset.__persistMuteUntil
         delete el.dataset.__lastManualMuteTs
-        delete el.dataset.__lastMediaTouchTs
-        delete el.dataset.__lastVisibleTs
-        delete el.dataset.__lastActiveTs
       } catch {}
     }
     if (poster) {
@@ -617,7 +600,6 @@ export default function VideoMedia({
     }
     const onPlay = () => {
       clearNativeControlsForPost()
-      markLifecycleTouchFn('play')
       setPausedState(false)
       showCenterGlyph('pause', 620)
       revealHud(1800)
@@ -642,7 +624,7 @@ export default function VideoMedia({
       try { el.removeEventListener('pause', onPause) } catch {}
       try { el.removeEventListener('ended', onEnded) } catch {}
     }
-  }, [clearNativeControlsForPost, hudVisible, markLifecycleTouchFn, revealHud, showCenterGlyph])
+  }, [clearNativeControlsForPost, hudVisible, revealHud, showCenterGlyph])
 
   React.useEffect(() => {
     const el = ref.current
@@ -814,7 +796,6 @@ export default function VideoMedia({
         }
 
         restoreVideoElFn(el)
-        markLifecycleTouchFn('visible')
         touchActiveVideoFn(el)
         enforceActiveVideoCapFn(el)
         try {
@@ -825,7 +806,7 @@ export default function VideoMedia({
             (el.readyState === 0 || !el.currentSrc) &&
             el.dataset?.__loadPending !== '1' &&
             el.paused &&
-            el.currentTime === 0
+            (el.currentTime === 0)
           ) {
             el.load?.()
           }
@@ -908,7 +889,6 @@ export default function VideoMedia({
     dropActiveVideoFn,
     enforceActiveVideoCapFn,
     isVideoNearViewportFn,
-    markLifecycleTouchFn,
     mediaVisMargin,
     restoreVideoElFn,
     touchActiveVideoFn,
@@ -950,24 +930,29 @@ export default function VideoMedia({
         } catch {}
         return
       }
-
-      // Для post/coordinator-owned media восстановление делает единый coordinator.
-      // Локальный remove(src)+load() здесь создаёт лишние 206/cancel-циклы и может рвать media shell.
-      if (String(dataForumVideo || '') === 'post' || coordinatorOwnsLifecycle) {
+      // Для пост-видео восстановление делает единый coordinator.
+      // Локальный remove(src)+load() здесь создаёт лишние 206/cancel-циклы.
+      if (String(dataForumVideo || '') === 'post') {
         try {
           onErrorProp?.(e)
         } catch {}
         return
       }
-
       try {
         const tried = Number(el.dataset.__recoverTry || 0)
         if (tried < 1) {
           const srcSafe = String(el.dataset.__src || el.getAttribute('data-src') || '')
           if (srcSafe) {
             el.dataset.__recoverTry = String(tried + 1)
-            try { el.pause?.() } catch {}
-            try { el.preload = 'metadata' } catch {}
+            try {
+              el.pause?.()
+            } catch {}
+            try {
+              el.removeAttribute('src')
+            } catch {}
+            try {
+              el.preload = 'metadata'
+            } catch {}
             try {
               if (recoverTimerRef.current) clearTimeout(recoverTimerRef.current)
             } catch {}
@@ -975,25 +960,24 @@ export default function VideoMedia({
               recoverTimerRef.current = 0
               try {
                 if (!el.isConnected) return
-                restoreVideoElFn(el)
+                if (!el.getAttribute('src')) el.setAttribute('src', srcSafe)
+                el.load?.()
               } catch {}
             }, 180)
           }
         }
       } catch {}
-
       try {
         onErrorProp?.(e)
       } catch {}
     },
-    [coordinatorOwnsLifecycle, dataForumVideo, onErrorProp, restoreVideoElFn],
+    [dataForumVideo, onErrorProp],
   )
 
   const onVideoLoaded = React.useCallback(() => {
     try {
       const el = ref.current
       if (!el) return
-      markLifecycleTouchFn('loaded')
       clearNativeControlsForPost()
       el.dataset.__recoverTry = '0'
       const revealPoster = () => {
@@ -1016,7 +1000,7 @@ export default function VideoMedia({
         revealPoster()
       }
     } catch {}
-  }, [clearNativeControlsForPost, markLifecycleTouchFn])
+  }, [clearNativeControlsForPost])
 
   const handleRootPointerDown = React.useCallback((e) => {
     try { onPointerDownProp?.(e) } catch {}
@@ -1179,4 +1163,4 @@ export default function VideoMedia({
       )}
     </div>
   )
-} 
+}

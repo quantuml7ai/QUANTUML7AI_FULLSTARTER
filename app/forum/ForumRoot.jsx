@@ -781,9 +781,6 @@ useEffect(() => {
   })()
 
   let cancelled = false
-  let rafA = 0
-  let rafB = 0
-
   const scheduleAlign = (attempt = 0) => {
     if (cancelled) return
     const currentUserScrollTs = (() => {
@@ -799,8 +796,8 @@ useEffect(() => {
   }
 
   try {
-    rafA = requestAnimationFrame(() => {
-      rafB = requestAnimationFrame(() => scheduleAlign(0))
+    const rafA = requestAnimationFrame(() => {
+      const rafB = requestAnimationFrame(() => scheduleAlign(0))
       sortRefreshAlignRafsRef.current.push(rafB)
     })
     sortRefreshAlignRafsRef.current.push(rafA)
@@ -811,8 +808,6 @@ useEffect(() => {
 
   return () => {
     cancelled = true
-    try { if (rafB) cancelAnimationFrame(rafB) } catch {}
-    try { if (rafA) cancelAnimationFrame(rafA) } catch {}    
     clearSortRefreshAlignHandles()
   }
 }, [clearSortRefreshAlignHandles, contentRefreshToken, runSortRefreshAlignment])
