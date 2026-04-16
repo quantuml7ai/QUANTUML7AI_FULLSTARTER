@@ -12,7 +12,7 @@ const audits = [
   },
   {
     label: 'Forum media ownership',
-    script: 'tools/audit-media-ownership.js',
+    script: 'tools/audit-media-ownership.mjs',
     outputs: ['forum-media-ownership.report.json'],
   },  
   {

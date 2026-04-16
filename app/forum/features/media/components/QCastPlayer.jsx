@@ -367,6 +367,8 @@ export default function QCastPlayer({
     const ctx2d = canvas.getContext('2d', { alpha: true })
     if (!ctx2d) return undefined
     st.ctx2d = ctx2d
+    let stopped = false
+    let rafId = 0
 
     const resize = () => {
       try {
@@ -400,6 +402,7 @@ export default function QCastPlayer({
 
     const paint = () => {
       st.raf = 0
+      if (stopped) return
       try {
         if (!hostRef.current || !ctx2d) return
         const w = st.w || 1
@@ -438,18 +441,34 @@ export default function QCastPlayer({
         ctx2d.fillRect(0, 0, w, h)
       } catch {}
     }
-
-    const tick = () => {
-      paint()
-      st.raf = requestAnimationFrame(tick)
+    const scheduleNext = () => {
+      if (stopped) return
+      rafId = requestAnimationFrame(tick)
+      st.raf = rafId
     }
 
-    st.raf = requestAnimationFrame(tick)
+    const tick = () => {
+      st.raf = 0
+      if (stopped) return
+      paint()
+      if (!isPlaying) return
+      scheduleNext()
+    }
+
+    if (isPlaying) {
+      scheduleNext()
+    } else {
+      paint()
+    }
 
     return () => {
+      stopped = true
       try {
-        if (st.raf) cancelAnimationFrame(st.raf)
+        if (rafId) cancelAnimationFrame(rafId)
       } catch {}
+      try {
+        if (st.raf && st.raf !== rafId) cancelAnimationFrame(st.raf)
+      } catch {}   
       st.raf = 0
       try {
         st.ro?.disconnect?.()

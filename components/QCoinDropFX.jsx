@@ -359,10 +359,23 @@ export default function QCoinDropFX ({
   useEffect(() => {
     if (!isBrowser()) return
     if (motionReducedRef.current) return
-
+  if (!uid) {
+    lastTimeRef.current = 0
+    const prevRaf = animFrameRef.current
+    animFrameRef.current = null
+    try { if (prevRaf) cancelAnimationFrame(prevRaf) } catch {}
+    return
+  }
     lastTimeRef.current = 0
     let stopped = false
+  let rafId = 0
 
+  const scheduleNext = () => {
+    if (stopped) return
+    rafId = requestAnimationFrame(loop)
+    animFrameRef.current = rafId
+  }
+  
     const loop = (ts) => {
       if (stopped) return
 
@@ -451,17 +464,18 @@ export default function QCoinDropFX ({
       }
 
       setTick((x) => (x + 1) & 1023)
-      if (!stopped) animFrameRef.current = requestAnimationFrame(loop)
+      if (!stopped) scheduleNext()
     }
 
-    animFrameRef.current = requestAnimationFrame(loop)
+    scheduleNext()
 
     return () => {
       stopped = true
-      const rafId = animFrameRef.current
+      const currentRaf = animFrameRef.current
       animFrameRef.current = null
-      if (rafId) cancelAnimationFrame(rafId)
-    }
+      try { if (rafId) cancelAnimationFrame(rafId) } catch {}
+      try { if (currentRaf && currentRaf !== rafId) cancelAnimationFrame(currentRaf) } catch {}
+     }
   }, [uid, intervalMs, minSize, maxSize, initWorld])
 
   useEffect(() => {

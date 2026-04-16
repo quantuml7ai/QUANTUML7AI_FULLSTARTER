@@ -31,7 +31,7 @@
     "project:docs:full": "pnpm project:docs && pnpm project:docs:audit",
     "audit:forum:diag": "node tools/analyze-forum-diag.js",
     "audit:forum:har": "node tools/analyze-forum-media-har.js",
-    "audit:forum:ownership": "node tools/audit-media-ownership.js"
+    "audit:forum:ownership": "node tools/audit-media-ownership.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.114.0",
