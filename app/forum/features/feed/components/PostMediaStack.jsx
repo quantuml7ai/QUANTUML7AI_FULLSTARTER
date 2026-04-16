@@ -5,6 +5,78 @@ import Image from 'next/image'
 
 const POST_MEDIA_EMBED_CACHE = new Map()
 
+function detectTMAHard() {
+  try {
+    if (typeof window === 'undefined') return false
+    const tg = window.Telegram && window.Telegram.WebApp
+    if (!tg) return false
+    if (tg.initData && typeof tg.initData === 'string' && tg.initData.includes('hash=')) return true
+    const hash = String(window.location.hash || '')
+    return hash.includes('tgWebAppData=') || hash.includes('tgwebappdata=')
+  } catch {
+    return false
+  }
+}
+
+function getIframeScrollTarget(node) {
+  try {
+    const forumScrollEl = document.querySelector?.('[data-forum-scroll="1"]')
+    if (forumScrollEl instanceof HTMLElement) return forumScrollEl
+  } catch {}
+  try {
+    let current = node instanceof HTMLElement ? node.parentElement : null
+    while (current) {
+      const style = window.getComputedStyle(current)
+      const canScrollY =
+        /(auto|scroll|overlay)/i.test(String(style?.overflowY || '')) &&
+        current.scrollHeight > current.clientHeight + 1
+      const canScrollX =
+        /(auto|scroll|overlay)/i.test(String(style?.overflowX || '')) &&
+        current.scrollWidth > current.clientWidth + 1
+      if (canScrollY || canScrollX) return current
+      current = current.parentElement
+    }
+  } catch {}
+  return null
+}
+
+function proxyIframeWheelScroll(node, deltaX = 0, deltaY = 0) {
+  const scrollEl = getIframeScrollTarget(node)
+  if (scrollEl instanceof HTMLElement) {
+    if (Math.abs(Number(deltaY || 0)) > 0) scrollEl.scrollTop += Number(deltaY || 0)
+    if (Math.abs(Number(deltaX || 0)) > 0) scrollEl.scrollLeft += Number(deltaX || 0)
+    return
+  }
+  try {
+    window.scrollBy({
+      left: Number(deltaX || 0),
+      top: Number(deltaY || 0),
+      behavior: 'auto',
+    })
+  } catch {}
+}
+
+function markIframeInteractionWindow(node, ttlMs = 5200) {
+  try {
+    const host =
+      node?.closest?.('.mediaBox[data-kind="iframe"]') ||
+      node?.closest?.('[data-kind="iframe"]') ||
+      null
+    const iframe = host?.querySelector?.('iframe[data-forum-media]') || null
+    if (!(iframe instanceof HTMLIFrameElement)) return
+    const persistUntil = String(Date.now() + Math.max(1800, Number(ttlMs || 0)))
+    const gestureUntil = String(Date.now() + 1800)
+    try { iframe.dataset.__persistMuteUntil = persistUntil } catch {}
+    try { iframe.dataset.__userGestureUntil = gestureUntil } catch {}
+    try {
+      if (host?.dataset) {
+        host.dataset.__persistMuteUntil = persistUntil
+        host.dataset.__userGestureUntil = gestureUntil
+      }
+    } catch {}
+  } catch {}
+}
+
 function uniqList(list) {
   return Array.from(new Set(Array.isArray(list) ? list.filter(Boolean) : []))
 }
@@ -201,6 +273,12 @@ function ImageCarousel({
 
 function IframeTouchShield({ href }) {
   const [interactive, setInteractive] = React.useState(false)
+  const [uiMode, setUiMode] = React.useState({
+    coarse: false,
+    fine: false,
+    tma: false,
+  })
+  const shieldRef = React.useRef(null)
   const unlockTimerRef = React.useRef(null)
   const pointerStateRef = React.useRef({
     id: null,
@@ -219,6 +297,7 @@ function IframeTouchShield({ href }) {
 
   const unlockInteract = React.useCallback((ttlMs = 2600) => {
     clearUnlockTimer()
+    markIframeInteractionWindow(shieldRef.current, ttlMs + 4200)
     setInteractive(true)
     unlockTimerRef.current = setTimeout(() => {
       setInteractive(false)
@@ -240,9 +319,40 @@ function IframeTouchShield({ href }) {
     return () => clearUnlockTimer()
   }, [clearUnlockTimer])
 
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return undefined
+    const coarseMq = window.matchMedia?.('(pointer: coarse)') || null
+    const fineMq = window.matchMedia?.('(pointer: fine)') || null
+    const updateUiMode = () => {
+      setUiMode({
+        coarse: !!coarseMq?.matches,
+        fine: !!fineMq?.matches,
+        tma: detectTMAHard(),
+      })
+    }
+    updateUiMode()
+    try { coarseMq?.addEventListener?.('change', updateUiMode) } catch {}
+    try { fineMq?.addEventListener?.('change', updateUiMode) } catch {}
+    return () => {
+      try { coarseMq?.removeEventListener?.('change', updateUiMode) } catch {}
+      try { fineMq?.removeEventListener?.('change', updateUiMode) } catch {}
+    }
+  }, [])
+
+  const touchShieldMode = !!uiMode.coarse || !!uiMode.tma
+  const desktopWheelProxyMode = !!uiMode.fine && !touchShieldMode
+  const shieldEnabled = touchShieldMode || desktopWheelProxyMode
+
   const handlePointerDown = React.useCallback((event) => {
+    if (!shieldEnabled) return
     const pointerType = String(event?.pointerType || '')
-    if (pointerType && pointerType !== 'touch' && pointerType !== 'pen') return
+    if (touchShieldMode) {
+      if (pointerType && pointerType !== 'touch' && pointerType !== 'pen') return
+    } else if (desktopWheelProxyMode) {
+      if (pointerType && pointerType !== 'mouse') return
+    } else {
+      return
+    }
     pointerStateRef.current = {
       id: event?.pointerId ?? null,
       startX: Number(event?.clientX || 0),
@@ -250,7 +360,7 @@ function IframeTouchShield({ href }) {
       moved: false,
       startedAt: Date.now(),
     }
-  }, [])
+  }, [desktopWheelProxyMode, shieldEnabled, touchShieldMode])
 
   const handlePointerMove = React.useCallback((event) => {
     const state = pointerStateRef.current
@@ -272,15 +382,43 @@ function IframeTouchShield({ href }) {
     const elapsed = Date.now() - Number(state.startedAt || 0)
     const isTap = !state.moved && dx < 12 && dy < 12 && elapsed < 420
     resetPointerState()
-    if (isTap) unlockInteract()
-  }, [resetPointerState, unlockInteract])
+    if (!isTap) return
+    try {
+      event?.preventDefault?.()
+      event?.stopPropagation?.()
+    } catch {}
+    unlockInteract(desktopWheelProxyMode ? 2200 : 2600)
+  }, [desktopWheelProxyMode, resetPointerState, unlockInteract])
 
   const handlePointerCancel = React.useCallback(() => {
     resetPointerState()
   }, [resetPointerState])
 
+  const handleWheel = React.useCallback((event) => {
+    if (!desktopWheelProxyMode || interactive) return
+    const deltaX = Number(event?.deltaX || 0)
+    const deltaY = Number(event?.deltaY || 0)
+    if (Math.abs(deltaX) < 0.1 && Math.abs(deltaY) < 0.1) return
+    try {
+      event.preventDefault()
+      event.stopPropagation()
+    } catch {}
+    proxyIframeWheelScroll(event?.currentTarget, deltaX, deltaY)
+  }, [desktopWheelProxyMode, interactive])
+
+  if (!shieldEnabled) return null
+
   return (
-    <div className={`iframeTouchShield${interactive ? ' isInteractive' : ''}`}>
+    <div
+      ref={shieldRef}
+      className={[
+        'iframeTouchShield',
+        'isEnabled',
+        interactive ? 'isInteractive' : '',
+        touchShieldMode ? 'isTouchMode' : '',
+        desktopWheelProxyMode ? 'isDesktopWheelProxy' : '',
+      ].filter(Boolean).join(' ')}
+    >
       <div
         className={`iframeTouchShieldGesture${interactive ? ' isInteractive' : ''}`}
         aria-hidden="true"
@@ -288,8 +426,9 @@ function IframeTouchShield({ href }) {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
+        onWheel={handleWheel}
       />
-      {href ? (
+      {href && touchShieldMode ? (
         <a
           className="iframeTouchShieldAction"
           href={href}

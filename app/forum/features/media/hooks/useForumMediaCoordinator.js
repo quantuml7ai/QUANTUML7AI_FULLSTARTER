@@ -2094,11 +2094,55 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       if (id) clearInterval(id);
       ytMutePolls.delete(player);
     };
+    const getIframeMuteSyncHoldUntil = (iframe) => {
+      try {
+        const owner =
+          iframe?.closest?.('.mediaBox[data-kind="iframe"]') ||
+          iframe?.closest?.('[data-kind="iframe"]') ||
+          iframe?.parentElement ||
+          null;
+        return Math.max(
+          Number(iframe?.dataset?.__persistMuteUntil || 0),
+          Number(iframe?.dataset?.__userGestureUntil || 0),
+          Number(owner?.dataset?.__persistMuteUntil || 0),
+          Number(owner?.dataset?.__userGestureUntil || 0),
+        );
+      } catch {}
+      return 0;
+    };
+    const shouldSyncYouTubeMute = (iframe) => {
+      try {
+        if (!(iframe instanceof HTMLIFrameElement) || !iframe.isConnected) return false;
+        return getIframeMuteSyncHoldUntil(iframe) > Date.now();
+      } catch {}
+      return false;
+    };
+    const findYouTubeIframeBySourceWindow = (sourceWindow) => {
+      if (!sourceWindow) return null;
+      try {
+        for (const [iframe] of ytPlayers.entries()) {
+          if (!(iframe instanceof HTMLIFrameElement)) continue;
+          if (!iframe.isConnected) continue;
+          if (iframe.contentWindow === sourceWindow) return iframe;
+        }
+      } catch {}
+      return null;
+    };
+    const parseIframeMessageData = (data) => {
+      if (!data) return null;
+      if (typeof data === 'string') {
+        const trimmed = data.trim();
+        if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) return null;
+        try { return JSON.parse(trimmed); } catch { return null; }
+      }
+      return typeof data === 'object' ? data : null;
+    };
     const startYtMutePoll = (player) => {
       if (!player || ytMutePolls.has(player)) return;
       const id = setInterval(() => {
         try {
-          if (!isAttachedYtPlayer(player)) {
+          const iframe = player?.getIframe?.() || null;
+          if (!isAttachedYtPlayer(player, iframe)) {
             stopYtMutePoll(player);
             ytMuteLast.delete(player);
             return;
@@ -2107,6 +2151,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           const last = ytMuteLast.get(player);
           if (last !== muted) {
             ytMuteLast.set(player, muted);
+            if (!shouldSyncYouTubeMute(iframe)) return;
             setMutedPref(muted, 'youtube', true, false);
           }
         } catch {}
@@ -3744,6 +3789,21 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         } catch {}
       }
     };
+    const onIframeMessage = (event) => {
+      try {
+        const origin = String(event?.origin || '').toLowerCase();
+        if (!origin.includes('youtube.com') && !origin.includes('youtube-nocookie.com')) return;
+        const payload = parseIframeMessageData(event?.data);
+        if (!payload || String(payload?.event || '') !== 'infoDelivery') return;
+        if (typeof payload?.info?.muted !== 'boolean') return;
+        const iframe = findYouTubeIframeBySourceWindow(event?.source);
+        if (!(iframe instanceof HTMLIFrameElement) || !iframe.isConnected) return;
+        const player = ytPlayers.get(iframe);
+        if (player) ytMuteLast.set(player, !!payload.info.muted);
+        if (!shouldSyncYouTubeMute(iframe)) return;
+        setMutedPref(!!payload.info.muted, 'youtube', true, false);
+      } catch {}
+    };
     let mo = null;
     try {
       mo = new MutationObserver((mutations) => {
@@ -3784,6 +3844,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     window.addEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
     window.addEventListener('site-media-play', onExternalMediaPlay);
     window.addEventListener('forum-boot-splash', onSplashGateChange);
+    window.addEventListener('message', onIframeMessage);
     onSplashGateChange({ detail: { active: isSplashGateActive() } });
     document.addEventListener('visibilitychange', onVisibilityRecover, true);
     window.addEventListener('pageshow', onPageShowRecover);
@@ -3813,6 +3874,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       window.removeEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
       window.removeEventListener('site-media-play', onExternalMediaPlay);
       window.removeEventListener('forum-boot-splash', onSplashGateChange);
+      window.removeEventListener('message', onIframeMessage);
       document.removeEventListener('visibilitychange', onVisibilityRecover, true);
       window.removeEventListener('pageshow', onPageShowRecover);
       window.removeEventListener('focus', onWindowFocusRecover, true);

@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-16T01:57:55.347Z",
+  "generatedAt": "2026-04-16T02:19:23.721Z",
   "scannedFiles": 274,
   "report": [
     {
@@ -807,22 +807,22 @@
         },
         {
           "key": "rectReads",
-          "line": 2233,
+          "line": 2278,
           "text": "const rect = node.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 2476,
+          "line": 2521,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 2493,
+          "line": 2538,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 3027,
+          "line": 3072,
           "text": "const rect = el.getBoundingClientRect?.();"
         },
         {
@@ -837,12 +837,12 @@
         },
         {
           "key": "raf",
-          "line": 3180,
+          "line": 3225,
           "text": "rafId = requestAnimationFrame(() => {"
         },
         {
           "key": "raf",
-          "line": 3730,
+          "line": 3775,
           "text": "mutationSweepRaf = requestAnimationFrame(() => {"
         }
       ]
@@ -1761,6 +1761,38 @@
           "key": "timers",
           "line": 604,
           "text": "const h = setTimeout(async () => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostMediaStack.jsx",
+      "score": 12,
+      "counts": {
+        "scrollWrite": 1,
+        "scrollRead": 1,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "scrollWrite",
+          "line": 51,
+          "text": "window.scrollBy({"
+        },
+        {
+          "key": "scrollRead",
+          "line": 46,
+          "text": "if (Math.abs(Number(deltaY || 0)) > 0) scrollEl.scrollTop += Number(deltaY || 0)"
+        },
+        {
+          "key": "timers",
+          "line": 302,
+          "text": "unlockTimerRef.current = setTimeout(() => {"
         }
       ]
     },
@@ -2719,28 +2751,6 @@
           "key": "timers",
           "line": 41,
           "text": "const id = setTimeout(() => {"
-        }
-      ]
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostMediaStack.jsx",
-      "score": 1,
-      "counts": {
-        "scrollWrite": 0,
-        "scrollRead": 0,
-        "alignOps": 0,
-        "restoreOps": 0,
-        "teleportOps": 0,
-        "rectReads": 0,
-        "resizeObserver": 0,
-        "raf": 0,
-        "timers": 1
-      },
-      "hits": [
-        {
-          "key": "timers",
-          "line": 223,
-          "text": "unlockTimerRef.current = setTimeout(() => {"
         }
       ]
     },

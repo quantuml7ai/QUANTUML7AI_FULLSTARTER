@@ -565,7 +565,7 @@ export const FORUM_STYLES = `
 .iframeTouchShield{
   position:absolute;
   inset:0;
-  display:flex;
+  display:none;
   align-items:flex-end;
   justify-content:flex-end;
   padding:12px;
@@ -573,11 +573,21 @@ export const FORUM_STYLES = `
   background:linear-gradient(180deg, rgba(4,8,16,0), rgba(4,8,16,.08));
   pointer-events:none;
 }
+.iframeTouchShield.isEnabled{
+  display:flex;
+}
+.iframeTouchShield.isDesktopWheelProxy{
+  padding:0;
+  background:transparent;
+}
 .iframeTouchShieldGesture{
   position:absolute;
   inset:0;
   pointer-events:auto;
   touch-action:pan-y pinch-zoom;
+}
+.iframeTouchShield.isDesktopWheelProxy .iframeTouchShieldGesture{
+  touch-action:auto;
 }
 .iframeTouchShield.isInteractive .iframeTouchShieldGesture,
 .iframeTouchShieldGesture.isInteractive{
@@ -604,17 +614,12 @@ export const FORUM_STYLES = `
   height:18px;
   display:block;
 }
-@media (pointer:fine){
-  .iframeTouchShield{
-    display:none;
-  }
+.iframeTouchShield.isDesktopWheelProxy .iframeTouchShieldAction{
+  display:none;
 }
 @media (pointer:coarse){
   .mediaBox[data-kind="iframe"] > iframe{
     pointer-events:auto;
-  }
-  .iframeTouchShield{
-    display:flex;
   }
 }
 /* YouTube iframe: минимальная высота отдельно (переменная под моб/десктоп) */
@@ -7071,5 +7076,4 @@ const Styles = () => (
 )
 
 export default Styles
-
 

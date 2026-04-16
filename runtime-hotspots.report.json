@@ -1,16 +1,16 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-16T01:57:55.194Z",
+  "generatedAt": "2026-04-16T02:19:23.461Z",
   "report": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
       "counts": {
-        "for-loop": 17,
+        "for-loop": 18,
         "while-loop": 2,
         "map-chain": 0,
         "filter-map": 0,
         "layout-read": 14,
-        "sync-json": 0,
+        "sync-json": 1,
         "local-storage": 0,
         "session-storage": 0,
         "network-call": 0,
@@ -24,7 +24,7 @@
           "text": "rootMargin: `${Math.max(isCoarseUi ? 420 : 340, Math.round(__MEDIA_VIS_MARGIN_PX * 1.35))}px 0px ${Math.max(isCoarseUi ? 980 : 760, Math.round(__MEDIA_VIS_MARGIN_PX * 2.35))}px 0px`,"
         }
       ],
-      "score": 95
+      "score": 97
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\lib\\adsCore.js",
@@ -857,6 +857,24 @@
         "network-call": 0,
         "raf": 2,
         "interval": 1
+      },
+      "longLines": [],
+      "score": 13
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostMediaStack.jsx",
+      "counts": {
+        "for-loop": 2,
+        "while-loop": 1,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 2,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
       },
       "longLines": [],
       "score": 13
@@ -1782,32 +1800,32 @@
       },
       "longLines": [
         {
-          "i": 979,
+          "i": 984,
           "len": 190,
           "text": ".emojiBtn{ width:38px; height:38px; border-radius:10px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.05); font-size:22px; color:#fff; transition: transform .06s }"
         },
         {
-          "i": 1058,
+          "i": 1063,
           "len": 188,
           "text": ".avaBig{ width:112px; height:112px; border-radius:16px; border:1px solid rgba(1, 204, 255, 0.31); display:grid; place-items:center; font-size:48px; background:rgba(119, 0, 255, 0.09) }"
         },
         {
-          "i": 1499,
+          "i": 1504,
           "len": 196,
           "text": ".iconBtn{ width:40px; height:40px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:transparent; display:grid; place-items:center; transition:transform .08s, box-shadow .2s }"
         },
         {
-          "i": 1658,
+          "i": 1663,
           "len": 184,
           "text": ".sortDrop{ position:absolute; top:68px; right:100px; width:120px; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:6px; z-index:3000 }"
         },
         {
-          "i": 1793,
+          "i": 1798,
           "len": 208,
           "text": ".qft_toast{ max-width:min(420px,90vw); padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(10,14,22,.94); color:#eaf4ff; box-shadow:0 10px 28px rgba(0,0,0,.45) }"
         },
         {
-          "i": 5493,
+          "i": 5498,
           "len": 183,
           "text": ".dmUnreadDot{ width:12px; height:12px; border-radius:999px; background:#35d07f; box-shadow:0 0 12px rgba(53,208,127,.7); flex:0 0 auto; animation: dmPulse 2.6s ease-in-out infinite; }"
         }
@@ -2024,24 +2042,6 @@
         "local-storage": 0,
         "session-storage": 0,
         "network-call": 1,
-        "raf": 0,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 4
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostMediaStack.jsx",
-      "counts": {
-        "for-loop": 2,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 0,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
         "raf": 0,
         "interval": 0
       },
