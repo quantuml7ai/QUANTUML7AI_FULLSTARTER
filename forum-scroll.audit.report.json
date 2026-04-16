@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-16T02:57:52.673Z",
+  "generatedAt": "2026-04-16T03:07:25.189Z",
   "scannedFiles": 274,
   "report": [
     {
@@ -1765,38 +1765,6 @@
       ]
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostMediaStack.jsx",
-      "score": 12,
-      "counts": {
-        "scrollWrite": 1,
-        "scrollRead": 1,
-        "alignOps": 0,
-        "restoreOps": 0,
-        "teleportOps": 0,
-        "rectReads": 0,
-        "resizeObserver": 0,
-        "raf": 0,
-        "timers": 1
-      },
-      "hits": [
-        {
-          "key": "scrollWrite",
-          "line": 51,
-          "text": "window.scrollBy({"
-        },
-        {
-          "key": "scrollRead",
-          "line": 46,
-          "text": "if (Math.abs(Number(deltaY || 0)) > 0) scrollEl.scrollTop += Number(deltaY || 0)"
-        },
-        {
-          "key": "timers",
-          "line": 302,
-          "text": "unlockTimerRef.current = setTimeout(() => {"
-        }
-      ]
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ForumSearchSortControls.jsx",
       "score": 12,
       "counts": {
@@ -2751,6 +2719,28 @@
           "key": "timers",
           "line": 41,
           "text": "const id = setTimeout(() => {"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostMediaStack.jsx",
+      "score": 1,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 1
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 260,
+          "text": "unlockTimerRef.current = setTimeout(() => {"
         }
       ]
     },

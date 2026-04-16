@@ -18,44 +18,6 @@ function detectTMAHard() {
   }
 }
 
-function getIframeScrollTarget(node) {
-  try {
-    const forumScrollEl = document.querySelector?.('[data-forum-scroll="1"]')
-    if (forumScrollEl instanceof HTMLElement) return forumScrollEl
-  } catch {}
-  try {
-    let current = node instanceof HTMLElement ? node.parentElement : null
-    while (current) {
-      const style = window.getComputedStyle(current)
-      const canScrollY =
-        /(auto|scroll|overlay)/i.test(String(style?.overflowY || '')) &&
-        current.scrollHeight > current.clientHeight + 1
-      const canScrollX =
-        /(auto|scroll|overlay)/i.test(String(style?.overflowX || '')) &&
-        current.scrollWidth > current.clientWidth + 1
-      if (canScrollY || canScrollX) return current
-      current = current.parentElement
-    }
-  } catch {}
-  return null
-}
-
-function proxyIframeWheelScroll(node, deltaX = 0, deltaY = 0) {
-  const scrollEl = getIframeScrollTarget(node)
-  if (scrollEl instanceof HTMLElement) {
-    if (Math.abs(Number(deltaY || 0)) > 0) scrollEl.scrollTop += Number(deltaY || 0)
-    if (Math.abs(Number(deltaX || 0)) > 0) scrollEl.scrollLeft += Number(deltaX || 0)
-    return
-  }
-  try {
-    window.scrollBy({
-      left: Number(deltaX || 0),
-      top: Number(deltaY || 0),
-      behavior: 'auto',
-    })
-  } catch {}
-}
-
 function markIframeInteractionWindow(node, ttlMs = 5200) {
   try {
     const host =
@@ -273,11 +235,7 @@ function ImageCarousel({
 
 function IframeTouchShield({ href }) {
   const [interactive, setInteractive] = React.useState(false)
-  const [uiMode, setUiMode] = React.useState({
-    coarse: false,
-    fine: false,
-    tma: false,
-  })
+  const [shieldEnabled, setShieldEnabled] = React.useState(false)
   const shieldRef = React.useRef(null)
   const unlockTimerRef = React.useRef(null)
   const pointerStateRef = React.useRef({
@@ -319,59 +277,23 @@ function IframeTouchShield({ href }) {
     return () => clearUnlockTimer()
   }, [clearUnlockTimer])
 
-  const touchShieldMode = !!uiMode.coarse || !!uiMode.tma
-  const desktopWheelProxyMode = !!uiMode.fine && !touchShieldMode
-  const shieldEnabled = touchShieldMode || desktopWheelProxyMode
-
-  React.useEffect(() => {
-    const iframe = (() => {
-      try {
-        return shieldRef.current?.closest?.('.mediaBox[data-kind="iframe"]')?.querySelector?.('iframe[data-forum-media]') || null
-      } catch {
-        return null
-      }
-    })()
-    if (!(iframe instanceof HTMLIFrameElement)) return undefined
-    if (desktopWheelProxyMode && !interactive) {
-      try { iframe.style.pointerEvents = 'none' } catch {}
-    } else {
-      try { iframe.style.pointerEvents = '' } catch {}
-    }
-    return () => {
-      try { iframe.style.pointerEvents = '' } catch {}
-    }
-  }, [desktopWheelProxyMode, interactive])
-
   React.useEffect(() => {
     if (typeof window === 'undefined') return undefined
     const coarseMq = window.matchMedia?.('(pointer: coarse)') || null
-    const fineMq = window.matchMedia?.('(pointer: fine)') || null
-    const updateUiMode = () => {
-      setUiMode({
-        coarse: !!coarseMq?.matches,
-        fine: !!fineMq?.matches,
-        tma: detectTMAHard(),
-      })
+    const updateShieldMode = () => {
+      setShieldEnabled(!!coarseMq?.matches || detectTMAHard())
     }
-    updateUiMode()
-    try { coarseMq?.addEventListener?.('change', updateUiMode) } catch {}
-    try { fineMq?.addEventListener?.('change', updateUiMode) } catch {}
+    updateShieldMode()
+    try { coarseMq?.addEventListener?.('change', updateShieldMode) } catch {}
     return () => {
-      try { coarseMq?.removeEventListener?.('change', updateUiMode) } catch {}
-      try { fineMq?.removeEventListener?.('change', updateUiMode) } catch {}
+      try { coarseMq?.removeEventListener?.('change', updateShieldMode) } catch {}
     }
   }, [])
 
   const handlePointerDown = React.useCallback((event) => {
     if (!shieldEnabled) return
     const pointerType = String(event?.pointerType || '')
-    if (touchShieldMode) {
-      if (pointerType && pointerType !== 'touch' && pointerType !== 'pen') return
-    } else if (desktopWheelProxyMode) {
-      if (pointerType && pointerType !== 'mouse') return
-    } else {
-      return
-    }
+    if (pointerType && pointerType !== 'touch' && pointerType !== 'pen') return
     pointerStateRef.current = {
       id: event?.pointerId ?? null,
       startX: Number(event?.clientX || 0),
@@ -379,7 +301,7 @@ function IframeTouchShield({ href }) {
       moved: false,
       startedAt: Date.now(),
     }
-  }, [desktopWheelProxyMode, shieldEnabled, touchShieldMode])
+  }, [shieldEnabled])
 
   const handlePointerMove = React.useCallback((event) => {
     const state = pointerStateRef.current
@@ -406,24 +328,12 @@ function IframeTouchShield({ href }) {
       event?.preventDefault?.()
       event?.stopPropagation?.()
     } catch {}
-    unlockInteract(desktopWheelProxyMode ? 2200 : 2600)
-  }, [desktopWheelProxyMode, resetPointerState, unlockInteract])
+    unlockInteract()
+  }, [resetPointerState, unlockInteract])
 
   const handlePointerCancel = React.useCallback(() => {
     resetPointerState()
   }, [resetPointerState])
-
-  const handleWheel = React.useCallback((event) => {
-    if (!desktopWheelProxyMode || interactive) return
-    const deltaX = Number(event?.deltaX || 0)
-    const deltaY = Number(event?.deltaY || 0)
-    if (Math.abs(deltaX) < 0.1 && Math.abs(deltaY) < 0.1) return
-    try {
-      event.preventDefault()
-      event.stopPropagation()
-    } catch {}
-    proxyIframeWheelScroll(event?.currentTarget, deltaX, deltaY)
-  }, [desktopWheelProxyMode, interactive])
 
   if (!shieldEnabled) return null
 
@@ -432,10 +342,7 @@ function IframeTouchShield({ href }) {
       ref={shieldRef}
       className={[
         'iframeTouchShield',
-        'isEnabled',
         interactive ? 'isInteractive' : '',
-        touchShieldMode ? 'isTouchMode' : '',
-        desktopWheelProxyMode ? 'isDesktopWheelProxy' : '',
       ].filter(Boolean).join(' ')}
     >
       <div
@@ -445,9 +352,8 @@ function IframeTouchShield({ href }) {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
-        onWheel={handleWheel}
       />
-      {href && touchShieldMode ? (
+      {href ? (
         <a
           className="iframeTouchShieldAction"
           href={href}
