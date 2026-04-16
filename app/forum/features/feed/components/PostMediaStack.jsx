@@ -319,6 +319,10 @@ function IframeTouchShield({ href }) {
     return () => clearUnlockTimer()
   }, [clearUnlockTimer])
 
+  const touchShieldMode = !!uiMode.coarse || !!uiMode.tma
+  const desktopWheelProxyMode = !!uiMode.fine && !touchShieldMode
+  const shieldEnabled = touchShieldMode || desktopWheelProxyMode
+
   React.useEffect(() => {
     const iframe = (() => {
       try {
@@ -357,10 +361,6 @@ function IframeTouchShield({ href }) {
       try { fineMq?.removeEventListener?.('change', updateUiMode) } catch {}
     }
   }, [])
-
-  const touchShieldMode = !!uiMode.coarse || !!uiMode.tma
-  const desktopWheelProxyMode = !!uiMode.fine && !touchShieldMode
-  const shieldEnabled = touchShieldMode || desktopWheelProxyMode
 
   const handlePointerDown = React.useCallback((event) => {
     if (!shieldEnabled) return
