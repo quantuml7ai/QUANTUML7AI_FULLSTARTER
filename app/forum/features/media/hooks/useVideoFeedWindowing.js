@@ -36,6 +36,7 @@ export default function useVideoFeedWindowing({
   const vfRosRef = useRef(new Map())
   const vfRafRef = useRef(0)
   const vfHardResetScheduleRef = useRef({ rafA: 0, rafB: 0, timeoutId: 0 })
+  const vfPendingHeightCompRef = useRef({ node: null, delta: 0, reason: '', timerId: 0 })
   const vfScrollStateRef = useRef({ top: 0, ts: 0, velocity: 0, direction: 0 })
   const vfScrollActivityRef = useRef({ activeUntil: 0, settleTimer: 0 })
   const vfWinMetaRef = useRef({ ts: 0, start: 0, end: 0 })
@@ -143,8 +144,18 @@ const vfMarkProgrammaticScroll = useCallback((reason = 'video_feed_windowing_com
   } catch {}
 }, [])
 
-const vfCompensateOffscreenHeightDelta = useCallback((node, delta, reason = 'video_feed_height_correction') => {
-  const shift = Math.round(Number(delta || 0))
+const vfIsProgrammaticCooldown = useCallback((windowMs = 260) => {
+  try {
+    const now = Date.now()
+    const last = Number(window.__forumProgrammaticScrollTs || 0)
+    return (now - last) < Math.max(80, Number(windowMs || 0))
+  } catch {
+    return false
+  }
+}, [])
+
+const vfApplyOffscreenHeightDelta = useCallback((node, delta, reason = 'video_feed_height_correction') => {
+  const shift = Math.max(-260, Math.min(260, Math.round(Number(delta || 0))))
   if (!node || !node.isConnected) return
   if (!Number.isFinite(shift) || Math.abs(shift) < 2) return
   if (!isBrowserFn()) return
@@ -236,48 +247,78 @@ const vfCompensateOffscreenHeightDelta = useCallback((node, delta, reason = 'vid
     }
 
     const vfMaxRender = vfGetMaxRender() + (velocity > 0.6 ? 2 : 0) + (velocity > 1.2 ? 2 : 0)
-    if ((end - start) > vfMaxRender) {
-      const mid = Math.floor((start + end) / 2)
-      const half = Math.floor(vfMaxRender / 2)
-      start = Math.max(0, mid - half)
-      end = Math.min(total, start + vfMaxRender)
-    }
+if ((end - start) > vfMaxRender) {
+  if (direction > 0) {
+    start = Math.max(0, end - vfMaxRender)
+  } else if (direction < 0) {
+    end = Math.min(total, start + vfMaxRender)
+  } else {
+    const mid = Math.floor((start + end) / 2)
+    const half = Math.floor(vfMaxRender / 2)
+    start = Math.max(0, mid - half)
+    end = Math.min(total, start + vfMaxRender)
+  }
+}
 
     setVfWin((prev) => {
       let nextStart = start
       let nextEnd = end
 
-      const shrinkOnly =
-        nextStart >= prev.start &&
-        nextEnd <= prev.end &&
-        (nextStart > prev.start || nextEnd < prev.end)
+const now = Date.now()
+const isScrollActive = Number(vfScrollActivityRef.current?.activeUntil || 0) > now
+const stickyItems = velocity > 1.2 ? 4 : velocity > 0.55 ? 3 : 2
 
-      if (shrinkOnly) {
-        const now = Date.now()
-        const recentWindowChange = (now - Number(vfWinMetaRef.current?.ts || 0)) < VF_WINDOW_STICKY_MS
-        const stickyItems = velocity > 1.2 ? 4 : velocity > 0.55 ? 3 : 2
-        const stickyMaxRender = vfMaxRender + stickyItems
-        const leadingTrim = Math.max(0, nextStart - prev.start)
-        const trailingTrim = Math.max(0, prev.end - nextEnd)
-        const smallShrink = leadingTrim <= stickyItems && trailingTrim <= stickyItems
+if (isScrollActive) {
+  const activeMaxRender = vfMaxRender + stickyItems + 2
+  nextStart = Math.min(prev.start, nextStart)
+  nextEnd = Math.max(prev.end, nextEnd)
 
-        if (recentWindowChange || smallShrink) {
-          nextStart = prev.start
-          nextEnd = prev.end
-        } else if (direction > 0 && trailingTrim > 0 && leadingTrim <= (stickyItems * 2)) {
-          nextEnd = prev.end
-        } else if (direction < 0 && leadingTrim > 0 && trailingTrim <= (stickyItems * 2)) {
-          nextStart = prev.start
-        }
-
-        if ((nextEnd - nextStart) > stickyMaxRender) {
-          if (direction >= 0 && nextEnd === prev.end) {
-            nextStart = Math.max(prev.start, nextEnd - stickyMaxRender)
-          } else if (direction <= 0 && nextStart === prev.start) {
-            nextEnd = Math.min(prev.end, nextStart + stickyMaxRender)
-          }
-        }
+  if ((nextEnd - nextStart) > activeMaxRender) {
+    if (direction > 0) {
+      nextStart = Math.max(0, nextEnd - activeMaxRender)
+    } else if (direction < 0) {
+      nextEnd = Math.min(total, nextStart + activeMaxRender)
+    } else {
+      const trimFromStart = Math.max(0, nextEnd - activeMaxRender)
+      const trimFromEnd = Math.min(total, nextStart + activeMaxRender)
+      if (Math.abs(trimFromStart - prev.start) <= Math.abs(trimFromEnd - prev.end)) {
+        nextStart = trimFromStart
+      } else {
+        nextEnd = trimFromEnd
       }
+    }
+  }
+}
+
+const shrinkOnly =
+  nextStart >= prev.start &&
+  nextEnd <= prev.end &&
+  (nextStart > prev.start || nextEnd < prev.end)
+
+if (!isScrollActive && shrinkOnly) {
+  const recentWindowChange = (now - Number(vfWinMetaRef.current?.ts || 0)) < VF_WINDOW_STICKY_MS
+  const stickyMaxRender = vfMaxRender + stickyItems
+  const leadingTrim = Math.max(0, nextStart - prev.start)
+  const trailingTrim = Math.max(0, prev.end - nextEnd)
+  const smallShrink = leadingTrim <= stickyItems && trailingTrim <= stickyItems
+
+  if (recentWindowChange || smallShrink) {
+    nextStart = prev.start
+    nextEnd = prev.end
+  } else if (direction > 0 && trailingTrim > 0 && leadingTrim <= (stickyItems * 2)) {
+    nextEnd = prev.end
+  } else if (direction < 0 && leadingTrim > 0 && trailingTrim <= (stickyItems * 2)) {
+    nextStart = prev.start
+  }
+
+  if ((nextEnd - nextStart) > stickyMaxRender) {
+    if (direction >= 0 && nextEnd === prev.end) {
+      nextStart = Math.max(prev.start, nextEnd - stickyMaxRender)
+    } else if (direction <= 0 && nextStart === prev.start) {
+      nextEnd = Math.min(prev.end, nextStart + stickyMaxRender)
+    }
+  }
+}
 
       const next = vfBuildWindow(nextStart, nextEnd, total)
       const topDelta = Math.abs(Number(prev.top || 0) - Number(next.top || 0))
@@ -300,7 +341,45 @@ const vfCompensateOffscreenHeightDelta = useCallback((node, delta, reason = 'vid
       try { vfRecalcWindow() } catch {}
     })
   }, [vfRecalcWindow])
+const vfQueueOffscreenHeightDelta = useCallback((node, delta, reason = 'video_feed_height_correction') => {
+  const pending = vfPendingHeightCompRef.current
+  const clamped = Math.max(-260, Math.min(260, Number(delta || 0)))
+  if (!node || !node.isConnected) return
+  if (!Number.isFinite(clamped) || Math.abs(clamped) < 2) return
 
+  pending.node = node
+  pending.reason = String(reason || 'video_feed_height_correction')
+  pending.delta = Math.max(-420, Math.min(420, Number(pending.delta || 0) + clamped))
+
+  const flush = () => {
+    const current = vfPendingHeightCompRef.current
+    current.timerId = 0
+    const now = Date.now()
+    const activeUntil = Number(vfScrollActivityRef.current?.activeUntil || 0)
+    if (now < activeUntil || vfIsProgrammaticCooldown(220)) {
+      current.timerId = setTimeout(flush, Math.max(90, VF_SCROLL_SETTLE_MS))
+      return
+    }
+
+    const targetNode = current.node
+    const totalDelta = Math.max(-260, Math.min(260, Number(current.delta || 0)))
+    const targetReason = String(current.reason || 'video_feed_height_correction')
+    current.node = null
+    current.delta = 0
+    current.reason = ''
+    if (!targetNode || !targetNode.isConnected) return
+    if (!Number.isFinite(totalDelta) || Math.abs(totalDelta) < 2) return
+
+    vfApplyOffscreenHeightDelta(targetNode, totalDelta, targetReason)
+    try { vfScheduleRecalc() } catch {}
+  }
+
+  if (pending.timerId) {
+    try { clearTimeout(pending.timerId) } catch {}
+    pending.timerId = 0
+  }
+  pending.timerId = setTimeout(flush, Math.max(220, VF_SCROLL_SETTLE_MS + 60))
+}, [vfApplyOffscreenHeightDelta, vfIsProgrammaticCooldown, vfScheduleRecalc])
   useEffect(() => {
     const cancelHardResetSchedule = () => {
       const scheduled = vfHardResetScheduleRef.current
@@ -326,6 +405,16 @@ const vfCompensateOffscreenHeightDelta = useCallback((node, delta, reason = 'vid
         }, { force: true })
       } catch {}
       try { vfHeightsRef.current.clear() } catch {}
+try {
+  const pending = vfPendingHeightCompRef.current
+  if (pending.timerId) {
+    try { clearTimeout(pending.timerId) } catch {}
+    pending.timerId = 0
+  }
+  pending.node = null
+  pending.delta = 0
+  pending.reason = ''
+} catch {}      
       try {
         vfWinMetaRef.current = { ts: Date.now(), start: 0, end: Math.min(vfGetMaxRender(), Math.max(0, vfSlots.length || 0)) }
         setVfWin({
@@ -442,11 +531,14 @@ const vfCompensateOffscreenHeightDelta = useCallback((node, delta, reason = 'vid
             : vfEstimateH(idx)
           const nextH = Math.round(h)
           const delta = nextH - prevH
-          if (Math.abs(delta) < 2) return
-          vfCompensateOffscreenHeightDelta(node, delta, `video_feed_measure_delta:${idx}`)
+          if (Math.abs(delta) < 2) return 
           vfHeightsRef.current.set(idx, nextH)
           const now = Date.now()
-          if (Number(vfScrollActivityRef.current.activeUntil || 0) > now) return
+          if (Number(vfScrollActivityRef.current.activeUntil || 0) > now || vfIsProgrammaticCooldown(220)) {
+            vfQueueOffscreenHeightDelta(node, delta, `video_feed_measure_delta:${idx}`)
+            return
+          }
+          vfApplyOffscreenHeightDelta(node, delta, `video_feed_measure_delta:${idx}`)
           vfScheduleRecalc()
         } catch {}
       }
@@ -458,7 +550,7 @@ const vfCompensateOffscreenHeightDelta = useCallback((node, delta, reason = 'vid
         vfRosRef.current.set(idx, ro)
       }
     } catch {}
-  }, [vfCompensateOffscreenHeightDelta, vfEstimateH, vfScheduleRecalc])
+  }, [vfApplyOffscreenHeightDelta, vfEstimateH, vfIsProgrammaticCooldown, vfQueueOffscreenHeightDelta, vfScheduleRecalc])
 
   useEffect(() => {
     if (!isBrowserFn()) return undefined
@@ -470,6 +562,19 @@ const vfCompensateOffscreenHeightDelta = useCallback((node, delta, reason = 'vid
     window.addEventListener('resize', onResize, { passive: true })
     return () => window.removeEventListener('resize', onResize)
   }, [videoFeedOpen, vfScheduleRecalc, isBrowserFn])
+
+        useEffect(() => {
+          const pending = vfPendingHeightCompRef.current
+          return () => {
+            if (pending.timerId) {
+              try { clearTimeout(pending.timerId) } catch {}
+              pending.timerId = 0
+            }
+            pending.node = null
+            pending.delta = 0
+            pending.reason = ''
+          }
+       }, [])
 
   return {
     vfSlots,
