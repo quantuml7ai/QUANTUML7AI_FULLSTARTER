@@ -7,6 +7,9 @@ const path = require('path');
 const MEDIA_EXT_RE = /\.(mp4|webm|mov|m4v|m3u8|mp3|aac|wav)(\?|$)/i;
 const FORUM_MEDIA_RE = /\/forum\/|blob\.vercel-storage\.com\/forum\//i;
 const AD_MEDIA_RE = /(?:^|\/)(ads?|ad-media|campaign|sponsor)(?:\/|[-_])|ADS\.mp4|forum[_-]?ad/i;
+const FORUM_REPEAT_WARN = 8;
+const CANCEL_WARN = 3;
+const CHURN_WARN = 14;
 
 function readJson(file) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -123,6 +126,7 @@ function buildRows(entries) {
   return [...rows.values()]
     .map((row) => ({
       ...row,
+      churnScore: row.total + (row.partial206 * 2) + (row.cancelled * 3),
       transferredMB: Math.round((row.transferred / 1024 / 1024) * 10) / 10,
       statuses: [...row.statuses],
       types: [...row.types],
@@ -205,6 +209,11 @@ function main() {
     topRepeatedExternalMedia: repeatedExternalMedia.slice(0, 20),
     topCancelled: rows.filter((row) => row.cancelled > 0).slice(0, 20),
     topChurn: rows.filter((row) => row.total >= 4).slice(0, 20),
+    thresholdBreaches: {
+      repeat: rows.filter((row) => row.category === 'forum' && row.total >= FORUM_REPEAT_WARN).slice(0, 20),
+      cancelled: rows.filter((row) => row.cancelled >= CANCEL_WARN).slice(0, 20),
+      churn: rows.filter((row) => row.churnScore >= CHURN_WARN).slice(0, 20),
+    },
     initiatorCounts: toSortedCounts(initiators, 20),
     hostCounts: toSortedCounts(hosts, 20),
     statusCounts: toSortedCounts(statuses, 20),

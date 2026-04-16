@@ -8,8 +8,11 @@ const targets = [
   'app/forum/features/media/utils/mediaLifecycleRuntime.js',
   'app/forum/features/media/components/VideoMedia.jsx',
   'app/forum/features/media/hooks/useForumMediaCoordinator.js',
+  'app/forum/features/feed/components/PostMediaStack.jsx',
   'app/forum/ForumAds.js',
   'app/forum/features/media/components/QCastPlayer.jsx',
+  'app/forum/ForumRoot.jsx',
+  'components/ForumBootSplash.jsx',
   'components/BgAudio.js',
 ]
 
@@ -19,9 +22,17 @@ const probes = [
   { kind: 'load_call', re: /\.\s*load\s*\(/g },
   { kind: 'remove_src', re: /removeAttribute\s*\(\s*['"]src['"]\s*\)/g },
   { kind: 'set_src', re: /setAttribute\s*\(\s*['"]src['"]/g },
-  { kind: 'persist_mute', re: /localStorage\.(?:setItem|getItem)\s*\([^)]*(forum:mediaMuted|forum:videoMuted|forum:qcastMuted)/g },
+  { kind: 'global_mute_read', re: /(?:readMutedPrefFromStorage|readMutedPref)\s*\(/g },
+  { kind: 'global_mute_write', re: /(?:writeMuted|__writeMediaMutedPref|writeMutedPrefToStorage)\s*\(/g },
+  { kind: 'local_mute_storage', re: /localStorage\.(?:setItem|getItem)\s*\([^)]*(forum:mediaMuted|forum:videoMuted|forum:qcastMuted)/g },
   { kind: 'muted_event', re: /CustomEvent\s*\(\s*['"]forum:media-mute['"]/g },
   { kind: 'site_media_play', re: /CustomEvent\s*\(\s*['"]site-media-play['"]/g },
+  { kind: 'post_message', re: /\.postMessage\s*\(/g },
+  { kind: 'player_init', re: /(?:new\s+YT\.Player|createPlayer|initYouTubePlayer|ensureYouTubeAPI)/g },
+  { kind: 'player_destroy', re: /(?:\.destroy\s*\(|detachYouTubePlayer|close\s*\(\))/g },
+  { kind: 'owner_transition', re: /(?:data-forum-iframe-active|__active|activeSinceTs|pauseForeignMedia|hardUnloadMedia)/g },
+  { kind: 'data_forum_media', re: /data-forum-media/g },
+  { kind: 'data_src_contract', re: /data-src|data-owner-id|data-forum-embed-kind|data-lifecycle-state/g },
   { kind: 'observer', re: /new\s+IntersectionObserver\s*\(/g },
 ]
 

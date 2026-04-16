@@ -106,6 +106,10 @@ function shouldShowSplashNow() {
   if (typeof window === 'undefined') return true
   if (window.__QL7_FORUM_SPLASH_SHOWN__) return false
   window.__QL7_FORUM_SPLASH_SHOWN__ = true
+  try {
+    window.__forumBootSplashActive = '1'
+    document.documentElement.dataset.forumBootSplashActive = '1'
+  } catch {}
   return true
 }
 
@@ -120,6 +124,27 @@ export default function ForumBootSplash({ onDone }) {
   const videoRef = useRef(null)
 
   const frameWidth = useMemo(() => getFrameWidth(), [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const active = visible && !closing
+    try {
+      if (active) {
+        window.__forumBootSplashActive = '1'
+        document.documentElement.dataset.forumBootSplashActive = '1'
+      } else {
+        delete window.__forumBootSplashActive
+        delete document.documentElement.dataset.forumBootSplashActive
+      }
+    } catch {}
+    try {
+      window.dispatchEvent(
+        new CustomEvent('forum-boot-splash', {
+          detail: { active: !!active },
+        }),
+      )
+    } catch {}
+  }, [visible, closing])
 
   const finish = useCallback(() => {
     if (FORUM_SPLASH_ENABLED !== 1) {

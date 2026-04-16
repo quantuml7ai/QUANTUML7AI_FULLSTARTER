@@ -143,6 +143,24 @@ export function __writeMediaMutedPref(nextMuted, options = {}) {
   } catch {}
 }
 
+function markLoadPending(el) {
+  if (!el?.dataset) return
+  try {
+    el.dataset.__loadPending = '1'
+    el.dataset.__warmReady = '0'
+    el.dataset.__loadPendingSince = String(Date.now())
+  } catch {}
+}
+
+function clearLoadPending(el, { keepWarmReady = false } = {}) {
+  if (!el?.dataset) return
+  try {
+    el.dataset.__loadPending = '0'
+    if (!keepWarmReady) el.dataset.__warmReady = '0'
+    delete el.dataset.__loadPendingSince
+  } catch {}
+}
+
 export function __markMediaLifecycleTouch(el, reason = 'touch') {
   if (!el?.dataset) return
   const now = Date.now()
@@ -178,12 +196,11 @@ export function __unloadVideoEl(el) {
   } catch {}
   try {
     el.dataset.__active = '0'
-    el.dataset.__loadPending = '0'
-    el.dataset.__warmReady = '0'
     el.dataset.__resident = '0'
     el.dataset.__prewarm = '0'
     el.dataset.__lastUnloadTs = String(nowTs)
   } catch {}
+  clearLoadPending(el)
   const hardUnloadRequested = (() => {
     try {
       return String(el?.dataset?.__forceHardUnload || '') === '1'
@@ -266,6 +283,7 @@ export function __restoreVideoEl(el) {
   const nowTs = Date.now()
   const src = el.dataset.__src || el.getAttribute('data-src') || ''
   if (!src) return
+  const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
   try {
     delete el.dataset.__forceHardUnload
   } catch {}
@@ -314,8 +332,7 @@ export function __restoreVideoEl(el) {
         networkStateNow === HTMLMediaElement.NETWORK_EMPTY
       if (readyStateNow === 0 || isNetworkEmpty) {
         if (!canRestoreLoad()) return
-        el.dataset.__loadPending = '1'
-        el.dataset.__warmReady = '0'
+        markLoadPending(el)
         el.load?.()
       }
     } catch {}
@@ -334,8 +351,7 @@ export function __restoreVideoEl(el) {
     }
   } catch {}
   try {
-    el.dataset.__loadPending = '1'
-    el.dataset.__warmReady = '0'
+    markLoadPending(el)
     el.setAttribute('src', src)
   } catch {}
   try {
@@ -364,7 +380,7 @@ export function __restoreVideoEl(el) {
     const isLoading =
       typeof HTMLMediaElement !== 'undefined' &&
       networkState === HTMLMediaElement.NETWORK_LOADING
-    if (!isLoading && canRestoreLoad()) el.load?.()
+    if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()
   } catch {}
 }
 

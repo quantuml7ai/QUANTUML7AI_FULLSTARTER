@@ -14,7 +14,17 @@ const audits = [
     label: 'Forum media ownership',
     script: 'tools/audit-media-ownership.mjs',
     outputs: ['forum-media-ownership.report.json'],
-  },  
+  },
+  {
+    label: 'Forum scroll runtime',
+    script: 'tools/audit-forum-scroll-runtime.js',
+    outputs: ['forum-scroll.audit.report.json'],
+  },
+  {
+    label: 'Media budget',
+    script: 'tools/audit-media-budget.js',
+    outputs: ['media-budget.audit.report.json'],
+  },
   {
     label: 'Effects leak',
     script: 'tools/audit-effects.js',

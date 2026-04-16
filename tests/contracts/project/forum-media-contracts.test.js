@@ -22,13 +22,45 @@ describe('forum media contracts', () => {
     expect(src).not.toMatch(/localStorage\.setItem\(MEDIA_VIDEO_MUTED_KEY,\s*['"]1['"]\)/)
   })
 
-  test('qcast does not persist global mute directly from toggle handler', () => {
+  test('qcast toggle does not use its own local mute storage', () => {
     const src = read('app/forum/features/media/components/QCastPlayer.jsx')
-    expect(src).not.toMatch(/toggleMute[\s\S]*writeMuted\(\!\!audio\.muted\)/)
+    expect(src).not.toContain('forum:qcastMuted')
+    expect(src).toContain('writeMuted(!!audio.muted)')
+    expect(src).toContain('__persistMuteUntil')
+    expect(src).toContain('crossOrigin="anonymous"')
   })
 
   test('forum ads autoplay fallback does not persist global mute', () => {
     const src = read('app/forum/ForumAds.js')
     expect(src).not.toMatch(/forum-ads-autoplay-fallback[\s\S]*writeMutedPrefToStorage\(true/)
+  })
+
+  test('media coordinator removes legacy query ownership toggles and qcast local mute storage', () => {
+    const src = read('app/forum/features/media/hooks/useForumMediaCoordinator.js')
+    expect(src).not.toContain("qs.get('legacyWarmSweep')")
+    expect(src).not.toContain("qs.get('legacyIframePrewarm')")
+    expect(src).not.toContain('forum:qcastMuted')
+    expect(src).toContain("source === 'media_element' || source === 'external' || source === 'forum-splash'")
+    expect(src).toContain("setMutedPref(!!el.muted, 'video')")
+  })
+
+  test('post video restore path avoids immediate duplicate load after src reattach', () => {
+    const src = read('app/forum/features/media/utils/mediaLifecycleRuntime.js')
+    expect(src).toContain("const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'")
+    expect(src).toContain('if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()')
+  })
+
+  test('boot splash publishes an active gate marker for forum media policy', () => {
+    const src = read('components/ForumBootSplash.jsx')
+    expect(src).toContain('__forumBootSplashActive')
+    expect(src).toContain("forum-boot-splash")
+  })
+
+  test('post media embeds expose stable owner metadata for coordinator policy', () => {
+    const src = read('app/forum/features/feed/components/PostMediaStack.jsx')
+    expect(src).toContain('data-owner-id=')
+    expect(src).toContain('data-forum-embed-kind=')
+    expect(src).toContain('data-lifecycle-state=')
+    expect(src).toContain('data-stable-shell="1"')
   })
 })

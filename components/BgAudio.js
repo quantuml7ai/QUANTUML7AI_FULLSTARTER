@@ -65,7 +65,8 @@ export default function BgAudio({
     return () => {
       cancelled = true
       try { a.pause() } catch {}
-
+      try { a.removeAttribute('src') } catch {}
+      try { a.load?.() } catch {}
     }
   }, [src])
 

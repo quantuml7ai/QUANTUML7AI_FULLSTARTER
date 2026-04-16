@@ -1,6 +1,6 @@
 {
   "phase": "project-tree-audit",
-  "timestamp": "2026-04-13T20:35:48.464Z",
+  "timestamp": "2026-04-16T01:03:36.233Z",
   "scope": "whole repository tree registry",
   "touched_files": [
     "PROJECT_TREE.md"
@@ -14,13 +14,13 @@
   "storage_risk": "none",
   "runtime_risk": "low",
   "notes": [
-    "repo_files=1592",
-    "source_files=655",
+    "repo_files=1599",
+    "source_files=661",
     "route_files=96"
   ],
   "status": "ok",
-  "total_repo_files": 1592,
-  "total_source_files": 655,
+  "total_repo_files": 1599,
+  "total_source_files": 661,
   "top_level_breakdown": {
     ".env.local": 1,
     ".env.local.example": 1,
@@ -30,7 +30,7 @@
     "account-sync-audit.report.json": 1,
     "ad-runtime.audit.report.json": 1,
     "AGENTS.md": 1,
-    "app": 382,
+    "app": 383,
     "audit": 170,
     "auth-bus.audit.report.json": 1,
     "components": 23,
@@ -40,6 +40,7 @@
     "forum-deps-audit.report.json": 1,
     "forum-diag.jsonl": 1,
     "forum-media-churn.audit.report.json": 1,
+    "forum-media-ownership.report.json": 1,
     "forum-scroll.audit.report.json": 1,
     "forum-startup.audit.report.json": 1,
     "heapsnapshot-analysis.report.json": 1,
@@ -61,9 +62,10 @@
     "public": 920,
     "README.md": 1,
     "runtime-hotspots.report.json": 1,
-    "tests": 18,
-    "tools": 30,
+    "tests": 21,
+    "tools": 31,
     "tsconfig.json": 1,
+    "tsconfig.tsbuildinfo": 1,
     "vitest.config.mjs": 1
   }
 }

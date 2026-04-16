@@ -46,6 +46,18 @@ function emitMutedPref(val, id, source = 'forum-ads') {
   } catch {}
 }
 
+function isForumBootSplashActive() {
+  if (!isBrowser()) return false;
+  try {
+    return (
+      window.__forumBootSplashActive === '1' ||
+      document.documentElement?.dataset?.forumBootSplashActive === '1'
+    );
+  } catch {
+    return false;
+  }
+}
+
 function desiredMutedFromPref(pref) {
   // Если префа нет — стартуем muted=true (иначе автоплей часто будет блокироваться браузером).
   return pref == null ? true : !!pref;
@@ -1045,8 +1057,9 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   const [isNear, setIsNear] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isPageActive, setIsPageActive] = useState(true);
+  const [isSplashActive, setIsSplashActive] = useState(() => isForumBootSplashActive());
 
-  const shouldPlay = isFocused && isPageActive;
+  const shouldPlay = isFocused && isPageActive && !isSplashActive;
   const shouldPlayRef = useRef(false);
   const adPlayEventTsRef = useRef(0);
   const emitAdPlayToCoordinator = React.useCallback((source = 'ad') => {
@@ -1070,6 +1083,22 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   useEffect(() => {
     shouldPlayRef.current = shouldPlay;
   }, [shouldPlay]);
+
+  useEffect(() => {
+    if (!isBrowser()) return undefined;
+    const syncSplash = (event) => {
+      const next =
+        typeof event?.detail?.active === 'boolean'
+          ? event.detail.active
+          : isForumBootSplashActive();
+      setIsSplashActive(!!next);
+    };
+    syncSplash();
+    window.addEventListener('forum-boot-splash', syncSplash);
+    return () => {
+      window.removeEventListener('forum-boot-splash', syncSplash);
+    };
+  }, []);
 
   // Page visibility + focus/blur
   useEffect(() => {
@@ -1572,7 +1601,6 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
           if (!muted) {
             // ВАЖНО:
             // autoplay fallback не имеет права переписывать persisted global mute preference.
-            emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback');
             setMuted(true);
             try { v.muted = true; } catch {}
           }
