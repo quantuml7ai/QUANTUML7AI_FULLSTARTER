@@ -326,7 +326,7 @@ requirements rest on the user. We provide frameworks, metrics, and explainabilit
   {
     title: 'Roadmap and launch',
     paras: [
-      `H2 2026: public launch of the L7 Exchange core and next-generation L7 blockchain — inter-network coordination layer
+      `H2 202(-?): public launch of the L7 Exchange core and next-generation L7 blockchain — inter-network coordination layer
 designed to simplify clearing and access rights at the smart contract level, as well as improve execution observability.
 Main focus — liquidity routing, explainable auto-execute, portfolio attribution, and team modes.`,
       `QCoin — the internal economy of the L7 ecosystem. The roadmap includes QCoin’s role in payment and incentive processes
@@ -347,7 +347,7 @@ ex_bullets: [
   'Risk limiters: limits, time-in-force, kill-switch, dynamic stop corridors',
   'Data unification: 87 TB of histories, 37+ billion candles, 200+ indicators and regime filters',
   'Wallet connection, non-custodial model, and logged action audit',
-  'H2 2026: public launch of L7 Exchange core and next-generation L7 blockchain',
+  'H2 202(-?): public launch of L7 Exchange core and next-generation L7 blockchain',
 ],
 
 
@@ -752,7 +752,7 @@ white-label и приватные развертывания для enterprise.`
   {
     title: 'Дорожная карта и запуск',
     paras: [
-      `H2 2026: публичный запуск ядра L7 Exchange и L7-блокчейна нового поколения — межсетевой слой согласования,
+      `H2 202(-?): публичный запуск ядра L7 Exchange и L7-блокчейна нового поколения — межсетевой слой согласования,
 призванный упростить клиринг и права доступа на уровне смарт-контрактов, а также улучшить наблюдаемость исполнения.
 Основной акцент — маршрутизация ликвидности, explainable auto-execute, портфельная атрибуция и командные режимы.`,
       `QCoin — внутренняя экономика экосистемы L7. В дорожной карте — роль QCoin в платёжных/стимулирующих процессах экосистемы.
@@ -773,7 +773,7 @@ ex_bullets: [
   'Ограничители риска: лимиты, time-in-force, kill-switch, динамические стоп-коридоры',
   'Унификация данных: 87 ТБ историй, 37+ млрд свечей, 200+ индикаторов и режимные фильтры',
   'Подключение кошельков, некостодиальная модель и журналируемый аудит действий',
-  'H2 2026: публичный запуск ядра L7 Exchange и L7-блокчейна нового поколения',
+  'H2 202(-?): публичный запуск ядра L7 Exchange и L7-блокчейна нового поколения',
 ],
 
     /* ===== SUBSCRIBE / CONTACT (кратко) ===== */
@@ -1176,7 +1176,7 @@ white-label і приватні розгортання для enterprise.`,
   {
     title: 'Дорожня карта і запуск',
     paras: [
-      `H2 2026: публічний запуск ядра L7 Exchange і L7-блокчейна нового покоління — міжмережевий шар узгодження,
+      `H2 202(-?): публічний запуск ядра L7 Exchange і L7-блокчейна нового покоління — міжмережевий шар узгодження,
 покликаний спростити кліринг і права доступу на рівні смарт-контрактів, а також покращити спостережуваність виконання.
 Основний акцент — маршрутизація ліквідності, explainable auto-execute, портфельна атрибуція та командні режими.`,
       `QCoin — внутрішня економіка екосистеми L7. У дорожній карті — роль QCoin у платіжних/стимулюючих процесах екосистеми.
@@ -1197,7 +1197,7 @@ ex_bullets: [
   'Обмежувачі ризику: ліміти, time-in-force, kill-switch, динамічні стоп-коридори',
   'Уніфікація даних: 87 ТБ історій, 37+ млрд свічок, 200+ індикаторів і режимні фільтри',
   'Підключення гаманців, некостодіальна модель і журналований аудит дій',
-  'H2 2026: публічний запуск ядра L7 Exchange і L7-блокчейна нового покоління',
+  'H2 202(-?): публічний запуск ядра L7 Exchange і L7-блокчейна нового покоління',
 ],
 
     /* ===== SUBSCRIBE / CONTACT (скорочено) ===== */
@@ -1600,7 +1600,7 @@ del lado del usuario. Damos marcos, métricas y explicabilidad para que el riesg
   {
     title: 'Hoja de ruta y lanzamiento',
     paras: [
-      `H2 2026: lanzamiento público del núcleo de L7 Exchange y del L7-blockchain de nueva generación — una capa de conciliación entre redes,
+      `H2 202(-?): lanzamiento público del núcleo de L7 Exchange y del L7-blockchain de nueva generación — una capa de conciliación entre redes,
 destinada a simplificar el clearing y los permisos de acceso a nivel de smart contracts, así como a mejorar la observabilidad de la ejecución.
 El foco principal — enrutamiento de liquidez, auto-ejecución explicable, atribución de cartera y modos de equipo.`,
       `QCoin — la economía interna del ecosistema L7. En la hoja de ruta — el papel de QCoin en los procesos de pago/estimulación del ecosistema.
@@ -1621,7 +1621,7 @@ ex_bullets: [
   'Limitadores de riesgo: límites, time-in-force, kill-switch, corredores de stop dinámicos',
   'Unificación de datos: 87 TB de históricos, 37+ mil millones de velas, 200+ indicadores y filtros de régimen',
   'Conexión de monederos, modelo no custodial y auditoría registrada de acciones',
-  'H2 2026: lanzamiento público del núcleo de L7 Exchange y del L7-blockchain de nueva generación',
+  'H2 202(-?): lanzamiento público del núcleo de L7 Exchange y del L7-blockchain de nueva generación',
 ],
 
 
@@ -2454,7 +2454,7 @@ exchange_sections: [
   {
     title: 'خارطة الطريق والإطلاق',
     paras: [
-      `H2 2026: الإطلاق العلني لهواة L7 Exchange ونظام سلسلة L7 من الجيل الجديد — طبقة تنسيق بين الشبكات،
+      `H2 202(-?): الإطلاق العلني لهواة L7 Exchange ونظام سلسلة L7 من الجيل الجديد — طبقة تنسيق بين الشبكات،
 مقصود بها تبسيط المقاصة وصلاحيات الوصول على مستوى العقود الذكية، وتحسين قابلية ملاحظة التنفيذ.
 التركيز الأساسي — توجيه السيولة، وتنفيذ تلقائي قابل للتفسير، وإسناد المحفظة وأوضاع الفرق.`,
       `QCoin — الاقتصاد الداخلي لمنظومة L7. في خارطة الطريق — دور QCoin في عمليات الدفع/التحفيز داخل المنظومة.
@@ -2475,7 +2475,7 @@ ex_bullets: [
   'محددات المخاطر: حدود، time-in-force، مفتاح إيقاف (kill-switch)، وممرات وقف خسارة ديناميكية',
   'توحيد البيانات: 87 تيرابايت من التاريخ، 37+ مليار شمعة، 200+ مؤشر ومرشحات حالات',
   'اتصال المحافظ، نموذج غير وصائي وتدقيق أفعال قابل للتسجيل',
-  'H2 2026: الإطلاق العلني لهواة L7 Exchange ونظام سلسلة L7 من الجيل الجديد',
+  'H2 202(-?): الإطلاق العلني لهواة L7 Exchange ونظام سلسلة L7 من الجيل الجديد',
 ],
 
 
@@ -2882,7 +2882,7 @@ kullanıcı tarafındadır. Riskin bilinçli olması için çerçeveler, metrikl
   {
     title: 'Yol haritası ve lansman',
     paras: [
-      `H2 2026: L7 Exchange çekirdeği ve yeni nesil L7 blokzincirinin halka açık lansmanı — akıllı sözleşmeler seviyesinde kliringi
+      `H2 202(-?): L7 Exchange çekirdeği ve yeni nesil L7 blokzincirinin halka açık lansmanı — akıllı sözleşmeler seviyesinde kliringi
 ve erişim haklarını basitleştirmeyi, ayrıca yürütmenin gözlemlenebilirliğini iyileştirmeyi amaçlayan ağlar arası uzlaşma katmanı.
 Ana odak — likidite yönlendirme, açıklanabilir otomatik yürütme, portföy atfı ve takım modları.`,
       `QCoin — L7 ekosisteminin dahili ekonomisi. Yol haritasında — ekosistemin ödeme/teşvik süreçlerinde QCoin’in rolü.
@@ -2903,7 +2903,7 @@ ex_bullets: [
   'Risk sınırlayıcıları: limitler, time-in-force, kill-switch, dinamik stop koridorları',
   'Veri birleştirme: 87 TB geçmiş, 37+ milyar mum, 200+ gösterge ve rejim filtreleri',
   'Cüzdan bağlantısı, saklama yapmayan model ve eylemlerin günlüğe alınabilir denetimi',
-  'H2 2026: L7 Exchange çekirdeğinin ve yeni nesil L7 blokzincirinin halka açık lansmanı',
+  'H2 202(-?): L7 Exchange çekirdeğinin ve yeni nesil L7 blokzincirinin halka açık lansmanı',
 ],
 
     /* ===== SUBSCRIBE / CONTACT ===== */
