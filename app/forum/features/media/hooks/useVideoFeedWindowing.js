@@ -136,7 +136,49 @@ export default function useVideoFeedWindowing({
     } catch {}
     return { st: winTop, vh: winH, mode: 'window' }
   }, [vfGetScrollEl])
+const vfMarkProgrammaticScroll = useCallback((reason = 'video_feed_windowing_compensation') => {
+  try {
+    window.__forumProgrammaticScrollTs = Date.now()
+    window.__forumProgrammaticScrollReason = String(reason || 'video_feed_windowing_compensation')
+  } catch {}
+}, [])
 
+const vfCompensateOffscreenHeightDelta = useCallback((node, delta, reason = 'video_feed_height_correction') => {
+  const shift = Math.round(Number(delta || 0))
+  if (!node || !node.isConnected) return
+  if (!Number.isFinite(shift) || Math.abs(shift) < 2) return
+  if (!isBrowserFn()) return
+
+  try {
+    const rect = node.getBoundingClientRect?.()
+    if (!rect) return
+
+    const scrollEl = vfGetScrollEl()
+    const useInner = !!scrollEl && (Number(scrollEl.scrollHeight || 0) > (Number(scrollEl.clientHeight || 0) + 1))
+    if (useInner && scrollEl) {
+      const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }
+      if (rect.bottom > (Number(hostRect.top || 0) + 1)) return
+      const prevTop = Number(scrollEl.scrollTop || 0)
+      const maxTop = Math.max(0, Number(scrollEl.scrollHeight || 0) - Number(scrollEl.clientHeight || 0))
+      const nextTop = Math.max(0, Math.min(maxTop, prevTop + shift))
+      if (Math.abs(nextTop - prevTop) < 1) return
+      vfMarkProgrammaticScroll(reason)
+      scrollEl.scrollTop = nextTop
+      return
+    }
+
+    if (rect.bottom > 0) return
+    const curY = Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0)
+    const nextY = Math.max(0, curY + shift)
+    if (Math.abs(nextY - curY) < 1) return
+    vfMarkProgrammaticScroll(reason)
+    try {
+      window.scrollTo({ top: nextY, behavior: 'auto' })
+    } catch {
+      try { window.scrollTo(0, nextY) } catch {}
+    }
+  } catch {}
+}, [isBrowserFn, vfGetScrollEl, vfMarkProgrammaticScroll])
   const vfEstimateH = useCallback((i) => {
     const slot = vfSlots?.[i]
     if (!slot || slot.type === 'item') return vfGetFixedItemH() + VF_ITEM_CHROME_EST
@@ -293,11 +335,7 @@ export default function useVideoFeedWindowing({
           bottom: 0,
         })
       } catch {}
-      try {
-        const el = vfGetScrollEl()
-        if (el && el.scrollHeight > el.clientHeight + 1) el.scrollTop = 0
-        else window.scrollTo(0, 0)
-      } catch {}
+
       try {
         cancelHardResetSchedule()
         vfHardResetScheduleRef.current.rafA = requestAnimationFrame(() => {
@@ -398,9 +436,14 @@ export default function useVideoFeedWindowing({
         try {
           const h = node.getBoundingClientRect?.()?.height
           if (!Number.isFinite(h) || h <= 1) return
-          const prev = vfHeightsRef.current.get(idx)
+          const prevMeasured = vfHeightsRef.current.get(idx)
+          const prevH = (Number.isFinite(prevMeasured) && prevMeasured > 1)
+            ? prevMeasured
+            : vfEstimateH(idx)
           const nextH = Math.round(h)
-          if (Number.isFinite(prev) && Math.abs(prev - nextH) < 2) return
+          const delta = nextH - prevH
+          if (Math.abs(delta) < 2) return
+          vfCompensateOffscreenHeightDelta(node, delta, `video_feed_measure_delta:${idx}`)
           vfHeightsRef.current.set(idx, nextH)
           const now = Date.now()
           if (Number(vfScrollActivityRef.current.activeUntil || 0) > now) return
@@ -415,7 +458,7 @@ export default function useVideoFeedWindowing({
         vfRosRef.current.set(idx, ro)
       }
     } catch {}
-  }, [vfScheduleRecalc])
+  }, [vfCompensateOffscreenHeightDelta, vfEstimateH, vfScheduleRecalc])
 
   useEffect(() => {
     if (!isBrowserFn()) return undefined
