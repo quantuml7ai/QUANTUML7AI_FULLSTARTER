@@ -6,6 +6,7 @@ import {
   MEDIA_VIDEO_MUTED_KEY,
   MEDIA_MUTED_EVENT,
   readMutedPrefFromStorage,
+  __writeMediaMutedPref,
   __touchActiveVideoEl,
   __dropActiveVideoEl,
   __enforceActiveVideoCap,
@@ -15,6 +16,10 @@ import {
   __isVideoNearViewport,
   __MEDIA_VIS_MARGIN_PX,
 } from '../utils/mediaLifecycleRuntime'
+import {
+  shouldPersistGlobalMute,
+  computeSettlingUntil,
+} from '../utils/mediaStatePolicy'
 
 export default function useForumMediaCoordinator({ emitDiag }) {
   // === Ленивая подгрузка превью видео в постах ===
@@ -26,12 +31,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         const env = String(process.env.NEXT_PUBLIC_FORUM_LEGACY_WARM_SWEEP || '').trim().toLowerCase();
         if (env === '1' || env === 'true' || env === 'on') explicit = 'on';
         if (env === '0' || env === 'false' || env === 'off') explicit = 'off';
-      } catch {}
-      try {
-        const qs = new URLSearchParams(window.location.search || '');
-        const fromQuery = String(qs.get('legacyWarmSweep') || '').trim().toLowerCase();
-        if (fromQuery === '1' || fromQuery === 'true' || fromQuery === 'on') explicit = 'on';
-        if (fromQuery === '0' || fromQuery === 'false' || fromQuery === 'off') explicit = 'off';
       } catch {}
       // По умолчанию legacy-контур выключен:
       // единым владельцем прогрева/старта является боевой координатор ниже.
@@ -188,7 +187,11 @@ export default function useForumMediaCoordinator({ emitDiag }) {
               const lastWarmKickTs = Number(video.dataset?.__lastWarmLoadKickTs || 0);
               if (lastWarmKickTs > 0 && (now - lastWarmKickTs) < minWarmGap) return;
               try { video.dataset.__lastWarmLoadKickTs = String(now); } catch {}
-              try { video.dataset.__loadPending = '1'; } catch {}
+              try {
+                video.dataset.__loadPending = '1';
+                video.dataset.__loadPendingSince = String(Date.now());
+                video.dataset.__warmReady = '0';
+              } catch {}
               trace('warm_load', video);
               video.load?.();
             }
@@ -438,12 +441,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         const env = String(process.env.NEXT_PUBLIC_FORUM_LEGACY_IFRAME_PREWARM || '').trim().toLowerCase();
         if (env === '1' || env === 'true' || env === 'on') explicit = 'on';
         if (env === '0' || env === 'false' || env === 'off') explicit = 'off';
-      } catch {}
-      try {
-        const qs = new URLSearchParams(window.location.search || '');
-        const fromQuery = String(qs.get('legacyIframePrewarm') || '').trim().toLowerCase();
-        if (fromQuery === '1' || fromQuery === 'true' || fromQuery === 'on') explicit = 'on';
-        if (fromQuery === '0' || fromQuery === 'false' || fromQuery === 'off') explicit = 'off';
       } catch {}
       // По умолчанию legacy iframe-прогрев выключен:
       // чтобы не конкурировать с основным near/focus контуром.
@@ -781,16 +778,38 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       };
     } catch {}
 
-    const writeMutedPref = (val) => {
+    const writeMutedPref = (val, options = {}) => {
       try {
-        const next = val ? '1' : '0';
-        localStorage.setItem(MEDIA_MUTED_KEY, next);
-        localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, next);
+        __writeMediaMutedPref(!!val, options);
+      } catch {}
+    };
+    const isSplashGateActive = () => {
+      try {
+        return (
+          window.__forumBootSplashActive === '1' ||
+          document?.documentElement?.dataset?.forumBootSplashActive === '1'
+        );
+      } catch {
+        return false;
+      }
+    };
+    const markMediaLoadPending = (el) => {
+      if (!(el instanceof HTMLMediaElement)) return;
+      try {
+        el.dataset.__loadPending = '1';
+        el.dataset.__warmReady = '0';
+        el.dataset.__loadPendingSince = String(Date.now());
+      } catch {}
+    };
+    const clearMediaLoadPending = (el, { keepWarmReady = false } = {}) => {
+      if (!(el instanceof HTMLMediaElement)) return;
+      try {
+        el.dataset.__loadPending = '0';
+        if (!keepWarmReady) el.dataset.__warmReady = '0';
+        delete el.dataset.__loadPendingSince;
       } catch {}
     };
     // Единый источник mute-предпочтения для video/iframe/youtube — storage.
-    // Для QCast используем отдельный ключ, чтобы звук QCast не "сбивался"
-    // от глобального muted-состояния видеоленты.
     // В mediaLifecycleRuntime уже есть одноразовый session boot mute,
     // поэтому здесь нельзя каждый init насильно перетирать настройку.
     let mutedPref = null;
@@ -801,21 +820,21 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     }
     if (typeof mutedPref !== 'boolean') mutedPref = true;
 
-    const desiredMuted = () => (mutedPref == null ? true : !!mutedPref);
-    const QCAST_MUTED_KEY = 'forum:qcastMuted';
-    const readQcastMutedPref = () => {
-      try {
-        const raw = localStorage.getItem(QCAST_MUTED_KEY);
-        if (raw == null) return null;
-        return raw === '1' || raw === 'true';
-      } catch {
-        return null;
-      }
+    const isAuthoritativeMuteSource = (source = 'forum-coordinator') => {
+      const normalized = String(source || '').trim().toLowerCase();
+      if (!normalized) return false;
+      return (
+        normalized === 'forum-coordinator' ||
+        normalized === 'video' ||
+        normalized === 'user' ||
+        normalized === 'qcast' ||
+        normalized === 'forum-ads-toggle'
+      );
     };
-    const writeQcastMutedPref = (next) => {
-      try {
-        localStorage.setItem(QCAST_MUTED_KEY, next ? '1' : '0');
-      } catch {}
+
+    const desiredMuted = () => {
+      if (isSplashGateActive()) return true;
+      return mutedPref == null ? true : !!mutedPref;
     };
  
 
@@ -842,12 +861,23 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       } catch {}
     };
 
-    const setMutedPref = (val, source = 'forum-coordinator', emit = true) => {
+    const setMutedPref = (val, source = 'forum-coordinator', emit = true, persistOverride = null) => {
       const next = !!val;
-      if (mutedPref === next && source === 'forum-coordinator') return;
-      mutedPref = next;
-      writeMutedPref(next);
-      applyMutedPrefToAll();
+      const authoritativeSource = isAuthoritativeMuteSource(source);
+      if (authoritativeSource && mutedPref === next && source === 'forum-coordinator') return;
+      if (authoritativeSource) mutedPref = next;
+      const persist =
+        authoritativeSource && typeof persistOverride === 'boolean'
+          ? persistOverride
+          : authoritativeSource
+            ? shouldPersistGlobalMute(source)
+            : false;
+      if (persist) {
+        writeMutedPref(next, { persist: true, source });
+      }
+      if (authoritativeSource) {
+        applyMutedPrefToAll();
+      }
       if (emit) {
         try {
           window.dispatchEvent(new CustomEvent(MEDIA_MUTED_EVENT, {
@@ -922,10 +952,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
                 networkState === HTMLMediaElement.NETWORK_NO_SOURCE
               );
             if (mayBeStuck) {
-              try {
-                node.dataset.__loadPending = '0';
-                delete node.dataset.__loadPendingSince;
-              } catch {}
+              clearMediaLoadPending(node);
               trace('load_pending_stale_reset', node, { pendingForMs, stalePendingMs });
               return acc;
             }
@@ -1475,10 +1502,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           readyState === 0 &&
           (now - pendingSince) > stalePendingMs
         ) {
-          try {
-            el.dataset.__loadPending = '0';
-            delete el.dataset.__loadPendingSince;
-          } catch {}
+          clearMediaLoadPending(el);
           trace('candidate_clear_stale_pending', el, { reason, pendingForMs: now - pendingSince });
         }
         const cold = networkState === HTMLMediaElement.NETWORK_EMPTY || !el.currentSrc;
@@ -1499,7 +1523,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             return false;
           }
           try { el.dataset.__candidateBoostTs = String(now); } catch {}
-          try { el.dataset.__loadPending = '1'; } catch {}
+          markMediaLoadPending(el);
           trace('candidate_force_load', el, { reason: `${reason}:cold` });
           try { el.load?.(); } catch {}
         }
@@ -1553,21 +1577,24 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           const isQcastAudio =
             owner?.getAttribute?.('data-forum-media') === 'qcast' ||
             String(el?.dataset?.qcastAudio || '') === '1';
-          if (isQcastAudio) {
-            writeQcastMutedPref(!!el.muted);
-            return;
-          }
+          if (isQcastAudio) return;
+          const persistUntil = Math.max(
+            Number(el?.dataset?.__persistMuteUntil || 0),
+            Number(owner?.dataset?.__persistMuteUntil || 0),
+          );
+          if (persistUntil <= Date.now()) return;
         } catch {}
-        setMutedPref(!!el.muted);
+        setMutedPref(!!el.muted, 'video');
       };
       volHandlers.set(el, h);
       el.addEventListener('volumechange', h, { passive: true });
     };
     const onMutedEvent = (e) => {
       if (e?.detail?.source === 'forum-coordinator') return;
-      if (e?.detail?.source === 'qcast') return;
       if (typeof e?.detail?.muted !== 'boolean') return;
-      setMutedPref(e.detail.muted, e.detail.source || 'external', false);
+      const source = String(e?.detail?.source || 'external');
+      if (source === 'media_element' || source === 'external' || source === 'forum-splash') return;
+      setMutedPref(e.detail.muted, source, false, false);
     };
     const onMediaPauseCaptured = (e) => {
       const target = e?.target;
@@ -1723,9 +1750,19 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         }
       } catch {}
       try {
-        window.dispatchEvent(new CustomEvent('site-media-play', {
-          detail: { source: 'html5', element: owner }
-        }));
+        const allowAudibleAnnouncement =
+          !isSplashGateActive() ||
+          hasManualLease(owner) ||
+          hasManualLease(target) ||
+          hasUserGestureIntent(owner) ||
+          hasUserGestureIntent(target);
+        if (allowAudibleAnnouncement) {
+          window.dispatchEvent(new CustomEvent('site-media-play', {
+            detail: { source: 'html5', element: owner }
+          }));
+        } else {
+          trace('play_announce_skip_splash_gate', target);
+        }
       } catch {}
       trace(coordinatorPlay ? 'coordinator_play' : 'user_play', target);
     };
@@ -1738,8 +1775,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       // при штатных pause/unload/reload сценариях; не считаем это "битым" src.
       if (errCode <= 1) {
         try {
-          target.dataset.__loadPending = '0';
-          if ((target.readyState || 0) < 2) target.dataset.__warmReady = '0';
+          clearMediaLoadPending(target, { keepWarmReady: (target.readyState || 0) >= 2 });
         } catch {}
         trace('media_error_ignore', target, { code: errCode, reason: 'benign_abort' });
         return;
@@ -1788,10 +1824,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       withSystemPause(target, () => {
         try { if (!target.paused) target.pause(); } catch {}
       });
-      try {
-        target.dataset.__loadPending = '0';
-        target.dataset.__warmReady = '0';
-      } catch {}
+      clearMediaLoadPending(target);
       if (owner instanceof Element) {
         scheduleHardUnload(owner, 0, 'error_blocked');
       }
@@ -1811,8 +1844,8 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       const target = e?.target;
       if (!(target instanceof HTMLVideoElement || target instanceof HTMLAudioElement)) return;
       clearMediaSrcBlocked(target, e?.type === 'canplay' ? 'canplay' : 'loadeddata');
+      clearMediaLoadPending(target, { keepWarmReady: target.readyState >= 2 });
       try {
-        target.dataset.__loadPending = '0';
         if (target.readyState >= 2) target.dataset.__warmReady = '1';
       } catch {}
     };
@@ -1829,8 +1862,16 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         traceCandidate('candidate_external_ignored', iframe, { reason });
       } catch {}
     };
+    const removedNodeCleanupTimers = new Map();
+    const cancelRemovedNodeCleanup = (node) => {
+      const timerId = removedNodeCleanupTimers.get(node);
+      if (!timerId) return;
+      try { clearTimeout(timerId); } catch {}
+      removedNodeCleanupTimers.delete(node);
+    };
     const cleanupObservedMediaNode = (node, reason = 'removed') => {
       if (!(node instanceof Element)) return;
+      cancelRemovedNodeCleanup(node);
       forEachMediaOwner(node, (owner) => {
         try { cancelUnload(owner); } catch {}
         try { clearReadyReplay(owner); } catch {}
@@ -1859,6 +1900,19 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           }
         }
       });
+    };
+    const scheduleRemovedNodeCleanup = (node, reason = 'mutation_removed') => {
+      if (!(node instanceof Element)) return;
+      cancelRemovedNodeCleanup(node);
+      const graceMs = isIOSUi ? 1600 : (isCoarseUi ? 1300 : 900);
+      const timerId = setTimeout(() => {
+        removedNodeCleanupTimers.delete(node);
+        try {
+          if (node.isConnected) return;
+        } catch {}
+        cleanupObservedMediaNode(node, reason);
+      }, graceMs);
+      removedNodeCleanupTimers.set(node, timerId);
     };
     const sweepDetachedMediaState = (reason = 'detached_sweep', force = false) => {
       const now = Date.now();
@@ -2053,7 +2107,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           const last = ytMuteLast.get(player);
           if (last !== muted) {
             ytMuteLast.set(player, muted);
-            setMutedPref(muted, 'youtube');
+            setMutedPref(muted, 'youtube', true, false);
           }
         } catch {}
       }, 650);
@@ -2152,11 +2206,13 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     })();
     const IFRAME_HARD_UNLOAD_MS = isIOSUi ? 9800 : (isCoarseUi ? 7600 : 5200);
     const IFRAME_RESIDENT_CAP = (() => {
-      if (isCoarseUi) return 4;
+      if (isIOSUi) return 1;
+      if (isCoarseUi) return 2;
       const dm = Number(navigator?.deviceMemory || 0);
-      if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 5;
-      return 6;
+      if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 3;
+      return 4;
     })();
+    const LIGHT_IFRAME_PREWARM = isIOSUi || isCoarseUi;
     let mediaDiagLastTs = 0;
     const emitMediaDiag = (event, extra = {}, force = false) => {
       try {
@@ -2351,12 +2407,19 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       if (id) clearTimeout(id);
       unloadTimers.delete(el);
     };
+    let settlingUntilTs = 0;
+    const markSettling = (ms = 900, reason = 'settle') => {
+      settlingUntilTs = computeSettlingUntil(settlingUntilTs, ms, Date.now());
+      emitMediaDiag('media_settling', { reason, settlingUntilTs }, false);
+    };
+    const isSettling = () => settlingUntilTs > Date.now();    
     emitMediaDiag('media_coordinator_init', {
       iframeHardUnloadMs: IFRAME_HARD_UNLOAD_MS,
       iframeResidentCap: IFRAME_RESIDENT_CAP,
       isCoarseUi,
       ...getIframeSnapshot(),
     }, true);
+    markSettling(1400, 'media_coordinator_init');
     try { window.__forumMediaCoordinatorActive = '1'; } catch {}
 
     const softPauseMedia = (el, reason = 'soft_pause') => {
@@ -2521,12 +2584,15 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         invalidatePlayRequest(el);
         try { el.dataset.__coordinatorUnloadUntil = String(Date.now() + 2500); } catch {}
         try {
+          const isPostFeedVideo =
+            el instanceof HTMLVideoElement &&
+            String(el?.getAttribute?.('data-forum-video') || '') === 'post';
           const farOutOfView = unloadReason === 'out_of_view' && !isNearViewportElement(el, isIOSUi ? 2200 : (isCoarseUi ? 1500 : 1200));
           const forceHard =
             unloadReason === 'cleanup' ||
             unloadReason === 'resident_cap' ||
             unloadReason === 'error_blocked' ||
-            (farOutOfView && (isIOSUi || isCoarseUi));
+            (farOutOfView && (isIOSUi || isCoarseUi) && !isPostFeedVideo);
           if (forceHard) el.dataset.__forceHardUnload = '1';
           else delete el.dataset.__forceHardUnload;
         } catch {}
@@ -2637,6 +2703,11 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       const delay = Number.isFinite(ms) ? ms : getUnloadDelay(el, reason);
       const id = setTimeout(() => {
         unloadTimers.delete(el);
+        if (isSettling()) {
+          trace('hard_unload_deferred_settling', el, { reason });
+          scheduleHardUnload(el, Math.max(900, delay), `${reason}:settle_retry`);
+          return;
+        }        
         if (!isIframeLike(el) && shouldRetainHtmlMedia(el)) {
           trace('hard_unload_skip_retained', el, { reason });
           return;
@@ -2694,14 +2765,34 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       try {
         hadSrc = !!String(el.getAttribute('src') || '').trim();
       } catch {}
-      if (!hadSrc) {
+      const activationReason =
+        reason === 'activate_pending' ||
+        reason === 'play' ||
+        reason === 'play_now' ||
+        reason === 'manual_activate';
+      if (!hadSrc && (!LIGHT_IFRAME_PREWARM || activationReason)) {
         try { el.setAttribute('src', nextSrc); } catch {}
       }
       try { el.setAttribute('data-forum-last-active-ts', String(now)); } catch {}
       try { el.setAttribute('data-forum-prewarm-ts', String(now)); } catch {}
-      try { enforceIframeResidentCap(el); } catch {}
-      trace('iframe_prewarm', el, { kind, reason, hadSrc });
-      emitMediaDiag('iframe_prewarm', { kind, reason, hadSrc, ...getIframeSnapshot() });
+      if (!LIGHT_IFRAME_PREWARM || activationReason || hadSrc) {
+        try { enforceIframeResidentCap(el); } catch {}
+      }
+      trace('iframe_prewarm', el, {
+        kind,
+        reason,
+        hadSrc,
+        lightPrewarm: LIGHT_IFRAME_PREWARM,
+        activated: !LIGHT_IFRAME_PREWARM || activationReason || hadSrc,
+      });
+      emitMediaDiag('iframe_prewarm', {
+        kind,
+        reason,
+        hadSrc,
+        lightPrewarm: LIGHT_IFRAME_PREWARM,
+        activated: !LIGHT_IFRAME_PREWARM || activationReason || hadSrc,
+        ...getIframeSnapshot(),
+      });
       return !!String(el.getAttribute('src') || '').trim();
     };
 
@@ -2735,6 +2826,16 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           maxCenterDist: maxCenterWithLease,
           manualLease,
         });
+        return;
+      }
+      const kind = String(el?.getAttribute?.('data-forum-media') || '');
+      const splashMutedOnly =
+        isSplashGateActive() &&
+        !manualLease &&
+        !hasGesture;
+      if (splashMutedOnly && (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe')) {
+        trace('play_skip_splash_gate', el, { kind });
+        try { prepareExternalMedia(el, 'splash_prewarm'); } catch {}
         return;
       }
       pauseForeignMedia(el);
@@ -2775,7 +2876,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
                   bypassSrcLimiter: userIntentKick || isIOSUi,
                   bypassPendingBudget: true,
                 })) return;
-                try { el.dataset.__loadPending = '1'; } catch {}
+                markMediaLoadPending(el);
                 trace('play_load', el);
                 el.load?.();
               }
@@ -2799,7 +2900,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         return;
       }
 
-      const kind = el.getAttribute('data-forum-media');
       if (kind === 'qcast') {
         const a = el.querySelector?.('audio');
         if (a instanceof HTMLAudioElement) {
@@ -2830,11 +2930,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
                 if (el?.dataset) el.dataset.__userUnmuteHoldUntil = String(userUnmuteHoldUntil);
               } catch {}
             }
-            const persistedQcastMuted = readQcastMutedPref();
-            const nextQcastMuted =
-              typeof persistedQcastMuted === 'boolean'
-                ? persistedQcastMuted
-                : desiredMuted();
+            const nextQcastMuted = desiredMuted();
             if (!keepManualQcastSound && !keepUserUnmutedQcast) {
               try {
                 a.muted = !!nextQcastMuted;
@@ -2849,7 +2945,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
                 a.removeAttribute?.('muted');
               } catch {}
             }
-            try { writeQcastMutedPref(!!a.muted); } catch {}
             // LOOP: qcast-аудио тоже зацикливаем
             a.loop = true;
             try { a.preload = 'auto'; } catch {}
@@ -3414,6 +3509,10 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           ? (el.matches?.(selector) ? el : el.closest?.(selector))
           : null;
         if (!(candidate instanceof Element)) return;
+        if (isSplashGateActive() && !manual && !hasManualLease(candidate) && !hasUserGestureIntent(candidate)) {
+          traceCandidate('candidate_external_ignored', candidate, { reason: `${reason}:splash_gate` });
+          return;
+        }
         const manualLease = hasManualLease(candidate);
         const visiblePxNow = getOwnerVisiblePx(candidate);
         const minVisiblePx = getStartVisiblePx(candidate);
@@ -3443,13 +3542,33 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     };
     const onExternalMediaPlay = (e) => {
       const source = String(e?.detail?.source || '');
+      const externalEl = e?.detail?.element || null;
+      if (
+        isSplashGateActive() &&
+        externalEl instanceof Element &&
+        !e?.detail?.manual &&
+        !hasManualLease(externalEl) &&
+        !hasUserGestureIntent(externalEl)
+      ) {
+        traceCandidate('candidate_external_ignored', externalEl, { reason: `${source}:splash_gate` });
+        try {
+          if (externalEl instanceof HTMLVideoElement || externalEl instanceof HTMLAudioElement) {
+            withSystemPause(externalEl, () => {
+              try { if (!externalEl.paused) externalEl.pause(); } catch {}
+            });
+          } else if (externalEl instanceof HTMLIFrameElement) {
+            try { externalEl.contentWindow?.postMessage?.({ method: 'pause' }, '*'); } catch {}
+            try { externalEl.contentWindow?.postMessage?.({ event: 'command', func: 'pauseVideo', args: '' }, '*'); } catch {}
+          }
+        } catch {}
+        return;
+      }
       const isAdSource =
         source === 'ad' ||
         source === 'forum_ads' ||
         source === 'forum-ads' ||
         source.startsWith('ad_');
       if (isAdSource) {
-        const externalEl = e?.detail?.element || null;
         if (externalEl instanceof Element) {
           const manual = !!e?.detail?.manual;
           const manualLease = hasManualLease(externalEl);
@@ -3551,7 +3670,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
               burstLimit: isIOSUi ? 3 : 4,
               blockMs: isIOSUi ? 15000 : 11000,
             })) return;
-            try { mediaEl.dataset.__loadPending = '1'; } catch {}
+            markMediaLoadPending(mediaEl);
             trace('visibility_restore', mediaEl, { reason, mode: 'kick_stalled' });
             try { mediaEl.load?.(); } catch {}
           }
@@ -3564,14 +3683,41 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       } catch {
         return;
       }
+      markSettling(1200, 'visibility_visible');
       try { observeAll(); } catch {}
       recoverVisibleHtmlMedia('visibility_visible');
     };
+    const onSplashGateChange = (e) => {
+      const splashActive =
+        typeof e?.detail?.active === 'boolean'
+          ? e.detail.active
+          : isSplashGateActive();
+      if (splashActive) {
+        markSettling(1400, 'splash_gate_active');
+        try { applyMutedPrefToAll(); } catch {}
+        try {
+          window.dispatchEvent(new CustomEvent(MEDIA_MUTED_EVENT, {
+            detail: { muted: true, source: 'forum-splash' }
+          }));
+        } catch {}
+        try {
+          if (active && isIframeLike(active) && !hasManualLease(active) && !hasUserGestureIntent(active)) {
+            softPauseMedia(active, 'splash_gate_active');
+            cancelUnload(active);
+          }
+        } catch {}
+        return;
+      }
+      markSettling(1600, 'splash_gate_release');
+      recoverVisibleHtmlMedia('splash_gate_release');
+    };
     const onPageShowRecover = () => {
+      markSettling(1400, 'pageshow');
       try { observeAll(); } catch {}
       recoverVisibleHtmlMedia('pageshow');
     };
     const onWindowFocusRecover = () => {
+      markSettling(1000, 'window_focus');
       recoverVisibleHtmlMedia('window_focus');
     };
 
@@ -3605,6 +3751,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         for (const m of mutations) {
           for (const n of (m.addedNodes || [])) {
             if (!(n instanceof Element)) continue;
+            cancelRemovedNodeCleanup(n);
             if (n.matches?.(selector)) {
               observeOne(n);
               touchedMedia = true;
@@ -3625,7 +3772,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             } catch {}
             if (!hasMedia) continue;
             touchedMedia = true;
-            cleanupObservedMediaNode(n, 'mutation_removed');
+            scheduleRemovedNodeCleanup(n, 'mutation_removed');
           }
         }
         if (!touchedMedia) return;
@@ -3636,6 +3783,8 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     } catch { mo = null; }
     window.addEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
     window.addEventListener('site-media-play', onExternalMediaPlay);
+    window.addEventListener('forum-boot-splash', onSplashGateChange);
+    onSplashGateChange({ detail: { active: isSplashGateActive() } });
     document.addEventListener('visibilitychange', onVisibilityRecover, true);
     window.addEventListener('pageshow', onPageShowRecover);
     window.addEventListener('focus', onWindowFocusRecover, true);
@@ -3647,6 +3796,12 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     document.addEventListener('canplay', onMediaLoadedCaptured, true);
     return () => { 
       try { mo?.disconnect?.(); } catch {}
+      try {
+        removedNodeCleanupTimers.forEach((id) => {
+          try { clearTimeout(id); } catch {}
+        });
+        removedNodeCleanupTimers.clear();
+      } catch {}
       if (mutationSweepRaf) {
         try {
           if (typeof cancelAnimationFrame === 'function') cancelAnimationFrame(mutationSweepRaf);
@@ -3657,6 +3812,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       mutationSweepPending = false;
       window.removeEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
       window.removeEventListener('site-media-play', onExternalMediaPlay);
+      window.removeEventListener('forum-boot-splash', onSplashGateChange);
       document.removeEventListener('visibilitychange', onVisibilityRecover, true);
       window.removeEventListener('pageshow', onPageShowRecover);
       window.removeEventListener('focus', onWindowFocusRecover, true);
@@ -3721,4 +3877,3 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     }; 
   }, [emitDiag]);
 }
-

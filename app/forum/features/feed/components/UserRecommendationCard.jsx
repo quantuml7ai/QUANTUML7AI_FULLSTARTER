@@ -520,6 +520,8 @@ export default function UserRecommendationCard({
         ),
       ),
     ),
-    React.createElement('style', { jsx: true }, styles),
+    React.createElement('style', {
+      dangerouslySetInnerHTML: { __html: styles },
+    }),
   )
 }

@@ -27,6 +27,13 @@ describe('App entry contracts', () => {
     expect(source).not.toContain('forumPath ||')
   })
 
+  it('keeps forum boot splash active marker wiring available for startup media gating', () => {
+    const source = readRepoFile('components/ForumBootSplash.jsx')
+
+    expect(source).toContain('__forumBootSplashActive')
+    expect(source).toContain('forum-boot-splash')
+  })
+
   it('keeps absolute preview metadata for home/about/subscribe/game', () => {
     const rootLayout = readRepoFile('app/layout.js')
     const aboutLayout = readRepoFile('app/about/layout.js')

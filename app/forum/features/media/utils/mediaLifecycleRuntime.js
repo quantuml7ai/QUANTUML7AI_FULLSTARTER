@@ -4,20 +4,17 @@ import React from 'react'
 import VideoMediaLeaf from '../components/VideoMedia'
 import QCastPlayerLeaf from '../components/QCastPlayer'
 import { createEnableVideoControlsOnTap } from './videoControls'
+import {
+  shouldKeepResidentPostVideo,
+} from './mediaStatePolicy'
 
 export const MEDIA_MUTED_KEY = 'forum:mediaMuted'
 export const MEDIA_VIDEO_MUTED_KEY = 'forum:videoMuted'
 export const MEDIA_MUTED_EVENT = 'forum:media-mute'
-;(() => {
-  // На каждый новый перезапуск страницы стартуем в muted,
-  // чтобы iPhone/Safari не блокировал autoplay из-за старого unmuted-состояния.
-  try {
-    if (typeof window === 'undefined') return
-    localStorage.setItem(MEDIA_MUTED_KEY, '1')
-    localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, '1')
-  } catch {}
-})()
-
+// ВАЖНО:
+// Нельзя насильно сбрасывать persisted mute на старте страницы.
+// Persisted mute — это пользовательское предпочтение, а не session bootstrap side-effect.
+ 
 export function readMutedPrefFromStorage() {
   try {
     let v = localStorage.getItem(MEDIA_MUTED_KEY)
@@ -136,11 +133,43 @@ export function __readMediaMutedPref() {
   return null
 }
 
-export function __writeMediaMutedPref(nextMuted) {
+export function __writeMediaMutedPref(nextMuted, options = {}) {
+  const persist = options?.persist !== false
+  if (!persist) return
   try {
     const v = nextMuted ? '1' : '0'
     localStorage.setItem(MEDIA_MUTED_KEY, v)
     localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, v)
+  } catch {}
+}
+
+function markLoadPending(el) {
+  if (!el?.dataset) return
+  try {
+    el.dataset.__loadPending = '1'
+    el.dataset.__warmReady = '0'
+    el.dataset.__loadPendingSince = String(Date.now())
+  } catch {}
+}
+
+function clearLoadPending(el, { keepWarmReady = false } = {}) {
+  if (!el?.dataset) return
+  try {
+    el.dataset.__loadPending = '0'
+    if (!keepWarmReady) el.dataset.__warmReady = '0'
+    delete el.dataset.__loadPendingSince
+  } catch {}
+}
+
+export function __markMediaLifecycleTouch(el, reason = 'touch') {
+  if (!el?.dataset) return
+  const now = Date.now()
+  try {
+    el.dataset.__lastMediaTouchTs = String(now)
+    if (reason === 'visible') el.dataset.__lastVisibleTs = String(now)
+    if (reason === 'active' || reason === 'play' || reason === 'visible' || reason === 'loaded') {
+      el.dataset.__lastActiveTs = String(now)
+    }
   } catch {}
 }
 
@@ -167,24 +196,58 @@ export function __unloadVideoEl(el) {
   } catch {}
   try {
     el.dataset.__active = '0'
-    el.dataset.__loadPending = '0'
-    el.dataset.__warmReady = '0'
     el.dataset.__resident = '0'
     el.dataset.__prewarm = '0'
     el.dataset.__lastUnloadTs = String(nowTs)
   } catch {}
+  clearLoadPending(el)
+  const hardUnloadRequested = (() => {
+    try {
+      return String(el?.dataset?.__forceHardUnload || '') === '1'
+    } catch {
+      return false
+    }
+  })()
   const canHardUnload = (() => {
     try {
       if (__VIDEO_HARD_CAP_ENABLED) return true
-      return String(el?.dataset?.__forceHardUnload || '') === '1'
+      return hardUnloadRequested
     } catch {
       return __VIDEO_HARD_CAP_ENABLED
     }
   })()
-  if (!canHardUnload) {
+const recentTouchTs = (() => {
+  try {
+    return Math.max(
+      Number(el?.dataset?.__lastMediaTouchTs || 0),
+      Number(el?.dataset?.__lastActiveTs || 0),
+      Number(el?.dataset?.__lastVisibleTs || 0),
+    )
+  } catch {
+    return 0
+  }
+})()
+
+const recentTouchAgeMs = recentTouchTs > 0 ? Math.max(0, nowTs - recentTouchTs) : Number.POSITIVE_INFINITY
+
+const keepResident = shouldKeepResidentPostVideo({
+  isPostFeedVideo,
+  hardUnloadRequested,
+  recentTouchAgeMs,
+  residentFlag: String(el?.dataset?.__resident || '') === '1',
+  prewarmFlag: String(el?.dataset?.__prewarm || '') === '1',
+})
+
+if (keepResident || !canHardUnload) {
     try {
       el.preload = 'metadata'
     } catch {}
+    try {
+      if (isPostFeedVideo) {
+        el.dataset.__resident = '1'
+        el.dataset.__lastSoftUnloadTs = String(nowTs)
+      }
+    } catch {}    
     return
   }
   try {
@@ -220,6 +283,7 @@ export function __restoreVideoEl(el) {
   const nowTs = Date.now()
   const src = el.dataset.__src || el.getAttribute('data-src') || ''
   if (!src) return
+  const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
   try {
     delete el.dataset.__forceHardUnload
   } catch {}
@@ -268,8 +332,7 @@ export function __restoreVideoEl(el) {
         networkStateNow === HTMLMediaElement.NETWORK_EMPTY
       if (readyStateNow === 0 || isNetworkEmpty) {
         if (!canRestoreLoad()) return
-        el.dataset.__loadPending = '1'
-        el.dataset.__warmReady = '0'
+        markLoadPending(el)
         el.load?.()
       }
     } catch {}
@@ -288,8 +351,7 @@ export function __restoreVideoEl(el) {
     }
   } catch {}
   try {
-    el.dataset.__loadPending = '1'
-    el.dataset.__warmReady = '0'
+    markLoadPending(el)
     el.setAttribute('src', src)
   } catch {}
   try {
@@ -318,7 +380,7 @@ export function __restoreVideoEl(el) {
     const isLoading =
       typeof HTMLMediaElement !== 'undefined' &&
       networkState === HTMLMediaElement.NETWORK_LOADING
-    if (!isLoading && canRestoreLoad()) el.load?.()
+    if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()
   } catch {}
 }
 
@@ -363,6 +425,7 @@ export function VideoMedia(props) {
       mediaVisMarginPx={__MEDIA_VIS_MARGIN_PX}
       dropActiveVideo={__dropActiveVideoEl}
       unloadVideoEl={__unloadVideoEl}
+      markMediaLifecycleTouch={__markMediaLifecycleTouch}
     />
   )
 }
