@@ -1,0 +1,104 @@
+{
+  "generatedAt": "2026-04-18T03:02:14.754Z",
+  "summary": {
+    "runtimeModesPresent": true,
+    "modeGuardsPresent": true,
+    "runtimeModeResolverPresent": true,
+    "runtimeModeServerPresent": true,
+    "runtimeModeClientPresent": true,
+    "forensicModePresent": true,
+    "prodAdaptiveCorePresent": true
+  },
+  "report": [
+    {
+      "file": "src/shared/runtime/modes/runtimeModes.js",
+      "counts": {
+        "modeBoundary": 2,
+        "forensicBoundary": 0,
+        "prodAdaptive": 0,
+        "debugSurface": 0
+      }
+    },
+    {
+      "file": "src/shared/runtime/modes/runtimeModeGuards.js",
+      "counts": {
+        "modeBoundary": 3,
+        "forensicBoundary": 0,
+        "prodAdaptive": 0,
+        "debugSurface": 0
+      }
+    },
+    {
+      "file": "src/shared/runtime/mode/runtimeModeResolver.js",
+      "counts": {
+        "modeBoundary": 3,
+        "forensicBoundary": 0,
+        "prodAdaptive": 0,
+        "debugSurface": 3
+      }
+    },
+    {
+      "file": "src/shared/runtime/mode/runtimeModeServer.js",
+      "counts": {
+        "modeBoundary": 3,
+        "forensicBoundary": 0,
+        "prodAdaptive": 0,
+        "debugSurface": 0
+      }
+    },
+    {
+      "file": "src/shared/runtime/mode/runtimeModeClient.js",
+      "counts": {
+        "modeBoundary": 3,
+        "forensicBoundary": 0,
+        "prodAdaptive": 0,
+        "debugSurface": 0
+      }
+    },
+    {
+      "file": "src/shared/runtime/mode/runtimeModeGuards.js",
+      "counts": {
+        "modeBoundary": 7,
+        "forensicBoundary": 0,
+        "prodAdaptive": 0,
+        "debugSurface": 0
+      }
+    },
+    {
+      "file": "src/shared/runtime/adaptive/productionAdaptiveCore.js",
+      "counts": {
+        "modeBoundary": 0,
+        "forensicBoundary": 3,
+        "prodAdaptive": 7,
+        "debugSurface": 0
+      }
+    },
+    {
+      "file": "src/shared/runtime/forensics/forensicMode.js",
+      "counts": {
+        "modeBoundary": 0,
+        "forensicBoundary": 14,
+        "prodAdaptive": 0,
+        "debugSurface": 0
+      }
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "counts": {
+        "modeBoundary": 0,
+        "forensicBoundary": 5,
+        "prodAdaptive": 0,
+        "debugSurface": 2
+      }
+    },
+    {
+      "file": "app/api/debug/forum-diag/route.js",
+      "counts": {
+        "modeBoundary": 0,
+        "forensicBoundary": 0,
+        "prodAdaptive": 0,
+        "debugSurface": 1
+      }
+    }
+  ]
+}

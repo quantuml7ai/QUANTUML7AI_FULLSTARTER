@@ -1,0 +1,109 @@
+{
+  "generatedAt": "2026-04-17T20:40:20.841Z",
+  "groupId": "forum-long-scroll",
+  "scenarios": [
+    {
+      "index": 7,
+      "id": "forum-long-scroll-30",
+      "title": "long scroll 30 cards",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "memory",
+        "media"
+      ]
+    },
+    {
+      "index": 8,
+      "id": "forum-long-scroll-100",
+      "title": "long scroll 100 cards",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 9,
+      "id": "forum-scroll-down-up-down",
+      "title": "down then up then down",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 11,
+      "id": "forum-fast-fling-scroll",
+      "title": "fast fling scroll",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "mainThread",
+        "memory"
+      ]
+    },
+    {
+      "index": 60,
+      "id": "forum-long-idle-after-scroll",
+      "title": "long idle state after forum scroll",
+      "category": "forum-extra",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "memory",
+        "routeIsolation",
+        "mainThread"
+      ]
+    }
+  ],
+  "routes": [
+    "/forum"
+  ],
+  "metricGroups": [
+    "memory",
+    "media",
+    "mainThread",
+    "routeIsolation"
+  ],
+  "deviceMatrix": [
+    "iphone-safari",
+    "android-chrome",
+    "desktop-chrome"
+  ],
+  "manualDataRequests": [
+    "Long-scroll trace with heap checkpoints at 30, 60 and 180 seconds",
+    "Peak iframe/native/ad counts during scroll and idle plateau notes"
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "generatedAt": "2026-04-18T03:02:14.801Z",
+  "summary": {
+    "hasProductionAdaptiveCore": true,
+    "filesScanned": 5
+  },
+  "report": [
+    {
+      "file": "src/shared/runtime/adaptive/deviceProfileResolver.js",
+      "counts": {
+        "deviceProfile": 12,
+        "effectDegradation": 0,
+        "priorityArbiter": 0,
+        "adaptiveActions": 0,
+        "pressureLadder": 0
+      }
+    },
+    {
+      "file": "src/shared/runtime/adaptive/effectDegradation.js",
+      "counts": {
+        "deviceProfile": 6,
+        "effectDegradation": 5,
+        "priorityArbiter": 0,
+        "adaptiveActions": 0,
+        "pressureLadder": 0
+      }
+    },
+    {
+      "file": "src/shared/runtime/adaptive/runtimePriority.js",
+      "counts": {
+        "deviceProfile": 0,
+        "effectDegradation": 0,
+        "priorityArbiter": 6,
+        "adaptiveActions": 0,
+        "pressureLadder": 0
+      }
+    },
+    {
+      "file": "src/shared/runtime/adaptive/productionAdaptiveCore.js",
+      "counts": {
+        "deviceProfile": 14,
+        "effectDegradation": 2,
+        "priorityArbiter": 2,
+        "adaptiveActions": 9,
+        "pressureLadder": 8
+      }
+    },
+    {
+      "file": "src/shared/runtime/budgets/routeProfiles.js",
+      "counts": {
+        "deviceProfile": 0,
+        "effectDegradation": 0,
+        "priorityArbiter": 0,
+        "adaptiveActions": 0,
+        "pressureLadder": 0
+      }
+    }
+  ]
+}

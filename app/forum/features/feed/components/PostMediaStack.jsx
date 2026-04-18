@@ -215,6 +215,8 @@ export default function PostMediaStack({
 }) {
   const mediaKeyBase = String(postId || 'post')
   const stableEmbedKey = String(postId || mediaKeyBase || '').trim()
+  const ownerId = `post-media:${mediaKeyBase}`
+  const lifecycleState = 'shell'
   const [stableEmbeds, setStableEmbeds] = React.useState(() => {
     const cached = POST_MEDIA_EMBED_CACHE.get(stableEmbedKey) || {}
     const nextYt = uniqList(ytLines).length ? uniqList(ytLines) : uniqList(cached.yt || [])
@@ -258,11 +260,24 @@ export default function PostMediaStack({
       {videoLines.length > 0 && (
         <div className="postVideo" style={{ display: 'grid', gap: 8, marginTop: 8 }}>
           {videoLines.map((src, i) => (
-            <div key={`video:${mediaKeyBase}:${src}:${i}`} className="videoCard mediaBox" data-kind="video" style={{ margin: 0 }}>
+            <div
+              key={`video:${mediaKeyBase}:${src}:${i}`}
+              className="videoCard mediaBox"
+              data-kind="video"
+              data-owner-id={ownerId}
+              data-forum-embed-kind="native-video"
+              data-lifecycle-state={lifecycleState}
+              data-stable-shell="1"
+              style={{ margin: 0 }}
+            >
               <VideoMediaComponent
                 key={`video-media:${mediaKeyBase}:${src}:${i}`}
                 data-forum-video="post"
                 data-forum-media="video"
+                data-owner-id={ownerId}
+                data-forum-embed-kind="native-video"
+                data-lifecycle-state={lifecycleState}
+                data-stable-shell="1"
                 src={src}
 
                 loading="eager"
@@ -296,6 +311,10 @@ export default function PostMediaStack({
                 className="videoCard mediaBox"
                 data-kind="iframe"
                 data-subkind="youtube"
+                data-owner-id={ownerId}
+                data-forum-embed-kind="youtube"
+                data-lifecycle-state={lifecycleState}
+                data-stable-shell="1"
                 style={{ margin: 0 }}
               >
                 <iframe
@@ -304,6 +323,10 @@ export default function PostMediaStack({
                   id={`yt_${postId || 'post'}_${i}`}
                   data-yt-id={videoId}
                   data-forum-media="youtube"
+                  data-owner-id={ownerId}
+                  data-forum-embed-kind="youtube"
+                  data-lifecycle-state={lifecycleState}
+                  data-stable-shell="1"
                   loading="eager"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -376,11 +399,24 @@ export default function PostMediaStack({
             }
 
             return (
-              <div key={`tt:${mediaKeyBase}:${videoId}:${i}`} className="videoCard mediaBox" data-kind="iframe" style={{ margin: 0 }}>
+              <div
+                key={`tt:${mediaKeyBase}:${videoId}:${i}`}
+                className="videoCard mediaBox"
+                data-kind="iframe"
+                data-owner-id={ownerId}
+                data-forum-embed-kind="tiktok"
+                data-lifecycle-state={lifecycleState}
+                data-stable-shell="1"
+                style={{ margin: 0 }}
+              >
                 <iframe
                   title="TikTok video"
                   data-forum-media="tiktok"
                   data-src={`https://www.tiktok.com/embed/v2/${videoId}`}
+                  data-owner-id={ownerId}
+                  data-forum-embed-kind="tiktok"
+                  data-lifecycle-state={lifecycleState}
+                  data-stable-shell="1"
                   loading="eager"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -397,8 +433,22 @@ export default function PostMediaStack({
       {audioLines.length > 0 && (
         <div className="postAudio" style={{ display: 'grid', gap: 8, marginTop: 8 }}>
           {audioLines.map((src, i) => (
-            <div key={`audio:${mediaKeyBase}:${src}:${i}`} className="audioCard mediaBox" data-kind="qcast">
-              <QCastPlayerComponent src={src} />
+            <div
+              key={`audio:${mediaKeyBase}:${src}:${i}`}
+              className="audioCard mediaBox"
+              data-kind="qcast"
+              data-owner-id={ownerId}
+              data-forum-embed-kind="qcast"
+              data-lifecycle-state={lifecycleState}
+              data-stable-shell="1"
+            >
+              <QCastPlayerComponent
+                src={src}
+                data-owner-id={ownerId}
+                data-forum-embed-kind="qcast"
+                data-lifecycle-state={lifecycleState}
+                data-stable-shell="1"
+              />
             </div>
           ))}
         </div>

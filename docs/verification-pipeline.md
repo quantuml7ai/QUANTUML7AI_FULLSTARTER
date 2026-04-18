@@ -29,17 +29,36 @@ The pipeline is intentionally non-interactive, CI-friendly, deterministic, and s
 
 1. `pnpm run verify:env`
 2. `pnpm run verify:docs`
-3. `pnpm run verify:audits`
+3. `pnpm run verify:audits:fast`
 4. `pnpm run lint`
 5. `pnpm run typecheck`
 6. `pnpm run test:contracts`
 7. `pnpm run test:unit`
 8. `pnpm run test:component`
-9. `pnpm run test:integration`
-10. `pnpm run test:smoke`
-11. `pnpm run build`
+9. `pnpm run verify:forum:runtime` when changed files hit runtime-critical zones
+10. `pnpm run verify:auth:fanout` when changed files hit runtime-critical zones
+11. `pnpm run verify:route:budgets` when changed files hit runtime-critical zones
+12. `pnpm run verify:startup:budgets` when changed files hit runtime-critical zones
+13. `pnpm run verify:ads:runtime` when changed files hit runtime-critical zones
+14. `pnpm run test:integration`
+15. `pnpm run test:smoke`
+16. `pnpm run build`
 
 If any stage fails, the pipeline stops immediately and returns a non-zero exit code.
+
+Optional deep release-grade verification is available through:
+
+```bash
+pnpm test:codex --deep
+```
+
+This enables the L2 deep diagnostic gate:
+
+- `pnpm run verify:audits:deep`
+- `pnpm run verify:media:har`
+- `pnpm run verify:media:heap`
+- `pnpm run verify:mobile:matrix`
+- `pnpm run verify:exchange:widgets`
 
 ## Internal Scripts
 
@@ -49,6 +68,15 @@ If any stage fails, the pipeline stops immediately and returns a non-zero exit c
   Ensures the verification workflow is documented in `README.md`, `AGENTS.md`, and this file.
 - `pnpm run verify:audits`
   Runs repo-wide static audit scripts and verifies that their reports are regenerated successfully.
+- `pnpm run verify:audits:fast`
+  Runs the L0 stage 0 audit contour: runtime hotspots, effects, auth bus, provider baseline, route budgets, player ownership, runtime passports, prod-lite discipline, diagnostics boundaries, and adaptive core.
+  The fast contour also emits `runtime-mode-resolution.report.json`, `adaptive-actions.report.json`, `pressure-ladder.report.json`, and `mode-contract.validation.report.json`.
+- `pnpm run verify:audits:deep`
+  Runs the full stage 0 audit pack including forum/media heavy audits, route teardown, console noise, layout stability, preload waste, auth cascade, same-src churn, feature flag safety, and forensic bounds.
+- `pnpm run verify:media:har`
+  Ingests a supplied HAR capture and emits `forum-media-har.report.json` with same-src windows, repeat-window tags, and fail signals.
+- `pnpm run verify:media:heap`
+  Ingests a supplied heap snapshot and emits `heapsnapshot-analysis.report.json` plus `media-heap.verify.report.json` with grouped runtime signals and heap discipline ratios.
 - `pnpm run test:contracts`
   Runs broad source-surface contract checks for API routes, app entry files, and forum hook modules.
 - `pnpm run lint`
@@ -67,6 +95,60 @@ If any stage fails, the pipeline stops immediately and returns a non-zero exit c
   Optional coverage run for deeper inspection.
 - `pnpm run test:quick`
   Reduced local loop for fast iteration. Useful during development, but not a substitute for `pnpm test:codex`.
+
+## Stage 0 Runtime Governance Layers
+
+Stage 0 formalizes three verification layers:
+
+1. `L0 Fast Gate`
+   `lint`, `typecheck`, contracts, unit/component tests, and `verify:audits:fast`
+2. `L1 Runtime-Critical Gate`
+   `verify:forum:runtime`, `verify:auth:fanout`, `verify:route:budgets`, `verify:startup:budgets`, `verify:ads:runtime`
+3. `L2 Deep Diagnostic Gate`
+   `verify:audits:deep`, `verify:media:har`, `verify:media:heap`, `verify:mobile:matrix`, `verify:exchange:widgets`
+
+The final stage 0 gate protocol is represented by eight required outputs:
+
+1. static fast
+2. diagnostics integrity
+3. mode integrity
+4. production-lite integrity
+5. baseline diff integrity
+6. mobile matrix
+7. route return
+8. release note
+
+Stage 0 also adds scenario telemetry entrypoints:
+
+- `verify:scenario:forum-mobile`
+- `verify:scenario:forum-desktop`
+- `verify:scenario:forum-route-return`
+- `verify:scenario:auth-cascade`
+- `verify:scenario:startup-shell`
+- `verify:scenario:exchange-route`
+- `verify:scenario:decorative-media`
+- `verify:scenario:forum-long-scroll`
+- `verify:scenario:forum-background-restore`
+- `verify:scenario:forum-wallet-untouched`
+- `verify:scenario:qcast-mixed`
+- `verify:scenario:provider-baseline`
+- `verify:scenario:route-teardown`
+- `verify:scenario:preload-waste`
+- `verify:scenario:console-noise`
+- `verify:scenario:adaptive-pressure`
+- `verify:scenario:forensic-mode`
+
+Baseline comparison is done via:
+
+```bash
+pnpm run verify:diff:last-baseline
+```
+
+This consumes:
+
+- `baseline-before.stage0.json`
+- `baseline-after.stage0.json`
+- `diff.stage0.json`
 
 ## Test Layout Standard
 
@@ -120,6 +202,31 @@ Secondary flags only matter when the master switch is enabled:
 ```bash
 NEXT_PUBLIC_FORUM_DIAG=0
 NEXT_PUBLIC_FORUM_PERF_TRACE=0
+```
+
+## Runtime Mode Env Contract
+
+Stage 0 now requires one shared mode resolver instead of ad-hoc runtime detection.
+
+Server-side contract:
+
+```bash
+APP_RUNTIME_MODE=production-adaptive
+APP_DIAGNOSTICS_MODE=off
+APP_FORENSIC_MODE=off
+APP_TELEMETRY_LEVEL=T0
+APP_ADAPTIVE_CORE_MODE=enforced
+```
+
+Client-safe mirror:
+
+```bash
+NEXT_PUBLIC_RUNTIME_MODE=production-adaptive
+NEXT_PUBLIC_DIAGNOSTICS_MODE=off
+NEXT_PUBLIC_ADAPTIVE_CORE=enforced
+NEXT_PUBLIC_FORENSIC_ALLOWED=0
+NEXT_PUBLIC_ROUTE_BUDGET_DEBUG=0
+NEXT_PUBLIC_CONSOLE_NOISE_CLASSIFIER=1
 ```
 
 ## Mandatory Usage Rule

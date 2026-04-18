@@ -13,8 +13,9 @@ export const MEDIA_MUTED_EVENT = 'forum:media-mute'
   // чтобы iPhone/Safari не блокировал autoplay из-за старого unmuted-состояния.
   try {
     if (typeof window === 'undefined') return
-    localStorage.setItem(MEDIA_MUTED_KEY, '1')
-    localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, '1')
+    const defaultMutedPref = String(1)
+    if (localStorage.getItem(MEDIA_MUTED_KEY) == null) localStorage.setItem(MEDIA_MUTED_KEY, defaultMutedPref)
+    if (localStorage.getItem(MEDIA_VIDEO_MUTED_KEY) == null) localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, defaultMutedPref)
   } catch {}
 })()
 
@@ -148,7 +149,7 @@ export function __enforceActiveVideoCap(exceptEl) {
 export function __readMediaMutedPref() {
   const v = readMutedPrefFromStorage()
   if (typeof v === 'boolean') return v
-  return null
+  return true
 }
 
 export function __writeMediaMutedPref(nextMuted) {
@@ -159,9 +160,19 @@ export function __writeMediaMutedPref(nextMuted) {
   } catch {}
 }
 
+export function __markMediaLifecycleTouch(el, reason = 'runtime_touch') {
+  if (!el?.dataset) return 0
+  const nowTs = Date.now()
+  try {
+    el.dataset.__lastLifecycleTouchTs = String(nowTs)
+    el.dataset.__lastLifecycleTouchReason = String(reason || 'runtime_touch')
+  } catch {}
+  return nowTs
+}
+
 export function __unloadVideoEl(el) {
   if (!el) return
-  const nowTs = Date.now()
+  const nowTs = __markMediaLifecycleTouch(el, 'unload')
   const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
   try {
     if (isPostFeedVideo) { 
@@ -205,12 +216,12 @@ const canHardUnload = (() => {
   }
 })()
 
-const shouldForceSoftResident =
+const shouldKeepResidentPostVideo =
   isPostFeedVideo &&
   __SOFT_RESIDENT_POST_VIDEO &&
   !hardUnloadRequested
 
-if (!canHardUnload || shouldForceSoftResident) {
+if (!canHardUnload || shouldKeepResidentPostVideo) {
   try {
     el.dataset.__resident = isPostFeedVideo ? '1' : '0'
     el.dataset.__prewarm = isPostFeedVideo ? '1' : '0'
@@ -249,7 +260,7 @@ try {
 
 export function __restoreVideoEl(el) {
   if (!el) return
-  const nowTs = Date.now()
+  const nowTs = __markMediaLifecycleTouch(el, 'restore')
   const src = el.dataset.__src || el.getAttribute('data-src') || ''
   const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
   if (!src) return
@@ -372,7 +383,8 @@ try {
       String(el.dataset?.__resident || '') === '1'
     )
 
-  if ((shouldKickPostRestore || !isPostFeedVideo) && !isLoading && canRestoreLoad()) {
+  if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()
+  if (shouldKickPostRestore && !isLoading && canRestoreLoad()) {
     el.load?.()
   }
 } catch {}

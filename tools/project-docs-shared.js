@@ -3,7 +3,7 @@ const path = require('path')
 
 const repoRoot = process.cwd()
 const ignoredTopDirs = ['.git', '.next', 'node_modules']
-const sourceExts = new Set(['.js', '.jsx', '.mjs', '.cjs', '.json'])
+const sourceExts = new Set(['.js', '.jsx', '.mjs', '.cjs', '.json', '.ts', '.tsx'])
 
 function sortNatural(list) {
   return list.sort((a, b) => a.localeCompare(b, 'ru', { sensitivity: 'base', numeric: true }))
@@ -70,7 +70,7 @@ function resolveLocalImport(fromFile, specifier, fileSet) {
     base = path.posix.normalize(path.posix.join(fromDir, specifier))
   } else if (specifier.startsWith('@/')) {
     base = path.posix.normalize(specifier.slice(2))
-  } else if (/^(app|components|lib|tools|public)\//.test(specifier)) {
+  } else if (/^(app|components|lib|tools|public|src|config)\//.test(specifier)) {
     base = path.posix.normalize(specifier)
   } else {
     return null
@@ -182,6 +182,8 @@ function categorizeFile(filePath) {
   if (top === 'components') return 'components'
   if (top === 'lib') return parts[1] ? `lib/${parts[1]}` : 'lib'
   if (top === 'public') return parts[1] ? `public/${parts[1]}` : 'public'
+  if (top === 'src') return parts[1] ? `src/${parts[1]}` : 'src'
+  if (top === 'config') return 'config'
   if (top === 'tools') return 'tools'
   if (top === 'audit') return 'audit'
   return 'root'

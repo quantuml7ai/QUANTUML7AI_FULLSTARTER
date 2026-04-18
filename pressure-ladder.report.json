@@ -1,0 +1,50 @@
+{
+  "generatedAt": "2026-04-18T03:02:14.893Z",
+  "ladder": {
+    "nominal": 0,
+    "elevated": 40,
+    "constrained": 70,
+    "survival": 90
+  },
+  "actionsByTier": [
+    {
+      "id": "nominal-forum",
+      "pressureTier": "nominal",
+      "effectTier": 0,
+      "actions": []
+    },
+    {
+      "id": "memory-pressure-forum",
+      "pressureTier": "constrained",
+      "effectTier": 2,
+      "actions": [
+        "degrade-effects",
+        "suppress-decorative-runtime",
+        "aggressive-offscreen-demotion"
+      ]
+    },
+    {
+      "id": "main-thread-pressure-forum",
+      "pressureTier": "survival",
+      "effectTier": 4,
+      "actions": [
+        "degrade-effects",
+        "suppress-decorative-runtime",
+        "main-thread-survival-mode",
+        "survival-profile-enforced"
+      ]
+    },
+    {
+      "id": "background-exchange",
+      "pressureTier": "constrained",
+      "effectTier": 4,
+      "actions": [
+        "degrade-effects",
+        "suppress-decorative-runtime",
+        "main-thread-survival-mode",
+        "background-throttle",
+        "adaptive-route-downgrade"
+      ]
+    }
+  ]
+}

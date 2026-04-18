@@ -1,0 +1,149 @@
+{
+  "generatedAt": "2026-04-18T03:02:43.077Z",
+  "repeatedMagic401Baseline": 1,
+  "report": [
+    {
+      "file": "app/layout.js",
+      "counts": {
+        "authOk": 1,
+        "authSuccess": 1,
+        "authLogout": 1,
+        "openAuth": 1,
+        "magic401": 1,
+        "wallet": 0,
+        "postAuthEffects": 0
+      },
+      "fanoutScore": 5
+    },
+    {
+      "file": "app/providers.jsx",
+      "counts": {
+        "authOk": 0,
+        "authSuccess": 0,
+        "authLogout": 0,
+        "openAuth": 0,
+        "magic401": 0,
+        "wallet": 9,
+        "postAuthEffects": 2
+      },
+      "fanoutScore": 2
+    },
+    {
+      "file": "components/AuthNavClient.jsx",
+      "counts": {
+        "authOk": 5,
+        "authSuccess": 0,
+        "authLogout": 3,
+        "openAuth": 3,
+        "magic401": 0,
+        "wallet": 2,
+        "postAuthEffects": 14
+      },
+      "fanoutScore": 28
+    },
+    {
+      "file": "components/TopBar.js",
+      "counts": {
+        "authOk": 0,
+        "authSuccess": 0,
+        "authLogout": 1,
+        "openAuth": 0,
+        "magic401": 0,
+        "wallet": 0,
+        "postAuthEffects": 0
+      },
+      "fanoutScore": 1
+    },
+    {
+      "file": "app/forum/features/ui/hooks/useForumSessionShell.js",
+      "counts": {
+        "authOk": 2,
+        "authSuccess": 0,
+        "authLogout": 2,
+        "openAuth": 0,
+        "magic401": 0,
+        "wallet": 0,
+        "postAuthEffects": 5
+      },
+      "fanoutScore": 9
+    },
+    {
+      "file": "app/forum/features/profile/hooks/useForumProfileSync.js",
+      "counts": {
+        "authOk": 2,
+        "authSuccess": 0,
+        "authLogout": 0,
+        "openAuth": 0,
+        "magic401": 0,
+        "wallet": 0,
+        "postAuthEffects": 4
+      },
+      "fanoutScore": 6
+    },
+    {
+      "file": "components/InviteFriendProvider.jsx",
+      "counts": {
+        "authOk": 2,
+        "authSuccess": 2,
+        "authLogout": 0,
+        "openAuth": 0,
+        "magic401": 0,
+        "wallet": 0,
+        "postAuthEffects": 7
+      },
+      "fanoutScore": 11
+    },
+    {
+      "file": "components/QCoinDropFX.jsx",
+      "counts": {
+        "authOk": 2,
+        "authSuccess": 2,
+        "authLogout": 0,
+        "openAuth": 0,
+        "magic401": 0,
+        "wallet": 0,
+        "postAuthEffects": 9
+      },
+      "fanoutScore": 13
+    },
+    {
+      "file": "app/exchange/BattleCoin.jsx",
+      "counts": {
+        "authOk": 4,
+        "authSuccess": 0,
+        "authLogout": 4,
+        "openAuth": 1,
+        "magic401": 0,
+        "wallet": 0,
+        "postAuthEffects": 11
+      },
+      "fanoutScore": 21
+    },
+    {
+      "file": "app/subscribe/subscribe.client.jsx",
+      "counts": {
+        "authOk": 3,
+        "authSuccess": 1,
+        "authLogout": 0,
+        "openAuth": 2,
+        "magic401": 0,
+        "wallet": 0,
+        "postAuthEffects": 5
+      },
+      "fanoutScore": 13
+    },
+    {
+      "file": "app/forum/shared/utils/openAuth.js",
+      "counts": {
+        "authOk": 2,
+        "authSuccess": 2,
+        "authLogout": 0,
+        "openAuth": 1,
+        "magic401": 0,
+        "wallet": 0,
+        "postAuthEffects": 0
+      },
+      "fanoutScore": 6
+    }
+  ]
+}

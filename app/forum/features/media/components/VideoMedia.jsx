@@ -991,7 +991,7 @@ const nextMuted = typeof initial === 'boolean' ? initial : fallbackMuted
       }
       // Для пост-видео восстановление делает единый coordinator.
       // Локальный remove(src)+load() здесь создаёт лишние 206/cancel-циклы.
-      if (String(dataForumVideo || '') === 'post') {
+      if (String(dataForumVideo || '') === 'post' || coordinatorOwnsLifecycle) {
         try {
           onErrorProp?.(e)
         } catch {}
@@ -1030,7 +1030,7 @@ const nextMuted = typeof initial === 'boolean' ? initial : fallbackMuted
         onErrorProp?.(e)
       } catch {}
     },
-    [dataForumVideo, onErrorProp],
+    [coordinatorOwnsLifecycle, dataForumVideo, onErrorProp],
   )
 
 const onVideoLoaded = React.useCallback(() => {

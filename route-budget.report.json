@@ -1,0 +1,936 @@
+{
+  "generatedAt": "2026-04-18T03:02:44.894Z",
+  "profiles": {
+    "forum-feed-mobile": {
+      "description": "Strict mobile forum feed profile with one-owner media discipline and single iframe allowance.",
+      "maxIframeCount": 1,
+      "maxIframePlayers": 1,
+      "maxNativeContentVideoCount": 1,
+      "maxNativeContentPlayers": 1,
+      "allowedAdMediaConcurrency": 1,
+      "allowedAdPlayers": 1,
+      "maxDecorativePlayers": 0,
+      "decorativeMediaPermission": "blocked",
+      "allowWarmNative": false,
+      "allowWarmIframe": false,
+      "allowWalletRuntimeBeforeIntent": false,
+      "allowRouteWidgets": false,
+      "allowPolling": false,
+      "walletAuthAllowance": "auth-bridge-only",
+      "routeWidgetAllowance": "minimal",
+      "startupSplashAllowance": "handoff-only",
+      "startupSplashAllowed": true,
+      "backgroundRestorePolicy": "policy-restore-only",
+      "offscreenLifecyclePolicy": "cooldown-then-destroy",
+      "offscreenPolicy": "cooldown-then-destroy",
+      "restorePolicy": "single-owner-policy-restore",
+      "teardownPolicy": "destroy-route-owned-heavy-runtime",
+      "routeLeavePolicy": "destroy-route-owned-heavy-runtime",
+      "externalOpenPolicy": "route-local-only",
+      "teardownDeadlineMs": 2200,
+      "budget": {
+        "ceiling": 4,
+        "softCap": 3,
+        "hardCap": 4,
+        "ownerArbitrationPriority": [
+          "content",
+          "ad",
+          "qcast",
+          "startup",
+          "decorative"
+        ],
+        "promotionRules": [
+          "shell-first-only",
+          "single-iframe-active",
+          "intent-or-near-required",
+          "no-warm-iframe-by-default"
+        ],
+        "demotionRules": [
+          "offscreen-demote-fast",
+          "ad-loses-to-content-in-focus",
+          "mobile-offscreen-destroy"
+        ],
+        "blockReasons": [
+          "iframe-cap-reached",
+          "shared-budget-overlap",
+          "mobile-offscreen-policy",
+          "wallet-before-intent"
+        ],
+        "hardDestroyRules": [
+          "route-leave",
+          "offscreen-timeout",
+          "owner-replaced"
+        ]
+      }
+    },
+    "forum-feed-desktop": {
+      "description": "Desktop forum feed profile with limited warm concurrency and shared owner arbitration.",
+      "maxIframeCount": 2,
+      "maxIframePlayers": 2,
+      "maxNativeContentVideoCount": 2,
+      "maxNativeContentPlayers": 2,
+      "allowedAdMediaConcurrency": 1,
+      "allowedAdPlayers": 1,
+      "maxDecorativePlayers": 0,
+      "decorativeMediaPermission": "blocked",
+      "allowWarmNative": true,
+      "allowWarmIframe": true,
+      "allowWalletRuntimeBeforeIntent": false,
+      "allowRouteWidgets": false,
+      "allowPolling": false,
+      "walletAuthAllowance": "auth-bridge-only",
+      "routeWidgetAllowance": "minimal",
+      "startupSplashAllowance": "handoff-only",
+      "startupSplashAllowed": true,
+      "backgroundRestorePolicy": "policy-restore",
+      "offscreenLifecyclePolicy": "cooldown-before-destroy",
+      "offscreenPolicy": "cooldown-before-destroy",
+      "restorePolicy": "policy-restore",
+      "teardownPolicy": "destroy-route-owned-heavy-runtime",
+      "routeLeavePolicy": "destroy-route-owned-heavy-runtime",
+      "externalOpenPolicy": "route-local-only",
+      "teardownDeadlineMs": 2600,
+      "budget": {
+        "ceiling": 6,
+        "softCap": 4,
+        "hardCap": 6,
+        "ownerArbitrationPriority": [
+          "content",
+          "ad",
+          "qcast",
+          "startup",
+          "decorative"
+        ],
+        "promotionRules": [
+          "shell-first-only",
+          "near-or-active-required",
+          "desktop-warm-cap"
+        ],
+        "demotionRules": [
+          "offscreen-demote",
+          "owner-replaced"
+        ],
+        "blockReasons": [
+          "iframe-cap-reached",
+          "shared-budget-overlap"
+        ],
+        "hardDestroyRules": [
+          "route-leave",
+          "owner-replaced"
+        ]
+      }
+    },
+    "forum-thread": {
+      "description": "Thread-focused forum profile with tight content ownership and no ad concurrency.",
+      "maxIframeCount": 1,
+      "maxIframePlayers": 1,
+      "maxNativeContentVideoCount": 1,
+      "maxNativeContentPlayers": 1,
+      "allowedAdMediaConcurrency": 0,
+      "allowedAdPlayers": 0,
+      "maxDecorativePlayers": 0,
+      "decorativeMediaPermission": "blocked",
+      "allowWarmNative": false,
+      "allowWarmIframe": false,
+      "allowWalletRuntimeBeforeIntent": false,
+      "allowRouteWidgets": false,
+      "allowPolling": false,
+      "walletAuthAllowance": "auth-bridge-only",
+      "routeWidgetAllowance": "minimal",
+      "startupSplashAllowance": "none",
+      "startupSplashAllowed": false,
+      "backgroundRestorePolicy": "cold-or-policy-restore",
+      "offscreenLifecyclePolicy": "destroy-fast",
+      "offscreenPolicy": "destroy-fast",
+      "restorePolicy": "cold-or-policy-restore",
+      "teardownPolicy": "destroy-on-thread-exit",
+      "routeLeavePolicy": "destroy-on-thread-exit",
+      "externalOpenPolicy": "route-local-only",
+      "teardownDeadlineMs": 1600,
+      "budget": {
+        "ceiling": 3,
+        "softCap": 2,
+        "hardCap": 3,
+        "ownerArbitrationPriority": [
+          "content",
+          "qcast",
+          "startup"
+        ],
+        "promotionRules": [
+          "shell-first-only",
+          "single-owner-only",
+          "active-center-priority"
+        ],
+        "demotionRules": [
+          "offscreen-destroy",
+          "thread-close-destroy"
+        ],
+        "blockReasons": [
+          "thread-inline-overlap"
+        ],
+        "hardDestroyRules": [
+          "thread-close",
+          "route-leave"
+        ]
+      }
+    },
+    "landing-decorative": {
+      "description": "Decorative landing profile with degraded mobile autoplay and no content-grade runtime.",
+      "maxIframeCount": 0,
+      "maxIframePlayers": 0,
+      "maxNativeContentVideoCount": 0,
+      "maxNativeContentPlayers": 0,
+      "allowedAdMediaConcurrency": 0,
+      "allowedAdPlayers": 0,
+      "maxDecorativePlayers": 1,
+      "decorativeMediaPermission": "degraded-mobile",
+      "allowWarmNative": false,
+      "allowWarmIframe": false,
+      "allowWalletRuntimeBeforeIntent": false,
+      "allowRouteWidgets": false,
+      "allowPolling": false,
+      "walletAuthAllowance": "none",
+      "routeWidgetAllowance": "minimal",
+      "startupSplashAllowance": "none",
+      "startupSplashAllowed": false,
+      "backgroundRestorePolicy": "cold-only",
+      "offscreenLifecyclePolicy": "destroy",
+      "offscreenPolicy": "destroy",
+      "restorePolicy": "cold-only",
+      "teardownPolicy": "destroy-route-owned-heavy-runtime",
+      "routeLeavePolicy": "destroy-route-owned-heavy-runtime",
+      "externalOpenPolicy": "allow-safe-links-only",
+      "teardownDeadlineMs": 1200,
+      "budget": {
+        "ceiling": 2,
+        "softCap": 1,
+        "hardCap": 2,
+        "ownerArbitrationPriority": [
+          "decorative"
+        ],
+        "promotionRules": [
+          "mobile-degrade-first"
+        ],
+        "demotionRules": [
+          "background-destroy"
+        ],
+        "blockReasons": [
+          "content-grade-runtime-forbidden"
+        ],
+        "hardDestroyRules": [
+          "route-leave",
+          "background"
+        ]
+      }
+    },
+    "widget-heavy": {
+      "description": "Generic widget-heavy route profile with route-local widgets and strict cleanup.",
+      "maxIframeCount": 2,
+      "maxIframePlayers": 2,
+      "maxNativeContentVideoCount": 0,
+      "maxNativeContentPlayers": 0,
+      "allowedAdMediaConcurrency": 0,
+      "allowedAdPlayers": 0,
+      "maxDecorativePlayers": 0,
+      "decorativeMediaPermission": "blocked",
+      "allowWarmNative": false,
+      "allowWarmIframe": false,
+      "allowWalletRuntimeBeforeIntent": false,
+      "allowRouteWidgets": true,
+      "allowPolling": true,
+      "walletAuthAllowance": "intent-only",
+      "routeWidgetAllowance": "route-local-only",
+      "startupSplashAllowance": "none",
+      "startupSplashAllowed": false,
+      "backgroundRestorePolicy": "cold-or-widget-specific",
+      "offscreenLifecyclePolicy": "pause-then-destroy",
+      "offscreenPolicy": "pause-then-destroy",
+      "restorePolicy": "cold-or-widget-specific",
+      "teardownPolicy": "strict-route-cleanup",
+      "routeLeavePolicy": "strict-route-cleanup",
+      "externalOpenPolicy": "route-local-only",
+      "teardownDeadlineMs": 2400,
+      "budget": {
+        "ceiling": 5,
+        "softCap": 4,
+        "hardCap": 5,
+        "ownerArbitrationPriority": [
+          "widget",
+          "content",
+          "auth"
+        ],
+        "promotionRules": [
+          "route-local-only",
+          "polling-owner-required"
+        ],
+        "demotionRules": [
+          "background-pause",
+          "route-leave-destroy"
+        ],
+        "blockReasons": [
+          "widget-bleed",
+          "polling-tail",
+          "external-script-noise"
+        ],
+        "hardDestroyRules": [
+          "route-leave",
+          "background-timeout"
+        ]
+      }
+    },
+    "editor-preview": {
+      "description": "Preview route profile with limited content runtime and no heavy widget bleed.",
+      "maxIframeCount": 0,
+      "maxIframePlayers": 0,
+      "maxNativeContentVideoCount": 1,
+      "maxNativeContentPlayers": 1,
+      "allowedAdMediaConcurrency": 0,
+      "allowedAdPlayers": 0,
+      "maxDecorativePlayers": 1,
+      "decorativeMediaPermission": "minimal",
+      "allowWarmNative": false,
+      "allowWarmIframe": false,
+      "allowWalletRuntimeBeforeIntent": false,
+      "allowRouteWidgets": false,
+      "allowPolling": false,
+      "walletAuthAllowance": "none",
+      "routeWidgetAllowance": "minimal",
+      "startupSplashAllowance": "none",
+      "startupSplashAllowed": false,
+      "backgroundRestorePolicy": "cold-or-shell-restore",
+      "offscreenLifecyclePolicy": "pause-then-destroy",
+      "offscreenPolicy": "pause-then-destroy",
+      "restorePolicy": "cold-or-shell-restore",
+      "teardownPolicy": "destroy-on-preview-exit",
+      "routeLeavePolicy": "destroy-on-preview-exit",
+      "externalOpenPolicy": "safe-link-only",
+      "teardownDeadlineMs": 1800,
+      "budget": {
+        "ceiling": 3,
+        "softCap": 2,
+        "hardCap": 3,
+        "ownerArbitrationPriority": [
+          "content",
+          "decorative"
+        ],
+        "promotionRules": [
+          "preview-intent-only"
+        ],
+        "demotionRules": [
+          "offscreen-pause"
+        ],
+        "blockReasons": [
+          "editor-preview-overlap"
+        ],
+        "hardDestroyRules": [
+          "route-leave"
+        ]
+      }
+    },
+    "auth-light": {
+      "description": "Thin auth-bridge profile with no eager wallet runtime.",
+      "maxIframeCount": 0,
+      "maxIframePlayers": 0,
+      "maxNativeContentVideoCount": 0,
+      "maxNativeContentPlayers": 0,
+      "allowedAdMediaConcurrency": 0,
+      "allowedAdPlayers": 0,
+      "maxDecorativePlayers": 0,
+      "decorativeMediaPermission": "minimal",
+      "allowWarmNative": false,
+      "allowWarmIframe": false,
+      "allowWalletRuntimeBeforeIntent": false,
+      "allowRouteWidgets": false,
+      "allowPolling": false,
+      "walletAuthAllowance": "thin-auth-bridge",
+      "routeWidgetAllowance": "none",
+      "startupSplashAllowance": "none",
+      "startupSplashAllowed": false,
+      "backgroundRestorePolicy": "cold-only",
+      "offscreenLifecyclePolicy": "destroy",
+      "offscreenPolicy": "destroy",
+      "restorePolicy": "cold-only",
+      "teardownPolicy": "clear-auth-side-effects",
+      "routeLeavePolicy": "clear-auth-side-effects",
+      "externalOpenPolicy": "safe-link-only",
+      "teardownDeadlineMs": 1200,
+      "budget": {
+        "ceiling": 2,
+        "softCap": 1,
+        "hardCap": 2,
+        "ownerArbitrationPriority": [
+          "auth",
+          "content"
+        ],
+        "promotionRules": [
+          "intent-only-wallet",
+          "auth-dedup-required"
+        ],
+        "demotionRules": [
+          "prompt-close-destroy"
+        ],
+        "blockReasons": [
+          "auth-fanout",
+          "wallet-baseline-leak"
+        ],
+        "hardDestroyRules": [
+          "prompt-close",
+          "route-leave"
+        ]
+      }
+    },
+    "wallet-ready": {
+      "description": "Wallet-capable profile with explicit user-intent ownership.",
+      "maxIframeCount": 0,
+      "maxIframePlayers": 0,
+      "maxNativeContentVideoCount": 1,
+      "maxNativeContentPlayers": 1,
+      "allowedAdMediaConcurrency": 0,
+      "allowedAdPlayers": 0,
+      "maxDecorativePlayers": 1,
+      "decorativeMediaPermission": "minimal",
+      "allowWarmNative": false,
+      "allowWarmIframe": false,
+      "allowWalletRuntimeBeforeIntent": false,
+      "allowRouteWidgets": false,
+      "allowPolling": false,
+      "walletAuthAllowance": "intent-only-wallet-runtime",
+      "routeWidgetAllowance": "minimal",
+      "startupSplashAllowance": "none",
+      "startupSplashAllowed": false,
+      "backgroundRestorePolicy": "cold-or-intent-restore",
+      "offscreenLifecyclePolicy": "pause-then-destroy",
+      "offscreenPolicy": "pause-then-destroy",
+      "restorePolicy": "cold-or-intent-restore",
+      "teardownPolicy": "destroy-wallet-runtime-after-route-leave",
+      "routeLeavePolicy": "destroy-wallet-runtime-after-route-leave",
+      "externalOpenPolicy": "safe-link-only",
+      "teardownDeadlineMs": 1800,
+      "budget": {
+        "ceiling": 3,
+        "softCap": 2,
+        "hardCap": 3,
+        "ownerArbitrationPriority": [
+          "wallet",
+          "content",
+          "auth"
+        ],
+        "promotionRules": [
+          "user-intent-required",
+          "wallet-after-auth-bridge"
+        ],
+        "demotionRules": [
+          "modal-close-demote"
+        ],
+        "blockReasons": [
+          "wallet-before-intent",
+          "provider-overlap"
+        ],
+        "hardDestroyRules": [
+          "route-leave",
+          "modal-close-timeout"
+        ]
+      }
+    },
+    "exchange-heavy": {
+      "description": "Exchange route profile for TradingView/Binance/widget-heavy pages with route-local isolation.",
+      "maxIframeCount": 2,
+      "maxIframePlayers": 2,
+      "maxNativeContentVideoCount": 0,
+      "maxNativeContentPlayers": 0,
+      "allowedAdMediaConcurrency": 0,
+      "allowedAdPlayers": 0,
+      "maxDecorativePlayers": 0,
+      "decorativeMediaPermission": "blocked",
+      "allowWarmNative": false,
+      "allowWarmIframe": false,
+      "allowWalletRuntimeBeforeIntent": false,
+      "allowRouteWidgets": true,
+      "allowPolling": true,
+      "walletAuthAllowance": "intent-only",
+      "routeWidgetAllowance": "route-local-only",
+      "startupSplashAllowance": "none",
+      "startupSplashAllowed": false,
+      "backgroundRestorePolicy": "route-local-recreate-only",
+      "offscreenLifecyclePolicy": "pause-then-destroy",
+      "offscreenPolicy": "pause-then-destroy",
+      "restorePolicy": "cold-or-widget-specific",
+      "teardownPolicy": "strict-route-cleanup",
+      "routeLeavePolicy": "strict-route-cleanup",
+      "externalOpenPolicy": "route-local-only",
+      "teardownDeadlineMs": 2400,
+      "budget": {
+        "ceiling": 6,
+        "softCap": 5,
+        "hardCap": 6,
+        "ownerArbitrationPriority": [
+          "widget",
+          "content",
+          "auth",
+          "wallet"
+        ],
+        "promotionRules": [
+          "route-local-only",
+          "polling-owner-required",
+          "teardown-proof-required"
+        ],
+        "demotionRules": [
+          "background-pause",
+          "route-leave-destroy"
+        ],
+        "blockReasons": [
+          "widget-bleed",
+          "polling-tail",
+          "external-script-noise"
+        ],
+        "hardDestroyRules": [
+          "route-leave",
+          "background-timeout"
+        ]
+      }
+    },
+    "about-decorative": {
+      "description": "Decorative about route profile with mobile degradation by default.",
+      "maxIframeCount": 0,
+      "maxIframePlayers": 0,
+      "maxNativeContentVideoCount": 0,
+      "maxNativeContentPlayers": 0,
+      "allowedAdMediaConcurrency": 0,
+      "allowedAdPlayers": 0,
+      "maxDecorativePlayers": 1,
+      "decorativeMediaPermission": "degraded-mobile",
+      "allowWarmNative": false,
+      "allowWarmIframe": false,
+      "allowWalletRuntimeBeforeIntent": false,
+      "allowRouteWidgets": false,
+      "allowPolling": false,
+      "walletAuthAllowance": "none",
+      "routeWidgetAllowance": "minimal",
+      "startupSplashAllowance": "none",
+      "startupSplashAllowed": false,
+      "backgroundRestorePolicy": "cold-only",
+      "offscreenLifecyclePolicy": "destroy",
+      "offscreenPolicy": "destroy",
+      "restorePolicy": "cold-only",
+      "teardownPolicy": "destroy-route-owned-heavy-runtime",
+      "routeLeavePolicy": "destroy-route-owned-heavy-runtime",
+      "externalOpenPolicy": "safe-link-only",
+      "teardownDeadlineMs": 1200,
+      "budget": {
+        "ceiling": 2,
+        "softCap": 1,
+        "hardCap": 2,
+        "ownerArbitrationPriority": [
+          "decorative"
+        ],
+        "promotionRules": [
+          "mobile-degrade-first"
+        ],
+        "demotionRules": [
+          "background-destroy"
+        ],
+        "blockReasons": [
+          "content-grade-runtime-forbidden"
+        ],
+        "hardDestroyRules": [
+          "route-leave",
+          "background"
+        ]
+      }
+    },
+    "ads-preview": {
+      "description": "Ads preview route profile with preview-only media and intent-only auth or wallet bridges.",
+      "maxIframeCount": 1,
+      "maxIframePlayers": 1,
+      "maxNativeContentVideoCount": 1,
+      "maxNativeContentPlayers": 1,
+      "allowedAdMediaConcurrency": 1,
+      "allowedAdPlayers": 1,
+      "maxDecorativePlayers": 1,
+      "decorativeMediaPermission": "minimal",
+      "allowWarmNative": false,
+      "allowWarmIframe": false,
+      "allowWalletRuntimeBeforeIntent": false,
+      "allowRouteWidgets": false,
+      "allowPolling": false,
+      "walletAuthAllowance": "intent-only-wallet-runtime",
+      "routeWidgetAllowance": "minimal",
+      "startupSplashAllowance": "none",
+      "startupSplashAllowed": false,
+      "backgroundRestorePolicy": "cold-or-preview-restore",
+      "offscreenLifecyclePolicy": "pause-then-destroy",
+      "offscreenPolicy": "pause-then-destroy",
+      "restorePolicy": "cold-or-preview-restore",
+      "teardownPolicy": "destroy-preview-runtime-on-leave",
+      "routeLeavePolicy": "destroy-preview-runtime-on-leave",
+      "externalOpenPolicy": "safe-link-only",
+      "teardownDeadlineMs": 1800,
+      "budget": {
+        "ceiling": 4,
+        "softCap": 3,
+        "hardCap": 4,
+        "ownerArbitrationPriority": [
+          "ad",
+          "wallet",
+          "auth",
+          "decorative"
+        ],
+        "promotionRules": [
+          "preview-only",
+          "intent-only-wallet"
+        ],
+        "demotionRules": [
+          "background-destroy",
+          "route-leave-destroy"
+        ],
+        "blockReasons": [
+          "wallet-before-intent",
+          "content-grade-runtime-forbidden"
+        ],
+        "hardDestroyRules": [
+          "route-leave",
+          "owner-replaced"
+        ]
+      }
+    },
+    "quest-cards": {
+      "description": "Quest cards profile with autoplay degradation and shared page budget.",
+      "maxIframeCount": 0,
+      "maxIframePlayers": 0,
+      "maxNativeContentVideoCount": 1,
+      "maxNativeContentPlayers": 1,
+      "allowedAdMediaConcurrency": 0,
+      "allowedAdPlayers": 0,
+      "maxDecorativePlayers": 1,
+      "decorativeMediaPermission": "degraded-mobile",
+      "allowWarmNative": false,
+      "allowWarmIframe": false,
+      "allowWalletRuntimeBeforeIntent": false,
+      "allowRouteWidgets": false,
+      "allowPolling": false,
+      "walletAuthAllowance": "auth-bridge-only",
+      "routeWidgetAllowance": "minimal",
+      "startupSplashAllowance": "none",
+      "startupSplashAllowed": false,
+      "backgroundRestorePolicy": "cold-or-shell-restore",
+      "offscreenLifecyclePolicy": "cooldown-then-destroy",
+      "offscreenPolicy": "cooldown-then-destroy",
+      "restorePolicy": "cold-or-shell-restore",
+      "teardownPolicy": "destroy-route-owned-heavy-runtime",
+      "routeLeavePolicy": "destroy-route-owned-heavy-runtime",
+      "externalOpenPolicy": "safe-link-only",
+      "teardownDeadlineMs": 1600,
+      "budget": {
+        "ceiling": 3,
+        "softCap": 2,
+        "hardCap": 3,
+        "ownerArbitrationPriority": [
+          "content",
+          "decorative"
+        ],
+        "promotionRules": [
+          "shell-first-only",
+          "degrade-on-mobile"
+        ],
+        "demotionRules": [
+          "offscreen-destroy"
+        ],
+        "blockReasons": [
+          "content-grade-runtime-forbidden"
+        ],
+        "hardDestroyRules": [
+          "route-leave"
+        ]
+      }
+    },
+    "qcast-mixed": {
+      "description": "Shared qcast and content profile with single mute source and overlap enforcement.",
+      "maxIframeCount": 1,
+      "maxIframePlayers": 1,
+      "maxNativeContentVideoCount": 1,
+      "maxNativeContentPlayers": 1,
+      "allowedAdMediaConcurrency": 0,
+      "allowedAdPlayers": 0,
+      "maxDecorativePlayers": 0,
+      "decorativeMediaPermission": "blocked",
+      "allowWarmNative": false,
+      "allowWarmIframe": false,
+      "allowWalletRuntimeBeforeIntent": false,
+      "allowRouteWidgets": false,
+      "allowPolling": false,
+      "walletAuthAllowance": "auth-bridge-only",
+      "routeWidgetAllowance": "minimal",
+      "startupSplashAllowance": "none",
+      "startupSplashAllowed": false,
+      "backgroundRestorePolicy": "policy-restore-only",
+      "offscreenLifecyclePolicy": "cooldown-then-destroy",
+      "offscreenPolicy": "cooldown-then-destroy",
+      "restorePolicy": "single-owner-policy-restore",
+      "teardownPolicy": "destroy-route-owned-heavy-runtime",
+      "routeLeavePolicy": "destroy-route-owned-heavy-runtime",
+      "externalOpenPolicy": "route-local-only",
+      "teardownDeadlineMs": 1800,
+      "budget": {
+        "ceiling": 3,
+        "softCap": 2,
+        "hardCap": 3,
+        "ownerArbitrationPriority": [
+          "content",
+          "qcast",
+          "startup"
+        ],
+        "promotionRules": [
+          "single-owner-only",
+          "shared-mute-source-only"
+        ],
+        "demotionRules": [
+          "offscreen-demote-fast"
+        ],
+        "blockReasons": [
+          "qcast-content-overlap",
+          "second-world-created"
+        ],
+        "hardDestroyRules": [
+          "route-leave",
+          "owner-replaced"
+        ]
+      }
+    }
+  },
+  "routeAssignments": [
+    {
+      "route": "/",
+      "type": "fixed",
+      "profile": "landing-decorative",
+      "files": [
+        "app/page.js",
+        "app/layout.js"
+      ],
+      "totals": {
+        "wallet": 0,
+        "analytics": 8,
+        "topBar": 3,
+        "forumShellGate": 12,
+        "widgets": 6,
+        "autoplay": 0,
+        "iframe": 1,
+        "video": 0
+      }
+    },
+    {
+      "route": "/forum",
+      "type": "device-class",
+      "profile": {
+        "coarse": "forum-feed-mobile",
+        "fine": "forum-feed-desktop"
+      },
+      "files": [
+        "app/forum/page.js",
+        "app/forum/layout.js",
+        "app/forum/ForumRoot.jsx",
+        "components/ForumBootSplash.jsx"
+      ],
+      "totals": {
+        "wallet": 0,
+        "analytics": 1,
+        "topBar": 0,
+        "forumShellGate": 0,
+        "widgets": 0,
+        "autoplay": 9,
+        "iframe": 0,
+        "video": 1
+      }
+    },
+    {
+      "route": "forum-thread-view",
+      "type": "virtual",
+      "profile": "forum-thread",
+      "files": [
+        "app/forum/ForumRoot.jsx",
+        "app/forum/features/feed/components/ThreadRepliesPane.jsx",
+        "app/forum/features/feed/components/PostMediaStack.jsx"
+      ],
+      "totals": {
+        "wallet": 0,
+        "analytics": 0,
+        "topBar": 0,
+        "forumShellGate": 0,
+        "widgets": 0,
+        "autoplay": 1,
+        "iframe": 2,
+        "video": 0
+      }
+    },
+    {
+      "route": "/about",
+      "type": "fixed",
+      "profile": "about-decorative",
+      "files": [
+        "app/about/page.js"
+      ],
+      "totals": {
+        "wallet": 0,
+        "analytics": 1,
+        "topBar": 0,
+        "forumShellGate": 0,
+        "widgets": 0,
+        "autoplay": 3,
+        "iframe": 0,
+        "video": 1
+      }
+    },
+    {
+      "route": "/exchange",
+      "type": "fixed",
+      "profile": "exchange-heavy",
+      "files": [
+        "app/exchange/page.js",
+        "lib/databroker.js",
+        "app/components/CryptoNewsLens.jsx"
+      ],
+      "totals": {
+        "wallet": 0,
+        "analytics": 0,
+        "topBar": 2,
+        "forumShellGate": 0,
+        "widgets": 28,
+        "autoplay": 6,
+        "iframe": 0,
+        "video": 0
+      }
+    },
+    {
+      "route": "/academy",
+      "type": "fixed",
+      "profile": "editor-preview",
+      "files": [
+        "app/academy/page.js",
+        "app/academy/AcademyExamBlock.js"
+      ],
+      "totals": {
+        "wallet": 0,
+        "analytics": 0,
+        "topBar": 0,
+        "forumShellGate": 0,
+        "widgets": 0,
+        "autoplay": 0,
+        "iframe": 0,
+        "video": 0
+      }
+    },
+    {
+      "route": "/subscribe",
+      "type": "fixed",
+      "profile": "auth-light",
+      "files": [
+        "app/subscribe/page.js",
+        "app/subscribe/subscribe.client.jsx"
+      ],
+      "totals": {
+        "wallet": 0,
+        "analytics": 0,
+        "topBar": 0,
+        "forumShellGate": 0,
+        "widgets": 0,
+        "autoplay": 2,
+        "iframe": 0,
+        "video": 0
+      }
+    },
+    {
+      "route": "/ads/home",
+      "type": "fixed",
+      "profile": "ads-preview",
+      "files": [
+        "app/ads/home.js",
+        "lib/adsCore.js"
+      ],
+      "totals": {
+        "wallet": 0,
+        "analytics": 1,
+        "topBar": 0,
+        "forumShellGate": 0,
+        "widgets": 2,
+        "autoplay": 6,
+        "iframe": 0,
+        "video": 2
+      }
+    },
+    {
+      "route": "forum-quest-cards",
+      "type": "virtual",
+      "profile": "quest-cards",
+      "files": [
+        "app/forum/features/quests/components/QuestHub.jsx"
+      ],
+      "totals": {
+        "wallet": 0,
+        "analytics": 0,
+        "topBar": 0,
+        "forumShellGate": 0,
+        "widgets": 0,
+        "autoplay": 6,
+        "iframe": 0,
+        "video": 2
+      }
+    },
+    {
+      "route": "forum-qcast-mixed",
+      "type": "virtual",
+      "profile": "qcast-mixed",
+      "files": [
+        "app/forum/features/media/components/QCastPlayer.jsx",
+        "app/forum/features/qcoin/components/QCoinWithdrawPopover.jsx"
+      ],
+      "totals": {
+        "wallet": 0,
+        "analytics": 0,
+        "topBar": 0,
+        "forumShellGate": 0,
+        "widgets": 0,
+        "autoplay": 37,
+        "iframe": 0,
+        "video": 1
+      }
+    }
+  ],
+  "checks": {
+    "rootHeavyProviders": 85,
+    "routeLocalWidgetIsolation": {
+      "exchangeFilesPresent": true,
+      "widgetBleedOutsideExchange": 8
+    },
+    "globalShellBleed": {
+      "appLayoutHasTopBar": true,
+      "appLayoutHasWallet": true
+    },
+    "startupRouteCapabilityMatrix": {
+      "profileCount": 13,
+      "assignmentCount": 10
+    },
+    "forumShellSeparation": {
+      "forumShellGatePresent": true,
+      "forumLayoutPresent": true
+    },
+    "decorativeRouteBaselinePolicy": [
+      {
+        "file": "app/about/page.js",
+        "autoplaySignals": 3,
+        "iframeSignals": 0,
+        "videoSignals": 1
+      },
+      {
+        "file": "app/ads/home.js",
+        "autoplaySignals": 6,
+        "iframeSignals": 0,
+        "videoSignals": 2
+      },
+      {
+        "file": "app/academy/page.js",
+        "autoplaySignals": 0,
+        "iframeSignals": 0,
+        "videoSignals": 0
+      }
+    ]
+  }
+}

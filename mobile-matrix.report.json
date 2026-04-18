@@ -1,0 +1,1754 @@
+{
+  "generatedAt": "2026-04-18T03:00:37.879Z",
+  "profiles": [
+    {
+      "profileId": "forum-feed-mobile",
+      "profile": {
+        "description": "Strict mobile forum feed profile with one-owner media discipline and single iframe allowance.",
+        "maxIframeCount": 1,
+        "maxIframePlayers": 1,
+        "maxNativeContentVideoCount": 1,
+        "maxNativeContentPlayers": 1,
+        "allowedAdMediaConcurrency": 1,
+        "allowedAdPlayers": 1,
+        "maxDecorativePlayers": 0,
+        "decorativeMediaPermission": "blocked",
+        "allowWarmNative": false,
+        "allowWarmIframe": false,
+        "allowWalletRuntimeBeforeIntent": false,
+        "allowRouteWidgets": false,
+        "allowPolling": false,
+        "walletAuthAllowance": "auth-bridge-only",
+        "routeWidgetAllowance": "minimal",
+        "startupSplashAllowance": "handoff-only",
+        "startupSplashAllowed": true,
+        "backgroundRestorePolicy": "policy-restore-only",
+        "offscreenLifecyclePolicy": "cooldown-then-destroy",
+        "offscreenPolicy": "cooldown-then-destroy",
+        "restorePolicy": "single-owner-policy-restore",
+        "teardownPolicy": "destroy-route-owned-heavy-runtime",
+        "routeLeavePolicy": "destroy-route-owned-heavy-runtime",
+        "externalOpenPolicy": "route-local-only",
+        "teardownDeadlineMs": 2200,
+        "budget": {
+          "ceiling": 4,
+          "softCap": 3,
+          "hardCap": 4,
+          "ownerArbitrationPriority": [
+            "content",
+            "ad",
+            "qcast",
+            "startup",
+            "decorative"
+          ],
+          "promotionRules": [
+            "shell-first-only",
+            "single-iframe-active",
+            "intent-or-near-required",
+            "no-warm-iframe-by-default"
+          ],
+          "demotionRules": [
+            "offscreen-demote-fast",
+            "ad-loses-to-content-in-focus",
+            "mobile-offscreen-destroy"
+          ],
+          "blockReasons": [
+            "iframe-cap-reached",
+            "shared-budget-overlap",
+            "mobile-offscreen-policy",
+            "wallet-before-intent"
+          ],
+          "hardDestroyRules": [
+            "route-leave",
+            "offscreen-timeout",
+            "owner-replaced"
+          ]
+        }
+      }
+    },
+    {
+      "profileId": "forum-feed-desktop",
+      "profile": {
+        "description": "Desktop forum feed profile with limited warm concurrency and shared owner arbitration.",
+        "maxIframeCount": 2,
+        "maxIframePlayers": 2,
+        "maxNativeContentVideoCount": 2,
+        "maxNativeContentPlayers": 2,
+        "allowedAdMediaConcurrency": 1,
+        "allowedAdPlayers": 1,
+        "maxDecorativePlayers": 0,
+        "decorativeMediaPermission": "blocked",
+        "allowWarmNative": true,
+        "allowWarmIframe": true,
+        "allowWalletRuntimeBeforeIntent": false,
+        "allowRouteWidgets": false,
+        "allowPolling": false,
+        "walletAuthAllowance": "auth-bridge-only",
+        "routeWidgetAllowance": "minimal",
+        "startupSplashAllowance": "handoff-only",
+        "startupSplashAllowed": true,
+        "backgroundRestorePolicy": "policy-restore",
+        "offscreenLifecyclePolicy": "cooldown-before-destroy",
+        "offscreenPolicy": "cooldown-before-destroy",
+        "restorePolicy": "policy-restore",
+        "teardownPolicy": "destroy-route-owned-heavy-runtime",
+        "routeLeavePolicy": "destroy-route-owned-heavy-runtime",
+        "externalOpenPolicy": "route-local-only",
+        "teardownDeadlineMs": 2600,
+        "budget": {
+          "ceiling": 6,
+          "softCap": 4,
+          "hardCap": 6,
+          "ownerArbitrationPriority": [
+            "content",
+            "ad",
+            "qcast",
+            "startup",
+            "decorative"
+          ],
+          "promotionRules": [
+            "shell-first-only",
+            "near-or-active-required",
+            "desktop-warm-cap"
+          ],
+          "demotionRules": [
+            "offscreen-demote",
+            "owner-replaced"
+          ],
+          "blockReasons": [
+            "iframe-cap-reached",
+            "shared-budget-overlap"
+          ],
+          "hardDestroyRules": [
+            "route-leave",
+            "owner-replaced"
+          ]
+        }
+      }
+    },
+    {
+      "profileId": "forum-thread",
+      "profile": {
+        "description": "Thread-focused forum profile with tight content ownership and no ad concurrency.",
+        "maxIframeCount": 1,
+        "maxIframePlayers": 1,
+        "maxNativeContentVideoCount": 1,
+        "maxNativeContentPlayers": 1,
+        "allowedAdMediaConcurrency": 0,
+        "allowedAdPlayers": 0,
+        "maxDecorativePlayers": 0,
+        "decorativeMediaPermission": "blocked",
+        "allowWarmNative": false,
+        "allowWarmIframe": false,
+        "allowWalletRuntimeBeforeIntent": false,
+        "allowRouteWidgets": false,
+        "allowPolling": false,
+        "walletAuthAllowance": "auth-bridge-only",
+        "routeWidgetAllowance": "minimal",
+        "startupSplashAllowance": "none",
+        "startupSplashAllowed": false,
+        "backgroundRestorePolicy": "cold-or-policy-restore",
+        "offscreenLifecyclePolicy": "destroy-fast",
+        "offscreenPolicy": "destroy-fast",
+        "restorePolicy": "cold-or-policy-restore",
+        "teardownPolicy": "destroy-on-thread-exit",
+        "routeLeavePolicy": "destroy-on-thread-exit",
+        "externalOpenPolicy": "route-local-only",
+        "teardownDeadlineMs": 1600,
+        "budget": {
+          "ceiling": 3,
+          "softCap": 2,
+          "hardCap": 3,
+          "ownerArbitrationPriority": [
+            "content",
+            "qcast",
+            "startup"
+          ],
+          "promotionRules": [
+            "shell-first-only",
+            "single-owner-only",
+            "active-center-priority"
+          ],
+          "demotionRules": [
+            "offscreen-destroy",
+            "thread-close-destroy"
+          ],
+          "blockReasons": [
+            "thread-inline-overlap"
+          ],
+          "hardDestroyRules": [
+            "thread-close",
+            "route-leave"
+          ]
+        }
+      }
+    },
+    {
+      "profileId": "landing-decorative",
+      "profile": {
+        "description": "Decorative landing profile with degraded mobile autoplay and no content-grade runtime.",
+        "maxIframeCount": 0,
+        "maxIframePlayers": 0,
+        "maxNativeContentVideoCount": 0,
+        "maxNativeContentPlayers": 0,
+        "allowedAdMediaConcurrency": 0,
+        "allowedAdPlayers": 0,
+        "maxDecorativePlayers": 1,
+        "decorativeMediaPermission": "degraded-mobile",
+        "allowWarmNative": false,
+        "allowWarmIframe": false,
+        "allowWalletRuntimeBeforeIntent": false,
+        "allowRouteWidgets": false,
+        "allowPolling": false,
+        "walletAuthAllowance": "none",
+        "routeWidgetAllowance": "minimal",
+        "startupSplashAllowance": "none",
+        "startupSplashAllowed": false,
+        "backgroundRestorePolicy": "cold-only",
+        "offscreenLifecyclePolicy": "destroy",
+        "offscreenPolicy": "destroy",
+        "restorePolicy": "cold-only",
+        "teardownPolicy": "destroy-route-owned-heavy-runtime",
+        "routeLeavePolicy": "destroy-route-owned-heavy-runtime",
+        "externalOpenPolicy": "allow-safe-links-only",
+        "teardownDeadlineMs": 1200,
+        "budget": {
+          "ceiling": 2,
+          "softCap": 1,
+          "hardCap": 2,
+          "ownerArbitrationPriority": [
+            "decorative"
+          ],
+          "promotionRules": [
+            "mobile-degrade-first"
+          ],
+          "demotionRules": [
+            "background-destroy"
+          ],
+          "blockReasons": [
+            "content-grade-runtime-forbidden"
+          ],
+          "hardDestroyRules": [
+            "route-leave",
+            "background"
+          ]
+        }
+      }
+    },
+    {
+      "profileId": "editor-preview",
+      "profile": {
+        "description": "Preview route profile with limited content runtime and no heavy widget bleed.",
+        "maxIframeCount": 0,
+        "maxIframePlayers": 0,
+        "maxNativeContentVideoCount": 1,
+        "maxNativeContentPlayers": 1,
+        "allowedAdMediaConcurrency": 0,
+        "allowedAdPlayers": 0,
+        "maxDecorativePlayers": 1,
+        "decorativeMediaPermission": "minimal",
+        "allowWarmNative": false,
+        "allowWarmIframe": false,
+        "allowWalletRuntimeBeforeIntent": false,
+        "allowRouteWidgets": false,
+        "allowPolling": false,
+        "walletAuthAllowance": "none",
+        "routeWidgetAllowance": "minimal",
+        "startupSplashAllowance": "none",
+        "startupSplashAllowed": false,
+        "backgroundRestorePolicy": "cold-or-shell-restore",
+        "offscreenLifecyclePolicy": "pause-then-destroy",
+        "offscreenPolicy": "pause-then-destroy",
+        "restorePolicy": "cold-or-shell-restore",
+        "teardownPolicy": "destroy-on-preview-exit",
+        "routeLeavePolicy": "destroy-on-preview-exit",
+        "externalOpenPolicy": "safe-link-only",
+        "teardownDeadlineMs": 1800,
+        "budget": {
+          "ceiling": 3,
+          "softCap": 2,
+          "hardCap": 3,
+          "ownerArbitrationPriority": [
+            "content",
+            "decorative"
+          ],
+          "promotionRules": [
+            "preview-intent-only"
+          ],
+          "demotionRules": [
+            "offscreen-pause"
+          ],
+          "blockReasons": [
+            "editor-preview-overlap"
+          ],
+          "hardDestroyRules": [
+            "route-leave"
+          ]
+        }
+      }
+    },
+    {
+      "profileId": "auth-light",
+      "profile": {
+        "description": "Thin auth-bridge profile with no eager wallet runtime.",
+        "maxIframeCount": 0,
+        "maxIframePlayers": 0,
+        "maxNativeContentVideoCount": 0,
+        "maxNativeContentPlayers": 0,
+        "allowedAdMediaConcurrency": 0,
+        "allowedAdPlayers": 0,
+        "maxDecorativePlayers": 0,
+        "decorativeMediaPermission": "minimal",
+        "allowWarmNative": false,
+        "allowWarmIframe": false,
+        "allowWalletRuntimeBeforeIntent": false,
+        "allowRouteWidgets": false,
+        "allowPolling": false,
+        "walletAuthAllowance": "thin-auth-bridge",
+        "routeWidgetAllowance": "none",
+        "startupSplashAllowance": "none",
+        "startupSplashAllowed": false,
+        "backgroundRestorePolicy": "cold-only",
+        "offscreenLifecyclePolicy": "destroy",
+        "offscreenPolicy": "destroy",
+        "restorePolicy": "cold-only",
+        "teardownPolicy": "clear-auth-side-effects",
+        "routeLeavePolicy": "clear-auth-side-effects",
+        "externalOpenPolicy": "safe-link-only",
+        "teardownDeadlineMs": 1200,
+        "budget": {
+          "ceiling": 2,
+          "softCap": 1,
+          "hardCap": 2,
+          "ownerArbitrationPriority": [
+            "auth",
+            "content"
+          ],
+          "promotionRules": [
+            "intent-only-wallet",
+            "auth-dedup-required"
+          ],
+          "demotionRules": [
+            "prompt-close-destroy"
+          ],
+          "blockReasons": [
+            "auth-fanout",
+            "wallet-baseline-leak"
+          ],
+          "hardDestroyRules": [
+            "prompt-close",
+            "route-leave"
+          ]
+        }
+      }
+    },
+    {
+      "profileId": "wallet-ready",
+      "profile": {
+        "description": "Wallet-capable profile with explicit user-intent ownership.",
+        "maxIframeCount": 0,
+        "maxIframePlayers": 0,
+        "maxNativeContentVideoCount": 1,
+        "maxNativeContentPlayers": 1,
+        "allowedAdMediaConcurrency": 0,
+        "allowedAdPlayers": 0,
+        "maxDecorativePlayers": 1,
+        "decorativeMediaPermission": "minimal",
+        "allowWarmNative": false,
+        "allowWarmIframe": false,
+        "allowWalletRuntimeBeforeIntent": false,
+        "allowRouteWidgets": false,
+        "allowPolling": false,
+        "walletAuthAllowance": "intent-only-wallet-runtime",
+        "routeWidgetAllowance": "minimal",
+        "startupSplashAllowance": "none",
+        "startupSplashAllowed": false,
+        "backgroundRestorePolicy": "cold-or-intent-restore",
+        "offscreenLifecyclePolicy": "pause-then-destroy",
+        "offscreenPolicy": "pause-then-destroy",
+        "restorePolicy": "cold-or-intent-restore",
+        "teardownPolicy": "destroy-wallet-runtime-after-route-leave",
+        "routeLeavePolicy": "destroy-wallet-runtime-after-route-leave",
+        "externalOpenPolicy": "safe-link-only",
+        "teardownDeadlineMs": 1800,
+        "budget": {
+          "ceiling": 3,
+          "softCap": 2,
+          "hardCap": 3,
+          "ownerArbitrationPriority": [
+            "wallet",
+            "content",
+            "auth"
+          ],
+          "promotionRules": [
+            "user-intent-required",
+            "wallet-after-auth-bridge"
+          ],
+          "demotionRules": [
+            "modal-close-demote"
+          ],
+          "blockReasons": [
+            "wallet-before-intent",
+            "provider-overlap"
+          ],
+          "hardDestroyRules": [
+            "route-leave",
+            "modal-close-timeout"
+          ]
+        }
+      }
+    },
+    {
+      "profileId": "about-decorative",
+      "profile": {
+        "description": "Decorative about route profile with mobile degradation by default.",
+        "maxIframeCount": 0,
+        "maxIframePlayers": 0,
+        "maxNativeContentVideoCount": 0,
+        "maxNativeContentPlayers": 0,
+        "allowedAdMediaConcurrency": 0,
+        "allowedAdPlayers": 0,
+        "maxDecorativePlayers": 1,
+        "decorativeMediaPermission": "degraded-mobile",
+        "allowWarmNative": false,
+        "allowWarmIframe": false,
+        "allowWalletRuntimeBeforeIntent": false,
+        "allowRouteWidgets": false,
+        "allowPolling": false,
+        "walletAuthAllowance": "none",
+        "routeWidgetAllowance": "minimal",
+        "startupSplashAllowance": "none",
+        "startupSplashAllowed": false,
+        "backgroundRestorePolicy": "cold-only",
+        "offscreenLifecyclePolicy": "destroy",
+        "offscreenPolicy": "destroy",
+        "restorePolicy": "cold-only",
+        "teardownPolicy": "destroy-route-owned-heavy-runtime",
+        "routeLeavePolicy": "destroy-route-owned-heavy-runtime",
+        "externalOpenPolicy": "safe-link-only",
+        "teardownDeadlineMs": 1200,
+        "budget": {
+          "ceiling": 2,
+          "softCap": 1,
+          "hardCap": 2,
+          "ownerArbitrationPriority": [
+            "decorative"
+          ],
+          "promotionRules": [
+            "mobile-degrade-first"
+          ],
+          "demotionRules": [
+            "background-destroy"
+          ],
+          "blockReasons": [
+            "content-grade-runtime-forbidden"
+          ],
+          "hardDestroyRules": [
+            "route-leave",
+            "background"
+          ]
+        }
+      }
+    },
+    {
+      "profileId": "ads-preview",
+      "profile": {
+        "description": "Ads preview route profile with preview-only media and intent-only auth or wallet bridges.",
+        "maxIframeCount": 1,
+        "maxIframePlayers": 1,
+        "maxNativeContentVideoCount": 1,
+        "maxNativeContentPlayers": 1,
+        "allowedAdMediaConcurrency": 1,
+        "allowedAdPlayers": 1,
+        "maxDecorativePlayers": 1,
+        "decorativeMediaPermission": "minimal",
+        "allowWarmNative": false,
+        "allowWarmIframe": false,
+        "allowWalletRuntimeBeforeIntent": false,
+        "allowRouteWidgets": false,
+        "allowPolling": false,
+        "walletAuthAllowance": "intent-only-wallet-runtime",
+        "routeWidgetAllowance": "minimal",
+        "startupSplashAllowance": "none",
+        "startupSplashAllowed": false,
+        "backgroundRestorePolicy": "cold-or-preview-restore",
+        "offscreenLifecyclePolicy": "pause-then-destroy",
+        "offscreenPolicy": "pause-then-destroy",
+        "restorePolicy": "cold-or-preview-restore",
+        "teardownPolicy": "destroy-preview-runtime-on-leave",
+        "routeLeavePolicy": "destroy-preview-runtime-on-leave",
+        "externalOpenPolicy": "safe-link-only",
+        "teardownDeadlineMs": 1800,
+        "budget": {
+          "ceiling": 4,
+          "softCap": 3,
+          "hardCap": 4,
+          "ownerArbitrationPriority": [
+            "ad",
+            "wallet",
+            "auth",
+            "decorative"
+          ],
+          "promotionRules": [
+            "preview-only",
+            "intent-only-wallet"
+          ],
+          "demotionRules": [
+            "background-destroy",
+            "route-leave-destroy"
+          ],
+          "blockReasons": [
+            "wallet-before-intent",
+            "content-grade-runtime-forbidden"
+          ],
+          "hardDestroyRules": [
+            "route-leave",
+            "owner-replaced"
+          ]
+        }
+      }
+    },
+    {
+      "profileId": "quest-cards",
+      "profile": {
+        "description": "Quest cards profile with autoplay degradation and shared page budget.",
+        "maxIframeCount": 0,
+        "maxIframePlayers": 0,
+        "maxNativeContentVideoCount": 1,
+        "maxNativeContentPlayers": 1,
+        "allowedAdMediaConcurrency": 0,
+        "allowedAdPlayers": 0,
+        "maxDecorativePlayers": 1,
+        "decorativeMediaPermission": "degraded-mobile",
+        "allowWarmNative": false,
+        "allowWarmIframe": false,
+        "allowWalletRuntimeBeforeIntent": false,
+        "allowRouteWidgets": false,
+        "allowPolling": false,
+        "walletAuthAllowance": "auth-bridge-only",
+        "routeWidgetAllowance": "minimal",
+        "startupSplashAllowance": "none",
+        "startupSplashAllowed": false,
+        "backgroundRestorePolicy": "cold-or-shell-restore",
+        "offscreenLifecyclePolicy": "cooldown-then-destroy",
+        "offscreenPolicy": "cooldown-then-destroy",
+        "restorePolicy": "cold-or-shell-restore",
+        "teardownPolicy": "destroy-route-owned-heavy-runtime",
+        "routeLeavePolicy": "destroy-route-owned-heavy-runtime",
+        "externalOpenPolicy": "safe-link-only",
+        "teardownDeadlineMs": 1600,
+        "budget": {
+          "ceiling": 3,
+          "softCap": 2,
+          "hardCap": 3,
+          "ownerArbitrationPriority": [
+            "content",
+            "decorative"
+          ],
+          "promotionRules": [
+            "shell-first-only",
+            "degrade-on-mobile"
+          ],
+          "demotionRules": [
+            "offscreen-destroy"
+          ],
+          "blockReasons": [
+            "content-grade-runtime-forbidden"
+          ],
+          "hardDestroyRules": [
+            "route-leave"
+          ]
+        }
+      }
+    },
+    {
+      "profileId": "qcast-mixed",
+      "profile": {
+        "description": "Shared qcast and content profile with single mute source and overlap enforcement.",
+        "maxIframeCount": 1,
+        "maxIframePlayers": 1,
+        "maxNativeContentVideoCount": 1,
+        "maxNativeContentPlayers": 1,
+        "allowedAdMediaConcurrency": 0,
+        "allowedAdPlayers": 0,
+        "maxDecorativePlayers": 0,
+        "decorativeMediaPermission": "blocked",
+        "allowWarmNative": false,
+        "allowWarmIframe": false,
+        "allowWalletRuntimeBeforeIntent": false,
+        "allowRouteWidgets": false,
+        "allowPolling": false,
+        "walletAuthAllowance": "auth-bridge-only",
+        "routeWidgetAllowance": "minimal",
+        "startupSplashAllowance": "none",
+        "startupSplashAllowed": false,
+        "backgroundRestorePolicy": "policy-restore-only",
+        "offscreenLifecyclePolicy": "cooldown-then-destroy",
+        "offscreenPolicy": "cooldown-then-destroy",
+        "restorePolicy": "single-owner-policy-restore",
+        "teardownPolicy": "destroy-route-owned-heavy-runtime",
+        "routeLeavePolicy": "destroy-route-owned-heavy-runtime",
+        "externalOpenPolicy": "route-local-only",
+        "teardownDeadlineMs": 1800,
+        "budget": {
+          "ceiling": 3,
+          "softCap": 2,
+          "hardCap": 3,
+          "ownerArbitrationPriority": [
+            "content",
+            "qcast",
+            "startup"
+          ],
+          "promotionRules": [
+            "single-owner-only",
+            "shared-mute-source-only"
+          ],
+          "demotionRules": [
+            "offscreen-demote-fast"
+          ],
+          "blockReasons": [
+            "qcast-content-overlap",
+            "second-world-created"
+          ],
+          "hardDestroyRules": [
+            "route-leave",
+            "owner-replaced"
+          ]
+        }
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "index": 1,
+      "id": "forum-cold-signed-out",
+      "title": "/forum cold start signed-out",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "telegram-webview"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 2,
+      "id": "forum-cold-signed-in",
+      "title": "/forum cold start signed-in",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "telegram-webview"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "authRuntime"
+      ]
+    },
+    {
+      "index": 3,
+      "id": "forum-first-interaction",
+      "title": "first interaction after hydration",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "mainThread",
+        "memory"
+      ]
+    },
+    {
+      "index": 4,
+      "id": "forum-splash-handoff",
+      "title": "splash to feed handoff",
+      "category": "forum-startup",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "mainThread",
+        "authRuntime"
+      ]
+    },
+    {
+      "index": 5,
+      "id": "forum-startup-wallet-untouched",
+      "title": "startup with wallet untouched",
+      "category": "forum-startup",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "memory"
+      ]
+    },
+    {
+      "index": 6,
+      "id": "forum-startup-after-auth-session",
+      "title": "startup after prior auth session",
+      "category": "forum-startup",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "memory",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 7,
+      "id": "forum-long-scroll-30",
+      "title": "long scroll 30 cards",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "memory",
+        "media"
+      ]
+    },
+    {
+      "index": 8,
+      "id": "forum-long-scroll-100",
+      "title": "long scroll 100 cards",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 9,
+      "id": "forum-scroll-down-up-down",
+      "title": "down then up then down",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 10,
+      "id": "forum-slow-scroll-autoplay",
+      "title": "slow scroll with autoplay",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 11,
+      "id": "forum-fast-fling-scroll",
+      "title": "fast fling scroll",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "mainThread",
+        "memory"
+      ]
+    },
+    {
+      "index": 12,
+      "id": "forum-mixed-feed",
+      "title": "mixed feed native plus iframe plus ads plus qcast",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "memory",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 13,
+      "id": "forum-topic-back",
+      "title": "forum to topic to back",
+      "category": "forum-route-return",
+      "route": "forum-thread-view",
+      "profileHint": "forum-thread",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "routeIsolation",
+        "memory",
+        "media"
+      ]
+    },
+    {
+      "index": 14,
+      "id": "forum-other-route-back",
+      "title": "forum to other route to back",
+      "category": "forum-route-return",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "routeIsolation",
+        "authRuntime",
+        "memory"
+      ]
+    },
+    {
+      "index": 15,
+      "id": "forum-background-foreground",
+      "title": "background to foreground",
+      "category": "forum-route-return",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "telegram-webview"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 16,
+      "id": "forum-app-resume",
+      "title": "app minimized to resumed",
+      "category": "forum-route-return",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "telegram-webview"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "authRuntime"
+      ]
+    },
+    {
+      "index": 17,
+      "id": "forum-ios-bfcache",
+      "title": "iOS Safari back forward cache",
+      "category": "forum-route-return",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "routeIsolation",
+        "memory",
+        "media"
+      ]
+    },
+    {
+      "index": 18,
+      "id": "forum-telegram-suspend-resume",
+      "title": "Telegram WebView suspend and resume",
+      "category": "forum-route-return",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "telegram-webview"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "authRuntime"
+      ]
+    },
+    {
+      "index": 19,
+      "id": "forum-native-to-iframe",
+      "title": "active native to active iframe",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 20,
+      "id": "forum-iframe-to-native",
+      "title": "active iframe to active native",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 21,
+      "id": "forum-content-ad-contest",
+      "title": "content media versus ad media contest",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 22,
+      "id": "forum-qcast-content-coexistence",
+      "title": "qcast and content coexistence",
+      "category": "forum-media",
+      "route": "forum-qcast-mixed",
+      "profileHint": "qcast-mixed",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 23,
+      "id": "forum-shorts-return-replace",
+      "title": "shorts iframe replace on return",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 24,
+      "id": "forum-same-source-revisit",
+      "title": "same source revisited after short scroll away",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "memory"
+      ]
+    },
+    {
+      "index": 25,
+      "id": "forum-iphone-safari-autoplay-no-gesture",
+      "title": "iPhone Safari autoplay without gesture",
+      "category": "forum-mobile-browser",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "media",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 26,
+      "id": "forum-iphone-safari-autoplay-after-gesture",
+      "title": "iPhone Safari autoplay after first gesture",
+      "category": "forum-mobile-browser",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "media",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 27,
+      "id": "forum-iphone-chrome",
+      "title": "iPhone Chrome",
+      "category": "forum-mobile-browser",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-chrome"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 28,
+      "id": "forum-android-chrome",
+      "title": "Android Chrome",
+      "category": "forum-mobile-browser",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 29,
+      "id": "forum-telegram-mini-app",
+      "title": "Telegram Mini App WebView",
+      "category": "forum-mobile-browser",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "telegram-webview"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "authRuntime"
+      ]
+    },
+    {
+      "index": 33,
+      "id": "root-shell-idle-non-forum",
+      "title": "root shell idle on non-forum route",
+      "category": "root-startup",
+      "route": "/",
+      "profileHint": "landing-decorative",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "memory"
+      ]
+    },
+    {
+      "index": 34,
+      "id": "root-shell-after-forum-visit",
+      "title": "root shell after forum visited once",
+      "category": "root-startup",
+      "route": "/",
+      "profileHint": "landing-decorative",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "routeIsolation",
+        "memory"
+      ]
+    },
+    {
+      "index": 35,
+      "id": "root-shell-after-wallet-modal",
+      "title": "root shell after wallet modal open and close",
+      "category": "root-startup",
+      "route": "/ads/home",
+      "profileHint": "ads-preview",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 36,
+      "id": "root-shell-after-auth-prompt",
+      "title": "root shell after auth prompt open and close",
+      "category": "root-startup",
+      "route": "/subscribe",
+      "profileHint": "auth-light",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "memory"
+      ]
+    },
+    {
+      "index": 37,
+      "id": "route-transition-heavy-forum-history",
+      "title": "route transition with heavy forum history",
+      "category": "root-startup",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "routeIsolation",
+        "memory"
+      ]
+    },
+    {
+      "index": 38,
+      "id": "forum-deeplink-topic",
+      "title": "deep-link into forum topic",
+      "category": "root-startup",
+      "route": "forum-thread-view",
+      "profileHint": "forum-thread",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "authRuntime"
+      ]
+    },
+    {
+      "index": 39,
+      "id": "exchange-to-forum-return",
+      "title": "return from exchange to forum",
+      "category": "root-startup",
+      "route": "/exchange",
+      "profileHint": "exchange-heavy",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "routeIsolation",
+        "memory"
+      ]
+    },
+    {
+      "index": 40,
+      "id": "about-to-forum-return",
+      "title": "return from about to forum",
+      "category": "root-startup",
+      "route": "/about",
+      "profileHint": "about-decorative",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "routeIsolation",
+        "memory"
+      ]
+    },
+    {
+      "index": 41,
+      "id": "exchange-startup",
+      "title": "/exchange startup",
+      "category": "exchange-route",
+      "route": "/exchange",
+      "profileHint": "exchange-heavy",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "routeIsolation",
+        "memory",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 42,
+      "id": "exchange-leave-cleanup",
+      "title": "/exchange leave cleanup",
+      "category": "exchange-route",
+      "route": "/exchange",
+      "profileHint": "exchange-heavy",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "routeIsolation",
+        "memory"
+      ]
+    },
+    {
+      "index": 43,
+      "id": "exchange-repeated-visit",
+      "title": "/exchange repeated visit",
+      "category": "exchange-route",
+      "route": "/exchange",
+      "profileHint": "exchange-heavy",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "routeIsolation",
+        "memory",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 44,
+      "id": "exchange-widget-failures",
+      "title": "/exchange with TradingView or Binance failures",
+      "category": "exchange-route",
+      "route": "/exchange",
+      "profileHint": "exchange-heavy",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "routeIsolation",
+        "mainThread",
+        "consoleNoise"
+      ]
+    },
+    {
+      "index": 45,
+      "id": "exchange-idle-background",
+      "title": "/exchange idle background tab",
+      "category": "exchange-route",
+      "route": "/exchange",
+      "profileHint": "exchange-heavy",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "routeIsolation",
+        "memory"
+      ]
+    },
+    {
+      "index": 46,
+      "id": "about-decorative-budget",
+      "title": "/about decorative media budget",
+      "category": "decorative-route",
+      "route": "/about",
+      "profileHint": "about-decorative",
+      "deviceMatrix": [
+        "iphone-safari",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "memory"
+      ]
+    },
+    {
+      "index": 47,
+      "id": "ads-preview-budget",
+      "title": "/ads/home preview media budget",
+      "category": "decorative-route",
+      "route": "/ads/home",
+      "profileHint": "ads-preview",
+      "deviceMatrix": [
+        "iphone-safari",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "authRuntime"
+      ]
+    },
+    {
+      "index": 48,
+      "id": "academy-widget-media-pressure",
+      "title": "/academy route with widget and media pressure",
+      "category": "decorative-route",
+      "route": "/academy",
+      "profileHint": "editor-preview",
+      "deviceMatrix": [
+        "iphone-safari",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 49,
+      "id": "quest-hub-autoplay-cards",
+      "title": "quest hub autoplay cards",
+      "category": "decorative-route",
+      "route": "forum-quest-cards",
+      "profileHint": "quest-cards",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 50,
+      "id": "qcoin-mini-video-surfaces",
+      "title": "qcoin mini-video surfaces",
+      "category": "decorative-route",
+      "route": "forum-qcast-mixed",
+      "profileHint": "qcast-mixed",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 51,
+      "id": "provider-only-startup-without-forum",
+      "title": "provider-only startup without forum",
+      "category": "startup-extra",
+      "route": "/",
+      "profileHint": "landing-decorative",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "memory"
+      ]
+    },
+    {
+      "index": 52,
+      "id": "forum-with-external-wallet-intent",
+      "title": "forum with external wallet intent",
+      "category": "startup-extra",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "memory"
+      ]
+    },
+    {
+      "index": 53,
+      "id": "forum-signed-in-leave-return",
+      "title": "forum signed-in then route leave then return",
+      "category": "route-return-extra",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "routeIsolation",
+        "memory"
+      ]
+    },
+    {
+      "index": 54,
+      "id": "repeated-auth-prompt-open-close",
+      "title": "repeated auth prompt open and close",
+      "category": "auth-extra",
+      "route": "/subscribe",
+      "profileHint": "auth-light",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "consoleNoise"
+      ]
+    },
+    {
+      "index": 55,
+      "id": "forum-same-source-visibility-restore",
+      "title": "same-source video revisit after visibility restore",
+      "category": "forum-restore-extra",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "memory"
+      ]
+    },
+    {
+      "index": 56,
+      "id": "forum-same-source-route-restore",
+      "title": "same-source video revisit after route restore",
+      "category": "forum-restore-extra",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 57,
+      "id": "external-widget-crash-teardown",
+      "title": "external widget crash and teardown verification",
+      "category": "exchange-extra",
+      "route": "/exchange",
+      "profileHint": "exchange-heavy",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "routeIsolation",
+        "consoleNoise",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 58,
+      "id": "preload-heavy-startup-slow-network",
+      "title": "preload-heavy startup on slow network",
+      "category": "startup-extra",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "mainThread",
+        "consoleNoise",
+        "memory"
+      ]
+    },
+    {
+      "index": 59,
+      "id": "startup-on-low-memory-mobile-profile",
+      "title": "startup on low-memory mobile profile",
+      "category": "startup-extra",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "authRuntime"
+      ]
+    },
+    {
+      "index": 60,
+      "id": "forum-long-idle-after-scroll",
+      "title": "long idle state after forum scroll",
+      "category": "forum-extra",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "memory",
+        "routeIsolation",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 61,
+      "id": "forum-memory-pressure",
+      "title": "forum under forced memory pressure",
+      "category": "adaptive-pressure",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "memory",
+        "productionAdaptation",
+        "media"
+      ]
+    },
+    {
+      "index": 62,
+      "id": "forum-main-thread-pressure",
+      "title": "forum under simulated main-thread pressure",
+      "category": "adaptive-pressure",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "mainThread",
+        "productionAdaptation",
+        "media"
+      ]
+    },
+    {
+      "index": 63,
+      "id": "decorative-low-memory-profile",
+      "title": "decorative route under low-memory profile",
+      "category": "adaptive-pressure",
+      "route": "/about",
+      "profileHint": "about-decorative",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "memory",
+        "productionAdaptation",
+        "media"
+      ]
+    },
+    {
+      "index": 64,
+      "id": "exchange-widget-failure-slow-network",
+      "title": "exchange under widget failure and slow network",
+      "category": "adaptive-pressure",
+      "route": "/exchange",
+      "profileHint": "exchange-heavy",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "routeIsolation",
+        "consoleNoise",
+        "productionAdaptation"
+      ]
+    },
+    {
+      "index": 65,
+      "id": "forum-weak-cpu-heuristic",
+      "title": "forum on weak CPU heuristic",
+      "category": "adaptive-pressure",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "mainThread",
+        "productionAdaptation",
+        "memory"
+      ]
+    },
+    {
+      "index": 66,
+      "id": "forum-effect-degradation-transition",
+      "title": "forum route with adaptive effect degradation transitions",
+      "category": "adaptive-pressure",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "productionAdaptation",
+        "mainThread",
+        "media"
+      ]
+    },
+    {
+      "index": 67,
+      "id": "production-adaptive-profile-switch",
+      "title": "production adaptive profile switch during session",
+      "category": "adaptive-pressure",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "productionAdaptation",
+        "routeIsolation",
+        "memory"
+      ]
+    },
+    {
+      "index": 68,
+      "id": "background-return-after-budget-downgrade",
+      "title": "background return after budget downgrade",
+      "category": "adaptive-pressure",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "telegram-webview"
+      ],
+      "metricGroups": [
+        "productionAdaptation",
+        "memory",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 69,
+      "id": "same-session-route-profile-reevaluation",
+      "title": "same-session route shift with capability profile re-evaluation",
+      "category": "adaptive-pressure",
+      "route": "/exchange",
+      "profileHint": "exchange-heavy",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "productionAdaptation",
+        "routeIsolation",
+        "authRuntime"
+      ]
+    },
+    {
+      "index": 70,
+      "id": "emergency-forensic-mode-toggle",
+      "title": "emergency forensic mode activation and deactivation",
+      "category": "forensic-mode",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "productionAdaptation",
+        "consoleNoise",
+        "routeIsolation"
+      ]
+    }
+  ],
+  "failCriteria": [
+    "max-one-live-iframe-on-mobile",
+    "offscreen-iframe-must-destroy-before-deadline",
+    "wallet-before-intent-is-a-fail",
+    "heap-must-recover-after-route-leave"
+  ]
+}

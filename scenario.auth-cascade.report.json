@@ -1,0 +1,148 @@
+{
+  "generatedAt": "2026-04-17T20:40:20.483Z",
+  "groupId": "auth-cascade",
+  "scenarios": [
+    {
+      "index": 2,
+      "id": "forum-cold-signed-in",
+      "title": "/forum cold start signed-in",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "telegram-webview"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "authRuntime"
+      ]
+    },
+    {
+      "index": 6,
+      "id": "forum-startup-after-auth-session",
+      "title": "startup after prior auth session",
+      "category": "forum-startup",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "memory",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 16,
+      "id": "forum-app-resume",
+      "title": "app minimized to resumed",
+      "category": "forum-route-return",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "telegram-webview"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "authRuntime"
+      ]
+    },
+    {
+      "index": 34,
+      "id": "root-shell-after-forum-visit",
+      "title": "root shell after forum visited once",
+      "category": "root-startup",
+      "route": "/",
+      "profileHint": "landing-decorative",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "routeIsolation",
+        "memory"
+      ]
+    },
+    {
+      "index": 35,
+      "id": "root-shell-after-wallet-modal",
+      "title": "root shell after wallet modal open and close",
+      "category": "root-startup",
+      "route": "/ads/home",
+      "profileHint": "ads-preview",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 36,
+      "id": "root-shell-after-auth-prompt",
+      "title": "root shell after auth prompt open and close",
+      "category": "root-startup",
+      "route": "/subscribe",
+      "profileHint": "auth-light",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "memory"
+      ]
+    },
+    {
+      "index": 54,
+      "id": "repeated-auth-prompt-open-close",
+      "title": "repeated auth prompt open and close",
+      "category": "auth-extra",
+      "route": "/subscribe",
+      "profileHint": "auth-light",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "consoleNoise"
+      ]
+    }
+  ],
+  "routes": [
+    "/forum",
+    "/",
+    "/ads/home",
+    "/subscribe"
+  ],
+  "metricGroups": [
+    "memory",
+    "media",
+    "authRuntime",
+    "mainThread",
+    "routeIsolation",
+    "consoleNoise"
+  ],
+  "deviceMatrix": [
+    "iphone-safari",
+    "android-chrome",
+    "telegram-webview",
+    "desktop-chrome"
+  ],
+  "manualDataRequests": [
+    "Signed-in and signed-out runs with auth prompt open/close trace"
+  ]
+}

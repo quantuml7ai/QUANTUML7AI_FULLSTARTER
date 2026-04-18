@@ -75,6 +75,57 @@ This is the official non-interactive verify pipeline for:
 
 `pnpm verify` is available as a convenience alias, but the official name used in documentation, reporting, and Codex workflow is `pnpm test:codex`.
 
+## Stage 0 Runtime Governance
+
+Stage 0 establishes a two-contour runtime discipline for the project:
+
+- `Deep Awareness Layer` for `dev` / `qa` / `stage` / bounded forensics
+- `Production Adaptive Core` for lightweight runtime control in production
+
+The unified runtime mode contract is now driven by one shared resolver instead of scattered `NODE_ENV` checks:
+
+```bash
+APP_RUNTIME_MODE=production-adaptive
+APP_DIAGNOSTICS_MODE=off
+APP_FORENSIC_MODE=off
+APP_TELEMETRY_LEVEL=T0
+APP_ADAPTIVE_CORE_MODE=enforced
+NEXT_PUBLIC_RUNTIME_MODE=production-adaptive
+NEXT_PUBLIC_DIAGNOSTICS_MODE=off
+NEXT_PUBLIC_ADAPTIVE_CORE=enforced
+NEXT_PUBLIC_FORENSIC_ALLOWED=0
+NEXT_PUBLIC_ROUTE_BUDGET_DEBUG=0
+NEXT_PUBLIC_CONSOLE_NOISE_CLASSIFIER=1
+```
+
+Local research defaults live in `.env.local.example`.
+
+The repository now includes:
+
+- runtime identity registry under `src/shared/runtime/identity`
+- route capability matrix under `src/shared/runtime/budgets`
+- budget governance and promotion journals
+- runtime passport snapshots and serializer utilities
+- regression diff engine and baseline capture tooling
+- unified mode resolver under `src/shared/runtime/mode`
+- extended audit pack for route budgets, ownership, adaptive core, diagnostics boundaries, prod-lite discipline, and forensic bounds
+- scenario telemetry groups for forum, startup, exchange, decorative, adaptive pressure, and forensic validation
+
+Useful stage 0 commands:
+
+- `pnpm run verify:audits:fast`
+- `pnpm run verify:audits:deep`
+- `pnpm run verify:forum:runtime`
+- `pnpm run verify:auth:fanout`
+- `pnpm run verify:route:budgets`
+- `pnpm run verify:startup:budgets`
+- `pnpm run verify:mobile:matrix`
+- `pnpm run verify:exchange:widgets`
+- `pnpm run verify:diff:last-baseline`
+
+Deep scenario packs are emitted as `scenario.*.report.json`, while runtime/budget artifacts are written as `*.report.json` and `runtime-passport.snapshot.json`.
+Final stage 0 also emits `runtime-mode-resolution.report.json`, `adaptive-actions.report.json`, `pressure-ladder.report.json`, and `mode-contract.validation.report.json`.
+
 ## What `pnpm test:codex` Runs
 
 `pnpm test:codex` executes the full pipeline in a fixed order:
@@ -146,3 +197,4 @@ Every final report should include:
 ## Additional Reference
 
 Detailed pipeline rules and script descriptions live in [docs/verification-pipeline.md](docs/verification-pipeline.md).
+Stage 0 engineering and governance details live in [docs/stage0-engineering-report.md](docs/stage0-engineering-report.md).

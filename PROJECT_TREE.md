@@ -6,8 +6,8 @@
 > Если меняются связи файла с другими файлами настолько, что комментарий устаревает, комментарий тоже обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-tree.js`.
 
-Сгенерировано автоматически: 2026-04-13T20:35:47.525Z
-Файлов в реестре: 1592
+Сгенерировано автоматически: 2026-04-18T03:02:07.127Z
+Файлов в реестре: 1733
 
 ## Исключенные каталоги
 - `.git/` — служебные внутренние данные Git, не часть прикладного дерева проекта.
@@ -26,42 +26,97 @@
 - `.npmrc` — 1 файлов
 - `account-sync-audit.report.json` — 1 файлов
 - `ad-runtime.audit.report.json` — 1 файлов
+- `adaptive-actions.report.json` — 1 файлов
+- `adaptive-core.report.json` — 1 файлов
 - `AGENTS.md` — 1 файлов
-- `app` — 382 файлов
+- `app` — 383 файлов
 - `audit` — 170 файлов
 - `auth-bus.audit.report.json` — 1 файлов
+- `auth-cascade.report.json` — 1 файлов
+- `baseline-after.stage0.json` — 1 файлов
+- `baseline-before.stage0.json` — 1 файлов
 - `components` — 23 файлов
+- `config` — 1 файлов
+- `console-noise-classification.report.json` — 1 файлов
+- `decorative-media-budget.report.json` — 1 файлов
 - `deep-audit.report.json` — 1 файлов
-- `docs` — 1 файлов
+- `diagnostics-boundaries.report.json` — 1 файлов
+- `diff.stage0.json` — 1 файлов
+- `docs` — 2 файлов
 - `effects-leak.report.json` — 1 файлов
+- `feature-flag-safety.report.json` — 1 файлов
+- `forensic-bounds.report.json` — 1 файлов
 - `forum-deps-audit.report.json` — 1 файлов
 - `forum-diag.jsonl` — 1 файлов
 - `forum-media-churn.audit.report.json` — 1 файлов
+- `forum-media-har.report.json` — 1 файлов
 - `forum-scroll.audit.report.json` — 1 файлов
 - `forum-startup.audit.report.json` — 1 файлов
 - `heapsnapshot-analysis.report.json` — 1 файлов
 - `heavy-audit.report.json` — 1 файлов
+- `iframe-restore.report.json` — 1 файлов
 - `jsconfig.json` — 1 файлов
+- `layout-stability.report.json` — 1 файлов
 - `lib` — 13 файлов
 - `media-audit.report.json` — 1 файлов
 - `media-budget.audit.report.json` — 1 файлов
+- `media-heap.verify.report.json` — 1 файлов
+- `media-ownership.audit.report.json` — 1 файлов
+- `mobile-matrix.report.json` — 1 файлов
+- `mode-contract.validation.report.json` — 1 файлов
 - `next-env.d.ts` — 1 файлов
 - `next.config.mjs` — 1 файлов
+- `observer-cleanup.report.json` — 1 файлов
 - `package.json` — 1 файлов
+- `player-budget.report.json` — 1 файлов
 - `pnpm-lock.yaml` — 1 файлов
 - `pnpm-workspace.yaml` — 1 файлов
+- `preload-waste.report.json` — 1 файлов
+- `pressure-ladder.report.json` — 1 файлов
+- `prod-lite-discipline.report.json` — 1 файлов
 - `PROJECT_DEPENDENCIES.md` — 1 файлов
 - `PROJECT_OWNERSHIP.md` — 1 файлов
 - `PROJECT_RISKS.md` — 1 файлов
 - `PROJECT_ROUTES.md` — 1 файлов
 - `PROJECT_TREE.md` — 1 файлов
+- `provider-baseline.report.json` — 1 файлов
 - `public` — 920 файлов
+- `qcast-ownership.report.json` — 1 файлов
 - `README.md` — 1 файлов
+- `route-budget.report.json` — 1 файлов
+- `route-priority-policies.report.json` — 1 файлов
+- `route-teardown.report.json` — 1 файлов
 - `runtime-hotspots.report.json` — 1 файлов
-- `tests` — 18 файлов
-- `tools` — 30 файлов
+- `runtime-mode-resolution.report.json` — 1 файлов
+- `runtime-passport.snapshot.json` — 1 файлов
+- `runtime-passports.report.json` — 1 файлов
+- `same-src-thrash.report.json` — 1 файлов
+- `scenario.adaptive-pressure.report.json` — 1 файлов
+- `scenario.auth-cascade.report.json` — 1 файлов
+- `scenario.console-noise.report.json` — 1 файлов
+- `scenario.decorative-media.report.json` — 1 файлов
+- `scenario.exchange-route.report.json` — 1 файлов
+- `scenario.forensic-mode.report.json` — 1 файлов
+- `scenario.forum-background-restore.report.json` — 1 файлов
+- `scenario.forum-desktop.report.json` — 1 файлов
+- `scenario.forum-long-scroll.report.json` — 1 файлов
+- `scenario.forum-mobile.report.json` — 1 файлов
+- `scenario.forum-route-return.report.json` — 1 файлов
+- `scenario.forum-wallet-untouched.report.json` — 1 файлов
+- `scenario.preload-waste.report.json` — 1 файлов
+- `scenario.provider-baseline.report.json` — 1 файлов
+- `scenario.qcast-mixed.report.json` — 1 файлов
+- `scenario.route-teardown.report.json` — 1 файлов
+- `scenario.startup-shell.report.json` — 1 файлов
+- `src` — 32 файлов
+- `startup-budget.report.json` — 1 файлов
+- `tests` — 40 файлов
+- `timer-cleanup.report.json` — 1 файлов
+- `tools` — 61 файлов
 - `tsconfig.json` — 1 файлов
+- `tsconfig.tsbuildinfo` — 1 файлов
 - `vitest.config.mjs` — 1 файлов
+- `widget-isolation.report.json` — 1 файлов
 
 ## Дерево проекта
 
@@ -412,6 +467,7 @@
           - mediaLifecycleRuntime.js — Утилита media Lifecycle Runtime домена медиа. Связи: импортирует forum/features/media/components/QCastPlayer.jsx, forum/features/media/components/VideoMedia.jsx, forum/features/media/utils/videoControls.js; используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/components/PostCardBridge.jsx, forum/features/media/components/ComposerAttachmentPreview.jsx.
           - mediaLinks.js — Утилита media Links домена медиа. Связи: используется в forum/ForumRoot.jsx, forum/features/media/utils/mediaUrlPipeline.js, forum/features/ui/components/ForumSearchSortControls.jsx.
           - mediaRuntime.js — Утилита media Runtime домена медиа. Связи: импортирует forum/shared/constants/media.js, lib/forumVideoTrim.js; используется в forum/ForumRoot.jsx, forum/features/media/components/VideoTrimPopover.jsx, forum/features/media/hooks/useVideoTrimController.js.
+          - mediaStatePolicy.js — Утилита media State Policy домена медиа. Связи: используется в tests/unit/forum/media/mediaStatePolicy.test.js.
           - mediaUrlPipeline.js — Утилита media Url Pipeline домена медиа. Связи: импортирует forum/features/media/utils/mediaLinks.js; используется в forum/ForumRoot.jsx.
           - moderationPrep.js — Утилита moderation Prep домена медиа. Связи: используется в forum/ForumRoot.jsx.
           - qcastBars.js — Утилита qcast Bars домена медиа. Связи: используется в forum/features/media/components/QCastPlayer.jsx.
@@ -821,7 +877,10 @@
   - WalletTON.js — Общий React-компонент Wallet TON, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - WalletTRON.js — Общий React-компонент Wallet TRON, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - Web3Provider.js — Общий React-компонент Web3 Provider, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- config/ — Каталог config.
+  - runtime-governance.json — JSON-файл runtime governance. Связи: используется в src/shared/runtime/budgets/routeProfileResolver.js, src/shared/runtime/budgets/routeProfiles.js, src/shared/runtime/identity/runtimeTypes.js.
 - docs/ — Каталог docs.
+  - stage0-engineering-report.md — Markdown-документ stage0 engineering report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - verification-pipeline.md — Markdown-документ verification pipeline. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - lib/ — Общие библиотеки, кеши, middleware-хелперы и инфраструктурные утилиты.
   - geo/ — Каталог geo.
@@ -1788,6 +1847,49 @@
   - qcoin-32.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
   - tonconnect-manifest.json — JSON-файл из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
   - upload.jpg — JPG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+- src/ — Каталог src.
+  - shared/ — Каталог shared.
+    - runtime/ — Каталог runtime.
+      - adaptive/ — Каталог adaptive.
+        - deviceProfileResolver.js — JS-файл device Profile Resolver. Связи: используется в src/shared/runtime/adaptive/productionAdaptiveCore.js.
+        - effectDegradation.js — JS-файл effect Degradation. Связи: используется в src/shared/runtime/adaptive/productionAdaptiveCore.js.
+        - productionAdaptiveCore.js — JS-файл production Adaptive Core. Связи: импортирует src/shared/runtime/adaptive/deviceProfileResolver.js, src/shared/runtime/adaptive/effectDegradation.js, src/shared/runtime/adaptive/runtimePriority.js.
+        - runtimePriority.js — JS-файл runtime Priority. Связи: используется в src/shared/runtime/adaptive/productionAdaptiveCore.js.
+      - budgets/ — Каталог budgets.
+        - budgetEngine.js — JS-файл budget Engine. Связи: импортирует src/shared/runtime/budgets/budgetViolations.js, src/shared/runtime/budgets/ownerArbitration.js, src/shared/runtime/budgets/promotionJournal.js; используется в tests/contracts/forum/ads-shared-budget.contract.test.js, tests/contracts/forum/iframe-singleton-mobile.contract.test.js, tests/integration/runtime/runtimeGovernance.integration.test.js.
+        - budgetViolations.js — JS-файл budget Violations. Связи: используется в src/shared/runtime/budgets/budgetEngine.js.
+        - ownerArbitration.js — JS-файл owner Arbitration. Связи: используется в src/shared/runtime/budgets/budgetEngine.js.
+        - promotionJournal.js — JS-файл promotion Journal. Связи: используется в src/shared/runtime/budgets/budgetEngine.js.
+        - routeCapabilities.js — JS-файл route Capabilities. Связи: импортирует src/shared/runtime/budgets/routeProfileResolver.js, src/shared/runtime/budgets/routeProfiles.js; используется в tests/contracts/root/runtime-startup-budget.contract.test.js, tests/contracts/route/widget-locality.contract.test.js, tests/integration/runtime/runtimeGovernance.integration.test.js.
+        - routeProfileResolver.js — JS-файл route Profile Resolver. Связи: импортирует config/runtime-governance.json; используется в src/shared/runtime/budgets/routeCapabilities.js, tests/contracts/forum/player-budget-profiles.contract.test.js, tests/unit/runtime/runtimeGovernance.test.js.
+        - routeProfiles.js — JS-файл route Profiles. Связи: импортирует config/runtime-governance.json; используется в src/shared/runtime/budgets/routeCapabilities.js, tests/contracts/decorative/autoplay-budget.contract.test.js, tests/contracts/forum/ads-shared-budget.contract.test.js.
+      - diff/ — Каталог diff.
+        - diffEngine.js — JS-файл diff Engine. Связи: используется в tests/unit/runtime/runtimeGovernance.test.js.
+        - diffReportFormatter.js — JS-файл diff Report Formatter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forensics/ — Каталог forensics.
+        - forensicMode.js — JS-файл forensic Mode. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - identity/ — Каталог identity.
+        - runtimeDebugStore.js — JS-файл runtime Debug Store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - runtimeInspector.js — JS-файл runtime Inspector. Связи: импортирует src/shared/runtime/passports/runtimePassport.js.
+        - runtimeRegistry.js — JS-файл runtime Registry. Связи: импортирует src/shared/runtime/identity/runtimeStates.js, src/shared/runtime/identity/runtimeTypes.js; используется в tests/integration/runtime/runtimeGovernance.integration.test.js, tests/unit/runtime/runtimeGovernance.test.js.
+        - runtimeStates.js — JS-файл runtime States. Связи: импортирует src/shared/runtime/identity/runtimeTypes.js; используется в src/shared/runtime/identity/runtimeRegistry.js, tests/unit/runtime/runtimeGovernance.test.js.
+        - runtimeTypes.js — JS-файл runtime Types. Связи: импортирует config/runtime-governance.json; используется в src/shared/runtime/identity/runtimeRegistry.js, src/shared/runtime/identity/runtimeStates.js, src/shared/runtime/passports/runtimePassport.js.
+      - mode/ — Каталог mode.
+        - runtimeFlags.js — JS-файл runtime Flags. Связи: импортирует src/shared/runtime/mode/runtimeModeTypes.js; используется в src/shared/runtime/mode/runtimeMode.js, src/shared/runtime/mode/runtimeModeClient.js, src/shared/runtime/mode/runtimeModeResolver.js.
+        - runtimeMode.js — JS-файл runtime Mode. Связи: импортирует src/shared/runtime/mode/runtimeFlags.js, src/shared/runtime/mode/runtimeModeClient.js, src/shared/runtime/mode/runtimeModeDebug.js; используется в src/shared/runtime/modes/runtimeModes.js, src/shared/runtime/passports/runtimePassport.js.
+        - runtimeModeClient.js — JS-файл runtime Mode Client. Связи: импортирует src/shared/runtime/mode/runtimeFlags.js, src/shared/runtime/mode/runtimeModeResolver.js; используется в src/shared/runtime/mode/runtimeMode.js.
+        - runtimeModeDebug.js — JS-файл runtime Mode Debug. Связи: используется в src/shared/runtime/mode/runtimeMode.js.
+        - runtimeModeGuards.js — JS-файл runtime Mode Guards. Связи: импортирует src/shared/runtime/mode/runtimeModeResolver.js, src/shared/runtime/mode/runtimeModeTypes.js; используется в src/shared/runtime/mode/runtimeMode.js, src/shared/runtime/modes/runtimeModeGuards.js.
+        - runtimeModeResolver.js — JS-файл runtime Mode Resolver. Связи: импортирует src/shared/runtime/mode/runtimeFlags.js, src/shared/runtime/mode/runtimeModeTypes.js; используется в src/shared/runtime/mode/runtimeMode.js, src/shared/runtime/mode/runtimeModeClient.js, src/shared/runtime/mode/runtimeModeGuards.js.
+        - runtimeModeServer.js — JS-файл runtime Mode Server. Связи: импортирует src/shared/runtime/mode/runtimeModeResolver.js; используется в src/shared/runtime/mode/runtimeMode.js.
+        - runtimeModeTypes.js — JS-файл runtime Mode Types. Связи: используется в src/shared/runtime/mode/runtimeFlags.js, src/shared/runtime/mode/runtimeMode.js, src/shared/runtime/mode/runtimeModeGuards.js.
+      - modes/ — Каталог modes.
+        - runtimeModeGuards.js — JS-файл runtime Mode Guards. Связи: импортирует src/shared/runtime/mode/runtimeModeGuards.js.
+        - runtimeModes.js — JS-файл runtime Modes. Связи: импортирует src/shared/runtime/mode/runtimeMode.js.
+      - passports/ — Каталог passports.
+        - runtimePassport.js — JS-файл runtime Passport. Связи: импортирует src/shared/runtime/identity/runtimeTypes.js, src/shared/runtime/mode/runtimeMode.js; используется в src/shared/runtime/identity/runtimeInspector.js, tests/integration/runtime/runtimeGovernance.integration.test.js, tests/unit/runtime/runtimeGovernance.test.js.
+        - runtimePassportPanel.jsx — JSX-файл runtime Passport Panel. Связи: используется в tests/component/runtime/runtimeComponentSurfaces.test.jsx.
+        - runtimePassportSerializer.js — JS-файл runtime Passport Serializer. Связи: используется в tests/unit/runtime/runtimeGovernance.test.js.
 - tests/ — Каталог tests.
   - component/ — Каталог component.
     - forum/ — Каталог forum.
@@ -1796,11 +1898,32 @@
           - components/ — Каталог components.
             - UserRecommendationCard.test.jsx — JSX-файл User Recommendation Card.test. Связи: импортирует forum/features/feed/components/UserRecommendationCard.jsx, tests/fixtures/forum/recommendations.js.
             - UserRecommendationsRail.test.jsx — JSX-файл User Recommendations Rail.test. Связи: импортирует forum/features/feed/components/UserRecommendationsRail.jsx, tests/fixtures/forum/recommendations.js.
+    - runtime/ — Каталог runtime.
+      - runtimeComponentSurfaces.test.jsx — JSX-файл runtime Component Surfaces.test. Связи: импортирует src/shared/runtime/passports/runtimePassportPanel.jsx, tests/support/runtimeGovernance.js.
   - contracts/ — Каталог contracts.
+    - decorative/ — Каталог decorative.
+      - autoplay-budget.contract.test.js — JS-файл autoplay budget.contract.test. Связи: импортирует src/shared/runtime/budgets/routeProfiles.js.
+    - forum/ — Каталог forum.
+      - ads-shared-budget.contract.test.js — JS-файл ads shared budget.contract.test. Связи: импортирует src/shared/runtime/budgets/budgetEngine.js, src/shared/runtime/budgets/routeProfiles.js.
+      - iframe-singleton-mobile.contract.test.js — JS-файл iframe singleton mobile.contract.test. Связи: импортирует src/shared/runtime/budgets/budgetEngine.js, src/shared/runtime/budgets/routeProfiles.js.
+      - media-budget-owner.contract.test.js — JS-файл media budget owner.contract.test. Связи: импортирует tests/support/runtimeGovernance.js.
+      - native-video-cold-offscreen.contract.test.js — JS-файл native video cold offscreen.contract.test. Связи: импортирует src/shared/runtime/budgets/routeProfiles.js.
+      - player-budget-profiles.contract.test.js — JS-файл player budget profiles.contract.test. Связи: импортирует src/shared/runtime/budgets/routeProfileResolver.js, tests/support/runtimeGovernance.js.
+      - qcast-shared-mute-owner.contract.test.js — JS-файл qcast shared mute owner.contract.test. Связи: импортирует tests/support/runtimeGovernance.js.
+      - same-src-thrash-guard.contract.test.js — JS-файл same src thrash guard.contract.test. Связи: импортирует tests/support/runtimeGovernance.js.
     - project/ — Каталог project.
       - api-route-contracts.test.js — JS-файл api route contracts.test. Связи: импортирует tests/support/projectSurface.js.
       - app-entry-contracts.test.js — JS-файл app entry contracts.test. Связи: импортирует tests/support/projectSurface.js.
       - forum-hook-contracts.test.js — JS-файл forum hook contracts.test. Связи: импортирует tests/support/projectSurface.js.
+      - forum-media-contracts.test.js — JS-файл forum media contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - runtime-governance-contracts.test.js — JS-файл runtime governance contracts.test. Связи: импортирует tests/support/runtimeGovernance.js.
+    - root/ — Каталог root.
+      - auth-bus-budget.contract.test.js — JS-файл auth bus budget.contract.test. Связи: импортирует tests/support/runtimeGovernance.js.
+      - runtime-mode.contract.test.js — JS-файл runtime mode.contract.test. Связи: импортирует tests/support/runtimeGovernance.js.
+      - runtime-startup-budget.contract.test.js — JS-файл runtime startup budget.contract.test. Связи: импортирует src/shared/runtime/budgets/routeCapabilities.js, tests/support/runtimeGovernance.js.
+      - wallet-intent-only.contract.test.js — JS-файл wallet intent only.contract.test. Связи: импортирует src/shared/runtime/budgets/routeProfiles.js.
+    - route/ — Каталог route.
+      - widget-locality.contract.test.js — JS-файл widget locality.contract.test. Связи: импортирует src/shared/runtime/budgets/routeCapabilities.js, tests/support/runtimeGovernance.js.
   - fixtures/ — Каталог fixtures.
     - forum/ — Каталог forum.
       - recommendations.js — JS-файл recommendations. Связи: используется в tests/component/forum/features/feed/components/UserRecommendationCard.test.jsx, tests/component/forum/features/feed/components/UserRecommendationsRail.test.jsx, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
@@ -1813,6 +1936,10 @@
         - feed/ — Каталог feed.
           - hooks/ — Каталог hooks.
             - useUserRecommendationsRail.test.jsx — JSX-файл use User Recommendations Rail.test. Связи: импортирует forum/features/feed/hooks/usePostMediaTextModel.js, forum/features/feed/hooks/usePublishedPostsModel.js, forum/features/feed/hooks/useThreadPostsModel.js.
+      - media/ — Каталог media.
+        - coordinator-runtime-contract.test.js — JS-файл coordinator runtime contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - runtime/ — Каталог runtime.
+      - runtimeGovernance.integration.test.js — JS-файл runtime Governance.integration.test. Связи: импортирует src/shared/runtime/budgets/budgetEngine.js, src/shared/runtime/budgets/routeCapabilities.js, src/shared/runtime/budgets/routeProfiles.js.
   - mocks/ — Каталог mocks.
     - .gitkeep — Служебный-файл . Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - smoke/ — Каталог smoke.
@@ -1821,8 +1948,11 @@
         - media/ — Каталог media.
           - components/ — Каталог components.
             - VideoFeedPane.test.jsx — JSX-файл Video Feed Pane.test. Связи: импортирует forum/features/feed/components/UserRecommendationsRail.jsx, tests/fixtures/forum/recommendations.js.
+    - runtime/ — Каталог runtime.
+      - runtimeGovernance.smoke.test.js — JS-файл runtime Governance.smoke.test. Связи: импортирует tests/support/runtimeGovernance.js.
   - support/ — Каталог support.
     - projectSurface.js — JS-файл project Surface. Связи: используется в tests/contracts/project/api-route-contracts.test.js, tests/contracts/project/app-entry-contracts.test.js, tests/contracts/project/forum-hook-contracts.test.js.
+    - runtimeGovernance.js — JS-файл runtime Governance. Связи: импортирует tests/support/projectSurface.js; используется в tests/component/runtime/runtimeComponentSurfaces.test.jsx, tests/contracts/forum/media-budget-owner.contract.test.js, tests/contracts/forum/player-budget-profiles.contract.test.js.
     - setup-dom.js — JS-файл setup dom. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - unit/ — Каталог unit.
     - forum/ — Каталог forum.
@@ -1837,19 +1967,35 @@
         - media/ — Каталог media.
           - utils/ — Каталог utils.
             - mediaRuntime.test.js — JS-файл media Runtime.test. Связи: импортирует forum/features/media/utils/mediaRuntime.js.
+      - media/ — Каталог media.
+        - mediaStatePolicy.test.js — JS-файл media State Policy.test. Связи: импортирует forum/features/media/utils/mediaStatePolicy.js.
       - shared/ — Каталог shared.
         - config/ — Каталог config.
           - runtime.test.js — JS-файл runtime.test. Связи: импортирует forum/shared/config/runtime.js.
         - utils/ — Каталог utils.
           - counts.test.js — JS-файл counts.test. Связи: импортирует forum/shared/utils/counts.js.
+    - runtime/ — Каталог runtime.
+      - runtimeGovernance.test.js — JS-файл runtime Governance.test. Связи: импортирует src/shared/runtime/budgets/budgetEngine.js, src/shared/runtime/budgets/routeProfileResolver.js, src/shared/runtime/budgets/routeProfiles.js.
 - tools/ — Локальные скрипты аудита, генерации и техобслуживания.
+  - ingest/ — Подкаталог инструментов: ingest.
+    - harCaptureProtocol.md — Локальный скрипт/инструмент har Capture Protocol для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+    - heapCaptureProtocol.md — Локальный скрипт/инструмент heap Capture Protocol для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+    - normalizeHar.js — Локальный скрипт/инструмент normalize Har для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+    - normalizeHeap.js — Локальный скрипт/инструмент normalize Heap для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - analyze-forum-diag.js — Локальный скрипт/инструмент analyze forum diag для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - analyze-forum-media-har.js — Локальный скрипт/инструмент analyze forum media har для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - analyze-heapsnapshot.js — Локальный скрипт/инструмент analyze heapsnapshot для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-account-sync.js — Локальный скрипт/инструмент audit account sync для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-ad-runtime.js — Локальный скрипт/инструмент audit ad runtime для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-adaptive-actions.js — Локальный скрипт/инструмент audit adaptive actions для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-adaptive-core.js — Локальный скрипт/инструмент audit adaptive core для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - audit-auth-bus.js — Локальный скрипт/инструмент audit auth bus для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-auth-cascade.js — Локальный скрипт/инструмент audit auth cascade для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-console-noise.js — Локальный скрипт/инструмент audit console noise для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-diagnostics-boundaries.js — Локальный скрипт/инструмент audit diagnostics boundaries для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - audit-effects.js — Локальный скрипт/инструмент audit effects для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-feature-flag-safety.js — Локальный скрипт/инструмент audit feature flag safety для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-forensic-mode-bounds.js — Локальный скрипт/инструмент audit forensic mode bounds для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - audit-forum-deps.js — Локальный скрипт/инструмент audit forum deps для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-forum-functional-parity.ps1 — Локальный скрипт/инструмент audit forum functional parity для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-forum-media-churn.js — Локальный скрипт/инструмент audit forum media churn для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
@@ -1858,10 +2004,26 @@
   - audit-forum-view-report.js — Локальный скрипт/инструмент audit forum view report для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-full-forum.js — Локальный скрипт/инструмент audit full forum для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-heavy.js — Локальный скрипт/инструмент audit heavy для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-iframe-restore.js — Локальный скрипт/инструмент audit iframe restore для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-layout-stability.js — Локальный скрипт/инструмент audit layout stability для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - audit-media-budget.js — Локальный скрипт/инструмент audit media budget для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-media-ownership.js — Локальный скрипт/инструмент audit media ownership для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-media.js — Локальный скрипт/инструмент audit media для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-mobile-profile-budget.js — Локальный скрипт/инструмент audit mobile profile budget для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-mode-contract.js — Локальный скрипт/инструмент audit mode contract для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-player-ownership.js — Локальный скрипт/инструмент audit player ownership для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-preload-waste.js — Локальный скрипт/инструмент audit preload waste для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-prod-lite-discipline.js — Локальный скрипт/инструмент audit prod lite discipline для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - audit-project-docs.js — Локальный скрипт/инструмент audit project docs для аудита или техобслуживания. Связи: импортирует tools/project-docs-shared.js.
+  - audit-provider-baseline.js — Локальный скрипт/инструмент audit provider baseline для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-route-budgets.js — Локальный скрипт/инструмент audit route budgets для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-route-priority-policies.js — Локальный скрипт/инструмент audit route priority policies для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-route-teardown.js — Локальный скрипт/инструмент audit route teardown для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - audit-runtime-hotspots.js — Локальный скрипт/инструмент audit runtime hotspots для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-runtime-mode-resolution.js — Локальный скрипт/инструмент audit runtime mode resolution для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-runtime-passports.js — Локальный скрипт/инструмент audit runtime passports для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-same-src-thrash.js — Локальный скрипт/инструмент audit same src thrash для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - compare-baselines.js — Локальный скрипт/инструмент compare baselines для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - generate-project-dependencies.js — Локальный скрипт/инструмент generate project dependencies для аудита или техобслуживания. Связи: импортирует tools/project-docs-shared.js.
   - generate-project-docs.js — Локальный скрипт/инструмент generate project docs для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - generate-project-ownership.js — Локальный скрипт/инструмент generate project ownership для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
@@ -1869,8 +2031,12 @@
   - generate-project-routes.js — Локальный скрипт/инструмент generate project routes для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - generate-project-tree.js — Локальный скрипт/инструмент generate project tree для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - project-docs-shared.js — Локальный скрипт/инструмент project docs shared для аудита или техобслуживания. Связи: используется в tools/audit-project-docs.js, tools/generate-project-dependencies.js, tools/generate-project-risks.js.
+  - run-governance-group.mjs — Локальный скрипт/инструмент run governance group для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - run-scenario-telemetry.mjs — Локальный скрипт/инструмент run scenario telemetry для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - run-verification-audits.mjs — Локальный скрипт/инструмент run verification audits для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
-  - test-codex.mjs — Локальный скрипт/инструмент test codex для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - runtime-governance-baseline.mjs — Локальный скрипт/инструмент runtime governance baseline для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - runtime-governance.js — Локальный скрипт/инструмент runtime governance для аудита или техобслуживания. Связи: используется в tools/audit-adaptive-actions.js, tools/audit-adaptive-core.js, tools/audit-auth-cascade.js.
+  - test-codex.mjs — Локальный скрипт/инструмент test codex для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - verify-docs-workflow.mjs — Локальный скрипт/инструмент verify docs workflow для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - verify-environment.mjs — Локальный скрипт/инструмент verify environment для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
 - .env.local — Локальный runtime-конфиг и секреты окружения. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
@@ -1880,31 +2046,84 @@
 - .npmrc — Служебный-файл . Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - account-sync-audit.report.json — Сводный JSON-отчет аудита синхронизации аккаунта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - ad-runtime.audit.report.json — JSON-файл ad runtime.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- adaptive-actions.report.json — JSON-файл adaptive actions.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- adaptive-core.report.json — JSON-файл adaptive core.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - AGENTS.md — Markdown-документ AGENTS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - auth-bus.audit.report.json — JSON-файл auth bus.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- auth-cascade.report.json — JSON-файл auth cascade.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- baseline-after.stage0.json — JSON-файл baseline after.stage0. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- baseline-before.stage0.json — JSON-файл baseline before.stage0. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- console-noise-classification.report.json — JSON-файл console noise classification.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- decorative-media-budget.report.json — JSON-файл decorative media budget.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - deep-audit.report.json — Сводный JSON-отчет глубокого аудита проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- diagnostics-boundaries.report.json — JSON-файл diagnostics boundaries.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- diff.stage0.json — JSON-файл diff.stage0. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - effects-leak.report.json — JSON-отчет аудита утечек эффектов. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- feature-flag-safety.report.json — JSON-файл feature flag safety.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- forensic-bounds.report.json — JSON-файл forensic bounds.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-deps-audit.report.json — JSON-отчет аудита зависимостей форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-diag.jsonl — Потоковый лог диагностики форума в формате JSONL. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-media-churn.audit.report.json — JSON-файл forum media churn.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- forum-media-har.report.json — JSON-файл forum media har.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-scroll.audit.report.json — JSON-файл forum scroll.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-startup.audit.report.json — JSON-файл forum startup.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - heapsnapshot-analysis.report.json — JSON-файл heapsnapshot analysis.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - heavy-audit.report.json — JSON-отчет тяжелого аудита hot-path зон. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- iframe-restore.report.json — JSON-файл iframe restore.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - jsconfig.json — Алиасы и baseUrl проекта для JS/JSX. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- layout-stability.report.json — JSON-файл layout stability.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - media-audit.report.json — JSON-отчет аудита медиа-подсистемы. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - media-budget.audit.report.json — JSON-файл media budget.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- media-heap.verify.report.json — JSON-файл media heap.verify.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- media-ownership.audit.report.json — JSON-файл media ownership.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- mobile-matrix.report.json — JSON-файл mobile matrix.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- mode-contract.validation.report.json — JSON-файл mode contract.validation.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - next-env.d.ts — Служебный файл Next.js для типовой совместимости среды. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - next.config.mjs — Главная конфигурация Next.js сборки и рантайма. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- observer-cleanup.report.json — JSON-файл observer cleanup.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - package.json — Манифест пакета, npm/pnpm-скрипты и зависимости. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- player-budget.report.json — JSON-файл player budget.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - pnpm-lock.yaml — Lockfile pnpm с зафиксированными версиями зависимостей. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - pnpm-workspace.yaml — Конфиг workspace для pnpm. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- preload-waste.report.json — JSON-файл preload waste.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- pressure-ladder.report.json — JSON-файл pressure ladder.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- prod-lite-discipline.report.json — JSON-файл prod lite discipline.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - PROJECT_DEPENDENCIES.md — Markdown-документ PROJECT DEPENDENCIES. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - PROJECT_OWNERSHIP.md — Markdown-документ PROJECT OWNERSHIP. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - PROJECT_RISKS.md — Markdown-документ PROJECT RISKS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - PROJECT_ROUTES.md — Markdown-документ PROJECT ROUTES. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - PROJECT_TREE.md — Markdown-документ PROJECT TREE. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- provider-baseline.report.json — JSON-файл provider baseline.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- qcast-ownership.report.json — JSON-файл qcast ownership.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - README.md — Корневая документация проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- route-budget.report.json — JSON-файл route budget.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- route-priority-policies.report.json — JSON-файл route priority policies.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- route-teardown.report.json — JSON-файл route teardown.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - runtime-hotspots.report.json — JSON-отчет по runtime-hotspots. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- runtime-mode-resolution.report.json — JSON-файл runtime mode resolution.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- runtime-passport.snapshot.json — JSON-файл runtime passport.snapshot. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- runtime-passports.report.json — JSON-файл runtime passports.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- same-src-thrash.report.json — JSON-файл same src thrash.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.adaptive-pressure.report.json — JSON-файл scenario.adaptive pressure.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.auth-cascade.report.json — JSON-файл scenario.auth cascade.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.console-noise.report.json — JSON-файл scenario.console noise.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.decorative-media.report.json — JSON-файл scenario.decorative media.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.exchange-route.report.json — JSON-файл scenario.exchange route.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.forensic-mode.report.json — JSON-файл scenario.forensic mode.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.forum-background-restore.report.json — JSON-файл scenario.forum background restore.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.forum-desktop.report.json — JSON-файл scenario.forum desktop.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.forum-long-scroll.report.json — JSON-файл scenario.forum long scroll.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.forum-mobile.report.json — JSON-файл scenario.forum mobile.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.forum-route-return.report.json — JSON-файл scenario.forum route return.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.forum-wallet-untouched.report.json — JSON-файл scenario.forum wallet untouched.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.preload-waste.report.json — JSON-файл scenario.preload waste.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.provider-baseline.report.json — JSON-файл scenario.provider baseline.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.qcast-mixed.report.json — JSON-файл scenario.qcast mixed.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.route-teardown.report.json — JSON-файл scenario.route teardown.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.startup-shell.report.json — JSON-файл scenario.startup shell.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- startup-budget.report.json — JSON-файл startup budget.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- timer-cleanup.report.json — JSON-файл timer cleanup.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - tsconfig.json — JSON-файл tsconfig. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- tsconfig.tsbuildinfo — .tsbuildinfo-файл tsconfig. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - vitest.config.mjs — ESM-конфиг/модуль vitest.config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- widget-isolation.report.json — JSON-файл widget isolation.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.

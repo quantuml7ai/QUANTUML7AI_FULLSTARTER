@@ -1,0 +1,999 @@
+{
+  "generatedAt": "2026-04-18T03:02:43.645Z",
+  "passportFields": [
+    "route",
+    "routeBudgetProfile",
+    "runtimeMode",
+    "telemetryLevel",
+    "telemetryLabel",
+    "activeMediaOwners",
+    "countActiveIframe",
+    "countActiveNativeVideo",
+    "countActiveAdMedia",
+    "qcastState",
+    "walletAuthRuntimeState",
+    "providerCounts",
+    "externalWidgetPresence",
+    "timersCount",
+    "observersCount",
+    "sameSrcPressureScore",
+    "currentBudgetPressureScore",
+    "budgetPressureScore",
+    "mainThreadPressureScore",
+    "memoryPressureScore",
+    "teardownCleanlinessScore",
+    "startupHeavinessScore",
+    "layoutTurbulenceScore",
+    "authFanoutScore",
+    "activeAdaptiveProfile",
+    "currentEffectDegradationTier",
+    "adaptiveTier",
+    "priorityArbitrationActionsCount",
+    "decorativeSuppressionsCount",
+    "offscreenAggressiveDemotionsCount",
+    "lowMemoryFallbackActivations",
+    "mainThreadSurvivalModeActivations",
+    "backgroundThrottleActivations",
+    "adaptiveRouteDowngradeCount",
+    "degradeActionsTaken",
+    "degradeActionsTakenCount",
+    "blockedPromotionsCount",
+    "survivalModeActive",
+    "forensicModeActive"
+  ],
+  "runtimeModeSummary": {
+    "runtimeMode": "production-adaptive",
+    "telemetryLevel": "T0",
+    "telemetryLabel": "minimal-prod-counters",
+    "forensicModeActive": false,
+    "diagnosticsMode": "off"
+  },
+  "routeSnapshots": [
+    {
+      "route": "/",
+      "runtimeMode": "production-adaptive",
+      "telemetryLevel": "T0",
+      "telemetryLabel": "minimal-prod-counters",
+      "routeBudgetProfile": "landing-decorative",
+      "activeMediaOwners": [
+        "page.js"
+      ],
+      "countActiveIframe": 1,
+      "countActiveNativeVideo": 0,
+      "countActiveAdMedia": 0,
+      "qcastState": {
+        "count": 0,
+        "activeOwners": []
+      },
+      "walletAuthRuntimeState": {
+        "authSignals": 4,
+        "providerSignals": 8
+      },
+      "providerCounts": {
+        "heavyProviders": 8
+      },
+      "externalWidgetPresence": 0,
+      "observersCount": 0,
+      "timersCount": 3,
+      "sameSrcPressureScore": 0,
+      "currentBudgetPressureScore": 20,
+      "budgetPressureScore": 20,
+      "mainThreadPressureScore": 0,
+      "memoryPressureScore": 10,
+      "teardownCleanlinessScore": 8,
+      "startupHeavinessScore": 8,
+      "layoutTurbulenceScore": 0,
+      "authFanoutScore": 4,
+      "activeAdaptiveProfile": "landing-decorative:mid",
+      "currentEffectDegradationTier": 0,
+      "adaptiveTier": 0,
+      "priorityArbitrationActionsCount": 0,
+      "decorativeSuppressionsCount": 0,
+      "offscreenAggressiveDemotionsCount": 0,
+      "lowMemoryFallbackActivations": 0,
+      "mainThreadSurvivalModeActivations": 0,
+      "backgroundThrottleActivations": 0,
+      "adaptiveRouteDowngradeCount": 0,
+      "degradeActionsTaken": [],
+      "degradeActionsTakenCount": 0,
+      "blockedPromotions": 0,
+      "blockedPromotionsCount": 0,
+      "survivalModeActive": false,
+      "forensicModeActive": false,
+      "unexplainedActiveRuntime": true,
+      "files": [
+        {
+          "file": "app/page.js",
+          "counts": {
+            "video": 0,
+            "iframe": 1,
+            "audio": 0,
+            "timers": 3,
+            "observers": 0,
+            "cleanup": 6,
+            "auth": 0,
+            "providers": 0,
+            "layoutReads": 0,
+            "console": 0,
+            "preload": 0,
+            "sameSrc": 0,
+            "blockedPromotion": 0
+          }
+        },
+        {
+          "file": "app/layout.js",
+          "counts": {
+            "video": 0,
+            "iframe": 0,
+            "audio": 0,
+            "timers": 0,
+            "observers": 0,
+            "cleanup": 2,
+            "auth": 4,
+            "providers": 8,
+            "layoutReads": 0,
+            "console": 0,
+            "preload": 0,
+            "sameSrc": 0,
+            "blockedPromotion": 0
+          }
+        }
+      ]
+    },
+    {
+      "route": "/forum",
+      "runtimeMode": "production-adaptive",
+      "telemetryLevel": "T0",
+      "telemetryLabel": "minimal-prod-counters",
+      "routeBudgetProfile": {
+        "coarse": "forum-feed-mobile",
+        "fine": "forum-feed-desktop"
+      },
+      "activeMediaOwners": [
+        "ForumBootSplash.jsx"
+      ],
+      "countActiveIframe": 0,
+      "countActiveNativeVideo": 1,
+      "countActiveAdMedia": 0,
+      "qcastState": {
+        "count": 0,
+        "activeOwners": []
+      },
+      "walletAuthRuntimeState": {
+        "authSignals": 0,
+        "providerSignals": 1
+      },
+      "providerCounts": {
+        "heavyProviders": 1
+      },
+      "externalWidgetPresence": 0,
+      "observersCount": 0,
+      "timersCount": 5,
+      "sameSrcPressureScore": 0,
+      "currentBudgetPressureScore": 20,
+      "budgetPressureScore": 20,
+      "mainThreadPressureScore": 10,
+      "memoryPressureScore": 10,
+      "teardownCleanlinessScore": 5,
+      "startupHeavinessScore": 4,
+      "layoutTurbulenceScore": 2,
+      "authFanoutScore": 0,
+      "activeAdaptiveProfile": "forum-feed-mobile:mid",
+      "currentEffectDegradationTier": 0,
+      "adaptiveTier": 0,
+      "priorityArbitrationActionsCount": 0,
+      "decorativeSuppressionsCount": 0,
+      "offscreenAggressiveDemotionsCount": 0,
+      "lowMemoryFallbackActivations": 0,
+      "mainThreadSurvivalModeActivations": 0,
+      "backgroundThrottleActivations": 0,
+      "adaptiveRouteDowngradeCount": 0,
+      "degradeActionsTaken": [],
+      "degradeActionsTakenCount": 0,
+      "blockedPromotions": 4,
+      "blockedPromotionsCount": 4,
+      "survivalModeActive": false,
+      "forensicModeActive": false,
+      "unexplainedActiveRuntime": false,
+      "files": [
+        {
+          "file": "app/forum/page.js",
+          "counts": {
+            "video": 0,
+            "iframe": 0,
+            "audio": 0,
+            "timers": 0,
+            "observers": 0,
+            "cleanup": 0,
+            "auth": 0,
+            "providers": 0,
+            "layoutReads": 2,
+            "console": 0,
+            "preload": 0,
+            "sameSrc": 0,
+            "blockedPromotion": 2
+          }
+        },
+        {
+          "file": "app/forum/layout.js",
+          "counts": {
+            "video": 0,
+            "iframe": 0,
+            "audio": 0,
+            "timers": 0,
+            "observers": 0,
+            "cleanup": 0,
+            "auth": 0,
+            "providers": 1,
+            "layoutReads": 0,
+            "console": 0,
+            "preload": 0,
+            "sameSrc": 0,
+            "blockedPromotion": 0
+          }
+        },
+        {
+          "file": "app/forum/ForumRoot.jsx",
+          "counts": {
+            "video": 0,
+            "iframe": 0,
+            "audio": 0,
+            "timers": 2,
+            "observers": 0,
+            "cleanup": 1,
+            "auth": 0,
+            "providers": 0,
+            "layoutReads": 0,
+            "console": 0,
+            "preload": 0,
+            "sameSrc": 0,
+            "blockedPromotion": 0
+          }
+        },
+        {
+          "file": "components/ForumBootSplash.jsx",
+          "counts": {
+            "video": 1,
+            "iframe": 0,
+            "audio": 0,
+            "timers": 3,
+            "observers": 0,
+            "cleanup": 4,
+            "auth": 0,
+            "providers": 0,
+            "layoutReads": 0,
+            "console": 1,
+            "preload": 3,
+            "sameSrc": 0,
+            "blockedPromotion": 2
+          }
+        }
+      ]
+    },
+    {
+      "route": "forum-thread-view",
+      "runtimeMode": "production-adaptive",
+      "telemetryLevel": "T0",
+      "telemetryLabel": "minimal-prod-counters",
+      "routeBudgetProfile": "forum-thread",
+      "activeMediaOwners": [
+        "PostMediaStack.jsx"
+      ],
+      "countActiveIframe": 2,
+      "countActiveNativeVideo": 0,
+      "countActiveAdMedia": 0,
+      "qcastState": {
+        "count": 0,
+        "activeOwners": []
+      },
+      "walletAuthRuntimeState": {
+        "authSignals": 0,
+        "providerSignals": 0
+      },
+      "providerCounts": {
+        "heavyProviders": 0
+      },
+      "externalWidgetPresence": 0,
+      "observersCount": 0,
+      "timersCount": 2,
+      "sameSrcPressureScore": 0,
+      "currentBudgetPressureScore": 20,
+      "budgetPressureScore": 20,
+      "mainThreadPressureScore": 0,
+      "memoryPressureScore": 20,
+      "teardownCleanlinessScore": 1,
+      "startupHeavinessScore": 0,
+      "layoutTurbulenceScore": 0,
+      "authFanoutScore": 0,
+      "activeAdaptiveProfile": "landing-decorative:mid",
+      "currentEffectDegradationTier": 0,
+      "adaptiveTier": 0,
+      "priorityArbitrationActionsCount": 0,
+      "decorativeSuppressionsCount": 0,
+      "offscreenAggressiveDemotionsCount": 0,
+      "lowMemoryFallbackActivations": 0,
+      "mainThreadSurvivalModeActivations": 0,
+      "backgroundThrottleActivations": 0,
+      "adaptiveRouteDowngradeCount": 0,
+      "degradeActionsTaken": [],
+      "degradeActionsTakenCount": 0,
+      "blockedPromotions": 0,
+      "blockedPromotionsCount": 0,
+      "survivalModeActive": false,
+      "forensicModeActive": false,
+      "unexplainedActiveRuntime": true,
+      "files": [
+        {
+          "file": "app/forum/ForumRoot.jsx",
+          "counts": {
+            "video": 0,
+            "iframe": 0,
+            "audio": 0,
+            "timers": 2,
+            "observers": 0,
+            "cleanup": 1,
+            "auth": 0,
+            "providers": 0,
+            "layoutReads": 0,
+            "console": 0,
+            "preload": 0,
+            "sameSrc": 0,
+            "blockedPromotion": 0
+          }
+        },
+        {
+          "file": "app/forum/features/feed/components/ThreadRepliesPane.jsx",
+          "counts": {
+            "video": 0,
+            "iframe": 0,
+            "audio": 0,
+            "timers": 0,
+            "observers": 0,
+            "cleanup": 0,
+            "auth": 0,
+            "providers": 0,
+            "layoutReads": 0,
+            "console": 0,
+            "preload": 0,
+            "sameSrc": 0,
+            "blockedPromotion": 0
+          }
+        },
+        {
+          "file": "app/forum/features/feed/components/PostMediaStack.jsx",
+          "counts": {
+            "video": 0,
+            "iframe": 2,
+            "audio": 0,
+            "timers": 0,
+            "observers": 0,
+            "cleanup": 0,
+            "auth": 0,
+            "providers": 0,
+            "layoutReads": 0,
+            "console": 0,
+            "preload": 0,
+            "sameSrc": 0,
+            "blockedPromotion": 0
+          }
+        }
+      ]
+    },
+    {
+      "route": "/about",
+      "runtimeMode": "production-adaptive",
+      "telemetryLevel": "T0",
+      "telemetryLabel": "minimal-prod-counters",
+      "routeBudgetProfile": "about-decorative",
+      "activeMediaOwners": [
+        "page.js"
+      ],
+      "countActiveIframe": 0,
+      "countActiveNativeVideo": 1,
+      "countActiveAdMedia": 0,
+      "qcastState": {
+        "count": 0,
+        "activeOwners": []
+      },
+      "walletAuthRuntimeState": {
+        "authSignals": 0,
+        "providerSignals": 1
+      },
+      "providerCounts": {
+        "heavyProviders": 1
+      },
+      "externalWidgetPresence": 0,
+      "observersCount": 0,
+      "timersCount": 0,
+      "sameSrcPressureScore": 0,
+      "currentBudgetPressureScore": 20,
+      "budgetPressureScore": 20,
+      "mainThreadPressureScore": 0,
+      "memoryPressureScore": 10,
+      "teardownCleanlinessScore": 1,
+      "startupHeavinessScore": 2,
+      "layoutTurbulenceScore": 0,
+      "authFanoutScore": 0,
+      "activeAdaptiveProfile": "about-decorative:mid",
+      "currentEffectDegradationTier": 0,
+      "adaptiveTier": 0,
+      "priorityArbitrationActionsCount": 0,
+      "decorativeSuppressionsCount": 0,
+      "offscreenAggressiveDemotionsCount": 0,
+      "lowMemoryFallbackActivations": 0,
+      "mainThreadSurvivalModeActivations": 0,
+      "backgroundThrottleActivations": 0,
+      "adaptiveRouteDowngradeCount": 0,
+      "degradeActionsTaken": [],
+      "degradeActionsTakenCount": 0,
+      "blockedPromotions": 0,
+      "blockedPromotionsCount": 0,
+      "survivalModeActive": false,
+      "forensicModeActive": false,
+      "unexplainedActiveRuntime": false,
+      "files": [
+        {
+          "file": "app/about/page.js",
+          "counts": {
+            "video": 1,
+            "iframe": 0,
+            "audio": 0,
+            "timers": 0,
+            "observers": 0,
+            "cleanup": 1,
+            "auth": 0,
+            "providers": 1,
+            "layoutReads": 0,
+            "console": 1,
+            "preload": 1,
+            "sameSrc": 0,
+            "blockedPromotion": 0
+          }
+        }
+      ]
+    },
+    {
+      "route": "/exchange",
+      "runtimeMode": "production-adaptive",
+      "telemetryLevel": "T0",
+      "telemetryLabel": "minimal-prod-counters",
+      "routeBudgetProfile": "exchange-heavy",
+      "activeMediaOwners": [],
+      "countActiveIframe": 0,
+      "countActiveNativeVideo": 0,
+      "countActiveAdMedia": 0,
+      "qcastState": {
+        "count": 0,
+        "activeOwners": []
+      },
+      "walletAuthRuntimeState": {
+        "authSignals": 7,
+        "providerSignals": 0
+      },
+      "providerCounts": {
+        "heavyProviders": 0
+      },
+      "externalWidgetPresence": 0,
+      "observersCount": 0,
+      "timersCount": 9,
+      "sameSrcPressureScore": 0,
+      "currentBudgetPressureScore": 20,
+      "budgetPressureScore": 20,
+      "mainThreadPressureScore": 5,
+      "memoryPressureScore": 0,
+      "teardownCleanlinessScore": 24,
+      "startupHeavinessScore": 0,
+      "layoutTurbulenceScore": 1,
+      "authFanoutScore": 7,
+      "activeAdaptiveProfile": "exchange-heavy:mid",
+      "currentEffectDegradationTier": 0,
+      "adaptiveTier": 0,
+      "priorityArbitrationActionsCount": 0,
+      "decorativeSuppressionsCount": 0,
+      "offscreenAggressiveDemotionsCount": 0,
+      "lowMemoryFallbackActivations": 0,
+      "mainThreadSurvivalModeActivations": 0,
+      "backgroundThrottleActivations": 0,
+      "adaptiveRouteDowngradeCount": 0,
+      "degradeActionsTaken": [],
+      "degradeActionsTakenCount": 0,
+      "blockedPromotions": 0,
+      "blockedPromotionsCount": 0,
+      "survivalModeActive": false,
+      "forensicModeActive": false,
+      "unexplainedActiveRuntime": false,
+      "files": [
+        {
+          "file": "app/exchange/page.js",
+          "counts": {
+            "video": 0,
+            "iframe": 0,
+            "audio": 0,
+            "timers": 7,
+            "observers": 0,
+            "cleanup": 15,
+            "auth": 7,
+            "providers": 0,
+            "layoutReads": 1,
+            "console": 5,
+            "preload": 0,
+            "sameSrc": 0,
+            "blockedPromotion": 0
+          }
+        },
+        {
+          "file": "lib/databroker.js",
+          "counts": {
+            "video": 0,
+            "iframe": 0,
+            "audio": 0,
+            "timers": 0,
+            "observers": 0,
+            "cleanup": 0,
+            "auth": 0,
+            "providers": 0,
+            "layoutReads": 0,
+            "console": 2,
+            "preload": 0,
+            "sameSrc": 0,
+            "blockedPromotion": 0
+          }
+        },
+        {
+          "file": "app/components/CryptoNewsLens.jsx",
+          "counts": {
+            "video": 0,
+            "iframe": 0,
+            "audio": 0,
+            "timers": 2,
+            "observers": 0,
+            "cleanup": 9,
+            "auth": 0,
+            "providers": 0,
+            "layoutReads": 0,
+            "console": 8,
+            "preload": 0,
+            "sameSrc": 0,
+            "blockedPromotion": 0
+          }
+        }
+      ]
+    },
+    {
+      "route": "/academy",
+      "runtimeMode": "production-adaptive",
+      "telemetryLevel": "T0",
+      "telemetryLabel": "minimal-prod-counters",
+      "routeBudgetProfile": "editor-preview",
+      "activeMediaOwners": [],
+      "countActiveIframe": 0,
+      "countActiveNativeVideo": 0,
+      "countActiveAdMedia": 0,
+      "qcastState": {
+        "count": 0,
+        "activeOwners": []
+      },
+      "walletAuthRuntimeState": {
+        "authSignals": 10,
+        "providerSignals": 0
+      },
+      "providerCounts": {
+        "heavyProviders": 0
+      },
+      "externalWidgetPresence": 0,
+      "observersCount": 0,
+      "timersCount": 4,
+      "sameSrcPressureScore": 0,
+      "currentBudgetPressureScore": 20,
+      "budgetPressureScore": 20,
+      "mainThreadPressureScore": 0,
+      "memoryPressureScore": 0,
+      "teardownCleanlinessScore": 3,
+      "startupHeavinessScore": 0,
+      "layoutTurbulenceScore": 0,
+      "authFanoutScore": 10,
+      "activeAdaptiveProfile": "landing-decorative:mid",
+      "currentEffectDegradationTier": 0,
+      "adaptiveTier": 0,
+      "priorityArbitrationActionsCount": 0,
+      "decorativeSuppressionsCount": 0,
+      "offscreenAggressiveDemotionsCount": 0,
+      "lowMemoryFallbackActivations": 0,
+      "mainThreadSurvivalModeActivations": 0,
+      "backgroundThrottleActivations": 0,
+      "adaptiveRouteDowngradeCount": 0,
+      "degradeActionsTaken": [],
+      "degradeActionsTakenCount": 0,
+      "blockedPromotions": 0,
+      "blockedPromotionsCount": 0,
+      "survivalModeActive": false,
+      "forensicModeActive": false,
+      "unexplainedActiveRuntime": false,
+      "files": [
+        {
+          "file": "app/academy/page.js",
+          "counts": {
+            "video": 0,
+            "iframe": 0,
+            "audio": 0,
+            "timers": 0,
+            "observers": 0,
+            "cleanup": 0,
+            "auth": 0,
+            "providers": 0,
+            "layoutReads": 0,
+            "console": 0,
+            "preload": 0,
+            "sameSrc": 0,
+            "blockedPromotion": 0
+          }
+        },
+        {
+          "file": "app/academy/AcademyExamBlock.js",
+          "counts": {
+            "video": 0,
+            "iframe": 0,
+            "audio": 0,
+            "timers": 4,
+            "observers": 0,
+            "cleanup": 3,
+            "auth": 10,
+            "providers": 0,
+            "layoutReads": 0,
+            "console": 4,
+            "preload": 0,
+            "sameSrc": 0,
+            "blockedPromotion": 0
+          }
+        }
+      ]
+    },
+    {
+      "route": "/subscribe",
+      "runtimeMode": "production-adaptive",
+      "telemetryLevel": "T0",
+      "telemetryLabel": "minimal-prod-counters",
+      "routeBudgetProfile": "auth-light",
+      "activeMediaOwners": [],
+      "countActiveIframe": 0,
+      "countActiveNativeVideo": 0,
+      "countActiveAdMedia": 0,
+      "qcastState": {
+        "count": 0,
+        "activeOwners": []
+      },
+      "walletAuthRuntimeState": {
+        "authSignals": 6,
+        "providerSignals": 0
+      },
+      "providerCounts": {
+        "heavyProviders": 0
+      },
+      "externalWidgetPresence": 0,
+      "observersCount": 0,
+      "timersCount": 2,
+      "sameSrcPressureScore": 0,
+      "currentBudgetPressureScore": 20,
+      "budgetPressureScore": 20,
+      "mainThreadPressureScore": 0,
+      "memoryPressureScore": 0,
+      "teardownCleanlinessScore": 3,
+      "startupHeavinessScore": 0,
+      "layoutTurbulenceScore": 0,
+      "authFanoutScore": 6,
+      "activeAdaptiveProfile": "auth-light:mid",
+      "currentEffectDegradationTier": 0,
+      "adaptiveTier": 0,
+      "priorityArbitrationActionsCount": 0,
+      "decorativeSuppressionsCount": 0,
+      "offscreenAggressiveDemotionsCount": 0,
+      "lowMemoryFallbackActivations": 0,
+      "mainThreadSurvivalModeActivations": 0,
+      "backgroundThrottleActivations": 0,
+      "adaptiveRouteDowngradeCount": 0,
+      "degradeActionsTaken": [],
+      "degradeActionsTakenCount": 0,
+      "blockedPromotions": 0,
+      "blockedPromotionsCount": 0,
+      "survivalModeActive": false,
+      "forensicModeActive": false,
+      "unexplainedActiveRuntime": false,
+      "files": [
+        {
+          "file": "app/subscribe/page.js",
+          "counts": {
+            "video": 0,
+            "iframe": 0,
+            "audio": 0,
+            "timers": 0,
+            "observers": 0,
+            "cleanup": 0,
+            "auth": 0,
+            "providers": 0,
+            "layoutReads": 0,
+            "console": 0,
+            "preload": 0,
+            "sameSrc": 0,
+            "blockedPromotion": 0
+          }
+        },
+        {
+          "file": "app/subscribe/subscribe.client.jsx",
+          "counts": {
+            "video": 0,
+            "iframe": 0,
+            "audio": 0,
+            "timers": 2,
+            "observers": 0,
+            "cleanup": 3,
+            "auth": 6,
+            "providers": 0,
+            "layoutReads": 0,
+            "console": 2,
+            "preload": 0,
+            "sameSrc": 0,
+            "blockedPromotion": 0
+          }
+        }
+      ]
+    },
+    {
+      "route": "/ads/home",
+      "runtimeMode": "production-adaptive",
+      "telemetryLevel": "T0",
+      "telemetryLabel": "minimal-prod-counters",
+      "routeBudgetProfile": "ads-preview",
+      "activeMediaOwners": [
+        "home.js"
+      ],
+      "countActiveIframe": 0,
+      "countActiveNativeVideo": 2,
+      "countActiveAdMedia": 2,
+      "qcastState": {
+        "count": 0,
+        "activeOwners": []
+      },
+      "walletAuthRuntimeState": {
+        "authSignals": 0,
+        "providerSignals": 1
+      },
+      "providerCounts": {
+        "heavyProviders": 1
+      },
+      "externalWidgetPresence": 0,
+      "observersCount": 0,
+      "timersCount": 0,
+      "sameSrcPressureScore": 0,
+      "currentBudgetPressureScore": 20,
+      "budgetPressureScore": 20,
+      "mainThreadPressureScore": 20,
+      "memoryPressureScore": 20,
+      "teardownCleanlinessScore": 1,
+      "startupHeavinessScore": 2,
+      "layoutTurbulenceScore": 4,
+      "authFanoutScore": 0,
+      "activeAdaptiveProfile": "ads-preview:mid",
+      "currentEffectDegradationTier": 0,
+      "adaptiveTier": 0,
+      "priorityArbitrationActionsCount": 0,
+      "decorativeSuppressionsCount": 0,
+      "offscreenAggressiveDemotionsCount": 0,
+      "lowMemoryFallbackActivations": 0,
+      "mainThreadSurvivalModeActivations": 0,
+      "backgroundThrottleActivations": 0,
+      "adaptiveRouteDowngradeCount": 0,
+      "degradeActionsTaken": [],
+      "degradeActionsTakenCount": 0,
+      "blockedPromotions": 0,
+      "blockedPromotionsCount": 0,
+      "survivalModeActive": false,
+      "forensicModeActive": false,
+      "unexplainedActiveRuntime": false,
+      "files": [
+        {
+          "file": "app/ads/home.js",
+          "counts": {
+            "video": 2,
+            "iframe": 0,
+            "audio": 0,
+            "timers": 0,
+            "observers": 0,
+            "cleanup": 1,
+            "auth": 0,
+            "providers": 0,
+            "layoutReads": 4,
+            "console": 6,
+            "preload": 1,
+            "sameSrc": 0,
+            "blockedPromotion": 0
+          }
+        },
+        {
+          "file": "lib/adsCore.js",
+          "counts": {
+            "video": 0,
+            "iframe": 0,
+            "audio": 0,
+            "timers": 0,
+            "observers": 0,
+            "cleanup": 0,
+            "auth": 0,
+            "providers": 1,
+            "layoutReads": 0,
+            "console": 3,
+            "preload": 0,
+            "sameSrc": 0,
+            "blockedPromotion": 0
+          }
+        }
+      ]
+    },
+    {
+      "route": "forum-quest-cards",
+      "runtimeMode": "production-adaptive",
+      "telemetryLevel": "T0",
+      "telemetryLabel": "minimal-prod-counters",
+      "routeBudgetProfile": "quest-cards",
+      "activeMediaOwners": [
+        "QuestHub.jsx"
+      ],
+      "countActiveIframe": 0,
+      "countActiveNativeVideo": 2,
+      "countActiveAdMedia": 0,
+      "qcastState": {
+        "count": 0,
+        "activeOwners": []
+      },
+      "walletAuthRuntimeState": {
+        "authSignals": 0,
+        "providerSignals": 0
+      },
+      "providerCounts": {
+        "heavyProviders": 0
+      },
+      "externalWidgetPresence": 0,
+      "observersCount": 0,
+      "timersCount": 3,
+      "sameSrcPressureScore": 0,
+      "currentBudgetPressureScore": 20,
+      "budgetPressureScore": 20,
+      "mainThreadPressureScore": 0,
+      "memoryPressureScore": 20,
+      "teardownCleanlinessScore": 1,
+      "startupHeavinessScore": 2,
+      "layoutTurbulenceScore": 0,
+      "authFanoutScore": 0,
+      "activeAdaptiveProfile": "landing-decorative:mid",
+      "currentEffectDegradationTier": 0,
+      "adaptiveTier": 0,
+      "priorityArbitrationActionsCount": 0,
+      "decorativeSuppressionsCount": 0,
+      "offscreenAggressiveDemotionsCount": 0,
+      "lowMemoryFallbackActivations": 0,
+      "mainThreadSurvivalModeActivations": 0,
+      "backgroundThrottleActivations": 0,
+      "adaptiveRouteDowngradeCount": 0,
+      "degradeActionsTaken": [],
+      "degradeActionsTakenCount": 0,
+      "blockedPromotions": 0,
+      "blockedPromotionsCount": 0,
+      "survivalModeActive": false,
+      "forensicModeActive": false,
+      "unexplainedActiveRuntime": false,
+      "files": [
+        {
+          "file": "app/forum/features/quests/components/QuestHub.jsx",
+          "counts": {
+            "video": 2,
+            "iframe": 0,
+            "audio": 0,
+            "timers": 3,
+            "observers": 0,
+            "cleanup": 1,
+            "auth": 0,
+            "providers": 0,
+            "layoutReads": 0,
+            "console": 0,
+            "preload": 2,
+            "sameSrc": 0,
+            "blockedPromotion": 0
+          }
+        }
+      ]
+    },
+    {
+      "route": "forum-qcast-mixed",
+      "runtimeMode": "production-adaptive",
+      "telemetryLevel": "T0",
+      "telemetryLabel": "minimal-prod-counters",
+      "routeBudgetProfile": "qcast-mixed",
+      "activeMediaOwners": [
+        "QCastPlayer.jsx",
+        "QCoinWithdrawPopover.jsx"
+      ],
+      "countActiveIframe": 0,
+      "countActiveNativeVideo": 1,
+      "countActiveAdMedia": 0,
+      "qcastState": {
+        "count": 1,
+        "activeOwners": [
+          "QCastPlayer.jsx"
+        ]
+      },
+      "walletAuthRuntimeState": {
+        "authSignals": 0,
+        "providerSignals": 0
+      },
+      "providerCounts": {
+        "heavyProviders": 0
+      },
+      "externalWidgetPresence": 0,
+      "observersCount": 0,
+      "timersCount": 2,
+      "sameSrcPressureScore": 0,
+      "currentBudgetPressureScore": 20,
+      "budgetPressureScore": 20,
+      "mainThreadPressureScore": 25,
+      "memoryPressureScore": 10,
+      "teardownCleanlinessScore": 26,
+      "startupHeavinessScore": 3,
+      "layoutTurbulenceScore": 5,
+      "authFanoutScore": 0,
+      "activeAdaptiveProfile": "landing-decorative:mid",
+      "currentEffectDegradationTier": 0,
+      "adaptiveTier": 0,
+      "priorityArbitrationActionsCount": 0,
+      "decorativeSuppressionsCount": 0,
+      "offscreenAggressiveDemotionsCount": 0,
+      "lowMemoryFallbackActivations": 0,
+      "mainThreadSurvivalModeActivations": 0,
+      "backgroundThrottleActivations": 0,
+      "adaptiveRouteDowngradeCount": 0,
+      "degradeActionsTaken": [],
+      "degradeActionsTakenCount": 0,
+      "blockedPromotions": 1,
+      "blockedPromotionsCount": 1,
+      "survivalModeActive": false,
+      "forensicModeActive": false,
+      "unexplainedActiveRuntime": false,
+      "files": [
+        {
+          "file": "app/forum/features/media/components/QCastPlayer.jsx",
+          "counts": {
+            "video": 0,
+            "iframe": 0,
+            "audio": 1,
+            "timers": 2,
+            "observers": 0,
+            "cleanup": 24,
+            "auth": 0,
+            "providers": 0,
+            "layoutReads": 2,
+            "console": 0,
+            "preload": 2,
+            "sameSrc": 0,
+            "blockedPromotion": 1
+          }
+        },
+        {
+          "file": "app/forum/features/qcoin/components/QCoinWithdrawPopover.jsx",
+          "counts": {
+            "video": 1,
+            "iframe": 0,
+            "audio": 0,
+            "timers": 0,
+            "observers": 0,
+            "cleanup": 2,
+            "auth": 0,
+            "providers": 0,
+            "layoutReads": 3,
+            "console": 0,
+            "preload": 1,
+            "sameSrc": 0,
+            "blockedPromotion": 0
+          }
+        }
+      ]
+    }
+  ]
+}

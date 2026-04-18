@@ -258,7 +258,7 @@ export default function ForumPage() {
               {!canAccept && (
                 <div className="fr-note">
                   {t('forum_rules_scroll_hint') ||
-                    'Прокрутите текст до конца, чтобы активировать кнопку.'}
+                    'Carefully read the rules and click “Accept”.'}
                 </div>
               )}
 
