@@ -1094,6 +1094,51 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       try { media.dataset.__lastLoadKickTs = String(now); } catch {}
       return true;
     };
+    const requestHtmlMediaLoad = (
+      el,
+      {
+        channel = 'generic',
+        minGapMs = 1300,
+        burstWindowMs = 16000,
+        burstLimit = 5,
+        blockMs = 10000,
+        bypassSrcLimiter = false,
+        bypassPendingBudget = false,
+        boostCandidateTs = false,
+        readyRetryCount = null,
+        traceEvent = 'load_kick',
+        traceData = null,
+      } = {},
+    ) => {
+      const media = getMediaStateNode(el);
+      if (!(media instanceof HTMLMediaElement)) return false;
+      if (!canKickLoad(media, {
+        channel,
+        minGapMs,
+        burstWindowMs,
+        burstLimit,
+        blockMs,
+        bypassSrcLimiter,
+        bypassPendingBudget,
+      })) return false;
+      const now = Date.now();
+      try {
+        media.dataset.__loadPending = '1';
+        media.dataset.__warmReady = '0';
+        media.dataset.__loadPendingSince = String(now);
+      } catch {}
+      if (boostCandidateTs) {
+        try { media.dataset.__candidateBoostTs = String(now); } catch {}
+      }
+      if (readyRetryCount != null) {
+        try { media.dataset.__readyRetryCount = String(readyRetryCount); } catch {}
+      }
+      try {
+        trace(traceEvent, media, traceData || { channel });
+      } catch {}
+      try { media.load?.(); } catch {}
+      return true;
+    };
     const getOwnerNode = (el) => {
       try {
         if (el instanceof Element) {
@@ -1422,6 +1467,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       try {
         applyMutedPref(el);
         el.playsInline = true;
+        let restoredColdVideo = false;
         if (el instanceof HTMLVideoElement) {
           try { el.dataset.__resident = '1'; } catch {}
           try { el.dataset.__prewarm = '1'; } catch {}
@@ -1429,6 +1475,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           if (!el.getAttribute('src')) {
             trace('candidate_restore', el, { reason });
             __restoreVideoEl(el);
+            restoredColdVideo = true;
           }
         } else {
           try { el.preload = 'auto'; } catch {}
@@ -1464,11 +1511,11 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           trace('candidate_clear_stale_pending', el, { reason, pendingForMs: now - pendingSince });
         }
         const cold = networkState === HTMLMediaElement.NETWORK_EMPTY || !el.currentSrc;
-        if (cold && (now - lastBoostTs) > 1500 && el.dataset?.__loadPending !== '1') {
+        if (!restoredColdVideo && cold && (now - lastBoostTs) > 1500 && el.dataset?.__loadPending !== '1') {
           const minGapMs = highPriorityReason
             ? (isIOSUi ? 1300 : (isCoarseUi ? 1000 : 900))
             : (isIOSUi ? 1900 : (isCoarseUi ? 1600 : 1400));
-          if (!canKickLoad(el, {
+          if (!requestHtmlMediaLoad(el, {
             channel: 'candidate_cold',
             minGapMs,
             burstWindowMs: isIOSUi ? 22000 : 16000,
@@ -1476,14 +1523,13 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             blockMs: isIOSUi ? 14000 : 10000,
             bypassPendingBudget: highPriorityReason,
             bypassSrcLimiter: highPriorityReason && isIOSUi,
+            boostCandidateTs: true,
+            traceEvent: 'candidate_force_load',
+            traceData: { reason: `${reason}:cold` },
           })) {
             armReadyReplay(el);
             return false;
           }
-          try { el.dataset.__candidateBoostTs = String(now); } catch {}
-          try { el.dataset.__loadPending = '1'; } catch {}
-          trace('candidate_force_load', el, { reason: `${reason}:cold` });
-          try { el.load?.(); } catch {}
         }
         const stalledPending =
           String(el.dataset?.__loadPending || '') === '1' &&
@@ -1493,7 +1539,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           (now - pendingSince) > (isIOSUi ? 1100 : 1450);
         const maxReadyRetryCount = isIOSUi ? 2 : 1;
         if (stalledPending && readyRetryCount < maxReadyRetryCount && (now - lastBoostTs) > 900) {
-          if (!canKickLoad(el, {
+          if (!requestHtmlMediaLoad(el, {
             channel: 'candidate_retry',
             minGapMs: isIOSUi ? 1600 : 1200,
             burstWindowMs: isIOSUi ? 22000 : 17000,
@@ -1501,20 +1547,20 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             blockMs: isIOSUi ? 13000 : 9000,
             bypassPendingBudget: true,
             bypassSrcLimiter: isIOSUi,
+            boostCandidateTs: true,
+            readyRetryCount: readyRetryCount + 1,
+            traceEvent: 'candidate_pending_stall_retry',
+            traceData: {
+              reason,
+              stalledMs: now - pendingSince,
+            },
           })) {
             armReadyReplay(el);
             return false;
           }
-          try { el.dataset.__candidateBoostTs = String(now); } catch {}
-          try { el.dataset.__readyRetryCount = String(readyRetryCount + 1); } catch {}
-          trace('candidate_pending_stall_retry', el, {
-            reason,
-            stalledMs: now - pendingSince,
-          });
           try {
             if (!el.getAttribute('src')) __restoreVideoEl(el);
           } catch {}
-          try { el.load?.(); } catch {}
         }
         armReadyReplay(el);
       } catch {}
@@ -2796,7 +2842,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
               const empty = (el.networkState === HTMLMediaElement.NETWORK_EMPTY) || !el.currentSrc;
               if (!restoredNow && empty && el.dataset?.__loadPending !== '1' && el.paused && (el.currentTime === 0)) {
                 const userIntentKick = hasUserGestureIntent(el) || hasManualLease(el);
-                if (!canKickLoad(el, {
+                if (!requestHtmlMediaLoad(el, {
                   channel: 'play_cold',
                   minGapMs: isIOSUi ? 1700 : (isCoarseUi ? 1500 : 1300),
                   burstWindowMs: isIOSUi ? 22000 : 15000,
@@ -2804,10 +2850,8 @@ export default function useForumMediaCoordinator({ emitDiag }) {
                   blockMs: isIOSUi ? 12000 : 9000,
                   bypassSrcLimiter: userIntentKick || isIOSUi,
                   bypassPendingBudget: true,
+                  traceEvent: 'play_load',
                 })) return;
-                try { el.dataset.__loadPending = '1'; } catch {}
-                trace('play_load', el);
-                el.load?.();
               }
             } catch {}
             __touchActiveVideoEl(el);
@@ -2887,7 +2931,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
               try {
                 const empty = (a.networkState === HTMLMediaElement.NETWORK_EMPTY) || !a.currentSrc;
                 const userIntentKick = hasUserGestureIntent(a) || hasManualLease(el) || hasManualLease(a);
-                if (empty && a.paused && canKickLoad(a, {
+                if (empty && a.paused && requestHtmlMediaLoad(a, {
                   channel: 'qcast_cold',
                   minGapMs: isIOSUi ? 1800 : 1500,
                   burstWindowMs: isIOSUi ? 20000 : 15000,
@@ -2897,7 +2941,9 @@ export default function useForumMediaCoordinator({ emitDiag }) {
                   // QCast is single-audio focus content: keep it responsive on mobile
                   // even when video prewarm budget is occupied.
                   bypassPendingBudget: true,
-                })) a.load?.();
+                  traceEvent: 'qcast_load',
+                  traceData: { reason: 'qcast_cold' },
+                })) {}
               } catch {}
               armReadyReplay(a);
             } else if (a.paused) {
@@ -3574,16 +3620,15 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             typeof HTMLMediaElement !== 'undefined' &&
             Number(mediaEl.networkState || 0) === HTMLMediaElement.NETWORK_EMPTY;
           if (hasSrcNow && readyStateNow === 0 && networkEmpty && mediaEl.dataset?.__loadPending !== '1') {
-            if (!canKickLoad(mediaEl, {
+            if (!requestHtmlMediaLoad(mediaEl, {
               channel: 'visibility_recover',
               minGapMs: isIOSUi ? 2100 : (isCoarseUi ? 1800 : 1500),
               burstWindowMs: isIOSUi ? 24000 : 18000,
               burstLimit: isIOSUi ? 3 : 4,
               blockMs: isIOSUi ? 15000 : 11000,
+              traceEvent: 'visibility_restore',
+              traceData: { reason, mode: 'kick_stalled' },
             })) return;
-            try { mediaEl.dataset.__loadPending = '1'; } catch {}
-            trace('visibility_restore', mediaEl, { reason, mode: 'kick_stalled' });
-            try { mediaEl.load?.(); } catch {}
           }
         });
       } catch {}

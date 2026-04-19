@@ -11,10 +11,23 @@ describe('coordinator runtime contract', () => {
     expect(src).toContain("if (String(dataForumVideo || '') === 'post' || coordinatorOwnsLifecycle)")
   })
 
+  test('VideoMedia leaves post-video src attach to the coordinator', () => {
+    const src = read('app/forum/features/media/components/VideoMedia.jsx')
+    expect(src).not.toContain('shouldBootstrapAttach')
+    expect(src).not.toContain('__bootAttachedSrc')
+    expect(src).not.toContain('__bootMetadataPrimed')
+  })
+
   test('coordinator defers hard unload during settling', () => {
     const src = read('app/forum/features/media/hooks/useForumMediaCoordinator.js')
     expect(src).toContain('hard_unload_deferred_settling')
     expect(src).toContain('markSettling')
+  })
+
+  test('post media stack keeps forum embeds lazy until the coordinator promotes them', () => {
+    const src = read('app/forum/features/feed/components/PostMediaStack.jsx')
+    expect(src).not.toContain('loading="eager"')
+    expect(src).toContain('loading="lazy"')
   })
 
   test('coordinator respects splash gate and keeps qcast on the shared mute source', () => {
@@ -39,5 +52,11 @@ describe('coordinator runtime contract', () => {
     expect(src).toContain('export function __markMediaLifecycleTouch')
     expect(src).toContain('shouldKeepResidentPostVideo')
     expect(src).toContain("const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'")
+  })
+
+  test('media lifecycle restore does not force a second post-video load kick', () => {
+    const src = read('app/forum/features/media/utils/mediaLifecycleRuntime.js')
+    expect(src).toContain('if (isPostFeedVideo) return')
+    expect(src).not.toContain('shouldKickPostRestore')
   })
 })

@@ -279,8 +279,6 @@ export default function PostMediaStack({
                 data-lifecycle-state={lifecycleState}
                 data-stable-shell="1"
                 src={src}
-
-                loading="eager"
                 playsInline
                 controls={false}
                 controlsList="nodownload noplaybackrate noremoteplayback"
@@ -327,7 +325,7 @@ export default function PostMediaStack({
                   data-forum-embed-kind="youtube"
                   data-lifecycle-state={lifecycleState}
                   data-stable-shell="1"
-                  loading="eager"
+                  loading="lazy"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
@@ -417,7 +415,7 @@ export default function PostMediaStack({
                   data-forum-embed-kind="tiktok"
                   data-lifecycle-state={lifecycleState}
                   data-stable-shell="1"
-                  loading="eager"
+                  loading="lazy"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
