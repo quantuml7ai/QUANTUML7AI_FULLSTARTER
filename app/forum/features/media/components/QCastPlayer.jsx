@@ -935,7 +935,7 @@ React.useEffect(() => {
       {qcastFxProfile.viz ? ( 
         <canvas ref={canvasRef} className="qcastViz" data-on={isPlaying ? '1' : '0'} aria-hidden="true" />
       ) : null}
-     <audio ref={audioRef} src={src} preload="auto" playsInline crossOrigin="anonymous" referrerPolicy="no-referrer" data-qcast-audio="1" className="qcastAudio" />
+     <audio ref={audioRef} src={src} preload="metadata" playsInline crossOrigin="anonymous" referrerPolicy="no-referrer" data-qcast-audio="1" className="qcastAudio" />
 
       {FX_POOL > 0 ? (
         <div className="qcastFxLayer" data-scope={qcastFxProfile.fullscreen ? 'viewport' : 'card'} aria-hidden="true">

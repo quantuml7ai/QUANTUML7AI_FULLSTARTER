@@ -1024,10 +1024,12 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   // текущий выбранный mediaHref (конкретный youtube / картинка и т.п.)
   const [mediaHref, setMediaHref] = useState(null);
 
-  const rootRef = useRef(null);
-  const videoRef = useRef(null);
-  const ytIframeRef = useRef(null);
-  const ytPlayerRef = useRef(null);
+const rootRef = useRef(null);
+const videoRef = useRef(null);
+const detachVideoTimerRef = useRef(null);
+const [attachedVideoSrc, setAttachedVideoSrc] = useState('');
+const ytIframeRef = useRef(null);
+const ytPlayerRef = useRef(null);
   const videoErrorUntilRef = useRef(new Map());
   const isVideoSrcTemporarilyBlocked = (src) => {
     const key = String(src || '').trim();
@@ -1068,6 +1070,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
 
   const shouldPlay = isFocused && isPageActive;
   const shouldPlayRef = useRef(false);
+  const mutedRef = useRef(true);
   const adPlayEventTsRef = useRef(0);
   const emitAdPlayToCoordinator = React.useCallback((source = 'ad') => {
     if (!isBrowser()) return;
@@ -1108,10 +1111,65 @@ const slotCssVars = {
   '--forum-ad-lens-sparkle-dur': `${AD_LENS_UI.sparkleDurationMs}ms`,
 };
 
-  useEffect(() => {
-    shouldPlayRef.current = shouldPlay;
-  }, [shouldPlay]);
+useEffect(() => {
+  shouldPlayRef.current = shouldPlay;
+}, [shouldPlay]);
 
+useEffect(() => {
+  mutedRef.current = !!muted;
+}, [muted]);
+
+useEffect(() => {
+  if (detachVideoTimerRef.current) {
+    clearTimeout(detachVideoTimerRef.current);
+    detachVideoTimerRef.current = null;
+  }
+
+  if (media.kind !== 'video') {
+    setAttachedVideoSrc('');
+    const node = videoRef.current;
+    if (node) {
+      try { node.pause?.(); } catch {}
+      try { node.removeAttribute('src'); } catch {}
+      try { node.load?.(); } catch {}
+    }
+    return undefined;
+  }
+
+  const nextSrc = String(media.src || '').trim();
+  if (!nextSrc || isVideoSrcTemporarilyBlocked(nextSrc)) {
+    setAttachedVideoSrc('');
+    const node = videoRef.current;
+    if (node) {
+      try { node.pause?.(); } catch {}
+      try { node.removeAttribute('src'); } catch {}
+      try { node.load?.(); } catch {}
+    }
+    return undefined;
+  }
+
+  const wantAttached = shouldPlay || isNear;
+  if (wantAttached) {
+    setAttachedVideoSrc((prev) => (prev === nextSrc ? prev : nextSrc));
+    return undefined;
+  }
+
+  detachVideoTimerRef.current = setTimeout(() => {
+    detachVideoTimerRef.current = null;
+    const node = videoRef.current;
+    try { node?.pause?.(); } catch {}
+    try { node?.removeAttribute?.('src'); } catch {}
+    try { node?.load?.(); } catch {}
+    setAttachedVideoSrc('');
+  }, isNear ? 1800 : 450);
+
+  return () => {
+    if (detachVideoTimerRef.current) {
+      clearTimeout(detachVideoTimerRef.current);
+      detachVideoTimerRef.current = null;
+    }
+  };
+}, [isNear, media.kind, media.src, shouldPlay]);
   // Page visibility + focus/blur
   useEffect(() => {
     if (!isBrowser()) return;
@@ -1528,69 +1586,86 @@ const slotCssVars = {
   }, [safeClick, conf, slotKind, mediaHref, isNear, isFocused]);
 
   // YouTube Iframe API для управления звуком
-  useEffect(() => {
-    if (!isBrowser()) return;
-    if (media.kind !== 'youtube' || !media.src) return;
-
-    let cancelled = false;
-
-    function createPlayer() {
-      if (cancelled) return;
-      if (!window.YT || !window.YT.Player || !ytIframeRef.current) return;
-
-      try {
-        const player = new window.YT.Player(ytIframeRef.current, {
-          videoId: media.src,
-          playerVars: {
-            autoplay: 0,
-            controls: 0,
-            mute: muted ? 1 : 0,
-            rel: 0,
-            fs: 0,
-            modestbranding: 1,
-            playsinline: 1,
-            loop: 1,
-            playlist: media.src,
-          },
-          events: {
-            onReady: (ev) => {
-              if (cancelled) return;
-              ytPlayerRef.current = ev.target;
-              try {
-                if (muted) ev.target.mute?.();
-                else ev.target.unMute?.();
-                // Играем только если реально в фокусе внимания
-                if (shouldPlayRef.current) ev.target.playVideo?.();
-                else ev.target.pauseVideo?.();
-              } catch {}
-            },
-          },
-        });
-
-        ytPlayerRef.current = player;
-      } catch {}
+useEffect(() => {
+  if (!isBrowser()) return;
+  if (media.kind !== 'youtube' || !media.src) {
+    const existing = ytPlayerRef.current;
+    if (existing) {
+      try { existing.destroy?.(); } catch {}
+      ytPlayerRef.current = null;
     }
+    return;
+  }
 
-    if (window.YT && window.YT.Player) {
+  let cancelled = false;
+  let localPlayer = null;
+
+  const cleanupPlayer = () => {
+    if (localPlayer) {
+      try { localPlayer.destroy?.(); } catch {}
+    }
+    if (ytPlayerRef.current === localPlayer) {
+      ytPlayerRef.current = null;
+    }
+  };
+
+  function createPlayer() {
+    if (cancelled) return;
+    if (!window.YT || !window.YT.Player || !ytIframeRef.current) return;
+
+    try {
+      localPlayer = new window.YT.Player(ytIframeRef.current, {
+        videoId: media.src,
+        playerVars: {
+          autoplay: 0,
+          controls: 0,
+          mute: 1,
+          rel: 0,
+          fs: 0,
+          modestbranding: 1,
+          playsinline: 1,
+          loop: 1,
+          playlist: media.src,
+        },
+        events: {
+          onReady: (ev) => {
+            if (cancelled) return;
+            ytPlayerRef.current = ev.target;
+            try {
+              if (mutedRef.current) ev.target.mute?.();
+              else ev.target.unMute?.();
+              if (shouldPlayRef.current) ev.target.playVideo?.();
+              else ev.target.pauseVideo?.();
+            } catch {}
+          },
+        },
+      });
+
+      ytPlayerRef.current = localPlayer;
+    } catch {}
+  }
+
+  if (window.YT && window.YT.Player) {
+    createPlayer();
+  } else {
+    const prev = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function () {
+      if (typeof prev === 'function') prev();
       createPlayer();
-    } else {
-      const prev = window.onYouTubeIframeAPIReady;
-      window.onYouTubeIframeAPIReady = function () {
-        if (typeof prev === 'function') prev();
-        createPlayer();
-      };
-      if (!document.getElementById('yt-iframe-api')) {
-        const tag = document.createElement('script');
-        tag.id = 'yt-iframe-api';
-        tag.src = 'https://www.youtube.com/iframe_api';
-        document.head.appendChild(tag);
-      }
-    }
-
-    return () => {
-      cancelled = true;
     };
-  }, [media, muted]);
+    if (!document.getElementById('yt-iframe-api')) {
+      const tag = document.createElement('script');
+      tag.id = 'yt-iframe-api';
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.head.appendChild(tag);
+    }
+  }
+
+  return () => {
+    cancelled = true;
+    cleanupPlayer();
+  };
+}, [media.kind, media.src]);
   // ===== Hard stop / resume playback depending on attention =====
   useEffect(() => {
     // HTML5 video
@@ -2137,13 +2212,13 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
   <div className="forum-ad-media-fill">
     <video
       ref={videoRef}
-      src={media.src}
+      src={attachedVideoSrc || undefined}
       className="forum-ad-fit"
       muted={muted}
       loop
       playsInline
       referrerPolicy="no-referrer"
-      preload={isNear ? 'metadata' : 'none'}
+      preload={shouldPlay ? 'auto' : (isNear ? 'metadata' : 'none')}
       onLoadedData={() => {
         try { clearVideoSrcBlock(media?.src); } catch {}
       }}

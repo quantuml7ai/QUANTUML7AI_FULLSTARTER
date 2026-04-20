@@ -225,7 +225,7 @@ if (!canHardUnload || shouldKeepResidentPostVideo) {
   try {
     el.dataset.__resident = isPostFeedVideo ? '1' : '0'
     el.dataset.__prewarm = isPostFeedVideo ? '1' : '0'
-    el.preload = isPostFeedVideo ? 'auto' : 'metadata'
+    el.preload = 'metadata'
   } catch {}
   return
 }
@@ -273,10 +273,10 @@ const canRestoreLoad = () => {
     const blockedUntil = Number(el.dataset?.__restoreLoadBlockedUntil || 0)
     if (blockedUntil > now) return false
 
-    const fastRestore = isPostFeedVideo
-    const minGap = fastRestore ? 320 : 1500
-    const winMs = fastRestore ? 8000 : 16000
-    const burstLimit = fastRestore ? 14 : 5
+const fastRestore = isPostFeedVideo
+const minGap = fastRestore ? 1200 : 1500
+const winMs = fastRestore ? 20000 : 16000
+const burstLimit = fastRestore ? 4 : 5
 
     const lastTs = Number(el.dataset?.__lastRestoreLoadTs || 0)
     if (lastTs > 0 && (now - lastTs) < minGap) return false
@@ -294,7 +294,7 @@ const canRestoreLoad = () => {
     el.dataset.__restoreLoadCount = String(count)
 
     if (count > burstLimit) {
-      el.dataset.__restoreLoadBlockedUntil = String(now + (fastRestore ? 1200 : 10000))
+      el.dataset.__restoreLoadBlockedUntil = String(now + (fastRestore ? 6000 : 10000))
       return false
     }
 
