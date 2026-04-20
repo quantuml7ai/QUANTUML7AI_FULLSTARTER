@@ -1110,8 +1110,7 @@ const onVideoLoaded = React.useCallback(() => {
   ref={ref}
   data-forum-media={dataForumMedia}
   data-forum-video={dataForumVideo}
-  playsInline={playsInline}
-  defaultMuted={typeof defaultMutedProp === 'boolean' ? defaultMutedProp : (isPostVideo ? true : !!autoPlay)}
+  playsInline={playsInline} 
   preload={renderPreload}
   controls={isPostVideo ? undefined : renderControls}
   autoPlay={autoPlay}
