@@ -1,4 +1,4 @@
-﻿'use client'
+﻿ 'use client'
 import React from 'react'
 import Image from 'next/image'
 import { formatMediaTime } from '../utils/formatMediaTime'
@@ -12,8 +12,6 @@ import {
   QCastIconGear,
 } from './qcast/QCastIcons'
 
-const QCAST_MUTED_KEY = 'forum:qcastMuted'
-
 export default function QCastPlayer({
   src,
   onRemove,
@@ -25,7 +23,7 @@ export default function QCastPlayer({
 }) {
   const desiredMuted = React.useCallback((pref) => (
     pref == null ? true : !!pref
-  ), [])
+  ), []) 
   const readMutedPref = React.useCallback(() => {
     try {
       return typeof readMutedPrefFromStorage === 'function' ? readMutedPrefFromStorage() : null;
@@ -38,22 +36,8 @@ export default function QCastPlayer({
       if (typeof writeMutedPref === 'function') writeMutedPref(!!nextMuted);
     } catch {}
   }, [writeMutedPref]);
-  const readQcastMutedPref = React.useCallback(() => {
-    try {
-      if (typeof localStorage !== 'undefined') {
-        const raw = localStorage.getItem(QCAST_MUTED_KEY);
-        if (raw === '1' || raw === 'true') return true;
-        if (raw === '0' || raw === 'false') return false;
-      }
-    } catch {}
-    return readMutedPref();
-  }, [readMutedPref]);
+  const readQcastMutedPref = React.useCallback(() => readMutedPref(), [readMutedPref]);
   const writeQcastMutedPref = React.useCallback((nextMuted) => {
-    try {
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(QCAST_MUTED_KEY, nextMuted ? '1' : '0');
-      }
-    } catch {}
     writeMuted(nextMuted);
   }, [writeMuted]);
   const rearmPooledFx = React.useCallback((el) => {
@@ -413,27 +397,36 @@ const spawnFx = React.useCallback((kind, origin) => {
     };
 
     const onVolume = () => {
+      const now = Date.now();
       try {
         setMuted(!!audio.muted);
         const v = Number(audio.volume);
         if (Number.isFinite(v)) setVolume(Math.min(1, Math.max(0, v)));
         syncMasterGain();
+        const persistUntil = Math.max(
+          Number(audio?.dataset?.__persistMuteUntil || 0),
+          Number(hostRef.current?.dataset?.__persistMuteUntil || 0),
+        );
         const skipPersistUntil = Math.max(
           Number(audio?.dataset?.__skipMutePersistUntil || 0),
           Number(hostRef.current?.dataset?.__skipMutePersistUntil || 0),
         );
-        if (skipPersistUntil <= Date.now()) {
+        if (skipPersistUntil <= now && persistUntil > now) {
           writeQcastMutedPref(!!audio.muted);
         }
       } catch {}
-      try {
+      try { 
+        const persistUntil = Math.max(
+          Number(audio?.dataset?.__persistMuteUntil || 0),
+          Number(hostRef.current?.dataset?.__persistMuteUntil || 0),
+        );
         const skipPersistUntil = Math.max(
           Number(audio?.dataset?.__skipMutePersistUntil || 0),
           Number(hostRef.current?.dataset?.__skipMutePersistUntil || 0),
         );
-        if (skipPersistUntil > Date.now()) return;
+        if (skipPersistUntil > now || persistUntil <= now) return;
       } catch {}
-      try {
+      try { 
         window.dispatchEvent(new CustomEvent(mutedEventName, {
           detail: { muted: !!audio.muted, source: 'qcast', id: playerIdRef.current }
         }));
@@ -641,6 +634,17 @@ const spawnFx = React.useCallback((kind, origin) => {
   }, [showControls, showSettings]);
 
   const unlockAudio = async () => { try { await waRef.current.__ensure?.(); } catch {} };
+  const needsAudioGraph = React.useCallback(() => {
+    try {
+      return !!waRef.current?.ctx || surround || preset !== 'custom';
+    } catch {
+      return false;
+    }
+  }, [preset, surround]);
+  const maybeUnlockAudioGraph = React.useCallback(async () => {
+    if (!needsAudioGraph()) return;
+    try { await unlockAudio(); } catch {}
+  }, [needsAudioGraph]);
 
   const togglePlay = async (e) => {
     e?.preventDefault?.(); e?.stopPropagation?.();
@@ -648,7 +652,7 @@ const spawnFx = React.useCallback((kind, origin) => {
     const audio = audioRef.current;
     const host = hostRef.current;
     if (!audio) return;
-    const unlockPromise = unlockAudio();
+    const unlockPromise = maybeUnlockAudioGraph();
     if (audio.paused) {
       const gestureUntil = String(Date.now() + 1800);
       const leaseUntil = String(Date.now() + 7200);
@@ -674,7 +678,7 @@ const spawnFx = React.useCallback((kind, origin) => {
         delete host?.dataset?.__userPausedAt;
         if (host?.dataset) host.dataset.__manualLeaseUntil = leaseUntil;
       } catch {}
-      try {
+      try { 
         const p = audio.play();
         if (p && typeof p.then === 'function') {
           p.then(() => {
@@ -731,13 +735,19 @@ const spawnFx = React.useCallback((kind, origin) => {
 
   const toggleMute = async (e) => {
     e?.preventDefault?.(); e?.stopPropagation?.();
-    openControls(); await unlockAudio();
+    openControls(); await maybeUnlockAudioGraph();
     const audio = audioRef.current;
     const host = hostRef.current;
     if (!audio) return;
     audio.muted = !audio.muted;
+    audio.defaultMuted = !!audio.muted;
+    if (audio.muted) audio.setAttribute?.('muted', '');
+    else audio.removeAttribute?.('muted');
+    const persistMuteUntil = String(Date.now() + 2600);
     writeQcastMutedPref(!!audio.muted);
     try {
+      audio.dataset.__persistMuteUntil = persistMuteUntil;
+      if (host?.dataset) host.dataset.__persistMuteUntil = persistMuteUntil;
       if (!audio.muted) {
         const gestureUntil = String(Date.now() + 1800);
         const leaseUntil = String(Date.now() + 90_000);
@@ -781,13 +791,20 @@ const spawnFx = React.useCallback((kind, origin) => {
     } catch {}
     try { writeMuted(!!audio.muted); } catch {}
     try { window.dispatchEvent(new CustomEvent(mutedEventName,{ detail:{ muted: audio.muted, source:'qcast', id: playerIdRef.current } })); } catch {}
+    try {
+      if (!audio.muted && !audio.paused) {
+        window.dispatchEvent(new CustomEvent('site-media-play', {
+          detail: { source: 'qcast', element: host || null, manual: true, id: playerIdRef.current }
+        }));
+      }
+    } catch {}
   };
 
   const setVol = async (v) => {
     const audio = audioRef.current;
     const host = hostRef.current;
     if (!audio) return;
-    openControls(); await unlockAudio();
+    openControls(); await maybeUnlockAudioGraph();
     const next = Math.min(1, Math.max(0, Number(v)));
     try { audio.volume = next; } catch {}
     try {
@@ -847,13 +864,13 @@ const spawnFx = React.useCallback((kind, origin) => {
     e?.preventDefault?.();
     e?.stopPropagation?.();
     openControls();
-    await unlockAudio();
+    await maybeUnlockAudioGraph();
     const audio = audioRef.current;
     if (!audio) return;
     const t = Number(e?.target?.value || 0) || 0;
     try { audio.currentTime = t; } catch {}
     setCurrentTime(t);
-  }, [openControls]);
+  }, [maybeUnlockAudioGraph, openControls]);
 
 // ===== Speed helpers (mobile uses single-cycle button) =====
 const speedSteps = React.useMemo(() => [0.5, 0.75, 1, 1.25, 1.5, 2], []);
@@ -915,10 +932,10 @@ React.useEffect(() => {
     <div className="qcastPlayer" ref={hostRef} onPointerDown={onPlayerPointerDown}
       data-preview={preview ? '1' : '0'} data-forum-media="qcast" data-qcast="1" data-viz={qcastFxProfile.viz ? '1' : '0'} dir={dir}>
       <Image className="qcastCover" src="/audio/Q-Cast.png" alt="Q-Cast" width={720} height={1280} unoptimized />
-      {qcastFxProfile.viz ? (
+      {qcastFxProfile.viz ? ( 
         <canvas ref={canvasRef} className="qcastViz" data-on={isPlaying ? '1' : '0'} aria-hidden="true" />
       ) : null}
-     <audio ref={audioRef} src={src} preload="auto" playsInline referrerPolicy="no-referrer" data-qcast-audio="1" className="qcastAudio" />
+     <audio ref={audioRef} src={src} preload="auto" playsInline crossOrigin="anonymous" referrerPolicy="no-referrer" data-qcast-audio="1" className="qcastAudio" />
 
       {FX_POOL > 0 ? (
         <div className="qcastFxLayer" data-scope={qcastFxProfile.fullscreen ? 'viewport' : 'card'} aria-hidden="true">
@@ -1087,7 +1104,7 @@ React.useEffect(() => {
             <div className="qcastSettingsTitle">Sound</div>
             <button type="button" className="qcastSettingsClose"
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowSettings(false); }} aria-label="Close">✕</button>
-          </div>
+          </div> 
           <div className="qcastSettingsBody">
             <div className="qcastSettingRow">
               <div className="qcastSettingLabel">Volume</div>
@@ -1120,7 +1137,7 @@ React.useEffect(() => {
                   </button>
                 ))}
               </div>
-            </div>
+            </div> 
             <div className="qcastSettingRow">
               <div className="qcastSettingLabel">Surround</div>
               <button type="button" className={`qcastToggle ${surround ? 'on' : ''}`}

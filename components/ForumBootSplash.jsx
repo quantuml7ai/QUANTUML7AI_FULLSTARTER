@@ -269,9 +269,13 @@ export default function ForumBootSplash({ onDone }) {
 
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    if (typeof window !== 'undefined') window.__forumBootSplashActive = '1'
 
     return () => {
       document.body.style.overflow = prevOverflow
+      if (typeof window !== 'undefined' && window.__forumBootSplashActive === '1') {
+        delete window.__forumBootSplashActive
+      }
     }
   }, [visible])
 

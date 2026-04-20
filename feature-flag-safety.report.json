@@ -1,0 +1,95 @@
+{
+  "generatedAt": "2026-04-18T03:00:34.868Z",
+  "report": [
+    {
+      "file": "app/layout.js",
+      "counts": {
+        "forumDiagFlags": 3,
+        "runtimeFlags": 0,
+        "guardFunctions": 0,
+        "samplingHints": 0
+      }
+    },
+    {
+      "file": "app/api/debug/forum-diag/route.js",
+      "counts": {
+        "forumDiagFlags": 3,
+        "runtimeFlags": 0,
+        "guardFunctions": 0,
+        "samplingHints": 0
+      }
+    },
+    {
+      "file": "app/forum/features/diagnostics/hooks/useForumDiagnostics.js",
+      "counts": {
+        "forumDiagFlags": 3,
+        "runtimeFlags": 0,
+        "guardFunctions": 0,
+        "samplingHints": 5
+      }
+    },
+    {
+      "file": "src/shared/runtime/modes/runtimeModes.js",
+      "counts": {
+        "forumDiagFlags": 0,
+        "runtimeFlags": 0,
+        "guardFunctions": 2,
+        "samplingHints": 0
+      }
+    },
+    {
+      "file": "src/shared/runtime/modes/runtimeModeGuards.js",
+      "counts": {
+        "forumDiagFlags": 0,
+        "runtimeFlags": 0,
+        "guardFunctions": 2,
+        "samplingHints": 0
+      }
+    },
+    {
+      "file": "src/shared/runtime/mode/runtimeModeResolver.js",
+      "counts": {
+        "forumDiagFlags": 0,
+        "runtimeFlags": 11,
+        "guardFunctions": 3,
+        "samplingHints": 0
+      }
+    },
+    {
+      "file": "src/shared/runtime/mode/runtimeModeServer.js",
+      "counts": {
+        "forumDiagFlags": 0,
+        "runtimeFlags": 0,
+        "guardFunctions": 3,
+        "samplingHints": 0
+      }
+    },
+    {
+      "file": "src/shared/runtime/mode/runtimeModeClient.js",
+      "counts": {
+        "forumDiagFlags": 0,
+        "runtimeFlags": 1,
+        "guardFunctions": 3,
+        "samplingHints": 0
+      }
+    },
+    {
+      "file": "src/shared/runtime/mode/runtimeModeGuards.js",
+      "counts": {
+        "forumDiagFlags": 0,
+        "runtimeFlags": 0,
+        "guardFunctions": 6,
+        "samplingHints": 0
+      }
+    },
+    {
+      "file": "src/shared/runtime/forensics/forensicMode.js",
+      "counts": {
+        "forumDiagFlags": 0,
+        "runtimeFlags": 0,
+        "guardFunctions": 0,
+        "samplingHints": 8
+      }
+    }
+  ]
+}

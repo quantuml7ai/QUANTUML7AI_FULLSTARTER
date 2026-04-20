@@ -1,0 +1,38 @@
+{
+  "generatedAt": "2026-04-17T20:40:20.602Z",
+  "groupId": "forensic-mode",
+  "scenarios": [
+    {
+      "index": 70,
+      "id": "emergency-forensic-mode-toggle",
+      "title": "emergency forensic mode activation and deactivation",
+      "category": "forensic-mode",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "productionAdaptation",
+        "consoleNoise",
+        "routeIsolation"
+      ]
+    }
+  ],
+  "routes": [
+    "/forum"
+  ],
+  "metricGroups": [
+    "productionAdaptation",
+    "consoleNoise",
+    "routeIsolation"
+  ],
+  "deviceMatrix": [
+    "desktop-chrome",
+    "iphone-safari"
+  ],
+  "manualDataRequests": [
+    "Bounded forensic activation trace with ttl, payload size and auto-shutdown evidence"
+  ]
+}

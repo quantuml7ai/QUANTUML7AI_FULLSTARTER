@@ -22,6 +22,12 @@ const KEYWORDS = [
   'youtube',
   'tiktok',
 ];
+const KEYWORD_GROUPS = Object.freeze({
+  mediaDom: ['htmlvideoelement', 'htmlaudioelement', 'htmliframeelement'],
+  observers: ['intersectionobserver', 'resizeobserver'],
+  forumRuntime: ['__forum', 'forumads', 'useforummediacoordinator'],
+  sdkRuntimes: ['web3modal', 'wagmi', 'youtube', 'tiktok'],
+});
 
 function readHeaderMeta(file) {
   const fd = fs.openSync(file, 'r');
@@ -104,6 +110,16 @@ async function analyzeNodes(file, nodeTypes, nodeFieldCount) {
           maxSelfSizeKB: Math.round((row.maxSelfSize / 1024) * 100) / 100,
         }))
         .sort((a, b) => b.selfSize - a.selfSize || b.count - a.count);
+      const typeTotals = Object.fromEntries(
+        stats.map((row) => [row.type, {
+          count: row.count,
+          selfSize: row.selfSize,
+          selfSizeMB: row.selfSizeMB,
+          detachedCount: row.detachedCount,
+          detachedSelfSize: row.detachedSelfSize,
+          detachedSelfSizeMB: row.detachedSelfSizeMB,
+        }]),
+      );
       resolve({
         totalNodes,
         totalSelfSize,
@@ -111,6 +127,7 @@ async function analyzeNodes(file, nodeTypes, nodeFieldCount) {
         detachedNodes,
         detachedSelfSize,
         detachedSelfSizeMB: Math.round((detachedSelfSize / 1024 / 1024) * 100) / 100,
+        typeTotals,
         topTypesBySelfSize: stats.slice(0, 16),
         topTypesByDetachedSize: stats
           .filter((row) => row.detachedCount > 0)
@@ -228,6 +245,30 @@ async function main() {
     analyzeNodes(file, nodeTypes, nodeFieldCount),
     scanKeywords(file, KEYWORDS),
   ]);
+  const keywordMap = new Map(keywordSummary.map((row) => [String(row.keyword || '').toLowerCase(), Number(row.count || 0)]));
+  const typeTotals = nodeSummary.typeTotals || {};
+  const nativeSelfSize = Number(typeTotals.native?.selfSize || 0);
+  const mediaGroupSummary = Object.fromEntries(
+    Object.entries(KEYWORD_GROUPS).map(([group, keywords]) => {
+      const counts = Object.fromEntries(
+        keywords.map((keyword) => [keyword, Number(keywordMap.get(keyword) || 0)]),
+      );
+      const total = Object.values(counts).reduce((sum, value) => sum + Number(value || 0), 0);
+      return [group, { total, counts }];
+    }),
+  );
+  const ratios = {
+    nativeToSelfRatio: nodeSummary.totalSelfSize ? Number((nativeSelfSize / nodeSummary.totalSelfSize).toFixed(4)) : 0,
+    detachedToSelfRatio: nodeSummary.totalSelfSize ? Number((nodeSummary.detachedSelfSize / nodeSummary.totalSelfSize).toFixed(4)) : 0,
+    detachedToNativeRatio: nativeSelfSize ? Number((nodeSummary.detachedSelfSize / nativeSelfSize).toFixed(4)) : 0,
+  };
+  const failSignals = {
+    iframePresenceElevated: Number(keywordMap.get('htmliframeelement') || 0) > 1,
+    mediaDomPresenceElevated: Number(mediaGroupSummary.mediaDom?.total || 0) > 20,
+    observerDensityElevated: Number(mediaGroupSummary.observers?.total || 0) > 25,
+    sdkRuntimePresenceElevated: Number(mediaGroupSummary.sdkRuntimes?.total || 0) > 40,
+    detachedLeakElevated: Number(ratios.detachedToSelfRatio || 0) > 0.03,
+  };
 
   const summary = {
     file,
@@ -240,11 +281,41 @@ async function main() {
     nodes: nodeSummary,
     keywordHits: keywordSummary.slice(0, 24),
   };
+  const verifyReport = {
+    file,
+    generatedAt: new Date().toISOString(),
+    snapshot: summary.snapshot,
+    fileSizeMB: summary.fileSizeMB,
+    heapDiscipline: {
+      totalSelfSizeMB: nodeSummary.totalSelfSizeMB,
+      detachedNodes: nodeSummary.detachedNodes,
+      detachedSelfSizeMB: nodeSummary.detachedSelfSizeMB,
+      ratios,
+      topTypesBySelfSize: nodeSummary.topTypesBySelfSize.slice(0, 10),
+      topTypesByDetachedSize: nodeSummary.topTypesByDetachedSize.slice(0, 10),
+    },
+    runtimeGroups: mediaGroupSummary,
+    failSignals,
+    calibrationSignals: {
+      nodeCount: Number(summary.snapshot.nodeCount || 0),
+      edgeCount: Number(summary.snapshot.edgeCount || 0),
+      htmlVideoKeywordHits: Number(keywordMap.get('htmlvideoelement') || 0),
+      htmlAudioKeywordHits: Number(keywordMap.get('htmlaudioelement') || 0),
+      htmlIframeKeywordHits: Number(keywordMap.get('htmliframeelement') || 0),
+      youtubeKeywordHits: Number(keywordMap.get('youtube') || 0),
+      wagmiKeywordHits: Number(keywordMap.get('wagmi') || 0),
+      web3modalKeywordHits: Number(keywordMap.get('web3modal') || 0),
+    },
+  };
 
   const outPath = path.join(process.cwd(), 'heapsnapshot-analysis.report.json');
   fs.writeFileSync(outPath, JSON.stringify(summary, null, 2), 'utf8');
+  const verifyOutPath = path.join(process.cwd(), 'media-heap.verify.report.json');
+  fs.writeFileSync(verifyOutPath, JSON.stringify(verifyReport, null, 2), 'utf8');
   console.log(JSON.stringify(summary, null, 2));
   console.log(`Saved: ${outPath}`);
+  console.log(JSON.stringify(verifyReport, null, 2));
+  console.log(`Saved: ${verifyOutPath}`);
 }
 
 main().catch((error) => {

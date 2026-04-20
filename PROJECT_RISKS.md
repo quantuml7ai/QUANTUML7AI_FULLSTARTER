@@ -4,8 +4,8 @@
 > Если меняются критические точки входа, серверные контракты, import-граф или ownership модулей, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-risks.js`.
 
-Сгенерировано автоматически: 2026-04-13T20:35:47.266Z
-Исходных файлов в анализе: 655
+Сгенерировано автоматически: 2026-04-18T03:02:06.900Z
+Исходных файлов в анализе: 792
 Route-aware файлов: 96
 
 ## Что Считается Риском
@@ -119,13 +119,16 @@ Route-aware файлов: 96
 - `app/api/forum/_utils.js` — используют 33 локальных модулей
 - `app/api/forum/_db.js` — используют 32 локальных модулей
 - `components/i18n.js` — используют 30 локальных модулей
+- `tools/runtime-governance.js` — используют 25 локальных модулей
 - `app/forum/features/profile/utils/profileCache.js` — используют 18 локальных модулей
 - `app/forum/shared/utils/classnames.js` — используют 17 локальных модулей
 - `app/api/profile/_identity.js` — используют 15 локальных модулей
+- `tests/support/runtimeGovernance.js` — используют 11 локальных модулей
 - `app/api/dm/_utils.js` — используют 8 локальных модулей
 - `app/forum/features/profile/components/AvatarEmoji.jsx` — используют 8 локальных модулей
 - `app/forum/shared/components/HydrateText.jsx` — используют 8 локальных модулей
 - `lib/metadataCache.js` — используют 8 локальных модулей
+- `src/shared/runtime/budgets/routeProfiles.js` — используют 8 локальных модулей
 - `app/api/dm/_db.js` — используют 7 локальных модулей
 - `app/forum/shared/utils/browser.js` — используют 7 локальных модулей
 - `app/ads.js` — используют 6 локальных модулей
@@ -135,12 +138,9 @@ Route-aware файлов: 96
 - `app/forum/features/profile/components/VipFlipBadge.jsx` — используют 5 локальных модулей
 - `app/forum/shared/utils/counts.js` — используют 5 локальных модулей
 - `lib/subscriptions.js` — используют 5 локальных модулей
+- `src/shared/runtime/mode/runtimeModeResolver.js` — используют 5 локальных модулей
 - `app/forum/features/dm/utils/mediaParsing.js` — используют 4 локальных модулей
 - `app/forum/features/media/utils/mediaLifecycleRuntime.js` — используют 4 локальных модулей
-- `app/forum/features/media/utils/mediaRuntime.js` — используют 4 локальных модулей
-- `app/forum/features/profile/hooks/useVipFlag.js` — используют 4 локальных модулей
-- `app/forum/features/subscriptions/utils/starred.js` — используют 4 локальных модулей
-- `app/forum/features/ui/components/StarButton.jsx` — используют 4 локальных модулей
 
 ## Файлы С Самым Высоким Fan-Out
 
@@ -154,12 +154,14 @@ Route-aware файлов: 96
 - `app/forum/features/ui/components/ComposerCore.jsx` — импортирует 9 локальных модулей
 - `app/forum/ForumHeaderPanel.jsx` — импортирует 9 локальных модулей
 - `tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx` — импортирует 9 локальных модулей
+- `tests/unit/runtime/runtimeGovernance.test.js` — импортирует 9 локальных модулей
 - `app/forum/features/ui/components/ForumOverlayStack.jsx` — импортирует 8 локальных модулей
 - `app/forum/features/ui/hooks/useForumScreenFlowsRuntime.js` — импортирует 8 локальных модулей
 - `app/forum/features/dm/components/DmThreadHeader.jsx` — импортирует 7 локальных модулей
 - `app/forum/features/feed/components/PostHeaderMeta.jsx` — импортирует 7 локальных модулей
 - `app/forum/features/feed/hooks/useForumFeedRuntime.js` — импортирует 7 локальных модулей
 - `app/forum/features/ui/utils/buildForumRootPropBundles.js` — импортирует 7 локальных модулей
+- `src/shared/runtime/mode/runtimeMode.js` — импортирует 7 локальных модулей
 - `app/forum/features/media/hooks/useForumVideoFeedRuntime.js` — импортирует 6 локальных модулей
 - `app/forum/features/profile/components/ProfilePopover.jsx` — импортирует 6 локальных модулей
 - `app/forum/features/ui/hooks/useForumComposerSubmitRuntime.js` — импортирует 6 локальных модулей
@@ -167,8 +169,6 @@ Route-aware файлов: 96
 - `app/forum/features/dm/components/DmMessagesPane.jsx` — импортирует 5 локальных модулей
 - `app/forum/features/feed/components/TopicsOrPanelsSwitch.jsx` — импортирует 5 локальных модулей
 - `app/forum/features/moderation/hooks/useForumModerationRuntime.js` — импортирует 5 локальных модулей
-- `app/forum/features/ui/components/ForumSearchSortControls.jsx` — импортирует 5 локальных модулей
-- `app/api/forum/mutate/route.js` — импортирует 4 локальных модулей
 
 ## Зоны С Повышенной Плотностью Связей
 
@@ -192,6 +192,7 @@ Route-aware файлов: 96
 - `app/game` — файлов: 2; исходящих связей: 3; плотность: 1.5
 - `app/subscribe` — файлов: 3; исходящих связей: 4; плотность: 1.33
 - `forum/ui` — файлов: 51; исходящих связей: 64; плотность: 1.25
+- `src/shared` — файлов: 32; исходящих связей: 34; плотность: 1.06
 - `api/telegram` — файлов: 4; исходящих связей: 4; плотность: 1
 - `api/qcoin` — файлов: 3; исходящих связей: 3; плотность: 1
 - `api/battlecoin` — файлов: 2; исходящих связей: 2; плотность: 1
@@ -201,7 +202,6 @@ Route-aware файлов: 96
 - `app/ads.js` — файлов: 1; исходящих связей: 1; плотность: 1
 - `app/components` — файлов: 1; исходящих связей: 1; плотность: 1
 - `app/contact` — файлов: 1; исходящих связей: 1; плотность: 1
-- `app/privacy` — файлов: 1; исходящих связей: 1; плотность: 1
 
 ## Серверные И Инфраструктурные Хотспоты
 

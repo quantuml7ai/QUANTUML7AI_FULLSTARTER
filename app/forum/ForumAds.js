@@ -56,7 +56,28 @@ const AD_SLOT_HEIGHT_PX = {
   tablet: 620,   // 640..1023px
   desktop: 650,  // >= 1024px
 };
+const AD_LENS_UI = Object.freeze({
+  sizePx: 40,
+  rightPx: 10,
+  bottomPx: 10,
 
+  strokeColor: '#6fe7ff',
+  handleColor: '#b77dff',
+  outlineColor: 'rgba(255, 215, 120, .96)',
+  glowColor: 'rgba(111, 231, 255, .42)',
+  glowColor2: 'rgba(183, 125, 255, .22)',
+
+  opacity: 0.98,
+  outlineWidth: 1,
+  ringWidth: 1.8,
+  handleWidth: 2.2,
+  orbitWidth: 1,
+
+  floatDurationMs: 2800,
+  sweepDurationMs: 2400,
+  pulseDurationMs: 1800,
+  sparkleDurationMs: 1600,
+});
 const CAMPAIGN_ID = 'forum_ads_v1';
 const FALLBACK_CAMPAIGN_SEED = 'forum_ads_seed';
 
@@ -1060,11 +1081,32 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
       }));
     } catch {}
   }, []);
-  const slotCssVars = {
-    '--ad-slot-h-m': `${AD_SLOT_HEIGHT_PX.mobile}px`,
-    '--ad-slot-h-t': `${AD_SLOT_HEIGHT_PX.tablet}px`,
-    '--ad-slot-h-d': `${AD_SLOT_HEIGHT_PX.desktop}px`,
-  };
+const slotCssVars = {
+  '--ad-slot-h-m': `${AD_SLOT_HEIGHT_PX.mobile}px`,
+  '--ad-slot-h-t': `${AD_SLOT_HEIGHT_PX.tablet}px`,
+  '--ad-slot-h-d': `${AD_SLOT_HEIGHT_PX.desktop}px`,
+
+  '--forum-ad-lens-size': `${AD_LENS_UI.sizePx}px`,
+  '--forum-ad-lens-right': `${AD_LENS_UI.rightPx}px`,
+  '--forum-ad-lens-bottom': `${AD_LENS_UI.bottomPx}px`,
+
+  '--forum-ad-lens-stroke': AD_LENS_UI.strokeColor,
+  '--forum-ad-lens-handle': AD_LENS_UI.handleColor,
+  '--forum-ad-lens-outline': AD_LENS_UI.outlineColor,
+  '--forum-ad-lens-glow': AD_LENS_UI.glowColor,
+  '--forum-ad-lens-glow-2': AD_LENS_UI.glowColor2,
+
+  '--forum-ad-lens-opacity': String(AD_LENS_UI.opacity),
+  '--forum-ad-lens-outline-w': `${AD_LENS_UI.outlineWidth}px`,
+  '--forum-ad-lens-ring-w': `${AD_LENS_UI.ringWidth}px`,
+  '--forum-ad-lens-handle-w': `${AD_LENS_UI.handleWidth}px`,
+  '--forum-ad-lens-orbit-w': `${AD_LENS_UI.orbitWidth}px`,
+
+  '--forum-ad-lens-float-dur': `${AD_LENS_UI.floatDurationMs}ms`,
+  '--forum-ad-lens-sweep-dur': `${AD_LENS_UI.sweepDurationMs}ms`,
+  '--forum-ad-lens-pulse-dur': `${AD_LENS_UI.pulseDurationMs}ms`,
+  '--forum-ad-lens-sparkle-dur': `${AD_LENS_UI.sparkleDurationMs}ms`,
+};
 
   useEffect(() => {
     shouldPlayRef.current = shouldPlay;
@@ -1787,9 +1829,247 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   .forum-ad-media-slot[data-layout="fluid"] .forum-ad-fit {
     width: 100%;
     height: auto;
-   object-fit: contain;
+    object-fit: contain;
     display: block;
-  }    
+  }
+
+  .forum-ad-lens {
+    position: absolute;
+    right: var(--forum-ad-lens-right, 10px);
+    bottom: var(--forum-ad-lens-bottom, 10px);
+    width: var(--forum-ad-lens-size, 40px);
+    height: var(--forum-ad-lens-size, 40px);
+    z-index: 5;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    opacity: var(--forum-ad-lens-opacity, .98);
+    transform: translateZ(0);
+    transform-origin: 50% 50%;
+    filter:
+      drop-shadow(0 0 8px var(--forum-ad-lens-glow, rgba(111, 231, 255, .42)))
+      drop-shadow(0 0 16px var(--forum-ad-lens-glow-2, rgba(183, 125, 255, .22)));
+    animation: forumAdLensFloat var(--forum-ad-lens-float-dur, 2800ms) ease-in-out infinite;
+  }
+  .forum-ad-audio-toggle{
+    position:absolute;
+    left: calc(
+      var(--forum-ad-lens-right, 10px) +
+      var(--forum-ad-lens-size, 10px) - 35px
+    );
+    bottom: var(--forum-ad-lens-bottom, 10px);
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    display:grid;
+    place-items:center;
+    z-index: 7;
+    pointer-events:auto;
+    touch-action: manipulation;
+    user-select:none;
+    -webkit-user-select:none;
+
+    border: 1px solid rgba(157,220,255,.35);
+    color:#e6f4ff;
+    background:
+      radial-gradient(120% 120% at 30% 30%, rgba(255,255,255,.12), rgba(255,255,255,0) 60%),
+      radial-gradient(100% 100% at 70% 70%, rgba(0,200,255,.16), rgba(0,200,255,0) 60%),
+      linear-gradient(180deg, rgba(0,35,60,.28), rgba(0,35,60,.42));
+    box-shadow:
+      inset 0 0 18px rgba(0,180,255,.16),
+      0 8px 20px rgba(0,0,0,.35);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+
+    transition:
+      transform .18s ease,
+      filter .18s ease,
+      box-shadow .18s ease,
+      border-color .18s ease;
+  }
+
+  .forum-ad-audio-toggle:hover{
+    transform: translateY(-1px) scale(1.03);
+    filter: brightness(1.06);
+  }
+
+  .forum-ad-audio-toggle:active{
+    transform: scale(.98);
+  }
+
+  .forum-ad-audio-toggle .ico{
+    font-size:18px;
+    line-height:1;
+    filter: drop-shadow(0 0 6px rgba(64,200,255,.7));
+  }
+
+  .forum-ad-audio-toggle.on{
+    animation: forumAdAudioPulse 3s ease-out infinite;
+  }
+
+  @keyframes forumAdAudioPulse{
+    0%{
+      box-shadow:
+        inset 0 0 18px rgba(0,180,255,.16),
+        0 0 0 0 rgba(0,194,255,.35);
+    }
+    60%{
+      box-shadow:
+        inset 0 0 18px rgba(0,180,255,.16),
+        0 0 0 12px rgba(0,194,255,0);
+    }
+    100%{
+      box-shadow:
+        inset 0 0 18px rgba(0,180,255,.16),
+        0 0 0 0 rgba(0,194,255,0);
+    }
+  }
+
+  @media (max-width: 640px){
+    .forum-ad-audio-toggle{
+      width:36px;
+      height:36px;
+      right: calc(
+        var(--forum-ad-lens-right, 10px) +
+        (var(--forum-ad-lens-size, 40px) - 6px) + 8px
+      );
+    }
+    .forum-ad-audio-toggle .ico{
+      font-size:16px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .forum-ad-audio-toggle.on{
+      animation:none !important;
+    }
+  }
+  .forum-ad-lensSvg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: visible;
+  }
+
+  .forum-ad-lensOrbit {
+    fill: none;
+    stroke: var(--forum-ad-lens-outline, rgba(255, 215, 120, .96));
+    stroke-width: var(--forum-ad-lens-orbit-w, 1px);
+    stroke-linecap: round;
+    stroke-dasharray: 2.2 4.4;
+    opacity: .92;
+    transform-origin: 16px 16px;
+    animation: forumAdLensSweep var(--forum-ad-lens-sweep-dur, 2400ms) linear infinite;
+  }
+
+  .forum-ad-lensRingOutline {
+    fill: none;
+    stroke: var(--forum-ad-lens-outline, rgba(255, 215, 120, .96));
+    stroke-width: var(--forum-ad-lens-outline-w, 1px);
+    opacity: .98;
+  }
+
+  .forum-ad-lensRing {
+    fill: none;
+    stroke: var(--forum-ad-lens-stroke, #6fe7ff);
+    stroke-width: var(--forum-ad-lens-ring-w, 1.8px);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: .98;
+    animation: forumAdLensPulse var(--forum-ad-lens-pulse-dur, 1800ms) ease-in-out infinite;
+  }
+
+  .forum-ad-lensHandleOutline {
+    fill: none;
+    stroke: var(--forum-ad-lens-outline, rgba(255, 215, 120, .96));
+    stroke-width: var(--forum-ad-lens-outline-w, 1px);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: .98;
+  }
+
+  .forum-ad-lensHandle {
+    fill: none;
+    stroke: var(--forum-ad-lens-handle, #b77dff);
+    stroke-width: var(--forum-ad-lens-handle-w, 2.2px);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: .98;
+    animation: forumAdLensPulse var(--forum-ad-lens-pulse-dur, 1800ms) ease-in-out infinite;
+  }
+
+  .forum-ad-lensCore {
+    fill: rgba(255,255,255,.16);
+    stroke: var(--forum-ad-lens-outline, rgba(255, 215, 120, .96));
+    stroke-width: .8px;
+    opacity: .92;
+  }
+
+  .forum-ad-lensSpark {
+    fill: rgba(255,255,255,.95);
+    filter: drop-shadow(0 0 6px rgba(255,255,255,.45));
+    transform-origin: 24px 9px;
+    animation: forumAdLensSparkle var(--forum-ad-lens-sparkle-dur, 1600ms) ease-in-out infinite;
+  }
+
+  @keyframes forumAdLensFloat {
+    0%, 100% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+      transform: translate3d(0, -1.5px, 0) scale(1.03);
+    }
+  }
+
+  @keyframes forumAdLensSweep {
+    0% {
+      stroke-dashoffset: 0;
+      transform: rotate(0deg);
+    }
+    100% {
+      stroke-dashoffset: -13.2;
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes forumAdLensPulse {
+    0%, 100% {
+      filter: brightness(1);
+      opacity: .92;
+    }
+    50% {
+      filter: brightness(1.18);
+      opacity: 1;
+    }
+  }
+
+  @keyframes forumAdLensSparkle {
+    0%, 100% {
+      opacity: .35;
+      transform: scale(.8);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.18);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .forum-ad-lens {
+      width: calc(var(--forum-ad-lens-size, 40px) - 6px);
+      height: calc(var(--forum-ad-lens-size, 40px) - 6px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .forum-ad-lens,
+    .forum-ad-lensOrbit,
+    .forum-ad-lensRing,
+    .forum-ad-lensHandle,
+    .forum-ad-lensSpark {
+      animation: none !important;
+    }
+  }
 `}</style>
 
 
@@ -1986,12 +2266,62 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
               <button
                 type="button"
                 onClick={handleToggleSound}
-                className="audio-toggle"
-                aria-label={muted ? 'Включить звук' : 'Выключить звук'}
+                className={`forum-ad-audio-toggle ${muted ? 'on' : 'off'}`}
+                aria-label={muted ? 'on' : 'off'}
               >
-                {muted ? '🔇' : '🔊'}
+                <span className="ico" aria-hidden="true">
+                  {muted ? '🔇' : '🔊'}
+                </span>
               </button>
-            )}
+            )} 
+
+            <div className="forum-ad-lens" aria-hidden="true">
+              <svg
+                className="forum-ad-lensSvg"
+                viewBox="0 0 40 40"
+                focusable="false"
+                aria-hidden="true"
+              >
+                <circle
+                  className="forum-ad-lensOrbit"
+                  cx="16"
+                  cy="16"
+                  r="10.75"
+                />
+                <circle
+                  className="forum-ad-lensRingOutline"
+                  cx="16"
+                  cy="16"
+                  r="7.7"
+                />
+                <circle
+                  className="forum-ad-lensRing"
+                  cx="16"
+                  cy="16"
+                  r="7.1"
+                />
+                <path
+                  className="forum-ad-lensHandleOutline"
+                  d="M21.15 21.15 L30.15 30.15"
+                />
+                <path
+                  className="forum-ad-lensHandle"
+                  d="M21.15 21.15 L30.15 30.15"
+                />
+                <circle
+                  className="forum-ad-lensCore"
+                  cx="16"
+                  cy="16"
+                  r="1.55"
+                />
+                <circle
+                  className="forum-ad-lensSpark"
+                  cx="24.2"
+                  cy="8.9"
+                  r="1.05"
+                />
+              </svg>
+            </div>
 
             <div className="pointer-events-none абсолют inset-0 rounded-lg border border-transparent qshine" />
           </div>

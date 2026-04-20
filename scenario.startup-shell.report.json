@@ -1,0 +1,159 @@
+{
+  "generatedAt": "2026-04-17T20:40:20.828Z",
+  "groupId": "startup-shell",
+  "scenarios": [
+    {
+      "index": 4,
+      "id": "forum-splash-handoff",
+      "title": "splash to feed handoff",
+      "category": "forum-startup",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "mainThread",
+        "authRuntime"
+      ]
+    },
+    {
+      "index": 5,
+      "id": "forum-startup-wallet-untouched",
+      "title": "startup with wallet untouched",
+      "category": "forum-startup",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "memory"
+      ]
+    },
+    {
+      "index": 33,
+      "id": "root-shell-idle-non-forum",
+      "title": "root shell idle on non-forum route",
+      "category": "root-startup",
+      "route": "/",
+      "profileHint": "landing-decorative",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "memory"
+      ]
+    },
+    {
+      "index": 34,
+      "id": "root-shell-after-forum-visit",
+      "title": "root shell after forum visited once",
+      "category": "root-startup",
+      "route": "/",
+      "profileHint": "landing-decorative",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "routeIsolation",
+        "memory"
+      ]
+    },
+    {
+      "index": 35,
+      "id": "root-shell-after-wallet-modal",
+      "title": "root shell after wallet modal open and close",
+      "category": "root-startup",
+      "route": "/ads/home",
+      "profileHint": "ads-preview",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 38,
+      "id": "forum-deeplink-topic",
+      "title": "deep-link into forum topic",
+      "category": "root-startup",
+      "route": "forum-thread-view",
+      "profileHint": "forum-thread",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "authRuntime"
+      ]
+    },
+    {
+      "index": 51,
+      "id": "provider-only-startup-without-forum",
+      "title": "provider-only startup without forum",
+      "category": "startup-extra",
+      "route": "/",
+      "profileHint": "landing-decorative",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "memory"
+      ]
+    },
+    {
+      "index": 59,
+      "id": "startup-on-low-memory-mobile-profile",
+      "title": "startup on low-memory mobile profile",
+      "category": "startup-extra",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "authRuntime"
+      ]
+    }
+  ],
+  "routes": [
+    "/forum",
+    "/",
+    "/ads/home",
+    "forum-thread-view"
+  ],
+  "metricGroups": [
+    "media",
+    "mainThread",
+    "authRuntime",
+    "memory",
+    "routeIsolation"
+  ],
+  "deviceMatrix": [
+    "iphone-safari",
+    "android-chrome",
+    "desktop-chrome"
+  ],
+  "manualDataRequests": [
+    "Startup requests summary before first usable frame"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-04-18T03:02:44.895Z",
+  "report": [
+    {
+      "file": "app/about/page.js",
+      "autoplaySignals": 3,
+      "iframeSignals": 0,
+      "videoSignals": 1
+    },
+    {
+      "file": "app/ads/home.js",
+      "autoplaySignals": 6,
+      "iframeSignals": 0,
+      "videoSignals": 2
+    },
+    {
+      "file": "app/academy/page.js",
+      "autoplaySignals": 0,
+      "iframeSignals": 0,
+      "videoSignals": 0
+    }
+  ]
+}

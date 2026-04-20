@@ -1,9 +1,9 @@
 {
-  "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-03-24T02:19:51.925Z",
+  "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
+  "generatedAt": "2026-04-18T03:02:40.930Z",
   "report": [
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\AuthNavClient.jsx",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\AuthNavClient.jsx",
       "counts": {
         "dynamicImport": 0,
         "ssrFalseDynamic": 0,
@@ -21,7 +21,7 @@
       ]
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\layout.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\layout.js",
       "counts": {
         "dynamicImport": 5,
         "ssrFalseDynamic": 5,
@@ -35,11 +35,11 @@
       },
       "startupMarks": [
         {
-          "line": 64,
+          "line": 73,
           "text": "if (typeof window.markForumStartup !== 'function') {"
         },
         {
-          "line": 65,
+          "line": 74,
           "text": "window.markForumStartup = function (label, extra) {"
         }
       ],
@@ -49,11 +49,11 @@
       ]
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\providers.jsx",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\providers.jsx",
       "counts": {
         "dynamicImport": 0,
         "ssrFalseDynamic": 0,
-        "providerGateNull": 1,
+        "providerGateNull": 2,
         "web3Modal": 2,
         "wagmi": 9,
         "analytics": 0,
@@ -68,7 +68,7 @@
       ]
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\QCoinDropFX.jsx",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\QCoinDropFX.jsx",
       "counts": {
         "dynamicImport": 0,
         "ssrFalseDynamic": 0,
@@ -86,7 +86,7 @@
       ]
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\InviteFriendProvider.jsx",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\InviteFriendProvider.jsx",
       "counts": {
         "dynamicImport": 0,
         "ssrFalseDynamic": 0,
@@ -104,7 +104,7 @@
       ]
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\ScrollTopPulse.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\ScrollTopPulse.js",
       "counts": {
         "dynamicImport": 0,
         "ssrFalseDynamic": 0,
@@ -122,7 +122,7 @@
       ]
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\NotRobot.jsx",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\NotRobot.jsx",
       "counts": {
         "dynamicImport": 0,
         "ssrFalseDynamic": 0,
@@ -140,7 +140,7 @@
       ]
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\ForumBootSplash.jsx",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\ForumBootSplash.jsx",
       "counts": {
         "dynamicImport": 0,
         "ssrFalseDynamic": 0,
@@ -158,7 +158,25 @@
       ]
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\page.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumRoot.jsx",
+      "counts": {
+        "dynamicImport": 0,
+        "ssrFalseDynamic": 0,
+        "providerGateNull": 1,
+        "web3Modal": 0,
+        "wagmi": 0,
+        "analytics": 0,
+        "beforeInteractiveScript": 0,
+        "topBarMount": 0,
+        "forumBootSplash": 0
+      },
+      "startupMarks": [],
+      "riskFlags": [
+        "provider returns null during startup path"
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\page.js",
       "counts": {
         "dynamicImport": 0,
         "ssrFalseDynamic": 0,
@@ -181,7 +199,7 @@
       ]
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\TopBar.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\TopBar.js",
       "counts": {
         "dynamicImport": 1,
         "ssrFalseDynamic": 1,
@@ -197,7 +215,7 @@
       "riskFlags": []
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\layout.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\layout.js",
       "counts": {
         "dynamicImport": 0,
         "ssrFalseDynamic": 0,
@@ -213,23 +231,7 @@
       "riskFlags": []
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\components\\BgAudio.js",
-      "counts": {
-        "dynamicImport": 0,
-        "ssrFalseDynamic": 0,
-        "providerGateNull": 0,
-        "web3Modal": 0,
-        "wagmi": 0,
-        "analytics": 0,
-        "beforeInteractiveScript": 0,
-        "topBarMount": 0,
-        "forumBootSplash": 0
-      },
-      "startupMarks": [],
-      "riskFlags": []
-    },
-    {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\ForumRoot.jsx",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\BgAudio.js",
       "counts": {
         "dynamicImport": 0,
         "ssrFalseDynamic": 0,

@@ -1,0 +1,96 @@
+{
+  "generatedAt": "2026-04-17T20:40:20.777Z",
+  "groupId": "route-teardown",
+  "scenarios": [
+    {
+      "index": 13,
+      "id": "forum-topic-back",
+      "title": "forum to topic to back",
+      "category": "forum-route-return",
+      "route": "forum-thread-view",
+      "profileHint": "forum-thread",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "routeIsolation",
+        "memory",
+        "media"
+      ]
+    },
+    {
+      "index": 14,
+      "id": "forum-other-route-back",
+      "title": "forum to other route to back",
+      "category": "forum-route-return",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "routeIsolation",
+        "authRuntime",
+        "memory"
+      ]
+    },
+    {
+      "index": 42,
+      "id": "exchange-leave-cleanup",
+      "title": "/exchange leave cleanup",
+      "category": "exchange-route",
+      "route": "/exchange",
+      "profileHint": "exchange-heavy",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "routeIsolation",
+        "memory"
+      ]
+    },
+    {
+      "index": 57,
+      "id": "external-widget-crash-teardown",
+      "title": "external widget crash and teardown verification",
+      "category": "exchange-extra",
+      "route": "/exchange",
+      "profileHint": "exchange-heavy",
+      "deviceMatrix": [
+        "desktop-chrome",
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "routeIsolation",
+        "consoleNoise",
+        "mainThread"
+      ]
+    }
+  ],
+  "routes": [
+    "forum-thread-view",
+    "/forum",
+    "/exchange"
+  ],
+  "metricGroups": [
+    "routeIsolation",
+    "memory",
+    "media",
+    "authRuntime",
+    "consoleNoise",
+    "mainThread"
+  ],
+  "deviceMatrix": [
+    "iphone-safari",
+    "android-chrome",
+    "desktop-chrome"
+  ],
+  "manualDataRequests": [
+    "Enter/leave teardown traces with leftover timers, observers and widgets counts"
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "generatedAt": "2026-04-17T20:40:20.672Z",
+  "groupId": "preload-waste",
+  "scenarios": [
+    {
+      "index": 4,
+      "id": "forum-splash-handoff",
+      "title": "splash to feed handoff",
+      "category": "forum-startup",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "mainThread",
+        "authRuntime"
+      ]
+    },
+    {
+      "index": 58,
+      "id": "preload-heavy-startup-slow-network",
+      "title": "preload-heavy startup on slow network",
+      "category": "startup-extra",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "mainThread",
+        "consoleNoise",
+        "memory"
+      ]
+    }
+  ],
+  "routes": [
+    "/forum"
+  ],
+  "metricGroups": [
+    "media",
+    "mainThread",
+    "authRuntime",
+    "consoleNoise",
+    "memory"
+  ],
+  "deviceMatrix": [
+    "iphone-safari",
+    "android-chrome",
+    "desktop-chrome"
+  ],
+  "manualDataRequests": [
+    "Slow-network preload trace with unused preload classification"
+  ]
+}

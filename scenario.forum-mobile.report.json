@@ -1,0 +1,565 @@
+{
+  "generatedAt": "2026-04-17T20:40:20.583Z",
+  "groupId": "forum-mobile",
+  "scenarios": [
+    {
+      "index": 1,
+      "id": "forum-cold-signed-out",
+      "title": "/forum cold start signed-out",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "telegram-webview"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 2,
+      "id": "forum-cold-signed-in",
+      "title": "/forum cold start signed-in",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "telegram-webview"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "authRuntime"
+      ]
+    },
+    {
+      "index": 3,
+      "id": "forum-first-interaction",
+      "title": "first interaction after hydration",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "mainThread",
+        "memory"
+      ]
+    },
+    {
+      "index": 4,
+      "id": "forum-splash-handoff",
+      "title": "splash to feed handoff",
+      "category": "forum-startup",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "mainThread",
+        "authRuntime"
+      ]
+    },
+    {
+      "index": 5,
+      "id": "forum-startup-wallet-untouched",
+      "title": "startup with wallet untouched",
+      "category": "forum-startup",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "memory"
+      ]
+    },
+    {
+      "index": 6,
+      "id": "forum-startup-after-auth-session",
+      "title": "startup after prior auth session",
+      "category": "forum-startup",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "authRuntime",
+        "memory",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 7,
+      "id": "forum-long-scroll-30",
+      "title": "long scroll 30 cards",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "memory",
+        "media"
+      ]
+    },
+    {
+      "index": 8,
+      "id": "forum-long-scroll-100",
+      "title": "long scroll 100 cards",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 9,
+      "id": "forum-scroll-down-up-down",
+      "title": "down then up then down",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 10,
+      "id": "forum-slow-scroll-autoplay",
+      "title": "slow scroll with autoplay",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 11,
+      "id": "forum-fast-fling-scroll",
+      "title": "fast fling scroll",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "mainThread",
+        "memory"
+      ]
+    },
+    {
+      "index": 12,
+      "id": "forum-mixed-feed",
+      "title": "mixed feed native plus iframe plus ads plus qcast",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "memory",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 13,
+      "id": "forum-topic-back",
+      "title": "forum to topic to back",
+      "category": "forum-route-return",
+      "route": "forum-thread-view",
+      "profileHint": "forum-thread",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "routeIsolation",
+        "memory",
+        "media"
+      ]
+    },
+    {
+      "index": 14,
+      "id": "forum-other-route-back",
+      "title": "forum to other route to back",
+      "category": "forum-route-return",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "routeIsolation",
+        "authRuntime",
+        "memory"
+      ]
+    },
+    {
+      "index": 15,
+      "id": "forum-background-foreground",
+      "title": "background to foreground",
+      "category": "forum-route-return",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "telegram-webview"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 16,
+      "id": "forum-app-resume",
+      "title": "app minimized to resumed",
+      "category": "forum-route-return",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "telegram-webview"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "authRuntime"
+      ]
+    },
+    {
+      "index": 17,
+      "id": "forum-ios-bfcache",
+      "title": "iOS Safari back forward cache",
+      "category": "forum-route-return",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "routeIsolation",
+        "memory",
+        "media"
+      ]
+    },
+    {
+      "index": 18,
+      "id": "forum-telegram-suspend-resume",
+      "title": "Telegram WebView suspend and resume",
+      "category": "forum-route-return",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "telegram-webview"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "authRuntime"
+      ]
+    },
+    {
+      "index": 19,
+      "id": "forum-native-to-iframe",
+      "title": "active native to active iframe",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 20,
+      "id": "forum-iframe-to-native",
+      "title": "active iframe to active native",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 21,
+      "id": "forum-content-ad-contest",
+      "title": "content media versus ad media contest",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 22,
+      "id": "forum-qcast-content-coexistence",
+      "title": "qcast and content coexistence",
+      "category": "forum-media",
+      "route": "forum-qcast-mixed",
+      "profileHint": "qcast-mixed",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 23,
+      "id": "forum-shorts-return-replace",
+      "title": "shorts iframe replace on return",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 24,
+      "id": "forum-same-source-revisit",
+      "title": "same source revisited after short scroll away",
+      "category": "forum-media",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "memory"
+      ]
+    },
+    {
+      "index": 25,
+      "id": "forum-iphone-safari-autoplay-no-gesture",
+      "title": "iPhone Safari autoplay without gesture",
+      "category": "forum-mobile-browser",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "media",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 26,
+      "id": "forum-iphone-safari-autoplay-after-gesture",
+      "title": "iPhone Safari autoplay after first gesture",
+      "category": "forum-mobile-browser",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "media",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 27,
+      "id": "forum-iphone-chrome",
+      "title": "iPhone Chrome",
+      "category": "forum-mobile-browser",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-chrome"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 28,
+      "id": "forum-android-chrome",
+      "title": "Android Chrome",
+      "category": "forum-mobile-browser",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "mainThread"
+      ]
+    },
+    {
+      "index": 29,
+      "id": "forum-telegram-mini-app",
+      "title": "Telegram Mini App WebView",
+      "category": "forum-mobile-browser",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "telegram-webview"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "authRuntime"
+      ]
+    },
+    {
+      "index": 55,
+      "id": "forum-same-source-visibility-restore",
+      "title": "same-source video revisit after visibility restore",
+      "category": "forum-restore-extra",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "memory"
+      ]
+    },
+    {
+      "index": 56,
+      "id": "forum-same-source-route-restore",
+      "title": "same-source video revisit after route restore",
+      "category": "forum-restore-extra",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 60,
+      "id": "forum-long-idle-after-scroll",
+      "title": "long idle state after forum scroll",
+      "category": "forum-extra",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "desktop-chrome"
+      ],
+      "metricGroups": [
+        "memory",
+        "routeIsolation",
+        "mainThread"
+      ]
+    }
+  ],
+  "routes": [
+    "/forum",
+    "forum-thread-view",
+    "forum-qcast-mixed"
+  ],
+  "metricGroups": [
+    "memory",
+    "media",
+    "mainThread",
+    "authRuntime",
+    "routeIsolation"
+  ],
+  "deviceMatrix": [
+    "iphone-safari",
+    "android-chrome",
+    "telegram-webview",
+    "desktop-chrome",
+    "iphone-chrome"
+  ],
+  "manualDataRequests": [
+    "HAR export for iPhone Safari, Android Chrome and Telegram WebView forum runs",
+    "Heap snapshots for cold start, 60s and 180s checkpoints"
+  ]
+}

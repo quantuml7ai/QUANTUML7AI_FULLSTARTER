@@ -1,9 +1,9 @@
 {
-  "root": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-03-24T02:19:51.901Z",
+  "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
+  "generatedAt": "2026-04-18T03:02:44.788Z",
   "report": [
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
       "runtime": {
         "videoTag": 1,
         "iframeTag": 2,
@@ -27,7 +27,31 @@
       "businessScore": 0
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumAdsRuntime.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ForumAdSlot.jsx",
+      "runtime": {
+        "videoTag": 0,
+        "iframeTag": 0,
+        "intersectionObserver": 0,
+        "mapUsage": 0,
+        "fetchCalls": 0,
+        "imageProbe": 0,
+        "ytPlayer": 0,
+        "intervals": 0,
+        "raf": 1,
+        "preloadAttr": 0
+      },
+      "business": {
+        "purchase": 0,
+        "activation": 0,
+        "placement": 0,
+        "rotation": 0,
+        "package": 0
+      },
+      "runtimeScore": 1,
+      "businessScore": 0
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumAdsRuntime.js",
       "runtime": {
         "videoTag": 0,
         "iframeTag": 0,
@@ -51,7 +75,7 @@
       "businessScore": 0
     },
     {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\lib\\adsCore.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\lib\\adsCore.js",
       "runtime": {
         "videoTag": 0,
         "iframeTag": 0,
@@ -73,30 +97,6 @@
       },
       "runtimeScore": 1,
       "businessScore": 16
-    },
-    {
-      "file": "C:\\Users\\BETEP\\OneDrive\\Рабочий стол\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\components\\ForumAdSlot.jsx",
-      "runtime": {
-        "videoTag": 0,
-        "iframeTag": 0,
-        "intersectionObserver": 0,
-        "mapUsage": 0,
-        "fetchCalls": 0,
-        "imageProbe": 0,
-        "ytPlayer": 0,
-        "intervals": 0,
-        "raf": 0,
-        "preloadAttr": 0
-      },
-      "business": {
-        "purchase": 0,
-        "activation": 0,
-        "placement": 0,
-        "rotation": 0,
-        "package": 0
-      },
-      "runtimeScore": 0,
-      "businessScore": 0
     }
   ]
 }

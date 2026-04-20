@@ -13,8 +13,9 @@ export const MEDIA_MUTED_EVENT = 'forum:media-mute'
   // чтобы iPhone/Safari не блокировал autoplay из-за старого unmuted-состояния.
   try {
     if (typeof window === 'undefined') return
-    localStorage.setItem(MEDIA_MUTED_KEY, '1')
-    localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, '1')
+    const defaultMutedPref = String(1)
+    if (localStorage.getItem(MEDIA_MUTED_KEY) == null) localStorage.setItem(MEDIA_MUTED_KEY, defaultMutedPref)
+    if (localStorage.getItem(MEDIA_VIDEO_MUTED_KEY) == null) localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, defaultMutedPref)
   } catch {}
 })()
 
@@ -54,6 +55,21 @@ const __VIDEO_HARD_CAP_ENABLED = (() => {
     return false
   } catch {
     return false
+  }
+})()
+
+const __SOFT_RESIDENT_POST_VIDEO = (() => {
+  try {
+    const ua = String((typeof navigator !== 'undefined' ? navigator.userAgent : '') || '')
+    const isIOS = /iP(hone|ad|od)/i.test(ua)
+    const isAndroid = /Android/i.test(ua)
+    const coarse = !!(typeof window !== 'undefined' && window?.matchMedia?.('(pointer: coarse)')?.matches)
+    const dm = Number((typeof navigator !== 'undefined' ? navigator?.deviceMemory : 0) || 0)
+    const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 3
+
+    return !!isIOS || !!isAndroid || !!coarse || !!lowMem
+  } catch {
+    return true
   }
 })()
 
@@ -133,7 +149,7 @@ export function __enforceActiveVideoCap(exceptEl) {
 export function __readMediaMutedPref() {
   const v = readMutedPrefFromStorage()
   if (typeof v === 'boolean') return v
-  return null
+  return true
 }
 
 export function __writeMediaMutedPref(nextMuted) {
@@ -144,12 +160,22 @@ export function __writeMediaMutedPref(nextMuted) {
   } catch {}
 }
 
-export function __unloadVideoEl(el) {
-  if (!el) return
+export function __markMediaLifecycleTouch(el, reason = 'runtime_touch') {
+  if (!el?.dataset) return 0
   const nowTs = Date.now()
   try {
-    const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
-    if (isPostFeedVideo) {
+    el.dataset.__lastLifecycleTouchTs = String(nowTs)
+    el.dataset.__lastLifecycleTouchReason = String(reason || 'runtime_touch')
+  } catch {}
+  return nowTs
+}
+
+export function __unloadVideoEl(el) {
+  if (!el) return
+  const nowTs = __markMediaLifecycleTouch(el, 'unload')
+  const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
+  try {
+    if (isPostFeedVideo) { 
       // Для feed-видео не переносим seek-позицию между unload/restore:
       // это снижает range-шторм и нестабильные "серые" перезапуски.
       delete el.dataset.__resumeTime
@@ -173,20 +199,36 @@ export function __unloadVideoEl(el) {
     el.dataset.__prewarm = '0'
     el.dataset.__lastUnloadTs = String(nowTs)
   } catch {}
-  const canHardUnload = (() => {
-    try {
-      if (__VIDEO_HARD_CAP_ENABLED) return true
-      return String(el?.dataset?.__forceHardUnload || '') === '1'
-    } catch {
-      return __VIDEO_HARD_CAP_ENABLED
-    }
-  })()
-  if (!canHardUnload) {
-    try {
-      el.preload = 'metadata'
-    } catch {}
-    return
+const hardUnloadRequested = (() => {
+  try {
+    return String(el?.dataset?.__forceHardUnload || '') === '1'
+  } catch {
+    return false
   }
+})()
+
+const canHardUnload = (() => {
+  try {
+    if (__VIDEO_HARD_CAP_ENABLED) return true
+    return hardUnloadRequested
+  } catch {
+    return __VIDEO_HARD_CAP_ENABLED
+  }
+})()
+
+const shouldKeepResidentPostVideo =
+  isPostFeedVideo &&
+  __SOFT_RESIDENT_POST_VIDEO &&
+  !hardUnloadRequested
+
+if (!canHardUnload || shouldKeepResidentPostVideo) {
+  try {
+    el.dataset.__resident = isPostFeedVideo ? '1' : '0'
+    el.dataset.__prewarm = isPostFeedVideo ? '1' : '0'
+    el.preload = isPostFeedVideo ? 'auto' : 'metadata'
+  } catch {}
+  return
+}
   try {
     if (!el.dataset.__src && el.currentSrc) el.dataset.__src = el.currentSrc
     if (!el.dataset.__src && el.getAttribute('src')) el.dataset.__src = el.getAttribute('src')
@@ -203,13 +245,14 @@ export function __unloadVideoEl(el) {
   try {
     el.preload = 'none'
   } catch {}
-  try {
-    const poster = el.dataset?.__posterOriginal || ''
-    if (poster) el.setAttribute('poster', poster)
-    el.dataset.__posterRevealed = '0'
-    el.dataset.__needsPosterRestore = '1'
-    el.dataset.__lastHardUnloadTs = String(nowTs)
-  } catch {}
+try {
+  el.removeAttribute('poster')
+  delete el.dataset.__posterOriginal
+  delete el.dataset.__posterMediaKey
+  delete el.dataset.__posterRevealed
+  delete el.dataset.__needsPosterRestore
+  el.dataset.__lastHardUnloadTs = String(nowTs)
+} catch {}
   try {
     el.load?.()
   } catch {}
@@ -217,41 +260,50 @@ export function __unloadVideoEl(el) {
 
 export function __restoreVideoEl(el) {
   if (!el) return
-  const nowTs = Date.now()
+  const nowTs = __markMediaLifecycleTouch(el, 'restore')
   const src = el.dataset.__src || el.getAttribute('data-src') || ''
+  const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
   if (!src) return
   try {
     delete el.dataset.__forceHardUnload
   } catch {}
-  const canRestoreLoad = () => {
-    try {
-      const now = Date.now()
-      const blockedUntil = Number(el.dataset?.__restoreLoadBlockedUntil || 0)
-      if (blockedUntil > now) return false
-      const minGap = 1500
-      const lastTs = Number(el.dataset?.__lastRestoreLoadTs || 0)
-      if (lastTs > 0 && (now - lastTs) < minGap) return false
-      const winMs = 16000
-      const burstLimit = 5
-      const winStart = Number(el.dataset?.__restoreLoadWindowStart || 0)
-      const inWindow = winStart > 0 && (now - winStart) < winMs
-      let count = Number(el.dataset?.__restoreLoadCount || 0)
-      if (!inWindow) {
-        el.dataset.__restoreLoadWindowStart = String(now)
-        count = 0
-      }
-      count += 1
-      el.dataset.__restoreLoadCount = String(count)
-      if (count > burstLimit) {
-        el.dataset.__restoreLoadBlockedUntil = String(now + 10000)
-        return false
-      }
-      el.dataset.__lastRestoreLoadTs = String(now)
-      return true
-    } catch {
-      return true
+const canRestoreLoad = () => {
+  try {
+    const now = Date.now()
+    const blockedUntil = Number(el.dataset?.__restoreLoadBlockedUntil || 0)
+    if (blockedUntil > now) return false
+
+    const fastRestore = isPostFeedVideo
+    const minGap = fastRestore ? 320 : 1500
+    const winMs = fastRestore ? 8000 : 16000
+    const burstLimit = fastRestore ? 14 : 5
+
+    const lastTs = Number(el.dataset?.__lastRestoreLoadTs || 0)
+    if (lastTs > 0 && (now - lastTs) < minGap) return false
+
+    const winStart = Number(el.dataset?.__restoreLoadWindowStart || 0)
+    const inWindow = winStart > 0 && (now - winStart) < winMs
+    let count = Number(el.dataset?.__restoreLoadCount || 0)
+
+    if (!inWindow) {
+      el.dataset.__restoreLoadWindowStart = String(now)
+      count = 0
     }
+
+    count += 1
+    el.dataset.__restoreLoadCount = String(count)
+
+    if (count > burstLimit) {
+      el.dataset.__restoreLoadBlockedUntil = String(now + (fastRestore ? 1200 : 10000))
+      return false
+    }
+
+    el.dataset.__lastRestoreLoadTs = String(now)
+    return true
+  } catch {
+    return true
   }
+}
   try {
     el.dataset.__lastRestoreTs = String(nowTs)
   } catch {}
@@ -275,18 +327,22 @@ export function __restoreVideoEl(el) {
     } catch {}
     return
   }
-  try {
-    el.preload = (el.dataset?.__prewarm === '1') ? 'auto' : 'metadata'
-  } catch {}
-  try {
-    const shouldRestorePoster = String(el.dataset?.__needsPosterRestore || '') === '1'
-    if (shouldRestorePoster) {
-      const poster = el.dataset?.__posterOriginal || ''
-      if (poster && !el.getAttribute('poster')) el.setAttribute('poster', poster)
-      el.dataset.__posterRevealed = '0'
-      el.dataset.__needsPosterRestore = '0'
-    }
-  } catch {}
+try {
+  const shouldAutoPreload =
+    isPostFeedVideo ||
+    String(el.dataset?.__prewarm || '') === '1' ||
+    String(el.dataset?.__active || '') === '1' ||
+    String(el.dataset?.__resident || '') === '1'
+
+  el.preload = shouldAutoPreload ? 'auto' : 'metadata'
+} catch {}
+try {
+  el.removeAttribute('poster')
+  delete el.dataset.__posterOriginal
+  delete el.dataset.__posterMediaKey
+  delete el.dataset.__posterRevealed
+  delete el.dataset.__needsPosterRestore
+} catch {}
   try {
     el.dataset.__loadPending = '1'
     el.dataset.__warmReady = '0'
@@ -313,13 +369,25 @@ export function __restoreVideoEl(el) {
       }
     }
   } catch {}
-  try {
-    const networkState = Number(el.networkState || 0)
-    const isLoading =
-      typeof HTMLMediaElement !== 'undefined' &&
-      networkState === HTMLMediaElement.NETWORK_LOADING
-    if (!isLoading && canRestoreLoad()) el.load?.()
-  } catch {}
+try {
+  const networkState = Number(el.networkState || 0)
+  const isLoading =
+    typeof HTMLMediaElement !== 'undefined' &&
+    networkState === HTMLMediaElement.NETWORK_LOADING
+
+  const shouldKickPostRestore =
+    isPostFeedVideo &&
+    (
+      String(el.dataset?.__prewarm || '') === '1' ||
+      String(el.dataset?.__active || '') === '1' ||
+      String(el.dataset?.__resident || '') === '1'
+    )
+
+  if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()
+  if (shouldKickPostRestore && !isLoading && canRestoreLoad()) {
+    el.load?.()
+  }
+} catch {}
 }
 
 export function __hasLazyVideoSourceWithoutSrc(el) {

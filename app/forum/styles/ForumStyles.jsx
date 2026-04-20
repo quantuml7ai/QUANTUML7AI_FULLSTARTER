@@ -199,16 +199,14 @@ export const FORUM_STYLES = `
     .mediaBox[data-kind="video"]{ --mb-h: var(--mb-video-h); height: var(--mb-video-h); max-height: var(--mb-video-h); background:#000; }
     .mediaBox[data-kind="image"]{ --mb-h: var(--mb-image-h); }
 .mediaBox[data-kind="iframe"]{
-      --mb-h: var(--mb-iframe-h);
-      min-height: var(--mb-iframe-h);
-      height: var(--mb-iframe-h);
-      max-height: var(--mb-iframe-h);
-      background:#000;
-      position:relative;
-      overflow:hidden;
-      touch-action: pan-y pinch-zoom;
-      overscroll-behavior: contain;
-    }
+  --mb-h: var(--mb-iframe-h);
+  min-height: var(--mb-iframe-h);
+  height: var(--mb-iframe-h);
+  max-height: var(--mb-iframe-h);
+  background:#000;
+  position:relative;
+  overflow:hidden;
+}
     .mediaBox[data-kind="audio"]{ --mb-h: var(--mb-audio-h); background:#000; }
     /* QCast: отдельная максимальная высота */
     .mediaBox[data-kind="qcast"]{ --mb-h: var(--mb-qcast-h); background:#000; }
@@ -559,64 +557,9 @@ export const FORUM_STYLES = `
       border:0;
       aspect-ratio:16/9;
       display:block;
-      background:#000;
-      touch-action: pan-y pinch-zoom;
+      background:#000; 
     }
-.iframeTouchShield{
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:flex-end;
-  justify-content:flex-end;
-  padding:12px;
-  touch-action:pan-y;
-  background:linear-gradient(180deg, rgba(4,8,16,0), rgba(4,8,16,.08));
-  pointer-events:none;
-}
-.iframeTouchShieldGesture{
-  position:absolute;
-  inset:0;
-  pointer-events:auto;
-  touch-action:pan-y pinch-zoom;
-}
-.iframeTouchShield.isInteractive .iframeTouchShieldGesture,
-.iframeTouchShieldGesture.isInteractive{
-  pointer-events:none;
-}
-.iframeTouchShieldAction{
-  position:relative;
-  z-index:2;
-  width:38px;
-  height:38px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.18);
-  background:rgba(6,12,22,.74);
-  color:#eaf4ff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 10px 24px rgba(0,0,0,.28);
-  backdrop-filter:blur(6px);
-  pointer-events:auto;
-}
-.iframeTouchShieldAction svg{
-  width:18px;
-  height:18px;
-  display:block;
-}
-@media (pointer:fine){
-  .iframeTouchShield{
-    display:none;
-  }
-}
-@media (pointer:coarse){
-  .mediaBox[data-kind="iframe"] > iframe{
-    pointer-events:auto;
-  }
-  .iframeTouchShield{
-    display:flex;
-  }
-}
+
 /* YouTube iframe: минимальная высота отдельно (переменная под моб/десктоп) */
 .mediaBox > iframe[data-forum-media="youtube"]{
   min-height: var(--mb-yt-iframe-min-h, 0px);

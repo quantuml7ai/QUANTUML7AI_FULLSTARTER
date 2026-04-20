@@ -1,0 +1,123 @@
+{
+  "generatedAt": "2026-04-17T20:40:20.700Z",
+  "groupId": "forum-background-restore",
+  "scenarios": [
+    {
+      "index": 15,
+      "id": "forum-background-foreground",
+      "title": "background to foreground",
+      "category": "forum-route-return",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "telegram-webview"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "routeIsolation"
+      ]
+    },
+    {
+      "index": 16,
+      "id": "forum-app-resume",
+      "title": "app minimized to resumed",
+      "category": "forum-route-return",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome",
+        "telegram-webview"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "authRuntime"
+      ]
+    },
+    {
+      "index": 17,
+      "id": "forum-ios-bfcache",
+      "title": "iOS Safari back forward cache",
+      "category": "forum-route-return",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari"
+      ],
+      "metricGroups": [
+        "routeIsolation",
+        "memory",
+        "media"
+      ]
+    },
+    {
+      "index": 18,
+      "id": "forum-telegram-suspend-resume",
+      "title": "Telegram WebView suspend and resume",
+      "category": "forum-route-return",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "telegram-webview"
+      ],
+      "metricGroups": [
+        "memory",
+        "media",
+        "authRuntime"
+      ]
+    },
+    {
+      "index": 55,
+      "id": "forum-same-source-visibility-restore",
+      "title": "same-source video revisit after visibility restore",
+      "category": "forum-restore-extra",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "memory"
+      ]
+    },
+    {
+      "index": 56,
+      "id": "forum-same-source-route-restore",
+      "title": "same-source video revisit after route restore",
+      "category": "forum-restore-extra",
+      "route": "/forum",
+      "profileHint": "forum-feed-mobile",
+      "deviceMatrix": [
+        "iphone-safari",
+        "android-chrome"
+      ],
+      "metricGroups": [
+        "media",
+        "routeIsolation"
+      ]
+    }
+  ],
+  "routes": [
+    "/forum"
+  ],
+  "metricGroups": [
+    "memory",
+    "media",
+    "routeIsolation",
+    "authRuntime"
+  ],
+  "deviceMatrix": [
+    "iphone-safari",
+    "android-chrome",
+    "telegram-webview"
+  ],
+  "manualDataRequests": [
+    "Background/foreground and route-restore traces with runtime passport before and after restore"
+  ]
+}
